@@ -30,6 +30,7 @@ html,body{margin:0;height:100%;background:#2b3a26;overflow:hidden;touch-action:n
 #rels li.done{color:#7a6a5a}
 #rels li.now{font-weight:bold}
 #rels li.later{color:#9a8a7a}
+#rels li.rama{color:#4f7a4a;font-style:italic;list-style:none;margin-left:-14px}
 #rels .h{color:#d24a4a;letter-spacing:1px}
 #rels .mb{display:flex;justify-content:center;margin-top:6px}
 #rels button.pick{font-size:13px;padding:2px 8px;margin:2px}
@@ -1333,7 +1334,7 @@ function releaseCow(a){
 }
 function offerSale(k, a){
   const price = CH[k].buys[a.kind];
-  say(k, `¡Buena vaca esa! Le doy ${price} dólares por ella, señorita. ¿Trato hecho?`, [[`🤝 Vender la vaca (${price} dólares)`, () => { close(); sellCow(k, a, price); }], ['Mejor no', close]]);
+  say(k, `¡Buena vaca esa! Le doy ${price} dólares por ella, señorita. ¿Trato hecho?`, [[`🤝 Vender la vaca (${price} dólares)`, () => { close(); sellCow(k, a, price); }], ['Mejor no', () => { close(); logEv(`Ana no quiso venderle la vaca jersey a ${NAMES[k]}.`, [k, ...witnesses()]); storyEvent('venta_rechazada'); save(); }]]);
 }
 function sellCow(k, a, price){
   a.state = 'bought'; a.owner = k; a.nav = null; game.inv.dolares += price;
@@ -1449,7 +1450,7 @@ function autoOptions(){
   if (late) add('Irse a dormir', { type: 'sleep' }, hn >= 22 ? 12 : 5);
   for (const key of ['lago', 'puente', 'camino_blanco', 'bosque_encantado', 'huerta', 'granero']) add('Pasear hasta ' + PLACES[key][0], { type: 'place', key }, 1);
   if (sc === 'out' && S !== 3 && hn < 19) add('Recostarse en el pasto a mirar las nubes', { type: 'lie' }, 1.5);
-  const se = storyNow(); if (se && se.estado === 'va') add('Ir a ' + placeName(se.lugar) + ' (la historia de hoy: ' + se.pista + ')', ROOMS[se.lugar] ? { type: 'house', id: se.lugar } : { type: 'place', key: se.lugar }, 6);
+  const se = storyNow(); if (se) add('Ir a ' + placeName(se.lugar) + ' (la historia de hoy: ' + se.pista + ')', ROOMS[se.lugar] ? { type: 'house', id: se.lugar } : { type: 'place', key: se.lugar }, 6);
   add('Dar un paseo sin rumbo', { type: 'wander' }, 1.5); add('Quedarse un rato soñando despierta', { type: 'idle' }, 1);
   const fresh = O.filter(o => !auto.hist.slice(-2).includes(o.label));
   return fresh.length ? fresh : O;
@@ -1687,7 +1688,7 @@ const PLACES = {
   ...Object.fromEntries(Object.values(HOUSES).map(h => [h.place[0], [h.place[1], h.at.x + h.place[2], h.at.y + h.place[3]]])),
   ...Object.fromEntries(Object.entries(AREAS).map(([k, A]) => [k, [A.name, A.x + A.w / 2, A.y + A.h / 2]])),
   camino_pueblo: ['el camino al pueblo', TOWN[0] + 90, TOWN[1] - 4],
-  ...Object.fromEntries(Object.entries(AREAS).map(([k, A]) => [k + '_porton', ['la entrada de ' + A.name, ...({ N: [A.x + A.w / 2, A.y - 20], S: [A.x + A.w / 2, A.y + A.h + 20], E: [A.x + A.w + 20, A.y + A.h / 2], W: [A.x - 20, A.y + A.h / 2] })[A.gate]]])),
+  ...Object.fromEntries(Object.entries(AREAS).map(([k, A]) => [k + '_porton', [('la entrada de ' + A.name).replace(/ de el /, ' del '), ...({ N: [A.x + A.w / 2, A.y - 20], S: [A.x + A.w / 2, A.y + A.h + 20], E: [A.x + A.w + 20, A.y + A.h / 2], W: [A.x - 20, A.y + A.h / 2] })[A.gate]]])),
   huerta: ['la huerta de Tejas Verdes', BEDS[4].x, BEDS[4].y + 34],
   granero: ['el granero', BARN.x + 60, BARN.y + 50], puente: ['el puente del arroyo', BRIDGE.x - 80, BRIDGE.y + 8], camino_blanco: ['el Camino Blanco de las Delicias', (GG.x + BRIDGE.x) / 2, BRIDGE.y + 6],
   lago: ['el Lago de las Aguas Brillantes', BENCH.x + 40, BENCH.y + 22], bosque_encantado: ['el Bosque Encantado', 15 * T + 30, 30 * T + 24],
@@ -1943,61 +1944,100 @@ const STORY_EFFECTS = {
   estado_ana: { desc: 'a Ana le pasa algo que se ve ("estado")', run: f => { if (ANA_STATES[f.estado]) setAnaState(f.estado); } },
 };
 const STORY_EVENTS = {
-  vaca_agarrada: 'Ana agarra una vaca de la cuerda', vaca_vendida: 'Ana vende una vaca', vaca_en_corral: 'Ana deja una vaca en el corral de Tejas Verdes', vaca_en_potrero: 'Ana deja una vaca en el potrero del Sr. Harrison', vaca_en_avena: 'Ana deja una vaca en el campo de avena',
+  vaca_agarrada: 'Ana agarra una vaca de la cuerda', 'agarrada:<animal>': 'Ana agarra de la cuerda a ese animal', vaca_vendida: 'Ana vende una vaca', 'vendida:<animal>': 'Ana vende ese animal', venta_rechazada: 'a Ana le ofrecen comprarle una vaca y ella dice que no', vaca_en_corral: 'Ana deja una vaca en el corral de Tejas Verdes', vaca_en_potrero: 'Ana deja una vaca en el potrero del Sr. Harrison', vaca_en_avena: 'Ana deja una vaca en el campo de avena',
   cocinado: 'Ana cocina algo', 'cocinado:tarta': 'Ana cocina una tarta', 'cocinado:te': 'Ana prepara té', 'regalo:<personaje>': 'Ana le regala o le da algo a ese personaje (por ejemplo regalo:harrison)',
 };
 const STORY_PLACES = () => [...Object.keys(PLACES), ...Object.keys(ROOMS)];
-const placeName = l => PLACES[l] ? PLACES[l][0] : l === 'gg' ? 'la cocina de Tejas Verdes' : l === 'os' ? 'la salita de La Cuesta del Huerto' : l === 'rl' ? 'la casa de la Sra. Lynde' : l === 'ga' ? 'la pieza de Ana' : l;
+const placeName = l => PLACES[l] ? PLACES[l][0] : l === 'gg' ? 'la cocina de Tejas Verdes' : l === 'os' ? 'la salita de La Cuesta del Huerto' : l === 'rl' ? 'la casa de la Sra. Lynde' : l === 'ga' ? 'la pieza de Ana' : l === 'hh' ? 'la casa del Sr. Harrison' : HOUSES[l]?.name || l;
 const S_EFFECT = () => ({ type: 'object', additionalProperties: false, required: ['tipo', 'quien', 'animal', 'lugar', 'estado', 'hasta', 'cuando'], properties: { tipo: { type: 'string', enum: Object.keys(STORY_EFFECTS) }, quien: { type: 'array', items: { type: 'string', enum: Object.keys(CH) } }, animal: { type: 'string', enum: ['', ...Object.keys(ANIMALS)] }, lugar: { type: 'string', enum: ['', ...Object.keys(AREAS)] }, estado: { type: 'string', enum: ['', ...Object.keys(ANA_STATES)] }, hasta: { type: 'integer' }, cuando: { type: 'string', enum: ['antes', 'despues'] } } });
-const storySchema = () => ({ type: 'object', additionalProperties: false, required: ['titulo', 'inspiracion', 'resumen', 'escenas'], properties: {
-  titulo: { type: 'string' }, inspiracion: { type: 'string' }, resumen: { type: 'string' },
-  escenas: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['hora', 'lugar', 'personajes', 'que_pasa', 'pista', 'encargo', 'fin', 'evento', 'efectos', 'frases'], properties: {
-    hora: { type: 'integer' }, lugar: { type: 'string', enum: STORY_PLACES() }, personajes: { type: 'array', items: { type: 'string', enum: Object.keys(CH) } },
-    que_pasa: { type: 'string' }, pista: { type: 'string' }, encargo: AI_SCHEMA.properties.encargo, fin: { type: 'string', enum: ['llega_ana', 'encargo_cumplido', 'evento'] }, evento: { type: 'string' },
-    efectos: { type: 'array', items: S_EFFECT() }, frases: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['quien', 'texto'], properties: { quien: { type: 'string', enum: ['ana', ...Object.keys(CH), ...Object.keys(ANIMALS).filter(k => ANIMALS[k].talks)] }, texto: { type: 'string' } } } } } } } } });
+const S_SCENE = () => ({ type: 'object', additionalProperties: false, required: ['id', 'hora', 'lugar', 'personajes', 'que_pasa', 'pista', 'encargo', 'fin', 'evento', 'efectos', 'frases', 'requiere', 'clave', 'contra'], properties: {
+  id: { type: 'string' }, hora: { type: 'integer' }, lugar: { type: 'string', enum: STORY_PLACES() }, personajes: { type: 'array', items: { type: 'string', enum: Object.keys(CH) } },
+  que_pasa: { type: 'string' }, pista: { type: 'string' }, encargo: AI_SCHEMA.properties.encargo, fin: { type: 'string', enum: ['llega_ana', 'encargo_cumplido', 'evento'] }, evento: { type: 'string' },
+  efectos: { type: 'array', items: S_EFFECT() }, frases: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['quien', 'texto'], properties: { quien: { type: 'string', enum: ['ana', ...Object.keys(CH), ...Object.keys(ANIMALS).filter(k => ANIMALS[k].talks)] }, texto: { type: 'string' } } } },
+  requiere: { type: 'array', items: { type: 'string' } }, clave: { type: 'boolean' }, contra: { type: 'array', items: { type: 'string' } } } });
+const storySchema = () => ({ type: 'object', additionalProperties: false, required: ['titulo', 'inspiracion', 'resumen', 'escenas'], properties: { titulo: { type: 'string' }, inspiracion: { type: 'string' }, resumen: { type: 'string' }, escenas: { type: 'array', items: S_SCENE() } } });
+const branchSchema = () => ({ type: 'object', additionalProperties: false, required: ['titulo_rama', 'resumen', 'escenas'], properties: { titulo_rama: { type: 'string' }, resumen: { type: 'string' }, escenas: { type: 'array', items: S_SCENE() } } });
 const NO_TASK = { tipo: 'ninguno', item: '', cantidad: 0, para: '', lugar: '', recado: '' };
-function validStory(o, h0 = Math.max(8, Math.ceil(hourNow() + .5))){
-  if (!o || !Array.isArray(o.escenas)) return null;
-  const esc = []; let last = h0 - 1;
-  for (const e of o.escenas.slice(0, 9)) {
+/* How a story works. The scenes written in the morning are the MAIN BRANCH: what would happen, more or less, if nobody
+   forces anything. It is loose on purpose: each scene has an hour, but it opens when what it needs has happened
+   ("requiere": earlier scenes or events), so a chain can run early or late; a scene that is not key ("clave": false) can
+   be missed and the story goes on with a gap; one whose event happens by itself before its time counts as done ("ya").
+   When a key scene can no longer be (Ana was not there, what it waited for did not happen, or something against it
+   did: "contra"), the story opens a new BRANCH: the AI writes how it goes on from what really happened (without it:
+   the branches written by hand, or else the main branch without what depended on the broken scene). */
+const FINAL = ['hecha', 'ya', 'perdida', 'sin_evento', 'sin_encargo', 'rota', 'descartada'];
+const GAP = ['perdida', 'sin_evento', 'sin_encargo'];   // (missed, not key: a gap the story goes on with)
+const isFinal = e => FINAL.includes(e.estado);
+const evKnown = n => typeof n === 'string' && /^[a-z_]+(:[a-z_]+){0,2}$/.test(n) && (!!STORY_EVENTS[n] || Object.keys(STORY_EVENTS).some(k => k.includes(':<') && n.startsWith(k.split(':')[0] + ':')));
+const evDesc = n => STORY_EVENTS[n] || (() => { const k = Object.keys(STORY_EVENTS).find(k => k.includes(':<') && n.startsWith(k.split(':')[0] + ':')); return k ? STORY_EVENTS[k] + ' (' + n.split(':').slice(1).map(x => NAMES[x] || x).join(', ') + ')' : n; })();
+function validBeats(list, h0, pre = '', known = []){
+  const out = [], ids = new Set(known); let last = h0;
+  for (const [k, e] of (Array.isArray(list) ? list : []).slice(0, 9).entries()) {
+    if (!e) continue;
     const lugar = String(e.lugar || ''), inRoom = !!ROOMS[lugar]; if (!PLACES[lugar] && !inRoom) continue;
     const ps = [...new Set((Array.isArray(e.personajes) ? e.personajes : []).filter(k => CH[k]))].filter(k => lugar !== 'ga' && !(k === 'diana' && inRoom && lugar !== 'os'));
-    const hora = Math.max(Math.round(+e.hora || 0), last + 1, h0); if (hora > 21) break;
+    const hora = Math.max(Math.round(+e.hora || 0), last, h0); if (hora > 21) break;
     const enc = e.encargo && e.encargo.tipo && e.encargo.tipo !== 'ninguno' && ps.length ? { ...NO_TASK, ...e.encargo } : null;
-    const evento = String(e.evento || ''), fin = e.fin === 'evento' && evento ? 'evento' : enc && e.fin === 'encargo_cumplido' ? 'encargo_cumplido' : 'llega_ana';
+    const evento = evKnown(e.evento) ? e.evento : '', fin = e.fin === 'evento' && evento ? 'evento' : enc && e.fin === 'encargo_cumplido' ? 'encargo_cumplido' : 'llega_ana';
     const efectos = (Array.isArray(e.efectos) ? e.efectos : []).filter(f => f && STORY_EFFECTS[f.tipo]).map(f => ({ tipo: f.tipo, quien: (Array.isArray(f.quien) ? f.quien : []).filter(k => CH[k]), animal: ANIMALS[f.animal] ? f.animal : '', lugar: AREAS[f.lugar] ? f.lugar : '', estado: ANA_STATES[f.estado] ? f.estado : '', hasta: clamp(Math.round(+f.hasta || 19), 7, 23), cuando: f.cuando === 'despues' ? 'despues' : 'antes' }));
     const okq = ['ana', ...ps, ...Object.keys(ANIMALS).filter(k => ANIMALS[k].talks && ANIMALS[k].room === lugar)];
     const frases = (Array.isArray(e.frases) ? e.frases : []).filter(f => f && okq.includes(f.quien) && typeof f.texto === 'string' && f.texto.trim()).slice(0, 4).map(f => ({ quien: f.quien, texto: f.texto.trim().slice(0, 240) }));
-    esc.push({ hora, lugar, personajes: ps, que_pasa: String(e.que_pasa || '').slice(0, 400), pista: String(e.pista || '').slice(0, 90) || ('Algo pasa en ' + placeName(lugar)), encargo: enc, fin, evento: fin === 'evento' ? evento : '', efectos, frases, estado: 'espera' });
-    last = hora;
+    let id = pre + (String(e.id || '').toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 24) || 'e' + k); while (ids.has(id)) id += '_';
+    const ref = r => ids.has(pre + r) ? pre + r : ids.has(r) || evKnown(r) ? r : null;   // (earlier scenes, or events: never later ones)
+    const requiere = [...new Set((Array.isArray(e.requiere) ? e.requiere : []).map(r => ref(String(r))).filter(Boolean))].slice(0, 4);
+    const contra = [...new Set((Array.isArray(e.contra) ? e.contra : []).filter(evKnown))].slice(0, 4);
+    out.push({ id, hora, lugar, personajes: ps, que_pasa: String(e.que_pasa || '').slice(0, 400), pista: String(e.pista || '').slice(0, 90) || ('Algo pasa en ' + placeName(lugar)), encargo: enc, fin, evento: fin === 'evento' ? evento : '', efectos, frases, requiere, clave: !!e.clave, contra, margen: clamp(+e.margen || 3, 1, 6), estado: 'espera' });
+    ids.add(id); last = hora;
   }
-  if (!esc.length) return null;
-  return { day: today(), titulo: String(o.titulo || 'Un día en Avonlea').slice(0, 80), inspiracion: String(o.inspiracion || '').slice(0, 120), resumen: String(o.resumen || '').slice(0, 300), escenas: esc, i: 0, ev: {} };
+  return out;
+}
+function validStory(o, h0 = Math.max(8, Math.ceil(hourNow() + .5))){
+  if (!o) return null;
+  const esc = validBeats(o.escenas, h0); if (!esc.length) return null;
+  return { v: 2, day: today(), titulo: String(o.titulo || 'Un día en Avonlea').slice(0, 80), inspiracion: String(o.inspiracion || '').slice(0, 120), resumen: String(o.resumen || '').slice(0, 300), escenas: esc, ev: {}, hechos: [], ramas: [], gen: false, fin: false };
 }
 const runEffects = (e, when) => { for (const f of e.efectos || []) if (f.cuando === when) STORY_EFFECTS[f.tipo].run(f); };
 // a few stories written by hand, for when there is no AI (or it does not answer)
 const STORIES = [
   { titulo: 'La vaca del señor Harrison', inspiracion: 'Ana de Avonlea, capítulo 2: vender con prisa y arrepentirse con calma', resumen: 'Con Marilla y Matthew en Charlottetown, Ana encuentra una vaca jersey en la avena del Sr. Harrison y, furiosa, se la vende al Sr. Shearer... pero Dolly estaba en el corral. Termina pidiendo disculpas, con algo cocinado por ella y los veinte dólares.', escenas: [
-    { hora: 8, lugar: 'gg', personajes: ['marilla', 'matthew'], que_pasa: 'Marilla y Matthew salen a Charlottetown y no vuelven hasta la noche; Marilla le deja a Ana la casa a su cargo y le advierte, muy seria, que Dolly no vuelva a meterse en la avena del Sr. Harrison, que ya vino a quejarse dos veces.', pista: 'Marilla y Matthew se van al pueblo: despídete en la cocina', encargo: NO_TASK, fin: 'llega_ana', evento: '',
+    { id: 'despedida', hora: 8, lugar: 'gg', personajes: ['marilla', 'matthew'], que_pasa: 'Marilla y Matthew salen a Charlottetown y no vuelven hasta la noche; Marilla le deja a Ana la casa a su cargo y le advierte, muy seria, que Dolly no vuelva a meterse en la avena del Sr. Harrison, que ya vino a quejarse dos veces.', pista: 'Marilla y Matthew se van al pueblo: despídete en la cocina', encargo: NO_TASK, fin: 'llega_ana', evento: '',
       efectos: [{ tipo: 'ausente', quien: ['marilla', 'matthew'], hasta: 19, cuando: 'despues' }, { tipo: 'ausente', quien: ['harrison'], hasta: 15, cuando: 'antes' }],
       frases: [{ quien: 'marilla', texto: 'La casa queda en tus manos, Ana. Y por lo que más quieras: que Dolly no vuelva a meterse en la avena del señor Harrison.' }, { quien: 'ana', texto: '¡Marilla, puedes confiar en mí como en una roca! Bueno... como en una roca un poquito soñadora.' }, { quien: 'matthew', texto: 'Bueno, pues... yo confío, ya lo creo.' }] },
-    { hora: 9, lugar: 'huerta', personajes: ['diana'], que_pasa: 'Diana viene a ver a Ana a la huerta; Ana le cuenta, indignadísima, la carta del Sr. Harrison, que amenaza con "tomar medidas" si la vaca vuelve a su avena, y le habla de Ginger, el loro que dice cosas.', pista: 'Diana viene a verte a la huerta', encargo: NO_TASK, fin: 'llega_ana', evento: '', efectos: [],
+    { id: 'carta', hora: 9, lugar: 'huerta', personajes: ['diana'], que_pasa: 'Diana viene a ver a Ana a la huerta; Ana le cuenta, indignadísima, la carta del Sr. Harrison, que amenaza con "tomar medidas" si la vaca vuelve a su avena, y le habla de Ginger, el loro que dice cosas.', pista: 'Diana viene a verte a la huerta', encargo: NO_TASK, fin: 'llega_ana', evento: '', efectos: [],
       frases: [{ quien: 'ana', texto: 'El señor Harrison me escribió una carta, Diana. ¡Una carta! Dice que si mi vaca vuelve a pisar su avena, "tomará medidas".' }] },
-    { hora: 11, lugar: 'avena_porton', personajes: ['diana'], que_pasa: 'Hay una vaca jersey en plena avena del Sr. Harrison, comiendo feliz. Ana está segura de que es Dolly; Diana la ayuda a perseguirla, entre gritos y risas, mientras la vaca se escapa una y otra vez.', pista: '¡Hay una vaca en la avena del Sr. Harrison!', encargo: NO_TASK, fin: 'evento', evento: 'vaca_agarrada',
+    { id: 'vaca_avena', clave: true, hora: 11, lugar: 'avena_porton', personajes: ['diana'], que_pasa: 'Hay una vaca jersey en plena avena del Sr. Harrison, comiendo feliz. Ana está segura de que es Dolly; Diana la ayuda a perseguirla, entre gritos y risas, mientras la vaca se escapa una y otra vez.', pista: '¡Hay una vaca en la avena del Sr. Harrison!', encargo: NO_TASK, fin: 'evento', evento: 'vaca_agarrada',
       efectos: [{ tipo: 'vaca_suelta', animal: 'jersey', lugar: 'avena', cuando: 'antes' }],
       frases: [{ quien: 'ana', texto: '¡Dolly! ¡Traidora! ¡Después de todo lo que hemos hablado!' }] },
-    { hora: 12, lugar: 'avena_porton', personajes: ['shearer'], que_pasa: 'El Sr. Shearer, que pasa por el camino en su carreta comprando ganado, ve a Ana con la vaca de la cuerda, toda despeinada y furiosa, y le ofrece veinte dólares por ella.', pista: 'Por el camino viene alguien con una carreta', encargo: NO_TASK, fin: 'evento', evento: 'vaca_vendida', efectos: [],
+    { id: 'shearer', requiere: ['vaca_agarrada'], clave: true, contra: ['venta_rechazada', 'vaca_en_potrero'], hora: 12, lugar: 'avena_porton', personajes: ['shearer'], que_pasa: 'El Sr. Shearer, que pasa por el camino en su carreta comprando ganado, ve a Ana con la vaca de la cuerda, toda despeinada y furiosa, y le ofrece veinte dólares por ella.', pista: 'Por el camino viene alguien con una carreta', encargo: NO_TASK, fin: 'evento', evento: 'vaca_vendida', efectos: [],
       frases: [{ quien: 'shearer', texto: 'Buena vaca esa. Ando comprando ganado: le doy veinte dólares por ella, señorita.' }] },
-    { hora: 13, lugar: 'corral_porton', personajes: ['diana'], que_pasa: 'De vuelta en Tejas Verdes, orgullosa de su sentido práctico, Ana descubre a Dolly masticando tan tranquila en el corral: la vaca que vendió era la del Sr. Harrison. Desesperación total.', pista: 'Vuelve al corral de Tejas Verdes', encargo: NO_TASK, fin: 'llega_ana', evento: '', efectos: [],
+    { id: 'dolly', requiere: ['vaca_vendida'], margen: 4, hora: 13, lugar: 'corral_porton', personajes: ['diana'], que_pasa: 'De vuelta en Tejas Verdes, orgullosa de su sentido práctico, Ana descubre a Dolly masticando tan tranquila en el corral: la vaca que vendió era la del Sr. Harrison. Desesperación total.', pista: 'Vuelve al corral de Tejas Verdes', encargo: NO_TASK, fin: 'llega_ana', evento: '', efectos: [],
       frases: [{ quien: 'ana', texto: '...Diana. Dime que esa vaca es un fantasma del Bosque Encantado.' }, { quien: 'diana', texto: 'Ana... es Dolly.' }, { quien: 'ana', texto: '¡Vendí la vaca del señor Harrison! ¡Oh, Diana, estoy en un abismo de desesperación!' }] },
-    { hora: 14, lugar: 'gg', personajes: [], que_pasa: 'Sola en la cocina, Ana decide que una disculpa como corresponde necesita algo cocinado por ella (y revisa tres veces que no sea linimento).', pista: 'Cocina algo para pedir disculpas', encargo: NO_TASK, fin: 'evento', evento: 'cocinado', efectos: [],
+    { id: 'cocinar', requiere: ['vaca_vendida'], hora: 14, lugar: 'gg', personajes: [], que_pasa: 'Sola en la cocina, Ana decide que una disculpa como corresponde necesita algo cocinado por ella (y revisa tres veces que no sea linimento).', pista: 'Cocina algo para pedir disculpas', encargo: NO_TASK, fin: 'evento', evento: 'cocinado', efectos: [],
       frases: [{ quien: 'ana', texto: 'Una disculpa sin algo cocinado es como un poema sin rima. Y esta vez reviso que sea vainilla... ¡no linimento!' }] },
-    { hora: 16, lugar: 'hh', personajes: ['harrison'], que_pasa: 'Ana va a casa del Sr. Harrison a confesar: le vendió su vaca. Ginger chilla; Ana hace una disculpa grandiosa; el Sr. Harrison gruñe, pero se le escapa la risa, acepta lo que Ana le trae y admite que su cerca era un desastre. Terminan casi amigos.', pista: 'Ve a confesarle todo al Sr. Harrison', encargo: NO_TASK, fin: 'evento', evento: 'regalo:harrison', efectos: [],
+    { id: 'confesion', requiere: ['vaca_vendida'], clave: true, hora: 16, lugar: 'hh', personajes: ['harrison'], que_pasa: 'Ana va a casa del Sr. Harrison a confesar: le vendió su vaca. Ginger chilla; Ana hace una disculpa grandiosa; el Sr. Harrison gruñe, pero se le escapa la risa, acepta lo que Ana le trae y admite que su cerca era un desastre. Terminan casi amigos.', pista: 'Ve a confesarle todo al Sr. Harrison', encargo: NO_TASK, fin: 'evento', evento: 'regalo:harrison', efectos: [],
       frases: [{ quien: 'ginger', texto: '¡Pelirroja! ¡Pelirroja! ¡Cuidado con la pelirroja!' }, { quien: 'ana', texto: 'Señor Harrison, vengo a confesar un crimen: vendí su vaca. No por maldad, sino por un exceso de indignación justa, que es mucho peor.' }, { quien: 'harrison', texto: 'Vaya, vaya... siéntate, muchacha. La verdad, la cerca de mi avena es un desastre.' }] },
-    { hora: 19, lugar: 'gg', personajes: ['marilla', 'matthew', 'lynde'], que_pasa: 'Vuelven Marilla y Matthew; Ana lo cuenta todo de un tirón. Marilla, con su humor seco; Matthew, de su lado; y la Sra. Lynde llega con la noticia que ya corre por el pueblo.', pista: 'Marilla y Matthew vuelven a casa', encargo: NO_TASK, fin: 'llega_ana', evento: '', efectos: [],
+    { id: 'vuelta', requiere: ['vaca_vendida'], hora: 19, lugar: 'gg', personajes: ['marilla', 'matthew', 'lynde'], que_pasa: 'Vuelven Marilla y Matthew; Ana lo cuenta todo de un tirón. Marilla, con su humor seco; Matthew, de su lado; y la Sra. Lynde llega con la noticia que ya corre por el pueblo.', pista: 'Marilla y Matthew vuelven a casa', encargo: NO_TASK, fin: 'llega_ana', evento: '', efectos: [],
       frases: [{ quien: 'marilla', texto: 'Ana Shirley, ¿alguna vez pasará un día sin que te metas en un lío?' }, { quien: 'matthew', texto: 'Bueno, pues... era una vaca muy parecida. Ya lo creo.' }, { quien: 'lynde', texto: 'Me contaron en el pueblo que alguien vendió una vaca... ¡que no era suya!' }] },
-    { hora: 21, lugar: 'ga', personajes: [], que_pasa: 'En su cuarto, frente a la ventana y el cerezo Reina de las Nieves, Ana piensa en el día.', pista: 'Sube a tu cuarto', encargo: NO_TASK, fin: 'llega_ana', evento: '', efectos: [],
-      frases: [{ quien: 'ana', texto: 'Marilla dice que mañana es un día nuevo, todavía sin ningún error. Voy a hacer lo posible por dejarlo así... por lo menos hasta el desayuno.' }] }] },
+    { id: 'noche', hora: 21, lugar: 'ga', personajes: [], que_pasa: 'En su cuarto, frente a la ventana y el cerezo Reina de las Nieves, Ana piensa en el día.', pista: 'Sube a tu cuarto', encargo: NO_TASK, fin: 'llega_ana', evento: '', efectos: [],
+      frases: [{ quien: 'ana', texto: 'Marilla dice que mañana es un día nuevo, todavía sin ningún error. Voy a hacer lo posible por dejarlo así... por lo menos hasta el desayuno.' }] }],
+    // the other ways the day can go (when there is no AI to write them)
+    ramas: [
+      { desde: 'shearer', titulo: 'Ana no vende la vaca', resumen: 'Ana estuvo a punto de vender la vaca del Sr. Harrison, pero no lo hizo; al final todo queda en un susto, una cerca por arreglar y una Marilla sorprendida.', escenas: [
+        { id: 'alivio', hora: 13, lugar: 'corral_porton', personajes: ['diana'], que_pasa: 'De vuelta en Tejas Verdes, Ana encuentra a Dolly masticando en el corral: la vaca de la avena era la del Sr. Harrison. ¡Y ella casi la vende! Alivio, risas nerviosas y un escalofrío.', pista: 'Vuelve al corral de Tejas Verdes', encargo: NO_TASK, fin: 'llega_ana', evento: '', efectos: [],
+          frases: [{ quien: 'ana', texto: '¡Diana! Dolly está en el corral... ¡y yo casi vendo la vaca del señor Harrison! Mi ángel de la guarda me tiró de la trenza justo a tiempo.' }, { quien: 'diana', texto: '¡Ana! ¿Te imaginas si se la hubieras vendido?' }] },
+        { id: 'devolver', hora: 16, lugar: 'hh', personajes: ['harrison'], que_pasa: 'Ana va a contarle al Sr. Harrison que su vaca anduvo en la avena (por su propia cerca rota). Ginger chilla; el Sr. Harrison gruñe, pero tiene que admitir que la cerca es un desastre, y le cae en gracia esa muchacha que habla tanto.', pista: 'Ve a contarle al Sr. Harrison lo de su vaca', encargo: NO_TASK, fin: 'llega_ana', evento: '', efectos: [],
+          frases: [{ quien: 'ginger', texto: '¡Pelirroja! ¡Pelirroja!' }, { quien: 'harrison', texto: 'Hmpf. ¿Así que era mi vaca la de la avena? Bueno... la cerca está hecha un desastre, eso lo admito.' }] },
+        { id: 'vuelta', hora: 19, lugar: 'gg', personajes: ['marilla', 'matthew'], que_pasa: 'Vuelven Marilla y Matthew; Ana les cuenta que casi vende la vaca del Sr. Harrison, pero que esta vez lo pensó dos veces. Marilla, sorprendida, la elogia a su manera; Matthew, orgullosísimo.', pista: 'Marilla y Matthew vuelven a casa', encargo: NO_TASK, fin: 'llega_ana', evento: '', efectos: [],
+          frases: [{ quien: 'marilla', texto: 'Vaya, Ana. Por una vez pensaste antes de actuar. Habrá que marcar el día en el calendario.' }, { quien: 'matthew', texto: 'Bueno, pues... yo sabía que lo harías bien. Ya lo creo.' }] },
+        { id: 'noche', hora: 21, lugar: 'ga', personajes: [], que_pasa: 'En su cuarto, Ana piensa en el error que estuvo a punto de cometer.', pista: 'Sube a tu cuarto', encargo: NO_TASK, fin: 'llega_ana', evento: '', efectos: [],
+          frases: [{ quien: 'ana', texto: 'Hoy casi cometo el error más grande de mi vida... y no lo cometí. Es una sensación rarísima, como estrenar zapatos.' }] }] },
+      { desde: 'vaca_avena', titulo: 'La vaca se queda en la avena', resumen: 'La vaca siguió en la avena, y el Sr. Harrison vino furioso a reclamar por una vaca que resultó ser suya.', escenas: [
+        { id: 'reclamo', hora: 16, lugar: 'corral_porton', personajes: ['harrison'], que_pasa: 'El Sr. Harrison, de vuelta del pueblo, encuentra una vaca en su avena y llega furioso a Tejas Verdes a reclamar... pero en el corral está Dolly, tan tranquila: la vaca de la avena es la suya. Entre el enojo y la vergüenza, termina riéndose de sí mismo.', pista: 'Alguien viene muy enojado a Tejas Verdes', encargo: NO_TASK, fin: 'llega_ana', evento: '', efectos: [],
+          frases: [{ quien: 'harrison', texto: '¡Muchacha! ¡Tu vaca está otra vez en mi avena, y esta vez tomo medidas!' }, { quien: 'ana', texto: 'Señor Harrison, con todo respeto... Dolly está aquí, en el corral. Esa vaca es suya.' }] },
+        { id: 'vuelta', hora: 19, lugar: 'gg', personajes: ['marilla', 'matthew'], que_pasa: 'Vuelven Marilla y Matthew; Ana les cuenta que el Sr. Harrison vino a reclamar por una vaca que era de él mismo.', pista: 'Marilla y Matthew vuelven a casa', encargo: NO_TASK, fin: 'llega_ana', evento: '', efectos: [],
+          frases: [{ quien: 'marilla', texto: 'Ese hombre debería arreglar su cerca antes de andar escribiendo cartas.' }] },
+        { id: 'noche', hora: 21, lugar: 'ga', personajes: [], que_pasa: 'En su cuarto, Ana se ríe sola del día.', pista: 'Sube a tu cuarto', encargo: NO_TASK, fin: 'llega_ana', evento: '', efectos: [],
+          frases: [{ quien: 'ana', texto: 'Hoy el lío fue de otro, para variar. Es casi decepcionante.' }] }] }] },
   { titulo: 'El cordial de frambuesa', inspiracion: 'el capítulo 16 del libro: el té con Diana', resumen: 'Diana invita a Ana a tomar el té, y Marilla, que no olvida lo del vino de grosellas, manda un recado de paz a la Sra. Barry.', escenas: [
     { hora: 10, lugar: 'os', personajes: ['diana', 'barry'], que_pasa: 'Diana invita a Ana a tomar el té en la salita; la Sra. Barry les deja el cordial de frambuesa, esta vez bien etiquetado, y las mira con cierta cautela.', pista: 'Diana te invita a tomar el té en su casa', encargo: NO_TASK, fin: 'llega_ana' },
     { hora: 13, lugar: 'gg', personajes: ['marilla'], que_pasa: 'Marilla, que se acuerda del lío del vino de grosellas, le pide a Ana que le lleve un recado de paz a la Sra. Barry.', pista: 'Marilla quiere hablar contigo en la cocina', encargo: { ...NO_TASK, tipo: 'recado', para: 'barry', recado: 'Marilla le manda saludos y dice que esta vez el cordial es cordial de verdad' }, fin: 'encargo_cumplido' },
@@ -2046,39 +2086,83 @@ async function newDay(ended){
   if (aiReady()) { try { await reflectDay(ended); } catch (e) { console.debug('[avonlea IA] fin del día', e.message); } }
   storyBusy = false; makeStory();
 }
-function storyEvent(name){ const st = game.story; if (!st || st.day !== today()) return; (st.ev = st.ev || {})[name] = true; }
-const storyNow = () => { const st = game.story; return st && st.day === today() && st.i < st.escenas.length ? st.escenas[st.i] : null; };
+function storyEvent(name){ const st = game.story; if (!st || st.day !== today()) return; (st.ev = st.ev || {})[name] = hourNow(); }
+const storyOpen = () => { const st = game.story; return st && st.v === 2 && st.day === today() ? st.escenas.filter(e => e.estado === 'abierta').sort((a, b) => a.hora - b.hora) : []; };
+const storyNow = () => storyOpen().find(e => !e.played) || null;
 const storyPos = e => ROOMS[e.lugar] ? { room: e.lugar, place: null } : { room: 'out', place: e.lugar };
 const storyHere = e => ROOMS[e.lugar] ? game.scene === e.lugar : game.scene === 'out' && dist(ana.x, ana.y, PLACES[e.lugar][1], PLACES[e.lugar][2]) < 150;
+const storyPast = st => (st.hechos || []).slice(-6).map(h => h.t).join(' / ');
 function storyText(who){
-  const st = game.story; if (!st || st.day !== today() || st.i >= st.escenas.length) return '';
-  const mine = st.escenas.slice(st.i).filter(e => e.personajes.includes(who)); if (!mine.length) return '';
-  return `LA HISTORIA DE HOY («${st.titulo}», inspirada en ${st.inspiracion}), en lo que toca a ${NAMES[who]}: ` + mine.map(e => `a las ${e.hora}:00, en ${placeName(e.lugar)}: ${e.que_pasa}`).join(' Después, ') + ' (Guíate por esto, sin adelantarlo.)';
+  const st = game.story; if (!st || st.v !== 2 || st.day !== today()) return '';
+  const mine = st.escenas.filter(e => !isFinal(e) && e.personajes.includes(who)), past = storyPast(st);
+  if (!mine.length && !past) return '';
+  return `LA HISTORIA DE HOY («${st.titulo}», inspirada en ${st.inspiracion})` + (past ? `. Lo que ha pasado hasta ahora (${NAMES[who]} solo sabe lo que vio o le contaron): ${past}.` : '.')
+    + (mine.length ? ` Lo que viene, en lo que toca a ${NAMES[who]}: ` + mine.map(e => `hacia las ${e.hora}:00, en ${placeName(e.lugar)}: ${e.que_pasa}`).join(' Después, ') + ' (Guíate por esto, sin adelantarlo.)' : '');
 }
-function storyTick(){
-  const e = storyNow(); if (!e) return;
-  const hn = hourNow();
-  if (e.estado === 'espera') { if (hn >= e.hora - .75) { e.estado = 'va'; runEffects(e, 'antes'); notice('📖 ' + e.pista); } return; }
-  const evDone = e.fin === 'evento' && game.story.ev?.[e.evento];
-  if (e.estado === 'va') {
-    for (const k of e.personajes) { PEOPLE[k].story = storyPos(e); PEOPLE[k].away = null; }
-    if (evDone && e.played) return storyNext('hecha');
-    if (hn > e.hora + 3) return storyNext(evDone ? 'hecha' : 'perdida');
-    if (!storyHere(e) || amb.cur || game.talk || game.cooking || sleeping) return;
-    const present = e.personajes.filter(k => sceneOf(k) === game.scene && (game.scene !== 'out' || dist(PEOPLE[k].x, PEOPLE[k].y, ana.x, ana.y) < 220));
-    if (present.length < e.personajes.length) { e.waitT = e.waitT || TT + 30; if (TT < e.waitT) return; }   // (gives them a moment to arrive)
-    storyPlay(e, present); return;
+// when what a scene needs happened (null: not yet); a missed scene that was not key counts as a gap, not as a wall
+function storyReq(st, e){
+  let t = 0;
+  for (const r of e.requiere || []) {
+    const b = st.escenas.find(x => x.id === r);
+    if (b && GAP.includes(b.estado)) continue;
+    const h = st.ev[r]; if (h == null) return null; t = Math.max(t, h);
   }
-  if (e.estado === 'jugada') {   // played: wait for the decisions, and for the errand if there is one
-    if (game.talk || amb.cur) return;
-    if (e.fin === 'encargo_cumplido' && e.taskId) { const t = game.tasks.find(t => t.id === e.taskId); if (t && !t.done) return; }
-    if (e.fin === 'evento' && !evDone) { if (hn < e.hora + 5) return; return storyNext('sin_evento'); }   // (waits for what has to happen)
-    storyNext(e.fin === 'encargo_cumplido' && !e.taskId ? 'sin_encargo' : 'hecha');
+  return t;
+}
+const storyEvDone = (st, e) => e.fin === 'evento' && st.ev[e.evento] != null && st.ev[e.evento] >= (e.reqAt ?? 0);
+function storyTick(){
+  const st = game.story; if (!st || st.v !== 2 || st.day !== today() || st.gen || st.fin) return;
+  const hn = hourNow();
+  for (const e of st.escenas) {
+    if (isFinal(e) || e.estado === 'jugando') continue;
+    const rq = storyReq(st, e);
+    if (rq == null) {   // what it needs has not happened (yet)
+      if (hn > e.hora + e.margen + 1) { if (e.clave) return storyBranch(e, 'falta'); storyEnd(e, 'perdida'); }
+      continue;
+    }
+    e.reqAt = Math.max(rq, e.hora - 3);
+    const against = (e.contra || []).find(c => st.ev[c] != null && st.ev[c] >= e.reqAt);
+    if (against && !storyEvDone(st, e)) return storyBranch(e, 'contra:' + against);
+    if (e.estado === 'espera') {
+      if (storyEvDone(st, e)) { storyEnd(e, 'ya'); continue; }   // (it happened by itself, before its time)
+      const early = e.requiere.length && hn >= Math.max(rq + .25, e.hora - 2);   // (what it waited for came early: so does it)
+      if (hn < e.hora - .75 && !early) continue;
+      e.estado = 'abierta'; e.vence = Math.max(e.hora, hn) + e.margen; e.opened = true; runEffects(e, 'antes'); notice('📖 ' + e.pista); save();
+    }
+    if (e.estado === 'abierta') {
+      if (storyEvDone(st, e) && !e.played) { e.yaAt = e.yaAt ?? hn; if (!storyHere(e) || hn > e.yaAt + .5) { storyEnd(e, 'ya'); continue; } }
+      if (hn > e.vence) { if (e.clave) return storyBranch(e, 'tarde'); storyEnd(e, 'perdida'); }
+      continue;
+    }
+    if (e.estado === 'jugada') {   // played: wait for the decisions, and for the errand or the event if there is one
+      if (game.talk || amb.cur) continue;
+      if (e.fin === 'encargo_cumplido') {
+        const t = e.taskId && game.tasks.find(t => t.id === e.taskId);
+        if (!e.taskId || (t && !t.done && hn > e.vence + 4)) { if (e.clave) return storyBranch(e, 'sin_encargo'); storyEnd(e, 'sin_encargo'); continue; }
+        if (t && !t.done) continue;
+      }
+      if (e.fin === 'evento' && !storyEvDone(st, e)) { if (hn < e.vence + 2) continue; if (e.clave) return storyBranch(e, 'sin_evento'); storyEnd(e, 'sin_evento'); continue; }
+      storyEnd(e, 'hecha');
+    }
+  }
+  // whoever is in an open scene goes there (the earliest one first)
+  const open = storyOpen();
+  for (const [k, p] of Object.entries(PEOPLE)) {
+    const e = open.find(e => e.personajes.includes(k));
+    if (e) { p.story = storyPos(e); p.away = null; } else if (p.story) { p.story = null; if (p.target?.story) p.target = null; }
+  }
+  if (amb.cur || game.talk || game.cooking || sleeping) return;
+  for (const e of open) {
+    if (e.played || !storyHere(e)) continue;
+    const present = e.personajes.filter(k => sceneOf(k) === game.scene && (game.scene !== 'out' || dist(PEOPLE[k].x, PEOPLE[k].y, ana.x, ana.y) < 220));
+    if (present.length < e.personajes.length) { e.waitT = e.waitT || TT + 30; if (TT < e.waitT) continue; }   // (gives them a moment to arrive)
+    storyPlay(e, present); return;
   }
 }
 async function storyPlay(e, present){
   const st = game.story; e.estado = 'jugando'; userInput();
-  const note = `ESCENA DE LA HISTORIA DE HOY «${st.titulo}» (inspirada en ${st.inspiracion}): ${e.que_pasa}` + (e.frases?.length ? ` Estas frases tienen que aparecer tal cual, cada una dicha por quien se indica: ${e.frases.map(f => nameOf(f.quien) + ': «' + f.texto + '»').join(' ')}.` : '') + (e.encargo ? ` En esta escena ${NAMES[present[0]] || 'alguien'} le pide algo a Ana: ${(() => { try { return taskText({ ...e.encargo, from: present[0], n: e.encargo.cantidad || 1, para: e.encargo.para || present[0] }); } catch (err) { return e.encargo.tipo; } })()}.` : '') + ' Es un momento especial del día: la escena puede ser algo más larga.';
+  const past = storyPast(st), rama = st.ramas[st.ramas.length - 1];
+  const note = `ESCENA DE LA HISTORIA DE HOY «${st.titulo}» (inspirada en ${st.inspiracion}): ${e.que_pasa}` + (past ? ` (Lo que pasó antes hoy: ${past}.)` : '') + (rama && e.id.startsWith(rama.pre) ? ` (La historia ya no es la del libro: ${rama.por}; ahora va por «${rama.titulo}».)` : '') + (e.frases?.length ? ` Estas frases tienen que aparecer tal cual, cada una dicha por quien se indica: ${e.frases.map(f => nameOf(f.quien) + ': «' + f.texto + '»').join(' ')}.` : '') + (e.encargo ? ` En esta escena ${NAMES[present[0]] || 'alguien'} le pide algo a Ana: ${(() => { try { return taskText({ ...e.encargo, from: present[0], n: e.encargo.cantidad || 1, para: e.encargo.para || present[0] }); } catch (err) { return e.encargo.tipo; } })()}.` : '') + ' Es un momento especial del día: la escena puede ser algo más larga.';
   let s = null;
   if (aiReady()) { try { s = await sceneAsk(present, note); } catch (err) { console.debug('[avonlea IA] escena de la historia', err.message); } }
   const fr = (e.frases || []).filter(f => f.quien === 'ana' || present.includes(f.quien) || talkersHere().includes(f.quien));
@@ -2088,21 +2172,83 @@ async function storyPlay(e, present){
   if (!s.resumen) s.resumen = `${st.titulo}: ${e.que_pasa}`;
   if (e.encargo && present.length && (!s.out.encargo || s.out.encargo.tipo === 'ninguno')) s.out.encargo = { ...e.encargo };
   if (!aiReady()) notice('📖 ' + e.que_pasa);
-  if (amb.cur || game.talk) { e.estado = 'va'; return; }   // (something else started meanwhile: later)
+  if (amb.cur || game.talk || game.story !== st || e.estado !== 'jugando') { if (e.estado === 'jugando') e.estado = 'abierta'; return; }   // (something else happened meanwhile: later)
   s.story = e; s.turns = 1; e.estado = 'jugada'; e.played = true;
   sceneStart(s, present.length > 0);
 }
-function storyNext(how){
-  const st = game.story, e = st.escenas[st.i];
-  e.estado = how; runEffects(e, 'despues');
-  for (const k of e.personajes) { const p = PEOPLE[k]; p.story = null; if (p.target?.story) p.target = null; }
-  if (how === 'perdida') logEv('Ana no llegó a tiempo: ' + e.que_pasa, e.personajes);
-  st.i++;
-  if (st.i >= st.escenas.length) { logEv(`La historia del día: «${st.titulo}». ${st.resumen}`, Object.keys(CH)); (game.stories = game.stories || []).push(st.titulo); notice('📖 Fin de la historia de hoy: «' + st.titulo + '»'); }
-  else notice('📖 Más tarde: ' + st.escenas[st.i].pista);
-  save();
+function storyRelease(e){ for (const k of e.personajes) { const p = PEOPLE[k]; if (!p) continue; p.story = null; if (p.target?.story) p.target = null; } }
+function storyEnd(e, how){
+  const st = game.story, hn = hourNow(); e.estado = how;
+  if (how === 'hecha' || how === 'ya') st.ev[e.id] = hn;
+  if (e.opened) runEffects(e, 'despues');
+  if (how === 'perdida' && e.opened && e.personajes.length) logEv('Ana no llegó a tiempo: ' + e.que_pasa, e.personajes);
+  const t = how === 'hecha' ? e.que_pasa : how === 'ya' ? 'Antes de lo pensado, ' + evDesc(e.evento).replace(/^./, c => c.toLowerCase()) : how === 'perdida' ? 'No pasó (Ana no estuvo): ' + e.pista : 'Quedó a medias: ' + e.pista;
+  st.hechos.push({ h: Math.round(hn * 10) / 10, t: t.slice(0, 200) });
+  storyRelease(e); storyCheckEnd(); save();
 }
-
+function storyCheckEnd(){
+  const st = game.story; if (st.gen || st.fin || st.escenas.some(e => !isFinal(e))) return;
+  st.fin = true; const r = st.ramas[st.ramas.length - 1];
+  logEv(`La historia del día: «${st.titulo}»${r ? ' (que terminó siendo «' + r.titulo + '»)' : ''}. ${r ? r.resumen || 'El día tomó otro camino: ' + r.por + '.' : st.resumen}`, Object.keys(CH));
+  (game.stories = game.stories || []).push(st.titulo); notice('📖 Fin de la historia de hoy: «' + (r ? r.titulo : st.titulo) + '»');
+}
+function storyWhy(e, why){
+  if (why.startsWith('contra:')) return `en vez de lo que iba a pasar («${e.pista}»), pasó esto: ${evDesc(why.slice(7)).replace(/^./, c => c.toLowerCase())}`;
+  if (why === 'tarde') return `Ana no estuvo en ${placeName(e.lugar)} a tiempo («${e.pista}»), y eso ya no pasó`;
+  if (why === 'sin_evento') return `no pasó lo que tenía que pasar: ${evDesc(e.evento).replace(/^./, c => c.toLowerCase())}`;
+  if (why === 'sin_encargo') return `Ana no tomó, o no cumplió, el encargo de «${e.pista}»`;
+  return `nunca se dio lo que hacía falta para «${e.pista}»`;
+}
+// the story leaves its path: from here on, a new branch
+function storyBranch(e, why){
+  const st = game.story;
+  if (st.ramas.length >= 3) return storyEnd(e, why === 'sin_evento' || why === 'sin_encargo' ? why : 'perdida');   // (enough turns for one day: a gap)
+  const txt = storyWhy(e, why);
+  e.estado = 'rota'; e.porque = txt; storyRelease(e); st.gen = true;
+  st.hechos.push({ h: Math.round(hourNow() * 10) / 10, t: 'El día tomó otro camino: ' + txt });
+  logEv('El día tomó otro camino: ' + txt + '.');
+  notice('📖 La historia toma otro camino…'); save();
+  storyBranchMake(st, e, why, txt).catch(err => { console.debug('[avonlea] rama', err); if (game.story === st) { st.gen = false; save(); } });
+}
+function branchMsg(st, e, txt, pend, h0){
+  const today_ = game.journal.filter(j => j.d === today()).slice(-14);
+  return worldText() + `\n\nLA HISTORIA DE HOY: «${st.titulo}» (inspirada en ${st.inspiracion}). ${st.resumen}`
+    + `\n\nLO QUE YA PASÓ DE LA HISTORIA:\n${(st.hechos || []).map(h => `- ${fmtHour(h.h)}: ${h.t}`).join('\n') || '(nada aún)'}`
+    + (today_.length ? `\n\nLO QUE PASÓ HOY (el diario):\n${today_.map(j => '- ' + j.t).join('\n')}` : '')
+    + `\n\nDÓNDE SE DESVIÓ (a las ${fmtHour(hourNow())}): ${txt}.`
+    + `\n\nLO QUE IBA A PASAR DESPUÉS EN LA RAMA PRINCIPAL (ya no vale tal cual; puedes retomar lo que aún tenga sentido): ${pend.map(x => `${x.hora}:00, en ${placeName(x.lugar)}${x.personajes.length ? ', con ' + x.personajes.map(k => NAMES[k]).join(' y ') : ''}: ${x.que_pasa}`).join(' | ') || '(nada)'}`
+    + `\n\nDÓNDE ESTÁ CADA UNO: ${Object.keys(CH).map(k => NAMES[k] + ': ' + whereText(k)).join('; ')}. Animales: ${Object.entries(ANIM).map(([k, a]) => `${k} (${ANIMALS[k].desc}): ${ANIMALS[k].kind !== 'cow' ? 'en su lugar' : a.state === 'bought' ? 'vendida a ' + (NAMES[a.owner] || a.owner) : a.state === 'led' ? 'Ana la lleva de la cuerda' : a.area && AREAS[a.area] ? 'en ' + AREAS[a.area].name : a.state || 'en su lugar'}`).join('; ')}.`
+    + `\nLUGARES (claves): ${STORY_PLACES().map(l => l + ' = ' + placeName(l)).join('; ')}.`
+    + `\nESCENAS YA HECHAS (sus "id" sirven en "requiere"): ${st.escenas.filter(x => x.estado === 'hecha' || x.estado === 'ya').map(x => x.id).join(', ') || '(ninguna)'}.`
+    + `\n\nRAMA NUEVA: escribe cómo sigue la historia desde las ${h0}:00.`;
+}
+const fmtHour = h => `${Math.floor(h % 24)}:${String(Math.floor((h % 1) * 60)).padStart(2, '0')}`;
+async function storyBranchMake(st, e, why, txt){
+  const n = st.ramas.length + 1, pre = 'r' + n + '_', h0 = Math.max(Math.ceil(hourNow()), 7);
+  const pend = st.escenas.filter(x => !isFinal(x)), playing = pend.filter(x => x.estado === 'jugando');
+  const known = st.escenas.filter(x => x.estado === 'hecha' || x.estado === 'ya').map(x => x.id);
+  let beats = [], keep = [], titulo = '', resumen = '';
+  if (aiReady()) {
+    try { const o = (await aiCall([{ role: 'user', content: branchMsg(st, e, txt, pend, h0) }], branchSchema())).out; beats = validBeats(o.escenas, h0, pre, known); titulo = String(o.titulo_rama || '').slice(0, 80); resumen = String(o.resumen || '').slice(0, 300); }
+    catch (err) { console.debug('[avonlea IA] rama', err.message); }
+  }
+  if (!beats.length) {   // without the AI: a branch written by hand for this turn, if the story has one
+    const src = STORIES.find(x => x.titulo === st.titulo), r = src?.ramas?.find(r => r.desde === e.id && (!r.por || r.por.some(p => why.startsWith(p))));
+    if (r) { beats = validBeats(r.escenas, h0, pre, known); titulo = r.titulo; resumen = r.resumen || ''; }
+  }
+  if (!beats.length) {   // ...or the main branch, without what depended on the broken scene
+    const gone = new Set([e.id, e.evento].filter(Boolean));
+    for (const x of pend) if (x.requiere.some(r => gone.has(r))) { gone.add(x.id); if (x.evento) gone.add(x.evento); } else keep.push(x);
+    titulo = 'Otro camino'; resumen = txt;
+    if (!keep.some(x => x.lugar === 'ga') && h0 <= 21) beats = validBeats([{ id: 'noche', hora: 21, lugar: 'ga', personajes: [], que_pasa: 'En su cuarto, Ana piensa en cómo el día tomó un camino distinto del que parecía: ' + txt + '.', pista: 'Al final del día, sube a tu cuarto', fin: 'llega_ana' }], h0, pre, known);
+  }
+  if (game.story !== st) return;   // (a new day came meanwhile)
+  for (const x of pend) if (!keep.includes(x) && !playing.includes(x)) { x.estado = 'descartada'; storyRelease(x); }
+  st.escenas.push(...beats); st.ramas.push({ pre, desde: e.id, por: txt, titulo: titulo || 'Otro camino', resumen, hora: hourNow() }); st.gen = false;
+  const next = [...keep, ...beats].sort((a, b) => a.hora - b.hora)[0];
+  notice('📖 La historia sigue por otro camino: «' + (titulo || 'Otro camino') + '»' + (next ? ' · ' + next.pista : ''));
+  storyCheckEnd(); save();
+}
 /* ---------- the panel: the story of the day, and the graph of who feels what for whom ---------- */
 const FOND_COL = ['#b5604c', '#c98a5a', '#d9a441', '#a8b05a', '#7aa060', '#4f8a5a'];
 let relSel = null;
@@ -2111,7 +2257,15 @@ function relPanel(on){
   close();
   const st = game.story, sp = $('story');
   if (st && st.day === today()) {
-    const rows = st.escenas.map((e, k) => k < st.i ? `<li class="done">${e.hora}:00 · ${esc(e.pista)} ${e.estado === 'perdida' ? '<i>(no llegaste)</i>' : '✓'}</li>` : k === st.i ? `<li class="now">${e.hora}:00 · ${esc(e.pista)}</li>` : `<li class="later">${e.hora}:00 · …</li>`).join('');
+    const mark = { hecha: '✓', ya: '✓ <i>(antes de tiempo)</i>', perdida: '<i>(no llegaste)</i>', sin_evento: '<i>(no pasó)</i>', sin_encargo: '<i>(sin encargo)</i>', rota: '<i>↯ aquí se desvió</i>' };
+    let rows = '';
+    for (const e of st.escenas) {
+      if (e.estado === 'descartada') continue;
+      const r = st.ramas.find(r => e.id.startsWith(r.pre) && !rows.includes('data-r="' + r.pre + '"'));
+      if (r) rows += `<li class="rama" data-r="${r.pre}">🌿 ${esc(r.titulo)}</li>`;
+      rows += isFinal(e) ? `<li class="done">${e.hora}:00 · ${esc(e.pista)} ${mark[e.estado] || ''}</li>` : e.estado === 'espera' ? `<li class="later">${e.hora}:00 · …</li>` : `<li class="now">${e.hora}:00 · ${esc(e.pista)}</li>`;
+    }
+    if (st.gen) rows += '<li class="rama">🌿 La historia está tomando otro camino…</li>';
     sp.innerHTML = `<div class="st">📖 «${esc(st.titulo)}»</div><div class="si">${esc(st.inspiracion)}</div><ul>${rows}</ul>`;
   } else sp.innerHTML = '<div class="si">📖 La historia de hoy se está escribiendo…</div>';
   sp.innerHTML += `<div class="si">Historias escritas a mano (para mañana): ${STORIES.map((x, k) => `<button class="pick" data-k="${k}">${game.nextStory === x.titulo ? '✓ ' : ''}${esc(x.titulo)}</button>`).join(' ')}</div>`;
@@ -2201,11 +2355,17 @@ FIN DEL DÍA (cuando te piden reflexionar sobre el día que terminó)
 
 GUIÓN DEL DÍA (cuando te piden la historia de hoy)
 - Una pequeña historia para hoy, inspirada en un episodio de los libros de Ana de las Tejas Verdes o de la serie animada (por ejemplo: el té con cordial de frambuesa, el broche de amatista, el vestido de mangas abullonadas, el Bosque Encantado, el pelo teñido de verde, la tarta con linimento, la Dama de Shalott en el lago, el picnic, la primera visita de la Sra. Lynde), adaptada a lo que el juego puede mostrar: solo estos lugares y personajes, y lo que pueden hacer (conversar, ir a un lugar, encargos: traer, regar, cocinar, recado, ir). Tono tranquilo, tierno y con humor; sin peligros reales. No repitas historias de días anteriores; puede retomar lo que pasó ayer o las relaciones.
-- "escenas": de 2 a 4, en orden, con "hora" entre la indicada y las 20 (al menos 2 horas entre una y otra); "lugar": una clave de lugar o, si pasa dentro de una casa, gg, os, rl o ga (ga es la pieza de Ana: allí está sola); "personajes": quiénes están (Ana siempre está: no la pongas; Diana solo puede estar afuera o en os; también pueden venir personajes de fuera, como el Sr. Shearer); "que_pasa": una o dos frases para quien escriba la escena; "pista": para la jugadora, qué la espera y dónde, sin contar el final (12 palabras como máximo); "encargo": si en esa escena alguien le pide algo a Ana (si no, "tipo": "ninguno"); "fin": "llega_ana" (termina al jugarse) o "encargo_cumplido" (termina cuando Ana cumple el encargo).
+- Es la RAMA PRINCIPAL: lo que pasaría más o menos si nadie fuerza nada. Tiene que ser flexible: las cosas pueden pasar antes o después, y alguna escena puede no pasar.
+- "escenas": de 2 a 6, en orden, con "hora" entre la indicada y las 20 (la hora es orientativa); "lugar": una clave de lugar o, si pasa dentro de una casa, gg, os, rl o ga (ga es la pieza de Ana: allí está sola); "personajes": quiénes están (Ana siempre está: no la pongas; Diana solo puede estar afuera o en os; también pueden venir personajes de fuera, como el Sr. Shearer); "que_pasa": una o dos frases para quien escriba la escena; "pista": para la jugadora, qué la espera y dónde, sin contar el final (12 palabras como máximo); "encargo": si en esa escena alguien le pide algo a Ana (si no, "tipo": "ninguno"); "fin": "llega_ana" (termina al jugarse) o "encargo_cumplido" (termina cuando Ana cumple el encargo).
 - "efectos": cosas que pasan al empezar ("cuando": "antes") o al terminar ("despues") la escena: ${Object.entries(STORY_EFFECTS).map(([k, f]) => k + ' (' + f.desc + ')').join('; ')}. Animales: ${Object.entries(ANIMALS).map(([k, a]) => k + ' = ' + a.desc).join('; ')}. Áreas: ${Object.entries(AREAS).map(([k, A]) => k + ' = ' + A.name).join('; ')}. Lo que se le puede notar a Ana: ${Object.entries(ANA_STATES).map(([k, a]) => k + ' (' + a.desc + ')').join('; ')}. Los campos que no se usan van vacíos.
 - "fin": "evento" si la escena termina cuando pasa algo que el juego nota ("evento": ${Object.entries(STORY_EVENTS).map(([k, d]) => k + ' = ' + d).join('; ')}); si no, "evento": "".
 - "frases": hasta 4 frases clave, dichas tal cual por quien se indica (pueden ser de Ana, de los presentes o de un animal que habla); si no hacen falta, [].
+- "id": una clave breve y única para la escena (por ejemplo "vaca_avena"). "requiere": lo que tiene que haber pasado antes para que la escena tenga sentido: "id" de escenas anteriores o eventos (de los de "fin"); la escena empieza cuando eso pasó (antes o después de su hora); si no requiere nada, []. "clave": true si sin esa escena la historia no puede seguir como está escrita (si no pasa, la historia toma otro camino); false para escenas de relleno o de ambiente, que pueden no pasar sin que importe. "contra": eventos que, si pasan, cambian la historia (por ejemplo, si la escena espera que Ana venda la vaca, "venta_rechazada"); si no hay, [].
 - "titulo" breve; "inspiracion": de qué capítulo o episodio sale; "resumen": dos frases.
+
+RAMA NUEVA (cuando te dicen que la historia de hoy se desvió)
+- Lo que pasó, pasó: escribe cómo sigue el día desde ahí, coherente con lo que de verdad ocurrió y con dónde está cada uno, con el mismo espíritu y tono del episodio (las consecuencias pueden ser cómicas o tiernas, nunca un castigo). Puedes retomar más adelante lo que aún tenga sentido de la rama principal.
+- "escenas": de 1 a 4, con el mismo formato que en el guión del día, desde la hora indicada; en "requiere" solo "id" de escenas ya hechas, de escenas de esta misma rama o eventos. "titulo_rama": cómo se llama este camino (breve); "resumen": una o dos frases de cómo termina el día por este camino.
 
 PLANIFICAR (cuando te piden el plan del día)
 - Piensa como el personaje: su carácter, su trabajo, la estación, la hora, lo que sabe, lo que recuerda, los encargos que dio y lo que acaba de pasar.
@@ -2504,7 +2664,7 @@ const sfx = { happy: () => { note(660, .3); note(880, .35, .03, 'sine', .12); no
 
 /* ---------- keeping the day: in the browser ---------- */
 function save(){ try { localStorage.setItem('avonlea', JSON.stringify({ inv: game.inv, hasCan: game.hasCan, water: game.water, fond: game.fond, said: game.said, saidS: game.saidS, seasonShift: game.seasonShift, teaDay: game.teaDay, journal: game.journal, mem: game.mem, know: game.know, tasks: game.tasks, plans: game.plans, table: game.table, giftFor: game.giftFor, npcGiftDay: game.npcGiftDay, lastDay: game.lastDay, taskSeq: game.taskSeq, rel: game.rel, relLog: game.relLog, impr: game.impr, story: game.story, stories: game.stories, nextStory: game.nextStory, ground: game.ground, groundSeq: game.groundSeq, anaStates: game.anaStates, animals: Object.fromEntries(Object.entries(ANIM).map(([k, a]) => [k, { x: a.x, y: a.y, where: a.where, state: a.state, area: a.area, owner: a.owner }])), beds: BEDS.map(b => [b.stage, b.wet, b.grow]), dayT })); } catch (e) {} }
-try { const s = JSON.parse(localStorage.getItem('avonlea') || 'null'); if (s) { Object.assign(game.inv, s.inv); game.hasCan = s.hasCan; game.water = s.water; Object.assign(game.fond, s.fond); game.said = s.said || {}; game.saidS = s.saidS || {}; game.seasonShift = s.seasonShift || 0; game.teaDay = s.teaDay ?? -1; game.journal = s.journal || []; game.mem = s.mem || {}; for (const k of ['know', 'plans', 'giftFor', 'npcGiftDay']) game[k] = s[k] || {}; game.tasks = s.tasks || []; game.table = s.table || null; game.lastDay = s.lastDay ?? null; game.taskSeq = s.taskSeq || 0; game.rel = s.rel || null; game.relLog = s.relLog || []; game.impr = s.impr || {}; game.story = s.story || null; game.stories = s.stories || []; game.nextStory = s.nextStory || null; game.ground = s.ground || []; game.groundSeq = s.groundSeq || 0; game.anaStates = s.anaStates || {}; for (const [k, v] of Object.entries(s.animals || {})) if (ANIM[k]) Object.assign(ANIM[k], v); (s.beds || []).forEach((v, k) => { if (BEDS[k]) [BEDS[k].stage, BEDS[k].wet, BEDS[k].grow] = v; }); if (s.dayT) dayT = s.dayT; if (game.hasCan) ana.carry = 'can'; } } catch (e) {}
+try { const s = JSON.parse(localStorage.getItem('avonlea') || 'null'); if (s) { Object.assign(game.inv, s.inv); game.hasCan = s.hasCan; game.water = s.water; Object.assign(game.fond, s.fond); game.said = s.said || {}; game.saidS = s.saidS || {}; game.seasonShift = s.seasonShift || 0; game.teaDay = s.teaDay ?? -1; game.journal = s.journal || []; game.mem = s.mem || {}; for (const k of ['know', 'plans', 'giftFor', 'npcGiftDay']) game[k] = s[k] || {}; game.tasks = s.tasks || []; game.table = s.table || null; game.lastDay = s.lastDay ?? null; game.taskSeq = s.taskSeq || 0; game.rel = s.rel || null; game.relLog = s.relLog || []; game.impr = s.impr || {}; game.story = s.story?.v === 2 ? s.story : null; if (game.story) game.story.gen = false; game.stories = s.stories || []; game.nextStory = s.nextStory || null; game.ground = s.ground || []; game.groundSeq = s.groundSeq || 0; game.anaStates = s.anaStates || {}; for (const [k, v] of Object.entries(s.animals || {})) if (ANIM[k]) Object.assign(ANIM[k], v); (s.beds || []).forEach((v, k) => { if (BEDS[k]) [BEDS[k].stage, BEDS[k].wet, BEDS[k].grow] = v; }); if (s.dayT) dayT = s.dayT; if (game.hasCan) ana.carry = 'can'; } } catch (e) {}
 relInit();
 addEventListener('pagehide', save); setInterval(save, 10000);
 
@@ -2873,7 +3033,7 @@ function render(){
   for (const k of ITEMS) if (I[k]) bits.push(ITEM_DEFS[k].icon + ' ' + I[k]);
   if (game.hasCan) bits.push('💧 ' + game.water + '/6');
   $('inv').textContent = bits.length ? bits.join('  ') : 'Ana · Tejas Verdes';
-  const ts = activeTasks(), se = storyNow(), tl = [...(se ? ['📖 ' + se.hora + ':00 · ' + se.pista] : []), ...ts.map(t => '📜 ' + taskText(t) + (t.para !== t.from || t.tipo !== 'traer' ? ' · ' + NAMES[t.from] : ''))].join('\n');
+  const ts = activeTasks(), tl = [...storyOpen().filter(e => !e.played).slice(0, 2).map(e => '📖 ' + e.hora + ':00 · ' + e.pista), ...ts.map(t => '📜 ' + taskText(t) + (t.para !== t.from || t.tipo !== 'traer' ? ' · ' + NAMES[t.from] : ''))].join('\n');
   if ($('tasks').dataset.t !== tl) { $('tasks').dataset.t = tl; $('tasks').textContent = tl; $('tasks').style.whiteSpace = 'pre-line'; $('tasks').hidden = !tl; }
   const d = dayT % 1, hh = Math.floor((d * 24 + 6) % 24), mm = Math.floor(((d * 24 + 6) % 1) * 60);
   $('clock').textContent = SICON[S] + ' ' + SEASONS[S] + ' · ' + (night > .5 ? '☾ ' : '') + String(hh).padStart(2, '0') + ':' + String(mm).padStart(2, '0');
@@ -2947,7 +3107,7 @@ function drawMap(){
   $('maptitle').textContent = 'Avonlea · ' + SEASONS[S] + ', día ' + (Math.floor(dayT) % 2 + 1) + ' · ' + SICON[S];
 }
 function loop(now){ const dt = clamp((now - last) / 1000, 0, .05); last = now; update(dt); render(); requestAnimationFrame(loop); }
-window.__avonlea = { STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, fallbackStory, makeStory, storyNow, storyTick, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+window.__avonlea = { STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
 requestAnimationFrame(loop);
 })();
 </script>
