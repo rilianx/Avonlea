@@ -34,6 +34,13 @@ html,body{margin:0;height:100%;background:#2b3a26;overflow:hidden;touch-action:n
 #rels .h{color:#d24a4a;letter-spacing:1px}
 #rels .mb{display:flex;justify-content:center;margin-top:6px}
 #rels button.pick{font-size:13px;padding:2px 8px;margin:2px}
+#rels button.dbg{font-size:12px;padding:1px 7px;margin:2px}
+#rels .bt{text-align:left;font-size:12.5px;line-height:1.4;border-left:3px solid #c9b48f;padding:3px 8px;margin:5px 0;background:rgba(255,250,235,.6)}
+#rels .bt b{font-size:13.5px}
+#rels .bt.on{border-color:#d9a441}#rels .bt.ok{border-color:#7aa060}#rels .bt.gap{border-color:#b5a58a;opacity:.8}#rels .bt.br{border-color:#b5604c}#rels .bt.off{opacity:.45;text-decoration:line-through}
+#rels .bt .k{color:#8a6a4a;font-style:italic}#rels .bt .tag{font-size:11px;border:1px solid currentColor;border-radius:6px;padding:0 4px;margin-left:4px}
+#rels .dh{text-align:left;font-size:13px;font-weight:bold;color:#4f7a4a;margin:8px 0 2px}
+#rels details{text-align:left;font-size:13px;margin:4px 0}
 #saybtn{position:fixed;right:10px;top:130px;width:42px;height:36px;font-size:19px;line-height:30px;padding:0;cursor:pointer}
 #sleep{position:fixed;inset:0;z-index:30;background:#0d1020;color:#e8e2c8;font:italic 34px Georgia,serif;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 1.2s ease}
 #sleep.on{opacity:1;pointer-events:auto}
@@ -1969,7 +1976,7 @@ const FINAL = ['hecha', 'ya', 'perdida', 'sin_evento', 'sin_encargo', 'rota', 'd
 const GAP = ['perdida', 'sin_evento', 'sin_encargo'];   // (missed, not key: a gap the story goes on with)
 const isFinal = e => FINAL.includes(e.estado);
 const evKnown = n => typeof n === 'string' && /^[a-z_]+(:[a-z_]+){0,2}$/.test(n) && (!!STORY_EVENTS[n] || Object.keys(STORY_EVENTS).some(k => k.includes(':<') && n.startsWith(k.split(':')[0] + ':')));
-const evDesc = n => STORY_EVENTS[n] || (() => { const k = Object.keys(STORY_EVENTS).find(k => k.includes(':<') && n.startsWith(k.split(':')[0] + ':')); return k ? STORY_EVENTS[k] + ' (' + n.split(':').slice(1).map(x => NAMES[x] || x).join(', ') + ')' : n; })();
+const evDesc = n => STORY_EVENTS[n] || (() => { const k = Object.keys(STORY_EVENTS).find(k => k.includes(':<') && n.startsWith(k.split(':')[0] + ':')); return k ? STORY_EVENTS[k].replace(/ \(por ejemplo[^)]*\)/, '') + ' (' + n.split(':').slice(1).map(x => NAMES[x] || x).join(', ') + ')' : n; })();
 function validBeats(list, h0, pre = '', known = []){
   const out = [], ids = new Set(known); let last = h0;
   for (const [k, e] of (Array.isArray(list) ? list : []).slice(0, 9).entries()) {
@@ -2125,6 +2132,7 @@ function storyTick(){
     if (against && !storyEvDone(st, e)) return storyBranch(e, 'contra:' + against);
     if (e.estado === 'espera') {
       if (storyEvDone(st, e)) { storyEnd(e, 'ya'); continue; }   // (it happened by itself, before its time)
+      if (hn > e.hora + e.margen && rq <= e.hora) { if (e.clave) return storyBranch(e, 'tarde'); storyEnd(e, 'perdida'); continue; }   // (its time went by, e.g. the clock jumped)
       const early = e.requiere.length && hn >= Math.max(rq + .25, e.hora - 2);   // (what it waited for came early: so does it)
       if (hn < e.hora - .75 && !early) continue;
       e.estado = 'abierta'; e.vence = Math.max(e.hora, hn) + e.margen; e.opened = true; runEffects(e, 'antes'); notice('📖 ' + e.pista); save();
@@ -2266,11 +2274,50 @@ function relPanel(on){
       rows += isFinal(e) ? `<li class="done">${e.hora}:00 · ${esc(e.pista)} ${mark[e.estado] || ''}</li>` : e.estado === 'espera' ? `<li class="later">${e.hora}:00 · …</li>` : `<li class="now">${e.hora}:00 · ${esc(e.pista)}</li>`;
     }
     if (st.gen) rows += '<li class="rama">🌿 La historia está tomando otro camino…</li>';
-    sp.innerHTML = `<div class="st">📖 «${esc(st.titulo)}»</div><div class="si">${esc(st.inspiracion)}</div><ul>${rows}</ul>`;
+    sp.innerHTML = `<div class="st">📖 «${esc(st.titulo)}»</div><div class="si">${esc(st.inspiracion)}</div>` + (storyDbg ? storyDbgHtml(st) : `<ul>${rows}</ul>`);
   } else sp.innerHTML = '<div class="si">📖 La historia de hoy se está escribiendo…</div>';
   sp.innerHTML += `<div class="si">Historias escritas a mano (para mañana): ${STORIES.map((x, k) => `<button class="pick" data-k="${k}">${game.nextStory === x.titulo ? '✓ ' : ''}${esc(x.titulo)}</button>`).join(' ')}</div>`;
+  if (storyDbg) sp.innerHTML += STORIES.map(x => `<details><summary>🐞 Guion completo de «${esc(x.titulo)}»${x.ramas?.length ? ' (con ' + x.ramas.length + ' ramas escritas a mano)' : ''}</summary>${x.escenas.map(e => beatHtml(e)).join('')}${(x.ramas || []).map(r => `<div class="dh">🌿 Rama «${esc(r.titulo)}» · si se rompe «${esc(r.desde)}»${r.por ? ' por ' + r.por.join(', ') : ''}</div>${r.resumen ? `<div class="si">${esc(r.resumen)}</div>` : ''}${r.escenas.map(e => beatHtml(e)).join('')}`).join('')}</details>`).join('');
+  sp.innerHTML += `<div class="si"><button class="dbg" id="dbgbtn">🐞 ${storyDbg ? 'Ocultar el detalle' : 'Ver toda la historia (depurar)'}</button>${storyDbg && st ? ' <button class="dbg" id="dbgcopy">📋 Copiar como JSON</button>' : ''}</div>`;
   sp.querySelectorAll('.pick').forEach(bt => bt.addEventListener('click', () => { const x = STORIES[+bt.dataset.k]; game.nextStory = game.nextStory === x.titulo ? null : x.titulo; save(); relPanel(true); }));
+  $('dbgbtn').addEventListener('click', () => { storyDbg = !storyDbg; try { localStorage.setItem('avonlea-debug', storyDbg ? '1' : ''); } catch (e) {} relPanel(true); });
+  $('dbgcopy')?.addEventListener('click', () => { try { navigator.clipboard.writeText(JSON.stringify(game.story, null, 2)); notice('📋 Historia copiada'); } catch (e) {} });
+  sp.querySelectorAll('.jump').forEach(bt => bt.addEventListener('click', () => { const h = +bt.dataset.h; dayT = Math.max(dayT, today() + (h - 6) / 24); storyTick(); relPanel(true); }));
   drawRels();
+}
+/* the debugger: the whole story, scene by scene (what is coming too), with what each one needs and what happened */
+let storyDbg = false; try { storyDbg = !!localStorage.getItem('avonlea-debug'); } catch (e) {}
+const DBG_STATE = { espera: ['', '⏳ espera'], abierta: ['on', '▶ abierta'], jugando: ['on', '🎭 jugándose'], jugada: ['on', '🎭 jugada, esperando cómo termina'], hecha: ['ok', '✓ hecha'], ya: ['ok', '✓ pasó antes de tiempo'], perdida: ['gap', '○ se perdió (vacío)'], sin_evento: ['gap', '○ no pasó el evento (vacío)'], sin_encargo: ['gap', '○ sin encargo (vacío)'], rota: ['br', '↯ se rompió: aquí se desvió'], descartada: ['off', '✗ descartada por la rama'] };
+function beatHtml(e, st){
+  const [cls, lab] = st ? DBG_STATE[e.estado] || ['', e.estado] : ['', ''], hh = h => fmtHour(h);
+  const has = n => st && st.ev?.[n] != null, req = (e.requiere || []).map(r => `${esc(r)}${st ? (has(r) ? ' ✓' + hh(st.ev[r]) : ' …') : ''}`).join(', ');
+  const fin = e.fin === 'evento' ? `cuando pase <b>${esc(e.evento)}</b> (${esc(evDesc(e.evento))})${has(e.evento) ? ' ✓' + hh(st.ev[e.evento]) : ''}` : e.fin === 'encargo_cumplido' ? 'cuando Ana cumpla el encargo' : 'al jugarse la escena';
+  const enc = e.encargo && e.encargo.tipo && e.encargo.tipo !== 'ninguno' ? Object.entries(e.encargo).filter(([, v]) => v).map(([k, v]) => k + ': ' + v).join(', ') : '';
+  const efx = (e.efectos || []).map(f => `${f.tipo} (${f.cuando || 'antes'}: ${[f.quien?.join('+'), f.animal, f.lugar, f.estado, f.tipo === 'ausente' ? 'hasta las ' + (f.hasta || 19) : ''].filter(Boolean).join(', ')})`).join('; ');
+  const run = st && e.vence != null && !isFinal(e) ? `abierta; vence a las ${hh(e.vence)}${e.reqAt != null ? ', cuenta lo que pase desde las ' + hh(e.reqAt) : ''}` : '';
+  return `<div class="bt ${cls}"><b>${e.hora}:00 · ${esc(e.id || '')}</b>${e.clave ? '<span class="tag">clave</span>' : '<span class="tag">relleno</span>'} ${lab ? '· ' + lab : ''}`
+    + (st && e.estado === 'espera' && e.hora - .8 > hourNow() ? ` <button class="dbg jump" data-h="${e.hora - .8}">⏩ ir a las ${hh(e.hora - .8)}</button>` : '')
+    + `<br><span class="k">dónde:</span> ${esc(placeName(e.lugar))} (${esc(e.lugar)})${e.personajes?.length ? ' · <span class="k">con:</span> ' + e.personajes.map(k => esc(NAMES[k] || k)).join(', ') : ''}`
+    + `<br><span class="k">qué pasa:</span> ${esc(e.que_pasa || '')}<br><span class="k">pista:</span> ${esc(e.pista || '')}<br><span class="k">termina:</span> ${fin}`
+    + (req ? `<br><span class="k">requiere:</span> ${req}` : '') + (e.contra?.length ? `<br><span class="k">en contra:</span> ${e.contra.map(c => esc(c) + (has(c) ? ' ⚠' + hh(st.ev[c]) : '')).join(', ')}` : '')
+    + (efx ? `<br><span class="k">efectos:</span> ${esc(efx)}` : '') + (enc ? `<br><span class="k">encargo:</span> ${esc(enc)}` : '')
+    + (e.frases?.length ? `<br><span class="k">frases:</span> ${e.frases.map(f => `${esc(nameOf(f.quien))}: «${esc(f.texto)}»`).join(' ')}` : '')
+    + (run ? `<br><span class="k">ahora:</span> ${run}` : '') + (e.porque ? `<br><span class="k">por qué se rompió:</span> ${esc(e.porque)}` : '') + '</div>';
+}
+function storyDbgHtml(st){
+  let h = '', pre = '';
+  for (const e of st.escenas) {
+    const r = st.ramas.find(r => e.id.startsWith(r.pre));
+    if (r && r.pre !== pre) { pre = r.pre; h += `<div class="dh">🌿 Rama «${esc(r.titulo)}» (desde «${esc(r.desde)}», a las ${fmtHour(r.hora)})</div><div class="si">${esc(r.por)}${r.resumen ? ' → ' + esc(r.resumen) : ''}</div>`; }
+    h += beatHtml(e, st);
+  }
+  if (st.gen) h += '<div class="dh">🌿 La IA está escribiendo la rama…</div>';
+  const src = STORIES.find(x => x.titulo === st.titulo), left = (src?.ramas || []).filter(r => !st.ramas.some(x => x.desde === r.desde));
+  if (left.length) h += `<details><summary>Ramas escritas a mano que no se tomaron (${left.length})</summary>${left.map(r => `<div class="dh">🌿 «${esc(r.titulo)}» · si se rompe «${esc(r.desde)}»</div>${r.escenas.map(e => beatHtml(e)).join('')}`).join('')}</details>`;
+  const ev = Object.entries(st.ev || {}).sort((a, b) => a[1] - b[1]);
+  h += `<div class="dh">Eventos de hoy</div><div class="si" style="text-align:left">${ev.length ? ev.map(([k, t]) => fmtHour(t) + ' ' + esc(k)).join(' · ') : '(ninguno todavía)'}</div>`;
+  h += `<div class="dh">Lo que va pasando (lo saben los personajes)</div><div class="si" style="text-align:left">${(st.hechos || []).map(x => fmtHour(x.h) + ' ' + esc(x.t)).join('<br>') || '(nada todavía)'}</div>`;
+  return h;
 }
 const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 function drawRels(){
