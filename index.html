@@ -252,14 +252,6 @@ function paintGround(s){
 
 /* ---------- people ----------
    Each is drawn at its feet, about 46 to 54 pixels tall, from the front, the back or the side. */
-const LOOKS = {
-  ana:     { hair: '#c0582e', hairD: '#8f3b1d', style: 'braids', dress: '#5c8c63', dressD: '#436b4a', collar: '#fbf6ea', hat: true, freckles: true, skin: '#f6d6bb', h: 1, scarf: '#d9433b' },
-  diana:   { hair: '#2e2420', hairD: '#16100c', style: 'curls', dress: '#d98aa0', dressD: '#b56a82', collar: '#fff4f6', bow: '#f6e7a8', skin: '#f3d0b4', h: 1, scarf: '#f2e3a0' },
-  matthew: { hair: '#c9c4bb', hairD: '#8e8a82', style: 'old', beard: true, dress: '#4d4a54', dressD: '#37353c', coat: true, hatDark: true, skin: '#eac6a8', h: 1.22, scarf: '#9a6a44' },
-  marilla: { hair: '#5a4636', hairD: '#3b2d22', style: 'bun', dress: '#7a6e7e', dressD: '#5d5361', apron: '#f4efe4', brooch: true, skin: '#eecaae', h: 1.18, scarf: '#5c8c63' },
-  lynde:   { hair: '#9b948c', hairD: '#6a645d', style: 'bun', dress: '#8a5a62', dressD: '#6c444b', collar: '#f4efe4', apron: '#f4efe4', brooch: true, skin: '#efc8aa', h: 1.12, scarf: '#c0582e' },
-  barry:   { hair: '#3b2a22', hairD: '#24180f', style: 'bun', dress: '#5a6a8e', dressD: '#465474', collar: '#f4efe4', brooch: true, skin: '#f0cdb0', h: 1.18, scarf: '#a58ad8' },
-};
 const SKIN_LINE = 'rgba(150,90,60,.7)';
 function drawPerson(c, p, t){
   const L = LOOKS[p.look], x = p.x, y = p.y, w = Math.sin(p.walk * TAU), sitting = p.sit, d = p.dir, side = d === 1 || d === 3;
@@ -632,21 +624,87 @@ function drawRLQuilt(c){
 
 /* ---------- the game ---------- */
 // scene: 'out' (Avonlea), 'gg' (the kitchen at Green Gables) or 'os' (the parlour at Orchard Slope)
-const game = { scene: 'out', inv: { bayas: 0, manzanas: 0, tarta: 0, compota: 0, te: 0, ramo: 0 }, hasCan: false, water: 0, fond: { matthew: 0, marilla: 0, diana: 0, barry: 0, lynde: 0, toby: 0 }, cooking: null, talk: null, said: {}, saidS: {}, seasonShift: 0, teaDay: -1, map: false, journal: [], mem: {}, know: {}, tasks: [], plans: {}, table: null, giftFor: {}, npcGiftDay: {}, lastDay: null, taskSeq: 0 };
+const game = { scene: 'out', inv: { bayas: 0, manzanas: 0, tarta: 0, compota: 0, te: 0, ramo: 0 }, hasCan: false, water: 0, fond: { toby: 0 }, cooking: null, talk: null, said: {}, saidS: {}, seasonShift: 0, teaDay: -1, map: false, journal: [], mem: {}, know: {}, tasks: [], plans: {}, table: null, giftFor: {}, npcGiftDay: {}, lastDay: null, taskSeq: 0 };
 const mkPerson = (look, x, y) => ({ look, x, y, dir: 2, walk: 0, moving: false, blink: 0, idle: 0, sit: false, vx: 0, vy: 0, carry: null, pet: false, crouch: false, lookAround: 0 });
 const ana = mkPerson('ana', GG.x - 6, GG.y + 70);
-const matthew = Object.assign(mkPerson('matthew', BARN.x + 60, BARN.y + 50), { goals: [[BARN.x + 60, BARN.y + 50], [GG.x - 140, GG.y + 90], [BARN.x - 20, BARN.y + 70], [GG.x + 120, GG.y + 160]], goal: 0, wait: 3 });
-// Diana is out in her garden by day, and at home in the evenings and all winter ('where' is the scene she is in)
+/* ---------- the characters: all there is to know about each one is here ----------
+   To add a character: one more entry below (name, look, voice for the AI, lines, abilities, where it lives, and
+   a routine if it goes visiting) and nothing else: the names, the prompt for the AI, the dialogue, the map, the
+   routines and the "Hablar con" prompts are all derived from the entries.
+   - home: 'out' (Avonlea) or the house it lives in; spawn/goals: where it starts and strolls (in its home place)
+   - routine (optional): where it is wanted at each hour, how it crosses the fields (home 'out') and where it stands
+     in the rooms it visits (roomGoals); hostGoals: where a resident stands while someone is visiting
+   - gossip: whom it tells what it has seen each morning; kin: who sees it work; whereText: what it is doing
+   Diana is the companion (she walks with Ana, goes home at night): her moves are written out in update(). */
+const ANA = { look: { hair: '#c0582e', hairD: '#8f3b1d', style: 'braids', dress: '#5c8c63', dressD: '#436b4a', collar: '#fbf6ea', hat: true, freckles: true, skin: '#f6d6bb', h: 1, scarf: '#d9433b' }, voice: "once años, huérfana, la adoptaron los Cuthbert. Pelirroja (detesta su pelo), pecosa, de imaginación desbordante, habla mucho y con palabras grandiosas (\"alma gemela\", \"espíritu afín\", \"hay tanto lugar para la imaginación\"), dramática, se mete en líos sin querer y es muy cariñosa." };
 const DIANA_OUT = [[OS.x - 50, OS.y + 60], [OS.x + 80, OS.y + 140], [OS.x - 130, OS.y + 180], [OS.x + 20, OS.y + 70]], DIANA_IN = [[5.8 * T, 3.4 * T], [8.4 * T, 4.4 * T], [4.6 * T, 6.6 * T]];
-const diana = Object.assign(mkPerson('diana', OS.x - 50, OS.y + 60), { goals: DIANA_OUT, goal: 0, wait: 2, follow: false, where: 'out' });
-const marilla = Object.assign(mkPerson('marilla', TABLE.x + 70, TABLE.y + 30), { goals: [[TABLE.x + 70, TABLE.y + 30], [STOVE.x + 60, STOVE.y + 40], [10.5 * T, 3.4 * T]], goal: 0, wait: 4 });
-const barry = Object.assign(mkPerson('barry', 8.6 * T, 4.4 * T), { goals: [[8.6 * T, 4.4 * T], [11.4 * T, 6 * T], [4.4 * T, 6.8 * T], [7.6 * T, 3.4 * T]], goal: 0, wait: 3 });
-// Mrs. Lynde: at home at her window in the mornings, visiting Marilla (or Mrs. Barry) in the afternoons
-const lynde = Object.assign(mkPerson('lynde', RLC.x + 30, RLC.y + 10), { goals: [[RLC.x + 30, RLC.y + 10], [RLQ.x - 70, RLQ.y + 28], [6.4 * T, 7.4 * T]], goal: 0, wait: 3, house: 'rl' });
-// where each one is ('out' or the house they are in), and where they stand in each room when others visit
-matthew.where = 'out'; marilla.where = 'gg'; barry.where = 'os'; lynde.where = 'rl';
-matthew.outGoals = matthew.goals; marilla.base = marilla.goals; barry.base = barry.goals;
-const ROOM = { gg: { lynde: [[TABLE.x - 64, TABLE.y + 34]], matthew: [[TABLE.x - 6, TABLE.y + 48]] }, os: { lynde: [[TEA.x - 58, TEA.y + 34]] }, rl: { lynde: lynde.goals } };
+const MEAL = hr => (hr >= 7 && hr < 8.5) || (hr >= 12 && hr < 13.5) || (hr >= 18 && hr < 19.5);
+const CHARACTERS = {
+  matthew: {
+    name: 'Matthew', fullName: 'Matthew Cuthbert', article: '', look: { hair: '#c9c4bb', hairD: '#8e8a82', style: 'old', beard: true, dress: '#4d4a54', dressD: '#37353c', coat: true, hatDark: true, skin: '#eac6a8', h: 1.22, scarf: '#9a6a44' },
+    voice: "unos sesenta años, hermano de Marilla. Tímidísimo, de muy pocas palabras, le dan miedo casi todas las mujeres, pero adora a Ana y siempre se pone de su lado. Trabaja en la granja: las vacas, el heno, el granero. Muletillas: \"Bueno, pues...\", \"Ya lo creo, ya lo creo\". Frases cortas, titubeantes, tiernas.",
+    spawn: [BARN.x + 60, BARN.y + 50], goals: [[BARN.x + 60, BARN.y + 50], [GG.x - 140, GG.y + 90], [BARN.x - 20, BARN.y + 70], [GG.x + 120, GG.y + 160]], wait: 3, speed: { walk: 40, out: 34, room: 26 },
+    home: 'out', abil: {"ir": true, "visitar": true, "regalar": ["manzanas", "bayas"], "regar": true, "cocinar": false, "acompanar": false}, gossip: ['marilla'], kin: ['marilla'],
+    lines: ["Bueno, pues... sí, es un día precioso, Ana. Ya lo creo.", "Las vacas andan contentas hoy. Será por el sol, supongo.", "Marilla dice que hablas mucho. Bueno, a mí me gusta oírte, ¿sabes?", "¿Viste las flores junto al camino? Bueno, pues... me hicieron pensar en ti.", "Ya lo creo, ya lo creo. Anda, ve a jugar un rato, que el día está lindo."],
+    seasonLines: ["Bueno, pues... ya brotó todo. La primavera, ¿no? Ya lo creo.", "Hace calor para la siega, ya lo creo. Bueno, el heno no se corta solo.", "Las manzanas de los Barry están en su punto. Marilla querrá hacer compota, supongo.", "Abrígate bien, Ana. El frío... bueno, pues, no es broma."],
+    giftReply: " Bueno, pues... gracias, Ana.", whereText: { gg: 'en la cocina de Tejas Verdes, a la hora de comer' },
+    routine: { want: (hr, day) => MEAL(hr) ? 'gg' : 'out', across: { gg: [[GG.x - 60, GG.y + 70], [GG.x - 20, GG.y + 42]] }, roomGoals: { gg: [[TABLE.x - 6, TABLE.y + 48]] } },
+  },
+  marilla: {
+    name: 'Marilla', fullName: 'Marilla Cuthbert', article: '', look: { hair: '#5a4636', hairD: '#3b2d22', style: 'bun', dress: '#7a6e7e', dressD: '#5d5361', apron: '#f4efe4', brooch: true, skin: '#eecaae', h: 1.18, scarf: '#5c8c63' },
+    voice: "hermana de Matthew, severa, práctica y ordenada, con un humor seco que esconde; quiere mucho a Ana aunque le cuesta decirlo, y la reprende por soñar despierta o hablar demasiado. Lleva siempre su broche de amatista. Se ocupa de la casa y de la cocina, y no sale de ella.",
+    spawn: [TABLE.x + 70, TABLE.y + 30], goals: [[TABLE.x + 70, TABLE.y + 30], [STOVE.x + 60, STOVE.y + 40], [10.5 * T, 3.4 * T]], wait: 4, speed: { room: 30 },
+    home: 'gg', abil: {"ir": false, "visitar": false, "regalar": ["tarta", "compota", "te"], "regar": true, "cocinar": true, "acompanar": false}, gossip: ['matthew', 'lynde'], kin: ['matthew'],
+    hostGoals: [[TABLE.x + 64, TABLE.y + 34]],
+    lines: ["Ana, no te quedes soñando despierta. Aunque... la cocina está ordenada, eso sí.", "Si quieres cocinar, la estufa está encendida. Cuidado con no quemar nada esta vez.", "Matthew no lo dice, pero te echa de menos cuando te vas donde Diana.", "Riega la huerta antes de que caiga el sol, que las plantas lo agradecen.", "Hmm. Bueno, admito que hoy te has portado muy bien."],
+    seasonLines: ["Hay que limpiar la casa a fondo, que es primavera. Y tú me vas a ayudar, Ana.", "Con este calor, mejor un té y no enciendas mucho la estufa.", "Es tiempo de manzanas: una buena compota para el invierno no está de más.", "Siéntate cerca de la estufa, niña, que vienes helada."],
+    giftReply: " Vaya, Ana. Muy bien hecho.",
+  },
+  diana: {
+    name: 'Diana', fullName: 'Diana Barry', article: '', look: { hair: '#2e2420', hairD: '#16100c', style: 'curls', dress: '#d98aa0', dressD: '#b56a82', collar: '#fff4f6', bow: '#f6e7a8', skin: '#f3d0b4', h: 1, scarf: '#f2e3a0' },
+    voice: "la amiga del alma de Ana, de pelo negro y rizado, dulce, alegre y un poco miedosa; admira la imaginación de Ana. Se juraron amistad eterna. Una vez Ana le sirvió por error vino de grosellas creyendo que era cordial de frambuesa, Diana se emborrachó y su madre les prohibió verse por un tiempo: ahora lo recuerdan entre risas y vergüenza. Está en su jardín de día y en casa al atardecer y en invierno.",
+    spawn: [OS.x - 50, OS.y + 60], goals: DIANA_OUT, wait: 2, speed: {},
+    home: 'out', init: { follow: false }, companion: true, abil: {"ir": true, "visitar": true, "regalar": ["manzanas", "bayas", "ramo"], "regar": false, "cocinar": false, "acompanar": true}, gossip: ['barry'], kin: [],
+    lines: ["¡Ana, mi alma gemela! Te estaba esperando.", "Mamá dice que puedo salir hasta que se ponga el sol. ¿Vamos al lago?", "¿Te acuerdas de nuestro juramento de amistad? ¡Para siempre!", "Los manzanos están llenos este año. Toma las que quieras.", "El Bosque Encantado me da un poquito de miedo... pero contigo no."],
+    seasonLines: ["¡Mira los manzanos en flor, Ana! Parecen novias vestidas de blanco.", "¡Qué calor! ¿Vamos a remojar los pies en el lago?", "El Bosque Encantado está todo rojo y dorado... ¡como un cuento!", "¡Está nevando! Mamá no me deja salir sin bufanda. Ven, entra a calentarte junto al fuego."],
+    giftReply: " ¡Eres la mejor amiga del mundo!",
+  },
+  barry: {
+    name: 'Sra. Barry', fullName: 'Sra. Barry', article: 'la ', onMap: false, look: { hair: '#3b2a22', hairD: '#24180f', style: 'bun', dress: '#5a6a8e', dressD: '#465474', collar: '#f4efe4', brooch: true, skin: '#f0cdb0', h: 1.18, scarf: '#a58ad8' },
+    voice: "la madre de Diana. Correcta, estricta y algo estirada; desconfió de Ana después de lo del vino, pero ahora la aprecia, con cierta cautela. No sale de su salita.",
+    spawn: [8.6 * T, 4.4 * T], goals: [[8.6 * T, 4.4 * T], [11.4 * T, 6 * T], [4.4 * T, 6.8 * T], [7.6 * T, 3.4 * T]], wait: 3, speed: { room: 28 },
+    home: 'os', abil: {"ir": false, "visitar": false, "regalar": ["manzanas", "compota"], "regar": false, "cocinar": false, "acompanar": false}, gossip: ['diana', 'lynde'], kin: [],
+    hostGoals: [[TEA.x + 58, TEA.y + 34]],
+    lines: ["Ana Shirley, siempre es un gusto verte por aquí. Pórtate bien, ¿eh?", "Diana habla de ti todo el día, ¿sabes?", "Esta vez el cordial de frambuesa está bien etiquetado, te lo aseguro.", "Saluda a Marilla de mi parte, querida."],
+    seasonLines: ["Buenos días, Ana. Diana está deseando verte.", "Qué calor, ¿verdad? Hay limonada en la despensa.", "Diana me ayudó con las manzanas. Llévale algunas a Marilla.", "Pasa, pasa, que hace un frío terrible. Diana está junto al fuego."],
+    giftReply: " Qué amable eres, Ana.",
+  },
+  lynde: {
+    name: 'Sra. Lynde', fullName: 'Sra. Rachel Lynde', article: 'la ', look: { hair: '#9b948c', hairD: '#6a645d', style: 'bun', dress: '#8a5a62', dressD: '#6c444b', collar: '#f4efe4', apron: '#f4efe4', brooch: true, skin: '#efc8aa', h: 1.12, scarf: '#c0582e' },
+    voice: "la vecina chismosa y mandona de Marilla; gordita, activa y de buen corazón, dice siempre lo que piensa y opina de todo (de la crianza de Ana, del pelo, de la huerta). Teje cubrecamas de retazos junto a su ventana, desde donde ve todo lo que pasa por el camino. Quiere a Ana más de lo que reconoce. Por la tarde visita a Marilla en Tejas Verdes o a la Sra. Barry.",
+    spawn: [RLC.x + 30, RLC.y + 10], goals: [[RLC.x + 30, RLC.y + 10], [RLQ.x - 70, RLQ.y + 28], [6.4 * T, 7.4 * T]], wait: 3, speed: { walk: 46, room: 26 },
+    home: 'rl', abil: {"ir": false, "visitar": false, "regalar": ["compota", "te"], "regar": false, "cocinar": false, "acompanar": false}, gossip: ['marilla', 'barry'], kin: [],
+    lines: ["Ana Shirley, hablas más que un molino... pero tienes buen corazón, eso lo reconozco.", "Desde mi ventana veo todo el camino: no se me escapa nadie. Lo digo sin mala intención, ¿eh?", "Llevo cincuenta y dos cubrecamas de retazos, ¡cincuenta y dos! Y no pienso parar.", "Marilla hizo bien en quedarse contigo, y lo digo yo, que nunca me callo lo que pienso.", "A una niña hay que enseñarle a ser útil. Pero, bueno, tú vas por buen camino."],
+    seasonLines: ["¡Vaya, vaya, ya brotó todo! Ya es hora de limpiar la casa, digo yo.", "Con este calor no hay quien teja... ¡pero yo tejo, claro que tejo!", "El otoño siempre me hace pensar en los cubrecamas. Este año haré uno rojo y dorado.", "Pasa, niña, que hace un frío de mil demonios... perdón, de los que dan escalofríos."],
+    giftReply: " Vaya, vaya... se nota que a ti te criaron bien.",
+    whereText: { rl: 'en su casa, junto a la ventana', gg: 'de visita en la cocina de Tejas Verdes, tomando el té con Marilla', os: 'de visita en la salita de La Cuesta del Huerto, tomando el té con la Sra. Barry', out: 'caminando por el camino' },
+    routine: { want: (hr, day) => hr >= 13 && hr < 18 ? (day % 2 ? 'os' : 'gg') : 'rl', roomGoals: { gg: [[TABLE.x - 64, TABLE.y + 34]], os: [[TEA.x - 58, TEA.y + 34]], rl: null },
+      describe: "La Sra. Lynde se queda tejiendo en su casa hasta mediodía, y de 13 a 18 visita a Marilla (un día) o a la Sra. Barry (al otro) para tomar el té y ponerse al día con las novedades; después vuelve a su casa. Cuando están juntos, conversan entre ellos." },
+  },
+};
+const CH = CHARACTERS;
+CH.lynde.routine.roomGoals.rl = CH.lynde.goals;
+CH.matthew.routine.describe = "Matthew entra a la cocina de Tejas Verdes a comer (hacia las 7, las 12 y las 18) y está con Marilla.";
+const LOOKS = { ana: ANA.look }; for (const k of Object.keys(CH)) LOOKS[k] = CH[k].look;
+const NAMES = { toby: 'Toby' }; for (const k of Object.keys(CH)) NAMES[k] = CH[k].name;
+const LINES = {}, SEASON_LINES = {}; for (const k of Object.keys(CH)) { LINES[k] = CH[k].lines; SEASON_LINES[k] = CH[k].seasonLines; }
+const ABIL = {}; for (const k of Object.keys(CH)) ABIL[k] = CH[k].abil;
+const COOK = Object.keys(CH).find(k => CH[k].abil.cocinar);
+// the people: one per entry (the ones the game names directly are pulled out below)
+const PEOPLE = {};
+for (const [k, c] of Object.entries(CH)) PEOPLE[k] = Object.assign(mkPerson(k, ...c.spawn), { goals: c.goals, goal: 0, wait: c.wait, where: c.home, base: c.goals, outGoals: c.goals, house: c.home !== 'out' ? c.home : null }, c.init);
+const { matthew, marilla, diana, barry, lynde } = PEOPLE;
+for (const k of Object.keys(CH)) game.fond[k] = 0;
 const toby = { x: ana.x + 30, y: ana.y + 20, dir: 1, walk: 0, moving: false, sitT: 0, sniff: 0, petted: 0 };
 const SPEED = 84;
 function blockedOut(x, y){
@@ -675,11 +733,9 @@ function wander(p, dt, sp){
 }
 
 /* ---------- what can be done here ---------- */
-const NAMES = { matthew: 'Matthew', marilla: 'Marilla', diana: 'Diana', barry: 'Sra. Barry', lynde: 'Sra. Lynde', toby: 'Toby' };
-const PEOPLE = { matthew, marilla, diana, barry, lynde };
 function near(){
   const out = [], P = ana, here = (x, y, r = 30) => dist(P.x, P.y, x, y) < r;
-  for (const k of Object.keys(PEOPLE)) { const q = PEOPLE[k]; if (sceneOf(k) === game.scene && here(q.x, q.y, 34)) out.push({ d: dist(P.x, P.y, q.x, q.y), label: 'Hablar con ' + (k === 'barry' || k === 'lynde' ? 'la ' : '') + NAMES[k], act: () => talk(k) }); }
+  for (const k of Object.keys(PEOPLE)) { const q = PEOPLE[k]; if (sceneOf(k) === game.scene && here(q.x, q.y, 34)) out.push({ d: dist(P.x, P.y, q.x, q.y), label: 'Hablar con ' + CH[k].article + NAMES[k], act: () => talk(k) }); }
   if (game.scene === 'out') {
     if (here(toby.x, toby.y, 28)) out.push({ d: dist(P.x, P.y, toby.x, toby.y), label: 'Acariciar a Toby', act: pet });
     const ripe = S === 1 || S === 2;
@@ -699,7 +755,7 @@ function near(){
   } else {
     if (game.scene === 'gg') {
       if (here(STOVE.x, STOVE.y + 10, 44)) out.push({ d: dist(P.x, P.y, STOVE.x, STOVE.y + 10), label: 'Cocinar', act: cookMenu });
-      if (game.table && here(TABLE.x, TABLE.y, 64)) out.push({ d: dist(P.x, P.y, TABLE.x, TABLE.y) + 2, label: 'Tomar ' + ITEM_NAME[game.table][0] + ' que dejó Marilla', act: () => { const k = game.table; game.inv[k]++; game.table = null; float('+' + itemText(k), TABLE.x, TABLE.y - 50); logEv(`Ana tomó ${ITEM_NAME[k][0]} que Marilla le dejó en la mesa.`, ['marilla', ...witnesses()]); sfx.happy(); save(); } });
+      if (game.table && here(TABLE.x, TABLE.y, 64)) out.push({ d: dist(P.x, P.y, TABLE.x, TABLE.y) + 2, label: 'Tomar ' + ITEM_NAME[game.table][0] + ' que dejó ' + NAMES[COOK], act: () => { const k = game.table; game.inv[k]++; game.table = null; float('+' + itemText(k), TABLE.x, TABLE.y - 50); logEv(`Ana tomó ${ITEM_NAME[k][0]} que Marilla le dejó en la mesa.`, ['marilla', ...witnesses()]); sfx.happy(); save(); } });
     } else if (game.scene === 'os') {
       if (here(FIRE.x, FIRE.y + 10, 50)) out.push({ d: dist(P.x, P.y, FIRE.x, FIRE.y + 10) + 6, label: 'Calentarse junto al fuego', act: warmUp });
       if (here(TEA.x, TEA.y, 50) || here(SOFA.x, SOFA.y, 60)) out.push({ d: Math.min(dist(P.x, P.y, TEA.x, TEA.y), dist(P.x, P.y, SOFA.x, SOFA.y)) + 8, label: ana.sit ? 'Levantarse' : diana.where === 'os' ? 'Tomar el té con Diana' : 'Sentarse en el sofá', act: ana.sit ? () => { ana.sit = false; diana.sit = false; } : teaTime });
@@ -734,21 +790,8 @@ function teaTime(){
 
 /* ---------- talking ----------
    A box with who speaks, how fond of her they are (♥), what they say and what Ana can answer. */
-const LINES = {
-  matthew: ['Bueno, pues... sí, es un día precioso, Ana. Ya lo creo.', 'Las vacas andan contentas hoy. Será por el sol, supongo.', 'Marilla dice que hablas mucho. Bueno, a mí me gusta oírte, ¿sabes?', '¿Viste las flores junto al camino? Bueno, pues... me hicieron pensar en ti.', 'Ya lo creo, ya lo creo. Anda, ve a jugar un rato, que el día está lindo.'],
-  marilla: ['Ana, no te quedes soñando despierta. Aunque... la cocina está ordenada, eso sí.', 'Si quieres cocinar, la estufa está encendida. Cuidado con no quemar nada esta vez.', 'Matthew no lo dice, pero te echa de menos cuando te vas donde Diana.', 'Riega la huerta antes de que caiga el sol, que las plantas lo agradecen.', 'Hmm. Bueno, admito que hoy te has portado muy bien.'],
-  diana: ['¡Ana, mi alma gemela! Te estaba esperando.', 'Mamá dice que puedo salir hasta que se ponga el sol. ¿Vamos al lago?', '¿Te acuerdas de nuestro juramento de amistad? ¡Para siempre!', 'Los manzanos están llenos este año. Toma las que quieras.', 'El Bosque Encantado me da un poquito de miedo... pero contigo no.'],
-};
-LINES.lynde = ['Ana Shirley, hablas más que un molino... pero tienes buen corazón, eso lo reconozco.', 'Desde mi ventana veo todo el camino: no se me escapa nadie. Lo digo sin mala intención, ¿eh?', 'Llevo cincuenta y dos cubrecamas de retazos, ¡cincuenta y dos! Y no pienso parar.', 'Marilla hizo bien en quedarse contigo, y lo digo yo, que nunca me callo lo que pienso.', 'A una niña hay que enseñarle a ser útil. Pero, bueno, tú vas por buen camino.'];
-LINES.barry = ['Ana Shirley, siempre es un gusto verte por aquí. Pórtate bien, ¿eh?', 'Diana habla de ti todo el día, ¿sabes?', 'Esta vez el cordial de frambuesa está bien etiquetado, te lo aseguro.', 'Saluda a Marilla de mi parte, querida.'];
 // once each season, the first thing each of them says is about the season
-const SEASON_LINES = {
-  matthew: ['Bueno, pues... ya brotó todo. La primavera, ¿no? Ya lo creo.', 'Hace calor para la siega, ya lo creo. Bueno, el heno no se corta solo.', 'Las manzanas de los Barry están en su punto. Marilla querrá hacer compota, supongo.', 'Abrígate bien, Ana. El frío... bueno, pues, no es broma.'],
-  marilla: ['Hay que limpiar la casa a fondo, que es primavera. Y tú me vas a ayudar, Ana.', 'Con este calor, mejor un té y no enciendas mucho la estufa.', 'Es tiempo de manzanas: una buena compota para el invierno no está de más.', 'Siéntate cerca de la estufa, niña, que vienes helada.'],
-  diana: ['¡Mira los manzanos en flor, Ana! Parecen novias vestidas de blanco.', '¡Qué calor! ¿Vamos a remojar los pies en el lago?', 'El Bosque Encantado está todo rojo y dorado... ¡como un cuento!', '¡Está nevando! Mamá no me deja salir sin bufanda. Ven, entra a calentarte junto al fuego.'],
-  lynde: ['¡Vaya, vaya, ya brotó todo! Ya es hora de limpiar la casa, digo yo.', 'Con este calor no hay quien teja... ¡pero yo tejo, claro que tejo!', 'El otoño siempre me hace pensar en los cubrecamas. Este año haré uno rojo y dorado.', 'Pasa, niña, que hace un frío de mil demonios... perdón, de los que dan escalofríos.'],
-  barry: ['Buenos días, Ana. Diana está deseando verte.', 'Qué calor, ¿verdad? Hay limonada en la despensa.', 'Diana me ayudó con las manzanas. Llévale algunas a Marilla.', 'Pasa, pasa, que hace un frío terrible. Diana está junto al fuego.'],
-};
+/* (LINES and SEASON_LINES come from the characters) */
 const seasonCount = () => Math.floor(dayT / 2) + game.seasonShift;
 const GIFTS = { tarta: ['tarta de bayas', '¡Una tarta! Huele de maravilla.'], compota: ['compota de manzana', '¡Qué rica compota! Gracias.'], te: ['taza de té', 'Un té calentito, justo lo que me hacía falta.'], ramo: ['ramo de flores', '¡Qué flores tan lindas! Las pondré en agua.'] };
 function talk(who, again = false){
@@ -808,13 +851,6 @@ const PLACES = {
   lago: ['el Lago de las Aguas Brillantes', BENCH.x + 40, BENCH.y + 22], bosque_encantado: ['el Bosque Encantado', 15 * T + 30, 30 * T + 24],
 };
 // what each one can do (the game checks every action against this)
-const ABIL = {
-  matthew: { ir: true, visitar: true, regalar: ['manzanas', 'bayas'], regar: true, cocinar: false, acompanar: false },
-  marilla: { ir: false, visitar: false, regalar: ['tarta', 'compota', 'te'], regar: true, cocinar: true, acompanar: false },
-  diana: { ir: true, visitar: true, regalar: ['manzanas', 'bayas', 'ramo'], regar: false, cocinar: false, acompanar: true },
-  barry: { ir: false, visitar: false, regalar: ['manzanas', 'compota'], regar: false, cocinar: false, acompanar: false },
-  lynde: { ir: false, visitar: false, regalar: ['compota', 'te'], regar: false, cocinar: false, acompanar: false },
-};
 function abilText(who){
   const A = ABIL[who], L = [];
   if (A.ir) L.push('ir a algún lugar de Avonlea (' + Object.values(PLACES).map(p => p[0]).join(', ') + ') y quedarte un rato');
@@ -844,7 +880,7 @@ function logEv(text, who = witnesses()){
   for (const k of new Set(who)) know(k, text);
 }
 function shareNews(){
-  for (const [a, b] of [['matthew', 'marilla'], ['diana', 'barry'], ['lynde', 'marilla'], ['lynde', 'barry']]) for (const [x, y] of [[a, b], [b, a]])
+  for (const x of Object.keys(CH)) for (const y of CH[x].gossip)
     for (const e of (game.know[x] || []).filter(e => e.d === today() && !e.t.startsWith('(') && !(game.know[y] || []).some(f => f.t === e.t))) know(y, '(' + NAMES[x] + ' le contó) ' + e.t, e.d);
 }
 // what was said in conversations, as the character will remember it
@@ -981,8 +1017,8 @@ function doStep(who, s){
   if (s.accion === 'ir') p.target = { place: s.lugar, until: hourNow() + 2.5 };
   else if (s.accion === 'visitar_a_ana') p.target = { ana: true, until: hourNow() + 2.5 };
   else if (s.accion === 'esperar') p.target = null;
-  else if (s.accion === 'cocinar') { game.table = s.item; logEv(`Marilla cocinó ${ITEM_NAME[s.item][0]} y la dejó en la mesa de la cocina para Ana.`, ['marilla', 'matthew']); if (game.scene === 'gg') float('Marilla dejó ' + ITEM_NAME[s.item][0] + ' en la mesa', TABLE.x, TABLE.y - 60); }
-  else if (s.accion === 'regar') { if (S !== 3) { BEDS.forEach(b => { if (!b.wet && b.stage < 3) { b.wet = 1; b.grow = 0; } }); logEv(`${NAMES[who]} regó la huerta.`, [who, who === 'matthew' ? 'marilla' : 'matthew']); } }
+  else if (s.accion === 'cocinar') { game.table = s.item; logEv(`${NAMES[who]} cocinó ${ITEM_NAME[s.item][0]} y la dejó en la mesa de la cocina para Ana.`, [who, ...CH[who].kin]); if (game.scene === 'gg') float(NAMES[who] + ' dejó ' + ITEM_NAME[s.item][0] + ' en la mesa', TABLE.x, TABLE.y - 60); }
+  else if (s.accion === 'regar') { if (S !== 3) { BEDS.forEach(b => { if (!b.wet && b.stage < 3) { b.wet = 1; b.grow = 0; } }); logEv(`${NAMES[who]} regó la huerta.`, [who, ...CH[who].kin]); } }
   else if (s.accion === 'regalar') game.giftFor[who] = s.item;
   save();
 }
@@ -1013,6 +1049,8 @@ function goTarget(p, dt, sp){
 }
 
 /* ---------- the prompt ---------- */
+const CAST = [['Ana Shirley', ANA.voice], ...Object.values(CH).map(c => [c.fullName, c.voice])].map(([n, v]) => `- ${n}: ${v}`).join('\n');
+const ROUTINES = Object.values(CH).filter(c => c.routine).map(c => c.routine.describe).join(' ');
 const AI_SYSTEM = `Eres la voz de los personajes de "Un día en Avonlea", un juego tranquilo y sin misiones inspirado en "Ana de las Tejas Verdes" (L. M. Montgomery, 1908). La jugadora es Ana Shirley. Tú das voz y vida al personaje con quien Ana conversa, o planificas su día. Escribe siempre en español, con tuteo entre Ana y su familia y amigas.
 
 EL MUNDO
@@ -1023,22 +1061,17 @@ LO QUE ANA PUEDE HACER EN EL JUEGO
 Pasear; acariciar a Toby, el perro de Tejas Verdes (no habla); tomar la regadera en la bomba y regar la huerta, que crece hasta florecer, y cortar flores para hacer ramos (no en invierno); recoger bayas y manzanas (solo en verano y otoño); cocinar en la cocina de Tejas Verdes tarta de bayas (con 3 bayas), compota de manzana (con 3 manzanas) o té; regalar lo que tiene; tomar el té con Diana en la salita de los Barry; calentarse junto a la chimenea; pasear con Diana; sentarse en la banca del lago; llevar cosas o recados de unos a otros.
 
 LOS PERSONAJES
-- Ana Shirley: once años, huérfana, la adoptaron los Cuthbert. Pelirroja (detesta su pelo), pecosa, de imaginación desbordante, habla mucho y con palabras grandiosas ("alma gemela", "espíritu afín", "hay tanto lugar para la imaginación"), dramática, se mete en líos sin querer y es muy cariñosa.
-- Matthew Cuthbert: unos sesenta años, hermano de Marilla. Tímidísimo, de muy pocas palabras, le dan miedo casi todas las mujeres, pero adora a Ana y siempre se pone de su lado. Trabaja en la granja: las vacas, el heno, el granero. Muletillas: "Bueno, pues...", "Ya lo creo, ya lo creo". Frases cortas, titubeantes, tiernas.
-- Marilla Cuthbert: hermana de Matthew, severa, práctica y ordenada, con un humor seco que esconde; quiere mucho a Ana aunque le cuesta decirlo, y la reprende por soñar despierta o hablar demasiado. Lleva siempre su broche de amatista. Se ocupa de la casa y de la cocina, y no sale de ella.
-- Diana Barry: la amiga del alma de Ana, de pelo negro y rizado, dulce, alegre y un poco miedosa; admira la imaginación de Ana. Se juraron amistad eterna. Una vez Ana le sirvió por error vino de grosellas creyendo que era cordial de frambuesa, Diana se emborrachó y su madre les prohibió verse por un tiempo: ahora lo recuerdan entre risas y vergüenza. Está en su jardín de día y en casa al atardecer y en invierno.
-- Sra. Rachel Lynde: la vecina chismosa y mandona de Marilla; gordita, activa y de buen corazón, dice siempre lo que piensa y opina de todo (de la crianza de Ana, del pelo, de la huerta). Teje cubrecamas de retazos junto a su ventana, desde donde ve todo lo que pasa por el camino. Quiere a Ana más de lo que reconoce. Por la tarde visita a Marilla en Tejas Verdes o a la Sra. Barry.
-- Sra. Barry: la madre de Diana. Correcta, estricta y algo estirada; desconfió de Ana después de lo del vino, pero ahora la aprecia, con cierta cautela. No sale de su salita.
+${CAST}
 Fuera de escena existen la escuela, la señorita Stacy, Gilbert Blythe (que una vez le dijo "Zanahorias" a Ana) y la iglesia; se pueden nombrar en la conversación, pero no aparecen en el juego.
 
 LAS RUTINAS (el juego las cumple solo)
-Matthew entra a la cocina de Tejas Verdes a comer (hacia las 7, las 12 y las 18) y está con Marilla. La Sra. Lynde se queda tejiendo en su casa hasta mediodía, y de 13 a 18 visita a Marilla (un día) o a la Sra. Barry (al otro) para tomar el té y ponerse al día con las novedades; después vuelve a su casa. Cuando están juntos, conversan entre ellos.
+${ROUTINES}
 
 LO QUE CADA PERSONAJE SABE
 Cada uno sabe solo lo que vio, lo que le contaron en su casa y lo que conversó con Ana: está en su estado. No sabe lo que no está ahí (por ejemplo, Marilla no sabe lo que Ana hizo en casa de los Barry, a menos que se lo cuenten).
 
 ESCENAS DE CONVERSACIÓN (cuando te piden una escena)
-- Escribes lo que se dicen en voz alta, como en una obra de teatro, en "lineas": cada una es { "quien": "ana" o el personaje (matthew, marilla, diana, barry), "texto" }. Ana también habla: tú escribes sus palabras, con su voz (entusiasta, dramática, con palabras grandiosas) y el jugador no elige nada. Solo hablan Ana y los PRESENTES que te indiquen.
+- Escribes lo que se dicen en voz alta, como en una obra de teatro, en "lineas": cada una es { "quien": "ana" o el personaje (${Object.keys(CH).join(', ')}), "texto" }. Ana también habla: tú escribes sus palabras, con su voz (entusiasta, dramática, con palabras grandiosas) y el jugador no elige nada. Solo hablan Ana y los PRESENTES que te indiquen.
 - Si hay dos o más personajes presentes, conversan sobre todo entre ellos (la comida, los vecinos, el tiempo, la cosecha, los chismes, la casa, lo que Ana hizo); Ana puede quedarse escuchando y decir poco o nada, o intervenir con una frase.
 - Cada uno habla solo como su personaje, con su voz propia. Cada línea es breve: una o dos frases, 18 palabras como máximo, porque se lee en un globito sobre la cabeza.
 - Una escena tiene de 2 a 6 líneas, alternando las voces con naturalidad (si hay varios personajes pueden hablarse entre ellos; no todos tienen que decir algo). Termina bien, sin dejar una pregunta abierta a Ana: con una frase de cierre, un comentario, un silencio cómodo o alguien que vuelve a lo suyo. Si el momento no pide palabras (Matthew solo saluda con la cabeza, o nadie tiene nada que decir), "lineas" puede tener una sola línea o ninguna.
@@ -1063,9 +1096,7 @@ const AI_SCHEMA = { type: 'object', additionalProperties: false, required: ['lin
   accion: { type: 'object', additionalProperties: false, required: ['tipo', 'item', 'cantidad', 'lugar'], properties: { tipo: { type: 'string', enum: ['ninguna', 'regalar', 'acompanar', 'ir'] }, item: S_ITEM, cantidad: { type: 'integer' }, lugar: S_PLACE } } } };
 function whereText(k){
   const w = PEOPLE[k].where;
-  if (k === 'lynde') return w === 'rl' ? 'en su casa, junto a la ventana' : w === 'gg' ? 'de visita en la cocina de Tejas Verdes, tomando el té con Marilla' : w === 'os' ? 'de visita en la salita de La Cuesta del Huerto, tomando el té con la Sra. Barry' : 'caminando por el camino';
-  if (k === 'matthew' && w === 'gg') return 'en la cocina de Tejas Verdes, a la hora de comer';
-  return w === 'out' ? 'afuera, por Avonlea' : w === 'gg' ? 'en la cocina de Tejas Verdes' : 'en la salita de La Cuesta del Huerto';
+  return CH[k].whereText?.[w] ?? (w === 'out' ? 'afuera, por Avonlea' : w === 'gg' ? 'en la cocina de Tejas Verdes' : w === 'os' ? 'en la salita de La Cuesta del Huerto' : 'en la casa de la Sra. Lynde');
 }
 function placeText(){
   if (game.scene === 'rl') return 'en la casa de la Sra. Lynde, junto a la ventana desde la que ella ve pasar a todo el mundo';
@@ -1085,7 +1116,7 @@ function stateText(who){
     `Ana está ${placeText()}${diana.follow && who !== 'diana' ? ', paseando con Diana' : ''}; Toby la acompaña.`,
     `Ana lleva: ${carry.length ? carry.join(', ') : 'nada en las manos'}.`,
     `La huerta: ${S === 3 ? 'duerme bajo la nieve' : `${bloom} de 6 canteros con flores; ${dry} sin regar`}.` + (game.table ? ` En la mesa de la cocina hay ${ITEM_NAME[game.table][0]}.` : ''),
-    `Cariño hacia Ana (0 a 5): Matthew ${game.fond.matthew}, Marilla ${game.fond.marilla}, Diana ${game.fond.diana}, Sra. Barry ${game.fond.barry}, Sra. Lynde ${game.fond.lynde}.`,
+    `Cariño hacia Ana (0 a 5): ${Object.keys(CH).map(k => NAMES[k] + ' ' + game.fond[k]).join(', ')}.`,
     '', `PERSONAJE: ${NAMES[who]}, que ahora está ${whereText(who)}.`, `Lo que ${NAMES[who]} puede hacer: ${abilText(who)}.` + (game.npcGiftDay[who] === today() ? ' (Hoy ya le regaló algo a Ana.)' : ''),
   ];
   const P = game.plans[who];
@@ -1165,7 +1196,7 @@ function sceneMsg(parts, note){
   }
   if (amb.hist.length) m += '\n\nLO ÚLTIMO QUE SE DIJERON (no lo repitas):\n' + amb.hist.slice(-8).map(x => '- ' + x).join('\n');
   const ctx = [];
-  for (const k of ['lynde', 'matthew']) if (parts.includes(k) && PEOPLE[k].where !== (k === 'lynde' ? 'rl' : 'out')) ctx.push(NAMES[k] + ' está ' + whereText(k) + '.');
+  for (const k of parts) if (CH[k].routine && PEOPLE[k].where !== CH[k].home) ctx.push(NAMES[k] + ' está ' + whereText(k) + '.');
   if (ctx.length) m += '\n\n' + ctx.join(' ');
   return m + `\n\nPRESENTES: Ana${parts.map(k => ', ' + NAMES[k]).join('')}.\nAHORA PASA: ${note}\nEscribe la escena.`;
 }
@@ -1289,7 +1320,7 @@ function give(who, k){
   const p = PEOPLE[who]; hearts(p.x, p.y - 56); sfx.happy();
   logEv('Ana le regaló ' + GIFTS[k][0].replace(/^(\S+)/, 'una $1').replace('una ramo', 'un ramo') + ' a ' + NAMES[who] + '.', [who, ...witnesses()]); planSoon(who, 'Ana te acaba de hacer un regalo'); save();
   if (aiReady()) { aiTalk(who, '(Ana le regala a ' + NAMES[who] + ' ' + GIFTS[k][0].replace(/^(\S+)/, 'una $1').replace('una ramo', 'un ramo') + ', hecha o juntada por ella.)'); return; }
-  const extra = who === 'matthew' ? ' Bueno, pues... gracias, Ana.' : who === 'marilla' ? ' Vaya, Ana. Muy bien hecho.' : who === 'barry' ? ' Qué amable eres, Ana.' : who === 'lynde' ? ' Vaya, vaya... se nota que a ti te criaron bien.' : ' ¡Eres la mejor amiga del mundo!';
+  const extra = CH[who].giftReply;
   say(who, GIFTS[k][1] + extra, [['De nada', close]]);
 }
 function say(who, text, opts, wait = false){
@@ -1420,7 +1451,7 @@ const ROAD = {
 function routeTo(p, want){
   let pts;
   if (p.house) { const from = p.from || p.house; pts = from === want ? [DOOR[want]] : [...ROAD[from], ...[...ROAD[want]].reverse().slice(1), DOOR[want]]; }
-  else pts = [[GG.x - 60, GG.y + 70], [GG.x - 20, GG.y + 42], DOOR[want]];
+  else pts = [...CH[p.look].routine.across[want], DOOR[want]];   // (lives out in the fields: straight across the yard)
   let bi = 0, bd = 1e9; pts.forEach((q, i) => { const d = dist(p.x, p.y, q[0], q[1]); if (d < bd) { bd = d; bi = i; } });
   return { pts, i: bi };
 }
@@ -1433,8 +1464,8 @@ function commute(p, want, dt, sp){
   if (!p.route || p.dest !== want) { p.dest = want; p.route = routeTo(p, want); p.routeT = 0; }
   const R = p.route; p.routeT += dt;
   if (game.scene === 'out' && p.routeT < 90) { const [tx, ty] = R.pts[R.i]; if (walkTo(p, tx, ty, sp, dt)) R.i++; if (R.i < R.pts.length) return; }
-  p.where = want; p.route = null; p.dest = null; p.moving = false; p.x = KDOOR.x; p.y = KIT.h - 14; p.dir = 0; p.goals = ROOM[want][p.look]; p.goal = 0; p.wait = 2;
-  logEv(NAMES[p.look] + (want === 'gg' ? ' entró a la cocina de Tejas Verdes.' : want === 'os' ? ' llegó a La Cuesta del Huerto.' : ' volvió a su casa.'), [p.look]);
+  p.where = want; p.route = null; p.dest = null; p.moving = false; p.x = KDOOR.x; p.y = KIT.h - 14; p.dir = 0; p.goals = CH[p.look].routine.roomGoals[want]; p.goal = 0; p.wait = 2;
+  logEv(NAMES[p.look] + (want === p.house ? ' volvió a su casa.' : want === 'gg' ? ' entró a la cocina de Tejas Verdes.' : ' llegó a La Cuesta del Huerto.'), [p.look]);
 }
 
 /* ---------- the loop ---------- */
@@ -1461,7 +1492,7 @@ function update(dt){
   ana.walk = ana.moving ? (ana.walk + dt * 1.9 * Math.hypot(ana.vx, ana.vy) / SPEED) % 1 : 0;
   if (ana.idle > 3 && ana.idle < 9 && !ana.sit && !game.talk) { ana.dir = 2; ana.lookAround = Math.sin(ana.idle * 1.4) * 1.4; }
   if (ana.idle > 9 && game.scene === 'out' && !game.talk) ana.sit = true;
-  for (const p of [ana, matthew, diana, marilla, barry, lynde]) { p.blink -= dt; if (p.blink < -2.5 - Math.random() * 3) p.blink = .14; }
+  for (const p of [ana, ...Object.values(PEOPLE)]) { p.blink -= dt; if (p.blink < -2.5 - Math.random() * 3) p.blink = .14; }
   // cooking: a moment at the stove, then it is ready
   if (game.cooking && (game.cooking.t -= dt) <= 0) { const k = game.cooking.k; game.inv[k]++; game.cooking = null; logEv('Ana cocinó ' + { tarta: 'una tarta de bayas', compota: 'compota de manzana', te: 'té' }[k] + ' en la cocina de Tejas Verdes.'); taskEvent('cocinar', k); float('¡' + { tarta: 'Tarta de bayas', compota: 'Compota de manzana', te: 'Té' }[k] + ' lista!', STOVE.x, STOVE.y - 70); sfx.done(); save(); }
   // the others: Matthew about the farm, Diana about her garden (or with Ana), Marilla in the kitchen
@@ -1479,22 +1510,17 @@ function update(dt){
   runPlans(dt);
   ambUpdate(dt); for (const b of bubbles) b.t += dt; bubbles = bubbles.filter(b => b.t < b.dur + .35);
   if ((taskTick -= dt) < 0) { taskTick = .5; taskEvent('ir'); }
-  // who is wanted where: Matthew in the kitchen at mealtimes; Mrs. Lynde at home, visiting in the afternoons
-  const hr = hourNow(), meal = (hr >= 7 && hr < 8.5) || (hr >= 12 && hr < 13.5) || (hr >= 18 && hr < 19.5);
-  matthew.want = meal ? 'gg' : 'out'; lynde.want = hr >= 13 && hr < 18 ? (today() % 2 ? 'os' : 'gg') : 'rl';
-  marilla.goals = lynde.where === 'gg' || matthew.where === 'gg' ? [[TABLE.x + 64, TABLE.y + 34]] : marilla.base;
-  barry.goals = lynde.where === 'os' ? [[TEA.x + 58, TEA.y + 34]] : barry.base;
-  if (!busy('matthew')) {
-    if (matthew.where !== matthew.want) { matthew.target = null; commute(matthew, matthew.want, dt, 40); }
-    else if (matthew.where === 'gg') { if (game.scene === 'gg') wander(matthew, dt, 26); }
-    else if (!goTarget(matthew, dt, 40) && game.scene === 'out') wander(matthew, dt, 34);
+  // everyone but Diana follows their routine: where they are wanted (home, or visiting), walking there, or about the place
+  const hr = hourNow(), visiting = k => !!CH[k].routine && PEOPLE[k].where !== 'out' && PEOPLE[k].where !== CH[k].home;
+  for (const [k, p] of Object.entries(PEOPLE)) {
+    const c = CH[k]; if (c.companion) continue;
+    p.want = c.routine ? c.routine.want(hr, today()) : c.home;
+    if (c.hostGoals) p.goals = Object.keys(PEOPLE).some(o => visiting(o) && PEOPLE[o].where === p.where) ? c.hostGoals : p.base;
+    if (busy(k)) continue;
+    if (p.where !== p.want) { p.target = null; commute(p, p.want, dt, c.speed.walk); }
+    else if (p.where === 'out') { if (!goTarget(p, dt, c.speed.walk) && game.scene === 'out') wander(p, dt, c.speed.out); }
+    else if (game.scene === p.where) wander(p, dt, c.speed.room);
   }
-  if (!busy('lynde')) {
-    if (lynde.where !== lynde.want) commute(lynde, lynde.want, dt, 46);
-    else if (game.scene === lynde.where) wander(lynde, dt, 26);
-  }
-  if (game.scene === 'gg' && !busy('marilla')) wander(marilla, dt, 30);
-  if (game.scene === 'os' && !busy('barry')) wander(barry, dt, 28);
   if (diana.sit && !ana.sit) diana.sit = false;
   const dianaIn = () => { diana.where = 'os'; diana.goals = DIANA_IN; diana.x = DIANA_IN[0][0]; diana.y = DIANA_IN[0][1]; diana.homeT = 0; diana.moving = false; };
   if (diana.follow) {
@@ -1730,15 +1756,13 @@ function drawMap(){
     c.beginPath(); c.arc(sx, sy, r, 0, TAU); c.fillStyle = col; c.fill(); c.lineWidth = 1.4 * dpr; c.strokeStyle = 'rgba(60,35,20,.9)'; c.stroke();
     c.font = `italic ${12 * dpr}px Georgia, serif`; c.textAlign = 'center'; c.lineWidth = 3 * dpr; c.strokeStyle = 'rgba(241,226,191,.95)'; const ly = big ? sy - r - 4 * dpr : sy + r + 12 * dpr; c.strokeText(who, sx, ly); c.fillStyle = '#4a2f1c'; c.fillText(who, sx, ly);
   };
-  mark('Marilla', at('gg'), LOOKS.marilla.dress, 12, false);
-  mark('Matthew', at(matthew.where, matthew.x, matthew.y), LOOKS.matthew.dress, matthew.where === 'out' ? 0 : 12, false);
-  mark('Sra. Lynde', at(lynde.where, lynde.x, lynde.y), LOOKS.lynde.dress, lynde.where === 'out' ? 0 : lynde.where === 'os' ? -12 : 0, false);
-  mark('Diana', at(diana.where, diana.x, diana.y), LOOKS.diana.dress, diana.where === 'out' ? 0 : -12, false);
+  const slot = {};
+  for (const [k, p] of Object.entries(PEOPLE)) { if (CH[k].onMap === false) continue; const n = slot[p.where] = (slot[p.where] || 0) + 1; mark(NAMES[k], at(p.where, p.x, p.y), LOOKS[k].dress, p.where === 'out' ? 0 : [12, -12, 24, -24][n - 1] || 0, false); }
   mark('Ana', at(game.scene, ana.x, ana.y), '#d9433b', 0, true);
   $('maptitle').textContent = 'Avonlea · ' + SEASONS[S] + ', día ' + (Math.floor(dayT) % 2 + 1) + ' · ' + SICON[S];
 }
 function loop(now){ const dt = clamp((now - last) / 1000, 0, .05); last = now; update(dt); render(); requestAnimationFrame(loop); }
-window.__avonlea = { lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+window.__avonlea = { reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
 requestAnimationFrame(loop);
 })();
 </script>
