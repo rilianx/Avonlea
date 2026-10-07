@@ -1138,7 +1138,7 @@ function tobyThink(dt){
 function anaMenu(){
   const opts = [];
   if (game.inv.te > 0) opts.push(['☕ Tomar la taza de té', sipTea]);
-  if (game.scene === 'out' && (S !== 3 || ana.lie)) opts.push([ana.lie ? 'Levantarse' : '🌿 Recostarme en el pasto', () => { close(); if (ana.lie) { ana.lie = false; return; } if (nearPath(ana.x, ana.y, 26)) return anaSays('Aquí es camino... busco un pedacito de pasto.'); ana.lie = true; ana.sit = false; ana.goto = null; ana.dir = 2; logEv('Ana se recostó en el pasto a mirar las nubes.'); }]);
+  if (game.scene === 'out' && (S !== 3 || ana.lie)) opts.push([ana.lie ? 'Levantarse' : '🌿 Recostarme en el pasto', () => { close(); if (ana.lie) { ana.lie = false; return; } if (nearPath(ana.x, ana.y, 26)) return anaSays('Aquí es camino... busco un pedacito de pasto.'); if (underTree(ana.x, ana.y)) return anaSays('Aquí el árbol me tapa el cielo... busco un lugar con más nubes.'); ana.lie = true; ana.sit = false; ana.goto = null; ana.dir = 2; logEv('Ana se recostó en el pasto a mirar las nubes.'); }]);
   if (game.hasCan) opts.push(['Dejar la regadera', () => dropItem('can')]);
   for (const k of ITEMS) if (game.inv[k] > 0) opts.push(['Dejar ' + itemText(k, game.inv[k]), () => dropItem(k)]);
   if (!opts.length) { float('No llevo nada en las manos', ana.x, ana.y - 60); return; }
@@ -1217,6 +1217,8 @@ function startIntent(intent, manual, said){
   auto.intent = { ...intent, manual }; auto.thinkAt = 0; if (manual) auto.on = true;
   if (said) anaSays(said);
 }
+// (lying down, nobody wants a tree crown between them and us)
+const underTree = (x, y) => trees.some(tr => tr.y > y - 10 && Math.abs(tr.x - x) < 50 * tr.s && tr.y - y < 120 * tr.s);
 const LIE_LINES = ['¡Mira esa nube! Parece un dragón... no, un barco de velas blancas. ¡O una oveja con sombrero!', 'Qué bien se está en el pasto. Se oyen las abejas y, si me callo un momento, hasta el crecer de las flores.', 'Las nubes son como las ideas: pasan lentísimo y nunca se repiten.', 'Si me quedo muy quieta, quizás las hadas me confundan con una flor.'];
 const AUTO_SAY = ['¡Qué día para hacer algo bonito!', 'Se me ocurrió una idea... ¡de esas que solo tengo yo!', '¡A ver qué descubro por ahí!', 'Mi imaginación no me deja quieta.', 'Hay tanto por hacer y tan poco tiempo... ¡y yo con tantas ideas!'];
 async function autoDecide(){
@@ -1264,7 +1266,7 @@ function autoStep(){
     case 'wander': if (it.started) return stay(8, 8) ? undefined : done(); it.started = true; { const [x, y] = randSpot(sc === 'out' ? 260 : 120); return to(x, y); }
     case 'lie': {
       if (sc !== 'out') return go(hopTo('out'));
-      if (!it.started) { it.started = true; let spot = null; for (let k = 0; k < 30 && !spot; k++) { const [x, y] = randSpot(240); if (!nearPath(x, y, 30) && !inBrook(x, y, 30) && !inLake(x, y, 30)) spot = [x, y]; } const [x, y] = spot || randSpot(100); return to(x, y); }
+      if (!it.started) { it.started = true; let spot = null; for (let k = 0; k < 30 && !spot; k++) { const [x, y] = randSpot(240); if (!nearPath(x, y, 30) && !inBrook(x, y, 30) && !inLake(x, y, 30) && !underTree(x, y)) spot = [x, y]; } const [x, y] = spot || randSpot(100); return to(x, y); }
       if (!ana.lie) { if (it.lay) return done(); it.lay = true; ana.lie = true; ana.sit = false; ana.dir = 2; it.until = TT + calm(40, 40); return anaSays(pick(LIE_LINES)); }
       if (TT > it.until) { ana.lie = false; return done(); }
       return;
@@ -2150,7 +2152,7 @@ function update(dt){
     else if (diana.lie) { if (TT > (diana.lieUntil || 0) || busy('diana') || night > .3) diana.lie = false; }
     else if (!busy('diana') && !goTarget(diana, dt, 46)) {
       wander(diana, dt, 40);
-      if (diana.wait > 2 && S !== 3 && night < .3 && TT > (diana.lieAt = diana.lieAt || TT + 60 + Math.random() * 90)) { diana.lie = true; diana.moving = false; diana.lieUntil = TT + 25 + Math.random() * 30; diana.lieAt = diana.lieUntil + 90 + Math.random() * 120; }
+      if (diana.wait > 2 && S !== 3 && night < .3 && !underTree(diana.x, diana.y) && TT > (diana.lieAt = diana.lieAt || TT + 60 + Math.random() * 90)) { diana.lie = true; diana.moving = false; diana.lieUntil = TT + 25 + Math.random() * 30; diana.lieAt = diana.lieUntil + 90 + Math.random() * 120; }
     }
   } else if (diana.where === 'os') {
     diana.goals = DIANA_IN;
