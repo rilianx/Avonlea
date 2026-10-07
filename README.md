@@ -25,6 +25,7 @@ La partida se guarda sola en el navegador: lo que lleva Ana, lo que creció en l
 - **Cocinar** en la cocina de Tejas Verdes: tarta de bayas, compota de manzana o té.
 - **Conversar y regalar** a Matthew, Marilla, Diana, la Sra. Barry y la Sra. Lynde, que le van tomando cariño.
 - **Visitar a Diana** en La Cuesta del Huerto, **tomar el té** con ella en el sofá de la salita (con cordial de frambuesa, esta vez bien etiquetado), **calentarse junto al fuego** o **salir a pasear juntas**.
+- **Subir a su pieza** por la escalera de la cocina: el cuarto del alero este, de paredes blancas, con la cama angosta, el espejo, el vestido marrón de mangas abullonadas y, por la ventana, el cerezo **Reina de las Nieves**. Por la noche Ana dice que tiene sueño; en su cama puede **dormir** (desde las 20:00) y el día empieza de nuevo al amanecer. Si pasa de las 2 de la mañana, se queda dormida sola.
 - **Sentarse** en la banca del **Lago de las Aguas Brillantes**.
 - Visitar a la **Sra. Rachel Lynde** en su casa de la Hondonada, junto al arroyo: teje junto a la ventana desde donde ve pasar a todo el mundo.
 - Pasear por el **Camino Blanco de las Delicias** y el **Bosque Encantado**.

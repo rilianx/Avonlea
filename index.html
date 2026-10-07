@@ -13,6 +13,8 @@ html,body{margin:0;height:100%;background:#2b3a26;overflow:hidden;touch-action:n
 #tasks[hidden]{display:none}
 #clock{position:fixed;right:10px;top:10px;padding:4px 10px;font-size:15px;pointer-events:none}
 #talk[hidden]{display:none}
+#sleep{position:fixed;inset:0;z-index:30;background:#0d1020;color:#e8e2c8;font:italic 34px Georgia,serif;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 1.2s ease}
+#sleep.on{opacity:1;pointer-events:auto}
 #talk{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(560px,calc(100% - 28px));padding:12px 16px 12px;font-size:17px;line-height:1.4}
 #talk .who{font-weight:bold;color:#7a3a22;margin-bottom:2px} #talk .who span{color:#d24a4a;font-weight:normal;margin-left:6px;letter-spacing:1px}
 #talk .opts{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
@@ -48,6 +50,7 @@ html,body{margin:0;height:100%;background:#2b3a26;overflow:hidden;touch-action:n
 <div id="clock" class="paper"></div>
 <div id="hint" class="paper">Flechas o WASD para pasear (o toca el suelo) · toca una persona u objeto para interactuar · M para el mapa</div>
 <div id="talk" class="paper" hidden></div>
+<div id="sleep"></div>
 <button id="mapbtn" class="paper" title="Mapa (M)">🗺</button>
 <button id="aibtn" class="paper" title="Diálogos con IA">✒</button>
 <div id="ai" hidden><div class="paper sheet">
@@ -657,6 +660,121 @@ HOUSES.rl.interior = {
   glow: () => [RLQ.x - 60, RLQ.y - 70, 170, '255,190,110', .4], place: 'en la casa de la Sra. Lynde, junto a la ventana desde la que ella ve pasar a todo el mundo',
 };
 
+/* ---------- Ana's room: the east gable (the narrow bed, the muslin curtains, the Snow Queen outside the window) ---------- */
+const STAIRS = { x: 12 * T, y: 4.7 * T };
+const GA = { win: 4.6 * T, bed: { x: 10.2 * T, y: 5.7 * T }, table: { x: 7.6 * T, y: 3.7 * T }, wash: { x: 2.6 * T, y: 3.6 * T } };
+function drawStairsUp(c){
+  const x0 = 11.2 * T, x1 = 12.8 * T, yb = 4.6 * T, yt = 2.3 * T;
+  blob(c, [[x0, yb], [x1, yb], [x1, yt], [x0, yt + 10]], '#a67c52');
+  for (let k = 0; k < 7; k++) { const y = yb - 4 - k * 11; c.fillStyle = k % 2 ? '#c9a070' : '#b88c5e'; c.fillRect(x0 + 2 + k * 1.2, y - 7, x1 - x0 - 4 - k * 1.2, 7); line(c, [[x0 + 2, y], [x1 - 2, y]], 'rgba(70,42,26,.4)', 1, k); }
+  line(c, [[x0 - 3, yb + 2], [x0 - 3, yt + 6]], '#6a4a30', 3); for (let k = 0; k < 4; k++) line(c, [[x0 - 3, yb - k * 24], [x0 - 3, yb - 14 - k * 24]], '#7a5536', 4, k);
+  ell(c, (x0 + x1) / 2, yt + 6, 26, 6, 'rgba(30,20,15,.7)');
+}
+function drawAnaRoom(c, t, night){
+  c.fillStyle = '#d2a878'; c.fillRect(0, 0, KIT.w, KIT.h);
+  c.strokeStyle = 'rgba(110,70,40,.3)'; c.lineWidth = 1; for (let y = 2.4 * T; y < KIT.h; y += 14) { c.beginPath(); c.moveTo(0, y); c.lineTo(KIT.w, y); c.stroke(); for (let x = (y / 14 % 2) * 40 + 20; x < KIT.w; x += 80) { c.beginPath(); c.moveTo(x, y); c.lineTo(x, y + 14); c.stroke(); } }
+  blob(c, [[0, 0], [KIT.w, 0], [KIT.w, 2.4 * T], [0, 2.4 * T]], '#f6f2e8');   // whitewashed, like in the book
+  c.strokeStyle = 'rgba(160,150,130,.18)'; for (let x = 14; x < KIT.w; x += 36) { c.beginPath(); c.moveTo(x, 4); c.lineTo(x + 3, 2.4 * T - 4); c.stroke(); }
+  c.fillStyle = '#9a7a56'; c.fillRect(0, 2.4 * T - 5, KIT.w, 5);
+  // the window, and the Snow Queen cherry tree outside it (in blossom, green, red and gold, or bare in the snow)
+  const wx = GA.win;
+  blob(c, [[wx - 42, 10], [wx + 42, 10], [wx + 42, 60], [wx - 42, 60]], night > .3 ? '#2d3a66' : S === 3 ? '#e4eef4' : '#bfe0ea');
+  c.save(); c.beginPath(); c.rect(wx - 42, 10, 84, 50); c.clip();
+  c.fillStyle = '#6a4a32'; c.fillRect(wx + 8, 32, 7, 40);
+  const bl = S === 0 ? ['#fffaf2', '#fbdde3'] : S === 1 ? ['#6fa84e', '#5c9a4c'] : S === 2 ? ['#d8873a', '#c8583a'] : null;
+  if (bl) { ell(c, wx + 6, 26, 36, 20, bl[0]); ell(c, wx - 16, 36, 20, 13, bl[1]); ell(c, wx + 28, 38, 18, 12, bl[0]); }
+  else { for (const [a, b, d, e] of [[wx + 11, 36, wx - 18, 20], [wx + 11, 34, wx + 30, 18], [wx + 11, 42, wx - 8, 34]]) line(c, [[a, b], [d, e]], '#6a4a32', 2, d); ell(c, wx - 18, 20, 6, 2.4, '#f6f8fb'); ell(c, wx + 30, 18, 6, 2.4, '#f6f8fb'); }
+  if (night > .3) for (let k = 0; k < 6; k++) ell(c, wx - 36 + k * 14, 16 + (k * 7) % 14, 1, 1, 'rgba(255,255,220,.8)');
+  c.restore();
+  c.strokeStyle = '#8a6a48'; c.lineWidth = 3; c.beginPath(); c.moveTo(wx, 10); c.lineTo(wx, 60); c.moveTo(wx - 42, 35); c.lineTo(wx + 42, 35); c.stroke();
+  for (const sd of [-1, 1]) blob(c, [[wx + sd * 46, 8], [wx + sd * 28, 8], [wx + sd * 34, 40], [wx + sd * 48, 64]], 'rgba(255,253,246,.92)');
+  // pegs on the wall: her straw hat and the brown dress with the puffed sleeves
+  const px = 1.3 * T;
+  blob(c, [[px - 22, 20], [px + 30, 20], [px + 30, 25], [px - 22, 25]], '#7a5536');
+  ell(c, px - 12, 17, 11, 4, '#e8c46a', true); ell(c, px - 12, 14, 6, 4, '#e8c46a', true); line(c, [[px - 18, 16], [px - 6, 16]], '#c0582e', 1.6);
+  blob(c, [[px + 14, 24], [px + 26, 24], [px + 28, 58], [px + 12, 58]], '#8a5a3a'); ell(c, px + 10, 30, 6, 6, '#8a5a3a', true); ell(c, px + 30, 30, 6, 6, '#8a5a3a', true);
+  // the looking-glass over the little table
+  ell(c, GA.table.x, 34, 14, 19, '#c9a04a', true); ell(c, GA.table.x, 34, 10.5, 15.5, '#cfe2ea');
+  // a hooked mat
+  ell(c, 6.4 * T, 7 * T, 84, 30, '#a8554a', true); ell(c, 6.4 * T, 7 * T, 64, 21, '#efe0c8'); ell(c, 6.4 * T, 7 * T, 42, 13, '#5c8c63');
+  // the stairs going down
+  blob(c, [[KDOOR.x - 26, KIT.h], [KDOOR.x - 20, KIT.h - 22], [KDOOR.x + 20, KIT.h - 22], [KDOOR.x + 26, KIT.h]], '#5b3a28');
+  for (let k = 0; k < 3; k++) line(c, [[KDOOR.x - 24 + k * 2, KIT.h - 4 - k * 6], [KDOOR.x + 24 - k * 2, KIT.h - 4 - k * 6]], 'rgba(230,200,160,.5)', 1.4, k);
+  line(c, [[KDOOR.x - 30, KIT.h - 4], [KDOOR.x - 30, KIT.h - 30]], '#6a4a30', 3); line(c, [[KDOOR.x + 30, KIT.h - 4], [KDOOR.x + 30, KIT.h - 30]], '#6a4a30', 3);
+}
+function drawAnaBed(c){
+  const x = GA.bed.x, y = GA.bed.y;
+  ell(c, x, y + 3, 80, 9, 'rgba(40,25,15,.22)');
+  blob(c, [[x - 70, y], [x + 70, y], [x + 70, y - 14], [x - 70, y - 14]], '#8a6040');
+  blob(c, [[x + 62, y - 6], [x + 74, y - 6], [x + 74, y - 60], [x + 62, y - 60]], '#7a5536');
+  blob(c, [[x - 74, y - 6], [x - 62, y - 6], [x - 62, y - 36], [x - 74, y - 36]], '#7a5536');
+  blob(c, [[x - 64, y - 14], [x + 62, y - 14], [x + 62, y - 32], [x - 64, y - 32]], '#f6efe0');
+  const cols = ['#d9433b', '#d9a441', '#5c8c63', '#7f9ec0', '#a58ad8', '#f2c94c'];
+  for (let k = 0; k < 9; k++) for (let q = 0; q < 2; q++) { c.fillStyle = cols[(k * 2 + q * 3) % cols.length]; c.globalAlpha = .8; c.fillRect(x - 62 + k * 10, y - 30 + q * 8, 9, 7); } c.globalAlpha = 1;
+  ell(c, x + 46, y - 36, 17, 7, '#fffaf0', true);
+}
+function drawAnaTable(c, t){
+  const x = GA.table.x, y = GA.table.y;
+  ell(c, x, y + 2, 30, 6, 'rgba(40,25,15,.22)');
+  for (const cx of [-22, 22]) blob(c, [[x + cx - 3, y], [x + cx + 3, y], [x + cx + 3, y - 20], [x + cx - 3, y - 20]], '#7a5536');
+  blob(c, [[x - 28, y - 20], [x + 28, y - 20], [x + 24, y - 30], [x - 24, y - 30]], '#8a6040');
+  for (let k = 0; k < 3; k++) blob(c, [[x - 20, y - 31 - k * 4], [x - 4, y - 31 - k * 4], [x - 4, y - 35 - k * 4], [x - 20, y - 35 - k * 4]], ['#7f9ec0', '#a8554a', '#d9a441'][k]);
+  blob(c, [[x + 8, y - 31], [x + 12, y - 31], [x + 12, y - 46], [x + 8, y - 46]], '#fffaf0'); ell(c, x + 10, y - 49 - Math.abs(Math.sin(t * 6)) * 1.5, 2, 4, '#ffd27a');
+}
+function drawAnaWash(c){
+  const x = GA.wash.x, y = GA.wash.y;
+  ell(c, x, y + 2, 28, 6, 'rgba(40,25,15,.22)');
+  for (const cx of [-18, 18]) blob(c, [[x + cx - 3, y], [x + cx + 3, y], [x + cx + 3, y - 22], [x + cx - 3, y - 22]], '#7a5536');
+  blob(c, [[x - 24, y - 22], [x + 24, y - 22], [x + 20, y - 30], [x - 20, y - 30]], '#8a6040');
+  ell(c, x - 6, y - 32, 11, 4, '#f6efe0', true); blob(c, [[x + 8, y - 30], [x + 18, y - 30], [x + 17, y - 46], [x + 9, y - 46]], '#9db3bf'); line(c, [[x + 18, y - 40], [x + 22, y - 38]], 'rgba(70,90,100,.9)', 1.6);
+}
+// Ana says something out loud (a bubble), when nobody else is talking
+function anaSays(text){ if (amb.cur) return; bubbles = [{ q: 'ana', text, t: 0, dur: lineDur(text) }]; sfx.blip(); }
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const WINDOW_LINES = ['¡Mi Reina de las Nieves, toda vestida de novia! Cada primavera pienso que se casa con el cielo.', 'Ya no tiene flores, pero qué verde está... Seguro que me entiende, aunque no hable.', 'Mi cerezo se puso su vestido rojo y dorado. ¡Es el árbol más elegante de toda la Isla!', 'Mi querida Reina de las Nieves duerme bajo la nieve. Ya despertará, es cuestión de paciencia... ¡y yo tengo muchísima! Bueno, casi.'];
+const MIRROR_LINES = ['¡Ay, mi pelo! Aunque hoy, con esta luz, parece casi... bueno, castaño. Casi.', 'Con tantas pecas parezco un mapa de islas. ¡Tengo toda la Isla del Príncipe Eduardo en la nariz!', 'Algún día seré pálida y de pelo negro azabache. Y mientras tanto, ¡me quedo con mi imaginación!'];
+const SLEEPY_LINES = [['¡Ay, qué sueño! Hasta la luna bosteza esta noche.', 'Creo que ya es hora de subir a mi cuarto... ¿o aún no? ¡Aaah!'], ['Siento los párpados pesados como cortinas de terciopelo. ¡Me caigo de sueño!', 'Mi cama del alero me llama. ¡Ahí me esperan mis sueños más hermosos!']];
+
+const ROOMS = { gg: HOUSES.gg.interior, os: HOUSES.os.interior, rl: HOUSES.rl.interior };
+ROOMS.ga = {
+  parent: 'gg', exitAt: [STAIRS.x, STAIRS.y + 14], exitLabel: 'Bajar a la cocina',
+  draw: drawAnaRoom, items: (g, t) => [{ y: GA.bed.y, draw: () => drawAnaBed(g) }, { y: GA.table.y, draw: () => drawAnaTable(g, t) }, { y: GA.wash.y, draw: () => drawAnaWash(g) }],
+  blocked: (x, y) => (Math.abs(x - GA.bed.x) < 76 && y > GA.bed.y - 30 && y < GA.bed.y + 4) || (Math.abs(x - GA.table.x) < 30 && y > GA.table.y - 24 && y < GA.table.y + 4) || (Math.abs(x - GA.wash.x) < 26 && y > GA.wash.y - 26 && y < GA.wash.y + 4),
+  glow: () => [GA.table.x, GA.table.y - 40, 150, '255,190,110', .38], place: 'en su cuarto del alero este de Tejas Verdes, con la ventana donde está el cerezo Reina de las Nieves',
+  actions: add => {
+    add('bed', GA.bed.x - 20, GA.bed.y + 14, 60, 'Dormir en mi cama', goToBed, { hy: 30, hit: 0, pri: 2, test: (x, y) => Math.abs(x - GA.bed.x) < 76 && y > GA.bed.y - 62 && y < GA.bed.y + 6 });
+    add('gwin', GA.win, 3.9 * T, 70, 'Mirar por la ventana', () => anaSays(WINDOW_LINES[S]), { hy: 40, hit: 0, pri: 3, test: (x, y) => Math.abs(x - GA.win) < 46 && y < 62 });
+    add('mirror', GA.table.x, GA.table.y + 26, 56, 'Mirarse en el espejo', () => anaSays(pick(MIRROR_LINES)), { hy: 40, hit: 0, pri: 3, test: (x, y) => Math.abs(x - GA.table.x) < 18 && y < 56 });
+  },
+};
+
+// the kitchen has the stairs up to her room
+HOUSES.gg.interior.draw = (c, t, night) => { drawKitchen(c, t, night); drawStairsUp(c); };
+{ const b0 = HOUSES.gg.interior.blocked; HOUSES.gg.interior.blocked = (x, y) => b0(x, y) || (x > 11.1 * T && y < 4.5 * T); }
+{ const a0 = HOUSES.gg.interior.actions; HOUSES.gg.interior.actions = add => { a0(add); add('stairs', STAIRS.x, STAIRS.y, 44, 'Subir a la pieza de Ana', () => goIn('ga', [KDOOR.x, KIT.h - 28]), { hy: 40, hit: 0, pri: 1, test: (x, y) => x > 11.1 * T && x < 12.9 * T && y > 2.2 * T && y < 4.7 * T }); }; }
+
+/* ---------- sleep: Ana gets sleepy at night, and goes to bed (the day starts again at dawn) ---------- */
+let sleeping = false, sleepyStage = 0;
+function goToBed(){
+  if (hourNow() < 20) { anaSays('Todavía no tengo sueño... ¡hay tanto que imaginar antes de dormir!'); return; }
+  goSleep(false);
+}
+function goSleep(forced){
+  if (sleeping) return; sleeping = true; close(); ana.goto = null; ana.sit = false;
+  const el = $('sleep'); el.textContent = forced ? 'Ana se quedó dormida…' : 'Zzz…'; el.classList.add('on');
+  setTimeout(() => {
+    goIn('ga', [GA.bed.x - 20, GA.bed.y + 16]); ana.dir = 0; bubbles = [];
+    dayT = Math.floor(dayT) + 1; sleepyStage = 0;
+    const grew = BEDS.filter(b => b.wet && b.stage < 3).length;
+    for (const b of BEDS) if (b.wet) { b.wet = 0; b.grow = 0; b.stage = Math.min(3, b.stage + 1); }
+    for (const b of bushes) if (!b.berries) b.berries = 3;
+    for (const t of trees) if (t.kind === 'apple' && !t.apples) t.apples = 3;
+    logEv(forced ? 'Ana se quedó dormida y la llevaron a su cama.' : 'Ana durmió toda la noche en su cuarto del alero este.', []);
+    el.textContent = '☀ Buenos días, Avonlea'; save();
+    setTimeout(() => { el.classList.remove('on'); sleeping = false; if (grew) notice('🌱 La huerta creció mientras dormías.'); }, 1400);
+  }, 1500);
+}
+
 /* ---------- the game ---------- */
 // scene: 'out' (Avonlea), 'gg' (the kitchen at Green Gables) or 'os' (the parlour at Orchard Slope)
 const game = { scene: 'out', inv: { bayas: 0, manzanas: 0, tarta: 0, compota: 0, te: 0, ramo: 0 }, hasCan: false, water: 0, ground: [], groundSeq: 0, sipUntil: 0, fond: { toby: 0 }, cooking: null, talk: null, said: {}, saidS: {}, seasonShift: 0, teaDay: -1, map: false, journal: [], mem: {}, know: {}, tasks: [], plans: {}, table: null, giftFor: {}, npcGiftDay: {}, lastDay: null, taskSeq: 0 };
@@ -773,7 +891,7 @@ function blockedOut(x, y){
 }
 function blockedIn(x, y, scene = game.scene){
   if (x < 14 || x > KIT.w - 14 || y < 2.4 * T + 8 || (y > KIT.h - 4 && Math.abs(x - KDOOR.x) > 16)) return true;
-  return HOUSES[scene].interior.blocked(x, y);
+  return ROOMS[scene].blocked(x, y);
 }
 const blocked = (x, y) => game.scene === 'out' ? blockedOut(x, y) : blockedIn(x, y);
 function moveBy(o, dx, dy){ if (!blocked(o.x + dx, o.y)) o.x += dx; if (!blocked(o.x, o.y + dy)) o.y += dy; }
@@ -879,8 +997,8 @@ function targets(){
     for (const [id, h] of Object.entries(HOUSES)) add('h:' + id, h.at.x, h.at.y + 6, 26, h.enter, () => goIn(id), { pri: 4, test: (x, y) => Math.abs(x - h.at.x) < h.at.w / 2 + 8 && y < h.at.y + 10 && y > h.at.y - 80 });
     add('bench', BENCH.x, BENCH.y + 6, 26, ana.sit ? 'Levantarse' : 'Sentarse a mirar el lago', () => { ana.sit = !ana.sit; if (ana.sit) { logEv('Ana se sentó a mirar el Lago de las Aguas Brillantes.'); ana.x = BENCH.x; ana.y = BENCH.y - 2; ana.dir = 2; } }, { pri: 4, hy: 10, hit: 32 });
   } else {
-    HOUSES[game.scene].interior.actions?.(add);
-    add('door', KDOOR.x, KIT.h, 26, 'Salir', () => goOut(), { hy: 10, hit: 30 });
+    ROOMS[game.scene].actions?.(add);
+    add('door', KDOOR.x, KIT.h, 26, ROOMS[game.scene].exitLabel ?? 'Salir', () => goOut(), { hy: 10, hit: 30 });
   }
   game.ground.forEach(it => { if (it.scene === game.scene) add('g:' + it.id, it.x, it.y, 28, it.k === 'can' ? 'Recoger la regadera' : 'Recoger ' + itemText(it.k, it.n), () => pickUp(it), { hy: 8, hit: 20 }); });
   return L;
@@ -903,6 +1021,7 @@ function targetAt(wx, wy){
 }
 // a tap: do it at once if she is close enough, otherwise she walks there (A*) and does it on arrival; on bare ground she just walks
 function tapAt(sx, sy){
+  if (sleeping) return;
   const wx = view.ox + sx / view.Z, wy = view.oy + sy / view.Z, t = targetAt(wx, wy);
   if (t && (t.self || dist(ana.x, ana.y, t.x, t.y) < t.reach * .85)) { ana.goto = null; t.act(); }
   else ana.goto = t ? { id: t.id, scene: game.scene } : { x: wx, y: wy, scene: game.scene };
@@ -948,8 +1067,9 @@ function drawGround(c, it){
 function drawCup(c, p){ ell(c, p.x + 10, p.y - 20, 4.6, 3, '#fffaf0', true); for (let k = 0; k < 2; k++) line(c, [[p.x + 9 + k * 3, p.y - 25], [p.x + 11 + k * 3 + Math.sin(TT * 4 + k) * 1.5, p.y - 31]], 'rgba(255,255,255,.75)', 1); }
 let hoverAt = null;
 function pet(){ logEv('Ana acarició a Toby.'); ana.pet = true; ana.crouch = true; toby.petted = 2.2; toby.dir = toby.x < ana.x ? 1 : 3; ana.dir = toby.x > ana.x ? 1 : 3; game.fond.toby++; hearts(toby.x, toby.y - 24); sfx.happy(); save(); setTimeout(() => { ana.pet = false; ana.crouch = false; }, 1600); }
-function goIn(room){ game.scene = room; ana.x = KDOOR.x; ana.y = KIT.h - 14; ana.dir = 0; ana.sit = false; toby.x = ana.x + 26; toby.y = ana.y; if (diana.follow) { diana.where = room; diana.sit = false; diana.x = ana.x - 26; diana.y = ana.y; } cam.x = KIT.w / 2; cam.y = KIT.h / 2; }
+function goIn(room, at){ game.scene = room; ana.x = at ? at[0] : KDOOR.x; ana.y = at ? at[1] : KIT.h - 14; ana.dir = 0; ana.sit = false; toby.x = ana.x + 26; toby.y = ana.y; if (diana.follow) { diana.where = room; diana.sit = false; diana.x = ana.x - 26; diana.y = ana.y; } cam.x = KIT.w / 2; cam.y = KIT.h / 2; }
 function goOut(){
+  if (ROOMS[game.scene].parent) return goIn(ROOMS[game.scene].parent, ROOMS[game.scene].exitAt);
   const H = HOUSES[game.scene].at;
   game.scene = 'out'; ana.x = H.x; ana.y = H.y + 24; ana.dir = 2; ana.sit = false; toby.x = ana.x + 24; toby.y = ana.y + 10;
   if (diana.follow) { diana.where = 'out'; diana.sit = false; diana.goals = DIANA_OUT; diana.x = ana.x - 24; diana.y = ana.y + 10; }
@@ -1245,7 +1365,7 @@ Avonlea, en la Isla del Príncipe Eduardo, hacia 1880. Lugares: ${WORLD}.
 Las estaciones duran dos días: en primavera florecen los manzanos y cerezos; en verano y otoño hay bayas en los arbustos y manzanas en el huerto de los Barry; en otoño las hojas se ponen rojas y doradas; en invierno nieva, el lago se congela y la huerta duerme bajo la nieve.
 
 LO QUE ANA PUEDE HACER EN EL JUEGO
-Pasear; acariciar a Toby, el perro de Tejas Verdes (no habla); tomar la regadera en la bomba y regar la huerta, que crece hasta florecer, y cortar flores para hacer ramos (no en invierno); recoger bayas y manzanas (solo en verano y otoño); cocinar en la cocina de Tejas Verdes tarta de bayas (con 3 bayas), compota de manzana (con 3 manzanas) o té; regalar lo que tiene; tomar el té con Diana en la salita de los Barry; calentarse junto a la chimenea; pasear con Diana; sentarse en la banca del lago; llevar cosas o recados de unos a otros.
+Pasear; acariciar a Toby, el perro de Tejas Verdes (no habla); tomar la regadera en la bomba y regar la huerta, que crece hasta florecer, y cortar flores para hacer ramos (no en invierno); recoger bayas y manzanas (solo en verano y otoño); cocinar en la cocina de Tejas Verdes tarta de bayas (con 3 bayas), compota de manzana (con 3 manzanas) o té; regalar lo que tiene; tomar el té con Diana en la salita de los Barry; calentarse junto a la chimenea; pasear con Diana; sentarse en la banca del lago; llevar cosas o recados de unos a otros; subir a su cuarto del alero este por la escalera de la cocina (con la ventana de su amigo el cerezo Reina de las Nieves) y dormir en su cama cuando es de noche.
 
 LOS PERSONAJES
 ${CAST}
@@ -1258,10 +1378,11 @@ LO QUE CADA PERSONAJE SABE
 Cada uno sabe solo lo que vio, lo que le contaron en su casa y lo que conversó con Ana: está en su estado. No sabe lo que no está ahí (por ejemplo, Marilla no sabe lo que Ana hizo en casa de los Barry, a menos que se lo cuenten).
 
 ESCENAS DE CONVERSACIÓN (cuando te piden una escena)
-- Escribes lo que se dicen en voz alta, como en una obra de teatro, en "lineas": cada una es { "quien": "ana" o el personaje (${Object.keys(CH).join(', ')}), "texto" }. Ana también habla: tú escribes sus palabras, con su voz (entusiasta, dramática, con palabras grandiosas) y el jugador no elige nada. Solo hablan Ana y los PRESENTES que te indiquen.
-- Si hay dos o más personajes presentes, conversan sobre todo entre ellos (la comida, los vecinos, el tiempo, la cosecha, los chismes, la casa, lo que Ana hizo); Ana puede quedarse escuchando y decir poco o nada, o intervenir con una frase.
-- Cada uno habla solo como su personaje, con su voz propia. Cada línea es breve: una o dos frases, 18 palabras como máximo, porque se lee en un globito sobre la cabeza.
-- Una escena tiene de 2 a 6 líneas, alternando las voces con naturalidad (si hay varios personajes pueden hablarse entre ellos; no todos tienen que decir algo). Termina bien, sin dejar una pregunta abierta a Ana: con una frase de cierre, un comentario, un silencio cómodo o alguien que vuelve a lo suyo. Si el momento no pide palabras (Matthew solo saluda con la cabeza, o nadie tiene nada que decir), "lineas" puede tener una sola línea o ninguna.
+- Escribes lo que se dicen en voz alta, como en una obra de teatro, en "lineas": cada una es { "quien": "ana" o el personaje (${Object.keys(CH).join(', ')}), "texto" }. Ana también habla: tú escribes sus palabras, con su voz de siempre (tú ya sabes cómo es), y el jugador no elige nada. Solo hablan Ana y los PRESENTES que te indiquen.
+- Si hay dos o más personajes presentes, conversan sobre todo entre ellos (la comida, los vecinos, el tiempo, la cosecha, los chismes, la casa, lo que Ana hizo); Ana se une enseguida.
+- Cada uno habla solo como su personaje, con su voz propia. Las líneas de los demás son breves (18 palabras como máximo); las de Ana pueden ser más largas (unas 30 palabras), porque se leen en un globito sobre la cabeza.
+- Ana es la gran conversadora y la que más habla en cualquier escena, también cuando los demás conversan entre ellos: puede encadenar dos o tres líneas seguidas, divagar, exagerar y emocionarse; los demás la dejan hablar, se ríen o la frenan con cariño.
+- Una escena tiene de 3 a 8 líneas, alternando las voces con naturalidad (si hay varios personajes pueden hablarse entre ellos; no todos tienen que decir algo). Termina bien, sin dejar una pregunta abierta a Ana: con una frase de cierre, un comentario, un silencio cómodo o alguien que vuelve a lo suyo. Si el momento no pide palabras (Matthew solo saluda con la cabeza, o nadie tiene nada que decir), "lineas" puede tener una sola línea o ninguna; Ana casi nunca se queda callada.
 - Ten en cuenta lo que es verdad ahora (la hora, la estación, el lugar, lo que Ana lleva, quién la acompaña), lo que cada personaje sabe y recuerda, y su plan de hoy; nombra a veces, con naturalidad, algo de eso; no lo enumeres todo y no repitas lo que ya se dijo en charlas anteriores (está en lo que saben y recuerdan, y en "LO ÚLTIMO QUE SE DIJERON").
 - Si Ana ya lleva una taza de té, o está tomando té, nadie le ofrece otra ni la deja en la mesa; lo mismo con cualquier plato ya preparado que ella lleve (tarta, compota, ramo). Una taza que Ana preparó es suya, para ofrecérsela a alguien; que ella esté tomando té es otra cosa.
 - No contradigas el estado: no hay manzanas ni bayas en primavera ni en invierno, ni flores en invierno; si Ana no lleva algo, no lo tiene.
@@ -1287,7 +1408,7 @@ function whereText(k){
   return CH[k].whereText?.[w] ?? (HOUSES[w]?.inText ?? 'afuera, por Avonlea');
 }
 function placeText(){
-  if (game.scene !== 'out') return HOUSES[game.scene].interior.place;
+  if (game.scene !== 'out') return ROOMS[game.scene].place;
   let best = null, bd = 1e9; for (const pl of Object.values(PLACES)) { const d = dist(ana.x, ana.y, pl[1], pl[2]); if (d < bd) { bd = d; best = pl[0]; } }
   return (bd > 500 ? 'en el campo, algo lejos de ' : 'cerca de ') + best;
 }
@@ -1301,7 +1422,7 @@ function stateText(who){
   const L = [
     `AHORA: día ${today() + 1} en Avonlea, ${SEASONS[S].toLowerCase()} (día ${today() % 2 + 1} de 2 de la estación), las ${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}, ${moment}.`,
     `Ana está ${placeText()}${diana.follow && who !== 'diana' ? ', paseando con Diana' : ''}; Toby la acompaña.`,
-    `Ana lleva: ${carry.length ? carry.join(', ') : 'nada en las manos'}.` + (sipping() ? ' Ana está tomando té ahora mismo, con la taza en la mano: nadie tiene que ofrecerle otro.' : '') + (onGround.length ? ` En el suelo, cerca, Ana dejó: ${onGround.join(', ')}.` : ''),
+    `Ana lleva: ${carry.length ? carry.join(', ') : 'nada en las manos'}.` + (sipping() ? ' Ana está tomando té ahora mismo, con la taza en la mano: nadie tiene que ofrecerle otro.' : '') + (onGround.length ? ` En el suelo, cerca, Ana dejó: ${onGround.join(', ')}.` : '') + (hourNow() >= 21 ? ' Ya es tarde: Ana tiene sueño y debería irse a dormir a su cama, en su cuarto del alero este.' : ''),
     `La huerta: ${S === 3 ? 'duerme bajo la nieve' : `${bloom} de 6 canteros con flores; ${dry} sin regar`}.` + (game.table ? ` En la mesa de la cocina hay ${ITEM_NAME[game.table][0]}.` : ''),
     `Cariño hacia Ana (0 a 5): ${Object.keys(CH).map(k => NAMES[k] + ' ' + game.fond[k]).join(', ')}.`,
     '', `PERSONAJE: ${NAMES[who]}, que ahora está ${whereText(who)}.`, `Lo que ${NAMES[who]} puede hacer: ${abilText(who)}.` + (game.npcGiftDay[who] === today() ? ' (Hoy ya le regaló algo a Ana.)' : ''),
@@ -1368,7 +1489,7 @@ async function claudeCall(messages, schema, retry = true){
 const amb = { cur: null, ready: null, busy: false, tok: 0, cool: 0, err: 0, mute: {}, seen: {}, recent: null, hist: [] };
 let bubbles = [];
 const personOf = k => k === 'ana' ? ana : PEOPLE[k];
-const lineDur = t => clamp(1.7 + t.length * .055, 2.4, 7);
+const lineDur = t => clamp(1.7 + t.length * .055, 2.4, 9);
 const nameOf = k => k === 'ana' ? 'Ana' : NAMES[k];
 // who is in the talk: the one asked, and whoever stands close to them (and to Ana)
 function chatGroup(main){
@@ -1389,7 +1510,7 @@ function sceneMsg(parts, note){
 }
 async function sceneAsk(parts, note){
   const r = await aiCall([{ role: 'user', content: sceneMsg(parts, note) }]), o = r.out, ok = ['ana', ...parts];
-  const lines = (Array.isArray(o.lineas) ? o.lineas : []).filter(l => l && ok.includes(l.quien) && typeof l.texto === 'string' && l.texto.trim()).slice(0, 6).map(l => ({ q: l.quien, t: l.texto.trim().slice(0, 220) }));
+  const lines = (Array.isArray(o.lineas) ? o.lineas : []).filter(l => l && ok.includes(l.quien) && typeof l.texto === 'string' && l.texto.trim()).slice(0, 9).map(l => ({ q: l.quien, t: l.texto.trim().slice(0, 320) }));
   return { parts, lines, out: o, scene: game.scene, born: TT, resumen: typeof o.resumen === 'string' ? o.resumen.trim() : '' };
 }
 function sceneStart(s, directed){
@@ -1457,7 +1578,7 @@ function aiTalk(who, note, turns = 0){
 function ambNote(parts){
   const names = parts.map(k => NAMES[k]).join(' y ');
   if (parts.includes('diana') && diana.follow) return `Ana y Diana pasean juntas y van conversando mientras caminan${parts.length > 1 ? '; cerca está ' + parts.filter(k => k !== 'diana').map(k => NAMES[k]).join(' y ') : ''}. (Charla al pasar: nadie se lo pidió; Ana también habla.)`;
-  if (parts.length > 1) return `Ana llega donde están ${names}, que conversan entre ellos. (Charla al pasar: nadie se lo pidió. Hablan sobre todo entre ellos —los vecinos, la comida, el tiempo, la cosecha, los chismes, lo que Ana hizo—; Ana escucha y dice poco o nada, o interviene con una frase.)`;
+  if (parts.length > 1) return `Ana llega donde están ${names}, que conversan entre ellos. (Charla al pasar: nadie se lo pidió. Hablan sobre todo entre ellos —los vecinos, la comida, el tiempo, la cosecha, los chismes, lo que Ana hizo—; Ana se une enseguida y habla bastante.)`;
   return `Ana pasa cerca de ${names} y se detiene un momento. (Charla al pasar: nadie se lo pidió; Ana también habla. Pueden saludarse o comentar algo del momento.)`;
 }
 function ambUpdate(dt){
@@ -1655,11 +1776,16 @@ function commute(p, want, dt, sp){
 const cam = { x: ana.x, y: ana.y };
 let last = performance.now(), TT = 0, here = null, taskTick = 0;
 function update(dt){
+  if (sleeping) return;
   TT += dt; dayT += dt / 3600; boil = Math.floor(TT * 6);
   const { night } = light();
   // the season: two days each
   const ns = (seasonCount() % 4 + 4) % 4;
   if (ns !== S) { S = ns; if (TT > 1) { logEv('Llegó ' + ['la primavera', 'el verano', 'el otoño', 'el invierno'][S] + '.', Object.keys(PEOPLE)); for (const w of Object.keys(PEOPLE)) planSoon(w, 'Acaba de llegar ' + ['la primavera', 'el verano', 'el otoño', 'el invierno'][S], true); } if (TT > 1) notice(SICON[S] + ' ' + ['¡Llegó la primavera! Los manzanos están en flor.', '¡Llegó el verano! Hay bayas y manzanas, y luciérnagas de noche.', '¡Llegó el otoño! Las hojas se ponen rojas y doradas.', '¡Llegó el invierno! El lago se heló y la huerta duerme bajo la nieve.'][S]); }
+  // late at night Ana gets sleepy (twice, out loud), and past two in the morning she falls asleep
+  { const hn = hourNow(); if (hn < 20) sleepyStage = 0;
+    else if (hn >= 26 && !game.talk) goSleep(true);
+    else if (sleepyStage < 2 && hn >= [21, 23.5][sleepyStage] && !game.talk && !amb.cur) anaSays(pick(SLEEPY_LINES[sleepyStage++])); }
   // Ana: walks where she is told (not while talking or cooking); sits on the bench until she moves
   let mx = 0, my = 0;
   if (!game.talk && !game.cooking && !game.map && $('ai').hidden) {
@@ -1772,7 +1898,7 @@ function render(){
   const inView = (x, y, m = 80) => x > ox - m && x < ox + vw + m && y > oy - m && y < oy + vh + m * 2;
   const list = [];
   if (inside) {
-    const I = HOUSES[game.scene].interior; I.draw(g, t, night); list.push(...I.items(g, t));
+    const I = ROOMS[game.scene]; I.draw(g, t, night); list.push(...I.items(g, t));
     for (const k of Object.keys(PEOPLE)) if (sceneOf(k) === game.scene) list.push({ y: PEOPLE[k].y, draw: () => drawPerson(g, PEOPLE[k], t) });
     for (const it of game.ground) if (it.scene === game.scene) list.push({ y: it.y, draw: () => drawGround(g, it) });
   } else {
@@ -1868,7 +1994,7 @@ function render(){
     g.globalCompositeOperation = 'lighter';
     const sc = (x, y) => [(x - ox) * Z, (y - oy) * Z];
     const glow = (x, y, r, col, a) => { const [sx, sy] = sc(x, y), rr = r * Z, gr = g.createRadialGradient(sx, sy, 0, sx, sy, rr); gr.addColorStop(0, `rgba(${col},${a})`); gr.addColorStop(1, `rgba(${col},0)`); g.fillStyle = gr; g.fillRect(sx - rr, sy - rr, rr * 2, rr * 2); };
-    if (inside) { const [x, y, r, col, al] = HOUSES[game.scene].interior.glow(t); glow(x, y, r, col, al * night); }
+    if (inside) { const [x, y, r, col, al] = ROOMS[game.scene].glow(t); glow(x, y, r, col, al * night); }
     else {
       for (const H of HOUSE_SPOTS) for (const wx of [-H.w / 2 + 46, H.w / 2 - 46]) glow(H.x + wx, H.y - 30, 90, '255,190,100', .42 * night);
       if (S === 1) for (const f of fireflies) { const fx_ = ox + ((f.x + cam.x - ox) % vw + vw) % vw, fy = oy + ((f.y + cam.y - oy) % vh + vh) % vh, a = Math.max(0, Math.sin(f.ph * 1.7)) * night; if (a > .05) glow(fx_, fy - 14, 7, '230,255,140', a); }
@@ -1945,7 +2071,7 @@ function drawMap(){
   if (!mapBase || mapBase.s !== S || mapBase.w !== w) mapBase = paintMapBase(w, h);
   c.setTransform(1, 0, 0, 1, 0, 0); c.drawImage(mapBase.cv, 0, 0);
   // where everyone is (someone indoors is shown at the door of the house)
-  const at = (where, x, y) => where === 'out' ? [x, y] : [HOUSES[where].at.x, HOUSES[where].at.y + 20];
+  const at = (where, x, y) => where === 'out' ? [x, y] : [HOUSES[ROOMS[where].parent ?? where].at.x, HOUSES[ROOMS[where].parent ?? where].at.y + 20];
   const mark = (who, [x, y], col, dx, big) => {
     const sx = x * k + dx * dpr, sy = y * k, r = (big ? 6 + Math.sin(TT * 5) * 1.2 : 4.5) * dpr;
     c.beginPath(); c.arc(sx, sy, r, 0, TAU); c.fillStyle = col; c.fill(); c.lineWidth = 1.4 * dpr; c.strokeStyle = 'rgba(60,35,20,.9)'; c.stroke();
@@ -1957,7 +2083,7 @@ function drawMap(){
   $('maptitle').textContent = 'Avonlea · ' + SEASONS[S] + ', día ' + (Math.floor(dayT) % 2 + 1) + ' · ' + SICON[S];
 }
 function loop(now){ const dt = clamp((now - last) / 1000, 0, .05); last = now; update(dt); render(); requestAnimationFrame(loop); }
-window.__avonlea = { view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+window.__avonlea = { ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
 requestAnimationFrame(loop);
 })();
 </script>
