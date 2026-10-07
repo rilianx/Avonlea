@@ -9,9 +9,9 @@ Todo el juego es un solo archivo, [`index.html`](index.html): se abre en el nave
 ## Cómo jugar
 
 - **Abrir:** descarga `index.html` y ábrelo en el navegador.
-- **Moverse:** flechas o WASD; o toca el suelo y Ana va hasta allí (rodea los obstáculos). En el celular, también puedes arrastrar el dedo.
+- **Moverse:** flechas o WASD (con Shift, más rápido); o toca el suelo y Ana va hasta allí (rodea los obstáculos). En el celular, también puedes arrastrar el dedo.
 - **Hacer cosas:** toca (o haz clic en) la persona o el objeto: si Ana está cerca, lo hace al instante; si no, camina hasta allí y lo hace al llegar. Toca a Ana para dejar lo que lleva (la regadera, una taza...) o tomarse el té que preparó. Con el ratón, una etiqueta nombra lo que hay bajo el puntero. Espacio, E o Enter hacen lo de más cerca.
-- **Ana por su cuenta:** si no tocas nada durante unos 15 segundos, Ana hace lo suyo: la IA elige entre lo que puede hacer (regar, recoger bayas, acariciar a Toby, cocinar, ir a conversar con alguien, visitar una casa, pasear, soñar despierta, irse a dormir de noche...) y lo dice en voz alta; sin IA lo elige el juego. Cualquier tecla o toque te devuelve el control (se puede desactivar en ✒).
+- **Ana por su cuenta:** si no tocas nada durante unos 15 segundos, Ana hace lo suyo: la IA elige entre lo que puede hacer (regar, recoger bayas, acariciar a Toby, cocinar, ir a conversar con alguien, visitar una casa, pasear, soñar despierta, irse a dormir de noche...) y lo dice en voz alta; sin IA lo elige el juego. Lo hace sin apuro: pasea despacio, se detiene a mirar a su alrededor y se queda un buen rato en cada cosa antes de decidir la siguiente. Cualquier tecla o toque te devuelve el control (se puede desactivar en ✒).
 - **Decir algo:** Enter o T (o el botón 💬) abren una línea para escribir lo que dice Ana. Los demás reaccionan, y la IA entiende si es una despedida («tengo que irme») o un destino («voy a la huerta»): la charla se corta y Ana se va. Caminar también interrumpe una conversación.
 - **Charlas:** los personajes conversan solos en globitos cuando Ana pasa cerca (y Ana también habla: no hay que elegir qué dice). Con Espacio sobre alguien, la charla es con ella; al final solo se decide lo importante (aceptar un encargo, regalar, pasear). Espacio o un toque saltan una frase; Esc sale.
 - **Mapa:** M o el botón 🗺.

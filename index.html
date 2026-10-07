@@ -787,7 +787,7 @@ function goSleep(forced){
 // scene: 'out' (Avonlea), 'gg' (the kitchen at Green Gables) or 'os' (the parlour at Orchard Slope)
 const game = { scene: 'out', inv: { bayas: 0, manzanas: 0, tarta: 0, compota: 0, te: 0, ramo: 0 }, hasCan: false, water: 0, ground: [], groundSeq: 0, sipUntil: 0, fond: { toby: 0 }, cooking: null, talk: null, said: {}, saidS: {}, seasonShift: 0, teaDay: -1, map: false, journal: [], mem: {}, know: {}, tasks: [], plans: {}, table: null, giftFor: {}, npcGiftDay: {}, lastDay: null, taskSeq: 0 };
 const mkPerson = (look, x, y) => ({ look, x, y, dir: 2, walk: 0, moving: false, blink: 0, idle: 0, sit: false, vx: 0, vy: 0, carry: null, pet: false, crouch: false, lookAround: 0 });
-const ana = mkPerson('ana', GG.x - 6, GG.y + 70);
+const ana = mkPerson('ana', GG.x - 6, GG.y + 70); ana.pace = 60;
 /* ---------- the characters: all there is to know about each one is here ----------
    To add a character: one more entry below (name, look, voice for the AI, lines, abilities, where it lives, and
    a routine if it goes visiting) and nothing else: the names, the prompt for the AI, the dialogue, the map, the
@@ -892,7 +892,7 @@ const { matthew, marilla, diana, barry, lynde } = PEOPLE;
 })();
 for (const k of Object.keys(CH)) game.fond[k] = 0;
 const toby = { x: ana.x + 30, y: ana.y + 20, dir: 1, walk: 0, moving: false, sitT: 0, sniff: 0, petted: 0 };
-const SPEED = 84;
+const SPEED = 84, WALK = 60, RUN = 100, STROLL = 34;   // (SPEED is the reference the step animation is scaled by)
 function blockedOut(x, y){
   return x < 16 || y < 40 || x > WW - 16 || y > WH - 8 || inLake(x, y, 6) || inBrook(x, y, 2) || inHouses(x, y, 2) ||
     trees.some(t => Math.hypot(t.x - x, (t.y - y) * 1.6) < 11 * t.s) || dist(x, y, PUMP.x, PUMP.y) < 9;
@@ -1142,23 +1142,25 @@ function autoCook(){
 // carrying out the intent, one step each time she is free
 function autoStep(){
   const it = auto.intent, sc = game.scene;
-  const go = (id, o = {}) => { ana.goto = { id, scene: sc, auto: true, ...o }; };
-  const to = (x, y) => { ana.goto = { x, y, scene: sc, auto: true }; };
-  const done = () => { auto.intent = null; auto.thinkAt = TT + 3 + Math.random() * 6; };
+  const calm = (a, b) => it.manual ? 1 : a + Math.random() * b;   // (what she does on her own is done unhurried; what she was told, as it comes)
+  const go = (id, o = {}) => { ana.goto = { id, scene: sc, auto: true, stroll: !it.manual, ...o }; };
+  const to = (x, y) => { ana.goto = { x, y, scene: sc, auto: true, stroll: !it.manual }; };
+  const done = () => { auto.intent = null; auto.thinkAt = TT + (it.manual ? 2 : 14 + Math.random() * 26); };
+  const stay = (a, b) => { if (!it.until) it.until = TT + calm(a, b); return TT < it.until; };   // (stays a while, taking it in)
   switch (it.type) {
     case 'house': {
       const next = hopTo(it.id); if (next) return go(next);
       if (it.id === 'out') return done();
-      if (!it.until) it.until = TT + 7 + Math.random() * 6;
-      if (TT > it.until) return done();
-      const [x, y] = randSpot(110); return to(x, y);
+      if (!stay(24, 20)) return done();
+      if (!it.nextSpot || TT > it.nextSpot) { it.nextSpot = TT + 6 + Math.random() * 8; const [x, y] = randSpot(110); return to(x, y); }
+      return;
     }
-    case 'target': if (it.started || !targets().some(t => t.id === it.id)) return done(); it.started = true; return go(it.id);
-    case 'cook': { const next = hopTo('gg'); if (next) return go(next); if (it.started) return done(); it.started = true; return go('stove', { use: autoCook }); }
+    case 'target': if (!it.started) { if (!targets().some(t => t.id === it.id)) return done(); it.started = true; return go(it.id); } return stay(10, 14) ? undefined : done();
+    case 'cook': { const next = hopTo('gg'); if (next) return go(next); if (!it.started) { it.started = true; return go('stove', { use: autoCook }); } return stay(12, 10) ? undefined : done(); }
     case 'sleep': { const next = hopTo('ga'); if (next) return go(next); if (it.started) return done(); it.started = true; return go('bed'); }
-    case 'place': { const next = hopTo('out'); if (next) return go(next); if (it.started) return done(); it.started = true; return to(PLACES[it.key][1], PLACES[it.key][2]); }
-    case 'wander': if (it.started) return done(); it.started = true; { const [x, y] = randSpot(sc === 'out' ? 260 : 120); return to(x, y); }
-    case 'idle': if (!it.until) it.until = TT + 6 + Math.random() * 5; if (TT > it.until) done(); return;
+    case 'place': { const next = hopTo('out'); if (next) return go(next); if (!it.started) { it.started = true; return to(PLACES[it.key][1], PLACES[it.key][2]); } return stay(22, 16) ? undefined : done(); }
+    case 'wander': if (it.started) return stay(8, 8) ? undefined : done(); it.started = true; { const [x, y] = randSpot(sc === 'out' ? 260 : 120); return to(x, y); }
+    case 'idle': if (!stay(25, 25)) done(); return;
     case 'talkto': {
       const k = it.k, p = PEOPLE[k];
       if (sceneOf(k) !== sc) return go(hopTo(p.where));
@@ -1556,6 +1558,7 @@ ESCENAS DE CONVERSACIÓN (cuando te piden una escena)
 
 ANA POR SU CUENTA (cuando te piden qué hace Ana mientras la jugadora no la controla, o qué hace tras lo que la jugadora le hizo decir)
 - Te dan opciones numeradas: elige la que Ana desearía hacer ahora (su carácter, la hora, la estación, lo que lleva, sus ganas de ver a los demás o de quedarse soñando, el sueño, lo que acaba de hacer: no repitas) y, en "pensamiento", escribe lo que Ana diría en voz alta al decidirlo (una o dos frases, con su voz).
+- Ana no tiene prisa: disfruta cada cosa con calma, paseando, mirando, respirando; casi una meditación. Cada cosa que hace por su cuenta le toma un buen rato.
 - Si la jugadora le hizo decir algo que indica qué hace o adónde va, elige la opción que corresponde; si ninguna corresponde, 0.
 
 PLANIFICAR (cuando te piden el plan del día)
@@ -1969,6 +1972,7 @@ function update(dt){
     if (stick) { const dx = stick.x - stick.x0, dy = stick.y - stick.y0, l = Math.hypot(dx, dy); if (l > 10) { mx = dx / Math.max(l, 50); my = dy / Math.max(l, 50); } }
   }
   autoTick();
+  ana.savoring = false;
   // walking to something she was sent to (a tap): by the A* path, and doing it on arrival
   const gt = ana.goto;
   if (gt && (game.talk || game.cooking || game.map || mx || my || game.scene !== gt.scene)) ana.goto = null;
@@ -1976,16 +1980,21 @@ function update(dt){
     const t = gt.id ? targets().find(q => q.id === gt.id) : null;
     if (gt.id && !t) ana.goto = null;
     else if (gt.auto && amb.cur) { /* a talk is going on: she waits */ }
+    else if (gt.stroll && TT < (ana.savor?.until || 0)) { ana.savoring = true; }   // (stopped for a moment, to look around)
     else if (t && dist(ana.x, ana.y, t.x, t.y) < t.reach * .85) { ana.goto = null; (gt.use || t.act)(); }
     else { const n = navStep(ana, t ? t.x : gt.x, t ? t.y : gt.y); if (n.arrived) { ana.goto = null; if (t && dist(ana.x, ana.y, t.x, t.y) < t.reach) (gt.use || t.act)(); } else { const dx = n.wx - ana.x, dy = n.wy - ana.y, d = Math.hypot(dx, dy) || 1; mx = dx / d; my = dy / d; } }
   }
+  // how fast: a walk (Shift to hurry), or a stroll when she is out on her own: every so often she stops to look about
+  ana.pace = ana.goto?.stroll ? STROLL : (keys.has('ShiftLeft') || keys.has('ShiftRight')) ? RUN : WALK;
+  if (ana.goto?.stroll) { const sv = ana.savor = ana.savor || { next: TT + 5 + Math.random() * 6, until: 0 }; if (!ana.savoring && TT > sv.next && TT >= sv.until) { sv.until = TT + 2.5 + Math.random() * 3.5; sv.next = sv.until + 6 + Math.random() * 8; } }
   const l = Math.hypot(mx, my); if (l > 1) { mx /= l; my /= l; }
   ana.moving = l > .05;
-  if (ana.moving) { ana.sit = false; ana.vx = lerp(ana.vx, mx * SPEED, .25); ana.vy = lerp(ana.vy, my * SPEED, .25); ana.dir = Math.abs(mx) > Math.abs(my) * .9 ? (mx > 0 ? 1 : 3) : (my > 0 ? 2 : 0); ana.idle = 0; ana.lookAround = 0; }
+  if (ana.moving) { ana.sit = false; ana.vx = lerp(ana.vx, mx * ana.pace, .25); ana.vy = lerp(ana.vy, my * ana.pace, .25); ana.dir = Math.abs(mx) > Math.abs(my) * .9 ? (mx > 0 ? 1 : 3) : (my > 0 ? 2 : 0); ana.idle = 0; ana.lookAround = 0; }
   else { ana.vx *= .7; ana.vy *= .7; ana.idle += dt; }
   if (!ana.sit) moveBy(ana, ana.vx * dt, ana.vy * dt);
   ana.walk = ana.moving ? (ana.walk + dt * 1.9 * Math.hypot(ana.vx, ana.vy) / SPEED) % 1 : 0;
   if (ana.idle > 3 && ana.idle < 9 && !ana.sit && !game.talk) { ana.dir = 2; ana.lookAround = Math.sin(ana.idle * 1.4) * 1.4; }
+  if (ana.savoring) ana.lookAround = Math.sin(TT * 1.4) * 1.4;
   if (ana.idle > 9 && game.scene === 'out' && !game.talk) ana.sit = true;
   for (const p of [ana, ...Object.values(PEOPLE)]) { p.blink -= dt; if (p.blink < -2.5 - Math.random() * 3) p.blink = .14; }
   // cooking: a moment at the stove, then it is ready
@@ -2019,7 +2028,7 @@ function update(dt){
   if (diana.sit && !ana.sit) diana.sit = false;
   const dianaIn = () => { diana.where = 'os'; diana.goals = DIANA_IN; diana.x = DIANA_IN[0][0]; diana.y = DIANA_IN[0][1]; diana.homeT = 0; diana.moving = false; };
   if (diana.follow) {
-    if (diana.where === game.scene && !diana.sit) { const tx = ana.x + (ana.dir === 1 ? -24 : 24), ty = ana.y - 6; if (dist(diana.x, diana.y, tx, ty) > 18) walkPath(diana, tx, ty, SPEED * (dist(diana.x, diana.y, tx, ty) > 80 ? 1.4 : 1), dt); else { diana.moving = false; diana.dir = ana.dir; } }
+    if (diana.where === game.scene && !diana.sit) { const tx = ana.x + (ana.dir === 1 ? -24 : 24), ty = ana.y - 6; if (dist(diana.x, diana.y, tx, ty) > 18) walkPath(diana, tx, ty, Math.max(34, ana.pace) * (dist(diana.x, diana.y, tx, ty) > 80 ? 1.5 : 1), dt); else { diana.moving = false; diana.dir = ana.dir; } }
     if (night > .6 && game.scene === 'out' && !game.talk) { diana.follow = false; float('Diana se fue a casa', diana.x, diana.y - 60); }
   } else if (diana.where === 'out') {
     diana.goals = DIANA_OUT;
@@ -2038,7 +2047,7 @@ function update(dt){
   const tx = ana.x + (ana.dir === 3 ? 26 : -26), ty = ana.y + 14, dx = tx - toby.x, dy = ty - toby.y, dd = Math.hypot(dx, dy);
   toby.petted -= dt;
   toby.moving = dd > 14 && toby.sniff <= 0 && toby.petted <= 0;
-  if (toby.moving) { const sp = Math.min(SPEED * (dd > 90 ? 1.5 : 1.05), dd * 3); moveBy(toby, dx / dd * sp * dt, dy / dd * sp * dt); toby.dir = dx > 0 ? 1 : 3; toby.walk = (toby.walk + dt * 2.6) % 1; toby.sitT = 0; }
+  if (toby.moving) { const sp = Math.min(Math.max(34, ana.pace) * (dd > 90 ? 1.7 : 1.15), dd * 3); moveBy(toby, dx / dd * sp * dt, dy / dd * sp * dt); toby.dir = dx > 0 ? 1 : 3; toby.walk = (toby.walk + dt * 2.6) % 1; toby.sitT = 0; }
   else { toby.sitT += dt; toby.walk = 0; }
   toby.sniff -= dt; if (!ana.moving && toby.sitT > .5 && toby.sitT < 1 && Math.random() < dt * .4) toby.sniff = 1.4;
   // the garden grows (a watered bed comes up a stage after a while); berries and apples come back
@@ -2260,7 +2269,7 @@ function drawMap(){
   $('maptitle').textContent = 'Avonlea · ' + SEASONS[S] + ', día ' + (Math.floor(dayT) % 2 + 1) + ' · ' + SICON[S];
 }
 function loop(now){ const dt = clamp((now - last) / 1000, 0, .05); last = now; update(dt); render(); requestAnimationFrame(loop); }
-window.__avonlea = { idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+window.__avonlea = { paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
 requestAnimationFrame(loop);
 })();
 </script>
