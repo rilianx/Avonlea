@@ -110,3 +110,7 @@ La IA solo puede hacer lo que el juego permite. Cada encargo, regalo y paso del 
 Inspirado en *Ana de las Tejas Verdes* de L. M. Montgomery (1908), de dominio público. Los dibujos y el código son propios del juego.
 
 Empezó como un prototipo dentro de [boulder-duo](https://github.com/rilianx/boulder-duo).
+
+## Para quien quiera agregar personajes o casas
+
+Todo lo que define a un personaje está en una sola ficha de `CHARACTERS` (nombre, aspecto, voz para la IA, frases, habilidades, dónde vive y, si visita a otros, su rutina); las casas están en `HOUSES` (exterior, camino y su interior). De esas fichas se derivan los nombres, el prompt de la IA, el mapa, las rutinas y el «Hablar con…». Al cargar la página, la consola avisa si a una ficha le falta algo. Diana, la compañera de Ana, es la única con movimientos escritos aparte (en `update()`).

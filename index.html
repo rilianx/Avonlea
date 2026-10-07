@@ -137,22 +137,42 @@ const paper = document.createElement('canvas'); paper.width = paper.height = 256
   p.strokeStyle = 'rgba(120,90,60,.06)'; for (let n = 0; n < 60; n++) { p.beginPath(); const x = r() * 256, y = r() * 256; p.moveTo(x, y); p.quadraticCurveTo(x + r() * 20 - 10, y + r() * 20 - 10, x + r() * 30 - 15, y + r() * 30 - 15); p.stroke(); } })();
 
 /* ---------- Avonlea ---------- */
-const GG = { x: 20 * T, y: 15 * T, w: 7 * T, name: 'Tejas Verdes' };          // the front's middle, at the ground
-const OS = { x: 54 * T, y: 15 * T, w: 6 * T, name: 'La Cuesta del Huerto' };
+const GG = { x: 20 * T, y: 15 * T, w: 7 * T };          // the front's middle, at the ground
+const OS = { x: 54 * T, y: 15 * T, w: 6 * T };
 const BARN = { x: 9 * T, y: 13 * T, w: 5 * T };
 const LAKE = { x: 37 * T, y: 40 * T, rx: 9.5 * T, ry: 4.6 * T };
 const brook = [[41 * T, -20], [41.6 * T, 8 * T], [40.4 * T, 16 * T], [41.4 * T, 24 * T], [40.2 * T, 31 * T], [38.5 * T, LAKE.y - LAKE.ry + 20]];
 const BRIDGE = { x: 40.6 * T, y: 19.5 * T };
-const LY = { x: 28 * T, y: 27 * T, w: 6 * T, name: 'La Hondonada de Lynde' };
+const LY = { x: 28 * T, y: 27 * T, w: 6 * T };
 const PUMP = { x: GG.x + GG.w / 2 + 34, y: GG.y + 56 };
 const BENCH = { x: LAKE.x - 50, y: LAKE.y - LAKE.ry - 30 };
 const STOVE_SPOT = 'stove';
+// the houses: where they stand and how they look from outside, how one comes and goes (door and road to the junction
+// J of the main road), and what they are called. Each gets its interior below (HOUSES[id].interior).
+// To add a house: an entry here, its interior with the others, and it shows up in the world, the map and the prompt.
+const J = [BRIDGE.x - 220, BRIDGE.y + 6];
+const HOUSES = {
+  gg: { at: GG, name: 'Tejas Verdes', depth: 110, roof: '#5f9a58', wall: '#f7f2e6', trim: '#4f7d47', small: false, sign: [-70, 96],
+    enter: 'Entrar a casa', inText: 'en la cocina de Tejas Verdes', arrive: ' entró a la cocina de Tejas Verdes.', place: ['tejas_verdes', 'Tejas Verdes', -60, 76],
+    road: [[GG.x, GG.y + 40], [GG.x + 6, GG.y + 80], [GG.x + 120, BRIDGE.y + 4], J],
+    describe: "Tejas Verdes (la granja de los Cuthbert, casa blanca de tejados verdes, con su cocina, su huerta de seis canteros con rosas, girasoles y lilas, la bomba de agua y el granero)" },
+  os: { at: OS, name: 'La Cuesta del Huerto', depth: 100, roof: '#9a5a3c', wall: '#efe0c8', trim: '#7a4a32', small: true, sign: [-90, 70],
+    enter: 'Entrar a La Cuesta del Huerto', inText: 'en la salita de La Cuesta del Huerto', arrive: ' llegó a La Cuesta del Huerto.', place: ['cuesta_del_huerto', 'La Cuesta del Huerto', -50, 64],
+    road: [[OS.x - 8, OS.y + 44], [OS.x - 30, OS.y + 90], [BRIDGE.x + 140, BRIDGE.y - 6], [BRIDGE.x, BRIDGE.y], [BRIDGE.x - 120, BRIDGE.y + 6], J],
+    describe: "La Cuesta del Huerto (la casa de los Barry, con su salita, su chimenea y su huerto de manzanos)" },
+  rl: { at: LY, name: 'La Hondonada de Lynde', depth: 100, roof: '#6a7f96', wall: '#f1ead8', trim: '#4f647a', small: true, sign: [-96, 60], mapLabel: ['Hondonada de Lynde', 38],
+    enter: 'Entrar a la casa de la Sra. Lynde', inText: 'en la casa de la Sra. Lynde', arrive: ' volvió a su casa.', place: ['hondonada_lynde', 'la casa de la Sra. Lynde', 20, 56],
+    path: [[BRIDGE.x - 260, BRIDGE.y + 160], [LY.x + 94, LY.y + 26], [LY.x + 24, LY.y + 42], [LY.x, LY.y + 8]],
+    road: [[LY.x + 24, LY.y + 42], [LY.x + 94, LY.y + 26], [BRIDGE.x - 260, BRIDGE.y + 160], J],
+    describe: "la Hondonada de Lynde (la casa de la Sra. Rachel Lynde, junto al arroyo y al camino, con la ventana desde donde ve pasar a todo el mundo)" },
+};
+const HOUSE_SPOTS = Object.values(HOUSES).map(h => h.at);
 const paths = [
   [[GG.x, GG.y + 6], [GG.x + 6, GG.y + 80], [GG.x + 120, BRIDGE.y + 4], [BRIDGE.x - 120, BRIDGE.y + 6], [BRIDGE.x, BRIDGE.y], [BRIDGE.x + 140, BRIDGE.y - 6], [OS.x - 30, OS.y + 90], [OS.x, OS.y + 6]],
   [[BRIDGE.x - 220, BRIDGE.y + 6], [BRIDGE.x - 260, BRIDGE.y + 160], [LAKE.x - 100, LAKE.y - LAKE.ry - 40]],
   [[GG.x - 60, GG.y + 70], [BARN.x + 20, BARN.y + 30]],
-  [[BRIDGE.x - 260, BRIDGE.y + 160], [LY.x + 94, LY.y + 26], [LY.x + 24, LY.y + 42], [LY.x, LY.y + 8]],
 ];
+for (const h of Object.values(HOUSES)) if (h.path) paths.push(h.path);
 const segs = []; paths.forEach(p => { for (let i = 0; i + 1 < p.length; i++) segs.push([p[i], p[i + 1]]); });
 const segDist = (x, y, a, b) => { const dx = b[0] - a[0], dy = b[1] - a[1], t = clamp(((x - a[0]) * dx + (y - a[1]) * dy) / (dx * dx + dy * dy), 0, 1); return Math.hypot(x - a[0] - dx * t, y - a[1] - dy * t); };
 const nearPath = (x, y, w) => segs.some(([a, b]) => segDist(x, y, a, b) < w);
@@ -160,7 +180,7 @@ const brookSegs = []; for (let i = 0; i + 1 < brook.length; i++) brookSegs.push(
 const inBrook = (x, y, m = 0) => brookSegs.some(([a, b]) => segDist(x, y, a, b) < 14 + m) && !(Math.abs(x - BRIDGE.x) < 40 && Math.abs(y - BRIDGE.y) < 22 + m * 0);
 const inLake = (x, y, m = 0) => ((x - LAKE.x) / (LAKE.rx + m)) ** 2 + ((y - LAKE.y) / (LAKE.ry + m)) ** 2 < 1;
 const inBox = (b, d, x, y, m) => x > b.x - b.w / 2 - m && x < b.x + b.w / 2 + m && y > b.y - d - m && y < b.y + m;
-const inHouses = (x, y, m = 0) => inBox(GG, 110, x, y, m) || inBox(OS, 100, x, y, m) || inBox(LY, 100, x, y, m) || inBox(BARN, 96, x, y, m);
+const inHouses = (x, y, m = 0) => Object.values(HOUSES).some(h => inBox(h.at, h.depth, x, y, m)) || inBox(BARN, 96, x, y, m);
 // the kitchen garden: six beds by Green Gables; each grows when watered (seed, sprout, leaves, flowers)
 const BEDS = []; for (let r = 0; r < 2; r++) for (let k = 0; k < 3; k++) BEDS.push({ x: GG.x + GG.w / 2 + 80 + k * 46, y: GG.y + 20 + r * 44, stage: 1, wet: 0, grow: 0, kind: (r * 3 + k) % 3 });
 const FLOWER_KINDS = [['#f08aa0', 'rosas'], ['#f2c94c', 'girasoles'], ['#a58ad8', 'lilas']];
@@ -184,26 +204,21 @@ for (let n = 0; n < 900 && bushes.length < 22; n++) { const x = R() * WW, y = R(
 // a few near home, so berries are close at hand
 for (const [dx, dy] of [[-190, 150], [-250, 90], [260, 170]]) bushes.push({ kind: 'bush', x: GG.x + dx, y: GG.y + dy, s: 1, ph: R() * TAU, berries: 3, regrow: 0 });
 const props = [
-  { kind: 'house', h: GG, roof: '#5f9a58', wall: '#f7f2e6', trim: '#4f7d47', y: GG.y, x: GG.x },
-  { kind: 'house', h: OS, roof: '#9a5a3c', wall: '#efe0c8', trim: '#7a4a32', y: OS.y, x: OS.x, small: true },
-  { kind: 'house', h: LY, roof: '#6a7f96', wall: '#f1ead8', trim: '#4f647a', y: LY.y, x: LY.x, small: true },
   { kind: 'barn', x: BARN.x, y: BARN.y },
   { kind: 'pump', x: PUMP.x, y: PUMP.y },
   { kind: 'bench', x: BENCH.x, y: BENCH.y },
   { kind: 'bridge', x: BRIDGE.x, y: BRIDGE.y + 14 },
-  { kind: 'sign', x: GG.x - 70, y: GG.y + 96, text: 'Tejas Verdes' },
-  { kind: 'sign', x: OS.x - 90, y: OS.y + 70, text: 'La Cuesta del Huerto' },
-  { kind: 'sign', x: LY.x - 96, y: LY.y + 60, text: 'La Hondonada de Lynde' },
   { kind: 'sign', x: LAKE.x - 160, y: LAKE.y - LAKE.ry - 34, text: 'Lago de las Aguas Brillantes' },
   { kind: 'sign', x: GG.x + 260, y: BRIDGE.y + 30, text: 'Camino Blanco de las Delicias' },
   { kind: 'sign', x: 15 * T, y: 30 * T, text: 'Bosque Encantado' },
 ];
+for (const [k, h] of Object.entries(HOUSES)) props.push({ kind: 'house', h: h.at, roof: h.roof, wall: h.wall, trim: h.trim, x: h.at.x, y: h.at.y, small: h.small }, { kind: 'sign', x: h.at.x + h.sign[0], y: h.at.y + h.sign[1], text: h.name });
 for (let x = GG.x - GG.w / 2 - 40; x < GG.x + GG.w / 2 + 230; x += 24) if (Math.abs(x - GG.x) > 40 && !(x > PUMP.x - 20 && x < PUMP.x + 20)) props.push({ kind: 'post', x, y: GG.y + 120 });
 const tufts = [], flowers = [], reeds = [], pads = [];
 for (let n = 0; n < 3200; n++) { const x = R() * WW, y = R() * WH; if (!inLake(x, y, 10) && !inHouses(x, y, 4) && !nearPath(x, y, 16) && !inBrook(x, y, 6) && !inBeds(x, y)) tufts.push({ x, y, h: 5 + R() * 7, ph: R() * TAU, c: R() }); }
 const FCOLS = ['#fffaf2', '#ffd7e8', '#f7e27a', '#c9a7f2', '#ff9f8a', '#a8d8ff'];
 for (let n = 0; n < 850; n++) { const x = R() * WW, y = R() * WH; if (!inLake(x, y, 14) && !inHouses(x, y, 6) && !nearPath(x, y, 18) && !inBrook(x, y, 8) && !inBeds(x, y)) flowers.push({ x, y, c: FCOLS[Math.floor(R() * FCOLS.length)], ph: R() * TAU, s: .8 + R() * .6 }); }
-for (const H of [GG, OS, LY]) for (let n = 0; n < 50; n++) { const x = H.x - H.w / 2 + R() * H.w, y = H.y + 10 + R() * 34; if (Math.abs(x - H.x) > 26) flowers.push({ x, y, c: ['#ff9f8a', '#ffd7e8', '#f7e27a', '#fffaf2'][n % 4], ph: R() * TAU, s: 1.1 }); }
+for (const H of HOUSE_SPOTS) for (let n = 0; n < 50; n++) { const x = H.x - H.w / 2 + R() * H.w, y = H.y + 10 + R() * 34; if (Math.abs(x - H.x) > 26) flowers.push({ x, y, c: ['#ff9f8a', '#ffd7e8', '#f7e27a', '#fffaf2'][n % 4], ph: R() * TAU, s: 1.1 }); }
 for (let n = 0; n < 70; n++) { const a = R() * TAU, k = .96 + R() * .1; reeds.push({ x: LAKE.x + Math.cos(a) * LAKE.rx * k, y: LAKE.y + Math.sin(a) * LAKE.ry * k, h: 14 + R() * 12, ph: R() * TAU }); }
 for (let n = 0; n < 12; n++) { const a = R() * TAU, k = R() * .75; pads.push({ x: LAKE.x + Math.cos(a) * LAKE.rx * k, y: LAKE.y + Math.sin(a) * LAKE.ry * k, r: 7 + R() * 6, a: R() * TAU, bloom: R() < .4 }); }
 
@@ -245,7 +260,7 @@ function paintGround(s){
   c.save(); c.translate(LAKE.x, LAKE.y); c.scale(1, LAKE.ry / LAKE.rx);
   const bank = c.createRadialGradient(0, 0, LAKE.rx * .7, 0, 0, LAKE.rx * 1.14); bank.addColorStop(0, `rgba(${P.bank},0)`); bank.addColorStop(.88, `rgba(${P.bank},.5)`); bank.addColorStop(1, `rgba(${P.bank},0)`);
   c.fillStyle = bank; c.beginPath(); c.arc(0, 0, LAKE.rx * 1.14, 0, TAU); c.fill(); c.restore();
-  for (const H of [GG, OS, LY]) { c.fillStyle = s === 3 ? 'rgba(150,140,130,.22)' : 'rgba(130,95,55,.3)'; c.beginPath(); c.ellipse(H.x, H.y + 30, H.w / 2 + 6, 26, 0, 0, TAU); c.fill(); }
+  for (const H of HOUSE_SPOTS) { c.fillStyle = s === 3 ? 'rgba(150,140,130,.22)' : 'rgba(130,95,55,.3)'; c.beginPath(); c.ellipse(H.x, H.y + 30, H.w / 2 + 6, 26, 0, 0, TAU); c.fill(); }
   // the garden beds' earth (under snow in winter)
   for (const b of BEDS) { c.fillStyle = P.bed; c.beginPath(); c.ellipse(b.x, b.y, 21, 14, 0, 0, TAU); c.fill(); c.strokeStyle = 'rgba(60,40,25,.5)'; c.lineWidth = 1; c.stroke(); c.strokeStyle = s === 3 ? 'rgba(140,130,125,.4)' : 'rgba(60,40,25,.3)'; for (let k = -2; k <= 2; k++) { c.beginPath(); c.moveTo(b.x - 15, b.y + k * 5); c.lineTo(b.x + 15, b.y + k * 5); c.stroke(); } }
 }
@@ -622,6 +637,33 @@ function drawRLQuilt(c){
   for (let k = 0; k < 8; k++) for (let q = 0; q < 3; q++) { c.fillStyle = cols[(k * 3 + q * 5) % cols.length]; c.globalAlpha = .75; c.fillRect(x - 46 + k * 11.5, y - 42 + q * 6.4, 9.5, 5.4); } c.globalAlpha = 1;
 }
 
+/* ---------- the interiors of the houses (see HOUSES, above) ----------
+   draw: the room; items: what stands in it, to be drawn in order of their feet; blocked: where one cannot walk;
+   glow: the lamplight at night; place: how the prompt says where Ana is; actions: what she can do there. */
+HOUSES.gg.interior = {
+  draw: drawKitchen, items: g => [{ y: TABLE.y, draw: () => drawTable(g) }],
+  blocked: (x, y) => (Math.abs(x - STOVE.x) < 36 && y < STOVE.y + 6) || (Math.abs(x - TABLE.x) < 60 && y > TABLE.y - 26 && y < TABLE.y + 6),
+  glow: () => [TABLE.x, TABLE.y - 40, 160, '255,190,110', .4], place: 'en la cocina de Tejas Verdes',
+  actions: (out, here, P) => {
+    if (here(STOVE.x, STOVE.y + 10, 44)) out.push({ d: dist(P.x, P.y, STOVE.x, STOVE.y + 10), label: 'Cocinar', act: cookMenu });
+    if (game.table && here(TABLE.x, TABLE.y, 64)) out.push({ d: dist(P.x, P.y, TABLE.x, TABLE.y) + 2, label: 'Tomar ' + ITEM_NAME[game.table][0] + ' que dejó ' + NAMES[COOK], act: () => { const k = game.table; game.inv[k]++; game.table = null; float('+' + itemText(k), TABLE.x, TABLE.y - 50); logEv(`Ana tomó ${ITEM_NAME[k][0]} que ${NAMES[COOK]} le dejó en la mesa.`, [COOK, ...witnesses()]); sfx.happy(); save(); } });
+  },
+};
+HOUSES.os.interior = {
+  draw: drawParlour, items: g => [{ y: SOFA.y - 20, draw: () => drawSofa(g) }, { y: TEA.y, draw: () => drawTea(g) }],
+  blocked: (x, y) => (Math.abs(x - FIRE.x) < 46 && y < FIRE.y + 6) || (Math.abs(x - SOFA.x) < 62 && y < SOFA.y - 12) || ((x - TEA.x) / 36) ** 2 + ((y - TEA.y + 4) / 12) ** 2 < 1,
+  glow: t => [FIRE.x, FIRE.y - 20, 190, '255,170,90', .45 + .05 * Math.sin(t * 7)], place: 'en la salita de La Cuesta del Huerto, junto a la chimenea',
+  actions: (out, here, P) => {
+    if (here(FIRE.x, FIRE.y + 10, 50)) out.push({ d: dist(P.x, P.y, FIRE.x, FIRE.y + 10) + 6, label: 'Calentarse junto al fuego', act: warmUp });
+    if (here(TEA.x, TEA.y, 50) || here(SOFA.x, SOFA.y, 60)) out.push({ d: Math.min(dist(P.x, P.y, TEA.x, TEA.y), dist(P.x, P.y, SOFA.x, SOFA.y)) + 8, label: ana.sit ? 'Levantarse' : diana.where === 'os' ? 'Tomar el té con Diana' : 'Sentarse en el sofá', act: ana.sit ? () => { ana.sit = false; diana.sit = false; } : teaTime });
+  },
+};
+HOUSES.rl.interior = {
+  draw: drawLynde, items: (g, t) => [{ y: RLC.y, draw: () => drawRLChair(g, t) }, { y: RLQ.y, draw: () => drawRLQuilt(g) }],
+  blocked: (x, y) => dist(x, y, RLC.x, RLC.y) < 14 || (Math.abs(x - RLQ.x) < 58 && y > RLQ.y - 28 && y < RLQ.y + 6),
+  glow: () => [RLQ.x - 60, RLQ.y - 70, 170, '255,190,110', .4], place: 'en la casa de la Sra. Lynde, junto a la ventana desde la que ella ve pasar a todo el mundo',
+};
+
 /* ---------- the game ---------- */
 // scene: 'out' (Avonlea), 'gg' (the kitchen at Green Gables) or 'os' (the parlour at Orchard Slope)
 const game = { scene: 'out', inv: { bayas: 0, manzanas: 0, tarta: 0, compota: 0, te: 0, ramo: 0 }, hasCan: false, water: 0, fond: { toby: 0 }, cooking: null, talk: null, said: {}, saidS: {}, seasonShift: 0, teaDay: -1, map: false, journal: [], mem: {}, know: {}, tasks: [], plans: {}, table: null, giftFor: {}, npcGiftDay: {}, lastDay: null, taskSeq: 0 };
@@ -704,6 +746,32 @@ const COOK = Object.keys(CH).find(k => CH[k].abil.cocinar);
 const PEOPLE = {};
 for (const [k, c] of Object.entries(CH)) PEOPLE[k] = Object.assign(mkPerson(k, ...c.spawn), { goals: c.goals, goal: 0, wait: c.wait, where: c.home, base: c.goals, outGoals: c.goals, house: c.home !== 'out' ? c.home : null }, c.init);
 const { matthew, marilla, diana, barry, lynde } = PEOPLE;
+// a checklist for new entries: anything missing is reported in the console when the page loads
+(function checkRegistry(){
+  const bad = [], need = (ok, msg) => { if (!ok) bad.push(msg); };
+  for (const [k, c] of Object.entries(CH)) {
+    const w = m => k + ': ' + m;
+    for (const f of ['name', 'fullName', 'voice', 'giftReply']) need(typeof c[f] === 'string' && c[f], w('falta ' + f));
+    need(typeof c.article === 'string', w('falta article ("" o "la ")'));
+    need(c.look && c.look.hair && c.look.dress && c.look.skin && c.look.h, w('falta look (hair, dress, skin, h...)'));
+    need(Array.isArray(c.spawn) && c.spawn.length === 2 && Array.isArray(c.goals) && c.goals.length && c.wait >= 0, w('falta spawn, goals o wait'));
+    need(c.home === 'out' || HOUSES[c.home], w('home debe ser "out" o una casa de HOUSES'));
+    need(c.abil && ['ir', 'visitar', 'regalar', 'regar', 'cocinar', 'acompanar'].every(f => f in c.abil), w('abil necesita ir, visitar, regalar, regar, cocinar y acompanar'));
+    need(Array.isArray(c.gossip) && c.gossip.every(g => CH[g]) && Array.isArray(c.kin), w('gossip y kin deben ser listas de personajes'));
+    need(Array.isArray(c.lines) && c.lines.length && Array.isArray(c.seasonLines) && c.seasonLines.length === 4, w('lines (frases) y seasonLines (4: una por estación)'));
+    if (c.routine) {
+      need(typeof c.routine.want === 'function' && c.routine.describe && c.routine.roomGoals, w('routine necesita want(hr, día), describe y roomGoals'));
+      for (const h of Object.keys(c.routine.roomGoals || {})) need(HOUSES[h] && (c.home !== 'out' || c.routine.across?.[h]), w('falta across[' + h + '] (cómo cruza el campo)'));
+    }
+  }
+  for (const [k, h] of Object.entries(HOUSES)) {
+    const w = m => 'casa ' + k + ': ' + m, I = h.interior || {};
+    need(h.at && h.name && h.depth && h.roof && h.wall && h.trim && h.sign && h.enter && h.inText && h.arrive && h.place && h.describe, w('faltan datos del exterior'));
+    need(Array.isArray(h.road) && h.road.length, w('falta road (camino hasta el cruce J)'));
+    need(['draw', 'items', 'blocked', 'glow'].every(f => typeof I[f] === 'function') && I.place, w('interior necesita draw, items, blocked, glow y place'));
+  }
+  if (bad.length) console.warn('[avonlea] fichas incompletas:\n' + bad.join('\n'));
+})();
 for (const k of Object.keys(CH)) game.fond[k] = 0;
 const toby = { x: ana.x + 30, y: ana.y + 20, dir: 1, walk: 0, moving: false, sitT: 0, sniff: 0, petted: 0 };
 const SPEED = 84;
@@ -713,9 +781,7 @@ function blockedOut(x, y){
 }
 function blockedIn(x, y){
   if (x < 14 || x > KIT.w - 14 || y < 2.4 * T + 8 || (y > KIT.h - 4 && Math.abs(x - KDOOR.x) > 16)) return true;
-  if (game.scene === 'rl') return dist(x, y, RLC.x, RLC.y) < 14 || (Math.abs(x - RLQ.x) < 58 && y > RLQ.y - 28 && y < RLQ.y + 6);
-  if (game.scene === 'os') return (Math.abs(x - FIRE.x) < 46 && y < FIRE.y + 6) || (Math.abs(x - SOFA.x) < 62 && y < SOFA.y - 12) || ((x - TEA.x) / 36) ** 2 + ((y - TEA.y + 4) / 12) ** 2 < 1;
-  return (Math.abs(x - STOVE.x) < 36 && y < STOVE.y + 6) || (Math.abs(x - TABLE.x) < 60 && y > TABLE.y - 26 && y < TABLE.y + 6);
+  return HOUSES[game.scene].interior.blocked(x, y);
 }
 const blocked = (x, y) => game.scene === 'out' ? blockedOut(x, y) : blockedIn(x, y);
 function moveBy(o, dx, dy){ if (!blocked(o.x + dx, o.y)) o.x += dx; if (!blocked(o.x, o.y + dy)) o.y += dy; }
@@ -748,18 +814,10 @@ function near(){
       else if (game.hasCan && game.water > 0 && !b.wet) out.push({ d: dist(P.x, P.y, b.x, b.y), label: 'Regar', act: () => { b.wet = 1; b.grow = 0; game.water--; logEv('Ana regó la huerta.'); taskEvent('regar'); drops(b.x, b.y); sfx.water(); save(); } });
       else if (game.hasCan && game.water <= 0 && !b.wet) out.push({ d: dist(P.x, P.y, b.x, b.y) + 50, label: 'La regadera está vacía (llénala en la bomba)', act: () => {} });
     }
-    if (here(GG.x, GG.y + 6, 26)) out.push({ d: dist(P.x, P.y, GG.x, GG.y + 6) + 4, label: 'Entrar a casa', act: () => goIn('gg') });
-    if (here(LY.x, LY.y + 6, 26)) out.push({ d: dist(P.x, P.y, LY.x, LY.y + 6) + 4, label: 'Entrar a la casa de la Sra. Lynde', act: () => goIn('rl') });
-    if (here(OS.x, OS.y + 6, 26)) out.push({ d: dist(P.x, P.y, OS.x, OS.y + 6) + 4, label: 'Entrar a ' + OS.name, act: () => goIn('os') });
+    for (const [id, h] of Object.entries(HOUSES)) if (here(h.at.x, h.at.y + 6, 26)) out.push({ d: dist(P.x, P.y, h.at.x, h.at.y + 6) + 4, label: h.enter, act: () => goIn(id) });
     if (here(BENCH.x, BENCH.y + 6, 26)) out.push({ d: dist(P.x, P.y, BENCH.x, BENCH.y + 6) + 4, label: ana.sit ? 'Levantarse' : 'Sentarse a mirar el lago', act: () => { ana.sit = !ana.sit; if (ana.sit) { logEv('Ana se sentó a mirar el Lago de las Aguas Brillantes.'); ana.x = BENCH.x; ana.y = BENCH.y - 2; ana.dir = 2; } } });
   } else {
-    if (game.scene === 'gg') {
-      if (here(STOVE.x, STOVE.y + 10, 44)) out.push({ d: dist(P.x, P.y, STOVE.x, STOVE.y + 10), label: 'Cocinar', act: cookMenu });
-      if (game.table && here(TABLE.x, TABLE.y, 64)) out.push({ d: dist(P.x, P.y, TABLE.x, TABLE.y) + 2, label: 'Tomar ' + ITEM_NAME[game.table][0] + ' que dejó ' + NAMES[COOK], act: () => { const k = game.table; game.inv[k]++; game.table = null; float('+' + itemText(k), TABLE.x, TABLE.y - 50); logEv(`Ana tomó ${ITEM_NAME[k][0]} que Marilla le dejó en la mesa.`, ['marilla', ...witnesses()]); sfx.happy(); save(); } });
-    } else if (game.scene === 'os') {
-      if (here(FIRE.x, FIRE.y + 10, 50)) out.push({ d: dist(P.x, P.y, FIRE.x, FIRE.y + 10) + 6, label: 'Calentarse junto al fuego', act: warmUp });
-      if (here(TEA.x, TEA.y, 50) || here(SOFA.x, SOFA.y, 60)) out.push({ d: Math.min(dist(P.x, P.y, TEA.x, TEA.y), dist(P.x, P.y, SOFA.x, SOFA.y)) + 8, label: ana.sit ? 'Levantarse' : diana.where === 'os' ? 'Tomar el té con Diana' : 'Sentarse en el sofá', act: ana.sit ? () => { ana.sit = false; diana.sit = false; } : teaTime });
-    }
+    HOUSES[game.scene].interior.actions?.(out, here, P);
     if (here(KDOOR.x, KIT.h, 26)) out.push({ d: dist(P.x, P.y, KDOOR.x, KIT.h), label: 'Salir', act: () => goOut() });
   }
   out.sort((a, b) => a.d - b.d);
@@ -768,7 +826,7 @@ function near(){
 function pet(){ logEv('Ana acarició a Toby.'); ana.pet = true; ana.crouch = true; toby.petted = 2.2; toby.dir = toby.x < ana.x ? 1 : 3; ana.dir = toby.x > ana.x ? 1 : 3; game.fond.toby++; hearts(toby.x, toby.y - 24); sfx.happy(); save(); setTimeout(() => { ana.pet = false; ana.crouch = false; }, 1600); }
 function goIn(room){ game.scene = room; ana.x = KDOOR.x; ana.y = KIT.h - 14; ana.dir = 0; ana.sit = false; toby.x = ana.x + 26; toby.y = ana.y; if (diana.follow) { diana.where = room; diana.sit = false; diana.x = ana.x - 26; diana.y = ana.y; } cam.x = KIT.w / 2; cam.y = KIT.h / 2; }
 function goOut(){
-  const H = { gg: GG, os: OS, rl: LY }[game.scene];
+  const H = HOUSES[game.scene].at;
   game.scene = 'out'; ana.x = H.x; ana.y = H.y + 24; ana.dir = 2; ana.sit = false; toby.x = ana.x + 24; toby.y = ana.y + 10;
   if (diana.follow) { diana.where = 'out'; diana.sit = false; diana.goals = DIANA_OUT; diana.x = ana.x - 24; diana.y = ana.y + 10; }
   cam.x = ana.x; cam.y = ana.y;
@@ -845,9 +903,9 @@ const itemText = (k, n = 1) => n + ' ' + ITEM_NAME[k][n > 1 ? 1 : 0];
 const inSeason = k => ({ bayas: S === 1 || S === 2, manzanas: S === 1 || S === 2, tarta: S === 1 || S === 2 || game.inv.bayas >= 3 || game.inv.tarta > 0, compota: S === 1 || S === 2 || game.inv.manzanas >= 3 || game.inv.compota > 0, te: true, ramo: S !== 3 || game.inv.ramo > 0 })[k];
 // the places the characters (and Ana's errands) can go to; each a spot one can walk to
 const PLACES = {
-  tejas_verdes: ['Tejas Verdes', GG.x - 60, GG.y + 76], cuesta_del_huerto: ['La Cuesta del Huerto', OS.x - 50, OS.y + 64], huerta: ['la huerta de Tejas Verdes', BEDS[4].x, BEDS[4].y + 34],
+  ...Object.fromEntries(Object.values(HOUSES).map(h => [h.place[0], [h.place[1], h.at.x + h.place[2], h.at.y + h.place[3]]])),
+  huerta: ['la huerta de Tejas Verdes', BEDS[4].x, BEDS[4].y + 34],
   granero: ['el granero', BARN.x + 60, BARN.y + 50], puente: ['el puente del arroyo', BRIDGE.x - 80, BRIDGE.y + 8], camino_blanco: ['el Camino Blanco de las Delicias', (GG.x + BRIDGE.x) / 2, BRIDGE.y + 6],
-  hondonada_lynde: ['la casa de la Sra. Lynde', LY.x + 20, LY.y + 56],
   lago: ['el Lago de las Aguas Brillantes', BENCH.x + 40, BENCH.y + 22], bosque_encantado: ['el Bosque Encantado', 15 * T + 30, 30 * T + 24],
 };
 // what each one can do (the game checks every action against this)
@@ -1051,10 +1109,11 @@ function goTarget(p, dt, sp){
 /* ---------- the prompt ---------- */
 const CAST = [['Ana Shirley', ANA.voice], ...Object.values(CH).map(c => [c.fullName, c.voice])].map(([n, v]) => `- ${n}: ${v}`).join('\n');
 const ROUTINES = Object.values(CH).filter(c => c.routine).map(c => c.routine.describe).join(' ');
+const WORLD = (l => l.slice(0, -1).join(', ') + ' y ' + l[l.length - 1])([...Object.values(HOUSES).map(h => h.describe), 'el arroyo con su puente de madera', 'el Camino Blanco de las Delicias (con cerezos)', 'el Lago de las Aguas Brillantes (con una banca)', 'el Bosque Encantado (oscuro, de pinos, que Ana y Diana "encantaron" con su imaginación y ahora les da miedo)']);
 const AI_SYSTEM = `Eres la voz de los personajes de "Un día en Avonlea", un juego tranquilo y sin misiones inspirado en "Ana de las Tejas Verdes" (L. M. Montgomery, 1908). La jugadora es Ana Shirley. Tú das voz y vida al personaje con quien Ana conversa, o planificas su día. Escribe siempre en español, con tuteo entre Ana y su familia y amigas.
 
 EL MUNDO
-Avonlea, en la Isla del Príncipe Eduardo, hacia 1880. Lugares: Tejas Verdes (la granja de los Cuthbert, casa blanca de tejados verdes, con su cocina, su huerta de seis canteros con rosas, girasoles y lilas, la bomba de agua y el granero), La Cuesta del Huerto (la casa de los Barry, con su salita, su chimenea y su huerto de manzanos), el arroyo con su puente de madera, el Camino Blanco de las Delicias (con cerezos), el Lago de las Aguas Brillantes (con una banca) el Bosque Encantado (oscuro, de pinos, que Ana y Diana "encantaron" con su imaginación y ahora les da miedo) y la Hondonada de Lynde (la casa de la Sra. Rachel Lynde, junto al arroyo y al camino, con la ventana desde donde ve pasar a todo el mundo).
+Avonlea, en la Isla del Príncipe Eduardo, hacia 1880. Lugares: ${WORLD}.
 Las estaciones duran dos días: en primavera florecen los manzanos y cerezos; en verano y otoño hay bayas en los arbustos y manzanas en el huerto de los Barry; en otoño las hojas se ponen rojas y doradas; en invierno nieva, el lago se congela y la huerta duerme bajo la nieve.
 
 LO QUE ANA PUEDE HACER EN EL JUEGO
@@ -1096,12 +1155,10 @@ const AI_SCHEMA = { type: 'object', additionalProperties: false, required: ['lin
   accion: { type: 'object', additionalProperties: false, required: ['tipo', 'item', 'cantidad', 'lugar'], properties: { tipo: { type: 'string', enum: ['ninguna', 'regalar', 'acompanar', 'ir'] }, item: S_ITEM, cantidad: { type: 'integer' }, lugar: S_PLACE } } } };
 function whereText(k){
   const w = PEOPLE[k].where;
-  return CH[k].whereText?.[w] ?? (w === 'out' ? 'afuera, por Avonlea' : w === 'gg' ? 'en la cocina de Tejas Verdes' : w === 'os' ? 'en la salita de La Cuesta del Huerto' : 'en la casa de la Sra. Lynde');
+  return CH[k].whereText?.[w] ?? (HOUSES[w]?.inText ?? 'afuera, por Avonlea');
 }
 function placeText(){
-  if (game.scene === 'rl') return 'en la casa de la Sra. Lynde, junto a la ventana desde la que ella ve pasar a todo el mundo';
-  if (game.scene === 'gg') return 'en la cocina de Tejas Verdes';
-  if (game.scene === 'os') return 'en la salita de La Cuesta del Huerto, junto a la chimenea';
+  if (game.scene !== 'out') return HOUSES[game.scene].interior.place;
   let best = null, bd = 1e9; for (const pl of Object.values(PLACES)) { const d = dist(ana.x, ana.y, pl[1], pl[2]); if (d < bd) { bd = d; best = pl[0]; } }
   return (bd > 500 ? 'en el campo, algo lejos de ' : 'cerca de ') + best;
 }
@@ -1441,13 +1498,7 @@ $('mapnext').addEventListener('click', () => { game.seasonShift = (game.seasonSh
 /* ---------- routines: who goes where (Matthew in for meals, Mrs. Lynde's visits) ----------
    Whoever has somewhere to be walks there along the roads (if Ana is outdoors she sees them go in at the door; if she
    is indoors they just turn up at the door of the room). */
-const J = [BRIDGE.x - 220, BRIDGE.y + 6];
-const DOOR = { gg: [GG.x, GG.y + 10], os: [OS.x, OS.y + 10], rl: [LY.x, LY.y + 10] };
-const ROAD = {
-  gg: [[GG.x, GG.y + 40], [GG.x + 6, GG.y + 80], [GG.x + 120, BRIDGE.y + 4], J],
-  os: [[OS.x - 8, OS.y + 44], [OS.x - 30, OS.y + 90], [BRIDGE.x + 140, BRIDGE.y - 6], [BRIDGE.x, BRIDGE.y], [BRIDGE.x - 120, BRIDGE.y + 6], J],
-  rl: [[LY.x + 24, LY.y + 42], [LY.x + 94, LY.y + 26], [BRIDGE.x - 260, BRIDGE.y + 160], J],
-};
+const DOOR = {}, ROAD = {}; for (const [k, h] of Object.entries(HOUSES)) { DOOR[k] = [h.at.x, h.at.y + 10]; ROAD[k] = h.road; }
 function routeTo(p, want){
   let pts;
   if (p.house) { const from = p.from || p.house; pts = from === want ? [DOOR[want]] : [...ROAD[from], ...[...ROAD[want]].reverse().slice(1), DOOR[want]]; }
@@ -1465,7 +1516,7 @@ function commute(p, want, dt, sp){
   const R = p.route; p.routeT += dt;
   if (game.scene === 'out' && p.routeT < 90) { const [tx, ty] = R.pts[R.i]; if (walkTo(p, tx, ty, sp, dt)) R.i++; if (R.i < R.pts.length) return; }
   p.where = want; p.route = null; p.dest = null; p.moving = false; p.x = KDOOR.x; p.y = KIT.h - 14; p.dir = 0; p.goals = CH[p.look].routine.roomGoals[want]; p.goal = 0; p.wait = 2;
-  logEv(NAMES[p.look] + (want === p.house ? ' volvió a su casa.' : want === 'gg' ? ' entró a la cocina de Tejas Verdes.' : ' llegó a La Cuesta del Huerto.'), [p.look]);
+  logEv(NAMES[p.look] + (want === p.house ? ' volvió a su casa.' : HOUSES[want].arrive), [p.look]);
 }
 
 /* ---------- the loop ---------- */
@@ -1579,9 +1630,7 @@ function render(){
   const inView = (x, y, m = 80) => x > ox - m && x < ox + vw + m && y > oy - m && y < oy + vh + m * 2;
   const list = [];
   if (inside) {
-    if (game.scene === 'gg') { drawKitchen(g, t, night); list.push({ y: TABLE.y, draw: () => drawTable(g) }); }
-    else if (game.scene === 'os') { drawParlour(g, t, night); list.push({ y: SOFA.y - 20, draw: () => drawSofa(g) }, { y: TEA.y, draw: () => drawTea(g) }); }
-    else { drawLynde(g, t, night); list.push({ y: RLC.y, draw: () => drawRLChair(g, t) }, { y: RLQ.y, draw: () => drawRLQuilt(g) }); }
+    const I = HOUSES[game.scene].interior; I.draw(g, t, night); list.push(...I.items(g, t));
     for (const k of Object.keys(PEOPLE)) if (sceneOf(k) === game.scene) list.push({ y: PEOPLE[k].y, draw: () => drawPerson(g, PEOPLE[k], t) });
   } else {
     g.drawImage(ground, ox, oy, vw, vh, ox, oy, vw, vh);
@@ -1669,11 +1718,9 @@ function render(){
     g.globalCompositeOperation = 'lighter';
     const sc = (x, y) => [(x - ox) * Z, (y - oy) * Z];
     const glow = (x, y, r, col, a) => { const [sx, sy] = sc(x, y), rr = r * Z, gr = g.createRadialGradient(sx, sy, 0, sx, sy, rr); gr.addColorStop(0, `rgba(${col},${a})`); gr.addColorStop(1, `rgba(${col},0)`); g.fillStyle = gr; g.fillRect(sx - rr, sy - rr, rr * 2, rr * 2); };
-    if (game.scene === 'gg') glow(TABLE.x, TABLE.y - 40, 160, '255,190,110', .4 * night);
-    else if (game.scene === 'rl') glow(RLQ.x - 60, RLQ.y - 70, 170, '255,190,110', .4 * night);
-    else if (inside) glow(FIRE.x, FIRE.y - 20, 190, '255,170,90', (.45 + .05 * Math.sin(t * 7)) * night);
+    if (inside) { const [x, y, r, col, al] = HOUSES[game.scene].interior.glow(t); glow(x, y, r, col, al * night); }
     else {
-      for (const H of [GG, OS, LY]) for (const wx of [-H.w / 2 + 46, H.w / 2 - 46]) glow(H.x + wx, H.y - 30, 90, '255,190,100', .42 * night);
+      for (const H of HOUSE_SPOTS) for (const wx of [-H.w / 2 + 46, H.w / 2 - 46]) glow(H.x + wx, H.y - 30, 90, '255,190,100', .42 * night);
       if (S === 1) for (const f of fireflies) { const fx_ = ox + ((f.x + cam.x - ox) % vw + vw) % vw, fy = oy + ((f.y + cam.y - oy) % vh + vh) % vh, a = Math.max(0, Math.sin(f.ph * 1.7)) * night; if (a > .05) glow(fx_, fy - 14, 7, '230,255,140', a); }
     }
     g.globalCompositeOperation = 'source-over';
@@ -1727,12 +1774,12 @@ function paintMapBase(w, h){
   for (const b of BEDS) ell(c, b.x, b.y, 18, 11, S === 3 ? '#eef2f4' : '#8a6440', true);
   // houses: a front and a roof
   const house = (x, y, w, roof, wall) => { blob(c, [[x - w / 2, y], [x + w / 2, y], [x + w / 2, y - 60], [x - w / 2, y - 60]], wall); blob(c, [[x - w / 2 - 14, y - 56], [x + w / 2 + 14, y - 56], [x + w / 2 - 8, y - 130], [x - w / 2 + 8, y - 130]], S === 3 ? '#f6f8fb' : roof); blob(c, [[x - 12, y], [x - 12, y - 32], [x + 12, y - 32], [x + 12, y]], '#7a4f32'); };
-  house(GG.x, GG.y, GG.w, '#5f9a58', '#f7f2e6'); house(OS.x, OS.y, OS.w, '#9a5a3c', '#efe0c8'); house(LY.x, LY.y, LY.w, '#6a7f96', '#f1ead8'); house(BARN.x, BARN.y, BARN.w, '#6f6a66', '#b5523c');
+  for (const h of Object.values(HOUSES)) house(h.at.x, h.at.y, h.at.w, h.roof, h.wall); house(BARN.x, BARN.y, BARN.w, '#6f6a66', '#b5523c');
   blob(c, [[BRIDGE.x - 44, BRIDGE.y - 16], [BRIDGE.x + 44, BRIDGE.y - 16], [BRIDGE.x + 44, BRIDGE.y + 14], [BRIDGE.x - 44, BRIDGE.y + 14]], '#a8814f');
   // names, in ink
   c.fillStyle = '#4a2f1c'; c.textAlign = 'center';
   const label = (text, x, y, size = 46) => { c.font = `italic ${size}px Georgia, serif`; c.fillStyle = 'rgba(241,226,191,.75)'; const tw = c.measureText(text).width; c.fillRect(x - tw / 2 - 8, y - size * .85, tw + 16, size * 1.1); c.fillStyle = '#4a2f1c'; c.fillText(text, x, y); };
-  label('Tejas Verdes', GG.x, GG.y - 150); label('La Cuesta del Huerto', OS.x, OS.y - 150); label('Granero', BARN.x, BARN.y - 150, 38); label('Hondonada de Lynde', LY.x, LY.y - 150, 38);
+  for (const h of Object.values(HOUSES)) label(h.mapLabel?.[0] ?? h.name, h.at.x, h.at.y - 150, h.mapLabel?.[1]); label('Granero', BARN.x, BARN.y - 150, 38);
   label('Lago de las Aguas Brillantes', LAKE.x, LAKE.y + LAKE.ry + 64); label('Bosque Encantado', 9 * T, 44 * T);
   label('Camino Blanco de las Delicias', GG.x + 360, BRIDGE.y - 96, 38); label('Huerta', BEDS[1].x, BEDS[0].y - 34, 34); label('Arroyo', brook[2][0] + 90, brook[2][1] + 160, 34);
   // a compass rose and a double border
@@ -1750,7 +1797,7 @@ function drawMap(){
   if (!mapBase || mapBase.s !== S || mapBase.w !== w) mapBase = paintMapBase(w, h);
   c.setTransform(1, 0, 0, 1, 0, 0); c.drawImage(mapBase.cv, 0, 0);
   // where everyone is (someone indoors is shown at the door of the house)
-  const at = (where, x, y) => where === 'out' ? [x, y] : where === 'os' ? [OS.x, OS.y + 20] : where === 'rl' ? [LY.x, LY.y + 20] : [GG.x, GG.y + 20];
+  const at = (where, x, y) => where === 'out' ? [x, y] : [HOUSES[where].at.x, HOUSES[where].at.y + 20];
   const mark = (who, [x, y], col, dx, big) => {
     const sx = x * k + dx * dpr, sy = y * k, r = (big ? 6 + Math.sin(TT * 5) * 1.2 : 4.5) * dpr;
     c.beginPath(); c.arc(sx, sy, r, 0, TAU); c.fillStyle = col; c.fill(); c.lineWidth = 1.4 * dpr; c.strokeStyle = 'rgba(60,35,20,.9)'; c.stroke();
@@ -1762,7 +1809,7 @@ function drawMap(){
   $('maptitle').textContent = 'Avonlea · ' + SEASONS[S] + ', día ' + (Math.floor(dayT) % 2 + 1) + ' · ' + SICON[S];
 }
 function loop(now){ const dt = clamp((now - last) / 1000, 0, .05); last = now; update(dt); render(); requestAnimationFrame(loop); }
-window.__avonlea = { reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+window.__avonlea = { HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
 requestAnimationFrame(loop);
 })();
 </script>
