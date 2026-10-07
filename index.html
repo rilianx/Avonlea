@@ -50,6 +50,15 @@ html,body{margin:0;height:100%;background:#2b3a26;overflow:hidden;touch-action:n
 #talk button{font:15px Georgia,serif;background:#fffaf0;color:#3b2a1c;border:1.5px solid #6b4a30;border-radius:8px 11px 7px 10px;padding:6px 11px;cursor:pointer}
 #talk button:focus{outline:2px solid #d9a441}
 #talk.wait .line{color:#9a7a5a;font-style:italic}
+#talk .tbar{height:3px;background:rgba(107,74,48,.15);margin-top:8px;border-radius:2px;overflow:hidden}
+#talk .tbar i{display:block;height:100%;width:100%;background:#a8432c;animation:tbar 10s linear forwards}
+@keyframes tbar{from{width:100%}to{width:0}}
+#aiq{position:fixed;right:64px;top:10px;z-index:30;width:min(460px,calc(100% - 20px));padding:8px 10px;font-size:13px}
+#aiq[hidden]{display:none}
+#aiq .h{font-weight:bold;color:#7a3a22}
+#aiq pre{white-space:pre-wrap;max-height:220px;overflow:auto;font-size:11px;background:rgba(255,255,255,.5);padding:4px}
+#aiq textarea{width:100%;box-sizing:border-box;height:120px;font:11px monospace;margin-top:4px}
+#aiq button{font:13px Georgia,serif;background:#fffaf0;color:#3b2a1c;border:1.5px solid #6b4a30;border-radius:8px 11px 7px 10px;padding:3px 9px;cursor:pointer;margin:3px 3px 0 0}
 @media (max-width:640px){#hint{top:58px !important;max-width:calc(100% - 30px) !important}}
 #hint{position:fixed;left:50%;top:12px;transform:translateX(-50%);padding:5px 12px;font-size:14px;pointer-events:none;transition:opacity 1.5s;text-align:center;max-width:calc(100% - 200px)}
 #mapbtn{position:fixed;right:10px;top:46px;width:42px;height:36px;font-size:20px;line-height:30px;padding:0;cursor:pointer}
@@ -79,6 +88,7 @@ html,body{margin:0;height:100%;background:#2b3a26;overflow:hidden;touch-action:n
 <div id="clock" class="paper"></div>
 <div id="hint" class="paper">Flechas o WASD para pasear (o toca el suelo) · toca una persona u objeto para interactuar · Enter o T para decir algo · M para el mapa</div>
 <div id="talk" class="paper" hidden></div>
+<div id="aiq" class="paper" hidden><div class="h">🐞 La IA eres tú · <span class="n"></span></div><details><summary>Ver el pedido</summary><pre class="p"></pre></details><textarea spellcheck="false"></textarea><div><button class="ok">Responder</button><button class="cp">📋 Copiar todo (para otra IA)</button><button class="no">Que falle</button><button class="all">Que fallen todos los de este tipo</button></div></div>
 <div id="sleep"></div>
 <form id="say" class="paper" hidden autocomplete="off"><input id="sayin" maxlength="240" placeholder="Lo que dice Ana… (Enter para decir · Esc para cerrar)" spellcheck="false"><button type="submit">Decir</button></form>
 <button id="saybtn" class="paper" title="Decir algo (Enter o T)">💬</button>
@@ -93,11 +103,11 @@ html,body{margin:0;height:100%;background:#2b3a26;overflow:hidden;touch-action:n
   <label><input type="checkbox" id="aion"> Usar IA en las conversaciones (recomendado)</label>
   <label><input type="checkbox" id="aiauto"> Ana hace lo suyo sola cuando no la controlo</label>
   <label for="aimodel">Modelo</label>
-  <select id="aimodel"><option value="gpt-5.4-mini">GPT-5.4 mini (OpenAI)</option><option value="claude-opus-5-5">Claude Opus 5.5 (Anthropic)</option><option value="claude-sonnet-5-5">Claude Sonnet 5.5 (Anthropic, más rápido)</option><option value="claude-haiku-4-5">Claude Haiku 4.5 (Anthropic, el más barato)</option></select>
+  <select id="aimodel"><option value="gpt-5.4-mini">GPT-5.4 mini (OpenAI)</option><option value="claude-opus-5-5">Claude Opus 5.5 (Anthropic)</option><option value="claude-sonnet-5-5">Claude Sonnet 5.5 (Anthropic, más rápido)</option><option value="claude-haiku-4-5">Claude Haiku 4.5 (Anthropic, el más barato)</option><option value="manual">🐞 Yo hago de IA (depurar: respondo a mano)</option></select>
   <label for="aikey" id="aikeylab">Tu clave de la API</label>
   <input type="password" id="aikey" autocomplete="off" spellcheck="false">
   <div class="note" id="ainote"></div>
-  <div class="row"><button id="aitest">Probar</button><button id="aimem">Ver recuerdos</button><button id="aiforget">Borrar recuerdos</button><button id="aiclose">Cerrar</button></div>
+  <div class="row"><button id="aitest">Probar</button><button id="aimem">Ver recuerdos</button><button id="aiforget">Borrar recuerdos</button><button id="aireset">Empezar de cero</button><button id="aiclose">Cerrar</button></div>
   <pre id="aiout" hidden></pre>
 </div></div>
 <div id="map" hidden><div class="paper sheet"><div class="mt" id="maptitle"></div><canvas id="mapcv"></canvas><div class="mb"><button id="mapnext">Siguiente estación (prueba)</button><button id="mapclose">Cerrar</button></div></div></div>
@@ -637,6 +647,34 @@ function drawBed(c, b, t){
 /* ---------- the kitchen at Green Gables ---------- */
 const KIT = { w: 13 * T, h: 9 * T };   // the room, its own little world
 const STOVE = { x: 3 * T, y: 3.2 * T }, TABLE = { x: 7 * T, y: 5.2 * T }, KDOOR = { x: 6.5 * T, y: 9 * T - 6 };
+// the places at the table (x, y, facing; and where one walks to before sitting down): Ana and a guest behind it, the Cuthberts at the ends
+const SEATS = { ana: [TABLE.x - 16, TABLE.y - 44, 2], lynde: [TABLE.x + 20, TABLE.y - 44, 2], matthew: [TABLE.x - 54, TABLE.y + 2, 1], marilla: [TABLE.x + 54, TABLE.y + 2, 3] };
+const seatFrom = q => q[1] < TABLE.y ? [q[0], q[1]] : [q[0], q[1] + 16];
+function sitSeat(p, q, dt, sp){
+  if (p.mealSat) { p.moving = false; return; }
+  const snap = () => { p.x = q[0]; p.y = q[1]; p.dir = q[2]; p.sit = true; p.mealSat = true; p.moving = false; p.nav = null; };
+  if (game.scene !== 'gg') return snap();
+  const [ax, ay] = seatFrom(q); if (walkPath(p, ax, ay, sp, dt)) snap();
+}
+function mealSit(){
+  if (ana.meal) { ana.sit = false; ana.meal = null; return; }
+  const q = SEATS.ana; ana.goto = null; ana.lie = false; ana.x = q[0]; ana.y = q[1]; ana.dir = q[2]; ana.sit = true; ana.vx = ana.vy = 0;
+  ana.meal = { next: TT + 2.5, rounds: 0, logged: false };
+}
+// sitting at the table at mealtime, they talk: a little conversation every so often, while she stays
+function mealTick(){
+  const m = ana.meal; if (!m) return;
+  if (!ana.sit || game.scene !== 'gg') { ana.meal = null; return; }
+  if (amb.cur || game.talk || amb.busy || TT < m.next || m.rounds >= 4) return;
+  const hr = hourNow(), parts = Object.keys(PEOPLE).filter(k => sceneOf(k) === 'gg' && PEOPLE[k].mealSat);
+  m.next = TT + 30; if (!parts.length || !MEAL(hr)) return;
+  const w = mealWord(hr); m.rounds++;
+  if (!m.logged) { m.logged = true; logEv(`Ana se sentó a ${w.verb} con ${parts.map(k => NAMES[k]).join(' y ')} (${w.menu}).`, parts); }
+  const note = `Están sentados a la mesa de la cocina de Tejas Verdes, ${w.ing} (${w.menu}). Charla de sobremesa, tranquila${m.rounds > 1 ? ' (siguen conversando; no repitan lo que ya se dijo)' : ''}: cómo va el día, lo que ha pasado, lo que viene, algún chisme del pueblo; Ana habla mucho y con imaginación, Marilla le recuerda que coma, Matthew dice poco pero tierno.`;
+  if (!aiReady()) { const ls = [{ q: 'ana', t: pick(['¡Qué rico huele todo! Comer en esta mesa me hace sentir parte de una familia de verdad.', 'Marilla, ¿no te parece que el pan sabe distinto cuando una está feliz?', 'Hoy imaginé que esta mesa era un banquete en un castillo... pero esto es mucho mejor, porque es de verdad.']) }, ...parts.slice(0, 2).map(k => ({ q: k, t: pick(LINES[k]) }))]; sceneStart({ parts, lines: ls, out: {}, scene: 'gg', resumen: '' }, false); return; }
+  amb.busy = true;
+  sceneAsk(parts, note).then(s => { if (ana.meal === m && !amb.cur && !game.talk && s.lines.length) sceneStart(s, false); }).catch(e => console.debug('[avonlea IA] comida', e.message)).finally(() => { amb.busy = false; });
+}
 function drawKitchen(c, t, night){
   // floor boards, the back wall with a window and shelves, a rag rug
   c.fillStyle = '#c99a63'; c.fillRect(0, 0, KIT.w, KIT.h);
@@ -778,6 +816,7 @@ HOUSES.gg.interior = {
   glow: () => [TABLE.x, TABLE.y - 40, 160, '255,190,110', .4], place: 'en la cocina de Tejas Verdes',
   actions: add => {
     add('stove', STOVE.x, STOVE.y + 10, 44, 'Cocinar', cookMenu, { hy: 30, hit: 44 });
+    add('mesa', TABLE.x, TABLE.y - 30, 76, ana.meal ? 'Levantarse de la mesa' : 'Sentarse a la mesa', mealSit, { pri: 6, hy: 14, hit: 54 });
     if (game.table && !hasIt(game.table)) add('table', TABLE.x, TABLE.y, 64, 'Tomar ' + ITEM_NAME[game.table][0] + ' que dejó ' + NAMES[COOK], () => { const k = game.table; game.inv[k]++; game.table = null; float('+' + itemText(k), TABLE.x, TABLE.y - 50); logEv(`Ana tomó ${ITEM_NAME[k][0]} que ${NAMES[COOK]} le dejó en la mesa.`, [COOK, ...witnesses()]); sfx.happy(); save(); }, { pri: 2, hy: 26, hit: 52 });
   },
 };
@@ -976,6 +1015,7 @@ const ana = mkPerson('ana', GG.x - 6, GG.y + 70); ana.pace = 60;
 const ANA = { look: { hair: '#c0582e', hairD: '#8f3b1d', style: 'braids', dress: '#5c8c63', dressD: '#436b4a', collar: '#fbf6ea', hat: true, freckles: true, skin: '#f6d6bb', h: 1, scarf: '#d9433b' }, voice: "once años, huérfana, la adoptaron los Cuthbert. Pelirroja (detesta su pelo), pecosa, de imaginación desbordante, habla mucho y con palabras grandiosas (\"alma gemela\", \"espíritu afín\", \"hay tanto lugar para la imaginación\"), dramática, se mete en líos sin querer y es muy cariñosa." };
 const DIANA_OUT = [[OS.x - 50, OS.y + 60], [OS.x + 80, OS.y + 140], [OS.x - 130, OS.y + 180], [OS.x + 20, OS.y + 70]], DIANA_IN = [[5.8 * T, 3.4 * T], [8.4 * T, 4.4 * T], [4.6 * T, 6.6 * T]];
 const MEAL = hr => (hr >= 7 && hr < 8.5) || (hr >= 12 && hr < 13.5) || (hr >= 18 && hr < 19.5);
+const mealWord = hr => hr < 10 ? { verb: 'desayunar', ing: 'desayunando', menu: 'avena con crema, pan con mantequilla y té' } : hr < 15 ? { verb: 'almorzar', ing: 'almorzando', menu: 'guiso de cordero con papas y pan casero' } : { verb: 'cenar', ing: 'cenando', menu: 'pan, queso, mermelada de ciruela y té' };
 const CHARACTERS = {
   matthew: {
     name: 'Matthew', fullName: 'Matthew Cuthbert', article: '', look: { hair: '#c9c4bb', hairD: '#8e8a82', style: 'old', beard: true, dress: '#4d4a54', dressD: '#37353c', coat: true, hatDark: true, skin: '#eac6a8', h: 1.22, scarf: '#9a6a44' },
@@ -1346,7 +1386,7 @@ function offerSale(k, a){
 function sellCow(k, a, price){
   a.state = 'bought'; a.owner = k; a.nav = null; game.inv.dolares += price;
   float('+' + price + ' dólares', ana.x, ana.y - 60); sfx.done();
-  logEv(`Ana le vendió una vaca jersey a ${NAMES[k]} por ${price} dólares.`, [k, ...witnesses()]); storyEvent('vaca_vendida'); storyEvent('vendida:' + a.id); save();
+  logEv(`Ana le vendió una vaca jersey a${CH[k].article === 'el ' ? 'l ' : ' ' + CH[k].article}${NAMES[k]} por ${price} dólares.`, [k, ...witnesses()]); storyEvent('vaca_vendida'); storyEvent('vendida:' + a.id); save();
 }
 function drawCow(c, a, t){
   const x = a.x, y = a.y, w = Math.sin(a.walk * TAU), d = a.dir === 3 ? -1 : 1, down = !a.moving && (a.munch || 0) > .6, l = a.moving ? w * 2.6 : 0;
@@ -1450,10 +1490,11 @@ function autoOptions(){
   targets().filter(t => !t.self && t.pri < 50 && !t.id.startsWith('p:') && !t.id.startsWith('h:') && !skip.includes(t.id)).map(t => ({ t, d: dist(ana.x, ana.y, t.x, t.y) })).sort((a, b) => a.d - b.d).slice(0, 6)
     .forEach(({ t, d }) => add(t.label, { type: 'target', id: t.id }, (t.id.startsWith('bed:') ? 3 : t.id === 'toby' || t.id === 'pump' ? 2 : 1.5) / (1 + d / 400)));
   if (!late) add('Cocinar algo en la cocina', { type: 'cook' }, 1.2);
-  for (const k of Object.keys(PEOPLE)) if (TT >= (amb.mute[k] || 0) && !(k === 'diana' && diana.follow)) add('Ir a conversar con ' + CH[k].article + NAMES[k] + ' (' + whereText(k) + ')', { type: 'talkto', k }, 3);
+  for (const k of Object.keys(PEOPLE)) if (TT >= (amb.mute[k] || 0) && PEOPLE[k].where !== 'away' && !(k === 'diana' && diana.follow)) add('Ir a conversar con ' + CH[k].article + NAMES[k] + ' (' + whereText(k) + ')', { type: 'talkto', k }, 3);
   if (sc === 'out') for (const [id, h] of Object.entries(HOUSES)) add('Entrar a ' + h.name, { type: 'house', id }, 1);
   else add('Salir a pasear', { type: 'house', id: 'out' }, 1.5);
   if (sc !== 'ga') add('Subir a su pieza', { type: 'house', id: 'ga' }, late ? 2 : .5);
+  if (MEAL(hn) && !ana.meal && ['matthew', 'marilla'].some(k => PEOPLE[k].want === 'gg')) add('Sentarse a la mesa a ' + mealWord(hn).verb + ' con los Cuthbert', { type: 'meal' }, 6);
   if (late) add('Irse a dormir', { type: 'sleep' }, hn >= 22 ? 12 : 5);
   for (const key of ['lago', 'puente', 'camino_blanco', 'bosque_encantado', 'huerta', 'granero']) add('Pasear hasta ' + PLACES[key][0], { type: 'place', key }, 1);
   if (sc === 'out' && S !== 3 && hn < 19) add('Recostarse en el pasto a mirar las nubes', { type: 'lie' }, 1.5);
@@ -1478,6 +1519,7 @@ const underTree = (x, y) => trees.some(tr => tr.y > y - 10 && Math.abs(tr.x - x)
 const LIE_LINES = ['¡Mira esa nube! Parece un dragón... no, un barco de velas blancas. ¡O una oveja con sombrero!', 'Qué bien se está en el pasto. Se oyen las abejas y, si me callo un momento, hasta el crecer de las flores.', 'Las nubes son como las ideas: pasan lentísimo y nunca se repiten.', 'Si me quedo muy quieta, quizás las hadas me confundan con una flor.'];
 const AUTO_SAY = ['¡Qué día para hacer algo bonito!', 'Se me ocurrió una idea... ¡de esas que solo tengo yo!', '¡A ver qué descubro por ahí!', 'Mi imaginación no me deja quieta.', 'Hay tanto por hacer y tan poco tiempo... ¡y yo con tantas ideas!'];
 async function autoDecide(){
+  const sa = storyAuto(); if (sa) { auto.hist.push(sa.label); if (auto.hist.length > 6) auto.hist.shift(); startIntent(sa.intent, false, ''); return; }   // (the story of the day comes first)
   const opts = autoOptions(), sc = game.scene; if (!opts.length) { auto.thinkAt = TT + 4; return; }
   let pick = null, said = '';
   if (aiReady() && TT >= auto.err) {
@@ -1490,6 +1532,53 @@ async function autoDecide(){
   if (!pick) { let r = Math.random() * opts.reduce((a, o) => a + o.w, 0); pick = opts.find(o => (r -= o.w) <= 0) || opts[0]; said = Math.random() < .35 ? pick5() : ''; }
   auto.hist.push(pick.label); if (auto.hist.length > 6) auto.hist.shift();
   startIntent(pick.intent, false, said);
+}
+// a decision the player let pass: Ana takes it, by her character (the AI) or by what the story of the day needs
+const CHOICE_W = [[/Sí, lo haré/, 6], [/Vender/, 5], [/Paseamos/, 3], [/Seguir conversando/, 2.5], [/^Regalar|dinero/, 1.5], [/Adiós|Ahora no|Mejor no|Nada por ahora/, .5]];
+const storyLive = () => { const st = game.story; return st && st.v === 2 && st.day === today() && !st.gen ? st.escenas.filter(e => e.estado === 'abierta' || e.estado === 'jugada' || e.estado === 'jugando').sort((a, b) => a.hora - b.hora) : []; };
+function chooseMsg(who, q, opts){
+  const live = storyLive();
+  return worldText() + `\n\nAna está con ${NAMES[who]}.` + (amb.hist.length ? ` Lo último que se dijeron: ${amb.hist.slice(-5).join(' / ')}` : '')
+    + (live.length ? `\nLA HISTORIA DE HOY («${game.story.titulo}») va por aquí: ${live.map(e => e.que_pasa).join(' Luego: ')}` : '')
+    + `\n\nLo que se le plantea a Ana: «${q}»\nANA POR SU CUENTA: la jugadora no eligió a tiempo y Ana decide sola, con su carácter (impulsiva, entusiasta, de buen corazón). Opciones:\n` + opts.map((o, i) => `${i + 1}. ${o[0]}`).join('\n') + '\nElige una (número en "eleccion") y escribe en "pensamiento" lo que Ana dice en voz alta al decidirlo (una frase).';
+}
+async function autoChoose(){
+  const tk = game.talk, opts = game.talkOpts; if (!tk || !opts?.length) return;
+  const who = tk.who, q = $('talk').querySelector('.line')?.textContent || '';
+  let k = -1, said = '';
+  if (aiReady()) {
+    $('talk').classList.add('wait');
+    try { const r = await aiCall([{ role: 'user', content: chooseMsg(who, q, opts) }], AUTO_SCHEMA); k = Math.round(+r.out.eleccion) - 1; said = typeof r.out.pensamiento === 'string' ? r.out.pensamiento.trim() : ''; }
+    catch (e) { console.debug('[avonlea IA] Ana elige', e.message); }
+    if (game.talk !== tk || game.talkOpts !== opts) return;   // (the player chose meanwhile)
+    $('talk').classList.remove('wait');
+  }
+  if (!(k >= 0 && k < opts.length)) {
+    const need = storyLive().filter(e => e.fin === 'evento').map(e => e.evento), score = l => (CHOICE_W.find(([rx]) => rx.test(l))?.[1] ?? 1) + (need.includes('vaca_vendida') && /Vender/.test(l) ? 10 : 0) + (need.includes('regalo:' + who) && /^Regalar|dinero/.test(l) ? 10 : 0);
+    k = opts.reduce((b, o, i) => score(o[0]) > score(opts[b][0]) ? i : b, 0);
+  }
+  logEv('Ana decidió por su cuenta: ' + opts[k][0].replace(/^\W+/, '') + '.', [who, ...witnesses()]);
+  opts[k][1]();
+  if (said) setTimeout(() => { if (!amb.cur) anaSays(said); }, 50);
+}
+// what the story of the day needs from Ana right now (when she is on her own): go where it happens, and do what it waits for
+function storyAuto(){
+  for (const e of storyLive()) {
+    if (e.estado === 'jugando') return null;
+    const here = storyHere(e);
+    if (e.estado === 'abierta' && !e.played && !here) return { label: 'Ir a ' + placeName(e.lugar) + ' (la historia de hoy)', intent: ROOMS[e.lugar] ? { type: 'house', id: e.lugar } : { type: 'place', key: e.lugar } };
+    if (e.fin === 'evento' && !storyEvDone(game.story, e)) { const it = eventIntent(e.evento); if (it) return it; }
+    if (e.estado === 'abierta' && here) return { label: 'Esperar aquí (la historia de hoy)', intent: { type: 'idle' } };
+  }
+  return null;
+}
+function eventIntent(ev){
+  const led = ledCow(), cow = Object.values(ANIM).find(a => a.kind === 'cow' && a.state === 'loose' && a.where === 'out' && AREAS[a.area]?.kind === 'oats');
+  if (ev === 'vaca_agarrada' && !led && cow) return game.scene === 'out' ? { label: 'Agarrar a la vaca', intent: { type: 'target', id: 'a:' + cow.id } } : { label: 'Salir', intent: { type: 'house', id: 'out' } };
+  if (ev === 'vaca_vendida' && led) { const t = targets().find(t => t.id.startsWith('sell:')); if (t) return { label: t.label, intent: { type: 'target', id: t.id } }; }
+  if (ev.startsWith('cocinado')) return { label: 'Cocinar algo en la cocina', intent: { type: 'cook' } };
+  if (ev.startsWith('regalo:')) { const k = ev.split(':')[1]; if (PEOPLE[k] && Object.keys(GIFTS).some(g => game.inv[g] > 0)) return { label: 'Ir a darle algo a ' + NAMES[k], intent: { type: 'talkmenu', k } }; }
+  return null;
 }
 const pick5 = () => AUTO_SAY[Math.floor(Math.random() * AUTO_SAY.length)];
 function autoCook(){
@@ -1526,6 +1615,13 @@ function autoStep(){
       return;
     }
     case 'idle': if (!stay(25, 25)) done(); return;
+    case 'talkmenu': { const p = PEOPLE[it.k]; if (sceneOf(it.k) !== sc) return go(hopTo(p.where)); if (!it.started) { it.started = true; return go('p:' + it.k); } return done(); }
+    case 'meal': {
+      const next = hopTo('gg'); if (next) return go(next);
+      if (!it.started) { it.started = true; return go('mesa'); }
+      if (!ana.sit || !MEAL(hourNow())) { if (ana.meal) ana.sit = false; return done(); }
+      return;
+    }
     case 'talkto': {
       const k = it.k, p = PEOPLE[k];
       if (sceneOf(k) !== sc) return go(hopTo(p.where));
@@ -1675,9 +1771,9 @@ function walkOption(who){
 const AI = { on: true, auto: true, model: 'gpt-5.4-mini', keys: { openai: '', anthropic: '' } };
 try { const st = JSON.parse(localStorage.getItem('avonlea-ai') || '{}'); if (st.key) { AI.keys.anthropic = st.key; delete st.key; } Object.assign(AI, st); AI.keys = Object.assign({ openai: '', anthropic: '' }, st.keys || AI.keys); } catch (e) {}
 const saveAI = () => { try { localStorage.setItem('avonlea-ai', JSON.stringify(AI)); } catch (e) {} };
-const provider = (m = AI.model) => m.startsWith('gpt') ? 'openai' : 'anthropic';
-const PROV = { openai: { name: 'OpenAI', hint: 'sk-...' }, anthropic: { name: 'Anthropic', hint: 'sk-ant-...' } };
-const aiKey = () => AI.keys[provider()] || '';
+const provider = (m = AI.model) => m === 'manual' ? 'manual' : m.startsWith('gpt') ? 'openai' : 'anthropic';
+const PROV = { openai: { name: 'OpenAI', hint: 'sk-...' }, anthropic: { name: 'Anthropic', hint: 'sk-ant-...' }, manual: { name: 'nadie (respondes tú)', hint: 'no hace falta clave' } };
+const aiKey = () => provider() === 'manual' ? 'manual' : AI.keys[provider()] || '';
 const aiReady = () => AI.on && !!aiKey();
 const hourNow = () => (dayT % 1) * 24 + 6;   // 6 (dawn) .. 30 (dawn again)
 const ITEMS = Object.keys(ITEM_DEFS);
@@ -1725,7 +1821,7 @@ function know(k, text, d = today() + 1){
   a.push({ d, s: S, t: text }); if (a.length > 30) a.splice(0, a.length - 30);
 }
 function logEv(text, who = witnesses()){
-  const j = game.journal, e = { d: today() + 1, s: S, t: text };
+  const j = game.journal, e = { d: today() + 1, s: S, t: text, h: Math.round(hourNow() * 100) / 100 };
   if (!(j.length && j[j.length - 1].t === text && j[j.length - 1].d === e.d)) { j.push(e); if (j.length > 80) j.splice(0, j.length - 80); }
   for (const k of new Set(who)) know(k, text);
 }
@@ -2116,6 +2212,41 @@ function storyReq(st, e){
   }
   return t;
 }
+/* the judge (the AI): with the diary of what really happened, it decides if a scene already happened in what matters
+   (even if not as written: another hour, without someone, in other words), if it can still happen, or if it no longer can */
+const judgeSchema = ids => ({ type: 'object', additionalProperties: false, required: ['veredictos'], properties: { veredictos: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['id', 'veredicto', 'nota'], properties: { id: { type: 'string', enum: ids }, veredicto: { type: 'string', enum: ['cumplida', 'sigue', 'no_puede'] }, nota: { type: 'string' } } } } } });
+const todayLog = () => game.journal.filter(j => j.d === today() + 1);
+const whereNow = () => `DÓNDE ESTÁ CADA UNO: Ana: ${game.scene === 'out' ? placeText() : placeName(game.scene)}; ${Object.keys(CH).map(k => NAMES[k] + ': ' + whereText(k)).join('; ')}. Animales: ${Object.entries(ANIM).map(([k, a]) => `${k} (${ANIMALS[k].desc}): ${ANIMALS[k].kind !== 'cow' ? 'en su lugar' : a.state === 'bought' ? 'vendida a ' + (NAMES[a.owner] || a.owner) : a.state === 'led' ? 'Ana la lleva de la cuerda' : a.area && AREAS[a.area] ? 'en ' + AREAS[a.area].name : a.state || 'en su lugar'}`).join('; ')}. Lo que lleva Ana: ${ITEMS.filter(k => game.inv[k] > 0).map(k => itemText(k, game.inv[k])).join(', ') || 'nada'}.`;
+function judgeMsg(st, beats){
+  const fin = e => e.fin === 'evento' ? 'termina cuando ' + evDesc(e.evento).replace(/^./, c => c.toLowerCase()) : e.fin === 'encargo_cumplido' ? 'termina cuando Ana cumple el encargo' : 'termina cuando se juega (Ana llega y la escena pasa)';
+  return worldText() + `\n\nLA HISTORIA DE HOY: «${st.titulo}» (inspirada en ${st.inspiracion}). ${st.resumen}`
+    + `\n\nBITÁCORA DE HOY (lo que de verdad pasó, con la hora):\n${todayLog().map(j => `- ${j.h != null ? fmtHour(j.h) : '?'} ${j.t}`).join('\n') || '(nada)'}`
+    + `\n\nEVENTOS QUE EL JUEGO NOTÓ: ${Object.entries(st.ev || {}).sort((a, b) => a[1] - b[1]).map(([k, t]) => fmtHour(t) + ' ' + k).join(', ') || '(ninguno)'}`
+    + `\nLO QUE YA PASÓ DE LA HISTORIA: ${storyPast(st) || '(nada aún)'}`
+    + `\n${whereNow()}\nAHORA SON LAS ${fmtHour(hourNow())}.`
+    + `\n\nESCENAS POR JUZGAR:\n${beats.map(e => `- "${e.id}" (hacia las ${e.hora}:00, en ${placeName(e.lugar)}${e.personajes.length ? ', con ' + e.personajes.map(k => NAMES[k]).join(' y ') : ''}; ${e.estado === 'jugada' ? 'ya se jugó la conversación' : e.estado === 'abierta' ? 'esperando que Ana llegue' : 'todavía no empieza'}): ${e.que_pasa} (${fin(e)})`).join('\n')}`
+    + `\n\nJUEZ DE LA HISTORIA: decide cada escena.`;
+}
+async function storyJudge(st, beats){
+  st.judging = true; st.judgeT = TT + 40; st.judgeN = todayLog().length;
+  try {
+    const o = (await aiCall([{ role: 'user', content: judgeMsg(st, beats) }], judgeSchema(beats.map(e => e.id)))).out;
+    if (game.story !== st || st.gen) return;
+    for (const v of Array.isArray(o.veredictos) ? o.veredictos : []) {
+      const e = beats.find(b => b.id === v.id); if (!e || isFinal(e) || e.estado === 'jugando') continue;
+      const nota = String(v.nota || '').trim().slice(0, 200); e.juicio = { v: v.veredicto, nota, h: hourNow() };
+      if (v.veredicto === 'cumplida') { e.nota = nota; storyEnd(e, 'hecha'); }
+      else if (v.veredicto === 'no_puede') { if (e.clave) { st.judging = false; storyBranch(e, 'juez:' + nota); return; } e.nota = nota; storyEnd(e, 'perdida'); }
+    }
+  } catch (err) { console.debug('[avonlea IA] juez', err.message); }
+  finally { st.judging = false; for (const e of beats) if (e.juzgada === 'pend') e.juzgada = 'ok'; save(); }
+}
+// before giving a scene up (or opening a branch), the judge looks at the diary: maybe it already happened, another way
+function storyWait(st, e){
+  if (!aiReady() || e.juzgada === 'ok') return false;
+  if (!st.judging && e.juzgada !== 'pend') { e.juzgada = 'pend'; storyJudge(st, [e]); }
+  return true;
+}
 const storyEvDone = (st, e) => e.fin === 'evento' && st.ev[e.evento] != null && st.ev[e.evento] >= (e.reqAt ?? 0);
 function storyTick(){
   const st = game.story; if (!st || st.v !== 2 || st.day !== today() || st.gen || st.fin) return;
@@ -2124,7 +2255,7 @@ function storyTick(){
     if (isFinal(e) || e.estado === 'jugando') continue;
     const rq = storyReq(st, e);
     if (rq == null) {   // what it needs has not happened (yet)
-      if (hn > e.hora + e.margen + 1) { if (e.clave) return storyBranch(e, 'falta'); storyEnd(e, 'perdida'); }
+      if (hn > e.hora + e.margen + 1) { if (storyWait(st, e)) continue; if (e.clave) return storyBranch(e, 'falta'); storyEnd(e, 'perdida'); }
       continue;
     }
     e.reqAt = Math.max(rq, e.hora - 3);
@@ -2132,31 +2263,36 @@ function storyTick(){
     if (against && !storyEvDone(st, e)) return storyBranch(e, 'contra:' + against);
     if (e.estado === 'espera') {
       if (storyEvDone(st, e)) { storyEnd(e, 'ya'); continue; }   // (it happened by itself, before its time)
-      if (hn > e.hora + e.margen && rq <= e.hora) { if (e.clave) return storyBranch(e, 'tarde'); storyEnd(e, 'perdida'); continue; }   // (its time went by, e.g. the clock jumped)
+      if (hn > e.hora + e.margen && rq <= e.hora) { if (storyWait(st, e)) continue; if (e.clave) return storyBranch(e, 'tarde'); storyEnd(e, 'perdida'); continue; }   // (its time went by, e.g. the clock jumped)
       const early = e.requiere.length && hn >= Math.max(rq + .25, e.hora - 2);   // (what it waited for came early: so does it)
       if (hn < e.hora - .75 && !early) continue;
       e.estado = 'abierta'; e.vence = Math.max(e.hora, hn) + e.margen; e.opened = true; runEffects(e, 'antes'); notice('📖 ' + e.pista); save();
     }
     if (e.estado === 'abierta') {
       if (storyEvDone(st, e) && !e.played) { e.yaAt = e.yaAt ?? hn; if (!storyHere(e) || hn > e.yaAt + .5) { storyEnd(e, 'ya'); continue; } }
-      if (hn > e.vence) { if (e.clave) return storyBranch(e, 'tarde'); storyEnd(e, 'perdida'); }
+      if (hn > e.vence) { if (storyWait(st, e)) continue; if (e.clave) return storyBranch(e, 'tarde'); storyEnd(e, 'perdida'); }
       continue;
     }
     if (e.estado === 'jugada') {   // played: wait for the decisions, and for the errand or the event if there is one
       if (game.talk || amb.cur) continue;
       if (e.fin === 'encargo_cumplido') {
         const t = e.taskId && game.tasks.find(t => t.id === e.taskId);
-        if (!e.taskId || (t && !t.done && hn > e.vence + 4)) { if (e.clave) return storyBranch(e, 'sin_encargo'); storyEnd(e, 'sin_encargo'); continue; }
+        if (!e.taskId || (t && !t.done && hn > e.vence + 4)) { if (storyWait(st, e)) continue; if (e.clave) return storyBranch(e, 'sin_encargo'); storyEnd(e, 'sin_encargo'); continue; }
         if (t && !t.done) continue;
       }
-      if (e.fin === 'evento' && !storyEvDone(st, e)) { if (hn < e.vence + 2) continue; if (e.clave) return storyBranch(e, 'sin_evento'); storyEnd(e, 'sin_evento'); continue; }
+      if (e.fin === 'evento' && !storyEvDone(st, e)) { if (hn < e.vence + 2 || storyWait(st, e)) continue; if (e.clave) return storyBranch(e, 'sin_evento'); storyEnd(e, 'sin_evento'); continue; }
       storyEnd(e, 'hecha');
     }
   }
-  // whoever is in an open scene goes there (the earliest one first)
-  const open = storyOpen();
+  // something new in the diary: the judge looks at the scenes going on (and the ones that could start)
+  if (aiReady() && !st.judging && TT >= (st.judgeT || 0) && todayLog().slice(st.judgeN ?? 0).some(j => /\bAna\b/.test(j.t) && !/^(Ana decidió|El día tomó otro camino)/.test(j.t))) {   // (something Ana did)
+    const c = st.escenas.filter(e => e.estado === 'abierta' || e.estado === 'jugada');
+    if (c.length) storyJudge(st, c.slice(0, 6)); else st.judgeN = todayLog().length;
+  }
+  // whoever is in an open scene (or in one being played) goes there (the earliest one first)
+  const open = storyOpen(), pos = [...open, ...st.escenas.filter(e => e.estado === 'jugando' || (e.estado === 'jugada' && e.fin !== 'llega_ana'))];   // (they stay while the scene waits for what has to happen)
   for (const [k, p] of Object.entries(PEOPLE)) {
-    const e = open.find(e => e.personajes.includes(k));
+    const e = pos.find(e => e.personajes.includes(k));
     if (e) { p.story = storyPos(e); p.away = null; } else if (p.story) { p.story = null; if (p.target?.story) p.target = null; }
   }
   if (amb.cur || game.talk || game.cooking || sleeping) return;
@@ -2182,6 +2318,7 @@ async function storyPlay(e, present){
   if (!aiReady()) notice('📖 ' + e.que_pasa);
   if (amb.cur || game.talk || game.story !== st || e.estado !== 'jugando') { if (e.estado === 'jugando') e.estado = 'abierta'; return; }   // (something else happened meanwhile: later)
   s.story = e; s.turns = 1; e.estado = 'jugada'; e.played = true;
+  s.noMenu = !e.encargo && !(e.fin === 'evento' && e.evento.startsWith('regalo:'));   // (a decision only when the scene has one to offer)
   sceneStart(s, present.length > 0);
 }
 function storyRelease(e){ for (const k of e.personajes) { const p = PEOPLE[k]; if (!p) continue; p.story = null; if (p.target?.story) p.target = null; } }
@@ -2190,7 +2327,7 @@ function storyEnd(e, how){
   if (how === 'hecha' || how === 'ya') st.ev[e.id] = hn;
   if (e.opened) runEffects(e, 'despues');
   if (how === 'perdida' && e.opened && e.personajes.length) logEv('Ana no llegó a tiempo: ' + e.que_pasa, e.personajes);
-  const t = how === 'hecha' ? e.que_pasa : how === 'ya' ? 'Antes de lo pensado, ' + evDesc(e.evento).replace(/^./, c => c.toLowerCase()) : how === 'perdida' ? 'No pasó (Ana no estuvo): ' + e.pista : 'Quedó a medias: ' + e.pista;
+  const t = e.nota ? (how === 'hecha' ? '' : 'No pasó: ') + e.nota : how === 'hecha' ? e.que_pasa : how === 'ya' ? 'Antes de lo pensado, ' + evDesc(e.evento).replace(/^./, c => c.toLowerCase()) : how === 'perdida' ? 'No pasó (Ana no estuvo): ' + e.pista : 'Quedó a medias: ' + e.pista;
   st.hechos.push({ h: Math.round(hn * 10) / 10, t: t.slice(0, 200) });
   storyRelease(e); storyCheckEnd(); save();
 }
@@ -2204,6 +2341,7 @@ function storyWhy(e, why){
   if (why.startsWith('contra:')) return `en vez de lo que iba a pasar («${e.pista}»), pasó esto: ${evDesc(why.slice(7)).replace(/^./, c => c.toLowerCase())}`;
   if (why === 'tarde') return `Ana no estuvo en ${placeName(e.lugar)} a tiempo («${e.pista}»), y eso ya no pasó`;
   if (why === 'sin_evento') return `no pasó lo que tenía que pasar: ${evDesc(e.evento).replace(/^./, c => c.toLowerCase())}`;
+  if (why.startsWith('juez:')) return `según lo que pasó, «${e.pista}» ya no puede ser: ${why.slice(5)}`;
   if (why === 'sin_encargo') return `Ana no tomó, o no cumplió, el encargo de «${e.pista}»`;
   return `nunca se dio lo que hacía falta para «${e.pista}»`;
 }
@@ -2219,10 +2357,10 @@ function storyBranch(e, why){
   storyBranchMake(st, e, why, txt).catch(err => { console.debug('[avonlea] rama', err); if (game.story === st) { st.gen = false; save(); } });
 }
 function branchMsg(st, e, txt, pend, h0){
-  const today_ = game.journal.filter(j => j.d === today()).slice(-14);
+  const today_ = todayLog().slice(-16);
   return worldText() + `\n\nLA HISTORIA DE HOY: «${st.titulo}» (inspirada en ${st.inspiracion}). ${st.resumen}`
     + `\n\nLO QUE YA PASÓ DE LA HISTORIA:\n${(st.hechos || []).map(h => `- ${fmtHour(h.h)}: ${h.t}`).join('\n') || '(nada aún)'}`
-    + (today_.length ? `\n\nLO QUE PASÓ HOY (el diario):\n${today_.map(j => '- ' + j.t).join('\n')}` : '')
+    + (today_.length ? `\n\nLO QUE PASÓ HOY (el diario, con la hora):\n${today_.map(j => `- ${j.h != null ? fmtHour(j.h) : '?'} ${j.t}`).join('\n')}` : '')
     + `\n\nDÓNDE SE DESVIÓ (a las ${fmtHour(hourNow())}): ${txt}.`
     + `\n\nLO QUE IBA A PASAR DESPUÉS EN LA RAMA PRINCIPAL (ya no vale tal cual; puedes retomar lo que aún tenga sentido): ${pend.map(x => `${x.hora}:00, en ${placeName(x.lugar)}${x.personajes.length ? ', con ' + x.personajes.map(k => NAMES[k]).join(' y ') : ''}: ${x.que_pasa}`).join(' | ') || '(nada)'}`
     + `\n\nDÓNDE ESTÁ CADA UNO: ${Object.keys(CH).map(k => NAMES[k] + ': ' + whereText(k)).join('; ')}. Animales: ${Object.entries(ANIM).map(([k, a]) => `${k} (${ANIMALS[k].desc}): ${ANIMALS[k].kind !== 'cow' ? 'en su lugar' : a.state === 'bought' ? 'vendida a ' + (NAMES[a.owner] || a.owner) : a.state === 'led' ? 'Ana la lleva de la cuerda' : a.area && AREAS[a.area] ? 'en ' + AREAS[a.area].name : a.state || 'en su lugar'}`).join('; ')}.`
@@ -2302,7 +2440,7 @@ function beatHtml(e, st){
     + (req ? `<br><span class="k">requiere:</span> ${req}` : '') + (e.contra?.length ? `<br><span class="k">en contra:</span> ${e.contra.map(c => esc(c) + (has(c) ? ' ⚠' + hh(st.ev[c]) : '')).join(', ')}` : '')
     + (efx ? `<br><span class="k">efectos:</span> ${esc(efx)}` : '') + (enc ? `<br><span class="k">encargo:</span> ${esc(enc)}` : '')
     + (e.frases?.length ? `<br><span class="k">frases:</span> ${e.frases.map(f => `${esc(nameOf(f.quien))}: «${esc(f.texto)}»`).join(' ')}` : '')
-    + (run ? `<br><span class="k">ahora:</span> ${run}` : '') + (e.porque ? `<br><span class="k">por qué se rompió:</span> ${esc(e.porque)}` : '') + '</div>';
+    + (e.juicio ? `<br><span class="k">juez (${fmtHour(e.juicio.h)}):</span> ${esc(e.juicio.v)}${e.juicio.nota ? ' — ' + esc(e.juicio.nota) : ''}` : '') + (run ? `<br><span class="k">ahora:</span> ${run}` : '') + (e.porque ? `<br><span class="k">por qué se rompió:</span> ${esc(e.porque)}` : '') + '</div>';
 }
 function storyDbgHtml(st){
   let h = '', pre = '';
@@ -2312,6 +2450,7 @@ function storyDbgHtml(st){
     h += beatHtml(e, st);
   }
   if (st.gen) h += '<div class="dh">🌿 La IA está escribiendo la rama…</div>';
+  if (st.judging) h += '<div class="dh">⚖ El juez está mirando la bitácora…</div>';
   const src = STORIES.find(x => x.titulo === st.titulo), left = (src?.ramas || []).filter(r => !st.ramas.some(x => x.desde === r.desde));
   if (left.length) h += `<details><summary>Ramas escritas a mano que no se tomaron (${left.length})</summary>${left.map(r => `<div class="dh">🌿 «${esc(r.titulo)}» · si se rompe «${esc(r.desde)}»</div>${r.escenas.map(e => beatHtml(e)).join('')}`).join('')}</details>`;
   const ev = Object.entries(st.ev || {}).sort((a, b) => a[1] - b[1]);
@@ -2414,6 +2553,11 @@ RAMA NUEVA (cuando te dicen que la historia de hoy se desvió)
 - Lo que pasó, pasó: escribe cómo sigue el día desde ahí, coherente con lo que de verdad ocurrió y con dónde está cada uno, con el mismo espíritu y tono del episodio (las consecuencias pueden ser cómicas o tiernas, nunca un castigo). Puedes retomar más adelante lo que aún tenga sentido de la rama principal.
 - "escenas": de 1 a 4, con el mismo formato que en el guión del día, desde la hora indicada; en "requiere" solo "id" de escenas ya hechas, de escenas de esta misma rama o eventos. "titulo_rama": cómo se llama este camino (breve); "resumen": una o dos frases de cómo termina el día por este camino.
 
+JUEZ DE LA HISTORIA (cuando te piden juzgar escenas de la historia de hoy)
+- Para cada escena: "cumplida" si lo esencial ya pasó según la bitácora o los eventos, aunque no haya sido exactamente como estaba escrita (a otra hora, en otro lugar cercano, sin alguno de los personajes, con otras palabras); "sigue" si todavía no pasó pero aún puede pasar; "no_puede" si ya no puede pasar como está escrita (pasó algo que lo contradice, o la ocasión ya pasó).
+- Flexible con la forma, estricto con los hechos: solo cuenta lo que dice la bitácora o los eventos; no supongas lo que no está escrito. Ante la duda, "sigue".
+- "nota": una frase breve, en tercera persona, de lo que pasó o por qué (queda en el diario de la historia).
+
 PLANIFICAR (cuando te piden el plan del día)
 - Piensa como el personaje: su carácter, su trabajo, la estación, la hora, lo que sabe, lo que recuerda, los encargos que dio y lo que acaba de pasar.
 - Usa solo las acciones que ese personaje puede hacer. Planes sencillos y propios de su vida: Matthew trabaja en el granero, a veces pasea y busca a Ana para darle algo; Marilla cocina y riega; Diana juega, pasea a lugares bonitos y a veces busca a Ana; la Sra. Barry casi solo espera en su salita y a veces prepara un regalo.`;
@@ -2474,7 +2618,30 @@ async function post(url, headers, body){
 }
 const httpError = (res, data) => new Error({ 401: 'la clave no es válida', 403: 'la clave no tiene permiso', 429: 'demasiadas conversaciones seguidas (o sin saldo), espera un poco', 529: 'el servicio está saturado' }[res.status] || ('error ' + res.status + (data.error?.message ? ': ' + data.error.message : '')));
 function parseJSON(txt){ try { const o = JSON.parse(txt); if (o && typeof o === 'object') return o; } catch (e) {} throw new Error('respuesta incompleta'); }
-const aiCall = (messages, schema = AI_SCHEMA) => provider() === 'openai' ? openaiCall(messages, schema) : claudeCall(messages, schema);
+const aiCall = (messages, schema = AI_SCHEMA) => provider() === 'manual' ? manualCall(messages, schema) : provider() === 'openai' ? openaiCall(messages, schema) : claudeCall(messages, schema);
+/* the AI by hand, to debug: each request waits in a little panel (and in window.__avonlea.aiq) until someone answers
+   it with JSON in the requested shape — the player, another AI they paste it into, or whoever is testing the game */
+const aiq = { list: [], seq: 0, skip: new Set() };
+const aiqKind = sch => { const p = Object.keys(sch.properties || {}); return p.includes('lineas') ? 'una escena' : p.includes('titulo_rama') ? 'una rama de la historia' : p.includes('escenas') ? 'el guión del día' : p.includes('veredictos') ? 'el juez de la historia' : p.includes('eleccion') ? 'Ana decide' : p.includes('relaciones') ? 'el fin del día' : p.includes('pasos') ? 'un plan del día' : 'un pedido'; };
+function skel(sc){ if (!sc) return null; if (sc.enum) return sc.enum[0]; switch (sc.type) { case 'object': return Object.fromEntries(Object.entries(sc.properties || {}).map(([k, v]) => [k, skel(v)])); case 'array': return []; case 'integer': case 'number': return 0; case 'boolean': return false; default: return ''; } }
+function manualCall(messages, schema){
+  if (aiq.skip.has(aiqKind(schema))) return Promise.reject(new Error('omitido'));
+  return new Promise((resolve, reject) => { aiq.list.push({ id: ++aiq.seq, kind: aiqKind(schema), prompt: messages.map(m => m.content).join('\n\n'), schema, resolve, reject }); aiqDraw(); });
+}
+function aiqAnswer(id, ans){
+  const k = aiq.list.findIndex(r => r.id === id); if (k < 0) return false;
+  const r = aiq.list.splice(k, 1)[0]; aiqDraw();
+  try { const out = typeof ans === 'string' ? parseJSON(ans) : ans; r.resolve({ content: JSON.stringify(out), out }); } catch (e) { r.reject(e); }
+  return true;
+}
+function aiqFail(id, why = 'no hubo respuesta'){ const k = aiq.list.findIndex(r => r.id === id); if (k < 0) return false; aiq.list.splice(k, 1)[0].reject(new Error(why)); aiqDraw(); return true; }
+function aiqDraw(){
+  const box = $('aiq'), r = aiq.list[0]; box.hidden = !r; if (!r) { box.dataset.id = ''; return; }
+  box.querySelector('.n').textContent = r.kind + (aiq.list.length > 1 ? ` (y ${aiq.list.length - 1} más esperando)` : '');
+  if (box.dataset.id === String(r.id)) return;
+  box.dataset.id = r.id; box.querySelector('.p').textContent = r.prompt + '\n\nFORMATO (JSON Schema):\n' + JSON.stringify(r.schema);
+  box.querySelector('textarea').value = JSON.stringify(skel(r.schema), null, 1);
+}
 // OpenAI (Chat Completions): the fixed prompt goes first so it is cached automatically; the answer must fit the schema
 async function openaiCall(messages, schema, strict = true){
   const body = { model: AI.model, max_completion_tokens: 4000, messages: [{ role: 'system', content: AI_SYSTEM + (strict ? '' : '\n\nResponde solo con un objeto JSON que siga este esquema: ' + JSON.stringify(schema)) }, ...messages] };
@@ -2550,8 +2717,9 @@ function turnTo(p, to){
 }
 function ambTick(dt){
   const s = amb.cur;
-  if (!s.directed && (game.scene !== s.scene || game.talk || game.cooking || game.map || !$('ai').hidden || s.parts.every(k => sceneOf(k) !== game.scene || dist(ana.x, ana.y, PEOPLE[k].x, PEOPLE[k].y) > 190))) return ambEnd();
-  for (const k of s.parts) if (!(k === 'diana' && diana.follow)) PEOPLE[k].moving = false;
+  const far = (r) => s.parts.length && s.parts.every(k => sceneOf(k) !== game.scene || dist(ana.x, ana.y, PEOPLE[k].x, PEOPLE[k].y) > r);
+  if (!s.directed && (game.scene !== s.scene || game.talk || game.cooking || game.map || !$('ai').hidden || far(190))) return ambEnd();
+  if (s.directed && (game.scene !== s.scene || far(260))) { s.noMenu = true; if (game.talk?.scene) { game.talk = null; $('talk').hidden = true; } return ambEnd(); }   // (Ana walked off: the talk is over)
   if ((s.wait -= dt) > 0) return;
   if (++s.i >= s.lines.length) return ambEnd();
   const l = s.lines[s.i], sp = personOf(l.q), dur = lineDur(l.t);
@@ -2571,6 +2739,7 @@ function ambEnd(){
   amb.cool = TT + 20;
   for (const k of s.parts) { amb.mute[k] = TT + (k === 'diana' && diana.follow ? 70 : 110); amb.seen[k] = true; }
   if (s.after) startIntent(s.after, true);
+  if (s.directed && s.noMenu && game.talk?.scene) game.talk = null;   // (nothing to decide: the talk just ends)
   if (s.directed && !s.noMenu) { const last = [...s.lines].reverse().find(l => l.q === who) || s.lines[s.lines.length - 1]; ambMenu(who, last ? last.t : '…', s); }
 }
 // stops whatever is being said (Ana is going to talk, or leaves)
@@ -2621,6 +2790,7 @@ function ambUpdate(dt){
     return;
   }
   if (amb.busy || TT < amb.cool || TT < amb.err) return;
+  { const se = storyNow(); if (se && storyHere(se)) return; }   // (here a scene of the story is about to be played: it goes first)
   let best = null, bd = 1e9;
   for (const k of all) { const d = dd(k); if (TT < (amb.mute[k] || 0) || d > 240 || d >= bd) continue; best = k; bd = d; }
   if (!best) return;
@@ -2666,14 +2836,18 @@ function give(who, k){
   say(who, d.gift.reply + CH[who].giftReply, [['De nada', close]]);
 }
 function say(who, text, opts, wait = false){
-  game.talk = { who };
+  game.talk = { who, wait };
   const box = $('talk'), f = Math.min(5, game.fond[who] || 0), heartsTxt = who in game.fond ? '♥'.repeat(f) + '♡'.repeat(5 - f) : '';
   box.innerHTML = `<div class="who">${NAMES[who] || who}<span>${heartsTxt}</span></div><div class="line"></div><div class="opts"></div>`;
   box.querySelector('.line').textContent = text; box.classList.toggle('wait', wait);
   const row = box.querySelector('.opts');
   opts.forEach(([label, fn], k) => { const b = document.createElement('button'); b.textContent = (opts.length > 1 ? (k + 1) + '. ' : '') + label; b.onclick = e => { e.stopPropagation(); fn(); }; row.appendChild(b); });
   box.hidden = false; game.talkOpts = opts;
+  // a decision with a character: if the player does not choose in 10 seconds, Ana chooses by herself
+  if (opts.length > 1 && !wait && PEOPLE[who] && AI.auto !== false) { game.talk.deadline = TT + 10; box.insertAdjacentHTML('beforeend', '<div class="tbar"><i></i></div>'); }
 }
+// a decision box is open (the talk itself, or waiting for the AI, does not hold anyone still)
+const menuOpen = () => !!game.talk && !game.talk.scene && !game.talk.wait;
 function close(){ $('talk').hidden = true; game.talk = null; game.talkOpts = null; ambAbort(); }
 function cookMenu(){
   const can = k => Object.entries(ITEM_DEFS[k].recipe).every(([i, n]) => game.inv[i] >= n);
@@ -2710,7 +2884,7 @@ function note(f, d, vol = .03, type = 'sine', at = 0){ if (!AC) return; const o 
 const sfx = { happy: () => { note(660, .3); note(880, .35, .03, 'sine', .12); note(990, .4, .025, 'sine', .24); }, water: () => { for (let k = 0; k < 4; k++) note(1200 + k * 160, .08, .015, 'triangle', k * .05); }, cook: () => note(330, .5, .02, 'triangle'), blip: () => note(420 + Math.random() * 160, .07, .012, 'triangle'), done: () => { note(523, .25); note(659, .25, .03, 'sine', .1); note(784, .4, .03, 'sine', .2); } };
 
 /* ---------- keeping the day: in the browser ---------- */
-function save(){ try { localStorage.setItem('avonlea', JSON.stringify({ inv: game.inv, hasCan: game.hasCan, water: game.water, fond: game.fond, said: game.said, saidS: game.saidS, seasonShift: game.seasonShift, teaDay: game.teaDay, journal: game.journal, mem: game.mem, know: game.know, tasks: game.tasks, plans: game.plans, table: game.table, giftFor: game.giftFor, npcGiftDay: game.npcGiftDay, lastDay: game.lastDay, taskSeq: game.taskSeq, rel: game.rel, relLog: game.relLog, impr: game.impr, story: game.story, stories: game.stories, nextStory: game.nextStory, ground: game.ground, groundSeq: game.groundSeq, anaStates: game.anaStates, animals: Object.fromEntries(Object.entries(ANIM).map(([k, a]) => [k, { x: a.x, y: a.y, where: a.where, state: a.state, area: a.area, owner: a.owner }])), beds: BEDS.map(b => [b.stage, b.wet, b.grow]), dayT })); } catch (e) {} }
+function save(){ if (wiping) return; try { localStorage.setItem('avonlea', JSON.stringify({ inv: game.inv, hasCan: game.hasCan, water: game.water, fond: game.fond, said: game.said, saidS: game.saidS, seasonShift: game.seasonShift, teaDay: game.teaDay, journal: game.journal, mem: game.mem, know: game.know, tasks: game.tasks, plans: game.plans, table: game.table, giftFor: game.giftFor, npcGiftDay: game.npcGiftDay, lastDay: game.lastDay, taskSeq: game.taskSeq, rel: game.rel, relLog: game.relLog, impr: game.impr, story: game.story, stories: game.stories, nextStory: game.nextStory, ground: game.ground, groundSeq: game.groundSeq, anaStates: game.anaStates, animals: Object.fromEntries(Object.entries(ANIM).map(([k, a]) => [k, { x: a.x, y: a.y, where: a.where, state: a.state, area: a.area, owner: a.owner }])), beds: BEDS.map(b => [b.stage, b.wet, b.grow]), dayT })); } catch (e) {} }
 try { const s = JSON.parse(localStorage.getItem('avonlea') || 'null'); if (s) { Object.assign(game.inv, s.inv); game.hasCan = s.hasCan; game.water = s.water; Object.assign(game.fond, s.fond); game.said = s.said || {}; game.saidS = s.saidS || {}; game.seasonShift = s.seasonShift || 0; game.teaDay = s.teaDay ?? -1; game.journal = s.journal || []; game.mem = s.mem || {}; for (const k of ['know', 'plans', 'giftFor', 'npcGiftDay']) game[k] = s[k] || {}; game.tasks = s.tasks || []; game.table = s.table || null; game.lastDay = s.lastDay ?? null; game.taskSeq = s.taskSeq || 0; game.rel = s.rel || null; game.relLog = s.relLog || []; game.impr = s.impr || {}; game.story = s.story?.v === 2 ? s.story : null; if (game.story) game.story.gen = false; game.stories = s.stories || []; game.nextStory = s.nextStory || null; game.ground = s.ground || []; game.groundSeq = s.groundSeq || 0; game.anaStates = s.anaStates || {}; for (const [k, v] of Object.entries(s.animals || {})) if (ANIM[k]) Object.assign(ANIM[k], v); (s.beds || []).forEach((v, k) => { if (BEDS[k]) [BEDS[k].stage, BEDS[k].wet, BEDS[k].grow] = v; }); if (s.dayT) dayT = s.dayT; if (game.hasCan) ana.carry = 'can'; } } catch (e) {}
 relInit();
 addEventListener('pagehide', save); setInterval(save, 10000);
@@ -2725,11 +2899,11 @@ addEventListener('keydown', e => {
   if (e.code === 'KeyT' && !game.map) { e.preventDefault(); openSay(); return; }
   if (e.code === 'KeyM' && !game.talk) { toggleMap(); return; }
   if (game.map) { if (e.code === 'Escape' || e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); toggleMap(false); } return; }
-  if (game.talk?.scene) {
-    if (/^Arrow|^Key[WASD]$/.test(e.code)) close();   // walking off ends the talk
-    else { if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); if (amb.cur) amb.cur.wait = 0; } else if (e.code === 'Escape') close(); return; }
+  if (game.talk && !menuOpen()) {   // a talk going on: she can walk (walking off ends it), Space skips a line, Esc ends it
+    if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); if (amb.cur) amb.cur.wait = 0; return; }
+    if (e.code === 'Escape') { close(); return; }
   }
-  if (game.talk) {
+  else if (game.talk) {
     const n = +e.key; if (n >= 1 && game.talkOpts && game.talkOpts[n - 1]) { game.talkOpts[n - 1][1](); return; }
     if (e.code === 'Space' || e.code === 'Enter' || e.code === 'Escape') { e.preventDefault(); if (game.talkOpts && game.talkOpts.length === 1) game.talkOpts[0][1](); else if (e.code === 'Escape') close(); }
     return;
@@ -2740,10 +2914,10 @@ addEventListener('keydown', e => {
 });
 addEventListener('keyup', e => keys.delete(e.code));
 let stick = null, tapStart = null;
-cv.addEventListener('pointerdown', e => { audio(); hint(); userInput(); if (game.talk) { if (game.talk.scene && amb.cur) amb.cur.wait = 0; return; } stick = { x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY }; tapStart = { x: e.clientX, y: e.clientY, t: performance.now() }; });
+cv.addEventListener('pointerdown', e => { audio(); hint(); userInput(); if (menuOpen()) return; if (game.talk && amb.cur) { const t = targetAt(view.ox + e.clientX / view.Z, view.oy + e.clientY / view.Z); if (t && (t.self || amb.cur.parts.includes(t.id.slice(2)))) { amb.cur.wait = 0; return; } } stick = { x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY }; tapStart = { x: e.clientX, y: e.clientY, t: performance.now() }; });
 addEventListener('pointermove', e => { if (stick) { stick.x = e.clientX; stick.y = e.clientY; } hoverAt = e.pointerType === 'mouse' && e.target === cv ? [e.clientX, e.clientY] : null; });
 addEventListener('pointerup', e => {
-  if (tapStart && !game.talk && !game.map && $('ai').hidden && Math.hypot(e.clientX - tapStart.x, e.clientY - tapStart.y) < 10 && performance.now() - tapStart.t < 500) tapAt(e.clientX, e.clientY);
+  if (tapStart && !menuOpen() && !game.map && $('ai').hidden && Math.hypot(e.clientX - tapStart.x, e.clientY - tapStart.y) < 10 && performance.now() - tapStart.t < 500) tapAt(e.clientX, e.clientY);
   tapStart = null; stick = null;
 });
 addEventListener('pointercancel', () => { stick = null; tapStart = null; });
@@ -2761,11 +2935,12 @@ function aiPanel(on){
 }
 // the key field shows the key of the chosen model's provider
 function aiKeyField(){
-  const pv = provider($('aimodel').value), P = PROV[pv];
+  const pv = provider($('aimodel').value), P = PROV[pv], man = pv === 'manual';
+  $('aikey').hidden = $('aikeylab').hidden = man;
   $('aikey').value = AI.keys[pv] || ''; $('aikey').placeholder = P.hint; $('aikeylab').textContent = 'Tu clave de la API de ' + P.name;
-  $('ainote').textContent = `La clave la pones tú: se guarda solo en este navegador y se envía directamente a ${pv === 'openai' ? 'api.openai.com' : 'api.anthropic.com'}. No compartas el archivo ni el navegador con la clave puesta.`;
+  $('ainote').textContent = man ? 'Para depurar: cada vez que el juego le pida algo a la IA, aparece abajo a la derecha el pedido y un JSON por completar; lo respondes tú (o lo copias a otra IA y pegas su respuesta). Mientras no respondas, eso espera.' : `La clave la pones tú: se guarda solo en este navegador y se envía directamente a ${pv === 'openai' ? 'api.openai.com' : 'api.anthropic.com'}. No compartas el archivo ni el navegador con la clave puesta.`;
 }
-const aiSync = () => { AI.on = $('aion').checked; AI.auto = $('aiauto').checked; AI.model = $('aimodel').value; AI.keys[provider()] = $('aikey').value.trim(); saveAI(); };
+const aiSync = () => { AI.on = $('aion').checked; AI.auto = $('aiauto').checked; AI.model = $('aimodel').value; if (provider() !== 'manual') AI.keys[provider()] = $('aikey').value.trim(); saveAI(); };
 $('aimodel').addEventListener('change', () => { AI.model = $('aimodel').value; saveAI(); aiKeyField(); });
 for (const id of ['aion', 'aiauto', 'aikey']) $(id).addEventListener('change', aiSync);
 $('aibtn').addEventListener('pointerdown', e => { e.stopPropagation(); audio(); if (!game.talk) aiPanel(true); });
@@ -2787,6 +2962,14 @@ $('aimem').addEventListener('click', () => {
   o.textContent = per + '\n\n— Encargos —\n' + (game.tasks.map(t => '  ' + (t.done ? '✓ ' : '· ') + taskText(t) + ' (de ' + NAMES[t.from] + ')').join('\n') || '  (ninguno)') + '\n\n— Diario de Ana —\n' + (game.journal.slice(-30).map(e => '  · día ' + e.d + ': ' + e.t).join('\n') || '  (nada todavía)');
 });
 $('aiforget').addEventListener('click', () => { if (!confirm('¿Borrar todo lo que recuerdan y el diario de lo que ha pasado?')) return; game.mem = {}; game.journal = []; game.know = {}; game.plans = {}; game.tasks = []; game.giftFor = {}; save(); $('aiout').hidden = false; $('aiout').textContent = 'Listo: es como si fuera el primer día.'; });
+$('aiq').querySelector('.ok').addEventListener('click', () => { const r = aiq.list[0]; if (!r) return; try { parseJSON($('aiq').querySelector('textarea').value); } catch (e) { notice('🐞 Eso no es un JSON válido'); return; } aiqAnswer(r.id, $('aiq').querySelector('textarea').value); });
+$('aiq').querySelector('.no').addEventListener('click', () => { const r = aiq.list[0]; if (r) aiqFail(r.id); });
+$('aiq').querySelector('.all').addEventListener('click', () => { const r = aiq.list[0]; if (!r) return; aiq.skip.add(r.kind); for (const x of aiq.list.filter(x => x.kind === r.kind)) aiqFail(x.id, 'omitido'); notice('🐞 Desde ahora no se pregunta: ' + r.kind); });
+$('aiq').querySelector('.cp').addEventListener('click', () => { const r = aiq.list[0]; if (!r) return; try { navigator.clipboard.writeText(`INSTRUCCIONES:\n${AI_SYSTEM}\n\nPEDIDO:\n${r.prompt}\n\nResponde solo con un objeto JSON que siga este esquema:\n${JSON.stringify(r.schema)}`); notice('📋 Copiado: pégalo en otra IA y trae su respuesta'); } catch (e) {} });
+$('aiq').addEventListener('keydown', e => e.stopPropagation());
+// starting over: everything that happened is forgotten (the AI settings stay)
+let wiping = false;
+$('aireset').addEventListener('click', () => { if (!confirm('¿Borrar todo (el día, lo que tiene Ana, lo que recuerdan, las relaciones, la historia) y empezar de cero?')) return; wiping = true; try { localStorage.removeItem('avonlea'); } catch (e) {} location.reload(); });
 try { if (!aiKey() && !localStorage.getItem('avonlea-ai-asked')) { localStorage.setItem('avonlea-ai-asked', '1'); aiPanel(true); } } catch (e) {}
 $('say').addEventListener('submit', e => { e.preventDefault(); const t = $('sayin').value.trim(); $('sayin').value = ''; closeSay(); if (t) anaSpeak(t); });
 $('sayin').addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); closeSay(); } });
@@ -2826,6 +3009,7 @@ const cam = { x: ana.x, y: ana.y };
 let last = performance.now(), TT = 0, here = null, taskTick = 0, storyT = 2;
 function update(dt){
   if (sleeping) return;
+  if (AI.on && provider() === 'manual' && aiq.list.length) return;   // (debugging by hand: the world waits for the answer)
   TT += dt; dayT += dt / 3600; boil = Math.floor(TT * 6);
   const { night } = light();
   // the season: two days each
@@ -2837,17 +3021,18 @@ function update(dt){
     else if (sleepyStage < 2 && hn >= [21, 23.5][sleepyStage] && !game.talk && !amb.cur) anaSays(pick(SLEEPY_LINES[sleepyStage++])); }
   // Ana: walks where she is told (not while talking or cooking); sits on the bench until she moves
   let mx = 0, my = 0;
-  if (!game.talk && !game.cooking && !game.map && $('ai').hidden) {
+  if (!menuOpen() && !game.cooking && !game.map && $('ai').hidden) {
     if (keys.has('ArrowLeft') || keys.has('KeyA')) mx--; if (keys.has('ArrowRight') || keys.has('KeyD')) mx++;
     if (keys.has('ArrowUp') || keys.has('KeyW')) my--; if (keys.has('ArrowDown') || keys.has('KeyS')) my++;
     if (stick) { const dx = stick.x - stick.x0, dy = stick.y - stick.y0, l = Math.hypot(dx, dy); if (l > 10) { mx = dx / Math.max(l, 50); my = dy / Math.max(l, 50); } }
   }
+  if (game.talk?.deadline && TT > game.talk.deadline && !sayOpen) { game.talk.deadline = 0; autoChoose(); }
   autoTick();
   ana.torn = !!game.anaStates.rasgado; ana.askew = !!game.anaStates.despeinada;
   ana.savoring = false;
   // walking to something she was sent to (a tap): by the A* path, and doing it on arrival
   const gt = ana.goto;
-  if (gt && (game.talk || game.cooking || game.map || mx || my || game.scene !== gt.scene)) ana.goto = null;
+  if (gt && (menuOpen() || game.cooking || game.map || mx || my || game.scene !== gt.scene)) ana.goto = null;
   else if (gt) {
     const t = gt.id ? targets().find(q => q.id === gt.id) : null;
     if (gt.id && !t) ana.goto = null;
@@ -2861,7 +3046,7 @@ function update(dt){
   if (ana.goto?.stroll) { const sv = ana.savor = ana.savor || { next: TT + 5 + Math.random() * 6, until: 0 }; if (!ana.savoring && TT > sv.next && TT >= sv.until) { sv.until = TT + 2.5 + Math.random() * 3.5; sv.next = sv.until + 6 + Math.random() * 8; } }
   const l = Math.hypot(mx, my); if (l > 1) { mx /= l; my /= l; }
   ana.moving = l > .05;
-  if (ana.moving) { ana.sit = false; ana.lie = false; ana.vx = lerp(ana.vx, mx * ana.pace, .25); ana.vy = lerp(ana.vy, my * ana.pace, .25); ana.dir = Math.abs(mx) > Math.abs(my) * .9 ? (mx > 0 ? 1 : 3) : (my > 0 ? 2 : 0); ana.idle = 0; ana.lookAround = 0; }
+  if (ana.moving) { ana.meal = null; ana.sit = false; ana.lie = false; ana.vx = lerp(ana.vx, mx * ana.pace, .25); ana.vy = lerp(ana.vy, my * ana.pace, .25); ana.dir = Math.abs(mx) > Math.abs(my) * .9 ? (mx > 0 ? 1 : 3) : (my > 0 ? 2 : 0); ana.idle = 0; ana.lookAround = 0; }
   else { ana.vx *= .7; ana.vy *= .7; ana.idle += dt; }
   if (!ana.sit) moveBy(ana, ana.vx * dt, ana.vy * dt);
   ana.walk = ana.moving ? (ana.walk + dt * 1.9 * Math.hypot(ana.vx, ana.vy) / SPEED) % 1 : 0;
@@ -2873,7 +3058,7 @@ function update(dt){
   if (game.cooking && (game.cooking.t -= dt) <= 0) { const k = game.cooking.k; game.inv[k]++; game.cooking = null; logEv('Ana cocinó ' + { tarta: 'una tarta de bayas', compota: 'compota de manzana', te: 'té' }[k] + ' en la cocina de Tejas Verdes.'); taskEvent('cocinar', k); storyEvent('cocinado'); storyEvent('cocinado:' + k); float('¡' + { tarta: 'Tarta de bayas', compota: 'Compota de manzana', te: 'Té' }[k] + ' lista!', STOVE.x, STOVE.y - 70); sfx.done(); save(); }
   // the others: Matthew about the farm, Diana about her garden (or with Ana), Marilla in the kitchen
   // (Diana goes home in the evening and stays in all winter; Mrs. Barry keeps the parlour)
-  const wantHome = night > .35 || S === 3, busy = w => game.talk?.who === w || !!amb.cur?.parts.includes(w);
+  const wantHome = night > .35 || S === 3, busy = w => (menuOpen() && game.talk.who === w) || (!!amb.cur?.parts.includes(w) && !PEOPLE[w].story && (PEOPLE[w].want == null || PEOPLE[w].where === PEOPLE[w].want));
   // a new day: news are shared at home, old errands lapse; then the plans are carried out
   if (game.lastDay !== today()) {
     if (game.lastDay != null && game.lastDay < today()) {
@@ -2885,7 +3070,7 @@ function update(dt){
   }
   runPlans(dt);
   if ((storyT -= dt) < 0) { storyT = .5; storyTick(); if (!storyBusy && (!game.story || game.story.day !== today()) && hourNow() < 18 && TT > 4) makeStory(); }
-  ambUpdate(dt); for (const b of bubbles) b.t += dt; bubbles = bubbles.filter(b => b.t < b.dur + .35);
+  mealTick(); ambUpdate(dt); for (const b of bubbles) b.t += dt; bubbles = bubbles.filter(b => b.t < b.dur + .35);
   if ((taskTick -= dt) < 0) { taskTick = .5; taskEvent('ir'); }
   // everyone but Diana follows their routine: where they are wanted (home, or visiting), walking there, or about the place
   const hr = hourNow(), visiting = k => !!CH[k].routine && PEOPLE[k].where !== 'out' && PEOPLE[k].where !== CH[k].home;
@@ -2895,6 +3080,9 @@ function update(dt){
     if (p.story?.place && p.where === 'out') p.target = { place: p.story.place, until: 99, story: true };
     if (c.hostGoals) p.goals = Object.keys(PEOPLE).some(o => visiting(o) && PEOPLE[o].where === p.where) ? c.hostGoals : p.base;
     if (busy(k)) continue;
+    const seat = p.where === 'gg' && p.want === 'gg' && MEAL(hr) && !p.story && SEATS[k];   // (mealtime: to the table)
+    if (seat) { sitSeat(p, seat, dt, c.speed.room || 30); continue; }
+    if (p.mealSat) { p.mealSat = false; p.sit = false; if (p.where === 'gg') { p.x = seatFrom(SEATS[k])[0]; p.y = seatFrom(SEATS[k])[1]; } }
     if (p.where !== p.want) { p.target = null; commute(p, p.want, dt, c.speed.walk); }
     else if (p.where === 'out') { if (!goTarget(p, dt, c.speed.walk) && game.scene === 'out') wander(p, dt, c.speed.out); }
     else if (game.scene === p.where) wander(p, dt, c.speed.room);
@@ -2936,7 +3124,7 @@ function update(dt){
   for (const b of bushes) if (!b.berries && (b.regrow -= dt) <= 0) b.berries = 3;
   for (const t of trees) if (t.kind === 'apple' && !t.apples && (t.regrow -= dt) <= 0) t.apples = 3;
   // what she can do here, and doing it
-  here = game.talk || game.cooking || game.map || !$('ai').hidden ? null : near();
+  here = menuOpen() || game.cooking || game.map || !$('ai').hidden ? null : near();
   if (actNow) { actNow = false; if (here) here.act(); }
   // life about
   for (const b of butterflies) { b.ph += dt * 9; const dx = b.tx - b.x, dy = b.ty - b.y, dd = Math.hypot(dx, dy); if (dd < 8) { b.tx = clamp(b.x + (Math.random() - .5) * 300, 0, WW); b.ty = clamp(b.y + (Math.random() - .5) * 300, 0, WH); } else { b.x += dx / dd * 22 * dt; b.y += dy / dd * 22 * dt; } }
@@ -3043,10 +3231,9 @@ function render(){
   // the rope, when she leads a cow
   { const a = ledCow(); if (a && a.where === game.scene) { const hx = ana.x + (ana.dir === 3 ? -7 : 7), hy = ana.y - 14, nx = a.x + (a.dir === 3 ? -14 : 14), ny = a.y - 17; g.strokeStyle = '#8a6a48'; g.lineWidth = 1.1; g.beginPath(); g.moveTo(hx, hy); g.quadraticCurveTo((hx + nx) / 2, Math.max(hy, ny) + 10, nx, ny); g.stroke(); } }
   // a little tag over what the pointer is on (or what she could do right here)
-  const hov = hoverAt && !game.talk && !game.map && $('ai').hidden ? targetAt(ox + hoverAt[0] / Z, oy + hoverAt[1] / Z) : null;
+  const hov = hoverAt && !menuOpen() && !game.map && $('ai').hidden ? targetAt(ox + hoverAt[0] / Z, oy + hoverAt[1] / Z) : null;
   cv.style.cursor = hov ? 'pointer' : '';
-  const tag = hov || (!bubbles.length ? here : null);
-  if (tag && !tag.self) drawTag(g, tag);
+  // (no labels over things: what can be done is discovered by trying)
   // speech bubbles over the heads of whoever is talking
   for (const b of bubbles) { const p = personOf(b.q); if (p && (b.q === 'ana' || (PEOPLE[b.q] ? sceneOf(b.q) : animalWhere(b.q)) === game.scene)) drawBubble(g, p, b); }
   // the light of the day (indoors a warm lamp at night)
@@ -3154,7 +3341,7 @@ function drawMap(){
   $('maptitle').textContent = 'Avonlea · ' + SEASONS[S] + ', día ' + (Math.floor(dayT) % 2 + 1) + ' · ' + SICON[S];
 }
 function loop(now){ const dt = clamp((now - last) / 1000, 0, .05); last = now; update(dt); render(); requestAnimationFrame(loop); }
-window.__avonlea = { STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+window.__avonlea = { aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
 requestAnimationFrame(loop);
 })();
 </script>
