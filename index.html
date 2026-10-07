@@ -270,7 +270,28 @@ function paintGround(s){
 /* ---------- people ----------
    Each is drawn at its feet, about 46 to 54 pixels tall, from the front, the back or the side. */
 const SKIN_LINE = 'rgba(150,90,60,.7)';
+// lying on the grass on her back, hands behind her head, looking at the clouds (head to the left)
+function drawLying(c, p, t){
+  const L = LOOKS[p.look], x = p.x, y = p.y, br = Math.sin(t * 1.6 + x) * .6;
+  ell(c, x + 2, y + 3, 33 * L.h, 9.5, 'rgba(50,80,35,.3)');
+  c.save(); c.translate(x, y); c.scale(L.h, L.h);
+  const shoe = '#5b3a28'; c.fillStyle = L.skin; c.fillRect(24, -6, 8, 2.6); c.fillRect(24, -1.5, 8, 2.6);
+  ell(c, 34, -4.8, 3, 2.2, shoe, true); ell(c, 34, -.3, 3, 2.2, shoe, true);
+  blob(c, [[-12, -9 - br], [24, -8], [28, 2], [-12, 3]], L.dress); c.fillStyle = L.dressD; c.fillRect(20, -8, 3, 10);
+  if (L.collar) blob(c, [[-14, -8], [-9, -9], [-9, 2], [-14, 2]], L.collar, false);
+  c.strokeStyle = L.dressD; c.lineWidth = 3; c.lineCap = 'round'; c.beginPath(); c.moveTo(-11, -6); c.lineTo(-18, -13); c.stroke(); ell(c, -22, -14, 2.4, 2, L.skin, true);
+  if (L.style === 'braids') for (const [dy, k] of [[-5, 0], [1, 1]]) { line(c, [[-26, -7 + dy * .4], [-36, -4 + dy], [-44, -3 + dy + k]], L.hair, 3.4, 5 + k); ell(c, -44, -3 + dy + k, 1.7, 1.3, '#d9433b'); }
+  if (L.style === 'curls') for (let k = 0; k < 4; k++) ell(c, -28 - k * 3.4, -5 + (k % 2) * 4, 3.2, 2.8, L.hair, true);
+  ell(c, -21, -8, 7.8, 7.6, L.skin, SKIN_LINE);
+  ell(c, -24.5, -10, 6.6, 6.2, L.hair, true); if (L.bow) ell(c, -25, -15.5, 2.4, 1.6, L.bow, true);
+  for (const ex of [-23.5, -18]) line(c, [[ex - 1.6, -8.2], [ex, -8.9], [ex + 1.6, -8.2]], '#3a2418', .9);
+  line(c, [[-22, -4.4], [-20, -4], [-18.4, -4.6]], 'rgba(200,110,90,.9)', .9);
+  if (L.freckles) for (const [fx, fy] of [[-23, -6.2], [-21.5, -5.8], [-19.6, -6.2]]) ell(c, fx, fy, .35, .35, 'rgba(150,80,50,.55)');
+  if (L.hat) { ell(c, -34, 6, 8.5, 3.4, '#e8c46a', true); ell(c, -34, 4.6, 4.4, 2.2, '#e8c46a', true); line(c, [[-38, 5.4], [-30, 5.4]], '#c0582e', 1.4); }
+  c.restore();
+}
 function drawPerson(c, p, t){
+  if (p.lie) { drawLying(c, p, t); return; }
   const L = LOOKS[p.look], x = p.x, y = p.y, w = Math.sin(p.walk * TAU), sitting = p.sit, d = p.dir, side = d === 1 || d === 3;
   const bob = p.moving ? Math.abs(Math.sin(p.walk * TAU)) * 1.6 : Math.sin(t * 2 + x) * .35, wind = Math.sin(t * 1.3) * .6 + Math.sin(t * 3.1) * .3;
   ell(c, x, y, 11 * L.h, 4, 'rgba(30,40,20,.26)');
@@ -891,7 +912,7 @@ const { matthew, marilla, diana, barry, lynde } = PEOPLE;
   if (bad.length) console.warn('[avonlea] fichas incompletas:\n' + bad.join('\n'));
 })();
 for (const k of Object.keys(CH)) game.fond[k] = 0;
-const toby = { x: ana.x + 30, y: ana.y + 20, dir: 1, walk: 0, moving: false, sitT: 0, sniff: 0, petted: 0 };
+const toby = { mode: 'near', goal: null, until: 0, x: ana.x + 30, y: ana.y + 20, dir: 1, walk: 0, moving: false, sitT: 0, sniff: 0, petted: 0 };
 const SPEED = 84, WALK = 60, RUN = 100, STROLL = 34;   // (SPEED is the reference the step animation is scaled by)
 function blockedOut(x, y){
   return x < 16 || y < 40 || x > WW - 16 || y > WH - 8 || inLake(x, y, 6) || inBrook(x, y, 2) || inHouses(x, y, 2) ||
@@ -988,7 +1009,7 @@ function walkPath(p, tx, ty, sp, dt){
 function targets(){
   const L = [], add = (id, x, y, reach, label, act, o = {}) => L.push({ id, x, y, reach, label, act, hy: 14, hit: 26, pri: 0, ...o });
   add('ana', ana.x, ana.y, 1e9, 'Ana', anaMenu, { hy: 22, hit: 15, self: true });
-  for (const k of Object.keys(PEOPLE)) { const q = PEOPLE[k]; if (sceneOf(k) === game.scene) add('p:' + k, q.x, q.y, 34, 'Hablar con ' + CH[k].article + NAMES[k], () => talk(k), { hy: 26 * LOOKS[k].h, hit: 28 }); }
+  for (const k of Object.keys(PEOPLE)) { const q = PEOPLE[k]; if (sceneOf(k) === game.scene) add('p:' + k, q.x, q.y, 34, 'Hablar con ' + CH[k].article + NAMES[k], () => talk(k), { hy: q.lie ? 8 : 26 * LOOKS[k].h, hit: q.lie ? 26 : 28 }); }
   if (game.scene === 'out') {
     add('toby', toby.x, toby.y, 28, 'Acariciar a Toby', pet, { hy: 8, hit: 22 });
     const ripe = S === 1 || S === 2;
@@ -1035,10 +1056,55 @@ function tapAt(sx, sy){
   else ana.goto = t ? { id: t.id, scene: game.scene } : { x: wx, y: wy, scene: game.scene };
 }
 const view = { ox: 0, oy: 0, Z: 1 };
+/* ---------- Toby: trots about her, goes off to sniff at bushes and trees and the pump, to see who is about,
+   comes back when she walks on; and stays close indoors ---------- */
+function dogGo(tx, ty, sp, dt){
+  const n = navStep(toby, tx, ty); if (n.arrived) { toby.moving = false; return true; }
+  const dx = n.wx - toby.x, dy = n.wy - toby.y, d = Math.hypot(dx, dy) || 1, v = Math.min(sp, d * 4), ox = toby.x, oy = toby.y;
+  moveBy(toby, dx / d * v * dt, dy / d * v * dt);
+  toby.moving = true; toby.dir = dx > 0 ? 1 : 3; toby.walk = (toby.walk + dt * 2.6 * Math.max(.6, v / 55)) % 1; toby.sitT = 0;
+  if (Math.hypot(toby.x - ox, toby.y - oy) < v * dt * .25 && (toby.stuck = (toby.stuck || 0) + dt) > .8) { toby.nav = null; toby.stuck = 0; toby.goal = null; toby.until = 0; }
+  return false;
+}
+function tobyGoal(forceNear){
+  const out = game.scene === 'out', free = (x, y) => !blocked(x, y);
+  if (!out) { for (let k = 0; k < 10; k++) { const a = Math.random() * TAU, r = 30 + Math.random() * 50, x = ana.x + Math.cos(a) * r, y = ana.y + Math.sin(a) * r; if (free(x, y)) return { p: [x, y], roam: false }; } return { p: [ana.x + 24, ana.y + 10], roam: false }; }
+  const still = ana.lie || ana.sit || (!ana.moving && ana.idle > 5);
+  if (!forceNear && (still ? Math.random() < .8 : Math.random() < .3)) {   // off exploring: something of interest, or just a spot, up to 450 away
+    const spots = [...bushes, ...trees.filter(t => t.kind === 'apple'), ...BEDS, PUMP, BENCH, ...Object.keys(PEOPLE).filter(k => sceneOf(k) === 'out').map(k => PEOPLE[k])].filter(o => { const d = dist(o.x, o.y, ana.x, ana.y); return d > 90 && d < 450; });
+    if (spots.length && Math.random() < .7) { const o = spots[Math.floor(Math.random() * spots.length)]; return { p: [o.x + (Math.random() - .5) * 40, o.y + 14], roam: true }; }
+    for (let k = 0; k < 12; k++) { const a = Math.random() * TAU, r = 140 + Math.random() * 300, x = ana.x + Math.cos(a) * r, y = ana.y + Math.sin(a) * r; if (free(x, y)) return { p: [x, y], roam: true }; }
+  }
+  const ah = ana.moving ? [[0, -1], [1, 0], [0, 1], [-1, 0]][ana.dir] : [0, 0];   // (a little ahead of her when she walks)
+  for (let k = 0; k < 10; k++) { const a = Math.random() * TAU, r = 25 + Math.random() * 90, x = ana.x + Math.cos(a) * r + ah[0] * 50, y = ana.y + Math.sin(a) * r + ah[1] * 50; if (free(x, y)) return { p: [x, y], roam: false }; }
+  return { p: [ana.x + (ana.dir === 3 ? 26 : -26), ana.y + 14], roam: false };
+}
+function tobyThink(dt){
+  toby.petted -= dt; toby.sniff -= dt;
+  if (toby.petted > 0) { toby.moving = false; toby.sitT += dt; return; }
+  const dA = dist(toby.x, toby.y, ana.x, ana.y), out = game.scene === 'out', leash = out ? (ana.moving ? 300 : 520) : 110;
+  if (dA > leash) { toby.goal = null; toby.until = 0; toby.mode = 'back'; }
+  if (toby.mode === 'back') {   // she walked on: he runs to catch up
+    if (dA < 80) toby.mode = 'near'; else { dogGo(ana.x + (ana.dir === 3 ? 26 : -26), ana.y + 14, Math.max(34, ana.pace) * 2.2 + 30, dt); return; }
+  }
+  if (!toby.goal) {
+    if (TT < toby.until) { toby.moving = false; toby.sitT += dt; toby.walk = 0; return; }
+    const g = tobyGoal(false); toby.goal = g.p; toby.roam = g.roam; toby.nav = null;
+  }
+  const sp = toby.roam ? 62 : Math.max(34, ana.pace) * 1.4 + 10;
+  if (dogGo(toby.goal[0], toby.goal[1], sp, dt)) {
+    toby.goal = null; toby.until = TT + (toby.roam ? 4 + Math.random() * 9 : 1.5 + Math.random() * 3.5);
+    if (toby.roam) toby.sniff = 1.6;
+    toby.moving = false;
+  }
+  if (!toby.moving) { toby.sitT += dt; toby.walk = 0; }
+}
+
 // putting things down and picking them up again (the watering can too), and drinking the tea she made
 function anaMenu(){
   const opts = [];
   if (game.inv.te > 0) opts.push(['☕ Tomar la taza de té', sipTea]);
+  if (game.scene === 'out' && (S !== 3 || ana.lie)) opts.push([ana.lie ? 'Levantarse' : '🌿 Recostarme en el pasto', () => { close(); if (ana.lie) { ana.lie = false; return; } if (nearPath(ana.x, ana.y, 26)) return anaSays('Aquí es camino... busco un pedacito de pasto.'); ana.lie = true; ana.sit = false; ana.goto = null; ana.dir = 2; logEv('Ana se recostó en el pasto a mirar las nubes.'); }]);
   if (game.hasCan) opts.push(['Dejar la regadera', () => dropItem('can')]);
   for (const k of ITEMS) if (game.inv[k] > 0) opts.push(['Dejar ' + itemText(k, game.inv[k]), () => dropItem(k)]);
   if (!opts.length) { float('No llevo nada en las manos', ana.x, ana.y - 60); return; }
@@ -1101,6 +1167,7 @@ function autoOptions(){
   if (sc !== 'ga') add('Subir a su pieza', { type: 'house', id: 'ga' }, late ? 2 : .5);
   if (late) add('Irse a dormir', { type: 'sleep' }, hn >= 22 ? 12 : 5);
   for (const key of ['lago', 'puente', 'camino_blanco', 'bosque_encantado', 'huerta', 'granero']) add('Pasear hasta ' + PLACES[key][0], { type: 'place', key }, 1);
+  if (sc === 'out' && S !== 3 && hn < 19) add('Recostarse en el pasto a mirar las nubes', { type: 'lie' }, 1.5);
   add('Dar un paseo sin rumbo', { type: 'wander' }, 1.5); add('Quedarse un rato soñando despierta', { type: 'idle' }, 1);
   const fresh = O.filter(o => !auto.hist.slice(-2).includes(o.label));
   return fresh.length ? fresh : O;
@@ -1116,6 +1183,7 @@ function startIntent(intent, manual, said){
   auto.intent = { ...intent, manual }; auto.thinkAt = 0; if (manual) auto.on = true;
   if (said) anaSays(said);
 }
+const LIE_LINES = ['¡Mira esa nube! Parece un dragón... no, un barco de velas blancas. ¡O una oveja con sombrero!', 'Qué bien se está en el pasto. Se oyen las abejas y, si me callo un momento, hasta el crecer de las flores.', 'Las nubes son como las ideas: pasan lentísimo y nunca se repiten.', 'Si me quedo muy quieta, quizás las hadas me confundan con una flor.'];
 const AUTO_SAY = ['¡Qué día para hacer algo bonito!', 'Se me ocurrió una idea... ¡de esas que solo tengo yo!', '¡A ver qué descubro por ahí!', 'Mi imaginación no me deja quieta.', 'Hay tanto por hacer y tan poco tiempo... ¡y yo con tantas ideas!'];
 async function autoDecide(){
   const opts = autoOptions(), sc = game.scene; if (!opts.length) { auto.thinkAt = TT + 4; return; }
@@ -1160,6 +1228,13 @@ function autoStep(){
     case 'sleep': { const next = hopTo('ga'); if (next) return go(next); if (it.started) return done(); it.started = true; return go('bed'); }
     case 'place': { const next = hopTo('out'); if (next) return go(next); if (!it.started) { it.started = true; return to(PLACES[it.key][1], PLACES[it.key][2]); } return stay(22, 16) ? undefined : done(); }
     case 'wander': if (it.started) return stay(8, 8) ? undefined : done(); it.started = true; { const [x, y] = randSpot(sc === 'out' ? 260 : 120); return to(x, y); }
+    case 'lie': {
+      if (sc !== 'out') return go(hopTo('out'));
+      if (!it.started) { it.started = true; let spot = null; for (let k = 0; k < 30 && !spot; k++) { const [x, y] = randSpot(240); if (!nearPath(x, y, 30) && !inBrook(x, y, 30) && !inLake(x, y, 30)) spot = [x, y]; } const [x, y] = spot || randSpot(100); return to(x, y); }
+      if (!ana.lie) { if (it.lay) return done(); it.lay = true; ana.lie = true; ana.sit = false; ana.dir = 2; it.until = TT + calm(40, 40); return anaSays(pick(LIE_LINES)); }
+      if (TT > it.until) { ana.lie = false; return done(); }
+      return;
+    }
     case 'idle': if (!stay(25, 25)) done(); return;
     case 'talkto': {
       const k = it.k, p = PEOPLE[k];
@@ -1227,11 +1302,11 @@ async function anaSpeak(text){
 function drawCup(c, p){ ell(c, p.x + 10, p.y - 20, 4.6, 3, '#fffaf0', true); for (let k = 0; k < 2; k++) line(c, [[p.x + 9 + k * 3, p.y - 25], [p.x + 11 + k * 3 + Math.sin(TT * 4 + k) * 1.5, p.y - 31]], 'rgba(255,255,255,.75)', 1); }
 let hoverAt = null;
 function pet(){ logEv('Ana acarició a Toby.'); ana.pet = true; ana.crouch = true; toby.petted = 2.2; toby.dir = toby.x < ana.x ? 1 : 3; ana.dir = toby.x > ana.x ? 1 : 3; game.fond.toby++; hearts(toby.x, toby.y - 24); sfx.happy(); save(); setTimeout(() => { ana.pet = false; ana.crouch = false; }, 1600); }
-function goIn(room, at){ game.scene = room; ana.x = at ? at[0] : KDOOR.x; ana.y = at ? at[1] : KIT.h - 14; ana.dir = 0; ana.sit = false; toby.x = ana.x + 26; toby.y = ana.y; if (diana.follow) { diana.where = room; diana.sit = false; diana.x = ana.x - 26; diana.y = ana.y; } cam.x = KIT.w / 2; cam.y = KIT.h / 2; }
+function goIn(room, at){ game.scene = room; ana.lie = false; diana.lie = false; ana.x = at ? at[0] : KDOOR.x; ana.y = at ? at[1] : KIT.h - 14; ana.dir = 0; ana.sit = false; toby.x = ana.x + 26; toby.y = ana.y; if (diana.follow) { diana.where = room; diana.sit = false; diana.x = ana.x - 26; diana.y = ana.y; } cam.x = KIT.w / 2; cam.y = KIT.h / 2; }
 function goOut(){
   if (ROOMS[game.scene].parent) return goIn(ROOMS[game.scene].parent, ROOMS[game.scene].exitAt);
   const H = HOUSES[game.scene].at;
-  game.scene = 'out'; ana.x = H.x; ana.y = H.y + 24; ana.dir = 2; ana.sit = false; toby.x = ana.x + 24; toby.y = ana.y + 10;
+  game.scene = 'out'; ana.lie = false; diana.lie = false; ana.x = H.x; ana.y = H.y + 24; ana.dir = 2; ana.sit = false; toby.x = ana.x + 24; toby.y = ana.y + 10;
   if (diana.follow) { diana.where = 'out'; diana.sit = false; diana.goals = DIANA_OUT; diana.x = ana.x - 24; diana.y = ana.y + 10; }
   cam.x = ana.x; cam.y = ana.y;
 }
@@ -1258,7 +1333,7 @@ function teaTime(){
 const seasonCount = () => Math.floor(dayT / 2) + game.seasonShift;
 const GIFTS = { tarta: ['tarta de bayas', '¡Una tarta! Huele de maravilla.'], compota: ['compota de manzana', '¡Qué rica compota! Gracias.'], te: ['taza de té', 'Un té calentito, justo lo que me hacía falta.'], ramo: ['ramo de flores', '¡Qué flores tan lindas! Las pondré en agua.'] };
 function talk(who, again = false){
-  const p = PEOPLE[who];
+  const p = PEOPLE[who]; p.lie = false;
   ambAbort();
   if (AI.on && !aiKey()) askKey();
   const pre = again ? [] : talkPrelude(who);
@@ -1591,7 +1666,7 @@ function stateText(who){
   const L = [
     `AHORA: día ${today() + 1} en Avonlea, ${SEASONS[S].toLowerCase()} (día ${today() % 2 + 1} de 2 de la estación), las ${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}, ${moment}.`,
     `Ana está ${placeText()}${diana.follow && who !== 'diana' ? ', paseando con Diana' : ''}; Toby la acompaña.`,
-    `Ana lleva: ${carry.length ? carry.join(', ') : 'nada en las manos'}.` + (sipping() ? ' Ana está tomando té ahora mismo, con la taza en la mano: nadie tiene que ofrecerle otro.' : '') + (onGround.length ? ` En el suelo, cerca, Ana dejó: ${onGround.join(', ')}.` : '') + (hourNow() >= 21 ? ' Ya es tarde: Ana tiene sueño y debería irse a dormir a su cama, en su cuarto del alero este.' : ''),
+    `Ana lleva: ${carry.length ? carry.join(', ') : 'nada en las manos'}.` + (ana.lie ? ' Ana está recostada en el pasto, mirando el cielo y las nubes.' : '') + (sipping() ? ' Ana está tomando té ahora mismo, con la taza en la mano: nadie tiene que ofrecerle otro.' : '') + (onGround.length ? ` En el suelo, cerca, Ana dejó: ${onGround.join(', ')}.` : '') + (hourNow() >= 21 ? ' Ya es tarde: Ana tiene sueño y debería irse a dormir a su cama, en su cuarto del alero este.' : ''),
     `La huerta: ${S === 3 ? 'duerme bajo la nieve' : `${bloom} de 6 canteros con flores; ${dry} sin regar`}.` + (game.table ? ` En la mesa de la cocina hay ${ITEM_NAME[game.table][0]}.` : ''),
     `Cariño hacia Ana (0 a 5): ${Object.keys(CH).map(k => NAMES[k] + ' ' + game.fond[k]).join(', ')}.`,
     '', `PERSONAJE: ${NAMES[who]}, que ahora está ${whereText(who)}.`, `Lo que ${NAMES[who]} puede hacer: ${abilText(who)}.` + (game.npcGiftDay[who] === today() ? ' (Hoy ya le regaló algo a Ana.)' : ''),
@@ -1747,7 +1822,7 @@ function aiTalk(who, note, turns = 0){
 // passing by: the scene is asked for a little before Ana arrives and starts when she is near
 function ambNote(parts){
   const names = parts.map(k => NAMES[k]).join(' y ');
-  if (parts.includes('diana') && diana.follow) return `Ana y Diana pasean juntas y van conversando mientras caminan${parts.length > 1 ? '; cerca está ' + parts.filter(k => k !== 'diana').map(k => NAMES[k]).join(' y ') : ''}. (Charla al pasar: nadie se lo pidió; Ana también habla.)`;
+  if (parts.includes('diana') && diana.follow) return `Ana y Diana ${ana.lie ? 'están recostadas en el pasto mirando las nubes, conversando con calma' : 'pasean juntas y van conversando mientras caminan'}${parts.length > 1 ? '; cerca está ' + parts.filter(k => k !== 'diana').map(k => NAMES[k]).join(' y ') : ''}. (Charla al pasar: nadie se lo pidió; Ana también habla.)`;
   if (parts.length > 1) return `Ana llega donde están ${names}, que conversan entre ellos. (Charla al pasar: nadie se lo pidió. Hablan sobre todo entre ellos —los vecinos, la comida, el tiempo, la cosecha, los chismes, lo que Ana hizo—; Ana se une enseguida y habla bastante.)`;
   return `Ana pasa cerca de ${names} y se detiene un momento. (Charla al pasar: nadie se lo pidió; Ana también habla. Pueden saludarse o comentar algo del momento.)`;
 }
@@ -1787,7 +1862,7 @@ function drawBubble(g, p, b){
   for (const w of b.text.split(' ')) { const t = cur ? cur + ' ' + w : w; if (cur && g.measureText(t).width > 116) { rows.push(cur); cur = w; } else cur = t; }
   rows.push(cur);
   const lh = 12, w = Math.max(...rows.map(r => g.measureText(r).width)) + 16, h = rows.length * lh + 9, a = clamp(Math.min(b.t / .15, (b.dur + .35 - b.t) / .3), 0, 1);
-  const top = p.y - 62 * LOOKS[p.look].h - 6 - (1 - a) * 5, x = p.x - w / 2, y = top - h - 5, r = 7;
+  const top = (p.lie ? p.y - 24 : p.y - 62 * LOOKS[p.look].h - 6) - (1 - a) * 5, x = p.x - w / 2, y = top - h - 5, r = 7;
   g.save(); g.globalAlpha = a; g.lineJoin = 'round';
   g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, p.x + 4, y + h, r); g.lineTo(p.x + 4, y + h); g.lineTo(p.x, top); g.lineTo(p.x - 4, y + h); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath();
   g.fillStyle = '#fffaf0'; g.fill(); g.strokeStyle = p === ana ? '#a8432c' : '#6b4a30'; g.lineWidth = 1.2; g.stroke();
@@ -1989,13 +2064,13 @@ function update(dt){
   if (ana.goto?.stroll) { const sv = ana.savor = ana.savor || { next: TT + 5 + Math.random() * 6, until: 0 }; if (!ana.savoring && TT > sv.next && TT >= sv.until) { sv.until = TT + 2.5 + Math.random() * 3.5; sv.next = sv.until + 6 + Math.random() * 8; } }
   const l = Math.hypot(mx, my); if (l > 1) { mx /= l; my /= l; }
   ana.moving = l > .05;
-  if (ana.moving) { ana.sit = false; ana.vx = lerp(ana.vx, mx * ana.pace, .25); ana.vy = lerp(ana.vy, my * ana.pace, .25); ana.dir = Math.abs(mx) > Math.abs(my) * .9 ? (mx > 0 ? 1 : 3) : (my > 0 ? 2 : 0); ana.idle = 0; ana.lookAround = 0; }
+  if (ana.moving) { ana.sit = false; ana.lie = false; ana.vx = lerp(ana.vx, mx * ana.pace, .25); ana.vy = lerp(ana.vy, my * ana.pace, .25); ana.dir = Math.abs(mx) > Math.abs(my) * .9 ? (mx > 0 ? 1 : 3) : (my > 0 ? 2 : 0); ana.idle = 0; ana.lookAround = 0; }
   else { ana.vx *= .7; ana.vy *= .7; ana.idle += dt; }
   if (!ana.sit) moveBy(ana, ana.vx * dt, ana.vy * dt);
   ana.walk = ana.moving ? (ana.walk + dt * 1.9 * Math.hypot(ana.vx, ana.vy) / SPEED) % 1 : 0;
   if (ana.idle > 3 && ana.idle < 9 && !ana.sit && !game.talk) { ana.dir = 2; ana.lookAround = Math.sin(ana.idle * 1.4) * 1.4; }
   if (ana.savoring) ana.lookAround = Math.sin(TT * 1.4) * 1.4;
-  if (ana.idle > 9 && game.scene === 'out' && !game.talk) ana.sit = true;
+  if (ana.idle > 9 && game.scene === 'out' && !game.talk && !ana.lie) ana.sit = true;
   for (const p of [ana, ...Object.values(PEOPLE)]) { p.blink -= dt; if (p.blink < -2.5 - Math.random() * 3) p.blink = .14; }
   // cooking: a moment at the stove, then it is ready
   if (game.cooking && (game.cooking.t -= dt) <= 0) { const k = game.cooking.k; game.inv[k]++; game.cooking = null; logEv('Ana cocinó ' + { tarta: 'una tarta de bayas', compota: 'compota de manzana', te: 'té' }[k] + ' en la cocina de Tejas Verdes.'); taskEvent('cocinar', k); float('¡' + { tarta: 'Tarta de bayas', compota: 'Compota de manzana', te: 'Té' }[k] + ' lista!', STOVE.x, STOVE.y - 70); sfx.done(); save(); }
@@ -2028,13 +2103,21 @@ function update(dt){
   if (diana.sit && !ana.sit) diana.sit = false;
   const dianaIn = () => { diana.where = 'os'; diana.goals = DIANA_IN; diana.x = DIANA_IN[0][0]; diana.y = DIANA_IN[0][1]; diana.homeT = 0; diana.moving = false; };
   if (diana.follow) {
-    if (diana.where === game.scene && !diana.sit) { const tx = ana.x + (ana.dir === 1 ? -24 : 24), ty = ana.y - 6; if (dist(diana.x, diana.y, tx, ty) > 18) walkPath(diana, tx, ty, Math.max(34, ana.pace) * (dist(diana.x, diana.y, tx, ty) > 80 ? 1.5 : 1), dt); else { diana.moving = false; diana.dir = ana.dir; } }
+    if (diana.where === game.scene && !diana.sit) {
+      const lying = ana.lie && game.scene === 'out', tx = lying ? ana.x + 6 : ana.x + (ana.dir === 1 ? -24 : 24), ty = lying ? ana.y + 24 : ana.y - 6;
+      if (dist(diana.x, diana.y, tx, ty) > 18) { diana.lie = false; walkPath(diana, tx, ty, Math.max(34, ana.pace) * (dist(diana.x, diana.y, tx, ty) > 80 ? 1.5 : 1), dt); }
+      else { diana.moving = false; diana.dir = ana.dir; diana.lie = lying; }
+    }
     if (night > .6 && game.scene === 'out' && !game.talk) { diana.follow = false; float('Diana se fue a casa', diana.x, diana.y - 60); }
   } else if (diana.where === 'out') {
     diana.goals = DIANA_OUT;
     if (game.scene !== 'out') { if (wantHome) dianaIn(); }
     else if (wantHome) { diana.homeT = (diana.homeT || 0) + dt; if (walkPath(diana, OS.x, OS.y + 10, 46, dt) || diana.homeT > 20 || dist(diana.x, diana.y, cam.x, cam.y) > 700) dianaIn(); }
-    else if (!busy('diana') && !goTarget(diana, dt, 46)) wander(diana, dt, 40);
+    else if (diana.lie) { if (TT > (diana.lieUntil || 0) || busy('diana') || night > .3) diana.lie = false; }
+    else if (!busy('diana') && !goTarget(diana, dt, 46)) {
+      wander(diana, dt, 40);
+      if (diana.wait > 2 && S !== 3 && night < .3 && TT > (diana.lieAt = diana.lieAt || TT + 60 + Math.random() * 90)) { diana.lie = true; diana.moving = false; diana.lieUntil = TT + 25 + Math.random() * 30; diana.lieAt = diana.lieUntil + 90 + Math.random() * 120; }
+    }
   } else if (diana.where === 'os') {
     diana.goals = DIANA_IN;
     if (!wantHome && game.scene !== 'os') { diana.where = 'out'; diana.goals = DIANA_OUT; diana.goal = 0; diana.x = OS.x; diana.y = OS.y + 30; diana.sit = false; }
@@ -2043,13 +2126,7 @@ function update(dt){
     // she came along into Green Gables and was told goodbye: out of the door she goes
     if (walkTo(diana, KDOOR.x, KIT.h - 8, 40, dt)) { diana.where = 'out'; diana.x = GG.x - 20; diana.y = GG.y + 30; }
   } else { diana.where = 'out'; diana.x = GG.x - 20; diana.y = GG.y + 30; }
-  // Toby: comes along, sniffs about, sits; wags when petted
-  const tx = ana.x + (ana.dir === 3 ? 26 : -26), ty = ana.y + 14, dx = tx - toby.x, dy = ty - toby.y, dd = Math.hypot(dx, dy);
-  toby.petted -= dt;
-  toby.moving = dd > 14 && toby.sniff <= 0 && toby.petted <= 0;
-  if (toby.moving) { const sp = Math.min(Math.max(34, ana.pace) * (dd > 90 ? 1.7 : 1.15), dd * 3); moveBy(toby, dx / dd * sp * dt, dy / dd * sp * dt); toby.dir = dx > 0 ? 1 : 3; toby.walk = (toby.walk + dt * 2.6) % 1; toby.sitT = 0; }
-  else { toby.sitT += dt; toby.walk = 0; }
-  toby.sniff -= dt; if (!ana.moving && toby.sitT > .5 && toby.sitT < 1 && Math.random() < dt * .4) toby.sniff = 1.4;
+  tobyThink(dt);
   // the garden grows (a watered bed comes up a stage after a while); berries and apples come back
   if (S !== 3) for (const b of BEDS) if (b.wet && (b.grow += dt) > 25) { b.wet = 0; b.grow = 0; b.stage = Math.min(3, b.stage + 1); }
   for (const b of bushes) if (!b.berries && (b.regrow -= dt) <= 0) b.berries = 3;
@@ -2269,7 +2346,7 @@ function drawMap(){
   $('maptitle').textContent = 'Avonlea · ' + SEASONS[S] + ', día ' + (Math.floor(dayT) % 2 + 1) + ' · ' + SICON[S];
 }
 function loop(now){ const dt = clamp((now - last) / 1000, 0, .05); last = now; update(dt); render(); requestAnimationFrame(loop); }
-window.__avonlea = { paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+window.__avonlea = { touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
 requestAnimationFrame(loop);
 })();
 </script>
