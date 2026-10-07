@@ -11,9 +11,9 @@ Todo el juego es un solo archivo, [`index.html`](index.html): se abre en el nave
 - **Abrir:** descarga `index.html` y ábrelo en el navegador.
 - **Moverse:** flechas o WASD. En el celular, arrastra el dedo.
 - **Hacer cosas:** Espacio (o E, o Enter). En el celular, el botón ✋. Cuando hay algo que hacer cerca, abajo aparece qué es.
-- **Conversaciones:** 1, 2, 3… para elegir qué responde Ana (o tocando el botón). Esc para salir.
+- **Charlas:** los personajes conversan solos en globitos cuando Ana pasa cerca (y Ana también habla: no hay que elegir qué dice). Con Espacio sobre alguien, la charla es con ella; al final solo se decide lo importante (aceptar un encargo, regalar, pasear). Espacio o un toque saltan una frase; Esc sale.
 - **Mapa:** M o el botón 🗺.
-- **Diálogos con IA:** el botón ✒ (ver más abajo).
+- **Diálogos con IA:** el botón ✒ (ver más abajo). Las charlas están pensadas para la IA; sin clave solo dicen unas frases escritas.
 
 La partida se guarda sola en el navegador: lo que lleva Ana, lo que creció en la huerta, el cariño de cada uno (♥), el día y la estación.
 

@@ -56,8 +56,8 @@ html,body{margin:0;height:100%;background:#2b3a26;overflow:hidden;touch-action:n
 <button id="aibtn" class="paper" title="Diálogos con IA">✒</button>
 <div id="ai" hidden><div class="paper sheet">
   <h3>Diálogos con IA</h3>
-  <div>Con esto activado, Matthew, Marilla, Diana y la Sra. Barry conversan con una IA: se acuerdan de lo que ha pasado y de lo que les contaste.</div>
-  <label><input type="checkbox" id="aion"> Usar IA en las conversaciones</label>
+  <div>Matthew, Marilla, Diana y la Sra. Barry conversan con una IA: cuando Ana pasa cerca charlan solos (y Ana también habla), en globitos sobre sus cabezas; se acuerdan de lo que ha pasado y de lo que se dijeron. Sin la clave, solo dicen unas frases escritas de antemano.</div>
+  <label><input type="checkbox" id="aion"> Usar IA en las conversaciones (recomendado)</label>
   <label for="aimodel">Modelo</label>
   <select id="aimodel"><option value="gpt-5.4-mini">GPT-5.4 mini (OpenAI)</option><option value="claude-opus-5-5">Claude Opus 5.5 (Anthropic)</option><option value="claude-sonnet-5-5">Claude Sonnet 5.5 (Anthropic, más rápido)</option><option value="claude-haiku-4-5">Claude Haiku 4.5 (Anthropic, el más barato)</option></select>
   <label for="aikey" id="aikeylab">Tu clave de la API</label>
@@ -699,9 +699,10 @@ const seasonCount = () => Math.floor(dayT / 2) + game.seasonShift;
 const GIFTS = { tarta: ['tarta de bayas', '¡Una tarta! Huele de maravilla.'], compota: ['compota de manzana', '¡Qué rica compota! Gracias.'], te: ['taza de té', 'Un té calentito, justo lo que me hacía falta.'], ramo: ['ramo de flores', '¡Qué flores tan lindas! Las pondré en agua.'] };
 function talk(who, again = false){
   const p = PEOPLE[who];
+  ambAbort();
   if (AI.on && !aiKey()) askKey();
   const pre = again ? [] : talkPrelude(who);
-  if (aiReady()) { face(who); conv = null; aiTalk(who, 'Ana se acerca a conversar con ' + NAMES[who] + '.' + pre.map(x => ' (' + x + ')').join('')); return; }
+  if (aiReady()) { face(who); aiTalk(who, 'Ana se acerca a conversar con ' + NAMES[who] + '.' + pre.map(x => ' (' + x + ')').join('')); return; }
   if (!p.sit) { p.dir = ana.x < p.x ? 3 : 1; if (Math.abs(ana.y - p.y) > Math.abs(ana.x - p.x)) p.dir = ana.y < p.y ? 0 : 2; }
   if (!ana.sit) ana.dir = p.x < ana.x ? 3 : 1;
   let text;
@@ -732,14 +733,13 @@ function walkOption(who){
    three things to say, and may note one new memory. Gifts and walks are still decided by the game itself, so
    nothing the AI writes can break it; if the AI is off or fails, the written lines are used. */
 // (each provider has its own key, typed in by the player and kept in this browser)
-const AI = { on: false, model: 'gpt-5.4-mini', keys: { openai: '', anthropic: '' } };
+const AI = { on: true, model: 'gpt-5.4-mini', keys: { openai: '', anthropic: '' } };
 try { const st = JSON.parse(localStorage.getItem('avonlea-ai') || '{}'); if (st.key) { AI.keys.anthropic = st.key; delete st.key; } Object.assign(AI, st); AI.keys = Object.assign({ openai: '', anthropic: '' }, st.keys || AI.keys); } catch (e) {}
 const saveAI = () => { try { localStorage.setItem('avonlea-ai', JSON.stringify(AI)); } catch (e) {} };
 const provider = (m = AI.model) => m.startsWith('gpt') ? 'openai' : 'anthropic';
 const PROV = { openai: { name: 'OpenAI', hint: 'sk-...' }, anthropic: { name: 'Anthropic', hint: 'sk-ant-...' } };
 const aiKey = () => AI.keys[provider()] || '';
 const aiReady = () => AI.on && !!aiKey();
-let conv = null;   // the conversation going on: { who, id, msgs, turns }
 const hourNow = () => (dayT % 1) * 24 + 6;   // 6 (dawn) .. 30 (dawn again)
 const ITEMS = ['bayas', 'manzanas', 'tarta', 'compota', 'te', 'ramo'];
 const ITEM_NAME = { bayas: ['baya', 'bayas'], manzanas: ['manzana', 'manzanas'], tarta: ['tarta de bayas', 'tartas de bayas'], compota: ['compota de manzana', 'compotas de manzana'], te: ['taza de té', 'tazas de té'], ramo: ['ramo de flores', 'ramos de flores'] };
@@ -861,6 +861,7 @@ function talkPrelude(who){
   const k = game.giftFor[who];
   if (k && ABIL[who].regalar.includes(k) && inSeason(k) && game.npcGiftDay[who] !== today()) { const q = k === 'bayas' || k === 'manzanas' ? 3 : 1; game.inv[k] += q; game.npcGiftDay[who] = today(); float('+' + itemText(k, q), ana.x, ana.y - 60); logEv(`${NAMES[who]} le regaló a Ana ${itemText(k, q)}.`, [who, ...witnesses()]); n.push(`Le das a Ana ${itemText(k, q)}, como tenías pensado.`); }
   delete game.giftFor[who];
+  if (amb.recent && amb.recent.parts.includes(who) && TT - amb.recent.t < 90) n.push('Estaban conversando con Ana hace un momento: ' + amb.recent.summary);
   if (p.wantsTalk) { n.push(`Tú fuiste a buscar a Ana${p.why ? ' (' + p.why + ')' : ''}.`); p.wantsTalk = false; }
   save();
   return n;
@@ -976,24 +977,27 @@ Fuera de escena existen la escuela, la señorita Stacy, la Sra. Rachel Lynde (la
 LO QUE CADA PERSONAJE SABE
 Cada uno sabe solo lo que vio, lo que le contaron en su casa y lo que conversó con Ana: está en su estado. No sabe lo que no está ahí (por ejemplo, Marilla no sabe lo que Ana hizo en casa de los Barry, a menos que se lo cuenten).
 
-CONVERSAR (cuando te piden la respuesta del personaje)
-- Habla solo como ese personaje, con su voz propia. Una a tres frases cortas: unas 40 palabras como máximo.
-- Ten en cuenta lo que es verdad ahora (la hora, la estación, el lugar, lo que Ana lleva, quién la acompaña), lo que el personaje sabe y recuerda, y su plan de hoy; nombra a veces, con naturalidad, algo de eso; no lo enumeres todo y no repitas lo que ya dijiste en esta conversación.
+ESCENAS DE CONVERSACIÓN (cuando te piden una escena)
+- Escribes lo que se dicen en voz alta, como en una obra de teatro, en "lineas": cada una es { "quien": "ana" o el personaje (matthew, marilla, diana, barry), "texto" }. Ana también habla: tú escribes sus palabras, con su voz (entusiasta, dramática, con palabras grandiosas) y el jugador no elige nada. Solo hablan Ana y los PRESENTES que te indiquen.
+- Cada uno habla solo como su personaje, con su voz propia. Cada línea es breve: una o dos frases, 18 palabras como máximo, porque se lee en un globito sobre la cabeza.
+- Una escena tiene de 2 a 6 líneas, alternando las voces con naturalidad (si hay varios personajes pueden hablarse entre ellos; no todos tienen que decir algo). Termina bien, sin dejar una pregunta abierta a Ana: con una frase de cierre, un comentario, un silencio cómodo o alguien que vuelve a lo suyo. Si el momento no pide palabras (Matthew solo saluda con la cabeza, o nadie tiene nada que decir), "lineas" puede tener una sola línea o ninguna.
+- Ten en cuenta lo que es verdad ahora (la hora, la estación, el lugar, lo que Ana lleva, quién la acompaña), lo que cada personaje sabe y recuerda, y su plan de hoy; nombra a veces, con naturalidad, algo de eso; no lo enumeres todo y no repitas lo que ya se dijo en charlas anteriores (está en lo que saben y recuerdan, y en "LO ÚLTIMO QUE SE DIJERON").
 - No contradigas el estado: no hay manzanas ni bayas en primavera ni en invierno, ni flores en invierno; si Ana no lleva algo, no lo tiene.
 - No inventes sucesos que el juego tendría que mostrar; las únicas cosas que pueden pasar son las de "encargo" y "accion".
 - El cariño (de 0 a 5) cambia el tono: con poco cariño el personaje es más reservado, con mucho es más cálido y cercano.
 - Nunca hables de juegos, puntos, corazones, inteligencia artificial ni cosas modernas.
-- "replies": dos o tres cosas distintas que Ana podría decir a continuación, con la voz de Ana, de 12 palabras como máximo cada una. No incluyas despedidas, regalos ni aceptar encargos: el juego los agrega solo.
-- "memory": si en este intercambio se dijo algo nuevo que el personaje recordaría días después (un secreto, una promesa, un plan, algo que Ana contó), una frase corta en tercera persona desde el personaje (por ejemplo "Ana le contó que quiere ser poetisa"); si no, "".
-- "encargo": de vez en cuando (no en cada conversación, y nunca si Ana ya tiene 3 encargos o ya tiene uno tuyo pendiente), el personaje puede pedirle algo a Ana, si va con su carácter y con la estación, y lo dice en "text". Tipos: "traer" (llevar "cantidad" de "item" a "para", que puede ser el mismo personaje), "regar" ("cantidad" de canteros, no en invierno), "cocinar" ("item": tarta, compota o te), "recado" (decirle "recado" a "para", otro personaje), "ir" (ir a "lugar"). Marilla pide tareas de la casa y la huerta; Matthew casi nunca pide nada, y si lo hace es tímido; Diana propone juegos, ir a lugares y recados para su madre; la Sra. Barry, recados para Marilla. Si no hay encargo, "tipo": "ninguno". Los campos que no se usan van vacíos ("" o 0).
-- "accion": algo que el personaje hace ahora mismo, solo de lo que puede hacer (está en su estado): "regalar" ("item" y "cantidad" de 1 a 3), "acompanar" (Diana sale a pasear con Ana), "ir" (se va a "lugar"). Si no hace nada, "tipo": "ninguna".
+- Charla al pasar (Ana pasa cerca, o va paseando): conversación ligera, de aire cotidiano, sin importancia. "encargo" con "tipo": "ninguno" y "accion" con "tipo": "ninguna".
+- Conversación que Ana inició (se acerca a conversar, entrega algo, acepta o rechaza un encargo): es el momento de lo importante. El jugador solo decide lo que importa (aceptar un encargo, regalar, pasear), así que el resto de lo que Ana diga lo escribes tú.
+- "resumen": una frase en tercera persona de lo que se dijo o pasó, para recordarlo después (por ejemplo "Ana le contó a Diana que quiere ser poetisa"); si no se dijo nada que valga la pena, "".
+- "encargo": de vez en cuando (no en cada conversación, solo en las que Ana inició, y nunca si Ana ya tiene 3 encargos o ya tiene uno de ese personaje pendiente), el personaje puede pedirle algo a Ana, si va con su carácter y con la estación, y lo dice en una de las líneas. Tipos: "traer" (llevar "cantidad" de "item" a "para", que puede ser el mismo personaje), "regar" ("cantidad" de canteros, no en invierno), "cocinar" ("item": tarta, compota o te), "recado" (decirle "recado" a "para", otro personaje), "ir" (ir a "lugar"). Marilla pide tareas de la casa y la huerta; Matthew casi nunca pide nada, y si lo hace es tímido; Diana propone juegos, ir a lugares y recados para su madre; la Sra. Barry, recados para Marilla. Si no hay encargo, "tipo": "ninguno". Los campos que no se usan van vacíos ("" o 0).
+- "accion": algo que un personaje hace ahora mismo, solo de lo que puede hacer (está en su estado), y solo en las conversaciones que Ana inició: "regalar" ("item" y "cantidad" de 1 a 3), "acompanar" (Diana sale a pasear con Ana), "ir" (se va a "lugar"). Si no hace nada, "tipo": "ninguna".
 
 PLANIFICAR (cuando te piden el plan del día)
 - Piensa como el personaje: su carácter, su trabajo, la estación, la hora, lo que sabe, lo que recuerda, los encargos que dio y lo que acaba de pasar.
 - Usa solo las acciones que ese personaje puede hacer. Planes sencillos y propios de su vida: Matthew trabaja en el granero, a veces pasea y busca a Ana para darle algo; Marilla cocina y riega; Diana juega, pasea a lugares bonitos y a veces busca a Ana; la Sra. Barry casi solo espera en su salita y a veces prepara un regalo.`;
 const S_ITEM = { type: 'string', enum: ['', ...ITEMS] }, S_WHO = { type: 'string', enum: ['', ...Object.keys(PEOPLE)] }, S_PLACE = { type: 'string', enum: ['', ...Object.keys(PLACES)] };
-const AI_SCHEMA = { type: 'object', additionalProperties: false, required: ['text', 'replies', 'memory', 'encargo', 'accion'], properties: {
-  text: { type: 'string' }, replies: { type: 'array', items: { type: 'string' } }, memory: { type: 'string' },
+const AI_SCHEMA = { type: 'object', additionalProperties: false, required: ['lineas', 'resumen', 'encargo', 'accion'], properties: {
+  lineas: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['quien', 'texto'], properties: { quien: { type: 'string', enum: ['ana', ...Object.keys(PEOPLE)] }, texto: { type: 'string' } } } }, resumen: { type: 'string' },
   encargo: { type: 'object', additionalProperties: false, required: ['tipo', 'item', 'cantidad', 'para', 'lugar', 'recado'], properties: { tipo: { type: 'string', enum: TASK_KINDS }, item: S_ITEM, cantidad: { type: 'integer' }, para: S_WHO, lugar: S_PLACE, recado: { type: 'string' } } },
   accion: { type: 'object', additionalProperties: false, required: ['tipo', 'item', 'cantidad', 'lugar'], properties: { tipo: { type: 'string', enum: ['ninguna', 'regalar', 'acompanar', 'ir'] }, item: S_ITEM, cantidad: { type: 'integer' }, lugar: S_PLACE } } } };
 function placeText(){
@@ -1068,36 +1072,138 @@ async function claudeCall(messages, schema, retry = true){
   return { content: data.content, out: parseJSON((data.content || []).filter(b => b.type === 'text').map(b => b.text).join('')) };
 }
 
-/* ---------- a conversation ---------- */
-function aiTalk(who, userText){
-  if (!conv || conv.who !== who || conv.model !== AI.model) conv = { who, id: Math.random(), msgs: [], turns: 0, model: AI.model };
-  const c = conv;
-  c.msgs.push({ role: 'user', content: c.msgs.length ? userText : stateText(who) + '\n\nAHORA PASA: ' + userText + '\nResponde como ' + NAMES[who] + '.' });
-  c.turns++;
+/* ---------- conversations: scenes played as speech bubbles ----------
+   The AI writes a short scene (what Ana and whoever is near say, one line each, Ana included: the player chooses
+   nothing) and the game plays it as bubbles over their heads, one at a time, then lets it end by itself.
+   - Passing by: when Ana comes near someone (or walks with Diana) the scene is asked for a little before she gets
+     there, and plays without stopping her. It can be empty: sometimes nobody says anything.
+   - On purpose (Space on someone): the same scene, and at the end the player decides only what matters (an errand,
+     a present, a walk). Space or a tap skips a line; Esc leaves. */
+const amb = { cur: null, ready: null, busy: false, tok: 0, cool: 0, err: 0, mute: {}, seen: {}, recent: null, hist: [] };
+let bubbles = [];
+const personOf = k => k === 'ana' ? ana : PEOPLE[k];
+const lineDur = t => clamp(1.7 + t.length * .055, 2.4, 7);
+const nameOf = k => k === 'ana' ? 'Ana' : NAMES[k];
+// who is in the talk: the one asked, and whoever stands close to them (and to Ana)
+function chatGroup(main){
+  const p = PEOPLE[main];
+  return [main, ...Object.keys(PEOPLE).filter(k => k !== main && sceneOf(k) === game.scene && dist(PEOPLE[k].x, PEOPLE[k].y, p.x, p.y) < 140 && dist(PEOPLE[k].x, PEOPLE[k].y, ana.x, ana.y) < 200).slice(0, 2)];
+}
+function sceneMsg(parts, note){
+  let m = stateText(parts[0]);
+  for (const k of parts.slice(1)) {
+    const kn = (game.know[k] || []).slice(-6).map(e => '  - ' + e.t).join('\n') || '  (nada)', mm = (game.mem[k] || []).slice(-4).map(x => '  - ' + x).join('\n') || '  (nada)';
+    m += `\n\nTAMBIÉN PRESENTE: ${NAMES[k]} (cariño hacia Ana: ${game.fond[k]}). Lo que sabe:\n${kn}\nLo que recuerda de sus conversaciones con Ana:\n${mm}`;
+  }
+  if (amb.hist.length) m += '\n\nLO ÚLTIMO QUE SE DIJERON (no lo repitas):\n' + amb.hist.slice(-8).map(x => '- ' + x).join('\n');
+  return m + `\n\nPRESENTES: Ana${parts.map(k => ', ' + NAMES[k]).join('')}.\nAHORA PASA: ${note}\nEscribe la escena.`;
+}
+async function sceneAsk(parts, note){
+  const r = await aiCall([{ role: 'user', content: sceneMsg(parts, note) }]), o = r.out, ok = ['ana', ...parts];
+  const lines = (Array.isArray(o.lineas) ? o.lineas : []).filter(l => l && ok.includes(l.quien) && typeof l.texto === 'string' && l.texto.trim()).slice(0, 6).map(l => ({ q: l.quien, t: l.texto.trim().slice(0, 220) }));
+  return { parts, lines, out: o, scene: game.scene, born: TT, resumen: typeof o.resumen === 'string' ? o.resumen.trim() : '' };
+}
+function sceneStart(s, directed){
+  s.i = -1; s.wait = .5; s.directed = directed; amb.cur = s; bubbles = [];
+  if (directed) { game.talk = { who: s.parts[0], scene: true }; game.talkOpts = null; $('talk').hidden = true; applyAction(s.parts[0], s.out.accion); }
+}
+function turnTo(p, to){
+  if (p === ana ? ana.moving : p.sit || (p === diana && diana.follow && p.moving)) return;
+  p.dir = to.x < p.x ? 3 : 1; if (Math.abs(to.y - p.y) > Math.abs(to.x - p.x) * 1.2) p.dir = to.y < p.y ? 0 : 2;
+}
+function ambTick(dt){
+  const s = amb.cur;
+  if (!s.directed && (game.scene !== s.scene || game.talk || game.cooking || game.map || !$('ai').hidden || s.parts.every(k => sceneOf(k) !== game.scene || dist(ana.x, ana.y, PEOPLE[k].x, PEOPLE[k].y) > 190))) return ambEnd();
+  for (const k of s.parts) if (!(k === 'diana' && diana.follow)) PEOPLE[k].moving = false;
+  if ((s.wait -= dt) > 0) return;
+  if (++s.i >= s.lines.length) return ambEnd();
+  const l = s.lines[s.i], sp = personOf(l.q), dur = lineDur(l.t);
+  bubbles = [{ q: l.q, text: l.t, t: 0, dur }]; s.wait = dur + .35; sfx.blip();
+  for (const k of ['ana', ...s.parts]) if (k !== l.q) turnTo(personOf(k), sp);
+}
+// the end of a scene (it ran out, or Ana walked off, or she spoke to someone): what happened is remembered
+function ambEnd(){
+  const s = amb.cur; amb.cur = null; if (!s) return;
+  const said = s.lines.slice(0, s.i + 1), who = s.parts[0];
+  if (said.length && (s.resumen || s.directed)) {
+    for (const l of said) amb.hist.push(nameOf(l.q) + ': ' + l.t); if (amb.hist.length > 16) amb.hist.splice(0, amb.hist.length - 16);
+    const sum = s.resumen || (s.parts.length > 1 ? 'Ana conversó con ' + s.parts.map(k => NAMES[k]).join(' y ') + '.' : 'Ana conversó con ' + NAMES[who] + '.');
+    logEv(sum, [...s.parts, ...witnesses()]); if (s.resumen) for (const k of s.parts) remember(k, sum);
+    amb.recent = { parts: s.parts, summary: said.map(l => nameOf(l.q) + ': «' + l.t + '»').join(' '), t: TT };
+  }
+  amb.cool = TT + 20;
+  for (const k of s.parts) { amb.mute[k] = TT + (k === 'diana' && diana.follow ? 70 : 110); amb.seen[k] = true; }
+  if (s.directed) { const last = [...s.lines].reverse().find(l => l.q === who) || s.lines[s.lines.length - 1]; ambMenu(who, last ? last.t : '…', s); }
+}
+// stops whatever is being said (Ana is going to talk, or leaves)
+function ambAbort(){ amb.tok = 0; amb.ready = null; if (amb.cur) { amb.cur.directed = false; ambEnd(); } bubbles = []; }
+// at the end of a talk she started: the player decides only what matters
+function ambMenu(who, text, s){
+  const opts = [], req = validTask(who, s.out.encargo);
+  if (req) {
+    opts.push(['📜 Sí, lo haré', () => { addTask(req); aiTalk(who, `(Ana acepta el encargo: ${taskText(req)}.)`, s.turns); }]);
+    opts.push(['Ahora no puedo', () => aiTalk(who, '(Ana dice que ahora no puede hacer ese encargo.)', s.turns)]);
+  }
+  opts.push(...taskOptions(who));
+  for (const [k, [name]] of Object.entries(GIFTS)) if (game.inv[k] > 0) opts.push(['Regalar ' + name, () => give(who, k)]);
+  opts.push(...walkOption(who));
+  if (!req && s.turns < 4) opts.push(['Seguir conversando', () => aiTalk(who, `(Ana sigue conversando con ${NAMES[who]}; lo último: ${s.lines.slice(-3).map(l => nameOf(l.q) + ': «' + l.t + '»').join(' ')})`, s.turns)]);
+  opts.push(['Adiós', close]);
+  say(who, text, opts);
+}
+function aiTalk(who, note, turns = 0){
+  const id = amb.tok = Math.random(), parts = chatGroup(who);
   say(who, NAMES[who] + ' está pensando…', [['Adiós', close]], true);
-  aiCall(c.msgs).then(r => {
-    if (conv !== c || game.talk?.who !== who) return;
-    const o = r.out, text = typeof o.text === 'string' ? o.text.trim() : '';
-    if (!text) throw new Error('respuesta vacía');
-    c.msgs.push({ role: 'assistant', content: r.content });
-    if (typeof o.memory === 'string' && o.memory.trim()) remember(who, o.memory.trim());
-    applyAction(who, o.accion);
-    const opts = [], req = validTask(who, o.encargo);
-    if (req) {
-      opts.push(['📜 Sí, lo haré', () => { addTask(req); aiTalk(who, `(Ana acepta el encargo: ${taskText(req)}.)`); }]);
-      opts.push(['Ahora no puedo', () => aiTalk(who, '(Ana dice que ahora no puede hacer ese encargo.)')]);
-    }
-    // (after a few exchanges the conversation winds down)
-    if (c.turns < 6) for (const q of (Array.isArray(o.replies) ? o.replies : []).filter(q => typeof q === 'string' && q.trim()).slice(0, 3)) opts.push(['«' + q.trim() + '»', () => { logEv('Ana conversó con ' + NAMES[who] + '.', [who]); aiTalk(who, 'Ana dice: «' + q.trim() + '»'); }]);
-    opts.push(...taskOptions(who));
-    for (const [k, [name]] of Object.entries(GIFTS)) if (game.inv[k] > 0) opts.push(['Regalar ' + name, () => give(who, k)]);
-    opts.push(...walkOption(who), ['Adiós', close]);
-    say(who, text, opts);
+  sceneAsk(parts, note).then(s => {
+    if (amb.tok !== id || game.talk?.who !== who) return;
+    if (!s.lines.length) throw new Error('escena vacía');
+    s.turns = turns + 1; sceneStart(s, true);
   }).catch(err => {
-    if (conv !== c) return;
-    conv = null; notice('✒ La IA no respondió (' + err.message + '). Uso las frases de siempre.');
+    if (amb.tok !== id) return;
+    amb.tok = 0; notice('✒ La IA no respondió (' + err.message + '). Uso las frases de siempre.');
     if (game.talk?.who === who) { close(); talkFixed(who); }
   });
+}
+// passing by: the scene is asked for a little before Ana arrives and starts when she is near
+const ambNote = parts => parts.includes('diana') && diana.follow
+  ? `Ana y Diana pasean juntas y van conversando mientras caminan${parts.length > 1 ? '; cerca está ' + parts.filter(k => k !== 'diana').map(k => NAMES[k]).join(' y ') : ''}. (Charla al pasar: nadie se lo pidió; Ana también habla.)`
+  : `Ana pasa cerca de ${parts.map(k => NAMES[k]).join(' y ')} y se detiene un momento. (Charla al pasar: nadie se lo pidió; Ana también habla. Pueden saludarse, comentar algo del momento o hablarse entre ellos.)`;
+function ambUpdate(dt){
+  if (amb.cur) return ambTick(dt);
+  if (game.talk || game.cooking || game.map || !$('ai').hidden) return;
+  const all = Object.keys(PEOPLE).filter(k => sceneOf(k) === game.scene), dd = k => dist(ana.x, ana.y, PEOPLE[k].x, PEOPLE[k].y);
+  for (const k of Object.keys(PEOPLE)) if (sceneOf(k) !== game.scene || dd(k) > 280) amb.seen[k] = false;
+  if (amb.ready) {
+    const s = amb.ready;
+    if (s.scene !== game.scene || TT - s.born > 50 || s.parts.every(k => sceneOf(k) !== game.scene || dd(k) > 420)) amb.ready = null;
+    else if (s.parts.some(k => sceneOf(k) === game.scene && dd(k) < 100)) { amb.ready = null; sceneStart(s, false); }
+    return;
+  }
+  if (amb.busy || TT < amb.cool || TT < amb.err) return;
+  let best = null, bd = 1e9;
+  for (const k of all) { const d = dd(k); if (TT < (amb.mute[k] || 0) || (amb.seen[k] && !(k === 'diana' && diana.follow)) || d > 240 || d >= bd) continue; best = k; bd = d; }
+  if (!best) return;
+  if (!aiReady()) {   // (without the AI: just a word from them, from the written lines)
+    if (bd < 90) { const l = LINES[best], t = l[Math.floor(Math.random() * l.length)]; amb.mute[best] = TT + 110; amb.seen[best] = true; sceneStart({ parts: [best], lines: [{ q: best, t }], out: {}, scene: game.scene, resumen: '' }, false); }
+    return;
+  }
+  const parts = chatGroup(best); amb.busy = true;
+  sceneAsk(parts, ambNote(parts)).then(s => {
+    if (s.lines.length) amb.ready = s; else for (const k of parts) { amb.mute[k] = TT + 60; amb.seen[k] = true; }
+  }).catch(e => { console.debug('[avonlea IA] charla', e.message); amb.err = TT + 60; }).finally(() => { amb.busy = false; });
+}
+function drawBubble(g, p, b){
+  g.font = '10px Georgia, serif'; g.textAlign = 'center';
+  const rows = []; let cur = '';
+  for (const w of b.text.split(' ')) { const t = cur ? cur + ' ' + w : w; if (cur && g.measureText(t).width > 116) { rows.push(cur); cur = w; } else cur = t; }
+  rows.push(cur);
+  const lh = 12, w = Math.max(...rows.map(r => g.measureText(r).width)) + 16, h = rows.length * lh + 9, a = clamp(Math.min(b.t / .15, (b.dur + .35 - b.t) / .3), 0, 1);
+  const top = p.y - 62 * LOOKS[p.look].h - 6 - (1 - a) * 5, x = p.x - w / 2, y = top - h - 5, r = 7;
+  g.save(); g.globalAlpha = a; g.lineJoin = 'round';
+  g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, p.x + 4, y + h, r); g.lineTo(p.x + 4, y + h); g.lineTo(p.x, top); g.lineTo(p.x - 4, y + h); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath();
+  g.fillStyle = '#fffaf0'; g.fill(); g.strokeStyle = p === ana ? '#a8432c' : '#6b4a30'; g.lineWidth = 1.2; g.stroke();
+  g.fillStyle = '#3b2a1c'; rows.forEach((t, k) => g.fillText(t, p.x, y + 5 + (k + 1) * lh - 3));
+  g.restore();
 }
 function askKey(){
   const P = PROV[provider()], k = (prompt(`Para conversar con IA (${AI.model}), pega tu clave de la API de ${P.name} (${P.hint}). Se guarda solo en este navegador.`) || '').trim();
@@ -1121,7 +1227,7 @@ function say(who, text, opts, wait = false){
   opts.forEach(([label, fn], k) => { const b = document.createElement('button'); b.textContent = (opts.length > 1 ? (k + 1) + '. ' : '') + label; b.onclick = e => { e.stopPropagation(); fn(); }; row.appendChild(b); });
   box.hidden = false; game.talkOpts = opts;
 }
-function close(){ $('talk').hidden = true; game.talk = null; game.talkOpts = null; conv = null; }
+function close(){ $('talk').hidden = true; game.talk = null; game.talkOpts = null; ambAbort(); }
 function cookMenu(){
   const R = [['Tarta de bayas (3 bayas)', 'tarta', { bayas: 3 }], ['Compota de manzana (3 manzanas)', 'compota', { manzanas: 3 }], ['Té', 'te', {}]];
   const opts = R.filter(([, , need]) => Object.entries(need).every(([k, n]) => game.inv[k] >= n)).map(([label, k, need]) => [label, () => { close(); for (const [i, n] of Object.entries(need)) game.inv[i] -= n; game.cooking = { k, t: 2.6 }; ana.dir = 0; sfx.cook(); }]);
@@ -1153,7 +1259,7 @@ function light(){
 let AC = null;
 function audio(){ if (!AC) try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
 function note(f, d, vol = .03, type = 'sine', at = 0){ if (!AC) return; const o = AC.createOscillator(), v = AC.createGain(), t = AC.currentTime + at; o.type = type; o.frequency.value = f; v.gain.setValueAtTime(0, t); v.gain.linearRampToValueAtTime(vol, t + .02); v.gain.exponentialRampToValueAtTime(.0001, t + d); o.connect(v); v.connect(AC.destination); o.start(t); o.stop(t + d); }
-const sfx = { happy: () => { note(660, .3); note(880, .35, .03, 'sine', .12); note(990, .4, .025, 'sine', .24); }, water: () => { for (let k = 0; k < 4; k++) note(1200 + k * 160, .08, .015, 'triangle', k * .05); }, cook: () => note(330, .5, .02, 'triangle'), done: () => { note(523, .25); note(659, .25, .03, 'sine', .1); note(784, .4, .03, 'sine', .2); } };
+const sfx = { happy: () => { note(660, .3); note(880, .35, .03, 'sine', .12); note(990, .4, .025, 'sine', .24); }, water: () => { for (let k = 0; k < 4; k++) note(1200 + k * 160, .08, .015, 'triangle', k * .05); }, cook: () => note(330, .5, .02, 'triangle'), blip: () => note(420 + Math.random() * 160, .07, .012, 'triangle'), done: () => { note(523, .25); note(659, .25, .03, 'sine', .1); note(784, .4, .03, 'sine', .2); } };
 
 /* ---------- keeping the day: in the browser ---------- */
 function save(){ try { localStorage.setItem('avonlea', JSON.stringify({ inv: game.inv, hasCan: game.hasCan, water: game.water, fond: game.fond, said: game.said, saidS: game.saidS, seasonShift: game.seasonShift, teaDay: game.teaDay, journal: game.journal, mem: game.mem, know: game.know, tasks: game.tasks, plans: game.plans, table: game.table, giftFor: game.giftFor, npcGiftDay: game.npcGiftDay, lastDay: game.lastDay, taskSeq: game.taskSeq, beds: BEDS.map(b => [b.stage, b.wet, b.grow]), dayT })); } catch (e) {} }
@@ -1169,6 +1275,7 @@ addEventListener('keydown', e => {
   audio(); hint();
   if (e.code === 'KeyM' && !game.talk) { toggleMap(); return; }
   if (game.map) { if (e.code === 'Escape' || e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); toggleMap(false); } return; }
+  if (game.talk?.scene) { if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); if (amb.cur) amb.cur.wait = 0; } else if (e.code === 'Escape') close(); return; }
   if (game.talk) {
     const n = +e.key; if (n >= 1 && game.talkOpts && game.talkOpts[n - 1]) { game.talkOpts[n - 1][1](); return; }
     if (e.code === 'Space' || e.code === 'Enter' || e.code === 'Escape') { e.preventDefault(); if (game.talkOpts && game.talkOpts.length === 1) game.talkOpts[0][1](); else if (e.code === 'Escape') close(); }
@@ -1179,7 +1286,7 @@ addEventListener('keydown', e => {
 });
 addEventListener('keyup', e => keys.delete(e.code));
 let stick = null;
-cv.addEventListener('pointerdown', e => { audio(); hint(); if (game.talk) return; stick = { x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY }; });
+cv.addEventListener('pointerdown', e => { audio(); hint(); if (game.talk) { if (game.talk.scene && amb.cur) amb.cur.wait = 0; return; } stick = { x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY }; });
 addEventListener('pointermove', e => { if (stick) { stick.x = e.clientX; stick.y = e.clientY; } });
 addEventListener('pointerup', () => { stick = null; }); addEventListener('pointercancel', () => { stick = null; });
 $('act').addEventListener('pointerdown', e => { e.stopPropagation(); audio(); actNow = true; });
@@ -1210,7 +1317,7 @@ $('aitest').addEventListener('click', async () => {
   aiSync(); const o = $('aiout'); o.hidden = false;
   if (!aiKey()) { o.textContent = 'Falta tu clave de la API de ' + PROV[provider()].name + '.'; return; }
   o.textContent = 'Preguntándole a Diana…';
-  try { const r = await aiCall([{ role: 'user', content: stateText('diana') + '\n\nAHORA PASA: Ana saluda a Diana (esto es solo una prueba de la voz).' }]); o.textContent = 'Diana: ' + r.text + '\n\nAna podría decir:\n' + r.replies.map(q => '· ' + q).join('\n'); }
+  try { const r = await sceneAsk(['diana'], 'Ana saluda a Diana (esto es solo una prueba de la voz).'); o.textContent = r.lines.map(l => nameOf(l.q) + ': ' + l.t).join('\n') || '(no dijeron nada)'; }
   catch (e) { o.textContent = 'No funcionó: ' + e.message; }
 });
 $('aimem').addEventListener('click', () => {
@@ -1223,6 +1330,7 @@ $('aimem').addEventListener('click', () => {
   o.textContent = per + '\n\n— Encargos —\n' + (game.tasks.map(t => '  ' + (t.done ? '✓ ' : '· ') + taskText(t) + ' (de ' + NAMES[t.from] + ')').join('\n') || '  (ninguno)') + '\n\n— Diario de Ana —\n' + (game.journal.slice(-30).map(e => '  · día ' + e.d + ': ' + e.t).join('\n') || '  (nada todavía)');
 });
 $('aiforget').addEventListener('click', () => { if (!confirm('¿Borrar todo lo que recuerdan y el diario de lo que ha pasado?')) return; game.mem = {}; game.journal = []; game.know = {}; game.plans = {}; game.tasks = []; game.giftFor = {}; save(); $('aiout').hidden = false; $('aiout').textContent = 'Listo: es como si fuera el primer día.'; });
+try { if (!aiKey() && !localStorage.getItem('avonlea-ai-asked')) { localStorage.setItem('avonlea-ai-asked', '1'); aiPanel(true); } } catch (e) {}
 $('mapnext').addEventListener('click', () => { game.seasonShift = (game.seasonShift + 1) % 4; save(); });
 
 /* ---------- the loop ---------- */
@@ -1254,7 +1362,7 @@ function update(dt){
   if (game.cooking && (game.cooking.t -= dt) <= 0) { const k = game.cooking.k; game.inv[k]++; game.cooking = null; logEv('Ana cocinó ' + { tarta: 'una tarta de bayas', compota: 'compota de manzana', te: 'té' }[k] + ' en la cocina de Tejas Verdes.'); taskEvent('cocinar', k); float('¡' + { tarta: 'Tarta de bayas', compota: 'Compota de manzana', te: 'Té' }[k] + ' lista!', STOVE.x, STOVE.y - 70); sfx.done(); save(); }
   // the others: Matthew about the farm, Diana about her garden (or with Ana), Marilla in the kitchen
   // (Diana goes home in the evening and stays in all winter; Mrs. Barry keeps the parlour)
-  const wantHome = night > .35 || S === 3, busy = w => game.talk?.who === w;
+  const wantHome = night > .35 || S === 3, busy = w => game.talk?.who === w || !!amb.cur?.parts.includes(w);
   // a new day: news are shared at home, old errands lapse; then the plans are carried out
   if (game.lastDay !== today()) {
     if (game.lastDay != null && game.lastDay < today()) {
@@ -1265,6 +1373,7 @@ function update(dt){
     game.lastDay = today(); save();
   }
   runPlans(dt);
+  ambUpdate(dt); for (const b of bubbles) b.t += dt; bubbles = bubbles.filter(b => b.t < b.dur + .35);
   if ((taskTick -= dt) < 0) { taskTick = .5; taskEvent('ir'); }
   if (!busy('matthew') && !goTarget(matthew, dt, 40) && game.scene === 'out') wander(matthew, dt, 34);
   if (game.scene === 'gg' && !busy('marilla')) wander(marilla, dt, 30);
@@ -1400,6 +1509,8 @@ function render(){
     else if (f.kind === 'heart') { const y = f.y - f.t * 22, s = 3; g.fillStyle = `rgba(230,80,90,${1 - f.t / 1.2})`; g.beginPath(); g.moveTo(f.x, y + s); g.bezierCurveTo(f.x - s * 2, y - s * .5, f.x - s, y - s * 1.8, f.x, y - s * .6); g.bezierCurveTo(f.x + s, y - s * 1.8, f.x + s * 2, y - s * .5, f.x, y + s); g.fill(); }
     else if (f.kind === 'drop') ell(g, f.x, f.y, 1.2, 2, `rgba(120,180,220,${1 - f.t})`);
   }
+  // speech bubbles over the heads of whoever is talking
+  for (const b of bubbles) { const p = personOf(b.q); if (p && (b.q === 'ana' || sceneOf(b.q) === game.scene)) drawBubble(g, p, b); }
   // the light of the day (indoors a warm lamp at night)
   g.setTransform(dpr, 0, 0, dpr, 0, 0);
   // snowflakes, falling leaves, petals
@@ -1508,7 +1619,7 @@ function drawMap(){
   $('maptitle').textContent = 'Avonlea · ' + SEASONS[S] + ', día ' + (Math.floor(dayT) % 2 + 1) + ' · ' + SICON[S];
 }
 function loop(now){ const dt = clamp((now - last) / 1000, 0, .05); last = now; update(dt); render(); requestAnimationFrame(loop); }
-window.__avonlea = { game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+window.__avonlea = { amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
 requestAnimationFrame(loop);
 })();
 </script>
