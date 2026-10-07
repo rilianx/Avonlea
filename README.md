@@ -23,10 +23,15 @@ La partida se guarda sola en el navegador: lo que lleva Ana, lo que creció en l
 - **Regar la huerta:** toma la regadera en la bomba y riega los seis canteros. Cada uno crece hasta florecer (rosas, girasoles, lilas), y las flores se cortan para hacer ramos.
 - **Recoger** bayas de los arbustos y manzanas del huerto de los Barry, en verano y otoño.
 - **Cocinar** en la cocina de Tejas Verdes: tarta de bayas, compota de manzana o té.
-- **Conversar y regalar** a Matthew, Marilla, Diana y la Sra. Barry, que le van tomando cariño.
+- **Conversar y regalar** a Matthew, Marilla, Diana, la Sra. Barry y la Sra. Lynde, que le van tomando cariño.
 - **Visitar a Diana** en La Cuesta del Huerto, **tomar el té** con ella en el sofá de la salita (con cordial de frambuesa, esta vez bien etiquetado), **calentarse junto al fuego** o **salir a pasear juntas**.
 - **Sentarse** en la banca del **Lago de las Aguas Brillantes**.
+- Visitar a la **Sra. Rachel Lynde** en su casa de la Hondonada, junto al arroyo: teje junto a la ventana desde donde ve pasar a todo el mundo.
 - Pasear por el **Camino Blanco de las Delicias** y el **Bosque Encantado**.
+
+## Rutinas
+
+Los personajes se mueven con horarios: **Matthew** entra a la cocina de Tejas Verdes a comer (hacia las 7, las 12 y las 18) y está con Marilla; la **Sra. Lynde** teje en su casa por la mañana y por la tarde visita a Marilla (un día) o a la Sra. Barry (al otro), caminando por los caminos. Cuando coinciden, conversan entre ellos y Ana puede quedarse escuchando.
 
 ## Las estaciones
 
