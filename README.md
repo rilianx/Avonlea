@@ -33,6 +33,12 @@ La partida se guarda sola en el navegador: lo que lleva Ana, lo que creció en l
 - Visitar a la **Sra. Rachel Lynde** en su casa de la Hondonada, junto al arroyo: teje junto a la ventana desde donde ve pasar a todo el mundo.
 - Pasear por el **Camino Blanco de las Delicias** y el **Bosque Encantado**.
 
+## La historia de cada día y quién quiere a quién
+
+- **Una historia por día:** cada mañana la IA escribe un pequeño episodio inspirado en los libros o en la serie (el cordial de frambuesa, el broche de amatista, el Bosque Encantado...), adaptado a lo que el juego puede hacer: dos a cuatro escenas con hora, lugar y quiénes están. Los personajes van solos a su lugar; arriba a la izquierda aparece la pista (📖) y, cuando Ana llega, la escena se juega. Si en ella alguien le pide algo, tú decides; la historia sigue cuando lo cumples. Sin IA, el juego elige entre unas historias escritas a mano.
+- **Quién quiere a quién (👥):** un grafo con todos los personajes y Ana; cada flecha guarda cuánto cariño le tiene uno al otro (0 a 5) y una nota. Empieza como en el libro y cambia: cada noche la IA repasa el día, ajusta las relaciones que lo merecen y deja una impresión duradera a quien vivió algo importante. Todos lo usan al conversar.
+- **Pasar al día siguiente (⏭):** salta la noche: Ana despierta en su cama, la noche se repasa y se escribe la historia del nuevo día.
+
 ## Rutinas
 
 Los personajes se mueven con horarios: **Matthew** entra a la cocina de Tejas Verdes a comer (hacia las 7, las 12 y las 18) y está con Marilla; la **Sra. Lynde** teje en su casa por la mañana y por la tarde visita a Marilla (un día) o a la Sra. Barry (al otro), caminando por los caminos. Cuando coinciden, conversan entre ellos y Ana puede quedarse escuchando.
