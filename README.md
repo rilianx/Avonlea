@@ -9,8 +9,8 @@ Todo el juego es un solo archivo, [`index.html`](index.html): se abre en el nave
 ## Cómo jugar
 
 - **Abrir:** descarga `index.html` y ábrelo en el navegador.
-- **Moverse:** flechas o WASD. En el celular, arrastra el dedo.
-- **Hacer cosas:** Espacio (o E, o Enter). En el celular, el botón ✋. Cuando hay algo que hacer cerca, abajo aparece qué es.
+- **Moverse:** flechas o WASD; o toca el suelo y Ana va hasta allí (rodea los obstáculos). En el celular, también puedes arrastrar el dedo.
+- **Hacer cosas:** toca (o haz clic en) la persona o el objeto: si Ana está cerca, lo hace al instante; si no, camina hasta allí y lo hace al llegar. Toca a Ana para dejar lo que lleva (la regadera, una taza...) o tomarse el té que preparó. Con el ratón, una etiqueta nombra lo que hay bajo el puntero. Espacio, E o Enter hacen lo de más cerca.
 - **Charlas:** los personajes conversan solos en globitos cuando Ana pasa cerca (y Ana también habla: no hay que elegir qué dice). Con Espacio sobre alguien, la charla es con ella; al final solo se decide lo importante (aceptar un encargo, regalar, pasear). Espacio o un toque saltan una frase; Esc sale.
 - **Mapa:** M o el botón 🗺.
 - **Diálogos con IA:** el botón ✒ (ver más abajo). Las charlas están pensadas para la IA; sin clave solo dicen unas frases escritas.
@@ -35,7 +35,7 @@ Los personajes se mueven con horarios: **Matthew** entra a la cocina de Tejas Ve
 
 ## Las estaciones
 
-Un día dura 8 minutos: la mañana, una tarde dorada y una noche con ventanas encendidas y luciérnagas. Cada estación dura dos días.
+Un día dura 60 minutos: la mañana, una tarde dorada y una noche con ventanas encendidas y luciérnagas. Cada estación dura dos días.
 
 - **Primavera:** manzanos y cerezos en flor, y pétalos en el aire.
 - **Verano:** bayas, manzanas y luciérnagas.
