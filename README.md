@@ -37,6 +37,7 @@ La partida se guarda sola en el navegador: lo que lleva Ana, lo que creció en l
 
 - **Una historia por día:** cada mañana la IA escribe un pequeño episodio inspirado en los libros o en la serie (el cordial de frambuesa, el broche de amatista, el Bosque Encantado...), adaptado a lo que el juego puede hacer: dos a cuatro escenas con hora, lugar y quiénes están. Los personajes van solos a su lugar; arriba a la izquierda aparece la pista (📖) y, cuando Ana llega, la escena se juega. Si en ella alguien le pide algo, tú decides; la historia sigue cuando lo cumples. Sin IA, el juego elige entre unas historias escritas a mano.
 - **Quién quiere a quién (👥):** un grafo con todos los personajes y Ana; cada flecha guarda cuánto cariño le tiene uno al otro (0 a 5) y una nota. Empieza como en el libro y cambia: cada noche la IA repasa el día, ajusta las relaciones que lo merecen y deja una impresión duradera a quien vivió algo importante. Todos lo usan al conversar.
+- **Historias escritas a mano:** en el panel 👥 se puede elegir una para el día siguiente, por ejemplo «La vaca del señor Harrison» (de *Ana de Avonlea*): con Marilla y Matthew en el pueblo, Ana persigue una vaca por la avena del Sr. Harrison, se la vende al Sr. Shearer... y descubre que Dolly estaba en el corral.
 - **Pasar al día siguiente (⏭):** salta la noche: Ana despierta en su cama, la noche se repasa y se escribe la historia del nuevo día.
 
 ## Rutinas
@@ -121,6 +122,19 @@ Inspirado en *Ana de las Tejas Verdes* de L. M. Montgomery (1908), de dominio p�
 
 Empezó como un prototipo dentro de [boulder-duo](https://github.com/rilianx/boulder-duo).
 
-## Para quien quiera agregar personajes o casas
+## Para quien quiera agregar cosas al juego
 
-Todo lo que define a un personaje está en una sola ficha de `CHARACTERS` (nombre, aspecto, voz para la IA, frases, habilidades, dónde vive y, si visita a otros, su rutina); las casas están en `HOUSES` (exterior, camino y su interior). De esas fichas se derivan los nombres, el prompt de la IA, el mapa, las rutinas y el «Hablar con…». Al cargar la página, la consola avisa si a una ficha le falta algo. Diana, la compañera de Ana, es la única con movimientos escritos aparte (en `update()`).
+Cada tipo de cosa tiene su registro en `index.html`; para agregar una, basta una entrada nueva, y el juego deriva el resto (el mapa, el prompt de la IA, los menús, las rutinas). Al cargar la página, la consola avisa si a una ficha le falta algo.
+
+| Registro | Qué es | Ejemplo |
+|---|---|---|
+| `CHARACTERS` | personajes: aspecto, voz para la IA, frases, habilidades, dónde viven (`home`: una casa, `'out'` o `'away'` si viven fuera), su rutina, su carreta (`vehicle`), qué compran (`buys`) | el Sr. Harrison, el Sr. Shearer |
+| `HOUSES` | casas: exterior, cartel, sendero, descripción para la IA y su interior (dibujo, muebles, colisiones, lo que se puede hacer dentro) | la granja del Sr. Harrison |
+| `AREAS` | lugares cercados: campos y corrales, con su cerca y su portón | el campo de avena, el corral, el potrero |
+| `ANIMALS` | animales: vacas (pastan, se escapan, se llevan de la cuerda, se venden) y loros (hablan) | Dolly, la vaca jersey, Ginger |
+| `ITEM_DEFS` | lo que Ana puede llevar: nombre, ícono, estación, receta, cómo se regala | la tarta, el té, los dólares |
+| `ANA_STATES` | cómo se ve Ana (los demás lo notan) | el vestido rasgado, el sombrero torcido |
+| `STORY_EFFECTS`, `STORY_EVENTS` | piezas de las historias: lo que pasa al empezar o terminar una escena, y lo que el juego nota | alguien se va al pueblo, una vaca se escapa; vender una vaca, cocinar, regalar |
+| `STORIES` | historias escritas a mano (con escenas, efectos, eventos y frases clave) | «La vaca del señor Harrison» |
+
+Diana, la compañera de Ana, y Toby son los únicos con movimientos escritos aparte (en `update()`).
