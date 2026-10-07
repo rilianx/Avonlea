@@ -13,6 +13,11 @@ html,body{margin:0;height:100%;background:#2b3a26;overflow:hidden;touch-action:n
 #tasks[hidden]{display:none}
 #clock{position:fixed;right:10px;top:10px;padding:4px 10px;font-size:15px;pointer-events:none}
 #talk[hidden]{display:none}
+#say{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(560px,calc(100% - 28px));display:flex;gap:6px;padding:8px 10px;z-index:20}
+#say[hidden]{display:none}
+#say input{flex:1;font:16px Georgia,serif;padding:6px 10px;border:1.5px solid #6b4a30;border-radius:8px;background:#fffaf0;color:#3b2a1c;min-width:0}
+#say button{font:15px Georgia,serif;background:#fffaf0;color:#3b2a1c;border:1.5px solid #6b4a30;border-radius:8px;padding:6px 12px;cursor:pointer}
+#saybtn{position:fixed;right:10px;top:130px;width:42px;height:36px;font-size:19px;line-height:30px;padding:0;cursor:pointer}
 #sleep{position:fixed;inset:0;z-index:30;background:#0d1020;color:#e8e2c8;font:italic 34px Georgia,serif;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 1.2s ease}
 #sleep.on{opacity:1;pointer-events:auto}
 #talk{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(560px,calc(100% - 28px));padding:12px 16px 12px;font-size:17px;line-height:1.4}
@@ -48,15 +53,18 @@ html,body{margin:0;height:100%;background:#2b3a26;overflow:hidden;touch-action:n
 <div id="inv" class="paper"></div>
 <div id="tasks" class="paper" hidden></div>
 <div id="clock" class="paper"></div>
-<div id="hint" class="paper">Flechas o WASD para pasear (o toca el suelo) · toca una persona u objeto para interactuar · M para el mapa</div>
+<div id="hint" class="paper">Flechas o WASD para pasear (o toca el suelo) · toca una persona u objeto para interactuar · Enter o T para decir algo · M para el mapa</div>
 <div id="talk" class="paper" hidden></div>
 <div id="sleep"></div>
+<form id="say" class="paper" hidden autocomplete="off"><input id="sayin" maxlength="240" placeholder="Lo que dice Ana… (Enter para decir · Esc para cerrar)" spellcheck="false"><button type="submit">Decir</button></form>
+<button id="saybtn" class="paper" title="Decir algo (Enter o T)">💬</button>
 <button id="mapbtn" class="paper" title="Mapa (M)">🗺</button>
 <button id="aibtn" class="paper" title="Diálogos con IA">✒</button>
 <div id="ai" hidden><div class="paper sheet">
   <h3>Diálogos con IA</h3>
   <div>Matthew, Marilla, Diana y la Sra. Barry conversan con una IA: cuando Ana pasa cerca charlan solos (y Ana también habla), en globitos sobre sus cabezas; se acuerdan de lo que ha pasado y de lo que se dijeron. Sin la clave, solo dicen unas frases escritas de antemano.</div>
   <label><input type="checkbox" id="aion"> Usar IA en las conversaciones (recomendado)</label>
+  <label><input type="checkbox" id="aiauto"> Ana hace lo suyo sola cuando no la controlo</label>
   <label for="aimodel">Modelo</label>
   <select id="aimodel"><option value="gpt-5.4-mini">GPT-5.4 mini (OpenAI)</option><option value="claude-opus-5-5">Claude Opus 5.5 (Anthropic)</option><option value="claude-sonnet-5-5">Claude Sonnet 5.5 (Anthropic, más rápido)</option><option value="claude-haiku-4-5">Claude Haiku 4.5 (Anthropic, el más barato)</option></select>
   <label for="aikey" id="aikeylab">Tu clave de la API</label>
@@ -1064,6 +1072,156 @@ function drawGround(c, it){
   c.font = '13px serif'; c.textAlign = 'center'; c.fillStyle = '#000'; c.fillText({ bayas: '🫐', manzanas: '🍎', tarta: '🥧', compota: '🍯', te: '☕', ramo: '💐' }[it.k], it.x, it.y - 3);
   if (it.n > 1) { c.font = 'bold 8px Georgia, serif'; c.lineWidth = 2; c.strokeStyle = 'rgba(255,250,235,.9)'; c.strokeText(it.n, it.x + 9, it.y); c.fillStyle = '#4a2f1c'; c.fillText(it.n, it.x + 9, it.y); }
 }
+/* ---------- Ana on her own ----------
+   When the player has not touched anything for a while Ana does what she wants: the AI picks one of the things she
+   could do here (or the game does, by weights), says it out loud, and she goes and does it (A* paths, through the
+   doors and up the stairs). Any key or tap gives control back. What the player makes her say can also send her off. */
+const AUTO_IDLE = 15;
+let lastInput = 0, sayOpen = false;
+const auto = { on: false, intent: null, thinkAt: 0, busy: false, err: 0, told: false, hist: [] };
+const autoAllowed = () => AI.auto !== false && !game.talk && !game.cooking && !game.map && $('ai').hidden && !sleeping && !sayOpen;
+function userInput(){ lastInput = TT; auto.on = false; if (auto.intent) { auto.intent = null; if (ana.goto?.auto) ana.goto = null; } }
+const randSpot = r => { for (let k = 0; k < 14; k++) { const x = ana.x + (Math.random() - .5) * 2 * r, y = ana.y + (Math.random() - .5) * 2 * r; if (!blocked(x, y)) return [x, y]; } return [ana.x, ana.y]; };
+// the next thing to walk to on the way to a room ('out' = the fields)
+function hopTo(goal){
+  const sc = game.scene; if (sc === goal) return null;
+  if (sc === 'out') return 'h:' + (goal === 'ga' ? 'gg' : goal);
+  return sc === 'gg' && goal === 'ga' ? 'stairs' : 'door';
+}
+function autoOptions(){
+  const O = [], hn = hourNow(), late = hn >= 20, sc = game.scene;
+  const add = (label, intent, w = 1) => O.push({ label, intent, w });
+  const skip = ['door', 'stairs', 'bed', 'stove'];
+  targets().filter(t => !t.self && t.pri < 50 && !t.id.startsWith('p:') && !t.id.startsWith('h:') && !skip.includes(t.id)).map(t => ({ t, d: dist(ana.x, ana.y, t.x, t.y) })).sort((a, b) => a.d - b.d).slice(0, 6)
+    .forEach(({ t, d }) => add(t.label, { type: 'target', id: t.id }, (t.id.startsWith('bed:') ? 3 : t.id === 'toby' || t.id === 'pump' ? 2 : 1.5) / (1 + d / 400)));
+  if (!late) add('Cocinar algo en la cocina', { type: 'cook' }, 1.2);
+  for (const k of Object.keys(PEOPLE)) if (TT >= (amb.mute[k] || 0) && !(k === 'diana' && diana.follow)) add('Ir a conversar con ' + CH[k].article + NAMES[k] + ' (' + whereText(k) + ')', { type: 'talkto', k }, 3);
+  if (sc === 'out') for (const [id, h] of Object.entries(HOUSES)) add('Entrar a ' + h.name, { type: 'house', id }, 1);
+  else add('Salir a pasear', { type: 'house', id: 'out' }, 1.5);
+  if (sc !== 'ga') add('Subir a su pieza', { type: 'house', id: 'ga' }, late ? 2 : .5);
+  if (late) add('Irse a dormir', { type: 'sleep' }, hn >= 22 ? 12 : 5);
+  for (const key of ['lago', 'puente', 'camino_blanco', 'bosque_encantado', 'huerta', 'granero']) add('Pasear hasta ' + PLACES[key][0], { type: 'place', key }, 1);
+  add('Dar un paseo sin rumbo', { type: 'wander' }, 1.5); add('Quedarse un rato soñando despierta', { type: 'idle' }, 1);
+  const fresh = O.filter(o => !auto.hist.slice(-2).includes(o.label));
+  return fresh.length ? fresh : O;
+}
+function autoMsg(opts, text){
+  const near = Object.keys(PEOPLE).filter(k => sceneOf(k) === game.scene).map(k => NAMES[k] + ' (' + whereText(k) + ')'), tasks = activeTasks().map(t => taskText(t) + ' (de ' + NAMES[t.from] + ')');
+  return worldText() + `\n\nEn este lugar están: ${near.join(', ') || 'nadie más'}.` + (tasks.length ? `\nEncargos pendientes de Ana: ${tasks.join('; ')}.` : '') + (auto.hist.length ? `\nLo último que Ana hizo por su cuenta: ${auto.hist.join('; ')}.` : '')
+    + (text ? `\n\nLa jugadora hizo decir a Ana, en voz alta: «${text}».\nANA POR SU CUENTA: ¿qué hace Ana a continuación? Opciones:\n0. Nada especial (solo lo dijo)\n` : '\n\nANA POR SU CUENTA: la jugadora no la controla ahora. Opciones:\n')
+    + opts.map((o, i) => `${i + 1}. ${o.label}`).join('\n') + (text ? '\nElige el número que corresponde a lo que dijo (0 si no dijo qué hace ni adónde va).' : '\nElige una (número en "eleccion") y escribe en "pensamiento" lo que Ana dice en voz alta al decidirlo.');
+}
+function startIntent(intent, manual, said){
+  if (!intent) return;
+  auto.intent = { ...intent, manual }; auto.thinkAt = 0; if (manual) auto.on = true;
+  if (said) anaSays(said);
+}
+const AUTO_SAY = ['¡Qué día para hacer algo bonito!', 'Se me ocurrió una idea... ¡de esas que solo tengo yo!', '¡A ver qué descubro por ahí!', 'Mi imaginación no me deja quieta.', 'Hay tanto por hacer y tan poco tiempo... ¡y yo con tantas ideas!'];
+async function autoDecide(){
+  const opts = autoOptions(), sc = game.scene; if (!opts.length) { auto.thinkAt = TT + 4; return; }
+  let pick = null, said = '';
+  if (aiReady() && TT >= auto.err) {
+    auto.busy = true;
+    try { const r = await aiCall([{ role: 'user', content: autoMsg(opts) }], AUTO_SCHEMA), o = opts[Math.round(+r.out.eleccion) - 1]; if (o) { pick = o; said = typeof r.out.pensamiento === 'string' ? r.out.pensamiento.trim() : ''; } }
+    catch (e) { console.debug('[avonlea IA] Ana sola', e.message); auto.err = TT + 60; }
+    auto.busy = false;
+    if (!autoAllowed() || TT - lastInput < AUTO_IDLE || game.scene !== sc || auto.intent) return;   // (the player took over meanwhile)
+  }
+  if (!pick) { let r = Math.random() * opts.reduce((a, o) => a + o.w, 0); pick = opts.find(o => (r -= o.w) <= 0) || opts[0]; said = Math.random() < .35 ? pick5() : ''; }
+  auto.hist.push(pick.label); if (auto.hist.length > 6) auto.hist.shift();
+  startIntent(pick.intent, false, said);
+}
+const pick5 = () => AUTO_SAY[Math.floor(Math.random() * AUTO_SAY.length)];
+function autoCook(){
+  for (const [k, need] of [['tarta', { bayas: 3 }], ['compota', { manzanas: 3 }], ['te', {}]]) {
+    if (hasIt(k) || !Object.entries(need).every(([i, n]) => game.inv[i] >= n)) continue;
+    for (const [i, n] of Object.entries(need)) game.inv[i] -= n; game.cooking = { k, t: 2.6 }; ana.dir = 0; sfx.cook(); return;
+  }
+  anaSays('Hmm, no tengo con qué cocinar nada nuevo... ¡ni siquiera cabe otra taza de té!');
+}
+// carrying out the intent, one step each time she is free
+function autoStep(){
+  const it = auto.intent, sc = game.scene;
+  const go = (id, o = {}) => { ana.goto = { id, scene: sc, auto: true, ...o }; };
+  const to = (x, y) => { ana.goto = { x, y, scene: sc, auto: true }; };
+  const done = () => { auto.intent = null; auto.thinkAt = TT + 3 + Math.random() * 6; };
+  switch (it.type) {
+    case 'house': {
+      const next = hopTo(it.id); if (next) return go(next);
+      if (it.id === 'out') return done();
+      if (!it.until) it.until = TT + 7 + Math.random() * 6;
+      if (TT > it.until) return done();
+      const [x, y] = randSpot(110); return to(x, y);
+    }
+    case 'target': if (it.started || !targets().some(t => t.id === it.id)) return done(); it.started = true; return go(it.id);
+    case 'cook': { const next = hopTo('gg'); if (next) return go(next); if (it.started) return done(); it.started = true; return go('stove', { use: autoCook }); }
+    case 'sleep': { const next = hopTo('ga'); if (next) return go(next); if (it.started) return done(); it.started = true; return go('bed'); }
+    case 'place': { const next = hopTo('out'); if (next) return go(next); if (it.started) return done(); it.started = true; return to(PLACES[it.key][1], PLACES[it.key][2]); }
+    case 'wander': if (it.started) return done(); it.started = true; { const [x, y] = randSpot(sc === 'out' ? 260 : 120); return to(x, y); }
+    case 'idle': if (!it.until) it.until = TT + 6 + Math.random() * 5; if (TT > it.until) done(); return;
+    case 'talkto': {
+      const k = it.k, p = PEOPLE[k];
+      if (sceneOf(k) !== sc) return go(hopTo(p.where));
+      if (!it.started) { it.started = true; amb.mute[k] = 0; amb.cool = 0; return go('p:' + k, { use: () => {} }); }   // (walking up to them starts a talk by itself)
+      if (!it.until) it.until = TT + 10;
+      if ((amb.recent && amb.recent.parts.includes(k) && TT - amb.recent.t < 15) || TT > it.until) return done();
+      return;
+    }
+  }
+  done();
+}
+function autoTick(){
+  if (!autoAllowed()) return;
+  const manual = auto.intent?.manual;
+  if (!manual && TT - lastInput < AUTO_IDLE) { auto.on = false; return; }
+  if (!auto.on) { auto.on = true; if (!auto.told && !manual) { auto.told = true; notice('Ana hace lo suyo; muévete o toca algo para retomar el control.'); } }
+  if (amb.cur) return;
+  if (auto.intent) { if (!ana.goto) autoStep(); return; }
+  if (TT >= auto.thinkAt && !auto.busy) autoDecide();
+}
+
+/* ---------- saying something (typed): Ana says it out loud, the others react; leaving the talk, or heading
+   somewhere, is understood by the AI ("tengo que irme", "voy a la huerta") ---------- */
+function openSay(){ if (sleeping) return; sayOpen = true; const f = $('say'); f.hidden = false; f.style.bottom = $('talk').hidden ? '14px' : ($('talk').offsetHeight + 24) + 'px'; $('sayin').focus(); }
+function closeSay(){ sayOpen = false; $('say').hidden = true; $('sayin').blur(); }
+function nearbyGroup(){
+  const d = k => dist(PEOPLE[k].x, PEOPLE[k].y, ana.x, ana.y), ks = Object.keys(PEOPLE).filter(k => sceneOf(k) === game.scene && d(k) < 180).sort((a, b) => d(a) - d(b));
+  return ks.length ? chatGroup(ks[0]) : [];
+}
+function validGo(g){
+  if (!g || g.tipo === 'ninguna') return null;
+  const d = String(g.destino || '');
+  if (g.tipo === 'irse') return { intent: null };
+  if (g.tipo === 'lugar' && PLACES[d]) return { intent: { type: 'place', key: d } };
+  if (g.tipo === 'casa' && ROOMS[d]) return { intent: { type: 'house', id: d } };
+  if (g.tipo === 'persona' && PEOPLE[d]) return { intent: { type: 'talkto', k: d } };
+  if (g.tipo === 'dormir') return { intent: { type: 'sleep' } };
+  return null;
+}
+async function anaSpeak(text){
+  text = text.trim().slice(0, 240); if (!text || sleeping) return;
+  const was = !!amb.cur || !!game.talk;
+  userInput(); close();   // (this leaves whatever was going on: a scene, a menu)
+  bubbles = [{ q: 'ana', text, t: 0, dur: lineDur(text) }]; sfx.blip();
+  const parts = nearbyGroup(), id = amb.tok = Math.random();
+  if (!aiReady()) {
+    if (parts.length) setTimeout(() => { if (amb.tok === id && !game.talk && !amb.cur) { const k = parts[0]; sceneStart({ parts: [k], lines: [{ q: k, t: LINES[k][Math.floor(Math.random() * LINES[k].length)] }], out: {}, scene: game.scene, resumen: '' }, false); } }, 1800);
+    return;
+  }
+  try {
+    if (parts.length) {
+      const s = await sceneAsk(parts, `Ana dice en voz alta (la jugadora le hizo decir esto): «${text}». ${was ? 'Interrumpe lo que se estaban diciendo. ' : ''}Escribe cómo reaccionan los demás y, si hace falta, lo que Ana añade (su frase ya se vio, no la repitas); si lo que dijo es despedirse o ir a otro lado, "ana_va" lo indica.`);
+      if (amb.tok !== id || game.talk || amb.cur) return;
+      const v = validGo(s.out.ana_va);
+      if (!s.lines.length) { if (v) startIntent(v.intent, true); return; }
+      s.after = v?.intent || null; s.noMenu = !!v; s.turns = 1;
+      sceneStart(s, !v);   // (if she is leaving, a scene she can walk out of; otherwise a talk with its decisions at the end)
+    } else {
+      const opts = autoOptions(), r = await aiCall([{ role: 'user', content: autoMsg(opts, text) }], AUTO_SCHEMA), o = opts[Math.round(+r.out.eleccion) - 1];
+      if (amb.tok === id && o) startIntent(o.intent, true);
+    }
+  } catch (e) { notice('✒ La IA no respondió (' + e.message + ').'); }
+}
 function drawCup(c, p){ ell(c, p.x + 10, p.y - 20, 4.6, 3, '#fffaf0', true); for (let k = 0; k < 2; k++) line(c, [[p.x + 9 + k * 3, p.y - 25], [p.x + 11 + k * 3 + Math.sin(TT * 4 + k) * 1.5, p.y - 31]], 'rgba(255,255,255,.75)', 1); }
 let hoverAt = null;
 function pet(){ logEv('Ana acarició a Toby.'); ana.pet = true; ana.crouch = true; toby.petted = 2.2; toby.dir = toby.x < ana.x ? 1 : 3; ana.dir = toby.x > ana.x ? 1 : 3; game.fond.toby++; hearts(toby.x, toby.y - 24); sfx.happy(); save(); setTimeout(() => { ana.pet = false; ana.crouch = false; }, 1600); }
@@ -1133,7 +1291,7 @@ function walkOption(who){
    three things to say, and may note one new memory. Gifts and walks are still decided by the game itself, so
    nothing the AI writes can break it; if the AI is off or fails, the written lines are used. */
 // (each provider has its own key, typed in by the player and kept in this browser)
-const AI = { on: true, model: 'gpt-5.4-mini', keys: { openai: '', anthropic: '' } };
+const AI = { on: true, auto: true, model: 'gpt-5.4-mini', keys: { openai: '', anthropic: '' } };
 try { const st = JSON.parse(localStorage.getItem('avonlea-ai') || '{}'); if (st.key) { AI.keys.anthropic = st.key; delete st.key; } Object.assign(AI, st); AI.keys = Object.assign({ openai: '', anthropic: '' }, st.keys || AI.keys); } catch (e) {}
 const saveAI = () => { try { localStorage.setItem('avonlea-ai', JSON.stringify(AI)); } catch (e) {} };
 const provider = (m = AI.model) => m.startsWith('gpt') ? 'openai' : 'anthropic';
@@ -1393,16 +1551,24 @@ ESCENAS DE CONVERSACIÓN (cuando te piden una escena)
 - Conversación que Ana inició (se acerca a conversar, entrega algo, acepta o rechaza un encargo): es el momento de lo importante. El jugador solo decide lo que importa (aceptar un encargo, regalar, pasear), así que el resto de lo que Ana diga lo escribes tú.
 - "resumen": una frase en tercera persona de lo que se dijo o pasó, para recordarlo después (por ejemplo "Ana le contó a Diana que quiere ser poetisa"); si no se dijo nada que valga la pena, "".
 - "encargo": de vez en cuando (no en cada conversación, solo en las que Ana inició, y nunca si Ana ya tiene 3 encargos o ya tiene uno de ese personaje pendiente), el personaje puede pedirle algo a Ana, si va con su carácter y con la estación, y lo dice en una de las líneas. Tipos: "traer" (llevar "cantidad" de "item" a "para", que puede ser el mismo personaje), "regar" ("cantidad" de canteros, no en invierno), "cocinar" ("item": tarta, compota o te), "recado" (decirle "recado" a "para", otro personaje), "ir" (ir a "lugar"). Marilla pide tareas de la casa y la huerta; Matthew casi nunca pide nada, y si lo hace es tímido; Diana propone juegos, ir a lugares y recados para su madre; la Sra. Barry, recados para Marilla. Si no hay encargo, "tipo": "ninguno". Los campos que no se usan van vacíos ("" o 0).
+- "ana_va": solo si Ana acaba de decir, por boca de la jugadora, que se va de la conversación o adónde va: "irse" (se despide, sin destino), "lugar" (destino: una de estas claves: ${Object.keys(PLACES).join(', ')}), "casa" (destino: gg = Tejas Verdes, os = La Cuesta del Huerto, rl = la casa de la Sra. Lynde, ga = su pieza), "persona" (destino: ${Object.keys(CH).join(', ')}) o "dormir". Los demás reaccionan con una despedida breve. Si no, "tipo": "ninguna" y "destino": "".
 - "accion": algo que un personaje hace ahora mismo, solo de lo que puede hacer (está en su estado), y solo en las conversaciones que Ana inició: "regalar" ("item" y "cantidad" de 1 a 3), "acompanar" (Diana sale a pasear con Ana), "ir" (se va a "lugar"). Si no hace nada, "tipo": "ninguna".
+
+ANA POR SU CUENTA (cuando te piden qué hace Ana mientras la jugadora no la controla, o qué hace tras lo que la jugadora le hizo decir)
+- Te dan opciones numeradas: elige la que Ana desearía hacer ahora (su carácter, la hora, la estación, lo que lleva, sus ganas de ver a los demás o de quedarse soñando, el sueño, lo que acaba de hacer: no repitas) y, en "pensamiento", escribe lo que Ana diría en voz alta al decidirlo (una o dos frases, con su voz).
+- Si la jugadora le hizo decir algo que indica qué hace o adónde va, elige la opción que corresponde; si ninguna corresponde, 0.
 
 PLANIFICAR (cuando te piden el plan del día)
 - Piensa como el personaje: su carácter, su trabajo, la estación, la hora, lo que sabe, lo que recuerda, los encargos que dio y lo que acaba de pasar.
 - Usa solo las acciones que ese personaje puede hacer. Planes sencillos y propios de su vida: Matthew trabaja en el granero, a veces pasea y busca a Ana para darle algo; Marilla cocina y riega; Diana juega, pasea a lugares bonitos y a veces busca a Ana; la Sra. Barry casi solo espera en su salita y a veces prepara un regalo.`;
 const S_ITEM = { type: 'string', enum: ['', ...ITEMS] }, S_WHO = { type: 'string', enum: ['', ...Object.keys(PEOPLE)] }, S_PLACE = { type: 'string', enum: ['', ...Object.keys(PLACES)] };
-const AI_SCHEMA = { type: 'object', additionalProperties: false, required: ['lineas', 'resumen', 'encargo', 'accion'], properties: {
+const AI_SCHEMA = { type: 'object', additionalProperties: false, required: ['lineas', 'resumen', 'encargo', 'accion', 'ana_va'], properties: {
+  ana_va: { type: 'object', additionalProperties: false, required: ['tipo', 'destino'], properties: { tipo: { type: 'string', enum: ['ninguna', 'irse', 'lugar', 'casa', 'persona', 'dormir'] }, destino: { type: 'string' } } },
   lineas: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['quien', 'texto'], properties: { quien: { type: 'string', enum: ['ana', ...Object.keys(PEOPLE)] }, texto: { type: 'string' } } } }, resumen: { type: 'string' },
   encargo: { type: 'object', additionalProperties: false, required: ['tipo', 'item', 'cantidad', 'para', 'lugar', 'recado'], properties: { tipo: { type: 'string', enum: TASK_KINDS }, item: S_ITEM, cantidad: { type: 'integer' }, para: S_WHO, lugar: S_PLACE, recado: { type: 'string' } } },
   accion: { type: 'object', additionalProperties: false, required: ['tipo', 'item', 'cantidad', 'lugar'], properties: { tipo: { type: 'string', enum: ['ninguna', 'regalar', 'acompanar', 'ir'] }, item: S_ITEM, cantidad: { type: 'integer' }, lugar: S_PLACE } } } };
+const AUTO_SCHEMA = { type: 'object', additionalProperties: false, required: ['eleccion', 'pensamiento'], properties: { eleccion: { type: 'integer' }, pensamiento: { type: 'string' } } };
+const worldText = () => stateText(Object.keys(CH)[0]).split('\n\n')[0];
 function whereText(k){
   const w = PEOPLE[k].where;
   return CH[k].whereText?.[w] ?? (HOUSES[w]?.inText ?? 'afuera, por Avonlea');
@@ -1543,7 +1709,8 @@ function ambEnd(){
   }
   amb.cool = TT + 20;
   for (const k of s.parts) { amb.mute[k] = TT + (k === 'diana' && diana.follow ? 70 : 110); amb.seen[k] = true; }
-  if (s.directed) { const last = [...s.lines].reverse().find(l => l.q === who) || s.lines[s.lines.length - 1]; ambMenu(who, last ? last.t : '…', s); }
+  if (s.after) startIntent(s.after, true);
+  if (s.directed && !s.noMenu) { const last = [...s.lines].reverse().find(l => l.q === who) || s.lines[s.lines.length - 1]; ambMenu(who, last ? last.t : '…', s); }
 }
 // stops whatever is being said (Ana is going to talk, or leaves)
 function ambAbort(){ amb.tok = 0; amb.ready = null; if (amb.cur) { amb.cur.directed = false; ambEnd(); } bubbles = []; }
@@ -1691,21 +1858,26 @@ let actNow = false;
 addEventListener('keydown', e => {
   if (e.target.closest && e.target.closest('input,select,textarea')) return;
   if (!$('ai').hidden) { if (e.code === 'Escape') aiPanel(false); return; }
-  audio(); hint();
+  audio(); hint(); userInput();
+  if (e.code === 'KeyT' && !game.map) { e.preventDefault(); openSay(); return; }
   if (e.code === 'KeyM' && !game.talk) { toggleMap(); return; }
   if (game.map) { if (e.code === 'Escape' || e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); toggleMap(false); } return; }
-  if (game.talk?.scene) { if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); if (amb.cur) amb.cur.wait = 0; } else if (e.code === 'Escape') close(); return; }
+  if (game.talk?.scene) {
+    if (/^Arrow|^Key[WASD]$/.test(e.code)) close();   // walking off ends the talk
+    else { if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); if (amb.cur) amb.cur.wait = 0; } else if (e.code === 'Escape') close(); return; }
+  }
   if (game.talk) {
     const n = +e.key; if (n >= 1 && game.talkOpts && game.talkOpts[n - 1]) { game.talkOpts[n - 1][1](); return; }
     if (e.code === 'Space' || e.code === 'Enter' || e.code === 'Escape') { e.preventDefault(); if (game.talkOpts && game.talkOpts.length === 1) game.talkOpts[0][1](); else if (e.code === 'Escape') close(); }
     return;
   }
+  if (e.code === 'Enter' && !game.talk) { e.preventDefault(); openSay(); return; }
   keys.add(e.code); if (e.code.startsWith('Arrow') || e.code === 'Space') e.preventDefault();
-  if (e.code === 'Space' || e.code === 'KeyE' || e.code === 'Enter') actNow = true;
+  if (e.code === 'Space' || e.code === 'KeyE') actNow = true;
 });
 addEventListener('keyup', e => keys.delete(e.code));
 let stick = null, tapStart = null;
-cv.addEventListener('pointerdown', e => { audio(); hint(); if (game.talk) { if (game.talk.scene && amb.cur) amb.cur.wait = 0; return; } stick = { x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY }; tapStart = { x: e.clientX, y: e.clientY, t: performance.now() }; });
+cv.addEventListener('pointerdown', e => { audio(); hint(); userInput(); if (game.talk) { if (game.talk.scene && amb.cur) amb.cur.wait = 0; return; } stick = { x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY }; tapStart = { x: e.clientX, y: e.clientY, t: performance.now() }; });
 addEventListener('pointermove', e => { if (stick) { stick.x = e.clientX; stick.y = e.clientY; } hoverAt = e.pointerType === 'mouse' && e.target === cv ? [e.clientX, e.clientY] : null; });
 addEventListener('pointerup', e => {
   if (tapStart && !game.talk && !game.map && $('ai').hidden && Math.hypot(e.clientX - tapStart.x, e.clientY - tapStart.y) < 10 && performance.now() - tapStart.t < 500) tapAt(e.clientX, e.clientY);
@@ -1722,7 +1894,7 @@ $('mapcv').addEventListener('click', () => toggleMap(false));
 // the AI settings: on/off, the key (kept in this browser only), the model; and a look at what they remember
 function aiPanel(on){
   $('ai').hidden = !on; if (!on) return;
-  close(); $('aion').checked = AI.on; $('aimodel').value = AI.model; $('aiout').hidden = true; aiKeyField();
+  close(); $('aion').checked = AI.on; $('aiauto').checked = AI.auto !== false; $('aimodel').value = AI.model; $('aiout').hidden = true; aiKeyField();
 }
 // the key field shows the key of the chosen model's provider
 function aiKeyField(){
@@ -1730,9 +1902,9 @@ function aiKeyField(){
   $('aikey').value = AI.keys[pv] || ''; $('aikey').placeholder = P.hint; $('aikeylab').textContent = 'Tu clave de la API de ' + P.name;
   $('ainote').textContent = `La clave la pones tú: se guarda solo en este navegador y se envía directamente a ${pv === 'openai' ? 'api.openai.com' : 'api.anthropic.com'}. No compartas el archivo ni el navegador con la clave puesta.`;
 }
-const aiSync = () => { AI.on = $('aion').checked; AI.model = $('aimodel').value; AI.keys[provider()] = $('aikey').value.trim(); saveAI(); };
+const aiSync = () => { AI.on = $('aion').checked; AI.auto = $('aiauto').checked; AI.model = $('aimodel').value; AI.keys[provider()] = $('aikey').value.trim(); saveAI(); };
 $('aimodel').addEventListener('change', () => { AI.model = $('aimodel').value; saveAI(); aiKeyField(); });
-for (const id of ['aion', 'aikey']) $(id).addEventListener('change', aiSync);
+for (const id of ['aion', 'aiauto', 'aikey']) $(id).addEventListener('change', aiSync);
 $('aibtn').addEventListener('pointerdown', e => { e.stopPropagation(); audio(); if (!game.talk) aiPanel(true); });
 $('aiclose').addEventListener('click', () => { aiSync(); aiPanel(false); });
 $('aitest').addEventListener('click', async () => {
@@ -1753,6 +1925,9 @@ $('aimem').addEventListener('click', () => {
 });
 $('aiforget').addEventListener('click', () => { if (!confirm('¿Borrar todo lo que recuerdan y el diario de lo que ha pasado?')) return; game.mem = {}; game.journal = []; game.know = {}; game.plans = {}; game.tasks = []; game.giftFor = {}; save(); $('aiout').hidden = false; $('aiout').textContent = 'Listo: es como si fuera el primer día.'; });
 try { if (!aiKey() && !localStorage.getItem('avonlea-ai-asked')) { localStorage.setItem('avonlea-ai-asked', '1'); aiPanel(true); } } catch (e) {}
+$('say').addEventListener('submit', e => { e.preventDefault(); const t = $('sayin').value.trim(); $('sayin').value = ''; closeSay(); if (t) anaSpeak(t); });
+$('sayin').addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); closeSay(); } });
+$('saybtn').addEventListener('pointerdown', e => { e.stopPropagation(); audio(); sayOpen ? closeSay() : openSay(); });
 $('mapnext').addEventListener('click', () => { game.seasonShift = (game.seasonShift + 1) % 4; save(); });
 
 /* ---------- routines: who goes where (Matthew in for meals, Mrs. Lynde's visits) ----------
@@ -1793,14 +1968,16 @@ function update(dt){
     if (keys.has('ArrowUp') || keys.has('KeyW')) my--; if (keys.has('ArrowDown') || keys.has('KeyS')) my++;
     if (stick) { const dx = stick.x - stick.x0, dy = stick.y - stick.y0, l = Math.hypot(dx, dy); if (l > 10) { mx = dx / Math.max(l, 50); my = dy / Math.max(l, 50); } }
   }
+  autoTick();
   // walking to something she was sent to (a tap): by the A* path, and doing it on arrival
   const gt = ana.goto;
   if (gt && (game.talk || game.cooking || game.map || mx || my || game.scene !== gt.scene)) ana.goto = null;
   else if (gt) {
     const t = gt.id ? targets().find(q => q.id === gt.id) : null;
     if (gt.id && !t) ana.goto = null;
-    else if (t && dist(ana.x, ana.y, t.x, t.y) < t.reach * .85) { ana.goto = null; t.act(); }
-    else { const n = navStep(ana, t ? t.x : gt.x, t ? t.y : gt.y); if (n.arrived) { ana.goto = null; if (t && dist(ana.x, ana.y, t.x, t.y) < t.reach) t.act(); } else { const dx = n.wx - ana.x, dy = n.wy - ana.y, d = Math.hypot(dx, dy) || 1; mx = dx / d; my = dy / d; } }
+    else if (gt.auto && amb.cur) { /* a talk is going on: she waits */ }
+    else if (t && dist(ana.x, ana.y, t.x, t.y) < t.reach * .85) { ana.goto = null; (gt.use || t.act)(); }
+    else { const n = navStep(ana, t ? t.x : gt.x, t ? t.y : gt.y); if (n.arrived) { ana.goto = null; if (t && dist(ana.x, ana.y, t.x, t.y) < t.reach) (gt.use || t.act)(); } else { const dx = n.wx - ana.x, dy = n.wy - ana.y, d = Math.hypot(dx, dy) || 1; mx = dx / d; my = dy / d; } }
   }
   const l = Math.hypot(mx, my); if (l > 1) { mx /= l; my /= l; }
   ana.moving = l > .05;
@@ -2083,7 +2260,7 @@ function drawMap(){
   $('maptitle').textContent = 'Avonlea · ' + SEASONS[S] + ', día ' + (Math.floor(dayT) % 2 + 1) + ' · ' + SICON[S];
 }
 function loop(now){ const dt = clamp((now - last) / 1000, 0, .05); last = now; update(dt); render(); requestAnimationFrame(loop); }
-window.__avonlea = { ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+window.__avonlea = { idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
 requestAnimationFrame(loop);
 })();
 </script>
