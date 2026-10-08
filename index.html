@@ -114,7 +114,7 @@ html,body{margin:0;height:100%;background:#2b3a26;overflow:hidden;touch-action:n
   <label for="aikey" id="aikeylab">Tu clave de la API</label>
   <input type="password" id="aikey" autocomplete="off" spellcheck="false">
   <div class="note" id="ainote"></div>
-  <div class="row"><button id="aitest">Probar</button><button id="aimem">Ver recuerdos</button><button id="aiforget">Borrar recuerdos</button><button id="aireset">Empezar de cero</button><button id="aiclose">Cerrar</button></div>
+  <div class="row"><button id="aitest">Probar</button><button id="aimem">Ver recuerdos</button><button id="ailog">Ver registro</button><button id="aiforget">Borrar recuerdos</button><button id="aireset">Empezar de cero</button><button id="aiclose">Cerrar</button></div>
   <div id="aitok"></div>
   <pre id="aiout" hidden></pre>
 </div></div>
@@ -2241,10 +2241,10 @@ const storyHere = e => ROOMS[e.lugar] ? game.scene === e.lugar : game.scene === 
 const storyPast = st => (st.hechos || []).slice(-6).map(h => h.t).join(' / ');
 function storyText(who){
   const st = game.story; if (!st || st.v !== 2 || st.day !== today()) return '';
-  const mine = st.escenas.filter(e => !isFinal(e) && e.personajes.includes(who)), past = storyPast(st);
+  const mine = st.escenas.filter(e => !isFinal(e) && e.personajes.includes(who)).slice(0, FULL() ? 9 : 1), past = FULL() ? storyPast(st) : '';   // (minimal: only what comes next for them)
   if (!mine.length && !past) return '';
-  return `LA HISTORIA DE HOY («${st.titulo}», inspirada en ${st.inspiracion})` + (past ? `. Lo que ha pasado hasta ahora (${NAMES[who]} solo sabe lo que vio o le contaron): ${past}.` : '.')
-    + (mine.length ? ` Lo que viene, en lo que toca a ${NAMES[who]}: ` + mine.map(e => `hacia las ${e.hora}:00, en ${placeName(e.lugar)}: ${e.que_pasa}`).join(' Después, ') + ' (Guíate por esto, sin adelantarlo.)' : '');
+  return `LA HISTORIA DE HOY («${st.titulo}»${FULL() ? ', inspirada en ' + st.inspiracion : ''})` + (past ? `. Lo que ha pasado hasta ahora (${NAMES[who]} solo sabe lo que vio o le contaron): ${past}.` : '.')
+    + (mine.length ? ` Lo que viene, en lo que toca a ${NAMES[who]}: ` + mine.map(e => `hacia las ${e.hora}:00, en ${placeName(e.lugar)}: ${FULL() ? e.que_pasa : e.que_pasa.slice(0, 170)}`).join(' Después, ') + ' (Guíate por esto, sin adelantarlo.)' : '');
 }
 // when what a scene needs happened (null: not yet); a missed scene that was not key counts as a gap, not as a wall
 function storyReq(st, e){
@@ -2720,9 +2720,9 @@ function sysFor(schema){
    kept in this browser, by kind of request, until put back to zero */
 let TOK = { calls: 0, in: 0, cached: 0, out: 0, kinds: {}, since: Date.now() };
 try { const t = JSON.parse(localStorage.getItem('avonlea-tokens') || 'null'); if (t && t.kinds) TOK = t; } catch (e) {}
-function tokCount(schema, inp, cached, out){
+function tokCount(schema, inp, cached, out, reason = 0){
   const k = TOK.kinds[aiqKind(schema)] = TOK.kinds[aiqKind(schema)] || { calls: 0, in: 0, cached: 0, out: 0 };
-  for (const o of [TOK, k]) { o.calls++; o.in += inp; o.cached += cached; o.out += out; }
+  for (const o of [TOK, k]) { o.calls++; o.in += inp; o.cached += cached; o.out += out; o.reason = (o.reason || 0) + reason; }
   try { localStorage.setItem('avonlea-tokens', JSON.stringify(TOK)); } catch (e) {}
   tokDraw();
 }
@@ -2731,11 +2731,27 @@ function tokDraw(){
   const all = TOK.in + TOK.cached + TOK.out, chip = $('tok');
   chip.hidden = !TOK.calls; chip.textContent = '🪙 ' + kfmt(all) + ' tokens';
   if ($('ai').hidden) return;
-  $('aitok').innerHTML = TOK.calls ? `<b>Tokens gastados</b> (desde el ${new Date(TOK.since).toLocaleDateString()}): ${kfmt(TOK.in)} de entrada, ${kfmt(TOK.cached)} desde el caché (más baratos), ${kfmt(TOK.out)} de salida; ${TOK.calls} llamadas.<br>`
+  $('aitok').innerHTML = TOK.calls ? `<b>Tokens gastados</b> (desde el ${new Date(TOK.since).toLocaleDateString()}): ${kfmt(TOK.in)} de entrada, ${kfmt(TOK.cached)} desde el caché (más baratos), ${kfmt(TOK.out)} de salida${TOK.reason ? ` (${kfmt(TOK.reason)} de ellos, razonamiento)` : ''}; ${TOK.calls} llamadas.<br>`
     + Object.entries(TOK.kinds).sort((a, b) => (b[1].in + b[1].cached + b[1].out) - (a[1].in + a[1].cached + a[1].out)).map(([k, o]) => `· ${k}: ${o.calls} × ≈${kfmt(Math.round((o.in + o.cached + o.out) / o.calls))} = ${kfmt(o.in + o.cached + o.out)}`).join('<br>')
     + ' <button id="toknull">Poner en cero</button>' : '<b>Tokens gastados:</b> todavía ninguno.';
   const left = Math.ceil((aiGate.until - performance.now()) / 1000); if (left > 0) $('aitok').innerHTML += `<br>⏸ La IA está en pausa por un error 429 (demasiados pedidos o sin saldo): vuelve a intentar en ${left} s. Mientras tanto, el juego sigue sin IA.`;
   $('toknull')?.addEventListener('click', () => { TOK = { calls: 0, in: 0, cached: 0, out: 0, kinds: {}, since: Date.now() }; try { localStorage.setItem('avonlea-tokens', JSON.stringify(TOK)); } catch (e) {} tokDraw(); });
+}
+/* the log of the last requests: what was sent (the instructions and the request), what came back, and what it cost;
+   to look at in ✒ («Ver registro») or to download whole */
+let AILOG = []; try { AILOG = JSON.parse(localStorage.getItem('avonlea-ailog') || '[]'); } catch (e) {}
+function aiLogPush(schema, model, sys, messages, out, inTok, cached, outTok, reason, effort){
+  AILOG.push({ at: Date.now(), hora: fmtHour(hourNow()), kind: aiqKind(schema), model, effort, sys, user: messages.map(m => m.content).join('\n\n'), schema: JSON.stringify(schema).length, out, tok: { in: inTok, cached, out: outTok, reason } });
+  if (AILOG.length > 30) AILOG.splice(0, AILOG.length - 30);
+  try { localStorage.setItem('avonlea-ailog', JSON.stringify(AILOG)); } catch (e) { AILOG.splice(0, 15); }
+}
+function aiLogShow(){
+  const o = $('aiout'); o.hidden = false;
+  if (!AILOG.length) { o.textContent = 'Todavía no hay pedidos registrados.'; return; }
+  o.innerHTML = '<b>Últimos pedidos</b> (el más reciente primero). Los tokens de entrada son: instrucciones + pedido + el formato (JSON Schema); los de salida incluyen el razonamiento del modelo. <button id="ailogdl">Descargar todo (JSON)</button><br>'
+    + [...AILOG].reverse().map(r => `<details><summary>${esc(r.hora)} · ${esc(r.kind)} · entrada ${r.tok.in} (caché ${r.tok.cached}) · salida ${r.tok.out}${r.tok.reason ? ' (razonamiento ' + r.tok.reason + ')' : ''} · ${esc(r.model)}${r.effort ? ' / ' + esc(r.effort) : ''}</summary>`
+      + `Instrucciones: ${r.sys.length} caracteres · pedido: ${r.user.length} · formato: ${r.schema} · respuesta: ${r.out.length}\n\n— PEDIDO —\n${esc(r.user)}\n\n— RESPUESTA —\n${esc(r.out)}\n\n— INSTRUCCIONES —\n${esc(r.sys)}</details>`).join('');
+  $('ailogdl').addEventListener('click', () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(AILOG, null, 1)], { type: 'application/json' })); a.download = 'avonlea-pedidos-ia.json'; a.click(); });
 }
 /* the AI by hand, to debug: each request waits in a little panel (and in window.__avonlea.aiq) until someone answers
    it with JSON in the requested shape — the player, another AI they paste it into, or whoever is testing the game */
@@ -2761,17 +2777,25 @@ function aiqDraw(){
   box.querySelector('textarea').value = JSON.stringify(skel(r.schema), null, 1);
 }
 // OpenAI (Chat Completions): the fixed prompt goes first so it is cached automatically; the answer must fit the schema
+// (the least reasoning the model takes: a chat needs no thinking, and its tokens are paid as output; remembered per model)
+const EFFORTS = ['none', 'minimal', 'low'], effortAt = {};
 async function openaiCall(messages, schema, strict = true){
   const body = { model: AI.model, max_completion_tokens: 4000, messages: [{ role: 'system', content: sysFor(schema) + (strict ? '' : '\n\nResponde solo con un objeto JSON que siga este esquema: ' + JSON.stringify(schema)) }, ...messages] };
-  if (strict) { body.response_format = { type: 'json_schema', json_schema: { name: 'respuesta', strict: true, schema } }; body.reasoning_effort = 'low'; }
+  const ef = effortAt[AI.model] ?? 0;
+  if (strict) { body.response_format = { type: 'json_schema', json_schema: { name: 'respuesta', strict: true, schema } }; if (ef < EFFORTS.length) body.reasoning_effort = EFFORTS[ef]; }
   else body.response_format = { type: 'json_object' };
   const { res, data } = await post('https://api.openai.com/v1/chat/completions', { 'content-type': 'application/json', authorization: 'Bearer ' + aiKey() }, body);
-  // (if the model does not take the schema or the effort setting, ask again more simply)
-  if (!res.ok) { if (res.status === 400 && strict) return openaiCall(messages, schema, false); throw httpError(res, data); }
+  // (if the model does not take that effort, the next one; if it does not take the schema, ask again more simply)
+  if (!res.ok) {
+    if (res.status === 400 && strict && body.reasoning_effort && /reasoning/i.test(data.error?.message || data.error?.param || '')) { effortAt[AI.model] = ef + 1; return openaiCall(messages, schema, true); }
+    if (res.status === 400 && strict) return openaiCall(messages, schema, false);
+    throw httpError(res, data);
+  }
   const msg = data.choices?.[0]?.message || {};
   if (msg.refusal) throw new Error('no quiso responder eso');
   console.debug('[avonlea IA]', data.model, data.usage);
-  const u = data.usage || {}, ca = u.prompt_tokens_details?.cached_tokens || 0; tokCount(schema, (u.prompt_tokens || 0) - ca, ca, u.completion_tokens || 0);
+  const u = data.usage || {}, ca = u.prompt_tokens_details?.cached_tokens || 0; tokCount(schema, (u.prompt_tokens || 0) - ca, ca, u.completion_tokens || 0, u.completion_tokens_details?.reasoning_tokens || 0);
+  aiLogPush(schema, data.model || AI.model, body.messages[0].content, messages, msg.content || '', u.prompt_tokens || 0, ca, u.completion_tokens || 0, u.completion_tokens_details?.reasoning_tokens || 0, body.reasoning_effort || '');
   return { content: msg.content || '', out: parseJSON(msg.content || '') };
 }
 // Claude (Messages API): the fixed prompt is marked for caching
@@ -2788,6 +2812,7 @@ async function claudeCall(messages, schema, retry = true){
   if (data.stop_reason === 'refusal') throw new Error('no quiso responder eso');
   console.debug('[avonlea IA]', data.model, data.usage);
   const u = data.usage || {}; tokCount(schema, (u.input_tokens || 0) + (u.cache_creation_input_tokens || 0), u.cache_read_input_tokens || 0, u.output_tokens || 0);
+  aiLogPush(schema, data.model || AI.model, body.system[0].text, messages, (data.content || []).filter(b => b.type === 'text').map(b => b.text).join(''), (u.input_tokens || 0) + (u.cache_creation_input_tokens || 0) + (u.cache_read_input_tokens || 0), u.cache_read_input_tokens || 0, u.output_tokens || 0, 0, body.output_config.effort || '');
   return { content: data.content, out: parseJSON((data.content || []).filter(b => b.type === 'text').map(b => b.text).join('')) };
 }
 
@@ -3082,6 +3107,7 @@ $('aitest').addEventListener('click', async () => {
   try { const r = await sceneAsk(['diana'], 'Ana saluda a Diana (esto es solo una prueba de la voz).'); o.textContent = r.lines.map(l => nameOf(l.q) + ': ' + l.t).join('\n') || '(no dijeron nada)'; }
   catch (e) { o.textContent = 'No funcionó: ' + e.message; }
 });
+$('ailog').addEventListener('click', aiLogShow);
 $('aimem').addEventListener('click', () => {
   const o = $('aiout'); o.hidden = false;
   const per = Object.keys(PEOPLE).map(w => {
@@ -3473,7 +3499,7 @@ function drawMap(){
   $('maptitle').textContent = 'Avonlea · ' + SEASONS[S] + ', día ' + (Math.floor(dayT) % 2 + 1) + ' · ' + SICON[S];
 }
 function loop(now){ const dt = clamp((now - last) / 1000, 0, .05); last = now; update(dt); render(); requestAnimationFrame(loop); }
-window.__avonlea = { sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+window.__avonlea = { ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
 requestAnimationFrame(loop);
 })();
 </script>
