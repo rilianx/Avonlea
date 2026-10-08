@@ -108,7 +108,7 @@ html,body{margin:0;height:100%;background:#2b3a26;overflow:hidden;touch-action:n
   <label><input type="checkbox" id="aiauto"> Ana hace lo suyo sola cuando no la controlo</label>
   <label><input type="checkbox" id="aiplans"> Los personajes planean su día con IA (en el modo completo, una vez por la mañana; si no, siguen su rutina)</label>
   <label for="aimode">Gasto de IA</label>
-  <select id="aimode"><option value="minimo">Mínimo (recomendado): instrucciones breves; la IA escribe las charlas, la historia del día y sus ramas, y el repaso de la noche</option><option value="completo">Completo: además el juez de la historia, los planes de los personajes y las decisiones de Ana (gasta varias veces más)</option></select>
+  <select id="aimode"><option value="minimo">Mínimo (recomendado): instrucciones breves; la IA escribe las charlas, la historia del día y sus ramas, el juez (una vez por hora) y el repaso de la noche</option><option value="completo">Completo: además los planes de los personajes y las decisiones de Ana (gasta varias veces más)</option></select>
   <label for="aimodel">Modelo</label>
   <select id="aimodel"><option value="gpt-5.4-mini">GPT-5.4 mini (OpenAI)</option><option value="claude-opus-5-5">Claude Opus 5.5 (Anthropic)</option><option value="claude-sonnet-5-5">Claude Sonnet 5.5 (Anthropic, más rápido)</option><option value="claude-haiku-4-5">Claude Haiku 4.5 (Anthropic, el más barato)</option><option value="manual">🐞 Yo hago de IA (depurar: respondo a mano)</option></select>
   <label for="aikey" id="aikeylab">Tu clave de la API</label>
@@ -2262,6 +2262,9 @@ const judgeSchema = ids => ({ type: 'object', additionalProperties: false, requi
 const todayLog = () => game.journal.filter(j => j.d === today() + 1);
 const whereNow = () => `DÓNDE ESTÁ CADA UNO: Ana: ${game.scene === 'out' ? placeText() : placeName(game.scene)}; ${Object.keys(CH).map(k => NAMES[k] + ': ' + whereText(k)).join('; ')}. Animales: ${Object.entries(ANIM).map(([k, a]) => `${k} (${ANIMALS[k].desc}): ${ANIMALS[k].kind !== 'cow' ? 'en su lugar' : a.state === 'bought' ? 'vendida a ' + (NAMES[a.owner] || a.owner) : a.state === 'led' ? 'Ana la lleva de la cuerda' : a.area && AREAS[a.area] ? 'en ' + AREAS[a.area].name : a.state || 'en su lugar'}`).join('; ')}. Lo que lleva Ana: ${ITEMS.filter(k => game.inv[k] > 0).map(k => itemText(k, game.inv[k])).join(', ') || 'nada'}.`;
 function judgeMsg(st, beats){
+  if (!FULL()) return `BITÁCORA DE HOY (hora: lo que pasó):\n${todayLog().slice(-25).map(j => `${j.h != null ? fmtHour(j.h) : '?'} ${j.t}`).join('\n') || '(nada)'}`
+    + `\nEVENTOS: ${Object.entries(st.ev || {}).sort((a, b) => a[1] - b[1]).map(([k, t]) => fmtHour(t) + ' ' + k).join(', ') || '(ninguno)'}\nAHORA: ${fmtHour(hourNow())}.`
+    + `\n\nPLAN (¿se cumplió?):\n${beats.map(e => `- "${e.id}" (hacia las ${e.hora}:00, en ${placeName(e.lugar)}${e.personajes.length ? ', con ' + e.personajes.map(k => NAMES[k]).join(' y ') : ''}): ${e.que_pasa}${e.fin === 'evento' ? ' (termina cuando ' + evDesc(e.evento).replace(/^./, c => c.toLowerCase()) + ')' : ''}`).join('\n')}`;
   const fin = e => e.fin === 'evento' ? 'termina cuando ' + evDesc(e.evento).replace(/^./, c => c.toLowerCase()) : e.fin === 'encargo_cumplido' ? 'termina cuando Ana cumple el encargo' : 'termina cuando se juega (Ana llega y la escena pasa)';
   return worldText() + `\n\nLA HISTORIA DE HOY: «${st.titulo}» (inspirada en ${st.inspiracion}). ${st.resumen}`
     + `\n\nBITÁCORA DE HOY (lo que de verdad pasó, con la hora):\n${todayLog().map(j => `- ${j.h != null ? fmtHour(j.h) : '?'} ${j.t}`).join('\n') || '(nada)'}`
@@ -2272,7 +2275,7 @@ function judgeMsg(st, beats){
     + `\n\nJUEZ DE LA HISTORIA: decide cada escena.`;
 }
 async function storyJudge(st, beats){
-  st.judging = true; st.judgeT = TT + 90; st.judgeN = todayLog().length;
+  st.judging = true; st.judgeH = hourNow() + 1; st.judgeN = todayLog().length;   // (the next look, in an hour of the game)
   try {
     const o = (await aiCall([{ role: 'user', content: judgeMsg(st, beats) }], judgeSchema(beats.map(e => e.id)))).out;
     if (game.story !== st || st.gen) return;
@@ -2280,6 +2283,7 @@ async function storyJudge(st, beats){
       const e = beats.find(b => b.id === v.id); if (!e || isFinal(e) || e.estado === 'jugando') continue;
       const nota = String(v.nota || '').trim().slice(0, 200); e.juicio = { v: v.veredicto, nota, h: hourNow() };
       if (v.veredicto === 'cumplida') { e.nota = nota; storyEnd(e, 'hecha'); }
+      else if (v.veredicto === 'sigue' && e.juzgada === 'pend') { e.margen += 1; if (e.vence != null) e.vence = Math.max(e.vence, hourNow()) + 1; }   // (it can still happen: one more hour)
       else if (v.veredicto === 'no_puede') { if (e.clave) { st.judging = false; storyBranch(e, 'juez:' + nota); return; } e.nota = nota; storyEnd(e, 'perdida'); }
     }
   } catch (err) { console.debug('[avonlea IA] juez', err.message); }
@@ -2287,9 +2291,8 @@ async function storyJudge(st, beats){
 }
 // before giving a scene up (or opening a branch), the judge looks at the diary: maybe it already happened, another way
 function storyWait(st, e){
-  if (!aiReady() || !FULL() || e.juzgada === 'ok') return false;
-  if (!st.judging && e.juzgada !== 'pend') { e.juzgada = 'pend'; storyJudge(st, [e]); }
-  return true;
+  if (!aiReady() || e.juzgada === 'ok') return false;
+  e.juzgada = 'pend'; return true;   // (it waits for the judge's next look)
 }
 const storyEvDone = (st, e) => e.fin === 'evento' && st.ev[e.evento] != null && st.ev[e.evento] >= (e.reqAt ?? 0);
 function storyTick(){
@@ -2328,11 +2331,13 @@ function storyTick(){
       storyEnd(e, 'hecha');
     }
   }
-  // something new in the diary: the judge looks at the scenes going on (and the ones that could start)
-  if (aiReady() && FULL() && !st.judging && TT >= (st.judgeT || 0) && todayLog().slice(st.judgeN ?? 0).some(j => /\bAna\b/.test(j.t) && !/^(Ana decidió|El día tomó otro camino)/.test(j.t))) {   // (something Ana did)
-    const c = st.escenas.filter(e => e.estado === 'abierta' || e.estado === 'jugada');
-    if (c.length) storyJudge(st, c.slice(0, 6)); else st.judgeN = todayLog().length;
+  // the judge looks once an hour of the game (if Ana did something since, or a scene waits for it)
+  if (aiReady() && !st.judging && hn >= (st.judgeH ?? 0)) {
+    const c = st.escenas.filter(e => !isFinal(e) && e.estado !== 'jugando' && (e.estado === 'abierta' || e.estado === 'jugada' || e.juzgada === 'pend'));
+    const news = todayLog().slice(st.judgeN ?? 0).some(j => /\bAna\b/.test(j.t) && !/^(Ana decidió|Ana durmió|El día tomó otro camino)/.test(j.t));
+    if (c.length && (news || c.some(e => e.juzgada === 'pend'))) storyJudge(st, c.slice(0, 6)); else st.judgeH = hn + .25;
   }
+
   // whoever is in an open scene (or in one being played) goes there (the earliest one first)
   const open = storyOpen(), pos = [...open, ...st.escenas.filter(e => e.estado === 'jugando' || (e.estado === 'jugada' && e.fin !== 'llega_ana'))];   // (they stay while the scene waits for what has to happen)
   for (const [k, p] of Object.entries(PEOPLE)) {
@@ -2701,12 +2706,13 @@ const MIN_SEC = {
   'el fin del día': () => 'FIN DEL DÍA: "relaciones": solo los cambios que el día justifica (casi siempre pocos o ninguno), "cambio" -1, 0 o 1 y una "nota" breve; "impresiones": como mucho una por personaje que vivió algo importante (una frase).',
   'el guión del día': () => `GUIÓN: una historia breve para hoy, inspirada en un episodio de los libros o de la serie, tierna y con humor, jugable aquí (conversar, ir a lugares, encargos). De 2 a 5 escenas en orden, con "hora" entre la indicada y las 20: "id" breve; "lugar" (clave); "personajes" (sin Ana; Diana solo afuera o en os; en ga Ana está sola); "que_pasa" (1 o 2 frases); "pista" (12 palabras como máximo, sin contar el final); "encargo" (o "ninguno"); "fin": llega_ana, encargo_cumplido o evento (con "evento"); "efectos" al empezar o terminar (${Object.entries(STORY_EFFECTS).map(([k, f]) => k + ': ' + f.desc).join('; ')}; animales: ${Object.keys(ANIMALS).join(', ')}; áreas: ${Object.keys(AREAS).join(', ')}; estados de Ana: ${Object.keys(ANA_STATES).join(', ')}); "frases": hasta 3 frases clave o []; "requiere": ids o eventos que deben pasar antes; "clave": true si sin ella la historia no puede seguir; "contra": eventos que la desvían. Eventos: ${Object.keys(STORY_EVENTS).join(', ')}.`,
   'una rama de la historia': () => MIN_SEC['el guión del día']() + '\nRAMA NUEVA: la historia se desvió; escribe cómo sigue (de 1 a 3 escenas, mismo formato) desde lo que de verdad pasó, con el mismo tono; "titulo_rama" y "resumen".',
-  'el juez de la historia': () => 'JUEZ: para cada escena, "cumplida" si lo esencial ya pasó según la bitácora (aunque fuera distinto), "sigue" si aún puede pasar, "no_puede" si ya no; ante la duda, "sigue". "nota": una frase.',
+  'el juez de la historia': () => 'Eres el juez de la historia de un juego: con la bitácora de lo que de verdad pasó, dices si cada escena del plan se cumplió. Responde solo con el JSON pedido.\nJUEZ: para cada escena, "cumplida" si lo esencial ya pasó según la bitácora (aunque fuera distinto), "sigue" si aún puede pasar, "no_puede" si ya no; ante la duda, "sigue". "nota": una frase.',
   'los planes del día': () => 'PLANES: planes sencillos y propios de la vida de cada uno, solo con lo que puede hacer.',
   'un cambio de plan': () => 'PLANES: planes sencillos y propios de su vida, solo con lo que puede hacer.',
 };
 function sysFor(schema){
   const kind = aiqKind(schema);
+  if (!FULL() && kind === 'el juez de la historia') return MIN_SEC[kind]();   // (the judge needs no characters)
   if (!FULL() && MIN_SEC[kind]) return MIN_HEAD() + '\n\n' + MIN_SEC[kind]();
   const secs = SYS_FOR[kind]; return secs ? SYS.head + '\n\n' + secs.map(k => SYS.sec[k] || '').join('\n\n') : AI_SYSTEM;
 }
