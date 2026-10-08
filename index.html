@@ -56,6 +56,13 @@ html,body{margin:0;height:100%;background:#2b3a26;overflow:hidden;touch-action:n
 #talk .tbar{height:3px;background:rgba(107,74,48,.15);margin-top:8px;border-radius:2px;overflow:hidden}
 #talk .tbar i{display:block;height:100%;width:100%;background:#a8432c;animation:tbar 10s linear forwards}
 @keyframes tbar{from{width:100%}to{width:0}}
+#trip{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:20;width:min(520px,calc(100% - 28px));padding:14px 18px;font-size:15px;line-height:1.45}
+#trip[hidden]{display:none}
+#trip .tt{font-size:19px;font-style:italic;text-align:center}
+#trip .road{position:relative;height:30px;margin:10px 0 2px;border-bottom:3px dotted #b59a6a}
+#trip .road span{position:absolute;bottom:2px;font-size:22px;transform:scaleX(-1)}
+#trip .ts{text-align:center;font-size:13px;color:#6b4a30;font-style:italic;margin-bottom:8px}
+#trip #triplines div{margin:4px 0}
 #aiq{position:fixed;right:64px;top:10px;z-index:30;width:min(460px,calc(100% - 20px));padding:8px 10px;font-size:13px}
 #aiq[hidden]{display:none}
 #aiq .h{font-weight:bold;color:#7a3a22}
@@ -92,6 +99,7 @@ html,body{margin:0;height:100%;background:#2b3a26;overflow:hidden;touch-action:n
 <div id="tok" class="paper" title="Tokens gastados con la IA" hidden></div>
 <div id="hint" class="paper">Flechas o WASD para pasear (o toca el suelo) · toca una persona u objeto para interactuar · Enter o T para decir algo · M para el mapa</div>
 <div id="talk" class="paper" hidden></div>
+<div id="trip" class="paper" hidden><div class="tt" id="triptitle"></div><div class="road"><span id="tripcart">🐴</span></div><div class="ts" id="tripstop"></div><div id="triplines"></div></div>
 <div id="aiq" class="paper" hidden><div class="h">🐞 La IA eres tú · <span class="n"></span></div><details><summary>Ver el pedido</summary><pre class="p"></pre></details><textarea spellcheck="false"></textarea><div><button class="ok">Responder</button><button class="cp">📋 Copiar todo (para otra IA)</button><button class="no">Que falle</button><button class="all">Que fallen todos los de este tipo</button></div></div>
 <div id="sleep"></div>
 <form id="say" class="paper" hidden autocomplete="off"><input id="sayin" maxlength="240" placeholder="Lo que dice Ana… (Enter para decir · Esc para cerrar)" spellcheck="false"><button type="submit">Decir</button></form>
@@ -106,6 +114,7 @@ html,body{margin:0;height:100%;background:#2b3a26;overflow:hidden;touch-action:n
   <div>Matthew, Marilla, Diana y la Sra. Barry conversan con una IA: cuando Ana pasa cerca charlan solos (y Ana también habla), en globitos sobre sus cabezas; se acuerdan de lo que ha pasado y de lo que se dijeron. Sin la clave, solo dicen unas frases escritas de antemano.</div>
   <label><input type="checkbox" id="aion"> Usar IA en las conversaciones (recomendado)</label>
   <label><input type="checkbox" id="aiauto"> Ana hace lo suyo sola cuando no la controlo</label>
+  <label><input type="checkbox" id="aistories"> Historia del día (un guion inspirado en los libros; con IA, se escribe cada mañana)</label>
   <label><input type="checkbox" id="aiplans"> Los personajes planean su día con IA (en el modo completo, una vez por la mañana; si no, siguen su rutina)</label>
   <label for="aimode">Gasto de IA</label>
   <select id="aimode"><option value="minimo">Mínimo (recomendado): instrucciones breves; la IA escribe las charlas, la historia del día y sus ramas, el juez (una vez por hora) y el repaso de la noche</option><option value="completo">Completo: además los planes de los personajes y las decisiones de Ana (gasta varias veces más)</option></select>
@@ -138,7 +147,7 @@ html,body{margin:0;height:100%;background:#2b3a26;overflow:hidden;touch-action:n
 (() => {
 'use strict';
 const cv = document.getElementById('cv'), g = cv.getContext('2d');
-const T = 32, WW = 72 * T, WH = 50 * T, TAU = Math.PI * 2;
+const T = 32, K = 2.5, U = T * K, WW = 72 * U, WH = 50 * U, TAU = Math.PI * 2, KK = K * K;   // (U: the unit of distances outdoors; T: the size of things)
 function rng(seed){ return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 const R = rng(18780228);
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v)), lerp = (a, b, k) => a + (b - a) * k, dist = (a, b, c, d) => Math.hypot(a - c, b - d);
@@ -189,15 +198,15 @@ const paper = document.createElement('canvas'); paper.width = paper.height = 256
   p.strokeStyle = 'rgba(120,90,60,.06)'; for (let n = 0; n < 60; n++) { p.beginPath(); const x = r() * 256, y = r() * 256; p.moveTo(x, y); p.quadraticCurveTo(x + r() * 20 - 10, y + r() * 20 - 10, x + r() * 30 - 15, y + r() * 30 - 15); p.stroke(); } })();
 
 /* ---------- Avonlea ---------- */
-const GG = { x: 20 * T, y: 15 * T, w: 7 * T };          // the front's middle, at the ground
-const OS = { x: 54 * T, y: 15 * T, w: 6 * T };
-const BARN = { x: 9 * T, y: 13 * T, w: 5 * T };
-const LAKE = { x: 37 * T, y: 40 * T, rx: 9.5 * T, ry: 4.6 * T };
-const brook = [[41 * T, -20], [41.6 * T, 8 * T], [40.4 * T, 16 * T], [41.4 * T, 24 * T], [40.2 * T, 31 * T], [38.5 * T, LAKE.y - LAKE.ry + 20]];
-const BRIDGE = { x: 40.6 * T, y: 19.5 * T };
-const LY = { x: 28 * T, y: 27 * T, w: 6 * T };
-const HH = { x: 8.5 * T, y: 23.6 * T, w: 5 * T };   // Mr. Harrison's, the new neighbour
-const TOWN = [22, 13 * T + 40];
+const GG = { x: 20 * U, y: 15 * U, w: 7 * T };          // the front's middle, at the ground
+const OS = { x: 54 * U, y: 15 * U, w: 6 * T };
+const BARN = { x: 13.4 * U, y: 13 * U, w: 5 * T };
+const LAKE = { x: 37 * U, y: 40 * U, rx: 15 * T, ry: 7 * T };
+const brook = [[41 * U, -20], [41.6 * U, 8 * U], [40.4 * U, 16 * U], [41.4 * U, 24 * U], [40.2 * U, 31 * U], [38.5 * U, LAKE.y - LAKE.ry + 20]];
+const BRIDGE = { x: 40.6 * U, y: 19.5 * U };
+const LY = { x: 28 * U, y: 27 * U, w: 6 * T };
+const HH = { x: 8.5 * U, y: 23.6 * U, w: 5 * T };   // Mr. Harrison's, the new neighbour
+const TOWN = [22, 13 * U + 40];
 const HHR = { table: { x: 6.4 * T, y: 5.4 * T }, cage: { x: 10.8 * T, y: 4.6 * T }, stove: { x: 2.4 * T, y: 3.2 * T } };   // (inside his house)   // where the road leaves Avonlea, towards Carmody and Charlottetown
 const PUMP = { x: GG.x + GG.w / 2 + 34, y: GG.y + 56 };
 const BENCH = { x: LAKE.x - 50, y: LAKE.y - LAKE.ry - 30 };
@@ -217,16 +226,16 @@ const HOUSES = {
     describe: "la Hondonada de Lynde (la casa de la Sra. Rachel Lynde, junto al arroyo y al camino, con la ventana desde donde ve pasar a todo el mundo)" },
   hh: { at: HH, name: 'La granja del Sr. Harrison', depth: 100, roof: '#8a7a5a', wall: '#e6dcc4', trim: '#6a5a3a', small: true, sign: [-80, 60], mapLabel: ['Sr. Harrison', 34],
     enter: 'Entrar a casa del Sr. Harrison', inText: 'en la casa del Sr. Harrison', arrive: ' entró a la casa del Sr. Harrison.', place: ['granja_harrison', 'la granja del Sr. Harrison', 24, 56],
-    path: [[GG.x - 60, GG.y + 70], [13.8 * T, 21.6 * T], [11.9 * T, 24.4 * T], [HH.x, HH.y + 8]],
+    path: [[GG.x - 60, GG.y + 70], [13.8 * U, 21.6 * U], [11.9 * U, 24.4 * U], [HH.x, HH.y + 8]],
     describe: "la granja del Sr. Harrison (el vecino nuevo, gruñón y desordenado, con su loro Ginger, su potrero y su campo de avena, que linda con Tejas Verdes)" },
 };
 const HOUSE_SPOTS = Object.values(HOUSES).map(h => h.at);
 /* ---------- the fenced places: fields and pens (to add one: an entry here; it gets its fence, its ground, a place
    on the map and a place the characters and the stories can name). kind: 'oats' or 'pen'; gate: the side with the gate */
 const AREAS = {
-  corral: { name: 'el corral de Tejas Verdes', kind: 'pen', x: 12.2 * T, y: 9.4 * T, w: 3.8 * T, h: 4 * T, gate: 'S' },
-  avena: { name: 'el campo de avena del Sr. Harrison', kind: 'oats', x: 13 * T, y: 23 * T, w: 6 * T, h: 5.6 * T, gate: 'N' },
-  potrero: { name: 'el potrero del Sr. Harrison', kind: 'pen', x: 4.4 * T, y: 25.2 * T, w: 3.8 * T, h: 3 * T, gate: 'E' },
+  corral: { name: 'el corral de Tejas Verdes', kind: 'pen', x: GG.x - 2 * T - 3.8 * T - 60, y: GG.y - 4 * T - 40, w: 3.8 * T, h: 4 * T, gate: 'S' },
+  avena: { name: 'el campo de avena del Sr. Harrison', kind: 'oats', x: 13 * U, y: 23 * U, w: 7 * T, h: 6 * T, gate: 'N' },
+  potrero: { name: 'el potrero del Sr. Harrison', kind: 'pen', x: HH.x - 5 * T - 3.8 * T, y: HH.y + 1.4 * T, w: 3.8 * T, h: 3 * T, gate: 'E' },
 };
 const inArea = (A, x, y, m = 0) => x > A.x - m && x < A.x + A.w + m && y > A.y - m && y < A.y + A.h + m;
 const inAreas = (x, y, m = 0) => Object.values(AREAS).some(A => inArea(A, x, y, m));
@@ -267,16 +276,16 @@ const free = (x, y, m) => !inLake(x, y, m) && !inHouses(x, y, m + 24) && !inArea
 const trees = [];
 const tree = (x, y, kind, s = .9 + R() * .35) => trees.push({ kind, x, y, s, ph: R() * TAU, apples: kind === 'apple' ? 3 : 0, regrow: 0 });
 const clearOfBeds = (x, y) => BEDS.every(b => dist(b.x, b.y, x, y) > 70);
-for (let k = 0; k < 9; k++) { const x = GG.x + 180 + k * 64, y = BRIDGE.y - 50 + (k % 2) * 6; if (free(x, y, 30) && clearOfBeds(x, y) && Math.abs(x - BRIDGE.x) > 60) tree(x, y, 'blossom', .85); const y2 = BRIDGE.y + 70; if (free(x + 30, y2, 30) && clearOfBeds(x + 30, y2) && Math.abs(x + 30 - BRIDGE.x) > 60) tree(x + 30, y2, 'blossom', .85); }
+for (let k = 0; k < Math.floor((BRIDGE.x - GG.x - 240) / 64); k++) { const x = GG.x + 180 + k * 64, y = BRIDGE.y - 50 + (k % 2) * 6; if (free(x, y, 30) && clearOfBeds(x, y) && Math.abs(x - BRIDGE.x) > 60) tree(x, y, 'blossom', .85); const y2 = BRIDGE.y + 70; if (free(x + 30, y2, 30) && clearOfBeds(x + 30, y2) && Math.abs(x + 30 - BRIDGE.x) > 60) tree(x + 30, y2, 'blossom', .85); }
 for (let r = 0; r < 3; r++) for (let k = 0; k < 4; k++) { const x = OS.x - 100 + k * 70 + (r % 2) * 30, y = OS.y + 130 + r * 70; if (free(x, y, 30)) tree(x, y, 'apple', .9); }
-for (let n = 0; n < 900 && trees.filter(t => t.kind === 'pine').length < 26; n++) { const x = 1 * T + R() * 16 * T, y = 30 * T + R() * 18 * T; if (free(x, y, 24) && !trees.some(t => dist(t.x, t.y, x, y) < 52)) tree(x, y, 'pine', .9 + R() * .4); }
-for (let n = 0; n < 3000 && trees.length < 110; n++) {
+for (let n = 0; n < 900 * KK && trees.filter(t => t.kind === 'pine').length < 26 * KK; n++) { const x = 1 * U + R() * 16 * U, y = 30 * U + R() * 18 * U; if (free(x, y, 24) && !trees.some(t => dist(t.x, t.y, x, y) < 52)) tree(x, y, 'pine', .9 + R() * .4); }
+for (let n = 0; n < 3000 * KK && trees.length < 110 * KK; n++) {
   const x = R() * WW, y = R() * WH, edge = Math.min(x, y, WW - x, WH - y) < 4 * T;
   if ((!edge && R() < .6) || !free(x, y, 50) || !clearOfBeds(x, y) || trees.some(t => dist(t.x, t.y, x, y) < 86)) continue;
   tree(x, y, R() < .25 ? 'pine' : 'oak');
 }
 const bushes = [];
-for (let n = 0; n < 900 && bushes.length < 22; n++) { const x = R() * WW, y = R() * WH; if (!free(x, y, 24) || trees.some(t => dist(t.x, t.y, x, y) < 56) || bushes.some(b => dist(b.x, b.y, x, y) < 60)) continue; bushes.push({ kind: 'bush', x, y, s: .85 + R() * .4, ph: R() * TAU, berries: 3, regrow: 0 }); }
+for (let n = 0; n < 900 * KK && bushes.length < 22 * KK; n++) { const x = R() * WW, y = R() * WH; if (!free(x, y, 24) || trees.some(t => dist(t.x, t.y, x, y) < 56) || bushes.some(b => dist(b.x, b.y, x, y) < 60)) continue; bushes.push({ kind: 'bush', x, y, s: .85 + R() * .4, ph: R() * TAU, berries: 3, regrow: 0 }); }
 // a few near home, so berries are close at hand
 for (const [dx, dy] of [[-190, 150], [-250, 90], [260, 170]]) bushes.push({ kind: 'bush', x: GG.x + dx, y: GG.y + dy, s: 1, ph: R() * TAU, berries: 3, regrow: 0 });
 const props = [
@@ -286,21 +295,22 @@ const props = [
   { kind: 'bridge', x: BRIDGE.x, y: BRIDGE.y + 14 },
   { kind: 'sign', x: LAKE.x - 160, y: LAKE.y - LAKE.ry - 34, text: 'Lago de las Aguas Brillantes' },
   { kind: 'sign', x: GG.x + 260, y: BRIDGE.y + 30, text: 'Camino Blanco de las Delicias' },
-  { kind: 'sign', x: 15 * T, y: 30 * T, text: 'Bosque Encantado' },
+  { kind: 'sign', x: 15 * U, y: 30 * U, text: 'Bosque Encantado' },
+  { kind: 'sign', x: TOWN[0] + 120, y: TOWN[1] - 30, text: 'A Carmody y Bright River' },
 ];
 for (const [a, b] of FENCES) { const len = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.round(len / 22)); for (let i = 0; i <= n; i++) { const x = lerp(a[0], b[0], i / n), y = lerp(a[1], b[1], i / n); props.push({ kind: 'fpost', x, y, nx: i < n ? lerp(a[0], b[0], (i + 1) / n) : null, ny: i < n ? lerp(a[1], b[1], (i + 1) / n) : null }); } }
 for (const [k, h] of Object.entries(HOUSES)) props.push({ kind: 'house', h: h.at, roof: h.roof, wall: h.wall, trim: h.trim, x: h.at.x, y: h.at.y, small: h.small }, { kind: 'sign', x: h.at.x + h.sign[0], y: h.at.y + h.sign[1], text: h.name });
 for (let x = GG.x - GG.w / 2 - 40; x < GG.x + GG.w / 2 + 230; x += 24) if (Math.abs(x - GG.x) > 40 && !(x > PUMP.x - 20 && x < PUMP.x + 20)) props.push({ kind: 'post', x, y: GG.y + 120 });
 const tufts = [], flowers = [], reeds = [], pads = [];
-for (let n = 0; n < 3200; n++) { const x = R() * WW, y = R() * WH; if (!inLake(x, y, 10) && !inHouses(x, y, 4) && !inAreas(x, y, 4) && !nearPath(x, y, 16) && !inBrook(x, y, 6) && !inBeds(x, y)) tufts.push({ x, y, h: 5 + R() * 7, ph: R() * TAU, c: R() }); }
+for (let n = 0; n < 3200 * KK; n++) { const x = R() * WW, y = R() * WH; if (!inLake(x, y, 10) && !inHouses(x, y, 4) && !inAreas(x, y, 4) && !nearPath(x, y, 16) && !inBrook(x, y, 6) && !inBeds(x, y)) tufts.push({ x, y, h: 5 + R() * 7, ph: R() * TAU, c: R() }); }
 const FCOLS = ['#fffaf2', '#ffd7e8', '#f7e27a', '#c9a7f2', '#ff9f8a', '#a8d8ff'];
-for (let n = 0; n < 850; n++) { const x = R() * WW, y = R() * WH; if (!inLake(x, y, 14) && !inHouses(x, y, 6) && !inAreas(x, y, 6) && !nearPath(x, y, 18) && !inBrook(x, y, 8) && !inBeds(x, y)) flowers.push({ x, y, c: FCOLS[Math.floor(R() * FCOLS.length)], ph: R() * TAU, s: .8 + R() * .6 }); }
+for (let n = 0; n < 850 * KK; n++) { const x = R() * WW, y = R() * WH; if (!inLake(x, y, 14) && !inHouses(x, y, 6) && !inAreas(x, y, 6) && !nearPath(x, y, 18) && !inBrook(x, y, 8) && !inBeds(x, y)) flowers.push({ x, y, c: FCOLS[Math.floor(R() * FCOLS.length)], ph: R() * TAU, s: .8 + R() * .6 }); }
 for (const H of HOUSE_SPOTS) for (let n = 0; n < 50; n++) { const x = H.x - H.w / 2 + R() * H.w, y = H.y + 10 + R() * 34; if (Math.abs(x - H.x) > 26) flowers.push({ x, y, c: ['#ff9f8a', '#ffd7e8', '#f7e27a', '#fffaf2'][n % 4], ph: R() * TAU, s: 1.1 }); }
 for (let n = 0; n < 70; n++) { const a = R() * TAU, k = .96 + R() * .1; reeds.push({ x: LAKE.x + Math.cos(a) * LAKE.rx * k, y: LAKE.y + Math.sin(a) * LAKE.ry * k, h: 14 + R() * 12, ph: R() * TAU }); }
 for (let n = 0; n < 12; n++) { const a = R() * TAU, k = R() * .75; pads.push({ x: LAKE.x + Math.cos(a) * LAKE.rx * k, y: LAKE.y + Math.sin(a) * LAKE.ry * k, r: 7 + R() * 6, a: R() * TAU, bloom: R() < .4 }); }
 
 /* ---------- the ground, painted again each season (watercolour washes, the paths, the brook's bed) ---------- */
-const ground = document.createElement('canvas'); ground.width = WW; ground.height = WH;
+const GS = .6, ground = document.createElement('canvas'); ground.width = Math.ceil(WW * GS); ground.height = Math.ceil(WH * GS);
 let groundSeason = -1;
 const GPAL = [
   { base: '#94c266', wash: ['170,212,110', '120,170,80', '196,218,122'], grass: 'rgba(70,110,40,.18)', path: ['rgba(150,120,70,.3)', '#cdae7a', '#dbbf8d'], bed: '#8a6440', wood: '40,70,40,.45', bank: '120,95,60' },
@@ -310,26 +320,26 @@ const GPAL = [
 ];
 function paintGround(s){
   const c = ground.getContext('2d'), r = rng(4242), P = GPAL[s];
-  groundSeason = s;
+  groundSeason = s; c.setTransform(GS, 0, 0, GS, 0, 0);
   c.fillStyle = P.base; c.fillRect(0, 0, WW, WH);
-  for (let n = 0; n < 520; n++) {
+  for (let n = 0; n < 520 * KK; n++) {
     const x = r() * WW, y = r() * WH, rr = 30 + r() * 130, gr = c.createRadialGradient(x, y, 0, x, y, rr);
     const col = r() < .4 ? P.wash[0] : r() < .5 ? P.wash[1] : P.wash[2];
     gr.addColorStop(0, `rgba(${col},.33)`); gr.addColorStop(1, `rgba(${col},0)`); c.fillStyle = gr; c.fillRect(x - rr, y - rr, rr * 2, rr * 2);
   }
   // the Haunted Wood is darker
-  const hw = c.createRadialGradient(9 * T, 40 * T, 40, 9 * T, 40 * T, 13 * T); hw.addColorStop(0, `rgba(${P.wood})`); hw.addColorStop(1, `rgba(${P.wood.split(',').slice(0, 3)},0)`); c.fillStyle = hw; c.fillRect(0, 26 * T, 24 * T, 24 * T);
+  const hw = c.createRadialGradient(9 * U, 40 * U, 40, 9 * U, 40 * U, 13 * U); hw.addColorStop(0, `rgba(${P.wood})`); hw.addColorStop(1, `rgba(${P.wood.split(',').slice(0, 3)},0)`); c.fillStyle = hw; c.fillRect(0, 26 * T, 24 * T, 24 * T);
   // pencil strokes of grass over the wash
   c.strokeStyle = P.grass; c.lineWidth = .8;
-  for (let n = 0; n < 6000; n++) { const x = r() * WW, y = r() * WH; c.beginPath(); c.moveTo(x, y); c.lineTo(x + 1 + r() * 2, y - 2 - r() * 3); c.stroke(); }
+  for (let n = 0; n < 6000 * KK; n++) { const x = r() * WW, y = r() * WH; c.beginPath(); c.moveTo(x, y); c.lineTo(x + 1 + r() * 2, y - 2 - r() * 3); c.stroke(); }
   // autumn: fallen leaves; winter: the snow glitters a little
-  if (s === 2) for (let n = 0; n < 2600; n++) { const x = r() * WW, y = r() * WH; c.fillStyle = ['rgba(200,90,50,.55)', 'rgba(220,150,60,.55)', 'rgba(180,60,40,.5)', 'rgba(230,190,80,.5)'][n % 4]; c.beginPath(); c.ellipse(x, y, 2.4 + r() * 1.6, 1.2 + r(), r() * TAU, 0, TAU); c.fill(); }
-  if (s === 3) for (let n = 0; n < 2400; n++) { const x = r() * WW, y = r() * WH; c.fillStyle = r() < .5 ? 'rgba(170,190,215,.35)' : 'rgba(255,255,255,.9)'; c.beginPath(); c.ellipse(x, y, 1 + r() * 2.5, .6 + r(), 0, 0, TAU); c.fill(); }
+  if (s === 2) for (let n = 0; n < 2600 * KK; n++) { const x = r() * WW, y = r() * WH; c.fillStyle = ['rgba(200,90,50,.55)', 'rgba(220,150,60,.55)', 'rgba(180,60,40,.5)', 'rgba(230,190,80,.5)'][n % 4]; c.beginPath(); c.ellipse(x, y, 2.4 + r() * 1.6, 1.2 + r(), r() * TAU, 0, TAU); c.fill(); }
+  if (s === 3) for (let n = 0; n < 2400 * KK; n++) { const x = r() * WW, y = r() * WH; c.fillStyle = r() < .5 ? 'rgba(170,190,215,.35)' : 'rgba(255,255,255,.9)'; c.beginPath(); c.ellipse(x, y, 1 + r() * 2.5, .6 + r(), 0, 0, TAU); c.fill(); }
   const stroke = (pts, w, col) => { c.strokeStyle = col; c.lineWidth = w; c.lineCap = 'round'; c.lineJoin = 'round'; c.beginPath(); c.moveTo(...pts[0]); for (let i = 1; i < pts.length; i++) { const p = pts[i - 1], q = pts[i]; c.quadraticCurveTo(p[0], p[1], (p[0] + q[0]) / 2, (p[1] + q[1]) / 2); } c.lineTo(...pts[pts.length - 1]); c.stroke(); };
   for (const p of paths) { stroke(p, 54, P.path[0]); stroke(p, 40, P.path[1]); stroke(p, 26, P.path[2]); }
   // pencil edges of the paths
   for (const p of paths) for (const side of [-1, 1]) { c.strokeStyle = 'rgba(110,80,50,.35)'; c.lineWidth = 1; c.beginPath(); for (let i = 0; i < p.length; i++) { const [x, y] = p[i], [nx, ny] = p[Math.min(i + 1, p.length - 1)], [px, py] = p[Math.max(i - 1, 0)], a = Math.atan2(ny - py, nx - px) + side * Math.PI / 2; const X = x + Math.cos(a) * 19, Y = y + Math.sin(a) * 19; i ? c.lineTo(X, Y) : c.moveTo(X, Y); } c.stroke(); }
-  for (let n = 0; n < 900; n++) { const x = r() * WW, y = r() * WH; if (nearPath(x, y, 16)) { c.fillStyle = r() < .5 ? 'rgba(120,95,60,.4)' : 'rgba(245,232,200,.5)'; c.beginPath(); c.ellipse(x, y, 1.5 + r() * 2, 1 + r(), 0, 0, TAU); c.fill(); } }
+  for (let n = 0; n < 900 * KK; n++) { const x = r() * WW, y = r() * WH; if (nearPath(x, y, 16)) { c.fillStyle = r() < .5 ? 'rgba(120,95,60,.4)' : 'rgba(245,232,200,.5)'; c.beginPath(); c.ellipse(x, y, 1.5 + r() * 2, 1 + r(), 0, 0, TAU); c.fill(); } }
   // winter: footprints in the snow along the paths
   if (s === 3) for (const [a, b] of segs) for (let q = 0; q < 1; q += 18 / Math.hypot(b[0] - a[0], b[1] - a[1])) { const x = lerp(a[0], b[0], q), y = lerp(a[1], b[1], q), o = (Math.round(q * 1000) % 2 ? 4 : -4); c.fillStyle = 'rgba(140,150,170,.35)'; c.beginPath(); c.ellipse(x + o, y + o * .3, 2.2, 1.4, 0, 0, TAU); c.fill(); }
   // the brook's bed and the lake's shore
@@ -967,6 +977,47 @@ HOUSES.hh.interior = {
   actions: add => { add('cage', HHR.cage.x, HHR.cage.y, 50, 'Mirar a Ginger', () => animalSays('ginger'), { hy: 40, hit: 36, pri: 3 }); },
 };
 const ROOMS = Object.fromEntries(Object.entries(HOUSES).map(([k, h]) => [k, h.interior]));
+// the station at Bright River: the platform, the little station house, the pile of shingles where Ana waited for
+// Matthew, the rails, and the cart and the mare at the road (it is outdoors, but a scene of its own, far away)
+const BRS = { house: { x: 2.6 * T, y: 2.9 * T }, pile: { x: 10.2 * T, y: 4.4 * T }, lamp: { x: 6 * T, y: 2.95 * T }, cart: { x: 9.6 * T, y: 7.4 * T } };
+function drawStation(c, t, night){
+  c.fillStyle = S === 3 ? '#e9eef2' : ['#9cc66c', '#8db45c', '#b0a860'][S]; c.fillRect(0, 0, KIT.w, KIT.h);
+  // far fields and the sky band at the top
+  blob(c, [[0, 0], [KIT.w, 0], [KIT.w, 1.2 * T], [0, 1.2 * T]], night > .4 ? '#3d4a6e' : S === 3 ? '#dfe7ee' : '#cfe6ef', false);
+  blob(c, [[0, 1.2 * T], [KIT.w * .3, .9 * T], [KIT.w * .7, 1.1 * T], [KIT.w, .85 * T], [KIT.w, 1.5 * T], [0, 1.5 * T]], S === 3 ? '#f2f5f7' : '#7fae5a', false);
+  // the rails: sleepers and two lines of iron
+  for (let x = 4; x < KIT.w; x += 14) blob(c, [[x, 1.55 * T], [x + 7, 1.55 * T], [x + 7, 2.2 * T], [x, 2.2 * T]], '#7a5a3e', false);
+  line(c, [[0, 1.68 * T], [KIT.w, 1.68 * T]], '#5a5a62', 2.2, 11); line(c, [[0, 2.06 * T], [KIT.w, 2.06 * T]], '#5a5a62', 2.2, 12);
+  // the platform of planks
+  blob(c, [[0, 2.4 * T], [KIT.w, 2.4 * T], [KIT.w, 5.1 * T], [0, 5.1 * T]], '#c9a06a');
+  c.strokeStyle = 'rgba(110,70,40,.35)'; c.lineWidth = 1; for (let y = 2.4 * T + 12; y < 5.1 * T; y += 12) { c.beginPath(); c.moveTo(0, y); c.lineTo(KIT.w, y); c.stroke(); }
+  // the road below, where the cart waits
+  blob(c, [[0, 6.6 * T], [KIT.w, 6.4 * T], [KIT.w, 8.4 * T], [0, 8.6 * T]], S === 3 ? '#d6d3cc' : '#d9bd8a');
+  // the station house, with its sign
+  const H = BRS.house;
+  blob(c, [[H.x - 60, H.y], [H.x + 60, H.y], [H.x + 60, H.y - 52], [H.x - 60, H.y - 52]], '#d9c6a0'); hatch(c, H.x + 30, H.y - 50, 28, 48, 5);
+  blob(c, [[H.x - 70, H.y - 50], [H.x + 70, H.y - 50], [H.x + 50, H.y - 78], [H.x - 50, H.y - 78]], '#7a4a3a');
+  blob(c, [[H.x - 14, H.y], [H.x + 14, H.y], [H.x + 14, H.y - 34], [H.x - 14, H.y - 34]], '#6a4630');
+  blob(c, [[H.x + 26, H.y - 22], [H.x + 50, H.y - 22], [H.x + 50, H.y - 40], [H.x + 26, H.y - 40]], night > .3 ? '#f5d58a' : '#bfe0ea');
+  blob(c, [[H.x - 56, H.y - 46], [H.x - 18, H.y - 46], [H.x - 18, H.y - 34], [H.x - 56, H.y - 34]], '#fffaf0');
+  c.fillStyle = '#3b2a1c'; c.font = '5px Georgia, serif'; c.textAlign = 'center'; c.fillText('BRIGHT RIVER', H.x - 37, H.y - 38);
+  // a telegraph pole and the lamp
+  line(c, [[KIT.w - 30, 2.3 * T], [KIT.w - 30, .5 * T]], '#6a4a30', 3, 21); line(c, [[KIT.w - 44, .7 * T], [KIT.w - 16, .7 * T]], '#6a4a30', 2, 22);
+  const L = BRS.lamp; line(c, [[L.x, L.y], [L.x, L.y - 60]], '#3a3436', 2.4, 23); ell(c, L.x, L.y - 64, 6, 7, night > .3 ? '#ffe7a8' : '#e8e2cc', true);
+}
+const drawStationPile = c => { const P = BRS.pile; for (let k = 0; k < 6; k++) blob(c, [[P.x - 34 + (k % 2) * 4, P.y - k * 4], [P.x + 34 - (k % 3) * 3, P.y - k * 4], [P.x + 34 - (k % 3) * 3, P.y - k * 4 - 4], [P.x - 34 + (k % 2) * 4, P.y - k * 4 - 4]], k % 2 ? '#b58a5a' : '#c99a66'); };
+ROOMS.br = {
+  draw: drawStation, place: 'en la estación de Bright River, a seis horas de carreta de Avonlea, donde Matthew fue a buscar a Ana cuando llegó', exitLabel: 'Volver a Avonlea en la carreta (seis horas)',
+  items: (g, t) => [{ y: BRS.pile.y, draw: () => drawStationPile(g) }, { y: BRS.cart.y, draw: () => drawCart(g, { x: BRS.cart.x, y: BRS.cart.y, dir: 3, walk: 0, moving: false }, t) }],
+  blocked: (x, y) => y < 2.5 * T || (Math.abs(x - BRS.house.x) < 66 && y < BRS.house.y + 4) || (Math.abs(x - BRS.pile.x) < 38 && y > BRS.pile.y - 26 && y < BRS.pile.y + 4) || (Math.abs(x - BRS.cart.x) < 60 && y > BRS.cart.y - 22 && y < BRS.cart.y + 6),
+  glow: () => [BRS.lamp.x, BRS.lamp.y - 60, 170, '255,200,120', .45],
+  actions: add => {
+    add('pila', BRS.pile.x, BRS.pile.y + 6, 50, ana.sit ? 'Levantarse' : 'Sentarse en la pila de tablas', () => { if (ana.sit) { ana.sit = false; return; } ana.sit = true; ana.x = BRS.pile.x; ana.y = BRS.pile.y + 2; ana.dir = 2; logEv('Ana se sentó en la pila de tablas de la estación de Bright River, donde esperó a Matthew el día que llegó.'); anaSays(pick(STATION_LINES)); }, { pri: 4, hy: 18, hit: 46 });
+    add('vias', KIT.w / 2, 2.5 * T, 40, 'Mirar las vías', () => anaSays(pick(RAIL_LINES)), { pri: 6, hy: 20, hit: 40 });
+  },
+};
+const STATION_LINES = ['Aquí mismo esperé a Matthew, sentada en estas tablas, con mi bolsa de viaje. Me había imaginado que si no venía me subiría a un cerezo a dormir bajo la luna.', 'Qué raro volver aquí... el día que llegué no sabía que existía Tejas Verdes. Ahora no sabría vivir sin ella.', 'El jefe de estación me dijo que esperara adentro, ¡pero aquí afuera había mucho más lugar para la imaginación!'];
+const RAIL_LINES = ['Las vías se van y se van... ¿no da gusto pensar adónde llegan? Aunque ahora yo ya llegué a donde quería.', 'Cuando pasa el tren tiembla todo, como si el mundo entero tuviera prisa. A mí me gusta más la carreta de Matthew.'];
 ROOMS.ga = {
   parent: 'gg', exitAt: [STAIRS.x, STAIRS.y + 14], exitLabel: 'Bajar a la cocina',
   draw: drawAnaRoom, items: (g, t) => [{ y: GA.bed.y, draw: () => drawAnaBed(g) }, { y: GA.table.y, draw: () => drawAnaTable(g, t) }, { y: GA.wash.y, draw: () => drawAnaWash(g) }],
@@ -1159,9 +1210,12 @@ for (const [k, d] of Object.entries(ANIMALS)) { const A = d.home && AREAS[d.home
 for (const k of Object.keys(CH)) game.fond[k] = 0;
 const toby = { mode: 'near', goal: null, until: 0, x: ana.x + 30, y: ana.y + 20, dir: 1, walk: 0, moving: false, sitT: 0, sniff: 0, petted: 0 };
 const SPEED = 84, WALK = 60, RUN = 100, STROLL = 34;   // (SPEED is the reference the step animation is scaled by)
+const TB = 128, treeBins = new Map();
+for (const t of trees) { const k = Math.floor(t.x / TB) + ',' + Math.floor(t.y / TB); if (!treeBins.has(k)) treeBins.set(k, []); treeBins.get(k).push(t); }
+function treesNear(x, y){ const cx = Math.floor(x / TB), cy = Math.floor(y / TB), out = []; for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) { const b = treeBins.get((cx + i) + ',' + (cy + j)); if (b) out.push(...b); } return out; }
 function blockedOut(x, y){
   return x < 16 || y < 40 || x > WW - 16 || y > WH - 8 || inLake(x, y, 6) || inBrook(x, y, 2) || inHouses(x, y, 2) || nearFence(x, y) ||
-    trees.some(t => Math.hypot(t.x - x, (t.y - y) * 1.6) < 11 * t.s) || dist(x, y, PUMP.x, PUMP.y) < 9;
+    treesNear(x, y).some(t => Math.hypot(t.x - x, (t.y - y) * 1.6) < 11 * t.s) || dist(x, y, PUMP.x, PUMP.y) < 9;
 }
 function blockedIn(x, y, scene = game.scene){
   if (x < 14 || x > KIT.w - 14 || y < 2.4 * T + 8 || (y > KIT.h - 4 && Math.abs(x - KDOOR.x) > 16)) return true;
@@ -1272,6 +1326,7 @@ function targets(){
       else if (game.hasCan && game.water <= 0 && !b.wet) add(id, b.x, b.y, 30, 'La regadera está vacía (llénala en la bomba)', say_('La regadera está vacía: llénala en la bomba'), { ...o, pri: 50 });
     });
     for (const [id, h] of Object.entries(HOUSES)) add('h:' + id, h.at.x, h.at.y + 6, 26, h.enter, () => goIn(id), { pri: 4, test: (x, y) => Math.abs(x - h.at.x) < h.at.w / 2 + 8 && y < h.at.y + 10 && y > h.at.y - 80 });
+    add('trip', TOWN[0] + 60, TOWN[1], 60, 'Ir a la estación de Bright River', () => tripAsk('br'), { pri: 3, hy: 12, hit: 40 });
     add('bench', BENCH.x, BENCH.y + 6, 26, ana.sit ? 'Levantarse' : 'Sentarse a mirar el lago', () => { ana.sit = !ana.sit; if (ana.sit) { logEv('Ana se sentó a mirar el Lago de las Aguas Brillantes.'); ana.x = BENCH.x; ana.y = BENCH.y - 2; ana.dir = 2; } }, { pri: 4, hy: 10, hit: 32 });
   } else {
     ROOMS[game.scene].actions?.(add);
@@ -1544,7 +1599,7 @@ async function autoDecide(){
 }
 // a decision the player let pass: Ana takes it, by her character (the AI) or by what the story of the day needs
 const CHOICE_W = [[/Sí, lo haré/, 6], [/Vender/, 5], [/Paseamos/, 3], [/Seguir conversando/, 2.5], [/^Regalar|dinero/, 1.5], [/Adiós|Ahora no|Mejor no|Nada por ahora/, .5]];
-const storyLive = () => { const st = game.story; return st && st.v === 2 && st.day === today() && !st.gen ? st.escenas.filter(e => e.estado === 'abierta' || e.estado === 'jugada' || e.estado === 'jugando').sort((a, b) => a.hora - b.hora) : []; };
+const storyLive = () => { const st = AI.stories && game.story; return st && st.v === 2 && st.day === today() && !st.gen ? st.escenas.filter(e => e.estado === 'abierta' || e.estado === 'jugada' || e.estado === 'jugando').sort((a, b) => a.hora - b.hora) : []; };
 function chooseMsg(who, q, opts){
   const live = storyLive();
   return worldText() + `\n\nAna está con ${NAMES[who]}.` + (amb.hist.length ? ` Lo último que se dijeron: ${amb.hist.slice(-5).join(' / ')}` : '')
@@ -1697,8 +1752,40 @@ async function anaSpeak(text){
 function drawCup(c, p){ ell(c, p.x + 10, p.y - 20, 4.6, 3, '#fffaf0', true); for (let k = 0; k < 2; k++) line(c, [[p.x + 9 + k * 3, p.y - 25], [p.x + 11 + k * 3 + Math.sin(TT * 4 + k) * 1.5, p.y - 31]], 'rgba(255,255,255,.75)', 1); }
 let hoverAt = null;
 function pet(){ logEv('Ana acarició a Toby.'); ana.pet = true; ana.crouch = true; toby.petted = 2.2; toby.dir = toby.x < ana.x ? 1 : 3; ana.dir = toby.x > ana.x ? 1 : 3; game.fond.toby++; hearts(toby.x, toby.y - 24); sfx.happy(); save(); setTimeout(() => { ana.pet = false; ana.crouch = false; }, 1600); }
+/* ---------- the trip to Bright River: six hours by cart with Matthew, along the White Way and past the Lake of Shining
+   Waters (as the day Ana came); the hours go by while they talk (the AI writes it, once; or the lines of the book) ---------- */
+const TRIP_LINES = { br: [['ana', '¡Oh, Matthew! Ir hasta Bright River contigo, en la carreta, es como volver a leer el primer capítulo de mi vida.'], ['matthew', 'Bueno, pues... es un buen trecho. Ya lo creo.'], ['ana', '¿Te acuerdas del Camino Blanco de las Delicias, aquel primer día? Yo me quedé sin palabras. ¡Yo! ¡Sin palabras!'], ['matthew', 'Me acuerdo, sí. No dijiste nada por un buen rato. Me asusté un poco.']],
+  out: [['ana', 'Volver a casa al atardecer es casi mejor que irse. Tejas Verdes nos espera como un abrazo.'], ['matthew', 'Bueno, pues... Marilla tendrá la cena lista, supongo.'], ['ana', 'Matthew, ¿sabías que eres la persona más simpática con quien se puede ir en carreta?'], ['matthew', 'Ya lo creo, ya lo creo.']] };
+function tripAsk(to){
+  const hn = hourNow(), m = PEOPLE.matthew;
+  if (to === 'br' && m.where === 'away') return anaSays('Matthew no está, y sin él y la carreta Bright River queda lejísimos: ¡seis horas de camino!');
+  if (hn + 6 > 23.5) return anaSays(to === 'br' ? 'Ya es muy tarde para ir hasta Bright River: son seis horas de carreta. Mejor mañana temprano.' : 'Ya es muy tarde para volver a casa: son seis horas de camino de noche. Matthew dice que esperemos a que amanezca... ¡como en una novela!');
+  say('Ana', to === 'br' ? '¿Ir hasta la estación de Bright River? Son seis horas de carreta con Matthew.' : '¿Volver a Avonlea? Son seis horas de carreta.', [[to === 'br' ? '🐴 Ir con Matthew en la carreta' : '🐴 Volver a casa', () => { close(); tripGo(to); }], ['Mejor no', close]]);
+}
+let trip = null;
+function tripGo(to){
+  const m = PEOPLE.matthew; userInput(); ana.goto = null; auto.intent = null; ana.sit = false; diana.follow = false;
+  trip = { to, t: 0, dur: 14, from: dayT, lines: TRIP_LINES[to].map(([q, t]) => ({ q, t })), shown: 0, next: 1.5 };
+  m.away = null; m.target = null; m.story = null; game.tripWith = 'matthew'; m.where = 'trip';
+  logEv(to === 'br' ? 'Ana y Matthew salieron en la carreta hacia la estación de Bright River.' : 'Ana y Matthew emprendieron la vuelta a Avonlea en la carreta.', ['matthew']);
+  $('trip').hidden = false; $('triptitle').textContent = to === 'br' ? '🐴 Camino a Bright River' : '🐴 De vuelta a Avonlea'; $('triplines').innerHTML = '';
+  if (aiReady()) { trip.asking = true; sceneAsk(['matthew'], `Ana y Matthew van en la carreta ${to === 'br' ? 'de Avonlea a la estación de Bright River' : 'de vuelta de Bright River a Avonlea'}: seis horas por caminos de campo, pasando por el Camino Blanco de las Delicias y el Lago de las Aguas Brillantes (como el día en que Ana llegó). Charla tranquila de viaje: Ana habla muchísimo, Matthew escucha y dice poco.`, 'pasar').then(s => { if (trip && s.lines.length) trip.lines = s.lines; }).catch(() => {}).finally(() => { if (trip) trip.asking = false; }); }
+}
+function tripTick(dt){
+  const tr = trip; tr.t += dt; dayT = tr.from + (6 / 24) * Math.min(1, tr.t / tr.dur);
+  const p = Math.min(1, tr.t / tr.dur), stops = tr.to === 'br' ? ['Avonlea', 'el Camino Blanco', 'el Lago de las Aguas Brillantes', 'Carmody', 'Bright River'] : ['Bright River', 'Carmody', 'el Lago de las Aguas Brillantes', 'el Camino Blanco', 'Avonlea'];
+  $('tripcart').style.left = (4 + p * 88) + '%'; $('tripstop').textContent = 'Pasando por ' + stops[Math.min(stops.length - 1, Math.floor(p * stops.length))] + ' · ' + fmtHour(hourNow());
+  if (!tr.asking && tr.shown < tr.lines.length && (tr.next -= dt) <= 0) { const l = tr.lines[tr.shown++]; $('triplines').insertAdjacentHTML('beforeend', `<div><b>${esc(nameOf(l.q))}:</b> ${esc(l.t)}</div>`); tr.next = Math.min(lineDur(l.t) * .8, tr.dur / (tr.lines.length + 1)); }
+  if (tr.t < tr.dur || tr.asking || tr.shown < tr.lines.length) return;
+  trip = null; $('trip').hidden = true;
+  const m = PEOPLE.matthew;
+  if (tr.to === 'br') { goIn('br', [KDOOR.x - 40, KIT.h - 40]); m.where = 'br'; m.x = BRS.cart.x - 70; m.y = BRS.cart.y - 6; m.dir = 1; logEv('Ana y Matthew llegaron a la estación de Bright River.', ['matthew']); }
+  else { game.scene = 'out'; ana.x = TOWN[0] + 70; ana.y = TOWN[1] + 6; ana.dir = 1; toby.x = ana.x + 26; toby.y = ana.y + 8; cam.x = ana.x; cam.y = ana.y; m.where = 'out'; m.x = ana.x + 30; m.y = ana.y - 4; m.nav = null; game.tripWith = null; logEv('Ana y Matthew volvieron a Avonlea desde Bright River.', ['matthew']); }
+  save();
+}
 function goIn(room, at){ game.scene = room; ana.lie = false; diana.lie = false; ana.x = at ? at[0] : KDOOR.x; ana.y = at ? at[1] : KIT.h - 14; ana.dir = 0; ana.sit = false; toby.x = ana.x + 26; toby.y = ana.y; if (diana.follow) { diana.where = room; diana.sit = false; diana.x = ana.x - 26; diana.y = ana.y; } cam.x = KIT.w / 2; cam.y = KIT.h / 2; }
 function goOut(){
+  if (game.scene === 'br') return tripAsk('out');
   if (ROOMS[game.scene].parent) return goIn(ROOMS[game.scene].parent, ROOMS[game.scene].exitAt);
   const H = HOUSES[game.scene].at;
   game.scene = 'out'; ana.lie = false; diana.lie = false; ana.x = H.x; ana.y = H.y + 24; ana.dir = 2; ana.sit = false; toby.x = ana.x + 24; toby.y = ana.y + 10;
@@ -1777,7 +1864,7 @@ function walkOption(who){
    three things to say, and may note one new memory. Gifts and walks are still decided by the game itself, so
    nothing the AI writes can break it; if the AI is off or fails, the written lines are used. */
 // (each provider has its own key, typed in by the player and kept in this browser)
-const AI = { on: true, auto: true, model: 'gpt-5.4-mini', mode: 'minimo', keys: { openai: '', anthropic: '' } };
+const AI = { on: true, auto: true, model: 'gpt-5.4-mini', mode: 'minimo', stories: false, keys: { openai: '', anthropic: '' } };
 const FULL = () => AI.mode === 'completo';   // (the full AI: the judge, the plans, Ana deciding with the AI; the minimal one spends several times less)
 try { const st = JSON.parse(localStorage.getItem('avonlea-ai') || '{}'); if (st.key) { AI.keys.anthropic = st.key; delete st.key; } Object.assign(AI, st); AI.keys = Object.assign({ openai: '', anthropic: '' }, st.keys || AI.keys); } catch (e) {}
 const saveAI = () => { try { localStorage.setItem('avonlea-ai', JSON.stringify(AI)); } catch (e) {} };
@@ -1804,7 +1891,7 @@ const PLACES = {
   ...Object.fromEntries(Object.entries(AREAS).map(([k, A]) => [k + '_porton', [('la entrada de ' + A.name).replace(/ de el /, ' del '), ...({ N: [A.x + A.w / 2, A.y - 20], S: [A.x + A.w / 2, A.y + A.h + 20], E: [A.x + A.w + 20, A.y + A.h / 2], W: [A.x - 20, A.y + A.h / 2] })[A.gate]]])),
   huerta: ['la huerta de Tejas Verdes', BEDS[4].x, BEDS[4].y + 34],
   granero: ['el granero', BARN.x + 60, BARN.y + 50], puente: ['el puente del arroyo', BRIDGE.x - 80, BRIDGE.y + 8], camino_blanco: ['el Camino Blanco de las Delicias', (GG.x + BRIDGE.x) / 2, BRIDGE.y + 6],
-  lago: ['el Lago de las Aguas Brillantes', BENCH.x + 40, BENCH.y + 22], bosque_encantado: ['el Bosque Encantado', 15 * T + 30, 30 * T + 24],
+  lago: ['el Lago de las Aguas Brillantes', BENCH.x + 40, BENCH.y + 22], bosque_encantado: ['el Bosque Encantado', 15 * U + 30, 30 * U + 24],
 };
 // what each one can do (the game checks every action against this)
 function abilText(who){
@@ -2095,7 +2182,7 @@ const STORY_EVENTS = {
   cocinado: 'Ana cocina algo', 'cocinado:tarta': 'Ana cocina una tarta', 'cocinado:te': 'Ana prepara té', 'regalo:<personaje>': 'Ana le regala o le da algo a ese personaje (por ejemplo regalo:harrison)',
 };
 const STORY_PLACES = () => [...Object.keys(PLACES), ...Object.keys(ROOMS)];
-const placeName = l => PLACES[l] ? PLACES[l][0] : l === 'gg' ? 'la cocina de Tejas Verdes' : l === 'os' ? 'la salita de La Cuesta del Huerto' : l === 'rl' ? 'la casa de la Sra. Lynde' : l === 'ga' ? 'la pieza de Ana' : l === 'hh' ? 'la casa del Sr. Harrison' : HOUSES[l]?.name || l;
+const placeName = l => PLACES[l] ? PLACES[l][0] : l === 'gg' ? 'la cocina de Tejas Verdes' : l === 'os' ? 'la salita de La Cuesta del Huerto' : l === 'rl' ? 'la casa de la Sra. Lynde' : l === 'ga' ? 'la pieza de Ana' : l === 'hh' ? 'la casa del Sr. Harrison' : l === 'br' ? 'la estación de Bright River' : HOUSES[l]?.name || l;
 const S_EFFECT = () => ({ type: 'object', additionalProperties: false, required: ['tipo', 'quien', 'animal', 'lugar', 'estado', 'hasta', 'cuando'], properties: { tipo: { type: 'string', enum: Object.keys(STORY_EFFECTS) }, quien: { type: 'array', items: { type: 'string', enum: Object.keys(CH) } }, animal: { type: 'string', enum: ['', ...Object.keys(ANIMALS)] }, lugar: { type: 'string', enum: ['', ...Object.keys(AREAS)] }, estado: { type: 'string', enum: ['', ...Object.keys(ANA_STATES)] }, hasta: { type: 'integer' }, cuando: { type: 'string', enum: ['antes', 'despues'] } } });
 const S_SCENE = () => ({ type: 'object', additionalProperties: false, required: ['id', 'hora', 'lugar', 'personajes', 'que_pasa', 'pista', 'encargo', 'fin', 'evento', 'efectos', 'frases', 'requiere', 'clave', 'contra'], properties: {
   id: { type: 'string' }, hora: { type: 'integer' }, lugar: { type: 'string', enum: STORY_PLACES() }, personajes: { type: 'array', items: { type: 'string', enum: Object.keys(CH) } },
@@ -2231,10 +2318,10 @@ async function makeStory(){
 async function newDay(ended){
   storyBusy = true;
   if (aiReady()) { try { await reflectDay(ended); } catch (e) { console.debug('[avonlea IA] fin del día', e.message); } }
-  storyBusy = false; makeStory();
+  storyBusy = false; if (AI.stories) makeStory();
 }
 function storyEvent(name){ const st = game.story; if (!st || st.day !== today()) return; (st.ev = st.ev || {})[name] = hourNow(); }
-const storyOpen = () => { const st = game.story; return st && st.v === 2 && st.day === today() ? st.escenas.filter(e => e.estado === 'abierta').sort((a, b) => a.hora - b.hora) : []; };
+const storyOpen = () => { const st = AI.stories && game.story; return st && st.v === 2 && st.day === today() ? st.escenas.filter(e => e.estado === 'abierta').sort((a, b) => a.hora - b.hora) : []; };
 const storyNow = () => storyOpen().find(e => !e.played) || null;
 const storyPos = e => ROOMS[e.lugar] ? { room: e.lugar, place: null } : { room: 'out', place: e.lugar };
 const storyHere = e => ROOMS[e.lugar] ? game.scene === e.lugar : game.scene === 'out' && dist(ana.x, ana.y, PLACES[e.lugar][1], PLACES[e.lugar][2]) < 150;
@@ -2450,8 +2537,9 @@ let relSel = null;
 function relPanel(on){
   $('rels').hidden = !on; if (!on) return;
   close();
-  const st = game.story, sp = $('story');
-  if (st && st.day === today()) {
+  const st = AI.stories ? game.story : null, sp = $('story');
+  if (!AI.stories) sp.innerHTML = '<div class="si">📖 Las historias del día están en pausa (se activan en ✒).</div>';
+  else if (st && st.day === today()) {
     const mark = { hecha: '✓', ya: '✓ <i>(antes de tiempo)</i>', perdida: '<i>(no llegaste)</i>', sin_evento: '<i>(no pasó)</i>', sin_encargo: '<i>(sin encargo)</i>', rota: '<i>↯ aquí se desvió</i>' };
     let rows = '';
     for (const e of st.escenas) {
@@ -2462,7 +2550,7 @@ function relPanel(on){
     }
     if (st.gen) rows += '<li class="rama">🌿 La historia está tomando otro camino…</li>';
     sp.innerHTML = `<div class="st">📖 «${esc(st.titulo)}»</div><div class="si">${esc(st.inspiracion)}</div>` + (storyDbg ? storyDbgHtml(st) : `<ul>${rows}</ul>`);
-  } else sp.innerHTML = '<div class="si">📖 La historia de hoy se está escribiendo…</div>';
+  } else if (AI.stories) sp.innerHTML = '<div class="si">📖 La historia de hoy se está escribiendo…</div>';
   sp.innerHTML += `<div class="si">Historias escritas a mano (para mañana): ${STORIES.map((x, k) => `<button class="pick" data-k="${k}">${game.nextStory === x.titulo ? '✓ ' : ''}${esc(x.titulo)}</button>`).join(' ')}</div>`;
   if (storyDbg) sp.innerHTML += STORIES.map(x => `<details><summary>🐞 Guion completo de «${esc(x.titulo)}»${x.ramas?.length ? ' (con ' + x.ramas.length + ' ramas escritas a mano)' : ''}</summary>${x.escenas.map(e => beatHtml(e)).join('')}${(x.ramas || []).map(r => `<div class="dh">🌿 Rama «${esc(r.titulo)}» · si se rompe «${esc(r.desde)}»${r.por ? ' por ' + r.por.join(', ') : ''}</div>${r.resumen ? `<div class="si">${esc(r.resumen)}</div>` : ''}${r.escenas.map(e => beatHtml(e)).join('')}`).join('')}</details>`).join('');
   sp.innerHTML += `<div class="si"><button class="dbg" id="dbgbtn">🐞 ${storyDbg ? 'Ocultar el detalle' : 'Ver toda la historia (depurar)'}</button>${storyDbg && st ? ' <button class="dbg" id="dbgcopy">📋 Copiar como JSON</button>' : ''}</div>`;
@@ -2622,7 +2710,7 @@ const AUTO_SCHEMA = { type: 'object', additionalProperties: false, required: ['e
 const worldText = () => stateText(Object.keys(CH)[0]).split('\n\n')[0];
 function whereText(k){
   const w = PEOPLE[k].where;
-  return w === 'away' ? 'fuera de Avonlea, en el pueblo' : CH[k].whereText?.[w] ?? (HOUSES[w]?.inText ?? 'afuera, por Avonlea');
+  return w === 'away' ? 'fuera de Avonlea, en el pueblo' : w === 'br' ? 'en la estación de Bright River' : CH[k].whereText?.[w] ?? (HOUSES[w]?.inText ?? 'afuera, por Avonlea');
 }
 function placeText(){
   if (game.scene !== 'out') return ROOMS[game.scene].place;
@@ -3050,11 +3138,11 @@ const hearts = (x, y) => { for (let k = 0; k < 4; k++) fx.push({ kind: 'heart', 
 const drops = (x, y) => { for (let k = 0; k < 10; k++) fx.push({ kind: 'drop', x: x - 10 + Math.random() * 20, y: y - 20 - Math.random() * 8, vy: Math.random() * 20, t: 0 }); };
 
 /* ---------- life about: butterflies, birds, fireflies, clouds ---------- */
-const butterflies = Array.from({ length: 16 }, (_, k) => ({ x: R() * WW, y: R() * WH, ph: R() * TAU, c: ['#fff3a8', '#ffd0e4', '#bfe3ff', '#ffb58a'][k % 4], tx: R() * WW, ty: R() * WH }));
+const butterflies = Array.from({ length: Math.round(16 * KK) }, (_, k) => ({ x: R() * WW, y: R() * WH, ph: R() * TAU, c: ['#fff3a8', '#ffd0e4', '#bfe3ff', '#ffb58a'][k % 4], tx: R() * WW, ty: R() * WH }));
 const fireflies = Array.from({ length: 34 }, () => ({ x: R() * 400 - 200, y: R() * 300 - 150, ph: R() * TAU }));
 // snow in winter, falling leaves in autumn, petals in spring (in screen space)
 const weather = Array.from({ length: 110 }, () => ({ x: Math.random(), y: Math.random(), ph: Math.random() * TAU, s: .5 + Math.random(), c: Math.floor(Math.random() * 4) }));
-const clouds = Array.from({ length: 8 }, () => ({ x: R() * WW, y: R() * WH, r: 120 + R() * 170 }));
+const clouds = Array.from({ length: Math.round(8 * KK) }, () => ({ x: R() * WW, y: R() * WH, r: 120 + R() * 170 }));
 let birds = [], nextBirds = 6;
 let dayT = .3;   // 0 dawn (6:00), .25 noon, .5 evening (18:00), the night, back to dawn
 function light(){
@@ -3117,7 +3205,7 @@ $('mapcv').addEventListener('click', () => toggleMap(false));
 // the AI settings: on/off, the key (kept in this browser only), the model; and a look at what they remember
 function aiPanel(on){
   $('ai').hidden = !on; if (!on) return;
-  close(); tokDraw(); $('aion').checked = AI.on; $('aiauto').checked = AI.auto !== false; $('aiplans').checked = AI.plans !== false; $('aimode').value = FULL() ? 'completo' : 'minimo'; $('aimodel').value = AI.model; $('aiout').hidden = true; aiKeyField();
+  close(); tokDraw(); $('aion').checked = AI.on; $('aiauto').checked = AI.auto !== false; $('aiplans').checked = AI.plans !== false; $('aistories').checked = !!AI.stories; $('aimode').value = FULL() ? 'completo' : 'minimo'; $('aimodel').value = AI.model; $('aiout').hidden = true; aiKeyField();
 }
 // the key field shows the key of the chosen model's provider
 function aiKeyField(){
@@ -3126,9 +3214,9 @@ function aiKeyField(){
   $('aikey').value = AI.keys[pv] || ''; $('aikey').placeholder = P.hint; $('aikeylab').textContent = 'Tu clave de la API de ' + P.name;
   $('ainote').textContent = man ? 'Para depurar: cada vez que el juego le pida algo a la IA, aparece abajo a la derecha el pedido y un JSON por completar; lo respondes tú (o lo copias a otra IA y pegas su respuesta). Mientras no respondas, eso espera.' : `La clave la pones tú: se guarda solo en este navegador y se envía directamente a ${pv === 'openai' ? 'api.openai.com' : 'api.anthropic.com'}. No compartas el archivo ni el navegador con la clave puesta.`;
 }
-const aiSync = () => { AI.on = $('aion').checked; AI.auto = $('aiauto').checked; AI.plans = $('aiplans').checked; AI.mode = $('aimode').value; AI.model = $('aimodel').value; if (provider() !== 'manual') AI.keys[provider()] = $('aikey').value.trim(); saveAI(); };
+const aiSync = () => { AI.on = $('aion').checked; AI.auto = $('aiauto').checked; AI.plans = $('aiplans').checked; AI.stories = $('aistories').checked; AI.mode = $('aimode').value; AI.model = $('aimodel').value; if (provider() !== 'manual') AI.keys[provider()] = $('aikey').value.trim(); saveAI(); };
 $('aimodel').addEventListener('change', () => { AI.model = $('aimodel').value; saveAI(); aiKeyField(); });
-for (const id of ['aion', 'aiauto', 'aiplans', 'aimode', 'aikey']) $(id).addEventListener('change', aiSync);
+for (const id of ['aion', 'aiauto', 'aiplans', 'aistories', 'aimode', 'aikey']) $(id).addEventListener('change', aiSync);
 $('aibtn').addEventListener('pointerdown', e => { e.stopPropagation(); audio(); if (!game.talk) aiPanel(true); });
 $('aiclose').addEventListener('click', () => { aiSync(); aiPanel(false); });
 $('aitest').addEventListener('click', async () => {
@@ -3198,6 +3286,7 @@ const cam = { x: ana.x, y: ana.y };
 let last = performance.now(), TT = 0, here = null, taskTick = 0, storyT = 2;
 function update(dt){
   if (sleeping) return;
+  if (trip) { TT += dt; return tripTick(dt); }
   if (AI.on && provider() === 'manual' && aiq.list.length) return;   // (debugging by hand: the world waits for the answer)
   TT += dt; dayT += dt / 3600; boil = Math.floor(TT * 6);
   const { night } = light();
@@ -3258,13 +3347,14 @@ function update(dt){
     game.lastDay = today(); save();
   }
   runPlans(dt);
-  if ((storyT -= dt) < 0) { storyT = .5; storyTick(); if (!storyBusy && (!game.story || game.story.day !== today()) && hourNow() < 18 && TT > 4) makeStory(); }
+  if ((storyT -= dt) < 0 && AI.stories) { storyT = .5; storyTick(); if (!storyBusy && (!game.story || game.story.day !== today()) && hourNow() < 18 && TT > 4) makeStory(); }
   mealTick(); ambUpdate(dt); for (const b of bubbles) b.t += dt; bubbles = bubbles.filter(b => b.t < b.dur + .35);
   if ((taskTick -= dt) < 0) { taskTick = .5; taskEvent('ir'); }
   // everyone but Diana follows their routine: where they are wanted (home, or visiting), walking there, or about the place
   const hr = hourNow(), visiting = k => !!CH[k].routine && PEOPLE[k].where !== 'out' && PEOPLE[k].where !== CH[k].home;
   for (const [k, p] of Object.entries(PEOPLE)) {
     const c = CH[k]; if (c.companion) continue;
+    if (k === game.tripWith) { p.want = p.where; continue; }   // (he went with Ana to Bright River)
     p.want = p.story ? p.story.room : (p.away && p.away.day === today() && hr < p.away.until) ? 'away' : c.routine ? c.routine.want(hr, today()) : c.home;
     if (p.story?.place && p.where === 'out') p.target = { place: p.story.place, until: 99, story: true };
     if (c.hostGoals) p.goals = Object.keys(PEOPLE).some(o => visiting(o) && PEOPLE[o].where === p.where) ? c.hostGoals : p.base;
@@ -3346,7 +3436,7 @@ function render(){
     for (const k of Object.keys(PEOPLE)) if (sceneOf(k) === game.scene) list.push({ y: PEOPLE[k].y, draw: () => drawPerson(g, PEOPLE[k], t) });
     for (const it of game.ground) if (it.scene === game.scene) list.push({ y: it.y, draw: () => drawGround(g, it) });
   } else {
-    g.drawImage(ground, ox, oy, vw, vh, ox, oy, vw, vh);
+    g.drawImage(ground, ox * GS, oy * GS, vw * GS, vh * GS, ox, oy, vw, vh);
     // the brook and the lake: water with the sky's shimmer, lily pads, a fish jumping now and then
     // (in winter both are frozen: pale ice with cracks, and a glint now and then)
     const ice = S === 3;
@@ -3479,7 +3569,7 @@ function paintMapBase(w, h){
   c.setTransform(k, 0, 0, k, 0, 0);
   // a pale wash of the season's colour, a darker one for the Haunted Wood
   c.fillStyle = ['rgba(150,190,100,.25)', 'rgba(130,170,80,.28)', 'rgba(210,150,70,.25)', 'rgba(200,215,230,.35)'][S]; c.fillRect(60, 60, WW - 120, WH - 120);
-  c.fillStyle = 'rgba(60,90,50,.16)'; c.beginPath(); c.ellipse(9 * T, 40 * T, 12 * T, 9 * T, 0, 0, TAU); c.fill();
+  c.fillStyle = 'rgba(60,90,50,.16)'; c.beginPath(); c.ellipse(9 * U, 40 * U, 12 * U, 9 * U, 0, 0, TAU); c.fill();
   const stroke = (pts, wd, col) => { c.strokeStyle = col; c.lineWidth = wd; c.lineCap = 'round'; c.lineJoin = 'round'; c.beginPath(); c.moveTo(...pts[0]); pts.slice(1).forEach(p => c.lineTo(...p)); c.stroke(); };
   for (const p of paths) { stroke(p, 34, 'rgba(150,110,60,.5)'); stroke(p, 22, '#e3c99a'); }
   stroke(brook, 30, S === 3 ? '#c9dde6' : '#7fb2c9');
@@ -3501,7 +3591,7 @@ function paintMapBase(w, h){
   c.fillStyle = '#4a2f1c'; c.textAlign = 'center';
   const label = (text, x, y, size = 46) => { c.font = `italic ${size}px Georgia, serif`; c.fillStyle = 'rgba(241,226,191,.75)'; const tw = c.measureText(text).width; c.fillRect(x - tw / 2 - 8, y - size * .85, tw + 16, size * 1.1); c.fillStyle = '#4a2f1c'; c.fillText(text, x, y); };
   for (const h of Object.values(HOUSES)) label(h.mapLabel?.[0] ?? h.name, h.at.x, h.at.y - 150, h.mapLabel?.[1]); label('Granero', BARN.x, BARN.y - 150, 38);
-  label('Lago de las Aguas Brillantes', LAKE.x, LAKE.y + LAKE.ry + 64); label('Bosque Encantado', 9 * T, 44 * T);
+  label('Lago de las Aguas Brillantes', LAKE.x, LAKE.y + LAKE.ry + 64); label('Bosque Encantado', 9 * U, 44 * U);
   label('Camino Blanco de las Delicias', GG.x + 360, BRIDGE.y - 96, 38); label('Huerta', BEDS[1].x, BEDS[0].y - 34, 34); label('Arroyo', brook[2][0] + 90, brook[2][1] + 160, 34);
   // a compass rose and a double border
   const cx = WW - 150, cy = WH - 150;
@@ -3518,7 +3608,7 @@ function drawMap(){
   if (!mapBase || mapBase.s !== S || mapBase.w !== w) mapBase = paintMapBase(w, h);
   c.setTransform(1, 0, 0, 1, 0, 0); c.drawImage(mapBase.cv, 0, 0);
   // where everyone is (someone indoors is shown at the door of the house)
-  const at = (where, x, y) => where === 'out' ? [x, y] : [HOUSES[ROOMS[where].parent ?? where].at.x, HOUSES[ROOMS[where].parent ?? where].at.y + 20];
+  const at = (where, x, y) => where === 'out' ? [x, y] : where === 'br' ? [TOWN[0] + 14, TOWN[1]] : [HOUSES[ROOMS[where].parent ?? where].at.x, HOUSES[ROOMS[where].parent ?? where].at.y + 20];
   const mark = (who, [x, y], col, dx, big) => {
     const sx = x * k + dx * dpr, sy = y * k, r = (big ? 6 + Math.sin(TT * 5) * 1.2 : 4.5) * dpr;
     c.beginPath(); c.arc(sx, sy, r, 0, TAU); c.fillStyle = col; c.fill(); c.lineWidth = 1.4 * dpr; c.strokeStyle = 'rgba(60,35,20,.9)'; c.stroke();
@@ -3530,7 +3620,7 @@ function drawMap(){
   $('maptitle').textContent = 'Avonlea · ' + SEASONS[S] + ', día ' + (Math.floor(dayT) % 2 + 1) + ' · ' + SICON[S];
 }
 function loop(now){ const dt = clamp((now - last) / 1000, 0, .05); last = now; update(dt); render(); requestAnimationFrame(loop); }
-window.__avonlea = { ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+window.__avonlea = { tripGo, trip: () => trip, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
 requestAnimationFrame(loop);
 })();
 </script>
