@@ -106,7 +106,9 @@ html,body{margin:0;height:100%;background:#2b3a26;overflow:hidden;touch-action:n
   <div>Matthew, Marilla, Diana y la Sra. Barry conversan con una IA: cuando Ana pasa cerca charlan solos (y Ana también habla), en globitos sobre sus cabezas; se acuerdan de lo que ha pasado y de lo que se dijeron. Sin la clave, solo dicen unas frases escritas de antemano.</div>
   <label><input type="checkbox" id="aion"> Usar IA en las conversaciones (recomendado)</label>
   <label><input type="checkbox" id="aiauto"> Ana hace lo suyo sola cuando no la controlo</label>
-  <label><input type="checkbox" id="aiplans"> Los personajes planean su día con IA (una vez por la mañana; si no, siguen su rutina)</label>
+  <label><input type="checkbox" id="aiplans"> Los personajes planean su día con IA (en el modo completo, una vez por la mañana; si no, siguen su rutina)</label>
+  <label for="aimode">Gasto de IA</label>
+  <select id="aimode"><option value="minimo">Mínimo (recomendado): instrucciones breves; la IA escribe las charlas, la historia del día y sus ramas, y el repaso de la noche</option><option value="completo">Completo: además el juez de la historia, los planes de los personajes y las decisiones de Ana (gasta varias veces más)</option></select>
   <label for="aimodel">Modelo</label>
   <select id="aimodel"><option value="gpt-5.4-mini">GPT-5.4 mini (OpenAI)</option><option value="claude-opus-5-5">Claude Opus 5.5 (Anthropic)</option><option value="claude-sonnet-5-5">Claude Sonnet 5.5 (Anthropic, más rápido)</option><option value="claude-haiku-4-5">Claude Haiku 4.5 (Anthropic, el más barato)</option><option value="manual">🐞 Yo hago de IA (depurar: respondo a mano)</option></select>
   <label for="aikey" id="aikeylab">Tu clave de la API</label>
@@ -1529,7 +1531,7 @@ async function autoDecide(){
   const sa = storyAuto(); if (sa) { auto.hist.push(sa.label); if (auto.hist.length > 6) auto.hist.shift(); startIntent(sa.intent, false, ''); return; }   // (the story of the day comes first)
   const opts = autoOptions(), sc = game.scene; if (!opts.length) { auto.thinkAt = TT + 4; return; }
   let pick = null, said = '';
-  if (aiReady() && TT >= auto.err) {
+  if (aiReady() && FULL() && TT >= auto.err) {
     auto.busy = true;
     try { const r = await aiCall([{ role: 'user', content: autoMsg(opts) }], AUTO_SCHEMA), o = opts[Math.round(+r.out.eleccion) - 1]; if (o) { pick = o; said = typeof r.out.pensamiento === 'string' ? r.out.pensamiento.trim() : ''; } }
     catch (e) { console.debug('[avonlea IA] Ana sola', e.message); auto.err = TT + 60; }
@@ -1553,7 +1555,7 @@ async function autoChoose(){
   const tk = game.talk, opts = game.talkOpts; if (!tk || !opts?.length) return;
   const who = tk.who, q = $('talk').querySelector('.line')?.textContent || '';
   let k = -1, said = '';
-  if (aiReady()) {
+  if (aiReady() && FULL()) {
     $('talk').classList.add('wait');
     try { const r = await aiCall([{ role: 'user', content: chooseMsg(who, q, opts) }], AUTO_SCHEMA); k = Math.round(+r.out.eleccion) - 1; said = typeof r.out.pensamiento === 'string' ? r.out.pensamiento.trim() : ''; }
     catch (e) { console.debug('[avonlea IA] Ana elige', e.message); }
@@ -1775,7 +1777,8 @@ function walkOption(who){
    three things to say, and may note one new memory. Gifts and walks are still decided by the game itself, so
    nothing the AI writes can break it; if the AI is off or fails, the written lines are used. */
 // (each provider has its own key, typed in by the player and kept in this browser)
-const AI = { on: true, auto: true, model: 'gpt-5.4-mini', keys: { openai: '', anthropic: '' } };
+const AI = { on: true, auto: true, model: 'gpt-5.4-mini', mode: 'minimo', keys: { openai: '', anthropic: '' } };
+const FULL = () => AI.mode === 'completo';   // (the full AI: the judge, the plans, Ana deciding with the AI; the minimal one spends several times less)
 try { const st = JSON.parse(localStorage.getItem('avonlea-ai') || '{}'); if (st.key) { AI.keys.anthropic = st.key; delete st.key; } Object.assign(AI, st); AI.keys = Object.assign({ openai: '', anthropic: '' }, st.keys || AI.keys); } catch (e) {}
 const saveAI = () => { try { localStorage.setItem('avonlea-ai', JSON.stringify(AI)); } catch (e) {} };
 const provider = (m = AI.model) => m === 'manual' ? 'manual' : m.startsWith('gpt') ? 'openai' : 'anthropic';
@@ -1806,7 +1809,7 @@ const PLACES = {
 // what each one can do (the game checks every action against this)
 function abilText(who){
   const A = ABIL[who], L = [];
-  if (A.ir) L.push('ir a algún lugar de Avonlea (' + Object.values(PLACES).map(p => p[0]).join(', ') + ') y quedarte un rato');
+  if (A.ir) L.push(FULL() ? 'ir a algún lugar de Avonlea (' + Object.values(PLACES).map(p => p[0]).join(', ') + ') y quedarte un rato' : 'ir a lugares de Avonlea');
   if (A.visitar) L.push('ir a buscar a Ana para conversar');
   if (A.acompanar) L.push('acompañar a Ana a pasear');
   if (A.cocinar) L.push('cocinar (tarta de bayas, compota de manzana o té) y dejarlo en la mesa de la cocina para Ana');
@@ -1931,7 +1934,7 @@ const PLAN_SCHEMA = { type: 'object', additionalProperties: false, required: ['p
     lugar: { type: 'string', enum: ['', ...Object.keys(PLACES)] }, item: { type: 'string', enum: ['', ...ITEMS] }, motivo: { type: 'string' } } } } } };
 const planQ = [], planAt = {};
 let planBusy = false, planWait = 0;
-const plansOn = () => aiReady() && AI.plans !== false;
+const plansOn = () => aiReady() && FULL() && AI.plans !== false;
 const PLANNERS = () => Object.keys(PEOPLE).filter(k => CH[k].plans !== false);
 // re-planning one character, when something important happened to them: at most twice a day, three hours apart
 function planSoon(who, reason){
@@ -2284,7 +2287,7 @@ async function storyJudge(st, beats){
 }
 // before giving a scene up (or opening a branch), the judge looks at the diary: maybe it already happened, another way
 function storyWait(st, e){
-  if (!aiReady() || e.juzgada === 'ok') return false;
+  if (!aiReady() || !FULL() || e.juzgada === 'ok') return false;
   if (!st.judging && e.juzgada !== 'pend') { e.juzgada = 'pend'; storyJudge(st, [e]); }
   return true;
 }
@@ -2326,7 +2329,7 @@ function storyTick(){
     }
   }
   // something new in the diary: the judge looks at the scenes going on (and the ones that could start)
-  if (aiReady() && !st.judging && TT >= (st.judgeT || 0) && todayLog().slice(st.judgeN ?? 0).some(j => /\bAna\b/.test(j.t) && !/^(Ana decidió|El día tomó otro camino)/.test(j.t))) {   // (something Ana did)
+  if (aiReady() && FULL() && !st.judging && TT >= (st.judgeT || 0) && todayLog().slice(st.judgeN ?? 0).some(j => /\bAna\b/.test(j.t) && !/^(Ana decidió|El día tomó otro camino)/.test(j.t))) {   // (something Ana did)
     const c = st.escenas.filter(e => e.estado === 'abierta' || e.estado === 'jugada');
     if (c.length) storyJudge(st, c.slice(0, 6)); else st.judgeN = todayLog().length;
   }
@@ -2634,7 +2637,7 @@ function stateText(who){
     `Cariño hacia Ana (0 a 5): ${Object.keys(CH).map(k => NAMES[k] + ' ' + game.fond[k]).join(', ')}.`,
     '', `PERSONAJE: ${NAMES[who]}, que ahora está ${whereText(who)}.`, `Lo que ${NAMES[who]} puede hacer: ${abilText(who)}.` + (game.npcGiftDay[who] === today() ? ' (Hoy ya le regaló algo a Ana.)' : ''),
   ];
-  L.push(`Lo que ${NAMES[who]} siente por los demás (de 0 a 5): ${relText(who)}.`);
+  L.push(`Lo que ${NAMES[who]} siente por los demás (de 0 a 5): ${relText(who, FULL() ? null : ['ana', ...Object.keys(PEOPLE).filter(k => sceneOf(k) === game.scene)])}.`);
   const imp = game.impr[who] || []; if (imp.length) L.push(`Lo que se le quedó de días anteriores: ${imp.slice(-4).join(' / ')}`);
   const sty = storyText(who); if (sty) L.push(sty);
   const P = game.plans[who];
@@ -2642,9 +2645,9 @@ function stateText(who){
   const mine = game.tasks.filter(t => t.from === who && (!t.done || !t.thanked)), others = activeTasks().filter(t => t.from !== who).length;
   L.push(`Encargos que ${NAMES[who]} le dio a Ana: ${mine.length ? mine.map(t => taskText(t) + (t.done ? ' (ya lo cumplió)' : ' (pendiente)')).join('; ') : 'ninguno pendiente'}. Ana tiene ${activeTasks().length} encargo(s) pendiente(s) en total${others ? ` (${others} de otras personas)` : ''}.`);
   const k = game.know[who] || [];
-  L.push('', `LO QUE ${NAMES[who].toUpperCase()} SABE QUE HA PASADO (lo vio o se lo contaron; lo más reciente al final):`, ...(k.length ? k.slice(-18).map(e => `- día ${e.d} (${SEASONS[e.s].toLowerCase()}): ${e.t}`) : ['- (nada todavía)']));
+  L.push('', `LO QUE ${NAMES[who].toUpperCase()} SABE QUE HA PASADO (lo vio o se lo contaron; lo más reciente al final):`, ...(k.length ? k.slice(FULL() ? -18 : -6).map(e => `- día ${e.d} (${SEASONS[e.s].toLowerCase()}): ${e.t}`) : ['- (nada todavía)']));
   const m = game.mem[who] || [];
-  L.push('', `LO QUE ${NAMES[who].toUpperCase()} RECUERDA DE SUS CONVERSACIONES CON ANA:`, ...(m.length ? m.map(x => '- ' + x) : ['- (nada todavía)']));
+  L.push('', `LO QUE ${NAMES[who].toUpperCase()} RECUERDA DE SUS CONVERSACIONES CON ANA:`, ...(m.length ? m.slice(FULL() ? -16 : -4).map(x => '- ' + x) : ['- (nada todavía)']));
   return L.join('\n');
 }
 
@@ -2682,6 +2685,30 @@ async function aiCall(messages, schema = AI_SCHEMA){
     }
     throw e;
   } finally { aiGate.busy--; }
+}
+/* the instructions for the AI, per request: only the part that request needs (and in the minimal mode, a short version) */
+const SYS = (() => {
+  const head = [], sec = {};
+  for (const p of AI_SYSTEM.split(/\n\n(?=[A-ZÁÉÍÓÚÑ][A-ZÁÉÍÓÚÑ ]{4,}(?: \(|\n))/)) { const k = p.split('\n')[0].replace(/ \(.*/, '').trim(); if (/^(ESCENAS|ANA POR|FIN DEL|GUIÓN|RAMA|JUEZ|PLANIFICAR)/.test(k)) sec[k] = p; else head.push(p); }
+  return { head: head.join('\n\n'), sec };
+})();
+const SYS_FOR = { 'una escena': ['ESCENAS DE CONVERSACIÓN'], 'Ana decide': ['ANA POR SU CUENTA'], 'el fin del día': ['FIN DEL DÍA'], 'el guión del día': ['GUIÓN DEL DÍA'], 'una rama de la historia': ['GUIÓN DEL DÍA', 'RAMA NUEVA'], 'el juez de la historia': ['JUEZ DE LA HISTORIA'], 'los planes del día': ['PLANIFICAR'], 'un cambio de plan': ['PLANIFICAR'] };
+const MIN_HEAD = () => `Eres la voz de los personajes de «Un día en Avonlea», un juego tranquilo inspirado en «Ana de las Tejas Verdes» (L. M. Montgomery), hacia 1880. Español, tuteo en la familia; tono tierno y con humor, como el libro. Ana Shirley: 11 años, pelirroja, huérfana adoptada por los Cuthbert; soñadora, muy conversadora, de palabras grandiosas e imaginación desbordante. Nada moderno (ni juegos, ni IA). No inventes sucesos que el juego tendría que mostrar. Responde solo con el JSON pedido; los campos que no se usan van vacíos ("", 0, [], "ninguno" o "ninguna").
+PERSONAJES: ${Object.keys(CH).map(k => NAMES[k] + ': ' + CH[k].voice.split(/(?<=\.)\s/).reduce((a, x) => a.length < 110 ? (a ? a + ' ' : '') + x : a, '')).join(' | ')}`;
+const MIN_SEC = {
+  'una escena': () => `ESCENA: "lineas" (de 2 a 5): lo que dicen en voz alta Ana y los PRESENTES, cada uno con su voz; Ana es la que más habla (hasta 25 palabras por línea; los demás, 15). Que termine sin dejar una pregunta abierta. Respeta lo que es verdad ahora (lo que Ana lleva, la estación) y no repitas lo ya dicho. Charla al pasar: ligera, sin encargo ni acción. Si Ana inició la charla, de vez en cuando el personaje puede pedirle un "encargo" (traer "cantidad" de "item" a "para", regar, cocinar tarta/compota/te, recado a "para", ir a "lugar"; nunca si ya tiene 3 o uno suyo pendiente) o hacer una "accion" (regalar, acompanar, ir). "resumen": una frase en tercera persona de lo importante, o "". "ana_va": solo si la jugadora hizo decir a Ana que se va: irse, lugar (${Object.keys(PLACES).join(', ')}), casa (gg, os, rl, ga), persona o dormir; si no, "ninguna".`,
+  'Ana decide': () => 'ANA DECIDE: elige la opción que Ana elegiría ahora, por su carácter y el momento, sin repetir lo último ("eleccion": su número); "pensamiento": lo que dice en voz alta (una frase).',
+  'el fin del día': () => 'FIN DEL DÍA: "relaciones": solo los cambios que el día justifica (casi siempre pocos o ninguno), "cambio" -1, 0 o 1 y una "nota" breve; "impresiones": como mucho una por personaje que vivió algo importante (una frase).',
+  'el guión del día': () => `GUIÓN: una historia breve para hoy, inspirada en un episodio de los libros o de la serie, tierna y con humor, jugable aquí (conversar, ir a lugares, encargos). De 2 a 5 escenas en orden, con "hora" entre la indicada y las 20: "id" breve; "lugar" (clave); "personajes" (sin Ana; Diana solo afuera o en os; en ga Ana está sola); "que_pasa" (1 o 2 frases); "pista" (12 palabras como máximo, sin contar el final); "encargo" (o "ninguno"); "fin": llega_ana, encargo_cumplido o evento (con "evento"); "efectos" al empezar o terminar (${Object.entries(STORY_EFFECTS).map(([k, f]) => k + ': ' + f.desc).join('; ')}; animales: ${Object.keys(ANIMALS).join(', ')}; áreas: ${Object.keys(AREAS).join(', ')}; estados de Ana: ${Object.keys(ANA_STATES).join(', ')}); "frases": hasta 3 frases clave o []; "requiere": ids o eventos que deben pasar antes; "clave": true si sin ella la historia no puede seguir; "contra": eventos que la desvían. Eventos: ${Object.keys(STORY_EVENTS).join(', ')}.`,
+  'una rama de la historia': () => MIN_SEC['el guión del día']() + '\nRAMA NUEVA: la historia se desvió; escribe cómo sigue (de 1 a 3 escenas, mismo formato) desde lo que de verdad pasó, con el mismo tono; "titulo_rama" y "resumen".',
+  'el juez de la historia': () => 'JUEZ: para cada escena, "cumplida" si lo esencial ya pasó según la bitácora (aunque fuera distinto), "sigue" si aún puede pasar, "no_puede" si ya no; ante la duda, "sigue". "nota": una frase.',
+  'los planes del día': () => 'PLANES: planes sencillos y propios de la vida de cada uno, solo con lo que puede hacer.',
+  'un cambio de plan': () => 'PLANES: planes sencillos y propios de su vida, solo con lo que puede hacer.',
+};
+function sysFor(schema){
+  const kind = aiqKind(schema);
+  if (!FULL() && MIN_SEC[kind]) return MIN_HEAD() + '\n\n' + MIN_SEC[kind]();
+  const secs = SYS_FOR[kind]; return secs ? SYS.head + '\n\n' + secs.map(k => SYS.sec[k] || '').join('\n\n') : AI_SYSTEM;
 }
 /* the tokens spent: every answer of the AI says how many it read (some of them from the cache, cheaper) and wrote;
    kept in this browser, by kind of request, until put back to zero */
@@ -2729,7 +2756,7 @@ function aiqDraw(){
 }
 // OpenAI (Chat Completions): the fixed prompt goes first so it is cached automatically; the answer must fit the schema
 async function openaiCall(messages, schema, strict = true){
-  const body = { model: AI.model, max_completion_tokens: 4000, messages: [{ role: 'system', content: AI_SYSTEM + (strict ? '' : '\n\nResponde solo con un objeto JSON que siga este esquema: ' + JSON.stringify(schema)) }, ...messages] };
+  const body = { model: AI.model, max_completion_tokens: 4000, messages: [{ role: 'system', content: sysFor(schema) + (strict ? '' : '\n\nResponde solo con un objeto JSON que siga este esquema: ' + JSON.stringify(schema)) }, ...messages] };
   if (strict) { body.response_format = { type: 'json_schema', json_schema: { name: 'respuesta', strict: true, schema } }; body.reasoning_effort = 'low'; }
   else body.response_format = { type: 'json_object' };
   const { res, data } = await post('https://api.openai.com/v1/chat/completions', { 'content-type': 'application/json', authorization: 'Bearer ' + aiKey() }, body);
@@ -2743,7 +2770,7 @@ async function openaiCall(messages, schema, strict = true){
 }
 // Claude (Messages API): the fixed prompt is marked for caching
 async function claudeCall(messages, schema, retry = true){
-  const body = { model: AI.model, max_tokens: 4000, system: [{ type: 'text', text: AI_SYSTEM, cache_control: { type: 'ephemeral' } }], messages, output_config: { format: { type: 'json_schema', schema } } };
+  const body = { model: AI.model, max_tokens: 4000, system: [{ type: 'text', text: sysFor(schema), cache_control: { type: 'ephemeral' } }], messages, output_config: { format: { type: 'json_schema', schema } } };
   const headers = { 'content-type': 'application/json', 'x-api-key': aiKey(), 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' };
   // (low effort: quick answers for a chat; on the Opus and Sonnet models, a declined answer is retried on another model)
   if (AI.model !== 'claude-haiku-4-5') { body.output_config.effort = 'low'; if (retry) { body.fallbacks = 'default'; headers['anthropic-beta'] = 'server-side-fallback-2026-07-01'; } }
@@ -2823,7 +2850,7 @@ function ambEnd(){
     logEv(sum, [...s.parts, ...witnesses()]); if (s.resumen) for (const k of s.parts) remember(k, sum);
     amb.recent = { parts: s.parts, summary: said.map(l => nameOf(l.q) + ': «' + l.t + '»').join(' '), t: TT };
   }
-  amb.cool = TT + 35;
+  amb.cool = TT + (FULL() ? 35 : 60);
   for (const k of s.parts) { amb.mute[k] = TT + (k === 'diana' && diana.follow ? 70 : 110); amb.seen[k] = true; }
   if (s.after) startIntent(s.after, true);
   if (s.directed && s.noMenu && game.talk?.scene) game.talk = null;   // (nothing to decide: the talk just ends)
@@ -3028,7 +3055,7 @@ $('mapcv').addEventListener('click', () => toggleMap(false));
 // the AI settings: on/off, the key (kept in this browser only), the model; and a look at what they remember
 function aiPanel(on){
   $('ai').hidden = !on; if (!on) return;
-  close(); tokDraw(); $('aion').checked = AI.on; $('aiauto').checked = AI.auto !== false; $('aiplans').checked = AI.plans !== false; $('aimodel').value = AI.model; $('aiout').hidden = true; aiKeyField();
+  close(); tokDraw(); $('aion').checked = AI.on; $('aiauto').checked = AI.auto !== false; $('aiplans').checked = AI.plans !== false; $('aimode').value = FULL() ? 'completo' : 'minimo'; $('aimodel').value = AI.model; $('aiout').hidden = true; aiKeyField();
 }
 // the key field shows the key of the chosen model's provider
 function aiKeyField(){
@@ -3037,9 +3064,9 @@ function aiKeyField(){
   $('aikey').value = AI.keys[pv] || ''; $('aikey').placeholder = P.hint; $('aikeylab').textContent = 'Tu clave de la API de ' + P.name;
   $('ainote').textContent = man ? 'Para depurar: cada vez que el juego le pida algo a la IA, aparece abajo a la derecha el pedido y un JSON por completar; lo respondes tú (o lo copias a otra IA y pegas su respuesta). Mientras no respondas, eso espera.' : `La clave la pones tú: se guarda solo en este navegador y se envía directamente a ${pv === 'openai' ? 'api.openai.com' : 'api.anthropic.com'}. No compartas el archivo ni el navegador con la clave puesta.`;
 }
-const aiSync = () => { AI.on = $('aion').checked; AI.auto = $('aiauto').checked; AI.plans = $('aiplans').checked; AI.model = $('aimodel').value; if (provider() !== 'manual') AI.keys[provider()] = $('aikey').value.trim(); saveAI(); };
+const aiSync = () => { AI.on = $('aion').checked; AI.auto = $('aiauto').checked; AI.plans = $('aiplans').checked; AI.mode = $('aimode').value; AI.model = $('aimodel').value; if (provider() !== 'manual') AI.keys[provider()] = $('aikey').value.trim(); saveAI(); };
 $('aimodel').addEventListener('change', () => { AI.model = $('aimodel').value; saveAI(); aiKeyField(); });
-for (const id of ['aion', 'aiauto', 'aiplans', 'aikey']) $(id).addEventListener('change', aiSync);
+for (const id of ['aion', 'aiauto', 'aiplans', 'aimode', 'aikey']) $(id).addEventListener('change', aiSync);
 $('aibtn').addEventListener('pointerdown', e => { e.stopPropagation(); audio(); if (!game.talk) aiPanel(true); });
 $('aiclose').addEventListener('click', () => { aiSync(); aiPanel(false); });
 $('aitest').addEventListener('click', async () => {
@@ -3062,7 +3089,7 @@ $('aiforget').addEventListener('click', () => { if (!confirm('¿Borrar todo lo q
 $('aiq').querySelector('.ok').addEventListener('click', () => { const r = aiq.list[0]; if (!r) return; try { parseJSON($('aiq').querySelector('textarea').value); } catch (e) { notice('🐞 Eso no es un JSON válido'); return; } aiqAnswer(r.id, $('aiq').querySelector('textarea').value); });
 $('aiq').querySelector('.no').addEventListener('click', () => { const r = aiq.list[0]; if (r) aiqFail(r.id); });
 $('aiq').querySelector('.all').addEventListener('click', () => { const r = aiq.list[0]; if (!r) return; aiq.skip.add(r.kind); for (const x of aiq.list.filter(x => x.kind === r.kind)) aiqFail(x.id, 'omitido'); notice('🐞 Desde ahora no se pregunta: ' + r.kind); });
-$('aiq').querySelector('.cp').addEventListener('click', () => { const r = aiq.list[0]; if (!r) return; try { navigator.clipboard.writeText(`INSTRUCCIONES:\n${AI_SYSTEM}\n\nPEDIDO:\n${r.prompt}\n\nResponde solo con un objeto JSON que siga este esquema:\n${JSON.stringify(r.schema)}`); notice('📋 Copiado: pégalo en otra IA y trae su respuesta'); } catch (e) {} });
+$('aiq').querySelector('.cp').addEventListener('click', () => { const r = aiq.list[0]; if (!r) return; try { navigator.clipboard.writeText(`INSTRUCCIONES:\n${sysFor(r.schema)}\n\nPEDIDO:\n${r.prompt}\n\nResponde solo con un objeto JSON que siga este esquema:\n${JSON.stringify(r.schema)}`); notice('📋 Copiado: pégalo en otra IA y trae su respuesta'); } catch (e) {} });
 $('aiq').addEventListener('keydown', e => e.stopPropagation());
 $('tok').addEventListener('pointerdown', e => { e.stopPropagation(); if (!game.talk) aiPanel(true); });
 tokDraw();
@@ -3440,7 +3467,7 @@ function drawMap(){
   $('maptitle').textContent = 'Avonlea · ' + SEASONS[S] + ', día ' + (Math.floor(dayT) % 2 + 1) + ' · ' + SICON[S];
 }
 function loop(now){ const dt = clamp((now - last) / 1000, 0, .05); last = now; update(dt); render(); requestAnimationFrame(loop); }
-window.__avonlea = { aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+window.__avonlea = { sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
 requestAnimationFrame(loop);
 })();
 </script>
