@@ -143,7 +143,7 @@ html,body{margin:0;height:100%;background:#2b3a26;overflow:hidden;touch-action:n
 (() => {
 'use strict';
 const cv = document.getElementById('cv'), g = cv.getContext('2d');
-const T = 32, K = 2.5, U = T * K, WW = 72 * U, WH = 50 * U, TAU = Math.PI * 2, KK = K * K;   // (U: the unit of distances outdoors; T: the size of things)
+const T = 32, K = 2.5, U = T * K, AX = 150 * U, AW = 72 * U, WW = AX + AW, WH = 50 * U, TAU = Math.PI * 2, KK = K * K;   // (U: the unit of distances outdoors; T: the size of things; AX: where Avonlea begins, AW its width)
 function rng(seed){ return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 const R = rng(18780228);
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v)), lerp = (a, b, k) => a + (b - a) * k, dist = (a, b, c, d) => Math.hypot(a - c, b - d);
@@ -193,16 +193,58 @@ const paper = document.createElement('canvas'); paper.width = paper.height = 256
 (() => { const p = paper.getContext('2d'), r = rng(5); for (let n = 0; n < 9000; n++) { p.fillStyle = r() < .5 ? `rgba(90,60,30,${r() * .12})` : `rgba(255,250,235,${r() * .15})`; p.fillRect(r() * 256, r() * 256, 1 + r(), 1 + r()); }
   p.strokeStyle = 'rgba(120,90,60,.06)'; for (let n = 0; n < 60; n++) { p.beginPath(); const x = r() * 256, y = r() * 256; p.moveTo(x, y); p.quadraticCurveTo(x + r() * 20 - 10, y + r() * 20 - 10, x + r() * 30 - 15, y + r() * 30 - 15); p.stroke(); } })();
 
-/* ---------- Avonlea ---------- */
-const GG = { x: 20 * U, y: 15 * U, w: 7 * T };          // the front's middle, at the ground
-const OS = { x: 54 * U, y: 15 * U, w: 6 * T };
-const BARN = { x: 13.4 * U, y: 13 * U, w: 5 * T };
-const LAKE = { x: 37 * U, y: 40 * U, rx: 15 * T, ry: 7 * T };
-const brook = [[41 * U, -20], [41.6 * U, 8 * U], [40.4 * U, 16 * U], [41.4 * U, 24 * U], [40.2 * U, 31 * U], [38.5 * U, LAKE.y - LAKE.ry + 20]];
-const BRIDGE = { x: 40.6 * U, y: 19.5 * U };
-const LY = { x: 28 * U, y: 27 * U, w: 6 * T };
-const HH = { x: 8.5 * U, y: 23.6 * U, w: 5 * T };   // Mr. Harrison's, the new neighbour
-const TOWN = [22, 13 * U + 40];
+/* ---------- THE MAP: the whole world, described in a few lines and drawn by the game (seeded, the same every time).
+   - ZONES: bands from west to east; each kind (ZONE_KINDS) knows its ground by season and what it scatters.
+   - AVONLEA: the places of Avonlea, in units U from where its band begins (the houses, the brook, the lake...).
+   - ROAD: the road from Avonlea to Bright River; STREAMS cross it under wooden bridges; FEATURES along it: farms, signs,
+     a lighthouse, and MOMENTS (someone says something when Ana passes by).
+   To add a zone, a place or a feature: a line here (and, for a new kind, an entry in ZONE_KINDS or FEATURE_KINDS). ---------- */
+const MAP = {
+  zones: [{ kind: 'pueblo', x0: 0, x1: 22 * U, name: 'Bright River' }, { kind: 'costa', x0: 22 * U, x1: 64 * U, name: 'la costa' }, { kind: 'flores', x0: 64 * U, x1: 96 * U, name: 'el campo de flores' },
+    { kind: 'bosque', x0: 96 * U, x1: 122 * U, name: 'el bosque' }, { kind: 'campo', x0: 122 * U, x1: AX, name: 'los campos' }, { kind: 'avonlea', x0: AX, x1: WW, name: 'Avonlea' }],
+  avonlea: { gg: [20, 15], os: [54, 15], barn: [13.4, 13], lake: [37, 40], bridge: [40.6, 19.5], ly: [28, 27], hh: [8.5, 23.6], town: [0, 13],
+    brook: [[41, -.25], [41.6, 8], [40.4, 16], [41.4, 24], [40.2, 31]], hhPath: [[13.8, 21.6], [11.9, 24.4]], avena: [13, 23], haunted: [1, 30, 17, 48], hauntedSign: [15, 30] },
+  road: { y: 13.5 * U, wave: 60, step: 5 * U, end: 8 * U },   // (the road, from Avonlea westwards to the station)
+  station: [8 * U, 13.5 * U],
+  streams: [138 * U, 110 * U, 80 * U],
+  features: [
+    { kind: 'granja', x: 140 * U, side: -1 }, { kind: 'granja', x: 128 * U, side: 1 }, { kind: 'granja', x: 18 * U, side: 1 }, { kind: 'granja', x: 30 * U, side: -1 },
+    { kind: 'faro', x: 44 * U }, { kind: 'cartel', x: 24 * U, text: 'Bright River' }, { kind: 'cartel', x: 97 * U, text: 'El campo de flores' },
+    { kind: 'momento', x: 138 * U + 40, lines: [['ana', '¡Un puente de madera! Cada tabla suena distinto... como un piano para caballos.'], ['matthew', 'Bueno, pues... ya lo creo.']] },
+    { kind: 'momento', x: 86 * U, west: true, lines: [['ana', '¡Señor Matthew! ¡Señor Matthew!'], ['matthew', '¿Qué... qué pasa, Ana?'], ['ana', '¡Mire! ¡Todo el campo se volvió rosado! ¿No le dan ganas de llorar de lo hermoso que es?'], ['matthew', 'Bueno, pues... es muy bonito, sí. Ya lo creo.']] },
+    { kind: 'momento', x: 57 * U, lines: [['ana', '¡El mar! ¡Y la arena es roja! Parece que la isla se hubiera puesto colorada.'], ['matthew', 'Es la tierra de la isla, Ana. Roja como tu... bueno, pues, roja.']] },
+    { kind: 'momento', x: 44 * U, lines: [['ana', 'Un faro... imagino que adentro vive alguien muy solitario que escribe poemas a las gaviotas.']] },
+  ],
+};
+// how each kind of zone looks: its ground by season, and what it scatters (per million square px)
+const ZONE_KINDS = {
+  avonlea: { ground: null },
+  campo: { ground: ['#9cc66c', '#8db45c', '#b0a860', '#e9eef2'], trees: 14, pines: .2, bushes: 3, tufts: 500, flowers: 120 },
+  bosque: { ground: ['#6f9e52', '#648f48', '#8a8a48', '#e4ebef'], trees: 22, pines: .8, bushes: 2, tufts: 380 },
+  flores: { ground: ['#a8c870', '#98b860', '#b8aa66', '#eef2f5'], trees: 2, pines: 0, bushes: 1, tufts: 380, lupins: 2600 },
+  costa: { ground: ['#b9c880', '#aabb70', '#c2b67a', '#eef1f4'], trees: 2, pines: .5, bushes: 1, tufts: 360, dunes: 26, rocks: 8, sea: true },
+  pueblo: { ground: ['#9cc66c', '#8db45c', '#b0a860', '#e9eef2'], trees: 8, pines: .2, bushes: 2, tufts: 460, flowers: 120, sea: true },
+};
+const zoneAt = x => MAP.zones.find(z => x >= z.x0 && x < z.x1) || MAP.zones[MAP.zones.length - 1];
+const avU = ([x, y]) => [AX + x * U, y * U];   // (a place of Avonlea, from its units)
+const AV = MAP.avonlea;
+const GG = { x: avU(AV.gg)[0], y: avU(AV.gg)[1], w: 7 * T };          // the front's middle, at the ground
+const OS = { x: avU(AV.os)[0], y: avU(AV.os)[1], w: 6 * T };
+const BARN = { x: avU(AV.barn)[0], y: avU(AV.barn)[1], w: 5 * T };
+const LAKE = { x: avU(AV.lake)[0], y: avU(AV.lake)[1], rx: 15 * T, ry: 7 * T };
+const brook = [...AV.brook.map(avU), [AX + 38.5 * U, LAKE.y - LAKE.ry + 20]];
+const BRIDGE = { x: avU(AV.bridge)[0], y: avU(AV.bridge)[1] };
+const LY = { x: avU(AV.ly)[0], y: avU(AV.ly)[1], w: 6 * T };
+const HH = { x: avU(AV.hh)[0], y: avU(AV.hh)[1], w: 5 * T };   // Mr. Harrison's, the new neighbour
+const TOWN = [AX + 22, AV.town[1] * U + 40];   // where the road leaves Avonlea, towards Carmody and Bright River
+// the road to Bright River: from the edge of Avonlea westwards, gently winding, to the station
+const ROAD = (() => { const R = MAP.road, pts = [[TOWN[0], TOWN[1]]]; for (let x = AX - R.step, k = 1; x > R.end; x -= R.step, k++) pts.push([x, R.y + Math.sin(k * 1.3) * R.wave]); pts.push([R.end, MAP.station[1] + 40]); return pts; })();
+const roadY = x => { for (let i = 1; i < ROAD.length; i++) { const a = ROAD[i - 1], b = ROAD[i]; if (x <= a[0] && x >= b[0]) return lerp(a[1], b[1], (a[0] - x) / (a[0] - b[0])); } return x > ROAD[0][0] ? ROAD[0][1] : ROAD[ROAD.length - 1][1]; };
+// the coast: south of the road the land ends in red sand, and then the sea (it fades out towards the flowers)
+const coastY = x => roadY(x) + 190 + Math.sin(x * .003) * 30 + Math.max(0, x - 61 * U) * 4;
+const inSea = (x, y, m = 0) => x < 64 * U && y > coastY(x) - m;
+const STATION = { x: MAP.station[0], y: MAP.station[1] - 10, w: 5 * T };
+const STREAMS = MAP.streams.map(x => { const y0 = roadY(x); return { pts: [[x - 30, 0], [x + 26, y0 * .5], [x, y0], [x - 22, (y0 + WH) / 2], [x + 18, WH]], bridge: { x, y: y0 } }; });
 const HHR = { table: { x: 6.4 * T, y: 5.4 * T }, cage: { x: 10.8 * T, y: 4.6 * T }, stove: { x: 2.4 * T, y: 3.2 * T } };   // (inside his house)   // where the road leaves Avonlea, towards Carmody and Charlottetown
 const PUMP = { x: GG.x + GG.w / 2 + 34, y: GG.y + 56 };
 const BENCH = { x: LAKE.x - 50, y: LAKE.y - LAKE.ry - 30 };
@@ -222,15 +264,18 @@ const HOUSES = {
     describe: "la Hondonada de Lynde (la casa de la Sra. Rachel Lynde, junto al arroyo y al camino, con la ventana desde donde ve pasar a todo el mundo)" },
   hh: { at: HH, name: 'La granja del Sr. Harrison', depth: 100, roof: '#8a7a5a', wall: '#e6dcc4', trim: '#6a5a3a', small: true, sign: [-80, 60], mapLabel: ['Sr. Harrison', 34],
     enter: 'Entrar a casa del Sr. Harrison', inText: 'en la casa del Sr. Harrison', arrive: ' entró a la casa del Sr. Harrison.', place: ['granja_harrison', 'la granja del Sr. Harrison', 24, 56],
-    path: [[GG.x - 60, GG.y + 70], [13.8 * U, 21.6 * U], [11.9 * U, 24.4 * U], [HH.x, HH.y + 8]],
+    path: [[GG.x - 60, GG.y + 70], ...AV.hhPath.map(avU), [HH.x, HH.y + 8]],
     describe: "la granja del Sr. Harrison (el vecino nuevo, gruñón y desordenado, con su loro Ginger, su potrero y su campo de avena, que linda con Tejas Verdes)" },
 };
+HOUSES.br = { at: STATION, name: 'La estación de Bright River', depth: 90, roof: '#7a4a3a', wall: '#d9c6a0', trim: '#6a4630', small: true, sign: [-96, 60], far: true, mapLabel: ['Estación de Bright River', 60],
+  enter: 'Entrar al andén', inText: 'en la estación de Bright River', arrive: ' llegó a la estación de Bright River.', place: ['estacion', 'la estación de Bright River', 30, 56],
+  describe: 'la estación de Bright River (a seis horas de carreta de Avonlea, junto al mar: donde Matthew fue a buscar a Ana cuando llegó)' };
 const HOUSE_SPOTS = Object.values(HOUSES).map(h => h.at);
 /* ---------- the fenced places: fields and pens (to add one: an entry here; it gets its fence, its ground, a place
    on the map and a place the characters and the stories can name). kind: 'oats' or 'pen'; gate: the side with the gate */
 const AREAS = {
   corral: { name: 'el corral de Tejas Verdes', kind: 'pen', x: GG.x - 2 * T - 3.8 * T - 60, y: GG.y - 4 * T - 40, w: 3.8 * T, h: 4 * T, gate: 'S' },
-  avena: { name: 'el campo de avena del Sr. Harrison', kind: 'oats', x: 13 * U, y: 23 * U, w: 7 * T, h: 6 * T, gate: 'N' },
+  avena: { name: 'el campo de avena del Sr. Harrison', kind: 'oats', x: avU(AV.avena)[0], y: avU(AV.avena)[1], w: 7 * T, h: 6 * T, gate: 'N' },
   potrero: { name: 'el potrero del Sr. Harrison', kind: 'pen', x: HH.x - 5 * T - 3.8 * T, y: HH.y + 1.4 * T, w: 3.8 * T, h: 3 * T, gate: 'E' },
 };
 const inArea = (A, x, y, m = 0) => x > A.x - m && x < A.x + A.w + m && y > A.y - m && y < A.y + A.h + m;
@@ -253,12 +298,14 @@ const paths = [
   [[GG.x - 60, GG.y + 70], [BARN.x + 20, BARN.y + 30]],
 ];
 for (const h of Object.values(HOUSES)) if (h.path) paths.push(h.path);
-paths.push([[BARN.x + 20, BARN.y + 30], [BARN.x - 140, BARN.y + 34], [0, TOWN[1]]]);   // the road to town
+paths.push([[BARN.x + 20, BARN.y + 30], [BARN.x - 140, BARN.y + 34], [TOWN[0], TOWN[1]]]);   // the road to town
+paths.push(ROAD, [[STATION.x, STATION.y + 6], [STATION.x + 40, ROAD[ROAD.length - 1][1]]]);   // the road to Bright River, and to the station's door
 const segs = []; paths.forEach(p => { for (let i = 0; i + 1 < p.length; i++) segs.push([p[i], p[i + 1]]); });
 const segDist = (x, y, a, b) => { const dx = b[0] - a[0], dy = b[1] - a[1], t = clamp(((x - a[0]) * dx + (y - a[1]) * dy) / (dx * dx + dy * dy), 0, 1); return Math.hypot(x - a[0] - dx * t, y - a[1] - dy * t); };
 const nearPath = (x, y, w) => segs.some(([a, b]) => segDist(x, y, a, b) < w);
 const brookSegs = []; for (let i = 0; i + 1 < brook.length; i++) brookSegs.push([brook[i], brook[i + 1]]);
-const inBrook = (x, y, m = 0) => brookSegs.some(([a, b]) => segDist(x, y, a, b) < 14 + m) && !(Math.abs(x - BRIDGE.x) < 40 && Math.abs(y - BRIDGE.y) < 22 + m * 0);
+const WATERS = [{ pts: brook, bridge: BRIDGE }, ...STREAMS].map(w => ({ ...w, segs: w.pts.slice(1).map((p, i) => [w.pts[i], p]) }));
+const inBrook = (x, y, m = 0) => WATERS.some(w => w.segs.some(([a, b]) => segDist(x, y, a, b) < 14 + m) && !(Math.abs(x - w.bridge.x) < 40 && Math.abs(y - w.bridge.y) < 22));
 const inLake = (x, y, m = 0) => ((x - LAKE.x) / (LAKE.rx + m)) ** 2 + ((y - LAKE.y) / (LAKE.ry + m)) ** 2 < 1;
 const inBox = (b, d, x, y, m) => x > b.x - b.w / 2 - m && x < b.x + b.w / 2 + m && y > b.y - d - m && y < b.y + m;
 const inHouses = (x, y, m = 0) => Object.values(HOUSES).some(h => inBox(h.at, h.depth, x, y, m)) || inBox(BARN, 96, x, y, m);
@@ -274,72 +321,112 @@ const tree = (x, y, kind, s = .9 + R() * .35) => trees.push({ kind, x, y, s, ph:
 const clearOfBeds = (x, y) => BEDS.every(b => dist(b.x, b.y, x, y) > 70);
 for (let k = 0; k < Math.floor((BRIDGE.x - GG.x - 240) / 64); k++) { const x = GG.x + 180 + k * 64, y = BRIDGE.y - 50 + (k % 2) * 6; if (free(x, y, 30) && clearOfBeds(x, y) && Math.abs(x - BRIDGE.x) > 60) tree(x, y, 'blossom', .85); const y2 = BRIDGE.y + 70; if (free(x + 30, y2, 30) && clearOfBeds(x + 30, y2) && Math.abs(x + 30 - BRIDGE.x) > 60) tree(x + 30, y2, 'blossom', .85); }
 for (let r = 0; r < 3; r++) for (let k = 0; k < 4; k++) { const x = OS.x - 100 + k * 70 + (r % 2) * 30, y = OS.y + 130 + r * 70; if (free(x, y, 30)) tree(x, y, 'apple', .9); }
-for (let n = 0; n < 900 * KK && trees.filter(t => t.kind === 'pine').length < 26 * KK; n++) { const x = 1 * U + R() * 16 * U, y = 30 * U + R() * 18 * U; if (free(x, y, 24) && !trees.some(t => dist(t.x, t.y, x, y) < 52)) tree(x, y, 'pine', .9 + R() * .4); }
+for (let n = 0; n < 900 * KK && trees.filter(t => t.kind === 'pine').length < 26 * KK; n++) { const [hx0, hy0, hx1, hy1] = AV.haunted, x = AX + (hx0 + R() * (hx1 - hx0)) * U, y = (hy0 + R() * (hy1 - hy0)) * U; if (free(x, y, 24) && !trees.some(t => dist(t.x, t.y, x, y) < 52)) tree(x, y, 'pine', .9 + R() * .4); }
 for (let n = 0; n < 3000 * KK && trees.length < 110 * KK; n++) {
-  const x = R() * WW, y = R() * WH, edge = Math.min(x, y, WW - x, WH - y) < 4 * T;
+  const x = AX + R() * AW, y = R() * WH, edge = Math.min(x - AX, y, WW - x, WH - y) < 4 * T;
   if ((!edge && R() < .6) || !free(x, y, 50) || !clearOfBeds(x, y) || trees.some(t => dist(t.x, t.y, x, y) < 86)) continue;
   tree(x, y, R() < .25 ? 'pine' : 'oak');
 }
 const bushes = [];
-for (let n = 0; n < 900 * KK && bushes.length < 22 * KK; n++) { const x = R() * WW, y = R() * WH; if (!free(x, y, 24) || trees.some(t => dist(t.x, t.y, x, y) < 56) || bushes.some(b => dist(b.x, b.y, x, y) < 60)) continue; bushes.push({ kind: 'bush', x, y, s: .85 + R() * .4, ph: R() * TAU, berries: 3, regrow: 0 }); }
+for (let n = 0; n < 900 * KK && bushes.length < 22 * KK; n++) { const x = AX + R() * AW, y = R() * WH; if (!free(x, y, 24) || trees.some(t => dist(t.x, t.y, x, y) < 56) || bushes.some(b => dist(b.x, b.y, x, y) < 60)) continue; bushes.push({ kind: 'bush', x, y, s: .85 + R() * .4, ph: R() * TAU, berries: 3, regrow: 0 }); }
 // a few near home, so berries are close at hand
 for (const [dx, dy] of [[-190, 150], [-250, 90], [260, 170]]) bushes.push({ kind: 'bush', x: GG.x + dx, y: GG.y + dy, s: 1, ph: R() * TAU, berries: 3, regrow: 0 });
 const props = [
   { kind: 'barn', x: BARN.x, y: BARN.y },
   { kind: 'pump', x: PUMP.x, y: PUMP.y },
   { kind: 'bench', x: BENCH.x, y: BENCH.y },
-  { kind: 'bridge', x: BRIDGE.x, y: BRIDGE.y + 14 },
+  ...WATERS.map(w => ({ kind: 'bridge', x: w.bridge.x, y: w.bridge.y + 14 })),
   { kind: 'sign', x: LAKE.x - 160, y: LAKE.y - LAKE.ry - 34, text: 'Lago de las Aguas Brillantes' },
   { kind: 'sign', x: GG.x + 260, y: BRIDGE.y + 30, text: 'Camino Blanco de las Delicias' },
-  { kind: 'sign', x: 15 * U, y: 30 * U, text: 'Bosque Encantado' },
+  { kind: 'sign', x: avU(AV.hauntedSign)[0], y: avU(AV.hauntedSign)[1], text: 'Bosque Encantado' },
   { kind: 'sign', x: TOWN[0] + 120, y: TOWN[1] - 30, text: 'A Carmody y Bright River' },
 ];
+for (const f of MAP.features) {
+  if (f.kind === 'granja') props.push({ kind: 'granja', x: f.x, y: roadY(f.x) + (f.side < 0 ? -150 : 200) });
+  else if (f.kind === 'faro') props.push({ kind: 'faro', x: f.x, y: coastY(f.x) - 30 });
+  else if (f.kind === 'cartel') props.push({ kind: 'sign', x: f.x, y: roadY(f.x) - 36, text: f.text });
+}
 for (const [a, b] of FENCES) { const len = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.round(len / 22)); for (let i = 0; i <= n; i++) { const x = lerp(a[0], b[0], i / n), y = lerp(a[1], b[1], i / n); props.push({ kind: 'fpost', x, y, nx: i < n ? lerp(a[0], b[0], (i + 1) / n) : null, ny: i < n ? lerp(a[1], b[1], (i + 1) / n) : null }); } }
 for (const [k, h] of Object.entries(HOUSES)) props.push({ kind: 'house', h: h.at, roof: h.roof, wall: h.wall, trim: h.trim, x: h.at.x, y: h.at.y, small: h.small }, { kind: 'sign', x: h.at.x + h.sign[0], y: h.at.y + h.sign[1], text: h.name });
 for (let x = GG.x - GG.w / 2 - 40; x < GG.x + GG.w / 2 + 230; x += 24) if (Math.abs(x - GG.x) > 40 && !(x > PUMP.x - 20 && x < PUMP.x + 20)) props.push({ kind: 'post', x, y: GG.y + 120 });
 const tufts = [], flowers = [], reeds = [], pads = [];
-for (let n = 0; n < 3200 * KK; n++) { const x = R() * WW, y = R() * WH; if (!inLake(x, y, 10) && !inHouses(x, y, 4) && !inAreas(x, y, 4) && !nearPath(x, y, 16) && !inBrook(x, y, 6) && !inBeds(x, y)) tufts.push({ x, y, h: 5 + R() * 7, ph: R() * TAU, c: R() }); }
+for (let n = 0; n < 3200 * KK; n++) { const x = AX + R() * AW, y = R() * WH; if (!inLake(x, y, 10) && !inHouses(x, y, 4) && !inAreas(x, y, 4) && !nearPath(x, y, 16) && !inBrook(x, y, 6) && !inBeds(x, y)) tufts.push({ x, y, h: 5 + R() * 7, ph: R() * TAU, c: R() }); }
 const FCOLS = ['#fffaf2', '#ffd7e8', '#f7e27a', '#c9a7f2', '#ff9f8a', '#a8d8ff'];
-for (let n = 0; n < 850 * KK; n++) { const x = R() * WW, y = R() * WH; if (!inLake(x, y, 14) && !inHouses(x, y, 6) && !inAreas(x, y, 6) && !nearPath(x, y, 18) && !inBrook(x, y, 8) && !inBeds(x, y)) flowers.push({ x, y, c: FCOLS[Math.floor(R() * FCOLS.length)], ph: R() * TAU, s: .8 + R() * .6 }); }
+for (let n = 0; n < 850 * KK; n++) { const x = AX + R() * AW, y = R() * WH; if (!inLake(x, y, 14) && !inHouses(x, y, 6) && !inAreas(x, y, 6) && !nearPath(x, y, 18) && !inBrook(x, y, 8) && !inBeds(x, y)) flowers.push({ x, y, c: FCOLS[Math.floor(R() * FCOLS.length)], ph: R() * TAU, s: .8 + R() * .6 }); }
 for (const H of HOUSE_SPOTS) for (let n = 0; n < 50; n++) { const x = H.x - H.w / 2 + R() * H.w, y = H.y + 10 + R() * 34; if (Math.abs(x - H.x) > 26) flowers.push({ x, y, c: ['#ff9f8a', '#ffd7e8', '#f7e27a', '#fffaf2'][n % 4], ph: R() * TAU, s: 1.1 }); }
+const lupins = [], dunes = [], rocks = [];
+{
+  const ok = (x, y, m) => !nearPath(x, y, m + 16) && !inBrook(x, y, m) && !inSea(x, y, m) && !inHouses(x, y, m + 10) && Math.abs(x - STATION.x) > 160;
+  const near = new Map(), key = (x, y) => Math.floor(x / 128) + ',' + Math.floor(y / 128), crowded = (x, y, d) => { const cx = Math.floor(x / 128), cy = Math.floor(y / 128); for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) for (const t of near.get((cx + i) + ',' + (cy + j)) || []) if (dist(t.x, t.y, x, y) < d) return true; return false; };
+  for (const z of MAP.zones) {
+    const Z = ZONE_KINDS[z.kind]; if (!Z.ground) continue;
+    const area = (z.x1 - z.x0) * WH / 1e6, put = (n, fn) => { for (let k = 0; k < n * 2.5 && n > 0; k++) { const x = z.x0 + R() * (z.x1 - z.x0), y = 20 + R() * (WH - 40); if (fn(x, y) === 'done' && --n <= 0) break; } };
+    put(Z.trees * area, (x, y) => { if (!ok(x, y, 40) || crowded(x, y, 70)) return; const t = { kind: R() < Z.pines ? 'pine' : 'oak', x, y, s: .9 + R() * .35, ph: R() * TAU, apples: 0, regrow: 0 }; trees.push(t); const k2 = key(x, y); if (!near.has(k2)) near.set(k2, []); near.get(k2).push(t); return 'done'; });
+    put(Z.bushes * area, (x, y) => { if (!ok(x, y, 24) || crowded(x, y, 56)) return; bushes.push({ kind: 'bush', x, y, s: .85 + R() * .4, ph: R() * TAU, berries: 3, regrow: 0 }); return 'done'; });
+    put((Z.tufts || 0) * area, (x, y) => { if (!ok(x, y, 0)) return; tufts.push({ x, y, h: 5 + R() * 7, ph: R() * TAU, c: R() }); return 'done'; });
+    put((Z.flowers || 0) * area, (x, y) => { if (!ok(x, y, 2)) return; flowers.push({ x, y, c: FCOLS[Math.floor(R() * FCOLS.length)], ph: R() * TAU, s: 1 }); return 'done'; });
+    put((Z.lupins || 0) * area, (x, y) => { if (!ok(x, y, 0)) return; lupins.push({ x, y, s: .7 + R() * .6, ph: R() * TAU, c: R() }); return 'done'; });
+    put((Z.dunes || 0) * area, (x, y) => { if (!ok(x, y, 20) || coastY(x) - y > 500) return; dunes.push({ x, y, s: .8 + R() * .5, ph: R() * TAU }); return 'done'; });
+    put((Z.rocks || 0) * area, (x, y) => { if (!ok(x, y, 10)) return; rocks.push({ x, y, s: .7 + R() * .6 }); return 'done'; });
+  }
+}
 for (let n = 0; n < 70; n++) { const a = R() * TAU, k = .96 + R() * .1; reeds.push({ x: LAKE.x + Math.cos(a) * LAKE.rx * k, y: LAKE.y + Math.sin(a) * LAKE.ry * k, h: 14 + R() * 12, ph: R() * TAU }); }
 for (let n = 0; n < 12; n++) { const a = R() * TAU, k = R() * .75; pads.push({ x: LAKE.x + Math.cos(a) * LAKE.rx * k, y: LAKE.y + Math.sin(a) * LAKE.ry * k, r: 7 + R() * 6, a: R() * TAU, bloom: R() < .4 }); }
 
 /* ---------- the ground, painted again each season (watercolour washes, the paths, the brook's bed) ---------- */
-const GS = .6, ground = document.createElement('canvas'); ground.width = Math.ceil(WW * GS); ground.height = Math.ceil(WH * GS);
-let groundSeason = -1;
+const GS = .6, TILE = 1024, tiles = new Map();   // (the ground by tiles of 1024 px, painted at 60%, the last ones kept)
+function groundTile(tx, ty){
+  const key = S + ':' + tx + ',' + ty; let cv = tiles.get(key);
+  if (cv) { tiles.delete(key); tiles.set(key, cv); return cv; }
+  cv = document.createElement('canvas'); cv.width = cv.height = Math.ceil(TILE * GS); paintTile(cv, S, tx * TILE, ty * TILE); tiles.set(key, cv);
+  if (tiles.size > 40) tiles.delete(tiles.keys().next().value);
+  return cv;
+}
 const GPAL = [
   { base: '#94c266', wash: ['170,212,110', '120,170,80', '196,218,122'], grass: 'rgba(70,110,40,.18)', path: ['rgba(150,120,70,.3)', '#cdae7a', '#dbbf8d'], bed: '#8a6440', wood: '40,70,40,.45', bank: '120,95,60' },
   { base: '#86b058', wash: ['150,192,92', '104,148,62', '184,200,102'], grass: 'rgba(60,95,35,.2)', path: ['rgba(150,120,70,.3)', '#cfab72', '#ddbd86'], bed: '#86603c', wood: '36,64,34,.5', bank: '120,95,60' },
   { base: '#aaa65c', wash: ['204,170,92', '150,146,70', '214,140,70'], grass: 'rgba(110,90,40,.2)', path: ['rgba(150,110,70,.3)', '#c9a676', '#d6b98a'], bed: '#80603e', wood: '90,60,30,.4', bank: '120,90,55' },
   { base: '#e9eef2', wash: ['255,255,255', '204,216,230', '236,240,247'], grass: 'rgba(150,170,195,.16)', path: ['rgba(150,150,160,.25)', '#d6d3cc', '#e3e0d9'], bed: '#d9d6d2', wood: '120,140,165,.3', bank: '150,160,175' },
 ];
-function paintGround(s){
-  const c = ground.getContext('2d'), r = rng(4242), P = GPAL[s];
-  groundSeason = s; c.setTransform(GS, 0, 0, GS, 0, 0);
-  c.fillStyle = P.base; c.fillRect(0, 0, WW, WH);
-  for (let n = 0; n < 520 * KK; n++) {
-    const x = r() * WW, y = r() * WH, rr = 30 + r() * 130, gr = c.createRadialGradient(x, y, 0, x, y, rr);
-    const col = r() < .4 ? P.wash[0] : r() < .5 ? P.wash[1] : P.wash[2];
-    gr.addColorStop(0, `rgba(${col},.33)`); gr.addColorStop(1, `rgba(${col},0)`); c.fillStyle = gr; c.fillRect(x - rr, y - rr, rr * 2, rr * 2);
+function paintTile(cv, s, X0, Y0){
+  const c = cv.getContext('2d'), P = GPAL[s], D = TILE * TILE / (AW * WH);
+  let r = rng(4242 + X0 * 3 + Y0 * 7 + s * 11); const RX = () => X0 + r() * TILE, RY = () => Y0 + r() * TILE;
+  c.setTransform(GS, 0, 0, GS, -X0 * GS, -Y0 * GS);
+  // each zone's ground; Avonlea's own colour
+  for (const z of MAP.zones) if (z.x1 > X0 && z.x0 < X0 + TILE) { c.fillStyle = ZONE_KINDS[z.kind].ground ? ZONE_KINDS[z.kind].ground[s] : P.base; c.fillRect(Math.max(z.x0, X0) - 1, Y0, Math.min(z.x1, X0 + TILE) - Math.max(z.x0, X0) + 2, TILE); }
+  // watercolour washes (the neighbouring tiles' too, so they meet without seams)
+  for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) {
+    const ax = X0 + i * TILE, ay = Y0 + j * TILE, rw = rng(99 + ax * 3 + ay * 7);
+    for (let n = 0; n < 520 * KK * D; n++) {
+      const x = ax + rw() * TILE, y = ay + rw() * TILE, rr = 30 + rw() * 130, cc = rw(), cc2 = rw();
+      if (x + rr < X0 || x - rr > X0 + TILE || y + rr < Y0 || y - rr > Y0 + TILE) continue;
+      const gr = c.createRadialGradient(x, y, 0, x, y, rr), col = cc < .4 ? P.wash[0] : cc2 < .5 ? P.wash[1] : P.wash[2];
+      gr.addColorStop(0, `rgba(${col},.33)`); gr.addColorStop(1, `rgba(${col},0)`); c.fillStyle = gr; c.fillRect(x - rr, y - rr, rr * 2, rr * 2);
+    }
+  }
+  // the coast: red sand, then the sea (painted still; the waves move above)
+  if (X0 < 64 * U) {
+    const pts = []; for (let x = X0 - 16; x <= X0 + TILE + 16; x += 16) pts.push([x, coastY(x)]);
+    c.fillStyle = s === 3 ? '#dde9ef' : '#d9785a'; c.beginPath(); c.moveTo(X0 - 16, Y0 + TILE + 10); pts.forEach(([x, y]) => c.lineTo(x, y - 12)); c.lineTo(X0 + TILE + 16, Y0 + TILE + 10); c.fill();
+    c.fillStyle = s === 3 ? '#c7dbe6' : '#5c9fc2'; c.beginPath(); c.moveTo(X0 - 16, Y0 + TILE + 10); pts.forEach(([x, y]) => c.lineTo(x, y + 14)); c.lineTo(X0 + TILE + 16, Y0 + TILE + 10); c.fill();
   }
   // the Haunted Wood is darker
-  const hw = c.createRadialGradient(9 * U, 40 * U, 40, 9 * U, 40 * U, 13 * U); hw.addColorStop(0, `rgba(${P.wood})`); hw.addColorStop(1, `rgba(${P.wood.split(',').slice(0, 3)},0)`); c.fillStyle = hw; c.fillRect(0, 26 * T, 24 * T, 24 * T);
+  const hw = c.createRadialGradient(AX + 9 * U, 40 * U, 40, AX + 9 * U, 40 * U, 13 * U); hw.addColorStop(0, `rgba(${P.wood})`); hw.addColorStop(1, `rgba(${P.wood.split(',').slice(0, 3)},0)`); c.fillStyle = hw; c.fillRect(AX, 20 * U, 30 * U, 30 * U);
   // pencil strokes of grass over the wash
   c.strokeStyle = P.grass; c.lineWidth = .8;
-  for (let n = 0; n < 6000 * KK; n++) { const x = r() * WW, y = r() * WH; c.beginPath(); c.moveTo(x, y); c.lineTo(x + 1 + r() * 2, y - 2 - r() * 3); c.stroke(); }
+  for (let n = 0; n < 6000 * KK * D; n++) { const x = RX(), y = RY(); c.beginPath(); c.moveTo(x, y); c.lineTo(x + 1 + r() * 2, y - 2 - r() * 3); c.stroke(); }
   // autumn: fallen leaves; winter: the snow glitters a little
-  if (s === 2) for (let n = 0; n < 2600 * KK; n++) { const x = r() * WW, y = r() * WH; c.fillStyle = ['rgba(200,90,50,.55)', 'rgba(220,150,60,.55)', 'rgba(180,60,40,.5)', 'rgba(230,190,80,.5)'][n % 4]; c.beginPath(); c.ellipse(x, y, 2.4 + r() * 1.6, 1.2 + r(), r() * TAU, 0, TAU); c.fill(); }
-  if (s === 3) for (let n = 0; n < 2400 * KK; n++) { const x = r() * WW, y = r() * WH; c.fillStyle = r() < .5 ? 'rgba(170,190,215,.35)' : 'rgba(255,255,255,.9)'; c.beginPath(); c.ellipse(x, y, 1 + r() * 2.5, .6 + r(), 0, 0, TAU); c.fill(); }
+  if (s === 2) for (let n = 0; n < 2600 * KK * D; n++) { const x = RX(), y = RY(); c.fillStyle = ['rgba(200,90,50,.55)', 'rgba(220,150,60,.55)', 'rgba(180,60,40,.5)', 'rgba(230,190,80,.5)'][n % 4]; c.beginPath(); c.ellipse(x, y, 2.4 + r() * 1.6, 1.2 + r(), r() * TAU, 0, TAU); c.fill(); }
+  if (s === 3) for (let n = 0; n < 2400 * KK * D; n++) { const x = RX(), y = RY(); c.fillStyle = r() < .5 ? 'rgba(170,190,215,.35)' : 'rgba(255,255,255,.9)'; c.beginPath(); c.ellipse(x, y, 1 + r() * 2.5, .6 + r(), 0, 0, TAU); c.fill(); }
   const stroke = (pts, w, col) => { c.strokeStyle = col; c.lineWidth = w; c.lineCap = 'round'; c.lineJoin = 'round'; c.beginPath(); c.moveTo(...pts[0]); for (let i = 1; i < pts.length; i++) { const p = pts[i - 1], q = pts[i]; c.quadraticCurveTo(p[0], p[1], (p[0] + q[0]) / 2, (p[1] + q[1]) / 2); } c.lineTo(...pts[pts.length - 1]); c.stroke(); };
   for (const p of paths) { stroke(p, 54, P.path[0]); stroke(p, 40, P.path[1]); stroke(p, 26, P.path[2]); }
   // pencil edges of the paths
   for (const p of paths) for (const side of [-1, 1]) { c.strokeStyle = 'rgba(110,80,50,.35)'; c.lineWidth = 1; c.beginPath(); for (let i = 0; i < p.length; i++) { const [x, y] = p[i], [nx, ny] = p[Math.min(i + 1, p.length - 1)], [px, py] = p[Math.max(i - 1, 0)], a = Math.atan2(ny - py, nx - px) + side * Math.PI / 2; const X = x + Math.cos(a) * 19, Y = y + Math.sin(a) * 19; i ? c.lineTo(X, Y) : c.moveTo(X, Y); } c.stroke(); }
-  for (let n = 0; n < 900 * KK; n++) { const x = r() * WW, y = r() * WH; if (nearPath(x, y, 16)) { c.fillStyle = r() < .5 ? 'rgba(120,95,60,.4)' : 'rgba(245,232,200,.5)'; c.beginPath(); c.ellipse(x, y, 1.5 + r() * 2, 1 + r(), 0, 0, TAU); c.fill(); } }
+  for (let n = 0; n < 900 * KK * D; n++) { const x = RX(), y = RY(); if (nearPath(x, y, 16)) { c.fillStyle = r() < .5 ? 'rgba(120,95,60,.4)' : 'rgba(245,232,200,.5)'; c.beginPath(); c.ellipse(x, y, 1.5 + r() * 2, 1 + r(), 0, 0, TAU); c.fill(); } }
   // winter: footprints in the snow along the paths
   if (s === 3) for (const [a, b] of segs) for (let q = 0; q < 1; q += 18 / Math.hypot(b[0] - a[0], b[1] - a[1])) { const x = lerp(a[0], b[0], q), y = lerp(a[1], b[1], q), o = (Math.round(q * 1000) % 2 ? 4 : -4); c.fillStyle = 'rgba(140,150,170,.35)'; c.beginPath(); c.ellipse(x + o, y + o * .3, 2.2, 1.4, 0, 0, TAU); c.fill(); }
   // the brook's bed and the lake's shore
-  stroke(brook, 40, `rgba(${P.bank},.45)`);
+  for (const w of WATERS) stroke(w.pts, 40, `rgba(${P.bank},.45)`);
   c.save(); c.translate(LAKE.x, LAKE.y); c.scale(1, LAKE.ry / LAKE.rx);
   const bank = c.createRadialGradient(0, 0, LAKE.rx * .7, 0, 0, LAKE.rx * 1.14); bank.addColorStop(0, `rgba(${P.bank},0)`); bank.addColorStop(.88, `rgba(${P.bank},.5)`); bank.addColorStop(1, `rgba(${P.bank},0)`);
   c.fillStyle = bank; c.beginPath(); c.arc(0, 0, LAKE.rx * 1.14, 0, TAU); c.fill(); c.restore();
@@ -625,6 +712,8 @@ function drawBarn(c, o){
 }
 function drawProp(c, o, t, night){
   if (o.kind === 'house') drawHouse(c, o, t, night);
+  else if (o.kind === 'granja') drawHouse(c, { h: { x: o.x, y: o.y, w: 4.4 * T }, roof: ['#8a5a3c', '#5f7a9a', '#7a6a4a'][Math.floor(o.x / 7) % 3], wall: '#efe4cc', trim: '#6a4a32', x: o.x, y: o.y, small: true }, t, night);
+  else if (o.kind === 'faro') { const x = o.x, y = o.y; ell(c, x + 8, y + 2, 20, 6, 'rgba(30,40,20,.22)'); blob(c, [[x - 12, y], [x + 12, y], [x + 7, y - 90], [x - 7, y - 90]], '#f6f2e8'); for (let k = 0; k < 3; k++) blob(c, [[x - 11 + k * 1.6, y - 20 - k * 26], [x + 11 - k * 1.6, y - 20 - k * 26], [x + 10 - k * 1.6, y - 32 - k * 26], [x - 10 + k * 1.6, y - 32 - k * 26]], '#c8463a'); blob(c, [[x - 9, y - 90], [x + 9, y - 90], [x + 9, y - 102], [x - 9, y - 102]], night > .3 ? '#ffe7a8' : '#f5d58a'); blob(c, [[x - 11, y - 102], [x + 11, y - 102], [x, y - 114]], '#3a3436'); }
   else if (o.kind === 'barn') drawBarn(c, o);
   else if (o.kind === 'tree' || o.kind === 'oak' || o.kind === 'pine' || o.kind === 'apple' || o.kind === 'blossom') drawTree(c, o, t);
   else if (o.kind === 'bush') drawBush(c, o, t);
@@ -1003,15 +1092,16 @@ function drawStation(c, t, night){
 }
 const drawStationPile = c => { const P = BRS.pile; for (let k = 0; k < 6; k++) blob(c, [[P.x - 34 + (k % 2) * 4, P.y - k * 4], [P.x + 34 - (k % 3) * 3, P.y - k * 4], [P.x + 34 - (k % 3) * 3, P.y - k * 4 - 4], [P.x - 34 + (k % 2) * 4, P.y - k * 4 - 4]], k % 2 ? '#b58a5a' : '#c99a66'); };
 ROOMS.br = {
-  draw: drawStation, place: 'en la estación de Bright River, a seis horas de carreta de Avonlea, donde Matthew fue a buscar a Ana cuando llegó', exitLabel: 'Volver a Avonlea en la carreta (seis horas)',
-  items: (g, t) => [{ y: BRS.pile.y, draw: () => drawStationPile(g) }, { y: BRS.cart.y, draw: () => drawCart(g, { x: BRS.cart.x, y: BRS.cart.y, dir: 3, walk: 0, moving: false }, t) }],
-  blocked: (x, y) => y < 2.5 * T || (Math.abs(x - BRS.house.x) < 66 && y < BRS.house.y + 4) || (Math.abs(x - BRS.pile.x) < 38 && y > BRS.pile.y - 26 && y < BRS.pile.y + 4) || (Math.abs(x - BRS.cart.x) < 60 && y > BRS.cart.y - 22 && y < BRS.cart.y + 6),
+  draw: drawStation, place: 'en el andén de la estación de Bright River, a seis horas de carreta de Avonlea, donde Matthew fue a buscar a Ana cuando llegó', exitLabel: 'Salir al camino',
+  items: (g, t) => [{ y: BRS.pile.y, draw: () => drawStationPile(g) }],
+  blocked: (x, y) => y < 2.5 * T || (Math.abs(x - BRS.house.x) < 66 && y < BRS.house.y + 4) || (Math.abs(x - BRS.pile.x) < 38 && y > BRS.pile.y - 26 && y < BRS.pile.y + 4),
   glow: () => [BRS.lamp.x, BRS.lamp.y - 60, 170, '255,200,120', .45],
   actions: add => {
     add('pila', BRS.pile.x, BRS.pile.y + 6, 50, ana.sit ? 'Levantarse' : 'Sentarse en la pila de tablas', () => { if (ana.sit) { ana.sit = false; return; } ana.sit = true; ana.x = BRS.pile.x; ana.y = BRS.pile.y + 2; ana.dir = 2; logEv('Ana se sentó en la pila de tablas de la estación de Bright River, donde esperó a Matthew el día que llegó.'); anaSays(pick(STATION_LINES)); }, { pri: 4, hy: 18, hit: 46 });
     add('vias', KIT.w / 2, 2.5 * T, 40, 'Mirar las vías', () => anaSays(pick(RAIL_LINES)), { pri: 6, hy: 20, hit: 40 });
   },
 };
+HOUSES.br.interior = ROOMS.br;
 const STATION_LINES = ['Aquí mismo esperé a Matthew, sentada en estas tablas, con mi bolsa de viaje. Me había imaginado que si no venía me subiría a un cerezo a dormir bajo la luna.', 'Qué raro volver aquí... el día que llegué no sabía que existía Tejas Verdes. Ahora no sabría vivir sin ella.', 'El jefe de estación me dijo que esperara adentro, ¡pero aquí afuera había mucho más lugar para la imaginación!'];
 const RAIL_LINES = ['Las vías se van y se van... ¿no da gusto pensar adónde llegan? Aunque ahora yo ya llegué a donde quería.', 'Cuando pasa el tren tiembla todo, como si el mundo entero tuviera prisa. A mí me gusta más la carreta de Matthew.'];
 ROOMS.ga = {
@@ -1210,7 +1300,7 @@ const TB = 128, treeBins = new Map();
 for (const t of trees) { const k = Math.floor(t.x / TB) + ',' + Math.floor(t.y / TB); if (!treeBins.has(k)) treeBins.set(k, []); treeBins.get(k).push(t); }
 function treesNear(x, y){ const cx = Math.floor(x / TB), cy = Math.floor(y / TB), out = []; for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) { const b = treeBins.get((cx + i) + ',' + (cy + j)); if (b) out.push(...b); } return out; }
 function blockedOut(x, y){
-  return x < 16 || y < 40 || x > WW - 16 || y > WH - 8 || inLake(x, y, 6) || inBrook(x, y, 2) || inHouses(x, y, 2) || nearFence(x, y) ||
+  return x < 16 || y < 40 || x > WW - 16 || y > WH - 8 || inLake(x, y, 6) || inBrook(x, y, 2) || inSea(x, y, 4) || inHouses(x, y, 2) || nearFence(x, y) ||
     treesNear(x, y).some(t => Math.hypot(t.x - x, (t.y - y) * 1.6) < 11 * t.s) || dist(x, y, PUMP.x, PUMP.y) < 9;
 }
 function blockedIn(x, y, scene = game.scene){
@@ -1322,7 +1412,8 @@ function targets(){
       else if (game.hasCan && game.water <= 0 && !b.wet) add(id, b.x, b.y, 30, 'La regadera está vacía (llénala en la bomba)', say_('La regadera está vacía: llénala en la bomba'), { ...o, pri: 50 });
     });
     for (const [id, h] of Object.entries(HOUSES)) add('h:' + id, h.at.x, h.at.y + 6, 26, h.enter, () => goIn(id), { pri: 4, test: (x, y) => Math.abs(x - h.at.x) < h.at.w / 2 + 8 && y < h.at.y + 10 && y > h.at.y - 80 });
-    add('trip', TOWN[0] + 60, TOWN[1], 60, 'Ir a la estación de Bright River', () => tripAsk('br'), { pri: 3, hy: 12, hit: 40 });
+    if (!cart.on) add('trip', TOWN[0] + 60, TOWN[1], 60, 'Ir a la estación de Bright River', () => tripAsk('br'), { pri: 3, hy: 12, hit: 40 });
+    if (cart.on && !cart.riding) add('cart', cart.x - (cart.dir === 3 ? -44 : 44), cart.y - 10, 70, 'Subir a la carreta', cartAsk, { pri: 2, hy: 20, hit: 46 });
     add('bench', BENCH.x, BENCH.y + 6, 26, ana.sit ? 'Levantarse' : 'Sentarse a mirar el lago', () => { ana.sit = !ana.sit; if (ana.sit) { logEv('Ana se sentó a mirar el Lago de las Aguas Brillantes.'); ana.x = BENCH.x; ana.y = BENCH.y - 2; ana.dir = 2; } }, { pri: 4, hy: 10, hit: 32 });
   } else {
     ROOMS[game.scene].actions?.(add);
@@ -1551,7 +1642,7 @@ function autoOptions(){
     .forEach(({ t, d }) => add(t.label, { type: 'target', id: t.id }, (t.id.startsWith('bed:') ? 3 : t.id === 'toby' || t.id === 'pump' ? 2 : 1.5) / (1 + d / 400)));
   if (!late) add('Cocinar algo en la cocina', { type: 'cook' }, 1.2);
   for (const k of Object.keys(PEOPLE)) if (TT >= (amb.mute[k] || 0) && PEOPLE[k].where !== 'away' && !(k === 'diana' && diana.follow)) add('Ir a conversar con ' + CH[k].article + NAMES[k] + ' (' + whereText(k) + ')', { type: 'talkto', k }, 3);
-  if (sc === 'out') for (const [id, h] of Object.entries(HOUSES)) add('Entrar a ' + h.name, { type: 'house', id }, 1);
+  if (sc === 'out') for (const [id, h] of Object.entries(HOUSES)) if (!h.far) add('Entrar a ' + h.name, { type: 'house', id }, 1);
   else add('Salir a pasear', { type: 'house', id: 'out' }, 1.5);
   if (sc !== 'ga') add('Subir a su pieza', { type: 'house', id: 'ga' }, late ? 2 : .5);
   if (MEAL(hn) && !ana.meal && ['matthew', 'marilla'].some(k => PEOPLE[k].want === 'gg')) add('Sentarse a la mesa a ' + mealWord(hn).verb + ' con los Cuthbert', { type: 'meal' }, 6);
@@ -1750,166 +1841,69 @@ let hoverAt = null;
 function pet(){ logEv('Ana acarició a Toby.'); ana.pet = true; ana.crouch = true; toby.petted = 2.2; toby.dir = toby.x < ana.x ? 1 : 3; ana.dir = toby.x > ana.x ? 1 : 3; game.fond.toby++; hearts(toby.x, toby.y - 24); sfx.happy(); save(); setTimeout(() => { ana.pet = false; ana.crouch = false; }, 1600); }
 /* ---------- the trip to Bright River: six hours by cart with Matthew, along the White Way and past the Lake of Shining
    Waters (as the day Ana came); the hours go by while they talk (the AI writes it, once; or the lines of the book) ---------- */
-const TRIP_LINES = { br: [['ana', '¡Oh, Matthew! Ir hasta Bright River contigo, en la carreta, es como volver a leer el primer capítulo de mi vida.'], ['matthew', 'Bueno, pues... es un buen trecho. Ya lo creo.'], ['ana', '¿Te acuerdas del Camino Blanco de las Delicias, aquel primer día? Yo me quedé sin palabras. ¡Yo! ¡Sin palabras!'], ['matthew', 'Me acuerdo, sí. No dijiste nada por un buen rato. Me asusté un poco.']],
-  out: [['ana', 'Volver a casa al atardecer es casi mejor que irse. Tejas Verdes nos espera como un abrazo.'], ['matthew', 'Bueno, pues... Marilla tendrá la cena lista, supongo.'], ['ana', 'Matthew, ¿sabías que eres la persona más simpática con quien se puede ir en carreta?'], ['matthew', 'Ya lo creo, ya lo creo.']] };
+/* ---------- the trip to Bright River: Matthew drives the cart along the road (the same world, walked or ridden).
+   Ana can get off anywhere (moving, or tapping the ground) and get on again (tapping the cart); while they ride they
+   talk as anywhere else (the cart does not stop), and at some places someone says something (MAP.features: momento).
+   Out of Avonlea the hours go by faster: the road is long (six hours by cart, more on foot). ---------- */
+const TRAVEL = 9.5, CART_SPEED = 130;
+const cart = { on: false, x: 0, y: 0, dir: 3, dest: null, riding: false, walk: 0, moving: false };
+const ROAD_W = ROAD[ROAD.length - 1][0] + 60, ROAD_E = TOWN[0] - 60;   // (where the cart stops: by the station, and at the edge of Avonlea)
 function tripAsk(to){
   const hn = hourNow(), m = PEOPLE.matthew;
-  if (to === 'br' && m.where === 'away') return anaSays('Matthew no está, y sin él y la carreta Bright River queda lejísimos: ¡seis horas de camino!');
-  if (hn + 6 > 23.5) return anaSays(to === 'br' ? 'Ya es muy tarde para ir hasta Bright River: son seis horas de carreta. Mejor mañana temprano.' : 'Ya es muy tarde para volver a casa: son seis horas de camino de noche. Matthew dice que esperemos a que amanezca... ¡como en una novela!');
-  say('Ana', to === 'br' ? '¿Ir hasta la estación de Bright River? Son seis horas de carreta con Matthew.' : '¿Volver a Avonlea? Son seis horas de carreta.', [[to === 'br' ? '🐴 Ir con Matthew en la carreta' : '🐴 Volver a casa', () => { close(); tripGo(to); }], ['Mejor no', close]]);
+  if (m.where === 'away' || (m.where !== 'out' && m.where !== CH.matthew.home && !CH.matthew.routine)) return anaSays('Matthew no está, y sin él y la carreta Bright River queda lejísimos: ¡seis horas de camino!');
+  if (hn + 6 > 23.5) return anaSays('Ya es muy tarde para ir hasta Bright River: son seis horas de carreta. Mejor mañana temprano.');
+  say('Ana', '¿Ir hasta la estación de Bright River con Matthew en la carreta? Son unas seis horas de camino.', [['🐴 Vamos', () => { close(); cartStart(); }], ['Mejor no', close]]);
 }
-/* ---------- maps in a few lines: a ROUTE is a long strip with a road, ZONES (each kind knows how to paint its ground
-   and what to scatter: trees, flowers, rocks, the sea...) and FEATURES (streams with their wooden bridges, signs, houses,
-   a lighthouse, and MOMENTS: the cart stops and someone says something). Everything is drawn by the game from this
-   description (seeded, the same every time): a new map costs a few lines, no pictures and no AI.
-   To add a route: an entry in ROUTES; to add a kind of zone or feature: an entry in ZONE_KINDS or in FEATURE_KINDS. ---------- */
-const ROUTES = {
-  bright_river: { name: 'el camino a Bright River', len: 9800, h: 900, hours: 6, from: 'Avonlea', to: 'Bright River',
-    road: [[0, 450], [800, 430], [1500, 470], [2300, 420], [3100, 380], [3900, 430], [4800, 470], [5600, 400], [6400, 360], [7300, 380], [8200, 430], [9000, 450], [9800, 440]],
-    zones: [{ kind: 'campo', from: 0, to: 2100 }, { kind: 'bosque', from: 2100, to: 3500 }, { kind: 'flores', from: 3500, to: 5300 }, { kind: 'costa', from: 5300, to: 8400 }, { kind: 'pueblo', from: 8400, to: 9800 }],
-    features: [
-      { kind: 'cartel', x: 260, text: 'Avonlea' }, { kind: 'granja', x: 650, side: -1 }, { kind: 'granja', x: 1250, side: 1 },
-      { kind: 'arroyo', x: 1750 }, { kind: 'arroyo', x: 2950 }, { kind: 'arroyo', x: 4900 },
-      { kind: 'faro', x: 7100 }, { kind: 'cartel', x: 8500, text: 'Bright River' }, { kind: 'granja', x: 8800, side: -1 }, { kind: 'granja', x: 9250, side: 1 },
-      { kind: 'momento', x: 1760, stop: 3.5, lines: [['ana', '¡Un puente de madera! Cada tabla suena distinto, Matthew... como un piano para caballos.'], ['matthew', 'Bueno, pues... ya lo creo.']] },
-      { kind: 'momento', x: 4300, stop: 7, ida: true, lines: [['ana', '¡Señor Matthew! ¡Señor Matthew!'], ['matthew', '¿Qué... qué pasa, Ana?'], ['ana', '¡Mire! ¡Todo el campo se volvió rosado! ¿No le dan ganas de llorar de lo hermoso que es?'], ['matthew', 'Bueno, pues... es muy bonito, sí. Ya lo creo.']] },
-      { kind: 'momento', x: 4300, stop: 4, vuelta: true, lines: [['ana', 'Otra vez el campo rosado... de vuelta parece que nos despide.'], ['matthew', 'Ya lo creo.']] },
-      { kind: 'momento', x: 5600, stop: 6, lines: [['ana', '¡El mar, Matthew! ¡Y la arena es roja! Nunca vi una costa así: parece que la isla se hubiera puesto colorada.'], ['matthew', 'Es la tierra de la isla, Ana. Roja como tu... bueno, pues, roja.']] },
-      { kind: 'momento', x: 7120, stop: 3.5, lines: [['ana', 'Un faro... imagino que adentro vive alguien muy solitario que escribe poemas a las gaviotas.']] },
-    ] },
-};
-// how each kind of zone looks: its ground (by season) and what it scatters (per 1000 px of road)
-const ZONE_KINDS = {
-  campo: { ground: ['#9cc66c', '#8db45c', '#b0a860', '#e9eef2'], scatter: { oak: 6, bush: 4, flor: 30, tuft: 90 } },
-  bosque: { ground: ['#6f9e52', '#648f48', '#8a8a48', '#e4ebef'], scatter: { pine: 26, oak: 4, tuft: 60 } },
-  flores: { ground: ['#a8c870', '#98b860', '#b8aa66', '#eef2f5'], scatter: { lupino: 520, oak: 1.5, tuft: 60 } },
-  costa: { ground: ['#b9c880', '#aabb70', '#c2b67a', '#eef1f4'], sea: true, scatter: { duna: 40, tuft: 50, roca: 6 } },
-  pueblo: { ground: ['#9cc66c', '#8db45c', '#b0a860', '#e9eef2'], scatter: { oak: 4, flor: 20, tuft: 70 } },
-};
-function buildRoute(R){
-  if (R.built) return R;
-  const r = rng(R.len), road = R.road, cum = [0];
-  for (let i = 1; i < road.length; i++) cum.push(cum[i - 1] + dist(road[i - 1][0], road[i - 1][1], road[i][0], road[i][1]));
-  const roadY = x => { let i = 1; while (i < road.length - 1 && road[i][0] < x) i++; const a = road[i - 1], b = road[i], k = clamp((x - a[0]) / (b[0] - a[0]), 0, 1); return lerp(a[1], b[1], k); };
-  const zoneAt = x => R.zones.find(z => x >= z.from && x < z.to) || R.zones[R.zones.length - 1];
-  const nearRoad = (x, y, m) => Math.abs(y - roadY(x)) < m, streams = R.features.filter(f => f.kind === 'arroyo');
-  const coastY = x => roadY(x) + 80 + Math.sin(x * .004) * 26;   // (where the land ends, by the sea)
-  const items = [];
-  for (const z of R.zones) for (const [kind, per] of Object.entries(ZONE_KINDS[z.kind].scatter)) {
-    const n = Math.round(per * (z.to - z.from) / 1000);
-    for (let k = 0; k < n * 3 && items.filter(o => o.z === z && o.kind === kind).length < n; k++) {
-      const x = z.from + r() * (z.to - z.from), y = 30 + r() * (R.h - 60);
-      if (nearRoad(x, y, kind === 'tuft' || kind === 'flor' || kind === 'lupino' ? 22 : 60) || streams.some(f => Math.abs(x - f.x) < 50)) continue;
-      if (ZONE_KINDS[z.kind].sea && y > coastY(x) - (kind === 'tuft' ? 4 : 20)) continue;
-      items.push({ z, kind, x, y, s: .8 + r() * .5, ph: r() * TAU, c: r() });
-    }
-  }
-  Object.assign(R, { built: true, cum, roadY, zoneAt, coastY, items, total: road[road.length - 1][0] });
-  return R;
+function cartStart(){
+  const m = PEOPLE.matthew; cart.on = true; cart.x = ROAD_E; cart.y = roadY(cart.x); cart.dir = 3; cart.dest = 'br';
+  game.tripWith = 'matthew'; m.away = null; m.target = null; m.story = null; m.where = 'out';
+  logEv('Ana y Matthew salieron en la carreta hacia la estación de Bright River.', ['matthew']); cartOn();
 }
-// the drawn things of a route
-const FEATURE_KINDS = {
-  arroyo: (g, R, f, t, ice) => {   // a stream across the strip, and the wooden bridge over it
-    const y0 = R.roadY(f.x);
-    g.strokeStyle = ice ? '#cfe1ea' : '#6fb0cc'; g.lineWidth = 34; g.beginPath(); g.moveTo(f.x - 30, 0); g.quadraticCurveTo(f.x + 20, y0, f.x - 20, R.h); g.stroke();
-    if (!ice) { g.strokeStyle = 'rgba(255,255,255,.35)'; g.lineWidth = 1.2; for (let k = 0; k < 6; k++) { const yy = (t * 30 + k * 150) % R.h; g.beginPath(); g.moveTo(f.x - 8, yy); g.lineTo(f.x + 2, yy + 14); g.stroke(); } }
-    blob(g, [[f.x - 44, y0 - 22], [f.x + 44, y0 - 22], [f.x + 44, y0 + 22], [f.x - 44, y0 + 22]], '#9a7048');
-    for (let k = -40; k < 44; k += 8) line(g, [[k + f.x, y0 - 22], [k + f.x, y0 + 22]], 'rgba(60,40,25,.45)', .9, k);
-    for (const sd of [-1, 1]) { line(g, [[f.x - 46, y0 + sd * 24], [f.x + 46, y0 + sd * 24]], '#6a4a30', 2.4, sd + 7); for (let k = -44; k <= 44; k += 22) line(g, [[f.x + k, y0 + sd * 24], [f.x + k, y0 + sd * 24 - 12]], '#6a4a30', 2, k + sd); line(g, [[f.x - 46, y0 + sd * 24 - 12], [f.x + 46, y0 + sd * 24 - 12]], '#7a5536', 1.6, sd + 9); }
-  },
-  cartel: (g, R, f) => { const y = R.roadY(f.x) - 40; line(g, [[f.x, y + 22], [f.x, y]], '#6a4a30', 2.4); blob(g, [[f.x - 40, y - 14], [f.x + 40, y - 14], [f.x + 40, y + 2], [f.x - 40, y + 2]], '#f1e2bf'); g.fillStyle = '#3b2a1c'; g.font = 'italic 10px Georgia, serif'; g.textAlign = 'center'; g.fillText(f.text, f.x, y - 2); },
-  granja: (g, R, f, t, ice, night) => { const y = R.roadY(f.x) + (f.side < 0 ? -110 : 150); drawHouse(g, { h: { x: f.x, y, w: 4.4 * T }, roof: ['#8a5a3c', '#5f7a9a', '#7a6a4a'][Math.floor(f.x) % 3], wall: '#efe4cc', trim: '#6a4a32', x: f.x, y, small: true }, t, night); },
-  faro: (g, R, f) => { const y = R.coastY(f.x) - 20; blob(g, [[f.x - 12, y], [f.x + 12, y], [f.x + 7, y - 90], [f.x - 7, y - 90]], '#f6f2e8'); for (let k = 0; k < 3; k++) blob(g, [[f.x - 11 + k * 1.6, y - 20 - k * 26], [f.x + 11 - k * 1.6, y - 20 - k * 26], [f.x + 10 - k * 1.6, y - 32 - k * 26], [f.x - 10 + k * 1.6, y - 32 - k * 26]], '#c8463a'); blob(g, [[f.x - 9, y - 90], [f.x + 9, y - 90], [f.x + 9, y - 102], [f.x - 9, y - 102]], '#f5d58a'); blob(g, [[f.x - 11, y - 102], [f.x + 11, y - 102], [f.x, y - 114]], '#3a3436'); },
-};
-let trip = null;
-function tripGo(to){
-  const m = PEOPLE.matthew, R = buildRoute(ROUTES.bright_river); userInput(); ana.goto = null; auto.intent = null; ana.sit = false; diana.follow = false; close();
-  trip = { to, R, s: to === 'br' ? 0 : R.total, dir: to === 'br' ? 1 : -1, from: dayT, fast: false, stop: 0, done: {}, lines: TRIP_LINES[to].map(([q, t]) => ({ q, t })), shown: 0, next: 4 };
-  m.away = null; m.target = null; m.story = null; game.tripWith = 'matthew'; m.where = 'trip';
-  logEv(to === 'br' ? 'Ana y Matthew salieron en la carreta hacia la estación de Bright River.' : 'Ana y Matthew emprendieron la vuelta a Avonlea en la carreta.', ['matthew']);
-  $('tripbar').hidden = false; tripBar();
-  if (aiReady()) { trip.asking = true; sceneAsk(['matthew'], `Ana y Matthew van en la carreta ${to === 'br' ? 'de Avonlea a la estación de Bright River' : 'de vuelta de Bright River a Avonlea'}: seis horas por caminos de campo, puentes de madera, un campo de flores rosadas y la costa de arena roja de la isla. Charla tranquila de viaje: Ana habla muchísimo, Matthew escucha y dice poco.`, 'pasar').then(s => { if (trip && s.lines.length) trip.lines = s.lines; }).catch(() => {}).finally(() => { if (trip) trip.asking = false; }); }
+function cartOn(dest){
+  if (dest) cart.dest = dest;
+  cart.riding = true; ana.goto = null; ana.lie = false; auto.intent = null; diana.follow = false; close();
+  notice(cart.dest === 'br' ? '🐴 Rumbo a Bright River (para bajarte, muévete o toca el suelo)' : '🐴 De vuelta a Avonlea (para bajarte, muévete o toca el suelo)');
 }
-const tripBar = () => { $('tripfast').textContent = trip?.fast ? '▶ Al paso' : '⏩ Más rápido'; };
-const ROUTE_SPEED = 120;
-function tripTick(dt){
-  const tr = trip, R = tr.R, m = PEOPLE.matthew;
-  // moments: the cart stops and they talk
-  for (const f of R.features) if (f.kind === 'momento' && !tr.done[f.x + (f.vuelta ? 'v' : '')] && !(f.ida && tr.dir < 0) && !(f.vuelta && tr.dir > 0) && (tr.dir > 0 ? tr.s >= f.x : tr.s <= f.x)) {
-    tr.done[f.x + (f.vuelta ? 'v' : '')] = true; tr.stop = f.stop; tr.moment = f.lines.map(([q, t]) => ({ q, t })); tr.mi = 0; tr.mnext = 0;
-  }
-  if (tr.moment) { if ((tr.mnext -= dt) <= 0) { if (tr.mi >= tr.moment.length) { tr.moment = null; tr.stop = 0; } else { const l = tr.moment[tr.mi++]; bubbles = [{ q: l.q, text: l.t, t: 0, dur: lineDur(l.t) }]; sfx.blip(); tr.mnext = lineDur(l.t) + .4; } } }
-  else if (!tr.asking && tr.shown < tr.lines.length && (tr.next -= dt) <= 0) { const l = tr.lines[tr.shown++]; bubbles = [{ q: l.q, text: l.t, t: 0, dur: lineDur(l.t) }]; sfx.blip(); tr.next = lineDur(l.t) + 6 + Math.random() * 6; }
-  for (const b of bubbles) b.t += dt; bubbles = bubbles.filter(b => b.t < b.dur + .35);
-  const moving = !tr.moment;
-  if (moving) tr.s = clamp(tr.s + tr.dir * ROUTE_SPEED * (tr.fast ? 3.5 : 1) * dt, 0, R.total);
-  dayT = tr.from + (R.hours / 24) * (tr.dir > 0 ? tr.s / R.total : 1 - tr.s / R.total);
-  // where they sit: Ana and Matthew on the cart
-  const x = tr.s, y = R.roadY(x); tr.x = x; tr.y = y; tr.moving = moving; tr.walk = moving ? (tr.walk || 0) + dt * 1.6 * (tr.fast ? 2 : 1) : 0;
-  ana.x = x - tr.dir * 34; ana.y = y - 16; ana.dir = tr.dir > 0 ? 1 : 3; ana.sit = true; m.x = x - tr.dir * 56; m.y = y - 18; m.dir = ana.dir; m.sit = true;
-  if (tr.dir > 0 ? tr.s < R.total : tr.s > 0) return;
-  if (tr.moment) return;
-  trip = null; $('tripbar').hidden = true; bubbles = []; ana.sit = false; m.sit = false;
-  if (tr.to === 'br') { goIn('br', [KDOOR.x - 40, KIT.h - 40]); m.where = 'br'; m.x = BRS.cart.x - 70; m.y = BRS.cart.y - 6; m.dir = 1; logEv('Ana y Matthew llegaron a la estación de Bright River.', ['matthew']); }
-  else { game.scene = 'out'; ana.x = TOWN[0] + 70; ana.y = TOWN[1] + 6; ana.dir = 1; toby.x = ana.x + 26; toby.y = ana.y + 8; cam.x = ana.x; cam.y = ana.y; m.where = 'out'; m.x = ana.x + 30; m.y = ana.y - 4; m.nav = null; game.tripWith = null; logEv('Ana y Matthew volvieron a Avonlea desde Bright River.', ['matthew']); }
-  save();
+function cartOff(){ cart.riding = false; ana.sit = false; ana.x = cart.x + (cart.dir === 3 ? 10 : -10); ana.y = cart.y + 26; }
+function cartAsk(){
+  const nearSt = cart.x < ROAD_W + 600, nearAv = cart.x > ROAD_E - 600, o = [];
+  if (!nearSt) o.push([nearAv ? '🐴 Ir a Bright River' : '🐴 Seguir a Bright River', () => cartOn('br')]);
+  if (!nearAv) o.push(['🐴 Volver a Avonlea', () => cartOn('av')]);
+  o.push(['Todavía no', close]);
+  say('matthew', 'Bueno, pues... ¿seguimos?', o);
 }
-// drawing a route: the camera follows the cart
-function drawRoute(W, H, dpr){
-  const tr = trip, R = tr.R, t = TT, { night, dusk } = light(), ice = S === 3;
-  const Z = clamp(Math.min(W / (12 * T), H / (9 * T)), 1.1, 3.2) * .85, vw = W / Z, vh = H / Z;
-  const ox = clamp(tr.x - vw / 2 + tr.dir * vw * .12, 0, Math.max(0, R.total - vw)), oy = clamp(tr.y - vh / 2 + (ZONE_KINDS[R.zoneAt(tr.x).kind].sea ? vh * .18 : 0), 0, Math.max(0, R.h - vh));   // (by the sea, the camera looks a little toward it)
-  view.ox = ox; view.oy = oy; view.Z = Z;
-  g.setTransform(dpr, 0, 0, dpr, 0, 0); g.fillStyle = '#2b2219'; g.fillRect(0, 0, W, H);
-  g.setTransform(dpr * Z, 0, 0, dpr * Z, -ox * dpr * Z, -oy * dpr * Z);
-  const inV = (x, m = 120) => x > ox - m && x < ox + vw + m;
-  // the ground of each zone, and the sea along the coast
-  for (const z of R.zones) { if (z.to < ox - 50 || z.from > ox + vw + 50) continue; g.fillStyle = ZONE_KINDS[z.kind].ground[S]; g.fillRect(z.from - 1, 0, z.to - z.from + 2, R.h); }
-  for (const z of R.zones) if (ZONE_KINDS[z.kind].sea && z.to > ox && z.from < ox + vw) {
-    const x0 = Math.max(z.from, ox - 20), x1 = Math.min(z.to, ox + vw + 20), pts = []; for (let x = x0; x <= x1; x += 20) pts.push([x, R.coastY(x)]);
-    g.fillStyle = ice ? '#dde9ef' : '#d9785a'; g.beginPath(); g.moveTo(x0, R.h); pts.forEach(([x, y]) => g.lineTo(x, y - 6)); g.lineTo(x1, R.h); g.fill();   // red sand
-    g.fillStyle = ice ? '#c7dbe6' : '#5c9fc2'; g.beginPath(); g.moveTo(x0, R.h); pts.forEach(([x, y]) => g.lineTo(x, y + 22 + Math.sin(x * .05 + t) * 3)); g.lineTo(x1, R.h); g.fill();   // the sea
-    if (!ice) { g.strokeStyle = 'rgba(255,255,255,.6)'; g.lineWidth = 1.4; for (let k = 0; k < 3; k++) { g.beginPath(); pts.forEach(([x, y], i) => { const yy = y + 30 + k * 26 + Math.sin(x * .03 + t * 1.5 + k) * 3; i ? g.lineTo(x, yy) : g.moveTo(x, yy); }); g.stroke(); } }
+function cartTick(dt){
+  if (!cart.on) return;
+  const m = PEOPLE.matthew, d = cart.dest === 'br' ? -1 : 1, goal = d < 0 ? ROAD_W : ROAD_E;
+  cart.moving = cart.riding && (d < 0 ? cart.x > goal : cart.x < goal);
+  if (cart.moving) { cart.x += d * CART_SPEED * dt; cart.walk = (cart.walk + dt * 1.6) % 1; }
+  cart.y = roadY(cart.x); cart.dir = d < 0 ? 3 : 1;
+  m.x = cart.x - (d < 0 ? -1 : 1) * 56; m.y = cart.y - 18; m.dir = cart.dir; m.sit = true; m.moving = false; m.where = 'out';
+  if (cart.riding) { ana.x = cart.x - (d < 0 ? -1 : 1) * 34; ana.y = cart.y - 16; ana.dir = cart.dir; ana.sit = true; ana.vx = ana.vy = 0; }
+  if (cart.riding && !cart.moving) {   // (arrived)
+    cartOff();
+    if (cart.dest === 'br') { logEv('Ana y Matthew llegaron a la estación de Bright River.', ['matthew']); notice('📍 La estación de Bright River'); }
+    else { logEv('Ana y Matthew volvieron a Avonlea desde Bright River.', ['matthew']); cart.on = false; game.tripWith = null; m.sit = false; m.y = cart.y + 20; m.nav = null; }
+    save();
   }
-  // the road
-  g.lineCap = 'round'; g.lineJoin = 'round';
-  for (const [w, c] of [[48, ice ? 'rgba(150,150,160,.3)' : 'rgba(150,120,70,.35)'], [36, ice ? '#d6d3cc' : '#cdae7a'], [22, ice ? '#e3e0d9' : '#dbbf8d']]) { g.strokeStyle = c; g.lineWidth = w; g.beginPath(); R.road.forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); g.stroke(); }
-  for (const f of R.features) if (f.kind === 'arroyo' && inV(f.x)) FEATURE_KINDS.arroyo(g, R, f, t, ice);
-  // the small things on the ground (grass, flowers, the pink lupins), then what stands up, by depth
-  const list = [];
-  for (const o of R.items) {
-    if (!inV(o.x, 60)) continue;
-    if (o.kind === 'tuft') { if (ice && o.c > .3) continue; const b = Math.sin(t * 1.6 + o.x * .02) * 2; g.strokeStyle = ice ? 'rgba(150,140,110,.6)' : o.c < .5 ? 'rgba(70,130,45,.8)' : 'rgba(110,165,64,.8)'; g.lineWidth = 1.1; g.beginPath(); for (const d of [-3, 0, 3]) { g.moveTo(o.x + d, o.y); g.quadraticCurveTo(o.x + d + b * .4, o.y - 5, o.x + d * 1.2 + b, o.y - 9 * o.s); } g.stroke(); }
-    else if (o.kind === 'flor') { if (ice) continue; ell(g, o.x, o.y - 5, 2, 1.6, ['#fffaf2', '#ffd7e8', '#f7e27a', '#c9a7f2'][Math.floor(o.c * 4)]); }
-    else if (o.kind === 'lupino') { if (ice || (S === 2 && o.c > .3)) continue; const b = Math.sin(t * 1.4 + o.ph) * 1.4, col = ['#e88ab0', '#f2a6c4', '#d46a9c', '#c98ad8'][Math.floor(o.c * 4)], hgt = 10 + o.s * 8; line(g, [[o.x, o.y], [o.x + b, o.y - hgt]], '#5e9a3e', 1); for (let k = 0; k < 5; k++) ell(g, o.x + b * (1 - k / 6), o.y - hgt + k * 2.4, 2.2 - k * .2, 1.6, col); }
-    else list.push(o);
+  // at night, if the cart was left waiting, Matthew goes home
+  if (!cart.riding && cart.on && hourNow() > 23.5) { cart.on = false; game.tripWith = null; m.sit = false; m.where = CH.matthew.home; }
+}
+// the moments of the road: someone says something when Ana passes by (once a day each)
+let momentX = null; const momentDone = {};
+function momentsTick(){
+  if (game.scene !== 'out' || ana.x > AX) { momentX = ana.x; return; }
+  const px = momentX ?? ana.x; momentX = ana.x;
+  for (const f of MAP.features) {
+    if (f.kind !== 'momento' || momentDone[f.x] === today() || Math.abs(ana.y - roadY(f.x)) > 300 || !((px > f.x && ana.x <= f.x) || (px < f.x && ana.x >= f.x)) || (f.west && ana.x > px)) continue;
+    momentDone[f.x] = today(); if (amb.cur) continue;
+    const mNear = sceneOf('matthew') === 'out' && dist(PEOPLE.matthew.x, PEOPLE.matthew.y, ana.x, ana.y) < 160;
+    const lines = f.lines.filter(([q]) => q === 'ana' || (q === 'matthew' && mNear)).map(([q, t]) => ({ q, t }));
+    if (lines.length) sceneStart({ parts: mNear ? ['matthew'] : [], lines, out: {}, scene: 'out', resumen: '' }, false);
   }
-  for (const f of R.features) if (FEATURE_KINDS[f.kind] && f.kind !== 'arroyo' && inV(f.x, 200)) list.push({ feat: f, y: f.kind === 'granja' ? R.roadY(f.x) + (f.side < 0 ? -110 : 150) : f.kind === 'faro' ? R.coastY(f.x) - 20 : R.roadY(f.x) - 18 });
-  list.push({ cart: true, y: tr.y + 1 });
-  list.sort((a, b) => a.y - b.y);
-  for (const o of list) {
-    if (o.cart) { drawCart(g, { x: tr.x, y: tr.y, dir: tr.dir > 0 ? 1 : 3, walk: tr.walk, moving: tr.moving }, t); drawPerson(g, PEOPLE.matthew, t); drawPerson(g, ana, t); continue; }
-    if (o.feat) { FEATURE_KINDS[o.feat.kind](g, R, o.feat, t, ice, night); continue; }
-    if (o.kind === 'oak' || o.kind === 'pine') drawTree(g, o, t);
-    else if (o.kind === 'bush') drawBush(g, { ...o, berries: 0 }, t);
-    else if (o.kind === 'duna') { ell(g, o.x, o.y, 26 * o.s, 9 * o.s, ice ? '#f2f5f7' : '#e8cf9a', true); for (let k = -2; k <= 2; k++) line(g, [[o.x + k * 6, o.y - 4], [o.x + k * 7 + Math.sin(t + o.ph + k) * 2, o.y - 16 * o.s]], ice ? '#b9c4cc' : '#9aa85a', 1, k); }
-    else if (o.kind === 'roca') ell(g, o.x, o.y, 9 * o.s, 6 * o.s, '#a8796a', true);
-  }
-  // gulls over the coast
-  const cz = R.zones.find(z => ZONE_KINDS[z.kind].sea); if (cz && !ice && tr.x > cz.from - 300 && tr.x < cz.to + 300) for (let k = 0; k < 4; k++) { const gx = tr.x + Math.sin(t * .3 + k * 2) * 300 + k * 60, gy = R.coastY(tr.x) - 60 + Math.cos(t * .5 + k) * 30; line(g, [[gx - 7, gy], [gx, gy + 3 + Math.sin(t * 6 + k) * 2], [gx + 7, gy]], '#4a4a52', 1.2, k); }
-  // the light of the hour, the bubbles, the paper
-  g.setTransform(dpr, 0, 0, dpr, 0, 0);
-  if (dusk > 0) { g.fillStyle = `rgba(255,150,70,${.2 * dusk})`; g.fillRect(0, 0, W, H); }
-  if (night > 0) { g.fillStyle = `rgba(18,26,60,${.6 * night})`; g.fillRect(0, 0, W, H); }
-  for (const b of bubbles) { const p = personOf(b.q); if (p) drawBubble(g, p, b, W, H); }
-  g.globalAlpha = .9; g.fillStyle = g.createPattern(paper, 'repeat'); g.fillRect(0, 0, W, H); g.globalAlpha = 1;
-  const z = R.zoneAt(tr.x), names = { campo: 'campos de Avonlea', bosque: 'el bosque', flores: 'el campo de flores', costa: 'la costa de la isla', pueblo: 'cerca de Bright River' };
-  $('tripstop').textContent = `🐴 ${R.name} · ${names[z.kind] || ''} · ${Math.round(tr.dir > 0 ? tr.s / R.total * 100 : 100 - tr.s / R.total * 100)}%`;
-  const hh = Math.floor(hourNow() % 24), mm = Math.floor((hourNow() % 1) * 60); $('clock').textContent = SICON[S] + ' ' + SEASONS[S] + ' · ' + String(hh).padStart(2, '0') + ':' + String(mm).padStart(2, '0');
 }
 function goIn(room, at){ game.scene = room; ana.lie = false; diana.lie = false; ana.x = at ? at[0] : KDOOR.x; ana.y = at ? at[1] : KIT.h - 14; ana.dir = 0; ana.sit = false; toby.x = ana.x + 26; toby.y = ana.y; if (diana.follow) { diana.where = room; diana.sit = false; diana.x = ana.x - 26; diana.y = ana.y; } cam.x = KIT.w / 2; cam.y = KIT.h / 2; }
 function goOut(){
-  if (game.scene === 'br') return tripAsk('out');
   if (ROOMS[game.scene].parent) return goIn(ROOMS[game.scene].parent, ROOMS[game.scene].exitAt);
   const H = HOUSES[game.scene].at;
   game.scene = 'out'; ana.lie = false; diana.lie = false; ana.x = H.x; ana.y = H.y + 24; ana.dir = 2; ana.sit = false; toby.x = ana.x + 24; toby.y = ana.y + 10;
@@ -2838,6 +2832,7 @@ function whereText(k){
 }
 function placeText(){
   if (game.scene !== 'out') return ROOMS[game.scene].place;
+  if (ana.x < AX) return `${cart.riding ? 'en la carreta de Matthew, ' : ''}en ${zoneAt(ana.x).name}, por el camino de Avonlea a Bright River (${Math.round((AX - ana.x) / (AX - ROAD_W) * 6)} horas de carreta desde Avonlea)`;
   let best = null, bd = 1e9; for (const pl of Object.values(PLACES)) { const d = dist(ana.x, ana.y, pl[1], pl[2]); if (d < bd) { bd = d; best = pl[0]; } }
   return (bd > 500 ? 'en el campo, algo lejos de ' : 'cerca de ') + best;
 }
@@ -3411,9 +3406,8 @@ const cam = { x: ana.x, y: ana.y };
 let last = performance.now(), TT = 0, here = null, taskTick = 0, storyT = 2;
 function update(dt){
   if (sleeping) return;
-  if (trip) { TT += dt; boil = Math.floor(TT * 6); return tripTick(dt); }
   if (AI.on && provider() === 'manual' && aiq.list.length) return;   // (debugging by hand: the world waits for the answer)
-  TT += dt; dayT += dt / 3600; boil = Math.floor(TT * 6);
+  TT += dt; dayT += dt / 3600 * ((game.scene === 'out' && ana.x < AX - 200) || game.scene === 'br' ? TRAVEL : 1); boil = Math.floor(TT * 6);
   const { night } = light();
   // the season: two days each
   const ns = (seasonCount() % 4 + 4) % 4;
@@ -3430,10 +3424,11 @@ function update(dt){
     if (stick) { const dx = stick.x - stick.x0, dy = stick.y - stick.y0, l = Math.hypot(dx, dy); if (l > 10) { mx = dx / Math.max(l, 50); my = dy / Math.max(l, 50); } }
   }
   if (game.talk?.deadline && TT > game.talk.deadline && !sayOpen) { game.talk.deadline = 0; autoChoose(); }
-  autoTick();
+  autoTick(); cartTick(dt); momentsTick();
   ana.torn = !!game.anaStates.rasgado; ana.askew = !!game.anaStates.despeinada;
   ana.savoring = false;
   // walking to something she was sent to (a tap): by the A* path, and doing it on arrival
+  if (cart.riding && (mx || my || ana.goto)) cartOff();
   const gt = ana.goto;
   if (gt && (menuOpen() || game.cooking || game.map || mx || my || game.scene !== gt.scene)) ana.goto = null;
   else if (gt) {
@@ -3540,15 +3535,13 @@ function update(dt){
   for (const b of birds) { b.x += 120 * dt; b.ph += dt * 10; } birds = birds.filter(b => b.x < cam.x + 900);
   for (const f of fx) { f.t += dt; if (f.kind === 'drop') { f.vy += 200 * dt; f.y += f.vy * dt; } }
   fx = fx.filter(f => f.t < (f.kind === 'text' ? 2 : 1.2));
-  if (game.scene === 'out') { cam.x = lerp(cam.x, ana.x, .08); cam.y = lerp(cam.y, ana.y - 20, .08); }
+  if (game.scene === 'out') { const sea = ana.x < 61 * U && coastY(ana.x) - ana.y < 420 ? 110 : 0; cam.x = lerp(cam.x, ana.x, .08); cam.y = lerp(cam.y, ana.y - 20 + sea, .08); }   // (by the sea, the view leans towards it)
 }
 function render(){
   const W = innerWidth, H = innerHeight, dpr = devicePixelRatio || 1;
   if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
-  if (trip) { drawingOut = true; return drawRoute(W, H, dpr); }
   const { night, dusk } = light(), t = TT, inside = game.scene !== 'out';
   drawingOut = !inside;
-  if (groundSeason !== S) paintGround(S);
   const Z = inside ? Math.min(W / KIT.w, H / KIT.h) * .94 : clamp(Math.min(W / ((H > W ? 8 : 12) * T), H / (9 * T)), 1.1, 3.2);
   const vw = W / Z, vh = H / Z;
   const ox = inside ? (KIT.w - vw) / 2 : clamp(cam.x - vw / 2, 0, WW - vw), oy = inside ? (KIT.h - vh) / 2 : clamp(cam.y - vh / 2, 0, WH - vh);
@@ -3562,7 +3555,10 @@ function render(){
     for (const k of Object.keys(PEOPLE)) if (sceneOf(k) === game.scene) list.push({ y: PEOPLE[k].y, draw: () => drawPerson(g, PEOPLE[k], t) });
     for (const it of game.ground) if (it.scene === game.scene) list.push({ y: it.y, draw: () => drawGround(g, it) });
   } else {
-    g.drawImage(ground, ox * GS, oy * GS, vw * GS, vh * GS, ox, oy, vw, vh);
+    for (let tx = Math.floor(ox / TILE); tx * TILE < ox + vw; tx++) for (let ty = Math.floor(oy / TILE); ty * TILE < oy + vh; ty++) { const cv = groundTile(tx, ty); g.drawImage(cv, .5, .5, cv.width - 1, cv.height - 1, tx * TILE, ty * TILE, TILE, TILE); }
+    // the sea along the coast: waves coming in
+    if (ox < 64 * U && S !== 3) { g.strokeStyle = 'rgba(255,255,255,.55)'; g.lineWidth = 1.4; for (let k = 0; k < 4; k++) { g.beginPath(); for (let x = Math.floor(ox / 20) * 20; x < Math.min(ox + vw, 64 * U) + 20; x += 20) { const yy = coastY(x) + 26 + k * 30 + Math.sin(x * .03 + TT * 1.5 + k) * 3; x === Math.floor(ox / 20) * 20 ? g.moveTo(x, yy) : g.lineTo(x, yy); } g.stroke(); } }
+    for (const w of WATERS.slice(1)) { g.lineCap = 'round'; g.lineJoin = 'round'; g.strokeStyle = S === 3 ? '#cfe2ea' : '#6aa8c4'; g.lineWidth = 28; g.beginPath(); g.moveTo(...w.pts[0]); w.pts.slice(1).forEach(p => g.lineTo(...p)); g.stroke(); }
     // the brook and the lake: water with the sky's shimmer, lily pads, a fish jumping now and then
     // (in winter both are frozen: pale ice with cracks, and a glint now and then)
     const ice = S === 3;
@@ -3603,9 +3599,13 @@ function render(){
       for (let k = 0; k < 5; k++) { const a = k / 5 * TAU + f.ph; ell(g, f.x + b + Math.cos(a) * 1.8 * f.s, f.y - 6 * f.s + Math.sin(a) * 1.3 * f.s, 1.4 * f.s, 1.1 * f.s, f.c); }
       ell(g, f.x + b, f.y - 6 * f.s, .9 * f.s, .9 * f.s, '#f2c14e');
     }
+    for (const o of lupins) { if (S === 3 || (S === 2 && o.c > .3) || !inView(o.x, o.y, 20)) continue; const b = Math.sin(t * 1.4 + o.ph) * 1.4, col = ['#e88ab0', '#f2a6c4', '#d46a9c', '#c98ad8'][Math.floor(o.c * 4)], hg = 10 + o.s * 8; g.strokeStyle = '#5e9a3e'; g.lineWidth = 1; g.beginPath(); g.moveTo(o.x, o.y); g.lineTo(o.x + b, o.y - hg); g.stroke(); for (let k = 0; k < 5; k++) ell(g, o.x + b * (1 - k / 6), o.y - hg + k * 2.4, 2.2 - k * .2, 1.6, col); }
+    for (const o of dunes) { if (!inView(o.x, o.y, 40)) continue; ell(g, o.x, o.y, 26 * o.s, 9 * o.s, S === 3 ? '#f2f5f7' : '#e8cf9a', true); for (let k = -2; k <= 2; k++) line(g, [[o.x + k * 6, o.y - 4], [o.x + k * 7 + Math.sin(t + o.ph + k) * 2, o.y - 16 * o.s]], S === 3 ? '#b9c4cc' : '#9aa85a', 1, k); }
+    for (const o of rocks) if (inView(o.x, o.y, 20)) ell(g, o.x, o.y, 9 * o.s, 6 * o.s, '#a8796a', true);
     for (const r of reeds) { if (!inView(r.x, r.y)) continue; const b = Math.sin(t * 1.2 + r.ph) * 2; line(g, [[r.x, r.y], [r.x + b * .5, r.y - r.h * .6], [r.x + b, r.y - r.h]], S >= 2 ? '#9a8a4a' : '#6b8f3a', 1.5, r.h); ell(g, r.x + b, r.y - r.h + 3, 1.6, 3.6, '#7a5536'); }
     for (const o of [...props, ...trees, ...bushes]) if (inView(o.x, o.y, 170)) list.push({ y: o.y, draw: () => drawProp(g, o, t, night) });
     for (const k of Object.keys(PEOPLE)) if (sceneOf(k) === 'out') { list.push({ y: PEOPLE[k].y, draw: () => drawPerson(g, PEOPLE[k], t) }); if (CH[k].vehicle === 'cart') list.push({ y: PEOPLE[k].y - .5, draw: () => drawCart(g, PEOPLE[k], t) }); }
+    if (cart.on && inView(cart.x, cart.y, 120)) list.push({ y: cart.y + 1, draw: () => drawCart(g, cart, t) });
     for (const a of Object.values(ANIM)) if (a.kind === 'cow' && a.where === 'out' && inView(a.x, a.y)) list.push({ y: a.y, draw: () => drawCow(g, a, t) });
     for (const it of game.ground) if (it.scene === 'out' && inView(it.x, it.y)) list.push({ y: it.y, draw: () => drawGround(g, it) });
   }
@@ -3695,10 +3695,12 @@ function paintMapBase(w, h){
   c.setTransform(k, 0, 0, k, 0, 0);
   // a pale wash of the season's colour, a darker one for the Haunted Wood
   c.fillStyle = ['rgba(150,190,100,.25)', 'rgba(130,170,80,.28)', 'rgba(210,150,70,.25)', 'rgba(200,215,230,.35)'][S]; c.fillRect(60, 60, WW - 120, WH - 120);
-  c.fillStyle = 'rgba(60,90,50,.16)'; c.beginPath(); c.ellipse(9 * U, 40 * U, 12 * U, 9 * U, 0, 0, TAU); c.fill();
+  for (const z of MAP.zones) if (ZONE_KINDS[z.kind].ground) { c.fillStyle = { campo: 'rgba(150,190,100,.2)', bosque: 'rgba(60,110,60,.25)', flores: 'rgba(230,140,180,.3)', costa: 'rgba(220,200,140,.25)', pueblo: 'rgba(150,190,100,.2)' }[z.kind]; c.fillRect(z.x0, 60, z.x1 - z.x0, WH - 120); }
+  { c.fillStyle = S === 3 ? '#d6e7ee' : '#8fbfd2'; c.beginPath(); c.moveTo(0, WH); for (let x = 0; x <= 64 * U; x += 200) c.lineTo(x, Math.min(WH, coastY(x))); c.lineTo(64 * U, WH); c.fill(); }
+  c.fillStyle = 'rgba(60,90,50,.16)'; c.beginPath(); c.ellipse(AX + 9 * U, 40 * U, 12 * U, 9 * U, 0, 0, TAU); c.fill();
   const stroke = (pts, wd, col) => { c.strokeStyle = col; c.lineWidth = wd; c.lineCap = 'round'; c.lineJoin = 'round'; c.beginPath(); c.moveTo(...pts[0]); pts.slice(1).forEach(p => c.lineTo(...p)); c.stroke(); };
   for (const p of paths) { stroke(p, 34, 'rgba(150,110,60,.5)'); stroke(p, 22, '#e3c99a'); }
-  stroke(brook, 30, S === 3 ? '#c9dde6' : '#7fb2c9');
+  for (const w of WATERS) stroke(w.pts, 30, S === 3 ? '#c9dde6' : '#7fb2c9');
   ell(c, LAKE.x, LAKE.y, LAKE.rx, LAKE.ry, S === 3 ? '#d6e7ee' : '#8fbfd2', 'rgba(60,80,100,.8)');
   ell(c, LAKE.x - 60, LAKE.y - 20, 70, 16, 'rgba(255,255,255,.35)');
   // trees: little pencil crowns and pines
@@ -3712,13 +3714,13 @@ function paintMapBase(w, h){
   // houses: a front and a roof
   const house = (x, y, w, roof, wall) => { blob(c, [[x - w / 2, y], [x + w / 2, y], [x + w / 2, y - 60], [x - w / 2, y - 60]], wall); blob(c, [[x - w / 2 - 14, y - 56], [x + w / 2 + 14, y - 56], [x + w / 2 - 8, y - 130], [x - w / 2 + 8, y - 130]], S === 3 ? '#f6f8fb' : roof); blob(c, [[x - 12, y], [x - 12, y - 32], [x + 12, y - 32], [x + 12, y]], '#7a4f32'); };
   for (const h of Object.values(HOUSES)) house(h.at.x, h.at.y, h.at.w, h.roof, h.wall); house(BARN.x, BARN.y, BARN.w, '#6f6a66', '#b5523c');
-  blob(c, [[BRIDGE.x - 44, BRIDGE.y - 16], [BRIDGE.x + 44, BRIDGE.y - 16], [BRIDGE.x + 44, BRIDGE.y + 14], [BRIDGE.x - 44, BRIDGE.y + 14]], '#a8814f');
+  for (const w of WATERS) blob(c, [[w.bridge.x - 44, w.bridge.y - 16], [w.bridge.x + 44, w.bridge.y - 16], [w.bridge.x + 44, w.bridge.y + 14], [w.bridge.x - 44, w.bridge.y + 14]], '#a8814f');
   // names, in ink
   c.fillStyle = '#4a2f1c'; c.textAlign = 'center';
   const label = (text, x, y, size = 46) => { c.font = `italic ${size}px Georgia, serif`; c.fillStyle = 'rgba(241,226,191,.75)'; const tw = c.measureText(text).width; c.fillRect(x - tw / 2 - 8, y - size * .85, tw + 16, size * 1.1); c.fillStyle = '#4a2f1c'; c.fillText(text, x, y); };
   for (const h of Object.values(HOUSES)) label(h.mapLabel?.[0] ?? h.name, h.at.x, h.at.y - 150, h.mapLabel?.[1]); label('Granero', BARN.x, BARN.y - 150, 38);
-  label('Lago de las Aguas Brillantes', LAKE.x, LAKE.y + LAKE.ry + 64); label('Bosque Encantado', 9 * U, 44 * U);
-  label('Camino Blanco de las Delicias', GG.x + 360, BRIDGE.y - 96, 38); label('Huerta', BEDS[1].x, BEDS[0].y - 34, 34); label('Arroyo', brook[2][0] + 90, brook[2][1] + 160, 34);
+  label('Lago de las Aguas Brillantes', LAKE.x, LAKE.y + LAKE.ry + 64); label('Bosque Encantado', AX + 9 * U, 44 * U); for (const z of MAP.zones) if (ZONE_KINDS[z.kind].ground && z.kind !== 'pueblo') label(z.name.replace(/^el |^la |^los /, '').replace(/^./, ch => ch.toUpperCase()), (z.x0 + z.x1) / 2, roadY((z.x0 + z.x1) / 2) - 300, 90); label('Camino a Bright River', AX - 30 * U, roadY(AX - 30 * U) + 260, 80);
+  label('Camino Blanco de las Delicias', GG.x + 360, BRIDGE.y - 96, 38); label('Arroyo', brook[2][0] + 90, brook[2][1] + 160, 34);
   // a compass rose and a double border
   const cx = WW - 150, cy = WH - 150;
   blob(c, [[cx, cy - 70], [cx + 14, cy], [cx, cy + 70], [cx - 14, cy]], '#d9bf8f'); blob(c, [[cx - 70, cy], [cx, cy - 14], [cx + 70, cy], [cx, cy + 14]], '#d9bf8f');
@@ -3734,7 +3736,7 @@ function drawMap(){
   if (!mapBase || mapBase.s !== S || mapBase.w !== w) mapBase = paintMapBase(w, h);
   c.setTransform(1, 0, 0, 1, 0, 0); c.drawImage(mapBase.cv, 0, 0);
   // where everyone is (someone indoors is shown at the door of the house)
-  const at = (where, x, y) => where === 'out' ? [x, y] : where === 'br' ? [TOWN[0] + 14, TOWN[1]] : [HOUSES[ROOMS[where].parent ?? where].at.x, HOUSES[ROOMS[where].parent ?? where].at.y + 20];
+  const at = (where, x, y) => where === 'out' ? [x, y] : [HOUSES[ROOMS[where].parent ?? where].at.x, HOUSES[ROOMS[where].parent ?? where].at.y + 20];
   const mark = (who, [x, y], col, dx, big) => {
     const sx = x * k + dx * dpr, sy = y * k, r = (big ? 6 + Math.sin(TT * 5) * 1.2 : 4.5) * dpr;
     c.beginPath(); c.arc(sx, sy, r, 0, TAU); c.fillStyle = col; c.fill(); c.lineWidth = 1.4 * dpr; c.strokeStyle = 'rgba(60,35,20,.9)'; c.stroke();
@@ -3746,7 +3748,7 @@ function drawMap(){
   $('maptitle').textContent = 'Avonlea · ' + SEASONS[S] + ', día ' + (Math.floor(dayT) % 2 + 1) + ' · ' + SICON[S];
 }
 function loop(now){ const dt = clamp((now - last) / 1000, 0, .05); last = now; update(dt); render(); requestAnimationFrame(loop); }
-window.__avonlea = { ROUTES, buildRoute, tripGo, trip: () => trip, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+window.__avonlea = { MAP, cart, cartStart, cartOn, cartOff, ROAD, AX, roadY, coastY, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
 requestAnimationFrame(loop);
 })();
 </script>
