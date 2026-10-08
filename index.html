@@ -681,7 +681,7 @@ function mealTick(){
   const note = `Están sentados a la mesa de la cocina de Tejas Verdes, ${w.ing} (${w.menu}). Charla de sobremesa, tranquila${m.rounds > 1 ? ' (siguen conversando; no repitan lo que ya se dijo)' : ''}: cómo va el día, lo que ha pasado, lo que viene, algún chisme del pueblo; Ana habla mucho y con imaginación, Marilla le recuerda que coma, Matthew dice poco pero tierno.`;
   if (!aiReady()) { const ls = [{ q: 'ana', t: pick(['¡Qué rico huele todo! Comer en esta mesa me hace sentir parte de una familia de verdad.', 'Marilla, ¿no te parece que el pan sabe distinto cuando una está feliz?', 'Hoy imaginé que esta mesa era un banquete en un castillo... pero esto es mucho mejor, porque es de verdad.']) }, ...parts.slice(0, 2).map(k => ({ q: k, t: pick(LINES[k]) }))]; sceneStart({ parts, lines: ls, out: {}, scene: 'gg', resumen: '' }, false); return; }
   amb.busy = true;
-  sceneAsk(parts, note).then(s => { if (ana.meal === m && !amb.cur && !game.talk && s.lines.length) sceneStart(s, false); }).catch(e => console.debug('[avonlea IA] comida', e.message)).finally(() => { amb.busy = false; });
+  sceneAsk(parts, note, 'pasar').then(s => { if (ana.meal === m && !amb.cur && !game.talk && s.lines.length) sceneStart(s, false); }).catch(e => console.debug('[avonlea IA] comida', e.message)).finally(() => { amb.busy = false; });
 }
 function drawKitchen(c, t, night){
   // floor boards, the back wall with a window and shelves, a rag rug
@@ -1682,7 +1682,7 @@ async function anaSpeak(text){
   }
   try {
     if (parts.length) {
-      const s = await sceneAsk(parts, `Ana dice en voz alta (la jugadora le hizo decir esto): «${text}». ${was ? 'Interrumpe lo que se estaban diciendo. ' : ''}Escribe cómo reaccionan los demás y, si hace falta, lo que Ana añade (su frase ya se vio, no la repitas); si lo que dijo es despedirse o ir a otro lado, "ana_va" lo indica.`);
+      const s = await sceneAsk(parts, `Ana dice en voz alta (la jugadora le hizo decir esto): «${text}». ${was ? 'Interrumpe lo que se estaban diciendo. ' : ''}Escribe cómo reaccionan los demás y, si hace falta, lo que Ana añade (su frase ya se vio, no la repitas); si lo que dijo es despedirse o ir a otro lado, "ana_va" lo indica.`, 'dicho');
       if (amb.tok !== id || game.talk || amb.cur) return;
       const v = validGo(s.out.ana_va);
       if (!s.lines.length) { if (v) startIntent(v.intent, true); return; }
@@ -2616,6 +2616,8 @@ const AI_SCHEMA = { type: 'object', additionalProperties: false, required: ['lin
   lineas: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['quien', 'texto'], properties: { quien: { type: 'string', enum: ['ana', ...Object.keys(PEOPLE), ...Object.keys(ANIMALS).filter(k => ANIMALS[k].talks)] }, texto: { type: 'string' } } } }, resumen: { type: 'string' },
   encargo: { type: 'object', additionalProperties: false, required: ['tipo', 'item', 'cantidad', 'para', 'lugar', 'recado'], properties: { tipo: { type: 'string', enum: TASK_KINDS }, item: S_ITEM, cantidad: { type: 'integer' }, para: S_WHO, lugar: S_PLACE, recado: { type: 'string' } } },
   accion: { type: 'object', additionalProperties: false, required: ['tipo', 'item', 'cantidad', 'lugar'], properties: { tipo: { type: 'string', enum: ['ninguna', 'regalar', 'acompanar', 'ir'] }, item: S_ITEM, cantidad: { type: 'integer' }, lugar: S_PLACE } } } };
+const SCHEMA_PASS = () => ({ type: 'object', additionalProperties: false, required: ['lineas', 'resumen'], properties: { lineas: AI_SCHEMA.properties.lineas, resumen: AI_SCHEMA.properties.resumen } });
+const SCHEMA_SAID = () => ({ type: 'object', additionalProperties: false, required: ['lineas', 'resumen', 'ana_va'], properties: { lineas: AI_SCHEMA.properties.lineas, resumen: AI_SCHEMA.properties.resumen, ana_va: AI_SCHEMA.properties.ana_va } });
 const AUTO_SCHEMA = { type: 'object', additionalProperties: false, required: ['eleccion', 'pensamiento'], properties: { eleccion: { type: 'integer' }, pensamiento: { type: 'string' } } };
 const worldText = () => stateText(Object.keys(CH)[0]).split('\n\n')[0];
 function whereText(k){
@@ -2698,10 +2700,12 @@ const SYS = (() => {
   return { head: head.join('\n\n'), sec };
 })();
 const SYS_FOR = { 'una escena': ['ESCENAS DE CONVERSACIÓN'], 'Ana decide': ['ANA POR SU CUENTA'], 'el fin del día': ['FIN DEL DÍA'], 'el guión del día': ['GUIÓN DEL DÍA'], 'una rama de la historia': ['GUIÓN DEL DÍA', 'RAMA NUEVA'], 'el juez de la historia': ['JUEZ DE LA HISTORIA'], 'los planes del día': ['PLANIFICAR'], 'un cambio de plan': ['PLANIFICAR'] };
-const MIN_HEAD = () => `Eres la voz de los personajes de «Un día en Avonlea», un juego tranquilo inspirado en «Ana de las Tejas Verdes» (L. M. Montgomery), hacia 1880. Español, tuteo en la familia; tono tierno y con humor, como el libro. Ana Shirley: 11 años, pelirroja, huérfana adoptada por los Cuthbert; soñadora, muy conversadora, de palabras grandiosas e imaginación desbordante. Nada moderno (ni juegos, ni IA). No inventes sucesos que el juego tendría que mostrar. Responde solo con el JSON pedido; los campos que no se usan van vacíos ("", 0, [], "ninguno" o "ninguna").
-PERSONAJES: ${Object.keys(CH).map(k => NAMES[k] + ': ' + CH[k].voice.split(/(?<=\.)\s/).reduce((a, x) => a.length < 110 ? (a ? a + ' ' : '') + x : a, '')).join(' | ')}`;
+const voiceShort = k => CH[k].voice.split(/(?<=\.)\s/).reduce((a, x) => a.length < 110 ? (a ? a + ' ' : '') + x : a, '');
+const MIN_HEAD = (cast = true) => `Eres la voz de los personajes de «Un día en Avonlea», un juego tranquilo inspirado en «Ana de las Tejas Verdes» (L. M. Montgomery), hacia 1880. Español, tuteo en la familia; tono tierno y con humor, como el libro. Ana Shirley: 11 años, pelirroja, huérfana adoptada por los Cuthbert; soñadora, muy conversadora, de palabras grandiosas e imaginación desbordante. Nada moderno (ni juegos, ni IA). No inventes sucesos que el juego tendría que mostrar. Responde solo con el JSON pedido; los campos que no se usan van vacíos ("", 0, [], "ninguno" o "ninguna").${cast ? '\nPERSONAJES: ' + Object.keys(CH).map(k => NAMES[k] + ': ' + voiceShort(k)).join(' | ') : ''}`;
 const MIN_SEC = {
-  'una escena': () => `ESCENA: "lineas" (de 2 a 5): lo que dicen en voz alta Ana y los PRESENTES, cada uno con su voz; Ana es la que más habla (hasta 25 palabras por línea; los demás, 15). Que termine sin dejar una pregunta abierta. Respeta lo que es verdad ahora (lo que Ana lleva, la estación) y no repitas lo ya dicho. Charla al pasar: ligera, sin encargo ni acción. Si Ana inició la charla, de vez en cuando el personaje puede pedirle un "encargo" (traer "cantidad" de "item" a "para", regar, cocinar tarta/compota/te, recado a "para", ir a "lugar"; nunca si ya tiene 3 o uno suyo pendiente) o hacer una "accion" (regalar, acompanar, ir). "resumen": una frase en tercera persona de lo importante, o "". "ana_va": solo si la jugadora hizo decir a Ana que se va: irse, lugar (${Object.keys(PLACES).join(', ')}), casa (gg, os, rl, ga), persona o dormir; si no, "ninguna".`,
+  'una escena': sch => `ESCENA: "lineas" (de 2 a 5): lo que dicen en voz alta Ana y los PRESENTES, cada uno con su voz; Ana es la que más habla (hasta 25 palabras por línea; los demás, 15). Que termine sin dejar una pregunta abierta. Respeta lo que es verdad ahora y no repitas lo ya dicho. "resumen": una frase en tercera persona de lo importante, o "".`
+    + (sch?.properties?.encargo ? ` De vez en cuando el personaje puede pedirle a Ana un "encargo" (traer "cantidad" de "item" a "para", regar, cocinar tarta/compota/te, recado a "para", ir a "lugar"; nunca si ya tiene 3 o uno suyo pendiente) o hacer una "accion" (regalar, acompanar, ir); si no, "ninguno"/"ninguna".` : '')
+    + (sch?.properties?.ana_va ? ` "ana_va": solo si lo que Ana dijo es que se va: irse, lugar (${Object.keys(PLACES).join(', ')}), casa (gg, os, rl, ga), persona o dormir; si no, "ninguna".` : ''),
   'Ana decide': () => 'ANA DECIDE: elige la opción que Ana elegiría ahora, por su carácter y el momento, sin repetir lo último ("eleccion": su número); "pensamiento": lo que dice en voz alta (una frase).',
   'el fin del día': () => 'FIN DEL DÍA: "relaciones": solo los cambios que el día justifica (casi siempre pocos o ninguno), "cambio" -1, 0 o 1 y una "nota" breve; "impresiones": como mucho una por personaje que vivió algo importante (una frase).',
   'el guión del día': () => `GUIÓN: una historia breve para hoy, inspirada en un episodio de los libros o de la serie, tierna y con humor, jugable aquí (conversar, ir a lugares, encargos). De 2 a 5 escenas en orden, con "hora" entre la indicada y las 20: "id" breve; "lugar" (clave); "personajes" (sin Ana; Diana solo afuera o en os; en ga Ana está sola); "que_pasa" (1 o 2 frases); "pista" (12 palabras como máximo, sin contar el final); "encargo" (o "ninguno"); "fin": llega_ana, encargo_cumplido o evento (con "evento"); "efectos" al empezar o terminar (${Object.entries(STORY_EFFECTS).map(([k, f]) => k + ': ' + f.desc).join('; ')}; animales: ${Object.keys(ANIMALS).join(', ')}; áreas: ${Object.keys(AREAS).join(', ')}; estados de Ana: ${Object.keys(ANA_STATES).join(', ')}); "frases": hasta 3 frases clave o []; "requiere": ids o eventos que deben pasar antes; "clave": true si sin ella la historia no puede seguir; "contra": eventos que la desvían. Eventos: ${Object.keys(STORY_EVENTS).join(', ')}.`,
@@ -2713,7 +2717,8 @@ const MIN_SEC = {
 function sysFor(schema){
   const kind = aiqKind(schema);
   if (!FULL() && kind === 'el juez de la historia') return MIN_SEC[kind]();   // (the judge needs no characters)
-  if (!FULL() && MIN_SEC[kind]) return MIN_HEAD() + '\n\n' + MIN_SEC[kind]();
+  if (!FULL() && kind === 'una escena') return MIN_HEAD(false) + '\n\n' + MIN_SEC[kind](schema);   // (the voices come in the request, only of who is there)
+  if (!FULL() && MIN_SEC[kind]) return MIN_HEAD() + '\n\n' + MIN_SEC[kind](schema);
   const secs = SYS_FOR[kind]; return secs ? SYS.head + '\n\n' + secs.map(k => SYS.sec[k] || '').join('\n\n') : AI_SYSTEM;
 }
 /* the tokens spent: every answer of the AI says how many it read (some of them from the cache, cheaper) and wrote;
@@ -2834,7 +2839,31 @@ function chatGroup(main){
   return [main, ...Object.keys(PEOPLE).filter(k => k !== main && sceneOf(k) === game.scene && dist(PEOPLE[k].x, PEOPLE[k].y, p.x, p.y) < 140 && dist(PEOPLE[k].x, PEOPLE[k].y, ana.x, ana.y) < 200).slice(0, 2)];
 }
 const talkersHere = () => Object.keys(ANIMALS).filter(k => ANIMALS[k].talks && ANIM[k].where === game.scene);
-function sceneMsg(parts, note){
+// what a character knows lately, without repeats nor comings and goings (for the short request)
+const BORING = /^\S+(?: \S+)? (entró a|volvió a su casa|llegó a|llegó por|salió|se fue al pueblo)/;
+function factsOf(k, n = 3){
+  const seen = new Set(), out = [];
+  for (const t of [...(game.know[k] || []).map(e => e.t), ...(game.mem[k] || []).map(x => x.replace(/^día \d+: /, ''))].reverse()) {
+    const c = t.replace(/^\([^)]*\) /, ''); if (seen.has(c) || BORING.test(c)) continue; seen.add(c); out.push(c.slice(0, 150)); if (out.length >= n) break;
+  }
+  return out.reverse();
+}
+function sceneMsgMin(parts, note, full){
+  const top = stateText(Object.keys(CH)[0]).split('\n').slice(0, 3);
+  let m = top.join('\n').replace('; Toby la acompaña', '') + (parts.length ? '' : '\nAna está sola.');
+  for (const k of parts) {
+    const f = factsOf(k), r = relGet(k, 'ana').n;
+    m += `\n- ${NAMES[k]} (cariño hacia Ana ${game.fond[k] ?? 2}/5${r ? ': ' + r : ''}; ${whereText(k)}): ${voiceShort(k)}` + (f.length ? ` Sabe: ${f.join(' / ')}` : '');
+    if (full) { const mine = activeTasks().filter(t => t.from === k); m += ` Puede: ${abilText(k)}.` + (mine.length ? ` Le encargó a Ana: ${mine.map(taskText).join('; ')}.` : ''); }
+  }
+  if (full) m += `\nAna tiene ${activeTasks().length} encargo(s) pendiente(s).`;
+  if (!/ESCENA DE LA HISTORIA/.test(note)) { const st = game.story, e = st && st.v === 2 && st.day === today() ? st.escenas.find(e => !isFinal(e) && e.personajes.some(k => parts.includes(k))) : null; if (e) m += `\nLA HISTORIA DE HOY («${st.titulo}»), lo que viene: hacia las ${e.hora}:00, ${e.que_pasa.slice(0, 160)} (sin adelantarlo).`; }
+  for (const k of talkersHere()) m += `\nAhí está ${ANIMALS[k].name} ("quien": "${k}"): ${ANIMALS[k].desc}; puede soltar una frase corta.`;
+  if (amb.hist.length) m += '\nLO ÚLTIMO QUE SE DIJERON (no lo repitas): ' + amb.hist.slice(-4).map(x => x.slice(0, 120)).join(' / ');
+  return m + `\nPRESENTES: Ana${parts.map(k => ', ' + NAMES[k]).join('')}.\nAHORA PASA: ${note}`;
+}
+function sceneMsg(parts, note, full = true){
+  if (!FULL()) return sceneMsgMin(parts, note, full);
   let m = parts.length ? stateText(parts[0]) : worldText() + '\n\nAna está sola.';
   for (const k of parts.slice(1)) {
     const kn = (game.know[k] || []).slice(-6).map(e => '  - ' + e.t).join('\n') || '  (nada)', mm = (game.mem[k] || []).slice(-4).map(x => '  - ' + x).join('\n') || '  (nada)';
@@ -2847,8 +2876,10 @@ function sceneMsg(parts, note){
   if (ctx.length) m += '\n\n' + ctx.join(' ');
   return m + `\n\nPRESENTES: Ana${parts.map(k => ', ' + NAMES[k]).join('')}.\nAHORA PASA: ${note}\nEscribe la escena.`;
 }
-async function sceneAsk(parts, note){
-  const r = await aiCall([{ role: 'user', content: sceneMsg(parts, note) }]), o = r.out, ok = ['ana', ...parts, ...talkersHere()];
+// kind: 'pasar' (a passing chat: only the lines), 'dicho' (after something Ana said: also where she goes), or a talk she started (all)
+async function sceneAsk(parts, note, kind = 'charla'){
+  const sch = kind === 'pasar' ? SCHEMA_PASS() : kind === 'dicho' ? SCHEMA_SAID() : AI_SCHEMA;
+  const r = await aiCall([{ role: 'user', content: sceneMsg(parts, note, kind === 'charla') }], sch), o = { encargo: NO_TASK, accion: { tipo: 'ninguna' }, ana_va: { tipo: 'ninguna', destino: '' }, ...r.out }, ok = ['ana', ...parts, ...talkersHere()];
   const lines = (Array.isArray(o.lineas) ? o.lineas : []).filter(l => l && ok.includes(l.quien) && typeof l.texto === 'string' && l.texto.trim()).slice(0, 9).map(l => ({ q: l.quien, t: l.texto.trim().slice(0, 320) }));
   return { parts, lines, out: o, scene: game.scene, born: TT, resumen: typeof o.resumen === 'string' ? o.resumen.trim() : '' };
 }
@@ -2944,7 +2975,7 @@ function ambUpdate(dt){
     return;
   }
   const parts = chatGroup(best); amb.busy = true;
-  sceneAsk(parts, ambNote(parts)).then(s => {
+  sceneAsk(parts, ambNote(parts), 'pasar').then(s => {
     if (s.lines.length) amb.ready = s; else for (const k of parts) { amb.mute[k] = TT + 60; amb.seen[k] = true; }
   }).catch(e => { console.debug('[avonlea IA] charla', e.message); amb.err = TT + 60; }).finally(() => { amb.busy = false; });
 }
@@ -3104,7 +3135,7 @@ $('aitest').addEventListener('click', async () => {
   aiSync(); const o = $('aiout'); o.hidden = false;
   if (!aiKey()) { o.textContent = 'Falta tu clave de la API de ' + PROV[provider()].name + '.'; return; }
   o.textContent = 'Preguntándole a Diana…';
-  try { const r = await sceneAsk(['diana'], 'Ana saluda a Diana (esto es solo una prueba de la voz).'); o.textContent = r.lines.map(l => nameOf(l.q) + ': ' + l.t).join('\n') || '(no dijeron nada)'; }
+  try { const r = await sceneAsk(['diana'], 'Ana saluda a Diana (esto es solo una prueba de la voz).', 'pasar'); o.textContent = r.lines.map(l => nameOf(l.q) + ': ' + l.t).join('\n') || '(no dijeron nada)'; }
   catch (e) { o.textContent = 'No funcionó: ' + e.message; }
 });
 $('ailog').addEventListener('click', aiLogShow);
