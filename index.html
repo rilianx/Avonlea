@@ -106,6 +106,7 @@ html,body{margin:0;height:100%;background:#2b3a26;overflow:hidden;touch-action:n
   <div>Matthew, Marilla, Diana y la Sra. Barry conversan con una IA: cuando Ana pasa cerca charlan solos (y Ana también habla), en globitos sobre sus cabezas; se acuerdan de lo que ha pasado y de lo que se dijeron. Sin la clave, solo dicen unas frases escritas de antemano.</div>
   <label><input type="checkbox" id="aion"> Usar IA en las conversaciones (recomendado)</label>
   <label><input type="checkbox" id="aiauto"> Ana hace lo suyo sola cuando no la controlo</label>
+  <label><input type="checkbox" id="aiplans"> Los personajes planean su día con IA (una vez por la mañana; si no, siguen su rutina)</label>
   <label for="aimodel">Modelo</label>
   <select id="aimodel"><option value="gpt-5.4-mini">GPT-5.4 mini (OpenAI)</option><option value="claude-opus-5-5">Claude Opus 5.5 (Anthropic)</option><option value="claude-sonnet-5-5">Claude Sonnet 5.5 (Anthropic, más rápido)</option><option value="claude-haiku-4-5">Claude Haiku 4.5 (Anthropic, el más barato)</option><option value="manual">🐞 Yo hago de IA (depurar: respondo a mano)</option></select>
   <label for="aikey" id="aikeylab">Tu clave de la API</label>
@@ -1930,17 +1931,20 @@ const PLAN_SCHEMA = { type: 'object', additionalProperties: false, required: ['p
     lugar: { type: 'string', enum: ['', ...Object.keys(PLACES)] }, item: { type: 'string', enum: ['', ...ITEMS] }, motivo: { type: 'string' } } } } } };
 const planQ = [], planAt = {};
 let planBusy = false, planWait = 0;
-function planSoon(who, reason, force = false){
-  if (!aiReady() || planQ.some(q => q[0] === who)) return;
-  const at = today() * 24 + hourNow();
-  if (!force && planAt[who] != null && at - planAt[who] < 1.5) return;
-  planAt[who] = at; planQ.push([who, reason]); pumpPlans();
+const plansOn = () => aiReady() && AI.plans !== false;
+const PLANNERS = () => Object.keys(PEOPLE).filter(k => CH[k].plans !== false);
+// re-planning one character, when something important happened to them: at most twice a day, three hours apart
+function planSoon(who, reason){
+  if (!plansOn() || CH[who].plans === false || planQ.some(q => q[0] === who)) return;
+  const P = game.plans[who], at = today() * 24 + hourNow();
+  if (!P || P.day !== today() || (P.re || 0) >= 2 || (planAt[who] != null && at - planAt[who] < 3)) return;
+  planAt[who] = at; P.re = (P.re || 0) + 1; planQ.push([who, reason]); pumpPlans();
 }
 async function pumpPlans(){
   if (planBusy || !planQ.length || !aiReady()) return;
   planBusy = true;
   const [who, reason] = planQ.shift();
-  try { await makePlan(who, reason); } catch (e) { console.debug('[avonlea IA] plan', who, e.message); planWait = 60; }
+  try { await makePlan(who, reason); } catch (e) { console.debug('[avonlea IA] plan', who, e.message); }   // (no retries: the routine is enough)
   planBusy = false; pumpPlans();
 }
 function validStep(who, s, h0){
@@ -1960,8 +1964,39 @@ async function makePlan(who, reason){
   const msg = stateText(who) + `\n\nAHORA PASA: ${reason}.\nPLANIFICA lo que ${NAMES[who]} hará en lo que queda de hoy (son las ${Math.floor(hourNow())}:00; el día termina a las 24). "pensamiento": una o dos frases en primera persona, con la voz de ${NAMES[who]}, sobre qué piensa hacer hoy y por qué. "pasos": de 1 a 4 acciones en orden, con "hora" entera entre ${h0} y 23, usando solo lo que ${NAMES[who]} puede hacer; "lugar" solo para ir, "item" solo para cocinar o regalar (si no, ""), y "motivo" en pocas palabras.`;
   const r = await aiCall([{ role: 'user', content: msg }], PLAN_SCHEMA);
   const steps = (Array.isArray(r.out.pasos) ? r.out.pasos : []).map(s => validStep(who, s, h0)).filter(Boolean).sort((a, b) => a.hora - b.hora).slice(0, 4);
-  game.plans[who] = { day: today(), thought: String(r.out.pensamiento || '').slice(0, 300), steps, reason };
+  game.plans[who] = { day: today(), thought: String(r.out.pensamiento || '').slice(0, 300), steps, reason, re: game.plans[who]?.re || 0 };
   save();
+}
+/* the plans of the morning: ONE request for everyone (the world is told once, and each one only what is theirs);
+   if it fails, the day goes on by the routines, without asking again until tomorrow */
+const PLANS_SCHEMA = () => ({ type: 'object', additionalProperties: false, required: ['planes'], properties: { planes: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['quien', 'pensamiento', 'pasos'], properties: { quien: { type: 'string', enum: PLANNERS() }, pensamiento: PLAN_SCHEMA.properties.pensamiento, pasos: PLAN_SCHEMA.properties.pasos } } } } });
+function planBlock(who){
+  const k = (game.know[who] || []).slice(-6).map(e => e.t), imp = (game.impr[who] || []).slice(-2), mine = activeTasks().filter(t => t.from === who), sty = storyText(who);
+  return `- ${NAMES[who]} (ahora ${whereText(who)}; cariño hacia Ana ${game.fond[who] ?? 2}/5). Puede: ${abilText(who)}.` + (imp.length ? ` Se le quedó: ${imp.join(' / ')}.` : '') + (k.length ? ` Sabe de hace poco: ${k.join(' / ')}.` : '') + (mine.length ? ` Le encargó a Ana: ${mine.map(taskText).join('; ')}.` : '') + (sty ? ' ' + sty : '');
+}
+let planDay = -1;
+async function makePlansAll(){
+  const who = PLANNERS(), h0 = Math.ceil(hourNow()), day = today();
+  planDay = day;
+  for (const k of who) game.plans[k] = { day, thought: '', steps: [], reason: 'el día', re: 0 };   // (until the answer, and if there is none: the routine)
+  if (h0 > 22 || !who.length) return;
+  const msg = worldText() + `
+
+PLANIFICA el día de cada uno (son las ${Math.floor(hourNow())}:00; el día termina a las 24): ${who.map(k => NAMES[k]).join(', ')}.
+${who.map(planBlock).join('\n')}`
+    + `
+
+Para cada uno ("quien"): "pensamiento", una o dos frases en primera persona, con su voz, sobre qué piensa hacer hoy y por qué; "pasos", de 0 a 3 acciones en orden, con "hora" entera entre ${h0} y 23, solo de lo que puede hacer; "lugar" solo para ir, "item" solo para cocinar o regalar (si no, ""), y "motivo" en pocas palabras. Planes sencillos, propios de su vida; no todos tienen que buscar a Ana.`;
+  try {
+    const r = await aiCall([{ role: 'user', content: msg }], PLANS_SCHEMA());
+    if (today() !== day) return;
+    for (const p of Array.isArray(r.out.planes) ? r.out.planes : []) {
+      if (!who.includes(p.quien)) continue;
+      const steps = (Array.isArray(p.pasos) ? p.pasos : []).map(s => validStep(p.quien, s, h0)).filter(Boolean).sort((a, b) => a.hora - b.hora).slice(0, 3);
+      game.plans[p.quien] = { day, thought: String(p.pensamiento || '').slice(0, 300), steps, reason: 'el día', re: 0 };
+    }
+    save();
+  } catch (e) { console.debug('[avonlea IA] planes del día', e.message); }
 }
 function doStep(who, s){
   const p = PEOPLE[who];
@@ -1976,7 +2011,7 @@ function doStep(who, s){
 }
 // carrying the plans out: the steps whose hour has come (of several at once, only the last walk counts)
 function runPlans(dt){
-  if ((planWait -= dt) < 0 && aiReady()) { planWait = 3; for (const who of Object.keys(PEOPLE)) if (CH[who].plans !== false && (!game.plans[who] || game.plans[who].day !== today()) && hourNow() < 22) planSoon(who, game.plans[who] ? 'Empieza un nuevo día' : 'Ana empieza su día en Avonlea', true); }
+  if ((planWait -= dt) < 0 && plansOn()) { planWait = 3; if (planDay !== today() && hourNow() < 22 && PLANNERS().some(k => game.plans[k]?.day !== today())) makePlansAll(); }
   const h = hourNow();
   for (const who of Object.keys(PEOPLE)) {
     const P = game.plans[who]; if (!P || P.day !== today()) continue;
@@ -2648,7 +2683,7 @@ function tokDraw(){
 /* the AI by hand, to debug: each request waits in a little panel (and in window.__avonlea.aiq) until someone answers
    it with JSON in the requested shape — the player, another AI they paste it into, or whoever is testing the game */
 const aiq = { list: [], seq: 0, skip: new Set() };
-const aiqKind = sch => { const p = Object.keys(sch.properties || {}); return p.includes('lineas') ? 'una escena' : p.includes('titulo_rama') ? 'una rama de la historia' : p.includes('escenas') ? 'el guión del día' : p.includes('veredictos') ? 'el juez de la historia' : p.includes('eleccion') ? 'Ana decide' : p.includes('relaciones') ? 'el fin del día' : p.includes('pasos') ? 'un plan del día' : 'un pedido'; };
+const aiqKind = sch => { const p = Object.keys(sch.properties || {}); return p.includes('lineas') ? 'una escena' : p.includes('titulo_rama') ? 'una rama de la historia' : p.includes('escenas') ? 'el guión del día' : p.includes('veredictos') ? 'el juez de la historia' : p.includes('eleccion') ? 'Ana decide' : p.includes('relaciones') ? 'el fin del día' : p.includes('planes') ? 'los planes del día' : p.includes('pasos') ? 'un cambio de plan' : 'un pedido'; };
 function skel(sc){ if (!sc) return null; if (sc.enum) return sc.enum[0]; switch (sc.type) { case 'object': return Object.fromEntries(Object.entries(sc.properties || {}).map(([k, v]) => [k, skel(v)])); case 'array': return []; case 'integer': case 'number': return 0; case 'boolean': return false; default: return ''; } }
 function manualCall(messages, schema){
   if (aiq.skip.has(aiqKind(schema))) return Promise.reject(new Error('omitido'));
@@ -2959,7 +2994,7 @@ $('mapcv').addEventListener('click', () => toggleMap(false));
 // the AI settings: on/off, the key (kept in this browser only), the model; and a look at what they remember
 function aiPanel(on){
   $('ai').hidden = !on; if (!on) return;
-  close(); tokDraw(); $('aion').checked = AI.on; $('aiauto').checked = AI.auto !== false; $('aimodel').value = AI.model; $('aiout').hidden = true; aiKeyField();
+  close(); tokDraw(); $('aion').checked = AI.on; $('aiauto').checked = AI.auto !== false; $('aiplans').checked = AI.plans !== false; $('aimodel').value = AI.model; $('aiout').hidden = true; aiKeyField();
 }
 // the key field shows the key of the chosen model's provider
 function aiKeyField(){
@@ -2968,9 +3003,9 @@ function aiKeyField(){
   $('aikey').value = AI.keys[pv] || ''; $('aikey').placeholder = P.hint; $('aikeylab').textContent = 'Tu clave de la API de ' + P.name;
   $('ainote').textContent = man ? 'Para depurar: cada vez que el juego le pida algo a la IA, aparece abajo a la derecha el pedido y un JSON por completar; lo respondes tú (o lo copias a otra IA y pegas su respuesta). Mientras no respondas, eso espera.' : `La clave la pones tú: se guarda solo en este navegador y se envía directamente a ${pv === 'openai' ? 'api.openai.com' : 'api.anthropic.com'}. No compartas el archivo ni el navegador con la clave puesta.`;
 }
-const aiSync = () => { AI.on = $('aion').checked; AI.auto = $('aiauto').checked; AI.model = $('aimodel').value; if (provider() !== 'manual') AI.keys[provider()] = $('aikey').value.trim(); saveAI(); };
+const aiSync = () => { AI.on = $('aion').checked; AI.auto = $('aiauto').checked; AI.plans = $('aiplans').checked; AI.model = $('aimodel').value; if (provider() !== 'manual') AI.keys[provider()] = $('aikey').value.trim(); saveAI(); };
 $('aimodel').addEventListener('change', () => { AI.model = $('aimodel').value; saveAI(); aiKeyField(); });
-for (const id of ['aion', 'aiauto', 'aikey']) $(id).addEventListener('change', aiSync);
+for (const id of ['aion', 'aiauto', 'aiplans', 'aikey']) $(id).addEventListener('change', aiSync);
 $('aibtn').addEventListener('pointerdown', e => { e.stopPropagation(); audio(); if (!game.talk) aiPanel(true); });
 $('aiclose').addEventListener('click', () => { aiSync(); aiPanel(false); });
 $('aitest').addEventListener('click', async () => {
@@ -3044,7 +3079,7 @@ function update(dt){
   const { night } = light();
   // the season: two days each
   const ns = (seasonCount() % 4 + 4) % 4;
-  if (ns !== S) { S = ns; if (TT > 1) { logEv('Llegó ' + ['la primavera', 'el verano', 'el otoño', 'el invierno'][S] + '.', Object.keys(PEOPLE)); for (const w of Object.keys(PEOPLE)) planSoon(w, 'Acaba de llegar ' + ['la primavera', 'el verano', 'el otoño', 'el invierno'][S], true); } if (TT > 1) notice(SICON[S] + ' ' + ['¡Llegó la primavera! Los manzanos están en flor.', '¡Llegó el verano! Hay bayas y manzanas, y luciérnagas de noche.', '¡Llegó el otoño! Las hojas se ponen rojas y doradas.', '¡Llegó el invierno! El lago se heló y la huerta duerme bajo la nieve.'][S]); }
+  if (ns !== S) { S = ns; if (TT > 1) { logEv('Llegó ' + ['la primavera', 'el verano', 'el otoño', 'el invierno'][S] + '.', Object.keys(PEOPLE)); } if (TT > 1) notice(SICON[S] + ' ' + ['¡Llegó la primavera! Los manzanos están en flor.', '¡Llegó el verano! Hay bayas y manzanas, y luciérnagas de noche.', '¡Llegó el otoño! Las hojas se ponen rojas y doradas.', '¡Llegó el invierno! El lago se heló y la huerta duerme bajo la nieve.'][S]); }
   // late at night Ana gets sleepy (twice, out loud), and past two in the morning she falls asleep
   { const hn = hourNow(); if (hn < 20) sleepyStage = 0;
     else if (hn >= 26 && !game.talk) goSleep(true);

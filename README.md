@@ -92,7 +92,7 @@ Con la IA activada:
 
   Ana los acepta o no. El juego comprueba solo cuándo están hechos, y quien lo pidió se lo agradece. Los pendientes se ven en la nota 📜.
 - **Lo que hace cada uno:** Matthew va a lugares, busca a Ana, riega y le regala manzanas o bayas. Marilla cocina (y deja la tarta en la mesa) y riega. Diana va a lugares, busca a Ana, la acompaña y le regala cosas. La Sra. Barry regala manzanas o compota. Un **!** sobre alguien indica que tiene algo para Ana.
-- **Planes:** cada mañana, y cuando pasa algo, la IA hace el plan del día de cada personaje con lo que puede hacer, y el juego lo cumple a su hora. Pasa algo cuando llega una estación, Ana le hace un regalo, cumple un encargo o le trae un recado.
+- **Planes:** cada mañana la IA hace, en **un solo pedido**, el plan del día de todos los personajes con lo que cada uno puede hacer, y el juego lo cumple a su hora. Si a alguien le pasa algo importante (Ana le hace un regalo, cumple su encargo o le trae un recado), se le rehace el plan, como mucho dos veces al día y con tres horas entre una y otra. Si el pedido falla, no se reintenta: ese día siguen su rutina. Se puede apagar en ✒ («Los personajes planean su día con IA»).
 - **Ver recuerdos** (en el panel ✒) muestra el plan de hoy, lo que sabe y lo que recuerda cada uno, los encargos y el diario de Ana.
 
 La IA solo puede hacer lo que el juego permite. Cada encargo, regalo y paso del plan se revisa contra las reglas (quién puede hacer qué, la estación, qué se puede conseguir), y lo que no corresponde se descarta. Por eso lo que escribe la IA nunca rompe la partida.
