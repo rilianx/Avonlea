@@ -56,13 +56,9 @@ html,body{margin:0;height:100%;background:#2b3a26;overflow:hidden;touch-action:n
 #talk .tbar{height:3px;background:rgba(107,74,48,.15);margin-top:8px;border-radius:2px;overflow:hidden}
 #talk .tbar i{display:block;height:100%;width:100%;background:#a8432c;animation:tbar 10s linear forwards}
 @keyframes tbar{from{width:100%}to{width:0}}
-#trip{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:20;width:min(520px,calc(100% - 28px));padding:14px 18px;font-size:15px;line-height:1.45}
-#trip[hidden]{display:none}
-#trip .tt{font-size:19px;font-style:italic;text-align:center}
-#trip .road{position:relative;height:30px;margin:10px 0 2px;border-bottom:3px dotted #b59a6a}
-#trip .road span{position:absolute;bottom:2px;font-size:22px;transform:scaleX(-1)}
-#trip .ts{text-align:center;font-size:13px;color:#6b4a30;font-style:italic;margin-bottom:8px}
-#trip #triplines div{margin:4px 0}
+#tripbar{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:20;padding:6px 12px;font-size:14px;font-style:italic;white-space:nowrap;max-width:calc(100% - 20px);overflow:hidden;text-overflow:ellipsis}
+#tripbar[hidden]{display:none}
+#tripbar button{font:13px Georgia,serif;background:#fffaf0;color:#3b2a1c;border:1.5px solid #6b4a30;border-radius:8px 11px 7px 10px;padding:2px 8px;cursor:pointer;margin-left:6px;font-style:normal}
 #aiq{position:fixed;right:64px;top:10px;z-index:30;width:min(460px,calc(100% - 20px));padding:8px 10px;font-size:13px}
 #aiq[hidden]{display:none}
 #aiq .h{font-weight:bold;color:#7a3a22}
@@ -99,7 +95,7 @@ html,body{margin:0;height:100%;background:#2b3a26;overflow:hidden;touch-action:n
 <div id="tok" class="paper" title="Tokens gastados con la IA" hidden></div>
 <div id="hint" class="paper">Flechas o WASD para pasear (o toca el suelo) · toca una persona u objeto para interactuar · Enter o T para decir algo · M para el mapa</div>
 <div id="talk" class="paper" hidden></div>
-<div id="trip" class="paper" hidden><div class="tt" id="triptitle"></div><div class="road"><span id="tripcart">🐴</span></div><div class="ts" id="tripstop"></div><div id="triplines"></div></div>
+<div id="tripbar" class="paper" hidden><span id="tripstop"></span> <button id="tripfast">⏩ Más rápido</button></div>
 <div id="aiq" class="paper" hidden><div class="h">🐞 La IA eres tú · <span class="n"></span></div><details><summary>Ver el pedido</summary><pre class="p"></pre></details><textarea spellcheck="false"></textarea><div><button class="ok">Responder</button><button class="cp">📋 Copiar todo (para otra IA)</button><button class="no">Que falle</button><button class="all">Que fallen todos los de este tipo</button></div></div>
 <div id="sleep"></div>
 <form id="say" class="paper" hidden autocomplete="off"><input id="sayin" maxlength="240" placeholder="Lo que dice Ana… (Enter para decir · Esc para cerrar)" spellcheck="false"><button type="submit">Decir</button></form>
@@ -1762,26 +1758,154 @@ function tripAsk(to){
   if (hn + 6 > 23.5) return anaSays(to === 'br' ? 'Ya es muy tarde para ir hasta Bright River: son seis horas de carreta. Mejor mañana temprano.' : 'Ya es muy tarde para volver a casa: son seis horas de camino de noche. Matthew dice que esperemos a que amanezca... ¡como en una novela!');
   say('Ana', to === 'br' ? '¿Ir hasta la estación de Bright River? Son seis horas de carreta con Matthew.' : '¿Volver a Avonlea? Son seis horas de carreta.', [[to === 'br' ? '🐴 Ir con Matthew en la carreta' : '🐴 Volver a casa', () => { close(); tripGo(to); }], ['Mejor no', close]]);
 }
+/* ---------- maps in a few lines: a ROUTE is a long strip with a road, ZONES (each kind knows how to paint its ground
+   and what to scatter: trees, flowers, rocks, the sea...) and FEATURES (streams with their wooden bridges, signs, houses,
+   a lighthouse, and MOMENTS: the cart stops and someone says something). Everything is drawn by the game from this
+   description (seeded, the same every time): a new map costs a few lines, no pictures and no AI.
+   To add a route: an entry in ROUTES; to add a kind of zone or feature: an entry in ZONE_KINDS or in FEATURE_KINDS. ---------- */
+const ROUTES = {
+  bright_river: { name: 'el camino a Bright River', len: 9800, h: 900, hours: 6, from: 'Avonlea', to: 'Bright River',
+    road: [[0, 450], [800, 430], [1500, 470], [2300, 420], [3100, 380], [3900, 430], [4800, 470], [5600, 400], [6400, 360], [7300, 380], [8200, 430], [9000, 450], [9800, 440]],
+    zones: [{ kind: 'campo', from: 0, to: 2100 }, { kind: 'bosque', from: 2100, to: 3500 }, { kind: 'flores', from: 3500, to: 5300 }, { kind: 'costa', from: 5300, to: 8400 }, { kind: 'pueblo', from: 8400, to: 9800 }],
+    features: [
+      { kind: 'cartel', x: 260, text: 'Avonlea' }, { kind: 'granja', x: 650, side: -1 }, { kind: 'granja', x: 1250, side: 1 },
+      { kind: 'arroyo', x: 1750 }, { kind: 'arroyo', x: 2950 }, { kind: 'arroyo', x: 4900 },
+      { kind: 'faro', x: 7100 }, { kind: 'cartel', x: 8500, text: 'Bright River' }, { kind: 'granja', x: 8800, side: -1 }, { kind: 'granja', x: 9250, side: 1 },
+      { kind: 'momento', x: 1760, stop: 3.5, lines: [['ana', '¡Un puente de madera! Cada tabla suena distinto, Matthew... como un piano para caballos.'], ['matthew', 'Bueno, pues... ya lo creo.']] },
+      { kind: 'momento', x: 4300, stop: 7, ida: true, lines: [['ana', '¡Señor Matthew! ¡Señor Matthew!'], ['matthew', '¿Qué... qué pasa, Ana?'], ['ana', '¡Mire! ¡Todo el campo se volvió rosado! ¿No le dan ganas de llorar de lo hermoso que es?'], ['matthew', 'Bueno, pues... es muy bonito, sí. Ya lo creo.']] },
+      { kind: 'momento', x: 4300, stop: 4, vuelta: true, lines: [['ana', 'Otra vez el campo rosado... de vuelta parece que nos despide.'], ['matthew', 'Ya lo creo.']] },
+      { kind: 'momento', x: 5600, stop: 6, lines: [['ana', '¡El mar, Matthew! ¡Y la arena es roja! Nunca vi una costa así: parece que la isla se hubiera puesto colorada.'], ['matthew', 'Es la tierra de la isla, Ana. Roja como tu... bueno, pues, roja.']] },
+      { kind: 'momento', x: 7120, stop: 3.5, lines: [['ana', 'Un faro... imagino que adentro vive alguien muy solitario que escribe poemas a las gaviotas.']] },
+    ] },
+};
+// how each kind of zone looks: its ground (by season) and what it scatters (per 1000 px of road)
+const ZONE_KINDS = {
+  campo: { ground: ['#9cc66c', '#8db45c', '#b0a860', '#e9eef2'], scatter: { oak: 6, bush: 4, flor: 30, tuft: 90 } },
+  bosque: { ground: ['#6f9e52', '#648f48', '#8a8a48', '#e4ebef'], scatter: { pine: 26, oak: 4, tuft: 60 } },
+  flores: { ground: ['#a8c870', '#98b860', '#b8aa66', '#eef2f5'], scatter: { lupino: 520, oak: 1.5, tuft: 60 } },
+  costa: { ground: ['#b9c880', '#aabb70', '#c2b67a', '#eef1f4'], sea: true, scatter: { duna: 40, tuft: 50, roca: 6 } },
+  pueblo: { ground: ['#9cc66c', '#8db45c', '#b0a860', '#e9eef2'], scatter: { oak: 4, flor: 20, tuft: 70 } },
+};
+function buildRoute(R){
+  if (R.built) return R;
+  const r = rng(R.len), road = R.road, cum = [0];
+  for (let i = 1; i < road.length; i++) cum.push(cum[i - 1] + dist(road[i - 1][0], road[i - 1][1], road[i][0], road[i][1]));
+  const roadY = x => { let i = 1; while (i < road.length - 1 && road[i][0] < x) i++; const a = road[i - 1], b = road[i], k = clamp((x - a[0]) / (b[0] - a[0]), 0, 1); return lerp(a[1], b[1], k); };
+  const zoneAt = x => R.zones.find(z => x >= z.from && x < z.to) || R.zones[R.zones.length - 1];
+  const nearRoad = (x, y, m) => Math.abs(y - roadY(x)) < m, streams = R.features.filter(f => f.kind === 'arroyo');
+  const coastY = x => roadY(x) + 80 + Math.sin(x * .004) * 26;   // (where the land ends, by the sea)
+  const items = [];
+  for (const z of R.zones) for (const [kind, per] of Object.entries(ZONE_KINDS[z.kind].scatter)) {
+    const n = Math.round(per * (z.to - z.from) / 1000);
+    for (let k = 0; k < n * 3 && items.filter(o => o.z === z && o.kind === kind).length < n; k++) {
+      const x = z.from + r() * (z.to - z.from), y = 30 + r() * (R.h - 60);
+      if (nearRoad(x, y, kind === 'tuft' || kind === 'flor' || kind === 'lupino' ? 22 : 60) || streams.some(f => Math.abs(x - f.x) < 50)) continue;
+      if (ZONE_KINDS[z.kind].sea && y > coastY(x) - (kind === 'tuft' ? 4 : 20)) continue;
+      items.push({ z, kind, x, y, s: .8 + r() * .5, ph: r() * TAU, c: r() });
+    }
+  }
+  Object.assign(R, { built: true, cum, roadY, zoneAt, coastY, items, total: road[road.length - 1][0] });
+  return R;
+}
+// the drawn things of a route
+const FEATURE_KINDS = {
+  arroyo: (g, R, f, t, ice) => {   // a stream across the strip, and the wooden bridge over it
+    const y0 = R.roadY(f.x);
+    g.strokeStyle = ice ? '#cfe1ea' : '#6fb0cc'; g.lineWidth = 34; g.beginPath(); g.moveTo(f.x - 30, 0); g.quadraticCurveTo(f.x + 20, y0, f.x - 20, R.h); g.stroke();
+    if (!ice) { g.strokeStyle = 'rgba(255,255,255,.35)'; g.lineWidth = 1.2; for (let k = 0; k < 6; k++) { const yy = (t * 30 + k * 150) % R.h; g.beginPath(); g.moveTo(f.x - 8, yy); g.lineTo(f.x + 2, yy + 14); g.stroke(); } }
+    blob(g, [[f.x - 44, y0 - 22], [f.x + 44, y0 - 22], [f.x + 44, y0 + 22], [f.x - 44, y0 + 22]], '#9a7048');
+    for (let k = -40; k < 44; k += 8) line(g, [[k + f.x, y0 - 22], [k + f.x, y0 + 22]], 'rgba(60,40,25,.45)', .9, k);
+    for (const sd of [-1, 1]) { line(g, [[f.x - 46, y0 + sd * 24], [f.x + 46, y0 + sd * 24]], '#6a4a30', 2.4, sd + 7); for (let k = -44; k <= 44; k += 22) line(g, [[f.x + k, y0 + sd * 24], [f.x + k, y0 + sd * 24 - 12]], '#6a4a30', 2, k + sd); line(g, [[f.x - 46, y0 + sd * 24 - 12], [f.x + 46, y0 + sd * 24 - 12]], '#7a5536', 1.6, sd + 9); }
+  },
+  cartel: (g, R, f) => { const y = R.roadY(f.x) - 40; line(g, [[f.x, y + 22], [f.x, y]], '#6a4a30', 2.4); blob(g, [[f.x - 40, y - 14], [f.x + 40, y - 14], [f.x + 40, y + 2], [f.x - 40, y + 2]], '#f1e2bf'); g.fillStyle = '#3b2a1c'; g.font = 'italic 10px Georgia, serif'; g.textAlign = 'center'; g.fillText(f.text, f.x, y - 2); },
+  granja: (g, R, f, t, ice, night) => { const y = R.roadY(f.x) + (f.side < 0 ? -110 : 150); drawHouse(g, { h: { x: f.x, y, w: 4.4 * T }, roof: ['#8a5a3c', '#5f7a9a', '#7a6a4a'][Math.floor(f.x) % 3], wall: '#efe4cc', trim: '#6a4a32', x: f.x, y, small: true }, t, night); },
+  faro: (g, R, f) => { const y = R.coastY(f.x) - 20; blob(g, [[f.x - 12, y], [f.x + 12, y], [f.x + 7, y - 90], [f.x - 7, y - 90]], '#f6f2e8'); for (let k = 0; k < 3; k++) blob(g, [[f.x - 11 + k * 1.6, y - 20 - k * 26], [f.x + 11 - k * 1.6, y - 20 - k * 26], [f.x + 10 - k * 1.6, y - 32 - k * 26], [f.x - 10 + k * 1.6, y - 32 - k * 26]], '#c8463a'); blob(g, [[f.x - 9, y - 90], [f.x + 9, y - 90], [f.x + 9, y - 102], [f.x - 9, y - 102]], '#f5d58a'); blob(g, [[f.x - 11, y - 102], [f.x + 11, y - 102], [f.x, y - 114]], '#3a3436'); },
+};
 let trip = null;
 function tripGo(to){
-  const m = PEOPLE.matthew; userInput(); ana.goto = null; auto.intent = null; ana.sit = false; diana.follow = false;
-  trip = { to, t: 0, dur: 14, from: dayT, lines: TRIP_LINES[to].map(([q, t]) => ({ q, t })), shown: 0, next: 1.5 };
+  const m = PEOPLE.matthew, R = buildRoute(ROUTES.bright_river); userInput(); ana.goto = null; auto.intent = null; ana.sit = false; diana.follow = false; close();
+  trip = { to, R, s: to === 'br' ? 0 : R.total, dir: to === 'br' ? 1 : -1, from: dayT, fast: false, stop: 0, done: {}, lines: TRIP_LINES[to].map(([q, t]) => ({ q, t })), shown: 0, next: 4 };
   m.away = null; m.target = null; m.story = null; game.tripWith = 'matthew'; m.where = 'trip';
   logEv(to === 'br' ? 'Ana y Matthew salieron en la carreta hacia la estación de Bright River.' : 'Ana y Matthew emprendieron la vuelta a Avonlea en la carreta.', ['matthew']);
-  $('trip').hidden = false; $('triptitle').textContent = to === 'br' ? '🐴 Camino a Bright River' : '🐴 De vuelta a Avonlea'; $('triplines').innerHTML = '';
-  if (aiReady()) { trip.asking = true; sceneAsk(['matthew'], `Ana y Matthew van en la carreta ${to === 'br' ? 'de Avonlea a la estación de Bright River' : 'de vuelta de Bright River a Avonlea'}: seis horas por caminos de campo, pasando por el Camino Blanco de las Delicias y el Lago de las Aguas Brillantes (como el día en que Ana llegó). Charla tranquila de viaje: Ana habla muchísimo, Matthew escucha y dice poco.`, 'pasar').then(s => { if (trip && s.lines.length) trip.lines = s.lines; }).catch(() => {}).finally(() => { if (trip) trip.asking = false; }); }
+  $('tripbar').hidden = false; tripBar();
+  if (aiReady()) { trip.asking = true; sceneAsk(['matthew'], `Ana y Matthew van en la carreta ${to === 'br' ? 'de Avonlea a la estación de Bright River' : 'de vuelta de Bright River a Avonlea'}: seis horas por caminos de campo, puentes de madera, un campo de flores rosadas y la costa de arena roja de la isla. Charla tranquila de viaje: Ana habla muchísimo, Matthew escucha y dice poco.`, 'pasar').then(s => { if (trip && s.lines.length) trip.lines = s.lines; }).catch(() => {}).finally(() => { if (trip) trip.asking = false; }); }
 }
+const tripBar = () => { $('tripfast').textContent = trip?.fast ? '▶ Al paso' : '⏩ Más rápido'; };
+const ROUTE_SPEED = 120;
 function tripTick(dt){
-  const tr = trip; tr.t += dt; dayT = tr.from + (6 / 24) * Math.min(1, tr.t / tr.dur);
-  const p = Math.min(1, tr.t / tr.dur), stops = tr.to === 'br' ? ['Avonlea', 'el Camino Blanco', 'el Lago de las Aguas Brillantes', 'Carmody', 'Bright River'] : ['Bright River', 'Carmody', 'el Lago de las Aguas Brillantes', 'el Camino Blanco', 'Avonlea'];
-  $('tripcart').style.left = (4 + p * 88) + '%'; $('tripstop').textContent = 'Pasando por ' + stops[Math.min(stops.length - 1, Math.floor(p * stops.length))] + ' · ' + fmtHour(hourNow());
-  if (!tr.asking && tr.shown < tr.lines.length && (tr.next -= dt) <= 0) { const l = tr.lines[tr.shown++]; $('triplines').insertAdjacentHTML('beforeend', `<div><b>${esc(nameOf(l.q))}:</b> ${esc(l.t)}</div>`); tr.next = Math.min(lineDur(l.t) * .8, tr.dur / (tr.lines.length + 1)); }
-  if (tr.t < tr.dur || tr.asking || tr.shown < tr.lines.length) return;
-  trip = null; $('trip').hidden = true;
-  const m = PEOPLE.matthew;
+  const tr = trip, R = tr.R, m = PEOPLE.matthew;
+  // moments: the cart stops and they talk
+  for (const f of R.features) if (f.kind === 'momento' && !tr.done[f.x + (f.vuelta ? 'v' : '')] && !(f.ida && tr.dir < 0) && !(f.vuelta && tr.dir > 0) && (tr.dir > 0 ? tr.s >= f.x : tr.s <= f.x)) {
+    tr.done[f.x + (f.vuelta ? 'v' : '')] = true; tr.stop = f.stop; tr.moment = f.lines.map(([q, t]) => ({ q, t })); tr.mi = 0; tr.mnext = 0;
+  }
+  if (tr.moment) { if ((tr.mnext -= dt) <= 0) { if (tr.mi >= tr.moment.length) { tr.moment = null; tr.stop = 0; } else { const l = tr.moment[tr.mi++]; bubbles = [{ q: l.q, text: l.t, t: 0, dur: lineDur(l.t) }]; sfx.blip(); tr.mnext = lineDur(l.t) + .4; } } }
+  else if (!tr.asking && tr.shown < tr.lines.length && (tr.next -= dt) <= 0) { const l = tr.lines[tr.shown++]; bubbles = [{ q: l.q, text: l.t, t: 0, dur: lineDur(l.t) }]; sfx.blip(); tr.next = lineDur(l.t) + 6 + Math.random() * 6; }
+  for (const b of bubbles) b.t += dt; bubbles = bubbles.filter(b => b.t < b.dur + .35);
+  const moving = !tr.moment;
+  if (moving) tr.s = clamp(tr.s + tr.dir * ROUTE_SPEED * (tr.fast ? 3.5 : 1) * dt, 0, R.total);
+  dayT = tr.from + (R.hours / 24) * (tr.dir > 0 ? tr.s / R.total : 1 - tr.s / R.total);
+  // where they sit: Ana and Matthew on the cart
+  const x = tr.s, y = R.roadY(x); tr.x = x; tr.y = y; tr.moving = moving; tr.walk = moving ? (tr.walk || 0) + dt * 1.6 * (tr.fast ? 2 : 1) : 0;
+  ana.x = x - tr.dir * 34; ana.y = y - 16; ana.dir = tr.dir > 0 ? 1 : 3; ana.sit = true; m.x = x - tr.dir * 56; m.y = y - 18; m.dir = ana.dir; m.sit = true;
+  if (tr.dir > 0 ? tr.s < R.total : tr.s > 0) return;
+  if (tr.moment) return;
+  trip = null; $('tripbar').hidden = true; bubbles = []; ana.sit = false; m.sit = false;
   if (tr.to === 'br') { goIn('br', [KDOOR.x - 40, KIT.h - 40]); m.where = 'br'; m.x = BRS.cart.x - 70; m.y = BRS.cart.y - 6; m.dir = 1; logEv('Ana y Matthew llegaron a la estación de Bright River.', ['matthew']); }
   else { game.scene = 'out'; ana.x = TOWN[0] + 70; ana.y = TOWN[1] + 6; ana.dir = 1; toby.x = ana.x + 26; toby.y = ana.y + 8; cam.x = ana.x; cam.y = ana.y; m.where = 'out'; m.x = ana.x + 30; m.y = ana.y - 4; m.nav = null; game.tripWith = null; logEv('Ana y Matthew volvieron a Avonlea desde Bright River.', ['matthew']); }
   save();
+}
+// drawing a route: the camera follows the cart
+function drawRoute(W, H, dpr){
+  const tr = trip, R = tr.R, t = TT, { night, dusk } = light(), ice = S === 3;
+  const Z = clamp(Math.min(W / (12 * T), H / (9 * T)), 1.1, 3.2) * .85, vw = W / Z, vh = H / Z;
+  const ox = clamp(tr.x - vw / 2 + tr.dir * vw * .12, 0, Math.max(0, R.total - vw)), oy = clamp(tr.y - vh / 2 + (ZONE_KINDS[R.zoneAt(tr.x).kind].sea ? vh * .18 : 0), 0, Math.max(0, R.h - vh));   // (by the sea, the camera looks a little toward it)
+  view.ox = ox; view.oy = oy; view.Z = Z;
+  g.setTransform(dpr, 0, 0, dpr, 0, 0); g.fillStyle = '#2b2219'; g.fillRect(0, 0, W, H);
+  g.setTransform(dpr * Z, 0, 0, dpr * Z, -ox * dpr * Z, -oy * dpr * Z);
+  const inV = (x, m = 120) => x > ox - m && x < ox + vw + m;
+  // the ground of each zone, and the sea along the coast
+  for (const z of R.zones) { if (z.to < ox - 50 || z.from > ox + vw + 50) continue; g.fillStyle = ZONE_KINDS[z.kind].ground[S]; g.fillRect(z.from - 1, 0, z.to - z.from + 2, R.h); }
+  for (const z of R.zones) if (ZONE_KINDS[z.kind].sea && z.to > ox && z.from < ox + vw) {
+    const x0 = Math.max(z.from, ox - 20), x1 = Math.min(z.to, ox + vw + 20), pts = []; for (let x = x0; x <= x1; x += 20) pts.push([x, R.coastY(x)]);
+    g.fillStyle = ice ? '#dde9ef' : '#d9785a'; g.beginPath(); g.moveTo(x0, R.h); pts.forEach(([x, y]) => g.lineTo(x, y - 6)); g.lineTo(x1, R.h); g.fill();   // red sand
+    g.fillStyle = ice ? '#c7dbe6' : '#5c9fc2'; g.beginPath(); g.moveTo(x0, R.h); pts.forEach(([x, y]) => g.lineTo(x, y + 22 + Math.sin(x * .05 + t) * 3)); g.lineTo(x1, R.h); g.fill();   // the sea
+    if (!ice) { g.strokeStyle = 'rgba(255,255,255,.6)'; g.lineWidth = 1.4; for (let k = 0; k < 3; k++) { g.beginPath(); pts.forEach(([x, y], i) => { const yy = y + 30 + k * 26 + Math.sin(x * .03 + t * 1.5 + k) * 3; i ? g.lineTo(x, yy) : g.moveTo(x, yy); }); g.stroke(); } }
+  }
+  // the road
+  g.lineCap = 'round'; g.lineJoin = 'round';
+  for (const [w, c] of [[48, ice ? 'rgba(150,150,160,.3)' : 'rgba(150,120,70,.35)'], [36, ice ? '#d6d3cc' : '#cdae7a'], [22, ice ? '#e3e0d9' : '#dbbf8d']]) { g.strokeStyle = c; g.lineWidth = w; g.beginPath(); R.road.forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); g.stroke(); }
+  for (const f of R.features) if (f.kind === 'arroyo' && inV(f.x)) FEATURE_KINDS.arroyo(g, R, f, t, ice);
+  // the small things on the ground (grass, flowers, the pink lupins), then what stands up, by depth
+  const list = [];
+  for (const o of R.items) {
+    if (!inV(o.x, 60)) continue;
+    if (o.kind === 'tuft') { if (ice && o.c > .3) continue; const b = Math.sin(t * 1.6 + o.x * .02) * 2; g.strokeStyle = ice ? 'rgba(150,140,110,.6)' : o.c < .5 ? 'rgba(70,130,45,.8)' : 'rgba(110,165,64,.8)'; g.lineWidth = 1.1; g.beginPath(); for (const d of [-3, 0, 3]) { g.moveTo(o.x + d, o.y); g.quadraticCurveTo(o.x + d + b * .4, o.y - 5, o.x + d * 1.2 + b, o.y - 9 * o.s); } g.stroke(); }
+    else if (o.kind === 'flor') { if (ice) continue; ell(g, o.x, o.y - 5, 2, 1.6, ['#fffaf2', '#ffd7e8', '#f7e27a', '#c9a7f2'][Math.floor(o.c * 4)]); }
+    else if (o.kind === 'lupino') { if (ice || (S === 2 && o.c > .3)) continue; const b = Math.sin(t * 1.4 + o.ph) * 1.4, col = ['#e88ab0', '#f2a6c4', '#d46a9c', '#c98ad8'][Math.floor(o.c * 4)], hgt = 10 + o.s * 8; line(g, [[o.x, o.y], [o.x + b, o.y - hgt]], '#5e9a3e', 1); for (let k = 0; k < 5; k++) ell(g, o.x + b * (1 - k / 6), o.y - hgt + k * 2.4, 2.2 - k * .2, 1.6, col); }
+    else list.push(o);
+  }
+  for (const f of R.features) if (FEATURE_KINDS[f.kind] && f.kind !== 'arroyo' && inV(f.x, 200)) list.push({ feat: f, y: f.kind === 'granja' ? R.roadY(f.x) + (f.side < 0 ? -110 : 150) : f.kind === 'faro' ? R.coastY(f.x) - 20 : R.roadY(f.x) - 18 });
+  list.push({ cart: true, y: tr.y + 1 });
+  list.sort((a, b) => a.y - b.y);
+  for (const o of list) {
+    if (o.cart) { drawCart(g, { x: tr.x, y: tr.y, dir: tr.dir > 0 ? 1 : 3, walk: tr.walk, moving: tr.moving }, t); drawPerson(g, PEOPLE.matthew, t); drawPerson(g, ana, t); continue; }
+    if (o.feat) { FEATURE_KINDS[o.feat.kind](g, R, o.feat, t, ice, night); continue; }
+    if (o.kind === 'oak' || o.kind === 'pine') drawTree(g, o, t);
+    else if (o.kind === 'bush') drawBush(g, { ...o, berries: 0 }, t);
+    else if (o.kind === 'duna') { ell(g, o.x, o.y, 26 * o.s, 9 * o.s, ice ? '#f2f5f7' : '#e8cf9a', true); for (let k = -2; k <= 2; k++) line(g, [[o.x + k * 6, o.y - 4], [o.x + k * 7 + Math.sin(t + o.ph + k) * 2, o.y - 16 * o.s]], ice ? '#b9c4cc' : '#9aa85a', 1, k); }
+    else if (o.kind === 'roca') ell(g, o.x, o.y, 9 * o.s, 6 * o.s, '#a8796a', true);
+  }
+  // gulls over the coast
+  const cz = R.zones.find(z => ZONE_KINDS[z.kind].sea); if (cz && !ice && tr.x > cz.from - 300 && tr.x < cz.to + 300) for (let k = 0; k < 4; k++) { const gx = tr.x + Math.sin(t * .3 + k * 2) * 300 + k * 60, gy = R.coastY(tr.x) - 60 + Math.cos(t * .5 + k) * 30; line(g, [[gx - 7, gy], [gx, gy + 3 + Math.sin(t * 6 + k) * 2], [gx + 7, gy]], '#4a4a52', 1.2, k); }
+  // the light of the hour, the bubbles, the paper
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  if (dusk > 0) { g.fillStyle = `rgba(255,150,70,${.2 * dusk})`; g.fillRect(0, 0, W, H); }
+  if (night > 0) { g.fillStyle = `rgba(18,26,60,${.6 * night})`; g.fillRect(0, 0, W, H); }
+  for (const b of bubbles) { const p = personOf(b.q); if (p) drawBubble(g, p, b, W, H); }
+  g.globalAlpha = .9; g.fillStyle = g.createPattern(paper, 'repeat'); g.fillRect(0, 0, W, H); g.globalAlpha = 1;
+  const z = R.zoneAt(tr.x), names = { campo: 'campos de Avonlea', bosque: 'el bosque', flores: 'el campo de flores', costa: 'la costa de la isla', pueblo: 'cerca de Bright River' };
+  $('tripstop').textContent = `🐴 ${R.name} · ${names[z.kind] || ''} · ${Math.round(tr.dir > 0 ? tr.s / R.total * 100 : 100 - tr.s / R.total * 100)}%`;
+  const hh = Math.floor(hourNow() % 24), mm = Math.floor((hourNow() % 1) * 60); $('clock').textContent = SICON[S] + ' ' + SEASONS[S] + ' · ' + String(hh).padStart(2, '0') + ':' + String(mm).padStart(2, '0');
 }
 function goIn(room, at){ game.scene = room; ana.lie = false; diana.lie = false; ana.x = at ? at[0] : KDOOR.x; ana.y = at ? at[1] : KIT.h - 14; ana.dir = 0; ana.sit = false; toby.x = ana.x + 26; toby.y = ana.y; if (diana.follow) { diana.where = room; diana.sit = false; diana.x = ana.x - 26; diana.y = ana.y; } cam.x = KIT.w / 2; cam.y = KIT.h / 2; }
 function goOut(){
@@ -3242,6 +3366,7 @@ $('aiq').querySelector('.no').addEventListener('click', () => { const r = aiq.li
 $('aiq').querySelector('.all').addEventListener('click', () => { const r = aiq.list[0]; if (!r) return; aiq.skip.add(r.kind); for (const x of aiq.list.filter(x => x.kind === r.kind)) aiqFail(x.id, 'omitido'); notice('🐞 Desde ahora no se pregunta: ' + r.kind); });
 $('aiq').querySelector('.cp').addEventListener('click', () => { const r = aiq.list[0]; if (!r) return; try { navigator.clipboard.writeText(`INSTRUCCIONES:\n${sysFor(r.schema)}\n\nPEDIDO:\n${r.prompt}\n\nResponde solo con un objeto JSON que siga este esquema:\n${JSON.stringify(r.schema)}`); notice('📋 Copiado: pégalo en otra IA y trae su respuesta'); } catch (e) {} });
 $('aiq').addEventListener('keydown', e => e.stopPropagation());
+$('tripfast').addEventListener('pointerdown', e => { e.stopPropagation(); if (trip) { trip.fast = !trip.fast; tripBar(); } });
 $('tok').addEventListener('pointerdown', e => { e.stopPropagation(); if (!game.talk) aiPanel(true); });
 tokDraw();
 // starting over: everything that happened is forgotten (the AI settings stay)
@@ -3286,7 +3411,7 @@ const cam = { x: ana.x, y: ana.y };
 let last = performance.now(), TT = 0, here = null, taskTick = 0, storyT = 2;
 function update(dt){
   if (sleeping) return;
-  if (trip) { TT += dt; return tripTick(dt); }
+  if (trip) { TT += dt; boil = Math.floor(TT * 6); return tripTick(dt); }
   if (AI.on && provider() === 'manual' && aiq.list.length) return;   // (debugging by hand: the world waits for the answer)
   TT += dt; dayT += dt / 3600; boil = Math.floor(TT * 6);
   const { night } = light();
@@ -3420,6 +3545,7 @@ function update(dt){
 function render(){
   const W = innerWidth, H = innerHeight, dpr = devicePixelRatio || 1;
   if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
+  if (trip) { drawingOut = true; return drawRoute(W, H, dpr); }
   const { night, dusk } = light(), t = TT, inside = game.scene !== 'out';
   drawingOut = !inside;
   if (groundSeason !== S) paintGround(S);
@@ -3620,7 +3746,7 @@ function drawMap(){
   $('maptitle').textContent = 'Avonlea · ' + SEASONS[S] + ', día ' + (Math.floor(dayT) % 2 + 1) + ' · ' + SICON[S];
 }
 function loop(now){ const dt = clamp((now - last) / 1000, 0, .05); last = now; update(dt); render(); requestAnimationFrame(loop); }
-window.__avonlea = { tripGo, trip: () => trip, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+window.__avonlea = { ROUTES, buildRoute, tripGo, trip: () => trip, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
 requestAnimationFrame(loop);
 })();
 </script>
