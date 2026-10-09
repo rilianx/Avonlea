@@ -1534,7 +1534,7 @@ for (const [k, d] of Object.entries(ANIMALS)) { const A = d.home && AREAS[d.home
 })();
 for (const k of Object.keys(CH)) game.fond[k] = 0;
 const toby = { mode: 'near', goal: null, until: 0, x: ana.x + 30, y: ana.y + 20, dir: 1, walk: 0, moving: false, sitT: 0, sniff: 0, petted: 0 };
-const SPEED = 84, WALK = 60, RUN = 100, STROLL = 34;   // (SPEED is the reference the step animation is scaled by)
+const SPEED = 84, WALK = 50, RUN = 90, STROLL = 34, MAPWALK = 64;   // (SPEED is the reference the step animation is scaled by)
 function blockedOut(x, y){
   return x < 16 || y < 40 || x > WW - 16 || y > WH - 8 || inLake(x, y, 6) || inBrook(x, y, 2) || inSea(x, y, 4) || inHouses(x, y, 2) || nearFence(x, y) ||
     treesNear(x, y).some(t => Math.hypot(t.x - x, (t.y - y) * 1.6) < 11 * t.s) || dist(x, y, PUMP.x, PUMP.y) < 9;
@@ -1563,7 +1563,8 @@ function obsBar(){
   const ag = AGENTS[OBS], b = wmBody(OBS), sc = obsScene();
   const doing = ag?.distract ? '💭 ' + ag.distract.text : ag?.hold ? 'esperando aquí' : ag?.followOf ? 'acompaña a ' + wmName(ag.followOf) : ag?.task?.st === 'todo' ? stepText(ag.task.a) : (pw => pw ? 'espera a ' + wmName(pw.to) : activeGoals(ag || {}).length ? 'pensando qué hacer' : 'en lo suyo')(ag && activeGoals(ag).flatMap(g => g.pending || []).find(q => q.h.st === 'run'));
   const where = !sc ? (b.where === 'away' ? 'fuera de Avonlea' : 'dentro de su casa (no se ve)') : sc === 'out' ? '' : placeName(sc);
-  const txt = '👁 ' + wmName(OBS) + ' · ' + doing + (where ? ' · ' + where : '');
+  const pt = ag && !ag.distract && ag.task ? paceText(ag) : '';
+  const txt = '👁 ' + wmName(OBS) + ' · ' + doing + (pt ? ' (' + pt + ')' : '') + (where ? ' · ' + where : '');
   if (el.dataset.t !== txt) { el.dataset.t = txt; el.firstChild.textContent = txt; }
   el.hidden = false;
 }
@@ -3752,7 +3753,7 @@ function update(dt){
   // how fast: a walk (Shift to hurry), or a stroll when she is out on her own: every so often she stops to look about
   if (dest && !ana.goto?.dest) dest = null;
   if (!$('wmp').hidden && (wmDrawT -= dt) < 0) { wmDrawT = .5; wmRunDraw(); }
-  ana.pace = ana.goto?.stroll ? STROLL : ana.goto?.dest ? 80 : (keys.has('ShiftLeft') || keys.has('ShiftRight')) ? RUN : WALK;
+  ana.pace = ana.goto?.stroll ? STROLL : ana.goto?.wm && AGENTS.ana ? wmPace(AGENTS.ana) : ana.goto?.dest ? MAPWALK : (keys.has('ShiftLeft') || keys.has('ShiftRight')) ? RUN : WALK;
   if (ana.goto?.stroll) { const sv = ana.savor = ana.savor || { next: TT + 5 + Math.random() * 6, until: 0 }; if (!ana.savoring && TT > sv.next && TT >= sv.until) { sv.until = TT + 2.5 + Math.random() * 3.5; sv.next = sv.until + 6 + Math.random() * 8; } }
   const l = Math.hypot(mx, my); if (l > 1) { mx /= l; my /= l; }
   ana.moving = l > .05;
@@ -4837,6 +4838,7 @@ function pickTask(ag){
   walk(start, me, new Set(), [], 0);
   return best;
 }
+// (a task may take longer the farther it is and the slower one walks: its budget of time, set when it is chosen)
 const SELF_MOVING = ['dar', 'vender', 'comprar', 'cambiar', 'conversar', 'disculparse', 'pedir', 'interceder', 'guiar'];
 // the player gives Ana something else to do (walks her, taps somewhere, talks): her plan waits; after a while with
 // nothing asked of her she takes it up again (planned anew from where she is and what she has now)
@@ -4871,7 +4873,7 @@ function agentTick(dt){
       g.waited = true; g.waitUntil = TT + (pendingOn(g) ? 3 : g.partial ? 2 : 20); if (pendingOn(g)) g.tries--; agentLog(ag, '⏳ espera' + (pendingOn(g) ? ' lo que pidió' : '') + ': ' + g.label);
     }
     if (!activeGoals(ag).length) { agentIdle(ag); continue; }
-    if (!ag.task || ag.task.st !== 'todo') { ag.task = pickTask(ag); if (ag.task) { ag.task.t = 0; ag.task.step = { a: ag.task.a, t: 0 }; agentLog(ag, '→ ' + stepText(ag.task.a) + (activeGoals(ag).length > 1 ? ' (' + ag.task.g.label + ')' : '')); } }
+    if (!ag.task || ag.task.st !== 'todo') { ag.task = pickTask(ag); if (ag.task) { ag.task.t = 0; ag.task.step = { a: ag.task.a, t: 0 }; const q = taskPoint(ag, ag.task).q, b = wmBody(ag.who); ag.task.budget = 90 + (q && b ? 2 * dist(b.x, b.y, q[0], q[1]) / wmPace(ag) : 60); agentLog(ag, '→ ' + stepText(ag.task.a) + (activeGoals(ag).length > 1 ? ' (' + ag.task.g.label + ')' : '')); } }
     const t = ag.task;
     if (!t) { if (ag.st !== 'wait') { ag.st = 'wait'; wmRelease(ag.who); } continue; }
     if (distractCheck(ag)) continue;
@@ -4881,7 +4883,7 @@ function agentTick(dt){
     else r = t.a.v === 'ir' ? 'ok' : wmExec(ag, t.a, t.step, dt);
     if (r === 'fail' && pendingOn(t.g) && /no lo tiene|faltan|no tiene|no viene|no la lleva/.test(t.step.why || '')) { t.blockedUntil = TT + 3; t.step = { a: t.a, t: 0 }; t.there = false; ag.task = null; agentLog(ag, '⏳ falta lo que pidió: ' + stepText(t.a)); continue; }   // (it is on its way: meanwhile, something else)
     if (r === 'ok') { t.st = 'done'; ag.task = null; agentCheck(ag); }
-    else if (r === 'fail' || t.step.t > 150) {
+    else if (r === 'fail' || t.step.t > (t.budget || 150)) {
       agentLog(ag, '✘ falló: ' + stepText(t.a) + (t.step.why ? ' (' + t.step.why + ')' : '')); ag.task = null; t.st = 'fail';
       if (++t.g.tries > 3) goalEnd(ag, t.g, 'fail', 'falló varias veces'); else goalPlan(ag, t.g);
     }
@@ -4901,6 +4903,15 @@ const FOCO = {   // [enfoque, social, what catches the eye]
 };
 const focoOf = k => { const f = FOCO[k] || (FOLKBY[k]?.kid ? [.5, .7, ['animales', 'lago']] : [.7, .5, []]); return { enfoque: f[0], social: f[1], atrae: f[2] }; };
 let WM_DISTRACT = true;
+// how fast each one walks (an old farmer is not a girl of eleven), and how the errand changes it: with a deadline they
+// hurry (Ana runs to school), something asked of them goes a little brisker, and the dreamy ones dawdle on their own errands
+const PACE = { ana: 46, diana: 44, gilbert: 46, matthew: 36, marilla: 38, barry: 38, lynde: 40, harrison: 36, shearer: 40, lawson: 38, sraallan: 40, peg: 38 };
+function wmPace(ag){
+  const k = ag.who, base = PACE[k] || (FOLKBY[k]?.kid ? 46 : CH[k]?.speed?.walk || 38), u = urgency(ag);
+  const m = u > .9 ? 1.5 : u > .4 ? 1.1 : focoOf(k).enfoque < .5 ? .8 : 1;
+  return base * m * (Object.values(ANIM).some(a => a.state === 'led' && (a.ledBy || 'ana') === k) ? .85 : 1);
+}
+const paceText = ag => { const u = urgency(ag); return u > .9 ? 'con prisa' : u < .4 && focoOf(ag.who).enfoque < .5 ? 'sin apuro' : ''; };
 const qOf = k => k === 'ana' ? 'ana' : PEOPLE[k] ? k : 'f:' + k;
 const isKid = k => k === 'ana' || k === 'diana' || !!FOLKBY[k]?.kid;
 const CHAT_HOLD = {};   // (those of the routines kept a moment by a chat: who → until)
@@ -5065,9 +5076,9 @@ function wmMove(who, key, dt){
 function wmWalk(who, x, y, scene, dt){
   const b = wmBody(who);
   if (who === 'ana') { if (TT - (ana.wmArr || -9) < .4) return true; if (!ana.goto || !ana.goto.wm || dist(ana.goto.x, ana.goto.y, x, y) > 30) ana.goto = { x, y, scene, wm: true }; return false; }
-  const sp = (CH[who]?.speed?.walk || 40), visible = viewScene() === scene && (scene !== 'out' || seen(b.x, b.y, 300));
+  const sp = AGENTS[who] ? wmPace(AGENTS[who]) : (CH[who]?.speed?.walk || 40), visible = viewScene() === scene && (scene !== 'out' || seen(b.x, b.y, 300));
   if (visible) return walkPath(b, x, y, sp, dt, scene);
-  const d = dist(b.x, b.y, x, y), v = Math.min(d, sp * 1.5 * dt); b.x += (x - b.x) / (d || 1) * v; b.y += (y - b.y) / (d || 1) * v; b.moving = d > 2; if (Math.abs(x - b.x) > 1) b.dir = x > b.x ? 1 : 3; b.walk = (b.walk + dt * 1.8) % 1;
+  const d = dist(b.x, b.y, x, y), v = Math.min(d, sp * dt); b.x += (x - b.x) / (d || 1) * v; b.y += (y - b.y) / (d || 1) * v; b.moving = d > 2; if (Math.abs(x - b.x) > 1) b.dir = x > b.x ? 1 : 3; b.walk = (b.walk + dt * 1.8) % 1;
   return d < 2;
 }
 function wmStop(who){ const b = wmBody(who); if (who === 'ana') { if (ana.goto?.wm) ana.goto = null; } else b.moving = false; }
