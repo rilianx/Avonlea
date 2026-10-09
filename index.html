@@ -147,7 +147,7 @@ html,body{margin:0;height:100%;background:#2b3a26;overflow:hidden;touch-action:n
   <div id="aitok"></div>
   <pre id="aiout" hidden></pre>
 </div></div>
-<div id="map" hidden><div class="paper sheet"><div class="mt" id="maptitle"></div><canvas id="mapcv"></canvas><div class="mb"><button id="mapnext">Siguiente estación (prueba)</button><button id="mapclose">Cerrar</button></div></div></div>
+<div id="map" hidden><div class="paper sheet"><div class="mt" id="maptitle"></div><canvas id="mapcv"></canvas><div class="mb"><button id="mapzin" title="Acercar">＋</button><button id="mapzout" title="Alejar">－</button><button id="mapnext">Siguiente estación (prueba)</button><button id="mapclose">Cerrar</button></div></div></div>
 <script>
 /* Un día en Avonlea: a first look at a calm game inspired by "Anne of Green Gables" (L. M. Montgomery, 1908). No
    missions: Ana lives at Green Gables with Matthew and Marilla, and spends the days as she likes: watering the
@@ -590,17 +590,34 @@ function drawLying(c, p, t){
   if (S !== 3 && drawingOut) { c.strokeStyle = S === 2 ? 'rgba(150,120,50,.7)' : 'rgba(70,115,45,.75)'; c.lineWidth = .9; c.beginPath(); for (let k = 0; k < 14; k++) { const gx = -36 + k * 5.2 + (k % 3), gy = 9 + (k % 2) * 1.5; c.moveTo(gx, gy); c.lineTo(gx + 1 + (k % 2), gy - 3.5 - (k % 3)); } c.stroke(); }
   c.restore();
 }
+// eight ways of facing (0 up, 1 up-right, 2 right … 7 up-left): taken from the way one is going; standing, from the four
+// that the rest of the game sets (dir: 0 up, 1 right, 2 down, 3 left). The diagonals are three-quarter views: the face
+// (or the back of the head) turned a little, drawn facing right and mirrored for the left.
+function facing8(p){
+  if (p._fx != null) {
+    const dx = p.x - p._fx, dy = p.y - p._fy, m = Math.hypot(dx, dy);
+    if (m > .25 && m < 30 && p.moving) {
+      const a = Math.atan2(dy, dx), q = ((Math.round(a / (Math.PI / 4)) + 2) % 8 + 8) % 8, cur = p.dir8 ?? q;
+      const off = Math.abs(((a - (cur - 2) * Math.PI / 4) % TAU + TAU + Math.PI) % TAU - Math.PI);   // (a little stickiness: no flicker between two)
+      if (off > Math.PI / 8 + .12) p.dir8 = q; else p.dir8 = cur;
+    } else if (p.dir !== p._fd) p.dir8 = [0, 2, 4, 6][p.dir] ?? 4;
+  } else p.dir8 = [0, 2, 4, 6][p.dir] ?? 4;
+  p._fx = p.x; p._fy = p.y; p._fd = p.dir;
+  if (!p.moving && p.dir8 % 2 === 0 && p.dir8 !== [0, 2, 4, 6][p.dir]) p.dir8 = [0, 2, 4, 6][p.dir] ?? 4;   // (turned on purpose to face someone)
+  return p.dir8;
+}
 function drawPerson(c, p, t){
   if (p.lie) { drawLying(c, p, t); return; }
-  const L = LOOKS[p.look], x = p.x, y = p.y, w = Math.sin(p.walk * TAU), sitting = p.sit, d = p.dir, side = d === 1 || d === 3;
+  const q8 = facing8(p), flip = q8 >= 5, side = q8 === 2 || q8 === 6, tq = q8 % 2, d = side ? (flip ? 3 : 1) : (q8 <= 1 || q8 === 7) ? 0 : 2;
+  const L = LOOKS[p.look], x = p.x, y = p.y, w = Math.sin(p.walk * TAU), sitting = p.sit;
   const bob = p.moving ? Math.abs(Math.sin(p.walk * TAU)) * 1.6 : Math.sin(t * 2 + x) * .35, wind = Math.sin(t * 1.3) * .6 + Math.sin(t * 3.1) * .3;
   ell(c, x, y, 11 * L.h, 4, 'rgba(30,40,20,.26)');
-  c.save(); c.translate(x, y - bob + (sitting ? 9 : 0) + (p.crouch ? 5 : 0)); c.scale(L.h * (d === 3 ? -1 : 1), L.h);
+  c.save(); c.translate(x, y - bob + (sitting ? 9 : 0) + (p.crouch ? 5 : 0)); c.scale(L.h * (flip ? -1 : 1), L.h);
   // legs and shoes
   if (!sitting) {
     const l = p.moving ? w * 3 : 0, shoe = '#5b3a28';
     if (side) { c.fillStyle = L.coat ? L.dressD : L.skin; c.fillRect(-2 - l, -10, 2.4, 7); c.fillRect(l, -10, 2.4, 7); ell(c, -1 - l, -3, 3.2, 2.2, shoe, true); ell(c, 1 + l, -3, 3.2, 2.2, shoe, true); }
-    else { c.fillStyle = L.coat ? L.dressD : L.skin; c.fillRect(-4.2, -10, 2.2, 7); c.fillRect(2, -10, 2.2, 7); ell(c, -3.2, -3 + (p.moving ? w * 1.4 : 0), 3, 2.4, shoe, true); ell(c, 3.2, -3 - (p.moving ? w * 1.4 : 0), 3, 2.4, shoe, true); }
+    else { const o = tq * 1.2, f = tq && d === 2 ? 1.2 : 0; c.fillStyle = L.coat ? L.dressD : L.skin; c.fillRect(-4.2 + o, -10, 2.2, 7); c.fillRect(2 + o * .5, -10, 2.2, 7); ell(c, -3.2 + o + f, -3 + (p.moving ? w * 1.4 : 0), 3, 2.4, shoe, true); ell(c, 3.2 + o * .5 + f, -3 - (p.moving ? w * 1.4 : 0), 3, 2.4, shoe, true); }
   } else { ell(c, -6, -3, 3.2, 2.2, '#5b3a28', true); ell(c, 6, -3, 3.2, 2.2, '#5b3a28', true); }
   // the dress (or Matthew's coat and trousers)
   const sw = p.moving ? w * 1.4 : wind * .35, wide = sitting ? 4 : 0;
@@ -616,11 +633,12 @@ function drawPerson(c, p, t){
   if (p.pet) { arm(4, -21, 10, -12 + Math.sin(t * 8) * 1.2); arm(-4, -21, -6, -13); }
   else if (side) arm(1, -21, 1 + a, -13);
   else if (sitting) { arm(-5, -21, -3, -12); arm(5, -21, 3, -12); }
+  else if (tq) { arm(-4.6, -21, -6 + a * .5, -14); arm(5.6, -21, 7.4 - a * .5, -13.5); }
   else { arm(-5.5, -21, -7.5, -14 + a * .4); arm(5.5, -21, 7.5, -14 - a * .4); }
   if (p.carry === 'can') { const hx = side ? 2 + a : 8, hy = -12; blob(c, [[hx - 1, hy], [hx + 7, hy], [hx + 6, hy + 7], [hx, hy + 7]], '#9db3bf'); line(c, [[hx + 7, hy + 2], [hx + 11, hy - 2]], 'rgba(70,90,100,.9)', 1.4); }
   // collar, brooch
   if (d !== 0) blob(c, [[-5, -24.5], [5, -24.5], [3, -21.5], [0, -23], [-3, -21.5]], L.collar || L.dressD, false);
-  if (L.brooch && d === 2) ell(c, 0, -22, 1.3, 1.3, '#d9a441', true);
+  if (L.brooch && d === 2) ell(c, tq * 1.6, -22, 1.3, 1.3, '#d9a441', true);
   // a knitted scarf out of doors in winter, its end in the wind
   if (S === 3 && drawingOut) {
     blob(c, [[-5.8, -26], [5.8, -26], [5.4, -21.6], [-5.4, -21.6]], L.scarf);
@@ -634,14 +652,16 @@ function drawPerson(c, p, t){
     c.strokeStyle = L.hairD; c.lineWidth = .9; for (let s = .3; s < 1; s += .23) { const sx = lerp(bx, ex, s), sy = lerp(by, ey, s); c.beginPath(); c.moveTo(sx - 1.6, sy - 1); c.lineTo(sx + 1.6, sy + .6); c.stroke(); }
     ell(c, ex, ey + 1, 2, 1.3, '#d9433b');
   };
-  if (L.style === 'braids' && d === 2) { braid(-6, hy + 4, 12, 1.4); braid(6, hy + 4, 12, 1.4); }
+  if (L.style === 'braids' && d === 2) { braid(-6 + tq * 1.4, hy + 4, 12, 1.4); braid(6 + tq * 1.4, hy + 4, 12, 1.4); }
   if (L.style === 'curls' && d !== 0) for (const sx of [-7.5, 7.5]) for (let k = 0; k < 3; k++) ell(c, sx + (sx > 0 ? -k * .4 : k * .4), hy + 3 + k * 3.4, 2.6, 2.2, L.hair, true);
   ell(c, 0, hy, 8.2, 8.6, L.skin, SKIN_LINE);
   if (d === 0) {
-    ell(c, 0, hy - 1, 8.6, 8.6, L.hair, true);
-    if (L.style === 'braids') { braid(-4, hy + 3, 13, 1.8); braid(4, hy + 3, 13, 1.8); }
-    if (L.style === 'bun') ell(c, 0, hy - 3, 4, 3.4, L.hairD, true);
-    if (L.style === 'curls') for (let k = -2; k <= 2; k++) ell(c, k * 3, hy + 6, 2.6, 2.6, L.hair, true);
+    const bo = -tq * 2.8;   // (three-quarter from behind: the hair a little to the far side)
+    if (tq) { ell(c, 7.4, hy + 1.5, 1.5, 2, L.skin, true); ell(c, 6, hy + 4.2, 1.6, 1.1, 'rgba(240,120,110,.35)'); }
+    ell(c, bo, hy - 1, 8.6 - tq * .6, 8.6, L.hair, true);
+    if (L.style === 'braids') { braid(-4 + bo, hy + 3, 13, 1.8); braid(4 + bo, hy + 3, 13, 1.8); }
+    if (L.style === 'bun') ell(c, bo, hy - 3, 4, 3.4, L.hairD, true);
+    if (L.style === 'curls') for (let k = -2; k <= 2; k++) ell(c, k * 3 + bo, hy + 6, 2.6, 2.6, L.hair, true);
   } else if (side) {
     blob(c, [[-8.5, hy - 1], [-6, hy - 8], [2, hy - 9.2], [7.5, hy - 4], [5, hy - 5], [-1, hy - 4], [-3, hy + 3], [-8, hy + 4]], L.hair);
     if (L.style === 'braids') braid(-6, hy + 3, 13, -1.8);
@@ -653,23 +673,29 @@ function drawPerson(c, p, t){
     if (L.beard) blob(c, [[1, hy + 2], [8, hy + 3], [6, hy + 9], [0, hy + 8]], L.hair);
   } else {
     // front: hair (and fringe), eyes that blink, cheeks, freckles, a smile
-    if (L.style === 'bun') blob(c, [[-8.6, hy + 1], [-7.5, hy - 6], [0, hy - 9.6], [7.5, hy - 6], [8.6, hy + 1], [5, hy - 4], [0, hy - 6.5], [-5, hy - 4]], L.hair);
-    else if (L.style === 'old') blob(c, [[-8.8, hy + 4], [-8.4, hy - 4], [-5, hy - 8.5], [5, hy - 8.5], [8.4, hy - 4], [8.8, hy + 4], [6.5, hy - 2], [-6.5, hy - 2]], L.hair);
-    else blob(c, [[-8.6, hy + 2], [-8, hy - 6], [-3, hy - 9.5], [3, hy - 9.5], [8, hy - 6], [8.6, hy + 2], [6, hy - 3], [2, hy - 4.5], [-1, hy - 3], [-5, hy - 4.5]], L.hair);
+    // (three-quarter: everything on the face moves toward the side it looks to; the far eye and cheek narrower,
+    // a little hair on the far side, and the nose shows)
+    const fo = tq * 2.2, sh = pts => pts.map(([px, py]) => [px + fo * (1 - Math.abs(px) / 12), py]);
+    if (tq) blob(c, [[-8.6, hy + 3], [-8.6, hy - 4], [-6, hy - 6], [-5.2, hy + 4]], L.hair);
+    if (L.style === 'bun') blob(c, sh([[-8.6, hy + 1], [-7.5, hy - 6], [0, hy - 9.6], [7.5, hy - 6], [8.6, hy + 1], [5, hy - 4], [0, hy - 6.5], [-5, hy - 4]]), L.hair);
+    else if (L.style === 'old') blob(c, sh([[-8.8, hy + 4], [-8.4, hy - 4], [-5, hy - 8.5], [5, hy - 8.5], [8.4, hy - 4], [8.8, hy + 4], [6.5, hy - 2], [-6.5, hy - 2]]), L.hair);
+    else blob(c, sh([[-8.6, hy + 2], [-8, hy - 6], [-3, hy - 9.5], [3, hy - 9.5], [8, hy - 6], [8.6, hy + 2], [6, hy - 3], [2, hy - 4.5], [-1, hy - 3], [-5, hy - 4.5]]), L.hair);
     const open = p.blink <= 0, lk = p.lookAround || 0;
     for (const ex of [-3.2, 3.2]) {
-      if (open) { ell(c, ex + lk, hy + 1.2, 1.3, 1.8, '#3a2418'); ell(c, ex + lk + .4, hy + .4, .45, .55, '#fff'); }
-      else line(c, [[ex - 1.2, hy + 1.5], [ex, hy + 2.3], [ex + 1.2, hy + 1.5]], '#3a2418', .9);
+      const far = tq && ex < 0, exx = ex + fo + (far ? .6 : 0), wf = far ? .75 : 1;
+      if (open) { ell(c, exx + lk, hy + 1.2, 1.3 * wf, 1.8, '#3a2418'); ell(c, exx + lk + .4, hy + .4, .45 * wf, .55, '#fff'); }
+      else line(c, [[exx - 1.2 * wf, hy + 1.5], [exx, hy + 2.3], [exx + 1.2 * wf, hy + 1.5]], '#3a2418', .9);
     }
-    ell(c, -5, hy + 4, 1.9, 1.1, 'rgba(240,120,110,.38)'); ell(c, 5, hy + 4, 1.9, 1.1, 'rgba(240,120,110,.38)');
-    if (L.freckles) for (const [fx, fy] of [[-4.5, hy + 3], [-3.2, hy + 3.6], [-5.6, hy + 3.5], [4.5, hy + 3], [3.2, hy + 3.6], [5.6, hy + 3.5]]) ell(c, fx, fy, .35, .35, 'rgba(150,80,50,.55)');
-    if (L.beard) blob(c, [[-6, hy + 3], [6, hy + 3], [4, hy + 10], [0, hy + 11.5], [-4, hy + 10]], L.hair);
-    else line(c, [[-1.4, hy + 5.2], [0, hy + 6.1], [1.4, hy + 5.2]], '#b5604c', .8);
+    ell(c, -5 + fo * .8, hy + 4, 1.9 * (tq ? .6 : 1), 1.1, 'rgba(240,120,110,.38)'); ell(c, 5 + fo * .7, hy + 4, 1.9, 1.1, 'rgba(240,120,110,.38)');
+    if (tq) ell(c, 3.4 + fo, hy + 3.2, .9, .6, 'rgba(200,130,100,.85)');
+    if (L.freckles) for (const [fx, fy] of [[-4.5, hy + 3], [-3.2, hy + 3.6], [-5.6, hy + 3.5], [4.5, hy + 3], [3.2, hy + 3.6], [5.6, hy + 3.5]]) if (!(tq && fx < -5)) ell(c, fx + fo * .8, fy, .35, .35, 'rgba(150,80,50,.55)');
+    if (L.beard) blob(c, sh([[-6, hy + 3], [6, hy + 3], [4, hy + 10], [0, hy + 11.5], [-4, hy + 10]]), L.hair);
+    else line(c, [[-1.4 + fo, hy + 5.2], [fo, hy + 6.1], [1.4 + fo, hy + 5.2]], '#b5604c', .8);
   }
-  if (L.bow && d !== 0) { ell(c, -5, hy - 7, 2.6, 1.8, L.bow, true); ell(c, -1.6, hy - 7.6, 2.6, 1.8, L.bow, true); }
+  if (L.bow && d !== 0) { const bo = tq && d === 2 ? 1.6 : 0; ell(c, -5 + bo, hy - 7, 2.6, 1.8, L.bow, true); ell(c, -1.6 + bo, hy - 7.6, 2.6, 1.8, L.bow, true); }
   // hats: Ana's straw hat with its ribbon in the breeze, Matthew's dark one
   if (L.hat) {
-    const by = hy - 6.5, rt = side ? -7 : 6;
+    const by = hy - 6.5, rt = side || tq ? -7 : 6;   // (the ribbon flies behind)
     ell(c, 0, by + 1, 13, 4.2, '#ecd08a', true); ell(c, 0, by - 2, 7.4, 5, '#ecd08a', true);
     if (p.askew) { c.translate(0, by); c.rotate(-.32); c.translate(-3, -by); }
     c.fillStyle = '#d9433b'; c.fillRect(-7.2, by - 1.4, 14.4, 2.4);
@@ -3620,7 +3646,35 @@ let noteTimer = 0;
 function notice(text){ const h = $('hint'); h.textContent = text; h.style.transition = 'none'; h.style.opacity = 1; void h.offsetWidth; h.style.transition = ''; clearTimeout(noteTimer); noteTimer = setTimeout(() => { h.style.opacity = 0; }, 4500); }
 $('mapbtn').addEventListener('pointerdown', e => { e.stopPropagation(); audio(); if (!game.talk) toggleMap(); });
 $('mapclose').addEventListener('click', () => toggleMap(false));
-$('mapcv').addEventListener('click', e => { const r = e.currentTarget.getBoundingClientRect(); goDest((e.clientX - r.left) / r.width * WW, (e.clientY - r.top) / r.height * WH); });
+// the paper map: the wheel (or two fingers, or ＋/－) brings it closer around the pointer; dragging moves it; a tap (not a drag) sends Ana there
+const MV = { z: 1, ox: 0, oy: 0, moved: 0 }, mapPtr = new Map(); let mapDrag = null;
+function mapClamp(){ MV.z = clamp(MV.z, 1, 6); MV.ox = clamp(MV.ox, 0, WW - WW / MV.z); MV.oy = clamp(MV.oy, 0, WH - WH / MV.z); }
+const mapWorld = (cx, cy) => { const r = $('mapcv').getBoundingClientRect(); return [MV.ox + (cx - r.left) / r.width * WW / MV.z, MV.oy + (cy - r.top) / r.height * WH / MV.z]; };
+function mapZoom(f, cx, cy){
+  const r = $('mapcv').getBoundingClientRect(); if (cx == null) { cx = r.left + r.width / 2; cy = r.top + r.height / 2; }
+  const [wx, wy] = mapWorld(cx, cy); MV.z = clamp(MV.z * f, 1, 6);
+  MV.ox = wx - (cx - r.left) / r.width * WW / MV.z; MV.oy = wy - (cy - r.top) / r.height * WH / MV.z; mapClamp(); MV.moved = performance.now();
+}
+$('mapcv').addEventListener('wheel', e => { e.preventDefault(); mapZoom(Math.exp(-e.deltaY * .0015), e.clientX, e.clientY); }, { passive: false });
+$('mapcv').addEventListener('pointerdown', e => { e.currentTarget.setPointerCapture?.(e.pointerId); mapPtr.set(e.pointerId, [e.clientX, e.clientY]); mapDrag = { x: e.clientX, y: e.clientY, ox: MV.ox, oy: MV.oy, moved: false, pinch: mapPtr.size === 2 ? null : undefined }; });
+$('mapcv').addEventListener('pointermove', e => {
+  if (!mapDrag || !mapPtr.has(e.pointerId)) return; const prev = mapPtr.get(e.pointerId); mapPtr.set(e.pointerId, [e.clientX, e.clientY]);
+  if (mapPtr.size === 2) {   // (two fingers: closer or farther, around the middle)
+    const [a, b] = [...mapPtr.values()], [pa, pb] = [...mapPtr.entries()].map(([id, q]) => id === e.pointerId ? prev : q);
+    const d0 = Math.hypot(pa[0] - pb[0], pa[1] - pb[1]), d1 = Math.hypot(a[0] - b[0], a[1] - b[1]); if (d0 > 10) mapZoom(d1 / d0, (a[0] + b[0]) / 2, (a[1] + b[1]) / 2);
+    mapDrag.moved = true; return;
+  }
+  const r = $('mapcv').getBoundingClientRect(), dx = e.clientX - mapDrag.x, dy = e.clientY - mapDrag.y;
+  if (Math.hypot(dx, dy) > 6) mapDrag.moved = true;
+  if (mapDrag.moved) { MV.ox = mapDrag.ox - dx / r.width * WW / MV.z; MV.oy = mapDrag.oy - dy / r.height * WH / MV.z; mapClamp(); MV.moved = performance.now(); }
+});
+const mapUp = e => { mapPtr.delete(e.pointerId); if (mapPtr.size === 1 && mapDrag) { const [q] = mapPtr.values(); mapDrag.x = q[0]; mapDrag.y = q[1]; mapDrag.ox = MV.ox; mapDrag.oy = MV.oy; } };
+$('mapcv').addEventListener('pointerup', mapUp); $('mapcv').addEventListener('pointercancel', mapUp);
+$('mapcv').addEventListener('click', e => { if (mapDrag?.moved) { mapDrag = null; return; } mapDrag = null; goDest(...mapWorld(e.clientX, e.clientY)); });
+$('mapzin').addEventListener('click', () => mapZoom(1.5)); $('mapzout').addEventListener('click', () => mapZoom(1 / 1.5));
+// the view of the fields: the wheel brings it closer or farther (out of doors)
+let viewZoom = 1;
+cv.addEventListener('wheel', e => { e.preventDefault(); if (game.scene === 'out' || viewScene() === 'out') viewZoom = clamp(viewZoom * Math.exp(-e.deltaY * .0012), .55, 2.2); }, { passive: false });
 // the AI settings: on/off, the key (kept in this browser only), the model; and a look at what they remember
 function aiPanel(on){
   $('ai').hidden = !on; if (!on) return;
@@ -3866,7 +3920,7 @@ function renderView(){
   if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
   const { night, dusk } = light(), t = TT, inside = game.scene !== 'out';
   drawingOut = !inside;
-  const Z = inside ? Math.min(W / KIT.w, H / KIT.h) * .94 : clamp(Math.min(W / ((H > W ? 8 : 12) * T), H / (9 * T)), 1.1, 3.2) * (cam.zoom ?? 1);
+  const Z = inside ? Math.min(W / KIT.w, H / KIT.h) * .94 : clamp(Math.min(W / ((H > W ? 8 : 12) * T), H / (9 * T)), 1.1, 3.2) * (cam.zoom ?? 1) * viewZoom;
   const vw = W / Z, vh = H / Z;
   const ox = inside ? (KIT.w - vw) / 2 : clamp(cam.x - vw / 2, 0, WW - vw), oy = inside ? (KIT.h - vh) / 2 : clamp(cam.y - vh / 2, 0, WH - vh);
   view.ox = ox; view.oy = oy; view.Z = Z; view.inside = inside;
@@ -5320,15 +5374,16 @@ function toggleMap(on = !game.map){
   game.map = on; $('map').hidden = !on;
   if (!on) return;
   close();
+  if (MV.z > 1 && game.scene === 'out') { MV.ox = ana.x - WW / MV.z / 2; MV.oy = ana.y - WH / MV.z / 2; mapClamp(); }   // (zoomed in: where Ana is)
   const mc = $('mapcv'), dpr = devicePixelRatio || 1, aw = innerWidth - 44, ah = innerHeight - 130, k = Math.min(aw / WW, ah / WH);
   mc.style.width = Math.round(WW * k) + 'px'; mc.style.height = Math.round(WH * k) + 'px';
   mc.width = Math.round(WW * k * dpr); mc.height = Math.round(WH * k * dpr); mapBase = null;
 }
-function paintMapBase(w, h){
+function paintMapBase(w, h, z = 1, ox = 0, oy = 0){
   const cv2 = document.createElement('canvas'); cv2.width = w; cv2.height = h;
   const c = cv2.getContext('2d'), k = w / WW, r = rng(31);
   c.fillStyle = '#f1e2bf'; c.fillRect(0, 0, w, h);
-  c.setTransform(k, 0, 0, k, 0, 0);
+  c.setTransform(k * z, 0, 0, k * z, -ox * k * z, -oy * k * z);   // (zoomed in: only the part in view, drawn sharp)
   // a pale wash of the season's colour, a darker one for the Haunted Wood
   c.fillStyle = ['rgba(150,190,100,.25)', 'rgba(130,170,80,.28)', 'rgba(210,150,70,.25)', 'rgba(200,215,230,.35)'][S]; c.fillRect(60, 60, WW - 120, WH - 120);
   for (const f of FIELDS) { c.fillStyle = ['rgba(200,210,120,.45)', 'rgba(170,200,110,.45)', 'rgba(150,115,80,.4)', 'rgba(215,205,140,.45)', 'rgba(140,190,100,.4)'][f.crop]; c.fillRect(f.x, f.y, f.w, f.h); c.strokeStyle = 'rgba(110,80,50,.35)'; c.lineWidth = 6; c.strokeRect(f.x, f.y, f.w, f.h); }
@@ -5376,12 +5431,17 @@ function paintMapBase(w, h){
   for (let n = 0; n < w * h / 60; n++) { c.fillStyle = r() < .5 ? `rgba(120,80,40,${r() * .1})` : `rgba(255,250,235,${r() * .2})`; c.fillRect(r() * w, r() * h, 1 + r(), 1 + r()); }
   c.strokeStyle = 'rgba(90,60,35,.8)'; c.lineWidth = 2; c.strokeRect(5, 5, w - 10, h - 10); c.lineWidth = 1; c.strokeRect(10, 10, w - 20, h - 20);
   const vg = c.createRadialGradient(w / 2, h / 2, Math.min(w, h) * .3, w / 2, h / 2, Math.max(w, h) * .7); vg.addColorStop(0, 'rgba(120,80,40,0)'); vg.addColorStop(1, 'rgba(120,80,40,.25)'); c.fillStyle = vg; c.fillRect(0, 0, w, h);
-  return { cv: cv2, s: S, w };
+  return { cv: cv2, s: S, w, z, ox, oy };
 }
 function drawMap(){
-  const mc = $('mapcv'), c = mc.getContext('2d'), w = mc.width, h = mc.height, k = w / WW, dpr = devicePixelRatio || 1;
-  if (!mapBase || mapBase.s !== S || mapBase.w !== w) mapBase = paintMapBase(w, h);
-  c.setTransform(1, 0, 0, 1, 0, 0); c.drawImage(mapBase.cv, 0, 0);
+  const mc = $('mapcv'), c = mc.getContext('2d'), w = mc.width, h = mc.height, dpr = devicePixelRatio || 1;
+  mapClamp(); const k = w / WW * MV.z, ox = MV.ox, oy = MV.oy;
+  const stale = !mapBase || mapBase.s !== S || mapBase.w !== w;
+  if (stale || ((mapBase.z !== MV.z || mapBase.ox !== ox || mapBase.oy !== oy) && performance.now() - MV.moved > 160)) mapBase = paintMapBase(w, h, MV.z, ox, oy);
+  // (while it is being zoomed or dragged, the last drawing is stretched; a moment after, it is drawn again, sharp)
+  c.setTransform(1, 0, 0, 1, 0, 0); c.fillStyle = '#f1e2bf'; c.fillRect(0, 0, w, h);
+  const sz = MV.z / mapBase.z; c.setTransform(sz, 0, 0, sz, (mapBase.ox - ox) * k, (mapBase.oy - oy) * k); c.drawImage(mapBase.cv, 0, 0);
+  c.setTransform(1, 0, 0, 1, -ox * k, -oy * k);
   // where everyone is (someone indoors is shown at the door of the house)
   const at = (where, x, y) => where === 'out' ? [x, y] : [HOUSES[ROOMS[where].parent ?? where].at.x, HOUSES[ROOMS[where].parent ?? where].at.y + 20];
   const mark = (who, [x, y], col, dx, big) => {
@@ -5398,7 +5458,7 @@ function drawMap(){
     const fx = dest.x * k, fy = dest.y * k; line(c, [[fx, fy], [fx, fy - 16 * dpr]], '#4a2f1c', 1.4 * dpr, 1); blob(c, [[fx, fy - 16 * dpr], [fx + 10 * dpr, fy - 13 * dpr], [fx, fy - 10 * dpr]], '#d9433b');
   }
   mark('Ana', at(game.scene, ana.x, ana.y), '#d9433b', 0, true);
-  $('maptitle').textContent = 'Avonlea · ' + SEASONS[S] + ', día ' + (Math.floor(dayT) % 2 + 1) + ' · ' + SICON[S] + ' · toca un lugar para ir allí';
+  $('maptitle').textContent = 'Avonlea · ' + SEASONS[S] + ', día ' + (Math.floor(dayT) % 2 + 1) + ' · ' + SICON[S] + ' · toca un lugar para ir allí · rueda o pellizco: acercar · arrastra para moverte';
 }
 function loop(now){ const dt = clamp((now - last) / 1000, 0, .05); last = now; update(dt); render(); requestAnimationFrame(loop); }
 window.__avonlea = { focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
