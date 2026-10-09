@@ -630,10 +630,22 @@ function drawEye(c, F, cx, cy, wf, o, lk, open, L){   // (o: +1 the right eye, â
   ell(c, ix, cy + eh * .1, ew * .42, eh * .44, '#1a100a');
   ell(c, ix - ew * .3, cy - eh * .28, ew * .3 + .12, eh * .24 + .1, '#fff'); ell(c, ix + ew * .32, cy + eh * .45, ew * .12 + .05, eh * .1 + .05, 'rgba(255,255,255,.85)');
   // the upper lid, dark and a little heavier at the outer corner; the lashes flick out (the girls)
-  c.strokeStyle = ink; c.lineWidth = .7 + F.lash * .3; c.beginPath(); c.moveTo(cx - o * ew * 1.05, cy - eh * .05); c.quadraticCurveTo(cx - o * ew * .1, cy - eh * 1.32, cx + o * ew * 1.08, cy - eh * .2); c.stroke();
-  if (F.lash > 0) { c.lineWidth = .55 + F.lash * .2; c.beginPath(); c.moveTo(cx + o * ew * 1.02, cy - eh * .22); c.lineTo(cx + o * (ew * 1.05 + .9 * F.lash), cy - eh * .45 - .5 * F.lash); c.stroke(); }
-  c.strokeStyle = 'rgba(60,35,25,.35)'; c.lineWidth = .45; c.beginPath(); c.moveTo(cx - o * ew * .2, cy + eh * 1.02); c.lineTo(cx + o * ew * .8, cy + eh * .75); c.stroke();
+  c.strokeStyle = 'rgba(58,34,24,.9)'; c.lineWidth = .5 + F.lash * .1; c.beginPath(); c.moveTo(cx - o * ew * .95, cy - eh * .2); c.quadraticCurveTo(cx - o * ew * .1, cy - eh * 1.25, cx + o * ew, cy - eh * .3); c.stroke();
+  if (F.lash > .5) { c.lineWidth = .4; c.beginPath(); c.moveTo(cx + o * ew * .95, cy - eh * .32); c.lineTo(cx + o * (ew + .45), cy - eh * .5); c.stroke(); }   // (only a hint of lashes)
   if (F.arrugas) { c.strokeStyle = 'rgba(120,70,50,.45)'; c.lineWidth = .4; for (const k of [-1, 1]) { c.beginPath(); c.moveTo(cx + o * (ew + .5), cy + k * .5); c.lineTo(cx + o * (ew + 1.4), cy + k * .9); c.stroke(); } }
+}
+function drawBeard(c, L, hy, side, sh, p, t, F){
+  const strands = (pts) => { c.strokeStyle = L.hairD; c.lineWidth = .4; c.globalAlpha = .55; for (const [a, b, e, f] of pts) { c.beginPath(); c.moveTo(a, b); c.lineTo(e, f); c.stroke(); } c.globalAlpha = 1; };
+  if (side) {
+    blob(c, [[-.5, hy + 1.5], [1, hy + 5], [3, hy + 8.2], [5.4, hy + 9.6], [6.6, hy + 8.8], [7.8, hy + 9.2], [8.2, hy + 6.6], [6.8, hy + 6.9], [5, hy + 7], [3, hy + 5.4], [1.6, hy + 2]], L.hair, false);
+    strands([[2, hy + 5, 2.6, hy + 7], [4, hy + 7.4, 4.4, hy + 9], [6, hy + 8, 6.2, hy + 9.2]]);
+    drawMouth(c, F, 6.4, hy + 5.8, p, t, .45); ell(c, 6.7, hy + 4.9, 1.6, .85, L.hair, false, .15); return;
+  }
+  blob(c, sh([[-7.9, hy + 1.2], [-7.6, hy + 6], [-5.4, hy + 9.6], [-3.4, hy + 11.6], [-1.6, hy + 10.8], [0, hy + 12.6], [1.6, hy + 10.8], [3.4, hy + 11.6], [5.4, hy + 9.6], [7.6, hy + 6], [7.9, hy + 1.2], [6.3, hy + 3], [4.6, hy + 5.8], [2.4, hy + 7.6], [0, hy + 7.9], [-2.4, hy + 7.6], [-4.6, hy + 5.8], [-6.3, hy + 3]]), L.hair, false);
+  strands([[-5.6, hy + 6, -5, hy + 8.4], [-2.6, hy + 8.6, -2.2, hy + 10.4], [0, hy + 9, 0, hy + 11.2], [2.6, hy + 8.6, 2.2, hy + 10.4], [5.6, hy + 6, 5, hy + 8.4]].map(([a, b, e, f]) => sh([[a, b], [e, f]]).flat()));
+  const [mx] = sh([[0, 0]])[0];
+  drawMouth(c, F, mx, hy + 6.6, p, t, .6);
+  for (const k of [-1, 1]) ell(c, mx + k * 1.5, hy + 5.1, 1.9, .95, L.hair, false, k * .18);   // (the moustache, over the lip)
 }
 const isTalking = p => bubbles.some(b => b.t < b.dur && personOf(b.q) === p);
 function drawMouth(c, F, mx, my, p, t, wf = 1){
@@ -762,9 +774,9 @@ function drawPerson(c, p, t){
     if (F.tpl === 'nina') blob(c, [[-1, hy - 5], [2, hy - 6], [5.5, hy - 5.5], [7.6, hy - 3], [6.2, hy - 2.4], [5.2, hy - 3.8], [3.8, hy - 1.8], [2.6, hy - 4]], L.hair);   // (the fringe, in points)
     drawEye(c, F, 4.5, hy + 1.3, .62, -1, .6, p.blink <= 0, L);
     ell(c, 8.2, hy + 2.6, 1.1, 1, 'rgba(200,130,100,.9)'); ell(c, 3.4, hy + 4.4, 2.2, 1.2, `rgba(240,120,110,${F.blush})`);
-    drawMouth(c, F, 6.4, hy + 5.6, p, t, .55);
+    if (!L.beard) drawMouth(c, F, 6.4, hy + 5.6, p, t, .55);
     if (L.freckles) for (const [fx, fy] of [[1.5, hy + 3], [3, hy + 3.4], [2.2, hy + 4.3]]) ell(c, fx, fy, .35, .35, 'rgba(150,80,50,.55)');
-    if (L.beard) blob(c, [[1, hy + 2], [8, hy + 3], [6, hy + 9], [0, hy + 8]], L.hair);
+    if (L.beard) drawBeard(c, L, hy, true, null, p, t, F);
   } else {
     // front: hair (and fringe), eyes that blink, cheeks, freckles, a smile
     // (three-quarter: everything on the face moves toward the side it looks to; the far eye and cheek narrower,
@@ -781,7 +793,7 @@ function drawPerson(c, p, t){
     ell(c, -5.2 + fo * .8, hy + 4.6, 2 * (tq ? .6 : 1), 1.2, `rgba(240,120,110,${F.blush})`); ell(c, 5.2 + fo * .7, hy + 4.6, 2, 1.2, `rgba(240,120,110,${F.blush})`);
     if (tq) ell(c, 3.4 + fo, hy + 3.6, .9, .6, 'rgba(200,130,100,.85)'); else line(c, [[.5, hy + 3.3], [.1, hy + 4]], 'rgba(170,100,80,.7)', .6);   // (the nose: a touch)
     if (L.freckles) for (const [fx, fy] of [[-4.5, hy + 3], [-3.2, hy + 3.6], [-5.6, hy + 3.5], [4.5, hy + 3], [3.2, hy + 3.6], [5.6, hy + 3.5]]) if (!(tq && fx < -5)) ell(c, fx + fo * .8, fy, .35, .35, 'rgba(150,80,50,.55)');
-    if (L.beard) blob(c, sh([[-6, hy + 3], [6, hy + 3], [4, hy + 10], [0, hy + 11.5], [-4, hy + 10]]), L.hair);
+    if (L.beard) drawBeard(c, L, hy, false, sh, p, t, F);
     else drawMouth(c, F, fo, hy + 6, p, t, tq ? .85 : 1);
   }
   if (L.bow && d !== 0) { const bo = tq && d === 2 ? 1.6 : 0; ell(c, -5 + bo, hy - 7, 2.6, 1.8, L.bow, true); ell(c, -1.6 + bo, hy - 7.6, 2.6, 1.8, L.bow, true); }
