@@ -10,7 +10,9 @@ Todo en **una misma conversación**, en este orden, adjuntando al comienzo la ho
 > planos con una sola sombra, sin degradados, sin texturas, sin sombras en el suelo. Fondo blanco liso. Cada pieza
 > separada de las demás por espacio en blanco, nunca tocándose. Todas las hojas a la misma escala. El personaje es Ana
 > Shirley, de la imagen adjunta: niña de 11 años, delgada, pelo rojo en dos trenzas con cintas rojas, pecas, ojos gris
-> azulado, vestido verde con cuello blanco, botines marrones. Las vistas son siempre cinco y en este orden: frente, tres
+> azulado, frente amplia y despejada (el flequillo corto, dejando ver bien la frente), cara más larga y ovalada que
+> en la imagen de referencia, no redonda, con el mentón algo puntiagudo, como la Ana de la serie de 1979; la cabeza un poco
+> más chica respecto del cuerpo, vestido verde con cuello blanco, botines marrones. Las vistas son siempre cinco y en este orden: frente, tres
 > cuartos mirando a la derecha, perfil derecho, tres cuartos de espalda (mirando hacia la derecha), espalda.
 
 ## 1. Hoja de cuerpo (sin cabeza: reutilizable)
@@ -25,7 +27,8 @@ Todo en **una misma conversación**, en este orden, adjuntando al comienzo la ho
 ## 2. Hoja de cabeza (con su cara y su pelo)
 
 > Hoja 2, la CABEZA de Ana, a la misma escala que la hoja 1 (encaja sobre ese cuello), en las cinco vistas en una fila:
-> con su cara completa (ojos, cejas, nariz, pecas, boca sonriendo) y su pelo con flequillo, un cuello corto cortado en
+> con su cara completa (ojos, cejas, nariz, pecas, boca sonriendo) y su pelo con un flequillo corto y ralo que deja ver
+> la frente amplia; la cara larga y ovalada, con el mentón algo puntiagudo (no una cara redonda de bebé), un cuello corto cortado en
 > recto abajo, SIN trenzas (el pelo termina donde nacen) y sin sombrero. Segunda fila: la cabeza de frente con cuatro
 > expresiones (contenta, triste, sorprendida, enojada), mismo tamaño. Tercera fila: una trenza sola, recta y vertical,
 > con su cinta roja; y el sombrero de paja con cinta roja en las cinco vistas, del tamaño justo para esa cabeza.
