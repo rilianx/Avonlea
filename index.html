@@ -31,6 +31,7 @@ html,body{margin:0;height:100%;background:#2b3a26;overflow:hidden;touch-action:n
 #wmrun ol{margin:2px 0 2px 18px;padding:0}
 #wmrun ul.gl{list-style:none;margin:2px 0;padding:0}
 #wmrun ul.gl li.done{opacity:.6}
+#wmrun ol.tk{margin:1px 0 4px 14px;font-size:11.5px}
 #wmrun ul.gl li.fail{opacity:.6;text-decoration:line-through}
 #wmrun li.cur{font-weight:bold}
 #wmrun li.past{opacity:.55}
@@ -4667,7 +4668,7 @@ function wmSearch(me, goal, favors, s0, cap){
   let best = { h: goal.h(s0), g: 0, path: [] }, n = 0;
   while (heap.length && n++ < cap) {
     const cur = pop();
-    if (goal.test(cur.s)) return { plan: cur.path, cost: cur.g, n, ok: true };
+    if (goal.test(cur.s)) return { plan: cur.path, cost: cur.g, n, ok: true, C };
     const h = goal.h(cur.s); if (h < best.h || (h === best.h && cur.g < best.g && cur.path.length)) best = { h, g: cur.g, path: cur.path };
     if (cur.path.length >= 12) continue;
     for (const a of verbs(cur.s, me, C)) {
@@ -4678,7 +4679,7 @@ function wmSearch(me, goal, favors, s0, cap){
       push({ s: t, g, f: g + goal.h(t) * 40, path: [...cur.path, a] });
     }
   }
-  return best.path.length && best.h < goal.h(s0) ? { plan: best.path, cost: best.g, n, ok: false, partial: true } : { plan: null, n, ok: false };
+  return best.path.length && best.h < goal.h(s0) ? { plan: best.path, cost: best.g, n, ok: false, partial: true, C } : { plan: null, n, ok: false };
 }
 const stepText = a => ({ ir: () => 'ir a ' + (WP_NAME[a.p] || wmPlaceText(a.p)), tomar: () => 'tomar ' + itemTextW(a.x, 1), recoger: () => 'recoger ' + itemTextW(a.x, a.n), cocinar: () => 'cocinar ' + (ITEM_NAME[a.x]?.[0] || a.x),
   dar: () => `darle ${itemTextW(a.x, a.n)} a ${wmName(a.k)}`, vender: () => `vender ${a.x === 'vaca' ? ANIMALS[a.cow].name : itemTextW(a.x, 1)} a ${wmName(a.k)}`, comprar: () => `llevar ${itemTextW(a.x, 1)} anotado en la libreta`, cambiar: () => `cambiar ${itemTextW(a.g, a.n)} por ${ITEM_NAME[a.x][0]}`,
@@ -4687,78 +4688,122 @@ const wmPlaceText = p => p.startsWith('p:') ? 'donde está ' + wmName(p.slice(2)
 
 /* ---------- the agents: someone with a goal and a plan, carrying it out step by step in the world ---------- */
 const AGENTS = {};
-const MAX_GOALS = 3;   // (an agenda of up to three goals, as a priority queue: each one with its own plan)
+const MAX_GOALS = 3;   // (an agenda of up to three goals; their tasks, with the order each one needs, are done in the best order)
 const activeGoals = ag => (ag?.goals || []).filter(g => g.st === 'run');
 const agentChain = ag => [...new Set(activeGoals(ag).flatMap(g => g.chain))];
 let WM_OBEY = true;   // (when someone asks Ana for something, she does it by herself: for the tests)
-function agentOf(who){ return AGENTS[who] || (AGENTS[who] = { who, goals: [], log: [], st: 'idle', pending: [] }); }
-// how urgent a goal is: with a time limit 3, asked by someone 2, one's own 1 (ties: whichever came first)
+function agentOf(who){ return AGENTS[who] || (AGENTS[who] = { who, goals: [], tasks: [], log: [], st: 'idle' }); }
+// how urgent a goal is: with a time limit 3, asked by someone 2, one's own 1
 const goalPrio = (goal, o) => o.prio ?? (goal.deadline ? 3 : o.parent ? 2 : 1);
-const queue = ag => activeGoals(ag).sort((a, b) => b.prio - a.prio || a.seq - b.seq);
-let goalSeq = 0;
+let goalSeq = 0, taskSeq = 0;
 function agentStart(who, goal, o = {}){
   const ag = agentOf(who); delete ag.hold;
   if (activeGoals(ag).length >= MAX_GOALS) return null;
-  const g = { who, goal, favors: o.favors || [], chain: o.chain || [], st: 'run', label: o.label || goal.text, parent: o.parent, since: TT, log: ag.log, prio: goalPrio(goal, o), seq: ++goalSeq, plan: null, i: 0, tries: 0, pending: [] };
+  const g = { who, goal, favors: o.favors || [], chain: o.chain || [], st: 'run', label: o.label || goal.text, parent: o.parent, since: TT, log: ag.log, prio: goalPrio(goal, o), seq: ++goalSeq, tries: 0, pending: [] };
   ag.goals.push(g); if (ag.goals.length > 12) ag.goals.splice(0, ag.goals.length - 12);
   if (who === 'ana') { auto.on = false; auto.intent = null; ag.followOf = null; if (ana.goto && !ana.goto.wm) ana.goto = null; }
   agentLog(ag, '＋ ' + g.label + ' (prioridad ' + g.prio + ')');
-  if (agentCheck(ag), g.st === 'run' && !goalPlan(ag, g)) return g;
-  if (ag.cur && ag.cur !== g && g.prio > ag.cur.prio) { agentLog(ag, '⇢ deja en pausa: ' + ag.cur.label); pauseGoal(ag, ag.cur); }   // (something more urgent: first that)
+  agentCheck(ag); if (g.st === 'run') goalPlan(ag, g);
+  if (ag.task && g.prio === 3 && ag.task.g.prio < 3) { agentLog(ag, '⇢ primero lo urgente'); ag.task = null; wmStop(who); }
   return g;
 }
-function agentLog(ag, t){ ag.log.push(fmtHour(hourNow()) + ' ' + t); if (ag.log.length > 16) ag.log.shift(); }
-// what was asked of others for this goal and is still on its way counts as coming (for its plan)
+function agentLog(ag, t){ ag.log.push(fmtHour(hourNow()) + ' ' + t); if (ag.log.length > 18) ag.log.shift(); }
 function promised(ag, g, s){ for (const p of g.pending || []) if (p.h.st === 'run') FAVORS[p.f.f].eff(s, ag.who, p.to, p.f); return s; }
-// a plan for one goal, alone (cheap); false if there is none (the goal is given up)
+
+/* --- from a plan (a line of steps) to tasks with the order they really need: a task depends on another if, without
+   that one, it could not be done. The walking is not a task: one walks to wherever the chosen task is done
+   (except the last walk of a plan, or one with someone following: there, getting there is the point). */
+const actSig = a => [a.v, a.x, a.k, a.cow, a.g, a.favor ? a.favor.f + ':' + a.favor.to + ':' + (a.favor.item || '') : '', a.v === 'soltar' || a.v === 'ir' ? a.p : ''].join('|');
+function planToTasks(me, plan, s0, C){
+  const steps = []; let s = clone(s0);
+  plan.forEach((a, k) => {
+    const keep = a.v !== 'ir' || k === plan.length - 1 || Object.values(s.follow).includes(me);
+    if (keep) steps.push({ a, loc: a.v === 'ir' ? a.p : s.pos[me], deps: [] });
+    a.eff(s); s.t += a.cost;
+  });
+  const avail = (st, step) => { if (step.a.v === 'ir') return { eff: t => { t.pos[me] = step.a.p; for (const [f, w] of Object.entries(t.follow)) if (w === me) t.pos[f] = step.a.p; } }; st.pos[me] = step.loc; return verbs(st, me, C).find(b => actSig(b) === actSig(step.a)); };
+  // what a step changes (to tell whether, without another one, it would do the same)
+  const delta = (x, y) => { const d = []; for (const w of Object.keys(y.invs)) for (const k of new Set([...Object.keys(x.invs[w] || {}), ...Object.keys(y.invs[w])])) { const v = (y.invs[w][k] || 0) - (x.invs[w]?.[k] || 0); if (Math.abs(v) > 1e-9) d.push(w + '.' + k + ':' + v); }
+    for (const f of ['cows', 'follow', 'ofensa', 'facts']) for (const k of new Set([...Object.keys(x[f]), ...Object.keys(y[f])])) if (x[f][k] !== y[f][k]) d.push(f + '.' + k + ':' + y[f][k]);
+    for (const k of Object.keys(y.rel)) if (x.rel[k] !== y.rel[k]) d.push('rel.' + k + ':' + (y.rel[k] - (x.rel[k] ?? 2)));
+    for (const k of Object.keys(y.know)) if ((x.know[k] || []).length !== y.know[k].length) d.push('know.' + k);
+    return d.sort().join(';'); };
+  const run = (skip, upto) => { const t = clone(s0); for (let m = 0; m < upto; m++) { if (m === skip) continue; const b = avail(t, steps[m]); if (b) b.eff(t); } const before = clone(t), b = avail(t, steps[upto]); if (!b) return null; b.eff(t); return delta(before, t); };
+  const base = steps.map((_, j) => run(-1, j));
+  for (let j = 1; j < steps.length; j++) for (let i = 0; i < j; i++) {
+    if (steps[j].a.v === 'ir') { steps[j].deps.push(i); continue; }   // (a walk kept as a task, to take someone along or to be there: after all that came before)
+    const d = run(i, j); if (d === null || d !== base[j]) steps[j].deps.push(i);   // (without step i, step j could not be done, or would not do the same)
+  }
+  return steps;
+}
+// a plan for one goal, made into tasks (its old tasks still to do are replaced)
 function goalPlan(ag, g){
   const s = promised(ag, g, wmNow());
-  if (g.goal.test(s) && !(g.pending || []).some(p => p.h.st === 'run')) { goalEnd(ag, g, 'done'); return false; }
+  ag.tasks = ag.tasks.filter(t => t.g !== g || t.st === 'done');
+  if (g.goal.test(s) && !pendingOn(g)) { goalEnd(ag, g, 'done'); return false; }
+  if (g.goal.test(s)) { g.waitUntil = TT + 3; return true; }   // (only what was promised is missing: wait for it)
   const r = wmPlan(ag.who, g.goal, g.favors, s, g.chain);
-  if (!r.plan) { agentLog(ag, 'no encuentra cómo: ' + g.label + ' (' + r.n + ' estados)'); goalEnd(ag, g, 'fail', g.partial ? 'avanzó, pero no lo suficiente por hoy' : 'no hay un plan posible'); return false; }
-  g.plan = r.plan; g.i = 0; g.step = null; g.partial = r.partial || g.partial; g.n = r.n; g.waitUntil = 0;
-  agentLog(ag, (r.partial ? 'plan parcial' : 'plan') + ' (' + g.label + '): ' + r.plan.map(stepText).join(' → '));
+  if (!r.plan) { console.debug('[avonlea plan] sin plan', ag.who, g.label, JSON.stringify({ pos: s.pos, cows: s.cows, follow: s.follow, sick: game.wm.sick, rel: Object.fromEntries(Object.entries(s.rel).filter(([k]) => k.startsWith('ana>'))), facts: s.facts })); agentLog(ag, 'no encuentra cómo: ' + g.label + ' (' + r.n + ' estados)'); goalEnd(ag, g, 'fail', g.partial ? 'avanzó, pero no lo suficiente por hoy' : 'no hay un plan posible'); return false; }
+  g.partial = r.partial || g.partial; g.n = r.n; g.waitUntil = 0;
+  const steps = planToTasks(ag.who, r.plan, s, r.C), ids = steps.map(() => ++taskSeq);
+  steps.forEach((st, k) => ag.tasks.push({ id: ids[k], g, a: st.a, loc: st.loc, deps: st.deps.map(i => ids[i]), st: 'todo' }));
+  agentLog(ag, (r.partial ? 'plan parcial' : 'plan') + ' (' + g.label + '): ' + steps.map((st, k) => (k + 1) + '. ' + stepText(st.a) + (st.deps.length ? ' [tras ' + st.deps.map(i => i + 1).join(', ') + ']' : '')).join(' · '));
   return true;
 }
-function pauseGoal(ag, g){ g.step = null; g.plan = null; if (ag.cur === g) ag.cur = null; }   // (when it comes back, a fresh plan: the world will have changed)
-function agentCheck(ag, s = wmNow()){ for (const g of activeGoals(ag)) if (g.goal.test(s)) goalEnd(ag, g, 'done'); }
+function agentCheck(ag, s = wmNow()){ for (const g of activeGoals(ag)) if (g.goal.test(s) && !pendingOn(g)) goalEnd(ag, g, 'done'); }
 function goalEnd(ag, g, st, why){
-  g.st = st; g.why = why; g.step = null; if (ag.cur === g) ag.cur = null;
+  g.st = st; g.why = why; if (ag.task?.g === g) ag.task = null;
+  for (const t of ag.tasks) if (t.g === g && t.st === 'todo') t.st = st === 'done' ? 'skip' : 'fail';
   const msg = st === 'done' ? `${wmName(ag.who)} logró: ${g.label}.` : `${wmName(ag.who)} no pudo: ${g.label}${why ? ' (' + why + ')' : ''}.`;
   agentLog(ag, (st === 'done' ? '✔ ' : '✘ ') + g.label + (why ? ' (' + why + ')' : '')); logEv(msg, []);
   if (ag.who === 'ana' && st === 'done') float('✔ ' + g.label, ana.x, ana.y - 64);
 }
-function agentIdle(ag){ ag.st = 'idle'; ag.cur = null; wmRelease(ag.who); }
+function agentIdle(ag){ ag.st = 'idle'; ag.task = null; wmRelease(ag.who); }
 function agentEnd(ag, st, why){ for (const g of activeGoals(ag)) goalEnd(ag, g, st, why); agentIdle(ag); }
 const pendingOn = g => (g.pending || []).some(p => p.h.st === 'run');
-// the goal to work on now: the most urgent one that is not waiting for something
-function pickGoal(ag){ return queue(ag).find(g => !(g.waitUntil > TT)) || null; }
+const taskReady = (ag, t) => t.st === 'todo' && t.g.st === 'run' && !(t.blockedUntil > TT) && !(t.g.waitUntil > TT) && t.deps.every(id => ag.tasks.find(u => u.id === id)?.st !== 'todo');
+// which ready task now: the most urgent goal first (a time limit goes before anything), then the nearest
+function pickTask(ag){
+  const b = wmBody(ag.who), here = b ? [b.x, b.y] : [0, 0], inRoom = wmScene(ag.who) !== 'out';
+  let best = null, bs = 1e12;
+  for (const t of ag.tasks) {
+    if (!taskReady(ag, t)) continue;
+    const key = t.a.k && !t.loc?.startsWith('h:') && t.loc !== 'cocina' ? personKey(t.a.k) || t.loc : t.loc, q = keyPoint(key) || (key === 'cocina' ? DOOR.gg : null);
+    const d = !q ? 0 : inRoom && (key === 'cocina' || key?.startsWith('h:')) && personKey(ag.who) === key ? 0 : dist(here[0], here[1], q[0], q[1]);
+    const score = d - (t.g.prio === 3 ? 1e9 : (t.g.prio - 1) * 400);
+    if (score < bs) { bs = score; best = t; }
+  }
+  return best;
+}
+const SELF_MOVING = ['dar', 'vender', 'comprar', 'cambiar', 'conversar', 'disculparse', 'pedir', 'interceder', 'guiar'];
 function agentTick(dt){
   for (const ag of Object.values(AGENTS)) {
     if (ag.hold) { wmHold(ag, dt); continue; }
     if (!activeGoals(ag).length) { if (ag.st !== 'idle') agentIdle(ag); continue; }
     if (ag.who === 'ana' && (WM_KEYS.some(k => keys.has(k)) || !!stick || (ana.goto && !ana.goto.wm && !ana.goto.auto))) { agentEnd(ag, 'fail', 'la jugadora tomó el control'); continue; }
-    const g = pickGoal(ag);
-    if (!g) { if (ag.st !== 'wait') { ag.st = 'wait'; wmRelease(ag.who); } if ((ag.chk = (ag.chk || 0) - dt) < 0) { ag.chk = 1; agentCheck(ag); } continue; }   // (everything is waiting: stand by)
-    ag.st = 'run';
-    if (ag.cur !== g) { if (ag.cur) pauseGoal(ag, ag.cur); ag.cur = g; if (activeGoals(ag).length > 1) agentLog(ag, '▶ ahora: ' + g.label); }
-    if (g.pending.some(p => p.h.st === 'fail' && !p.seen)) { for (const p of g.pending) if (p.h.st === 'fail') p.seen = true; agentLog(ag, 'quien iba a ayudar no pudo'); g.plan = null; if (++g.tries > 3) { goalEnd(ag, g, 'fail', 'nadie pudo ayudar'); continue; } }
-    if (!g.plan && !goalPlan(ag, g)) continue;
-    if (g.i >= g.plan.length) {   // its plan is done: done, or waiting for what was promised, or (a little later) another try
+    for (const g of activeGoals(ag)) if (g.pending.some(p => p.h.st === 'fail' && !p.seen)) { for (const p of g.pending) if (p.h.st === 'fail') { p.seen = true; delete game.wm.facts['pedido:' + p.f.f + ':' + p.to + ':' + today()]; }   // (they tried and could not: one may ask again)
+      agentLog(ag, 'quien iba a ayudar no pudo: ' + g.label); if (++g.tries > 3) goalEnd(ag, g, 'fail', 'nadie pudo ayudar'); else goalPlan(ag, g); }
+    // goals with nothing left to do: done, waiting for what was promised, or (a little later) a new plan
+    for (const g of activeGoals(ag)) {
+      if (ag.tasks.some(t => t.g === g && t.st === 'todo') || g.waitUntil > TT) continue;
       agentCheck(ag); if (g.st !== 'run') continue;
-      if (pendingOn(g)) { g.waitUntil = TT + 3; g.plan = null; agentLog(ag, '⏳ espera lo que pidió: ' + g.label); continue; }
-      if (++g.tries > 3) { goalEnd(ag, g, 'fail', g.partial ? 'avanzó, pero no lo suficiente por hoy' : 'no resultó'); continue; }
-      g.waitUntil = TT + (g.partial ? 2 : 20); g.plan = null; agentLog(ag, '⏳ espera: ' + g.label); continue;
+      if (pendingOn(g)) { if (!g.waitLog) { g.waitLog = 1; agentLog(ag, '⏳ espera lo que pidió: ' + g.label); } g.waitUntil = TT + 3; continue; }
+      if (g.waited) { g.waited = false; if (++g.tries > 3) { goalEnd(ag, g, 'fail', g.partial ? 'avanzó, pero no lo suficiente por hoy' : 'no resultó'); continue; } goalPlan(ag, g); continue; }
+      g.waited = true; g.waitUntil = TT + (pendingOn(g) ? 3 : g.partial ? 2 : 20); if (pendingOn(g)) g.tries--; agentLog(ag, '⏳ espera' + (pendingOn(g) ? ' lo que pidió' : '') + ': ' + g.label);
     }
-    const a = g.plan[g.i];
-    if (!g.step) { g.step = { a, t: 0 }; agentLog(ag, '→ ' + stepText(a)); }
-    g.step.t += dt; ag.goalNow = g;
-    const r = wmExec(ag, a, g.step, dt);
-    if (r === 'fail' && pendingOn(g) && /no lo tiene|faltan|no tiene|no viene|no la lleva/.test(g.step.why || '')) { g.step = null; g.plan = null; g.waitUntil = TT + 3; agentLog(ag, '⏳ espera lo que pidió: ' + g.label); continue; }   // (what is missing is on its way: meanwhile, something else)
-    if (r === 'ok') { g.i++; g.step = null; agentCheck(ag); }
-    else if (r === 'fail' || g.step.t > 150) {
-      agentLog(ag, '✘ falló: ' + stepText(a) + (g.step.why ? ' (' + g.step.why + ')' : '')); g.step = null; g.plan = null;
-      if (++g.tries > 3) goalEnd(ag, g, 'fail', 'falló varias veces');
+    if (!activeGoals(ag).length) { agentIdle(ag); continue; }
+    if (!ag.task || ag.task.st !== 'todo') { ag.task = pickTask(ag); if (ag.task) { ag.task.t = 0; ag.task.step = { a: ag.task.a, t: 0 }; agentLog(ag, '→ ' + stepText(ag.task.a) + (activeGoals(ag).length > 1 ? ' (' + ag.task.g.label + ')' : '')); } }
+    const t = ag.task;
+    if (!t) { if (ag.st !== 'wait') { ag.st = 'wait'; wmRelease(ag.who); } continue; }
+    ag.st = 'run'; ag.goalNow = t.g; t.step.t += dt;
+    let r;
+    if (!SELF_MOVING.includes(t.a.v) && !t.there) { r = wmMove(ag.who, t.loc, dt); if (r === 'ok') { t.there = true; r = t.a.v === 'ir' ? 'ok' : 'run'; } }
+    else r = t.a.v === 'ir' ? 'ok' : wmExec(ag, t.a, t.step, dt);
+    if (r === 'fail' && pendingOn(t.g) && /no lo tiene|faltan|no tiene|no viene|no la lleva/.test(t.step.why || '')) { t.blockedUntil = TT + 3; t.step = { a: t.a, t: 0 }; t.there = false; ag.task = null; agentLog(ag, '⏳ falta lo que pidió: ' + stepText(t.a)); continue; }   // (it is on its way: meanwhile, something else)
+    if (r === 'ok') { t.st = 'done'; ag.task = null; agentCheck(ag); }
+    else if (r === 'fail' || t.step.t > 150) {
+      agentLog(ag, '✘ falló: ' + stepText(t.a) + (t.step.why ? ' (' + t.step.why + ')' : '')); ag.task = null; t.st = 'fail';
+      if (++t.g.tries > 3) goalEnd(ag, t.g, 'fail', 'falló varias veces'); else goalPlan(ag, t.g);
     }
   }
 }
@@ -4901,7 +4946,7 @@ function wmExec(ag, a, st, dt){
         if (f.f === 'venir') { if (WM_OBEY) { const A = agentOf('ana'); A.followOf = me; agentLog(A, 'acompaña a ' + wmName(me)); } else addTask({ from: CH[me] ? me : 'marilla', tipo: 'ir', n: 1, para: 'ana', d: today(), lugar: 'casa_parroquial' }); return 'ok'; }
         const sub = F.goal(me, f, wmNow());
         if (a.k === 'ana' && !WM_OBEY) { if (f.f === 'traer' && CH[me]) addTask({ from: me, tipo: 'traer', n: f.n, para: me, d: today(), item: f.item }); else notice(`📜 ${wmName(me)} te pide: ${sub.text}.`); }
-        else { const h = agentStart(a.k, sub, { label: sub.text + ' (se lo pidió ' + wmName(me) + ')', parent: me, chain: [...agentChain(ag), me] }); if (!h) { st.why = wmName(a.k) + ' tiene demasiado que hacer'; return 'fail'; } const gg = ag.goalNow || ag.cur; if (gg) gg.pending = [...(gg.pending || []).filter(p => p.h.st === 'run'), { h, f, to: a.k }]; }
+        else { const h = agentStart(a.k, sub, { label: sub.text + ' (se lo pidió ' + wmName(me) + ')', parent: me, chain: [...agentChain(ag), me] }); if (!h) { st.why = wmName(a.k) + ' tiene demasiado que hacer'; return 'fail'; } const gg = ag.goalNow; if (gg) gg.pending = [...(gg.pending || []).filter(p => p.h.st === 'run'), { h, f, to: a.k }]; }
         st.sub = sub;
       }
       return 'ok';   // (asked: on with the rest of the plan; what was promised is waited for only where it is needed)
@@ -5026,8 +5071,8 @@ function wmPanelDraw(){
 function wmRunDraw(){
   const gs = { run: '▶', done: '✔', fail: '✘' }, st = { run: 'en marcha', wait: 'esperando', idle: '' };
   $('wmrun').innerHTML = Object.values(AGENTS).map(ag => `<div class="ag"><b>${wmName(ag.who)}</b> ${ag.hold ? '· esperando aquí' : ag.followOf ? '· acompaña a ' + wmName(ag.followOf) : st[ag.st] || ''}`
-    + (ag.goals?.length ? '<ul class="gl">' + [...queue(ag), ...ag.goals.filter(g => g.st !== 'run').slice(-4)].map(g => `<li class="${g.st}">${g.st === 'run' ? (g === ag.cur ? '▶' : g.waitUntil > TT ? '⏳' : '·') : gs[g.st]} <small>[${g.prio}]</small> ${g.label}${g.why ? ' <i>(' + g.why + ')</i>' : ''}</li>`).join('') + '</ul>' : '')
-    + (ag.cur?.plan ? '<ol>' + ag.cur.plan.map((a, j) => `<li${j === ag.cur.i ? ' class="cur"' : j < ag.cur.i ? ' class="past"' : ''}>${stepText(a)}</li>`).join('') + '</ol>' : '')
+    + (ag.goals?.length ? '<ul class="gl">' + [...activeGoals(ag), ...ag.goals.filter(g => g.st !== 'run').slice(-4)].map(g => `<li class="${g.st}">${gs[g.st]} <small>[${g.prio}]</small> ${g.label}${g.why ? ' <i>(' + g.why + ')</i>' : ''}`
+      + (g.st === 'run' ? '<ol class="tk">' + ag.tasks.filter(t => t.g === g && t.st !== 'skip').map(t => { const n = ag.tasks.filter(u => u.g === g && u.st !== 'skip'), dep = t.deps.map(id => n.findIndex(u => u.id === id) + 1).filter(Boolean); return `<li class="${t === ag.task ? 'cur' : t.st === 'done' ? 'past' : ''}">${t === ag.task ? '▶ ' : t.st === 'done' ? '✔ ' : taskReady(ag, t) ? '○ ' : '· '}${stepText(t.a)}${dep.length && t.st === 'todo' ? ' <small>(tras ' + dep.join(', ') + ')</small>' : ''}</li>`; }).join('') + '</ol>' : '') + '</li>').join('') + '</ul>' : '')
     + (ag.log?.length ? '<pre>' + ag.log.slice(-6).join('\n') + '</pre>' : '') + '</div>').join('') || '<i>Nadie tiene una meta todavía.</i>';
 }
 
