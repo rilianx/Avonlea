@@ -82,10 +82,22 @@ en código.
 
 `video/gemini_ana_gira.mp4` (Gemini/Veo): Ana camina en el lugar mientras gira (frente, ¾, perfil, ¾ espalda, espalda).
 
-    python3 tools/trace_video.py sprites/video/gemini_ana_gira.mp4 ana --k 10 --eps 3.5 --minarea 14 \
+    python3 tools/trace_video.py sprites/video/gemini_ana_gira.mp4 ana --k 10 --eps 4 --eps-face 1.6 --minarea 14 \
       --views 'frente:0-1.4,tq_frente:1.3-2.7,perfil:2.6-4.1,tq_espalda:4.0-5.4,espalda:5.3-6.8' --sheet lamina.png
 
 Para cada vista (tramo en segundos) busca el ciclo que cierra (el par de cuadros más parecidos a un paso completo de
 distancia), toma 8 cuadros parejos y los calca; si mira a la izquierda los refleja. El juego camina con esos cuadros y
 usa el más quieto para estar de pie (sentada, agachada y acostada siguen con las poses de las hojas). En el visor,
 «Ropa: café (video) / verde (hojas)» cambia entre las dos.
+
+Comparación de calcos para los 40 cuadros del video (peso; error medio por pixel contra el video a tamaño de juego):
+
+| calco | peso | gzip | error | cara |
+|---|---|---|---|---|
+| propio, eps 3.5 | 202 KB | 65 KB | 57 | ojos como manchas |
+| **propio, eps 4 + cabeza eps 1.6 + azul de los ojos (el que se usa)** | **273 KB** | **81 KB** | 58 | se lee |
+| VTracer polígonos a 1/3 (`--engine vtracer`) | 270 KB | 58 KB | 47 | tosca |
+| VTracer polígonos a 1/2 | 460 KB | — | 40 | regular |
+| VTracer curvas a tamaño completo | 5 MB | 1,8 MB | — | — |
+
+(Los puntos se guardan como pasos de uno a otro: números chicos.)

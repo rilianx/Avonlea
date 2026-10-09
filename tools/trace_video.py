@@ -13,6 +13,9 @@ from PIL import Image
 ap = argparse.ArgumentParser(); ap.add_argument('video'); ap.add_argument('name'); ap.add_argument('--views', required=True)
 ap.add_argument('--n', type=int, default=8); ap.add_argument('--k', type=int, default=14); ap.add_argument('--eps', type=float, default=1.2)
 ap.add_argument('--height', type=float, default=46); ap.add_argument('--minarea', type=float, default=4); ap.add_argument('--sheet')
+ap.add_argument('--eps-face', type=float, default=1.0, help='la cabeza, más fina (los ojos y la boca se leen)')
+ap.add_argument('--engine', default='propio', help="'propio' (zonas de color planas) o 'vtracer' (capas apiladas, más fiel)")
+ap.add_argument('--scale', type=float, default=1/3, help='con vtracer: achicar el cuadro antes de vectorizar')
 a = ap.parse_args()
 cap = cv2.VideoCapture(a.video); fps = cap.get(cv2.CAP_PROP_FPS) or 24; frames = []
 while True:
@@ -49,6 +52,8 @@ sample = np.concatenate([frames[i][masks[i]] for i in range(0, len(frames), max(
 _, kl, cen = cv2.kmeans(sample, a.k, None, (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 50, .3), 3, cv2.KMEANS_PP_CENTERS)
 cnt = np.bincount(kl.ravel(), minlength=a.k); pal = cen[np.argsort(-cnt)]
 pal = pal[[i for i in range(len(pal)) if cnt[np.argsort(-cnt)][i] > len(sample) * .004]]
+blue = sample[(sample[:, 2] > sample[:, 0] + 25) & (sample[:, 2] > 100)]   # (the eyes: too small to make a colour of their own, but they must be blue)
+if len(blue) > 30: pal = np.concatenate([pal, blue.mean(0, keepdims=True)])
 dark = int(np.argmin(pal.sum(1))); pal = np.concatenate([pal[dark:dark + 1], np.delete(pal, dark, 0)])   # (the darkest first: the line)
 def quant(im, m):
     px = im[m].astype(np.float32); wht = np.full(3, 255, np.float32); seg = pal - wht
@@ -56,24 +61,51 @@ def quant(im, m):
     Q = np.full(m.shape, -1, np.int32); Q[m] = ((px[:, None, :] - (wht + tt[..., None] * seg[None])) ** 2).sum(2).argmin(1)
     votes = np.stack([cv2.blur((Q == c).astype(np.float32), (3, 3)) for c in range(len(pal))]); return np.where(m, votes.argmax(0), -1)
 k = a.height / H0 * 10
-def polys(mask, f):
+def polys(mask, f, eps=None, minarea=None):
     cs, _ = cv2.findContours(mask.astype(np.uint8), cv2.RETR_CCOMP, cv2.CHAIN_APPROX_NONE); out = []
     for c in cs:
-        if abs(cv2.contourArea(c)) < a.minarea: continue
-        c = cv2.approxPolyDP(c, a.eps, True).reshape(-1, 2)
+        if abs(cv2.contourArea(c)) < (minarea or a.minarea): continue
+        c = cv2.approxPolyDP(c, eps or a.eps, True).reshape(-1, 2)
         if len(c) >= 3: out.append([int(round(v)) for x, y in c for v in f(x, y)])
     return out
 def trace(i, mirror):
     im, m = frames[i], masks[i]; Q = quant(im, m); x, b, _ = info[i]; sx = -1 if mirror else 1
     f = lambda px, py: ((px - x) * k * sx, (py - b) * k)
+    ys_ = np.nonzero(m.any(1))[0]; hy = int(ys_.min() + (ys_.max() - ys_.min()) * .24); head = np.zeros_like(m); head[:hy] = True
     L = [{'c': -1, 'p': polys(m, f)}]; zs = []
     for c in range(len(pal)):
         mm = (Q == c) & m
-        if mm.sum() >= a.minarea:
-            p = polys(mm, f)
+        if mm.sum() >= 3:   # (the head with a finer line than the body: the face must read)
+            hair = pal[c][0] > 140 and pal[c][1] < 120 and pal[c][0] - pal[c][2] > 70   # (the hair, even in the head, with the body's line: it is the face that must read)
+            p = polys(mm, f) if hair else polys(mm & ~head, f) + polys(cv2.dilate((mm & head).astype(np.uint8), np.ones((2, 2), np.uint8)) > 0, f, a.eps_face, 3)
             if p: zs.append((mm.sum(), {'c': c, 'p': p}))
     return L + [z for _, z in sorted(zs, key=lambda z: -z[0])]
 
+VT_PAL = []   # (with vtracer: the colours it uses, shared between frames when close)
+def vt_col(h):
+    c = np.array([int(h[i:i + 2], 16) for i in (1, 3, 5)])
+    for j, q in enumerate(VT_PAL):
+        if np.abs(q - c).sum() < 18: return j
+    VT_PAL.append(c); return len(VT_PAL) - 1
+def trace_vt(i, mirror):   # vtracer: the figure alone (transparent around), smaller, as polygons in stacked layers
+    import vtracer
+    im, m = frames[i], masks[i]; ys, xs = np.nonzero(m); x0, y0 = xs.min() - 4, ys.min() - 4; x1, y1 = xs.max() + 5, ys.max() + 5
+    rgba = np.dstack([im[y0:y1, x0:x1], (m[y0:y1, x0:x1] * 255).astype(np.uint8)]); I = Image.fromarray(rgba, 'RGBA')
+    I = I.resize((max(1, round(I.width * a.scale)), max(1, round(I.height * a.scale))), Image.LANCZOS); q = np.array(I); q[..., 3] = np.where(q[..., 3] > 128, 255, 0)
+    with tempfile.TemporaryDirectory() as td:
+        Image.fromarray(q, 'RGBA').save(td + '/f.png')
+        vtracer.convert_image_to_svg_py(td + '/f.png', td + '/f.svg', colormode='color', hierarchical='stacked', mode='polygon', filter_speckle=3, color_precision=6,
+                                        layer_difference=20, corner_threshold=60, length_threshold=3.5, splice_threshold=45, path_precision=1)
+        svg = open(td + '/f.svg').read()
+    fx, fb, _ = info[i]; sx = -1 if mirror else 1; L = []
+    for mm in re.finditer(r'<path d="([^"]+)" fill="([^"]+)" transform="translate\(([-\d.]+),([-\d.]+)\)"', svg):
+        d, col, tx, ty = mm.group(1), mm.group(2), float(mm.group(3)), float(mm.group(4)); polys_ = []
+        for sub in re.split(r'(?=M)', d):
+            nums = [float(v) for v in re.findall(r'-?\d+(?:\.\d+)?', sub)]
+            if len(nums) >= 6: polys_.append([int(round(v)) for j in range(0, len(nums) - 1, 2) for v in (((nums[j] + tx) / a.scale + x0 - fx) * k * sx, ((nums[j + 1] + ty) / a.scale + y0 - fb) * k)])
+        if polys_: L.append({'c': vt_col(col), 'p': polys_})
+    return L
+if a.engine == 'vtracer': trace = trace_vt
 out = {'pal': ['#%02x%02x%02x' % tuple(int(v) for v in q) for q in pal], 'sw': round(1.3 * k, 2), 'views': {}}
 out['line'] = out['pal'][0]; chosen = {}
 for spec in a.views.split(','):
@@ -90,6 +122,12 @@ for spec in a.views.split(','):
     st_ = min(idx, key=spread)   # (standing: the frame of the cycle with the feet closest together)
     out['views'][v] = {'walk': [trace(i, left) for i in idx], 'stand': trace(st_, left)}
     chosen[v] = (idx, left); print(v, 'ciclo desde', s, 'de', P, 'cuadros (', round(P / fps, 2), 's), diferencia', round(d, 4), 'mira a la', 'izquierda' if left else 'derecha')
+def delta(L):   # (each polygon: its first point, then the steps from point to point: small numbers)
+    for ly in L: ly['p'] = [q[:2] + [q[j] - q[j - 2] for j in range(2, len(q))] for q in ly['p']]
+for V in out['views'].values():
+    for L in V['walk'] + [V['stand']]: delta(L)
+out['delta'] = 1
+if a.engine == 'vtracer': out['pal'] = ['#%02x%02x%02x' % tuple(int(v) for v in q) for q in VT_PAL]; out['sw'] = 0; out['rule'] = 'nonzero'
 fn = f'sprites/vec/{a.name}_anim.json'; json.dump(out, open(fn, 'w'), separators=(',', ':')); print(fn, os.path.getsize(fn), 'bytes')
 if a.sheet:   # (a contact sheet of the chosen frames, a row per view)
     cw = int(H0 * .6); rows = []
