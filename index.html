@@ -111,6 +111,7 @@ html,body{margin:0;height:100%;background:#2b3a26;overflow:hidden;touch-action:n
   <label><input type="checkbox" id="aion"> Usar IA en las conversaciones (recomendado)</label>
   <label><input type="checkbox" id="aiauto"> Ana hace lo suyo sola cuando no la controlo</label>
   <label><input type="checkbox" id="aistories"> Historia del día (un guion inspirado en los libros; con IA, se escribe cada mañana)</label>
+  <label><input type="checkbox" id="aimem"> Memoria de los personajes (los que tienen «memoria» en su ficha guardan lo que conversaron con Ana y lo recuerdan después; apagada, nadie guarda nada)</label>
   <label><input type="checkbox" id="aiplans"> Los personajes planean su día con IA (en el modo completo, una vez por la mañana; si no, siguen su rutina)</label>
   <label for="aimode">Gasto de IA</label>
   <select id="aimode"><option value="minimo">Mínimo (recomendado): instrucciones breves; la IA escribe las charlas, la historia del día y sus ramas, el juez (una vez por hora) y el repaso de la noche</option><option value="completo">Completo: además los planes de los personajes y las decisiones de Ana (gasta varias veces más)</option></select>
@@ -2197,7 +2198,7 @@ function shareNews(){
     for (const e of (game.know[x] || []).filter(e => e.d === today() && !e.t.startsWith('(') && !(game.know[y] || []).some(f => f.t === e.t))) know(y, '(' + NAMES[x] + ' le contó) ' + e.t, e.d);
 }
 // what was said in conversations, as the character will remember it
-function remember(who, text){ const m = game.mem[who] = game.mem[who] || []; if (m.some(x => x.endsWith(': ' + text))) return; m.push('día ' + (today() + 1) + ': ' + text); if (m.length > 16) m.splice(0, m.length - 16); save(); }
+function remember(who, text){ if (!memOn(who)) return; const m = game.mem[who] = game.mem[who] || []; if (m.some(x => x.endsWith(': ' + text))) return; m.push('día ' + (today() + 1) + ': ' + text); if (m.length > 16) m.splice(0, m.length - 16); save(); }
 
 /* ---------- errands: what the others ask Ana to do (the game checks they are done) ---------- */
 const TASK_KINDS = ['ninguno', 'traer', 'regar', 'cocinar', 'recado', 'ir'];
@@ -3014,7 +3015,7 @@ function stateText(who){
   const k = game.know[who] || [];
   L.push('', `LO QUE ${NAMES[who].toUpperCase()} SABE QUE HA PASADO (lo vio o se lo contaron; lo más reciente al final):`, ...(k.length ? k.slice(FULL() ? -18 : -6).map(e => `- día ${e.d} (${SEASONS[e.s].toLowerCase()}): ${e.t}`) : ['- (nada todavía)']));
   const m = game.mem[who] || [];
-  L.push('', `LO QUE ${NAMES[who].toUpperCase()} RECUERDA DE SUS CONVERSACIONES CON ANA:`, ...(m.length ? m.slice(FULL() ? -16 : -4).map(x => '- ' + x) : ['- (nada todavía)']));
+  if (memOn(who)) L.push('', `LO QUE ${NAMES[who].toUpperCase()} RECUERDA DE SUS CONVERSACIONES CON ANA:`, ...(m.length ? m.slice(FULL() ? -16 : -4).map(x => '- ' + x) : ['- (nada todavía)']));
   return L.join('\n');
 }
 
@@ -3204,7 +3205,7 @@ const talkersHere = () => Object.keys(ANIMALS).filter(k => ANIMALS[k].talks && A
 const BORING = /^\S+(?: \S+)? (entró a|volvió a su casa|llegó a|llegó por|salió|se fue al pueblo)/;
 function factsOf(k, n = 3){
   const seen = new Set(), out = [];
-  for (const t of [...(game.know[k] || []).map(e => e.t), ...(game.mem[k] || []).map(x => x.replace(/^día \d+: /, ''))].reverse()) {
+  for (const t of [...(game.know[k] || []).map(e => e.t), ...(memOn(k) ? game.mem[k] || [] : []).map(x => x.replace(/^día \d+: /, ''))].reverse()) {
     const c = t.replace(/^\([^)]*\) /, ''); if (seen.has(c) || BORING.test(c)) continue; seen.add(c); out.push(c.slice(0, 150)); if (out.length >= n) break;
   }
   return out.reverse();
@@ -3227,7 +3228,7 @@ function sceneMsg(parts, note, full = true){
   if (!FULL()) return sceneMsgMin(parts, note, full);
   let m = parts.length ? stateText(parts[0]) : worldText() + '\n\nAna está sola.';
   for (const k of parts.slice(1)) {
-    const kn = (game.know[k] || []).slice(-6).map(e => '  - ' + e.t).join('\n') || '  (nada)', mm = (game.mem[k] || []).slice(-4).map(x => '  - ' + x).join('\n') || '  (nada)';
+    const kn = (game.know[k] || []).slice(-6).map(e => '  - ' + e.t).join('\n') || '  (nada)', mm = (memOn(k) && (game.mem[k] || []).slice(-4).map(x => '  - ' + x).join('\n')) || '  (nada)';
     m += `\n\nTAMBIÉN PRESENTE: ${NAMES[k]} (cariño hacia Ana: ${game.fond[k]}). Lo que siente: ${relText(k, ['ana', ...parts])}. ${storyText(k)}\nLo que sabe:\n${kn}\nLo que recuerda de sus conversaciones con Ana:\n${mm}`;
   }
   for (const k of talkersHere()) m += `\n\nAHÍ ESTÁ TAMBIÉN ${ANIMALS[k].name}: ${ANIMALS[k].desc}. Puede soltar alguna frase corta en la escena ("quien": "${k}").`;
@@ -3479,7 +3480,7 @@ $('mapcv').addEventListener('click', e => { const r = e.currentTarget.getBoundin
 // the AI settings: on/off, the key (kept in this browser only), the model; and a look at what they remember
 function aiPanel(on){
   $('ai').hidden = !on; if (!on) return;
-  close(); tokDraw(); $('aion').checked = AI.on; $('aiauto').checked = AI.auto !== false; $('aiplans').checked = AI.plans !== false; $('aistories').checked = !!AI.stories; $('aimode').value = FULL() ? 'completo' : 'minimo'; $('aimodel').value = AI.model; $('aiout').hidden = true; aiKeyField();
+  close(); tokDraw(); $('aion').checked = AI.on; $('aiauto').checked = AI.auto !== false; $('aiplans').checked = AI.plans !== false; $('aistories').checked = !!AI.stories; $('aimem').checked = !!AI.memoria; $('aimode').value = FULL() ? 'completo' : 'minimo'; $('aimodel').value = AI.model; $('aiout').hidden = true; aiKeyField();
 }
 // the key field shows the key of the chosen model's provider
 function aiKeyField(){
@@ -3488,9 +3489,9 @@ function aiKeyField(){
   $('aikey').value = AI.keys[pv] || ''; $('aikey').placeholder = P.hint; $('aikeylab').textContent = 'Tu clave de la API de ' + P.name;
   $('ainote').textContent = man ? 'Para depurar: cada vez que el juego le pida algo a la IA, aparece abajo a la derecha el pedido y un JSON por completar; lo respondes tú (o lo copias a otra IA y pegas su respuesta). Mientras no respondas, eso espera.' : `La clave la pones tú: se guarda solo en este navegador y se envía directamente a ${pv === 'openai' ? 'api.openai.com' : 'api.anthropic.com'}. No compartas el archivo ni el navegador con la clave puesta.`;
 }
-const aiSync = () => { AI.on = $('aion').checked; AI.auto = $('aiauto').checked; AI.plans = $('aiplans').checked; AI.stories = $('aistories').checked; AI.mode = $('aimode').value; AI.model = $('aimodel').value; if (provider() !== 'manual') AI.keys[provider()] = $('aikey').value.trim(); saveAI(); };
+const aiSync = () => { AI.on = $('aion').checked; AI.auto = $('aiauto').checked; AI.plans = $('aiplans').checked; AI.stories = $('aistories').checked; AI.memoria = $('aimem').checked; AI.mode = $('aimode').value; AI.model = $('aimodel').value; if (provider() !== 'manual') AI.keys[provider()] = $('aikey').value.trim(); saveAI(); };
 $('aimodel').addEventListener('change', () => { AI.model = $('aimodel').value; saveAI(); aiKeyField(); });
-for (const id of ['aion', 'aiauto', 'aiplans', 'aistories', 'aimode', 'aikey']) $(id).addEventListener('change', aiSync);
+for (const id of ['aion', 'aiauto', 'aiplans', 'aistories', 'aimem', 'aimode', 'aikey']) $(id).addEventListener('change', aiSync);
 $('aibtn').addEventListener('pointerdown', e => { e.stopPropagation(); audio(); if (!game.talk) aiPanel(true); });
 $('aiclose').addEventListener('click', () => { aiSync(); aiPanel(false); });
 $('aitest').addEventListener('click', async () => {
@@ -4222,6 +4223,16 @@ const FICHAS = {
   pescador: ['un pescador de Avonlea, curtido y bromista', ['la pesca', 'el mar', 'el tiempo']],
 };
 for (const [k, d] of Object.entries(FOLK_DEFS)) { const f = FICHAS[k]; d.ficha = f ? f[0] : d.look.h < .99 ? d.name + ', un niño de Avonlea que juega cerca de su casa' : d.name + ', de Avonlea, que vive en ' + d.home.replace(/^Casa de /, 'la casa de ').replace(/^Granja /, 'la granja '); d.topics = f ? f[1] : d.look.h < .99 ? ['un juego', 'un bicho que encontró'] : ['el tiempo', 'la cosecha', 'los vecinos', 'las noticias de la aldea']; }
+/* THE CARD (the same for everyone, the main characters and the people of the village):
+     nombre, ficha (who they are, in a sentence or two), temas (what they like to talk about), frases (what they say
+     without the AI) and memoria (true: they keep what they talked about with Ana, when «Memoria de los personajes» is on).
+   The main characters have more besides (errands, presents, routines: CHARACTERS); fichaOf gives the card of anyone. */
+for (const [k, c] of Object.entries(CH)) { c.temas = c.temas || ['lo que pasó hoy', 'la granja', 'los vecinos']; if (c.memoria === undefined) c.memoria = true; }
+for (const d of Object.values(FOLK_DEFS)) if (d.memoria === undefined) d.memoria = ['gilbert', 'sraallan', 'farero', 'peg', 'jasper', 'sara'].some(k => FOLK_DEFS[k] === d);
+function fichaOf(k){
+  if (CH[k]) return { nombre: CH[k].fullName, ficha: CH[k].fullName + ', ' + voiceShort(k), temas: CH[k].temas, frases: CH[k].lines, memoria: CH[k].memoria };
+  const d = FOLK_DEFS[k]; return d ? { nombre: d.name, ficha: d.ficha, temas: d.topics, frases: d.lines, memoria: d.memoria } : null;
+}
 const ANA_FICHA = 'Ana Shirley, 11 años, pelirroja y pecosa, huérfana adoptada por Matthew y Marilla Cuthbert de Tejas Verdes; soñadora, muy conversadora, de palabras grandiosas e imaginación desbordante';
 const SEASON_TOPICS = [['las flores de los manzanos', 'la primavera'], ['el calor', 'las vacaciones', 'las bayas'], ['las hojas rojas', 'las manzanas', 'la cosecha'], ['la nieve', 'el frío', 'la Navidad']];
 // written exchanges for two neighbours (when there is no AI)
@@ -4229,16 +4240,17 @@ const PAIR_LINES = {
   kids: [['¡Te pillé! ¡Ahora tú la llevas!', '¡No vale, no estaba jugando!'], ['¿Viste? A Gilbert se le fue la botella de leche río abajo.', '¡Ja! Que no se entere el maestro.'], ['¿Jugamos a las escondidas?', 'Bueno, pero yo no cuento esta vez.'], ['Dicen que en el Bosque Encantado hay fantasmas.', 'Eso lo inventó Ana Shirley. ¡Pero igual no voy!']],
   big: [['¡Buenos días! ¿Ya supo lo de la vaca de los Cuthbert?', '¡Si lo sabe todo Avonlea! Esa vaca es más lista que el Sr. Harrison.'], ['Qué lindo día para tender la ropa.', 'Ya lo creo. Y ayer que no paró de llover.'], ['¿Va a la tienda de Lawson?', 'Sí, se me acabó el azúcar. Con tanta compota...'], ['Dicen que el nuevo pastor predica muy bonito.', 'Y la Sra. Allan es un encanto, eso sí.'], ['¿Cómo vienen las papas este año?', 'Buenas, si no llueve demasiado.']],
 };
+const memOn = k => !!AI.memoria && !!fichaOf(k)?.memoria;
 const enc = { cur: null, ready: null, busy: false, mute: {}, cool: 0, err: 0 };
 const encP = id => id === 'ana' ? ana : FOLKBY[id];
 const encName = id => id === 'ana' ? 'Ana' : FOLKBY[id].def.name;
 const encQ = id => id === 'ana' ? 'ana' : 'f:' + id;
-const encPlace = (x, y) => game.scene === 'es' ? 'la escuela de Avonlea, en plena clase' : game.scene !== 'out' ? (HOUSES[game.scene]?.inText || 'una casa de Avonlea') : (n => n ? 'Avonlea, cerca de ' + n.replace(/^(La|El|Los) /, m => m.toLowerCase()) : 'un camino de Avonlea')(placeNear(x, y));
+const encPlace = (x, y) => game.scene === 'es' ? 'la escuela de Avonlea, en plena clase' : game.scene !== 'out' ? (HOUSES[game.scene]?.inText || 'una casa de Avonlea') : (n => n ? ('Avonlea, cerca de ' + n.replace(/^(La|El|Los) /, m => m.toLowerCase())).replace(/ de el /, ' del ') : 'un camino de Avonlea')(placeNear(x, y));
 function encTopic(x, y){ const f = [x, y].filter(i => i !== 'ana').map(i => FOLKBY[i].def.topics).flat(); return pick(Math.random() < .75 && f.length ? f : SEASON_TOPICS[S]); }
 // the request, as simple as can be (and the answer: who says what, in order)
 function encMsg(x, y, topic){
-  const p = encP(x);
-  return `Eres ${FOLKBY[x].def.ficha}, de Avonlea («Ana de las Tejas Verdes», L. M. Montgomery). Te encuentras con ${y === 'ana' ? ANA_FICHA : FOLKBY[y].def.ficha}. Están en ${encPlace(p.x, p.y)}; es ${SEASONS[S].toLowerCase()} y son las ${fmtHour(hourNow())}. Genera una conversación breve (de 2 a 4 líneas, de hasta 20 palabras) sobre ${topic}.` + (y === 'ana' ? ' Ana también habla.' : '');
+  const p = encP(x), mem = memOn(x) ? (game.mem[x] || []).slice(-3).map(m => m.replace(/^día \d+: /, '').replace(/\.$/, '')) : [];
+  return `Eres ${fichaOf(x).ficha}, de Avonlea («Ana de las Tejas Verdes», L. M. Montgomery). Te encuentras con ${y === 'ana' ? ANA_FICHA : fichaOf(y).ficha}.` + (mem.length ? ` Recuerdas: ${mem.join(' / ')}.` : '') + ` Están en ${encPlace(p.x, p.y)}; es ${SEASONS[S].toLowerCase()} y son las ${fmtHour(hourNow())}. Genera una conversación breve (de 2 a 4 líneas, de hasta 20 palabras) sobre ${topic}.` + (y === 'ana' ? ' Ana también habla.' : '');
 }
 const ENC_SYS = 'Escribes diálogos breves para un juego tranquilo inspirado en «Ana de las Tejas Verdes» (L. M. Montgomery), hacia 1880, en la isla del Príncipe Eduardo. Español; cada uno con su voz; tono tierno y con humor, como el libro. Responde solo con el JSON pedido.';
 async function encAsk(x, y){
@@ -4262,7 +4274,11 @@ function encEnd(){
   const s = enc.cur; enc.cur = null; if (!s) return;
   for (const id of s.parts) if (id !== 'ana') { FOLKBY[id].talkT = TT + 1.5; enc.mute[id] = TT + (s.parts.includes('ana') ? 150 : 90); }
   enc.cool = TT + (s.parts.includes('ana') ? 20 : 40);
-  if (s.parts.includes('ana') && s.i >= 0) { const o = s.parts.find(i => i !== 'ana'); logEv('Ana conversó con ' + FOLKBY[o].def.name + (s.topic ? ' sobre ' + s.topic : '') + '.', []); }
+  if (s.parts.includes('ana') && s.i >= 0) {
+    const o = s.parts.find(i => i !== 'ana'), last = s.lines[Math.min(s.i, s.lines.length - 1)];
+    logEv('Ana conversó con ' + FOLKBY[o].def.name + (s.topic ? ' sobre ' + s.topic : '') + '.', []);
+    remember(o, 'Conversé con Ana' + (s.topic ? ' sobre ' + s.topic : '') + (last ? '; lo último: «' + last.t.slice(0, 90) + '»' : '') + '.');   // (only if they have memory)
+  }
 }
 function encTick(dt){
   const s = enc.cur, withAna = s.parts.includes('ana');
