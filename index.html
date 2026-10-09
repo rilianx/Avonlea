@@ -606,10 +606,27 @@ function facing8(p){
   if (!p.moving && p.dir8 % 2 === 0 && p.dir8 !== [0, 2, 4, 6][p.dir]) p.dir8 = [0, 2, 4, 6][p.dir] ?? 4;   // (turned on purpose to face someone)
   return p.dir8;
 }
+// Ana's gesture (from the anime): walking, or bending down, a braid falls forward over her shoulder; when she stops she
+// takes it and throws it back with her hand. (braidBack: it is behind now; flick: the gesture, 1.1 s.)
+function braidFlick(p, t, d){
+  const dt = clamp(t - (p._bt ?? t), 0, .1); p._bt = t;
+  if (p.flick) { const g = (t - p.flick) / 1.1; if (g < 1 && !p.moving && !p.sit && d !== 0) return g; p.flick = 0; p.braidBack = g >= .6; }
+  if (p.moving) { p._bw = (p._bw || 0) + dt; p._bstill = 0; if (p.braidBack && p._bw > 5 + (p.n || 0) % 3) { p.braidBack = false; p._bw = 0; } }   // (walking: it slips forward again)
+  else if (p.crouch) p.braidBack = false;
+  else if (!p.braidBack && !p.sit && !p.carry && d !== 0 && (p._bstill = (p._bstill || 0) + dt) > (p._bwait ??= .5 + Math.random() * 1.2)) { p.flick = t; p._bstill = 0; p._bwait = undefined; p._bw = 0; }
+  return -1;
+}
+// where the hand is along the gesture: down by the side → at the braid → lifting it → over the shoulder → down again
+function flickHand(g, side){
+  const P = side ? [[1, -13], [4, -22], [5, -31], [-3, -34], [1, -13]] : [[7.5, -14], [7, -23], [9, -32], [4, -37], [7.5, -14]], T_ = [0, .28, .5, .66, 1];
+  let i = 0; while (i < 3 && g > T_[i + 1]) i++; const k = (g - T_[i]) / (T_[i + 1] - T_[i]), e = k * k * (3 - 2 * k);
+  return [lerp(P[i][0], P[i + 1][0], e), lerp(P[i][1], P[i + 1][1], e)];
+}
 function drawPerson(c, p, t){
   if (p.lie) { drawLying(c, p, t); return; }
   const q8 = facing8(p), flip = q8 >= 5, side = q8 === 2 || q8 === 6, tq = q8 % 2, d = side ? (flip ? 3 : 1) : (q8 <= 1 || q8 === 7) ? 0 : 2;
   const L = LOOKS[p.look], x = p.x, y = p.y, w = Math.sin(p.walk * TAU), sitting = p.sit;
+  const fl = L.style === 'braids' ? braidFlick(p, t, d) : -1;   // (-1, or how far along the gesture of throwing a braid back is)
   const bob = p.moving ? Math.abs(Math.sin(p.walk * TAU)) * 1.6 : Math.sin(t * 2 + x) * .35, wind = Math.sin(t * 1.3) * .6 + Math.sin(t * 3.1) * .3;
   ell(c, x, y, 11 * L.h, 4, 'rgba(30,40,20,.26)');
   c.save(); c.translate(x, y - bob + (sitting ? 9 : 0) + (p.crouch ? 5 : 0)); c.scale(L.h * (flip ? -1 : 1), L.h);
@@ -631,10 +648,10 @@ function drawPerson(c, p, t){
   c.strokeStyle = L.coat ? L.dressD : L.skin; c.lineWidth = 3; c.lineCap = 'round';
   const arm = (x0, y0, x1, y1) => { c.strokeStyle = L.coat ? L.dress : L.dressD; c.lineWidth = 3.2; c.beginPath(); c.moveTo(x0, y0); c.lineTo((x0 + x1) / 2, (y0 + y1) / 2); c.stroke(); c.strokeStyle = L.skin; c.lineWidth = 2.6; c.beginPath(); c.moveTo((x0 + x1) / 2, (y0 + y1) / 2); c.lineTo(x1, y1); c.stroke(); };
   if (p.pet) { arm(4, -21, 10, -12 + Math.sin(t * 8) * 1.2); arm(-4, -21, -6, -13); }
-  else if (side) arm(1, -21, 1 + a, -13);
+  else if (side) { if (fl < 0) arm(1, -21, 1 + a, -13); }
   else if (sitting) { arm(-5, -21, -3, -12); arm(5, -21, 3, -12); }
-  else if (tq) { arm(-4.6, -21, -6 + a * .5, -14); arm(5.6, -21, 7.4 - a * .5, -13.5); }
-  else { arm(-5.5, -21, -7.5, -14 + a * .4); arm(5.5, -21, 7.5, -14 - a * .4); }
+  else if (tq) { arm(-4.6, -21, -6 + a * .5, -14); if (fl < 0) arm(5.6, -21, 7.4 - a * .5, -13.5); }
+  else { arm(-5.5, -21, -7.5, -14 + a * .4); if (fl < 0) arm(5.5, -21, 7.5, -14 - a * .4); }
   if (p.carry === 'can') { const hx = side ? 2 + a : 8, hy = -12; blob(c, [[hx - 1, hy], [hx + 7, hy], [hx + 6, hy + 7], [hx, hy + 7]], '#9db3bf'); line(c, [[hx + 7, hy + 2], [hx + 11, hy - 2]], 'rgba(70,90,100,.9)', 1.4); }
   // collar, brooch
   if (d !== 0) blob(c, [[-5, -24.5], [5, -24.5], [3, -21.5], [0, -23], [-3, -21.5]], L.collar || L.dressD, false);
@@ -652,7 +669,17 @@ function drawPerson(c, p, t){
     c.strokeStyle = L.hairD; c.lineWidth = .9; for (let s = .3; s < 1; s += .23) { const sx = lerp(bx, ex, s), sy = lerp(by, ey, s); c.beginPath(); c.moveTo(sx - 1.6, sy - 1); c.lineTo(sx + 1.6, sy + .6); c.stroke(); }
     ell(c, ex, ey + 1, 2, 1.3, '#d9433b');
   };
-  if (L.style === 'braids' && d === 2) { braid(-6 + tq * 1.4, hy + 4, 12, 1.4); braid(6 + tq * 1.4, hy + 4, 12, 1.4); }
+  const braidTo = (bx, by, tx, ty) => {   // (a braid whose end is held: from the head to the hand)
+    c.strokeStyle = L.hair; c.lineWidth = 3.6; c.lineCap = 'round'; c.beginPath(); c.moveTo(bx, by); c.quadraticCurveTo((bx + tx) / 2 + 2, (by + ty) / 2 + 3, tx, ty); c.stroke();
+    c.strokeStyle = L.hairD; c.lineWidth = .9; for (let s = .3; s < 1; s += .23) { const sx = lerp(bx, tx, s), sy = lerp(by, ty, s) + 2 * Math.sin(s * Math.PI); c.beginPath(); c.moveTo(sx - 1.6, sy - 1); c.lineTo(sx + 1.6, sy + .6); c.stroke(); }
+    ell(c, tx, ty + 1, 2, 1.3, '#d9433b');
+  };
+  if (L.style === 'braids' && d === 2) {
+    braid(-6 + tq * 1.4, hy + 4, 12, 1.4);
+    const bx = 6 + tq * 1.4;
+    if (fl >= 0) { if (fl < .62) braidTo(bx, hy + 4, ...flickHand(fl, false)); }   // (the hand takes it and throws it over the shoulder)
+    else if (!p.braidBack) braid(bx, hy + 4, 12, 1.4);
+  }
   if (L.style === 'curls' && d !== 0) for (const sx of [-7.5, 7.5]) for (let k = 0; k < 3; k++) ell(c, sx + (sx > 0 ? -k * .4 : k * .4), hy + 3 + k * 3.4, 2.6, 2.2, L.hair, true);
   ell(c, 0, hy, 8.2, 8.6, L.skin, SKIN_LINE);
   if (d === 0) {
@@ -664,7 +691,10 @@ function drawPerson(c, p, t){
     if (L.style === 'curls') for (let k = -2; k <= 2; k++) ell(c, k * 3 + bo, hy + 6, 2.6, 2.6, L.hair, true);
   } else if (side) {
     blob(c, [[-8.5, hy - 1], [-6, hy - 8], [2, hy - 9.2], [7.5, hy - 4], [5, hy - 5], [-1, hy - 4], [-3, hy + 3], [-8, hy + 4]], L.hair);
-    if (L.style === 'braids') braid(-6, hy + 3, 13, -1.8);
+    if (L.style === 'braids') {
+      if (fl >= 0) { if (fl < .62) braidTo(3, hy + 5, ...flickHand(fl, true)); else braid(-6, hy + 3, 13 * Math.min(1, (fl - .55) * 3), -1.8); }
+      else if (p.braidBack) braid(-6, hy + 3, 13, -1.8); else braid(3, hy + 5, 11, 1.2);
+    }
     if (L.style === 'bun') ell(c, -7, hy - 3, 3.4, 3.4, L.hairD, true);
     if (L.style === 'curls') for (let k = 0; k < 3; k++) ell(c, -7, hy + 2 + k * 3.4, 2.6, 2.2, L.hair, true);
     if (p.blink <= 0) { ell(c, 4.6, hy + 1, 1.1, 1.6, '#3a2418'); ell(c, 4.9, hy + .4, .4, .5, '#fff'); } else line(c, [[3.6, hy + 1.4], [5.6, hy + 1.4]], '#3a2418', .9);
@@ -702,6 +732,7 @@ function drawPerson(c, p, t){
     line(c, [[rt, by], [rt + 4 * Math.sign(rt), by + 3], [rt + (6 + wind * 2) * Math.sign(rt), by + 6 + Math.sin(t * 4) * 1.2]], '#d9433b', 1.8, 9);
   }
   if (L.hatDark) { const by = hy - 7; ell(c, 0, by + 1, 11, 3.4, '#2f2b30', true); blob(c, [[-6, by], [6, by], [5, by - 6], [-5, by - 6]], '#3a353c'); }
+  if (fl >= 0) { const [hx, hyy] = flickHand(fl, side), sx = side ? 1 : 5.5; arm(sx, -21, hx, hyy); ell(c, hx, hyy, 1.7, 1.6, L.skin); }
   c.restore();
 }
 // Toby, the dog
