@@ -894,7 +894,7 @@ function flickHand(g, side){
 }
 // the head the image model drew (the sheets' kit), on a body drawn in code: with the game's pencil around it; it blinks,
 // talks, makes faces, wears the hat, as in the kit
-const KHS = 1.3;   // (the kit's head, this much bigger on the body in code)
+const KHS = 1.48;   // (the kit's head, this much bigger on the body in code)
 const kitBraidRoots = vi => { const H = CKIT.ana?.head[VEC_VIEW[vi]]; return H && H.br.map(([x, y]) => [x * .1 * KHS, -23.4 + y * .1 * KHS]); };
 function kitHeadOn(c, p, t, vi, L){
   const K = CKIT.ana, view = VEC_VIEW[vi], Hd = K && K.head[view]; if (!Hd) return false;
