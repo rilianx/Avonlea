@@ -77,3 +77,15 @@ La cabeza encaja por el ancho del cuello. Las poses (sentada, agachada, acostada
 **Visor:** `index.html?visor` muestra solo a Ana, para moverla (flechas, Shift para correr, rueda para el zoom) y
 probar todo: sentarse, agacharse, acostarse, hablar, la trenza, el sombrero, las caras, girar, y comparar con el dibujo
 en código.
+
+## Desde un video (ciclos de caminar cuadro a cuadro)
+
+`video/gemini_ana_gira.mp4` (Gemini/Veo): Ana camina en el lugar mientras gira (frente, ¾, perfil, ¾ espalda, espalda).
+
+    python3 tools/trace_video.py sprites/video/gemini_ana_gira.mp4 ana --k 10 --eps 3.5 --minarea 14 \
+      --views 'frente:0-1.4,tq_frente:1.3-2.7,perfil:2.6-4.1,tq_espalda:4.0-5.4,espalda:5.3-6.8' --sheet lamina.png
+
+Para cada vista (tramo en segundos) busca el ciclo que cierra (el par de cuadros más parecidos a un paso completo de
+distancia), toma 8 cuadros parejos y los calca; si mira a la izquierda los refleja. El juego camina con esos cuadros y
+usa el más quieto para estar de pie (sentada, agachada y acostada siguen con las poses de las hojas). En el visor,
+«Ropa: café (video) / verde (hojas)» cambia entre las dos.
