@@ -3606,7 +3606,7 @@ addEventListener('keydown', e => {
 });
 addEventListener('keyup', e => keys.delete(e.code));
 let stick = null, tapStart = null;
-cv.addEventListener('pointerdown', e => { audio(); hint(); userInput(); if (menuOpen()) return; if (game.talk && amb.cur) { const t = targetAt(view.ox + e.clientX / view.Z, view.oy + e.clientY / view.Z); if (t && (t.self || amb.cur.parts.includes(t.id.slice(2)))) { amb.cur.wait = 0; return; } } stick = { x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY }; tapStart = { x: e.clientX, y: e.clientY, t: performance.now() }; });
+cv.addEventListener('pointerdown', e => { audio(); hint(); if (OBS && !menuOpen()) { observe(null); return; } userInput(); if (menuOpen()) return; if (game.talk && amb.cur) { const t = targetAt(view.ox + e.clientX / view.Z, view.oy + e.clientY / view.Z); if (t && (t.self || amb.cur.parts.includes(t.id.slice(2)))) { amb.cur.wait = 0; return; } } stick = { x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY }; tapStart = { x: e.clientX, y: e.clientY, t: performance.now() }; });
 addEventListener('pointermove', e => { if (stick) { stick.x = e.clientX; stick.y = e.clientY; } hoverAt = e.pointerType === 'mouse' && e.target === cv ? [e.clientX, e.clientY] : null; });
 addEventListener('pointerup', e => {
   if (tapStart && !menuOpen() && !game.map && $('ai').hidden && Math.hypot(e.clientX - tapStart.x, e.clientY - tapStart.y) < 10 && performance.now() - tapStart.t < 500) tapAt(e.clientX, e.clientY);
@@ -4800,7 +4800,7 @@ function goalEnd(ag, g, st, why){
   agentLog(ag, (st === 'done' ? '✔ ' : '✘ ') + g.label + (why ? ' (' + why + ')' : '')); logEv(msg, []);
   if (ag.who === 'ana' && st === 'done') float('✔ ' + g.label, ana.x, ana.y - 64);
 }
-function agentIdle(ag){ ag.st = 'idle'; ag.task = null; wmRelease(ag.who); }
+function agentIdle(ag){ ag.st = 'idle'; ag.task = null; ag.paused = false; ag.seenInput = null; wmRelease(ag.who); }
 function agentEnd(ag, st, why){ for (const g of activeGoals(ag)) goalEnd(ag, g, st, why); agentIdle(ag); }
 const pendingOn = g => (g.pending || []).some(p => p.h.st === 'run');
 const taskReady = (ag, t) => t.st === 'todo' && t.g.st === 'run' && !(t.blockedUntil > TT) && !(t.g.waitUntil > TT) && t.deps.every(id => ag.tasks.find(u => u.id === id)?.st !== 'todo');
@@ -4836,11 +4836,27 @@ function pickTask(ag){
   return best;
 }
 const SELF_MOVING = ['dar', 'vender', 'comprar', 'cambiar', 'conversar', 'disculparse', 'pedir', 'interceder', 'guiar'];
+// the player gives Ana something else to do (walks her, taps somewhere, talks): her plan waits; after a while with
+// nothing asked of her she takes it up again (planned anew from where she is and what she has now)
+const RESUME_IDLE = 12;
+function anaPaused(ag){
+  if (ag.seenInput == null) ag.seenInput = lastInput;
+  const busyNow = WM_KEYS.some(k => keys.has(k)) || !!stick || (ana.goto && !ana.goto.wm && !ana.goto.auto) || menuOpen() || !!game.talk || game.cooking || sleeping;
+  if (!ag.paused) {
+    if (lastInput <= ag.seenInput && !(ana.goto && !ana.goto.wm && !ana.goto.auto) && !WM_KEYS.some(k => keys.has(k)) && !stick) return false;
+    ag.paused = true; ag.st = 'pausa'; const t = ag.task; if (t) { t.there = false; t.step = { a: t.a, t: 0 }; ag.task = null; }
+    if (ana.goto?.wm) ana.goto = null; agentLog(ag, '⏸ la jugadora le pidió otra cosa: el plan espera'); return true;
+  }
+  if (busyNow || TT - lastInput < RESUME_IDLE) return true;
+  ag.paused = false; ag.seenInput = lastInput; agentLog(ag, '▶ vuelve a su plan');
+  for (const g of activeGoals(ag)) goalPlan(ag, g);
+  return true;
+}
 function agentTick(dt){
   for (const ag of Object.values(AGENTS)) {
     if (ag.hold) { wmHold(ag, dt); continue; }
     if (!activeGoals(ag).length) { if (ag.st !== 'idle') agentIdle(ag); continue; }
-    if (ag.who === 'ana' && (WM_KEYS.some(k => keys.has(k)) || !!stick || (ana.goto && !ana.goto.wm && !ana.goto.auto))) { agentEnd(ag, 'fail', 'la jugadora tomó el control'); continue; }
+    if (ag.who === 'ana' && anaPaused(ag)) continue;
     for (const g of activeGoals(ag)) if (g.pending.some(p => p.h.st === 'fail' && !p.seen)) { for (const p of g.pending) if (p.h.st === 'fail') { p.seen = true; delete game.wm.facts['pedido:' + p.f.f + ':' + p.to + ':' + today()]; }   // (they tried and could not: one may ask again)
       agentLog(ag, 'quien iba a ayudar no pudo: ' + g.label); if (++g.tries > 3) goalEnd(ag, g, 'fail', 'nadie pudo ayudar'); else goalPlan(ag, g); }
     // goals with nothing left to do: done, waiting for what was promised, or (a little later) a new plan
@@ -5129,7 +5145,7 @@ function wmPanelDraw(){
   wmRunDraw();
 }
 function wmRunDraw(){
-  const gs = { run: '▶', done: '✔', fail: '✘' }, st = { run: 'en marcha', wait: 'esperando', idle: '' };
+  const gs = { run: '▶', done: '✔', fail: '✘' }, st = { run: 'en marcha', wait: 'esperando', idle: '', pausa: '⏸ en pausa (la jugadora la controla; vuelve a su plan tras ' + RESUME_IDLE + ' s sin órdenes)' };
   $('wmrun').innerHTML = Object.values(AGENTS).map(ag => `<div class="ag">${ag.who !== 'ana' ? `<button class="eye${OBS === ag.who ? ' on' : ''}" data-obs="${ag.who}" title="Observar">👁</button> ` : ''}<b>${wmName(ag.who)}</b> ${ag.hold ? '· esperando aquí' : ag.followOf ? '· acompaña a ' + wmName(ag.followOf) : st[ag.st] || ''}`
     + (ag.goals?.length ? '<ul class="gl">' + [...activeGoals(ag), ...ag.goals.filter(g => g.st !== 'run').slice(-4)].map(g => `<li class="${g.st}">${gs[g.st]} <small>[${g.prio}]</small> ${g.label}${g.why ? ' <i>(' + g.why + ')</i>' : ''}`
       + (g.st === 'run' ? '<ol class="tk">' + ag.tasks.filter(t => t.g === g && t.st !== 'skip').map(t => { const n = ag.tasks.filter(u => u.g === g && u.st !== 'skip'), dep = t.deps.map(id => n.findIndex(u => u.id === id) + 1).filter(Boolean); return `<li class="${t === ag.task ? 'cur' : t.st === 'done' ? 'past' : ''}">${t === ag.task ? '▶ ' : t.st === 'done' ? '✔ ' : taskReady(ag, t) ? '○ ' : '· '}${stepText(t.a)}${dep.length && t.st === 'todo' ? ' <small>(tras ' + dep.join(', ') + ')</small>' : ''}</li>`; }).join('') + '</ol>' : '') + '</li>').join('') + '</ul>' : '')
