@@ -765,8 +765,24 @@ function rigDraw(c, p, t){
    crouching, lying, running). The head sits on the body's neck; the face blinks and talks over its own drawing. ---------- */
 // walking, frame by frame, as a video model drew her (tools/trace_video.py): a cycle per view; standing, its quietest frame
 let ANIM_ON = true;
+// the same drawings for others, recoloured: which traced one each takes, and which of its colours are hair and dress
+// (the rest, skin, apron, boots, eyes, line, stay). The look of each one gives the new colours.
+const ANIM_SLOTS = { ana: { hair: 3, hairD: 8, dress: 2, dressD: 4 } };
+const ANIM_LIKE = { 'f:ruby': 'ana', 'f:jane': 'ana', 'f:josie': 'ana' };
+const animCache = {};
+const shadeHex = (h, f) => '#' + [1, 3, 5].map(i => Math.round(parseInt(h.slice(i, i + 2), 16) * f).toString(16).padStart(2, '0')).join('');
+function animOf(look){
+  if (CANIM[VEC_LOOK[look]]) return CANIM[VEC_LOOK[look]];
+  const base = ANIM_LIKE[look]; if (!base || !CANIM[base]) return null;
+  if (!animCache[look]) {
+    const A = CANIM[base], S_ = ANIM_SLOTS[base], L = LOOKS[look], pal = A.pal.slice();
+    pal[S_.hair] = L.hair; pal[S_.hairD] = shadeHex(L.hairD || L.hair, .78); pal[S_.dress] = L.dress; pal[S_.dressD] = shadeHex(L.dressD || L.dress, .8);
+    animCache[look] = { ...A, pal };
+  }
+  return animCache[look];
+}
 function animDraw(c, p, t){
-  const A = VEC_ON && ANIM_ON && CANIM[VEC_LOOK[p.look]]; if (!A || p.sit || p.lie || p.crouch) return false;
+  const A = VEC_ON && ANIM_ON && animOf(p.look); if (!A || p.sit || p.lie || p.crouch) return false;
   const q8 = facing8(p), flip = q8 >= 5, vi = flip ? 8 - q8 : q8, V = A.views[VEC_VIEW[vi]], L = LOOKS[p.look]; if (!V) return false;
   braidFlick(p, t, 2);   // (only for its measure of speed)
   const fr = p.moving ? V.walk[Math.floor((((p.walk || 0) % 1) + 1) % 1 * V.walk.length)] : V.stand;
@@ -5757,7 +5773,7 @@ function startVisor(){
   document.body.classList.add('visor');
   $('ai').hidden = true; close();   // (no settings dialog over her: the keys must reach her)
   const P = document.createElement('div'); P.id = 'visor'; P.className = 'paper';
-  P.innerHTML = `<b>Visor</b> <select id="vwho"><option value="ana">Ana</option><option value="marilla">Marilla</option><option value="matthew">Matthew</option></select> <small>flechas para caminar · Shift para correr · rueda: zoom</small><div>
+  P.innerHTML = `<b>Visor</b> <select id="vwho"><option value="ana">Ana</option><option value="marilla">Marilla</option><option value="matthew">Matthew</option><option value="f:ruby">Ruby (recoloreada)</option><option value="f:jane">Jane (recoloreada)</option><option value="f:josie">Josie (recoloreada)</option></select> <small>flechas para caminar · Shift para correr · rueda: zoom</small><div>
     <button data-a="sit">Sentarse</button><button data-a="crouch">Agacharse</button><button data-a="lie">Acostarse</button>
     <button data-a="talk">Hablar</button><button data-a="flick">Echarse la trenza</button><button data-a="hat">Sombrero</button>
     <button data-a="turn">Girar</button><button data-a="code">Dibujo GPT / código</button><button data-a="anim">Ropa: café (video) / verde (hojas)</button></div>

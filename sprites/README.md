@@ -112,3 +112,9 @@ corta cada cuadro por las columnas más finas entre los dos y se queda con uno:
     python3 tools/trace_video.py sprites/video/gemini_marilla_matthew_gira.mp4 matthew --split 2 --pick 1 --views $V --k 10 --eps 4 --eps-face 1.6 --minarea 14
 
 En el visor se elige a quién mirar.
+
+## Recolorear: el mismo dibujo para otros
+
+`ANIM_LIKE` (index.html) dice qué calco usa cada personaje que no tiene el suyo, y `ANIM_SLOTS` cuáles de sus colores son
+pelo y vestido; los colores nuevos salen de la ficha de aspecto de cada uno (`look`). Ruby, Jane y Josie caminan con el
+ciclo de Ana recoloreado: casi no pesa (solo la paleta).
