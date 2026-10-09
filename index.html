@@ -610,6 +610,7 @@ function facing8(p){
 // takes it and throws it back with her hand. (braidBack: it is behind now; flick: the gesture, 1.1 s.)
 function braidFlick(p, t, d){
   const dt = clamp(t - (p._bt ?? t), 0, .1); p._bt = t;
+  if (dt > 0) { const m = p._bx == null ? 0 : Math.hypot(p.x - p._bx, p.y - p._by); p._spd = lerp(p._spd || 0, m < 40 ? m / dt : 0, .15); } p._bx = p.x; p._by = p.y;
   if (p.flick) { const g = (t - p.flick) / 1.1; if (g < 1 && !p.moving && !p.sit && d !== 0) return g; p.flick = 0; p.braidBack = g >= .6; }
   if (p.moving) { p._bw = (p._bw || 0) + dt; p._bstill = 0; if (p.braidBack && p._bw > 5 + (p.n || 0) % 3) { p.braidBack = false; p._bw = 0; } }   // (walking: it slips forward again)
   else if (p.crouch) p.braidBack = false;
@@ -630,6 +631,23 @@ function drawPerson(c, p, t){
   const bob = p.moving ? Math.abs(Math.sin(p.walk * TAU)) * 1.6 : Math.sin(t * 2 + x) * .35, wind = Math.sin(t * 1.3) * .6 + Math.sin(t * 3.1) * .3;
   ell(c, x, y, 11 * L.h, 4, 'rgba(30,40,20,.26)');
   c.save(); c.translate(x, y - bob + (sitting ? 9 : 0) + (p.crouch ? 5 : 0)); c.scale(L.h * (flip ? -1 : 1), L.h);
+  const hy = -32;
+  const braid = (bx, by, len, k, th = 0) => {
+    const sn = Math.sin(th), cs = Math.cos(th), sway = (wind + (p.moving ? w : 0)) * k * Math.max(.2, cs);
+    const ex = bx + sn * len + sway, ey = by + cs * len, cx = bx + sn * len * .5 + k * .5, cy = by + cs * len * .5 + Math.abs(sn) * len * .22;   // (straight out it still sags a little)
+    c.strokeStyle = L.hair; c.lineWidth = 3.6; c.lineCap = 'round'; c.beginPath(); c.moveTo(bx, by); c.quadraticCurveTo(cx, cy, ex, ey); c.stroke();
+    c.strokeStyle = L.hairD; c.lineWidth = .9; for (let s = .3; s < 1; s += .23) { const u = 1 - s, sx = u * u * bx + 2 * u * s * cx + s * s * ex, sy = u * u * by + 2 * u * s * cy + s * s * ey; c.beginPath(); c.moveTo(sx - 1.6 * cs, sy - 1 - 1.6 * sn); c.lineTo(sx + 1.6 * cs, sy + .6 + 1.6 * sn); c.stroke(); }
+    ell(c, ex + sn * 1, ey + cs, 2, 1.3, '#d9433b');
+  };
+  const braidTo = (bx, by, tx, ty) => {   // (a braid whose end is held: from the head to the hand)
+    c.strokeStyle = L.hair; c.lineWidth = 3.6; c.lineCap = 'round'; c.beginPath(); c.moveTo(bx, by); c.quadraticCurveTo((bx + tx) / 2 + 2, (by + ty) / 2 + 3, tx, ty); c.stroke();
+    c.strokeStyle = L.hairD; c.lineWidth = .9; for (let s = .3; s < 1; s += .23) { const sx = lerp(bx, tx, s), sy = lerp(by, ty, s) + 2 * Math.sin(s * Math.PI); c.beginPath(); c.moveTo(sx - 1.6, sy - 1); c.lineTo(sx + 1.6, sy + .6); c.stroke(); }
+    ell(c, tx, ty + 1, 2, 1.3, '#d9433b');
+  };
+  // running, the braids fly out to the sides (more the faster); thrown back, one flies out level a moment
+  const run = clamp(((p._spd || 0) - 34) / 46, 0, 1), bob2 = Math.sin(p.walk * TAU), out = run * 1.05;
+  const flung = fl >= .62 ? (fl - .62) / .38 : -1;   // (after the throw: level, then dropping behind the shoulder)
+  if (L.style === 'braids' && d === 2 && run > .25 && p.braidBack && fl < 0) braid(6 + tq * 1.4, hy + 4, 12, 1.4, out * (1 + .25 * bob2));   // (behind her, showing at the side)
   // legs and shoes
   if (!sitting) {
     const l = p.moving ? w * 3 : 0, shoe = '#5b3a28';
@@ -662,23 +680,11 @@ function drawPerson(c, p, t){
     if (d !== 0) { const ex = side ? -3 : 2.5; blob(c, [[ex, -22], [ex + 3, -22], [ex + 3.4 + wind * 1.4, -14.5], [ex + .4 + wind * 1.4, -14.5]], L.scarf); c.fillStyle = 'rgba(255,255,255,.5)'; c.fillRect(ex + .4 + wind * 1.4, -16.5, 3, 1); }
   }
   // hair behind, then the head
-  const hy = -32;
-  const braid = (bx, by, len, k) => {
-    c.strokeStyle = L.hair; c.lineWidth = 3.6; c.lineCap = 'round'; c.beginPath(); c.moveTo(bx, by);
-    const ex = bx + (wind + (p.moving ? w : 0)) * k, ey = by + len; c.quadraticCurveTo(bx + k * .5, by + len * .6, ex, ey); c.stroke();
-    c.strokeStyle = L.hairD; c.lineWidth = .9; for (let s = .3; s < 1; s += .23) { const sx = lerp(bx, ex, s), sy = lerp(by, ey, s); c.beginPath(); c.moveTo(sx - 1.6, sy - 1); c.lineTo(sx + 1.6, sy + .6); c.stroke(); }
-    ell(c, ex, ey + 1, 2, 1.3, '#d9433b');
-  };
-  const braidTo = (bx, by, tx, ty) => {   // (a braid whose end is held: from the head to the hand)
-    c.strokeStyle = L.hair; c.lineWidth = 3.6; c.lineCap = 'round'; c.beginPath(); c.moveTo(bx, by); c.quadraticCurveTo((bx + tx) / 2 + 2, (by + ty) / 2 + 3, tx, ty); c.stroke();
-    c.strokeStyle = L.hairD; c.lineWidth = .9; for (let s = .3; s < 1; s += .23) { const sx = lerp(bx, tx, s), sy = lerp(by, ty, s) + 2 * Math.sin(s * Math.PI); c.beginPath(); c.moveTo(sx - 1.6, sy - 1); c.lineTo(sx + 1.6, sy + .6); c.stroke(); }
-    ell(c, tx, ty + 1, 2, 1.3, '#d9433b');
-  };
   if (L.style === 'braids' && d === 2) {
-    braid(-6 + tq * 1.4, hy + 4, 12, 1.4);
+    braid(-6 + tq * 1.4, hy + 4, 12, 1.4, -out * (1 + .25 * bob2));
     const bx = 6 + tq * 1.4;
-    if (fl >= 0) { if (fl < .62) braidTo(bx, hy + 4, ...flickHand(fl, false)); }   // (the hand takes it and throws it over the shoulder)
-    else if (!p.braidBack) braid(bx, hy + 4, 12, 1.4);
+    if (fl >= 0) { if (fl < .62) braidTo(bx, hy + 4, ...flickHand(fl, false)); else braid(bx, hy + 2, 12 * (1 - Math.max(0, flung - .5) * 1.4), 0, lerp(1.62, .9, flung * flung)); }   // (the hand takes it and throws it over the shoulder: out level, then behind)
+    else if (!p.braidBack) braid(bx, hy + 4, 12, 1.4, out * (1 - .25 * bob2));
   }
   if (L.style === 'curls' && d !== 0) for (const sx of [-7.5, 7.5]) for (let k = 0; k < 3; k++) ell(c, sx + (sx > 0 ? -k * .4 : k * .4), hy + 3 + k * 3.4, 2.6, 2.2, L.hair, true);
   ell(c, 0, hy, 8.2, 8.6, L.skin, SKIN_LINE);
@@ -686,14 +692,14 @@ function drawPerson(c, p, t){
     const bo = -tq * 2.8;   // (three-quarter from behind: the hair a little to the far side)
     if (tq) { ell(c, 7.4, hy + 1.5, 1.5, 2, L.skin, true); ell(c, 6, hy + 4.2, 1.6, 1.1, 'rgba(240,120,110,.35)'); }
     ell(c, bo, hy - 1, 8.6 - tq * .6, 8.6, L.hair, true);
-    if (L.style === 'braids') { braid(-4 + bo, hy + 3, 13, 1.8); braid(4 + bo, hy + 3, 13, 1.8); }
+    if (L.style === 'braids') { braid(-4 + bo, hy + 3, 13, 1.8, -out * (1 + .25 * bob2)); braid(4 + bo, hy + 3, 13, 1.8, out * (1 - .25 * bob2)); }
     if (L.style === 'bun') ell(c, bo, hy - 3, 4, 3.4, L.hairD, true);
     if (L.style === 'curls') for (let k = -2; k <= 2; k++) ell(c, k * 3 + bo, hy + 6, 2.6, 2.6, L.hair, true);
   } else if (side) {
     blob(c, [[-8.5, hy - 1], [-6, hy - 8], [2, hy - 9.2], [7.5, hy - 4], [5, hy - 5], [-1, hy - 4], [-3, hy + 3], [-8, hy + 4]], L.hair);
     if (L.style === 'braids') {
-      if (fl >= 0) { if (fl < .62) braidTo(3, hy + 5, ...flickHand(fl, true)); else braid(-6, hy + 3, 13 * Math.min(1, (fl - .55) * 3), -1.8); }
-      else if (p.braidBack) braid(-6, hy + 3, 13, -1.8); else braid(3, hy + 5, 11, 1.2);
+      if (fl >= 0) { if (fl < .62) braidTo(3, hy + 5, ...flickHand(fl, true)); else braid(-6, hy + 2, 13, 0, -lerp(1.65, .25, flung * flung)); }
+      else if (p.braidBack || run > .5) braid(-6, hy + 3, 13, -1.8, -out * (1.1 + .3 * Math.sin(p.walk * TAU * 2))); else braid(3, hy + 5, 11, 1.2, -out * .6);
     }
     if (L.style === 'bun') ell(c, -7, hy - 3, 3.4, 3.4, L.hairD, true);
     if (L.style === 'curls') for (let k = 0; k < 3; k++) ell(c, -7, hy + 2 + k * 3.4, 2.6, 2.2, L.hair, true);
