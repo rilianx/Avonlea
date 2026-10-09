@@ -769,7 +769,7 @@ function rigDraw(c, p, t){
 let ANIM_ON = true;
 // Ana's drawing: 'mano' (in code, a big head in pencil with the anime's features; the body as always), 'video' (traced
 // from a video), 'hojas' (traced from the sheets), 'codigo' (the first drawing in code)
-let ANA_STYLE = 'video';
+let ANA_STYLE = (location.search.match(/ana=(video|mano|hojas|codigo)/) || [, 'mano'])[1];   // (the default: the hand-drawn one with the big head; ?ana=video etc. to choose)
 const tracedOK = (look, kind) => VEC_ON && (look === 'ana' ? ANA_STYLE === kind : kind !== 'video' || ANIM_ON);
 // the same drawings for others, recoloured: which traced one each takes, and which of its colours are hair and dress
 // (the rest, skin, apron, boots, eyes, line, stay). The look of each one gives the new colours.
@@ -5813,7 +5813,7 @@ function startVisor(){
   P.innerHTML = `<b>Visor</b> <select id="vwho"><option value="ana">Ana</option><option value="marilla">Marilla</option><option value="matthew">Matthew</option><option value="f:ruby">Ruby (recoloreada)</option><option value="f:jane">Jane (recoloreada)</option><option value="f:josie">Josie (recoloreada)</option></select> <small>flechas para caminar · Shift para correr · rueda: zoom</small><div>
     <button data-a="sit">Sentarse</button><button data-a="crouch">Agacharse</button><button data-a="lie">Acostarse</button>
     <button data-a="talk">Hablar</button><button data-a="flick">Echarse la trenza</button><button data-a="hat">Sombrero</button>
-    <button data-a="turn">Girar</button><button data-a="code">Otros: dibujo GPT / código</button> Ana: <select id="vsty"><option value="video">video</option><option value="mano">a mano (cabezona)</option><option value="hojas">hojas</option><option value="codigo">código antiguo</option></select></div>
+    <button data-a="turn">Girar</button><button data-a="code">Otros: dibujo GPT / código</button> Ana: <select id="vsty"><option value="mano">a mano (cabezona)</option><option value="video">video</option><option value="hojas">hojas</option><option value="codigo">código antiguo</option></select></div>
     <div>Cara: <button data-f="">normal</button><button data-f="contenta">contenta</button><button data-f="triste">triste</button><button data-f="sorprendida">sorprendida</button><button data-f="enojada">enojada</button></div>`;
   document.body.appendChild(P);
   const a = ana, L = LOOKS.ana; a.x = 0; a.y = 0; a.dir = 2; a.dir8 = 4; a.blink = -1; a.braidBack = false; a.sit = a.lie = a.crouch = false;
@@ -5831,6 +5831,7 @@ function startVisor(){
     if (k === 'anim') ANIM_ON = !ANIM_ON;
   });
   cv.addEventListener('wheel', e => { e.preventDefault(); Z = clamp(Z * Math.exp(-e.deltaY * .0015), 1.5, 12); }, { passive: false });
+  $('vsty').value = ANA_STYLE;
   $('vsty').addEventListener('change', e => { ANA_STYLE = e.target.value; e.target.blur(); });
   $('vwho').addEventListener('change', e => { a.look = e.target.value; e.target.blur(); });   // (another one to look at: the same body, another look)
   const frame = now => {
