@@ -661,7 +661,9 @@ function headShape(c, L, hy, d, tq, F){
     c.ellipse(0, hy, 8.2, 8.6, 0, Math.PI * .92, Math.PI * 2.08);
     c.quadraticCurveTo(8.3, hy + 5, 4.4 + fo, hy + 8.2 + ch * .5); c.quadraticCurveTo(fo, hy + 9.4 + ch, -4.4 + fo * 1.4, hy + 8.2 + ch * .5); c.quadraticCurveTo(-8.3 + fo * 1.2, hy + 5, -8.1, hy + 1.6);
   }
-  c.closePath(); c.fillStyle = L.skin; c.fill(); c.strokeStyle = 'rgba(140,80,55,.75)'; c.lineWidth = .55; c.stroke();
+  c.closePath(); c.fillStyle = L.skin; c.fill();
+  if (L.pencil) { c.strokeStyle = INK; c.lineWidth = .75; c.stroke(); c.save(); c.translate(.35, .25); c.strokeStyle = 'rgba(70,42,26,.35)'; c.lineWidth = .45; c.stroke(); c.restore(); }   // (pencil: a line, and a second lighter one a little off)
+  else { c.strokeStyle = 'rgba(140,80,55,.75)'; c.lineWidth = .55; c.stroke(); }
 }
 const isTalking = p => bubbles.some(b => b.t < b.dur && personOf(b.q) === p);
 function drawMouth(c, F, mx, my, p, t, wf = 1){
@@ -682,7 +684,7 @@ const VEC = {"ana":{"pal":["#4a2e1e","#b84f26","#903e1f","#fbd2ac","#eac6a5","#4
 const VEC_LOOK = { ana: 'ana', marilla: 'marilla', matthew: 'matthew' }, VEC_VIEW = ['espalda', 'tq_espalda', 'perfil', 'tq_frente', 'frente'], vecCache = new Map();
 let VEC_ON = true;
 function vecDraw(c, p, t){
-  const V = VEC_ON && VEC[VEC_LOOK[p.look]]; if (!V) return false;
+  const V = tracedOK(p.look, 'hojas') && VEC[VEC_LOOK[p.look]]; if (!V) return false;
   const q8 = facing8(p), flip = q8 >= 5, vi = flip ? 8 - q8 : q8, L = LOOKS[p.look];
   // walking: standing, in step, standing, in step (front and back: the other foot, mirrored)
   const ph = p.moving ? Math.floor((((p.walk || 0) % 1) + 1) % 1 * 4) : 0, step = ph % 2 === 1, mir = ph === 3 && (vi === 0 || vi === 4);
@@ -715,7 +717,7 @@ function rigBraid(c, R, x0, y0, cx, cy, ex, ey){
   rigLayers(c, R, B.l, ly => { const P = new Path2D(); for (const q of ly.p) { for (let i = 0; i < q.length; i += 2) { const [bx, by, tx, ty] = at(clamp(q[i + 1] / len, 0, 1.05)), m = Math.hypot(tx, ty) || 1, X = bx + ty / m * q[i], Y = by - tx / m * q[i]; i ? P.lineTo(X, Y) : P.moveTo(X, Y); } P.closePath(); } return P; });
 }
 function rigDraw(c, p, t){
-  const R = VEC_ON && RIG[VEC_LOOK[p.look]]; if (!R) return false;
+  const R = tracedOK(p.look, 'hojas') && RIG[VEC_LOOK[p.look]]; if (!R) return false;
   const q8 = facing8(p), flip = q8 >= 5, vi = flip ? 8 - q8 : q8, view = VEC_VIEW[vi], V = R.views[view], L = LOOKS[p.look]; if (!V) return false;
   const d = vi === 0 || vi === 1 ? 0 : vi === 2 ? 1 : 2, fl = braidFlick(p, t, d), side = vi === 2;
   const w = p.moving ? Math.sin(p.walk * TAU) : 0, bob = p.moving ? -Math.abs(w) * 12 : Math.sin(t * 2 + p.x) * 2.5;
@@ -765,6 +767,10 @@ function rigDraw(c, p, t){
    crouching, lying, running). The head sits on the body's neck; the face blinks and talks over its own drawing. ---------- */
 // walking, frame by frame, as a video model drew her (tools/trace_video.py): a cycle per view; standing, its quietest frame
 let ANIM_ON = true;
+// Ana's drawing: 'mano' (in code, a big head in pencil with the anime's features; the body as always), 'video' (traced
+// from a video), 'hojas' (traced from the sheets), 'codigo' (the first drawing in code)
+let ANA_STYLE = 'mano';
+const tracedOK = (look, kind) => VEC_ON && (look === 'ana' ? ANA_STYLE === kind : kind !== 'video' || ANIM_ON);
 // the same drawings for others, recoloured: which traced one each takes, and which of its colours are hair and dress
 // (the rest, skin, apron, boots, eyes, line, stay). The look of each one gives the new colours.
 const ANIM_SLOTS = { ana: { hair: 3, hairD: 8, dress: 2, dressD: 4 } };
@@ -782,7 +788,7 @@ function animOf(look){
   return animCache[look];
 }
 function animDraw(c, p, t){
-  const A = VEC_ON && ANIM_ON && animOf(p.look); if (!A || p.sit || p.lie || p.crouch) return false;
+  const A = tracedOK(p.look, 'video') && animOf(p.look); if (!A || p.sit || p.lie || p.crouch) return false;
   const q8 = facing8(p), flip = q8 >= 5, vi = flip ? 8 - q8 : q8, V = A.views[VEC_VIEW[vi]], L = LOOKS[p.look]; if (!V) return false;
   braidFlick(p, t, 2);   // (only for its measure of speed)
   const fr = p.moving ? V.walk[Math.floor((((p.walk || 0) % 1) + 1) % 1 * V.walk.length)] : V.stand;
@@ -790,7 +796,7 @@ function animDraw(c, p, t){
   c.save(); c.translate(p.x, p.y); const k = L.h * .1; c.scale(k * (flip ? -1 : 1), k); rigLayers(c, A, fr, A.delta ? rigPathD : rigPath); c.restore(); return true;
 }
 function kitDraw(c, p, t){
-  const K = VEC_ON && CKIT[VEC_LOOK[p.look]]; if (!K) return false;
+  const K = tracedOK(p.look, 'hojas') && CKIT[VEC_LOOK[p.look]]; if (!K) return false;
   const q8 = facing8(p), flip = q8 >= 5, vi = flip ? 8 - q8 : q8, view = VEC_VIEW[vi], L = LOOKS[p.look], B = K.body[view], Hd = K.head[view];
   const d = vi === 0 || vi === 1 ? 0 : vi === 2 ? 1 : 2, fl = braidFlick(p, t, d), side = vi === 2, fb = vi === 0 || vi === 4;
   const run = clamp(((p._spd || 0) - 34) / 46, 0, 1);
@@ -887,12 +893,13 @@ function flickHand(g, side){
   return [lerp(P[i][0], P[i + 1][0], e), lerp(P[i][1], P[i + 1][1], e)];
 }
 function drawPerson(c, p, t){
+  if (p.look === 'ana') { const La = LOOKS.ana; La.big = ANA_STYLE === 'mano' ? 1.38 : 0; La.pencil = ANA_STYLE === 'mano'; }
   if (animDraw(c, p, t) || kitDraw(c, p, t)) return;
   if (p.lie) { drawLying(c, p, t); return; }
   if (rigDraw(c, p, t) || vecDraw(c, p, t)) return;
   const q8 = facing8(p), flip = q8 >= 5, side = q8 === 2 || q8 === 6, tq = q8 % 2, d = side ? (flip ? 3 : 1) : (q8 <= 1 || q8 === 7) ? 0 : 2;
   const L = LOOKS[p.look], x = p.x, y = p.y, w = Math.sin(p.walk * TAU), sitting = p.sit;
-  const hb = pts => { blob(c, pts, L.hair, false); c.strokeStyle = 'rgba(70,35,20,.7)'; c.lineWidth = .5; c.lineJoin = 'round'; c.beginPath(); pts.forEach(([a, b], k) => k ? c.lineTo(a + .6, b + .4) : c.moveTo(a + .6, b + .4)); c.closePath(); c.stroke(); };   // (hair: a thin clean line, as in the anime)
+  const hb = (pts, col = L.hair) => { if (L.pencil) { blob(c, pts, col, true); return; } blob(c, pts, col, false); c.strokeStyle = 'rgba(70,35,20,.7)'; c.lineWidth = .5; c.lineJoin = 'round'; c.beginPath(); pts.forEach(([a, b], k) => k ? c.lineTo(a + .6, b + .4) : c.moveTo(a + .6, b + .4)); c.closePath(); c.stroke(); };   // (hair: a thin clean line, as in the anime)
   const fl = L.style === 'braids' ? braidFlick(p, t, d) : -1;   // (-1, or how far along the gesture of throwing a braid back is)
   const bob = p.moving ? Math.abs(Math.sin(p.walk * TAU)) * 1.6 : Math.sin(t * 2 + x) * .35, wind = Math.sin(t * 1.3) * .6 + Math.sin(t * 3.1) * .3;
   if (!p.noShadow) ell(c, x, y, 11 * L.h, 4, 'rgba(30,40,20,.26)');
@@ -901,12 +908,12 @@ function drawPerson(c, p, t){
   const braid = (bx, by, len, k, th = 0) => {
     const sn = Math.sin(th), cs = Math.cos(th), sway = (wind + (p.moving ? w : 0)) * k * Math.max(.2, cs);
     const ex = bx + sn * len + sway, ey = by + cs * len, cx = bx + sn * len * .5 + k * .5, cy = by + cs * len * .5 + Math.abs(sn) * len * .22;   // (straight out it still sags a little)
-    c.strokeStyle = L.hair; c.lineWidth = 3.6; c.lineCap = 'round'; c.beginPath(); c.moveTo(bx, by); c.quadraticCurveTo(cx, cy, ex, ey); c.stroke();
+    c.strokeStyle = L.hair; c.lineWidth = 3.6 / Math.sqrt(L.big || 1); c.lineCap = 'round'; c.beginPath(); c.moveTo(bx, by); c.quadraticCurveTo(cx, cy, ex, ey); c.stroke();
     c.strokeStyle = L.hairD; c.lineWidth = .9; for (let s = .3; s < 1; s += .23) { const u = 1 - s, sx = u * u * bx + 2 * u * s * cx + s * s * ex, sy = u * u * by + 2 * u * s * cy + s * s * ey; c.beginPath(); c.moveTo(sx - 1.6 * cs, sy - 1 - 1.6 * sn); c.lineTo(sx + 1.6 * cs, sy + .6 + 1.6 * sn); c.stroke(); }
     ell(c, ex + sn * 1, ey + cs, 2, 1.3, '#d9433b');
   };
   const braidTo = (bx, by, tx, ty) => {   // (a braid whose end is held: from the head to the hand)
-    c.strokeStyle = L.hair; c.lineWidth = 3.6; c.lineCap = 'round'; c.beginPath(); c.moveTo(bx, by); c.quadraticCurveTo((bx + tx) / 2 + 2, (by + ty) / 2 + 3, tx, ty); c.stroke();
+    c.strokeStyle = L.hair; c.lineWidth = 3.6 / Math.sqrt(L.big || 1); c.lineCap = 'round'; c.beginPath(); c.moveTo(bx, by); c.quadraticCurveTo((bx + tx) / 2 + 2, (by + ty) / 2 + 3, tx, ty); c.stroke();
     c.strokeStyle = L.hairD; c.lineWidth = .9; for (let s = .3; s < 1; s += .23) { const sx = lerp(bx, tx, s), sy = lerp(by, ty, s) + 2 * Math.sin(s * Math.PI); c.beginPath(); c.moveTo(sx - 1.6, sy - 1); c.lineTo(sx + 1.6, sy + .6); c.stroke(); }
     ell(c, tx, ty + 1, 2, 1.3, '#d9433b');
   };
@@ -945,7 +952,9 @@ function drawPerson(c, p, t){
     blob(c, [[-5.8, -26], [5.8, -26], [5.4, -21.6], [-5.4, -21.6]], L.scarf);
     if (d !== 0) { const ex = side ? -3 : 2.5; blob(c, [[ex, -22], [ex + 3, -22], [ex + 3.4 + wind * 1.4, -14.5], [ex + .4 + wind * 1.4, -14.5]], L.scarf); c.fillStyle = 'rgba(255,255,255,.5)'; c.fillRect(ex + .4 + wind * 1.4, -16.5, 3, 1); }
   }
-  // hair behind, then the head
+  // hair behind, then the head (a big head, scaled about the neck, for the drawing 'a mano')
+  const HS = L.big || 1, hsOut = ([x, y]) => [x * HS, (y + 24) * HS - 24];
+  c.save(); if (HS !== 1) { c.translate(0, -24); c.scale(HS, HS); c.translate(0, 24); }
   if (L.style === 'braids' && d === 2) {
     braid(-6 + tq * 1.4, hy + 4, 12, 1.4, -out * (1 + .25 * bob2));
     const bx = 6 + tq * 1.4;
@@ -987,7 +996,7 @@ function drawPerson(c, p, t){
     else if (L.h <= 1.02) hb(sh([[-8.6, hy + 2], [-8.2, hy - 6], [-3, hy - 9.6], [3, hy - 9.6], [8.2, hy - 6], [8.6, hy + 2], [7, hy - 1], [6, hy - 3.8], [4.2, hy - 1.6], [2.6, hy - 4.8], [.6, hy - 2.2], [-1.2, hy - 5], [-3.2, hy - 1.8], [-4.8, hy - 4.6], [-6.6, hy - 1.2]]));   // (children: a fringe in points, as in the anime)
     else hb(sh([[-8.6, hy + 2], [-8, hy - 6], [-3, hy - 9.5], [3, hy - 9.5], [8, hy - 6], [8.6, hy + 2], [6, hy - 3], [2, hy - 4.5], [-1, hy - 3], [-5, hy - 4.5]]));
     const open = p.blink <= 0, lk = p.lookAround || 0, F = faceOf(p.look, L), sp = F.ew > 1.6 ? 3.7 : 3.3;
-    if (F.tpl === 'nina') for (const k of [-1, 1]) if (!(tq && k < 0)) hb([[k * 8.7 + fo * .2, hy - 3], [k * 7.2 + fo * .2, hy - 2], [k * 7.6 + fo * .3, hy + 5.5], [k * 8.9 + fo * .2, hy + 4]]);   // (locks down the cheeks)
+    if (F.tpl === 'nina') for (const k of [-1, 1]) if (!(tq && k < 0)) hb([[k * 8.7 + fo * .2, hy - 3], [k * 7.2 + fo * .2, hy - 2], [k * 7.6 + fo * .3, hy + 5.5], [k * 8.9 + fo * .2, hy + 4]], L.pencil ? L.hairD : L.hair);   // (locks down the cheeks)
     for (const ex of [-sp, sp]) { const far = tq && ex < 0; drawEye(c, F, ex + fo + (far ? .5 : 0), hy + 2, far ? .72 : 1, Math.sign(ex), lk, open, L); }
     ell(c, -5 + fo * .8, hy + 5.2, 1.8 * (tq ? .6 : 1), 1, `rgba(240,120,110,${F.blush})`); ell(c, 5 + fo * .7, hy + 5.2, 1.8, 1, `rgba(240,120,110,${F.blush})`);
     if (tq) ell(c, 3.4 + fo, hy + 4.4, .8, .55, 'rgba(200,130,100,.7)'); else { c.strokeStyle = 'rgba(170,100,80,.6)'; c.lineWidth = .5; c.beginPath(); c.moveTo(.6, hy + 4.2); c.lineTo(.1, hy + 4.9); c.stroke(); }   // (the nose: a touch)
@@ -1005,7 +1014,8 @@ function drawPerson(c, p, t){
     line(c, [[rt, by], [rt + 4 * Math.sign(rt), by + 3], [rt + (6 + wind * 2) * Math.sign(rt), by + 6 + Math.sin(t * 4) * 1.2]], '#d9433b', 1.8, 9);
   }
   if (L.hatDark) { const by = hy - 7; ell(c, 0, by + 1, 11, 3.4, '#2f2b30', true); blob(c, [[-6, by], [6, by], [5, by - 6], [-5, by - 6]], '#3a353c'); }
-  if (fl >= 0) { const [hx, hyy] = flickHand(fl, side), sx = side ? 1 : 5.5; arm(sx, -21, hx, hyy); ell(c, hx, hyy, 1.7, 1.6, L.skin); }
+  c.restore();
+  if (fl >= 0) { const [hx, hyy] = hsOut(flickHand(fl, side)), sx = side ? 1 : 5.5; arm(sx, -21, hx, hyy); ell(c, hx, hyy, 1.7, 1.6, L.skin); }   // (with a big head the hand goes as far out as the head is big)
   c.restore();
 }
 // Toby, the dog
@@ -5776,7 +5786,7 @@ function startVisor(){
   P.innerHTML = `<b>Visor</b> <select id="vwho"><option value="ana">Ana</option><option value="marilla">Marilla</option><option value="matthew">Matthew</option><option value="f:ruby">Ruby (recoloreada)</option><option value="f:jane">Jane (recoloreada)</option><option value="f:josie">Josie (recoloreada)</option></select> <small>flechas para caminar · Shift para correr · rueda: zoom</small><div>
     <button data-a="sit">Sentarse</button><button data-a="crouch">Agacharse</button><button data-a="lie">Acostarse</button>
     <button data-a="talk">Hablar</button><button data-a="flick">Echarse la trenza</button><button data-a="hat">Sombrero</button>
-    <button data-a="turn">Girar</button><button data-a="code">Dibujo GPT / código</button><button data-a="anim">Ropa: café (video) / verde (hojas)</button></div>
+    <button data-a="turn">Girar</button><button data-a="code">Otros: dibujo GPT / código</button> Ana: <select id="vsty"><option value="mano">a mano (cabezona)</option><option value="video">video</option><option value="hojas">hojas</option><option value="codigo">código antiguo</option></select></div>
     <div>Cara: <button data-f="">normal</button><button data-f="contenta">contenta</button><button data-f="triste">triste</button><button data-f="sorprendida">sorprendida</button><button data-f="enojada">enojada</button></div>`;
   document.body.appendChild(P);
   const a = ana, L = LOOKS.ana; a.x = 0; a.y = 0; a.dir = 2; a.dir8 = 4; a.blink = -1; a.braidBack = false; a.sit = a.lie = a.crouch = false;
@@ -5794,6 +5804,7 @@ function startVisor(){
     if (k === 'anim') ANIM_ON = !ANIM_ON;
   });
   cv.addEventListener('wheel', e => { e.preventDefault(); Z = clamp(Z * Math.exp(-e.deltaY * .0015), 1.5, 12); }, { passive: false });
+  $('vsty').addEventListener('change', e => { ANA_STYLE = e.target.value; e.target.blur(); });
   $('vwho').addEventListener('change', e => { a.look = e.target.value; e.target.blur(); });   // (another one to look at: the same body, another look)
   const frame = now => {
     const dt = clamp((now - last) / 1000, 0, .05); last = now; t += dt; TT = t;
