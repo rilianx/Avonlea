@@ -2217,6 +2217,7 @@ function talk(who, again = false){
   if (pre.some(x => x.startsWith('Ana cumplió'))) text = '¡Gracias por hacer lo que te pedí, Ana! ' + text;
   const opts = [...taskOptions(who)];
   for (const [k, [name]] of Object.entries(GIFTS)) if (game.inv[k] > 0) opts.push(['Regalar ' + name, () => give(who, k)]);
+  if (!isQuieto(who) || who === 'marilla') opts.push(['🙏 Pedirle un favor', () => favorMenu(who)]);
   opts.push(...walkOption(who), ['Adiós', close]);
   say(who, text, opts);
 }
@@ -4466,7 +4467,7 @@ const THINGS = {
   vaca: { tags: ['animal'], valor: 20 },
   cinta: { tags: ['adorno', 'regalo'], valor: .3 }, caramelos: { tags: ['dulce', 'comida', 'regalo'], valor: .1 }, huevos: { tags: ['comida', 'cosecha'], valor: .05 },
 };
-const ALL_AT_ONCE = ['bayas', 'manzanas', 'hierbas', 'dolares', 'azucar'];   // (these change hands all together; the rest one by one)
+const ALL_AT_ONCE = ['bayas', 'manzanas', 'hierbas', 'dolares', 'azucar', 'huevos'];   // (these change hands all together; the rest one by one)
 // --- places: a point out of doors ('cocina' is inside Green Gables); what can be done there
 const WP = {
   granero: [BARN.x + 60, BARN.y + 50], corral: [AREAS.corral.x + AREAS.corral.w / 2, AREAS.corral.y + AREAS.corral.h / 2], potrero: [AREAS.potrero.x + AREAS.potrero.w / 2, AREAS.potrero.y + AREAS.potrero.h / 2],
@@ -4493,8 +4494,11 @@ const WHO = {
   peg: { caracter: ['orgulloso'], le_gusta: ['hierba'] },
 };
 const whoOf = k => WHO[k] || { caracter: [], le_gusta: [] };
+const isQuieto = k => !!whoOf(k).quieto || (game.wm?.sick || []).includes(k);
 const CUTHBERT = ['ana', 'matthew', 'marilla'];
-const FAMILY = o => o === 'ana' || CUTHBERT.includes(o) ? CUTHBERT : [o];   // (whose cow it is: the household)
+const FAMILY = o => o === 'ana' || CUTHBERT.includes(o) ? CUTHBERT : [o];
+const HOUSEHOLDS = [CUTHBERT, ['barry', 'diana'], ['allan', 'sraallan'], ['hetty', 'olivia', 'sara'], ['alec', 'janet', 'felicity', 'felix', 'cecily']];
+const kin = (a, b) => HOUSEHOLDS.some(h => h.includes(a) && h.includes(b));   // (whose cow it is: the household)
 const wmName = k => k === 'ana' ? 'Ana' : NAMES[k] || FOLKBY[k]?.def.name || k;
 // the model's own memory: inventories of the others, relations and offences, who knows what, facts of the day
 game.wm = game.wm || { inv: {}, rel: { 'ana>gilbert': -2, 'ana>josie': 0 }, ofensa: { 'ana>gilbert': 'zanahorias' }, know: {}, facts: {} };
@@ -4513,6 +4517,7 @@ function socialRule(R, verb, from, to, thing){
     R.set(to, from, r + (soft ? 2 : 1)); if (soft || r + 1 >= 1) R.delOfensa(to, from); return true;
   }
   if (verb === 'pedir') return r >= 2 || c.includes('generoso');
+  if (verb === 'interceder') { if (r < 4 || R.fact('intercede:' + to + '>' + thing)) return false; R.set(to, thing, R.get(to, thing) + 1); R.setFact('intercede:' + to + '>' + thing); return true; }   // (a dear friend speaks for someone: one step closer)
 }
 const realR = { get: relGetW, set: relSetW, fact: f => !!game.wm.facts[f + ':' + today()], setFact: f => { game.wm.facts[f + ':' + today()] = true; }, delOfensa: (a, b) => { delete game.wm.ofensa[a + '>' + b]; } };
 const stateR = s => ({ get: (a, b) => s.rel[a + '>' + b] ?? 2, set: (a, b, n) => { s.rel[a + '>' + b] = clamp(n, -2, 5); }, fact: f => !!s.facts[f], setFact: f => { s.facts[f] = 1; }, delOfensa: (a, b) => { delete s.ofensa[a + '>' + b]; } });
@@ -4559,21 +4564,33 @@ const clone = s => ({ t: s.t, pos: { ...s.pos }, invs: Object.fromEntries(Object
 const sKey = s => JSON.stringify([s.pos, s.invs, s.cows, s.ofensa, s.follow, s.facts, s.stock, Object.entries(s.rel).filter(([k, v]) => v !== 2).sort(), Object.entries(s.know).map(([k, v]) => k + v.length)]);
 
 // --- the verbs: for the one who acts (me) in state s, what can be done, what it costs (minutes) and what it changes
-const FAVORS = {   // what one can ask of someone (to: who can be asked; eff: what it makes true; goal: the goal handed to them)
+const FAVORS = {   // what one can ask of someone (ok: whether it can be asked; eff: what it makes true; goal: the goal installed in whoever accepts)
   pasear: { eff: (s, me, to) => { s.follow[me] = to; }, ok: (s, me, to) => to === 'ana' || me === 'ana' },
   venir: { eff: (s, me, to) => { s.follow[to] = me; }, ok: (s, me, to) => to === 'ana' },
-  traer: { eff: (s, me, to, a) => { s.invs[me][a.item] = (s.invs[me][a.item] || 0) + a.n; }, ok: (s, me, to) => to === 'ana' || to === 'matthew', wait: 30,
-    goal: (me, a, s0) => G.tener(me, a.item, (s0.invs[me][a.item] || 0) + a.n) },
-  vender_vaca: { eff: (s, me, to, a) => { s.cows[a.cow] = 'sold:' + me; }, ok: (s, me, to, a) => CUTHBERT.includes(to) && s.cows[a.cow] && !s.cows[a.cow].startsWith('sold'), wait: 30, goal: (me, a) => G.vaca_vendida(a.cow, me) },
-  encerrar_vaca: { eff: (s, me, to, a) => { s.cows[a.cow] = a.pen; }, ok: (s, me, to, a) => (to === 'ana' || to === 'matthew') && !String(s.cows[a.cow]).startsWith('led'), wait: 30, goal: (me, a) => G.vaca_en(a.cow, a.pen) },
+  traer: { eff: (s, me, to, a) => { s.invs[me][a.item] = (s.invs[me][a.item] || 0) + a.n; }, ok: (s, me, to, a) => to !== me && (!isQuieto(to) || (s.invs[to]?.[a.item] || 0) >= a.n), wait: 45,
+    goal: (me, a, s0) => G.tener(me, a.item, (s0.invs[me][a.item] || 0) + a.n), say: a => `¿Me traerías ${itemTextW(a.item, a.n)}?` },
+  vender_vaca: { eff: (s, me, to, a) => { s.cows[a.cow] = 'sold:' + me; }, ok: (s, me, to, a) => CUTHBERT.includes(to) && s.cows[a.cow] && !s.cows[a.cow].startsWith('sold'), wait: 45, goal: (me, a) => G.vaca_vendida(a.cow, me), say: () => '¿Me vendería la vaca?' },
+  encerrar_vaca: { eff: (s, me, to, a) => { s.cows[a.cow] = a.pen; }, ok: (s, me, to, a) => to !== me && !isQuieto(to) && !String(s.cows[a.cow]).startsWith('led') && !String(s.cows[a.cow]).startsWith('sold'), wait: 45, goal: (me, a) => G.vaca_en(a.cow, a.pen),
+    say: a => a.cow === 'jersey' && a.pen === 'potrero' ? '¿Me harías el favor de devolver mi vaca al potrero? Yo no me puedo ni levantar.' : `¡${ANIMALS[a.cow].name} anda suelta otra vez! ¿Podrías llevarla a ${WP_NAME[a.pen]}?` },
+  interceder: { eff: (s, me, to, a) => { socialRule(stateR(s), 'interceder', to, a.target, me); }, ok: (s, me, to, a) => (s.rel[a.target + '>' + to] ?? 2) >= 4 && !s.facts['intercede:' + a.target + '>' + me], wait: 20,
+    goal: (me, a) => G.intercede(a.target, me), say: a => `¿Hablarías con ${wmName(a.target)} por mí? A ti te escucha.` },
 };
+// whom one could ask for help with a goal (anyone present who is not in the chain of who asked whom)
+function autoFavors(me, goal, s0, exclude = []){
+  if (exclude.length >= 2) return [];   // (no longer chains than: A asks B, who asks C)
+  const cands = WM_PEOPLE().filter(k => k !== me && !exclude.includes(k) && s0.pos[k] && (!isQuieto(me) || s0.pos[k] === s0.pos[me]) && (kin(me, k) || relGetW(k, me) >= 3)), out = [];   // (one asks one's own, or a friend)
+  if (goal.kind === 'tener') { const miss = goal.n - (s0.invs[goal.k]?.[goal.x] || 0); if (miss > 0) for (const k of cands) out.push({ f: 'traer', to: k, item: goal.x, n: miss }); }
+  if (goal.kind === 'vaca_en') for (const k of cands) out.push({ f: 'encerrar_vaca', to: k, cow: goal.c, pen: goal.p });
+  if (goal.kind === 'rel_min' && goal.b === me) for (const k of cands) if (relGetW(goal.a, k) >= 4) out.push({ f: 'interceder', to: k, target: goal.a });
+  return out;
+}
 function verbs(s, me, C){
   const L = [], here = s.pos[me], inv = s.invs[me], W = whoOf(me), at = k => s.pos[k] && s.pos[k] === here && k !== me;
   const add = (v, cost, eff, a = {}) => L.push({ v, cost, eff, ...a });
-  if (!W.quieto) for (const p of C.places) if (p !== here && C.pts[p]) add('ir', travelMin(me, here, p, C.pts), t => { t.pos[me] = p; for (const [f, w] of Object.entries(t.follow)) if (w === me) t.pos[f] = p; }, { p });
+  if (!isQuieto(me)) for (const p of C.places) if (p !== here && C.pts[p]) add('ir', travelMin(me, here, p, C.pts), t => { t.pos[me] = p; for (const [f, w] of Object.entries(t.follow)) if (w === me) t.pos[f] = p; }, { p });
   const of = OFRECE[here] || {};
   for (const x of of.tomar || []) if (!(inv[x] > 0)) add('tomar', 1, t => { t.invs[me][x] = 1; }, { x });
-  for (const x of of.recoger || []) if (s.stock[x] > 0 && (inv[x] || 0) < 9) { const n = Math.min(x === 'ramo' ? 1 : 3, s.stock[x]); add('recoger', 3, t => { t.invs[me][x] = (t.invs[me][x] || 0) + n; t.stock[x] -= n; }, { x, n }); }
+  for (const x of of.recoger || []) if (s.stock[x] > 0 && (inv[x] || 0) < 9) { const n = Math.min(x === 'ramo' ? 1 : x === 'huevos' ? 9 : 3, s.stock[x]); add('recoger', 3, t => { t.invs[me][x] = (t.invs[me][x] || 0) + n; t.stock[x] -= n; }, { x, n }); }
   if (here === W.cocina) for (const [x, d] of Object.entries(THINGS)) if (d.receta && Object.entries(d.receta).every(([i, n]) => (inv[i] || 0) >= n) && (inv[x] || 0) < 3) add('cocinar', 10, t => { for (const [i, n] of Object.entries(d.receta)) t.invs[me][i] -= n; t.invs[me][x] = (t.invs[me][x] || 0) + 1; }, { x });
   for (const k of C.people) if (at(k)) {
     for (const x of Object.keys(inv)) if (inv[x] > 0 && THINGS[x] && x !== 'cuerda' && C.items.includes(x)) { const n = ALL_AT_ONCE.includes(x) ? inv[x] : 1; add('dar', 1, t => { t.invs[me][x] -= n; t.invs[k][x] = (t.invs[k][x] || 0) + n; for (const tag of THINGS[x].tags) t.facts['dio:' + k + ':' + tag] = 1; t.facts['dio:' + k + ':' + x] = 1; t.facts['dio:' + x] = 1; socialRule(stateR(t), 'dar', me, k, x); }, { x, k, n }); }
@@ -4586,7 +4603,8 @@ function verbs(s, me, C){
     }
     if ((s.know[k] || []).some(f => !s.know[me].includes(f)) || (s.know[me] || []).some(f => !(s.know[k] || []).includes(f))) add('conversar', 2, t => { const u = [...new Set([...t.know[me], ...t.know[k]])]; t.know[me] = [...u]; t.know[k] = [...u]; }, { k });
     if (s.ofensa[k + '>' + me] && !s.facts['disc:' + k + '>' + me]) add('disculparse', 2, t => { socialRule(stateR(t), 'disculparse', me, k); }, { k });
-    for (const f of C.favors) { const F = FAVORS[f.f]; if (f.to === k && F.ok(s, me, k, f) && socialRule(stateR(s), 'pedir', me, k) && !s.facts['pedido:' + f.f + ':' + k]) add('pedir', 2 + (F.wait || 0), t => { F.eff(t, me, k, f); t.facts['pedido:' + f.f + ':' + k] = 1; }, { k, favor: f }); }
+    if (C.intercede && C.intercede[0] === k && !s.facts['intercede:' + k + '>' + C.intercede[1]]) add('interceder', 2, t => { socialRule(stateR(t), 'interceder', me, k, C.intercede[1]); t.facts['intercede:' + k + '>' + C.intercede[1]] = 1; }, { k, por: C.intercede[1] });
+    for (const f of C.favors) { const F = FAVORS[f.f]; if (f.to === k && F.ok(s, me, k, f) && socialRule(stateR(s), 'pedir', me, k) && !s.facts['pedido:' + f.f + ':' + k]) add('pedir', 2 + (F.wait || 0) + (isQuieto(me) ? 0 : 40), t => { F.eff(t, me, k, f); t.facts['pedido:' + f.f + ':' + k] = 1; }, { k, favor: f }); }
   }
   for (const [c, st] of Object.entries(s.cows)) {
     if (st === here && inv.cuerda > 0 && !Object.values(s.cows).includes('led:' + me) && (FAMILY(C.owner[c]).includes(me) || st.startsWith('c:'))) add('guiar', 2, t => { t.cows[c] = 'led:' + me; }, { cow: c });
@@ -4597,13 +4615,14 @@ function verbs(s, me, C){
 
 // --- the goals: a condition (test), how far it is (h: steps missing, roughly), and what matters for it
 const G = {
-  tener: (k, x, n) => ({ text: `${wmName(k)} tiene ${itemTextW(x, n)}`, test: s => (s.invs[k][x] || 0) >= n, h: s => { const miss = n - (s.invs[k][x] || 0); if (miss <= 0) return 0; const held = Object.entries(s.invs).some(([w, I]) => w !== k && (I[x] || 0) >= miss); return 1 + (held ? 0 : THINGS[x]?.receta ? 2 : 1) + (THINGS[x]?.receta ? Math.ceil(miss / 1) - 1 : 0); }, items: [x, ...Object.keys(THINGS[x]?.receta || {}), ...(TREATS[x] ? Object.keys(TRADE).flatMap(g => [g, ...Object.keys(THINGS[g]?.receta || {})]) : [])], people: [k, ...(TREATS[x] || LIBRETA.includes(x) ? ['lawson'] : [])] }),
+  tener: (k, x, n) => ({ kind: 'tener', k, x, n, text: `${wmName(k)} tiene ${itemTextW(x, n)}`, test: s => (s.invs[k][x] || 0) >= n, h: s => { const miss = n - (s.invs[k][x] || 0); if (miss <= 0) return 0; const held = Object.entries(s.invs).some(([w, I]) => w !== k && (I[x] || 0) >= miss); return 1 + (held ? 0 : THINGS[x]?.receta ? 2 : 1) + (THINGS[x]?.receta ? Math.ceil(miss / 1) - 1 : 0); }, items: [x, ...Object.keys(THINGS[x]?.receta || {}), ...(TREATS[x] ? Object.keys(TRADE).flatMap(g => [g, ...Object.keys(THINGS[g]?.receta || {})]) : [])], people: [k, ...(TREATS[x] || LIBRETA.includes(x) ? ['lawson'] : [])] }),
   dinero: (k, n) => ({ text: `${wmName(k)} junta ${n} dólares`, test: s => (s.invs[k].dolares || 0) >= n - 1e-9, h: s => moneyH(s.invs[k], n), items: ['tarta', 'compota', 'bayas', 'manzanas'], people: [k, 'lawson', 'shearer'] }),
   regalo_gusto: (k, to) => ({ text: `${wmName(k)} le regala a ${wmName(to)} algo que le guste`, test: s => (whoOf(to).le_gusta || []).some(t => s.facts['dio:' + to + ':' + t]), h: s => (whoOf(to).le_gusta || []).some(t => s.facts['dio:' + to + ':' + t]) ? 0 : 2, items: Object.keys(THINGS).filter(x => THINGS[x].tags.some(t => whoOf(to).le_gusta?.includes(t))).flatMap(x => [x, ...Object.keys(THINGS[x].receta || {})]), people: [k, to] }),
   reconciliar: (k, to) => ({ text: `${wmName(k)} se reconcilia con ${wmName(to)}`, test: s => (s.rel[to + '>' + k] ?? 2) >= 2 && !s.ofensa[to + '>' + k], h: s => ((s.rel[to + '>' + k] ?? 2) >= 2 ? 0 : 1) + (s.ofensa[to + '>' + k] ? 1 : 0), items: ['tarta', 'bayas', 'ramo'], people: [k, to] }),
-  rel_min: (a, b, n, by) => ({ text: `que ${wmName(a)} quiera a ${wmName(b)} al menos ${n}`, test: s => (s.rel[a + '>' + b] ?? 2) >= n, h: s => Math.max(0, n - (s.rel[a + '>' + b] ?? 2)), items: ['tarta', 'bayas'], people: [a, b] }),
+  intercede: (t, por) => ({ kind: 'intercede', text: `hablar con ${wmName(t)} por ${wmName(por)}`, test: s => !!s.facts['intercede:' + t + '>' + por], h: s => s.facts['intercede:' + t + '>' + por] ? 0 : 1, items: [], people: [t], intercede: [t, por] }),
+  rel_min: (a, b, n, by) => ({ kind: 'rel_min', a, b, n, text: `que ${wmName(a)} quiera a ${wmName(b)} al menos ${n}`, test: s => (s.rel[a + '>' + b] ?? 2) >= n, h: s => Math.max(0, n - (s.rel[a + '>' + b] ?? 2)), items: ['tarta', 'bayas'], people: [a, b] }),
   estar_en: (k, p, hasta) => ({ text: `${wmName(k)} está en ${WP_NAME[p] || p}` + (hasta ? ' antes de las ' + fmtHour(hasta) : ''), test: s => s.pos[k] === p && (!hasta || s.t <= hasta * 60), h: s => s.pos[k] === p ? 0 : 1, items: [], people: [k], places: [p], deadline: hasta }),
-  vaca_en: (c, p) => ({ text: `${ANIMALS[c].name} queda en ${WP_NAME[p]}`, test: s => s.cows[c] === p, h: s => s.cows[c] === p ? 0 : String(s.cows[c]).startsWith('led') ? 1 : 2, items: ['cuerda'], people: [], places: [p] }),
+  vaca_en: (c, p) => ({ kind: 'vaca_en', c, p, text: `${ANIMALS[c].name} queda en ${WP_NAME[p]}`, test: s => s.cows[c] === p, h: s => s.cows[c] === p ? 0 : String(s.cows[c]).startsWith('led') ? 1 : 2, items: ['cuerda'], people: [], places: [p] }),
   vaca_vendida: (c, to) => ({ text: `${ANIMALS[c].name} vendida${to ? ' a ' + wmName(to) : ''}`, test: s => to ? s.cows[c] === 'sold:' + to : String(s.cows[c]).startsWith('sold'), h: s => String(s.cows[c]).startsWith('sold') ? 0 : String(s.cows[c]).startsWith('led') ? 1 : 2, items: ['cuerda'], people: to ? [to] : ['shearer'] }),
   conoce: (k, f) => ({ text: `${wmName(k)} se entera (${f.replace(/_/g, ' ')})`, test: s => (s.know[k] || []).includes(f), h: s => (s.know[k] || []).includes(f) ? 0 : 1, items: [], people: [k, ...WM_PEOPLE().filter(p => (game.wm.know[p] || []).includes(f))] }),
   acompana: (a, b) => ({ text: `${wmName(a)} acompaña a ${wmName(b)}`, test: s => s.follow[a] === b, h: s => s.follow[a] === b ? 0 : 1, items: [], people: [a, b] }),
@@ -4620,9 +4639,17 @@ function moneyH(I, n){
 const itemTextW = (x, n) => ITEM_NAME[x] ? itemText(x, n) : n + ' ' + x;
 
 // --- the planner: A* over states (weighted: the steps missing count as 25 minutes each); at most 6000 states
-function wmPlan(me, goal, favors = [], s0 = wmNow()){
+// first one looks for a way to do it oneself (with the favors the goal names); only if there is none, whom to ask
+function wmPlan(me, goal, favors = [], s0 = wmNow(), exclude = []){
+  favors = favors.filter(f => !exclude.includes(f.to));
+  let own = wmSearch(me, goal, favors, s0, 1500); if (own.ok) return own;
+  if (own.n >= 1500 && exclude.length) { own = wmSearch(me, goal, favors, s0, 6000); if (own.ok) return own; }   // (a favor asked: if the search ran out of room, not of ways, once more and wider)
+  const more = autoFavors(me, goal, s0, exclude); if (!more.length) return own;
+  const r = wmSearch(me, goal, [...favors, ...more], s0, 2500); return r.ok || !own.plan ? r : own;
+}
+function wmSearch(me, goal, favors, s0, cap){
   const people = [...new Set([me, ...goal.people, ...WM_PEOPLE().filter(k => whoOf(k).compra || whoOf(k).vende), ...favors.map(f => f.to)])].filter(k => s0.pos[k]);
-  const items = [...new Set([...(goal.items || []), 'dolares', ...Object.keys(THINGS).filter(x => (s0.invs[me][x] || 0) > 0)])];
+  const items = [...new Set([...(goal.items || []), 'dolares'])];   // (only the things that matter for this goal)
   // only the places that matter: where the people and the cows are, where the things needed are got, the kitchen, the goal's own
   const places = new Set([...(goal.places || []), whoOf(me).cocina, 'corral', 'potrero'].filter(Boolean));
   for (const [p, o] of Object.entries(OFRECE)) if ([...(o.tomar || []), ...(o.recoger || [])].some(x => items.includes(x) || x === 'cuerda' && Object.keys(s0.cows).length)) places.add(p);
@@ -4630,12 +4657,12 @@ function wmPlan(me, goal, favors = [], s0 = wmNow()){
   const pts = {}; for (const p of places) { const q = keyPoint(p); if (q) pts[p] = q; }
   pts[s0.pos[me]] = pts[s0.pos[me]] || (wmBody(me) ? [wmBody(me).x, wmBody(me).y] : null);
   const owner = Object.fromEntries(Object.keys(s0.cows).map(c => [c, ANIM[c].owner || ANIMALS[c].owner]));
-  const C = { places: [...places].filter(p => pts[p]), pts, people, items: [...items, 'cuerda', 'azucar', 'hierbas'], favors, owner };
+  const C = { places: [...places].filter(p => pts[p]), pts, people, items: [...items, 'cuerda', 'azucar', 'hierbas'], favors, owner, intercede: goal.intercede };
   const heap = [], push = o => { heap.push(o); let i = heap.length - 1; while (i > 0) { const j = (i - 1) >> 1; if (heap[j].f <= heap[i].f) break; [heap[i], heap[j]] = [heap[j], heap[i]]; i = j; } };
   const pop = () => { const top = heap[0], last = heap.pop(); if (heap.length) { heap[0] = last; let i = 0; for (;;) { const l = 2 * i + 1, r = l + 1; let m = i; if (l < heap.length && heap[l].f < heap[m].f) m = l; if (r < heap.length && heap[r].f < heap[m].f) m = r; if (m === i) break; [heap[i], heap[m]] = [heap[m], heap[i]]; i = m; } } return top; };
   push({ s: s0, g: 0, f: goal.h(s0) * 40, path: [] }); const seenK = new Map([[sKey(s0), 0]]);
   let best = { h: goal.h(s0), g: 0, path: [] }, n = 0;
-  while (heap.length && n++ < 2500) {
+  while (heap.length && n++ < cap) {
     const cur = pop();
     if (goal.test(cur.s)) return { plan: cur.path, cost: cur.g, n, ok: true };
     const h = goal.h(cur.s); if (h < best.h || (h === best.h && cur.g < best.g && cur.path.length)) best = { h, g: cur.g, path: cur.path };
@@ -4652,7 +4679,7 @@ function wmPlan(me, goal, favors = [], s0 = wmNow()){
 }
 const stepText = a => ({ ir: () => 'ir a ' + (WP_NAME[a.p] || wmPlaceText(a.p)), tomar: () => 'tomar ' + itemTextW(a.x, 1), recoger: () => 'recoger ' + itemTextW(a.x, a.n), cocinar: () => 'cocinar ' + (ITEM_NAME[a.x]?.[0] || a.x),
   dar: () => `darle ${itemTextW(a.x, a.n)} a ${wmName(a.k)}`, vender: () => `vender ${a.x === 'vaca' ? ANIMALS[a.cow].name : itemTextW(a.x, 1)} a ${wmName(a.k)}`, comprar: () => `llevar ${itemTextW(a.x, 1)} anotado en la libreta`, cambiar: () => `cambiar ${itemTextW(a.g, a.n)} por ${ITEM_NAME[a.x][0]}`,
-  conversar: () => 'conversar con ' + wmName(a.k), disculparse: () => 'disculparse con ' + wmName(a.k), pedir: () => `pedirle a ${wmName(a.k)}: ${a.favor.f.replace('_', ' ')}`, guiar: () => 'guiar a ' + ANIMALS[a.cow].name, soltar: () => `soltar a ${ANIMALS[a.cow].name} en ${WP_NAME[a.p]}` }[a.v] || (() => a.v))().replace(/\ba el\b/g, 'al');
+  conversar: () => 'conversar con ' + wmName(a.k), interceder: () => `hablar con ${wmName(a.k)} por ${wmName(a.por)}`, disculparse: () => 'disculparse con ' + wmName(a.k), pedir: () => `pedirle a ${wmName(a.k)}: ` + ({ traer: `que le traiga ${itemTextW(a.favor.item, a.favor.n)}`, encerrar_vaca: `que lleve a ${ANIMALS[a.favor.cow]?.name} a ${WP_NAME[a.favor.pen]}`, interceder: `que hable con ${wmName(a.favor.target)} por él`, vender_vaca: 'que le venda la vaca', pasear: 'que salgan a pasear', venir: 'que venga con ella' }[a.favor.f] || a.favor.f), guiar: () => 'guiar a ' + ANIMALS[a.cow].name, soltar: () => `soltar a ${ANIMALS[a.cow].name} en ${WP_NAME[a.p]}` }[a.v] || (() => a.v))().replace(/\ba el\b/g, 'al');
 const wmPlaceText = p => p.startsWith('p:') ? 'donde está ' + wmName(p.slice(2)) : p.startsWith('c:') ? 'donde está ' + ANIMALS[p.slice(2)].name : p.startsWith('h:') ? HOUSES[p.slice(2)].place[1] : WP_NAME[p] || p;
 
 /* ---------- the agents: someone with a goal and a plan, carrying it out step by step in the world ---------- */
@@ -4660,7 +4687,7 @@ const AGENTS = {};
 const agentOn = k => !!AGENTS[k] && (AGENTS[k].st === 'run' || AGENTS[k].st === 'wait' || AGENTS[k].hold);
 let WM_OBEY = true;   // (when someone asks Ana for something, she does it by herself: for the tests)
 function agentStart(who, goal, o = {}){
-  const ag = AGENTS[who] = { who, goal, favors: o.favors || [], st: 'run', tries: 0, log: [], i: 0, plan: null, since: TT, label: o.label || goal.text, parent: o.parent };
+  const ag = AGENTS[who] = { who, goal, favors: o.favors || [], chain: o.chain || [], st: 'run', tries: 0, log: [], i: 0, plan: null, since: TT, label: o.label || goal.text, parent: o.parent };
   if (who === 'ana') { auto.on = false; auto.intent = null; if (ana.goto && !ana.goto.wm) ana.goto = null; }
   agentReplan(ag); return ag;
 }
@@ -4668,7 +4695,7 @@ function agentLog(ag, t){ ag.log.push(fmtHour(hourNow()) + ' ' + t); if (ag.log.
 function agentReplan(ag){
   const s = wmNow();
   if (ag.goal.test(s)) return agentEnd(ag, 'done');
-  const r = wmPlan(ag.who, ag.goal, ag.favors, s);
+  const r = wmPlan(ag.who, ag.goal, ag.favors, s, ag.chain);
   if (!r.plan) { agentLog(ag, 'no encuentra cómo (' + r.n + ' estados revisados)'); return agentEnd(ag, 'fail', ag.partial ? 'avanzó, pero no lo suficiente por hoy' : 'no hay un plan posible'); }
   ag.plan = r.plan; ag.i = 0; ag.step = null; ag.partial = r.partial; ag.n = r.n;
   agentLog(ag, (r.partial ? 'plan parcial: ' : 'plan: ') + r.plan.map(stepText).join(' → '));
@@ -4831,20 +4858,28 @@ function wmExec(ag, a, st, dt){
     case 'pedir': {
       if (!st.asked) {
         const r = reach(a.k); if (r !== 'ok') return r;
-        if (!socialRule(realR, 'pedir', me, a.k)) { bubble(a.k, 'No, ahora no.'); st.why = wmName(a.k) + ' no quiso'; return 'fail'; }
+        if (!socialRule(realR, 'pedir', me, a.k)) { bubble(a.k, 'No, ahora no.'); st.why = wmName(a.k) + ' no quiso'; realR.setFact('pedido:' + a.favor.f + ':' + a.k); return 'fail'; }
+        if (a.k !== 'ana' && wmDriven(a.k) && !AGENTS[a.k].hold) { bubble(a.k, 'Ahora no puedo, estoy en otra cosa.'); st.why = wmName(a.k) + ' está ocupado'; realR.setFact('pedido:' + a.favor.f + ':' + a.k); return 'fail'; }
         st.asked = 1; realR.setFact('pedido:' + a.favor.f + ':' + a.k);
         const F = FAVORS[a.favor.f], f = a.favor;
-        bubble(me, { pasear: '¿Vamos a pasear juntas?', venir: '¿Vienes a tomar el té conmigo?', traer: `¿Me traerías ${itemTextW(f.item, f.n)}?`, vender_vaca: '¿Me vendería la vaca?', encerrar_vaca: '¡Su vaca está otra vez en mi avena! Enciérrela, por favor.' }[f.f] || '¿Me harías un favor?');
+        bubble(me, F.say ? F.say(f) : { pasear: '¿Vamos a pasear juntas?', venir: '¿Vienes a tomar el té conmigo?' }[f.f] || '¿Me harías un favor?');
         logEv(`${wmName(me)} le pidió a ${wmName(a.k)}: ${f.f.replace('_', ' ')}.`, []);
         if (f.f === 'pasear') { if (me === 'diana') diana.follow = true; else AGENTS[me].follow = a.k; return 'ok'; }
         if (f.f === 'venir') { if (WM_OBEY) AGENTS.ana = { who: 'ana', st: 'idle', log: [], followOf: me, label: 'acompaña a ' + wmName(me) }; else addTask({ from: CH[me] ? me : 'marilla', tipo: 'ir', n: 1, para: 'ana', d: today(), lugar: 'casa_parroquial' }); return 'ok'; }
         const sub = F.goal(me, f, wmNow());
         if (a.k === 'ana' && !WM_OBEY) { if (f.f === 'traer' && CH[me]) addTask({ from: me, tipo: 'traer', n: f.n, para: me, d: today(), item: f.item }); else notice(`📜 ${wmName(me)} te pide: ${sub.text}.`); }
-        else st.subGoal = agentStart(a.k, sub, { label: sub.text + ' (se lo pidió ' + wmName(me) + ')', parent: me }).goal;
+        else st.subGoal = agentStart(a.k, sub, { label: sub.text + ' (se lo pidió ' + wmName(me) + ')', parent: me, chain: [...(ag.chain || []), me] }).goal;
         st.sub = sub;
       }
       if (st.sub && AGENTS[a.k]?.st === 'fail' && AGENTS[a.k].goal === st.subGoal) { st.why = wmName(a.k) + ' no pudo'; return 'fail'; }
       return st.sub && !st.sub.test(wmNow()) ? 'run' : 'ok';
+    }
+    case 'interceder': {
+      const r = reach(a.k); if (r !== 'ok') return r;
+      if (!st.said) { st.said = 1; bubble(me, `${wmName(a.k)}, ${wmName(a.por)} está arrepentido de verdad. ¿No le darías otra oportunidad?`); }
+      if (!wait(2.8)) return 'run';
+      const ok = socialRule(realR, 'interceder', me, a.k, a.por); realR.setFact('intercede:' + a.k + '>' + a.por);
+      bubble(a.k, ok ? (a.k === 'ana' ? 'Bueno... si tú lo dices, Diana. Lo pensaré.' : 'Está bien, lo pensaré.') : 'Hmpf.'); logEv(`${wmName(me)} habló con ${wmName(a.k)} por ${wmName(a.por)}.`, []); return 'ok';
     }
     case 'guiar': {
       const c = ANIM[a.cow]; if (!(inv.cuerda > 0)) { st.why = 'no tiene cuerda'; return 'fail'; }
@@ -4896,16 +4931,41 @@ const WM_TESTS = [
   { who: 'gilbert', text: 'Gilbert quiere que Ana le hable', setup: () => { dayAt(16); game.wm.rel['ana>gilbert'] = -2; game.wm.ofensa['ana>gilbert'] = 'zanahorias'; delete game.wm.facts['disc:ana>gilbert:' + today()]; atOut('ana', PLAY.aldea[0], PLAY.aldea[1] + 80); atOut('gilbert', PLAY.aldea[0] + 300, PLAY.aldea[1] + 120); }, goal: () => G.rel_min('ana', 'gilbert', 0) },
   { who: 'sraallan', text: 'La Sra. Allan quiere tomar el té con Ana', setup: () => { dayAt(15); wmInv('sraallan').te = 0; atOut('ana', CHURCH_DOOR[0] + 120, CHURCH_DOOR[1] + 60); atOut('sraallan', CHURCH_DOOR[0] + 260, CHURCH_DOOR[1] + 80); }, goal: () => G.te_con('sraallan', 'ana', 'casa_parroquial'), favors: [{ f: 'venir', to: 'ana' }] },
   { who: 'peg', text: 'Peg Bowen junta hierbas', setup: () => { dayAt(10); setSeason(1); wmInv('peg').hierbas = 0; atOut('peg', WP.bosque_peg[0] - 300, WP.bosque_peg[1] + 200); }, goal: () => G.tener('peg', 'hierbas', 3) },
+  { who: 'marilla', text: 'Marilla necesita azúcar: se la pide a Matthew, que va a la tienda', setup: () => { dayAt(12.2); wmInv('marilla').azucar = 0; if (game.scene !== 'out') goOut(); atOut('ana', PLAY.aldea[0], PLAY.aldea[1] + 200); const m = PEOPLE.matthew; m.where = 'gg'; m.x = TABLE.x - 6; m.y = TABLE.y + 48; }, goal: () => G.tener('marilla', 'azucar', 1) },
+  { who: 'barry', text: 'La Sra. Barry quiere compota: se la pide a Diana, y Diana a Ana', setup: () => { dayAt(10); setSeason(2); for (const t of trees) if (t.kind === 'apple') t.apples = 3; wmInv('barry').compota = 0; wmInv('diana').compota = 0; game.inv.compota = 0; game.inv.manzanas = 0; diana.where = 'os'; diana.x = KIT.w / 2; diana.y = KIT.h / 2; const b = PEOPLE.barry; b.where = 'os'; atOut('ana', GG.x, GG.y + 90); }, goal: () => G.tener('barry', 'compota', 1) },
+  { who: 'gilbert', text: 'Gilbert le pide a Diana que hable con Ana por él', setup: () => { dayAt(16); game.wm.rel['ana>gilbert'] = -2; game.wm.ofensa['ana>gilbert'] = 'zanahorias'; game.wm.rel['ana>diana'] = 5; game.wm.rel['diana>gilbert'] = 3; for (const f of Object.keys(game.wm.facts)) if (/^(disc|intercede):ana>gilbert/.test(f)) delete game.wm.facts[f]; atOut('ana', PLAY.aldea[0], PLAY.aldea[1] + 80); atOut('gilbert', PLAY.aldea[0] + 300, PLAY.aldea[1] + 120); atOut('diana', PLAY.aldea[0] + 420, PLAY.aldea[1] + 160); }, goal: () => G.rel_min('ana', 'gilbert', 0) },
+  { who: 'harrison', text: 'El Sr. Harrison, enfermo en cama, le pide a Ana que devuelva su vaca', setup: () => { dayAt(11); game.wm.sick = ['harrison']; const A = AREAS.avena; cowLoose('jersey', A.x + 30, A.y + A.h - 30); game.inv.cuerda = 0; const h = PEOPLE.harrison; h.where = 'hh'; h.x = KIT.w / 2; h.y = KIT.h / 2; goIn('hh'); }, goal: () => G.vaca_en('jersey', 'potrero') },
+  { who: 'matthew', text: 'Ana le pide a Matthew que le traiga huevos', setup: () => { dayAt(9); game.eggDay = -1; game.inv.huevos = 0; atOut('ana', GG.x + 300, GG.y + 140); atOut('matthew', GG.x + 200, GG.y + 150); }, ask: { f: 'traer', to: 'matthew', item: 'huevos', n: 6 } },
   { who: 'ana', text: 'Regalar una tarta de bayas en invierno (imposible)', setup: () => { dayAt(10); setSeason(3); game.inv.bayas = 0; game.inv.tarta = 0; atOut('ana', GG.x, GG.y + 90); }, goal: () => G.regalar_cosa('ana', 'tarta') },
 ];
+// Ana asks someone a favor (the player, from a conversation): if they accept and see how, the goal is theirs
+function favorMenu(who){
+  const opts = [], cuth = CUTHBERT.includes(who);
+  const wants = [['manzanas', 3], ['bayas', 3], ['huevos', 6], ...(cuth ? [['azucar', 1]] : []), ...(who === 'marilla' ? [['tarta', 1], ['compota', 1], ['te', 1]] : [])];
+  for (const [x, n] of wants) if (inSeason(x) || x === 'huevos' || x === 'azucar') opts.push([`Que me traiga ${itemText(x, n)}`, () => playerAsk(who, { f: 'traer', to: who, item: x, n })]);
+  for (const c of Object.values(ANIM)) if (c.kind === 'cow' && cowKey(c).startsWith('c:')) opts.push([`Que lleve a ${ANIMALS[c.id].name} a su corral`, () => playerAsk(who, { f: 'encerrar_vaca', to: who, cow: c.id, pen: ANIMALS[c.id].home })]);
+  opts.push(['← Volver', () => talk(who, true)]);
+  say(who, '¿Qué necesitas, Ana?', opts);
+}
+function playerAsk(who, f){
+  close();
+  const F = FAVORS[f.f], s0 = wmNow();
+  if (!socialRule(realR, 'pedir', 'ana', who)) return say(who, 'Ahora no, Ana.', [['Bueno', close]]), null;
+  if (wmDriven(who) && !AGENTS[who].hold) return say(who, 'Ahora no puedo, estoy en otra cosa. Más tarde, ¿sí?', [['Bueno', close]]), null;
+  const goal = F.goal('ana', f, s0), r = wmPlan(who, goal, [], s0, ['ana']);
+  if (!r.plan) return say(who, pick(['Bueno, pues... no sé cómo podría, Ana.', 'Me gustaría, pero no veo cómo.']), [['Bueno', close]]), null;
+  logEv(`Ana le pidió a ${wmName(who)}: ${goal.text}.`, [who]);
+  say(who, pick(['¡Claro que sí! Ya vuelvo.', 'Bueno, pues... ya lo creo, Ana. Deja eso en mis manos.', 'Por supuesto, querida.']), [['¡Gracias!', close]]);
+  return agentStart(who, goal, { label: goal.text + ' (se lo pidió Ana)', parent: 'ana', chain: ['ana'] });
+}
 function dayAt(h){ dayT = Math.floor(dayT) + (h - 6) / 24; }
 function wmRunTest(i){
   const T = WM_TESTS[i];
   for (const k of Object.keys(AGENTS)) { wmRelease(k); delete AGENTS[k]; }
-  close(); if (ana.goto) ana.goto = null; diana.follow = false; game.seasonShift = 0; cowHome('dolly'); cowHome('jersey'); game.inv.cuerda = 0; for (const k of ['matthew', 'harrison', 'shearer']) delete game.wm.inv[k];
+  close(); if (ana.goto) ana.goto = null; diana.follow = false; game.wm.sick = []; for (const f of Object.keys(game.wm.facts)) if (/^(pedido|intercede|disc|gusto|dio):/.test(f)) delete game.wm.facts[f]; game.seasonShift = 0; cowHome('dolly'); cowHome('jersey'); game.inv.cuerda = 0; for (const k of ['matthew', 'harrison', 'shearer']) delete game.wm.inv[k];
   if (PEOPLE.shearer.where !== 'away') { PEOPLE.shearer.where = 'away'; }
   T.setup(); S = ((seasonCount() % 4) + 4) % 4;
-  const ag = agentStart(T.who, T.goal(), { favors: T.favors || [], label: T.text }); ag.test = i;
+  const ag = T.ask ? playerAsk(T.who, T.ask) || { st: 'fail', why: 'no aceptó', log: [] } : agentStart(T.who, T.goal(), { favors: T.favors || [], label: T.text }); ag.test = i; if (T.ask) ag.label = T.text;
   if (T.who !== 'ana') cam.x = wmBody(T.who).x, cam.y = wmBody(T.who).y;
   wmPanelDraw(); return ag;
 }
