@@ -769,7 +769,7 @@ function rigDraw(c, p, t){
 let ANIM_ON = true;
 // Ana's drawing: 'mano' (in code, a big head in pencil with the anime's features; the body as always), 'video' (traced
 // from a video), 'hojas' (traced from the sheets), 'codigo' (the first drawing in code)
-let ANA_STYLE = 'mano';
+let ANA_STYLE = 'video';
 const tracedOK = (look, kind) => VEC_ON && (look === 'ana' ? ANA_STYLE === kind : kind !== 'video' || ANIM_ON);
 // the same drawings for others, recoloured: which traced one each takes, and which of its colours are hair and dress
 // (the rest, skin, apron, boots, eyes, line, stay). The look of each one gives the new colours.
@@ -892,12 +892,31 @@ function flickHand(g, side){
   let i = 0; while (i < 3 && g > T_[i + 1]) i++; const k = (g - T_[i]) / (T_[i + 1] - T_[i]), e = k * k * (3 - 2 * k);
   return [lerp(P[i][0], P[i + 1][0], e), lerp(P[i][1], P[i + 1][1], e)];
 }
+// the head the image model drew (the sheets' kit), on a body drawn in code: with the game's pencil around it; it blinks,
+// talks, makes faces, wears the hat, as in the kit
+const KHS = 1.3;   // (the kit's head, this much bigger on the body in code)
+const kitBraidRoots = vi => { const H = CKIT.ana?.head[VEC_VIEW[vi]]; return H && H.br.map(([x, y]) => [x * .1 * KHS, -23.4 + y * .1 * KHS]); };
+function kitHeadOn(c, p, t, vi, L){
+  const K = CKIT.ana, view = VEC_VIEW[vi], Hd = K && K.head[view]; if (!Hd) return false;
+  const ex = vi === 4 && p.face && K.expr[p.face], HL = ex ? ex.l : Hd.l, MK = ex ? ex.marks : Hd.marks;
+  c.save(); c.translate(0, -23.4); c.scale(.1 * KHS, .1 * KHS);
+  rigLayers(c, K, HL);
+  const P = rigPath(HL[0]); c.strokeStyle = INK; c.lineWidth = 7; c.lineJoin = 'round'; c.stroke(P); c.translate(3, 2); c.strokeStyle = 'rgba(70,42,26,.35)'; c.lineWidth = 4; c.stroke(P); c.translate(-3, -2);   // (pencil around)
+  if (MK) {
+    const fill = (x, y, rx, ry, col) => { c.beginPath(); c.ellipse(x, y, rx, ry, 0, 0, TAU); c.fillStyle = col; c.fill(); };
+    if (p.blink > 0) for (const [x, y, rx, ry] of MK.eyes) { fill(x, y, rx, ry, K.pal[3]); c.strokeStyle = K.line; c.lineWidth = Math.max(4, ry * .2); c.lineCap = 'round'; c.beginPath(); c.moveTo(x - rx * .8, y); c.quadraticCurveTo(x, y + ry * .55, x + rx * .8, y); c.stroke(); }
+    if (isTalking(p) && MK.mouth) { let [x, y, rx, ry] = MK.mouth; const o = .45 + Math.abs(Math.sin(t * 13)) * .55; if (vi === 2) { x -= rx * .4; rx *= .55; ry = Math.min(ry, 6); }
+      fill(x, y, rx + 3, ry + 3, K.pal[3]); fill(x, y + 2, rx * .8, (ry + 8) * o, '#9a3a32'); fill(x, y + 2 + (ry + 8) * o * .45, rx * .5, (ry + 8) * o * .45, '#e07a70'); }
+  }
+  if (L.hat && K.hat[view]) { c.translate(Hd.hat[0], Hd.hat[1] + 8); if (p.askew) c.rotate(-.32); c.scale(1.3, 1.3); rigLayers(c, K, K.hat[view].l); }
+  c.restore(); return true;
+}
 function drawPerson(c, p, t){
   if (p.look === 'ana') { const La = LOOKS.ana; La.big = ANA_STYLE === 'mano' ? 1.38 : 0; La.pencil = ANA_STYLE === 'mano'; }
   if (animDraw(c, p, t) || kitDraw(c, p, t)) return;
   if (p.lie) { drawLying(c, p, t); return; }
   if (rigDraw(c, p, t) || vecDraw(c, p, t)) return;
-  const q8 = facing8(p), flip = q8 >= 5, side = q8 === 2 || q8 === 6, tq = q8 % 2, d = side ? (flip ? 3 : 1) : (q8 <= 1 || q8 === 7) ? 0 : 2;
+  const q8 = facing8(p), flip = q8 >= 5, side = q8 === 2 || q8 === 6, tq = q8 % 2, d = side ? (flip ? 3 : 1) : (q8 <= 1 || q8 === 7) ? 0 : 2, vi = flip ? 8 - q8 : q8;
   const L = LOOKS[p.look], x = p.x, y = p.y, w = Math.sin(p.walk * TAU), sitting = p.sit;
   const hb = (pts, col = L.hair) => { if (L.pencil) { blob(c, pts, col, true); return; } blob(c, pts, col, false); c.strokeStyle = 'rgba(70,35,20,.7)'; c.lineWidth = .5; c.lineJoin = 'round'; c.beginPath(); pts.forEach(([a, b], k) => k ? c.lineTo(a + .6, b + .4) : c.moveTo(a + .6, b + .4)); c.closePath(); c.stroke(); };   // (hair: a thin clean line, as in the anime)
   const fl = L.style === 'braids' ? braidFlick(p, t, d) : -1;   // (-1, or how far along the gesture of throwing a braid back is)
@@ -905,16 +924,17 @@ function drawPerson(c, p, t){
   if (!p.noShadow) ell(c, x, y, 11 * L.h, 4, 'rgba(30,40,20,.26)');
   c.save(); c.translate(x, y - bob + (sitting ? 9 : 0) + (p.crouch ? 5 : 0)); c.scale(L.h * (flip ? -1 : 1), L.h);
   const hy = -32;
+  const bstroke = () => { const bw = 3.6 / Math.sqrt(L.big || 1) * (L.pencil ? .8 : 1); if (L.pencil) { c.strokeStyle = INK; c.lineWidth = bw + 1.1; c.stroke(); } c.strokeStyle = L.hair; c.lineWidth = bw; c.stroke(); };   // (a braid's body; in pencil, with the line around it)
   const braid = (bx, by, len, k, th = 0) => {
     const sn = Math.sin(th), cs = Math.cos(th), sway = (wind + (p.moving ? w : 0)) * k * Math.max(.2, cs);
     const ex = bx + sn * len + sway, ey = by + cs * len, cx = bx + sn * len * .5 + k * .5, cy = by + cs * len * .5 + Math.abs(sn) * len * .22;   // (straight out it still sags a little)
-    c.strokeStyle = L.hair; c.lineWidth = 3.6 / Math.sqrt(L.big || 1); c.lineCap = 'round'; c.beginPath(); c.moveTo(bx, by); c.quadraticCurveTo(cx, cy, ex, ey); c.stroke();
-    c.strokeStyle = L.hairD; c.lineWidth = .9; for (let s = .3; s < 1; s += .23) { const u = 1 - s, sx = u * u * bx + 2 * u * s * cx + s * s * ex, sy = u * u * by + 2 * u * s * cy + s * s * ey; c.beginPath(); c.moveTo(sx - 1.6 * cs, sy - 1 - 1.6 * sn); c.lineTo(sx + 1.6 * cs, sy + .6 + 1.6 * sn); c.stroke(); }
+    c.lineCap = 'round'; c.beginPath(); c.moveTo(bx, by); c.quadraticCurveTo(cx, cy, ex, ey); bstroke();
+    c.strokeStyle = L.hairD; c.lineWidth = L.pencil ? .55 : .9; for (let s = .3; s < 1; s += L.pencil ? .17 : .23) { const u = 1 - s, sx = u * u * bx + 2 * u * s * cx + s * s * ex, sy = u * u * by + 2 * u * s * cy + s * s * ey; c.beginPath(); c.moveTo(sx - 1.6 * cs, sy - 1 - 1.6 * sn); c.lineTo(sx + 1.6 * cs, sy + .6 + 1.6 * sn); c.stroke(); }
     ell(c, ex + sn * 1, ey + cs, 2, 1.3, '#d9433b');
   };
   const braidTo = (bx, by, tx, ty) => {   // (a braid whose end is held: from the head to the hand)
-    c.strokeStyle = L.hair; c.lineWidth = 3.6 / Math.sqrt(L.big || 1); c.lineCap = 'round'; c.beginPath(); c.moveTo(bx, by); c.quadraticCurveTo((bx + tx) / 2 + 2, (by + ty) / 2 + 3, tx, ty); c.stroke();
-    c.strokeStyle = L.hairD; c.lineWidth = .9; for (let s = .3; s < 1; s += .23) { const sx = lerp(bx, tx, s), sy = lerp(by, ty, s) + 2 * Math.sin(s * Math.PI); c.beginPath(); c.moveTo(sx - 1.6, sy - 1); c.lineTo(sx + 1.6, sy + .6); c.stroke(); }
+    c.lineCap = 'round'; c.beginPath(); c.moveTo(bx, by); c.quadraticCurveTo((bx + tx) / 2 + 2, (by + ty) / 2 + 3, tx, ty); bstroke();
+    c.strokeStyle = L.hairD; c.lineWidth = L.pencil ? .55 : .9; for (let s = .3; s < 1; s += .23) { const sx = lerp(bx, tx, s), sy = lerp(by, ty, s) + 2 * Math.sin(s * Math.PI); c.beginPath(); c.moveTo(sx - 1.6, sy - 1); c.lineTo(sx + 1.6, sy + .6); c.stroke(); }
     ell(c, tx, ty + 1, 2, 1.3, '#d9433b');
   };
   // running, the braids fly out to the sides (more the faster); thrown back, one flies out level a moment
@@ -955,12 +975,18 @@ function drawPerson(c, p, t){
   // hair behind, then the head (a big head, scaled about the neck, for the drawing 'a mano')
   const HS = L.big || 1, hsOut = ([x, y]) => [x * HS, (y + 24) * HS - 24];
   c.save(); if (HS !== 1) { c.translate(0, -24); c.scale(HS, HS); c.translate(0, 24); }
+  const BR = L.pencil ? kitBraidRoots(vi) : null;   // (with the kit's head: the braids from where it has them)
   if (L.style === 'braids' && d === 2) {
-    braid(-6 + tq * 1.4, hy + 4, 12, 1.4, -out * (1 + .25 * bob2));
-    const bx = 6 + tq * 1.4;
-    if (fl >= 0) { if (fl < .62) braidTo(bx, hy + 4, ...flickHand(fl, false)); else braid(bx, hy + 2, 12 * (1 - Math.max(0, flung - .5) * 1.4), 0, lerp(1.62, .9, flung * flung)); }   // (the hand takes it and throws it over the shoulder: out level, then behind)
-    else if (!p.braidBack) braid(bx, hy + 4, 12, 1.4, out * (1 - .25 * bob2));
+    braid(...(BR ? BR[0] : [-6 + tq * 1.4, hy + 4]), 12, 1.4, -out * (1 + .25 * bob2));
+    const [bx, byy] = BR ? BR[1] : [6 + tq * 1.4, hy + 4];
+    if (fl >= 0) { if (fl < .62) braidTo(bx, byy, ...flickHand(fl, false)); else braid(bx, byy - 2, 12 * (1 - Math.max(0, flung - .5) * 1.4), 0, lerp(1.62, .9, flung * flung)); }   // (the hand takes it and throws it over the shoulder: out level, then behind)
+    else if (!p.braidBack) braid(bx, byy, 12, 1.4, out * (1 - .25 * bob2));
   }
+  if (BR) {   // (the kit's head; from the side the braid behind it, from behind the braids down the back)
+    if (side) braid(...BR[0], 13, -1.8, -out * (1.1 + .3 * Math.sin(p.walk * TAU * 2)) - .1);
+    kitHeadOn(c, p, t, vi, L);
+    if (d === 0) { braid(...BR[0], 13, 1.8, -out * (1 + .25 * bob2)); braid(...BR[1], 13, 1.8, out * (1 - .25 * bob2)); }
+  } else {
   if (L.style === 'curls' && d !== 0) for (const sx of [-7.5, 7.5]) for (let k = 0; k < 3; k++) ell(c, sx + (sx > 0 ? -k * .4 : k * .4), hy + 3 + k * 3.4, 2.6, 2.2, L.hair, true);
   headShape(c, L, hy, d, tq, faceOf(p.look, L));
   if (d === 0) {
@@ -1014,6 +1040,7 @@ function drawPerson(c, p, t){
     line(c, [[rt, by], [rt + 4 * Math.sign(rt), by + 3], [rt + (6 + wind * 2) * Math.sign(rt), by + 6 + Math.sin(t * 4) * 1.2]], '#d9433b', 1.8, 9);
   }
   if (L.hatDark) { const by = hy - 7; ell(c, 0, by + 1, 11, 3.4, '#2f2b30', true); blob(c, [[-6, by], [6, by], [5, by - 6], [-5, by - 6]], '#3a353c'); }
+  }
   c.restore();
   if (fl >= 0) { const [hx, hyy] = hsOut(flickHand(fl, side)), sx = side ? 1 : 5.5; arm(sx, -21, hx, hyy); ell(c, hx, hyy, 1.7, 1.6, L.skin); }   // (with a big head the hand goes as far out as the head is big)
   c.restore();
@@ -5776,7 +5803,7 @@ function drawMap(){
   $('maptitle').textContent = 'Avonlea · ' + SEASONS[S] + ', día ' + (Math.floor(dayT) % 2 + 1) + ' · ' + SICON[S] + ' · toca un lugar para ir allí · rueda o pellizco: acercar · arrastra para moverte';
 }
 function loop(now){ const dt = clamp((now - last) / 1000, 0, .05); last = now; update(dt); render(); requestAnimationFrame(loop); }
-window.__avonlea = { setVec: v => { VEC_ON = v; }, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+window.__avonlea = { setVec: v => { VEC_ON = v; }, setStyle: v => { ANA_STYLE = v; }, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
 /* ---------- the viewer (index.html?visor): only Ana, big, on a plain floor, to look at the drawings and move her:
    arrows (Shift to run), and buttons for everything she can do. ---------- */
 function startVisor(){
@@ -5786,7 +5813,7 @@ function startVisor(){
   P.innerHTML = `<b>Visor</b> <select id="vwho"><option value="ana">Ana</option><option value="marilla">Marilla</option><option value="matthew">Matthew</option><option value="f:ruby">Ruby (recoloreada)</option><option value="f:jane">Jane (recoloreada)</option><option value="f:josie">Josie (recoloreada)</option></select> <small>flechas para caminar · Shift para correr · rueda: zoom</small><div>
     <button data-a="sit">Sentarse</button><button data-a="crouch">Agacharse</button><button data-a="lie">Acostarse</button>
     <button data-a="talk">Hablar</button><button data-a="flick">Echarse la trenza</button><button data-a="hat">Sombrero</button>
-    <button data-a="turn">Girar</button><button data-a="code">Otros: dibujo GPT / código</button> Ana: <select id="vsty"><option value="mano">a mano (cabezona)</option><option value="video">video</option><option value="hojas">hojas</option><option value="codigo">código antiguo</option></select></div>
+    <button data-a="turn">Girar</button><button data-a="code">Otros: dibujo GPT / código</button> Ana: <select id="vsty"><option value="video">video</option><option value="mano">a mano (cabezona)</option><option value="hojas">hojas</option><option value="codigo">código antiguo</option></select></div>
     <div>Cara: <button data-f="">normal</button><button data-f="contenta">contenta</button><button data-f="triste">triste</button><button data-f="sorprendida">sorprendida</button><button data-f="enojada">enojada</button></div>`;
   document.body.appendChild(P);
   const a = ana, L = LOOKS.ana; a.x = 0; a.y = 0; a.dir = 2; a.dir8 = 4; a.blink = -1; a.braidBack = false; a.sit = a.lie = a.crouch = false;
