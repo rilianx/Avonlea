@@ -14,3 +14,14 @@ generan con el mismo dibujo del juego (`drawPerson`).
 > suelo. El fondo debe ser blanco liso.
 
 Lo que vuelva se calca a código (colores planos → trazados) y se monta sobre el esqueleto del juego.
+
+## Del dibujo de GPT al juego
+
+`gpt_ana_sin_sombrero.webp` es la hoja redibujada. Se calca a trazados con:
+
+    python3 tools/trace.py sprites/gpt_ana_sin_sombrero.webp ana --eps 1 \
+      --pal '#4a2e1e,#b74e27,#923d1d,#fbd2ac,#e5b391,#477a56,#355c3e,#5f3924,#d53430,#ece6dc,#65787c,#f2a08c,#ffffff'
+
+(`--pal`: los colores planos de la hoja, el primero es la línea.) Escribe `sprites/vec/ana.json` y el bloque `VEC` de
+`index.html`. `node tools/compare.js ana salida.png` dibuja el calco donde estaban las figuras, para compararlo con la
+imagen original.
