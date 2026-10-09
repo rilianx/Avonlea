@@ -710,7 +710,7 @@ function drawPerson(c, p, t){
   const hb = pts => { blob(c, pts, L.hair, false); c.strokeStyle = 'rgba(70,35,20,.7)'; c.lineWidth = .5; c.lineJoin = 'round'; c.beginPath(); pts.forEach(([a, b], k) => k ? c.lineTo(a + .6, b + .4) : c.moveTo(a + .6, b + .4)); c.closePath(); c.stroke(); };   // (hair: a thin clean line, as in the anime)
   const fl = L.style === 'braids' ? braidFlick(p, t, d) : -1;   // (-1, or how far along the gesture of throwing a braid back is)
   const bob = p.moving ? Math.abs(Math.sin(p.walk * TAU)) * 1.6 : Math.sin(t * 2 + x) * .35, wind = Math.sin(t * 1.3) * .6 + Math.sin(t * 3.1) * .3;
-  ell(c, x, y, 11 * L.h, 4, 'rgba(30,40,20,.26)');
+  if (!p.noShadow) ell(c, x, y, 11 * L.h, 4, 'rgba(30,40,20,.26)');
   c.save(); c.translate(x, y - bob + (sitting ? 9 : 0) + (p.crouch ? 5 : 0)); c.scale(L.h * (flip ? -1 : 1), L.h);
   const hy = -32;
   const braid = (bx, by, len, k, th = 0) => {
