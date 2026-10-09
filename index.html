@@ -318,7 +318,7 @@ const HOUSES = {
   tl: { at: SHOP, name: 'Tienda de Lawson', depth: 96, roof: '#8a5a3c', wall: '#e8d6b0', trim: '#5a3a28', small: true, style: 'tienda', sign: [-88, 62], far: true,
     enter: 'Entrar a la tienda', inText: 'en la tienda de Lawson', arrive: ' entró a la tienda de Lawson.', place: ['tienda_lawson', 'la tienda de Lawson', 30, 56],
     open: () => { const h = hourNow() % 24; return h >= 8 && h < 18; }, closed: 'La tienda está cerrada (abre de 8 a 18)',
-    describe: 'la tienda de Lawson (en la aldea, con su toldo a rayas: azúcar, harina, hilo, cintas, caramelos de menta; el Sr. Lawson compra tartas, compotas y fruta)' },
+    describe: 'la tienda de Lawson (en la aldea, con su toldo a rayas: azúcar, harina, hilo, cintas, caramelos de menta; se cambian huevos, fruta y tartas por lo que hace falta, y lo de la casa se anota en la libreta de cada familia)' },
 };
 const HOUSE_SPOTS = Object.values(HOUSES).map(h => h.at);
 const BUILDINGS = MAP.buildings.map(b => ({ ...b, x: b.at[0] * U, y: b.at[1] * U, w: b.style === 'hotel' ? 9 * T : b.style === 'galpon' ? 7 * T : b.style === 'faro' ? 44 : 4.6 * T }));
@@ -1289,27 +1289,45 @@ ROOMS.tl = HOUSES.tl.interior = {
   },
 };
 const SHOP_LINES = ['¡Caramelos de menta, de limón y de rosa! Si yo fuera rica, me compraría uno de cada color solo para mirarlos.', 'Huele a canela, a jabón y a papel de envolver. Las tiendas tienen un olor a promesas.', 'Esas cintas... la azul quedaría preciosa con mi pelo. Bueno, con mi pelo nada queda precioso, pero la azul quedaría menos mal.'];
-// money: dollars and cents
+// money: dollars and cents (only the cattle dealer pays in money)
 const money = (n, short) => { n = r2(n || 0); return short ? n.toFixed(2).replace('.', ',') : n < 1 ? Math.round(n * 100) + ' centavos' : (n === 1 ? '1 dólar' : (Number.isInteger(n) ? n : n.toFixed(2).replace('.', ',')) + ' dólares'); };
-// buying and selling with Mr. Lawson (at his door or at the counter)
-function shopMenu(){
-  const L = FOLKBY.lawson, open = HOUSES.tl.open(), here = L && L.where !== 'in' && (game.scene === L.where) && dist(ana.x, ana.y, L.x, L.y) < 140;
+// the Cuthberts' account book at Lawson's: what the house needs is written down, Marilla pays at the end of the month
+function libretaAdd(who, x){
+  const L = game.libreta = game.libreta || []; L.push({ x, who, d: today() + 1 }); if (L.length > 30) L.shift();
+  logEv(`${wmName(who)} se llevó ${LIBRETA_ART[x]} de la tienda de Lawson, a la libreta de los Cuthbert.`); save();
+}
+const libretaToday = () => (game.libreta || []).filter(e => e.d === today() + 1 && e.who === 'ana').length;
+// at Mr. Lawson's (his counter, or himself): two steps — what kind of errand, then what
+function shopMenu(step){
+  const L = FOLKBY.lawson, open = HOUSES.tl.open(), here = L && L.where !== 'in' && game.scene === L.where && dist(ana.x, ana.y, L.x, L.y) < 140;
   if (!open) return say('lawson', 'Ya cerré, Ana. Abro mañana a las ocho en punto, como siempre.', [['Adiós', close]]);
   if (!here && game.scene !== 'tl') return say('lawson', 'Pasa, pasa, que el mostrador está adentro.', [['Adiós', close]]);
-  const I = game.inv, opts = [];
-  for (const [k, price] of Object.entries(SHOP_SELLS)) if (I.dolares >= price - 1e-9) opts.push([`Comprar ${ITEM_NAME[k][0]} (${money(price)})`, () => shopDo('compra', k, price)]);
-  for (const [k, price] of Object.entries(SHOP_BUYS)) if (I[k] > 0) { const n = ALL_AT_ONCE.includes(k) ? I[k] : 1; opts.push([`Venderle ${itemText(k, n)} (${money(price * n)})`, () => shopDo('venta', k, price, n)]); }
+  const I = game.inv, back = ['← Volver', () => shopMenu()];
+  if (step === 'cambiar') {
+    const opts = [];
+    for (const c of Object.keys(TREATS)) { const o = tradeFor(I, c)[0]; if (o) opts.push([`${ITEM_DEFS[c].gift.art[0].toUpperCase() + ITEM_DEFS[c].gift.art.slice(1)}, por ${itemText(o.g, o.k)}`, () => shopTrade(c, o)]); }
+    const has = Object.keys(TRADE).filter(g => I[g] > 0).map(g => itemText(g, I[g])).join(', ');
+    return say('lawson', opts.length ? `Veamos qué traes: ${has}. ¿Qué te gustaría llevarte?` : has ? `Con ${has} todavía no alcanza para un capricho, Ana. Junta un poco más.` : 'No traes nada para cambiar. Huevos, fruta, una tarta de las tuyas... todo me sirve.', [...opts, back]);
+  }
+  if (step === 'libreta') {
+    if (libretaToday() >= 2) return say('lawson', 'Ya llevas dos cosas anotadas hoy, Ana. Marilla me lo agradecerá si paramos aquí.', [back]);
+    return say('lawson', '¿Qué hace falta en Tejas Verdes? Lo anoto en la libreta de los Cuthbert.', [...LIBRETA.map(x => [LIBRETA_ART[x][0].toUpperCase() + LIBRETA_ART[x].slice(1), () => shopLibreta(x)]), back]);
+  }
+  const opts = [['🧺 Cambiar algo que traigo por un capricho', () => shopMenu('cambiar')], ['📒 Llevar algo para la casa (a la libreta)', () => shopMenu('libreta')]];
   if (L) opts.push(['Conversar con el Sr. Lawson', () => { close(); folkTalk(L); }]);
   opts.push(['Adiós', close]);
-  say('lawson', `¿Qué te llevas hoy, Ana? Tienes ${money(I.dolares)}.` + (Object.keys(SHOP_BUYS).some(k => I[k] > 0) ? ' Y si traes algo rico, te lo compro.' : ''), opts);
+  say('lawson', pick(['¡Buenos días, Ana! ¿Qué se te ofrece?', 'Pasa, pasa. ¿Vienes a cambiar algo o te manda Marilla?', 'Llegaron cintas nuevas, Ana. ¿Qué se te ofrece?']), opts);
 }
-function shopDo(kind, k, price, n = 1){
-  const I = game.inv, L = FOLKBY.lawson;
-  if (kind === 'compra') { I.dolares = r2(I.dolares - price); I[k] = (I[k] || 0) + 1; logEv(`Ana compró ${ITEM_DEFS[k].gift?.art || itemText(k, 1)} en la tienda de Lawson.`); float('+' + itemText(k, 1), ana.x, ana.y - 60); }
-  else { I[k] -= n; I.dolares = r2(I.dolares + price * n); logEv(`Ana le vendió ${itemText(k, n)} al Sr. Lawson por ${money(price * n)}.`); float('+' + money(price * n), ana.x, ana.y - 60); }
-  sfx.happy(); save(); close();
-  if (L) bubbles = [{ q: 'f:lawson', text: kind === 'compra' ? pick(['Aquí tienes. ¡Que lo disfrutes!', 'Buena elección, niña.', 'Te lo envuelvo en papel de estraza.']) : pick(['¡Huele de maravilla! Se lo venderé a la Sra. Pye antes del mediodía.', 'Trato hecho. Tu tarta tiene fama, Ana.']), t: 0, dur: 3 }];
-  setTimeout(shopMenu, 700);
+function shopTrade(c, o){
+  const I = game.inv; I[o.g] -= o.k; I[c] = (I[c] || 0) + 1;
+  logEv(`Ana cambió ${itemText(o.g, o.k)} por ${ITEM_DEFS[c].gift.art} en la tienda de Lawson.`); float('+' + itemText(c, 1), ana.x, ana.y - 60); sfx.happy(); save(); close();
+  bubbles = [{ q: 'f:lawson', text: pick(['Trato hecho. ¡Que lo disfrutes!', 'Buen cambio, niña. Tus cosas tienen fama.', 'Te lo envuelvo en papel de estraza.']), t: 0, dur: 3 }];
+  setTimeout(() => shopMenu('cambiar'), 700);
+}
+function shopLibreta(x){
+  game.inv[x] = (game.inv[x] || 0) + 1; libretaAdd('ana', x); float('+' + itemText(x, 1), ana.x, ana.y - 60); sfx.happy(); close();
+  bubbles = [{ q: 'f:lawson', text: 'Anotado en la libreta. Saludos a Marilla.', t: 0, dur: 3 }];
+  setTimeout(() => shopMenu('libreta'), 700);
 }
 const CHURCH_LINES = ['Cuando rezo de verdad, me gusta imaginar que estoy en un gran bosque, mirando el cielo... aquí también se puede, si una se esfuerza.', 'La primera vez que vine me puse flores en el sombrero. ¡La Sra. Lynde casi se desmaya!', 'Qué silencio tan bonito. Hasta mis pensamientos andan de puntillas.'];
 const MILK_LINES = ['Las botellas de leche de la escuela, enfriándose en el río hasta la hora del almuerzo. Cada una tiene el nombre de su dueño... ¡la mía no la confundiría nunca!', 'El agua del río es tan fría que la leche sale como si viniera de una cueva encantada.'];
@@ -1637,6 +1655,7 @@ function targets(){
     for (const f of FOLK) if (f.where === 'out' && Math.abs(f.x - ana.x) < 400 && Math.abs(f.y - ana.y) < 400) add('f:' + f.id, f.x, f.y, 34, f.id === 'lawson' ? 'Comprar o vender (Sr. Lawson)' : 'Hablar con ' + f.def.name, () => f.id === 'lawson' ? shopMenu() : folkTalk(f), { hy: 26 * f.def.look.h, hit: 24 });
     if (dist(ana.x, ana.y, FARO.x, FARO.y) < 260) add('faro', FARO.x, FARO.y + 10, 120, 'Mirar el mar desde el faro', () => { anaSays(pick(FARO_LINES)); logEv('Ana miró el mar desde el faro.'); }, { pri: 5, hy: 60, hit: 40 });
     if (dist(ana.x, ana.y, MILK.x, MILK.y) < 200) add('leche', MILK.x, MILK.y, 60, 'Mirar las botellas de leche en el río', () => anaSays(pick(MILK_LINES)), { pri: 5, hy: 8, hit: 34 });
+    if (dist(ana.x, ana.y, WP.gallinero[0], WP.gallinero[1]) < 160) add('huevos', WP.gallinero[0], WP.gallinero[1], 50, game.eggDay === today() ? 'Las gallinas ya pusieron hoy' : 'Juntar los huevos', () => { if (game.eggDay === today()) return anaSays('Ya junté los huevos de hoy. Las gallinas no son máquinas, pobrecitas.'); const n = eggsToday(); game.eggDay = today(); game.inv.huevos += n; float('+' + itemText('huevos', n), ana.x, ana.y - 60); logEv('Ana juntó ' + itemText('huevos', n) + ' en el gallinero.'); sfx.happy(); save(); }, { pri: 5, hy: 8, hit: 40 });
     if (!cart.on) add('trip', BARN.x + 70, BARN.y + 60, 60, 'Ir a la estación de Bright River en la carreta', () => tripAsk('br'), { pri: 5, hy: 12, hit: 30 });
     if (cart.on && !cart.riding) add('cart', cart.x - (cart.dir === 3 ? -44 : 44), cart.y - 10, 70, 'Subir a la carreta', cartAsk, { pri: 2, hy: 20, hit: 46 });
     add('bench', BENCH.x, BENCH.y + 6, 26, ana.sit ? 'Levantarse' : 'Sentarse a mirar el lago', () => { ana.sit = !ana.sit; if (ana.sit) { logEv('Ana se sentó a mirar el Lago de las Aguas Brillantes.'); ana.x = BENCH.x; ana.y = BENCH.y - 2; ana.dir = 2; } }, { pri: 4, hy: 10, hit: 32 });
@@ -2177,6 +2196,7 @@ const ITEM_DEFS = {
   cuerda:   { names: ['cuerda', 'cuerdas'], icon: '🪢', season: () => true },
   azucar:   { names: ['taza de azúcar', 'tazas de azúcar'], icon: '🥄', season: () => true },
   hierbas:  { names: ['manojo de hierbas', 'manojos de hierbas'], icon: '🌿', season: () => S !== 3 },
+  huevos:   { names: ['huevo', 'huevos'], icon: '🥚', season: () => true },
   cinta:    { names: ['cinta para el pelo', 'cintas para el pelo'], icon: '🎀', season: () => true, gift: { name: 'cinta para el pelo', art: 'una cinta para el pelo', reply: '¡Una cinta preciosa! Me la pondré el domingo.' } },
   caramelos: { names: ['bolsita de caramelos de menta', 'bolsitas de caramelos de menta'], icon: '🍬', season: () => true, gift: { name: 'bolsita de caramelos', art: 'una bolsita de caramelos de menta', reply: '¡Caramelos de menta! Son mis favoritos.' } },
   dolares:  { names: ['dólar', 'dólares'], icon: '💵', season: () => game.inv.dolares > 0, giveAll: true, gift: { name: 'el dinero', art: 'el dinero', reply: 'Vaya... bueno, pues gracias.' }, note: 'dinero' },
@@ -3518,8 +3538,8 @@ function note(f, d, vol = .03, type = 'sine', at = 0){ if (!AC) return; const o 
 const sfx = { happy: () => { note(660, .3); note(880, .35, .03, 'sine', .12); note(990, .4, .025, 'sine', .24); }, water: () => { for (let k = 0; k < 4; k++) note(1200 + k * 160, .08, .015, 'triangle', k * .05); }, cook: () => note(330, .5, .02, 'triangle'), blip: () => note(420 + Math.random() * 160, .07, .012, 'triangle'), done: () => { note(523, .25); note(659, .25, .03, 'sine', .1); note(784, .4, .03, 'sine', .2); } };
 
 /* ---------- keeping the day: in the browser ---------- */
-function save(){ if (wiping) return; try { localStorage.setItem('avonlea', JSON.stringify({ wm: game.wm, inv: game.inv, hasCan: game.hasCan, water: game.water, fond: game.fond, said: game.said, saidS: game.saidS, seasonShift: game.seasonShift, teaDay: game.teaDay, journal: game.journal, mem: game.mem, know: game.know, tasks: game.tasks, plans: game.plans, table: game.table, giftFor: game.giftFor, npcGiftDay: game.npcGiftDay, lastDay: game.lastDay, taskSeq: game.taskSeq, rel: game.rel, relLog: game.relLog, impr: game.impr, story: game.story, stories: game.stories, nextStory: game.nextStory, ground: game.ground, groundSeq: game.groundSeq, anaStates: game.anaStates, animals: Object.fromEntries(Object.entries(ANIM).map(([k, a]) => [k, { x: a.x, y: a.y, where: a.where, state: a.state, area: a.area, owner: a.owner }])), beds: BEDS.map(b => [b.stage, b.wet, b.grow]), dayT })); } catch (e) {} }
-try { const s = JSON.parse(localStorage.getItem('avonlea') || 'null'); if (s) { if (s.wm) game.wm = s.wm; Object.assign(game.inv, s.inv); game.hasCan = s.hasCan; game.water = s.water; Object.assign(game.fond, s.fond); game.said = s.said || {}; game.saidS = s.saidS || {}; game.seasonShift = s.seasonShift || 0; game.teaDay = s.teaDay ?? -1; game.journal = s.journal || []; game.mem = s.mem || {}; for (const k of ['know', 'plans', 'giftFor', 'npcGiftDay']) game[k] = s[k] || {}; game.tasks = s.tasks || []; game.table = s.table || null; game.lastDay = s.lastDay ?? null; game.taskSeq = s.taskSeq || 0; game.rel = s.rel || null; game.relLog = s.relLog || []; game.impr = s.impr || {}; game.story = s.story?.v === 2 ? s.story : null; if (game.story) game.story.gen = false; game.stories = s.stories || []; game.nextStory = s.nextStory || null; game.ground = s.ground || []; game.groundSeq = s.groundSeq || 0; game.anaStates = s.anaStates || {}; for (const [k, v] of Object.entries(s.animals || {})) if (ANIM[k]) Object.assign(ANIM[k], v); (s.beds || []).forEach((v, k) => { if (BEDS[k]) [BEDS[k].stage, BEDS[k].wet, BEDS[k].grow] = v; }); if (s.dayT) dayT = s.dayT; if (game.hasCan) ana.carry = 'can'; } } catch (e) {}
+function save(){ if (wiping) return; try { localStorage.setItem('avonlea', JSON.stringify({ wm: game.wm, libreta: game.libreta, eggDay: game.eggDay, inv: game.inv, hasCan: game.hasCan, water: game.water, fond: game.fond, said: game.said, saidS: game.saidS, seasonShift: game.seasonShift, teaDay: game.teaDay, journal: game.journal, mem: game.mem, know: game.know, tasks: game.tasks, plans: game.plans, table: game.table, giftFor: game.giftFor, npcGiftDay: game.npcGiftDay, lastDay: game.lastDay, taskSeq: game.taskSeq, rel: game.rel, relLog: game.relLog, impr: game.impr, story: game.story, stories: game.stories, nextStory: game.nextStory, ground: game.ground, groundSeq: game.groundSeq, anaStates: game.anaStates, animals: Object.fromEntries(Object.entries(ANIM).map(([k, a]) => [k, { x: a.x, y: a.y, where: a.where, state: a.state, area: a.area, owner: a.owner }])), beds: BEDS.map(b => [b.stage, b.wet, b.grow]), dayT })); } catch (e) {} }
+try { const s = JSON.parse(localStorage.getItem('avonlea') || 'null'); if (s) { if (s.wm) game.wm = s.wm; game.libreta = s.libreta || []; game.eggDay = s.eggDay; Object.assign(game.inv, s.inv); game.hasCan = s.hasCan; game.water = s.water; Object.assign(game.fond, s.fond); game.said = s.said || {}; game.saidS = s.saidS || {}; game.seasonShift = s.seasonShift || 0; game.teaDay = s.teaDay ?? -1; game.journal = s.journal || []; game.mem = s.mem || {}; for (const k of ['know', 'plans', 'giftFor', 'npcGiftDay']) game[k] = s[k] || {}; game.tasks = s.tasks || []; game.table = s.table || null; game.lastDay = s.lastDay ?? null; game.taskSeq = s.taskSeq || 0; game.rel = s.rel || null; game.relLog = s.relLog || []; game.impr = s.impr || {}; game.story = s.story?.v === 2 ? s.story : null; if (game.story) game.story.gen = false; game.stories = s.stories || []; game.nextStory = s.nextStory || null; game.ground = s.ground || []; game.groundSeq = s.groundSeq || 0; game.anaStates = s.anaStates || {}; for (const [k, v] of Object.entries(s.animals || {})) if (ANIM[k]) Object.assign(ANIM[k], v); (s.beds || []).forEach((v, k) => { if (BEDS[k]) [BEDS[k].stage, BEDS[k].wet, BEDS[k].grow] = v; }); if (s.dayT) dayT = s.dayT; if (game.hasCan) ana.carry = 'can'; } } catch (e) {}
 relInit();
 addEventListener('pagehide', save); setInterval(save, 10000);
 
@@ -4430,16 +4450,21 @@ function encUpdate(dt){
 
 // --- things: what they are (tags), what they are worth (dollars), how one gets them
 // the shop: what Mr. Lawson sells (price in dollars) and what he pays for what Ana brings
-const SHOP_SELLS = { azucar: .2, cuerda: .5, cinta: .3, caramelos: .1 };
-const SHOP_BUYS = { tarta: 1, compota: 1, bayas: .1, manzanas: .1 };
+// (no money at the shop, as in Avonlea: Ana trades what she brings for a treat, and what the house needs goes in the
+// Cuthberts' account book, which Marilla settles at the end of the month)
+const TRADE = { huevos: 1, bayas: 1 / 3, manzanas: 1 / 3, ramo: 2, tarta: 4, compota: 4 };   // (what each thing is worth, in trade)
+const TREATS = { cinta: 3, caramelos: 1 };                                                     // (what a treat costs, in trade)
+const LIBRETA = ['azucar', 'cuerda'], LIBRETA_ART = { azucar: 'una taza de azúcar', cuerda: 'una cuerda' };                                                          // (what can be put on the account)
+const tradeFor = (inv, c) => Object.entries(TRADE).map(([g, v]) => ({ g, k: Math.ceil(TREATS[c] / v - 1e-9) })).filter(o => (inv[o.g] || 0) >= o.k).sort((a, b) => a.k * TRADE[a.g] - b.k * TRADE[b.g]);
 const r2 = n => Math.round(n * 100) / 100;
+const eggsToday = () => S === 3 ? 2 : 6;   // (in winter the hens lay little)
 const THINGS = {
   bayas: { tags: ['comida', 'cosecha'], valor: .1 }, manzanas: { tags: ['comida', 'cosecha'], valor: .1 },
   tarta: { tags: ['comida', 'hecha_a_mano', 'regalo'], valor: 1, receta: { bayas: 3 } }, compota: { tags: ['comida', 'hecha_a_mano', 'regalo'], valor: 1, receta: { manzanas: 3 } },
   te: { tags: ['bebida', 'regalo'], valor: 0, receta: {} }, ramo: { tags: ['flores', 'hecha_a_mano', 'regalo'], valor: 0 },
   dolares: { tags: ['dinero'] }, cuerda: { tags: ['herramienta'] }, azucar: { tags: ['comida', 'tienda'], valor: .2 }, hierbas: { tags: ['hierba'], valor: .1 },
   vaca: { tags: ['animal'], valor: 20 },
-  cinta: { tags: ['adorno', 'regalo'], valor: .3 }, caramelos: { tags: ['dulce', 'comida', 'regalo'], valor: .1 },
+  cinta: { tags: ['adorno', 'regalo'], valor: .3 }, caramelos: { tags: ['dulce', 'comida', 'regalo'], valor: .1 }, huevos: { tags: ['comida', 'cosecha'], valor: .05 },
 };
 const ALL_AT_ONCE = ['bayas', 'manzanas', 'hierbas', 'dolares', 'azucar'];   // (these change hands all together; the rest one by one)
 // --- places: a point out of doors ('cocina' is inside Green Gables); what can be done there
@@ -4447,10 +4472,10 @@ const WP = {
   granero: [BARN.x + 60, BARN.y + 50], corral: [AREAS.corral.x + AREAS.corral.w / 2, AREAS.corral.y + AREAS.corral.h / 2], potrero: [AREAS.potrero.x + AREAS.potrero.w / 2, AREAS.potrero.y + AREAS.potrero.h / 2],
   huerta: [PLACES.huerta[1], PLACES.huerta[2]], arbustos: [GG.x - 200, GG.y + 170], huerto: [OS.x - 170, OS.y + 200], cocina: [GG.x, GG.y + 30],
   tienda: door('Tienda de Lawson'), escuela: SCHOOL_DOOR, casa_parroquial: door('Casa parroquial'), bosque_peg: [WOODS[1].x + WOODS[1].rx * .55, WOODS[1].y + 40],
-  aldea: PLAY.aldea, lago: [PLACES.lago[1], PLACES.lago[2]],
+  aldea: PLAY.aldea, lago: [PLACES.lago[1], PLACES.lago[2]], gallinero: [BARN.x + 150, BARN.y + 96],
 };
-const WP_NAME = { granero: 'el granero', corral: 'el corral', potrero: 'el potrero del Sr. Harrison', huerta: 'la huerta', arbustos: 'los arbustos de bayas', huerto: 'el huerto de los Barry', cocina: 'la cocina de Tejas Verdes', tienda: 'la tienda de Lawson', escuela: 'la escuela', casa_parroquial: 'la casa parroquial', bosque_peg: 'el bosque de Peg Bowen', aldea: 'la aldea', lago: 'el lago' };
-const OFRECE = { granero: { tomar: ['cuerda'] }, arbustos: { recoger: ['bayas'] }, huerto: { recoger: ['manzanas'] }, huerta: { recoger: ['ramo'] }, bosque_peg: { recoger: ['hierbas'] } };
+const WP_NAME = { gallinero: 'el gallinero', granero: 'el granero', corral: 'el corral', potrero: 'el potrero del Sr. Harrison', huerta: 'la huerta', arbustos: 'los arbustos de bayas', huerto: 'el huerto de los Barry', cocina: 'la cocina de Tejas Verdes', tienda: 'la tienda de Lawson', escuela: 'la escuela', casa_parroquial: 'la casa parroquial', bosque_peg: 'el bosque de Peg Bowen', aldea: 'la aldea', lago: 'el lago' };
+const OFRECE = { gallinero: { recoger: ['huevos'] }, granero: { tomar: ['cuerda'] }, arbustos: { recoger: ['bayas'] }, huerto: { recoger: ['manzanas'] }, huerta: { recoger: ['ramo'] }, bosque_peg: { recoger: ['hierbas'] } };
 for (const k of ['granero', 'corral', 'potrero', 'escuela', 'casa_parroquial', 'tienda']) if (!PLACES[k]) PLACES[k] = [WP_NAME[k], ...WP[k]];   // (so errands can name them)
 // --- people: character, likes, what they buy and sell, where they cook, whether they leave the house; and their inventories
 const WHO = {
@@ -4462,7 +4487,7 @@ const WHO = {
   lynde: { caracter: ['chismoso', 'severo'], le_gusta: ['comida'] },
   harrison: { caracter: ['orgulloso'], le_gusta: ['comida'], inv: { cuerda: 1 } },
   shearer: { caracter: [], compra: { animal: 20 }, inv: { dolares: 60 } },
-  lawson: { caracter: ['generoso'], compra: { comida: 1 }, vende: SHOP_SELLS, abre: [8, 18] },
+  lawson: { caracter: ['generoso'], trueque: true, abre: [8, 18] },
   gilbert: { caracter: ['orgulloso', 'generoso'], le_gusta: ['comida'] },
   sraallan: { caracter: ['generoso', 'sensible'], le_gusta: ['hecha_a_mano', 'flores'], cocina: 'casa_parroquial' },
   peg: { caracter: ['orgulloso'], le_gusta: ['hierba'] },
@@ -4527,7 +4552,7 @@ function wmNow(){
   const near = (p, r) => WP[p] ? [WP[p][0], WP[p][1], r] : null;
   { const [x, y, r] = near('arbustos', 260); s.stock.bayas = S === 1 || S === 2 ? bushes.filter(b => dist(b.x, b.y, x, y) < r).reduce((n, b) => n + (b.berries || 0), 0) : 0; }
   { const [x, y, r] = near('huerto', 340); s.stock.manzanas = S === 1 || S === 2 ? trees.filter(t => t.kind === 'apple' && dist(t.x, t.y, x, y) < r).reduce((n, t) => n + (t.apples || 0), 0) : 0; }
-  s.stock.ramo = S === 3 ? 0 : BEDS.filter(b => b.stage >= 3).length; s.stock.hierbas = S === 3 ? 0 : 9;
+  s.stock.ramo = S === 3 ? 0 : BEDS.filter(b => b.stage >= 3).length; s.stock.hierbas = S === 3 ? 0 : 9; s.stock.huevos = game.eggDay === today() ? 0 : eggsToday();
   return s;
 }
 const clone = s => ({ t: s.t, pos: { ...s.pos }, invs: Object.fromEntries(Object.entries(s.invs).map(([k, v]) => [k, { ...v }])), cows: { ...s.cows }, rel: { ...s.rel }, ofensa: { ...s.ofensa }, know: Object.fromEntries(Object.entries(s.know).map(([k, v]) => [k, [...v]])), follow: { ...s.follow }, facts: { ...s.facts }, stock: { ...s.stock } });
@@ -4553,10 +4578,12 @@ function verbs(s, me, C){
   for (const k of C.people) if (at(k)) {
     for (const x of Object.keys(inv)) if (inv[x] > 0 && THINGS[x] && x !== 'cuerda' && C.items.includes(x)) { const n = ALL_AT_ONCE.includes(x) ? inv[x] : 1; add('dar', 1, t => { t.invs[me][x] -= n; t.invs[k][x] = (t.invs[k][x] || 0) + n; for (const tag of THINGS[x].tags) t.facts['dio:' + k + ':' + tag] = 1; t.facts['dio:' + k + ':' + x] = 1; t.facts['dio:' + x] = 1; socialRule(stateR(t), 'dar', me, k, x); }, { x, k, n }); }
     const buys = whoOf(k).compra || {};
-    for (const x of Object.keys(inv)) { const tag = (THINGS[x]?.tags || []).find(g => buys[g]); if (tag && inv[x] > 0 && x !== 'dolares') add('vender', 2, t => { t.invs[me][x]--; t.invs[me].dolares = r2((t.invs[me].dolares || 0) + THINGS[x].valor); }, { x, k }); }
     if (buys.animal) for (const [c, st] of Object.entries(s.cows)) if (st === 'led:' + me && FAMILY(C.owner[c]).includes(me)) add('vender', 2, t => { t.cows[c] = 'sold:' + k; t.invs[me].dolares = (t.invs[me].dolares || 0) + buys.animal; t.know[me].push('vendio_vaca'); t.know[k].push('vendio_vaca'); }, { x: 'vaca', cow: c, k });
-    const V = whoOf(k).vende || {}, open = !whoOf(k).abre || (s.t >= whoOf(k).abre[0] * 60 && s.t < whoOf(k).abre[1] * 60);
-    if (open) for (const [x, price] of Object.entries(V)) if ((inv.dolares || 0) >= price && C.items.includes(x) && (inv[x] || 0) < 2) add('comprar', 2, t => { t.invs[me].dolares -= price; t.invs[me][x] = (t.invs[me][x] || 0) + 1; }, { x, k, price });
+    const open = !whoOf(k).abre || (s.t >= whoOf(k).abre[0] * 60 && s.t < whoOf(k).abre[1] * 60);
+    if (open && whoOf(k).trueque) {
+      for (const c of Object.keys(TREATS)) if (C.items.includes(c) && (inv[c] || 0) < 2) for (const o of tradeFor(inv, c).slice(0, 2)) add('cambiar', 2, t => { t.invs[me][o.g] -= o.k; t.invs[me][c] = (t.invs[me][c] || 0) + 1; }, { x: c, g: o.g, n: o.k, k });
+      if (CUTHBERT.includes(me)) for (const x of LIBRETA) if (C.items.includes(x) && (inv[x] || 0) < 2) add('comprar', 2, t => { t.invs[me][x] = (t.invs[me][x] || 0) + 1; }, { x, k });
+    }
     if ((s.know[k] || []).some(f => !s.know[me].includes(f)) || (s.know[me] || []).some(f => !(s.know[k] || []).includes(f))) add('conversar', 2, t => { const u = [...new Set([...t.know[me], ...t.know[k]])]; t.know[me] = [...u]; t.know[k] = [...u]; }, { k });
     if (s.ofensa[k + '>' + me] && !s.facts['disc:' + k + '>' + me]) add('disculparse', 2, t => { socialRule(stateR(t), 'disculparse', me, k); }, { k });
     for (const f of C.favors) { const F = FAVORS[f.f]; if (f.to === k && F.ok(s, me, k, f) && socialRule(stateR(s), 'pedir', me, k) && !s.facts['pedido:' + f.f + ':' + k]) add('pedir', 2 + (F.wait || 0), t => { F.eff(t, me, k, f); t.facts['pedido:' + f.f + ':' + k] = 1; }, { k, favor: f }); }
@@ -4570,7 +4597,7 @@ function verbs(s, me, C){
 
 // --- the goals: a condition (test), how far it is (h: steps missing, roughly), and what matters for it
 const G = {
-  tener: (k, x, n) => ({ text: `${wmName(k)} tiene ${itemTextW(x, n)}`, test: s => (s.invs[k][x] || 0) >= n, h: s => { const miss = n - (s.invs[k][x] || 0); if (miss <= 0) return 0; const held = Object.entries(s.invs).some(([w, I]) => w !== k && (I[x] || 0) >= miss); return 1 + (held ? 0 : THINGS[x]?.receta ? 2 : 1) + (THINGS[x]?.receta ? Math.ceil(miss / 1) - 1 : 0); }, items: [x, ...Object.keys(THINGS[x]?.receta || {})], people: [k] }),
+  tener: (k, x, n) => ({ text: `${wmName(k)} tiene ${itemTextW(x, n)}`, test: s => (s.invs[k][x] || 0) >= n, h: s => { const miss = n - (s.invs[k][x] || 0); if (miss <= 0) return 0; const held = Object.entries(s.invs).some(([w, I]) => w !== k && (I[x] || 0) >= miss); return 1 + (held ? 0 : THINGS[x]?.receta ? 2 : 1) + (THINGS[x]?.receta ? Math.ceil(miss / 1) - 1 : 0); }, items: [x, ...Object.keys(THINGS[x]?.receta || {}), ...(TREATS[x] ? Object.keys(TRADE).flatMap(g => [g, ...Object.keys(THINGS[g]?.receta || {})]) : [])], people: [k, ...(TREATS[x] || LIBRETA.includes(x) ? ['lawson'] : [])] }),
   dinero: (k, n) => ({ text: `${wmName(k)} junta ${n} dólares`, test: s => (s.invs[k].dolares || 0) >= n - 1e-9, h: s => moneyH(s.invs[k], n), items: ['tarta', 'compota', 'bayas', 'manzanas'], people: [k, 'lawson', 'shearer'] }),
   regalo_gusto: (k, to) => ({ text: `${wmName(k)} le regala a ${wmName(to)} algo que le guste`, test: s => (whoOf(to).le_gusta || []).some(t => s.facts['dio:' + to + ':' + t]), h: s => (whoOf(to).le_gusta || []).some(t => s.facts['dio:' + to + ':' + t]) ? 0 : 2, items: Object.keys(THINGS).filter(x => THINGS[x].tags.some(t => whoOf(to).le_gusta?.includes(t))).flatMap(x => [x, ...Object.keys(THINGS[x].receta || {})]), people: [k, to] }),
   reconciliar: (k, to) => ({ text: `${wmName(k)} se reconcilia con ${wmName(to)}`, test: s => (s.rel[to + '>' + k] ?? 2) >= 2 && !s.ofensa[to + '>' + k], h: s => ((s.rel[to + '>' + k] ?? 2) >= 2 ? 0 : 1) + (s.ofensa[to + '>' + k] ? 1 : 0), items: ['tarta', 'bayas', 'ramo'], people: [k, to] }),
@@ -4624,9 +4651,9 @@ function wmPlan(me, goal, favors = [], s0 = wmNow()){
   return best.path.length && best.h < goal.h(s0) ? { plan: best.path, cost: best.g, n, ok: false, partial: true } : { plan: null, n, ok: false };
 }
 const stepText = a => ({ ir: () => 'ir a ' + (WP_NAME[a.p] || wmPlaceText(a.p)), tomar: () => 'tomar ' + itemTextW(a.x, 1), recoger: () => 'recoger ' + itemTextW(a.x, a.n), cocinar: () => 'cocinar ' + (ITEM_NAME[a.x]?.[0] || a.x),
-  dar: () => `darle ${itemTextW(a.x, a.n)} a ${wmName(a.k)}`, vender: () => `vender ${a.x === 'vaca' ? ANIMALS[a.cow].name : itemTextW(a.x, 1)} a ${wmName(a.k)}`, comprar: () => `comprar ${itemTextW(a.x, 1)} a ${wmName(a.k)}`,
+  dar: () => `darle ${itemTextW(a.x, a.n)} a ${wmName(a.k)}`, vender: () => `vender ${a.x === 'vaca' ? ANIMALS[a.cow].name : itemTextW(a.x, 1)} a ${wmName(a.k)}`, comprar: () => `llevar ${itemTextW(a.x, 1)} anotado en la libreta`, cambiar: () => `cambiar ${itemTextW(a.g, a.n)} por ${ITEM_NAME[a.x][0]}`,
   conversar: () => 'conversar con ' + wmName(a.k), disculparse: () => 'disculparse con ' + wmName(a.k), pedir: () => `pedirle a ${wmName(a.k)}: ${a.favor.f.replace('_', ' ')}`, guiar: () => 'guiar a ' + ANIMALS[a.cow].name, soltar: () => `soltar a ${ANIMALS[a.cow].name} en ${WP_NAME[a.p]}` }[a.v] || (() => a.v))().replace(/\ba el\b/g, 'al');
-const wmPlaceText = p => p.startsWith('p:') ? 'donde está ' + wmName(p.slice(2)) : p.startsWith('c:') ? 'donde está ' + ANIMALS[p.slice(2)].name : p.startsWith('h:') ? HOUSES[p.slice(2)].name : WP_NAME[p] || p;
+const wmPlaceText = p => p.startsWith('p:') ? 'donde está ' + wmName(p.slice(2)) : p.startsWith('c:') ? 'donde está ' + ANIMALS[p.slice(2)].name : p.startsWith('h:') ? HOUSES[p.slice(2)].place[1] : WP_NAME[p] || p;
 
 /* ---------- the agents: someone with a goal and a plan, carrying it out step by step in the world ---------- */
 const AGENTS = {};
@@ -4745,6 +4772,7 @@ function wmExec(ag, a, st, dt){
       if (a.x === 'manzanas') for (const u of trees.filter(u => u.kind === 'apple' && dist(u.x, u.y, b.x, b.y) < 380 && u.apples > 0)) { const k = Math.min(u.apples, a.n - got); u.apples -= k; u.regrow = 90; got += k; if (got >= a.n) break; }
       if (a.x === 'ramo') { const bed = BEDS.find(u => u.stage >= 3); if (bed) { bed.stage = 1; got = 1; } }
       if (a.x === 'hierbas') got = S === 3 ? 0 : a.n;
+      if (a.x === 'huevos' && game.eggDay !== today()) { got = eggsToday(); game.eggDay = today(); }
       if (!got) { st.why = 'no quedaba'; return 'fail'; }
       inv[a.x] = (inv[a.x] || 0) + got; float('+' + itemTextW(a.x, got), b.x, b.y - 50); logEv(`${wmName(me)} recogió ${itemTextW(a.x, got)}.`, []); return 'ok';
     }
@@ -4771,15 +4799,19 @@ function wmExec(ag, a, st, dt){
         if (me === 'ana' && CH[a.k]) sellCow(a.k, c, price); else { c.state = 'bought'; c.owner = a.k; c.ledBy = null; c.nav = null; inv.dolares = (inv.dolares || 0) + price; logEv(`${wmName(me)} le vendió ${ANIMALS[c.id].name} a ${wmName(a.k)} por ${price} dólares.`, []); }
         wmFact('vendio_vaca', [me, a.k]); bubble(a.k, '¡Trato hecho! Buena vaca.'); return 'ok';
       }
-      if (!(inv[a.x] > 0)) { st.why = 'no lo tiene'; return 'fail'; }
-      inv[a.x]--; inv.dolares = r2((inv.dolares || 0) + THINGS[a.x].valor); float('+' + THINGS[a.x].valor + ' dólares', b.x, b.y - 50);
-      logEv(`${wmName(me)} le vendió ${itemTextW(a.x, 1)} a ${wmName(a.k)}.`, []); bubble(a.k, 'Se la compro. ¡Huele de maravilla!'); return 'ok';
+      st.why = 'eso no se vende'; return 'fail';
+    }
+    case 'cambiar': {
+      const r = reach(a.k); if (r !== 'ok') return r;
+      const W = whoOf(a.k), hr = hourNow() % 24; if (W.abre && (hr < W.abre[0] || hr >= W.abre[1])) { st.why = 'la tienda está cerrada'; return 'fail'; }
+      if ((inv[a.g] || 0) < a.n) { st.why = 'no tiene qué cambiar'; return 'fail'; }
+      inv[a.g] -= a.n; inv[a.x] = (inv[a.x] || 0) + 1; float('+' + itemTextW(a.x, 1), b.x, b.y - 50);
+      logEv(`${wmName(me)} cambió ${itemTextW(a.g, a.n)} por ${ITEM_DEFS[a.x]?.gift?.art || itemTextW(a.x, 1)} en la tienda de Lawson.`, []); bubble(a.k, 'Trato hecho. ¡Que lo disfrutes!'); return 'ok';
     }
     case 'comprar': {
       const r = reach(a.k); if (r !== 'ok') return r;
       const W = whoOf(a.k), hr = hourNow() % 24; if (W.abre && (hr < W.abre[0] || hr >= W.abre[1])) { st.why = 'la tienda está cerrada'; return 'fail'; }
-      if ((inv.dolares || 0) < a.price) { st.why = 'no le alcanza'; return 'fail'; }
-      inv.dolares = r2(inv.dolares - a.price); inv[a.x] = (inv[a.x] || 0) + 1; logEv(`${wmName(me)} compró ${itemTextW(a.x, 1)} en la tienda de ${wmName(a.k)}.`, []); bubble(a.k, 'Aquí tiene. ¡Que le aproveche!'); return 'ok';
+      inv[a.x] = (inv[a.x] || 0) + 1; libretaAdd(me, a.x); bubble(a.k, 'Anotado en la libreta de los Cuthbert. Saludos a Marilla.'); return 'ok';
     }
     case 'conversar': {
       const r = reach(a.k); if (r !== 'ok') return r;
@@ -4849,7 +4881,7 @@ const cowLoose = (id, x, y) => { const c = ANIM[id]; c.state = 'loose'; c.area =
 const cowHome = id => { const c = ANIM[id], A = AREAS[ANIMALS[id].home]; c.state = 'home'; c.area = ANIMALS[id].home; c.x = A.x + A.w / 2; c.y = A.y + A.h / 2; c.ledBy = null; c.owner = ANIMALS[id].owner; c.where = 'out'; };
 const WM_TESTS = [
   { who: 'ana', text: 'Vender la vaca', setup: () => { dayAt(9); cowHome('dolly'); game.inv.cuerda = 0; hold('shearer', [PLAY.aldea[0] - 80, PLAY.aldea[1] + 60]); atOut('ana', GG.x, GG.y + 90); }, goal: () => G.vaca_vendida('dolly') },
-  { who: 'ana', text: 'Juntar 2 dólares', setup: () => { dayAt(9); setSeason(1); game.inv.dolares = 0; for (const u of bushes) if (dist(u.x, u.y, WP.arbustos[0], WP.arbustos[1]) < 260) u.berries = 3; atOut('ana', GG.x, GG.y + 90); }, goal: () => G.dinero('ana', 2) },
+  { who: 'ana', text: 'Conseguir una cinta para el pelo (trueque)', setup: () => { dayAt(9); setSeason(1); game.inv.cinta = 0; game.eggDay = today(); for (const u of bushes) if (dist(u.x, u.y, WP.arbustos[0], WP.arbustos[1]) < 260) u.berries = 3; atOut('ana', GG.x, GG.y + 90); }, goal: () => G.tener('ana', 'cinta', 1) },
   { who: 'ana', text: 'Regalarle a Marilla algo que le guste', setup: () => { dayAt(10); setSeason(0); BEDS[0].stage = 3; BEDS[1].stage = 3; atOut('ana', GG.x + 200, GG.y + 120); }, goal: () => G.regalo_gusto('ana', 'marilla') },
   { who: 'ana', text: 'Reconciliarse con Diana', setup: () => { dayAt(11); game.fond.diana = 1; game.wm.ofensa['diana>ana'] = 'licor'; delete game.wm.facts['disc:diana>ana:' + today()]; diana.follow = false; atOut('diana', OS.x - 60, OS.y + 80); atOut('ana', GG.x, GG.y + 90); }, goal: () => G.reconciliar('ana', 'diana') },
   { who: 'ana', text: 'Llegar a la escuela antes de las 9', setup: () => { dayAt(8.2); atOut('ana', GG.x, GG.y + 90); }, goal: () => G.estar_en('ana', 'escuela', 9) },
