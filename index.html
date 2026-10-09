@@ -124,7 +124,7 @@ html,body{margin:0;height:100%;background:#2b3a26;overflow:hidden;touch-action:n
 <button id="relbtn" class="paper" title="La historia de hoy y quién quiere a quién">👥</button>
 <button id="daybtn" class="paper" title="Pasar al día siguiente">⏭</button>
 <button id="wmbtn" class="paper" title="Metas de prueba (el planificador, sin IA)">🎯</button>
-<div id="wmp" class="paper" hidden><div class="mt">🎯 Metas de prueba <small>(sin IA: el planificador)</small></div><label><input type="checkbox" id="wmobey" checked> Ana hace sola lo que le piden</label><div id="wmlist"></div><div id="wmrun"></div><div class="mb"><button id="wmstop">Detener todo</button><button id="wmclose">Cerrar</button></div></div>
+<div id="wmp" class="paper" hidden><div class="mt">🎯 Metas de prueba <small>(sin IA: el planificador)</small></div><label><input type="checkbox" id="wmobey" checked> Ana hace sola lo que le piden</label> <label><input type="checkbox" id="wmdis" checked> Se distraen (según su enfoque)</label><div id="wmlist"></div><div id="wmrun"></div><div class="mb"><button id="wmstop">Detener todo</button><button id="wmclose">Cerrar</button></div></div>
 <div id="rels" hidden><div class="paper sheet"><div class="mt">La historia de hoy, y quién quiere a quién</div><div id="story"></div><svg id="relsvg" viewBox="0 0 420 300"></svg><div id="reldet"></div><div class="mb"><button id="relclose">Cerrar</button></div></div></div>
 <button id="mapbtn" class="paper" title="Mapa (M)">🗺</button>
 <button id="aibtn" class="paper" title="Diálogos con IA">✒</button>
@@ -1561,7 +1561,7 @@ function observe(who){
 function obsBar(){
   const el = $('obs'); if (!OBS) { if (!el.hidden) el.hidden = true; return; }
   const ag = AGENTS[OBS], b = wmBody(OBS), sc = obsScene();
-  const doing = ag?.hold ? 'esperando aquí' : ag?.followOf ? 'acompaña a ' + wmName(ag.followOf) : ag?.task?.st === 'todo' ? stepText(ag.task.a) : (pw => pw ? 'espera a ' + wmName(pw.to) : activeGoals(ag || {}).length ? 'pensando qué hacer' : 'en lo suyo')(ag && activeGoals(ag).flatMap(g => g.pending || []).find(q => q.h.st === 'run'));
+  const doing = ag?.distract ? '💭 ' + ag.distract.text : ag?.hold ? 'esperando aquí' : ag?.followOf ? 'acompaña a ' + wmName(ag.followOf) : ag?.task?.st === 'todo' ? stepText(ag.task.a) : (pw => pw ? 'espera a ' + wmName(pw.to) : activeGoals(ag || {}).length ? 'pensando qué hacer' : 'en lo suyo')(ag && activeGoals(ag).flatMap(g => g.pending || []).find(q => q.h.st === 'run'));
   const where = !sc ? (b.where === 'away' ? 'fuera de Avonlea' : 'dentro de su casa (no se ve)') : sc === 'out' ? '' : placeName(sc);
   const txt = '👁 ' + wmName(OBS) + ' · ' + doing + (where ? ' · ' + where : '');
   if (el.dataset.t !== txt) { el.dataset.t = txt; el.firstChild.textContent = txt; }
@@ -3674,6 +3674,7 @@ $('wmbtn').addEventListener('pointerdown', e => { e.stopPropagation(); audio(); 
 $('wmp').addEventListener('pointerdown', e => e.stopPropagation());
 $('obsback').addEventListener('click', e => { e.stopPropagation(); observe(null); });
 $('wmrun').addEventListener('pointerdown', e => { const k = e.target.closest('[data-obs]')?.dataset.obs; if (k) observe(OBS === k ? null : k); });
+$('wmdis').addEventListener('change', e => { WM_DISTRACT = e.target.checked; });
 $('wmlist').addEventListener('click', e => { const i = e.target.closest('button')?.dataset.i; if (i != null) wmRunTest(+i); });
 $('wmobey').addEventListener('change', e => { WM_OBEY = e.target.checked; });
 $('wmstop').addEventListener('click', () => { for (const k of Object.keys(AGENTS)) { wmRelease(k); delete AGENTS[k]; } wmPanelDraw(); });
@@ -3731,7 +3732,7 @@ function update(dt){
     if (stick) { const dx = stick.x - stick.x0, dy = stick.y - stick.y0, l = Math.hypot(dx, dy); if (l > 10) { mx = dx / Math.max(l, 50); my = dy / Math.max(l, 50); } }
   }
   if (game.talk?.deadline && TT > game.talk.deadline && !sayOpen) { game.talk.deadline = 0; autoChoose(); }
-  autoTick(); cartTick(dt); momentsTick(); folkTick(dt); faunaTick(dt); agentTick(dt); wmFollowTick();
+  autoTick(); cartTick(dt); momentsTick(); folkTick(dt); faunaTick(dt); agentTick(dt); chatTick(dt); wmFollowTick();
   ana.torn = !!game.anaStates.rasgado; ana.askew = !!game.anaStates.despeinada;
   ana.savoring = false;
   // walking to something she was sent to (a tap): by the A* path, and doing it on arrival
@@ -3785,6 +3786,7 @@ function update(dt){
   const hr = hourNow(), visiting = k => !!CH[k].routine && PEOPLE[k].where !== 'out' && PEOPLE[k].where !== CH[k].home;
   for (const [k, p] of Object.entries(PEOPLE)) {
     const c = CH[k]; if (wmDriven(k) || c.companion) continue;
+    if (CHAT_HOLD[k] > TT) { p.moving = false; continue; }   // (stopped for a chat)
     if (k === game.tripWith) { p.want = p.where; continue; }   // (he went with Ana to Bright River)
     p.want = p.story ? p.story.room : (p.away && p.away.day === today() && hr < p.away.until) ? 'away' : c.routine ? c.routine.want(hr, today()) : c.home;
     if (p.story?.place && p.where === 'out') p.target = { place: p.story.place, until: 99, story: true };
@@ -3797,7 +3799,7 @@ function update(dt){
     else if (p.where === 'out') { if (!goTarget(p, dt, c.speed.walk) && watched('out')) inScene('out', () => wander(p, dt, c.speed.out)); }
     else if (watched(p.where)) inScene(p.where, () => wander(p, dt, c.speed.room));
   }
-  if (!wmDriven('diana')) {   // (unless she is carrying out a goal of her own)
+  if (!wmDriven('diana') && !(CHAT_HOLD.diana > TT)) {   // (unless she is carrying out a goal of her own)
   if (diana.sit && !ana.sit) diana.sit = false;
   const wantHomeD = wantHome && diana.story?.room !== 'out';
   const dianaIn = () => { diana.where = 'os'; diana.goals = DIANA_IN; diana.x = DIANA_IN[0][0]; diana.y = DIANA_IN[0][1]; diana.homeT = 0; diana.moving = false; };
@@ -3940,7 +3942,7 @@ function renderView(){
   const anaHere = RENDER_REAL === game.scene;
   if (anaHere && sipping()) list.push({ y: ana.y + .2, draw: () => drawCup(g, ana) });
   if (anaHere) list.push({ y: ana.y + (ana.sit && !inside ? 6 : 0), draw: () => drawPerson(g, ana, t) }, { y: toby.y, draw: () => drawDog(g, toby, t) });
-  if (OBS) { const b = wmBody(OBS); if (b && !b.lie) list.push({ y: 1e9, draw: () => { const hy = b.y - 56 * (LOOKS[b.look]?.h || 1) - 6 + Math.sin(t * 4) * 1.5; blob(g, [[b.x - 5, hy - 7], [b.x + 5, hy - 7], [b.x, hy]], '#e0a030'); } }); }   // (a little arrow over whoever is watched)
+  if (OBS) { const b = wmBody(OBS); if (b && !b.lie) list.push({ y: 1e9, draw: () => { const hy = b.y - 50 * (LOOKS[b.look]?.h || 1) - 4 + Math.sin(t * 4) * 1.5; blob(g, [[b.x - 5, hy - 7], [b.x + 5, hy - 7], [b.x, hy]], '#e0a030'); } }); }   // (a little arrow over whoever is watched)
   list.sort((a, b) => a.y - b.y).forEach(o => o.draw());
   // a little "!" over whoever has something for Ana: thanks, a present, a delivery, or came looking for her
   for (const [k, p] of Object.entries(PEOPLE)) {
@@ -4857,6 +4859,7 @@ function agentTick(dt){
     if (ag.hold) { wmHold(ag, dt); continue; }
     if (!activeGoals(ag).length) { if (ag.st !== 'idle') agentIdle(ag); continue; }
     if (ag.who === 'ana' && anaPaused(ag)) continue;
+    if (distractTick(ag)) continue;
     for (const g of activeGoals(ag)) if (g.pending.some(p => p.h.st === 'fail' && !p.seen)) { for (const p of g.pending) if (p.h.st === 'fail') { p.seen = true; delete game.wm.facts['pedido:' + p.f.f + ':' + p.to + ':' + today()]; }   // (they tried and could not: one may ask again)
       agentLog(ag, 'quien iba a ayudar no pudo: ' + g.label); if (++g.tries > 3) goalEnd(ag, g, 'fail', 'nadie pudo ayudar'); else goalPlan(ag, g); }
     // goals with nothing left to do: done, waiting for what was promised, or (a little later) a new plan
@@ -4871,6 +4874,7 @@ function agentTick(dt){
     if (!ag.task || ag.task.st !== 'todo') { ag.task = pickTask(ag); if (ag.task) { ag.task.t = 0; ag.task.step = { a: ag.task.a, t: 0 }; agentLog(ag, '→ ' + stepText(ag.task.a) + (activeGoals(ag).length > 1 ? ' (' + ag.task.g.label + ')' : '')); } }
     const t = ag.task;
     if (!t) { if (ag.st !== 'wait') { ag.st = 'wait'; wmRelease(ag.who); } continue; }
+    if (distractCheck(ag)) continue;
     ag.st = 'run'; ag.goalNow = t.g; t.step.t += dt;
     let r;
     if (!SELF_MOVING.includes(t.a.v) && !t.there) { r = wmMove(ag.who, t.loc, dt); if (r === 'ok') { t.there = true; r = t.a.v === 'ir' ? 'ok' : 'run'; } }
@@ -4884,6 +4888,152 @@ function agentTick(dt){
   }
 }
 const WM_KEYS = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'KeyA', 'KeyD', 'KeyW', 'KeyS'];   // (the player moving Ana herself stops her plan)
+
+/* ---------- focus and wandering attention: nobody in Avonlea goes about an errand like a messenger. On the way to a task
+   one may stop to look at what one likes (the lake, the flowers, an animal), or to talk with whoever one meets; how
+   often and how long depends on the character (enfoque: 0 all over the place … 1 straight there; social: how much
+   they like a chat; atrae: what catches their eye) and on how pressing the errand is (a deadline: hardly at all;
+   something asked of them: less). Then they go on with what they were doing. ---------- */
+const FOCO = {   // [enfoque, social, what catches the eye]
+  ana: [.3, .8, ['lago', 'flores', 'arboles', 'mar', 'animales']], diana: [.6, .8, ['flores', 'lago']], matthew: [.7, .1, ['animales', 'campo']],
+  marilla: [.9, .4, []], barry: [.9, .3, []], lynde: [.4, 1, ['gente']], harrison: [.7, .3, ['animales']], shearer: [.8, .4, ['animales']],
+  lawson: [.9, .5, []], gilbert: [.8, .5, ['ana']], sraallan: [.6, .7, ['flores', 'arboles']], peg: [.5, .2, ['campo']],
+};
+const focoOf = k => { const f = FOCO[k] || (FOLKBY[k]?.kid ? [.5, .7, ['animales', 'lago']] : [.7, .5, []]); return { enfoque: f[0], social: f[1], atrae: f[2] }; };
+let WM_DISTRACT = true;
+const qOf = k => k === 'ana' ? 'ana' : PEOPLE[k] ? k : 'f:' + k;
+const isKid = k => k === 'ana' || k === 'diana' || !!FOLKBY[k]?.kid;
+const CHAT_HOLD = {};   // (those of the routines kept a moment by a chat: who → until)
+let CHATS = [];
+const urgency = ag => { const p = Math.max(0, ...activeGoals(ag).map(g => g.prio || 1)); return p >= 3 ? .95 : p === 2 ? .45 : 0; };
+function sayB(q, text){ bubbles = bubbles.filter(x => x.q !== q); bubbles.push({ q, text, t: 0, dur: lineDur(text) }); }
+const FAUNA_NAME = { cat: 'un gato', cow: 'una vaca', duck: 'los patos', gull: 'las gaviotas', hen: 'las gallinas', horse: 'un caballo', pig: 'un cerdo', sheep: 'una oveja' };
+// what there is to look at around someone (out of doors)
+function stimuli(b){
+  const L = [], add = (id, kind, x, y, name) => L.push({ id, kind, x, y, name });
+  if (inLake(b.x, b.y, 110)) add('lago', 'lago', LAKE.x, LAKE.y, 'el Lago de las Aguas Brillantes');
+  if (S < 2) LUPINS.forEach((l, i) => { if (((b.x - l.x) / (l.rx + 60)) ** 2 + ((b.y - l.y) / (l.ry + 60)) ** 2 < 1) add('lup' + i, 'flores', l.x, l.y, 'las flores'); });
+  if (S === 0) { const t = treesNear(b.x, b.y).find(t => t.kind === 'blossom' && dist(t.x, t.y, b.x, b.y) < 70); if (t) add('tr' + Math.round(t.x / 200) + ',' + Math.round(t.y / 200), 'arboles', t.x, t.y, 'los árboles en flor'); }
+  if (dist(b.x, b.y, PLACES.playa[1], PLACES.playa[2]) < 260 || dist(b.x, b.y, FARO.x, FARO.y) < 360) add('mar', 'mar', b.x, b.y + 200, 'el mar');
+  const a = FAUNA.find(a => !a.fly && dist(a.x, a.y, b.x, b.y) < 80); if (a) add('fa' + FAUNA.indexOf(a), 'animales', a.x, a.y, FAUNA_NAME[a.kind] || 'un animal');
+  for (const [k, c] of Object.entries(ANIM)) if (c.kind === 'cow' && c.where === 'out' && dist(c.x, c.y, b.x, b.y) < 80) add('cow' + k, 'animales', c.x, c.y, ANIMALS[k].name);
+  const f = FIELDS.findIndex(f => b.x > f.x - 20 && b.x < f.x + f.w + 20 && b.y > f.y - 20 && b.y < f.y + f.h + 20); if (f >= 0) add('campo' + f, 'campo', FIELDS[f].x + FIELDS[f].w / 2, FIELDS[f].y + FIELDS[f].h / 2, 'el campo');
+  return L;
+}
+const LOOK_TEXT = { lago: s => 'se quedó mirando ' + s.name, flores: () => 'se detuvo a mirar las flores', arboles: () => 'se quedó mirando los árboles en flor', mar: () => 'se quedó mirando el mar', animales: s => 'se detuvo a mirar ' + s.name, campo: () => 'se detuvo a ver cómo va el campo' };
+const LOOK_LINES = {
+  ana: { lago: ['¡El Lago de las Aguas Brillantes! Podría quedarme aquí la vida entera.', 'El agua tiene hoy un color de perla... ¿o de ópalo?'], flores: ['¡Qué flores! Parecen pensamientos de alguien muy feliz.', 'Si yo fuera flor, querría ser una de estas.'], arboles: ['Los cerezos en flor parecen novias vestidas de blanco.', '¡La Blanca Senda de las Delicias, otra vez!'], mar: ['El mar... ¿qué habrá del otro lado?', 'Cuando sea grande voy a cruzar el mar. O a escribir sobre él.'], animales: ['¡Hola, pequeño! ¿Cómo te llamas? Yo te diré Lord Fitzgerald.', '¿Qué pensarán los animales de nosotros?'], campo: ['Todo crece tan callado... como un secreto.'] },
+  matthew: { animales: ['Buen animal, sí... buen animal.', 'Ejem... tranquila, tranquila.'], campo: ['Hmm. Va bien la avena. Sí... va bien.'] },
+  diana: { flores: ['¡Ay, qué lindas! Le llevaré unas a mamá.'], lago: ['Ana diría algo precioso de este lago...'] },
+  _: { lago: ['¡Qué lindo está el lago hoy!'], flores: ['Qué bonitas las flores este año.'], arboles: ['Mire nada más esos árboles.'], mar: ['Qué brisa trae el mar.'], animales: ['Mira tú...'], campo: ['Buena tierra, esta.'] },
+};
+// on the way to a task: something to look at, or someone to talk with?
+function distractCheck(ag){
+  if (!WM_DISTRACT || ag.hold || ag.followOf || TT < (ag.calmUntil || 0) || TT < (ag.nextCheck || 0)) return false;
+  ag.nextCheck = TT + .5;
+  const who = ag.who, b = wmBody(who); if (!b || !b.moving) return false;
+  const F = focoOf(who), urg = urgency(ag), seen = ag.seenStim || (ag.seenStim = {});
+  if (chatTry(ag, F, urg)) return true;
+  if (wmScene(who) !== 'out') return false;
+  const goal = ag.task && taskPoint(ag, ag.task).q;
+  for (const s of stimuli(b)) {
+    if (goal && dist(s.x, s.y, goal[0], goal[1]) < 160) continue;   // (what the errand is about is no distraction)
+    if (seen[s.id] > TT || seen[s.kind] > TT) continue; seen[s.id] = TT + 150; seen[s.kind] = TT + 60;   // (and not the same kind of thing over and over)   // (each thing once on the way: passing it again later, maybe)
+    if (Math.random() < (1 - F.enfoque) * (F.atrae.includes(s.kind) ? 1 : .12) * (1 - urg)) { startLook(ag, s, F, urg); return true; }
+  }
+  return false;
+}
+function startLook(ag, s, F, urg){
+  const b = wmBody(ag.who), dur = (4 + 14 * (1 - F.enfoque) * (.5 + Math.random())) * (1 - urg * .7);
+  wmRelease(ag.who); b.moving = false; b.dir = s.x < b.x ? 3 : 1;
+  ag.distract = { kind: s.kind, text: LOOK_TEXT[s.kind](s), until: TT + dur };
+  agentLog(ag, '💭 ' + ag.distract.text + ' (' + Math.round(dur) + ' s)');
+  const L = (LOOK_LINES[ag.who] || LOOK_LINES._)[s.kind] || (ag.who === 'ana' ? null : LOOK_LINES._[s.kind]);
+  if (L && Math.random() < .8) sayB(qOf(ag.who), pick(L));
+}
+// while distracted the task waits; then on with it
+function distractTick(ag){
+  const d = ag.distract; if (!d) return false;
+  if (d.chat ? CHATS.includes(d.chat) : TT < d.until) { const b = wmBody(ag.who); b.moving = false; if (ag.who === 'ana' && ana.goto?.wm) ana.goto = null; return true; }
+  ag.distract = null; ag.calmUntil = TT + 15 + 30 * focoOf(ag.who).enfoque;
+  agentLog(ag, '↩ sigue' + (ag.task ? ' con: ' + stepText(ag.task.a) : ' con lo suyo'));
+  return false;
+}
+const inChat = k => CHATS.some(c => c.parts.includes(k)) || FOLKBY[k]?.talkT > TT || !!amb.cur?.parts?.includes(k) || !!enc.cur?.parts?.includes(k) || (k === 'ana' && (!!game.talk || !!enc.cur || !!amb.cur)) || !!AGENTS[k]?.distract;
+function chatTry(ag, F, urg){
+  const me = ag.who, b = wmBody(me), sc = wmScene(me), pc = ag.pairCool || (ag.pairCool = {});
+  for (const o of ['ana', ...Object.keys(PEOPLE), ...FOLK.map(f => f.id)]) {
+    if (o === me || wmScene(o) !== sc || (ag.task && JSON.stringify(ag.task.a).includes(`"${o}"`))) continue;   // (not whoever the errand is with: that talk is the errand)
+    const ob = wmBody(o); if (!ob || ob.lie || dist(b.x, b.y, ob.x, ob.y) > 64 || pc[o] > TT || inChat(o)) continue;
+    pc[o] = TT + 180;
+    const anaFree = o === 'ana' && !(wmDriven('ana') && !AGENTS.ana.paused), G = focoOf(o), r = relGetW(me, o), oag = AGENTS[o];
+    let p = (F.social * .6 + G.social * .4) * (F.atrae.includes(o) || F.atrae.includes('gente') ? 1.5 : 1) * (1 - urg) * (r >= 4 ? 1.3 : r <= 0 ? .3 : 1);
+    if (oag && activeGoals(oag).length) p *= 1 - urgency(oag);
+    if (Math.random() >= p) continue;
+    startChat(me, o, anaFree); return true;
+  }
+  return false;
+}
+function startChat(a, b, anaFree){
+  const c = { parts: [a, b], lines: chatLines(a, b, anaFree), i: -1, wait: .2, anaFree }; CHATS.push(c);
+  for (const [p, o] of [[a, b], [b, a]]) {
+    const body = wmBody(p);
+    if (p === 'ana' && anaFree) continue;   // (Ana, when the player has her: not held)
+    body.moving = false; body.dir = wmBody(o).x < body.x ? 3 : 1;
+    const ag = AGENTS[p];
+    if (ag && activeGoals(ag).length) { wmRelease(p); ag.distract = { kind: 'charla', chat: c, text: 'conversa con ' + wmName(o) }; agentLog(ag, '💬 se detuvo a conversar con ' + wmName(o)); }
+    else if (FOLKBY[p]) { FOLKBY[p].talkT = TT + 1e6; FOLKBY[p].route = []; }
+    else if (PEOPLE[p]) CHAT_HOLD[p] = TT + 1e6;
+  }
+}
+function chatEnd(c){
+  CHATS = CHATS.filter(x => x !== c);
+  for (const p of c.parts) { if (FOLKBY[p]?.talkT > TT + 1000) FOLKBY[p].talkT = TT + 1; delete CHAT_HOLD[p]; }
+  if (c.i >= 1) logEv(`${wmName(c.parts[0])} y ${wmName(c.parts[1])} conversaron un rato${wmScene(c.parts[0]) === 'out' ? ' en el camino' : ''}.`, []);
+}
+function chatTick(dt){
+  for (const c of CHATS.slice()) {
+    const [a, b] = c.parts.map(wmBody);
+    if (!a || !b || wmScene(c.parts[0]) !== wmScene(c.parts[1]) || dist(a.x, a.y, b.x, b.y) > (c.anaFree ? 200 : 140)) { chatEnd(c); continue; }
+    if ((c.wait -= dt) > 0) continue;
+    if (++c.i >= c.lines.length) { chatEnd(c); continue; }
+    const l = c.lines[c.i]; sayB(qOf(l.q), l.t); c.wait = lineDur(l.t) + .35;
+  }
+}
+// what they say (no generative AI: a greeting, a few lines as the characters are, and a goodbye that mentions the errand)
+const LYNDE_CHISME = ['¿Supo que a los Pye se les escapó otra vez el cerdo? Yo siempre lo dije.', '¡Esa niña de los Cuthbert! Pelirroja y con una lengua... aunque buen corazón tiene, eso sí.', 'Dicen que la maestra nueva usa sombrero con plumas. ¡Plumas, en una escuela!', 'Yo no soy de las que hablan, pero el loro del Sr. Harrison dice cada cosa...', 'Matthew Cuthbert fue a la tienda y salió con un rastrillo. ¡En pleno invierno!'];
+const CHISME_RE = ['¡No me diga!', '¿De veras? ¡Qué cosa!', 'Bueno, yo de eso no sé nada...', 'Ya me lo imaginaba.'];
+const ANA_DIANA = [['¡Diana, amiga del alma! Tengo tanto que contarte.', '¡Ana! Yo también. ¿Nos vemos en el Bosque Encantado?'], ['¿Viste qué color tiene hoy el lago? Como de perla.', 'Yo solo vi que estaba azul... pero tú lo dices más bonito.'], ['Prometamos ser amigas mientras el sol y la luna existan.', '¡Lo prometo, Ana!']];
+const ANA_SUENA = [['¿No le parece que hoy el mundo está recién hecho?', 'Esta niña... qué cosas dice.'], ['Vi una nube con forma de barco. Iba hacia Charlottetown.', 'Ya lo creo, Ana. Ya lo creo.']];
+function chatLines(a, b, anaFree){
+  const L = [], say = (q, t) => L.push({ q, t }), h = hourNow(), hi = h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches';
+  const tu = isKid(a) && isKid(b), nm = k => /^[a-zá-ú]/.test(wmName(k)) ? '' : wmName(k), A = nm(a), B = nm(b), to = n => n ? ', ' + n : '';   // ("un vecino" is no name to call someone by)
+  if (anaFree) {   // (Ana, as the player moves her, passing by: a word to her)
+    const d = FOLKBY[a]?.def;
+    say(a, a === 'gilbert' && d ? pick(d.lines) : pick([`¡${hi}, Ana!`, '¡Hola, Ana! ¿A dónde vas tan apurada?', '¡Ana Shirley! Saludos a Marilla.']));
+    if (relGetW('ana', a) <= 0) say('ana', pick(FOLKBY[a]?.def.ana || ['Hmpf.']));
+    return L;
+  }
+  const ana_ = a === 'ana' ? a : b === 'ana' ? b : null, other = ana_ && (a === 'ana' ? b : a);
+  if (ana_ && relGetW('ana', other) <= 0) { say(other, FOLKBY[other]?.def.lines ? pick(FOLKBY[other].def.lines) : `${hi}, Ana.`); say('ana', pick(FOLKBY[other]?.def.ana || ['Hmpf.'])); return L; }
+  if (a === 'matthew' || b === 'matthew') {   // (Matthew: a greeting, and off he goes)
+    const o = a === 'matthew' ? b : a;
+    say(o, `¡${hi}, Matthew!`); say('matthew', pick(['Eh... b-buenas.', 'Buenas... sí... buen día, ¿no?', 'Ejem... buenas.']));
+    if (focoOf(o).social > .7) say(o, pick(['¡Qué raro verlo por aquí! ¿Cómo anda todo?', '¿Y Marilla? ¿Bien?']));
+    say('matthew', pick(['Bueno... tengo que seguir, ¿sabe? Sí... eso.', 'Pues... sí... tengo un encargo. Hasta luego.'])); return L;
+  }
+  say(a, `¡${hi}${to(B)}!`); say(b, tu ? pick([`¡Hola${to(A)}! ¿A dónde vas?`, `¡Hola${to(A)}!`]) : pick([`¡${hi}${to(A)}! ¿Cómo están todos en casa?`, `¡Qué gusto verle${to(A)}!`]));
+  const rounds = 1 + Math.round((1 - Math.max(focoOf(a).enfoque, focoOf(b).enfoque)) * 3);
+  for (let k = 0; k < rounds; k++) {
+    if (a === 'lynde' || b === 'lynde') { const o = a === 'lynde' ? b : a; say('lynde', pick(LYNDE_CHISME)); say(o, pick(CHISME_RE)); }
+    else if (ana_ && other === 'diana') { const [x, y] = ANA_DIANA[(k + Math.floor(TT)) % ANA_DIANA.length]; say('ana', x); say('diana', y); }
+    else if (ana_) { const [x, y] = pick(ANA_SUENA); say('ana', x); say(other, y); }
+    else { const [x, y] = pick(PAIR_LINES[tu ? 'kids' : 'big']); say(a, x); say(b, y); }
+  }
+  const t = AGENTS[a]?.task || AGENTS[b]?.task, who = AGENTS[a]?.task ? a : b;
+  say(who, t ? `Bueno, me voy, que tengo que ${stepText(t.a)}.` : pick(['Bueno, ¡que le vaya bien!', 'Me voy, que se hace tarde.']));
+  return L;
+}
 
 // --- moving a body to a place key: Ana by her own walking (A*, by the roads), the others by theirs
 function wmTarget(who, key){
@@ -5122,6 +5272,7 @@ function playerAsk(who, f){
 function dayAt(h){ dayT = Math.floor(dayT) + (h - 6) / 24; }
 function wmRunTest(i){
   const T = WM_TESTS[i];
+  for (const c of CHATS.slice()) chatEnd(c);
   for (const k of Object.keys(AGENTS)) { wmRelease(k); delete AGENTS[k]; }
   close(); if (ana.goto) ana.goto = null; diana.follow = false; game.wm.sick = []; for (const f of Object.keys(game.wm.facts)) if (/^(pedido|intercede|disc|gusto|dio):/.test(f)) delete game.wm.facts[f]; game.seasonShift = 0; cowHome('dolly'); cowHome('jersey'); game.inv.cuerda = 0; for (const k of ['matthew', 'harrison', 'shearer']) delete game.wm.inv[k];
   if (PEOPLE.shearer.where !== 'away') { PEOPLE.shearer.where = 'away'; }
@@ -5146,7 +5297,7 @@ function wmPanelDraw(){
 }
 function wmRunDraw(){
   const gs = { run: '▶', done: '✔', fail: '✘' }, st = { run: 'en marcha', wait: 'esperando', idle: '', pausa: '⏸ en pausa (la jugadora la controla; vuelve a su plan tras ' + RESUME_IDLE + ' s sin órdenes)' };
-  $('wmrun').innerHTML = Object.values(AGENTS).map(ag => `<div class="ag">${ag.who !== 'ana' ? `<button class="eye${OBS === ag.who ? ' on' : ''}" data-obs="${ag.who}" title="Observar">👁</button> ` : ''}<b>${wmName(ag.who)}</b> ${ag.hold ? '· esperando aquí' : ag.followOf ? '· acompaña a ' + wmName(ag.followOf) : st[ag.st] || ''}`
+  $('wmrun').innerHTML = Object.values(AGENTS).map(ag => `<div class="ag">${ag.who !== 'ana' ? `<button class="eye${OBS === ag.who ? ' on' : ''}" data-obs="${ag.who}" title="Observar">👁</button> ` : ''}<b>${wmName(ag.who)}</b> ${ag.hold ? '· esperando aquí' : ag.followOf ? '· acompaña a ' + wmName(ag.followOf) : (ag.distract ? '· 💭 ' + ag.distract.text : st[ag.st] || '')}`
     + (ag.goals?.length ? '<ul class="gl">' + [...activeGoals(ag), ...ag.goals.filter(g => g.st !== 'run').slice(-4)].map(g => `<li class="${g.st}">${gs[g.st]} <small>[${g.prio}]</small> ${g.label}${g.why ? ' <i>(' + g.why + ')</i>' : ''}`
       + (g.st === 'run' ? '<ol class="tk">' + ag.tasks.filter(t => t.g === g && t.st !== 'skip').map(t => { const n = ag.tasks.filter(u => u.g === g && u.st !== 'skip'), dep = t.deps.map(id => n.findIndex(u => u.id === id) + 1).filter(Boolean); return `<li class="${t === ag.task ? 'cur' : t.st === 'done' ? 'past' : ''}">${t === ag.task ? '▶ ' : t.st === 'done' ? '✔ ' : taskReady(ag, t) ? '○ ' : '· '}${stepText(t.a)}${dep.length && t.st === 'todo' ? ' <small>(tras ' + dep.join(', ') + ')</small>' : ''}</li>`; }).join('') + '</ol>' : '') + '</li>').join('') + '</ul>' : '')
     + (ag.log?.length ? '<pre>' + ag.log.slice(-6).join('\n') + '</pre>' : '') + '</div>').join('') || '<i>Nadie tiene una meta todavía.</i>';
@@ -5239,7 +5390,7 @@ function drawMap(){
   $('maptitle').textContent = 'Avonlea · ' + SEASONS[S] + ', día ' + (Math.floor(dayT) % 2 + 1) + ' · ' + SICON[S] + ' · toca un lugar para ir allí';
 }
 function loop(now){ const dt = clamp((now - last) / 1000, 0, .05); last = now; update(dt); render(); requestAnimationFrame(loop); }
-window.__avonlea = { observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+window.__avonlea = { focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
 requestAnimationFrame(loop);
 })();
 </script>
