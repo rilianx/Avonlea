@@ -34,6 +34,8 @@ html,body{margin:0;height:100%;background:#2b3a26;overflow:hidden;touch-action:n
 #wmrun ol.tk{margin:1px 0 4px 14px;font-size:11.5px}
 #wmrun ul.gl li.fail{opacity:.6;text-decoration:line-through}
 #wmrun li.cur{font-weight:bold}
+#wmrun .eye{padding:0 4px;font-size:12px}
+#wmrun .eye.on{background:#e0a030}
 #wmrun li.past{opacity:.55}
 #wmrun pre{white-space:pre-wrap;font-size:11px;margin:2px 0;opacity:.8}
 #wmp .mb{margin-top:8px}
@@ -81,6 +83,9 @@ html,body{margin:0;height:100%;background:#2b3a26;overflow:hidden;touch-action:n
 #aiq textarea{width:100%;box-sizing:border-box;height:120px;font:11px monospace;margin-top:4px}
 #aiq button{font:13px Georgia,serif;background:#fffaf0;color:#3b2a1c;border:1.5px solid #6b4a30;border-radius:8px 11px 7px 10px;padding:3px 9px;cursor:pointer;margin:3px 3px 0 0}
 @media (max-width:640px){#hint{top:58px !important;max-width:calc(100% - 30px) !important}}
+#obs{position:fixed;left:50%;top:52px;transform:translateX(-50%);z-index:13;padding:4px 6px 4px 12px;font-size:13.5px;max-width:calc(100% - 24px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#obs[hidden]{display:none}
+#obs button{font:inherit;font-size:12px;margin-left:6px}
 #hint{position:fixed;left:50%;top:12px;transform:translateX(-50%);padding:5px 12px;font-size:14px;pointer-events:none;transition:opacity 1.5s;text-align:center;max-width:calc(100% - 200px)}
 #mapbtn{position:fixed;right:10px;top:46px;width:42px;height:36px;font-size:20px;line-height:30px;padding:0;cursor:pointer}
 #map{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(30,20,10,.45)}
@@ -108,6 +113,7 @@ html,body{margin:0;height:100%;background:#2b3a26;overflow:hidden;touch-action:n
 <div id="tasks" class="paper" hidden></div>
 <div id="clock" class="paper"></div>
 <div id="tok" class="paper" title="Tokens gastados con la IA" hidden></div>
+<div id="obs" class="paper" hidden><span></span> <button id="obsback">Volver a Ana</button></div>
 <div id="hint" class="paper">Flechas o WASD para pasear (o toca el suelo) · toca una persona u objeto para interactuar · Enter o T para decir algo · M para el mapa</div>
 <div id="talk" class="paper" hidden></div>
 <div id="tripbar" class="paper" hidden><span id="tripstop"></span> <button id="tripfast">⏩ Más rápido</button></div>
@@ -1537,7 +1543,31 @@ function blockedIn(x, y, scene = game.scene){
   if (x < 14 || x > KIT.w - 14 || y < 2.4 * T + 8 || (y > KIT.h - 4 && Math.abs(x - KDOOR.x) > 16)) return true;
   return ROOMS[scene].blocked(x, y);
 }
-const blocked = (x, y) => game.scene === 'out' ? blockedOut(x, y) : blockedIn(x, y);
+// (SCN: the scene whoever is walking is in, when it is not Ana's: the one being watched)
+let SCN = null; const curScene = () => SCN || game.scene;
+/* ---------- watching someone: the player still moves Ana, but the view follows another one (outdoors and into the
+   houses), to see how they go about their goals. Where the view is, they walk by the paths as Ana would. ---------- */
+let OBS = null;
+const obsScene = () => { const b = OBS && wmBody(OBS), sc = b && wmScene(OBS); return sc === 'out' || ROOMS[sc] ? sc : null; };
+const viewScene = () => obsScene() || game.scene;
+const watched = sc => sc === game.scene || sc === viewScene();
+function inScene(sc, f){ const o = SCN; SCN = sc; try { return f(); } finally { SCN = o; } }
+function observe(who){
+  OBS = who && who !== 'ana' && wmBody(who) ? who : null; cam.snap = true;
+  if (OBS && innerWidth < 700) wmPanel(false);   // (on a small screen the panel would cover it)
+  obsBar();
+}
+// the strip at the top while watching: who, what they are doing now, and the way back to Ana
+function obsBar(){
+  const el = $('obs'); if (!OBS) { if (!el.hidden) el.hidden = true; return; }
+  const ag = AGENTS[OBS], b = wmBody(OBS), sc = obsScene();
+  const doing = ag?.hold ? 'esperando aquí' : ag?.followOf ? 'acompaña a ' + wmName(ag.followOf) : ag?.task?.st === 'todo' ? stepText(ag.task.a) : (pw => pw ? 'espera a ' + wmName(pw.to) : activeGoals(ag || {}).length ? 'pensando qué hacer' : 'en lo suyo')(ag && activeGoals(ag).flatMap(g => g.pending || []).find(q => q.h.st === 'run'));
+  const where = !sc ? (b.where === 'away' ? 'fuera de Avonlea' : 'dentro de su casa (no se ve)') : sc === 'out' ? '' : placeName(sc);
+  const txt = '👁 ' + wmName(OBS) + ' · ' + doing + (where ? ' · ' + where : '');
+  if (el.dataset.t !== txt) { el.dataset.t = txt; el.firstChild.textContent = txt; }
+  el.hidden = false;
+}
+const blocked = (x, y) => curScene() === 'out' ? blockedOut(x, y) : blockedIn(x, y, curScene());
 function moveBy(o, dx, dy){ if (!blocked(o.x + dx, o.y)) o.x += dx; if (!blocked(o.x, o.y + dy)) o.y += dy; }
 function walkTo(p, tx, ty, sp, dt){
   const dx = tx - p.x, dy = ty - p.y, d = Math.hypot(dx, dy);
@@ -1616,14 +1646,15 @@ function gridPath(scene, x0, y0, x1, y1){
 }
 // one step along the way to (tx, ty): the next point to walk to, and whether it has arrived (it re-plans if the goal moved)
 function navStep(p, tx, ty){
-  const sc = game.scene;
+  const sc = curScene();
   if (!p.nav || p.nav.sc !== sc || dist(p.nav.tx, p.nav.ty, tx, ty) > 40) p.nav = { sc, tx, ty, pts: findPath(sc, p.x, p.y, tx, ty) || [[tx, ty]], i: 0 };
   const n = p.nav;
   while (n.i < n.pts.length - 1 && dist(p.x, p.y, n.pts[n.i][0], n.pts[n.i][1]) < 6) n.i++;
   const [wx, wy] = n.pts[n.i];
   return { wx, wy, arrived: n.i === n.pts.length - 1 && dist(p.x, p.y, wx, wy) < 5 };
 }
-function walkPath(p, tx, ty, sp, dt){
+function walkPath(p, tx, ty, sp, dt, sc){
+  if (sc && sc !== curScene()) { const o = SCN; SCN = sc; try { return walkPath(p, tx, ty, sp, dt); } finally { SCN = o; } }
   const n = navStep(p, tx, ty);
   if (n.arrived) { p.moving = false; return true; }
   const ox = p.x, oy = p.y; walkTo(p, n.wx, n.wy, sp, dt);
@@ -1690,6 +1721,7 @@ function targetAt(wx, wy){
 // a tap: do it at once if she is close enough, otherwise she walks there (A*) and does it on arrival; on bare ground she just walks
 function tapAt(sx, sy){
   if (sleeping) return;
+  if (OBS) { observe(null); return; }   // (watching someone: a tap brings the view back to Ana)
   const wx = view.ox + sx / view.Z, wy = view.oy + sy / view.Z, t = targetAt(wx, wy);
   if (t && (t.self || dist(ana.x, ana.y, t.x, t.y) < t.reach * .85)) { ana.goto = null; t.act(); }
   else ana.goto = t ? { id: t.id, scene: game.scene } : { x: wx, y: wy, scene: game.scene };
@@ -1757,16 +1789,17 @@ function animalsThink(dt){
     if (a.where === 'away') continue;
     if (a.state === 'bought') {   // she goes along with whoever bought her (and is gone when he is)
       const b = PEOPLE[a.owner]; if (!b || b.where === 'away') { a.where = 'away'; continue; }
-      if (game.scene !== 'out' || b.where !== 'out') continue;
+      if (viewScene() !== 'out' || b.where !== 'out') continue;
       const bx = b.x + (b.dir === 3 ? 60 : -60), by = b.y + 8; if (dist(a.x, a.y, bx, by) > 14) cowGo(a, bx, by, 50, dt); else a.moving = false; continue;
     }
     if (a.state === 'led' && a.ledBy && a.ledBy !== 'ana') {   // (led on a rope by someone else: she goes along)
       const L = wmBody(a.ledBy); if (!L) continue; const bx = L.x + (L.dir === 3 ? 30 : -30), by = L.y + 6;
-      if (game.scene !== 'out' || L.where !== 'out' || dist(a.x, a.y, bx, by) > 300) { if (L.where === 'out') { a.x = bx; a.y = by; } a.moving = false; }
+      if (viewScene() !== 'out' || L.where !== 'out' || dist(a.x, a.y, bx, by) > 300) { if (L.where === 'out') { a.x = bx; a.y = by; } a.moving = false; }
       else if (dist(a.x, a.y, bx, by) > 16) cowGo(a, bx, by, 70, dt); else a.moving = false;
       continue;
     }
-    if (game.scene !== 'out') continue;   // (out in the fields, things only move while Ana is out there)
+    if (viewScene() !== 'out') continue;   // (out in the fields, things only move while someone looks: Ana, or whoever is watched)
+    if (a.state === 'led' && game.scene !== 'out') continue;
     if (a.state === 'led') { const bx = ana.x + (ana.dir === 3 ? 30 : -30), by = ana.y + 6; if (dist(a.x, a.y, bx, by) > 16) cowGo(a, bx, by, Math.max(34, ana.pace) * 1.3, dt); else a.moving = false; continue; }
     const A = AREAS[a.area];
     if (a.state === 'loose' && ana.moving && dist(a.x, a.y, ana.x, ana.y) < 56) { const d = dist(a.x, a.y, ana.x, ana.y) || 1; a.flee = TT + 1.1; a.fx = (a.x - ana.x) / d; a.fy = (a.y - ana.y) / d; }
@@ -2157,13 +2190,13 @@ function momentsTick(){
     if (lines.length) sceneStart({ parts: mNear ? ['matthew'] : [], lines, out: {}, scene: 'out', resumen: '' }, false);
   }
 }
-function goIn(room, at){ game.scene = room; ana.lie = false; diana.lie = false; ana.x = at ? at[0] : KDOOR.x; ana.y = at ? at[1] : KIT.h - 14; ana.dir = 0; ana.sit = false; toby.x = ana.x + 26; toby.y = ana.y; if (diana.follow) { diana.where = room; diana.sit = false; diana.x = ana.x - 26; diana.y = ana.y; } cam.x = KIT.w / 2; cam.y = KIT.h / 2; }
+function goIn(room, at){ game.scene = room; ana.lie = false; diana.lie = false; ana.x = at ? at[0] : KDOOR.x; ana.y = at ? at[1] : KIT.h - 14; ana.dir = 0; ana.sit = false; toby.x = ana.x + 26; toby.y = ana.y; if (diana.follow) { diana.where = room; diana.sit = false; diana.x = ana.x - 26; diana.y = ana.y; } if (!obsScene()) { cam.x = KIT.w / 2; cam.y = KIT.h / 2; } }
 function goOut(){
   if (ROOMS[game.scene].parent) return goIn(ROOMS[game.scene].parent, ROOMS[game.scene].exitAt);
   const H = HOUSES[game.scene].at;
   game.scene = 'out'; ana.lie = false; diana.lie = false; ana.x = H.x; ana.y = H.y + 24; ana.dir = 2; ana.sit = false; toby.x = ana.x + 24; toby.y = ana.y + 10;
   if (diana.follow) { diana.where = 'out'; diana.sit = false; diana.goals = DIANA_OUT; diana.x = ana.x - 24; diana.y = ana.y + 10; }
-  cam.x = ana.x; cam.y = ana.y;
+  if (!obsScene()) { cam.x = ana.x; cam.y = ana.y; }
 }
 const today = () => Math.floor(dayT);
 function warmUp(){ ana.dir = 0; float(S === 3 ? 'Qué calentito, después de tanta nieve…' : 'Qué lindo crepita el fuego', FIRE.x, FIRE.y - 100); if (S === 3) hearts(ana.x, ana.y - 56); sfx.happy(); }
@@ -3639,6 +3672,8 @@ $('sayin').addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPr
 $('saybtn').addEventListener('pointerdown', e => { e.stopPropagation(); audio(); sayOpen ? closeSay() : openSay(); });
 $('wmbtn').addEventListener('pointerdown', e => { e.stopPropagation(); audio(); wmPanel(); });
 $('wmp').addEventListener('pointerdown', e => e.stopPropagation());
+$('obsback').addEventListener('click', e => { e.stopPropagation(); observe(null); });
+$('wmrun').addEventListener('pointerdown', e => { const k = e.target.closest('[data-obs]')?.dataset.obs; if (k) observe(OBS === k ? null : k); });
 $('wmlist').addEventListener('click', e => { const i = e.target.closest('button')?.dataset.i; if (i != null) wmRunTest(+i); });
 $('wmobey').addEventListener('change', e => { WM_OBEY = e.target.checked; });
 $('wmstop').addEventListener('click', () => { for (const k of Object.keys(AGENTS)) { wmRelease(k); delete AGENTS[k]; } wmPanelDraw(); });
@@ -3656,19 +3691,19 @@ const DOOR = {}; for (const [k, h] of Object.entries(HOUSES)) DOOR[k] = [h.at.x,
 function commute(p, want, dt, sp){
   if (p.where === 'away') { if (want === 'away') return; p.where = 'out'; p.x = TOWN[0] + 8; p.y = TOWN[1]; p.nav = null; p.dest = null; if (p.outGoals) p.goals = p.outGoals; logEv(NAMES[p.look] + ' llegó por el camino del pueblo.', [p.look]); }
   if (p.where !== 'out') {   // inside a house: out through the door
-    if (game.scene === p.where && !(p.exitT > 8)) { p.exitT = (p.exitT || 0) + dt; if (!walkPath(p, KDOOR.x, KIT.h - 8, 40, dt)) return; }
+    if (watched(p.where) && !(p.exitT > 8)) { p.exitT = (p.exitT || 0) + dt; if (!walkPath(p, KDOOR.x, KIT.h - 8, 40, dt, p.where)) return; }
     const h = p.where; p.exitT = 0; p.where = 'out'; p.sit = false; p.moving = false; p.from = h; p.nav = null; p.x = DOOR[h][0]; p.y = DOOR[h][1] + 14; if (p.outGoals) p.goals = p.outGoals;
   }
   if (want === 'out') return;
   if (want === 'away') {   // off to town: along the road to the edge of the map, and gone
     if (p.dest !== 'away') { p.dest = 'away'; p.routeT = 0; p.nav = null; }
     p.routeT += dt;
-    if (game.scene === 'out' && p.routeT < 90 && !walkPath(p, TOWN[0], TOWN[1], sp, dt)) return;
+    if (watched('out') && p.routeT < 90 && !walkPath(p, TOWN[0], TOWN[1], sp, dt, 'out')) return;
     p.where = 'away'; p.dest = null; p.nav = null; p.moving = false; logEv(NAMES[p.look] + ' se fue al pueblo.', [p.look]); return;
   }
   if (p.dest !== want) { p.dest = want; p.routeT = 0; p.nav = null; }
   p.routeT += dt;
-  if (game.scene === 'out' && p.routeT < 90 && !walkPath(p, DOOR[want][0], DOOR[want][1], sp, dt)) return;
+  if (watched('out') && p.routeT < 90 && !walkPath(p, DOOR[want][0], DOOR[want][1], sp, dt, 'out')) return;
   p.where = want; p.nav = null; p.dest = null; p.moving = false; p.x = KDOOR.x; p.y = KIT.h - 14; p.dir = 0; p.goals = (want === CH[p.look].home ? p.base : CH[p.look].routine?.roomGoals?.[want]) || [[6.5 * T, 6 * T], [5 * T, 5.6 * T]]; p.goal = 0; p.wait = 2;
   logEv(NAMES[p.look] + (want === p.house ? ' volvió a su casa.' : HOUSES[want].arrive), [p.look]);
 }
@@ -3759,8 +3794,8 @@ function update(dt){
     if (seat) { sitSeat(p, seat, dt, c.speed.room || 30); continue; }
     if (p.mealSat) { p.mealSat = false; p.sit = false; if (p.where === 'gg') { p.x = seatFrom(SEATS[k])[0]; p.y = seatFrom(SEATS[k])[1]; } }
     if (p.where !== p.want) { p.target = null; commute(p, p.want, dt, c.speed.walk); }
-    else if (p.where === 'out') { if (!goTarget(p, dt, c.speed.walk) && game.scene === 'out') wander(p, dt, c.speed.out); }
-    else if (game.scene === p.where) wander(p, dt, c.speed.room);
+    else if (p.where === 'out') { if (!goTarget(p, dt, c.speed.walk) && watched('out')) inScene('out', () => wander(p, dt, c.speed.out)); }
+    else if (watched(p.where)) inScene(p.where, () => wander(p, dt, c.speed.room));
   }
   if (!wmDriven('diana')) {   // (unless she is carrying out a goal of her own)
   if (diana.sit && !ana.sit) diana.sit = false;
@@ -3814,11 +3849,16 @@ function update(dt){
   for (const f of fx) { f.t += dt; if (f.kind === 'drop') { f.vy += 200 * dt; f.y += f.vy * dt; } }
   fx = fx.filter(f => f.t < (f.kind === 'text' ? 2 : 1.2));
   // by the lighthouse the view opens up (the whole tower, the sea): the camera draws back and looks up a little
-  const byFaro = game.scene === 'out' && dist(ana.x, ana.y, FARO.x, FARO.y) < 560;
+  const vs = viewScene(), ob = obsScene() === 'out' ? wmBody(OBS) : ana;   // (the camera follows Ana, or whoever is watched)
+  const byFaro = vs === 'out' && dist(ob.x, ob.y, FARO.x, FARO.y) < 560;
   cam.zoom = lerp(cam.zoom ?? 1, byFaro ? .55 : 1, .04);
-  if (game.scene === 'out') { cam.x = lerp(cam.x, ana.x, .08); cam.y = lerp(cam.y, ana.y - 20 - (byFaro ? 150 : 0), .08); }
+  if (vs === 'out') { const k = cam.snap ? 1 : .08; cam.snap = false; cam.x = lerp(cam.x, ob.x, k); cam.y = lerp(cam.y, ob.y - 20 - (byFaro ? 150 : 0), k); }
+  obsBar();
 }
-function render(){
+// what is drawn is the scene being looked at: Ana's, or that of whoever she is watching (Ana and Toby only in hers)
+let RENDER_REAL = 'out';
+function render(){ const real = game.scene; RENDER_REAL = real; game.scene = viewScene(); try { renderView(); } finally { game.scene = real; } }
+function renderView(){
   const W = innerWidth, H = innerHeight, dpr = devicePixelRatio || 1;
   if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
   const { night, dusk } = light(), t = TT, inside = game.scene !== 'out';
@@ -3897,8 +3937,10 @@ function render(){
     for (const a of Object.values(ANIM)) if (a.kind === 'cow' && a.where === 'out' && inView(a.x, a.y)) list.push({ y: a.y, draw: () => drawCow(g, a, t) });
     for (const it of game.ground) if (it.scene === 'out' && inView(it.x, it.y)) list.push({ y: it.y, draw: () => drawGround(g, it) });
   }
-  if (sipping()) list.push({ y: ana.y + .2, draw: () => drawCup(g, ana) });
-  list.push({ y: ana.y + (ana.sit && !inside ? 6 : 0), draw: () => drawPerson(g, ana, t) }, { y: toby.y, draw: () => drawDog(g, toby, t) });
+  const anaHere = RENDER_REAL === game.scene;
+  if (anaHere && sipping()) list.push({ y: ana.y + .2, draw: () => drawCup(g, ana) });
+  if (anaHere) list.push({ y: ana.y + (ana.sit && !inside ? 6 : 0), draw: () => drawPerson(g, ana, t) }, { y: toby.y, draw: () => drawDog(g, toby, t) });
+  if (OBS) { const b = wmBody(OBS); if (b && !b.lie) list.push({ y: 1e9, draw: () => { const hy = b.y - 56 * (LOOKS[b.look]?.h || 1) - 6 + Math.sin(t * 4) * 1.5; blob(g, [[b.x - 5, hy - 7], [b.x + 5, hy - 7], [b.x, hy]], '#e0a030'); } }); }   // (a little arrow over whoever is watched)
   list.sort((a, b) => a.y - b.y).forEach(o => o.draw());
   // a little "!" over whoever has something for Ana: thanks, a present, a delivery, or came looking for her
   for (const [k, p] of Object.entries(PEOPLE)) {
@@ -3908,7 +3950,7 @@ function render(){
     g.fillStyle = '#c0582e'; g.font = 'bold 12px Georgia, serif'; g.textAlign = 'center'; g.fillText('!', p.x, by - 2.5);
   }
   // a tree in front of her lets her show through a little
-  if (!inside) for (const tr of trees) if (tr.y > ana.y + 4 && Math.abs(tr.x - ana.x) < 34 * tr.s && tr.y - ana.y < 90 * tr.s) { g.save(); g.globalAlpha = .5; drawPerson(g, ana, t); g.restore(); break; }
+  if (!inside && anaHere) for (const tr of trees) if (tr.y > ana.y + 4 && Math.abs(tr.x - ana.x) < 34 * tr.s && tr.y - ana.y < 90 * tr.s) { g.save(); g.globalAlpha = .5; drawPerson(g, ana, t); g.restore(); break; }
   if (!inside) {
     if (S < 2) for (const b of butterflies) { if (!inView(b.x, b.y)) continue; const f = Math.abs(Math.sin(b.ph)), y = b.y - 18 + Math.sin(b.ph * .2) * 4; ell(g, b.x, b.y, 2.5, 1, 'rgba(30,40,20,.15)'); ell(g, b.x - 2.5 * f, y, 2.6 * f + .4, 2.2, b.c, true); ell(g, b.x + 2.5 * f, y, 2.6 * f + .4, 2.2, b.c, true); }
     for (const b of birds) { ell(g, b.x + 30, b.y + 60, 4, 1.5, 'rgba(30,40,20,.18)'); const f = Math.sin(b.ph) * 4; line(g, [[b.x - 6, b.y + f], [b.x - 2, b.y - 2], [b.x, b.y], [b.x + 2, b.y - 2], [b.x + 6, b.y + f]], '#4a4040', 1.4, 2); }
@@ -3922,9 +3964,9 @@ function render(){
     else if (f.kind === 'drop') ell(g, f.x, f.y, 1.2, 2, `rgba(120,180,220,${1 - f.t})`);
   }
   // the rope, when she leads a cow
-  { const a = ledCow(); if (a && a.where === game.scene) { const hx = ana.x + (ana.dir === 3 ? -7 : 7), hy = ana.y - 14, nx = a.x + (a.dir === 3 ? -14 : 14), ny = a.y - 17; g.strokeStyle = '#8a6a48'; g.lineWidth = 1.1; g.beginPath(); g.moveTo(hx, hy); g.quadraticCurveTo((hx + nx) / 2, Math.max(hy, ny) + 10, nx, ny); g.stroke(); } }
+  { const a = ledCow(); if (a && anaHere && a.where === game.scene) { const hx = ana.x + (ana.dir === 3 ? -7 : 7), hy = ana.y - 14, nx = a.x + (a.dir === 3 ? -14 : 14), ny = a.y - 17; g.strokeStyle = '#8a6a48'; g.lineWidth = 1.1; g.beginPath(); g.moveTo(hx, hy); g.quadraticCurveTo((hx + nx) / 2, Math.max(hy, ny) + 10, nx, ny); g.stroke(); } }
   // a little tag over what the pointer is on (or what she could do right here)
-  const hov = hoverAt && !menuOpen() && !game.map && $('ai').hidden ? targetAt(ox + hoverAt[0] / Z, oy + hoverAt[1] / Z) : null;
+  const hov = hoverAt && anaHere && !menuOpen() && !game.map && $('ai').hidden ? targetAt(ox + hoverAt[0] / Z, oy + hoverAt[1] / Z) : null;
   cv.style.cursor = hov ? 'pointer' : '';
   // (no labels over things: what can be done is discovered by trying)
   // the light of the day (indoors a warm lamp at night)
@@ -3959,7 +4001,7 @@ function render(){
   const vg = g.createRadialGradient(W / 2, H / 2, Math.min(W, H) * .42, W / 2, H / 2, Math.max(W, H) * .75);
   vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(60,40,20,.3)'); g.fillStyle = vg; g.fillRect(0, 0, W, H);
   // speech bubbles over the heads of whoever is talking (on the screen, over the light of the day, so they read at night)
-  for (const b of bubbles) { const p = personOf(b.q); if (p && (b.q === 'ana' || (PEOPLE[b.q] ? sceneOf(b.q) : b.q.startsWith('f:') ? FOLKBY[b.q.slice(2)]?.where : animalWhere(b.q)) === game.scene)) drawBubble(g, p, b, W, H); }
+  for (const b of bubbles) { const p = personOf(b.q); if (p && (b.q === 'ana' ? anaHere : (PEOPLE[b.q] ? sceneOf(b.q) : b.q.startsWith('f:') ? FOLKBY[b.q.slice(2)]?.where : animalWhere(b.q)) === game.scene)) drawBubble(g, p, b, W, H); }
   // the little papers: what she has, the hour, what she can do
   const I = game.inv, bits = [];
   for (const k of ITEMS) if (I[k]) bits.push(ITEM_DEFS[k].icon + ' ' + (k === 'dolares' ? money(I[k], true) : I[k]));
@@ -4156,7 +4198,7 @@ const FOLK = Object.entries(FOLK_DEFS).map(([k, d], n) => {
   return Object.assign(mkPerson('f:' + k, ...home), { id: k, def: d, n, home, field: fl ? [fl.x + fl.w / 2, fl.y + fl.h / 2] : home, fieldR: fl ? Math.min(fl.w, fl.h) / 2 : 80, where: 'in', route: [], wait: 0, key: '', plan: null, re: 0, kid: d.look.h < .99, inAt: home });
 });
 const FOLKBY = Object.fromEntries(FOLK.map(f => [f.id, f]));
-const seen = (x, y, m = 160) => game.scene === 'out' && view.Z && x > view.ox - m && x < view.ox + innerWidth / view.Z + m && y > view.oy - m && y < view.oy + innerHeight / view.Z + m;
+const seen = (x, y, m = 160) => viewScene() === 'out' && view.Z && x > view.ox - m && x < view.ox + innerWidth / view.Z + m && y > view.oy - m && y < view.oy + innerHeight / view.Z + m;
 function folkSeat(f){
   if (f.where === 'tl') { f.x = SHOP_IN.counter.x + 30; f.y = SHOP_IN.counter.y - 22; f.dir = 2; f.sit = false; return; }   // (behind the counter)   // in the school: the pupils at their desks (Ana's is the sixth), the teacher by the blackboard
   if (f.def.kind === 'maestro') { f.x = 6.5 * T + 44; f.y = 3.2 * T + 14; f.dir = 2; f.sit = false; return; }
@@ -4230,7 +4272,7 @@ function faunaTick(dt){
     else { b.s += (b.back ? -1 : 1) * 70 * dt; if (b.s > b.len || b.s < 0) { b.s = clamp(b.s, 0, b.len); b.back = !b.back; b.wait = 20 + Math.random() * 30; } b.moving = true; b.walk = (b.walk + 1.8 * 70 * dt / SPEED) % 1; }
     const [x, y, dx] = buggyAt(b, b.s); b.x = x; b.y = y; if (Math.abs(dx) > 1) b.dir = (dx > 0) !== b.back ? 1 : 3;
   }
-  if (game.scene !== 'out') return;
+  if (viewScene() !== 'out') return;
   for (const a of FAUNA) {
     a.ph += dt;
     if (a.fly) { const L = coastSegs.length, u = ((TT * a.sp + a.s) % 1) * L, i = Math.floor(u), [p, q] = coastSegs[i], k = u - i, nx = q[1] - p[1], ny = -(q[0] - p[0]), nl = Math.hypot(nx, ny) || 1; a.x = lerp(p[0], q[0], k) + nx / nl * a.off; a.y = lerp(p[1], q[1], k) + ny / nl * a.off; a.dir = q[0] > p[0] ? 1 : 3; continue; }
@@ -4857,8 +4899,8 @@ function wmMove(who, key, dt){
 function wmWalk(who, x, y, scene, dt){
   const b = wmBody(who);
   if (who === 'ana') { if (TT - (ana.wmArr || -9) < .4) return true; if (!ana.goto || !ana.goto.wm || dist(ana.goto.x, ana.goto.y, x, y) > 30) ana.goto = { x, y, scene, wm: true }; return false; }
-  const sp = (CH[who]?.speed?.walk || 40), visible = game.scene === scene && (scene !== 'out' || seen(b.x, b.y, 300));
-  if (visible) return walkPath(b, x, y, sp, dt);
+  const sp = (CH[who]?.speed?.walk || 40), visible = viewScene() === scene && (scene !== 'out' || seen(b.x, b.y, 300));
+  if (visible) return walkPath(b, x, y, sp, dt, scene);
   const d = dist(b.x, b.y, x, y), v = Math.min(d, sp * 1.5 * dt); b.x += (x - b.x) / (d || 1) * v; b.y += (y - b.y) / (d || 1) * v; b.moving = d > 2; if (Math.abs(x - b.x) > 1) b.dir = x > b.x ? 1 : 3; b.walk = (b.walk + dt * 1.8) % 1;
   return d < 2;
 }
@@ -5088,7 +5130,7 @@ function wmPanelDraw(){
 }
 function wmRunDraw(){
   const gs = { run: '▶', done: '✔', fail: '✘' }, st = { run: 'en marcha', wait: 'esperando', idle: '' };
-  $('wmrun').innerHTML = Object.values(AGENTS).map(ag => `<div class="ag"><b>${wmName(ag.who)}</b> ${ag.hold ? '· esperando aquí' : ag.followOf ? '· acompaña a ' + wmName(ag.followOf) : st[ag.st] || ''}`
+  $('wmrun').innerHTML = Object.values(AGENTS).map(ag => `<div class="ag">${ag.who !== 'ana' ? `<button class="eye${OBS === ag.who ? ' on' : ''}" data-obs="${ag.who}" title="Observar">👁</button> ` : ''}<b>${wmName(ag.who)}</b> ${ag.hold ? '· esperando aquí' : ag.followOf ? '· acompaña a ' + wmName(ag.followOf) : st[ag.st] || ''}`
     + (ag.goals?.length ? '<ul class="gl">' + [...activeGoals(ag), ...ag.goals.filter(g => g.st !== 'run').slice(-4)].map(g => `<li class="${g.st}">${gs[g.st]} <small>[${g.prio}]</small> ${g.label}${g.why ? ' <i>(' + g.why + ')</i>' : ''}`
       + (g.st === 'run' ? '<ol class="tk">' + ag.tasks.filter(t => t.g === g && t.st !== 'skip').map(t => { const n = ag.tasks.filter(u => u.g === g && u.st !== 'skip'), dep = t.deps.map(id => n.findIndex(u => u.id === id) + 1).filter(Boolean); return `<li class="${t === ag.task ? 'cur' : t.st === 'done' ? 'past' : ''}">${t === ag.task ? '▶ ' : t.st === 'done' ? '✔ ' : taskReady(ag, t) ? '○ ' : '· '}${stepText(t.a)}${dep.length && t.st === 'todo' ? ' <small>(tras ' + dep.join(', ') + ')</small>' : ''}</li>`; }).join('') + '</ol>' : '') + '</li>').join('') + '</ul>' : '')
     + (ag.log?.length ? '<pre>' + ag.log.slice(-6).join('\n') + '</pre>' : '') + '</div>').join('') || '<i>Nadie tiene una meta todavía.</i>';
@@ -5181,7 +5223,7 @@ function drawMap(){
   $('maptitle').textContent = 'Avonlea · ' + SEASONS[S] + ', día ' + (Math.floor(dayT) % 2 + 1) + ' · ' + SICON[S] + ' · toca un lugar para ir allí';
 }
 function loop(now){ const dt = clamp((now - last) / 1000, 0, .05); last = now; update(dt); render(); requestAnimationFrame(loop); }
-window.__avonlea = { AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+window.__avonlea = { observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
 requestAnimationFrame(loop);
 })();
 </script>
