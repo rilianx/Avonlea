@@ -19,9 +19,23 @@ Lo que vuelva se calca a código (colores planos → trazados) y se monta sobre 
 
 `gpt_ana_sin_sombrero.webp` es la hoja redibujada. Se calca a trazados con:
 
-    python3 tools/trace.py sprites/gpt_ana_sin_sombrero.webp ana --eps 1 \
+    python3 tools/trace.py sprites/gpt_ana_sin_sombrero.webp ana --eps 2 --poly \
       --pal '#4a2e1e,#b74e27,#923d1d,#fbd2ac,#e5b391,#477a56,#355c3e,#5f3924,#d53430,#ece6dc,#65787c,#f2a08c,#ffffff'
 
 (`--pal`: los colores planos de la hoja, el primero es la línea.) Escribe `sprites/vec/ana.json` y el bloque `VEC` de
 `index.html`. `node tools/compare.js ana salida.png` dibuja el calco donde estaban las figuras, para compararlo con la
 imagen original.
+
+Pesos medidos para Ana (10 figuras; error = diferencia media por pixel con la imagen, 0–765):
+
+| calco | peso | gzip | error grande | error a tamaño de juego |
+|---|---|---|---|---|
+| polígonos eps 1 | 75 KB | 26 KB | 31.8 | 26.3 |
+| **polígonos eps 2 (el que se usa)** | **44 KB** | **16.5 KB** | 32.3 | 26.9 |
+| polígonos eps 3 | 33 KB | 12.6 KB | 36.4 | 31.1 |
+| polígonos eps 4.5 | 26 KB | 10 KB | 43.3 | 37.8 |
+| polígonos eps 6 | 21 KB | 8.3 KB | 50.8 | 44.3 |
+| curvas eps 1 | 144 KB | 45 KB | 32.7 | 27.7 |
+
+El dibujo en código actual (cuerpo, cara, pelo, trenzas y gestos) pesa 27 KB (9 KB gzip) y sirve para todos los
+personajes; cada personaje agrega unos 180 bytes de ficha.

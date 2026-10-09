@@ -13,6 +13,8 @@ from PIL import Image
 
 ap = argparse.ArgumentParser(); ap.add_argument('img'); ap.add_argument('name'); ap.add_argument('--k', type=int, default=24)
 ap.add_argument('--eps', type=float, default=.8); ap.add_argument('--height', type=float, default=46); ap.add_argument('--minarea', type=float, default=5)
+ap.add_argument('--out', help='escribir el calco aquí y no tocar index.html (para probar)')
+ap.add_argument('--poly', action='store_true', help='polígonos en vez de curvas')
 ap.add_argument('--pal', help='colores planos, separados por coma (#rrggbb); el primero es la línea. Sin esto, se adivinan')
 a = ap.parse_args()
 im = np.array(Image.open(a.img).convert('RGB')); H, W = im.shape[:2]
@@ -49,6 +51,10 @@ Q = np.full((H, W), -1, np.int32); Q[fg_in] = near
 for _ in range(2):
     votes = np.stack([cv2.blur((Q == c).astype(np.float32), (3, 3)) for c in range(len(flat))])
     best = votes.argmax(0); Q = np.where(fg_in, best, -1)
+# each flat colour, the mean of the pixels that are well inside its zones (closer to the image than the guess)
+for c in range(len(pal)):
+    core = cv2.erode((Q == c).astype(np.uint8), np.ones((3, 3), np.uint8)) > 0
+    if core.sum() > 30 and not (a.pal and c == 0): pal[c] = im[core].mean(0)
 cols = ['#%02x%02x%02x' % tuple(int(v) for v in p) for p in pal]
 # the line colour: the darkest
 dark = 0 if a.pal else int(np.argmin([p.sum() for p in pal]))
@@ -61,6 +67,9 @@ def path_of(mask, ox, oy, k):
         c = cv2.approxPolyDP(c, a.eps, True).reshape(-1, 2)
         if len(c) < 3: continue
         P = [((x - ox) * k * 10, (y - oy) * k * 10) for x, y in c]
+        if a.poly:
+            q = [(int(round(x)), int(round(y))) for x, y in P]; seg = ['M%d %d' % q[0]] + ['l%d %d' % (q[i][0] - q[i - 1][0], q[i][1] - q[i - 1][1]) for i in range(1, len(q))]
+            out.append(''.join(seg) + 'z'); continue
         # smooth: from the middle of each side to the next, curving at the corner (quadratic curves)
         mid = [((P[i][0] + P[(i + 1) % len(P)][0]) / 2, (P[i][1] + P[(i + 1) % len(P)][1]) / 2) for i in range(len(P))]
         r = lambda v: int(round(v))
@@ -88,10 +97,11 @@ for i, (x, y, w, h, _) in enumerate(figs):
     layers += [z for _, z in sorted(zs, key=lambda z: -z[0])]   # (big zones first, the small ones over them)
     data[row][v] = layers; data['sw'] = max(data['sw'], round(1.3 * k * 10, 2))   # (each zone also stroked in its colour, this wide: no seams)
     data['src']['figs'].append([row, v, float(x + ox), float(y + oy), float(k)])   # (where it was in the sheet: to measure the error)
-out = f'sprites/vec/{a.name}.json'
+out = a.out or f'sprites/vec/{a.name}.json'
 import os; os.makedirs('sprites/vec', exist_ok=True); json.dump(data, open(out, 'w'), separators=(',', ':'))
 print('paleta', cols, 'línea', cols[dark]); print(out, os.path.getsize(out), 'bytes')
 
+if a.out: raise SystemExit(0)
 # the VEC block in index.html (all the traced characters there are)
 import glob
 allv = {os.path.basename(f)[:-5]: json.load(open(f)) for f in sorted(glob.glob('sprites/vec/*.json'))}

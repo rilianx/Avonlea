@@ -1,6 +1,6 @@
 // draws a traced sheet where the figures were in the original, to compare: node tools/compare.js ana out.png
 const { chromium } = require('/opt/node22/lib/node_modules/playwright');
-const V = JSON.parse(require('fs').readFileSync(`sprites/vec/${process.argv[2]}.json`));
+const V = JSON.parse(require('fs').readFileSync(process.argv[2].endsWith('.json') ? process.argv[2] : `sprites/vec/${process.argv[2]}.json`));
 (async () => {
   const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium', args: ['--no-sandbox'] });
   const pg = await b.newPage();
