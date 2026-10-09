@@ -3076,6 +3076,7 @@ const MIN_SEC = {
 };
 function sysFor(schema){
   const kind = aiqKind(schema);
+  if (kind === 'un encuentro') return ENC_SYS;   // (the people of the village: a short request, a short instruction)
   if (!FULL() && kind === 'el juez de la historia') return MIN_SEC[kind]();   // (the judge needs no characters)
   if (!FULL() && kind === 'una escena') return MIN_HEAD(false) + '\n\n' + MIN_SEC[kind](schema);   // (the voices come in the request, only of who is there)
   if (!FULL() && MIN_SEC[kind]) return MIN_HEAD() + '\n\n' + MIN_SEC[kind](schema);
@@ -3121,7 +3122,7 @@ function aiLogShow(){
 /* the AI by hand, to debug: each request waits in a little panel (and in window.__avonlea.aiq) until someone answers
    it with JSON in the requested shape — the player, another AI they paste it into, or whoever is testing the game */
 const aiq = { list: [], seq: 0, skip: new Set() };
-const aiqKind = sch => { const p = Object.keys(sch.properties || {}); return p.includes('lineas') ? 'una escena' : p.includes('titulo_rama') ? 'una rama de la historia' : p.includes('escenas') ? 'el guión del día' : p.includes('veredictos') ? 'el juez de la historia' : p.includes('eleccion') ? 'Ana decide' : p.includes('relaciones') ? 'el fin del día' : p.includes('planes') ? 'los planes del día' : p.includes('pasos') ? 'un cambio de plan' : 'un pedido'; };
+const aiqKind = sch => { const p = Object.keys(sch.properties || {}); return p.includes('conversacion') ? 'un encuentro' : p.includes('lineas') ? 'una escena' : p.includes('titulo_rama') ? 'una rama de la historia' : p.includes('escenas') ? 'el guión del día' : p.includes('veredictos') ? 'el juez de la historia' : p.includes('eleccion') ? 'Ana decide' : p.includes('relaciones') ? 'el fin del día' : p.includes('planes') ? 'los planes del día' : p.includes('pasos') ? 'un cambio de plan' : 'un pedido'; };
 function skel(sc){ if (!sc) return null; if (sc.enum) return sc.enum[0]; switch (sc.type) { case 'object': return Object.fromEntries(Object.entries(sc.properties || {}).map(([k, v]) => [k, skel(v)])); case 'array': return []; case 'integer': case 'number': return 0; case 'boolean': return false; default: return ''; } }
 function manualCall(messages, schema){
   if (aiq.skip.has(aiqKind(schema))) return Promise.reject(new Error('omitido'));
@@ -3316,6 +3317,7 @@ function ambNote(parts){
 }
 function ambUpdate(dt){
   if (amb.cur) return ambTick(dt);
+  if (enc.cur) return;
   if (game.talk || game.cooking || game.map || !$('ai').hidden) return;
   const all = Object.keys(PEOPLE).filter(k => sceneOf(k) === game.scene), dd = k => dist(ana.x, ana.y, PEOPLE[k].x, PEOPLE[k].y);
   for (const k of Object.keys(PEOPLE)) if (sceneOf(k) !== game.scene || dd(k) > 280) amb.seen[k] = false;
@@ -3624,7 +3626,7 @@ function update(dt){
   }
   runPlans(dt);
   if ((storyT -= dt) < 0 && AI.stories) { storyT = .5; storyTick(); if (!storyBusy && (!game.story || game.story.day !== today()) && hourNow() < 18 && TT > 4) makeStory(); }
-  mealTick(); ambUpdate(dt); for (const b of bubbles) b.t += dt; bubbles = bubbles.filter(b => b.t < b.dur + .35);
+  mealTick(); ambUpdate(dt); encUpdate(dt); for (const b of bubbles) b.t += dt; bubbles = bubbles.filter(b => b.t < b.dur + .35);
   if ((taskTick -= dt) < 0) { taskTick = .5; taskEvent('ir'); }
   // everyone but Diana follows their routine: where they are wanted (home, or visiting), walking there, or about the place
   const hr = hourNow(), visiting = k => !!CH[k].routine && PEOPLE[k].where !== 'out' && PEOPLE[k].where !== CH[k].home;
@@ -4065,12 +4067,6 @@ function folkTick(dt){
     } else if (!f.moving && Math.random() < dt * .2) f.dir = [0, 1, 2, 3][Math.floor(Math.random() * 4)];
   }
 }
-function folkTalk(f){
-  f.talkT = TT + 5; f.route = []; f.moving = false; f.dir = Math.abs(ana.x - f.x) > Math.abs(ana.y - f.y) ? (ana.x > f.x ? 1 : 3) : (ana.y > f.y ? 2 : 0);
-  const line = pick(f.def.lines); bubbles = [{ q: 'f:' + f.id, text: line, t: 0, dur: lineDur(line) }]; sfx.blip();
-  if (!f.met) { f.met = true; logEv('Ana se encontró con ' + f.def.name + (game.scene === 'es' ? ' en la escuela.' : '.'), []); }
-  if (f.def.ana && Math.random() < .7) { const r = pick(f.def.ana); setTimeout(() => { if (!amb.cur && bubbles[0]?.q === 'f:' + f.id) anaSays(r); }, lineDur(line) * 1000 + 300); }
-}
 
 /* ---------- the animals of the farms: cows, sheep and horses in the pastures, hens about the farmyards, pigs, ducks on the
    lake and the river, gulls by the sea, cats in the village. Made from the map (they go where it says); they move only when
@@ -4188,6 +4184,132 @@ function drawCat(c, a, t){
 const FAUNA_DRAW = { cow: (c, a, t) => drawCow(c, a, t), sheep: drawSheep, horse: drawHorse, hen: drawHen, pig: drawPig, duck: drawDuck, gull: drawGull, cat: drawCat };
 function drawBuggy(c, b, t){ drawCart(c, b, t); const d = b.dir === 3 ? -1 : 1; drawPerson(c, { look: b.look, x: b.x - 40 * d, y: b.y - 12, dir: b.dir, sit: true, walk: 0, moving: false, blink: 0 }, t); }
 const FARO_LINES = ['Desde aquí se ve todo el golfo. ¡Si hasta me parece ver Escocia! Bueno... no, pero casi.', 'Un faro es como un amigo que nunca se duerme. Me gustaría ser farera, o por lo menos gaviota.', 'Las olas rompen contra las rocas como si tuvieran algo urgente que decir.'];
+/* ---------- the cards of the people of Avonlea (who they are and what they like to talk about) and their encounters:
+   when Ana comes near one of them, when she taps one, or when two of them meet near her, they talk. With the AI, a
+   short request: «Eres X de Avonlea y te encuentras con Y. Están en Z, es tal estación y tal hora. Genera una
+   conversación sobre L.» Without it (or if it fails), the written lines. ---------- */
+const FICHAS = {
+  gilbert: ['Gilbert Blythe, 13 años, el chico más listo y simpático de la escuela; una vez llamó «Zanahorias» a Ana y ella le rompió la pizarra en la cabeza; desde entonces Ana no le habla, aunque él lo intenta', ['el concurso de ortografía', 'la pizarra rota', 'el puente del estanque', 'los exámenes para entrar a Queen\'s']],
+  josie: ['Josie Pye, compañera de escuela de Ana, presumida, envidiosa y de lengua afilada; siempre está desafiando a los demás', ['el vestido nuevo de alguien', 'un desafío peligroso', 'los chismes de la escuela']],
+  gertie: ['Gertie Pye, hermana menor de Josie, imita todo lo que dice su hermana', ['lo que dijo Josie', 'los lápices perdidos']],
+  ruby: ['Ruby Gillis, compañera de Ana, bonita y romántica, siempre hablando de pretendientes', ['los pretendientes', 'las botellas de leche en el río', 'la boda de su hermana']],
+  jane: ['Jane Andrews, compañera de Ana, sensata, trabajadora y sin mucha imaginación', ['los deberes de aritmética', 'el club de cuentos', 'la cosecha de su padre']],
+  prissy: ['Prissy Andrews, 16 años, la mayor de la escuela, se da aires de señorita y estudia para entrar a Queen\'s', ['los estudios', 'el maestro', 'ser casi una señorita']],
+  charlie: ['Charlie Sloane, compañero de escuela de Ana, tímido, de ojos saltones, enamorado de Ana', ['la tarta de su madre', 'su pizarra nueva', 'un paseo']],
+  moody: ['Moody Spurgeon MacPherson, compañero de escuela de Ana, serio y torpe, quiere ser pastor', ['los sermones', 'un castigo injusto', 'las vacas']],
+  tillie: ['Tillie Boulter, compañera de escuela de Ana, alegre y juguetona', ['los juegos del recreo', 'un nido de petirrojos']],
+  felicity: ['Felicity King, de la granja King, muy hacendosa y orgullosa de su cocina', ['el pan', 'los modales de una señorita', 'su primo Felix']],
+  felix: ['Felix King, de la granja King, regordete, crédulo y fanfarrón', ['la bruja del bosque', 'las historias de fantasmas', 'los dulces de la tienda']],
+  cecily: ['Cecily King, de la granja King, la más pequeña, dulce y tímida', ['las recitaciones', 'los gatitos']],
+  sara: ['Sara Stanley, la niña de la historia, que vive en Rose Cottage con sus tías; cuenta historias maravillosas', ['una historia de fantasmas', 'el barco fantasma', 'la tía Hetty']],
+  phillips: ['el Sr. Phillips, el maestro de Avonlea, severo y algo distraído, que corteja a Prissy Andrews', ['la ortografía', 'el examen', 'la disciplina']],
+  allan: ['el reverendo Allan, el nuevo pastor de Avonlea, joven, bondadoso y de buen humor', ['la escuela dominical', 'el picnic de la iglesia', 'dar gracias']],
+  sraallan: ['la Sra. Allan, esposa del pastor, joven, dulce y alegre; Ana la adora (es su «espíritu afín»)', ['el té en la casa parroquial', 'la recitación de Ana', 'la escuela dominical']],
+  lawson: ['el Sr. Lawson, dueño de la tienda de la aldea, amable y conversador', ['la mercadería nueva', 'los precios', 'los encargos de Marilla']],
+  herrero: ['el herrero de Avonlea, grandote, tiznado y de buen corazón', ['los caballos', 'las herraduras', 'el fuego de la fragua']],
+  editor: ['el editor de La Crónica de Avonlea, el periódico del pueblo, siempre buscando noticias', ['las noticias del pueblo', 'un cuento para el periódico']],
+  hetty: ['la Srta. Hetty King, de Rose Cottage, solterona estricta y orgullosa, con mucho corazón escondido', ['los modales', 'los niños de hoy', 'la familia King']],
+  olivia: ['Olivia King, hermana de Hetty, dulce y romántica, a quien corteja Jasper Dale', ['un picnic', 'Jasper Dale', 'las flores']],
+  jasper: ['Jasper Dale, el inventor tímido de Avonlea, que tartamudea y se sonroja; enamorado de Olivia King', ['un invento', 'la fotografía', 'la Srta. Olivia']],
+  alec: ['Alec King, granjero, hermano de Hetty, trabajador y de pocas palabras', ['la siega', 'el tiempo', 'Matthew Cuthbert']],
+  janet: ['Janet King, esposa de Alec, madre práctica y cariñosa', ['los hijos', 'la cocina', 'lo que dijo Marilla']],
+  srapye: ['la Sra. Pye, madre de Josie y Gertie, chismosa y criticona', ['los chismes', 'el pelo rojo de Ana', 'el loro del Sr. Harrison']],
+  sloane: ['el Sr. Sloane, granjero, padre de Charlie', ['las papas', 'el tiempo', 'la feria']],
+  andrews: ['el Sr. Andrews, granjero, padre de Jane y Prissy, serio y formal', ['la cosecha', 'Tejas Verdes']],
+  peg: ['Peg Bowen, la vieja excéntrica que vive sola en el bosque; los niños creen que es bruja, pero es buena y sabia a su manera', ['el bosque', 'las hierbas', 'lo que dicen de ella']],
+  farero: ['el capitán Jim, el viejo farero, marinero retirado que cuenta historias del mar', ['el mar', 'las tormentas', 'los barcos', 'sus viajes']],
+  veraneante: ['una señora de Boston que veranea en el hotel White Sands, encantada con todo', ['la playa', 'la isla', 'la ciudad']],
+  pescador: ['un pescador de Avonlea, curtido y bromista', ['la pesca', 'el mar', 'el tiempo']],
+};
+for (const [k, d] of Object.entries(FOLK_DEFS)) { const f = FICHAS[k]; d.ficha = f ? f[0] : d.look.h < .99 ? d.name + ', un niño de Avonlea que juega cerca de su casa' : d.name + ', de Avonlea, que vive en ' + d.home.replace(/^Casa de /, 'la casa de ').replace(/^Granja /, 'la granja '); d.topics = f ? f[1] : d.look.h < .99 ? ['un juego', 'un bicho que encontró'] : ['el tiempo', 'la cosecha', 'los vecinos', 'las noticias de la aldea']; }
+const ANA_FICHA = 'Ana Shirley, 11 años, pelirroja y pecosa, huérfana adoptada por Matthew y Marilla Cuthbert de Tejas Verdes; soñadora, muy conversadora, de palabras grandiosas e imaginación desbordante';
+const SEASON_TOPICS = [['las flores de los manzanos', 'la primavera'], ['el calor', 'las vacaciones', 'las bayas'], ['las hojas rojas', 'las manzanas', 'la cosecha'], ['la nieve', 'el frío', 'la Navidad']];
+// written exchanges for two neighbours (when there is no AI)
+const PAIR_LINES = {
+  kids: [['¡Te pillé! ¡Ahora tú la llevas!', '¡No vale, no estaba jugando!'], ['¿Viste? A Gilbert se le fue la botella de leche río abajo.', '¡Ja! Que no se entere el maestro.'], ['¿Jugamos a las escondidas?', 'Bueno, pero yo no cuento esta vez.'], ['Dicen que en el Bosque Encantado hay fantasmas.', 'Eso lo inventó Ana Shirley. ¡Pero igual no voy!']],
+  big: [['¡Buenos días! ¿Ya supo lo de la vaca de los Cuthbert?', '¡Si lo sabe todo Avonlea! Esa vaca es más lista que el Sr. Harrison.'], ['Qué lindo día para tender la ropa.', 'Ya lo creo. Y ayer que no paró de llover.'], ['¿Va a la tienda de Lawson?', 'Sí, se me acabó el azúcar. Con tanta compota...'], ['Dicen que el nuevo pastor predica muy bonito.', 'Y la Sra. Allan es un encanto, eso sí.'], ['¿Cómo vienen las papas este año?', 'Buenas, si no llueve demasiado.']],
+};
+const enc = { cur: null, ready: null, busy: false, mute: {}, cool: 0, err: 0 };
+const encP = id => id === 'ana' ? ana : FOLKBY[id];
+const encName = id => id === 'ana' ? 'Ana' : FOLKBY[id].def.name;
+const encQ = id => id === 'ana' ? 'ana' : 'f:' + id;
+const encPlace = (x, y) => game.scene === 'es' ? 'la escuela de Avonlea, en plena clase' : game.scene !== 'out' ? (HOUSES[game.scene]?.inText || 'una casa de Avonlea') : (n => n ? 'Avonlea, cerca de ' + n.replace(/^(La|El|Los) /, m => m.toLowerCase()) : 'un camino de Avonlea')(placeNear(x, y));
+function encTopic(x, y){ const f = [x, y].filter(i => i !== 'ana').map(i => FOLKBY[i].def.topics).flat(); return pick(Math.random() < .75 && f.length ? f : SEASON_TOPICS[S]); }
+// the request, as simple as can be (and the answer: who says what, in order)
+function encMsg(x, y, topic){
+  const p = encP(x);
+  return `Eres ${FOLKBY[x].def.ficha}, de Avonlea («Ana de las Tejas Verdes», L. M. Montgomery). Te encuentras con ${y === 'ana' ? ANA_FICHA : FOLKBY[y].def.ficha}. Están en ${encPlace(p.x, p.y)}; es ${SEASONS[S].toLowerCase()} y son las ${fmtHour(hourNow())}. Genera una conversación breve (de 2 a 4 líneas, de hasta 20 palabras) sobre ${topic}.` + (y === 'ana' ? ' Ana también habla.' : '');
+}
+const ENC_SYS = 'Escribes diálogos breves para un juego tranquilo inspirado en «Ana de las Tejas Verdes» (L. M. Montgomery), hacia 1880, en la isla del Príncipe Eduardo. Español; cada uno con su voz; tono tierno y con humor, como el libro. Responde solo con el JSON pedido.';
+async function encAsk(x, y){
+  const topic = encTopic(x, y), sch = { type: 'object', additionalProperties: false, required: ['conversacion'], properties: { conversacion: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['quien', 'texto'], properties: { quien: { type: 'string', enum: [x, y] }, texto: { type: 'string' } } } } } };
+  const r = await aiCall([{ role: 'user', content: encMsg(x, y, topic) }], sch);
+  const lines = (r.out.conversacion || []).filter(l => l && [x, y].includes(l.quien) && typeof l.texto === 'string' && l.texto.trim()).slice(0, 6).map(l => ({ q: encQ(l.quien), t: l.texto.trim().slice(0, 220) }));
+  return { parts: [x, y], lines, topic, scene: game.scene, born: TT };
+}
+function encFallback(x, y){
+  if (y === 'ana') { const d = FOLKBY[x].def, l = [{ q: encQ(x), t: pick(d.lines) }]; if (d.ana && Math.random() < .7) l.push({ q: 'ana', t: pick(d.ana) }); return { parts: [x, y], lines: l, topic: '', scene: game.scene, born: TT }; }
+  const [a, b] = pick(PAIR_LINES[FOLKBY[x].kid && FOLKBY[y].kid ? 'kids' : 'big'].filter(p => !(/pastor/.test(p[0]) && [x, y].some(i => /allan/.test(i)))));
+  return { parts: [x, y], lines: [{ q: encQ(x), t: a }, { q: encQ(y), t: b }], topic: '', scene: game.scene, born: TT };
+}
+function encStart(s){
+  enc.cur = s; s.i = -1; s.wait = .3; bubbles = [];
+  const [a, b] = s.parts.map(encP);
+  for (const id of s.parts) if (id !== 'ana') { const f = FOLKBY[id]; f.talkT = TT + 1e6; f.route = []; f.moving = false; }
+  for (const [p, o] of [[a, b], [b, a]]) if (p !== ana || !ana.moving) { p.dir = o.x < p.x ? 3 : 1; if (Math.abs(o.y - p.y) > Math.abs(o.x - p.x) * 1.2) p.dir = o.y < p.y ? 0 : 2; }
+}
+function encEnd(){
+  const s = enc.cur; enc.cur = null; if (!s) return;
+  for (const id of s.parts) if (id !== 'ana') { FOLKBY[id].talkT = TT + 1.5; enc.mute[id] = TT + (s.parts.includes('ana') ? 150 : 90); }
+  enc.cool = TT + (s.parts.includes('ana') ? 20 : 40);
+  if (s.parts.includes('ana') && s.i >= 0) { const o = s.parts.find(i => i !== 'ana'); logEv('Ana conversó con ' + FOLKBY[o].def.name + (s.topic ? ' sobre ' + s.topic : '') + '.', []); }
+}
+function encTick(dt){
+  const s = enc.cur, withAna = s.parts.includes('ana');
+  if (game.scene !== s.scene || game.talk || game.map || s.parts.some(id => id !== 'ana' && FOLKBY[id].where !== game.scene) || s.parts.every(id => id === 'ana' || dist(ana.x, ana.y, encP(id).x, encP(id).y) > (withAna ? 230 : 420))) { bubbles = []; return encEnd(); }
+  if ((s.wait -= dt) > 0) return;
+  if (++s.i >= s.lines.length) return encEnd();
+  const l = s.lines[s.i], dur = lineDur(l.t); bubbles = [{ q: l.q, text: l.t, t: 0, dur }]; s.wait = dur + .35; sfx.blip();
+}
+// Ana taps someone: they talk now (with the AI, after a moment: «…»)
+function folkTalk(f){
+  if (enc.cur?.parts.includes(f.id)) return;
+  if (enc.cur) encEnd(); if (amb.cur) ambAbort();
+  enc.ready = null; f.talkT = TT + 1e6; f.route = []; f.moving = false;
+  if (!aiReady()) return encStart(encFallback(f.id, 'ana'));
+  bubbles = [{ q: 'f:' + f.id, text: '…', t: 0, dur: 30 }]; const id = enc.tok = Math.random();
+  encAsk(f.id, 'ana').then(s => { if (enc.tok !== id) return; if (!s.lines.length) throw new Error('vacía'); encStart(s); })
+    .catch(e => { if (enc.tok !== id) return; console.debug('[avonlea IA] encuentro', e.message); encStart(encFallback(f.id, 'ana')); });
+}
+function encUpdate(dt){
+  if (enc.cur) return encTick(dt);
+  if (amb.cur || amb.ready || game.talk || game.map || game.cooking || !$('ai').hidden || sleeping) return;
+  const here = FOLK.filter(f => f.where === game.scene), dd = f => dist(ana.x, ana.y, f.x, f.y), free = f => TT >= (enc.mute[f.id] || 0) && !(f.talkT > TT);
+  if (enc.ready) {   // (asked for as Ana came near: it starts when she is there)
+    const s = enc.ready, f = FOLKBY[s.parts[0]];
+    if (s.scene !== game.scene || TT - s.born > 50 || f.where !== game.scene || dd(f) > 420) enc.ready = null;
+    else if (dd(f) < 100) { enc.ready = null; encStart(s); }
+    return;
+  }
+  if (enc.busy || TT < enc.cool || TT < enc.err) return;
+  // Ana comes near someone
+  let best = null, bd = 1e9; for (const f of here) { const d = dd(f); if (free(f) && d < (aiReady() ? 240 : 90) && d < bd && !f.sit) { best = f; bd = d; } }
+  if (best) {
+    if (!aiReady()) return encStart(encFallback(best.id, 'ana'));
+    enc.busy = true;
+    return encAsk(best.id, 'ana').then(s => { if (s.lines.length) enc.ready = s; else enc.mute[best.id] = TT + 60; }).catch(e => { console.debug('[avonlea IA] encuentro', e.message); enc.err = TT + 60; }).finally(() => { enc.busy = false; });
+  }
+  // two of them meet near her (out of doors)
+  if (game.scene !== 'out') return;
+  const near = here.filter(f => free(f) && dd(f) < 360);
+  for (let i = 0; i < near.length; i++) for (let j = i + 1; j < near.length; j++) {
+    const a = near[i], b = near[j]; if (dist(a.x, a.y, b.x, b.y) > 70 || Math.random() > .02) continue;
+    if (!aiReady()) return encStart(encFallback(a.id, b.id));
+    enc.busy = true; a.talkT = b.talkT = TT + 1e6; a.route = []; b.route = []; a.moving = b.moving = false;
+    return encAsk(a.id, b.id).then(s => { if (s.lines.length && !amb.cur && !enc.cur) encStart(s); else a.talkT = b.talkT = TT; })
+      .catch(e => { a.talkT = b.talkT = TT; enc.err = TT + 60; console.debug('[avonlea IA] encuentro', e.message); }).finally(() => { enc.busy = false; enc.cool = TT + 40; });
+  }
+}
 /* ---------- the map: Avonlea drawn on a sheet of paper, with where everyone is ---------- */
 let mapBase = null;
 function toggleMap(on = !game.map){
@@ -4275,7 +4397,7 @@ function drawMap(){
   $('maptitle').textContent = 'Avonlea · ' + SEASONS[S] + ', día ' + (Math.floor(dayT) % 2 + 1) + ' · ' + SICON[S] + ' · toca un lugar para ir allí';
 }
 function loop(now){ const dt = clamp((now - last) / 1000, 0, .05); last = now; update(dt); render(); requestAnimationFrame(loop); }
-window.__avonlea = { FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+window.__avonlea = { enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
 requestAnimationFrame(loop);
 })();
 </script>
