@@ -62,3 +62,18 @@ como viene dibujada en la hoja de partes. Ahora solo se marca dónde están los 
 
 y el juego, al parpadear, tapa cada ojo con el color de la piel y dibuja el ojo cerrado; al hablar, tapa la boca y
 dibuja la boca abierta (de frente, de tres cuartos y de perfil).
+
+## Por piezas separadas: cuerpo sin cabeza, cabeza, poses (el formato actual)
+
+Pedidas con `PROMPTS.md`: `gpt2_ana_cuerpo.webp`, `gpt2_ana_cabeza.webp`, `gpt2_ana_poses.webp`.
+
+    python3 tools/trace_kit.py ana --cuerpo sprites/gpt2_ana_cuerpo.webp --cabeza sprites/gpt2_ana_cabeza.webp \
+      --poses sprites/gpt2_ana_poses.webp --skin 3,4,16 \
+      --pal '#301f11,#ae4722,#8b3e1f,#fcd2ae,#e0af91,#407251,#335a40,#553724,#d53430,#ece6dc,#5a7183,#f2a08c,#ffffff,#f3d796,#d9b26a,#a82a2a,#f9ddbe'
+
+El cuerpo queda con los pies en (0,0) y la cabeza con su cuello en (0,0): una cabeza se puede poner sobre otro cuerpo.
+La cabeza encaja por el ancho del cuello. Las poses (sentada, agachada, acostada, corriendo) se usan enteras.
+
+**Visor:** `index.html?visor` muestra solo a Ana, para moverla (flechas, Shift para correr, rueda para el zoom) y
+probar todo: sentarse, agacharse, acostarse, hablar, la trenza, el sombrero, las caras, girar, y comparar con el dibujo
+en código.
