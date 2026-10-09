@@ -39,3 +39,16 @@ Pesos medidos para Ana (10 figuras; error = diferencia media por pixel con la im
 
 El dibujo en código actual (cuerpo, cara, pelo, trenzas y gestos) pesa 27 KB (9 KB gzip) y sirve para todos los
 personajes; cada personaje agrega unos 180 bytes de ficha.
+
+## Por partes (títere de recortes)
+
+`gpt_ana_partes.webp`: el cuerpo sin trenzas ni brazos en 5 vistas, un brazo de frente y uno de lado, una trenza recta, y
+el sombrero en 5 vistas. Se calca con:
+
+    python3 tools/trace_parts.py sprites/gpt_ana_partes.webp ana \
+      --pal '#4a2e1e,#b74e27,#923d1d,#fbd2ac,#e5b391,#477a56,#355c3e,#5f3924,#d53430,#ece6dc,#65787c,#f2a08c,#ffffff,#f8d290,#deb068'
+
+(`--hair` y `--dress`: qué colores de la paleta son pelo y vestido, para encontrar los enganches.) El juego arma a Ana
+con las piezas: el tronco según la vista, los pies que se levantan o adelantan al caminar, los brazos que rotan desde el
+hombro (y suben en el gesto de la trenza), las trenzas que se doblan siguiendo la curva de su física (al correr se abren,
+al echarla atrás vuela en horizontal) y el sombrero sobre el pelo. Pesa 34 KB.
