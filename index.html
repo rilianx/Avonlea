@@ -4762,17 +4762,35 @@ function agentIdle(ag){ ag.st = 'idle'; ag.task = null; wmRelease(ag.who); }
 function agentEnd(ag, st, why){ for (const g of activeGoals(ag)) goalEnd(ag, g, st, why); agentIdle(ag); }
 const pendingOn = g => (g.pending || []).some(p => p.h.st === 'run');
 const taskReady = (ag, t) => t.st === 'todo' && t.g.st === 'run' && !(t.blockedUntil > TT) && !(t.g.waitUntil > TT) && t.deps.every(id => ag.tasks.find(u => u.id === id)?.st !== 'todo');
-// which ready task now: the most urgent goal first (a time limit goes before anything), then the nearest
+// which ready task now: looking up to three tasks ahead (in an order their precedences allow), the sequence with the
+// shortest walk; a goal with a time limit goes before anything, and putting off what someone asked for costs a little
+const LOOKAHEAD = 3;
+function taskPoint(ag, t, inRoomKey){
+  const key = t.a.k && !t.loc?.startsWith('h:') && t.loc !== 'cocina' ? personKey(t.a.k) || t.loc : t.loc;
+  return { key, q: keyPoint(key) || (key === 'cocina' ? DOOR.gg : key?.startsWith('h:') ? DOOR[key.slice(2)] : null) };
+}
 function pickTask(ag){
-  const b = wmBody(ag.who), here = b ? [b.x, b.y] : [0, 0], inRoom = wmScene(ag.who) !== 'out';
-  let best = null, bs = 1e12;
-  for (const t of ag.tasks) {
-    if (!taskReady(ag, t)) continue;
-    const key = t.a.k && !t.loc?.startsWith('h:') && t.loc !== 'cocina' ? personKey(t.a.k) || t.loc : t.loc, q = keyPoint(key) || (key === 'cocina' ? DOOR.gg : null);
-    const d = !q ? 0 : inRoom && (key === 'cocina' || key?.startsWith('h:')) && personKey(ag.who) === key ? 0 : dist(here[0], here[1], q[0], q[1]);
-    const score = d - (t.g.prio === 3 ? 1e9 : (t.g.prio - 1) * 400);
-    if (score < bs) { bs = score; best = t; }
-  }
+  const b = wmBody(ag.who), me = personKey(ag.who), start = b && wmScene(ag.who) === 'out' ? [b.x, b.y] : (taskPoint(ag, { a: {}, loc: me || 'cocina' }).q || [b?.x || 0, b?.y || 0]);
+  const elig = ag.tasks.filter(t => t.st === 'todo' && t.g.st === 'run' && !(t.blockedUntil > TT) && !(t.g.waitUntil > TT));
+  if (!elig.length) return null;
+  const urgent = elig.some(t => t.g.prio === 3 && taskReady(ag, t));
+  const pts = new Map(elig.map(t => [t, taskPoint(ag, t)]));
+  const ready = (t, done) => t.deps.every(id => { const u = ag.tasks.find(v => v.id === id); return !u || u.st !== 'todo' || done.has(u); });
+  let best = null, bc = Infinity;
+  const depth = Math.min(LOOKAHEAD, elig.length), led0 = Object.values(ANIM).some(c => c.state === 'led' && (c.ledBy || 'ana') === ag.who);
+  const leading = done => { const g = [...done].some(t => t.a.v === 'guiar'), s_ = [...done].some(t => t.a.v === 'soltar'); return (led0 || g) && !s_; };   // (walking with a cow on a rope is slow and awkward)
+  const walk = (pos, posKey, done, seq, cost) => {
+    if (cost >= bc) return;
+    if (seq.length === depth) { bc = cost; best = seq[0]; return; }
+    for (const t of elig) {
+      if (done.has(t) || !ready(t, done)) continue;
+      if (!seq.length && urgent && t.g.prio !== 3) continue;   // (a time limit: that first)
+      const { key, q } = pts.get(t), d = (!q || key === posKey ? 0 : dist(pos[0], pos[1], q[0], q[1])) * (leading(done) && t.a.v !== 'soltar' ? 2.5 : 1);
+      const delay = seq.length * (t.g.prio - 1) * 400;   // (putting off what someone asked for)
+      done.add(t); seq.push(t); walk(q || pos, key, done, seq, cost + d + delay); seq.pop(); done.delete(t);
+    }
+  };
+  walk(start, me, new Set(), [], 0);
   return best;
 }
 const SELF_MOVING = ['dar', 'vender', 'comprar', 'cambiar', 'conversar', 'disculparse', 'pedir', 'interceder', 'guiar'];
