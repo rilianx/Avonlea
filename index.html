@@ -4687,83 +4687,78 @@ const wmPlaceText = p => p.startsWith('p:') ? 'donde está ' + wmName(p.slice(2)
 
 /* ---------- the agents: someone with a goal and a plan, carrying it out step by step in the world ---------- */
 const AGENTS = {};
-const MAX_GOALS = 3;   // (an agenda: up to three goals at once, planned together)
+const MAX_GOALS = 3;   // (an agenda of up to three goals, as a priority queue: each one with its own plan)
 const activeGoals = ag => (ag?.goals || []).filter(g => g.st === 'run');
 const agentChain = ag => [...new Set(activeGoals(ag).flatMap(g => g.chain))];
 let WM_OBEY = true;   // (when someone asks Ana for something, she does it by herself: for the tests)
-function agentOf(who){ return AGENTS[who] || (AGENTS[who] = { who, goals: [], log: [], plan: null, i: 0, st: 'idle', tries: 0, pending: [] }); }
-// a new goal for someone: on their agenda (if there is room), and a new plan for everything they have to do
+function agentOf(who){ return AGENTS[who] || (AGENTS[who] = { who, goals: [], log: [], st: 'idle', pending: [] }); }
+// how urgent a goal is: with a time limit 3, asked by someone 2, one's own 1 (ties: whichever came first)
+const goalPrio = (goal, o) => o.prio ?? (goal.deadline ? 3 : o.parent ? 2 : 1);
+const queue = ag => activeGoals(ag).sort((a, b) => b.prio - a.prio || a.seq - b.seq);
+let goalSeq = 0;
 function agentStart(who, goal, o = {}){
   const ag = agentOf(who); delete ag.hold;
   if (activeGoals(ag).length >= MAX_GOALS) return null;
-  const g = { who, goal, favors: o.favors || [], chain: o.chain || [], st: 'run', label: o.label || goal.text, parent: o.parent, since: TT, log: ag.log };
-  ag.goals.push(g); ag.since = TT; ag.tries = 0; if (ag.goals.length > 12) ag.goals.splice(0, ag.goals.length - 12);
+  const g = { who, goal, favors: o.favors || [], chain: o.chain || [], st: 'run', label: o.label || goal.text, parent: o.parent, since: TT, log: ag.log, prio: goalPrio(goal, o), seq: ++goalSeq, plan: null, i: 0, tries: 0, pending: [] };
+  ag.goals.push(g); if (ag.goals.length > 12) ag.goals.splice(0, ag.goals.length - 12);
   if (who === 'ana') { auto.on = false; auto.intent = null; ag.followOf = null; if (ana.goto && !ana.goto.wm) ana.goto = null; }
-  agentLog(ag, '＋ ' + g.label); agentReplan(ag); return g;
+  agentLog(ag, '＋ ' + g.label + ' (prioridad ' + g.prio + ')');
+  if (agentCheck(ag), g.st === 'run' && !goalPlan(ag, g)) return g;
+  if (ag.cur && ag.cur !== g && g.prio > ag.cur.prio) { agentLog(ag, '⇢ deja en pausa: ' + ag.cur.label); pauseGoal(ag, ag.cur); }   // (something more urgent: first that)
+  return g;
 }
 function agentLog(ag, t){ ag.log.push(fmtHour(hourNow()) + ' ' + t); if (ag.log.length > 16) ag.log.shift(); }
-// several goals as one: all of them true; the steps missing, added up
-function combineGoals(gs){
-  if (gs.length === 1) return gs[0].goal;
-  const P = gs.map(g => g.goal), U = k => [...new Set(P.flatMap(g => g[k] || []))], dl = P.map(g => g.deadline).filter(Boolean);
-  return { kind: 'multi', parts: P, text: P.map(g => g.text).join(' + '), test: s => P.every(g => g.test(s)), h: s => P.reduce((n, g) => n + g.h(s), 0),
-    items: U('items'), people: U('people'), places: U('places'), deadline: dl.length ? Math.min(...dl) : 0, intercede: P.find(g => g.intercede)?.intercede };
+// what was asked of others for this goal and is still on its way counts as coming (for its plan)
+function promised(ag, g, s){ for (const p of g.pending || []) if (p.h.st === 'run') FAVORS[p.f.f].eff(s, ag.who, p.to, p.f); return s; }
+// a plan for one goal, alone (cheap); false if there is none (the goal is given up)
+function goalPlan(ag, g){
+  const s = promised(ag, g, wmNow());
+  if (g.goal.test(s) && !(g.pending || []).some(p => p.h.st === 'run')) { goalEnd(ag, g, 'done'); return false; }
+  const r = wmPlan(ag.who, g.goal, g.favors, s, g.chain);
+  if (!r.plan) { agentLog(ag, 'no encuentra cómo: ' + g.label + ' (' + r.n + ' estados)'); goalEnd(ag, g, 'fail', g.partial ? 'avanzó, pero no lo suficiente por hoy' : 'no hay un plan posible'); return false; }
+  g.plan = r.plan; g.i = 0; g.step = null; g.partial = r.partial || g.partial; g.n = r.n; g.waitUntil = 0;
+  agentLog(ag, (r.partial ? 'plan parcial' : 'plan') + ' (' + g.label + '): ' + r.plan.map(stepText).join(' → '));
+  return true;
 }
-// what was asked of others and is still on its way counts as coming (for the plan)
-function promised(ag, s){ for (const p of ag.pending || []) if (p.h.st === 'run') FAVORS[p.f.f].eff(s, ag.who, p.to, p.f); return s; }
-function agentReplan(ag){
-  const s = promised(ag, wmNow());
-  agentCheck(ag, s);
-  let act = activeGoals(ag); if (!act.length) return agentIdle(ag);
-  const plan = gs => gs.length > 1 ? wmSearch(ag.who, combineGoals(gs), gs.flatMap(g => g.favors).filter(f => !gs.flatMap(g => g.chain).includes(f.to)), s, 1500)   // (all together: on one's own; asking others is for each goal alone)
-    : wmPlan(ag.who, gs[0].goal, gs[0].favors, s, gs[0].chain);
-  let r = plan(act);
-  if (!r.ok && act.length > 1) {   // not everything together: each one alone; those with no way at all are given up, the rest planned together
-    const alone = act.map(g => ({ g, r: plan([g]) }));
-    for (const x of alone) if (!x.r.plan) goalEnd(ag, x.g, 'fail', x.g.partial ? 'avanzó, pero no lo suficiente por hoy' : 'no hay un plan posible');
-    const full = alone.filter(x => x.r.ok).map(x => x.g);
-    r = full.length > 1 ? plan(full) : null;
-    if (!r?.ok) r = (alone.find(x => x.r.ok) || alone.find(x => x.r.plan))?.r || r;
-  }
-  act = activeGoals(ag); if (!act.length) return agentIdle(ag);
-  if (!r?.plan) { agentLog(ag, 'no encuentra cómo (' + (r?.n || 0) + ' estados revisados)'); for (const g of act) goalEnd(ag, g, 'fail', g.partial ? 'avanzó, pero no lo suficiente por hoy' : 'no hay un plan posible'); return agentIdle(ag); }
-  ag.plan = r.plan; ag.i = 0; ag.step = null; ag.partial = r.partial; ag.n = r.n; ag.st = 'run';
-  for (const g of act) { g.n = r.n; if (r.partial) g.partial = true; }
-  agentLog(ag, (r.partial ? 'plan parcial: ' : 'plan: ') + r.plan.map(stepText).join(' → '));
-}
+function pauseGoal(ag, g){ g.step = null; g.plan = null; if (ag.cur === g) ag.cur = null; }   // (when it comes back, a fresh plan: the world will have changed)
 function agentCheck(ag, s = wmNow()){ for (const g of activeGoals(ag)) if (g.goal.test(s)) goalEnd(ag, g, 'done'); }
 function goalEnd(ag, g, st, why){
-  g.st = st; g.why = why;
+  g.st = st; g.why = why; g.step = null; if (ag.cur === g) ag.cur = null;
   const msg = st === 'done' ? `${wmName(ag.who)} logró: ${g.label}.` : `${wmName(ag.who)} no pudo: ${g.label}${why ? ' (' + why + ')' : ''}.`;
   agentLog(ag, (st === 'done' ? '✔ ' : '✘ ') + g.label + (why ? ' (' + why + ')' : '')); logEv(msg, []);
   if (ag.who === 'ana' && st === 'done') float('✔ ' + g.label, ana.x, ana.y - 64);
 }
-function agentIdle(ag){ ag.st = 'idle'; ag.plan = null; ag.step = null; wmRelease(ag.who); }
+function agentIdle(ag){ ag.st = 'idle'; ag.cur = null; wmRelease(ag.who); }
 function agentEnd(ag, st, why){ for (const g of activeGoals(ag)) goalEnd(ag, g, st, why); agentIdle(ag); }
-const pendingOn = ag => (ag.pending || []).some(p => p.h.st === 'run');
+const pendingOn = g => (g.pending || []).some(p => p.h.st === 'run');
+// the goal to work on now: the most urgent one that is not waiting for something
+function pickGoal(ag){ return queue(ag).find(g => !(g.waitUntil > TT)) || null; }
 function agentTick(dt){
   for (const ag of Object.values(AGENTS)) {
     if (ag.hold) { wmHold(ag, dt); continue; }
     if (!activeGoals(ag).length) { if (ag.st !== 'idle') agentIdle(ag); continue; }
     if (ag.who === 'ana' && (WM_KEYS.some(k => keys.has(k)) || !!stick || (ana.goto && !ana.goto.wm && !ana.goto.auto))) { agentEnd(ag, 'fail', 'la jugadora tomó el control'); continue; }
-    if (ag.pending?.some(p => p.h.st === 'fail' && !p.seen)) { for (const p of ag.pending) if (p.h.st === 'fail') p.seen = true; agentLog(ag, 'quien iba a ayudar no pudo'); if (++ag.tries > 3) { agentEnd(ag, 'fail', 'nadie pudo ayudar'); continue; } agentReplan(ag); continue; }
-    if (ag.st === 'wait') {   // the plan is done but some goal is not (yet): wait for what was promised, or a little, then try again
-      agentCheck(ag); if (!activeGoals(ag).length) { agentIdle(ag); continue; }
-      if (pendingOn(ag) && (ag.waitAll = (ag.waitAll || 0) + dt) < 600) continue;
-      if ((ag.waitT -= dt) <= 0) { ag.st = 'run'; if (++ag.tries > 3) { agentEnd(ag, 'fail', ag.partial ? 'avanzó, pero no lo suficiente por hoy' : 'no resultó'); continue; } agentReplan(ag); }
-      continue;
+    const g = pickGoal(ag);
+    if (!g) { if (ag.st !== 'wait') { ag.st = 'wait'; wmRelease(ag.who); } if ((ag.chk = (ag.chk || 0) - dt) < 0) { ag.chk = 1; agentCheck(ag); } continue; }   // (everything is waiting: stand by)
+    ag.st = 'run';
+    if (ag.cur !== g) { if (ag.cur) pauseGoal(ag, ag.cur); ag.cur = g; if (activeGoals(ag).length > 1) agentLog(ag, '▶ ahora: ' + g.label); }
+    if (g.pending.some(p => p.h.st === 'fail' && !p.seen)) { for (const p of g.pending) if (p.h.st === 'fail') p.seen = true; agentLog(ag, 'quien iba a ayudar no pudo'); g.plan = null; if (++g.tries > 3) { goalEnd(ag, g, 'fail', 'nadie pudo ayudar'); continue; } }
+    if (!g.plan && !goalPlan(ag, g)) continue;
+    if (g.i >= g.plan.length) {   // its plan is done: done, or waiting for what was promised, or (a little later) another try
+      agentCheck(ag); if (g.st !== 'run') continue;
+      if (pendingOn(g)) { g.waitUntil = TT + 3; g.plan = null; agentLog(ag, '⏳ espera lo que pidió: ' + g.label); continue; }
+      if (++g.tries > 3) { goalEnd(ag, g, 'fail', g.partial ? 'avanzó, pero no lo suficiente por hoy' : 'no resultó'); continue; }
+      g.waitUntil = TT + (g.partial ? 2 : 20); g.plan = null; agentLog(ag, '⏳ espera: ' + g.label); continue;
     }
-    if (!ag.plan) continue;
-    if (ag.i >= ag.plan.length) { agentCheck(ag); if (!activeGoals(ag).length) agentIdle(ag); else { ag.st = 'wait'; ag.waitT = ag.partial ? 2 : 25; ag.waitAll = 0; agentLog(ag, pendingOn(ag) ? 'espera lo que pidió' : 'espera'); } continue; }
-    const a = ag.plan[ag.i];
-    if (!ag.step) { ag.step = { a, t: 0 }; agentLog(ag, '→ ' + stepText(a)); }
-    ag.step.t += dt;
-    let r = wmExec(ag, a, ag.step, dt);
-    if (r === 'fail' && pendingOn(ag) && ag.step.t < 600 && /no lo tiene|faltan|no tiene|no viene|no la lleva/.test(ag.step.why || '')) r = 'run';   // (what is missing is on its way: wait for it)
-    if (r === 'ok') { ag.i++; ag.step = null; agentCheck(ag); if (!activeGoals(ag).length) agentIdle(ag); }
-    else if (r === 'fail' || ag.step.t > (pendingOn(ag) ? 600 : 150)) {
-      agentLog(ag, '✘ falló: ' + stepText(a) + (ag.step.why ? ' (' + ag.step.why + ')' : '')); ag.step = null;
-      if (++ag.tries > 3) agentEnd(ag, 'fail', 'falló varias veces'); else agentReplan(ag);
+    const a = g.plan[g.i];
+    if (!g.step) { g.step = { a, t: 0 }; agentLog(ag, '→ ' + stepText(a)); }
+    g.step.t += dt; ag.goalNow = g;
+    const r = wmExec(ag, a, g.step, dt);
+    if (r === 'fail' && pendingOn(g) && /no lo tiene|faltan|no tiene|no viene|no la lleva/.test(g.step.why || '')) { g.step = null; g.plan = null; g.waitUntil = TT + 3; agentLog(ag, '⏳ espera lo que pidió: ' + g.label); continue; }   // (what is missing is on its way: meanwhile, something else)
+    if (r === 'ok') { g.i++; g.step = null; agentCheck(ag); }
+    else if (r === 'fail' || g.step.t > 150) {
+      agentLog(ag, '✘ falló: ' + stepText(a) + (g.step.why ? ' (' + g.step.why + ')' : '')); g.step = null; g.plan = null;
+      if (++g.tries > 3) goalEnd(ag, g, 'fail', 'falló varias veces');
     }
   }
 }
@@ -4906,7 +4901,7 @@ function wmExec(ag, a, st, dt){
         if (f.f === 'venir') { if (WM_OBEY) { const A = agentOf('ana'); A.followOf = me; agentLog(A, 'acompaña a ' + wmName(me)); } else addTask({ from: CH[me] ? me : 'marilla', tipo: 'ir', n: 1, para: 'ana', d: today(), lugar: 'casa_parroquial' }); return 'ok'; }
         const sub = F.goal(me, f, wmNow());
         if (a.k === 'ana' && !WM_OBEY) { if (f.f === 'traer' && CH[me]) addTask({ from: me, tipo: 'traer', n: f.n, para: me, d: today(), item: f.item }); else notice(`📜 ${wmName(me)} te pide: ${sub.text}.`); }
-        else { const h = agentStart(a.k, sub, { label: sub.text + ' (se lo pidió ' + wmName(me) + ')', parent: me, chain: [...agentChain(ag), me] }); if (!h) { st.why = wmName(a.k) + ' tiene demasiado que hacer'; return 'fail'; } ag.pending = [...(ag.pending || []).filter(p => p.h.st === 'run'), { h, f, to: a.k }]; }
+        else { const h = agentStart(a.k, sub, { label: sub.text + ' (se lo pidió ' + wmName(me) + ')', parent: me, chain: [...agentChain(ag), me] }); if (!h) { st.why = wmName(a.k) + ' tiene demasiado que hacer'; return 'fail'; } const gg = ag.goalNow || ag.cur; if (gg) gg.pending = [...(gg.pending || []).filter(p => p.h.st === 'run'), { h, f, to: a.k }]; }
         st.sub = sub;
       }
       return 'ok';   // (asked: on with the rest of the plan; what was promised is waited for only where it is needed)
@@ -4979,6 +4974,8 @@ const WM_TESTS = [
     goals: () => [[G.tener('ana', 'cinta', 1), 'conseguir una cinta para el pelo'], [G.regalo_gusto('ana', 'diana'), 'regalarle a Diana algo que le guste'], [G.tener('marilla', 'azucar', 1), 'llevarle azúcar a Marilla']] },
   { who: 'matthew', text: 'Matthew encierra a Dolly y, ocupado, acepta además traerle huevos a Ana', setup: () => { dayAt(9); game.eggDay = -1; game.inv.huevos = 0; wmInv('matthew').cuerda = 0; cowLoose('dolly', GG.x + 520, GG.y + 300); atOut('ana', GG.x + 300, GG.y + 140); atOut('matthew', GG.x + 200, GG.y + 150); },
     goals: () => [[G.vaca_en('dolly', 'corral'), 'encerrar a Dolly']], ask: { f: 'traer', to: 'matthew', item: 'huevos', n: 6 } },
+  { who: 'ana', text: 'Ana quiere una cinta, pero antes debe llegar a la escuela a las 9', setup: () => { dayAt(8.1); game.eggDay = -1; game.inv.huevos = 0; game.inv.cinta = 0; atOut('ana', GG.x, GG.y + 90); },
+    goals: () => [[G.tener('ana', 'cinta', 1), 'conseguir una cinta para el pelo'], [G.estar_en('ana', 'escuela', 9), 'llegar a la escuela antes de las 9']] },
   { who: 'ana', text: 'Regalar una tarta de bayas en invierno (imposible)', setup: () => { dayAt(10); setSeason(3); game.inv.bayas = 0; game.inv.tarta = 0; atOut('ana', GG.x, GG.y + 90); }, goal: () => G.regalar_cosa('ana', 'tarta') },
 ];
 // Ana asks someone a favor (the player, from a conversation): if they accept and see how, the goal is theirs
@@ -5029,8 +5026,8 @@ function wmPanelDraw(){
 function wmRunDraw(){
   const gs = { run: '▶', done: '✔', fail: '✘' }, st = { run: 'en marcha', wait: 'esperando', idle: '' };
   $('wmrun').innerHTML = Object.values(AGENTS).map(ag => `<div class="ag"><b>${wmName(ag.who)}</b> ${ag.hold ? '· esperando aquí' : ag.followOf ? '· acompaña a ' + wmName(ag.followOf) : st[ag.st] || ''}`
-    + (ag.goals?.length ? '<ul class="gl">' + ag.goals.slice(-5).map(g => `<li class="${g.st}">${gs[g.st]} ${g.label}${g.why ? ' <i>(' + g.why + ')</i>' : ''}</li>`).join('') + '</ul>' : '')
-    + (ag.plan && activeGoals(ag).length ? '<ol>' + ag.plan.map((a, j) => `<li${j === ag.i && ag.st === 'run' ? ' class="cur"' : j < ag.i ? ' class="past"' : ''}>${stepText(a)}</li>`).join('') + '</ol>' : '')
+    + (ag.goals?.length ? '<ul class="gl">' + [...queue(ag), ...ag.goals.filter(g => g.st !== 'run').slice(-4)].map(g => `<li class="${g.st}">${g.st === 'run' ? (g === ag.cur ? '▶' : g.waitUntil > TT ? '⏳' : '·') : gs[g.st]} <small>[${g.prio}]</small> ${g.label}${g.why ? ' <i>(' + g.why + ')</i>' : ''}</li>`).join('') + '</ul>' : '')
+    + (ag.cur?.plan ? '<ol>' + ag.cur.plan.map((a, j) => `<li${j === ag.cur.i ? ' class="cur"' : j < ag.cur.i ? ' class="past"' : ''}>${stepText(a)}</li>`).join('') + '</ol>' : '')
     + (ag.log?.length ? '<pre>' + ag.log.slice(-6).join('\n') + '</pre>' : '') + '</div>').join('') || '<i>Nadie tiene una meta todavía.</i>';
 }
 
