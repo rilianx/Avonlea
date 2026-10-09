@@ -23,6 +23,11 @@ html,body{margin:0;height:100%;background:#2b3a26;overflow:hidden;touch-action:n
 #relbtn{position:fixed;right:10px;top:172px;width:42px;height:36px;font-size:19px;line-height:30px;padding:0;cursor:pointer}
 #daybtn{position:fixed;right:10px;top:214px;width:42px;height:36px;font-size:17px;line-height:30px;padding:0;cursor:pointer}
 #wmbtn{position:fixed;right:10px;top:256px;width:42px;height:36px;font-size:18px;line-height:30px;padding:0;cursor:pointer}
+#headbtn{position:fixed;right:10px;top:298px;width:42px;height:36px;font-size:18px;line-height:30px;padding:0;cursor:pointer}
+#headp{position:fixed;right:58px;top:298px;z-index:14;padding:6px 10px;font-size:13px}
+#headp[hidden]{display:none}
+#headp label{display:flex;align-items:center;gap:8px;white-space:nowrap}
+#headp input{width:min(160px,40vw)}
 body.visor > *:not(#cv):not(#visor){display:none !important}
 #visor{position:fixed;left:10px;top:10px;right:10px;padding:8px 10px;font-size:13px;z-index:20}
 #visor button{font:inherit;font-size:12.5px;margin:3px 3px 0 0}
@@ -127,6 +132,8 @@ body.visor > *:not(#cv):not(#visor){display:none !important}
 <button id="relbtn" class="paper" title="La historia de hoy y quién quiere a quién">👥</button>
 <button id="daybtn" class="paper" title="Pasar al día siguiente">⏭</button>
 <button id="wmbtn" class="paper" title="Metas de prueba (el planificador, sin IA)">🎯</button>
+<button id="headbtn" class="paper" title="Tamaño de las cabezas">🙂</button>
+<div id="headp" class="paper" hidden><label>Cabezas <b id="headv"></b><input id="headr" type="range" min="1" max="5" step="0.1"></label></div>
 <div id="wmp" class="paper" hidden><div class="mt">🎯 Metas de prueba <small>(sin IA: el planificador)</small></div><label><input type="checkbox" id="wmobey" checked> Ana hace sola lo que le piden</label> <label><input type="checkbox" id="wmdis" checked> Se distraen (según su enfoque)</label> <label><input type="checkbox" id="vecon" checked> Ana dibujada por GPT (prueba)</label><div id="wmlist"></div><div id="wmrun"></div><div class="mb"><button id="wmstop">Detener todo</button><button id="wmclose">Cerrar</button></div></div>
 <div id="rels" hidden><div class="paper sheet"><div class="mt">La historia de hoy, y quién quiere a quién</div><div id="story"></div><svg id="relsvg" viewBox="0 0 420 300"></svg><div id="reldet"></div><div class="mb"><button id="relclose">Cerrar</button></div></div></div>
 <button id="mapbtn" class="paper" title="Mapa (M)">🗺</button>
@@ -772,23 +779,28 @@ let ANIM_ON = true;
 let ANA_STYLE = (location.search.match(/ana=(video|mano|hojas|codigo)/) || [, 'mano'])[1];   // (the default: the hand-drawn one with the big head; ?ana=video etc. to choose)
 // big heads for everyone (as in the anime's chibi moments): the drawn in code ones scale their head about the neck; the
 // traced from video ones are warped (above the neck, bigger; a little below, blending in). ?cabezas=0 for the plain ones
-let BIG_HEADS = !/cabezas=0/.test(location.search);
-const BIG_K = 1.38, BIG_KV = 1.75, NECK = -362, NECK_BAND = 34;   // (how much bigger, drawn and traced (whose heads are smaller to start with); where the chin is on the video figures, in their units ×10)
+// HEAD_M: how many times a real (anime) head; the 🙂 slider in the game, or ?cabezas=N. The drawn in code ones already
+// have a head about twice a real one, so they get HEAD_M / 2 (never smaller than theirs)
+let HEAD_M = (() => { const q = location.search.match(/cabezas=([\d.]+)/); if (q) return +q[1] || 1; try { const v = +localStorage.getItem('avonlea-cabezas'); if (v >= 1) return v; } catch (e) {} return 3; })();
+const setHeadM = v => { HEAD_M = clamp(+v || 1, 1, 5); try { localStorage.setItem('avonlea-cabezas', HEAD_M); } catch (e) {} };
+const NECK = -345, NECK_BAND = 26;   // (the neck on the video figures, in their units ×10: below it nothing changes; over the band above it (the chin) it grows to the full size)
 const bigCache = new WeakMap();
 function bigAnim(A){
-  let B = bigCache.get(A); if (B) return B;
+  let B = bigCache.get(A); if (B && B._m === HEAD_M) return B;
+  const BIG_KV = HEAD_M;
   const warpFrame = fr => {
     const abs = fr.map(ly => ({ c: ly.c, p: ly.p.map(q => { if (!A.delta) return q.slice(); const o = [q[0], q[1]]; let x = q[0], y = q[1]; for (let i = 2; i < q.length; i += 2) o.push(x += q[i], y += q[i + 1]); return o; }) }));
     let sx = 0, n = 0; for (const ly of abs) for (const q of ly.p) for (let i = 0; i < q.length; i += 2) if (q[i + 1] < NECK) { sx += q[i]; n++; }
     const cx = n ? sx / n : 0;   // (the head's middle, this frame)
     for (const ly of abs) for (const q of ly.p) for (let i = 0; i < q.length; i += 2) {
-      const y = q[i + 1], k = y <= NECK ? BIG_KV : y >= NECK + NECK_BAND ? 1 : lerp(BIG_KV, 1, (y - NECK) / NECK_BAND);
-      q[i] = cx + (q[i] - cx) * k; if (y < NECK) q[i + 1] = NECK + (y - NECK) * BIG_KV;
+      const u = NECK - q[i + 1]; if (u <= 0) continue;   // (height above the neck; the size grows smoothly over the band, so the outline doesn't break)
+      const b = NECK_BAND, k = u < b ? 1 + (BIG_KV - 1) * u / b : BIG_KV, uu = u < b ? u + (BIG_KV - 1) * u * u / (2 * b) : b + (BIG_KV - 1) * b / 2 + BIG_KV * (u - b);
+      q[i] = cx + (q[i] - cx) * k; q[i + 1] = NECK - uu;
     }
     return abs;
   };
   const views = {}; for (const [v, V] of Object.entries(A.views)) views[v] = { ...V, stand: warpFrame(V.stand), walk: V.walk.map(warpFrame) };
-  B = { ...A, delta: 0, views }; bigCache.set(A, B); return B;
+  B = { ...A, delta: 0, views, _m: HEAD_M }; bigCache.set(A, B); return B;
 }
 const tracedOK = (look, kind) => VEC_ON && (look === 'ana' ? ANA_STYLE === kind : kind !== 'video' || ANIM_ON);
 // the same drawings for others, recoloured: which traced one each takes, and which of its colours are hair and dress
@@ -808,7 +820,7 @@ function animOf(look){
   return animCache[look];
 }
 function animDraw(c, p, t){
-  let A = tracedOK(p.look, 'video') && animOf(p.look); if (!A || p.sit || p.lie || p.crouch) return false; if (BIG_HEADS) A = bigAnim(A);
+  let A = tracedOK(p.look, 'video') && animOf(p.look); if (!A || p.sit || p.lie || p.crouch) return false; if (HEAD_M > 1) A = bigAnim(A);
   const q8 = facing8(p), flip = q8 >= 5, vi = flip ? 8 - q8 : q8, V = A.views[VEC_VIEW[vi]], L = LOOKS[p.look]; if (!V) return false;
   braidFlick(p, t, 2);   // (only for its measure of speed)
   const fr = p.moving ? V.walk[Math.floor((((p.walk || 0) % 1) + 1) % 1 * V.walk.length)] : V.stand;
@@ -914,7 +926,7 @@ function flickHand(g, side){
 }
 // the head the image model drew (the sheets' kit), on a body drawn in code: with the game's pencil around it; it blinks,
 // talks, makes faces, wears the hat, as in the kit
-const KHS = 1.85;   // (the kit's head, this much bigger on the body in code)
+const KHS = 1;   // (the kit's head, at its own size: the big head scaling (HEAD_M) makes it bigger)
 const kitBraidRoots = vi => { const H = CKIT.ana?.head[VEC_VIEW[vi]]; return H && H.br.map(([x, y]) => [x * .1 * KHS, -23.4 + y * .1 * KHS]); };
 function kitHeadOn(c, p, t, vi, L){
   const K = CKIT.ana, view = VEC_VIEW[vi], Hd = K && K.head[view]; if (!Hd) return false;
@@ -932,7 +944,7 @@ function kitHeadOn(c, p, t, vi, L){
   c.restore(); return true;
 }
 function drawPerson(c, p, t){
-  if (p.look === 'ana') { const La = LOOKS.ana; La.big = ANA_STYLE === 'mano' ? 1.38 : 0; La.pencil = ANA_STYLE === 'mano'; } else if (LOOKS[p.look]) LOOKS[p.look].big = BIG_HEADS ? BIG_K : 0;
+  if (p.look === 'ana') { const La = LOOKS.ana; La.big = ANA_STYLE === 'mano' ? HEAD_M : 0; La.pencil = ANA_STYLE === 'mano'; } else if (LOOKS[p.look]) LOOKS[p.look].big = Math.max(1, HEAD_M / 2);
   if (animDraw(c, p, t) || kitDraw(c, p, t)) return;
   if (p.lie) { drawLying(c, p, t); return; }
   if (rigDraw(c, p, t) || vecDraw(c, p, t)) return;
@@ -944,7 +956,7 @@ function drawPerson(c, p, t){
   if (!p.noShadow) ell(c, x, y, 11 * L.h, 4, 'rgba(30,40,20,.26)');
   c.save(); c.translate(x, y - bob + (sitting ? 9 : 0) + (p.crouch ? 5 : 0)); c.scale(L.h * (flip ? -1 : 1), L.h);
   const hy = -32;
-  const bstroke = () => { const bw = 3.6 / Math.sqrt(L.big || 1) * (L.pencil ? .8 : 1); if (L.pencil) { c.strokeStyle = INK; c.lineWidth = bw + 1.1; c.stroke(); } c.strokeStyle = L.hair; c.lineWidth = bw; c.stroke(); };   // (a braid's body; in pencil, with the line around it)
+  const bstroke = () => { const bw = (L.pencil ? 3 : 3.6 / Math.sqrt(L.big || 1)); if (L.pencil) { c.strokeStyle = INK; c.lineWidth = bw + 1.1; c.stroke(); } c.strokeStyle = L.hair; c.lineWidth = bw; c.stroke(); };   // (a braid's body; in pencil, with the line around it)
   const braid = (bx, by, len, k, th = 0) => {
     const sn = Math.sin(th), cs = Math.cos(th), sway = (wind + (p.moving ? w : 0)) * k * Math.max(.2, cs);
     const ex = bx + sn * len + sway, ey = by + cs * len, cx = bx + sn * len * .5 + k * .5, cy = by + cs * len * .5 + Math.abs(sn) * len * .22;   // (straight out it still sags a little)
@@ -994,17 +1006,17 @@ function drawPerson(c, p, t){
   }
   // hair behind, then the head (a big head, scaled about the neck, for the drawing 'a mano')
   const HS = L.big || 1, hsOut = ([x, y]) => [x * HS, (y + 24) * HS - 24];
-  c.save(); if (HS !== 1) { c.translate(0, -24); c.scale(HS, HS); c.translate(0, 24); }
-  const BR = L.pencil ? kitBraidRoots(vi) : null;   // (with the kit's head: the braids from where it has them)
+  const BR = L.pencil ? kitBraidRoots(vi)?.map(hsOut) : null;   // (with the kit's head: the braids from where it has them; they are not made bigger with it)
+  c.save(); if (HS !== 1 && !BR) { c.translate(0, -24); c.scale(HS, HS); c.translate(0, 24); }
   if (L.style === 'braids' && d === 2) {
     braid(...(BR ? BR[0] : [-6 + tq * 1.4, hy + 4]), 12, 1.4, -out * (1 + .25 * bob2));
     const [bx, byy] = BR ? BR[1] : [6 + tq * 1.4, hy + 4];
-    if (fl >= 0) { if (fl < .62) braidTo(bx, byy, ...flickHand(fl, false)); else braid(bx, byy - 2, 12 * (1 - Math.max(0, flung - .5) * 1.4), 0, lerp(1.62, .9, flung * flung)); }   // (the hand takes it and throws it over the shoulder: out level, then behind)
+    if (fl >= 0) { if (fl < .62) braidTo(bx, byy, ...(BR ? hsOut(flickHand(fl, false)) : flickHand(fl, false))); else braid(bx, byy - 2, 12 * (1 - Math.max(0, flung - .5) * 1.4), 0, lerp(1.62, .9, flung * flung)); }   // (the hand takes it and throws it over the shoulder: out level, then behind)
     else if (!p.braidBack) braid(bx, byy, 12, 1.4, out * (1 - .25 * bob2));
   }
   if (BR) {   // (the kit's head; from the side the braid behind it, from behind the braids down the back)
     if (side) braid(...BR[0], 13, -1.8, -out * (1.1 + .3 * Math.sin(p.walk * TAU * 2)) - .1);
-    kitHeadOn(c, p, t, vi, L);
+    c.save(); c.translate(0, -24); c.scale(HS, HS); c.translate(0, 24); kitHeadOn(c, p, t, vi, L); c.restore();
     if (d === 0) { braid(...BR[0], 13, 1.8, -out * (1 + .25 * bob2)); braid(...BR[1], 13, 1.8, out * (1 - .25 * bob2)); }
   } else {
   if (L.style === 'curls' && d !== 0) for (const sx of [-7.5, 7.5]) for (let k = 0; k < 3; k++) ell(c, sx + (sx > 0 ? -k * .4 : k * .4), hy + 3 + k * 3.4, 2.6, 2.2, L.hair, true);
@@ -3887,7 +3899,7 @@ function drawBubble(g, p, b, W, H){
   const wrap = () => { g.font = fs + 'px Georgia, serif'; rows = []; let cur = ''; for (const w of b.text.split(' ')) { const t = cur ? cur + ' ' + w : w; if (cur && g.measureText(t).width > maxW) { rows.push(cur); cur = w; } else cur = t; } rows.push(cur); };
   wrap(); if (rows.length > 5) { fs -= 1; maxW = Math.min(maxW + 60, W - 24); wrap(); }
   const lh = fs + 3, w = Math.min(Math.max(...rows.map(r => g.measureText(r).width)) + 18, W - 12), h = rows.length * lh + 10, r = 8;
-  const headY = p.lie ? p.y - 24 : p.headTop ? p.y - p.headTop : p.y - 62 * LOOKS[p.look].h - 6;
+  const headY = p.lie ? p.y - 24 : p.headTop ? p.y - p.headTop : p.y - Math.max(62, 28 + 12 * HEAD_M) * LOOKS[p.look].h - 6;
   const sx = (p.x - view.ox) * Z, top = (headY - view.oy) * Z - (1 - a) * 5, foot = (p.y - view.oy) * Z;
   let y = top - h - 8, below = false;
   if (y < 6) { y = Math.min(foot + 10, H - h - 6); below = true; }
@@ -4087,6 +4099,10 @@ $('say').addEventListener('submit', e => { e.preventDefault(); const t = $('sayi
 $('sayin').addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); closeSay(); } });
 $('saybtn').addEventListener('pointerdown', e => { e.stopPropagation(); audio(); sayOpen ? closeSay() : openSay(); });
 $('wmbtn').addEventListener('pointerdown', e => { e.stopPropagation(); audio(); wmPanel(); });
+{ const r = $('headr'), v = $('headv'), show = () => { r.value = HEAD_M; v.textContent = '×' + HEAD_M.toFixed(1); };
+  $('headbtn').addEventListener('pointerdown', e => { e.stopPropagation(); show(); $('headp').hidden = !$('headp').hidden; });
+  $('headp').addEventListener('pointerdown', e => e.stopPropagation());
+  r.addEventListener('input', () => { setHeadM(r.value); show(); }); r.addEventListener('change', () => r.blur()); }
 $('wmp').addEventListener('pointerdown', e => e.stopPropagation());
 $('obsback').addEventListener('click', e => { e.stopPropagation(); observe(null); });
 $('wmrun').addEventListener('pointerdown', e => { const k = e.target.closest('[data-obs]')?.dataset.obs; if (k) observe(OBS === k ? null : k); });
@@ -5823,7 +5839,7 @@ function drawMap(){
   $('maptitle').textContent = 'Avonlea · ' + SEASONS[S] + ', día ' + (Math.floor(dayT) % 2 + 1) + ' · ' + SICON[S] + ' · toca un lugar para ir allí · rueda o pellizco: acercar · arrastra para moverte';
 }
 function loop(now){ const dt = clamp((now - last) / 1000, 0, .05); last = now; update(dt); render(); requestAnimationFrame(loop); }
-window.__avonlea = { setVec: v => { VEC_ON = v; }, setStyle: v => { ANA_STYLE = v; }, setBig: v => { BIG_HEADS = v; }, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+window.__avonlea = { setVec: v => { VEC_ON = v; }, setStyle: v => { ANA_STYLE = v; }, setHead: setHeadM, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
 /* ---------- the viewer (index.html?visor): only Ana, big, on a plain floor, to look at the drawings and move her:
    arrows (Shift to run), and buttons for everything she can do. ---------- */
 function startVisor(){
@@ -5833,7 +5849,7 @@ function startVisor(){
   P.innerHTML = `<b>Visor</b> <select id="vwho"><option value="ana">Ana</option><option value="marilla">Marilla</option><option value="matthew">Matthew</option><option value="f:ruby">Ruby (recoloreada)</option><option value="f:jane">Jane (recoloreada)</option><option value="f:josie">Josie (recoloreada)</option></select> <small>flechas para caminar · Shift para correr · rueda: zoom</small><div>
     <button data-a="sit">Sentarse</button><button data-a="crouch">Agacharse</button><button data-a="lie">Acostarse</button>
     <button data-a="talk">Hablar</button><button data-a="flick">Echarse la trenza</button><button data-a="hat">Sombrero</button>
-    <button data-a="turn">Girar</button><button data-a="code">Otros: dibujo GPT / código</button> Ana: <select id="vsty"><option value="mano">a mano (cabezona)</option><option value="video">video</option><option value="hojas">hojas</option><option value="codigo">código antiguo</option></select></div>
+    <button data-a="turn">Girar</button><button data-a="code">Otros: dibujo GPT / código</button> Ana: <select id="vsty"><option value="mano">a mano (cabezona)</option><option value="video">video</option><option value="hojas">hojas</option><option value="codigo">código antiguo</option></select> Cabezas <input id="vhead" type="range" min="1" max="5" step="0.1" style="width:110px;vertical-align:middle"> <b id="vheadv"></b></div>
     <div>Cara: <button data-f="">normal</button><button data-f="contenta">contenta</button><button data-f="triste">triste</button><button data-f="sorprendida">sorprendida</button><button data-f="enojada">enojada</button></div>`;
   document.body.appendChild(P);
   const a = ana, L = LOOKS.ana; a.x = 0; a.y = 0; a.dir = 2; a.dir8 = 4; a.blink = -1; a.braidBack = false; a.sit = a.lie = a.crouch = false;
@@ -5852,6 +5868,7 @@ function startVisor(){
   });
   cv.addEventListener('wheel', e => { e.preventDefault(); Z = clamp(Z * Math.exp(-e.deltaY * .0015), 1.5, 12); }, { passive: false });
   $('vsty').value = ANA_STYLE;
+  { const r = $('vhead'), v = $('vheadv'), show = () => { r.value = HEAD_M; v.textContent = '×' + HEAD_M.toFixed(1); }; show(); r.addEventListener('input', () => { setHeadM(r.value); show(); }); r.addEventListener('change', () => r.blur()); }
   $('vsty').addEventListener('change', e => { ANA_STYLE = e.target.value; e.target.blur(); });
   $('vwho').addEventListener('change', e => { a.look = e.target.value; e.target.blur(); });   // (another one to look at: the same body, another look)
   const frame = now => {
