@@ -53,16 +53,12 @@ con las piezas: el tronco según la vista, los pies que se levantan o adelantan 
 hombro (y suben en el gesto de la trenza), las trenzas que se doblan siguiendo la curva de su física (al correr se abren,
 al echarla atrás vuela en horizontal) y el sombrero sobre el pelo. Pesa 34 KB.
 
-## El rostro por piezas (kit)
+## La cara: parpadear y hablar sobre el dibujo
 
-`gpt_ana_rostro.webp`: la cabeza sin pelo ni rasgos en 5 vistas; los ojos en 5 estados (abiertos, cerrados, alegres,
-tristes, sorprendidos: izquierdo, derecho, perfil); las cejas en 3 estados; la nariz; la boca en 6 estados (sonrisa,
-neutra, hablando, abierta, triste, sorprendida: frente y perfil); el pelo en 5 vistas, en capa de atrás y flequillo.
+Se probó armar la cara con un kit de piezas (`gpt_ana_rostro.webp`, `tools/trace_face.py`), pero queda mejor la cara tal
+como viene dibujada en la hoja de partes. Ahora solo se marca dónde están los ojos y la boca:
 
-    python3 tools/trace_face.py sprites/gpt_ana_rostro.webp sprites/gpt_ana_partes.webp ana \
-      --pal '#4a2e1e,#b74e27,#923d1d,#fbd2ac,#e5b391,#477a56,#355c3e,#5f3924,#d53430,#ece6dc,#65787c,#f2a08c,#ffffff,#f8d290,#deb068,#1a1a2a,#3f7fc0'
+    python3 tools/face_marks.py sprites/gpt_ana_partes.webp ana
 
-Las posiciones (ojos, nariz, boca, cabeza, pelo) salen de la hoja de partes; las escalas también: la de la cabeza por el
-ancho a la altura de las orejas, la del pelo por su ancho, la de los rasgos por el tamaño del iris (GPT dibuja cada fila
-del kit a su propia escala). Las trenzas del pelo se cortan en el cuello: cuelgan las que tienen física. En el juego,
-`p.blink` cierra los ojos, hablar alterna las bocas, y `p.face` / `p.mouth` / `p.brows` eligen una expresión.
+y el juego, al parpadear, tapa cada ojo con el color de la piel y dibuja el ojo cerrado; al hablar, tapa la boca y
+dibuja la boca abierta (de frente, de tres cuartos y de perfil).
