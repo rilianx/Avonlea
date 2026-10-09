@@ -770,6 +770,26 @@ let ANIM_ON = true;
 // Ana's drawing: 'mano' (in code, a big head in pencil with the anime's features; the body as always), 'video' (traced
 // from a video), 'hojas' (traced from the sheets), 'codigo' (the first drawing in code)
 let ANA_STYLE = (location.search.match(/ana=(video|mano|hojas|codigo)/) || [, 'mano'])[1];   // (the default: the hand-drawn one with the big head; ?ana=video etc. to choose)
+// big heads for everyone (as in the anime's chibi moments): the drawn in code ones scale their head about the neck; the
+// traced from video ones are warped (above the neck, bigger; a little below, blending in). ?cabezas=0 for the plain ones
+let BIG_HEADS = !/cabezas=0/.test(location.search);
+const BIG_K = 1.38, BIG_KV = 1.75, NECK = -362, NECK_BAND = 34;   // (how much bigger, drawn and traced (whose heads are smaller to start with); where the chin is on the video figures, in their units ×10)
+const bigCache = new WeakMap();
+function bigAnim(A){
+  let B = bigCache.get(A); if (B) return B;
+  const warpFrame = fr => {
+    const abs = fr.map(ly => ({ c: ly.c, p: ly.p.map(q => { if (!A.delta) return q.slice(); const o = [q[0], q[1]]; let x = q[0], y = q[1]; for (let i = 2; i < q.length; i += 2) o.push(x += q[i], y += q[i + 1]); return o; }) }));
+    let sx = 0, n = 0; for (const ly of abs) for (const q of ly.p) for (let i = 0; i < q.length; i += 2) if (q[i + 1] < NECK) { sx += q[i]; n++; }
+    const cx = n ? sx / n : 0;   // (the head's middle, this frame)
+    for (const ly of abs) for (const q of ly.p) for (let i = 0; i < q.length; i += 2) {
+      const y = q[i + 1], k = y <= NECK ? BIG_KV : y >= NECK + NECK_BAND ? 1 : lerp(BIG_KV, 1, (y - NECK) / NECK_BAND);
+      q[i] = cx + (q[i] - cx) * k; if (y < NECK) q[i + 1] = NECK + (y - NECK) * BIG_KV;
+    }
+    return abs;
+  };
+  const views = {}; for (const [v, V] of Object.entries(A.views)) views[v] = { ...V, stand: warpFrame(V.stand), walk: V.walk.map(warpFrame) };
+  B = { ...A, delta: 0, views }; bigCache.set(A, B); return B;
+}
 const tracedOK = (look, kind) => VEC_ON && (look === 'ana' ? ANA_STYLE === kind : kind !== 'video' || ANIM_ON);
 // the same drawings for others, recoloured: which traced one each takes, and which of its colours are hair and dress
 // (the rest, skin, apron, boots, eyes, line, stay). The look of each one gives the new colours.
@@ -788,7 +808,7 @@ function animOf(look){
   return animCache[look];
 }
 function animDraw(c, p, t){
-  const A = tracedOK(p.look, 'video') && animOf(p.look); if (!A || p.sit || p.lie || p.crouch) return false;
+  let A = tracedOK(p.look, 'video') && animOf(p.look); if (!A || p.sit || p.lie || p.crouch) return false; if (BIG_HEADS) A = bigAnim(A);
   const q8 = facing8(p), flip = q8 >= 5, vi = flip ? 8 - q8 : q8, V = A.views[VEC_VIEW[vi]], L = LOOKS[p.look]; if (!V) return false;
   braidFlick(p, t, 2);   // (only for its measure of speed)
   const fr = p.moving ? V.walk[Math.floor((((p.walk || 0) % 1) + 1) % 1 * V.walk.length)] : V.stand;
@@ -894,7 +914,7 @@ function flickHand(g, side){
 }
 // the head the image model drew (the sheets' kit), on a body drawn in code: with the game's pencil around it; it blinks,
 // talks, makes faces, wears the hat, as in the kit
-const KHS = 1.48;   // (the kit's head, this much bigger on the body in code)
+const KHS = 1.85;   // (the kit's head, this much bigger on the body in code)
 const kitBraidRoots = vi => { const H = CKIT.ana?.head[VEC_VIEW[vi]]; return H && H.br.map(([x, y]) => [x * .1 * KHS, -23.4 + y * .1 * KHS]); };
 function kitHeadOn(c, p, t, vi, L){
   const K = CKIT.ana, view = VEC_VIEW[vi], Hd = K && K.head[view]; if (!Hd) return false;
@@ -912,7 +932,7 @@ function kitHeadOn(c, p, t, vi, L){
   c.restore(); return true;
 }
 function drawPerson(c, p, t){
-  if (p.look === 'ana') { const La = LOOKS.ana; La.big = ANA_STYLE === 'mano' ? 1.38 : 0; La.pencil = ANA_STYLE === 'mano'; }
+  if (p.look === 'ana') { const La = LOOKS.ana; La.big = ANA_STYLE === 'mano' ? 1.38 : 0; La.pencil = ANA_STYLE === 'mano'; } else if (LOOKS[p.look]) LOOKS[p.look].big = BIG_HEADS ? BIG_K : 0;
   if (animDraw(c, p, t) || kitDraw(c, p, t)) return;
   if (p.lie) { drawLying(c, p, t); return; }
   if (rigDraw(c, p, t) || vecDraw(c, p, t)) return;
@@ -5803,7 +5823,7 @@ function drawMap(){
   $('maptitle').textContent = 'Avonlea · ' + SEASONS[S] + ', día ' + (Math.floor(dayT) % 2 + 1) + ' · ' + SICON[S] + ' · toca un lugar para ir allí · rueda o pellizco: acercar · arrastra para moverte';
 }
 function loop(now){ const dt = clamp((now - last) / 1000, 0, .05); last = now; update(dt); render(); requestAnimationFrame(loop); }
-window.__avonlea = { setVec: v => { VEC_ON = v; }, setStyle: v => { ANA_STYLE = v; }, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+window.__avonlea = { setVec: v => { VEC_ON = v; }, setStyle: v => { ANA_STYLE = v; }, setBig: v => { BIG_HEADS = v; }, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
 /* ---------- the viewer (index.html?visor): only Ana, big, on a plain floor, to look at the drawings and move her:
    arrows (Shift to run), and buttons for everything she can do. ---------- */
 function startVisor(){
