@@ -101,3 +101,14 @@ Comparación de calcos para los 40 cuadros del video (peso; error medio por pixe
 | VTracer curvas a tamaño completo | 5 MB | 1,8 MB | — | — |
 
 (Los puntos se guardan como pasos de uno a otro: números chicos.)
+
+## Dos personajes en un mismo video
+
+`video/gemini_marilla_matthew_gira.mp4`: Marilla y Matthew caminan juntos mientras giran. `--split 2 --pick 0|1`
+corta cada cuadro por las columnas más finas entre los dos y se queda con uno:
+
+    V='frente:0-1.8,tq_frente:1.5-3.1,perfil:4-6.4,tq_espalda:6.6-8,espalda:8-10'
+    python3 tools/trace_video.py sprites/video/gemini_marilla_matthew_gira.mp4 marilla --split 2 --pick 0 --views $V --k 10 --eps 4 --eps-face 1.6 --minarea 14
+    python3 tools/trace_video.py sprites/video/gemini_marilla_matthew_gira.mp4 matthew --split 2 --pick 1 --views $V --k 10 --eps 4 --eps-face 1.6 --minarea 14
+
+En el visor se elige a quién mirar.

@@ -13,6 +13,7 @@ from PIL import Image
 ap = argparse.ArgumentParser(); ap.add_argument('video'); ap.add_argument('name'); ap.add_argument('--views', required=True)
 ap.add_argument('--n', type=int, default=8); ap.add_argument('--k', type=int, default=14); ap.add_argument('--eps', type=float, default=1.2)
 ap.add_argument('--height', type=float, default=46); ap.add_argument('--minarea', type=float, default=4); ap.add_argument('--sheet')
+ap.add_argument('--split', type=int, default=1, help='cuántos personajes hay lado a lado en el video'); ap.add_argument('--pick', type=int, default=0, help='cuál tomar (0 = el de la izquierda)')
 ap.add_argument('--eps-face', type=float, default=1.0, help='la cabeza, más fina (los ojos y la boca se leen)')
 ap.add_argument('--engine', default='propio', help="'propio' (zonas de color planas) o 'vtracer' (capas apiladas, más fiel)")
 ap.add_argument('--scale', type=float, default=1/3, help='con vtracer: achicar el cuadro antes de vectorizar')
@@ -32,6 +33,17 @@ def mask_of(im):
     for i in big: keep |= lab == i
     ff = (~keep).astype(np.uint8); cv2.floodFill(ff, np.zeros((H + 2, W + 2), np.uint8), (0, 0), 2); return ff != 2
 masks = [mask_of(f) for f in frames]
+def pick_part(m):   # (several side by side: cut at the thinnest columns between them, keep one)
+    if a.split < 2: return m
+    xs = np.nonzero(m.any(0))[0]; x0, x1 = xs.min(), xs.max(); col = m.sum(0).astype(float); cuts = []
+    for j in range(1, a.split):
+        c0, c1 = int(x0 + (x1 - x0) * (j - .35) / a.split), int(x0 + (x1 - x0) * (j + .35) / a.split)
+        cuts.append(c0 + int(np.argmin(cv2.blur(col[None, c0:c1], (9, 1))[0])))
+    edges = [x0] + cuts + [x1 + 1]; out = np.zeros_like(m); l, r = edges[a.pick], edges[a.pick + 1]; out[:, l:r] = m[:, l:r]
+    n, lab, st, _ = cv2.connectedComponentsWithStats(out.astype(np.uint8))   # (the biggest piece: no crumbs of the other one)
+    if n > 1: j = 1 + int(np.argmax(st[1:, 4])); out = lab == j
+    return out
+masks = [pick_part(m) for m in masks]
 def feet(m):
     ys, xs = np.nonzero(m); b = ys.max(); fx = xs[ys > b - (b - ys.min()) * .06]; return (fx.min() + fx.max()) / 2, b, b - ys.min()
 info = [feet(m) for m in masks]
