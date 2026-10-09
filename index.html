@@ -22,6 +22,17 @@ html,body{margin:0;height:100%;background:#2b3a26;overflow:hidden;touch-action:n
 #say button{font:15px Georgia,serif;background:#fffaf0;color:#3b2a1c;border:1.5px solid #6b4a30;border-radius:8px;padding:6px 12px;cursor:pointer}
 #relbtn{position:fixed;right:10px;top:172px;width:42px;height:36px;font-size:19px;line-height:30px;padding:0;cursor:pointer}
 #daybtn{position:fixed;right:10px;top:214px;width:42px;height:36px;font-size:17px;line-height:30px;padding:0;cursor:pointer}
+#wmbtn{position:fixed;right:10px;top:256px;width:42px;height:36px;font-size:18px;line-height:30px;padding:0;cursor:pointer}
+#wmp{position:fixed;left:10px;top:54px;bottom:10px;width:min(360px,calc(100% - 70px));z-index:14;overflow:auto;padding:8px 10px;font-size:12.5px}
+#wmp[hidden]{display:none}
+#wmp .mt{font-weight:bold;margin-bottom:4px}
+#wmlist button{display:block;width:100%;text-align:left;margin:2px 0;font:inherit;cursor:pointer}
+#wmrun .ag{border-top:1px solid rgba(90,60,35,.3);margin-top:6px;padding-top:4px}
+#wmrun ol{margin:2px 0 2px 18px;padding:0}
+#wmrun li.cur{font-weight:bold}
+#wmrun li.past{opacity:.55}
+#wmrun pre{white-space:pre-wrap;font-size:11px;margin:2px 0;opacity:.8}
+#wmp .mb{margin-top:8px}
 #rels{position:fixed;inset:0;z-index:15;display:flex;align-items:center;justify-content:center;background:rgba(30,20,10,.45)}
 #rels[hidden]{display:none}
 #rels .sheet{padding:10px 14px 12px;width:min(560px,calc(100% - 24px));max-height:calc(100% - 30px);overflow:auto;text-align:center}
@@ -102,6 +113,8 @@ html,body{margin:0;height:100%;background:#2b3a26;overflow:hidden;touch-action:n
 <button id="saybtn" class="paper" title="Decir algo (Enter o T)">💬</button>
 <button id="relbtn" class="paper" title="La historia de hoy y quién quiere a quién">👥</button>
 <button id="daybtn" class="paper" title="Pasar al día siguiente">⏭</button>
+<button id="wmbtn" class="paper" title="Metas de prueba (el planificador, sin IA)">🎯</button>
+<div id="wmp" class="paper" hidden><div class="mt">🎯 Metas de prueba <small>(sin IA: el planificador)</small></div><label><input type="checkbox" id="wmobey" checked> Ana hace sola lo que le piden</label><div id="wmlist"></div><div id="wmrun"></div><div class="mb"><button id="wmstop">Detener todo</button><button id="wmclose">Cerrar</button></div></div>
 <div id="rels" hidden><div class="paper sheet"><div class="mt">La historia de hoy, y quién quiere a quién</div><div id="story"></div><svg id="relsvg" viewBox="0 0 420 300"></svg><div id="reldet"></div><div class="mb"><button id="relclose">Cerrar</button></div></div></div>
 <button id="mapbtn" class="paper" title="Mapa (M)">🗺</button>
 <button id="aibtn" class="paper" title="Diálogos con IA">✒</button>
@@ -1646,7 +1659,7 @@ function tobyThink(dt){
 /* ---------- the animals: cows graze, get loose, are led and sold; Ginger talks ---------- */
 const animalWhere = k => ANIM[k]?.where;
 function animalSays(k, text){ const a = ANIM[k]; if (!a || amb.cur) return; text = text || pick(ANIMALS[k].lines); bubbles = [{ q: k, text, t: 0, dur: lineDur(text) }]; a.talkT = TT + 1.6; sfx.blip(); }
-const ledCow = () => Object.values(ANIM).find(a => a.state === 'led');
+const ledCow = () => Object.values(ANIM).find(a => a.state === 'led' && (!a.ledBy || a.ledBy === 'ana'));
 function cowGo(a, tx, ty, sp, dt){
   const n = navStep(a, tx, ty); if (n.arrived) { a.moving = false; return true; }
   const dx = n.wx - a.x, dy = n.wy - a.y, d = Math.hypot(dx, dy) || 1, v = Math.min(sp, d * 4), ox = a.x, oy = a.y;
@@ -1662,6 +1675,12 @@ function animalsThink(dt){
       const b = PEOPLE[a.owner]; if (!b || b.where === 'away') { a.where = 'away'; continue; }
       if (game.scene !== 'out' || b.where !== 'out') continue;
       const bx = b.x + (b.dir === 3 ? 60 : -60), by = b.y + 8; if (dist(a.x, a.y, bx, by) > 14) cowGo(a, bx, by, 50, dt); else a.moving = false; continue;
+    }
+    if (a.state === 'led' && a.ledBy && a.ledBy !== 'ana') {   // (led on a rope by someone else: she goes along)
+      const L = wmBody(a.ledBy); if (!L) continue; const bx = L.x + (L.dir === 3 ? 30 : -30), by = L.y + 6;
+      if (game.scene !== 'out' || L.where !== 'out' || dist(a.x, a.y, bx, by) > 300) { if (L.where === 'out') { a.x = bx; a.y = by; } a.moving = false; }
+      else if (dist(a.x, a.y, bx, by) > 16) cowGo(a, bx, by, 70, dt); else a.moving = false;
+      continue;
     }
     if (game.scene !== 'out') continue;   // (out in the fields, things only move while Ana is out there)
     if (a.state === 'led') { const bx = ana.x + (ana.dir === 3 ? 30 : -30), by = ana.y + 6; if (dist(a.x, a.y, bx, by) > 16) cowGo(a, bx, by, Math.max(34, ana.pace) * 1.3, dt); else a.moving = false; continue; }
@@ -1937,7 +1956,7 @@ function autoStep(){
   done();
 }
 function autoTick(){
-  if (!autoAllowed()) return;
+  if (!autoAllowed() || AGENTS.ana?.followOf || wmDriven('ana')) return;   // (a goal of the planner, or following someone who asked: no wandering off)
   const manual = auto.intent?.manual;
   if (!manual && TT - lastInput < AUTO_IDLE) { auto.on = false; return; }
   if (!auto.on) { auto.on = true; if (!auto.told && !manual) { auto.told = true; notice('Ana hace lo suyo; muévete o toca algo para retomar el control.'); } }
@@ -2094,6 +2113,9 @@ const ITEM_DEFS = {
   compota:  { names: ['compota de manzana', 'compotas de manzana'], icon: '🍯', season: () => S === 1 || S === 2 || game.inv.manzanas >= 3 || game.inv.compota > 0, prepared: true, recipe: { manzanas: 3 }, cook: 'Compota de manzana (3 manzanas)', gift: { name: 'compota de manzana', art: 'una compota de manzana', reply: '¡Qué rica compota! Gracias.' } },
   te:       { names: ['taza de té', 'tazas de té'], icon: '☕', season: () => true, prepared: true, recipe: {}, cook: 'Té', gift: { name: 'taza de té', art: 'una taza de té', reply: 'Un té calentito, justo lo que me hacía falta.' }, note: 'la preparó ella y puede ofrecérsela a alguien' },
   ramo:     { names: ['ramo de flores', 'ramos de flores'], icon: '💐', season: () => S !== 3 || game.inv.ramo > 0, prepared: true, gift: { name: 'ramo de flores', art: 'un ramo de flores', reply: '¡Qué flores tan lindas! Las pondré en agua.' } },
+  cuerda:   { names: ['cuerda', 'cuerdas'], icon: '🪢', season: () => true },
+  azucar:   { names: ['taza de azúcar', 'tazas de azúcar'], icon: '🍬', season: () => true },
+  hierbas:  { names: ['manojo de hierbas', 'manojos de hierbas'], icon: '🌿', season: () => S !== 3 },
   dolares:  { names: ['dólar', 'dólares'], icon: '💵', season: () => game.inv.dolares > 0, giveAll: true, gift: { name: 'el dinero', art: 'el dinero', reply: 'Vaya... bueno, pues gracias.' }, note: 'dinero' },
 };
 for (const k of Object.keys(ITEM_DEFS)) if (!(k in game.inv)) game.inv[k] = 0;
@@ -2134,7 +2156,7 @@ function walkOption(who){
    three things to say, and may note one new memory. Gifts and walks are still decided by the game itself, so
    nothing the AI writes can break it; if the AI is off or fails, the written lines are used. */
 // (each provider has its own key, typed in by the player and kept in this browser)
-const AI = { on: true, auto: true, model: 'gpt-5.4-mini', mode: 'minimo', stories: false, keys: { openai: '', anthropic: '' } };
+const AI = { on: false, auto: true, model: 'gpt-5.4-mini', mode: 'minimo', stories: false, keys: { openai: '', anthropic: '' } };
 const FULL = () => AI.mode === 'completo';   // (the full AI: the judge, the plans, Ana deciding with the AI; the minimal one spends several times less)
 try { const st = JSON.parse(localStorage.getItem('avonlea-ai') || '{}'); if (st.key) { AI.keys.anthropic = st.key; delete st.key; } Object.assign(AI, st); AI.keys = Object.assign({ openai: '', anthropic: '' }, st.keys || AI.keys); } catch (e) {}
 const saveAI = () => { try { localStorage.setItem('avonlea-ai', JSON.stringify(AI)); } catch (e) {} };
@@ -3433,8 +3455,8 @@ function note(f, d, vol = .03, type = 'sine', at = 0){ if (!AC) return; const o 
 const sfx = { happy: () => { note(660, .3); note(880, .35, .03, 'sine', .12); note(990, .4, .025, 'sine', .24); }, water: () => { for (let k = 0; k < 4; k++) note(1200 + k * 160, .08, .015, 'triangle', k * .05); }, cook: () => note(330, .5, .02, 'triangle'), blip: () => note(420 + Math.random() * 160, .07, .012, 'triangle'), done: () => { note(523, .25); note(659, .25, .03, 'sine', .1); note(784, .4, .03, 'sine', .2); } };
 
 /* ---------- keeping the day: in the browser ---------- */
-function save(){ if (wiping) return; try { localStorage.setItem('avonlea', JSON.stringify({ inv: game.inv, hasCan: game.hasCan, water: game.water, fond: game.fond, said: game.said, saidS: game.saidS, seasonShift: game.seasonShift, teaDay: game.teaDay, journal: game.journal, mem: game.mem, know: game.know, tasks: game.tasks, plans: game.plans, table: game.table, giftFor: game.giftFor, npcGiftDay: game.npcGiftDay, lastDay: game.lastDay, taskSeq: game.taskSeq, rel: game.rel, relLog: game.relLog, impr: game.impr, story: game.story, stories: game.stories, nextStory: game.nextStory, ground: game.ground, groundSeq: game.groundSeq, anaStates: game.anaStates, animals: Object.fromEntries(Object.entries(ANIM).map(([k, a]) => [k, { x: a.x, y: a.y, where: a.where, state: a.state, area: a.area, owner: a.owner }])), beds: BEDS.map(b => [b.stage, b.wet, b.grow]), dayT })); } catch (e) {} }
-try { const s = JSON.parse(localStorage.getItem('avonlea') || 'null'); if (s) { Object.assign(game.inv, s.inv); game.hasCan = s.hasCan; game.water = s.water; Object.assign(game.fond, s.fond); game.said = s.said || {}; game.saidS = s.saidS || {}; game.seasonShift = s.seasonShift || 0; game.teaDay = s.teaDay ?? -1; game.journal = s.journal || []; game.mem = s.mem || {}; for (const k of ['know', 'plans', 'giftFor', 'npcGiftDay']) game[k] = s[k] || {}; game.tasks = s.tasks || []; game.table = s.table || null; game.lastDay = s.lastDay ?? null; game.taskSeq = s.taskSeq || 0; game.rel = s.rel || null; game.relLog = s.relLog || []; game.impr = s.impr || {}; game.story = s.story?.v === 2 ? s.story : null; if (game.story) game.story.gen = false; game.stories = s.stories || []; game.nextStory = s.nextStory || null; game.ground = s.ground || []; game.groundSeq = s.groundSeq || 0; game.anaStates = s.anaStates || {}; for (const [k, v] of Object.entries(s.animals || {})) if (ANIM[k]) Object.assign(ANIM[k], v); (s.beds || []).forEach((v, k) => { if (BEDS[k]) [BEDS[k].stage, BEDS[k].wet, BEDS[k].grow] = v; }); if (s.dayT) dayT = s.dayT; if (game.hasCan) ana.carry = 'can'; } } catch (e) {}
+function save(){ if (wiping) return; try { localStorage.setItem('avonlea', JSON.stringify({ wm: game.wm, inv: game.inv, hasCan: game.hasCan, water: game.water, fond: game.fond, said: game.said, saidS: game.saidS, seasonShift: game.seasonShift, teaDay: game.teaDay, journal: game.journal, mem: game.mem, know: game.know, tasks: game.tasks, plans: game.plans, table: game.table, giftFor: game.giftFor, npcGiftDay: game.npcGiftDay, lastDay: game.lastDay, taskSeq: game.taskSeq, rel: game.rel, relLog: game.relLog, impr: game.impr, story: game.story, stories: game.stories, nextStory: game.nextStory, ground: game.ground, groundSeq: game.groundSeq, anaStates: game.anaStates, animals: Object.fromEntries(Object.entries(ANIM).map(([k, a]) => [k, { x: a.x, y: a.y, where: a.where, state: a.state, area: a.area, owner: a.owner }])), beds: BEDS.map(b => [b.stage, b.wet, b.grow]), dayT })); } catch (e) {} }
+try { const s = JSON.parse(localStorage.getItem('avonlea') || 'null'); if (s) { if (s.wm) game.wm = s.wm; Object.assign(game.inv, s.inv); game.hasCan = s.hasCan; game.water = s.water; Object.assign(game.fond, s.fond); game.said = s.said || {}; game.saidS = s.saidS || {}; game.seasonShift = s.seasonShift || 0; game.teaDay = s.teaDay ?? -1; game.journal = s.journal || []; game.mem = s.mem || {}; for (const k of ['know', 'plans', 'giftFor', 'npcGiftDay']) game[k] = s[k] || {}; game.tasks = s.tasks || []; game.table = s.table || null; game.lastDay = s.lastDay ?? null; game.taskSeq = s.taskSeq || 0; game.rel = s.rel || null; game.relLog = s.relLog || []; game.impr = s.impr || {}; game.story = s.story?.v === 2 ? s.story : null; if (game.story) game.story.gen = false; game.stories = s.stories || []; game.nextStory = s.nextStory || null; game.ground = s.ground || []; game.groundSeq = s.groundSeq || 0; game.anaStates = s.anaStates || {}; for (const [k, v] of Object.entries(s.animals || {})) if (ANIM[k]) Object.assign(ANIM[k], v); (s.beds || []).forEach((v, k) => { if (BEDS[k]) [BEDS[k].stage, BEDS[k].wet, BEDS[k].grow] = v; }); if (s.dayT) dayT = s.dayT; if (game.hasCan) ana.carry = 'can'; } } catch (e) {}
 relInit();
 addEventListener('pagehide', save); setInterval(save, 10000);
 
@@ -3527,6 +3549,12 @@ try { if (!aiKey() && !localStorage.getItem('avonlea-ai-asked')) { localStorage.
 $('say').addEventListener('submit', e => { e.preventDefault(); const t = $('sayin').value.trim(); $('sayin').value = ''; closeSay(); if (t) anaSpeak(t); });
 $('sayin').addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); closeSay(); } });
 $('saybtn').addEventListener('pointerdown', e => { e.stopPropagation(); audio(); sayOpen ? closeSay() : openSay(); });
+$('wmbtn').addEventListener('pointerdown', e => { e.stopPropagation(); audio(); wmPanel(); });
+$('wmp').addEventListener('pointerdown', e => e.stopPropagation());
+$('wmlist').addEventListener('click', e => { const i = e.target.closest('button')?.dataset.i; if (i != null) wmRunTest(+i); });
+$('wmobey').addEventListener('change', e => { WM_OBEY = e.target.checked; });
+$('wmstop').addEventListener('click', () => { for (const k of Object.keys(AGENTS)) { wmRelease(k); delete AGENTS[k]; } wmPanelDraw(); });
+$('wmclose').addEventListener('click', () => wmPanel(false));
 $('relbtn').addEventListener('pointerdown', e => { e.stopPropagation(); audio(); userInput(); relPanel($('rels').hidden); });
 $('relclose').addEventListener('click', () => relPanel(false));
 $('rels').addEventListener('pointerdown', e => { if (e.target === $('rels')) relPanel(false); });
@@ -3580,7 +3608,7 @@ function update(dt){
     if (stick) { const dx = stick.x - stick.x0, dy = stick.y - stick.y0, l = Math.hypot(dx, dy); if (l > 10) { mx = dx / Math.max(l, 50); my = dy / Math.max(l, 50); } }
   }
   if (game.talk?.deadline && TT > game.talk.deadline && !sayOpen) { game.talk.deadline = 0; autoChoose(); }
-  autoTick(); cartTick(dt); momentsTick(); folkTick(dt); faunaTick(dt);
+  autoTick(); cartTick(dt); momentsTick(); folkTick(dt); faunaTick(dt); agentTick(dt); wmFollowTick();
   ana.torn = !!game.anaStates.rasgado; ana.askew = !!game.anaStates.despeinada;
   ana.savoring = false;
   // walking to something she was sent to (a tap): by the A* path, and doing it on arrival
@@ -3595,10 +3623,11 @@ function update(dt){
     else if (t && dist(ana.x, ana.y, t.x, t.y) < t.reach * .85) { ana.goto = null; (gt.use || t.act)(); }
     else {
       const sk = ana.stk; if (!sk || dist(ana.x, ana.y, sk.x, sk.y) > 6) ana.stk = { x: ana.x, y: ana.y, t: TT }; else if (TT - sk.t > 1.5) { ana.nav = null; ana.stk = null; }   // (stuck: find the way again)
-      const n = navStep(ana, t ? t.x : gt.x, t ? t.y : gt.y); if (n.arrived) { ana.goto = null; if (t && dist(ana.x, ana.y, t.x, t.y) < t.reach) (gt.use || t.act)(); } else { const dx = n.wx - ana.x, dy = n.wy - ana.y, d = Math.hypot(dx, dy) || 1; mx = dx / d; my = dy / d; } }
+      const n = navStep(ana, t ? t.x : gt.x, t ? t.y : gt.y); if (n.arrived) { if (gt.wm) ana.wmArr = TT; ana.goto = null; if (t && dist(ana.x, ana.y, t.x, t.y) < t.reach) (gt.use || t.act)(); } else { const dx = n.wx - ana.x, dy = n.wy - ana.y, d = Math.hypot(dx, dy) || 1; mx = dx / d; my = dy / d; } }
   }
   // how fast: a walk (Shift to hurry), or a stroll when she is out on her own: every so often she stops to look about
   if (dest && !ana.goto?.dest) dest = null;
+  if (!$('wmp').hidden && (wmDrawT -= dt) < 0) { wmDrawT = .5; wmRunDraw(); }
   ana.pace = ana.goto?.stroll ? STROLL : ana.goto?.dest ? 80 : (keys.has('ShiftLeft') || keys.has('ShiftRight')) ? RUN : WALK;
   if (ana.goto?.stroll) { const sv = ana.savor = ana.savor || { next: TT + 5 + Math.random() * 6, until: 0 }; if (!ana.savoring && TT > sv.next && TT >= sv.until) { sv.until = TT + 2.5 + Math.random() * 3.5; sv.next = sv.until + 6 + Math.random() * 8; } }
   const l = Math.hypot(mx, my); if (l > 1) { mx /= l; my /= l; }
@@ -3632,7 +3661,7 @@ function update(dt){
   // everyone but Diana follows their routine: where they are wanted (home, or visiting), walking there, or about the place
   const hr = hourNow(), visiting = k => !!CH[k].routine && PEOPLE[k].where !== 'out' && PEOPLE[k].where !== CH[k].home;
   for (const [k, p] of Object.entries(PEOPLE)) {
-    const c = CH[k]; if (c.companion) continue;
+    const c = CH[k]; if (wmDriven(k) || c.companion) continue;
     if (k === game.tripWith) { p.want = p.where; continue; }   // (he went with Ana to Bright River)
     p.want = p.story ? p.story.room : (p.away && p.away.day === today() && hr < p.away.until) ? 'away' : c.routine ? c.routine.want(hr, today()) : c.home;
     if (p.story?.place && p.where === 'out') p.target = { place: p.story.place, until: 99, story: true };
@@ -3645,6 +3674,7 @@ function update(dt){
     else if (p.where === 'out') { if (!goTarget(p, dt, c.speed.walk) && game.scene === 'out') wander(p, dt, c.speed.out); }
     else if (game.scene === p.where) wander(p, dt, c.speed.room);
   }
+  if (!wmDriven('diana')) {   // (unless she is carrying out a goal of her own)
   if (diana.sit && !ana.sit) diana.sit = false;
   const wantHomeD = wantHome && diana.story?.room !== 'out';
   const dianaIn = () => { diana.where = 'os'; diana.goals = DIANA_IN; diana.x = DIANA_IN[0][0]; diana.y = DIANA_IN[0][1]; diana.homeT = 0; diana.moving = false; };
@@ -3676,6 +3706,7 @@ function update(dt){
     // she came along into Green Gables and was told goodbye: out of the door she goes
     if (walkTo(diana, KDOOR.x, KIT.h - 8, 40, dt)) { diana.where = 'out'; diana.x = GG.x - 20; diana.y = GG.y + 30; }
   } else { diana.where = 'out'; diana.x = GG.x - 20; diana.y = GG.y + 30; }
+  }
   tobyThink(dt); animalsThink(dt);
   // the garden grows (a watered bed comes up a stage after a while); berries and apples come back
   if (S !== 3) for (const b of BEDS) if (b.wet && (b.grow += dt) > 25) { b.wet = 0; b.grow = 0; b.stage = Math.min(3, b.stage + 1); }
@@ -4055,6 +4086,7 @@ function folkGo(f, pl){
 function folkTick(dt){
   const h = hourNow();
   for (const f of FOLK) {
+    if (wmDriven(f.id)) continue;
     if ((f.re -= dt) <= 0) { f.re = .8 + Math.random() * .6; const pl = FOLK_KINDS[f.def.kind](h, f); if (pl.k !== f.key) { f.key = pl.k; f.plan = pl; folkGo(f, pl); } }
     if (f.where !== 'out') continue;
     if (f.talkT > TT) { f.moving = false; continue; }
@@ -4326,6 +4358,468 @@ function encUpdate(dt){
       .catch(e => { a.talkT = b.talkT = TT; enc.err = TT + 60; console.debug('[avonlea IA] encuentro', e.message); }).finally(() => { enc.busy = false; enc.cool = TT + 40; });
   }
 }
+/* ========== THE WORLD MODEL: things, places, people, verbs, goals and a planner (traditional AI, no generative AI) ==========
+   The state of the world is data; a goal is a condition on it; the planner (A* over states, like the paths over the map)
+   finds the cheapest sequence of verbs that makes the condition true, and an agent carries it out with the game's own
+   functions, finding a new plan when the world changes under it. Everyone uses the same verbs: Ana and the others. */
+
+// --- things: what they are (tags), what they are worth (dollars), how one gets them
+const THINGS = {
+  bayas: { tags: ['comida', 'cosecha'], valor: .1 }, manzanas: { tags: ['comida', 'cosecha'], valor: .1 },
+  tarta: { tags: ['comida', 'hecha_a_mano', 'regalo'], valor: 1, receta: { bayas: 3 } }, compota: { tags: ['comida', 'hecha_a_mano', 'regalo'], valor: 1, receta: { manzanas: 3 } },
+  te: { tags: ['bebida', 'regalo'], valor: 0, receta: {} }, ramo: { tags: ['flores', 'hecha_a_mano', 'regalo'], valor: 0 },
+  dolares: { tags: ['dinero'] }, cuerda: { tags: ['herramienta'] }, azucar: { tags: ['comida', 'tienda'], valor: .2 }, hierbas: { tags: ['hierba'], valor: .1 },
+  vaca: { tags: ['animal'], valor: 20 },
+};
+const ALL_AT_ONCE = ['bayas', 'manzanas', 'hierbas', 'dolares', 'azucar'];   // (these change hands all together; the rest one by one)
+// --- places: a point out of doors ('cocina' is inside Green Gables); what can be done there
+const WP = {
+  granero: [BARN.x + 60, BARN.y + 50], corral: [AREAS.corral.x + AREAS.corral.w / 2, AREAS.corral.y + AREAS.corral.h / 2], potrero: [AREAS.potrero.x + AREAS.potrero.w / 2, AREAS.potrero.y + AREAS.potrero.h / 2],
+  huerta: [PLACES.huerta[1], PLACES.huerta[2]], arbustos: [GG.x - 200, GG.y + 170], huerto: [OS.x - 170, OS.y + 200], cocina: [GG.x, GG.y + 30],
+  tienda: door('Tienda de Lawson'), escuela: SCHOOL_DOOR, casa_parroquial: door('Casa parroquial'), bosque_peg: [WOODS[1].x + WOODS[1].rx * .55, WOODS[1].y + 40],
+  aldea: PLAY.aldea, lago: [PLACES.lago[1], PLACES.lago[2]],
+};
+const WP_NAME = { granero: 'el granero', corral: 'el corral', potrero: 'el potrero del Sr. Harrison', huerta: 'la huerta', arbustos: 'los arbustos de bayas', huerto: 'el huerto de los Barry', cocina: 'la cocina de Tejas Verdes', tienda: 'la tienda de Lawson', escuela: 'la escuela', casa_parroquial: 'la casa parroquial', bosque_peg: 'el bosque de Peg Bowen', aldea: 'la aldea', lago: 'el lago' };
+const OFRECE = { granero: { tomar: ['cuerda'] }, arbustos: { recoger: ['bayas'] }, huerto: { recoger: ['manzanas'] }, huerta: { recoger: ['ramo'] }, bosque_peg: { recoger: ['hierbas'] } };
+for (const k of ['granero', 'corral', 'potrero', 'escuela', 'casa_parroquial', 'tienda']) if (!PLACES[k]) PLACES[k] = [WP_NAME[k], ...WP[k]];   // (so errands can name them)
+// --- people: character, likes, what they buy and sell, where they cook, whether they leave the house; and their inventories
+const WHO = {
+  ana: { caracter: ['soñadora', 'orgullosa', 'rencorosa'], le_gusta: ['flores', 'hecha_a_mano'], cocina: 'cocina' },
+  matthew: { caracter: ['tímido', 'generoso'], le_gusta: ['hecha_a_mano', 'comida'], cocina: 'cocina', inv: { dolares: 5 } },
+  marilla: { caracter: ['severo', 'generoso'], le_gusta: ['hecha_a_mano'], cocina: 'cocina', quieto: true },
+  diana: { caracter: ['sensible', 'generoso'], le_gusta: ['flores', 'comida'] },
+  barry: { caracter: ['severo'], le_gusta: ['flores'], quieto: true },
+  lynde: { caracter: ['chismoso', 'severo'], le_gusta: ['comida'] },
+  harrison: { caracter: ['orgulloso'], le_gusta: ['comida'], inv: { cuerda: 1 } },
+  shearer: { caracter: [], compra: { animal: 20 }, inv: { dolares: 60 } },
+  lawson: { caracter: ['generoso'], compra: { comida: 1 }, vende: { azucar: .2, cuerda: .5 }, abre: [8, 18] },
+  gilbert: { caracter: ['orgulloso', 'generoso'], le_gusta: ['comida'] },
+  sraallan: { caracter: ['generoso', 'sensible'], le_gusta: ['hecha_a_mano', 'flores'], cocina: 'casa_parroquial' },
+  peg: { caracter: ['orgulloso'], le_gusta: ['hierba'] },
+};
+const whoOf = k => WHO[k] || { caracter: [], le_gusta: [] };
+const CUTHBERT = ['ana', 'matthew', 'marilla'];
+const FAMILY = o => o === 'ana' || CUTHBERT.includes(o) ? CUTHBERT : [o];   // (whose cow it is: the household)
+const wmName = k => k === 'ana' ? 'Ana' : NAMES[k] || FOLKBY[k]?.def.name || k;
+// the model's own memory: inventories of the others, relations and offences, who knows what, facts of the day
+game.wm = game.wm || { inv: {}, rel: { 'ana>gilbert': -2, 'ana>josie': 0 }, ofensa: { 'ana>gilbert': 'zanahorias' }, know: {}, facts: {} };
+const wmInv = k => { if (k === 'ana') return game.inv; const I = game.wm.inv; if (!I[k]) I[k] = { ...(whoOf(k).inv || {}) }; return I[k]; };
+for (const k of ['cuerda', 'azucar', 'hierbas']) if (!(k in game.inv)) game.inv[k] = 0;
+const relGetW = (a, b) => b === 'ana' && CH[a] ? game.fond[a] ?? 2 : game.wm.rel[a + '>' + b] ?? (a === 'ana' ? 3 : 2);
+const relSetW = (a, b, n) => { n = clamp(Math.round(n), -2, 5); if (b === 'ana' && CH[a]) game.fond[a] = clamp(n, 0, 5); else game.wm.rel[a + '>' + b] = n; };
+
+// --- social rules: the same for the planner (on a copy of the state) and for the world (R: get, set, ofensa, fact)
+function socialRule(R, verb, from, to, thing){
+  const c = whoOf(to).caracter, r = R.get(to, from);
+  if (verb === 'dar') { const likes = (THINGS[thing]?.tags || []).some(t => whoOf(to).le_gusta?.includes(t)); if (likes && !R.fact('gusto:' + to + '>' + from)) { R.set(to, from, r + 1); R.setFact('gusto:' + to + '>' + from); } return likes; }
+  if (verb === 'disculparse') {
+    if (R.fact('disc:' + to + '>' + from)) return false; R.setFact('disc:' + to + '>' + from);   // (once a day counts)
+    const soft = c.includes('sensible') || c.includes('generoso');
+    R.set(to, from, r + (soft ? 2 : 1)); if (soft || r + 1 >= 1) R.delOfensa(to, from); return true;
+  }
+  if (verb === 'pedir') return r >= 2 || c.includes('generoso');
+}
+const realR = { get: relGetW, set: relSetW, fact: f => !!game.wm.facts[f + ':' + today()], setFact: f => { game.wm.facts[f + ':' + today()] = true; }, delOfensa: (a, b) => { delete game.wm.ofensa[a + '>' + b]; } };
+const stateR = s => ({ get: (a, b) => s.rel[a + '>' + b] ?? 2, set: (a, b, n) => { s.rel[a + '>' + b] = clamp(n, -2, 5); }, fact: f => !!s.facts[f], setFact: f => { s.facts[f] = 1; }, delOfensa: (a, b) => { delete s.ofensa[a + '>' + b]; } });
+const wmKnow = (k, f) => { const K = game.wm.know[k] = game.wm.know[k] || []; if (!K.includes(f)) K.push(f); };
+const wmFact = (f, who = []) => { for (const k of who) wmKnow(k, f); };
+
+// --- where everyone is, as the model sees it: a place key ('p:k' = out of doors where k stands; 'cocina'; 'h:room')
+const wmBody = k => k === 'ana' ? ana : PEOPLE[k] || FOLKBY[k];
+const wmScene = k => k === 'ana' ? game.scene : wmBody(k)?.where;
+function personKey(k){
+  const b = wmBody(k), w = wmScene(k); if (!b || !w || w === 'away' || w === 'in') return null;
+  if (w === 'gg') return 'cocina';
+  if (w !== 'out') return HOUSES[w] ? 'h:' + w : null;
+  for (const [p, xy] of Object.entries(WP)) if (AREAS[p] ? inArea(AREAS[p], b.x, b.y) : dist(b.x, b.y, xy[0], xy[1]) < 135) return p;
+  return 'p:' + k;
+}
+function cowKey(a){ if (a.state === 'led') return 'led:' + (a.ledBy || 'ana'); if (a.state === 'bought') return 'sold:' + a.owner; const ar = areaAt(a.x, a.y); return ar === 'corral' || ar === 'potrero' ? ar : 'c:' + a.id; }
+function keyPoint(key){
+  if (WP[key]) return WP[key];
+  if (key.startsWith('h:')) return DOOR[key.slice(2)];
+  if (key.startsWith('c:')) { const a = ANIM[key.slice(2)]; return a ? [a.x, a.y] : null; }
+  if (key.startsWith('p:')) { const b = wmBody(key.slice(2)); return b ? [b.x, b.y] : null; }
+}
+const SPEEDS = { ana: 60 };
+const travelMin = (who, a, b, pts) => { const p = pts[a], q = pts[b]; if (!p || !q) return 1e6; return 1 + dist(p[0], p[1], q[0], q[1]) * 1.3 / (SPEEDS[who] || 40) * 24 / 60 + (a === 'cocina' || b === 'cocina' || a.startsWith('h:') || b.startsWith('h:') ? 2 : 0); };
+
+// --- the state now (for planning and for checking a goal in the world)
+const WM_PEOPLE = () => ['ana', ...Object.keys(CH), 'lawson', 'gilbert', 'sraallan', 'peg'];
+function wmNow(){
+  const s = { t: hourNow() * 60, pos: {}, invs: {}, cows: {}, rel: {}, ofensa: { ...game.wm.ofensa }, know: {}, follow: {}, facts: {}, stock: {} };
+  for (const k of WM_PEOPLE()) { s.pos[k] = personKey(k); s.invs[k] = { ...wmInv(k) }; s.know[k] = [...(game.wm.know[k] || [])]; }
+  for (const a of WM_PEOPLE()) for (const b of WM_PEOPLE()) if (a !== b) s.rel[a + '>' + b] = relGetW(a, b);
+  for (const a of Object.values(ANIM)) if (a.kind === 'cow') s.cows[a.id] = cowKey(a);
+  for (const [f, v] of Object.entries(game.wm.facts)) if (v && f.endsWith(':' + today())) s.facts[f.slice(0, -(':' + today()).length)] = 1;
+  if (diana.follow) s.follow.diana = 'ana';
+  for (const [k, ag] of Object.entries(AGENTS)) { if (ag.follow) s.follow[k] = ag.follow; if (ag.followOf) s.follow[k] = ag.followOf; }
+  const near = (p, r) => WP[p] ? [WP[p][0], WP[p][1], r] : null;
+  { const [x, y, r] = near('arbustos', 260); s.stock.bayas = S === 1 || S === 2 ? bushes.filter(b => dist(b.x, b.y, x, y) < r).reduce((n, b) => n + (b.berries || 0), 0) : 0; }
+  { const [x, y, r] = near('huerto', 340); s.stock.manzanas = S === 1 || S === 2 ? trees.filter(t => t.kind === 'apple' && dist(t.x, t.y, x, y) < r).reduce((n, t) => n + (t.apples || 0), 0) : 0; }
+  s.stock.ramo = S === 3 ? 0 : BEDS.filter(b => b.stage >= 3).length; s.stock.hierbas = S === 3 ? 0 : 9;
+  return s;
+}
+const clone = s => ({ t: s.t, pos: { ...s.pos }, invs: Object.fromEntries(Object.entries(s.invs).map(([k, v]) => [k, { ...v }])), cows: { ...s.cows }, rel: { ...s.rel }, ofensa: { ...s.ofensa }, know: Object.fromEntries(Object.entries(s.know).map(([k, v]) => [k, [...v]])), follow: { ...s.follow }, facts: { ...s.facts }, stock: { ...s.stock } });
+const sKey = s => JSON.stringify([s.pos, s.invs, s.cows, s.ofensa, s.follow, s.facts, s.stock, Object.entries(s.rel).filter(([k, v]) => v !== 2).sort(), Object.entries(s.know).map(([k, v]) => k + v.length)]);
+
+// --- the verbs: for the one who acts (me) in state s, what can be done, what it costs (minutes) and what it changes
+const FAVORS = {   // what one can ask of someone (to: who can be asked; eff: what it makes true; goal: the goal handed to them)
+  pasear: { eff: (s, me, to) => { s.follow[me] = to; }, ok: (s, me, to) => to === 'ana' || me === 'ana' },
+  venir: { eff: (s, me, to) => { s.follow[to] = me; }, ok: (s, me, to) => to === 'ana' },
+  traer: { eff: (s, me, to, a) => { s.invs[me][a.item] = (s.invs[me][a.item] || 0) + a.n; }, ok: (s, me, to) => to === 'ana' || to === 'matthew', wait: 30,
+    goal: (me, a, s0) => G.tener(me, a.item, (s0.invs[me][a.item] || 0) + a.n) },
+  vender_vaca: { eff: (s, me, to, a) => { s.cows[a.cow] = 'sold:' + me; }, ok: (s, me, to, a) => CUTHBERT.includes(to) && s.cows[a.cow] && !s.cows[a.cow].startsWith('sold'), wait: 30, goal: (me, a) => G.vaca_vendida(a.cow, me) },
+  encerrar_vaca: { eff: (s, me, to, a) => { s.cows[a.cow] = a.pen; }, ok: (s, me, to, a) => (to === 'ana' || to === 'matthew') && !String(s.cows[a.cow]).startsWith('led'), wait: 30, goal: (me, a) => G.vaca_en(a.cow, a.pen) },
+};
+function verbs(s, me, C){
+  const L = [], here = s.pos[me], inv = s.invs[me], W = whoOf(me), at = k => s.pos[k] && s.pos[k] === here && k !== me;
+  const add = (v, cost, eff, a = {}) => L.push({ v, cost, eff, ...a });
+  if (!W.quieto) for (const p of C.places) if (p !== here && C.pts[p]) add('ir', travelMin(me, here, p, C.pts), t => { t.pos[me] = p; for (const [f, w] of Object.entries(t.follow)) if (w === me) t.pos[f] = p; }, { p });
+  const of = OFRECE[here] || {};
+  for (const x of of.tomar || []) if (!(inv[x] > 0)) add('tomar', 1, t => { t.invs[me][x] = 1; }, { x });
+  for (const x of of.recoger || []) if (s.stock[x] > 0 && (inv[x] || 0) < 9) { const n = Math.min(x === 'ramo' ? 1 : 3, s.stock[x]); add('recoger', 3, t => { t.invs[me][x] = (t.invs[me][x] || 0) + n; t.stock[x] -= n; }, { x, n }); }
+  if (here === W.cocina) for (const [x, d] of Object.entries(THINGS)) if (d.receta && Object.entries(d.receta).every(([i, n]) => (inv[i] || 0) >= n) && (inv[x] || 0) < 3) add('cocinar', 10, t => { for (const [i, n] of Object.entries(d.receta)) t.invs[me][i] -= n; t.invs[me][x] = (t.invs[me][x] || 0) + 1; }, { x });
+  for (const k of C.people) if (at(k)) {
+    for (const x of Object.keys(inv)) if (inv[x] > 0 && THINGS[x] && x !== 'cuerda' && C.items.includes(x)) { const n = ALL_AT_ONCE.includes(x) ? inv[x] : 1; add('dar', 1, t => { t.invs[me][x] -= n; t.invs[k][x] = (t.invs[k][x] || 0) + n; for (const tag of THINGS[x].tags) t.facts['dio:' + k + ':' + tag] = 1; t.facts['dio:' + k + ':' + x] = 1; t.facts['dio:' + x] = 1; socialRule(stateR(t), 'dar', me, k, x); }, { x, k, n }); }
+    const buys = whoOf(k).compra || {};
+    for (const x of Object.keys(inv)) { const tag = (THINGS[x]?.tags || []).find(g => buys[g]); if (tag && inv[x] > 0 && x !== 'dolares') add('vender', 2, t => { t.invs[me][x]--; t.invs[me].dolares = (t.invs[me].dolares || 0) + THINGS[x].valor; }, { x, k }); }
+    if (buys.animal) for (const [c, st] of Object.entries(s.cows)) if (st === 'led:' + me && FAMILY(C.owner[c]).includes(me)) add('vender', 2, t => { t.cows[c] = 'sold:' + k; t.invs[me].dolares = (t.invs[me].dolares || 0) + buys.animal; t.know[me].push('vendio_vaca'); t.know[k].push('vendio_vaca'); }, { x: 'vaca', cow: c, k });
+    const V = whoOf(k).vende || {}, open = !whoOf(k).abre || (s.t >= whoOf(k).abre[0] * 60 && s.t < whoOf(k).abre[1] * 60);
+    if (open) for (const [x, price] of Object.entries(V)) if ((inv.dolares || 0) >= price && C.items.includes(x) && (inv[x] || 0) < 2) add('comprar', 2, t => { t.invs[me].dolares -= price; t.invs[me][x] = (t.invs[me][x] || 0) + 1; }, { x, k, price });
+    if ((s.know[k] || []).some(f => !s.know[me].includes(f)) || (s.know[me] || []).some(f => !(s.know[k] || []).includes(f))) add('conversar', 2, t => { const u = [...new Set([...t.know[me], ...t.know[k]])]; t.know[me] = [...u]; t.know[k] = [...u]; }, { k });
+    if (s.ofensa[k + '>' + me] && !s.facts['disc:' + k + '>' + me]) add('disculparse', 2, t => { socialRule(stateR(t), 'disculparse', me, k); }, { k });
+    for (const f of C.favors) { const F = FAVORS[f.f]; if (f.to === k && F.ok(s, me, k, f) && socialRule(stateR(s), 'pedir', me, k) && !s.facts['pedido:' + f.f + ':' + k]) add('pedir', 2 + (F.wait || 0), t => { F.eff(t, me, k, f); t.facts['pedido:' + f.f + ':' + k] = 1; }, { k, favor: f }); }
+  }
+  for (const [c, st] of Object.entries(s.cows)) {
+    if (st === here && inv.cuerda > 0 && !Object.values(s.cows).includes('led:' + me) && (FAMILY(C.owner[c]).includes(me) || st.startsWith('c:'))) add('guiar', 2, t => { t.cows[c] = 'led:' + me; }, { cow: c });
+    if (st === 'led:' + me && (here === 'corral' || here === 'potrero')) add('soltar', 1, t => { t.cows[c] = here; }, { cow: c, p: here });
+  }
+  return L;
+}
+
+// --- the goals: a condition (test), how far it is (h: steps missing, roughly), and what matters for it
+const G = {
+  tener: (k, x, n) => ({ text: `${wmName(k)} tiene ${itemTextW(x, n)}`, test: s => (s.invs[k][x] || 0) >= n, h: s => { const miss = n - (s.invs[k][x] || 0); if (miss <= 0) return 0; const held = Object.entries(s.invs).some(([w, I]) => w !== k && (I[x] || 0) >= miss); return 1 + (held ? 0 : THINGS[x]?.receta ? 2 : 1) + (THINGS[x]?.receta ? Math.ceil(miss / 1) - 1 : 0); }, items: [x, ...Object.keys(THINGS[x]?.receta || {})], people: [k] }),
+  dinero: (k, n) => ({ text: `${wmName(k)} junta ${n} dólares`, test: s => (s.invs[k].dolares || 0) >= n - 1e-9, h: s => moneyH(s.invs[k], n), items: ['tarta', 'compota', 'bayas', 'manzanas'], people: [k, 'lawson', 'shearer'] }),
+  regalo_gusto: (k, to) => ({ text: `${wmName(k)} le regala a ${wmName(to)} algo que le guste`, test: s => (whoOf(to).le_gusta || []).some(t => s.facts['dio:' + to + ':' + t]), h: s => (whoOf(to).le_gusta || []).some(t => s.facts['dio:' + to + ':' + t]) ? 0 : 2, items: Object.keys(THINGS).filter(x => THINGS[x].tags.some(t => whoOf(to).le_gusta?.includes(t))).flatMap(x => [x, ...Object.keys(THINGS[x].receta || {})]), people: [k, to] }),
+  reconciliar: (k, to) => ({ text: `${wmName(k)} se reconcilia con ${wmName(to)}`, test: s => (s.rel[to + '>' + k] ?? 2) >= 2 && !s.ofensa[to + '>' + k], h: s => ((s.rel[to + '>' + k] ?? 2) >= 2 ? 0 : 1) + (s.ofensa[to + '>' + k] ? 1 : 0), items: ['tarta', 'bayas', 'ramo'], people: [k, to] }),
+  rel_min: (a, b, n, by) => ({ text: `que ${wmName(a)} quiera a ${wmName(b)} al menos ${n}`, test: s => (s.rel[a + '>' + b] ?? 2) >= n, h: s => Math.max(0, n - (s.rel[a + '>' + b] ?? 2)), items: ['tarta', 'bayas'], people: [a, b] }),
+  estar_en: (k, p, hasta) => ({ text: `${wmName(k)} está en ${WP_NAME[p] || p}` + (hasta ? ' antes de las ' + fmtHour(hasta) : ''), test: s => s.pos[k] === p && (!hasta || s.t <= hasta * 60), h: s => s.pos[k] === p ? 0 : 1, items: [], people: [k], places: [p], deadline: hasta }),
+  vaca_en: (c, p) => ({ text: `${ANIMALS[c].name} queda en ${WP_NAME[p]}`, test: s => s.cows[c] === p, h: s => s.cows[c] === p ? 0 : String(s.cows[c]).startsWith('led') ? 1 : 2, items: ['cuerda'], people: [], places: [p] }),
+  vaca_vendida: (c, to) => ({ text: `${ANIMALS[c].name} vendida${to ? ' a ' + wmName(to) : ''}`, test: s => to ? s.cows[c] === 'sold:' + to : String(s.cows[c]).startsWith('sold'), h: s => String(s.cows[c]).startsWith('sold') ? 0 : String(s.cows[c]).startsWith('led') ? 1 : 2, items: ['cuerda'], people: to ? [to] : ['shearer'] }),
+  conoce: (k, f) => ({ text: `${wmName(k)} se entera (${f.replace(/_/g, ' ')})`, test: s => (s.know[k] || []).includes(f), h: s => (s.know[k] || []).includes(f) ? 0 : 1, items: [], people: [k, ...WM_PEOPLE().filter(p => (game.wm.know[p] || []).includes(f))] }),
+  acompana: (a, b) => ({ text: `${wmName(a)} acompaña a ${wmName(b)}`, test: s => s.follow[a] === b, h: s => s.follow[a] === b ? 0 : 1, items: [], people: [a, b] }),
+  te_con: (k, g, p) => ({ text: `${wmName(k)} toma el té con ${wmName(g)} en ${WP_NAME[p]}`, test: s => s.pos[g] === p && s.pos[k] === p && (s.invs[k].te || 0) >= 1, h: s => (s.pos[g] === p ? 0 : 1) + (s.pos[k] === p ? 0 : 1) + ((s.invs[k].te || 0) >= 1 ? 0 : 1), items: ['te'], people: [k, g], places: [p] }),
+  regalar_cosa: (k, x) => ({ text: `${wmName(k)} regala ${ITEM_NAME[x]?.[0] || x}`, test: s => !!s.facts['dio:' + x], h: s => s.facts['dio:' + x] ? 0 : (s.invs[k][x] ? 1 : 2), items: [x, ...Object.keys(THINGS[x]?.receta || {})], people: [k, 'diana', 'marilla', 'matthew'] }),
+};
+// how many steps, roughly, to n dollars: selling what is made (1), cooking what is gathered (2), gathering (3); a cow, 2 at most
+function moneyH(I, n){
+  let d = n - (I.dolares || 0); if (d <= 1e-9) return 0;
+  let h = 0, made = (I.tarta || 0) + (I.compota || 0), raw = Math.floor((I.bayas || 0) / 3) + Math.floor((I.manzanas || 0) / 3);
+  while (d > 1e-9) { h += made > 0 ? (made--, 1) : raw > 0 ? (raw--, 2) : 3; d -= 1; }
+  return Math.min(h, 4);
+}
+const itemTextW = (x, n) => ITEM_NAME[x] ? itemText(x, n) : n + ' ' + x;
+
+// --- the planner: A* over states (weighted: the steps missing count as 25 minutes each); at most 6000 states
+function wmPlan(me, goal, favors = [], s0 = wmNow()){
+  const people = [...new Set([me, ...goal.people, ...WM_PEOPLE().filter(k => whoOf(k).compra || whoOf(k).vende), ...favors.map(f => f.to)])].filter(k => s0.pos[k]);
+  const items = [...new Set([...(goal.items || []), 'dolares', ...Object.keys(THINGS).filter(x => (s0.invs[me][x] || 0) > 0)])];
+  // only the places that matter: where the people and the cows are, where the things needed are got, the kitchen, the goal's own
+  const places = new Set([...(goal.places || []), whoOf(me).cocina, 'corral', 'potrero'].filter(Boolean));
+  for (const [p, o] of Object.entries(OFRECE)) if ([...(o.tomar || []), ...(o.recoger || [])].some(x => items.includes(x) || x === 'cuerda' && Object.keys(s0.cows).length)) places.add(p);
+  for (const k of people) places.add(s0.pos[k]); for (const st of Object.values(s0.cows)) if (keyPoint(st)) places.add(st);
+  const pts = {}; for (const p of places) { const q = keyPoint(p); if (q) pts[p] = q; }
+  pts[s0.pos[me]] = pts[s0.pos[me]] || (wmBody(me) ? [wmBody(me).x, wmBody(me).y] : null);
+  const owner = Object.fromEntries(Object.keys(s0.cows).map(c => [c, ANIM[c].owner || ANIMALS[c].owner]));
+  const C = { places: [...places].filter(p => pts[p]), pts, people, items: [...items, 'cuerda', 'azucar', 'hierbas'], favors, owner };
+  const heap = [], push = o => { heap.push(o); let i = heap.length - 1; while (i > 0) { const j = (i - 1) >> 1; if (heap[j].f <= heap[i].f) break; [heap[i], heap[j]] = [heap[j], heap[i]]; i = j; } };
+  const pop = () => { const top = heap[0], last = heap.pop(); if (heap.length) { heap[0] = last; let i = 0; for (;;) { const l = 2 * i + 1, r = l + 1; let m = i; if (l < heap.length && heap[l].f < heap[m].f) m = l; if (r < heap.length && heap[r].f < heap[m].f) m = r; if (m === i) break; [heap[i], heap[m]] = [heap[m], heap[i]]; i = m; } } return top; };
+  push({ s: s0, g: 0, f: goal.h(s0) * 40, path: [] }); const seenK = new Map([[sKey(s0), 0]]);
+  let best = { h: goal.h(s0), g: 0, path: [] }, n = 0;
+  while (heap.length && n++ < 2500) {
+    const cur = pop();
+    if (goal.test(cur.s)) return { plan: cur.path, cost: cur.g, n, ok: true };
+    const h = goal.h(cur.s); if (h < best.h || (h === best.h && cur.g < best.g && cur.path.length)) best = { h, g: cur.g, path: cur.path };
+    if (cur.path.length >= 12) continue;
+    for (const a of verbs(cur.s, me, C)) {
+      const t = clone(cur.s); a.eff(t); t.t += a.cost;
+      if (goal.deadline && t.t > goal.deadline * 60 + 1) continue;
+      const k = sKey(t), g = cur.g + a.cost;
+      if (seenK.has(k) && seenK.get(k) <= g) continue; seenK.set(k, g);
+      push({ s: t, g, f: g + goal.h(t) * 40, path: [...cur.path, a] });
+    }
+  }
+  return best.path.length && best.h < goal.h(s0) ? { plan: best.path, cost: best.g, n, ok: false, partial: true } : { plan: null, n, ok: false };
+}
+const stepText = a => ({ ir: () => 'ir a ' + (WP_NAME[a.p] || wmPlaceText(a.p)), tomar: () => 'tomar ' + itemTextW(a.x, 1), recoger: () => 'recoger ' + itemTextW(a.x, a.n), cocinar: () => 'cocinar ' + (ITEM_NAME[a.x]?.[0] || a.x),
+  dar: () => `darle ${itemTextW(a.x, a.n)} a ${wmName(a.k)}`, vender: () => `vender ${a.x === 'vaca' ? ANIMALS[a.cow].name : itemTextW(a.x, 1)} a ${wmName(a.k)}`, comprar: () => `comprar ${itemTextW(a.x, 1)} a ${wmName(a.k)}`,
+  conversar: () => 'conversar con ' + wmName(a.k), disculparse: () => 'disculparse con ' + wmName(a.k), pedir: () => `pedirle a ${wmName(a.k)}: ${a.favor.f.replace('_', ' ')}`, guiar: () => 'guiar a ' + ANIMALS[a.cow].name, soltar: () => `soltar a ${ANIMALS[a.cow].name} en ${WP_NAME[a.p]}` }[a.v] || (() => a.v))().replace(/\ba el\b/g, 'al');
+const wmPlaceText = p => p.startsWith('p:') ? 'donde está ' + wmName(p.slice(2)) : p.startsWith('c:') ? 'donde está ' + ANIMALS[p.slice(2)].name : p.startsWith('h:') ? HOUSES[p.slice(2)].name : WP_NAME[p] || p;
+
+/* ---------- the agents: someone with a goal and a plan, carrying it out step by step in the world ---------- */
+const AGENTS = {};
+const agentOn = k => !!AGENTS[k] && (AGENTS[k].st === 'run' || AGENTS[k].st === 'wait' || AGENTS[k].hold);
+let WM_OBEY = true;   // (when someone asks Ana for something, she does it by herself: for the tests)
+function agentStart(who, goal, o = {}){
+  const ag = AGENTS[who] = { who, goal, favors: o.favors || [], st: 'run', tries: 0, log: [], i: 0, plan: null, since: TT, label: o.label || goal.text, parent: o.parent };
+  if (who === 'ana') { auto.on = false; auto.intent = null; if (ana.goto && !ana.goto.wm) ana.goto = null; }
+  agentReplan(ag); return ag;
+}
+function agentLog(ag, t){ ag.log.push(fmtHour(hourNow()) + ' ' + t); if (ag.log.length > 14) ag.log.shift(); }
+function agentReplan(ag){
+  const s = wmNow();
+  if (ag.goal.test(s)) return agentEnd(ag, 'done');
+  const r = wmPlan(ag.who, ag.goal, ag.favors, s);
+  if (!r.plan) { agentLog(ag, 'no encuentra cómo (' + r.n + ' estados revisados)'); return agentEnd(ag, 'fail', ag.partial ? 'avanzó, pero no lo suficiente por hoy' : 'no hay un plan posible'); }
+  ag.plan = r.plan; ag.i = 0; ag.step = null; ag.partial = r.partial; ag.n = r.n;
+  agentLog(ag, (r.partial ? 'plan parcial: ' : 'plan: ') + r.plan.map(stepText).join(' → '));
+}
+function agentEnd(ag, st, why){
+  ag.st = st; ag.why = why; ag.step = null; wmRelease(ag.who);
+  const msg = st === 'done' ? `${wmName(ag.who)} logró: ${ag.label}.` : `${wmName(ag.who)} no pudo: ${ag.label}${why ? ' (' + why + ')' : ''}.`;
+  agentLog(ag, st === 'done' ? '✔ logrado' : '✘ ' + (why || 'no pudo')); logEv(msg, []);
+  if (ag.who === 'ana' && st === 'done') float('✔ ' + ag.label, ana.x, ana.y - 64);
+}
+function agentTick(dt){
+  for (const ag of Object.values(AGENTS)) {
+    if (ag.hold) { wmHold(ag, dt); continue; }
+    if (ag.st !== 'run' && ag.st !== 'wait') continue;
+    if (ag.who === 'ana' && (WM_KEYS.some(k => keys.has(k)) || !!stick || (ana.goto && !ana.goto.wm && !ana.goto.auto))) { agentEnd(ag, 'fail', 'la jugadora tomó el control'); continue; }
+    if (ag.st === 'wait') {   // the plan is done but the goal is not (yet): wait a little for the others, then try again
+      if (ag.goal.test(wmNow())) { agentEnd(ag, 'done'); continue; }
+      if ((ag.waitT -= dt) <= 0) { ag.st = 'run'; if (++ag.tries > 3) { agentEnd(ag, 'fail', ag.partial ? 'avanzó, pero no lo suficiente por hoy' : 'no resultó'); continue; } agentReplan(ag); }
+      continue;
+    }
+    if (!ag.plan) continue;
+    if (ag.i >= ag.plan.length) { if (ag.goal.test(wmNow())) agentEnd(ag, 'done'); else { ag.st = 'wait'; ag.waitT = ag.partial ? 2 : 25; agentLog(ag, 'espera'); } continue; }
+    const a = ag.plan[ag.i];
+    if (!ag.step) { ag.step = { a, t: 0 }; agentLog(ag, '→ ' + stepText(a)); }
+    ag.step.t += dt;
+    const r = wmExec(ag, a, ag.step, dt);
+    if (r === 'ok') { ag.i++; ag.step = null; }
+    else if (r === 'fail' || ag.step.t > (a.v === 'pedir' ? 600 : 150)) {
+      agentLog(ag, '✘ falló: ' + stepText(a) + (ag.step.why ? ' (' + ag.step.why + ')' : '')); ag.step = null;
+      if (++ag.tries > 3) agentEnd(ag, 'fail', 'falló varias veces'); else agentReplan(ag);
+    }
+  }
+}
+const WM_KEYS = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'KeyA', 'KeyD', 'KeyW', 'KeyS'];   // (the player moving Ana herself stops her plan)
+
+// --- moving a body to a place key: Ana by her own walking (A*, by the roads), the others by theirs
+function wmTarget(who, key){
+  // where to walk now (and in which scene) to reach 'key'
+  if (key === 'cocina' || key.startsWith('h:')) { const room = key === 'cocina' ? 'gg' : key.slice(2); return { room, door: DOOR[room] }; }
+  const q = keyPoint(key); if (!q) return null;
+  const tb = key.startsWith('p:') ? wmBody(key.slice(2)) : null, tscene = key.startsWith('p:') ? wmScene(key.slice(2)) : 'out';
+  if (tscene && tscene !== 'out') return tscene === 'gg' ? { room: 'gg', door: DOOR.gg, at: tb ? [tb.x, tb.y] : null } : HOUSES[tscene] ? { room: tscene, door: DOOR[tscene] } : null;
+  return { out: q };
+}
+function wmMove(who, key, dt){
+  const T = wmTarget(who, key); if (!T) return 'fail';
+  const b = wmBody(who), sc = wmScene(who), near = key.startsWith('p:') ? 40 : 46;
+  if (T.out) {
+    if (sc !== 'out') { wmExit(who); return 'run'; }
+    const pen = AREAS[key], d = dist(b.x, b.y, T.out[0], T.out[1]);
+    if (pen ? inArea(pen, b.x, b.y, -6) : d < near) { wmStop(who); return 'ok'; }   // (into a pen means inside its fence)
+    if (wmWalk(who, T.out[0], T.out[1], 'out', dt) && !pen && d < 130) { wmStop(who); return 'ok'; }   // (as near as one can get)
+    if (b.wmPx != null && dist(b.x, b.y, b.wmPx, b.wmPy) < 1.5) b.wmStill = (b.wmStill || 0) + dt; else b.wmStill = 0; b.wmPx = b.x; b.wmPy = b.y;
+    if (b.wmStill > 1.5 && !pen && d < 130) { b.wmStill = 0; wmStop(who); return 'ok'; }   // (stuck just short of it: close enough)
+    return 'run';
+  }
+  // a room
+  if (sc === T.room) { const p = T.at || (who === 'ana' && T.room === 'gg' ? [STOVE.x, STOVE.y + 40] : null); if (!p || dist(b.x, b.y, p[0], p[1]) < 40) { wmStop(who); return 'ok'; } wmWalk(who, p[0], p[1], T.room, dt); return 'run'; }
+  if (sc !== 'out') { wmExit(who); return 'run'; }
+  if (dist(b.x, b.y, T.door[0], T.door[1] + 20) < 34) { wmEnter(who, T.room); return 'run'; }
+  wmWalk(who, T.door[0], T.door[1] + 20, 'out', dt); return 'run';
+}
+function wmWalk(who, x, y, scene, dt){
+  const b = wmBody(who);
+  if (who === 'ana') { if (TT - (ana.wmArr || -9) < .4) return true; if (!ana.goto || !ana.goto.wm || dist(ana.goto.x, ana.goto.y, x, y) > 30) ana.goto = { x, y, scene, wm: true }; return false; }
+  const sp = (CH[who]?.speed?.walk || 40), visible = game.scene === scene && (scene !== 'out' || seen(b.x, b.y, 300));
+  if (visible) return walkPath(b, x, y, sp, dt);
+  const d = dist(b.x, b.y, x, y), v = Math.min(d, sp * 1.5 * dt); b.x += (x - b.x) / (d || 1) * v; b.y += (y - b.y) / (d || 1) * v; b.moving = d > 2; if (Math.abs(x - b.x) > 1) b.dir = x > b.x ? 1 : 3; b.walk = (b.walk + dt * 1.8) % 1;
+  return d < 2;
+}
+function wmStop(who){ const b = wmBody(who); if (who === 'ana') { if (ana.goto?.wm) ana.goto = null; } else b.moving = false; }
+function wmExit(who){
+  if (who === 'ana') { goOut(); return; }
+  const b = wmBody(who), h = b.where; b.where = 'out'; b.sit = false; b.nav = null; const d = DOOR[h] || [b.x, b.y]; b.x = d[0]; b.y = d[1] + 16;
+}
+function wmEnter(who, room){
+  if (who === 'ana') { goIn(room); return; }
+  const b = wmBody(who); b.where = room; b.nav = null; b.x = KDOOR.x; b.y = KIT.h - 20;
+}
+function wmRelease(who){ const b = wmBody(who); if (!b) return; if (who === 'ana') { if (ana.goto?.wm) ana.goto = null; } else { b.moving = false; b.nav = null; if (FOLKBY[who]) { FOLKBY[who].key = ''; FOLKBY[who].route = []; } } }
+function wmHold(ag, dt){   // someone kept at a place for a test (the buyer waiting at the village)
+  const b = wmBody(ag.who); if (b.where !== 'out') { b.where = 'out'; b.x = ag.hold[0]; b.y = ag.hold[1]; }
+  if (dist(b.x, b.y, ag.hold[0], ag.hold[1]) > 30) wmWalk(ag.who, ag.hold[0], ag.hold[1], 'out', dt); else b.moving = false;
+}
+// the bodies of the agents are moved here, not by their routines (the routine loops ask this first)
+const wmDriven = k => !!AGENTS[k] && (AGENTS[k].st === 'run' || AGENTS[k].st === 'wait' || !!AGENTS[k].hold);
+
+// --- doing each verb in the world (when the body has arrived): 'run' while it takes, 'ok', or 'fail'
+function wmExec(ag, a, st, dt){
+  const me = ag.who, inv = wmInv(me), b = wmBody(me);
+  const bubble = (k, text) => { const q = k === 'ana' ? 'ana' : PEOPLE[k] ? k : 'f:' + k; bubbles = [{ q, text, t: 0, dur: lineDur(text) }]; };
+  const reach = k => { const kk = personKey(k); if (!kk) { st.why = wmName(k) + ' no está'; return 'fail'; } return wmMove(me, kk === 'cocina' || kk.startsWith('h:') ? kk : 'p:' + k, dt); };
+  const wait = s => { st.w = (st.w || 0) + dt; return st.w >= s; };
+  switch (a.v) {
+    case 'ir': return wmMove(me, a.p, dt);
+    case 'tomar': if (!wait(1)) return 'run'; inv[a.x] = (inv[a.x] || 0) + 1; float('+1 ' + ITEM_NAME[a.x]?.[0], b.x, b.y - 50); logEv(`${wmName(me)} tomó ${itemTextW(a.x, 1)} en ${WP_NAME[personKey(me)] || 'el granero'}.`, []); return 'ok';
+    case 'recoger': {
+      if (!wait(2)) return 'run';
+      let got = 0;
+      if (a.x === 'bayas') for (const u of bushes.filter(u => dist(u.x, u.y, b.x, b.y) < 300 && u.berries > 0)) { const k = Math.min(u.berries, a.n - got); u.berries -= k; u.regrow = 90; got += k; if (got >= a.n) break; }
+      if (a.x === 'manzanas') for (const u of trees.filter(u => u.kind === 'apple' && dist(u.x, u.y, b.x, b.y) < 380 && u.apples > 0)) { const k = Math.min(u.apples, a.n - got); u.apples -= k; u.regrow = 90; got += k; if (got >= a.n) break; }
+      if (a.x === 'ramo') { const bed = BEDS.find(u => u.stage >= 3); if (bed) { bed.stage = 1; got = 1; } }
+      if (a.x === 'hierbas') got = S === 3 ? 0 : a.n;
+      if (!got) { st.why = 'no quedaba'; return 'fail'; }
+      inv[a.x] = (inv[a.x] || 0) + got; float('+' + itemTextW(a.x, got), b.x, b.y - 50); logEv(`${wmName(me)} recogió ${itemTextW(a.x, got)}.`, []); return 'ok';
+    }
+    case 'cocinar': {
+      const d = THINGS[a.x]; if (!Object.entries(d.receta).every(([i, n]) => (inv[i] || 0) >= n)) { st.why = 'faltan ingredientes'; return 'fail'; }
+      if (!wait(3)) return 'run';
+      for (const [i, n] of Object.entries(d.receta)) inv[i] -= n; inv[a.x] = (inv[a.x] || 0) + 1;
+      float('+1 ' + ITEM_NAME[a.x][0], b.x, b.y - 50); logEv(`${wmName(me)} cocinó ${ITEM_NAME[a.x][0]}.`, []); if (me === 'ana') taskEvent('cocinar', a.x); return 'ok';
+    }
+    case 'dar': {
+      const r = reach(a.k); if (r !== 'ok') return r;
+      const n = ALL_AT_ONCE.includes(a.x) ? inv[a.x] || 0 : Math.min(1, inv[a.x] || 0); if (!n) { st.why = 'no lo tiene'; return 'fail'; }
+      inv[a.x] -= n; const to = wmInv(a.k); to[a.x] = (to[a.x] || 0) + n;
+      for (const tag of THINGS[a.x].tags) realR.setFact('dio:' + a.k + ':' + tag); realR.setFact('dio:' + a.k + ':' + a.x); realR.setFact('dio:' + a.x);
+      const liked = socialRule(realR, 'dar', me, a.k, a.x);
+      const tb = wmBody(a.k); if (liked && tb) hearts(tb.x, tb.y - 56);
+      logEv(`${wmName(me)} le dio ${itemTextW(a.x, n)} a ${wmName(a.k)}.`, []); bubble(a.k, liked ? pick(['¡Qué lindo detalle! Muchas gracias.', '¡Oh! Justo lo que me gusta.']) : 'Gracias.'); return 'ok';
+    }
+    case 'vender': {
+      const r = reach(a.k); if (r !== 'ok') return r;
+      if (a.x === 'vaca') {
+        const c = ANIM[a.cow]; if (c.state !== 'led' || (c.ledBy || 'ana') !== me) { st.why = 'la vaca no viene con ' + wmName(me); return 'fail'; }
+        const price = whoOf(a.k).compra.animal;
+        if (me === 'ana' && CH[a.k]) sellCow(a.k, c, price); else { c.state = 'bought'; c.owner = a.k; c.ledBy = null; c.nav = null; inv.dolares = (inv.dolares || 0) + price; logEv(`${wmName(me)} le vendió ${ANIMALS[c.id].name} a ${wmName(a.k)} por ${price} dólares.`, []); }
+        wmFact('vendio_vaca', [me, a.k]); bubble(a.k, '¡Trato hecho! Buena vaca.'); return 'ok';
+      }
+      if (!(inv[a.x] > 0)) { st.why = 'no lo tiene'; return 'fail'; }
+      inv[a.x]--; inv.dolares = (inv.dolares || 0) + THINGS[a.x].valor; float('+' + THINGS[a.x].valor + ' dólares', b.x, b.y - 50);
+      logEv(`${wmName(me)} le vendió ${itemTextW(a.x, 1)} a ${wmName(a.k)}.`, []); bubble(a.k, 'Se la compro. ¡Huele de maravilla!'); return 'ok';
+    }
+    case 'comprar': {
+      const r = reach(a.k); if (r !== 'ok') return r;
+      const W = whoOf(a.k), hr = hourNow() % 24; if (W.abre && (hr < W.abre[0] || hr >= W.abre[1])) { st.why = 'la tienda está cerrada'; return 'fail'; }
+      if ((inv.dolares || 0) < a.price) { st.why = 'no le alcanza'; return 'fail'; }
+      inv.dolares -= a.price; inv[a.x] = (inv[a.x] || 0) + 1; logEv(`${wmName(me)} compró ${itemTextW(a.x, 1)} en la tienda de ${wmName(a.k)}.`, []); bubble(a.k, 'Aquí tiene. ¡Que le aproveche!'); return 'ok';
+    }
+    case 'conversar': {
+      const r = reach(a.k); if (r !== 'ok') return r;
+      if (!st.said) { st.said = 1; const news = (game.wm.know[a.k] || []).find(f => !(game.wm.know[me] || []).includes(f)) || (game.wm.know[me] || []).find(f => !(game.wm.know[a.k] || []).includes(f)); bubble(me, news === 'vendio_vaca' ? '¿Es verdad lo que dicen, que vendieron la vaca?' : '¿Qué hay de nuevo?'); }
+      if (!wait(2.5)) return 'run';
+      const u = [...new Set([...(game.wm.know[me] || []), ...(game.wm.know[a.k] || [])])]; game.wm.know[me] = [...u]; game.wm.know[a.k] = [...u];
+      logEv(`${wmName(me)} conversó con ${wmName(a.k)}.`, []); return 'ok';
+    }
+    case 'disculparse': {
+      const r = reach(a.k); if (r !== 'ok') return r;
+      if (!st.said) { st.said = 1; bubble(me, me === 'gilbert' ? 'Ana, perdóname lo de «Zanahorias». Fue una tontería.' : 'Perdóname, de verdad. No quise hacerte daño.'); }
+      if (!wait(2.6)) return 'run';
+      const before = relGetW(a.k, me); socialRule(realR, 'disculparse', me, a.k); const after = relGetW(a.k, me);
+      bubble(a.k, a.k === 'ana' ? (after >= 0 ? 'Bueno... está bien, Gilbert Blythe.' : 'Hmpf.') : after - before >= 2 ? '¡Claro que te perdono! Eres mi amiga del alma.' : 'Está bien... pero que no se repita.');
+      logEv(`${wmName(me)} se disculpó con ${wmName(a.k)}.`, []); return 'ok';
+    }
+    case 'pedir': {
+      if (!st.asked) {
+        const r = reach(a.k); if (r !== 'ok') return r;
+        if (!socialRule(realR, 'pedir', me, a.k)) { bubble(a.k, 'No, ahora no.'); st.why = wmName(a.k) + ' no quiso'; return 'fail'; }
+        st.asked = 1; realR.setFact('pedido:' + a.favor.f + ':' + a.k);
+        const F = FAVORS[a.favor.f], f = a.favor;
+        bubble(me, { pasear: '¿Vamos a pasear juntas?', venir: '¿Vienes a tomar el té conmigo?', traer: `¿Me traerías ${itemTextW(f.item, f.n)}?`, vender_vaca: '¿Me vendería la vaca?', encerrar_vaca: '¡Su vaca está otra vez en mi avena! Enciérrela, por favor.' }[f.f] || '¿Me harías un favor?');
+        logEv(`${wmName(me)} le pidió a ${wmName(a.k)}: ${f.f.replace('_', ' ')}.`, []);
+        if (f.f === 'pasear') { if (me === 'diana') diana.follow = true; else AGENTS[me].follow = a.k; return 'ok'; }
+        if (f.f === 'venir') { if (WM_OBEY) AGENTS.ana = { who: 'ana', st: 'idle', log: [], followOf: me, label: 'acompaña a ' + wmName(me) }; else addTask({ from: CH[me] ? me : 'marilla', tipo: 'ir', n: 1, para: 'ana', d: today(), lugar: 'casa_parroquial' }); return 'ok'; }
+        const sub = F.goal(me, f, wmNow());
+        if (a.k === 'ana' && !WM_OBEY) { if (f.f === 'traer' && CH[me]) addTask({ from: me, tipo: 'traer', n: f.n, para: me, d: today(), item: f.item }); else notice(`📜 ${wmName(me)} te pide: ${sub.text}.`); }
+        else st.subGoal = agentStart(a.k, sub, { label: sub.text + ' (se lo pidió ' + wmName(me) + ')', parent: me }).goal;
+        st.sub = sub;
+      }
+      if (st.sub && AGENTS[a.k]?.st === 'fail' && AGENTS[a.k].goal === st.subGoal) { st.why = wmName(a.k) + ' no pudo'; return 'fail'; }
+      return st.sub && !st.sub.test(wmNow()) ? 'run' : 'ok';
+    }
+    case 'guiar': {
+      const c = ANIM[a.cow]; if (!(inv.cuerda > 0)) { st.why = 'no tiene cuerda'; return 'fail'; }
+      if (c.state === 'led' || c.state === 'bought') { st.why = 'la vaca no está libre'; return 'fail'; }
+      if (wmScene(me) !== 'out') { wmExit(me); return 'run'; }
+      if (dist(b.x, b.y, c.x, c.y) > 40) { wmWalk(me, c.x, c.y, 'out', dt); return 'run'; }
+      wmStop(me); if (me === 'ana') leadCow(c); else { c.state = 'led'; c.ledBy = me; c.nav = null; logEv(`${wmName(me)} agarró a ${ANIMALS[c.id].name} de la cuerda.`, []); }
+      return 'ok';
+    }
+    case 'soltar': {
+      const c = ANIM[a.cow]; if (c.state !== 'led') { st.why = 'no la lleva'; return 'fail'; }
+      if (!inArea(AREAS[a.p], c.x, c.y) && inArea(AREAS[a.p], b.x, b.y)) { c.x = clamp(b.x + 20, AREAS[a.p].x + 12, AREAS[a.p].x + AREAS[a.p].w - 12); c.y = b.y; }   // (she came in after whoever leads her)
+      if (!inArea(AREAS[a.p], c.x, c.y)) { if (!wait(4)) return 'run'; st.why = 'la vaca no entró'; return 'fail'; }
+      if (me === 'ana') releaseCow(c); else { const ar = areaAt(c.x, c.y); c.ledBy = null; c.area = ar; c.state = ar && ar === ANIMALS[c.id].home ? 'home' : 'loose'; c.goal = null; c.nav = null; logEv(`${wmName(me)} dejó a ${ANIMALS[c.id].name} en ${AREAS[ar].name}.`, []); }
+      return 'ok';
+    }
+  }
+  return 'fail';
+}
+// Ana, asked to come along: she follows whoever asked (out of doors), until that one's goal is over
+function wmFollowTick(){
+  const A = AGENTS.ana; if (!A || !A.followOf) return;
+  const L = AGENTS[A.followOf]; if (!L || (L.st !== 'run' && L.st !== 'wait')) { A.followOf = null; if (ana.goto?.wm) ana.goto = null; return; }
+  const b = wmBody(A.followOf); if (!b) return;
+  if (game.scene !== 'out') { if (wmScene(A.followOf) === 'out') goOut(); return; }
+  if (dist(ana.x, ana.y, b.x, b.y) > 50) ana.goto = { x: b.x + 26, y: b.y + 6, scene: 'out', wm: true }; else if (ana.goto?.wm) ana.goto = null;
+}
+
+/* ---------- the test goals (17, from the design document): each one sets the scene up and hands a goal to someone ---------- */
+const hold = (k, at) => { AGENTS[k] = { who: k, hold: at, st: 'hold', log: [] }; const b = wmBody(k); b.where = 'out'; b.x = at[0]; b.y = at[1]; b.sit = false; };
+const atOut = (k, x, y) => { const b = wmBody(k); if (b.where !== 'out' && k !== 'ana') b.where = 'out'; if (k === 'ana' && game.scene !== 'out') goOut(); b.x = x; b.y = y; b.nav = null; };
+const setSeason = n => { game.seasonShift = ((n - Math.floor(dayT / 2)) % 4 + 4) % 4; S = n; };
+const cowLoose = (id, x, y) => { const c = ANIM[id]; c.state = 'loose'; c.area = areaAt(x, y) || null; c.x = x; c.y = y; c.ledBy = null; c.owner = ANIMALS[id].owner; c.where = 'out'; c.goal = null; c.nav = null; };
+const cowHome = id => { const c = ANIM[id], A = AREAS[ANIMALS[id].home]; c.state = 'home'; c.area = ANIMALS[id].home; c.x = A.x + A.w / 2; c.y = A.y + A.h / 2; c.ledBy = null; c.owner = ANIMALS[id].owner; c.where = 'out'; };
+const WM_TESTS = [
+  { who: 'ana', text: 'Vender la vaca', setup: () => { dayAt(9); cowHome('dolly'); game.inv.cuerda = 0; hold('shearer', [PLAY.aldea[0] - 80, PLAY.aldea[1] + 60]); atOut('ana', GG.x, GG.y + 90); }, goal: () => G.vaca_vendida('dolly') },
+  { who: 'ana', text: 'Juntar 2 dólares', setup: () => { dayAt(9); setSeason(1); game.inv.dolares = 0; for (const u of bushes) if (dist(u.x, u.y, WP.arbustos[0], WP.arbustos[1]) < 260) u.berries = 3; atOut('ana', GG.x, GG.y + 90); }, goal: () => G.dinero('ana', 2) },
+  { who: 'ana', text: 'Regalarle a Marilla algo que le guste', setup: () => { dayAt(10); setSeason(0); BEDS[0].stage = 3; BEDS[1].stage = 3; atOut('ana', GG.x + 200, GG.y + 120); }, goal: () => G.regalo_gusto('ana', 'marilla') },
+  { who: 'ana', text: 'Reconciliarse con Diana', setup: () => { dayAt(11); game.fond.diana = 1; game.wm.ofensa['diana>ana'] = 'licor'; delete game.wm.facts['disc:diana>ana:' + today()]; diana.follow = false; atOut('diana', OS.x - 60, OS.y + 80); atOut('ana', GG.x, GG.y + 90); }, goal: () => G.reconciliar('ana', 'diana') },
+  { who: 'ana', text: 'Llegar a la escuela antes de las 9', setup: () => { dayAt(8.2); atOut('ana', GG.x, GG.y + 90); }, goal: () => G.estar_en('ana', 'escuela', 9) },
+  { who: 'ana', text: 'Devolver la vaca escapada del Sr. Harrison', setup: () => { dayAt(10); game.inv.cuerda = 0; const A = AREAS.avena; cowLoose('jersey', A.x + A.w / 2, A.y + A.h / 2); atOut('ana', GG.x, GG.y + 90); }, goal: () => G.vaca_en('jersey', 'potrero') },
+  { who: 'matthew', text: 'Matthew le trae azúcar a Marilla', setup: () => { dayAt(10); wmInv('matthew').dolares = 5; wmInv('marilla').azucar = 0; atOut('matthew', BARN.x + 60, BARN.y + 60); }, goal: () => G.tener('marilla', 'azucar', 1) },
+  { who: 'matthew', text: 'Matthew encierra a Dolly', setup: () => { dayAt(10); wmInv('matthew').cuerda = 0; cowLoose('dolly', GG.x + 420, GG.y + 260); atOut('matthew', BARN.x + 60, BARN.y + 60); }, goal: () => G.vaca_en('dolly', 'corral') },
+  { who: 'marilla', text: 'Marilla quiere compota para el invierno', setup: () => { dayAt(10); setSeason(2); wmInv('marilla').manzanas = 0; wmInv('marilla').compota = 0; for (const t of trees) if (t.kind === 'apple') t.apples = 3; if (game.scene !== 'gg') goIn('gg'); }, goal: () => G.tener('marilla', 'compota', 2), favors: [{ f: 'traer', to: 'ana', item: 'manzanas', n: 6 }] },
+  { who: 'diana', text: 'Diana quiere pasear con Ana', setup: () => { dayAt(11); diana.follow = false; game.fond.diana = 5; atOut('diana', OS.x - 60, OS.y + 80); atOut('ana', GG.x + 300, GG.y + 120); }, goal: () => G.acompana('diana', 'ana'), favors: [{ f: 'pasear', to: 'ana' }] },
+  { who: 'lynde', text: 'La Sra. Lynde quiere enterarse de la venta', setup: () => { dayAt(11); game.wm.know.lynde = []; wmKnow('ana', 'vendio_vaca'); atOut('ana', GG.x, GG.y + 90); }, goal: () => G.conoce('lynde', 'vendio_vaca') },
+  { who: 'harrison', text: 'El Sr. Harrison quiere a la vaca fuera de su avena', setup: () => { dayAt(10); const A = AREAS.avena; cowLoose('dolly', A.x + A.w / 2, A.y + A.h / 2); wmInv('harrison').cuerda = 1; atOut('harrison', HH.x + 60, HH.y + 60); }, goal: () => G.vaca_en('dolly', 'corral'), favors: [{ f: 'encerrar_vaca', to: 'matthew', cow: 'dolly', pen: 'corral' }] },
+  { who: 'shearer', text: 'El Sr. Shearer quiere comprar una vaca', setup: () => { dayAt(10); cowHome('dolly'); wmInv('matthew').cuerda = 0; delete game.wm.facts['pedido:vender_vaca:matthew:' + today()]; atOut('shearer', GG.x + 300, GG.y + 200); atOut('matthew', BARN.x + 60, BARN.y + 60); }, goal: () => G.vaca_vendida('dolly', 'shearer'), favors: [{ f: 'vender_vaca', to: 'matthew', cow: 'dolly' }] },
+  { who: 'gilbert', text: 'Gilbert quiere que Ana le hable', setup: () => { dayAt(16); game.wm.rel['ana>gilbert'] = -2; game.wm.ofensa['ana>gilbert'] = 'zanahorias'; delete game.wm.facts['disc:ana>gilbert:' + today()]; atOut('ana', PLAY.aldea[0], PLAY.aldea[1] + 80); atOut('gilbert', PLAY.aldea[0] + 300, PLAY.aldea[1] + 120); }, goal: () => G.rel_min('ana', 'gilbert', 0) },
+  { who: 'sraallan', text: 'La Sra. Allan quiere tomar el té con Ana', setup: () => { dayAt(15); wmInv('sraallan').te = 0; atOut('ana', CHURCH_DOOR[0] + 120, CHURCH_DOOR[1] + 60); atOut('sraallan', CHURCH_DOOR[0] + 260, CHURCH_DOOR[1] + 80); }, goal: () => G.te_con('sraallan', 'ana', 'casa_parroquial'), favors: [{ f: 'venir', to: 'ana' }] },
+  { who: 'peg', text: 'Peg Bowen junta hierbas', setup: () => { dayAt(10); setSeason(1); wmInv('peg').hierbas = 0; atOut('peg', WP.bosque_peg[0] - 300, WP.bosque_peg[1] + 200); }, goal: () => G.tener('peg', 'hierbas', 3) },
+  { who: 'ana', text: 'Regalar una tarta de bayas en invierno (imposible)', setup: () => { dayAt(10); setSeason(3); game.inv.bayas = 0; game.inv.tarta = 0; atOut('ana', GG.x, GG.y + 90); }, goal: () => G.regalar_cosa('ana', 'tarta') },
+];
+function dayAt(h){ dayT = Math.floor(dayT) + (h - 6) / 24; }
+function wmRunTest(i){
+  const T = WM_TESTS[i];
+  for (const k of Object.keys(AGENTS)) { wmRelease(k); delete AGENTS[k]; }
+  close(); if (ana.goto) ana.goto = null; diana.follow = false; game.seasonShift = 0; cowHome('dolly'); cowHome('jersey'); game.inv.cuerda = 0; for (const k of ['matthew', 'harrison', 'shearer']) delete game.wm.inv[k];
+  if (PEOPLE.shearer.where !== 'away') { PEOPLE.shearer.where = 'away'; }
+  T.setup(); S = ((seasonCount() % 4) + 4) % 4;
+  const ag = agentStart(T.who, T.goal(), { favors: T.favors || [], label: T.text }); ag.test = i;
+  if (T.who !== 'ana') cam.x = wmBody(T.who).x, cam.y = wmBody(T.who).y;
+  wmPanelDraw(); return ag;
+}
+// --- the panel: the test goals, and what each agent is doing
+function wmPanel(show = $('wmp').hidden){ $('wmp').hidden = !show; if (show) wmPanelDraw(); }
+let wmDrawT = 0;
+function wmPanelDraw(){
+  if ($('wmp').hidden) return;
+  $('wmlist').innerHTML = WM_TESTS.map((T, i) => `<button data-i="${i}">${i + 1}. ${wmName(T.who)}: ${T.text}</button>`).join('');
+  wmRunDraw();
+}
+function wmRunDraw(){
+  const st = { run: '▶ en curso', wait: '⏸ esperando', done: '✔ logrado', fail: '✘ no pudo', hold: '· esperando aquí', idle: '· acompañando' };
+  $('wmrun').innerHTML = Object.values(AGENTS).map(ag => `<div class="ag"><b>${wmName(ag.who)}</b> ${st[ag.st] || ''}${ag.label ? ' — ' + ag.label : ''}${ag.plan ? '<ol>' + ag.plan.map((a, j) => `<li${j === ag.i && ag.st === 'run' ? ' class="cur"' : j < ag.i ? ' class="past"' : ''}>${stepText(a)}</li>`).join('') + '</ol>' : ''}${ag.log?.length ? '<pre>' + ag.log.slice(-6).join('\n') + '</pre>' : ''}</div>`).join('') || '<i>Nadie tiene una meta todavía.</i>';
+}
+
 /* ---------- the map: Avonlea drawn on a sheet of paper, with where everyone is ---------- */
 let mapBase = null;
 function toggleMap(on = !game.map){
@@ -4413,7 +4907,7 @@ function drawMap(){
   $('maptitle').textContent = 'Avonlea · ' + SEASONS[S] + ', día ' + (Math.floor(dayT) % 2 + 1) + ' · ' + SICON[S] + ' · toca un lugar para ir allí';
 }
 function loop(now){ const dt = clamp((now - last) / 1000, 0, .05); last = now; update(dt); render(); requestAnimationFrame(loop); }
-window.__avonlea = { enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+window.__avonlea = { AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
 requestAnimationFrame(loop);
 })();
 </script>
