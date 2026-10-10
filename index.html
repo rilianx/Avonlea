@@ -23,6 +23,11 @@ html,body{margin:0;height:100%;background:#2b3a26;overflow:hidden;touch-action:n
 #relbtn{position:fixed;right:10px;top:172px;width:42px;height:36px;font-size:19px;line-height:30px;padding:0;cursor:pointer}
 #daybtn{position:fixed;right:10px;top:214px;width:42px;height:36px;font-size:17px;line-height:30px;padding:0;cursor:pointer}
 #wmbtn{position:fixed;right:10px;top:256px;width:42px;height:36px;font-size:18px;line-height:30px;padding:0;cursor:pointer}
+#autobtn{position:fixed;right:10px;top:340px;width:42px;height:36px;font-size:18px;line-height:30px;padding:0;cursor:pointer}
+#autobtn.on{outline:2px solid #6a8f3c}
+#autobar{position:fixed;left:50%;bottom:12px;transform:translateX(-50%);z-index:13;padding:4px 6px 4px 12px;font-size:13.5px;max-width:calc(100% - 24px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#autobar[hidden]{display:none}
+#autobar button{font:inherit;font-size:12px;margin-left:6px}
 #headbtn{position:fixed;right:10px;top:298px;width:42px;height:36px;font-size:18px;line-height:30px;padding:0;cursor:pointer}
 #headp{position:fixed;right:58px;top:298px;z-index:14;padding:6px 10px;font-size:13px}
 #headp[hidden]{display:none}
@@ -133,6 +138,8 @@ body.visor > *:not(#cv):not(#visor){display:none !important}
 <button id="daybtn" class="paper" title="Pasar al día siguiente">⏭</button>
 <button id="wmbtn" class="paper" title="Metas de prueba (el planificador, sin IA)">🎯</button>
 <button id="headbtn" class="paper" title="Tamaño de las cabezas">🙂</button>
+<button id="autobtn" class="paper" title="Ana en automático (y mover el mapa libremente)">🤖</button>
+<div id="autobar" class="paper" hidden>🤖 Ana en automático · flechas o arrastrar: mover el mapa <button id="autocenter">Centrar en Ana</button><button id="autooff">Tomar el control</button></div>
 <div id="headp" class="paper" hidden><label>Cabezas <b id="headv"></b><input id="headr" type="range" min="1" max="5" step="0.1"></label></div>
 <div id="wmp" class="paper" hidden><div class="mt">🎯 Metas de prueba <small>(sin IA: el planificador)</small></div><label><input type="checkbox" id="wmobey" checked> Ana hace sola lo que le piden</label> <label><input type="checkbox" id="wmdis" checked> Se distraen (según su enfoque)</label> <label><input type="checkbox" id="vecon"> Ana dibujada por GPT (prueba)</label><div id="wmlist"></div><div id="wmrun"></div><div class="mb"><button id="wmstop">Detener todo</button><button id="wmclose">Cerrar</button></div></div>
 <div id="rels" hidden><div class="paper sheet"><div class="mt">La historia de hoy, y quién quiere a quién</div><div id="story"></div><svg id="relsvg" viewBox="0 0 420 300"></svg><div id="reldet"></div><div class="mb"><button id="relclose">Cerrar</button></div></div></div>
@@ -1975,7 +1982,10 @@ let SCN = null; const curScene = () => SCN || game.scene;
    houses), to see how they go about their goals. Where the view is, they walk by the paths as Ana would. ---------- */
 let OBS = null;
 const obsScene = () => { const b = OBS && wmBody(OBS), sc = b && wmScene(OBS); return sc === 'out' || ROOMS[sc] ? sc : null; };
-const viewScene = () => obsScene() || game.scene;
+// Ana on her own: her plan never waits for the player, and the keys or a drag move the view instead of her
+let ANA_AUTO = false;
+const freeCam = { x: 0, y: 0, free: false };   // (free: the view was moved away from Ana; outdoors)
+const viewScene = () => obsScene() || (ANA_AUTO && freeCam.free ? 'out' : game.scene);
 const watched = sc => sc === game.scene || sc === viewScene();
 function inScene(sc, f){ const o = SCN; SCN = sc; try { return f(); } finally { SCN = o; } }
 function observe(who){
@@ -4014,7 +4024,7 @@ let actNow = false;
 addEventListener('keydown', e => {
   if (e.target.closest && e.target.closest('input,select,textarea')) return;
   if (!$('ai').hidden) { if (e.code === 'Escape') aiPanel(false); return; }
-  audio(); hint(); userInput();
+  audio(); hint(); if (!ANA_AUTO) userInput();
   if (e.code === 'KeyT' && !game.map) { e.preventDefault(); openSay(); return; }
   if (e.code === 'KeyM' && !game.talk) { toggleMap(); return; }
   if (game.map) { if (e.code === 'Escape' || e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); toggleMap(false); } return; }
@@ -4033,13 +4043,15 @@ addEventListener('keydown', e => {
 });
 addEventListener('keyup', e => keys.delete(e.code));
 let stick = null, tapStart = null;
-cv.addEventListener('pointerdown', e => { audio(); hint(); if (OBS && !menuOpen()) { observe(null); return; } userInput(); if (menuOpen()) return; if (game.talk && amb.cur) { const t = targetAt(view.ox + e.clientX / view.Z, view.oy + e.clientY / view.Z); if (t && (t.self || amb.cur.parts.includes(t.id.slice(2)))) { amb.cur.wait = 0; return; } } stick = { x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY }; tapStart = { x: e.clientX, y: e.clientY, t: performance.now() }; });
-addEventListener('pointermove', e => { if (stick) { stick.x = e.clientX; stick.y = e.clientY; } hoverAt = e.pointerType === 'mouse' && e.target === cv ? [e.clientX, e.clientY] : null; });
+let panDrag = null;
+cv.addEventListener('pointerdown', e => { audio(); hint(); if (ANA_AUTO && !menuOpen() && !game.talk) { freeStart(); panDrag = { x: e.clientX, y: e.clientY, cx: freeCam.x, cy: freeCam.y }; return; } if (OBS && !menuOpen()) { observe(null); return; } userInput(); if (menuOpen()) return; if (game.talk && amb.cur) { const t = targetAt(view.ox + e.clientX / view.Z, view.oy + e.clientY / view.Z); if (t && (t.self || amb.cur.parts.includes(t.id.slice(2)))) { amb.cur.wait = 0; return; } } stick = { x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY }; tapStart = { x: e.clientX, y: e.clientY, t: performance.now() }; });
+addEventListener('pointermove', e => { if (panDrag) { const Z = view.Z || 1; freeCam.x = panDrag.cx - (e.clientX - panDrag.x) / Z; freeCam.y = panDrag.cy - (e.clientY - panDrag.y) / Z; } if (stick) { stick.x = e.clientX; stick.y = e.clientY; } hoverAt = e.pointerType === 'mouse' && e.target === cv ? [e.clientX, e.clientY] : null; });
 addEventListener('pointerup', e => {
+  panDrag = null;
   if (tapStart && !menuOpen() && !game.map && $('ai').hidden && Math.hypot(e.clientX - tapStart.x, e.clientY - tapStart.y) < 10 && performance.now() - tapStart.t < 500) tapAt(e.clientX, e.clientY);
   tapStart = null; stick = null;
 });
-addEventListener('pointercancel', () => { stick = null; tapStart = null; });
+addEventListener('pointercancel', () => { stick = null; tapStart = null; panDrag = null; });
 let hinted = false; function hint(){ if (hinted) return; hinted = true; setTimeout(() => { $('hint').style.opacity = 0; }, 4000); }
 // a note at the top for a moment (when the season turns)
 let noteTimer = 0;
@@ -4126,6 +4138,23 @@ $('say').addEventListener('submit', e => { e.preventDefault(); const t = $('sayi
 $('sayin').addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); closeSay(); } });
 $('saybtn').addEventListener('pointerdown', e => { e.stopPropagation(); audio(); sayOpen ? closeSay() : openSay(); });
 $('wmbtn').addEventListener('pointerdown', e => { e.stopPropagation(); audio(); wmPanel(); });
+// Ana in automatic: start moving the view (from where it is; from her house if she is indoors)
+function freeStart(){
+  if (freeCam.free || obsScene()) return;
+  if (game.scene === 'out') { freeCam.x = cam.x; freeCam.y = cam.y; }
+  else { const H = HOUSES[ROOMS[game.scene]?.parent || game.scene]?.at; freeCam.x = H ? H.x : cam.x; freeCam.y = H ? H.y : cam.y; cam.x = freeCam.x; cam.y = freeCam.y; }
+  freeCam.free = true;
+}
+function setAuto(on){
+  ANA_AUTO = on; freeCam.free = false; panDrag = null; stick = null; keys.clear(); cam.snap = true;
+  $('autobar').hidden = !on; $('autobtn').classList.toggle('on', on);
+  if (on) { if (ana.goto && !ana.goto.wm) ana.goto = null; notice(activeGoals(AGENTS.ana).length ? '🤖 Ana sigue sola con lo que tiene que hacer' : '🤖 Ana en automático (ponle una meta en 🎯)'); }
+  else userInput();
+}
+$('autobtn').addEventListener('pointerdown', e => { e.stopPropagation(); audio(); setAuto(!ANA_AUTO); });
+$('autobar').addEventListener('pointerdown', e => e.stopPropagation());
+$('autocenter').addEventListener('pointerdown', e => { e.stopPropagation(); freeCam.free = false; observe(null); cam.snap = true; });
+$('autooff').addEventListener('pointerdown', e => { e.stopPropagation(); setAuto(false); });
 { const r = $('headr'), v = $('headv'), show = () => { r.value = HEAD_M; v.textContent = '×' + HEAD_M.toFixed(1); };
   $('headbtn').addEventListener('pointerdown', e => { e.stopPropagation(); show(); $('headp').hidden = !$('headp').hidden; });
   $('headp').addEventListener('pointerdown', e => e.stopPropagation());
@@ -4191,6 +4220,7 @@ function update(dt){
     if (keys.has('ArrowUp') || keys.has('KeyW')) my--; if (keys.has('ArrowDown') || keys.has('KeyS')) my++;
     if (stick) { const dx = stick.x - stick.x0, dy = stick.y - stick.y0, l = Math.hypot(dx, dy); if (l > 10) { mx = dx / Math.max(l, 50); my = dy / Math.max(l, 50); } }
   }
+  if (ANA_AUTO) { if (mx || my) { freeStart(); const v = 520 / (cam.zoom || 1) / (viewZoom || 1); freeCam.x += mx * v * dt; freeCam.y += my * v * dt; } mx = my = 0; }   // (on her own: the keys move the view)
   if (game.talk?.deadline && TT > game.talk.deadline && !sayOpen) { game.talk.deadline = 0; autoChoose(); }
   autoTick(); cartTick(dt); momentsTick(); folkTick(dt); faunaTick(dt); agentTick(dt); wmApproachTick(dt); chatTick(dt); wmFollowTick();
   ana.torn = !!game.anaStates.rasgado; ana.askew = !!game.anaStates.despeinada;
@@ -4314,7 +4344,8 @@ function update(dt){
   const vs = viewScene(), ob = obsScene() === 'out' ? wmBody(OBS) : ana;   // (the camera follows Ana, or whoever is watched)
   const byFaro = vs === 'out' && dist(ob.x, ob.y, FARO.x, FARO.y) < 560;
   cam.zoom = lerp(cam.zoom ?? 1, byFaro ? .55 : 1, .04);
-  if (vs === 'out') { const k = cam.snap ? 1 : .08; cam.snap = false; cam.x = lerp(cam.x, ob.x, k); cam.y = lerp(cam.y, ob.y - 20 - (byFaro ? 150 : 0), k); }
+  if (vs === 'out' && ANA_AUTO && freeCam.free && !obsScene()) { const k = cam.snap ? 1 : .3; cam.snap = false; cam.x = lerp(cam.x, freeCam.x, k); cam.y = lerp(cam.y, freeCam.y, k); }
+  else if (vs === 'out') { const k = cam.snap ? 1 : .08; cam.snap = false; cam.x = lerp(cam.x, ob.x, k); cam.y = lerp(cam.y, ob.y - 20 - (byFaro ? 150 : 0), k); }
   obsBar();
 }
 // what is drawn is the scene being looked at: Ana's, or that of whoever she is watching (Ana and Toby only in hers)
@@ -5305,6 +5336,7 @@ const SELF_MOVING = ['dar', 'vender', 'comprar', 'cambiar', 'conversar', 'discul
 const RESUME_IDLE = 12;
 function anaPaused(ag){
   if (ag.seenInput == null) ag.seenInput = lastInput;
+  if (ANA_AUTO) { if (!ag.paused) return false; ag.paused = false; ag.seenInput = lastInput; agentLog(ag, '▶ vuelve a su plan (en automático)'); for (const g of activeGoals(ag)) goalPlan(ag, g); return true; }
   const busyNow = WM_KEYS.some(k => keys.has(k)) || !!stick || (ana.goto && !ana.goto.wm && !ana.goto.auto) || menuOpen() || !!game.talk || game.cooking || sleeping;
   if (!ag.paused) {
     if (lastInput <= ag.seenInput && !(ana.goto && !ana.goto.wm && !ana.goto.auto) && !WM_KEYS.some(k => keys.has(k)) && !stick) return false;
