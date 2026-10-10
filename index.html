@@ -776,13 +776,13 @@ function rigDraw(c, p, t){
 let ANIM_ON = true;
 // Ana's drawing: 'mano' (in code, a big head in pencil with the anime's features; the body as always), 'video' (traced
 // from a video), 'hojas' (traced from the sheets), 'codigo' (the first drawing in code)
-let ANA_STYLE = (location.search.match(/ana=(video|mano|hojas|codigo)/) || [, 'mano'])[1];   // (the default: the hand-drawn one with the big head; ?ana=video etc. to choose)
+let ANA_STYLE = (location.search.match(/ana=(video|mano|hojas|codigo)/) || [, 'video'])[1];   // (the default: the one traced from the video; ?ana=mano etc. to choose)
 // big heads for everyone (as in the anime's chibi moments): the drawn in code ones scale their head about the neck; the
 // traced from video ones are warped (above the neck, bigger; a little below, blending in). ?cabezas=0 for the plain ones
 // HEAD_M: how many times a real (anime) head; the 🙂 slider in the game, or ?cabezas=N. The drawn in code ones already
 // have a head about twice a real one, so they get HEAD_M / 2 (never smaller than theirs)
-let HEAD_M = (() => { const q = location.search.match(/cabezas=([\d.]+)/); if (q) return +q[1] || 1; try { const v = +localStorage.getItem('avonlea-cabezas'); if (v >= 1) return v; } catch (e) {} return 3; })();
-const setHeadM = v => { HEAD_M = clamp(+v || 1, 1, 5); try { localStorage.setItem('avonlea-cabezas', HEAD_M); } catch (e) {} };
+let HEAD_M = (() => { const q = location.search.match(/cabezas=([\d.]+)/); if (q) return +q[1] || 1; try { const v = +localStorage.getItem('avonlea-cabezas2'); if (v >= 1) return v; } catch (e) {} return 1; })();
+const setHeadM = v => { HEAD_M = clamp(+v || 1, 1, 5); try { localStorage.setItem('avonlea-cabezas2', HEAD_M); } catch (e) {} };
 const NECK = -345, NECK_BAND = 26;   // (the neck on the video figures, in their units ×10: below it nothing changes; over the band above it (the chin) it grows to the full size)
 const bigCache = new WeakMap();
 function bigAnim(A){
@@ -5849,7 +5849,7 @@ function startVisor(){
   P.innerHTML = `<b>Visor</b> <select id="vwho"><option value="ana">Ana</option><option value="marilla">Marilla</option><option value="matthew">Matthew</option><option value="f:ruby">Ruby (recoloreada)</option><option value="f:jane">Jane (recoloreada)</option><option value="f:josie">Josie (recoloreada)</option></select> <small>flechas para caminar · Shift para correr · rueda: zoom</small><div>
     <button data-a="sit">Sentarse</button><button data-a="crouch">Agacharse</button><button data-a="lie">Acostarse</button>
     <button data-a="talk">Hablar</button><button data-a="flick">Echarse la trenza</button><button data-a="hat">Sombrero</button>
-    <button data-a="turn">Girar</button><button data-a="code">Otros: dibujo GPT / código</button> Ana: <select id="vsty"><option value="mano">a mano (cabezona)</option><option value="video">video</option><option value="hojas">hojas</option><option value="codigo">código antiguo</option></select> Cabezas <input id="vhead" type="range" min="1" max="5" step="0.1" style="width:110px;vertical-align:middle"> <b id="vheadv"></b></div>
+    <button data-a="turn">Girar</button><button data-a="code">Otros: dibujo GPT / código</button> Ana: <select id="vsty"><option value="video">video</option><option value="mano">a mano (cabezona)</option><option value="hojas">hojas</option><option value="codigo">código antiguo</option></select> Cabezas <input id="vhead" type="range" min="1" max="5" step="0.1" style="width:110px;vertical-align:middle"> <b id="vheadv"></b></div>
     <div>Cara: <button data-f="">normal</button><button data-f="contenta">contenta</button><button data-f="triste">triste</button><button data-f="sorprendida">sorprendida</button><button data-f="enojada">enojada</button></div>`;
   document.body.appendChild(P);
   const a = ana, L = LOOKS.ana; a.x = 0; a.y = 0; a.dir = 2; a.dir8 = 4; a.blink = -1; a.braidBack = false; a.sit = a.lie = a.crouch = false;
