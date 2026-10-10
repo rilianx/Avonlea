@@ -170,6 +170,8 @@ Cada personaje (`agentOf`) tiene hasta **3 metas activas** (`MAX_GOALS`), y sus 
 - **Caminar:** `wmMove` lleva al personaje por los caminos y entra o sale de las casas. Para hablar con alguien se acerca hasta tenerlo al lado (~40 px; o en la misma habitación).
 - **Pedir:** muestra el globo con el pedido. Si el otro acepta, se le instala la meta con `agentStart`, y quien pidió sigue con lo demás. Lo prometido cuenta como hecho al replanificar (`promised`). Se espera solo donde hace falta («⏳ espera lo que pidió»).
 - **Quien no sale de casa** (o está enfermo) **manda a llamar** a Ana: ella va, y ahí se le pide.
+- **Llamar a alguien:** si la persona a quien se va a ver se está alejando, quien la busca la llama («¡Matthew! ¡Espera!») cuando está a distancia de voz (`CALL_R`, 520 px). La persona se detiene y mira, o viene si quiere a quien la llama (cariño ≥ 3, familia o niños). Espera unos 14 s (`callPerson`, `calledHold`). La jugadora también puede llamar: botón 📣 o tecla L (a quien esté más cerca), y al tocar a alguien que se va, Ana le grita que espere.
+- **Quedarse:** una meta `estar_en` con `quedar` (ir a clases: llegar antes de las 9 y quedarse hasta las 12, `CLASES_FIN`) no termina al llegar. El personaje entra y se queda (`stayTick`), sus otras metas esperan, y a esa hora la meta se da por cumplida.
 - **Si algo falla** (no quedaban manzanas, la persona no estaba, se acabó el tiempo de la tarea), el personaje **replanifica desde el estado real**. Si falla más de tres veces, abandona la meta.
 - **Si la meta ya se cumple** (porque otro la cumplió, por ejemplo), termina.
 

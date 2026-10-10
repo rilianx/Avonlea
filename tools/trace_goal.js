@@ -13,7 +13,7 @@
 const path = require('path'), fs = require('fs');
 let pw; try { pw = require('playwright'); } catch (e) { pw = require('/opt/node22/lib/node_modules/playwright'); }
 const argv = process.argv.slice(2), opt = (k, d) => { const i = argv.indexOf('--' + k); return i >= 0 ? argv.splice(i, 2)[1] : d; };
-const out = opt('out', 'traza.png'), pdf = opt('pdf', null), maxT = +opt('max', 900), W = +opt('w', 1500), which = argv.join(' ');
+const out = opt('out', 'traza.png'), pdf = opt('pdf', null), maxT = +opt('max', 2400), W = +opt('w', 1500), which = argv.join(' ');
 const exe = process.env.PLAYWRIGHT_CHROMIUM || (fs.existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chromium' : undefined);
 
 (async () => {

@@ -8,7 +8,7 @@ Un estado es una foto del mundo hecha de datos (`wmNow()`), y el planificador tr
 
 | Componente | Qué guarda | Ejemplo |
 |---|---|---|
-| `t` | la hora, en minutos desde la medianoche | `792.0866799999999` (= 13:12.086679999999888) |
+| `t` | la hora, en minutos desde la medianoche | `792.06664` (= 13:12.066640000000007) |
 | `pos` | dónde está cada persona, como un **lugar** (ver §6): un punto del mapa (`granero`, `huerto`…), `cocina` (adentro de Tejas Verdes), `h:casa` (adentro de otra casa) o `p:quien` (afuera, donde esa persona esté) | `ana: "cocina"` |
 | `invs` | lo que cada uno tiene: `{ cosa: cantidad }` | `ana: { huevos: 6, cuerda: 1 }` |
 | `cows` | dónde está cada vaca: `corral`, `potrero`, `c:vaca` (suelta, donde esté), `led:quien` (alguien la lleva de la cuerda), `sold:quien` (vendida) | `{"dolly":"corral","jersey":"potrero"}` |
@@ -53,7 +53,7 @@ Una meta es una **condición** sobre el estado (`test`) y una estimación de **c
 | `reconciliar(quien, a)` | a lo quiere ≥ 2 y no está ofendido | 1 por cada cosa que falte |
 | `intercede(a, por)` | se habló con a por alguien | 0 / 1 |
 | `rel_min(a, b, n)` | a quiere a b al menos n | lo que falta |
-| `estar_en(quien, lugar, hasta)` | quien está ahí (antes de la hora límite) | 0 / 1 (y la búsqueda descarta lo que pase de la hora) |
+| `estar_en(quien, lugar, hasta, quedar)` | quien está ahí (antes de la hora límite); con `quedar`, al llegar se queda (en la escuela, adentro, en clases) hasta esa hora y recién ahí la meta termina | 0 / 1 (y la búsqueda descarta lo que pase de la hora) |
 | `vaca_en(vaca, lugar)` | la vaca está en ese corral o potrero | 0 / 1 si alguien la lleva / 2 |
 | `vaca_vendida(vaca, a)` | vendida (a esa persona) | 0 / 1 / 2 |
 | `conoce(quien, noticia)` | quien sabe la noticia | 0 / 1 |
@@ -145,7 +145,7 @@ Reglas sociales (las mismas en el plan y en el mundo): pedir funciona si el otro
 | 1 | Ana | Conseguir una cinta para el pelo (trueque) | — |
 | 2 | Ana | Regalarle a Marilla algo que le guste | — |
 | 3 | Ana | Reconciliarse con Diana | — |
-| 4 | Ana | Llegar a la escuela antes de las 9 | — |
+| 4 | Ana | Ir a clases: llegar a la escuela antes de las 9 y quedarse hasta el mediodía | — |
 | 5 | Ana | Devolver la vaca escapada del Sr. Harrison | — |
 | 6 | Matthew | Matthew le trae azúcar a Marilla | — |
 | 7 | Matthew | Matthew encierra a Dolly | — |
@@ -165,7 +165,7 @@ Reglas sociales (las mismas en el plan y en el mundo): pedir funciona si el otro
 | 21 | Matthew | Matthew con dos metas: azúcar para Marilla y encerrar a Dolly *(varias metas)* | — |
 | 22 | Ana | Ana con tres metas: una cinta para ella, un regalo para Diana y azúcar para Marilla *(varias metas)* | — |
 | 23 | Matthew | Matthew encierra a Dolly y, ocupado, acepta además traerle huevos a Ana *(Ana pide el favor)* *(varias metas)* | — |
-| 24 | Ana | Ana quiere una cinta, pero antes debe llegar a la escuela a las 9 *(varias metas)* | — |
+| 24 | Ana | Ana quiere una cinta, pero antes tiene clases (de 9 a 12) *(varias metas)* | — |
 | 25 | Ana | Regalar una tarta de bayas en invierno (imposible) | — |
 
 Cómo se cumplió cada una, dibujado en el mapa: [`trazas/metas.pdf`](../trazas/metas.pdf) (`node tools/trace_goal.js --pdf trazas/metas.pdf`).

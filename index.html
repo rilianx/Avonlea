@@ -25,6 +25,7 @@ html,body{margin:0;height:100%;background:#2b3a26;overflow:hidden;touch-action:n
 #wmbtn{position:fixed;right:10px;top:256px;width:42px;height:36px;font-size:18px;line-height:30px;padding:0;cursor:pointer}
 #autobtn{position:fixed;right:10px;top:340px;width:42px;height:36px;font-size:18px;line-height:30px;padding:0;cursor:pointer}
 #autobtn.on{outline:2px solid #6a8f3c}
+#callbtn{position:fixed;right:10px;top:382px;width:42px;height:36px;font-size:18px;line-height:30px;padding:0;cursor:pointer}
 #autobar{position:fixed;left:50%;bottom:12px;transform:translateX(-50%);z-index:13;padding:4px 6px 4px 12px;font-size:13.5px;max-width:calc(100% - 24px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #autobar[hidden]{display:none}
 #autobar button{font:inherit;font-size:12px;margin-left:6px}
@@ -127,7 +128,7 @@ body.visor > *:not(#cv):not(#visor){display:none !important}
 <div id="clock" class="paper"></div>
 <div id="tok" class="paper" title="Tokens gastados con la IA" hidden></div>
 <div id="obs" class="paper" hidden><span></span> <button id="obsback">Volver a Ana</button></div>
-<div id="hint" class="paper">Flechas o WASD para pasear (o toca el suelo) · toca una persona u objeto para interactuar · Enter o T para decir algo · M para el mapa</div>
+<div id="hint" class="paper">Flechas o WASD para pasear (o toca el suelo) · toca una persona u objeto para interactuar · Enter o T para decir algo · M para el mapa · L para llamar a alguien</div>
 <div id="talk" class="paper" hidden></div>
 <div id="tripbar" class="paper" hidden><span id="tripstop"></span> <button id="tripfast">⏩ Más rápido</button></div>
 <div id="aiq" class="paper" hidden><div class="h">🐞 La IA eres tú · <span class="n"></span></div><details><summary>Ver el pedido</summary><pre class="p"></pre></details><textarea spellcheck="false"></textarea><div><button class="ok">Responder</button><button class="cp">📋 Copiar todo (para otra IA)</button><button class="no">Que falle</button><button class="all">Que fallen todos los de este tipo</button></div></div>
@@ -139,6 +140,7 @@ body.visor > *:not(#cv):not(#visor){display:none !important}
 <button id="wmbtn" class="paper" title="Metas de prueba (el planificador, sin IA)">🎯</button>
 <button id="headbtn" class="paper" title="Tamaño de las cabezas">🙂</button>
 <button id="autobtn" class="paper" title="Ana en automático (y mover el mapa libremente)">🤖</button>
+<button id="callbtn" class="paper" title="Llamar a quien esté cerca (L): se detiene, o viene si te quiere">📣</button>
 <div id="autobar" class="paper" hidden>🤖 Ana en automático · flechas o arrastrar: mover el mapa <button id="autocenter">Centrar en Ana</button><button id="autooff">Tomar el control</button></div>
 <div id="headp" class="paper" hidden><label>Cabezas <b id="headv"></b><input id="headr" type="range" min="1" max="5" step="0.1"></label></div>
 <div id="wmp" class="paper" hidden><div class="mt">🎯 Metas de prueba <small>(sin IA: el planificador)</small></div><label><input type="checkbox" id="wmobey" checked> Ana hace sola lo que le piden</label> <label><input type="checkbox" id="wmdis" checked> Se distraen (según su enfoque)</label> <label><input type="checkbox" id="vecon"> Ana dibujada por GPT (prueba)</label><div id="wmlist"></div><div id="wmrun"></div><div class="mb"><button id="wmstop">Detener todo</button><button id="wmclose">Cerrar</button></div></div>
@@ -1995,7 +1997,9 @@ function observe(who){
 }
 // what someone is doing now, in a few words (the strip while watching; the traces of the tests)
 function doingText(k){
-  const ag = AGENTS[k];
+  const ag = AGENTS[k], cl = wmBody(k)?.called;
+  if (cl && TT < cl.until) return (cl.come ? 'va donde ' : 'espera a ') + wmName(cl.by) + ' (lo llamó)';
+  { const sg = activeGoals(ag || {}).find(g => g.staying); if (sg) return (sg.goal.room === 'es' ? '📚 en clases' : 'se queda') + ' hasta las ' + fmtHour(sg.goal.quedar); }
   return ag?.distract ? '💭 ' + ag.distract.text : ag?.hold ? 'esperando aquí' : ag?.followOf ? 'acompaña a ' + wmName(ag.followOf) : ag?.task?.st === 'todo' ? stepText(ag.task.a) : (pw => pw ? 'espera a ' + wmName(pw.to) : activeGoals(ag || {}).length ? 'pensando qué hacer' : 'en lo suyo')(ag && activeGoals(ag).flatMap(g => g.pending || []).find(q => q.h.st === 'run'));
 }
 // the strip at the top while watching: who, what they are doing now, and the way back to Ana
@@ -2097,6 +2101,7 @@ function navStep(p, tx, ty){
 }
 function walkPath(p, tx, ty, sp, dt, sc){
   if (sc && sc !== curScene()) { const o = SCN; SCN = sc; try { return walkPath(p, tx, ty, sp, dt); } finally { SCN = o; } }
+  if (p.called) { const r = calledHold(p, dt); if (r !== null) return r; }   // (someone called them: they stop, or come)
   const n = navStep(p, tx, ty);
   if (n.arrived) { p.moving = false; return true; }
   const ox = p.x, oy = p.y; walkTo(p, n.wx, n.wy, sp, dt);
@@ -2166,7 +2171,8 @@ function tapAt(sx, sy){
   if (OBS) { observe(null); return; }   // (watching someone: a tap brings the view back to Ana)
   const wx = view.ox + sx / view.Z, wy = view.oy + sy / view.Z, t = targetAt(wx, wy);
   if (t && (t.self || dist(ana.x, ana.y, t.x, t.y) < t.reach * .85)) { ana.goto = null; t.act(); }
-  else ana.goto = t ? { id: t.id, scene: game.scene } : { x: wx, y: wy, scene: game.scene };
+  else { ana.goto = t ? { id: t.id, scene: game.scene } : { x: wx, y: wy, scene: game.scene };
+    if (t && /^[pf]:/.test(t.id)) { const k = t.id.slice(2), b = wmBody(k); if (b && b.moving && !b.called) callPerson('ana', k, { come: false }); } }   // (someone walking off: «¡Espera!»)
 }
 const view = { ox: 0, oy: 0, Z: 1 };
 /* ---------- Toby: trots about her, goes off to sniff at bushes and trees and the pump, to see who is about,
@@ -3777,6 +3783,43 @@ async function claudeCall(messages, schema, retry = true){
      a present, a walk). Space or a tap skips a line; Esc leaves. */
 const amb = { cur: null, ready: null, busy: false, tok: 0, cool: 0, err: 0, mute: {}, seen: {}, recent: null, hist: [] };
 let bubbles = [];
+// --- calling someone from a distance: they stop and look (and, if they get on with whoever calls, come over), a while
+const CALL_R = 520, CALL_WAIT = 14;
+const callName = k => wmName(k).replace(/^(el|la) /, '');
+function callPerson(by, k, o = {}){
+  const b = wmBody(k), cb = wmBody(by); if (!b || !cb || k === by || wmScene(k) !== wmScene(by) || b.lie || b.sit) return false;
+  const d = dist(b.x, b.y, cb.x, cb.y); if (d > CALL_R || d < 50) return false;
+  const come = o.come ?? (relGetW(k, by) >= 3 || kin(k, by) || !!FOLKBY[k]?.kid);
+  b.called = { by, t0: TT, until: TT + (o.wait || CALL_WAIT), come };
+  if (o.say !== false) { const n = callName(k), formal = /^(Sr|Sra|Srta)\.|Rev|Sr\. /.test(n) && by === 'ana'; sayB(qOf(by), `¡${n}! ` + (formal ? '¡Espere un momento, por favor!' : come ? '¡Ven un momento!' : '¡Espera!')); }
+  return true;
+}
+// a called one: facing whoever called, waiting (or walking up to them); 'null' when the call is over
+function calledHold(p, dt){
+  const c = p.called, cb = c && wmBody(c.by);
+  if (!c || !cb || TT > c.until) { p.called = null; return null; }
+  const d = dist(p.x, p.y, cb.x, cb.y); if (d < 60) c.until = Math.min(c.until, TT + 4);   // (they are together: a moment more, to talk)
+  if (Math.abs(cb.x - p.x) > Math.abs(cb.y - p.y)) p.dir = cb.x > p.x ? 1 : 3; else p.dir = cb.y > p.y ? 2 : 0;
+  if (c.come && d > 46) { p.called = null; walkPath(p, cb.x + (p.x < cb.x ? -30 : 30), cb.y + 4, 40, dt); p.called = c; }
+  else p.moving = false;
+  return false;
+}
+function calledTick(){
+  for (const p of [...Object.values(PEOPLE), ...FOLK]) {
+    const c = p.called; if (!c) continue;
+    if (TT > c.until) { p.called = null; continue; }
+    const k = PEOPLE[p.id] === p ? p.id : Object.keys(PEOPLE).find(x => PEOPLE[x] === p) || p.id;
+    if (!c.ans && TT > c.t0 + 1.2 && watched(p.where || 'out')) { c.ans = 1; sayB(qOf(k), c.come ? pick(['¿Sí? ¡Ya voy!', '¡Voy!', '¿Me llamabas? Ya voy.']) : pick(['¿Sí?', '¿Me llamabas?', '¿Qué pasa?'])); }
+  }
+}
+// the player: call whoever is nearest (not right beside her) within reach of a voice
+function callNearest(){
+  if (game.talk || menuOpen()) return;
+  let best = null, bd = 1e9;
+  for (const k of [...Object.keys(PEOPLE), ...FOLK.map(f => f.id)]) { const b = wmBody(k); if (!b || wmScene(k) !== game.scene || b.called) continue; const d = dist(b.x, b.y, ana.x, ana.y); if (d > 50 && d < CALL_R && d < bd) { bd = d; best = k; } }
+  if (!best) { notice('No hay nadie cerca a quien llamar'); return; }
+  callPerson('ana', best);
+}
 const personOf = k => k === 'ana' ? ana : PEOPLE[k] || ANIM[k] || (k.startsWith('f:') ? FOLKBY[k.slice(2)] : null);
 const lineDur = t => clamp(1.7 + t.length * .055, 2.4, 9);
 const nameOf = k => k === 'ana' ? 'Ana' : NAMES[k] || ANIMALS[k]?.name;
@@ -4032,6 +4075,7 @@ addEventListener('keydown', e => {
   audio(); hint(); if (!ANA_AUTO) userInput();
   if (e.code === 'KeyT' && !game.map) { e.preventDefault(); openSay(); return; }
   if (e.code === 'KeyM' && !game.talk) { toggleMap(); return; }
+  if (e.code === 'KeyL' && !game.map && !game.talk) { callNearest(); return; }
   if (game.map) { if (e.code === 'Escape' || e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); toggleMap(false); } return; }
   if (game.talk && !menuOpen()) {   // a talk going on: she can walk (walking off ends it), Space skips a line, Esc ends it
     if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); if (amb.cur) amb.cur.wait = 0; return; }
@@ -4157,6 +4201,7 @@ function setAuto(on){
   else userInput();
 }
 $('autobtn').addEventListener('pointerdown', e => { e.stopPropagation(); audio(); setAuto(!ANA_AUTO); });
+$('callbtn').addEventListener('pointerdown', e => { e.stopPropagation(); audio(); callNearest(); });
 $('autobar').addEventListener('pointerdown', e => e.stopPropagation());
 $('autocenter').addEventListener('pointerdown', e => { e.stopPropagation(); freeCam.free = false; observe(null); cam.snap = true; });
 $('autooff').addEventListener('pointerdown', e => { e.stopPropagation(); setAuto(false); });
@@ -4227,7 +4272,7 @@ function update(dt){
   }
   if (ANA_AUTO) { if (mx || my) { freeStart(); const v = 520 / (cam.zoom || 1) / (viewZoom || 1); freeCam.x += mx * v * dt; freeCam.y += my * v * dt; } mx = my = 0; }   // (on her own: the keys move the view)
   if (game.talk?.deadline && TT > game.talk.deadline && !sayOpen) { game.talk.deadline = 0; autoChoose(); }
-  autoTick(); cartTick(dt); momentsTick(); folkTick(dt); faunaTick(dt); agentTick(dt); wmApproachTick(dt); chatTick(dt); wmFollowTick();
+  autoTick(); cartTick(dt); momentsTick(); folkTick(dt); faunaTick(dt); agentTick(dt); wmApproachTick(dt); calledTick(); chatTick(dt); wmFollowTick();
   ana.torn = !!game.anaStates.rasgado; ana.askew = !!game.anaStates.despeinada;
   ana.savoring = false;
   // walking to something she was sent to (a tap): by the A* path, and doing it on arrival
@@ -5159,6 +5204,7 @@ function verbs(s, me, C){
 }
 
 // --- the goals: a condition (test), how far it is (h: steps missing, roughly), and what matters for it
+const PLACE_ROOM = { escuela: 'es' }, CLASES_FIN = 12;   // (classes: from 9 to noon)   // (a place with a room to be in: one goes in to stay)
 const G = {
   tener: (k, x, n) => ({ kind: 'tener', k, x, n, text: `${wmName(k)} tiene ${itemTextW(x, n)}`, test: s => (s.invs[k][x] || 0) >= n, h: s => { const miss = n - (s.invs[k][x] || 0); if (miss <= 0) return 0; const held = Object.entries(s.invs).some(([w, I]) => w !== k && (I[x] || 0) >= miss); return 1 + (held ? 0 : THINGS[x]?.receta ? 2 : 1) + (THINGS[x]?.receta ? Math.ceil(miss / 1) - 1 : 0); }, items: [x, ...Object.keys(THINGS[x]?.receta || {}), ...(TREATS[x] ? Object.keys(TRADE).flatMap(g => [g, ...Object.keys(THINGS[g]?.receta || {})]) : [])], people: [k, ...(TREATS[x] || LIBRETA.includes(x) ? ['lawson'] : [])] }),
   dinero: (k, n) => ({ text: `${wmName(k)} junta ${n} dólares`, test: s => (s.invs[k].dolares || 0) >= n - 1e-9, h: s => moneyH(s.invs[k], n), items: ['tarta', 'compota', 'bayas', 'manzanas'], people: [k, 'lawson', 'shearer'] }),
@@ -5166,7 +5212,9 @@ const G = {
   reconciliar: (k, to) => ({ text: `${wmName(k)} se reconcilia con ${wmName(to)}`, test: s => (s.rel[to + '>' + k] ?? 2) >= 2 && !s.ofensa[to + '>' + k], h: s => ((s.rel[to + '>' + k] ?? 2) >= 2 ? 0 : 1) + (s.ofensa[to + '>' + k] ? 1 : 0), items: ['tarta', 'bayas', 'ramo'], people: [k, to] }),
   intercede: (t, por) => ({ kind: 'intercede', text: `hablar con ${wmName(t)} por ${wmName(por)}`, test: s => !!s.facts['intercede:' + t + '>' + por], h: s => s.facts['intercede:' + t + '>' + por] ? 0 : 1, items: [], people: [t], intercede: [t, por] }),
   rel_min: (a, b, n, by) => ({ kind: 'rel_min', a, b, n, text: `que ${wmName(a)} quiera a ${wmName(b)} al menos ${n}`, test: s => (s.rel[a + '>' + b] ?? 2) >= n, h: s => Math.max(0, n - (s.rel[a + '>' + b] ?? 2)), items: ['tarta', 'bayas'], people: [a, b] }),
-  estar_en: (k, p, hasta) => ({ text: `${wmName(k)} está en ${WP_NAME[p] || p}` + (hasta ? ' antes de las ' + fmtHour(hasta) : ''), test: s => s.pos[k] === p && (!hasta || s.t <= hasta * 60), h: s => s.pos[k] === p ? 0 : 1, items: [], people: [k], places: [p], deadline: hasta }),
+  // (quedar: an hour until which one stays there once arrived, as at school until classes end; the goal is done then)
+  estar_en: (k, p, hasta, quedar) => { const at = s => s.pos[k] === p || (PLACE_ROOM[p] && s.pos[k] === 'h:' + PLACE_ROOM[p]);
+    return { kind: 'estar_en', text: `${wmName(k)} está en ${WP_NAME[p] || p}` + (hasta ? ' antes de las ' + fmtHour(hasta) : '') + (quedar ? ' y se queda hasta las ' + fmtHour(quedar) : ''), test: s => at(s) && (!hasta || s.t <= hasta * 60), h: s => at(s) ? 0 : 1, items: [], people: [k], places: [p], deadline: hasta, quedar, room: PLACE_ROOM[p] }; },
   vaca_en: (c, p) => ({ kind: 'vaca_en', c, p, text: `${ANIMALS[c].name} queda en ${WP_NAME[p]}`, test: s => s.cows[c] === p, h: s => s.cows[c] === p ? 0 : String(s.cows[c]).startsWith('led') ? 1 : 2, items: ['cuerda'], people: [], places: [p] }),
   vaca_vendida: (c, to) => ({ text: `${ANIMALS[c].name} vendida${to ? ' a ' + wmName(to) : ''}`, test: s => to ? s.cows[c] === 'sold:' + to : String(s.cows[c]).startsWith('sold'), h: s => String(s.cows[c]).startsWith('sold') ? 0 : String(s.cows[c]).startsWith('led') ? 1 : 2, items: ['cuerda'], people: to ? [to] : ['shearer'] }),
   conoce: (k, f) => ({ text: `${wmName(k)} se entera (${f.replace(/_/g, ' ')})`, test: s => (s.know[k] || []).includes(f), h: s => (s.know[k] || []).includes(f) ? 0 : 1, items: [], people: [k, ...WM_PEOPLE().filter(p => (game.wm.know[p] || []).includes(f))] }),
@@ -5291,13 +5339,23 @@ function goalPlan(ag, g){
   agentLog(ag, (r.partial ? 'plan parcial' : 'plan') + ' (' + g.label + '): ' + steps.map((st, k) => (k + 1) + '. ' + stepText(st.a) + (st.deps.length ? ' [tras ' + st.deps.map(i => i + 1).join(', ') + ']' : '')).join(' · '));
   return true;
 }
-function agentCheck(ag, s = wmNow()){ for (const g of activeGoals(ag)) if (g.goal.test(s) && !pendingOn(g)) goalEnd(ag, g, 'done'); }
+function agentCheck(ag, s = wmNow()){ for (const g of activeGoals(ag)) if (!g.staying && g.goal.test(s) && !pendingOn(g)) goalEnd(ag, g, 'done'); }
 function goalEnd(ag, g, st, why){
+  if (st === 'done' && g.goal.quedar && !g.stayed && hourNow() < g.goal.quedar) {   // (arrived: now to stay, until the hour)
+    if (!g.staying) { g.staying = true; agentLog(ag, '📚 llegó: se queda hasta las ' + fmtHour(g.goal.quedar)); logEv(`${wmName(ag.who)} llegó a ${WP_NAME[g.goal.places[0]] || 'su destino'} y se queda hasta las ${fmtHour(g.goal.quedar)}.`, []); }
+    return;
+  }
   g.st = st; g.why = why; if (ag.task?.g === g) ag.task = null;
   for (const t of ag.tasks) if (t.g === g && t.st === 'todo') t.st = st === 'done' ? 'skip' : 'fail';
   const msg = st === 'done' ? `${wmName(ag.who)} logró: ${g.label}.` : `${wmName(ag.who)} no pudo: ${g.label}${why ? ' (' + why + ')' : ''}.`;
   agentLog(ag, (st === 'done' ? '✔ ' : '✘ ') + g.label + (why ? ' (' + why + ')' : '')); logEv(msg, []);
   if (ag.who === 'ana' && st === 'done') float('✔ ' + g.label, ana.x, ana.y - 64);
+}
+function stayTick(ag, g, dt){
+  if (hourNow() >= g.goal.quedar) { g.staying = false; g.stayed = true; agentLog(ag, '🔔 terminó: ' + g.label); goalEnd(ag, g, 'done'); return; }
+  ag.st = 'run'; ag.task = null;
+  const key = g.goal.room ? 'h:' + g.goal.room : g.goal.places[0], r = wmMove(ag.who, key, dt);
+  if (r === 'ok') { const b = wmBody(ag.who); if (ag.who !== 'ana') b.moving = false; }
 }
 function agentIdle(ag){ ag.st = 'idle'; ag.task = null; ag.paused = false; ag.seenInput = null; wmRelease(ag.who); }
 function agentEnd(ag, st, why){ for (const g of activeGoals(ag)) goalEnd(ag, g, st, why); agentIdle(ag); }
@@ -5358,6 +5416,7 @@ function agentTick(dt){
     if (ag.hold) { wmHold(ag, dt); continue; }
     if (!activeGoals(ag).length) { if (ag.st !== 'idle') agentIdle(ag); continue; }
     if (ag.who === 'ana' && anaPaused(ag)) continue;
+    { const sg = activeGoals(ag).find(g => g.staying); if (sg) { stayTick(ag, sg, dt); continue; } }   // (at school: in class, the rest waits)
     if (distractTick(ag)) continue;
     for (const g of activeGoals(ag)) if (g.pending.some(p => p.h.st === 'fail' && !p.seen)) { for (const p of g.pending) if (p.h.st === 'fail') { p.seen = true; delete game.wm.facts['pedido:' + p.f.f + ':' + p.to + ':' + today()]; }   // (they tried and could not: one may ask again)
       agentLog(ag, 'quien iba a ayudar no pudo: ' + g.label); if (++g.tries > 3) goalEnd(ag, g, 'fail', 'nadie pudo ayudar'); else goalPlan(ag, g); }
@@ -5560,6 +5619,7 @@ function wmMove(who, key, dt){
     const pen = AREAS[key], d = dist(b.x, b.y, T.out[0], T.out[1]);
     if (pen ? inArea(pen, b.x, b.y, -6) : d < near) { wmStop(who); return 'ok'; }   // (into a pen means inside its fence)
     const person = key.startsWith('p:'), lim = person ? 64 : 130;   // (to a person: up to them, to speak to them face to face)
+    if (person && d > 110 && d < CALL_R && !(b.wmCallT > TT - 25)) { const tb = wmBody(key.slice(2)); if (tb && tb.moving && !tb.called) { b.wmCallT = TT; callPerson(who, key.slice(2), { come: false }); } }   // (they are walking off: call them to wait)
     if (wmWalk(who, T.out[0], T.out[1], 'out', dt) && !pen && d < lim) { wmStop(who); return 'ok'; }   // (as near as one can get)
     if (b.wmT !== TT) { b.wmStill = b.wmPx != null && dist(b.x, b.y, b.wmPx, b.wmPy) < 4 * dt ? (b.wmStill || 0) + dt : 0; b.wmPx = b.x; b.wmPy = b.y; b.wmT = TT; }   // (once a frame: it may be asked twice; still = slower than 4 px/s, a walker does ~0.7 px a frame)
     if (b.wmStill > (person ? 4 : 1.5) && !pen && d < 130) { b.wmStill = 0; wmStop(who); return 'ok'; }   // (stuck just short of it: close enough)
@@ -5575,6 +5635,7 @@ function wmWalk(who, x, y, scene, dt){
   const b = wmBody(who);
   if (who === 'ana') { if (TT - (ana.wmArr || -9) < .4) return true; if (!ana.goto || !ana.goto.wm || dist(ana.goto.x, ana.goto.y, x, y) > 30) ana.goto = { x, y, scene, wm: true }; return false; }
   const sp = AGENTS[who] ? wmPace(AGENTS[who]) : (CH[who]?.speed?.walk || 40), visible = viewScene() === scene && (scene !== 'out' || seen(b.x, b.y, 300));
+  if (b.called && TT < b.called.until) { b.moving = false; return false; }
   if (visible) return walkPath(b, x, y, sp, dt, scene);
   const d = dist(b.x, b.y, x, y), v = Math.min(d, sp * dt); b.x += (x - b.x) / (d || 1) * v; b.y += (y - b.y) / (d || 1) * v; b.moving = d > 2; if (Math.abs(x - b.x) > 1) b.dir = x > b.x ? 1 : 3; b.walk = (b.walk + dt * 1.8) % 1;
   return d < 2;
@@ -5748,7 +5809,7 @@ const WM_TESTS = [
   { who: 'ana', text: 'Conseguir una cinta para el pelo (trueque)', setup: () => { dayAt(9); setSeason(1); game.inv.cinta = 0; game.eggDay = today(); for (const u of bushes) if (dist(u.x, u.y, WP.arbustos[0], WP.arbustos[1]) < 260) u.berries = 3; atOut('ana', GG.x, GG.y + 90); }, goal: () => G.tener('ana', 'cinta', 1) },
   { who: 'ana', text: 'Regalarle a Marilla algo que le guste', setup: () => { dayAt(10); setSeason(0); BEDS[0].stage = 3; BEDS[1].stage = 3; atOut('ana', GG.x + 200, GG.y + 120); }, goal: () => G.regalo_gusto('ana', 'marilla') },
   { who: 'ana', text: 'Reconciliarse con Diana', setup: () => { dayAt(11); game.fond.diana = 1; game.wm.ofensa['diana>ana'] = 'licor'; delete game.wm.facts['disc:diana>ana:' + today()]; diana.follow = false; atOut('diana', OS.x - 60, OS.y + 80); atOut('ana', GG.x, GG.y + 90); }, goal: () => G.reconciliar('ana', 'diana') },
-  { who: 'ana', text: 'Llegar a la escuela antes de las 9', setup: () => { dayAt(8.2); atOut('ana', GG.x, GG.y + 90); }, goal: () => G.estar_en('ana', 'escuela', 9) },
+  { who: 'ana', text: 'Ir a clases: llegar a la escuela antes de las 9 y quedarse hasta el mediodía', setup: () => { dayAt(8.2); atOut('ana', GG.x, GG.y + 90); }, goal: () => G.estar_en('ana', 'escuela', 9, CLASES_FIN) },
   { who: 'ana', text: 'Devolver la vaca escapada del Sr. Harrison', setup: () => { dayAt(10); game.inv.cuerda = 0; const A = AREAS.avena; cowLoose('jersey', A.x + A.w / 2, A.y + A.h / 2); atOut('ana', GG.x, GG.y + 90); }, goal: () => G.vaca_en('jersey', 'potrero') },
   { who: 'matthew', text: 'Matthew le trae azúcar a Marilla', setup: () => { dayAt(10); wmInv('matthew').dolares = 5; wmInv('marilla').azucar = 0; atOut('matthew', BARN.x + 60, BARN.y + 60); }, goal: () => G.tener('marilla', 'azucar', 1) },
   { who: 'matthew', text: 'Matthew encierra a Dolly', setup: () => { dayAt(10); wmInv('matthew').cuerda = 0; cowLoose('dolly', GG.x + 420, GG.y + 260); atOut('matthew', BARN.x + 60, BARN.y + 60); }, goal: () => G.vaca_en('dolly', 'corral') },
@@ -5771,8 +5832,8 @@ const WM_TESTS = [
     goals: () => [[G.tener('ana', 'cinta', 1), 'conseguir una cinta para el pelo'], [G.regalo_gusto('ana', 'diana'), 'regalarle a Diana algo que le guste'], [G.tener('marilla', 'azucar', 1), 'llevarle azúcar a Marilla']] },
   { who: 'matthew', text: 'Matthew encierra a Dolly y, ocupado, acepta además traerle huevos a Ana', setup: () => { dayAt(9); game.eggDay = -1; game.inv.huevos = 0; wmInv('matthew').cuerda = 0; cowLoose('dolly', GG.x + 520, GG.y + 300); atOut('ana', GG.x + 300, GG.y + 140); atOut('matthew', GG.x + 200, GG.y + 150); },
     goals: () => [[G.vaca_en('dolly', 'corral'), 'encerrar a Dolly']], ask: { f: 'traer', to: 'matthew', item: 'huevos', n: 6 } },
-  { who: 'ana', text: 'Ana quiere una cinta, pero antes debe llegar a la escuela a las 9', setup: () => { dayAt(8.1); game.eggDay = -1; game.inv.huevos = 0; game.inv.cinta = 0; atOut('ana', GG.x, GG.y + 90); },
-    goals: () => [[G.tener('ana', 'cinta', 1), 'conseguir una cinta para el pelo'], [G.estar_en('ana', 'escuela', 9), 'llegar a la escuela antes de las 9']] },
+  { who: 'ana', text: 'Ana quiere una cinta, pero antes tiene clases (de 9 a 12)', setup: () => { dayAt(8.1); game.eggDay = -1; game.inv.huevos = 0; game.inv.cinta = 0; atOut('ana', GG.x, GG.y + 90); },
+    goals: () => [[G.tener('ana', 'cinta', 1), 'conseguir una cinta para el pelo'], [G.estar_en('ana', 'escuela', 9, CLASES_FIN), 'ir a clases (de 9 a 12)']] },
   { who: 'ana', text: 'Regalar una tarta de bayas en invierno (imposible)', setup: () => { dayAt(10); setSeason(3); game.inv.bayas = 0; game.inv.tarta = 0; atOut('ana', GG.x, GG.y + 90); }, goal: () => G.regalar_cosa('ana', 'tarta') },
 ];
 // Ana asks someone a favor (the player, from a conversation): if they accept and see how, the goal is theirs

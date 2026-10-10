@@ -65,7 +65,7 @@ const exe = process.env.PLAYWRIGHT_CHROMIUM || (fs.existsSync('/opt/pw-browsers/
     '| `reconciliar(quien, a)` | a lo quiere ≥ 2 y no está ofendido | 1 por cada cosa que falte |',
     '| `intercede(a, por)` | se habló con a por alguien | 0 / 1 |',
     '| `rel_min(a, b, n)` | a quiere a b al menos n | lo que falta |',
-    '| `estar_en(quien, lugar, hasta)` | quien está ahí (antes de la hora límite) | 0 / 1 (y la búsqueda descarta lo que pase de la hora) |',
+    '| `estar_en(quien, lugar, hasta, quedar)` | quien está ahí (antes de la hora límite); con `quedar`, al llegar se queda (en la escuela, adentro, en clases) hasta esa hora y recién ahí la meta termina | 0 / 1 (y la búsqueda descarta lo que pase de la hora) |',
     '| `vaca_en(vaca, lugar)` | la vaca está en ese corral o potrero | 0 / 1 si alguien la lleva / 2 |',
     '| `vaca_vendida(vaca, a)` | vendida (a esa persona) | 0 / 1 / 2 |',
     '| `conoce(quien, noticia)` | quien sabe la noticia | 0 / 1 |',
