@@ -4192,7 +4192,7 @@ function update(dt){
     if (stick) { const dx = stick.x - stick.x0, dy = stick.y - stick.y0, l = Math.hypot(dx, dy); if (l > 10) { mx = dx / Math.max(l, 50); my = dy / Math.max(l, 50); } }
   }
   if (game.talk?.deadline && TT > game.talk.deadline && !sayOpen) { game.talk.deadline = 0; autoChoose(); }
-  autoTick(); cartTick(dt); momentsTick(); folkTick(dt); faunaTick(dt); agentTick(dt); chatTick(dt); wmFollowTick();
+  autoTick(); cartTick(dt); momentsTick(); folkTick(dt); faunaTick(dt); agentTick(dt); wmApproachTick(dt); chatTick(dt); wmFollowTick();
   ana.torn = !!game.anaStates.rasgado; ana.askew = !!game.anaStates.despeinada;
   ana.savoring = false;
   // walking to something she was sent to (a tap): by the A* path, and doing it on arrival
@@ -5086,7 +5086,7 @@ const FAVORS = {   // what one can ask of someone (ok: whether it can be asked; 
 // whom one could ask for help with a goal (anyone present who is not in the chain of who asked whom)
 function autoFavors(me, goal, s0, exclude = []){
   if (exclude.length >= 2) return [];   // (no longer chains than: A asks B, who asks C)
-  const cands = WM_PEOPLE().filter(k => k !== me && !exclude.includes(k) && s0.pos[k] && (!isQuieto(me) || s0.pos[k] === s0.pos[me]) && (kin(me, k) || relGetW(k, me) >= 3)), out = [];   // (one asks one's own, or a friend)
+  const cands = WM_PEOPLE().filter(k => k !== me && !exclude.includes(k) && s0.pos[k] && (!isQuieto(me) || s0.pos[k] === s0.pos[me] || k === 'ana') && (kin(me, k) || relGetW(k, me) >= 3)), out = [];   // (one asks one's own, or a friend; one who cannot go out, those with them, or sends for Ana)
   if (goal.kind === 'tener') { const miss = goal.n - (s0.invs[goal.k]?.[goal.x] || 0); if (miss > 0) for (const k of cands) out.push({ f: 'traer', to: k, item: goal.x, n: miss }); }
   if (goal.kind === 'vaca_en') for (const k of cands) out.push({ f: 'encerrar_vaca', to: k, cow: goal.c, pen: goal.p });
   if (goal.kind === 'rel_min' && goal.b === me) for (const k of cands) if (relGetW(goal.a, k) >= 4) out.push({ f: 'interceder', to: k, target: goal.a });
@@ -5114,6 +5114,7 @@ function verbs(s, me, C){
     if (C.intercede && C.intercede[0] === k && !s.facts['intercede:' + k + '>' + C.intercede[1]]) add('interceder', 2, t => { socialRule(stateR(t), 'interceder', me, k, C.intercede[1]); t.facts['intercede:' + k + '>' + C.intercede[1]] = 1; }, { k, por: C.intercede[1] });
     for (const f of C.favors) { const F = FAVORS[f.f]; if (f.to === k && F.ok(s, me, k, f) && socialRule(stateR(s), 'pedir', me, k) && !s.facts['pedido:' + f.f + ':' + k]) add('pedir', 2 + (F.wait || 0) + (isQuieto(me) ? 0 : 40), t => { F.eff(t, me, k, f); t.facts['pedido:' + f.f + ':' + k] = 1; }, { k, favor: f }); }
   }
+  if (isQuieto(me) && !at('ana')) for (const f of C.favors) { const F = FAVORS[f.f]; if (f.to === 'ana' && F.ok(s, me, 'ana', f) && !s.facts['pedido:' + f.f + ':ana']) add('pedir', 2 + (F.wait || 0) + 25, t => { F.eff(t, me, 'ana', f); t.facts['pedido:' + f.f + ':ana'] = 1; }, { k: 'ana', favor: f, llamar: true }); }   // (sends for her: she comes, then is asked)
   for (const [c, st] of Object.entries(s.cows)) {
     if (st === here && inv.cuerda > 0 && !Object.values(s.cows).includes('led:' + me) && (FAMILY(C.owner[c]).includes(me) || st.startsWith('c:'))) add('guiar', 2, t => { t.cows[c] = 'led:' + me; }, { cow: c });
     if (st === 'led:' + me && (here === 'corral' || here === 'potrero')) add('soltar', 1, t => { t.cows[c] = here; }, { cow: c, p: here });
@@ -5521,9 +5522,10 @@ function wmMove(who, key, dt){
     if (sc !== 'out') { wmExit(who); return 'run'; }
     const pen = AREAS[key], d = dist(b.x, b.y, T.out[0], T.out[1]);
     if (pen ? inArea(pen, b.x, b.y, -6) : d < near) { wmStop(who); return 'ok'; }   // (into a pen means inside its fence)
-    if (wmWalk(who, T.out[0], T.out[1], 'out', dt) && !pen && d < 130) { wmStop(who); return 'ok'; }   // (as near as one can get)
-    if (b.wmPx != null && dist(b.x, b.y, b.wmPx, b.wmPy) < 1.5) b.wmStill = (b.wmStill || 0) + dt; else b.wmStill = 0; b.wmPx = b.x; b.wmPy = b.y;
-    if (b.wmStill > 1.5 && !pen && d < 130) { b.wmStill = 0; wmStop(who); return 'ok'; }   // (stuck just short of it: close enough)
+    const person = key.startsWith('p:'), lim = person ? 64 : 130;   // (to a person: up to them, to speak to them face to face)
+    if (wmWalk(who, T.out[0], T.out[1], 'out', dt) && !pen && d < lim) { wmStop(who); return 'ok'; }   // (as near as one can get)
+    if (b.wmT !== TT) { b.wmStill = b.wmPx != null && dist(b.x, b.y, b.wmPx, b.wmPy) < 4 * dt ? (b.wmStill || 0) + dt : 0; b.wmPx = b.x; b.wmPy = b.y; b.wmT = TT; }   // (once a frame: it may be asked twice; still = slower than 4 px/s, a walker does ~0.7 px a frame)
+    if (b.wmStill > (person ? 4 : 1.5) && !pen && d < 130) { b.wmStill = 0; wmStop(who); return 'ok'; }   // (stuck just short of it: close enough)
     return 'run';
   }
   // a room
@@ -5630,11 +5632,18 @@ function wmExec(ag, a, st, dt){
       logEv(`${wmName(me)} se disculpó con ${wmName(a.k)}.`, []); return 'ok';
     }
     case 'pedir': {
+      if (!st.asked && a.llamar) {   // (one who cannot come sends for Ana, and waits for her)
+        const here = wmScene('ana') === wmScene(me) && (wmScene(me) !== 'out' || dist(ana.x, ana.y, b.x, b.y) < 90);   // (in the same room is with them)
+        if (!here) {
+          if (!st.called) { st.called = 1; if (ag.task) ag.task.budget = Math.max(ag.task.budget || 150, 600); notice(`📜 ${wmName(me)} te manda llamar${WP_NAME[personKey(me)] ? ' (' + WP_NAME[personKey(me)] + ')' : ''}.`); logEv(`${wmName(me)} mandó a llamar a Ana.`, []); if (WM_OBEY) WM_APPROACH = { who: me, done: () => {} }; }
+          return 'run';
+        }
+      }
       if (!st.asked) {
-        const r = reach(a.k); if (r !== 'ok') return r;
+        const r = a.llamar ? 'ok' : reach(a.k); if (r !== 'ok') return r;
         if (!socialRule(realR, 'pedir', me, a.k)) { bubble(a.k, 'No, ahora no.'); st.why = wmName(a.k) + ' no quiso'; realR.setFact('pedido:' + a.favor.f + ':' + a.k); return 'fail'; }
         if (a.k !== 'ana' && activeGoals(AGENTS[a.k]).length >= MAX_GOALS) { bubble(a.k, 'Ahora no puedo, tengo demasiado que hacer.'); st.why = wmName(a.k) + ' está ocupado'; realR.setFact('pedido:' + a.favor.f + ':' + a.k); return 'fail'; }
-        st.asked = 1; realR.setFact('pedido:' + a.favor.f + ':' + a.k);
+        st.asked = 1; realR.setFact('pedido:' + a.favor.f + ':' + a.k); if (a.llamar && WM_APPROACH && WM_APPROACH.who === me) { WM_APPROACH = null; wmStop('ana'); }
         const F = FAVORS[a.favor.f], f = a.favor;
         bubble(me, F.say ? F.say(f) : { pasear: '¿Vamos a pasear juntas?', venir: '¿Vienes a tomar el té conmigo?' }[f.f] || '¿Me harías un favor?');
         logEv(`${wmName(me)} le pidió a ${wmName(a.k)}: ${f.f.replace('_', ' ')}.`, []);
@@ -5740,19 +5749,38 @@ function playerAsk(who, f){
   return agentStart(who, goal, { label: goal.text + ' (se lo pidió Ana)', parent: 'ana', chain: ['ana'] });
 }
 function dayAt(h){ dayT = Math.floor(dayT) + (h - 6) / 24; }
+// Ana goes up to someone and then asks them (a favour in the test goals: as the player would, talking to them)
+let WM_APPROACH = null;
+function anaAskWalk(who, f, label){
+  const h = { who: 'ana', label, log: [], _st: 'run', why: '', get st() { return this.h ? this.h.st : this._st; }, get n() { return this.h?.n; } };
+  WM_APPROACH = { who, h, done: () => { const g = playerAsk(who, f); if (g) { h.h = g; if (h.test != null) g.test = h.test; } else { h._st = 'fail'; h.why = 'no aceptó'; } } };
+  return h;
+}
+function wmApproachTick(dt){
+  const A = WM_APPROACH; if (!A) return;
+  const tb = wmBody(A.who), sc = wmScene(A.who), inRoom = sc && sc !== 'out' && game.scene === sc && tb && dist(ana.x, ana.y, tb.x, tb.y) < 130;
+  if (inRoom) { wmStop('ana'); WM_APPROACH = null; A.done(); return; }   // (in the room with them: near enough to talk; the furniture may be in the way)
+  const r = wmMove('ana', 'p:' + A.who, dt);
+  if (r === 'fail') { if (A.h) { A.h._st = 'fail'; A.h.why = wmName(A.who) + ' no está'; } WM_APPROACH = null; return; }
+  if (r !== 'ok') return;
+  WM_APPROACH = null; A.done();
+}
 function wmRunTest(i){
   const T = WM_TESTS[i];
   for (const c of CHATS.slice()) chatEnd(c);
   for (const k of Object.keys(AGENTS)) { wmRelease(k); delete AGENTS[k]; }
   close(); if (ana.goto) ana.goto = null; diana.follow = false; game.wm.sick = []; for (const f of Object.keys(game.wm.facts)) if (/^(pedido|intercede|disc|gusto|dio):/.test(f)) delete game.wm.facts[f]; game.seasonShift = 0; cowHome('dolly'); cowHome('jersey'); game.inv.cuerda = 0; for (const k of ['matthew', 'harrison', 'shearer']) delete game.wm.inv[k];
   if (PEOPLE.shearer.where !== 'away') { PEOPLE.shearer.where = 'away'; }
+  WM_APPROACH = null;
+  const keep = { scene: game.scene, x: ana.x, y: ana.y, dir: ana.dir, tx: toby.x, ty: toby.y, cx: cam.x, cy: cam.y };
   T.setup(); S = ((seasonCount() % 4) + 4) % 4;
+  game.scene = keep.scene; ana.x = keep.x; ana.y = keep.y; ana.dir = keep.dir; ana.goto = null; toby.x = keep.tx; toby.y = keep.ty; cam.x = keep.cx; cam.y = keep.cy;   // (Ana where she was: no jumping to the test's start)
   let ag;
   if (T.goals) {   // (several goals at once, maybe one asked later)
     const hs = T.goals().map(([goal, label]) => agentStart(T.who, goal, { label, favors: T.favors || [] })).filter(Boolean);
-    if (T.ask) { const h = playerAsk(T.who, T.ask); if (h) hs.push(h); }
+    if (T.ask) hs.push(anaAskWalk(T.ask.to, T.ask, T.text));
     ag = { who: T.who, get st() { return hs.some(h => h.st === 'run') ? 'run' : hs.every(h => h.st === 'done') ? 'done' : 'fail'; }, get why() { return hs.filter(h => h.why).map(h => h.label + ': ' + h.why).join('; '); }, log: agentOf(T.who).log, get n() { return hs[0]?.n; } };
-  } else ag = T.ask ? playerAsk(T.who, T.ask) || { st: 'fail', why: 'no aceptó', log: [] } : agentStart(T.who, T.goal(), { favors: T.favors || [], label: T.text });
+  } else ag = T.ask ? anaAskWalk(T.ask.to, T.ask, T.text) : agentStart(T.who, T.goal(), { favors: T.favors || [], label: T.text });
   ag.test = i; if (T.ask && !T.goals) ag.label = T.text;
   if (T.who !== 'ana') cam.x = wmBody(T.who).x, cam.y = wmBody(T.who).y;
   wmPanelDraw(); return ag;
