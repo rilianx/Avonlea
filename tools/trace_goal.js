@@ -5,20 +5,24 @@
    that moment, what was given, bought, cooked...), listed with their time on the right.
 
      node tools/trace_goal.js <test number | words of its name> [--out traza.png] [--max 900] [--w 1500]
+     node tools/trace_goal.js --pdf trazas/metas.pdf [numbers or words, comma separated; all if none]
+
+   With --pdf: each goal run on a fresh page, one page of the PDF each, and a first page with all the results.
 
    Needs Playwright (and a Chromium: PLAYWRIGHT_CHROMIUM or /opt/pw-browsers/chromium). */
 const path = require('path'), fs = require('fs');
 let pw; try { pw = require('playwright'); } catch (e) { pw = require('/opt/node22/lib/node_modules/playwright'); }
 const argv = process.argv.slice(2), opt = (k, d) => { const i = argv.indexOf('--' + k); return i >= 0 ? argv.splice(i, 2)[1] : d; };
-const out = opt('out', 'traza.png'), maxT = +opt('max', 900), W = +opt('w', 1500), which = argv.join(' ');
+const out = opt('out', 'traza.png'), pdf = opt('pdf', null), maxT = +opt('max', 900), W = +opt('w', 1500), which = argv.join(' ');
 const exe = process.env.PLAYWRIGHT_CHROMIUM || (fs.existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chromium' : undefined);
 
 (async () => {
   const b = await pw.chromium.launch({ executablePath: exe, args: ['--no-sandbox'] });
   const pg = await b.newPage({ viewport: { width: 900, height: 640 } }); const errs = []; pg.on('pageerror', e => errs.push(e.message));
   await pg.addInitScript(() => { localStorage.clear(); localStorage.setItem('avonlea-ai-asked', '1'); });
-  await pg.goto('file://' + path.resolve(__dirname, '..', 'index.html')); await pg.waitForFunction(() => window.__avonlea);
-  const r = await pg.evaluate(async ([which, maxT, W]) => {
+  const load = async () => { await pg.goto('file://' + path.resolve(__dirname, '..', 'index.html')); await pg.waitForFunction(() => window.__avonlea); };
+  await load();
+  const trace = which => pg.evaluate(async ([which, maxT, W]) => {
     const A = window.__avonlea, tests = A.WM_TESTS;
     const i = /^\d+$/.test(which) ? +which : tests.findIndex(T => T.text.toLowerCase().includes(which.toLowerCase()));
     if (!(i >= 0 && tests[i])) return { err: 'no hay una meta de prueba así: ' + which + '\n' + tests.map((T, j) => j + ' ' + T.text).join('\n') };
@@ -59,22 +63,22 @@ const exe = process.env.PLAYWRIGHT_CHROMIUM || (fs.existsSync('/opt/pw-browsers/
     const pts = [...who.flatMap(k => tr[k]), ...cowK.flatMap(c => cows[c]), ...marks.map(e => e.p)];
     let x0 = Math.min(...pts.map(p => p[0])) - 300, x1 = Math.max(...pts.map(p => p[0])) + 420, y0 = Math.min(...pts.map(p => p[1])) - 300, y1 = Math.max(...pts.map(p => p[1])) + 200;
     const minW = 1600; if (x1 - x0 < minW) { const c = (x0 + x1) / 2; x0 = c - minW / 2; x1 = c + minW / 2; }
-    if ((y1 - y0) < (x1 - x0) * .45) { const c = (y0 + y1) / 2, hh = (x1 - x0) * .45; y0 = c - hh / 2; y1 = c + hh / 2; }
+    if ((y1 - y0) < (x1 - x0) * .62) { const c = (y0 + y1) / 2, hh = (x1 - x0) * .62; y0 = c - hh / 2; y1 = c + hh / 2; }
+    if ((y1 - y0) > (x1 - x0) * .82) { const c = (x0 + x1) / 2, ww = (y1 - y0) / .82; x0 = c - ww / 2; x1 = c + ww / 2; }   // (landscape, to fill a page)
+    if (x0 < 0) { x1 -= x0; x0 = 0; } if (x1 > A.WW) { x0 -= x1 - A.WW; x1 = A.WW; } if (y0 < 0) { y1 -= y0; y0 = 0; } if (y1 > A.WH) { y0 -= y1 - A.WH; y1 = A.WH; }
     x0 = Math.max(0, x0); y0 = Math.max(0, y0); x1 = Math.min(A.WW, x1); y1 = Math.min(A.WH, y1);
     const rw = x1 - x0, rh = y1 - y0, mapH = Math.round(W * rh / rw), z = A.WW / rw, base = A.paintMapBase(W, mapH, z, x0, y0), s = W / rw;
     // the legend on the right
-    const LW = 520, lines = [];
+    const LW = 660, lines = [];
     const cv = document.createElement('canvas'), c = cv.getContext('2d');
     const col = k => A.LOOKS[k]?.dress || '#888', ink = '#4a2f1c', P = ([x, y]) => [(x - x0) * s, (y - y0) * s];
     const wrap = (text, w, font) => { c.font = font; const out = []; let l = ''; for (const wd of text.split(' ')) { const tl = l ? l + ' ' + wd : wd; if (c.measureText(tl).width > w && l) { out.push(l); l = wd; } else l = tl; } if (l) out.push(l); return out; };
     const legend = [];
-    for (const l of wrap(T.text, LW - 40, 'bold 22px Georgia, serif')) legend.push({ t: l, f: 'bold 22px Georgia, serif' });
-    legend.push({ t: `${hhmm(h0)} → ${hhmm(A.hourNow())} · ${ag.st === 'done' ? '✔ cumplida' : ag.st === 'fail' ? '✘ no se cumplió' + (ag.why ? ' (' + ag.why + ')' : '') : '… sin terminar'}`, f: 'italic 17px Georgia, serif' });
+    const result = ag.st === 'done' ? '✔ cumplida' : ag.st === 'fail' ? '✘ no se cumplió' + (ag.why ? ' (' + ag.why + ')' : '') : '… sin terminar', span = `${hhmm(h0)} → ${hhmm(A.hourNow())}`;
+    for (const k of who) legend.push({ t: wmN(k), f: 'bold 21px Georgia, serif', dot: col(k) });
+    for (const c_ of cowK) legend.push({ t: (A.ANIMALS[c_]?.name || c_) + ' (vaca)', f: 'bold 21px Georgia, serif', dot: '#7a5a3a', dash: true });
     legend.push({ t: '', f: '8px serif' });
-    for (const k of who) legend.push({ t: wmN(k), f: 'bold 16px Georgia, serif', dot: col(k) });
-    for (const c_ of cowK) legend.push({ t: (A.ANIMALS[c_]?.name || c_) + ' (vaca)', f: 'bold 16px Georgia, serif', dot: '#7a5a3a', dash: true });
-    legend.push({ t: '', f: '8px serif' });
-    marks.forEach((e, n) => { const head = `${n + 1}. ${hhmm(e.h)} `, body = e.kind === 'meta' ? `${e.text} — estaba: ${e.was}` : e.text; wrap(head + body, LW - 40, '15px Georgia, serif').forEach((l, j) => legend.push({ t: l, f: '15px Georgia, serif', ind: j ? 26 : 0, meta: e.kind === 'meta' })); });
+    marks.forEach((e, n) => { const head = `${n + 1}. ${hhmm(e.h)} `, body = e.kind === 'meta' ? `${e.text} — estaba: ${e.was}` : e.text; wrap(head + body, LW - 40, '20px Georgia, serif').forEach((l, j) => legend.push({ t: l, f: '20px Georgia, serif', ind: j ? 26 : 0, meta: e.kind === 'meta' })); });
     const lh = f => +f.match(/(\d+)px/)[1] * 1.35, legH = legend.reduce((a, l) => a + lh(l.f), 40);
     cv.width = W + LW; cv.height = Math.max(mapH, legH);
     c.fillStyle = '#f1e2bf'; c.fillRect(0, 0, cv.width, cv.height); c.drawImage(base.cv, 0, 0);
@@ -84,7 +88,7 @@ const exe = process.env.PLAYWRIGHT_CHROMIUM || (fs.existsSync('/opt/pw-browsers/
       for (const q of Q.filter(q => q[2] % 30 === 0)) { const [x, y] = P(q); c.beginPath(); c.arc(x, y, 3, 0, Math.PI * 2); c.fillStyle = colr; c.fill(); } };
     for (const c_ of cowK) way(cows[c_], '#7a5a3a', true);
     for (const k of who) way(tr[k], col(k));
-    const label = (text, x, y, size = 15) => { c.font = `italic ${size}px Georgia, serif`; c.textAlign = 'center'; c.lineWidth = 4; c.strokeStyle = 'rgba(241,226,191,.95)'; c.strokeText(text, x, y); c.fillStyle = ink; c.fillText(text, x, y); };
+    const label = (text, x, y, size = 18) => { c.font = `italic ${size}px Georgia, serif`; c.textAlign = 'center'; c.lineWidth = 4; c.strokeStyle = 'rgba(241,226,191,.95)'; c.strokeText(text, x, y); c.fillStyle = ink; c.fillText(text, x, y); };
     for (const k of who) {   // start (a ring) and end (a filled square)
       const Q = tr[k], [sx, sy] = P(Q[0]), [ex, ey] = P(Q[Q.length - 1]);
       c.beginPath(); c.arc(sx, sy, 9, 0, Math.PI * 2); c.fillStyle = 'rgba(255,250,235,.9)'; c.fill(); c.lineWidth = 4; c.strokeStyle = col(k); c.stroke();
@@ -104,12 +108,39 @@ const exe = process.env.PLAYWRIGHT_CHROMIUM || (fs.existsSync('/opt/pw-browsers/
     for (const l of legend) { c.font = l.f; c.fillStyle = l.meta ? '#a3302a' : ink; const x = W + 20 + (l.ind || 0) + (l.dot ? 30 : 0);
       if (l.dot) { c.strokeStyle = l.dot; c.lineWidth = 5; c.setLineDash(l.dash ? [8, 6] : []); c.beginPath(); c.moveTo(W + 20, y - 5); c.lineTo(W + 42, y - 5); c.stroke(); c.setLineDash([]); }
       c.fillText(l.t, x, y); y += lh(l.f); }
-    c.font = 'italic 13px Georgia, serif'; c.fillStyle = 'rgba(74,47,28,.75)'; c.fillText('○ inicio · ■ fin · ● rojo: le piden algo (o recibe la meta) · puntos: cada 30 s', W + 20, cv.height - 14);
-    return { png: cv.toDataURL('image/png'), test: i, text: T.text, st: ag.st, why: ag.why, who, marks: marks.length };
+    c.font = 'italic 16px Georgia, serif'; c.fillStyle = 'rgba(74,47,28,.75)'; c.fillText('○ inicio · ■ fin · ● rojo: le piden algo (o recibe la meta) · puntos: cada 30 s', W + 20, cv.height - 14);
+    // the title, big, in a band across the top
+    const F = document.createElement('canvas'), f = F.getContext('2d'), tl = wrap(`Meta ${i}: ${T.text}`, F.width = cv.width, 'bold 38px Georgia, serif').length > 1 ? wrap(`Meta ${i}: ${T.text}`, cv.width - 60, 'bold 38px Georgia, serif') : [`Meta ${i}: ${T.text}`], TH = 40 + tl.length * 48 + 36;
+    F.height = cv.height + TH; f.fillStyle = '#efe0bb'; f.fillRect(0, 0, F.width, TH); f.fillStyle = ink; f.textAlign = 'left';
+    f.font = 'bold 38px Georgia, serif'; tl.forEach((l, j) => f.fillText(l, 30, 54 + j * 48));
+    f.font = 'italic 24px Georgia, serif'; f.fillStyle = ag.st === 'done' ? '#3d6b2a' : ag.st === 'fail' ? '#a3302a' : '#7a5a2a'; f.fillText(`${span} (hora del juego) · ${result}`, 30, 40 + tl.length * 48 + 14);
+    f.strokeStyle = 'rgba(90,60,35,.7)'; f.lineWidth = 3; f.beginPath(); f.moveTo(0, TH - 1.5); f.lineTo(F.width, TH - 1.5); f.stroke();
+    f.drawImage(cv, 0, TH);
+    return { png: F.toDataURL('image/png'), jpg: F.toDataURL('image/jpeg', .8), result, span, test: i, text: T.text, st: ag.st, why: ag.why, who, names: who.map(wmN), marks: marks.length };
   }, [which, maxT, W]);
-  if (r.err) { console.error(r.err); process.exit(1); }
-  fs.writeFileSync(out, Buffer.from(r.png.split(',')[1], 'base64'));
-  console.log(`${r.test}. ${r.text}: ${r.st}${r.why ? ' (' + r.why + ')' : ''} · ${r.who.join(', ')} · ${r.marks} marcas → ${out}`);
+  const say = r => console.log(`${r.test}. ${r.text}: ${r.st}${r.why ? ' (' + r.why + ')' : ''} · ${r.who.join(', ')} · ${r.marks} marcas`);
+  if (!pdf) {
+    const r = await trace(which); if (r.err) { console.error(r.err); process.exit(1); }
+    fs.writeFileSync(out, Buffer.from(r.png.split(',')[1], 'base64')); say(r); console.log('→ ' + out);
+  } else {   // all (or the ones named), each on a fresh page; then one PDF
+    const n = await pg.evaluate(() => window.__avonlea.WM_TESTS.length);
+    const list = which.trim() ? which.split(',').map(w => w.trim()) : Array.from({ length: n }, (_, j) => String(j)), rs = [];
+    for (const w of list) { await load(); const r = await trace(w); if (r.err) { console.error(r.err.split('\n')[0]); continue; } say(r); rs.push(r); }
+    const esc = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;'), when = new Date().toLocaleString('es-CL');
+    const html = `<!doctype html><meta charset="utf-8"><style>
+      @page { size: 297mm 210mm; margin: 0 } body { margin: 0; font-family: Georgia, serif; color: #4a2f1c }
+      .p { width: 297mm; height: 210mm; page-break-after: always; display: flex; align-items: center; justify-content: center; background: #f1e2bf; overflow: hidden }
+      .p img { max-width: 100%; max-height: 100%; object-fit: contain }
+      .c { display: block; height: auto; min-height: 210mm; overflow: visible; padding: 12mm 16mm; box-sizing: border-box } h1 { font-size: 26pt; margin: 0 0 2mm } .s { font-style: italic; margin-bottom: 6mm }
+      table { border-collapse: collapse; width: 100%; font-size: 9.5pt } tr { page-break-inside: avoid } td, th { border-bottom: 1px solid #c9b48a; padding: 1.1mm 2mm; text-align: left; vertical-align: top }
+      .ok { color: #3d6b2a } .ko { color: #a3302a } .run { color: #7a5a2a }</style>
+      <div class="p c"><h1>Avonlea · cómo se cumplen las metas</h1><div class="s">${rs.length} metas de prueba · ${esc(when)} · una página por meta: recorridos, inicio (○) y fin (■), y lo que pasó con su hora</div>
+      <table><tr><th>#</th><th>Meta</th><th>Horas (del juego)</th><th>Resultado</th><th>Quiénes</th></tr>
+      ${rs.map(r => `<tr><td>${r.test}</td><td>${esc(r.text)}</td><td>${r.span}</td><td class="${r.st === 'done' ? 'ok' : r.st === 'fail' ? 'ko' : 'run'}">${esc(r.result)}</td><td>${esc(r.names.join(', '))}</td></tr>`).join('')}</table></div>
+      ${rs.map(r => `<div class="p"><img src="${r.jpg}"></div>`).join('')}`;
+    const pp = await b.newPage(); await pp.setContent(html, { waitUntil: 'load' });
+    await pp.pdf({ path: pdf, width: '297mm', height: '210mm', printBackground: true }); console.log('→ ' + pdf + ' (' + Math.round(fs.statSync(pdf).size / 1024) + ' KB)');
+  }
   if (errs.length) console.log('errores en la página:', errs.slice(0, 5));
   await b.close();
 })();
