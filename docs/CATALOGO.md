@@ -8,7 +8,7 @@ Un estado es una foto del mundo hecha de datos (`wmNow()`), y el planificador tr
 
 | Componente | Qué guarda | Ejemplo |
 |---|---|---|
-| `t` | la hora, en minutos desde la medianoche | `792.07332` (= 13:12.073319999999967) |
+| `t` | la hora, en minutos desde la medianoche | `792.0866799999999` (= 13:12.086679999999888) |
 | `pos` | dónde está cada persona, como un **lugar** (ver §6): un punto del mapa (`granero`, `huerto`…), `cocina` (adentro de Tejas Verdes), `h:casa` (adentro de otra casa) o `p:quien` (afuera, donde esa persona esté) | `ana: "cocina"` |
 | `invs` | lo que cada uno tiene: `{ cosa: cantidad }` | `ana: { huevos: 6, cuerda: 1 }` |
 | `cows` | dónde está cada vaca: `corral`, `potrero`, `c:vaca` (suelta, donde esté), `led:quien` (alguien la lleva de la cuerda), `sold:quien` (vendida) | `{"dolly":"corral","jersey":"potrero"}` |
@@ -30,9 +30,9 @@ Las mismas para todos (Ana y los demás). Cada una tiene una **condición** (cu�
 | `recoger` | el lugar la ofrece para recoger y queda `stock` | 3 | +3 (huevos: todos; ramo: 1), −stock |
 | `cocinar` algo | está en su cocina y tiene los ingredientes de la receta | 10 | −ingredientes, +1 del plato |
 | `dar` una cosa a alguien presente | la tiene | 1 | pasa de uno a otro; si al otro le gusta (por etiqueta), sube su cariño una vez al día; deja el hecho `dio:…` |
-| `vender` la vaca | lleva una vaca de su familia y alguien presente compra animales | 2 | vaca → `sold:comprador`, + dólares; ambos saben la noticia |
-| `cambiar` (trueque) | está con el tendero, la tienda abierta, y tiene con qué pagar el gusto | 2 | −lo que entrega, +el gusto (cinta, caramelos) |
-| `comprar` a la libreta | es de los Cuthbert y está en la tienda abierta | 2 | +1 (azúcar, cuerda), anotado en la libreta |
+| `vender` la vaca | lleva una vaca de su familia y alguien presente compra animales | 5 | vaca → `sold:comprador`, + dólares; ambos saben la noticia |
+| `cambiar` (trueque) | está con el tendero, la tienda abierta, y tiene con qué pagar el gusto | 4 | −lo que entrega, +el gusto (cinta, caramelos) |
+| `comprar` a la libreta | es de los Cuthbert y está en la tienda abierta | 4 | +1 (azúcar, cuerda), anotado en la libreta |
 | `conversar` con alguien presente | uno sabe algo que el otro no | 2 | ambos quedan sabiendo lo mismo |
 | `disculparse` con alguien presente | ese alguien está ofendido con quien actúa y hoy no se ha disculpado | 2 | sube el cariño (+2 si el otro es sensible o generoso, +1 si no); puede borrar la ofensa |
 | `interceder` | la meta es hablar por alguien y está con esa persona | 2 | el otro quiere un poco más a aquel por quien se habló |

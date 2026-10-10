@@ -5139,11 +5139,11 @@ function verbs(s, me, C){
   for (const k of C.people) if (at(k)) {
     for (const x of Object.keys(inv)) if (inv[x] > 0 && THINGS[x] && x !== 'cuerda' && C.items.includes(x)) { const n = ALL_AT_ONCE.includes(x) ? inv[x] : 1; add('dar', 1, t => { t.invs[me][x] -= n; t.invs[k][x] = (t.invs[k][x] || 0) + n; for (const tag of THINGS[x].tags) t.facts['dio:' + k + ':' + tag] = 1; t.facts['dio:' + k + ':' + x] = 1; t.facts['dio:' + x] = 1; socialRule(stateR(t), 'dar', me, k, x); }, { x, k, n }); }
     const buys = whoOf(k).compra || {};
-    if (buys.animal) for (const [c, st] of Object.entries(s.cows)) if (st === 'led:' + me && FAMILY(C.owner[c]).includes(me)) add('vender', 2, t => { t.cows[c] = 'sold:' + k; t.invs[me].dolares = (t.invs[me].dolares || 0) + buys.animal; t.know[me].push('vendio_vaca'); t.know[k].push('vendio_vaca'); }, { x: 'vaca', cow: c, k });
+    if (buys.animal) for (const [c, st] of Object.entries(s.cows)) if (st === 'led:' + me && FAMILY(C.owner[c]).includes(me)) add('vender', 5, t => { t.cows[c] = 'sold:' + k; t.invs[me].dolares = (t.invs[me].dolares || 0) + buys.animal; t.know[me].push('vendio_vaca'); t.know[k].push('vendio_vaca'); }, { x: 'vaca', cow: c, k });
     const open = !whoOf(k).abre || (s.t >= whoOf(k).abre[0] * 60 && s.t < whoOf(k).abre[1] * 60);
     if (open && whoOf(k).trueque) {
-      for (const c of Object.keys(TREATS)) if (C.items.includes(c) && (inv[c] || 0) < 2) for (const o of tradeFor(inv, c).slice(0, 2)) add('cambiar', 2, t => { t.invs[me][o.g] -= o.k; t.invs[me][c] = (t.invs[me][c] || 0) + 1; }, { x: c, g: o.g, n: o.k, k });
-      if (CUTHBERT.includes(me)) for (const x of LIBRETA) if (C.items.includes(x) && (inv[x] || 0) < 2) add('comprar', 2, t => { t.invs[me][x] = (t.invs[me][x] || 0) + 1; }, { x, k });
+      for (const c of Object.keys(TREATS)) if (C.items.includes(c) && (inv[c] || 0) < 2) for (const o of tradeFor(inv, c).slice(0, 2)) add('cambiar', 4, t => { t.invs[me][o.g] -= o.k; t.invs[me][c] = (t.invs[me][c] || 0) + 1; }, { x: c, g: o.g, n: o.k, k });
+      if (CUTHBERT.includes(me)) for (const x of LIBRETA) if (C.items.includes(x) && (inv[x] || 0) < 2) add('comprar', 4, t => { t.invs[me][x] = (t.invs[me][x] || 0) + 1; }, { x, k });
     }
     if ((s.know[k] || []).some(f => !s.know[me].includes(f)) || (s.know[me] || []).some(f => !(s.know[k] || []).includes(f))) add('conversar', 2, t => { const u = [...new Set([...t.know[me], ...t.know[k]])]; t.know[me] = [...u]; t.know[k] = [...u]; }, { k });
     if (s.ofensa[k + '>' + me] && !s.facts['disc:' + k + '>' + me]) add('disculparse', 2, t => { socialRule(stateR(t), 'disculparse', me, k); }, { k });
@@ -5602,6 +5602,13 @@ function wmExec(ag, a, st, dt){
   const bubble = (k, text) => { const q = k === 'ana' ? 'ana' : PEOPLE[k] ? k : 'f:' + k; bubbles = [{ q, text, t: 0, dur: lineDur(text) }]; };
   const reach = k => { const kk = personKey(k); if (!kk) { st.why = wmName(k) + ' no está'; return 'fail'; } return wmMove(me, kk === 'cocina' || kk.startsWith('h:') ? kk : 'p:' + k, dt); };
   const wait = s => { st.w = (st.w || 0) + dt; return st.w >= s; };
+  // a deal takes a moment: one asks, the other answers (weighs it, looks the cow over), then it is done
+  const haggle = (ask, answer) => {
+    if (!st.hg) { st.hg = 1; st.w = 0; bubble(me, ask); }
+    if (st.hg === 1) { if (!wait(2.6)) return false; st.hg = 2; st.w = 0; bubble(a.k, answer); }
+    if (st.hg === 2) { if (!wait(2.6)) return false; st.hg = 3; }
+    return true;
+  };
   switch (a.v) {
     case 'ir': return wmMove(me, a.p, dt);
     case 'tomar': if (!wait(1)) return 'run'; inv[a.x] = (inv[a.x] || 0) + 1; float('+1 ' + ITEM_NAME[a.x]?.[0], b.x, b.y - 50); logEv(`${wmName(me)} tomó ${itemTextW(a.x, 1)} en ${WP_NAME[personKey(me)] || 'el granero'}.`, []); return 'ok';
@@ -5635,6 +5642,7 @@ function wmExec(ag, a, st, dt){
       const r = reach(a.k); if (r !== 'ok') return r;
       if (a.x === 'vaca') {
         const c = ANIM[a.cow]; if (c.state !== 'led' || (c.ledBy || 'ana') !== me) { st.why = 'la vaca no viene con ' + wmName(me); return 'fail'; }
+        if (!haggle('¿Le interesaría comprar esta vaca? Es buena lechera.', 'Déjeme verla bien… los dientes, las patas… Sí, me conviene.')) return 'run';
         const price = whoOf(a.k).compra.animal;
         if (me === 'ana' && CH[a.k]) sellCow(a.k, c, price); else { c.state = 'bought'; c.owner = a.k; c.ledBy = null; c.nav = null; inv.dolares = (inv.dolares || 0) + price; logEv(`${wmName(me)} le vendió ${ANIMALS[c.id].name} a ${wmName(a.k)} por ${price} dólares.`, []); }
         wmFact('vendio_vaca', [me, a.k]); bubble(a.k, '¡Trato hecho! Buena vaca.'); return 'ok';
@@ -5645,13 +5653,15 @@ function wmExec(ag, a, st, dt){
       const r = reach(a.k); if (r !== 'ok') return r;
       const W = whoOf(a.k), hr = hourNow() % 24; if (W.abre && (hr < W.abre[0] || hr >= W.abre[1])) { st.why = 'la tienda está cerrada'; return 'fail'; }
       if ((inv[a.g] || 0) < a.n) { st.why = 'no tiene qué cambiar'; return 'fail'; }
+      if (!haggle(`Buenos días, Sr. Lawson. ¿Me cambiaría ${itemTextW(a.g, a.n)} por ${ITEM_DEFS[a.x]?.gift?.art || itemTextW(a.x, 1)}?`, 'Veamos lo que traes… Sí, me sirven. Un momento.')) return 'run';
       inv[a.g] -= a.n; inv[a.x] = (inv[a.x] || 0) + 1; float('+' + itemTextW(a.x, 1), b.x, b.y - 50);
       logEv(`${wmName(me)} cambió ${itemTextW(a.g, a.n)} por ${ITEM_DEFS[a.x]?.gift?.art || itemTextW(a.x, 1)} en la tienda de Lawson.`, []); bubble(a.k, 'Trato hecho. ¡Que lo disfrutes!'); return 'ok';
     }
     case 'comprar': {
       const r = reach(a.k); if (r !== 'ok') return r;
       const W = whoOf(a.k), hr = hourNow() % 24; if (W.abre && (hr < W.abre[0] || hr >= W.abre[1])) { st.why = 'la tienda está cerrada'; return 'fail'; }
-      inv[a.x] = (inv[a.x] || 0) + 1; libretaAdd(me, a.x); bubble(a.k, 'Anotado en la libreta de los Cuthbert. Saludos a Marilla.'); return 'ok';
+      if (!haggle(`Buenos días, Sr. Lawson. ¿Me daría ${LIBRETA_ART[a.x] || itemTextW(a.x, 1)}? A la libreta de los Cuthbert.`, a.x === 'azucar' ? 'Cómo no. Déjame pesarla…' : 'Cómo no, aquí tengo una. Un momento…')) return 'run';
+      inv[a.x] = (inv[a.x] || 0) + 1; libretaAdd(me, a.x); float('+' + itemTextW(a.x, 1), b.x, b.y - 50); bubble(a.k, 'Anotado en la libreta de los Cuthbert. Saludos a Marilla.'); return 'ok';
     }
     case 'conversar': {
       const r = reach(a.k); if (r !== 'ok') return r;
