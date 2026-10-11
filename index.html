@@ -2404,7 +2404,7 @@ for (const c of ESCENAS) Dialogo.registrar(c);
   for (const b of A) if (!keys.includes(b) && (b.tag || !b.book)) Dialogo.registrar({ ...base, id: b.id, prioridad: (b.tag ? (b.book ? 3.5 : 1.8) : 1) - b.i / 100, interrumpe: b.tag === 'carreta', camino: b.tag ? { no_callado: true, visible: b.tag } : { no_callado: true, tramo_v: b.v }, lineas: b.lines });
 }
 // the talks of pairs and trios (DLG_BANK), as scenes too: when they meet, where it makes sense
-for (const [key, list] of Object.entries(DLG_BANK)) list.forEach((blk, i) => Dialogo.registrar({ id: 'par:' + key + ':' + i, disparo: 'encuentro', quienes: key.split('+'), donde: blk.at, lineas: blk.l || blk }));
+for (const [key, list] of Object.entries(DLG_BANK)) list.forEach((blk, i) => Dialogo.registrar({ id: 'par:' + key + ':' + i, disparo: 'encuentro', quienes: key.split('+'), donde: Array.isArray(blk) ? undefined : blk.at, lineas: Array.isArray(blk) ? blk : blk.l }));
 // the school: rows of desks, the master's desk, the blackboard, the stove, the windows over the river
 function drawSchool(c, t, night){
   c.fillStyle = '#b98a58'; c.fillRect(0, 0, KIT.w, KIT.h);
