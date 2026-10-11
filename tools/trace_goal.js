@@ -17,7 +17,7 @@ const path = require('path'), fs = require('fs');
 let pw; try { pw = require('playwright'); } catch (e) { pw = require('/opt/node22/lib/node_modules/playwright'); }
 const argv = process.argv.slice(2), opt = (k, d) => { const i = argv.indexOf('--' + k); return i >= 0 ? argv.splice(i, 2)[1] : d; };
 const season = opt('season', null), sunday = argv.includes('--domingo') ? (argv.splice(argv.indexOf('--domingo'), 1), true) : false;
-const md = opt('md', null), out = opt('out', 'traza.png'), pdf = opt('pdf', null), maxT = +opt('max', 2400), W = +opt('w', 1500), which = argv.join(' ');
+const md = opt('md', null), out = opt('out', 'traza.png'), pdf = opt('pdf', null), maxT = +opt('max', 4800), W = +opt('w', 1500), which = argv.join(' ');
 const exe = process.env.PLAYWRIGHT_CHROMIUM || (fs.existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chromium' : undefined);
 
 (async () => {
@@ -61,7 +61,7 @@ const exe = process.env.PLAYWRIGHT_CHROMIUM || (fs.existsSync('/opt/pw-browsers/
     const wmN = k => A.wmName(k);
     for (const k of keys) doing[k] = A.AGENTS[k] ? A.doingText(k) : null;
     const h0 = A.hourNow(); let t = 0; sample(0);
-    for (const lim = dia ? Math.max(maxT, 16000) : maxT; t < lim && (ag.st === 'run' || ag.st === 'pausa'); t += .5) { A.step(.5); sample(t + .5); }
+    for (const lim = dia ? Math.max(maxT, 32000) : maxT; t < lim && (ag.st === 'run' || ag.st === 'pausa'); t += .5) { A.step(.5); sample(t + .5); }
     for (let k = 0; k < 4; k++) { A.step(.5); sample(t += .5); }
     // who to draw: those who had goals, were named in what happened, or led a cow; and the cows that moved
     const moved = P => P.length > 1 && P.some(q => Math.hypot(q[0] - P[0][0], q[1] - P[0][1]) > 60);

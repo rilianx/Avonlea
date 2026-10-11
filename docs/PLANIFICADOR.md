@@ -200,7 +200,7 @@ Cuando no hay meta, sigue la rutina de lugares de siempre. Al lanzar una meta de
 
 ## 7c. Lugares lejos: el camino de Bright River
 
-La estación está al final de un camino de ocho millas que no está en el mapa (una escena propia, `'camino'`). Para el planificador, `h:br` está a `ROAD_MIN` = 130 minutos más que su puerta (el letrero en el borde del mapa): `travelMin` suma `roadMin(a) − roadMin(b)`. Como esa acción cuesta mucho más que las demás, la heurística de `estar_en` y `llevar` también la cuenta (si no, el A\* con peso probaría todo lo demás antes y se quedaría sin espacio). En la ejecución, quien va a `h:br` llega al letrero, entra al camino (`where: 'camino'`, `roadS` de 1 a 0) y al llegar aparece en el andén; al salir de la estación, al revés. Si Ana va con alguien en la calesa (`subir_calesa`), entra al camino con el que maneja.
+La estación está al final de un camino de ocho millas que no está en el mapa (una tierra aparte, `'camino'`, dibujada como Avonlea). Para el planificador, `h:br` está a `ROAD_MIN` = 145 minutos más que su puerta (el letrero en el borde del mapa): `travelMin` suma `roadMin(a) − roadMin(b)`. Como esa acción cuesta mucho más que las demás, la heurística de `estar_en` y `llevar` también la cuenta (si no, el A\* con peso probaría todo lo demás antes y se quedaría sin espacio). En la ejecución, quien va a `h:br` llega al letrero, entra al camino (`where: 'camino'`, `roadS` de 1 a 0) y al llegar aparece en el andén; al salir de la estación, al revés. Si Ana va con alguien en la calesa (`subir_calesa`), entra al camino con el que maneja.
 
 Un ejemplo con todo: el capítulo 1 del libro ([CAP1.md](CAP1.md)).
 
