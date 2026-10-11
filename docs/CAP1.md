@@ -88,7 +88,7 @@ No está en el mapa de Avonlea (en el borde noroeste hay solo un **letrero**, «
 - **Los campos arados**: un granjero sembrando a mano, vacas, cercas en zigzag.
 - **La iglesia de la loma**: la iglesia blanca y su cementerio, casitas con lilas.
 - **El puentecito de los sauces**, **la curva del atardecer**.
-- **La Avenida**: el túnel de manzanos en flor, pintado como una acuarela: flores blancas y hojas nuevas, ramas en flor en los bordes de la pantalla, pétalos que caen, un camino de pasto y una luz blanca y brumosa al fondo (Ana enmudece).
+- **La Avenida**: el túnel de manzanos en flor, pegados al camino por los dos lados (los de adelante dejan un hueco suave alrededor de la calesa), pintado como una acuarela: flores blancas y hojas nuevas, ramas en flor en los bordes de la pantalla, pétalos que caen, un camino de pasto y una luz blanca y brumosa al fondo (Ana enmudece).
 - **Newbridge**: casas a ambos lados, la tienda, perros y chicos (Ana y Matthew pasan en silencio).
 - **Tres millas de silencio** y la entrada de Avonlea, con un mojón por milla y un letrero por tramo.
 

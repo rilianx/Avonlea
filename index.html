@@ -1963,7 +1963,7 @@ const RSTN = { x: 760, y: roadY(900) - 330, w: 5 * T }, RAIL = [[260, 0], [300, 
 const RCHERRY = { x: 470, y: 560 };   // (the big wild cherry tree at the bend of the line, where Ana meant to sleep)
 const RP = [], RT = [], RF = [], RWAT = [], RFOLK = [], RCOW = [], RDOG = [], RBANK = [], RSEA = [], ROAD_SPOT = { aserradero: [], granjero: [], vacas: [], iglesia: [], lilas: [], sauces: [] };
 {
-  const r = rng(1908), R_ = () => r(), tree_ = (x, y, kind, s = .85 + R_() * .4) => { if (y > 60 && y < RH - 40 && Math.abs(y - roadY(x)) > 62 && !nearW(x, y, 60)) RT.push({ kind, x, y, s, ph: R_() * TAU }); };
+  const r = rng(1908), R_ = () => r(), tree_ = (x, y, kind, s = .85 + R_() * .4, gap = 62) => { if (y > 60 && y < RH - 40 && Math.abs(y - roadY(x)) > gap && !nearW(x, y, 60)) RT.push({ kind, x, y, s, ph: R_() * TAU }); };
   const nearW = (x, y, m) => RWAT.some(w => w.pts.some((p, i) => i && segDist(x, y, w.pts[i - 1], p) < w.w / 2 + m));
   const house = (x, y, o = {}) => RP.push({ kind: 'house', h: { x, y, w: o.w || 4.4 * T }, roof: o.roof || ['#8a5a3c', '#5f7a9a', '#7a6a4a', '#9a5a3c'][Math.floor(R_() * 4)], wall: o.wall || ['#efe4cc', '#e6dcc4', '#f1ead8'][Math.floor(R_() * 3)], trim: '#6a4a32', x, y, small: true, style: o.style });
   const sign = (x, y, text) => RP.push({ kind: 'sign', x, y, text });
@@ -2018,7 +2018,7 @@ const RP = [], RT = [], RF = [], RWAT = [], RFOLK = [], RCOW = [], RDOG = [], RB
       for (let x = x0; x < x1; x += 640) for (const sd of [-1, 1]) if (Math.abs(x - xm) > 400) RF.push({ x, y: sd < 0 ? roadY(x) - 680 : roadY(x) + 130, w: 560, h: 520, crop: x % 2 ? 0 : 3 });
     }
     else if (k === 'curva') { for (let x = x0; x < x1; x += 70) if (R_() < .6) tree_(x, roadY(x) + (R_() < .5 ? -1 : 1) * (100 + R_() * 600), R_() < .5 ? 'blossom' : 'oak'); }
-    else if (k === 'avenida') { const kind = () => R_() < .8 ? 'manzano' : 'tree'; for (let x = x0; x < x1; x += 30 + R_() * 25) { tree_(x + R_() * 14, roadY(x) - 64 - R_() * 14, kind(), 1.05 + R_() * .35); tree_(x + 18, roadY(x) - 125 - R_() * 30, kind(), 1.1 + R_() * .35); if (R_() < .7) tree_(x + 8, roadY(x) - 190 - R_() * 60, kind(), 1 + R_() * .3); tree_(x + 4, roadY(x) + 150 + R_() * 25, kind(), .9 + R_() * .25); if (R_() < .8) tree_(x + 24, roadY(x) + 215 + R_() * 50, kind(), 1 + R_() * .25); } }   // (the near side a little farther off, so its crowns do not hide the road)
+    else if (k === 'avenida') { const kind = () => R_() < .82 ? 'manzano' : 'tree'; for (let x = x0; x < x1; x += 26 + R_() * 18) { tree_(x + R_() * 10, roadY(x) - 46 - R_() * 8, kind(), 1.15 + R_() * .3, 40); tree_(x + 14, roadY(x) - 100 - R_() * 25, kind(), 1.15 + R_() * .35); if (R_() < .7) tree_(x + 8, roadY(x) - 165 - R_() * 50, kind(), 1 + R_() * .3); tree_(x + 4, roadY(x) + 46 + R_() * 10, kind(), 1.05 + R_() * .25, 40); tree_(x + 20, roadY(x) + 110 + R_() * 30, kind(), 1 + R_() * .25); if (R_() < .7) tree_(x + 10, roadY(x) + 180 + R_() * 50, kind(), 1 + R_() * .25); } }   // (close on both sides of the road: a tunnel; the near ones let the buggy show through)
     else if (k === 'pueblo') {   // Newbridge: a bustling little village (dogs, boys, faces at the windows)
       for (let x = x0 + 150; x < x1 - 150; x += 280) for (const sd of [-1, 1]) if (R_() < .85) house(x + R_() * 50, roadY(x) + sd * (200 + R_() * 40) + (sd > 0 ? 60 : 0), { w: 3.8 * T });
       RP.push({ kind: 'edificio', b: { style: 'tienda', x: xm, y: roadY(xm) - 200, w: 4.6 * T } }); sign(xm - 120, roadY(xm) - 150, 'Newbridge');
@@ -2093,13 +2093,16 @@ function drawRoadThing(c, o, t){
   return false;
 }
 // the view of the road: the ground, then everything with its feet on it, sorted; the Avenue's arch of blossom on top
+let roadFront = [], roadLayer = null;
 function roadView(g, ox, oy, vw, vh, t, night, list){
+  roadFront = [];
   for (let tx = Math.floor(ox / TILE); tx * TILE < ox + vw; tx++) for (let ty = Math.floor(oy / TILE); ty * TILE < oy + vh; ty++) { if (tx < 0 || ty < 0 || tx * TILE > RW || ty * TILE > RH) continue; const cv = roadTile(tx, ty); g.drawImage(cv, .5, .5, cv.width - 1, cv.height - 1, tx * TILE, ty * TILE, TILE, TILE); }
   const inV = (x, y, m = 200) => x > ox - m && x < ox + vw + m && y > oy - m && y < oy + vh + m * 1.5;
   // the water moves a little
   if (S !== 3) for (const w of RWAT) for (let i = 1; i < w.pts.length; i++) { const a = w.pts[i - 1], b = w.pts[i]; for (let k = 0; k < 8; k++) { const q = ((t * .2 + k / 8) % 1), x = lerp(a[0], b[0], q), y = lerp(a[1], b[1], q); if (inV(x, y, 0)) { g.strokeStyle = 'rgba(255,255,255,.4)'; g.lineWidth = 1.2; g.beginPath(); g.moveTo(x - 5, y); g.lineTo(x + 5, y + 1); g.stroke(); } } }
   for (let k = Math.floor((ox - 400) / RBIN); k <= Math.floor((ox + vw + 400) / RBIN); k++) for (const [kind, o] of RBINS.get(k) || []) {
     const x = kind === 'p' && o.kind === 'edificio' ? o.b.x : o.x, y = kind === 'p' && o.kind === 'edificio' ? o.b.y : o.y; if (!inV(x, y)) continue;
+    if (kind === 't' && o.y > roadY(o.x) && o.y - roadY(o.x) < 150 && roadTramo(roadSOf(o.x)).kind === 'avenida') { roadFront.push(o); continue; }   // (the Avenue's trees on the near side: drawn over everything, with a hole around the buggy)
     if (kind === 'p' || kind === 't') list.push({ y, draw: () => { if (!drawRoadThing(g, o, t)) drawProp(g, o, t, night); } });
     else if (kind === 'f') { if (o.sow) { o.walk = (t * .5) % 1; o.moving = true; } list.push({ y, draw: () => drawPerson(g, o, t) }); }
     else if (kind === 'c') list.push({ y, draw: () => drawCow(g, o, t) });
@@ -2117,6 +2120,17 @@ function roadCanopy(g, ox, oy, vw, vh, t){
   const [a, b] = avenidaX(); if (ox > b + 600 || ox + vw < a - 600) return;
   const bloom = S === 0, inn = x => clamp(Math.min(x - a, b - x) / 400, 0, 1);   // (how deep into the Avenue: the arch thickens)
   const deep = inn(ox + vw / 2), FL = ['#ffffff', '#fbfcf4', '#f4f7ea'], LV = ['#a8d07a', '#86b85a', '#c4e09a'];
+  // the near trees, in their own layer, with a soft hole where the buggy is (so the tunnel closes round it and it still shows)
+  if (roadFront.length) {
+    const cv = g.canvas, L = roadLayer && roadLayer.width === cv.width && roadLayer.height === cv.height ? roadLayer : (roadLayer = Object.assign(document.createElement('canvas'), { width: cv.width, height: cv.height })), lc = L.getContext('2d');
+    lc.setTransform(1, 0, 0, 1, 0, 0); lc.clearRect(0, 0, L.width, L.height); lc.setTransform(g.getTransform());
+    for (const o of roadFront.sort((p, q) => p.y - q.y)) drawProp(lc, o, t, false);
+    const d = PEOPLE[game.road?.with], who = [ana.onCart || game.scene === 'camino' ? ana : null, d?.where === 'camino' ? d : null].filter(Boolean);
+    lc.globalCompositeOperation = 'destination-out';
+    for (const p of who) { const hx = p.x + 20, hy = p.y - 22; lc.save(); lc.translate(hx, hy); lc.scale(1.9, 1); const gr = lc.createRadialGradient(0, 0, 45, 0, 0, 120); gr.addColorStop(0, 'rgba(0,0,0,.94)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); lc.fillStyle = gr; lc.fillRect(-125, -125, 250, 250); lc.restore(); }   // (longer along the road)
+    lc.globalCompositeOperation = 'source-over';
+    g.save(); g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(L, 0, 0); g.restore();
+  }
   g.save();
   // the light at the end of the tunnel: a white, misty brightness ahead of the buggy (and the sunset beyond)
   if (S !== 3 && deep > 0) {
