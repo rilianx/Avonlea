@@ -2,7 +2,7 @@
 
 *(Generado con `node tools/trace_goal.js cap1 --out cap1.png`; la imagen (en webp) es [`trazas/cap1.webp`](../trazas/cap1.webp).)*
 
-El capítulo I de *Ana de las Tejas Verdes* («La Sra. Rachel Lynde se sorprende»), con el viaje del capítulo II y el comienzo del III, jugado en el juego por el planificador (A\*) y las rutinas, sin IA. En el juego: panel 🎯 → **📖 Capítulo 1 del libro** (parte a las 14:54, justo antes de que salga Matthew; el telegrama de mediodía se da por recibido). Con 👁 se puede seguir a cualquiera (la Sra. Lynde, Matthew, Marilla…).
+El capítulo I de *Ana de las Tejas Verdes* («La Sra. Rachel Lynde se sorprende»), con el viaje del capítulo II y el comienzo del III, jugado en el juego por el planificador (A\*) y las rutinas, sin IA. En el juego: panel 🎯 → **📖 Capítulo 1 del libro** (parte a las 14:54, justo antes de que salga Matthew; a 50× el capítulo entero se ve en unos 6 minutos; el telegrama de mediodía se da por recibido). Con 👁 se puede seguir a cualquiera (la Sra. Lynde, Matthew, Marilla…).
 
 ## 1. La agenda verdadera (solo del libro)
 
@@ -92,7 +92,7 @@ No está en el mapa de Avonlea (en el borde noroeste hay solo un **letrero**, «
 - **Newbridge**: casas a ambos lados, la tienda, perros y chicos (Ana y Matthew pasan en silencio).
 - **Tres millas de silencio** y la entrada de Avonlea, con un mojón por milla y un letrero por tramo.
 
-Se puede **ir en la calesa** (145 minutos del juego, como en el libro: unos 12 minutos reales a 1×; abajo, botones **1× · 1.5× · 2× · 3×**), **bajarse** (moviendo a Ana: Matthew la espera; si se la deja quieta un rato, vuelve sola a la calesa), **subirse** («🐴 Subir a la calesa») o **ir a pie** (desde el letrero de Avonlea o saliendo del andén; son más de tres horas). Los personajes del planificador también lo recorren, en calesa o a pie. **🗺 La isla**: un mapa grande con solo los pueblos, los caminos y el tren, y dónde va Ana.
+Se puede **ir en la calesa** (145 minutos del juego, como en el libro: unos 12 minutos reales a 1×; abajo, la velocidad del tiempo: **1× · 2× · 5× · 10× · 25× · 50×**), **bajarse** (moviendo a Ana: Matthew la espera; si se la deja quieta un rato, vuelve sola a la calesa), **subirse** («🐴 Subir a la calesa») o **ir a pie** (desde el letrero de Avonlea o saliendo del andén; son más de tres horas). Los personajes del planificador también lo recorren, en calesa o a pie. **🗺 La isla**: un mapa grande con solo los pueblos, los caminos y el tren, y dónde va Ana.
 
 **El tiempo**: un minuto del juego dura **5 segundos** (una hora, 5 minutos; un día entero, 2 horas).
 
