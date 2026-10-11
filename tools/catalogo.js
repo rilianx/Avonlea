@@ -54,7 +54,25 @@ const exe = process.env.PLAYWRIGHT_CHROMIUM || (fs.existsSync('/opt/pw-browsers/
     '| `pedir` un favor a alguien presente | el favor está permitido (§4), el otro lo quiere ≥ 2 o es generoso, y hoy no se lo pidió | 2 + espera del favor (+40 si quien pide no es quieto) | el efecto del favor (lo que el otro va a lograr); en el mundo, al otro se le instala una meta |',
     '| `pedir` mandando a llamar | quien pide es quieto y el favor es para Ana (que no está ahí) | 2 + espera + 25 | igual; en el mundo, Ana va hasta la persona y entonces se le pide |',
     '| `guiar` una vaca | tiene cuerda, la vaca está aquí, no lleva otra, y es de su familia o anda suelta | 2 | vaca → `led:quien` |',
-    '| `soltar` la vaca | la lleva y está en el corral o el potrero | 1 | vaca → ese lugar |', '');
+    '| `soltar` la vaca | la lleva y está en el corral o el potrero | 1 | vaca → ese lugar |',
+    '| **Del libro** (cada una se ofrece solo si sirve para la meta) | | | |',
+    '| `quehacer` (lavar los platos, barrer, poner la mesa) | en la cocina de Tejas Verdes (Ana o Marilla) | 6 | hecho `quehacer:x`; la primera vez, +1 de cariño de Marilla |',
+    '| `ordeñar` una vaca | en el corral, con la vaca ahí, hoy no ordeñada | 8 | +2 jarros de leche |',
+    '| `alimentar` a los animales | en el corral o el gallinero | 4 | hecho `alimentados:lugar` |',
+    '| `visitar` a alguien | esa persona está en su casa | 12 | hecho `visita:a>b`; +1 de cariño |',
+    '| `devolver` lo prestado | tiene algo que le prestó alguien presente | 1 | vuelve a su dueño; +1 de cariño |',
+    '| `jurar` ser amigas del alma | Ana y Diana juntas, con cariño ≥ 4 | 5 | hecho para siempre `amigas:ana&diana`; cariño 5 |',
+    '| `perdonar` | quien actúa está ofendido con alguien presente que se disculpó (o lo quiere ≥ 1) | 2 | se borra la ofensa; +1 de cariño |',
+    '| `cuidar` a un enfermo | el enfermo está presente y se tiene el jarabe (se toma en la cocina) | 15 | se mejora; +2 de cariño |',
+    '| `avisar_medico` | en la aldea, hay un enfermo | 4 | el médico lo atiende: se mejora |',
+    '| `estudiar` / `recitar` | en la escuela o en casa / en la escuela, sabiéndose la lección | 20 / 3 | sabe la lección / hecho `recito` |',
+    '| `rezar` | en su casa o en la iglesia | 3 | hecho `rezo` |',
+    '| `coser` (un vestido) | en su cocina, si sabe coser, con un corte de tela | 30 | +1 vestido con mangas abullonadas |',
+    '| `adornar` el sombrero | tiene un ramo | 2 | hecho `adorno`; −1 ramo |',
+    '| `remar` | en el lago | 15 | hecho `remo` |',
+    '| `nombrar` un lugar | Ana, en un lugar que todavía no bautizó | 2 | el lugar queda con su nombre para siempre (aparece en el mapa) |',
+    '| `regañar` | alguien que regaña (Marilla, la Sra. Lynde, la Sra. Barry) y una falta; quien no sale manda a llamar a Ana | 3 | hecho `regaño`; Ana queda castigada media hora en la cocina |',
+    '| `subir_calesa` | Matthew, con quien quiere llevar | 3 | lo acompaña; el viaje de Matthew dura 2,4 veces menos |', '');
   // --- the goals
   L.push('## 3. Las metas', '',
     'Una meta es una **condición** sobre el estado (`test`) y una estimación de **cuántos pasos faltan** (`h`, la heurística de A*). Cada meta dice también qué cosas, personas y lugares importan para ella (el planificador mira solo esos).', '',
@@ -72,7 +90,8 @@ const exe = process.env.PLAYWRIGHT_CHROMIUM || (fs.existsSync('/opt/pw-browsers/
     '| `paseo(a, b, lugar, min)` | a y b llegan juntos (b acompaña a a) a un lugar bonito; ahí se quedan `min` minutos conversando y recién entonces termina | 1 por acompañar + 1 por llegar |',
     '| `acompana(a, b)` | a acompaña a b | 0 / 1 |',
     '| `te_con(quien, invitado, lugar)` | los dos están en el lugar y quien tiene té | 1 por cada cosa que falte |',
-    '| `regalar_cosa(quien, cosa)` | esa cosa fue regalada | 0 / 1 si la tiene / 2 |', '');
+    '| `regalar_cosa(quien, cosa)` | esa cosa fue regalada | 0 / 1 si la tiene / 2 |',
+    '| **Del libro:** `quehaceres(quien, lista)`, `alimentados(lugares)`, `visitar(a, b)`, `devuelto(a, cosa, b)`, `amigas(a, b)`, `paces(a, b)`, `sano(quien)`, `recito(quien)`, `rezo(quien)`, `adornado(quien)`, `remo(quien)`, `nombres(quien, n)`, `regañado(quien)`, `llevar(quien, a, lugar)` | el hecho de cada una (ver las acciones) | lo que falta (0, 1 o 2) |', '');
   // --- favours
   L.push('## 4. Los favores (lo que se le puede pedir a otro)', '',
     'Pedir un favor es una acción más; si el otro acepta, en el mundo se le instala una **meta propia** (y él puede, a su vez, pedirle a un tercero: cadenas de hasta tres).', '',
@@ -82,7 +101,10 @@ const exe = process.env.PLAYWRIGHT_CHROMIUM || (fs.existsSync('/opt/pw-browsers/
     '| `encerrar_vaca` | no es quieto y nadie lleva ni compró la vaca | la vaca en su corral | `vaca_en` | 45 |',
     '| `interceder` por alguien | el destinatario quiere ≥ 4 a quien intercede | (+1 de cariño hacia quien pide) | `intercede` | 20 |',
     '| `pasear` | con Ana | quien recibe el pedido acompaña a quien pide (lo sigue) | — | — |',
-    '| `venir` (invitación para más tarde) | a Ana | Ana estará en el lugar a la hora | `estar_en(Ana, lugar, hora, se queda)`, que empieza una hora antes de la cita (té a las 17, o algo más tarde) | 30 |', '',
+    '| `prestar` cosa | el otro la tiene | quien pide la tiene (queda «prestada»: hay que devolverla) | — (se la pasa en el momento) | — |',
+    '| `quehaceres` | a Ana | los quehaceres hechos | `quehaceres(Ana, lista)` | 30 |',
+    '| `llevar` en la calesa | a Matthew | los dos en el lugar | `llevar(Matthew, quien pide, lugar)` | 15 |',
+    '| `venir` (invitación para más tarde; también Ana invita a Diana) | a Ana | Ana estará en el lugar a la hora | `estar_en(Ana, lugar, hora, se queda)`, que empieza una hora antes de la cita (té a las 17, o algo más tarde) | 30 |', '',
     'A quién se le puede pedir sin que la meta lo diga: a los de su casa o a un amigo (cariño ≥ 3); quien no sale, solo a quien está con él, o manda a llamar a Ana.', '');
   // --- things
   L.push('## 5. Las cosas', '',

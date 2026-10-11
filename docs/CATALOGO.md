@@ -8,7 +8,7 @@ Un estado es una foto del mundo hecha de datos (`wmNow()`), y el planificador tr
 
 | Componente | Qué guarda | Ejemplo |
 |---|---|---|
-| `t` | la hora, en minutos desde la medianoche | `792.07332` (= 13:12.073319999999967) |
+| `t` | la hora, en minutos desde la medianoche | `792.0866799999999` (= 13:12.086679999999888) |
 | `pos` | dónde está cada persona, como un **lugar** (ver §6): un punto del mapa (`granero`, `huerto`…), `cocina` (adentro de Tejas Verdes), `h:casa` (adentro de otra casa) o `p:quien` (afuera, donde esa persona esté) | `ana: "cocina"` |
 | `invs` | lo que cada uno tiene: `{ cosa: cantidad }` | `ana: { huevos: 6, cuerda: 1 }` |
 | `cows` | dónde está cada vaca: `corral`, `potrero`, `c:vaca` (suelta, donde esté), `led:quien` (alguien la lleva de la cuerda), `sold:quien` (vendida) | `{"dolly":"corral","jersey":"potrero"}` |
@@ -40,6 +40,24 @@ Las mismas para todos (Ana y los demás). Cada una tiene una **condición** (cu�
 | `pedir` mandando a llamar | quien pide es quieto y el favor es para Ana (que no está ahí) | 2 + espera + 25 | igual; en el mundo, Ana va hasta la persona y entonces se le pide |
 | `guiar` una vaca | tiene cuerda, la vaca está aquí, no lleva otra, y es de su familia o anda suelta | 2 | vaca → `led:quien` |
 | `soltar` la vaca | la lleva y está en el corral o el potrero | 1 | vaca → ese lugar |
+| **Del libro** (cada una se ofrece solo si sirve para la meta) | | | |
+| `quehacer` (lavar los platos, barrer, poner la mesa) | en la cocina de Tejas Verdes (Ana o Marilla) | 6 | hecho `quehacer:x`; la primera vez, +1 de cariño de Marilla |
+| `ordeñar` una vaca | en el corral, con la vaca ahí, hoy no ordeñada | 8 | +2 jarros de leche |
+| `alimentar` a los animales | en el corral o el gallinero | 4 | hecho `alimentados:lugar` |
+| `visitar` a alguien | esa persona está en su casa | 12 | hecho `visita:a>b`; +1 de cariño |
+| `devolver` lo prestado | tiene algo que le prestó alguien presente | 1 | vuelve a su dueño; +1 de cariño |
+| `jurar` ser amigas del alma | Ana y Diana juntas, con cariño ≥ 4 | 5 | hecho para siempre `amigas:ana&diana`; cariño 5 |
+| `perdonar` | quien actúa está ofendido con alguien presente que se disculpó (o lo quiere ≥ 1) | 2 | se borra la ofensa; +1 de cariño |
+| `cuidar` a un enfermo | el enfermo está presente y se tiene el jarabe (se toma en la cocina) | 15 | se mejora; +2 de cariño |
+| `avisar_medico` | en la aldea, hay un enfermo | 4 | el médico lo atiende: se mejora |
+| `estudiar` / `recitar` | en la escuela o en casa / en la escuela, sabiéndose la lección | 20 / 3 | sabe la lección / hecho `recito` |
+| `rezar` | en su casa o en la iglesia | 3 | hecho `rezo` |
+| `coser` (un vestido) | en su cocina, si sabe coser, con un corte de tela | 30 | +1 vestido con mangas abullonadas |
+| `adornar` el sombrero | tiene un ramo | 2 | hecho `adorno`; −1 ramo |
+| `remar` | en el lago | 15 | hecho `remo` |
+| `nombrar` un lugar | Ana, en un lugar que todavía no bautizó | 2 | el lugar queda con su nombre para siempre (aparece en el mapa) |
+| `regañar` | alguien que regaña (Marilla, la Sra. Lynde, la Sra. Barry) y una falta; quien no sale manda a llamar a Ana | 3 | hecho `regaño`; Ana queda castigada media hora en la cocina |
+| `subir_calesa` | Matthew, con quien quiere llevar | 3 | lo acompaña; el viaje de Matthew dura 2,4 veces menos |
 
 ## 3. Las metas
 
@@ -61,6 +79,7 @@ Una meta es una **condición** sobre el estado (`test`) y una estimación de **c
 | `acompana(a, b)` | a acompaña a b | 0 / 1 |
 | `te_con(quien, invitado, lugar)` | los dos están en el lugar y quien tiene té | 1 por cada cosa que falte |
 | `regalar_cosa(quien, cosa)` | esa cosa fue regalada | 0 / 1 si la tiene / 2 |
+| **Del libro:** `quehaceres(quien, lista)`, `alimentados(lugares)`, `visitar(a, b)`, `devuelto(a, cosa, b)`, `amigas(a, b)`, `paces(a, b)`, `sano(quien)`, `recito(quien)`, `rezo(quien)`, `adornado(quien)`, `remo(quien)`, `nombres(quien, n)`, `regañado(quien)`, `llevar(quien, a, lugar)` | el hecho de cada una (ver las acciones) | lo que falta (0, 1 o 2) |
 
 ## 4. Los favores (lo que se le puede pedir a otro)
 
@@ -73,7 +92,10 @@ Pedir un favor es una acción más; si el otro acepta, en el mundo se le instala
 | `encerrar_vaca` | no es quieto y nadie lleva ni compró la vaca | la vaca en su corral | `vaca_en` | 45 |
 | `interceder` por alguien | el destinatario quiere ≥ 4 a quien intercede | (+1 de cariño hacia quien pide) | `intercede` | 20 |
 | `pasear` | con Ana | quien recibe el pedido acompaña a quien pide (lo sigue) | — | — |
-| `venir` (invitación para más tarde) | a Ana | Ana estará en el lugar a la hora | `estar_en(Ana, lugar, hora, se queda)`, que empieza una hora antes de la cita (té a las 17, o algo más tarde) | 30 |
+| `prestar` cosa | el otro la tiene | quien pide la tiene (queda «prestada»: hay que devolverla) | — (se la pasa en el momento) | — |
+| `quehaceres` | a Ana | los quehaceres hechos | `quehaceres(Ana, lista)` | 30 |
+| `llevar` en la calesa | a Matthew | los dos en el lugar | `llevar(Matthew, quien pide, lugar)` | 15 |
+| `venir` (invitación para más tarde; también Ana invita a Diana) | a Ana | Ana estará en el lugar a la hora | `estar_en(Ana, lugar, hora, se queda)`, que empieza una hora antes de la cita (té a las 17, o algo más tarde) | 30 |
 
 A quién se le puede pedir sin que la meta lo diga: a los de su casa o a un amigo (cariño ≥ 3); quien no sale, solo a quien está con él, o manda a llamar a Ana.
 
@@ -93,10 +115,15 @@ A quién se le puede pedir sin que la meta lo diga: a los de su casa o a un amig
 | manojo de hierbas (`hierbas`) | hierba | — | — | 0.1 |
 | vaca (`vaca`) | animal | — | — | 20 |
 | cinta para el pelo (`cinta`) | adorno, regalo | — | — | 0.3 |
+| jarro de leche (`leche`) | comida, granja | — | 1 | 0.1 |
+| libro (`libro`) | lectura, regalo | — | — | 0.5 |
+| frasco de jarabe de ipecacuana (`jarabe`) | remedio | — | — | 0.2 |
+| corte de tela (`tela`) | tienda | — | — | 0.5 |
+| vestido con mangas abullonadas (`vestido`) | ropa, adorno, hecha_a_mano, regalo | 1 corte de tela | — | 2 |
 | bolsita de caramelos de menta (`caramelos`) | dulce, comida, regalo | — | — | 0.1 |
 | huevo (`huevos`) | comida, cosecha | — | 1 | 0.05 |
 
-Gustos de la tienda (precio en trueque): cinta para el pelo 3, bolsita de caramelos de menta 1. A la libreta de los Cuthbert: taza de azúcar, cuerda.
+Gustos de la tienda (precio en trueque): cinta para el pelo 3, bolsita de caramelos de menta 1. A la libreta de los Cuthbert: taza de azúcar, cuerda, cortes de tela.
 
 ## 6. Los lugares
 
@@ -109,12 +136,13 @@ Gustos de la tienda (precio en trueque): cinta para el pelo 3, bolsita de carame
 | `huerta` | la huerta | recoger ramo de flores |
 | `arbustos` | los arbustos de bayas | recoger baya |
 | `huerto` | el huerto de los Barry | recoger manzana |
-| `cocina` | la cocina de Tejas Verdes | cocinar (los de Tejas Verdes) |
+| `cocina` | la cocina de Tejas Verdes | tomar frasco de jarabe de ipecacuana |
 | `tienda` | la tienda de Lawson | trueque y libreta (de 8 a 18) |
 | `escuela` | la escuela | — |
 | `casa_parroquial` | la casa parroquial | — |
 | `bosque_peg` | el bosque de Peg Bowen | recoger manojo de hierbas |
 | `aldea` | la aldea | — |
+| `iglesia` | la iglesia | — |
 | `lago` | el lago | — |
 
 Además: `cocina` es adentro de Tejas Verdes, `h:casa` adentro de cualquier otra casa, `p:quien` el punto del mapa donde está esa persona y `c:vaca` donde está una vaca suelta.
@@ -123,10 +151,10 @@ Además: `cocina` es adentro de Tejas Verdes, `h:casa` adentro de cualquier otra
 
 | Persona | Carácter | Le gusta | Compra / vende | Cocina en | Otros |
 |---|---|---|---|---|---|
-| Ana (`ana`) | soñadora, orgullosa, rencorosa | flores, hecha_a_mano | — | la cocina de Tejas Verdes | camina a 46 · enfoque 0.3, social 0.8 |
+| Ana (`ana`) | soñadora, orgullosa, rencorosa | flores, hecha_a_mano, lectura, ropa | — | la cocina de Tejas Verdes | camina a 46 · enfoque 0.3, social 0.8 |
 | Matthew (`matthew`) | tímido, generoso | hecha_a_mano, comida | — | la cocina de Tejas Verdes | tiene 5 dólares · camina a 36 · enfoque 0.7, social 0.1 |
 | Marilla (`marilla`) | severo, generoso | hecha_a_mano | — | la cocina de Tejas Verdes | no sale de casa · camina a 38 · enfoque 0.9, social 0.4 |
-| Diana (`diana`) | sensible, generoso | flores, comida, adorno | — | — | camina a 44 · enfoque 0.6, social 0.8 |
+| Diana (`diana`) | sensible, generoso | flores, comida, adorno, lectura | — | — | tiene 1 libro · camina a 44 · enfoque 0.6, social 0.8 |
 | Sra. Barry (`barry`) | severo | flores | — | — | no sale de casa · camina a 38 · enfoque 0.9, social 0.3 |
 | Sra. Lynde (`lynde`) | chismoso, severo | comida | — | — | camina a 40 · enfoque 0.4, social 1 |
 | Sr. Harrison (`harrison`) | orgulloso | comida | — | — | tiene 1 cuerda · camina a 36 · enfoque 0.7, social 0.3 |
@@ -168,5 +196,23 @@ Reglas sociales (las mismas en el plan y en el mundo): pedir funciona si el otro
 | 23 | Matthew | Matthew encierra a Dolly y, ocupado, acepta además traerle huevos a Ana *(Ana pide el favor)* *(varias metas)* | — |
 | 24 | Ana | Ana quiere una cinta, pero antes tiene clases (de 9 a 12) *(varias metas)* | — |
 | 25 | Ana | Regalar una tarta de bayas en invierno (imposible) | — |
+| 26 | Marilla | Marilla le pide a Ana lavar los platos y barrer la cocina (cap. 4, 8) | quehaceres → Ana |
+| 27 | Matthew | Matthew ordeña las vacas y le lleva la leche a Marilla (cap. 6, 10) | — |
+| 28 | Matthew | Matthew les da de comer a los animales (cap. 21) | — |
+| 29 | Ana | Ana visita a la Sra. Lynde (cap. 9, 10) | — |
+| 30 | Ana | Ana le pide prestado un libro a Diana (cap. 12, 18) | prestar → Diana |
+| 31 | Ana | Ana le devuelve el libro a Diana (cap. 21, 30) | — |
+| 32 | Ana | Ana y Diana juran ser amigas del alma (cap. 12) | — |
+| 33 | Ana | Gilbert ya se disculpó: Ana lo perdona y hacen las paces (cap. 38) | — |
+| 34 | Ana | El Sr. Harrison está enfermo: Ana lo cuida con jarabe, o va a buscar al médico (cap. 18) | — |
+| 35 | Ana | Ana estudia la lección y la recita en la escuela (cap. 17, 24) | — |
+| 36 | Ana | Ana dice sus oraciones (cap. 7) | — |
+| 37 | Marilla | Marilla cose un vestido con mangas abullonadas (le piden la tela a la tienda) (cap. 25) | — |
+| 38 | Ana | Ana adorna su sombrero con flores (cap. 11) | — |
+| 39 | Ana | Ana rema en el lago (cap. 28) | — |
+| 40 | Ana | Ana le pone nombre a tres lugares (cap. 2, 12) | — |
+| 41 | Marilla | A Ana se le olvidaron los quehaceres: Marilla la manda llamar y la regaña (cap. 26) | — |
+| 42 | Ana | Ana invita a Diana a tomar el té en Tejas Verdes (cap. 16) | venir → Diana |
+| 43 | Matthew | Matthew lleva a Ana en la calesa hasta la aldea (cap. 2, 25) | — |
 
 Cómo se cumplió cada una, dibujado en el mapa: [`trazas/metas.pdf`](../trazas/metas.pdf) (`node tools/trace_goal.js --pdf trazas/metas.pdf`).
