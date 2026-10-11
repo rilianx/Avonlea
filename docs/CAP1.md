@@ -2,7 +2,7 @@
 
 *(Generado con `node tools/trace_goal.js cap1 --out cap1.png`; la imagen (en webp) es [`trazas/cap1.webp`](../trazas/cap1.webp).)*
 
-El capítulo I de *Ana de las Tejas Verdes* («La Sra. Rachel Lynde se sorprende»), con el viaje del capítulo II y el comienzo del III, jugado en el juego por el planificador (A\*) y las rutinas, sin IA. En el juego: panel 🎯 → **📖 Capítulo 1 del libro**.
+El capítulo I de *Ana de las Tejas Verdes* («La Sra. Rachel Lynde se sorprende»), con el viaje del capítulo II y el comienzo del III, jugado en el juego por el planificador (A\*) y las rutinas, sin IA. En el juego: panel 🎯 → **📖 Capítulo 1 del libro** (parte a las 14:54, justo antes de que salga Matthew; el telegrama de mediodía se da por recibido). Con 👁 se puede seguir a cualquiera (la Sra. Lynde, Matthew, Marilla…).
 
 ## 1. La agenda verdadera (solo del libro)
 

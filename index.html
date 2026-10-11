@@ -25,6 +25,8 @@ html,body{margin:0;height:100%;background:#2b3a26;overflow:hidden;touch-action:n
 #wmbtn{position:fixed;right:10px;top:256px;width:42px;height:36px;font-size:18px;line-height:30px;padding:0;cursor:pointer}
 #autobtn{position:fixed;right:10px;top:340px;width:42px;height:36px;font-size:18px;line-height:30px;padding:0;cursor:pointer}
 #autobtn.on{outline:2px solid #6a8f3c}
+#obsbtn{position:fixed;right:10px;top:424px;width:42px;height:36px;font-size:18px;line-height:30px;padding:0;cursor:pointer}
+#obsmenu{position:fixed;right:60px;top:300px;z-index:25;max-height:calc(100% - 320px);min-height:120px;overflow-y:auto;padding:8px 10px;width:290px;font-size:14px}#obsmenu[hidden]{display:none}#obsmenu .h{font-style:italic;margin-bottom:4px}#obsmenu button{display:block;width:100%;text-align:left;font:14px Georgia,serif;background:#fffaf0;color:#3b2a1c;border:1px solid #c9b48a;border-radius:6px;padding:3px 7px;margin:3px 0;cursor:pointer}#obsmenu button.on{background:#e8c890}#obsmenu small{opacity:.7;font-style:italic}
 #callbtn{position:fixed;right:10px;top:382px;width:42px;height:36px;font-size:18px;line-height:30px;padding:0;cursor:pointer}
 #autobar{position:fixed;left:50%;bottom:12px;transform:translateX(-50%);z-index:13;padding:4px 6px 4px 12px;font-size:13.5px;max-width:calc(100% - 24px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #autobar[hidden]{display:none}
@@ -140,6 +142,8 @@ body.visor > *:not(#cv):not(#visor){display:none !important}
 <button id="saybtn" class="paper" title="Decir algo (Enter o T)">💬</button>
 <button id="relbtn" class="paper" title="La historia de hoy y quién quiere a quién">👥</button>
 <button id="daybtn" class="paper" title="Pasar al día siguiente">⏭</button>
+<button id="obsbtn" class="paper" title="Observar a un personaje (que la vista lo siga)">👁</button>
+<div id="obsmenu" class="paper" hidden></div>
 <button id="wmbtn" class="paper" title="Metas de prueba (el planificador, sin IA)">🎯</button>
 <button id="headbtn" class="paper" title="Tamaño de las cabezas">🙂</button>
 <button id="autobtn" class="paper" title="Ana en automático (y mover el mapa libremente)">🤖</button>
@@ -2046,7 +2050,7 @@ function startCap1(){
   close(); if (ana.goto) ana.goto = null; WM_APPROACH = null; AGENDA_ON = false; if ($('wmagenda')) $('wmagenda').checked = false;
   cart.on = false; cart.riding = false; game.tripWith = null; game.road = null; diana.follow = false;
   if (today() % 7 === 6) dayT += 1;   // (a weekday)
-  dayAt(12); setSeason(0); S = 0;     // (an afternoon in early June)
+  dayAt(14.9); setSeason(0); S = 0;     // (an afternoon in early June, just before Matthew goes)
   game.dlgUsed = {};
   CAP1.on = true; CAP1.done = 0; CAP1.marks = {}; CAP1.f = {}; CAP1.extra = null;
   const put = (k, room, x, y) => { const b = PEOPLE[k]; b.where = room; b.x = x; b.y = y; b.sit = false; b.nav = null; b.buggy = false; b.roadDir = 0; b.story = null; b.away = null; };
@@ -2063,7 +2067,7 @@ function startCap1(){
 function cap1Tick(){
   if (!CAP1.on || CAP1.done) return;
   const h = hourNow(), f = CAP1.f, M = PEOPLE.matthew, R = PEOPLE.lynde, Ma = PEOPLE.marilla, A = AGENTS.ana;
-  if (!f.t0) { f.t0 = 1; cap1Mark('telegrama', 'Marilla recibió un telegrama de la Sra. Spencer: el huérfano llega en el tren de las cinco y media a Bright River.'); }
+  if (!f.t0) { f.t0 = 1; CAP1.marks.telegrama = 12; logEv('A mediodía, Marilla recibió un telegrama de la Sra. Spencer: el huérfano llega en el tren de las cinco y media a Bright River.', []); }   // (before the chapter starts)
   if (h >= 15 && !f.t15) { f.t15 = 1; if (R.where === 'rl') cap1Mark('rachel_teje', 'La Sra. Rachel Lynde tejía una colcha junto a la ventana, vigilando el camino.'); if (FOLKBY.thomas?.where === 'out') cap1Mark('thomas_nabos', 'Thomas Lynde sembraba nabos en el campo de la colina, detrás del granero.'); }
   // Matthew goes, in the buggy, in his best suit
   if (h >= 15.33 && !f.go) { f.go = 1; M.buggy = true; agentStart('matthew', { ...G.estar_en('matthew', 'h:br'), text: 'Matthew va a la estación de Bright River a buscar al niño' }, { label: 'ir a Bright River a buscar al niño huérfano (cap. 1)', prio: 3 }); }
@@ -4690,6 +4694,16 @@ $('autooff').addEventListener('pointerdown', e => { e.stopPropagation(); setAuto
   r.addEventListener('input', () => { setHeadM(r.value); show(); }); r.addEventListener('change', () => r.blur()); }
 $('wmp').addEventListener('pointerdown', e => e.stopPropagation());
 $('obsback').addEventListener('click', e => { e.stopPropagation(); observe(null); });
+// choosing whom to watch: everyone with a name (the main characters first), and where they are now
+function obsWhere(k){ const b = wmBody(k), w = wmScene(k); if (!b || !w) return ''; return w === 'out' ? '' : w === 'away' ? 'fuera de Avonlea' : w === 'in' ? 'en su casa' : w === 'camino' ? 'en el camino de Bright River' : w === 'br' ? 'en la estación de Bright River' : placeName(w); }
+function obsMenu(show = $('obsmenu').hidden){
+  const el = $('obsmenu'); el.hidden = !show; if (!show) return;
+  const main = Object.keys(PEOPLE).filter(k => CH[k].onMap !== false || PEOPLE[k].where !== 'away'), folk = FOLK.filter(f => !/^v\d+$/.test(f.id)).map(f => f.id);
+  const row = k => `<button data-k="${k}" class="${OBS === k ? 'on' : ''}">${wmName(k)} <small>${obsWhere(k)}</small></button>`;
+  el.innerHTML = '<div class="h">👁 ¿A quién observar? (la vista lo sigue)</div>' + `<button data-k="ana" class="${OBS ? '' : 'on'}">Ana <small>(volver a ella)</small></button>` + main.map(row).join('') + '<div class="h" style="margin-top:6px">Del pueblo</div>' + folk.map(row).join('');
+}
+$('obsbtn').addEventListener('pointerdown', e => { e.stopPropagation(); obsMenu(); });
+$('obsmenu').addEventListener('pointerdown', e => { e.stopPropagation(); const k = e.target.closest('[data-k]')?.dataset.k; if (!k) return; observe(k === 'ana' ? null : k); obsMenu(false); });
 $('wmrun').addEventListener('pointerdown', e => { const k = e.target.closest('[data-obs]')?.dataset.obs; if (k) observe(OBS === k ? null : k); });
 $('vecon').checked = VEC_ON; $('vecon').addEventListener('change', e => { VEC_ON = e.target.checked; });
 $('wmdis').addEventListener('change', e => { WM_DISTRACT = e.target.checked; });
