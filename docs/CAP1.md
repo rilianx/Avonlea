@@ -23,7 +23,7 @@ Las escenas son los diálogos del libro (traducidos), cada una con su tiempo del
 
 ## 3. Comparación
 
-**32/32 momentos del libro ocurren en la simulación**; diferencia media **34 min**, máxima **132 min**. Sin contar la visita de Rachel (que ahora, a propósito, va a Tejas Verdes apenas ve pasar a Matthew, en vez de esperar al té como en el libro): media **14 min**, máxima **38 min**. (\* = hora estimada en el libro.)
+**32/32 momentos del libro ocurren en la simulación**; diferencia media **38 min**, máxima **132 min**. Sin contar la visita de Rachel (que ahora, a propósito, va a Tejas Verdes apenas ve pasar a Matthew, en vez de esperar al té como en el libro): media **20 min**, máxima **52 min**. (\* = hora estimada en el libro.)
 
 | # | Libro | Simulación | Δ | Quién | Qué |
 |---|---|---|---|---|---|
@@ -49,16 +49,16 @@ Las escenas son los diálogos del libro (traducidos), cada una con su tiempo del
 | 20 | 18:15* | 16:23 | −112 min | los Bell | recibe a Rachel, que cuenta la noticia de los Cuthbert |
 | 21 | 18:15* | 18:41 | +26 min | Matthew | Ana y Matthew suben a la calesa; ella no suelta su bolso de alfombra; salen del pueblo |
 | 22 | 18:25* | 18:48 | +23 min | Ana | arranca una rama de ciruelo silvestre que roza la calesa y empieza a hablar (la novia, el vestido de wincey, los caminos rojos...) |
-| 23 | 19:00* | 19:23 | +23 min | Matthew | le dice que puede hablar todo lo que quiera; descubre que le gusta su charla |
-| 24 | 19:30* | 20:08 | +38 min | Ana | le muestra su trenza: «¿De qué color diría que es esto?» —«Es rojo, ¿no?» |
-| 25 | 19:45* | 20:14 | +29 min | Ana | enmudece de asombro bajo las flores, con el atardecer al fondo |
-| 26 | 20:00* | 20:23 | +23 min | Matthew | cruzan el pueblo en silencio; perros que ladran, chicos que gritan y caras curiosas en las ventanas |
-| 27 | 20:40* | 21:00 | +20 min | Matthew | rompe el silencio tras tres millas: «solo nos falta una milla»; Ana bautiza el Camino Blanco de las Delicias |
-| 28 | 20:45* | 21:18 | +33 min | Ana | bautiza el Lago de las Aguas Brillantes; aún hay luz en una ventana de La Cuesta del Huerto; cruza el puente con los ojos cerrados |
-| 29 | 20:55* | 21:29 | +34 min | Ana | adivina cuál es Tejas Verdes, bajo una gran estrella blanca; el sol ya se puso |
-| 30 | 21:00* | 21:18 | +18 min | Rachel | ve pasar la calesa en la oscuridad |
-| 31 | 21:05* | 21:37 | +32 min | Matthew | baja a Ana de la calesa; ella susurra que los árboles hablan en sueños; entran a la casa |
-| 32 | 21:05* | 21:37 | +32 min | Marilla | sale al encuentro, ve a la niña de pelo rojo y pregunta dónde está el niño |
+| 23 | 19:00* | 19:29 | +29 min | Matthew | le dice que puede hablar todo lo que quiera; descubre que le gusta su charla |
+| 24 | 19:30* | 20:15 | +45 min | Ana | le muestra su trenza: «¿De qué color diría que es esto?» —«Es rojo, ¿no?» |
+| 25 | 19:45* | 20:32 | +47 min | Ana | enmudece de asombro bajo las flores, con el atardecer al fondo |
+| 26 | 20:00* | 20:41 | +41 min | Matthew | cruzan el pueblo en silencio; perros que ladran, chicos que gritan y caras curiosas en las ventanas |
+| 27 | 20:40* | 21:18 | +38 min | Matthew | rompe el silencio tras tres millas: «solo nos falta una milla»; Ana bautiza el Camino Blanco de las Delicias |
+| 28 | 20:45* | 21:36 | +51 min | Ana | bautiza el Lago de las Aguas Brillantes; aún hay luz en una ventana de La Cuesta del Huerto; cruza el puente con los ojos cerrados |
+| 29 | 20:55* | 21:47 | +52 min | Ana | adivina cuál es Tejas Verdes, bajo una gran estrella blanca; el sol ya se puso |
+| 30 | 21:00* | 21:35 | +35 min | Rachel | ve pasar la calesa en la oscuridad |
+| 31 | 21:05* | 21:55 | +50 min | Matthew | baja a Ana de la calesa; ella susurra que los árboles hablan en sueños; entran a la casa |
+| 32 | 21:05* | 21:55 | +50 min | Marilla | sale al encuentro, ve a la niña de pelo rojo y pregunta dónde está el niño |
 
 ### Qué diferencias había y cómo se redujeron (agregando cosas)
 
@@ -108,6 +108,14 @@ Todo diálogo escrito es una **escena** (una cápsula, autocontenida: un tema co
 
 Un **director** las mira varias veces por segundo y, en cada canal (la calesa, la cocina, la estación, la ventana de Rachel…), pone la más importante que se pueda decir. Las escenas se dicen **completas**: ya no se cortan por tiempo.
 
+Como en los juegos actuales:
+
+- **Conversación o comentario.** Una conversación que otra más importante corta no se pierde. Sigue después donde quedó, con una frase puente («Bueno, como le decía…», «¿Dónde iba? ¡Ah, sí!»). Un comentario de Ana sobre lo que se ve sí se pierde si lo cortan, porque ya pasó el momento. Los comentarios van entre las conversaciones, uno por minuto como mucho.
+- **Lo que está por terminar, termina.** Si a la escena que se dice le quedan dos líneas o menos, la que quiere interrumpir espera.
+- **El ritmo del viaje.** Durante los momentos del capítulo y las escenas imprescindibles, Matthew lleva la yegua al paso (70 % de la velocidad), para que alcancen a decirse. El costo: el viaje dura unos 15 minutos más que antes, y la llegada queda unos 50 minutos después que en el libro. Lo que se gana: se dicen 15 de las 25 escenas del libro (antes, 13), todas las importantes, y algunos comentarios de Ana.
+- **Un guion fuera del código.** Las escenas del capítulo están escritas en un bloque de texto (`id="guion"`).
+- **El panel 🎭 Escenas en 🎯.** Muestra qué se dice, qué podría decirse y por qué no se dice el resto.
+
 Prioridades en el viaje:
 
 | Prioridad | Escena |
@@ -115,10 +123,11 @@ Prioridades en el viaje:
 | 10 (interrumpe) | **El túnel de manzanos** (la Avenida): corta lo que se estaba diciendo; Ana enmudece. |
 | 9 (interrumpe) | El nombre de la Avenida y «solo nos falta una milla» (al llegar a Avonlea, si pasaron por ella); la laguna de Barry (con la laguna a la vista); «¿es ésa Tejas Verdes?» (después de la laguna). |
 | 8 (interrumpe) | Newbridge, todavía en silencio. |
-| 3.55 | Los momentos del capítulo, en su orden: la rama de ciruelo, «puedes hablar todo lo que quieras», «¿de qué color diría que es esto?». |
+| 3.55 (al paso) | Los momentos del capítulo, en su orden: la rama de ciruelo, «puedes hablar todo lo que quieras», «¿de qué color diría que es esto?». |
 | 3.5 (interrumpe el hilo) | Lo del libro que nombra algo, mientras está a la vista: el cerezo de la estación, los barrancos, los abetos, el mar, el aserradero, el granjero, la iglesia, las lilas, los sauces, la curva, la señora de la carreta. Corta el hilo de la charla (que se retoma después), no los momentos del capítulo. |
+| 2.5 (al paso) | Las imprescindibles: los caminos rojos, los arbolitos del orfanato, «¿cómo es su hermana?». |
 | 2 | Las demás escenas del libro (cada una un tema completo: el vestido blanco, el tren y el barco, los caminos rojos, los arbolitos del orfanato, Marilla, la yegua, el velero, «¿divinamente hermoso?»…), desde el tramo donde las pone el libro, en su orden. |
-| 1.8 / 1 | Lo improvisado de Ana: sobre algo a la vista, o sobre el tramo en que van. |
+| 2.2 / 1 | Los comentarios de Ana (lo improvisado): sobre algo a la vista (entre conversación y conversación, uno por minuto como mucho), o sobre el tramo en que van. |
 | 0 | Ocurrencias sueltas, cada medio minuto si no hay nada más. |
 
 Lo que no alcanza a decirse en un viaje queda para el siguiente (el estado guarda qué se dijo). En la calesa y durante el capítulo no se cuelan frases sueltas ni saludos de los vecinos.
