@@ -955,7 +955,7 @@ function kitHeadOn(c, p, t, vi, L){
   c.restore(); return true;
 }
 function drawPerson(c, p, t){
-  if (p.look === 'ana') { const La = LOOKS.ana; La.big = ANA_STYLE === 'mano' ? HEAD_M : 0; La.pencil = ANA_STYLE === 'mano'; } else if (LOOKS[p.look]) LOOKS[p.look].big = Math.max(1, HEAD_M / 2);
+  if (p.look === 'ana') { const La = LOOKS.ana; La.big = ANA_STYLE === 'mano' ? HEAD_M : 0; La.pencil = ANA_STYLE === 'mano'; if (La.hair0 == null) { La.hair0 = La.hair; La.hairD0 = La.hairD; } const green = !!game.wm?.perm?.pelo_verde; La.hair = green ? '#5a8a3a' : La.hair0; La.hairD = green ? '#3e6a26' : La.hairD0; } else if (LOOKS[p.look]) LOOKS[p.look].big = Math.max(1, HEAD_M / 2);
   if (animDraw(c, p, t) || kitDraw(c, p, t)) return;
   if (p.lie) { drawLying(c, p, t); return; }
   if (rigDraw(c, p, t) || vecDraw(c, p, t)) return;
@@ -2688,6 +2688,13 @@ const ITEM_DEFS = {
   jarabe:   { names: ['frasco de jarabe de ipecacuana', 'frascos de jarabe de ipecacuana'], icon: '🧴', season: () => game.inv.jarabe > 0 },
   tela:     { names: ['corte de tela', 'cortes de tela'], icon: '🧵', season: () => game.inv.tela > 0 },
   vestido:  { names: ['vestido con mangas abullonadas', 'vestidos con mangas abullonadas'], icon: '👗', season: () => game.inv.vestido > 0, gift: { name: 'vestido', art: 'un vestido con mangas abullonadas', reply: '¡Mangas abullonadas! ¡Es el vestido más lindo del mundo!' } },
+  carta:    { names: ['carta', 'cartas'], icon: '✉️', season: () => game.inv.carta > 0 },
+  cuento:   { names: ['cuento escrito a mano', 'cuentos escritos a mano'], icon: '📜', season: () => game.inv.cuento > 0 },
+  heno:     { names: ['fardo de heno', 'fardos de heno'], icon: '🌾', season: () => game.inv.heno > 0 },
+  lena:     { names: ['atado de leña', 'atados de leña'], icon: '🪵', season: () => game.inv.lena > 0 },
+  mantequilla: { names: ['pan de mantequilla', 'panes de mantequilla'], icon: '🧈', season: () => game.inv.mantequilla > 0, gift: { name: 'mantequilla', art: 'un pan de mantequilla', reply: '¡Mantequilla fresca! Gracias.' } },
+  canasta:  { names: ['canasta de picnic', 'canastas de picnic'], icon: '🧺', season: () => game.inv.canasta > 0 },
+  tinte:    { names: ['frasco de tinte para el pelo', 'frascos de tinte para el pelo'], icon: '🧪', season: () => game.inv.tinte > 0 },
   cinta:    { names: ['cinta para el pelo', 'cintas para el pelo'], icon: '🎀', season: () => true, gift: { name: 'cinta para el pelo', art: 'una cinta para el pelo', reply: '¡Una cinta preciosa! Me la pondré el domingo.' } },
   caramelos: { names: ['bolsita de caramelos de menta', 'bolsitas de caramelos de menta'], icon: '🍬', season: () => true, gift: { name: 'bolsita de caramelos', art: 'una bolsita de caramelos de menta', reply: '¡Caramelos de menta! Son mis favoritos.' } },
   dolares:  { names: ['dólar', 'dólares'], icon: '💵', season: () => game.inv.dolares > 0, giveAll: true, gift: { name: 'el dinero', art: 'el dinero', reply: 'Vaya... bueno, pues gracias.' }, note: 'dinero' },
@@ -4641,6 +4648,8 @@ const FOLK_DEFS = {
   gilbert: { name: 'Gilbert Blythe', kind: 'alumno', home: 'Casa de los Blythe', play: 'lago', look: kidLook('#5a3a26', '#5a6e8a', { dressD: '#3e5068', coat: true, h: .88 }),
     lines: ['¡Buenos días, Zanahorias!... Perdón, perdón. Era una broma, Ana.', '¿Me vas a hablar algún día, Ana Shirley?', 'Te gané en ortografía. Pero en composición... bueno, ahí ganas tú.', '¿Quieres que te ayude a cruzar el arroyo? ¿No? Bueno...'],
     ana: ['Hmpf.', 'No le hablo a Gilbert Blythe. Nunca jamás.', '(Ana sigue de largo con la nariz en alto.)'] },
+  buhonero: { name: 'el buhonero', kind: 'buhonero', home: 'Pensión', look: { hair: '#2a1a14', hairD: '#1a0a04', beard: true, dress: '#6a4a3a', dressD: '#4a2a1a', coat: true, hatDark: true, skin: '#d8a888', h: 1.12 },
+    lines: ['¡Cintas, botones, peinetas, tinte para el pelo! ¡Todo lo que una señorita necesita!', 'Un tinte que deja el pelo negro azabache, señorita. Garantizado.'] },
   josie: { name: 'Josie Pye', kind: 'alumno', home: 'Casa de los Pye', play: 'aldea', look: kidLook('#e8cf86', '#c8a0d0', { dressD: '#a07ab0', style: 'curls', bow: '#f6d0e0' }),
     lines: ['¿Ese vestido es nuevo, Ana? Ah, no... es el de siempre.', 'Te apuesto a que no te atreves a caminar por el techo de la casa de los Barry.', 'Mi mamá dice que las pelirrojas tienen mal genio. ¿Es verdad?'],
     ana: ['Josie Pye, eres... ¡eres una Pye!', 'No pienso contestarte eso.'] },
@@ -4765,6 +4774,7 @@ const FOLK_KINDS = {
   tendero: (h, f) => h >= 8 && h < 18 ? IN(f.home, 'tl') : h >= 18 && h < 20 ? OUT(PLAY.aldea, 120) : IN(f.home),
   recado: (h, f) => h >= 7.5 && h < 19.5 ? OUT(ERRANDS[(f.n * 7 + Math.floor(h / 1.5)) % ERRANDS.length], 60) : IN(f.home),
   juego: (h, f) => h >= 8 && h < 19 ? OUT(f.home, 170) : IN(f.home),
+  buhonero: (h, f) => h >= 8 && h < 18.5 ? OUT(ERRANDS[(f.n * 5 + Math.floor(h * 1.3)) % ERRANDS.length], 60) : IN(f.home),
   medico: (h, f) => h >= 8 && h < 19 ? OUT(Math.floor(h) % 3 ? PLAY.aldea : f.home, 110) : IN(f.home),
 };
 const FARO = BUILDINGS.find(b => b.style === 'faro');
@@ -4966,6 +4976,7 @@ const FICHAS = {
   srbarry: ['el Sr. Barry, el padre de Diana, granjero de La Cuesta del Huerto, callado y trabajador', ['el heno', 'la cosecha', 'el tiempo']],
   maryjoe: ['Mary Joe, la muchacha francesa que trabaja en casa de los Barry; no sabe qué hacer en una emergencia', ['la ropa tendida', 'la noche del crup', 'la señora Barry']],
   jerry: ['Jerry Buote, el muchacho francés que Matthew contrata para ayudar en la granja de Tejas Verdes', ['la leña', 'las vacas', 'el trabajo del campo']],
+  buhonero: ['un vendedor ambulante que va de casa en casa con su baúl de cintas, botones y tinte para el pelo (el que le vendió a Ana el tinte que le dejó el pelo verde)', ['sus mercancías', 'el tinte para el pelo', 'los caminos']],
   medico: ['el médico de la zona, que atiende a los enfermos de Avonlea; un señor serio y amable', ['los enfermos', 'el crup de Minnie May', 'la salud']],
   srbell: ['el Sr. Bell, el superintendente de la escuela dominical, un señor mayor y muy formal que hace oraciones larguísimas', ['la escuela dominical', 'los versículos', 'la iglesia']],
   josephine: ['la Srta. Josephine Barry, la tía rica de Diana, de Charlottetown: brusca y estirada, pero Ana la hace reír como nadie; de visita en La Cuesta del Huerto', ['Charlottetown', 'la exposición', 'la noche en que Ana le saltó encima en la cama']],
@@ -5088,9 +5099,9 @@ function encUpdate(dt){
 // (no money at the shop, as in Avonlea: Ana trades what she brings for a treat, and what the house needs goes in the
 // Cuthberts' account book, which Marilla settles at the end of the month)
 const TRADE = { leche: 1, huevos: 1, bayas: 1 / 3, manzanas: 1 / 3, ramo: 2, tarta: 4, compota: 4 };   // (what each thing is worth, in trade)
-const TREATS = { cinta: 3, caramelos: 1 };                                                     // (what a treat costs, in trade)
+const TREATS = { cinta: 3, caramelos: 1 }, PRICE = { ...TREATS, tinte: 2 };   // (PRICE: also what the peddler sells)                                                     // (what a treat costs, in trade)
 const LIBRETA = ['azucar', 'cuerda', 'tela'], LIBRETA_ART = { azucar: 'una taza de azúcar', cuerda: 'una cuerda', tela: 'un corte de tela' };                                                          // (what can be put on the account)
-const tradeFor = (inv, c) => Object.entries(TRADE).map(([g, v]) => ({ g, k: Math.ceil(TREATS[c] / v - 1e-9) })).filter(o => (inv[o.g] || 0) >= o.k).sort((a, b) => a.k * TRADE[a.g] - b.k * TRADE[b.g]);
+const tradeFor = (inv, c) => Object.entries(TRADE).map(([g, v]) => ({ g, k: Math.ceil(PRICE[c] / v - 1e-9) })).filter(o => (inv[o.g] || 0) >= o.k).sort((a, b) => a.k * TRADE[a.g] - b.k * TRADE[b.g]);
 const r2 = n => Math.round(n * 100) / 100;
 const eggsToday = () => S === 3 ? 2 : 6;   // (in winter the hens lay little)
 const THINGS = {
@@ -5101,7 +5112,9 @@ const THINGS = {
   vaca: { tags: ['animal'], valor: 20 },
   cinta: { tags: ['adorno', 'regalo'], valor: .3 },
   leche: { tags: ['comida', 'granja'], valor: .1 }, libro: { tags: ['lectura', 'regalo'], valor: .5 }, jarabe: { tags: ['remedio'], valor: .2 }, tela: { tags: ['tienda'], valor: .5 },
-  vestido: { tags: ['ropa', 'adorno', 'hecha_a_mano', 'regalo'], valor: 2, receta: { tela: 1 }, hace: 'coser' }, caramelos: { tags: ['dulce', 'comida', 'regalo'], valor: .1 }, huevos: { tags: ['comida', 'cosecha'], valor: .05 },
+  vestido: { tags: ['ropa', 'adorno', 'hecha_a_mano', 'regalo'], valor: 2, receta: { tela: 1 }, hace: 'coser' },
+  carta: { tags: ['escrito'], valor: 0 }, cuento: { tags: ['escrito', 'hecha_a_mano'], valor: 0 }, heno: { tags: ['granja'], valor: .2 }, lena: { tags: ['granja'], valor: .2 },
+  mantequilla: { tags: ['comida', 'hecha_a_mano', 'regalo'], valor: .5, receta: { leche: 2 }, hace: 'batir' }, canasta: { tags: ['comida'], valor: .5, receta: {}, hace: 'preparar' }, tinte: { tags: ['tienda'], valor: .3 }, caramelos: { tags: ['dulce', 'comida', 'regalo'], valor: .1 }, huevos: { tags: ['comida', 'cosecha'], valor: .05 },
 };
 const ALL_AT_ONCE = ['bayas', 'manzanas', 'hierbas', 'dolares', 'azucar', 'huevos'];   // (these change hands all together; the rest one by one)
 // --- places: a point out of doors ('cocina' is inside Green Gables); what can be done there
@@ -5109,9 +5122,9 @@ const WP = {
   granero: [BARN.x + 60, BARN.y + 50], corral: [AREAS.corral.x + AREAS.corral.w / 2, AREAS.corral.y + AREAS.corral.h / 2], potrero: [AREAS.potrero.x + AREAS.potrero.w / 2, AREAS.potrero.y + AREAS.potrero.h / 2],
   huerta: [PLACES.huerta[1], PLACES.huerta[2]], arbustos: [GG.x - 200, GG.y + 170], huerto: [OS.x - 170, OS.y + 200], cocina: [GG.x, GG.y + 30],
   tienda: door('Tienda de Lawson'), escuela: SCHOOL_DOOR, casa_parroquial: door('Casa parroquial'), bosque_peg: [WOODS[1].x + WOODS[1].rx * .55, WOODS[1].y + 40],
-  aldea: PLAY.aldea, lago: [PLACES.lago[1], PLACES.lago[2]], gallinero: [BARN.x + 150, BARN.y + 96], iglesia: CHURCH_DOOR,
+  aldea: PLAY.aldea, lago: [PLACES.lago[1], PLACES.lago[2]], gallinero: [BARN.x + 150, BARN.y + 96], iglesia: CHURCH_DOOR, salon: door('Ayuntamiento'), colina: PLAY.campo_rosado, campo: (f => [f.x + f.w / 2, f.y + f.h / 2])(fieldNear([GG.x + 300, GG.y - 200])),
 };
-const WP_NAME = { gallinero: 'el gallinero', granero: 'el granero', corral: 'el corral', potrero: 'el potrero del Sr. Harrison', huerta: 'la huerta', arbustos: 'los arbustos de bayas', huerto: 'el huerto de los Barry', cocina: 'la cocina de Tejas Verdes', tienda: 'la tienda de Lawson', escuela: 'la escuela', casa_parroquial: 'la casa parroquial', bosque_peg: 'el bosque de Peg Bowen', aldea: 'la aldea', iglesia: 'la iglesia', lago: 'el lago' };
+const WP_NAME = { gallinero: 'el gallinero', granero: 'el granero', corral: 'el corral', potrero: 'el potrero del Sr. Harrison', huerta: 'la huerta', arbustos: 'los arbustos de bayas', huerto: 'el huerto de los Barry', cocina: 'la cocina de Tejas Verdes', tienda: 'la tienda de Lawson', escuela: 'la escuela', casa_parroquial: 'la casa parroquial', bosque_peg: 'el bosque de Peg Bowen', aldea: 'la aldea', iglesia: 'la iglesia', salon: 'el salón del pueblo', colina: 'la colina', campo: 'el campo de heno', lago: 'el lago' };
 const OFRECE = { gallinero: { recoger: ['huevos'] }, granero: { tomar: ['cuerda'] }, arbustos: { recoger: ['bayas'] }, huerto: { recoger: ['manzanas'] }, huerta: { recoger: ['ramo'] }, bosque_peg: { recoger: ['hierbas'] }, cocina: { tomar: ['jarabe'] } };
 for (const k of ['granero', 'corral', 'potrero', 'escuela', 'casa_parroquial', 'tienda']) if (!PLACES[k]) PLACES[k] = [WP_NAME[k], ...WP[k]];   // (so errands can name them)
 // --- people: character, likes, what they buy and sell, where they cook, whether they leave the house; and their inventories
@@ -5124,15 +5137,18 @@ const WHO = {
   lynde: { caracter: ['chismoso', 'severo'], le_gusta: ['comida'], cose: true, regaña: true },
   harrison: { caracter: ['orgulloso'], le_gusta: ['comida'], inv: { cuerda: 1 } },
   shearer: { caracter: [], compra: { animal: 20 }, inv: { dolares: 60 } },
-  lawson: { caracter: ['generoso'], trueque: true, abre: [8, 18] },
   gilbert: { caracter: ['orgulloso', 'generoso'], le_gusta: ['comida'] },
   sraallan: { caracter: ['generoso', 'sensible'], le_gusta: ['hecha_a_mano', 'flores'], cocina: 'casa_parroquial' },
   peg: { caracter: ['orgulloso'], le_gusta: ['hierba'] },
   medico: { caracter: ['generoso'], le_gusta: [], medico: true },
+  buhonero: { caracter: [], le_gusta: [], trueque: true, vende: ['tinte'] },
+  lawson: { caracter: ['generoso'], trueque: true, abre: [8, 18], vende: ['cinta', 'caramelos'] },
 };
 const whoOf = k => WHO[k] || { caracter: [], le_gusta: [] };
 const isQuieto = k => !!whoOf(k).quieto || (game.wm?.sick || []).includes(k);
 const CUTHBERT = ['ana', 'matthew', 'marilla'];
+const d0Home = (here, me) => false;   // (where one can cook: one's own kitchen)
+const ITEM_PLACE = { lena: 'granero', heno: 'campo', leche: 'corral' };
 const QUEHACERES = ['platos', 'barrer', 'mesa'], QUEHACER_TXT = { platos: 'lavar los platos', barrer: 'barrer la cocina', mesa: 'poner la mesa' };
 const JURAN = ['ana', 'diana'];   // (friends of the soul: «mientras duren el sol y la luna»)
 const NOMBRES_ANA = { huerta: 'el Valle de las Violetas', arbustos: 'el Sendero de los Abedules', lago: 'el Lago de las Aguas Brillantes', bosque_peg: 'el Bosque Encantado', corral: 'Idlewild' };
@@ -5186,7 +5202,7 @@ const SPEEDS = { ana: 60 };
 const travelMin = (who, a, b, pts) => { const p = pts[a], q = pts[b]; if (!p || !q) return 1e6; return 1 + dist(p[0], p[1], q[0], q[1]) * 1.3 / (SPEEDS[who] || 40) * 24 / 60 + (a === 'cocina' || b === 'cocina' || a.startsWith('h:') || b.startsWith('h:') ? 2 : 0); };
 
 // --- the state now (for planning and for checking a goal in the world)
-const WM_PEOPLE = () => ['ana', ...Object.keys(CH), 'lawson', 'gilbert', 'sraallan', 'peg', 'medico'];
+const WM_PEOPLE = () => ['ana', ...Object.keys(CH), 'lawson', 'gilbert', 'sraallan', 'peg', 'medico', 'buhonero'];
 function wmNow(){
   const s = { t: hourNow() * 60, pos: {}, invs: {}, cows: {}, rel: {}, ofensa: { ...game.wm.ofensa }, know: {}, follow: {}, facts: {}, stock: {}, sick: [...(game.wm.sick || [])] };
   for (const k of WM_PEOPLE()) { s.pos[k] = personKey(k); s.invs[k] = { ...wmInv(k) }; s.know[k] = [...(game.wm.know[k] || [])]; }
@@ -5194,6 +5210,7 @@ function wmNow(){
   for (const a of Object.values(ANIM)) if (a.kind === 'cow') s.cows[a.id] = cowKey(a);
   for (const [f, v] of Object.entries(game.wm.facts)) if (v && f.endsWith(':' + today())) s.facts[f.slice(0, -(':' + today()).length)] = 1;
   for (const f of Object.keys(game.wm.perm)) s.facts[f] = 1;
+  if (S === 3) s.facts.invierno = 1;
   if (diana.follow) s.follow.diana = 'ana';
   for (const [k, ag] of Object.entries(AGENTS)) { if (ag.follow) s.follow[k] = ag.follow; if (ag.followOf) s.follow[k] = ag.followOf; }
   const near = (p, r) => WP[p] ? [WP[p][0], WP[p][1], r] : null;
@@ -5245,15 +5262,15 @@ function verbs(s, me, C){
   const of = OFRECE[here] || {};
   for (const x of of.tomar || []) if (!(inv[x] > 0) && C.items.includes(x) && !(x === 'jarabe' && game.wm.sinJarabe)) add('tomar', 1, t => { t.invs[me][x] = 1; }, { x });
   for (const x of of.recoger || []) if (s.stock[x] > 0 && (inv[x] || 0) < 9) { const n = Math.min(x === 'ramo' ? 1 : x === 'huevos' ? 9 : 3, s.stock[x]); add('recoger', 3, t => { t.invs[me][x] = (t.invs[me][x] || 0) + n; t.stock[x] -= n; }, { x, n }); }
-  if (here === W.cocina) for (const [x, d] of Object.entries(THINGS)) if (d.receta && C.items.includes(x) && (d.hace !== 'coser' || W.cose) && Object.entries(d.receta).every(([i, n]) => (inv[i] || 0) >= n) && (inv[x] || 0) < 3) add(d.hace || 'cocinar', d.hace === 'coser' ? 30 : 10, t => { for (const [i, n] of Object.entries(d.receta)) t.invs[me][i] -= n; t.invs[me][x] = (t.invs[me][x] || 0) + 1; }, { x });
+  if (here === W.cocina || d0Home(here, me)) for (const [x, d] of Object.entries(THINGS)) if (d.receta && C.items.includes(x) && (d.hace !== 'coser' || W.cose) && Object.entries(d.receta).every(([i, n]) => (inv[i] || 0) >= n) && (inv[x] || 0) < 3) add(d.hace || 'cocinar', d.hace === 'coser' ? 30 : 10, t => { for (const [i, n] of Object.entries(d.receta)) t.invs[me][i] -= n; t.invs[me][x] = (t.invs[me][x] || 0) + 1; }, { x });
   for (const k of C.people) if (at(k)) {
     for (const x of Object.keys(inv)) if (inv[x] > 0 && THINGS[x] && x !== 'cuerda' && C.items.includes(x)) { const n = ALL_AT_ONCE.includes(x) ? inv[x] : 1; add('dar', 1, t => { t.invs[me][x] -= n; t.invs[k][x] = (t.invs[k][x] || 0) + n; for (const tag of THINGS[x].tags) t.facts['dio:' + k + ':' + tag] = 1; t.facts['dio:' + k + ':' + x] = 1; t.facts['dio:' + x] = 1; socialRule(stateR(t), 'dar', me, k, x); }, { x, k, n }); }
     const buys = whoOf(k).compra || {};
     if (buys.animal) for (const [c, st] of Object.entries(s.cows)) if (st === 'led:' + me && FAMILY(C.owner[c]).includes(me)) add('vender', 5, t => { t.cows[c] = 'sold:' + k; t.invs[me].dolares = (t.invs[me].dolares || 0) + buys.animal; t.know[me].push('vendio_vaca'); t.know[k].push('vendio_vaca'); }, { x: 'vaca', cow: c, k });
     const open = !whoOf(k).abre || (s.t >= whoOf(k).abre[0] * 60 && s.t < whoOf(k).abre[1] * 60);
     if (open && whoOf(k).trueque) {
-      for (const c of Object.keys(TREATS)) if (C.items.includes(c) && (inv[c] || 0) < 2) for (const o of tradeFor(inv, c).slice(0, 2)) add('cambiar', 4, t => { t.invs[me][o.g] -= o.k; t.invs[me][c] = (t.invs[me][c] || 0) + 1; }, { x: c, g: o.g, n: o.k, k });
-      if (CUTHBERT.includes(me)) for (const x of LIBRETA) if (C.items.includes(x) && (inv[x] || 0) < 2) add('comprar', 4, t => { t.invs[me][x] = (t.invs[me][x] || 0) + 1; }, { x, k });
+      for (const c of whoOf(k).vende || Object.keys(TREATS)) if (C.items.includes(c) && (inv[c] || 0) < 2) for (const o of tradeFor(inv, c).slice(0, 2)) add('cambiar', 4, t => { t.invs[me][o.g] -= o.k; t.invs[me][c] = (t.invs[me][c] || 0) + 1; }, { x: c, g: o.g, n: o.k, k });
+      if (CUTHBERT.includes(me) && (!whoOf(k).vende || k === 'lawson')) for (const x of LIBRETA) if (C.items.includes(x) && (inv[x] || 0) < 2) add('comprar', 4, t => { t.invs[me][x] = (t.invs[me][x] || 0) + 1; }, { x, k });
     }
     if ((s.know[k] || []).some(f => !s.know[me].includes(f)) || (s.know[me] || []).some(f => !(s.know[k] || []).includes(f))) add('conversar', 2, t => { const u = [...new Set([...t.know[me], ...t.know[k]])]; t.know[me] = [...u]; t.know[k] = [...u]; }, { k });
     if (s.ofensa[k + '>' + me] && !s.facts['disc:' + k + '>' + me]) add('disculparse', 2, t => { socialRule(stateR(t), 'disculparse', me, k); }, { k });
@@ -5266,6 +5283,10 @@ function verbs(s, me, C){
     if (C.kind === 'sano' && (s.sick || []).includes(k) && (inv.jarabe > 0 || W.medico)) add('cuidar', 15, t => { t.sick = t.sick.filter(x => x !== k); if (!W.medico) t.invs[me].jarabe -= 1; t.rel[k + '>' + me] = Math.min(5, (t.rel[k + '>' + me] ?? 2) + 2); }, { k });
     if (C.kind === 'regañado' && W.regaña && s.facts['falta:' + k] && !s.facts['regaño:' + k]) add('regañar', 3, t => { t.facts['regaño:' + k] = 1; delete t.facts['falta:' + k]; }, { k });
     if (C.lleva === k && s.follow[k] !== me) add('subir_calesa', 3, t => { t.follow[k] = me; }, { k });
+    if (C.kind === 'club' && inv.cuento > 0 && JURAN.includes(k) && !s.facts['club:' + me]) add('leer_cuento', 8, t => { t.invs[me].cuento -= 1; t.facts['club:' + me] = 1; }, { k });
+    if (C.kind === 'felicitar' && (s.facts['concierto:' + k] || s.facts['recito:' + k]) && !s.facts['felicito:' + me + '>' + k]) add('felicitar', 2, t => { t.facts['felicito:' + me + '>' + k] = 1; t.rel[k + '>' + me] = Math.min(5, (t.rel[k + '>' + me] ?? 2) + 1); }, { k });
+    if (C.kind === 'consolado' && s.facts['triste:' + k] && !s.facts['consolo:' + me + '>' + k]) add('consolar', 5, t => { delete t.facts['triste:' + k]; t.facts['consolo:' + me + '>' + k] = 1; t.rel[k + '>' + me] = Math.min(5, (t.rel[k + '>' + me] ?? 2) + 1); }, { k });
+    if (C.kind === 'picnic' && here === 'lago' && inv.canasta > 0 && (me !== 'ana' || s.facts['permiso:picnic']) && !s.facts['picnic:' + me]) add('merendar', 20, t => { t.invs[me].canasta -= 1; t.facts['picnic:' + me] = 1; t.facts['picnic:' + k] = 1; }, { k });
     for (const f of C.favors) { const F = FAVORS[f.f]; if (f.to === k && F.ok(s, me, k, f) && socialRule(stateR(s), 'pedir', me, k) && !s.facts['pedido:' + f.f + ':' + k]) add('pedir', 2 + (F.wait || 0) + (isQuieto(me) ? 0 : 40), t => { F.eff(t, me, k, f); t.facts['pedido:' + f.f + ':' + k] = 1; }, { k, favor: f }); }
   }
   if (C.kind === 'regañado' && W.regaña && isQuieto(me) && !at('ana') && s.facts['falta:ana'] && !s.facts['regaño:ana']) add('regañar', 3 + 25, t => { t.facts['regaño:ana'] = 1; delete t.facts['falta:ana']; }, { k: 'ana', llamar: true });   // (sends for her, to scold her)
@@ -5279,6 +5300,25 @@ function verbs(s, me, C){
   if (C.kind === 'adornado' && inv.ramo > 0 && !s.facts['adorno:' + me]) add('adornar', 2, t => { t.invs[me].ramo -= 1; t.facts['adorno:' + me] = 1; });
   if (C.kind === 'remo' && here === 'lago' && !s.facts['remo:' + me]) add('remar', 15, t => { t.facts['remo:' + me] = 1; });
   if (C.kind === 'nombres' && me === 'ana' && NOMBRES_ANA[here] && !s.facts['nombre:' + here]) add('nombrar', 2, t => { t.facts['nombre:' + here] = 1; }, { p: here });
+  // (from the book, second batch) letters and books, the story club, the concert, the farm, winter, the picnic, the dye, the dare
+  const home = here === W.cocina || (here || '').startsWith('h:');
+  if (C.kind === 'carta' && home && !(inv.carta > 0) && !s.facts['carta_enviada:' + me]) add('escribir_carta', 8, t => { t.invs[me].carta = 1; });
+  if (C.kind === 'carta' && here === 'tienda' && inv.carta > 0) add('enviar_carta', 2, t => { t.invs[me].carta -= 1; t.facts['carta_enviada:' + me] = 1; });
+  if (C.kind === 'leido' && inv.libro > 0 && !s.facts['leido:' + me]) add('leer', 20, t => { t.facts['leido:' + me] = 1; });
+  if (C.kind === 'club' && home && !(inv.cuento > 0) && !s.facts['club:' + me]) add('escribir_cuento', 20, t => { t.invs[me].cuento = 1; });
+  if (C.kind === 'concierto' && (here === 'escuela' || here === 'h:es' || here === 'salon') && !(s.know[me] || []).includes('poema')) add('ensayar', 15, t => { t.know[me] = [...(t.know[me] || []), 'poema']; });
+  if (C.kind === 'concierto' && here === 'salon' && (s.know[me] || []).includes('poema') && !s.facts['concierto:' + me]) add('actuar', 5, t => { t.facts['concierto:' + me] = 1; });
+  if (C.kind === 'sala' && here === 'salon' && inv.ramo > 0 && !s.facts['sala_decorada']) add('decorar_sala', 6, t => { t.invs[me].ramo -= 1; t.facts['sala_decorada'] = 1; });
+  if (C.items.includes('heno') && here === 'campo' && !isQuieto(me) && !s.facts['heno_hecho']) add('hacer_heno', 25, t => { t.invs[me].heno = (t.invs[me].heno || 0) + 3; t.facts['heno_hecho'] = 1; });
+  if (C.items.includes('lena') && here === 'granero' && !isQuieto(me) && (inv.lena || 0) < 3) add('partir_lena', 10, t => { t.invs[me].lena = (t.invs[me].lena || 0) + 3; });
+  if (C.kind === 'huerta' && here === 'huerta' && !s.facts['sembrado']) add('sembrar', 10, t => { t.facts['sembrado'] = 1; });
+  if (C.kind === 'huerta' && here === 'huerta' && s.facts['sembrado'] && !s.facts['regado']) add('regar', 5, t => { t.facts['regado'] = 1; });
+  if (C.kind === 'patinar' && here === 'lago' && s.facts['invierno'] && !s.facts['patino:' + me]) add('patinar', 15, t => { t.facts['patino:' + me] = 1; });
+  if (C.kind === 'trineo' && here === 'colina' && s.facts['invierno'] && !s.facts['trineo:' + me]) add('trineo', 15, t => { t.facts['trineo:' + me] = 1; });
+  if (C.kind === 'picnic' && me === 'ana' && here === 'cocina' && at('marilla') && !s.facts['permiso:picnic']) add('pedir_permiso', 2, t => { t.facts['permiso:picnic'] = 1; });
+  if (C.kind === 'teñido' && here === W.cocina && inv.tinte > 0 && !s.facts['pelo_teñido:' + me]) add('teñir', 10, t => { t.invs[me].tinte -= 1; t.facts['pelo_teñido:' + me] = 1; });
+  if (C.kind === 'pelo_corto' && here === 'cocina' && (s.facts['pelo_teñido:ana'] || s.facts['pelo_verde']) && !s.facts['pelo_corto']) add('cortar_pelo', 6, t => { t.facts['pelo_corto'] = 1; delete t.facts['pelo_verde']; });
+  if (C.kind === 'desafio' && here === 'huerto' && !s.facts['trepo:' + me]) add('trepar', 6, t => { t.facts['trepo:' + me] = 1; });
   if (isQuieto(me) && !at('ana')) for (const f of C.favors) { const F = FAVORS[f.f]; if (f.to === 'ana' && F.ok(s, me, 'ana', f) && !s.facts['pedido:' + f.f + ':ana']) add('pedir', 2 + (F.wait || 0) + 25, t => { F.eff(t, me, 'ana', f); t.facts['pedido:' + f.f + ':ana'] = 1; }, { k: 'ana', favor: f, llamar: true }); }   // (sends for her: she comes, then is asked)
   for (const [c, st] of Object.entries(s.cows)) {
     if (st === here && inv.cuerda > 0 && !Object.values(s.cows).includes('led:' + me) && (FAMILY(C.owner[c]).includes(me) || st.startsWith('c:'))) add('guiar', 2, t => { t.cows[c] = 'led:' + me; }, { cow: c });
@@ -5320,6 +5360,20 @@ const G = {
   remo: k => ({ kind: 'remo', text: `${wmName(k)} rema en el lago`, test: s => !!s.facts['remo:' + k], h: s => s.facts['remo:' + k] ? 0 : 1, items: [], people: [k], places: ['lago'] }),
   nombres: (k, n) => ({ kind: 'nombres', text: `${wmName(k)} le pone nombre a ${n} lugares`, test: s => Object.keys(NOMBRES_ANA).filter(p => s.facts['nombre:' + p]).length >= n, h: s => Math.max(0, n - Object.keys(NOMBRES_ANA).filter(p => s.facts['nombre:' + p]).length), items: [], people: [k], places: Object.keys(NOMBRES_ANA) }),
   regañado: k => ({ kind: 'regañado', text: `regañar a ${wmName(k)} por la falta`, test: s => !!s.facts['regaño:' + k], h: s => s.facts['regaño:' + k] ? 0 : 1, items: [], people: [k] }),
+  carta: k => ({ kind: 'carta', text: `${wmName(k)} escribe una carta y la manda por correo`, test: s => !!s.facts['carta_enviada:' + k], h: s => s.facts['carta_enviada:' + k] ? 0 : s.invs[k].carta ? 1 : 2, items: ['carta'], people: [k], places: ['tienda', 'cocina'] }),
+  leido: k => ({ kind: 'leido', text: `${wmName(k)} lee un libro`, test: s => !!s.facts['leido:' + k], h: s => s.facts['leido:' + k] ? 0 : s.invs[k].libro ? 1 : 2, items: ['libro'], people: [k] }),
+  club: k => ({ kind: 'club', text: `${wmName(k)} escribe un cuento y se lo lee al club de cuentos`, test: s => !!s.facts['club:' + k], h: s => s.facts['club:' + k] ? 0 : s.invs[k].cuento ? 1 : 2, items: ['cuento'], people: [k, 'diana'], places: ['cocina'] }),
+  concierto: k => ({ kind: 'concierto', text: `${wmName(k)} ensaya y recita en el concierto del salón`, test: s => !!s.facts['concierto:' + k], h: s => s.facts['concierto:' + k] ? 0 : (s.know[k] || []).includes('poema') ? 1 : 2, items: [], people: [k], places: ['salon', 'escuela'] }),
+  sala: k => ({ kind: 'sala', text: `${wmName(k)} decora el salón con flores para el concierto`, test: s => !!s.facts['sala_decorada'], h: s => s.facts['sala_decorada'] ? 0 : s.invs[k].ramo ? 1 : 2, items: ['ramo'], people: [k], places: ['salon', 'huerta'] }),
+  felicitar: (a, b) => ({ kind: 'felicitar', text: `${wmName(a)} felicita a ${wmName(b)}`, test: s => !!s.facts['felicito:' + a + '>' + b], h: s => s.facts['felicito:' + a + '>' + b] ? 0 : 1, items: [], people: [a, b] }),
+  consolado: (a, b) => ({ kind: 'consolado', text: `${wmName(a)} consuela a ${wmName(b)}`, test: s => !s.facts['triste:' + b], h: s => s.facts['triste:' + b] ? 1 : 0, items: [], people: [a, b] }),
+  huerta: k => ({ kind: 'huerta', text: `${wmName(k)} siembra y riega la huerta`, test: s => !!s.facts['regado'], h: s => s.facts['regado'] ? 0 : s.facts['sembrado'] ? 1 : 2, items: [], people: [k], places: ['huerta'] }),
+  patinar: k => ({ kind: 'patinar', text: `${wmName(k)} patina en el lago helado`, test: s => !!s.facts['patino:' + k], h: s => s.facts['patino:' + k] ? 0 : 1, items: [], people: [k], places: ['lago'] }),
+  trineo: k => ({ kind: 'trineo', text: `${wmName(k)} se tira en trineo por la colina`, test: s => !!s.facts['trineo:' + k], h: s => s.facts['trineo:' + k] ? 0 : 1, items: [], people: [k], places: ['colina'] }),
+  picnic: (a, b) => ({ kind: 'picnic', text: `${wmName(a)} va de picnic al lago con ${wmName(b)}`, test: s => !!s.facts['picnic:' + a], h: s => s.facts['picnic:' + a] ? 0 : (s.invs[a].canasta ? 0 : 1) + (s.facts['permiso:picnic'] || a !== 'ana' ? 0 : 1) + (s.follow[b] === a ? 0 : 2) + (s.pos[a] === 'lago' ? 0 : 1) + 1, items: ['canasta'], people: [a, b, 'marilla'], places: ['lago', 'cocina'] }),
+  teñido: k => ({ kind: 'teñido', text: `${wmName(k)} se tiñe el pelo de negro azabache`, test: s => !!s.facts['pelo_teñido:' + k], h: s => s.facts['pelo_teñido:' + k] ? 0 : s.invs[k].tinte ? 1 : 2, items: ['tinte', 'huevos'], people: [k, 'buhonero'], places: ['cocina', 'gallinero'] }),
+  pelo_corto: k => ({ kind: 'pelo_corto', text: `a ${wmName(k)} le cortan el pelo verde`, test: s => !!s.facts['pelo_corto'], h: s => s.facts['pelo_corto'] ? 0 : 1, items: [], people: [k], places: ['cocina'] }),
+  desafio: k => ({ kind: 'desafio', text: `${wmName(k)} acepta el desafío de Josie y camina por el techo de los Barry`, test: s => !!s.facts['trepo:' + k], h: s => s.facts['trepo:' + k] ? 0 : 1, items: [], people: [k], places: ['huerto'] }),
   llevar: (by, k, p) => ({ kind: 'llevar', text: `${wmName(by)} lleva a ${wmName(k)} en la calesa a ${WP_NAME[p]}`, test: s => s.pos[by] === p && s.pos[k] === p, h: s => (s.follow[k] === by || s.pos[k] === p ? 0 : 1) + (s.pos[by] === p ? 0 : 1), items: [], people: [by, k], places: [p], lleva: k }),
   acompana: (a, b) => ({ text: `${wmName(a)} acompaña a ${wmName(b)}`, test: s => s.follow[a] === b, h: s => s.follow[a] === b ? 0 : 1, items: [], people: [a, b] }),
   te_con: (k, g, p) => ({ text: `${wmName(k)} toma el té con ${wmName(g)} en ${WP_NAME[p]}`, test: s => s.pos[g] === p && s.pos[k] === p && (s.invs[k].te || 0) >= 1, h: s => (s.pos[g] === p ? 0 : 1) + (s.pos[k] === p ? 0 : 1) + ((s.invs[k].te || 0) >= 1 ? 0 : 1), items: ['te'], people: [k, g], places: [p] }),
@@ -5349,6 +5403,7 @@ function wmSearch(me, goal, favors, s0, cap){
   // only the places that matter: where the people and the cows are, where the things needed are got, the kitchen, the goal's own
   const places = new Set([...(goal.places || []), whoOf(me).cocina, 'corral', 'potrero'].filter(Boolean));
   for (const [p, o] of Object.entries(OFRECE)) if ([...(o.tomar || []), ...(o.recoger || [])].some(x => items.includes(x) || x === 'cuerda' && Object.keys(s0.cows).length)) places.add(p);
+  for (const [x, p] of Object.entries(ITEM_PLACE)) if (items.includes(x)) places.add(p);   // (where things are made: firewood in the barn, hay in the field)
   for (const k of people) places.add(s0.pos[k]); for (const st of Object.values(s0.cows)) if (keyPoint(st)) places.add(st);
   const pts = {}; for (const p of places) { const q = keyPoint(p); if (q) pts[p] = q; }
   pts[s0.pos[me]] = pts[s0.pos[me]] || (wmBody(me) ? [wmBody(me).x, wmBody(me).y] : null);
@@ -5378,7 +5433,10 @@ const stepText = a => ({ ir: () => 'ir a ' + (WP_NAME[a.p] || wmPlaceText(a.p)),
   conversar: () => 'conversar con ' + wmName(a.k), interceder: () => `hablar con ${wmName(a.k)} por ${wmName(a.por)}`, disculparse: () => 'disculparse con ' + wmName(a.k), pedir: () => `pedirle a ${wmName(a.k)}: ` + ({ traer: `que le traiga ${itemTextW(a.favor.item, a.favor.n)}`, encerrar_vaca: `que lleve a ${ANIMALS[a.favor.cow]?.name} a ${WP_NAME[a.favor.pen]}`, interceder: `que hable con ${wmName(a.favor.target)} por él`, vender_vaca: 'que le venda la vaca', pasear: 'que den un paseo juntas', venir: 'que venga a tomar el té más tarde', prestar: `que le preste ${ITEM_DEFS[a.favor.item]?.gift?.art || a.favor.item}`, curar: `que venga a ver a ${wmName(a.favor.k)}`, quehaceres: 'que haga los quehaceres', llevar: `que la lleve en la calesa a ${WP_NAME[a.favor.lugar]}` }[a.favor.f] || a.favor.f), guiar: () => 'guiar a ' + ANIMALS[a.cow].name,
   quehacer: () => QUEHACER_TXT[a.x], ordeñar: () => 'ordeñar a ' + ANIMALS[a.cow].name, alimentar: () => 'dar de comer a los animales en ' + WP_NAME[a.p], visitar: () => 'visitar a ' + wmName(a.k), devolver: () => `devolverle ${ITEM_DEFS[a.x]?.gift?.art || a.x} a ${wmName(a.k)}`,
   jurar: () => 'jurar ser amigas del alma con ' + wmName(a.k), perdonar: () => 'perdonar a ' + wmName(a.k), cuidar: () => 'cuidar a ' + wmName(a.k), estudiar: () => 'estudiar la lección', recitar: () => 'recitar la lección',
-  rezar: () => 'decir sus oraciones', adornar: () => 'adornar el sombrero con flores', remar: () => 'remar en el lago', nombrar: () => 'ponerle nombre a ' + WP_NAME[a.p], regañar: () => 'regañar a ' + wmName(a.k), subir_calesa: () => `subir a ${wmName(a.k)} a la calesa`, coser: () => 'coser ' + (ITEM_NAME[a.x]?.[0] || a.x), soltar: () => `soltar a ${ANIMALS[a.cow].name} en ${WP_NAME[a.p]}` }[a.v] || (() => a.v))().replace(/\ba el\b/g, 'al');
+  rezar: () => 'decir sus oraciones', escribir_carta: () => 'escribir una carta', enviar_carta: () => 'mandar la carta por correo', leer: () => 'leer un libro', escribir_cuento: () => 'escribir un cuento', leer_cuento: () => 'leerle su cuento a ' + wmName(a.k),
+  ensayar: () => 'ensayar la recitación', actuar: () => 'recitar en el concierto', decorar_sala: () => 'decorar el salón con flores', felicitar: () => 'felicitar a ' + wmName(a.k), consolar: () => 'consolar a ' + wmName(a.k), hacer_heno: () => 'hacer heno', partir_lena: () => 'partir leña',
+  sembrar: () => 'sembrar la huerta', regar: () => 'regar la huerta', patinar: () => 'patinar en el lago', trineo: () => 'tirarse en trineo', pedir_permiso: () => 'pedirle permiso a Marilla', merendar: () => 'merendar en el lago con ' + wmName(a.k), teñir: () => 'teñirse el pelo', cortar_pelo: () => 'cortarse el pelo', trepar: () => 'caminar por el techo de los Barry',
+  batir: () => 'batir ' + (ITEM_NAME[a.x]?.[0] || a.x), preparar: () => 'preparar ' + (ITEM_NAME[a.x]?.[0] || a.x), adornar: () => 'adornar el sombrero con flores', remar: () => 'remar en el lago', nombrar: () => 'ponerle nombre a ' + WP_NAME[a.p], regañar: () => 'regañar a ' + wmName(a.k), subir_calesa: () => `subir a ${wmName(a.k)} a la calesa`, coser: () => 'coser ' + (ITEM_NAME[a.x]?.[0] || a.x), soltar: () => `soltar a ${ANIMALS[a.cow].name} en ${WP_NAME[a.p]}` }[a.v] || (() => a.v))().replace(/\ba el\b/g, 'al');
 const wmPlaceText = p => p.startsWith('p:') ? 'donde está ' + wmName(p.slice(2)) : p.startsWith('c:') ? 'donde está ' + ANIMALS[p.slice(2)].name : p.startsWith('h:') ? HOUSES[p.slice(2)].place[1] : WP_NAME[p] || p;
 
 /* ---------- the agents: someone with a goal and a plan, carrying it out step by step in the world ---------- */
@@ -5500,7 +5558,7 @@ function pickTask(ag){
   return best;
 }
 // (a task may take longer the farther it is and the slower one walks: its budget of time, set when it is chosen)
-const SELF_MOVING = ['dar', 'vender', 'comprar', 'cambiar', 'conversar', 'disculparse', 'pedir', 'interceder', 'guiar', 'visitar', 'devolver', 'jurar', 'perdonar', 'cuidar', 'regañar', 'subir_calesa'];
+const SELF_MOVING = ['dar', 'vender', 'comprar', 'cambiar', 'conversar', 'disculparse', 'pedir', 'interceder', 'guiar', 'visitar', 'devolver', 'jurar', 'perdonar', 'cuidar', 'regañar', 'subir_calesa', 'leer_cuento', 'felicitar', 'consolar', 'pedir_permiso', 'merendar'];
 // the player gives Ana something else to do (walks her, taps somewhere, talks): her plan waits; after a while with
 // nothing asked of her she takes it up again (planned anew from where she is and what she has now)
 const RESUME_IDLE = 12;
@@ -5867,13 +5925,36 @@ function wmExec(ag, a, st, dt){
       if (a.k === 'ana') { const A = agentOf('ana'); A.followOf = me; A.ride = true; agentLog(A, 'va en la calesa con ' + wmName(me)); } else agentOf(a.k).followOf = me;
       logEv(`${wmName(me)} llevó a ${wmName(a.k)} en la calesa.`, []); return 'ok';
     }
+    case 'escribir_carta': { if (!st.said) { st.said = 1; bubble(me, 'Querida Srta. Stacy: le escribo desde Tejas Verdes, donde los cerezos están en flor…'); } if (!wait(4)) return 'run'; inv.carta = (inv.carta || 0) + 1; float('+1 carta', b.x, b.y - 50); logEv(`${wmName(me)} escribió una carta.`, []); return 'ok'; }
+    case 'enviar_carta': { if (!(inv.carta > 0)) { st.why = 'no tiene la carta'; return 'fail'; } if (!wait(2)) return 'run'; inv.carta -= 1; realR.setFact('carta_enviada:' + me); bubble('lawson', 'La carta sale mañana con el correo. ¿Para quién es, Ana?'); logEv(`${wmName(me)} mandó una carta por correo.`, []); return 'ok'; }
+    case 'leer': { if (!st.said) { st.said = 1; bubble(me, '«Ben-Hur»… ¡No puedo parar de leer! La carrera de cuadrigas…'); } if (!wait(5)) return 'run'; realR.setFact('leido:' + me); logEv(`${wmName(me)} leyó un libro.`, []); return 'ok'; }
+    case 'escribir_cuento': { if (!st.said) { st.said = 1; bubble(me, '«Los celos de Cordelia»: una historia trágica, con un ahogado y una dama de cabellos de oro…'); } if (!wait(5)) return 'run'; inv.cuento = (inv.cuento || 0) + 1; float('+1 cuento', b.x, b.y - 50); logEv(`${wmName(me)} escribió un cuento.`, []); return 'ok'; }
+    case 'leer_cuento': { const r = reach(a.k); if (r !== 'ok') return r; if (!st.said) { st.said = 1; bubble(me, 'Escucha, Diana: «La dama Geraldine caminaba a la luz de la luna…»'); } if (st.said === 1 && wait(4)) { st.said = 2; st.w = 0; bubble(a.k, '¡Ay, Ana, qué triste! ¡Lloré en la parte del ahogado!'); } if (st.said !== 2 || !wait(3)) return 'run'; inv.cuento -= 1; realR.setFact('club:' + me); logEv(`${wmName(me)} le leyó su cuento a ${wmName(a.k)} en el club de cuentos.`, []); return 'ok'; }
+    case 'ensayar': { if (!st.said) { st.said = 1; bubble(me, '«La doncella de Shalott»… otra vez desde el principio, con más sentimiento.'); } if (!wait(4)) return 'run'; wmKnow(me, 'poema'); logEv(`${wmName(me)} ensayó su recitación.`, []); return 'ok'; }
+    case 'actuar': { if (!st.said) { st.said = 1; bubble(me, '«…y la barca siguió flotando río abajo, hacia Camelot.»'); } if (!wait(5)) return 'run'; realR.setFact('concierto:' + me); hearts(b.x, b.y - 56); logEv(`${wmName(me)} recitó en el concierto del salón, y la aplaudieron mucho.`, []); return 'ok'; }
+    case 'decorar_sala': { if (!(inv.ramo > 0)) { st.why = 'no tiene flores'; return 'fail'; } if (!wait(4)) return 'run'; inv.ramo -= 1; realR.setFact('sala_decorada'); float('💐 sala decorada', b.x, b.y - 50); logEv(`${wmName(me)} decoró el salón con flores para el concierto.`, []); return 'ok'; }
+    case 'felicitar': { const r = reach(a.k); if (r !== 'ok') return r; if (!st.said) { st.said = 1; bubble(me, '¡Felicitaciones! Lo hiciste maravillosamente.'); } if (!wait(2.5)) return 'run'; realR.setFact('felicito:' + me + '>' + a.k); relSetW(a.k, me, relGetW(a.k, me) + 1); bubble(a.k, '¡Gracias! Estaba tan nerviosa…'); logEv(`${wmName(me)} felicitó a ${wmName(a.k)}.`, []); return 'ok'; }
+    case 'consolar': { const r = reach(a.k); if (r !== 'ok') return r; if (!st.said) { st.said = 1; bubble(me, 'No llores… todo se va a arreglar, ya verás. Yo estoy contigo.'); } if (!wait(3.5)) return 'run'; delete game.wm.facts['triste:' + a.k + ':' + today()]; realR.setFact('consolo:' + me + '>' + a.k); relSetW(a.k, me, relGetW(a.k, me) + 1); bubble(a.k, 'Gracias… ya me siento mejor.'); logEv(`${wmName(me)} consoló a ${wmName(a.k)}.`, []); return 'ok'; }
+    case 'hacer_heno': { if (!st.said) { st.said = 1; bubble(me, 'A juntar el heno antes de que llueva…'); } if (!wait(5)) return 'run'; inv.heno = (inv.heno || 0) + 3; realR.setFact('heno_hecho'); float('+3 fardos de heno', b.x, b.y - 50); logEv(`${wmName(me)} hizo heno en el campo.`, []); return 'ok'; }
+    case 'partir_lena': { if (!st.said) { st.said = 1; bubble(me, '¡Zas! ¡Zas! Leña para la cocina de Marilla.'); } if (!wait(4)) return 'run'; inv.lena = (inv.lena || 0) + 3; float('+3 atados de leña', b.x, b.y - 50); logEv(`${wmName(me)} partió leña.`, []); return 'ok'; }
+    case 'sembrar': { if (!wait(4)) return 'run'; realR.setFact('sembrado'); float('🌱 sembrado', b.x, b.y - 50); logEv(`${wmName(me)} sembró la huerta.`, []); return 'ok'; }
+    case 'regar': { if (!wait(3)) return 'run'; realR.setFact('regado'); float('💧 regado', b.x, b.y - 50); logEv(`${wmName(me)} regó la huerta.`, []); return 'ok'; }
+    case 'patinar': { if (!st.said) { st.said = 1; bubble(me, '¡Mira, Diana! ¡Vuelo sobre el hielo como una golondrina!'); } if (!wait(5)) return 'run'; realR.setFact('patino:' + me); logEv(`${wmName(me)} patinó en el lago helado.`, []); return 'ok'; }
+    case 'trineo': { if (!st.said) { st.said = 1; bubble(me, '¡Allá vamos, colina abajo! ¡Agárrate fuerte!'); } if (!wait(5)) return 'run'; realR.setFact('trineo:' + me); logEv(`${wmName(me)} se tiró en trineo por la colina.`, []); return 'ok'; }
+    case 'pedir_permiso': { const r = reach('marilla'); if (r !== 'ok') return r; if (!st.said) { st.said = 1; bubble(me, 'Marilla, ¿puedo ir al picnic de la escuela dominical? ¡Va a haber helado!'); } if (st.said === 1 && wait(3)) { st.said = 2; st.w = 0; bubble('marilla', 'Está bien, puedes ir. Y te pongo una canasta con algo rico.'); } if (st.said !== 2 || !wait(2.5)) return 'run'; realR.setFact('permiso:picnic'); logEv(`Marilla le dio permiso a ${wmName(me)} para ir al picnic.`, []); return 'ok'; }
+    case 'merendar': { const r = reach(a.k); if (r !== 'ok') return r; if (!(inv.canasta > 0)) { st.why = 'no tiene la canasta'; return 'fail'; } if (!st.said) { st.said = 1; bubble(me, '¡Un picnic junto al lago! Y hay helado… ¡nunca había probado helado! Es indescriptible.'); } if (!wait(5)) return 'run'; inv.canasta -= 1; realR.setFact('picnic:' + me); realR.setFact('picnic:' + a.k); logEv(`${wmName(me)} fue de picnic al lago con ${wmName(a.k)}.`, []); return 'ok'; }
+    case 'teñir': { if (!(inv.tinte > 0)) { st.why = 'no tiene el tinte'; return 'fail'; } if (!st.said) { st.said = 1; bubble(me, '¡Negro azabache como el ala de un cuervo! Ya está… ¡¿VERDE?!'); } if (!wait(4)) return 'run'; inv.tinte -= 1; realR.setFact('pelo_teñido:' + me); if (me === 'ana') realR.setPerm('pelo_verde'); logEv(`${wmName(me)} se tiñó el pelo… y le quedó verde.`, []); return 'ok'; }
+    case 'cortar_pelo': { if (!st.said) { st.said = 1; bubble('marilla', 'No hay más remedio, Ana: hay que cortarlo. Quédate quieta.'); } if (!wait(4)) return 'run'; delete game.wm.perm['pelo_verde']; realR.setFact('pelo_corto'); bubble('ana', 'Mi pelo… Bueno, por lo menos ya no es verde.'); logEv('A Ana le cortaron el pelo verde, bien cortito.', []); return 'ok'; }
+    case 'trepar': { if (!st.said) { st.said = 1; bubble(me, '¡Josie Pye, mira cómo camino por el techo de los Barry!… ¡Ay!'); } if (!wait(4)) return 'run'; realR.setFact('trepo:' + me); realR.setFact('tobillo:' + me); logEv(`${wmName(me)} aceptó el desafío de Josie, caminó por el techo de los Barry… y se cayó y se torció el tobillo.`, []); return 'ok'; }
     case 'coser':
+    case 'batir':
+    case 'preparar':
     case 'cocinar': {
       const d = THINGS[a.x]; if (!Object.entries(d.receta).every(([i, n]) => (inv[i] || 0) >= n)) { st.why = 'faltan ingredientes'; return 'fail'; }
       if (!st.said && a.v === 'coser') { st.said = 1; bubble(me, 'Coso el vestido… y le pongo unas mangas abullonadas, como las que usan ahora.'); }
       if (!wait(a.v === 'coser' ? 5 : 3)) return 'run';
       for (const [i, n] of Object.entries(d.receta)) inv[i] -= n; inv[a.x] = (inv[a.x] || 0) + 1;
-      float('+1 ' + ITEM_NAME[a.x][0], b.x, b.y - 50); logEv(`${wmName(me)} ${a.v === 'coser' ? 'cosió ' + (ITEM_DEFS[a.x]?.gift?.art || ITEM_NAME[a.x][0]) : 'cocinó ' + ITEM_NAME[a.x][0]}.`, []); if (me === 'ana' && a.v === 'cocinar') taskEvent('cocinar', a.x); return 'ok';
+      float('+1 ' + ITEM_NAME[a.x][0], b.x, b.y - 50); logEv(`${wmName(me)} ${{ coser: 'cosió', batir: 'batió', preparar: 'preparó' }[a.v] ? { coser: 'cosió', batir: 'batió', preparar: 'preparó' }[a.v] + ' ' + (ITEM_DEFS[a.x]?.gift?.art || ITEM_NAME[a.x][0]) : 'cocinó ' + ITEM_NAME[a.x][0]}.`, []); if (me === 'ana' && a.v === 'cocinar') taskEvent('cocinar', a.x); return 'ok';
     }
     case 'dar': {
       const r = reach(a.k); if (r !== 'ok') return r;
@@ -5899,9 +5980,9 @@ function wmExec(ag, a, st, dt){
       const r = reach(a.k); if (r !== 'ok') return r;
       const W = whoOf(a.k), hr = hourNow() % 24; if (W.abre && (hr < W.abre[0] || hr >= W.abre[1])) { st.why = 'la tienda está cerrada'; return 'fail'; }
       if ((inv[a.g] || 0) < a.n) { st.why = 'no tiene qué cambiar'; return 'fail'; }
-      if (!haggle(`Buenos días, Sr. Lawson. ¿Me cambiaría ${itemTextW(a.g, a.n)} por ${ITEM_DEFS[a.x]?.gift?.art || itemTextW(a.x, 1)}?`, 'Veamos lo que traes… Sí, me sirven. Un momento.')) return 'run';
+      if (!haggle(`Buenos días${a.k === 'lawson' ? ', Sr. Lawson' : ''}. ¿Me cambiaría ${itemTextW(a.g, a.n)} por ${ITEM_DEFS[a.x]?.gift?.art || itemTextW(a.x, 1)}?`, a.k === 'buhonero' ? 'Este tinte deja el pelo negro como el ala de un cuervo, señorita. ¡Y no se va con el lavado!' : 'Veamos lo que traes… Sí, me sirven. Un momento.')) return 'run';
       inv[a.g] -= a.n; inv[a.x] = (inv[a.x] || 0) + 1; float('+' + itemTextW(a.x, 1), b.x, b.y - 50);
-      logEv(`${wmName(me)} cambió ${itemTextW(a.g, a.n)} por ${ITEM_DEFS[a.x]?.gift?.art || itemTextW(a.x, 1)} en la tienda de Lawson.`, []); bubble(a.k, 'Trato hecho. ¡Que lo disfrutes!'); return 'ok';
+      logEv(`${wmName(me)} cambió ${itemTextW(a.g, a.n)} por ${ITEM_DEFS[a.x]?.gift?.art || itemTextW(a.x, 1)}${a.k === 'lawson' ? ' en la tienda de Lawson' : ' con ' + wmName(a.k)}.`, []); bubble(a.k, a.k === 'buhonero' ? '¡Negro azabache garantizado! Palabra de honor.' : 'Trato hecho. ¡Que lo disfrutes!'); return 'ok';
     }
     case 'comprar': {
       const r = reach(a.k); if (r !== 'ok') return r;
@@ -6041,6 +6122,24 @@ const WM_TESTS = [
   { who: 'marilla', text: 'A Ana se le olvidaron los quehaceres: Marilla la manda llamar y la regaña (cap. 26)', setup: () => { dayAt(17); realR.setFact('falta:ana'); delete game.wm.facts['regaño:ana:' + today()]; PEOPLE.marilla.where = 'gg'; }, goal: () => G.regañado('ana') },
   { who: 'ana', text: 'Ana invita a Diana a tomar el té en Tejas Verdes (cap. 16)', setup: () => { dayAt(13); game.inv.te = 0; delete game.wm.facts['pedido:venir:diana:' + today()]; diana.follow = false; atOut('diana', OS.x - 60, OS.y + 80); }, goal: () => G.te_con('ana', 'diana', 'cocina'), favors: [{ f: 'venir', to: 'diana', lugar: 'cocina' }] },
   { who: 'matthew', text: 'Matthew lleva a Ana en la calesa hasta la aldea (cap. 2, 25)', setup: () => { dayAt(10); atOut('matthew', GG.x + 120, GG.y + 120); }, goal: () => G.llevar('matthew', 'ana', 'aldea') },
+  // --- from the book, second batch
+  { who: 'ana', text: 'Ana le escribe una carta a la Srta. Stacy y la manda por correo (cap. 36)', setup: () => { dayAt(10); game.inv.carta = 0; delete game.wm.facts['carta_enviada:ana:' + today()]; }, goal: () => G.carta('ana') },
+  { who: 'ana', text: 'Ana lee el libro que le prestaron (cap. 18, 30)', setup: () => { dayAt(15); game.inv.libro = 1; delete game.wm.facts['leido:ana:' + today()]; }, goal: () => G.leido('ana') },
+  { who: 'ana', text: 'Ana escribe un cuento y se lo lee a Diana en el club de cuentos (cap. 26)', setup: () => { dayAt(14); game.inv.cuento = 0; delete game.wm.facts['club:ana:' + today()]; diana.follow = false; atOut('diana', OS.x - 60, OS.y + 80); }, goal: () => G.club('ana') },
+  { who: 'ana', text: 'Ana ensaya y recita en el concierto del salón (cap. 19, 24, 33)', setup: () => { dayAt(15); game.wm.know.ana = (game.wm.know.ana || []).filter(f => f !== 'poema'); delete game.wm.facts['concierto:ana:' + today()]; }, goal: () => G.concierto('ana') },
+  { who: 'ana', text: 'Ana decora el salón con flores para el concierto (cap. 24)', setup: () => { dayAt(10); setSeason(0); BEDS[0].stage = 3; BEDS[1].stage = 3; game.inv.ramo = 0; delete game.wm.facts['sala_decorada:' + today()]; }, goal: () => G.sala('ana') },
+  { who: 'ana', text: 'Diana recitó en el concierto: Ana la felicita (cap. 24)', setup: () => { dayAt(17); realR.setFact('concierto:diana'); delete game.wm.facts['felicito:ana>diana:' + today()]; diana.follow = false; atOut('diana', OS.x - 60, OS.y + 80); }, goal: () => G.felicitar('ana', 'diana') },
+  { who: 'ana', text: 'A Diana le prohibieron ver a Ana y está triste: Ana la consuela (cap. 16)', setup: () => { dayAt(16); realR.setFact('triste:diana'); diana.follow = false; atOut('diana', OS.x - 60, OS.y + 80); }, goal: () => G.consolado('ana', 'diana') },
+  { who: 'matthew', text: 'Matthew hace heno en el campo (cap. 28, 32)', setup: () => { dayAt(9); setSeason(1); wmInv('matthew').heno = 0; delete game.wm.facts['heno_hecho:' + today()]; atOut('matthew', BARN.x + 60, BARN.y + 60); }, goal: () => G.tener('matthew', 'heno', 3) },
+  { who: 'matthew', text: 'Matthew parte leña para la cocina de Marilla (cap. 15)', setup: () => { dayAt(9); wmInv('matthew').lena = 0; wmInv('marilla').lena = 0; PEOPLE.marilla.where = 'gg'; atOut('matthew', BARN.x + 60, BARN.y + 60); }, goal: () => G.tener('marilla', 'lena', 3) },
+  { who: 'marilla', text: 'Marilla bate mantequilla con la leche de la mañana (cap. 8)', setup: () => { dayAt(8); cowHome('dolly'); wmInv('marilla').leche = 0; wmInv('marilla').mantequilla = 0; wmInv('matthew').leche = 0; delete game.wm.facts['ordeñada:dolly:' + today()]; PEOPLE.marilla.where = 'gg'; atOut('matthew', BARN.x + 60, BARN.y + 60); }, goal: () => G.tener('marilla', 'mantequilla', 1) },
+  { who: 'ana', text: 'Ana siembra y riega la huerta (cap. 13)', setup: () => { dayAt(9); setSeason(0); delete game.wm.facts['sembrado:' + today()]; delete game.wm.facts['regado:' + today()]; }, goal: () => G.huerta('ana') },
+  { who: 'ana', text: 'Ana patina en el lago helado (invierno)', setup: () => { dayAt(14); setSeason(3); delete game.wm.facts['patino:ana:' + today()]; }, goal: () => G.patinar('ana') },
+  { who: 'ana', text: 'Ana se tira en trineo por la colina (invierno)', setup: () => { dayAt(14); setSeason(3); delete game.wm.facts['trineo:ana:' + today()]; }, goal: () => G.trineo('ana') },
+  { who: 'ana', text: 'Ana le pide permiso a Marilla y va de picnic al lago con Diana (cap. 13, 14)', setup: () => { dayAt(11); setSeason(1); game.inv.canasta = 0; for (const f of ['permiso:picnic', 'picnic:ana', 'pedido:pasear:diana']) delete game.wm.facts[f + ':' + today()]; PEOPLE.marilla.where = 'gg'; diana.follow = false; atOut('diana', OS.x - 60, OS.y + 80); }, goal: () => G.picnic('ana', 'diana'), favors: [{ f: 'pasear', to: 'diana' }] },
+  { who: 'ana', text: 'Ana le compra tinte al buhonero y se tiñe el pelo… verde (cap. 27)', setup: () => { dayAt(10); game.inv.tinte = 0; game.inv.huevos = 0; game.eggDay = -1; delete game.wm.perm.pelo_verde; delete game.wm.facts['pelo_teñido:ana:' + today()]; atOut('buhonero', GG.x + 260, GG.y + 160); }, goal: () => G.teñido('ana') },
+  { who: 'ana', text: 'Marilla le corta a Ana el pelo verde (cap. 27)', setup: () => { dayAt(16); game.wm.perm.pelo_verde = true; delete game.wm.facts['pelo_corto:' + today()]; PEOPLE.marilla.where = 'gg'; }, goal: () => G.pelo_corto('ana') },
+  { who: 'ana', text: 'Josie desafía a Ana a caminar por el techo de los Barry (cap. 23)', setup: () => { dayAt(15); delete game.wm.facts['trepo:ana:' + today()]; }, goal: () => G.desafio('ana') },
 ];
 // Ana asks someone a favor (the player, from a conversation): if they accept and see how, the goal is theirs
 function favorMenu(who){

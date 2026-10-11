@@ -8,7 +8,7 @@ Un estado es una foto del mundo hecha de datos (`wmNow()`), y el planificador tr
 
 | Componente | Qué guarda | Ejemplo |
 |---|---|---|
-| `t` | la hora, en minutos desde la medianoche | `792.07332` (= 13:12.073319999999967) |
+| `t` | la hora, en minutos desde la medianoche | `792.0799999999999` (= 13:12.079999999999927) |
 | `pos` | dónde está cada persona, como un **lugar** (ver §6): un punto del mapa (`granero`, `huerto`…), `cocina` (adentro de Tejas Verdes), `h:casa` (adentro de otra casa) o `p:quien` (afuera, donde esa persona esté) | `ana: "cocina"` |
 | `invs` | lo que cada uno tiene: `{ cosa: cantidad }` | `ana: { huevos: 6, cuerda: 1 }` |
 | `cows` | dónde está cada vaca: `corral`, `potrero`, `c:vaca` (suelta, donde esté), `led:quien` (alguien la lleva de la cuerda), `sold:quien` (vendida) | `{"dolly":"corral","jersey":"potrero"}` |
@@ -58,6 +58,22 @@ Las mismas para todos (Ana y los demás). Cada una tiene una **condición** (cu�
 | `nombrar` un lugar | Ana, en un lugar que todavía no bautizó | 2 | el lugar queda con su nombre para siempre (aparece en el mapa) |
 | `regañar` | alguien que regaña (Marilla, la Sra. Lynde, la Sra. Barry) y una falta; quien no sale manda a llamar a Ana | 3 | hecho `regaño`; Ana queda castigada media hora en la cocina |
 | `subir_calesa` | Matthew, con quien quiere llevar | 3 | lo acompaña; el viaje de Matthew dura 2,4 veces menos |
+| **Del libro, segunda tanda** | | | |
+| `escribir_carta` / `enviar_carta` | en casa / en la tienda (el correo), con la carta | 8 / 2 | +1 carta / hecho `carta_enviada` |
+| `leer` | tiene un libro | 20 | hecho `leido` |
+| `escribir_cuento` / `leer_cuento` | en casa / con Diana presente (el club de cuentos) | 20 / 8 | +1 cuento / hecho `club` |
+| `ensayar` / `actuar` | en la escuela o el salón / en el salón, sabiéndose el poema | 15 / 5 | sabe el poema / hecho `concierto` |
+| `decorar_sala` | en el salón, con un ramo | 6 | hecho `sala_decorada` |
+| `felicitar` | alguien presente recitó o actuó | 2 | +1 de cariño |
+| `consolar` | alguien presente está triste | 5 | se le pasa; +1 de cariño |
+| `hacer_heno` / `partir_lena` | en el campo de heno / en el granero | 25 / 10 | +3 fardos de heno / +3 atados de leña |
+| `batir` (mantequilla) / `preparar` (canasta) | en su cocina, con 2 jarros de leche / sin nada | 10 | +1 pan de mantequilla / +1 canasta de picnic |
+| `sembrar` / `regar` | en la huerta (regar, después de sembrar) | 10 / 5 | hechos `sembrado` / `regado` |
+| `patinar` / `trineo` | en invierno, en el lago helado / en la colina | 15 | hechos `patino` / `trineo` |
+| `pedir_permiso` | Ana, en la cocina con Marilla | 2 | hecho `permiso:picnic` (sin él, Ana no puede ir al picnic) |
+| `merendar` | en el lago, con la canasta, con alguien (y, si es Ana, con permiso) | 20 | hecho `picnic` (para los dos) |
+| `teñir` / `cortar_pelo` | en la cocina, con tinte (se le cambia al buhonero) / con el pelo verde | 10 / 6 | el pelo queda verde (se ve en el dibujo) / se le corta |
+| `trepar` | en el huerto de los Barry (el desafío de Josie) | 6 | hecho `trepo`… y se tuerce el tobillo |
 
 ## 3. Las metas
 
@@ -79,6 +95,7 @@ Una meta es una **condición** sobre el estado (`test`) y una estimación de **c
 | `acompana(a, b)` | a acompaña a b | 0 / 1 |
 | `te_con(quien, invitado, lugar)` | los dos están en el lugar y quien tiene té | 1 por cada cosa que falte |
 | `regalar_cosa(quien, cosa)` | esa cosa fue regalada | 0 / 1 si la tiene / 2 |
+| **Del libro, segunda tanda:** `carta(quien)`, `leido(quien)`, `club(quien)`, `concierto(quien)`, `sala(quien)`, `felicitar(a, b)`, `consolado(a, b)`, `huerta(quien)`, `patinar(quien)`, `trineo(quien)`, `picnic(a, b)`, `teñido(quien)`, `pelo_corto(quien)`, `desafio(quien)` | el hecho de cada una | lo que falta |
 | **Del libro:** `quehaceres(quien, lista)`, `alimentados(lugares)`, `visitar(a, b)`, `devuelto(a, cosa, b)`, `amigas(a, b)`, `paces(a, b)`, `sano(quien)`, `recito(quien)`, `rezo(quien)`, `adornado(quien)`, `remo(quien)`, `nombres(quien, n)`, `regañado(quien)`, `llevar(quien, a, lugar)` | el hecho de cada una (ver las acciones) | lo que falta (0, 1 o 2) |
 
 ## 4. Los favores (lo que se le puede pedir a otro)
@@ -120,6 +137,13 @@ A quién se le puede pedir sin que la meta lo diga: a los de su casa o a un amig
 | frasco de jarabe de ipecacuana (`jarabe`) | remedio | — | — | 0.2 |
 | corte de tela (`tela`) | tienda | — | — | 0.5 |
 | vestido con mangas abullonadas (`vestido`) | ropa, adorno, hecha_a_mano, regalo | 1 corte de tela | — | 2 |
+| carta (`carta`) | escrito | — | — | 0 |
+| cuento escrito a mano (`cuento`) | escrito, hecha_a_mano | — | — | 0 |
+| fardo de heno (`heno`) | granja | — | — | 0.2 |
+| atado de leña (`lena`) | granja | — | — | 0.2 |
+| pan de mantequilla (`mantequilla`) | comida, hecha_a_mano, regalo | 2 jarros de leche | — | 0.5 |
+| canasta de picnic (`canasta`) | comida | (nada: se hace en la cocina) | — | 0.5 |
+| frasco de tinte para el pelo (`tinte`) | tienda | — | — | 0.3 |
 | bolsita de caramelos de menta (`caramelos`) | dulce, comida, regalo | — | — | 0.1 |
 | huevo (`huevos`) | comida, cosecha | — | 1 | 0.05 |
 
@@ -143,6 +167,9 @@ Gustos de la tienda (precio en trueque): cinta para el pelo 3, bolsita de carame
 | `bosque_peg` | el bosque de Peg Bowen | recoger manojo de hierbas |
 | `aldea` | la aldea | — |
 | `iglesia` | la iglesia | — |
+| `salon` | el salón del pueblo | — |
+| `colina` | la colina | — |
+| `campo` | el campo de heno | — |
 | `lago` | el lago | — |
 
 Además: `cocina` es adentro de Tejas Verdes, `h:casa` adentro de cualquier otra casa, `p:quien` el punto del mapa donde está esa persona y `c:vaca` donde está una vaca suelta.
@@ -159,11 +186,12 @@ Además: `cocina` es adentro de Tejas Verdes, `h:casa` adentro de cualquier otra
 | Sra. Lynde (`lynde`) | chismoso, severo | comida | — | — | camina a 40 · enfoque 0.4, social 1 |
 | Sr. Harrison (`harrison`) | orgulloso | comida | — | — | tiene 1 cuerda · camina a 36 · enfoque 0.7, social 0.3 |
 | Sr. Shearer (`shearer`) | — | — | compra vacas (20 dólares) | — | tiene 60 dólares · camina a 40 · enfoque 0.8, social 0.4 |
-| Sr. Lawson (`lawson`) | generoso | — | trueque | — | abre de 8 a 18 · camina a 38 · enfoque 0.9, social 0.5 |
 | Gilbert Blythe (`gilbert`) | orgulloso, generoso | comida | — | — | camina a 46 · enfoque 0.8, social 0.5 |
 | la Sra. Allan (`sraallan`) | generoso, sensible | hecha_a_mano, flores | — | la casa parroquial | camina a 40 · enfoque 0.6, social 0.7 |
 | Peg Bowen (`peg`) | orgulloso | hierba | — | — | camina a 38 · enfoque 0.5, social 0.2 |
 | el médico (`medico`) | generoso | — | — | — |  |
+| el buhonero (`buhonero`) | — | — | trueque | — |  |
+| Sr. Lawson (`lawson`) | generoso | — | trueque | — | abre de 8 a 18 · camina a 38 · enfoque 0.9, social 0.5 |
 
 Reglas sociales (las mismas en el plan y en el mundo): pedir funciona si el otro te quiere ≥ 2 o es generoso; un regalo con una etiqueta que le gusta sube el cariño (una vez al día); disculparse sube el cariño (+2 si es sensible o generoso); interceder exige que el destinatario quiera ≥ 4 a quien habla.
 
@@ -216,5 +244,22 @@ Reglas sociales (las mismas en el plan y en el mundo): pedir funciona si el otro
 | 42 | Marilla | A Ana se le olvidaron los quehaceres: Marilla la manda llamar y la regaña (cap. 26) | — |
 | 43 | Ana | Ana invita a Diana a tomar el té en Tejas Verdes (cap. 16) | venir → Diana |
 | 44 | Matthew | Matthew lleva a Ana en la calesa hasta la aldea (cap. 2, 25) | — |
+| 45 | Ana | Ana le escribe una carta a la Srta. Stacy y la manda por correo (cap. 36) | — |
+| 46 | Ana | Ana lee el libro que le prestaron (cap. 18, 30) | — |
+| 47 | Ana | Ana escribe un cuento y se lo lee a Diana en el club de cuentos (cap. 26) | — |
+| 48 | Ana | Ana ensaya y recita en el concierto del salón (cap. 19, 24, 33) | — |
+| 49 | Ana | Ana decora el salón con flores para el concierto (cap. 24) | — |
+| 50 | Ana | Diana recitó en el concierto: Ana la felicita (cap. 24) | — |
+| 51 | Ana | A Diana le prohibieron ver a Ana y está triste: Ana la consuela (cap. 16) | — |
+| 52 | Matthew | Matthew hace heno en el campo (cap. 28, 32) | — |
+| 53 | Matthew | Matthew parte leña para la cocina de Marilla (cap. 15) | — |
+| 54 | Marilla | Marilla bate mantequilla con la leche de la mañana (cap. 8) | — |
+| 55 | Ana | Ana siembra y riega la huerta (cap. 13) | — |
+| 56 | Ana | Ana patina en el lago helado (invierno) | — |
+| 57 | Ana | Ana se tira en trineo por la colina (invierno) | — |
+| 58 | Ana | Ana le pide permiso a Marilla y va de picnic al lago con Diana (cap. 13, 14) | pasear → Diana |
+| 59 | Ana | Ana le compra tinte al buhonero y se tiñe el pelo… verde (cap. 27) | — |
+| 60 | Ana | Marilla le corta a Ana el pelo verde (cap. 27) | — |
+| 61 | Ana | Josie desafía a Ana a caminar por el techo de los Barry (cap. 23) | — |
 
 Cómo se cumplió cada una, dibujado en el mapa: [`trazas/metas.pdf`](../trazas/metas.pdf) (`node tools/trace_goal.js --pdf trazas/metas.pdf`).

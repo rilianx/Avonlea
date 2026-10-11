@@ -72,7 +72,23 @@ const exe = process.env.PLAYWRIGHT_CHROMIUM || (fs.existsSync('/opt/pw-browsers/
     '| `remar` | en el lago | 15 | hecho `remo` |',
     '| `nombrar` un lugar | Ana, en un lugar que todavía no bautizó | 2 | el lugar queda con su nombre para siempre (aparece en el mapa) |',
     '| `regañar` | alguien que regaña (Marilla, la Sra. Lynde, la Sra. Barry) y una falta; quien no sale manda a llamar a Ana | 3 | hecho `regaño`; Ana queda castigada media hora en la cocina |',
-    '| `subir_calesa` | Matthew, con quien quiere llevar | 3 | lo acompaña; el viaje de Matthew dura 2,4 veces menos |', '');
+    '| `subir_calesa` | Matthew, con quien quiere llevar | 3 | lo acompaña; el viaje de Matthew dura 2,4 veces menos |',
+    '| **Del libro, segunda tanda** | | | |',
+    '| `escribir_carta` / `enviar_carta` | en casa / en la tienda (el correo), con la carta | 8 / 2 | +1 carta / hecho `carta_enviada` |',
+    '| `leer` | tiene un libro | 20 | hecho `leido` |',
+    '| `escribir_cuento` / `leer_cuento` | en casa / con Diana presente (el club de cuentos) | 20 / 8 | +1 cuento / hecho `club` |',
+    '| `ensayar` / `actuar` | en la escuela o el salón / en el salón, sabiéndose el poema | 15 / 5 | sabe el poema / hecho `concierto` |',
+    '| `decorar_sala` | en el salón, con un ramo | 6 | hecho `sala_decorada` |',
+    '| `felicitar` | alguien presente recitó o actuó | 2 | +1 de cariño |',
+    '| `consolar` | alguien presente está triste | 5 | se le pasa; +1 de cariño |',
+    '| `hacer_heno` / `partir_lena` | en el campo de heno / en el granero | 25 / 10 | +3 fardos de heno / +3 atados de leña |',
+    '| `batir` (mantequilla) / `preparar` (canasta) | en su cocina, con 2 jarros de leche / sin nada | 10 | +1 pan de mantequilla / +1 canasta de picnic |',
+    '| `sembrar` / `regar` | en la huerta (regar, después de sembrar) | 10 / 5 | hechos `sembrado` / `regado` |',
+    '| `patinar` / `trineo` | en invierno, en el lago helado / en la colina | 15 | hechos `patino` / `trineo` |',
+    '| `pedir_permiso` | Ana, en la cocina con Marilla | 2 | hecho `permiso:picnic` (sin él, Ana no puede ir al picnic) |',
+    '| `merendar` | en el lago, con la canasta, con alguien (y, si es Ana, con permiso) | 20 | hecho `picnic` (para los dos) |',
+    '| `teñir` / `cortar_pelo` | en la cocina, con tinte (se le cambia al buhonero) / con el pelo verde | 10 / 6 | el pelo queda verde (se ve en el dibujo) / se le corta |',
+    '| `trepar` | en el huerto de los Barry (el desafío de Josie) | 6 | hecho `trepo`… y se tuerce el tobillo |', '');
   // --- the goals
   L.push('## 3. Las metas', '',
     'Una meta es una **condición** sobre el estado (`test`) y una estimación de **cuántos pasos faltan** (`h`, la heurística de A*). Cada meta dice también qué cosas, personas y lugares importan para ella (el planificador mira solo esos).', '',
@@ -91,6 +107,7 @@ const exe = process.env.PLAYWRIGHT_CHROMIUM || (fs.existsSync('/opt/pw-browsers/
     '| `acompana(a, b)` | a acompaña a b | 0 / 1 |',
     '| `te_con(quien, invitado, lugar)` | los dos están en el lugar y quien tiene té | 1 por cada cosa que falte |',
     '| `regalar_cosa(quien, cosa)` | esa cosa fue regalada | 0 / 1 si la tiene / 2 |',
+    '| **Del libro, segunda tanda:** `carta(quien)`, `leido(quien)`, `club(quien)`, `concierto(quien)`, `sala(quien)`, `felicitar(a, b)`, `consolado(a, b)`, `huerta(quien)`, `patinar(quien)`, `trineo(quien)`, `picnic(a, b)`, `teñido(quien)`, `pelo_corto(quien)`, `desafio(quien)` | el hecho de cada una | lo que falta |',
     '| **Del libro:** `quehaceres(quien, lista)`, `alimentados(lugares)`, `visitar(a, b)`, `devuelto(a, cosa, b)`, `amigas(a, b)`, `paces(a, b)`, `sano(quien)`, `recito(quien)`, `rezo(quien)`, `adornado(quien)`, `remo(quien)`, `nombres(quien, n)`, `regañado(quien)`, `llevar(quien, a, lugar)` | el hecho de cada una (ver las acciones) | lo que falta (0, 1 o 2) |', '');
   // --- favours
   L.push('## 4. Los favores (lo que se le puede pedir a otro)', '',

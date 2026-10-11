@@ -56,6 +56,20 @@ Elegidas por tres criterios: que aparezcan seguido en el libro, que tengan un **
 | 16 | **invitar a tomar el té** | Ana invita a Diana (16); la Sra. Allan invita a Ana (22) | ya existe la invitación para más tarde | — | invitar también a Diana, y servir el té en casa |
 | 17 | **llevar en la calesa** | Matthew lleva a Ana desde la estación (2); a Carmody (25) | tener el caballo enganchado | ir más rápido con alguien | la calesa ya existe en el juego (el carro); usarla en los planes |
 
+### Segunda tanda (también implementada)
+
+| Acciones | Del libro (capítulos) | Lo nuevo que se agregó al juego |
+|---|---|---|
+| **escribir y mandar una carta**, **leer** un libro | Ana le escribe a la Srta. Stacy (36); los libros prestados (18, 30) | cosa `carta`; el correo, en la tienda de Lawson |
+| **escribir un cuento** y **leerlo** en el club | el Club de Cuentos de Ana y Diana (26) | cosa `cuento` |
+| **ensayar**, **recitar en el concierto**, **decorar la sala**, **felicitar** | los conciertos (19, 24, 33) | lugar: el salón del pueblo (el Ayuntamiento) |
+| **consolar** | Diana, triste porque no puede ver a Ana (16) | — |
+| **hacer heno**, **partir leña**, **batir mantequilla**, **sembrar y regar** | la granja (8, 13, 15, 28, 32) | cosas `heno`, `leña`, `mantequilla`; lugar: el campo de heno |
+| **patinar**, **trineo** | el invierno en Avonlea | lugar: la colina |
+| **pedir permiso**, **preparar la canasta**, **merendar** | el picnic de la escuela dominical, con helado (13, 14) | cosa `canasta`; sin permiso de Marilla, Ana no va |
+| **teñirse el pelo** y **cortárselo** | el tinte del buhonero que deja el pelo verde (27) | cosa `tinte`; personaje nuevo: **el buhonero**, que va de casa en casa; el pelo de Ana se ve verde |
+| **trepar** al techo de los Barry | el desafío de Josie Pye (23) | — |
+
 ## 3. Capítulo a capítulo
 
 ### Cap. 1 — La señora Rachel Lynde se sorprende (Mrs. Rachel Lynde is Surprised)
