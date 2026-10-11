@@ -2018,7 +2018,7 @@ const RP = [], RT = [], RF = [], RWAT = [], RFOLK = [], RCOW = [], RDOG = [], RB
       for (let x = x0; x < x1; x += 640) for (const sd of [-1, 1]) if (Math.abs(x - xm) > 400) RF.push({ x, y: sd < 0 ? roadY(x) - 680 : roadY(x) + 130, w: 560, h: 520, crop: x % 2 ? 0 : 3 });
     }
     else if (k === 'curva') { for (let x = x0; x < x1; x += 70) if (R_() < .6) tree_(x, roadY(x) + (R_() < .5 ? -1 : 1) * (100 + R_() * 600), R_() < .5 ? 'blossom' : 'oak'); }
-    else if (k === 'avenida') { const kind = () => R_() < .82 ? 'manzano' : 'tree'; for (let x = x0; x < x1; x += 26 + R_() * 18) { tree_(x + R_() * 10, roadY(x) - 46 - R_() * 8, kind(), 1.15 + R_() * .3, 40); tree_(x + 14, roadY(x) - 100 - R_() * 25, kind(), 1.15 + R_() * .35); if (R_() < .7) tree_(x + 8, roadY(x) - 165 - R_() * 50, kind(), 1 + R_() * .3); tree_(x + 4, roadY(x) + 46 + R_() * 10, kind(), 1.05 + R_() * .25, 40); tree_(x + 20, roadY(x) + 110 + R_() * 30, kind(), 1 + R_() * .25); if (R_() < .7) tree_(x + 10, roadY(x) + 180 + R_() * 50, kind(), 1 + R_() * .25); } }   // (close on both sides of the road: a tunnel; the near ones let the buggy show through)
+    else if (k === 'avenida') { for (let x = x0; x < x1; x += 34 + R_() * 8) { tree_(x + R_() * 6, roadY(x) - 46 - R_() * 6, R_() < .9 ? 'manzano' : 'tree', 1.15 + R_() * .2, 40); tree_(x + 17 + R_() * 6, roadY(x) + 46 + R_() * 6, R_() < .9 ? 'manzano' : 'tree', 1.1 + R_() * .2, 40); } }   // (one row on each side, close to the road: a tunnel; the near one lets the buggy show through)
     else if (k === 'pueblo') {   // Newbridge: a bustling little village (dogs, boys, faces at the windows)
       for (let x = x0 + 150; x < x1 - 150; x += 280) for (const sd of [-1, 1]) if (R_() < .85) house(x + R_() * 50, roadY(x) + sd * (200 + R_() * 40) + (sd > 0 ? 60 : 0), { w: 3.8 * T });
       RP.push({ kind: 'edificio', b: { style: 'tienda', x: xm, y: roadY(xm) - 200, w: 4.6 * T } }); sign(xm - 120, roadY(xm) - 150, 'Newbridge');
@@ -2142,10 +2142,10 @@ function roadCanopy(g, ox, oy, vw, vh, t){
   for (let x = Math.max(a - 200, Math.floor(ox / 18) * 18 - 36); x < Math.min(b + 200, ox + vw + 36); x += 18) {
     const y = roadY(x), d = inn(x); if (d <= 0) continue;
     for (let k = 0; k < 7; k++) {
-      const sd = k % 2 ? 1 : -1, reach = rh(x, k) * 70, yy = sd < 0 ? y - 165 + reach - rh(x, k + 9) * 20 : y + 100 - reach * .3, leaf = rh(x, k + 11) < .3;
-      g.globalAlpha = (sd < 0 ? .2 + .3 * (1 - reach / 70) : .22) * d; ell(g, x + (rh(x, k + 3) - .5) * 20, yy, 16 + rh(x, k + 5) * 16, 10 + rh(x, k + 7) * 8, !bloom || leaf ? LV[k % 3] : FL[k % 3], false);
+      const reach = rh(x, k) * 70, yy = y - 150 + reach - rh(x, k + 9) * 20, leaf = rh(x, k + 11) < .3;   // (from the far row, reaching over the road)
+      g.globalAlpha = (.18 + .3 * (1 - reach / 70)) * d; ell(g, x + (rh(x, k + 3) - .5) * 20, yy, 16 + rh(x, k + 5) * 16, 10 + rh(x, k + 7) * 8, !bloom || leaf ? LV[k % 3] : FL[k % 3], false);
     }
-    if (bloom) { g.globalAlpha = .85 * d; for (let k = 0; k < 5; k++) { const sd = k % 2 ? 1 : -1; ell(g, x + rh(x, k + 20) * 18, sd < 0 ? y - 100 - rh(x, k + 21) * 60 : y + 40 + rh(x, k + 21) * 30, 1.8, 1.8, '#ffffff', false); } }
+    if (bloom) { g.globalAlpha = .85 * d; for (let k = 0; k < 3; k++) ell(g, x + rh(x, k + 20) * 18, y - 90 - rh(x, k + 21) * 60, 1.8, 1.8, '#ffffff', false); }
   }
   // petals drifting down
   if (bloom && deep > 0) { g.globalAlpha = .9 * deep; for (let i = 0; i < 110; i++) { const sp = 16 + rh(i, 1) * 20, px = ox + ((rh(i, 2) * vw + t * (8 + rh(i, 3) * 12) + Math.sin(t * .9 + i) * 18) % vw + vw) % vw, py = oy + ((rh(i, 4) * vh + t * sp) % vh); ell(g, px, py, 2.2, 1.3, i % 5 ? '#ffffff' : '#f6eef0', false, t * 2 + i); } }
