@@ -2022,16 +2022,7 @@ function roadTramoIn(k, tr){
   if (tr.v === 1 && PEOPLE[k].roadDir > 0 && !game.roadLady) game.roadLady = { s: clamp(PEOPLE[k].roadS + .03, 0, 1) };   // (a lady in a cart, coming the other way)
   if (!tr.quiet) logEv(`En ${tr.name}, Ana le habló a ${wmName(k)} sin parar${tr.v >= 0 ? ': ' + (LIBRO1.viajeP[tr.v].split(/[.;]/)[0] || '').toLowerCase() : ''}.`, []);
 }
-// what is spoken of needs to be in sight: the exchanges that name a thing of the road wait for it
-const ROAD_TAGS = [['cerezo', /mi cerezo|curva de la vía/i], ['barranco', /barrancos|abedules/i], ['abetos', /abetos|este bosque|zorzal/i], ['flores', /rama de ciruelo|cerezos en flor|ciruelos silvestres|manzanos/i], ['carreta', /carreta|la conoce|saludó/i], ['mar', /franja azul|es el mar|el golfo|el mar se ve|la arena/i], ['aserradero', /aserradero|ropa tendida|niñitos jugando|madera recién cortada/i], ['granjero', /sembrando|siembra/i], ['vacas', /las vacas/i], ['iglesia', /iglesia|cementerio|campana/i], ['lilas', /lilas/i], ['sauces', /sauces|puentecito/i], ['curva', /vuelta del camino|da una vuelta|vueltas del camino/i]];
-const ROAD_BLOCKS = {};
-function roadBlocks(v){   // a stretch's lines (the book's, then Ana's own) in exchanges: each begins where Ana speaks again after an answer
-  const tr = ROAD_TRAMOS.find(t => t.v === v), key = 'viaje' + v, src = LIBRO1.viaje[v] || [], f = tr?.first || 0;
-  const book = src.map((l, i) => ({ q: l[0], t: l[1], m: CAP1_MARK[key + ':' + i], book: 1 })), order = [...book.slice(f), ...book.slice(0, f), ...(VIAJE_MAS[v] || []).map(([q, t]) => ({ q, t }))], B = [];
-  for (const l of order) { if (!B.length || (l.q === 'ana' && B[B.length - 1].lines[B[B.length - 1].lines.length - 1].q !== 'ana')) B.push({ lines: [] }); B[B.length - 1].lines.push(l); }
-  B.forEach((b, i) => { b.i = i; b.book = b.lines.some(l => l.book); const txt = b.lines.map(l => l.t).join(' '); b.tag = ROAD_TAGS.find(([, re]) => re.test(txt))?.[0] || null; });
-  return B;
-}
+// what is spoken of needs to be in sight (camino.visible in a scene): is it, from where Ana is?
 function roadTagOk(tag, x){
   if (!tag) return true;
   if (tag === 'mar') return RSEA.some(([a, b]) => x > a + 300 && x < b - 300);
@@ -2160,7 +2151,6 @@ const dlgKey = ks => [...ks].sort().join('+');
    her home through the Avenue and past the pond, at dusk. Each moment of the book (LIBRO1.verdad) is marked here
    when it happens in the simulation (CAP1.marks), to compare the two agendas (tools/trace_goal.js cap1). ---------- */
 const CAP1 = { on: false, done: 0, marks: {}, f: {}, extra: null };
-const CAP1_MARK = { 'viaje0:0': 'rama_ciruelo', 'viaje4:6': 'hablar_todo', 'viaje9:0': 'pelo_rojo' };
 function cap1Mark(id, note){ if (!CAP1.on || CAP1.marks[id] != null) return; CAP1.marks[id] = +hourNow().toFixed(3); if (note) logEv(note, []); }
 const cap1Pick = (src, idx) => idx.map(i => src[i]).filter(Boolean);
 function startCap1(){
@@ -2306,6 +2296,8 @@ function dlgHacer(list){   // what a scene does when it starts or ends
   }
 }
 const dlgPath = p => p.split('.').reduce((o, k) => o?.[k], LIBRO1);
+// where the lines of a scene come from: 'libro:path' (LIBRO1), 'mas:n' (Ana's own on the road), 'relleno:n' (her loose musings)
+function dlgFuente(s){ const i = s.indexOf(':'), k = s.slice(0, i), p = s.slice(i + 1); return k === 'libro' ? dlgPath(p) || [] : k === 'mas' ? VIAJE_MAS[+p] || [] : k === 'relleno' ? fillLines(+p || 1).map(l => [l.q, l.t]) : []; }
 class Dialogo {
   constructor(c){ Object.assign(this, { canal: 'general', prioridad: 1, interrumpe: false, repetir: 'una_vez', retomar: false, pausa: 1.4 }, c); }
   dicha(){ const v = dlgDichas()[this.id]; return this.repetir === 'una_vez' ? !!v : this.repetir === 'dia' ? v === today() : false; }
@@ -2316,7 +2308,8 @@ class Dialogo {
   }
   lineas(){
     let L = this.lineas_;
-    if (typeof L === 'string') { const [k, p] = L.split(':'); L = k === 'libro' ? dlgPath(p) : k === 'relleno' ? fillLines(+p || 1).map(l => [l.q, l.t]) : []; }
+    if (typeof L === 'string') L = dlgFuente(L);
+    else if (Array.isArray(L) && L.length && !Array.isArray(L[0]) && (L[0].de || L[0].lineas)) L = L.flatMap(p => { const src = p.de ? dlgFuente(p.de) : p.lineas; return p.elegir ? p.elegir.map(i => src[i]).filter(Boolean) : src; });   // (pieces of several sources)
     L = (L || []).map(l => Array.isArray(l) ? l : [l.q, l.t, l.m]);
     if (this.elegir) L = this.elegir.map(i => L[i]).filter(Boolean);
     if (this.marcas) L = L.map((l, j) => this.marcas[j] ? [l[0], l[1], this.marcas[j]] : l);
@@ -2374,7 +2367,7 @@ const ESCENAS = [
     al_terminar: [{ ana: { sit: false } }, { meta: { quien: 'matthew', tipo: 'llevar', args: ['ana', 'cocina'], etiqueta: 'llevar a la niña a Tejas Verdes en la calesa (cap. 2)', prioridad: 3 } }] },
   // the tunnel of apple blossom first, before anything (Ana falls silent); Newbridge, still silent
   { id: 'avenida', canal: 'viaje', prioridad: 10, interrumpe: true, calesa: 'camino', camino: { tramo: 'avenida' },
-    lineas: [['ana', '(Ana enmudece. Se queda mirando la bóveda de flores, con las manos juntas, como si estuviera en una iglesia.)'], ['matthew', '(Matthew la mira de reojo. No dice nada, para no romper el encanto.)'], ['ana', '(…)']] },
+    lineas: [{ de: 'libro:viaje.10', elegir: [7] }, { lineas: [['ana', '(Ana enmudece. Se queda mirando la bóveda de flores, con las manos juntas, como si estuviera en una iglesia.)'], ['matthew', '(Matthew la mira de reojo. No dice nada, para no romper el encanto.)'], ['ana', '(…)']] }] },
   { id: 'newbridge', canal: 'viaje', prioridad: 8, interrumpe: true, calesa: 'camino', camino: { tramo: 'Newbridge' }, si: ['dicha:avenida'],
     lineas: [['ana', '(Callada todavía. Los perros les ladran, los chicos gritan desde las cercas, hay caras curiosas en las ventanas: Ana no ve nada de eso.)']] },
   // into Avonlea: one more mile (and the Avenue gets its name), the pond in sight, Green Gables after it, home
@@ -2390,18 +2383,83 @@ const ESCENAS = [
   { id: 'relleno', canal: 'viaje', prioridad: 0, repetir: { cada: 30 }, calesa: 'camino', camino: { no_callado: true }, lineas: 'relleno:1' },
 ];
 for (const c of ESCENAS) Dialogo.registrar(c);
-// the talk of the road, made into scenes from the book and Ana's own lines (the same configuration as any other):
-//  · the thread of Ana's chatter (the book's exchanges that name nothing in sight): in the book's order, wherever
-//    they are on the way home (each one when the one before has been said)
-//  · the moments of the chapter (the plum branch, «you can talk as much as you like», «what colour would you call
-//    this?»): in their order, before the rest of the chatter
-//  · what names something of the road (the book's, or Ana's own): while it is in sight, before the thread
-//  · Ana's own about a stretch: in it
-{ const A = []; for (let v = 0; v < LIBRO1.viaje.length; v++) for (const b of (ROAD_BLOCKS[v] = roadBlocks(v))) A.push({ ...b, v, id: 'v' + v + ':' + b.i });
-  const keys = A.filter(b => b.lines.some(l => l.m)), thread = A.filter(b => b.book && !b.tag && !keys.includes(b)), base = { canal: 'viaje', retomar: true, calesa: 'camino', camino: { no_callado: true } };
-  keys.forEach((b, j) => Dialogo.registrar({ ...base, id: b.id, prioridad: b.tag ? 3.65 : 3.55, camino: { no_callado: true, ...(b.tag ? { visible: b.tag } : {}) }, si: j ? ['dicha:' + keys[j - 1].id] : [], lineas: b.lines }));
-  thread.forEach((b, j) => Dialogo.registrar({ ...base, id: b.id, prioridad: 2, si: j ? ['dicha:' + thread[j - 1].id] : [], lineas: b.lines }));
-  for (const b of A) if (!keys.includes(b) && (b.tag || !b.book)) Dialogo.registrar({ ...base, id: b.id, prioridad: (b.tag ? (b.book ? 3.5 : 1.8) : 1) - b.i / 100, interrumpe: b.tag === 'carreta' || (b.tag && b.book),   /* (the book's, about something in sight, cut the thread: it is taken up again after) */ camino: b.tag ? { no_callado: true, visible: b.tag } : { no_callado: true, tramo_v: b.v }, lineas: b.lines });
+// the talk of the road, as self-contained scenes: each one a whole topic, with its beginning and its end (they can
+// be said in any order, unless one says it needs another: «si»). Pieces: L<stretch>:<lines> are the book's lines of
+// that stretch (LIBRO1.viaje), M<stretch>:<lines> Ana's own (VIAJE_MAS). Where: a thing in sight (visible), or the
+// stretch where the book has it (from there on). The moments of the chapter (key) come in their order.
+const VIAJE_ESCENAS = [
+  // the book
+  ['novia', 'La novia del cerezo', 'L0:0-5', { visible: 'flores', key: 1, marcas: { 0: 'rama_ciruelo' } }],
+  ['mi_cerezo', 'Mi cerezo', 'L0:6-8', { visible: 'cerezo' }],
+  ['barrancos', 'Un río de flores', 'L0:9-10', { visible: 'barranco' }],
+  ['vestido_blanco', 'El vestido blanco y las mangas abullonadas', 'L1:0,1,8-11', { si: ['dicha:novia'] }],
+  ['la_carreta', 'La señora de la carreta', 'L1:2-3', { visible: 'carreta' }],
+  ['wincey', 'El vestido de wincey', 'L1:4-7', {}],
+  ['tren_barco', 'El tren y el barco', 'L2:0-6', {}],
+  ['abetos', 'Abetos balsámicos', 'L2:7-10', { visible: 'abetos' }],
+  ['isla_florida', 'La isla más florida', 'L3:0-3', { visible: 'flores' }],
+  ['caminos_rojos', 'Los caminos rojos', 'L3:4-9 L4:0-1', {}],
+  ['el_golfo', 'El golfo', 'L4:2-3', { visible: 'mar' }],
+  ['hablo_demasiado', '¿Hablo demasiado?', 'L4:4-10', { key: 1, marcas: { 2: 'hablar_todo' } }],
+  ['arboles_orfanato', 'Los arbolitos del orfanato', 'L5:0-6', {}],
+  ['el_arroyo', 'Un arroyo cerca de Tejas Verdes', 'L5:7-10', {}],
+  ['sra_hammond', 'La señora Hammond y los mellizos', 'L6:0-7', { visible: 'aserradero' }],
+  ['amiga_imaginaria', 'La amiga del aparador', 'L6:8-9', {}],
+  ['nabos', 'Los nabos', 'L7:0-3', { visible: 'granjero' }],
+  ['marilla', '¿Cómo es su hermana?', 'L7:4-7', {}],
+  ['la_yegua', 'La yegua sin nombre', 'L7:8-10', {}],
+  ['casita_lilas', 'La casita con lilas', 'L8:0-2', { visible: 'lilas' }],
+  ['el_velero', 'La nube velero', 'L8:3-6', {}],
+  ['la_iglesia', 'La iglesia blanca', 'L8:7-10', { visible: 'iglesia' }],
+  ['pelo_rojo', 'El pelo rojo', 'L9:0-8', { key: 1, marcas: { 0: 'pelo_rojo' } }],
+  ['divinamente', '¿Divinamente hermoso o angelicalmente bueno?', 'L9:9-10 L10:0-4', { si: ['dicha:pelo_rojo'] }],
+  ['cielo_rosado', 'El cielo se ruboriza', 'L10:5-6', { visible: 'curva' }],
+  // Ana's own
+  ['m_barranco', 'Un pasillo de castillo', 'M0:0-2', { visible: 'barranco' }],
+  ['m_abedules', 'Damas de honor', 'M0:3-4', { visible: 'barranco' }],
+  ['m_rama', 'La rama de ciruelo', 'M0:5-7', { visible: 'flores', si: ['dicha:novia'] }],
+  ['m_manzanos', 'Nombres para los manzanos', 'M1:3,7', { visible: 'flores' }],
+  ['m_granjas', 'Las granjas no son celosas', 'M1:4-6', { tramo: 1 }],
+  ['m_sombra', 'La sombra de los abetos', 'M2:0', { visible: 'abetos' }],
+  ['m_olor', 'Un frasco de bosque', 'M2:1-3', { visible: 'abetos' }],
+  ['m_sono_bosque', 'El bosque soñado', 'M2:4', { visible: 'abetos' }],
+  ['m_zorzal', 'El zorzal', 'M2:5-7', { visible: 'abetos' }],
+  ['m_hondonada', 'Un tazón de nieve', 'M3:0-2', { visible: 'flores' }],
+  ['m_primaveras', 'Sesenta primaveras', 'M3:3-7', { tramo: 3 }],
+  ['m_todo_el_mundo', 'Todo el mundo de la isla', 'M4:0', { visible: 'mar' }],
+  ['m_mar_azul', 'El mar se peina', 'M4:1-2', { visible: 'mar' }],
+  ['m_arena', 'Arena de dos colores', 'M4:3-5', { visible: 'mar' }],
+  ['m_juguetes', 'Graneros de juguete', 'M4:6-7', { tramo: 4 }],
+  ['m_arces', 'Los arces viejos', 'M5:0', { tramo: 5 }],
+  ['m_abejas', 'Las abejas virtuosas', 'M5:1-3', { tramo: 5 }],
+  ['m_arroyito', 'Todo está conectado', 'M5:4-7', { tramo: 5 }],
+  ['m_madera', 'Madera recién cortada', 'M6:0-1', { visible: 'aserradero' }],
+  ['m_cuentos', 'Cuentos para los mellizos', 'M6:2-5', { visible: 'aserradero', si: ['dicha:sra_hammond'] }],
+  ['m_rueda', 'La rueda del aserradero', 'M6:6-7', { visible: 'aserradero' }],
+  ['m_sembrador', 'Semillas de esperanza', 'M7:0', { visible: 'granjero' }],
+  ['m_vacas', 'Lo que piensan las vacas', 'M7:1-5', { visible: 'vacas' }],
+  ['m_cercas', 'Costuras de campo', 'M7:6-7', { tramo: 7 }],
+  ['m_cementerio', 'Un jardín para descansar', 'M8:0', { visible: 'iglesia' }],
+  ['m_lilas', 'A Marilla le gustan las lilas', 'M8:1-4', { visible: 'lilas' }],
+  ['m_domingos', 'Un sombrero para los domingos', 'M8:5-7', { visible: 'iglesia' }],
+  ['m_sauces', 'Los sauces', 'M9:0', { visible: 'sauces' }],
+  ['m_puentecito', 'Un tambor chiquito', 'M9:1-2', { visible: 'sauces' }],
+  ['m_luz', 'La luz dorada', 'M9:3-7', { tramo: 9 }],
+  ['m_vestido_baile', 'Un vestido de baile', 'M10:0', { tramo: 10 }],
+  ['m_falta_mucho', '¿Falta mucho?', 'M10:1-3', { tramo: 10 }],
+  ['m_vuelta', 'Las vueltas del camino', 'M10:4-7', { visible: 'curva' }],
+];
+// (from the short notation to the configuration of a Dialogo: the same as any other scene)
+{ const piezas = p => p.split(' ').map(t => { const [, src, v, ls] = t.match(/^([LM])(\d+):(.+)$/); const idx = ls.split(',').flatMap(r => { const [a, b] = r.split('-').map(Number); return b == null ? [a] : Array.from({ length: b - a + 1 }, (_, i) => a + i); }); return { de: (src === 'L' ? 'libro:viaje.' : 'mas:') + v, elegir: idx }; });
+  const base = { canal: 'viaje', calesa: 'camino', retomar: true };
+  const keys = VIAJE_ESCENAS.filter(e => e[3].key).map(e => e[0]);
+  VIAJE_ESCENAS.forEach(([id, nombre, p, o], order) => {
+    const book = p.startsWith('L'), v = +p.match(/^[LM](\d+)/)[1], tr = ROAD_TRAMOS.find(t => t.v === v), ki = keys.indexOf(id);
+    const si = [...(o.si || []).map(c => c.replace(/^dicha:/, 'dicha:viaje:')), ...(ki > 0 ? ['dicha:viaje:' + keys[ki - 1]] : [])];
+    const camino = o.visible ? { no_callado: true, visible: o.visible } : o.tramo != null ? { no_callado: true, tramo_v: o.tramo } : { no_callado: true, desde: tr ? tr.s : 0 };
+    const prioridad = o.key ? (o.visible ? 3.65 : 3.55) : o.visible ? (book ? 3.5 : 1.8) : book ? 2 - order / 1000 : 1 - order / 1000;
+    Dialogo.registrar({ ...base, id: 'viaje:' + id, nombre, prioridad, interrumpe: !!(book && o.visible && !o.key), camino, si, lineas: piezas(p), marcas: o.marcas });
+  });
 }
 // the talks of pairs and trios (DLG_BANK), as scenes too: when they meet, where it makes sense
 for (const [key, list] of Object.entries(DLG_BANK)) list.forEach((blk, i) => Dialogo.registrar({ id: 'par:' + key + ':' + i, disparo: 'encuentro', quienes: key.split('+'), donde: Array.isArray(blk) ? undefined : blk.at, lineas: Array.isArray(blk) ? blk : blk.l }));
@@ -7250,7 +7308,7 @@ function loop(now){
   else { owed = Math.min(owed + Math.min(raw, .25) * k, 3 * k * .05 + 2); const t0 = performance.now(); while (owed > 1e-4 && performance.now() - t0 < 22) { const d = Math.min(.05, owed); update(d); owed -= d; } }
   FRAME++; tripBarDraw(); render(); islaDraw(); requestAnimationFrame(loop);
 }
-window.__avonlea = { roadBlocks, DIALOGOS, dlgCtx, bubblesNow: () => bubbles, toby, cartSheet: (c, x, y, c8, t) => { const L = [], p = { look: 'matthew', x, y, c8, walk: 0, moving: false }; const [cx, cy] = [x, y]; pushCart(L, c, { x: cx, y: cy, c8, walk: 0, moving: true }, t); for (const [k, look] of [[0, 'matthew'], [1, 'ana']]) { const [sx, sy] = cartSeat(cx, cy, c8, k); L.push({ y: sy, draw: () => drawPerson(c, { ...mkPerson(look, sx, sy), sit: true, dir: c8Dir(c8) }, t) }); } L.sort((a, b) => a.y - b.y).forEach(o => o.draw()); }, startCap1, CAP1, LIBRO1, ROAD_TRAMOS, ROAD_MIN, roadTramo, islaToggle, DLG_BANK, startDay, setSeason, agendaData: () => AGENDA.map(e => ({ who: wmName(e.who), from: e.from, to: e.to, label: e.label, season: e.season, sunday: !!e.sunday, ana: !!(e.ana || e.who === 'ana'), cond: e.when ? String(e.when).replace(/^\(\) => /, '') : '' })), setAgenda: v => { AGENDA_ON = v; }, AGENDA, wmData: () => ({ THINGS, WHO, OFRECE, WP_NAME, TRADE, TREATS, LIBRETA, ITEM_NAME, MAX_GOALS, PACE, FOCO }), paintMapBase, doingText, wmName, wmBody, wmScene, WW, WH, setVec: v => { VEC_ON = v; }, setStyle: v => { ANA_STYLE = v; }, setHead: setHeadM, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+window.__avonlea = { DIALOGOS, dlgCtx, bubblesNow: () => bubbles, toby, cartSheet: (c, x, y, c8, t) => { const L = [], p = { look: 'matthew', x, y, c8, walk: 0, moving: false }; const [cx, cy] = [x, y]; pushCart(L, c, { x: cx, y: cy, c8, walk: 0, moving: true }, t); for (const [k, look] of [[0, 'matthew'], [1, 'ana']]) { const [sx, sy] = cartSeat(cx, cy, c8, k); L.push({ y: sy, draw: () => drawPerson(c, { ...mkPerson(look, sx, sy), sit: true, dir: c8Dir(c8) }, t) }); } L.sort((a, b) => a.y - b.y).forEach(o => o.draw()); }, startCap1, CAP1, LIBRO1, ROAD_TRAMOS, ROAD_MIN, roadTramo, islaToggle, DLG_BANK, startDay, setSeason, agendaData: () => AGENDA.map(e => ({ who: wmName(e.who), from: e.from, to: e.to, label: e.label, season: e.season, sunday: !!e.sunday, ana: !!(e.ana || e.who === 'ana'), cond: e.when ? String(e.when).replace(/^\(\) => /, '') : '' })), setAgenda: v => { AGENDA_ON = v; }, AGENDA, wmData: () => ({ THINGS, WHO, OFRECE, WP_NAME, TRADE, TREATS, LIBRETA, ITEM_NAME, MAX_GOALS, PACE, FOCO }), paintMapBase, doingText, wmName, wmBody, wmScene, WW, WH, setVec: v => { VEC_ON = v; }, setStyle: v => { ANA_STYLE = v; }, setHead: setHeadM, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
 /* ---------- the viewer (index.html?visor): only Ana, big, on a plain floor, to look at the drawings and move her:
    arrows (Shift to run), and buttons for everything she can do. ---------- */
 function startVisor(){

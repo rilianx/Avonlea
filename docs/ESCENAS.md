@@ -95,13 +95,24 @@ Una charla de dos, solo en la cocina, cuando se encuentran:
   lineas: [['ana', '¿Puedo poner flores en la mesa?'], ['marilla', 'Pon las que quieras…']] }
 ```
 
-## Las escenas que se arman solas
+## Las escenas del viaje (autocontenidas)
 
-- **La charla del viaje** se arma con esta misma configuración a partir de las líneas del libro y las de Ana (`LIBRO1.viaje`, `VIAJE_MAS`). Cada tramo se parte en intercambios: empieza uno cada vez que Ana vuelve a hablar después de una respuesta. Cada intercambio queda en uno de estos grupos:
-  - **El hilo de la charla:** las líneas del libro que no nombran nada a la vista. Van con prioridad 2, en el orden del libro: cada una exige `dicha:` de la anterior.
-  - **Los momentos del capítulo:** van con prioridad 3,55, en su orden.
-  - **Lo que nombra algo del camino:** se dice con `camino.visible`. Las del libro van con prioridad 3,5 e interrumpen el hilo (que se retoma); las de Ana, con 1,8.
-  - **Lo de Ana sobre un tramo:** se dice con `camino.tramo_v` y prioridad 1.
-- **Las charlas de pares y tríos** (`DLG_BANK`) se convierten en escenas con `disparo: 'encuentro'`. Cuando dos personajes se encuentran, se elige la primera que no se haya dicho y que tenga sentido donde están.
+Cada escena es **autocontenida**: un tema completo, con principio y final, que se entiende sola y puede decirse en cualquier orden, salvo que diga que necesita otra con `si: ['dicha:…']`. Por ejemplo, «El vestido blanco» empieza con «Pero sí espero…» y necesita antes «La novia del cerezo».
+
+Están escritas a mano en `VIAJE_ESCENAS` con una notación corta: `[id, nombre, piezas, opciones]`.
+
+- **Piezas:** `L<tramo>:<líneas>` son las líneas del libro de ese tramo (`LIBRO1.viaje`); `M<tramo>:<líneas>` son las de Ana (`VIAJE_MAS`). Una escena puede juntar trozos de dos tramos, como «Los caminos rojos»: `'L3:4-9 L4:0-1'`.
+- **Opciones:** `visible` (algo que tiene que estar a la vista), `tramo` (solo en ese tramo), `key` (momento del capítulo), `si`, `marcas`.
+
+Cada una se convierte en la configuración de un `Dialogo` como cualquier otra, y sus piezas quedan como `lineas: [{ de: 'libro:viaje.3', elegir: [4,5,…] }, { de: 'libro:viaje.4', elegir: [0, 1] }]`.
+
+Hay 25 escenas del libro y 33 de Ana. Así se ordenan:
+
+- **Momentos del capítulo:** la novia del cerezo (con la rama de ciruelo), «¿Hablo demasiado?» y «El pelo rojo». Van en su orden, con prioridad 3,55.
+- **Lo que nombra algo:** el cerezo, los barrancos, la señora de la carreta, los abetos, el golfo, la Sra. Hammond (frente al aserradero), los nabos, la casita con lilas, la iglesia. Se dicen con eso a la vista, con prioridad 3,5, e interrumpen lo de menos prioridad.
+- **El resto del libro:** se dice desde el tramo donde lo pone el libro en adelante, en ese orden (prioridad 2).
+- **Lo de Ana:** va después, con prioridad 1,8 si nombra algo a la vista y 1 si es de un tramo.
+
+Las **charlas de pares y tríos** (`DLG_BANK`) se convierten en escenas con `disparo: 'encuentro'`. Cuando dos personajes se encuentran, se elige la primera que no se haya dicho y que tenga sentido donde están.
 
 El capítulo 1 cuenta lo que pasa con hechos (`dlgHecho('matthew_en_estacion')`…), y las escenas reaccionan a ellos. Ninguna escena tiene código propio.
