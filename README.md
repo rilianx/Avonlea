@@ -69,6 +69,8 @@ La partida se guarda sola en el navegador: lo que lleva Ana, lo que creció en l
 
 **El tiempo:** un minuto del juego dura 5 segundos (una hora, 5 minutos).
 
+**La calesa en ocho vistas:** como los personajes, la calesa (y las carretas del pueblo) se ve de lado, de frente cuando viene, de espaldas cuando se va y en las cuatro diagonales: el caballo va siempre adelante, las ruedas y la caja giran con ella, y quienes van sentados miran hacia donde va.
+
 **El capítulo 1 del libro, simulado:** en 🎯 → «📖 Capítulo 1 del libro» (parte a las 14:54, justo antes de que salga Matthew; abajo se puede acelerar): una tarde de junio; la Sra. Lynde ve desde su ventana pasar a Matthew en la calesa, con su mejor traje, y va enseguida a Tejas Verdes a averiguar; ve la mesa puesta para tres y Marilla le cuenta lo del huérfano; ella se va a contarlo a los Bell. Mientras, Matthew hace las ocho millas a Bright River, el tren de las 17:30 deja a una niña en el andén, el jefe de estación se lo explica, y Matthew la trae a casa por la Avenida y junto a la laguna, al atardecer: «¿Dónde está el niño?». Todo con metas del planificador y los diálogos del libro. Los 32 momentos del capítulo ocurren en orden, con 3 minutos de diferencia media respecto a la agenda sacada del libro: [docs/CAP1.md](docs/CAP1.md) (la comparación y cómo funcionan los diálogos) y [la traza](trazas/cap1.webp) (`node tools/trace_goal.js cap1`).
 
 **Observar a cualquiera (👁):** el botón 👁 de la derecha abre la lista de todos los personajes con nombre (los principales y los del pueblo) y dónde está cada uno; al elegir uno, la vista lo sigue (también por el camino de Bright River). «Ana» vuelve a ella.

@@ -1866,8 +1866,8 @@ function roadView(g, ox, oy, vw, vh, t, night, list){
     else if (kind === 'd') list.push({ y, draw: () => drawDog(g, o, t) });
   }
   // the lady in a cart coming the other way, near Bright River (Matthew nods to her: on the Island one nods to everybody)
-  { const s = .17 - ((t / ROAD_SEC * 1.6) % .13), [x, y, dx] = roadAt(s); if (inV(x, y)) { const b = { look: 'f:blewett', x, y: y - 14, dir: 3, walk: (t * 1.6) % 1, moving: true }; list.push({ y: y + 4, draw: () => drawBuggy(g, b, t) }); } }
-  for (const k of Object.keys(PEOPLE)) { const p = PEOPLE[k]; if (p.where !== 'camino' || !inV(p.x, p.y)) continue; list.push({ y: p.y, draw: () => drawPerson(g, p, t) }); if (p.buggy) { const d = p.dir === 3 ? 3 : 1, back = d === 1 ? -1 : 1; list.push({ y: p.y + 18.5, draw: () => drawCart(g, { x: p.x - back * 56, y: p.y + 18, dir: d, walk: p.walk || 0, moving: !!p.roadDir && !p.roadWait }, t) }); } }
+  { const s = .17 - ((t / ROAD_SEC * 1.6) % .13), [x, y, dx] = roadAt(s); if (inV(x, y)) { const b = { look: 'f:blewett', x, y: y + 14, dir: 3, c8: ((Math.round(Math.atan2(-roadAt(s)[3], -dx) / (Math.PI / 4)) + 2) % 8 + 8) % 8, walk: (t * 1.6) % 1, moving: true }; list.push({ y: y + 15, draw: () => drawBuggy(g, b, t) }); } }
+  for (const k of Object.keys(PEOPLE)) { const p = PEOPLE[k]; if (p.where !== 'camino' || !inV(p.x, p.y)) continue; if (p.buggy) pushDriven(list, g, p, t); else list.push({ y: p.y, draw: () => drawPerson(g, p, t) }); }
 }
 function roadCanopy(g, ox, oy, vw, vh){   // the Avenue: a canopy of snowy fragrant bloom overhead
   const a = roadXOf(ROAD_TRAMOS.find(r => r.kind === 'avenida').s), b = roadXOf(ROAD_TRAMOS.find(r => r.name === 'Newbridge').s);
@@ -1884,7 +1884,7 @@ ROOMS.camino = {
   actions: add => {
     if (dist(ana.x, ana.y, RSTN.x, RSTN.y + 20) < 260) add('andén', RSTN.x, RSTN.y + 10, 40, 'Entrar al andén de la estación', () => goIn('br'), { pri: 3, hy: 20, hit: 36 });
     if (dist(ana.x, ana.y, RCHERRY.x, RCHERRY.y) < 360) add('cerezo', RCHERRY.x, RCHERRY.y - 30, 70, 'Mirar el gran cerezo silvestre', () => anaSays(pick(CHERRY_LINES)), { pri: 5, hy: 60, hit: 60 });
-    const d = PEOPLE[game.road?.with]; if (d && d.where === 'camino' && !ana.onCart) { const back = d.dir === 1 ? -1 : 1; add('calesa', d.x - back * 56, d.y + 8, 70, '🐴 Subir a la calesa', () => roadBoard(), { pri: 2, hy: 20, hit: 46 }); }
+    const d = PEOPLE[game.road?.with]; if (d && d.where === 'camino' && !ana.onCart) { const [cx, cy] = cartFromDriver(d.x, d.y, cartC8(d)); add('calesa', cx, cy - 6, 70, '🐴 Subir a la calesa', () => roadBoard(), { pri: 2, hy: 20, hit: 46 }); }
     for (const k of Object.keys(PEOPLE)) { const p = PEOPLE[k]; if (p.where === 'camino' && p.buggy && !game.road && dist(ana.x, ana.y, p.x, p.y) < 200) add('calesa:' + k, p.x, p.y, 60, `🐴 Pedirle a ${wmName(k)} que la lleve`, () => { game.road = { with: k }; roadBoard(); }, { pri: 2, hy: 20, hit: 46 }); }
   },
 };
@@ -1908,7 +1908,7 @@ function roadJoin(withK){
   const d = wmBody(withK); if (!d || d.where !== 'camino') return;
   if (game.talk) close();
   game.scene = 'camino'; game.road = { with: withK }; ana.onCart = true; ana.sit = true; ana.goto = null; ana.lie = false; ana.moving = false; diana.follow = false; ana.roadS = d.roadS;
-  const back = d.dir === 1 ? -1 : 1; ana.x = d.x - back * 22; ana.y = d.y + 2;
+  const c8_ = cartC8(d), [cx_, cy_] = cartFromDriver(d.x, d.y, c8_), [ax_, ay_] = cartSeat(cx_, cy_, c8_, 1); ana.x = ax_; ana.y = ay_; ana.dir = c8Dir(c8_);
   if (!obsScene()) { cam.x = ana.x; cam.y = ana.y; cam.snap = true; }
 }
 function roadBoard(){ const d = PEOPLE[game.road?.with]; if (!d) return; ana.onCart = true; ana.sit = true; ana.goto = null; sayB(qOf(game.road.with), pick(['Bueno, pues… sube.', 'Ya lo creo. Arriba.', 'Sube, sube. Seguimos.'])); }
@@ -1931,7 +1931,7 @@ function roadTick(dt){
   if (game.scene === 'camino') {
     const d = PEOPLE[game.road?.with];
     if (ana.onCart && d) {   // in the buggy: where the buggy is; at the end of the road, she gets down with the driver
-      if (d.where === 'camino') { const back = d.dir === 1 ? -1 : 1; ana.x = d.x - back * 22; ana.y = d.y + 2; ana.dir = d.dir; ana.sit = true; ana.vx = ana.vy = 0; ana.roadS = d.roadS; }
+      if (d.where === 'camino') { const c8_ = cartC8(d), [cx_, cy_] = cartFromDriver(d.x, d.y, c8_), [ax_, ay_] = cartSeat(cx_, cy_, c8_, 1); ana.x = ax_; ana.y = ay_; ana.dir = c8Dir(c8_); ana.sit = true; ana.vx = ana.vy = 0; ana.roadS = d.roadS; }
       else if (d.where === 'br') { ana.onCart = false; goIn('br', [d.x + 26, d.y + 6]); }
       else {
         game.scene = 'out'; ana.onCart = false; ana.sit = false; ana.x = d.x + 22; ana.y = d.y + 2;
@@ -1942,7 +1942,7 @@ function roadTick(dt){
     } else {   // on foot: along the road, out at either end
       ana.roadS = roadSOf(ana.x);
       if (ana.x > RW - 160) { game.scene = 'out'; game.road = null; ana.x = DOOR.br[0] + 30; ana.y = DOOR.br[1] + 30; if (!obsScene()) { cam.x = ana.x; cam.y = ana.y; cam.snap = true; } logEv('Ana llegó a pie a Avonlea por el camino de Bright River.'); }
-      else if (d && d.where === 'camino' && TT - lastInput > 8 && !ANA_AUTO) { const back = d.dir === 1 ? -1 : 1, cx = d.x - back * 30, cy = d.y + 16; if (dist(ana.x, ana.y, cx, cy) < 40) roadBoard(); else if (!ana.goto) ana.goto = { x: cx, y: cy, scene: 'camino' }; }   // (a while without moving her: back to the buggy)
+      else if (d && d.where === 'camino' && TT - lastInput > 8 && !ANA_AUTO) { const [cx0, cy0] = cartFromDriver(d.x, d.y, cartC8(d)), cx = cx0, cy = cy0 + 16; if (dist(ana.x, ana.y, cx, cy) < 40) roadBoard(); else if (!ana.goto) ana.goto = { x: cx, y: cy, scene: 'camino' }; }   // (a while without moving her: back to the buggy)
       else if (d && d.where === 'camino' && ANA_AUTO && TT - (ana.offT || 0) > 25) roadBoard();
     }
   }
@@ -1952,7 +1952,7 @@ function roadTick(dt){
 }
 // on the main map, the buggy goes with whoever drives it
 function buggyTick(){
-  for (const k of Object.keys(PEOPLE)) { const b = PEOPLE[k]; if (b.buggy && b.where !== 'out' && b.where !== 'camino' && b.where !== 'br') b.buggy = false; }
+  for (const k of Object.keys(PEOPLE)) { const b = PEOPLE[k]; if (b.buggy && (b.where === 'out' || b.where === 'camino')) cartTrack(b); if (b.buggy && b.where !== 'out' && b.where !== 'camino' && b.where !== 'br') b.buggy = false; }
 }
 
 /* ---------- the trip's talk: Ana's chatter (the book's, stretch by stretch) and Matthew's few words. Nothing is said
@@ -2719,7 +2719,7 @@ function targets(){
     if (dist(ana.x, ana.y, MILK.x, MILK.y) < 200) add('leche', MILK.x, MILK.y, 60, 'Mirar las botellas de leche en el río', () => anaSays(pick(MILK_LINES)), { pri: 5, hy: 8, hit: 34 });
     if (dist(ana.x, ana.y, WP.gallinero[0], WP.gallinero[1]) < 160) add('huevos', WP.gallinero[0], WP.gallinero[1], 50, game.eggDay === today() ? 'Las gallinas ya pusieron hoy' : 'Juntar los huevos', () => { if (game.eggDay === today()) return anaSays('Ya junté los huevos de hoy. Las gallinas no son máquinas, pobrecitas.'); const n = eggsToday(); game.eggDay = today(); game.inv.huevos += n; float('+' + itemText('huevos', n), ana.x, ana.y - 60); logEv('Ana juntó ' + itemText('huevos', n) + ' en el gallinero.'); sfx.happy(); save(); }, { pri: 5, hy: 8, hit: 40 });
     if (!cart.on) add('trip', BARN.x + 70, BARN.y + 60, 60, 'Ir a la estación de Bright River en la carreta', () => tripAsk('br'), { pri: 5, hy: 12, hit: 30 });
-    if (cart.on && !cart.riding) add('cart', cart.x - (cart.dir === 3 ? -44 : 44), cart.y - 10, 70, 'Subir a la carreta', cartAsk, { pri: 2, hy: 20, hit: 46 });
+    if (cart.on && !cart.riding) add('cart', cart.x, cart.y - 10, 70, 'Subir a la carreta', cartAsk, { pri: 2, hy: 20, hit: 46 });
     add('bench', BENCH.x, BENCH.y + 6, 26, ana.sit ? 'Levantarse' : 'Sentarse a mirar el lago', () => { ana.sit = !ana.sit; if (ana.sit) { logEv('Ana se sentó a mirar el Lago de las Aguas Brillantes.'); ana.x = BENCH.x; ana.y = BENCH.y - 2; ana.dir = 2; } }, { pri: 4, hy: 10, hit: 32 });
   } else {
     ROOMS[game.scene].actions?.(add);
@@ -2875,19 +2875,67 @@ function drawCow(c, a, t){
   c.restore();
 }
 // the farmhand's cart and horse that go with whoever has one
-function drawCart(c, p, t){
-  const d = p.dir === 3 ? -1 : 1, x = p.x, y = p.y, w = Math.sin(p.walk * TAU), l = p.moving ? w * 3 : 0;
-  c.save(); c.translate(x, y); c.scale(d, 1);
-  ell(c, 34, 1, 20, 4.6, 'rgba(30,40,20,.22)'); ell(c, -44, 1, 24, 5, 'rgba(30,40,20,.22)');
-  // the horse, ahead
-  c.strokeStyle = '#5a3a24'; c.lineWidth = 3.2; c.lineCap = 'round'; c.beginPath(); for (const [lx, s] of [[24, 1], [30, -1], [42, 1], [47, -1]]) { c.moveTo(lx, -14); c.lineTo(lx + l * s, 0); } c.stroke();
-  ell(c, 36, -20, 15, 8, '#7a4a2a', true); blob(c, [[46, -24], [52, -36], [58, -34], [52, -20]], '#7a4a2a'); ell(c, 56, -33, 5, 3.6, '#7a4a2a', true);
-  line(c, [[47, -26], [51, -36]], '#3a2418', 2.6, 3); line(c, [[21, -22], [16, -12 + Math.sin(t * 2) * 2]], '#3a2418', 2.4, 4); ell(c, 57, -34, .8, .8, '#1a1a1a');
-  // the cart, behind
-  line(c, [[-28, -16], [26, -18]], '#6a4a30', 2, 5);
-  blob(c, [[-62, -30], [-26, -30], [-26, -14], [-62, -14]], '#8a6040'); for (let k = -58; k < -28; k += 8) line(c, [[k, -30], [k, -14]], 'rgba(60,40,25,.4)', .8, k);
-  ell(c, -44, -10, 9, 9, 'rgba(0,0,0,0)', '#4a3424'); for (let k = 0; k < 4; k++) { const a = k * Math.PI / 4 + (p.moving ? TT * 3 : 0); line(c, [[-44 - Math.cos(a) * 8, -10 - Math.sin(a) * 8], [-44 + Math.cos(a) * 8, -10 + Math.sin(a) * 8]], '#4a3424', 1, k); }
+// the buggy (and the cart), seen from eight sides as the people are: from the side, from the front (coming), from
+// behind (going away) and in the four diagonals. p.x, p.y: the middle of the box on the ground; p.c8: where it is
+// heading (0 up/away, 2 right, 4 down/towards us, 6 left; odd ones the diagonals), else from p.dir.
+const cartC8 = p => p.c8 ?? (p.dir === 3 ? 6 : p.dir === 0 ? 0 : p.dir === 2 ? 4 : 2);
+const c8Dir = c8 => c8 === 0 ? 0 : c8 === 4 ? 2 : c8 < 4 ? 1 : 3;   // (how the ones sitting in it face)
+function cartAxes(c8){ const a = (c8 - 2) * Math.PI / 4, hx = Math.round(Math.cos(a) * 1000) / 1000, hy = Math.round(Math.sin(a) * 1000) / 1000; return { hx, hy, A: [hx, hy * .6], B: [-hy, hx * .6] }; }   // (A: along, B: across, the ground seen at a slant)
+function cartSeat(cx, cy, c8, k){ const { A, B } = cartAxes(c8), s = k ? 1 : -1; return [cx - A[0] * 8 + s * (B[0] * 10 + A[0] * 8), cy - A[1] * 8 + s * (B[1] * 10 + A[1] * 8) - 18]; }   // (k 0: who drives, 1: beside)
+function cartFromDriver(x, y, c8){ const [sx, sy] = cartSeat(0, 0, c8, 0); return [x - sx, y - sy]; }
+// where it is heading, from how it moved (a little stickiness, so it does not flicker between two)
+function cartTrack(o, x = o.x, y = o.y){
+  if (o._cx != null) { const dx = x - o._cx, dy = y - o._cy, m = Math.hypot(dx, dy); if (m > .3 && m < 80) { const a = Math.atan2(dy, dx), q = ((Math.round(a / (Math.PI / 4)) + 2) % 8 + 8) % 8, cur = o.c8 ?? q, off = Math.abs(((a - (cur - 2) * Math.PI / 4) % TAU + TAU + Math.PI) % TAU - Math.PI); o.c8 = off > Math.PI / 8 + .1 ? q : cur; } }
+  o._cx = x; o._cy = y; return o.c8;
+}
+const HORSE = '#7a4a2a', HORSE_D = '#3a2418', HORSE_L = '#5a3a24';
+function drawCartHorse(c, p, t){
+  const c8 = cartC8(p), { hx, hy, A } = cartAxes(c8), hxp = p.x + A[0] * 46, hyp = p.y + A[1] * 46 * 1.8, w = Math.sin((p.walk || 0) * TAU), l = p.moving ? w * 3 : 0;
+  // the shafts, from the box to the horse
+  const { B } = cartAxes(c8); for (const s of [-1, 1]) line(c, [[p.x + A[0] * 18 + B[0] * 6 * s, p.y + A[1] * 18 + B[1] * 6 * s - 16], [hxp - A[0] * 10 + B[0] * 4 * s, hyp - A[1] * 10 + B[1] * 4 * s - 18]], '#6a4a30', 1.8, 5 + s);
+  c.save(); c.translate(hxp, hyp);
+  if (c8 === 4) {   // coming towards us: chest, legs, the long face between the ears
+    ell(c, 0, 1, 12, 4, 'rgba(30,40,20,.22)');
+    c.strokeStyle = HORSE_L; c.lineWidth = 3.2; c.lineCap = 'round'; c.beginPath(); for (const [lx, s] of [[-6, 1], [6, -1], [-3.5, -1], [3.5, 1]]) { c.moveTo(lx, -12); c.lineTo(lx, l * s * .5); } c.stroke();
+    ell(c, 0, -19, 10, 10, HORSE, true); ell(c, 0, -32, 5, 9, HORSE, true); ell(c, 0, -25, 3.6, 3, '#9a6a4a', true);
+    blob(c, [[-5, -39], [-3, -46], [-1, -39]], HORSE); blob(c, [[1, -39], [3, -46], [5, -39]], HORSE); line(c, [[0, -41], [0, -34]], HORSE_D, 2.4, 3);
+    ell(c, -3, -34, .9, .9, '#1a1a1a'); ell(c, 3, -34, .9, .9, '#1a1a1a');
+  } else if (c8 === 0) {   // going away: the rump and the tail, the ears beyond
+    ell(c, 0, 1, 12, 4, 'rgba(30,40,20,.22)');
+    c.strokeStyle = HORSE_L; c.lineWidth = 3.2; c.lineCap = 'round'; c.beginPath(); for (const [lx, s] of [[-6, 1], [6, -1], [-3.5, -1], [3.5, 1]]) { c.moveTo(lx, -12); c.lineTo(lx, l * s * .5); } c.stroke();
+    ell(c, 0, -30, 4.5, 4, HORSE, true); blob(c, [[-4, -32], [-3, -39], [-1, -33]], HORSE); blob(c, [[1, -33], [3, -39], [4, -32]], HORSE);
+    ell(c, 0, -19, 11, 10, HORSE, true); line(c, [[0, -24], [Math.sin(t * 2) * 2, -9]], HORSE_D, 2.8, 4);
+  } else {   // from the side (or at a slant: the same, shortened)
+    const d = hx < 0 ? -1 : 1, k = c8 % 2 ? .74 : 1;
+    c.scale(d * k, 1);
+    ell(c, -2, 1, 20, 4.6, 'rgba(30,40,20,.22)');
+    c.strokeStyle = HORSE_L; c.lineWidth = 3.2; c.lineCap = 'round'; c.beginPath(); for (const [lx, s] of [[-12, 1], [-6, -1], [6, 1], [11, -1]]) { c.moveTo(lx, -14); c.lineTo(lx + l * s, 0); } c.stroke();
+    ell(c, 0, -20, 15, 8, HORSE, true); blob(c, [[10, -24], [16, -36], [22, -34], [16, -20]], HORSE); ell(c, 20, -33, 5, 3.6, HORSE, true);
+    line(c, [[11, -26], [15, -36]], HORSE_D, 2.6, 3); line(c, [[-15, -22], [-20, -12 + Math.sin(t * 2) * 2]], HORSE_D, 2.4, 4); ell(c, 21, -34, .8, .8, '#1a1a1a');
+  }
   c.restore();
+}
+function drawCartBody(c, p, t){
+  const c8 = cartC8(p), { hx, A, B } = cartAxes(c8), x = p.x, y = p.y, P = (u, v, h) => [x + A[0] * u + B[0] * v, y + A[1] * u + B[1] * v - h];
+  ell(c, x, y + 1, 20 + 6 * Math.abs(hx), 6, 'rgba(30,40,20,.22)');
+  const wheel = s => { const [wx, wy] = P(-2, 13 * s, 9), rx = Math.max(1.6, 9 * Math.abs(hx)); ell(c, wx, wy, rx, 9, 'rgba(0,0,0,0)', '#4a3424'); for (let k = 0; k < 4; k++) { const a = k * Math.PI / 4 + (p.moving ? TT * 3 : 0); line(c, [[wx - Math.cos(a) * rx * .9, wy - Math.sin(a) * 8], [wx + Math.cos(a) * rx * .9, wy + Math.sin(a) * 8]], '#4a3424', 1, k); } };
+  const near = B[1] > 0 ? 1 : B[1] < 0 ? -1 : 0, far = -near || -1;
+  wheel(far);
+  // the box: the inside, then its four sides from the far one to the near one
+  const L = 18, Wd = 13, fl = [P(-L, -Wd, 12), P(L, -Wd, 12), P(L, Wd, 12), P(-L, Wd, 12)], rim = [P(-L, -Wd, 28), P(L, -Wd, 28), P(L, Wd, 28), P(-L, Wd, 28)];
+  blob(c, rim, '#5a3a24');
+  const faces = [0, 1, 2, 3].map(i => { const j = (i + 1) % 4; return { q: [fl[i], fl[j], rim[j], rim[i]], y: (fl[i][1] + fl[j][1]) / 2 }; }).sort((a, b) => a.y - b.y);
+  faces.forEach((f, i) => { blob(c, f.q, i < 2 ? '#7a5434' : '#8a6040'); if (i >= 2) { const [a, b] = [f.q[0], f.q[1]]; for (let k = 1; k < 4; k++) line(c, [[lerp(a[0], b[0], k / 4), lerp(a[1], b[1], k / 4)], [lerp(f.q[3][0], f.q[2][0], k / 4), lerp(f.q[3][1], f.q[2][1], k / 4)]], 'rgba(60,40,25,.4)', .8, k); } });
+  if (near) wheel(near); else wheel(1);
+}
+function drawCart(c, p, t){ const { hy } = cartAxes(cartC8(p)); if (hy < -.1) { drawCartHorse(c, p, t); drawCartBody(c, p, t); } else { drawCartBody(c, p, t); drawCartHorse(c, p, t); } }
+// into a list sorted by depth: the box and the horse separately (people sit between them)
+function pushCart(list, g, p, t){ const { A } = cartAxes(cartC8(p)); list.push({ y: p.y + 1, draw: () => drawCartBody(g, p, t) }, { y: p.y + A[1] * 46 * 1.8 + 1, draw: () => drawCartHorse(g, p, t) }); }
+// whoever drives: the buggy around them, and they (and whoever rides beside) sitting in it, facing the way it goes
+function pushDriven(list, g, p, t){
+  const c8 = cartC8(p), [cx, cy] = cartFromDriver(p.x, p.y, c8);
+  pushCart(list, g, { x: cx, y: cy, c8, walk: p.walk || 0, moving: !!(p.moving || (p.roadDir && !p.roadWait) || p.drive) }, t);
+  list.push({ y: p.y, draw: () => drawPerson(g, { ...p, _fx: undefined, sit: true, moving: false, dir: c8Dir(c8) }, t) });
 }
 
 // putting things down and picking them up again (the watering can too), and drinking the tea she made
@@ -3193,10 +3241,10 @@ function cartTick(dt){
   const m = PEOPLE.matthew, d = cart.dest === 'br' ? 1 : -1;
   cart.moving = cart.riding && (d > 0 ? cart.s < CART_LEN : cart.s > 0);
   if (cart.moving) { cart.s = clamp(cart.s + d * CART_SPEED * dt, 0, CART_LEN); cart.walk = (cart.walk + dt * 1.6) % 1; }
-  const [cx, cy, dx] = cartAt(cart.s); cart.x = cx; cart.y = cy; if (cart.moving) cart.dir = (dx * d) >= 0 ? 1 : 3;
-  const back = cart.dir === 1 ? -1 : 1;
-  m.x = cart.x + back * 56; m.y = cart.y - 18; m.dir = cart.dir; m.sit = true; m.moving = false; m.where = 'out';
-  if (cart.riding) { ana.x = cart.x + back * 34; ana.y = cart.y - 16; ana.dir = cart.dir; ana.sit = true; ana.vx = ana.vy = 0; }
+  const [cx, cy, dx] = cartAt(cart.s); cart.x = cx; cart.y = cy; if (cart.moving) { cart.dir = (dx * d) >= 0 ? 1 : 3; cartTrack(cart); }
+  const c8 = cartC8(cart), [sx, sy] = cartSeat(cart.x, cart.y, c8, 0), [ax, ay] = cartSeat(cart.x, cart.y, c8, 1);
+  m.x = sx; m.y = sy; m.dir = c8Dir(c8); m.sit = true; m.buggy = false; m.moving = false; m.where = 'out';
+  if (cart.riding) { ana.x = ax; ana.y = ay; ana.dir = c8Dir(c8); ana.sit = true; ana.vx = ana.vy = 0; }
   if (cart.riding && !cart.moving) {   // (arrived)
     cartOff();
     if (cart.dest === 'br') { cart.on = false; m.sit = false; roadStart('matthew', 1, -1); roadJoin('matthew'); roadTramoIn('matthew', roadTramo(1)); notice('🐴 El camino a Bright River: ocho millas'); return; }
@@ -5088,8 +5136,8 @@ function renderView(){
     if (inView(MILK.x, MILK.y) && S !== 3) for (let k = 0; k < 4; k++) { const x = MILK.x - 14 + k * 9, y = MILK.y + Math.sin(t * 2 + k) * 1.2; blob(g, [[x - 2.6, y], [x + 2.6, y], [x + 2.6, y - 9], [x + 1.2, y - 12], [x - 1.2, y - 12], [x - 2.6, y - 9]], 'rgba(250,250,245,.95)'); line(g, [[x - 1.2, y - 13], [x + 1.2, y - 13]], '#7a5536', 1.6, k); }
     for (const r of reeds) { if (!inView(r.x, r.y)) continue; const b = Math.sin(t * 1.2 + r.ph) * 2; line(g, [[r.x, r.y], [r.x + b * .5, r.y - r.h * .6], [r.x + b, r.y - r.h]], S >= 2 ? '#9a8a4a' : '#6b8f3a', 1.5, r.h); ell(g, r.x + b, r.y - r.h + 3, 1.6, 3.6, '#7a5536'); }
     for (const o of [...props, ...trees, ...bushes]) if (inView(o.x, o.y, 170)) list.push({ y: o.y, draw: () => drawProp(g, o, t, night) });
-    for (const k of Object.keys(PEOPLE)) if (sceneOf(k) === 'out') { const p = PEOPLE[k]; list.push({ y: p.y, draw: () => drawPerson(g, p.buggy ? { ...p, sit: true, moving: false, dir: p.dir === 3 ? 3 : 1 } : p, t) }); if (CH[k].vehicle === 'cart') list.push({ y: p.y - .5, draw: () => drawCart(g, p, t) }); if (p.buggy) { const d = p.dir === 3 ? 3 : 1, back = d === 1 ? -1 : 1; list.push({ y: p.y + 18.5, draw: () => drawCart(g, { x: p.x - back * 56, y: p.y + 18, dir: d, walk: p.walk || 0, moving: p.moving }, t) }); } }
-    if (cart.on && inView(cart.x, cart.y, 120)) list.push({ y: cart.y + 1, draw: () => drawCart(g, cart, t) });
+    for (const k of Object.keys(PEOPLE)) if (sceneOf(k) === 'out') { const p = PEOPLE[k]; if (p.buggy) pushDriven(list, g, p, t); else list.push({ y: p.y, draw: () => drawPerson(g, p, t) }); if (CH[k].vehicle === 'cart') list.push({ y: p.y - .5, draw: () => drawCart(g, p, t) }); }
+    if (cart.on && inView(cart.x, cart.y, 120)) pushCart(list, g, cart, t);
     for (const f of FOLK) if (f.where === 'out' && inView(f.x, f.y)) list.push({ y: f.y, draw: () => drawPerson(g, f, t) });
     for (const a of FAUNA) if (inView(a.x, a.y - (a.alt || 0), 60)) list.push({ y: a.fly ? a.y + 1e5 : a.water ? a.y - 40 : a.y, draw: () => FAUNA_DRAW[a.kind](g, a, t) });
     for (const b of BUGGIES) if (inView(b.x, b.y, 120)) list.push({ y: b.y + 1, draw: () => drawBuggy(g, b, t) });
@@ -5465,7 +5513,7 @@ function faunaTick(dt){
   for (const b of BUGGIES) {
     if ((b.wait || 0) > 0) { b.wait -= dt; b.moving = false; }
     else { b.s += (b.back ? -1 : 1) * 70 * dt; if (b.s > b.len || b.s < 0) { b.s = clamp(b.s, 0, b.len); b.back = !b.back; b.wait = 20 + Math.random() * 30; } b.moving = true; b.walk = (b.walk + 1.8 * 70 * dt / SPEED) % 1; }
-    const [x, y, dx] = buggyAt(b, b.s); b.x = x; b.y = y; if (Math.abs(dx) > 1) b.dir = (dx > 0) !== b.back ? 1 : 3;
+    const [x, y, dx] = buggyAt(b, b.s); b.x = x; b.y = y; if (Math.abs(dx) > 1) b.dir = (dx > 0) !== b.back ? 1 : 3; cartTrack(b);
   }
   if (viewScene() !== 'out') return;
   for (const a of FAUNA) {
@@ -5542,7 +5590,7 @@ function drawCat(c, a, t){
   c.restore();
 }
 const FAUNA_DRAW = { cow: (c, a, t) => drawCow(c, a, t), sheep: drawSheep, horse: drawHorse, hen: drawHen, pig: drawPig, duck: drawDuck, gull: drawGull, cat: drawCat };
-function drawBuggy(c, b, t){ drawCart(c, b, t); const d = b.dir === 3 ? -1 : 1; drawPerson(c, { look: b.look, x: b.x - 40 * d, y: b.y - 12, dir: b.dir, sit: true, walk: 0, moving: false, blink: 0 }, t); }
+function drawBuggy(c, b, t){ const c8 = cartC8(b), [sx, sy] = cartSeat(b.x, b.y, c8, 0), who = () => drawPerson(c, { look: b.look, x: sx, y: sy, dir: c8Dir(c8), sit: true, walk: 0, moving: false, blink: 0 }, t); if (cartAxes(c8).hy < -.1) { drawCartHorse(c, b, t); who(); drawCartBody(c, b, t); } else { who(); drawCartBody(c, b, t); drawCartHorse(c, b, t); } }
 const FARO_LINES = ['Desde aquí se ve todo el golfo. ¡Si hasta me parece ver Escocia! Bueno... no, pero casi.', 'Un faro es como un amigo que nunca se duerme. Me gustaría ser farera, o por lo menos gaviota.', 'Las olas rompen contra las rocas como si tuvieran algo urgente que decir.'];
 /* ---------- the cards of the people of Avonlea (who they are and what they like to talk about) and their encounters:
    when Ana comes near one of them, when she taps one, or when two of them meet near her, they talk. With the AI, a
@@ -6694,7 +6742,7 @@ function wmFollowTick(){
   if (!wmDriven(A.followOf)) { A.followOf = null; if (A.ride) { A.ride = false; ana.sit = false; } if (ana.goto?.wm) ana.goto = null; return; }
   const b = wmBody(A.followOf); if (!b) return;
   if (wmScene(A.followOf) === 'camino' || game.scene === 'camino') { if (game.scene !== 'camino' && wmScene(A.followOf) === 'camino') { roadJoin(A.followOf); roadTramoIn(A.followOf, b.roadTr || roadTramo(b.roadS)); } return; }
-  if (A.ride && game.scene === 'out' && wmScene(A.followOf) === 'out') { const back = b.dir === 1 ? -1 : 1; ana.x = b.buggy ? b.x - back * 22 : b.x + 18; ana.y = b.y + (b.buggy ? 2 : 4); ana.sit = !!b.buggy; if (b.buggy) ana.dir = b.dir; ana.goto = null; ana.moving = false; return; }   // (in the cart, beside him)
+  if (A.ride && game.scene === 'out' && wmScene(A.followOf) === 'out') { if (b.buggy) { const c8 = cartC8(b), [cx, cy] = cartFromDriver(b.x, b.y, c8); [ana.x, ana.y] = cartSeat(cx, cy, c8, 1); ana.dir = c8Dir(c8); } else { ana.x = b.x + 18; ana.y = b.y + 4; } ana.sit = !!b.buggy; ana.goto = null; ana.moving = false; return; }   // (in the cart, beside him)
   if (game.scene === 'out' && HOUSES[wmScene(A.followOf)] && dist(ana.x, ana.y, DOOR[wmScene(A.followOf)][0], DOOR[wmScene(A.followOf)][1]) < 160) { ana.sit = false; goIn(wmScene(A.followOf)); return; }   // (he went in: she goes in after him)
   if (game.scene !== 'out') { if (wmScene(A.followOf) === 'out') goOut(); return; }
   if (dist(ana.x, ana.y, b.x, b.y) > 50) ana.goto = { x: b.x + 26, y: b.y + 6, scene: 'out', wm: true }; else if (ana.goto?.wm) ana.goto = null;
@@ -7001,7 +7049,7 @@ function drawMap(){
   $('maptitle').textContent = 'Avonlea · ' + SEASONS[S] + ', día ' + (Math.floor(dayT) % 2 + 1) + ' · ' + SICON[S] + ' · toca un lugar para ir allí · rueda o pellizco: acercar · arrastra para moverte';
 }
 function loop(now){ const dt = clamp((now - last) / 1000, 0, .05); last = now; const k = tripSpeed(), n = Math.ceil(k); for (let i = 0; i < n; i++) update(dt * k / n); render(); islaDraw(); requestAnimationFrame(loop); }   // (on the road it can go faster: 1.5×, 2×, 3×)
-window.__avonlea = { startCap1, CAP1, LIBRO1, ROAD_TRAMOS, ROAD_MIN, roadTramo, islaToggle, DLG_BANK, startDay, setSeason, agendaData: () => AGENDA.map(e => ({ who: wmName(e.who), from: e.from, to: e.to, label: e.label, season: e.season, sunday: !!e.sunday, ana: !!(e.ana || e.who === 'ana'), cond: e.when ? String(e.when).replace(/^\(\) => /, '') : '' })), setAgenda: v => { AGENDA_ON = v; }, AGENDA, wmData: () => ({ THINGS, WHO, OFRECE, WP_NAME, TRADE, TREATS, LIBRETA, ITEM_NAME, MAX_GOALS, PACE, FOCO }), paintMapBase, doingText, wmName, wmBody, wmScene, WW, WH, setVec: v => { VEC_ON = v; }, setStyle: v => { ANA_STYLE = v; }, setHead: setHeadM, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+window.__avonlea = { cartSheet: (c, x, y, c8, t) => { const L = [], p = { look: 'matthew', x, y, c8, walk: 0, moving: false }; const [cx, cy] = [x, y]; pushCart(L, c, { x: cx, y: cy, c8, walk: 0, moving: true }, t); for (const [k, look] of [[0, 'matthew'], [1, 'ana']]) { const [sx, sy] = cartSeat(cx, cy, c8, k); L.push({ y: sy, draw: () => drawPerson(c, { ...mkPerson(look, sx, sy), sit: true, dir: c8Dir(c8) }, t) }); } L.sort((a, b) => a.y - b.y).forEach(o => o.draw()); }, startCap1, CAP1, LIBRO1, ROAD_TRAMOS, ROAD_MIN, roadTramo, islaToggle, DLG_BANK, startDay, setSeason, agendaData: () => AGENDA.map(e => ({ who: wmName(e.who), from: e.from, to: e.to, label: e.label, season: e.season, sunday: !!e.sunday, ana: !!(e.ana || e.who === 'ana'), cond: e.when ? String(e.when).replace(/^\(\) => /, '') : '' })), setAgenda: v => { AGENDA_ON = v; }, AGENDA, wmData: () => ({ THINGS, WHO, OFRECE, WP_NAME, TRADE, TREATS, LIBRETA, ITEM_NAME, MAX_GOALS, PACE, FOCO }), paintMapBase, doingText, wmName, wmBody, wmScene, WW, WH, setVec: v => { VEC_ON = v; }, setStyle: v => { ANA_STYLE = v; }, setHead: setHeadM, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
 /* ---------- the viewer (index.html?visor): only Ana, big, on a plain floor, to look at the drawings and move her:
    arrows (Shift to run), and buttons for everything she can do. ---------- */
 function startVisor(){
