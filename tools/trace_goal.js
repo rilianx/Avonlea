@@ -55,7 +55,7 @@ const exe = process.env.PLAYWRIGHT_CHROMIUM || (fs.existsSync('/opt/pw-browsers/
     const wmN = k => A.wmName(k);
     for (const k of keys) doing[k] = A.AGENTS[k] ? A.doingText(k) : null;
     const h0 = A.hourNow(); let t = 0; sample(0);
-    for (const lim = dia ? Math.max(maxT, 9000) : maxT; t < lim && (ag.st === 'run' || ag.st === 'pausa'); t += .5) { A.step(.5); sample(t + .5); }
+    for (const lim = dia ? Math.max(maxT, 16000) : maxT; t < lim && (ag.st === 'run' || ag.st === 'pausa'); t += .5) { A.step(.5); sample(t + .5); }
     for (let k = 0; k < 4; k++) { A.step(.5); sample(t += .5); }
     // who to draw: those who had goals, were named in what happened, or led a cow; and the cows that moved
     const moved = P => P.length > 1 && P.some(q => Math.hypot(q[0] - P[0][0], q[1] - P[0][1]) > 60);
