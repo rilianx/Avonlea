@@ -92,7 +92,7 @@ No está en el mapa de Avonlea (en el borde noroeste hay solo un **letrero**, «
 - **Newbridge**: casas a ambos lados, la tienda, perros y chicos (Ana y Matthew pasan en silencio).
 - **Tres millas de silencio** y la entrada de Avonlea, con un mojón por milla y un letrero por tramo.
 
-Se puede **ir en la calesa** (145 minutos del juego, como en el libro: unos 12 minutos reales a 1×; abajo, la velocidad del tiempo: **1× · 2× · 5× · 10× · 25× · 50×**), **bajarse** (moviendo a Ana: Matthew la espera; si se la deja quieta un rato, vuelve sola a la calesa), **subirse** («🐴 Subir a la calesa») o **ir a pie** (desde el letrero de Avonlea o saliendo del andén; son más de tres horas). Los personajes del planificador también lo recorren, en calesa o a pie. **🗺 La isla**: un mapa grande con solo los pueblos, los caminos y el tren, y dónde va Ana.
+Se puede **ir en la calesa** (145 minutos del juego, como en el libro: unos 12 minutos reales a 1×; con el botón de la velocidad, a la derecha: **1× → 2× → 5× → 10× → 25× → 50×**), **bajarse** (moviendo a Ana: Matthew la espera; si se la deja quieta un rato, vuelve sola a la calesa), **subirse** («🐴 Subir a la calesa») o **ir a pie** (desde el letrero de Avonlea o saliendo del andén; son más de tres horas). Los personajes del planificador también lo recorren, en calesa o a pie. **🗺 La isla**: un mapa grande con solo los pueblos, los caminos y el tren, y dónde va Ana.
 
 **El tiempo**: un minuto del juego dura **5 segundos** (una hora, 5 minutos; un día entero, 2 horas).
 
