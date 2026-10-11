@@ -7,6 +7,8 @@
      node tools/trace_goal.js <test number | words of its name> [--out traza.png] [--max 900] [--w 1500]
      node tools/trace_goal.js --pdf trazas/metas.pdf [numbers or words, comma separated; all if none]
      node tools/trace_goal.js dia [--season 0..3] [--domingo] --out dia.png   (a whole day, 6:00 to 22:00: everyone's routine of goals)
+     node tools/trace_goal.js cap1 --out trazas/cap1.png [--md docs/CAP1.md]   (chapter 1 of the book, simulated: the book's
+       agenda against the simulated one, moment by moment; and the long road to Bright River in a strip below the map)
 
    With --pdf: each goal run on a fresh page, one page of the PDF each, and a first page with all the results.
 
@@ -15,7 +17,7 @@ const path = require('path'), fs = require('fs');
 let pw; try { pw = require('playwright'); } catch (e) { pw = require('/opt/node22/lib/node_modules/playwright'); }
 const argv = process.argv.slice(2), opt = (k, d) => { const i = argv.indexOf('--' + k); return i >= 0 ? argv.splice(i, 2)[1] : d; };
 const season = opt('season', null), sunday = argv.includes('--domingo') ? (argv.splice(argv.indexOf('--domingo'), 1), true) : false;
-const out = opt('out', 'traza.png'), pdf = opt('pdf', null), maxT = +opt('max', 2400), W = +opt('w', 1500), which = argv.join(' ');
+const md = opt('md', null), out = opt('out', 'traza.png'), pdf = opt('pdf', null), maxT = +opt('max', 2400), W = +opt('w', 1500), which = argv.join(' ');
 const exe = process.env.PLAYWRIGHT_CHROMIUM || (fs.existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chromium' : undefined);
 
 (async () => {
@@ -26,20 +28,24 @@ const exe = process.env.PLAYWRIGHT_CHROMIUM || (fs.existsSync('/opt/pw-browsers/
   await load();
   const trace = which => pg.evaluate(async ([which, maxT, W, season, sunday]) => {
     const A = window.__avonlea, tests = A.WM_TESTS;
-    const dia = which === 'dia', i = dia ? 'día' : /^\d+$/.test(which) ? +which : tests.findIndex(T => T.text.toLowerCase().includes(which.toLowerCase()));
+    const cap = which === 'cap1', dia = which === 'dia' || cap, i = cap ? 'cap. 1' : dia ? 'día' : /^\d+$/.test(which) ? +which : tests.findIndex(T => T.text.toLowerCase().includes(which.toLowerCase()));
     if (!dia && !(i >= 0 && tests[i])) return { err: 'no hay una meta de prueba así: ' + which + '\n' + tests.map((T, j) => j + ' ' + T.text).join('\n') };
-    const SEAS = ['primavera', 'verano', 'otoño', 'invierno'], T = dia ? { text: 'Un día en Avonlea: la rutina de metas de cada uno (' + SEAS[season ?? A.season()] + (sunday ? ', domingo' : '') + ')', who: 'ana' } : tests[i], hhmm = h => { const m = Math.round(h * 60); return String(Math.floor(m / 60) % 24).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); };
+    const SEAS = ['primavera', 'verano', 'otoño', 'invierno'], T = cap ? { text: 'Capítulo 1 (y 2) del libro, simulado con metas: la llegada de Ana', who: 'ana' } : dia ? { text: 'Un día en Avonlea: la rutina de metas de cada uno (' + SEAS[season ?? A.season()] + (sunday ? ', domingo' : '') + ')', who: 'ana' } : tests[i], hhmm = h => { const m = Math.round(h * 60); return String(Math.floor(m / 60) % 24).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); };
     // where someone is on the map (indoors: at the door of the house)
     const onMap = k => {
       const bd = A.wmBody(k), sc = A.wmScene(k); if (!bd || !sc || sc === 'away' || sc === 'in') return null;
       if (sc === 'out') return [bd.x, bd.y];
+      if (sc === 'camino') return [A.HOUSES.br.at.x, A.HOUSES.br.at.y + 30];
       const H = A.HOUSES[A.ROOMS[sc]?.parent ?? sc]; return H ? [H.at.x, H.at.y + 30] : null;
     };
-    const keys = ['ana', ...Object.keys(A.PEOPLE), ...A.FOLK.map(f => f.id)];
-    if (dia) { if (sunday) A.setDay(6); A.startDay(); if (season != null) A.setSeason(+season); }
-    const ag = dia ? { get st() { return A.hourNow() < 22 ? 'run' : 'done'; }, why: '' } : A.wmRunTest(i), tr = {}, cows = {}, evs = [], seenJ = A.game.journal.length, goalsN = {}, doing = {};
+    const keys = cap ? ['ana', 'matthew', 'lynde', 'marilla'] : ['ana', ...Object.keys(A.PEOPLE), ...A.FOLK.map(f => f.id)];
+    const road = [], book = cap ? A.LIBRO1.verdad : [], bookAt = {};
+    if (cap) A.startCap1();
+    else if (dia) { if (sunday) A.setDay(6); A.startDay(); if (season != null) A.setSeason(+season); }
+    const ag = cap ? { get st() { return A.CAP1.done || A.hourNow() > 23.5 ? 'done' : 'run'; }, why: '' } : dia ? { get st() { return A.hourNow() < 22 ? 'run' : 'done'; }, why: '' } : A.wmRunTest(i), tr = {}, cows = {}, evs = [], seenJ = A.game.journal.length, goalsN = {}, doing = {};
     let jn = A.game.journal.length;
     const sample = t => {
+      if (cap) { const m = A.PEOPLE.matthew; if (m.where === 'camino' && t % 2 === 0) road.push([m.roadS, A.hourNow(), m.roadDir, A.game.scene === 'camino']); for (const [id, h] of Object.entries(A.CAP1.marks)) if (!bookAt[id]) { const e = book.find(b => b[0] === id), q = e && e[3]; bookAt[id] = { h, p: onMap(q === 'thomas' ? 'lynde' : q === 'jefe' || q === 'spencer' ? 'ana' : q === 'bell' || q === 'rachel' ? 'lynde' : q), road: (q === 'matthew' ? A.PEOPLE.matthew.where === 'camino' : q === 'ana' && A.game.scene === 'camino') ? A.PEOPLE.matthew.roadS : null }; } }
       if (!dia || t % 2 === 0) for (const k of keys) { const p = onMap(k); if (!p) continue; (tr[k] = tr[k] || []).push([p[0], p[1], t]); }
       for (const [c, o] of Object.entries(A.ANIM)) if (o.kind === 'cow' && o.where !== 'in') (cows[c] = cows[c] || []).push([o.x, o.y, t, o.state === 'led' ? o.ledBy || 'ana' : null]);
       // a new goal for someone (asked, or the test's): where they were and what they were doing then
@@ -60,11 +66,12 @@ const exe = process.env.PLAYWRIGHT_CHROMIUM || (fs.existsSync('/opt/pw-browsers/
     // who to draw: those who had goals, were named in what happened, or led a cow; and the cows that moved
     const moved = P => P.length > 1 && P.some(q => Math.hypot(q[0] - P[0][0], q[1] - P[0][1]) > 60);
     const marks = evs.filter(e => e.p && (e.kind === 'meta' || !/volvió a su casa|entró a|salió de|conversaron|se detuvo|un rato/.test(e.text)));
-    if (dia) marks.splice(0, marks.length, ...marks.filter(e => e.kind === 'meta' || /logró|no pudo/.test(e.text)));   // (a whole day: only when each goal starts and how it ends)
-    const who = keys.filter(k => tr[k] && (A.AGENTS[k] || k === 'ana' || marks.some(e => e.k === k || e.text.includes(' ' + wmN(k)))));
+    if (cap) marks.splice(0, marks.length, ...book.filter(b => bookAt[b[0]]?.p).map(b => ({ k: null, h: bookAt[b[0]].h, p: bookAt[b[0]].road != null ? null : bookAt[b[0]].p, kind: 'hecho', text: b[5], book: b[1], id: b[0] })));
+    else if (dia) marks.splice(0, marks.length, ...marks.filter(e => e.kind === 'meta' || /logró|no pudo/.test(e.text)));   // (a whole day: only when each goal starts and how it ends)
+    const who = keys.filter(k => tr[k] && (cap || A.AGENTS[k] || k === 'ana' || marks.some(e => e.k === k || e.text.includes(' ' + wmN(k)))));
     const cowK = Object.keys(cows).filter(c => moved(cows[c]));
     // the part of the map: everything drawn, with some room around
-    const pts = [...who.flatMap(k => tr[k]), ...cowK.flatMap(c => cows[c]), ...marks.map(e => e.p)];
+    const pts = [...who.flatMap(k => tr[k]), ...cowK.flatMap(c => cows[c]), ...marks.map(e => e.p).filter(Boolean)];
     let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9; for (const p of pts) { if (p[0] < x0) x0 = p[0]; if (p[0] > x1) x1 = p[0]; if (p[1] < y0) y0 = p[1]; if (p[1] > y1) y1 = p[1]; }
     x0 -= 300; x1 += 420; y0 -= 300; y1 += 200;
     const minW = 1600; if (x1 - x0 < minW) { const c = (x0 + x1) / 2; x0 = c - minW / 2; x1 = c + minW / 2; }
@@ -83,9 +90,12 @@ const exe = process.env.PLAYWRIGHT_CHROMIUM || (fs.existsSync('/opt/pw-browsers/
     for (const k of who) legend.push({ t: wmN(k), f: 'bold 21px Georgia, serif', dot: col(k) });
     for (const c_ of cowK) legend.push({ t: (A.ANIMALS[c_]?.name || c_) + ' (vaca)', f: 'bold 21px Georgia, serif', dot: '#7a5a3a', dash: true });
     legend.push({ t: '', f: '8px serif' });
-    marks.forEach((e, n) => { const head = `${n + 1}. ${hhmm(e.h)} `, body = e.kind === 'meta' ? `${e.text} — estaba: ${e.was}` : e.text; wrap(head + body, LW - 40, '20px Georgia, serif').forEach((l, j) => legend.push({ t: l, f: '20px Georgia, serif', ind: j ? 26 : 0, meta: e.kind === 'meta' })); });
+    if (cap) legend.push({ t: 'n. hora del libro → hora simulada (diferencia)', f: 'italic 18px Georgia, serif' });
+    const dmin = e => Math.round((e.h - e.book) * 60), dtx = e => { const d = dmin(e); return d === 0 ? '=' : (d > 0 ? '+' : '−') + Math.abs(d) + ' min'; };
+    marks.forEach((e, n) => { const head = cap ? `${n + 1}. ${hhmm(e.book)} → ${hhmm(e.h)} (${dtx(e)}) ` : `${n + 1}. ${hhmm(e.h)} `, body = e.kind === 'meta' ? `${e.text} — estaba: ${e.was}` : e.text; wrap(head + body, LW - 40, '20px Georgia, serif').forEach((l, j) => legend.push({ t: l, f: '20px Georgia, serif', ind: j ? 26 : 0, meta: e.kind === 'meta' })); });
     const lh = f => +f.match(/(\d+)px/)[1] * 1.35, legH = legend.reduce((a, l) => a + lh(l.f), 40);
-    cv.width = W + LW; cv.height = Math.max(mapH, legH);
+    const SH = cap ? 400 : 0;   // (the road to Bright River, in a strip below the map)
+    cv.width = W + LW; cv.height = Math.max(mapH + SH, legH);
     c.fillStyle = '#f1e2bf'; c.fillRect(0, 0, cv.width, cv.height); c.drawImage(base.cv, 0, 0);
     c.lineJoin = c.lineCap = 'round';
     // the ways: a pale halo, then the colour; a dot every 30 s of game
@@ -104,9 +114,22 @@ const exe = process.env.PLAYWRIGHT_CHROMIUM || (fs.existsSync('/opt/pw-browsers/
     }
     // the numbered marks (the same place several times: side by side)
     const used = [];
-    marks.forEach((e, n) => { let [x, y] = P(e.p); while (used.some(([u, v]) => Math.hypot(u - x, v - y) < 22)) x += 22; used.push([x, y]);
+    marks.forEach((e, n) => { if (!e.p) return; let [x, y] = P(e.p); while (used.some(([u, v]) => Math.hypot(u - x, v - y) < 22)) x += 22; used.push([x, y]);
       c.beginPath(); c.arc(x, y, 11, 0, Math.PI * 2); c.fillStyle = e.kind === 'meta' ? '#d9433b' : '#fff8e6'; c.fill(); c.lineWidth = 2; c.strokeStyle = ink; c.stroke();
       c.font = 'bold 12px Georgia, serif'; c.textAlign = 'center'; c.fillStyle = e.kind === 'meta' ? '#fff' : ink; c.fillText(String(n + 1), x, y + 4); });
+    if (cap) {   // the strip: the eight miles, Bright River on the left and Avonlea on the right; going (above) and coming back (below)
+      const y0s = mapH, X = sv => 60 + sv * (W - 120), TR = A.ROAD_TRAMOS;
+      c.fillStyle = '#efe0bb'; c.fillRect(0, y0s, W, cv.height - y0s); c.strokeStyle = 'rgba(90,60,35,.6)'; c.lineWidth = 2; c.beginPath(); c.moveTo(0, y0s); c.lineTo(W, y0s); c.stroke();
+      c.font = 'bold 22px Georgia, serif'; c.fillStyle = ink; c.textAlign = 'left'; c.fillText('El camino de Bright River (fuera del mapa: ocho millas, unas dos horas en calesa)', 20, y0s + 32);
+      const ya = y0s + 190, yb = y0s + 300;
+      TR.forEach((r, j) => { const x = X(r.s), x2 = X(TR[j + 1]?.s ?? 1); c.fillStyle = j % 2 ? 'rgba(184,87,62,.10)' : 'rgba(184,87,62,.18)'; c.fillRect(x, ya - 40, x2 - x, yb - ya + 70); c.save(); c.translate((x + x2) / 2, ya - 46); c.rotate(-.5); c.font = 'italic 14px Georgia, serif'; c.fillStyle = ink; c.textAlign = 'left'; c.fillText(r.name, 0, 0); c.restore(); });
+      c.font = 'bold 18px Georgia, serif'; c.textAlign = 'center'; c.fillStyle = ink; c.fillText('Bright River', X(0), yb + 62); c.fillText('Avonlea', X(1), yb + 62);
+      c.font = 'italic 16px Georgia, serif'; c.textAlign = 'left'; c.fillText('ida: Matthew solo', 20, ya - 10); c.fillText('vuelta: Matthew y Ana', 20, yb - 10);
+      for (const [sel, yy] of [[q => q[2] < 0, ya], [q => q[2] > 0, yb]]) { const Q = road.filter(sel); if (Q.length < 2) continue;
+        c.strokeStyle = col('matthew'); c.lineWidth = 6; c.beginPath(); Q.forEach((q, j) => j ? c.lineTo(X(q[0]), yy) : c.moveTo(X(q[0]), yy)); c.stroke();
+        let last = -1; for (const q of Q) { const hh = Math.floor(q[1] * 2) / 2; if (hh !== last) { last = hh; c.beginPath(); c.arc(X(q[0]), yy, 5, 0, Math.PI * 2); c.fillStyle = ink; c.fill(); c.font = '14px Georgia, serif'; c.textAlign = 'center'; c.fillText(hhmm(q[1]), X(q[0]), yy + 24); } } }
+      marks.forEach((e, n) => { const b = bookAt[e.id]; if (b?.road == null) return; const back = road.find(q => Math.abs(q[1] - e.h) < .02); const yy = back && back[2] > 0 ? yb : ya, x = X(b.road); c.beginPath(); c.arc(x, yy - 22, 11, 0, Math.PI * 2); c.fillStyle = '#fff8e6'; c.fill(); c.lineWidth = 2; c.strokeStyle = ink; c.stroke(); c.font = 'bold 12px Georgia, serif'; c.textAlign = 'center'; c.fillStyle = ink; c.fillText(String(n + 1), x, yy - 18); });
+    }
     // the legend
     c.fillStyle = 'rgba(250,242,222,.97)'; c.fillRect(W, 0, LW, cv.height); c.strokeStyle = 'rgba(90,60,35,.6)'; c.lineWidth = 2; c.beginPath(); c.moveTo(W, 0); c.lineTo(W, cv.height); c.stroke();
     let y = 34; c.textAlign = 'left';
@@ -121,12 +144,14 @@ const exe = process.env.PLAYWRIGHT_CHROMIUM || (fs.existsSync('/opt/pw-browsers/
     f.font = 'italic 24px Georgia, serif'; f.fillStyle = ag.st === 'done' ? '#3d6b2a' : ag.st === 'fail' ? '#a3302a' : '#7a5a2a'; f.fillText(`${span} (hora del juego) · ${result}`, 30, 40 + tl.length * 48 + 14);
     f.strokeStyle = 'rgba(90,60,35,.7)'; f.lineWidth = 3; f.beginPath(); f.moveTo(0, TH - 1.5); f.lineTo(F.width, TH - 1.5); f.stroke();
     f.drawImage(cv, 0, TH);
-    return { png: F.toDataURL('image/png'), jpg: F.toDataURL('image/jpeg', .8), result, span, test: i, text: T.text, st: ag.st, why: ag.why, who, names: who.map(wmN), marks: marks.length };
+    const cmp = cap ? book.map(b => ({ id: b[0], libro: hhmm(b[1]), exacta: !!b[2], quien: b[3], donde: b[4], que: b[5], cita: b[6], sim: bookAt[b[0]] ? hhmm(bookAt[b[0]].h) : null, delta: bookAt[b[0]] ? Math.round((bookAt[b[0]].h - b[1]) * 60) : null })) : null;
+    return { cmp, png: F.toDataURL('image/png'), jpg: F.toDataURL('image/jpeg', .8), result, span, test: i, text: T.text, st: ag.st, why: ag.why, who, names: who.map(wmN), marks: marks.length };
   }, [which, maxT, W, season, sunday]);
   const say = r => console.log(`${r.test}. ${r.text}: ${r.st}${r.why ? ' (' + r.why + ')' : ''} · ${r.who.join(', ')} · ${r.marks} marcas`);
   if (!pdf) {
     const r = await trace(which); if (r.err) { console.error(r.err); process.exit(1); }
     fs.writeFileSync(out, Buffer.from(r.png.split(',')[1], 'base64')); say(r); console.log('→ ' + out);
+    if (r.cmp) { const ok = r.cmp.filter(x => x.sim), abs = ok.map(x => Math.abs(x.delta)); console.log(`cap. 1: ${ok.length}/${r.cmp.length} momentos del libro ocurren; diferencia media ${Math.round(abs.reduce((a, b) => a + b, 0) / (abs.length || 1))} min, máxima ${Math.max(0, ...abs)} min`); for (const x of r.cmp) console.log(`  ${x.libro} → ${x.sim || '—'} (${x.delta == null ? 'no ocurre' : (x.delta >= 0 ? '+' : '') + x.delta}) ${x.id}`); if (md) fs.writeFileSync(md + '.json', JSON.stringify(r.cmp, null, 1)); }
   } else {   // all (or the ones named), each on a fresh page; then one PDF
     const n = await pg.evaluate(() => window.__avonlea.WM_TESTS.length);
     const list = which.trim() ? which.split(',').map(w => w.trim()) : Array.from({ length: n }, (_, j) => String(j)), rs = [];

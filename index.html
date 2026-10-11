@@ -89,6 +89,8 @@ body.visor > *:not(#cv):not(#visor){display:none !important}
 @keyframes tbar{from{width:100%}to{width:0}}
 #tripbar{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:20;padding:6px 12px;font-size:14px;font-style:italic;white-space:nowrap;max-width:calc(100% - 20px);overflow:hidden;text-overflow:ellipsis}
 #tripbar[hidden]{display:none}
+#tripbar button.on{background:#e8c890;font-weight:bold}
+#isla{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;background:rgba(40,30,20,.45)}#isla[hidden]{display:none}#isla .sheet{padding:10px;text-align:center}#isla .mt{font-style:italic;margin-bottom:6px}#isla button{font:14px Georgia,serif;background:#fffaf0;color:#3b2a1c;border:1.5px solid #6b4a30;border-radius:8px 11px 7px 10px;padding:3px 10px;cursor:pointer;margin:6px 4px 0}
 #tripbar button{font:13px Georgia,serif;background:#fffaf0;color:#3b2a1c;border:1.5px solid #6b4a30;border-radius:8px 11px 7px 10px;padding:2px 8px;cursor:pointer;margin-left:6px;font-style:normal}
 #aiq{position:fixed;right:64px;top:10px;z-index:30;width:min(460px,calc(100% - 20px));padding:8px 10px;font-size:13px}
 #aiq[hidden]{display:none}
@@ -130,7 +132,8 @@ body.visor > *:not(#cv):not(#visor){display:none !important}
 <div id="obs" class="paper" hidden><span></span> <button id="obsback">Volver a Ana</button></div>
 <div id="hint" class="paper">Flechas o WASD para pasear (o toca el suelo) · toca una persona u objeto para interactuar · Enter o T para decir algo · M para el mapa · L para llamar a alguien</div>
 <div id="talk" class="paper" hidden></div>
-<div id="tripbar" class="paper" hidden><span id="tripstop"></span> <button id="tripfast">⏩ Más rápido</button></div>
+<div id="tripbar" class="paper" hidden><span id="tripstop"></span> <span id="tripspd"><button data-k="1">1×</button><button data-k="1.5">1.5×</button><button data-k="2">2×</button><button data-k="3">3×</button></span> <button id="tripisla" title="El mapa de la isla">🗺 La isla</button></div>
+<div id="isla" hidden><div class="paper sheet"><div class="mt">La Isla del Príncipe Eduardo · los pueblos y los caminos</div><canvas id="islacv"></canvas><div><button id="islaclose">Cerrar</button></div></div></div>
 <div id="aiq" class="paper" hidden><div class="h">🐞 La IA eres tú · <span class="n"></span></div><details><summary>Ver el pedido</summary><pre class="p"></pre></details><textarea spellcheck="false"></textarea><div><button class="ok">Responder</button><button class="cp">📋 Copiar todo (para otra IA)</button><button class="no">Que falle</button><button class="all">Que fallen todos los de este tipo</button></div></div>
 <div id="sleep"></div>
 <form id="say" class="paper" hidden autocomplete="off"><input id="sayin" maxlength="240" placeholder="Lo que dice Ana… (Enter para decir · Esc para cerrar)" spellcheck="false"><button type="submit">Decir</button></form>
@@ -143,7 +146,7 @@ body.visor > *:not(#cv):not(#visor){display:none !important}
 <button id="callbtn" class="paper" title="Llamar a quien esté cerca (L): se detiene, o viene si te quiere">📣</button>
 <div id="autobar" class="paper" hidden>🤖 Ana en automático · flechas o arrastrar: mover el mapa <button id="autocenter">Centrar en Ana</button><button id="autooff">Tomar el control</button></div>
 <div id="headp" class="paper" hidden><label>Cabezas <b id="headv"></b><input id="headr" type="range" min="1" max="5" step="0.1"></label></div>
-<div id="wmp" class="paper" hidden><div class="mt">🎯 Metas de prueba <small>(sin IA: el planificador)</small></div><label><input type="checkbox" id="wmobey" checked> Ana hace sola lo que le piden</label> <label><input type="checkbox" id="wmdis" checked> Se distraen (según su enfoque)</label> <label><input type="checkbox" id="wmagenda" checked> Rutinas de metas (la agenda de cada uno)</label> <label><input type="checkbox" id="vecon"> Ana dibujada por GPT (prueba)</label><div id="wmlist"></div><div id="wmrun"></div><div class="mb"><button id="wmstop">Detener todo</button><button id="wmclose">Cerrar</button></div></div>
+<div id="wmp" class="paper" hidden><div class="mt">🎯 Metas de prueba <small>(sin IA: el planificador)</small></div><label><input type="checkbox" id="wmobey" checked> Ana hace sola lo que le piden</label> <label><input type="checkbox" id="wmdis" checked> Se distraen (según su enfoque)</label> <label><input type="checkbox" id="wmagenda" checked> Rutinas de metas (la agenda de cada uno)</label> <button id="wmcap1" title="Una tarde de junio: Rachel en su ventana, Matthew va a Bright River y vuelve con Ana (el libro, simulado con metas)">📖 Capítulo 1 del libro</button> <label><input type="checkbox" id="vecon"> Ana dibujada por GPT (prueba)</label><div id="wmlist"></div><div id="wmrun"></div><div class="mb"><button id="wmstop">Detener todo</button><button id="wmclose">Cerrar</button></div></div>
 <div id="rels" hidden><div class="paper sheet"><div class="mt">La historia de hoy, y quién quiere a quién</div><div id="story"></div><svg id="relsvg" viewBox="0 0 420 300"></svg><div id="reldet"></div><div class="mb"><button id="relclose">Cerrar</button></div></div></div>
 <button id="mapbtn" class="paper" title="Mapa (M)">🗺</button>
 <button id="aibtn" class="paper" title="Diálogos con IA">✒</button>
@@ -166,7 +169,7 @@ body.visor > *:not(#cv):not(#visor){display:none !important}
   <div id="aitok"></div>
   <pre id="aiout" hidden></pre>
 </div></div>
-<div id="map" hidden><div class="paper sheet"><div class="mt" id="maptitle"></div><canvas id="mapcv"></canvas><div class="mb"><button id="mapzin" title="Acercar">＋</button><button id="mapzout" title="Alejar">－</button><button id="mapnext">Siguiente estación (prueba)</button><button id="mapclose">Cerrar</button></div></div></div>
+<div id="map" hidden><div class="paper sheet"><div class="mt" id="maptitle"></div><canvas id="mapcv"></canvas><div class="mb"><button id="mapzin" title="Acercar">＋</button><button id="mapzout" title="Alejar">－</button><button id="mapnext">Siguiente estación (prueba)</button><button id="mapisla">🗺 La isla</button><button id="mapclose">Cerrar</button></div></div></div>
 <script>
 /* Un día en Avonlea: a first look at a calm game inspired by "Anne of Green Gables" (L. M. Montgomery, 1908). No
    missions: Ana lives at Green Gables with Matthew and Marilla, and spends the days as she likes: watering the
@@ -387,7 +390,7 @@ for (const w of WATERS) w.near = segIndex(w.segs);
 const inBrook = (x, y, m = 0) => WATERS.some(w => w.near(x, y, (w.pts === brook ? 14 : 20) + m) && !w.bridges.some(b => Math.abs(x - b.x) < 44 && Math.abs(y - b.y) < 24));
 const inLake = (x, y, m = 0) => ((x - LAKE.x) / (LAKE.rx + m)) ** 2 + ((y - LAKE.y) / (LAKE.ry + m)) ** 2 < 1;
 const inBox = (b, d, x, y, m) => x > b.x - b.w / 2 - m && x < b.x + b.w / 2 + m && y > b.y - d - m && y < b.y + m;
-const HBOX = [...Object.values(HOUSES).map(h => [h.at, h.depth]), [BARN, 96], ...BUILDINGS.map(b => [b, b.style === 'faro' ? 30 : 100])];
+const HBOX = [...Object.values(HOUSES).map(h => [h.at, h.far ? 12 : h.depth]), [BARN, 96], ...BUILDINGS.map(b => [b, b.style === 'faro' ? 30 : 100])];
 const inHouses = (x, y, m = 0) => HBOX.some(([b, d]) => Math.abs(x - b.x) < b.w / 2 + m + 4 && inBox(b, d, x, y, m));
 const WOODS = MAP.woods.map(w => ({ ...w, x: w.at[0] * U, y: w.at[1] * U, rx: w.r[0] * U, ry: w.r[1] * U }));
 const inWood = (x, y) => WOODS.find(w => ((x - w.x) / w.rx) ** 2 + ((y - w.y) / w.ry) ** 2 < 1);
@@ -443,7 +446,7 @@ const props = [
   ...Array.from({ length: Math.ceil((STATION.x + 22 * U) / 28) }, (_, k) => ({ kind: 'rail', x: k * 28, y: STATION.y - 130 })),
 ];
 for (const [a, b] of FENCES) { const len = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.round(len / 22)); for (let i = 0; i <= n; i++) { const x = lerp(a[0], b[0], i / n), y = lerp(a[1], b[1], i / n); props.push({ kind: 'fpost', x, y, nx: i < n ? lerp(a[0], b[0], (i + 1) / n) : null, ny: i < n ? lerp(a[1], b[1], (i + 1) / n) : null }); } }
-for (const [k, h] of Object.entries(HOUSES)) props.push({ kind: 'house', h: h.at, roof: h.roof, wall: h.wall, trim: h.trim, x: h.at.x, y: h.at.y, small: h.small, style: h.style }, { kind: 'sign', x: h.at.x + h.sign[0], y: h.at.y + h.sign[1], text: h.name });
+for (const [k, h] of Object.entries(HOUSES)) if (h.far) props.push({ kind: 'roadsign', x: h.at.x, y: h.at.y, text: 'Bright River · 8 millas' }); else props.push({ kind: 'house', h: h.at, roof: h.roof, wall: h.wall, trim: h.trim, x: h.at.x, y: h.at.y, small: h.small, style: h.style }, { kind: 'sign', x: h.at.x + h.sign[0], y: h.at.y + h.sign[1], text: h.name });
 for (let x = GG.x - GG.w / 2 - 40; x < GG.x + GG.w / 2 + 230; x += 24) if (Math.abs(x - GG.x) > 40 && !(x > PUMP.x - 20 && x < PUMP.x + 20)) props.push({ kind: 'post', x, y: GG.y + 120 });
 // the milk bottles of the school, cooling in the river (as in the book)
 const MILK = (() => { const s0 = RIVERS[0].pts; let best = s0[0], bd = 1e9; for (let i = 1; i < s0.length; i++) for (let q = 0; q <= 1; q += .05) { const x = lerp(s0[i - 1][0], s0[i][0], q), y = lerp(s0[i - 1][1], s0[i][1], q), d = dist(x, y, SCHOOL.x + 60, SCHOOL.y + 40); if (d < bd) { bd = d; best = [x, y]; } } return { x: best[0], y: best[1] }; })();
@@ -1282,6 +1285,12 @@ function drawProp(c, o, t, night){
   }
   else if (o.kind === 'bench') { ell(c, o.x, o.y + 2, 22, 4, 'rgba(30,40,20,.2)'); blob(c, [[o.x - 20, o.y - 12], [o.x + 20, o.y - 12], [o.x + 20, o.y - 7], [o.x - 20, o.y - 7]], '#8a6040'); blob(c, [[o.x - 20, o.y - 22], [o.x + 20, o.y - 22], [o.x + 20, o.y - 18], [o.x - 20, o.y - 18]], '#8a6040'); c.fillStyle = '#6d4a30'; c.fillRect(o.x - 17, o.y - 12, 3, 12); c.fillRect(o.x + 14, o.y - 12, 3, 12); }
   else if (o.kind === 'bridge') { blob(c, [[o.x - 44, o.y - 30], [o.x + 44, o.y - 30], [o.x + 44, o.y], [o.x - 44, o.y]], '#a8814f'); for (let k = -40; k < 44; k += 10) line(c, [[o.x + k, o.y - 29], [o.x + k, o.y - 1]], 'rgba(90,60,35,.5)', .8, k); c.fillStyle = '#7a5536'; c.fillRect(o.x - 44, o.y - 34, 88, 3); c.fillRect(o.x - 44, o.y - 2, 88, 3); }
+  else if (o.kind === 'roadsign') {   // (the road to Bright River leaves the map here)
+    ell(c, o.x + 2, o.y + 1, 8, 2.5, 'rgba(30,40,20,.22)'); c.fillStyle = '#6a4630'; c.fillRect(o.x - 2, o.y - 34, 4, 34);
+    c.font = 'italic 8px Georgia, serif'; const tw = c.measureText(o.text).width + 12;
+    blob(c, [[o.x - 6, o.y - 40], [o.x + tw - 10, o.y - 40], [o.x + tw - 2, o.y - 34], [o.x + tw - 10, o.y - 28], [o.x - 6, o.y - 28]], '#e2c896');
+    c.fillStyle = '#4a2f1c'; c.textAlign = 'left'; c.fillText(o.text, o.x - 1, o.y - 31.5);
+  }
   else if (o.kind === 'sign') {
     ell(c, o.x + 2, o.y + 1, 6, 2, 'rgba(30,40,20,.2)'); c.fillStyle = '#7a5536'; c.fillRect(o.x - 1.5, o.y - 20, 3, 20);
     c.font = 'italic 8px Georgia, serif'; const tw = c.measureText(o.text).width + 10;
@@ -1646,18 +1655,468 @@ function drawStation(c, t, night){
   line(c, [[KIT.w - 30, 2.3 * T], [KIT.w - 30, .5 * T]], '#6a4a30', 3, 21); line(c, [[KIT.w - 44, .7 * T], [KIT.w - 16, .7 * T]], '#6a4a30', 2, 22);
   const L = BRS.lamp; line(c, [[L.x, L.y], [L.x, L.y - 60]], '#3a3436', 2.4, 23); ell(c, L.x, L.y - 64, 6, 7, night > .3 ? '#ffe7a8' : '#e8e2cc', true);
 }
+function drawTrain(c, e){   // (it comes in from the right, stops a while, and goes on to White Sands)
+  const x = e < 6 ? KIT.w + 200 - e / 6 * (KIT.w * .5 + 200) : e < 26 ? KIT.w * .5 : KIT.w * .5 - (e - 26) * (e - 26) * 6, y = 2.1 * T;
+  for (let k = 0; k < 3; k++) { const cx = x + k * 96; blob(c, [[cx - 44, y], [cx + 44, y], [cx + 44, y - 40], [cx - 44, y - 40]], k ? '#7a3a2a' : '#2a2a30'); if (k) for (let j = -2; j <= 2; j++) blob(c, [[cx + j * 16 - 5, y - 30], [cx + j * 16 + 5, y - 30], [cx + j * 16 + 5, y - 20], [cx + j * 16 - 5, y - 20]], '#f5d58a', false); else { blob(c, [[cx - 30, y - 40], [cx - 18, y - 40], [cx - 18, y - 58], [cx - 30, y - 58]], '#2a2a30'); for (let j = 0; j < 3; j++) ell(c, cx - 24 - j * 10, y - 64 - j * 8 - Math.sin(TT * 3 + j) * 3, 7 + j * 3, 5 + j * 2, 'rgba(240,240,240,.7)'); } ell(c, cx - 26, y, 7, 7, '#1a1a1a'); ell(c, cx + 26, y, 7, 7, '#1a1a1a'); }
+}
 const drawStationPile = c => { const P = BRS.pile; for (let k = 0; k < 6; k++) blob(c, [[P.x - 34 + (k % 2) * 4, P.y - k * 4], [P.x + 34 - (k % 3) * 3, P.y - k * 4], [P.x + 34 - (k % 3) * 3, P.y - k * 4 - 4], [P.x - 34 + (k % 2) * 4, P.y - k * 4 - 4]], k % 2 ? '#b58a5a' : '#c99a66'); };
 ROOMS.br = {
   draw: drawStation, place: 'en el andén de la estación de Bright River, al otro lado de la aldea, junto al mar, donde Matthew fue a buscar a Ana cuando llegó', exitLabel: 'Salir al camino',
-  items: (g, t) => [{ y: BRS.pile.y, draw: () => drawStationPile(g) }],
+  items: (g, t) => [{ y: BRS.pile.y, draw: () => drawStationPile(g) }, ...(Object.values(PEOPLE).some(p => p.where === 'br' && p.buggy) ? [{ y: BRS.cart.y + 1, draw: () => drawCart(g, { x: BRS.cart.x, y: BRS.cart.y, dir: 1, walk: 0, moving: false }, t) }] : []), ...(game.train && TT - game.train.t0 < 40 ? [{ y: 2.3 * T, draw: () => drawTrain(g, TT - game.train.t0) }] : [])],
   blocked: (x, y) => y < 2.5 * T || (Math.abs(x - BRS.house.x) < 66 && y < BRS.house.y + 4) || (Math.abs(x - BRS.pile.x) < 38 && y > BRS.pile.y - 26 && y < BRS.pile.y + 4),
   glow: () => [BRS.lamp.x, BRS.lamp.y - 60, 170, '255,200,120', .45],
   actions: add => {
     add('pila', BRS.pile.x, BRS.pile.y + 6, 50, ana.sit ? 'Levantarse' : 'Sentarse en la pila de tablas', () => { if (ana.sit) { ana.sit = false; return; } ana.sit = true; ana.x = BRS.pile.x; ana.y = BRS.pile.y + 2; ana.dir = 2; logEv('Ana se sentó en la pila de tablas de la estación de Bright River, donde esperó a Matthew el día que llegó.'); anaSays(pick(STATION_LINES)); }, { pri: 4, hy: 18, hit: 46 });
     add('vias', KIT.w / 2, 2.5 * T, 40, 'Mirar las vías', () => anaSays(pick(RAIL_LINES)), { pri: 6, hy: 20, hit: 40 });
+    const m = PEOPLE.matthew; if (m.where === 'br' && m.buggy && !wmDriven('matthew')) add('calesa', BRS.cart.x, BRS.cart.y - 10, 60, '🐴 Volver a Tejas Verdes en la calesa con Matthew', () => { roadStart('matthew', 0, 1); roadJoin('matthew'); roadTramoIn('matthew', roadTramo(0)); }, { pri: 2, hy: 20, hit: 46 });
   },
 };
 HOUSES.br.interior = ROOMS.br;
+const LIBRO1 = {"verdad":[["telegrama",12.0,0,"marilla","Tejas Verdes","recibe el telegrama de la Sra. Spencer, que trae el cartero desde la estación: llegan en el tren de las 17:30","We had a telegram from Mrs. Alexander Spencer today--the mail-man brought it from the station"],["rachel_teje",15.0,0,"rachel","su cocina en la Hondonada de Lynde, junto a la ventana","teje una colcha de algodón y vigila el camino principal","sit for hours at her kitchen window, knitting \"cotton warp\" quilts"],["thomas_nabos",15.0,0,"thomas","el campo de la colina, detrás del granero de los Lynde","siembra su semilla tardía de nabo","was sowing his late turnip seed on the hill field beyond the barn"],["matthew_sale",15.333,0,"matthew","Tejas Verdes, el patio y el largo sendero","sale de casa en la calesa con la yegua alazana, en vez de sembrar nabos en el campo rojo del arroyo","Matthew Cuthbert ought to have been sowing his on the big red brook field"],["matthew_hondonada",15.5,1,"matthew","el camino de la hondonada (pasa frente a la casa de Rachel) y sube la colina roja","conduce la calesa con la yegua alazana, con cuello blanco y su mejor traje, rumbo a Bright River","at half-past three on the afternoon of a busy day, placidly driving over the hollow and up the hill"],["rachel_ve",15.5,1,"rachel","su cocina, en la ventana","ve pasar a Matthew arreglado y no logra adivinar adónde va; decide ir a Tejas Verdes después del té","I'll just step over to Green Gables after tea and find out from Marilla where he's gone and why"],["matthew_camino",15.583,0,"matthew","el camino de ocho millas a Bright River, entre granjas, bosquecillos de abetos y hondonadas con ciruelos silvestres","trota tranquilo; solo sufre cuando tiene que saludar con la cabeza a las mujeres que se cruza","jogged comfortably over the eight miles to Bright River"],["mesa_tres",17.0,0,"marilla","la cocina de Tejas Verdes","pone la mesa para tres con loza de diario, mermelada de manzana silvestre y un solo tipo de queque, y se sienta a tejer","There were three plates laid"],["rachel_te",17.25,0,"rachel","su casa en la Hondonada de Lynde","toma el té","Accordingly after tea Mrs. Rachel set out"],["ana_tren",17.5,1,"ana","andén de la estación de Bright River","baja del tren de las cinco y media con la Sra. Spencer, que la deja a cargo del jefe de estación","Mrs. Spencer came off the train with that girl and gave her into my charge"],["spencer_sigue",17.5,1,"spencer","tren, de Bright River a White Sands","sigue viaje en el mismo tren hasta la estación de White Sands (solo mencionada)","Of course she goes on to White Sands station herself"],["ana_pila",17.583,0,"ana","andén, sobre una pila de tejuelas al extremo","rehúsa entrar a la sala de espera de señoras: «hay más campo para la imaginación»; se sienta a esperar","she informed me gravely that she preferred to stay outside. 'There was more scope for imagination,'"],["rachel_sendero",17.583,0,"rachel","el sendero de Tejas Verdes, con rosales silvestres","camina por el largo sendero lleno de surcos, criticando que vivan tan apartados","It's just _staying_, that's what"],["rachel_entra",17.667,0,"rachel","patio trasero y cocina de Tejas Verdes","golpea la puerta de la cocina, entra y anota mentalmente la mesa puesta para tres","Mrs. Rachel rapped smartly at the kitchen door and stepped in when bidden to do so"],["marilla_cuenta",17.667,0,"marilla","la cocina de Tejas Verdes","recibe a Rachel y le cuenta que Matthew fue a Bright River a buscar a un niño huérfano de Nueva Escocia","Matthew went to Bright River. We're getting a little boy from an orphan asylum in Nova Scotia"],["rachel_sale",18.0,0,"rachel","sale de Tejas Verdes por el sendero","se va (para alivio de Marilla) rumbo a casa de Robert Bell a contar la noticia, hablándoles a los rosales silvestres","she concluded to go up the road to Robert Bell's and tell the news"],["matthew_estacion",18.0,1,"matthew","patio del pequeño hotel de Bright River y la estación","ata la yegua en el patio del hotel, pasa junto a la niña sin mirarla y se va a la estación","he tied his horse in the yard of the small Bright River hotel and went over to the station house"],["jefe_explica",18.0,1,"jefe","la boletería de la estación de Bright River","cierra la boletería para irse a cenar; le explica a Matthew que solo llegó una niña y se marcha a casa con hambre","The five-thirty train has been in and gone half an hour ago"],["matthew_nina",18.083,0,"matthew","el extremo del andén","camina hasta la niña; ella se presenta y él decide llevarla a casa y que Marilla aclare el error","he would take her home and let Marilla do that"],["bell_recibe",18.25,0,"bell","la casa de Robert Bell, camino arriba","recibe a Rachel, que cuenta la noticia de los Cuthbert","go up the road to Robert Bell's and tell the news"],["suben_calesa",18.25,0,"matthew","patio del hotel de Bright River","Ana y Matthew suben a la calesa; ella no suelta su bolso de alfombra; salen del pueblo","they had reached the buggy"],["rama_ciruelo",18.417,0,"ana","una cuesta empinada con barrancos de cerezos silvestres y abedules","arranca una rama de ciruelo silvestre que roza la calesa y empieza a hablar (la novia, el vestido de wincey, los caminos rojos...)","The child put out her hand and broke off a branch of wild plum"],["hablar_todo",19.0,0,"matthew","el camino a Avonlea","le dice que puede hablar todo lo que quiera; descubre que le gusta su charla","Oh, you can talk as much as you like. I don't mind."],["pelo_rojo",19.5,0,"ana","el camino, antes de la Avenida","le muestra su trenza: «¿De qué color diría que es esto?» —«Es rojo, ¿no?»","It's red, ain't it?"],["avenida",19.75,0,"ana","la Avenida (Camino Blanco de las Delicias), túnel de manzanos en flor, cerca de Newbridge","enmudece de asombro bajo las flores, con el atardecer al fondo","They had simply rounded a curve in the road and found themselves in the \"Avenue.\""],["newbridge",20.0,0,"matthew","el pueblo de Newbridge","cruzan el pueblo en silencio; perros que ladran, chicos que gritan y caras curiosas en las ventanas","Through Newbridge, a bustling little village where dogs barked at them"],["una_milla",20.667,0,"matthew","el camino, a una milla de casa","rompe el silencio tras tres millas: «solo nos falta una milla»; Ana bautiza el Camino Blanco de las Delicias","But we haven't very far to go now--only another mile."],["lago",20.75,0,"ana","la cima de la colina sobre la laguna de los Barry y su puente","bautiza el Lago de las Aguas Brillantes; aún hay luz en una ventana de La Cuesta del Huerto; cruza el puente con los ojos cerrados","\"That's Barry's pond,\" said Matthew."],["adivina_tv",20.917,0,"ana","cima de la colina frente a Tejas Verdes","adivina cuál es Tejas Verdes, bajo una gran estrella blanca; el sol ya se puso","\"That's it, isn't it?\" she said, pointing."],["rachel_ve_vuelta",21.0,0,"rachel","su ventana en la Hondonada de Lynde (ya de vuelta de casa de los Bell)","ve pasar la calesa en la oscuridad","not so dark that Mrs. Rachel could not see them from her window vantage"],["baja_ana",21.083,0,"matthew","el patio oscuro de Tejas Verdes, entre álamos","baja a Ana de la calesa; ella susurra que los árboles hablan en sueños; entran a la casa","Listen to the trees talking in their sleep"],["marilla_nino",21.083,0,"marilla","la cocina de Tejas Verdes","sale al encuentro, ve a la niña de pelo rojo y pregunta dónde está el niño","Matthew Cuthbert, who's that? Where is the boy?"]],"rachel_marilla":[["marilla","Buenas tardes, Rachel. Qué tarde tan linda, ¿no? Siéntate. ¿Cómo están todos en tu casa?"],["lynde","Todos bastante bien. Aunque temí que tú no lo estuvieras, Marilla, cuando vi salir a Matthew. Pensé que iba a buscar al doctor."],["marilla","Oh, no, estoy muy bien, aunque ayer tuve un dolor de cabeza terrible."],["marilla","Matthew fue a Bright River. Vamos a traer a un niñito de un orfanato de Nueva Escocia, y llega esta noche en el tren."],["lynde","…  …  ¿Lo dices en serio, Marilla?"],["marilla","Sí, por supuesto."],["lynde","¡Un niño! ¡Ustedes dos, de entre toda la gente! ¿Pero qué cosa en el mundo les metió esa idea en la cabeza?"],["marilla","Lo venimos pensando hace tiempo, todo el invierno. La señora Alexander Spencer vino antes de Navidad y dijo que en primavera traería a una niñita del orfanato de Hopeton."],["marilla","Así que Matthew y yo lo hemos conversado de vez en cuando. Decidimos traer un niño. Matthew ya tiene sus años, sesenta, y no está tan ágil como antes."],["marilla","El corazón le molesta bastante. Y tú sabes lo difícil que está conseguir peones: solo esos muchachitos franceses a medio criar."],["marilla","Y apenas uno les enseña algo, se van a las fábricas de conservas de langosta o a los Estados Unidos."],["marilla","Matthew quería un niño de Inglaterra, pero le dije que no, rotundo: nada de pilluelos de las calles de Londres. Por lo menos uno nacido en Canadá."],["marilla","Así que le mandamos recado a la señora Spencer con la familia de Richard Spencer, en Carmody: que nos trajera un niño listo y despierto de unos diez u once años."],["marilla","Es la mejor edad: lo bastante grande para ayudar en las tareas y lo bastante chico para criarlo como se debe. Le daremos un buen hogar y escuela."],["marilla","Hoy llegó un telegrama de la señora Spencer; lo trajo el cartero. Llegan en el tren de las cinco y media. Ella lo deja en Bright River y sigue hasta White Sands."],["lynde","Bueno, Marilla, te lo digo derecho: creo que están haciendo una tontería enorme, una cosa arriesgada, eso es lo que es. No saben lo que van a recibir."],["lynde","Meten a un niño extraño en su casa sin saber nada de él: ni su carácter, ni qué clase de padres tuvo, ni cómo va a salir."],["lynde","¡Si la semana pasada leí en el diario que un matrimonio del oeste de la Isla sacó a un niño de un orfanato, y él les prendió fuego a la casa de noche!"],["lynde","¡A propósito, Marilla! Casi los deja tostados en sus camas. Y sé de otro niño adoptado que se chupaba los huevos; no hubo forma de quitarle la maña."],["lynde","Si me hubieras pedido consejo, cosa que no hiciste, Marilla, te habría dicho: ¡por el amor de Dios, ni lo pienses! Eso es lo que te habría dicho."],["marilla","No niego que algo de razón tienes, Rachel. Yo también he tenido mis dudas. Pero Matthew estaba empeñadísimo, se lo noté, así que cedí."],["marilla","Es tan raro que Matthew se empeñe en algo, que cuando lo hace siento que es mi deber ceder."],["marilla","Y riesgos hay en casi todo en este mundo. Hasta los hijos propios no siempre salen bien. Además, Nueva Escocia está aquí al lado: no puede ser muy distinto de nosotros."],["lynde","Bueno, ojalá todo salga bien. Pero después no digas que no te advertí si quema Tejas Verdes o echa estricnina al pozo."],["lynde","Supe de un caso en Nuevo Brunswick: un huérfano de asilo hizo eso y la familia entera murió entre dolores espantosos. Aunque en ese caso era una niña."],["marilla","Bueno, nosotros no vamos a traer una niña. Jamás se me ocurriría criar a una niña. Me sorprende la señora Spencer."],["marilla","Pero, en fin, ella sería capaz de adoptar un orfanato entero si se le metiera en la cabeza."],["lynde","Bueno, bueno… no te quito más tiempo, Marilla. Que Dios los ayude con ese niño, eso es lo que digo."]],"rachel_bell":[["lynde","(Escena inventada) ¡Robert, señora Bell, no van a creer lo que les vengo a contar! Siéntense, que es para caerse de espaldas, eso es lo que es."],["bell","¿Qué pasa, Rachel? ¿Hay alguien enfermo?"],["lynde","¡Matthew y Marilla Cuthbert van a adoptar a un niño! ¡De un orfanato de Nueva Escocia! Matthew fue a buscarlo a Bright River esta misma tarde, con cuello blanco."],["bell","¡No me diga! ¿Los Cuthbert? ¿Ellos, que no saben nada de niños?"],["lynde","Eso mismo digo yo. Una tontería y un riesgo. Pero nadie me pidió consejo, claro. Ya verán si no termina quemándoles la casa. Quedan advertidos."],["bell","Bueno, Rachel, habrá que ver qué tal sale el muchacho."]],"estacion":[["matthew","Disculpe… ¿falta mucho para el tren de las cinco y media?"],["jefe","El tren de las cinco y media pasó hace media hora. Pero dejaron a una pasajera para usted: una niñita. Está sentada allá, sobre las tejuelas."],["jefe","Le pedí que entrara a la sala de espera de señoras, pero me dijo muy seria que prefería quedarse afuera: «Hay más campo para la imaginación». Es todo un caso."],["matthew","Yo no espero a una niña. Vine a buscar a un niño. Debería estar aquí. La señora Alexander Spencer iba a traérmelo de Nueva Escocia."],["jefe","(silba) Debe haber algún error. La señora Spencer bajó del tren con esa niña y me la dejó a cargo."],["jefe","Dijo que usted y su hermana la iban a adoptar y que vendría por ella en un rato. Es todo lo que sé, y no tengo más huérfanos escondidos por aquí."],["matthew","No entiendo…"],["jefe","Mejor pregúntele a la niña. Seguro que se lo explica: tiene lengua propia, eso es seguro. A lo mejor se les acabaron los niños de la marca que usted quería."],["ana","Supongo que usted es el señor Matthew Cuthbert, de Tejas Verdes. Me alegro mucho de verlo. Ya empezaba a temer que no viniera por mí."],["ana","Estaba imaginándome todas las cosas que podrían haberle impedido venir."],["ana","Había decidido que, si no venía esta noche, me iría por la vía hasta ese gran cerezo silvestre de la curva y me subiría a dormir ahí. No me daría ni un poquito de miedo."],["ana","¿No sería precioso dormir en un cerezo silvestre todo blanco de flores a la luz de la luna? Una podría imaginar que vive en salones de mármol, ¿no cree?"],["ana","Y estaba segura de que vendría por mí en la mañana, si no venía esta noche."],["matthew","Siento haber llegado tarde. Vamos. El caballo está allá en el patio. Dame tu bolso."],["ana","¡Oh, yo puedo llevarlo! No pesa. Traigo todos mis bienes terrenales, pero no pesa. Y si no se toma de cierta manera, el asa se sale; yo sé el truco exacto."],["ana","Es un bolso de alfombra viejísimo. ¡Oh, qué contenta estoy de que haya venido, aunque habría sido lindo dormir en un cerezo silvestre!"],["ana","Tenemos que recorrer un buen trecho, ¿no? La señora Spencer dijo que eran ocho millas. Me alegro, porque me encanta andar en coche."],["ana","¡Oh, parece tan maravilloso que voy a vivir con ustedes y a pertenecerles! Nunca le he pertenecido a nadie, no de verdad. Pero el orfanato fue lo peor."],["ana","Solo estuve cuatro meses, pero bastó. Supongo que usted nunca fue huérfano en un orfanato, así que no puede entender cómo es. Es peor que todo lo imaginable."],["ana","Eran buenos, ¿sabe?, la gente del orfanato. Pero hay tan poco campo para la imaginación… solo en los otros huérfanos."],["ana","Yo imaginaba que la niña de al lado era en realidad hija de un conde, robada en la cuna por una niñera cruel que murió antes de poder confesar."],["ana","Me quedaba despierta de noche imaginando esas cosas, porque de día no tenía tiempo. Por eso debo estar tan flaca. Soy terriblemente flaca, ¿no?"],["ana","No tengo nada de carne en los huesos. Me encanta imaginar que soy rellenita y que tengo hoyuelos en los codos."],["matthew","Bueno, pues… aquí está la calesa. Sube."]],"llegada":[["marilla","Matthew Cuthbert, ¿quién es ésa? ¿Dónde está el niño?"],["matthew","No había ningún niño. Solo estaba ella."],["marilla","¡Ningún niño! Pero tiene que haber habido un niño. Le mandamos decir a la señora Spencer que trajera un niño."],["matthew","Bueno, pues, no lo trajo. La trajo a ella. Le pregunté al jefe de estación. Y tuve que traerla a casa. No se podía quedar allá, fuera cual fuera el error."],["marilla","¡Vaya, qué lindo enredo!"],["ana","¡No me quieren! ¡No me quieren porque no soy un niño! Debí haberlo esperado. Nadie me ha querido nunca."],["ana","Debí saber que era demasiado hermoso para durar. Debí saber que nadie me quería de verdad. ¡Oh, qué voy a hacer! ¡Me voy a poner a llorar!"]],"viaje":[[["ana","(arranca una rama de ciruelo silvestre) ¿No es precioso? ¿En qué le hace pensar ese árbol inclinado sobre el barranco, todo blanco y como de encaje?"],["matthew","Bueno, pues, no sé."],["ana","¡Pues en una novia, claro! Una novia toda de blanco con un velo vaporoso. Nunca he visto una, pero puedo imaginarme cómo sería."],["ana","Yo no espero ser novia nunca. Soy tan fea que nadie querrá casarse conmigo… salvo, quizás, un misionero en el extranjero."],["ana","Supongo que un misionero en el extranjero no será muy exigente."],["matthew","Mm."],["ana","Mire, allá atrás, en la curva de la vía: ése es mi cerezo. El que iba a ser mi dormitorio esta noche. Adiós, querido cerezo, ¡ya no te necesito!"],["ana","¿Cree que se habrá desilusionado? Yo creo que los árboles se encariñan con quienes piensan en ellos."],["matthew","Bueno, pues… puede ser."],["ana","Estos barrancos son tan altos que es como andar por el fondo de un río de flores. Los abedules parecen señoritas delgadas asomándose a vernos pasar."],["matthew","Ya lo creo."]],[["ana","Pero sí espero tener algún día un vestido blanco. Ése es mi ideal más alto de felicidad terrenal. Me encanta la ropa bonita."],["ana","Y nunca en mi vida he tenido un vestido bonito, que yo recuerde. Pero así tengo mucho más que esperar, ¿no?"],["ana","(Matthew saluda con la cabeza a la señora de la carreta) ¿La conoce?"],["matthew","No. Pero aquí en la Isla hay que saludar a todo el que uno se cruza."],["ana","Esta mañana, al salir del orfanato, sentí tanta vergüenza de tener que ponerme este horrible vestido viejo de wincey. Todas las huérfanas teníamos que usarlos."],["ana","Un comerciante de Hopeton regaló trescientas yardas de wincey al orfanato el invierno pasado. Algunos decían que era porque no podía venderlo…"],["ana","…pero yo prefiero creer que fue por la bondad de su corazón, ¿no le parece?"],["matthew","Bueno, pues, sí, me parece."],["ana","Y lo que más deseo, después de un vestido blanco, son mangas abullonadas. ¡Están tan de moda! Me emocionaría con solo ponerme un vestido de mangas abullonadas."],["matthew","¿Mangas… abullonadas?"],["ana","Infladas como globos, aquí arriba. Con estos brazos tan flacos parecerían dos globos atados a dos palitos. Igual las quiero, con toda mi alma."],["matthew","Bueno, pues…"]],[["ana","Cuando subimos al tren sentí que todos me miraban y me tenían lástima. Pero me puse a imaginar que llevaba el vestido de seda celeste más hermoso del mundo."],["ana","Porque cuando una imagina, más vale imaginar algo que valga la pena. Y un sombrero enorme de flores y plumas, un reloj de oro, y guantes y botines de cabritilla."],["ana","Me animé enseguida y disfruté el viaje a la Isla con todas mis fuerzas. No me mareé nada en el barco. La señora Spencer tampoco, aunque siempre se marea."],["ana","Dijo que no tuvo tiempo de marearse, de tanto vigilar que yo no me cayera por la borda. Que nunca había visto a nadie merodear tanto como yo."],["ana","Pero si eso la salvó del mareo, fue una suerte que yo merodeara, ¿no?"],["matthew","Bueno, pues, eso parece."],["ana","Y yo quería ver todo lo que se pudiera ver en ese barco, porque no sabía si alguna vez tendría otra oportunidad."],["ana","¡Qué olor tan rico tiene este bosque! Huele como a Navidad guardada en un cajón. ¿Cómo se llaman estos árboles?"],["matthew","Abetos. Abetos balsámicos."],["ana","Abetos balsámicos… Suena a remedio para el alma. Escuche a los pájaros: cantan como si fuera el único día de verano del año."],["matthew","Ya lo creo."]],[["ana","¡Oh, hay muchos más cerezos en flor! Esta Isla es el lugar más florido que existe. Ya la quiero, y me alegra tanto venir a vivir aquí."],["ana","Siempre oí decir que la Isla del Príncipe Eduardo era el lugar más bonito del mundo. Me imaginaba que vivía aquí, pero nunca creí que de verdad pasaría."],["ana","Es delicioso cuando las cosas que una imagina se vuelven realidad, ¿no?"],["matthew","Ya lo creo."],["ana","Pero estos caminos rojos son tan curiosos. Cuando subimos al tren en Charlottetown y empezaron a pasar volando, le pregunté a la señora Spencer qué los hacía rojos."],["ana","Me dijo que no sabía y que, por piedad, no le preguntara más. Que ya le había hecho mil preguntas. Supongo que sí, pero ¿cómo va una a averiguar las cosas si no pregunta?"],["ana","¿Y qué es lo que hace rojos los caminos?"],["matthew","Bueno, pues, no sé."],["ana","Mire las ruedas: van todas pintadas de rojo, igual que los cascos de la yegua. Si una caminara descalza por aquí, se le pondrían los pies color ladrillo."],["matthew","Je. Eso sí."]],[["ana","Bueno, ésa es una de las cosas que averiguaré algún día. ¿No es espléndido pensar en todas las cosas que hay por averiguar? Me hace sentir feliz de estar viva."],["ana","Es un mundo tan interesante. No sería ni la mitad de interesante si lo supiéramos todo, ¿verdad? Entonces no habría campo para la imaginación."],["ana","¡Oh, mire allá, esa franja azul! ¿Es el mar?"],["matthew","El golfo. Sí."],["ana","…Pero, ¿estoy hablando demasiado? La gente siempre me dice que hablo demasiado. ¿Preferiría que no hablara? Si usted lo dice, me callo."],["ana","Puedo callarme cuando me lo propongo, aunque me cuesta."],["matthew","Oh, puedes hablar todo lo que quieras. A mí no me molesta."],["ana","¡Oh, qué alegría! Sé que usted y yo nos vamos a llevar de maravilla. Es un alivio hablar cuando una quiere y que no le digan que los niños deben verse y no oírse."],["ana","Me lo han dicho un millón de veces si me lo han dicho una. Y la gente se ríe de mí porque uso palabras largas."],["ana","Pero si una tiene ideas grandes, tiene que usar palabras grandes para expresarlas, ¿no cree?"],["matthew","Bueno, pues, eso parece razonable."]],[["ana","La señora Spencer dijo que mi lengua debía estar colgada del medio. Pero no: está bien firme de un extremo."],["ana","También me dijo que su casa se llamaba Tejas Verdes, y que había árboles alrededor. Me alegré más que nunca. ¡Me encantan los árboles!"],["ana","En el orfanato no había ninguno, solo unos pobres arbolitos chiquititos al frente, con unas jaulitas encaladas alrededor. Parecían huérfanos ellos también."],["ana","Me daban ganas de llorar. Les decía: «¡Oh, pobrecitos! Si estuvieran en un bosque grande, con musgos y campanillas en las raíces, podrían crecer…»"],["ana","«…y un arroyo cerca y pájaros cantando en sus ramas. Pero donde están, no pueden. Sé exactamente cómo se sienten, arbolitos»."],["ana","Me dio pena dejarlos esta mañana. Una se encariña tanto con esas cosas, ¿no?"],["matthew","Bueno, pues, sí."],["ana","¿Hay algún arroyo cerca de Tejas Verdes? Se me olvidó preguntárselo a la señora Spencer."],["matthew","Bueno, pues, sí, hay uno justo abajo de la casa."],["ana","¡Figúrese! Siempre soñé con vivir cerca de un arroyo, aunque nunca creí que pasaría. Los sueños no suelen cumplirse, ¿verdad? ¿No sería lindo que se cumplieran?"],["matthew","Ya lo creo."]],[["ana","¿Ve ese aserradero junto al río? Antes del orfanato viví con la señora Hammond, río arriba, donde su marido tenía un aserradero. Era un lugar muy solitario."],["ana","La señora Hammond tenía ocho hijos. ¡Tuvo mellizos tres veces! A mí me gustan los bebés con moderación, pero mellizos tres veces seguidas es demasiado."],["ana","Se lo dije así de firme a la señora Hammond cuando llegó el último par. ¡Me cansaba tanto cargarlos!"],["matthew","¿Tú los cuidabas?"],["ana","Sí. Y antes, en casa de la señora Thomas, cuidaba a sus cuatro niños, todos menores que yo. Le aseguro que los niños dan mucho trabajo."],["ana","Cuando murió el señor Hammond, ella repartió a sus hijos entre los parientes y se fue a los Estados Unidos. A mí nadie me quiso, así que me mandaron al orfanato."],["ana","Pero no crea que me quejo. Una se acostumbra a muchas cosas. Aunque nunca a no pertenecerle a nadie."],["matthew","Mm. Bueno, pues…"],["ana","En casa de la señora Thomas tenía una amiga imaginaria que vivía en la puerta de vidrio del aparador. Se llamaba Katie Maurice. Pero eso se lo cuento otro día."],["matthew","Cuando quieras."]],[["ana","¿Ese hombre está sembrando? ¿Qué siembra?"],["matthew","Nabos, seguramente. Es tiempo de nabos tardíos. Yo debería estar sembrando los míos esta tarde."],["ana","¡Y en cambio vino a buscarme a mí! Me siento muy honrada de valer más que una tarde de nabos. Espero que los nabos no se ofendan."],["matthew","Je. Los nabos pueden esperar."],["ana","¿Cómo es su hermana? La señora Spencer dijo que se llamaba señorita Marilla Cuthbert. Marilla es un nombre muy digno."],["matthew","Marilla… bueno, pues, Marilla es muy… muy ordenada. Tiene la casa como un espejo."],["ana","Yo también voy a ser muy ordenada, de verdad. Lo intentaré con todas mis fuerzas. ¿Cree que le voy a gustar?"],["matthew","Bueno, pues… eso ya lo verá Marilla."],["ana","¿Y cómo se llama la yegua? Tiene un color tan lindo, como de castaña recién pelada."],["matthew","Es la yegua alazana. Nomás la yegua."],["ana","¡Pobrecita, sin nombre! Aunque quizá le gusta ser simplemente «la yegua». Hay quienes no necesitan adornos."]],[["ana","¿Usted imagina cosas, señor Cuthbert? Esa casita con lilas en la puerta: yo imagino que vive una anciana que espera a un marinero que partió hace cuarenta años."],["matthew","Bueno, pues, ahí vive gente de apellido… no me acuerdo."],["ana","Mejor así. Si supiera el apellido, se arruinaría la historia."],["ana","Esa nube larga parece un velero con las velas rosadas. Va hacia algún puerto de Arabia, cargado de especias."],["matthew","Bueno, pues, a mí me parece más bien una nube."],["ana","Usted es muy honrado, señor Cuthbert. Pero ¿no es más divertido que sea un velero?"],["matthew","Bueno, pues… sí, puede ser un velero."],["ana","¡Mire la iglesia, qué blanca! Me pregunto si la campana se siente sola toda la semana esperando el domingo."],["ana","Cuando estoy triste me imagino cosas así, y la tristeza se va un poco más lejos. No se va del todo, pero se queda esperando en la esquina."],["matthew","Ya lo creo."],["ana","Pero desde que usted llegó a la estación no he estado triste ni un minutito."]],[["ana","Ahora me siento casi perfectamente feliz. No puedo ser del todo perfectamente feliz porque… bueno, ¿de qué color diría usted que es esto?"],["matthew","Es rojo, ¿no?"],["ana","(suspira desde la punta de los pies) Sí, es rojo. Ahora entiende por qué no puedo ser perfectamente feliz. Nadie que tenga el pelo rojo podría."],["ana","Lo demás no me importa tanto: las pecas, los ojos verdes, lo flaca. Puedo imaginar que tengo un cutis de pétalo de rosa y ojos violeta como estrellas."],["ana","Pero el pelo rojo NO puedo imaginármelo lejos. Hago lo posible. Pienso: «Ahora mi pelo es de un negro glorioso, negro como el ala del cuervo»."],["ana","Pero todo el tiempo SÉ que es simplemente rojo, y eso me rompe el corazón. Será la pena de toda mi vida."],["ana","Leí en una novela de una niña con una pena de toda la vida, pero no era el pelo rojo. Su pelo era de oro puro, ondulado sobre su frente de alabastro."],["ana","¿Qué es una frente de alabastro? Nunca he podido averiguarlo. ¿Usted me lo puede decir?"],["matthew","Bueno, pues, me temo que no."],["ana","Sea lo que sea, debe ser algo lindo, porque ella era divinamente hermosa. ¿Alguna vez se ha imaginado lo que se siente ser divinamente hermoso?"],["matthew","Bueno, pues, no, nunca."]],[["ana","Yo sí, a menudo. Si pudiera elegir, ¿qué preferiría ser: divinamente hermoso, deslumbrantemente inteligente o angelicalmente bueno?"],["matthew","Bueno, pues, yo… no sé exactamente."],["ana","Yo tampoco. Nunca me decido. Pero en realidad da casi lo mismo, porque no es probable que llegue a ser ninguna de las tres."],["ana","Ser angelicalmente buena debe ser muy cansador. Habría que andar siempre con cara de vitral de iglesia."],["matthew","Je."],["ana","El cielo se está poniendo rosado. ¿No es raro que el cielo se ruborice todas las tardes? Como si alguien le dijera un cumplido."],["matthew","Ya lo creo."],["ana","Lo que es seguro es que nunca seré angelicalmente buena. La señora Spencer dice… ¡oh, señor Cuthbert! ¡Oh, señor Cuthbert!! ¡Oh, señor Cuthbert!!!"]]],"viajeP":["Salida del pueblo de Bright River (el hotel, la estación y la vía quedan atrás). Una cuesta empinada con el camino hundido en la tierra roja: barrancos más altos que la calesa, bordeados de cerezos silvestres en flor y abedules blancos y delgados. A lo lejos, en la curva de la vía, el gran cerezo silvestre.","Granjas ordenadas a ambos lados del camino, con huertos de manzanos en flor; prados que bajan hacia nieblas de color perla y púrpura en el horizonte. Una señora en carreta viene en sentido contrario.","Un bosquecillo de abetos balsámicos que da sombra al camino; pajaritos cantando en las ramas. Al salir, una hondonada donde los ciruelos silvestres cuelgan su flor vaporosa.","El camino de tierra roja brillante serpentea entre campos verdes; más cerezos y ciruelos silvestres en flor a la orilla; huertos de manzanos que perfuman el aire.","Lomaje suave con prados; desde lo alto de una colina se ve a lo lejos una franja azul oscuro: el golfo. Casas blancas de granja con graneros rojos.","Camino entre granjas rodeadas de grandes arces y abetos; un huerto de manzanos zumbando de abejas; un arroyito que cruza bajo el camino.","Un aserradero junto a un río, con pilas de tablas y troncos; una casa pobre con niños pequeños jugando en el patio; ropa tendida.","Campos arados de tierra roja; un granjero sembrando a mano; vacas en un potrero; cercas de troncos en zigzag.","Una iglesia blanca con su cementerio sobre una loma; casitas con lilas junto a la puerta; luz dorada de la tarde y nubes largas sobre los campos.","Campos de papas y trigo recién sembrado; un arroyo con sauces bajo un puentecito de tablas; la luz de la tarde se vuelve cada vez más dorada.","El camino baja y hace una curva; el cielo se tiñe de rosa con el atardecer. Adelante, en la penumbra, se adivina el comienzo de un largo túnel de manzanos en flor: la Avenida."],"relleno":["¿Usted cree que las vacas piensan en algo cuando se quedan mirando el camino tanto rato?","Esa cerca en zigzag parece una costura hecha por un gigante muy distraído.","Si yo fuera un pájaro, haría mi nido en la punta de ese abeto, para ver el mundo entero desde arriba.","Me pregunto qué sueñan las piedras. Seguramente cosas muy, muy lentas.","¿Ha notado que el aire de junio sabe dulce? Casi se podría untar en el pan.","Ese granero rojo parece orgulloso de sí mismo, como si supiera que es el más rojo de la comarca.","Cuando sea grande quiero escribir un libro. Uno muy triste, con un final feliz en el último segundo.","¿Usted cree que las nubes se cansan de andar siempre de un lado para otro?","El trébol huele a miel. Si cierro los ojos, casi puedo oír a las abejas haciendo sus cuentas.","Debe ser muy triste ser una flor del camino y que nadie sepa cómo te llamas.","Esas mariposas blancas parecen pétalos que se arrepintieron de caer.","¿Le gusta la poesía, señor Cuthbert? Yo me sé de memoria muchos versos… bueno, pedazos de muchos versos.","Ese senderito que se mete al bosque seguro lleva a un lugar secreto donde nunca ha llegado nadie.","Los álamos tiemblan como si alguien les estuviera contando un secreto al oído.","Me encanta el ruido de los cascos de la yegua: tloc, tloc, tloc. Es como un reloj que no tiene apuro.","Si tuviera un jardín, plantaría solo flores con nombres bonitos. Nada de cardos ni de ortigas.","¿Sabe qué es lo más lindo de un camino? Que nunca se sabe qué hay detrás de la próxima curva.","Ese ternerito nos mira como si fuéramos lo más interesante que ha visto en toda la semana.","Las ventanas de las granjas brillan con el sol de la tarde, como si se alegraran de vernos pasar.","Me pregunto si alguien en esas granjas estará pensando en mí ahora mismo. Probablemente no. Pero podría ser.","Los dientes de león parecen monedas de oro que alguien desparramó por el pasto.","Una vez leí que hay países donde nunca nieva. Debe ser muy aburrido para los niños, ¿no cree?","¿Cuál cree usted que es la hora más bonita del día? Yo creo que ésta, cuando todo se pone dorado.","El sombrero se me quiere volar. Si se vuela, imaginaré que era un pájaro que siempre quiso ser libre.","¡Huele a pasto cortado! Es el olor más verde del mundo.","Esa vaca manchada parece un mapa de países que todavía no existen.","¿Usted cree que los grillos ensayan antes de cantar en la noche?","Me gustaría tener una pieza con una ventana que mire hacia los árboles. ¿Sería mucho pedir?","El viento en el trigo hace olas, como si el campo quisiera ser mar.","Qué silencio tan amable hay aquí. No es como el del orfanato, que era un silencio que regañaba."],"avonlea":{"camino_blanco":[["ana","…"],["matthew","(después de Newbridge y tres millas de silencio) Supongo que estarás bien cansada y con hambre. Pero ya no falta mucho: solo una milla más."],["ana","Oh, señor Cuthbert… ese lugar por el que pasamos, ese lugar blanco… ¿qué era?"],["matthew","Bueno, pues, debes referirte a la Avenida. Es un lugar bonito, más o menos."],["ana","¿Bonito? Oh, «bonito» no parece la palabra justa. Ni «hermoso» tampoco. No alcanzan. ¡Oh, era maravilloso, maravilloso!"],["ana","Es lo primero que veo que la imaginación no podría mejorar. Me llena aquí (se pone una mano en el pecho). Me dio un dolorcito raro y, sin embargo, agradable."],["ana","¿Alguna vez ha sentido un dolor así, señor Cuthbert?"],["matthew","Bueno, pues, no recuerdo haberlo sentido nunca."],["ana","Yo lo siento muchas veces, cada vez que veo algo regiamente hermoso. Pero no deberían llamar «la Avenida» a ese lugar tan precioso. Ese nombre no significa nada."],["ana","Deberían llamarlo… a ver… el Camino Blanco de las Delicias. ¿No es un nombre bonito e imaginativo?"],["ana","Cuando no me gusta el nombre de un lugar o de alguien, le imagino uno nuevo. En el orfanato había una Hepzibah Jenkins, pero yo siempre la imaginé como Rosalía DeVere."],["ana","Otros podrán llamarlo la Avenida, pero yo siempre le diré el Camino Blanco de las Delicias."],["ana","¿De verdad solo falta una milla para llegar a casa? Me alegro y me da pena. Pena porque este viaje ha sido tan agradable, y siempre me apena que lo agradable termine."],["ana","Puede venir algo todavía más agradable después, pero nunca se sabe. Y muchas veces no lo es. Ésa ha sido mi experiencia, al menos."],["ana","Pero me alegra pensar en llegar a casa. Nunca he tenido un hogar de verdad, que yo recuerde. Me da otra vez ese dolorcito agradable… ¡Oh, qué bonito es eso!"]],"lago":[["matthew","Ésa es la laguna de Barry."],["ana","Oh, ese nombre tampoco me gusta. La llamaré… a ver… el Lago de las Aguas Brillantes. Sí, ése es su nombre verdadero. Lo sé por el escalofrío."],["ana","Cuando doy con un nombre que calza exacto, siento un escalofrío. ¿A usted las cosas le dan escalofríos?"],["matthew","Bueno, pues, sí. Siempre me da como un escalofrío ver esos gusanos blancos y feos que salen al cavar en los almácigos de pepinos. Detesto cómo se ven."],["ana","Oh, no creo que sea exactamente la misma clase de escalofrío. ¿Usted cree? No parece haber mucha relación entre gusanos y lagos de aguas brillantes, ¿no?"],["ana","¡Oh, aquí está el puente! Voy a cerrar los ojos bien apretados. Siempre me dan miedo los puentes."],["ana","No puedo evitar imaginar que, justo al llegar al medio, se va a doblar como una navaja y nos va a atrapar. Por eso cierro los ojos."],["ana","Pero siempre tengo que abrirlos cuando creo que vamos llegando al medio. Porque, verá, si el puente SÍ se doblara, yo querría VERLO doblarse."],["ana","¡Qué retumbo tan alegre hace! Siempre me gusta la parte del retumbo. ¿No es espléndido que haya tantas cosas que nos gustan en este mundo?"],["ana","Ya pasamos. Ahora miraré hacia atrás. Buenas noches, querido Lago de las Aguas Brillantes."],["ana","Yo siempre les doy las buenas noches a las cosas que quiero, igual que a las personas. Creo que les gusta. Esa agua parece estar sonriéndome."],["matthew","Ya lo creo."]],"cuesta_del_huerto":[["ana","Pero ¿por qué los demás la llaman la laguna de Barry?"],["matthew","Supongo que porque el señor Barry vive allá arriba, en esa casa. La Cuesta del Huerto se llama su propiedad."],["matthew","Si no fuera por ese matorral grande de atrás, desde aquí se vería Tejas Verdes. Pero hay que dar la vuelta por el camino, así que es casi media milla más."],["ana","¿El señor Barry tiene niñitas? Bueno, no tan niñitas tampoco… más o menos de mi tamaño."],["matthew","Tiene una de unos once años. Se llama Diana."],["ana","¡Oh! (respira hondo) ¡Qué nombre tan perfectamente precioso!"],["matthew","Bueno, pues, no sé. A mí me suena terriblemente pagano. Yo preferiría Jane o Mary o algún nombre sensato así."],["matthew","Pero cuando Diana nació había un profesor alojado en la casa; le dejaron a él ponerle el nombre, y la llamó Diana."],["ana","¡Entonces ojalá hubiera habido un profesor así cerca cuando yo nací!"]],"tejas_verdes":[["matthew","Ya estamos bien cerca de casa. Ésa de allá es Tejas Verdes…"],["ana","¡Oh, no me diga! (le baja el brazo y cierra los ojos) Déjeme adivinar. Estoy segura de que adivinaré."],["ana","(abre los ojos y mira las granjas, una por una) ¿Es ésa, verdad? La de la izquierda, lejos del camino, blanca de árboles en flor, con esa gran estrella encima."],["matthew","(sacude las riendas, encantado) ¡Bueno, pues, adivinaste! Pero me imagino que la señora Spencer te la describió para que la reconocieras."],["ana","No, no lo hizo, de verdad que no. Lo que dijo podría haber sido de casi cualquiera de esas casas. Pero apenas la vi, sentí que era mi hogar."],["ana","Oh, parece que estuviera soñando. ¿Sabe? Debo tener el brazo morado del codo para arriba, de tanto pellizcarme hoy."],["ana","A cada rato me venía una sensación horrible de que todo era un sueño, y me pellizcaba para ver si era real…"],["ana","…hasta que me acordé de que, aunque fuera un sueño, más valía seguir soñando todo lo posible. Así que dejé de pellizcarme. Pero ES real, y ya casi llegamos."],["matthew","Bueno, pues… ya llegamos."],["ana","(en el patio oscuro, mientras él la baja) Escuche a los árboles hablando en sueños. ¡Qué lindos sueños deben tener!"]]}};
+/* ---------- the long road to Bright River: eight miles of red road, a scene of its own (it is not on the map of
+   Avonlea: at the edge of the map there is only a signpost). The cart stays in the middle and the country goes by,
+   in the order of the book (chapter II): the station village, the cutting with the wild cherries, the farms, the fir
+   wood, the plums, the gulf from a hill, the sawmill, the church, the Avenue, Newbridge, and three miles of silence.
+   It takes its time, as in the book (a little over two hours; the buttons at the bottom make it go faster).
+   Whoever is on it: b.where = 'camino', b.roadS (0 = the station, 1 = the edge of Avonlea) and b.roadDir (+1 towards
+   Avonlea, -1 towards Bright River). Ana rides with whoever drives (game.road.with). ---------- */
+const ROAD_MIN = 130, ROAD_SEC = ROAD_MIN * 2.5, ROAD_PX = 15000, ROAD_Y = 6.3 * T, ROAD_HOR = 3.1 * T, ROAD_MILES = 7;
+const ROAD_TRAMOS = [
+  { s: 0, kind: 'pueblo', name: 'Bright River', v: -1 },
+  { s: .035, kind: 'barranco', name: 'La cuesta de los cerezos silvestres', v: 0 },
+  { s: .09, kind: 'granjas', name: 'Las granjas de los manzanos', v: 1 },
+  { s: .145, kind: 'bosque', name: 'El bosquecillo de abetos', v: 2 },
+  { s: .2, kind: 'ciruelos', name: 'La hondonada de los ciruelos', v: 3 },
+  { s: .255, kind: 'colina_mar', name: 'La colina sobre el golfo', v: 4, first: 4 },
+  { s: .31, kind: 'granjas', name: 'Las granjas de los arces', v: 5 },
+  { s: .365, kind: 'aserradero', name: 'El aserradero del río', v: 6 },
+  { s: .42, kind: 'campos', name: 'Los campos arados', v: 7 },
+  { s: .475, kind: 'iglesia', name: 'La iglesia de la loma', v: 8 },
+  { s: .53, kind: 'arroyo', name: 'El puentecito de los sauces', v: 9 },
+  { s: .585, kind: 'curva', name: 'La curva del atardecer', v: 10 },
+  { s: .64, kind: 'avenida', name: 'La Avenida', v: -1, quiet: true, m: 'avenida', note: 'La calesa entró a la Avenida, un túnel de manzanos en flor; Ana enmudeció de asombro.' },
+  { s: .7, kind: 'pueblo', name: 'Newbridge', v: -1, quiet: true, m: 'newbridge', note: 'Cruzaron Newbridge en silencio: perros que ladraban, chicos que gritaban, caras curiosas en las ventanas.' },
+  { s: .76, kind: 'campos', name: 'Tres millas de silencio', v: -1, quiet: true },
+  { s: .955, kind: 'borde', name: 'La entrada de Avonlea', v: -1, quiet: true },
+];
+const roadTramo = s => { let r = ROAD_TRAMOS[0]; for (const t of ROAD_TRAMOS) if (s >= t.s) r = t; return r; };
+const roadMiles = (s, dir) => Math.max(0, Math.round((dir > 0 ? (1 - s) * ROAD_MILES + 1 : s * ROAD_MILES) * 2) / 2);   // (to Green Gables there is one mile more, in Avonlea)
+const rh = (i, k = 0) => { const x = Math.sin(i * 127.1 + k * 311.7) * 43758.5453; return x - Math.floor(x); };
+let ROADV = 0;   // (where the view of the road is: Ana's place on it, or whoever is watched)
+function roadSlots(p, sp, f){ const cx = KIT.w / 2, off = ROADV * ROAD_PX * p; for (let i = Math.floor((off - cx - 140) / sp); i <= Math.ceil((off + cx + 140) / sp); i++) { const s = i * sp / (ROAD_PX * p); if (s < -.03 || s > 1.03) continue; f(cx + i * sp - off, roadTramo(clamp(s, 0, 1)).kind, i, s); } }
+// the little things of the country, drawn small (far) or big (near)
+function rTree(c, x, y, k, z, night){
+  const sn = S, sc = z;
+  if (k === 'fir') { line(c, [[x, y], [x, y - 8 * sc]], '#5a3a24', 1.6 * sc, x); for (let j = 0; j < 3; j++) blob(c, [[x - (11 - j * 3) * sc, y - (6 + j * 9) * sc], [x + (11 - j * 3) * sc, y - (6 + j * 9) * sc], [x, y - (20 + j * 9) * sc]], sn === 3 && j === 2 ? '#e8eef2' : j % 2 ? '#2f5a3a' : '#3a6a42', false); return; }
+  const trunk = k === 'birch' ? '#efeae0' : '#6a4a30';
+  line(c, [[x, y], [x, y - 14 * sc]], trunk, (k === 'birch' ? 1.6 : 2.4) * sc, x);
+  if (k === 'birch') { for (let j = 0; j < 3; j++) line(c, [[x - 1 * sc, y - (3 + j * 4) * sc], [x + 1 * sc, y - (3 + j * 4) * sc]], '#3a3436', .6, j); }
+  if (sn === 3) { ell(c, x, y - 18 * sc, 9 * sc, 6 * sc, 'rgba(0,0,0,0)', '#6a5a4a'); return; }   // (bare in winter)
+  const blossom = (k === 'blossom' || k === 'apple') && sn === 0, col = k === 'willow' ? '#8aac5a' : k === 'birch' ? '#a8c868' : k === 'maple' ? (sn === 2 ? '#d8743a' : '#4f8a3c') : blossom ? (k === 'blossom' ? '#f6f2f0' : '#f4dce4') : sn === 2 ? '#c8983a' : '#5f9a44';
+  const r = (k === 'maple' ? 13 : k === 'willow' ? 11 : 10) * sc;
+  if (k === 'willow') { ell(c, x, y - 20 * sc, r, r * .9, col, true); for (let j = -2; j <= 2; j++) line(c, [[x + j * 4 * sc, y - 18 * sc], [x + j * 5 * sc, y - 6 * sc]], '#7a9a4a', .8, j); return; }
+  ell(c, x - 4 * sc, y - 17 * sc, r * .8, r * .7, col, true); ell(c, x + 5 * sc, y - 19 * sc, r * .8, r * .7, col, true); ell(c, x, y - 24 * sc, r * .75, r * .65, col, true);
+  if (blossom && k === 'apple') for (let j = 0; j < 5; j++) ell(c, x + (rh(x, j) - .5) * r * 1.6, y - 16 * sc - rh(j, x) * r, 1.2 * sc, 1.2 * sc, '#e88ab0');
+}
+function rHouse(c, x, y, z, o = {}){
+  const w = 16 * z, h = 11 * z, wall = o.wall || '#f2ede2', roof = o.roof || '#7a5a4a';
+  blob(c, [[x - w, y], [x + w, y], [x + w, y - h], [x - w, y - h]], wall);
+  blob(c, [[x - w - 3 * z, y - h], [x + w + 3 * z, y - h], [x + w * .5, y - h - 9 * z], [x - w * .5, y - h - 9 * z]], S === 3 ? '#f2f5f7' : roof);
+  blob(c, [[x - 3 * z, y], [x + 3 * z, y], [x + 3 * z, y - 7 * z], [x - 3 * z, y - 7 * z]], '#6a4630', false);
+  for (const d of [-10, 9]) blob(c, [[x + d * z - 2.6 * z, y - 4 * z], [x + d * z + 2.6 * z, y - 4 * z], [x + d * z + 2.6 * z, y - 8.4 * z], [x + d * z - 2.6 * z, y - 8.4 * z]], light().night > .35 ? '#f5d58a' : '#bfe0ea', false);
+  if (o.lilac && S < 2) for (let j = 0; j < 4; j++) ell(c, x - 6 * z + j * 2 * z, y - 3 * z - (j % 2) * 2 * z, 2.4 * z, 2.2 * z, '#b48ad0', true);
+}
+function rBarn(c, x, y, z){ blob(c, [[x - 15 * z, y], [x + 15 * z, y], [x + 15 * z, y - 14 * z], [x, y - 22 * z], [x - 15 * z, y - 14 * z]], '#a8463a'); blob(c, [[x - 5 * z, y], [x + 5 * z, y], [x + 5 * z, y - 10 * z], [x - 5 * z, y - 10 * z]], '#6a2a22', false); }
+function rChurch(c, x, y, z){ rHouse(c, x, y, z * 1.1, { roof: '#5a5a62' }); blob(c, [[x + 10 * z, y - 12 * z], [x + 18 * z, y - 12 * z], [x + 18 * z, y - 28 * z], [x + 10 * z, y - 28 * z]], '#f6f2e8'); blob(c, [[x + 9 * z, y - 28 * z], [x + 19 * z, y - 28 * z], [x + 14 * z, y - 42 * z]], '#5a5a62'); for (let j = 0; j < 5; j++) blob(c, [[x - 30 * z + j * 6 * z, y + 4 * z], [x - 27 * z + j * 6 * z, y + 4 * z], [x - 27 * z + j * 6 * z, y - 2 * z], [x - 30 * z + j * 6 * z, y - 2 * z]], '#c8c4bc', false); }
+function rMill(c, x, y, z){ blob(c, [[x - 20 * z, y], [x + 20 * z, y], [x + 20 * z, y - 18 * z], [x - 20 * z, y - 18 * z]], '#9a7a56'); blob(c, [[x - 23 * z, y - 18 * z], [x + 23 * z, y - 18 * z], [x + 14 * z, y - 27 * z], [x - 14 * z, y - 27 * z]], '#5a4a44'); ell(c, x + 24 * z, y - 9 * z, 9 * z, 9 * z, 'rgba(0,0,0,0)', '#5a3a24'); for (let j = 0; j < 4; j++) { const a = j * Math.PI / 4 + TT * .8; line(c, [[x + 24 * z - Math.cos(a) * 9 * z, y - 9 * z - Math.sin(a) * 9 * z], [x + 24 * z + Math.cos(a) * 9 * z, y - 9 * z + Math.sin(a) * 9 * z]], '#5a3a24', 1, j); } for (let j = 0; j < 4; j++) blob(c, [[x - 34 * z, y - j * 3 * z], [x - 22 * z, y - j * 3 * z], [x - 22 * z, y - j * 3 * z - 3 * z], [x - 34 * z, y - j * 3 * z - 3 * z]], j % 2 ? '#c99a66' : '#b58a5a', false); }
+function rCow(c, x, y, z){ ell(c, x, y - 6 * z, 8 * z, 4.6 * z, '#f4efe4', true); ell(c, x - 2 * z, y - 7 * z, 3 * z, 2 * z, '#3a2a24'); ell(c, x + 9 * z, y - 8 * z, 3 * z, 2.4 * z, '#f4efe4', true); line(c, [[x - 5 * z, y - 3 * z], [x - 5 * z, y]], '#3a2a24', 1.4 * z, 1); line(c, [[x + 5 * z, y - 3 * z], [x + 5 * z, y]], '#3a2a24', 1.4 * z, 2); }
+function drawRoad(c, t, night){
+  const W = KIT.w, H = KIT.h, Y = ROAD_Y, HZ = ROAD_HOR, w3 = S === 3, { dusk } = light(), here = roadTramo(ROADV);
+  // the sky: pale blue, pink at sunset, blue-black at night
+  const sg = c.createLinearGradient(0, 0, 0, HZ);
+  sg.addColorStop(0, night > .55 ? '#1e2846' : w3 ? '#cfdbe6' : '#9ccbe4'); sg.addColorStop(1, night > .55 ? '#3d4a6e' : dusk > .15 ? '#f4b8a0' : w3 ? '#eef2f5' : '#e4f1f4');
+  c.fillStyle = sg; c.fillRect(0, 0, W, HZ + 4);
+  if (night > .55) for (let k = 0; k < 24; k++) { const a = Math.sin(t * 1.3 + k * 5.1); if (a > .2) { c.fillStyle = `rgba(255,250,230,${a * .8})`; c.fillRect(rh(k) * W, rh(k, 1) * HZ * .8, 1.2, 1.2); } }
+  // far away: the hills (and from the hill, the gulf: a dark blue strip)
+  const hill = (k, amp, col, base) => { c.beginPath(); c.moveTo(0, HZ + 6); for (let x = 0; x <= W; x += 6) { const wx = x + ROADV * ROAD_PX * k; c.lineTo(x, base - amp * (.55 + .3 * Math.sin(wx * .011) + .2 * Math.sin(wx * .027 + 1))); } c.lineTo(W, HZ + 6); c.closePath(); c.fillStyle = col; c.fill(); };
+  hill(.04, 18, night > .55 ? '#2a3a4a' : w3 ? '#dfe6ec' : '#9ab4a0', HZ - 2);
+  for (let x = 0; x <= W; x += 4) { const s = ROADV + (x - W / 2) / (ROAD_PX * .04); if (roadTramo(clamp(s, 0, 1)).kind === 'colina_mar') { c.fillStyle = w3 ? '#9ab0c0' : night > .55 ? '#1a2a3e' : '#2f5f8a'; c.fillRect(x, HZ - 9, 4, 5); } }
+  hill(.1, 10, night > .55 ? '#2a3a32' : w3 ? '#e9eef2' : '#7fae5a', HZ + 3);
+  // the ground
+  c.fillStyle = w3 ? '#f2f5f7' : ['#8fc06a', '#86b45a', '#b0a860'][S]; c.fillRect(0, HZ + 2, W, H - HZ);
+  // the middle distance: what each stretch has (farms, woods, the church, the mill...)
+  roadSlots(.45, 30, (x, k, i, s) => {
+    const r = rh(i), r2 = rh(i, 2), y = HZ + 14 + rh(i, 3) * (Y - HZ - 40), z = .55 + (y - HZ) / (Y - HZ) * .45;
+    if (k === 'campos' && r2 < .5) { c.fillStyle = w3 ? '#e4e8ea' : '#a85a3a'; c.fillRect(x - 15, y - 5 * z, 30, 8 * z); c.strokeStyle = 'rgba(70,30,20,.4)'; c.lineWidth = .7; for (let j = 0; j < 3; j++) { c.beginPath(); c.moveTo(x - 15, y - 3 * z + j * 2.4 * z); c.lineTo(x + 15, y - 3 * z + j * 2.4 * z); c.stroke(); } }
+    if (k === 'pueblo') { if (r < .6) rHouse(c, x, y, z, { roof: ['#7a5a4a', '#5f7a9a', '#8a5a3c'][i % 3] }); else if (r < .8) rTree(c, x, y, 'maple', z); return; }
+    if (k === 'bosque') { rTree(c, x - 6, y, 'fir', z); if (r < .8) rTree(c, x + 8, y + 6, 'fir', z * 1.1); return; }
+    if (k === 'barranco') { if (r < .5) rTree(c, x, y, 'blossom', z); else if (r < .85) rTree(c, x, y, 'birch', z); return; }
+    if (k === 'ciruelos') { if (r < .75) rTree(c, x, y, 'blossom', z); return; }
+    if (k === 'avenida') { rTree(c, x, y, 'apple', z * 1.1); return; }
+    if (k === 'granjas') { if (r < .1) rHouse(c, x, y, z); else if (r < .18) rBarn(c, x, y, z); else if (r < .6) rTree(c, x, y, i % 2 ? 'apple' : 'maple', z); return; }
+    if (k === 'aserradero') { if (r < .07) rMill(c, x, y, z); else if (r < .14) rHouse(c, x, y, z, { roof: '#6a6a6a', wall: '#d8d0c0' }); else if (r < .4) rTree(c, x, y, 'maple', z); return; }
+    if (k === 'campos') { if (r < .12) rCow(c, x, y, z); else if (r < .2) rTree(c, x, y, 'maple', z); return; }
+    if (k === 'iglesia') { if (r < .06) rChurch(c, x, y, z); else if (r < .28) rHouse(c, x, y, z, { lilac: true }); else if (r < .45) rTree(c, x, y, 'maple', z); return; }
+    if (k === 'arroyo') { if (r < .45) rTree(c, x, y, 'willow', z); else if (r < .6) rTree(c, x, y, 'maple', z); return; }
+    if (k === 'colina_mar') { if (r < .08) rHouse(c, x, y, z); else if (r < .14) rBarn(c, x, y, z); else if (r < .3) rTree(c, x, y, 'maple', z); return; }
+    if (r < .25) rTree(c, x, y, k === 'curva' && r < .12 ? 'blossom' : 'maple', z);
+  });
+  // a brook or the river crossing under the road (the sawmill, the willows)
+  roadSlots(1, 260, (x, k, i) => { if ((k === 'aserradero' || k === 'arroyo') && rh(i, 7) < .5) { c.fillStyle = w3 ? '#cfe2ea' : '#6aa8c4'; c.beginPath(); c.moveTo(x - 10, HZ + 4); c.lineTo(x + 10, HZ + 4); c.lineTo(x + 34, H); c.lineTo(x - 2, H); c.closePath(); c.fill(); } });
+  // the red road (and its two ruts, and pebbles going by)
+  c.fillStyle = w3 ? '#e6e4dc' : '#b8573e'; c.fillRect(0, Y - 16, W, 32);
+  line(c, [[0, Y - 16], [W, Y - 16]], 'rgba(80,40,25,.35)', 1, 3); line(c, [[0, Y + 16], [W, Y + 16]], 'rgba(80,40,25,.35)', 1, 4);
+  roadSlots(1, 9, (x, k, i) => { const r = rh(i, 4); if (r < .5) { c.fillStyle = w3 ? 'rgba(150,150,150,.4)' : 'rgba(90,40,25,.45)'; c.fillRect(x, Y - 12 + r * 24, 2, 1); } });
+  c.strokeStyle = w3 ? 'rgba(160,160,160,.5)' : 'rgba(120,50,30,.5)'; c.lineWidth = 1; for (const dy of [-5, 7]) { c.beginPath(); c.moveTo(0, Y + dy); c.lineTo(W, Y + dy); c.stroke(); }
+  // the far side of the road: fences (rails in zigzag by the fields, posts by the farms), telegraph poles by the villages
+  roadSlots(1, 26, (x, k, i) => {
+    const y = Y - 20;
+    if (k === 'campos' || k === 'granjas' || k === 'colina_mar') { const up = i % 2 ? -4 : 0; line(c, [[x, y + up], [x + 26, y - 4 - up]], '#9a7a56', 1.6, i); line(c, [[x, y + up - 5], [x + 26, y - 9 - up]], '#9a7a56', 1.6, i + 1); }
+    else if (k === 'pueblo' && i % 6 === 0) { line(c, [[x, y], [x, y - 44]], '#6a4a30', 2, i); line(c, [[x - 8, y - 40], [x + 8, y - 40]], '#6a4a30', 1.6, i + 1); line(c, [[x, y - 40], [x + 156, y - 40]], 'rgba(40,40,40,.35)', .5, i + 2); }
+  });
+  // the milestones and the name of each stretch, at the side of the road
+  for (let m = 0; m <= ROAD_MILES; m++) { const x = W / 2 + (m / ROAD_MILES - ROADV) * ROAD_PX; if (x < -40 || x > W + 40) continue; blob(c, [[x - 4, Y - 16], [x + 4, Y - 16], [x + 4, Y - 28], [x, Y - 31], [x - 4, Y - 28]], '#e8e2d4'); c.fillStyle = '#4a2f1c'; c.font = 'bold 6px Georgia, serif'; c.textAlign = 'center'; c.fillText(String(ROAD_MILES - m + 1), x, Y - 20); }
+  for (const tr of ROAD_TRAMOS) { const x = W / 2 + (tr.s - ROADV) * ROAD_PX + 30; if (x < -80 || x > W + 80) continue; c.font = 'italic 7px Georgia, serif'; const tw = c.measureText(tr.name).width + 8; line(c, [[x, Y - 18], [x, Y - 44]], '#7a5536', 2, 9); blob(c, [[x - tw / 2, Y - 54], [x + tw / 2, Y - 54], [x + tw / 2, Y - 43], [x - tw / 2, Y - 43]], '#d9bf8f'); c.fillStyle = '#4a2f1c'; c.textAlign = 'center'; c.fillText(tr.name, x, Y - 46); }
+}
+// near: the bank by the road, the flowers, and the trees close by (in front of the cart); in the Avenue, the arch of
+// apple trees in bloom overhead
+function drawRoadNear(c, t){
+  const W = KIT.w, H = KIT.h, Y = ROAD_Y, w3 = S === 3;
+  roadSlots(1.35, 22, (x, k, i) => {
+    const r = rh(i, 5), y = Y + 26 + rh(i, 6) * (H - Y - 30);
+    if (k === 'barranco') { blob(c, [[x - 12, H], [x + 12, H], [x + 12, Y + 22 + r * 8], [x - 12, Y + 24 + r * 6]], w3 ? '#e8ecee' : '#a8503a', false); if (r < .35) rTree(c, x, y + 10, r < .2 ? 'blossom' : 'birch', 1.6); return; }
+    if ((k === 'ciruelos' || k === 'curva') && r < .18) { rTree(c, x, y + 8, 'blossom', 1.5); return; }
+    if (k === 'avenida' && r < .5) { rTree(c, x, H + 4, 'apple', 2.2); return; }
+    if (k === 'bosque' && r < .25) { rTree(c, x, y + 10, 'fir', 1.7); return; }
+    if (w3) return;
+    const sw = Math.sin(t * 1.6 + i) * 1.4; c.strokeStyle = 'rgba(70,120,45,.85)'; c.lineWidth = 1.1; c.beginPath(); for (const o of [-3, 0, 3]) { c.moveTo(x + o, y); c.quadraticCurveTo(x + o * .6 + sw * .4, y - 5, x + o * 1.2 + sw, y - 9); } c.stroke();
+    if (r < .3 && S < 2) ell(c, x + sw, y - 9, 1.8, 1.6, ['#f6f2f0', '#f2c14e', '#e88ab0', '#b48ad0'][i % 4]);
+  });
+  // the Avenue: the arch of blossoms overhead, the sunset showing through at the end
+  roadSlots(1.1, 18, (x, k, i) => { if (k !== 'avenida' || S === 3) return; const y = rh(i, 8) * ROAD_HOR * .9; ell(c, x, y, 16, 11, S === 0 ? (i % 3 ? '#f6eef0' : '#f2d8e2') : '#5f9a44', true); });
+}
+ROOMS.camino = {
+  draw: drawRoad, place: 'en el largo camino rojo entre Bright River y Avonlea, en la calesa', exitLabel: '',
+  items: (g, t) => {
+    const L = [{ y: 1e6, draw: () => drawRoadNear(g, t) }];
+    for (const k of Object.keys(PEOPLE)) { const b = PEOPLE[k]; if (b.where === 'camino') { const back = b.dir === 1 ? -1 : 1; L.push({ y: b.y + 18, draw: () => drawCart(g, { x: b.x - back * 56, y: b.y + 18, dir: b.dir, walk: b.walk || 0, moving: !!b.roadDir }, t) }); } }
+    return L;
+  },
+  blocked: () => true,
+  glow: () => [KIT.w / 2, ROAD_Y, 1, '255,200,120', 0],
+};
+// someone sets off on the road (from the signpost of Avonlea, s = 1, or from the station, s = 0)
+function roadStart(k, s, dir){
+  const b = wmBody(k); if (!b) return;
+  b.where = 'camino'; b.roadS = s; b.roadDir = dir; b.sit = true; b.nav = null; b.moving = false; b.buggy = true; b.dir = dir > 0 ? 1 : 3;
+  const tr = roadTramo(s); b.roadTr = tr;
+  logEv(`${wmName(k)} tomó el camino ${dir > 0 ? 'de Bright River a Avonlea' : 'de Avonlea a Bright River'} (ocho millas).`, []);
+}
+// and arrives at the other end
+function roadArrive(k, where){
+  const b = wmBody(k); b.roadDir = 0; b.sit = false; b.moving = false; b.nav = null;
+  if (where === 'br') { b.where = 'br'; b.x = BRS.cart.x - 70; b.y = BRS.cart.y + 4; b.dir = 3; logEv(`${wmName(k)} llegó a Bright River.`, []); }
+  else { b.where = 'out'; b.x = DOOR.br[0] + 40; b.y = DOOR.br[1] + 24; b.dir = 1; logEv(`${wmName(k)} llegó a Avonlea por el camino de Bright River.`, []); }
+}
+// Ana gets on the road with whoever drives (beside them in the cart)
+function roadJoin(withK){
+  const d = wmBody(withK); if (!d || d.where !== 'camino') return;
+  if (game.talk) close();
+  game.scene = 'camino'; game.road = { with: withK }; ana.roadS = d.roadS; ana.sit = true; ana.goto = null; ana.lie = false; ana.moving = false; diana.follow = false;
+  if (!obsScene()) { cam.x = KIT.w / 2; cam.y = KIT.h / 2; }
+}
+function roadTick(dt){
+  for (const k of Object.keys(PEOPLE)) {
+    const b = PEOPLE[k]; if (b.where !== 'camino') continue;
+    if (!b.roadDir) b.roadDir = 1;   // (left on the road: home to Avonlea)
+    b.roadS = clamp((b.roadS ?? 1) + b.roadDir * dt / ROAD_SEC, 0, 1); b.walk = ((b.walk || 0) + dt * 1.6) % 1; b.sit = true;
+    const tr = roadTramo(b.roadS); if (tr !== b.roadTr) { b.roadTr = tr; if (game.road?.with === k && game.scene === 'camino') roadTramoIn(k, tr); }
+    if (b.roadDir > 0 && b.roadS >= 1) roadArrive(k, 'out'); else if (b.roadDir < 0 && b.roadS <= 0) roadArrive(k, 'br');
+  }
+  // Ana, in the cart: where the cart is; at the end of the road, she gets down with the driver
+  if (game.scene === 'camino') {
+    const d = PEOPLE[game.road?.with];
+    if (d?.where === 'camino') { ana.roadS = d.roadS; ana.sit = true; ana.vx = ana.vy = 0; }
+    else if (d?.where === 'br') { goIn('br', [d.x + 26, d.y + 6]); }
+    else {
+      game.scene = 'out'; ana.sit = false; ana.x = (d?.x ?? DOOR.br[0]) + 22; ana.y = (d?.y ?? DOOR.br[1] + 24) + 2;
+      if (!obsScene()) { cam.x = ana.x; cam.y = ana.y; }
+      if (d && game.tripWith === game.road.with && !wmDriven(game.road.with)) { d.buggy = false; cart.on = true; cart.s = CART_LEN; cart.dest = 'av'; cart.dir = 1; cartOn('av'); }   // (the trip she asked for: on to Green Gables)
+      roadAvonlea(game.road?.with);
+    }
+  }
+  // the driver of the trip Ana asked for waits by the cart at the station
+  const m = PEOPLE[game.tripWith]; if (m && m.where === 'br' && !wmDriven(game.tripWith)) { m.x = BRS.cart.x - 70; m.y = BRS.cart.y + 4; m.moving = false; }
+  // the view: where everyone on the road is drawn, around the cart in the middle
+  const vs = viewScene();
+  if (vs === 'camino') ROADV = game.scene === 'camino' ? ana.roadS : (wmBody(OBS)?.roadS ?? ROADV);
+  for (const k of Object.keys(PEOPLE)) { const b = PEOPLE[k]; if (b.where !== 'camino') continue; b.x = KIT.w / 2 + (b.roadS - ROADV) * ROAD_PX; b.y = ROAD_Y - 4; b.dir = b.roadDir > 0 ? 1 : 3; b.moving = false; }
+  if (game.scene === 'camino') { const d = PEOPLE[game.road?.with]; if (d) { const back = d.dir === 1 ? -1 : 1; ana.x = d.x - back * 22; ana.y = d.y + 2; ana.dir = d.dir; } }
+  tripBarDraw();
+}
+// on the main map, the buggy goes with whoever drives it
+function buggyTick(){
+  for (const k of Object.keys(PEOPLE)) { const b = PEOPLE[k]; if (b.buggy && b.where !== 'out' && b.where !== 'camino' && b.where !== 'br') b.buggy = false; }
+}
+
+/* ---------- the trip's talk: Ana's chatter (the book's, stretch by stretch) and Matthew's few words. Nothing is said
+   twice: each stretch goes on, next time, where it was left (game.dlgUsed), and when all of it has been said, Ana's
+   other musings; when those too are said, it all starts over. ---------- */
+let TALKS = [];
+function talkPlay(lines, o = {}){
+  const L = lines.map(l => Array.isArray(l) ? { q: l[0], t: l[1], m: l[2] } : l).filter(l => l.t && l.t !== '…');
+  for (const k of o.hold || []) CHAT_HOLD[k] = TT + 1e6;
+  const t = { hold: o.hold, lines: L, i: -1, wait: o.delay ?? .5, ch: o.ch, stop: o.stop, end: o.end, budget: o.budget ? o.budget * 2.5 : 0, el: 0, use: o.use, resumen: o.resumen };
+  if (o.ch && TALKS.some(x => x.ch === o.ch)) { if (o.queue) (TALK_Q[o.ch] ||= []).push(t); return t; }
+  TALKS.push(t); if (t.resumen) logEv(t.resumen, []); return t;
+}
+const TALK_Q = {};
+const talkQ = k => k === 'bell' ? 'f:srbell' : k === 'jefe' ? 'f:jefe' : qOf(k);
+const talkBusy = ch => TALKS.some(x => x.ch === ch);
+function talkTick(dt){
+  for (const t of TALKS.slice()) {
+    t.el += dt;
+    if ((t.wait -= dt) > 0) continue;
+    if (t.stop?.() || ++t.i >= t.lines.length || (t.budget && t.el > t.budget)) { talkEnd(t); continue; }
+    const l = t.lines[t.i]; sayB(talkQ(l.q), l.t); t.wait = lineDur(l.t) + .35;
+    if (l.m) cap1Mark(l.m); t.use?.(t.i, l);
+  }
+}
+function talkEnd(t){
+  TALKS = TALKS.filter(x => x !== t);
+  for (const k of t.hold || []) delete CHAT_HOLD[k];
+  t.end?.(t.lines.slice(t.i + 1));
+  const q = t.ch && TALK_Q[t.ch]; if (q?.length) { const n = q.shift(); TALKS.push(n); if (n.resumen) logEv(n.resumen, []); }
+}
+// what is said on each stretch of the road, in order, from where it was left
+function roadLines(tr){
+  if (tr.quiet) return [];
+  const key = 'viaje' + tr.v, src = tr.v >= 0 ? LIBRO1.viaje[tr.v] : null, used = game.dlgUsed || (game.dlgUsed = {});
+  if (!src) return [];
+  const order = [...src.slice(tr.first || 0), ...src.slice(0, tr.first || 0)], n = used[key] || 0;
+  if (n >= order.length) return [];
+  return order.slice(n).map((l, j) => ({ q: l[0], t: l[1], m: CAP1_MARK[key + ':' + ((n + j + (tr.first || 0)) % order.length)] }));
+}
+function roadTramoIn(k, tr){
+  if (tr.m) cap1Mark(tr.m, tr.note);
+  else if (tr.note) logEv(tr.note, []);
+  for (const t of TALKS.filter(x => x.ch === 'viaje' && x.road)) talkEnd(t);   // (what was being said is left for another time)
+  let L = PEOPLE[k].roadDir > 0 ? roadLines(tr) : [], key = 'viaje' + tr.v;   // (the book's chatter is the trip home, from the station; going there, Ana's other musings)
+  if (tr.v === -1 && !tr.quiet && CAP1.extra?.length) { L = CAP1.extra.map(([q, t]) => ({ q, t })); key = null; CAP1.extra = null; }
+  if (!L.length && !tr.quiet) L = fillLines(2);
+  if (!L.length) return;
+  const t = talkPlay(L, { ch: 'viaje', delay: 1.5, stop: () => game.scene !== 'camino' || PEOPLE[k].roadTr !== tr, use: key ? () => { game.dlgUsed[key] = (game.dlgUsed[key] || 0) + 1; } : null });
+  t.road = true;
+  logEv(`En ${tr.name}, Ana le habló a ${wmName(k)} sin parar${tr.v >= 0 ? ': ' + (LIBRO1.viajeP[tr.v].split(/[.;]/)[0] || '').toLowerCase() : ''}.`, []);
+}
+// Ana's other musings, never twice in a row (when the book's lines of a stretch are all said)
+function fillLines(n){
+  const used = game.dlgUsed || (game.dlgUsed = {}), R = LIBRO1.relleno; let i = used.relleno || 0;
+  if (i >= R.length) { for (const k of Object.keys(used)) if (k.startsWith('viaje') || k === 'relleno') delete used[k]; i = 0; }   // (all of it said: it starts over)
+  const L = R.slice(i, i + n).map(t => ({ q: 'ana', t })); used.relleno = i + L.length; return L;
+}
+// at the end of the road, on the way into Avonlea: the Avenue behind, one more mile, the pond, Green Gables
+function roadAvonlea(k){
+  game.road = null; const U_ = game.dlgUsed || (game.dlgUsed = {});
+  if (k !== 'matthew' || U_.avonlea || AGENTS.ana?.followOf !== 'matthew' && !cart.riding) return;
+  U_.avonlea = 1;   // (the Avenue is named once)
+  const A = LIBRO1.avonlea.camino_blanco, pick_ = (src, idx) => idx.map(i => src[i]).filter(Boolean);
+  talkPlay(pick_(A, [1, 3, 4, 9, 11]).map((l, j) => [...l, j === 0 ? 'una_milla' : undefined]), { ch: 'viaje', queue: true, delay: 1, resumen: 'Matthew rompió el silencio: «solo nos falta una milla». Ana bautizó la Avenida: el Camino Blanco de las Delicias.' });
+  game.road = null;
+}
+// the strip at the bottom while on the road (or in the cart): where, how far, and how fast
+let GAME_SPEED = 1;
+const tripOn = () => game.scene === 'camino' || cart.riding || (!!AGENTS.ana?.ride && !!AGENTS.ana.followOf) || (CAP1.on && !CAP1.done);
+const tripSpeed = () => tripOn() ? GAME_SPEED : 1;
+let tripTxt = '';
+function tripBarDraw(){
+  const on = tripOn(); $('tripbar').hidden = !on; if (!on) return;
+  let s = '🐴 En la calesa';
+  if (game.scene === 'camino') { const d = PEOPLE[game.road?.with], dir = d?.roadDir || 1, tr = roadTramo(ana.roadS); s = `🐴 ${dir > 0 ? 'Hacia Avonlea' : 'Hacia Bright River'} · ${tr.name} · faltan ${roadMiles(ana.roadS, dir)} millas`; }
+  else if (CAP1.on && !CAP1.done) s = '📖 Capítulo 1 · ' + fmtHour(hourNow());
+  if (s !== tripTxt) { tripTxt = s; $('tripstop').textContent = s; }
+  for (const b of $('tripspd').children) b.classList.toggle('on', +b.dataset.k === GAME_SPEED);
+}
+// the island, the big map: only the towns, the roads between them, and where Ana is
+const ISLA = {
+  shore: [[.04, .5], [.09, .38], [.16, .33], [.25, .36], [.33, .3], [.42, .3], [.5, .27], [.58, .28], [.66, .24], [.75, .26], [.83, .22], [.92, .26], [.97, .36], [.93, .44], [.86, .46], [.8, .55], [.72, .6], [.66, .7], [.58, .66], [.5, .62], [.44, .66], [.36, .6], [.28, .62], [.2, .58], [.12, .62], [.06, .58]],
+  towns: { avonlea: ['Avonlea', .47, .35], whitesands: ['White Sands', .56, .33], spencervale: ['Spencervale', .38, .34], newbridge: ['Newbridge', .5, .44], carmody: ['Carmody', .42, .47], brightriver: ['Bright River', .5, .53], charlottetown: ['Charlottetown', .6, .61], hopeton: ['Hopeton', .22, .5] },
+  roads: [['avonlea', 'newbridge', 'brightriver'], ['avonlea', 'whitesands'], ['avonlea', 'spencervale'], ['avonlea', 'carmody'], ['carmody', 'brightriver'], ['brightriver', 'charlottetown']],
+  rail: [[.1, .52], [.22, .5], [.36, .52], [.5, .53], [.6, .61], [.8, .5], [.92, .4]],
+};
+function islaToggle(on = $('isla').hidden){
+  $('isla').hidden = !on; if (!on) return;
+  const cv = $('islacv'), dpr = devicePixelRatio || 1, w = Math.min(innerWidth - 40, 760), h = Math.round(w * .62);
+  cv.style.width = w + 'px'; cv.style.height = h + 'px'; cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); islaDraw();
+}
+function islaDraw(){
+  if ($('isla').hidden) return;
+  const cv = $('islacv'), c = cv.getContext('2d'), w = cv.width, h = cv.height, dpr = devicePixelRatio || 1, P = ([x, y]) => [x * w, y * h], T_ = ISLA.towns;
+  c.setTransform(1, 0, 0, 1, 0, 0); c.fillStyle = '#bcd8e2'; c.fillRect(0, 0, w, h);
+  c.strokeStyle = 'rgba(255,255,255,.5)'; c.lineWidth = dpr; for (let k = 0; k < 9; k++) { c.beginPath(); c.moveTo(0, h * (k + .5) / 9); for (let x = 0; x <= w; x += 20 * dpr) c.lineTo(x, h * (k + .5) / 9 + Math.sin(x * .02 + k) * 2 * dpr); c.stroke(); }
+  blob(c, ISLA.shore.map(P), '#f1e2bf'); ell(c, .47 * w, .37 * h, .07 * w, .045 * h, 'rgba(160,190,120,.35)');
+  c.setLineDash([6 * dpr, 4 * dpr]); line(c, ISLA.rail.map(P), '#5a5a62', 1.6 * dpr, 7); c.setLineDash([]);
+  for (const r of ISLA.roads) line(c, r.map(k => P([T_[k][1], T_[k][2]])), '#b8573e', 2.2 * dpr, r.length);
+  for (const [k, [name, x, y]] of Object.entries(T_)) { const [sx, sy] = P([x, y]), big = k === 'avonlea' || k === 'brightriver' || k === 'charlottetown'; c.beginPath(); c.arc(sx, sy, (big ? 5 : 3.5) * dpr, 0, TAU); c.fillStyle = big ? '#7a4a3a' : '#9a7a56'; c.fill(); c.font = `italic ${(big ? 14 : 12) * dpr}px Georgia, serif`; c.textAlign = 'center'; c.lineWidth = 3 * dpr; c.strokeStyle = 'rgba(241,226,191,.95)'; c.strokeText(name, sx, sy - 9 * dpr); c.fillStyle = '#4a2f1c'; c.fillText(name, sx, sy - 9 * dpr); }
+  c.font = `italic ${11 * dpr}px Georgia, serif`; c.fillStyle = '#4a6a7a'; c.fillText('Golfo de San Lorenzo', .5 * w, .12 * h); c.fillText('Estrecho de Northumberland', .45 * w, .85 * h);
+  // where Ana is: in Avonlea, at Bright River, or somewhere on the road between them
+  const av = [T_.avonlea[1], T_.avonlea[2]], nb = [T_.newbridge[1], T_.newbridge[2]], br = [T_.brightriver[1], T_.brightriver[2]];
+  const onRoad = s => s > .5 ? [lerp(nb[0], av[0], (s - .5) * 2), lerp(nb[1], av[1], (s - .5) * 2)] : [lerp(br[0], nb[0], s * 2), lerp(br[1], nb[1], s * 2)];
+  const mk = (p, name, col) => { const [sx, sy] = P(p); c.beginPath(); c.arc(sx, sy, (6 + Math.sin(TT * 5)) * dpr, 0, TAU); c.fillStyle = col; c.fill(); c.lineWidth = 1.4 * dpr; c.strokeStyle = 'rgba(60,35,20,.9)'; c.stroke(); c.font = `bold ${12 * dpr}px Georgia, serif`; c.fillStyle = '#4a2f1c'; c.fillText(name, sx, sy + 20 * dpr); };
+  const m = PEOPLE.matthew; if (m.where === 'camino' && game.scene !== 'camino') mk(onRoad(m.roadS), 'Matthew', LOOKS.matthew.dress);
+  mk(game.scene === 'camino' ? onRoad(ana.roadS) : game.scene === 'br' ? br : av, 'Ana', '#d9433b');
+}
+
+/* ---------- the bank of written dialogues for pairs and trios: when two (or three) of them meet, the next block not
+   yet said (game.dlgUsed); when all have been said, the usual greetings and gossip ---------- */
+const DLG_BANK = {
+  'ana+diana': [
+    [['ana', '¿Juras ser mi amiga del alma, Diana, mientras el sol y la luna existan?'], ['diana', '¡Lo juro! Aunque no sé muy bien cómo se jura… ¿así está bien?'], ['ana', 'Perfecto. Ahora es para siempre.']],
+    [['diana', 'Ana, ¿cómo se te ocurren tantas palabras largas?'], ['ana', 'Las tengo guardadas para las ideas grandes. Las chicas no caben en palabras chicas.'], ['diana', 'Yo solo tengo palabras medianas…']],
+    [['ana', 'He decidido que el claro de los abedules se llame la Senda de los Enamorados.'], ['diana', '¡Qué romántico! Pero no se lo digas a mamá.'], ['ana', 'Será nuestro secreto, como todo lo importante.']],
+    [['diana', 'Mamá dice que puedo ir a tu casa el sábado, si no hay lluvia.'], ['ana', 'Entonces voy a rezar para que no llueva… y por si acaso, para que llueva solo un poquito.']],
+    [['ana', '¿Te imaginas que el Bosque Encantado de verdad tenga fantasmas?'], ['diana', '¡Ana! Ahora no voy a poder pasar por ahí de noche.'], ['ana', 'Yo tampoco. Creo que imaginé demasiado bien.']],
+    [['diana', 'Gilbert Blythe te miró otra vez en clase.'], ['ana', 'Gilbert Blythe puede mirar a la pared. A mí no me interesa en lo más mínimo.'], ['diana', 'Si tú lo dices…']],
+  ],
+  'ana+marilla': [
+    [['marilla', 'Ana, ¿barriste el porche como te dije?'], ['ana', 'Sí, Marilla… bueno, casi. Me distraje mirando una araña que tejía, y era tan perfecta…'], ['marilla', 'Las arañas no barren porches, Ana.']],
+    [['ana', 'Marilla, ¿alguna vez fue usted una niña como yo?'], ['marilla', 'Fui una niña. Como tú, espero que no.'], ['ana', 'Entonces se perdió de mucho, Marilla.']],
+    [['marilla', 'Di tus oraciones antes de dormir.'], ['ana', 'Ya sé una de memoria. Pero a veces prefiero inventarlas: me salen más sentidas.'], ['marilla', 'Hmm. Con que sean sinceras, basta.']],
+    [['ana', '¿Puedo poner flores en la mesa? Una mesa sin flores es como una cara sin sonrisa.'], ['marilla', 'Pon las que quieras, mientras no traigas medio jardín y las abejas con él.']],
+    [['marilla', 'Ese sombrero está lleno de flores otra vez.'], ['ana', 'Es que las flores me quedan mejor que el pelo rojo, Marilla.'], ['marilla', 'Tu pelo no tiene la culpa de nada. Quítate eso antes de ir a la iglesia.']],
+  ],
+  'ana+matthew': [
+    [['ana', 'Señor Matthew, ¿le parece que el arroyo canta?'], ['matthew', 'Bueno, pues… ahora que lo dices, algo tararea, sí.'], ['ana', '¡Sabía que usted lo entendería!']],
+    [['matthew', 'Ana… ¿te gustaría un vestido con mangas abullonadas? Digo… por si acaso.'], ['ana', '¡Oh, señor Matthew! ¿De verdad lo dice?'], ['matthew', 'Bueno, pues… no le digas nada a Marilla todavía.']],
+    [['ana', '¿Usted cree que las vacas tienen pensamientos profundos?'], ['matthew', 'Bueno, pues… las nuestras parecen pensar mucho en el pasto.'], ['ana', 'Eso también es una filosofía.']],
+    [['matthew', 'Lo hiciste muy bien hoy, Ana.'], ['ana', '¿Usted cree? Yo pensé que me había equivocado en todo.'], ['matthew', 'Ya lo creo que no. Yo lo vi.']],
+    [['ana', 'Hoy no hablé casi nada, señor Matthew. ¿Se dio cuenta?'], ['matthew', 'Bueno, pues… no, la verdad. Me pareció lo de siempre.'], ['ana', '¡Ay! Entonces tendré que esforzarme más.']],
+  ],
+  'lynde+marilla': [
+    [['lynde', 'Marilla, esa niña tuya va a terminar de maestra o de actriz, una de dos.'], ['marilla', 'Mientras termine sus quehaceres primero, Rachel, que termine de lo que quiera.']],
+    [['lynde', '¿Supiste que los Pye volvieron a pelear con los Sloane por la cerca?'], ['marilla', 'No, y no me hace falta saberlo.'], ['lynde', 'Bueno, yo solo lo digo. Nadie puede decir que Rachel Lynde no avisa.']],
+    [['marilla', '¿Más té, Rachel?'], ['lynde', 'Media taza. Y de esa mermelada de ciruelas, que la tuya es mejor que la mía, aunque no se lo digas a nadie.']],
+    [['lynde', 'La maestra nueva tiene ideas muy modernas. ¡Hacen ejercicios físicos en la escuela!'], ['marilla', 'Mientras no se rompan la cabeza…'], ['lynde', 'Ya veremos, Marilla. Ya veremos.']],
+  ],
+  'marilla+matthew': [
+    [['marilla', 'Matthew, ¿le estuviste dando caramelos a Ana otra vez?'], ['matthew', 'Bueno, pues… quizás uno. O dos.'], ['marilla', 'Esa niña te tiene en la palma de la mano.']],
+    [['matthew', 'Marilla… la niña está creciendo, ¿no te parece?'], ['marilla', 'Demasiado rápido, Matthew. Demasiado rápido.']],
+    [['marilla', 'Hay que arreglar la cerca del potrero antes del invierno.'], ['matthew', 'Ya lo creo. Mañana temprano, si no llueve.']],
+  ],
+  'ana+gilbert': [
+    [['gilbert', 'Ana, ¿algún día me vas a perdonar lo de «Zanahorias»?'], ['ana', 'Algunas cosas no se perdonan, Gilbert Blythe.'], ['gilbert', 'Bueno… seguiré preguntando.']],
+    [['gilbert', 'Felicitaciones por el examen. Me ganaste por un punto.'], ['ana', '…Gracias.'], ['gilbert', 'La próxima vez no será tan fácil, Ana.']],
+    [['gilbert', '¿Quieres que te ayude con ese canasto?'], ['ana', 'Puedo sola, gracias.'], ['gilbert', 'Ya sé que puedes. Solo preguntaba.']],
+  ],
+  'ana+lynde': [
+    [['lynde', 'Vaya, Ana, se te está oscureciendo el pelo. Ya no es tan colorado.'], ['ana', '¿De verdad, Sra. Lynde? ¡Es lo más lindo que me ha dicho nunca!']],
+    [['lynde', 'Espero que te portes bien en la escuela, niña.'], ['ana', 'Lo intento con todas mis fuerzas, Sra. Lynde. A veces mis fuerzas se distraen.']],
+  ],
+  'ana+diana+marilla': [
+    [['marilla', 'Niñas, no se alejen más allá del arroyo.'], ['diana', 'No, Srta. Cuthbert.'], ['ana', 'Solo hasta el Bosque Encantado, Marilla… que está más acá del arroyo, casi.'], ['marilla', 'Ana…']],
+    [['diana', 'Srta. Cuthbert, ¿Ana puede venir a tomar el té mañana?'], ['marilla', 'Si termina sus quehaceres, sí.'], ['ana', '¡Los terminaré hoy mismo! Bueno, mañana temprano.']],
+  ],
+  'ana+marilla+matthew': [
+    [['ana', '¡Adivinen qué me pasó hoy!'], ['marilla', 'Algo que vamos a lamentar, seguramente.'], ['matthew', 'Déjala contar, Marilla.'], ['ana', '¡Gracias, señor Matthew! Pues verán…']],
+    [['marilla', 'A la mesa. Y Ana, sin novelas en la mesa.'], ['ana', 'Era solo un capitulito, Marilla.'], ['matthew', '(se ríe bajito) Je.']],
+  ],
+  'ana+lynde+marilla': [
+    [['lynde', 'Marilla, esa niña habla más que un loro.'], ['ana', 'Los loros solo repiten, Sra. Lynde. Yo invento.'], ['marilla', 'Ana. A tu cuarto.']],
+  ],
+};
+const dlgKey = ks => [...ks].sort().join('+');
+function dlgNext(ks){
+  const key = dlgKey(ks), list = DLG_BANK[key]; if (!list) return null;
+  const used = game.dlgUsed || (game.dlgUsed = {}), n = used['par:' + key] || 0; if (n >= list.length) return null;
+  used['par:' + key] = n + 1; return list[n].map(([q, t]) => ({ q, t }));
+}
+/* ---------- chapter I of the book (with chapter II and the start of III), played by the planner and the routines:
+   Mrs. Rachel at her window sees Matthew drive by in his best suit; after tea she goes to Green Gables to find out;
+   Marilla has set the table for three and tells her (an orphan boy!); Rachel takes the news up the road to the Bells.
+   Meanwhile Matthew drives the eight miles to Bright River, finds a girl waiting on the pile of shingles, and brings
+   her home through the Avenue and past the pond, at dusk. Each moment of the book (LIBRO1.verdad) is marked here
+   when it happens in the simulation (CAP1.marks), to compare the two agendas (tools/trace_goal.js cap1). ---------- */
+const CAP1 = { on: false, done: 0, marks: {}, f: {}, extra: null };
+const CAP1_MARK = { 'viaje0:0': 'rama_ciruelo', 'viaje4:6': 'hablar_todo', 'viaje9:0': 'pelo_rojo' };
+function cap1Mark(id, note){ if (!CAP1.on || CAP1.marks[id] != null) return; CAP1.marks[id] = +hourNow().toFixed(3); if (note) logEv(note, []); }
+const cap1Pick = (src, idx) => idx.map(i => src[i]).filter(Boolean);
+function startCap1(){
+  for (const c of CHATS.slice()) chatEnd(c); TALKS = []; for (const k of Object.keys(TALK_Q)) delete TALK_Q[k];
+  for (const k of Object.keys(AGENTS)) { wmRelease(k); delete AGENTS[k]; }
+  close(); if (ana.goto) ana.goto = null; WM_APPROACH = null; AGENDA_ON = false; if ($('wmagenda')) $('wmagenda').checked = false;
+  cart.on = false; cart.riding = false; game.tripWith = null; game.road = null; diana.follow = false;
+  if (today() % 7 === 6) dayT += 1;   // (a weekday)
+  dayAt(12); setSeason(0); S = 0;     // (an afternoon in early June)
+  game.dlgUsed = {};
+  CAP1.on = true; CAP1.done = 0; CAP1.marks = {}; CAP1.f = {}; CAP1.extra = null;
+  const put = (k, room, x, y) => { const b = PEOPLE[k]; b.where = room; b.x = x; b.y = y; b.sit = false; b.nav = null; b.buggy = false; b.roadDir = 0; b.story = null; b.away = null; };
+  put('marilla', 'gg', STOVE.x + 30, STOVE.y + 40); put('matthew', 'out', BARN.x + 140, BARN.y + 70); put('lynde', 'rl', KDOOR.x - 60, KIT.h * .45);
+  if (PEOPLE.shearer.where !== 'away') PEOPLE.shearer.where = 'away';
+  // Matthew in the field until he goes; Rachel at her window until tea
+  agentStart('matthew', G.estar_en('matthew', 'granero', null, 15.3), { label: 'trabajar en el campo detrás del granero hasta que sea hora (cap. 1)' });
+  agentStart('lynde', G.estar_en('lynde', 'h:rl', null, 17.5), { label: 'tejer junto a la ventana, vigilando el camino, y tomar el té (cap. 1)' });
+  // Ana, on the train: she is not at the station yet
+  game.scene = 'br'; ana.hidden = true; ana.sit = false; ana.x = KIT.w / 2; ana.y = 3.6 * T; ana.dir = 2;
+  game.train = null; observe('lynde');
+  logEv('Capítulo 1: una tarde de comienzos de junio en Avonlea.', []);
+}
+function cap1Tick(){
+  if (!CAP1.on || CAP1.done) return;
+  const h = hourNow(), f = CAP1.f, M = PEOPLE.matthew, R = PEOPLE.lynde, Ma = PEOPLE.marilla, A = AGENTS.ana;
+  if (!f.t0) { f.t0 = 1; cap1Mark('telegrama', 'Marilla recibió un telegrama de la Sra. Spencer: el huérfano llega en el tren de las cinco y media a Bright River.'); }
+  if (h >= 15 && !f.t15) { f.t15 = 1; if (R.where === 'rl') cap1Mark('rachel_teje', 'La Sra. Rachel Lynde tejía una colcha junto a la ventana, vigilando el camino.'); if (FOLKBY.thomas?.where === 'out') cap1Mark('thomas_nabos', 'Thomas Lynde sembraba nabos en el campo de la colina, detrás del granero.'); }
+  // Matthew goes, in the buggy, in his best suit
+  if (h >= 15.33 && !f.go) { f.go = 1; M.buggy = true; agentStart('matthew', { ...G.estar_en('matthew', 'h:br'), text: 'Matthew va a la estación de Bright River a buscar al niño' }, { label: 'ir a Bright River a buscar al niño huérfano (cap. 1)', prio: 3 }); }
+  if (f.go && M.where === 'out' && !CAP1.marks.matthew_sale && dist(M.x, M.y, GG.x, GG.y) > 300) cap1Mark('matthew_sale', 'Matthew salió de Tejas Verdes en la calesa con la yegua alazana, con cuello blanco y su mejor traje.');
+  if (f.go && M.where === 'out' && dist(M.x, M.y, LY.x, LY.y + 60) < 420) {
+    if (h < 19) { if (!CAP1.marks.matthew_hondonada) { cap1Mark('matthew_hondonada', 'Matthew pasó por la hondonada, frente a la casa de la Sra. Lynde, y subió la colina.'); if (R.where === 'rl') { cap1Mark('rachel_ve', 'Rachel lo vio pasar desde la ventana: ¿adónde irá Matthew Cuthbert tan arreglado? Decidió ir a Tejas Verdes después del té.'); if (viewScene() === 'rl') sayB('lynde', '¡Matthew Cuthbert, con cuello blanco y en la calesa! ¿Adónde irá? Después del té voy a Tejas Verdes a averiguarlo.'); } } }
+    else if (A?.followOf === 'matthew' && R.where === 'rl') cap1Mark('rachel_ve_vuelta', 'Ya oscurecía, pero Rachel alcanzó a ver desde su ventana la calesa que volvía, con alguien más.');
+  }
+  if ((M.where === 'camino' && M.roadDir < 0) || (CAP1.marks.matthew_hondonada && !f.st && M.where === 'out' && dist(M.x, M.y, LY.x, LY.y) > 900)) cap1Mark('matthew_camino', 'Matthew trotaba tranquilo por las ocho millas a Bright River, entre granjas, abetos y ciruelos en flor.');
+  if (h >= 17 && !f.mesa) { f.mesa = 1; if (Ma.where === 'gg') { cap1Mark('mesa_tres', 'Marilla puso la mesa para tres, con mermelada de manzana silvestre y un solo tipo de torta.'); if (viewScene() === 'gg') sayB('marilla', 'Tres platos. Matthew, yo… y el niño.'); } }
+  if (h >= 17.25 && !f.te) { f.te = 1; if (R.where === 'rl') cap1Mark('rachel_te', 'Rachel Lynde tomó el té.'); }
+  // Rachel goes to Green Gables to find out
+  if (h >= 17.5 && !f.rv) { f.rv = 1; agentStart('lynde', { ...G.estar_en('lynde', 'cocina'), text: 'Rachel va a Tejas Verdes a averiguar adónde fue Matthew' }, { label: 'ir a Tejas Verdes a averiguar adónde fue Matthew (cap. 1)', prio: 3 }); }
+  if (f.rv && R.where === 'out' && dist(R.x, R.y, GG.x, GG.y) < 520) cap1Mark('rachel_sendero', 'Rachel caminó por el largo sendero de Tejas Verdes, criticando que vivan tan apartados.');
+  if (f.rv && R.where === 'gg' && !f.rm) {
+    f.rm = 1; cap1Mark('rachel_entra', 'Rachel golpeó la puerta de la cocina, entró, y vio la mesa puesta para tres.'); cap1Mark('marilla_cuenta');
+    talkPlay(LIBRO1.rachel_marilla, { ch: 'gg', budget: 20, hold: ['lynde', 'marilla'], resumen: 'Marilla le contó a Rachel que Matthew fue a Bright River a buscar a un niño huérfano de Nueva Escocia.',
+      end: rest => { f.rmEnd = 1; game.wm.know.lynde = [...new Set([...(game.wm.know.lynde || []), 'huerfano'])]; if (rest.length) (DLG_BANK['lynde+marilla'] ||= []).unshift(rest); agentStart('lynde', { ...G.estar_en('lynde', 'casa_bell', null, null), text: 'Rachel va a casa de los Bell a contar la noticia' }, { label: 'ir a casa de Robert Bell a contar la noticia (cap. 1)', prio: 3 }); } });
+  }
+  if (f.rmEnd && R.where === 'out' && !CAP1.marks.rachel_sale) cap1Mark('rachel_sale', 'Rachel salió de Tejas Verdes rumbo a la casa de Robert Bell, a contar la noticia.');
+  if (f.rmEnd && !f.bell) { const B = FOLKBY.srbell; if (B) { B.talkT = TT + 1e6; B.route = []; if (B.where !== 'out' || dist(B.x, B.y, WP.casa_bell[0], WP.casa_bell[1]) > 60) { B.where = 'out'; B.x = WP.casa_bell[0] + 30; B.y = WP.casa_bell[1] + 10; } } }
+  if (f.rmEnd && !f.bell && R.where === 'out' && dist(R.x, R.y, WP.casa_bell[0], WP.casa_bell[1]) < 130) {
+    f.bell = 1; cap1Mark('bell_recibe', 'Los Bell recibieron a Rachel, que les contó la noticia de los Cuthbert.');
+    talkPlay(LIBRO1.rachel_bell, { ch: 'bell', budget: 15, hold: ['lynde'], end: () => { if (FOLKBY.srbell) FOLKBY.srbell.talkT = TT + 1; agentStart('lynde', { ...G.estar_en('lynde', 'h:rl'), text: 'Rachel vuelve a su casa' }, { label: 'volver a casa, a la ventana (cap. 1)' }); } });
+  }
+  // the train comes in at Bright River: Ana gets off, and Mrs. Spencer goes on to White Sands
+  if (h >= 17.5 && !f.train) { f.train = TT; game.train = { t0: TT }; if (OBS === 'lynde') observe(null); }
+  if (f.train && !f.anaOn && TT - f.train > 7) { f.anaOn = 1; ana.hidden = false; ana.x = KIT.w * .45; ana.y = 3.4 * T; ana.dir = 2; cap1Mark('ana_tren', 'Ana bajó del tren de las cinco y media con la Sra. Spencer, que la dejó a cargo del jefe de estación.'); cap1Mark('spencer_sigue', 'La Sra. Spencer siguió viaje en el mismo tren hasta White Sands.'); }
+  if (f.anaOn && !f.pila && TT - f.train > 20) { f.pila = 1; ana.sit = true; ana.x = BRS.pile.x; ana.y = BRS.pile.y + 2; ana.dir = 2; cap1Mark('ana_pila', 'Ana no quiso entrar a la sala de espera de señoras («hay más campo para la imaginación») y se sentó en la pila de tejuelas.'); sayB('ana', 'Prefiero quedarme afuera, gracias. Aquí hay más campo para la imaginación.'); }
+  // Matthew at the station: the stationmaster, the girl on the shingles; and home in the buggy
+  if (M.where === 'br' && !f.st) {
+    f.st = 1; cap1Mark('matthew_estacion', 'Matthew ató la yegua en el patio del hotel de Bright River, pasó junto a la niña sin mirarla y fue a la estación.'); cap1Mark('jefe_explica');
+    const E = LIBRO1.estacion, idx = [0, 1, 3, 8, 13, 23];
+    CAP1.extra = E.filter((_, i) => !idx.includes(i) && i > 8 && i !== 13).slice(0, 4);
+    talkPlay(cap1Pick(E, idx).map(l => [...l, l === E[8] ? 'matthew_nina' : undefined]), { ch: 'br', budget: 16, hold: ['matthew'], resumen: 'El jefe de estación le explicó a Matthew que solo había llegado una niña; Matthew decidió llevarla a casa y que Marilla aclarara el error.',
+      end: () => { ana.sit = false; agentStart('matthew', G.llevar('matthew', 'ana', 'cocina'), { label: 'llevar a la niña a Tejas Verdes en la calesa (cap. 2)', prio: 3 }); } });
+  }
+  if (game.scene === 'camino' && f.st && !CAP1.marks.suben_calesa) cap1Mark('suben_calesa', 'Ana y Matthew subieron a la calesa (ella no soltó su bolso de alfombra) y salieron del pueblo.');
+  // into Avonlea: the pond, the Barrys', Green Gables under the big white star
+  if (f.st && M.where === 'out' && h > 19 && !f.lago && dist(M.x, M.y, 37 * U, 40 * U) < 380 && A?.followOf === 'matthew') {
+    f.lago = 1; const L = LIBRO1.avonlea;
+    talkPlay(cap1Pick(L.lago, [0, 1, 5, 9]).map((l, j) => [...l, j === 0 ? 'lago' : undefined]), { ch: 'viaje', queue: true, resumen: 'Matthew le mostró la laguna de Barry; Ana la bautizó el Lago de las Aguas Brillantes.' });
+  }
+  if (f.st && M.where === 'out' && h > 19 && !f.tv && dist(M.x, M.y, GG.x, GG.y) < 1500 && A?.followOf === 'matthew') {
+    f.tv = 1; talkPlay(cap1Pick(LIBRO1.avonlea.tejas_verdes, [2, 3, 8]).map((l, j) => [...l, j === 0 ? 'adivina_tv' : undefined]), { ch: 'viaje', queue: true, resumen: 'Ana adivinó cuál era Tejas Verdes, bajo una gran estrella blanca.' });
+  }
+  // home: Matthew helps her down; Marilla comes out: where is the boy?
+  if (f.st && !f.home && M.where === 'gg' && !wmDriven('matthew')) {
+    f.home = 1; if (game.scene !== 'gg') goIn('gg'); ana.sit = false; cap1Mark('baja_ana', 'Matthew bajó a Ana de la calesa en el patio oscuro de Tejas Verdes, entre los álamos, y entraron a la casa.');
+    for (const t of TALKS.filter(x => x.ch === 'viaje')) talkEnd(t); TALK_Q.viaje = [];   // (at the door, the trip's talk is over)
+    talkPlay(LIBRO1.llegada.map((l, j) => [...l, j === 0 ? 'marilla_nino' : undefined]), { ch: 'gg', hold: ['matthew', 'marilla'], resumen: 'Marilla vio a la niña de pelo rojo: «Matthew Cuthbert, ¿quién es ésa? ¿Dónde está el niño?»', end: () => { CAP1.done = hourNow(); logEv('Fin del capítulo 1 (y del 2): Ana llegó a Tejas Verdes.', []); } });
+  }
+}
 // the school: rows of desks, the master's desk, the blackboard, the stove, the windows over the river
 function drawSchool(c, t, night){
   c.fillStyle = '#b98a58'; c.fillRect(0, 0, KIT.w, KIT.h);
@@ -2134,7 +2593,8 @@ function targets(){
       else if (game.hasCan && game.water > 0 && !b.wet) add(id, b.x, b.y, 30, 'Regar', () => { b.wet = 1; b.grow = 0; game.water--; logEv('Ana regó la huerta.'); taskEvent('regar'); drops(b.x, b.y); sfx.water(); save(); }, o);
       else if (game.hasCan && game.water <= 0 && !b.wet) add(id, b.x, b.y, 30, 'La regadera está vacía (llénala en la bomba)', say_('La regadera está vacía: llénala en la bomba'), { ...o, pri: 50 });
     });
-    for (const [id, h] of Object.entries(HOUSES)) add('h:' + id, h.at.x, h.at.y + 6, 26, h.open && !h.open() ? h.closed : h.enter, () => h.open && !h.open() ? anaSays(pick(['Cerrado... el Sr. Lawson abre a las ocho.', 'La tienda está cerrada. ¡Y yo que soñaba con unos caramelos de menta!'])) : goIn(id), { pri: 4, test: (x, y) => Math.abs(x - h.at.x) < h.at.w / 2 + 8 && y < h.at.y + 10 && y > h.at.y - 80 });
+    add('h:br', HOUSES.br.at.x, HOUSES.br.at.y + 6, 30, 'El camino a Bright River (8 millas)', () => anaSays(pick(['¡Ocho millas hasta Bright River! A pie no llego ni para la cena. Con Matthew, en la calesa, sí.', 'Por aquí se va a Bright River, y a la estación. Es lejísimos: hay que ir en la calesa.'])), { pri: 4, hy: 30, hit: 30 });
+    for (const [id, h] of Object.entries(HOUSES)) if (!h.far) add('h:' + id, h.at.x, h.at.y + 6, 26, h.open && !h.open() ? h.closed : h.enter, () => h.open && !h.open() ? anaSays(pick(['Cerrado... el Sr. Lawson abre a las ocho.', 'La tienda está cerrada. ¡Y yo que soñaba con unos caramelos de menta!'])) : goIn(id), { pri: 4, test: (x, y) => Math.abs(x - h.at.x) < h.at.w / 2 + 8 && y < h.at.y + 10 && y > h.at.y - 80 });
     for (const f of FOLK) if (f.where === 'out' && Math.abs(f.x - ana.x) < 400 && Math.abs(f.y - ana.y) < 400) add('f:' + f.id, f.x, f.y, 34, f.id === 'lawson' ? 'Comprar o vender (Sr. Lawson)' : 'Hablar con ' + f.def.name, () => f.id === 'lawson' ? shopMenu() : folkTalk(f), { hy: 26 * f.def.look.h, hit: 24 });
     if (dist(ana.x, ana.y, FARO.x, FARO.y) < 260) add('faro', FARO.x, FARO.y + 10, 120, 'Mirar el mar desde el faro', () => { anaSays(pick(FARO_LINES)); logEv('Ana miró el mar desde el faro.'); }, { pri: 5, hy: 60, hit: 40 });
     if (dist(ana.x, ana.y, MILK.x, MILK.y) < 200) add('leche', MILK.x, MILK.y, 60, 'Mirar las botellas de leche en el río', () => anaSays(pick(MILK_LINES)), { pri: 5, hy: 8, hit: 34 });
@@ -2145,7 +2605,7 @@ function targets(){
   } else {
     ROOMS[game.scene].actions?.(add);
     for (const f of FOLK) if (f.where === game.scene) add('f:' + f.id, f.x, f.y, f.id === 'lawson' ? 60 : 34, f.id === 'lawson' ? 'Comprar o vender (Sr. Lawson)' : 'Hablar con ' + f.def.name, () => f.id === 'lawson' ? shopMenu() : folkTalk(f), { hy: 26 * f.def.look.h, hit: 22, pri: 3 });
-    add('door', KDOOR.x, KIT.h, 26, ROOMS[game.scene].exitLabel ?? 'Salir', () => goOut(), { hy: 10, hit: 30 });
+    if (game.scene !== 'camino') add('door', KDOOR.x, KIT.h, 26, ROOMS[game.scene].exitLabel ?? 'Salir', () => goOut(), { hy: 10, hit: 30 });
   }
   game.ground.forEach(it => { if (it.scene === game.scene) add('g:' + it.id, it.x, it.y, 28, it.k === 'can' ? 'Recoger la regadera' : 'Recoger ' + itemText(it.k, it.n), () => pickUp(it), { hy: 8, hit: 20 }); });
   return L;
@@ -2522,7 +2982,7 @@ function autoStep(){
   done();
 }
 function autoTick(){
-  if (!autoAllowed() || AGENTS.ana?.followOf || wmDriven('ana')) return;   // (a goal of the planner, or following someone who asked: no wandering off)
+  if (!autoAllowed() || AGENTS.ana?.followOf || wmDriven('ana') || (CAP1.on && !CAP1.done) || game.scene === 'camino' || ana.hidden || cart.riding) return;   // (in the book's chapter she waits for Matthew; in the cart she rides)   // (a goal of the planner, or following someone who asked: no wandering off)
   const manual = auto.intent?.manual;
   if (!manual && TT - lastInput < AUTO_IDLE) { auto.on = false; return; }
   if (!auto.on) { auto.on = true; if (!auto.told && !manual) { auto.told = true; notice('Ana hace lo suyo; muévete o toca algo para retomar el control.'); } }
@@ -2620,7 +3080,7 @@ function cartTick(dt){
   if (cart.riding) { ana.x = cart.x + back * 34; ana.y = cart.y - 16; ana.dir = cart.dir; ana.sit = true; ana.vx = ana.vy = 0; }
   if (cart.riding && !cart.moving) {   // (arrived)
     cartOff();
-    if (cart.dest === 'br') { logEv('Ana y Matthew llegaron a la estación de Bright River.', ['matthew']); notice('📍 La estación de Bright River'); }
+    if (cart.dest === 'br') { cart.on = false; m.sit = false; roadStart('matthew', 1, -1); roadJoin('matthew'); roadTramoIn('matthew', roadTramo(1)); notice('🐴 El camino a Bright River: ocho millas'); return; }
     else { logEv('Ana y Matthew volvieron a Tejas Verdes desde Bright River.', ['matthew']); cart.on = false; game.tripWith = null; m.sit = false; m.y = cart.y + 20; m.nav = null; }
     save();
   }
@@ -2641,6 +3101,8 @@ function momentsTick(){
 }
 function goIn(room, at){ game.scene = room; ana.lie = false; diana.lie = false; ana.x = at ? at[0] : KDOOR.x; ana.y = at ? at[1] : KIT.h - 14; ana.dir = 0; ana.sit = false; toby.x = ana.x + 26; toby.y = ana.y; if (diana.follow) { diana.where = room; diana.sit = false; diana.x = ana.x - 26; diana.y = ana.y; } if (!obsScene()) { cam.x = KIT.w / 2; cam.y = KIT.h / 2; } }
 function goOut(){
+  if (game.scene === 'camino') return;
+  if (game.scene === 'br') { const m = PEOPLE.matthew; if (m.where === 'br' && m.buggy) { roadStart('matthew', 0, 1); roadJoin('matthew'); roadTramoIn('matthew', roadTramo(0)); return; } return anaSays('Son ocho millas hasta Avonlea... a pie no. Tendré que esperar a que alguien venga en la calesa.'); }
   if (ROOMS[game.scene].parent) return goIn(ROOMS[game.scene].parent, ROOMS[game.scene].exitAt);
   const H = HOUSES[game.scene].at;
   game.scene = 'out'; ana.lie = false; diana.lie = false; ana.x = H.x; ana.y = H.y + 24; ana.dir = 2; ana.sit = false; toby.x = ana.x + 24; toby.y = ana.y + 10;
@@ -4190,7 +4652,10 @@ $('aiq').querySelector('.no').addEventListener('click', () => { const r = aiq.li
 $('aiq').querySelector('.all').addEventListener('click', () => { const r = aiq.list[0]; if (!r) return; aiq.skip.add(r.kind); for (const x of aiq.list.filter(x => x.kind === r.kind)) aiqFail(x.id, 'omitido'); notice('🐞 Desde ahora no se pregunta: ' + r.kind); });
 $('aiq').querySelector('.cp').addEventListener('click', () => { const r = aiq.list[0]; if (!r) return; try { navigator.clipboard.writeText(`INSTRUCCIONES:\n${sysFor(r.schema)}\n\nPEDIDO:\n${r.prompt}\n\nResponde solo con un objeto JSON que siga este esquema:\n${JSON.stringify(r.schema)}`); notice('📋 Copiado: pégalo en otra IA y trae su respuesta'); } catch (e) {} });
 $('aiq').addEventListener('keydown', e => e.stopPropagation());
-$('tripfast').addEventListener('pointerdown', e => { e.stopPropagation(); if (trip) { trip.fast = !trip.fast; tripBar(); } });
+for (const b of $('tripspd').children) b.addEventListener('pointerdown', e => { e.stopPropagation(); GAME_SPEED = +b.dataset.k; tripTxt = ''; tripBarDraw(); });
+$('tripisla').addEventListener('pointerdown', e => { e.stopPropagation(); islaToggle(); });
+$('mapisla').addEventListener('click', () => islaToggle(true));
+$('islaclose').addEventListener('click', () => islaToggle(false));
 $('tok').addEventListener('pointerdown', e => { e.stopPropagation(); if (!game.talk) aiPanel(true); });
 tokDraw();
 // starting over: everything that happened is forgotten (the AI settings stay)
@@ -4229,6 +4694,7 @@ $('wmrun').addEventListener('pointerdown', e => { const k = e.target.closest('[d
 $('vecon').checked = VEC_ON; $('vecon').addEventListener('change', e => { VEC_ON = e.target.checked; });
 $('wmdis').addEventListener('change', e => { WM_DISTRACT = e.target.checked; });
 $('wmagenda').addEventListener('change', e => { AGENDA_ON = e.target.checked; agendaT = 0; });
+$('wmcap1').addEventListener('click', () => { startCap1(); notice('📖 Capítulo 1: una tarde de junio. Mira a la Sra. Lynde en su ventana… (abajo puedes acelerar)'); });
 $('wmlist').addEventListener('click', e => { const i = e.target.closest('button')?.dataset.i; if (i != null) wmRunTest(+i); });
 $('wmobey').addEventListener('change', e => { WM_OBEY = e.target.checked; });
 $('wmstop').addEventListener('click', () => { for (const k of Object.keys(AGENTS)) { wmRelease(k); delete AGENTS[k]; } wmPanelDraw(); });
@@ -4285,9 +4751,10 @@ function update(dt){
     if (keys.has('ArrowUp') || keys.has('KeyW')) my--; if (keys.has('ArrowDown') || keys.has('KeyS')) my++;
     if (stick) { const dx = stick.x - stick.x0, dy = stick.y - stick.y0, l = Math.hypot(dx, dy); if (l > 10) { mx = dx / Math.max(l, 50); my = dy / Math.max(l, 50); } }
   }
+  if (game.scene === 'camino' || ana.hidden) { mx = my = 0; if (ana.goto && !ana.goto.wm) ana.goto = null; }
   if (ANA_AUTO) { if (mx || my) { freeStart(); const v = 520 / (cam.zoom || 1) / (viewZoom || 1); freeCam.x += mx * v * dt; freeCam.y += my * v * dt; } mx = my = 0; }   // (on her own: the keys move the view)
   if (game.talk?.deadline && TT > game.talk.deadline && !sayOpen) { game.talk.deadline = 0; autoChoose(); }
-  autoTick(); cartTick(dt); momentsTick(); folkTick(dt); faunaTick(dt); agentTick(dt); agendaTick(); wmApproachTick(dt); calledTick(); chatTick(dt); wmFollowTick();
+  autoTick(); cartTick(dt); roadTick(dt); buggyTick(); talkTick(dt); cap1Tick(); momentsTick(); folkTick(dt); faunaTick(dt); agentTick(dt); agendaTick(); wmApproachTick(dt); calledTick(); chatTick(dt); wmFollowTick();
   ana.torn = !!game.anaStates.rasgado; ana.askew = !!game.anaStates.despeinada;
   ana.savoring = false;
   // walking to something she was sent to (a tap): by the A* path, and doing it on arrival
@@ -4343,9 +4810,11 @@ function update(dt){
     const c = CH[k]; if (wmDriven(k) || c.companion) continue;
     if (CHAT_HOLD[k] > TT) { p.moving = false; continue; }   // (stopped for a chat)
     if (k === game.tripWith) { p.want = p.where; continue; }   // (he went with Ana to Bright River)
+    if (p.where === 'camino') continue;   // (on the road: it takes them home)
     p.want = p.story ? p.story.room : (p.away && p.away.day === today() && hr < p.away.until) ? 'away' : c.routine ? c.routine.want(hr, today()) : c.home;
     if (p.story?.place && p.where === 'out') p.target = { place: p.story.place, until: 99, story: true };
     if (c.hostGoals) p.goals = Object.keys(PEOPLE).some(o => visiting(o) && PEOPLE[o].where === p.where) ? c.hostGoals : p.base;
+    if (p.where === 'br' && p.want !== 'br') { roadStart(k, 0, 1); continue; }
     if (busy(k)) continue;
     const seat = p.where === 'gg' && p.want === 'gg' && MEAL(hr) && !p.story && SEATS[k];   // (mealtime: to the table)
     if (seat) { sitSeat(p, seat, dt, c.speed.room || 30); continue; }
@@ -4486,7 +4955,7 @@ function renderView(){
     if (inView(MILK.x, MILK.y) && S !== 3) for (let k = 0; k < 4; k++) { const x = MILK.x - 14 + k * 9, y = MILK.y + Math.sin(t * 2 + k) * 1.2; blob(g, [[x - 2.6, y], [x + 2.6, y], [x + 2.6, y - 9], [x + 1.2, y - 12], [x - 1.2, y - 12], [x - 2.6, y - 9]], 'rgba(250,250,245,.95)'); line(g, [[x - 1.2, y - 13], [x + 1.2, y - 13]], '#7a5536', 1.6, k); }
     for (const r of reeds) { if (!inView(r.x, r.y)) continue; const b = Math.sin(t * 1.2 + r.ph) * 2; line(g, [[r.x, r.y], [r.x + b * .5, r.y - r.h * .6], [r.x + b, r.y - r.h]], S >= 2 ? '#9a8a4a' : '#6b8f3a', 1.5, r.h); ell(g, r.x + b, r.y - r.h + 3, 1.6, 3.6, '#7a5536'); }
     for (const o of [...props, ...trees, ...bushes]) if (inView(o.x, o.y, 170)) list.push({ y: o.y, draw: () => drawProp(g, o, t, night) });
-    for (const k of Object.keys(PEOPLE)) if (sceneOf(k) === 'out') { list.push({ y: PEOPLE[k].y, draw: () => drawPerson(g, PEOPLE[k], t) }); if (CH[k].vehicle === 'cart') list.push({ y: PEOPLE[k].y - .5, draw: () => drawCart(g, PEOPLE[k], t) }); }
+    for (const k of Object.keys(PEOPLE)) if (sceneOf(k) === 'out') { const p = PEOPLE[k]; list.push({ y: p.y, draw: () => drawPerson(g, p.buggy ? { ...p, sit: true, moving: false, dir: p.dir === 3 ? 3 : 1 } : p, t) }); if (CH[k].vehicle === 'cart') list.push({ y: p.y - .5, draw: () => drawCart(g, p, t) }); if (p.buggy) { const d = p.dir === 3 ? 3 : 1, back = d === 1 ? -1 : 1; list.push({ y: p.y + 18.5, draw: () => drawCart(g, { x: p.x - back * 56, y: p.y + 18, dir: d, walk: p.walk || 0, moving: p.moving }, t) }); } }
     if (cart.on && inView(cart.x, cart.y, 120)) list.push({ y: cart.y + 1, draw: () => drawCart(g, cart, t) });
     for (const f of FOLK) if (f.where === 'out' && inView(f.x, f.y)) list.push({ y: f.y, draw: () => drawPerson(g, f, t) });
     for (const a of FAUNA) if (inView(a.x, a.y - (a.alt || 0), 60)) list.push({ y: a.fly ? a.y + 1e5 : a.water ? a.y - 40 : a.y, draw: () => FAUNA_DRAW[a.kind](g, a, t) });
@@ -4497,7 +4966,8 @@ function renderView(){
   }
   const anaHere = RENDER_REAL === game.scene;
   if (anaHere && sipping()) list.push({ y: ana.y + .2, draw: () => drawCup(g, ana) });
-  if (anaHere) list.push({ y: ana.y + (ana.sit && !inside ? 6 : 0), draw: () => drawPerson(g, ana, t) }, { y: toby.y, draw: () => drawDog(g, toby, t) });
+  if (anaHere && !ana.hidden) list.push({ y: ana.y + (ana.sit && !inside ? 6 : 0), draw: () => drawPerson(g, ana, t) });
+  if (anaHere && !ana.hidden && game.scene !== 'camino' && game.scene !== 'br') list.push({ y: toby.y, draw: () => drawDog(g, toby, t) });
   if (OBS) { const b = wmBody(OBS); if (b && !b.lie) list.push({ y: 1e9, draw: () => { const hy = b.y - 50 * (LOOKS[b.look]?.h || 1) - 4 + Math.sin(t * 4) * 1.5; blob(g, [[b.x - 5, hy - 7], [b.x + 5, hy - 7], [b.x, hy]], '#e0a030'); } }); }   // (a little arrow over whoever is watched)
   list.sort((a, b) => a.y - b.y).forEach(o => o.draw());
   // a little "!" over whoever has something for Ana: thanks, a present, a delivery, or came looking for her
@@ -4732,6 +5202,8 @@ const FOLK_DEFS = {
     lines: ['Así que te quedaste con los Cuthbert. Hmm. Yo te habría hecho trabajar de verdad.'], ana: ['(Ana se esconde detrás de un árbol. ¡Menos mal que Marilla no la dejó irse con ella!)'] },
   carrie: { name: 'Carrie Sloane', kind: 'alumno', home: 'Granja Sloane', play: 'escuela', look: kidLook('#c8a070', '#e8d0a0', { dressD: '#c0a878', style: 'braids', h: .8 }),
     lines: ['¿Viste la composición de Ana? ¡La señorita Stacy la leyó en voz alta!'] },
+  jefe: { name: 'el jefe de estación', kind: 'jefe', home: 'Hotel White Sands', look: { hair: '#5a4a3a', hairD: '#3a2a1a', dress: '#2a3a5a', dressD: '#1a2a40', coat: true, hatDark: true, beard: true, skin: '#e8c0a0', h: 1.14 },
+    lines: ['El tren de las cinco y media ya pasó, ¿sabe? Hoy no viene otro.', 'Esa niñita de pelo rojo... se sentó en las tejuelas a imaginar cosas. Todo un caso.'] },
   thomas: { name: 'Thomas Lynde', kind: 'granjero', home: 'La Hondonada de Lynde', look: { hair: '#8a7a6a', hairD: '#6a5a4a', style: 'old', dress: '#5a5a48', dressD: '#3a3a28', coat: true, skin: '#e0b090', h: 1.12 },
     lines: ['Buenas. Rachel está adentro. Ella habla por los dos, ¿sabes?'] },
   veraneante: { name: 'una veraneante del hotel', kind: 'playa', home: 'Hotel White Sands', look: { hair: '#c8a060', hairD: '#a07a40', style: 'bun', dress: '#f4f0f8', dressD: '#c8c0d8', collar: '#c8a0d0', skin: '#f6dcc8', h: 1.08 },
@@ -4776,6 +5248,7 @@ const FOLK_KINDS = {
   recado: (h, f) => h >= 7.5 && h < 19.5 ? OUT(ERRANDS[(f.n * 7 + Math.floor(h / 1.5)) % ERRANDS.length], 60) : IN(f.home),
   juego: (h, f) => h >= 8 && h < 19 ? OUT(f.home, 170) : IN(f.home),
   buhonero: (h, f) => h >= 8 && h < 18.5 ? OUT(ERRANDS[(f.n * 5 + Math.floor(h * 1.3)) % ERRANDS.length], 60) : IN(f.home),
+  jefe: () => ({ k: 'br:jefe', at: [BRS.house.x + 50, BRS.house.y + 26], in: 'br', r: 0 }),
   medico: (h, f) => h >= 8 && h < 19 ? OUT(Math.floor(h) % 3 ? PLAY.aldea : f.home, 110) : IN(f.home),
 };
 const FARO = BUILDINGS.find(b => b.style === 'faro');
@@ -4787,6 +5260,7 @@ const FOLK = Object.entries(FOLK_DEFS).map(([k, d], n) => {
 const FOLKBY = Object.fromEntries(FOLK.map(f => [f.id, f]));
 const seen = (x, y, m = 160) => viewScene() === 'out' && view.Z && x > view.ox - m && x < view.ox + innerWidth / view.Z + m && y > view.oy - m && y < view.oy + innerHeight / view.Z + m;
 function folkSeat(f){
+  if (f.where === 'br') { f.x = BRS.house.x + 50; f.y = BRS.house.y + 26; f.dir = 2; f.sit = false; return; }   // (the stationmaster, at his door)
   if (f.where === 'tl') { f.x = SHOP_IN.counter.x + 30; f.y = SHOP_IN.counter.y - 22; f.dir = 2; f.sit = false; return; }   // (behind the counter)   // in the school: the pupils at their desks (Ana's is the sixth), the teacher by the blackboard
   if (f.def.kind === 'maestro') { f.x = 6.5 * T + 44 + (f.id === 'stacy' ? 70 : 0); f.y = 3.2 * T + 14; f.dir = 2; f.sit = false; return; }
   const pupils = FOLK.filter(q => q.def.kind === 'alumno'), i = pupils.indexOf(f), seats = SCHOOL_DESKS.filter((_, j) => j !== 5);
@@ -5125,7 +5599,8 @@ const WP = {
   tienda: door('Tienda de Lawson'), escuela: SCHOOL_DOOR, casa_parroquial: door('Casa parroquial'), bosque_peg: [WOODS[1].x + WOODS[1].rx * .55, WOODS[1].y + 40],
   aldea: PLAY.aldea, lago: [PLACES.lago[1], PLACES.lago[2]], gallinero: [BARN.x + 150, BARN.y + 96], iglesia: CHURCH_DOOR, salon: door('Ayuntamiento'), colina: PLAY.campo_rosado, campo: (f => [f.x + f.w / 2, f.y + f.h / 2])(fieldNear([GG.x + 300, GG.y - 200])),
 };
-const WP_NAME = { gallinero: 'el gallinero', granero: 'el granero', corral: 'el corral', potrero: 'el potrero del Sr. Harrison', huerta: 'la huerta', arbustos: 'los arbustos de bayas', huerto: 'el huerto de los Barry', cocina: 'la cocina de Tejas Verdes', tienda: 'la tienda de Lawson', escuela: 'la escuela', casa_parroquial: 'la casa parroquial', bosque_peg: 'el bosque de Peg Bowen', aldea: 'la aldea', iglesia: 'la iglesia', salon: 'el salón del pueblo', colina: 'la colina', campo: 'el campo de heno', lago: 'el lago' };
+WP.casa_bell = door('Casa de los Pettibone');
+const WP_NAME = { casa_bell: 'la casa de Robert Bell', 'h:br': 'la estación de Bright River', 'h:rl': 'la casa de la Sra. Lynde', camino: 'el camino de Bright River', gallinero: 'el gallinero', granero: 'el granero', corral: 'el corral', potrero: 'el potrero del Sr. Harrison', huerta: 'la huerta', arbustos: 'los arbustos de bayas', huerto: 'el huerto de los Barry', cocina: 'la cocina de Tejas Verdes', tienda: 'la tienda de Lawson', escuela: 'la escuela', casa_parroquial: 'la casa parroquial', bosque_peg: 'el bosque de Peg Bowen', aldea: 'la aldea', iglesia: 'la iglesia', salon: 'el salón del pueblo', colina: 'la colina', campo: 'el campo de heno', lago: 'el lago' };
 const OFRECE = { gallinero: { recoger: ['huevos'] }, granero: { tomar: ['cuerda'] }, arbustos: { recoger: ['bayas'] }, huerto: { recoger: ['manzanas'] }, huerta: { recoger: ['ramo'] }, bosque_peg: { recoger: ['hierbas'] }, cocina: { tomar: ['jarabe'] } };
 for (const k of ['granero', 'corral', 'potrero', 'escuela', 'casa_parroquial', 'tienda']) if (!PLACES[k]) PLACES[k] = [WP_NAME[k], ...WP[k]];   // (so errands can name them)
 // --- people: character, likes, what they buy and sell, where they cook, whether they leave the house; and their inventories
@@ -5188,6 +5663,7 @@ const wmScene = k => k === 'ana' ? game.scene : wmBody(k)?.where;
 function personKey(k){
   const b = wmBody(k), w = wmScene(k); if (!b || !w || w === 'away' || w === 'in') return null;
   if (w === 'gg') return 'cocina';
+  if (w === 'camino') return 'camino';
   if (w !== 'out') return HOUSES[w] ? 'h:' + w : null;
   for (const [p, xy] of Object.entries(WP)) if (AREAS[p] ? inArea(AREAS[p], b.x, b.y) : dist(b.x, b.y, xy[0], xy[1]) < 135) return p;
   return 'p:' + k;
@@ -5195,12 +5671,14 @@ function personKey(k){
 function cowKey(a){ if (a.state === 'led') return 'led:' + (a.ledBy || 'ana'); if (a.state === 'bought') return 'sold:' + a.owner; const ar = areaAt(a.x, a.y); return ar === 'corral' || ar === 'potrero' ? ar : 'c:' + a.id; }
 function keyPoint(key){
   if (WP[key]) return WP[key];
+  if (key === 'camino') return DOOR.br;
   if (key.startsWith('h:')) return DOOR[key.slice(2)];
   if (key.startsWith('c:')) { const a = ANIM[key.slice(2)]; return a ? [a.x, a.y] : null; }
   if (key.startsWith('p:')) { const b = wmBody(key.slice(2)); return b ? [b.x, b.y] : null; }
 }
 const SPEEDS = { ana: 60 };
-const travelMin = (who, a, b, pts) => { const p = pts[a], q = pts[b]; if (!p || !q) return 1e6; return 1 + dist(p[0], p[1], q[0], q[1]) * 1.3 / (SPEEDS[who] || 40) * 24 / 60 + (a === 'cocina' || b === 'cocina' || a.startsWith('h:') || b.startsWith('h:') ? 2 : 0); };
+const roadMin = k => k === 'h:br' ? ROAD_MIN : k === 'camino' ? ROAD_MIN / 2 : 0;
+const travelMin = (who, a, b, pts) => { const p = pts[a], q = pts[b]; if (!p || !q) return 1e6; return 1 + Math.abs(roadMin(a) - roadMin(b)) + dist(p[0], p[1], q[0], q[1]) * 1.3 / (SPEEDS[who] || 40) * 24 / 60 + (a === 'cocina' || b === 'cocina' || a.startsWith('h:') || b.startsWith('h:') ? 2 : 0); };
 
 // --- the state now (for planning and for checking a goal in the world)
 const WM_PEOPLE = () => ['ana', ...Object.keys(CH), 'lawson', 'gilbert', 'sraallan', 'peg', 'medico', 'buhonero'];
@@ -5340,7 +5818,7 @@ const G = {
   rel_min: (a, b, n, by) => ({ kind: 'rel_min', a, b, n, text: `que ${wmName(a)} quiera a ${wmName(b)} al menos ${n}`, test: s => (s.rel[a + '>' + b] ?? 2) >= n, h: s => Math.max(0, n - (s.rel[a + '>' + b] ?? 2)), items: ['tarta', 'bayas'], people: [a, b] }),
   // (quedar: an hour until which one stays there once arrived, as at school until classes end; the goal is done then)
   estar_en: (k, p, hasta, quedar) => { const at = s => s.pos[k] === p || (PLACE_ROOM[p] && s.pos[k] === 'h:' + PLACE_ROOM[p]);
-    return { kind: 'estar_en', text: `${wmName(k)} está en ${WP_NAME[p] || p}` + (hasta ? ' antes de las ' + fmtHour(hasta) : '') + (quedar ? ' y se queda hasta las ' + fmtHour(quedar) : ''), test: s => at(s) && (!hasta || s.t <= hasta * 60), h: s => at(s) ? 0 : 1, items: [], people: [k], places: [p], deadline: hasta, quedar, room: PLACE_ROOM[p] }; },
+    return { kind: 'estar_en', text: `${wmName(k)} está en ${WP_NAME[p] || p}` + (hasta ? ' antes de las ' + fmtHour(hasta) : '') + (quedar ? ' y se queda hasta las ' + fmtHour(quedar) : ''), test: s => at(s) && (!hasta || s.t <= hasta * 60), h: s => at(s) ? 0 : 1 + Math.abs(roadMin(p) - roadMin(s.pos[k])) / 40, items: [], people: [k], places: [p], deadline: hasta, quedar, room: PLACE_ROOM[p] }; },
   vaca_en: (c, p) => ({ kind: 'vaca_en', c, p, text: `${ANIMALS[c].name} queda en ${WP_NAME[p]}`, test: s => s.cows[c] === p, h: s => s.cows[c] === p ? 0 : String(s.cows[c]).startsWith('led') ? 1 : 2, items: ['cuerda'], people: [], places: [p] }),
   vaca_vendida: (c, to) => ({ text: `${ANIMALS[c].name} vendida${to ? ' a ' + wmName(to) : ''}`, test: s => to ? s.cows[c] === 'sold:' + to : String(s.cows[c]).startsWith('sold'), h: s => String(s.cows[c]).startsWith('sold') ? 0 : String(s.cows[c]).startsWith('led') ? 1 : 2, items: ['cuerda'], people: to ? [to] : ['shearer'] }),
   conoce: (k, f) => ({ text: `${wmName(k)} se entera (${f.replace(/_/g, ' ')})`, test: s => (s.know[k] || []).includes(f), h: s => (s.know[k] || []).includes(f) ? 0 : 1, items: [], people: [k, ...WM_PEOPLE().filter(p => (game.wm.know[p] || []).includes(f))] }),
@@ -5375,7 +5853,7 @@ const G = {
   teñido: k => ({ kind: 'teñido', text: `${wmName(k)} se tiñe el pelo de negro azabache`, test: s => !!s.facts['pelo_teñido:' + k], h: s => s.facts['pelo_teñido:' + k] ? 0 : s.invs[k].tinte ? 1 : 2, items: ['tinte', 'huevos'], people: [k, 'buhonero'], places: ['cocina', 'gallinero'] }),
   pelo_corto: k => ({ kind: 'pelo_corto', text: `a ${wmName(k)} le cortan el pelo verde`, test: s => !!s.facts['pelo_corto'], h: s => s.facts['pelo_corto'] ? 0 : 1, items: [], people: [k], places: ['cocina'] }),
   desafio: k => ({ kind: 'desafio', text: `${wmName(k)} acepta el desafío de Josie y camina por el techo de los Barry`, test: s => !!s.facts['trepo:' + k], h: s => s.facts['trepo:' + k] ? 0 : 1, items: [], people: [k], places: ['huerto'] }),
-  llevar: (by, k, p) => ({ kind: 'llevar', text: `${wmName(by)} lleva a ${wmName(k)} en la calesa a ${WP_NAME[p]}`, test: s => s.pos[by] === p && s.pos[k] === p, h: s => (s.follow[k] === by || s.pos[k] === p ? 0 : 1) + (s.pos[by] === p ? 0 : 1), items: [], people: [by, k], places: [p], lleva: k }),
+  llevar: (by, k, p) => ({ kind: 'llevar', text: `${wmName(by)} lleva a ${wmName(k)} en la calesa a ${WP_NAME[p]}`, test: s => s.pos[by] === p && s.pos[k] === p, h: s => (s.follow[k] === by || s.pos[k] === p ? 0 : 1) + (s.pos[by] === p ? 0 : 1 + Math.abs(roadMin(p) - roadMin(s.pos[by])) / 40), items: [], people: [by, k], places: [p], lleva: k }),
   acompana: (a, b) => ({ text: `${wmName(a)} acompaña a ${wmName(b)}`, test: s => s.follow[a] === b, h: s => s.follow[a] === b ? 0 : 1, items: [], people: [a, b] }),
   te_con: (k, g, p) => ({ text: `${wmName(k)} toma el té con ${wmName(g)} en ${WP_NAME[p]}`, test: s => s.pos[g] === p && s.pos[k] === p && (s.invs[k].te || 0) >= 1, h: s => (s.pos[g] === p ? 0 : 1) + (s.pos[k] === p ? 0 : 1) + ((s.invs[k].te || 0) >= 1 ? 0 : 1), items: ['te'], people: [k, g], places: [p] }),
   regalar_cosa: (k, x) => ({ text: `${wmName(k)} regala ${ITEM_NAME[x]?.[0] || x}`, test: s => !!s.facts['dio:' + x], h: s => s.facts['dio:' + x] ? 0 : (s.invs[k][x] ? 1 : 2), items: [x, ...Object.keys(THINGS[x]?.receta || {})], people: [k, 'diana', 'marilla', 'matthew'] }),
@@ -5709,7 +6187,9 @@ function chatTry(ag, F, urg){
   return false;
 }
 function startChat(a, b, anaFree){
-  const c = { parts: [a, b], lines: chatLines(a, b, anaFree), i: -1, wait: .2, anaFree }; CHATS.push(c);
+  const third = Object.keys(DLG_BANK).length && [...Object.keys(PEOPLE), ...FOLK.map(f => f.id)].find(o => o !== a && o !== b && wmScene(o) === wmScene(a) && !inChat(o) && DLG_BANK[dlgKey([a, b, o])] && dist(wmBody(o).x, wmBody(o).y, wmBody(a).x, wmBody(a).y) < 120);
+  const bank = (third && dlgNext([a, b, third])) || dlgNext([a, b]);
+  const c = { parts: [a, b], lines: bank || chatLines(a, b, anaFree), i: -1, wait: .2, anaFree }; CHATS.push(c);
   for (const [p, o] of [[a, b], [b, a]]) {
     const body = wmBody(p);
     if (p === 'ana' && anaFree) continue;   // (Ana, when the player has her: not held)
@@ -5775,12 +6255,19 @@ function wmTarget(who, key){
   if (key === 'cocina' || key.startsWith('h:')) { const room = key === 'cocina' ? 'gg' : key.slice(2); return { room, door: DOOR[room] }; }
   const q = keyPoint(key); if (!q) return null;
   const tb = key.startsWith('p:') ? wmBody(key.slice(2)) : null, tscene = key.startsWith('p:') ? wmScene(key.slice(2)) : 'out';
+  if (tscene === 'camino') return { road: wmBody(key.slice(2)).roadS };
   if (tscene && tscene !== 'out') return tscene === 'gg' ? { room: 'gg', door: DOOR.gg, at: tb ? [tb.x, tb.y] : null } : HOUSES[tscene] ? { room: tscene, door: DOOR[tscene] } : null;
   return { out: q };
 }
 function wmMove(who, key, dt){
   const T = wmTarget(who, key); if (!T) return 'fail';
   const b = wmBody(who), sc = wmScene(who), near = key.startsWith('p:') ? 40 : 46;
+  if (T.room === 'br' && who === 'matthew') b.buggy = true;   // (to the station: in the buggy)
+  if (sc === 'camino') {   // (on the road: on towards the end that leads there; or, to someone on the road, up to them)
+    if (T.road != null) { if (Math.abs(T.road - b.roadS) < .004) { b.roadDir = 0; return 'ok'; } b.roadDir = T.road > b.roadS ? 1 : -1; return 'run'; }
+    b.roadDir = T.room === 'br' ? -1 : 1; return 'run';
+  }
+  if (T.road != null) { if (sc !== 'out') { wmExit(who); return 'run'; } if (dist(b.x, b.y, DOOR.br[0], DOOR.br[1] + 20) < 40) { roadStart(who, 1, -1); return 'run'; } wmWalk(who, DOOR.br[0], DOOR.br[1] + 20, 'out', dt); return 'run'; }
   if (T.out) {
     if (sc !== 'out') { wmExit(who); return 'run'; }
     const pen = AREAS[key], d = dist(b.x, b.y, T.out[0], T.out[1]);
@@ -5801,20 +6288,31 @@ function wmMove(who, key, dt){
 function wmWalk(who, x, y, scene, dt){
   const b = wmBody(who);
   if (who === 'ana') { if (TT - (ana.wmArr || -9) < .4) return true; if (!ana.goto || !ana.goto.wm || dist(ana.goto.x, ana.goto.y, x, y) > 30) ana.goto = { x, y, scene, wm: true }; return false; }
-  const sp = (AGENTS[who] ? wmPace(AGENTS[who]) : (CH[who]?.speed?.walk || 40)) * (AGENTS.ana?.ride && AGENTS.ana.followOf === who ? 2.4 : 1), visible = viewScene() === scene && (scene !== 'out' || seen(b.x, b.y, 300));
+  const sp = b.buggy ? 80 : (AGENTS[who] ? wmPace(AGENTS[who]) : (CH[who]?.speed?.walk || 40)) * (AGENTS.ana?.ride && AGENTS.ana.followOf === who ? 2.4 : 1), visible = viewScene() === scene && (scene !== 'out' || seen(b.x, b.y, 300));
   if (b.called && TT < b.called.until) { b.moving = false; return false; }
   if (visible) return walkPath(b, x, y, sp, dt, scene);
+  if (b.buggy && scene === 'out') {   // (a buggy, even unseen, goes by the roads: past Mrs. Lynde's window)
+    if (!b.bnav || dist(b.bnav.x, b.bnav.y, x, y) > 30) { const r = netRoute(b.x, b.y, x, y); b.bnav = { x, y, pts: r ? [...r.pts, [x, y]] : [[x, y]], i: 0 }; }
+    const q = b.bnav.pts[b.bnav.i], dq = dist(b.x, b.y, q[0], q[1]), vq = Math.min(dq, sp * dt);
+    b.x += (q[0] - b.x) / (dq || 1) * vq; b.y += (q[1] - b.y) / (dq || 1) * vq; b.moving = true; if (Math.abs(q[0] - b.x) > 1) b.dir = q[0] > b.x ? 1 : 3; b.walk = (b.walk + dt * 1.8) % 1;
+    if (dq < 2) { if (b.bnav.i < b.bnav.pts.length - 1) b.bnav.i++; else { b.bnav = null; b.moving = false; return true; } }
+    return false;
+  }
   const d = dist(b.x, b.y, x, y), v = Math.min(d, sp * dt); b.x += (x - b.x) / (d || 1) * v; b.y += (y - b.y) / (d || 1) * v; b.moving = d > 2; if (Math.abs(x - b.x) > 1) b.dir = x > b.x ? 1 : 3; b.walk = (b.walk + dt * 1.8) % 1;
   return d < 2;
 }
 function wmStop(who){ const b = wmBody(who); if (who === 'ana') { if (ana.goto?.wm) ana.goto = null; } else b.moving = false; }
 function wmExit(who){
   if (who === 'ana') { goOut(); return; }
-  const b = wmBody(who), h = b.where; b.where = 'out'; b.sit = false; b.nav = null; const d = DOOR[h] || [b.x, b.y]; b.x = d[0]; b.y = d[1] + 16;
+  const b = wmBody(who), h = b.where;
+  if (h === 'br') { roadStart(who, 0, 1); return; }   // (from the station: the road home)
+  if (h === 'camino') return;
+  b.where = 'out'; b.sit = false; b.nav = null; const d = DOOR[h] || [b.x, b.y]; b.x = d[0]; b.y = d[1] + 16;
 }
 function wmEnter(who, room){
+  if (room === 'br' && wmScene(who) === 'out') { if (who === 'ana') return; roadStart(who, 1, -1); return; }   // (the station is at the end of the road)
   if (who === 'ana') { goIn(room); return; }
-  const b = wmBody(who); b.where = room; b.nav = null; b.x = KDOOR.x; b.y = KIT.h - 20;
+  const b = wmBody(who); if (room !== 'br') b.buggy = false; b.where = room; b.nav = null; b.x = KDOOR.x; b.y = KIT.h - 20;
 }
 function wmRelease(who){ const b = wmBody(who); if (!b) return; if (who === 'ana') { if (ana.goto?.wm) ana.goto = null; } else { b.moving = false; b.nav = null; if (FOLKBY[who]) { FOLKBY[who].key = ''; FOLKBY[who].route = []; } } }
 function wmHold(ag, dt){   // someone kept at a place for a test (the buyer waiting at the village)
@@ -6061,7 +6559,9 @@ function wmFollowTick(){
   const A = AGENTS.ana; if (!A || !A.followOf) return;
   if (!wmDriven(A.followOf)) { A.followOf = null; if (A.ride) { A.ride = false; ana.sit = false; } if (ana.goto?.wm) ana.goto = null; return; }
   const b = wmBody(A.followOf); if (!b) return;
-  if (A.ride && game.scene === 'out' && wmScene(A.followOf) === 'out') { ana.x = b.x + 18; ana.y = b.y + 4; ana.goto = null; ana.moving = false; return; }   // (in the cart, beside him)
+  if (wmScene(A.followOf) === 'camino' || game.scene === 'camino') { if (game.scene !== 'camino' && wmScene(A.followOf) === 'camino') { roadJoin(A.followOf); roadTramoIn(A.followOf, b.roadTr || roadTramo(b.roadS)); } return; }
+  if (A.ride && game.scene === 'out' && wmScene(A.followOf) === 'out') { const back = b.dir === 1 ? -1 : 1; ana.x = b.buggy ? b.x - back * 22 : b.x + 18; ana.y = b.y + (b.buggy ? 2 : 4); ana.sit = !!b.buggy; if (b.buggy) ana.dir = b.dir; ana.goto = null; ana.moving = false; return; }   // (in the cart, beside him)
+  if (game.scene === 'out' && HOUSES[wmScene(A.followOf)] && dist(ana.x, ana.y, DOOR[wmScene(A.followOf)][0], DOOR[wmScene(A.followOf)][1]) < 160) { ana.sit = false; goIn(wmScene(A.followOf)); return; }   // (he went in: she goes in after him)
   if (game.scene !== 'out') { if (wmScene(A.followOf) === 'out') goOut(); return; }
   if (dist(ana.x, ana.y, b.x, b.y) > 50) ana.goto = { x: b.x + 26, y: b.y + 6, scene: 'out', wm: true }; else if (ana.goto?.wm) ana.goto = null;
 }
@@ -6324,7 +6824,7 @@ function paintMapBase(w, h, z = 1, ox = 0, oy = 0){
   c.fillStyle = '#4a2f1c'; c.textAlign = 'center';
   const label = (text, x, y, size = 46) => { c.font = `italic ${size}px Georgia, serif`; c.fillStyle = 'rgba(241,226,191,.75)'; const tw = c.measureText(text).width; c.fillRect(x - tw / 2 - 8, y - size * .85, tw + 16, size * 1.1); c.fillStyle = '#4a2f1c'; c.fillText(text, x, y); };
   label('Granero', BARN.x, BARN.y - 150, 70);
-  for (const [k, h] of Object.entries(HOUSES)) big(h, BIG[k] || 2);
+  for (const [k, h] of Object.entries(HOUSES)) if (!h.far) big(h, BIG[k] || 2);
   for (const [k, h] of Object.entries(HOUSES)) { const s = BIG[k] || 2; label(h.mapLabel?.[0] ?? h.name, h.at.x, h.at.y - (h.style === 'iglesia' ? 280 : h.style === 'escuela' ? 195 : 140) * s - 20, 120); }
   label('Lago de las Aguas Brillantes', LAKE.x, LAKE.y + LAKE.ry + 110, 100); for (const w of WOODS.filter(w => w.haunted)) label('Bosque Encantado', w.x, w.y + w.ry * .3, 100); for (const b of BUILDINGS) { if (b.style === 'faro') { c.save(); c.translate(b.x, b.y); c.scale(1.8, 1.8); c.translate(-b.x, -b.y); blob(c, [[b.x - 30, b.y], [b.x + 30, b.y], [b.x + 16, b.y - 220], [b.x - 16, b.y - 220]], '#f6f2e8'); for (let q = 0; q < 3; q++) c.fillStyle = '#c8463a', c.fillRect(b.x - 26 + q * 4, b.y - 50 - q * 60, 52 - q * 8, 24); blob(c, [[b.x - 22, b.y - 220], [b.x + 22, b.y - 220], [b.x, b.y - 270]], '#3a3436'); c.restore(); label(b.name, b.x, b.y - 520, 120); continue; } house(b.x, b.y, b.w, '#8a6a5a', '#efe4cc'); label(b.name, b.x, b.y - 150, 70); } label('Aldea de Avonlea', 50 * U, 23.2 * U, 150); label('Golfo de San Lorenzo', 40 * U, 4.5 * U, 220); label('Campo rosado', LUPINS[0].x, LUPINS[0].y, 34); label('Río', RIVERS[0].pts[3][0] + 120, RIVERS[0].pts[3][1] + 60, 34);
   label('Camino Blanco de las Delicias', GG.x + 900, BRIDGE.y - 110, 80);
@@ -6349,7 +6849,7 @@ function drawMap(){
   const sz = MV.z / mapBase.z; c.setTransform(sz, 0, 0, sz, (mapBase.ox - ox) * k, (mapBase.oy - oy) * k); c.drawImage(mapBase.cv, 0, 0);
   c.setTransform(1, 0, 0, 1, -ox * k, -oy * k);
   // where everyone is (someone indoors is shown at the door of the house)
-  const at = (where, x, y) => where === 'out' ? [x, y] : [HOUSES[ROOMS[where].parent ?? where].at.x, HOUSES[ROOMS[where].parent ?? where].at.y + 20];
+  const at = (where, x, y) => where === 'out' ? [x, y] : where === 'camino' ? [STATION.x, STATION.y] : [HOUSES[ROOMS[where].parent ?? where].at.x, HOUSES[ROOMS[where].parent ?? where].at.y + 20];
   const mark = (who, [x, y], col, dx, big) => {
     const sx = x * k + dx * dpr, sy = y * k, r = (big ? 6 + Math.sin(TT * 5) * 1.2 : 4.5) * dpr;
     c.beginPath(); c.arc(sx, sy, r, 0, TAU); c.fillStyle = col; c.fill(); c.lineWidth = 1.4 * dpr; c.strokeStyle = 'rgba(60,35,20,.9)'; c.stroke();
@@ -6366,8 +6866,8 @@ function drawMap(){
   mark('Ana', at(game.scene, ana.x, ana.y), '#d9433b', 0, true);
   $('maptitle').textContent = 'Avonlea · ' + SEASONS[S] + ', día ' + (Math.floor(dayT) % 2 + 1) + ' · ' + SICON[S] + ' · toca un lugar para ir allí · rueda o pellizco: acercar · arrastra para moverte';
 }
-function loop(now){ const dt = clamp((now - last) / 1000, 0, .05); last = now; update(dt); render(); requestAnimationFrame(loop); }
-window.__avonlea = { startDay, setSeason, agendaData: () => AGENDA.map(e => ({ who: wmName(e.who), from: e.from, to: e.to, label: e.label, season: e.season, sunday: !!e.sunday, ana: !!(e.ana || e.who === 'ana'), cond: e.when ? String(e.when).replace(/^\(\) => /, '') : '' })), setAgenda: v => { AGENDA_ON = v; }, AGENDA, wmData: () => ({ THINGS, WHO, OFRECE, WP_NAME, TRADE, TREATS, LIBRETA, ITEM_NAME, MAX_GOALS, PACE, FOCO }), paintMapBase, doingText, wmName, wmBody, wmScene, WW, WH, setVec: v => { VEC_ON = v; }, setStyle: v => { ANA_STYLE = v; }, setHead: setHeadM, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+function loop(now){ const dt = clamp((now - last) / 1000, 0, .05); last = now; const k = tripSpeed(), n = Math.ceil(k); for (let i = 0; i < n; i++) update(dt * k / n); render(); islaDraw(); requestAnimationFrame(loop); }   // (on the road it can go faster: 1.5×, 2×, 3×)
+window.__avonlea = { startCap1, CAP1, LIBRO1, ROAD_TRAMOS, ROAD_MIN, roadTramo, islaToggle, DLG_BANK, startDay, setSeason, agendaData: () => AGENDA.map(e => ({ who: wmName(e.who), from: e.from, to: e.to, label: e.label, season: e.season, sunday: !!e.sunday, ana: !!(e.ana || e.who === 'ana'), cond: e.when ? String(e.when).replace(/^\(\) => /, '') : '' })), setAgenda: v => { AGENDA_ON = v; }, AGENDA, wmData: () => ({ THINGS, WHO, OFRECE, WP_NAME, TRADE, TREATS, LIBRETA, ITEM_NAME, MAX_GOALS, PACE, FOCO }), paintMapBase, doingText, wmName, wmBody, wmScene, WW, WH, setVec: v => { VEC_ON = v; }, setStyle: v => { ANA_STYLE = v; }, setHead: setHeadM, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
 /* ---------- the viewer (index.html?visor): only Ana, big, on a plain floor, to look at the drawings and move her:
    arrows (Shift to run), and buttons for everything she can do. ---------- */
 function startVisor(){
