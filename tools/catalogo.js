@@ -69,6 +69,7 @@ const exe = process.env.PLAYWRIGHT_CHROMIUM || (fs.existsSync('/opt/pw-browsers/
     '| `vaca_en(vaca, lugar)` | la vaca está en ese corral o potrero | 0 / 1 si alguien la lleva / 2 |',
     '| `vaca_vendida(vaca, a)` | vendida (a esa persona) | 0 / 1 / 2 |',
     '| `conoce(quien, noticia)` | quien sabe la noticia | 0 / 1 |',
+    '| `paseo(a, b, lugar, min)` | a y b llegan juntos (b acompaña a a) a un lugar bonito; ahí se quedan `min` minutos conversando y recién entonces termina | 1 por acompañar + 1 por llegar |',
     '| `acompana(a, b)` | a acompaña a b | 0 / 1 |',
     '| `te_con(quien, invitado, lugar)` | los dos están en el lugar y quien tiene té | 1 por cada cosa que falte |',
     '| `regalar_cosa(quien, cosa)` | esa cosa fue regalada | 0 / 1 si la tiene / 2 |', '');
@@ -80,8 +81,8 @@ const exe = process.env.PLAYWRIGHT_CHROMIUM || (fs.existsSync('/opt/pw-browsers/
     '| `vender_vaca` | se le pide a un Cuthbert y la vaca no está vendida | la vaca vendida a quien pide | `vaca_vendida` | 45 |',
     '| `encerrar_vaca` | no es quieto y nadie lleva ni compró la vaca | la vaca en su corral | `vaca_en` | 45 |',
     '| `interceder` por alguien | el destinatario quiere ≥ 4 a quien intercede | (+1 de cariño hacia quien pide) | `intercede` | 20 |',
-    '| `pasear` | con Ana | quien pide la acompaña | — | — |',
-    '| `venir` | a Ana | Ana acompaña a quien pide | — | — |', '',
+    '| `pasear` | con Ana | quien recibe el pedido acompaña a quien pide (lo sigue) | — | — |',
+    '| `venir` (invitación para más tarde) | a Ana | Ana estará en el lugar a la hora | `estar_en(Ana, lugar, hora, se queda)`, que empieza una hora antes de la cita (té a las 17, o algo más tarde) | 30 |', '',
     'A quién se le puede pedir sin que la meta lo diga: a los de su casa o a un amigo (cariño ≥ 3); quien no sale, solo a quien está con él, o manda a llamar a Ana.', '');
   // --- things
   L.push('## 5. Las cosas', '',

@@ -8,7 +8,7 @@ Un estado es una foto del mundo hecha de datos (`wmNow()`), y el planificador tr
 
 | Componente | Qué guarda | Ejemplo |
 |---|---|---|
-| `t` | la hora, en minutos desde la medianoche | `792.06664` (= 13:12.066640000000007) |
+| `t` | la hora, en minutos desde la medianoche | `792.07332` (= 13:12.073319999999967) |
 | `pos` | dónde está cada persona, como un **lugar** (ver §6): un punto del mapa (`granero`, `huerto`…), `cocina` (adentro de Tejas Verdes), `h:casa` (adentro de otra casa) o `p:quien` (afuera, donde esa persona esté) | `ana: "cocina"` |
 | `invs` | lo que cada uno tiene: `{ cosa: cantidad }` | `ana: { huevos: 6, cuerda: 1 }` |
 | `cows` | dónde está cada vaca: `corral`, `potrero`, `c:vaca` (suelta, donde esté), `led:quien` (alguien la lleva de la cuerda), `sold:quien` (vendida) | `{"dolly":"corral","jersey":"potrero"}` |
@@ -57,6 +57,7 @@ Una meta es una **condición** sobre el estado (`test`) y una estimación de **c
 | `vaca_en(vaca, lugar)` | la vaca está en ese corral o potrero | 0 / 1 si alguien la lleva / 2 |
 | `vaca_vendida(vaca, a)` | vendida (a esa persona) | 0 / 1 / 2 |
 | `conoce(quien, noticia)` | quien sabe la noticia | 0 / 1 |
+| `paseo(a, b, lugar, min)` | a y b llegan juntos (b acompaña a a) a un lugar bonito; ahí se quedan `min` minutos conversando y recién entonces termina | 1 por acompañar + 1 por llegar |
 | `acompana(a, b)` | a acompaña a b | 0 / 1 |
 | `te_con(quien, invitado, lugar)` | los dos están en el lugar y quien tiene té | 1 por cada cosa que falte |
 | `regalar_cosa(quien, cosa)` | esa cosa fue regalada | 0 / 1 si la tiene / 2 |
@@ -71,8 +72,8 @@ Pedir un favor es una acción más; si el otro acepta, en el mundo se le instala
 | `vender_vaca` | se le pide a un Cuthbert y la vaca no está vendida | la vaca vendida a quien pide | `vaca_vendida` | 45 |
 | `encerrar_vaca` | no es quieto y nadie lleva ni compró la vaca | la vaca en su corral | `vaca_en` | 45 |
 | `interceder` por alguien | el destinatario quiere ≥ 4 a quien intercede | (+1 de cariño hacia quien pide) | `intercede` | 20 |
-| `pasear` | con Ana | quien pide la acompaña | — | — |
-| `venir` | a Ana | Ana acompaña a quien pide | — | — |
+| `pasear` | con Ana | quien recibe el pedido acompaña a quien pide (lo sigue) | — | — |
+| `venir` (invitación para más tarde) | a Ana | Ana estará en el lugar a la hora | `estar_en(Ana, lugar, hora, se queda)`, que empieza una hora antes de la cita (té a las 17, o algo más tarde) | 30 |
 
 A quién se le puede pedir sin que la meta lo diga: a los de su casa o a un amigo (cariño ≥ 3); quien no sale, solo a quien está con él, o manda a llamar a Ana.
 
@@ -150,12 +151,12 @@ Reglas sociales (las mismas en el plan y en el mundo): pedir funciona si el otro
 | 6 | Matthew | Matthew le trae azúcar a Marilla | — |
 | 7 | Matthew | Matthew encierra a Dolly | — |
 | 8 | Marilla | Marilla quiere compota para el invierno | traer → Ana |
-| 9 | Diana | Diana quiere pasear con Ana | pasear → Ana |
+| 9 | Diana | Diana quiere dar un paseo con Ana hasta el lago | pasear → Ana |
 | 10 | Sra. Lynde | La Sra. Lynde quiere enterarse de la venta | — |
 | 11 | Sr. Harrison | El Sr. Harrison quiere a la vaca fuera de su avena | encerrar_vaca → Matthew |
 | 12 | Sr. Shearer | El Sr. Shearer quiere comprar una vaca | vender_vaca → Matthew |
 | 13 | Gilbert Blythe | Gilbert quiere que Ana le hable | — |
-| 14 | la Sra. Allan | La Sra. Allan quiere tomar el té con Ana | venir → Ana |
+| 14 | la Sra. Allan | La Sra. Allan invita a Ana a tomar el té por la tarde (se encuentran en la iglesia) | venir → Ana |
 | 15 | Peg Bowen | Peg Bowen junta hierbas | — |
 | 16 | Marilla | Marilla necesita azúcar: se la pide a Matthew, que va a la tienda | — |
 | 17 | Sra. Barry | La Sra. Barry quiere compota: se la pide a Diana, y Diana a Ana | — |
