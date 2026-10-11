@@ -23,7 +23,7 @@ Las escenas son los diálogos del libro (traducidos), cada una con su tiempo del
 
 ## 3. Comparación
 
-**32/32 momentos del libro ocurren en la simulación**; diferencia media **27 min**, máxima **137 min**. Sin contar la visita de Rachel (que ahora, a propósito, va a Tejas Verdes apenas ve pasar a Matthew, en vez de esperar al té como en el libro): media **4 min**, máxima **13 min**. (\* = hora estimada en el libro.)
+**32/32 momentos del libro ocurren en la simulación**; diferencia media **26 min**, máxima **137 min**. Sin contar la visita de Rachel (que ahora, a propósito, va a Tejas Verdes apenas ve pasar a Matthew, en vez de esperar al té como en el libro): media **3 min**, máxima **13 min**. (\* = hora estimada en el libro.)
 
 | # | Libro | Simulación | Δ | Quién | Qué |
 |---|---|---|---|---|---|
@@ -48,17 +48,17 @@ Las escenas son los diálogos del libro (traducidos), cada una con su tiempo del
 | 19 | 18:05* | 18:07 | +2 min | Matthew | camina hasta la niña; ella se presenta y él decide llevarla a casa y que Marilla aclare el error |
 | 20 | 18:15* | 15:58 | −137 min | los Bell | recibe a Rachel, que cuenta la noticia de los Cuthbert |
 | 21 | 18:15* | 18:11 | −4 min | Matthew | Ana y Matthew suben a la calesa; ella no suelta su bolso de alfombra; salen del pueblo |
-| 22 | 18:25* | 18:16 | −9 min | Ana | arranca una rama de ciruelo silvestre que roza la calesa y empieza a hablar (la novia, el vestido de wincey, los caminos rojos...) |
-| 23 | 19:00* | 18:51 | −9 min | Matthew | le dice que puede hablar todo lo que quiera; descubre que le gusta su charla |
-| 24 | 19:30* | 19:28 | −2 min | Ana | le muestra su trenza: «¿De qué color diría que es esto?» —«Es rojo, ¿no?» |
+| 22 | 18:25* | 18:18 | −7 min | Ana | arranca una rama de ciruelo silvestre que roza la calesa y empieza a hablar (la novia, el vestido de wincey, los caminos rojos...) |
+| 23 | 19:00* | 18:57 | −3 min | Matthew | le dice que puede hablar todo lo que quiera; descubre que le gusta su charla |
+| 24 | 19:30* | 19:29 | −1 min | Ana | le muestra su trenza: «¿De qué color diría que es esto?» —«Es rojo, ¿no?» |
 | 25 | 19:45* | 19:44 | −1 min | Ana | enmudece de asombro bajo las flores, con el atardecer al fondo |
 | 26 | 20:00* | 19:53 | −7 min | Matthew | cruzan el pueblo en silencio; perros que ladran, chicos que gritan y caras curiosas en las ventanas |
 | 27 | 20:40* | 20:36 | −4 min | Matthew | rompe el silencio tras tres millas: «solo nos falta una milla»; Ana bautiza el Camino Blanco de las Delicias |
-| 28 | 20:45* | 20:45 | = | Ana | bautiza el Lago de las Aguas Brillantes; aún hay luz en una ventana de La Cuesta del Huerto; cruza el puente con los ojos cerrados |
-| 29 | 20:55* | 20:51 | −4 min | Ana | adivina cuál es Tejas Verdes, bajo una gran estrella blanca; el sol ya se puso |
-| 30 | 21:00* | 20:48 | −12 min | Rachel | ve pasar la calesa en la oscuridad |
-| 31 | 21:05* | 20:52 | −13 min | Matthew | baja a Ana de la calesa; ella susurra que los árboles hablan en sueños; entran a la casa |
-| 32 | 21:05* | 20:52 | −13 min | Marilla | sale al encuentro, ve a la niña de pelo rojo y pregunta dónde está el niño |
+| 28 | 20:45* | 20:48 | +3 min | Ana | bautiza el Lago de las Aguas Brillantes; aún hay luz en una ventana de La Cuesta del Huerto; cruza el puente con los ojos cerrados |
+| 29 | 20:55* | 20:56 | +1 min | Ana | adivina cuál es Tejas Verdes, bajo una gran estrella blanca; el sol ya se puso |
+| 30 | 21:00* | 20:47 | −13 min | Rachel | ve pasar la calesa en la oscuridad |
+| 31 | 21:05* | 21:01 | −4 min | Matthew | baja a Ana de la calesa; ella susurra que los árboles hablan en sueños; entran a la casa |
+| 32 | 21:05* | 21:01 | −4 min | Marilla | sale al encuentro, ve a la niña de pelo rojo y pregunta dónde está el niño |
 
 ### Qué diferencias había y cómo se redujeron (agregando cosas)
 
@@ -105,5 +105,7 @@ Hay cinco fuentes, de la más escrita a la más libre:
 3. **Banco de diálogos para pares y tríos** (`DLG_BANK`): cuando dos personajes del planificador se encuentran y se ponen a conversar, primero se busca un diálogo escrito para ese par (Ana y Diana, Ana y Marilla, Ana y Matthew, Rachel y Marilla, Matthew y Marilla, Ana y Gilbert, Ana y Rachel) o, si hay un tercero cerca, para ese trío (Ana-Diana-Marilla, Ana-Matthew-Marilla, Ana-Rachel-Marilla). Cada bloque se dice una sola vez; cuando se acaban, vuelven los saludos y chismes de plantilla. Lo que no alcanzó a decirse en una escena del libro se agrega al banco de ese par.
 4. **Plantillas** (`chatLines`): saludos según la hora, chismes de la Sra. Lynde, la timidez de Matthew…
 5. **Con IA** (si está configurada): las escenas de los personajes cerca de Ana y los encuentros con los vecinos se generan, recordando lo ya dicho para no repetirlo.
+
+**Cada cosa en su lugar.** Lo que nombra algo del camino espera a que eso esté a la vista: «¿Ve ese aserradero junto al río?» se dice frente al aserradero, «¿Ese hombre está sembrando?» junto al granjero, «¡Mire la iglesia!» frente a la iglesia, «esa casita con lilas» junto a ella, «esa franja azul, ¿es el mar?» desde la colina, «¿La conoce?» cuando se cruzan con la señora de la carreta (que aparece al llegar a ese tramo), «ése es mi cerezo» todavía cerca de la estación. Cada tramo se divide en intercambios (desde que Ana vuelve a hablar después de una respuesta) y se elige el siguiente que tenga sentido ahí. Al llegar a Avonlea, Matthew vuelve por el camino de la laguna (un camino nuevo que baja de la hondonada a la orilla y sigue al Camino Blanco): «Ésa es la laguna de Barry» se dice con la laguna a la vista, y «¿es ésa Tejas Verdes?» después, por el Camino Blanco, con la casa adelante. Mientras van en la calesa (y durante el capítulo) no se cuelan frases sueltas ni saludos de los vecinos. En el banco de diálogos, algunos tienen su lugar: poner flores en la mesa, «a la mesa», las oraciones, en la cocina de Tejas Verdes; el té de Rachel y Marilla, adentro; «¿le parece que el arroyo canta?», junto al arroyo.
 
 Además, los **momentos del lugar** (`MAP.moments`: el campo rosado, el puente techado, el Camino Blanco…) se dicen una vez al día al pasar.
