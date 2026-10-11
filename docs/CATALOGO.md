@@ -8,7 +8,7 @@ Un estado es una foto del mundo hecha de datos (`wmNow()`), y el planificador tr
 
 | Componente | Qué guarda | Ejemplo |
 |---|---|---|
-| `t` | la hora, en minutos desde la medianoche | `792.0866799999999` (= 13:12.086679999999888) |
+| `t` | la hora, en minutos desde la medianoche | `792.07332` (= 13:12.073319999999967) |
 | `pos` | dónde está cada persona, como un **lugar** (ver §6): un punto del mapa (`granero`, `huerto`…), `cocina` (adentro de Tejas Verdes), `h:casa` (adentro de otra casa) o `p:quien` (afuera, donde esa persona esté) | `ana: "cocina"` |
 | `invs` | lo que cada uno tiene: `{ cosa: cantidad }` | `ana: { huevos: 6, cuerda: 1 }` |
 | `cows` | dónde está cada vaca: `corral`, `potrero`, `c:vaca` (suelta, donde esté), `led:quien` (alguien la lleva de la cuerda), `sold:quien` (vendida) | `{"dolly":"corral","jersey":"potrero"}` |
@@ -49,7 +49,7 @@ Las mismas para todos (Ana y los demás). Cada una tiene una **condición** (cu�
 | `jurar` ser amigas del alma | Ana y Diana juntas, con cariño ≥ 4 | 5 | hecho para siempre `amigas:ana&diana`; cariño 5 |
 | `perdonar` | quien actúa está ofendido con alguien presente que se disculpó (o lo quiere ≥ 1) | 2 | se borra la ofensa; +1 de cariño |
 | `cuidar` a un enfermo | el enfermo está presente y se tiene el jarabe (se toma en la cocina) | 15 | se mejora; +2 de cariño |
-| `avisar_medico` | en la aldea, hay un enfermo | 4 | el médico lo atiende: se mejora |
+| (buscar al médico) | favor `curar` al médico (en la aldea): él va donde el enfermo y lo `cuida` sin jarabe | — | se mejora |
 | `estudiar` / `recitar` | en la escuela o en casa / en la escuela, sabiéndose la lección | 20 / 3 | sabe la lección / hecho `recito` |
 | `rezar` | en su casa o en la iglesia | 3 | hecho `rezo` |
 | `coser` (un vestido) | en su cocina, si sabe coser, con un corte de tela | 30 | +1 vestido con mangas abullonadas |
@@ -163,6 +163,7 @@ Además: `cocina` es adentro de Tejas Verdes, `h:casa` adentro de cualquier otra
 | Gilbert Blythe (`gilbert`) | orgulloso, generoso | comida | — | — | camina a 46 · enfoque 0.8, social 0.5 |
 | la Sra. Allan (`sraallan`) | generoso, sensible | hecha_a_mano, flores | — | la casa parroquial | camina a 40 · enfoque 0.6, social 0.7 |
 | Peg Bowen (`peg`) | orgulloso | hierba | — | — | camina a 38 · enfoque 0.5, social 0.2 |
+| el médico (`medico`) | generoso | — | — | — |  |
 
 Reglas sociales (las mismas en el plan y en el mundo): pedir funciona si el otro te quiere ≥ 2 o es generoso; un regalo con una etiqueta que le gusta sube el cariño (una vez al día); disculparse sube el cariño (+2 si es sensible o generoso); interceder exige que el destinatario quiera ≥ 4 a quien habla.
 
@@ -204,15 +205,16 @@ Reglas sociales (las mismas en el plan y en el mundo): pedir funciona si el otro
 | 31 | Ana | Ana le devuelve el libro a Diana (cap. 21, 30) | — |
 | 32 | Ana | Ana y Diana juran ser amigas del alma (cap. 12) | — |
 | 33 | Ana | Gilbert ya se disculpó: Ana lo perdona y hacen las paces (cap. 38) | — |
-| 34 | Ana | El Sr. Harrison está enfermo: Ana lo cuida con jarabe, o va a buscar al médico (cap. 18) | — |
-| 35 | Ana | Ana estudia la lección y la recita en la escuela (cap. 17, 24) | — |
-| 36 | Ana | Ana dice sus oraciones (cap. 7) | — |
-| 37 | Marilla | Marilla cose un vestido con mangas abullonadas (le piden la tela a la tienda) (cap. 25) | — |
-| 38 | Ana | Ana adorna su sombrero con flores (cap. 11) | — |
-| 39 | Ana | Ana rema en el lago (cap. 28) | — |
-| 40 | Ana | Ana le pone nombre a tres lugares (cap. 2, 12) | — |
-| 41 | Marilla | A Ana se le olvidaron los quehaceres: Marilla la manda llamar y la regaña (cap. 26) | — |
-| 42 | Ana | Ana invita a Diana a tomar el té en Tejas Verdes (cap. 16) | venir → Diana |
-| 43 | Matthew | Matthew lleva a Ana en la calesa hasta la aldea (cap. 2, 25) | — |
+| 34 | Ana | El Sr. Harrison está enfermo: Ana lo cuida con jarabe de ipecacuana (cap. 18) | — |
+| 35 | Ana | El Sr. Harrison está enfermo y no queda jarabe en casa: Ana va a buscar al médico (cap. 18) | — |
+| 36 | Ana | Ana estudia la lección y la recita en la escuela (cap. 17, 24) | — |
+| 37 | Ana | Ana dice sus oraciones (cap. 7) | — |
+| 38 | Marilla | Marilla cose un vestido con mangas abullonadas (le piden la tela a la tienda) (cap. 25) | — |
+| 39 | Ana | Ana adorna su sombrero con flores (cap. 11) | — |
+| 40 | Ana | Ana rema en el lago (cap. 28) | — |
+| 41 | Ana | Ana le pone nombre a tres lugares (cap. 2, 12) | — |
+| 42 | Marilla | A Ana se le olvidaron los quehaceres: Marilla la manda llamar y la regaña (cap. 26) | — |
+| 43 | Ana | Ana invita a Diana a tomar el té en Tejas Verdes (cap. 16) | venir → Diana |
+| 44 | Matthew | Matthew lleva a Ana en la calesa hasta la aldea (cap. 2, 25) | — |
 
 Cómo se cumplió cada una, dibujado en el mapa: [`trazas/metas.pdf`](../trazas/metas.pdf) (`node tools/trace_goal.js --pdf trazas/metas.pdf`).

@@ -31,7 +31,7 @@ En total hay **unas 340 apariciones** de acciones nuevas, con unos 190 nombres d
 ## 2. Propuesta: qué agregar primero
 
 > **Las 17 ya están implementadas**, con una meta de prueba cada una: metas 26 a 43 del panel 🎯 (ver [trazas/metas.pdf](../trazas/metas.pdf) y el [catálogo](CATALOGO.md)). Diferencias con la propuesta:
-> - En el juego no hay médico ni Minnie May: el enfermo es el Sr. Harrison, y al médico se lo va a buscar a la aldea.
+> - El enfermo de las metas es el Sr. Harrison. Con jarabe de ipecacuana, Ana lo cuida ella misma; si no hay jarabe, va a buscar al médico (un personaje nuevo, en la aldea), que va a la granja y lo atiende. Minnie May ya está en el juego, pero sin el crup.
 > - La calesa no usa la carreta de la estación: Matthew lleva a Ana sentada a su lado, 2,4 veces más rápido.
 
 Elegidas por tres criterios: que aparezcan seguido en el libro, que tengan un **efecto claro sobre el estado** (para que el planificador pueda usarlas) y que encajen con lo que el juego ya tiene (lugares, cosas, personas).

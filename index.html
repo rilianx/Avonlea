@@ -2786,6 +2786,7 @@ function know(k, text, d = today() + 1){
   a.push({ d, s: S, t: text }); if (a.length > 30) a.splice(0, a.length - 30);
 }
 function logEv(text, who = witnesses()){
+  text = text.replace(/\ba el /g, 'al ').replace(/\bde el /g, 'del ');
   const j = game.journal, e = { d: today() + 1, s: S, t: text, h: Math.round(hourNow() * 100) / 100 };
   if (!(j.length && j[j.length - 1].t === text && j[j.length - 1].d === e.d)) { j.push(e); if (j.length > 80) j.splice(0, j.length - 80); }
   for (const k of new Set(who)) know(k, text);
@@ -4698,6 +4699,31 @@ const FOLK_DEFS = {
   farero: { name: 'el capitán Jim', kind: 'farero', home: 'Casa del farero', look: { hair: '#e8e4dc', hairD: '#b8b4ac', beard: true, style: 'old', dress: '#2a3a5a', dressD: '#1a2a40', coat: true, skin: '#e0b090', h: 1.16 },
     lines: ['Ese faro lleva cuarenta años encendido, y yo con él. Las noches de tormenta son las más hermosas.', '¿Ves esa vela allá lejos? Va a Charlottetown. Antes yo navegaba hasta las Antillas.', 'Si subes al faro al atardecer, el mar se pone de oro. Pregúntale a cualquier gaviota.'],
     ana: ['¡Capitán Jim, cuénteme una historia del mar!', '¡Qué vida tan romántica la de un farero!'] },
+  // --- the ones from the book that were missing
+  stacy: { name: 'la Srta. Stacy', kind: 'maestro', home: 'Pensión', look: { hair: '#a8683a', hairD: '#80482a', style: 'bun', dress: '#6a8a6a', dressD: '#4a6a4a', brooch: true, skin: '#f2cfb2', h: 1.08 },
+    lines: ['Ana, tu composición fue la mejor de la clase. Pero cuidado con los adjetivos: ¡no hacen falta tantos!', 'El viernes por la tarde salimos al bosque a estudiar botánica. ¿Te apuntas?', 'Este año preparamos a los mejores para el examen de Queen\'s. Tú puedes, Ana.'], ana: ['¡Srta. Stacy! Usted es mi espíritu afín, ¿lo sabía?'] },
+  minnie: { name: 'Minnie May Barry', kind: 'juego', home: 'La Cuesta del Huerto', look: kidLook('#2a1a14', '#e8c0d0', { dressD: '#c098a8', style: 'curls', bow: '#c8463a', h: .64 }),
+    lines: ['¡Ana! ¿Me cuentas el cuento del hada otra vez?', 'Diana no me deja jugar con sus muñecas. ¿Tú me dejas?', 'Ya no tengo tos. ¡Mamá dice que tú me salvaste!'] },
+  srbarry: { name: 'el Sr. Barry', kind: 'granjero', home: 'La Cuesta del Huerto', look: { hair: '#3a2a20', hairD: '#2a1a10', beard: true, dress: '#5a5040', dressD: '#3a3020', coat: true, hatDark: true, skin: '#e0b090', h: 1.18 },
+    lines: ['Buenas, Ana. Diana está en la casa, creo. O en el huerto.', 'El heno está listo para entrar. Si no llueve, mañana lo cargamos.'] },
+  maryjoe: { name: 'Mary Joe', kind: 'juego', home: 'La Cuesta del Huerto', look: { hair: '#5a3a2a', hairD: '#3a2010', style: 'bun', dress: '#8a7a6a', dressD: '#6a5a4a', apron: '#f4efe4', skin: '#e8c0a0', h: 1.06 },
+    lines: ['¡Ay, señorita Ana! Yo no sé nada de enfermedades, menos mal que usted vino aquella noche.', 'La señora Barry dice que tienda la ropa antes de que se nuble.'] },
+  jerry: { name: 'Jerry Buote', kind: 'granjero', home: 'Tejas Verdes', look: { hair: '#2a1a14', hairD: '#1a0a04', dress: '#6a5a3a', dressD: '#4a3a1a', coat: true, skin: '#e0b090', h: .98 },
+    lines: ['El Sr. Cuthbert me pidió que entrara la leña antes de la cena.', 'Oui, oui... ya voy, ya voy. ¡Esa vaca no se quiere mover!'] },
+  medico: { name: 'el médico', kind: 'medico', home: 'Pensión', look: { hair: '#8a8278', hairD: '#5a5248', style: 'old', dress: '#2a2a30', dressD: '#18181e', coat: true, hatDark: true, beard: true, skin: '#eecaae', h: 1.14 },
+    lines: ['¿Alguien enfermo en Tejas Verdes? Espero que no.', 'Esa niña Shirley tiene buena cabeza: salvó a la pequeña Barry del crup antes de que yo llegara.'] },
+  srbell: { name: 'el Sr. Bell', kind: 'iglesia', home: 'Casa de los Pettibone', look: { hair: '#c8c0b0', hairD: '#9a9080', style: 'old', dress: '#3a3a40', dressD: '#2a2a30', coat: true, beard: true, skin: '#eecaae', h: 1.16 },
+    lines: ['Te esperamos el domingo en la escuela dominical, Ana. Y apréndete el versículo.', 'Una oración larga no es mejor que una sincera, niña.'] },
+  josephine: { name: 'la Srta. Josephine Barry', kind: 'paseo', home: 'La Cuesta del Huerto', look: { hair: '#d8d4cc', hairD: '#a8a49c', style: 'bun', dress: '#4a2a4a', dressD: '#2a1a2a', brooch: true, skin: '#eecaae', h: 1.06 },
+    lines: ['¡La niña Ana! Desde que me saltaste encima en la cama, no me había reído tanto en años.', 'Cuando vengas a Charlottetown, te alojas en mi casa. Te llevo a la exposición.'], ana: ['¡Srta. Barry! Usted es un espíritu afín, aunque no lo parezca a primera vista.'] },
+  spencer: { name: 'la Sra. Spencer', kind: 'paseo', home: 'Hotel White Sands', look: { hair: '#7a5a3a', hairD: '#5a3a1a', style: 'bun', dress: '#5a6a8a', dressD: '#3a4a6a', skin: '#f2cfb2', h: 1.06 },
+    lines: ['¡Ana! Qué bien te ves. Y yo que creí que los Cuthbert querían una niña… ¡qué enredo!', 'Mi Lily estuvo enferma, por eso no pude llevarte yo a Tejas Verdes.'] },
+  blewett: { name: 'la Sra. Blewett', kind: 'recado', home: 'Hotel White Sands', look: { hair: '#3a2a20', hairD: '#2a1a10', style: 'bun', dress: '#4a4a3a', dressD: '#2a2a1a', skin: '#e8c0a0', h: 1.08 },
+    lines: ['Así que te quedaste con los Cuthbert. Hmm. Yo te habría hecho trabajar de verdad.'], ana: ['(Ana se esconde detrás de un árbol. ¡Menos mal que Marilla no la dejó irse con ella!)'] },
+  carrie: { name: 'Carrie Sloane', kind: 'alumno', home: 'Granja Sloane', play: 'escuela', look: kidLook('#c8a070', '#e8d0a0', { dressD: '#c0a878', style: 'braids', h: .8 }),
+    lines: ['¿Viste la composición de Ana? ¡La señorita Stacy la leyó en voz alta!'] },
+  thomas: { name: 'Thomas Lynde', kind: 'granjero', home: 'La Hondonada de Lynde', look: { hair: '#8a7a6a', hairD: '#6a5a4a', style: 'old', dress: '#5a5a48', dressD: '#3a3a28', coat: true, skin: '#e0b090', h: 1.12 },
+    lines: ['Buenas. Rachel está adentro. Ella habla por los dos, ¿sabes?'] },
   veraneante: { name: 'una veraneante del hotel', kind: 'playa', home: 'Hotel White Sands', look: { hair: '#c8a060', hairD: '#a07a40', style: 'bun', dress: '#f4f0f8', dressD: '#c8c0d8', collar: '#c8a0d0', skin: '#f6dcc8', h: 1.08 },
     lines: ['¡Qué playa tan encantadora! En Boston no hay nada parecido.', '¿Eres de aquí, niña? ¡Qué suerte vivir en un lugar así!'] },
   pescador: { name: 'un pescador', kind: 'playa', home: 'Casa del farero', look: { hair: '#5a4a3a', hairD: '#3a2a1a', beard: true, dress: '#c8a040', dressD: '#a07a20', coat: true, skin: '#d8a080', h: 1.16 },
@@ -4739,6 +4765,7 @@ const FOLK_KINDS = {
   tendero: (h, f) => h >= 8 && h < 18 ? IN(f.home, 'tl') : h >= 18 && h < 20 ? OUT(PLAY.aldea, 120) : IN(f.home),
   recado: (h, f) => h >= 7.5 && h < 19.5 ? OUT(ERRANDS[(f.n * 7 + Math.floor(h / 1.5)) % ERRANDS.length], 60) : IN(f.home),
   juego: (h, f) => h >= 8 && h < 19 ? OUT(f.home, 170) : IN(f.home),
+  medico: (h, f) => h >= 8 && h < 19 ? OUT(Math.floor(h) % 3 ? PLAY.aldea : f.home, 110) : IN(f.home),
 };
 const FARO = BUILDINGS.find(b => b.style === 'faro');
 const ERRANDS = [...BUILDINGS.filter(b => b.style !== 'faro').map(b => door(b.name)), SCHOOL_DOOR, CHURCH_DOOR, [STATION.x, STATION.y + 60], PLAY.aldea, PLAY.puente];
@@ -4750,7 +4777,7 @@ const FOLKBY = Object.fromEntries(FOLK.map(f => [f.id, f]));
 const seen = (x, y, m = 160) => viewScene() === 'out' && view.Z && x > view.ox - m && x < view.ox + innerWidth / view.Z + m && y > view.oy - m && y < view.oy + innerHeight / view.Z + m;
 function folkSeat(f){
   if (f.where === 'tl') { f.x = SHOP_IN.counter.x + 30; f.y = SHOP_IN.counter.y - 22; f.dir = 2; f.sit = false; return; }   // (behind the counter)   // in the school: the pupils at their desks (Ana's is the sixth), the teacher by the blackboard
-  if (f.def.kind === 'maestro') { f.x = 6.5 * T + 44; f.y = 3.2 * T + 14; f.dir = 2; f.sit = false; return; }
+  if (f.def.kind === 'maestro') { f.x = 6.5 * T + 44 + (f.id === 'stacy' ? 70 : 0); f.y = 3.2 * T + 14; f.dir = 2; f.sit = false; return; }
   const pupils = FOLK.filter(q => q.def.kind === 'alumno'), i = pupils.indexOf(f), seats = SCHOOL_DESKS.filter((_, j) => j !== 5);
   if (i < seats.length) { const d = seats[i]; f.x = d.x; f.y = d.y + 8; f.dir = 0; f.sit = true; } else { f.x = 1.2 * T + (i - seats.length) * 30; f.y = KIT.h - 30; f.dir = 0; f.sit = false; }
 }
@@ -4934,6 +4961,18 @@ const FICHAS = {
   farero: ['el capitán Jim, el viejo farero, marinero retirado que cuenta historias del mar', ['el mar', 'las tormentas', 'los barcos', 'sus viajes']],
   veraneante: ['una señora de Boston que veranea en el hotel White Sands, encantada con todo', ['la playa', 'la isla', 'la ciudad']],
   pescador: ['un pescador de Avonlea, curtido y bromista', ['la pesca', 'el mar', 'el tiempo']],
+  stacy: ['la Srta. Stacy, la maestra nueva de Avonlea: joven, alegre y comprensiva; saca a los alumnos a estudiar al bosque y prepara a los mejores para el examen de Queen\'s', ['las composiciones', 'la botánica', 'el examen de Queen\'s', 'el concierto de la escuela']],
+  minnie: ['Minnie May Barry, la hermanita de Diana, de tres años; Ana la salvó del crup una noche de invierno', ['los cuentos de hadas', 'las muñecas de Diana', 'la noche que estuvo enferma']],
+  srbarry: ['el Sr. Barry, el padre de Diana, granjero de La Cuesta del Huerto, callado y trabajador', ['el heno', 'la cosecha', 'el tiempo']],
+  maryjoe: ['Mary Joe, la muchacha francesa que trabaja en casa de los Barry; no sabe qué hacer en una emergencia', ['la ropa tendida', 'la noche del crup', 'la señora Barry']],
+  jerry: ['Jerry Buote, el muchacho francés que Matthew contrata para ayudar en la granja de Tejas Verdes', ['la leña', 'las vacas', 'el trabajo del campo']],
+  medico: ['el médico de la zona, que atiende a los enfermos de Avonlea; un señor serio y amable', ['los enfermos', 'el crup de Minnie May', 'la salud']],
+  srbell: ['el Sr. Bell, el superintendente de la escuela dominical, un señor mayor y muy formal que hace oraciones larguísimas', ['la escuela dominical', 'los versículos', 'la iglesia']],
+  josephine: ['la Srta. Josephine Barry, la tía rica de Diana, de Charlottetown: brusca y estirada, pero Ana la hace reír como nadie; de visita en La Cuesta del Huerto', ['Charlottetown', 'la exposición', 'la noche en que Ana le saltó encima en la cama']],
+  spencer: ['la Sra. Spencer, de White Sands, la que trajo a Ana del orfanato por error (los Cuthbert querían un niño)', ['el orfanato', 'el enredo de la niña en vez del niño', 'su hija Lily']],
+  blewett: ['la Sra. Peter Blewett, de White Sands, una mujer dura y tacaña que quería a Ana de sirvienta; Marilla no se la dio', ['sus muchos niños', 'el trabajo de la casa', 'las sirvientas']],
+  carrie: ['Carrie Sloane, compañera de escuela de Ana, hermana de Charlie', ['la escuela', 'la Srta. Stacy', 'su hermano Charlie']],
+  thomas: ['Thomas Lynde, el marido de la Sra. Rachel Lynde, un hombre tranquilo y callado (ella habla por los dos)', ['la siembra', 'Rachel', 'el campo']],
 };
 for (const [k, d] of Object.entries(FOLK_DEFS)) { const f = FICHAS[k]; d.ficha = f ? f[0] : d.look.h < .99 ? d.name + ', un niño de Avonlea que juega cerca de su casa' : d.name + ', de Avonlea, que vive en ' + d.home.replace(/^Casa de /, 'la casa de ').replace(/^Granja /, 'la granja '); d.topics = f ? f[1] : d.look.h < .99 ? ['un juego', 'un bicho que encontró'] : ['el tiempo', 'la cosecha', 'los vecinos', 'las noticias de la aldea']; }
 /* THE CARD (the same for everyone, the main characters and the people of the village):
@@ -5089,6 +5128,7 @@ const WHO = {
   gilbert: { caracter: ['orgulloso', 'generoso'], le_gusta: ['comida'] },
   sraallan: { caracter: ['generoso', 'sensible'], le_gusta: ['hecha_a_mano', 'flores'], cocina: 'casa_parroquial' },
   peg: { caracter: ['orgulloso'], le_gusta: ['hierba'] },
+  medico: { caracter: ['generoso'], le_gusta: [], medico: true },
 };
 const whoOf = k => WHO[k] || { caracter: [], le_gusta: [] };
 const isQuieto = k => !!whoOf(k).quieto || (game.wm?.sick || []).includes(k);
@@ -5146,7 +5186,7 @@ const SPEEDS = { ana: 60 };
 const travelMin = (who, a, b, pts) => { const p = pts[a], q = pts[b]; if (!p || !q) return 1e6; return 1 + dist(p[0], p[1], q[0], q[1]) * 1.3 / (SPEEDS[who] || 40) * 24 / 60 + (a === 'cocina' || b === 'cocina' || a.startsWith('h:') || b.startsWith('h:') ? 2 : 0); };
 
 // --- the state now (for planning and for checking a goal in the world)
-const WM_PEOPLE = () => ['ana', ...Object.keys(CH), 'lawson', 'gilbert', 'sraallan', 'peg'];
+const WM_PEOPLE = () => ['ana', ...Object.keys(CH), 'lawson', 'gilbert', 'sraallan', 'peg', 'medico'];
 function wmNow(){
   const s = { t: hourNow() * 60, pos: {}, invs: {}, cows: {}, rel: {}, ofensa: { ...game.wm.ofensa }, know: {}, follow: {}, facts: {}, stock: {}, sick: [...(game.wm.sick || [])] };
   for (const k of WM_PEOPLE()) { s.pos[k] = personKey(k); s.invs[k] = { ...wmInv(k) }; s.know[k] = [...(game.wm.know[k] || [])]; }
@@ -5176,6 +5216,7 @@ const FAVORS = {   // what one can ask of someone (ok: whether it can be asked; 
     say: a => `¿Vendrías a tomar el té conmigo esta tarde, a las ${fmtHour(teaHour(hourNow() * 60))}? En ${(WP_NAME[a.lugar || 'casa_parroquial'] || '').replace(/^(el|la) /, m => m)}.` },
   // (from the book) lending: the one asked hands it over at once (it is to be given back); the chores Marilla asks for; a ride in the cart
   prestar: { eff: (s, me, to, a) => { s.invs[to][a.item] -= 1; s.invs[me][a.item] = (s.invs[me][a.item] || 0) + 1; s.facts['prestado:' + a.item + ':' + to + '>' + me] = 1; }, ok: (s, me, to, a) => (s.invs[to]?.[a.item] || 0) > 0, say: a => `¿Me prestarías ${ITEM_DEFS[a.item]?.gift?.art || itemTextW(a.item, 1)}? Te lo devuelvo, prometido.` },
+  curar: { eff: (s, me, to, a) => { s.sick = (s.sick || []).filter(x => x !== a.k); }, ok: (s, me, to, a) => !!whoOf(to).medico && (s.sick || []).includes(a.k), wait: 40, goal: (me, a) => G.sano(a.k), say: a => `¡Doctor! ${wmName(a.k)} está enfermo. ¿Podría venir a verlo, por favor?` },
   quehaceres: { eff: (s, me, to, a) => { for (const q of a.q) s.facts['quehacer:' + q] = 1; }, ok: (s, me, to) => to === 'ana', wait: 30, goal: (me, a) => G.quehaceres(a.to, a.q), say: a => `Ana, hay que ${a.q.map(q => QUEHACER_TXT[q]).join(' y ')}. Y nada de quedarse soñando despierta.` },
   llevar: { eff: (s, me, to, a) => { s.pos[me] = a.lugar; s.pos[to] = a.lugar; }, ok: (s, me, to) => to === 'matthew' && me !== 'matthew', wait: 15, goal: (me, a) => G.llevar(a.to, me, a.lugar), say: a => `Matthew, ¿me llevarías en la calesa a ${WP_NAME[a.lugar]}?` },
   traer: { eff: (s, me, to, a) => { s.invs[me][a.item] = (s.invs[me][a.item] || 0) + a.n; }, ok: (s, me, to, a) => to !== me && (!isQuieto(to) || (s.invs[to]?.[a.item] || 0) >= a.n) && (!THINGS[a.item]?.hace || (s.invs[to]?.[a.item] || 0) >= a.n), wait: 45,   // (a dress is sewn, not fetched: one asks for the cloth)
@@ -5192,6 +5233,7 @@ function autoFavors(me, goal, s0, exclude = []){
   const cands = WM_PEOPLE().filter(k => k !== me && !exclude.includes(k) && s0.pos[k] && (!isQuieto(me) || s0.pos[k] === s0.pos[me] || k === 'ana') && (kin(me, k) || relGetW(k, me) >= 3)), out = [];   // (one asks one's own, or a friend; one who cannot go out, those with them, or sends for Ana)
   if (goal.kind === 'tener') { const miss = goal.n - (s0.invs[goal.k]?.[goal.x] || 0); if (miss > 0) for (const k of cands) { out.push({ f: 'traer', to: k, item: goal.x, n: miss }); for (const [i, n] of Object.entries(THINGS[goal.x]?.receta || {})) if ((s0.invs[goal.k]?.[i] || 0) < n * miss) out.push({ f: 'traer', to: k, item: i, n: n * miss - (s0.invs[goal.k]?.[i] || 0) }); } }   // (or what it is made of: the cloth for a dress)
   if (goal.kind === 'vaca_en') for (const k of cands) out.push({ f: 'encerrar_vaca', to: k, cow: goal.c, pen: goal.p });
+  if (goal.kind === 'sano' && me !== 'medico' && s0.pos.medico) out.push({ f: 'curar', to: 'medico', k: goal.k });   // (one goes to fetch the doctor)
   if (goal.kind === 'rel_min' && goal.b === me) for (const k of cands) if (relGetW(goal.a, k) >= 4) out.push({ f: 'interceder', to: k, target: goal.a });
   return out;
 }
@@ -5201,7 +5243,7 @@ function verbs(s, me, C){
   const ride = me === 'matthew' && Object.values(s.follow).includes(me);   // (Matthew with someone in the cart: much faster)
   if (!isQuieto(me)) for (const p of C.places) if (p !== here && C.pts[p]) add('ir', travelMin(me, here, p, C.pts) / (ride ? 2.4 : 1), t => { t.pos[me] = p; for (const [f, w] of Object.entries(t.follow)) if (w === me) t.pos[f] = p; }, { p });
   const of = OFRECE[here] || {};
-  for (const x of of.tomar || []) if (!(inv[x] > 0) && C.items.includes(x)) add('tomar', 1, t => { t.invs[me][x] = 1; }, { x });
+  for (const x of of.tomar || []) if (!(inv[x] > 0) && C.items.includes(x) && !(x === 'jarabe' && game.wm.sinJarabe)) add('tomar', 1, t => { t.invs[me][x] = 1; }, { x });
   for (const x of of.recoger || []) if (s.stock[x] > 0 && (inv[x] || 0) < 9) { const n = Math.min(x === 'ramo' ? 1 : x === 'huevos' ? 9 : 3, s.stock[x]); add('recoger', 3, t => { t.invs[me][x] = (t.invs[me][x] || 0) + n; t.stock[x] -= n; }, { x, n }); }
   if (here === W.cocina) for (const [x, d] of Object.entries(THINGS)) if (d.receta && C.items.includes(x) && (d.hace !== 'coser' || W.cose) && Object.entries(d.receta).every(([i, n]) => (inv[i] || 0) >= n) && (inv[x] || 0) < 3) add(d.hace || 'cocinar', d.hace === 'coser' ? 30 : 10, t => { for (const [i, n] of Object.entries(d.receta)) t.invs[me][i] -= n; t.invs[me][x] = (t.invs[me][x] || 0) + 1; }, { x });
   for (const k of C.people) if (at(k)) {
@@ -5221,7 +5263,7 @@ function verbs(s, me, C){
     if (C.kind === 'devuelto') for (const f of Object.keys(s.facts)) { const m = f.match(/^prestado:(\w+):(\w+)>(\w+)$/); if (m && m[2] === k && m[3] === me && inv[m[1]] > 0) add('devolver', 1, t => { t.invs[me][m[1]] -= 1; t.invs[k][m[1]] = (t.invs[k][m[1]] || 0) + 1; delete t.facts[f]; t.facts['devuelto:' + m[1] + ':' + me + '>' + k] = 1; t.rel[k + '>' + me] = Math.min(5, (t.rel[k + '>' + me] ?? 2) + 1); }, { k, x: m[1] }); }
     { const pair = 'amigas:' + [me, k].sort().join('&'); if (C.kind === 'amigas' && !s.facts[pair] && JURAN.includes(me) && JURAN.includes(k) && (s.rel[k + '>' + me] ?? 2) >= 4 && (s.rel[me + '>' + k] ?? 3) >= 4) add('jurar', 5, t => { t.facts[pair] = 1; t.rel[k + '>' + me] = 5; t.rel[me + '>' + k] = 5; }, { k }); }
     if (C.kind === 'paces' && s.ofensa[me + '>' + k] && (s.facts['disc:' + me + '>' + k] || (s.rel[me + '>' + k] ?? 2) >= 1)) add('perdonar', 2, t => { delete t.ofensa[me + '>' + k]; t.rel[me + '>' + k] = Math.min(5, (t.rel[me + '>' + k] ?? 2) + 1); }, { k });
-    if (C.kind === 'sano' && (s.sick || []).includes(k) && inv.jarabe > 0) add('cuidar', 15, t => { t.sick = t.sick.filter(x => x !== k); t.invs[me].jarabe -= 1; t.rel[k + '>' + me] = Math.min(5, (t.rel[k + '>' + me] ?? 2) + 2); }, { k });
+    if (C.kind === 'sano' && (s.sick || []).includes(k) && (inv.jarabe > 0 || W.medico)) add('cuidar', 15, t => { t.sick = t.sick.filter(x => x !== k); if (!W.medico) t.invs[me].jarabe -= 1; t.rel[k + '>' + me] = Math.min(5, (t.rel[k + '>' + me] ?? 2) + 2); }, { k });
     if (C.kind === 'regañado' && W.regaña && s.facts['falta:' + k] && !s.facts['regaño:' + k]) add('regañar', 3, t => { t.facts['regaño:' + k] = 1; delete t.facts['falta:' + k]; }, { k });
     if (C.lleva === k && s.follow[k] !== me) add('subir_calesa', 3, t => { t.follow[k] = me; }, { k });
     for (const f of C.favors) { const F = FAVORS[f.f]; if (f.to === k && F.ok(s, me, k, f) && socialRule(stateR(s), 'pedir', me, k) && !s.facts['pedido:' + f.f + ':' + k]) add('pedir', 2 + (F.wait || 0) + (isQuieto(me) ? 0 : 40), t => { F.eff(t, me, k, f); t.facts['pedido:' + f.f + ':' + k] = 1; }, { k, favor: f }); }
@@ -5231,7 +5273,6 @@ function verbs(s, me, C){
   if (C.kind === 'quehaceres' && here === 'cocina' && CUTHBERT.includes(me) && me !== 'matthew') for (const q of QUEHACERES) if (!s.facts['quehacer:' + q]) add('quehacer', 6, t => { t.facts['quehacer:' + q] = 1; if (me !== 'marilla' && !t.facts['gracias:' + me]) { t.facts['gracias:' + me] = 1; t.rel['marilla>' + me] = Math.min(5, (t.rel['marilla>' + me] ?? 2) + 1); } }, { x: q });
   if (C.items.includes('leche') && here === 'corral' && !isQuieto(me)) for (const [c, st] of Object.entries(s.cows)) if (st === 'corral' && !s.facts['ordeñada:' + c]) add('ordeñar', 8, t => { t.invs[me].leche = (t.invs[me].leche || 0) + 2; t.facts['ordeñada:' + c] = 1; }, { cow: c });
   if (C.kind === 'alimentados' && (here === 'corral' || here === 'gallinero') && !s.facts['alimentados:' + here]) add('alimentar', 4, t => { t.facts['alimentados:' + here] = 1; }, { p: here });
-  if (C.kind === 'sano' && here === 'aldea') for (const k of s.sick || []) if (!s.facts['medico:' + k]) add('avisar_medico', 4, t => { t.facts['medico:' + k] = 1; t.sick = t.sick.filter(x => x !== k); }, { k });
   if (C.kind === 'recito' && (here === 'escuela' || here === 'h:es' || here === W.cocina) && !(s.know[me] || []).includes('leccion')) add('estudiar', 20, t => { t.know[me] = [...(t.know[me] || []), 'leccion']; });
   if (C.kind === 'recito' && (here === 'escuela' || here === 'h:es') && (s.know[me] || []).includes('leccion') && !s.facts['recito:' + me]) add('recitar', 3, t => { t.facts['recito:' + me] = 1; });
   if (C.kind === 'rezo' && (here === W.cocina || here === 'iglesia') && !s.facts['rezo:' + me]) add('rezar', 3, t => { t.facts['rezo:' + me] = 1; });
@@ -5272,7 +5313,7 @@ const G = {
   devuelto: (a, x, b) => ({ kind: 'devuelto', text: `${wmName(a)} le devuelve ${ITEM_DEFS[x]?.gift?.art || x} a ${wmName(b)}`, test: s => !!s.facts['devuelto:' + x + ':' + a + '>' + b], h: s => s.facts['devuelto:' + x + ':' + a + '>' + b] ? 0 : 1, items: [x], people: [a, b] }),
   amigas: (a, b) => ({ kind: 'amigas', text: `${wmName(a)} y ${wmName(b)} juran ser amigas del alma`, test: s => !!s.facts['amigas:' + [a, b].sort().join('&')], h: s => s.facts['amigas:' + [a, b].sort().join('&')] ? 0 : 1, items: [], people: [a, b] }),
   paces: (a, b) => ({ kind: 'paces', text: `${wmName(a)} y ${wmName(b)} hacen las paces`, test: s => !s.ofensa[a + '>' + b] && !s.ofensa[b + '>' + a], h: s => (s.ofensa[a + '>' + b] ? 1 : 0) + (s.ofensa[b + '>' + a] ? 1 : 0), items: [], people: [a, b] }),
-  sano: k => ({ kind: 'sano', text: `${wmName(k)} se mejora`, test: s => !(s.sick || []).includes(k), h: s => (s.sick || []).includes(k) ? 1 : 0, items: ['jarabe'], people: [k], places: ['aldea', 'cocina'] }),
+  sano: k => ({ kind: 'sano', k, text: `${wmName(k)} se mejora`, test: s => !(s.sick || []).includes(k), h: s => (s.sick || []).includes(k) ? 1 : 0, items: ['jarabe'], people: [k], places: ['aldea', 'cocina'] }),
   recito: k => ({ kind: 'recito', text: `${wmName(k)} aprende la lección y la recita en la escuela`, test: s => !!s.facts['recito:' + k], h: s => s.facts['recito:' + k] ? 0 : (s.know[k] || []).includes('leccion') ? 1 : 2, items: [], people: [k], places: ['escuela'] }),
   rezo: k => ({ kind: 'rezo', text: `${wmName(k)} dice sus oraciones`, test: s => !!s.facts['rezo:' + k], h: s => s.facts['rezo:' + k] ? 0 : 1, items: [], people: [k], places: ['iglesia'] }),
   adornado: k => ({ kind: 'adornado', text: `${wmName(k)} adorna su sombrero con flores`, test: s => !!s.facts['adorno:' + k], h: s => s.facts['adorno:' + k] ? 0 : (s.invs[k].ramo ? 1 : 2), items: ['ramo'], people: [k] }),
@@ -5334,9 +5375,9 @@ function wmSearch(me, goal, favors, s0, cap){
 }
 const stepText = a => ({ ir: () => 'ir a ' + (WP_NAME[a.p] || wmPlaceText(a.p)), tomar: () => 'tomar ' + itemTextW(a.x, 1), recoger: () => 'recoger ' + itemTextW(a.x, a.n), cocinar: () => 'cocinar ' + (ITEM_NAME[a.x]?.[0] || a.x),
   dar: () => `darle ${itemTextW(a.x, a.n)} a ${wmName(a.k)}`, vender: () => `vender ${a.x === 'vaca' ? ANIMALS[a.cow].name : itemTextW(a.x, 1)} a ${wmName(a.k)}`, comprar: () => `llevar ${itemTextW(a.x, 1)} anotado en la libreta`, cambiar: () => `cambiar ${itemTextW(a.g, a.n)} por ${ITEM_NAME[a.x][0]}`,
-  conversar: () => 'conversar con ' + wmName(a.k), interceder: () => `hablar con ${wmName(a.k)} por ${wmName(a.por)}`, disculparse: () => 'disculparse con ' + wmName(a.k), pedir: () => `pedirle a ${wmName(a.k)}: ` + ({ traer: `que le traiga ${itemTextW(a.favor.item, a.favor.n)}`, encerrar_vaca: `que lleve a ${ANIMALS[a.favor.cow]?.name} a ${WP_NAME[a.favor.pen]}`, interceder: `que hable con ${wmName(a.favor.target)} por él`, vender_vaca: 'que le venda la vaca', pasear: 'que den un paseo juntas', venir: 'que venga a tomar el té más tarde', prestar: `que le preste ${ITEM_DEFS[a.favor.item]?.gift?.art || a.favor.item}`, quehaceres: 'que haga los quehaceres', llevar: `que la lleve en la calesa a ${WP_NAME[a.favor.lugar]}` }[a.favor.f] || a.favor.f), guiar: () => 'guiar a ' + ANIMALS[a.cow].name,
+  conversar: () => 'conversar con ' + wmName(a.k), interceder: () => `hablar con ${wmName(a.k)} por ${wmName(a.por)}`, disculparse: () => 'disculparse con ' + wmName(a.k), pedir: () => `pedirle a ${wmName(a.k)}: ` + ({ traer: `que le traiga ${itemTextW(a.favor.item, a.favor.n)}`, encerrar_vaca: `que lleve a ${ANIMALS[a.favor.cow]?.name} a ${WP_NAME[a.favor.pen]}`, interceder: `que hable con ${wmName(a.favor.target)} por él`, vender_vaca: 'que le venda la vaca', pasear: 'que den un paseo juntas', venir: 'que venga a tomar el té más tarde', prestar: `que le preste ${ITEM_DEFS[a.favor.item]?.gift?.art || a.favor.item}`, curar: `que venga a ver a ${wmName(a.favor.k)}`, quehaceres: 'que haga los quehaceres', llevar: `que la lleve en la calesa a ${WP_NAME[a.favor.lugar]}` }[a.favor.f] || a.favor.f), guiar: () => 'guiar a ' + ANIMALS[a.cow].name,
   quehacer: () => QUEHACER_TXT[a.x], ordeñar: () => 'ordeñar a ' + ANIMALS[a.cow].name, alimentar: () => 'dar de comer a los animales en ' + WP_NAME[a.p], visitar: () => 'visitar a ' + wmName(a.k), devolver: () => `devolverle ${ITEM_DEFS[a.x]?.gift?.art || a.x} a ${wmName(a.k)}`,
-  jurar: () => 'jurar ser amigas del alma con ' + wmName(a.k), perdonar: () => 'perdonar a ' + wmName(a.k), cuidar: () => 'cuidar a ' + wmName(a.k), avisar_medico: () => 'ir a buscar al médico para ' + wmName(a.k), estudiar: () => 'estudiar la lección', recitar: () => 'recitar la lección',
+  jurar: () => 'jurar ser amigas del alma con ' + wmName(a.k), perdonar: () => 'perdonar a ' + wmName(a.k), cuidar: () => 'cuidar a ' + wmName(a.k), estudiar: () => 'estudiar la lección', recitar: () => 'recitar la lección',
   rezar: () => 'decir sus oraciones', adornar: () => 'adornar el sombrero con flores', remar: () => 'remar en el lago', nombrar: () => 'ponerle nombre a ' + WP_NAME[a.p], regañar: () => 'regañar a ' + wmName(a.k), subir_calesa: () => `subir a ${wmName(a.k)} a la calesa`, coser: () => 'coser ' + (ITEM_NAME[a.x]?.[0] || a.x), soltar: () => `soltar a ${ANIMALS[a.cow].name} en ${WP_NAME[a.p]}` }[a.v] || (() => a.v))().replace(/\ba el\b/g, 'al');
 const wmPlaceText = p => p.startsWith('p:') ? 'donde está ' + wmName(p.slice(2)) : p.startsWith('c:') ? 'donde está ' + ANIMALS[p.slice(2)].name : p.startsWith('h:') ? HOUSES[p.slice(2)].place[1] : WP_NAME[p] || p;
 
@@ -5797,16 +5838,11 @@ function wmExec(ag, a, st, dt){
     }
     case 'cuidar': {
       const r = reach(a.k); if (r !== 'ok') return r;
-      if (!(inv.jarabe > 0)) { st.why = 'no tiene el jarabe'; return 'fail'; }
-      if (!st.said) { st.said = 1; bubble(me, 'Una cucharadita de jarabe de ipecacuana… y otra más. Ya va a pasar.'); }
+      const doc = !!whoOf(me).medico; if (!doc && !(inv.jarabe > 0)) { st.why = 'no tiene el jarabe'; return 'fail'; }
+      if (!st.said) { st.said = 1; bubble(me, doc ? 'Veamos… una gripe fuerte. Tome esto, y a guardar cama unos días.' : 'Una cucharadita de jarabe de ipecacuana… y otra más. Ya va a pasar.'); }
       if (!wait(5)) return 'run';
-      inv.jarabe -= 1; game.wm.sick = (game.wm.sick || []).filter(x => x !== a.k); relSetW(a.k, me, relGetW(a.k, me) + 2); bubble(a.k, 'Ya me siento mucho mejor. Gracias, niña.');
-      logEv(`${wmName(me)} cuidó a ${wmName(a.k)} con jarabe de ipecacuana, y se mejoró.`, []); return 'ok';
-    }
-    case 'avisar_medico': {
-      if (!st.said) { st.said = 1; bubble(me, `¡Doctor! ¡${wmName(a.k)} está enfermo, venga por favor!`); }
-      if (!wait(3)) return 'run';
-      realR.setFact('medico:' + a.k); game.wm.sick = (game.wm.sick || []).filter(x => x !== a.k); logEv(`${wmName(me)} fue a buscar al médico, que atendió a ${wmName(a.k)}.`, []); return 'ok';
+      if (!doc) inv.jarabe -= 1; game.wm.sick = (game.wm.sick || []).filter(x => x !== a.k); relSetW(a.k, me, relGetW(a.k, me) + 2); bubble(a.k, doc ? 'Gracias, doctor. Ya me siento mejor.' : 'Ya me siento mucho mejor. Gracias, niña.');
+      logEv(doc ? `${wmName(me)} atendió a ${wmName(a.k)}, que se mejoró.` : `${wmName(me)} cuidó a ${wmName(a.k)} con jarabe de ipecacuana, y se mejoró.`, []); return 'ok';
     }
     case 'estudiar': { if (!st.said) { st.said = 1; bubble(me, '«El cuadrado de la hipotenusa es igual…» Repaso y repaso.'); } if (!wait(4)) return 'run'; wmKnow(me, 'leccion'); logEv(`${wmName(me)} estudió la lección.`, []); return 'ok'; }
     case 'recitar': { if (!st.said) { st.said = 1; bubble(me, '«Y a lo largo del río, en su barca, iba la doncella de Shalott…»'); } if (!wait(4)) return 'run'; realR.setFact('recito:' + me); logEv(`${wmName(me)} recitó la lección en la escuela.`, []); return 'ok'; }
@@ -5994,7 +6030,8 @@ const WM_TESTS = [
   { who: 'ana', text: 'Ana le devuelve el libro a Diana (cap. 21, 30)', setup: () => { dayAt(12); game.inv.libro = 1; wmInv('diana').libro = 0; realR.setFact('prestado:libro:diana>ana'); diana.follow = false; atOut('diana', OS.x - 60, OS.y + 80); }, goal: () => G.devuelto('ana', 'libro', 'diana') },
   { who: 'ana', text: 'Ana y Diana juran ser amigas del alma (cap. 12)', setup: () => { dayAt(11); delete game.wm.perm['amigas:ana&diana']; game.fond.diana = 5; game.wm.rel['ana>diana'] = 5; diana.follow = false; atOut('diana', OS.x - 60, OS.y + 80); }, goal: () => G.amigas('ana', 'diana') },
   { who: 'ana', text: 'Gilbert ya se disculpó: Ana lo perdona y hacen las paces (cap. 38)', setup: () => { dayAt(16); game.wm.ofensa['ana>gilbert'] = 'zanahorias'; game.wm.rel['ana>gilbert'] = 0; realR.setFact('disc:ana>gilbert'); atOut('gilbert', PLAY.aldea[0] + 300, PLAY.aldea[1] + 120); }, goal: () => G.paces('ana', 'gilbert') },
-  { who: 'ana', text: 'El Sr. Harrison está enfermo: Ana lo cuida con jarabe, o va a buscar al médico (cap. 18)', setup: () => { dayAt(11); game.wm.sick = ['harrison']; game.inv.jarabe = 0; delete game.wm.facts['medico:harrison:' + today()]; const h = PEOPLE.harrison; h.where = 'hh'; h.x = KIT.w / 2; h.y = KIT.h / 2; }, goal: () => G.sano('harrison') },
+  { who: 'ana', text: 'El Sr. Harrison está enfermo: Ana lo cuida con jarabe de ipecacuana (cap. 18)', setup: () => { dayAt(11); game.wm.sick = ['harrison']; game.inv.jarabe = 0; delete game.wm.facts['medico:harrison:' + today()]; const h = PEOPLE.harrison; h.where = 'hh'; h.x = KIT.w / 2; h.y = KIT.h / 2; }, goal: () => G.sano('harrison') },
+  { who: 'ana', text: 'El Sr. Harrison está enfermo y no queda jarabe en casa: Ana va a buscar al médico (cap. 18)', setup: () => { dayAt(11); game.wm.sick = ['harrison']; game.inv.jarabe = 0; game.wm.sinJarabe = true; const h = PEOPLE.harrison; h.where = 'hh'; h.x = KIT.w / 2; h.y = KIT.h / 2; atOut('medico', PLAY.aldea[0] + 40, PLAY.aldea[1] + 20); }, goal: () => G.sano('harrison') },
   { who: 'ana', text: 'Ana estudia la lección y la recita en la escuela (cap. 17, 24)', setup: () => { dayAt(9); game.wm.know.ana = (game.wm.know.ana || []).filter(f => f !== 'leccion'); delete game.wm.facts['recito:ana:' + today()]; }, goal: () => G.recito('ana') },
   { who: 'ana', text: 'Ana dice sus oraciones (cap. 7)', setup: () => { dayAt(20); delete game.wm.facts['rezo:ana:' + today()]; }, goal: () => G.rezo('ana') },
   { who: 'marilla', text: 'Marilla cose un vestido con mangas abullonadas (le piden la tela a la tienda) (cap. 25)', setup: () => { dayAt(10); wmInv('marilla').tela = 0; wmInv('marilla').vestido = 0; wmInv('matthew').tela = 0; PEOPLE.marilla.where = 'gg'; atOut('matthew', BARN.x + 60, BARN.y + 60); }, goal: () => G.tener('marilla', 'vestido', 1) },
@@ -6048,7 +6085,7 @@ function wmRunTest(i){
   for (const k of Object.keys(AGENTS)) { wmRelease(k); delete AGENTS[k]; }
   close(); if (ana.goto) ana.goto = null; diana.follow = false; game.wm.sick = []; for (const f of Object.keys(game.wm.facts)) if (/^(pedido|intercede|disc|gusto|dio):/.test(f)) delete game.wm.facts[f]; game.seasonShift = 0; cowHome('dolly'); cowHome('jersey'); game.inv.cuerda = 0; for (const k of ['matthew', 'harrison', 'shearer']) delete game.wm.inv[k];
   if (PEOPLE.shearer.where !== 'away') { PEOPLE.shearer.where = 'away'; }
-  WM_APPROACH = null;
+  WM_APPROACH = null; game.wm.sinJarabe = false;
   const keep = { scene: game.scene, x: ana.x, y: ana.y, dir: ana.dir, tx: toby.x, ty: toby.y, cx: cam.x, cy: cam.y };
   T.setup(); S = ((seasonCount() % 4) + 4) % 4;
   game.scene = keep.scene; ana.x = keep.x; ana.y = keep.y; ana.dir = keep.dir; ana.goto = null; toby.x = keep.tx; toby.y = keep.ty; cam.x = keep.cx; cam.y = keep.cy;   // (Ana where she was: no jumping to the test's start)

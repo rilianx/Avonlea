@@ -64,7 +64,7 @@ const exe = process.env.PLAYWRIGHT_CHROMIUM || (fs.existsSync('/opt/pw-browsers/
     '| `jurar` ser amigas del alma | Ana y Diana juntas, con cariño ≥ 4 | 5 | hecho para siempre `amigas:ana&diana`; cariño 5 |',
     '| `perdonar` | quien actúa está ofendido con alguien presente que se disculpó (o lo quiere ≥ 1) | 2 | se borra la ofensa; +1 de cariño |',
     '| `cuidar` a un enfermo | el enfermo está presente y se tiene el jarabe (se toma en la cocina) | 15 | se mejora; +2 de cariño |',
-    '| `avisar_medico` | en la aldea, hay un enfermo | 4 | el médico lo atiende: se mejora |',
+    '| (buscar al médico) | favor `curar` al médico (en la aldea): él va donde el enfermo y lo `cuida` sin jarabe | — | se mejora |',
     '| `estudiar` / `recitar` | en la escuela o en casa / en la escuela, sabiéndose la lección | 20 / 3 | sabe la lección / hecho `recito` |',
     '| `rezar` | en su casa o en la iglesia | 3 | hecho `rezo` |',
     '| `coser` (un vestido) | en su cocina, si sabe coser, con un corte de tela | 30 | +1 vestido con mangas abullonadas |',
