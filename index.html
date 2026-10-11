@@ -181,7 +181,7 @@ body.visor > *:not(#cv):not(#visor){display:none !important}
 /* Un día en Avonlea: a first look at a calm game inspired by "Anne of Green Gables" (L. M. Montgomery, 1908). No
    missions: Ana lives at Green Gables with Matthew and Marilla, and spends the days as she likes: watering the
    kitchen garden, picking berries and apples, cooking in the kitchen, visiting her bosom friend Diana at Orchard
-   Slope across the brook, walking down to the Lake of Shining Waters, petting Toby the dog...
+   Slope across the brook, walking down to the Lake of Shining Waters, petting Pelusa the cat...
    - Seen from above and in front ("fake 3D"): everything is drawn in the order of its feet.
    - Drawn by hand: pencil outlines that wobble a little and "boil" (redrawn a few times a second, like hand-drawn
      animation), watercolour fills that do not quite meet the line, and paper grain over everything.
@@ -2507,7 +2507,7 @@ CH.lynde.rels = { ana: [1, 'la criticó al conocerla; hoy la defiende'], matthew
 CH.lynde.routine.roomGoals.rl = CH.lynde.goals;
 CH.matthew.routine.describe = "Matthew entra a la cocina de Tejas Verdes a comer (hacia las 7, las 12 y las 18) y está con Marilla.";
 const LOOKS = { ana: ANA.look }; for (const k of Object.keys(CH)) LOOKS[k] = CH[k].look;
-const NAMES = { toby: 'Toby', lawson: 'Sr. Lawson' }; for (const k of Object.keys(CH)) NAMES[k] = CH[k].name;
+const NAMES = { toby: 'Pelusa', lawson: 'Sr. Lawson' }; for (const k of Object.keys(CH)) NAMES[k] = CH[k].name;
 const LINES = {}, SEASON_LINES = {}; for (const k of Object.keys(CH)) { LINES[k] = CH[k].lines; SEASON_LINES[k] = CH[k].seasonLines; }
 const ABIL = {}; for (const k of Object.keys(CH)) ABIL[k] = CH[k].abil;
 const COOK = Object.keys(CH).find(k => CH[k].abil.cocinar);
@@ -2552,7 +2552,7 @@ for (const [k, d] of Object.entries(ANIMALS)) { const A = d.home && AREAS[d.home
   if (bad.length) console.warn('[avonlea] fichas incompletas:\n' + bad.join('\n'));
 })();
 for (const k of Object.keys(CH)) game.fond[k] = 0;
-const toby = { mode: 'near', goal: null, until: 0, x: ana.x + 30, y: ana.y + 20, dir: 1, walk: 0, moving: false, sitT: 0, sniff: 0, petted: 0 };
+const toby = { where: 'out', mode: null, goal: null, until: 0, x: GG.x - 90, y: GG.y + 46, dir: 1, walk: 0, moving: false, sitT: 0, sniff: 0, petted: 0, c: '#e09a4c', ph: 0 };   // (Pelusa, the cat of Green Gables: she goes her own way)
 const SPEED = 84, WALK = 50, RUN = 90, STROLL = 34, MAPWALK = 64;   // (SPEED is the reference the step animation is scaled by)
 function blockedOut(x, y){
   return x < 16 || y < 40 || x > WW - 16 || y > WH - 8 || inLake(x, y, 6) || inBrook(x, y, 2) || inSea(x, y, 4) || inHouses(x, y, 2) || nearFence(x, y) ||
@@ -2707,7 +2707,7 @@ function targets(){
   add('ana', ana.x, ana.y, 1e9, 'Ana', anaMenu, { hy: 22, hit: 15, self: true });
   for (const k of Object.keys(PEOPLE)) { const q = PEOPLE[k]; if (sceneOf(k) === game.scene) add('p:' + k, q.x, q.y, 34, 'Hablar con ' + CH[k].article + NAMES[k], () => talk(k), { hy: q.lie ? 8 : 26 * LOOKS[k].h, hit: q.lie ? 26 : 28 }); }
   if (game.scene === 'out') {
-    add('toby', toby.x, toby.y, 28, 'Acariciar a Toby', pet, { hy: 8, hit: 22 });
+    if (toby.where === game.scene && dist(toby.x, toby.y, ana.x, ana.y) < 260) add('toby', toby.x, toby.y, 28, 'Acariciar a Pelusa, la gata', pet, { hy: 12, hit: 24 });
     for (const a of Object.values(ANIM)) if (a.kind === 'cow' && a.where === 'out' && a.state !== 'bought') add('a:' + a.id, a.x, a.y, a.state === 'led' ? 60 : 30, a.state === 'led' ? 'Soltar a la vaca' : a.state === 'loose' ? 'Agarrar a la vaca' : 'Llevar a la vaca de la cuerda', () => a.state === 'led' ? releaseCow(a) : leadCow(a), { hy: 14, hit: 24 });
     const led = ledCow();
     if (led) for (const k of Object.keys(PEOPLE)) if (CH[k].buys?.[led.kind] && sceneOf(k) === 'out') add('sell:' + k, PEOPLE[k].x, PEOPLE[k].y, 50, `Vender la vaca a${CH[k].article === 'el ' ? 'l ' : ' ' + CH[k].article}${NAMES[k]}`, () => offerSale(k, led), { hy: 26, hit: 30, pri: -1 });
@@ -2765,8 +2765,7 @@ function tapAt(sx, sy){
     if (t && /^[pf]:/.test(t.id)) { const k = t.id.slice(2), b = wmBody(k); if (b && b.moving && !b.called) callPerson('ana', k, { come: false }); } }   // (someone walking off: «¡Espera!»)
 }
 const view = { ox: 0, oy: 0, Z: 1 };
-/* ---------- Toby: trots about her, goes off to sniff at bushes and trees and the pump, to see who is about,
-   comes back when she walks on; and stays close indoors ---------- */
+/* ---------- (a walker by the paths; it was Toby the dog's; Pelusa the cat walks with catGo, below) ---------- */
 function dogGo(tx, ty, sp, dt){
   const n = navStep(toby, tx, ty); if (n.arrived) { toby.moving = false; return true; }
   const dx = n.wx - toby.x, dy = n.wy - toby.y, d = Math.hypot(dx, dy) || 1, v = Math.min(sp, d * 4), ox = toby.x, oy = toby.y;
@@ -2789,27 +2788,31 @@ function tobyGoal(forceNear){
   for (let k = 0; k < 10; k++) { const a = Math.random() * TAU, r = 25 + Math.random() * 90, x = ana.x + Math.cos(a) * r + ah[0] * 50, y = ana.y + Math.sin(a) * r + ah[1] * 50; if (free(x, y)) return { p: [x, y], roam: false }; }
   return { p: [ana.x + (ana.dir === 3 ? 26 : -26), ana.y + 14], roam: false };
 }
+// Pelusa, the cat of Green Gables: she goes her own way about the house (the porch, the barn, the garden, the hen
+// house, a sunny spot), sleeps where she likes, comes into the kitchen at night and by the stove in winter; and now
+// and then, when Ana is near, she comes to her, rubs against her a while, and goes off again. She does not follow her.
+const CAT_SPOTS = () => [[GG.x - 90, GG.y + 46], [GG.x + 110, GG.y + 60], [BARN.x + 40, BARN.y + 70], [WP.huerta[0], WP.huerta[1] + 24], [GG.x - 220, GG.y + 150], [GG.x + 60, GG.y + 210], [WP.gallinero[0] - 30, WP.gallinero[1] + 24], [WP.granero[0] + 20, WP.granero[1] + 10]];
+const CAT_IN = () => [[STOVE.x + 46, STOVE.y + 56], [TABLE.x + 50, TABLE.y + 34], [KDOOR.x - 70, KIT.h - 40], [STOVE.x + 90, STOVE.y + 70]];
+function catGo(tx, ty, sp, dt){
+  const c = toby, d = dist(c.x, c.y, tx, ty); if (d < 8) { c.moving = false; c.nav = null; return true; }
+  if (watched(c.where)) return walkPath(c, tx, ty, sp, dt, c.where);
+  const v = Math.min(d, sp * dt); c.x += (tx - c.x) / d * v; c.y += (ty - c.y) / d * v; c.moving = true; if (Math.abs(tx - c.x) > 1) c.dir = tx > c.x ? 1 : 3; c.walk = (c.walk + dt * 2) % 1; return false;
+}
 function tobyThink(dt){
-  toby.petted -= dt; toby.sniff -= dt;
-  if (game.scene === 'camino' || game.scene === 'br' || ana.hidden) { toby.away = true; toby.moving = false; return; }   // (eight miles are too many for Toby: he waits at home)
-  if (toby.away) { toby.away = false; toby.x = ana.x + 30; toby.y = ana.y + 16; toby.mode = 'near'; toby.goal = null; }   // (and is there again when she is back)
-  if (toby.petted > 0) { toby.moving = false; toby.sitT += dt; return; }
-  const dA = dist(toby.x, toby.y, ana.x, ana.y), out = game.scene === 'out', leash = out ? (ana.moving ? 300 : 520) : 110;
-  if (dA > leash) { toby.goal = null; toby.until = 0; toby.mode = 'back'; }
-  if (toby.mode === 'back') {   // she walked on: he runs to catch up
-    if (dA < 80) toby.mode = 'near'; else { dogGo(ana.x + (ana.dir === 3 ? 26 : -26), ana.y + 14, Math.max(34, ana.pace) * 2.2 + 30, dt); return; }
-  }
-  if (!toby.goal) {
-    if (TT < toby.until) { toby.moving = false; toby.sitT += dt; toby.walk = 0; return; }
-    const g = tobyGoal(false); toby.goal = g.p; toby.roam = g.roam; toby.nav = null;
-  }
-  const sp = toby.roam ? 62 : Math.max(34, ana.pace) * 1.4 + 10;
-  if (dogGo(toby.goal[0], toby.goal[1], sp, dt)) {
-    toby.goal = null; toby.until = TT + (toby.roam ? 4 + Math.random() * 9 : 1.5 + Math.random() * 3.5);
-    if (toby.roam) toby.sniff = 1.6;
-    toby.moving = false;
-  }
-  if (!toby.moving) { toby.sitT += dt; toby.walk = 0; }
+  const c = toby; c.petted -= dt;
+  if (c.petted > 0) { c.moving = false; return; }
+  const h = hourNow(), wantIn = h >= 20.5 || h < 7 || (S === 3 && h >= 16);
+  if (wantIn && c.where === 'out') { c.mode = null; if (catGo(DOOR.gg[0], DOOR.gg[1] + 16, 40, dt)) { c.where = 'gg'; c.x = KDOOR.x; c.y = KIT.h - 20; c.goal = null; c.nav = null; } return; }
+  if (!wantIn && c.where === 'gg' && (c.goal == null)) { if (catGo(KDOOR.x, KIT.h - 16, 40, dt)) { c.where = 'out'; c.x = DOOR.gg[0]; c.y = DOOR.gg[1] + 20; c.goal = null; c.nav = null; } return; }
+  // to Ana now and then (only where she is, and near): she rubs against her ankles a while
+  const same = game.scene === c.where, dA = dist(c.x, c.y, ana.x, ana.y);
+  if (c.mode === 'ana') {
+    if (!same || dA > 520 || TT > c.until) { c.mode = null; c.goal = null; c.cool = TT + 50 + Math.random() * 80; }
+    else { if (dA > 26) catGo(ana.x + (c.x < ana.x ? -20 : 20), ana.y + 6, 50, dt); else { c.moving = false; c.nav = null; c.dir = c.x < ana.x ? 1 : 3; } return; }
+  } else if (same && dA < 340 && TT > (c.cool || 0) && Math.random() < dt * .07) { c.mode = 'ana'; c.until = TT + 12 + Math.random() * 12; c.sleep = false; }
+  // her own rounds: somewhere, a long rest (often asleep), somewhere else
+  if (!c.goal) { if (TT < (c.rest || 0)) { c.moving = false; return; } c.goal = pick(c.where === 'gg' ? CAT_IN() : CAT_SPOTS()); c.nav = null; c.sleep = false; }
+  if (catGo(c.goal[0], c.goal[1], 26, dt)) { c.goal = null; c.rest = TT + 20 + Math.random() * 50; c.sleep = Math.random() < .45; if (!wantIn && c.where === 'gg') c.rest = 0; }
 }
 
 /* ---------- the animals: cows graze, get loose, are led and sold; Ginger talks ---------- */
@@ -3214,7 +3217,7 @@ async function anaSpeak(text){
 }
 function drawCup(c, p){ ell(c, p.x + 10, p.y - 20, 4.6, 3, '#fffaf0', true); for (let k = 0; k < 2; k++) line(c, [[p.x + 9 + k * 3, p.y - 25], [p.x + 11 + k * 3 + Math.sin(TT * 4 + k) * 1.5, p.y - 31]], 'rgba(255,255,255,.75)', 1); }
 let hoverAt = null;
-function pet(){ logEv('Ana acarició a Toby.'); ana.pet = true; ana.crouch = true; toby.petted = 2.2; toby.dir = toby.x < ana.x ? 1 : 3; ana.dir = toby.x > ana.x ? 1 : 3; game.fond.toby++; hearts(toby.x, toby.y - 24); sfx.happy(); save(); setTimeout(() => { ana.pet = false; ana.crouch = false; }, 1600); }
+function pet(){ logEv('Ana acarició a Pelusa, la gata de Tejas Verdes, que ronroneó.'); toby.mode = 'ana'; toby.until = TT + 12; ana.pet = true; ana.crouch = true; toby.petted = 2.2; toby.dir = toby.x < ana.x ? 1 : 3; ana.dir = toby.x > ana.x ? 1 : 3; game.fond.toby++; hearts(toby.x, toby.y - 24); sfx.happy(); save(); setTimeout(() => { ana.pet = false; ana.crouch = false; }, 1600); }
 /* ---------- the trip to Bright River: Matthew drives the cart along the road (the same world, walked or ridden).
    Ana can get off anywhere (moving, or tapping the ground) and get on again (tapping the cart); while they ride they
    talk as anywhere else (the cart does not stop), and at some places someone says something (MAP.moments).
@@ -3278,13 +3281,13 @@ function momentsTick(){
     if (lines.length) sceneStart({ parts: mNear ? ['matthew'] : [], lines, out: {}, scene: 'out', resumen: '' }, false);
   }
 }
-function goIn(room, at){ game.scene = room; ana.lie = false; diana.lie = false; ana.x = at ? at[0] : KDOOR.x; ana.y = at ? at[1] : KIT.h - 14; ana.dir = 0; ana.sit = false; toby.x = ana.x + 26; toby.y = ana.y; if (diana.follow) { diana.where = room; diana.sit = false; diana.x = ana.x - 26; diana.y = ana.y; } if (!obsScene()) { cam.x = KIT.w / 2; cam.y = KIT.h / 2; } }
+function goIn(room, at){ game.scene = room; ana.lie = false; diana.lie = false; ana.x = at ? at[0] : KDOOR.x; ana.y = at ? at[1] : KIT.h - 14; ana.dir = 0; ana.sit = false; if (diana.follow) { diana.where = room; diana.sit = false; diana.x = ana.x - 26; diana.y = ana.y; } if (!obsScene()) { cam.x = KIT.w / 2; cam.y = KIT.h / 2; } }
 function goOut(){
   if (game.scene === 'camino') return;
   if (game.scene === 'br') { const m = PEOPLE.matthew; if (m.where === 'br' && m.buggy) { roadStart('matthew', 0, 1); roadJoin('matthew'); roadTramoIn('matthew', roadTramo(0)); return; } game.scene = 'camino'; game.road = null; ana.onCart = false; ana.sit = false; ana.x = RSTN.x; ana.y = RSTN.y + 50; ana.roadS = 0; if (!obsScene()) { cam.x = ana.x; cam.y = ana.y; cam.snap = true; } return; }
   if (ROOMS[game.scene].parent) return goIn(ROOMS[game.scene].parent, ROOMS[game.scene].exitAt);
   const H = HOUSES[game.scene].at;
-  game.scene = 'out'; ana.lie = false; diana.lie = false; ana.x = H.x; ana.y = H.y + 24; ana.dir = 2; ana.sit = false; toby.x = ana.x + 24; toby.y = ana.y + 10;
+  game.scene = 'out'; ana.lie = false; diana.lie = false; ana.x = H.x; ana.y = H.y + 24; ana.dir = 2; ana.sit = false;
   if (diana.follow) { diana.where = 'out'; diana.sit = false; diana.goals = DIANA_OUT; diana.x = ana.x - 24; diana.y = ana.y + 10; }
   if (!obsScene()) { cam.x = ana.x; cam.y = ana.y; }
 }
@@ -4153,7 +4156,7 @@ Avonlea, en la Isla del Príncipe Eduardo, hacia 1880. Lugares: ${WORLD}.
 Las estaciones duran dos días: en primavera florecen los manzanos y cerezos; en verano y otoño hay bayas en los arbustos y manzanas en el huerto de los Barry; en otoño las hojas se ponen rojas y doradas; en invierno nieva, el lago se congela y la huerta duerme bajo la nieve.
 
 LO QUE ANA PUEDE HACER EN EL JUEGO
-Pasear; acariciar a Toby, el perro de Tejas Verdes (no habla); tomar la regadera en la bomba y regar la huerta, que crece hasta florecer, y cortar flores para hacer ramos (no en invierno); recoger bayas y manzanas (solo en verano y otoño); cocinar en la cocina de Tejas Verdes tarta de bayas (con 3 bayas), compota de manzana (con 3 manzanas) o té; regalar lo que tiene; tomar el té con Diana en la salita de los Barry; calentarse junto a la chimenea; pasear con Diana; sentarse en la banca del lago; llevar cosas o recados de unos a otros; subir a su cuarto del alero este por la escalera de la cocina (con la ventana de su amigo el cerezo Reina de las Nieves) y dormir en su cama cuando es de noche.
+Pasear; acariciar a Pelusa, la gata de Tejas Verdes (no habla; anda por su cuenta y a veces se le acerca); tomar la regadera en la bomba y regar la huerta, que crece hasta florecer, y cortar flores para hacer ramos (no en invierno); recoger bayas y manzanas (solo en verano y otoño); cocinar en la cocina de Tejas Verdes tarta de bayas (con 3 bayas), compota de manzana (con 3 manzanas) o té; regalar lo que tiene; tomar el té con Diana en la salita de los Barry; calentarse junto a la chimenea; pasear con Diana; sentarse en la banca del lago; llevar cosas o recados de unos a otros; subir a su cuarto del alero este por la escalera de la cocina (con la ventana de su amigo el cerezo Reina de las Nieves) y dormir en su cama cuando es de noche.
 
 LOS PERSONAJES
 ${CAST}
@@ -4245,7 +4248,7 @@ function stateText(who){
   const bloom = BEDS.filter(b => b.stage >= 3).length, dry = BEDS.filter(b => !b.wet && b.stage < 3).length;
   const L = [
     `AHORA: día ${today() + 1} en Avonlea, ${SEASONS[S].toLowerCase()} (día ${today() % 2 + 1} de 2 de la estación), las ${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}, ${moment}.`,
-    `Ana está ${placeText()}${diana.follow && who !== 'diana' ? ', paseando con Diana' : ''}; Toby la acompaña.`,
+    `Ana está ${placeText()}${diana.follow && who !== 'diana' ? ', paseando con Diana' : ''}${toby.where === game.scene && dist(toby.x, toby.y, ana.x, ana.y) < 120 ? '; Pelusa, la gata, se le restriega en los tobillos' : ''}.`,
     `Ana lleva: ${carry.length ? carry.join(', ') : 'nada en las manos'}.` + (ledCow() ? ' Ana lleva una vaca jersey de una cuerda.' : '') + (ana.lie ? ' Ana está recostada en el pasto, mirando el cielo y las nubes.' : '') + Object.keys(game.anaStates).map(k => ' Ana ' + ANA_STATES[k].desc + '.').join('') + (sipping() ? ' Ana está tomando té ahora mismo, con la taza en la mano: nadie tiene que ofrecerle otro.' : '') + (onGround.length ? ` En el suelo, cerca, Ana dejó: ${onGround.join(', ')}.` : '') + (hourNow() >= 21 ? ' Ya es tarde: Ana tiene sueño y debería irse a dormir a su cama, en su cuarto del alero este.' : ''),
     `La huerta: ${S === 3 ? 'duerme bajo la nieve' : `${bloom} de 6 canteros con flores; ${dry} sin regar`}.` + (game.table ? ` En la mesa de la cocina hay ${ITEM_NAME[game.table][0]}.` : ''),
     `Cariño hacia Ana (0 a 5): ${Object.keys(CH).map(k => NAMES[k] + ' ' + game.fond[k]).join(', ')}.`,
@@ -4495,7 +4498,7 @@ function factsOf(k, n = 3){
 }
 function sceneMsgMin(parts, note, full){
   const top = stateText(Object.keys(CH)[0]).split('\n').slice(0, 3);
-  let m = top.join('\n').replace('; Toby la acompaña', '') + (parts.length ? '' : '\nAna está sola.');
+  let m = top.join('\n').replace('; Pelusa, la gata, se le restriega en los tobillos', '') + (parts.length ? '' : '\nAna está sola.');
   for (const k of parts) {
     const f = factsOf(k), r = relGet(k, 'ana').n;
     m += `\n- ${NAMES[k]} (cariño hacia Ana ${game.fond[k] ?? 2}/5${r ? ': ' + r : ''}; ${whereText(k)}): ${voiceShort(k)}` + (f.length ? ` Sabe: ${f.join(' / ')}` : '');
@@ -5173,7 +5176,7 @@ function renderView(){
   const anaHere = RENDER_REAL === game.scene;
   if (anaHere && sipping()) list.push({ y: ana.y + .2, draw: () => drawCup(g, ana) });
   if (anaHere && !ana.hidden) list.push({ y: ana.y + (ana.sit && !inside ? 6 : 0), draw: () => drawPerson(g, ana, t) });
-  if (anaHere && !ana.hidden && game.scene !== 'camino' && game.scene !== 'br') list.push({ y: toby.y, draw: () => drawDog(g, toby, t) });
+  if (toby.where === game.scene) list.push({ y: toby.y, draw: () => { g.save(); g.translate(toby.x, toby.y); g.scale(1.6, 1.6); drawCat(g, { ...toby, x: 0, y: 0 }, t); if (!toby.moving && toby.sleep && toby.mode !== 'ana') { g.fillStyle = 'rgba(70,50,30,.6)'; g.font = 'italic 6px Georgia, serif'; g.fillText('z', 6, -16 - (t * 3 % 4)); } g.restore(); } });
   if (OBS) { const b = wmBody(OBS); if (b && !b.lie) list.push({ y: 1e9, draw: () => { const hy = b.y - 50 * (LOOKS[b.look]?.h || 1) - 4 + Math.sin(t * 4) * 1.5; blob(g, [[b.x - 5, hy - 7], [b.x + 5, hy - 7], [b.x, hy]], '#e0a030'); } }); }   // (a little arrow over whoever is watched)
   list.sort((a, b) => a.y - b.y).forEach(o => o.draw());
   if (road) roadCanopy(g, ox, oy, vw, vh);
@@ -7080,7 +7083,7 @@ function loop(now){
   else { owed = Math.min(owed + Math.min(raw, .25) * k, 3 * k * .05 + 2); const t0 = performance.now(); while (owed > 1e-4 && performance.now() - t0 < 22) { const d = Math.min(.05, owed); update(d); owed -= d; } }
   FRAME++; tripBarDraw(); render(); islaDraw(); requestAnimationFrame(loop);
 }
-window.__avonlea = { cartSheet: (c, x, y, c8, t) => { const L = [], p = { look: 'matthew', x, y, c8, walk: 0, moving: false }; const [cx, cy] = [x, y]; pushCart(L, c, { x: cx, y: cy, c8, walk: 0, moving: true }, t); for (const [k, look] of [[0, 'matthew'], [1, 'ana']]) { const [sx, sy] = cartSeat(cx, cy, c8, k); L.push({ y: sy, draw: () => drawPerson(c, { ...mkPerson(look, sx, sy), sit: true, dir: c8Dir(c8) }, t) }); } L.sort((a, b) => a.y - b.y).forEach(o => o.draw()); }, startCap1, CAP1, LIBRO1, ROAD_TRAMOS, ROAD_MIN, roadTramo, islaToggle, DLG_BANK, startDay, setSeason, agendaData: () => AGENDA.map(e => ({ who: wmName(e.who), from: e.from, to: e.to, label: e.label, season: e.season, sunday: !!e.sunday, ana: !!(e.ana || e.who === 'ana'), cond: e.when ? String(e.when).replace(/^\(\) => /, '') : '' })), setAgenda: v => { AGENDA_ON = v; }, AGENDA, wmData: () => ({ THINGS, WHO, OFRECE, WP_NAME, TRADE, TREATS, LIBRETA, ITEM_NAME, MAX_GOALS, PACE, FOCO }), paintMapBase, doingText, wmName, wmBody, wmScene, WW, WH, setVec: v => { VEC_ON = v; }, setStyle: v => { ANA_STYLE = v; }, setHead: setHeadM, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+window.__avonlea = { toby, cartSheet: (c, x, y, c8, t) => { const L = [], p = { look: 'matthew', x, y, c8, walk: 0, moving: false }; const [cx, cy] = [x, y]; pushCart(L, c, { x: cx, y: cy, c8, walk: 0, moving: true }, t); for (const [k, look] of [[0, 'matthew'], [1, 'ana']]) { const [sx, sy] = cartSeat(cx, cy, c8, k); L.push({ y: sy, draw: () => drawPerson(c, { ...mkPerson(look, sx, sy), sit: true, dir: c8Dir(c8) }, t) }); } L.sort((a, b) => a.y - b.y).forEach(o => o.draw()); }, startCap1, CAP1, LIBRO1, ROAD_TRAMOS, ROAD_MIN, roadTramo, islaToggle, DLG_BANK, startDay, setSeason, agendaData: () => AGENDA.map(e => ({ who: wmName(e.who), from: e.from, to: e.to, label: e.label, season: e.season, sunday: !!e.sunday, ana: !!(e.ana || e.who === 'ana'), cond: e.when ? String(e.when).replace(/^\(\) => /, '') : '' })), setAgenda: v => { AGENDA_ON = v; }, AGENDA, wmData: () => ({ THINGS, WHO, OFRECE, WP_NAME, TRADE, TREATS, LIBRETA, ITEM_NAME, MAX_GOALS, PACE, FOCO }), paintMapBase, doingText, wmName, wmBody, wmScene, WW, WH, setVec: v => { VEC_ON = v; }, setStyle: v => { ANA_STYLE = v; }, setHead: setHeadM, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
 /* ---------- the viewer (index.html?visor): only Ana, big, on a plain floor, to look at the drawings and move her:
    arrows (Shift to run), and buttons for everything she can do. ---------- */
 function startVisor(){

@@ -1,6 +1,6 @@
 # Un día en Avonlea
 
-Un juego tranquilo de mundo abierto, sin misiones, inspirado en *Ana de las Tejas Verdes* (L. M. Montgomery, 1908, de dominio público). Ana vive en **Tejas Verdes** con **Matthew** y **Marilla**, visita a su amiga del alma **Diana** en **La Cuesta del Huerto**, riega la huerta, cocina, acaricia a **Toby** y pasa los días como quiere, a lo largo de las cuatro estaciones.
+Un juego tranquilo de mundo abierto, sin misiones, inspirado en *Ana de las Tejas Verdes* (L. M. Montgomery, 1908, de dominio público). Ana vive en **Tejas Verdes** con **Matthew** y **Marilla**, visita a su amiga del alma **Diana** en **La Cuesta del Huerto**, riega la huerta, cocina, acaricia a **Pelusa** y pasa los días como quiere, a lo largo de las cuatro estaciones.
 
 Todo el juego es un solo archivo, [`index.html`](index.html): se abre en el navegador, en el computador o en el celular, sin instalar nada.
 
@@ -11,7 +11,7 @@ Todo el juego es un solo archivo, [`index.html`](index.html): se abre en el nave
 - **Abrir:** descarga `index.html` y ábrelo en el navegador.
 - **Moverse:** flechas o WASD (con Shift, más rápido); o toca el suelo y Ana va hasta allí (rodea los obstáculos). En el celular, también puedes arrastrar el dedo.
 - **Hacer cosas:** toca (o haz clic en) la persona o el objeto: si Ana está cerca, lo hace al instante; si no, camina hasta allí y lo hace al llegar. Toca a Ana para dejar lo que lleva (la regadera, una taza...) o tomarse el té que preparó. No hay etiquetas sobre las cosas: lo que se puede hacer se descubre probando (el puntero cambia sobre lo que se puede tocar). Espacio, E o Enter hacen lo de más cerca.
-- **Ana por su cuenta:** si no tocas nada durante unos 15 segundos, Ana hace lo suyo: la IA elige entre lo que puede hacer (regar, recoger bayas, acariciar a Toby, cocinar, ir a conversar con alguien, visitar una casa, pasear, soñar despierta, irse a dormir de noche...) y lo dice en voz alta; sin IA lo elige el juego. Lo hace sin apuro: pasea despacio, se detiene a mirar a su alrededor y se queda un buen rato en cada cosa antes de decidir la siguiente. Si hay una escena de la historia del día, va primero: Ana va adonde pasa y hace lo que la escena espera (agarrar la vaca, venderla, cocinar, llevarle algo a alguien). Cualquier tecla o toque te devuelve el control (se puede desactivar en ✒).
+- **Ana por su cuenta:** si no tocas nada durante unos 15 segundos, Ana hace lo suyo: la IA elige entre lo que puede hacer (regar, recoger bayas, acariciar a Pelusa, cocinar, ir a conversar con alguien, visitar una casa, pasear, soñar despierta, irse a dormir de noche...) y lo dice en voz alta; sin IA lo elige el juego. Lo hace sin apuro: pasea despacio, se detiene a mirar a su alrededor y se queda un buen rato en cada cosa antes de decidir la siguiente. Si hay una escena de la historia del día, va primero: Ana va adonde pasa y hace lo que la escena espera (agarrar la vaca, venderla, cocinar, llevarle algo a alguien). Cualquier tecla o toque te devuelve el control (se puede desactivar en ✒).
 - **Decisiones con tiempo:** cuando un personaje te plantea algo (un encargo, una venta, qué hacer al final de una charla), una rayita se va acortando: si en 10 segundos no eliges, Ana decide sola, con su carácter (la IA) o según lo que necesita la historia, y dice en voz alta por qué.
 - **Decir algo:** Enter o T (o el botón 💬) abren una línea para escribir lo que dice Ana. Los demás reaccionan, y la IA entiende si es una despedida («tengo que irme») o un destino («voy a la huerta»): la charla se corta y Ana se va. Alejarse caminando también termina una conversación.
 - **Charlas:** los personajes conversan solos en globitos cuando Ana pasa cerca (y Ana también habla: no hay que elegir qué dice). Con Espacio sobre alguien, la charla es con ella; al final solo se decide lo importante (aceptar un encargo, regalar, pasear). Las charlas no detienen a nadie: Ana puede caminar mientras hablan (si se aleja, la charla termina), y quien tiene adónde ir sigue su camino conversando. Espacio, o tocar a quien habla, salta una frase; Esc sale.
@@ -22,7 +22,7 @@ La partida se guarda sola en el navegador: lo que lleva Ana, lo que creció en l
 
 ## Qué se puede hacer
 
-- **Acariciar a Toby**, el perro, que anda a su aire: trota alrededor de Ana, se va a husmear arbustos, árboles, la bomba o a ver quién anda por ahí (hasta unos 450 pasos), y vuelve corriendo si ella se aleja.
+- **Acariciar a Pelusa**, la gata de Tejas Verdes, que anda por su cuenta: hace su ronda por la casa (el porche, el granero, la huerta, el gallinero, un rincón al sol), duerme donde le da la gana, de noche (y en invierno desde la tarde) entra a la cocina junto a la estufa, y de vez en cuando, si Ana anda cerca, se le acerca, se le restriega en los tobillos un rato y se va. No la sigue.
 - **Regar la huerta:** toma la regadera en la bomba y riega los seis canteros. Cada uno crece hasta florecer (rosas, girasoles, lilas), y las flores se cortan para hacer ramos.
 - **Recoger** bayas de los arbustos y manzanas del huerto de los Barry, en verano y otoño.
 - **Cocinar** en la cocina de Tejas Verdes: tarta de bayas, compota de manzana o té.
@@ -173,4 +173,4 @@ Cada tipo de cosa tiene su registro en `index.html`; para agregar una, basta una
 | `MAP` | el mapa entero en pocas líneas, en unidades: la costa (el mar queda al otro lado), los lugares, los caminos con nombre, los ríos con sus puentes (cubiertos o no), los bosques, los campos de lupinos, los edificios (iglesia, escuela, hotel, tiendas, herrería, granjas, faro…) y los momentos en que alguien dice algo al pasar; el juego deriva los campos de cultivo, los árboles y la decoración, y lo dibuja todo, sin imágenes ni IA | Avonlea, de la estación de Bright River a Tejas Verdes |
 | `STORIES` | historias escritas a mano: escenas (con `id`, `requiere`, `clave`, `contra`, efectos, eventos y frases clave) y, si se quiere, `ramas` escritas a mano para cuando se desvía (`desde`: la escena clave que se rompió) | «La vaca del señor Harrison», con las ramas «Ana no vende la vaca» y «La vaca se queda en la avena» |
 
-Diana, la compañera de Ana, y Toby son los únicos con movimientos escritos aparte (en `update()`).
+Diana, la compañera de Ana, y Pelusa, la gata, son las únicas con movimientos escritos aparte (en `update()`).
