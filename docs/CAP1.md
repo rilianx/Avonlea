@@ -115,8 +115,8 @@ Prioridades en el viaje:
 | 10 (interrumpe) | **El túnel de manzanos** (la Avenida): corta lo que se estaba diciendo; Ana enmudece. |
 | 9 (interrumpe) | El nombre de la Avenida y «solo nos falta una milla» (al llegar a Avonlea, si pasaron por ella); la laguna de Barry (con la laguna a la vista); «¿es ésa Tejas Verdes?» (después de la laguna). |
 | 8 (interrumpe) | Newbridge, todavía en silencio. |
-| 3.5 | Lo del libro que nombra algo, mientras está a la vista: el cerezo de la estación, los barrancos, los abetos, el mar, el aserradero, el granjero, la iglesia, las lilas, los sauces, la curva. La señora de la carreta puede interrumpir, porque pasa rápido. |
-| 2.6 | Los momentos del capítulo, en su orden: la rama de ciruelo, «puedes hablar todo lo que quieras», «¿de qué color diría que es esto?». |
+| 3.55 | Los momentos del capítulo, en su orden: la rama de ciruelo, «puedes hablar todo lo que quieras», «¿de qué color diría que es esto?». |
+| 3.5 (interrumpe el hilo) | Lo del libro que nombra algo, mientras está a la vista: el cerezo de la estación, los barrancos, los abetos, el mar, el aserradero, el granjero, la iglesia, las lilas, los sauces, la curva, la señora de la carreta. Corta el hilo de la charla (que se retoma después), no los momentos del capítulo. |
 | 2 | El hilo de la charla de Ana (lo del libro que no nombra nada a la vista), en el orden del libro, donde sea: cada intercambio cuando ya se dijo el anterior. |
 | 1.8 / 1 | Lo improvisado de Ana: sobre algo a la vista, o sobre el tramo en que van. |
 | 0 | Ocurrencias sueltas, cada medio minuto si no hay nada más. |

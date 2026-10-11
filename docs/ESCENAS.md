@@ -99,8 +99,8 @@ Una charla de dos, solo en la cocina, cuando se encuentran:
 
 - **La charla del viaje** se arma con esta misma configuración a partir de las líneas del libro y las de Ana (`LIBRO1.viaje`, `VIAJE_MAS`). Cada tramo se parte en intercambios: empieza uno cada vez que Ana vuelve a hablar después de una respuesta. Cada intercambio queda en uno de estos grupos:
   - **El hilo de la charla:** las líneas del libro que no nombran nada a la vista. Van con prioridad 2, en el orden del libro: cada una exige `dicha:` de la anterior.
-  - **Los momentos del capítulo:** van con prioridad 2.6, en su orden.
-  - **Lo que nombra algo del camino:** se dice con `camino.visible`. Las del libro van con prioridad 3,5 y las de Ana con 1,8; la señora de la carreta interrumpe.
+  - **Los momentos del capítulo:** van con prioridad 3,55, en su orden.
+  - **Lo que nombra algo del camino:** se dice con `camino.visible`. Las del libro van con prioridad 3,5 e interrumpen el hilo (que se retoma); las de Ana, con 1,8.
   - **Lo de Ana sobre un tramo:** se dice con `camino.tramo_v` y prioridad 1.
 - **Las charlas de pares y tríos** (`DLG_BANK`) se convierten en escenas con `disparo: 'encuentro'`. Cuando dos personajes se encuentran, se elige la primera que no se haya dicho y que tenga sentido donde están.
 
