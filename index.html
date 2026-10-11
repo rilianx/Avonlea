@@ -2628,6 +2628,7 @@ function navGrid(scene){
 // far away: by the roads (the network below), with the grid only to get onto the road and off it at the end
 function findPath(scene, x0, y0, x1, y1){
   const D = dist(x0, y0, x1, y1);
+  if (scene === 'camino' && D > 700) return [[x1, y1]];   // (on the long road: straight along it; the grid is far too big to search end to end)
   if (scene === 'out' && D > 900) {
     const r = netRoute(x0, y0, x1, y1);
     if (r && r.cost < D * 2.6 + 800) {   // (a stretch that is not clear, like the end of a road at a door, goes by the grid)
@@ -2790,6 +2791,8 @@ function tobyGoal(forceNear){
 }
 function tobyThink(dt){
   toby.petted -= dt; toby.sniff -= dt;
+  if (game.scene === 'camino' || game.scene === 'br' || ana.hidden) { toby.away = true; toby.moving = false; return; }   // (eight miles are too many for Toby: he waits at home)
+  if (toby.away) { toby.away = false; toby.x = ana.x + 30; toby.y = ana.y + 16; toby.mode = 'near'; toby.goal = null; }   // (and is there again when she is back)
   if (toby.petted > 0) { toby.moving = false; toby.sitT += dt; return; }
   const dA = dist(toby.x, toby.y, ana.x, ana.y), out = game.scene === 'out', leash = out ? (ana.moving ? 300 : 520) : 110;
   if (dA > leash) { toby.goal = null; toby.until = 0; toby.mode = 'back'; }
