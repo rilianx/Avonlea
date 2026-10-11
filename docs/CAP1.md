@@ -23,7 +23,7 @@ Las escenas son los diálogos del libro (traducidos), cada una con su tiempo del
 
 ## 3. Comparación
 
-**32/32 momentos del libro ocurren en la simulación**; diferencia media **38 min**, máxima **132 min**. Sin contar la visita de Rachel (que ahora, a propósito, va a Tejas Verdes apenas ve pasar a Matthew, en vez de esperar al té como en el libro): media **20 min**, máxima **52 min**. (\* = hora estimada en el libro.)
+**32/32 momentos del libro ocurren en la simulación**; diferencia media **31 min**, máxima **132 min**. Sin contar la visita de Rachel (que ahora, a propósito, va a Tejas Verdes apenas ve pasar a Matthew, en vez de esperar al té como en el libro): media **11 min**, máxima **33 min**. (\* = hora estimada en el libro.)
 
 | # | Libro | Simulación | Δ | Quién | Qué |
 |---|---|---|---|---|---|
@@ -43,22 +43,22 @@ Las escenas son los diálogos del libro (traducidos), cada una con su tiempo del
 | 14 | 17:40* | 15:28 | −132 min | Rachel | golpea la puerta de la cocina, entra y anota mentalmente la mesa puesta para tres |
 | 15 | 17:40* | 15:28 | −132 min | Marilla | recibe a Rachel y le cuenta que Matthew fue a Bright River a buscar a un niño huérfano de Nueva Escocia |
 | 16 | 18:00* | 16:14 | −106 min | Rachel | se va (para alivio de Marilla) rumbo a casa de Robert Bell a contar la noticia, hablándoles a los rosales silvestres |
-| 17 | 18:00 | 18:02 | +2 min | Matthew | ata la yegua en el patio del hotel, pasa junto a la niña sin mirarla y se va a la estación |
-| 18 | 18:00 | 18:02 | +2 min | jefe de estación | cierra la boletería para irse a cenar; le explica a Matthew que solo llegó una niña y se marcha a casa con hambre |
-| 19 | 18:05* | 18:14 | +9 min | Matthew | camina hasta la niña; ella se presenta y él decide llevarla a casa y que Marilla aclare el error |
-| 20 | 18:15* | 16:23 | −112 min | los Bell | recibe a Rachel, que cuenta la noticia de los Cuthbert |
-| 21 | 18:15* | 18:41 | +26 min | Matthew | Ana y Matthew suben a la calesa; ella no suelta su bolso de alfombra; salen del pueblo |
-| 22 | 18:25* | 18:48 | +23 min | Ana | arranca una rama de ciruelo silvestre que roza la calesa y empieza a hablar (la novia, el vestido de wincey, los caminos rojos...) |
-| 23 | 19:00* | 19:29 | +29 min | Matthew | le dice que puede hablar todo lo que quiera; descubre que le gusta su charla |
-| 24 | 19:30* | 20:15 | +45 min | Ana | le muestra su trenza: «¿De qué color diría que es esto?» —«Es rojo, ¿no?» |
-| 25 | 19:45* | 20:32 | +47 min | Ana | enmudece de asombro bajo las flores, con el atardecer al fondo |
-| 26 | 20:00* | 20:41 | +41 min | Matthew | cruzan el pueblo en silencio; perros que ladran, chicos que gritan y caras curiosas en las ventanas |
-| 27 | 20:40* | 21:18 | +38 min | Matthew | rompe el silencio tras tres millas: «solo nos falta una milla»; Ana bautiza el Camino Blanco de las Delicias |
-| 28 | 20:45* | 21:36 | +51 min | Ana | bautiza el Lago de las Aguas Brillantes; aún hay luz en una ventana de La Cuesta del Huerto; cruza el puente con los ojos cerrados |
-| 29 | 20:55* | 21:47 | +52 min | Ana | adivina cuál es Tejas Verdes, bajo una gran estrella blanca; el sol ya se puso |
-| 30 | 21:00* | 21:35 | +35 min | Rachel | ve pasar la calesa en la oscuridad |
-| 31 | 21:05* | 21:55 | +50 min | Matthew | baja a Ana de la calesa; ella susurra que los árboles hablan en sueños; entran a la casa |
-| 32 | 21:05* | 21:55 | +50 min | Marilla | sale al encuentro, ve a la niña de pelo rojo y pregunta dónde está el niño |
+| 17 | 18:00 | 17:47 | −13 min | Matthew | ata la yegua en el patio del hotel, pasa junto a la niña sin mirarla y se va a la estación |
+| 18 | 18:00 | 17:47 | −13 min | jefe de estación | cierra la boletería para irse a cenar; le explica a Matthew que solo llegó una niña y se marcha a casa con hambre |
+| 19 | 18:05* | 18:00 | −5 min | Matthew | camina hasta la niña; ella se presenta y él decide llevarla a casa y que Marilla aclare el error |
+| 20 | 18:15* | 16:29 | −106 min | los Bell | recibe a Rachel, que cuenta la noticia de los Cuthbert |
+| 21 | 18:15* | 18:27 | +12 min | Matthew | Ana y Matthew suben a la calesa; ella no suelta su bolso de alfombra; salen del pueblo |
+| 22 | 18:25* | 18:33 | +8 min | Ana | arranca una rama de ciruelo silvestre que roza la calesa y empieza a hablar (la novia, el vestido de wincey, los caminos rojos...) |
+| 23 | 19:00* | 19:15 | +15 min | Matthew | le dice que puede hablar todo lo que quiera; descubre que le gusta su charla |
+| 24 | 19:30* | 20:01 | +31 min | Ana | le muestra su trenza: «¿De qué color diría que es esto?» —«Es rojo, ¿no?» |
+| 25 | 19:45* | 20:18 | +33 min | Ana | enmudece de asombro bajo las flores, con el atardecer al fondo |
+| 26 | 20:00* | 20:28 | +28 min | Matthew | cruzan el pueblo en silencio; perros que ladran, chicos que gritan y caras curiosas en las ventanas |
+| 27 | 20:40* | 20:51 | +11 min | Matthew | rompe el silencio tras tres millas: «solo nos falta una milla»; Ana bautiza el Camino Blanco de las Delicias |
+| 28 | 20:45* | 21:07 | +22 min | Ana | bautiza el Lago de las Aguas Brillantes; aún hay luz en una ventana de La Cuesta del Huerto; cruza el puente con los ojos cerrados |
+| 29 | 20:55* | 21:18 | +23 min | Ana | adivina cuál es Tejas Verdes, bajo una gran estrella blanca; el sol ya se puso |
+| 30 | 21:00* | 21:07 | +7 min | Rachel | ve pasar la calesa en la oscuridad |
+| 31 | 21:05* | 21:26 | +21 min | Matthew | baja a Ana de la calesa; ella susurra que los árboles hablan en sueños; entran a la casa |
+| 32 | 21:05* | 21:26 | +21 min | Marilla | sale al encuentro, ve a la niña de pelo rojo y pregunta dónde está el niño |
 
 ### Qué diferencias había y cómo se redujeron (agregando cosas)
 
@@ -112,7 +112,15 @@ Como en los juegos actuales:
 
 - **Conversación o comentario.** Una conversación que otra más importante corta no se pierde. Sigue después donde quedó, con una frase puente («Bueno, como le decía…», «¿Dónde iba? ¡Ah, sí!»). Un comentario de Ana sobre lo que se ve sí se pierde si lo cortan, porque ya pasó el momento. Los comentarios van entre las conversaciones, uno por minuto como mucho.
 - **Lo que está por terminar, termina.** Si a la escena que se dice le quedan dos líneas o menos, la que quiere interrumpir espera.
-- **El ritmo del viaje.** Durante los momentos del capítulo y las escenas imprescindibles, Matthew lleva la yegua al paso (70 % de la velocidad), para que alcancen a decirse. El costo: el viaje dura unos 15 minutos más que antes, y la llegada queda unos 50 minutos después que en el libro. Lo que se gana: se dicen 15 de las 25 escenas del libro (antes, 13), todas las importantes, y algunos comentarios de Ana.
+- **El ritmo del viaje.** Durante los momentos del capítulo y las escenas imprescindibles, Matthew lleva la yegua al paso (70 % de la velocidad), para que alcancen a decirse. Donde no se dice nada, en cambio, la deja trotar: en Newbridge va a 1,4 veces la velocidad, y en las tres millas de silencio a 1,9. Bajo las flores de la Avenida va más despacio, a 0,85. Así se dicen 15 de las 25 escenas del libro (antes, 13), todas las importantes, y la llegada queda solo unos 20 minutos después que en el libro.
+- **El silencio no es un vacío.** Después de la Avenida, Ana calla como en el libro, pero cada tanto el guion muestra lo que se ve y lo que piensan:
+  - los pétalos que le caen en el pelo;
+  - Matthew que afloja las riendas;
+  - las ventanas de Newbridge que se encienden;
+  - la primera estrella;
+  - las ranas;
+  - Ana que murmura «Blanco… de las Delicias…», antes de bautizar la Avenida.
+- **Junio.** Durante el capítulo el sol se pone una hora y media más tarde, así que la Avenida se ve con luz de atardecer.
 - **Un guion fuera del código.** Las escenas del capítulo están escritas en un bloque de texto (`id="guion"`).
 - **El panel 🎭 Escenas en 🎯.** Muestra qué se dice, qué podría decirse y por qué no se dice el resto.
 

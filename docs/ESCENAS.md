@@ -13,7 +13,9 @@ Como en los juegos actuales, hay dos clases de escena (`tipo`):
 
 Además, el director deja terminar lo que está por acabar: una escena que interrumpe espera si a la que se está diciendo le quedan dos líneas o menos.
 
-**El ritmo del viaje:** si una escena tiene `al_paso`, mientras se dice la calesa va al paso (`ROAD_PASO`, al 70 % de la velocidad). Así lo importante alcanza a decirse antes de que cambie el paisaje.
+**El ritmo del viaje:** si una escena tiene `al_paso`, mientras se dice la calesa va al paso (`ROAD_PASO`, al 70 % de la velocidad). Así lo importante alcanza a decirse antes de que cambie el paisaje. Cada tramo del camino puede tener además su `ritmo` (en `ROAD_TRAMOS`): en la Avenida 0,85 (despacio, bajo las flores), en Newbridge 1,4 y en las tres millas de silencio 1,9 (Matthew deja trotar a la yegua).
+
+El silencio también se escribe: después de la Avenida hay escenas de una línea, encadenadas con `si: dicha:…` y con una `pausa` larga (12–14 s). Muestran lo que se ve o lo que piensa Matthew, para que el silencio no quede vacío (`avenida_petalos`, `silencio_estrella`…, en el guion).
 
 ## Configuración
 

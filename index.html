@@ -258,6 +258,97 @@ si: dicha:avenida
 ---
 ana: (Callada todavía. Los perros les ladran, los chicos gritan desde las cercas, hay caras curiosas en las ventanas: Ana no ve nada de eso.)
 
+# --- el silencio después de la Avenida: Ana no habla, pero no es un vacío (lo que se ve, lo que piensa Matthew)
+=== avenida_petalos ===
+canal: viaje
+prioridad: 1.5
+pausa: 12
+calesa: camino
+camino: tramo=avenida
+si: dicha:avenida
+---
+ana: (Ana echa la cabeza atrás para mirar la bóveda de flores. Los pétalos le caen en el pelo y no se los quita.)
+
+=== avenida_paso ===
+canal: viaje
+prioridad: 1.5
+pausa: 12
+calesa: camino
+camino: tramo=avenida
+si: dicha:avenida_petalos
+---
+matthew: (Matthew afloja las riendas. La yegua va al paso, como si también ella quisiera que esto no se acabara.)
+
+=== avenida_roseton ===
+canal: viaje
+prioridad: 1.5
+pausa: 12
+calesa: camino
+camino: tramo=avenida
+si: dicha:avenida_paso
+---
+ana: (Al fondo de la Avenida, el cielo del atardecer brilla como el rosetón de una catedral.)
+
+=== newbridge_ventanas ===
+canal: viaje
+prioridad: 1.5
+pausa: 12
+calesa: camino
+camino: tramo=Newbridge
+si: dicha:newbridge
+---
+ana: (Las ventanas del pueblo se encienden una a una. Ana sigue mirando hacia atrás, hacia donde quedó la Avenida.)
+
+=== silencio_manos ===
+canal: viaje
+prioridad: 1.5
+pausa: 14
+calesa: camino
+camino: tramo=campos
+si: dicha:avenida
+---
+ana: (Ana va callada, con las manos juntas sobre el bolso de alfombra y los ojos en el cielo del oeste.)
+
+=== silencio_matthew ===
+canal: viaje
+prioridad: 1.5
+pausa: 14
+calesa: camino
+camino: tramo=campos
+si: dicha:silencio_manos
+---
+matthew: (Matthew la mira de reojo. Nunca pensó que el silencio de una niña pudiera ser tan cómodo.)
+
+=== silencio_estrella ===
+canal: viaje
+prioridad: 1.5
+pausa: 14
+calesa: camino
+camino: tramo=campos
+si: dicha:silencio_matthew
+---
+ana: (Sobre los campos aparece la primera estrella. Ana mueve los labios: quizás le está pidiendo un deseo.)
+
+=== silencio_ranas ===
+canal: viaje
+prioridad: 1.5
+pausa: 14
+calesa: camino
+camino: tramo=campos
+si: dicha:silencio_estrella
+---
+matthew: (En una laguna junto al camino empiezan a cantar las ranas. La yegua resopla: ya huele su casa.)
+
+=== silencio_nombre ===
+canal: viaje
+prioridad: 1.5
+pausa: 14
+calesa: camino
+camino: tramo=campos
+si: dicha:silencio_ranas
+---
+ana: (Muy bajito, casi para sí misma:) Blanco… de las Delicias… no, todavía no…
+
 # --- entrando a Avonlea: una milla más (y la Avenida tiene nombre), la laguna, Tejas Verdes, la casa
 === nombra_avenida ===
 canal: viaje
@@ -1847,9 +1938,9 @@ const ROAD_TRAMOS = [
   { s: .475, kind: 'iglesia', name: 'La iglesia de la loma', v: 8 },
   { s: .53, kind: 'arroyo', name: 'El puentecito de los sauces', v: 9 },
   { s: .585, kind: 'curva', name: 'La curva del atardecer', v: 10 },
-  { s: .64, kind: 'avenida', name: 'La Avenida', v: -1, quiet: true, m: 'avenida', note: 'La calesa entró a la Avenida, un túnel de manzanos en flor; Ana enmudeció de asombro.' },
-  { s: .7, kind: 'pueblo', name: 'Newbridge', v: -1, quiet: true, m: 'newbridge', note: 'Cruzaron Newbridge en silencio: perros que ladraban, chicos que gritaban, caras curiosas en las ventanas.' },
-  { s: .76, kind: 'campos', name: 'Tres millas de silencio', v: -1, quiet: true },
+  { s: .64, kind: 'avenida', name: 'La Avenida', v: -1, quiet: true, ritmo: .85, m: 'avenida', note: 'La calesa entró a la Avenida, un túnel de manzanos en flor; Ana enmudeció de asombro.' },
+  { s: .7, kind: 'pueblo', name: 'Newbridge', v: -1, quiet: true, ritmo: 1.4, m: 'newbridge', note: 'Cruzaron Newbridge en silencio: perros que ladraban, chicos que gritaban, caras curiosas en las ventanas.' },
+  { s: .76, kind: 'campos', name: 'Tres millas de silencio', v: -1, quiet: true, ritmo: 1.9 },   // (ritmo: Matthew lets the mare trot where nothing is said; slower under the blossom)
   { s: .955, kind: 'borde', name: 'La entrada de Avonlea', v: -1, quiet: true },
 ];
 const roadTramo = s => { let r = ROAD_TRAMOS[0]; for (const t of ROAD_TRAMOS) if (s >= t.s) r = t; return r; };
@@ -1925,7 +2016,7 @@ const RP = [], RT = [], RF = [], RWAT = [], RFOLK = [], RCOW = [], RDOG = [], RB
       for (let x = x0; x < x1; x += 640) for (const sd of [-1, 1]) if (Math.abs(x - xm) > 400) RF.push({ x, y: sd < 0 ? roadY(x) - 680 : roadY(x) + 130, w: 560, h: 520, crop: x % 2 ? 0 : 3 });
     }
     else if (k === 'curva') { for (let x = x0; x < x1; x += 70) if (R_() < .6) tree_(x, roadY(x) + (R_() < .5 ? -1 : 1) * (100 + R_() * 600), R_() < .5 ? 'blossom' : 'oak'); }
-    else if (k === 'avenida') { for (let x = x0; x < x1; x += 56) for (const sd of [-1, 1]) { tree_(x, roadY(x) + sd * (sd > 0 ? 100 : 72), 'blossom', .85); if (R_() < .6) tree_(x + 28, roadY(x) + sd * (150 + R_() * 50), 'blossom', .9); } }
+    else if (k === 'avenida') { for (let x = x0; x < x1; x += 40) { tree_(x + R_() * 8, roadY(x) - 68, 'blossom', 1.1 + R_() * .2); tree_(x + 20, roadY(x) - 120 - R_() * 20, 'blossom', 1.15 + R_() * .25); if (R_() < .7) tree_(x + 10, roadY(x) - 180 - R_() * 50, 'blossom', 1 + R_() * .3); tree_(x + 4, roadY(x) + 150 + R_() * 10, 'blossom', .9 + R_() * .15); tree_(x + 24, roadY(x) + 210 + R_() * 40, 'blossom', 1 + R_() * .2); } }   // (the near side a little farther off, so its crowns do not hide the road)
     else if (k === 'pueblo') {   // Newbridge: a bustling little village (dogs, boys, faces at the windows)
       for (let x = x0 + 150; x < x1 - 150; x += 280) for (const sd of [-1, 1]) if (R_() < .85) house(x + R_() * 50, roadY(x) + sd * (200 + R_() * 40) + (sd > 0 ? 60 : 0), { w: 3.8 * T });
       RP.push({ kind: 'edificio', b: { style: 'tienda', x: xm, y: roadY(xm) - 200, w: 4.6 * T } }); sign(xm - 120, roadY(xm) - 150, 'Newbridge');
@@ -1986,6 +2077,7 @@ function roadPaint(cv, s, X0, Y0){
   const near = ROAD_PTS.filter(([x, y]) => x > X0 - 700 && x < X0 + TILE + 700);
   const lanes = [[[RSTN.x, RSTN.y + 60], [ROAD_X0, roadY(ROAD_X0)]], [[RHOTEL.x, RHOTEL.y + 40], [RHOTEL.x, roadY(RHOTEL.x)]]].filter(L => inT(Math.min(L[0][0], L[1][0]), Math.min(L[0][1], L[1][1]), Math.max(L[0][0], L[1][0]), Math.max(L[0][1], L[1][1])));
   for (const p of [...(near.length > 1 ? [near] : []), ...lanes]) { stroke(p, 54, P.path[0]); stroke(p, 40, s === 3 ? P.path[1] : '#c98a62'); stroke(p, 26, s === 3 ? P.path[2] : '#d49a72'); }
+  { const [a, b] = avenidaX(); if (s === 0 && X0 + TILE > a && X0 < b) for (let n = 0; n < 1600; n++) { const x = RX(), y = RY(); if (x < a || x > b) continue; const dy = Math.abs(y - roadY(x)); if (dy < 30 || r() < .3) { c.fillStyle = ['rgba(255,246,248,.9)', 'rgba(246,206,220,.85)', 'rgba(255,255,255,.8)'][n % 3]; c.beginPath(); c.ellipse(x, y, 1.8 + r() * 1.6, 1 + r(), r() * TAU, 0, TAU); c.fill(); } } }   // (the Avenue: a carpet of fallen petals)
   for (let n = 0; n < 140; n++) { const x = RX(), y = RY(); if (Math.abs(y - roadY(x)) < 16 && x > ROAD_X0) { c.fillStyle = r() < .5 ? 'rgba(120,60,40,.4)' : 'rgba(245,220,200,.5)'; c.beginPath(); c.ellipse(x, y, 1.5 + r() * 2, 1 + r(), 0, 0, TAU); c.fill(); } }
 }
 // the things of the road that are not in drawProp: log piles, washing on a line, gravestones, lilacs, milestones
@@ -2014,11 +2106,33 @@ function roadView(g, ox, oy, vw, vh, t, night, list){
   if (game.roadLady) { const s = game.roadLady.s, [x, y, dx] = roadAt(s); if (inV(x, y)) { const b = { look: 'f:blewett', x, y: y + 14, dir: 3, c8: ((Math.round(Math.atan2(-roadAt(s)[3], -dx) / (Math.PI / 4)) + 2) % 8 + 8) % 8, walk: (t * 1.6) % 1, moving: true }; list.push({ y: y + 15, draw: () => drawBuggy(g, b, t) }); } }
   for (const k of Object.keys(PEOPLE)) { const p = PEOPLE[k]; if (p.where !== 'camino' || !inV(p.x, p.y)) continue; if (p.buggy) pushDriven(list, g, p, t); else list.push({ y: p.y, draw: () => drawPerson(g, p, t) }); }
 }
-function roadCanopy(g, ox, oy, vw, vh){   // the Avenue: a canopy of snowy fragrant bloom overhead
-  const a = roadXOf(ROAD_TRAMOS.find(r => r.kind === 'avenida').s), b = roadXOf(ROAD_TRAMOS.find(r => r.name === 'Newbridge').s);
-  if (S === 3 || ox > b || ox + vw < a) return;
-  g.save(); g.globalAlpha = .28;
-  for (let x = Math.max(a, Math.floor(ox / 40) * 40); x < Math.min(b, ox + vw + 40); x += 40) { const y = roadY(x), k = rh(x); ell(g, x, y - 60 + k * 20, 34, 22, S === 0 ? (k < .5 ? '#fbeef2' : '#f4d8e2') : '#6fa24c', false); ell(g, x + 20, y - 20 - k * 10, 26, 18, S === 0 ? '#fff6f8' : '#7fb05a', false); }
+// the Avenue (the book: «a canopy of snowy fragrant bloom… the sunset sky at the far end like a great rose window at
+// the end of a cathedral aisle»): an arch of blossom over the road, petals falling, the light rosy and golden, and at
+// its end the glow of the sunset
+const avenidaX = () => [roadXOf(ROAD_TRAMOS.find(r => r.kind === 'avenida').s), roadXOf(ROAD_TRAMOS.find(r => r.name === 'Newbridge').s)];
+function roadCanopy(g, ox, oy, vw, vh, t){
+  const [a, b] = avenidaX(); if (ox > b + 600 || ox + vw < a - 600) return;
+  const bloom = S === 0, inn = x => clamp(Math.min(x - a, b - x) / 400, 0, 1);   // (how deep into the Avenue: the arch thickens)
+  const cx = clamp(ox + vw / 2, a, b), deep = inn(ox + vw / 2);
+  // the glow of the sunset at the far end
+  if (S !== 3) { const ex = b + 80, ey = roadY(b) - 40, gr = g.createRadialGradient(ex, ey, 20, ex, ey, 900); gr.addColorStop(0, 'rgba(255,214,150,.55)'); gr.addColorStop(.35, 'rgba(255,170,150,.22)'); gr.addColorStop(1, 'rgba(255,170,150,0)'); g.fillStyle = gr; g.fillRect(ox, oy, vw, vh); }
+  // the arch: clusters of blossom reaching over the road from both sides, thinner over the middle so the buggy shows
+  g.save();
+  for (let x = Math.max(a - 200, Math.floor(ox / 22) * 22 - 44); x < Math.min(b + 200, ox + vw + 44); x += 22) {
+    const y = roadY(x), d = inn(x); if (d <= 0) continue;
+    for (let k = 0; k < 6; k++) {
+      const sd = k % 2 ? 1 : -1, reach = rh(x, k) * 70, yy = sd < 0 ? y - 165 + reach - rh(x, k + 9) * 20 : y + 100 - reach * .3, al = (sd < 0 ? .16 + .26 * (1 - reach / 70) : .2) * d;
+      g.globalAlpha = al; ell(g, x + (rh(x, k + 3) - .5) * 20, yy, 18 + rh(x, k + 5) * 16, 11 + rh(x, k + 7) * 8, bloom ? (rh(x, k + 11) < .5 ? '#fff4f7' : '#f6d4e0') : '#6fa24c', false);
+    }
+    if (bloom) { g.globalAlpha = .7 * d; for (let k = 0; k < 4; k++) { const sd = k % 2 ? 1 : -1; ell(g, x + rh(x, k + 20) * 22, sd < 0 ? y - 100 - rh(x, k + 21) * 60 : y + 40 + rh(x, k + 21) * 30, 1.6, 1.6, k % 3 ? '#ffffff' : '#f0a8c0', false); } }
+  }
+  // petals drifting down in the evening air
+  if (bloom && deep > 0) { g.globalAlpha = .85 * deep; for (let i = 0; i < 90; i++) { const sp = 18 + rh(i, 1) * 22, px = ox + ((rh(i, 2) * vw + t * (10 + rh(i, 3) * 14) + Math.sin(t * .9 + i) * 18) % vw + vw) % vw, py = oy + ((rh(i, 4) * vh + t * sp) % vh); ell(g, px, py, 2.2, 1.2, i % 4 ? '#fff6f8' : '#f3b8cc', false, t * 2 + i); } }
+  // the light: rosy, with slanting shafts of gold
+  if (S !== 3 && deep > 0) {
+    g.globalAlpha = deep; g.fillStyle = 'rgba(255,196,206,.12)'; g.fillRect(ox, oy, vw, vh);
+    for (let k = 0; k < 5; k++) { const sx = Math.floor((cx - 600) / 260) * 260 + k * 260 + Math.sin(t * .3 + k) * 20, gr = g.createLinearGradient(sx, oy, sx + 160, oy + vh); gr.addColorStop(0, 'rgba(255,226,160,0)'); gr.addColorStop(.5, `rgba(255,226,160,${.10 + .04 * Math.sin(t * .7 + k * 2)})`); gr.addColorStop(1, 'rgba(255,226,160,0)'); g.fillStyle = gr; g.beginPath(); g.moveTo(sx, oy); g.lineTo(sx + 70, oy); g.lineTo(sx + 330, oy + vh); g.lineTo(sx + 200, oy + vh); g.closePath(); g.fill(); }
+  }
   g.restore();
 }
 ROOMS.camino = {
@@ -2066,7 +2180,7 @@ function roadTick(dt){
     if (b.roadDir == null) b.roadDir = 1;   // (left on the road: home to Avonlea)
     b.roadWait = game.road?.with === k && game.scene === 'camino' && !ana.onCart;   // (Ana got down: the buggy waits for her)
     if (b.roadDir && !b.roadWait && !(CHAT_HOLD[k] > TT)) {
-      const v = b.buggy ? ROAD_V * (game.road?.with === k && TALKS.some(t => t.paso) ? ROAD_PASO : 1) : AGENTS[k] ? wmPace(AGENTS[k]) : (CH[k]?.speed?.walk || 40);   // (at a walk, while something that matters is said)
+      const v = b.buggy ? ROAD_V * (roadTramo(b.roadS ?? 1).ritmo || 1) * (game.road?.with === k && TALKS.some(t => t.paso) ? ROAD_PASO : 1) : AGENTS[k] ? wmPace(AGENTS[k]) : (CH[k]?.speed?.walk || 40);   // (at a walk, while something that matters is said)
       b.roadS = clamp((b.roadS ?? 1) + b.roadDir * v * dt / ROAD_LEN, 0, 1); b.walk = ((b.walk || 0) + dt * 1.6) % 1; b.moving = !b.buggy;
     } else b.moving = false;
     b.sit = !!b.buggy; roadPlace(k, b);
@@ -3300,7 +3414,8 @@ function drawCow(c, a, t){
 const cartC8 = p => p.c8 ?? (p.dir === 3 ? 6 : p.dir === 0 ? 0 : p.dir === 2 ? 4 : 2);
 const c8Dir = c8 => c8 === 0 ? 0 : c8 === 4 ? 2 : c8 < 4 ? 1 : 3;   // (how the ones sitting in it face)
 function cartAxes(c8){ const a = (c8 - 2) * Math.PI / 4, hx = Math.round(Math.cos(a) * 1000) / 1000, hy = Math.round(Math.sin(a) * 1000) / 1000; return { hx, hy, A: [hx, hy * .6], B: [-hy, hx * .6] }; }   // (A: along, B: across, the ground seen at a slant)
-function cartSeat(cx, cy, c8, k){ const { A, B } = cartAxes(c8), s = k ? 1 : -1; return [cx - A[0] * 8 + s * (B[0] * 10 + A[0] * 8), cy - A[1] * 8 + s * (B[1] * 10 + A[1] * 8) - 18]; }   // (k 0: who drives, 1: beside)
+const CART_W = 16;   // (half the width of the box: two side by side on the bench)
+function cartSeat(cx, cy, c8, k){ const { A, B } = cartAxes(c8), s = k ? 1 : -1, u = -8 + s * 4, v = s * 8; return [cx + A[0] * u + B[0] * v, cy + A[1] * u + B[1] * v - 16]; }   // (k 0: who drives, 1: beside; on the bench, a little staggered so that from the side both are seen)
 function cartFromDriver(x, y, c8){ const [sx, sy] = cartSeat(0, 0, c8, 0); return [x - sx, y - sy]; }
 // where it is heading, from how it moved (a little stickiness, so it does not flicker between two)
 function cartTrack(o, x = o.x, y = o.y){
@@ -3334,22 +3449,27 @@ function drawCartHorse(c, p, t){
   }
   c.restore();
 }
-function drawCartBody(c, p, t){
+// the box in two halves, so whoever rides sits inside it: what is behind them (the far wheel, the floor, the far sides,
+// the bench), and what is in front (the near sides and wheel); part: 'fondo' | 'frente' | both
+function drawCartBody(c, p, t, part){
   const c8 = cartC8(p), { hx, A, B } = cartAxes(c8), x = p.x, y = p.y, P = (u, v, h) => [x + A[0] * u + B[0] * v, y + A[1] * u + B[1] * v - h];
-  ell(c, x, y + 1, 20 + 6 * Math.abs(hx), 6, 'rgba(30,40,20,.22)');
-  const wheel = s => { const [wx, wy] = P(-2, 13 * s, 9), rx = Math.max(1.6, 9 * Math.abs(hx)); ell(c, wx, wy, rx, 9, 'rgba(0,0,0,0)', '#4a3424'); for (let k = 0; k < 4; k++) { const a = k * Math.PI / 4 + (p.moving ? TT * 3 : 0); line(c, [[wx - Math.cos(a) * rx * .9, wy - Math.sin(a) * 8], [wx + Math.cos(a) * rx * .9, wy + Math.sin(a) * 8]], '#4a3424', 1, k); } };
+  const wheel = s => { const [wx, wy] = P(-2, CART_W * s, 9), rx = Math.max(1.6, 9 * Math.abs(hx)); ell(c, wx, wy, rx, 9, 'rgba(0,0,0,0)', '#4a3424'); for (let k = 0; k < 4; k++) { const a = k * Math.PI / 4 + (p.moving ? TT * 3 : 0); line(c, [[wx - Math.cos(a) * rx * .9, wy - Math.sin(a) * 8], [wx + Math.cos(a) * rx * .9, wy + Math.sin(a) * 8]], '#4a3424', 1, k); } };
   const near = B[1] > 0 ? 1 : B[1] < 0 ? -1 : 0, far = -near || -1;
-  wheel(far);
-  // the box: the inside, then its four sides from the far one to the near one
-  const L = 18, Wd = 13, fl = [P(-L, -Wd, 12), P(L, -Wd, 12), P(L, Wd, 12), P(-L, Wd, 12)], rim = [P(-L, -Wd, 28), P(L, -Wd, 28), P(L, Wd, 28), P(-L, Wd, 28)];
-  blob(c, rim, '#5a3a24');
+  const L = 20, Wd = CART_W, fl = [P(-L, -Wd, 12), P(L, -Wd, 12), P(L, Wd, 12), P(-L, Wd, 12)], rim = [P(-L, -Wd, 25), P(L, -Wd, 25), P(L, Wd, 25), P(-L, Wd, 25)];
   const faces = [0, 1, 2, 3].map(i => { const j = (i + 1) % 4; return { q: [fl[i], fl[j], rim[j], rim[i]], y: (fl[i][1] + fl[j][1]) / 2 }; }).sort((a, b) => a.y - b.y);
-  faces.forEach((f, i) => { blob(c, f.q, i < 2 ? '#7a5434' : '#8a6040'); if (i >= 2) { const [a, b] = [f.q[0], f.q[1]]; for (let k = 1; k < 4; k++) line(c, [[lerp(a[0], b[0], k / 4), lerp(a[1], b[1], k / 4)], [lerp(f.q[3][0], f.q[2][0], k / 4), lerp(f.q[3][1], f.q[2][1], k / 4)]], 'rgba(60,40,25,.4)', .8, k); } });
-  if (near) wheel(near); else wheel(1);
+  const face = (f, i) => { blob(c, f.q, i < 2 ? '#7a5434' : '#8a6040'); if (i >= 2) { const [a, b] = [f.q[0], f.q[1]]; for (let k = 1; k < 4; k++) line(c, [[lerp(a[0], b[0], k / 4), lerp(a[1], b[1], k / 4)], [lerp(f.q[3][0], f.q[2][0], k / 4), lerp(f.q[3][1], f.q[2][1], k / 4)]], 'rgba(60,40,25,.4)', .8, k); } };
+  if (part !== 'frente') {
+    ell(c, x, y + 1, 22 + 6 * Math.abs(hx), 7, 'rgba(30,40,20,.22)');
+    wheel(far);
+    blob(c, fl, '#4a3020');   // (the floor, seen from above)
+    faces.slice(0, 2).forEach(face);
+    blob(c, [P(-12, -Wd + 1, 19), P(-4, -Wd + 1, 19), P(-4, Wd - 1, 19), P(-12, Wd - 1, 19)], '#9a7048');   // (the bench)
+  }
+  if (part !== 'fondo') { faces.slice(2).forEach((f, i) => face(f, i + 2)); if (near) wheel(near); else wheel(1); }
 }
 function drawCart(c, p, t){ const { hy } = cartAxes(cartC8(p)); if (hy < -.1) { drawCartHorse(c, p, t); drawCartBody(c, p, t); } else { drawCartBody(c, p, t); drawCartHorse(c, p, t); } }
 // into a list sorted by depth: the box and the horse separately (people sit between them)
-function pushCart(list, g, p, t){ const { A } = cartAxes(cartC8(p)); list.push({ y: p.y + 1, draw: () => drawCartBody(g, p, t) }, { y: p.y + A[1] * 46 * 1.8 + 1, draw: () => drawCartHorse(g, p, t) }); }
+function pushCart(list, g, p, t){ const { A } = cartAxes(cartC8(p)); list.push({ y: p.y - 40, draw: () => drawCartBody(g, p, t, 'fondo') }, { y: p.y + 1, draw: () => drawCartBody(g, p, t, 'frente') }, { y: p.y + A[1] * 46 * 1.8 + 1, draw: () => drawCartHorse(g, p, t) }); }
 // whoever drives: the buggy around them, and they (and whoever rides beside) sitting in it, facing the way it goes
 function pushDriven(list, g, p, t){
   const c8 = cartC8(p), [cx, cy] = cartFromDriver(p.x, p.y, c8);
@@ -5113,7 +5233,8 @@ const clouds = Array.from({ length: Math.round(8 * KK) }, () => ({ x: R() * WW, 
 let birds = [], nextBirds = 6;
 let dayT = .3;   // 0 dawn (6:00), .25 noon, .5 evening (18:00), the night, back to dawn
 function light(){
-  const d = dayT % 1, night = d < .52 ? 0 : d < .62 ? (d - .52) / .1 : d < .9 ? 1 : 1 - (d - .9) / .1;
+  // (in the chapter it is June: the sun sets an hour and a half later)
+  const d = dayT % 1 - (CAP1.on && !CAP1.done ? .06 : 0), night = d < .52 ? 0 : d < .62 ? (d - .52) / .1 : d < .9 ? 1 : 1 - (d - .9) / .1;
   const dusk = Math.max(0, 1 - Math.abs(d - .5) / .07) + Math.max(0, 1 - Math.abs(d - .96) / .06) * .7;
   return { night: clamp(night, 0, 1), dusk: clamp(dusk, 0, 1) };
 }
@@ -5585,7 +5706,7 @@ function renderView(){
   if (toby.where === game.scene) list.push({ y: toby.y, draw: () => { g.save(); g.translate(toby.x, toby.y); g.scale(1.6, 1.6); drawCat(g, { ...toby, x: 0, y: 0 }, t); if (!toby.moving && toby.sleep && toby.mode !== 'ana') { g.fillStyle = 'rgba(70,50,30,.6)'; g.font = 'italic 6px Georgia, serif'; g.fillText('z', 6, -16 - (t * 3 % 4)); } g.restore(); } });
   if (OBS) { const b = wmBody(OBS); if (b && !b.lie) list.push({ y: 1e9, draw: () => { const hy = b.y - 50 * (LOOKS[b.look]?.h || 1) - 4 + Math.sin(t * 4) * 1.5; blob(g, [[b.x - 5, hy - 7], [b.x + 5, hy - 7], [b.x, hy]], '#e0a030'); } }); }   // (a little arrow over whoever is watched)
   list.sort((a, b) => a.y - b.y).forEach(o => o.draw());
-  if (road) roadCanopy(g, ox, oy, vw, vh);
+  if (road) roadCanopy(g, ox, oy, vw, vh, t);
   // a little "!" over whoever has something for Ana: thanks, a present, a delivery, or came looking for her
   for (const [k, p] of Object.entries(PEOPLE)) {
     if (sceneOf(k) !== game.scene || (k === 'diana' && diana.follow) || !(p.wantsTalk || game.giftFor[k] || game.tasks.some(t => t.from === k && t.done && !t.thanked) || taskOptions(k).length)) continue;
@@ -6024,7 +6145,7 @@ function drawCat(c, a, t){
   c.restore();
 }
 const FAUNA_DRAW = { cow: (c, a, t) => drawCow(c, a, t), sheep: drawSheep, horse: drawHorse, hen: drawHen, pig: drawPig, duck: drawDuck, gull: drawGull, cat: drawCat };
-function drawBuggy(c, b, t){ const c8 = cartC8(b), [sx, sy] = cartSeat(b.x, b.y, c8, 0), who = () => drawPerson(c, { look: b.look, x: sx, y: sy, dir: c8Dir(c8), sit: true, walk: 0, moving: false, blink: 0 }, t); if (cartAxes(c8).hy < -.1) { drawCartHorse(c, b, t); who(); drawCartBody(c, b, t); } else { who(); drawCartBody(c, b, t); drawCartHorse(c, b, t); } }
+function drawBuggy(c, b, t){ const c8 = cartC8(b), [sx, sy] = cartSeat(b.x, b.y, c8, 0), who = () => drawPerson(c, { look: b.look, x: sx, y: sy, dir: c8Dir(c8), sit: true, walk: 0, moving: false, blink: 0 }, t); const body = () => { drawCartBody(c, b, t, 'fondo'); who(); drawCartBody(c, b, t, 'frente'); }; if (cartAxes(c8).hy < -.1) { drawCartHorse(c, b, t); body(); } else { body(); drawCartHorse(c, b, t); } }
 const FARO_LINES = ['Desde aquí se ve todo el golfo. ¡Si hasta me parece ver Escocia! Bueno... no, pero casi.', 'Un faro es como un amigo que nunca se duerme. Me gustaría ser farera, o por lo menos gaviota.', 'Las olas rompen contra las rocas como si tuvieran algo urgente que decir.'];
 /* ---------- the cards of the people of Avonlea (who they are and what they like to talk about) and their encounters:
    when Ana comes near one of them, when she taps one, or when two of them meet near her, they talk. With the AI, a
