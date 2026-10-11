@@ -8,7 +8,7 @@ Un estado es una foto del mundo hecha de datos (`wmNow()`), y el planificador tr
 
 | Componente | Qué guarda | Ejemplo |
 |---|---|---|
-| `t` | la hora, en minutos desde la medianoche | `792.0799999999999` (= 13:12.079999999999927) |
+| `t` | la hora, en minutos desde la medianoche | `792.07332` (= 13:12.073319999999967) |
 | `pos` | dónde está cada persona, como un **lugar** (ver §6): un punto del mapa (`granero`, `huerto`…), `cocina` (adentro de Tejas Verdes), `h:casa` (adentro de otra casa) o `p:quien` (afuera, donde esa persona esté) | `ana: "cocina"` |
 | `invs` | lo que cada uno tiene: `{ cosa: cantidad }` | `ana: { huevos: 6, cuerda: 1 }` |
 | `cows` | dónde está cada vaca: `corral`, `potrero`, `c:vaca` (suelta, donde esté), `led:quien` (alguien la lleva de la cuerda), `sold:quien` (vendida) | `{"dolly":"corral","jersey":"potrero"}` |
@@ -194,6 +194,32 @@ Además: `cocina` es adentro de Tejas Verdes, `h:casa` adentro de cualquier otra
 | Sr. Lawson (`lawson`) | generoso | — | trueque | — | abre de 8 a 18 · camina a 38 · enfoque 0.9, social 0.5 |
 
 Reglas sociales (las mismas en el plan y en el mundo): pedir funciona si el otro te quiere ≥ 2 o es generoso; un regalo con una etiqueta que le gusta sube el cariño (una vez al día); disculparse sube el cariño (+2 si es sensible o generoso); interceder exige que el destinatario quiera ≥ 4 a quien habla.
+
+## 8. Las rutinas de metas (la agenda de cada uno)
+
+Cada día, a su hora, el juego le da a cada uno estas metas (prioridad 1: lo que pide otro o lo que tiene hora límite va antes; como mucho una vez al día). Entre una y otra sigue la rutina de lugares de siempre. Lo de Ana, y lo que le piden por rutina, solo con 🤖. Se apaga con el interruptor del panel 🎯 o al lanzar una meta de prueba.
+
+| Hora | Quién | Meta | Cuándo |
+|---|---|---|---|
+| 6:00–9:00 | Matthew | dar de comer a los animales | todos los días |
+| 6:00–9:30 | Matthew | ordeñar y llevarle la leche a Marilla | `!realR.fact('ordeñada:dolly') && cowIn('dolly', 'corral')` |
+| 9:30–12:00 | Matthew | hacer heno | verano · `!realR.fact('heno_hecho')` |
+| 9:30–12:00 | Matthew | partir leña para Marilla | otoño, invierno |
+| 8:30–11:30 | Marilla | batir mantequilla | `(wmInv('marilla').leche \|\| 0) >= 2` |
+| 13:00–15:00 | Marilla | encargarle los quehaceres a Ana *(con 🤖)* | todos los días |
+| 17:00–19:00 | Marilla | regañar a Ana por los quehaceres *(con 🤖)* | `realR.fact('falta:ana')` |
+| 14:00–16:30 | Sra. Lynde | visitar a Marilla | `today() % 2 === 0` |
+| 14:00–16:30 | Sra. Lynde | visitar a la Sra. Barry | `today() % 2 === 1` |
+| 15:00–17:00 | Diana | dar un paseo con Ana *(con 🤖)* | primavera, verano, otoño · `!isSunday()` |
+| 7:30–8:30 | Ana | ir a clases *(con 🤖)* | primavera, otoño, invierno · `!isSunday()` |
+| 12:30–14:30 | Ana | la tarde libre *(con 🤖)* | todos los días |
+| 20:00–22:00 | Ana | decir sus oraciones *(con 🤖)* | todos los días |
+| 8:48–10:00 | Matthew | ir a la iglesia | los domingos |
+| 8:48–10:00 | Sra. Lynde | ir a la iglesia | los domingos |
+| 8:48–10:00 | Diana | ir a la iglesia | los domingos |
+| 8:48–10:00 | Ana | ir a la iglesia *(con 🤖)* | los domingos |
+
+Un día completo, dibujado en el mapa: `node tools/trace_goal.js dia [--season 0..3] [--domingo] --out dia.png` (ejemplos en `trazas/`).
 
 ## 8. Las metas de prueba (panel 🎯)
 

@@ -65,6 +65,8 @@ La partida se guarda sola en el navegador: lo que lleva Ana, lo que creció en l
 
 ## Rutinas
 
+**Rutinas de metas:** además de dónde está cada uno, cada día a su hora el juego le da metas al planificador, sacadas del libro: Matthew da de comer a los animales y ordeña al amanecer, hace heno en verano y parte leña en invierno; Marilla bate mantequilla y después de comer le encarga los quehaceres a Ana (y si a las cinco no están hechos, la manda llamar y la regaña); la Sra. Lynde visita a Marilla o a la Sra. Barry; Diana viene a buscar a Ana para pasear; Ana va a clases, en su tarde libre hace algo que le guste según la estación (sembrar, remar, patinar…) y reza antes de dormir; los domingos van a la iglesia. Lo de Ana (y lo que le piden por rutina) solo con 🤖, para no quitarle el control a la jugadora. El panel 🎯 muestra la agenda del día; [ver un día dibujado en el mapa](trazas/dia_primavera.webp).
+
 Los personajes se mueven con horarios: **Matthew** entra a la cocina de Tejas Verdes a comer (hacia las 7, las 12 y las 18) y está con Marilla; la **Sra. Lynde** teje en su casa por la mañana y por la tarde visita a Marilla (un día) o a la Sra. Barry (al otro), caminando por los caminos. Cuando coinciden, conversan entre ellos y Ana puede quedarse escuchando.
 
 ## Las estaciones

@@ -15,6 +15,7 @@ const exe = process.env.PLAYWRIGHT_CHROMIUM || (fs.existsSync('/opt/pw-browsers/
   const D = await pg.evaluate(() => {
     const A = window.__avonlea, d = A.wmData(), s = A.wmNow();
     return { ...d, tests: A.WM_TESTS.map((T, i) => ({ i, who: A.wmName(T.who), text: T.text, ask: !!T.ask, goals: !!T.goals, favors: (T.favors || []).map(f => f.f + ' → ' + A.wmName(f.to)) })),
+      agenda: A.agendaData(),
       names: Object.fromEntries(Object.keys(d.WHO).map(k => [k, A.wmName(k)])), state: { keys: Object.keys(s), pos: s.pos, cows: s.cows, stock: s.stock, t: s.t } };
   });
   await b.close();
@@ -136,6 +137,10 @@ const exe = process.env.PLAYWRIGHT_CHROMIUM || (fs.existsSync('/opt/pw-browsers/
   L.push('## 7. Las personas', '', '| Persona | Carácter | Le gusta | Compra / vende | Cocina en | Otros |', '|---|---|---|---|---|---|');
   for (const [k, w] of Object.entries(D.WHO)) L.push(`| ${nm(k)} (\`${k}\`) | ${list(w.caracter)} | ${list(w.le_gusta)} | ${[w.compra?.animal ? 'compra vacas (' + w.compra.animal + ' dólares)' : '', w.trueque ? 'trueque' : ''].filter(Boolean).join(', ') || '—'} | ${w.cocina ? D.WP_NAME[w.cocina] || w.cocina : '—'} | ${[w.quieto ? 'no sale de casa' : '', w.abre ? 'abre de ' + w.abre[0] + ' a ' + w.abre[1] : '', w.inv ? 'tiene ' + Object.entries(w.inv).map(([x, n]) => n + ' ' + item(x, n)).join(', ') : '', D.PACE[k] ? 'camina a ' + D.PACE[k] : '', D.FOCO[k] ? 'enfoque ' + D.FOCO[k][0] + ', social ' + D.FOCO[k][1] : ''].filter(Boolean).join(' · ')} |`);
   L.push('', 'Reglas sociales (las mismas en el plan y en el mundo): pedir funciona si el otro te quiere ≥ 2 o es generoso; un regalo con una etiqueta que le gusta sube el cariño (una vez al día); disculparse sube el cariño (+2 si es sensible o generoso); interceder exige que el destinatario quiera ≥ 4 a quien habla.', '');
+  L.push('## 8. Las rutinas de metas (la agenda de cada uno)', '', 'Cada día, a su hora, el juego le da a cada uno estas metas (prioridad 1: lo que pide otro o lo que tiene hora límite va antes; como mucho una vez al día). Entre una y otra sigue la rutina de lugares de siempre. Lo de Ana, y lo que le piden por rutina, solo con 🤖. Se apaga con el interruptor del panel 🎯 o al lanzar una meta de prueba.', '', '| Hora | Quién | Meta | Cuándo |', '|---|---|---|---|');
+  const SEAS = ['primavera', 'verano', 'otoño', 'invierno'], hh = h => Math.floor(h) + ':' + String(Math.round(h % 1 * 60)).padStart(2, '0');
+  for (const e of D.agenda) L.push(`| ${hh(e.from)}–${hh(e.to)} | ${e.who} | ${e.label}${e.ana ? ' *(con 🤖)*' : ''} | ${[e.sunday ? 'los domingos' : '', e.season ? e.season.map(i => SEAS[i]).join(', ') : '', e.cond ? '`' + e.cond.replace(/\|/g, '\\|').slice(0, 80) + '`' : ''].filter(Boolean).join(' · ') || 'todos los días'} |`);
+  L.push('', 'Un día completo, dibujado en el mapa: `node tools/trace_goal.js dia [--season 0..3] [--domingo] --out dia.png` (ejemplos en `trazas/`).', '');
   // --- tests
   L.push('## 8. Las metas de prueba (panel 🎯)', '', '| # | Quién | Meta | Favores que se le sugieren |', '|---|---|---|---|');
   for (const T of D.tests) L.push(`| ${T.i} | ${T.who} | ${T.text}${T.ask ? ' *(Ana pide el favor)*' : ''}${T.goals ? ' *(varias metas)*' : ''} | ${list(T.favors)} |`);

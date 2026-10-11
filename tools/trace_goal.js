@@ -6,6 +6,7 @@
 
      node tools/trace_goal.js <test number | words of its name> [--out traza.png] [--max 900] [--w 1500]
      node tools/trace_goal.js --pdf trazas/metas.pdf [numbers or words, comma separated; all if none]
+     node tools/trace_goal.js dia [--season 0..3] [--domingo] --out dia.png   (a whole day, 6:00 to 22:00: everyone's routine of goals)
 
    With --pdf: each goal run on a fresh page, one page of the PDF each, and a first page with all the results.
 
@@ -13,6 +14,7 @@
 const path = require('path'), fs = require('fs');
 let pw; try { pw = require('playwright'); } catch (e) { pw = require('/opt/node22/lib/node_modules/playwright'); }
 const argv = process.argv.slice(2), opt = (k, d) => { const i = argv.indexOf('--' + k); return i >= 0 ? argv.splice(i, 2)[1] : d; };
+const season = opt('season', null), sunday = argv.includes('--domingo') ? (argv.splice(argv.indexOf('--domingo'), 1), true) : false;
 const out = opt('out', 'traza.png'), pdf = opt('pdf', null), maxT = +opt('max', 2400), W = +opt('w', 1500), which = argv.join(' ');
 const exe = process.env.PLAYWRIGHT_CHROMIUM || (fs.existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chromium' : undefined);
 
@@ -22,11 +24,11 @@ const exe = process.env.PLAYWRIGHT_CHROMIUM || (fs.existsSync('/opt/pw-browsers/
   await pg.addInitScript(() => { localStorage.clear(); localStorage.setItem('avonlea-ai-asked', '1'); });
   const load = async () => { await pg.goto('file://' + path.resolve(__dirname, '..', 'index.html')); await pg.waitForFunction(() => window.__avonlea); };
   await load();
-  const trace = which => pg.evaluate(async ([which, maxT, W]) => {
+  const trace = which => pg.evaluate(async ([which, maxT, W, season, sunday]) => {
     const A = window.__avonlea, tests = A.WM_TESTS;
-    const i = /^\d+$/.test(which) ? +which : tests.findIndex(T => T.text.toLowerCase().includes(which.toLowerCase()));
-    if (!(i >= 0 && tests[i])) return { err: 'no hay una meta de prueba así: ' + which + '\n' + tests.map((T, j) => j + ' ' + T.text).join('\n') };
-    const T = tests[i], hhmm = h => { const m = Math.round(h * 60); return String(Math.floor(m / 60) % 24).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); };
+    const dia = which === 'dia', i = dia ? 'día' : /^\d+$/.test(which) ? +which : tests.findIndex(T => T.text.toLowerCase().includes(which.toLowerCase()));
+    if (!dia && !(i >= 0 && tests[i])) return { err: 'no hay una meta de prueba así: ' + which + '\n' + tests.map((T, j) => j + ' ' + T.text).join('\n') };
+    const SEAS = ['primavera', 'verano', 'otoño', 'invierno'], T = dia ? { text: 'Un día en Avonlea: la rutina de metas de cada uno (' + SEAS[season ?? A.season()] + (sunday ? ', domingo' : '') + ')', who: 'ana' } : tests[i], hhmm = h => { const m = Math.round(h * 60); return String(Math.floor(m / 60) % 24).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); };
     // where someone is on the map (indoors: at the door of the house)
     const onMap = k => {
       const bd = A.wmBody(k), sc = A.wmScene(k); if (!bd || !sc || sc === 'away' || sc === 'in') return null;
@@ -34,10 +36,11 @@ const exe = process.env.PLAYWRIGHT_CHROMIUM || (fs.existsSync('/opt/pw-browsers/
       const H = A.HOUSES[A.ROOMS[sc]?.parent ?? sc]; return H ? [H.at.x, H.at.y + 30] : null;
     };
     const keys = ['ana', ...Object.keys(A.PEOPLE), ...A.FOLK.map(f => f.id)];
-    const ag = A.wmRunTest(i), tr = {}, cows = {}, evs = [], seenJ = A.game.journal.length, goalsN = {}, doing = {};
+    if (dia) { if (sunday) A.setDay(6); A.startDay(); if (season != null) A.setSeason(+season); }
+    const ag = dia ? { get st() { return A.hourNow() < 22 ? 'run' : 'done'; }, why: '' } : A.wmRunTest(i), tr = {}, cows = {}, evs = [], seenJ = A.game.journal.length, goalsN = {}, doing = {};
     let jn = A.game.journal.length;
     const sample = t => {
-      for (const k of keys) { const p = onMap(k); if (!p) continue; (tr[k] = tr[k] || []).push([p[0], p[1], t]); }
+      if (!dia || t % 2 === 0) for (const k of keys) { const p = onMap(k); if (!p) continue; (tr[k] = tr[k] || []).push([p[0], p[1], t]); }
       for (const [c, o] of Object.entries(A.ANIM)) if (o.kind === 'cow' && o.where !== 'in') (cows[c] = cows[c] || []).push([o.x, o.y, t, o.state === 'led' ? o.ledBy || 'ana' : null]);
       // a new goal for someone (asked, or the test's): where they were and what they were doing then
       for (const [k, g] of Object.entries(A.AGENTS)) {
@@ -52,16 +55,18 @@ const exe = process.env.PLAYWRIGHT_CHROMIUM || (fs.existsSync('/opt/pw-browsers/
     const wmN = k => A.wmName(k);
     for (const k of keys) doing[k] = A.AGENTS[k] ? A.doingText(k) : null;
     const h0 = A.hourNow(); let t = 0; sample(0);
-    for (; t < maxT && (ag.st === 'run' || ag.st === 'pausa'); t += .5) { A.step(.5); sample(t + .5); }
+    for (const lim = dia ? Math.max(maxT, 9000) : maxT; t < lim && (ag.st === 'run' || ag.st === 'pausa'); t += .5) { A.step(.5); sample(t + .5); }
     for (let k = 0; k < 4; k++) { A.step(.5); sample(t += .5); }
     // who to draw: those who had goals, were named in what happened, or led a cow; and the cows that moved
     const moved = P => P.length > 1 && P.some(q => Math.hypot(q[0] - P[0][0], q[1] - P[0][1]) > 60);
     const marks = evs.filter(e => e.p && (e.kind === 'meta' || !/volvió a su casa|entró a|salió de|conversaron|se detuvo|un rato/.test(e.text)));
+    if (dia) marks.splice(0, marks.length, ...marks.filter(e => e.kind === 'meta' || /logró|no pudo/.test(e.text)));   // (a whole day: only when each goal starts and how it ends)
     const who = keys.filter(k => tr[k] && (A.AGENTS[k] || k === 'ana' || marks.some(e => e.k === k || e.text.includes(' ' + wmN(k)))));
     const cowK = Object.keys(cows).filter(c => moved(cows[c]));
     // the part of the map: everything drawn, with some room around
     const pts = [...who.flatMap(k => tr[k]), ...cowK.flatMap(c => cows[c]), ...marks.map(e => e.p)];
-    let x0 = Math.min(...pts.map(p => p[0])) - 300, x1 = Math.max(...pts.map(p => p[0])) + 420, y0 = Math.min(...pts.map(p => p[1])) - 300, y1 = Math.max(...pts.map(p => p[1])) + 200;
+    let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9; for (const p of pts) { if (p[0] < x0) x0 = p[0]; if (p[0] > x1) x1 = p[0]; if (p[1] < y0) y0 = p[1]; if (p[1] > y1) y1 = p[1]; }
+    x0 -= 300; x1 += 420; y0 -= 300; y1 += 200;
     const minW = 1600; if (x1 - x0 < minW) { const c = (x0 + x1) / 2; x0 = c - minW / 2; x1 = c + minW / 2; }
     if ((y1 - y0) < (x1 - x0) * .62) { const c = (y0 + y1) / 2, hh = (x1 - x0) * .62; y0 = c - hh / 2; y1 = c + hh / 2; }
     if ((y1 - y0) > (x1 - x0) * .82) { const c = (x0 + x1) / 2, ww = (y1 - y0) / .82; x0 = c - ww / 2; x1 = c + ww / 2; }   // (landscape, to fill a page)
@@ -110,14 +115,14 @@ const exe = process.env.PLAYWRIGHT_CHROMIUM || (fs.existsSync('/opt/pw-browsers/
       c.fillText(l.t, x, y); y += lh(l.f); }
     c.font = 'italic 16px Georgia, serif'; c.fillStyle = 'rgba(74,47,28,.75)'; c.fillText('○ inicio · ■ fin · ● rojo: le piden algo (o recibe la meta) · puntos: cada 30 s', W + 20, cv.height - 14);
     // the title, big, in a band across the top
-    const F = document.createElement('canvas'), f = F.getContext('2d'), tl = wrap(`Meta ${i}: ${T.text}`, F.width = cv.width, 'bold 38px Georgia, serif').length > 1 ? wrap(`Meta ${i}: ${T.text}`, cv.width - 60, 'bold 38px Georgia, serif') : [`Meta ${i}: ${T.text}`], TH = 40 + tl.length * 48 + 36;
+    const F = document.createElement('canvas'), f = F.getContext('2d'), tl = wrap(dia ? T.text : `Meta ${i}: ${T.text}`, F.width = cv.width, 'bold 38px Georgia, serif').length > 1 ? wrap(dia ? T.text : `Meta ${i}: ${T.text}`, cv.width - 60, 'bold 38px Georgia, serif') : [dia ? T.text : `Meta ${i}: ${T.text}`], TH = 40 + tl.length * 48 + 36;
     F.height = cv.height + TH; f.fillStyle = '#efe0bb'; f.fillRect(0, 0, F.width, TH); f.fillStyle = ink; f.textAlign = 'left';
     f.font = 'bold 38px Georgia, serif'; tl.forEach((l, j) => f.fillText(l, 30, 54 + j * 48));
     f.font = 'italic 24px Georgia, serif'; f.fillStyle = ag.st === 'done' ? '#3d6b2a' : ag.st === 'fail' ? '#a3302a' : '#7a5a2a'; f.fillText(`${span} (hora del juego) · ${result}`, 30, 40 + tl.length * 48 + 14);
     f.strokeStyle = 'rgba(90,60,35,.7)'; f.lineWidth = 3; f.beginPath(); f.moveTo(0, TH - 1.5); f.lineTo(F.width, TH - 1.5); f.stroke();
     f.drawImage(cv, 0, TH);
     return { png: F.toDataURL('image/png'), jpg: F.toDataURL('image/jpeg', .8), result, span, test: i, text: T.text, st: ag.st, why: ag.why, who, names: who.map(wmN), marks: marks.length };
-  }, [which, maxT, W]);
+  }, [which, maxT, W, season, sunday]);
   const say = r => console.log(`${r.test}. ${r.text}: ${r.st}${r.why ? ' (' + r.why + ')' : ''} · ${r.who.join(', ')} · ${r.marks} marcas`);
   if (!pdf) {
     const r = await trace(which); if (r.err) { console.error(r.err); process.exit(1); }

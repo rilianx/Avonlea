@@ -188,6 +188,16 @@ Otras capas sobre esto:
   - si mueve a Ana, el plan espera y lo retoma tras 12 s sin órdenes;
   - con 🤖 automático, Ana sigue sola y las teclas mueven el mapa.
 
+## 7b. Las rutinas de metas (la agenda)
+
+Las rutinas antiguas solo dicen **dónde** está cada uno a cada hora. La agenda (`AGENDA`) agrega **qué hace**: una lista de metas por personaje, cada una con su franja horaria y condiciones (estación, domingo, «si hay leche», «si Ana no hizo los quehaceres»). `agendaTick` las revisa cada 2 s y le da al planificador la que toca, como mucho una vez al día:
+
+- con **prioridad 1**, así que lo que pide otro (2) o lo que tiene hora límite (3) va antes;
+- solo si el personaje tiene espacio en su agenda de metas (deja uno libre para los pedidos);
+- lo de Ana, y lo que otros le piden por rutina, **solo con 🤖**, para no quitarle el control a la jugadora.
+
+Cuando no hay meta, sigue la rutina de lugares de siempre. Al lanzar una meta de prueba, la agenda se apaga (interruptor en el panel 🎯). La tabla completa está en el [catálogo, §8](CATALOGO.md#8-las-rutinas-de-metas-la-agenda-de-cada-uno), y un día completo se puede dibujar con `node tools/trace_goal.js dia`.
+
 ## 8. Ejemplo completo: «La Sra. Barry quiere compota»
 
 **Estado inicial (10:00):**
