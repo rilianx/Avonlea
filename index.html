@@ -1401,7 +1401,8 @@ function drawTree(c, o, t){
     return;
   }
   const AUT = [['#a8432c', '#c8583a', '#e07b4a', '#f2a66a'], ['#b8682a', '#d8873a', '#eaa84e', '#f6cc7a'], ['#b8962e', '#d4b240', '#e8cc5c', '#f6e48a']];
-  const greens = o.kind === 'blossom' ? (S === 0 ? ['#e8a8b8', '#f4c4cf', '#fbdde3', '#fff1f3'] : S === 1 ? ['#4f8a42', '#62a04b', '#86bb5e', '#b0d67e'] : AUT[0])
+  const greens = o.kind === 'manzano' ? (S === 0 ? ['#86b85a', '#eef4e2', '#fafcf4', '#ffffff'] : S === 1 ? ['#4f8a42', '#62a04b', '#86bb5e', '#b0d67e'] : AUT[1])
+    : o.kind === 'blossom' ? (S === 0 ? ['#e8a8b8', '#f4c4cf', '#fbdde3', '#fff1f3'] : S === 1 ? ['#4f8a42', '#62a04b', '#86bb5e', '#b0d67e'] : AUT[0])
     : o.kind === 'apple' ? (S === 0 ? ['#6a9e4e', '#f0d4dc', '#fbe8ec', '#ffffff'] : S === 1 ? ['#4f8a42', '#62a04b', '#86bb5e', '#b0d67e'] : ['#6a8a3a', '#8aa048', '#b8b05a', '#d8c870'])
     : S === 0 ? ['#5f9a46', '#74b052', '#98c868', '#c0e08a'] : S === 1 ? ['#4a7d3e', '#5c9446', '#7cb05a', '#a4cc76'] : AUT[Math.floor(o.ph / TAU * 3) % 3];
   const blobs = [[-16, 8, 20], [16, 8, 19], [0, 12, 21], [-10, -8, 19], [11, -9, 18], [0, -18, 16]];
@@ -1413,6 +1414,7 @@ function drawTree(c, o, t){
   for (const [bx, by, r] of blobs.slice(3)) ell(c, cx + bx * s - 3, cy + by * s - 4, r * .55 * s, r * .45 * s, greens[2]);
   for (const [bx, by, r] of blobs.slice(4)) ell(c, cx + bx * s - 5, cy + by * s - 7, r * .25 * s, r * .2 * s, greens[3]);
   hatch(c, cx - 4 * s, cy + 8 * s, 24 * s, 14 * s, seedOf(x, y));
+  if (o.kind === 'manzano' && S === 0) for (let k = 0; k < 14; k++) { const a = rh(k, o.ph) * TAU, d = rh(k + 7, o.ph) * 24; ell(c, cx + Math.cos(a) * d * s, cy + Math.sin(a) * d * .8 * s, 2.2 * s, 1.6 * s, k % 3 ? '#9cc870' : '#6f9e48'); }   // (the young leaves among the blossom)
   if (o.kind === 'apple' && (S === 1 || S === 2)) for (let k = 0; k < o.apples; k++) { const [ax, ay] = [[-12, 2], [10, -4], [2, 10]][k]; ell(c, cx + ax * s, cy + ay * s, 2.6, 2.6, '#d9433b', true); }
 }
 function drawBush(c, o, t){
@@ -1514,7 +1516,7 @@ function drawProp(c, o, t, night){
   else if (o.kind === 'granja') drawHouse(c, { h: { x: o.x, y: o.y, w: 4.4 * T }, roof: ['#8a5a3c', '#5f7a9a', '#7a6a4a'][Math.floor(o.x / 7) % 3], wall: '#efe4cc', trim: '#6a4a32', x: o.x, y: o.y, small: true }, t, night);
   else if (o.kind === 'faro') { const x = o.x, y = o.y; ell(c, x + 8, y + 2, 20, 6, 'rgba(30,40,20,.22)'); blob(c, [[x - 12, y], [x + 12, y], [x + 7, y - 90], [x - 7, y - 90]], '#f6f2e8'); for (let k = 0; k < 3; k++) blob(c, [[x - 11 + k * 1.6, y - 20 - k * 26], [x + 11 - k * 1.6, y - 20 - k * 26], [x + 10 - k * 1.6, y - 32 - k * 26], [x - 10 + k * 1.6, y - 32 - k * 26]], '#c8463a'); blob(c, [[x - 9, y - 90], [x + 9, y - 90], [x + 9, y - 102], [x - 9, y - 102]], night > .3 ? '#ffe7a8' : '#f5d58a'); blob(c, [[x - 11, y - 102], [x + 11, y - 102], [x, y - 114]], '#3a3436'); }
   else if (o.kind === 'barn') drawBarn(c, o);
-  else if (o.kind === 'tree' || o.kind === 'oak' || o.kind === 'pine' || o.kind === 'apple' || o.kind === 'blossom') drawTree(c, o, t);
+  else if (o.kind === 'tree' || o.kind === 'oak' || o.kind === 'pine' || o.kind === 'apple' || o.kind === 'blossom' || o.kind === 'manzano') drawTree(c, o, t);
   else if (o.kind === 'bush') drawBush(c, o, t);
   else if (o.kind === 'fpost') { ell(c, o.x + 1, o.y + 1, 3.5, 1.5, 'rgba(30,40,20,.2)'); blob(c, [[o.x - 1.8, o.y], [o.x + 1.8, o.y], [o.x + 1.8, o.y - 17], [o.x - 1.8, o.y - 17]], '#9a7a56'); if (o.nx != null) { line(c, [[o.x, o.y - 13], [o.nx, o.ny - 13]], '#8a6a48', 1.8, o.x); line(c, [[o.x, o.y - 7], [o.nx, o.ny - 7]], '#8a6a48', 1.8, o.y); } if (S === 3) ell(c, o.x, o.y - 17.5, 2.4, 1.2, '#f6f8fb'); }
   else if (o.kind === 'post') { ell(c, o.x + 2, o.y + 1, 5, 2, 'rgba(30,40,20,.2)'); blob(c, [[o.x - 2, o.y], [o.x + 2, o.y], [o.x + 2, o.y - 18], [o.x - 2, o.y - 18]], '#f2ede2'); c.fillStyle = '#f2ede2'; c.fillRect(o.x - 12, o.y - 15, 24, 3); c.fillRect(o.x - 12, o.y - 8, 24, 3); }
@@ -2016,7 +2018,7 @@ const RP = [], RT = [], RF = [], RWAT = [], RFOLK = [], RCOW = [], RDOG = [], RB
       for (let x = x0; x < x1; x += 640) for (const sd of [-1, 1]) if (Math.abs(x - xm) > 400) RF.push({ x, y: sd < 0 ? roadY(x) - 680 : roadY(x) + 130, w: 560, h: 520, crop: x % 2 ? 0 : 3 });
     }
     else if (k === 'curva') { for (let x = x0; x < x1; x += 70) if (R_() < .6) tree_(x, roadY(x) + (R_() < .5 ? -1 : 1) * (100 + R_() * 600), R_() < .5 ? 'blossom' : 'oak'); }
-    else if (k === 'avenida') { for (let x = x0; x < x1; x += 40) { tree_(x + R_() * 8, roadY(x) - 68, 'blossom', 1.1 + R_() * .2); tree_(x + 20, roadY(x) - 120 - R_() * 20, 'blossom', 1.15 + R_() * .25); if (R_() < .7) tree_(x + 10, roadY(x) - 180 - R_() * 50, 'blossom', 1 + R_() * .3); tree_(x + 4, roadY(x) + 150 + R_() * 10, 'blossom', .9 + R_() * .15); tree_(x + 24, roadY(x) + 210 + R_() * 40, 'blossom', 1 + R_() * .2); } }   // (the near side a little farther off, so its crowns do not hide the road)
+    else if (k === 'avenida') { const kind = () => R_() < .8 ? 'manzano' : 'tree'; for (let x = x0; x < x1; x += 30 + R_() * 25) { tree_(x + R_() * 14, roadY(x) - 64 - R_() * 14, kind(), 1.05 + R_() * .35); tree_(x + 18, roadY(x) - 125 - R_() * 30, kind(), 1.1 + R_() * .35); if (R_() < .7) tree_(x + 8, roadY(x) - 190 - R_() * 60, kind(), 1 + R_() * .3); tree_(x + 4, roadY(x) + 150 + R_() * 25, kind(), .9 + R_() * .25); if (R_() < .8) tree_(x + 24, roadY(x) + 215 + R_() * 50, kind(), 1 + R_() * .25); } }   // (the near side a little farther off, so its crowns do not hide the road)
     else if (k === 'pueblo') {   // Newbridge: a bustling little village (dogs, boys, faces at the windows)
       for (let x = x0 + 150; x < x1 - 150; x += 280) for (const sd of [-1, 1]) if (R_() < .85) house(x + R_() * 50, roadY(x) + sd * (200 + R_() * 40) + (sd > 0 ? 60 : 0), { w: 3.8 * T });
       RP.push({ kind: 'edificio', b: { style: 'tienda', x: xm, y: roadY(xm) - 200, w: 4.6 * T } }); sign(xm - 120, roadY(xm) - 150, 'Newbridge');
@@ -2077,7 +2079,8 @@ function roadPaint(cv, s, X0, Y0){
   const near = ROAD_PTS.filter(([x, y]) => x > X0 - 700 && x < X0 + TILE + 700);
   const lanes = [[[RSTN.x, RSTN.y + 60], [ROAD_X0, roadY(ROAD_X0)]], [[RHOTEL.x, RHOTEL.y + 40], [RHOTEL.x, roadY(RHOTEL.x)]]].filter(L => inT(Math.min(L[0][0], L[1][0]), Math.min(L[0][1], L[1][1]), Math.max(L[0][0], L[1][0]), Math.max(L[0][1], L[1][1])));
   for (const p of [...(near.length > 1 ? [near] : []), ...lanes]) { stroke(p, 54, P.path[0]); stroke(p, 40, s === 3 ? P.path[1] : '#c98a62'); stroke(p, 26, s === 3 ? P.path[2] : '#d49a72'); }
-  { const [a, b] = avenidaX(); if (s === 0 && X0 + TILE > a && X0 < b) for (let n = 0; n < 1600; n++) { const x = RX(), y = RY(); if (x < a || x > b) continue; const dy = Math.abs(y - roadY(x)); if (dy < 30 || r() < .3) { c.fillStyle = ['rgba(255,246,248,.9)', 'rgba(246,206,220,.85)', 'rgba(255,255,255,.8)'][n % 3]; c.beginPath(); c.ellipse(x, y, 1.8 + r() * 1.6, 1 + r(), r() * TAU, 0, TAU); c.fill(); } } }   // (the Avenue: a carpet of fallen petals)
+  { const [a, b] = avenidaX(); if (s < 2 && X0 + TILE > a && X0 < b) { const pts = ROAD_PTS.filter(([x]) => x > Math.max(a, X0 - 400) && x < Math.min(b, X0 + TILE + 400)); if (pts.length > 1) { stroke(pts, 46, 'rgba(126,176,84,.62)'); for (const o of [-8, 8]) stroke(pts.map(([x, y]) => [x, y + o]), 5, 'rgba(176,104,70,.55)'); for (let n = 0; n < 400; n++) { const x = RX(), y = RY(); if (x > a && x < b && Math.abs(y - roadY(x)) < 22) { c.strokeStyle = 'rgba(90,140,60,.6)'; c.lineWidth = .8; c.beginPath(); c.moveTo(x, y); c.lineTo(x + 1, y - 3); c.stroke(); } } } } }   // (under the blossom the road is grassy, with two ruts)
+  { const [a, b] = avenidaX(); if (s === 0 && X0 + TILE > a && X0 < b) for (let n = 0; n < 1600; n++) { const x = RX(), y = RY(); if (x < a || x > b) continue; const dy = Math.abs(y - roadY(x)); if (dy < 30 || r() < .3) { c.fillStyle = ['rgba(255,255,250,.9)', 'rgba(244,246,232,.85)', 'rgba(255,255,255,.8)'][n % 3]; c.beginPath(); c.ellipse(x, y, 1.8 + r() * 1.6, 1 + r(), r() * TAU, 0, TAU); c.fill(); } } }   // (the Avenue: a carpet of fallen petals)
   for (let n = 0; n < 140; n++) { const x = RX(), y = RY(); if (Math.abs(y - roadY(x)) < 16 && x > ROAD_X0) { c.fillStyle = r() < .5 ? 'rgba(120,60,40,.4)' : 'rgba(245,220,200,.5)'; c.beginPath(); c.ellipse(x, y, 1.5 + r() * 2, 1 + r(), 0, 0, TAU); c.fill(); } }
 }
 // the things of the road that are not in drawProp: log piles, washing on a line, gravestones, lilacs, milestones
@@ -2106,32 +2109,50 @@ function roadView(g, ox, oy, vw, vh, t, night, list){
   if (game.roadLady) { const s = game.roadLady.s, [x, y, dx] = roadAt(s); if (inV(x, y)) { const b = { look: 'f:blewett', x, y: y + 14, dir: 3, c8: ((Math.round(Math.atan2(-roadAt(s)[3], -dx) / (Math.PI / 4)) + 2) % 8 + 8) % 8, walk: (t * 1.6) % 1, moving: true }; list.push({ y: y + 15, draw: () => drawBuggy(g, b, t) }); } }
   for (const k of Object.keys(PEOPLE)) { const p = PEOPLE[k]; if (p.where !== 'camino' || !inV(p.x, p.y)) continue; if (p.buggy) pushDriven(list, g, p, t); else list.push({ y: p.y, draw: () => drawPerson(g, p, t) }); }
 }
-// the Avenue (the book: «a canopy of snowy fragrant bloom… the sunset sky at the far end like a great rose window at
+// the Avenue, painted like a watercolour of it (the book: «a canopy of snowy fragrant bloom… the sunset sky at the far end like a great rose window at
 // the end of a cathedral aisle»): an arch of blossom over the road, petals falling, the light rosy and golden, and at
 // its end the glow of the sunset
 const avenidaX = () => [roadXOf(ROAD_TRAMOS.find(r => r.kind === 'avenida').s), roadXOf(ROAD_TRAMOS.find(r => r.name === 'Newbridge').s)];
 function roadCanopy(g, ox, oy, vw, vh, t){
   const [a, b] = avenidaX(); if (ox > b + 600 || ox + vw < a - 600) return;
   const bloom = S === 0, inn = x => clamp(Math.min(x - a, b - x) / 400, 0, 1);   // (how deep into the Avenue: the arch thickens)
-  const cx = clamp(ox + vw / 2, a, b), deep = inn(ox + vw / 2);
-  // the glow of the sunset at the far end
-  if (S !== 3) { const ex = b + 80, ey = roadY(b) - 40, gr = g.createRadialGradient(ex, ey, 20, ex, ey, 900); gr.addColorStop(0, 'rgba(255,214,150,.55)'); gr.addColorStop(.35, 'rgba(255,170,150,.22)'); gr.addColorStop(1, 'rgba(255,170,150,0)'); g.fillStyle = gr; g.fillRect(ox, oy, vw, vh); }
-  // the arch: clusters of blossom reaching over the road from both sides, thinner over the middle so the buggy shows
+  const deep = inn(ox + vw / 2), FL = ['#ffffff', '#fbfcf4', '#f4f7ea'], LV = ['#a8d07a', '#86b85a', '#c4e09a'];
   g.save();
-  for (let x = Math.max(a - 200, Math.floor(ox / 22) * 22 - 44); x < Math.min(b + 200, ox + vw + 44); x += 22) {
-    const y = roadY(x), d = inn(x); if (d <= 0) continue;
-    for (let k = 0; k < 6; k++) {
-      const sd = k % 2 ? 1 : -1, reach = rh(x, k) * 70, yy = sd < 0 ? y - 165 + reach - rh(x, k + 9) * 20 : y + 100 - reach * .3, al = (sd < 0 ? .16 + .26 * (1 - reach / 70) : .2) * d;
-      g.globalAlpha = al; ell(g, x + (rh(x, k + 3) - .5) * 20, yy, 18 + rh(x, k + 5) * 16, 11 + rh(x, k + 7) * 8, bloom ? (rh(x, k + 11) < .5 ? '#fff4f7' : '#f6d4e0') : '#6fa24c', false);
-    }
-    if (bloom) { g.globalAlpha = .7 * d; for (let k = 0; k < 4; k++) { const sd = k % 2 ? 1 : -1; ell(g, x + rh(x, k + 20) * 22, sd < 0 ? y - 100 - rh(x, k + 21) * 60 : y + 40 + rh(x, k + 21) * 30, 1.6, 1.6, k % 3 ? '#ffffff' : '#f0a8c0', false); } }
-  }
-  // petals drifting down in the evening air
-  if (bloom && deep > 0) { g.globalAlpha = .85 * deep; for (let i = 0; i < 90; i++) { const sp = 18 + rh(i, 1) * 22, px = ox + ((rh(i, 2) * vw + t * (10 + rh(i, 3) * 14) + Math.sin(t * .9 + i) * 18) % vw + vw) % vw, py = oy + ((rh(i, 4) * vh + t * sp) % vh); ell(g, px, py, 2.2, 1.2, i % 4 ? '#fff6f8' : '#f3b8cc', false, t * 2 + i); } }
-  // the light: rosy, with slanting shafts of gold
+  // the light at the end of the tunnel: a white, misty brightness ahead of the buggy (and the sunset beyond)
   if (S !== 3 && deep > 0) {
-    g.globalAlpha = deep; g.fillStyle = 'rgba(255,196,206,.12)'; g.fillRect(ox, oy, vw, vh);
-    for (let k = 0; k < 5; k++) { const sx = Math.floor((cx - 600) / 260) * 260 + k * 260 + Math.sin(t * .3 + k) * 20, gr = g.createLinearGradient(sx, oy, sx + 160, oy + vh); gr.addColorStop(0, 'rgba(255,226,160,0)'); gr.addColorStop(.5, `rgba(255,226,160,${.10 + .04 * Math.sin(t * .7 + k * 2)})`); gr.addColorStop(1, 'rgba(255,226,160,0)'); g.fillStyle = gr; g.beginPath(); g.moveTo(sx, oy); g.lineTo(sx + 70, oy); g.lineTo(sx + 330, oy + vh); g.lineTo(sx + 200, oy + vh); g.closePath(); g.fill(); }
+    const hx = Math.min(b, ox + vw * .9), hy = roadY(hx) - 130, gr = g.createRadialGradient(hx, hy, 10, hx, hy, Math.max(vw, vh) * .55);
+    gr.addColorStop(0, `rgba(255,255,248,${.9 * deep})`); gr.addColorStop(.25, `rgba(254,252,238,${.6 * deep})`); gr.addColorStop(.6, `rgba(252,250,232,${.2 * deep})`); gr.addColorStop(1, 'rgba(250,246,230,0)'); g.fillStyle = gr; g.fillRect(ox, oy, vw, vh);
+    const ex = b + 80, ey = roadY(b) - 40, gs = g.createRadialGradient(ex, ey, 20, ex, ey, 700); gs.addColorStop(0, 'rgba(255,226,180,.45)'); gs.addColorStop(1, 'rgba(255,226,180,0)'); g.fillStyle = gs; g.fillRect(ox, oy, vw, vh);
+  }
+  // the arch: clusters of blossom and young leaves reaching over the road from both sides, thinner over the middle
+  for (let x = Math.max(a - 200, Math.floor(ox / 18) * 18 - 36); x < Math.min(b + 200, ox + vw + 36); x += 18) {
+    const y = roadY(x), d = inn(x); if (d <= 0) continue;
+    for (let k = 0; k < 7; k++) {
+      const sd = k % 2 ? 1 : -1, reach = rh(x, k) * 70, yy = sd < 0 ? y - 165 + reach - rh(x, k + 9) * 20 : y + 100 - reach * .3, leaf = rh(x, k + 11) < .3;
+      g.globalAlpha = (sd < 0 ? .2 + .3 * (1 - reach / 70) : .22) * d; ell(g, x + (rh(x, k + 3) - .5) * 20, yy, 16 + rh(x, k + 5) * 16, 10 + rh(x, k + 7) * 8, !bloom || leaf ? LV[k % 3] : FL[k % 3], false);
+    }
+    if (bloom) { g.globalAlpha = .85 * d; for (let k = 0; k < 5; k++) { const sd = k % 2 ? 1 : -1; ell(g, x + rh(x, k + 20) * 18, sd < 0 ? y - 100 - rh(x, k + 21) * 60 : y + 40 + rh(x, k + 21) * 30, 1.8, 1.8, '#ffffff', false); } }
+  }
+  // petals drifting down
+  if (bloom && deep > 0) { g.globalAlpha = .9 * deep; for (let i = 0; i < 110; i++) { const sp = 16 + rh(i, 1) * 20, px = ox + ((rh(i, 2) * vw + t * (8 + rh(i, 3) * 12) + Math.sin(t * .9 + i) * 18) % vw + vw) % vw, py = oy + ((rh(i, 4) * vh + t * sp) % vh); ell(g, px, py, 2.2, 1.3, i % 5 ? '#ffffff' : '#f6eef0', false, t * 2 + i); } }
+  // the light: soft, green-white, with slanting shafts
+  if (S !== 3 && deep > 0) {
+    g.globalAlpha = deep; g.fillStyle = 'rgba(250,255,236,.10)'; g.fillRect(ox, oy, vw, vh);
+    const cx = clamp(ox + vw / 2, a, b);
+    for (let k = 0; k < 5; k++) { const sx = Math.floor((cx - 600) / 260) * 260 + k * 260 + Math.sin(t * .3 + k) * 20, gr = g.createLinearGradient(sx, oy, sx + 160, oy + vh); gr.addColorStop(0, 'rgba(255,252,225,0)'); gr.addColorStop(.5, `rgba(255,252,225,${.12 + .05 * Math.sin(t * .7 + k * 2)})`); gr.addColorStop(1, 'rgba(255,252,225,0)'); g.fillStyle = gr; g.beginPath(); g.moveTo(sx, oy); g.lineTo(sx + 70, oy); g.lineTo(sx + 330, oy + vh); g.lineTo(sx + 200, oy + vh); g.closePath(); g.fill(); }
+  }
+  // branches hanging into the picture from its edges, close to us: as if we looked through them
+  if (bloom && deep > 0) {
+    const sc = Math.min(vw, vh) / 520, sw = Math.sin(t * .8) * 3;
+    const BR = [[0, 0, 1, 1, .9], [1, 0, -1, 1, 1], [1, 1, -1, -1, 1.1], [0, 1, 1, -1, .8]];   // (corner, and which way it reaches)
+    for (const [cx0, cy0, dx, dy, k] of BR) {
+      const x0 = ox + cx0 * vw, y0 = oy + cy0 * vh, L = 300 * sc * k, ang = Math.atan2(dy * .55, dx), seg = 10;
+      const pts = Array.from({ length: seg + 1 }, (_, i) => { const u = i / seg; return [x0 + Math.cos(ang) * L * u + Math.sin(u * 3 + cx0) * 14 * sc + sw * u, y0 + Math.sin(ang) * L * u + u * u * 40 * sc * (cy0 ? -1 : 1) * -1]; });
+      g.globalAlpha = .92 * deep; line(g, pts, '#6a4a32', 6 * sc, cx0 * 3 + cy0);
+      for (let i = 1; i <= seg; i++) { const [px, py] = pts[i], n = 9 + (i % 4) - Math.floor(i / 4);
+        for (let m = 0; m < n; m++) { const a2 = rh(i * 7 + m, cx0 + cy0 * 2) * TAU, r2 = (6 + rh(i + m * 3, 5) * 34) * sc * (1.2 - i / seg * .5), fx = px + Math.cos(a2) * r2, fy = py + Math.sin(a2) * r2 * .8;
+          if (m % 3 === 1) ell(g, fx, fy, 9 * sc, 4 * sc, LV[m % 3], false, a2); else { for (let p = 0; p < 5; p++) { const pa = p / 5 * TAU + a2; ell(g, fx + Math.cos(pa) * 4.4 * sc, fy + Math.sin(pa) * 4.4 * sc, 4 * sc, 4 * sc, p % 2 ? '#ffffff' : '#f8faf0', false); } ell(g, fx, fy, 1.8 * sc, 1.8 * sc, '#e0c860', false); } } }
+    }
   }
   g.restore();
 }
