@@ -5,7 +5,7 @@
    that moment, what was given, bought, cooked...), listed with their time on the right.
 
      node tools/trace_goal.js <test number | words of its name> [--out traza.png] [--max 900] [--w 1500]
-     node tools/trace_goal.js --pdf trazas/metas.pdf [numbers or words, comma separated; all if none]
+     node tools/trace_goal.js --pdf trazas/metas.pdf [--par 4] [numbers or words, comma separated; all if none]   (--par: goals run at once)
      node tools/trace_goal.js dia [--season 0..3] [--domingo] --out dia.png   (a whole day, 6:00 to 22:00: everyone's routine of goals)
      node tools/trace_goal.js cap1 --out trazas/cap1.png [--md docs/CAP1.md]   (chapter 1 of the book, simulated: the book's
        agenda against the simulated one, moment by moment; and the long road to Bright River in a strip below the map)
@@ -17,16 +17,18 @@ const path = require('path'), fs = require('fs');
 let pw; try { pw = require('playwright'); } catch (e) { pw = require('/opt/node22/lib/node_modules/playwright'); }
 const argv = process.argv.slice(2), opt = (k, d) => { const i = argv.indexOf('--' + k); return i >= 0 ? argv.splice(i, 2)[1] : d; };
 const season = opt('season', null), sunday = argv.includes('--domingo') ? (argv.splice(argv.indexOf('--domingo'), 1), true) : false;
-const md = opt('md', null), out = opt('out', 'traza.png'), pdf = opt('pdf', null), maxT = +opt('max', 4800), W = +opt('w', 1500), which = argv.join(' ');
+const parN = +opt('par', 4), md = opt('md', null), out = opt('out', 'traza.png'), pdf = opt('pdf', null), maxT = +opt('max', 4800), W = +opt('w', 1500), which = argv.join(' ');
 const exe = process.env.PLAYWRIGHT_CHROMIUM || (fs.existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chromium' : undefined);
 
 (async () => {
   const b = await pw.chromium.launch({ executablePath: exe, args: ['--no-sandbox'] });
-  const pg = await b.newPage({ viewport: { width: 900, height: 640 } }); const errs = []; pg.on('pageerror', e => errs.push(e.message));
-  await pg.addInitScript(() => { localStorage.clear(); localStorage.setItem('avonlea-ai-asked', '1'); });
-  const load = async () => { await pg.goto('file://' + path.resolve(__dirname, '..', 'index.html')); await pg.waitForFunction(() => window.__avonlea); };
+  const errs = [];
+  const newPage = async () => { const p = await b.newPage({ viewport: { width: 900, height: 640 } }); p.on('pageerror', e => errs.push(e.message)); await p.addInitScript(() => { localStorage.clear(); localStorage.setItem('avonlea-ai-asked', '1'); }); return p; };
+  const pg = await newPage();
+  const loadOn = async p => { await p.goto('file://' + path.resolve(__dirname, '..', 'index.html')); await p.waitForFunction(() => window.__avonlea); };
+  const load = () => loadOn(pg);
   await load();
-  const trace = which => pg.evaluate(async ([which, maxT, W, season, sunday]) => {
+  const traceOn = (p, which) => p.evaluate(async ([which, maxT, W, season, sunday]) => {
     const A = window.__avonlea, tests = A.WM_TESTS;
     const cap = which === 'cap1', dia = which === 'dia' || cap, i = cap ? 'cap. 1' : dia ? 'día' : /^\d+$/.test(which) ? +which : tests.findIndex(T => T.text.toLowerCase().includes(which.toLowerCase()));
     if (!dia && !(i >= 0 && tests[i])) return { err: 'no hay una meta de prueba así: ' + which + '\n' + tests.map((T, j) => j + ' ' + T.text).join('\n') };
@@ -147,6 +149,7 @@ const exe = process.env.PLAYWRIGHT_CHROMIUM || (fs.existsSync('/opt/pw-browsers/
     const cmp = cap ? book.map(b => ({ id: b[0], libro: hhmm(b[1]), exacta: !!b[2], quien: b[3], donde: b[4], que: b[5], cita: b[6], sim: bookAt[b[0]] ? hhmm(bookAt[b[0]].h) : null, delta: bookAt[b[0]] ? Math.round((bookAt[b[0]].h - b[1]) * 60) : null })) : null;
     return { cmp, png: F.toDataURL('image/png'), jpg: F.toDataURL('image/jpeg', .8), result, span, test: i, text: T.text, st: ag.st, why: ag.why, who, names: who.map(wmN), marks: marks.length };
   }, [which, maxT, W, season, sunday]);
+  const trace = which => traceOn(pg, which);
   const say = r => console.log(`${r.test}. ${r.text}: ${r.st}${r.why ? ' (' + r.why + ')' : ''} · ${r.who.join(', ')} · ${r.marks} marcas`);
   if (!pdf) {
     const r = await trace(which); if (r.err) { console.error(r.err); process.exit(1); }
@@ -155,7 +158,11 @@ const exe = process.env.PLAYWRIGHT_CHROMIUM || (fs.existsSync('/opt/pw-browsers/
   } else {   // all (or the ones named), each on a fresh page; then one PDF
     const n = await pg.evaluate(() => window.__avonlea.WM_TESTS.length);
     const list = which.trim() ? which.split(',').map(w => w.trim()) : Array.from({ length: n }, (_, j) => String(j)), rs = [];
-    for (const w of list) { await load(); const r = await trace(w); if (r.err) { console.error(r.err.split('\n')[0]); continue; } say(r); rs.push(r); }
+    // several pages at once (--par N, 4 by default): each takes the next goal; the results keep their order
+    const par = Math.max(1, parN), res = new Array(list.length); let next = 0;
+    await Promise.all(Array.from({ length: Math.min(par, list.length) }, async (_, j) => { const p = j ? await newPage() : pg;
+      while (next < list.length) { const k = next++; await loadOn(p); const r = await traceOn(p, list[k]); if (r.err) { console.error(r.err.split('\n')[0]); continue; } say(r); res[k] = r; } }));
+    for (const r of res) if (r) rs.push(r);
     const esc = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;'), when = new Date().toLocaleString('es-CL');
     const html = `<!doctype html><meta charset="utf-8"><style>
       @page { size: 297mm 210mm; margin: 0 } body { margin: 0; font-family: Georgia, serif; color: #4a2f1c }

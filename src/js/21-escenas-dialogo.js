@@ -1,0 +1,452 @@
+/* ---------- the dialogues (Dialogo): every written dialogue is a scene, a capsule that plays when its moment comes,
+   by place and by state, never by the clock. A scene is pure configuration (data, no code): who must be there and
+   where, what must be so, how important it is, what it says, and what it does when it starts and ends. The class
+   reads that configuration; the director (dlgTick) looks at all of them a few times a second and, in each channel,
+   plays the most important one that can be played. New scenes: Dialogo.registrar({...}) or the script (id="guion").
+   The configuration (all optional but `id` and `lineas`; docs/ESCENAS.md has it all with examples):
+     id, canal ('general'), prioridad (1), interrumpe (false), repetir ('una_vez' | 'siempre' | 'dia' | {cada: s}),
+     tipo: 'conversacion' (cut short, it goes on later where it was left, with a bridge line: puente) | 'comentario'
+     (a remark about the moment: cut short, it is lost), al_paso (the buggy at a walk while it is said),
+     sujeta: [who are held still while it is said],
+     quienes: [who speak] and, for the talks of pairs and trios, disparo: 'encuentro' (when they meet),
+     en: {who: scene}, cerca: [who, place, radius], calesa: 'camino' | 'avonlea' | 'cualquiera',
+     camino: {tramo, tramo_v, desde, visible, no_callado}, donde: 'gg' | 'casa' | 'dentro' | 'arroyo',
+     si: ['hecho:x', '!hecho:x', 'dicha:id', 'marca:id', 'capitulo', 'canal_libre:c', 'ana_visible', 'escena_ana:s',
+          'sabe:who:what', 'y_mayor:who:y'], o: [alternatives, each a configuration of these same conditions],
+     lineas: [[who, text], ...] | 'libro:path' | 'relleno:n', elegir: [indices], marcas: {index: mark},
+     al_empezar / al_terminar: [{hecho}, {marca, nota}, {log}, {saber: [who, what]}, {meta: {quien, tipo, args,
+          texto, etiqueta, prioridad}}, {soltar: who}, {ana: {props}}, {fin_capitulo: true}] ---------- */
+const DLG_LUGARES = { lago: () => [LAKE.x, LAKE.y], tejas_verdes: () => [GG.x, GG.y], casa_bell: () => WP.casa_bell, letrero_br: () => DOOR.br, hondonada: () => [LY.x, LY.y + 60] };
+const dlgHechos = () => game.dlgHechos || (game.dlgHechos = {});
+const dlgHecho = (n, v = true) => { dlgHechos()[n] = v; };
+const dlgDichas = () => game.escDone || (game.escDone = {});
+const dlgEscena = k => k === 'ana' ? game.scene : wmScene(k);
+function dlgCtx(){
+  const k = game.road?.with, d = PEOPLE[k], road = game.scene === 'camino' && !!ana.onCart && d?.where === 'camino', M = PEOPLE.matthew;
+  const ride = game.scene === 'out' && M.where === 'out' && ((!!AGENTS.ana?.ride && AGENTS.ana.followOf === 'matthew') || cart.riding);   // (Ana with Matthew in the buggy, in Avonlea)
+  return { road, d, dir: d?.roadDir || 0, tr: road ? roadTramo(d.roadS) : null, ride };
+}
+function dlgCond(s, c){   // one condition of state, written as text
+  if (s[0] === '!') return !dlgCond(s.slice(1), c);
+  const i = s.indexOf(':'), k = i < 0 ? s : s.slice(0, i), rest = i < 0 ? '' : s.slice(i + 1), [a, b] = k === 'sabe' || k === 'y_mayor' ? rest.split(':') : [rest];   // (an id may have ':' in it)
+  switch (k) {
+    case 'hecho': return !!dlgHechos()[a];
+    case 'dicha': return !!dlgDichas()[a];
+    case 'marca': return CAP1.marks[a] != null;
+    case 'capitulo': return CAP1.on && !CAP1.done;
+    case 'canal_libre': return !talkBusy(a);
+    case 'ana_visible': return !ana.hidden;
+    case 'escena_ana': return game.scene === a;
+    case 'sabe': return (game.wm.know[a] || []).includes(b);
+    case 'y_mayor': { const p = wmBody(a); return !!p && p.y > +b * U; }
+  }
+  return false;
+}
+function dlgDonde(at, k){   // where a talk of pairs and trios may happen
+  const sc = wmScene(k), b = wmBody(k); if (!b) return false;
+  if (at === 'gg') return sc === 'gg';
+  if (at === 'dentro') return sc !== 'out' && sc !== 'camino';
+  if (at === 'casa') return sc === 'gg' || (sc === 'out' && dist(b.x, b.y, GG.x, GG.y) < 520);
+  if (at === 'arroyo') return sc === 'out' && brookSegs.some(([p, q]) => segDist(b.x, b.y, p, q) < 300);
+  return true;
+}
+function dlgFalla(c, x){   // why the conditions of place and state of a configuration (or of one of its alternatives) are not met (null: they are)
+  if (c.en) for (const [k, sc] of Object.entries(c.en)) if (dlgEscena(k) !== sc) return `${k} no está en ${sc}`;
+  if (c.cerca) { const [k, l, r] = c.cerca, b = k === 'ana' ? ana : wmBody(k), p = DLG_LUGARES[l]?.(); if (!b || !p || dlgEscena(k) !== 'out' || dist(b.x, b.y, p[0], p[1]) > r) return `${k} no está cerca de ${l}`; }
+  if (c.calesa) { const ok = c.calesa === 'camino' ? x.road : c.calesa === 'avonlea' ? x.ride : x.road || x.ride; if (!ok) return c.calesa === 'avonlea' ? 'Ana no va en la calesa por Avonlea' : 'Ana no va en la calesa por el camino'; }
+  if (c.camino) {
+    const w = c.camino; if (!x.road || x.dir <= 0) return 'no van de vuelta por el camino';
+    if (w.tramo && x.tr.kind !== w.tramo && x.tr.name !== w.tramo) return 'no es el tramo ' + w.tramo;
+    if (w.tramo_v != null && x.tr.v !== w.tramo_v) return 'no es el tramo ' + w.tramo_v;
+    if (w.desde != null && x.d.roadS < w.desde) return 'todavía no llegan al tramo (' + Math.round(w.desde * 100) + '% del camino)';
+    if (w.visible && !roadTagOk(w.visible, ana.x)) return 'no se ve ' + w.visible;
+    if (w.no_callado && x.tr.quiet) return 'tramo de silencio';
+  }
+  if (c.donde && !dlgDonde(c.donde, c.quienes?.[0] || 'ana')) return 'no están en ' + c.donde;
+  for (const s of [].concat(c.si || [])) if (!dlgCond(s, x)) return 'falta ' + s;
+  if (c.o) { const r = c.o.map(alt => dlgFalla(alt, x)); if (!r.includes(null)) return r.join(' / '); }
+  return null;
+}
+const dlgCumple = (c, x) => !dlgFalla(c, x);
+function dlgHacer(list){   // what a scene does when it starts or ends
+  for (const a of list || []) {
+    if (a.hecho) dlgHecho(a.hecho);
+    if (a.marca) cap1Mark(a.marca, a.nota);
+    if (a.log) logEv(a.log, []);
+    if (a.saber) { const [k, f] = a.saber; game.wm.know[k] = [...new Set([...(game.wm.know[k] || []), f])]; }
+    if (a.meta) { const m = a.meta; agentStart(m.quien, { ...G[m.tipo](m.quien, ...(m.args || [])), ...(m.texto ? { text: m.texto } : {}) }, { label: m.etiqueta || m.texto, prio: m.prioridad }); }
+    if (a.soltar && FOLKBY[a.soltar]) FOLKBY[a.soltar].talkT = TT + 1;
+    if (a.ana) Object.assign(ana, a.ana);
+    if (a.fin_capitulo) { CAP1.done = hourNow(); logEv('Fin del capítulo 1 (y del 2): Ana llegó a Tejas Verdes.', []); }
+  }
+}
+const dlgPath = p => p.split('.').reduce((o, k) => o?.[k], LIBRO1);
+// where the lines of a scene come from: 'libro:path' (LIBRO1), 'mas:n' (Ana's own on the road), 'relleno:n' (her loose musings)
+function dlgFuente(s){ const i = s.indexOf(':'), k = s.slice(0, i), p = s.slice(i + 1); return k === 'libro' ? dlgPath(p) || [] : k === 'mas' ? VIAJE_MAS[+p] || [] : k === 'relleno' ? fillLines(+p || 1).map(l => [l.q, l.t]) : []; }
+// what is said to pick up a conversation that was cut short (by who speaks next), unless the scene has its own `puente`
+const DLG_PUENTE = {
+  ana: ['Bueno, como le decía…', '¿Dónde iba? ¡Ah, sí!', 'Perdón, me distraje. Le estaba contando…', 'Pero volviendo a lo de antes…', 'Ya sé, ya sé, me fui por las ramas. ¿En qué estaba? Ah, sí…'],
+  matthew: ['Bueno, pues… como decía…', 'Je. ¿En qué íbamos?'],
+  otro: ['Como decía…', 'Bueno, lo que le contaba…'],
+};
+const dlgProg = () => game.dlgProg || (game.dlgProg = {});   // (where each conversation cut short was left)
+const ROAD_PASO = .7;
+const DLG_RESPIRO = 60, dlgComento = {};   // (a remark, at most one a minute in each channel: they go between the conversations)   // (the buggy at a walk, while something that matters is said)
+class Dialogo {
+  constructor(c){ Object.assign(this, { canal: 'general', tipo: 'conversacion', prioridad: 1, interrumpe: false, repetir: 'una_vez', pausa: 1.4 }, c); }
+  dicha(){ const v = dlgDichas()[this.id]; return this.repetir === 'una_vez' ? !!v : this.repetir === 'dia' ? v === today() : false; }
+  // (a conversation left halfway goes on before a new one of the same importance)
+  get peso(){ return this.prioridad + (dlgProg()[this.id] ? .04 : 0); }
+  listo(x){
+    if (this.disparo === 'encuentro') return false;   // (these only when two of them meet: dlgNext)
+    if (this.dicha() || (this.repetir.cada && TT < (this.proxima || 0))) return false;
+    if (this.tipo === 'comentario' && this.prioridad > 0 && TT < (dlgComento[this.canal] || 0)) return false;   // (remarks, not one after another)
+    return dlgCumple(this, x);
+  }
+  porque(x){   // why it is not said now (for the panel)
+    if (this.disparo === 'encuentro') return 'cuando se encuentran';
+    if (this.dicha()) return 'ya dicha';
+    if (this.repetir.cada && TT < (this.proxima || 0)) return 'otra vez en ' + Math.ceil(this.proxima - TT) + ' s';
+    if (this.tipo === 'comentario' && this.prioridad > 0 && TT < (dlgComento[this.canal] || 0)) return 'hace poco hubo un comentario';
+    return dlgFalla(this, x);
+  }
+  lineas(){
+    let L = this.lineas_;
+    if (typeof L === 'string') L = dlgFuente(L);
+    else if (Array.isArray(L) && L.length && !Array.isArray(L[0]) && (L[0].de || L[0].lineas)) L = L.flatMap(p => { const src = p.de ? dlgFuente(p.de) : p.lineas; return p.elegir ? p.elegir.map(i => src[i]).filter(Boolean) : src; });   // (pieces of several sources)
+    L = (L || []).map(l => Array.isArray(l) ? l : [l.q, l.t, l.m]);
+    if (this.elegir) L = this.elegir.map(i => L[i]).filter(Boolean);
+    if (this.marcas) L = L.map((l, j) => this.marcas[j] ? [l[0], l[1], this.marcas[j]] : l);
+    return L.filter(l => l[1] && l[1] !== '…');
+  }
+  puenteDe(l){   // the line that picks it up again
+    if (this.puente === false) return [];
+    if (Array.isArray(this.puente)) return this.puente.map(p => Array.isArray(p) ? p : [l[0], p]);
+    return [[l[0], pick(DLG_PUENTE[l[0]] || DLG_PUENTE.otro)]];
+  }
+  decir(){
+    const D = dlgDichas(), P = dlgProg(), p = P[this.id] || 0; if (this.repetir === 'una_vez') D[this.id] = true; else if (this.repetir === 'dia') D[this.id] = today();
+    if (this.repetir.cada) this.proxima = TT + this.repetir.cada;
+    if (this.tipo === 'comentario') dlgComento[this.canal] = TT + DLG_RESPIRO;
+    const L = this.lineas(); if (p >= L.length) delete P[this.id]; if (!L.length || p >= L.length) return null;
+    if (!p) dlgHacer(this.al_empezar);
+    const pu = p ? this.puenteDe(L[p]) : [], k = pu.length;
+    const t = talkPlay([...pu, ...L.slice(p)], { ch: this.canal, hold: this.sujeta, delay: this.espera ?? .6, end: () => {
+      dlgPausa[this.canal] = TT + this.pausa;
+      if (t.interrupted) {   // cut short: a comment is lost; a conversation is left where it was (the line cut in its first half is said again)
+        const n = t.i - k, next = n < 0 ? p : p + n + (t.wait > lineDur(t.lines[t.i]?.t || '') / 2 ? 0 : 1);
+        if (this.tipo !== 'comentario' && next < L.length) { if (next) P[this.id] = next; delete D[this.id]; return; }
+      }
+      delete P[this.id]; dlgHacer(this.al_terminar);
+    } });
+    t.prio = this.prioridad; t.esc = this.id; t.paso = this.al_paso; t.desde = p; t.puente = k; return t;
+  }
+}
+const DIALOGOS = [], dlgPausa = {};
+// (the configurations keep their lines under `lineas`; the class reads them through lineas())
+const dlgNuevo = c => { const { lineas, ...r } = c; return new Dialogo({ ...r, lineas_: lineas }); };
+Dialogo.registrar = c => { const d = dlgNuevo(c); DIALOGOS.push(d); return d; };
+let dlgT = 0;
+function dlgTick(dt){
+  if ((dlgT -= dt) > 0) return; dlgT = .3;
+  const x = dlgCtx(), best = {};
+  for (const d of DIALOGOS) if (d.listo(x) && (!best[d.canal] || d.peso > best[d.canal].peso)) best[d.canal] = d;
+  for (const [ch, d] of Object.entries(best)) {
+    const cur = TALKS.find(t => t.ch === ch);
+    if (cur) { if (!(d.interrumpe && d.prioridad > (cur.prio ?? 0)) || cur.lines.length - cur.i <= 2) continue; cur.interrupted = true; talkEnd(cur); }   // (a more important one cuts in: the tunnel of trees; but what is about to end ends first)
+    else if (TT < (dlgPausa[ch] || 0)) continue;
+    d.decir();
+  }
+}
+// the talks of pairs and trios: when two (or three) of them meet, the next one not said that fits where they are
+function dlgNext(ks){
+  const key = dlgKey(ks), x = dlgCtx();
+  const d = DIALOGOS.find(e => e.disparo === 'encuentro' && dlgKey(e.quienes) === key && !e.dicha() && dlgCumple(e, x)); if (!d) return null;
+  dlgDichas()[d.id] = true; return d.lineas().map(([q, t]) => ({ q, t }));
+}
+// the scenes, as a script outside the code (the <script type="text/plain" id="guion"> block, at the top): each one
+// «=== id ===», its fields, one per line («field: value»), and its own lines after «---» («who: text #mark»).
+// dlgGuion turns it into the same configurations as anywhere else (docs/ESCENAS.md).
+const DLG_LISTA = ['sujeta', 'quienes', 'si', 'elegir', 'cerca'], DLG_PARES = ['en', 'marcas', 'camino'], DLG_NUM = ['prioridad', 'pausa', 'espera'], DLG_SI = ['interrumpe', 'al_paso'];
+const dlgVal = s => { s = s.trim(); return s === '-' ? null : s === 'true' || s === 'sí' ? true : s === 'false' || s === 'no' ? false : s !== '' && !isNaN(+s) ? +s : s; };
+function dlgCampo(k, v){   // a field of the script, from its text
+  if (DLG_LISTA.includes(k)) return v.split(',').map(dlgVal);
+  if (DLG_PARES.includes(k)) return Object.fromEntries(v.split(/[,\s]+/).filter(Boolean).map(p => { const i = p.indexOf('='); return i < 0 ? [p, true] : [p.slice(0, i), dlgVal(p.slice(i + 1))]; }));
+  if (DLG_NUM.includes(k)) return +v;
+  if (DLG_SI.includes(k)) return v === '' || dlgVal(v) === true;
+  if (k === 'repetir') { const m = v.match(/^cada\s+(\d+)/); return m ? { cada: +m[1] } : v; }
+  if (k === 'o') { const a = {}; for (const p of v.split(/\s+/).filter(Boolean)) { const i = p.indexOf('='), [f, g] = p.slice(0, i).split('.'), w = p.slice(i + 1); if (g) (a[f] ||= {})[g] = dlgVal(w); else a[f] = dlgCampo(f, w); } return a; }
+  return v;
+}
+function dlgAccion(s){   // an action of the script: «hecho x», «marca id | nota», «log texto», «saber quien qué», «soltar quien», «ana campo=valor», «meta quien tipo args | texto | etiqueta | prioridad», «fin_capitulo»
+  const [w, ...r] = s.split(' '), rest = r.join(' '), part = rest.split('|').map(x => x.trim());
+  switch (w) {
+    case 'hecho': return { hecho: rest };
+    case 'marca': return { marca: part[0], nota: part[1] || undefined };
+    case 'log': return { log: rest };
+    case 'saber': return { saber: r };
+    case 'soltar': return { soltar: rest };
+    case 'ana': return { ana: dlgCampo('en', rest) };
+    case 'fin_capitulo': return { fin_capitulo: true };
+    case 'meta': { const [quien, tipo, args = ''] = part[0].split(/\s+/); return { meta: { quien, tipo, args: args ? args.split(',').map(dlgVal) : [], texto: part[1] || undefined, etiqueta: part[2] || undefined, prioridad: part[3] ? +part[3] : undefined } }; }
+  }
+  throw new Error('guion: acción desconocida «' + s + '»');
+}
+function dlgGuion(txt){
+  const out = []; let c = null, body = false;
+  for (const raw of txt.split('\n')) {
+    const s = raw.trim(); if (!s || s[0] === '#') continue;
+    const h = s.match(/^===\s*(.+?)\s*===$/); if (h) { out.push(c = { id: h[1], _l: [] }); body = false; continue; }
+    if (!c) continue;
+    if (s === '---') { body = true; continue; }
+    const i = s.indexOf(':'), k = i < 0 ? s : s.slice(0, i).trim(), v = i < 0 ? '' : s.slice(i + 1).trim();
+    if (body) { const m = v.match(/^(.*?)\s+#(\S+)$/); c._l.push(m ? [k, m[1], m[2]] : [k, v]); continue; }
+    if (k === 'al_empezar' || k === 'al_terminar') (c[k] ||= []).push(dlgAccion(v));
+    else if (k === 'o') (c.o ||= []).push(dlgCampo('o', v));
+    else c[k] = dlgCampo(k, v);
+  }
+  return out.map(({ _l, lineas, ...c }) => {   // the lines: from the book (all, or a piece: «libro:x [1,2]»), and/or its own
+    const ref = lineas && lineas.split('+').map(r => { const m = r.trim().match(/^(\S+)(?:\s*\[([\d,\s]+)\])?$/); return { de: m[1], ...(m[2] ? { elegir: m[2].split(',').map(Number) } : {}) }; });
+    return { ...c, lineas: ref ? [...ref, ...(_l.length ? [{ lineas: _l }] : [])] : _l };
+  });
+}
+const ESCENAS = dlgGuion(document.getElementById('guion')?.textContent || '');
+for (const c of ESCENAS) Dialogo.registrar(c);
+// the talk of the road, as self-contained scenes: each one a whole topic, with its beginning and its end (they can
+// be said in any order, unless one says it needs another: «si»). Pieces: L<stretch>:<lines> are the book's lines of
+// that stretch (LIBRO1.viaje), M<stretch>:<lines> Ana's own (VIAJE_MAS). Where: a thing in sight (visible), or the
+// stretch where the book has it (from there on). The moments of the chapter (key) come in their order; they and the
+// ones that must not be missed (imprescindible) are said with the buggy at a walk. Ana's own are remarks (comentario).
+const VIAJE_ESCENAS = [
+  // the book
+  ['novia', 'La novia del cerezo', 'L0:0-5', { visible: 'flores', key: 1, marcas: { 0: 'rama_ciruelo' } }],
+  ['mi_cerezo', 'Mi cerezo', 'L0:6-8', { visible: 'cerezo' }],
+  ['barrancos', 'Un río de flores', 'L0:9-10', { visible: 'barranco' }],
+  ['vestido_blanco', 'El vestido blanco y las mangas abullonadas', 'L1:0,1,8-11', { si: ['dicha:novia'] }],
+  ['la_carreta', 'La señora de la carreta', 'L1:2-3', { visible: 'carreta' }],
+  ['wincey', 'El vestido de wincey', 'L1:4-7', {}],
+  ['tren_barco', 'El tren y el barco', 'L2:0-6', {}],
+  ['abetos', 'Abetos balsámicos', 'L2:7-10', { visible: 'abetos' }],
+  ['isla_florida', 'La isla más florida', 'L3:0-3', { visible: 'flores' }],
+  ['caminos_rojos', 'Los caminos rojos', 'L3:4-9 L4:0-1', { imprescindible: 1 }],
+  ['el_golfo', 'El golfo', 'L4:2-3', { visible: 'mar' }],
+  ['hablo_demasiado', '¿Hablo demasiado?', 'L4:4-10', { key: 1, marcas: { 2: 'hablar_todo' } }],
+  ['arboles_orfanato', 'Los arbolitos del orfanato', 'L5:0-6', { imprescindible: 1 }],
+  ['el_arroyo', 'Un arroyo cerca de Tejas Verdes', 'L5:7-10', {}],
+  ['sra_hammond', 'La señora Hammond y los mellizos', 'L6:0-7', { visible: 'aserradero' }],
+  ['amiga_imaginaria', 'La amiga del aparador', 'L6:8-9', {}],
+  ['nabos', 'Los nabos', 'L7:0-3', { visible: 'granjero' }],
+  ['marilla', '¿Cómo es su hermana?', 'L7:4-7', { imprescindible: 1 }],
+  ['la_yegua', 'La yegua sin nombre', 'L7:8-10', {}],
+  ['casita_lilas', 'La casita con lilas', 'L8:0-2', { visible: 'lilas' }],
+  ['el_velero', 'La nube velero', 'L8:3-6', {}],
+  ['la_iglesia', 'La iglesia blanca', 'L8:7-10', { visible: 'iglesia' }],
+  ['pelo_rojo', 'El pelo rojo', 'L9:0-8', { key: 1, marcas: { 0: 'pelo_rojo' } }],
+  ['divinamente', '¿Divinamente hermoso o angelicalmente bueno?', 'L9:9-10 L10:0-4', { si: ['dicha:pelo_rojo'] }],
+  ['cielo_rosado', 'El cielo se ruboriza', 'L10:5-6', { visible: 'curva' }],
+  // Ana's own
+  ['m_barranco', 'Un pasillo de castillo', 'M0:0-2', { visible: 'barranco' }],
+  ['m_abedules', 'Damas de honor', 'M0:3-4', { visible: 'barranco' }],
+  ['m_rama', 'La rama de ciruelo', 'M0:5-7', { visible: 'flores', si: ['dicha:novia'] }],
+  ['m_manzanos', 'Nombres para los manzanos', 'M1:3,7', { visible: 'flores' }],
+  ['m_granjas', 'Las granjas no son celosas', 'M1:4-6', { tramo: 1 }],
+  ['m_sombra', 'La sombra de los abetos', 'M2:0', { visible: 'abetos' }],
+  ['m_olor', 'Un frasco de bosque', 'M2:1-3', { visible: 'abetos' }],
+  ['m_sono_bosque', 'El bosque soñado', 'M2:4', { visible: 'abetos' }],
+  ['m_zorzal', 'El zorzal', 'M2:5-7', { visible: 'abetos' }],
+  ['m_hondonada', 'Un tazón de nieve', 'M3:0-2', { visible: 'flores' }],
+  ['m_primaveras', 'Sesenta primaveras', 'M3:3-7', { tramo: 3 }],
+  ['m_todo_el_mundo', 'Todo el mundo de la isla', 'M4:0', { visible: 'mar' }],
+  ['m_mar_azul', 'El mar se peina', 'M4:1-2', { visible: 'mar' }],
+  ['m_arena', 'Arena de dos colores', 'M4:3-5', { visible: 'mar' }],
+  ['m_juguetes', 'Graneros de juguete', 'M4:6-7', { tramo: 4 }],
+  ['m_arces', 'Los arces viejos', 'M5:0', { tramo: 5 }],
+  ['m_abejas', 'Las abejas virtuosas', 'M5:1-3', { tramo: 5 }],
+  ['m_arroyito', 'Todo está conectado', 'M5:4-7', { tramo: 5 }],
+  ['m_madera', 'Madera recién cortada', 'M6:0-1', { visible: 'aserradero' }],
+  ['m_cuentos', 'Cuentos para los mellizos', 'M6:2-5', { visible: 'aserradero', si: ['dicha:sra_hammond'] }],
+  ['m_rueda', 'La rueda del aserradero', 'M6:6-7', { visible: 'aserradero' }],
+  ['m_sembrador', 'Semillas de esperanza', 'M7:0', { visible: 'granjero' }],
+  ['m_vacas', 'Lo que piensan las vacas', 'M7:1-5', { visible: 'vacas' }],
+  ['m_cercas', 'Costuras de campo', 'M7:6-7', { tramo: 7 }],
+  ['m_cementerio', 'Un jardín para descansar', 'M8:0', { visible: 'iglesia' }],
+  ['m_lilas', 'A Marilla le gustan las lilas', 'M8:1-4', { visible: 'lilas' }],
+  ['m_domingos', 'Un sombrero para los domingos', 'M8:5-7', { visible: 'iglesia' }],
+  ['m_sauces', 'Los sauces', 'M9:0', { visible: 'sauces' }],
+  ['m_puentecito', 'Un tambor chiquito', 'M9:1-2', { visible: 'sauces' }],
+  ['m_luz', 'La luz dorada', 'M9:3-7', { tramo: 9 }],
+  ['m_vestido_baile', 'Un vestido de baile', 'M10:0', { tramo: 10 }],
+  ['m_falta_mucho', '¿Falta mucho?', 'M10:1-3', { tramo: 10 }],
+  ['m_vuelta', 'Las vueltas del camino', 'M10:4-7', { visible: 'curva' }],
+];
+// (from the short notation to the configuration of a Dialogo: the same as any other scene)
+{ const piezas = p => p.split(' ').map(t => { const [, src, v, ls] = t.match(/^([LM])(\d+):(.+)$/); const idx = ls.split(',').flatMap(r => { const [a, b] = r.split('-').map(Number); return b == null ? [a] : Array.from({ length: b - a + 1 }, (_, i) => a + i); }); return { de: (src === 'L' ? 'libro:viaje.' : 'mas:') + v, elegir: idx }; });
+  const base = { canal: 'viaje', calesa: 'camino' };
+  const keys = VIAJE_ESCENAS.filter(e => e[3].key).map(e => e[0]);
+  VIAJE_ESCENAS.forEach(([id, nombre, p, o], order) => {
+    const book = p.startsWith('L'), v = +p.match(/^[LM](\d+)/)[1], tr = ROAD_TRAMOS.find(t => t.v === v), ki = keys.indexOf(id);
+    const si = [...(o.si || []).map(c => c.replace(/^dicha:/, 'dicha:viaje:')), ...(ki > 0 ? ['dicha:viaje:' + keys[ki - 1]] : [])];
+    const camino = o.visible ? { no_callado: true, visible: o.visible } : o.tramo != null ? { no_callado: true, tramo_v: o.tramo } : { no_callado: true, desde: tr ? tr.s : 0 };
+    const prioridad = o.key ? (o.visible ? 3.65 : 3.55) : o.visible ? (book ? 3.5 : 2.2) : book ? (o.imprescindible ? 2.5 : 2) - order / 1000 : 1 - order / 1000;
+    Dialogo.registrar({ ...base, id: 'viaje:' + id, nombre, prioridad, tipo: book ? 'conversacion' : 'comentario', al_paso: !!(o.key || o.imprescindible), interrumpe: !!(book && o.visible && !o.key), camino, si, lineas: piezas(p), marcas: o.marcas });
+  });
+}
+// the talks of pairs and trios (DLG_BANK), as scenes too: when they meet, where it makes sense
+for (const [key, list] of Object.entries(DLG_BANK)) list.forEach((blk, i) => Dialogo.registrar({ id: 'par:' + key + ':' + i, disparo: 'encuentro', quienes: key.split('+'), donde: Array.isArray(blk) ? undefined : blk.at, lineas: Array.isArray(blk) ? blk : blk.l }));
+// the school: rows of desks, the master's desk, the blackboard, the stove, the windows over the river
+function drawSchool(c, t, night){
+  c.fillStyle = '#b98a58'; c.fillRect(0, 0, KIT.w, KIT.h);
+  c.strokeStyle = 'rgba(110,70,40,.35)'; c.lineWidth = 1; for (let y = 2.4 * T; y < KIT.h; y += 14) { c.beginPath(); c.moveTo(0, y); c.lineTo(KIT.w, y); c.stroke(); }
+  blob(c, [[0, 0], [KIT.w, 0], [KIT.w, 2.4 * T], [0, 2.4 * T]], '#e4dcbf'); c.fillStyle = '#7a5536'; c.fillRect(0, 2.4 * T - 5, KIT.w, 5);
+  blob(c, [[3.6 * T, 14], [9.4 * T, 14], [9.4 * T, 56], [3.6 * T, 56]], '#2f3a34'); c.fillStyle = 'rgba(240,240,230,.75)'; c.font = '8px Georgia, serif'; c.textAlign = 'left'; c.fillText(SCHOOL_BOARD[seasonCount() % SCHOOL_BOARD.length], 3.9 * T, 34);
+  for (const wx of [1.2 * T, 11.6 * T]) { blob(c, [[wx - 18, 14], [wx + 18, 14], [wx + 18, 50], [wx - 18, 50]], night > .3 ? '#3b4a72' : '#bfe0ea'); line(c, [[wx, 14], [wx, 50]], '#7a5536', 2.4, wx); }
+}
+const SCHOOL_DESKS = []; for (let r = 0; r < 3; r++) for (let k = 0; k < 4; k++) SCHOOL_DESKS.push({ x: 2.6 * T + k * 2.6 * T, y: 4.6 * T + r * 1.5 * T });
+const SCHOOL_BOARD = ['Lección de hoy: la isla del Príncipe Eduardo', 'Ortografía: «imaginación», «Avonlea»', 'Geometría: el triángulo', 'Historia: los primeros colonos'];
+const drawDesk = (c, d) => { blob(c, [[d.x - 22, d.y - 16], [d.x + 22, d.y - 16], [d.x + 22, d.y - 8], [d.x - 22, d.y - 8]], '#8a6040'); c.fillStyle = '#6a4a30'; c.fillRect(d.x - 20, d.y - 8, 3, 8); c.fillRect(d.x + 17, d.y - 8, 3, 8); };
+ROOMS.es = HOUSES.es.interior = {
+  draw: drawSchool, place: 'en la escuela de Avonlea, entre los pupitres, junto al río', exitLabel: 'Salir',
+  items: g => [...SCHOOL_DESKS.map(d => ({ y: d.y, draw: () => drawDesk(g, d) })), { y: 3.2 * T, draw: () => { blob(g, [[6.5 * T - 30, 3.2 * T - 18], [6.5 * T + 30, 3.2 * T - 18], [6.5 * T + 30, 3.2 * T], [6.5 * T - 30, 3.2 * T]], '#7a5536'); } }],
+  blocked: (x, y) => SCHOOL_DESKS.some(d => Math.abs(x - d.x) < 24 && y > d.y - 18 && y < d.y + 2) || (Math.abs(x - 6.5 * T) < 32 && y > 3.2 * T - 20 && y < 3.2 * T + 2),
+  glow: () => [6.5 * T, 3 * T, 170, '255,200,120', .35],
+  actions: add => {
+    const d = SCHOOL_DESKS[5]; add('pupitre', d.x, d.y + 10, 40, ana.sit ? 'Levantarse' : 'Sentarse en su pupitre', () => { if (ana.sit) { ana.sit = false; return; } ana.sit = true; ana.x = d.x; ana.y = d.y + 8; ana.dir = 0; logEv('Ana se sentó en su pupitre de la escuela.'); anaSays(pick(SCHOOL_LINES)); }, { pri: 4, hy: 18, hit: 30 });
+    add('pizarra', 6.5 * T, 2.6 * T, 60, 'Mirar la pizarra', () => anaSays(pick(BOARD_LINES)), { pri: 6, hy: 30, hit: 50 });
+  },
+};
+const SCHOOL_LINES = ['Mi pupitre, junto a la ventana... desde aquí se ve el río donde dejamos las botellas de leche.', 'Aquí fue donde le rompí la pizarra en la cabeza a Gilbert Blythe. ¡Me llamó «Zanahoria»! Todavía no se lo perdono... bueno, casi.', 'Diana y yo nos pasamos papelitos cuando el maestro no mira. Es una forma muy respetable de la amistad.'];
+const BOARD_LINES = ['La pizarra está llena de números. Los números no tienen imaginación, pobrecitos.', '¡Mi nombre escrito en la pizarra, por portarme mal! Pero con «a» al final, como debe ser: Ana.'];
+// the church: pews on both sides of the aisle, the pulpit, the tall windows
+function drawChurch(c, t, night){
+  c.fillStyle = '#c9a476'; c.fillRect(0, 0, KIT.w, KIT.h);
+  blob(c, [[0, 0], [KIT.w, 0], [KIT.w, 2.4 * T], [0, 2.4 * T]], '#f1ead8'); c.fillStyle = '#7a5536'; c.fillRect(0, 2.4 * T - 5, KIT.w, 5);
+  blob(c, [[5.9 * T, KIT.h], [7.1 * T, KIT.h], [7.1 * T, 2.4 * T], [5.9 * T, 2.4 * T]], '#a8443a', false);
+  for (const wx of [2 * T, 4 * T, 9 * T, 11 * T]) { blob(c, [[wx - 12, 60], [wx + 12, 60], [wx + 12, 22], [wx, 12], [wx - 12, 22]], night > .3 ? '#3b4a72' : ['#bfe0ea', '#f5d58a', '#e8b4c0', '#bfe0ea'][Math.floor(wx / T) % 4]); line(c, [[wx, 14], [wx, 60]], '#7a5536', 1.6, wx); }
+  blob(c, [[6.5 * T - 18, 2.4 * T + 20], [6.5 * T + 18, 2.4 * T + 20], [6.5 * T + 14, 2.4 * T - 6], [6.5 * T - 14, 2.4 * T - 6]], '#7a5536');
+}
+const PEWS = []; for (let r = 0; r < 4; r++) for (const sx of [3 * T, 10 * T]) PEWS.push({ x: sx, y: 4.2 * T + r * 1.2 * T });
+const drawPew = (c, p) => { blob(c, [[p.x - 64, p.y - 14], [p.x + 64, p.y - 14], [p.x + 64, p.y - 4], [p.x - 64, p.y - 4]], '#7a5536'); blob(c, [[p.x - 64, p.y - 24], [p.x + 64, p.y - 24], [p.x + 64, p.y - 14], [p.x - 64, p.y - 14]], '#6a4a30'); };
+// the hall: a stage with its curtain at the back, rows of benches, garlands of flowers when it has been decorated
+const SALA = { stage: { x: 6.5 * T, y: 3.3 * T }, benches: [0, 1, 2].flatMap(r => [3.4 * T, 9.6 * T].map(x => ({ x, y: 5.4 * T + r * 1.1 * T }))) };
+function drawSala(c, t, night){
+  c.fillStyle = '#b8905e'; c.fillRect(0, 0, KIT.w, KIT.h);
+  c.strokeStyle = 'rgba(110,70,40,.3)'; c.lineWidth = 1; for (let y = 2.4 * T; y < KIT.h; y += 14) { c.beginPath(); c.moveTo(0, y); c.lineTo(KIT.w, y); c.stroke(); }
+  blob(c, [[0, 0], [KIT.w, 0], [KIT.w, 2.4 * T], [0, 2.4 * T]], '#e8dcc0');
+  const s = SALA.stage; blob(c, [[s.x - 4.2 * T, s.y + 14], [s.x + 4.2 * T, s.y + 14], [s.x + 4.2 * T, s.y - 30], [s.x - 4.2 * T, s.y - 30]], '#8a5e3c'); blob(c, [[s.x - 4.2 * T, s.y + 14], [s.x + 4.2 * T, s.y + 14], [s.x + 4.2 * T, s.y + 22], [s.x - 4.2 * T, s.y + 22]], '#6a4428');   // (the stage, a step up)
+  for (const sd of [-1, 1]) blob(c, [[s.x + sd * 4.2 * T, 4], [s.x + sd * 2.6 * T, 4], [s.x + sd * 3 * T, s.y - 30], [s.x + sd * 4.2 * T, s.y - 30]], '#a8303a');   // (the red curtain, drawn back)
+  blob(c, [[s.x - 4.2 * T, 2], [s.x + 4.2 * T, 2], [s.x + 4.2 * T, 14], [s.x - 4.2 * T, 14]], '#8a2030');
+  for (const wx of [1.2 * T, KIT.w - 1.2 * T]) blob(c, [[wx - 14, 58], [wx + 14, 58], [wx + 14, 18], [wx - 14, 18]], night > .3 ? '#3b4a72' : '#bfe0ea');
+  if (realR.fact('sala_decorada')) for (let k = 0; k < 14; k++) { const x = .6 * T + k * (KIT.w - 1.2 * T) / 13, y = 24 + Math.sin(k * .9) * 6; line(c, [[x, y], [x + (KIT.w - 1.2 * T) / 13, 24 + Math.sin((k + 1) * .9) * 6]], '#5a8a3a', 2, k); ell(c, x, y, 4, 4, ['#f2c14e', '#e88ab0', '#f6f2f0', '#b48ad0'][k % 4], true); }   // (garlands of flowers)
+  c.fillStyle = '#4a2f1c'; c.font = 'italic 9px Georgia, serif'; c.textAlign = 'center'; c.fillText('Salón del pueblo de Avonlea', s.x, s.y - 34);
+}
+const drawBench = (c, p) => { blob(c, [[p.x - 70, p.y - 12], [p.x + 70, p.y - 12], [p.x + 70, p.y - 4], [p.x - 70, p.y - 4]], '#7a5536'); for (const o of [-60, 60]) line(c, [[p.x + o, p.y - 4], [p.x + o, p.y + 2]], '#5a3a24', 2, o); };
+ROOMS.sa = HOUSES.sa.interior = {
+  draw: drawSala, place: 'en el salón del pueblo, con su escenario y sus bancos', exitLabel: 'Salir',
+  items: g => SALA.benches.map(p => ({ y: p.y, draw: () => drawBench(g, p) })),
+  blocked: (x, y) => (y < SALA.stage.y + 14 && Math.abs(x - SALA.stage.x) > 4.2 * T) || SALA.benches.some(p => Math.abs(x - p.x) < 72 && y > p.y - 14 && y < p.y),
+  glow: () => [SALA.stage.x, SALA.stage.y - 10, 200, '255,210,140', .3],
+  actions: add => { add('escenario', SALA.stage.x, SALA.stage.y, 80, 'Subir al escenario', () => { ana.goto = { x: SALA.stage.x, y: SALA.stage.y, scene: 'sa' }; anaSays(pick(['Desde aquí arriba el salón parece enorme. ¡Cuánta gente cabría!', '«Señoras y señores…» ¡Ay, qué nervios, y eso que no hay nadie!'])); }, { pri: 5 }); },
+};
+ROOMS.ig = HOUSES.ig.interior = {
+  draw: drawChurch, place: 'en la iglesia de Avonlea, entre los bancos', exitLabel: 'Salir',
+  items: g => PEWS.map(p => ({ y: p.y, draw: () => drawPew(g, p) })),
+  blocked: (x, y) => PEWS.some(p => Math.abs(x - p.x) < 66 && y > p.y - 26 && y < p.y + 2) || (Math.abs(x - 6.5 * T) < 22 && y < 2.4 * T + 22),
+  glow: () => [6.5 * T, 2.6 * T, 180, '255,210,140', .35],
+  actions: add => {
+    const p = PEWS[2]; add('banco', p.x, p.y + 8, 70, ana.sit ? 'Levantarse' : 'Sentarse en un banco', () => { if (ana.sit) { ana.sit = false; return; } ana.sit = true; ana.x = p.x; ana.y = p.y + 4; ana.dir = 0; logEv('Ana se sentó un rato en la iglesia.'); anaSays(pick(CHURCH_LINES)); }, { pri: 4, hy: 18, hit: 50 });
+  },
+};
+
+// the shop: the counter with its scale and jars of sweets, shelves of jars and bolts of cloth behind, barrels of flour
+const SHOP_IN = { counter: { x: 6.5 * T, y: 3.7 * T, w: 7 * T }, barrels: [{ x: 1.3 * T, y: 6.6 * T }, { x: 2.3 * T, y: 7.1 * T }, { x: 11.6 * T, y: 6.8 * T }] };
+function drawShop(c, t, night){
+  c.fillStyle = '#b48a5c'; c.fillRect(0, 0, KIT.w, KIT.h);
+  c.strokeStyle = 'rgba(110,70,40,.3)'; c.lineWidth = 1; for (let y = 2.4 * T; y < KIT.h; y += 14) { c.beginPath(); c.moveTo(0, y); c.lineTo(KIT.w, y); c.stroke(); }
+  blob(c, [[0, 0], [KIT.w, 0], [KIT.w, 2.4 * T], [0, 2.4 * T]], '#d8c49a'); c.fillStyle = '#7a5536'; c.fillRect(0, 2.4 * T - 5, KIT.w, 5);
+  // shelves along the back wall, full of things
+  const JAR = ['#d9433b', '#f2c94c', '#7fb07a', '#e8a0b8', '#8fbfd2', '#c89050'];
+  for (let r = 0; r < 3; r++) { const y = 18 + r * 20; c.fillStyle = '#6a4a30'; c.fillRect(1.4 * T, y + 12, KIT.w - 2.8 * T, 3);
+    for (let k = 0; k < 18; k++) { const x = 1.6 * T + k * ((KIT.w - 3.2 * T) / 18); if ((k + r) % 5 === 4) { blob(c, [[x, y + 12], [x + 10, y + 12], [x + 10, y], [x, y]], ['#a8443a', '#4a6a9a', '#e8d6b0'][(k + r) % 3]); continue; } ell(c, x + 5, y + 6, 4, 6, JAR[(k * 3 + r) % JAR.length], true); blob(c, [[x + 2, y], [x + 8, y], [x + 8, y - 2], [x + 2, y - 2]], '#8a6a48'); } }
+  // a window on the side, a sign over the shelves
+  blob(c, [[KIT.w - 1.1 * T, 16], [KIT.w - .3 * T, 16], [KIT.w - .3 * T, 56], [KIT.w - 1.1 * T, 56]], night > .3 ? '#3b4a72' : '#bfe0ea');
+  c.fillStyle = '#4a2f1c'; c.font = 'italic 9px Georgia, serif'; c.textAlign = 'center'; c.fillText('LAWSON · Mercería y almacén', KIT.w / 2, 12);
+}
+function drawCounter(c){
+  const C = SHOP_IN.counter, x0 = C.x - C.w / 2, x1 = C.x + C.w / 2, y = C.y;
+  blob(c, [[x0, y - 26], [x1, y - 26], [x1, y], [x0, y]], '#8a6040'); blob(c, [[x0 - 4, y - 30], [x1 + 4, y - 30], [x1 + 4, y - 24], [x0 - 4, y - 24]], '#a87850');
+  for (let k = 0; k < 3; k++) { const jx = x0 + 30 + k * 26; ell(c, jx, y - 40, 9, 11, 'rgba(230,240,245,.55)', true); for (let q = 0; q < 6; q++) ell(c, jx - 4 + (q % 3) * 4, y - 36 - Math.floor(q / 3) * 5, 2, 2, ['#f4f4f4', '#7fd0a0', '#f08aa0'][k], true); }
+  const sx = x1 - 50; line(c, [[sx, y - 30], [sx, y - 48]], '#8a7040', 1.6, 1); line(c, [[sx - 16, y - 46], [sx + 16, y - 46]], '#8a7040', 1.4, 2); ell(c, sx - 16, y - 40, 8, 2.4, '#c8a040', true); ell(c, sx + 16, y - 40, 8, 2.4, '#c8a040', true);
+  for (let k = 0; k < 4; k++) line(c, [[C.x - 30 + k * 8, y - 30], [C.x - 34 + k * 8, y - 50 - (k % 2) * 6]], ['#d9433b', '#4a6a9a', '#f2c94c', '#e8a0b8'][k], 2.4, k);   // (ribbons on a stand)
+}
+const drawBarrel = (c, b) => { ell(c, b.x, b.y, 16, 5, 'rgba(30,20,10,.25)'); blob(c, [[b.x - 14, b.y], [b.x + 14, b.y], [b.x + 15, b.y - 30], [b.x - 15, b.y - 30]], '#9a6a3e'); ell(c, b.x, b.y - 30, 15, 5, '#f2ede2', true); for (const dy of [-8, -22]) line(c, [[b.x - 15, b.y + dy], [b.x + 15, b.y + dy]], '#5a3a24', 1.4, dy); };
+ROOMS.tl = HOUSES.tl.interior = {
+  draw: drawShop, place: 'en la tienda de Lawson, frente al mostrador', exitLabel: 'Salir',
+  items: g => [{ y: SHOP_IN.counter.y, draw: () => drawCounter(g) }, ...SHOP_IN.barrels.map(b => ({ y: b.y, draw: () => drawBarrel(g, b) }))],
+  blocked: (x, y) => (Math.abs(x - SHOP_IN.counter.x) < SHOP_IN.counter.w / 2 + 4 && y > SHOP_IN.counter.y - 34 && y < SHOP_IN.counter.y + 2) || SHOP_IN.barrels.some(b => Math.abs(x - b.x) < 18 && y > b.y - 12 && y < b.y + 4),
+  glow: () => [6.5 * T, 2.8 * T, 170, '255,200,120', .35],
+  actions: add => {
+    add('mostrador', SHOP_IN.counter.x - 60, SHOP_IN.counter.y + 10, 70, 'Comprar o vender en el mostrador', shopMenu, { pri: 3, hy: 20, hit: 40 });
+    add('frascos', SHOP_IN.counter.x - 140, SHOP_IN.counter.y + 8, 40, 'Mirar los frascos de caramelos', () => anaSays(pick(SHOP_LINES)), { pri: 6, hy: 40, hit: 30 });
+  },
+};
+const SHOP_LINES = ['¡Caramelos de menta, de limón y de rosa! Si yo fuera rica, me compraría uno de cada color solo para mirarlos.', 'Huele a canela, a jabón y a papel de envolver. Las tiendas tienen un olor a promesas.', 'Esas cintas... la azul quedaría preciosa con mi pelo. Bueno, con mi pelo nada queda precioso, pero la azul quedaría menos mal.'];
+// money: dollars and cents (only the cattle dealer pays in money)
+const money = (n, short) => { n = r2(n || 0); return short ? n.toFixed(2).replace('.', ',') : n < 1 ? Math.round(n * 100) + ' centavos' : (n === 1 ? '1 dólar' : (Number.isInteger(n) ? n : n.toFixed(2).replace('.', ',')) + ' dólares'); };
+// the Cuthberts' account book at Lawson's: what the house needs is written down, Marilla pays at the end of the month
+function libretaAdd(who, x){
+  const L = game.libreta = game.libreta || []; L.push({ x, who, d: today() + 1 }); if (L.length > 30) L.shift();
+  logEv(`${wmName(who)} se llevó ${LIBRETA_ART[x]} de la tienda de Lawson, a la libreta de los Cuthbert.`); save();
+}
+const libretaToday = () => (game.libreta || []).filter(e => e.d === today() + 1 && e.who === 'ana').length;
+// at Mr. Lawson's (his counter, or himself): two steps — what kind of errand, then what
+function shopMenu(step){
+  const L = FOLKBY.lawson, open = HOUSES.tl.open(), here = L && L.where !== 'in' && game.scene === L.where && dist(ana.x, ana.y, L.x, L.y) < 140;
+  if (!open) return say('lawson', 'Ya cerré, Ana. Abro mañana a las ocho en punto, como siempre.', [['Adiós', close]]);
+  if (!here && game.scene !== 'tl') return say('lawson', 'Pasa, pasa, que el mostrador está adentro.', [['Adiós', close]]);
+  const I = game.inv, back = ['← Volver', () => shopMenu()];
+  if (step === 'cambiar') {
+    const opts = [];
+    for (const c of Object.keys(TREATS)) { const o = tradeFor(I, c)[0]; if (o) opts.push([`${ITEM_DEFS[c].gift.art[0].toUpperCase() + ITEM_DEFS[c].gift.art.slice(1)}, por ${itemText(o.g, o.k)}`, () => shopTrade(c, o)]); }
+    const has = Object.keys(TRADE).filter(g => I[g] > 0).map(g => itemText(g, I[g])).join(', ');
+    return say('lawson', opts.length ? `Veamos qué traes: ${has}. ¿Qué te gustaría llevarte?` : has ? `Con ${has} todavía no alcanza para un capricho, Ana. Junta un poco más.` : 'No traes nada para cambiar. Huevos, fruta, una tarta de las tuyas... todo me sirve.', [...opts, back]);
+  }
+  if (step === 'libreta') {
+    if (libretaToday() >= 2) return say('lawson', 'Ya llevas dos cosas anotadas hoy, Ana. Marilla me lo agradecerá si paramos aquí.', [back]);
+    return say('lawson', '¿Qué hace falta en Tejas Verdes? Lo anoto en la libreta de los Cuthbert.', [...LIBRETA.map(x => [LIBRETA_ART[x][0].toUpperCase() + LIBRETA_ART[x].slice(1), () => shopLibreta(x)]), back]);
+  }
+  const opts = [['🧺 Cambiar algo que traigo por un capricho', () => shopMenu('cambiar')], ['📒 Llevar algo para la casa (a la libreta)', () => shopMenu('libreta')], ['📬 ¿Hay correo para mí?', correoRetirar]];
+  if (L) opts.push(['Conversar con el Sr. Lawson', () => { close(); folkTalk(L); }]);
+  opts.push(['Adiós', close]);
+  say('lawson', pick(['¡Buenos días, Ana! ¿Qué se te ofrece?', 'Pasa, pasa. ¿Vienes a cambiar algo o te manda Marilla?', 'Llegaron cintas nuevas, Ana. ¿Qué se te ofrece?']), opts);
+}
+function shopTrade(c, o){
+  const I = game.inv; I[o.g] -= o.k; I[c] = (I[c] || 0) + 1;
+  logEv(`Ana cambió ${itemText(o.g, o.k)} por ${ITEM_DEFS[c].gift.art} en la tienda de Lawson.`); float('+' + itemText(c, 1), ana.x, ana.y - 60); sfx.happy(); save(); close();
+  bubbles = [{ q: 'f:lawson', text: pick(['Trato hecho. ¡Que lo disfrutes!', 'Buen cambio, niña. Tus cosas tienen fama.', 'Te lo envuelvo en papel de estraza.']), t: 0, dur: 3 }];
+  setTimeout(() => shopMenu('cambiar'), 700);
+}
+function shopLibreta(x){
+  game.inv[x] = (game.inv[x] || 0) + 1; libretaAdd('ana', x); float('+' + itemText(x, 1), ana.x, ana.y - 60); sfx.happy(); close();
+  bubbles = [{ q: 'f:lawson', text: 'Anotado en la libreta. Saludos a Marilla.', t: 0, dur: 3 }];
+  setTimeout(() => shopMenu('libreta'), 700);
+}
+const CHURCH_LINES = ['Cuando rezo de verdad, me gusta imaginar que estoy en un gran bosque, mirando el cielo... aquí también se puede, si una se esfuerza.', 'La primera vez que vine me puse flores en el sombrero. ¡La Sra. Lynde casi se desmaya!', 'Qué silencio tan bonito. Hasta mis pensamientos andan de puntillas.'];
+const MILK_LINES = ['Las botellas de leche de la escuela, enfriándose en el río hasta la hora del almuerzo. Cada una tiene el nombre de su dueño... ¡la mía no la confundiría nunca!', 'El agua del río es tan fría que la leche sale como si viniera de una cueva encantada.'];
+const STATION_LINES = ['Aquí mismo esperé a Matthew, sentada en estas tablas, con mi bolsa de viaje. Me había imaginado que si no venía me subiría a un cerezo a dormir bajo la luna.', 'Qué raro volver aquí... el día que llegué no sabía que existía Tejas Verdes. Ahora no sabría vivir sin ella.', 'El jefe de estación me dijo que esperara adentro, ¡pero aquí afuera había mucho más lugar para la imaginación!'];
+const RAIL_LINES = ['Las vías se van y se van... ¿no da gusto pensar adónde llegan? Aunque ahora yo ya llegué a donde quería.', 'Cuando pasa el tren tiembla todo, como si el mundo entero tuviera prisa. A mí me gusta más la carreta de Matthew.'];
+ROOMS.ga = {
+  parent: 'gg', exitAt: [STAIRS.x, STAIRS.y + 14], exitLabel: 'Bajar a la cocina',
+  draw: drawAnaRoom, items: (g, t) => [{ y: GA.bed.y, draw: () => drawAnaBed(g) }, { y: GA.table.y, draw: () => drawAnaTable(g, t) }, { y: GA.wash.y, draw: () => drawAnaWash(g) }],
+  blocked: (x, y) => (Math.abs(x - GA.bed.x) < 76 && y > GA.bed.y - 30 && y < GA.bed.y + 4) || (Math.abs(x - GA.table.x) < 30 && y > GA.table.y - 24 && y < GA.table.y + 4) || (Math.abs(x - GA.wash.x) < 26 && y > GA.wash.y - 26 && y < GA.wash.y + 4),
+  glow: () => [GA.table.x, GA.table.y - 40, 150, '255,190,110', .38], place: 'en su cuarto del alero este de Tejas Verdes, con la ventana donde está el cerezo Reina de las Nieves',
+  actions: add => {
+    add('bed', GA.bed.x - 20, GA.bed.y + 14, 60, 'Dormir en mi cama', goToBed, { hy: 30, hit: 0, pri: 2, test: (x, y) => Math.abs(x - GA.bed.x) < 76 && y > GA.bed.y - 62 && y < GA.bed.y + 6 });
+    add('gwin', GA.win, 3.9 * T, 70, 'Mirar por la ventana', () => anaSays(WINDOW_LINES[S]), { hy: 40, hit: 0, pri: 3, test: (x, y) => Math.abs(x - GA.win) < 46 && y < 62 });
+    add('mirror', GA.table.x, GA.table.y + 26, 56, 'Mirarse en el espejo', () => anaSays(pick(MIRROR_LINES)), { hy: 40, hit: 0, pri: 3, test: (x, y) => Math.abs(x - GA.table.x) < 18 && y < 56 });
+  },
+};
+
+// the kitchen has the stairs up to her room
+HOUSES.gg.interior.draw = (c, t, night) => { drawKitchen(c, t, night); drawStairsUp(c); };
+{ const b0 = HOUSES.gg.interior.blocked; HOUSES.gg.interior.blocked = (x, y) => b0(x, y) || (x > 11.1 * T && y < 4.5 * T); }
+{ const a0 = HOUSES.gg.interior.actions; HOUSES.gg.interior.actions = add => { a0(add); add('stairs', STAIRS.x, STAIRS.y, 44, 'Subir a la pieza de Ana', () => goIn('ga', [KDOOR.x, KIT.h - 28]), { hy: 40, hit: 0, pri: 1, test: (x, y) => x > 11.1 * T && x < 12.9 * T && y > 2.2 * T && y < 4.7 * T }); }; }

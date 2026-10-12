@@ -1,0 +1,238 @@
+/* ---------- focus and wandering attention: nobody in Avonlea goes about an errand like a messenger. On the way to a task
+   one may stop to look at what one likes (the lake, the flowers, an animal), or to talk with whoever one meets; how
+   often and how long depends on the character (enfoque: 0 all over the place … 1 straight there; social: how much
+   they like a chat; atrae: what catches their eye) and on how pressing the errand is (a deadline: hardly at all;
+   something asked of them: less). Then they go on with what they were doing. ---------- */
+const FOCO = {   // [enfoque, social, what catches the eye]
+  ana: [.3, .8, ['lago', 'flores', 'arboles', 'mar', 'animales']], diana: [.6, .8, ['flores', 'lago']], matthew: [.7, .1, ['animales', 'campo']],
+  marilla: [.9, .4, []], barry: [.9, .3, []], lynde: [.4, 1, ['gente']], harrison: [.7, .3, ['animales']], shearer: [.8, .4, ['animales']],
+  lawson: [.9, .5, []], gilbert: [.8, .5, ['ana']], sraallan: [.6, .7, ['flores', 'arboles']], peg: [.5, .2, ['campo']],
+};
+const focoOf = k => { const f = FOCO[k] || (FOLKBY[k]?.kid ? [.5, .7, ['animales', 'lago']] : [.7, .5, []]); return { enfoque: f[0], social: f[1], atrae: f[2] }; };
+let WM_DISTRACT = true;
+// how fast each one walks (an old farmer is not a girl of eleven), and how the errand changes it: with a deadline they
+// hurry (Ana runs to school), something asked of them goes a little brisker, and the dreamy ones dawdle on their own errands
+const PACE = { ana: 46, diana: 44, gilbert: 46, matthew: 36, marilla: 38, barry: 38, lynde: 40, harrison: 36, shearer: 40, lawson: 38, sraallan: 40, peg: 38 };
+function wmPace(ag){
+  const k = ag.who, base = PACE[k] || (FOLKBY[k]?.kid ? 46 : CH[k]?.speed?.walk || 38), u = urgency(ag);
+  const m = u > .9 ? 1.5 : u > .4 ? 1.1 : focoOf(k).enfoque < .5 ? .8 : 1;
+  return base * m * (Object.values(ANIM).some(a => a.state === 'led' && (a.ledBy || 'ana') === k) ? .85 : 1);
+}
+const paceText = ag => { const u = urgency(ag); return u > .9 ? 'con prisa' : u < .4 && focoOf(ag.who).enfoque < .5 ? 'sin apuro' : ''; };
+const qOf = k => k === 'ana' ? 'ana' : PEOPLE[k] ? k : 'f:' + k;
+const isKid = k => k === 'ana' || k === 'diana' || !!FOLKBY[k]?.kid;
+const CHAT_HOLD = {};   // (those of the routines kept a moment by a chat: who → until)
+let CHATS = [];
+const urgency = ag => { const p = Math.max(0, ...activeGoals(ag).map(g => g.prio || 1)); return p >= 3 ? .95 : p === 2 ? .45 : 0; };
+function sayB(q, text){ bubbles = bubbles.filter(x => x.q !== q); bubbles.push({ q, text, t: 0, dur: lineDur(text) }); }
+const FAUNA_NAME = { cat: 'un gato', cow: 'una vaca', duck: 'los patos', gull: 'las gaviotas', hen: 'las gallinas', horse: 'un caballo', pig: 'un cerdo', sheep: 'una oveja' };
+// what there is to look at around someone (out of doors)
+function stimuli(b){
+  const L = [], add = (id, kind, x, y, name) => L.push({ id, kind, x, y, name });
+  if (inLake(b.x, b.y, 110)) add('lago', 'lago', LAKE.x, LAKE.y, 'el Lago de las Aguas Brillantes');
+  if (S < 2) LUPINS.forEach((l, i) => { if (((b.x - l.x) / (l.rx + 60)) ** 2 + ((b.y - l.y) / (l.ry + 60)) ** 2 < 1) add('lup' + i, 'flores', l.x, l.y, 'las flores'); });
+  if (S === 0) { const t = treesNear(b.x, b.y).find(t => t.kind === 'blossom' && dist(t.x, t.y, b.x, b.y) < 70); if (t) add('tr' + Math.round(t.x / 200) + ',' + Math.round(t.y / 200), 'arboles', t.x, t.y, 'los árboles en flor'); }
+  if (dist(b.x, b.y, PLACES.playa[1], PLACES.playa[2]) < 260 || dist(b.x, b.y, FARO.x, FARO.y) < 360) add('mar', 'mar', b.x, b.y + 200, 'el mar');
+  const a = FAUNA.find(a => !a.fly && dist(a.x, a.y, b.x, b.y) < 80); if (a) add('fa' + FAUNA.indexOf(a), 'animales', a.x, a.y, FAUNA_NAME[a.kind] || 'un animal');
+  for (const [k, c] of Object.entries(ANIM)) if (c.kind === 'cow' && c.where === 'out' && dist(c.x, c.y, b.x, b.y) < 80) add('cow' + k, 'animales', c.x, c.y, ANIMALS[k].name);
+  const f = FIELDS.findIndex(f => b.x > f.x - 20 && b.x < f.x + f.w + 20 && b.y > f.y - 20 && b.y < f.y + f.h + 20); if (f >= 0) add('campo' + f, 'campo', FIELDS[f].x + FIELDS[f].w / 2, FIELDS[f].y + FIELDS[f].h / 2, 'el campo');
+  return L;
+}
+const LOOK_TEXT = { lago: s => 'se quedó mirando ' + s.name, flores: () => 'se detuvo a mirar las flores', arboles: () => 'se quedó mirando los árboles en flor', mar: () => 'se quedó mirando el mar', animales: s => 'se detuvo a mirar ' + s.name, campo: () => 'se detuvo a ver cómo va el campo' };
+const LOOK_LINES = {
+  ana: { lago: ['¡El Lago de las Aguas Brillantes! Podría quedarme aquí la vida entera.', 'El agua tiene hoy un color de perla... ¿o de ópalo?'], flores: ['¡Qué flores! Parecen pensamientos de alguien muy feliz.', 'Si yo fuera flor, querría ser una de estas.'], arboles: ['Los cerezos en flor parecen novias vestidas de blanco.', '¡La Blanca Senda de las Delicias, otra vez!'], mar: ['El mar... ¿qué habrá del otro lado?', 'Cuando sea grande voy a cruzar el mar. O a escribir sobre él.'], animales: ['¡Hola, pequeño! ¿Cómo te llamas? Yo te diré Lord Fitzgerald.', '¿Qué pensarán los animales de nosotros?'], campo: ['Todo crece tan callado... como un secreto.'] },
+  matthew: { animales: ['Buen animal, sí... buen animal.', 'Ejem... tranquila, tranquila.'], campo: ['Hmm. Va bien la avena. Sí... va bien.'] },
+  diana: { flores: ['¡Ay, qué lindas! Le llevaré unas a mamá.'], lago: ['Ana diría algo precioso de este lago...'] },
+  _: { lago: ['¡Qué lindo está el lago hoy!'], flores: ['Qué bonitas las flores este año.'], arboles: ['Mire nada más esos árboles.'], mar: ['Qué brisa trae el mar.'], animales: ['Mira tú...'], campo: ['Buena tierra, esta.'] },
+};
+// on the way to a task: something to look at, or someone to talk with?
+function distractCheck(ag){
+  if (!WM_DISTRACT || ag.hold || ag.followOf || TT < (ag.calmUntil || 0) || TT < (ag.nextCheck || 0)) return false;
+  ag.nextCheck = TT + .5;
+  const who = ag.who, b = wmBody(who); if (!b || !b.moving) return false;
+  const F = focoOf(who), urg = urgency(ag), seen = ag.seenStim || (ag.seenStim = {});
+  if (chatTry(ag, F, urg)) return true;
+  if (wmScene(who) !== 'out') return false;
+  const goal = ag.task && taskPoint(ag, ag.task).q;
+  for (const s of stimuli(b)) {
+    if (goal && dist(s.x, s.y, goal[0], goal[1]) < 160) continue;   // (what the errand is about is no distraction)
+    if (seen[s.id] > TT || seen[s.kind] > TT) continue; seen[s.id] = TT + 150; seen[s.kind] = TT + 60;   // (and not the same kind of thing over and over)   // (each thing once on the way: passing it again later, maybe)
+    if (Math.random() < (1 - F.enfoque) * (F.atrae.includes(s.kind) ? 1 : .12) * (1 - urg)) { startLook(ag, s, F, urg); return true; }
+  }
+  return false;
+}
+function startLook(ag, s, F, urg){
+  const b = wmBody(ag.who), dur = (4 + 14 * (1 - F.enfoque) * (.5 + Math.random())) * (1 - urg * .7);
+  wmRelease(ag.who); b.moving = false; b.dir = s.x < b.x ? 3 : 1;
+  ag.distract = { kind: s.kind, text: LOOK_TEXT[s.kind](s), until: TT + dur };
+  agentLog(ag, '💭 ' + ag.distract.text + ' (' + Math.round(dur) + ' s)');
+  const L = (LOOK_LINES[ag.who] || LOOK_LINES._)[s.kind] || (ag.who === 'ana' ? null : LOOK_LINES._[s.kind]);
+  if (L && Math.random() < .8) sayB(qOf(ag.who), pick(L));
+}
+// while distracted the task waits; then on with it
+function distractTick(ag){
+  const d = ag.distract; if (!d) return false;
+  if (d.chat ? CHATS.includes(d.chat) : TT < d.until) { const b = wmBody(ag.who); b.moving = false; if (ag.who === 'ana' && ana.goto?.wm) ana.goto = null; return true; }
+  ag.distract = null; ag.calmUntil = TT + 15 + 30 * focoOf(ag.who).enfoque;
+  agentLog(ag, '↩ sigue' + (ag.task ? ' con: ' + stepText(ag.task.a) : ' con lo suyo'));
+  return false;
+}
+const inChat = k => CHATS.some(c => c.parts.includes(k)) || FOLKBY[k]?.talkT > TT || !!amb.cur?.parts?.includes(k) || !!enc.cur?.parts?.includes(k) || (k === 'ana' && (!!game.talk || !!enc.cur || !!amb.cur)) || !!AGENTS[k]?.distract;
+function chatTry(ag, F, urg){
+  const me = ag.who, b = wmBody(me), sc = wmScene(me), pc = ag.pairCool || (ag.pairCool = {});
+  if (writtenTalkOn() && (me === 'ana' || AGENTS.ana?.followOf === me)) return false;   // (who travel together talk by the written lines)
+  for (const o of ['ana', ...Object.keys(PEOPLE), ...FOLK.map(f => f.id)]) {
+    if (o === me || (o === 'ana' && writtenTalkOn()) || wmScene(o) !== sc || (ag.task && JSON.stringify(ag.task.a).includes(`"${o}"`))) continue;   // (not whoever the errand is with: that talk is the errand)
+    const ob = wmBody(o); if (!ob || ob.lie || dist(b.x, b.y, ob.x, ob.y) > 64 || pc[o] > TT || inChat(o)) continue;
+    pc[o] = TT + 180;
+    const anaFree = o === 'ana' && !(wmDriven('ana') && !AGENTS.ana.paused), G = focoOf(o), r = relGetW(me, o), oag = AGENTS[o];
+    let p = (F.social * .6 + G.social * .4) * (F.atrae.includes(o) || F.atrae.includes('gente') ? 1.5 : 1) * (1 - urg) * (r >= 4 ? 1.3 : r <= 0 ? .3 : 1);
+    if (oag && activeGoals(oag).length) p *= 1 - urgency(oag);
+    if (Math.random() >= p) continue;
+    startChat(me, o, anaFree); return true;
+  }
+  return false;
+}
+function startChat(a, b, anaFree){
+  const third = Object.keys(DLG_BANK).length && [...Object.keys(PEOPLE), ...FOLK.map(f => f.id)].find(o => o !== a && o !== b && wmScene(o) === wmScene(a) && !inChat(o) && DLG_BANK[dlgKey([a, b, o])] && dist(wmBody(o).x, wmBody(o).y, wmBody(a).x, wmBody(a).y) < 120);
+  const bank = (third && dlgNext([a, b, third])) || dlgNext([a, b]);
+  const c = { parts: [a, b], lines: bank || chatLines(a, b, anaFree), i: -1, wait: .2, anaFree }; CHATS.push(c);
+  for (const [p, o] of [[a, b], [b, a]]) {
+    const body = wmBody(p);
+    if (p === 'ana' && anaFree) continue;   // (Ana, when the player has her: not held)
+    body.moving = false; body.dir = wmBody(o).x < body.x ? 3 : 1;
+    const ag = AGENTS[p];
+    if (ag && activeGoals(ag).length) { wmRelease(p); ag.distract = { kind: 'charla', chat: c, text: 'conversa con ' + wmName(o) }; agentLog(ag, '💬 se detuvo a conversar con ' + wmName(o)); }
+    else if (FOLKBY[p]) { FOLKBY[p].talkT = TT + 1e6; FOLKBY[p].route = []; }
+    else if (PEOPLE[p]) CHAT_HOLD[p] = TT + 1e6;
+  }
+}
+function chatEnd(c){
+  CHATS = CHATS.filter(x => x !== c);
+  for (const p of c.parts) { if (FOLKBY[p]?.talkT > TT + 1000) FOLKBY[p].talkT = TT + 1; delete CHAT_HOLD[p]; }
+  if (c.i >= 1) logEv(`${wmName(c.parts[0])} y ${wmName(c.parts[1])} conversaron un rato${wmScene(c.parts[0]) === 'out' ? ' en el camino' : ''}.`, []);
+}
+function chatTick(dt){
+  for (const c of CHATS.slice()) {
+    const [a, b] = c.parts.map(wmBody);
+    if (!a || !b || wmScene(c.parts[0]) !== wmScene(c.parts[1]) || dist(a.x, a.y, b.x, b.y) > (c.anaFree ? 200 : 140)) { chatEnd(c); continue; }
+    if ((c.wait -= dt) > 0) continue;
+    if (++c.i >= c.lines.length) { chatEnd(c); continue; }
+    const l = c.lines[c.i]; sayB(qOf(l.q), l.t); c.wait = lineDur(l.t) + .35;
+  }
+}
+// what they say (no generative AI: a greeting, a few lines as the characters are, and a goodbye that mentions the errand)
+const LYNDE_CHISME = ['¿Supo que a los Pye se les escapó otra vez el cerdo? Yo siempre lo dije.', '¡Esa niña de los Cuthbert! Pelirroja y con una lengua... aunque buen corazón tiene, eso sí.', 'Dicen que la maestra nueva usa sombrero con plumas. ¡Plumas, en una escuela!', 'Yo no soy de las que hablan, pero el loro del Sr. Harrison dice cada cosa...', 'Matthew Cuthbert fue a la tienda y salió con un rastrillo. ¡En pleno invierno!'];
+const CHISME_RE = ['¡No me diga!', '¿De veras? ¡Qué cosa!', 'Bueno, yo de eso no sé nada...', 'Ya me lo imaginaba.'];
+const ANA_DIANA = [['¡Diana, amiga del alma! Tengo tanto que contarte.', '¡Ana! Yo también. ¿Nos vemos en el Bosque Encantado?'], ['¿Viste qué color tiene hoy el lago? Como de perla.', 'Yo solo vi que estaba azul... pero tú lo dices más bonito.'], ['Prometamos ser amigas mientras el sol y la luna existan.', '¡Lo prometo, Ana!']];
+const ANA_SUENA = [['¿No le parece que hoy el mundo está recién hecho?', 'Esta niña... qué cosas dice.'], ['Vi una nube con forma de barco. Iba hacia Charlottetown.', 'Ya lo creo, Ana. Ya lo creo.']];
+function chatLines(a, b, anaFree){
+  const L = [], say = (q, t) => L.push({ q, t }), h = hourNow(), hi = h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches';
+  const tu = isKid(a) && isKid(b), nm = k => /^[a-zá-ú]/.test(wmName(k)) ? '' : wmName(k), A = nm(a), B = nm(b), to = n => n ? ', ' + n : '';   // ("un vecino" is no name to call someone by)
+  if (anaFree) {   // (Ana, as the player moves her, passing by: a word to her)
+    const d = FOLKBY[a]?.def;
+    say(a, a === 'gilbert' && d ? pick(d.lines) : pick([`¡${hi}, Ana!`, '¡Hola, Ana! ¿A dónde vas tan apurada?', '¡Ana Shirley! Saludos a Marilla.']));
+    if (relGetW('ana', a) <= 0) say('ana', pick(FOLKBY[a]?.def.ana || ['Hmpf.']));
+    return L;
+  }
+  const ana_ = a === 'ana' ? a : b === 'ana' ? b : null, other = ana_ && (a === 'ana' ? b : a);
+  if (ana_ && relGetW('ana', other) <= 0) { say(other, FOLKBY[other]?.def.lines ? pick(FOLKBY[other].def.lines) : `${hi}, Ana.`); say('ana', pick(FOLKBY[other]?.def.ana || ['Hmpf.'])); return L; }
+  if (a === 'matthew' || b === 'matthew') {   // (Matthew: a greeting, and off he goes)
+    const o = a === 'matthew' ? b : a;
+    say(o, `¡${hi}, Matthew!`); say('matthew', pick(['Eh... b-buenas.', 'Buenas... sí... buen día, ¿no?', 'Ejem... buenas.']));
+    if (focoOf(o).social > .7) say(o, pick(['¡Qué raro verlo por aquí! ¿Cómo anda todo?', '¿Y Marilla? ¿Bien?']));
+    say('matthew', pick(['Bueno... tengo que seguir, ¿sabe? Sí... eso.', 'Pues... sí... tengo un encargo. Hasta luego.'])); return L;
+  }
+  say(a, `¡${hi}${to(B)}!`); say(b, tu ? pick([`¡Hola${to(A)}! ¿A dónde vas?`, `¡Hola${to(A)}!`]) : pick([`¡${hi}${to(A)}! ¿Cómo están todos en casa?`, `¡Qué gusto verle${to(A)}!`]));
+  const rounds = 1 + Math.round((1 - Math.max(focoOf(a).enfoque, focoOf(b).enfoque)) * 3);
+  for (let k = 0; k < rounds; k++) {
+    if (a === 'lynde' || b === 'lynde') { const o = a === 'lynde' ? b : a; say('lynde', pick(LYNDE_CHISME)); say(o, pick(CHISME_RE)); }
+    else if (ana_ && other === 'diana') { const [x, y] = ANA_DIANA[(k + Math.floor(TT)) % ANA_DIANA.length]; say('ana', x); say('diana', y); }
+    else if (ana_) { const [x, y] = pick(ANA_SUENA); say('ana', x); say(other, y); }
+    else { const [x, y] = pick(PAIR_LINES[tu ? 'kids' : 'big']); say(a, x); say(b, y); }
+  }
+  const t = AGENTS[a]?.task || AGENTS[b]?.task, who = AGENTS[a]?.task ? a : b;
+  say(who, t ? `Bueno, me voy, que tengo que ${stepText(t.a)}.` : pick(['Bueno, ¡que le vaya bien!', 'Me voy, que se hace tarde.']));
+  return L;
+}
+
+// --- moving a body to a place key: Ana by her own walking (A*, by the roads), the others by theirs
+function wmTarget(who, key){
+  // where to walk now (and in which scene) to reach 'key'
+  if (key === 'pieza') return { room: 'ga', door: DOOR.gg };
+  if (key === 'cocina' || key.startsWith('h:')) { const room = key === 'cocina' ? 'gg' : key.slice(2); return { room, door: DOOR[room] }; }
+  const q = keyPoint(key); if (!q) return null;
+  const tb = key.startsWith('p:') ? wmBody(key.slice(2)) : null, tscene = key.startsWith('p:') ? wmScene(key.slice(2)) : 'out';
+  if (tscene === 'camino') return { road: wmBody(key.slice(2)).roadS };
+  if (tscene && tscene !== 'out') return tscene === 'gg' ? { room: 'gg', door: DOOR.gg, at: tb ? [tb.x, tb.y] : null } : HOUSES[tscene] ? { room: tscene, door: DOOR[tscene], at: tb ? [tb.x, tb.y + (tb.bed ? 34 : 0)] : null } : null;   // (inside: up to them; to someone in bed, to the bedside)
+  return { out: q };
+}
+function wmMove(who, key, dt){
+  const T = wmTarget(who, key); if (!T) return 'fail';
+  const b = wmBody(who), sc = wmScene(who), near = key.startsWith('p:') ? 40 : 46;
+  if (T.room === 'br' && who === 'matthew') b.buggy = true;   // (to the station: in the buggy)
+  if (sc === 'camino') {   // (on the road: on towards the end that leads there; or, to someone on the road, up to them)
+    if (T.road != null) { if (Math.abs(T.road - b.roadS) < .004) { b.roadDir = 0; return 'ok'; } b.roadDir = T.road > b.roadS ? 1 : -1; return 'run'; }
+    b.roadDir = T.room === 'br' ? -1 : 1; return 'run';
+  }
+  if (T.road != null) { if (sc !== 'out') { wmExit(who); return 'run'; } if (dist(b.x, b.y, DOOR.br[0], DOOR.br[1] + 20) < 40) { roadStart(who, 1, -1); return 'run'; } wmWalk(who, DOOR.br[0], DOOR.br[1] + 20, 'out', dt); return 'run'; }
+  if (T.out) {
+    if (sc !== 'out') { wmExit(who); return 'run'; }
+    const pen = AREAS[key], d = dist(b.x, b.y, T.out[0], T.out[1]);
+    if (pen ? inArea(pen, b.x, b.y, -6) : d < near) { wmStop(who); return 'ok'; }   // (into a pen means inside its fence)
+    const person = key.startsWith('p:'), lim = person ? 64 : 130;   // (to a person: up to them, to speak to them face to face)
+    if (person && d > 110 && d < CALL_R && !(b.wmCallT > TT - 25)) { const tb = wmBody(key.slice(2)); if (tb && tb.moving && !tb.called) { b.wmCallT = TT; callPerson(who, key.slice(2), { come: false }); } }   // (they are walking off: call them to wait)
+    if (wmWalk(who, T.out[0], T.out[1], 'out', dt) && !pen && d < lim) { wmStop(who); return 'ok'; }   // (as near as one can get)
+    if (b.wmT !== TT) { b.wmStill = b.wmPx != null && dist(b.x, b.y, b.wmPx, b.wmPy) < 4 * dt ? (b.wmStill || 0) + dt : 0; b.wmPx = b.x; b.wmPy = b.y; b.wmT = TT; }   // (once a frame: it may be asked twice; still = slower than 4 px/s, a walker does ~0.7 px a frame)
+    if (b.wmStill > (person ? 4 : 1.5) && !pen && d < 130) { b.wmStill = 0; wmStop(who); return 'ok'; }   // (stuck just short of it: close enough)
+    return 'run';
+  }
+  // a room (Ana's: up the stairs, to the mirror)
+  if (T.room === 'ga') {
+    if (sc === 'ga') { const p = [GA.table.x, GA.table.y + 12]; if (dist(b.x, b.y, p[0], p[1]) < 30) { wmStop(who); return 'ok'; } wmWalk(who, p[0], p[1], 'ga', dt); return 'run'; }
+    if (sc === 'gg' && who === 'ana') { if (dist(b.x, b.y, STAIRS.x, STAIRS.y) < 40) { wmStop(who); goIn('ga', [KDOOR.x, KIT.h - 28]); return 'run'; } wmWalk(who, STAIRS.x, STAIRS.y, 'gg', dt); return 'run'; }
+    if (sc === 'gg') { b.where = 'ga'; b.x = KDOOR.x; b.y = KIT.h - 28; return 'run'; }
+    T.room = 'gg';
+  }
+  if (T.room === 'gg' && sc === 'ga') { if (who === 'ana') goIn('gg', [STAIRS.x - 16, STAIRS.y + 36]); else { b.where = 'gg'; b.x = STAIRS.x - 16; b.y = STAIRS.y + 36; } return 'run'; }   // (down the stairs)
+  if (sc === T.room) { const p = T.at || (who === 'ana' && T.room === 'gg' ? [STOVE.x, STOVE.y + 40] : null); if (!p || dist(b.x, b.y, p[0], p[1]) < 40) { wmStop(who); return 'ok'; } wmWalk(who, p[0], p[1], T.room, dt); return 'run'; }
+  if (sc !== 'out') { wmExit(who); return 'run'; }
+  if (dist(b.x, b.y, T.door[0], T.door[1] + 20) < 34) { wmEnter(who, T.room); return 'run'; }
+  wmWalk(who, T.door[0], T.door[1] + 20, 'out', dt); return 'run';
+}
+function wmWalk(who, x, y, scene, dt){
+  const b = wmBody(who);
+  if (who === 'ana') { if (TT - (ana.wmArr || -9) < .4) return true; if (!ana.goto || !ana.goto.wm || dist(ana.goto.x, ana.goto.y, x, y) > 30) ana.goto = { x, y, scene, wm: true }; return false; }
+  const sp = b.buggy ? 80 : (AGENTS[who] ? wmPace(AGENTS[who]) : (CH[who]?.speed?.walk || 40)) * (AGENTS.ana?.ride && AGENTS.ana.followOf === who ? 2.4 : 1), visible = viewScene() === scene && (scene !== 'out' || seen(b.x, b.y, 300));
+  if (b.called && TT < b.called.until) { b.moving = false; return false; }
+  if (b.buggy && scene === 'out') {   // (a buggy, seen or not, goes by the roads: past Mrs. Lynde's window)
+    if (!b.bnav || dist(b.bnav.x, b.bnav.y, x, y) > 30) { const r = netRoute(b.x, b.y, x, y); b.bnav = { x, y, pts: r ? [...r.pts, [x, y]] : [[x, y]], i: 0 }; }
+    const q = b.bnav.pts[b.bnav.i], dq = dist(b.x, b.y, q[0], q[1]), vq = Math.min(dq, sp * dt);
+    b.x += (q[0] - b.x) / (dq || 1) * vq; b.y += (q[1] - b.y) / (dq || 1) * vq; b.moving = true; if (Math.abs(q[0] - b.x) > 1) b.dir = q[0] > b.x ? 1 : 3; b.walk = (b.walk + dt * 1.8) % 1;
+    if (dq < 2) { if (b.bnav.i < b.bnav.pts.length - 1) b.bnav.i++; else { b.bnav = null; b.moving = false; return true; } }
+    return false;
+  }
+  if (visible) return walkPath(b, x, y, sp, dt, scene);
+  const d = dist(b.x, b.y, x, y), v = Math.min(d, sp * dt); b.x += (x - b.x) / (d || 1) * v; b.y += (y - b.y) / (d || 1) * v; b.moving = d > 2; if (Math.abs(x - b.x) > 1) b.dir = x > b.x ? 1 : 3; b.walk = (b.walk + dt * 1.8) % 1;
+  return d < 2;
+}
+function wmStop(who){ const b = wmBody(who); if (who === 'ana') { if (ana.goto?.wm) ana.goto = null; } else b.moving = false; }
+function wmExit(who){
+  if (who === 'ana') { goOut(); return; }
+  const b = wmBody(who), h = b.where;
+  if (h === 'br') { roadStart(who, 0, 1); return; }   // (from the station: the road home)
+  if (h === 'camino') return;
+  b.where = 'out'; b.sit = false; b.nav = null; const d = DOOR[h] || [b.x, b.y]; b.x = d[0]; b.y = d[1] + 16;
+}
+function wmEnter(who, room){
+  if (room === 'br' && wmScene(who) === 'out') { if (who === 'ana') return; roadStart(who, 1, -1); return; }   // (the station is at the end of the road)
+  if (who === 'ana') { goIn(room); return; }
+  const b = wmBody(who); if (room !== 'br') b.buggy = false; b.where = room; b.nav = null; b.x = KDOOR.x; b.y = KIT.h - 20;
+}
+function wmRelease(who){ const b = wmBody(who); if (!b) return; if (who === 'ana') { if (ana.goto?.wm) ana.goto = null; } else { b.moving = false; b.nav = null; if (FOLKBY[who]) { FOLKBY[who].key = ''; FOLKBY[who].route = []; } } }
+function wmHold(ag, dt){   // someone kept at a place for a test (the buyer waiting at the village)
+  const b = wmBody(ag.who); if (b.where !== 'out') { b.where = 'out'; b.x = ag.hold[0]; b.y = ag.hold[1]; }
+  if (dist(b.x, b.y, ag.hold[0], ag.hold[1]) > 30) wmWalk(ag.who, ag.hold[0], ag.hold[1], 'out', dt); else b.moving = false;
+}
+// the bodies of the agents are moved here, not by their routines (the routine loops ask this first)
+const wmDriven = k => !!AGENTS[k] && (activeGoals(AGENTS[k]).length > 0 || !!AGENTS[k].hold);

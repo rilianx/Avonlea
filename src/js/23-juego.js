@@ -1,0 +1,5 @@
+/* ---------- the game ---------- */
+// scene: 'out' (Avonlea), 'gg' (the kitchen at Green Gables) or 'os' (the parlour at Orchard Slope)
+const game = { scene: 'out', inv: { bayas: 0, manzanas: 0, tarta: 0, compota: 0, te: 0, ramo: 0 }, hasCan: false, water: 0, rel: null, nextStory: null, relLog: [], impr: {}, story: null, stories: [], ground: [], groundSeq: 0, anaStates: {}, sipUntil: 0, fond: { toby: 0 }, cooking: null, talk: null, said: {}, saidS: {}, seasonShift: 0, teaDay: -1, map: false, journal: [], mem: {}, know: {}, tasks: [], plans: {}, table: null, giftFor: {}, npcGiftDay: {}, lastDay: null, taskSeq: 0 };
+const mkPerson = (look, x, y) => ({ look, x, y, dir: 2, walk: 0, moving: false, blink: 0, idle: 0, sit: false, vx: 0, vy: 0, carry: null, pet: false, crouch: false, lookAround: 0 });
+const ana = mkPerson('ana', GG.x - 6, GG.y + 70); ana.pace = 60;

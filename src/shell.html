@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Un día en Avonlea</title>
+<style>
+html,body{margin:0;height:100%;background:#2b3a26;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;font-family:Georgia,'Times New Roman',serif}
+#cv{position:fixed;inset:0;width:100%;height:100%;display:block}
+.paper{background:#fbf3df;color:#3b2a1c;border:1.5px solid #6b4a30;border-radius:10px 14px 9px 12px;box-shadow:2px 3px 0 rgba(60,40,20,.35)}
+#inv{position:fixed;left:10px;top:10px;padding:5px 11px;font-size:15px;pointer-events:none;line-height:1.5}
+#tasks{position:fixed;left:10px;top:52px;padding:4px 10px;font-size:14px;pointer-events:none;line-height:1.45;max-width:min(330px,calc(100% - 80px))}
+#tasks[hidden]{display:none}
+#clock{position:fixed;right:10px;top:10px;padding:4px 10px;font-size:15px;pointer-events:none}
+#tok{position:fixed;right:10px;bottom:10px;padding:2px 8px;font-size:12px;cursor:pointer;opacity:.85}
+#tok[hidden]{display:none}
+#aitok{font-size:13px;margin-top:8px;line-height:1.4}
+#talk[hidden]{display:none}
+#say{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(560px,calc(100% - 28px));display:flex;gap:6px;padding:8px 10px;z-index:20}
+#say[hidden]{display:none}
+#say input{flex:1;font:16px Georgia,serif;padding:6px 10px;border:1.5px solid #6b4a30;border-radius:8px;background:#fffaf0;color:#3b2a1c;min-width:0}
+#say button{font:15px Georgia,serif;background:#fffaf0;color:#3b2a1c;border:1.5px solid #6b4a30;border-radius:8px;padding:6px 12px;cursor:pointer}
+#relbtn{position:fixed;right:10px;top:172px;width:42px;height:36px;font-size:19px;line-height:30px;padding:0;cursor:pointer}
+#daybtn{position:fixed;right:10px;top:214px;width:42px;height:36px;font-size:17px;line-height:30px;padding:0;cursor:pointer}
+#wmbtn{position:fixed;right:10px;top:256px;width:42px;height:36px;font-size:18px;line-height:30px;padding:0;cursor:pointer}
+#autobtn{position:fixed;right:10px;top:340px;width:42px;height:36px;font-size:18px;line-height:30px;padding:0;cursor:pointer}
+#autobtn.on{outline:2px solid #6a8f3c}
+#spdbtn{position:fixed;right:10px;top:466px;width:42px;height:36px;font:bold 13px Georgia,serif;line-height:30px;padding:0;cursor:pointer}#spdbtn.fast{outline:2px solid #c0582e;color:#a3302a}
+#obsbtn{position:fixed;right:10px;top:424px;width:42px;height:36px;font-size:18px;line-height:30px;padding:0;cursor:pointer}
+#obsmenu{position:fixed;right:60px;top:46px;z-index:25;max-height:calc(100% - 60px);overflow-y:auto;padding:8px 10px;width:min(330px,calc(100% - 76px));font-size:14px;box-sizing:border-box}#obsmenu[hidden]{display:none}#obsmenu .h{font-style:italic;margin:4px 0}#obsmenu button{display:flex;align-items:center;gap:8px;width:100%;text-align:left;font:14px Georgia,serif;background:#fffaf0;color:#3b2a1c;border:1px solid #c9b48a;border-radius:8px;padding:2px 6px;margin:3px 0;cursor:pointer;line-height:1.15}#obsmenu button.on{background:#e8c890;border-color:#8a6a40}#obsmenu canvas{flex:none;width:34px;height:40px;border-radius:6px;background:#e9dcc0}#obsmenu .t{display:flex;flex-direction:column;min-width:0}#obsmenu .t b{font-weight:normal}#obsmenu small{opacity:.75;font-style:italic;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-height:560px){#mapbtn,#aibtn,#saybtn,#relbtn,#daybtn,#wmbtn,#headbtn,#autobtn,#callbtn,#obsbtn,#spdbtn{height:32px!important;line-height:26px!important}#aibtn{top:84px!important}#saybtn{top:122px!important}#relbtn{top:160px!important}#daybtn{top:198px!important}#wmbtn{top:236px!important}#headbtn,#autobtn,#callbtn,#obsbtn,#spdbtn{right:58px!important}#headbtn{top:46px!important}#autobtn{top:84px!important}#callbtn{top:122px!important}#obsbtn{top:160px!important}#spdbtn{top:198px!important}#obsmenu{right:106px;top:10px;max-height:calc(100% - 20px);width:min(330px,calc(100% - 120px))}}
+#sidebtn{position:fixed;right:56px;top:46px;width:28px;height:36px;font-size:13px;line-height:30px;padding:0;cursor:pointer;opacity:.75}body.lado-oculto #sidebtn{right:10px;width:42px;font-size:17px;opacity:1}
+body.lado-oculto :is(#mapbtn,#aibtn,#saybtn,#relbtn,#daybtn,#wmbtn,#headbtn,#autobtn,#callbtn,#obsbtn,#spdbtn){display:none!important}
+#callbtn{position:fixed;right:10px;top:382px;width:42px;height:36px;font-size:18px;line-height:30px;padding:0;cursor:pointer}
+#autobar{position:fixed;left:50%;bottom:12px;transform:translateX(-50%);z-index:13;padding:4px 6px 4px 12px;font-size:13.5px;max-width:calc(100% - 24px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#autobar[hidden]{display:none}
+#autobar button{font:inherit;font-size:12px;margin-left:6px}
+#headbtn{position:fixed;right:10px;top:298px;width:42px;height:36px;font-size:18px;line-height:30px;padding:0;cursor:pointer}
+#headp{position:fixed;right:58px;top:298px;z-index:14;padding:6px 10px;font-size:13px}
+#headp[hidden]{display:none}
+#headp label{display:flex;align-items:center;gap:8px;white-space:nowrap}
+#headp input{width:min(160px,40vw)}
+body.visor > *:not(#cv):not(#visor){display:none !important}
+#visor{position:fixed;left:10px;top:10px;right:10px;padding:8px 10px;font-size:13px;z-index:20}
+#visor button{font:inherit;font-size:12.5px;margin:3px 3px 0 0}
+#wmp{position:fixed;left:10px;top:54px;bottom:10px;width:min(360px,calc(100% - 70px));z-index:14;overflow:auto;padding:8px 10px;font-size:12.5px}
+#wmp[hidden]{display:none}
+#wmp .mt{font-weight:bold;margin-bottom:4px}
+#wmlist button{display:block;width:100%;text-align:left;margin:2px 0;font:inherit;cursor:pointer}
+#wmrun .ag{border-top:1px solid rgba(90,60,35,.3);margin-top:6px;padding-top:4px}
+#wmrun ol{margin:2px 0 2px 18px;padding:0}
+#wmrun ul.gl{list-style:none;margin:2px 0;padding:0}
+#wmrun ul.gl li.done{opacity:.6}
+#wmrun ol.tk{margin:1px 0 4px 14px;font-size:11.5px}
+#wmrun ul.gl li.fail{opacity:.6;text-decoration:line-through}
+#wmrun li.cur{font-weight:bold}
+#wmrun .eye{padding:0 4px;font-size:12px}
+#wmrun .eye.on{background:#e0a030}
+#wmrun li.past{opacity:.55}
+#wmrun pre{white-space:pre-wrap;font-size:11px;margin:2px 0;opacity:.8}
+#wmp .mb{margin-top:8px}
+#rels{position:fixed;inset:0;z-index:15;display:flex;align-items:center;justify-content:center;background:rgba(30,20,10,.45)}
+#rels[hidden]{display:none}
+#rels .sheet{padding:10px 14px 12px;width:min(560px,calc(100% - 24px));max-height:calc(100% - 30px);overflow:auto;text-align:center}
+#rels .mt{font-size:18px;font-style:italic;margin-bottom:6px}
+#rels svg{width:100%;height:auto;display:block}
+#rels ul{text-align:left;margin:4px 0 6px;padding-left:20px;font-size:14px;line-height:1.45}
+#rels .st{font-size:17px}
+#rels .si{font-size:13px;color:#6b4a30;font-style:italic;margin:4px 0}
+#rels li.done{color:#7a6a5a}
+#rels li.now{font-weight:bold}
+#rels li.later{color:#9a8a7a}
+#rels li.rama{color:#4f7a4a;font-style:italic;list-style:none;margin-left:-14px}
+#rels .h{color:#d24a4a;letter-spacing:1px}
+#rels .mb{display:flex;justify-content:center;margin-top:6px}
+#rels button.pick{font-size:13px;padding:2px 8px;margin:2px}
+#rels button.dbg{font-size:12px;padding:1px 7px;margin:2px}
+#rels .bt{text-align:left;font-size:12.5px;line-height:1.4;border-left:3px solid #c9b48f;padding:3px 8px;margin:5px 0;background:rgba(255,250,235,.6)}
+#rels .bt b{font-size:13.5px}
+#rels .bt.on{border-color:#d9a441}#rels .bt.ok{border-color:#7aa060}#rels .bt.gap{border-color:#b5a58a;opacity:.8}#rels .bt.br{border-color:#b5604c}#rels .bt.off{opacity:.45;text-decoration:line-through}
+#rels .bt .k{color:#8a6a4a;font-style:italic}#rels .bt .tag{font-size:11px;border:1px solid currentColor;border-radius:6px;padding:0 4px;margin-left:4px}
+#rels .dh{text-align:left;font-size:13px;font-weight:bold;color:#4f7a4a;margin:8px 0 2px}
+#rels details{text-align:left;font-size:13px;margin:4px 0}
+#saybtn{position:fixed;right:10px;top:130px;width:42px;height:36px;font-size:19px;line-height:30px;padding:0;cursor:pointer}
+#sleep{position:fixed;inset:0;z-index:30;background:#0d1020;color:#e8e2c8;font:italic 34px Georgia,serif;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 1.2s ease}
+#sleep.on{opacity:1;pointer-events:auto}
+#talk{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(560px,calc(100% - 28px));padding:12px 16px 12px;font-size:17px;line-height:1.4}
+#talk .who{font-weight:bold;color:#7a3a22;margin-bottom:2px} #talk .who span{color:#d24a4a;font-weight:normal;margin-left:6px;letter-spacing:1px}
+#talk .opts{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+#talk button{font:15px Georgia,serif;background:#fffaf0;color:#3b2a1c;border:1.5px solid #6b4a30;border-radius:8px 11px 7px 10px;padding:6px 11px;cursor:pointer}
+#talk button:focus{outline:2px solid #d9a441}
+#talk.wait .line{color:#9a7a5a;font-style:italic}
+#talk .tbar{height:3px;background:rgba(107,74,48,.15);margin-top:8px;border-radius:2px;overflow:hidden}
+#talk .tbar i{display:block;height:100%;width:100%;background:#a8432c;animation:tbar 10s linear forwards}
+@keyframes tbar{from{width:100%}to{width:0}}
+#tripbar{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:20;padding:6px 12px;font-size:14px;font-style:italic;white-space:nowrap;max-width:calc(100% - 20px);overflow:hidden;text-overflow:ellipsis}
+#tripbar[hidden]{display:none}
+#tripbar button.on{background:#e8c890;font-weight:bold}
+#isla{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;background:rgba(40,30,20,.45)}#isla[hidden]{display:none}#isla .sheet{padding:10px;text-align:center}#isla .mt{font-style:italic;margin-bottom:6px}#isla button{font:14px Georgia,serif;background:#fffaf0;color:#3b2a1c;border:1.5px solid #6b4a30;border-radius:8px 11px 7px 10px;padding:3px 10px;cursor:pointer;margin:6px 4px 0}
+#tripbar button{font:13px Georgia,serif;background:#fffaf0;color:#3b2a1c;border:1.5px solid #6b4a30;border-radius:8px 11px 7px 10px;padding:2px 8px;cursor:pointer;margin-left:6px;font-style:normal}
+#aiq{position:fixed;right:64px;top:10px;z-index:30;width:min(460px,calc(100% - 20px));padding:8px 10px;font-size:13px}
+#aiq[hidden]{display:none}
+#aiq .h{font-weight:bold;color:#7a3a22}
+#aiq pre{white-space:pre-wrap;max-height:220px;overflow:auto;font-size:11px;background:rgba(255,255,255,.5);padding:4px}
+#aiq textarea{width:100%;box-sizing:border-box;height:120px;font:11px monospace;margin-top:4px}
+#aiq button{font:13px Georgia,serif;background:#fffaf0;color:#3b2a1c;border:1.5px solid #6b4a30;border-radius:8px 11px 7px 10px;padding:3px 9px;cursor:pointer;margin:3px 3px 0 0}
+@media (max-width:640px){#hint{top:58px !important;max-width:calc(100% - 30px) !important}}
+#obs{position:fixed;left:50%;top:52px;transform:translateX(-50%);z-index:13;padding:4px 6px 4px 12px;font-size:13.5px;max-width:calc(100% - 24px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#obs[hidden]{display:none}
+#obs button{font:inherit;font-size:12px;margin-left:6px}
+#hint{position:fixed;left:50%;top:12px;transform:translateX(-50%);padding:5px 12px;font-size:14px;pointer-events:none;transition:opacity 1.5s;text-align:center;max-width:calc(100% - 200px)}
+#mapbtn{position:fixed;right:10px;top:46px;width:42px;height:36px;font-size:20px;line-height:30px;padding:0;cursor:pointer}
+#map{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(30,20,10,.45)}
+#map[hidden]{display:none}
+#map .sheet{padding:8px 10px 10px;text-align:center}
+#map .mt{font-size:18px;font-style:italic;margin-bottom:5px}
+#mapcv{display:block;margin:0 auto;border-radius:4px}
+#map .mb{display:flex;gap:8px;justify-content:center;margin-top:8px}
+#aibtn{position:fixed;right:10px;top:88px;width:42px;height:36px;font-size:19px;line-height:30px;padding:0;cursor:pointer}
+#ai{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(30,20,10,.45)}
+#ai[hidden]{display:none}
+#ai .sheet{padding:12px 16px;width:min(520px,calc(100% - 28px));max-height:calc(100% - 40px);overflow:auto;font-size:15px;line-height:1.45}
+#ai h3{margin:0 0 6px;font-style:italic;font-weight:normal;font-size:20px}
+#ai label{display:block;margin:8px 0 2px}
+#ai input[type=password],#ai select{font:15px Georgia,serif;width:100%;box-sizing:border-box;padding:5px 8px;border:1.5px solid #6b4a30;border-radius:7px;background:#fffaf0;color:#3b2a1c}
+#ai .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+#ai .note{font-size:13px;color:#6b4a30;margin-top:4px}
+#ai pre{white-space:pre-wrap;font:13px Georgia,serif;background:#fffaf0;border:1px solid #d9bf8f;border-radius:6px;padding:8px;max-height:40vh;overflow:auto}
+#ai button,#map button,#rels button{font:15px Georgia,serif;background:#fffaf0;color:#3b2a1c;border:1.5px solid #6b4a30;border-radius:8px 11px 7px 10px;padding:5px 11px;cursor:pointer}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<div id="inv" class="paper"></div>
+<div id="tasks" class="paper" hidden></div>
+<div id="clock" class="paper"></div>
+<div id="tok" class="paper" title="Tokens gastados con la IA" hidden></div>
+<div id="obs" class="paper" hidden><span></span> <button id="obsback">Volver a Ana</button></div>
+<div id="hint" class="paper">Flechas o WASD para pasear (o toca el suelo) · toca una persona u objeto para interactuar · Enter o T para decir algo · M para el mapa · L para llamar a alguien</div>
+<div id="talk" class="paper" hidden></div>
+<div id="tripbar" class="paper" hidden><span id="tripstop"></span> <button id="tripisla" title="El mapa de la isla">🗺 La isla</button></div>
+<div id="isla" hidden><div class="paper sheet"><div class="mt">La Isla del Príncipe Eduardo · los pueblos y los caminos</div><canvas id="islacv"></canvas><div><button id="islaclose">Cerrar</button></div></div></div>
+<div id="aiq" class="paper" hidden><div class="h">🐞 La IA eres tú · <span class="n"></span></div><details><summary>Ver el pedido</summary><pre class="p"></pre></details><textarea spellcheck="false"></textarea><div><button class="ok">Responder</button><button class="cp">📋 Copiar todo (para otra IA)</button><button class="no">Que falle</button><button class="all">Que fallen todos los de este tipo</button></div></div>
+<div id="sleep"></div>
+<form id="say" class="paper" hidden autocomplete="off"><input id="sayin" maxlength="240" placeholder="Lo que dice Ana… (Enter para decir · Esc para cerrar)" spellcheck="false"><button type="submit">Decir</button></form>
+<button id="saybtn" class="paper" title="Decir algo (Enter o T)">💬</button>
+<button id="relbtn" class="paper" title="La historia de hoy y quién quiere a quién">👥</button>
+<button id="daybtn" class="paper" title="Pasar al día siguiente">⏭</button>
+<button id="spdbtn" class="paper" title="Velocidad del tiempo: toca para cambiarla (1×, 2×, 5×, 10×, 25×, 50×) · teclas + y −">1×</button>
+<button id="obsbtn" class="paper" title="Observar a un personaje (que la vista lo siga)">👁</button>
+<div id="obsmenu" class="paper" hidden></div>
+<button id="wmbtn" class="paper" title="Metas de prueba (el planificador, sin IA)">🎯</button>
+<button id="headbtn" class="paper" title="Tamaño de las cabezas">🙂</button>
+<button id="autobtn" class="paper" title="Ana en automático (y mover el mapa libremente)">🤖</button>
+<button id="callbtn" class="paper" title="Llamar a quien esté cerca (L): se detiene, o viene si te quiere">📣</button>
+<div id="autobar" class="paper" hidden>🤖 Ana en automático · flechas o arrastrar: mover el mapa <button id="autocenter">Centrar en Ana</button><button id="autooff">Tomar el control</button></div>
+<div id="headp" class="paper" hidden><label>Cabezas <b id="headv"></b><input id="headr" type="range" min="1" max="5" step="0.1"></label></div>
+<div id="wmp" class="paper" hidden><div class="mt">🎯 Metas de prueba <small>(sin IA: el planificador)</small></div><label><input type="checkbox" id="wmobey" checked> Ana hace sola lo que le piden</label> <label><input type="checkbox" id="wmdis" checked> Se distraen (según su enfoque)</label> <label><input type="checkbox" id="wmagenda" checked> Rutinas de metas (la agenda de cada uno)</label> <button id="wmcap1" title="Una tarde de junio: Rachel en su ventana, Matthew va a Bright River y vuelve con Ana (el libro, simulado con metas)">📖 Capítulo 1 del libro</button> <label><input type="checkbox" id="vecon"> Ana dibujada por GPT (prueba)</label><div id="wmlist"></div><div id="wmrun"></div><div class="mb"><button id="wmstop">Detener todo</button><button id="wmclose">Cerrar</button></div></div>
+<div id="rels" hidden><div class="paper sheet"><div class="mt">La historia de hoy, y quién quiere a quién</div><div id="story"></div><svg id="relsvg" viewBox="0 0 420 300"></svg><div id="reldet"></div><div class="mb"><button id="relclose">Cerrar</button></div></div></div>
+<button id="sidebtn" class="paper" title="Mostrar u ocultar los botones de la derecha">☰</button>
+<button id="mapbtn" class="paper" title="Mapa (M)">🗺</button>
+<button id="aibtn" class="paper" title="Diálogos con IA">✒</button>
+<div id="ai" hidden><div class="paper sheet">
+  <h3>Diálogos con IA</h3>
+  <div>Matthew, Marilla, Diana y la Sra. Barry conversan con una IA: cuando Ana pasa cerca charlan solos (y Ana también habla), en globitos sobre sus cabezas; se acuerdan de lo que ha pasado y de lo que se dijeron. Sin la clave, solo dicen unas frases escritas de antemano.</div>
+  <label><input type="checkbox" id="aion"> Usar IA en las conversaciones (recomendado)</label>
+  <label><input type="checkbox" id="aiauto"> Ana hace lo suyo sola cuando no la controlo</label>
+  <label><input type="checkbox" id="aistories"> Historia del día (un guion inspirado en los libros; con IA, se escribe cada mañana)</label>
+  <label><input type="checkbox" id="aimem"> Memoria de los personajes (los que tienen «memoria» en su ficha guardan lo que conversaron con Ana y lo recuerdan después; apagada, nadie guarda nada)</label>
+  <label><input type="checkbox" id="aiplans"> Los personajes planean su día con IA (en el modo completo, una vez por la mañana; si no, siguen su rutina)</label>
+  <label for="aimode">Gasto de IA</label>
+  <select id="aimode"><option value="minimo">Mínimo (recomendado): instrucciones breves; la IA escribe las charlas, la historia del día y sus ramas, el juez (una vez por hora) y el repaso de la noche</option><option value="completo">Completo: además los planes de los personajes y las decisiones de Ana (gasta varias veces más)</option></select>
+  <label for="aimodel">Modelo</label>
+  <select id="aimodel"><option value="gpt-5.4-mini">GPT-5.4 mini (OpenAI)</option><option value="claude-opus-5-5">Claude Opus 5.5 (Anthropic)</option><option value="claude-sonnet-5-5">Claude Sonnet 5.5 (Anthropic, más rápido)</option><option value="claude-haiku-4-5">Claude Haiku 4.5 (Anthropic, el más barato)</option><option value="manual">🐞 Yo hago de IA (depurar: respondo a mano)</option></select>
+  <label for="aikey" id="aikeylab">Tu clave de la API</label>
+  <input type="password" id="aikey" autocomplete="off" spellcheck="false">
+  <div class="note" id="ainote"></div>
+  <div class="row"><button id="aitest">Probar</button><button id="aimem">Ver recuerdos</button><button id="ailog">Ver registro</button><button id="aiforget">Borrar recuerdos</button><button id="aireset">Empezar de cero</button><button id="aiclose">Cerrar</button></div>
+  <div id="aitok"></div>
+  <pre id="aiout" hidden></pre>
+</div></div>
+<div id="map" hidden><div class="paper sheet"><div class="mt" id="maptitle"></div><canvas id="mapcv"></canvas><div class="mb"><button id="mapzin" title="Acercar">＋</button><button id="mapzout" title="Alejar">－</button><button id="mapnext">Siguiente estación (prueba)</button><button id="mapisla">🗺 La isla</button><button id="mapclose">Cerrar</button></div></div></div>
+<script type="text/plain" id="guion">
+<!--@guion-->
+</script>
+<script>
+<!--@js-->
+</script>
+</body>
+</html>

@@ -180,3 +180,16 @@ Cada tipo de cosa tiene su registro en `index.html`; para agregar una, basta una
 | `STORIES` | historias escritas a mano: escenas (con `id`, `requiere`, `clave`, `contra`, efectos, eventos y frases clave) y, si se quiere, `ramas` escritas a mano para cuando se desvía (`desde`: la escena clave que se rompió) | «La vaca del señor Harrison», con las ramas «Ana no vende la vaca» y «La vaca se queda en la avena» |
 
 Diana, la compañera de Ana, y Pelusa, la gata, son las únicas con movimientos escritos aparte (en `update()`).
+
+## Cómo está armado el código
+
+El juego sigue siendo **un solo archivo**, `index.html`, para que el link funcione siempre. Pero ya no se edita a mano: se arma desde `src/` con `node tools/build.js`.
+
+- `src/shell.html`: la página (estilos, botones, paneles).
+- `src/js/NN-nombre.js`: el código, en 68 partes que se juntan en orden, una sección cada una (`00-base.js` … `67-visor.js`). Por ejemplo: `59-agentes.js`, `61-acciones-vista.js`, `62-cartas.js`, `63-jugar.js`.
+- `src/datos/guion.txt`: el guion de las escenas.
+- `src/datos/libro1.json`: el texto del libro para el capítulo 1.
+
+Para cambiar algo: editar en `src/`, correr `node tools/build.js` y probar. `node tools/build.js --check` avisa si `index.html` no coincide con `src/`.
+
+La regresión de las 62 metas corre en paralelo: `node tools/trace_goal.js --pdf trazas/metas.pdf --par 4` (cerca de un minuto y medio).

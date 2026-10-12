@@ -1,0 +1,224 @@
+# El guion de las escenas (lo lee el juego al empezar: ver docs/ESCENAS.md).
+# Cada escena: «=== id ===», sus campos (uno por línea, «campo: valor»), y si tiene líneas propias, «---» y una línea
+# por intervención: «quien: texto» (con « #marca» al final si esa línea marca un momento del libro).
+# Las líneas pueden venir del libro: «lineas: libro:estacion», o un trozo: «lineas: libro:viaje.10 [7]».
+
+# --- el capítulo: Rachel en su ventana, en Tejas Verdes, donde los Bell; la estación; la casa
+=== rachel_ventana ===
+canal: rl
+prioridad: 6
+en: lynde=rl
+si: capitulo, marca:rachel_ve
+---
+lynde: ¡Matthew Cuthbert, con cuello blanco y en la calesa! ¿Adónde irá? No me quedo tranquila: voy ahora mismo a Tejas Verdes.
+
+=== mesa_tres ===
+canal: gg
+prioridad: 4
+en: marilla=gg
+si: capitulo, marca:mesa_tres
+---
+marilla: Tres platos. Matthew, yo… y el niño.
+
+=== rachel_marilla ===
+canal: gg
+prioridad: 9
+interrumpe
+sujeta: lynde, marilla
+en: lynde=gg, marilla=gg
+si: capitulo, hecho:rachel_llego_tejas_verdes
+lineas: libro:rachel_marilla
+al_empezar: marca marilla_cuenta | Marilla le contó a Rachel que Matthew fue a Bright River a buscar a un niño huérfano de Nueva Escocia.
+al_terminar: hecho rachel_lo_sabe
+al_terminar: saber lynde huerfano
+al_terminar: meta lynde estar_en casa_bell,-,- | Rachel va a casa de los Bell a contar la noticia | ir a casa de Robert Bell a contar la noticia (cap. 1) | 3
+
+=== rachel_bell ===
+canal: bell
+prioridad: 9
+sujeta: lynde
+cerca: lynde, casa_bell, 160
+si: capitulo, hecho:rachel_en_casa_bell
+lineas: libro:rachel_bell
+al_terminar: soltar srbell
+al_terminar: meta lynde estar_en h:rl,-,21.5 | Rachel vuelve a su casa, a la ventana | volver a casa, tomar el té y vigilar el camino desde la ventana (cap. 1)
+
+=== estacion ===
+canal: br
+prioridad: 9
+sujeta: matthew
+en: matthew=br
+si: capitulo, hecho:matthew_en_estacion, ana_visible, escena_ana:br
+lineas: libro:estacion
+marcas: 8=matthew_nina
+al_empezar: marca jefe_explica | El jefe de estación le explicó a Matthew que solo había llegado una niña; Matthew decidió llevarla a casa y que Marilla aclarara el error.
+al_terminar: ana sit=false
+al_terminar: meta matthew llevar ana,cocina | | llevar a la niña a Tejas Verdes en la calesa (cap. 2) | 3
+
+# --- el túnel de manzanos, antes que nada (Ana enmudece); Newbridge, callada todavía
+=== avenida ===
+canal: viaje
+prioridad: 10
+interrumpe
+calesa: camino
+camino: tramo=avenida
+lineas: libro:viaje.10 [7]
+---
+ana: (Ana enmudece. Se queda mirando la bóveda de flores, con las manos juntas, como si estuviera en una iglesia.)
+matthew: (Matthew la mira de reojo. No dice nada, para no romper el encanto.)
+ana: (…)
+
+=== newbridge ===
+canal: viaje
+prioridad: 8
+interrumpe
+calesa: camino
+camino: tramo=Newbridge
+si: dicha:avenida
+---
+ana: (Callada todavía. Los perros les ladran, los chicos gritan desde las cercas, hay caras curiosas en las ventanas: Ana no ve nada de eso.)
+
+# --- el silencio después de la Avenida: Ana no habla, pero no es un vacío (lo que se ve, lo que piensa Matthew)
+=== avenida_petalos ===
+canal: viaje
+prioridad: 1.5
+pausa: 12
+calesa: camino
+camino: tramo=avenida
+si: dicha:avenida
+---
+ana: (Ana echa la cabeza atrás para mirar la bóveda de flores. Los pétalos le caen en el pelo y no se los quita.)
+
+=== avenida_paso ===
+canal: viaje
+prioridad: 1.5
+pausa: 12
+calesa: camino
+camino: tramo=avenida
+si: dicha:avenida_petalos
+---
+matthew: (Matthew afloja las riendas. La yegua va al paso, como si también ella quisiera que esto no se acabara.)
+
+=== avenida_roseton ===
+canal: viaje
+prioridad: 1.5
+pausa: 12
+calesa: camino
+camino: tramo=avenida
+si: dicha:avenida_paso
+---
+ana: (Al fondo de la Avenida, el cielo del atardecer brilla como el rosetón de una catedral.)
+
+=== newbridge_ventanas ===
+canal: viaje
+prioridad: 1.5
+pausa: 12
+calesa: camino
+camino: tramo=Newbridge
+si: dicha:newbridge
+---
+ana: (Las ventanas del pueblo se encienden una a una. Ana sigue mirando hacia atrás, hacia donde quedó la Avenida.)
+
+=== silencio_manos ===
+canal: viaje
+prioridad: 1.5
+pausa: 14
+calesa: camino
+camino: tramo=campos
+si: dicha:avenida
+---
+ana: (Ana va callada, con las manos juntas sobre el bolso de alfombra y los ojos en el cielo del oeste.)
+
+=== silencio_matthew ===
+canal: viaje
+prioridad: 1.5
+pausa: 14
+calesa: camino
+camino: tramo=campos
+si: dicha:silencio_manos
+---
+matthew: (Matthew la mira de reojo. Nunca pensó que el silencio de una niña pudiera ser tan cómodo.)
+
+=== silencio_estrella ===
+canal: viaje
+prioridad: 1.5
+pausa: 14
+calesa: camino
+camino: tramo=campos
+si: dicha:silencio_matthew
+---
+ana: (Sobre los campos aparece la primera estrella. Ana mueve los labios: quizás le está pidiendo un deseo.)
+
+=== silencio_ranas ===
+canal: viaje
+prioridad: 1.5
+pausa: 14
+calesa: camino
+camino: tramo=campos
+si: dicha:silencio_estrella
+---
+matthew: (En una laguna junto al camino empiezan a cantar las ranas. La yegua resopla: ya huele su casa.)
+
+=== silencio_nombre ===
+canal: viaje
+prioridad: 1.5
+pausa: 14
+calesa: camino
+camino: tramo=campos
+si: dicha:silencio_ranas
+---
+ana: (Muy bajito, casi para sí misma:) Blanco… de las Delicias… no, todavía no…
+
+# --- entrando a Avonlea: una milla más (y la Avenida tiene nombre), la laguna, Tejas Verdes, la casa
+=== nombra_avenida ===
+canal: viaje
+prioridad: 9
+interrumpe
+si: dicha:avenida
+o: calesa=camino camino.desde=.955
+o: calesa=avonlea cerca=matthew,letrero_br,2500
+lineas: libro:avonlea.camino_blanco [1,2,3,4,9,11]
+marcas: 0=una_milla
+al_empezar: log Matthew rompió el silencio: «solo nos falta una milla». Ana bautizó la Avenida: el Camino Blanco de las Delicias.
+
+=== lago ===
+canal: viaje
+prioridad: 9
+interrumpe
+calesa: avonlea
+cerca: matthew, lago, 1300
+lineas: libro:avonlea.lago [0,1,2,3,10]
+marcas: 0=lago
+al_empezar: log Matthew le mostró la laguna de Barry; Ana la bautizó el Lago de las Aguas Brillantes.
+
+=== tejas_verdes ===
+canal: viaje
+prioridad: 9
+interrumpe
+si: dicha:lago
+o: calesa=avonlea cerca=matthew,tejas_verdes,1700 si=y_mayor:matthew:61
+o: si=capitulo,hecho:matthew_llego_casa,!hecho:llegaron
+lineas: libro:avonlea.tejas_verdes [0,1,2,3,4,8,9]
+marcas: 2=adivina_tv
+al_empezar: log Ana adivinó cuál era Tejas Verdes, bajo una gran estrella blanca.
+
+=== llegada ===
+canal: gg
+prioridad: 10
+sujeta: matthew, marilla
+en: marilla=gg
+si: capitulo, hecho:llegaron, canal_libre:viaje, escena_ana:gg
+lineas: libro:llegada
+marcas: 0=marilla_nino
+al_empezar: log Marilla vio a la niña de pelo rojo: «Matthew Cuthbert, ¿quién es ésa? ¿Dónde está el niño?»
+al_terminar: fin_capitulo
+
+# --- lo que Ana piensa en voz alta en el camino, cuando no hay otra cosa (un comentario: si lo cortan, se pierde)
+=== relleno ===
+canal: viaje
+tipo: comentario
+prioridad: 0
+repetir: cada 30
+calesa: camino
+camino: no_callado
+lineas: relleno:1
