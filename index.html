@@ -3640,8 +3640,8 @@ function hopTo(goal){
 function autoOptions(){
   const O = [], hn = hourNow(), late = hn >= 20, sc = game.scene;
   const add = (label, intent, w = 1) => O.push({ label, intent, w });
-  const skip = ['door', 'stairs', 'bed', 'stove'];
-  targets().filter(t => !t.self && t.pri < 50 && !t.id.startsWith('p:') && !t.id.startsWith('h:') && !skip.includes(t.id)).map(t => ({ t, d: dist(ana.x, ana.y, t.x, t.y) })).sort((a, b) => a.d - b.d).slice(0, 6)
+  const skip = ['door', 'stairs', 'bed', 'stove'];   // (and on her own she leaves the cows alone: 'a:' — one she just took back to its pasture, above all)
+  targets().filter(t => !t.self && t.pri < 50 && !t.id.startsWith('p:') && !t.id.startsWith('h:') && !t.id.startsWith('a:') && !skip.includes(t.id)).map(t => ({ t, d: dist(ana.x, ana.y, t.x, t.y) })).sort((a, b) => a.d - b.d).slice(0, 6)
     .forEach(({ t, d }) => add(t.label, { type: 'target', id: t.id }, (t.id.startsWith('bed:') ? 3 : t.id === 'toby' || t.id === 'pump' ? 2 : 1.5) / (1 + d / 400)));
   if (!late) add('Cocinar algo en la cocina', { type: 'cook' }, 1.2);
   for (const k of Object.keys(PEOPLE)) if (TT >= (amb.mute[k] || 0) && PEOPLE[k].where !== 'away' && !(k === 'diana' && diana.follow)) add('Ir a conversar con ' + CH[k].article + NAMES[k] + ' (' + whereText(k) + ')', { type: 'talkto', k }, 3);
@@ -6816,6 +6816,8 @@ function planToTasks(me, plan, s0, C){
 }
 // a plan for one goal, made into tasks (its old tasks still to do are replaced)
 function goalPlan(ag, g){
+  // what was asked and done, but did not last (the cow wandered off again): it may be asked once more
+  if (!g.goal.test(wmNow())) for (const p of g.pending || []) if (p.h.st === 'done' && !p.reask) { p.reask = true; delete game.wm.facts['pedido:' + p.f.f + ':' + p.to + ':' + today()]; }
   const s = promised(ag, g, wmNow());
   ag.tasks = ag.tasks.filter(t => t.g !== g || t.st === 'done');
   if (g.goal.test(s) && !pendingOn(g)) { goalEnd(ag, g, 'done'); return false; }
