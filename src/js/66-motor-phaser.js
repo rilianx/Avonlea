@@ -9,7 +9,7 @@
      into its own little canvas, in the same order of depth. So it looks the same, and from here each kind of thing
      can move to real sprites (sheets) without touching the rest.
    - One clock: Phaser's own loop sleeps and the game steps it after each frame. ---------- */
-const PH = { on: false, ready: false, game: null, scene: null, R: 0, vivos: new Map(), sala: null };
+const PH = { on: false, ready: false, game: null, scene: null, R: 0, vivos: new Map(), hojas: new Map(), caras: new Map(), sala: null, motivo: {} };   // (motivo: why each one was drawn from a sheet or live, for the tests)
 (() => {
   if (/visor/.test(location.search)) return;
   const q = location.search.match(/motor=(phaser|canvas)/);
@@ -34,7 +34,49 @@ function phArrancar(){
     } } });
 }
 // everything baked is thrown away and made again on the next frame
-function phRepintar(){ if (!PH.scene) return; for (const V of PH.vivos.values()) { V.img.destroy(); PH.scene.textures.remove(V.tk); } PH.vivos.clear(); PH.sala = null; }
+function phRepintar(){
+  if (!PH.scene) return;
+  for (const V of PH.vivos.values()) { V.img.destroy(); PH.scene.textures.remove(V.tk); } PH.vivos.clear(); PH.sala = null; PH.fuego?.destroy(); PH.fuego = null;
+  for (const H of PH.hojas.values()) PH.scene.textures.remove(H.tk); PH.hojas.clear();
+  for (const C of PH.caras.values()) C.img.destroy(); PH.caras.clear();
+}
+/* ---------- the people from sheets (step 2): each pose drawn once, the first time it is needed, by the same code ----------
+   A person standing, walking or bending down, quiet, is shown from a strip of her direction (standing, 8 steps, bending
+   down; one strip for each of 5 degrees of running); anything else (talking, blinking, sitting, lying, the gesture of the braid, a face) is still drawn live,
+   so it looks as always. Her drawing also keeps her own clocks (where she faces, when she throws her braid back): so it
+   still runs every frame, on a canvas that paints nothing, and costs almost nothing. */
+const NULO = new Proxy({}, {   // (a canvas that paints nothing: every method does nothing, every property is kept)
+  get: (o, k) => k in o ? o[k] : k === 'createLinearGradient' || k === 'createRadialGradient' || k === 'createPattern' ? () => ({ addColorStop(){} }) : k === 'measureText' ? () => ({ width: 0 }) : k === 'getTransform' ? () => new DOMMatrix() : () => {},
+  set: (o, k, v) => { o[k] = v; return true; } });
+const HOJA_BOX = [-30, -96, 30, 16];   // (around the feet: hat and hair up top, the shadow below; a person standing, walking or bending down)
+const phLlana = (b, t) => !b.lie && !b.sit && !b.carry && !b.pet && !(b.petted > 0) && !b.face && !b.askew && !b.torn && !(Math.abs(b.lookAround || 0) > .1) && !(b.blink > 0) && !(b.flick && t - b.flick < 1.1) && !isTalking(b) && !b.noShadow && !!LOOKS[b.look];   // (the braid's gesture lasts 1.1 s)
+// how she is drawn depends on these: if one changes (her look, the season, the style), new strips
+const phFirma = b => b.look + '|' + JSON.stringify(LOOKS[b.look]) + '|' + S + '|' + ANA_STYLE + '|' + VEC_ON + '|' + (typeof FACE_STYLE === 'undefined' ? '' : FACE_STYLE) + '|' + (b.look === 'ana' && !!game.wm?.perm?.pelo_verde);
+function phHoja(b, key, depth, t){
+  if (!phLlana(b, t) || PH.malas?.has(b.look)) return PH.motivo[key] = 'antes', false;
+  try { drawPerson(NULO, b, t); } catch (e) { (PH.malas ??= new Set()).add(b.look); console.debug('[avonlea phaser] sin hoja para', b.look, e.message); return false; }   // (her clocks)
+  if (!phLlana(b, t)) return PH.motivo[key] = 'después', false;
+  PH.motivo[key] = 'hoja';
+  const q = b.dir8 ?? [0, 2, 4, 6][b.dir] ?? 4, col = b.crouch ? 9 : b.moving ? 1 + ((Math.floor(b.walk * 8) % 8) + 8) % 8 : 0;
+  const corre = Math.round(clamp(((b._spd || 0) - 34) / 46, 0, 1) * 4) / 4;   // (how much she runs: the arms and the braids open; 5 degrees)
+  const fk = phFirma(b) + '|' + (b.braidBack ? 1 : 0) + '|' + q + '|' + corre + '|' + PH.R;
+  let H = PH.hojas.get(fk);
+  const R = PH.R, fw = Math.ceil((HOJA_BOX[2] - HOJA_BOX[0]) * R), fh = Math.ceil((HOJA_BOX[3] - HOJA_BOX[1]) * R);
+  if (!H) { const tk = 'h' + (PH.seq = (PH.seq || 0) + 1); H = { tk, tex: PH.scene.textures.createCanvas(tk, fw * 10, fh), hecho: [] }; PH.hojas.set(fk, H); }
+  if (!H.hecho[col]) {   // (this pose, drawn the first time: a person like her, still, in that pose)
+    const cx = col * fw - HOJA_BOX[0] * R, a = (q - 2) * Math.PI / 4, X = -HOJA_BOX[0], Y = -HOJA_BOX[1];
+    const tp = Object.assign(mkPerson(b.look, X, Y), { dir: b.dir, dir8: q, n: b.n, braidBack: b.braidBack, _bstill: 0, _bwait: 1e9, _spd: corre ? 34 + corre * 46 : 0 });
+    if (col >= 1 && col <= 8) { tp.moving = true; tp.walk = (col - 1) / 8; tp._fx = X - Math.cos(a); tp._fy = Y - Math.sin(a); }
+    else { tp._fx = X; tp._fy = Y; tp._fd = tp.dir; tp.crouch = col === 9; }
+    const c = H.tex.getContext(); c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.beginPath(); c.rect(col * fw, 0, fw, fh); c.clip(); c.setTransform(R, 0, 0, R, col * fw, 0);
+    const pant = g; g = c; try { drawPerson(c, tp, t); } finally { g = pant; c.restore(); }
+    H.tex.add(String(col), 0, col * fw, 0, fw, fh); H.tex.refresh(); H.hecho[col] = true;
+  }
+  let C = PH.caras.get(key);
+  if (!C) { C = { img: PH.scene.add.image(0, 0, H.tk, String(col)).setOrigin(0) }; PH.caras.set(key, C); }
+  C.img.setTexture(H.tk, String(col)).setPosition(b.x + HOJA_BOX[0], b.y + HOJA_BOX[1]).setScale(1 / R).setDepth(depth).setVisible(true); C.usado = PH.cuadro;
+  return true;
+}
 // does Phaser draw this place? (and shows its canvas, or hides it)
 function phNativo(interior){
   const si = PH.ready && interior && !!ROOMS[game.scene];
@@ -77,6 +119,13 @@ function phSala(v){
     });
   } else muebles.forEach((m, j) => { const V = PH.vivos.get('mueble:' + j); if (V) V.usado = PH.cuadro; });
 }
+// the little lives of a room that its baked image cannot have: the fire in the stove flickers
+function phEfectos(v){
+  let F = PH.fuego;
+  if (game.scene !== 'gg') { F?.setVisible(false); return; }
+  if (!F || !F.scene) F = PH.fuego = PH.scene.add.rectangle(STOVE.x, STOVE.y - 15, 20, 14, 0xff8c3c, .9);
+  F.setFillStyle(Phaser.Display.Color.GetColor(255, Math.round(130 + 50 * Math.sin(v.t * 6)), 60), .9).setDepth(-1e8).setVisible(true);
+}
 // one frame of the world under Phaser: the camera where the game's view is, the room, and each thing of the list
 function phMundo(list, v){
   const sc = PH.scene, dpr = v.dpr, cw = Math.round(v.W * dpr), ch = Math.round(v.H * dpr);
@@ -86,7 +135,9 @@ function phMundo(list, v){
   PH.cuadro = (PH.cuadro || 0) + 1;
   const cam = sc.cameras.main; cam.setZoom(v.Z * dpr); cam.centerOn(v.ox + v.W / v.Z / 2, v.oy + v.H / v.Z / 2);
   phSala(v);
-  list.forEach((o, i) => { const p = o.ph || { key: 'suelto:' + i, at: [0, 0], box: [0, 0, KIT.w, KIT.h] }; phVivo(p.key, p.at, p.box, o.y + i * 1e-6, o.draw); });
+  list.forEach((o, i) => { const p = o.ph || { key: 'suelto:' + i, at: [0, 0], box: [0, 0, KIT.w, KIT.h] }; if (!(p.persona && !PH.sinHojas && phHoja(p.persona, p.key, o.y + i * 1e-6, v.t))) phVivo(p.key, p.at, p.box, o.y + i * 1e-6, o.draw); });
+  for (const [k, C] of PH.caras) if (C.usado !== PH.cuadro) C.img.setVisible(false);   // (drawn live this frame, or gone)
+  phEfectos(v);
   for (const [k, V] of PH.vivos) if (V.usado !== PH.cuadro) {
     if (k.startsWith('mueble:') || k === 'fondo') { V.img.destroy(); sc.textures.remove(V.tk); PH.vivos.delete(k); }   // (another room's)
     else if (PH.cuadro - V.usado > 600) { V.img.destroy(); sc.textures.remove(V.tk); PH.vivos.delete(k); }   // (not seen for a while: its memory back)

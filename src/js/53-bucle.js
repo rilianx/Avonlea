@@ -174,8 +174,8 @@ function renderView(){
   const list = [];
   if (inside) {
     const I = ROOMS[game.scene]; if (!PH_NATIVO) { I.draw(g, t, night); list.push(...I.items(g, t)); }   // (under Phaser the room and its furniture are its own images)
-    for (const k of Object.keys(PEOPLE)) if (sceneOf(k) === game.scene) list.push({ y: PEOPLE[k].y, ph: { key: 'p:' + k, at: [PEOPLE[k].x, PEOPLE[k].y], box: PERSONA_BOX }, draw: () => drawPerson(g, PEOPLE[k], t) });
-    for (const f of FOLK) if (f.where === game.scene) list.push({ y: f.y + (f.sit ? 6 : 0), ph: { key: 'f:' + f.id, at: [f.x, f.y], box: PERSONA_BOX }, draw: () => drawPerson(g, f, t) });
+    for (const k of Object.keys(PEOPLE)) if (sceneOf(k) === game.scene) list.push({ y: PEOPLE[k].y, ph: { key: 'p:' + k, at: [PEOPLE[k].x, PEOPLE[k].y], box: PERSONA_BOX, persona: PEOPLE[k] }, draw: () => drawPerson(g, PEOPLE[k], t) });
+    for (const f of FOLK) if (f.where === game.scene) list.push({ y: f.y + (f.sit ? 6 : 0), ph: { key: 'f:' + f.id, at: [f.x, f.y], box: PERSONA_BOX, persona: f }, draw: () => drawPerson(g, f, t) });
     for (const it of game.ground) if (it.scene === game.scene) list.push({ y: it.y, ph: { key: 'suelo:' + game.ground.indexOf(it), at: [it.x, it.y], box: [-24, -30, 24, 12] }, draw: () => drawGround(g, it) });
   } else if (road) {
     roadView(g, ox, oy, vw, vh, t, night, list);
@@ -243,7 +243,7 @@ function renderView(){
   }
   const anaHere = RENDER_REAL === game.scene;
   if (anaHere && sipping()) list.push({ y: ana.y + .2, ph: { key: 'taza', at: [ana.x, ana.y], box: PERSONA_BOX }, draw: () => drawCup(g, ana) });
-  if (anaHere && !ana.hidden) list.push({ y: ana.sortY ?? ana.y + (ana.sit && !inside ? 6 : 0), ph: { key: 'ana', at: [ana.x, ana.y], box: PERSONA_BOX }, draw: () => { drawPerson(g, ana, t); if (realR.fact('adorno:ana') && !ana.lie && !ana.sit && LOOKS.ana.hat) ACC_OBJ.sombrero.f(g, ana); } });   // (with the wreath of flowers on her hat, the day she made it)
+  if (anaHere && !ana.hidden) list.push({ y: ana.sortY ?? ana.y + (ana.sit && !inside ? 6 : 0), ph: { key: 'ana', at: [ana.x, ana.y], box: PERSONA_BOX, persona: realR.fact('adorno:ana') ? null : ana }, draw: () => { drawPerson(g, ana, t); if (realR.fact('adorno:ana') && !ana.lie && !ana.sit && LOOKS.ana.hat) ACC_OBJ.sombrero.f(g, ana); } });   // (with the wreath of flowers on her hat, the day she made it)
   accPush(list, g, t);   // (what each one is doing, with its things)
   if (toby.where === game.scene) list.push({ y: toby.y, ph: { key: 'toby', at: [toby.x, toby.y], box: [-30, -44, 30, 14] }, draw: () => { g.save(); g.translate(toby.x, toby.y); g.scale(1.6, 1.6); drawCat(g, { ...toby, x: 0, y: 0 }, t); if (!toby.moving && toby.sleep && toby.mode !== 'ana') { g.fillStyle = 'rgba(70,50,30,.6)'; g.font = 'italic 6px Georgia, serif'; g.fillText('z', 6, -16 - (t * 3 % 4)); } g.restore(); } });
   if (OBS) { const b = wmBody(OBS); if (b && !b.lie) list.push({ y: 1e9, ph: { key: 'obs', at: [b.x, b.y], box: [-12, -110, 12, 0] }, draw: () => { const hy = b.y - 50 * (LOOKS[b.look]?.h || 1) - 4 + Math.sin(t * 4) * 1.5; blob(g, [[b.x - 5, hy - 7], [b.x + 5, hy - 7], [b.x, hy]], '#e0a030'); } }); }   // (a little arrow over whoever is watched)
