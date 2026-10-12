@@ -3518,16 +3518,37 @@ function setAnaState(k, on = true){
   if (on) { game.anaStates[k] = true; anaSays(ANA_STATES[k].say); logEv('Ana ' + ANA_STATES[k].desc + '.'); } else delete game.anaStates[k];
   save();
 }
+// the menu when Ana is touched: what the book's Ana could do here (from the planner), in a few groups so that a long
+// list does not swamp it (the ones that serve what she has to do first), and what to do with what she carries
+const ACC_GRUPOS = [
+  ['🏠 Quehaceres', ['quehacer', 'coser', 'batir', 'ordeñar', 'alimentar', 'sembrar', 'regar', 'hacer_heno', 'partir_lena', 'decorar_sala']],
+  ['📖 Leer y escribir', ['estudiar', 'leer', 'escribir_carta', 'enviar_carta', 'escribir_cuento', 'ensayar', 'recitar', 'actuar', 'rezar']],
+  ['🌸 Jugar e imaginar', ['trineo', 'patinar', 'remar', 'nombrar', 'trepar']],
+  ['🎀 Arreglarme', ['teñir', 'cortar_pelo', 'adornar']],
+];
+const cap = s => s[0].toUpperCase() + s.slice(1);
 function anaMenu(){
-  const opts = jugables().map(a => ['✨ ' + stepText(a)[0].toUpperCase() + stepText(a).slice(1), () => jugar(a)]);   // (what the book's Ana could do here)
-  for (const k of Object.keys(game.anaStates)) if (ANA_STATES[k].fix) opts.push([ANA_STATES[k].fix, () => { close(); setAnaState(k, false); }]);
-  if (game.inv.te > 0) opts.push(['☕ Tomar la taza de té', sipTea]);
-  if (game.scene === 'out' && (S !== 3 || ana.lie)) opts.push([ana.lie ? 'Levantarse' : '🌿 Recostarme en el pasto', () => { close(); if (ana.lie) { ana.lie = false; return; } if (nearPath(ana.x, ana.y, 26)) return anaSays('Aquí es camino... busco un pedacito de pasto.'); if (underTree(ana.x, ana.y)) return anaSays('Aquí el árbol me tapa el cielo... busco un lugar con más nubes.'); ana.lie = true; ana.sit = false; ana.goto = null; ana.dir = 2; logEv('Ana se recostó en el pasto a mirar las nubes.'); }]);
-  if (game.hasCan) opts.push(['Dejar la regadera', () => dropItem('can')]);
-  for (const k of ITEMS) if (game.inv[k] > 0) opts.push(['Dejar ' + itemText(k, game.inv[k]), () => dropItem(k)]);
-  if (!opts.length) { float('No llevo nada en las manos', ana.x, ana.y - 60); return; }
-  opts.push(['Nada', close]);
-  say('Ana', opts.some(o => o[0].startsWith('✨')) ? '¿Qué hago?' : '¿Qué hago con lo que llevo?', opts);
+  const J = jugables(), mine = [];
+  for (const k of Object.keys(game.anaStates)) if (ANA_STATES[k].fix) mine.push([ANA_STATES[k].fix, () => { close(); setAnaState(k, false); }]);
+  if (game.inv.te > 0) mine.push(['☕ Tomar la taza de té', sipTea]);
+  if (game.scene === 'out' && (S !== 3 || ana.lie)) mine.push([ana.lie ? 'Levantarse' : '🌿 Recostarme en el pasto', () => { close(); if (ana.lie) { ana.lie = false; return; } if (nearPath(ana.x, ana.y, 26)) return anaSays('Aquí es camino... busco un pedacito de pasto.'); if (underTree(ana.x, ana.y)) return anaSays('Aquí el árbol me tapa el cielo... busco un lugar con más nubes.'); ana.lie = true; ana.sit = false; ana.goto = null; ana.dir = 2; logEv('Ana se recostó en el pasto a mirar las nubes.'); }]);
+  if (game.hasCan) mine.push(['Dejar la regadera', () => dropItem('can')]);
+  for (const k of ITEMS) if (game.inv[k] > 0) mine.push(['Dejar ' + itemText(k, game.inv[k]), () => dropItem(k)]);
+  if (!J.length && !mine.length) { float('No llevo nada en las manos', ana.x, ana.y - 60); return; }
+  const act = a => [cap(stepText(a)), () => jugar(a)];
+  const plan = new Set((AGENTS.ana?.tasks || []).filter(t => t.st !== 'done' && t.st !== 'skip').map(t => t.a.v + ':' + (t.a.k || t.a.x || '')));
+  const sug = J.filter(a => plan.has(a.v + ':' + (a.k || a.x || '')));   // (what serves the goals she has)
+  if (J.length + mine.length <= 6) return say('Ana', '¿Qué hago?', [...J.map(a => { const [l, f] = act(a); return ['✨ ' + l, f]; }), ...mine, ['Nada', close]]);
+  // more than that: by groups (with someone; chores; reading and writing; play; dressing up; what she carries)
+  const groups = [];
+  if (sug.length) groups.push(['⭐ Lo que me toca', sug]);
+  const rest = J.filter(a => !sug.includes(a));
+  for (const k of [...new Set(rest.filter(a => a.k).map(a => a.k))]) groups.push(['👭 Con ' + wmName(k), rest.filter(a => a.k === k)]);
+  for (const [name, vs] of ACC_GRUPOS) groups.push([name, rest.filter(a => !a.k && vs.includes(a.v))]);
+  groups.push(['✨ Otras cosas', rest.filter(a => !a.k && !ACC_GRUPOS.some(([, vs]) => vs.includes(a.v)))]);
+  const top = groups.filter(([, L]) => L.length).map(([name, L]) => L.length === 1 ? [(name.startsWith('⭐') ? '⭐ ' : '✨ ') + act(L[0])[0], act(L[0])[1]] : [name + ' (' + L.length + ')', () => say('Ana', name.replace(/^\S+ /, '') + ':', [...L.map(act), ['← Volver', anaMenu]])]);
+  if (mine.length) top.push(['👜 Lo que llevo (' + mine.length + ')', () => say('Ana', '¿Qué hago con lo que llevo?', [...mine, ['← Volver', anaMenu]])]);
+  say('Ana', '¿Qué hago?', [...top, ['Nada', close]]);
 }
 function dropItem(k){
   const x = ana.x + (ana.dir === 3 ? -14 : 14), y = ana.y + 3;

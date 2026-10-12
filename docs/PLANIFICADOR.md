@@ -190,6 +190,14 @@ Cada personaje (`agentOf`) tiene hasta **3 metas activas** (`MAX_GOALS`), y sus 
   - en su pieza con el tinte: «✨ Teñirse el pelo»;
   - en la cocina: los quehaceres, estudiar, rezar, escribir una carta o un cuento, pedirle permiso a Marilla.
 
+  Si hay más de seis opciones, el menú las agrupa:
+  - **⭐ Lo que me toca:** lo que sirve para las metas que tiene Ana (está en su plan);
+  - **👭 Con Diana**, **con Marilla**…: lo que se hace con alguien;
+  - **🏠 Quehaceres**, **📖 Leer y escribir**, **🌸 Jugar e imaginar**, **🎀 Arreglarme**, **✨ Otras cosas**;
+  - **👜 Lo que llevo:** dejar cosas, el té, la regadera.
+
+  Un grupo con una sola cosa se muestra directo, y cada grupo tiene «← Volver».
+
   La primera vez del día que Ana llega a un lugar donde puede hacer algo así, aparece un aviso («✨ Aquí Ana podría…»). Lo que el jugador ya hace a su manera (recoger, comprar, cocinar, regalar, pedir, la vaca) no se repite en ese menú. Regar con la regadera también cuenta como regar la huerta. Si el jugador mueve a Ana, deja lo que estaba haciendo.
 - **Lugares de las acciones:** Ana se tiñe el pelo en **su pieza, frente al espejo** (el lugar `pieza`, arriba en Tejas Verdes), no en la cocina. Quien está enfermo **guarda cama en su casa**, bajo una colcha, y quien lo cuida va hasta la cabecera.
 - **Quedarse:** una meta `estar_en` con `quedar` (ir a clases: llegar antes de las 9 y quedarse hasta las 12, `CLASES_FIN`) no termina al llegar. El personaje entra y se queda (`stayTick`), sus otras metas esperan, y a esa hora la meta se da por cumplida.
