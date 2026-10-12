@@ -189,6 +189,7 @@ El juego sigue siendo **un solo archivo**, `index.html`, para que el link funcio
 - `src/js/NN-nombre.js`: el código, en 68 partes que se juntan en orden, una sección cada una (`00-base.js` … `67-visor.js`). Por ejemplo: `59-agentes.js`, `61-acciones-vista.js`, `62-cartas.js`, `63-jugar.js`.
 - `src/datos/guion.txt`: el guion de las escenas.
 - `src/datos/libro1.json`: el texto del libro para el capítulo 1.
+- `src/mapas/*.tmj`: los mapas, dibujados en [Tiled](https://www.mapeditor.org/): Avonlea entero (`avonlea.tmj`) y los interiores (`cocina`, `pieza`, `salita`, `salon`). Cómo editarlos: [docs/MAPAS.md](docs/MAPAS.md).
 
 Para cambiar algo: editar en `src/`, correr `node tools/build.js` y probar. `node tools/build.js --check` avisa si `index.html` no coincide con `src/`.
 

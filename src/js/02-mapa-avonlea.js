@@ -6,47 +6,30 @@
    - COAST: the line where the land ends (the sea lies north and east of it); ROADS: named lines; RIVERS: their lines and
      bridges; WOODS: ellipses of trees; LUPINS: pink fields; BUILDINGS: houses one does not enter (a style and a name);
      MOMENTS: someone says something when Ana passes by. The houses one enters are in HOUSES (with their place here).
-   To add anything: a line here. ---------- */
-const MAP = {
-  coast: [[0, 9], [12, 10.2], [22, 9.4], [30, 10.4], [40, 9.2], [50, 10], [60, 9.6], [66, 8], [70.5, 9.6], [74, 13.5], [79, 17.5], [84, 24], [88.5, 33], [92, 43], [94.5, 52], [96, 55]],
-  places: { gg: [22, 64], os: [60, 64], barn: [15.5, 62.6], lake: [44, 57.5], ly: [30.5, 49.6], hh: [10.5, 72], avena: [12.6, 66.6], station: [9, 14.6], iglesia: [16, 22.2], escuela: [45.5, 40.6], tienda: [46.8, 27], town: [96, 60] },
-  roads: {
-    estacion: [[9.4, 15.4], [14, 18.4], [20, 23], [28, 26.4], [36, 28.8], [44, 30]],
-    sur: [[44, 30], [41.5, 35], [37, 40], [33, 45], [30, 50.6], [26, 57], [22.6, 63.6]],
-    escuela: [[41.5, 35], [44, 38.2], [45.3, 40.8]],
-    hotel: [[44, 30], [41, 23], [37.5, 16], [35, 13.2]],
-    asilo: [[41, 23], [43.4, 19.6]],
-    iglesia: [[20, 23], [16.6, 22.8]],
-    este: [[44, 30], [56, 30], [64, 31.2], [72, 35], [80, 44.6], [87, 53], [96, 60]],
-    faro: [[64, 31.2], [67.6, 22], [70.2, 12.6]],
-    blanco: [[22.6, 64.4], [30, 66.2], [38, 66.6], [47, 66.2], [54, 65.6], [60, 64.8]],   // the White Way of Delight
-    lago: [[40, 66.4], [41.5, 61.6]],
-    laguna: [[33, 45], [35.5, 51], [37, 56.5], [38.6, 60.6], [41.5, 61.6]],   // (past Barry's pond: the way Matthew brings Ana home)
-  },
-  rivers: [
-    { name: 'el río', pts: [[60.5, 9.8], [58.6, 18], [56, 30], [52.6, 36], [48.2, 41.4], [45.4, 48], [44, 53.4]], bridges: [{ at: [56, 30], covered: true }] },
-    { name: 'el arroyo', pts: [[46, 61.4], [47, 66.2], [48.6, 74], [50, 84]], bridges: [{ at: [47, 66.2] }] },
-  ],
-  woods: [{ name: 'el Bosque Encantado', at: [38, 74], r: [9, 5.5], pines: .85, haunted: true }, { name: 'el bosque de Peg Bowen', at: [12, 48], r: [7, 6], pines: .6 },
-    { name: 'el bosque de los Cuthbert', at: [16, 55], r: [3.5, 3], pines: .5 }, { name: 'el bosque', at: [76, 40], r: [4, 3.5], pines: .5 }, { name: 'el bosque', at: [86, 70], r: [6, 6], pines: .6 }],
-  lupins: [{ at: [22, 18.6], r: [5, 2.6] }],
-  buildings: [
-    { style: 'hotel', at: [35, 12.4], name: 'Hotel White Sands' }, { style: 'faro', at: [70.6, 11.8], name: 'El faro' },
-    { style: 'salon', at: [36.6, 27.4], name: 'Ayuntamiento' }, { style: 'casa', at: [33.8, 31.8], name: 'Casa de los Pettibone' }, { style: 'tienda', at: [40.2, 26.8], name: 'La Crónica de Avonlea' },
-    { style: 'casa', at: [38.6, 33.6], name: 'Casa de los Potts' }, { style: 'herreria', at: [48, 33.4], name: 'Herrería' },
-    { style: 'casa', at: [51.4, 27.2], name: 'Pensión' }, { style: 'galpon', at: [66.4, 19.6], name: 'Fábrica de conservas' }, { style: 'casa', at: [60.4, 27], name: 'Casa de Jasper' },
-    { style: 'casa', at: [60.6, 36.6], name: 'Rose Cottage' }, { style: 'granja', at: [38.4, 39], name: 'Granja King' }, { style: 'casa', at: [10.4, 46.4], name: 'Casa de Peg Bowen' },
-    { style: 'casa', at: [82, 46.4], name: 'Casa de los Blythe' }, { style: 'salon', at: [43.6, 19.2], name: 'El asilo' },
-    { style: 'casa', at: [40.6, 45], name: 'Casa de los Pye' }, { style: 'casa', at: [69.6, 32.4], name: 'Casa de los Gillis' }, { style: 'granja', at: [76.6, 38.6], name: 'Granja Andrews' },
-    { style: 'granja', at: [24.6, 23.4], name: 'Granja Sloane' }, { style: 'casa', at: [12.4, 23.6], name: 'Casa parroquial' }, { style: 'casa', at: [68.2, 13.6], name: 'Casa del farero' },
-  ],
+   To add anything: draw it in Tiled (see docs/MAPAS.md); a moment: a line here. ---------- */
+// the geometry is drawn in Tiled (src/mapas/avonlea.tmj, 1 tile = 1 unit U): the coast, the roads, the rivers and their
+// bridges, the woods and the lupins, the buildings (their style is the object's type) and the places; here it is read
+// back in units, as it always was. The moments stay here: they are words, not places.
+const MAP = (() => {
+  const M = MAPAS.avonlea, r = v => Math.round(v / U * 1e4) / 1e4, L = n => M.layers.find(l => l.name === n).objects;
+  const pts = o => o.polyline.map(p => [r(o.x + p.x), r(o.y + p.y)]), at = o => [r(o.x), r(o.y)], prop = (o, k) => o.properties?.find(p => p.name === k)?.value;
+  const mid = o => [r(o.x + o.width / 2), r(o.y + o.height / 2)], rad = o => [r(o.width / 2), r(o.height / 2)], rios = L('rios'), bos = L('bosques');
+  return {
+  coast: pts(L('costa')[0]),
+  places: Object.fromEntries(L('lugares').map(o => [o.name, at(o)])),
+  roads: Object.fromEntries(L('caminos').map(o => [o.name, pts(o)])),
+  rivers: rios.filter(o => o.type === 'rio').map(o => ({ name: o.name, pts: pts(o), bridges: rios.filter(b => b.type === 'puente' && prop(b, 'rio') === o.name).map(b => ({ at: at(b), ...(prop(b, 'techado') ? { covered: true } : {}) })) })),
+  woods: bos.filter(o => o.type === 'bosque').map(o => ({ name: o.name, at: mid(o), r: rad(o), pines: prop(o, 'pinos'), ...(prop(o, 'embrujado') ? { haunted: true } : {}) })),
+  lupins: bos.filter(o => o.type === 'lupinos').map(o => ({ at: mid(o), r: rad(o) })),
+  buildings: L('edificios').map(o => ({ style: o.type, at: at(o), name: o.name })),
   moments: [
     { at: [22, 19.6], estaciones: [0, 1, 2], lines: [['ana', '¡Señor Matthew! ¡Señor Matthew!'], ['matthew', '¿Qué... qué pasa, Ana?'], ['ana', '¡Mire! ¡Todo el campo se volvió rosado! ¿No le dan ganas de llorar de lo hermoso que es?'], ['matthew', 'Bueno, pues... es muy bonito, sí. Ya lo creo.']] },
     { at: [56, 30], lines: [['ana', '¡Un puente con techo! Es como cruzar el río por adentro de una caja de música.']] },
     { at: [12, 16.6], lines: [['ana', '¡El mar! ¡Y la arena es roja! Parece que la isla se hubiera puesto colorada.']] },
     { at: [34, 66.4], estaciones: [0], lines: [['ana', 'El Camino Blanco de las Delicias... cada vez que paso me dan ganas de hablar en voz baja, como en una iglesia.']] },
   ],
-};
+  };
+})();
 const mU = ([x, y]) => [x * U, y * U];
 const segDist = (x, y, a, b) => { const dx = b[0] - a[0], dy = b[1] - a[1], t = clamp(((x - a[0]) * dx + (y - a[1]) * dy) / (dx * dx + dy * dy), 0, 1); return Math.hypot(x - a[0] - dx * t, y - a[1] - dy * t); };
 // (a quick lookup of segments by neighbourhood: is (x, y) within w of any of them?)
