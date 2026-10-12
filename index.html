@@ -3272,7 +3272,7 @@ function targets(){
       const id = 'bed:' + i, o = { hy: 4, hit: 24 }, say_ = text => () => float(text, b.x, b.y - 30);
       if (S === 3) add(id, b.x, b.y, 30, 'La huerta duerme bajo la nieve', say_('La huerta duerme bajo la nieve'), { ...o, pri: 50 });
       else if (b.stage >= 3) add(id, b.x, b.y, 30, 'Cortar ' + FLOWER_KINDS[b.kind][1], () => { b.stage = 1; game.inv.ramo++; logEv('Ana cortó ' + FLOWER_KINDS[b.kind][1] + ' de la huerta e hizo un ramo.'); float('+1 ramo de ' + FLOWER_KINDS[b.kind][1], b.x, b.y - 26); save(); }, o);
-      else if (game.hasCan && game.water > 0 && !b.wet) add(id, b.x, b.y, 30, 'Regar', () => { b.wet = 1; b.grow = 0; game.water--; logEv('Ana regó la huerta.'); taskEvent('regar'); drops(b.x, b.y); sfx.water(); save(); }, o);
+      else if (game.hasCan && game.water > 0 && !b.wet) add(id, b.x, b.y, 30, 'Regar', () => { b.wet = 1; b.grow = 0; game.water--; logEv('Ana regó la huerta.'); taskEvent('regar'); realR.setFact('sembrado'); realR.setFact('regado'); drops(b.x, b.y); sfx.water(); save(); }, o);
       else if (game.hasCan && game.water <= 0 && !b.wet) add(id, b.x, b.y, 30, 'La regadera está vacía (llénala en la bomba)', say_('La regadera está vacía: llénala en la bomba'), { ...o, pri: 50 });
     });
     add('h:br', HOUSES.br.at.x, HOUSES.br.at.y + 6, 30, 'El camino a Bright River (8 millas)', () => say('Ana', '¿Tomar el camino a Bright River a pie? Son ocho millas: más de tres horas caminando.', [['🚶 Vamos, paso a paso', () => { close(); roadOnFoot(1); }], ['Mejor no', close]]), { pri: 4, hy: 30, hit: 30 });
@@ -3519,7 +3519,7 @@ function setAnaState(k, on = true){
   save();
 }
 function anaMenu(){
-  const opts = [];
+  const opts = jugables().map(a => ['✨ ' + stepText(a)[0].toUpperCase() + stepText(a).slice(1), () => jugar(a)]);   // (what the book's Ana could do here)
   for (const k of Object.keys(game.anaStates)) if (ANA_STATES[k].fix) opts.push([ANA_STATES[k].fix, () => { close(); setAnaState(k, false); }]);
   if (game.inv.te > 0) opts.push(['☕ Tomar la taza de té', sipTea]);
   if (game.scene === 'out' && (S !== 3 || ana.lie)) opts.push([ana.lie ? 'Levantarse' : '🌿 Recostarme en el pasto', () => { close(); if (ana.lie) { ana.lie = false; return; } if (nearPath(ana.x, ana.y, 26)) return anaSays('Aquí es camino... busco un pedacito de pasto.'); if (underTree(ana.x, ana.y)) return anaSays('Aquí el árbol me tapa el cielo... busco un lugar con más nubes.'); ana.lie = true; ana.sit = false; ana.goto = null; ana.dir = 2; logEv('Ana se recostó en el pasto a mirar las nubes.'); }]);
@@ -3527,7 +3527,7 @@ function anaMenu(){
   for (const k of ITEMS) if (game.inv[k] > 0) opts.push(['Dejar ' + itemText(k, game.inv[k]), () => dropItem(k)]);
   if (!opts.length) { float('No llevo nada en las manos', ana.x, ana.y - 60); return; }
   opts.push(['Nada', close]);
-  say('Ana', '¿Qué hago con lo que llevo?', opts);
+  say('Ana', opts.some(o => o[0].startsWith('✨')) ? '¿Qué hago?' : '¿Qué hago con lo que llevo?', opts);
 }
 function dropItem(k){
   const x = ana.x + (ana.dir === 3 ? -14 : 14), y = ana.y + 3;
@@ -5522,7 +5522,7 @@ function update(dt){
   if (game.scene === 'camino' && ana.onCart && (mx || my || (ana.goto && !ana.goto.wm))) roadGetOff();   // (moving her: she gets down from the buggy)
   if (ANA_AUTO) { if (mx || my) { freeStart(); const v = 520 / (cam.zoom || 1) / (viewZoom || 1); freeCam.x += mx * v * dt; freeCam.y += my * v * dt; } mx = my = 0; }   // (on her own: the keys move the view)
   if (game.talk?.deadline && TT > game.talk.deadline && !sayOpen) { game.talk.deadline = 0; autoChoose(); }
-  autoTick(); cartTick(dt); roadTick(dt); buggyTick(); roadTalkTick(dt); dlgTick(dt); talkTick(dt); cap1Tick(); momentsTick(); folkTick(dt); faunaTick(dt); agentTick(dt); sickTick(); agendaTick(); wmApproachTick(dt); calledTick(); chatTick(dt); wmFollowTick();
+  autoTick(); cartTick(dt); roadTick(dt); buggyTick(); roadTalkTick(dt); dlgTick(dt); talkTick(dt); cap1Tick(); momentsTick(); folkTick(dt); faunaTick(dt); agentTick(dt); jugarTick(dt); sickTick(); agendaTick(); wmApproachTick(dt); calledTick(); chatTick(dt); wmFollowTick();
   ana.torn = !!game.anaStates.rasgado; ana.askew = !!game.anaStates.despeinada;
   ana.savoring = false;
   // walking to something she was sent to (a tap): by the A* path, and doing it on arrival
@@ -6553,7 +6553,7 @@ function verbs(s, me, C){
   if (C.kind === 'recito' && (here === 'escuela' || here === 'h:es') && (s.know[me] || []).includes('leccion') && !s.facts['recito:' + me]) add('recitar', 3, t => { t.facts['recito:' + me] = 1; });
   if (C.kind === 'rezo' && (here === W.cocina || here === 'iglesia') && !s.facts['rezo:' + me]) add('rezar', 3, t => { t.facts['rezo:' + me] = 1; });
   if (C.kind === 'adornado' && inv.ramo > 0 && !s.facts['adorno:' + me]) add('adornar', 2, t => { t.invs[me].ramo -= 1; t.facts['adorno:' + me] = 1; });
-  if (C.kind === 'remo' && here === 'lago' && !s.facts['remo:' + me]) add('remar', 15, t => { t.facts['remo:' + me] = 1; });
+  if (C.kind === 'remo' && here === 'lago' && !s.facts['invierno'] && !s.facts['remo:' + me]) add('remar', 15, t => { t.facts['remo:' + me] = 1; });
   if (C.kind === 'nombres' && me === 'ana' && NOMBRES_ANA[here] && !s.facts['nombre:' + here]) add('nombrar', 2, t => { t.facts['nombre:' + here] = 1; }, { p: here });
   // (from the book, second batch) letters and books, the story club, the concert, the farm, winter, the picnic, the dye, the dare
   const home = here === W.cocina || (here || '').startsWith('h:');
@@ -7222,12 +7222,51 @@ function sickTick(){
 // into the drawing: the things under the body (before it) and in its hands (after it)
 function accPush(list, g, t){
   for (const [k, b] of Object.entries(PEOPLE)) if (b.bed && b.where === game.scene) list.push({ y: b.y - 1, draw: () => { const x = b.x - 6, y = b.y + 2; blob(g, [[x - 34, y - 26], [x + 40, y - 26], [x + 40, y + 10], [x - 34, y + 10]], '#8a6040'); blob(g, [[x - 30, y - 22], [x + 36, y - 22], [x + 36, y + 6], [x - 30, y + 6]], '#f6f0e4'); ell(g, x - 22, y - 8, 9, 6, '#ffffff', true); } }, { y: b.y + 1, draw: () => { const x = b.x - 6, y = b.y + 2; blob(g, [[x - 8, y - 20], [x + 36, y - 20], [x + 36, y + 6], [x - 8, y + 6]], '#c86a5a'); for (let i = 0; i < 4; i++) line(g, [[x - 8 + i * 11, y - 20], [x - 8 + i * 11, y + 6]], 'rgba(255,240,220,.6)', 1, i); } });   // (the bed, and the quilt over the sick one)
-  for (const ag of Object.values(AGENTS)) {
+  for (const ag of [...Object.values(AGENTS), ...(game.playAct ? [game.playAct] : [])]) {
     const A = ag.acting; if (!A) continue; if (ag.task !== A.task) { accEnd(ag); continue; } const k = ag.who, b = wmBody(k); if (!b || (k === 'ana' ? RENDER_REAL !== game.scene : wmScene(k) !== game.scene)) continue;
     const O = ACC_OBJ[ACCION_VISTA[A.v].obj], y = b.sortY ?? b.y; if (!O) continue;
     if (O.u) list.push({ y: (A.v === 'merendar' ? A.base[1] : y) - .6, draw: () => O.u(g, b, A) });
     if (O.f) list.push({ y: y + 7, draw: () => O.f(g, b, A) });
   }
+}
+/* ---------- the player does what the planner can do: the same actions (verbs), offered where Ana is when she can do
+   them (touch Ana), and done the same way (wmExec, with their things and what they leave written: the goals count
+   them). Nothing is written twice: the menu asks the planner what is possible here. ---------- */
+const JUGABLE_TIPOS = ['visitar', 'devuelto', 'amigas', 'paces', 'sano', 'club', 'felicitar', 'consolado', 'picnic', 'quehaceres', 'alimentados', 'recito', 'rezo', 'adornado', 'remo', 'nombres', 'carta', 'leido', 'concierto', 'sala', 'huerta', 'patinar', 'trineo', 'teñido', 'pelo_corto', 'desafio'];
+const JUGABLE_NO = ['ir', 'tomar', 'recoger', 'dar', 'vender', 'cambiar', 'comprar', 'conversar', 'pedir', 'guiar', 'soltar', 'regañar', 'subir_calesa', 'interceder', 'cocinar', 'preparar', 'batir'];   // (these the player already has in her own way, or are not hers)
+function jugables(){
+  if (game.playAct || game.scene === 'camino') return [];
+  const s = wmNow(), here = s.pos.ana; if (!here) return [];
+  for (const k of WM_PEOPLE()) { const o = wmBody(k); if (k !== 'ana' && o && wmScene(k) === game.scene && dist(o.x, o.y, ana.x, ana.y) < 110) s.pos[k] = here; }   // (whoever is beside her counts as here)
+  const people = WM_PEOPLE().filter(k => k !== 'ana' && s.pos[k] === here), items = [...new Set([...Object.keys(THINGS), ...Object.keys(s.invs.ana || {})])];
+  const C = { places: [], pts: {}, people, items, favors: [], owner: {}, k: 'ana' }, out = [], seen = new Set();
+  for (const kind of JUGABLE_TIPOS) for (const v of verbs(s, 'ana', { ...C, kind })) {
+    if (JUGABLE_NO.includes(v.v)) continue;
+    const key = v.v + ':' + (v.k || '') + ':' + (v.x || '') + ':' + (v.p || ''); if (seen.has(key)) continue; seen.add(key);
+    const { eff, cost, ...a } = v; out.push(a);
+  }
+  return out;
+}
+function jugar(a){
+  close(); if (ana.goto) ana.goto = null; ana.sit = false;
+  game.playAct = { who: 'ana', a, st: {}, task: { a }, t0: TT };
+  game.playAct.task = game.playAct;   // (what accTick and accPush look at)
+  logEv('Ana decidió ' + stepText(a) + '.', []);
+}
+let jugT = 0;
+function jugarTick(dt){
+  if (!game.playAct && (jugT -= dt) < 0) {   // (now and then: can she do something of the book here? a little sign)
+    jugT = 1.5; const seen = game.jugVistos?.day === today() ? game.jugVistos : (game.jugVistos = { day: today(), k: [] });
+    const here = personKey('ana') + ':' + S, J = here && !seen.k.includes(here) ? jugables() : [];
+    if (J.length) { seen.k.push(here); notice('✨ Aquí Ana podría ' + J.slice(0, 2).map(stepText).join(' o ') + (J.length > 2 ? ', y más' : '') + ' (tócala)'); }   // (once a day for each place)
+  }
+  const P = game.playAct; if (!P) return;
+  if (lastInput > P.t0 + .3 && TT - lastInput < .3 && ana.moving && !ana.goto?.wm) { accEnd(P); game.playAct = null; return; }   // (the player moved her: she leaves it)
+  const r = wmExec(P, P.a, P.st, dt);
+  if (r === 'run') return;
+  game.playAct = null; if (ana.goto?.wm) ana.goto = null;
+  if (r === 'fail') float(P.st.why ? 'No pude: ' + P.st.why : 'No pude', ana.x, ana.y - 60);
+  save();
 }
 // --- doing each verb in the world (when the body has arrived): 'run' while it takes, 'ok', or 'fail'
 function wmExec(ag, a, st, dt){ const r = wmExec0(ag, a, st, dt); accTick(ag, a, st, r); return r; }
@@ -7793,7 +7832,7 @@ function loop(now){
   else { owed = Math.min(owed + Math.min(raw, .25) * k, 3 * k * .05 + 2); const t0 = performance.now(); while (owed > 1e-4 && performance.now() - t0 < 22) { const d = Math.min(.05, owed); update(d); owed -= d; } }
   FRAME++; tripBarDraw(); render(); islaDraw(); requestAnimationFrame(loop);
 }
-window.__avonlea = { DIALOGOS, dlgCtx, talks: () => TALKS, dlgGuion, dlgPanel, bubblesNow: () => bubbles, toby, cartSheet: (c, x, y, c8, t) => { const L = [], p = { look: 'matthew', x, y, c8, walk: 0, moving: false }; const [cx, cy] = [x, y]; pushCart(L, c, { x: cx, y: cy, c8, walk: 0, moving: true }, t); for (const [k, look] of [[0, 'matthew'], [1, 'ana']]) { const [sx, sy] = cartSeat(cx, cy, c8, k); L.push({ y: sy, draw: () => drawPerson(c, { ...mkPerson(look, sx, sy), sit: true, dir: c8Dir(c8) }, t) }); } L.sort((a, b) => a.y - b.y).forEach(o => o.draw()); }, startCap1, CAP1, LIBRO1, ROAD_TRAMOS, ROAD_MIN, roadTramo, islaToggle, DLG_BANK, startDay, setSeason, agendaData: () => AGENDA.map(e => ({ who: wmName(e.who), from: e.from, to: e.to, label: e.label, season: e.season, sunday: !!e.sunday, ana: !!(e.ana || e.who === 'ana'), cond: e.when ? String(e.when).replace(/^\(\) => /, '') : '' })), setAgenda: v => { AGENDA_ON = v; }, AGENDA, wmData: () => ({ THINGS, WHO, OFRECE, WP_NAME, TRADE, TREATS, LIBRETA, ITEM_NAME, MAX_GOALS, PACE, FOCO }), paintMapBase, doingText, wmName, wmBody, wmScene, WW, WH, setVec: v => { VEC_ON = v; }, setStyle: v => { ANA_STYLE = v; }, setHead: setHeadM, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+window.__avonlea = { jugables, jugar, anaMenu, playAct: () => game.playAct, DIALOGOS, dlgCtx, talks: () => TALKS, dlgGuion, dlgPanel, bubblesNow: () => bubbles, toby, cartSheet: (c, x, y, c8, t) => { const L = [], p = { look: 'matthew', x, y, c8, walk: 0, moving: false }; const [cx, cy] = [x, y]; pushCart(L, c, { x: cx, y: cy, c8, walk: 0, moving: true }, t); for (const [k, look] of [[0, 'matthew'], [1, 'ana']]) { const [sx, sy] = cartSeat(cx, cy, c8, k); L.push({ y: sy, draw: () => drawPerson(c, { ...mkPerson(look, sx, sy), sit: true, dir: c8Dir(c8) }, t) }); } L.sort((a, b) => a.y - b.y).forEach(o => o.draw()); }, startCap1, CAP1, LIBRO1, ROAD_TRAMOS, ROAD_MIN, roadTramo, islaToggle, DLG_BANK, startDay, setSeason, agendaData: () => AGENDA.map(e => ({ who: wmName(e.who), from: e.from, to: e.to, label: e.label, season: e.season, sunday: !!e.sunday, ana: !!(e.ana || e.who === 'ana'), cond: e.when ? String(e.when).replace(/^\(\) => /, '') : '' })), setAgenda: v => { AGENDA_ON = v; }, AGENDA, wmData: () => ({ THINGS, WHO, OFRECE, WP_NAME, TRADE, TREATS, LIBRETA, ITEM_NAME, MAX_GOALS, PACE, FOCO }), paintMapBase, doingText, wmName, wmBody, wmScene, WW, WH, setVec: v => { VEC_ON = v; }, setStyle: v => { ANA_STYLE = v; }, setHead: setHeadM, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
 /* ---------- the viewer (index.html?visor): only Ana, big, on a plain floor, to look at the drawings and move her:
    arrows (Shift to run), and buttons for everything she can do. ---------- */
 function startVisor(){

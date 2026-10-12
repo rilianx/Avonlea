@@ -184,6 +184,13 @@ Cada personaje (`agentOf`) tiene hasta **3 metas activas** (`MAX_GOALS`), y sus 
   - **lo que queda:** el pelo verde después del tinte; corto, sin trenzas, después de que Marilla lo corta; la corona de flores en el sombrero el resto del día.
 
   `wmExec` marca quién está haciendo qué (`ag.acting`) y el dibujo lo lee (`accPush`). Para que una acción nueva se vea, basta una línea en `ACCION_VISTA` y, si usa un objeto nuevo, su dibujo en `ACC_OBJ`.
+- **El jugador puede hacer lo mismo** (`jugables`, `jugar`): al tocar a Ana, su menú le pregunta al planificador qué acciones del libro puede hacer donde está, con lo que lleva y con quien tiene al lado (`verbs`, el mismo que usa la búsqueda), y las ofrece con ✨. Al elegir una, se hace con el mismo `wmExec`: los mismos objetos y el mismo movimiento, y anota los mismos hechos, así que las metas la cuentan. Ejemplos:
+  - junto al lago con la canasta, el permiso y Diana al lado: «✨ Merendar en el lago con Diana»;
+  - en la colina nevada: «✨ Tirarse en trineo»;
+  - en su pieza con el tinte: «✨ Teñirse el pelo»;
+  - en la cocina: los quehaceres, estudiar, rezar, escribir una carta o un cuento, pedirle permiso a Marilla.
+
+  La primera vez del día que Ana llega a un lugar donde puede hacer algo así, aparece un aviso («✨ Aquí Ana podría…»). Lo que el jugador ya hace a su manera (recoger, comprar, cocinar, regalar, pedir, la vaca) no se repite en ese menú. Regar con la regadera también cuenta como regar la huerta. Si el jugador mueve a Ana, deja lo que estaba haciendo.
 - **Lugares de las acciones:** Ana se tiñe el pelo en **su pieza, frente al espejo** (el lugar `pieza`, arriba en Tejas Verdes), no en la cocina. Quien está enfermo **guarda cama en su casa**, bajo una colcha, y quien lo cuida va hasta la cabecera.
 - **Quedarse:** una meta `estar_en` con `quedar` (ir a clases: llegar antes de las 9 y quedarse hasta las 12, `CLASES_FIN`) no termina al llegar. El personaje entra y se queda (`stayTick`), sus otras metas esperan, y a esa hora la meta se da por cumplida.
 - **Si algo falla** (no quedaban manzanas, la persona no estaba, se acabó el tiempo de la tarea), el personaje **replanifica desde el estado real**. Si falla más de tres veces, abandona la meta.
