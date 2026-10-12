@@ -155,6 +155,8 @@ function update(dt){
 }
 // what is drawn is the scene being looked at: Ana's, or that of whoever she is watching (Ana and Toby only in hers)
 let RENDER_REAL = 'out';
+let PH_NATIVO = false;   // (this frame, does Phaser draw the world? see 66-motor-phaser.js)
+const PERSONA_BOX = [-64, -112, 64, 26];   // (around a person's feet: her hat, her arms, sitting or lying)
 function render(){ const real = game.scene; RENDER_REAL = real; game.scene = viewScene(); try { renderView(); } finally { game.scene = real; } }
 function renderView(){
   const W = innerWidth, H = innerHeight, dpr = devicePixelRatio || 1;
@@ -165,15 +167,16 @@ function renderView(){
   const vw = W / Z, vh = H / Z;
   const ox = inside ? (KIT.w - vw) / 2 : clamp(cam.x - vw / 2, 0, (road ? RW : WW) - vw), oy = inside ? (KIT.h - vh) / 2 : clamp(cam.y - vh / 2, 0, (road ? RH : WH) - vh);
   view.ox = ox; view.oy = oy; view.Z = Z; view.inside = inside;
-  g.setTransform(dpr, 0, 0, dpr, 0, 0); g.fillStyle = '#2b2219'; g.fillRect(0, 0, W, H);
+  PH_NATIVO = phNativo(inside && !road);   // (Phaser draws this place's world, under a transparent screen with the rest on top)
+  g.setTransform(dpr, 0, 0, dpr, 0, 0); if (PH_NATIVO) g.clearRect(0, 0, W, H); else { g.fillStyle = '#2b2219'; g.fillRect(0, 0, W, H); }
   g.setTransform(dpr * Z, 0, 0, dpr * Z, -ox * dpr * Z, -oy * dpr * Z);
   const inView = (x, y, m = 80) => x > ox - m && x < ox + vw + m && y > oy - m && y < oy + vh + m * 2;
   const list = [];
   if (inside) {
-    const I = ROOMS[game.scene]; I.draw(g, t, night); list.push(...I.items(g, t));
-    for (const k of Object.keys(PEOPLE)) if (sceneOf(k) === game.scene) list.push({ y: PEOPLE[k].y, draw: () => drawPerson(g, PEOPLE[k], t) });
-    for (const f of FOLK) if (f.where === game.scene) list.push({ y: f.y + (f.sit ? 6 : 0), draw: () => drawPerson(g, f, t) });
-    for (const it of game.ground) if (it.scene === game.scene) list.push({ y: it.y, draw: () => drawGround(g, it) });
+    const I = ROOMS[game.scene]; if (!PH_NATIVO) { I.draw(g, t, night); list.push(...I.items(g, t)); }   // (under Phaser the room and its furniture are its own images)
+    for (const k of Object.keys(PEOPLE)) if (sceneOf(k) === game.scene) list.push({ y: PEOPLE[k].y, ph: { key: 'p:' + k, at: [PEOPLE[k].x, PEOPLE[k].y], box: PERSONA_BOX }, draw: () => drawPerson(g, PEOPLE[k], t) });
+    for (const f of FOLK) if (f.where === game.scene) list.push({ y: f.y + (f.sit ? 6 : 0), ph: { key: 'f:' + f.id, at: [f.x, f.y], box: PERSONA_BOX }, draw: () => drawPerson(g, f, t) });
+    for (const it of game.ground) if (it.scene === game.scene) list.push({ y: it.y, ph: { key: 'suelo:' + game.ground.indexOf(it), at: [it.x, it.y], box: [-24, -30, 24, 12] }, draw: () => drawGround(g, it) });
   } else if (road) {
     roadView(g, ox, oy, vw, vh, t, night, list);
     for (const it of game.ground) if (it.scene === 'camino') list.push({ y: it.y, draw: () => drawGround(g, it) });
@@ -239,12 +242,12 @@ function renderView(){
     for (const it of game.ground) if (it.scene === 'out' && inView(it.x, it.y)) list.push({ y: it.y, draw: () => drawGround(g, it) });
   }
   const anaHere = RENDER_REAL === game.scene;
-  if (anaHere && sipping()) list.push({ y: ana.y + .2, draw: () => drawCup(g, ana) });
-  if (anaHere && !ana.hidden) list.push({ y: ana.sortY ?? ana.y + (ana.sit && !inside ? 6 : 0), draw: () => { drawPerson(g, ana, t); if (realR.fact('adorno:ana') && !ana.lie && !ana.sit && LOOKS.ana.hat) ACC_OBJ.sombrero.f(g, ana); } });   // (with the wreath of flowers on her hat, the day she made it)
+  if (anaHere && sipping()) list.push({ y: ana.y + .2, ph: { key: 'taza', at: [ana.x, ana.y], box: PERSONA_BOX }, draw: () => drawCup(g, ana) });
+  if (anaHere && !ana.hidden) list.push({ y: ana.sortY ?? ana.y + (ana.sit && !inside ? 6 : 0), ph: { key: 'ana', at: [ana.x, ana.y], box: PERSONA_BOX }, draw: () => { drawPerson(g, ana, t); if (realR.fact('adorno:ana') && !ana.lie && !ana.sit && LOOKS.ana.hat) ACC_OBJ.sombrero.f(g, ana); } });   // (with the wreath of flowers on her hat, the day she made it)
   accPush(list, g, t);   // (what each one is doing, with its things)
-  if (toby.where === game.scene) list.push({ y: toby.y, draw: () => { g.save(); g.translate(toby.x, toby.y); g.scale(1.6, 1.6); drawCat(g, { ...toby, x: 0, y: 0 }, t); if (!toby.moving && toby.sleep && toby.mode !== 'ana') { g.fillStyle = 'rgba(70,50,30,.6)'; g.font = 'italic 6px Georgia, serif'; g.fillText('z', 6, -16 - (t * 3 % 4)); } g.restore(); } });
-  if (OBS) { const b = wmBody(OBS); if (b && !b.lie) list.push({ y: 1e9, draw: () => { const hy = b.y - 50 * (LOOKS[b.look]?.h || 1) - 4 + Math.sin(t * 4) * 1.5; blob(g, [[b.x - 5, hy - 7], [b.x + 5, hy - 7], [b.x, hy]], '#e0a030'); } }); }   // (a little arrow over whoever is watched)
-  list.sort((a, b) => a.y - b.y).forEach(o => o.draw());
+  if (toby.where === game.scene) list.push({ y: toby.y, ph: { key: 'toby', at: [toby.x, toby.y], box: [-30, -44, 30, 14] }, draw: () => { g.save(); g.translate(toby.x, toby.y); g.scale(1.6, 1.6); drawCat(g, { ...toby, x: 0, y: 0 }, t); if (!toby.moving && toby.sleep && toby.mode !== 'ana') { g.fillStyle = 'rgba(70,50,30,.6)'; g.font = 'italic 6px Georgia, serif'; g.fillText('z', 6, -16 - (t * 3 % 4)); } g.restore(); } });
+  if (OBS) { const b = wmBody(OBS); if (b && !b.lie) list.push({ y: 1e9, ph: { key: 'obs', at: [b.x, b.y], box: [-12, -110, 12, 0] }, draw: () => { const hy = b.y - 50 * (LOOKS[b.look]?.h || 1) - 4 + Math.sin(t * 4) * 1.5; blob(g, [[b.x - 5, hy - 7], [b.x + 5, hy - 7], [b.x, hy]], '#e0a030'); } }); }   // (a little arrow over whoever is watched)
+  list.sort((a, b) => a.y - b.y); if (PH_NATIVO) phMundo(list, { ox, oy, Z, W, H, dpr, t, night }); else list.forEach(o => o.draw());
   if (road) roadCanopy(g, ox, oy, vw, vh, t);
   // a little "!" over whoever has something for Ana: thanks, a present, a delivery, or came looking for her
   for (const [k, p] of Object.entries(PEOPLE)) {

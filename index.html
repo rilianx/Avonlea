@@ -424,7 +424,8 @@ lineas: relleno:1
    - What she has, what has grown and how fond everyone is of her are kept in the browser. */
 (() => {
 'use strict';
-const cv = document.getElementById('cv'), g = cv.getContext('2d');
+const cv = document.getElementById('cv');
+let g = cv.getContext('2d');   // (let: Phaser borrows it for a moment, to have each thing draw itself into its own sprite)
 const MIN_S = 5;   // (a minute of the game lasts five real seconds: an hour, five minutes; a whole day, two hours)
 const T = 32, K = 2.5, U = T * K, WW = 96 * U, WH = 84 * U, AX = 0, AW = WW, TAU = Math.PI * 2, KK = K * K;   // (U: the unit of distances outdoors; T: the size of things)
 // the interiors, drawn in Tiled (src/mapas/*.tmj, put in here by tools/build.js): where each thing is in each room
@@ -6020,6 +6021,8 @@ function update(dt){
 }
 // what is drawn is the scene being looked at: Ana's, or that of whoever she is watching (Ana and Toby only in hers)
 let RENDER_REAL = 'out';
+let PH_NATIVO = false;   // (this frame, does Phaser draw the world? see 66-motor-phaser.js)
+const PERSONA_BOX = [-64, -112, 64, 26];   // (around a person's feet: her hat, her arms, sitting or lying)
 function render(){ const real = game.scene; RENDER_REAL = real; game.scene = viewScene(); try { renderView(); } finally { game.scene = real; } }
 function renderView(){
   const W = innerWidth, H = innerHeight, dpr = devicePixelRatio || 1;
@@ -6030,15 +6033,16 @@ function renderView(){
   const vw = W / Z, vh = H / Z;
   const ox = inside ? (KIT.w - vw) / 2 : clamp(cam.x - vw / 2, 0, (road ? RW : WW) - vw), oy = inside ? (KIT.h - vh) / 2 : clamp(cam.y - vh / 2, 0, (road ? RH : WH) - vh);
   view.ox = ox; view.oy = oy; view.Z = Z; view.inside = inside;
-  g.setTransform(dpr, 0, 0, dpr, 0, 0); g.fillStyle = '#2b2219'; g.fillRect(0, 0, W, H);
+  PH_NATIVO = phNativo(inside && !road);   // (Phaser draws this place's world, under a transparent screen with the rest on top)
+  g.setTransform(dpr, 0, 0, dpr, 0, 0); if (PH_NATIVO) g.clearRect(0, 0, W, H); else { g.fillStyle = '#2b2219'; g.fillRect(0, 0, W, H); }
   g.setTransform(dpr * Z, 0, 0, dpr * Z, -ox * dpr * Z, -oy * dpr * Z);
   const inView = (x, y, m = 80) => x > ox - m && x < ox + vw + m && y > oy - m && y < oy + vh + m * 2;
   const list = [];
   if (inside) {
-    const I = ROOMS[game.scene]; I.draw(g, t, night); list.push(...I.items(g, t));
-    for (const k of Object.keys(PEOPLE)) if (sceneOf(k) === game.scene) list.push({ y: PEOPLE[k].y, draw: () => drawPerson(g, PEOPLE[k], t) });
-    for (const f of FOLK) if (f.where === game.scene) list.push({ y: f.y + (f.sit ? 6 : 0), draw: () => drawPerson(g, f, t) });
-    for (const it of game.ground) if (it.scene === game.scene) list.push({ y: it.y, draw: () => drawGround(g, it) });
+    const I = ROOMS[game.scene]; if (!PH_NATIVO) { I.draw(g, t, night); list.push(...I.items(g, t)); }   // (under Phaser the room and its furniture are its own images)
+    for (const k of Object.keys(PEOPLE)) if (sceneOf(k) === game.scene) list.push({ y: PEOPLE[k].y, ph: { key: 'p:' + k, at: [PEOPLE[k].x, PEOPLE[k].y], box: PERSONA_BOX }, draw: () => drawPerson(g, PEOPLE[k], t) });
+    for (const f of FOLK) if (f.where === game.scene) list.push({ y: f.y + (f.sit ? 6 : 0), ph: { key: 'f:' + f.id, at: [f.x, f.y], box: PERSONA_BOX }, draw: () => drawPerson(g, f, t) });
+    for (const it of game.ground) if (it.scene === game.scene) list.push({ y: it.y, ph: { key: 'suelo:' + game.ground.indexOf(it), at: [it.x, it.y], box: [-24, -30, 24, 12] }, draw: () => drawGround(g, it) });
   } else if (road) {
     roadView(g, ox, oy, vw, vh, t, night, list);
     for (const it of game.ground) if (it.scene === 'camino') list.push({ y: it.y, draw: () => drawGround(g, it) });
@@ -6104,12 +6108,12 @@ function renderView(){
     for (const it of game.ground) if (it.scene === 'out' && inView(it.x, it.y)) list.push({ y: it.y, draw: () => drawGround(g, it) });
   }
   const anaHere = RENDER_REAL === game.scene;
-  if (anaHere && sipping()) list.push({ y: ana.y + .2, draw: () => drawCup(g, ana) });
-  if (anaHere && !ana.hidden) list.push({ y: ana.sortY ?? ana.y + (ana.sit && !inside ? 6 : 0), draw: () => { drawPerson(g, ana, t); if (realR.fact('adorno:ana') && !ana.lie && !ana.sit && LOOKS.ana.hat) ACC_OBJ.sombrero.f(g, ana); } });   // (with the wreath of flowers on her hat, the day she made it)
+  if (anaHere && sipping()) list.push({ y: ana.y + .2, ph: { key: 'taza', at: [ana.x, ana.y], box: PERSONA_BOX }, draw: () => drawCup(g, ana) });
+  if (anaHere && !ana.hidden) list.push({ y: ana.sortY ?? ana.y + (ana.sit && !inside ? 6 : 0), ph: { key: 'ana', at: [ana.x, ana.y], box: PERSONA_BOX }, draw: () => { drawPerson(g, ana, t); if (realR.fact('adorno:ana') && !ana.lie && !ana.sit && LOOKS.ana.hat) ACC_OBJ.sombrero.f(g, ana); } });   // (with the wreath of flowers on her hat, the day she made it)
   accPush(list, g, t);   // (what each one is doing, with its things)
-  if (toby.where === game.scene) list.push({ y: toby.y, draw: () => { g.save(); g.translate(toby.x, toby.y); g.scale(1.6, 1.6); drawCat(g, { ...toby, x: 0, y: 0 }, t); if (!toby.moving && toby.sleep && toby.mode !== 'ana') { g.fillStyle = 'rgba(70,50,30,.6)'; g.font = 'italic 6px Georgia, serif'; g.fillText('z', 6, -16 - (t * 3 % 4)); } g.restore(); } });
-  if (OBS) { const b = wmBody(OBS); if (b && !b.lie) list.push({ y: 1e9, draw: () => { const hy = b.y - 50 * (LOOKS[b.look]?.h || 1) - 4 + Math.sin(t * 4) * 1.5; blob(g, [[b.x - 5, hy - 7], [b.x + 5, hy - 7], [b.x, hy]], '#e0a030'); } }); }   // (a little arrow over whoever is watched)
-  list.sort((a, b) => a.y - b.y).forEach(o => o.draw());
+  if (toby.where === game.scene) list.push({ y: toby.y, ph: { key: 'toby', at: [toby.x, toby.y], box: [-30, -44, 30, 14] }, draw: () => { g.save(); g.translate(toby.x, toby.y); g.scale(1.6, 1.6); drawCat(g, { ...toby, x: 0, y: 0 }, t); if (!toby.moving && toby.sleep && toby.mode !== 'ana') { g.fillStyle = 'rgba(70,50,30,.6)'; g.font = 'italic 6px Georgia, serif'; g.fillText('z', 6, -16 - (t * 3 % 4)); } g.restore(); } });
+  if (OBS) { const b = wmBody(OBS); if (b && !b.lie) list.push({ y: 1e9, ph: { key: 'obs', at: [b.x, b.y], box: [-12, -110, 12, 0] }, draw: () => { const hy = b.y - 50 * (LOOKS[b.look]?.h || 1) - 4 + Math.sin(t * 4) * 1.5; blob(g, [[b.x - 5, hy - 7], [b.x + 5, hy - 7], [b.x, hy]], '#e0a030'); } }); }   // (a little arrow over whoever is watched)
+  list.sort((a, b) => a.y - b.y); if (PH_NATIVO) phMundo(list, { ox, oy, Z, W, H, dpr, t, night }); else list.forEach(o => o.draw());
   if (road) roadCanopy(g, ox, oy, vw, vh, t);
   // a little "!" over whoever has something for Ana: thanks, a present, a delivery, or came looking for her
   for (const [k, p] of Object.entries(PEOPLE)) {
@@ -7684,19 +7688,21 @@ function sickTick(){
   for (const [k, b] of Object.entries(PEOPLE)) if (b.bed && !sick.includes(k)) { b.lie = false; delete b.bed; }
 }
 // into the drawing: the things under the body (before it) and in its hands (after it)
-function accPush(list, g, t){
+// (where each thing is drawn, for Phaser: around whoever does it, wide enough for a tablecloth or a sled)
+const ACC_BOX = [-90, -110, 90, 50];
+function accPush(list, _g, t){   // (they draw with g, the one in use: the screen's, or a sprite's under Phaser)
   if (game.scene === 'out') {   // (what the work left: bales in the field, wood stacked by the barn)
     if (game.heno?.dia === today()) for (const [x, y] of game.heno.pts) list.push({ y, draw: () => { blob(g, [[x - 9, y], [x + 9, y], [x + 9, y - 10], [x - 9, y - 10]], '#e0c870'); line(g, [[x - 9, y - 5], [x + 9, y - 5]], '#a88a3a', .8, 1); } });
     if (game.lena?.dia === today()) { const L = game.lena; list.push({ y: L.y, draw: () => { for (let k = 0; k < Math.min(12, L.n); k++) ell(g, L.x + (k % 4) * 9, L.y - Math.floor(k / 4) * 6, 5, 3, k % 2 ? '#c99a66' : '#b8885a', true); } }); }
   }
-  for (const [k, b] of Object.entries(PEOPLE)) if (b.bed && b.where === game.scene) list.push({ y: b.y - 1, draw: () => { const x = b.x - 6, y = b.y + 2; blob(g, [[x - 34, y - 26], [x + 40, y - 26], [x + 40, y + 10], [x - 34, y + 10]], '#8a6040'); blob(g, [[x - 30, y - 22], [x + 36, y - 22], [x + 36, y + 6], [x - 30, y + 6]], '#f6f0e4'); ell(g, x - 22, y - 8, 9, 6, '#ffffff', true); } }, { y: b.y + 1, draw: () => { const x = b.x - 6, y = b.y + 2; blob(g, [[x - 8, y - 20], [x + 36, y - 20], [x + 36, y + 6], [x - 8, y + 6]], '#c86a5a'); for (let i = 0; i < 4; i++) line(g, [[x - 8 + i * 11, y - 20], [x - 8 + i * 11, y + 6]], 'rgba(255,240,220,.6)', 1, i); } });   // (the bed, and the quilt over the sick one)
+  for (const [k, b] of Object.entries(PEOPLE)) if (b.bed && b.where === game.scene) list.push({ y: b.y - 1, ph: { key: 'cama:' + k, at: [b.x, b.y], box: [-50, -40, 50, 20] }, draw: () => { const x = b.x - 6, y = b.y + 2; blob(g, [[x - 34, y - 26], [x + 40, y - 26], [x + 40, y + 10], [x - 34, y + 10]], '#8a6040'); blob(g, [[x - 30, y - 22], [x + 36, y - 22], [x + 36, y + 6], [x - 30, y + 6]], '#f6f0e4'); ell(g, x - 22, y - 8, 9, 6, '#ffffff', true); } }, { y: b.y + 1, draw: () => { const x = b.x - 6, y = b.y + 2; blob(g, [[x - 8, y - 20], [x + 36, y - 20], [x + 36, y + 6], [x - 8, y + 6]], '#c86a5a'); for (let i = 0; i < 4; i++) line(g, [[x - 8 + i * 11, y - 20], [x - 8 + i * 11, y + 6]], 'rgba(255,240,220,.6)', 1, i); } });   // (the bed, and the quilt over the sick one)
   for (const ag of [...Object.values(AGENTS), ...(game.playAct ? [game.playAct] : [])]) {
     const A = ag.acting; if (!A) continue; if (ag.task !== A.task) { accEnd(ag); continue; } const k = ag.who, b = wmBody(k); if (!b || (k === 'ana' ? RENDER_REAL !== game.scene : wmScene(k) !== game.scene)) continue;
-    const y = b.sortY ?? b.y; if (A.lleva && ACC_OBJ[A.lleva]) { const C = ACC_OBJ[A.lleva]; list.push({ y: y + 7, draw: () => C.f(g, b, A) }); continue; }   // (carrying it to where it is done)
-    if (A.mesa) { const [mx, my, sy, kind] = A.mesa; list.push({ y: sy, draw: () => ACC_MESA[kind](g, mx, my, b, A) }); }   // (the notebook or the book, on the table)
+    const y = b.sortY ?? b.y; if (A.lleva && ACC_OBJ[A.lleva]) { const C = ACC_OBJ[A.lleva]; list.push({ y: y + 7, ph: { key: 'lleva:' + k, at: [b.x, b.y], box: ACC_BOX }, draw: () => C.f(g, b, A) }); continue; }   // (carrying it to where it is done)
+    if (A.mesa) { const [mx, my, sy, kind] = A.mesa; list.push({ y: sy, ph: { key: 'mesa:' + k, at: [mx, my], box: [-30, -24, 30, 16] }, draw: () => ACC_MESA[kind](g, mx, my, b, A) }); }   // (the notebook or the book, on the table)
     const O = ACC_OBJ[A.obj !== undefined ? A.obj : ACCION_VISTA[A.v].obj]; if (!O) continue;
-    if (O.u) list.push({ y: (A.v === 'merendar' ? A.base[1] : y) - .6, draw: () => O.u(g, b, A) });
-    if (O.f) list.push({ y: y + 7, draw: () => O.f(g, b, A) });
+    if (O.u) list.push({ y: (A.v === 'merendar' ? A.base[1] : y) - .6, ph: { key: 'obju:' + k, at: [b.x, b.y], box: ACC_BOX }, draw: () => O.u(g, b, A) });
+    if (O.f) list.push({ y: y + 7, ph: { key: 'objf:' + k, at: [b.x, b.y], box: ACC_BOX }, draw: () => O.f(g, b, A) });
   }
 }
 /* ---------- letters: written to someone (Ana reads it aloud as she writes), taken to the post office (Lawson's store),
@@ -8376,6 +8382,94 @@ function loop(now){
   FRAME++; tripBarDraw(); render(); islaDraw(); requestAnimationFrame(loop);
 }
 window.__avonlea = { jugables, jugar, anaMenu, correoRetirar, cartaLeer, CORREO, cartaTexto, playAct: () => game.playAct, DIALOGOS, dlgCtx, talks: () => TALKS, dlgGuion, dlgPanel, bubblesNow: () => bubbles, toby, cartSheet: (c, x, y, c8, t) => { const L = [], p = { look: 'matthew', x, y, c8, walk: 0, moving: false }; const [cx, cy] = [x, y]; pushCart(L, c, { x: cx, y: cy, c8, walk: 0, moving: true }, t); for (const [k, look] of [[0, 'matthew'], [1, 'ana']]) { const [sx, sy] = cartSeat(cx, cy, c8, k); L.push({ y: sy, draw: () => drawPerson(c, { ...mkPerson(look, sx, sy), sit: true, dir: c8Dir(c8) }, t) }); } L.sort((a, b) => a.y - b.y).forEach(o => o.draw()); }, startCap1, CAP1, LIBRO1, ROAD_TRAMOS, ROAD_MIN, roadTramo, islaToggle, DLG_BANK, startDay, setSeason, agendaData: () => AGENDA.map(e => ({ who: wmName(e.who), from: e.from, to: e.to, label: e.label, season: e.season, sunday: !!e.sunday, ana: !!(e.ana || e.who === 'ana'), cond: e.when ? String(e.when).replace(/^\(\) => /, '') : '' })), setAgenda: v => { AGENDA_ON = v; }, AGENDA, wmData: () => ({ THINGS, WHO, OFRECE, WP_NAME, TRADE, TREATS, LIBRETA, ITEM_NAME, MAX_GOALS, PACE, FOCO }), paintMapBase, doingText, wmName, wmBody, wmScene, WW, WH, setVec: v => { VEC_ON = v; }, setStyle: v => { ANA_STYLE = v; }, setHead: setHeadM, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+/* ---------- PHASER, the new engine (phase 2 of the plan) ----------
+   It comes in place by place, as the one who draws the world: the simulation, the planner, the scenes, the bubbles,
+   the menus and the touches stay as they are. ?motor=phaser in the link chooses it (and is remembered); ?motor=canvas
+   goes back to the drawing of always. Without that, Phaser is not even loaded.
+   - The screen (cv) stays on top, transparent where Phaser draws: the light of the day, the bubbles, the "!" and the
+     paper grain are still drawn there, over Phaser's world.
+   - Indoors, the room (floor, walls) and each piece of furniture are images baked once (again when the night or the
+     furniture changes); each person and each thing of an action is its own sprite, drawn by the same code as always
+     into its own little canvas, in the same order of depth. So it looks the same, and from here each kind of thing
+     can move to real sprites (sheets) without touching the rest.
+   - One clock: Phaser's own loop sleeps and the game steps it after each frame. ---------- */
+const PH = { on: false, ready: false, game: null, scene: null, R: 0, vivos: new Map(), sala: null };
+(() => {
+  if (/visor/.test(location.search)) return;
+  const q = location.search.match(/motor=(phaser|canvas)/);
+  try { if (q) localStorage.setItem('avonlea-motor', q[1]); } catch {}
+  let m = q ? q[1] : null; if (!m) try { m = localStorage.getItem('avonlea-motor'); } catch {}
+  if (m !== 'phaser') return;
+  PH.on = true;
+  const s = document.createElement('script'); s.src = 'vendor/phaser.min.js';
+  s.onload = phArrancar; s.onerror = () => { PH.on = false; console.warn('[avonlea] no pude cargar Phaser: sigue el dibujo de siempre'); };
+  document.head.appendChild(s);
+})();
+function phArrancar(){
+  const div = document.createElement('div'); div.id = 'ph'; div.style.cssText = 'position:fixed;inset:0;display:none'; cv.before(div);
+  const dpr = devicePixelRatio || 1;
+  PH.game = new Phaser.Game({ type: Phaser.AUTO, parent: div, backgroundColor: '#2b2219', banner: false, audio: { noAudio: true },
+    input: { keyboard: false, mouse: false, touch: false, gamepad: false },   // (the touches are the game's, on the screen above)
+    scale: { mode: Phaser.Scale.NONE, width: Math.round(innerWidth * dpr), height: Math.round(innerHeight * dpr), zoom: 1 / dpr },
+    scene: { create(){ PH.scene = this; PH.ready = true; PH.game.loop.sleep(); } } });
+}
+// does Phaser draw this place? (and shows its canvas, or hides it)
+function phNativo(interior){
+  const si = PH.ready && interior && !!ROOMS[game.scene];
+  const div = PH.game && PH.game.canvas?.parentNode; if (div) div.style.display = si ? '' : 'none';
+  return si;
+}
+// a sprite drawn by the game's own code: a little canvas of its own (box: [left, top, right, bottom] around `at`)
+function phVivo(key, at, box, depth, draw){
+  const sc = PH.scene, R = PH.R, w = Math.max(1, Math.ceil((box[2] - box[0]) * R)), h = Math.max(1, Math.ceil((box[3] - box[1]) * R));
+  let V = PH.vivos.get(key);
+  if (V && (V.w !== w || V.h !== h)) { V.img.destroy(); sc.textures.remove(V.tk); PH.vivos.delete(key); V = null; }
+  if (!V) { const tk = 'v' + (PH.seq = (PH.seq || 0) + 1); const tex = sc.textures.createCanvas(tk, w, h); V = { tk, tex, w, h, img: sc.add.image(0, 0, tk).setOrigin(0) }; PH.vivos.set(key, V); }
+  const c = V.tex.getContext(); c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, w, h);
+  c.globalAlpha = 1; c.globalCompositeOperation = 'source-over'; c.setTransform(R, 0, 0, R, -(at[0] + box[0]) * R, -(at[1] + box[1]) * R);
+  const pant = g; g = c; try { draw(c); } finally { g = pant; }
+  V.tex.refresh(); V.img.setPosition(at[0] + box[0], at[1] + box[1]).setScale(1 / R).setDepth(depth).setVisible(true); V.usado = PH.cuadro;
+}
+// the room and its furniture: images baked again only when something changes (the night, the season, a stew on the
+// stove; the furniture twice a second, in a box of its own measured the first time)
+function phSala(v){
+  const I = ROOMS[game.scene], W = KIT.w, Hh = KIT.h, sig = game.scene + '|' + PH.R + '|' + Math.round(v.night * 10) + '|' + S + '|' + (game.cooking ? Math.floor(v.t * 4) : '');
+  if (PH.sala?.scene !== game.scene || PH.sala.R !== PH.R) PH.sala = { scene: game.scene, R: PH.R, sig: '', t: -1, cajas: [] };
+  const P = PH.sala;
+  if (P.sig !== sig) { P.sig = sig; phVivo('fondo', [0, 0], [0, 0, W, Hh], -1e9, c => I.draw(c, v.t, v.night)); }
+  else PH.vivos.get('fondo').usado = PH.cuadro;
+  const muebles = I.items(g, v.t);
+  if (v.t - P.t > .5 || v.t < P.t) {
+    P.t = v.t;
+    muebles.forEach((m, j) => {
+      if (!P.cajas[j]) {   // (measured once: drawn on the whole room, the box is where it painted, and a margin)
+        const R = 2, cv0 = document.createElement('canvas'); cv0.width = W * R; cv0.height = Hh * R; const c = cv0.getContext('2d'); c.setTransform(R, 0, 0, R, 0, 0);
+        const pant = g; g = c; try { I.items(c, v.t)[j].draw(); } finally { g = pant; }
+        const d = c.getImageData(0, 0, cv0.width, cv0.height).data; let x0 = 1e9, y0 = 1e9, x1 = -1, y1 = -1;
+        for (let y = 0; y < cv0.height; y++) for (let x = 0; x < cv0.width; x++) if (d[(y * cv0.width + x) * 4 + 3]) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+        P.cajas[j] = x1 < 0 ? [0, 0, 1, 1] : [Math.max(0, x0 / R - 8), Math.max(0, y0 / R - 14), Math.min(W, x1 / R + 8), Math.min(Hh, y1 / R + 6)];
+      }
+      phVivo('mueble:' + j, [0, 0], P.cajas[j], m.y, c => I.items(c, v.t)[j].draw());
+    });
+  } else muebles.forEach((m, j) => { const V = PH.vivos.get('mueble:' + j); if (V) V.usado = PH.cuadro; });
+}
+// one frame of the world under Phaser: the camera where the game's view is, the room, and each thing of the list
+function phMundo(list, v){
+  const sc = PH.scene, dpr = v.dpr, cw = Math.round(v.W * dpr), ch = Math.round(v.H * dpr);
+  if (PH.game.scale.width !== cw || PH.game.scale.height !== ch) PH.game.scale.resize(cw, ch);
+  const R = Math.min(4, Math.max(1, Math.round(v.Z * dpr * 4) / 4));
+  if (R !== PH.R) { PH.R = R; for (const V of PH.vivos.values()) { V.img.destroy(); sc.textures.remove(V.tk); } PH.vivos.clear(); PH.sala = null; }   // (another size of screen: everything again, sharp)
+  PH.cuadro = (PH.cuadro || 0) + 1;
+  const cam = sc.cameras.main; cam.setZoom(v.Z * dpr); cam.centerOn(v.ox + v.W / v.Z / 2, v.oy + v.H / v.Z / 2);
+  phSala(v);
+  list.forEach((o, i) => { const p = o.ph || { key: 'suelto:' + i, at: [0, 0], box: [0, 0, KIT.w, KIT.h] }; phVivo(p.key, p.at, p.box, o.y + i * 1e-6, o.draw); });
+  for (const [k, V] of PH.vivos) if (V.usado !== PH.cuadro) {
+    if (k.startsWith('mueble:') || k === 'fondo') { V.img.destroy(); sc.textures.remove(V.tk); PH.vivos.delete(k); }   // (another room's)
+    else V.img.setVisible(false);
+  }
+  const now = performance.now(); PH.game.step(now, Math.min(50, now - (PH.t0 || now)) || 16); PH.t0 = now;
+}
+
 /* ---------- the viewer (index.html?visor): only Ana, big, on a plain floor, to look at the drawings and move her:
    arrows (Shift to run), and buttons for everything she can do. ---------- */
 function startVisor(){

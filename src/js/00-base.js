@@ -15,7 +15,8 @@
    - What she has, what has grown and how fond everyone is of her are kept in the browser. */
 (() => {
 'use strict';
-const cv = document.getElementById('cv'), g = cv.getContext('2d');
+const cv = document.getElementById('cv');
+let g = cv.getContext('2d');   // (let: Phaser borrows it for a moment, to have each thing draw itself into its own sprite)
 const MIN_S = 5;   // (a minute of the game lasts five real seconds: an hour, five minutes; a whole day, two hours)
 const T = 32, K = 2.5, U = T * K, WW = 96 * U, WH = 84 * U, AX = 0, AW = WW, TAU = Math.PI * 2, KK = K * K;   // (U: the unit of distances outdoors; T: the size of things)
 // the interiors, drawn in Tiled (src/mapas/*.tmj, put in here by tools/build.js): where each thing is in each room

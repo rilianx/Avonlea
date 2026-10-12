@@ -205,18 +205,20 @@ function sickTick(){
   for (const [k, b] of Object.entries(PEOPLE)) if (b.bed && !sick.includes(k)) { b.lie = false; delete b.bed; }
 }
 // into the drawing: the things under the body (before it) and in its hands (after it)
-function accPush(list, g, t){
+// (where each thing is drawn, for Phaser: around whoever does it, wide enough for a tablecloth or a sled)
+const ACC_BOX = [-90, -110, 90, 50];
+function accPush(list, _g, t){   // (they draw with g, the one in use: the screen's, or a sprite's under Phaser)
   if (game.scene === 'out') {   // (what the work left: bales in the field, wood stacked by the barn)
     if (game.heno?.dia === today()) for (const [x, y] of game.heno.pts) list.push({ y, draw: () => { blob(g, [[x - 9, y], [x + 9, y], [x + 9, y - 10], [x - 9, y - 10]], '#e0c870'); line(g, [[x - 9, y - 5], [x + 9, y - 5]], '#a88a3a', .8, 1); } });
     if (game.lena?.dia === today()) { const L = game.lena; list.push({ y: L.y, draw: () => { for (let k = 0; k < Math.min(12, L.n); k++) ell(g, L.x + (k % 4) * 9, L.y - Math.floor(k / 4) * 6, 5, 3, k % 2 ? '#c99a66' : '#b8885a', true); } }); }
   }
-  for (const [k, b] of Object.entries(PEOPLE)) if (b.bed && b.where === game.scene) list.push({ y: b.y - 1, draw: () => { const x = b.x - 6, y = b.y + 2; blob(g, [[x - 34, y - 26], [x + 40, y - 26], [x + 40, y + 10], [x - 34, y + 10]], '#8a6040'); blob(g, [[x - 30, y - 22], [x + 36, y - 22], [x + 36, y + 6], [x - 30, y + 6]], '#f6f0e4'); ell(g, x - 22, y - 8, 9, 6, '#ffffff', true); } }, { y: b.y + 1, draw: () => { const x = b.x - 6, y = b.y + 2; blob(g, [[x - 8, y - 20], [x + 36, y - 20], [x + 36, y + 6], [x - 8, y + 6]], '#c86a5a'); for (let i = 0; i < 4; i++) line(g, [[x - 8 + i * 11, y - 20], [x - 8 + i * 11, y + 6]], 'rgba(255,240,220,.6)', 1, i); } });   // (the bed, and the quilt over the sick one)
+  for (const [k, b] of Object.entries(PEOPLE)) if (b.bed && b.where === game.scene) list.push({ y: b.y - 1, ph: { key: 'cama:' + k, at: [b.x, b.y], box: [-50, -40, 50, 20] }, draw: () => { const x = b.x - 6, y = b.y + 2; blob(g, [[x - 34, y - 26], [x + 40, y - 26], [x + 40, y + 10], [x - 34, y + 10]], '#8a6040'); blob(g, [[x - 30, y - 22], [x + 36, y - 22], [x + 36, y + 6], [x - 30, y + 6]], '#f6f0e4'); ell(g, x - 22, y - 8, 9, 6, '#ffffff', true); } }, { y: b.y + 1, draw: () => { const x = b.x - 6, y = b.y + 2; blob(g, [[x - 8, y - 20], [x + 36, y - 20], [x + 36, y + 6], [x - 8, y + 6]], '#c86a5a'); for (let i = 0; i < 4; i++) line(g, [[x - 8 + i * 11, y - 20], [x - 8 + i * 11, y + 6]], 'rgba(255,240,220,.6)', 1, i); } });   // (the bed, and the quilt over the sick one)
   for (const ag of [...Object.values(AGENTS), ...(game.playAct ? [game.playAct] : [])]) {
     const A = ag.acting; if (!A) continue; if (ag.task !== A.task) { accEnd(ag); continue; } const k = ag.who, b = wmBody(k); if (!b || (k === 'ana' ? RENDER_REAL !== game.scene : wmScene(k) !== game.scene)) continue;
-    const y = b.sortY ?? b.y; if (A.lleva && ACC_OBJ[A.lleva]) { const C = ACC_OBJ[A.lleva]; list.push({ y: y + 7, draw: () => C.f(g, b, A) }); continue; }   // (carrying it to where it is done)
-    if (A.mesa) { const [mx, my, sy, kind] = A.mesa; list.push({ y: sy, draw: () => ACC_MESA[kind](g, mx, my, b, A) }); }   // (the notebook or the book, on the table)
+    const y = b.sortY ?? b.y; if (A.lleva && ACC_OBJ[A.lleva]) { const C = ACC_OBJ[A.lleva]; list.push({ y: y + 7, ph: { key: 'lleva:' + k, at: [b.x, b.y], box: ACC_BOX }, draw: () => C.f(g, b, A) }); continue; }   // (carrying it to where it is done)
+    if (A.mesa) { const [mx, my, sy, kind] = A.mesa; list.push({ y: sy, ph: { key: 'mesa:' + k, at: [mx, my], box: [-30, -24, 30, 16] }, draw: () => ACC_MESA[kind](g, mx, my, b, A) }); }   // (the notebook or the book, on the table)
     const O = ACC_OBJ[A.obj !== undefined ? A.obj : ACCION_VISTA[A.v].obj]; if (!O) continue;
-    if (O.u) list.push({ y: (A.v === 'merendar' ? A.base[1] : y) - .6, draw: () => O.u(g, b, A) });
-    if (O.f) list.push({ y: y + 7, draw: () => O.f(g, b, A) });
+    if (O.u) list.push({ y: (A.v === 'merendar' ? A.base[1] : y) - .6, ph: { key: 'obju:' + k, at: [b.x, b.y], box: ACC_BOX }, draw: () => O.u(g, b, A) });
+    if (O.f) list.push({ y: y + 7, ph: { key: 'objf:' + k, at: [b.x, b.y], box: ACC_BOX }, draw: () => O.f(g, b, A) });
   }
 }
