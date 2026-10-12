@@ -188,9 +188,9 @@ Cada personaje (`agentOf`) tiene hasta **3 metas activas** (`MAX_GOALS`), y sus 
   - **poner la mesa:** ir al aparador, sacar los platos, llevarlos a la mesa y ponerlos uno a uno; la mesa queda puesta el resto del día;
   - **lavar los platos:** recogerlos de la mesa, lavarlos en el fregadero, guardarlos en el aparador;
   - **barrer:** recorrer la cocina con la escoba;
-  - **escribir una carta o un cuento:** subir a su pieza y sentarse en su escritorio;
+  - **escribir una carta o un cuento:** subir a su pieza y sentarse en una banqueta frente a su escritorio, con el cuaderno o la carta (y el sobre) sobre la mesa y la pluma moviéndose;
   - **rezar:** arrodillada junto a su cama;
-  - **estudiar:** sentada a la mesa de la cocina, o en su pupitre en la escuela;
+  - **estudiar:** sentada a la mesa de la cocina, o en su pupitre en la escuela, con el libro abierto sobre la mesa (`mesa`: lo que queda sobre la mesa mientras se hace);
   - **recitar:** frente a la clase, junto a la pizarra;
   - **coser:** Marilla en su silla junto a la ventana;
   - **cocinar:** en la estufa;
