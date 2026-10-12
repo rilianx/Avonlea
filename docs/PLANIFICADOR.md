@@ -176,6 +176,15 @@ Cada personaje (`agentOf`) tiene hasta **3 metas activas** (`MAX_GOALS`), y sus 
 - **Acciones del libro** (ver [ACCIONES_DEL_LIBRO.md](ACCIONES_DEL_LIBRO.md)): quehaceres, ordeñar, dar de comer a los animales, visitar, prestar y devolver, jurar ser amigas del alma, perdonar, cuidar a un enfermo o avisar al médico, estudiar y recitar, rezar, coser, adornar el sombrero, remar, ponerle nombre a un lugar, regañar y llevar en la calesa.
   - **Cada una se ofrece solo si sirve para la meta** (`C.kind`, o las cosas de la meta). Si no, el planificador perdería el tiempo probando combinaciones de acciones que no importan: en la cocina, Ana puede rezar, estudiar, lavar los platos…
   - **Algunos hechos son para siempre** (`game.wm.perm`): las amigas del alma, y los nombres que Ana les pone a los lugares, que aparecen en el mapa.
+- **Cómo se ve cada acción** (`ACCION_VISTA`, pura configuración): mientras se hace una acción del libro, se ve con qué se hace y cómo:
+  - **objetos:** el mantel a cuadros, la canasta, los sándwiches y el helado del picnic; el trineo; los patines; el bote y los remos; el frasco y la palangana del tinte; las tijeras y los mechones verdes que caen; el libro, el papel y la pluma; el hacha y el tronco; la horquilla y los fardos; las semillas; la regadera; el balde de grano; la escoba, la palangana de platos; el bol y la cuchara; la mantequera; la costura; el canastito; el jarabe y la cuchara; la corona de flores en el sombrero;
+  - **postura:** sentada en el picnic (y Diana al lado), en el bote, cosiendo o rezando; de cara al espejo para teñirse;
+  - **movimiento:** colina abajo en el trineo y de vuelta arriba tirándolo; patinando en ronda sobre el hielo; remando en el lago; caminando por el techo de los Barry;
+  - **duración:** cada una dura lo suficiente para verse (`dur`);
+  - **lo que queda:** el pelo verde después del tinte; corto, sin trenzas, después de que Marilla lo corta; la corona de flores en el sombrero el resto del día.
+
+  `wmExec` marca quién está haciendo qué (`ag.acting`) y el dibujo lo lee (`accPush`). Para que una acción nueva se vea, basta una línea en `ACCION_VISTA` y, si usa un objeto nuevo, su dibujo en `ACC_OBJ`.
+- **Lugares de las acciones:** Ana se tiñe el pelo en **su pieza, frente al espejo** (el lugar `pieza`, arriba en Tejas Verdes), no en la cocina. Quien está enfermo **guarda cama en su casa**, bajo una colcha, y quien lo cuida va hasta la cabecera.
 - **Quedarse:** una meta `estar_en` con `quedar` (ir a clases: llegar antes de las 9 y quedarse hasta las 12, `CLASES_FIN`) no termina al llegar. El personaje entra y se queda (`stayTick`), sus otras metas esperan, y a esa hora la meta se da por cumplida.
 - **Si algo falla** (no quedaban manzanas, la persona no estaba, se acabó el tiempo de la tarea), el personaje **replanifica desde el estado real**. Si falla más de tres veces, abandona la meta.
 - **Si la meta ya se cumple** (porque otro la cumplió, por ejemplo), termina.
