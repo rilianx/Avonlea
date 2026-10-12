@@ -8411,11 +8411,19 @@ function phArrancar(){
   PH.game = new Phaser.Game({ type: Phaser.AUTO, parent: div, backgroundColor: '#2b2219', banner: false, audio: { noAudio: true },
     input: { keyboard: false, mouse: false, touch: false, gamepad: false },   // (the touches are the game's, on the screen above)
     scale: { mode: Phaser.Scale.NONE, width: Math.round(innerWidth * dpr), height: Math.round(innerHeight * dpr), zoom: 1 / dpr },
-    scene: { create(){ PH.scene = this; PH.ready = true; PH.game.loop.sleep(); } } });
+    scene: { create(){ PH.scene = this; PH.ready = true; PH.game.loop.sleep();
+      // (a phone may take back the graphics memory when the game goes to the background: everything is baked again)
+      this.sys.renderer.on?.(Phaser.Renderer.Events.RESTORE_WEBGL, phRepintar);
+      PH.game.events.on(Phaser.Core.Events.VISIBLE, () => { PH.game.loop.sleep(); phRepintar(); });   // (and its own clock stays asleep)
+    } } });
 }
+// everything baked is thrown away and made again on the next frame
+function phRepintar(){ if (!PH.scene) return; for (const V of PH.vivos.values()) { V.img.destroy(); PH.scene.textures.remove(V.tk); } PH.vivos.clear(); PH.sala = null; }
 // does Phaser draw this place? (and shows its canvas, or hides it)
 function phNativo(interior){
   const si = PH.ready && interior && !!ROOMS[game.scene];
+  if (si && !PH.antes) phRepintar();   // (coming in again from outside: the room baked fresh)
+  PH.antes = si;
   const div = PH.game && PH.game.canvas?.parentNode; if (div) div.style.display = si ? '' : 'none';
   return si;
 }
@@ -8437,7 +8445,7 @@ function phSala(v){
   if (PH.sala?.scene !== game.scene || PH.sala.R !== PH.R) PH.sala = { scene: game.scene, R: PH.R, sig: '', t: -1, cajas: [] };
   const P = PH.sala;
   if (P.sig !== sig) { P.sig = sig; phVivo('fondo', [0, 0], [0, 0, W, Hh], -1e9, c => I.draw(c, v.t, v.night)); }
-  else PH.vivos.get('fondo').usado = PH.cuadro;
+  else if (PH.vivos.has('fondo')) PH.vivos.get('fondo').usado = PH.cuadro; else { P.sig = ''; return phSala(v); }
   const muebles = I.items(g, v.t);
   if (v.t - P.t > .5 || v.t < P.t) {
     P.t = v.t;
@@ -8458,13 +8466,14 @@ function phMundo(list, v){
   const sc = PH.scene, dpr = v.dpr, cw = Math.round(v.W * dpr), ch = Math.round(v.H * dpr);
   if (PH.game.scale.width !== cw || PH.game.scale.height !== ch) PH.game.scale.resize(cw, ch);
   const R = Math.min(4, Math.max(1, Math.round(v.Z * dpr * 4) / 4));
-  if (R !== PH.R) { PH.R = R; for (const V of PH.vivos.values()) { V.img.destroy(); sc.textures.remove(V.tk); } PH.vivos.clear(); PH.sala = null; }   // (another size of screen: everything again, sharp)
+  if (R !== PH.R) { PH.R = R; phRepintar(); }   // (another size of screen: everything again, sharp)
   PH.cuadro = (PH.cuadro || 0) + 1;
   const cam = sc.cameras.main; cam.setZoom(v.Z * dpr); cam.centerOn(v.ox + v.W / v.Z / 2, v.oy + v.H / v.Z / 2);
   phSala(v);
   list.forEach((o, i) => { const p = o.ph || { key: 'suelto:' + i, at: [0, 0], box: [0, 0, KIT.w, KIT.h] }; phVivo(p.key, p.at, p.box, o.y + i * 1e-6, o.draw); });
   for (const [k, V] of PH.vivos) if (V.usado !== PH.cuadro) {
     if (k.startsWith('mueble:') || k === 'fondo') { V.img.destroy(); sc.textures.remove(V.tk); PH.vivos.delete(k); }   // (another room's)
+    else if (PH.cuadro - V.usado > 600) { V.img.destroy(); sc.textures.remove(V.tk); PH.vivos.delete(k); }   // (not seen for a while: its memory back)
     else V.img.setVisible(false);
   }
   const now = performance.now(); PH.game.step(now, Math.min(50, now - (PH.t0 || now)) || 16); PH.t0 = now;
