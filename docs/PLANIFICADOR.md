@@ -199,7 +199,10 @@ Cada personaje (`agentOf`) tiene hasta **3 metas activas** (`MAX_GOALS`), y sus 
   - **una visita:** sentarse con quien se visita, con una taza de té;
   - **recoger:** ir a la fuente de verdad, agachada con el canastito: los arbustos con bayas, los manzanos con manzanas, los nidos del gallinero, un cantero en flor, las hierbas del bosque;
   - **tomar:** la cuerda del gancho del granero; el jarabe o la canasta del aparador;
-  - **dar o devolver:** frente a frente, y se ve la cosa pasar de una mano a la otra;
+  - **dar o devolver:** frente a frente, y se ve la cosa pasar de una mano a la otra; también dentro de las casas, junto a quien la recibe (antes se entregaba desde la puerta);
+  - **jurar ser amigas del alma:** en el jardín de los Barry, frente a frente y de la mano;
+  - **cocinar en una casa sin interior** (la Sra. Allan en la casa parroquial): entra y no se ve un rato, en vez de cocinar en la puerta;
+  - **recitar y ensayar en la escuela:** adentro, frente a la clase;
   - **el corte de pelo:** Ana sentada en una silla en medio de la cocina, Marilla detrás con las tijeras, y caen los mechones verdes;
   - **el techo de los Barry:** caminar por el caballete… y la caída: Ana queda en el suelo con el tobillo torcido (solo si Josie la desafió);
   - **el concierto:** en el **salón del pueblo**, que ahora tiene interior (escenario con telón, bancos y guirnaldas cuando se decoró). Ahí se ensaya y se actúa sobre el escenario, y las guirnaldas se cuelgan tramo por tramo.
