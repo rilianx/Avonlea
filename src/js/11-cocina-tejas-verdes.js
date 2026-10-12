@@ -1,6 +1,6 @@
 /* ---------- the kitchen at Green Gables ---------- */
 const KIT = { w: 13 * T, h: 9 * T };   // the room, its own little world
-const STOVE = { x: 3 * T, y: 3.2 * T }, TABLE = { x: 7 * T, y: 5.2 * T }, KDOOR = { x: 6.5 * T, y: 9 * T - 6 };
+const STOVE = lugar('cocina', 'estufa'), TABLE = lugar('cocina', 'mesa'), KDOOR = lugar('cocina', 'puerta');   // (src/mapas/cocina.tmj)
 // the places at the table (x, y, facing; and where one walks to before sitting down): Ana and a guest behind it, the Cuthberts at the ends
 const SEATS = { ana: [TABLE.x - 16, TABLE.y - 44, 2], lynde: [TABLE.x + 20, TABLE.y - 44, 2], matthew: [TABLE.x - 54, TABLE.y + 2, 1], marilla: [TABLE.x + 54, TABLE.y + 2, 3] };
 const seatFrom = q => q[1] < TABLE.y ? [q[0], q[1]] : [q[0], q[1] + 16];

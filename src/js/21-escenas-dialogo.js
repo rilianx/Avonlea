@@ -327,7 +327,7 @@ function drawChurch(c, t, night){
 const PEWS = []; for (let r = 0; r < 4; r++) for (const sx of [3 * T, 10 * T]) PEWS.push({ x: sx, y: 4.2 * T + r * 1.2 * T });
 const drawPew = (c, p) => { blob(c, [[p.x - 64, p.y - 14], [p.x + 64, p.y - 14], [p.x + 64, p.y - 4], [p.x - 64, p.y - 4]], '#7a5536'); blob(c, [[p.x - 64, p.y - 24], [p.x + 64, p.y - 24], [p.x + 64, p.y - 14], [p.x - 64, p.y - 14]], '#6a4a30'); };
 // the hall: a stage with its curtain at the back, rows of benches, garlands of flowers when it has been decorated
-const SALA = { stage: { x: 6.5 * T, y: 3.3 * T }, benches: [0, 1, 2].flatMap(r => [3.4 * T, 9.6 * T].map(x => ({ x, y: 5.4 * T + r * 1.1 * T }))) };
+const SALA = { stage: lugar('salon', 'escenario'), benches: mapaObjs('salon', 'banco') };   // (src/mapas/salon.tmj)
 function drawSala(c, t, night){
   c.fillStyle = '#b8905e'; c.fillRect(0, 0, KIT.w, KIT.h);
   c.strokeStyle = 'rgba(110,70,40,.3)'; c.lineWidth = 1; for (let y = 2.4 * T; y < KIT.h; y += 14) { c.beginPath(); c.moveTo(0, y); c.lineTo(KIT.w, y); c.stroke(); }

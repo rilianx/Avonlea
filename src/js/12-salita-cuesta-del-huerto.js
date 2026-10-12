@@ -1,5 +1,5 @@
 /* ---------- the parlour at Orchard Slope (Diana's house): a fire, a sofa, tea and raspberry cordial ---------- */
-const FIRE = { x: 10.2 * T, y: 3.3 * T }, SOFA = { x: 3.6 * T, y: 4.5 * T }, TEA = { x: 7.4 * T, y: 6 * T };
+const FIRE = lugar('salita', 'chimenea'), SOFA = lugar('salita', 'sofa'), TEA = lugar('salita', 'te');   // (src/mapas/salita.tmj)
 function drawParlour(c, t, night){
   c.fillStyle = '#b7875a'; c.fillRect(0, 0, KIT.w, KIT.h);
   c.strokeStyle = 'rgba(100,60,35,.35)'; c.lineWidth = 1; for (let y = 2.4 * T; y < KIT.h; y += 14) { c.beginPath(); c.moveTo(0, y); c.lineTo(KIT.w, y); c.stroke(); for (let x = (y / 14 % 2) * 40 + 20; x < KIT.w; x += 80) { c.beginPath(); c.moveTo(x, y); c.lineTo(x, y + 14); c.stroke(); } }

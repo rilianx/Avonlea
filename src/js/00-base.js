@@ -18,6 +18,10 @@
 const cv = document.getElementById('cv'), g = cv.getContext('2d');
 const MIN_S = 5;   // (a minute of the game lasts five real seconds: an hour, five minutes; a whole day, two hours)
 const T = 32, K = 2.5, U = T * K, WW = 96 * U, WH = 84 * U, AX = 0, AW = WW, TAU = Math.PI * 2, KK = K * K;   // (U: the unit of distances outdoors; T: the size of things)
+// the interiors, drawn in Tiled (src/mapas/*.tmj, put in here by tools/build.js): where each thing is in each room
+const MAPAS = /*@mapas*/;
+const mapaObjs = (mapa, nombre) => (MAPAS[mapa]?.layers || []).flatMap(l => l.objects || []).filter(o => o.name === nombre).map(o => ({ x: o.x, y: o.y }));
+const lugar = (mapa, nombre) => { const o = mapaObjs(mapa, nombre)[0]; if (!o) throw new Error(`el mapa «${mapa}» no tiene «${nombre}»`); return o; };
 function rng(seed){ return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 const R = rng(18780228);
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v)), lerp = (a, b, k) => a + (b - a) * k, dist = (a, b, c, d) => Math.hypot(a - c, b - d);

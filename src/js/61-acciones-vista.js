@@ -51,7 +51,7 @@ const ACC_MOV = {
 // the sink; a letter is written at her desk, upstairs. A step: lugar (a room key to be in: 'cocina', 'pieza'), p (the
 // spot), mira (facing), sentar, dur (seconds), obj (what is drawn while it is done), lleva (what is carried on the way),
 // decir (said on arriving), hecho (what it leaves done). Without steps, the action is done where one stands.
-const KX = { aparador: { x: 1.4 * T, y: 6.6 * T }, fregadero: { x: 9.2 * T, y: 2.95 * T }, silla: { x: KIT.w / 2 + 76, y: 3.1 * T } };   // (the dresser with the plates, the dry sink, Marilla's chair by the window)
+const KX = { aparador: lugar('cocina', 'aparador'), fregadero: lugar('cocina', 'fregadero'), silla: lugar('cocina', 'silla') };   // (the dresser with the plates, the dry sink, Marilla's chair by the window)
 const enCasa = me => wmScene(me) === 'gg' || wmScene(me) === 'ga';
 const ACC_PASOS = {
   'quehacer:mesa': me => wmScene(me) !== 'gg' ? null : [

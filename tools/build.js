@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Builds index.html from src/: the page (src/shell.html), the script of scenes (src/datos/guion.txt), the book
-// (src/datos/libro1.json) and the code, in order (src/js/NN-*.js, concatenated as they are: one script, as before).
+// (src/datos/libro1.json), the interiors drawn in Tiled (src/mapas/*.tmj) and the code, in order (src/js/NN-*.js, concatenated as they are: one script, as before).
 // The game is still ONE file, so the link keeps working.
 //   node tools/build.js            → writes index.html
 //   node tools/build.js --check    → only checks that index.html is what src/ builds (exit 1 if not)
@@ -10,7 +10,8 @@ const read = p => fs.readFileSync(src(p), 'utf8');
 
 function build(){
   const js = fs.readdirSync(src('js')).filter(f => /^\d\d-.*\.js$/.test(f)).sort().map(f => read('js/' + f)).join('\n');
-  const code = js.replace('/*@libro1*/', () => read('datos/libro1.json'));
+  const mapas = Object.fromEntries(fs.readdirSync(src('mapas')).filter(f => f.endsWith('.tmj')).sort().map(f => [f.replace('.tmj', ''), JSON.parse(read('mapas/' + f))]));
+  const code = js.replace('/*@libro1*/', () => read('datos/libro1.json')).replace('/*@mapas*/', () => JSON.stringify(mapas));
   return read('shell.html').replace('<!--@guion-->', () => read('datos/guion.txt')).replace('<!--@js-->', () => code);
 }
 

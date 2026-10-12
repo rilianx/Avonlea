@@ -1,6 +1,6 @@
 /* ---------- Ana's room: the east gable (the narrow bed, the muslin curtains, the Snow Queen outside the window) ---------- */
-const STAIRS = { x: 12 * T, y: 4.7 * T };
-const GA = { win: 4.6 * T, bed: { x: 10.2 * T, y: 5.7 * T }, table: { x: 7.6 * T, y: 3.7 * T }, wash: { x: 2.6 * T, y: 3.6 * T } };
+const STAIRS = lugar('cocina', 'escalera');
+const GA = { win: lugar('pieza', 'ventana').x, bed: lugar('pieza', 'cama'), table: lugar('pieza', 'escritorio'), wash: lugar('pieza', 'lavatorio') };   // (src/mapas/pieza.tmj)
 function drawStairsUp(c){
   const x0 = 11.2 * T, x1 = 12.8 * T, yb = 4.6 * T, yt = 2.3 * T;
   blob(c, [[x0, yb], [x1, yb], [x1, yt], [x0, yt + 10]], '#a67c52');

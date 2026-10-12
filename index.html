@@ -427,6 +427,10 @@ lineas: relleno:1
 const cv = document.getElementById('cv'), g = cv.getContext('2d');
 const MIN_S = 5;   // (a minute of the game lasts five real seconds: an hour, five minutes; a whole day, two hours)
 const T = 32, K = 2.5, U = T * K, WW = 96 * U, WH = 84 * U, AX = 0, AW = WW, TAU = Math.PI * 2, KK = K * K;   // (U: the unit of distances outdoors; T: the size of things)
+// the interiors, drawn in Tiled (src/mapas/*.tmj, put in here by tools/build.js): where each thing is in each room
+const MAPAS = {"cocina":{"type":"map","version":"1.10","tiledversion":"1.10.2","orientation":"orthogonal","renderorder":"right-down","infinite":false,"width":13,"height":9,"tilewidth":32,"tileheight":32,"nextlayerid":2,"nextobjectid":8,"tilesets":[],"properties":[],"layers":[{"id":1,"name":"lugares","type":"objectgroup","draworder":"topdown","opacity":1,"visible":true,"x":0,"y":0,"objects":[{"id":1,"name":"estufa","type":"","x":96,"y":102.4,"width":0,"height":0,"rotation":0,"point":true,"visible":true},{"id":2,"name":"mesa","type":"","x":224,"y":166.4,"width":0,"height":0,"rotation":0,"point":true,"visible":true},{"id":3,"name":"puerta","type":"","x":208,"y":282,"width":0,"height":0,"rotation":0,"point":true,"visible":true},{"id":4,"name":"escalera","type":"","x":384,"y":150.4,"width":0,"height":0,"rotation":0,"point":true,"visible":true},{"id":5,"name":"aparador","type":"","x":44.8,"y":211.2,"width":0,"height":0,"rotation":0,"point":true,"visible":true},{"id":6,"name":"fregadero","type":"","x":294.4,"y":94.4,"width":0,"height":0,"rotation":0,"point":true,"visible":true},{"id":7,"name":"silla","type":"","x":284,"y":99.2,"width":0,"height":0,"rotation":0,"point":true,"visible":true}]}]},"pieza":{"type":"map","version":"1.10","tiledversion":"1.10.2","orientation":"orthogonal","renderorder":"right-down","infinite":false,"width":13,"height":9,"tilewidth":32,"tileheight":32,"nextlayerid":2,"nextobjectid":5,"tilesets":[],"properties":[],"layers":[{"id":1,"name":"lugares","type":"objectgroup","draworder":"topdown","opacity":1,"visible":true,"x":0,"y":0,"objects":[{"id":1,"name":"ventana","type":"","x":147.2,"y":0,"width":0,"height":0,"rotation":0,"point":true,"visible":true},{"id":2,"name":"cama","type":"","x":326.4,"y":182.4,"width":0,"height":0,"rotation":0,"point":true,"visible":true},{"id":3,"name":"escritorio","type":"","x":243.2,"y":118.4,"width":0,"height":0,"rotation":0,"point":true,"visible":true},{"id":4,"name":"lavatorio","type":"","x":83.2,"y":115.2,"width":0,"height":0,"rotation":0,"point":true,"visible":true}]}]},"salita":{"type":"map","version":"1.10","tiledversion":"1.10.2","orientation":"orthogonal","renderorder":"right-down","infinite":false,"width":13,"height":9,"tilewidth":32,"tileheight":32,"nextlayerid":2,"nextobjectid":4,"tilesets":[],"properties":[],"layers":[{"id":1,"name":"lugares","type":"objectgroup","draworder":"topdown","opacity":1,"visible":true,"x":0,"y":0,"objects":[{"id":1,"name":"chimenea","type":"","x":326.4,"y":105.6,"width":0,"height":0,"rotation":0,"point":true,"visible":true},{"id":2,"name":"sofa","type":"","x":115.2,"y":144,"width":0,"height":0,"rotation":0,"point":true,"visible":true},{"id":3,"name":"te","type":"","x":236.8,"y":192,"width":0,"height":0,"rotation":0,"point":true,"visible":true}]}]},"salon":{"type":"map","version":"1.10","tiledversion":"1.10.2","orientation":"orthogonal","renderorder":"right-down","infinite":false,"width":13,"height":9,"tilewidth":32,"tileheight":32,"nextlayerid":2,"nextobjectid":8,"tilesets":[],"properties":[],"layers":[{"id":1,"name":"lugares","type":"objectgroup","draworder":"topdown","opacity":1,"visible":true,"x":0,"y":0,"objects":[{"id":1,"name":"escenario","type":"","x":208,"y":105.6,"width":0,"height":0,"rotation":0,"point":true,"visible":true},{"id":2,"name":"banco","type":"banco","x":108.8,"y":172.8,"width":0,"height":0,"rotation":0,"point":true,"visible":true},{"id":3,"name":"banco","type":"banco","x":307.2,"y":172.8,"width":0,"height":0,"rotation":0,"point":true,"visible":true},{"id":4,"name":"banco","type":"banco","x":108.8,"y":208,"width":0,"height":0,"rotation":0,"point":true,"visible":true},{"id":5,"name":"banco","type":"banco","x":307.2,"y":208,"width":0,"height":0,"rotation":0,"point":true,"visible":true},{"id":6,"name":"banco","type":"banco","x":108.8,"y":243.20000000000002,"width":0,"height":0,"rotation":0,"point":true,"visible":true},{"id":7,"name":"banco","type":"banco","x":307.2,"y":243.20000000000002,"width":0,"height":0,"rotation":0,"point":true,"visible":true}]}]}};
+const mapaObjs = (mapa, nombre) => (MAPAS[mapa]?.layers || []).flatMap(l => l.objects || []).filter(o => o.name === nombre).map(o => ({ x: o.x, y: o.y }));
+const lugar = (mapa, nombre) => { const o = mapaObjs(mapa, nombre)[0]; if (!o) throw new Error(`el mapa «${mapa}» no tiene «${nombre}»`); return o; };
 function rng(seed){ return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 const R = rng(18780228);
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v)), lerp = (a, b, k) => a + (b - a) * k, dist = (a, b, c, d) => Math.hypot(a - c, b - d);
@@ -1563,7 +1567,7 @@ function drawBed(c, b, t){
 
 /* ---------- the kitchen at Green Gables ---------- */
 const KIT = { w: 13 * T, h: 9 * T };   // the room, its own little world
-const STOVE = { x: 3 * T, y: 3.2 * T }, TABLE = { x: 7 * T, y: 5.2 * T }, KDOOR = { x: 6.5 * T, y: 9 * T - 6 };
+const STOVE = lugar('cocina', 'estufa'), TABLE = lugar('cocina', 'mesa'), KDOOR = lugar('cocina', 'puerta');   // (src/mapas/cocina.tmj)
 // the places at the table (x, y, facing; and where one walks to before sitting down): Ana and a guest behind it, the Cuthberts at the ends
 const SEATS = { ana: [TABLE.x - 16, TABLE.y - 44, 2], lynde: [TABLE.x + 20, TABLE.y - 44, 2], matthew: [TABLE.x - 54, TABLE.y + 2, 1], marilla: [TABLE.x + 54, TABLE.y + 2, 3] };
 const seatFrom = q => q[1] < TABLE.y ? [q[0], q[1]] : [q[0], q[1] + 16];
@@ -1645,7 +1649,7 @@ function drawTable(c){
 }
 
 /* ---------- the parlour at Orchard Slope (Diana's house): a fire, a sofa, tea and raspberry cordial ---------- */
-const FIRE = { x: 10.2 * T, y: 3.3 * T }, SOFA = { x: 3.6 * T, y: 4.5 * T }, TEA = { x: 7.4 * T, y: 6 * T };
+const FIRE = lugar('salita', 'chimenea'), SOFA = lugar('salita', 'sofa'), TEA = lugar('salita', 'te');   // (src/mapas/salita.tmj)
 function drawParlour(c, t, night){
   c.fillStyle = '#b7875a'; c.fillRect(0, 0, KIT.w, KIT.h);
   c.strokeStyle = 'rgba(100,60,35,.35)'; c.lineWidth = 1; for (let y = 2.4 * T; y < KIT.h; y += 14) { c.beginPath(); c.moveTo(0, y); c.lineTo(KIT.w, y); c.stroke(); for (let x = (y / 14 % 2) * 40 + 20; x < KIT.w; x += 80) { c.beginPath(); c.moveTo(x, y); c.lineTo(x, y + 14); c.stroke(); } }
@@ -1771,8 +1775,8 @@ HOUSES.rl.interior = {
 };
 
 /* ---------- Ana's room: the east gable (the narrow bed, the muslin curtains, the Snow Queen outside the window) ---------- */
-const STAIRS = { x: 12 * T, y: 4.7 * T };
-const GA = { win: 4.6 * T, bed: { x: 10.2 * T, y: 5.7 * T }, table: { x: 7.6 * T, y: 3.7 * T }, wash: { x: 2.6 * T, y: 3.6 * T } };
+const STAIRS = lugar('cocina', 'escalera');
+const GA = { win: lugar('pieza', 'ventana').x, bed: lugar('pieza', 'cama'), table: lugar('pieza', 'escritorio'), wash: lugar('pieza', 'lavatorio') };   // (src/mapas/pieza.tmj)
 function drawStairsUp(c){
   const x0 = 11.2 * T, x1 = 12.8 * T, yb = 4.6 * T, yt = 2.3 * T;
   blob(c, [[x0, yb], [x1, yb], [x1, yt], [x0, yt + 10]], '#a67c52');
@@ -2852,7 +2856,7 @@ function drawChurch(c, t, night){
 const PEWS = []; for (let r = 0; r < 4; r++) for (const sx of [3 * T, 10 * T]) PEWS.push({ x: sx, y: 4.2 * T + r * 1.2 * T });
 const drawPew = (c, p) => { blob(c, [[p.x - 64, p.y - 14], [p.x + 64, p.y - 14], [p.x + 64, p.y - 4], [p.x - 64, p.y - 4]], '#7a5536'); blob(c, [[p.x - 64, p.y - 24], [p.x + 64, p.y - 24], [p.x + 64, p.y - 14], [p.x - 64, p.y - 14]], '#6a4a30'); };
 // the hall: a stage with its curtain at the back, rows of benches, garlands of flowers when it has been decorated
-const SALA = { stage: { x: 6.5 * T, y: 3.3 * T }, benches: [0, 1, 2].flatMap(r => [3.4 * T, 9.6 * T].map(x => ({ x, y: 5.4 * T + r * 1.1 * T }))) };
+const SALA = { stage: lugar('salon', 'escenario'), benches: mapaObjs('salon', 'banco') };   // (src/mapas/salon.tmj)
 function drawSala(c, t, night){
   c.fillStyle = '#b8905e'; c.fillRect(0, 0, KIT.w, KIT.h);
   c.strokeStyle = 'rgba(110,70,40,.3)'; c.lineWidth = 1; for (let y = 2.4 * T; y < KIT.h; y += 14) { c.beginPath(); c.moveTo(0, y); c.lineTo(KIT.w, y); c.stroke(); }
@@ -7232,7 +7236,7 @@ const ACC_MOV = {
 // the sink; a letter is written at her desk, upstairs. A step: lugar (a room key to be in: 'cocina', 'pieza'), p (the
 // spot), mira (facing), sentar, dur (seconds), obj (what is drawn while it is done), lleva (what is carried on the way),
 // decir (said on arriving), hecho (what it leaves done). Without steps, the action is done where one stands.
-const KX = { aparador: { x: 1.4 * T, y: 6.6 * T }, fregadero: { x: 9.2 * T, y: 2.95 * T }, silla: { x: KIT.w / 2 + 76, y: 3.1 * T } };   // (the dresser with the plates, the dry sink, Marilla's chair by the window)
+const KX = { aparador: lugar('cocina', 'aparador'), fregadero: lugar('cocina', 'fregadero'), silla: lugar('cocina', 'silla') };   // (the dresser with the plates, the dry sink, Marilla's chair by the window)
 const enCasa = me => wmScene(me) === 'gg' || wmScene(me) === 'ga';
 const ACC_PASOS = {
   'quehacer:mesa': me => wmScene(me) !== 'gg' ? null : [
