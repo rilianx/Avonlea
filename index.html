@@ -1609,6 +1609,20 @@ function drawKitchen(c, t, night){
   // the door out
   blob(c, [[KDOOR.x - 18, KIT.h], [KDOOR.x - 18, KIT.h - 6], [KDOOR.x + 18, KIT.h - 6], [KDOOR.x + 18, KIT.h]], '#7a4f32');
 }
+// the dresser with the everyday plates, the dry sink with its basin and bucket, a chair by the window
+function drawAparador(c){
+  const { x, y } = KX.aparador; ell(c, x + 4, y + 2, 34, 6, 'rgba(40,25,15,.22)');
+  blob(c, [[x - 30, y], [x + 30, y], [x + 30, y - 76], [x - 30, y - 76]], '#8a5e3c'); blob(c, [[x - 26, y - 40], [x + 26, y - 40], [x + 26, y - 72], [x - 26, y - 72]], '#5a3a24');
+  for (const yy of [y - 62, y - 50]) { line(c, [[x - 26, yy + 6], [x + 26, yy + 6]], '#8a5e3c', 2, yy); for (let k = 0; k < 4; k++) ell(c, x - 18 + k * 12, yy, 5, 5, ['#f6f8fa', '#e8eef2', '#dfe8f0', '#f6f8fa'][k], true); }
+  blob(c, [[x - 28, y - 36], [x - 1, y - 36], [x - 1, y - 4], [x - 28, y - 4]], '#9a6a44'); blob(c, [[x + 1, y - 36], [x + 28, y - 36], [x + 28, y - 4], [x + 1, y - 4]], '#9a6a44'); ell(c, x - 4, y - 20, 1.6, 1.6, '#3a2418'); ell(c, x + 4, y - 20, 1.6, 1.6, '#3a2418');
+}
+function drawFregadero(c){
+  const { x, y } = KX.fregadero; ell(c, x, y + 2, 30, 5, 'rgba(40,25,15,.2)');
+  blob(c, [[x - 28, y], [x + 28, y], [x + 28, y - 24], [x - 28, y - 24]], '#8a5e3c'); blob(c, [[x - 30, y - 24], [x + 30, y - 24], [x + 28, y - 30], [x - 28, y - 30]], '#a07450');
+  ell(c, x, y - 28, 14, 4, '#c8ccd0', true); ell(c, x, y - 28, 11, 2.6, 'rgba(150,190,220,.8)'); blob(c, [[x + 18, y - 30], [x + 26, y - 30], [x + 25, y - 40], [x + 19, y - 40]], '#8a8a90');
+  if (!(game.mesa?.dia === today() && game.mesa.sucia === false) && hourNow() > 9) for (let k = 0; k < 2; k++) ell(c, x - 18 + k * 5, y - 32 - k * 1.5, 5, 2, '#ece6d8', true);   // (dishes waiting)
+}
+function drawSilla(c, x, y){ blob(c, [[x - 10, y], [x + 10, y], [x + 10, y - 12], [x - 10, y - 12]], '#8a6040'); blob(c, [[x - 10, y - 12], [x + 10, y - 12], [x + 9, y - 32], [x - 9, y - 32]], '#7a5536'); for (const o of [-4, 4]) line(c, [[x + o, y - 14], [x + o, y - 30]], '#5a3a24', 1, o); }
 function drawTable(c){
   ell(c, TABLE.x, TABLE.y + 2, 46, 8, 'rgba(40,25,15,.22)');
   for (const [cx, cy] of [[-52, -8], [52, -8]]) { blob(c, [[TABLE.x + cx - 9, TABLE.y + cy], [TABLE.x + cx + 9, TABLE.y + cy], [TABLE.x + cx + 9, TABLE.y + cy - 24], [TABLE.x + cx - 9, TABLE.y + cy - 24]], '#8a6040'); }
@@ -1616,7 +1630,9 @@ function drawTable(c){
   c.fillStyle = '#6a4a30'; c.fillRect(TABLE.x - 38, TABLE.y - 12, 4, 12); c.fillRect(TABLE.x + 34, TABLE.y - 12, 4, 12);
   blob(c, [[TABLE.x - 44, TABLE.y - 40], [TABLE.x + 44, TABLE.y - 40], [TABLE.x + 42, TABLE.y - 18], [TABLE.x - 42, TABLE.y - 18]], '#f6efe0');
   for (let k = -3; k <= 3; k++) line(c, [[TABLE.x + k * 12, TABLE.y - 39], [TABLE.x + k * 12, TABLE.y - 19]], 'rgba(200,80,70,.35)', 1, k);
-  ell(c, TABLE.x - 14, TABLE.y - 30, 8, 4, '#fffaf0', true); ell(c, TABLE.x + 16, TABLE.y - 32, 5, 4, '#9db3bf', true);
+  const M = game.mesa?.dia === today() ? game.mesa : null;
+  if (M?.puesta) for (let k = 0; k < 3; k++) { const x = TABLE.x - 30 + k * 30, y = TABLE.y - 28; ell(c, x, y, 7, 3, '#ffffff', true); line(c, [[x + 9, y - 2], [x + 9, y + 2]], '#a8a8b0', 1, k); }   // (laid: three places)
+  else if (M?.sucia !== false) { ell(c, TABLE.x - 14, TABLE.y - 30, 8, 4, '#fffaf0', true); ell(c, TABLE.x + 16, TABLE.y - 32, 5, 4, '#9db3bf', true); }
   if (game.inv.tarta + game.inv.compota > 0) ell(c, TABLE.x - 14, TABLE.y - 32, 6, 3, '#7a4a8a', true);
   // what Marilla left on the table for Ana
   if (game.table === 'tarta') { ell(c, TABLE.x + 2, TABLE.y - 30, 10, 4.4, '#d9a46a', true); ell(c, TABLE.x + 2, TABLE.y - 31, 8, 3, '#6a3a6e'); }
@@ -1724,7 +1740,7 @@ function drawRLQuilt(c){
    draw: the room; items: what stands in it, to be drawn in order of their feet; blocked: where one cannot walk;
    glow: the lamplight at night; place: how the prompt says where Ana is; actions: what she can do there (add(id, x, y, reach, label, act)). */
 HOUSES.gg.interior = {
-  draw: drawKitchen, items: g => [{ y: TABLE.y, draw: () => drawTable(g) }],
+  draw: drawKitchen, items: g => [{ y: TABLE.y, draw: () => drawTable(g) }, { y: KX.aparador.y, draw: () => drawAparador(g) }, { y: KX.fregadero.y, draw: () => drawFregadero(g) }, { y: KX.silla.y - 2, draw: () => drawSilla(g, KX.silla.x, KX.silla.y) }],
   blocked: (x, y) => (Math.abs(x - STOVE.x) < 36 && y < STOVE.y + 6) || (Math.abs(x - TABLE.x) < 60 && y > TABLE.y - 26 && y < TABLE.y + 6),
   glow: () => [TABLE.x, TABLE.y - 40, 160, '255,190,110', .4], place: 'en la cocina de Tejas Verdes',
   actions: add => {
@@ -2898,7 +2914,7 @@ function shopMenu(step){
     if (libretaToday() >= 2) return say('lawson', 'Ya llevas dos cosas anotadas hoy, Ana. Marilla me lo agradecerá si paramos aquí.', [back]);
     return say('lawson', '¿Qué hace falta en Tejas Verdes? Lo anoto en la libreta de los Cuthbert.', [...LIBRETA.map(x => [LIBRETA_ART[x][0].toUpperCase() + LIBRETA_ART[x].slice(1), () => shopLibreta(x)]), back]);
   }
-  const opts = [['🧺 Cambiar algo que traigo por un capricho', () => shopMenu('cambiar')], ['📒 Llevar algo para la casa (a la libreta)', () => shopMenu('libreta')]];
+  const opts = [['🧺 Cambiar algo que traigo por un capricho', () => shopMenu('cambiar')], ['📒 Llevar algo para la casa (a la libreta)', () => shopMenu('libreta')], ['📬 ¿Hay correo para mí?', correoRetirar]];
   if (L) opts.push(['Conversar con el Sr. Lawson', () => { close(); folkTalk(L); }]);
   opts.push(['Adiós', close]);
   say('lawson', pick(['¡Buenos días, Ana! ¿Qué se te ofrece?', 'Pasa, pasa. ¿Vienes a cambiar algo o te manda Marilla?', 'Llegaron cintas nuevas, Ana. ¿Qué se te ofrece?']), opts);
@@ -3531,7 +3547,7 @@ const ACC_GRUPOS = [
 ];
 const cap = s => s[0].toUpperCase() + s.slice(1);
 function anaMenu(){
-  const J = jugables(), mine = [];
+  const J = jugables(), mine = cartas().filter(c => c.para === 'ana' && c.estado === 'recibida').map(c => ['📜 Leer la carta de ' + CORREO[c.de].nombre, () => cartaLeer(c)]);
   for (const k of Object.keys(game.anaStates)) if (ANA_STATES[k].fix) mine.push([ANA_STATES[k].fix, () => { close(); setAnaState(k, false); }]);
   if (game.inv.te > 0) mine.push(['☕ Tomar la taza de té', sipTea]);
   if (game.scene === 'out' && (S !== 3 || ana.lie)) mine.push([ana.lie ? 'Levantarse' : '🌿 Recostarme en el pasto', () => { close(); if (ana.lie) { ana.lie = false; return; } if (nearPath(ana.x, ana.y, 26)) return anaSays('Aquí es camino... busco un pedacito de pasto.'); if (underTree(ana.x, ana.y)) return anaSays('Aquí el árbol me tapa el cielo... busco un lugar con más nubes.'); ana.lie = true; ana.sit = false; ana.goto = null; ana.dir = 2; logEv('Ana se recostó en el pasto a mirar las nubes.'); }]);
@@ -5185,7 +5201,7 @@ function ambNote(parts){
   if (parts.length > 1) return `Ana llega donde están ${names}, que conversan entre ellos. (Charla al pasar: nadie se lo pidió. Hablan sobre todo entre ellos —los vecinos, la comida, el tiempo, la cosecha, los chismes, lo que Ana hizo—; Ana se une enseguida y habla bastante.)`;
   return `Ana pasa cerca de ${names} y se detiene un momento. (Charla al pasar: nadie se lo pidió; Ana también habla. Pueden saludarse o comentar algo del momento.)`;
 }
-const writtenTalkOn = () => game.scene === 'camino' || cart.riding || !!(AGENTS.ana?.ride && AGENTS.ana.followOf) || talkBusy('viaje') || (CAP1.on && !CAP1.done);
+const writtenTalkOn = () => !!game.playAct || game.scene === 'camino' || cart.riding || !!(AGENTS.ana?.ride && AGENTS.ana.followOf) || talkBusy('viaje') || (CAP1.on && !CAP1.done);
 function ambUpdate(dt){
   if (amb.cur) return ambTick(dt);
   if (enc.cur) return;
@@ -5550,7 +5566,7 @@ function update(dt){
   if (game.scene === 'camino' && ana.onCart && (mx || my || (ana.goto && !ana.goto.wm))) roadGetOff();   // (moving her: she gets down from the buggy)
   if (ANA_AUTO) { if (mx || my) { freeStart(); const v = 520 / (cam.zoom || 1) / (viewZoom || 1); freeCam.x += mx * v * dt; freeCam.y += my * v * dt; } mx = my = 0; }   // (on her own: the keys move the view)
   if (game.talk?.deadline && TT > game.talk.deadline && !sayOpen) { game.talk.deadline = 0; autoChoose(); }
-  autoTick(); cartTick(dt); roadTick(dt); buggyTick(); roadTalkTick(dt); dlgTick(dt); talkTick(dt); cap1Tick(); momentsTick(); folkTick(dt); faunaTick(dt); agentTick(dt); jugarTick(dt); sickTick(); agendaTick(); wmApproachTick(dt); calledTick(); chatTick(dt); wmFollowTick();
+  autoTick(); cartTick(dt); roadTick(dt); buggyTick(); roadTalkTick(dt); dlgTick(dt); talkTick(dt); cap1Tick(); momentsTick(); folkTick(dt); faunaTick(dt); agentTick(dt); jugarTick(dt); correoTick(dt); sickTick(); agendaTick(); wmApproachTick(dt); calledTick(); chatTick(dt); wmFollowTick();
   ana.torn = !!game.anaStates.rasgado; ana.askew = !!game.anaStates.despeinada;
   ana.savoring = false;
   // walking to something she was sent to (a tap): by the A* path, and doing it on arrival
@@ -6584,7 +6600,7 @@ function verbs(s, me, C){
   if (C.kind === 'remo' && here === 'lago' && !s.facts['invierno'] && !s.facts['remo:' + me]) add('remar', 15, t => { t.facts['remo:' + me] = 1; });
   if (C.kind === 'nombres' && me === 'ana' && NOMBRES_ANA[here] && !s.facts['nombre:' + here]) add('nombrar', 2, t => { t.facts['nombre:' + here] = 1; }, { p: here });
   // (from the book, second batch) letters and books, the story club, the concert, the farm, winter, the picnic, the dye, the dare
-  const home = here === W.cocina || (here || '').startsWith('h:');
+  const home = here === W.cocina || here === 'pieza' || (here || '').startsWith('h:');
   if (C.kind === 'carta' && home && !(inv.carta > 0) && !s.facts['carta_enviada:' + me]) add('escribir_carta', 8, t => { t.invs[me].carta = 1; });
   if (C.kind === 'carta' && here === 'tienda' && inv.carta > 0) add('enviar_carta', 2, t => { t.invs[me].carta -= 1; t.facts['carta_enviada:' + me] = 1; });
   if (C.kind === 'leido' && inv.libro > 0 && !s.facts['leido:' + me]) add('leer', 20, t => { t.facts['leido:' + me] = 1; });
@@ -7092,6 +7108,7 @@ function wmMove(who, key, dt){
     if (sc === 'gg') { b.where = 'ga'; b.x = KDOOR.x; b.y = KIT.h - 28; return 'run'; }
     T.room = 'gg';
   }
+  if (T.room === 'gg' && sc === 'ga') { if (who === 'ana') goIn('gg', [STAIRS.x - 16, STAIRS.y + 36]); else { b.where = 'gg'; b.x = STAIRS.x - 16; b.y = STAIRS.y + 36; } return 'run'; }   // (down the stairs)
   if (sc === T.room) { const p = T.at || (who === 'ana' && T.room === 'gg' ? [STOVE.x, STOVE.y + 40] : null); if (!p || dist(b.x, b.y, p[0], p[1]) < 40) { wmStop(who); return 'ok'; } wmWalk(who, p[0], p[1], T.room, dt); return 'run'; }
   if (sc !== 'out') { wmExit(who); return 'run'; }
   if (dist(b.x, b.y, T.door[0], T.door[1] + 20) < 34) { wmEnter(who, T.room); return 'run'; }
@@ -7154,6 +7171,7 @@ const ACCION_VISTA = {
   decorar_sala: { dur: 10, obj: 'flores' }, adornar: { dur: 6, obj: 'sombrero' }, cuidar: { obj: 'jarabe' },
   quehacer: { dur: 8, obj: 'quehacer' }, cocinar: { dur: 8, obj: 'bol' }, preparar: { dur: 8, obj: 'bol' }, batir: { dur: 10, obj: 'mantequera' }, coser: { dur: 12, obj: 'costura', sentar: true },
   recoger: { dur: 6, obj: 'canastito' }, jurar: { dur: 8, obj: 'manos' }, nombrar: { dur: 6, obj: 'recitar' },
+  visitar: { obj: 'te' },
   trepar: { dur: 10, mov: 'techo', arriba: true }, actuar: { dur: 10, obj: 'recitar' }, recitar: { dur: 8, obj: 'recitar' },
 };
 const accPhase = (A, per) => ((TT - A.t0) % per) / per;
@@ -7177,6 +7195,60 @@ const ACC_MOV = {
     const H = HOUSES.os.at, u = accPhase(A, 6); b.x = H.x - 40 + Math.abs(u * 2 - 1) * 80; b.y = H.y - 74; b.dir = u < .5 ? 1 : 3; b.moving = true; b.walk = ((b.walk || 0) + .01) % 1; b.sit = false; b.sortY = H.y + 2;
   },
 };
+// the steps of an action (ACC_PASOS): where it is really done, one place after another, and what is carried between
+// them: laying the table is going to the dresser for the plates and setting them on the table; the dishes are washed at
+// the sink; a letter is written at her desk, upstairs. A step: lugar (a room key to be in: 'cocina', 'pieza'), p (the
+// spot), mira (facing), sentar, dur (seconds), obj (what is drawn while it is done), lleva (what is carried on the way),
+// decir (said on arriving), hecho (what it leaves done). Without steps, the action is done where one stands.
+const KX = { aparador: { x: 1.4 * T, y: 6.6 * T }, fregadero: { x: 9.2 * T, y: 2.95 * T }, silla: { x: KIT.w / 2 + 76, y: 3.1 * T } };   // (the dresser with the plates, the dry sink, Marilla's chair by the window)
+const enCasa = me => wmScene(me) === 'gg' || wmScene(me) === 'ga';
+const ACC_PASOS = {
+  'quehacer:mesa': me => wmScene(me) !== 'gg' ? null : [
+    { p: [KX.aparador.x + 46, KX.aparador.y + 6], mira: 3, dur: 2.5, obj: 'aparador', decir: 'Los platos de todos los días…' },
+    { p: [TABLE.x - 20, TABLE.y + 18], mira: 0, dur: 3.5, lleva: 'platos', obj: 'poner', hecho: () => { game.mesa = { dia: today(), puesta: true }; } }],
+  'quehacer:platos': me => wmScene(me) !== 'gg' ? null : [
+    { p: [TABLE.x + 20, TABLE.y + 18], mira: 0, dur: 2, obj: 'recoger', hecho: () => { game.mesa = { dia: today(), sucia: false }; } },
+    { p: [KX.fregadero.x, KX.fregadero.y + 34], mira: 0, dur: 6, lleva: 'platos_sucios', obj: 'lavar' },
+    { p: [KX.aparador.x + 46, KX.aparador.y + 6], mira: 3, dur: 2, lleva: 'platos', obj: 'aparador' }],
+  'quehacer:barrer': me => wmScene(me) !== 'gg' ? null : [[3.2, 6.6], [5, 7.6], [8.6, 7.2], [10.2, 6], [4.4, 4.6]].map(([x, y]) => ({ p: [x * T, y * T], dur: 1.6, obj: 'escoba' })),
+  escribir_carta: me => me === 'ana' && enCasa(me) ? [{ lugar: 'pieza', p: [GA.table.x, GA.table.y + 8], mira: 0, sentar: true, dur: 21, obj: 'papel' }] : null,
+  escribir_cuento: me => me === 'ana' && enCasa(me) ? [{ lugar: 'pieza', p: [GA.table.x, GA.table.y + 8], mira: 0, sentar: true, dur: 10, obj: 'papel' }] : null,
+  estudiar: me => wmScene(me) === 'gg' ? [{ p: SEATS.ana.slice(0, 2), mira: 2, sentar: true, dur: 10, obj: 'libro' }] : wmScene(me) === 'es' ? [{ p: [SCHOOL_DESKS[5].x, SCHOOL_DESKS[5].y + 10], mira: 0, sentar: true, dur: 10, obj: 'libro' }] : null,
+  recitar: me => wmScene(me) === 'es' ? [{ p: [6.5 * T, 3.5 * T], mira: 2, dur: 8, obj: 'recitar' }] : null,   // (in front of the class, by the blackboard)
+  visitar: (me, a) => { const o = wmBody(a.k), sc = wmScene(me); if (!o || sc === 'out' || sc !== wmScene(a.k)) return null; const q = sc === 'gg' ? SEATS.lynde.slice(0, 2) : sc === 'os' ? [TEA.x - 40, TEA.y + 6] : [o.x - 34, o.y + 4]; return [{ p: q, mira: 1, sentar: true, dur: 7, obj: 'te' }]; },   // (sitting down for the visit, a cup of tea)
+  leer: me => wmScene(me) === 'ga' ? [{ p: [GA.bed.x - 50, GA.bed.y - 6], mira: 2, sentar: true, dur: 12, obj: 'libro' }] : wmScene(me) === 'gg' ? [{ p: SEATS.ana.slice(0, 2), mira: 2, sentar: true, dur: 12, obj: 'libro' }] : null,
+  rezar: me => me === 'ana' && enCasa(me) ? [{ lugar: 'pieza', p: [GA.bed.x - 40, GA.bed.y + 20], mira: 0, sentar: true, dur: 7, obj: 'rezar' }] : null,
+  coser: me => wmScene(me) === 'gg' ? [{ p: [KX.silla.x, KX.silla.y], mira: 2, sentar: true, dur: 12, obj: 'costura' }] : null,
+  cocinar: me => wmScene(me) === 'gg' ? [{ p: [STOVE.x + 14, STOVE.y + 40], mira: 0, dur: 7, obj: 'bol' }] : null,
+  preparar: me => wmScene(me) === 'gg' ? [{ p: [STOVE.x + 14, STOVE.y + 40], mira: 0, dur: 7, obj: 'bol' }] : null,
+  batir: me => wmScene(me) === 'gg' ? [{ p: [TABLE.x + 76, TABLE.y + 14], mira: 3, dur: 9, obj: 'mantequera' }] : null,
+  'ordeñar': (me, a) => { const c = ANIM[a.cow]; return c ? [{ p: () => [c.x - 26, c.y + 6], mira: 1, sentar: true, dur: 8, obj: 'balde' }] : null; },
+  alimentar: (me, a) => { const A = AREAS[a.p]; return A ? [[.3, .4], [.7, .6]].map(([u, v]) => ({ p: [A.x + A.w * u, A.y + A.h * v], dur: 3, obj: 'grano' })) : null; },
+  sembrar: me => BEDS.slice(0, 3).map(b => ({ p: [b.x, b.y + 22], mira: 0, dur: 3, obj: 'semillas' })),
+  regar: me => BEDS.slice(3, 6).map(b => ({ p: [b.x, b.y + 22], mira: 0, dur: 2.5, obj: 'regadera' })),
+  hacer_heno: me => { const f = FIELDS.find(f => dist(f.x + f.w / 2, f.y + f.h / 2, wmBody(me).x, wmBody(me).y) < 500); return f ? [[.25, .4], [.5, .6], [.75, .45]].map(([u, v]) => ({ p: [f.x + f.w * u, f.y + f.h * v], dur: 4, obj: 'horquilla' })) : null; },
+};
+const accPasos = (a, me) => (ACC_PASOS[a.v + ':' + a.x] || ACC_PASOS[a.v])?.(me, a) || null;
+// one step after another: go there (into the room first), then do it for a while; true when all are done
+function coreoTick(ag, a, st, dt, P){
+  const me = ag.who, b = wmBody(me), A = ag.acting; st.w = (st.w || 0) + dt;
+  const p = P[st.ci || 0]; if (!p) return true;
+  if (p.lugar && personKey(me) !== p.lugar) { b.sit = false; if (A) A.lleva = p.lleva; wmMove(me, p.lugar, dt); return false; }
+  const q = typeof p.p === 'function' ? p.p() : p.p;
+  if (q && !st.llego) {
+    if (A) { A.lleva = p.lleva; A.obj = null; }
+    b.sit = false; const d = dist(b.x, b.y, q[0], q[1]);
+    st.tw = (st.tw || 0) + dt;
+    if (d > 16 && st.tw < 9) { wmWalk(me, q[0], q[1], wmScene(me), dt); return false; }
+    wmStop(me); b.x = q[0]; b.y = q[1]; st.llego = 1; st.tw = 0;   // (there; or, stuck for a while, as good as there)
+  }
+  if (!st.pt) { st.pt = 0; if (A) { A.obj = p.obj; A.lleva = null; A.base = [b.x, b.y]; } if (p.decir) wmSay(me, p.decir); }
+  if (p.mira != null) b.dir = p.mira; b.sit = !!p.sentar; if (me !== 'ana') b.moving = false;
+  st.pt += dt; if (st.pt < p.dur) return false;
+  p.hecho?.(); b.sit = false; st.ci = (st.ci || 0) + 1; st.llego = 0; st.pt = 0;
+  return st.ci >= P.length;
+}
+const wmSay = (k, text) => { const q = k === 'ana' ? 'ana' : PEOPLE[k] ? k : 'f:' + k; bubbles = [{ q, text, t: 0, dur: lineDur(text) }]; };
 // the things it is done with: under the body (u) or in front of it (f); x, y are the feet; d: facing (1 right, 3 left)
 const ACC_OBJ = {
   picnic: { u(c, b, A){ const x = A.base[0] + 14, y = A.base[1] + 6;   // the checked cloth, the basket, the ice cream
@@ -7210,6 +7282,7 @@ const ACC_OBJ = {
   regadera: { f(c, b, A){ const s = b.dir === 3 ? -1 : 1, x = b.x + s * 10, y = b.y - 22; blob(c, [[x - 6, y - 5], [x + 6, y - 5], [x + 5, y + 5], [x - 5, y + 5]], '#7a8a9a'); line(c, [[x + s * 6, y - 2], [x + s * 15, y - 8]], '#7a8a9a', 1.6, 1); for (let k = 0; k < 5; k++) { const q = (TT * 2 + k * .2) % 1; ell(c, x + s * (16 + q * 6), y - 8 + q * 30, 1, 2, 'rgba(110,170,220,.9)'); } } },
   grano: { f(c, b, A){ const x = b.x + 8, y = b.y - 22; blob(c, [[x - 5, y - 4], [x + 5, y - 4], [x + 4, y + 5], [x - 4, y + 5]], '#9a8a6a'); for (let k = 0; k < 8; k++) { const q = (TT * 1.6 + k * .125) % 1, a = k * 2.3; ell(c, x + Math.cos(a) * q * 26, y + q * 26 + Math.sin(a) * 4, 1.1, 1.1, '#e8c860'); } } },
   balde: { u(c, b, A){ const x = b.x + 14, y = b.y + 2; blob(c, [[x - 6, y - 10], [x + 6, y - 10], [x + 5, y], [x - 5, y]], '#9aa0a8'); ell(c, x, y - 10, 6, 2, '#f8f8f2'); ell(c, b.x - 2, b.y + 1, 7, 3, '#8a6a4a', true); } },   // (the pail of milk, the stool)
+  te: { f(c, b, A){ const x = b.x + (b.dir === 3 ? -8 : 8), y = b.y - 20; ell(c, x, y + 2, 5, 1.6, '#f6f8fa', true); ell(c, x, y, 3, 2.6, '#f2ede2', true); if (Math.sin(TT * 2) > .3) line(c, [[x, y - 4], [x + 1, y - 9]], 'rgba(255,255,255,.7)', 1, 1); } },   // (a cup of tea)
   rezar: { f(c, b, A){ ell(c, b.x + (b.dir === 3 ? -3 : 3), b.y - 30, 2.6, 4, '#f2d2b8', true); } },   // (the hands together)
   flores: { f(c, b, A){ const x = b.x + 9, y = b.y - 28; for (let k = 0; k < 6; k++) ell(c, x + Math.cos(k) * 4, y + Math.sin(k * 1.7) * 3 - 4, 2.4, 2.4, ['#f2c14e', '#f6f2f0', '#e88ab0'][k % 3], true); line(c, [[x, y], [x - 1, y + 7]], '#4a7a3a', 1, 1); } },
   sombrero: { f(c, b, A){ const h = 50 * (LOOKS[b.look]?.h || 1); for (let k = 0; k < 7; k++) ell(c, b.x - 10 + k * 3.3, b.y - h + 6 + Math.abs(k - 3) * .4, 2, 2, ['#f2c14e', '#e88ab0', '#f6f2f0'][k % 3], true); } },   // (a wreath of buttercups and wild roses on the hat)
@@ -7223,15 +7296,22 @@ const ACC_OBJ = {
   costura: { f(c, b, A){ const x = b.x + 2, y = b.y - 18; blob(c, [[x - 10, y - 3], [x + 10, y - 3], [x + 12, y + 5], [x - 12, y + 5]], '#8aa8c8'); const u = Math.sin(TT * 3); line(c, [[x + 4, y], [x + 10 + u * 4, y - 8]], '#e8e8e8', .8, 1); } },   // (the cloth on her lap, the needle and thread)
   canastito: { f(c, b, A){ const x = b.x + (b.dir === 3 ? -10 : 10), y = b.y - 16; ell(c, x, y, 7, 3.4, '#b8864e', true); c.strokeStyle = '#7a5430'; c.lineWidth = 1.2; c.beginPath(); c.arc(x, y - 1, 6, Math.PI, 0); c.stroke(); ell(c, x - 2, y - 2, 2, 1.6, '#d9433b'); ell(c, x + 2, y - 2, 2, 1.6, '#3c4fa8'); } },
   manos: { f(c, b, A){ const o = A.k && wmBody(A.k); if (!o) return; const x = (b.x + o.x) / 2, y = (b.y + o.y) / 2 - 28; ell(c, x, y, 4, 3, '#f2d2b8', true); hearts && Math.random() < .01 && hearts(x, y - 20); } },   // (hand in hand: «I solemnly swear to be faithful to my bosom friend…»)
+  platos: { f(c, b, A){ const x = b.x + (b.dir === 3 ? -6 : b.dir === 1 ? 6 : 0), y = b.y - 24; for (let k = 0; k < 4; k++) ell(c, x, y - k * 1.8, 7, 2.4, '#f6f8fa', true); } },   // (a pile of clean plates in her arms)
+  platos_sucios: { f(c, b, A){ const x = b.x + (b.dir === 3 ? -6 : b.dir === 1 ? 6 : 0), y = b.y - 24; for (let k = 0; k < 3; k++) ell(c, x + (k % 2) * 2, y - k * 2, 7, 2.4, '#ece6d8', true); ell(c, x + 3, y - 7, 3, 2.4, '#9db3bf', true); ell(c, x - 2, y - 2, 1.4, .8, '#b8864e'); } },
+  aparador: { f(c, b, A){ const x = KX.aparador.x + 22, y = KX.aparador.y - 30; blob(c, [[x - 2, y - 14], [x + 10, y - 18], [x + 10, y + 10], [x - 2, y + 12]], '#a87850'); ACC_OBJ.platos.f(c, b, A); } },   // (the dresser door open)
+  poner: { f(c, b, A){ const n = Math.min(3, 1 + Math.floor((TT - A.t0) / 1.1)); for (let k = 0; k < n; k++) { const x = TABLE.x - 30 + k * 30, y = TABLE.y - 28; ell(c, x, y, 7, 3, '#ffffff', true); line(c, [[x + 9, y - 2], [x + 9, y + 2]], '#a8a8b0', 1, k); } if (n < 3) ACC_OBJ.platos.f(c, b, A); } },   // (the plates set one by one)
+  recoger: { f(c, b, A){ ACC_OBJ.platos_sucios.f(c, b, A); } },
+  lavar: { f(c, b, A){ const x = KX.fregadero.x, y = KX.fregadero.y - 14, u = Math.sin(TT * 5); ell(c, x + u * 3, y - 2, 6, 2.2, '#f6f8fa', true); for (let k = 0; k < 3; k++) ell(c, x - 8 + k * 8 + u * 2, y - 6 - ((TT * 9 + k * 5) % 8), 1.4, 1.4, 'rgba(255,255,255,.9)'); } },   // (a plate in the basin, the suds)
+  escoba: { f(c, b, A){ ACC_OBJ.quehacer.f(c, b, { ...A, x: 'barrer' }); } },
   recitar: { f(c, b, A){ const u = Math.sin(TT * 2); line(c, [[b.x + 6, b.y - 34], [b.x + 16, b.y - 44 - u * 4]], '#f2d2b8', 2, 1); } },   // (an arm out, with feeling)
 };
 // who is doing what, from wmExec: on the first moment of doing it, where they stood; at the end, back as they were
 function accTick(ag, a, st, r){
   const V = ACCION_VISTA[a.v], b = wmBody(ag.who); if (!V || !b) return;
   const doing = r === 'run' && (st.w > 0 || st.hg || st.said);
-  if (doing && !ag.acting) { ag.acting = { v: a.v, k: a.k, x: a.x, t0: TT, base: [b.x, b.y], sit: b.sit, task: ag.task }; if (V.sentar && !V.mov) { b.sit = true; if (V.con && a.k) { const o = wmBody(a.k); if (o && wmScene(a.k) === wmScene(ag.who)) { ag.acting.kb = [o.x, o.y, o.sit]; o.x = b.x + 46; o.y = b.y + 2; o.sit = true; o.dir = 3; b.dir = 1; } } } }
+  if (doing && !ag.acting) { ag.acting = { v: a.v, k: a.k, x: a.x, t0: TT, base: [b.x, b.y], sit: b.sit, task: ag.task }; if (V.sentar && !V.mov && !st.P) { b.sit = true; if (V.con && a.k) { const o = wmBody(a.k); if (o && wmScene(a.k) === wmScene(ag.who)) { ag.acting.kb = [o.x, o.y, o.sit]; o.x = b.x + 46; o.y = b.y + 2; o.sit = true; o.dir = 3; b.dir = 1; } } } }
   if (doing && ag.acting && V.mov) ACC_MOV[V.mov](b, ag.acting);
-  if (doing && ag.acting && V.mira != null) b.dir = V.mira;
+  if (doing && ag.acting && V.mira != null && !st.P) b.dir = V.mira;
   if (doing && ag.acting?.kb) { const o = wmBody(a.k); if (o) { o.x = ag.acting.base[0] + 46; o.y = ag.acting.base[1] + 2; o.sit = true; o.dir = 3; o.moving = false; } }   // (whoever it is done with stays beside, sitting)
   if (!doing && ag.acting && r !== 'run') accEnd(ag);
 }
@@ -7252,10 +7332,60 @@ function accPush(list, g, t){
   for (const [k, b] of Object.entries(PEOPLE)) if (b.bed && b.where === game.scene) list.push({ y: b.y - 1, draw: () => { const x = b.x - 6, y = b.y + 2; blob(g, [[x - 34, y - 26], [x + 40, y - 26], [x + 40, y + 10], [x - 34, y + 10]], '#8a6040'); blob(g, [[x - 30, y - 22], [x + 36, y - 22], [x + 36, y + 6], [x - 30, y + 6]], '#f6f0e4'); ell(g, x - 22, y - 8, 9, 6, '#ffffff', true); } }, { y: b.y + 1, draw: () => { const x = b.x - 6, y = b.y + 2; blob(g, [[x - 8, y - 20], [x + 36, y - 20], [x + 36, y + 6], [x - 8, y + 6]], '#c86a5a'); for (let i = 0; i < 4; i++) line(g, [[x - 8 + i * 11, y - 20], [x - 8 + i * 11, y + 6]], 'rgba(255,240,220,.6)', 1, i); } });   // (the bed, and the quilt over the sick one)
   for (const ag of [...Object.values(AGENTS), ...(game.playAct ? [game.playAct] : [])]) {
     const A = ag.acting; if (!A) continue; if (ag.task !== A.task) { accEnd(ag); continue; } const k = ag.who, b = wmBody(k); if (!b || (k === 'ana' ? RENDER_REAL !== game.scene : wmScene(k) !== game.scene)) continue;
-    const O = ACC_OBJ[ACCION_VISTA[A.v].obj], y = b.sortY ?? b.y; if (!O) continue;
+    const y = b.sortY ?? b.y; if (A.lleva && ACC_OBJ[A.lleva]) { const C = ACC_OBJ[A.lleva]; list.push({ y: y + 7, draw: () => C.f(g, b, A) }); continue; }   // (carrying it to where it is done)
+    const O = ACC_OBJ[A.obj !== undefined ? A.obj : ACCION_VISTA[A.v].obj]; if (!O) continue;
     if (O.u) list.push({ y: (A.v === 'merendar' ? A.base[1] : y) - .6, draw: () => O.u(g, b, A) });
     if (O.f) list.push({ y: y + 7, draw: () => O.f(g, b, A) });
   }
+}
+/* ---------- letters: written to someone (Ana reads it aloud as she writes), taken to the post office (Lawson's store),
+   they arrive a day or a few later (Charlottetown is farther), and the answer comes back days or weeks after: it waits
+   at the post office until Ana asks for it, and then she can read it. ---------- */
+const CORREO = {
+  diana: { nombre: 'Diana', donde: 'aquí en Avonlea, en La Cuesta del Huerto', dias: 1, resp: [2, 4], saludo: 'Mi queridísima Diana, amiga del alma:', firma: 'Tu amiga del alma hasta la muerte, Ana (con e)' },
+  stacy: { nombre: 'la Srta. Stacy', donde: 'en la pensión de Avonlea', dias: 1, resp: [3, 6], saludo: 'Querida Srta. Stacy:', firma: 'Su alumna que la quiere, Ana Shirley' },
+  sraallan: { nombre: 'la Sra. Allan', donde: 'en la casa parroquial', dias: 1, resp: [2, 5], saludo: 'Querida Sra. Allan:', firma: 'Con todo cariño, Ana Shirley' },
+  josephine: { nombre: 'la Srta. Josephine Barry', donde: 'en Charlottetown', dias: 3, resp: [7, 14], saludo: 'Querida tía Josephine (porque usted me dejó llamarla así):', firma: 'Su amiga que la recuerda siempre, Ana Shirley' },
+};
+const CARTA_CUERPO = {
+  diana: [['Te escribo desde mi cuarto del alero, con la ventana abierta y el cerezo Reina de las Nieves mirándome.', 'Hoy pensé que si fuéramos princesas encerradas en una torre, nos mandaríamos cartas con una paloma blanca. Pero el correo de Avonlea también sirve.', '¿Mañana nos vemos en el Bosque Encantado? Lleva tu libro de poemas.'], ['No puedo esperar a verte para contarte todo, así que te lo escribo.', 'Marilla dice que hablo demasiado, pero en el papel nadie me puede interrumpir.', 'Guárdame un lugar a tu lado en la escuela, ¿sí?']],
+  stacy: [['Le escribo para contarle que terminé de leer el libro que nos recomendó, y que lloré en el capítulo once.', 'Estuve pensando en lo que dijo de los adjetivos: esta carta tiene solo los indispensables. Bueno, casi.', 'Quería decirle que gracias a usted estudiar ya no me parece un castigo, sino una aventura.'], ['Le escribo desde Tejas Verdes con una pregunta muy importante: ¿cree usted que yo podría llegar a escribir un libro de verdad?', 'Ya tengo el título. Lo que me falta es todo lo demás.']],
+  sraallan: [['Le escribo para darle las gracias por el té de la otra tarde. Fue uno de los momentos más elegantes de mi vida.', 'Sigo pensando en lo que usted dijo de ser buena. Lo estoy intentando todos los días, aunque algunos días me resulta mejor que otros.'], ['Quería contarle que ya no le pongo linimento a las tartas. Aprendí la lección para siempre.', 'Ojalá todas las personas fueran tan comprensivas como usted.']],
+  josephine: [['Le escribo desde Avonlea, donde todo sigue igual de bonito que cuando usted vino de visita.', 'Diana y yo todavía nos reímos de la noche en que saltamos sobre su cama. Bueno, ahora nos reímos; esa noche no tanto.', 'Si alguna vez se aburre en Charlottetown, acuérdese de que aquí tiene una amiga con mucha imaginación.'], ['Le cuento que este año en Tejas Verdes {estacion}.', 'Marilla dice que no hay que molestar a las personas importantes con cartas largas, así que esta es corta. Para mí, al menos.']],
+};
+const CARTA_RESP = {
+  diana: [['Querida Ana:', '¡Qué carta tan bonita! La leí tres veces y la guardé en mi caja de cartas, con la cinta azul.', 'Mamá dice que mañana puedo ir a Tejas Verdes después de los quehaceres. ¡Llevo el libro de poemas!', 'Tu amiga del alma, Diana'], ['Queridísima Ana:', 'Tu carta me hizo reír tanto que Minnie May me preguntó qué pasaba. No le dije: es un secreto de amigas del alma.', 'Guardé tu lugar en la escuela. Ruby quería sentarse, pero le dije que no.', 'Siempre tuya, Diana']],
+  stacy: [['Querida Ana:', 'Me alegró mucho recibir tu carta. Escribes con el corazón, y eso no se enseña.', 'Sigue leyendo y escribiendo todos los días, aunque sea un poco. Y sí: usa menos adjetivos.', 'Con cariño, Muriel Stacy'], ['Querida Ana:', 'Claro que podrías escribir un libro. Empieza por una página, y después otra. Así se hacen todos.', 'Te espero el lunes con tu composición.', 'Tu maestra, M. Stacy']],
+  sraallan: [['Querida Ana:', 'Qué alegría me dio tu carta. A mí también me gustó mucho la tarde del té.', 'Ser buena no es no equivocarse nunca, Ana: es seguir intentándolo. Y tú lo haces muy bien.', 'Te quiere, la Sra. Allan']],
+  josephine: [['Querida Ana:', 'Tu carta me hizo reír más que cualquier cosa en todo el invierno. Hacía años que no me reía así.', 'Charlottetown es muy aburrido sin una niña como tú. Cuando vengas con Diana, iremos a la exposición.', 'Tu vieja amiga, Josephine Barry'], ['Mi querida Ana:', 'Recibí tu carta y la leí junto a la chimenea. Escribes como hablas, y eso es un gran elogio viniendo de mí.', 'Te mando un saludo para Marilla, y para ti, mi cariño.', 'J. Barry']],
+};
+const ESTACION_TXT = ['los cerezos están en flor', 'el sol de verano madura las bayas', 'los arces se pusieron rojos', 'la nieve cubre el Camino Blanco de las Delicias'];
+const cartas = () => game.cartas || (game.cartas = []);
+function cartaTexto(para){
+  const C = CORREO[para] || CORREO.stacy, body = pick(CARTA_CUERPO[para] || CARTA_CUERPO.stacy).map(l => l.replace('{estacion}', ESTACION_TXT[S]));
+  return [C.saludo, 'Aquí en Tejas Verdes ' + ESTACION_TXT[S] + '.', ...body, C.firma];
+}
+// the post goes round once in a while: what was sent arrives; what was answered comes back to the post office
+let correoT = 0;
+function correoTick(dt){
+  if ((correoT -= dt) > 0) return; correoT = 3;
+  const d = today();
+  for (const c of cartas()) {
+    const C = CORREO[c.para];
+    if (c.estado === 'enviada' && C && d >= c.envio + C.dias) { c.estado = 'entregada'; c.llego = d; c.resp = d + C.resp[0] + Math.floor(Math.random() * (C.resp[1] - C.resp[0] + 1)); logEv(`${cap(C.nombre)} recibió la carta de Ana.`, []); }
+    if (c.estado === 'entregada' && d >= c.resp) { c.estado = 'respondida'; cartas().push({ id: cartas().length + 1, de: c.para, para: 'ana', texto: pick(CARTA_RESP[c.para] || CARTA_RESP.stacy), dia: d, estado: 'en_correo' }); notice(`📬 Llegó una carta para Ana de ${CORREO[c.para].nombre}: está en la oficina de correos (la tienda de Lawson).`); logEv(`Llegó al correo una carta de ${CORREO[c.para].nombre} para Ana.`, []); }
+  }
+}
+// at the post office: Ana asks for her mail; at home (or anywhere), she reads it
+function correoRetirar(){
+  const L = cartas().filter(c => c.para === 'ana' && c.estado === 'en_correo'); if (!L.length) return say('lawson', 'Nada para ti hoy, Ana. Pero el correo llega todos los días: vuelve pronto.', [['← Volver', () => shopMenu()]]);
+  for (const c of L) c.estado = 'recibida'; logEv(`Ana retiró del correo ${L.length === 1 ? 'una carta de ' + CORREO[L[0].de].nombre : L.length + ' cartas'}.`, []); save();
+  say('lawson', L.length === 1 ? `Sí, hay una carta para ti, de ${CORREO[L[0].de].nombre}. Aquí tienes.` : `¡${L.length} cartas para ti! Eres la niña más escrita de Avonlea.`, [['📜 Leerla ahora', () => cartaLeer(L[0])], ['← Volver', () => shopMenu()]]);
+}
+function cartaLeer(c, i = 0){
+  c.estado = 'leida'; if (!i) logEv(`Ana leyó la carta de ${CORREO[c.de].nombre}.`, []);
+  const L = c.texto, last = i >= L.length - 1;
+  say('Ana', L[i], last ? [['Guardarla', close]] : [['Seguir leyendo', () => cartaLeer(c, i + 1)], ['Guardarla para después', () => { c.estado = 'recibida'; close(); }]]);
 }
 /* ---------- the player does what the planner can do: the same actions (verbs), offered where Ana is when she can do
    them (touch Ana), and done the same way (wmExec, with their things and what they leave written: the goals count
@@ -7277,6 +7407,7 @@ function jugables(){
   return out;
 }
 function jugar(a){
+  if (a.v === 'escribir_carta' && !a.para) return say('Ana', '¿A quién le escribo?', [...Object.entries(CORREO).map(([k, C]) => [cap(C.nombre) + (C.dias > 1 ? ' (' + C.donde + ')' : ''), () => jugar({ ...a, para: k })]), ['← Volver', anaMenu]]);
   close(); if (ana.goto) ana.goto = null; ana.sit = false;
   game.playAct = { who: 'ana', a, st: {}, task: { a }, t0: TT };
   game.playAct.task = game.playAct;   // (what accTick and accPush look at)
@@ -7303,7 +7434,7 @@ function wmExec0(ag, a, st, dt){
   const me = ag.who, inv = wmInv(me), b = wmBody(me);
   const bubble = (k, text) => { const q = k === 'ana' ? 'ana' : PEOPLE[k] ? k : 'f:' + k; bubbles = [{ q, text, t: 0, dur: lineDur(text) }]; };
   const reach = k => { const kk = personKey(k); if (!kk) { st.why = wmName(k) + ' no está'; return 'fail'; } return wmMove(me, kk === 'cocina' || (kk.startsWith('h:') && !wmBody(k)?.bed) ? kk : 'p:' + k, dt); };   // (to someone sick in bed: to the bedside)
-  const wait = s => { st.w = (st.w || 0) + dt; return st.w >= Math.max(s, ACCION_VISTA[a.v]?.dur || 0); };   // (long enough to be seen)
+  const wait = s => { if (st.P === undefined) st.P = accPasos(a, me); if (st.P) return coreoTick(ag, a, st, dt, st.P); st.w = (st.w || 0) + dt; return st.w >= Math.max(s, ACCION_VISTA[a.v]?.dur || 0); };   // (long enough to be seen; or, if it has its steps, done step by step where it is really done)
   // a deal takes a moment: one asks, the other answers (weighs it, looks the cow over), then it is done
   const haggle = (ask, answer) => {
     if (!st.hg) { st.hg = 1; st.w = 0; bubble(me, ask); }
@@ -7400,8 +7531,22 @@ function wmExec0(ag, a, st, dt){
       if (a.k === 'ana') { const A = agentOf('ana'); A.followOf = me; A.ride = true; agentLog(A, 'va en la calesa con ' + wmName(me)); } else agentOf(a.k).followOf = me;
       logEv(`${wmName(me)} llevó a ${wmName(a.k)} en la calesa.`, []); return 'ok';
     }
-    case 'escribir_carta': { if (!st.said) { st.said = 1; bubble(me, 'Querida Srta. Stacy: le escribo desde Tejas Verdes, donde los cerezos están en flor…'); } if (!wait(4)) return 'run'; inv.carta = (inv.carta || 0) + 1; float('+1 carta', b.x, b.y - 50); logEv(`${wmName(me)} escribió una carta.`, []); return 'ok'; }
-    case 'enviar_carta': { if (!(inv.carta > 0)) { st.why = 'no tiene la carta'; return 'fail'; } if (!wait(2)) return 'run'; inv.carta -= 1; realR.setFact('carta_enviada:' + me); bubble('lawson', 'La carta sale mañana con el correo. ¿Para quién es, Ana?'); logEv(`${wmName(me)} mandó una carta por correo.`, []); return 'ok'; }
+    case 'escribir_carta': {   // (at her desk: she reads it aloud as she writes, line by line)
+      if (!st.said) { st.said = 1; st.para = a.para || 'stacy'; st.txt = cartaTexto(st.para); st.lk = -1; }
+      if (st.llego || !st.P) { const k = Math.floor((st.pt ?? st.w ?? 0) / 3.4); if (k !== st.lk && st.txt[k]) { st.lk = k; bubble(me, st.txt[k]); } }
+      if (!wait(st.txt.length * 3.4)) return 'run';
+      inv.carta = (inv.carta || 0) + 1; cartas().push({ id: cartas().length + 1, de: me, para: st.para, texto: st.txt, dia: today(), estado: 'escrita' });
+      float('+1 carta para ' + CORREO[st.para].nombre, b.x, b.y - 50); logEv(`${wmName(me)} escribió una carta para ${CORREO[st.para].nombre}.`, []); return 'ok';
+    }
+    case 'enviar_carta': {   // (at the post office: who it is for, and off it goes with tomorrow's mail)
+      if (!(inv.carta > 0)) { st.why = 'no tiene la carta'; return 'fail'; }
+      const c = cartas().find(x => x.de === me && x.estado === 'escrita'), C = CORREO[c?.para] || CORREO.stacy;
+      if (!st.said) { st.said = 1; bubble('lawson', '¿Una carta, Ana? ¿Para quién es?'); }
+      if (st.said === 1 && st.w >= 2.6) { st.said = 2; bubble(me, `Para ${C.nombre}, ${C.donde}.${C.dias > 1 ? ' ¿Cuánto tarda en llegar?' : ''}`); }
+      if (st.said === 2 && st.w >= 5.4) { st.said = 3; bubble('lawson', C.dias > 1 ? `Unos ${C.dias} días, con suerte. Sale mañana con el correo.` : 'Le llega mañana mismo. Ya la pongo en la saca.'); }
+      if (!wait(7.6)) return 'run';
+      inv.carta -= 1; if (c) { c.estado = 'enviada'; c.envio = today(); } realR.setFact('carta_enviada:' + me); logEv(`${wmName(me)} mandó por correo una carta para ${C.nombre}.`, []); return 'ok';
+    }
     case 'leer': { if (!st.said) { st.said = 1; bubble(me, '«Ben-Hur»… ¡No puedo parar de leer! La carrera de cuadrigas…'); } if (!wait(5)) return 'run'; realR.setFact('leido:' + me); logEv(`${wmName(me)} leyó un libro.`, []); return 'ok'; }
     case 'escribir_cuento': { if (!st.said) { st.said = 1; bubble(me, '«Los celos de Cordelia»: una historia trágica, con un ahogado y una dama de cabellos de oro…'); } if (!wait(5)) return 'run'; inv.cuento = (inv.cuento || 0) + 1; float('+1 cuento', b.x, b.y - 50); logEv(`${wmName(me)} escribió un cuento.`, []); return 'ok'; }
     case 'leer_cuento': { const r = reach(a.k); if (r !== 'ok') return r; if (!st.said) { st.said = 1; bubble(me, 'Escucha, Diana: «La dama Geraldine caminaba a la luz de la luna…»'); } if (st.said === 1 && wait(4)) { st.said = 2; st.w = 0; bubble(a.k, '¡Ay, Ana, qué triste! ¡Lloré en la parte del ahogado!'); } if (st.said !== 2 || !wait(3)) return 'run'; inv.cuento -= 1; realR.setFact('club:' + me); logEv(`${wmName(me)} le leyó su cuento a ${wmName(a.k)} en el club de cuentos.`, []); return 'ok'; }
@@ -7861,7 +8006,7 @@ function loop(now){
   else { owed = Math.min(owed + Math.min(raw, .25) * k, 3 * k * .05 + 2); const t0 = performance.now(); while (owed > 1e-4 && performance.now() - t0 < 22) { const d = Math.min(.05, owed); update(d); owed -= d; } }
   FRAME++; tripBarDraw(); render(); islaDraw(); requestAnimationFrame(loop);
 }
-window.__avonlea = { jugables, jugar, anaMenu, playAct: () => game.playAct, DIALOGOS, dlgCtx, talks: () => TALKS, dlgGuion, dlgPanel, bubblesNow: () => bubbles, toby, cartSheet: (c, x, y, c8, t) => { const L = [], p = { look: 'matthew', x, y, c8, walk: 0, moving: false }; const [cx, cy] = [x, y]; pushCart(L, c, { x: cx, y: cy, c8, walk: 0, moving: true }, t); for (const [k, look] of [[0, 'matthew'], [1, 'ana']]) { const [sx, sy] = cartSeat(cx, cy, c8, k); L.push({ y: sy, draw: () => drawPerson(c, { ...mkPerson(look, sx, sy), sit: true, dir: c8Dir(c8) }, t) }); } L.sort((a, b) => a.y - b.y).forEach(o => o.draw()); }, startCap1, CAP1, LIBRO1, ROAD_TRAMOS, ROAD_MIN, roadTramo, islaToggle, DLG_BANK, startDay, setSeason, agendaData: () => AGENDA.map(e => ({ who: wmName(e.who), from: e.from, to: e.to, label: e.label, season: e.season, sunday: !!e.sunday, ana: !!(e.ana || e.who === 'ana'), cond: e.when ? String(e.when).replace(/^\(\) => /, '') : '' })), setAgenda: v => { AGENDA_ON = v; }, AGENDA, wmData: () => ({ THINGS, WHO, OFRECE, WP_NAME, TRADE, TREATS, LIBRETA, ITEM_NAME, MAX_GOALS, PACE, FOCO }), paintMapBase, doingText, wmName, wmBody, wmScene, WW, WH, setVec: v => { VEC_ON = v; }, setStyle: v => { ANA_STYLE = v; }, setHead: setHeadM, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+window.__avonlea = { jugables, jugar, anaMenu, correoRetirar, cartaLeer, CORREO, playAct: () => game.playAct, DIALOGOS, dlgCtx, talks: () => TALKS, dlgGuion, dlgPanel, bubblesNow: () => bubbles, toby, cartSheet: (c, x, y, c8, t) => { const L = [], p = { look: 'matthew', x, y, c8, walk: 0, moving: false }; const [cx, cy] = [x, y]; pushCart(L, c, { x: cx, y: cy, c8, walk: 0, moving: true }, t); for (const [k, look] of [[0, 'matthew'], [1, 'ana']]) { const [sx, sy] = cartSeat(cx, cy, c8, k); L.push({ y: sy, draw: () => drawPerson(c, { ...mkPerson(look, sx, sy), sit: true, dir: c8Dir(c8) }, t) }); } L.sort((a, b) => a.y - b.y).forEach(o => o.draw()); }, startCap1, CAP1, LIBRO1, ROAD_TRAMOS, ROAD_MIN, roadTramo, islaToggle, DLG_BANK, startDay, setSeason, agendaData: () => AGENDA.map(e => ({ who: wmName(e.who), from: e.from, to: e.to, label: e.label, season: e.season, sunday: !!e.sunday, ana: !!(e.ana || e.who === 'ana'), cond: e.when ? String(e.when).replace(/^\(\) => /, '') : '' })), setAgenda: v => { AGENDA_ON = v; }, AGENDA, wmData: () => ({ THINGS, WHO, OFRECE, WP_NAME, TRADE, TREATS, LIBRETA, ITEM_NAME, MAX_GOALS, PACE, FOCO }), paintMapBase, doingText, wmName, wmBody, wmScene, WW, WH, setVec: v => { VEC_ON = v; }, setStyle: v => { ANA_STYLE = v; }, setHead: setHeadM, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
 /* ---------- the viewer (index.html?visor): only Ana, big, on a plain floor, to look at the drawings and move her:
    arrows (Shift to run), and buttons for everything she can do. ---------- */
 function startVisor(){

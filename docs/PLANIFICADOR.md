@@ -184,6 +184,22 @@ Cada personaje (`agentOf`) tiene hasta **3 metas activas** (`MAX_GOALS`), y sus 
   - **lo que queda:** el pelo verde después del tinte; corto, sin trenzas, después de que Marilla lo corta; la corona de flores en el sombrero el resto del día.
 
   `wmExec` marca quién está haciendo qué (`ag.acting`) y el dibujo lo lee (`accPush`). Para que una acción nueva se vea, basta una línea en `ACCION_VISTA` y, si usa un objeto nuevo, su dibujo en `ACC_OBJ`.
+- **Dónde se hace de verdad** (`ACC_PASOS`): una acción puede tener pasos, cada uno en su lugar, y lo que se lleva de uno a otro:
+  - **poner la mesa:** ir al aparador, sacar los platos, llevarlos a la mesa y ponerlos uno a uno; la mesa queda puesta el resto del día;
+  - **lavar los platos:** recogerlos de la mesa, lavarlos en el fregadero, guardarlos en el aparador;
+  - **barrer:** recorrer la cocina con la escoba;
+  - **escribir una carta o un cuento:** subir a su pieza y sentarse en su escritorio;
+  - **rezar:** arrodillada junto a su cama;
+  - **estudiar:** sentada a la mesa de la cocina, o en su pupitre en la escuela;
+  - **recitar:** frente a la clase, junto a la pizarra;
+  - **coser:** Marilla en su silla junto a la ventana;
+  - **cocinar:** en la estufa;
+  - **ordeñar:** junto a la vaca;
+  - **la huerta, el heno y el grano:** recorriendo los surcos, el campo o el corral;
+  - **una visita:** sentarse con quien se visita, con una taza de té.
+
+  Un paso dice dónde (`lugar`, `p`), hacia dónde mira, si se sienta, cuánto dura, con qué se hace, qué se lleva en el camino y qué deja hecho. La cocina tiene ahora un aparador con los platos, un fregadero y una silla junto a la ventana.
+- **Las cartas** (`CORREO`): al escribir una carta se elige a quién (Diana, la Srta. Stacy, la Sra. Allan o la tía Josephine en Charlottetown). Ana la lee en voz alta mientras la escribe. Se lleva al correo (la tienda de Lawson), y el Sr. Lawson pregunta para quién es. Llega al día siguiente, o en unos días si es a Charlottetown. La respuesta vuelve días o semanas después, espera en el correo («📬 ¿Hay correo para mí?») y Ana puede leerla.
 - **El jugador puede hacer lo mismo** (`jugables`, `jugar`): al tocar a Ana, su menú le pregunta al planificador qué acciones del libro puede hacer donde está, con lo que lleva y con quien tiene al lado (`verbs`, el mismo que usa la búsqueda), y las ofrece con ✨. Al elegir una, se hace con el mismo `wmExec`: los mismos objetos y el mismo movimiento, y anota los mismos hechos, así que las metas la cuentan. Ejemplos:
   - junto al lago con la canasta, el permiso y Diana al lado: «✨ Merendar en el lago con Diana»;
   - en la colina nevada: «✨ Tirarse en trineo»;
