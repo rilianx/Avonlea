@@ -2,14 +2,15 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Prueba de Phaser</title>
 <style>
   :root { --papel: #f6efe0; --tinta: #3b2a1e; --borde: #c9a97a; --fondo: #e9dcc0; }
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --papel: #2c241c; --tinta: #f1e6d2; --borde: #6b5236; --fondo: #1b1612; } }
   :root[data-theme="dark"] { --papel: #2c241c; --tinta: #f1e6d2; --borde: #6b5236; --fondo: #1b1612; }
   html, body { margin: 0; height: 100%; background: var(--fondo); color: var(--tinta); font: 15px/1.35 Georgia, 'Times New Roman', serif; overflow: hidden; }
-  #juego { position: fixed; inset: 0; }
+  #juego { position: fixed; inset: 0; touch-action: none; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+  #juego canvas { touch-action: none; }
   #barra { position: fixed; left: 50%; bottom: max(12px, env(safe-area-inset-bottom)); transform: translateX(-50%); display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; max-width: calc(100% - 32px); }
   #barra button { font: inherit; color: var(--tinta); background: var(--papel); border: 1.5px solid var(--borde); border-radius: 999px; padding: 8px 16px; cursor: pointer; box-shadow: 0 2px 6px rgba(40,25,10,.18); }
   #barra button:disabled { opacity: .5; cursor: default; }
@@ -57,9 +58,14 @@ class Cocina extends Phaser.Scene {
     const ajustar = () => { const cam = this.cameras.main, W = this.scale.width, Hh = this.scale.height - 60 * DPR, z = Math.min(W / H.sala.w, Hh / H.sala.h);
       if (Hh > W * 1.2) { const zz = Math.min(z * 1.8, Hh * .62 / H.sala.h), alto = Math.round(H.sala.h * zz); cam.setViewport(0, Math.round((this.scale.height - alto) / 2), W, alto).setZoom(zz).setBounds(0, 0, H.sala.w, H.sala.h).startFollow(this.ana, true, .12, .12); }
       else { cam.stopFollow(); cam.removeBounds(); cam.setViewport(0, 0, this.scale.width, this.scale.height).setZoom(z); cam.centerOn(H.sala.w / 2, H.sala.h / 2 + 30 * DPR / z); } };
-    ajustar(); this.scale.on('resize', ajustar);
+    ajustar(); this.scale.on('resize', ajustar); window.__cocina = this;   // (for the tests)
     addEventListener('resize', () => this.scale.resize(innerWidth * DPR, innerHeight * DPR));
-    this.input.on('pointerdown', p => { if (this.tarea) return; this.ir(p.worldX, p.worldY); });
+    // touching: she goes there at once (if she was doing a chore, she leaves it, as in the game); holding the finger
+    // down she follows it; a little ring marks where she is going
+    this.marca = this.add.ellipse(0, 0, 14, 6).setStrokeStyle(1.2, 0x8a5e3c, .9).setDepth(-1e5).setVisible(false);
+    const tocar = p => { const w = this.cameras.main.getWorldPoint(p.x, p.y); if (this.tarea) this.dejar(); this.ir(w.x, w.y); this.marca.setPosition(this.meta.x, this.meta.y).setVisible(true).setAlpha(1).setScale(1); };
+    this.input.on('pointerdown', p => { tocar(p); this.tweens.add({ targets: this.marca, scale: 1.6, alpha: .25, duration: 380 }); });
+    this.input.on('pointermove', p => { if (p.isDown) tocar(p); });
     this.teclas = this.input.keyboard.createCursorKeys();
     document.getElementById('mesa').onclick = () => this.ponerMesa();
     document.getElementById('otra').onclick = () => { for (const p of this.platos) p.destroy(); this.platos = []; this.decir(''); };
@@ -71,29 +77,33 @@ class Cocina extends Phaser.Scene {
   // «poner la mesa», as the game does it (ACC_PASOS 'quehacer:mesa'): the dresser, then the table, a place every 1.1 s
   ponerMesa(){
     if (this.tarea) return; for (const p of this.platos) p.destroy(); this.platos = [];
-    const boton = document.getElementById('mesa'); boton.disabled = true; this.tarea = true;
+    const boton = document.getElementById('mesa'); boton.disabled = true; this.tarea = { boton, timers: [] };
+    const luego = (ms, f) => this.tarea?.timers.push(this.time.delayedCall(ms, f));
     this.ir(...M.aparador, () => {
       this.mirar(6, 9); this.decir('Los platos de todos los días…');
-      this.time.delayedCall(2500, () => {
+      luego(2500, () => {
         this.pila.setVisible(true);
         this.ir(...M.mesa, () => {
           this.mirar(0);
-          M.lugares.forEach(([x, y], k) => this.time.delayedCall(k * 1100, () => {
+          M.lugares.forEach(([x, y], k) => luego(k * 1100, () => {
             const p = this.add.image(x, y, 'plato').setScale(0).setDepth(H.orden.mesa + 1).setOrigin(9 / 24, .5); this.platos.push(p);
             this.tweens.add({ targets: p, scale: 1 / H.R, duration: 260, ease: 'Back.Out' });
             if (k === 2) this.pila.setVisible(false);
           }));
-          this.time.delayedCall(3500, () => { this.decir('¡Lista! La mesa puesta para tres.'); this.tarea = null; boton.disabled = false; });
+          luego(3500, () => { this.decir('¡Lista! La mesa puesta para tres.'); this.tarea = null; boton.disabled = false; });
         });
       });
     });
   }
+  // she leaves the chore half done (the plates go back to the dresser)
+  dejar(){ const T = this.tarea; if (!T) return; for (const e of T.timers) e.remove(false); this.tarea = null; T.boton.disabled = false; this.meta = null; this.pila.setVisible(false); this.ana.setFrame(this.q * H.frame.cols); }
   update(t, dms){
     const dt = Math.min(dms, 100) / 1000, a = this.ana, k = this.teclas;
     let vx = 0, vy = 0;
-    if (!this.tarea) { vx = (k.right.isDown ? 1 : 0) - (k.left.isDown ? 1 : 0); vy = (k.down.isDown ? 1 : 0) - (k.up.isDown ? 1 : 0); if (vx || vy) this.meta = null; }
+    vx = (k.right.isDown ? 1 : 0) - (k.left.isDown ? 1 : 0); vy = (k.down.isDown ? 1 : 0) - (k.up.isDown ? 1 : 0);
+    if (vx || vy) { if (this.tarea) this.dejar(); this.meta = null; this.marca.setVisible(false); }
     if (this.meta) { const dx = this.meta.x - a.x, dy = this.meta.y - a.y, d = Math.hypot(dx, dy);
-      if (d < 1.5) { const f = this.meta.luego; this.meta = null; a.setPosition(a.x + dx, a.y + dy); if (f) f(); } else { vx = dx / d; vy = dy / d; } }
+      if (d < 1.5) { const f = this.meta.luego; this.meta = null; this.marca.setVisible(false); a.setPosition(a.x + dx, a.y + dy); if (f) f(); } else { vx = dx / d; vy = dy / d; } }
     if (vx || vy) {
       const n = Math.hypot(vx, vy), step = Math.min(VEL * dt, this.meta ? Math.hypot(this.meta.x - a.x, this.meta.y - a.y) : 1e9);
       const [nx, ny] = this.dentro(a.x + vx / n * step, a.y + vy / n * step); a.setPosition(nx, ny);
