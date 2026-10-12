@@ -63,12 +63,16 @@ class Cocina extends Phaser.Scene {
     // touching: she goes there at once (if she was doing a chore, she leaves it, as in the game); holding the finger
     // down she follows it; a little ring marks where she is going
     this.marca = this.add.ellipse(0, 0, 14, 6).setStrokeStyle(1.2, 0x8a5e3c, .9).setDepth(-1e5).setVisible(false);
-    const tocar = p => { const w = this.cameras.main.getWorldPoint(p.x, p.y); if (this.tarea) this.dejar(); this.ir(w.x, w.y); this.marca.setPosition(this.meta.x, this.meta.y).setVisible(true).setAlpha(1).setScale(1); };
-    this.input.on('pointerdown', p => { tocar(p); this.tweens.add({ targets: this.marca, scale: 1.6, alpha: .25, duration: 380 }); });
-    this.input.on('pointermove', p => { if (p.isDown) tocar(p); });
+    const tocar = p => { const w = this.cameras.main.getWorldPoint(p.x, p.y); if (this.tarea) this.dejar(true); this.ir(w.x, w.y); this.marca.setPosition(this.meta.x, this.meta.y).setVisible(true).setAlpha(1).setScale(1); };
+    // (only touches on the room itself: Phaser also hears the ones on the buttons, and those would cancel the chore just begun)
+    const enSala = p => p.event?.target === this.game.canvas;
+    this.input.on('pointerdown', p => { if (!enSala(p)) return; this.arrastre = true; tocar(p); this.tweens.add({ targets: this.marca, scale: 1.6, alpha: .25, duration: 380 }); });
+    this.input.on('pointermove', p => { if (p.isDown && this.arrastre) tocar(p); });
+    this.input.on('pointerup', () => { this.arrastre = false; });
+    for (const ev of ['touchstart', 'touchend', 'mousedown', 'mouseup', 'pointerdown']) document.getElementById('barra').addEventListener(ev, e => e.stopPropagation());
     this.teclas = this.input.keyboard.createCursorKeys();
     document.getElementById('mesa').onclick = () => this.ponerMesa();
-    document.getElementById('otra').onclick = () => { for (const p of this.platos) p.destroy(); this.platos = []; this.decir(''); };
+    document.getElementById('otra').onclick = () => { this.dejar(); for (const p of this.platos) p.destroy(); this.platos = []; this.decir(''); };
   }
   dentro(x, y){ return [Phaser.Math.Clamp(x, 14, H.sala.w - 14), Phaser.Math.Clamp(y, H.sala.piso + 16, H.sala.h - 8)]; }
   ir(x, y, luego){ const [tx, ty] = this.dentro(x, y); this.meta = { x: tx, y: ty, luego }; }
@@ -77,8 +81,8 @@ class Cocina extends Phaser.Scene {
   // «poner la mesa», as the game does it (ACC_PASOS 'quehacer:mesa'): the dresser, then the table, a place every 1.1 s
   ponerMesa(){
     if (this.tarea) return; for (const p of this.platos) p.destroy(); this.platos = [];
-    const boton = document.getElementById('mesa'); boton.disabled = true; this.tarea = { boton, timers: [] };
-    const luego = (ms, f) => this.tarea?.timers.push(this.time.delayedCall(ms, f));
+    const boton = document.getElementById('mesa'); boton.disabled = true; boton.textContent = 'Poniendo la mesa…'; this.tarea = { boton, timers: [] };
+    const T = this.tarea, luego = (ms, f) => T.timers.push(this.time.delayedCall(ms, () => { if (this.tarea === T) f(); }));   // (only while this same chore goes on)
     this.ir(...M.aparador, () => {
       this.mirar(6, 9); this.decir('Los platos de todos los días…');
       luego(2500, () => {
@@ -90,18 +94,18 @@ class Cocina extends Phaser.Scene {
             this.tweens.add({ targets: p, scale: 1 / H.R, duration: 260, ease: 'Back.Out' });
             if (k === 2) this.pila.setVisible(false);
           }));
-          luego(3500, () => { this.decir('¡Lista! La mesa puesta para tres.'); this.tarea = null; boton.disabled = false; });
+          luego(3500, () => { this.decir('¡Lista! La mesa puesta para tres.'); this.tarea = null; boton.disabled = false; boton.textContent = 'Poner la mesa'; });
         });
       });
     });
   }
   // she leaves the chore half done (the plates go back to the dresser)
-  dejar(){ const T = this.tarea; if (!T) return; for (const e of T.timers) e.remove(false); this.tarea = null; T.boton.disabled = false; this.meta = null; this.pila.setVisible(false); this.ana.setFrame(this.q * H.frame.cols); }
+  dejar(dice){ const T = this.tarea; if (!T) return; for (const e of T.timers) e.remove(false); this.tarea = null; T.boton.disabled = false; T.boton.textContent = 'Poner la mesa'; if (dice) this.decir('Bueno… la mesa, después.'); this.meta = null; this.pila.setVisible(false); this.ana.setFrame(this.q * H.frame.cols); }
   update(t, dms){
     const dt = Math.min(dms, 100) / 1000, a = this.ana, k = this.teclas;
     let vx = 0, vy = 0;
     vx = (k.right.isDown ? 1 : 0) - (k.left.isDown ? 1 : 0); vy = (k.down.isDown ? 1 : 0) - (k.up.isDown ? 1 : 0);
-    if (vx || vy) { if (this.tarea) this.dejar(); this.meta = null; this.marca.setVisible(false); }
+    if (vx || vy) { if (this.tarea) this.dejar(true); this.meta = null; this.marca.setVisible(false); }
     if (this.meta) { const dx = this.meta.x - a.x, dy = this.meta.y - a.y, d = Math.hypot(dx, dy);
       if (d < 1.5) { const f = this.meta.luego; this.meta = null; this.marca.setVisible(false); a.setPosition(a.x + dx, a.y + dy); if (f) f(); } else { vx = dx / d; vy = dy / d; } }
     if (vx || vy) {
