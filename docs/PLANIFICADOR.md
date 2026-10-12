@@ -196,7 +196,15 @@ Cada personaje (`agentOf`) tiene hasta **3 metas activas** (`MAX_GOALS`), y sus 
   - **cocinar:** en la estufa;
   - **ordeñar:** junto a la vaca;
   - **la huerta, el heno y el grano:** recorriendo los surcos, el campo o el corral;
-  - **una visita:** sentarse con quien se visita, con una taza de té.
+  - **una visita:** sentarse con quien se visita, con una taza de té;
+  - **recoger:** ir a la fuente de verdad, agachada con el canastito: los arbustos con bayas, los manzanos con manzanas, los nidos del gallinero, un cantero en flor, las hierbas del bosque;
+  - **tomar:** la cuerda del gancho del granero; el jarabe o la canasta del aparador;
+  - **dar o devolver:** frente a frente, y se ve la cosa pasar de una mano a la otra;
+  - **el corte de pelo:** Ana sentada en una silla en medio de la cocina, Marilla detrás con las tijeras, y caen los mechones verdes;
+  - **el techo de los Barry:** caminar por el caballete… y la caída: Ana queda en el suelo con el tobillo torcido (solo si Josie la desafió);
+  - **el concierto:** en el **salón del pueblo**, que ahora tiene interior (escenario con telón, bancos y guirnaldas cuando se decoró). Ahí se ensaya y se actúa sobre el escenario, y las guirnaldas se cuelgan tramo por tramo.
+
+  Lo hecho queda a la vista ese día: la mesa puesta, los fardos de heno en el campo, la leña apilada junto al granero, los canteros regados, las guirnaldas en el salón. Al hacer algo con alguien, los dos quedan frente a frente.
 
   Un paso dice dónde (`lugar`, `p`), hacia dónde mira, si se sienta, cuánto dura, con qué se hace, qué se lleva en el camino y qué deja hecho. La cocina tiene ahora un aparador con los platos, un fregadero y una silla junto a la ventana.
 - **Las cartas** (`CORREO`): al escribir una carta se elige a quién (Diana, la Srta. Stacy, la Sra. Allan o la tía Josephine en Charlottetown). Ana la lee en voz alta mientras la escribe. Se lleva al correo (la tienda de Lawson), y el Sr. Lawson pregunta para quién es. Llega al día siguiente, o en unos días si es a Charlottetown. La respuesta vuelve días o semanas después, espera en el correo («📬 ¿Hay correo para mí?») y Ana puede leerla.

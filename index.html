@@ -592,6 +592,10 @@ const HOUSES = {
 };
 const HOUSE_SPOTS = Object.values(HOUSES).map(h => h.at);
 const BUILDINGS = MAP.buildings.map(b => ({ ...b, x: b.at[0] * U, y: b.at[1] * U, w: b.style === 'hotel' ? 9 * T : b.style === 'galpon' ? 7 * T : b.style === 'faro' ? 44 : 4.6 * T }));
+// the town hall, where the concerts are: one can go in (the building itself is drawn with the others)
+HOUSES.sa = { at: (b => ({ x: b.x, y: b.y, w: b.w }))(BUILDINGS.find(b => b.name === 'Ayuntamiento')), name: 'El salón del pueblo', noProp: true, small: true,
+  enter: 'Entrar al salón del pueblo', inText: 'en el salón del pueblo', arrive: ' entró al salón del pueblo.', place: ['salon_pueblo', 'el salón del pueblo', 30, 56],
+  describe: 'el salón del pueblo de Avonlea (donde se hacen los conciertos: un escenario con telón, bancos y, para las fiestas, guirnaldas de flores)' };
 /* ---------- the fenced places: fields and pens (to add one: an entry here; it gets its fence, its ground, a place
    on the map and a place the characters and the stories can name). kind: 'oats' or 'pen'; gate: the side with the gate */
 const AREAS = {
@@ -684,7 +688,7 @@ const props = [
   ...Array.from({ length: Math.ceil((STATION.x + 22 * U) / 28) }, (_, k) => ({ kind: 'rail', x: k * 28, y: STATION.y - 130 })),
 ];
 for (const [a, b] of FENCES) { const len = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.round(len / 22)); for (let i = 0; i <= n; i++) { const x = lerp(a[0], b[0], i / n), y = lerp(a[1], b[1], i / n); props.push({ kind: 'fpost', x, y, nx: i < n ? lerp(a[0], b[0], (i + 1) / n) : null, ny: i < n ? lerp(a[1], b[1], (i + 1) / n) : null }); } }
-for (const [k, h] of Object.entries(HOUSES)) if (h.road) props.push({ kind: 'roadsign', x: h.at.x, y: h.at.y, text: 'Bright River · 8 millas' }); else props.push({ kind: 'house', h: h.at, roof: h.roof, wall: h.wall, trim: h.trim, x: h.at.x, y: h.at.y, small: h.small, style: h.style }, { kind: 'sign', x: h.at.x + h.sign[0], y: h.at.y + h.sign[1], text: h.name });
+for (const [k, h] of Object.entries(HOUSES)) if (h.noProp) continue; else if (h.road) props.push({ kind: 'roadsign', x: h.at.x, y: h.at.y, text: 'Bright River · 8 millas' }); else props.push({ kind: 'house', h: h.at, roof: h.roof, wall: h.wall, trim: h.trim, x: h.at.x, y: h.at.y, small: h.small, style: h.style }, { kind: 'sign', x: h.at.x + h.sign[0], y: h.at.y + h.sign[1], text: h.name });
 for (let x = GG.x - GG.w / 2 - 40; x < GG.x + GG.w / 2 + 230; x += 24) if (Math.abs(x - GG.x) > 40 && !(x > PUMP.x - 20 && x < PUMP.x + 20)) props.push({ kind: 'post', x, y: GG.y + 120 });
 // the milk bottles of the school, cooling in the river (as in the book)
 const MILK = (() => { const s0 = RIVERS[0].pts; let best = s0[0], bd = 1e9; for (let i = 1; i < s0.length; i++) for (let q = 0; q <= 1; q += .05) { const x = lerp(s0[i - 1][0], s0[i][0], q), y = lerp(s0[i - 1][1], s0[i][1], q), d = dist(x, y, SCHOOL.x + 60, SCHOOL.y + 40); if (d < bd) { bd = d; best = [x, y]; } } return { x: best[0], y: best[1] }; })();
@@ -2847,6 +2851,27 @@ function drawChurch(c, t, night){
 }
 const PEWS = []; for (let r = 0; r < 4; r++) for (const sx of [3 * T, 10 * T]) PEWS.push({ x: sx, y: 4.2 * T + r * 1.2 * T });
 const drawPew = (c, p) => { blob(c, [[p.x - 64, p.y - 14], [p.x + 64, p.y - 14], [p.x + 64, p.y - 4], [p.x - 64, p.y - 4]], '#7a5536'); blob(c, [[p.x - 64, p.y - 24], [p.x + 64, p.y - 24], [p.x + 64, p.y - 14], [p.x - 64, p.y - 14]], '#6a4a30'); };
+// the hall: a stage with its curtain at the back, rows of benches, garlands of flowers when it has been decorated
+const SALA = { stage: { x: 6.5 * T, y: 3.3 * T }, benches: [0, 1, 2].flatMap(r => [3.4 * T, 9.6 * T].map(x => ({ x, y: 5.4 * T + r * 1.1 * T }))) };
+function drawSala(c, t, night){
+  c.fillStyle = '#b8905e'; c.fillRect(0, 0, KIT.w, KIT.h);
+  c.strokeStyle = 'rgba(110,70,40,.3)'; c.lineWidth = 1; for (let y = 2.4 * T; y < KIT.h; y += 14) { c.beginPath(); c.moveTo(0, y); c.lineTo(KIT.w, y); c.stroke(); }
+  blob(c, [[0, 0], [KIT.w, 0], [KIT.w, 2.4 * T], [0, 2.4 * T]], '#e8dcc0');
+  const s = SALA.stage; blob(c, [[s.x - 4.2 * T, s.y + 14], [s.x + 4.2 * T, s.y + 14], [s.x + 4.2 * T, s.y - 30], [s.x - 4.2 * T, s.y - 30]], '#8a5e3c'); blob(c, [[s.x - 4.2 * T, s.y + 14], [s.x + 4.2 * T, s.y + 14], [s.x + 4.2 * T, s.y + 22], [s.x - 4.2 * T, s.y + 22]], '#6a4428');   // (the stage, a step up)
+  for (const sd of [-1, 1]) blob(c, [[s.x + sd * 4.2 * T, 4], [s.x + sd * 2.6 * T, 4], [s.x + sd * 3 * T, s.y - 30], [s.x + sd * 4.2 * T, s.y - 30]], '#a8303a');   // (the red curtain, drawn back)
+  blob(c, [[s.x - 4.2 * T, 2], [s.x + 4.2 * T, 2], [s.x + 4.2 * T, 14], [s.x - 4.2 * T, 14]], '#8a2030');
+  for (const wx of [1.2 * T, KIT.w - 1.2 * T]) blob(c, [[wx - 14, 58], [wx + 14, 58], [wx + 14, 18], [wx - 14, 18]], night > .3 ? '#3b4a72' : '#bfe0ea');
+  if (realR.fact('sala_decorada')) for (let k = 0; k < 14; k++) { const x = .6 * T + k * (KIT.w - 1.2 * T) / 13, y = 24 + Math.sin(k * .9) * 6; line(c, [[x, y], [x + (KIT.w - 1.2 * T) / 13, 24 + Math.sin((k + 1) * .9) * 6]], '#5a8a3a', 2, k); ell(c, x, y, 4, 4, ['#f2c14e', '#e88ab0', '#f6f2f0', '#b48ad0'][k % 4], true); }   // (garlands of flowers)
+  c.fillStyle = '#4a2f1c'; c.font = 'italic 9px Georgia, serif'; c.textAlign = 'center'; c.fillText('Salón del pueblo de Avonlea', s.x, s.y - 34);
+}
+const drawBench = (c, p) => { blob(c, [[p.x - 70, p.y - 12], [p.x + 70, p.y - 12], [p.x + 70, p.y - 4], [p.x - 70, p.y - 4]], '#7a5536'); for (const o of [-60, 60]) line(c, [[p.x + o, p.y - 4], [p.x + o, p.y + 2]], '#5a3a24', 2, o); };
+ROOMS.sa = HOUSES.sa.interior = {
+  draw: drawSala, place: 'en el salón del pueblo, con su escenario y sus bancos', exitLabel: 'Salir',
+  items: g => SALA.benches.map(p => ({ y: p.y, draw: () => drawBench(g, p) })),
+  blocked: (x, y) => (y < SALA.stage.y + 14 && Math.abs(x - SALA.stage.x) > 4.2 * T) || SALA.benches.some(p => Math.abs(x - p.x) < 72 && y > p.y - 14 && y < p.y),
+  glow: () => [SALA.stage.x, SALA.stage.y - 10, 200, '255,210,140', .3],
+  actions: add => { add('escenario', SALA.stage.x, SALA.stage.y, 80, 'Subir al escenario', () => { ana.goto = { x: SALA.stage.x, y: SALA.stage.y, scene: 'sa' }; anaSays(pick(['Desde aquí arriba el salón parece enorme. ¡Cuánta gente cabría!', '«Señoras y señores…» ¡Ay, qué nervios, y eso que no hay nadie!'])); }, { pri: 5 }); },
+};
 ROOMS.ig = HOUSES.ig.interior = {
   draw: drawChurch, place: 'en la iglesia de Avonlea, entre los bancos', exitLabel: 'Salir',
   items: g => PEWS.map(p => ({ y: p.y, draw: () => drawPew(g, p) })),
@@ -6600,24 +6625,24 @@ function verbs(s, me, C){
   if (C.kind === 'remo' && here === 'lago' && !s.facts['invierno'] && !s.facts['remo:' + me]) add('remar', 15, t => { t.facts['remo:' + me] = 1; });
   if (C.kind === 'nombres' && me === 'ana' && NOMBRES_ANA[here] && !s.facts['nombre:' + here]) add('nombrar', 2, t => { t.facts['nombre:' + here] = 1; }, { p: here });
   // (from the book, second batch) letters and books, the story club, the concert, the farm, winter, the picnic, the dye, the dare
-  const home = here === W.cocina || here === 'pieza' || (here || '').startsWith('h:');
+  const home = me === 'ana' ? here === 'cocina' || here === 'pieza' : here === W.cocina || (here || '').startsWith('h:');   // (Ana writes at home, not in the hall or the shop)
   if (C.kind === 'carta' && home && !(inv.carta > 0) && !s.facts['carta_enviada:' + me]) add('escribir_carta', 8, t => { t.invs[me].carta = 1; });
   if (C.kind === 'carta' && here === 'tienda' && inv.carta > 0) add('enviar_carta', 2, t => { t.invs[me].carta -= 1; t.facts['carta_enviada:' + me] = 1; });
   if (C.kind === 'leido' && inv.libro > 0 && !s.facts['leido:' + me]) add('leer', 20, t => { t.facts['leido:' + me] = 1; });
   if (C.kind === 'club' && home && !(inv.cuento > 0) && !s.facts['club:' + me]) add('escribir_cuento', 20, t => { t.invs[me].cuento = 1; });
-  if (C.kind === 'concierto' && (here === 'escuela' || here === 'h:es' || here === 'salon') && !(s.know[me] || []).includes('poema')) add('ensayar', 15, t => { t.know[me] = [...(t.know[me] || []), 'poema']; });
-  if (C.kind === 'concierto' && here === 'salon' && (s.know[me] || []).includes('poema') && !s.facts['concierto:' + me]) add('actuar', 5, t => { t.facts['concierto:' + me] = 1; });
-  if (C.kind === 'sala' && here === 'salon' && inv.ramo > 0 && !s.facts['sala_decorada']) add('decorar_sala', 6, t => { t.invs[me].ramo -= 1; t.facts['sala_decorada'] = 1; });
+  if (C.kind === 'concierto' && (here === 'escuela' || here === 'h:es' || here === 'salon' || here === 'h:sa') && !(s.know[me] || []).includes('poema')) add('ensayar', 15, t => { t.know[me] = [...(t.know[me] || []), 'poema']; });
+  if (C.kind === 'concierto' && (here === 'salon' || here === 'h:sa') && (s.know[me] || []).includes('poema') && !s.facts['concierto:' + me]) add('actuar', 5, t => { t.facts['concierto:' + me] = 1; });
+  if (C.kind === 'sala' && (here === 'salon' || here === 'h:sa') && inv.ramo > 0 && !s.facts['sala_decorada']) add('decorar_sala', 6, t => { t.invs[me].ramo -= 1; t.facts['sala_decorada'] = 1; });
   if (C.items.includes('heno') && here === 'campo' && !isQuieto(me) && !s.facts['heno_hecho']) add('hacer_heno', 25, t => { t.invs[me].heno = (t.invs[me].heno || 0) + 3; t.facts['heno_hecho'] = 1; });
   if (C.items.includes('lena') && here === 'granero' && !isQuieto(me) && (inv.lena || 0) < 3) add('partir_lena', 10, t => { t.invs[me].lena = (t.invs[me].lena || 0) + 3; });
   if (C.kind === 'huerta' && here === 'huerta' && !s.facts['sembrado']) add('sembrar', 10, t => { t.facts['sembrado'] = 1; });
   if (C.kind === 'huerta' && here === 'huerta' && s.facts['sembrado'] && !s.facts['regado']) add('regar', 5, t => { t.facts['regado'] = 1; });
   if (C.kind === 'patinar' && here === 'lago' && s.facts['invierno'] && !s.facts['patino:' + me]) add('patinar', 15, t => { t.facts['patino:' + me] = 1; });
   if (C.kind === 'trineo' && here === 'colina' && s.facts['invierno'] && !s.facts['trineo:' + me]) add('trineo', 15, t => { t.facts['trineo:' + me] = 1; });
-  if (C.kind === 'picnic' && me === 'ana' && here === 'cocina' && at('marilla') && !s.facts['permiso:picnic']) add('pedir_permiso', 2, t => { t.facts['permiso:picnic'] = 1; });
+  if (C.kind === 'picnic' && me === 'ana' && here === 'cocina' && at('marilla') && (!C.jugador || S === 1) && !s.facts['permiso:picnic']) add('pedir_permiso', 2, t => { t.facts['permiso:picnic'] = 1; });
   if (C.kind === 'teñido' && (me === 'ana' ? here === 'pieza' : here === W.cocina) && inv.tinte > 0 && !s.facts['pelo_teñido:' + me]) add('teñir', 10, t => { t.invs[me].tinte -= 1; t.facts['pelo_teñido:' + me] = 1; });
   if (C.kind === 'pelo_corto' && here === 'cocina' && (s.facts['pelo_teñido:ana'] || s.facts['pelo_verde']) && !s.facts['pelo_corto']) add('cortar_pelo', 6, t => { t.facts['pelo_corto'] = 1; delete t.facts['pelo_verde']; });
-  if (C.kind === 'desafio' && here === 'huerto' && !s.facts['trepo:' + me]) add('trepar', 6, t => { t.facts['trepo:' + me] = 1; });
+  if (C.kind === 'desafio' && here === 'huerto' && s.facts['desafiada:' + me] && !s.facts['trepo:' + me]) add('trepar', 6, t => { t.facts['trepo:' + me] = 1; });
   if (isQuieto(me) && !at('ana')) for (const f of C.favors) { const F = FAVORS[f.f]; if (f.to === 'ana' && F.ok(s, me, 'ana', f) && !s.facts['pedido:' + f.f + ':ana']) add('pedir', 2 + (F.wait || 0) + 25, t => { F.eff(t, me, 'ana', f); t.facts['pedido:' + f.f + ':ana'] = 1; }, { k: 'ana', favor: f, llamar: true }); }   // (sends for her: she comes, then is asked)
   for (const [c, st] of Object.entries(s.cows)) {
     if (st === here && inv.cuerda > 0 && !Object.values(s.cows).includes('led:' + me) && (FAMILY(C.owner[c]).includes(me) || st.startsWith('c:'))) add('guiar', 2, t => { t.cows[c] = 'led:' + me; }, { cow: c });
@@ -7163,7 +7188,7 @@ const ACCION_VISTA = {
   patinar: { dur: 22, obj: 'patines', mov: 'patinar' },
   remar: { dur: 22, obj: 'bote', mov: 'remar', sentar: true },
   'teñir': { dur: 14, obj: 'tinte', mira: 0 },
-  cortar_pelo: { dur: 10, obj: 'tijeras' },
+  cortar_pelo: { dur: 10, obj: 'corte' },
   leer: { dur: 14, obj: 'libro', sentar: true }, estudiar: { dur: 12, obj: 'libro' }, ensayar: { dur: 10, obj: 'libro' },
   escribir_carta: { dur: 12, obj: 'papel' }, escribir_cuento: { dur: 14, obj: 'papel' }, leer_cuento: { obj: 'cuaderno' },
   partir_lena: { dur: 12, obj: 'hacha' }, hacer_heno: { dur: 14, obj: 'horquilla' }, sembrar: { dur: 12, obj: 'semillas' }, regar: { dur: 10, obj: 'regadera' },
@@ -7171,7 +7196,8 @@ const ACCION_VISTA = {
   decorar_sala: { dur: 10, obj: 'flores' }, adornar: { dur: 6, obj: 'sombrero' }, cuidar: { obj: 'jarabe' },
   quehacer: { dur: 8, obj: 'quehacer' }, cocinar: { dur: 8, obj: 'bol' }, preparar: { dur: 8, obj: 'bol' }, batir: { dur: 10, obj: 'mantequera' }, coser: { dur: 12, obj: 'costura', sentar: true },
   recoger: { dur: 6, obj: 'canastito' }, jurar: { dur: 8, obj: 'manos' }, nombrar: { dur: 6, obj: 'recitar' },
-  visitar: { obj: 'te' },
+  visitar: { obj: 'te' }, dar: { obj: 'entregar' }, devolver: { obj: 'entregar' }, tomar: { obj: 'canastito' },
+  leer_cuento: { obj: 'cuaderno', sentar: true, con: true }, felicitar: { obj: 'manos' }, consolar: { obj: 'abrazo' },
   trepar: { dur: 10, mov: 'techo', arriba: true }, actuar: { dur: 10, obj: 'recitar' }, recitar: { dur: 8, obj: 'recitar' },
 };
 const accPhase = (A, per) => ((TT - A.t0) % per) / per;
@@ -7191,8 +7217,11 @@ const ACC_MOV = {
     const c = A.ice || (A.ice = (() => { const dx = A.base[0] - LAKE.x, dy = A.base[1] - LAKE.y, m = Math.hypot(dx, dy) || 1; return [LAKE.x + dx / m * LAKE.rx * .5, LAKE.y + dy / m * LAKE.ry * .5]; })());
     const a = (TT - A.t0) * .25; b.x = c[0] + Math.sin(a) * 50; b.y = c[1] + Math.sin(a * 2) * 6; b.dir = Math.cos(a) > 0 ? 1 : 3; b.sit = true; b.moving = false;
   },
-  techo(b, A){   // up on the roof of the Barrys' house, arms out, along the ridge
-    const H = HOUSES.os.at, u = accPhase(A, 6); b.x = H.x - 40 + Math.abs(u * 2 - 1) * 80; b.y = H.y - 74; b.dir = u < .5 ? 1 : 3; b.moving = true; b.walk = ((b.walk || 0) + .01) % 1; b.sit = false; b.sortY = H.y + 2;
+  techo(b, A){   // up on the roof of the Barrys' house, arms out, along the ridge… and down she comes: the ankle
+    const H = HOUSES.os.at, e = TT - A.t0;
+    if (e < 6.5) { const u = (e % 6) / 6; b.x = H.x - 40 + Math.abs(u * 2 - 1) * 80; b.y = H.y - 74; b.dir = u < .5 ? 1 : 3; b.moving = true; b.walk = ((b.walk || 0) + .01) % 1; b.sit = false; b.sortY = H.y + 2; return; }
+    if (!A.cayo) { A.cayo = [b.x + 30, H.y + 26]; wmSay('ana', '¡Aaay!'); }
+    const u = Math.min(1, (e - 6.5) / .6); b.x = lerp(b.x, A.cayo[0], u); b.y = lerp(H.y - 74, A.cayo[1], u * u); b.moving = false; if (u >= 1) { delete b.sortY; b.sit = true; if (!A.dolor) { A.dolor = 1; wmSay('ana', '¡Mi tobillo! Creo que me lo torcí… Diana, no puedo pararme.'); } }
   },
 };
 // the steps of an action (ACC_PASOS): where it is really done, one place after another, and what is carried between
@@ -7222,11 +7251,23 @@ const ACC_PASOS = {
   cocinar: me => wmScene(me) === 'gg' ? [{ p: [STOVE.x + 14, STOVE.y + 40], mira: 0, dur: 7, obj: 'bol' }] : null,
   preparar: me => wmScene(me) === 'gg' ? [{ p: [STOVE.x + 14, STOVE.y + 40], mira: 0, dur: 7, obj: 'bol' }] : null,
   batir: me => wmScene(me) === 'gg' ? [{ p: [TABLE.x + 76, TABLE.y + 14], mira: 3, dur: 9, obj: 'mantequera' }] : null,
+  actuar: me => [{ lugar: 'h:sa', p: [SALA.stage.x, SALA.stage.y], mira: 2, dur: 10, obj: 'recitar' }],   // (on the stage of the hall)
+  ensayar: me => wmScene(me) === 'es' ? [{ p: [6.5 * T, 3.5 * T], mira: 2, dur: 10, obj: 'libro' }] : [{ lugar: 'h:sa', p: [SALA.stage.x, SALA.stage.y], mira: 2, dur: 10, obj: 'libro' }],
+  decorar_sala: me => [{ lugar: 'h:sa', p: [2 * T, 3 * T], mira: 0, dur: 4, obj: 'flores' }, { lugar: 'h:sa', p: [6.5 * T, 3.9 * T], mira: 0, dur: 4, obj: 'flores' }, { lugar: 'h:sa', p: [11 * T, 3 * T], mira: 0, dur: 4, obj: 'flores' }],   // (garlands along the wall, one stretch after another)
+  recoger: (me, a) => {   // (to where it really is: the bushes, the apple trees, the nests, a bed in flower, the herbs of the wood)
+    const b = wmBody(me), near = (L, n) => L.filter(Boolean).sort((p, q) => dist(p.x, p.y, b.x, b.y) - dist(q.x, q.y, b.x, b.y)).slice(0, n);
+    const at = a.x === 'bayas' ? near(bushes.filter(u => u.berries > 0 && dist(u.x, u.y, b.x, b.y) < 300), 2) : a.x === 'manzanas' ? near(trees.filter(u => u.kind === 'apple' && u.apples > 0 && dist(u.x, u.y, b.x, b.y) < 380), 2)
+      : a.x === 'ramo' ? near(BEDS.filter(u => u.stage >= 3), 1) : a.x === 'huevos' ? [{ x: BARN.x + 130, y: BARN.y + 86 }, { x: BARN.x + 170, y: BARN.y + 92 }] : a.x === 'hierbas' ? [0, 1, 2].map(k => ({ x: b.x - 60 + k * 60, y: b.y + (k % 2 ? 30 : -10) })) : [];
+    return at.length && wmScene(me) === 'out' ? at.map(u => ({ p: [u.x + (a.x === 'manzanas' ? 0 : 0), u.y + (a.x === 'manzanas' ? 14 : 18)], mira: 0, agachar: a.x !== 'manzanas', dur: 2.4, obj: 'canastito' })) : null;
+  },
+  tomar: (me, a) => a.x === 'cuerda' && wmScene(me) === 'out' ? [{ p: [BARN.x + 40, BARN.y + 34], mira: 0, dur: 2, obj: 'cuerda' }] : wmScene(me) === 'gg' ? [{ p: [KX.aparador.x + 46, KX.aparador.y + 6], mira: 3, dur: 2, obj: 'aparador' }] : null,   // (the rope on its hook in the barn; the syrup, the basket, from the dresser)
+  cortar_pelo: me => wmScene(me) === 'gg' ? [{ p: [KIT.w / 2 - 60, 6.6 * T], mira: 2, sentar: true, dur: 10, obj: 'corte', con: ['marilla', 16, -6] }] : null,   // (sitting on a chair in the middle of the kitchen, Marilla behind her with the scissors)
   'ordeñar': (me, a) => { const c = ANIM[a.cow]; return c ? [{ p: () => [c.x - 26, c.y + 6], mira: 1, sentar: true, dur: 8, obj: 'balde' }] : null; },
   alimentar: (me, a) => { const A = AREAS[a.p]; return A ? [[.3, .4], [.7, .6]].map(([u, v]) => ({ p: [A.x + A.w * u, A.y + A.h * v], dur: 3, obj: 'grano' })) : null; },
   sembrar: me => BEDS.slice(0, 3).map(b => ({ p: [b.x, b.y + 22], mira: 0, dur: 3, obj: 'semillas' })),
-  regar: me => BEDS.slice(3, 6).map(b => ({ p: [b.x, b.y + 22], mira: 0, dur: 2.5, obj: 'regadera' })),
-  hacer_heno: me => { const f = FIELDS.find(f => dist(f.x + f.w / 2, f.y + f.h / 2, wmBody(me).x, wmBody(me).y) < 500); return f ? [[.25, .4], [.5, .6], [.75, .45]].map(([u, v]) => ({ p: [f.x + f.w * u, f.y + f.h * v], dur: 4, obj: 'horquilla' })) : null; },
+  regar: me => BEDS.slice(3, 6).map(b => ({ p: [b.x, b.y + 22], mira: 0, dur: 2.5, obj: 'regadera', hecho: () => { b.wet = 1; b.grow = 0; } })),   // (the soil stays dark and wet)
+  hacer_heno: me => { const f = FIELDS.find(f => dist(f.x + f.w / 2, f.y + f.h / 2, wmBody(me).x, wmBody(me).y) < 500); return f ? [[.25, .4], [.5, .6], [.75, .45]].map(([u, v]) => ({ p: [f.x + f.w * u, f.y + f.h * v], dur: 4, obj: 'horquilla', hecho: () => { const H = game.heno?.dia === today() ? game.heno : (game.heno = { dia: today(), pts: [] }); H.pts.push([f.x + f.w * u + 26, f.y + f.h * v + 4]); } })) : null; },   // (the bales stay in the field)
+  partir_lena: me => wmScene(me) === 'out' ? [{ p: [BARN.x - 30, BARN.y + 70], mira: 1, dur: 10, obj: 'hacha', hecho: () => { game.lena = { dia: today(), x: BARN.x - 6, y: BARN.y + 74, n: (game.lena?.dia === today() ? game.lena.n : 0) + 3 }; } }] : null,   // (at the chopping block by the barn; the stacked wood stays)
 };
 const accPasos = (a, me) => (ACC_PASOS[a.v + ':' + a.x] || ACC_PASOS[a.v])?.(me, a) || null;
 // one step after another: go there (into the room first), then do it for a while; true when all are done
@@ -7243,9 +7284,10 @@ function coreoTick(ag, a, st, dt, P){
     wmStop(me); b.x = q[0]; b.y = q[1]; st.llego = 1; st.tw = 0;   // (there; or, stuck for a while, as good as there)
   }
   if (!st.pt) { st.pt = 0; if (A) { A.obj = p.obj; A.lleva = null; A.base = [b.x, b.y]; } if (p.decir) wmSay(me, p.decir); }
-  if (p.mira != null) b.dir = p.mira; b.sit = !!p.sentar; if (me !== 'ana') b.moving = false;
+  if (p.mira != null) b.dir = p.mira; b.sit = !!p.sentar; b.crouch = !!p.agachar; if (me !== 'ana') b.moving = false;
+  if (p.con) { const [k, dx, dy] = p.con, o = wmBody(k); if (o && wmScene(k) === wmScene(me)) { o.x = b.x + dx; o.y = b.y + dy; o.dir = b.dir; o.moving = false; o.sit = false; if (A) A.con = k; } }   // (whoever does it with her, at her side)
   st.pt += dt; if (st.pt < p.dur) return false;
-  p.hecho?.(); b.sit = false; st.ci = (st.ci || 0) + 1; st.llego = 0; st.pt = 0;
+  p.hecho?.(); b.sit = false; b.crouch = false; st.ci = (st.ci || 0) + 1; st.llego = 0; st.pt = 0;
   return st.ci >= P.length;
 }
 const wmSay = (k, text) => { const q = k === 'ana' ? 'ana' : PEOPLE[k] ? k : 'f:' + k; bubbles = [{ q, text, t: 0, dur: lineDur(text) }]; };
@@ -7282,6 +7324,10 @@ const ACC_OBJ = {
   regadera: { f(c, b, A){ const s = b.dir === 3 ? -1 : 1, x = b.x + s * 10, y = b.y - 22; blob(c, [[x - 6, y - 5], [x + 6, y - 5], [x + 5, y + 5], [x - 5, y + 5]], '#7a8a9a'); line(c, [[x + s * 6, y - 2], [x + s * 15, y - 8]], '#7a8a9a', 1.6, 1); for (let k = 0; k < 5; k++) { const q = (TT * 2 + k * .2) % 1; ell(c, x + s * (16 + q * 6), y - 8 + q * 30, 1, 2, 'rgba(110,170,220,.9)'); } } },
   grano: { f(c, b, A){ const x = b.x + 8, y = b.y - 22; blob(c, [[x - 5, y - 4], [x + 5, y - 4], [x + 4, y + 5], [x - 4, y + 5]], '#9a8a6a'); for (let k = 0; k < 8; k++) { const q = (TT * 1.6 + k * .125) % 1, a = k * 2.3; ell(c, x + Math.cos(a) * q * 26, y + q * 26 + Math.sin(a) * 4, 1.1, 1.1, '#e8c860'); } } },
   balde: { u(c, b, A){ const x = b.x + 14, y = b.y + 2; blob(c, [[x - 6, y - 10], [x + 6, y - 10], [x + 5, y], [x - 5, y]], '#9aa0a8'); ell(c, x, y - 10, 6, 2, '#f8f8f2'); ell(c, b.x - 2, b.y + 1, 7, 3, '#8a6a4a', true); } },   // (the pail of milk, the stool)
+  entregar: { f(c, b, A){ const o = A.k && wmBody(A.k); if (!o) return; const u = Math.min(1, (TT - A.t0) / 1.8), x = lerp(b.x, o.x, u), y = lerp(b.y, o.y, u) - 30 - Math.sin(u * Math.PI) * 6; c.font = '12px serif'; c.textAlign = 'center'; c.fillStyle = '#000'; c.fillText(ITEM_DEFS[A.x]?.icon || THINGS[A.x]?.icon || '🎁', x, y); } },   // (what is given, going from one to the other)
+  abrazo: { f(c, b, A){ const o = A.k && wmBody(A.k); if (!o) return; if (Math.sin(TT * 2) > .6) hearts && Math.random() < .02 && hearts((b.x + o.x) / 2, b.y - 50); ell(c, (b.x + o.x) / 2, b.y - 26, 4, 3, '#f2d2b8', true); } },
+  cuerda: { f(c, b, A){ const x = b.x + 8, y = b.y - 22; c.strokeStyle = '#b8945a'; c.lineWidth = 1.6; for (let k = 0; k < 3; k++) { c.beginPath(); c.ellipse(x, y, 6 - k, 4 - k * .6, 0, 0, TAU); c.stroke(); } } },   // (a coil of rope)
+  corte: { u(c, b, A){ drawSilla(c, b.x, b.y + 4); }, f(c, b, A){ const m = A.con && wmBody(A.con), hx = m ? m.x + 8 : b.x + 10, hy = (m ? m.y : b.y) - 40, s = Math.abs(Math.sin(TT * 8)) * .5; line(c, [[hx, hy], [hx + 9, hy - 3 - s * 6]], '#8a9098', 1.4, 1); line(c, [[hx, hy], [hx + 9, hy + 3 + s * 6]], '#8a9098', 1.4, 2); for (let i = 0; i < 5; i++) { const q = (TT * .7 + i * .2) % 1; ell(c, b.x - 8 + i * 4, b.y - 40 + q * 44, 2.4, 1, 'rgba(90,150,70,.9)', false, i); } } },   // (on a chair, Marilla's scissors, the green locks falling)
   te: { f(c, b, A){ const x = b.x + (b.dir === 3 ? -8 : 8), y = b.y - 20; ell(c, x, y + 2, 5, 1.6, '#f6f8fa', true); ell(c, x, y, 3, 2.6, '#f2ede2', true); if (Math.sin(TT * 2) > .3) line(c, [[x, y - 4], [x + 1, y - 9]], 'rgba(255,255,255,.7)', 1, 1); } },   // (a cup of tea)
   rezar: { f(c, b, A){ ell(c, b.x + (b.dir === 3 ? -3 : 3), b.y - 30, 2.6, 4, '#f2d2b8', true); } },   // (the hands together)
   flores: { f(c, b, A){ const x = b.x + 9, y = b.y - 28; for (let k = 0; k < 6; k++) ell(c, x + Math.cos(k) * 4, y + Math.sin(k * 1.7) * 3 - 4, 2.4, 2.4, ['#f2c14e', '#f6f2f0', '#e88ab0'][k % 3], true); line(c, [[x, y], [x - 1, y + 7]], '#4a7a3a', 1, 1); } },
@@ -7312,13 +7358,14 @@ function accTick(ag, a, st, r){
   if (doing && !ag.acting) { ag.acting = { v: a.v, k: a.k, x: a.x, t0: TT, base: [b.x, b.y], sit: b.sit, task: ag.task }; if (V.sentar && !V.mov && !st.P) { b.sit = true; if (V.con && a.k) { const o = wmBody(a.k); if (o && wmScene(a.k) === wmScene(ag.who)) { ag.acting.kb = [o.x, o.y, o.sit]; o.x = b.x + 46; o.y = b.y + 2; o.sit = true; o.dir = 3; b.dir = 1; } } } }
   if (doing && ag.acting && V.mov) ACC_MOV[V.mov](b, ag.acting);
   if (doing && ag.acting && V.mira != null && !st.P) b.dir = V.mira;
+  if (doing && ag.acting && a.k && !V.mov && !st.P) { const o = wmBody(a.k); if (o && wmScene(a.k) === wmScene(ag.who) && dist(o.x, o.y, b.x, b.y) < 140 && !o.sit) { const sd = o.x < b.x ? 3 : 1; b.dir = sd; o.dir = sd === 1 ? 3 : 1; } }   // (face to face)
   if (doing && ag.acting?.kb) { const o = wmBody(a.k); if (o) { o.x = ag.acting.base[0] + 46; o.y = ag.acting.base[1] + 2; o.sit = true; o.dir = 3; o.moving = false; } }   // (whoever it is done with stays beside, sitting)
   if (!doing && ag.acting && r !== 'run') accEnd(ag);
 }
 function accEnd(ag){
   const A = ag.acting, b = wmBody(ag.who); ag.acting = null; if (!A || !b) return;
-  if (ACCION_VISTA[A.v].mov) { [b.x, b.y] = A.base; b.moving = false; delete b.sortY; }
-  b.sit = !!A.sit && A.v !== 'merendar' ? A.sit : false;
+  if (ACCION_VISTA[A.v].mov) { [b.x, b.y] = A.cayo || A.base; b.moving = false; delete b.sortY; }
+  b.sit = A.cayo ? true : !!A.sit && A.v !== 'merendar' ? A.sit : false;   // (after the fall, on the ground)
   if (A.kb) { const o = wmBody(A.k); if (o) o.sit = A.kb[2]; }
 }
 // the sick stay in bed at home (lying down, under a quilt) until someone cures them
@@ -7329,6 +7376,10 @@ function sickTick(){
 }
 // into the drawing: the things under the body (before it) and in its hands (after it)
 function accPush(list, g, t){
+  if (game.scene === 'out') {   // (what the work left: bales in the field, wood stacked by the barn)
+    if (game.heno?.dia === today()) for (const [x, y] of game.heno.pts) list.push({ y, draw: () => { blob(g, [[x - 9, y], [x + 9, y], [x + 9, y - 10], [x - 9, y - 10]], '#e0c870'); line(g, [[x - 9, y - 5], [x + 9, y - 5]], '#a88a3a', .8, 1); } });
+    if (game.lena?.dia === today()) { const L = game.lena; list.push({ y: L.y, draw: () => { for (let k = 0; k < Math.min(12, L.n); k++) ell(g, L.x + (k % 4) * 9, L.y - Math.floor(k / 4) * 6, 5, 3, k % 2 ? '#c99a66' : '#b8885a', true); } }); }
+  }
   for (const [k, b] of Object.entries(PEOPLE)) if (b.bed && b.where === game.scene) list.push({ y: b.y - 1, draw: () => { const x = b.x - 6, y = b.y + 2; blob(g, [[x - 34, y - 26], [x + 40, y - 26], [x + 40, y + 10], [x - 34, y + 10]], '#8a6040'); blob(g, [[x - 30, y - 22], [x + 36, y - 22], [x + 36, y + 6], [x - 30, y + 6]], '#f6f0e4'); ell(g, x - 22, y - 8, 9, 6, '#ffffff', true); } }, { y: b.y + 1, draw: () => { const x = b.x - 6, y = b.y + 2; blob(g, [[x - 8, y - 20], [x + 36, y - 20], [x + 36, y + 6], [x - 8, y + 6]], '#c86a5a'); for (let i = 0; i < 4; i++) line(g, [[x - 8 + i * 11, y - 20], [x - 8 + i * 11, y + 6]], 'rgba(255,240,220,.6)', 1, i); } });   // (the bed, and the quilt over the sick one)
   for (const ag of [...Object.values(AGENTS), ...(game.playAct ? [game.playAct] : [])]) {
     const A = ag.acting; if (!A) continue; if (ag.task !== A.task) { accEnd(ag); continue; } const k = ag.who, b = wmBody(k); if (!b || (k === 'ana' ? RENDER_REAL !== game.scene : wmScene(k) !== game.scene)) continue;
@@ -7398,7 +7449,7 @@ function jugables(){
   if (game.scene === 'out' && (here === 'cocina' || here === 'pieza')) here = s.pos.ana = 'p:ana';   // (by the kitchen door is not in the kitchen: the chores, inside)
   for (const k of WM_PEOPLE()) { const o = wmBody(k); if (k !== 'ana' && o && wmScene(k) === game.scene && dist(o.x, o.y, ana.x, ana.y) < 110) s.pos[k] = here; }   // (whoever is beside her counts as here)
   const people = WM_PEOPLE().filter(k => k !== 'ana' && s.pos[k] === here), items = [...new Set([...Object.keys(THINGS), ...Object.keys(s.invs.ana || {})])];
-  const C = { places: [], pts: {}, people, items, favors: [], owner: {}, k: 'ana' }, out = [], seen = new Set();
+  const C = { places: [], pts: {}, people, items, favors: [], owner: {}, k: 'ana', jugador: true }, out = [], seen = new Set();
   for (const kind of JUGABLE_TIPOS) for (const v of verbs(s, 'ana', { ...C, kind })) {
     if (JUGABLE_NO.includes(v.v)) continue;
     const key = v.v + ':' + (v.k || '') + ':' + (v.x || '') + ':' + (v.p || ''); if (seen.has(key)) continue; seen.add(key);
@@ -7579,6 +7630,7 @@ function wmExec0(ag, a, st, dt){
     case 'dar': {
       const r = reach(a.k); if (r !== 'ok') return r;
       const n = ALL_AT_ONCE.includes(a.x) ? inv[a.x] || 0 : Math.min(1, inv[a.x] || 0); if (!n) { st.why = 'no lo tiene'; return 'fail'; }
+      if (!wait(1.8)) return 'run';   // (handing it over)
       inv[a.x] -= n; const to = wmInv(a.k); to[a.x] = (to[a.x] || 0) + n;
       for (const tag of THINGS[a.x].tags) realR.setFact('dio:' + a.k + ':' + tag); realR.setFact('dio:' + a.k + ':' + a.x); realR.setFact('dio:' + a.x);
       const liked = socialRule(realR, 'dar', me, a.k, a.x);
@@ -7761,7 +7813,7 @@ const WM_TESTS = [
   { who: 'ana', text: 'Ana le pide permiso a Marilla y va de picnic al lago con Diana (cap. 13, 14)', setup: () => { dayAt(11); setSeason(1); game.inv.canasta = 0; for (const f of ['permiso:picnic', 'picnic:ana', 'pedido:pasear:diana']) delete game.wm.facts[f + ':' + today()]; PEOPLE.marilla.where = 'gg'; diana.follow = false; atOut('diana', OS.x - 60, OS.y + 80); }, goal: () => G.picnic('ana', 'diana'), favors: [{ f: 'pasear', to: 'diana' }] },
   { who: 'ana', text: 'Ana le compra tinte al buhonero y se tiñe el pelo… verde (cap. 27)', setup: () => { dayAt(10); game.inv.tinte = 0; game.inv.huevos = 0; game.eggDay = -1; delete game.wm.perm.pelo_verde; delete game.wm.facts['pelo_teñido:ana:' + today()]; atOut('buhonero', GG.x + 260, GG.y + 160); }, goal: () => G.teñido('ana') },
   { who: 'ana', text: 'Marilla le corta a Ana el pelo verde (cap. 27)', setup: () => { dayAt(16); game.wm.perm.pelo_verde = true; delete game.wm.facts['pelo_corto:' + today()]; PEOPLE.marilla.where = 'gg'; }, goal: () => G.pelo_corto('ana') },
-  { who: 'ana', text: 'Josie desafía a Ana a caminar por el techo de los Barry (cap. 23)', setup: () => { dayAt(15); delete game.wm.facts['trepo:ana:' + today()]; }, goal: () => G.desafio('ana') },
+  { who: 'ana', text: 'Josie desafía a Ana a caminar por el techo de los Barry (cap. 23)', setup: () => { dayAt(15); delete game.wm.facts['trepo:ana:' + today()]; realR.setFact('desafiada:ana'); }, goal: () => G.desafio('ana') },
 ];
 /* ---------- the routines, made of goals: what each one does each day (from the book), handed to the planner at its
    hour, at most once a day. Low priority (1): what someone asks (2) or what has a deadline (3) goes first; with the
