@@ -5612,6 +5612,7 @@ function update(dt){
   if (dest && !ana.goto?.dest) dest = null;
   if (!$('wmp').hidden && (wmDrawT -= dt) < 0) { wmDrawT = .5; wmRunDraw(); }
   ana.pace = ana.goto?.stroll ? STROLL : ana.goto?.wm && AGENTS.ana ? wmPace(AGENTS.ana) : ana.goto?.dest ? MAPWALK : (keys.has('ShiftLeft') || keys.has('ShiftRight')) ? RUN : WALK;
+  if (realR.fact('tobillo:ana')) ana.pace *= .45;   // (the twisted ankle, the rest of the day: she limps)
   if (ana.goto?.stroll) { const sv = ana.savor = ana.savor || { next: TT + 5 + Math.random() * 6, until: 0 }; if (!ana.savoring && TT > sv.next && TT >= sv.until) { sv.until = TT + 2.5 + Math.random() * 3.5; sv.next = sv.until + 6 + Math.random() * 8; } }
   const l = Math.hypot(mx, my); if (l > 1) { mx /= l; my /= l; }
   ana.moving = l > .05;
@@ -7323,7 +7324,7 @@ const ACC_OBJ = {
   semillas: { f(c, b, A){ for (let k = 0; k < 5; k++) { const q = (TT * 1.4 + k * .2) % 1; ell(c, b.x + 10 + k * 3, b.y - 24 + q * 26, 1.2, 1.2, '#6a4a2a'); } for (let k = 0; k < 3; k++) line(c, [[b.x - 24, b.y + 8 + k * 6], [b.x + 34, b.y + 8 + k * 6]], 'rgba(110,70,40,.45)', 1.2, k); } },
   regadera: { f(c, b, A){ const s = b.dir === 3 ? -1 : 1, x = b.x + s * 10, y = b.y - 22; blob(c, [[x - 6, y - 5], [x + 6, y - 5], [x + 5, y + 5], [x - 5, y + 5]], '#7a8a9a'); line(c, [[x + s * 6, y - 2], [x + s * 15, y - 8]], '#7a8a9a', 1.6, 1); for (let k = 0; k < 5; k++) { const q = (TT * 2 + k * .2) % 1; ell(c, x + s * (16 + q * 6), y - 8 + q * 30, 1, 2, 'rgba(110,170,220,.9)'); } } },
   grano: { f(c, b, A){ const x = b.x + 8, y = b.y - 22; blob(c, [[x - 5, y - 4], [x + 5, y - 4], [x + 4, y + 5], [x - 4, y + 5]], '#9a8a6a'); for (let k = 0; k < 8; k++) { const q = (TT * 1.6 + k * .125) % 1, a = k * 2.3; ell(c, x + Math.cos(a) * q * 26, y + q * 26 + Math.sin(a) * 4, 1.1, 1.1, '#e8c860'); } } },
-  balde: { u(c, b, A){ const x = b.x + 14, y = b.y + 2; blob(c, [[x - 6, y - 10], [x + 6, y - 10], [x + 5, y], [x - 5, y]], '#9aa0a8'); ell(c, x, y - 10, 6, 2, '#f8f8f2'); ell(c, b.x - 2, b.y + 1, 7, 3, '#8a6a4a', true); } },   // (the pail of milk, the stool)
+  balde: { u(c, b, A){ blob(c, [[b.x - 7, b.y + 2], [b.x + 7, b.y + 2], [b.x + 6, b.y - 6], [b.x - 6, b.y - 6]], '#8a6a4a'); const x = b.x + 14, y = b.y + 2; blob(c, [[x - 6, y - 10], [x + 6, y - 10], [x + 5, y], [x - 5, y]], '#9aa0a8'); ell(c, x, y - 10, 6, 2, '#f8f8f2'); ell(c, b.x - 2, b.y + 1, 7, 3, '#8a6a4a', true); } },   // (the pail of milk, the stool)
   entregar: { f(c, b, A){ const o = A.k && wmBody(A.k); if (!o) return; const u = Math.min(1, (TT - A.t0) / 1.8), x = lerp(b.x, o.x, u), y = lerp(b.y, o.y, u) - 30 - Math.sin(u * Math.PI) * 6; c.font = '12px serif'; c.textAlign = 'center'; c.fillStyle = '#000'; c.fillText(ITEM_DEFS[A.x]?.icon || THINGS[A.x]?.icon || '🎁', x, y); } },   // (what is given, going from one to the other)
   abrazo: { f(c, b, A){ const o = A.k && wmBody(A.k); if (!o) return; if (Math.sin(TT * 2) > .6) hearts && Math.random() < .02 && hearts((b.x + o.x) / 2, b.y - 50); ell(c, (b.x + o.x) / 2, b.y - 26, 4, 3, '#f2d2b8', true); } },
   cuerda: { f(c, b, A){ const x = b.x + 8, y = b.y - 22; c.strokeStyle = '#b8945a'; c.lineWidth = 1.6; for (let k = 0; k < 3; k++) { c.beginPath(); c.ellipse(x, y, 6 - k, 4 - k * .6, 0, 0, TAU); c.stroke(); } } },   // (a coil of rope)
