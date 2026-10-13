@@ -81,10 +81,11 @@ const inChat = k => CHATS.some(c => c.parts.includes(k)) || FOLKBY[k]?.talkT > T
 function chatTry(ag, F, urg){
   const me = ag.who, b = wmBody(me), sc = wmScene(me), pc = ag.pairCool || (ag.pairCool = {});
   if (writtenTalkOn() && (me === 'ana' || AGENTS.ana?.followOf === me)) return false;   // (who travel together talk by the written lines)
-  if (ocupada(me)) return false;   // (in the middle of doing something: the talk can wait)
+  if (ocupada(me) || TT < (CHAT_YA[me] || 0)) return false;
+  { const k = ag.task?.a?.k, o = k && wmBody(k); if (o && wmScene(k) === sc && dist(b.x, b.y, o.x, o.y) < 220) return false; }   // (going up to the one the errand is with: not stopping to talk to someone else on the way)   // (in the middle of doing something: the talk can wait; and one who just talked goes on a while)
   for (const o of ['ana', ...Object.keys(PEOPLE), ...FOLK.map(f => f.id)]) {
     if (o === me || (o === 'ana' && writtenTalkOn()) || wmScene(o) !== sc || (ag.task && JSON.stringify(ag.task.a).includes(`"${o}"`))) continue;   // (not whoever the errand is with: that talk is the errand)
-    const ob = wmBody(o); if (!ob || ob.lie || dist(b.x, b.y, ob.x, ob.y) > 64 || pc[o] > TT || inChat(o) || ocupada(o)) continue;
+    const ob = wmBody(o); if (!ob || ob.lie || dist(b.x, b.y, ob.x, ob.y) > 64 || pc[o] > TT || inChat(o) || ocupada(o) || TT < (CHAT_YA[o] || 0)) continue;
     pc[o] = TT + 180;
     const anaFree = o === 'ana' && !(wmDriven('ana') && !AGENTS.ana.paused), G = focoOf(o), r = relGetW(me, o), oag = AGENTS[o];
     let p = (F.social * .6 + G.social * .4) * (F.atrae.includes(o) || F.atrae.includes('gente') ? 1.5 : 1) * (1 - urg) * (r >= 4 ? 1.3 : r <= 0 ? .3 : 1);
@@ -94,7 +95,9 @@ function chatTry(ag, F, urg){
   }
   return false;
 }
+const CHAT_YA = {};   // (who talked a moment ago → until when they go on without stopping to talk again)
 function startChat(a, b, anaFree){
+  CHAT_YA[a] = CHAT_YA[b] = TT + M(20);
   const third = Object.keys(DLG_BANK).length && [...Object.keys(PEOPLE), ...FOLK.map(f => f.id)].find(o => o !== a && o !== b && wmScene(o) === wmScene(a) && !inChat(o) && DLG_BANK[dlgKey([a, b, o])] && dist(wmBody(o).x, wmBody(o).y, wmBody(a).x, wmBody(a).y) < 120);
   const bank = (third && dlgNext([a, b, third])) || dlgNext([a, b]);
   const c = { parts: [a, b], lines: bank || chatLines(a, b, anaFree), i: -1, wait: .2, anaFree }; CHATS.push(c);
@@ -151,7 +154,7 @@ function chatLines(a, b, anaFree){
   for (let k = 0; k < rounds; k++) {
     if (a === 'lynde' || b === 'lynde') { const o = a === 'lynde' ? b : a; say('lynde', pick(LYNDE_CHISME)); say(o, pick(CHISME_RE)); }
     else if (ana_ && other === 'diana') { const [x, y] = ANA_DIANA[(k + Math.floor(TT)) % ANA_DIANA.length]; say('ana', x); say('diana', y); }
-    else if (ana_) { const [x, y] = suena(); say('ana', x); say(other, y); }
+    else if (ana_) { const [x, y] = suena(); say('ana', isKid(other) ? x.replace('¿No le parece', '¿No te parece').replace('¿Sabía', '¿Sabías') : x); say(other, isKid(other) ? pick(['¡Qué lindo, Ana!', '¿De verdad? ¡Cuéntame más!', '¡Qué cosas dices, Ana!']) : y); }
     else { const [x, y] = pares(); say(a, x); say(b, y); }
   }
   const t = AGENTS[a]?.task || AGENTS[b]?.task, who = AGENTS[a]?.task ? a : b;

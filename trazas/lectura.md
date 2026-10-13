@@ -58,3 +58,27 @@ La auditoría automática (`trazas/auditoria.md`) compara cada paso esperado con
 - **El picnic**: Marilla no contesta (no está en el relato) y Ana le responde a otra cosa («Sí, Marilla… me distraje mirando una araña»). Diana suelta frases sueltas en el picnic.
 - **El corte de pelo**: «Ana se sienta; con las tijeras» (las tijeras son de Marilla). Marilla habla de cocinar en medio del corte.
 - **El techo de los Barry**: no dice dónde empieza a trepar; bien la caída y el tobillo.
+
+## Segunda y tercera lectura (después de los arreglos)
+
+Lo de arriba quedó arreglado. Leyendo de nuevo aparecieron otras cosas, que también se arreglaron:
+
+| Qué se leía | Arreglo |
+|---|---|
+| Se oía media conversación: Ana contestaba «Sí, Marilla… me distraje mirando una araña» a algo que no aparecía; el comprador de la vaca no decía nada | el relato cuenta también lo que dicen al lado de quienes se observan, y lo que se dice en el cuadro de diálogo |
+| Ana le pedía huevos a Matthew y el pedido no aparecía: la respuesta de Matthew a «¡Espera!» lo tapaba | quien pide espera a que el otro termine de hablar; y quien recibe el pedido contesta («Sí, cómo no. Ahora mismo.») |
+| Marilla pedía tela y en el mismo momento soltaba «Riega la huerta…» | las frases sueltas no se dicen sobre lo que otro está diciendo, ni en medio de un pedido; una charla suelta se corta si alguien se ocupa |
+| En el té, Ana «tomaba el té» y conversaba mientras la Sra. Allan todavía lo preparaba | la visita se sienta y espera; el té y la charla empiezan cuando las dos están a la mesa |
+| Ana empezaba a jurar amistad o a recitar en la escuela y a mitad se ponía a conversar siete minutos | nadie se pone a conversar mientras hace algo, ni cuando va hacia la persona con quien tiene que hacerlo |
+| La Sra. Allan conversaba con cada persona que encontraba, con las mismas frases («¿Cómo vienen las papas?») | después de una charla, un rato sin otra |
+| Al leerle el cuento a Diana, Ana se sentaba y se paraba enseguida (lo mismo que la visita a la Sra. Lynde) | una vez empezado algo con alguien, no se lo sigue persiguiendo |
+| Matthew, al darle la leña a Marilla, quedaba parado dentro de la mesa (la regla de los muebles lo encontró) | a alguien en un cuarto se le llega a un lugar libre a su lado |
+| El trineo: «se sienta / se levanta» cada minuto; Diana «junto al huerto / junto a la casa» cada dos minutos; Marilla «junto al fregadero / en la cocina» | el vaivén de una acción no se cuenta; un margen entre lugares cercanos; alejarse de algo no es noticia |
+| Ana le hablaba de «usted» a Minnie May y ella contestaba como una señora | con los niños, de tú, y respuestas de niño |
+| «Ana lleva can.», «con Marilla detrás, con las tijeras» | «lleva la regadera», «con Marilla detrás, que le corta el pelo» |
+
+**Lo que queda, sabido:**
+- Ana conversa con casi todos los que encuentra en el camino (unos cinco minutos cada vez): los recados se alargan. Es su carácter, pero se podría bajar.
+- El Sr. Harrison se cura en cuanto termina el jarabe y sale de la casa.
+- La escuela no tiene mapa de Tiled: no se dice «junto a la pizarra».
+- La meta 9 (el paseo con Diana) falló una vez en la regresión; repetida 26 veces, salió bien todas.

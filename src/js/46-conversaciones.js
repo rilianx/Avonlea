@@ -247,7 +247,7 @@ function give(who, k){
   say(who, d.gift.reply + CH[who].giftReply, [['De nada', close]]);
 }
 function say(who, text, opts, wait = false){
-  game.talk = { who, wait }; relatoDicho(who, text);
+  game.talk = { who, wait }; if (who !== 'ana') relatoDicho(who, text);   // (Ana's own box is a question to the player, not something said)
   const box = $('talk'), f = Math.min(5, game.fond[who] || 0), heartsTxt = who in game.fond ? '♥'.repeat(f) + '♡'.repeat(5 - f) : '';
   box.innerHTML = `<div class="who">${NAMES[who] || who}<span>${heartsTxt}</span></div><div class="line"></div><div class="opts"></div>`;
   box.querySelector('.line').textContent = text; box.classList.toggle('wait', wait);

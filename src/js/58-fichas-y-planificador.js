@@ -127,7 +127,7 @@ function encUpdate(dt){
   if (enc.cur) return encTick(dt);
   if (writtenTalkOn()) return;
   if (amb.cur || amb.ready || game.talk || game.map || game.cooking || !$('ai').hidden || sleeping) return;
-  if (ocupada('ana') || hablando()) return;   // (Ana in the middle of something, or someone speaking: no loose greetings over it)
+  if (ocupada('ana') || hablando() || CHATS.some(c => c.parts.includes('ana'))) return;   // (Ana in the middle of something, or talking with someone, or someone speaking: no loose greetings over it)
   const here = FOLK.filter(f => f.where === game.scene), dd = f => dist(ana.x, ana.y, f.x, f.y), free = f => TT >= (enc.mute[f.id] || 0) && !(f.talkT > TT);
   if (enc.ready) {   // (asked for as Ana came near: it starts when she is there)
     const s = enc.ready, f = FOLKBY[s.parts[0]];

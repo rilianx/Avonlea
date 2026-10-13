@@ -204,7 +204,7 @@ function accTick(ag, a, st, r){
 }
 function accEnd(ag){
   const A = ag.acting, b = wmBody(ag.who); ag.acting = null; if (!A || !b) return;
-  for (const k of [ag.who, A.k]) if (k && k !== 'ana') amb.mute[k] = Math.max(amb.mute[k] || 0, TT + 90);   // (just done with something together: no loose line on top of it)
+  for (const k of [ag.who, A.k]) if (k && k !== 'ana') { amb.mute[k] = Math.max(amb.mute[k] || 0, TT + 90); enc.mute[k] = Math.max(enc.mute[k] || 0, TT + 90); }   // (just done with something together: no loose line on top of it)
   if (ACCION_VISTA[A.v].mov) { [b.x, b.y] = A.cayo || A.base; b.moving = false; delete b.sortY; }
   b.sit = A.cayo ? true : !!A.sit && !['merendar', 'visitar', 'tomar_te'].includes(A.v) ? A.sit : false;   // (after the fall, on the ground)
   if (A.kb) { const o = wmBody(A.k); if (o) o.sit = A.kb[2]; }
