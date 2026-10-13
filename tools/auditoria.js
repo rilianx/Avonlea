@@ -42,6 +42,8 @@ function reglasRotas(lineas){
   return out;
 }
 let REGLAS = [];
+// a line of the tale as plain text: the hour in bold, each on its own line; the summaries every 5 minutes in italics
+const relatoMd = l => { const t = l.texto.replace(/([*_\\`<>])/g, '\\$1'); return '**' + l.hora + '** ' + (t.startsWith('· ') ? '_' + t + '_' : t) + '  '; };
 (async () => {
   const b = await chromium.launch({ executablePath: process.env.CHROMIUM || '/opt/pw-browsers/chromium', args: ['--no-sandbox'] });
   const md = ['# Auditoría de las acciones', '', (VECES > 1 ? 'Cada acción se corrió ' + VECES + ' veces; un paso está ✔ solo si salió bien todas. ' : '') + 'Para cada acción: lo que debería pasar (el relato esperado, `tools/auditoria/esperado.js`), cada paso comparado con lo que el juego cuenta que pasó (✔ a qué hora y cuánto duró, ✘ qué se vio en cambio), y el relato completo del juego (`src/js/66-relato.js`). Se genera con `node tools/auditoria.js`.', ''];
@@ -66,7 +68,7 @@ let REGLAS = [];
     hechos[n].rotas = Object.keys(rotas).length;
     out.push('', Object.keys(rotas).length ? '**Reglas que no se cumplieron:**' : '**Reglas:** ✔ se cumplieron todas, siempre.');
     for (const [r, o] of Object.entries(rotas)) out.push('- ⚠ ' + (REGLAS.find(x => x[0] === r)?.[1] || r) + ' — ' + (VECES > 1 ? 'en ' + o.veces + ' de ' + VECES + ' veces, ' : '') + o.n + (o.n === 1 ? ' vez' : ' veces') + ' (la primera: ' + o.primera + ')');
-    out.push('', '<details><summary>Lo que el juego cuenta que pasó (' + r.lineas.length + ' líneas)</summary>', '', '```', ...r.lineas.map(l => l.hora + ' ' + l.texto), '```', '</details>', '');
+    out.push('', '<details><summary>Lo que el juego cuenta que pasó (' + r.lineas.length + ' líneas)</summary>', '', ...r.lineas.map(relatoMd), '', '</details>', '');
     const errs = vs.flatMap(x => x.errs);
     console.log(esp.titulo + ': ' + res.filter(x => x.ok).length + '/' + res.length + (hechos[n].rotas ? ' · reglas rotas: ' + Object.keys(rotas).join(', ') : '') + (errs.length ? ' · errores: ' + errs.slice(0, 2).join(' | ') : ''));
   };
