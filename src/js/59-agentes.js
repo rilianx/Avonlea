@@ -99,7 +99,7 @@ function teSentar(ag, g, dt){
     return true;
   }
   if (dist(b.x, b.y, s[0], s[1]) > 26 && !wmWalk(who, s[0], s[1], sc, dt)) return true;
-  wmStop(who); ag.acting = { v: 'tomar_te', t0: TT, dura: (g.stayUntil - hourNow()) * 60 * MIN_S, base: [s[0], s[1]], sit: false, obj: 'te' };
+  wmStop(who); ag.acting = { v: 'tomar_te', k: g.goal.te === 0 ? g.goal.people[1] : g.goal.con, t0: TT, dura: (g.stayUntil - hourNow()) * 60 * MIN_S, base: [s[0], s[1]], sit: false, obj: 'te' };
   b.x = s[0]; b.y = s[1]; b.dir = s[2]; b.sit = true; b.moving = false; return true;
 }
 function agentIdle(ag){ ag.st = 'idle'; ag.task = null; ag.paused = false; ag.seenInput = null; wmRelease(ag.who); }

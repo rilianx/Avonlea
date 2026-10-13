@@ -56,7 +56,7 @@ function update(dt){
   ana.walk = ana.moving ? (ana.walk + dt * 1.9 * Math.hypot(ana.vx, ana.vy) / SPEED) % 1 : 0;
   if (ana.idle > 3 && ana.idle < 9 && !ana.sit && !game.talk && !AGENTS.ana?.acting) { ana.dir = 2; ana.lookAround = Math.sin(ana.idle * 1.4) * 1.4; }
   if (ana.savoring) ana.lookAround = Math.sin(TT * 1.4) * 1.4;
-  if (ana.idle > 9 && game.scene === 'out' && !game.talk && !ana.lie) ana.sit = true;
+  if (ana.idle > 9 && game.scene === 'out' && !game.talk && !ana.lie && !(AGENTS.ana && activeGoals(AGENTS.ana).length)) ana.sit = true;   // (resting, when she has nothing to do: not in the middle of an errand)
   for (const p of [ana, ...Object.values(PEOPLE)]) { p.blink -= dt; if (p.blink < -2.5 - Math.random() * 3) p.blink = .14; }
   // cooking: a moment at the stove, then it is ready
   if (game.cooking && (game.cooking.t -= dt) <= 0) { const k = game.cooking.k; game.inv[k]++; game.cooking = null; logEv('Ana cocinó ' + { tarta: 'una tarta de bayas', compota: 'compota de manzana', te: 'té' }[k] + ' en la cocina de Tejas Verdes.'); taskEvent('cocinar', k); storyEvent('cocinado'); storyEvent('cocinado:' + k); float('¡' + { tarta: 'Tarta de bayas', compota: 'Compota de manzana', te: 'Té' }[k] + ' lista!', STOVE.x, STOVE.y - 70); sfx.done(); save(); }

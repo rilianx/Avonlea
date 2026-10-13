@@ -125,9 +125,11 @@ function chatTick(dt){
 const LYNDE_CHISME = ['¿Supo que a los Pye se les escapó otra vez el cerdo? Yo siempre lo dije.', '¡Esa niña de los Cuthbert! Pelirroja y con una lengua... aunque buen corazón tiene, eso sí.', 'Dicen que la maestra nueva usa sombrero con plumas. ¡Plumas, en una escuela!', 'Yo no soy de las que hablan, pero el loro del Sr. Harrison dice cada cosa...', 'Matthew Cuthbert fue a la tienda y salió con un rastrillo. ¡En pleno invierno!'];
 const CHISME_RE = ['¡No me diga!', '¿De veras? ¡Qué cosa!', 'Bueno, yo de eso no sé nada...', 'Ya me lo imaginaba.'];
 const ANA_DIANA = [['¡Diana, amiga del alma! Tengo tanto que contarte.', '¡Ana! Yo también. ¿Nos vemos en el Bosque Encantado?'], ['¿Viste qué color tiene hoy el lago? Como de perla.', 'Yo solo vi que estaba azul... pero tú lo dices más bonito.'], ['Prometamos ser amigas mientras el sol y la luna existan.', '¡Lo prometo, Ana!']];
-const ANA_SUENA = [['¿No le parece que hoy el mundo está recién hecho?', 'Esta niña... qué cosas dice.'], ['Vi una nube con forma de barco. Iba hacia Charlottetown.', 'Ya lo creo, Ana. Ya lo creo.']];
+const ANA_SUENA = [['¿No le parece que hoy el mundo está recién hecho?', 'Esta niña... qué cosas dice.'], ['Vi una nube con forma de barco. Iba hacia Charlottetown.', 'Ya lo creo, Ana. Ya lo creo.'], ['¿Sabía que los abedules parecen señoras de vestido blanco?', 'Nunca lo había pensado así.'], ['Hoy el lago brillaba como si tuviera estrellas adentro.', '¡Qué imaginación tienes, niña!'], ['Cuando sea grande quiero escribir libros. O ser maestra. O las dos cosas.', 'Tiempo tienes para decidirlo.']];
+const saludoHora = () => { const h = hourNow() % 24; return h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches'; };
 function chatLines(a, b, anaFree){
-  const L = [], say = (q, t) => L.push({ q, t }), h = hourNow(), hi = h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches';
+  const L = [], h = hourNow(), hi = saludoHora(), say = (q, t) => L.push({ q, t: t.replace(/Buenos días|Buenas tardes|Buenas noches/, hi) });   // (the greeting, as the hour is)
+  const sin = A => { const u = [...A].sort(() => Math.random() - .5); return () => u.length > 1 ? u.pop() : u[0]; }, suena = sin(ANA_SUENA), pares = sin(PAIR_LINES[isKid(a) && isKid(b) ? 'kids' : 'big']);   // (in one talk, no line twice)
   const tu = isKid(a) && isKid(b), nm = k => /^[a-zá-ú]/.test(wmName(k)) ? '' : wmName(k), A = nm(a), B = nm(b), to = n => n ? ', ' + n : '';   // ("un vecino" is no name to call someone by)
   if (anaFree) {   // (Ana, as the player moves her, passing by: a word to her)
     const d = FOLKBY[a]?.def;
@@ -148,8 +150,8 @@ function chatLines(a, b, anaFree){
   for (let k = 0; k < rounds; k++) {
     if (a === 'lynde' || b === 'lynde') { const o = a === 'lynde' ? b : a; say('lynde', pick(LYNDE_CHISME)); say(o, pick(CHISME_RE)); }
     else if (ana_ && other === 'diana') { const [x, y] = ANA_DIANA[(k + Math.floor(TT)) % ANA_DIANA.length]; say('ana', x); say('diana', y); }
-    else if (ana_) { const [x, y] = pick(ANA_SUENA); say('ana', x); say(other, y); }
-    else { const [x, y] = pick(PAIR_LINES[tu ? 'kids' : 'big']); say(a, x); say(b, y); }
+    else if (ana_) { const [x, y] = suena(); say('ana', x); say(other, y); }
+    else { const [x, y] = pares(); say(a, x); say(b, y); }
   }
   const t = AGENTS[a]?.task || AGENTS[b]?.task, who = AGENTS[a]?.task ? a : b;
   say(who, t ? `Bueno, me voy, que tengo que ${stepText(t.a).replace(/^(\S+r)se\b/, '$1me')}.` : pick(['Bueno, ¡que le vaya bien!', 'Me voy, que se hace tarde.']));

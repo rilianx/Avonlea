@@ -21,6 +21,11 @@ const out = build(), target = path.join(root, 'index.html');
 { const i = out.lastIndexOf('<script>'), j = out.lastIndexOf('</script>');
   try { new (require('vm').Script)(out.slice(i + 8, j), { filename: 'index.html (el código)' }); }
   catch (e) { console.error('El código tiene un error de sintaxis; index.html no se escribe.\n' + e.stack.split('\n').slice(0, 5).join('\n')); process.exit(1); } }
+// and a comment that swallows code while still valid: the house style is a note in parentheses at the end of a line,
+// «code;   // (note)»; code after such a note is lost (it happened three times)
+{ const malas = [];
+  for (const f of fs.readdirSync(src('js')).filter(f => f.endsWith('.js'))) read('js/' + f).split('\n').forEach((l, n) => { const i = l.indexOf('   // ('); if (i > 0 && l.trim()[0] !== '/' && /\)\s+(if|else|const|let|for|return|label|[A-Za-z_$][\w$]*(\.[\w$]+)*\s*(\(|=[^=]))/.test(l.slice(i))) malas.push(f + ':' + (n + 1) + '  ' + l.trim().slice(0, 120)); });
+  if (malas.length) { console.error('Hay código después de un comentario (se pierde):\n' + malas.join('\n')); process.exit(1); } }
 if (process.argv.includes('--check')) {
   const now = fs.readFileSync(target, 'utf8');
   if (now !== out) { console.error('index.html no coincide con src/ (corre: node tools/build.js)'); process.exit(1); }

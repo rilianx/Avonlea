@@ -186,7 +186,7 @@ module.exports = [
     id: 37, titulo: 'Las oraciones', quienes: ['ana'],
     relato: 'Ana sube a su pieza, se arrodilla junto a la cama y dice sus oraciones, unos minutos.',
     pasos: [
-      { quien: 'ana', lugar: /pieza/, junto: /cama/, accion: /rezar/, dura: 3, texto: 'Reza junto a la cama de su pieza.' },
+      { quien: 'ana', lugar: /pieza/, junto: /cama/, postura: /rodillas/, accion: /rezar/, dura: 3, texto: 'Reza de rodillas junto a la cama de su pieza.' },
     ],
   },
   {

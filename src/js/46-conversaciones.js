@@ -15,7 +15,7 @@ function callPerson(by, k, o = {}){
   const d = dist(b.x, b.y, cb.x, cb.y); if (d > CALL_R || d < 50) return false;
   const come = o.come ?? (relGetW(k, by) >= 3 || kin(k, by) || !!FOLKBY[k]?.kid);
   b.called = { by, t0: TT, until: TT + (o.wait || CALL_WAIT), come };
-  if (o.say !== false) { const n = callName(k), formal = /^(Sr|Sra|Srta)\.|Rev|Sr\. /.test(n) && by === 'ana'; sayB(qOf(by), `¡${n}! ` + (formal ? '¡Espere un momento, por favor!' : come ? '¡Ven un momento!' : '¡Espera!')); }
+  if (o.say !== false) { const n = callName(k), formal = /^(Sr|Sra|Srta)\.|Rev|Sr\. /.test(n) && by === 'ana'; sayB(qOf(by), `¡${n[0].toUpperCase() + n.slice(1)}! ` + (formal ? '¡Espere un momento, por favor!' : come ? '¡Ven un momento!' : '¡Espera!')); }
   return true;
 }
 // a called one: facing whoever called, waiting (or walking up to them); 'null' when the call is over

@@ -87,9 +87,8 @@ function wmExec0(ag, a, st, dt){
         const rc = wmMove(me, 'h:' + casa, dt); if (rc !== 'ok') return rc;
         if (wmScene(a.k) !== casa) { st.espera = (st.espera || 0) + dt; if (st.espera > M(40)) { delete h.recibe; st.why = wmName(a.k) + ' no llegó a su casa'; return 'fail'; } return 'run'; }
       }
-      const r = reach(a.k); if (r !== 'ok') return r;
-      if (!st.said) { st.said = 1; bubble(me, `Buenas tardes, ${callName(a.k)}. Vine a visitarla.`); }
-      if (st.said === 1 && wait(2.6)) { st.said = 2; st.w = 0; bubble(a.k, '¡Pasa, pasa! Siéntate, que pongo la tetera.'); }
+      if (!st.said) { const r = reach(a.k); if (r !== 'ok') return r; st.said = 1; st.t1 = TT; bubble(me, `${saludoHora()}, ${callName(a.k)}. Vine a visitarla.`); }   // (up to her, to greet her; then to the chair, not after her)
+      if (st.said === 1 && TT - st.t1 > 2.6) { st.said = 2; st.w = 0; bubble(a.k, '¡Pasa, pasa! Siéntate, que pongo la tetera.'); }
       if (st.said !== 2 || !wait(3)) return 'run';
       if (h) delete h.recibe; realR.setFact('visita:' + me + '>' + a.k); relSetW(a.k, me, relGetW(a.k, me) + 1); logEv(`${wmName(me)} visitó a ${wmName(a.k)}.`, []); return 'ok';
     }
@@ -219,14 +218,14 @@ function wmExec0(ag, a, st, dt){
       const r = reach(a.k); if (r !== 'ok') return r;
       const W = whoOf(a.k), hr = hourNow() % 24; if (W.abre && (hr < W.abre[0] || hr >= W.abre[1])) { st.why = 'la tienda está cerrada'; return 'fail'; }
       if ((inv[a.g] || 0) < a.n) { st.why = 'no tiene qué cambiar'; return 'fail'; }
-      if (!haggle(`Buenos días${a.k === 'lawson' ? ', Sr. Lawson' : ''}. ¿Me cambiaría ${itemTextW(a.g, a.n)} por ${ITEM_DEFS[a.x]?.gift?.art || itemTextW(a.x, 1)}?`, a.k === 'buhonero' ? 'Este tinte deja el pelo negro como el ala de un cuervo, señorita. ¡Y no se va con el lavado!' : 'Veamos lo que traes… Sí, me sirven. Un momento.')) return 'run';
+      if (!haggle(`${saludoHora()}${a.k === 'lawson' ? ', Sr. Lawson' : ''}. ¿Me cambiaría ${itemTextW(a.g, a.n)} por ${ITEM_DEFS[a.x]?.gift?.art || itemTextW(a.x, 1)}?`, a.k === 'buhonero' ? 'Este tinte deja el pelo negro como el ala de un cuervo, señorita. ¡Y no se va con el lavado!' : 'Veamos lo que traes… Sí, me sirven. Un momento.')) return 'run';
       inv[a.g] -= a.n; inv[a.x] = (inv[a.x] || 0) + 1; float('+' + itemTextW(a.x, 1), b.x, b.y - 50);
       logEv(`${wmName(me)} cambió ${itemTextW(a.g, a.n)} por ${ITEM_DEFS[a.x]?.gift?.art || itemTextW(a.x, 1)}${a.k === 'lawson' ? ' en la tienda de Lawson' : ' con ' + wmName(a.k)}.`, []); bubble(a.k, a.k === 'buhonero' ? '¡Negro azabache garantizado! Palabra de honor.' : 'Trato hecho. ¡Que lo disfrutes!'); return 'ok';
     }
     case 'comprar': {
       const r = reach(a.k); if (r !== 'ok') return r;
       const W = whoOf(a.k), hr = hourNow() % 24; if (W.abre && (hr < W.abre[0] || hr >= W.abre[1])) { st.why = 'la tienda está cerrada'; return 'fail'; }
-      if (!haggle(`Buenos días, Sr. Lawson. ¿Me daría ${LIBRETA_ART[a.x] || itemTextW(a.x, 1)}? A la libreta de los Cuthbert.`, a.x === 'azucar' ? 'Cómo no. Déjame pesarla…' : 'Cómo no, aquí tengo una. Un momento…')) return 'run';
+      if (!haggle(`${saludoHora()}, Sr. Lawson. ¿Me daría ${LIBRETA_ART[a.x] || itemTextW(a.x, 1)}? A la libreta de los Cuthbert.`, a.x === 'azucar' ? 'Cómo no. Déjame pesarla…' : 'Cómo no, aquí tengo una. Un momento…')) return 'run';
       inv[a.x] = (inv[a.x] || 0) + 1; libretaAdd(me, a.x); float('+' + itemTextW(a.x, 1), b.x, b.y - 50); bubble(a.k, 'Anotado en la libreta de los Cuthbert. Saludos a Marilla.'); return 'ok';
     }
     case 'conversar': {

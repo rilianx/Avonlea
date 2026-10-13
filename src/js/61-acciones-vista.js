@@ -19,7 +19,7 @@ const ACCION_VISTA = {
   decorar_sala: { dur: M(24), obj: 'flores' }, adornar: { dur: M(10), obj: 'sombrero' }, cuidar: { obj: 'jarabe' },
   quehacer: { dur: M(15), obj: 'quehacer' }, cocinar: { dur: M(30), obj: 'bol' }, preparar: { dur: M(15), obj: 'bol' }, batir: { dur: M(30), obj: 'mantequera' }, coser: { dur: M(40), obj: 'costura', sentar: true },
   recoger: { dur: M(8), obj: 'canastito' }, jurar: { dur: M(3), obj: 'manos' }, nombrar: { dur: M(2), obj: 'recitar' },
-  visitar: { obj: 'te' }, tomar_te: { obj: 'te', sentar: true }, dar: { obj: 'entregar' }, devolver: { obj: 'entregar' }, tomar: { obj: 'canastito' },
+  visitar: { obj: 'te', dur: M(32) }, tomar_te: { obj: 'te', sentar: true }, dar: { obj: 'entregar' }, devolver: { obj: 'entregar' }, tomar: { obj: 'canastito' },
   leer_cuento: { obj: 'cuaderno', sentar: true, con: true }, felicitar: { obj: 'manos' }, consolar: { obj: 'abrazo' },
   trepar: { dur: 10, mov: 'techo', arriba: true }, actuar: { dur: M(10), obj: 'recitar' }, recitar: { dur: M(5), obj: 'recitar' },
 };
@@ -68,9 +68,12 @@ const ACC_PASOS = {
   escribir_cuento: me => me === 'ana' && enCasa(me) ? [{ lugar: 'pieza', p: [GA.table.x - 12, GA.table.y + 8], mira: 0, sentar: true, dur: M(40), obj: 'banqueta', mesa: [GA.table.x + 15, GA.table.y - 25, GA.table.y + 1, 'cuaderno'] }] : null,
   estudiar: me => wmScene(me) === 'gg' ? [{ p: SEATS.ana.slice(0, 2), mira: 2, sentar: true, dur: M(40), obj: null, mesa: [SEATS.ana[0], TABLE.y - 31, TABLE.y + 1, 'libro'] }] : wmScene(me) === 'es' || personKey(me) === 'escuela' ? [{ lugar: 'h:es', p: [SCHOOL_DESKS[5].x - 6, SCHOOL_DESKS[5].y + 10], mira: 0, sentar: true, dur: M(40), obj: null, mesa: [SCHOOL_DESKS[5].x + 10, SCHOOL_DESKS[5].y - 12, SCHOOL_DESKS[5].y + 1, 'libro'] }] : null,   // (at the kitchen table or her desk at school, the book open on it)
   recitar: me => [{ lugar: 'h:es', p: [6.5 * T, 3.5 * T], mira: 2, dur: M(5), obj: 'recitar' }],   // (in front of the class, by the blackboard)
-  visitar: (me, a) => { const o = wmBody(a.k), sc = wmScene(me); if (!o || sc === 'out' || sc !== wmScene(a.k)) return null; const q = sc === 'gg' ? SEATS.lynde.slice(0, 2) : sc === 'os' ? [TEA.x - 40, TEA.y + 6] : [o.x - 34, o.y + 4]; return [{ p: q, mira: 1, sentar: true, dur: M(30), obj: 'te' }]; },   // (sitting down for the visit, a cup of tea)
+  // (sitting down for the visit, a cup of tea; and she who receives, sitting with her: Mrs. Lynde in her rocking chair)
+  visitar: (me, a) => { const o = wmBody(a.k), sc = wmScene(me); if (!o || sc === 'out' || sc !== wmScene(a.k)) return null;
+    const [q, mira, h] = sc === 'gg' ? [SEATS.lynde.slice(0, 2), 2, null] : sc === 'os' ? [[TEA.x - 40, TEA.y + 6], 1, [TEA.x + 40, TEA.y + 6, 3]] : sc === 'rl' ? [[RLC.x + 44, RLC.y + 2], 3, [RLC.x, RLC.y, 1]] : sc === 'cp' ? [CP_SILLAS[1].slice(0, 2), CP_SILLAS[1][2], CP_SILLAS[0]] : [[o.x - 34, o.y + 4], 1, [o.x + 12, o.y + 4, 3]];
+    return [{ p: q, mira, sentar: true, dur: M(30), obj: 'te', sentado: h && [a.k, ...h] }]; },
   leer: me => wmScene(me) === 'ga' ? [{ p: [GA.bed.x - 50, GA.bed.y - 6], mira: 2, sentar: true, dur: M(30), obj: 'libro' }] : wmScene(me) === 'gg' ? [{ p: SEATS.ana.slice(0, 2), mira: 2, sentar: true, dur: M(30), obj: 'libro' }] : null,
-  rezar: me => me === 'ana' && enCasa(me) ? [{ lugar: 'pieza', p: [GA.bed.x - 40, GA.bed.y + 20], mira: 0, sentar: true, dur: M(5), obj: 'rezar' }] : null,
+  rezar: me => me === 'ana' && enCasa(me) ? [{ lugar: 'pieza', p: [GA.bed.x - 40, GA.bed.y + 20], mira: 0, agachar: true, dur: M(5), obj: 'rezar' }] : null,
   coser: me => wmScene(me) === 'gg' ? [{ p: [KX.silla.x, KX.silla.y], mira: 2, sentar: true, dur: M(40), obj: 'costura' }] : null,
   cocinar: me => wmScene(me) === 'gg' ? [{ p: [STOVE.x + 14, STOVE.y + 40], mira: 0, dur: M(30), obj: 'bol' }] : wmScene(me) === 'out' && me !== 'ana' ? [{ adentro: true, dur: M(30) }] : null,
   preparar: me => wmScene(me) === 'gg' ? [{ p: [STOVE.x + 14, STOVE.y + 40], mira: 0, dur: M(15), obj: 'bol' }] : wmScene(me) === 'out' && me !== 'ana' ? [{ adentro: true, dur: M(15) }] : null,   // (at a door with no kitchen to show: inside, out of sight, for a while)
@@ -113,9 +116,11 @@ function coreoTick(ag, a, st, dt, P){
   }
   if (!st.pt) { st.pt = 0; if (A) { A.obj = p.obj; A.mesa = p.mesa || null; A.lleva = null; A.base = [b.x, b.y]; } if (p.decir) wmSay(me, p.decir); if (p.adentro && b.where === 'out') { b.where = 'in'; st.salir = 1; } }
   if (p.mira != null) b.dir = p.mira; b.sit = !!p.sentar; b.crouch = !!p.agachar; if (me !== 'ana') b.moving = false;
+  if (p.sentado) { const [k, x, y, od] = p.sentado, o = wmBody(k); if (o && wmScene(k) === wmScene(me)) { o.x = x; o.y = y; o.dir = od; o.sit = true; o.moving = false; o.nav = null; o.wait = Math.max(o.wait || 0, 1); } }   // (the other, sitting with her the while)
   if (p.con) { const [k, dx, dy, od] = p.con, o = wmBody(k); if (o && wmScene(k) === wmScene(me)) { o.x = b.x + dx; o.y = b.y + dy; o.dir = od ?? b.dir; o.moving = false; o.sit = false; if (A) A.con = k; } }   // (whoever does it with her, at her side)
   st.pt += dt; if (st.pt < p.dur) return false;
-  p.hecho?.(); if (A) A.mesa = null; b.sit = false; b.crouch = false; if (st.salir) { b.where = 'out'; st.salir = 0; } st.ci = (st.ci || 0) + 1; st.llego = 0; st.pt = 0;
+  // (the one who sat with her gets up: a step out of the rocking chair)
+  p.hecho?.(); if (p.sentado) { const o = wmBody(p.sentado[0]); if (o) { o.sit = false; if (ROOMS[o.where]?.blocked?.(o.x, o.y)) o.y += 22; } } if (A) A.mesa = null; b.sit = false; b.crouch = false; if (st.salir) { b.where = 'out'; st.salir = 0; } st.ci = (st.ci || 0) + 1; st.llego = 0; st.pt = 0;
   return st.ci >= P.length;
 }
 const wmSay = (k, text) => { const q = k === 'ana' ? 'ana' : PEOPLE[k] ? k : 'f:' + k; bubbles = [{ q, text, t: 0, dur: lineDur(text) }]; };
@@ -200,7 +205,7 @@ function accTick(ag, a, st, r){
 function accEnd(ag){
   const A = ag.acting, b = wmBody(ag.who); ag.acting = null; if (!A || !b) return;
   if (ACCION_VISTA[A.v].mov) { [b.x, b.y] = A.cayo || A.base; b.moving = false; delete b.sortY; }
-  b.sit = A.cayo ? true : !!A.sit && A.v !== 'merendar' ? A.sit : false;   // (after the fall, on the ground)
+  b.sit = A.cayo ? true : !!A.sit && !['merendar', 'visitar', 'tomar_te'].includes(A.v) ? A.sit : false;   // (after the fall, on the ground)
   if (A.kb) { const o = wmBody(A.k); if (o) o.sit = A.kb[2]; }
 }
 // the sick stay in bed at home (lying down, under a quilt) until someone cures them
