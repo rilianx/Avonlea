@@ -183,6 +183,8 @@ $('wmobey').addEventListener('change', e => { WM_OBEY = e.target.checked; });
 $('wmstop').addEventListener('click', () => { for (const k of Object.keys(AGENTS)) { wmRelease(k); delete AGENTS[k]; } wmPanelDraw(); });
 $('wmclose').addEventListener('click', () => wmPanel(false));
 $('relbtn').addEventListener('pointerdown', e => { e.stopPropagation(); audio(); userInput(); relPanel($('rels').hidden); });
+$('cuabtn').addEventListener('pointerdown', e => { e.stopPropagation(); audio(); userInput(); cuadernoPanel($('cua').hidden); });
+$('cuaclose').addEventListener('click', () => cuadernoPanel(false));
 $('relclose').addEventListener('click', () => relPanel(false));
 $('rels').addEventListener('pointerdown', e => { if (e.target === $('rels')) relPanel(false); });
 $('daybtn').addEventListener('pointerdown', e => { e.stopPropagation(); audio(); userInput(); if (!sleeping && !game.map) goSleep(false, true); });
