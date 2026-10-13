@@ -268,6 +268,7 @@ function storyTick(){
     if (e.played || !storyHere(e)) continue;
     const present = e.personajes.filter(k => sceneOf(k) === game.scene && (game.scene !== 'out' || dist(PEOPLE[k].x, PEOPLE[k].y, ana.x, ana.y) < 220));
     if (present.length < e.personajes.length) { e.waitT = e.waitT || TT + 30; if (TT < e.waitT) continue; }   // (gives them a moment to arrive)
+    if (hablando() || ['ana', ...present].some(ocupada)) continue;   // (not on top of what is being said or done: a moment later)
     storyPlay(e, present); return;
   }
 }

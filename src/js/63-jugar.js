@@ -46,7 +46,8 @@ function wmExec(ag, a, st, dt){ const r = wmExec0(ag, a, st, dt); accTick(ag, a,
 function wmExec0(ag, a, st, dt){
   const me = ag.who, inv = wmInv(me), b = wmBody(me);
   const bubble = (k, text) => { const q = k === 'ana' ? 'ana' : PEOPLE[k] ? k : 'f:' + k; bubbles = [{ q, text, t: 0, dur: lineDur(text) }]; };
-  const reach = k => { const kk = personKey(k); if (!kk) { st.why = wmName(k) + ' no está'; return 'fail'; } return wmMove(me, 'p:' + k, dt); };   // (up to them, wherever they are: indoors too, to the bedside)
+  const reach = k => { if (st.said || st.hg) return 'ok';   // (once begun with them, not after them: sitting down to read, the visit, the deal)
+    const kk = personKey(k); if (!kk) { st.why = wmName(k) + ' no está'; return 'fail'; } return wmMove(me, 'p:' + k, dt); };   // (up to them, wherever they are: indoors too, to the bedside)
   const wait = s => { if (st.P === undefined) st.P = accPasos(a, me); if (st.P) return coreoTick(ag, a, st, dt, st.P); st.w = (st.w || 0) + dt; return st.w >= Math.max(s, ACCION_VISTA[a.v]?.dur || 0); };   // (long enough to be seen; or, if it has its steps, done step by step where it is really done)
   // a deal takes a moment: one asks, the other answers (weighs it, looks the cow over), then it is done
   const haggle = (ask, answer) => {
@@ -255,9 +256,11 @@ function wmExec0(ag, a, st, dt){
       }
       if (!st.asked) {
         const r = a.llamar ? 'ok' : reach(a.k); if (r !== 'ok') return r;
+        if (hablando()) return 'run';   // (the other is still answering the call: one asks after)
         if (!socialRule(realR, 'pedir', me, a.k)) { bubble(a.k, 'No, ahora no.'); st.why = wmName(a.k) + ' no quiso'; realR.setFact('pedido:' + a.favor.f + ':' + a.k); return 'fail'; }
         if (a.k !== 'ana' && activeGoals(AGENTS[a.k]).length >= MAX_GOALS) { bubble(a.k, 'Ahora no puedo, tengo demasiado que hacer.'); st.why = wmName(a.k) + ' está ocupado'; realR.setFact('pedido:' + a.favor.f + ':' + a.k); return 'fail'; }
-        st.asked = 1; realR.setFact('pedido:' + a.favor.f + ':' + a.k); if (a.llamar && WM_APPROACH && WM_APPROACH.who === me) { WM_APPROACH = null; wmStop('ana'); }
+        st.asked = 1; realR.setFact('pedido:' + a.favor.f + ':' + a.k); for (const k of [me, a.k]) amb.mute[k] = Math.max(amb.mute[k] || 0, TT + 30);   // (asking and answering: no loose lines in between)
+ if (a.llamar && WM_APPROACH && WM_APPROACH.who === me) { WM_APPROACH = null; wmStop('ana'); }
         const F = FAVORS[a.favor.f], f = a.favor;
         bubble(me, F.say ? F.say(f) : { pasear: '¿Vamos a pasear juntas?', venir: '¿Vienes a tomar el té conmigo?' }[f.f] || '¿Me harías un favor?');
         logEv(`${wmName(me)} le pidió a ${wmName(a.k)}: ${f.f.replace('_', ' ')}.`, []);
@@ -268,7 +271,7 @@ function wmExec0(ag, a, st, dt){
         else { const h = agentStart(a.k, sub, { label: sub.text + ' (se lo pidió ' + wmName(me) + ')', parent: me, chain: [...agentChain(ag), me] }); if (!h) { st.why = wmName(a.k) + ' tiene demasiado que hacer'; return 'fail'; } const gg = ag.goalNow; if (gg) gg.pending = [...(gg.pending || []).filter(p => p.h.st === 'run'), { h, f, to: a.k }]; }
         st.sub = sub; st.t1 = TT;
       }
-      if (st.asked === 1) { if (TT - st.t1 < 2.6) return 'run'; st.asked = 2; bubble(a.k, SI_A[a.favor.f] || 'Está bien.'); }   // (and the answer, yes)
+      if (st.asked === 1) { if (TT - st.t1 < 2.6 || hablando()) return 'run'; st.asked = 2; bubble(a.k, SI_A[a.favor.f] || 'Está bien.'); }   // (and the answer, yes)
       return 'ok';   // (asked: on with the rest of the plan; what was promised is waited for only where it is needed)
     }
     case 'interceder': {

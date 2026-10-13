@@ -4981,6 +4981,7 @@ function storyTick(){
     if (e.played || !storyHere(e)) continue;
     const present = e.personajes.filter(k => sceneOf(k) === game.scene && (game.scene !== 'out' || dist(PEOPLE[k].x, PEOPLE[k].y, ana.x, ana.y) < 220));
     if (present.length < e.personajes.length) { e.waitT = e.waitT || TT + 30; if (TT < e.waitT) continue; }   // (gives them a moment to arrive)
+    if (hablando() || ['ana', ...present].some(ocupada)) continue;   // (not on top of what is being said or done: a moment later)
     storyPlay(e, present); return;
   }
 }
@@ -5570,6 +5571,8 @@ function ambTick(dt){
   if (!s.directed && (game.scene !== s.scene || game.talk || game.cooking || game.map || !$('ai').hidden || far(190))) return ambEnd();
   if (s.directed && (game.scene !== s.scene || far(260))) { s.noMenu = true; if (game.talk?.scene) { game.talk = null; $('talk').hidden = true; } return ambEnd(); }   // (Ana walked off: the talk is over)
   if ((s.wait -= dt) > 0) return;
+  if (!s.directed && ['ana', ...s.parts].some(ocupada)) return ambEnd();   // (one of them got busy: the loose talk is dropped)
+  if (hablando()) return;   // (someone else is saying something: after it)
   if (++s.i >= s.lines.length) return ambEnd();
   const l = s.lines[s.i], sp = personOf(l.q), dur = lineDur(l.t);
   bubbles = [{ q: l.q, text: l.t, t: 0, dur }]; s.wait = dur + .35; sfx.blip();
@@ -5629,6 +5632,8 @@ function ambNote(parts){
 }
 const writtenTalkOn = () => !!game.playAct || game.scene === 'camino' || cart.riding || !!(AGENTS.ana?.ride && AGENTS.ana.followOf) || talkBusy('viaje') || (CAP1.on && !CAP1.done);
 const ENFERMO_LINES = ['Ay… este resfrío me tiene molido.', 'No me siento nada bien, niña.', 'Cof, cof… Si no fuera por este pecho…'];   // (the sick, from bed)
+// someone is saying something right now (a loose line would cover it)
+const hablando = () => bubbles.some(b => b.t < b.dur);
 // busy: doing something (or someone doing something with her), or staying somewhere for a goal (at tea)
 const ocupada = k => !!(AGENTS[k]?.acting || (k === 'ana' && game.playAct) || Object.values(AGENTS).some(a => a.acting && (a.acting.k === k || a.acting.con === k)) || AGENTS[k] && activeGoals(AGENTS[k]).some(g => g.staying));
 function ambUpdate(dt){
@@ -5646,7 +5651,7 @@ function ambUpdate(dt){
   }
   if (amb.busy || TT < amb.cool || TT < amb.err) return;
   { const se = storyNow(); if (se && storyHere(se)) return; }   // (here a scene of the story is about to be played: it goes first)
-  if (ocupada('ana')) return;   // (in the middle of something with Ana, or Ana herself busy: no loose lines)
+  if (ocupada('ana') || hablando()) return;   // (in the middle of something with Ana, or Ana herself busy, or someone speaking: no loose lines)
   let best = null, bd = 1e9;
   for (const k of all) { const d = dd(k); if (TT < (amb.mute[k] || 0) || d > 240 || d >= bd || ocupada(k)) continue; best = k; bd = d; }
   if (!best) return;
@@ -5702,7 +5707,7 @@ function give(who, k){
   say(who, d.gift.reply + CH[who].giftReply, [['De nada', close]]);
 }
 function say(who, text, opts, wait = false){
-  game.talk = { who, wait };
+  game.talk = { who, wait }; relatoDicho(who, text);
   const box = $('talk'), f = Math.min(5, game.fond[who] || 0), heartsTxt = who in game.fond ? '♥'.repeat(f) + '♡'.repeat(5 - f) : '';
   box.innerHTML = `<div class="who">${NAMES[who] || who}<span>${heartsTxt}</span></div><div class="line"></div><div class="opts"></div>`;
   box.querySelector('.line').textContent = text; box.classList.toggle('wait', wait);
@@ -6800,6 +6805,7 @@ function encUpdate(dt){
   if (enc.cur) return encTick(dt);
   if (writtenTalkOn()) return;
   if (amb.cur || amb.ready || game.talk || game.map || game.cooking || !$('ai').hidden || sleeping) return;
+  if (ocupada('ana') || hablando()) return;   // (Ana in the middle of something, or someone speaking: no loose greetings over it)
   const here = FOLK.filter(f => f.where === game.scene), dd = f => dist(ana.x, ana.y, f.x, f.y), free = f => TT >= (enc.mute[f.id] || 0) && !(f.talkT > TT);
   if (enc.ready) {   // (asked for as Ana came near: it starts when she is there)
     const s = enc.ready, f = FOLKBY[s.parts[0]];
@@ -6809,7 +6815,7 @@ function encUpdate(dt){
   }
   if (enc.busy || TT < enc.cool || TT < enc.err) return;
   // Ana comes near someone
-  let best = null, bd = 1e9; for (const f of here) { const d = dd(f); if (free(f) && d < (aiReady() ? 240 : 90) && d < bd && !f.sit) { best = f; bd = d; } }
+  let best = null, bd = 1e9; for (const f of here) { const d = dd(f); if (free(f) && d < (aiReady() ? 240 : 90) && d < bd && !f.sit && !ocupada(f.id)) { best = f; bd = d; } }
   if (best) {
     if (!aiReady()) return encStart(encFallback(best.id, 'ana'));
     enc.busy = true;
@@ -7173,14 +7179,14 @@ function wmSearch(me, goal, favors, s0, cap){
   return best.path.length && best.h < goal.h(s0) ? { plan: best.path, cost: best.g, n, ok: false, partial: true, C } : { plan: null, n, ok: false };
 }
 const stepText = a => ({ ir: () => 'ir a ' + (WP_NAME[a.p] || wmPlaceText(a.p)), tomar: () => 'tomar ' + itemTextW(a.x, 1), recoger: () => 'recoger ' + itemTextW(a.x, a.n), cocinar: () => a.x === 'te' ? 'preparar el té' : 'cocinar ' + itemTextW(a.x, 1),
-  dar: () => `darle ${itemTextW(a.x, a.n)} a ${wmName(a.k)}`, vender: () => `vender ${a.x === 'vaca' ? ANIMALS[a.cow].name : itemTextW(a.x, 1)} a ${wmName(a.k)}`, comprar: () => `llevar ${itemTextW(a.x, 1)} anotado en la libreta`, cambiar: () => `cambiar ${itemTextW(a.g, a.n)} por ${itemTextW(a.x, 1)}`,
+  dar: () => `darle ${itemTextW(a.x, a.n)} a ${wmName(a.k)}`, vender: () => `vender ${a.x === 'vaca' ? ANIMALS[a.cow].name : itemTextW(a.x, 1)} a ${wmName(a.k)}`, comprar: () => `comprar ${itemTextW(a.x, 1)} a la libreta de los Cuthbert`, cambiar: () => `cambiar ${itemTextW(a.g, a.n)} por ${itemTextW(a.x, 1)}`,
   conversar: () => 'conversar con ' + wmName(a.k), interceder: () => `hablar con ${wmName(a.k)} por ${wmName(a.por)}`, disculparse: () => 'disculparse con ' + wmName(a.k), pedir: () => `pedirle a ${wmName(a.k)} ` + ({ traer: `que le traiga ${itemTextW(a.favor.item, a.favor.n)}`, encerrar_vaca: `que lleve a ${ANIMALS[a.favor.cow]?.name} a ${WP_NAME[a.favor.pen]}`, interceder: `que hable con ${wmName(a.favor.target)} por él`, vender_vaca: 'que le venda la vaca', pasear: 'que den un paseo juntas', venir: 'que venga a tomar el té más tarde', prestar: `que le preste ${ITEM_DEFS[a.favor.item]?.gift?.art || a.favor.item}`, curar: `que venga a ver a ${wmName(a.favor.k)}`, quehaceres: 'que haga los quehaceres', llevar: `que la lleve en la calesa a ${WP_NAME[a.favor.lugar]}` }[a.favor.f] || a.favor.f), guiar: () => 'guiar a ' + ANIMALS[a.cow].name,
   quehacer: () => QUEHACER_TXT[a.x], ordeñar: () => 'ordeñar a ' + ANIMALS[a.cow].name, alimentar: () => 'dar de comer a los animales en ' + (WP_NAME[a.p] || 'el corral'), visitar: () => 'visitar a ' + wmName(a.k), devolver: () => `devolverle ${ITEM_DEFS[a.x]?.gift?.art || a.x} a ${wmName(a.k)}`,
   jurar: () => 'jurar ser amigas del alma con ' + wmName(a.k), perdonar: () => 'perdonar a ' + wmName(a.k), cuidar: () => 'cuidar a ' + wmName(a.k), estudiar: () => 'estudiar la lección', recitar: () => 'recitar la lección',
   rezar: () => 'decir sus oraciones', escribir_carta: () => 'escribir una carta', enviar_carta: () => 'mandar la carta por correo', leer: () => 'leer un libro', escribir_cuento: () => 'escribir un cuento', leer_cuento: () => 'leerle su cuento a ' + wmName(a.k),
   ensayar: () => 'ensayar la recitación', actuar: () => 'recitar en el concierto', decorar_sala: () => 'decorar el salón con flores', felicitar: () => 'felicitar a ' + wmName(a.k), consolar: () => 'consolar a ' + wmName(a.k), hacer_heno: () => 'hacer heno', partir_lena: () => 'partir leña',
   tomar_te: () => 'tomar el té con ' + wmName(a.k), sembrar: () => 'sembrar la huerta', regar: () => 'regar la huerta', patinar: () => 'patinar en el lago', trineo: () => 'tirarse en trineo', pedir_permiso: () => 'pedirle permiso a Marilla', merendar: () => 'merendar en el lago con ' + wmName(a.k), teñir: () => 'teñirse el pelo', cortar_pelo: () => 'cortarse el pelo', trepar: () => 'caminar por el techo de los Barry',
-  batir: () => 'batir ' + (ITEM_NAME[a.x]?.[0] || a.x), preparar: () => 'preparar ' + (ITEM_NAME[a.x]?.[0] || a.x), adornar: () => 'adornar el sombrero con flores', remar: () => 'remar en el lago', nombrar: () => 'ponerle nombre a ' + WP_NAME[a.p], regañar: () => 'regañar a ' + wmName(a.k), subir_calesa: () => `subir a ${wmName(a.k)} a la calesa`, coser: () => 'coser ' + (ITEM_NAME[a.x]?.[0] || a.x), soltar: () => `soltar a ${ANIMALS[a.cow].name} en ${WP_NAME[a.p]}` }[a.v] || (() => a.v))().replace(/\b(a|con|de) (Sra?|Srta)\. /g, (m, p, t) => p + (t === 'Sr' ? ' el ' : ' la ') + t + '. ').replace(/\ba el\b/g, 'al').replace(/\bde el\b/g, 'del');   // (to Mrs. Lynde: «a la Sra. Lynde», «al Sr. Harrison»)
+  batir: () => a.x === 'mantequilla' ? 'batir la mantequilla' : 'batir ' + itemTextW(a.x, 1), preparar: () => 'preparar ' + itemTextW(a.x, 1), adornar: () => 'adornar el sombrero con flores', remar: () => 'remar en el lago', nombrar: () => 'ponerle nombre a ' + WP_NAME[a.p], regañar: () => 'regañar a ' + wmName(a.k), subir_calesa: () => `subir a ${wmName(a.k)} a la calesa`, coser: () => 'coser ' + itemTextW(a.x, 1), soltar: () => `soltar a ${ANIMALS[a.cow].name} en ${WP_NAME[a.p]}` }[a.v] || (() => a.v))().replace(/\b(a|con|de) (Sra?|Srta)\. /g, (m, p, t) => p + (t === 'Sr' ? ' el ' : ' la ') + t + '. ').replace(/\ba el\b/g, 'al').replace(/\bde el\b/g, 'del');   // (to Mrs. Lynde: «a la Sra. Lynde», «al Sr. Harrison»)
 const wmPlaceText = p => p.startsWith('p:') ? 'donde está ' + wmName(p.slice(2)) : p.startsWith('c:') ? 'donde está ' + ANIMALS[p.slice(2)].name : p.startsWith('h:') ? HOUSES[p.slice(2)].place[1] : WP_NAME[p] || p;
 
 /* ---------- the agents: someone with a goal and a plan, carrying it out step by step in the world ---------- */
@@ -7279,14 +7285,12 @@ const teSillas = sc => sc === 'cp' ? CP_SILLAS : sc === 'gg' ? [SEATS.ana, SEATS
 function teSentar(ag, g, dt){
   const who = ag.who, b = wmBody(who), sc = wmScene(who), key = g.goal.places[0], room = key === 'cocina' ? 'gg' : key.startsWith('h:') ? key.slice(2) : null, s = room === sc && teSillas(sc)?.[g.goal.te];
   if (!b || !s) return false;
-  if (ag.acting?.v === 'tomar_te') {
-    b.x = s[0]; b.y = s[1]; b.dir = s[2]; b.sit = true; b.moving = false;
-    if (g.goal.con && AGENTS[g.goal.con]?.acting?.v !== 'tomar_te' && hourNow() < g.goal.teHasta) g.stayUntil = Math.max(g.stayUntil, hourNow() + .5);   // (the visit waits for the tea: the half hour counts from when the other sits down to it)
-    return true;
-  }
-  if (dist(b.x, b.y, s[0], s[1]) > 26 && !wmWalk(who, s[0], s[1], sc, dt)) return true;
-  wmStop(who); ag.acting = { v: 'tomar_te', k: g.goal.te === 0 ? g.goal.people[1] : g.goal.con, t0: TT, dura: (g.stayUntil - hourNow()) * 60 * MIN_S, base: [s[0], s[1]], sit: false, obj: 'te' };
-  b.x = s[0]; b.y = s[1]; b.dir = s[2]; b.sit = true; b.moving = false; return true;
+  if (!g.teSentada) { if (dist(b.x, b.y, s[0], s[1]) > 26 && !wmWalk(who, s[0], s[1], sc, dt)) return true; wmStop(who); g.teSentada = true; }
+  b.x = s[0]; b.y = s[1]; b.dir = s[2]; b.sit = true; b.moving = false;
+  // the visit sits and waits for the one who receives (who may still be making the tea): the tea, and the half hour, begin when both are at the table
+  if (g.goal.con && AGENTS[g.goal.con]?.acting?.v !== 'tomar_te') { if (hourNow() < g.goal.teHasta) g.stayUntil = Math.max(g.stayUntil, hourNow() + .5); return true; }
+  if (ag.acting?.v !== 'tomar_te') ag.acting = { v: 'tomar_te', k: g.goal.te === 0 ? g.goal.people[1] : g.goal.con, t0: TT, dura: (g.stayUntil - hourNow()) * 60 * MIN_S, base: [s[0], s[1]], sit: false, obj: 'te' };
+  return true;
 }
 function agentIdle(ag){ ag.st = 'idle'; ag.task = null; ag.paused = false; ag.seenInput = null; wmRelease(ag.who); }
 function agentEnd(ag, st, why){ for (const g of activeGoals(ag)) goalEnd(ag, g, st, why); agentIdle(ag); }
@@ -7463,9 +7467,10 @@ const inChat = k => CHATS.some(c => c.parts.includes(k)) || FOLKBY[k]?.talkT > T
 function chatTry(ag, F, urg){
   const me = ag.who, b = wmBody(me), sc = wmScene(me), pc = ag.pairCool || (ag.pairCool = {});
   if (writtenTalkOn() && (me === 'ana' || AGENTS.ana?.followOf === me)) return false;   // (who travel together talk by the written lines)
+  if (ocupada(me)) return false;   // (in the middle of doing something: the talk can wait)
   for (const o of ['ana', ...Object.keys(PEOPLE), ...FOLK.map(f => f.id)]) {
     if (o === me || (o === 'ana' && writtenTalkOn()) || wmScene(o) !== sc || (ag.task && JSON.stringify(ag.task.a).includes(`"${o}"`))) continue;   // (not whoever the errand is with: that talk is the errand)
-    const ob = wmBody(o); if (!ob || ob.lie || dist(b.x, b.y, ob.x, ob.y) > 64 || pc[o] > TT || inChat(o)) continue;
+    const ob = wmBody(o); if (!ob || ob.lie || dist(b.x, b.y, ob.x, ob.y) > 64 || pc[o] > TT || inChat(o) || ocupada(o)) continue;
     pc[o] = TT + 180;
     const anaFree = o === 'ana' && !(wmDriven('ana') && !AGENTS.ana.paused), G = focoOf(o), r = relGetW(me, o), oag = AGENTS[o];
     let p = (F.social * .6 + G.social * .4) * (F.atrae.includes(o) || F.atrae.includes('gente') ? 1.5 : 1) * (1 - urg) * (r >= 4 ? 1.3 : r <= 0 ? .3 : 1);
@@ -7541,6 +7546,12 @@ function chatLines(a, b, anaFree){
 }
 
 // --- moving a body to a place key: Ana by her own walking (A*, by the roads), the others by theirs
+// beside someone in a room, where one can stand (not in the table they sit at)
+function libreJunto(room, x, y){
+  const B = ROOMS[room]?.blocked; if (!B || !B(x, y)) return [x, y];
+  for (const r of [30, 46, 62]) for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4 + Math.PI / 2, q = [x + Math.cos(a) * r, y + Math.sin(a) * r]; if (!B(q[0], q[1])) return q; }
+  return [x, y];
+}
 function wmTarget(who, key){
   // where to walk now (and in which scene) to reach 'key'
   if (key === 'pieza') return { room: 'ga', door: DOOR.gg };
@@ -7548,7 +7559,7 @@ function wmTarget(who, key){
   const q = keyPoint(key); if (!q) return null;
   const tb = key.startsWith('p:') ? wmBody(key.slice(2)) : null, tscene = key.startsWith('p:') ? wmScene(key.slice(2)) : 'out';
   if (tscene === 'camino') return { road: wmBody(key.slice(2)).roadS };
-  if (tscene && tscene !== 'out') return tscene === 'gg' ? { room: 'gg', door: DOOR.gg, at: tb ? [tb.x, tb.y] : null } : HOUSES[tscene] ? { room: tscene, door: DOOR[tscene], at: tb ? [tb.x, tb.y + (tb.bed ? 34 : 0)] : null } : null;   // (inside: up to them; to someone in bed, to the bedside)
+  if (tscene && tscene !== 'out') return tscene === 'gg' ? { room: 'gg', door: DOOR.gg, at: tb ? libreJunto('gg', tb.x, tb.y) : null } : HOUSES[tscene] ? { room: tscene, door: DOOR[tscene], at: tb ? libreJunto(tscene, tb.x, tb.y + (tb.bed ? 34 : 0)) : null } : null;   // (inside: up to them; to someone in bed, to the bedside)
   return { out: q };
 }
 function wmMove(who, key, dt){
@@ -7834,6 +7845,7 @@ function accTick(ag, a, st, r){
 }
 function accEnd(ag){
   const A = ag.acting, b = wmBody(ag.who); ag.acting = null; if (!A || !b) return;
+  for (const k of [ag.who, A.k]) if (k && k !== 'ana') amb.mute[k] = Math.max(amb.mute[k] || 0, TT + 90);   // (just done with something together: no loose line on top of it)
   if (ACCION_VISTA[A.v].mov) { [b.x, b.y] = A.cayo || A.base; b.moving = false; delete b.sortY; }
   b.sit = A.cayo ? true : !!A.sit && !['merendar', 'visitar', 'tomar_te'].includes(A.v) ? A.sit : false;   // (after the fall, on the ground)
   if (A.kb) { const o = wmBody(A.k); if (o) o.sit = A.kb[2]; }
@@ -7979,7 +7991,8 @@ function wmExec(ag, a, st, dt){ const r = wmExec0(ag, a, st, dt); accTick(ag, a,
 function wmExec0(ag, a, st, dt){
   const me = ag.who, inv = wmInv(me), b = wmBody(me);
   const bubble = (k, text) => { const q = k === 'ana' ? 'ana' : PEOPLE[k] ? k : 'f:' + k; bubbles = [{ q, text, t: 0, dur: lineDur(text) }]; };
-  const reach = k => { const kk = personKey(k); if (!kk) { st.why = wmName(k) + ' no está'; return 'fail'; } return wmMove(me, 'p:' + k, dt); };   // (up to them, wherever they are: indoors too, to the bedside)
+  const reach = k => { if (st.said || st.hg) return 'ok';   // (once begun with them, not after them: sitting down to read, the visit, the deal)
+    const kk = personKey(k); if (!kk) { st.why = wmName(k) + ' no está'; return 'fail'; } return wmMove(me, 'p:' + k, dt); };   // (up to them, wherever they are: indoors too, to the bedside)
   const wait = s => { if (st.P === undefined) st.P = accPasos(a, me); if (st.P) return coreoTick(ag, a, st, dt, st.P); st.w = (st.w || 0) + dt; return st.w >= Math.max(s, ACCION_VISTA[a.v]?.dur || 0); };   // (long enough to be seen; or, if it has its steps, done step by step where it is really done)
   // a deal takes a moment: one asks, the other answers (weighs it, looks the cow over), then it is done
   const haggle = (ask, answer) => {
@@ -8188,9 +8201,11 @@ function wmExec0(ag, a, st, dt){
       }
       if (!st.asked) {
         const r = a.llamar ? 'ok' : reach(a.k); if (r !== 'ok') return r;
+        if (hablando()) return 'run';   // (the other is still answering the call: one asks after)
         if (!socialRule(realR, 'pedir', me, a.k)) { bubble(a.k, 'No, ahora no.'); st.why = wmName(a.k) + ' no quiso'; realR.setFact('pedido:' + a.favor.f + ':' + a.k); return 'fail'; }
         if (a.k !== 'ana' && activeGoals(AGENTS[a.k]).length >= MAX_GOALS) { bubble(a.k, 'Ahora no puedo, tengo demasiado que hacer.'); st.why = wmName(a.k) + ' está ocupado'; realR.setFact('pedido:' + a.favor.f + ':' + a.k); return 'fail'; }
-        st.asked = 1; realR.setFact('pedido:' + a.favor.f + ':' + a.k); if (a.llamar && WM_APPROACH && WM_APPROACH.who === me) { WM_APPROACH = null; wmStop('ana'); }
+        st.asked = 1; realR.setFact('pedido:' + a.favor.f + ':' + a.k); for (const k of [me, a.k]) amb.mute[k] = Math.max(amb.mute[k] || 0, TT + 30);   // (asking and answering: no loose lines in between)
+ if (a.llamar && WM_APPROACH && WM_APPROACH.who === me) { WM_APPROACH = null; wmStop('ana'); }
         const F = FAVORS[a.favor.f], f = a.favor;
         bubble(me, F.say ? F.say(f) : { pasear: '¿Vamos a pasear juntas?', venir: '¿Vienes a tomar el té conmigo?' }[f.f] || '¿Me harías un favor?');
         logEv(`${wmName(me)} le pidió a ${wmName(a.k)}: ${f.f.replace('_', ' ')}.`, []);
@@ -8201,7 +8216,7 @@ function wmExec0(ag, a, st, dt){
         else { const h = agentStart(a.k, sub, { label: sub.text + ' (se lo pidió ' + wmName(me) + ')', parent: me, chain: [...agentChain(ag), me] }); if (!h) { st.why = wmName(a.k) + ' tiene demasiado que hacer'; return 'fail'; } const gg = ag.goalNow; if (gg) gg.pending = [...(gg.pending || []).filter(p => p.h.st === 'run'), { h, f, to: a.k }]; }
         st.sub = sub; st.t1 = TT;
       }
-      if (st.asked === 1) { if (TT - st.t1 < 2.6) return 'run'; st.asked = 2; bubble(a.k, SI_A[a.favor.f] || 'Está bien.'); }   // (and the answer, yes)
+      if (st.asked === 1) { if (TT - st.t1 < 2.6 || hablando()) return 'run'; st.asked = 2; bubble(a.k, SI_A[a.favor.f] || 'Está bien.'); }   // (and the answer, yes)
       return 'ok';   // (asked: on with the rest of the plan; what was promised is waited for only where it is needed)
     }
     case 'interceder': {
@@ -8390,7 +8405,7 @@ function playerAsk(who, f){
   if (activeGoals(AGENTS[who]).length >= MAX_GOALS) return say(who, 'Ahora no puedo, tengo demasiado que hacer. Más tarde, ¿sí?', [['Bueno', close]]), null;
   const goal = F.goal('ana', f, s0), r = wmPlan(who, goal, [], s0, ['ana']);
   if (!r.plan) return say(who, pick(['Bueno, pues... no sé cómo podría, Ana.', 'Me gustaría, pero no veo cómo.']), [['Bueno', close]]), null;
-  logEv(`Ana le pidió a ${wmName(who)}: ${goal.text}.`, [who]);
+  logEv(`Ana le pidió a ${wmName(who)}: ${goal.text}.`, [who]); relatoDicho('ana', F.say ? F.say(f) : '¿Me harías un favor?');
   say(who, pick(['¡Claro que sí! Ya vuelvo.', 'Bueno, pues... ya lo creo, Ana. Deja eso en mis manos.', 'Por supuesto, querida.']), [['¡Gracias!', close]]);
   return agentStart(who, goal, { label: goal.text + ' (se lo pidió Ana)', parent: 'ana', chain: ['ana'] });
 }
@@ -8666,7 +8681,7 @@ window.__avonlea = { relatoEmpezar, relato: () => RELATO.lineas, reglas: () => R
 var RELATO = { on: /[?&]relato/.test(location.search), quienes: null, lineas: [], antes: {}, ultimo: -1, globo: new Set(), mal: {}, visto: {}, encima: {} };
 const SITIO_NOMBRE = { estufa: 'la estufa', mesa: 'la mesa', puerta: 'la puerta', escalera: 'la escalera', aparador: 'el aparador', fregadero: 'el fregadero', silla: 'la silla de la ventana', ventana: 'la ventana', cama: 'la cama', escritorio: 'el escritorio', lavatorio: 'el lavatorio y su espejo', chimenea: 'la chimenea', sofa: 'el sofá', te: 'la mesita del té', escenario: 'el escenario', banco: 'los bancos', sillon: 'el sillón del pastor', estante: 'el estante de libros' };
 // the things of the actions, in words
-const COSA_NOMBRE = { picnic: 'el mantel del picnic', trineo: 'el trineo', patines: 'los patines', bote: 'el bote', tinte: 'el frasco de tinte', tijeras: 'las tijeras', libro: 'un libro', papel: 'un papel', cuaderno: 'el cuaderno', hacha: 'el hacha', horquilla: 'la horquilla', semillas: 'las semillas', regadera: 'la regadera', grano: 'el grano', balde: 'el balde', entregar: 'lo que entrega', abrazo: 'un abrazo', cuerda: 'la cuerda', corte: 'las tijeras', banqueta: 'la banqueta', te: 'el té', rezar: 'las manos juntas', flores: 'flores', sombrero: 'el sombrero con flores', jarabe: 'el jarabe', quehacer: 'el quehacer', bol: 'el bol', mantequera: 'la mantequera', costura: 'la costura', canastito: 'el canastito', manos: 'las manos', platos: 'una pila de platos limpios', platos_sucios: 'los platos sucios', aparador: 'el aparador abierto', poner: 'los platos que va dejando en la mesa', recoger: 'los platos que va recogiendo', lavar: 'la palangana con agua', escoba: 'la escoba', recitar: 'el gesto de recitar', carta: 'la carta', libro_abierto: 'el libro abierto' };
+const COSA_NOMBRE = { picnic: 'el mantel del picnic', trineo: 'el trineo', patines: 'los patines', bote: 'el bote', tinte: 'el frasco de tinte', tijeras: 'las tijeras', libro: 'un libro', papel: 'un papel', cuaderno: 'el cuaderno', hacha: 'el hacha', horquilla: 'la horquilla', semillas: 'las semillas', regadera: 'la regadera', grano: 'el grano', balde: 'el balde', entregar: 'lo que entrega', abrazo: 'un abrazo', cuerda: 'la cuerda', corte: 'Marilla detrás, con las tijeras', banqueta: 'la banqueta', te: 'el té', rezar: 'las manos juntas', flores: 'flores', sombrero: 'el sombrero con flores', jarabe: 'el jarabe', quehacer: 'el quehacer', bol: 'el bol', mantequera: 'la mantequera', costura: 'la costura', canastito: 'el canastito', manos: 'las manos', platos: 'una pila de platos limpios', platos_sucios: 'los platos sucios', aparador: 'el aparador abierto', poner: 'los platos que va dejando en la mesa', recoger: 'los platos que va recogiendo', lavar: 'la palangana con agua', escoba: 'la escoba', recitar: 'el gesto de recitar', carta: 'la carta', libro_abierto: 'el libro abierto' };
 // a name as the subject of a sentence: «la Sra. Lynde», «el Sr. Harrison»
 const relN = k => { const n = wmName(k); return /^Sr\. /.test(n) ? 'el ' + n : /^(Sra|Srta)\. /.test(n) ? 'la ' + n : n; };
 const cosa = k => k ? (COSA_NOMBRE[k] || k.replace(/_/g, ' ')) : '';
@@ -8683,7 +8698,9 @@ function relatoSitio(k){
     return { lugar: placeName(sc), junto };
   }
   let nombre = '', mejor = 1e9; for (const [n, x, y] of relatoLugares()) { const d = Math.hypot(b.x - x, b.y - y); if (d < mejor) { mejor = d; nombre = n; } }
-  return { lugar: 'Avonlea', junto: !nombre ? '' : mejor < 260 ? nombre : 'no lejos ' + (nombre.startsWith('el ') ? 'del ' + nombre.slice(3) : 'de ' + nombre) };
+  { const ya = RELATO.antes[k]?.junto, P = ya && relatoLugares().find(q => q[0] === ya), d = P && Math.hypot(b.x - P[1], b.y - P[2]); if (d != null && d < 200 && d < mejor + 120) { nombre = ya; mejor = d; } }   // (still by the place she was by: not «by the orchard, by the house» as she goes between them)
+  const lim = RELATO.antes[k]?.junto === nombre ? 340 : 260;   // (a margin: one going round the lighthouse is not «at it, near it, at it…» each minute)
+  return { lugar: 'Avonlea', junto: !nombre ? '' : mejor < lim ? nombre : 'no lejos ' + (nombre.startsWith('el ') ? 'del ' + nombre.slice(3) : 'de ' + nombre) };
 }
 // the places with a name, outdoors: those of the map and those of the errands (Peg's wood, the hill, the hayfield, the pasture…)
 let RELATO_LUGARES = null;
@@ -8701,7 +8718,7 @@ const RELATO_REGLAS = [
 const relatoCuerpos = () => [['ana', ana, game.scene], ...Object.entries(PEOPLE).map(([k, p]) => [k, p, p.where]), ...FOLK.filter(f => f.where !== 'in').map(f => [f.id, f, f.where])];
 // the rules broken now, by id (and what was seen, when the rule says it: RELATO.visto)
 const relatoMal = (k, b, A) => { const sc = wmScene(k), ids = []; for (const r of RELATO_REGLAS) { let v = false; try { v = r.mal(k, b, sc, A); } catch (e) {} if (v) { ids.push(r.id); RELATO.visto[k + '|' + r.id] = typeof v === 'string' ? v : ''; } } return ids; };
-const relatoPostura = (b, A) => b.bed ? 'acostada, en cama' : b.lie ? 'acostada' : b.sit ? 'sentada' : A?.v === 'rezar' && !b.moving ? 'de rodillas' : b.crouch ? 'agachada' : b.moving ? 'caminando' : 'de pie';
+const relatoPostura = (b, A) => b.bed ? 'acostada, en cama' : b.lie ? 'acostada' : b.sit ? 'sentada' : A?.v === 'rezar' && b.crouch ? 'de rodillas' : b.crouch ? 'agachada' : b.moving ? 'caminando' : 'de pie';
 function relatoEstado(k){
   const b = wmBody(k); if (!b) return null;
   const ag = AGENTS[k] || (k === 'ana' ? game.playAct : null), A = ag?.acting, s = relatoSitio(k);
@@ -8716,7 +8733,7 @@ const relatoFrase = (e, c, a) => {
   const n = relN(e.quien), p = [], sitio = c.has('lugar') || c.has('junto');
   if (sitio) {
     const entra = c.has('lugar') && e.lugar !== 'Avonlea' && (!a || a.lugar !== e.lugar), sale = a && c.has('lugar') && e.lugar === 'Avonlea' && a.lugar !== 'Avonlea';
-    p.push(!a ? 'está en ' + e.lugar + conJunto(e.junto) : entra ? 'entra a ' + e.lugar + conJunto(e.junto) : sale ? 'sale' + conJunto(e.junto) : (e.postura === 'caminando' ? 'va por ' : 'está en ') + e.lugar + conJunto(e.junto));
+    p.push(!a ? 'está en ' + e.lugar + conJunto(e.junto) : entra ? ('entra a ' + e.lugar).replace(/\ba el\b/, 'al') + conJunto(e.junto) : sale ? 'sale' + conJunto(e.junto) : (e.postura === 'caminando' ? 'va por ' : 'está en ') + e.lugar + conJunto(e.junto));
   }
   if (c.has('postura')) { if (QUIETA[e.postura]) p.push(QUIETA[e.postura]); else if (a && QUIETA[a.postura]) p.push('se levanta'); }
   if (c.has('accion')) { if (e.accion) p.push('empieza a ' + e._txt); else if (a?.accion) p.push('termina de ' + a._txt); }
@@ -8727,6 +8744,8 @@ const relatoFrase = (e, c, a) => {
   if (c.has('guia')) p.push(e.guia ? 'lleva de la cuerda a ' + e.guia : 'suelta la cuerda');
   return p.length ? n + ' ' + p.join('; ') + '.' : null;
 };
+// what is said in the talk box (the player's way of talking): into the account as well
+function relatoDicho(k, text){ if (RELATO.on && text) relatoLinea(relN(k) + ' dice: «' + text + '»', { quien: k, dice: text }); }
 function relatoLinea(texto, estado){ texto = texto.replace(/^(Al empezar, |⚠ |· )?([a-zá-ú])/, (m, p, c) => (p || '') + (p ? c : c.toUpperCase())); const L = { hora: relatoHora(), t: dayT, texto, estado }; RELATO.lineas.push(L); if (/[?&]relato/.test(location.search)) console.log('[relato] ' + L.hora + ' ' + texto); }
 // to start: whom to watch (null: Ana and whoever is in her scene)
 function relatoEmpezar(quienes){ RELATO.on = true; RELATO.quienes = quienes; RELATO.lineas = []; RELATO.antes = {}; RELATO.ultimo = -1; RELATO.globo = new Set(); RELATO.mal = {}; RELATO.encima = {}; }
@@ -8738,12 +8757,17 @@ function relatoTick(){
     const a = RELATO.antes[k], c = new Set(a ? Object.keys(e).filter(f => f !== 'quien' && f[0] !== '_' && e[f] !== a[f]) : ['lugar'].concat(['accion', 'lleva', 'objeto', 'tiene', 'pelo', 'guia'].filter(f => e[f]), QUIETA[e.postura] ? ['postura'] : []));
     let guarda = e;
     // walking past things is not news, nor going to and fro while sledding or skating: where she stops is (so it is kept as it was)
-    if (a && !c.has('lugar') && (e.postura === 'caminando' || e.accion && e.accion === a.accion && ACCION_VISTA[e.accion.split(' ')[0]]?.mov)) { c.delete('junto'); guarda = { ...e, junto: a.junto }; }
+    const vaiven = a && e.accion && e.accion === a.accion && ACCION_VISTA[e.accion.split(' ')[0]]?.mov;   // (sledding, skating, rowing: down and up again, round and round)
+    if (a && !c.has('lugar') && !c.has('accion') && (e.postura === 'caminando' || vaiven)) { c.delete('junto'); guarda = { ...e, junto: a.junto }; }
+    if (vaiven) { c.delete('postura'); guarda = { ...guarda, postura: a.postura }; }
     if (c.size) { const f = relatoFrase(e, c, a); if (f) relatoLinea((a ? '' : 'Al empezar, ') + f, e); RELATO.antes[k] = guarda; }
     const m0 = RELATO.mal[k] || '', nuevas = e._mal ? e._mal.split(',').filter(r => !m0.split(',').includes(r)) : []; RELATO.mal[k] = e._mal;   // (a rule just broken: said at once)
     if (nuevas.length) relatoLinea('⚠ ' + relN(k) + ': no se cumple que ' + nuevas.map(r => RELATO_REGLAS.find(x => x.id === r).texto + (RELATO.visto[k + '|' + r] ? ' (' + RELATO.visto[k + '|' + r] + ')' : '')).join(', ni que ') + '.', { ...e, regla: true });
     for (const b of bubbles) if ((b.q === k || b.q === 'f:' + k) && !RELATO.globo.has(b)) { RELATO.globo.add(b); relatoLinea(relN(k) + ' dice: ' + (/^«.*»$/.test(b.text) && b.text.indexOf('»') === b.text.length - 1 ? b.text : '«' + b.text + '»'), { ...e, dice: b.text }); }
   }
+  // and what is said beside them by someone not watched (who asks, who answers): else one hears only half of it
+  for (const b of bubbles) { if (RELATO.globo.has(b)) continue; const id = b.q.replace(/^f:/, ''), o = (PEOPLE[id] || FOLKBY[id]) && wmBody(id); if (!o || ks.includes(id)) continue;
+    if (ks.some(k => { const w = wmBody(k); return w && wmScene(k) === wmScene(id) && Math.hypot(w.x - o.x, w.y - o.y) < 180; })) { RELATO.globo.add(b); relatoLinea(relN(id) + ' dice: ' + (/^«.*»$/.test(b.text) ? b.text : '«' + b.text + '»'), { quien: id, dice: b.text, cerca: true }); } }
   const cinco = Math.floor(dayT * 24 * 12);   // (every 5 minutes of the game, how each one is)
   if (cinco !== RELATO.ultimo) { RELATO.ultimo = cinco; for (const k of ks) { const e = relatoEstado(k); if (e) relatoLinea('· ' + relN(k) + ': ' + [e.lugar + conJunto(e.junto), e.postura, e._txt, e.lleva && 'lleva ' + e.lleva, e.objeto && 'con ' + e.objeto].filter(Boolean).join(' · '), { ...e, resumen: true }); } }
 }

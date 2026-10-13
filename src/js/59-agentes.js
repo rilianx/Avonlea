@@ -94,14 +94,12 @@ const teSillas = sc => sc === 'cp' ? CP_SILLAS : sc === 'gg' ? [SEATS.ana, SEATS
 function teSentar(ag, g, dt){
   const who = ag.who, b = wmBody(who), sc = wmScene(who), key = g.goal.places[0], room = key === 'cocina' ? 'gg' : key.startsWith('h:') ? key.slice(2) : null, s = room === sc && teSillas(sc)?.[g.goal.te];
   if (!b || !s) return false;
-  if (ag.acting?.v === 'tomar_te') {
-    b.x = s[0]; b.y = s[1]; b.dir = s[2]; b.sit = true; b.moving = false;
-    if (g.goal.con && AGENTS[g.goal.con]?.acting?.v !== 'tomar_te' && hourNow() < g.goal.teHasta) g.stayUntil = Math.max(g.stayUntil, hourNow() + .5);   // (the visit waits for the tea: the half hour counts from when the other sits down to it)
-    return true;
-  }
-  if (dist(b.x, b.y, s[0], s[1]) > 26 && !wmWalk(who, s[0], s[1], sc, dt)) return true;
-  wmStop(who); ag.acting = { v: 'tomar_te', k: g.goal.te === 0 ? g.goal.people[1] : g.goal.con, t0: TT, dura: (g.stayUntil - hourNow()) * 60 * MIN_S, base: [s[0], s[1]], sit: false, obj: 'te' };
-  b.x = s[0]; b.y = s[1]; b.dir = s[2]; b.sit = true; b.moving = false; return true;
+  if (!g.teSentada) { if (dist(b.x, b.y, s[0], s[1]) > 26 && !wmWalk(who, s[0], s[1], sc, dt)) return true; wmStop(who); g.teSentada = true; }
+  b.x = s[0]; b.y = s[1]; b.dir = s[2]; b.sit = true; b.moving = false;
+  // the visit sits and waits for the one who receives (who may still be making the tea): the tea, and the half hour, begin when both are at the table
+  if (g.goal.con && AGENTS[g.goal.con]?.acting?.v !== 'tomar_te') { if (hourNow() < g.goal.teHasta) g.stayUntil = Math.max(g.stayUntil, hourNow() + .5); return true; }
+  if (ag.acting?.v !== 'tomar_te') ag.acting = { v: 'tomar_te', k: g.goal.te === 0 ? g.goal.people[1] : g.goal.con, t0: TT, dura: (g.stayUntil - hourNow()) * 60 * MIN_S, base: [s[0], s[1]], sit: false, obj: 'te' };
+  return true;
 }
 function agentIdle(ag){ ag.st = 'idle'; ag.task = null; ag.paused = false; ag.seenInput = null; wmRelease(ag.who); }
 function agentEnd(ag, st, why){ for (const g of activeGoals(ag)) goalEnd(ag, g, st, why); agentIdle(ag); }

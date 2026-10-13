@@ -71,7 +71,7 @@ function playerAsk(who, f){
   if (activeGoals(AGENTS[who]).length >= MAX_GOALS) return say(who, 'Ahora no puedo, tengo demasiado que hacer. Más tarde, ¿sí?', [['Bueno', close]]), null;
   const goal = F.goal('ana', f, s0), r = wmPlan(who, goal, [], s0, ['ana']);
   if (!r.plan) return say(who, pick(['Bueno, pues... no sé cómo podría, Ana.', 'Me gustaría, pero no veo cómo.']), [['Bueno', close]]), null;
-  logEv(`Ana le pidió a ${wmName(who)}: ${goal.text}.`, [who]);
+  logEv(`Ana le pidió a ${wmName(who)}: ${goal.text}.`, [who]); relatoDicho('ana', F.say ? F.say(f) : '¿Me harías un favor?');
   say(who, pick(['¡Claro que sí! Ya vuelvo.', 'Bueno, pues... ya lo creo, Ana. Deja eso en mis manos.', 'Por supuesto, querida.']), [['¡Gracias!', close]]);
   return agentStart(who, goal, { label: goal.text + ' (se lo pidió Ana)', parent: 'ana', chain: ['ana'] });
 }

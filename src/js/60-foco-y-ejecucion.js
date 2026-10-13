@@ -81,9 +81,10 @@ const inChat = k => CHATS.some(c => c.parts.includes(k)) || FOLKBY[k]?.talkT > T
 function chatTry(ag, F, urg){
   const me = ag.who, b = wmBody(me), sc = wmScene(me), pc = ag.pairCool || (ag.pairCool = {});
   if (writtenTalkOn() && (me === 'ana' || AGENTS.ana?.followOf === me)) return false;   // (who travel together talk by the written lines)
+  if (ocupada(me)) return false;   // (in the middle of doing something: the talk can wait)
   for (const o of ['ana', ...Object.keys(PEOPLE), ...FOLK.map(f => f.id)]) {
     if (o === me || (o === 'ana' && writtenTalkOn()) || wmScene(o) !== sc || (ag.task && JSON.stringify(ag.task.a).includes(`"${o}"`))) continue;   // (not whoever the errand is with: that talk is the errand)
-    const ob = wmBody(o); if (!ob || ob.lie || dist(b.x, b.y, ob.x, ob.y) > 64 || pc[o] > TT || inChat(o)) continue;
+    const ob = wmBody(o); if (!ob || ob.lie || dist(b.x, b.y, ob.x, ob.y) > 64 || pc[o] > TT || inChat(o) || ocupada(o)) continue;
     pc[o] = TT + 180;
     const anaFree = o === 'ana' && !(wmDriven('ana') && !AGENTS.ana.paused), G = focoOf(o), r = relGetW(me, o), oag = AGENTS[o];
     let p = (F.social * .6 + G.social * .4) * (F.atrae.includes(o) || F.atrae.includes('gente') ? 1.5 : 1) * (1 - urg) * (r >= 4 ? 1.3 : r <= 0 ? .3 : 1);
@@ -159,6 +160,12 @@ function chatLines(a, b, anaFree){
 }
 
 // --- moving a body to a place key: Ana by her own walking (A*, by the roads), the others by theirs
+// beside someone in a room, where one can stand (not in the table they sit at)
+function libreJunto(room, x, y){
+  const B = ROOMS[room]?.blocked; if (!B || !B(x, y)) return [x, y];
+  for (const r of [30, 46, 62]) for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4 + Math.PI / 2, q = [x + Math.cos(a) * r, y + Math.sin(a) * r]; if (!B(q[0], q[1])) return q; }
+  return [x, y];
+}
 function wmTarget(who, key){
   // where to walk now (and in which scene) to reach 'key'
   if (key === 'pieza') return { room: 'ga', door: DOOR.gg };
@@ -166,7 +173,7 @@ function wmTarget(who, key){
   const q = keyPoint(key); if (!q) return null;
   const tb = key.startsWith('p:') ? wmBody(key.slice(2)) : null, tscene = key.startsWith('p:') ? wmScene(key.slice(2)) : 'out';
   if (tscene === 'camino') return { road: wmBody(key.slice(2)).roadS };
-  if (tscene && tscene !== 'out') return tscene === 'gg' ? { room: 'gg', door: DOOR.gg, at: tb ? [tb.x, tb.y] : null } : HOUSES[tscene] ? { room: tscene, door: DOOR[tscene], at: tb ? [tb.x, tb.y + (tb.bed ? 34 : 0)] : null } : null;   // (inside: up to them; to someone in bed, to the bedside)
+  if (tscene && tscene !== 'out') return tscene === 'gg' ? { room: 'gg', door: DOOR.gg, at: tb ? libreJunto('gg', tb.x, tb.y) : null } : HOUSES[tscene] ? { room: tscene, door: DOOR[tscene], at: tb ? libreJunto(tscene, tb.x, tb.y + (tb.bed ? 34 : 0)) : null } : null;   // (inside: up to them; to someone in bed, to the bedside)
   return { out: q };
 }
 function wmMove(who, key, dt){

@@ -111,6 +111,8 @@ function ambTick(dt){
   if (!s.directed && (game.scene !== s.scene || game.talk || game.cooking || game.map || !$('ai').hidden || far(190))) return ambEnd();
   if (s.directed && (game.scene !== s.scene || far(260))) { s.noMenu = true; if (game.talk?.scene) { game.talk = null; $('talk').hidden = true; } return ambEnd(); }   // (Ana walked off: the talk is over)
   if ((s.wait -= dt) > 0) return;
+  if (!s.directed && ['ana', ...s.parts].some(ocupada)) return ambEnd();   // (one of them got busy: the loose talk is dropped)
+  if (hablando()) return;   // (someone else is saying something: after it)
   if (++s.i >= s.lines.length) return ambEnd();
   const l = s.lines[s.i], sp = personOf(l.q), dur = lineDur(l.t);
   bubbles = [{ q: l.q, text: l.t, t: 0, dur }]; s.wait = dur + .35; sfx.blip();
@@ -170,6 +172,8 @@ function ambNote(parts){
 }
 const writtenTalkOn = () => !!game.playAct || game.scene === 'camino' || cart.riding || !!(AGENTS.ana?.ride && AGENTS.ana.followOf) || talkBusy('viaje') || (CAP1.on && !CAP1.done);
 const ENFERMO_LINES = ['Ay… este resfrío me tiene molido.', 'No me siento nada bien, niña.', 'Cof, cof… Si no fuera por este pecho…'];   // (the sick, from bed)
+// someone is saying something right now (a loose line would cover it)
+const hablando = () => bubbles.some(b => b.t < b.dur);
 // busy: doing something (or someone doing something with her), or staying somewhere for a goal (at tea)
 const ocupada = k => !!(AGENTS[k]?.acting || (k === 'ana' && game.playAct) || Object.values(AGENTS).some(a => a.acting && (a.acting.k === k || a.acting.con === k)) || AGENTS[k] && activeGoals(AGENTS[k]).some(g => g.staying));
 function ambUpdate(dt){
@@ -187,7 +191,7 @@ function ambUpdate(dt){
   }
   if (amb.busy || TT < amb.cool || TT < amb.err) return;
   { const se = storyNow(); if (se && storyHere(se)) return; }   // (here a scene of the story is about to be played: it goes first)
-  if (ocupada('ana')) return;   // (in the middle of something with Ana, or Ana herself busy: no loose lines)
+  if (ocupada('ana') || hablando()) return;   // (in the middle of something with Ana, or Ana herself busy, or someone speaking: no loose lines)
   let best = null, bd = 1e9;
   for (const k of all) { const d = dd(k); if (TT < (amb.mute[k] || 0) || d > 240 || d >= bd || ocupada(k)) continue; best = k; bd = d; }
   if (!best) return;
@@ -243,7 +247,7 @@ function give(who, k){
   say(who, d.gift.reply + CH[who].giftReply, [['De nada', close]]);
 }
 function say(who, text, opts, wait = false){
-  game.talk = { who, wait };
+  game.talk = { who, wait }; relatoDicho(who, text);
   const box = $('talk'), f = Math.min(5, game.fond[who] || 0), heartsTxt = who in game.fond ? '♥'.repeat(f) + '♡'.repeat(5 - f) : '';
   box.innerHTML = `<div class="who">${NAMES[who] || who}<span>${heartsTxt}</span></div><div class="line"></div><div class="opts"></div>`;
   box.querySelector('.line').textContent = text; box.classList.toggle('wait', wait);

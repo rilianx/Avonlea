@@ -127,6 +127,7 @@ function encUpdate(dt){
   if (enc.cur) return encTick(dt);
   if (writtenTalkOn()) return;
   if (amb.cur || amb.ready || game.talk || game.map || game.cooking || !$('ai').hidden || sleeping) return;
+  if (ocupada('ana') || hablando()) return;   // (Ana in the middle of something, or someone speaking: no loose greetings over it)
   const here = FOLK.filter(f => f.where === game.scene), dd = f => dist(ana.x, ana.y, f.x, f.y), free = f => TT >= (enc.mute[f.id] || 0) && !(f.talkT > TT);
   if (enc.ready) {   // (asked for as Ana came near: it starts when she is there)
     const s = enc.ready, f = FOLKBY[s.parts[0]];
@@ -136,7 +137,7 @@ function encUpdate(dt){
   }
   if (enc.busy || TT < enc.cool || TT < enc.err) return;
   // Ana comes near someone
-  let best = null, bd = 1e9; for (const f of here) { const d = dd(f); if (free(f) && d < (aiReady() ? 240 : 90) && d < bd && !f.sit) { best = f; bd = d; } }
+  let best = null, bd = 1e9; for (const f of here) { const d = dd(f); if (free(f) && d < (aiReady() ? 240 : 90) && d < bd && !f.sit && !ocupada(f.id)) { best = f; bd = d; } }
   if (best) {
     if (!aiReady()) return encStart(encFallback(best.id, 'ana'));
     enc.busy = true;
@@ -500,12 +501,12 @@ function wmSearch(me, goal, favors, s0, cap){
   return best.path.length && best.h < goal.h(s0) ? { plan: best.path, cost: best.g, n, ok: false, partial: true, C } : { plan: null, n, ok: false };
 }
 const stepText = a => ({ ir: () => 'ir a ' + (WP_NAME[a.p] || wmPlaceText(a.p)), tomar: () => 'tomar ' + itemTextW(a.x, 1), recoger: () => 'recoger ' + itemTextW(a.x, a.n), cocinar: () => a.x === 'te' ? 'preparar el té' : 'cocinar ' + itemTextW(a.x, 1),
-  dar: () => `darle ${itemTextW(a.x, a.n)} a ${wmName(a.k)}`, vender: () => `vender ${a.x === 'vaca' ? ANIMALS[a.cow].name : itemTextW(a.x, 1)} a ${wmName(a.k)}`, comprar: () => `llevar ${itemTextW(a.x, 1)} anotado en la libreta`, cambiar: () => `cambiar ${itemTextW(a.g, a.n)} por ${itemTextW(a.x, 1)}`,
+  dar: () => `darle ${itemTextW(a.x, a.n)} a ${wmName(a.k)}`, vender: () => `vender ${a.x === 'vaca' ? ANIMALS[a.cow].name : itemTextW(a.x, 1)} a ${wmName(a.k)}`, comprar: () => `comprar ${itemTextW(a.x, 1)} a la libreta de los Cuthbert`, cambiar: () => `cambiar ${itemTextW(a.g, a.n)} por ${itemTextW(a.x, 1)}`,
   conversar: () => 'conversar con ' + wmName(a.k), interceder: () => `hablar con ${wmName(a.k)} por ${wmName(a.por)}`, disculparse: () => 'disculparse con ' + wmName(a.k), pedir: () => `pedirle a ${wmName(a.k)} ` + ({ traer: `que le traiga ${itemTextW(a.favor.item, a.favor.n)}`, encerrar_vaca: `que lleve a ${ANIMALS[a.favor.cow]?.name} a ${WP_NAME[a.favor.pen]}`, interceder: `que hable con ${wmName(a.favor.target)} por él`, vender_vaca: 'que le venda la vaca', pasear: 'que den un paseo juntas', venir: 'que venga a tomar el té más tarde', prestar: `que le preste ${ITEM_DEFS[a.favor.item]?.gift?.art || a.favor.item}`, curar: `que venga a ver a ${wmName(a.favor.k)}`, quehaceres: 'que haga los quehaceres', llevar: `que la lleve en la calesa a ${WP_NAME[a.favor.lugar]}` }[a.favor.f] || a.favor.f), guiar: () => 'guiar a ' + ANIMALS[a.cow].name,
   quehacer: () => QUEHACER_TXT[a.x], ordeñar: () => 'ordeñar a ' + ANIMALS[a.cow].name, alimentar: () => 'dar de comer a los animales en ' + (WP_NAME[a.p] || 'el corral'), visitar: () => 'visitar a ' + wmName(a.k), devolver: () => `devolverle ${ITEM_DEFS[a.x]?.gift?.art || a.x} a ${wmName(a.k)}`,
   jurar: () => 'jurar ser amigas del alma con ' + wmName(a.k), perdonar: () => 'perdonar a ' + wmName(a.k), cuidar: () => 'cuidar a ' + wmName(a.k), estudiar: () => 'estudiar la lección', recitar: () => 'recitar la lección',
   rezar: () => 'decir sus oraciones', escribir_carta: () => 'escribir una carta', enviar_carta: () => 'mandar la carta por correo', leer: () => 'leer un libro', escribir_cuento: () => 'escribir un cuento', leer_cuento: () => 'leerle su cuento a ' + wmName(a.k),
   ensayar: () => 'ensayar la recitación', actuar: () => 'recitar en el concierto', decorar_sala: () => 'decorar el salón con flores', felicitar: () => 'felicitar a ' + wmName(a.k), consolar: () => 'consolar a ' + wmName(a.k), hacer_heno: () => 'hacer heno', partir_lena: () => 'partir leña',
   tomar_te: () => 'tomar el té con ' + wmName(a.k), sembrar: () => 'sembrar la huerta', regar: () => 'regar la huerta', patinar: () => 'patinar en el lago', trineo: () => 'tirarse en trineo', pedir_permiso: () => 'pedirle permiso a Marilla', merendar: () => 'merendar en el lago con ' + wmName(a.k), teñir: () => 'teñirse el pelo', cortar_pelo: () => 'cortarse el pelo', trepar: () => 'caminar por el techo de los Barry',
-  batir: () => 'batir ' + (ITEM_NAME[a.x]?.[0] || a.x), preparar: () => 'preparar ' + (ITEM_NAME[a.x]?.[0] || a.x), adornar: () => 'adornar el sombrero con flores', remar: () => 'remar en el lago', nombrar: () => 'ponerle nombre a ' + WP_NAME[a.p], regañar: () => 'regañar a ' + wmName(a.k), subir_calesa: () => `subir a ${wmName(a.k)} a la calesa`, coser: () => 'coser ' + (ITEM_NAME[a.x]?.[0] || a.x), soltar: () => `soltar a ${ANIMALS[a.cow].name} en ${WP_NAME[a.p]}` }[a.v] || (() => a.v))().replace(/\b(a|con|de) (Sra?|Srta)\. /g, (m, p, t) => p + (t === 'Sr' ? ' el ' : ' la ') + t + '. ').replace(/\ba el\b/g, 'al').replace(/\bde el\b/g, 'del');   // (to Mrs. Lynde: «a la Sra. Lynde», «al Sr. Harrison»)
+  batir: () => a.x === 'mantequilla' ? 'batir la mantequilla' : 'batir ' + itemTextW(a.x, 1), preparar: () => 'preparar ' + itemTextW(a.x, 1), adornar: () => 'adornar el sombrero con flores', remar: () => 'remar en el lago', nombrar: () => 'ponerle nombre a ' + WP_NAME[a.p], regañar: () => 'regañar a ' + wmName(a.k), subir_calesa: () => `subir a ${wmName(a.k)} a la calesa`, coser: () => 'coser ' + itemTextW(a.x, 1), soltar: () => `soltar a ${ANIMALS[a.cow].name} en ${WP_NAME[a.p]}` }[a.v] || (() => a.v))().replace(/\b(a|con|de) (Sra?|Srta)\. /g, (m, p, t) => p + (t === 'Sr' ? ' el ' : ' la ') + t + '. ').replace(/\ba el\b/g, 'al').replace(/\bde el\b/g, 'del');   // (to Mrs. Lynde: «a la Sra. Lynde», «al Sr. Harrison»)
 const wmPlaceText = p => p.startsWith('p:') ? 'donde está ' + wmName(p.slice(2)) : p.startsWith('c:') ? 'donde está ' + ANIMALS[p.slice(2)].name : p.startsWith('h:') ? HOUSES[p.slice(2)].place[1] : WP_NAME[p] || p;
