@@ -86,7 +86,8 @@ function stayTick(ag, g, dt){
   if (r === 'ok') { const b = wmBody(ag.who); if (ag.who !== 'ana') b.moving = false; stayChat(g); }
 }
 // meanwhile they talk
-function stayChat(g){ const C = g.goal.chat; if (C && TT > (g.chatT || 0)) { g.chatT = TT + 7; const [k, line] = C[g.chatI = ((g.chatI ?? -1) + 1) % C.length]; if (watched(wmScene(k) || 'out')) sayB(qOf(k), line); } }
+function stayChat(g){ const C = g.goal.chat; if (C && (g.chatI ?? -1) < C.length - 1 && TT > (g.chatT || 0)) { g.chatT = TT + M(3); const [k, line] = C[g.chatI = (g.chatI ?? -1) + 1];   // (each line once, every few minutes: then they just sit together)
+ if (watched(wmScene(k) || 'out')) sayB(qOf(k), line); } }
 // tea (te_con, and the visit that comes to it): once in the room, each to her chair at the tea table (she who receives, te 0;
 // the visit, te 1), to sit there with her cup while the stay lasts (false: not there yet, or no chairs in this room)
 const teSillas = sc => sc === 'cp' ? CP_SILLAS : sc === 'gg' ? [SEATS.ana, SEATS.lynde] : sc === 'os' ? [[TEA.x + 40, TEA.y + 6, 3], [TEA.x - 40, TEA.y + 6, 1]] : null;

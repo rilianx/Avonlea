@@ -39,7 +39,7 @@ const FOLK_DEFS = {
   allan: { name: 'el reverendo Allan', kind: 'iglesia', home: 'Casa parroquial', room: 'cp', look: { hair: '#5a4a3a', hairD: '#3a2a20', dress: '#26242a', dressD: '#18161a', coat: true, hatDark: true, skin: '#eecaae', h: 1.14 },
     lines: ['Que Dios te bendiga, Ana. ¿Te veremos el domingo en la escuela dominical?', 'Hermoso día para dar gracias, ¿no te parece?'] },
   sraallan: { name: 'la Sra. Allan', kind: 'iglesia', home: 'Casa parroquial', room: 'cp', look: { hair: '#8a5a3a', hairD: '#6a3a20', style: 'bun', dress: '#6a8aa8', dressD: '#4a6a88', brooch: true, skin: '#f2cfb2', h: 1.08 },
-    lines: ['¡Ana, querida! Tienes que venir a tomar el té a la casa parroquial un día de estos.', 'Me encantó tu recitación. Tienes un don, Ana.'], ana: ['¡Oh, Sra. Allan! Usted es mi espíritu afín.'] },
+    lines: ['¡Ana, querida! ¡Qué gusto verte! ¿Cómo van tus estudios?', 'Me encantó tu recitación. Tienes un don, Ana.'], ana: ['¡Oh, Sra. Allan! Usted es mi espíritu afín.'] },
   lawson: { name: 'el Sr. Lawson', kind: 'tendero', home: 'Tienda de Lawson', look: { hair: '#9a9088', hairD: '#6a6058', style: 'old', dress: '#6a5a4a', dressD: '#4a3a2a', apron: '#f4efe4', coat: true, skin: '#eac6a8', h: 1.12 },
     lines: ['¡Buenos días, Ana! Llegaron caramelos de menta y cintas nuevas.', '¿Qué te manda Marilla hoy? ¿Azúcar? ¿Hilo?'] },
   herrero: { name: 'el herrero', kind: 'tienda', home: 'Herrería', look: { hair: '#2a1a14', hairD: '#1a0a04', beard: true, dress: '#5a4a3a', dressD: '#3a2a1a', apron: '#4a3a2a', coat: true, skin: '#d8a888', h: 1.2 },

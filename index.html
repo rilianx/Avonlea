@@ -5628,6 +5628,9 @@ function ambNote(parts){
   return `Ana pasa cerca de ${names} y se detiene un momento. (Charla al pasar: nadie se lo pidió; Ana también habla. Pueden saludarse o comentar algo del momento.)`;
 }
 const writtenTalkOn = () => !!game.playAct || game.scene === 'camino' || cart.riding || !!(AGENTS.ana?.ride && AGENTS.ana.followOf) || talkBusy('viaje') || (CAP1.on && !CAP1.done);
+const ENFERMO_LINES = ['Ay… este resfrío me tiene molido.', 'No me siento nada bien, niña.', 'Cof, cof… Si no fuera por este pecho…'];   // (the sick, from bed)
+// busy: doing something (or someone doing something with her), or staying somewhere for a goal (at tea)
+const ocupada = k => !!(AGENTS[k]?.acting || (k === 'ana' && game.playAct) || Object.values(AGENTS).some(a => a.acting && (a.acting.k === k || a.acting.con === k)) || AGENTS[k] && activeGoals(AGENTS[k]).some(g => g.staying));
 function ambUpdate(dt){
   if (amb.cur) return ambTick(dt);
   if (enc.cur) return;
@@ -5643,11 +5646,12 @@ function ambUpdate(dt){
   }
   if (amb.busy || TT < amb.cool || TT < amb.err) return;
   { const se = storyNow(); if (se && storyHere(se)) return; }   // (here a scene of the story is about to be played: it goes first)
+  if (ocupada('ana')) return;   // (in the middle of something with Ana, or Ana herself busy: no loose lines)
   let best = null, bd = 1e9;
-  for (const k of all) { const d = dd(k); if (TT < (amb.mute[k] || 0) || d > 240 || d >= bd) continue; best = k; bd = d; }
+  for (const k of all) { const d = dd(k); if (TT < (amb.mute[k] || 0) || d > 240 || d >= bd || ocupada(k)) continue; best = k; bd = d; }
   if (!best) return;
   if (!aiReady()) {   // (without the AI: just a word from them, from the written lines)
-    if (bd < 90) { const l = LINES[best], t = l[Math.floor(Math.random() * l.length)]; amb.mute[best] = TT + 110; amb.seen[best] = true; sceneStart({ parts: [best], lines: [{ q: best, t }], out: {}, scene: game.scene, resumen: '' }, false); }
+    if (bd < 90) { const l = (game.wm?.sick || []).includes(best) ? ENFERMO_LINES : LINES[best], t = l[Math.floor(Math.random() * l.length)]; amb.mute[best] = TT + 110; amb.seen[best] = true; sceneStart({ parts: [best], lines: [{ q: best, t }], out: {}, scene: game.scene, resumen: '' }, false); }
     return;
   }
   const parts = chatGroup(best); amb.busy = true;
@@ -6407,7 +6411,7 @@ const FOLK_DEFS = {
   allan: { name: 'el reverendo Allan', kind: 'iglesia', home: 'Casa parroquial', room: 'cp', look: { hair: '#5a4a3a', hairD: '#3a2a20', dress: '#26242a', dressD: '#18161a', coat: true, hatDark: true, skin: '#eecaae', h: 1.14 },
     lines: ['Que Dios te bendiga, Ana. ¿Te veremos el domingo en la escuela dominical?', 'Hermoso día para dar gracias, ¿no te parece?'] },
   sraallan: { name: 'la Sra. Allan', kind: 'iglesia', home: 'Casa parroquial', room: 'cp', look: { hair: '#8a5a3a', hairD: '#6a3a20', style: 'bun', dress: '#6a8aa8', dressD: '#4a6a88', brooch: true, skin: '#f2cfb2', h: 1.08 },
-    lines: ['¡Ana, querida! Tienes que venir a tomar el té a la casa parroquial un día de estos.', 'Me encantó tu recitación. Tienes un don, Ana.'], ana: ['¡Oh, Sra. Allan! Usted es mi espíritu afín.'] },
+    lines: ['¡Ana, querida! ¡Qué gusto verte! ¿Cómo van tus estudios?', 'Me encantó tu recitación. Tienes un don, Ana.'], ana: ['¡Oh, Sra. Allan! Usted es mi espíritu afín.'] },
   lawson: { name: 'el Sr. Lawson', kind: 'tendero', home: 'Tienda de Lawson', look: { hair: '#9a9088', hairD: '#6a6058', style: 'old', dress: '#6a5a4a', dressD: '#4a3a2a', apron: '#f4efe4', coat: true, skin: '#eac6a8', h: 1.12 },
     lines: ['¡Buenos días, Ana! Llegaron caramelos de menta y cintas nuevas.', '¿Qué te manda Marilla hoy? ¿Azúcar? ¿Hilo?'] },
   herrero: { name: 'el herrero', kind: 'tienda', home: 'Herrería', look: { hair: '#2a1a14', hairD: '#1a0a04', beard: true, dress: '#5a4a3a', dressD: '#3a2a1a', apron: '#4a3a2a', coat: true, skin: '#d8a888', h: 1.2 },
@@ -7267,7 +7271,8 @@ function stayTick(ag, g, dt){
   if (r === 'ok') { const b = wmBody(ag.who); if (ag.who !== 'ana') b.moving = false; stayChat(g); }
 }
 // meanwhile they talk
-function stayChat(g){ const C = g.goal.chat; if (C && TT > (g.chatT || 0)) { g.chatT = TT + 7; const [k, line] = C[g.chatI = ((g.chatI ?? -1) + 1) % C.length]; if (watched(wmScene(k) || 'out')) sayB(qOf(k), line); } }
+function stayChat(g){ const C = g.goal.chat; if (C && (g.chatI ?? -1) < C.length - 1 && TT > (g.chatT || 0)) { g.chatT = TT + M(3); const [k, line] = C[g.chatI = (g.chatI ?? -1) + 1];   // (each line once, every few minutes: then they just sit together)
+ if (watched(wmScene(k) || 'out')) sayB(qOf(k), line); } }
 // tea (te_con, and the visit that comes to it): once in the room, each to her chair at the tea table (she who receives, te 0;
 // the visit, te 1), to sit there with her cup while the stay lasts (false: not there yet, or no chairs in this room)
 const teSillas = sc => sc === 'cp' ? CP_SILLAS : sc === 'gg' ? [SEATS.ana, SEATS.lynde] : sc === 'os' ? [[TEA.x + 40, TEA.y + 6, 3], [TEA.x - 40, TEA.y + 6, 1]] : null;
@@ -7638,14 +7643,14 @@ const ACCION_VISTA = {
   'teñir': { dur: M(15), obj: 'tinte', mira: 0 },
   cortar_pelo: { dur: M(15), obj: 'corte' },
   leer: { dur: M(30), obj: 'libro', sentar: true }, estudiar: { dur: M(40), obj: 'libro' }, ensayar: { dur: M(20), obj: 'libro' },
-  escribir_carta: { dur: M(25), obj: 'papel' }, escribir_cuento: { dur: M(40), obj: 'papel' }, leer_cuento: { obj: 'cuaderno' },
+  escribir_carta: { dur: M(25), obj: 'papel' }, escribir_cuento: { dur: M(40), obj: 'papel' },
   partir_lena: { dur: M(25), obj: 'hacha' }, hacer_heno: { dur: M(45), obj: 'horquilla' }, sembrar: { dur: M(15), obj: 'semillas' }, regar: { dur: M(10), obj: 'regadera' },
   alimentar: { dur: M(8), obj: 'grano' }, 'ordeñar': { obj: 'balde', sentar: true }, rezar: { dur: M(5), obj: 'rezar', sentar: true },
-  decorar_sala: { dur: M(24), obj: 'flores' }, adornar: { dur: M(10), obj: 'sombrero' }, cuidar: { obj: 'jarabe' },
+  decorar_sala: { dur: M(24), obj: 'flores' }, adornar: { dur: M(10), obj: 'sombrero' }, cuidar: { obj: 'jarabe', dur: M(10) },
   quehacer: { dur: M(15), obj: 'quehacer' }, cocinar: { dur: M(30), obj: 'bol' }, preparar: { dur: M(15), obj: 'bol' }, batir: { dur: M(30), obj: 'mantequera' }, coser: { dur: M(40), obj: 'costura', sentar: true },
   recoger: { dur: M(8), obj: 'canastito' }, jurar: { dur: M(3), obj: 'manos' }, nombrar: { dur: M(2), obj: 'recitar' },
   visitar: { obj: 'te', dur: M(32) }, tomar_te: { obj: 'te', sentar: true }, dar: { obj: 'entregar' }, devolver: { obj: 'entregar' }, tomar: { obj: 'canastito' },
-  leer_cuento: { obj: 'cuaderno', sentar: true, con: true }, felicitar: { obj: 'manos' }, consolar: { obj: 'abrazo' },
+  leer_cuento: { obj: 'cuaderno', sentar: true, con: true, dur: M(15) }, felicitar: { obj: 'manos' }, consolar: { obj: 'abrazo' },
   trepar: { dur: 10, mov: 'techo', arriba: true }, actuar: { dur: M(10), obj: 'recitar' }, recitar: { dur: M(5), obj: 'recitar' },
 };
 const accPhase = (A, per) => ((TT - A.t0) % per) / per;
@@ -7968,6 +7973,8 @@ function jugarTick(dt){
   save();
 }
 // --- doing each verb in the world (when the body has arrived): 'run' while it takes, 'ok', or 'fail'
+// saying yes to what one is asked
+const SI_A = { venir: '¡Sí, me encantaría! Allí estaré.', traer: 'Sí, cómo no. Ahora mismo.', pasear: '¡Vamos!', prestar: 'Toma. Pero cuídalo, ¿eh?', curar: 'Voy enseguida.', quehaceres: 'Sí, Marilla.', llevar: 'Eh... sí, sí. Sube.', encerrar_vaca: 'Ahora mismo la llevo.', interceder: 'Hablaré con ella.' };
 function wmExec(ag, a, st, dt){ const r = wmExec0(ag, a, st, dt); accTick(ag, a, st, r); return r; }
 function wmExec0(ag, a, st, dt){
   const me = ag.who, inv = wmInv(me), b = wmBody(me);
@@ -8103,7 +8110,7 @@ function wmExec0(ag, a, st, dt){
     case 'partir_lena': { if (!st.said) { st.said = 1; bubble(me, '¡Zas! ¡Zas! Leña para la cocina de Marilla.'); } if (!wait(4)) return 'run'; inv.lena = (inv.lena || 0) + 3; float('+3 atados de leña', b.x, b.y - 50); logEv(`${wmName(me)} partió leña.`, []); return 'ok'; }
     case 'sembrar': { if (!wait(4)) return 'run'; realR.setFact('sembrado'); float('🌱 sembrado', b.x, b.y - 50); logEv(`${wmName(me)} sembró la huerta.`, []); return 'ok'; }
     case 'regar': { if (!wait(3)) return 'run'; realR.setFact('regado'); float('💧 regado', b.x, b.y - 50); logEv(`${wmName(me)} regó la huerta.`, []); return 'ok'; }
-    case 'patinar': { if (!st.said) { st.said = 1; bubble(me, '¡Mira, Diana! ¡Vuelo sobre el hielo como una golondrina!'); } if (!wait(5)) return 'run'; realR.setFact('patino:' + me); logEv(`${wmName(me)} patinó en el lago helado.`, []); return 'ok'; }
+    case 'patinar': { if (!st.said) { st.said = 1; bubble(me, (dist(diana.x, diana.y, b.x, b.y) < 200 && wmScene('diana') === 'out' ? '¡Mira, Diana! ' : '') + '¡Vuelo sobre el hielo como una golondrina!'); } if (!wait(5)) return 'run'; realR.setFact('patino:' + me); logEv(`${wmName(me)} patinó en el lago helado.`, []); return 'ok'; }
     case 'trineo': { if (!st.said) { st.said = 1; bubble(me, '¡Allá vamos, colina abajo! ¡Agárrate fuerte!'); } if (!wait(5)) return 'run'; realR.setFact('trineo:' + me); logEv(`${wmName(me)} se tiró en trineo por la colina.`, []); return 'ok'; }
     case 'pedir_permiso': { const r = reach('marilla'); if (r !== 'ok') return r; if (!st.said) { st.said = 1; bubble(me, 'Marilla, ¿puedo ir al picnic de la escuela dominical? ¡Va a haber helado!'); } if (st.said === 1 && wait(3)) { st.said = 2; st.w = 0; bubble('marilla', 'Está bien, puedes ir. Y te pongo una canasta con algo rico.'); } if (st.said !== 2 || !wait(2.5)) return 'run'; realR.setFact('permiso:picnic'); logEv(`Marilla le dio permiso a ${wmName(me)} para ir al picnic.`, []); return 'ok'; }
     case 'merendar': { const r = reach(a.k); if (r !== 'ok') return r; if (!(inv.canasta > 0)) { st.why = 'no tiene la canasta'; return 'fail'; } if (!st.said) { st.said = 1; bubble(me, '¡Un picnic junto al lago! Y hay helado… ¡nunca había probado helado! Es indescriptible.'); } if (!wait(5)) return 'run'; inv.canasta -= 1; realR.setFact('picnic:' + me); realR.setFact('picnic:' + a.k); logEv(`${wmName(me)} fue de picnic al lago con ${wmName(a.k)}.`, []); return 'ok'; }
@@ -8192,8 +8199,9 @@ function wmExec0(ag, a, st, dt){
         const sub = F.goal(me, f, wmNow());
         if (a.k === 'ana' && !WM_OBEY) { if (f.f === 'traer' && CH[me]) addTask({ from: me, tipo: 'traer', n: f.n, para: me, d: today(), item: f.item }); else notice(`📜 ${wmName(me)} te pide: ${sub.text}.`); }
         else { const h = agentStart(a.k, sub, { label: sub.text + ' (se lo pidió ' + wmName(me) + ')', parent: me, chain: [...agentChain(ag), me] }); if (!h) { st.why = wmName(a.k) + ' tiene demasiado que hacer'; return 'fail'; } const gg = ag.goalNow; if (gg) gg.pending = [...(gg.pending || []).filter(p => p.h.st === 'run'), { h, f, to: a.k }]; }
-        st.sub = sub;
+        st.sub = sub; st.t1 = TT;
       }
+      if (st.asked === 1) { if (TT - st.t1 < 2.6) return 'run'; st.asked = 2; bubble(a.k, SI_A[a.favor.f] || 'Está bien.'); }   // (and the answer, yes)
       return 'ok';   // (asked: on with the rest of the plan; what was promised is waited for only where it is needed)
     }
     case 'interceder': {

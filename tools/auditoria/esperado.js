@@ -28,7 +28,7 @@ module.exports = [
   },
   {
     id: 8, titulo: 'La compota de Marilla', quienes: ['marilla', 'ana'],
-    relato: 'Marilla quiere hacer compota para el invierno, pero no tiene manzanas: se las pide a Ana. Ana va a los manzanos, recoge las manzanas y se las lleva a Marilla a la cocina. Marilla las pela y las cuece en la estufa, removiendo, una media hora o más. Al final tiene la compota.',
+    relato: 'Marilla quiere hacer compota para el invierno, pero no tiene manzanas: se las pide a Ana. Ana va a los manzanos, recoge las manzanas y se las lleva a Marilla a la cocina. Marilla las pela y las cuece en la estufa, removiendo, una media hora por tanda (quiere dos frascos: hace dos tandas) o más. Al final tiene la compota.',
     pasos: [
       { quien: 'ana', lugar: /Avonlea/, accion: /recoger manzanas/, texto: 'Ana recoge manzanas de los manzanos.' },
       { quien: 'ana', tiene: /manzanas/, texto: 'Ana tiene las manzanas.' },
@@ -61,7 +61,7 @@ module.exports = [
 
   {
     id: 0, titulo: 'Vender la vaca', quienes: ['ana'],
-    relato: 'Ana va al granero y descuelga la cuerda de su gancho. Le pone la cuerda a la vaca y la lleva, despacio, hasta quien la compra. Hacen el trato y Ana vuelve con el dinero.',
+    relato: 'Ana va al granero y descuelga la cuerda de su gancho. Le pone la cuerda a la vaca y la lleva, despacio, hasta quien la compra. Hacen el trato y Ana se queda con el dinero.',
     pasos: [
       { quien: 'ana', junto: /granero/, accion: /tomar cuerda/, texto: 'Toma la cuerda en el granero.' },
       { quien: 'ana', guia: /./, texto: 'Lleva a la vaca de la cuerda.' },
@@ -116,7 +116,7 @@ module.exports = [
     ],
   },
   {
-    id: 17, titulo: 'La compota para la Sra. Barry', quienes: ['ana', 'barry'],
+    id: 17, titulo: 'La compota para la Sra. Barry', quienes: ['ana', 'barry', 'diana'],
     relato: 'La Sra. Barry quiere compota y se la pide a Diana; Diana se la pide a Ana. Ana la consigue y se la lleva a la Sra. Barry.',
     pasos: [
       { quien: 'ana', accion: /dar compota/, texto: 'Ana le da la compota.' },
@@ -149,7 +149,7 @@ module.exports = [
     ],
   },
   {
-    id: 31, titulo: 'Devolverle el libro a Diana', quienes: ['ana'],
+    id: 31, titulo: 'Devolverle el libro a Diana', quienes: ['ana', 'diana'],
     relato: 'Ana lleva el libro que le prestaron a la casa de Diana y se lo devuelve en sus manos.',
     pasos: [
       { quien: 'ana', accion: /devolver libro/, texto: 'Le devuelve el libro a Diana.' },
@@ -237,7 +237,7 @@ module.exports = [
   },
   {
     id: 48, titulo: 'Ensayar y recitar en el concierto', quienes: ['ana'],
-    relato: 'Ana ensaya su recitación con el libro, un rato. La noche del concierto sube al escenario del salón y recita.',
+    relato: 'Ana ensaya su recitación con el libro, un rato. Por la tarde, en el concierto, sube al escenario del salón y recita.',
     pasos: [
       { quien: 'ana', accion: /ensayar/, objeto: /libro/, dura: 12, texto: 'Ensaya con el libro, un rato.' },
       { quien: 'ana', junto: /escenario/, accion: /actuar/, dura: 6, texto: 'Recita en el escenario del salón.' },
@@ -311,7 +311,7 @@ module.exports = [
     ],
   },
   {
-    id: 58, titulo: 'El picnic con Diana', quienes: ['ana', 'diana'],
+    id: 58, titulo: 'El picnic con Diana', quienes: ['ana', 'diana', 'marilla'],
     relato: 'Ana le pide permiso a Marilla. Prepara la canasta en la cocina. Va al lago con Diana; extienden el mantel, se sientan y meriendan, sin apuro, un buen rato.',
     pasos: [
       { quien: 'ana', lugar: /cocina/, accion: /preparar canasta/, texto: 'Prepara la canasta en la cocina.' },

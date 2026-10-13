@@ -13,14 +13,14 @@ const ACCION_VISTA = {
   'teñir': { dur: M(15), obj: 'tinte', mira: 0 },
   cortar_pelo: { dur: M(15), obj: 'corte' },
   leer: { dur: M(30), obj: 'libro', sentar: true }, estudiar: { dur: M(40), obj: 'libro' }, ensayar: { dur: M(20), obj: 'libro' },
-  escribir_carta: { dur: M(25), obj: 'papel' }, escribir_cuento: { dur: M(40), obj: 'papel' }, leer_cuento: { obj: 'cuaderno' },
+  escribir_carta: { dur: M(25), obj: 'papel' }, escribir_cuento: { dur: M(40), obj: 'papel' },
   partir_lena: { dur: M(25), obj: 'hacha' }, hacer_heno: { dur: M(45), obj: 'horquilla' }, sembrar: { dur: M(15), obj: 'semillas' }, regar: { dur: M(10), obj: 'regadera' },
   alimentar: { dur: M(8), obj: 'grano' }, 'ordeñar': { obj: 'balde', sentar: true }, rezar: { dur: M(5), obj: 'rezar', sentar: true },
-  decorar_sala: { dur: M(24), obj: 'flores' }, adornar: { dur: M(10), obj: 'sombrero' }, cuidar: { obj: 'jarabe' },
+  decorar_sala: { dur: M(24), obj: 'flores' }, adornar: { dur: M(10), obj: 'sombrero' }, cuidar: { obj: 'jarabe', dur: M(10) },
   quehacer: { dur: M(15), obj: 'quehacer' }, cocinar: { dur: M(30), obj: 'bol' }, preparar: { dur: M(15), obj: 'bol' }, batir: { dur: M(30), obj: 'mantequera' }, coser: { dur: M(40), obj: 'costura', sentar: true },
   recoger: { dur: M(8), obj: 'canastito' }, jurar: { dur: M(3), obj: 'manos' }, nombrar: { dur: M(2), obj: 'recitar' },
   visitar: { obj: 'te', dur: M(32) }, tomar_te: { obj: 'te', sentar: true }, dar: { obj: 'entregar' }, devolver: { obj: 'entregar' }, tomar: { obj: 'canastito' },
-  leer_cuento: { obj: 'cuaderno', sentar: true, con: true }, felicitar: { obj: 'manos' }, consolar: { obj: 'abrazo' },
+  leer_cuento: { obj: 'cuaderno', sentar: true, con: true, dur: M(15) }, felicitar: { obj: 'manos' }, consolar: { obj: 'abrazo' },
   trepar: { dur: 10, mov: 'techo', arriba: true }, actuar: { dur: M(10), obj: 'recitar' }, recitar: { dur: M(5), obj: 'recitar' },
 };
 const accPhase = (A, per) => ((TT - A.t0) % per) / per;

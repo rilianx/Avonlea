@@ -40,6 +40,8 @@ function jugarTick(dt){
   save();
 }
 // --- doing each verb in the world (when the body has arrived): 'run' while it takes, 'ok', or 'fail'
+// saying yes to what one is asked
+const SI_A = { venir: '¡Sí, me encantaría! Allí estaré.', traer: 'Sí, cómo no. Ahora mismo.', pasear: '¡Vamos!', prestar: 'Toma. Pero cuídalo, ¿eh?', curar: 'Voy enseguida.', quehaceres: 'Sí, Marilla.', llevar: 'Eh... sí, sí. Sube.', encerrar_vaca: 'Ahora mismo la llevo.', interceder: 'Hablaré con ella.' };
 function wmExec(ag, a, st, dt){ const r = wmExec0(ag, a, st, dt); accTick(ag, a, st, r); return r; }
 function wmExec0(ag, a, st, dt){
   const me = ag.who, inv = wmInv(me), b = wmBody(me);
@@ -175,7 +177,7 @@ function wmExec0(ag, a, st, dt){
     case 'partir_lena': { if (!st.said) { st.said = 1; bubble(me, '¡Zas! ¡Zas! Leña para la cocina de Marilla.'); } if (!wait(4)) return 'run'; inv.lena = (inv.lena || 0) + 3; float('+3 atados de leña', b.x, b.y - 50); logEv(`${wmName(me)} partió leña.`, []); return 'ok'; }
     case 'sembrar': { if (!wait(4)) return 'run'; realR.setFact('sembrado'); float('🌱 sembrado', b.x, b.y - 50); logEv(`${wmName(me)} sembró la huerta.`, []); return 'ok'; }
     case 'regar': { if (!wait(3)) return 'run'; realR.setFact('regado'); float('💧 regado', b.x, b.y - 50); logEv(`${wmName(me)} regó la huerta.`, []); return 'ok'; }
-    case 'patinar': { if (!st.said) { st.said = 1; bubble(me, '¡Mira, Diana! ¡Vuelo sobre el hielo como una golondrina!'); } if (!wait(5)) return 'run'; realR.setFact('patino:' + me); logEv(`${wmName(me)} patinó en el lago helado.`, []); return 'ok'; }
+    case 'patinar': { if (!st.said) { st.said = 1; bubble(me, (dist(diana.x, diana.y, b.x, b.y) < 200 && wmScene('diana') === 'out' ? '¡Mira, Diana! ' : '') + '¡Vuelo sobre el hielo como una golondrina!'); } if (!wait(5)) return 'run'; realR.setFact('patino:' + me); logEv(`${wmName(me)} patinó en el lago helado.`, []); return 'ok'; }
     case 'trineo': { if (!st.said) { st.said = 1; bubble(me, '¡Allá vamos, colina abajo! ¡Agárrate fuerte!'); } if (!wait(5)) return 'run'; realR.setFact('trineo:' + me); logEv(`${wmName(me)} se tiró en trineo por la colina.`, []); return 'ok'; }
     case 'pedir_permiso': { const r = reach('marilla'); if (r !== 'ok') return r; if (!st.said) { st.said = 1; bubble(me, 'Marilla, ¿puedo ir al picnic de la escuela dominical? ¡Va a haber helado!'); } if (st.said === 1 && wait(3)) { st.said = 2; st.w = 0; bubble('marilla', 'Está bien, puedes ir. Y te pongo una canasta con algo rico.'); } if (st.said !== 2 || !wait(2.5)) return 'run'; realR.setFact('permiso:picnic'); logEv(`Marilla le dio permiso a ${wmName(me)} para ir al picnic.`, []); return 'ok'; }
     case 'merendar': { const r = reach(a.k); if (r !== 'ok') return r; if (!(inv.canasta > 0)) { st.why = 'no tiene la canasta'; return 'fail'; } if (!st.said) { st.said = 1; bubble(me, '¡Un picnic junto al lago! Y hay helado… ¡nunca había probado helado! Es indescriptible.'); } if (!wait(5)) return 'run'; inv.canasta -= 1; realR.setFact('picnic:' + me); realR.setFact('picnic:' + a.k); logEv(`${wmName(me)} fue de picnic al lago con ${wmName(a.k)}.`, []); return 'ok'; }
@@ -264,8 +266,9 @@ function wmExec0(ag, a, st, dt){
         const sub = F.goal(me, f, wmNow());
         if (a.k === 'ana' && !WM_OBEY) { if (f.f === 'traer' && CH[me]) addTask({ from: me, tipo: 'traer', n: f.n, para: me, d: today(), item: f.item }); else notice(`📜 ${wmName(me)} te pide: ${sub.text}.`); }
         else { const h = agentStart(a.k, sub, { label: sub.text + ' (se lo pidió ' + wmName(me) + ')', parent: me, chain: [...agentChain(ag), me] }); if (!h) { st.why = wmName(a.k) + ' tiene demasiado que hacer'; return 'fail'; } const gg = ag.goalNow; if (gg) gg.pending = [...(gg.pending || []).filter(p => p.h.st === 'run'), { h, f, to: a.k }]; }
-        st.sub = sub;
+        st.sub = sub; st.t1 = TT;
       }
+      if (st.asked === 1) { if (TT - st.t1 < 2.6) return 'run'; st.asked = 2; bubble(a.k, SI_A[a.favor.f] || 'Está bien.'); }   // (and the answer, yes)
       return 'ok';   // (asked: on with the rest of the plan; what was promised is waited for only where it is needed)
     }
     case 'interceder': {

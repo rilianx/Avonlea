@@ -169,6 +169,9 @@ function ambNote(parts){
   return `Ana pasa cerca de ${names} y se detiene un momento. (Charla al pasar: nadie se lo pidió; Ana también habla. Pueden saludarse o comentar algo del momento.)`;
 }
 const writtenTalkOn = () => !!game.playAct || game.scene === 'camino' || cart.riding || !!(AGENTS.ana?.ride && AGENTS.ana.followOf) || talkBusy('viaje') || (CAP1.on && !CAP1.done);
+const ENFERMO_LINES = ['Ay… este resfrío me tiene molido.', 'No me siento nada bien, niña.', 'Cof, cof… Si no fuera por este pecho…'];   // (the sick, from bed)
+// busy: doing something (or someone doing something with her), or staying somewhere for a goal (at tea)
+const ocupada = k => !!(AGENTS[k]?.acting || (k === 'ana' && game.playAct) || Object.values(AGENTS).some(a => a.acting && (a.acting.k === k || a.acting.con === k)) || AGENTS[k] && activeGoals(AGENTS[k]).some(g => g.staying));
 function ambUpdate(dt){
   if (amb.cur) return ambTick(dt);
   if (enc.cur) return;
@@ -184,11 +187,12 @@ function ambUpdate(dt){
   }
   if (amb.busy || TT < amb.cool || TT < amb.err) return;
   { const se = storyNow(); if (se && storyHere(se)) return; }   // (here a scene of the story is about to be played: it goes first)
+  if (ocupada('ana')) return;   // (in the middle of something with Ana, or Ana herself busy: no loose lines)
   let best = null, bd = 1e9;
-  for (const k of all) { const d = dd(k); if (TT < (amb.mute[k] || 0) || d > 240 || d >= bd) continue; best = k; bd = d; }
+  for (const k of all) { const d = dd(k); if (TT < (amb.mute[k] || 0) || d > 240 || d >= bd || ocupada(k)) continue; best = k; bd = d; }
   if (!best) return;
   if (!aiReady()) {   // (without the AI: just a word from them, from the written lines)
-    if (bd < 90) { const l = LINES[best], t = l[Math.floor(Math.random() * l.length)]; amb.mute[best] = TT + 110; amb.seen[best] = true; sceneStart({ parts: [best], lines: [{ q: best, t }], out: {}, scene: game.scene, resumen: '' }, false); }
+    if (bd < 90) { const l = (game.wm?.sick || []).includes(best) ? ENFERMO_LINES : LINES[best], t = l[Math.floor(Math.random() * l.length)]; amb.mute[best] = TT + 110; amb.seen[best] = true; sceneStart({ parts: [best], lines: [{ q: best, t }], out: {}, scene: game.scene, resumen: '' }, false); }
     return;
   }
   const parts = chatGroup(best); amb.busy = true;
