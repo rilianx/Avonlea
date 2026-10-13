@@ -1,100 +1,135 @@
 # Auditoría de las acciones
 
 Para cada acción: lo que debería pasar (el relato esperado, `tools/auditoria/esperado.js`), cada paso comparado con lo que el juego cuenta que pasó (✔ a qué hora y cuánto duró, ✘ qué se vio en cambio), y el relato completo del juego (`src/js/66-relato.js`). Se genera con `node tools/auditoria.js`.
-**Pasos que ocurren como deberían: 6 de 6.** **Acciones en que alguna regla no se cumplió: 0 de 2.**
+**Pasos que ocurren como deberían: 5 de 5.** **Acciones en que alguna regla no se cumplió: 0 de 2.**
 
 **Las reglas que siempre deben cumplirse**, se haga lo que se haga (se revisan en cada línea del relato): quien está enfermo está en cama; nadie se queda de pie dentro de un mueble; nadie se queda dentro de las paredes de una casa; nadie está en el agua (salvo en el bote, o patinando sobre el hielo); nadie está encima de otro; los animales de la cuerda van afuera.
 
 
-## Visita a la Sra. Lynde (meta 29: cumplida)
+## El vestido de mangas abullonadas (meta 38: cumplida)
 
-**Lo que debería pasar:** Ana va a la casa de la Sra. Lynde. Se sienta con ella y conversan con una taza de té, una media hora.
+**Lo que debería pasar:** Marilla quiere coserle un vestido a Ana. Le traen la tela de la tienda. Marilla se sienta junto a la ventana de la cocina y cose, sin apuro, un buen rato, hasta que el vestido está listo.
 
-- ✔ Llega a la casa de la Sra. Lynde. — 15:11, 31 min
-- ✔ Se sienta a tomar el té y conversar, una media hora. — 15:12, 30 min
+- ✔ Marilla tiene la tela. — 10:35, 41 min
+- ✔ Cose sentada junto a la ventana, un buen rato. — 10:36, 40 min
+- ✔ El vestido está listo. — 11:16, hasta el final
 
 **Reglas:** ✔ se cumplieron todas, siempre.
 
-<details><summary>Lo que el juego cuenta que pasó (34 líneas)</summary>
+<details><summary>Lo que el juego cuenta que pasó (77 líneas)</summary>
 
 ```
-15:00 Al empezar, Ana está en Avonlea, junto a Tejas Verdes.
-15:00 Al empezar, la Sra. Lynde está en la casa de la Sra. Lynde.
-15:00 · Ana: Avonlea, junto a Tejas Verdes · de pie
-15:00 · la Sra. Lynde: la casa de la Sra. Lynde · caminando
-15:00 Ana dice: «¡La Blanca Senda de las Delicias, otra vez!»
-15:05 · Ana: Avonlea, junto a la huerta de Tejas Verdes · caminando
-15:05 · la Sra. Lynde: la casa de la Sra. Lynde · caminando
-15:10 · Ana: Avonlea, junto a la casa de la Sra. Lynde · caminando
-15:10 · la Sra. Lynde: la casa de la Sra. Lynde · caminando
-15:11 Ana entra a la casa de la Sra. Lynde.
-15:11 La Sra. Lynde dice: «Marilla hizo bien en quedarse contigo, y lo digo yo, que nunca me callo lo que pienso.»
-15:11 Ana empieza a visitar a la Sra. Lynde; con el té.
-15:11 Ana dice: «Buenas tardes, Sra. Lynde. Vine a visitarla.»
-15:12 La Sra. Lynde dice: «¡Pasa, pasa! Siéntate, que pongo la tetera.»
-15:12 Ana se sienta; con el té.
-15:12 La Sra. Lynde se sienta.
-15:15 · Ana: la casa de la Sra. Lynde · sentada · visitar a la Sra. Lynde · con el té
-15:15 · la Sra. Lynde: la casa de la Sra. Lynde · sentada
-15:20 · Ana: la casa de la Sra. Lynde · sentada · visitar a la Sra. Lynde · con el té
-15:20 · la Sra. Lynde: la casa de la Sra. Lynde · sentada
-15:25 · Ana: la casa de la Sra. Lynde · sentada · visitar a la Sra. Lynde · con el té
-15:25 · la Sra. Lynde: la casa de la Sra. Lynde · sentada
-15:30 · Ana: la casa de la Sra. Lynde · sentada · visitar a la Sra. Lynde · con el té
-15:30 · la Sra. Lynde: la casa de la Sra. Lynde · sentada
-15:35 · Ana: la casa de la Sra. Lynde · sentada · visitar a la Sra. Lynde · con el té
-15:35 · la Sra. Lynde: la casa de la Sra. Lynde · sentada
-15:35 La Sra. Lynde dice: «Ana Shirley, hablas más que un molino... pero tienes buen corazón, eso lo reconozco.»
-15:40 · Ana: la casa de la Sra. Lynde · sentada · visitar a la Sra. Lynde · con el té
-15:40 · la Sra. Lynde: la casa de la Sra. Lynde · sentada
-15:42 Ana se levanta; termina de visitar a la Sra. Lynde.
-15:42 La Sra. Lynde se levanta.
-15:42 Ana dice: «Mi imaginación no me deja quieta.»
-15:43 La Sra. Lynde entra a la cocina de Tejas Verdes.
-15:43 Ana sale, junto a la casa de la Sra. Lynde.
+10:00 Al empezar, Ana está en Avonlea, junto a Tejas Verdes.
+10:00 Al empezar, Marilla está en Avonlea, junto a Tejas Verdes.
+10:00 · Ana: Avonlea, junto a Tejas Verdes · de pie
+10:00 · Marilla: Avonlea, junto a Tejas Verdes · de pie
+10:00 Marilla dice: «¿Me traerías un corte de tela?»
+10:00 Marilla dice: «Riega la huerta antes de que caiga el sol, que las plantas lo agradecen.»
+10:00 Ana dice: «Los cerezos en flor parecen novias vestidas de blanco.»
+10:01 Ana dice: «Sí, cómo no. Ahora mismo.»
+10:01 Marilla entra a la cocina de Tejas Verdes, junto a la puerta.
+10:05 · Ana: Avonlea, no lejos del campo de heno · caminando
+10:05 · Marilla: la cocina de Tejas Verdes, junto a la puerta · de pie
+10:10 · Ana: Avonlea, no lejos de la casa de la Sra. Lynde · caminando
+10:10 · Marilla: la cocina de Tejas Verdes, junto a la puerta · de pie
+10:10 Ana está en Avonlea, no lejos de la casa de Robert Bell.
+10:10 Ana dice: «¿Qué pensarán los animales de nosotros?»
+10:12 Una vecina dice: «¡Buenos días, Ana! ¿Cómo están Matthew y Marilla?»
+10:15 · Ana: Avonlea, no lejos de la aldea · caminando
+10:15 · Marilla: la cocina de Tejas Verdes, junto a la puerta · de pie
+10:18 Ana entra a la tienda de Lawson.
+10:18 El Sr. Lawson dice: «¡Buenos días, Ana! Llegaron caramelos de menta y cintas nuevas.»
+10:18 Ana dice: «Buenos días, Sr. Lawson. ¿Me daría un corte de tela? A la libreta de los Cuthbert.»
+10:19 El Sr. Lawson dice: «Cómo no, aquí tengo una. Un momento…»
+10:19 Ana ahora tiene un corte de tela.
+10:19 El Sr. Lawson dice: «Anotado en la libreta de los Cuthbert. Saludos a Marilla.»
+10:19 Ana sale.
+10:20 · Ana: Avonlea · caminando
+10:20 · Marilla: la cocina de Tejas Verdes, junto a la puerta · de pie
+10:25 · Ana: Avonlea · caminando
+10:25 · Marilla: la cocina de Tejas Verdes, junto a la puerta · de pie
+10:30 · Ana: Avonlea · caminando
+10:30 · Marilla: la cocina de Tejas Verdes, junto a la puerta · de pie
+10:34 Ana entra a la cocina de Tejas Verdes, junto a la puerta.
+10:34 Ana empieza a darle un corte de tela a Marilla; con lo que entrega.
+10:34 Marilla dice: «Matthew no lo dice, pero te echa de menos cuando te vas donde Diana.»
+10:35 · Ana: la cocina de Tejas Verdes, junto a la puerta · de pie · darle un corte de tela a Marilla · con lo que entrega
+10:35 · Marilla: la cocina de Tejas Verdes, junto a la puerta · de pie
+10:35 Ana termina de darle un corte de tela a Marilla; ya no tiene nada.
+10:35 Marilla ahora tiene un corte de tela.
+10:35 Marilla dice: «Gracias.»
+10:35 Marilla empieza a coser un vestido con mangas abullonadas.
+10:35 Marilla dice: «Coso el vestido… y le pongo unas mangas abullonadas, como las que usan ahora.»
+10:36 Ana dice: «Se me ocurrió una idea... ¡de esas que solo tengo yo!»
+10:36 Ana sale, junto a Tejas Verdes.
+10:36 Marilla está en la cocina de Tejas Verdes, junto a la silla de la ventana; se sienta; con la costura.
+10:37 Ana está en Avonlea, junto a la huerta de Tejas Verdes.
+10:40 · Ana: Avonlea, junto a la huerta de Tejas Verdes · caminando
+10:40 · Marilla: la cocina de Tejas Verdes, junto a la silla de la ventana · sentada · coser un vestido con mangas abullonadas · con la costura
+10:42 Ana está en Avonlea, junto al Camino Blanco de las Delicias.
+10:42 Ana dice: «El Camino Blanco de las Delicias... cada vez que paso me dan ganas de hablar en voz baja, como en una iglesia.»
+10:44 Ana se sienta.
+10:44 Ana se levanta.
+10:45 · Ana: Avonlea, junto al Camino Blanco de las Delicias · caminando
+10:45 · Marilla: la cocina de Tejas Verdes, junto a la silla de la ventana · sentada · coser un vestido con mangas abullonadas · con la costura
+10:47 Ana está en Avonlea, junto al Bosque Encantado.
+10:50 · Ana: Avonlea, junto al Bosque Encantado · de pie
+10:50 · Marilla: la cocina de Tejas Verdes, junto a la silla de la ventana · sentada · coser un vestido con mangas abullonadas · con la costura
+10:52 Ana está en Avonlea, junto al puente del arroyo.
+10:55 · Ana: Avonlea, junto al puente del arroyo · caminando
+10:55 · Marilla: la cocina de Tejas Verdes, junto a la silla de la ventana · sentada · coser un vestido con mangas abullonadas · con la costura
+10:56 Ana está en Avonlea, no lejos del puente del arroyo.
+10:59 Ana está en Avonlea, junto al huerto de los Barry.
+11:00 · Ana: Avonlea, junto al huerto de los Barry · de pie
+11:00 · Marilla: la cocina de Tejas Verdes, junto a la silla de la ventana · sentada · coser un vestido con mangas abullonadas · con la costura
+11:01 Minnie May Barry dice: «Dicen que el nuevo pastor predica muy bonito.»
+11:01 Mary Joe dice: «Y la Sra. Allan es un encanto, eso sí.»
+11:01 Ana entra a la salita de La Cuesta del Huerto.
+11:02 Ana está en la salita de La Cuesta del Huerto, junto a la mesita del té.
+11:02 La Sra. Barry dice: «Ana Shirley, siempre es un gusto verte por aquí. Pórtate bien, ¿eh?»
+11:05 · Ana: la salita de La Cuesta del Huerto, junto a la mesita del té · de pie
+11:05 · Marilla: la cocina de Tejas Verdes, junto a la silla de la ventana · sentada · coser un vestido con mangas abullonadas · con la costura
+11:10 · Ana: la salita de La Cuesta del Huerto, junto a la mesita del té · de pie
+11:10 · Marilla: la cocina de Tejas Verdes, junto a la silla de la ventana · sentada · coser un vestido con mangas abullonadas · con la costura
+11:15 · Ana: la salita de La Cuesta del Huerto, junto a la mesita del té · caminando
+11:15 · Marilla: la cocina de Tejas Verdes, junto a la silla de la ventana · sentada · coser un vestido con mangas abullonadas · con la costura
+11:15 Ana sale, junto a La Cuesta del Huerto.
+11:16 Marilla se levanta; termina de coser un vestido con mangas abullonadas; ahora tiene un vestido con mangas abullonadas.
+11:16 Marilla está en la cocina de Tejas Verdes.
 ```
 </details>
 
-## Cuidar al Sr. Harrison (meta 34: cumplida)
+## Batir mantequilla (meta 54: cumplida)
 
-**Lo que debería pasar:** El Sr. Harrison está enfermo, en cama. Ana saca el jarabe de ipecacuana del aparador de la cocina, va a su casa y, junto a la cama, se lo da a cucharadas.
+**Lo que debería pasar:** Marilla pone la leche de la mañana en la mantequera, junto a la mesa, y bate sin parar una media hora, hasta que hay mantequilla.
 
-- ✔ El Sr. Harrison está en cama. — 11:00, 14 min
-- ✔ Saca el jarabe del aparador. — 11:01, 1 min
-- ✔ Tiene el jarabe. — 11:02, 12 min
-- ✔ Se lo da en su casa. — 11:12, 1 min
+- ✔ Bate en la mantequera una media hora. — 08:17, 30 min
+- ✔ Tiene la mantequilla. — 08:47, hasta el final
 
 **Reglas:** ✔ se cumplieron todas, siempre.
 
-<details><summary>Lo que el juego cuenta que pasó (26 líneas)</summary>
+<details><summary>Lo que el juego cuenta que pasó (19 líneas)</summary>
 
 ```
-11:00 Al empezar, Ana está en Avonlea, junto a Tejas Verdes.
-11:00 Al empezar, el Sr. Harrison está en la casa del Sr. Harrison; está en cama; ahora tiene una cuerda.
-11:00 · Ana: Avonlea, junto a Tejas Verdes · de pie
-11:00 · el Sr. Harrison: la casa del Sr. Harrison · acostada, en cama
-11:00 Ana entra a la cocina de Tejas Verdes, junto a la puerta.
-11:00 Ana está en la cocina de Tejas Verdes; empieza a tomar un frasco de jarabe de ipecacuana.
-11:01 Ana sigue, con el aparador abierto.
-11:01 Ana está en la cocina de Tejas Verdes, junto al aparador.
-11:02 Ana termina de tomar un frasco de jarabe de ipecacuana; ahora tiene un frasco de jarabe de ipecacuana.
-11:02 Ana sale, junto a Tejas Verdes.
-11:02 Ana dice: «Los cerezos en flor parecen novias vestidas de blanco.»
-11:05 · Ana: Avonlea, junto a Tejas Verdes · de pie
-11:05 · el Sr. Harrison: la casa del Sr. Harrison · acostada, en cama
-11:10 · Ana: Avonlea, junto al campo de avena del Sr. Harrison · caminando
-11:10 · el Sr. Harrison: la casa del Sr. Harrison · acostada, en cama
-11:11 Ana entra a la casa del Sr. Harrison.
-11:12 El Sr. Harrison dice: «No me mires la casa, que el desorden es mío.»
-11:12 Ana empieza a cuidar al Sr. Harrison; con el jarabe.
-11:12 Ana dice: «Una cucharadita de jarabe de ipecacuana… y otra más. Ya va a pasar.»
-11:13 Ana termina de cuidar al Sr. Harrison; ya no tiene nada.
-11:13 El Sr. Harrison se levanta.
-11:13 El Sr. Harrison dice: «Ya me siento mucho mejor. Gracias, niña.»
-11:14 Ana sale, junto a la granja del Sr. Harrison.
-11:14 El Sr. Harrison sale, junto a la granja del Sr. Harrison.
-11:15 · Ana: Avonlea, junto a la granja del Sr. Harrison · caminando
-11:15 · el Sr. Harrison: Avonlea, junto a la granja del Sr. Harrison · caminando
+08:00 Al empezar, Marilla está en Avonlea, junto a Tejas Verdes.
+08:00 · Marilla: Avonlea, junto a Tejas Verdes · de pie
+08:00 Marilla dice: «¿Me traerías 2 jarros de leche?»
+08:00 Marilla dice: «Riega la huerta antes de que caiga el sol, que las plantas lo agradecen.»
+08:01 Marilla entra a la cocina de Tejas Verdes, junto a la puerta.
+08:05 · Marilla: la cocina de Tejas Verdes, junto a la puerta · de pie
+08:10 · Marilla: la cocina de Tejas Verdes, junto a la puerta · de pie
+08:15 · Marilla: la cocina de Tejas Verdes, junto a la puerta · de pie
+08:17 Marilla ahora tiene 2 jarros de leche.
+08:17 Marilla dice: «Gracias.»
+08:17 Marilla empieza a batir la mantequilla.
+08:17 Marilla está en la cocina de Tejas Verdes; con la mantequera.
+08:20 · Marilla: la cocina de Tejas Verdes · de pie · batir la mantequilla · con la mantequera
+08:25 · Marilla: la cocina de Tejas Verdes · de pie · batir la mantequilla · con la mantequera
+08:30 · Marilla: la cocina de Tejas Verdes · de pie · batir la mantequilla · con la mantequera
+08:35 · Marilla: la cocina de Tejas Verdes · de pie · batir la mantequilla · con la mantequera
+08:40 · Marilla: la cocina de Tejas Verdes · de pie · batir la mantequilla · con la mantequera
+08:45 · Marilla: la cocina de Tejas Verdes · de pie · batir la mantequilla · con la mantequera
+08:47 Marilla termina de batir la mantequilla; ahora tiene un pan de mantequilla.
 ```
 </details>
 
