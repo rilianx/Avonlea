@@ -34,7 +34,8 @@ function comparar(esp, lineas){
 // which it does not hold, for one person), with the first line where it happened
 function reglasRotas(lineas){
   const activa = {}, out = {};
-  for (const l of lineas) { const e = l.estado; if (!e || e.dice) continue;
+  let antes = null;
+  for (const l of lineas) { const e = l.estado; if (!e || e.dice) continue; if (e.regla) { const k = Object.keys(out).find(r => !out[r].visto && out[r].primera?.startsWith(l.hora)); if (k) { out[k].visto = 1; out[k].primera = l.hora + ' ' + l.texto + (antes ? ' (antes: ' + antes + ')' : ''); } continue; } antes = l.hora + ' ' + l.texto;
     const mal = (e._mal || '').split(',').filter(Boolean);
     for (const r of mal) { const k = e.quien + '|' + r; if (!activa[k]) { activa[k] = true; (out[r] ||= { n: 0, primera: l.hora + ' ' + l.texto }).n++; } }
     for (const k of Object.keys(activa)) if (k.startsWith(e.quien + '|') && !mal.includes(k.split('|')[1])) delete activa[k]; }
@@ -56,7 +57,7 @@ let REGLAS = [];
   };
   const correr = async (esp, n) => {
     const vs = []; for (let v = 0; v < VECES; v++) vs.push(await una(esp));
-    const r = vs.find(x => x.res.some(y => !y.ok)) || vs[0];   // (the account shown: a run where something failed, if any)
+    const r = vs.find(x => x.res.some(y => !y.ok)) || vs.find(x => Object.keys(x.rotas).length) || vs[0];   // (the account shown: a run where something failed, if any)
     const res = esp.pasos.map((p, k) => { const bien = vs.filter(x => x.res[k].ok).length, mal = vs.find(x => !x.res[k].ok); return { ok: bien === VECES, p, nota: (VECES > 1 ? bien + ' de ' + VECES + ' veces · ' : '') + (mal || vs[0]).res[k].nota }; });
     const out = []; hechos[n] = { res, out };
     out.push('## ' + esp.titulo + ' (meta ' + esp.id + ': ' + vs.map(x => x.st === 'done' ? 'cumplida' : x.st).join(', ') + ')', '', '**Lo que debería pasar:** ' + esp.relato, '');

@@ -70,7 +70,7 @@ function drawCPTe(c){
   blob(c, [[x + 10, y - 31], [x + 22, y - 31], [x + 22, y - 37], [x + 10, y - 37]], '#f3d6a0'); line(c, [[x + 10, y - 34], [x + 22, y - 34]], '#a8302a', 1.2, 1);
 }
 HOUSES.cp.interior = {
-  draw: drawParroquia,
+  draw: drawParroquia, dentro: [CP.te.x + 70, CP.te.y + 30],   // (dentro: where those of the house keep to, away from the door)
   items: g => [{ y: CP.estante.y, draw: () => drawCPEstante(g) }, { y: CP.sillon.y, draw: () => drawCPSillon(g) }, ...CP_SILLAS.map(s => ({ y: s[1] - 1, draw: () => drawCPSilla(g, s) })), { y: CP.te.y, draw: () => drawCPTe(g) }],
   blocked: (x, y) => (Math.abs(x - CP.fuego.x) < 46 && y < CP.fuego.y + 6) || (Math.abs(x - CP.estante.x) < 40 && y < CP.estante.y + 4) || dist(x, y, CP.sillon.x, CP.sillon.y - 8) < 22 || ((x - CP.te.x) / 34) ** 2 + ((y - CP.te.y + 4) / 12) ** 2 < 1,
   glow: t => [CP.fuego.x, CP.fuego.y - 20, 190, '255,170,90', .45 + .05 * Math.sin(t * 7)], place: 'en la salita de la casa parroquial, junto a la chimenea y la mesita del té',

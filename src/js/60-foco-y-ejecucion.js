@@ -195,7 +195,8 @@ function wmMove(who, key, dt){
     T.room = 'gg';
   }
   if (T.room === 'gg' && sc === 'ga') { if (who === 'ana') goIn('gg', [STAIRS.x - 16, STAIRS.y + 36]); else { b.where = 'gg'; b.x = STAIRS.x - 16; b.y = STAIRS.y + 36; } return 'run'; }   // (down the stairs)
-  if (sc === T.room) { const p = T.at || (who === 'ana' && T.room === 'gg' ? [STOVE.x, STOVE.y + 40] : null); if (!p || dist(b.x, b.y, p[0], p[1]) < 40) { wmStop(who); return 'ok'; } wmWalk(who, p[0], p[1], T.room, dt); return 'run'; }
+  // (in the room: to whom one goes; Ana, in the kitchen, to the stove; the others, in from the door, to where they keep to in that room)
+  if (sc === T.room) { const p = T.at || (who === 'ana' && T.room === 'gg' ? [STOVE.x, STOVE.y + 40] : who !== 'ana' ? ROOMS[T.room]?.dentro || null : null); if (!p || dist(b.x, b.y, p[0], p[1]) < 40) { wmStop(who); return 'ok'; } wmWalk(who, p[0], p[1], T.room, dt); return 'run'; }
   if (sc !== 'out') { wmExit(who); return 'run'; }
   if (dist(b.x, b.y, T.door[0], T.door[1] + 20) < 34) { wmEnter(who, T.room); return 'run'; }
   wmWalk(who, T.door[0], T.door[1] + 20, 'out', dt); return 'run';
@@ -213,6 +214,12 @@ function wmWalk(who, x, y, scene, dt){
     return false;
   }
   if (visible) return walkPath(b, x, y, sp, dt, scene);
+  if (scene === 'out') {   // (unseen, outdoors: the same way as if seen (by the roads, round the houses, the lake and the brooks), only without the steps)
+    const o = SCN; SCN = 'out'; let n; try { n = navStep(b, x, y); } finally { SCN = o; }
+    if (n.arrived) { b.moving = false; return true; }
+    const d = dist(b.x, b.y, n.wx, n.wy), v = Math.min(d, sp * dt); b.x += (n.wx - b.x) / (d || 1) * v; b.y += (n.wy - b.y) / (d || 1) * v; b.moving = true; if (Math.abs(n.wx - b.x) > 1) b.dir = n.wx > b.x ? 1 : 3; b.walk = (b.walk + dt * 1.8) % 1;
+    return false;
+  }
   const d = dist(b.x, b.y, x, y), v = Math.min(d, sp * dt); b.x += (x - b.x) / (d || 1) * v; b.y += (y - b.y) / (d || 1) * v; b.moving = d > 2; if (Math.abs(x - b.x) > 1) b.dir = x > b.x ? 1 : 3; b.walk = (b.walk + dt * 1.8) % 1;
   return d < 2;
 }
