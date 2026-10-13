@@ -8295,7 +8295,7 @@ function wmRunDraw(){
     + (ag.log?.length ? '<pre>' + ag.log.slice(-6).join('\n') + '</pre>' : '') + '</div>').join('') || '<i>Nadie tiene una meta todavía.</i>');
 }
 
-/* ---------- the drawings kept as images, in the engine of always (?cache in the link, to compare) ----------
+/* ---------- the drawings kept as images, in the engine of always (?cache=0 in the link turns it off, to compare) ----------
    What the Phaser trial taught: what makes a frame cheap is not the engine, it is not drawing again what does not change.
    So here, on the same canvas as always:
    - a person standing, walking or bending down, quiet, is drawn from a pose kept as an image (as the sheets of Phaser:
@@ -8304,7 +8304,7 @@ function wmRunDraw(){
      sway by turning a little on their trunk, and the smoke of the chimneys is drawn live as always.
    A thing not kept yet, when the frame has no time left to make it, is drawn as always: nothing appears late.
    Kept at the resolution of the screen (half steps, at most 3); the oldest let go when there are too many. */
-var CACHE_ON = /[?&]cache(?!=0)/.test(location.search);   // (var: drawPerson may be called before this part runs; then it is just off)
+var CACHE_ON = !/[?&]cache=0/.test(location.search);   // (on, unless ?cache=0, to compare; var: drawPerson may be called before this part runs, and then it is just off)
 var G0 = g;   // (the screen's canvas: only what is drawn there is kept)
 var CACHE = { mapa: new Map(), px: 0, max: 18e6, dentro: false, t0: 0, hechos: 0, cuadro: -1 };
 const cacheR = () => Math.min(3, Math.max(1, Math.round((view.Z || 1) * (devicePixelRatio || 1) * 2) / 2));
