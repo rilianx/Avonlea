@@ -33,7 +33,8 @@ function obsBar(){
   el.hidden = false;
 }
 const blocked = (x, y) => curScene() === 'out' ? blockedOut(x, y) : blockedIn(x, y, curScene());
-function moveBy(o, dx, dy){ if (!blocked(o.x + dx, o.y)) o.x += dx; if (!blocked(o.x, o.y + dy)) o.y += dy; }
+// (one who is already where one cannot be (put there by an action, by a fence's edge) may walk out: else she would never move again)
+function moveBy(o, dx, dy){ if (blocked(o.x, o.y)) { o.x += dx; o.y += dy; return; } if (!blocked(o.x + dx, o.y)) o.x += dx; if (!blocked(o.x, o.y + dy)) o.y += dy; }
 function walkTo(p, tx, ty, sp, dt){
   const dx = tx - p.x, dy = ty - p.y, d = Math.hypot(dx, dy);
   if (d < 4) { p.moving = false; return true; }
@@ -43,6 +44,15 @@ function walkTo(p, tx, ty, sp, dt){
 }
 function wander(p, dt, sp){
   if (p.wait > 0) { p.wait -= dt; p.moving = false; return; }
-  const [gx, gy] = p.goals[p.goal % p.goals.length];
+  if (!p.gLibre || p.gLibre.g !== p.goal) p.gLibre = { g: p.goal, at: sitioLibre(p, ...p.goals[p.goal % p.goals.length]) };   // (the spot, or beside it if someone is there or going there)
+  const [gx, gy] = p.gLibre.at;
   if (walkPath(p, gx, gy, sp, dt)) { p.goal = (p.goal + 1 + Math.floor(Math.random() * (p.goals.length - 1))) % p.goals.length; p.wait = 3 + Math.random() * 6; p.dir = 2; }
+}
+// a spot near (x, y), in the scene being worked out, where no one stands nor is going: no one stands on another
+const LIBRE_D = [[0, 0], [30, 0], [-30, 0], [0, 26], [0, -26], [30, 26], [-30, 26], [30, -26], [-30, -26], [60, 0], [-60, 0]];
+function sitioLibre(p, x, y, sc = curScene()){
+  const otros = [['ana', ana, game.scene], ...Object.entries(PEOPLE).map(([k, q]) => [k, q, q.where]), ...FOLK.map(f => [f.id, f, f.where])].filter(([, o, s]) => o !== p && s === sc);
+  for (const [dx, dy] of LIBRE_D) { const qx = x + dx, qy = y + dy; if ((dx || dy) && blocked(qx, qy)) continue;
+    if (!otros.some(([, o]) => Math.hypot(o.x - qx, o.y - qy) < 16 || o.gLibre && o.gLibre.at && Math.hypot(o.gLibre.at[0] - qx, o.gLibre.at[1] - qy) < 16)) return [qx, qy]; }
+  return [x, y];
 }

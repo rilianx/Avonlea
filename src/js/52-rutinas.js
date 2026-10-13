@@ -18,6 +18,7 @@ function commute(p, want, dt, sp){
   if (p.dest !== want) { p.dest = want; p.routeT = 0; p.nav = null; }
   p.routeT += dt;
   if (watched('out') && p.routeT < 90 && !walkPath(p, DOOR[want][0], DOOR[want][1], sp, dt, 'out')) return;
-  p.where = want; p.nav = null; p.dest = null; p.moving = false; p.x = KDOOR.x; p.y = KIT.h - 14; p.dir = 0; p.goals = (want === CH[p.look].home ? p.base : CH[p.look].routine?.roomGoals?.[want]) || [[6.5 * T, 6 * T], [5 * T, 5.6 * T]]; p.goal = 0; p.wait = 2;
+  p.where = want; p.nav = null; p.dest = null; p.moving = false; p.x = KDOOR.x; p.y = KIT.h - 14; p.dir = 0; p.goals = (want === CH[p.look].home ? p.base : CH[p.look].routine?.roomGoals?.[want]) || [[6.5 * T, 6 * T], [5 * T, 5.6 * T]]; p.goal = 0; p.wait = 2; p.gLibre = null;
+  if (!watched(want)) inScene(want, () => { [p.x, p.y] = sitioLibre(p, ...p.goals[0]); });   // (no one sees her come in: she is already at her place, not standing at the door)
   logEv(NAMES[p.look] + (want === p.house ? ' volvió a su casa.' : HOUSES[want].arrive), [p.look]);
 }

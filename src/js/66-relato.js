@@ -29,7 +29,7 @@ function relatoSitio(k){
 const RELATO_REGLAS = [
   { id: 'cama', texto: 'quien está enfermo está en cama', mal: (k, b) => (game.wm?.sick || []).includes(k) && !b.bed },
   { id: 'mueble', texto: 'nadie se queda de pie dentro de un mueble', mal: (k, b, sc) => sc !== 'out' && !b.moving && !b.sit && !b.lie && !!ROOMS[sc]?.blocked?.(b.x, b.y) },
-  { id: 'casa', texto: 'nadie se queda dentro de las paredes de una casa', mal: (k, b, sc) => sc === 'out' && !b.moving && inHouses(b.x, b.y) },
+  { id: 'casa', texto: 'nadie se queda dentro de las paredes de una casa', mal: (k, b, sc, A) => sc === 'out' && !b.moving && A?.v !== 'trepar' && inHouses(b.x, b.y) },   // (up on the roof, on a dare, is another thing)
   { id: 'agua', texto: 'nadie está en el agua (salvo en el bote, o patinando sobre el hielo)', mal: (k, b, sc, A) => sc === 'out' && !/^(remar|patinar)$/.test(A?.v || '') && (inLake(b.x, b.y) || inSea(b.x, b.y) || inBrook(b.x, b.y)) },
   { id: 'encima', texto: 'nadie está encima de otro', mal: (k, b, sc) => { const o = !b.moving && relatoCuerpos().find(([q, o, s]) => o !== b && s === sc && !o.moving && Math.hypot(o.x - b.x, o.y - b.y) < 8); const t0 = o ? (RELATO.encima[k] ??= TT) : (delete RELATO.encima[k], 0); return o && TT - t0 > 3 ? 'está encima de ' + wmName(o[0]) + (o[1].sit ? ', que está sentado' : '') : false; } },   // (a moment, coming in at a door, is no matter: staying so is)
   { id: 'cuerda', texto: 'los animales de la cuerda van afuera', mal: (k, b, sc) => sc !== 'out' && sc !== 'camino' && Object.values(ANIM).some(c => c.state === 'led' && (c.ledBy || 'ana') === k) },

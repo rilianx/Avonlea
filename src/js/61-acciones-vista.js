@@ -77,7 +77,7 @@ const ACC_PASOS = {
   batir: me => wmScene(me) === 'gg' ? [{ p: [TABLE.x + 76, TABLE.y + 14], mira: 3, dur: M(30), obj: 'mantequera' }] : null,
   actuar: me => [{ lugar: 'h:sa', p: [SALA.stage.x, SALA.stage.y], mira: 2, dur: M(10), obj: 'recitar' }],   // (on the stage of the hall)
   ensayar: me => wmScene(me) === 'es' || personKey(me) === 'escuela' ? [{ lugar: 'h:es', p: [6.5 * T, 3.5 * T], mira: 2, dur: M(20), obj: 'libro' }] : [{ lugar: 'h:sa', p: [SALA.stage.x, SALA.stage.y], mira: 2, dur: M(20), obj: 'libro' }],
-  decorar_sala: me => [{ lugar: 'h:sa', p: [2 * T, 3 * T], mira: 0, dur: M(8), obj: 'flores' }, { lugar: 'h:sa', p: [6.5 * T, 3.9 * T], mira: 0, dur: M(8), obj: 'flores' }, { lugar: 'h:sa', p: [11 * T, 3 * T], mira: 0, dur: M(8), obj: 'flores' }],   // (garlands along the wall, one stretch after another)
+  decorar_sala: me => [{ lugar: 'h:sa', p: [2 * T, SALA.stage.y + 22], mira: 0, dur: M(8), obj: 'flores' }, { lugar: 'h:sa', p: [6.5 * T, 3.9 * T], mira: 0, dur: M(8), obj: 'flores' }, { lugar: 'h:sa', p: [11 * T, SALA.stage.y + 22], mira: 0, dur: M(8), obj: 'flores' }],   // (garlands along the wall, one stretch after another)
   recoger: (me, a) => {   // (to where it really is: the bushes, the apple trees, the nests, a bed in flower, the herbs of the wood)
     const b = wmBody(me), near = (L, n) => L.filter(Boolean).sort((p, q) => dist(p.x, p.y, b.x, b.y) - dist(q.x, q.y, b.x, b.y)).slice(0, n);
     const at = a.x === 'bayas' ? near(bushes.filter(u => u.berries > 0 && dist(u.x, u.y, b.x, b.y) < 300), 2) : a.x === 'manzanas' ? near(trees.filter(u => u.kind === 'apple' && u.apples > 0 && dist(u.x, u.y, b.x, b.y) < 380), 2)
@@ -208,6 +208,21 @@ function sickTick(){
   const sick = game.wm?.sick || [];
   for (const k of sick) { const b = PEOPLE[k], h = CH[k]?.home; if (!b || !HOUSES[h] || b.where === 'away') continue; b.where = h; b.bed ||= [KIT.w * .7, KIT.h * .4]; b.x = b.bed[0]; b.y = b.bed[1]; b.lie = true; b.sit = false; b.moving = false; b.nav = null; }
   for (const [k, b] of Object.entries(PEOPLE)) if (b.bed && !sick.includes(k)) { b.lie = false; delete b.bed; }
+}
+// no one stays standing on another: two at rest on the same spot for a moment, the one less settled (not doing
+// anything, not sitting; Ana last) steps aside to a free spot beside it
+let APARTAR_T = 0;
+function apartarTick(){
+  if (TT < APARTAR_T) return; APARTAR_T = TT + .5;
+  const L = [['ana', ana, game.scene], ...Object.entries(PEOPLE).map(([k, q]) => [k, q, q.where]), ...FOLK.map(f => [f.id, f, f.where])].filter(([, b, s]) => s && s !== 'in' && s !== 'away' && s !== 'camino' && !b.moving && !b.bed);
+  const firme = ([k, b]) => (AGENTS[k]?.acting ? 4 : 0) + (b.sit || b.lie ? 2 : 0) + (k === 'ana' ? 1 : 0);
+  const mueve = new Set();
+  for (let i = 0; i < L.length; i++) for (let j = i + 1; j < L.length; j++) { const A = L[i], B = L[j]; if (A[2] === B[2] && Math.hypot(A[1].x - B[1].x, A[1].y - B[1].y) < 10) mueve.add(firme(A) < firme(B) ? A : B); }
+  for (const [, b] of L) if (![...mueve].some(m => m[1] === b)) delete b.encimaT;
+  for (const [k, b, sc] of mueve) {
+    if (TT - (b.encimaT ??= TT) < 1.5 || k === 'ana' && ana.goto) continue;   // (a moment is no matter)
+    inScene(sc, () => { [b.x, b.y] = sitioLibre(b, b.x, b.y); }); delete b.encimaT; b.nav = null;
+  }
 }
 // into the drawing: the things under the body (before it) and in its hands (after it)
 function accPush(list, g, t){
