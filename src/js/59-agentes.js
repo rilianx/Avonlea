@@ -156,7 +156,7 @@ function agentTick(dt){
       g.waited = true; g.waitUntil = TT + (pendingOn(g) ? 3 : g.partial ? 2 : 20); if (pendingOn(g)) g.tries--; agentLog(ag, '⏳ espera' + (pendingOn(g) ? ' lo que pidió' : '') + ': ' + g.label);
     }
     if (!activeGoals(ag).length) { agentIdle(ag); continue; }
-    if (!ag.task || ag.task.st !== 'todo') { ag.task = pickTask(ag); if (ag.task) { ag.task.t = 0; ag.task.step = { a: ag.task.a, t: 0 }; const q = taskPoint(ag, ag.task).q, b = wmBody(ag.who); ag.task.budget = 90 + (q && b ? 2 * dist(b.x, b.y, q[0], q[1]) / wmPace(ag) : 60); agentLog(ag, '→ ' + stepText(ag.task.a) + (activeGoals(ag).length > 1 ? ' (' + ag.task.g.label + ')' : '')); } }
+    if (!ag.task || ag.task.st !== 'todo') { ag.task = pickTask(ag); if (ag.task) { ag.task.t = 0; ag.task.step = { a: ag.task.a, t: 0 }; const q = taskPoint(ag, ag.task).q, b = wmBody(ag.who); ag.task.budget = 90 + (q && b ? 2 * dist(b.x, b.y, q[0], q[1]) / wmPace(ag) : 60) + accDuracion(ag.task.a, ag.who) * 1.5;   // (and what doing it takes: washing the dishes is a quarter of an hour) agentLog(ag, '→ ' + stepText(ag.task.a) + (activeGoals(ag).length > 1 ? ' (' + ag.task.g.label + ')' : '')); } }
     const t = ag.task;
     if (!t) { if (ag.st !== 'wait') { ag.st = 'wait'; wmRelease(ag.who); } continue; }
     if (distractCheck(ag)) continue;

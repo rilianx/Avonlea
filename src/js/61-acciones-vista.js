@@ -1,26 +1,27 @@
 /* ---------- how each action looks while it is being done (the staging): the things it is done with, drawn by the one
    who does it, how they stand or sit, and how they move. Pure data (ACCION_VISTA) plus a few drawings (ACC_OBJ);
    wmExec marks who is doing what (ag.acting) and the drawing reads it. Fields:
-     dur: seconds it lasts, at least (so it can be seen); sentar: they sit (and `con`, whoever it is done with, too);
+     dur: how long it lasts, in minutes of the game (M(n): n minutes; while Ana does something, the time goes faster); sentar: they sit (and `con`, whoever it is done with, too);
      mira: which way they face (0: up, to the mirror on the wall); obj: the thing (a drawing in ACC_OBJ); mov: how the body moves (ACC_MOV: sliding down on the sled, skating in
      rings, rowing, up on the roof); arriba: drawn above everything around it (on a roof) ---------- */
+const M = n => n * MIN_S;   // (n minutes of the game, in the seconds the game counts)
 const ACCION_VISTA = {
-  merendar: { dur: 24, sentar: true, con: true, obj: 'picnic' },
-  trineo: { dur: 24, obj: 'trineo', mov: 'trineo' },
-  patinar: { dur: 22, obj: 'patines', mov: 'patinar' },
-  remar: { dur: 22, obj: 'bote', mov: 'remar', sentar: true },
-  'teñir': { dur: 14, obj: 'tinte', mira: 0 },
-  cortar_pelo: { dur: 10, obj: 'corte' },
-  leer: { dur: 14, obj: 'libro', sentar: true }, estudiar: { dur: 12, obj: 'libro' }, ensayar: { dur: 10, obj: 'libro' },
-  escribir_carta: { dur: 12, obj: 'papel' }, escribir_cuento: { dur: 14, obj: 'papel' }, leer_cuento: { obj: 'cuaderno' },
-  partir_lena: { dur: 12, obj: 'hacha' }, hacer_heno: { dur: 14, obj: 'horquilla' }, sembrar: { dur: 12, obj: 'semillas' }, regar: { dur: 10, obj: 'regadera' },
-  alimentar: { dur: 8, obj: 'grano' }, 'ordeñar': { obj: 'balde', sentar: true }, rezar: { dur: 8, obj: 'rezar', sentar: true },
-  decorar_sala: { dur: 10, obj: 'flores' }, adornar: { dur: 6, obj: 'sombrero' }, cuidar: { obj: 'jarabe' },
-  quehacer: { dur: 8, obj: 'quehacer' }, cocinar: { dur: 8, obj: 'bol' }, preparar: { dur: 8, obj: 'bol' }, batir: { dur: 10, obj: 'mantequera' }, coser: { dur: 12, obj: 'costura', sentar: true },
-  recoger: { dur: 6, obj: 'canastito' }, jurar: { dur: 8, obj: 'manos' }, nombrar: { dur: 6, obj: 'recitar' },
+  merendar: { dur: M(40), sentar: true, con: true, obj: 'picnic' },
+  trineo: { dur: M(30), obj: 'trineo', mov: 'trineo' },
+  patinar: { dur: M(30), obj: 'patines', mov: 'patinar' },
+  remar: { dur: M(30), obj: 'bote', mov: 'remar', sentar: true },
+  'teñir': { dur: M(15), obj: 'tinte', mira: 0 },
+  cortar_pelo: { dur: M(15), obj: 'corte' },
+  leer: { dur: M(30), obj: 'libro', sentar: true }, estudiar: { dur: M(40), obj: 'libro' }, ensayar: { dur: M(20), obj: 'libro' },
+  escribir_carta: { dur: M(25), obj: 'papel' }, escribir_cuento: { dur: M(40), obj: 'papel' }, leer_cuento: { obj: 'cuaderno' },
+  partir_lena: { dur: M(25), obj: 'hacha' }, hacer_heno: { dur: M(45), obj: 'horquilla' }, sembrar: { dur: M(15), obj: 'semillas' }, regar: { dur: M(10), obj: 'regadera' },
+  alimentar: { dur: M(8), obj: 'grano' }, 'ordeñar': { obj: 'balde', sentar: true }, rezar: { dur: M(5), obj: 'rezar', sentar: true },
+  decorar_sala: { dur: M(24), obj: 'flores' }, adornar: { dur: M(10), obj: 'sombrero' }, cuidar: { obj: 'jarabe' },
+  quehacer: { dur: M(15), obj: 'quehacer' }, cocinar: { dur: M(30), obj: 'bol' }, preparar: { dur: M(15), obj: 'bol' }, batir: { dur: M(30), obj: 'mantequera' }, coser: { dur: M(40), obj: 'costura', sentar: true },
+  recoger: { dur: M(8), obj: 'canastito' }, jurar: { dur: M(3), obj: 'manos' }, nombrar: { dur: M(2), obj: 'recitar' },
   visitar: { obj: 'te' }, dar: { obj: 'entregar' }, devolver: { obj: 'entregar' }, tomar: { obj: 'canastito' },
   leer_cuento: { obj: 'cuaderno', sentar: true, con: true }, felicitar: { obj: 'manos' }, consolar: { obj: 'abrazo' },
-  trepar: { dur: 10, mov: 'techo', arriba: true }, actuar: { dur: 10, obj: 'recitar' }, recitar: { dur: 8, obj: 'recitar' },
+  trepar: { dur: 10, mov: 'techo', arriba: true }, actuar: { dur: M(10), obj: 'recitar' }, recitar: { dur: M(5), obj: 'recitar' },
 };
 const accPhase = (A, per) => ((TT - A.t0) % per) / per;
 // how the body moves while doing it (from where it was standing: A.base)
@@ -46,6 +47,7 @@ const ACC_MOV = {
     const u = Math.min(1, (e - 6.5) / .6); b.x = lerp(b.x, A.cayo[0], u); b.y = lerp(H.y - 74, A.cayo[1], u * u); b.moving = false; if (u >= 1) { delete b.sortY; b.sit = true; if (!A.dolor) { A.dolor = 1; wmSay('ana', '¡Mi tobillo! Creo que me lo torcí… Diana, no puedo pararme.'); } }
   },
 };
+// (all the durations, in minutes of the game: M(n))
 // the steps of an action (ACC_PASOS): where it is really done, one place after another, and what is carried between
 // them: laying the table is going to the dresser for the plates and setting them on the table; the dishes are washed at
 // the sink; a letter is written at her desk, upstairs. A step: lugar (a room key to be in: 'cocina', 'pieza'), p (the
@@ -55,43 +57,50 @@ const KX = { aparador: lugar('cocina', 'aparador'), fregadero: lugar('cocina', '
 const enCasa = me => wmScene(me) === 'gg' || wmScene(me) === 'ga';
 const ACC_PASOS = {
   'quehacer:mesa': me => wmScene(me) !== 'gg' ? null : [
-    { p: [KX.aparador.x + 46, KX.aparador.y + 6], mira: 3, dur: 2.5, obj: 'aparador', decir: 'Los platos de todos los días…' },
-    { p: [TABLE.x - 20, TABLE.y + 18], mira: 0, dur: 3.5, lleva: 'platos', obj: 'poner', hecho: () => { game.mesa = { dia: today(), puesta: true }; } }],
+    { p: [KX.aparador.x + 46, KX.aparador.y + 6], mira: 3, dur: M(2), obj: 'aparador', decir: 'Los platos de todos los días…' },
+    { p: [TABLE.x - 20, TABLE.y + 18], mira: 0, dur: M(5), lleva: 'platos', obj: 'poner', hecho: () => { game.mesa = { dia: today(), puesta: true }; } }],
   'quehacer:platos': me => wmScene(me) !== 'gg' ? null : [
-    { p: [TABLE.x + 20, TABLE.y + 18], mira: 0, dur: 2, obj: 'recoger', hecho: () => { game.mesa = { dia: today(), sucia: false }; } },
-    { p: [KX.fregadero.x, KX.fregadero.y + 34], mira: 0, dur: 6, lleva: 'platos_sucios', obj: 'lavar' },
-    { p: [KX.aparador.x + 46, KX.aparador.y + 6], mira: 3, dur: 2, lleva: 'platos', obj: 'aparador' }],
-  'quehacer:barrer': me => wmScene(me) !== 'gg' ? null : [[3.2, 6.6], [5, 7.6], [8.6, 7.2], [10.2, 6], [4.4, 4.6]].map(([x, y]) => ({ p: [x * T, y * T], dur: 1.6, obj: 'escoba' })),
-  escribir_carta: me => me === 'ana' && enCasa(me) ? [{ lugar: 'pieza', p: [GA.table.x - 12, GA.table.y + 8], mira: 0, sentar: true, dur: 21, obj: 'banqueta', mesa: [GA.table.x + 15, GA.table.y - 25, GA.table.y + 1, 'carta'] }] : null,
-  escribir_cuento: me => me === 'ana' && enCasa(me) ? [{ lugar: 'pieza', p: [GA.table.x - 12, GA.table.y + 8], mira: 0, sentar: true, dur: 10, obj: 'banqueta', mesa: [GA.table.x + 15, GA.table.y - 25, GA.table.y + 1, 'cuaderno'] }] : null,
-  estudiar: me => wmScene(me) === 'gg' ? [{ p: SEATS.ana.slice(0, 2), mira: 2, sentar: true, dur: 10, obj: null, mesa: [SEATS.ana[0], TABLE.y - 31, TABLE.y + 1, 'libro'] }] : wmScene(me) === 'es' || personKey(me) === 'escuela' ? [{ lugar: 'h:es', p: [SCHOOL_DESKS[5].x - 6, SCHOOL_DESKS[5].y + 10], mira: 0, sentar: true, dur: 10, obj: null, mesa: [SCHOOL_DESKS[5].x + 10, SCHOOL_DESKS[5].y - 12, SCHOOL_DESKS[5].y + 1, 'libro'] }] : null,   // (at the kitchen table or her desk at school, the book open on it)
-  recitar: me => [{ lugar: 'h:es', p: [6.5 * T, 3.5 * T], mira: 2, dur: 8, obj: 'recitar' }],   // (in front of the class, by the blackboard)
-  visitar: (me, a) => { const o = wmBody(a.k), sc = wmScene(me); if (!o || sc === 'out' || sc !== wmScene(a.k)) return null; const q = sc === 'gg' ? SEATS.lynde.slice(0, 2) : sc === 'os' ? [TEA.x - 40, TEA.y + 6] : [o.x - 34, o.y + 4]; return [{ p: q, mira: 1, sentar: true, dur: 7, obj: 'te' }]; },   // (sitting down for the visit, a cup of tea)
-  leer: me => wmScene(me) === 'ga' ? [{ p: [GA.bed.x - 50, GA.bed.y - 6], mira: 2, sentar: true, dur: 12, obj: 'libro' }] : wmScene(me) === 'gg' ? [{ p: SEATS.ana.slice(0, 2), mira: 2, sentar: true, dur: 12, obj: 'libro' }] : null,
-  rezar: me => me === 'ana' && enCasa(me) ? [{ lugar: 'pieza', p: [GA.bed.x - 40, GA.bed.y + 20], mira: 0, sentar: true, dur: 7, obj: 'rezar' }] : null,
-  coser: me => wmScene(me) === 'gg' ? [{ p: [KX.silla.x, KX.silla.y], mira: 2, sentar: true, dur: 12, obj: 'costura' }] : null,
-  cocinar: me => wmScene(me) === 'gg' ? [{ p: [STOVE.x + 14, STOVE.y + 40], mira: 0, dur: 7, obj: 'bol' }] : wmScene(me) === 'out' && me !== 'ana' ? [{ adentro: true, dur: 8 }] : null,
-  preparar: me => wmScene(me) === 'gg' ? [{ p: [STOVE.x + 14, STOVE.y + 40], mira: 0, dur: 7, obj: 'bol' }] : wmScene(me) === 'out' && me !== 'ana' ? [{ adentro: true, dur: 8 }] : null,   // (at a door with no kitchen to show: inside, out of sight, for a while)
-  batir: me => wmScene(me) === 'gg' ? [{ p: [TABLE.x + 76, TABLE.y + 14], mira: 3, dur: 9, obj: 'mantequera' }] : null,
-  actuar: me => [{ lugar: 'h:sa', p: [SALA.stage.x, SALA.stage.y], mira: 2, dur: 10, obj: 'recitar' }],   // (on the stage of the hall)
-  ensayar: me => wmScene(me) === 'es' || personKey(me) === 'escuela' ? [{ lugar: 'h:es', p: [6.5 * T, 3.5 * T], mira: 2, dur: 10, obj: 'libro' }] : [{ lugar: 'h:sa', p: [SALA.stage.x, SALA.stage.y], mira: 2, dur: 10, obj: 'libro' }],
-  decorar_sala: me => [{ lugar: 'h:sa', p: [2 * T, 3 * T], mira: 0, dur: 4, obj: 'flores' }, { lugar: 'h:sa', p: [6.5 * T, 3.9 * T], mira: 0, dur: 4, obj: 'flores' }, { lugar: 'h:sa', p: [11 * T, 3 * T], mira: 0, dur: 4, obj: 'flores' }],   // (garlands along the wall, one stretch after another)
+    { p: [TABLE.x + 20, TABLE.y + 18], mira: 0, dur: M(3), obj: 'recoger', hecho: () => { game.mesa = { dia: today(), sucia: false }; } },
+    { p: [KX.fregadero.x, KX.fregadero.y + 34], mira: 0, dur: M(12), lleva: 'platos_sucios', obj: 'lavar' },
+    { p: [KX.aparador.x + 46, KX.aparador.y + 6], mira: 3, dur: M(3), lleva: 'platos', obj: 'aparador' }],
+  'quehacer:barrer': me => wmScene(me) !== 'gg' ? null : [[3.2, 6.6], [5, 7.6], [8.6, 7.2], [10.2, 6], [4.4, 4.6]].map(([x, y]) => ({ p: [x * T, y * T], dur: M(2.5), obj: 'escoba' })),
+  escribir_carta: me => me === 'ana' && enCasa(me) ? [{ lugar: 'pieza', p: [GA.table.x - 12, GA.table.y + 8], mira: 0, sentar: true, dur: M(25), obj: 'banqueta', mesa: [GA.table.x + 15, GA.table.y - 25, GA.table.y + 1, 'carta'] }] : null,
+  escribir_cuento: me => me === 'ana' && enCasa(me) ? [{ lugar: 'pieza', p: [GA.table.x - 12, GA.table.y + 8], mira: 0, sentar: true, dur: M(40), obj: 'banqueta', mesa: [GA.table.x + 15, GA.table.y - 25, GA.table.y + 1, 'cuaderno'] }] : null,
+  estudiar: me => wmScene(me) === 'gg' ? [{ p: SEATS.ana.slice(0, 2), mira: 2, sentar: true, dur: M(40), obj: null, mesa: [SEATS.ana[0], TABLE.y - 31, TABLE.y + 1, 'libro'] }] : wmScene(me) === 'es' || personKey(me) === 'escuela' ? [{ lugar: 'h:es', p: [SCHOOL_DESKS[5].x - 6, SCHOOL_DESKS[5].y + 10], mira: 0, sentar: true, dur: M(40), obj: null, mesa: [SCHOOL_DESKS[5].x + 10, SCHOOL_DESKS[5].y - 12, SCHOOL_DESKS[5].y + 1, 'libro'] }] : null,   // (at the kitchen table or her desk at school, the book open on it)
+  recitar: me => [{ lugar: 'h:es', p: [6.5 * T, 3.5 * T], mira: 2, dur: M(5), obj: 'recitar' }],   // (in front of the class, by the blackboard)
+  visitar: (me, a) => { const o = wmBody(a.k), sc = wmScene(me); if (!o || sc === 'out' || sc !== wmScene(a.k)) return null; const q = sc === 'gg' ? SEATS.lynde.slice(0, 2) : sc === 'os' ? [TEA.x - 40, TEA.y + 6] : [o.x - 34, o.y + 4]; return [{ p: q, mira: 1, sentar: true, dur: M(30), obj: 'te' }]; },   // (sitting down for the visit, a cup of tea)
+  leer: me => wmScene(me) === 'ga' ? [{ p: [GA.bed.x - 50, GA.bed.y - 6], mira: 2, sentar: true, dur: M(30), obj: 'libro' }] : wmScene(me) === 'gg' ? [{ p: SEATS.ana.slice(0, 2), mira: 2, sentar: true, dur: M(30), obj: 'libro' }] : null,
+  rezar: me => me === 'ana' && enCasa(me) ? [{ lugar: 'pieza', p: [GA.bed.x - 40, GA.bed.y + 20], mira: 0, sentar: true, dur: M(5), obj: 'rezar' }] : null,
+  coser: me => wmScene(me) === 'gg' ? [{ p: [KX.silla.x, KX.silla.y], mira: 2, sentar: true, dur: M(40), obj: 'costura' }] : null,
+  cocinar: me => wmScene(me) === 'gg' ? [{ p: [STOVE.x + 14, STOVE.y + 40], mira: 0, dur: M(30), obj: 'bol' }] : wmScene(me) === 'out' && me !== 'ana' ? [{ adentro: true, dur: M(30) }] : null,
+  preparar: me => wmScene(me) === 'gg' ? [{ p: [STOVE.x + 14, STOVE.y + 40], mira: 0, dur: M(15), obj: 'bol' }] : wmScene(me) === 'out' && me !== 'ana' ? [{ adentro: true, dur: M(15) }] : null,   // (at a door with no kitchen to show: inside, out of sight, for a while)
+  batir: me => wmScene(me) === 'gg' ? [{ p: [TABLE.x + 76, TABLE.y + 14], mira: 3, dur: M(30), obj: 'mantequera' }] : null,
+  actuar: me => [{ lugar: 'h:sa', p: [SALA.stage.x, SALA.stage.y], mira: 2, dur: M(10), obj: 'recitar' }],   // (on the stage of the hall)
+  ensayar: me => wmScene(me) === 'es' || personKey(me) === 'escuela' ? [{ lugar: 'h:es', p: [6.5 * T, 3.5 * T], mira: 2, dur: M(20), obj: 'libro' }] : [{ lugar: 'h:sa', p: [SALA.stage.x, SALA.stage.y], mira: 2, dur: M(20), obj: 'libro' }],
+  decorar_sala: me => [{ lugar: 'h:sa', p: [2 * T, 3 * T], mira: 0, dur: M(8), obj: 'flores' }, { lugar: 'h:sa', p: [6.5 * T, 3.9 * T], mira: 0, dur: M(8), obj: 'flores' }, { lugar: 'h:sa', p: [11 * T, 3 * T], mira: 0, dur: M(8), obj: 'flores' }],   // (garlands along the wall, one stretch after another)
   recoger: (me, a) => {   // (to where it really is: the bushes, the apple trees, the nests, a bed in flower, the herbs of the wood)
     const b = wmBody(me), near = (L, n) => L.filter(Boolean).sort((p, q) => dist(p.x, p.y, b.x, b.y) - dist(q.x, q.y, b.x, b.y)).slice(0, n);
     const at = a.x === 'bayas' ? near(bushes.filter(u => u.berries > 0 && dist(u.x, u.y, b.x, b.y) < 300), 2) : a.x === 'manzanas' ? near(trees.filter(u => u.kind === 'apple' && u.apples > 0 && dist(u.x, u.y, b.x, b.y) < 380), 2)
       : a.x === 'ramo' ? near(BEDS.filter(u => u.stage >= 3), 1) : a.x === 'huevos' ? [{ x: BARN.x + 130, y: BARN.y + 86 }, { x: BARN.x + 170, y: BARN.y + 92 }] : a.x === 'hierbas' ? [0, 1, 2].map(k => ({ x: b.x - 60 + k * 60, y: b.y + (k % 2 ? 30 : -10) })) : [];
-    return at.length && wmScene(me) === 'out' ? at.map(u => ({ p: [u.x + (a.x === 'manzanas' ? 0 : 0), u.y + (a.x === 'manzanas' ? 14 : 18)], mira: 0, agachar: a.x !== 'manzanas', dur: 2.4, obj: 'canastito' })) : null;
+    return at.length && wmScene(me) === 'out' ? at.map(u => ({ p: [u.x + (a.x === 'manzanas' ? 0 : 0), u.y + (a.x === 'manzanas' ? 14 : 18)], mira: 0, agachar: a.x !== 'manzanas', dur: M(a.x === 'manzanas' ? 5 : 3), obj: 'canastito' })) : null;
   },
-  tomar: (me, a) => a.x === 'cuerda' && wmScene(me) === 'out' ? [{ p: [BARN.x + 40, BARN.y + 34], mira: 0, dur: 2, obj: 'cuerda' }] : wmScene(me) === 'gg' ? [{ p: [KX.aparador.x + 46, KX.aparador.y + 6], mira: 3, dur: 2, obj: 'aparador' }] : null,   // (the rope on its hook in the barn; the syrup, the basket, from the dresser)
-  cortar_pelo: me => wmScene(me) === 'gg' ? [{ p: [KIT.w / 2 - 60, 6.6 * T], mira: 2, sentar: true, dur: 10, obj: 'corte', con: ['marilla', 16, -6] }] : null,   // (sitting on a chair in the middle of the kitchen, Marilla behind her with the scissors)
-  jurar: (me, a) => { const b = wmBody(me), g = [OS.x + 50, OS.y + 44], near = wmScene(me) === 'out' && dist(b.x, b.y, g[0], g[1]) < 700; return [{ p: near ? g : [b.x, b.y], mira: 1, dur: 8, obj: 'manos', con: [a.k, 30, 0, 3] }]; },   // (in the Barrys' garden, face to face, hand in hand)
-  'ordeñar': (me, a) => { const c = ANIM[a.cow]; return c ? [{ p: () => [c.x - 26, c.y + 6], mira: 1, sentar: true, dur: 8, obj: 'balde' }] : null; },
-  alimentar: (me, a) => { const A = AREAS[a.p]; return A ? [[.3, .4], [.7, .6]].map(([u, v]) => ({ p: [A.x + A.w * u, A.y + A.h * v], dur: 3, obj: 'grano' })) : null; },
-  sembrar: me => BEDS.slice(0, 3).map(b => ({ p: [b.x, b.y + 22], mira: 0, dur: 3, obj: 'semillas' })),
-  regar: me => BEDS.slice(3, 6).map(b => ({ p: [b.x, b.y + 22], mira: 0, dur: 2.5, obj: 'regadera', hecho: () => { b.wet = 1; b.grow = 0; } })),   // (the soil stays dark and wet)
-  hacer_heno: me => { const f = FIELDS.find(f => dist(f.x + f.w / 2, f.y + f.h / 2, wmBody(me).x, wmBody(me).y) < 500); return f ? [[.25, .4], [.5, .6], [.75, .45]].map(([u, v]) => ({ p: [f.x + f.w * u, f.y + f.h * v], dur: 4, obj: 'horquilla', hecho: () => { const H = game.heno?.dia === today() ? game.heno : (game.heno = { dia: today(), pts: [] }); H.pts.push([f.x + f.w * u + 26, f.y + f.h * v + 4]); } })) : null; },   // (the bales stay in the field)
-  partir_lena: me => wmScene(me) === 'out' ? [{ p: [BARN.x - 30, BARN.y + 70], mira: 1, dur: 10, obj: 'hacha', hecho: () => { game.lena = { dia: today(), x: BARN.x - 6, y: BARN.y + 74, n: (game.lena?.dia === today() ? game.lena.n : 0) + 3 }; } }] : null,   // (at the chopping block by the barn; the stacked wood stays)
+  tomar: (me, a) => a.x === 'cuerda' && wmScene(me) === 'out' ? [{ p: [BARN.x + 40, BARN.y + 34], mira: 0, dur: M(1), obj: 'cuerda' }] : wmScene(me) === 'gg' ? [{ p: [KX.aparador.x + 46, KX.aparador.y + 6], mira: 3, dur: M(1), obj: 'aparador' }] : null,   // (the rope on its hook in the barn; the syrup, the basket, from the dresser)
+  'teñir': me => me === 'ana' && enCasa(me) ? [{ lugar: 'pieza', p: [GA.wash.x, GA.wash.y + 24], mira: 0, dur: M(15), obj: 'tinte', decir: '¡Negro azabache como el ala de un cuervo! Ya verán…' }] : null,   // (upstairs, at the washstand with its mirror)
+  cortar_pelo: me => wmScene(me) === 'gg' ? [{ p: [KIT.w / 2 - 60, 6.6 * T], mira: 2, sentar: true, dur: M(15), obj: 'corte', con: ['marilla', 16, -6] }] : null,   // (sitting on a chair in the middle of the kitchen, Marilla behind her with the scissors)
+  jurar: (me, a) => { const b = wmBody(me), g = [OS.x + 50, OS.y + 44], near = wmScene(me) === 'out' && dist(b.x, b.y, g[0], g[1]) < 700; return [{ p: near ? g : [b.x, b.y], mira: 1, dur: M(3), obj: 'manos', con: [a.k, 30, 0, 3] }]; },   // (in the Barrys' garden, face to face, hand in hand)
+  'ordeñar': (me, a) => { const c = ANIM[a.cow]; return c ? [{ p: () => [c.x - 26, c.y + 6], mira: 1, sentar: true, dur: M(15), obj: 'balde' }] : null; },
+  alimentar: (me, a) => { const A = AREAS[a.p]; return A ? [[.3, .4], [.7, .6]].map(([u, v]) => ({ p: [A.x + A.w * u, A.y + A.h * v], dur: M(4), obj: 'grano' })) : null; },
+  sembrar: me => BEDS.slice(0, 3).map(b => ({ p: [b.x, b.y + 22], mira: 0, dur: M(5), obj: 'semillas' })),
+  regar: me => BEDS.slice(3, 6).map(b => ({ p: [b.x, b.y + 22], mira: 0, dur: M(3), obj: 'regadera', hecho: () => { b.wet = 1; b.grow = 0; } })),   // (the soil stays dark and wet)
+  hacer_heno: me => { const f = FIELDS.find(f => dist(f.x + f.w / 2, f.y + f.h / 2, wmBody(me).x, wmBody(me).y) < 500); return f ? [[.25, .4], [.5, .6], [.75, .45]].map(([u, v]) => ({ p: [f.x + f.w * u, f.y + f.h * v], dur: M(15), obj: 'horquilla', hecho: () => { const H = game.heno?.dia === today() ? game.heno : (game.heno = { dia: today(), pts: [] }); H.pts.push([f.x + f.w * u + 26, f.y + f.h * v + 4]); } })) : null; },   // (the bales stay in the field)
+  partir_lena: me => wmScene(me) === 'out' ? [{ p: [BARN.x - 30, BARN.y + 70], mira: 1, dur: M(25), obj: 'hacha', hecho: () => { game.lena = { dia: today(), x: BARN.x - 6, y: BARN.y + 74, n: (game.lena?.dia === today() ? game.lena.n : 0) + 3 }; } }] : null,   // (at the chopping block by the barn; the stacked wood stays)
 };
+// how long an action takes, all its steps (seconds of the game; for a task's budget of time)
+function accDuracion(a, me){ let P = null; try { P = accPasos(a, me); } catch {} return P ? P.reduce((s, p) => s + (p.dur || 0), 0) : ACCION_VISTA[a.v]?.dur || 0; }
+// while Ana does something (and nobody is speaking), the time goes faster: what takes a quarter of an hour is seen in
+// a few seconds, and the clock says so (⏩)
+const TAREA_PRISA = 4;
+const tareaPrisa = () => (AGENTS.ana?.acting || game.playAct?.acting) && !game.talk && !bubbles.some(b => b.t < b.dur) && !menuOpen() ? TAREA_PRISA : 1;
 const accPasos = (a, me) => (ACC_PASOS[a.v + ':' + a.x] || ACC_PASOS[a.v])?.(me, a) || null;
 // one step after another: go there (into the room first), then do it for a while; true when all are done
 function coreoTick(ag, a, st, dt, P){
@@ -133,8 +142,8 @@ const ACC_OBJ = {
     for (let k = 1; k <= 2; k++) { c.strokeStyle = `rgba(255,255,255,${.5 / k})`; c.lineWidth = 1; c.beginPath(); c.ellipse(x, y + 4, 34 + k * 10 + Math.sin(TT + k) * 3, 9 + k * 3, 0, 0, TAU); c.stroke(); }
     blob(c, [[x - 32, y - 6 + r], [x + 32, y - 6 - r], [x + 22, y + 8], [x - 22, y + 8]], '#8a5a34'); blob(c, [[x - 28, y - 6 + r], [x + 28, y - 6 - r], [x + 24, y - 2], [x - 24, y - 2]], '#5a3a22'); },
     f(c, b, A){ const s = Math.sin(TT * 2.4); for (const o of [-1, 1]) line(c, [[b.x + o * 6, b.y - 16], [b.x + o * (26 + s * 6), b.y + 6 + s * 3]], '#c8a070', 2, o); } },
-  tinte: { u(c, b, A){ const ga = game.scene === 'ga', x = ga ? GA.table.x + 14 : b.x + 18, y = ga ? GA.table.y - 26 : b.y - 2; ell(c, x, y, 9, 3.4, '#e8eef2', true); ell(c, x, y - 1, 6.4, 2.2, `rgba(60,${Math.round(60 + 70 * Math.min(1, (TT - A.t0) / 14))},70,.8)`); },   // (the basin on the table under the mirror, the dye going green in it)
-    f(c, b, A){ const x = b.x + (b.dir === 3 ? -8 : 8), y = b.y - 30, p = (TT - A.t0) / 14; blob(c, [[x - 3, y], [x + 3, y], [x + 3, y - 10], [x + 1.5, y - 13], [x - 1.5, y - 13], [x - 3, y - 10]], '#2a3a2a'); if (p > .5) for (let k = 0; k < 3; k++) ell(c, b.x - 6 + k * 6, b.y - 40 + ((TT * 30 + k * 7) % 14), 1.2, 2, 'rgba(70,150,80,.85)'); } },
+  tinte: { u(c, b, A){ const ga = game.scene === 'ga', x = ga ? GA.wash.x - 6 : b.x + 18, y = ga ? GA.wash.y - 32 : b.y - 2; ell(c, x, y, 9, 3.4, '#e8eef2', true); ell(c, x, y - 1, 6.4, 2.2, `rgba(60,${Math.round(60 + 70 * Math.min(1, (TT - A.t0) / M(15)))},70,.8)`); },   // (the basin on the washstand, under the mirror, the dye going green in it)
+    f(c, b, A){ const x = b.x + (b.dir === 3 ? -8 : 8), y = b.y - 30, p = (TT - A.t0) / M(15); blob(c, [[x - 3, y], [x + 3, y], [x + 3, y - 10], [x + 1.5, y - 13], [x - 1.5, y - 13], [x - 3, y - 10]], '#2a3a2a'); if (p > .5) for (let k = 0; k < 3; k++) ell(c, b.x - 6 + k * 6, b.y - 40 + ((TT * 30 + k * 7) % 14), 1.2, 2, 'rgba(70,150,80,.85)'); } },
   tijeras: { f(c, b, A){ const k = A.k === 'ana' || !A.k ? ana : wmBody(A.k) || b, x = k.x + 10, y = k.y - 46, s = Math.abs(Math.sin(TT * 8)) * .5; line(c, [[x, y], [x + 9, y - 3 - s * 6]], '#8a9098', 1.4, 1); line(c, [[x, y], [x + 9, y + 3 + s * 6]], '#8a9098', 1.4, 2); for (let i = 0; i < 4; i++) { const q = (TT * .8 + i * .25) % 1; ell(c, x - 6 + i * 4, y + q * 46, 2.4, 1, 'rgba(90,150,70,.9)', false, i); } } },   // (green locks falling)
   libro: { f(c, b, A){ const x = b.x + (b.dir === 3 ? -6 : b.dir === 1 ? 6 : 0), y = b.y - (b.sit ? 20 : 26); blob(c, [[x - 8, y - 5], [x, y - 3], [x + 8, y - 5], [x + 8, y + 3], [x, y + 5], [x - 8, y + 3]], '#f6f0e0'); line(c, [[x, y - 3], [x, y + 5]], '#8a6a4a', .8, 1); line(c, [[x - 7, y - 4], [x - 7, y + 4]], '#7a3a2a', 1.2, 2); line(c, [[x + 7, y - 4], [x + 7, y + 4]], '#7a3a2a', 1.2, 3); } },
   papel: { f(c, b, A){ const x = b.x + (b.dir === 3 ? -9 : 9), y = b.y - 24; blob(c, [[x - 7, y - 5], [x + 7, y - 5], [x + 7, y + 6], [x - 7, y + 6]], '#fbf6ea'); for (let k = 0; k < 3; k++) line(c, [[x - 5, y - 2 + k * 3], [x + 4, y - 2 + k * 3]], 'rgba(60,60,90,.5)', .6, k); const w = Math.sin(TT * 6) * 3; line(c, [[x + w, y + 1], [x + 6 + w, y - 9]], '#efe6d6', 1.6, 4); } },   // (the quill moving)

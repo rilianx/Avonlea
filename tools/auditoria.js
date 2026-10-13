@@ -31,21 +31,23 @@ function comparar(esp, lineas){
 (async () => {
   const b = await chromium.launch({ executablePath: process.env.CHROMIUM || '/opt/pw-browsers/chromium', args: ['--no-sandbox'] });
   const md = ['# Auditoría de las acciones', '', 'Para cada acción: lo que debería pasar (el relato esperado, `tools/auditoria/esperado.js`), cada paso comparado con lo que el juego cuenta que pasó (✔ a qué hora y cuánto duró, ✘ qué se vio en cambio), y el relato completo del juego (`src/js/66-relato.js`). Se genera con `node tools/auditoria.js`.', ''];
-  let bien = 0, total = 0;
-  for (const esp of lista) {
+  let bien = 0, total = 0; const hechos = new Array(lista.length);
+  const correr = async (esp, n) => {
     const pg = await b.newPage(); const errs = []; pg.on('pageerror', e => errs.push(e.message));
     await pg.addInitScript(() => { localStorage.clear(); localStorage.setItem('avonlea-ai-asked', '1'); });
-    await pg.goto('file://' + path.join(root, 'index.html')); await pg.waitForFunction(() => window.__avonlea);
+    await pg.goto('file://' + path.join(root, 'index.html'), { timeout: 0 }); await pg.waitForFunction(() => window.__avonlea, null, { timeout: 0 });
     const r = await pg.evaluate(([id, q]) => { const A = window.__avonlea; document.getElementById('ai').hidden = true; const ag = A.wmRunTest(id); A.relatoEmpezar(q);
       for (let t = 0; t < 3600 && (ag.st === 'run' || ag.st === 'pausa'); t += .5) A.step(.5); for (let k = 0; k < 20; k++) A.step(.5);
       return { st: ag.st, lineas: A.relato() }; }, [esp.id, esp.quienes]);
-    const res = comparar(esp, r.lineas); bien += res.filter(x => x.ok).length; total += res.length;
-    md.push('## ' + esp.titulo + ' (meta ' + esp.id + ': ' + (r.st === 'done' ? 'cumplida' : r.st) + ')', '', '**Lo que debería pasar:** ' + esp.relato, '');
-    for (const x of res) md.push('- ' + (x.ok ? '✔' : '✘') + ' ' + x.p.texto + ' — ' + x.nota);
-    md.push('', '<details><summary>Lo que el juego cuenta que pasó (' + r.lineas.length + ' líneas)</summary>', '', '```', ...r.lineas.map(l => l.hora + ' ' + l.texto), '```', '</details>', '');
+    const res = comparar(esp, r.lineas), out = []; hechos[n] = { res, out };
+    out.push('## ' + esp.titulo + ' (meta ' + esp.id + ': ' + (r.st === 'done' ? 'cumplida' : r.st) + ')', '', '**Lo que debería pasar:** ' + esp.relato, '');
+    for (const x of res) out.push('- ' + (x.ok ? '✔' : '✘') + ' ' + x.p.texto + ' — ' + x.nota);
+    out.push('', '<details><summary>Lo que el juego cuenta que pasó (' + r.lineas.length + ' líneas)</summary>', '', '```', ...r.lineas.map(l => l.hora + ' ' + l.texto), '```', '</details>', '');
     console.log(esp.titulo + ': ' + res.filter(x => x.ok).length + '/' + res.length + (errs.length ? ' · errores: ' + errs.slice(0, 2).join(' | ') : ''));
     await pg.close();
-  }
+  };
+  let sig = 0; await Promise.all(Array.from({ length: Math.min(4, lista.length) }, async () => { while (sig < lista.length) { const n = sig++; await correr(lista[n], n); } }));   // (4 at a time; the report in order)
+  for (const h of hechos) { bien += h.res.filter(x => x.ok).length; total += h.res.length; md.push(...h.out); }
   md.splice(3, 0, '**Pasos que ocurren como deberían: ' + bien + ' de ' + total + '.**', '');
   fs.writeFileSync(path.join(root, 'trazas', 'auditoria.md'), md.join('\n') + '\n');
   console.log('→ trazas/auditoria.md · ' + bien + '/' + total + ' pasos');
