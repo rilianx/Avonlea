@@ -82,12 +82,13 @@ function phHoja(b, key, depth, t){
   }
   let C = PH.caras.get(key);
   if (!C) { C = { img: PH.scene.add.image(0, 0, H.tk, String(col)).setOrigin(0) }; PH.caras.set(key, C); }
-  C.img.setTexture(H.tk, String(col)).setPosition(b.x + HOJA_BOX[0], b.y + HOJA_BOX[1]).setScale(1 / R).setDepth(depth).setVisible(true); C.usado = PH.cuadro;
+  phProf(C.img.setTexture(H.tk, String(col)).setPosition(b.x + HOJA_BOX[0], b.y + HOJA_BOX[1]).setScale(1 / R).setVisible(true), depth); C.usado = PH.cuadro;
   return true;
 }
 // the heavy jobs (baking a chunk of floor, a tree, a strip of poses) are what makes a frame long: on a phone, copying
 // a new image to the graphics card stops everything. So each frame takes only what fits in a few milliseconds (at least
 // one); the rest waits for the next ones. Things are prepared a little before they come into view.
+const phProf = (o, d) => { if (o.depth !== d) o.setDepth(d); return o; };   // (a depth set again, even the same, makes Phaser sort its whole list: only when it changes)
 const phPuedo = () => { if (PH.hechos === 0 || performance.now() - PH.cuadroT0 < 4) { PH.hechos++; return true; } return false; };
 // does Phaser draw this place? (and shows its canvas, or hides it)
 function phNativo(sitio){
@@ -114,7 +115,7 @@ function phVivo(key, at, box, depth, draw, cada){
     const pant = g; g = c; try { draw(c); } finally { g = pant; }
     V.tex.refresh(); if (PH.subidas) { const k = key.replace(/[:\d].*$/, ''); PH.subidas[k] = (PH.subidas[k] || 0) + w * h; }   // (PH.subidas: what is copied to the card, for the tests)
   }
-  V.img.setPosition(at[0] + box[0], at[1] + box[1]).setScale(1 / R).setDepth(depth).setVisible(true); V.usado = PH.cuadro;
+  phProf(V.img.setPosition(at[0] + box[0], at[1] + box[1]).setScale(1 / R).setVisible(true), depth); V.usado = PH.cuadro;
 }
 // the room and its furniture: images baked again only when something changes (the night, the season, a stew on the
 // stove; the furniture twice a second, in a box of its own measured the first time)
@@ -171,7 +172,7 @@ function phFijo(o, depth, v){
     F.img.setOrigin(-b[0] / (b[2] - b[0]), -b[1] / (b[3] - b[1])).setScale(1 / Rf);   // (its origin at its foot: a tree turns on its trunk)
   }
   if (!F.img) return;
-  F.img.setPosition(o.x, o.y).setDepth(depth).setVisible(true).setRotation(arbol ? Math.sin(v.t * .9 + o.ph) * 1.6 * o.s / (110 * o.s) : 0);
+  phProf(F.img, depth).setPosition(o.x, o.y).setVisible(true).setRotation(arbol ? Math.sin(v.t * .9 + o.ph) * 1.6 * o.s / (110 * o.s) : 0);
   for (const e of F.humo || []) e.setVisible(true);
   F.usado = PH.cuadro;
 }
@@ -206,13 +207,14 @@ function phTexMata(tipo, a, b){
   if (tipo === 'pasto') { c.strokeStyle = a; c.lineWidth = 1.2; c.beginPath(); for (const o of [-3, 0, 3]) { c.moveTo(o, 0); c.quadraticCurveTo(o * .6, -16 * .6, o * 1.2, -16); } c.stroke(); }
   else if (tipo === 'flor') { const ph = b; c.strokeStyle = '#5e9a3e'; c.lineWidth = 1; c.beginPath(); c.moveTo(0, 0); c.lineTo(0, -6); c.stroke(); for (let k = 0; k < 5; k++) { const an = k / 5 * TAU + ph; ell(c, Math.cos(an) * 1.8, -6 + Math.sin(an) * 1.3, 1.4, 1.1, a); } ell(c, 0, -6, .9, .9, '#f2c14e'); }
   else if (tipo === 'lupino') { const hg = b; c.strokeStyle = '#5e9a3e'; c.lineWidth = 1; c.beginPath(); c.moveTo(0, 0); c.lineTo(0, -hg); c.stroke(); for (let k = 0; k < 5; k++) ell(c, 0, -hg + k * 2.4, 2.2 - k * .2, 1.6, a); }
+  else if (tipo === 'racimo') { const n = a, r = rng(b * 7 + n * 31); for (let i = 0; i < n; i++) { const dx = (r() - .5) * 20, dy = (r() - .5) * 3, hg = 10 + r() * 8, col = LUP_COL[Math.floor(r() * 4)]; c.strokeStyle = '#5e9a3e'; c.lineWidth = 1; c.beginPath(); c.moveTo(dx, dy); c.lineTo(dx, dy - hg); c.stroke(); for (let k = 0; k < 5; k++) ell(c, dx, dy - hg + k * 2.4, 2.2 - k * .2, 1.6, col); } }
   else if (tipo === 'junco') { line(c, [[0, 0], [0, -12], [0, -20]], a, 1.5, 20); ell(c, 0, -17, 1.6, 3.6, '#7a5536'); }
   PH.scene.textures.addCanvas(key, c0); PH.texMataAlto = { R, W, H };
   return key;
 }
 const TC_PASTO = [['rgba(70,130,45,.85)', 'rgba(110,165,64,.85)'], ['rgba(70,120,45,.85)', 'rgba(96,150,60,.85)'], ['rgba(140,130,60,.85)', 'rgba(175,150,70,.85)'], ['rgba(150,140,110,.7)', 'rgba(150,140,110,.7)']];   // (as the grass of always)
 const LUP_COL = ['#e88ab0', '#f2a6c4', '#d46a9c', '#c98ad8'];
-function phMata(sc, tk, x, y, alto, ancho = alto){ return sc.add.image(x, y, tk).setOrigin(.5, 32 / 34).setScale(ancho / 3, alto / 3).setDepth(-5e8 + y * 1e-4); }   // (alto: how much taller than drawn; ancho: wider)
+function phMata(sc, tk, x, y, alto, ancho = alto){ PH.capaMatas ??= sc.add.layer().setDepth(-5e8); const im = sc.add.image(x, y, tk).setOrigin(.5, 32 / 34).setScale(ancho / 3, alto / 3); PH.capaMatas.add(im); return im; }   // (in a layer of their own: the scene's list stays short, and nobody sorts them)   // (alto: how much taller than drawn; ancho: wider)
 function phTrozo(cx, cy, v, aviso){   // (aviso: just around the view, prepared ahead if there is time)
   const sc = PH.scene, key = S + '|' + cx + ',' + cy; PH.trozos ??= new Map();
   let C = PH.trozos.get(key);
@@ -235,7 +237,8 @@ function phTrozo(cx, cy, v, aviso){   // (aviso: just around the view, prepared 
     const D = decorAt(cx, cy), M = C.matas = [];   // (what moves: one sprite each)
     D.tufts.forEach(t => { if (S === 3 && t.c > .25) return; M.push({ k: 'p', o: t, spr: phMata(sc, phTexMata('pasto', TC_PASTO[S][t.c < .5 ? 0 : 1]), t.x, t.y, t.h / 16, 1) }); });
     if (S !== 3) D.flowers.forEach((f, i) => { if (S === 2 && i % 3) return; M.push({ k: 'f', o: f, spr: phMata(sc, phTexMata('flor', f.c, Math.round(((f.ph % (TAU / 5)) + TAU / 5) % (TAU / 5) / (TAU / 5) * 4) / 4 * TAU / 5), f.x, f.y, f.s) }); });
-    if (S !== 3) D.lupins.forEach(o => { if (S === 2 && o.c > .3) return; const hg = Math.round(10 + o.s * 8); M.push({ k: 'l', o, hg, spr: phMata(sc, phTexMata('lupino', LUP_COL[Math.floor(o.c * 4)], hg), o.x, o.y, 1) }); });
+    if (S !== 3) { const celdas = new Map(); D.lupins.forEach(o => { if (S === 2 && o.c > .3) return; const k = Math.floor(o.x / 22) + "," + Math.floor(o.y / 22); if (!celdas.has(k)) celdas.set(k, []); celdas.get(k).push(o); });   // (lupins by bunches: one sprite each, swaying together)
+      for (const L of celdas.values()) { const o = L[0], n = Math.min(5, L.length), vr = Math.floor(o.ph / TAU * 4) % 4, x = L.reduce((a, q) => a + q.x, 0) / L.length, y = Math.max(...L.map(q => q.y)); M.push({ k: 'l', o: { x, y, ph: o.ph }, hg: 14, spr: phMata(sc, phTexMata('racimo', n, vr), x, y, 1) }); } }
   }
   if (C.img) C.img.setVisible(true);
   const t = v.t, ox = v.ox, oy = v.oy, vw = v.W / v.Z, vh = v.H / v.Z;
@@ -291,7 +294,7 @@ function phEfectos(v){
   let F = PH.fuego;
   if (game.scene !== 'gg') { F?.setVisible(false); return; }
   if (!F || !F.scene) F = PH.fuego = PH.scene.add.rectangle(STOVE.x, STOVE.y - 15, 20, 14, 0xff8c3c, .9);
-  F.setFillStyle(Phaser.Display.Color.GetColor(255, Math.round(130 + 50 * Math.sin(v.t * 6)), 60), .9).setDepth(-1e8).setVisible(true);
+  phProf(F.setFillStyle(Phaser.Display.Color.GetColor(255, Math.round(130 + 50 * Math.sin(v.t * 6)), 60), .9).setVisible(true), -1e8);
 }
 // one frame of the world under Phaser: the camera where the game's view is, the room, and each thing of the list
 function phMundo(list, v){
@@ -310,20 +313,21 @@ function phMundo(list, v){
     if (!PH.apagar?.has('agua')) { phAgua(v, vw, vh); PH.agua.setVisible(true); } if (!PH.apagar?.has('orilla')) phOrilla(v, vw, vh);   // (PH.apagar: to measure what costs, in the tests)
   }
   if (game.scene !== 'out') { PH.agua?.setVisible(false); for (const s of PH.juncos?.spr || []) s.setVisible(false); }
-  for (const [k, C] of PH.trozos || []) if (C.usado !== PH.cuadro) { if (PH.cuadro - C.usado > 900 || !k.startsWith(S + '|')) { phTrozoFuera(C); PH.trozos.delete(k); } else if (C.vis !== false) { C.img?.setVisible(false); for (const m of C.matas || []) m.spr.setVisible(false); C.vis = false; } } else C.vis = true;
+  for (const [k, C] of PH.trozos || []) if (C.usado !== PH.cuadro) { if (C.matas && PH.cuadro - C.usado > 60) { for (const m of C.matas) m.spr.destroy(); C.matas = null; }   // (its grass, long out of sight: away)
+    if (PH.cuadro - C.usado > 900 || !k.startsWith(S + '|')) { phTrozoFuera(C); PH.trozos.delete(k); } else if (C.vis !== false) { C.img?.setVisible(false); for (const m of C.matas || []) m.spr.setVisible(false); C.vis = false; } } else C.vis = true;
   if (!PH.apagar?.has('papel')) phPapel(v); else { PH.papel?.setVisible(false); PH.vineta?.setVisible(false); }   // (anything not told where it is: drawn over the whole view, and noted to be told)
   list.forEach((o, i) => {
-    const d = o.y + i * 1e-6, p = o.ph || (((PH.sueltos ??= new Set()).add(o.draw.toString().slice(0, 60))), { key: 'suelto:' + i, at: [v.ox, v.oy], box: [0, 0, vw, vh] });
+    const d = o.y, p = o.ph || (((PH.sueltos ??= new Set()).add(o.draw.toString().slice(0, 60))), { key: 'suelto:' + i, at: [v.ox, v.oy], box: [0, 0, vw, vh] });
     if (PH.apagar?.has(p.fijo ? 'fijos' : 'cosas')) return;
     if (p.fijo) return phFijo(p.fijo, d, v);
     if (!(p.persona && !PH.sinHojas && phHoja(p.persona, p.key, d, v.t))) phVivo(p.key, p.at, p.box, d, o.draw);
   });
-  for (const [o, F] of PH.fijos) if (F.usado !== PH.cuadro) { if (PH.cuadro - (F.usado || 0) > 900) { phFijoFuera(F); PH.fijos.delete(o); } else { F.img?.setVisible(false); for (const e of F.humo || []) e.setVisible(false); } }   // (out of sight; long out of sight: its memory back)
+  for (const [o, F] of PH.fijos) if (F.usado !== PH.cuadro) { if (PH.cuadro - (F.usado || 0) > 300) { phFijoFuera(F); PH.fijos.delete(o); } else { F.img?.setVisible(false); for (const e of F.humo || []) e.setVisible(false); } }   // (out of sight; long out of sight: its memory back)
   for (const [k, C] of PH.caras) if (C.usado !== PH.cuadro) C.img.setVisible(false);   // (drawn live this frame, or gone)
   phEfectos(v);
   for (const [k, V] of PH.vivos) if (V.usado !== PH.cuadro) {
     if (k.startsWith('mueble:') || k === 'fondo') { V.img.destroy(); sc.textures.remove(V.tk); PH.vivos.delete(k); }   // (another room's)
-    else if (PH.cuadro - V.usado > 600) { V.img.destroy(); sc.textures.remove(V.tk); PH.vivos.delete(k); }   // (not seen for a while: its memory back)
+    else if (PH.cuadro - V.usado > 300) { V.img.destroy(); sc.textures.remove(V.tk); PH.vivos.delete(k); }   // (not seen for a while: its memory back)
     else V.img.setVisible(false);
   }
   const now = performance.now(); PH.game.step(now, Math.min(50, now - (PH.t0 || now)) || 16); PH.t0 = now;
