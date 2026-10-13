@@ -5,6 +5,7 @@ function update(dt){
   if (sleeping) return;
   if (AI.on && provider() === 'manual' && aiq.list.length) return;   // (debugging by hand: the world waits for the answer)
   TT += dt; dayT += dt / (MIN_S * 60 * 24); boil = Math.floor(TT * 6);
+  if (RELATO.on) relatoTick();   // (the account of what happens: 66-relato.js)
   const { night } = light();
   // the season: two days each
   const ns = (seasonCount() % 4 + 4) % 4;

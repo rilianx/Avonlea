@@ -5874,6 +5874,7 @@ function update(dt){
   if (sleeping) return;
   if (AI.on && provider() === 'manual' && aiq.list.length) return;   // (debugging by hand: the world waits for the answer)
   TT += dt; dayT += dt / (MIN_S * 60 * 24); boil = Math.floor(TT * 6);
+  if (RELATO.on) relatoTick();   // (the account of what happens: 66-relato.js)
   const { night } = light();
   // the season: two days each
   const ns = (seasonCount() % 4 + 4) % 4;
@@ -8482,7 +8483,70 @@ function loop(now){
   else { owed = Math.min(owed + Math.min(raw, .25) * k, 3 * k * .05 + 2); const t0 = performance.now(); while (owed > 1e-4 && performance.now() - t0 < 22) { const d = Math.min(.05, owed); update(d); owed -= d; } }
   FRAME++; tripBarDraw(); render(); islaDraw(); requestAnimationFrame(loop);
 }
-window.__avonlea = { jugables, jugar, anaMenu, correoRetirar, cartaLeer, CORREO, cartaTexto, playAct: () => game.playAct, DIALOGOS, dlgCtx, talks: () => TALKS, dlgGuion, dlgPanel, bubblesNow: () => bubbles, toby, cartSheet: (c, x, y, c8, t) => { const L = [], p = { look: 'matthew', x, y, c8, walk: 0, moving: false }; const [cx, cy] = [x, y]; pushCart(L, c, { x: cx, y: cy, c8, walk: 0, moving: true }, t); for (const [k, look] of [[0, 'matthew'], [1, 'ana']]) { const [sx, sy] = cartSeat(cx, cy, c8, k); L.push({ y: sy, draw: () => drawPerson(c, { ...mkPerson(look, sx, sy), sit: true, dir: c8Dir(c8) }, t) }); } L.sort((a, b) => a.y - b.y).forEach(o => o.draw()); }, startCap1, CAP1, LIBRO1, ROAD_TRAMOS, ROAD_MIN, roadTramo, islaToggle, DLG_BANK, startDay, setSeason, agendaData: () => AGENDA.map(e => ({ who: wmName(e.who), from: e.from, to: e.to, label: e.label, season: e.season, sunday: !!e.sunday, ana: !!(e.ana || e.who === 'ana'), cond: e.when ? String(e.when).replace(/^\(\) => /, '') : '' })), setAgenda: v => { AGENDA_ON = v; }, AGENDA, wmData: () => ({ THINGS, WHO, OFRECE, WP_NAME, TRADE, TREATS, LIBRETA, ITEM_NAME, MAX_GOALS, PACE, FOCO }), paintMapBase, doingText, wmName, wmBody, wmScene, WW, WH, setVec: v => { VEC_ON = v; }, setStyle: v => { ANA_STYLE = v; }, setHead: setHeadM, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+window.__avonlea = { relatoEmpezar, relato: () => RELATO.lineas, jugables, jugar, anaMenu, correoRetirar, cartaLeer, CORREO, cartaTexto, playAct: () => game.playAct, DIALOGOS, dlgCtx, talks: () => TALKS, dlgGuion, dlgPanel, bubblesNow: () => bubbles, toby, cartSheet: (c, x, y, c8, t) => { const L = [], p = { look: 'matthew', x, y, c8, walk: 0, moving: false }; const [cx, cy] = [x, y]; pushCart(L, c, { x: cx, y: cy, c8, walk: 0, moving: true }, t); for (const [k, look] of [[0, 'matthew'], [1, 'ana']]) { const [sx, sy] = cartSeat(cx, cy, c8, k); L.push({ y: sy, draw: () => drawPerson(c, { ...mkPerson(look, sx, sy), sit: true, dir: c8Dir(c8) }, t) }); } L.sort((a, b) => a.y - b.y).forEach(o => o.draw()); }, startCap1, CAP1, LIBRO1, ROAD_TRAMOS, ROAD_MIN, roadTramo, islaToggle, DLG_BANK, startDay, setSeason, agendaData: () => AGENDA.map(e => ({ who: wmName(e.who), from: e.from, to: e.to, label: e.label, season: e.season, sunday: !!e.sunday, ana: !!(e.ana || e.who === 'ana'), cond: e.when ? String(e.when).replace(/^\(\) => /, '') : '' })), setAgenda: v => { AGENDA_ON = v; }, AGENDA, wmData: () => ({ THINGS, WHO, OFRECE, WP_NAME, TRADE, TREATS, LIBRETA, ITEM_NAME, MAX_GOALS, PACE, FOCO }), paintMapBase, doingText, wmName, wmBody, wmScene, WW, WH, setVec: v => { VEC_ON = v; }, setStyle: v => { ANA_STYLE = v; }, setHead: setHeadM, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+/* ---------- the account of what happens: what can be seen, not what anyone intends ----------
+   For the audit of the actions (tools/auditoria.js) and for whoever wants to read the game as a tale (?relato in the
+   link writes it in the console). It watches some characters and writes, with the hour of the game:
+   - when something about them changes: where they are (the room, and what they are next to), how (standing, walking,
+     sitting, bending down, lying), what they are doing, what they carry or have at hand, what they say, what they have;
+   - every 5 minutes of the game, how each one is.
+   Each line also keeps the state as data (estado), so the audit can check it against what should have happened. */
+var RELATO = { on: /[?&]relato/.test(location.search), quienes: null, lineas: [], antes: {}, ultimo: -1, globo: new Set() };
+const SITIO_NOMBRE = { estufa: 'la estufa', mesa: 'la mesa', puerta: 'la puerta', escalera: 'la escalera', aparador: 'el aparador', fregadero: 'el fregadero', silla: 'la silla de la ventana', ventana: 'la ventana', cama: 'la cama', escritorio: 'el escritorio', lavatorio: 'el lavatorio y su espejo', chimenea: 'la chimenea', sofa: 'el sofá', te: 'la mesita del té', escenario: 'el escenario', banco: 'los bancos' };
+// the things of the actions, in words
+const COSA_NOMBRE = { picnic: 'el mantel del picnic', trineo: 'el trineo', patines: 'los patines', bote: 'el bote', tinte: 'el frasco de tinte', tijeras: 'las tijeras', libro: 'un libro', papel: 'un papel', cuaderno: 'el cuaderno', hacha: 'el hacha', horquilla: 'la horquilla', semillas: 'las semillas', regadera: 'la regadera', grano: 'el grano', balde: 'el balde', entregar: 'lo que entrega', abrazo: 'un abrazo', cuerda: 'la cuerda', corte: 'las tijeras', banqueta: 'la banqueta', te: 'el té', rezar: 'las manos juntas', flores: 'flores', sombrero: 'el sombrero con flores', jarabe: 'el jarabe', quehacer: 'el quehacer', bol: 'el bol', mantequera: 'la mantequera', costura: 'la costura', canastito: 'el canastito', manos: 'las manos', platos: 'una pila de platos limpios', platos_sucios: 'los platos sucios', aparador: 'el aparador abierto', poner: 'los platos que va dejando en la mesa', recoger: 'los platos que va recogiendo', lavar: 'la palangana con agua', escoba: 'la escoba', recitar: 'el gesto de recitar', carta: 'la carta', libro_abierto: 'el libro abierto' };
+const cosa = k => k ? (COSA_NOMBRE[k] || k.replace(/_/g, ' ')) : '';
+const conJunto = j => j ? (j.startsWith('el ') ? ', junto al ' + j.slice(3) : ', junto a ' + j) : '';
+const SALA_MAPA = { gg: 'cocina', ga: 'pieza', os: 'salita', sa: 'salon' };
+// where someone is, in words: the room and what she is next to; outdoors, the nearest named place
+function relatoSitio(k){
+  const b = wmBody(k), sc = wmScene(k); if (!b || !sc) return { lugar: '?', junto: '' };
+  if (sc === 'away') return { lugar: 'fuera de Avonlea', junto: '' };
+  if (sc === 'camino') return { lugar: 'el camino de Bright River', junto: '' };
+  if (sc !== 'out') {
+    const m = MAPAS[SALA_MAPA[sc]]; let junto = '', mejor = 46;
+    if (m) for (const o of m.layers.flatMap(l => l.objects || [])) { const d = Math.hypot(b.x - o.x, b.y - o.y); if (d < mejor) { mejor = d; junto = SITIO_NOMBRE[o.name] || o.name; } }
+    return { lugar: placeName(sc), junto };
+  }
+  let nombre = '', mejor = 1e9; for (const [, P] of Object.entries(PLACES)) { const d = Math.hypot(b.x - P[1], b.y - P[2]); if (d < mejor) { mejor = d; nombre = P[0]; } }
+  return { lugar: 'Avonlea', junto: mejor < 260 ? nombre : 'camino de ' + nombre };
+}
+const relatoPostura = b => b.lie ? 'acostada' : b.sit ? 'sentada' : b.crouch ? 'agachada' : b.moving ? 'caminando' : 'de pie';
+function relatoEstado(k){
+  const b = wmBody(k); if (!b) return null;
+  const ag = AGENTS[k] || (k === 'ana' ? game.playAct : null), A = ag?.acting, s = relatoSitio(k);
+  const inv = Object.entries(wmInv(k) || {}).filter(([, n]) => n > 0).map(([i, n]) => n + ' ' + i).join(', ');
+  return { quien: k, lugar: s.lugar, junto: s.junto, postura: relatoPostura(b), accion: A ? A.v + (A.x ? ' ' + A.x : '') : '', lleva: cosa(A?.lleva || (typeof b.carry === 'string' ? b.carry : b.carry ? 'algo' : '')), objeto: A ? [cosa(A.obj !== undefined ? A.obj : ACCION_VISTA[A.v]?.obj), A.mesa ? cosa(A.mesa[3]) + ' sobre la mesa' : ''].filter(Boolean).join(' y ') : '', tiene: inv, pelo: k === 'ana' && game.wm?.perm?.pelo_verde ? 'verde' : '' };
+}
+const relatoHora = () => { const d = dayT % 1, m = Math.floor(((d * 24 + 6) % 24) * 60); return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); };
+const relatoFrase = (e, c) => {   // (what changed, as a sentence)
+  const n = wmName(e.quien), p = [];
+  if (c.has('lugar') || c.has('junto')) p.push((e.postura === 'caminando' ? 'va por ' : 'está en ') + e.lugar + conJunto(e.junto));
+  if (c.has('postura') && !(c.has('lugar') || c.has('junto'))) p.push({ acostada: 'se acuesta', sentada: 'se sienta', agachada: 'se agacha', caminando: 'echa a andar', 'de pie': 'se queda de pie' }[e.postura]);
+  if (c.has('accion')) p.push(e.accion ? 'empieza: ' + e.accion : 'termina lo que hacía');
+  if (c.has('lleva')) p.push(e.lleva ? 'lleva ' + e.lleva : 'ya no lleva nada');
+  if (c.has('objeto') && e.objeto) p.push('con ' + e.objeto);
+  if (c.has('tiene')) p.push(e.tiene ? 'ahora tiene ' + e.tiene : 'ya no tiene nada');
+  if (c.has('pelo') && e.pelo) p.push('tiene el pelo ' + e.pelo);
+  return n + ' ' + p.join('; ') + '.';
+};
+function relatoLinea(texto, estado){ const L = { hora: relatoHora(), t: dayT, texto, estado }; RELATO.lineas.push(L); if (/[?&]relato/.test(location.search)) console.log('[relato] ' + L.hora + ' ' + texto); }
+// to start: whom to watch (null: Ana and whoever is in her scene)
+function relatoEmpezar(quienes){ RELATO.on = true; RELATO.quienes = quienes; RELATO.lineas = []; RELATO.antes = {}; RELATO.ultimo = -1; RELATO.globo = new Set(); }
+function relatoTick(){
+  if (!RELATO.on) return;
+  const ks = RELATO.quienes || ['ana', ...Object.keys(PEOPLE).filter(k => wmScene(k) === game.scene)];
+  for (const k of ks) {
+    const e = relatoEstado(k); if (!e) continue;
+    const a = RELATO.antes[k], c = new Set(a ? Object.keys(e).filter(f => f !== 'quien' && e[f] !== a[f]) : ['lugar'].concat(['accion', 'lleva', 'objeto', 'tiene', 'pelo'].filter(f => e[f])));
+    if (a && e.postura === 'caminando' && a.postura === 'caminando') c.delete('junto');   // (walking past things is not news: where she stops is)
+    if (c.size) { relatoLinea((a ? '' : 'Al empezar, ') + relatoFrase(e, c), e); RELATO.antes[k] = e; }
+    for (const b of bubbles) if (b.q === k && !RELATO.globo.has(b)) { RELATO.globo.add(b); relatoLinea(wmName(k) + ' dice: «' + b.text + '»', { ...e, dice: b.text }); }
+  }
+  const cinco = Math.floor(dayT * 24 * 12);   // (every 5 minutes of the game, how each one is)
+  if (cinco !== RELATO.ultimo) { RELATO.ultimo = cinco; for (const k of ks) { const e = relatoEstado(k); if (e) relatoLinea('· ' + wmName(k) + ': ' + [e.lugar + conJunto(e.junto), e.postura, e.accion, e.lleva && 'lleva ' + e.lleva, e.objeto && 'con ' + e.objeto].filter(Boolean).join(' · '), { ...e, resumen: true }); } }
+}
+
 /* ---------- the viewer (index.html?visor): only Ana, big, on a plain floor, to look at the drawings and move her:
    arrows (Shift to run), and buttons for everything she can do. ---------- */
 function startVisor(){
