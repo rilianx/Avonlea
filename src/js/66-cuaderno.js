@@ -58,7 +58,7 @@ function cuadernoTick(dt){
 }
 // the hint now: the last whose condition holds, or the plain one
 const cuadernoPista = m => [...m.pistas].reverse().find(([c]) => dlgCond(c, dlgCtx()))?.[1] || m.pista;
-const cuadernoAntes = m => m.antes || m.requiere.filter(r => !cuadernoCumple(r)).map(r => cuadernoMeta(r)?.titulo.toLowerCase()).filter(Boolean).join(', ');
+const cuadernoAntes = m => m.antes || m.requiere.filter(r => !cuadernoCumple(r)).map(r => { const t = cuadernoMeta(r)?.titulo; return t && t[0].toLowerCase() + t.slice(1); }).filter(Boolean).join(', ');
 function cuadernoPanel(open){
   const P = $('cua'); P.hidden = !open; if (!open) return;
   const n = CUADERNO_METAS.filter(m => cuadernoHecho(m.id)).length;
