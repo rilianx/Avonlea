@@ -174,6 +174,7 @@ function kitHeadOn(c, p, t, vi, L){
 }
 function drawPerson(c, p, t){
   if (p.look === 'ana') { const La = LOOKS.ana; La.big = ANA_STYLE === 'mano' ? HEAD_M : 0; La.pencil = ANA_STYLE === 'mano'; if (La.hair0 == null) { La.hair0 = La.hair; La.hairD0 = La.hairD; } const green = !!game.wm?.perm?.pelo_verde; La.hair = green ? '#5a8a3a' : La.hair0; La.hairD = green ? '#3e6a26' : La.hairD0; La.style = game.wm?.perm?.pelo_corto ? 'corto' : 'braids'; }   // (green after the dye; short, without braids, after Marilla cuts it) else if (LOOKS[p.look]) LOOKS[p.look].big = Math.max(1, HEAD_M / 2);
+  if (CACHE_ON && c === G0 && !CACHE.dentro && cachePersona(c, p, t)) return;   // (after her look is set up: a quiet pose, from a kept image: see 66-cache-dibujos.js)
   if (animDraw(c, p, t) || kitDraw(c, p, t)) return;
   if (p.lie) { drawLying(c, p, t); return; }
   if (rigDraw(c, p, t) || vecDraw(c, p, t)) return;

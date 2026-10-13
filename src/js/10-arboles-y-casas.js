@@ -132,6 +132,7 @@ function drawBarn(c, o){
   if (S === 3) blob(c, [[x - w / 2 + 10, y - h - 66], [x + w / 2 - 10, y - h - 66], [x + w / 2 - 2, y - h - 36], [x + 20, y - h - 30], [x - 30, y - h - 34], [x - w / 2 + 2, y - h - 30]], '#f6f8fb');
 }
 function drawProp(c, o, t, night){
+  if (CACHE_ON && c === G0 && !CACHE.dentro && cacheProp(c, o, t, night)) return;   // (kept as an image: see 66-cache-dibujos.js)
   if (o.kind === 'house') { drawHouse(c, o, t, night); if (o.style) drawSteeple(c, o); }
   else if (o.kind === 'edificio') drawBuilding(c, o.b, t, night);
   else if (o.kind === 'covered') { const x = o.x, y = o.y; ell(c, x + 8, y + 2, 60, 10, 'rgba(30,40,20,.22)'); blob(c, [[x - 56, y], [x + 56, y], [x + 56, y - 42], [x - 56, y - 42]], '#a8463a'); blob(c, [[x - 30, y], [x + 30, y], [x + 30, y - 30], [x - 30, y - 30]], '#3a2a24'); blob(c, [[x - 62, y - 40], [x + 62, y - 40], [x + 52, y - 66], [x - 52, y - 66]], '#5a4a44'); for (let k = -50; k <= 50; k += 10) line(c, [[x + k, y - 2], [x + k, y - 40]], 'rgba(60,25,20,.35)', .8, k); }
