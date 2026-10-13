@@ -73,6 +73,7 @@ body.visor > *:not(#cv):not(#visor){display:none !important}
 #cua .cm small{display:block;font-size:12.5px;opacity:.72;margin-left:1.2em}
 #cua .cm span{font-size:12px;opacity:.6;margin-left:1.2em}
 #cua .cm.hecha b{color:#4f7d47}
+#cua .cm.cerrada{opacity:.7}
 #cua .mb{text-align:center;margin-top:8px}
 #rels .sheet{padding:10px 14px 12px;width:min(560px,calc(100% - 24px));max-height:calc(100% - 30px);overflow:auto;text-align:center}
 #rels .mt{font-size:18px;font-style:italic;margin-bottom:6px}
@@ -567,46 +568,133 @@ ana: Las cartas a Charlottetown tardan tres días. En tres días pueden pasar ta
 carta: Le cuento que Matthew me regaló un vestido con mangas abullonadas. Son las mangas más abullonadas de toda la isla, creo.
 carta: Su amiga que la recuerda siempre, Ana Shirley.
 
+# --- conocer a Diana (cap. 8 y 12): Ana le cuenta a Marilla que quiere una amiga del alma (desde el menú de Marilla);
+# al día siguiente, en la tarde, Marilla va a La Cuesta del Huerto y la lleva (la agenda de Marilla, src/js/66-cadenas.js);
+# la Sra. Barry las recibe, llama a Diana, y las niñas se conocen. Si se encuentran antes por casualidad, se conocen
+# igual, pero sin la presentación: se quieren menos, y para jurar tendrán que pasar tiempo juntas.
+=== quiere_amiga ===
+canal: gg
+prioridad: 7
+interrumpe
+sujeta: marilla
+en: ana=gg, marilla=gg
+si: hecho:pide_amiga, !hecho:quiere_amiga, !hecho:conocidas_diana
+al_terminar: hecho quiere_amiga
+al_terminar: log Ana le contó a Marilla que quería una amiga del alma, y Marilla le habló de Diana Barry.
+---
+ana: Marilla, ¿cree usted que encontraré una amiga del alma en Avonlea?
+marilla: ¿Una qué?
+ana: Una amiga del alma, una amiga íntima, ¿sabe?, un espíritu verdaderamente afín al que pueda confiarle lo más profundo de mi alma. He soñado con conocerla toda mi vida.
+marilla: Diana Barry vive en La Cuesta del Huerto, y tiene más o menos tu edad. Es una niña muy buena; quizás sea una compañera de juegos para ti cuando vuelva a casa.
+ana: ¡Oh! ¿Y cómo es? ¿Tiene el pelo rojo? Espero que no. Ya es bastante malo que yo lo tenga.
+marilla: Diana es muy bonita: ojos y pelo negros, y mejillas rosadas. Y es buena e inteligente, que es mejor que ser bonita. Un día de estos tengo que ir a ver a la Sra. Barry; si te portas bien, puedes venir conmigo.
+ana: ¡Oh, Marilla! Ahora tengo miedo: ¿y si no le gusto? Sería la desilusión más trágica de mi vida.
+
+=== barry_recibe ===
+canal: os
+prioridad: 7
+interrumpe
+sujeta: marilla, barry
+en: ana=os, marilla=os
+si: hecho:quiere_amiga, !hecho:conocidas_diana, !hecho:barry_presenta
+al_terminar: hecho barry_presenta
+al_terminar: meta diana estar_en h:os,-,- | Diana entra a conocer a la niña de Tejas Verdes | entrar a conocer a la niña de Tejas Verdes (cap. 12) | 3
+---
+barry: Buenas tardes, Marilla. ¡Qué sorpresa! Pasa, pasa. ¿Y ésta es la niña que adoptaron?
+marilla: Sí, ésta es Ana Shirley. Vengo a devolverle el patrón de la falda que me prestó.
+ana: Ana con e, por favor.
+barry: ¿Cómo estás, Ana? Diana está en el jardín. ¡Diana! Ven a conocer a la niña de los Cuthbert.
+
+=== conoce_diana ===
+canal: os
+prioridad: 8
+interrumpe
+sujeta: ana, diana
+en: ana=os, diana=os
+si: hecho:barry_presenta, !hecho:conocidas_diana
+al_terminar: hecho conocidas_diana
+al_terminar: afecto diana ana 4
+al_terminar: afecto ana diana 5
+al_terminar: log Ana conoció a Diana Barry en La Cuesta del Huerto: la Sra. Barry las presentó.
+---
+barry: Ésta es mi hija Diana. Diana, ¿por qué no llevas a Ana al jardín y le muestras tus flores?
+diana: Hola… ¿quieres venir a ver el jardín?
+ana: (Ana mira a Diana muy seria, sin atreverse a respirar.) Oh, Diana… ¿crees que podrías… que podrías quererme un poquito, lo bastante como para ser mi amiga del alma?
+diana: (Diana se ríe; Diana siempre se ríe antes de hablar.) Bueno, creo que sí. Me alegro mucho de que hayas venido a vivir a Tejas Verdes. Va a ser tan lindo tener a alguien con quien jugar.
+
+=== diana_por_casualidad ===
+disparo: encuentro
+quienes: ana, diana
+# (una vez que Ana le contó a Marilla, se conocen como en el libro: Marilla la lleva y la Sra. Barry las presenta)
+si: !hecho:conocidas_diana, !hecho:barry_presenta, !hecho:quiere_amiga
+al_terminar: hecho conocidas_diana
+al_terminar: afecto diana ana 2
+al_terminar: afecto ana diana 4
+al_terminar: log Ana y Diana se conocieron por casualidad.
+---
+diana: Hola… ¿Tú eres la niña que vino a vivir a Tejas Verdes?
+ana: Sí… soy Ana. Ana con e. ¿Y tú… tú eres Diana Barry?
+diana: Sí. Mamá dice que eres muy rara. Pero no pareces rara. Bueno, un poquito.
+ana: (Ana se pone colorada hasta las orejas.) Tengo una imaginación muy grande, eso es todo. ¿Te… te gustaría que algún día jugáramos juntas?
+diana: Bueno… tal vez. Tengo que volver a casa ahora.
+
 </script>
 <script type="text/plain" id="cuaderno">
 # El cuaderno de Ana: lo que podría hacer, como metas del libro (lo lee el juego al empezar).
 # «== Grupo» empieza un grupo. Cada meta: «=== id ===» y sus campos, uno por línea:
 #   titulo: lo que se lee en el cuaderno (una meta, no una acción)
 #   pista: dónde o cuándo, sin los pasos
+#   pista si <condición>: otra pista, cuando se cumple la condición (vale la última que se cumpla)
 #   meta: cuándo está cumplida: una meta del planificador y sus argumentos, separados por espacios
 #         (p. ej. «amigas ana diana», «nombres ana 3»; una lista va con comas: «quehaceres ana platos,barrer»)
+#   requiere: lo que tiene que pasar antes (separado por comas): otras metas del cuaderno (por su id), o
+#         condiciones del guion («hecho:conocidas_diana», «dias_desde:quiere_amiga:1», «afecto:diana:ana:4»)
+#   antes: cómo se dice lo que falta, mientras está cerrada (si no, los títulos de las metas que requiere)
+#   acciones: lo que no se puede hacer mientras está cerrada (separado por comas): una acción («jurar»), una
+#         acción con alguien («perdonar:gilbert»), o un pedido («pedir/venir»: invitar a tomar el té)
 #   Las metas que se pueden usar (las del planificador): amigas, picnic, visitar, paces, quehaceres, regalo_gusto,
 #   huerta, rezo, leido, carta, club, recito, concierto, sala, nombres, adornado, remo, patinar, trineo, teñido,
-#   desafio, felicitar, consolado, devuelto, te_con, tener, dinero… (ver G en src/js/58-fichas-y-planificador.js);
-#   y además «tomando_te quien con_quien» (sentada a la mesita del té con esa persona).
+#   pelo_corto, desafio, felicitar, consolado, devuelto, te_con, tener, dinero, estar_en… (ver G en
+#   src/js/58-fichas-y-planificador.js); y además «tomando_te quien con_quien» (sentada a la mesita del té con esa
+#   persona) y «hecho x» (pasó x, en el guion).
+# Las cadenas del libro, de dónde salen y qué abren: docs/CADENAS.md.
 # Las líneas que empiezan con # son comentarios.
 
 == Amistades
 
+=== conocer_diana ===
+titulo: Conocer a Diana Barry
+pista: Quizás Marilla sepa de alguna niña de tu edad. Habla con ella.
+pista si hecho:quiere_amiga: Marilla dijo que un día de estos iría a La Cuesta del Huerto, donde viven los Barry… y que podrías ir con ella.
+meta: hecho conocidas_diana
+
 === amigas ===
 titulo: Tener una amiga del alma
-pista: Diana Barry vive en La Cuesta del Huerto, al otro lado del arroyo. Una amistad así se jura.
+pista: Una amistad así se jura, en el jardín, tomadas de las manos.
+pista si !afecto:diana:ana:4: Ya conoces a Diana, pero para jurar tienen que quererse mucho: pasen tiempo juntas, conversen, regálale algo.
 meta: amigas ana diana
+requiere: conocer_diana
+acciones: jurar
 
 === picnic ===
 titulo: Ir de picnic con Diana
 pista: Al lago, con una canasta. Primero hay que pedirle permiso a Marilla.
 meta: picnic ana diana
+requiere: amigas
+acciones: merendar, pedir_permiso
 
 === lynde ===
 titulo: Visitar a la Sra. Lynde
 pista: Vive en la Hondonada, junto al camino; desde su ventana lo ve todo. Por la tarde está en casa.
 meta: visitar ana lynde
 
-=== paces ===
-titulo: Hacer las paces con Gilbert Blythe
-pista: Le dijo «zanahorias». Él quiere disculparse… si Ana lo deja.
-meta: paces ana gilbert
-
 === allan ===
 titulo: Tomar el té con la Sra. Allan
-pista: La esposa del pastor vive en la casa parroquial, cerca de la iglesia. A veces invita.
+pista: La esposa del pastor vive en la casa parroquial, cerca de la iglesia. A veces invita a tomar el té.
 meta: tomando_te ana sraallan
+requiere: escuela_dominical
+antes: conocer a la Sra. Allan (en la iglesia, un domingo)
+acciones: pedir/venir
 
 == En Tejas Verdes
 
@@ -630,7 +718,32 @@ titulo: Decir sus oraciones
 pista: Junto a su cama, en la pieza del alero.
 meta: rezo ana
 
-== Libros y letras
+== La escuela y los libros
+
+=== escuela_dominical ===
+titulo: Ir a la escuela dominical
+pista: En la iglesia, camino a Bright River. Allí está el pastor, y su esposa, la Sra. Allan.
+meta: estar_en ana iglesia
+
+=== escuela ===
+titulo: Ir a la escuela
+pista: La escuela está junto al río, más allá de la aldea. Allí van Diana, Gilbert Blythe y los demás.
+meta: estar_en ana escuela
+
+=== recito ===
+titulo: Recitar la lección en la escuela
+pista: Hay que estudiarla antes.
+meta: recito ana
+requiere: escuela
+acciones: recitar
+
+=== paces ===
+titulo: Hacer las paces con Gilbert Blythe
+pista: Le dijo «zanahorias». Él quiere disculparse… si Ana lo deja.
+meta: paces ana gilbert
+requiere: escuela
+antes: conocer a Gilbert (en la escuela)
+acciones: disculparse:gilbert, perdonar:gilbert, interceder:gilbert
 
 === leido ===
 titulo: Leer un libro de principio a fin
@@ -646,21 +759,23 @@ meta: carta ana
 titulo: Escribir un cuento para el club de cuentos
 pista: Una historia trágica, con una dama de cabellos de oro… y leérsela a Diana.
 meta: club ana
-
-=== recito ===
-titulo: Recitar la lección en la escuela
-pista: Hay que estudiarla antes. La escuela está junto al río.
-meta: recito ana
+requiere: amigas
+acciones: escribir_cuento, leer_cuento
 
 === concierto ===
 titulo: Recitar en el concierto
 pista: En el salón del pueblo, en la aldea. Conviene ensayar.
 meta: concierto ana
+requiere: escuela
+antes: ir a la escuela (el concierto lo organizan la maestra y sus alumnos)
+acciones: ensayar, actuar
 
 === sala ===
 titulo: Decorar el salón para el concierto
 pista: Con flores de la huerta.
 meta: sala ana
+requiere: escuela
+acciones: decorar_sala
 
 == Al aire libre
 
@@ -678,6 +793,9 @@ meta: adornado ana
 titulo: Remar en el Lago de las Aguas Brillantes
 pista: El bote de los Barry está en el lago. En verano.
 meta: remo ana
+requiere: amigas
+antes: ser amiga de Diana (el bote es de los Barry)
+acciones: remar
 
 === patinar ===
 titulo: Patinar en el lago helado
@@ -696,10 +814,21 @@ titulo: Teñirse el pelo de negro azabache
 pista: El buhonero vende un tinte que promete maravillas… y acepta huevos.
 meta: teñido ana
 
+=== pelo_corto ===
+titulo: Librarse del pelo verde
+pista: El tinte no sale con nada. Marilla sabe lo que hay que hacer, aunque a Ana no le va a gustar.
+meta: pelo_corto ana
+requiere: tinte
+antes: ¿por qué habría que librarse de un pelo negro azabache? (primero, teñírselo)
+acciones: cortar_pelo
+
 === techo ===
 titulo: Aceptar el desafío de Josie Pye
 pista: Caminar por el caballete del techo de los Barry. ¿Qué podría salir mal?
 meta: desafio ana
+requiere: amigas
+antes: ser amiga de Diana (el desafío es en una fiesta en su casa)
+acciones: trepar
 
 </script>
 <script>
@@ -2850,7 +2979,7 @@ function startCap1(){
   if (today() % 7 === 6) dayT += 1;   // (a weekday)
   dayAt(14.9); setSeason(0); S = 0;     // (an afternoon in early June, just before Matthew goes)
   game.dlgUsed = {};
-  CAP1.on = true; CAP1.done = 0; CAP1.marks = {}; CAP1.f = {}; CAP1.extra = null; game.escDone = {}; game.dlgHechos = {}; game.dlgProg = {};
+  CAP1.on = true; CAP1.done = 0; CAP1.marks = {}; CAP1.f = {}; CAP1.extra = null; game.escDone = {}; game.dlgHechos = {}; if (game.wm) game.wm.hechos = {}; game.dlgProg = {};
   const put = (k, room, x, y) => { const b = PEOPLE[k]; b.where = room; b.x = x; b.y = y; b.sit = false; b.nav = null; b.buggy = false; b.roadDir = 0; b.story = null; b.away = null; };
   put('marilla', 'gg', STOVE.x + 30, STOVE.y + 40); put('matthew', 'out', BARN.x + 140, BARN.y + 70); put('lynde', 'rl', KDOOR.x - 60, KIT.h * .45);
   if (PEOPLE.shearer.where !== 'away') PEOPLE.shearer.where = 'away';
@@ -2924,8 +3053,10 @@ function cap1Tick(){
      al_empezar / al_terminar: [{hecho}, {marca, nota}, {log}, {saber: [who, what]}, {meta: {quien, tipo, args,
           texto, etiqueta, prioridad}}, {soltar: who}, {ana: {props}}, {fin_capitulo: true}] ---------- */
 const DLG_LUGARES = { lago: () => [LAKE.x, LAKE.y], tejas_verdes: () => [GG.x, GG.y], casa_bell: () => WP.casa_bell, letrero_br: () => DOOR.br, hondonada: () => [LY.x, LY.y + 60] };
-const dlgHechos = () => game.dlgHechos || (game.dlgHechos = {});
-const dlgHecho = (n, v = true) => { dlgHechos()[n] = v; };
+// what has happened (kept with the game: the chains of the book go on from one day to another); each with the day it
+// happened (from 1), so that a scene can wait a day or two after another (dias_desde)
+const dlgHechos = () => game.wm ? (game.wm.hechos ||= {}) : (game.dlgHechos ||= {});
+const dlgHecho = (n, v = today() + 1) => { dlgHechos()[n] = v; };
 const dlgDichas = () => game.escDone || (game.escDone = {});
 const dlgEscena = k => k === 'ana' ? game.scene : wmScene(k);
 function dlgCtx(){
@@ -2935,12 +3066,14 @@ function dlgCtx(){
 }
 function dlgCond(s, c){   // one condition of state, written as text
   if (s[0] === '!') return !dlgCond(s.slice(1), c);
-  const i = s.indexOf(':'), k = i < 0 ? s : s.slice(0, i), rest = i < 0 ? '' : s.slice(i + 1), [a, b] = k === 'sabe' || k === 'y_mayor' ? rest.split(':') : [rest];   // (an id may have ':' in it)
+  const i = s.indexOf(':'), k = i < 0 ? s : s.slice(0, i), rest = i < 0 ? '' : s.slice(i + 1), [a, b] = k === 'sabe' || k === 'y_mayor' || k === 'dias_desde' ? rest.split(':') : [rest];   // (an id may have ':' in it)
   switch (k) {
     case 'hecho': return !!dlgHechos()[a];
     case 'dicha': return !!dlgDichas()[a];
     case 'marca': return CAP1.marks[a] != null;
     case 'capitulo': return CAP1.on && !CAP1.done;
+    case 'afecto': { const [x, y, n] = rest.split(':'); return relGetW(x, y) >= +n; }   // (x cares for y at least n, of 0..5)
+    case 'dias_desde': { const d = dlgHechos()[a]; return typeof d === 'number' && today() + 1 - d >= +b; }   // (at least b days since a happened)
     case 'canal_libre': return !talkBusy(a);
     case 'ana_visible': return !ana.hidden;
     case 'escena_ana': return game.scene === a;
@@ -2985,6 +3118,7 @@ function dlgHacer(list){   // what a scene does when it starts or ends
     if (a.meta) { const m = a.meta; agentStart(m.quien, { ...G[m.tipo](m.quien, ...(m.args || [])), ...(m.texto ? { text: m.texto } : {}) }, { label: m.etiqueta || m.texto, prio: m.prioridad }); }
     if (a.soltar && FOLKBY[a.soltar]) FOLKBY[a.soltar].talkT = TT + 1;
     if (a.ana) Object.assign(ana, a.ana);
+    if (a.afecto) { const [k, o, n] = a.afecto; relSetW(k, o, Math.max(relGetW(k, o), +n)); }   // (how much one cares for the other, at least so much)
     if (a.fin_capitulo) { CAP1.done = hourNow(); logEv('Fin del capítulo 1 (y del 2): Ana llegó a Tejas Verdes.', []); }
   }
 }
@@ -3074,7 +3208,8 @@ function dlgTick(dt){
 function dlgNext(ks){
   const key = dlgKey(ks), x = dlgCtx();
   const d = DIALOGOS.find(e => e.disparo === 'encuentro' && dlgKey(e.quienes) === key && !e.dicha() && dlgCumple(e, x)); if (!d) return null;
-  dlgDichas()[d.id] = true; return d.lineas().map(([q, t]) => ({ q, t }));
+  dlgDichas()[d.id] = true; dlgHacer(d.al_empezar); dlgHacer(d.al_terminar);   // (an encounter is said all at once: what it does, at once too)
+  return d.lineas().map(([q, t]) => ({ q, t }));
 }
 // the scenes, as a script outside the code (the <script type="text/plain" id="guion"> block, at the top): each one
 // «=== id ===», its fields, one per line («field: value»), and its own lines after «---» («who: text #mark»).
@@ -3099,6 +3234,7 @@ function dlgAccion(s){   // an action of the script: «hecho x», «marca id | n
     case 'saber': return { saber: r };
     case 'soltar': return { soltar: rest };
     case 'ana': return { ana: dlgCampo('en', rest) };
+    case 'afecto': return { afecto: r };
     case 'fin_capitulo': return { fin_capitulo: true };
     case 'meta': { const [quien, tipo, args = ''] = part[0].split(/\s+/); return { meta: { quien, tipo, args: args ? args.split(',').map(dlgVal) : [], texto: part[1] || undefined, etiqueta: part[2] || undefined, prioridad: part[3] ? +part[3] : undefined } }; }
   }
@@ -3204,7 +3340,7 @@ const VIAJE_ESCENAS = [
   });
 }
 // the talks of pairs and trios (DLG_BANK), as scenes too: when they meet, where it makes sense
-for (const [key, list] of Object.entries(DLG_BANK)) list.forEach((blk, i) => Dialogo.registrar({ id: 'par:' + key + ':' + i, disparo: 'encuentro', quienes: key.split('+'), donde: Array.isArray(blk) ? undefined : blk.at, lineas: Array.isArray(blk) ? blk : blk.l }));
+for (const [key, list] of Object.entries(DLG_BANK)) list.forEach((blk, i) => Dialogo.registrar({ id: 'par:' + key + ':' + i, disparo: 'encuentro', quienes: key.split('+'), donde: Array.isArray(blk) ? undefined : blk.at, lineas: Array.isArray(blk) ? blk : blk.l, ...(/\bana\b/.test(key) && /\bdiana\b/.test(key) ? { si: ['hecho:conocidas_diana'] } : {}) }));   // (Ana and Diana as friends: once they have met)
 // the school: rows of desks, the master's desk, the blackboard, the stove, the windows over the river
 function drawSchool(c, t, night){
   c.fillStyle = '#b98a58'; c.fillRect(0, 0, KIT.w, KIT.h);
@@ -4689,7 +4825,8 @@ function talk(who, again = false){
   if (game.saidS[who] !== seasonCount()) { game.saidS[who] = seasonCount(); text = SEASON_LINES[who][S]; }
   else text = LINES[who][game.said[who] = ((game.said[who] ?? -1) + 1) % LINES[who].length];
   if (pre.some(x => x.startsWith('Ana cumplió'))) text = '¡Gracias por hacer lo que te pedí, Ana! ' + text;
-  const opts = [...taskOptions(who)];
+  if (who === 'diana' && !conoceDiana()) { const L = cadenaEncuentro('diana'); if (L) return say('diana', L.map(l => (l.q === 'ana' ? 'Ana: ' : '') + l.t).join('\n'), [['…', close]]); }   // (they have not met: the meeting of the book, not a friend's greeting)
+  const opts = [...taskOptions(who), ...cadenaOpciones(who)];
   for (const [k, [name]] of Object.entries(GIFTS)) if (game.inv[k] > 0) opts.push(['Regalar ' + name, () => give(who, k)]);
   if (!isQuieto(who) || who === 'marilla') opts.push(['🙏 Pedirle un favor', () => favorMenu(who)]);
   opts.push(...walkOption(who), ['Adiós', close]);
@@ -4702,7 +4839,7 @@ function face(who){
 }
 // walking with Diana (the same with or without AI: the game decides it, so it always works)
 function walkOption(who){
-  if (who !== 'diana') return [];
+  if (who !== 'diana' || !conoceDiana()) return [];
   return [diana.follow ? ['Hasta mañana, Diana', () => { diana.follow = false; logEv('Ana y Diana terminaron su paseo.'); save(); say(who, '¡Hasta mañana, Ana! Que sueñes bonito.', [['Adiós', close]]); }]
     : ['¿Paseamos juntas?', () => { diana.follow = true; game.fond.diana = Math.min(5, game.fond.diana + 1); logEv('Ana y Diana salieron a pasear juntas.'); save(); say(who, '¡Sí! Vamos, Ana, a donde tú quieras.', [['¡Vamos!', close]]); }]];
 }
@@ -5141,7 +5278,8 @@ const STORIES = [
     { hora: 13, lugar: 'gg', personajes: ['marilla', 'matthew'], que_pasa: 'A la hora de comer, Matthew le cuenta a Marilla, a su manera, lo bien que lo cuida Ana; Marilla disimula una sonrisa.', pista: 'La comida en Tejas Verdes', encargo: NO_TASK, fin: 'llega_ana' }] },
 ];
 function fallbackStory(){
-  const done = game.stories || [], fresh = STORIES.filter(st => !done.includes(st.titulo)), pool = fresh.length ? fresh : STORIES;
+  const ok = STORIES.filter(st => conoceDiana() || !JSON.stringify(st).includes('"diana"'));   // (with Diana: once Ana knows her)
+  const done = game.stories || [], fresh = ok.filter(st => !done.includes(st.titulo)), pool = fresh.length ? fresh : ok.length ? ok : STORIES;
   return validStory(pool[Math.floor(Math.random() * pool.length)]);
 }
 function storyMsg(){
@@ -5962,6 +6100,8 @@ function ambUpdate(dt){
   let best = null, bd = 1e9;
   for (const k of all) { const d = dd(k); if (TT < (amb.mute[k] || 0) || d > 240 || d >= bd || ocupada(k)) continue; best = k; bd = d; }
   if (!best) return;
+  { const L = bd < 90 && cadenaEncuentro(best); if (L) { amb.mute[best] = TT + 110; amb.seen[best] = true; sceneStart({ parts: [best], lines: L, out: {}, scene: game.scene, resumen: '' }, false); return; } }   // (two who have not met: they meet, as in the book)
+  if (best === 'diana' && !conoceDiana()) return;   // (no friend's greeting from one she does not know yet)
   if (!aiReady()) {   // (without the AI: just a word from them, from the written lines)
     if (bd < 90) { const l = (game.wm?.sick || []).includes(best) ? ENFERMO_LINES : LINES[best], t = l[Math.floor(Math.random() * l.length)]; amb.mute[best] = TT + 110; amb.seen[best] = true; sceneStart({ parts: [best], lines: [{ q: best, t }], out: {}, scene: game.scene, resumen: '' }, false); }
     return;
@@ -7314,9 +7454,10 @@ function autoFavors(me, goal, s0, exclude = []){
 }
 function verbs(s, me, C){
   const L = [], here = s.pos[me], inv = s.invs[me], W = whoOf(me), at = k => s.pos[k] && s.pos[k] === here && k !== me;
-  const add = (v, cost, eff, a = {}) => L.push({ v, cost, eff, ...a });
+  const add = (v, cost, eff, a = {}) => { if (!cuadernoCerrada(v, a)) L.push({ v, cost, eff, ...a }); };   // (what belongs to a goal of the book still closed: not yet, by anyone)
   const ride = me === 'matthew' && Object.values(s.follow).includes(me);   // (Matthew with someone in the cart: much faster)
-  if (!isQuieto(me)) for (const p of C.places) if (p !== here && C.pts[p]) add('ir', travelMin(me, here, p, C.pts) / (ride ? 2.4 : 1), t => { t.pos[me] = p; for (const [f, w] of Object.entries(t.follow)) if (w === me) t.pos[f] = p; }, { p });
+  if (!isQuieto(me) || C.sale) for (const p of C.places) if (p !== here && C.pts[p]) add('ir',   // (one who stays at home goes out for a goal that says so: Marilla to the Barrys)
+     travelMin(me, here, p, C.pts) / (ride ? 2.4 : 1), t => { t.pos[me] = p; for (const [f, w] of Object.entries(t.follow)) if (w === me) t.pos[f] = p; }, { p });
   const of = OFRECE[here] || {};
   for (const x of of.tomar || []) if (!(inv[x] > 0) && C.items.includes(x) && !(x === 'jarabe' && game.wm.sinJarabe)) add('tomar', 1, t => { t.invs[me][x] = 1; }, { x });
   for (const x of of.recoger || []) if (s.stock[x] > 0 && (inv[x] || 0) < 9) { const n = Math.min(x === 'ramo' ? 1 : x === 'huevos' ? 9 : 3, s.stock[x]); add('recoger', 3, t => { t.invs[me][x] = (t.invs[me][x] || 0) + n; t.stock[x] -= n; }, { x, n }); }
@@ -7467,7 +7608,7 @@ function wmSearch(me, goal, favors, s0, cap){
   const pts = {}; for (const p of places) { const q = keyPoint(p); if (q) pts[p] = q; }
   pts[s0.pos[me]] = pts[s0.pos[me]] || (wmBody(me) ? [wmBody(me).x, wmBody(me).y] : null);
   const owner = Object.fromEntries(Object.keys(s0.cows).map(c => [c, ANIM[c].owner || ANIMALS[c].owner]));
-  const C = { places: [...places].filter(p => pts[p]), pts, people, items: [...items, 'cuerda', 'azucar', 'hierbas'], favors, owner, intercede: goal.intercede, lleva: goal.lleva, kind: goal.kind, k: goal.k };
+  const C = { places: [...places].filter(p => pts[p]), pts, people, items: [...items, 'cuerda', 'azucar', 'hierbas'], favors, owner, intercede: goal.intercede, lleva: goal.lleva, sale: goal.sale, kind: goal.kind, k: goal.k };
   const heap = [], push = o => { heap.push(o); let i = heap.length - 1; while (i > 0) { const j = (i - 1) >> 1; if (heap[j].f <= heap[i].f) break; [heap[i], heap[j]] = [heap[j], heap[i]]; i = j; } };
   const pop = () => { const top = heap[0], last = heap.pop(); if (heap.length) { heap[0] = last; let i = 0; for (;;) { const l = 2 * i + 1, r = l + 1; let m = i; if (l < heap.length && heap[l].f < heap[m].f) m = l; if (r < heap.length && heap[r].f < heap[m].f) m = r; if (m === i) break; [heap[i], heap[m]] = [heap[m], heap[i]]; i = m; } } return top; };
   push({ s: s0, g: 0, f: goal.h(s0) * 40, path: [] }); const seenK = new Map([[sKey(s0), 0]]);
@@ -7848,7 +7989,7 @@ function chatLines(a, b, anaFree){
   const rounds = 1 + Math.round((1 - Math.max(focoOf(a).enfoque, focoOf(b).enfoque)) * 3);
   for (let k = 0; k < rounds; k++) {
     if (a === 'lynde' || b === 'lynde') { const o = a === 'lynde' ? b : a; say('lynde', pick(LYNDE_CHISME)); say(o, pick(CHISME_RE)); }
-    else if (ana_ && other === 'diana') { const [x, y] = ANA_DIANA[(k + Math.floor(TT)) % ANA_DIANA.length]; say('ana', x); say('diana', y); }
+    else if (ana_ && other === 'diana' && conoceDiana()) { const [x, y] = ANA_DIANA[(k + Math.floor(TT)) % ANA_DIANA.length]; say('ana', x); say('diana', y); }
     else if (ana_) { const [x, y] = suena(); say('ana', isKid(other) ? x.replace('¿No le parece', '¿No te parece').replace('¿Sabía', '¿Sabías') : x); say(other, isKid(other) ? pick(['¡Qué lindo, Ana!', '¿De verdad? ¡Cuéntame más!', '¡Qué cosas dices, Ana!']) : y); }
     else { const [x, y] = pares(); say(a, x); say(b, y); }
   }
@@ -8524,7 +8665,7 @@ function wmExec0(ag, a, st, dt){
         st.asked = 1; realR.setFact('pedido:' + a.favor.f + ':' + a.k); for (const k of [me, a.k]) amb.mute[k] = Math.max(amb.mute[k] || 0, TT + 30);   // (asking and answering: no loose lines in between)
  if (a.llamar && WM_APPROACH && WM_APPROACH.who === me) { WM_APPROACH = null; wmStop('ana'); }
         const F = FAVORS[a.favor.f], f = a.favor;
-        bubble(me, F.say ? F.say(f) : { pasear: '¿Vamos a pasear juntas?', venir: '¿Vienes a tomar el té conmigo?' }[f.f] || '¿Me harías un favor?');
+        bubble(me, f.dice ? f.dice : F.say ? F.say(f) : { pasear: '¿Vamos a pasear juntas?', venir: '¿Vienes a tomar el té conmigo?' }[f.f] || '¿Me harías un favor?');
         logEv(`${wmName(me)} le pidió a ${wmName(a.k)}: ${f.f.replace('_', ' ')}.`, []);
         if (f.f === 'prestar') { const I = wmInv(a.k); if (!(I[f.item] > 0)) { st.why = wmName(a.k) + ' no lo tiene'; return 'fail'; } I[f.item] -= 1; inv[f.item] = (inv[f.item] || 0) + 1; realR.setFact('prestado:' + f.item + ':' + a.k + '>' + me); float('+' + itemTextW(f.item, 1), b.x, b.y - 50); bubble(a.k, 'Claro que sí. Cuídalo mucho, ¿eh?'); logEv(`${wmName(a.k)} le prestó ${ITEM_DEFS[f.item]?.gift?.art || itemTextW(f.item, 1)} a ${wmName(me)}.`, []); return 'ok'; }
         if (f.f === 'pasear') { if (a.k === 'ana') { if (WM_OBEY) { const A = agentOf('ana'); A.followOf = me; agentLog(A, 'pasea con ' + wmName(me)); } else notice(`📜 ${wmName(me)} quiere dar un paseo contigo: síguela.`); } else if (a.k === 'diana' && me === 'ana') diana.follow = true; else agentOf(a.k).followOf = me; return 'ok'; }
@@ -8648,6 +8789,9 @@ const WM_TESTS = [
   { who: 'ana', text: 'Ana le compra tinte al buhonero y se tiñe el pelo… verde (cap. 27)', setup: () => { dayAt(10); game.inv.tinte = 0; game.inv.huevos = 0; game.eggDay = -1; delete game.wm.perm.pelo_verde; delete game.wm.facts['pelo_teñido:ana:' + today()]; atOut('buhonero', GG.x + 260, GG.y + 160); }, goal: () => G.teñido('ana') },
   { who: 'ana', text: 'Marilla le corta a Ana el pelo verde (cap. 27)', setup: () => { dayAt(16); game.wm.perm.pelo_verde = true; delete game.wm.facts['pelo_corto:' + today()]; PEOPLE.marilla.where = 'gg'; }, goal: () => G.pelo_corto('ana') },
   { who: 'ana', text: 'Josie desafía a Ana a caminar por el techo de los Barry (cap. 23)', setup: () => { dayAt(15); delete game.wm.facts['trepo:ana:' + today()]; realR.setFact('desafiada:ana'); }, goal: () => G.desafio('ana') },
+  // (a chain of the book, with its doors closed: Ana told Marilla yesterday that she wants a friend; today Marilla takes her)
+  { who: 'marilla', cadena: true, text: 'Marilla lleva a Ana a La Cuesta del Huerto y Ana conoce a Diana (cap. 8 y 12)', setup: () => { if (today() < 1) dayT += 1; dayAt(14.5); const H = dlgHechos(); for (const f of ['conocidas_diana', 'barry_presenta', 'pide_amiga']) delete H[f]; for (const f of Object.keys(game.wm.perm)) if (/^cuaderno:(conocer_diana|amigas)$|^amigas:ana&diana$/.test(f)) delete game.wm.perm[f]; H.quiere_amiga = today(); game.fond.diana = 0; delete game.wm.rel['ana>diana']; for (const k of Object.keys(dlgDichas())) if (/^(barry_recibe|conoce_diana|diana_por_casualidad)$/.test(k)) delete dlgDichas()[k]; const B = PEOPLE.barry; B.where = 'os'; B.x = KIT.w / 2; B.y = KIT.h / 2; atOut('diana', OS.x - 50, OS.y + 60); if (game.scene !== 'gg') goIn('gg'); const M = PEOPLE.marilla; M.where = 'gg'; M.x = STOVE.x + 60; M.y = STOVE.y + 60; },
+    goal: () => ({ ...G.paseo('marilla', 'ana', 'h:os', 15), chat: null, sale: true, text: 'Marilla lleva a Ana a La Cuesta del Huerto' }), favors: [{ f: 'pasear', to: 'ana', dice: 'Ana, voy a La Cuesta del Huerto a devolverle un patrón a la Sra. Barry. Ven conmigo: así conoces a Diana. Y pórtate bien.' }] },
 ];
 /* ---------- the routines, made of goals: what each one does each day (from the book), handed to the planner at its
    hour, at most once a day. Low priority (1): what someone asks (2) or what has a deadline (3) goes first; with the
@@ -8666,7 +8810,7 @@ const AGENDA = [
   { who: 'marilla', from: 17, to: 19, ana: true, label: 'regañar a Ana por los quehaceres', when: () => realR.fact('falta:ana'), goal: () => G.regañado('ana') },
   { who: 'lynde', from: 14, to: 16.5, label: 'visitar a Marilla', when: () => today() % 2 === 0, goal: () => G.visitar('lynde', 'marilla') },
   { who: 'lynde', from: 14, to: 16.5, label: 'visitar a la Sra. Barry', when: () => today() % 2 === 1, goal: () => G.visitar('lynde', 'barry') },
-  { who: 'diana', from: 15, to: 17, ana: true, season: [0, 1, 2], label: 'dar un paseo con Ana', when: () => !isSunday(), goal: () => G.paseo('diana', 'ana', 'lago', 30), favors: [{ f: 'pasear', to: 'ana' }] },
+  { who: 'diana', from: 15, to: 17, ana: true, season: [0, 1, 2], label: 'dar un paseo con Ana', when: () => !isSunday() && conoceDiana(), goal: () => G.paseo('diana', 'ana', 'lago', 30), favors: [{ f: 'pasear', to: 'ana' }] },
   { who: 'ana', from: 7.5, to: 8.5, ana: true, season: [0, 2, 3], label: 'ir a clases', when: () => !isSunday(), goal: () => G.estar_en('ana', 'escuela', 9, CLASES_FIN) },
   { who: 'ana', from: 12.5, to: 14.5, ana: true, label: 'la tarde libre', goal: () => anaTarde() },
   { who: 'ana', from: 20, to: 22, ana: true, label: 'decir sus oraciones', goal: () => G.rezo('ana') },
@@ -8745,6 +8889,7 @@ function wmApproachTick(dt){
 }
 function wmRunTest(i){
   const T = WM_TESTS[i];
+  game.libre = !T.cadena;   // (a test goal is of one thing: the chains of the book open, unless it is the test of a chain)
   for (const c of CHATS.slice()) chatEnd(c);
   for (const k of Object.keys(AGENTS)) { wmRelease(k); delete AGENTS[k]; }
   close(); if (ana.goto) ana.goto = null; diana.follow = false; game.wm.sick = []; for (const f of Object.keys(game.wm.facts)) if (/^(pedido|intercede|disc|gusto|dio):/.test(f)) delete game.wm.facts[f]; game.seasonShift = 0; cowHome('dolly'); cowHome('jersey'); game.inv.cuerda = 0; for (const k of ['matthew', 'harrison', 'shearer']) delete game.wm.inv[k];
@@ -8895,49 +9040,107 @@ if (/[?&]fps/.test(location.search)) {
   requestAnimationFrame(f);
 }
 
+/* ---------- the chains of the book, in the game (docs/CADENAS.md): what has to happen before something else can ----------
+   The goals and what closes their actions are in the notebook (src/datos/cuaderno.txt); the scenes, in the script
+   (src/datos/guion.txt). Here what joins them to the people: the first chain, to know Diana (cap. 8 and 12).
+   - Ana does not know Diana at the start: Diana does not greet her as a friend, does not walk with her, the stories of
+     the day with Diana wait, and the talks of the two of them too.
+   - Ana tells Marilla she wants a friend of the soul (from Marilla's menu: the scene quiere_amiga).
+   - The next day, in the afternoon, Marilla goes to Orchard Slope and takes Ana (her agenda, below); there Mrs. Barry
+     receives them and calls Diana (the scenes barry_recibe and conoce_diana).
+   - If they meet before by chance, they meet (the encounter diana_por_casualidad), but caring less for each other. */
+const conoceDiana = () => !!dlgHechos().conocidas_diana;
+// what Ana can tell Marilla (the player's way: from her menu)
+function cadenaOpciones(who){
+  const o = [];
+  if (who === 'marilla' && !dlgHechos().pide_amiga && !conoceDiana()) o.push(['Contarle que quieres una amiga del alma', () => { close(); dlgHecho('pide_amiga'); }]);
+  return o;
+}
+// Marilla, the day after, in the afternoon: to Orchard Slope, with Ana
+AGENDA.push({ who: 'marilla', from: 14, to: 17.5, label: 'llevar a Ana a La Cuesta del Huerto, a conocer a Diana (cap. 12)',
+  when: () => dlgCond('dias_desde:quiere_amiga:1', dlgCtx()) && !conoceDiana() && !dlgHechos().barry_presenta,
+  goal: () => ({ ...G.paseo('marilla', 'ana', 'h:os', 15), chat: null, sale: true, text: 'Marilla lleva a Ana a La Cuesta del Huerto' }),
+  favors: [{ f: 'pasear', to: 'ana', dice: 'Ana, voy a La Cuesta del Huerto a devolverle un patrón a la Sra. Barry. Ven conmigo: así conoces a Diana. Y pórtate bien.' }] });
+// meeting Diana before knowing her, by chance: the encounter of the script (once); and no talk as friends before that
+function cadenaEncuentro(k){
+  if (k !== 'diana' || conoceDiana()) return null;
+  return dlgNext(['ana', 'diana']);
+}
+
 /* ---------- the notebook: what Ana could do (📖), as goals of the book, not as actions ----------
    For the player to know what there is: each goal with a hint of where or when (not the steps: those are hers to find),
    and ✓ with the day, once she has done it. It is checked by the same goals the planner uses (G), now and then; what was
-   done stays (game.wm.perm). To add one: src/datos/cuaderno.txt. */
-// the goals are written apart, as the script of scenes (src/datos/cuaderno.txt, put in the page by tools/build.js):
-// «== Grupo», and each goal «=== id ===» with titulo, pista and meta (a goal of the planner and its arguments)
-const CUADERNO_EXTRA = { tomando_te: (k, con) => ({ test: () => AGENTS[k]?.acting?.v === 'tomar_te' && AGENTS[k].acting.k === con }) };   // (sitting at the tea table with her)
+   done stays (game.wm.perm). The goals of the book come in chains (to have a friend of the soul, first to know Diana;
+   the picnic, the story club, the boat, Josie's dare, after the friendship…): a goal may require others, and while it
+   is closed what belongs to it cannot be done, by the player or by anyone (its actions). Written apart, as the script of
+   scenes (src/datos/cuaderno.txt, put in the page by tools/build.js); the chains of the book: docs/CADENAS.md. */
+// goals that are not of the planner: sitting at the tea table with someone; something that happened, in the script
+const CUADERNO_EXTRA = {
+  tomando_te: (k, con) => ({ test: () => AGENTS[k]?.acting?.v === 'tomar_te' && AGENTS[k].acting.k === con }),
+  hecho: x => ({ test: () => !!dlgHechos()[x] }),
+};
 const cuadernoArg = v => /^-?\d+(\.\d+)?$/.test(v) ? +v : v.includes(',') ? v.split(',') : v;
+const cuadernoLista = v => (v || '').split(',').map(x => x.trim()).filter(Boolean);
 function cuadernoLeer(txt){
   const out = []; let grupo = null, m = null;
   for (const raw of txt.split('\n')) {
     const l = raw.trim(); if (!l || l[0] === '#') continue;
     let h;
-    if ((h = l.match(/^===\s*(.+?)\s*===$/))) { if (!grupo) out.push(grupo = ['', []]); grupo[1].push(m = { id: h[1] }); continue; }
-    if ((h = l.match(/^==\s*(.+)$/))) { out.push(grupo = [h[1], []]); m = null; continue; }
-    if (m && (h = l.match(/^(titulo|pista|meta):\s*(.*)$/))) m[h[1]] = h[2];
+    if ((h = l.match(/^===\s*(.+?)\s*===$/))) { if (!grupo) out.push(grupo = { nombre: '', metas: [] }); grupo.metas.push(m = { id: h[1], pistas: [] }); continue; }
+    if ((h = l.match(/^==\s*(.+)$/))) { out.push(grupo = { nombre: h[1], metas: [] }); m = null; continue; }
+    if (!m) continue;
+    if ((h = l.match(/^pista si (\S+):\s*(.*)$/))) m.pistas.push([h[1], h[2]]);
+    else if ((h = l.match(/^(titulo|pista|meta|requiere|antes|acciones):\s*(.*)$/))) m[h[1]] = h[2];
   }
-  return out.map(([g, ms]) => [g, ms.map(x => { const [f, ...a] = (x.meta || '').split(/\s+/), args = a.map(cuadernoArg), fn = G[f] || CUADERNO_EXTRA[f];
+  for (const g of out) for (const x of g.metas) {
+    const [f, ...a] = (x.meta || '').split(/\s+/), args = a.map(cuadernoArg), fn = G[f] || CUADERNO_EXTRA[f];
     if (!fn) console.warn('[avonlea] cuaderno: «' + x.id + '» tiene una meta desconocida: ' + x.meta);
-    return [x.id, x.titulo || x.id, x.pista || '', () => fn(...args)]; })]);
+    x.titulo ||= x.id; x.pista ||= ''; x.goal = () => fn(...args); x.requiere = cuadernoLista(x.requiere); x.acciones = cuadernoLista(x.acciones);
+  }
+  return out;
 }
 const CUADERNO = cuadernoLeer(document.getElementById('cuaderno')?.textContent || '');
+const CUADERNO_METAS = CUADERNO.flatMap(g => g.metas), cuadernoMeta = id => CUADERNO_METAS.find(m => m.id === id);
 // what has been done: the day it was first done, as the game counts the days, from 1 (kept with the facts for good)
 const cuadernoHecho = id => game.wm?.perm?.['cuaderno:' + id];
+// a requirement: another goal of the notebook, or a condition of the script (hecho:x, dias_desde:x:n, afecto:a:b:n…)
+const cuadernoCumple = r => r.includes(':') || r[0] === '!' ? dlgCond(r, dlgCtx()) : !!cuadernoHecho(r);
+// open: what it requires has happened (in the test goals, everything is open: game.libre, unless the test is of a chain)
+const cuadernoAbierta = m => !!game.libre || m.requiere.every(cuadernoCumple);
+// an action that belongs to a goal still closed (for the planner: not offered, not planned, by no one)
+// (the planner asks this for every action of every state it tries: the closed ones are worked out once every half second)
+let CERRADAS = { t: -9, libre: null, l: [] };
+function cuadernoCerrada(v, a){
+  if (game.libre) return false;
+  if (TT - CERRADAS.t > .5 || CERRADAS.libre !== !!game.libre) CERRADAS = { t: TT, libre: !!game.libre, l: CUADERNO_METAS.filter(m => m.acciones.length && !cuadernoAbierta(m)).flatMap(m => m.acciones.map(x => { const [verbo, quien] = x.split(':'), [vv, favor] = verbo.split('/'); return [vv, quien, favor]; })) };
+  return CERRADAS.l.some(([vv, quien, favor]) => vv === v && (!quien || a.k === quien) && (!favor || a.favor?.f === favor));
+}
 let cuadernoT = 0;
 function cuadernoTick(dt){
   if ((cuadernoT -= dt) > 0 || !game.wm) return; cuadernoT = 2;
   let s = null;
-  for (const [, metas] of CUADERNO) for (const [id, , , meta] of metas) {
-    if (cuadernoHecho(id)) continue;
-    let ok = false; s ||= wmNow(); try { ok = !!meta().test(s); } catch (e) {}
-    if (ok) { game.wm.perm['cuaderno:' + id] = today() + 1; const t = CUADERNO.flatMap(([, m]) => m).find(m => m[0] === id)[1]; notice('📖 ✓ ' + t); logEv('Ana cumplió en su cuaderno: ' + t + '.', []); }
+  for (const m of CUADERNO_METAS) {
+    if (cuadernoHecho(m.id) || !cuadernoAbierta(m)) continue;
+    let ok = false; s ||= wmNow(); try { ok = !!m.goal().test(s); } catch (e) {}
+    if (ok) { game.wm.perm['cuaderno:' + m.id] = today() + 1; notice('📖 ✓ ' + m.titulo); logEv('Ana cumplió en su cuaderno: ' + m.titulo + '.', []); }
   }
 }
+// the hint now: the last whose condition holds, or the plain one
+const cuadernoPista = m => [...m.pistas].reverse().find(([c]) => dlgCond(c, dlgCtx()))?.[1] || m.pista;
+const cuadernoAntes = m => m.antes || m.requiere.filter(r => !cuadernoCumple(r)).map(r => cuadernoMeta(r)?.titulo.toLowerCase()).filter(Boolean).join(', ');
 function cuadernoPanel(open){
   const P = $('cua'); P.hidden = !open; if (!open) return;
-  const todas = CUADERNO.flatMap(([, m]) => m), n = todas.filter(m => cuadernoHecho(m[0])).length;
-  $('cuasub').textContent = n + ' de ' + todas.length + ' · ' + (n === todas.length ? '¡todo! Ana podría escribir un libro con esto.' : 'las que faltan tienen una pista');
-  $('cualist').innerHTML = CUADERNO.map(([grupo, metas]) => '<h4>' + grupo + '</h4>' + metas.map(([id, titulo, pista]) => {
-    const d = cuadernoHecho(id);
-    return `<div class="cm${d ? ' hecha' : ''}"><b>${d ? '✓' : '○'} ${esc(titulo)}</b>${d ? `<span>el día ${d}</span>` : `<small>${esc(pista)}</small>`}</div>`;
+  const n = CUADERNO_METAS.filter(m => cuadernoHecho(m.id)).length;
+  $('cuasub').textContent = n + ' de ' + CUADERNO_METAS.length + ' · ' + (n === CUADERNO_METAS.length ? '¡todo! Ana podría escribir un libro con esto.' : 'las que faltan tienen una pista; 🔒: todavía no');
+  $('cualist').innerHTML = CUADERNO.map(g => '<h4>' + esc(g.nombre) + '</h4>' + g.metas.map(m => {
+    const d = cuadernoHecho(m.id), abierta = cuadernoAbierta(m);
+    return d ? `<div class="cm hecha"><b>✓ ${esc(m.titulo)}</b><span>el día ${d}</span></div>`
+      : abierta ? `<div class="cm"><b>○ ${esc(m.titulo)}</b><small>${esc(cuadernoPista(m))}</small></div>`
+      : `<div class="cm cerrada"><b>🔒 ${esc(m.titulo)}</b><small>Antes: ${esc(cuadernoAntes(m))}.</small></div>`;
   }).join('')).join('');
 }
+// a game that already had Ana and Diana as friends (before they had to meet): they know each other
+if (game.wm?.perm?.['amigas:ana&diana'] && !dlgHechos().conocidas_diana) dlgHecho('conocidas_diana');
 
 /* ---------- the map: Avonlea drawn on a sheet of paper, with where everyone is ---------- */
 let mapBase = null;

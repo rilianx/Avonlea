@@ -267,7 +267,7 @@ function wmExec0(ag, a, st, dt){
         st.asked = 1; realR.setFact('pedido:' + a.favor.f + ':' + a.k); for (const k of [me, a.k]) amb.mute[k] = Math.max(amb.mute[k] || 0, TT + 30);   // (asking and answering: no loose lines in between)
  if (a.llamar && WM_APPROACH && WM_APPROACH.who === me) { WM_APPROACH = null; wmStop('ana'); }
         const F = FAVORS[a.favor.f], f = a.favor;
-        bubble(me, F.say ? F.say(f) : { pasear: '¿Vamos a pasear juntas?', venir: '¿Vienes a tomar el té conmigo?' }[f.f] || '¿Me harías un favor?');
+        bubble(me, f.dice ? f.dice : F.say ? F.say(f) : { pasear: '¿Vamos a pasear juntas?', venir: '¿Vienes a tomar el té conmigo?' }[f.f] || '¿Me harías un favor?');
         logEv(`${wmName(me)} le pidió a ${wmName(a.k)}: ${f.f.replace('_', ' ')}.`, []);
         if (f.f === 'prestar') { const I = wmInv(a.k); if (!(I[f.item] > 0)) { st.why = wmName(a.k) + ' no lo tiene'; return 'fail'; } I[f.item] -= 1; inv[f.item] = (inv[f.item] || 0) + 1; realR.setFact('prestado:' + f.item + ':' + a.k + '>' + me); float('+' + itemTextW(f.item, 1), b.x, b.y - 50); bubble(a.k, 'Claro que sí. Cuídalo mucho, ¿eh?'); logEv(`${wmName(a.k)} le prestó ${ITEM_DEFS[f.item]?.gift?.art || itemTextW(f.item, 1)} a ${wmName(me)}.`, []); return 'ok'; }
         if (f.f === 'pasear') { if (a.k === 'ana') { if (WM_OBEY) { const A = agentOf('ana'); A.followOf = me; agentLog(A, 'pasea con ' + wmName(me)); } else notice(`📜 ${wmName(me)} quiere dar un paseo contigo: síguela.`); } else if (a.k === 'diana' && me === 'ana') diana.follow = true; else agentOf(a.k).followOf = me; return 'ok'; }

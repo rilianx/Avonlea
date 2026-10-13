@@ -368,3 +368,73 @@ carta: {noticia}
 ana: Las cartas a Charlottetown tardan tres días. En tres días pueden pasar tantas cosas… cuando llegue, lo que le cuento ya será viejo. Como las estrellas, que uno ve su luz de antes.
 carta: Le cuento que Matthew me regaló un vestido con mangas abullonadas. Son las mangas más abullonadas de toda la isla, creo.
 carta: Su amiga que la recuerda siempre, Ana Shirley.
+
+# --- conocer a Diana (cap. 8 y 12): Ana le cuenta a Marilla que quiere una amiga del alma (desde el menú de Marilla);
+# al día siguiente, en la tarde, Marilla va a La Cuesta del Huerto y la lleva (la agenda de Marilla, src/js/66-cadenas.js);
+# la Sra. Barry las recibe, llama a Diana, y las niñas se conocen. Si se encuentran antes por casualidad, se conocen
+# igual, pero sin la presentación: se quieren menos, y para jurar tendrán que pasar tiempo juntas.
+=== quiere_amiga ===
+canal: gg
+prioridad: 7
+interrumpe
+sujeta: marilla
+en: ana=gg, marilla=gg
+si: hecho:pide_amiga, !hecho:quiere_amiga, !hecho:conocidas_diana
+al_terminar: hecho quiere_amiga
+al_terminar: log Ana le contó a Marilla que quería una amiga del alma, y Marilla le habló de Diana Barry.
+---
+ana: Marilla, ¿cree usted que encontraré una amiga del alma en Avonlea?
+marilla: ¿Una qué?
+ana: Una amiga del alma, una amiga íntima, ¿sabe?, un espíritu verdaderamente afín al que pueda confiarle lo más profundo de mi alma. He soñado con conocerla toda mi vida.
+marilla: Diana Barry vive en La Cuesta del Huerto, y tiene más o menos tu edad. Es una niña muy buena; quizás sea una compañera de juegos para ti cuando vuelva a casa.
+ana: ¡Oh! ¿Y cómo es? ¿Tiene el pelo rojo? Espero que no. Ya es bastante malo que yo lo tenga.
+marilla: Diana es muy bonita: ojos y pelo negros, y mejillas rosadas. Y es buena e inteligente, que es mejor que ser bonita. Un día de estos tengo que ir a ver a la Sra. Barry; si te portas bien, puedes venir conmigo.
+ana: ¡Oh, Marilla! Ahora tengo miedo: ¿y si no le gusto? Sería la desilusión más trágica de mi vida.
+
+=== barry_recibe ===
+canal: os
+prioridad: 7
+interrumpe
+sujeta: marilla, barry
+en: ana=os, marilla=os
+si: hecho:quiere_amiga, !hecho:conocidas_diana, !hecho:barry_presenta
+al_terminar: hecho barry_presenta
+al_terminar: meta diana estar_en h:os,-,- | Diana entra a conocer a la niña de Tejas Verdes | entrar a conocer a la niña de Tejas Verdes (cap. 12) | 3
+---
+barry: Buenas tardes, Marilla. ¡Qué sorpresa! Pasa, pasa. ¿Y ésta es la niña que adoptaron?
+marilla: Sí, ésta es Ana Shirley. Vengo a devolverle el patrón de la falda que me prestó.
+ana: Ana con e, por favor.
+barry: ¿Cómo estás, Ana? Diana está en el jardín. ¡Diana! Ven a conocer a la niña de los Cuthbert.
+
+=== conoce_diana ===
+canal: os
+prioridad: 8
+interrumpe
+sujeta: ana, diana
+en: ana=os, diana=os
+si: hecho:barry_presenta, !hecho:conocidas_diana
+al_terminar: hecho conocidas_diana
+al_terminar: afecto diana ana 4
+al_terminar: afecto ana diana 5
+al_terminar: log Ana conoció a Diana Barry en La Cuesta del Huerto: la Sra. Barry las presentó.
+---
+barry: Ésta es mi hija Diana. Diana, ¿por qué no llevas a Ana al jardín y le muestras tus flores?
+diana: Hola… ¿quieres venir a ver el jardín?
+ana: (Ana mira a Diana muy seria, sin atreverse a respirar.) Oh, Diana… ¿crees que podrías… que podrías quererme un poquito, lo bastante como para ser mi amiga del alma?
+diana: (Diana se ríe; Diana siempre se ríe antes de hablar.) Bueno, creo que sí. Me alegro mucho de que hayas venido a vivir a Tejas Verdes. Va a ser tan lindo tener a alguien con quien jugar.
+
+=== diana_por_casualidad ===
+disparo: encuentro
+quienes: ana, diana
+# (una vez que Ana le contó a Marilla, se conocen como en el libro: Marilla la lleva y la Sra. Barry las presenta)
+si: !hecho:conocidas_diana, !hecho:barry_presenta, !hecho:quiere_amiga
+al_terminar: hecho conocidas_diana
+al_terminar: afecto diana ana 2
+al_terminar: afecto ana diana 4
+al_terminar: log Ana y Diana se conocieron por casualidad.
+---
+diana: Hola… ¿Tú eres la niña que vino a vivir a Tejas Verdes?
+ana: Sí… soy Ana. Ana con e. ¿Y tú… tú eres Diana Barry?
+diana: Sí. Mamá dice que eres muy rara. Pero no pareces rara. Bueno, un poquito.
+ana: (Ana se pone colorada hasta las orejas.) Tengo una imaginación muy grande, eso es todo. ¿Te… te gustaría que algún día jugáramos juntas?
+diana: Bueno… tal vez. Tengo que volver a casa ahora.

@@ -327,9 +327,10 @@ function autoFavors(me, goal, s0, exclude = []){
 }
 function verbs(s, me, C){
   const L = [], here = s.pos[me], inv = s.invs[me], W = whoOf(me), at = k => s.pos[k] && s.pos[k] === here && k !== me;
-  const add = (v, cost, eff, a = {}) => L.push({ v, cost, eff, ...a });
+  const add = (v, cost, eff, a = {}) => { if (!cuadernoCerrada(v, a)) L.push({ v, cost, eff, ...a }); };   // (what belongs to a goal of the book still closed: not yet, by anyone)
   const ride = me === 'matthew' && Object.values(s.follow).includes(me);   // (Matthew with someone in the cart: much faster)
-  if (!isQuieto(me)) for (const p of C.places) if (p !== here && C.pts[p]) add('ir', travelMin(me, here, p, C.pts) / (ride ? 2.4 : 1), t => { t.pos[me] = p; for (const [f, w] of Object.entries(t.follow)) if (w === me) t.pos[f] = p; }, { p });
+  if (!isQuieto(me) || C.sale) for (const p of C.places) if (p !== here && C.pts[p]) add('ir',   // (one who stays at home goes out for a goal that says so: Marilla to the Barrys)
+     travelMin(me, here, p, C.pts) / (ride ? 2.4 : 1), t => { t.pos[me] = p; for (const [f, w] of Object.entries(t.follow)) if (w === me) t.pos[f] = p; }, { p });
   const of = OFRECE[here] || {};
   for (const x of of.tomar || []) if (!(inv[x] > 0) && C.items.includes(x) && !(x === 'jarabe' && game.wm.sinJarabe)) add('tomar', 1, t => { t.invs[me][x] = 1; }, { x });
   for (const x of of.recoger || []) if (s.stock[x] > 0 && (inv[x] || 0) < 9) { const n = Math.min(x === 'ramo' ? 1 : x === 'huevos' ? 9 : 3, s.stock[x]); add('recoger', 3, t => { t.invs[me][x] = (t.invs[me][x] || 0) + n; t.stock[x] -= n; }, { x, n }); }
@@ -480,7 +481,7 @@ function wmSearch(me, goal, favors, s0, cap){
   const pts = {}; for (const p of places) { const q = keyPoint(p); if (q) pts[p] = q; }
   pts[s0.pos[me]] = pts[s0.pos[me]] || (wmBody(me) ? [wmBody(me).x, wmBody(me).y] : null);
   const owner = Object.fromEntries(Object.keys(s0.cows).map(c => [c, ANIM[c].owner || ANIMALS[c].owner]));
-  const C = { places: [...places].filter(p => pts[p]), pts, people, items: [...items, 'cuerda', 'azucar', 'hierbas'], favors, owner, intercede: goal.intercede, lleva: goal.lleva, kind: goal.kind, k: goal.k };
+  const C = { places: [...places].filter(p => pts[p]), pts, people, items: [...items, 'cuerda', 'azucar', 'hierbas'], favors, owner, intercede: goal.intercede, lleva: goal.lleva, sale: goal.sale, kind: goal.kind, k: goal.k };
   const heap = [], push = o => { heap.push(o); let i = heap.length - 1; while (i > 0) { const j = (i - 1) >> 1; if (heap[j].f <= heap[i].f) break; [heap[i], heap[j]] = [heap[j], heap[i]]; i = j; } };
   const pop = () => { const top = heap[0], last = heap.pop(); if (heap.length) { heap[0] = last; let i = 0; for (;;) { const l = 2 * i + 1, r = l + 1; let m = i; if (l < heap.length && heap[l].f < heap[m].f) m = l; if (r < heap.length && heap[r].f < heap[m].f) m = r; if (m === i) break; [heap[i], heap[m]] = [heap[m], heap[i]]; i = m; } } return top; };
   push({ s: s0, g: 0, f: goal.h(s0) * 40, path: [] }); const seenK = new Map([[sKey(s0), 0]]);

@@ -43,7 +43,8 @@ function talk(who, again = false){
   if (game.saidS[who] !== seasonCount()) { game.saidS[who] = seasonCount(); text = SEASON_LINES[who][S]; }
   else text = LINES[who][game.said[who] = ((game.said[who] ?? -1) + 1) % LINES[who].length];
   if (pre.some(x => x.startsWith('Ana cumplió'))) text = '¡Gracias por hacer lo que te pedí, Ana! ' + text;
-  const opts = [...taskOptions(who)];
+  if (who === 'diana' && !conoceDiana()) { const L = cadenaEncuentro('diana'); if (L) return say('diana', L.map(l => (l.q === 'ana' ? 'Ana: ' : '') + l.t).join('\n'), [['…', close]]); }   // (they have not met: the meeting of the book, not a friend's greeting)
+  const opts = [...taskOptions(who), ...cadenaOpciones(who)];
   for (const [k, [name]] of Object.entries(GIFTS)) if (game.inv[k] > 0) opts.push(['Regalar ' + name, () => give(who, k)]);
   if (!isQuieto(who) || who === 'marilla') opts.push(['🙏 Pedirle un favor', () => favorMenu(who)]);
   opts.push(...walkOption(who), ['Adiós', close]);
@@ -56,7 +57,7 @@ function face(who){
 }
 // walking with Diana (the same with or without AI: the game decides it, so it always works)
 function walkOption(who){
-  if (who !== 'diana') return [];
+  if (who !== 'diana' || !conoceDiana()) return [];
   return [diana.follow ? ['Hasta mañana, Diana', () => { diana.follow = false; logEv('Ana y Diana terminaron su paseo.'); save(); say(who, '¡Hasta mañana, Ana! Que sueñes bonito.', [['Adiós', close]]); }]
     : ['¿Paseamos juntas?', () => { diana.follow = true; game.fond.diana = Math.min(5, game.fond.diana + 1); logEv('Ana y Diana salieron a pasear juntas.'); save(); say(who, '¡Sí! Vamos, Ana, a donde tú quieras.', [['¡Vamos!', close]]); }]];
 }

@@ -335,4 +335,16 @@ module.exports = [
       { quien: 'ana', dice: /tobillo/, texto: 'Se cae y se tuerce el tobillo.' },
     ],
   },
+  {
+    id: 62, titulo: 'Conocer a Diana (una cadena del libro)', quienes: ['ana', 'marilla', 'diana', 'barry'],
+    relato: 'El día antes, Ana le contó a Marilla que quería una amiga del alma. Hoy, en la tarde, Marilla va a La Cuesta del Huerto a devolverle un patrón a la Sra. Barry y lleva a Ana. La Sra. Barry las recibe en la salita y llama a Diana, que está en el jardín. Diana entra, las presentan, y Ana le pregunta si podría quererla lo bastante como para ser su amiga del alma. Diana se ríe y dice que sí.',
+    pasos: [
+      { quien: 'marilla', dice: /La Cuesta del Huerto/, texto: 'Marilla invita a Ana a ir con ella a La Cuesta del Huerto.' },
+      { quien: 'ana', lugar: /Cuesta del Huerto/, texto: 'Ana llega con Marilla a la salita de los Barry.' },
+      { quien: 'barry', dice: /Diana/, texto: 'La Sra. Barry las recibe y llama a Diana.' },
+      { quien: 'diana', lugar: /Cuesta del Huerto/, texto: 'Diana entra a la salita.' },
+      { quien: 'ana', dice: /amiga del alma/, texto: 'Ana le pregunta si podría ser su amiga del alma.' },
+      { quien: 'diana', dice: /creo que sí/, texto: 'Diana dice que sí.' },
+    ],
+  },
 ];

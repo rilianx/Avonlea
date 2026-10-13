@@ -153,7 +153,7 @@ function chatLines(a, b, anaFree){
   const rounds = 1 + Math.round((1 - Math.max(focoOf(a).enfoque, focoOf(b).enfoque)) * 3);
   for (let k = 0; k < rounds; k++) {
     if (a === 'lynde' || b === 'lynde') { const o = a === 'lynde' ? b : a; say('lynde', pick(LYNDE_CHISME)); say(o, pick(CHISME_RE)); }
-    else if (ana_ && other === 'diana') { const [x, y] = ANA_DIANA[(k + Math.floor(TT)) % ANA_DIANA.length]; say('ana', x); say('diana', y); }
+    else if (ana_ && other === 'diana' && conoceDiana()) { const [x, y] = ANA_DIANA[(k + Math.floor(TT)) % ANA_DIANA.length]; say('ana', x); say('diana', y); }
     else if (ana_) { const [x, y] = suena(); say('ana', isKid(other) ? x.replace('¿No le parece', '¿No te parece').replace('¿Sabía', '¿Sabías') : x); say(other, isKid(other) ? pick(['¡Qué lindo, Ana!', '¿De verdad? ¡Cuéntame más!', '¡Qué cosas dices, Ana!']) : y); }
     else { const [x, y] = pares(); say(a, x); say(b, y); }
   }

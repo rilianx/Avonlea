@@ -17,8 +17,10 @@
      al_empezar / al_terminar: [{hecho}, {marca, nota}, {log}, {saber: [who, what]}, {meta: {quien, tipo, args,
           texto, etiqueta, prioridad}}, {soltar: who}, {ana: {props}}, {fin_capitulo: true}] ---------- */
 const DLG_LUGARES = { lago: () => [LAKE.x, LAKE.y], tejas_verdes: () => [GG.x, GG.y], casa_bell: () => WP.casa_bell, letrero_br: () => DOOR.br, hondonada: () => [LY.x, LY.y + 60] };
-const dlgHechos = () => game.dlgHechos || (game.dlgHechos = {});
-const dlgHecho = (n, v = true) => { dlgHechos()[n] = v; };
+// what has happened (kept with the game: the chains of the book go on from one day to another); each with the day it
+// happened (from 1), so that a scene can wait a day or two after another (dias_desde)
+const dlgHechos = () => game.wm ? (game.wm.hechos ||= {}) : (game.dlgHechos ||= {});
+const dlgHecho = (n, v = today() + 1) => { dlgHechos()[n] = v; };
 const dlgDichas = () => game.escDone || (game.escDone = {});
 const dlgEscena = k => k === 'ana' ? game.scene : wmScene(k);
 function dlgCtx(){
@@ -28,12 +30,14 @@ function dlgCtx(){
 }
 function dlgCond(s, c){   // one condition of state, written as text
   if (s[0] === '!') return !dlgCond(s.slice(1), c);
-  const i = s.indexOf(':'), k = i < 0 ? s : s.slice(0, i), rest = i < 0 ? '' : s.slice(i + 1), [a, b] = k === 'sabe' || k === 'y_mayor' ? rest.split(':') : [rest];   // (an id may have ':' in it)
+  const i = s.indexOf(':'), k = i < 0 ? s : s.slice(0, i), rest = i < 0 ? '' : s.slice(i + 1), [a, b] = k === 'sabe' || k === 'y_mayor' || k === 'dias_desde' ? rest.split(':') : [rest];   // (an id may have ':' in it)
   switch (k) {
     case 'hecho': return !!dlgHechos()[a];
     case 'dicha': return !!dlgDichas()[a];
     case 'marca': return CAP1.marks[a] != null;
     case 'capitulo': return CAP1.on && !CAP1.done;
+    case 'afecto': { const [x, y, n] = rest.split(':'); return relGetW(x, y) >= +n; }   // (x cares for y at least n, of 0..5)
+    case 'dias_desde': { const d = dlgHechos()[a]; return typeof d === 'number' && today() + 1 - d >= +b; }   // (at least b days since a happened)
     case 'canal_libre': return !talkBusy(a);
     case 'ana_visible': return !ana.hidden;
     case 'escena_ana': return game.scene === a;
@@ -78,6 +82,7 @@ function dlgHacer(list){   // what a scene does when it starts or ends
     if (a.meta) { const m = a.meta; agentStart(m.quien, { ...G[m.tipo](m.quien, ...(m.args || [])), ...(m.texto ? { text: m.texto } : {}) }, { label: m.etiqueta || m.texto, prio: m.prioridad }); }
     if (a.soltar && FOLKBY[a.soltar]) FOLKBY[a.soltar].talkT = TT + 1;
     if (a.ana) Object.assign(ana, a.ana);
+    if (a.afecto) { const [k, o, n] = a.afecto; relSetW(k, o, Math.max(relGetW(k, o), +n)); }   // (how much one cares for the other, at least so much)
     if (a.fin_capitulo) { CAP1.done = hourNow(); logEv('Fin del capítulo 1 (y del 2): Ana llegó a Tejas Verdes.', []); }
   }
 }
@@ -167,7 +172,8 @@ function dlgTick(dt){
 function dlgNext(ks){
   const key = dlgKey(ks), x = dlgCtx();
   const d = DIALOGOS.find(e => e.disparo === 'encuentro' && dlgKey(e.quienes) === key && !e.dicha() && dlgCumple(e, x)); if (!d) return null;
-  dlgDichas()[d.id] = true; return d.lineas().map(([q, t]) => ({ q, t }));
+  dlgDichas()[d.id] = true; dlgHacer(d.al_empezar); dlgHacer(d.al_terminar);   // (an encounter is said all at once: what it does, at once too)
+  return d.lineas().map(([q, t]) => ({ q, t }));
 }
 // the scenes, as a script outside the code (the <script type="text/plain" id="guion"> block, at the top): each one
 // «=== id ===», its fields, one per line («field: value»), and its own lines after «---» («who: text #mark»).
@@ -192,6 +198,7 @@ function dlgAccion(s){   // an action of the script: «hecho x», «marca id | n
     case 'saber': return { saber: r };
     case 'soltar': return { soltar: rest };
     case 'ana': return { ana: dlgCampo('en', rest) };
+    case 'afecto': return { afecto: r };
     case 'fin_capitulo': return { fin_capitulo: true };
     case 'meta': { const [quien, tipo, args = ''] = part[0].split(/\s+/); return { meta: { quien, tipo, args: args ? args.split(',').map(dlgVal) : [], texto: part[1] || undefined, etiqueta: part[2] || undefined, prioridad: part[3] ? +part[3] : undefined } }; }
   }
@@ -297,7 +304,7 @@ const VIAJE_ESCENAS = [
   });
 }
 // the talks of pairs and trios (DLG_BANK), as scenes too: when they meet, where it makes sense
-for (const [key, list] of Object.entries(DLG_BANK)) list.forEach((blk, i) => Dialogo.registrar({ id: 'par:' + key + ':' + i, disparo: 'encuentro', quienes: key.split('+'), donde: Array.isArray(blk) ? undefined : blk.at, lineas: Array.isArray(blk) ? blk : blk.l }));
+for (const [key, list] of Object.entries(DLG_BANK)) list.forEach((blk, i) => Dialogo.registrar({ id: 'par:' + key + ':' + i, disparo: 'encuentro', quienes: key.split('+'), donde: Array.isArray(blk) ? undefined : blk.at, lineas: Array.isArray(blk) ? blk : blk.l, ...(/\bana\b/.test(key) && /\bdiana\b/.test(key) ? { si: ['hecho:conocidas_diana'] } : {}) }));   // (Ana and Diana as friends: once they have met)
 // the school: rows of desks, the master's desk, the blackboard, the stove, the windows over the river
 function drawSchool(c, t, night){
   c.fillStyle = '#b98a58'; c.fillRect(0, 0, KIT.w, KIT.h);

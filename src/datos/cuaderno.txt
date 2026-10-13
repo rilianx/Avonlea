@@ -2,40 +2,57 @@
 # «== Grupo» empieza un grupo. Cada meta: «=== id ===» y sus campos, uno por línea:
 #   titulo: lo que se lee en el cuaderno (una meta, no una acción)
 #   pista: dónde o cuándo, sin los pasos
+#   pista si <condición>: otra pista, cuando se cumple la condición (vale la última que se cumpla)
 #   meta: cuándo está cumplida: una meta del planificador y sus argumentos, separados por espacios
 #         (p. ej. «amigas ana diana», «nombres ana 3»; una lista va con comas: «quehaceres ana platos,barrer»)
+#   requiere: lo que tiene que pasar antes (separado por comas): otras metas del cuaderno (por su id), o
+#         condiciones del guion («hecho:conocidas_diana», «dias_desde:quiere_amiga:1», «afecto:diana:ana:4»)
+#   antes: cómo se dice lo que falta, mientras está cerrada (si no, los títulos de las metas que requiere)
+#   acciones: lo que no se puede hacer mientras está cerrada (separado por comas): una acción («jurar»), una
+#         acción con alguien («perdonar:gilbert»), o un pedido («pedir/venir»: invitar a tomar el té)
 #   Las metas que se pueden usar (las del planificador): amigas, picnic, visitar, paces, quehaceres, regalo_gusto,
 #   huerta, rezo, leido, carta, club, recito, concierto, sala, nombres, adornado, remo, patinar, trineo, teñido,
-#   desafio, felicitar, consolado, devuelto, te_con, tener, dinero… (ver G en src/js/58-fichas-y-planificador.js);
-#   y además «tomando_te quien con_quien» (sentada a la mesita del té con esa persona).
+#   pelo_corto, desafio, felicitar, consolado, devuelto, te_con, tener, dinero, estar_en… (ver G en
+#   src/js/58-fichas-y-planificador.js); y además «tomando_te quien con_quien» (sentada a la mesita del té con esa
+#   persona) y «hecho x» (pasó x, en el guion).
+# Las cadenas del libro, de dónde salen y qué abren: docs/CADENAS.md.
 # Las líneas que empiezan con # son comentarios.
 
 == Amistades
 
+=== conocer_diana ===
+titulo: Conocer a Diana Barry
+pista: Quizás Marilla sepa de alguna niña de tu edad. Habla con ella.
+pista si hecho:quiere_amiga: Marilla dijo que un día de estos iría a La Cuesta del Huerto, donde viven los Barry… y que podrías ir con ella.
+meta: hecho conocidas_diana
+
 === amigas ===
 titulo: Tener una amiga del alma
-pista: Diana Barry vive en La Cuesta del Huerto, al otro lado del arroyo. Una amistad así se jura.
+pista: Una amistad así se jura, en el jardín, tomadas de las manos.
+pista si !afecto:diana:ana:4: Ya conoces a Diana, pero para jurar tienen que quererse mucho: pasen tiempo juntas, conversen, regálale algo.
 meta: amigas ana diana
+requiere: conocer_diana
+acciones: jurar
 
 === picnic ===
 titulo: Ir de picnic con Diana
 pista: Al lago, con una canasta. Primero hay que pedirle permiso a Marilla.
 meta: picnic ana diana
+requiere: amigas
+acciones: merendar, pedir_permiso
 
 === lynde ===
 titulo: Visitar a la Sra. Lynde
 pista: Vive en la Hondonada, junto al camino; desde su ventana lo ve todo. Por la tarde está en casa.
 meta: visitar ana lynde
 
-=== paces ===
-titulo: Hacer las paces con Gilbert Blythe
-pista: Le dijo «zanahorias». Él quiere disculparse… si Ana lo deja.
-meta: paces ana gilbert
-
 === allan ===
 titulo: Tomar el té con la Sra. Allan
-pista: La esposa del pastor vive en la casa parroquial, cerca de la iglesia. A veces invita.
+pista: La esposa del pastor vive en la casa parroquial, cerca de la iglesia. A veces invita a tomar el té.
 meta: tomando_te ana sraallan
+requiere: escuela_dominical
+antes: conocer a la Sra. Allan (en la iglesia, un domingo)
+acciones: pedir/venir
 
 == En Tejas Verdes
 
@@ -59,7 +76,32 @@ titulo: Decir sus oraciones
 pista: Junto a su cama, en la pieza del alero.
 meta: rezo ana
 
-== Libros y letras
+== La escuela y los libros
+
+=== escuela_dominical ===
+titulo: Ir a la escuela dominical
+pista: En la iglesia, camino a Bright River. Allí está el pastor, y su esposa, la Sra. Allan.
+meta: estar_en ana iglesia
+
+=== escuela ===
+titulo: Ir a la escuela
+pista: La escuela está junto al río, más allá de la aldea. Allí van Diana, Gilbert Blythe y los demás.
+meta: estar_en ana escuela
+
+=== recito ===
+titulo: Recitar la lección en la escuela
+pista: Hay que estudiarla antes.
+meta: recito ana
+requiere: escuela
+acciones: recitar
+
+=== paces ===
+titulo: Hacer las paces con Gilbert Blythe
+pista: Le dijo «zanahorias». Él quiere disculparse… si Ana lo deja.
+meta: paces ana gilbert
+requiere: escuela
+antes: conocer a Gilbert (en la escuela)
+acciones: disculparse:gilbert, perdonar:gilbert, interceder:gilbert
 
 === leido ===
 titulo: Leer un libro de principio a fin
@@ -75,21 +117,23 @@ meta: carta ana
 titulo: Escribir un cuento para el club de cuentos
 pista: Una historia trágica, con una dama de cabellos de oro… y leérsela a Diana.
 meta: club ana
-
-=== recito ===
-titulo: Recitar la lección en la escuela
-pista: Hay que estudiarla antes. La escuela está junto al río.
-meta: recito ana
+requiere: amigas
+acciones: escribir_cuento, leer_cuento
 
 === concierto ===
 titulo: Recitar en el concierto
 pista: En el salón del pueblo, en la aldea. Conviene ensayar.
 meta: concierto ana
+requiere: escuela
+antes: ir a la escuela (el concierto lo organizan la maestra y sus alumnos)
+acciones: ensayar, actuar
 
 === sala ===
 titulo: Decorar el salón para el concierto
 pista: Con flores de la huerta.
 meta: sala ana
+requiere: escuela
+acciones: decorar_sala
 
 == Al aire libre
 
@@ -107,6 +151,9 @@ meta: adornado ana
 titulo: Remar en el Lago de las Aguas Brillantes
 pista: El bote de los Barry está en el lago. En verano.
 meta: remo ana
+requiere: amigas
+antes: ser amiga de Diana (el bote es de los Barry)
+acciones: remar
 
 === patinar ===
 titulo: Patinar en el lago helado
@@ -125,7 +172,18 @@ titulo: Teñirse el pelo de negro azabache
 pista: El buhonero vende un tinte que promete maravillas… y acepta huevos.
 meta: teñido ana
 
+=== pelo_corto ===
+titulo: Librarse del pelo verde
+pista: El tinte no sale con nada. Marilla sabe lo que hay que hacer, aunque a Ana no le va a gustar.
+meta: pelo_corto ana
+requiere: tinte
+antes: ¿por qué habría que librarse de un pelo negro azabache? (primero, teñírselo)
+acciones: cortar_pelo
+
 === techo ===
 titulo: Aceptar el desafío de Josie Pye
 pista: Caminar por el caballete del techo de los Barry. ¿Qué podría salir mal?
 meta: desafio ana
+requiere: amigas
+antes: ser amiga de Diana (el desafío es en una fiesta en su casa)
+acciones: trepar

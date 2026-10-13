@@ -15,7 +15,7 @@ const AGENDA = [
   { who: 'marilla', from: 17, to: 19, ana: true, label: 'regañar a Ana por los quehaceres', when: () => realR.fact('falta:ana'), goal: () => G.regañado('ana') },
   { who: 'lynde', from: 14, to: 16.5, label: 'visitar a Marilla', when: () => today() % 2 === 0, goal: () => G.visitar('lynde', 'marilla') },
   { who: 'lynde', from: 14, to: 16.5, label: 'visitar a la Sra. Barry', when: () => today() % 2 === 1, goal: () => G.visitar('lynde', 'barry') },
-  { who: 'diana', from: 15, to: 17, ana: true, season: [0, 1, 2], label: 'dar un paseo con Ana', when: () => !isSunday(), goal: () => G.paseo('diana', 'ana', 'lago', 30), favors: [{ f: 'pasear', to: 'ana' }] },
+  { who: 'diana', from: 15, to: 17, ana: true, season: [0, 1, 2], label: 'dar un paseo con Ana', when: () => !isSunday() && conoceDiana(), goal: () => G.paseo('diana', 'ana', 'lago', 30), favors: [{ f: 'pasear', to: 'ana' }] },
   { who: 'ana', from: 7.5, to: 8.5, ana: true, season: [0, 2, 3], label: 'ir a clases', when: () => !isSunday(), goal: () => G.estar_en('ana', 'escuela', 9, CLASES_FIN) },
   { who: 'ana', from: 12.5, to: 14.5, ana: true, label: 'la tarde libre', goal: () => anaTarde() },
   { who: 'ana', from: 20, to: 22, ana: true, label: 'decir sus oraciones', goal: () => G.rezo('ana') },
@@ -94,6 +94,7 @@ function wmApproachTick(dt){
 }
 function wmRunTest(i){
   const T = WM_TESTS[i];
+  game.libre = !T.cadena;   // (a test goal is of one thing: the chains of the book open, unless it is the test of a chain)
   for (const c of CHATS.slice()) chatEnd(c);
   for (const k of Object.keys(AGENTS)) { wmRelease(k); delete AGENTS[k]; }
   close(); if (ana.goto) ana.goto = null; diana.follow = false; game.wm.sick = []; for (const f of Object.keys(game.wm.facts)) if (/^(pedido|intercede|disc|gusto|dio):/.test(f)) delete game.wm.facts[f]; game.seasonShift = 0; cowHome('dolly'); cowHome('jersey'); game.inv.cuerda = 0; for (const k of ['matthew', 'harrison', 'shearer']) delete game.wm.inv[k];
