@@ -94,15 +94,23 @@ function phNativo(sitio){
   return si;
 }
 // a sprite drawn by the game's own code: a little canvas of its own (box: [left, top, right, bottom] around `at`)
-function phVivo(key, at, box, depth, draw){
-  const sc = PH.scene, R = PH.R, w = Math.max(1, Math.ceil((box[2] - box[0]) * R)), h = Math.max(1, Math.ceil((box[3] - box[1]) * R));
-  let V = PH.vivos.get(key);
+// how often each kind of live sprite is drawn again (seconds; between times it only moves): copying a canvas to the
+// graphics card is what costs, so animals and carts 12 times a second, a person talking 20, what lies on the ground 4
+const VIVO_CADA = [[/^(p:|f:|ana$)/, 1 / 20], [/^(fauna|vaca|carro|calesa|buggy|carreta|toby|p:.*:carro)/, 1 / 12], [/^(suelo|heno|lena|destino|cama)/, 1 / 4], [/^(lleva|mesa|obju|objf|taza|obs)/, 1 / 15]];
+function phVivo(key, at, box, depth, draw, cada){
+  if (cada === undefined) { cada = 0; for (const [re, c] of VIVO_CADA) if (re.test(key)) { cada = c; break; } }
+  const sc = PH.scene, R = key === 'fondo' || key.startsWith('mueble:') ? PH.R : Math.min(PH.R, 2), w = Math.max(1, Math.ceil((box[2] - box[0]) * R)), h = Math.max(1, Math.ceil((box[3] - box[1]) * R));
+  let V = PH.vivos.get(key); const now = performance.now();
   if (V && (V.w !== w || V.h !== h)) { V.img.destroy(); sc.textures.remove(V.tk); PH.vivos.delete(key); V = null; }
-  if (!V) { const tk = 'v' + (PH.seq = (PH.seq || 0) + 1); const tex = sc.textures.createCanvas(tk, w, h); V = { tk, tex, w, h, img: sc.add.image(0, 0, tk).setOrigin(0) }; PH.vivos.set(key, V); }
-  const c = V.tex.getContext(); c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, w, h);
-  c.globalAlpha = 1; c.globalCompositeOperation = 'source-over'; c.setTransform(R, 0, 0, R, -(at[0] + box[0]) * R, -(at[1] + box[1]) * R);
-  const pant = g; g = c; try { draw(c); } finally { g = pant; }
-  V.tex.refresh(); V.img.setPosition(at[0] + box[0], at[1] + box[1]).setScale(1 / R).setDepth(depth).setVisible(true); V.usado = PH.cuadro;
+  if (!V) { const tk = 'v' + (PH.seq = (PH.seq || 0) + 1); const tex = sc.textures.createCanvas(tk, w, h); V = { tk, tex, w, h, t: -1e9, img: sc.add.image(0, 0, tk).setOrigin(0) }; PH.vivos.set(key, V); }
+  if (now - V.t >= cada * 1000 || !V.img.visible) {
+    V.t = now;
+    const c = V.tex.getContext(); c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, w, h);
+    c.globalAlpha = 1; c.globalCompositeOperation = 'source-over'; c.setTransform(R, 0, 0, R, -(at[0] + box[0]) * R, -(at[1] + box[1]) * R);
+    const pant = g; g = c; try { draw(c); } finally { g = pant; }
+    V.tex.refresh(); if (PH.subidas) { const k = key.replace(/[:\d].*$/, ''); PH.subidas[k] = (PH.subidas[k] || 0) + w * h; }   // (PH.subidas: what is copied to the card, for the tests)
+  }
+  V.img.setPosition(at[0] + box[0], at[1] + box[1]).setScale(1 / R).setDepth(depth).setVisible(true); V.usado = PH.cuadro;
 }
 // the room and its furniture: images baked again only when something changes (the night, the season, a stew on the
 // stove; the furniture twice a second, in a box of its own measured the first time)
@@ -152,7 +160,7 @@ function phFijo(o, depth, v){
     if (!F.tk || F.w !== w || F.h !== h) { phFijoFuera(F); F.tk = 'o' + (PH.seq = (PH.seq || 0) + 1); F.tex = sc.textures.createCanvas(F.tk, w, h); F.w = w; F.h = h; F.img = sc.add.image(0, 0, F.tk); F.humo = null; }
     const c = F.tex.getContext(); c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, w, h); c.setTransform(Rf, 0, 0, Rf, -(o.x + b[0]) * Rf, -(o.y + b[1]) * Rf);
     const humos = []; const pant = g; g = c; PH_HUMOS = humos; try { drawProp(c, o, arbol ? -o.ph / .9 : v.t, v.night); } finally { g = pant; PH_HUMOS = null; }
-    F.tex.refresh(); F.sig = sig;
+    F.tex.refresh(); F.sig = sig; if (PH.subidas) PH.subidas.fijo = (PH.subidas.fijo || 0) + w * h;
     for (const e of F.humo || []) e.destroy();
     F.humo = humos.map(([x, y, sm, nk]) => sc.add.particles(x, y, phTexHumo(), { lifespan: 4500, frequency: 4500 / nk, speedX: { min: 2, max: 8 }, speedY: { min: -18, max: -13 }, scale: { start: .35, end: 1.1 }, alpha: { start: sm, end: 0 }, rotate: { min: 0, max: 360 } }).setDepth(depth + .5));
     F.img.setOrigin(-b[0] / (b[2] - b[0]), -b[1] / (b[3] - b[1])).setScale(1 / Rf);   // (its origin at its foot: a tree turns on its trunk)
