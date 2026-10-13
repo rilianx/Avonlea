@@ -5,7 +5,7 @@ let TALKS = [];
 function talkPlay(lines, o = {}){
   const L = lines.map(l => Array.isArray(l) ? { q: l[0], t: l[1], m: l[2] } : l).filter(l => l.t && l.t !== '…');
   for (const k of o.hold || []) CHAT_HOLD[k] = TT + 1e6;
-  const t = { hold: o.hold, lines: L, i: -1, wait: o.delay ?? .5, ch: o.ch, stop: o.stop, end: o.end, budget: o.budget ? o.budget * MIN_S : 0, el: 0, use: o.use, resumen: o.resumen };
+  const t = { hold: o.hold, lines: L, i: -1, wait: o.delay ?? .5, gap: o.gap || 0, ch: o.ch, stop: o.stop, end: o.end, budget: o.budget ? o.budget * MIN_S : 0, el: 0, use: o.use, resumen: o.resumen };
   if (o.ch && TALKS.some(x => x.ch === o.ch)) { if (o.queue) (TALK_Q[o.ch] ||= []).push(t); return t; }
   TALKS.push(t); if (t.resumen) logEv(t.resumen, []); return t;
 }
@@ -17,7 +17,7 @@ function talkTick(dt){
     t.el += dt;
     if ((t.wait -= dt) > 0) continue;
     if (t.stop?.() || ++t.i >= t.lines.length || (t.budget && t.el > t.budget)) { talkEnd(t); continue; }
-    const l = t.lines[t.i]; sayB(talkQ(l.q), l.t); t.wait = lineDur(l.t) + .35;
+    const l = t.lines[t.i]; sayB(talkQ(l.q), l.t); t.wait = lineDur(l.t) + .35 + t.gap;   // (gap: a scene that takes its time, like a letter being written)
     if (l.m) cap1Mark(l.m); t.use?.(t.i, l);
   }
 }

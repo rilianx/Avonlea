@@ -29,6 +29,7 @@ El silencio también se escribe: después de la Avenida hay escenas de una líne
 | `tipo` | `'conversacion'` (si la cortan, sigue después donde quedó) o `'comentario'` (si la cortan, se pierde) | `'conversacion'` |
 | `puente` | qué se dice al retomarla: `[[quién, texto], ...]`, o `false` para seguir sin frase puente | una al azar de `DLG_PUENTE`, de quien habla a continuación |
 | `al_paso` | mientras se dice, la calesa va al paso | `false` |
+| `entre` | segundos de más entre una línea y la siguiente: una escena que se toma su tiempo, como una carta que se escribe | 0 |
 | `sujeta` | quiénes se quedan quietos mientras se dice (no se van a otra parte) | — |
 | `lineas` | `[[quién, texto], ...]`, o `'libro:ruta'` (de `LIBRO1`, p. ej. `'libro:avonlea.lago'`), o `'relleno:n'`, o trozos de varias fuentes: `[{ de: 'libro:viaje.10', elegir: [7] }, { lineas: [...] }]` | — |
 | `elegir` | índices de las líneas que se dicen (de una escena larga del libro) | todas |
@@ -60,6 +61,7 @@ El silencio también se escribe: después de la Avenida hay escenas de una líne
 | `escena_ana:s` | Ana está en la escena `s` |
 | `sabe:quien:qué` | quien sabe algo (`game.wm.know`) |
 | `y_mayor:quien:y` | quien está más al sur que `y` (en unidades del mapa) |
+| `carta:quien` | Ana está escribiendo una carta a esa persona, sentada a su escritorio (`diana`, `stacy`, `sraallan`, `josephine`) |
 
 Con `!` delante se niega (`'!hecho:llegaron'`). **`o: [ {...}, {...} ]`**: basta con que se cumpla una de las alternativas (cada una con estas mismas condiciones).
 
@@ -185,3 +187,15 @@ No todo cabe en un viaje: el libro tiene unas 116 líneas para el camino, y leí
 Las **charlas de pares y tríos** (`DLG_BANK`) se convierten en escenas con `disparo: 'encuentro'`. Cuando dos personajes se encuentran, se elige la primera que no se haya dicho y que tenga sentido donde están.
 
 El capítulo 1 cuenta lo que pasa con hechos (`dlgHecho('matthew_en_estacion')`…), y las escenas reaccionan a ellos. Ninguna escena tiene código propio.
+
+## Las cartas (escenas de texto)
+
+Escribir una carta es una escena del guion: `carta_<a quién>_1` y `carta_<a quién>_2` (la segunda, desde la segunda carta en adelante), en el canal `carta`, con `si: carta:<a quién>` y `entre: 5`, para que dure lo que dura escribirla (unos 25 minutos del juego). En sus líneas:
+
+- `carta: …` es lo que escribe: Ana lo lee en voz alta (con ✎) y es **la carta que llega** (lo que después lee quien la recibe);
+- `ana: …` es lo que piensa en voz alta mientras escribe (los desvaríos);
+- entre paréntesis, lo que hace: `ana: (Tacha una palabra con tres rayas.)`;
+- `{estacion}` se llena con la estación («los cerezos están en flor») y `{noticia}` con algo que de verdad le pasó hoy («Hoy fui de picnic al lago con Diana.»); si no hay noticia, esa línea no se dice.
+
+Para una carta a alguien nuevo: su entrada en `CORREO` (`src/js/62-cartas.js`) y sus dos escenas en el guion.
+

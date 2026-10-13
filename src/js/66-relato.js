@@ -71,6 +71,13 @@ const relatoFrase = (e, c, a) => {
   if (c.has('guia')) p.push(e.guia ? 'lleva de la cuerda a ' + e.guia : 'suelta la cuerda');
   return p.length ? n + ' ' + p.join('; ') + '.' : null;
 };
+// a line said, as the tale tells it: what she does (in parentheses) is told, not said; what she writes, written
+function relatoDice(n, t){
+  const m = t.match(/^\(([^)]*)\)\s*(.*)$/), q = s => /^«[^«]*»$/.test(s) ? s : '«' + s + '»';
+  if (m) return m[1] + (m[2] ? ' Y dice: ' + q(m[2]) : '');
+  if (t.startsWith('✎ ')) return n + ' escribe: ' + q(t.slice(2));
+  return n + ' dice: ' + q(t);
+}
 // what is said in the talk box (the player's way of talking): into the account as well
 function relatoDicho(k, text){ if (RELATO.on && text) relatoLinea(relN(k) + ' dice: «' + text + '»', { quien: k, dice: text }); }
 function relatoLinea(texto, estado){ texto = texto.replace(/^(Al empezar, |⚠ |· )?([a-zá-ú])/, (m, p, c) => (p || '') + (p ? c : c.toUpperCase())); const L = { hora: relatoHora(), t: dayT, texto, estado }; RELATO.lineas.push(L); if (/[?&]relato/.test(location.search)) console.log('[relato] ' + L.hora + ' ' + texto); }
@@ -91,7 +98,7 @@ function relatoTick(){
     if (c.size) { const f = relatoFrase(e, c, a); if (f) relatoLinea((a ? '' : 'Al empezar, ') + f, e); RELATO.antes[k] = guarda; }
     const m0 = RELATO.mal[k] || '', nuevas = e._mal ? e._mal.split(',').filter(r => !m0.split(',').includes(r)) : []; RELATO.mal[k] = e._mal;   // (a rule just broken: said at once)
     if (nuevas.length) relatoLinea('⚠ ' + relN(k) + ': no se cumple que ' + nuevas.map(r => RELATO_REGLAS.find(x => x.id === r).texto + (RELATO.visto[k + '|' + r] ? ' (' + RELATO.visto[k + '|' + r] + ')' : '')).join(', ni que ') + '.', { ...e, regla: true });
-    for (const b of bubbles) if ((b.q === k || b.q === 'f:' + k) && !RELATO.globo.has(b)) { RELATO.globo.add(b); relatoLinea(relN(k) + ' dice: ' + (/^«.*»$/.test(b.text) && b.text.indexOf('»') === b.text.length - 1 ? b.text : '«' + b.text + '»'), { ...e, dice: b.text }); }
+    for (const b of bubbles) if ((b.q === k || b.q === 'f:' + k) && !RELATO.globo.has(b)) { RELATO.globo.add(b); relatoLinea(relatoDice(relN(k), b.text), { ...e, dice: b.text }); }
   }
   // and what is said beside them by someone not watched (who asks, who answers): else one hears only half of it
   for (const b of bubbles) { if (RELATO.globo.has(b)) continue; const id = b.q.replace(/^f:/, ''), o = (PEOPLE[id] || FOLKBY[id]) && wmBody(id); if (!o || ks.includes(id)) continue;

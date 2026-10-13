@@ -39,6 +39,7 @@ function dlgCond(s, c){   // one condition of state, written as text
     case 'escena_ana': return game.scene === a;
     case 'sabe': return (game.wm.know[a] || []).includes(b);
     case 'y_mayor': { const p = wmBody(a); return !!p && p.y > +b * U; }
+    case 'carta': return game.cartaAhora?.para === a && TT - game.cartaAhora.t < 1 && !game.cartaEscena;   // (Ana is writing a letter to her, at her desk)
   }
   return false;
 }
@@ -117,7 +118,9 @@ class Dialogo {
     L = (L || []).map(l => Array.isArray(l) ? l : [l.q, l.t, l.m]);
     if (this.elegir) L = this.elegir.map(i => L[i]).filter(Boolean);
     if (this.marcas) L = L.map((l, j) => this.marcas[j] ? [l[0], l[1], this.marcas[j]] : l);
-    return L.filter(l => l[1] && l[1] !== '…');
+    // (what changes with the day: the season, and something that really happened to her lately; a line left empty is not said)
+    L = L.map(l => l[1] && /\{(estacion|noticia)\}/.test(l[1]) ? [l[0], l[1].replace('{estacion}', ESTACION_TXT[S]).replace('{noticia}', () => cartaNoticia() || ''), l[2]] : l);
+    return L.filter(l => l[1] && l[1] !== '…' && l[1].trim() !== '');
   }
   puenteDe(l){   // the line that picks it up again
     if (this.puente === false) return [];
@@ -131,7 +134,9 @@ class Dialogo {
     const L = this.lineas(); if (p >= L.length) delete P[this.id]; if (!L.length || p >= L.length) return null;
     if (!p) dlgHacer(this.al_empezar);
     const pu = p ? this.puenteDe(L[p]) : [], k = pu.length;
-    const t = talkPlay([...pu, ...L.slice(p)], { ch: this.canal, hold: this.sujeta, delay: this.espera ?? .6, end: () => {
+    if (this.canal === 'carta') game.cartaEscena = { id: this.id, lineas: L.filter(l => l[0] === 'carta').map(l => l[1]) };   // (what she writes: the letter that goes)
+    const escrita = l => l[0] === 'carta' ? ['ana', '✎ ' + l[1], l[2]] : l;   // (the lines of the letter: Ana reads them aloud as she writes them)
+    const t = talkPlay([...pu, ...L.slice(p)].map(escrita), { ch: this.canal, hold: this.sujeta, delay: this.espera ?? .6, gap: this.entre, end: () => {
       dlgPausa[this.canal] = TT + this.pausa;
       if (t.interrupted) {   // cut short: a comment is lost; a conversation is left where it was (the line cut in its first half is said again)
         const n = t.i - k, next = n < 0 ? p : p + n + (t.wait > lineDur(t.lines[t.i]?.t || '') / 2 ? 0 : 1);
@@ -167,7 +172,7 @@ function dlgNext(ks){
 // the scenes, as a script outside the code (the <script type="text/plain" id="guion"> block, at the top): each one
 // «=== id ===», its fields, one per line («field: value»), and its own lines after «---» («who: text #mark»).
 // dlgGuion turns it into the same configurations as anywhere else (docs/ESCENAS.md).
-const DLG_LISTA = ['sujeta', 'quienes', 'si', 'elegir', 'cerca'], DLG_PARES = ['en', 'marcas', 'camino'], DLG_NUM = ['prioridad', 'pausa', 'espera'], DLG_SI = ['interrumpe', 'al_paso'];
+const DLG_LISTA = ['sujeta', 'quienes', 'si', 'elegir', 'cerca'], DLG_PARES = ['en', 'marcas', 'camino'], DLG_NUM = ['prioridad', 'pausa', 'espera', 'entre'], DLG_SI = ['interrumpe', 'al_paso'];
 const dlgVal = s => { s = s.trim(); return s === '-' ? null : s === 'true' || s === 'sí' ? true : s === 'false' || s === 'no' ? false : s !== '' && !isNaN(+s) ? +s : s; };
 function dlgCampo(k, v){   // a field of the script, from its text
   if (DLG_LISTA.includes(k)) return v.split(',').map(dlgVal);

@@ -405,6 +405,153 @@ repetir: cada 30
 calesa: camino
 camino: no_callado
 lineas: relleno:1
+# --- las cartas: Ana escribe en su escritorio, y mientras escribe (unos 25 minutos) se le va la cabeza a otras cosas.
+# «carta:» es lo que escribe (lo lee en voz alta; es la carta que llega); «ana:» lo que piensa en voz alta; entre
+# paréntesis, lo que hace. {estacion} y {noticia} se llenan con la estación y con algo que de verdad le pasó hoy.
+# La segunda carta de cada una se repite desde entonces (si: dicha de la primera).
+
+=== carta_diana_1 ===
+canal: carta
+prioridad: 5
+si: carta:diana
+entre: 5
+---
+ana: (Ana moja la pluma en el tintero y se queda mirando el papel en blanco.)
+carta: Mi queridísima Diana, amiga del alma:
+ana: «Queridísima» es poco. ¿Existirá «requetequeridísima»? La Srta. Stacy diría que es un adjetivo de más… pero el corazón no cuenta adjetivos.
+carta: Te escribo desde mi cuarto del alero, con la ventana abierta. Aquí en Tejas Verdes {estacion}.
+carta: {noticia}
+ana: (Se le escapa una gota de tinta.) ¡Ay, no! Una mancha justo encima de «alero». Bueno, ahora parece una golondrina. Una golondrina de tinta. Lo dejo así: es poético.
+carta: Hoy pensé que si fuéramos princesas encerradas en una torre, nos mandaríamos cartas con una paloma blanca.
+ana: Yo sería la princesa Cordelia, de cabellos negro azabache… y Diana la princesa Geraldine, que ya tiene el pelo negro, así que a ella le cuesta menos imaginarse.
+ana: Pero el correo de Avonlea es casi lo mismo que una paloma, ¿no? Salvo que el Sr. Lawson no tiene alas. Ni plumas. Tiene bigote.
+carta: Prométeme que el sábado vamos al Bosque Encantado, aunque nos dé un poquito de miedo.
+ana: (Mira por la ventana un rato largo, con la pluma en la boca.)
+ana: ¿Y si le cuento lo del fantasma de la Burbuja de la Dríada? No… Marilla dice que esas cosas no se ponen por escrito. Quedan escritas, justamente.
+carta: Tu amiga del alma hasta la muerte, Ana (con e).
+ana: Listo. ¡La doblo como un abanico, para que se vea elegante!
+
+=== carta_diana_2 ===
+canal: carta
+prioridad: 5
+repetir: siempre
+si: carta:diana, dicha:carta_diana_1
+entre: 5
+---
+ana: (Ana estira el papel con la palma de la mano, muy seria.)
+carta: Mi queridísima Diana:
+carta: Aquí en Tejas Verdes {estacion}.
+carta: {noticia}
+ana: Una carta tiene que tener una noticia, una confidencia y una promesa. Lo leí en alguna parte. O me lo imaginé. Casi es lo mismo.
+carta: Te cuento una confidencia: a veces le hablo a mi reflejo en la puerta de la alacena. Se llama Katie Maurice y era mi única amiga antes de ti.
+ana: ¿Se reirá? Diana no se ríe de esas cosas. Bueno, un poquito. Pero con cariño.
+ana: (Dibuja una flor en el margen, y luego otra, y luego una enredadera entera.)
+carta: Y una promesa: mientras el sol y la luna existan, serás mi amiga del alma.
+ana: ¡Ay, la enredadera se comió media hoja! Ya no queda lugar para la posdata.
+carta: P. D.: La enredadera la hice yo. Es una enredadera de amistad.
+carta: Tuya siempre, Ana (con e).
+
+=== carta_stacy_1 ===
+canal: carta
+prioridad: 5
+si: carta:stacy
+entre: 5
+---
+ana: (Ana se sienta derechita, como en la escuela, y moja la pluma.)
+carta: Querida Srta. Stacy:
+carta: Aquí en Tejas Verdes {estacion}.
+ana: Así empiezan las cartas de los libros: con el tiempo que hace. Debe ser porque es lo único que todos saben.
+carta: Le escribo para contarle que terminé de leer el libro que nos recomendó, y que lloré en el capítulo once.
+ana: En realidad lloré en el diez también, pero lo del once fue más llanto. Más… literario.
+carta: {noticia}
+ana: (Tacha una palabra con tres rayas.) «Indescriptible» no: ya lo usé dos veces esta semana. La Srta. Stacy dice que una palabra gastada es como un vestido con brillo en los codos.
+carta: Estuve pensando en lo que dijo de los adjetivos: esta carta tiene solo los indispensables. Bueno, casi.
+ana: (Cuenta los adjetivos con los dedos, y se le acaban los dedos.)
+carta: Quería decirle que gracias a usted estudiar ya no me parece un castigo, sino una aventura.
+carta: Su alumna que la quiere, Ana Shirley.
+
+=== carta_stacy_2 ===
+canal: carta
+prioridad: 5
+repetir: siempre
+si: carta:stacy, dicha:carta_stacy_1
+entre: 5
+---
+ana: (Ana mira el techo, buscando las palabras entre las vigas.)
+carta: Querida Srta. Stacy:
+carta: Aquí en Tejas Verdes {estacion}.
+carta: Le escribo desde Tejas Verdes con una pregunta muy importante: ¿cree usted que yo podría llegar a escribir un libro de verdad?
+ana: Un libro con tapas verdes y letras doradas. «Por Ana Shirley». No: «por Cordelia Fitzgerald»… no, mejor con mi nombre. Que se sepa.
+carta: Ya tengo el título. Lo que me falta es todo lo demás.
+carta: {noticia}
+ana: (Se queda quieta, con la pluma en el aire, mirando por la ventana.) El título es lo más difícil. Lo demás es… bueno, lo demás también es difícil.
+carta: Le prometo que no voy a usar más de tres adjetivos por oración. Esta frase tiene cero. ¿Ve?
+carta: Su alumna que la quiere, Ana Shirley.
+
+=== carta_sraallan_1 ===
+canal: carta
+prioridad: 5
+si: carta:sraallan
+entre: 5
+---
+ana: (Ana busca su mejor papel, el que tiene un borde de florcitas.)
+carta: Querida Sra. Allan:
+carta: Aquí en Tejas Verdes {estacion}.
+carta: Le escribo para darle las gracias por el té de la otra tarde. Fue uno de los momentos más elegantes de mi vida.
+ana: Usé la taza con rosas y no se me cayó nada. Ni una miga. Bueno, una miga. Pero chiquita.
+carta: {noticia}
+ana: ¿Le cuento lo del pastel con linimento? No… eso fue antes, y ella fue tan buena que hizo como si no pasara nada. Mejor no recordárselo.
+carta: Sigo pensando en lo que usted dijo de ser buena. Lo estoy intentando todos los días, aunque algunos días me resulta mejor que otros.
+ana: (Suspira.) Los martes, por ejemplo, me resulta peor. No sé por qué. Debe ser algo de los martes.
+carta: Con todo cariño, Ana Shirley.
+
+=== carta_sraallan_2 ===
+canal: carta
+prioridad: 5
+repetir: siempre
+si: carta:sraallan, dicha:carta_sraallan_1
+entre: 5
+---
+ana: (Ana escribe despacio, con su mejor letra.)
+carta: Querida Sra. Allan:
+carta: Aquí en Tejas Verdes {estacion}.
+carta: {noticia}
+carta: En la escuela dominical aprendimos el salmo de los pastos verdes, y me acordé de usted, porque usted hace que todo parezca un pasto verde.
+ana: ¿Se entiende? Es una metáfora. Las metáforas son como los sombreros: hay que saber llevarlas.
+carta: Quería preguntarle si un espíritu afín puede ser también una persona mayor. Yo creo que sí, y que usted es una prueba.
+carta: Con todo cariño, Ana Shirley.
+
+=== carta_josephine_1 ===
+canal: carta
+prioridad: 5
+si: carta:josephine
+entre: 5
+---
+ana: (Ana sopla la pluma antes de empezar, como si fuera a tocar una flauta.)
+carta: Querida tía Josephine (porque usted me dejó llamarla así):
+carta: Le escribo desde Avonlea, donde todo sigue igual de bonito que cuando usted vino de visita. Aquí {estacion}.
+carta: {noticia}
+ana: (Se ríe sola.) Todavía me acuerdo de su cara cuando saltamos sobre la cama. ¡Parecía un fantasma con gorro de dormir!
+carta: Diana y yo todavía nos reímos de la noche en que saltamos sobre su cama. Bueno, ahora nos reímos; esa noche no tanto.
+ana: Charlottetown debe ser enorme. Con calles de piedra, y tiendas con vidrieras, y gente que no se saluda porque no se conoce. Qué triste, eso último.
+carta: Si alguna vez se aburre en su casa tan grande, acuérdese de que en Avonlea hay una niña que la quiere mucho.
+carta: Su amiga que la recuerda siempre, Ana Shirley.
+
+=== carta_josephine_2 ===
+canal: carta
+prioridad: 5
+repetir: siempre
+si: carta:josephine, dicha:carta_josephine_1
+entre: 5
+---
+ana: (Ana se arregla el pelo antes de escribir, como si la tía Josephine pudiera verla.)
+carta: Querida tía Josephine:
+carta: Aquí en Avonlea {estacion}.
+carta: {noticia}
+ana: Las cartas a Charlottetown tardan tres días. En tres días pueden pasar tantas cosas… cuando llegue, lo que le cuento ya será viejo. Como las estrellas, que uno ve su luz de antes.
+carta: Le cuento que Matthew me regaló un vestido con mangas abullonadas. Son las mangas más abullonadas de toda la isla, creo.
+carta: Su amiga que la recuerda siempre, Ana Shirley.
+
 </script>
 <script>
 /* Un día en Avonlea: a first look at a calm game inspired by "Anne of Green Gables" (L. M. Montgomery, 1908). No
@@ -2358,7 +2505,7 @@ let TALKS = [];
 function talkPlay(lines, o = {}){
   const L = lines.map(l => Array.isArray(l) ? { q: l[0], t: l[1], m: l[2] } : l).filter(l => l.t && l.t !== '…');
   for (const k of o.hold || []) CHAT_HOLD[k] = TT + 1e6;
-  const t = { hold: o.hold, lines: L, i: -1, wait: o.delay ?? .5, ch: o.ch, stop: o.stop, end: o.end, budget: o.budget ? o.budget * MIN_S : 0, el: 0, use: o.use, resumen: o.resumen };
+  const t = { hold: o.hold, lines: L, i: -1, wait: o.delay ?? .5, gap: o.gap || 0, ch: o.ch, stop: o.stop, end: o.end, budget: o.budget ? o.budget * MIN_S : 0, el: 0, use: o.use, resumen: o.resumen };
   if (o.ch && TALKS.some(x => x.ch === o.ch)) { if (o.queue) (TALK_Q[o.ch] ||= []).push(t); return t; }
   TALKS.push(t); if (t.resumen) logEv(t.resumen, []); return t;
 }
@@ -2370,7 +2517,7 @@ function talkTick(dt){
     t.el += dt;
     if ((t.wait -= dt) > 0) continue;
     if (t.stop?.() || ++t.i >= t.lines.length || (t.budget && t.el > t.budget)) { talkEnd(t); continue; }
-    const l = t.lines[t.i]; sayB(talkQ(l.q), l.t); t.wait = lineDur(l.t) + .35;
+    const l = t.lines[t.i]; sayB(talkQ(l.q), l.t); t.wait = lineDur(l.t) + .35 + t.gap;   // (gap: a scene that takes its time, like a letter being written)
     if (l.m) cap1Mark(l.m); t.use?.(t.i, l);
   }
 }
@@ -2644,6 +2791,7 @@ function dlgCond(s, c){   // one condition of state, written as text
     case 'escena_ana': return game.scene === a;
     case 'sabe': return (game.wm.know[a] || []).includes(b);
     case 'y_mayor': { const p = wmBody(a); return !!p && p.y > +b * U; }
+    case 'carta': return game.cartaAhora?.para === a && TT - game.cartaAhora.t < 1 && !game.cartaEscena;   // (Ana is writing a letter to her, at her desk)
   }
   return false;
 }
@@ -2722,7 +2870,9 @@ class Dialogo {
     L = (L || []).map(l => Array.isArray(l) ? l : [l.q, l.t, l.m]);
     if (this.elegir) L = this.elegir.map(i => L[i]).filter(Boolean);
     if (this.marcas) L = L.map((l, j) => this.marcas[j] ? [l[0], l[1], this.marcas[j]] : l);
-    return L.filter(l => l[1] && l[1] !== '…');
+    // (what changes with the day: the season, and something that really happened to her lately; a line left empty is not said)
+    L = L.map(l => l[1] && /\{(estacion|noticia)\}/.test(l[1]) ? [l[0], l[1].replace('{estacion}', ESTACION_TXT[S]).replace('{noticia}', () => cartaNoticia() || ''), l[2]] : l);
+    return L.filter(l => l[1] && l[1] !== '…' && l[1].trim() !== '');
   }
   puenteDe(l){   // the line that picks it up again
     if (this.puente === false) return [];
@@ -2736,7 +2886,9 @@ class Dialogo {
     const L = this.lineas(); if (p >= L.length) delete P[this.id]; if (!L.length || p >= L.length) return null;
     if (!p) dlgHacer(this.al_empezar);
     const pu = p ? this.puenteDe(L[p]) : [], k = pu.length;
-    const t = talkPlay([...pu, ...L.slice(p)], { ch: this.canal, hold: this.sujeta, delay: this.espera ?? .6, end: () => {
+    if (this.canal === 'carta') game.cartaEscena = { id: this.id, lineas: L.filter(l => l[0] === 'carta').map(l => l[1]) };   // (what she writes: the letter that goes)
+    const escrita = l => l[0] === 'carta' ? ['ana', '✎ ' + l[1], l[2]] : l;   // (the lines of the letter: Ana reads them aloud as she writes them)
+    const t = talkPlay([...pu, ...L.slice(p)].map(escrita), { ch: this.canal, hold: this.sujeta, delay: this.espera ?? .6, gap: this.entre, end: () => {
       dlgPausa[this.canal] = TT + this.pausa;
       if (t.interrupted) {   // cut short: a comment is lost; a conversation is left where it was (the line cut in its first half is said again)
         const n = t.i - k, next = n < 0 ? p : p + n + (t.wait > lineDur(t.lines[t.i]?.t || '') / 2 ? 0 : 1);
@@ -2772,7 +2924,7 @@ function dlgNext(ks){
 // the scenes, as a script outside the code (the <script type="text/plain" id="guion"> block, at the top): each one
 // «=== id ===», its fields, one per line («field: value»), and its own lines after «---» («who: text #mark»).
 // dlgGuion turns it into the same configurations as anywhere else (docs/ESCENAS.md).
-const DLG_LISTA = ['sujeta', 'quienes', 'si', 'elegir', 'cerca'], DLG_PARES = ['en', 'marcas', 'camino'], DLG_NUM = ['prioridad', 'pausa', 'espera'], DLG_SI = ['interrumpe', 'al_paso'];
+const DLG_LISTA = ['sujeta', 'quienes', 'si', 'elegir', 'cerca'], DLG_PARES = ['en', 'marcas', 'camino'], DLG_NUM = ['prioridad', 'pausa', 'espera', 'entre'], DLG_SI = ['interrumpe', 'al_paso'];
 const dlgVal = s => { s = s.trim(); return s === '-' ? null : s === 'true' || s === 'sí' ? true : s === 'false' || s === 'no' ? false : s !== '' && !isNaN(+s) ? +s : s; };
 function dlgCampo(k, v){   // a field of the script, from its text
   if (DLG_LISTA.includes(k)) return v.split(',').map(dlgVal);
@@ -8099,9 +8251,14 @@ function wmExec0(ag, a, st, dt){
       logEv(`${wmName(me)} llevó a ${wmName(a.k)} en la calesa.`, []); return 'ok';
     }
     case 'escribir_carta': {   // (at her desk: she reads it aloud as she writes, line by line)
-      if (!st.said) { st.said = 1; st.para = a.para || 'stacy'; st.txt = cartaTexto(st.para); st.lk = -1; }
-      if (st.llego || !st.P) { const k = Math.floor((st.pt ?? st.w ?? 0) / 3.4); if (k !== st.lk && st.txt[k]) { st.lk = k; bubble(me, st.txt[k]); } }
+      // (Ana: the writing is a scene of the script, carta_<to whom>: what she writes and what goes through her head as she does)
+      if (!st.said) { st.said = 1; st.para = a.para || 'stacy'; st.txt = cartaTexto(st.para); st.lk = -1; if (me === 'ana') game.cartaEscena = null; }
+      const escena = me === 'ana' && DIALOGOS.some(d => d.canal === 'carta' && d.id.startsWith('carta_' + st.para));
+      if (escena && st.P !== undefined && (st.P ? st.llego && st.pt > 0 : true)) game.cartaAhora = { para: st.para, t: TT };
+      if (!escena && (st.llego || !st.P)) { const k = Math.floor((st.pt ?? st.w ?? 0) / 3.4); if (k !== st.lk && st.txt[k]) { st.lk = k; bubble(me, st.txt[k]); } }
       if (!wait(st.txt.length * 3.4)) return 'run';
+      if (escena && game.cartaEscena?.lineas.length) st.txt = game.cartaEscena.lineas;
+      for (const t of TALKS.filter(t => t.ch === 'carta')) talkEnd(t);   // (the letter is done: what she was saying over it, too)
       inv.carta = (inv.carta || 0) + 1; cartas().push({ id: cartas().length + 1, de: me, para: st.para, texto: st.txt, dia: today(), estado: 'escrita' });
       float('+1 carta para ' + CORREO[st.para].nombre, b.x, b.y - 50); logEv(`${wmName(me)} escribió una carta para ${CORREO[st.para].nombre}.`, []); return 'ok';
     }
@@ -8747,6 +8904,13 @@ const relatoFrase = (e, c, a) => {
   if (c.has('guia')) p.push(e.guia ? 'lleva de la cuerda a ' + e.guia : 'suelta la cuerda');
   return p.length ? n + ' ' + p.join('; ') + '.' : null;
 };
+// a line said, as the tale tells it: what she does (in parentheses) is told, not said; what she writes, written
+function relatoDice(n, t){
+  const m = t.match(/^\(([^)]*)\)\s*(.*)$/), q = s => /^«[^«]*»$/.test(s) ? s : '«' + s + '»';
+  if (m) return m[1] + (m[2] ? ' Y dice: ' + q(m[2]) : '');
+  if (t.startsWith('✎ ')) return n + ' escribe: ' + q(t.slice(2));
+  return n + ' dice: ' + q(t);
+}
 // what is said in the talk box (the player's way of talking): into the account as well
 function relatoDicho(k, text){ if (RELATO.on && text) relatoLinea(relN(k) + ' dice: «' + text + '»', { quien: k, dice: text }); }
 function relatoLinea(texto, estado){ texto = texto.replace(/^(Al empezar, |⚠ |· )?([a-zá-ú])/, (m, p, c) => (p || '') + (p ? c : c.toUpperCase())); const L = { hora: relatoHora(), t: dayT, texto, estado }; RELATO.lineas.push(L); if (/[?&]relato/.test(location.search)) console.log('[relato] ' + L.hora + ' ' + texto); }
@@ -8767,7 +8931,7 @@ function relatoTick(){
     if (c.size) { const f = relatoFrase(e, c, a); if (f) relatoLinea((a ? '' : 'Al empezar, ') + f, e); RELATO.antes[k] = guarda; }
     const m0 = RELATO.mal[k] || '', nuevas = e._mal ? e._mal.split(',').filter(r => !m0.split(',').includes(r)) : []; RELATO.mal[k] = e._mal;   // (a rule just broken: said at once)
     if (nuevas.length) relatoLinea('⚠ ' + relN(k) + ': no se cumple que ' + nuevas.map(r => RELATO_REGLAS.find(x => x.id === r).texto + (RELATO.visto[k + '|' + r] ? ' (' + RELATO.visto[k + '|' + r] + ')' : '')).join(', ni que ') + '.', { ...e, regla: true });
-    for (const b of bubbles) if ((b.q === k || b.q === 'f:' + k) && !RELATO.globo.has(b)) { RELATO.globo.add(b); relatoLinea(relN(k) + ' dice: ' + (/^«.*»$/.test(b.text) && b.text.indexOf('»') === b.text.length - 1 ? b.text : '«' + b.text + '»'), { ...e, dice: b.text }); }
+    for (const b of bubbles) if ((b.q === k || b.q === 'f:' + k) && !RELATO.globo.has(b)) { RELATO.globo.add(b); relatoLinea(relatoDice(relN(k), b.text), { ...e, dice: b.text }); }
   }
   // and what is said beside them by someone not watched (who asks, who answers): else one hears only half of it
   for (const b of bubbles) { if (RELATO.globo.has(b)) continue; const id = b.q.replace(/^f:/, ''), o = (PEOPLE[id] || FOLKBY[id]) && wmBody(id); if (!o || ks.includes(id)) continue;

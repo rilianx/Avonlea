@@ -151,9 +151,14 @@ function wmExec0(ag, a, st, dt){
       logEv(`${wmName(me)} llevó a ${wmName(a.k)} en la calesa.`, []); return 'ok';
     }
     case 'escribir_carta': {   // (at her desk: she reads it aloud as she writes, line by line)
-      if (!st.said) { st.said = 1; st.para = a.para || 'stacy'; st.txt = cartaTexto(st.para); st.lk = -1; }
-      if (st.llego || !st.P) { const k = Math.floor((st.pt ?? st.w ?? 0) / 3.4); if (k !== st.lk && st.txt[k]) { st.lk = k; bubble(me, st.txt[k]); } }
+      // (Ana: the writing is a scene of the script, carta_<to whom>: what she writes and what goes through her head as she does)
+      if (!st.said) { st.said = 1; st.para = a.para || 'stacy'; st.txt = cartaTexto(st.para); st.lk = -1; if (me === 'ana') game.cartaEscena = null; }
+      const escena = me === 'ana' && DIALOGOS.some(d => d.canal === 'carta' && d.id.startsWith('carta_' + st.para));
+      if (escena && st.P !== undefined && (st.P ? st.llego && st.pt > 0 : true)) game.cartaAhora = { para: st.para, t: TT };
+      if (!escena && (st.llego || !st.P)) { const k = Math.floor((st.pt ?? st.w ?? 0) / 3.4); if (k !== st.lk && st.txt[k]) { st.lk = k; bubble(me, st.txt[k]); } }
       if (!wait(st.txt.length * 3.4)) return 'run';
+      if (escena && game.cartaEscena?.lineas.length) st.txt = game.cartaEscena.lineas;
+      for (const t of TALKS.filter(t => t.ch === 'carta')) talkEnd(t);   // (the letter is done: what she was saying over it, too)
       inv.carta = (inv.carta || 0) + 1; cartas().push({ id: cartas().length + 1, de: me, para: st.para, texto: st.txt, dia: today(), estado: 'escrita' });
       float('+1 carta para ' + CORREO[st.para].nombre, b.x, b.y - 50); logEv(`${wmName(me)} escribió una carta para ${CORREO[st.para].nombre}.`, []); return 'ok';
     }
