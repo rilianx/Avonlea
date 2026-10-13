@@ -81,7 +81,7 @@ function roadAvonlea(k){ game.road = null; }   // (into Avonlea: the scenes of t
 // the strip at the bottom while on the road (or in the cart): where, how far, and how fast
 let GAME_SPEED = 1;
 const tripOn = () => game.scene === 'camino' || cart.riding || (!!AGENTS.ana?.ride && !!AGENTS.ana.followOf) || (CAP1.on && !CAP1.done);
-const tripSpeed = () => GAME_SPEED * tareaPrisa();   // (the time can go faster anywhere: up to 50×; and while Ana does something, 4× more)
+const tripSpeed = () => GAME_SPEED;   // (the time can go faster anywhere: up to 50×)
 let tripTxt = '';
 function tripBarDraw(){
   const on = tripOn(); $('tripbar').hidden = !on; if (!on) return;

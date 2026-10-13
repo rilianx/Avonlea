@@ -324,6 +324,6 @@ function renderView(){
   const ts = activeTasks(), tl = [...storyOpen().filter(e => !e.played).slice(0, 2).map(e => '📖 ' + e.hora + ':00 · ' + e.pista), ...ts.map(t => '📜 ' + taskText(t) + (t.para !== t.from || t.tipo !== 'traer' ? ' · ' + NAMES[t.from] : ''))].join('\n');
   if ($('tasks').dataset.t !== tl) { $('tasks').dataset.t = tl; $('tasks').textContent = tl; $('tasks').style.whiteSpace = 'pre-line'; $('tasks').hidden = !tl; }
   const d = dayT % 1, hh = Math.floor((d * 24 + 6) % 24), mm = Math.floor(((d * 24 + 6) % 1) * 60);
-  $('clock').textContent = SICON[S] + ' ' + SEASONS[S] + ' · ' + (night > .5 ? '☾ ' : '') + String(hh).padStart(2, '0') + ':' + String(mm).padStart(2, '0') + (tareaPrisa() > 1 ? ' ⏩' : '');
+  $('clock').textContent = SICON[S] + ' ' + SEASONS[S] + ' · ' + (night > .5 ? '☾ ' : '') + String(hh).padStart(2, '0') + ':' + String(mm).padStart(2, '0');
   if (game.map) drawMap();
 }

@@ -1,7 +1,7 @@
 /* ---------- how each action looks while it is being done (the staging): the things it is done with, drawn by the one
    who does it, how they stand or sit, and how they move. Pure data (ACCION_VISTA) plus a few drawings (ACC_OBJ);
    wmExec marks who is doing what (ag.acting) and the drawing reads it. Fields:
-     dur: how long it lasts, in minutes of the game (M(n): n minutes; while Ana does something, the time goes faster); sentar: they sit (and `con`, whoever it is done with, too);
+     dur: how long it lasts, in minutes of the game (M(n): n minutes; at the pace of always: washing the dishes takes its while); sentar: they sit (and `con`, whoever it is done with, too);
      mira: which way they face (0: up, to the mirror on the wall); obj: the thing (a drawing in ACC_OBJ); mov: how the body moves (ACC_MOV: sliding down on the sled, skating in
      rings, rowing, up on the roof); arriba: drawn above everything around it (on a roof) ---------- */
 const M = n => n * MIN_S;   // (n minutes of the game, in the seconds the game counts)
@@ -97,16 +97,6 @@ const ACC_PASOS = {
 };
 // how long an action takes, all its steps (seconds of the game; for a task's budget of time)
 function accDuracion(a, me){ let P = null; try { P = accPasos(a, me); } catch {} return P ? P.reduce((s, p) => s + (p.dur || 0), 0) : ACCION_VISTA[a.v]?.dur || 0; }
-// while Ana does something (and nobody is speaking), the time goes faster: what takes a quarter of an hour is seen in
-// a few seconds, and the clock says so (⏩). But never what is short (under 6 minutes: giving, taking, a vow), and
-// never its start nor its end: the first and the last seconds go at their pace, so it is seen how it begins and ends.
-const TAREA_PRISA = 4, PRISA_MIN = 6, PRISA_BORDE = 3;
-function tareaPrisa(){
-  const A = AGENTS.ana?.acting || game.playAct?.acting;
-  if (!A || game.talk || bubbles.some(b => b.t < b.dur) || menuOpen()) return 1;
-  const total = A.dura || 0, ya = TT - A.t0;
-  return total >= M(PRISA_MIN) && ya > PRISA_BORDE && total - ya > PRISA_BORDE ? TAREA_PRISA : 1;
-}
 const accPasos = (a, me) => (ACC_PASOS[a.v + ':' + a.x] || ACC_PASOS[a.v])?.(me, a) || null;
 // one step after another: go there (into the room first), then do it for a while; true when all are done
 function coreoTick(ag, a, st, dt, P){

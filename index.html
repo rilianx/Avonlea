@@ -2345,7 +2345,7 @@ function roadAvonlea(k){ game.road = null; }   // (into Avonlea: the scenes of t
 // the strip at the bottom while on the road (or in the cart): where, how far, and how fast
 let GAME_SPEED = 1;
 const tripOn = () => game.scene === 'camino' || cart.riding || (!!AGENTS.ana?.ride && !!AGENTS.ana.followOf) || (CAP1.on && !CAP1.done);
-const tripSpeed = () => GAME_SPEED * tareaPrisa();   // (the time can go faster anywhere: up to 50×; and while Ana does something, 4× more)
+const tripSpeed = () => GAME_SPEED;   // (the time can go faster anywhere: up to 50×)
 let tripTxt = '';
 function tripBarDraw(){
   const on = tripOn(); $('tripbar').hidden = !on; if (!on) return;
@@ -6193,7 +6193,7 @@ function renderView(){
   const ts = activeTasks(), tl = [...storyOpen().filter(e => !e.played).slice(0, 2).map(e => '📖 ' + e.hora + ':00 · ' + e.pista), ...ts.map(t => '📜 ' + taskText(t) + (t.para !== t.from || t.tipo !== 'traer' ? ' · ' + NAMES[t.from] : ''))].join('\n');
   if ($('tasks').dataset.t !== tl) { $('tasks').dataset.t = tl; $('tasks').textContent = tl; $('tasks').style.whiteSpace = 'pre-line'; $('tasks').hidden = !tl; }
   const d = dayT % 1, hh = Math.floor((d * 24 + 6) % 24), mm = Math.floor(((d * 24 + 6) % 1) * 60);
-  $('clock').textContent = SICON[S] + ' ' + SEASONS[S] + ' · ' + (night > .5 ? '☾ ' : '') + String(hh).padStart(2, '0') + ':' + String(mm).padStart(2, '0') + (tareaPrisa() > 1 ? ' ⏩' : '');
+  $('clock').textContent = SICON[S] + ' ' + SEASONS[S] + ' · ' + (night > .5 ? '☾ ' : '') + String(hh).padStart(2, '0') + ':' + String(mm).padStart(2, '0');
   if (game.map) drawMap();
 }
 /* ---------- the roads as a network: to go far one goes by the road (Ana, when one taps the map; the people of Avonlea).
@@ -7494,7 +7494,7 @@ const wmDriven = k => !!AGENTS[k] && (activeGoals(AGENTS[k]).length > 0 || !!AGE
 /* ---------- how each action looks while it is being done (the staging): the things it is done with, drawn by the one
    who does it, how they stand or sit, and how they move. Pure data (ACCION_VISTA) plus a few drawings (ACC_OBJ);
    wmExec marks who is doing what (ag.acting) and the drawing reads it. Fields:
-     dur: how long it lasts, in minutes of the game (M(n): n minutes; while Ana does something, the time goes faster); sentar: they sit (and `con`, whoever it is done with, too);
+     dur: how long it lasts, in minutes of the game (M(n): n minutes; at the pace of always: washing the dishes takes its while); sentar: they sit (and `con`, whoever it is done with, too);
      mira: which way they face (0: up, to the mirror on the wall); obj: the thing (a drawing in ACC_OBJ); mov: how the body moves (ACC_MOV: sliding down on the sled, skating in
      rings, rowing, up on the roof); arriba: drawn above everything around it (on a roof) ---------- */
 const M = n => n * MIN_S;   // (n minutes of the game, in the seconds the game counts)
@@ -7590,16 +7590,6 @@ const ACC_PASOS = {
 };
 // how long an action takes, all its steps (seconds of the game; for a task's budget of time)
 function accDuracion(a, me){ let P = null; try { P = accPasos(a, me); } catch {} return P ? P.reduce((s, p) => s + (p.dur || 0), 0) : ACCION_VISTA[a.v]?.dur || 0; }
-// while Ana does something (and nobody is speaking), the time goes faster: what takes a quarter of an hour is seen in
-// a few seconds, and the clock says so (⏩). But never what is short (under 6 minutes: giving, taking, a vow), and
-// never its start nor its end: the first and the last seconds go at their pace, so it is seen how it begins and ends.
-const TAREA_PRISA = 4, PRISA_MIN = 6, PRISA_BORDE = 3;
-function tareaPrisa(){
-  const A = AGENTS.ana?.acting || game.playAct?.acting;
-  if (!A || game.talk || bubbles.some(b => b.t < b.dur) || menuOpen()) return 1;
-  const total = A.dura || 0, ya = TT - A.t0;
-  return total >= M(PRISA_MIN) && ya > PRISA_BORDE && total - ya > PRISA_BORDE ? TAREA_PRISA : 1;
-}
 const accPasos = (a, me) => (ACC_PASOS[a.v + ':' + a.x] || ACC_PASOS[a.v])?.(me, a) || null;
 // one step after another: go there (into the room first), then do it for a while; true when all are done
 function coreoTick(ag, a, st, dt, P){
