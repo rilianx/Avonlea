@@ -167,10 +167,10 @@ module.exports = [
     id: 34, titulo: 'Cuidar al Sr. Harrison', quienes: ['ana', 'harrison'],
     relato: 'El Sr. Harrison está enfermo, en cama. Ana saca el jarabe de ipecacuana del aparador de la cocina, va a su casa y, junto a la cama, se lo da a cucharadas.',
     pasos: [
+      { quien: 'harrison', postura: /cama/, texto: 'El Sr. Harrison está en cama.' },
       { quien: 'ana', junto: /aparador/, accion: /tomar jarabe/, texto: 'Saca el jarabe del aparador.' },
       { quien: 'ana', tiene: /jarabe/, texto: 'Tiene el jarabe.' },
       { quien: 'ana', lugar: /Harrison/, accion: /cuidar/, objeto: /jarabe/, texto: 'Se lo da en su casa.' },
-      { quien: 'harrison', postura: /acostad/, texto: 'El Sr. Harrison está en cama.' },
     ],
   },
   {

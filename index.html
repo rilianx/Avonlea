@@ -8522,7 +8522,7 @@ function relatoSitio(k){
     if (m) for (const o of m.layers.flatMap(l => l.objects || [])) { const d = Math.hypot(b.x - o.x, b.y - o.y); if (d < mejor) { mejor = d; junto = SITIO_NOMBRE[o.name] || o.name; } }
     return { lugar: placeName(sc), junto };
   }
-  let nombre = '', mejor = 1e9; for (const [, P] of Object.entries(PLACES)) { const d = Math.hypot(b.x - P[1], b.y - P[2]); if (d < mejor) { mejor = d; nombre = P[0]; } }
+  let nombre = '', mejor = 1e9; for (const [, P] of Object.entries(PLACES)) { if (!P[0]) continue; const d = Math.hypot(b.x - P[1], b.y - P[2]); if (d < mejor) { mejor = d; nombre = P[0]; } }
   return { lugar: 'Avonlea', junto: mejor < 260 ? nombre : 'camino de ' + nombre };
 }
 const relatoPostura = b => b.bed ? 'acostada, en cama' : b.lie ? 'acostada' : b.sit ? 'sentada' : b.crouch ? 'agachada' : b.moving ? 'caminando' : 'de pie';
@@ -8536,7 +8536,7 @@ const relatoHora = () => { const d = dayT % 1, m = Math.floor(((d * 24 + 6) % 24
 const relatoFrase = (e, c) => {   // (what changed, as a sentence)
   const n = wmName(e.quien), p = [];
   if (c.has('lugar') || c.has('junto')) p.push((e.postura === 'caminando' ? 'va por ' : 'está en ') + e.lugar + conJunto(e.junto));
-  if (c.has('postura') && !(c.has('lugar') || c.has('junto'))) p.push({ acostada: 'se acuesta', sentada: 'se sienta', agachada: 'se agacha', caminando: 'echa a andar', 'de pie': 'se queda de pie' }[e.postura]);
+  if (c.has('postura') && !(c.has('lugar') || c.has('junto'))) p.push({ 'acostada, en cama': 'está en cama', acostada: 'se acuesta', sentada: 'se sienta', agachada: 'se agacha', caminando: 'echa a andar', 'de pie': 'se queda de pie' }[e.postura]);
   if (c.has('accion')) p.push(e.accion ? 'empieza: ' + e.accion : 'termina lo que hacía');
   if (c.has('lleva')) p.push(e.lleva ? 'lleva ' + e.lleva : 'ya no lleva nada');
   if (c.has('objeto') && e.objeto) p.push('con ' + e.objeto);
