@@ -25,7 +25,7 @@ function phArrancar(){
   // two layers: Phaser (the world), the screen above it (the light of the day, the bubbles, the "!")
   const div = document.createElement('div'); div.id = 'ph'; div.style.cssText = 'position:fixed;inset:0;display:none'; cv.before(div);
   const dpr = devicePixelRatio || 1;
-  PH.game = new Phaser.Game({ type: Phaser.AUTO, parent: div, transparent: true, banner: false, audio: { noAudio: true },
+  PH.game = new Phaser.Game({ type: /[?&]render=canvas/.test(location.search) ? Phaser.CANVAS : Phaser.AUTO,   // (?render=canvas: Phaser without WebGL, to compare) parent: div, transparent: true, banner: false, audio: { noAudio: true },
     input: { keyboard: false, mouse: false, touch: false, gamepad: false },   // (the touches are the game's, on the screen above)
     scale: { mode: Phaser.Scale.NONE, width: Math.round(innerWidth * dpr), height: Math.round(innerHeight * dpr), zoom: 1 / dpr },
     scene: [{ key: 'mundo', create(){ PH.scene = this; PH.ready = true; PH.game.loop.sleep(); this.cameras.main.setBackgroundColor('#2b2219');
@@ -208,15 +208,20 @@ function phMata(sc, tk, x, y, alto, ancho = alto){ return sc.add.image(x, y, tk)
 function phTrozo(cx, cy, v){
   const sc = PH.scene, key = S + '|' + cx + ',' + cy; PH.trozos ??= new Map();
   let C = PH.trozos.get(key);
-  if (!C) {
-    C = {}; PH.trozos.set(key, C);
-    // the still part, baked (with a unit of margin, so no seam shows); empty chunks keep no image
+  // the painted ground and the still part in one image, opaque: one layer for the whole floor (with a unit of margin, so
+  // no seam shows). While a tile of ground is still being painted (one per frame), the chunk is baked with the plain one
+  // and again when it is ready.
+  const listas = () => { for (let tx = Math.floor((cx * TROZO - 1) / TILE); tx * TILE < (cx + 1) * TROZO + 1; tx++) for (let ty = Math.floor((cy * TROZO - 1) / TILE); ty * TILE < (cy + 1) * TROZO + 1; ty++) if (!tiles.has(S + ':' + tx + ',' + ty)) return false; return true; };
+  if (!C || (C.provisorio && listas())) {
+    if (!C) { C = {}; PH.trozos.set(key, C); }
     const Rc = 1, x0 = cx * TROZO - 1, y0 = cy * TROZO - 1, n = TROZO + 2, c0 = document.createElement('canvas'); c0.width = c0.height = n * Rc; const c = c0.getContext('2d'); c.setTransform(Rc, 0, 0, Rc, -x0 * Rc, -y0 * Rc);
-    const pant = g; g = c; try { sueloPintar(c, cx * TROZO, cy * TROZO, TROZO, TROZO, 0, { fijo: true }); } finally { g = pant; }
-    const d = c.getImageData(0, 0, c0.width, c0.height).data; let lleno = false; for (let i = 3; i < d.length; i += 64) if (d[i]) { lleno = true; break; }
-    if (lleno) { C.tk = 't' + (PH.seq = (PH.seq || 0) + 1); sc.textures.addCanvas(C.tk, c0); C.img = sc.add.image(x0, y0, C.tk).setOrigin(0).setScale(1 / Rc).setDepth(-9e8); }
-    // what moves: one sprite each
-    const D = decorAt(cx, cy), M = C.matas = [];
+    const pant = g; g = c; try { sueloPintar(c, x0, y0, n, n, 0, { baldosas: true }); sueloPintar(c, cx * TROZO, cy * TROZO, TROZO, TROZO, 0, { fijo: true }); } finally { g = pant; }
+    C.provisorio = !listas();
+    C.img?.destroy(); if (C.tk) sc.textures.remove(C.tk);
+    C.tk = 't' + (PH.seq = (PH.seq || 0) + 1); sc.textures.addCanvas(C.tk, c0); C.img = sc.add.image(x0, y0, C.tk).setOrigin(0).setScale(1 / Rc).setDepth(-1e9);
+  }
+  if (!C.matas) {
+    const D = decorAt(cx, cy), M = C.matas = [];   // (what moves: one sprite each)
     D.tufts.forEach(t => { if (S === 3 && t.c > .25) return; M.push({ k: 'p', o: t, spr: phMata(sc, phTexMata('pasto', TC_PASTO[S][t.c < .5 ? 0 : 1]), t.x, t.y, t.h / 16, 1) }); });
     if (S !== 3) D.flowers.forEach((f, i) => { if (S === 2 && i % 3) return; M.push({ k: 'f', o: f, spr: phMata(sc, phTexMata('flor', f.c, Math.round(((f.ph % (TAU / 5)) + TAU / 5) % (TAU / 5) / (TAU / 5) * 4) / 4 * TAU / 5), f.x, f.y, f.s) }); });
     if (S !== 3) D.lupins.forEach(o => { if (S === 2 && o.c > .3) return; const hg = Math.round(10 + o.s * 8); M.push({ k: 'l', o, hg, spr: phMata(sc, phTexMata('lupino', LUP_COL[Math.floor(o.c * 4)], hg), o.x, o.y, 1) }); });
@@ -224,6 +229,7 @@ function phTrozo(cx, cy, v){
   if (C.img) C.img.setVisible(true);
   const t = v.t, ox = v.ox, oy = v.oy, vw = v.W / v.Z, vh = v.H / v.Z;
   for (const m of C.matas) {
+    if (PH.apagar?.has('matas')) { m.spr.setVisible(false); continue; }
     const o = m.o, en = o.x > ox - 20 && o.x < ox + vw + 20 && o.y > oy - 20 && o.y < oy + vh + 40; m.spr.setVisible(en); if (!en) continue;
     if (m.k === 'p') { let bend = Math.sin(t * 1.6 + o.x * .02 + o.ph * .3) * 2.2; const dx = o.x - ana.x, dy = (o.y - ana.y) * 2, dd = Math.hypot(dx, dy); if (dd < 22) bend += (dx > 0 ? 1 : -1) * (22 - dd) * .35; m.spr.setRotation(bend / o.h); }
     else if (m.k === 'f') m.spr.setRotation(Math.sin(t * 1.8 + o.ph) * 1.2 / (6 * o.s));
@@ -287,15 +293,15 @@ function phMundo(list, v){
   const vw = v.W / v.Z, vh = v.H / v.Z;
   if (game.scene !== 'out') phSala(v);
   else {   // (the floor outdoors)
-    phBaldosas(v, vw, vh);
     for (let cx = Math.floor((v.ox - 20) / TROZO); cx * TROZO < v.ox + vw + 20; cx++) for (let cy = Math.floor((v.oy - 20) / TROZO); cy * TROZO < v.oy + vh + 40; cy++) phTrozo(cx, cy, v);
-    phAgua(v, vw, vh); PH.agua.setVisible(true); phOrilla(v, vw, vh);
+    if (!PH.apagar?.has('agua')) { phAgua(v, vw, vh); PH.agua.setVisible(true); } if (!PH.apagar?.has('orilla')) phOrilla(v, vw, vh);   // (PH.apagar: to measure what costs, in the tests)
   }
-  if (game.scene !== 'out') { PH.agua?.setVisible(false); for (const s of PH.juncos?.spr || []) s.setVisible(false); for (const B of PH.baldosas?.values() || []) B.img.setVisible(false); }
+  if (game.scene !== 'out') { PH.agua?.setVisible(false); for (const s of PH.juncos?.spr || []) s.setVisible(false); }
   for (const [k, C] of PH.trozos || []) if (C.usado !== PH.cuadro) { if (PH.cuadro - C.usado > 900 || !k.startsWith(S + '|')) { phTrozoFuera(C); PH.trozos.delete(k); } else if (C.vis !== false) { C.img?.setVisible(false); for (const m of C.matas) m.spr.setVisible(false); C.vis = false; } } else C.vis = true;
-  phPapel(v);   // (anything not told where it is: drawn over the whole view, and noted to be told)
+  if (!PH.apagar?.has('papel')) phPapel(v); else { PH.papel?.setVisible(false); PH.vineta?.setVisible(false); }   // (anything not told where it is: drawn over the whole view, and noted to be told)
   list.forEach((o, i) => {
     const d = o.y + i * 1e-6, p = o.ph || (((PH.sueltos ??= new Set()).add(o.draw.toString().slice(0, 60))), { key: 'suelto:' + i, at: [v.ox, v.oy], box: [0, 0, vw, vh] });
+    if (PH.apagar?.has(p.fijo ? 'fijos' : 'cosas')) return;
     if (p.fijo) return phFijo(p.fijo, d, v);
     if (!(p.persona && !PH.sinHojas && phHoja(p.persona, p.key, d, v.t))) phVivo(p.key, p.at, p.box, d, o.draw);
   });
