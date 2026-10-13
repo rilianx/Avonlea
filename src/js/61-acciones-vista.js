@@ -98,9 +98,15 @@ const ACC_PASOS = {
 // how long an action takes, all its steps (seconds of the game; for a task's budget of time)
 function accDuracion(a, me){ let P = null; try { P = accPasos(a, me); } catch {} return P ? P.reduce((s, p) => s + (p.dur || 0), 0) : ACCION_VISTA[a.v]?.dur || 0; }
 // while Ana does something (and nobody is speaking), the time goes faster: what takes a quarter of an hour is seen in
-// a few seconds, and the clock says so (⏩)
-const TAREA_PRISA = 4;
-const tareaPrisa = () => (AGENTS.ana?.acting || game.playAct?.acting) && !game.talk && !bubbles.some(b => b.t < b.dur) && !menuOpen() ? TAREA_PRISA : 1;
+// a few seconds, and the clock says so (⏩). But never what is short (under 6 minutes: giving, taking, a vow), and
+// never its start nor its end: the first and the last seconds go at their pace, so it is seen how it begins and ends.
+const TAREA_PRISA = 4, PRISA_MIN = 6, PRISA_BORDE = 3;
+function tareaPrisa(){
+  const A = AGENTS.ana?.acting || game.playAct?.acting;
+  if (!A || game.talk || bubbles.some(b => b.t < b.dur) || menuOpen()) return 1;
+  const total = A.dura || 0, ya = TT - A.t0;
+  return total >= M(PRISA_MIN) && ya > PRISA_BORDE && total - ya > PRISA_BORDE ? TAREA_PRISA : 1;
+}
 const accPasos = (a, me) => (ACC_PASOS[a.v + ':' + a.x] || ACC_PASOS[a.v])?.(me, a) || null;
 // one step after another: go there (into the room first), then do it for a while; true when all are done
 function coreoTick(ag, a, st, dt, P){
@@ -194,7 +200,7 @@ const ACC_MESA = {
 function accTick(ag, a, st, r){
   const V = ACCION_VISTA[a.v], b = wmBody(ag.who); if (!V || !b) return;
   const doing = r === 'run' && (st.w > 0 || st.hg || st.said);
-  if (doing && !ag.acting) { ag.acting = { v: a.v, k: a.k, x: a.x, t0: TT, base: [b.x, b.y], sit: b.sit, task: ag.task, ...(st.P ? { obj: null } : {}) }; if (V.sentar && !V.mov && !st.P) { b.sit = true; if (V.con && a.k) { const o = wmBody(a.k); if (o && wmScene(a.k) === wmScene(ag.who)) { ag.acting.kb = [o.x, o.y, o.sit]; o.x = b.x + 46; o.y = b.y + 2; o.sit = true; o.dir = 3; b.dir = 1; } } } }
+  if (doing && !ag.acting) { ag.acting = { v: a.v, k: a.k, x: a.x, t0: TT, dura: accDuracion(a, ag.who), base: [b.x, b.y], sit: b.sit, task: ag.task, ...(st.P ? { obj: null } : {}) }; if (V.sentar && !V.mov && !st.P) { b.sit = true; if (V.con && a.k) { const o = wmBody(a.k); if (o && wmScene(a.k) === wmScene(ag.who)) { ag.acting.kb = [o.x, o.y, o.sit]; o.x = b.x + 46; o.y = b.y + 2; o.sit = true; o.dir = 3; b.dir = 1; } } } }
   if (doing && ag.acting && V.mov) ACC_MOV[V.mov](b, ag.acting);
   if (doing && ag.acting && V.mira != null && !st.P) b.dir = V.mira;
   if (doing && ag.acting && a.k && !V.mov && !st.P) { const o = wmBody(a.k); if (o && wmScene(a.k) === wmScene(ag.who) && dist(o.x, o.y, b.x, b.y) < 140 && !o.sit) { const sd = o.x < b.x ? 3 : 1; b.dir = sd; o.dir = sd === 1 ? 3 : 1; } }   // (face to face)
