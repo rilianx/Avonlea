@@ -2,14 +2,15 @@
 // The audit of the actions: for each one, what should happen (tools/auditoria/esperado.js) against what does happen,
 // told by the game itself (the relato, src/js/66-relato.js). Writes a report with each tale, each step (✔ when and how
 // long, or ✘ what was seen instead) and the whole account.
-//   node tools/auditoria.js [ids...]     → trazas/auditoria.md
+//   node tools/auditoria.js [--veces N] [ids...]     → trazas/auditoria.md
 const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path');
 const root = path.resolve(__dirname, '..'), ESP = require('./auditoria/esperado.js');
-const pedidos = process.argv.slice(2).map(Number), lista = pedidos.length ? ESP.filter(e => pedidos.includes(e.id)) : ESP;
+const argv = process.argv.slice(2), vi = argv.indexOf('--veces'), VECES = vi >= 0 ? +argv.splice(vi, 2)[1] : 1;   // (--veces N: each action N times, to tell what always fails from what fails by chance)
+const pedidos = argv.map(Number), lista = pedidos.length ? ESP.filter(e => pedidos.includes(e.id)) : ESP;
 const minutos = t => t * 24 * 60, hh = m => String(Math.floor((m / 60 + 6) % 24)).padStart(2, '0') + ':' + String(Math.floor(m % 60)).padStart(2, '0');
 const CAMPOS = ['lugar', 'junto', 'postura', 'accion', 'lleva', 'objeto', 'tiene', 'pelo', 'guia', 'dice'];
-const cumple = (paso, e) => e && e.quien === paso.quien && CAMPOS.every(f => !paso[f] || paso[f].test(e[f] || ''));
+const cumple = (paso, e) => e && e.quien === paso.quien && CAMPOS.every(f => !paso[f] || paso[f].test(e[f] || '')) && (!paso.donde || paso.donde.test(e.lugar + ' · ' + e.junto));   // (donde: the room or what she is next to, inside or at the door)
 // each step in order: the first moment it is seen after the previous one; and how long it lasted (until it is not so)
 function comparar(esp, lineas){
   let desde = 0; const out = [];
@@ -31,21 +32,27 @@ function comparar(esp, lineas){
 }
 (async () => {
   const b = await chromium.launch({ executablePath: process.env.CHROMIUM || '/opt/pw-browsers/chromium', args: ['--no-sandbox'] });
-  const md = ['# Auditoría de las acciones', '', 'Para cada acción: lo que debería pasar (el relato esperado, `tools/auditoria/esperado.js`), cada paso comparado con lo que el juego cuenta que pasó (✔ a qué hora y cuánto duró, ✘ qué se vio en cambio), y el relato completo del juego (`src/js/66-relato.js`). Se genera con `node tools/auditoria.js`.', ''];
+  const md = ['# Auditoría de las acciones', '', (VECES > 1 ? 'Cada acción se corrió ' + VECES + ' veces; un paso está ✔ solo si salió bien todas. ' : '') + 'Para cada acción: lo que debería pasar (el relato esperado, `tools/auditoria/esperado.js`), cada paso comparado con lo que el juego cuenta que pasó (✔ a qué hora y cuánto duró, ✘ qué se vio en cambio), y el relato completo del juego (`src/js/66-relato.js`). Se genera con `node tools/auditoria.js`.', ''];
   let bien = 0, total = 0; const hechos = new Array(lista.length);
-  const correr = async (esp, n) => {
+  const una = async esp => {
     const pg = await b.newPage(); const errs = []; pg.on('pageerror', e => errs.push(e.message));
     await pg.addInitScript(() => { localStorage.clear(); localStorage.setItem('avonlea-ai-asked', '1'); });
     await pg.goto('file://' + path.join(root, 'index.html'), { timeout: 0 }); await pg.waitForFunction(() => window.__avonlea, null, { timeout: 0, polling: 100 });
     const r = await pg.evaluate(([id, q]) => { const A = window.__avonlea; document.getElementById('ai').hidden = true; const ag = A.wmRunTest(id); A.relatoEmpezar(q);
       for (let t = 0; t < 3600 && (ag.st === 'run' || ag.st === 'pausa'); t += .5) A.step(.5); for (let k = 0; k < 20; k++) A.step(.5);
       return { st: ag.st, lineas: A.relato() }; }, [esp.id, esp.quienes]);
-    const res = comparar(esp, r.lineas), out = []; hechos[n] = { res, out };
-    out.push('## ' + esp.titulo + ' (meta ' + esp.id + ': ' + (r.st === 'done' ? 'cumplida' : r.st) + ')', '', '**Lo que debería pasar:** ' + esp.relato, '');
+    await pg.close(); return { ...r, res: comparar(esp, r.lineas), errs };
+  };
+  const correr = async (esp, n) => {
+    const vs = []; for (let v = 0; v < VECES; v++) vs.push(await una(esp));
+    const r = vs.find(x => x.res.some(y => !y.ok)) || vs[0];   // (the account shown: a run where something failed, if any)
+    const res = esp.pasos.map((p, k) => { const bien = vs.filter(x => x.res[k].ok).length, mal = vs.find(x => !x.res[k].ok); return { ok: bien === VECES, p, nota: (VECES > 1 ? bien + ' de ' + VECES + ' veces · ' : '') + (mal || vs[0]).res[k].nota }; });
+    const out = []; hechos[n] = { res, out };
+    out.push('## ' + esp.titulo + ' (meta ' + esp.id + ': ' + vs.map(x => x.st === 'done' ? 'cumplida' : x.st).join(', ') + ')', '', '**Lo que debería pasar:** ' + esp.relato, '');
     for (const x of res) out.push('- ' + (x.ok ? '✔' : '✘') + ' ' + x.p.texto + ' — ' + x.nota);
     out.push('', '<details><summary>Lo que el juego cuenta que pasó (' + r.lineas.length + ' líneas)</summary>', '', '```', ...r.lineas.map(l => l.hora + ' ' + l.texto), '```', '</details>', '');
+    const errs = vs.flatMap(x => x.errs);
     console.log(esp.titulo + ': ' + res.filter(x => x.ok).length + '/' + res.length + (errs.length ? ' · errores: ' + errs.slice(0, 2).join(' | ') : ''));
-    await pg.close();
   };
   let sig = 0; await Promise.all(Array.from({ length: Math.min(4, lista.length) }, async () => { while (sig < lista.length) { const n = sig++; await correr(lista[n], n); } }));   // (4 at a time; the report in order)
   for (const h of hechos) { bien += h.res.filter(x => x.ok).length; total += h.res.length; md.push(...h.out); }

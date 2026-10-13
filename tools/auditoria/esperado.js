@@ -1,6 +1,6 @@
 // What should happen in each action, as a tale and as steps that can be checked against the account of the game
 // (the relato: src/js/66-relato.js). Each step: who, and what must be seen of her at some moment, in order:
-//   lugar / junto (where), postura, accion, lleva (in her arms), objeto (at hand), tiene (what she owns), pelo, dice;
+//   lugar / junto (where; donde: either, inside the room or at its door), postura, accion, lleva (in her arms), objeto (at hand), tiene (what she owns), pelo, dice;
 //   dura: for at least that many minutes of the game. Text fields are regular expressions.
 // id: the test goal that makes it happen (src/js/64-metas-de-prueba.js).
 module.exports = [
@@ -22,7 +22,7 @@ module.exports = [
     pasos: [
       { quien: 'ana', lugar: /pieza/, junto: /escritorio/, postura: /sentada/, objeto: /carta/, dura: 20, texto: 'Escribe sentada al escritorio de su pieza, con la carta sobre él, una media hora.' },
       { quien: 'ana', tiene: /carta/, texto: 'Termina con la carta en su sobre.' },
-      { quien: 'ana', junto: /tienda|correo/, texto: 'Va al correo (en la tienda de Lawson).' },
+      { quien: 'ana', donde: /tienda|correo/i, texto: 'Va al correo (en la tienda de Lawson).' },
       { quien: 'ana', tiene: /^(?![\s\S]*carta)/, texto: 'La deja: ya no la tiene.' },
     ],
   },
@@ -74,7 +74,7 @@ module.exports = [
     pasos: [
       { quien: 'ana', accion: /recoger bayas/, postura: /agachad/, texto: 'Se agacha a juntar bayas.' },
       { quien: 'ana', tiene: /bayas/, texto: 'Tiene las bayas.' },
-      { quien: 'ana', junto: /tienda/, texto: 'Va a la tienda de Lawson.' },
+      { quien: 'ana', donde: /tienda/i, texto: 'Va a la tienda de Lawson.' },
       { quien: 'ana', tiene: /cinta/, texto: 'Tiene la cinta.' },
     ],
   },
@@ -92,7 +92,7 @@ module.exports = [
     id: 6, titulo: 'Matthew trae azúcar', quienes: ['matthew', 'marilla'],
     relato: 'A Marilla le falta azúcar y se la pide a Matthew. Matthew va a la tienda de Lawson y la compra. Vuelve a la cocina y se la da.',
     pasos: [
-      { quien: 'matthew', junto: /tienda/, texto: 'Matthew va a la tienda.' },
+      { quien: 'matthew', donde: /tienda/i, texto: 'Matthew va a la tienda.' },
       { quien: 'matthew', tiene: /azucar/, texto: 'Compra el azúcar.' },
       { quien: 'matthew', lugar: /cocina/, accion: /dar azucar/, texto: 'Se la da a Marilla en la cocina.' },
       { quien: 'marilla', tiene: /azucar/, texto: 'Marilla tiene el azúcar.' },
