@@ -23,7 +23,7 @@ const cacheR = () => Math.min(3, Math.max(1, Math.round((view.Z || 1) * (deviceP
 // a frame has a few milliseconds for making images (at least one); after that, things are drawn as always
 function cachePuedo(){ if (CACHE.cuadro !== FRAME) { CACHE.cuadro = FRAME; CACHE.t0 = performance.now(); CACHE.hechos = 0; } if (CACHE.hechos === 0 || performance.now() - CACHE.t0 < 3) { CACHE.hechos++; return true; } return false; }
 function cacheGuardar(k, e){ CACHE.mapa.set(k, e); CACHE.px += e.cv.width * e.cv.height; while (CACHE.px > CACHE.max && CACHE.mapa.size) { const [k0, e0] = CACHE.mapa.entries().next().value; CACHE.mapa.delete(k0); CACHE.px -= e0.cv.width * e0.cv.height; } }
-function cacheTomar(k){ const e = CACHE.mapa.get(k); if (e) { CACHE.mapa.delete(k); CACHE.mapa.set(k, e); } return e; }   // (the last used goes last: the oldest are let go first)
+function cacheTomar(k){ const e = CACHE.mapa.get(k); if (e && perdido(e.cv)) { CACHE.mapa.delete(k); CACHE.px -= e.cv.width * e.cv.height; return null; } if (e) { CACHE.mapa.delete(k); CACHE.mapa.set(k, e); } return e; }   // (the last used goes last: the oldest are let go first)
 // what her drawing changes in her as it goes, without drawing her: where she faces (with its little stickiness) and, with
 // braids, the gesture of throwing one back and how fast she goes (as the drawing of always does it, with the same values)
 function cacheRelojes(b, t){
@@ -84,6 +84,15 @@ function cacheProp(c, o, t, night){
   for (const [chx, cy0, sm, nk] of e.humos) for (let k2 = 0; k2 < nk; k2++) { const q = ((t * .22 + k2 / nk) % 1), sx = chx + Math.sin(q * 6 + k2) * 6 + q * 22, sy = cy0 - q * 70; ell(c, sx, sy, 5 + q * 12, 4 + q * 9, `rgba(245,245,240,${sm * (1 - q)})`); }   // (the smoke, live, as always)
   return true;
 }
+// back from the background (a phone may have taken back the images kept aside, and they would draw black): all
+// painted again as they are needed — the ground, the road, the poses and the trees and houses, the paper map
+function olvidarDibujos(){
+  tiles.clear(); rtiles.clear(); for (const k in tilePlain) delete tilePlain[k];
+  CACHE.mapa.clear(); CACHE.px = 0; roadLayer = null; mapBase = null;
+  if (perdido(paper)) pintarPapel();
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) olvidarDibujos(); });
+addEventListener('pageshow', e => { if (e.persisted) olvidarDibujos(); });
 // ?fps in the link: a little counter of frames per second (and the slowest frame), to compare on a phone
 if (/[?&]fps/.test(location.search)) {
   const el = document.createElement('div'); el.style.cssText = 'position:fixed;left:8px;bottom:8px;z-index:99;font:12px/1.2 Georgia,serif;background:#fbf3dfe0;color:#3b2a1e;border:1px solid #c9a97a;border-radius:6px;padding:3px 7px;pointer-events:none';

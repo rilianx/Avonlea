@@ -130,6 +130,7 @@ function roadBlocked(x, y){
 const rtiles = new Map();
 function roadTile(tx, ty){
   const key = S + ':' + tx + ',' + ty; let cv = rtiles.get(key);
+  if (cv && perdido(cv)) { rtiles.delete(key); cv = null; }
   if (cv) { rtiles.delete(key); rtiles.set(key, cv); return cv; }
   { const w = tileBudget(); if (w) return w; }
   cv = document.createElement('canvas'); cv.width = cv.height = Math.ceil(TILE * GS); roadPaint(cv, S, tx * TILE, ty * TILE); rtiles.set(key, cv);

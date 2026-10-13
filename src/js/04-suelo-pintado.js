@@ -3,9 +3,12 @@ const GS = .6, TILE = 1024, tiles = new Map();   // (the ground by tiles of 1024
 let tilesPainted = 0, tileFrame = -1;
 const tilePlain = {};   // (a plain tile of the season's colour, while the real one waits its turn)
 let FRAME = 0;
+// a canvas kept aside that the browser took back (in the background, on a phone): it would draw black
+const perdido = cv => !!cv.getContext('2d').isContextLost?.();
 function tileBudget(){ if (tileFrame !== FRAME) { tileFrame = FRAME; tilesPainted = 0; } if (tilesPainted >= 1) { const k = S; if (!tilePlain[k]) { const c = document.createElement('canvas'); c.width = c.height = 8; const x = c.getContext('2d'); x.fillStyle = GPAL[k].base; x.fillRect(0, 0, 8, 8); tilePlain[k] = c; } return tilePlain[k]; } tilesPainted++; return null; }
 function groundTile(tx, ty){
   const key = S + ':' + tx + ',' + ty; let cv = tiles.get(key);
+  if (cv && perdido(cv)) { tiles.delete(key); cv = null; }   // (the phone took it back while the game was in the background: painted again)
   if (cv) { tiles.delete(key); tiles.set(key, cv); return cv; }
   { const w = tileBudget(); if (w) return w; }
   cv = document.createElement('canvas'); cv.width = cv.height = Math.ceil(TILE * GS); paintTile(cv, S, tx * TILE, ty * TILE); tiles.set(key, cv);

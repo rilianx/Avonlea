@@ -39,5 +39,7 @@ function hatch(c, x, y, w, h, seed, col = 'rgba(70,42,26,.22)'){
 }
 // paper grain: drawn over the whole screen
 const paper = document.createElement('canvas'); paper.width = paper.height = 256;
-(() => { const p = paper.getContext('2d'), r = rng(5); for (let n = 0; n < 9000; n++) { p.fillStyle = r() < .5 ? `rgba(90,60,30,${r() * .12})` : `rgba(255,250,235,${r() * .15})`; p.fillRect(r() * 256, r() * 256, 1 + r(), 1 + r()); }
-  p.strokeStyle = 'rgba(120,90,60,.06)'; for (let n = 0; n < 60; n++) { p.beginPath(); const x = r() * 256, y = r() * 256; p.moveTo(x, y); p.quadraticCurveTo(x + r() * 20 - 10, y + r() * 20 - 10, x + r() * 30 - 15, y + r() * 30 - 15); p.stroke(); } })();
+const pintarPapel = () => {   // (again if the phone takes it back: see olvidarDibujos)
+  paper.width = paper.width; const p = paper.getContext('2d'), r = rng(5); for (let n = 0; n < 9000; n++) { p.fillStyle = r() < .5 ? `rgba(90,60,30,${r() * .12})` : `rgba(255,250,235,${r() * .15})`; p.fillRect(r() * 256, r() * 256, 1 + r(), 1 + r()); }
+  p.strokeStyle = 'rgba(120,90,60,.06)'; for (let n = 0; n < 60; n++) { p.beginPath(); const x = r() * 256, y = r() * 256; p.moveTo(x, y); p.quadraticCurveTo(x + r() * 20 - 10, y + r() * 20 - 10, x + r() * 30 - 15, y + r() * 30 - 15); p.stroke(); } };
+pintarPapel();
