@@ -1,12 +1,21 @@
 /* ---------- the drawings kept as images, in the engine of always (?cache=0 in the link turns it off, to compare) ----------
-   What the Phaser trial taught: what makes a frame cheap is not the engine, it is not drawing again what does not change.
-   So here, on the same canvas as always:
-   - a person standing, walking or bending down, quiet, is drawn from a pose kept as an image (as the sheets of Phaser:
-     the same predicate, the same poses); anything else (talking, blinking, sitting...) is drawn as always;
+   What the trial of another engine (Phaser) taught: what makes a frame cheap is not the engine, it is not drawing again
+   what does not change. So, on the same canvas as always:
+   - a person standing, walking or bending down, quiet, is drawn from a pose kept as an image (standing, 8 steps, bending
+     down, in 8 directions, and 5 degrees of running); anything else (talking, blinking, sitting...) is drawn as always;
    - the trees, the houses, the fences... are kept as images (again if the season, the night or they change); the trees
      sway by turning a little on their trunk, and the smoke of the chimneys is drawn live as always.
    A thing not kept yet, when the frame has no time left to make it, is drawn as always: nothing appears late.
    Kept at the resolution of the screen (half steps, at most 3); the oldest let go when there are too many. */
+const NULO = new Proxy({}, {   // (a canvas that paints nothing: every method does nothing, every property is kept)
+  get: (o, k) => k in o ? o[k] : k === 'createLinearGradient' || k === 'createRadialGradient' || k === 'createPattern' ? () => ({ addColorStop(){} }) : k === 'measureText' ? () => ({ width: 0 }) : k === 'getTransform' ? () => new DOMMatrix() : () => {},
+  set: (o, k, v) => { o[k] = v; return true; } });
+const HOJA_BOX = [-30, -96, 30, 16];   // (around the feet: hat and hair up top, the shadow below; a person standing, walking or bending down)
+const phLlana = (b, t) => !b.lie && !b.sit && !b.carry && !b.pet && !(b.petted > 0) && !b.face && !b.askew && !b.torn && !(Math.abs(b.lookAround || 0) > .1) && !(b.blink > 0) && !(b.flick && t - b.flick < 1.1) && !isTalking(b) && !b.noShadow && !!LOOKS[b.look];   // (the braid's gesture lasts 1.1 s)
+// how she is drawn depends on these: if one changes (her look, the season, the style), new poses
+const phFirma = b => b.look + '|' + JSON.stringify(LOOKS[b.look]) + '|' + S + '|' + ANA_STYLE + '|' + VEC_ON + '|' + (typeof FACE_STYLE === 'undefined' ? '' : FACE_STYLE) + '|' + (b.look === 'ana' && !!game.wm?.perm?.pelo_verde);
+const FIJO_BOX = [-300, -440, 300, 90];   // (where to look for it the first time: the biggest house, the tallest tree)
+const phCampos = o => { let s = ''; for (const k in o) { const v = o[k]; if (v === null || typeof v !== 'object' && typeof v !== 'function') s += k + ':' + v + ';'; } return s; };   // (what it is made of: its own plain values)
 var CACHE_ON = !/[?&]cache=0/.test(location.search);   // (on, unless ?cache=0, to compare; var: drawPerson may be called before this part runs, and then it is just off)
 var G0 = g;   // (the screen's canvas: only what is drawn there is kept)
 var CACHE = { mapa: new Map(), px: 0, max: 18e6, dentro: false, t0: 0, hechos: 0, cuadro: -1 };
@@ -74,4 +83,11 @@ function cacheProp(c, o, t, night){
   c.drawImage(e.cv, box[0], box[1], box[2] - box[0], box[3] - box[1]); c.restore();
   for (const [chx, cy0, sm, nk] of e.humos) for (let k2 = 0; k2 < nk; k2++) { const q = ((t * .22 + k2 / nk) % 1), sx = chx + Math.sin(q * 6 + k2) * 6 + q * 22, sy = cy0 - q * 70; ell(c, sx, sy, 5 + q * 12, 4 + q * 9, `rgba(245,245,240,${sm * (1 - q)})`); }   // (the smoke, live, as always)
   return true;
+}
+// ?fps in the link: a little counter of frames per second (and the slowest frame), to compare on a phone
+if (/[?&]fps/.test(location.search)) {
+  const el = document.createElement('div'); el.style.cssText = 'position:fixed;left:8px;bottom:8px;z-index:99;font:12px/1.2 Georgia,serif;background:#fbf3dfe0;color:#3b2a1e;border:1px solid #c9a97a;border-radius:6px;padding:3px 7px;pointer-events:none';
+  document.body.appendChild(el); let n = 0, t0 = performance.now(), peor = 0, ant = t0;
+  const f = now => { n++; peor = Math.max(peor, now - ant); ant = now; if (now - t0 > 1000) { el.textContent = Math.round(n * 1000 / (now - t0)) + ' cuadros/s · el más lento ' + Math.round(peor) + ' ms' + (CACHE_ON ? '' : ' · sin guardar'); n = 0; t0 = now; peor = 0; } requestAnimationFrame(f); };
+  requestAnimationFrame(f);
 }

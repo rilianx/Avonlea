@@ -134,13 +134,12 @@ function drawCartBody(c, p, t, part){
 }
 function drawCart(c, p, t){ const { hy } = cartAxes(cartC8(p)); if (hy < -.1) { drawCartHorse(c, p, t); drawCartBody(c, p, t); } else { drawCartBody(c, p, t); drawCartHorse(c, p, t); } }
 // into a list sorted by depth: the box and the horse separately (people sit between them)
-function pushCart(list, _g, p, t, k = 'carro'){ const { A } = cartAxes(cartC8(p)), ph = n => ({ key: k + ':' + n, at: [p.x, p.y], box: CARRO_BOX }); list.push({ y: p.y - 40, ph: ph('fondo'), draw: () => drawCartBody(g, p, t, 'fondo') }, { y: p.y + 1, ph: ph('frente'), draw: () => drawCartBody(g, p, t, 'frente') }, { y: p.y + A[1] * 46 * 1.8 + 1, ph: ph('caballo'), draw: () => drawCartHorse(g, p, t) }); }   // (they draw with g, the one in use)
-const CARRO_BOX = [-150, -130, 150, 110];   // (the buggy and its horse, any way it faces)
+function pushCart(list, g, p, t){ const { A } = cartAxes(cartC8(p)); list.push({ y: p.y - 40, draw: () => drawCartBody(g, p, t, 'fondo') }, { y: p.y + 1, draw: () => drawCartBody(g, p, t, 'frente') }, { y: p.y + A[1] * 46 * 1.8 + 1, draw: () => drawCartHorse(g, p, t) }); }
 // whoever drives: the buggy around them, and they (and whoever rides beside) sitting in it, facing the way it goes
-function pushDriven(list, _g, p, t, k = 'p:' + p.look){
+function pushDriven(list, g, p, t){
   const c8 = cartC8(p), [cx, cy] = cartFromDriver(p.x, p.y, c8);
-  pushCart(list, g, { x: cx, y: cy, c8, walk: p.walk || 0, moving: !!(p.moving || (p.roadDir && !p.roadWait) || p.drive) }, t, k + ':carro');
-  list.push({ y: p.y, ph: { key: k, at: [p.x, p.y], box: PERSONA_BOX }, draw: () => drawPerson(g, { ...p, _fx: undefined, sit: true, moving: false, dir: c8Dir(c8) }, t) });
+  pushCart(list, g, { x: cx, y: cy, c8, walk: p.walk || 0, moving: !!(p.moving || (p.roadDir && !p.roadWait) || p.drive) }, t);
+  list.push({ y: p.y, draw: () => drawPerson(g, { ...p, _fx: undefined, sit: true, moving: false, dir: c8Dir(c8) }, t) });
 }
 
 // putting things down and picking them up again (the watering can too), and drinking the tea she made

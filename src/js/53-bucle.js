@@ -157,7 +157,7 @@ function update(dt){
 let RENDER_REAL = 'out';
 // the floor outdoors: the painted ground (baldosas), what stays still (fijo: the rivers, the lake, the pads, the dunes,
 // the rocks) and what moves (vivo: the waves and the glints of the water, the grass, the flowers, the beds, the reeds).
-// The drawing of always asks for all of it, in this order; Phaser bakes the still part by chunks, and moves the rest itself.
+// Each frame asks for all of it, in this order (the parts apart: to keep the still part as an image one day).
 function sueloPintar(g, ox, oy, vw, vh, t, P){
   const inView = (x, y, m = 80) => x > ox - m && x < ox + vw + m && y > oy - m && y < oy + vh + m * 2;
   if (P.baldosas) for (let tx = Math.floor(ox / TILE); tx * TILE < ox + vw; tx++) for (let ty = Math.floor(oy / TILE); ty * TILE < oy + vh; ty++) { const cv = groundTile(tx, ty); g.drawImage(cv, .5, .5, cv.width - 1, cv.height - 1, tx * TILE, ty * TILE, TILE, TILE); }
@@ -211,8 +211,6 @@ function sueloPintar(g, ox, oy, vw, vh, t, P){
   if (P.fijo) if (inView(MILK.x, MILK.y) && S !== 3) for (let k = 0; k < 4; k++) { const x = MILK.x - 14 + k * 9, y = MILK.y + Math.sin(t * 2 + k) * 1.2; blob(g, [[x - 2.6, y], [x + 2.6, y], [x + 2.6, y - 9], [x + 1.2, y - 12], [x - 1.2, y - 12], [x - 2.6, y - 9]], 'rgba(250,250,245,.95)'); line(g, [[x - 1.2, y - 13], [x + 1.2, y - 13]], '#7a5536', 1.6, k); }
   if (P.vivo) for (const r of reeds) { if (!inView(r.x, r.y)) continue; const b = Math.sin(t * 1.2 + r.ph) * 2; line(g, [[r.x, r.y], [r.x + b * .5, r.y - r.h * .6], [r.x + b, r.y - r.h]], S >= 2 ? '#9a8a4a' : '#6b8f3a', 1.5, r.h); ell(g, r.x + b, r.y - r.h + 3, 1.6, 3.6, '#7a5536'); }
 }
-let PH_NATIVO = false;   // (this frame, does Phaser draw the world? see 66-motor-phaser.js)
-const PERSONA_BOX = [-64, -112, 64, 26];   // (around a person's feet: her hat, her arms, sitting or lying)
 function render(){ const real = game.scene; RENDER_REAL = real; game.scene = viewScene(); try { renderView(); } finally { game.scene = real; } }
 function renderView(){
   const W = innerWidth, H = innerHeight, dpr = devicePixelRatio || 1;
@@ -223,38 +221,37 @@ function renderView(){
   const vw = W / Z, vh = H / Z;
   const ox = inside ? (KIT.w - vw) / 2 : clamp(cam.x - vw / 2, 0, (road ? RW : WW) - vw), oy = inside ? (KIT.h - vh) / 2 : clamp(cam.y - vh / 2, 0, (road ? RH : WH) - vh);
   view.ox = ox; view.oy = oy; view.Z = Z; view.inside = inside;
-  PH_NATIVO = phNativo(!road);   // (Phaser draws this place's world, under a transparent screen with the rest on top)
-  g.setTransform(dpr, 0, 0, dpr, 0, 0); if (PH_NATIVO) g.clearRect(0, 0, W, H); else { g.fillStyle = '#2b2219'; g.fillRect(0, 0, W, H); }
+  g.setTransform(dpr, 0, 0, dpr, 0, 0); g.fillStyle = '#2b2219'; g.fillRect(0, 0, W, H);
   g.setTransform(dpr * Z, 0, 0, dpr * Z, -ox * dpr * Z, -oy * dpr * Z);
   const inView = (x, y, m = 80) => x > ox - m && x < ox + vw + m && y > oy - m && y < oy + vh + m * 2;
   const list = [];
   if (inside) {
-    const I = ROOMS[game.scene]; if (!PH_NATIVO) { I.draw(g, t, night); list.push(...I.items(g, t)); }   // (under Phaser the room and its furniture are its own images)
-    for (const k of Object.keys(PEOPLE)) if (sceneOf(k) === game.scene) list.push({ y: PEOPLE[k].y, ph: { key: 'p:' + k, at: [PEOPLE[k].x, PEOPLE[k].y], box: PERSONA_BOX, persona: PEOPLE[k] }, draw: () => drawPerson(g, PEOPLE[k], t) });
-    for (const f of FOLK) if (f.where === game.scene) list.push({ y: f.y + (f.sit ? 6 : 0), ph: { key: 'f:' + f.id, at: [f.x, f.y], box: PERSONA_BOX, persona: f }, draw: () => drawPerson(g, f, t) });
-    for (const it of game.ground) if (it.scene === game.scene) list.push({ y: it.y, ph: { key: 'suelo:' + game.ground.indexOf(it), at: [it.x, it.y], box: [-24, -30, 24, 12] }, draw: () => drawGround(g, it) });
+    const I = ROOMS[game.scene]; I.draw(g, t, night); list.push(...I.items(g, t));
+    for (const k of Object.keys(PEOPLE)) if (sceneOf(k) === game.scene) list.push({ y: PEOPLE[k].y, draw: () => drawPerson(g, PEOPLE[k], t) });
+    for (const f of FOLK) if (f.where === game.scene) list.push({ y: f.y + (f.sit ? 6 : 0), draw: () => drawPerson(g, f, t) });
+    for (const it of game.ground) if (it.scene === game.scene) list.push({ y: it.y, draw: () => drawGround(g, it) });
   } else if (road) {
     roadView(g, ox, oy, vw, vh, t, night, list);
     for (const it of game.ground) if (it.scene === 'camino') list.push({ y: it.y, draw: () => drawGround(g, it) });
   } else {
-    if (!PH_NATIVO) sueloPintar(g, ox, oy, vw, vh, t, { baldosas: true, fijo: true, vivo: true });   // (under Phaser the floor is Phaser's)
-    for (const o of [...props, ...trees, ...bushes]) if (inView(o.x, o.y, 170)) list.push({ y: o.y, ph: { fijo: o }, draw: () => drawProp(g, o, t, night) });
-    for (const k of Object.keys(PEOPLE)) if (sceneOf(k) === 'out') { const p = PEOPLE[k]; if (p.buggy) pushDriven(list, g, p, t, 'p:' + k); else list.push({ y: p.sortY ?? p.y, ph: { key: 'p:' + k, at: [p.x, p.y], box: PERSONA_BOX, persona: p }, draw: () => drawPerson(g, p, t) }); if (CH[k].vehicle === 'cart') list.push({ y: p.y - .5, ph: { key: 'carreta:' + k, at: [p.x, p.y], box: CARRO_BOX }, draw: () => drawCart(g, p, t) }); }
-    if (cart.on && inView(cart.x, cart.y, 120)) pushCart(list, g, cart, t, 'calesa');
-    for (const f of FOLK) if (f.where === 'out' && inView(f.x, f.y)) list.push({ y: f.sortY ?? f.y, ph: { key: 'f:' + f.id, at: [f.x, f.y], box: PERSONA_BOX, persona: f }, draw: () => drawPerson(g, f, t) });
-    for (const a of FAUNA) if (inView(a.x, a.y - (a.alt || 0), 60)) list.push({ y: a.fly ? a.y + 1e5 : a.water ? a.y - 40 : a.y, ph: { key: 'fauna:' + FAUNA.indexOf(a), at: [a.x, a.y], box: [-70, -90 - (a.alt || 0), 70, 30] }, draw: () => FAUNA_DRAW[a.kind](g, a, t) });
-    for (const b of BUGGIES) if (inView(b.x, b.y, 120)) list.push({ y: b.y + 1, ph: { key: 'buggy:' + BUGGIES.indexOf(b), at: [b.x, b.y], box: CARRO_BOX }, draw: () => drawBuggy(g, b, t) });
-    if (dest && inView(dest.x, dest.y)) list.push({ y: dest.y, ph: { key: 'destino', at: [dest.x, dest.y], box: [-12, -40, 26, 8] }, draw: () => { const w = Math.sin(t * 4) * 2; ell(g, dest.x, dest.y, 8, 3, 'rgba(30,40,20,.25)'); line(g, [[dest.x, dest.y], [dest.x, dest.y - 30]], '#5a3a24', 1.6, 1); blob(g, [[dest.x, dest.y - 30], [dest.x + 16, dest.y - 25 + w * .3], [dest.x, dest.y - 20]], '#d9433b'); } });
-    for (const [ka, a] of Object.entries(ANIM)) if (a.kind === 'cow' && a.where === 'out' && inView(a.x, a.y)) list.push({ y: a.y, ph: { key: 'vaca:' + ka, at: [a.x, a.y], box: [-60, -70, 60, 24] }, draw: () => drawCow(g, a, t) });
-    for (const it of game.ground) if (it.scene === 'out' && inView(it.x, it.y)) list.push({ y: it.y, ph: { key: 'suelo:' + game.ground.indexOf(it), at: [it.x, it.y], box: [-24, -30, 24, 12] }, draw: () => drawGround(g, it) });
+    sueloPintar(g, ox, oy, vw, vh, t, { baldosas: true, fijo: true, vivo: true });
+    for (const o of [...props, ...trees, ...bushes]) if (inView(o.x, o.y, 170)) list.push({ y: o.y, draw: () => drawProp(g, o, t, night) });
+    for (const k of Object.keys(PEOPLE)) if (sceneOf(k) === 'out') { const p = PEOPLE[k]; if (p.buggy) pushDriven(list, g, p, t); else list.push({ y: p.sortY ?? p.y, draw: () => drawPerson(g, p, t) }); if (CH[k].vehicle === 'cart') list.push({ y: p.y - .5, draw: () => drawCart(g, p, t) }); }
+    if (cart.on && inView(cart.x, cart.y, 120)) pushCart(list, g, cart, t);
+    for (const f of FOLK) if (f.where === 'out' && inView(f.x, f.y)) list.push({ y: f.sortY ?? f.y, draw: () => drawPerson(g, f, t) });
+    for (const a of FAUNA) if (inView(a.x, a.y - (a.alt || 0), 60)) list.push({ y: a.fly ? a.y + 1e5 : a.water ? a.y - 40 : a.y, draw: () => FAUNA_DRAW[a.kind](g, a, t) });
+    for (const b of BUGGIES) if (inView(b.x, b.y, 120)) list.push({ y: b.y + 1, draw: () => drawBuggy(g, b, t) });
+    if (dest && inView(dest.x, dest.y)) list.push({ y: dest.y, draw: () => { const w = Math.sin(t * 4) * 2; ell(g, dest.x, dest.y, 8, 3, 'rgba(30,40,20,.25)'); line(g, [[dest.x, dest.y], [dest.x, dest.y - 30]], '#5a3a24', 1.6, 1); blob(g, [[dest.x, dest.y - 30], [dest.x + 16, dest.y - 25 + w * .3], [dest.x, dest.y - 20]], '#d9433b'); } });
+    for (const a of Object.values(ANIM)) if (a.kind === 'cow' && a.where === 'out' && inView(a.x, a.y)) list.push({ y: a.y, draw: () => drawCow(g, a, t) });
+    for (const it of game.ground) if (it.scene === 'out' && inView(it.x, it.y)) list.push({ y: it.y, draw: () => drawGround(g, it) });
   }
   const anaHere = RENDER_REAL === game.scene;
-  if (anaHere && sipping()) list.push({ y: ana.y + .2, ph: { key: 'taza', at: [ana.x, ana.y], box: PERSONA_BOX }, draw: () => drawCup(g, ana) });
-  if (anaHere && !ana.hidden) list.push({ y: ana.sortY ?? ana.y + (ana.sit && !inside ? 6 : 0), ph: { key: 'ana', at: [ana.x, ana.y], box: PERSONA_BOX, persona: realR.fact('adorno:ana') ? null : ana }, draw: () => { drawPerson(g, ana, t); if (realR.fact('adorno:ana') && !ana.lie && !ana.sit && LOOKS.ana.hat) ACC_OBJ.sombrero.f(g, ana); } });   // (with the wreath of flowers on her hat, the day she made it)
+  if (anaHere && sipping()) list.push({ y: ana.y + .2, draw: () => drawCup(g, ana) });
+  if (anaHere && !ana.hidden) list.push({ y: ana.sortY ?? ana.y + (ana.sit && !inside ? 6 : 0), draw: () => { drawPerson(g, ana, t); if (realR.fact('adorno:ana') && !ana.lie && !ana.sit && LOOKS.ana.hat) ACC_OBJ.sombrero.f(g, ana); } });   // (with the wreath of flowers on her hat, the day she made it)
   accPush(list, g, t);   // (what each one is doing, with its things)
-  if (toby.where === game.scene) list.push({ y: toby.y, ph: { key: 'toby', at: [toby.x, toby.y], box: [-30, -44, 30, 14] }, draw: () => { g.save(); g.translate(toby.x, toby.y); g.scale(1.6, 1.6); drawCat(g, { ...toby, x: 0, y: 0 }, t); if (!toby.moving && toby.sleep && toby.mode !== 'ana') { g.fillStyle = 'rgba(70,50,30,.6)'; g.font = 'italic 6px Georgia, serif'; g.fillText('z', 6, -16 - (t * 3 % 4)); } g.restore(); } });
-  if (OBS) { const b = wmBody(OBS); if (b && !b.lie) list.push({ y: 1e9, ph: { key: 'obs', at: [b.x, b.y], box: [-12, -110, 12, 0] }, draw: () => { const hy = b.y - 50 * (LOOKS[b.look]?.h || 1) - 4 + Math.sin(t * 4) * 1.5; blob(g, [[b.x - 5, hy - 7], [b.x + 5, hy - 7], [b.x, hy]], '#e0a030'); } }); }   // (a little arrow over whoever is watched)
-  list.sort((a, b) => a.y - b.y); if (PH_NATIVO) phMundo(list, { ox, oy, Z, W, H, dpr, t, night }); else list.forEach(o => o.draw());
+  if (toby.where === game.scene) list.push({ y: toby.y, draw: () => { g.save(); g.translate(toby.x, toby.y); g.scale(1.6, 1.6); drawCat(g, { ...toby, x: 0, y: 0 }, t); if (!toby.moving && toby.sleep && toby.mode !== 'ana') { g.fillStyle = 'rgba(70,50,30,.6)'; g.font = 'italic 6px Georgia, serif'; g.fillText('z', 6, -16 - (t * 3 % 4)); } g.restore(); } });
+  if (OBS) { const b = wmBody(OBS); if (b && !b.lie) list.push({ y: 1e9, draw: () => { const hy = b.y - 50 * (LOOKS[b.look]?.h || 1) - 4 + Math.sin(t * 4) * 1.5; blob(g, [[b.x - 5, hy - 7], [b.x + 5, hy - 7], [b.x, hy]], '#e0a030'); } }); }   // (a little arrow over whoever is watched)
+  list.sort((a, b) => a.y - b.y).forEach(o => o.draw());
   if (road) roadCanopy(g, ox, oy, vw, vh, t);
   // a little "!" over whoever has something for Ana: thanks, a present, a delivery, or came looking for her
   for (const [k, p] of Object.entries(PEOPLE)) {
@@ -311,7 +308,7 @@ function renderView(){
     g.globalCompositeOperation = 'source-over';
   }
   // paper grain and a soft vignette, like a page of a sketchbook
-  if (!PH_NATIVO) {   // (under Phaser, the paper and the vignette are Phaser's: the screen above paints almost nothing)
+  {
   g.globalAlpha = .9; g.fillStyle = g.createPattern(paper, 'repeat'); g.fillRect(0, 0, W, H); g.globalAlpha = 1;
   const vg = g.createRadialGradient(W / 2, H / 2, Math.min(W, H) * .42, W / 2, H / 2, Math.max(W, H) * .75);
   vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(60,40,20,.3)'); g.fillStyle = vg; g.fillRect(0, 0, W, H);
