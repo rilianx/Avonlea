@@ -69,7 +69,9 @@ CH.lynde.routine.roomGoals.rl = CH.lynde.goals;
 CH.matthew.routine.describe = "Matthew entra a la cocina de Tejas Verdes a comer (hacia las 7, las 12 y las 18) y está con Marilla.";
 const LOOKS = { ana: ANA.look }; for (const k of Object.keys(CH)) LOOKS[k] = CH[k].look;
 const NAMES = { toby: 'Pelusa', lawson: 'Sr. Lawson' }; for (const k of Object.keys(CH)) NAMES[k] = CH[k].name;
-const LINES = {}, SEASON_LINES = {}; for (const k of Object.keys(CH)) { LINES[k] = CH[k].lines; SEASON_LINES[k] = CH[k].seasonLines; }
+// a loose line may wait for something of the book to have happened: «[hecho:perdonada] …» (conditions of the script, with commas)
+const lineasSi = a => (a || []).filter(l => { const m = /^\[([^\]]+)\] /.exec(l); return !m || m[1].split(',').every(c => dlgCond(c.trim(), dlgCtx())); }).map(l => l.replace(/^\[[^\]]+\] /, ''));
+const LINES = {}, SEASON_LINES = {}; for (const k of Object.keys(CH)) { Object.defineProperty(LINES, k, { get: () => lineasSi(CH[k].lines), enumerable: true }); SEASON_LINES[k] = CH[k].seasonLines; }
 const ABIL = {}; for (const k of Object.keys(CH)) ABIL[k] = CH[k].abil;
 const COOK = Object.keys(CH).find(k => CH[k].abil.cocinar);
 // the people: one per entry (the ones the game names directly are pulled out below)

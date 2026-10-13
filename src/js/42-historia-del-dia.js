@@ -121,7 +121,7 @@ const STORIES = [
     { hora: 13, lugar: 'gg', personajes: ['marilla', 'matthew'], que_pasa: 'A la hora de comer, Matthew le cuenta a Marilla, a su manera, lo bien que lo cuida Ana; Marilla disimula una sonrisa.', pista: 'La comida en Tejas Verdes', encargo: NO_TASK, fin: 'llega_ana' }] },
 ];
 function fallbackStory(){
-  const ok = STORIES.filter(st => conoceDiana() || !JSON.stringify(st).includes('"diana"'));   // (with Diana: once Ana knows her)
+  const ok = STORIES.filter(st => dianaAmiga() || !JSON.stringify(st).includes('"diana"'));   // (with Diana: once Ana knows her)
   const done = game.stories || [], fresh = ok.filter(st => !done.includes(st.titulo)), pool = fresh.length ? fresh : ok.length ? ok : STORIES;
   return validStory(pool[Math.floor(Math.random() * pool.length)]);
 }

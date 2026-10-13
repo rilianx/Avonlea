@@ -42,7 +42,7 @@ module.exports = [
     id: 20, titulo: 'Matthew trae huevos', quienes: ['matthew', 'ana'],
     relato: 'Ana le pide huevos a Matthew. Matthew va donde están las gallinas, junto al granero, se agacha a sacarlos de los nidos y los junta. Se los lleva a Ana, que los recibe.',
     pasos: [
-      { quien: 'matthew', junto: /gallin|granero/, accion: /recoger huevos/, postura: /agachad/, texto: 'Matthew se agacha junto al granero, donde están las gallinas, a sacar los huevos.' },
+      { quien: 'matthew', junto: /gallin|granero/, accion: /recoger huevos/, postura: /agachad[ao]/, texto: 'Matthew se agacha junto al granero, donde están las gallinas, a sacar los huevos.' },
       { quien: 'matthew', tiene: /huevos/, texto: 'Matthew tiene los huevos.' },
       { quien: 'matthew', accion: /dar huevos/, texto: 'Se los da a Ana.' },
       { quien: 'ana', tiene: /huevos/, texto: 'Ana tiene los huevos.' },
@@ -72,7 +72,7 @@ module.exports = [
     id: 1, titulo: 'Una cinta para el pelo (trueque)', quienes: ['ana'],
     relato: 'Ana quiere una cinta y no tiene dinero. Va a los arbustos, se agacha y junta bayas en su canastito. Las lleva a la tienda de Lawson y las cambia por una cinta.',
     pasos: [
-      { quien: 'ana', accion: /recoger bayas/, postura: /agachad/, texto: 'Se agacha a juntar bayas.' },
+      { quien: 'ana', accion: /recoger bayas/, postura: /agachad[ao]/, texto: 'Se agacha a juntar bayas.' },
       { quien: 'ana', tiene: /bayas/, texto: 'Tiene las bayas.' },
       { quien: 'ana', donde: /tienda/i, texto: 'Va a la tienda de Lawson.' },
       { quien: 'ana', tiene: /cinta/, texto: 'Tiene la cinta.' },
@@ -82,7 +82,7 @@ module.exports = [
     id: 2, titulo: 'Un regalo para Marilla', quienes: ['ana', 'marilla'],
     relato: 'Ana quiere regalarle algo a Marilla. Va a la huerta, se agacha y corta un ramo de flores. Entra a la cocina y se lo da a Marilla, que lo recibe.',
     pasos: [
-      { quien: 'ana', junto: /huerta/, accion: /recoger ramo/, postura: /agachad/, texto: 'Corta flores en la huerta, agachada.' },
+      { quien: 'ana', junto: /huerta/, accion: /recoger ramo/, postura: /agachad[ao]/, texto: 'Corta flores en la huerta, agachada.' },
       { quien: 'ana', tiene: /ramo/, texto: 'Tiene el ramo.' },
       { quien: 'ana', lugar: /cocina/, accion: /dar ramo/, texto: 'Se lo da a Marilla en la cocina.' },
       { quien: 'marilla', tiene: /ramo/, texto: 'Marilla tiene el ramo.' },
@@ -111,7 +111,7 @@ module.exports = [
     id: 15, titulo: 'Peg Bowen junta hierbas', quienes: ['peg'],
     relato: 'Peg Bowen anda por el bosque. Se agacha aquí y allá a juntar hierbas, varias veces, y se las lleva.',
     pasos: [
-      { quien: 'peg', accion: /recoger hierbas/, postura: /agachad/, texto: 'Se agacha a juntar hierbas.' },
+      { quien: 'peg', accion: /recoger hierbas/, postura: /agachad[ao]/, texto: 'Se agacha a juntar hierbas.' },
       { quien: 'peg', tiene: /hierbas/, texto: 'Tiene las hierbas.' },
     ],
   },
@@ -127,7 +127,7 @@ module.exports = [
     id: 27, titulo: 'Ordeñar y llevar la leche', quienes: ['matthew', 'marilla'],
     relato: 'Matthew va al corral, se sienta en el banquito junto a la vaca y la ordeña en el balde, sin apuro, un cuarto de hora. Lleva la leche a la cocina y se la da a Marilla.',
     pasos: [
-      { quien: 'matthew', accion: /ordeñar/, postura: /sentad/, objeto: /balde/, dura: 10, texto: 'Ordeña sentado junto a la vaca, con el balde, un cuarto de hora.' },
+      { quien: 'matthew', accion: /ordeñar/, postura: /sentad[ao]/, objeto: /balde/, dura: 10, texto: 'Ordeña sentado junto a la vaca, con el balde, un cuarto de hora.' },
       { quien: 'matthew', tiene: /leche/, texto: 'Tiene la leche.' },
       { quien: 'matthew', lugar: /cocina/, accion: /dar leche/, texto: 'Se la da a Marilla en la cocina.' },
       { quien: 'marilla', tiene: /leche/, texto: 'Marilla tiene la leche.' },
@@ -345,6 +345,67 @@ module.exports = [
       { quien: 'diana', lugar: /Cuesta del Huerto/, texto: 'Diana entra a la salita.' },
       { quien: 'ana', dice: /amiga del alma/, texto: 'Ana le pregunta si podría ser su amiga del alma.' },
       { quien: 'diana', dice: /creo que sí/, texto: 'Diana dice que sí.' },
+    ],
+  },
+  {
+    id: 63, titulo: '«¡Zanahorias!» (una cadena del libro)', quienes: ['ana', 'gilbert'],
+    relato: 'El primer día de Ana en la escuela, Gilbert Blythe le toma una trenza y le dice «¡Zanahorias!». Ana se pone de pie, furiosa, y le parte la pizarra en la cabeza. Gilbert le pide perdón; Ana jura que nunca lo perdonará.',
+    pasos: [
+      { quien: 'ana', lugar: /escuela/, texto: 'Ana entra a la escuela.' },
+      { quien: 'gilbert', dice: /Zanahorias/, texto: 'Gilbert le dice «¡Zanahorias!».' },
+      { quien: 'ana', dice: /pizarra/, texto: 'Ana le parte la pizarra en la cabeza.' },
+      { quien: 'ana', dice: /Nunca/, texto: 'Ana jura no perdonarlo nunca.' },
+    ],
+  },
+  {
+    id: 64, titulo: 'El broche de amatista (una cadena del libro)', quienes: ['ana', 'marilla'],
+    relato: 'Marilla no encuentra su broche de amatista y culpa a Ana, que lo había visto. Ana, para poder ir al picnic, inventa que lo perdió en el lago. Entonces el broche aparece enganchado en el chal de Marilla, que le pide perdón y la deja ir al picnic.',
+    pasos: [
+      { quien: 'marilla', dice: /broche/, texto: 'Marilla pregunta por su broche.' },
+      { quien: 'ana', dice: /confes/, texto: 'Ana inventa una confesión.' },
+      { quien: 'marilla', dice: /chal/, texto: 'El broche aparece en el chal de Marilla.' },
+      { quien: 'marilla', dice: /Perdóname/, texto: 'Marilla le pide perdón y la deja ir al picnic.' },
+    ],
+  },
+  {
+    id: 65, titulo: 'El té con Diana y el vino de grosellas (una cadena del libro)', quienes: ['ana', 'diana'],
+    relato: 'Ana invita a Diana a tomar el té en Tejas Verdes. Se sientan a la mesa y Ana le sirve lo que cree que es cordial de frambuesa. Diana toma tres vasos, dice que se siente rara y se va a su casa tambaleándose.',
+    pasos: [
+      { quien: 'diana', lugar: /cocina/, texto: 'Diana llega a la cocina de Tejas Verdes.' },
+      { quien: 'ana', postura: /sentada/, objeto: /té/, texto: 'Se sientan a tomar el té.' },
+      { quien: 'ana', dice: /cordial/, texto: 'Ana le sirve el «cordial».' },
+      { quien: 'diana', dice: /muy mal/, texto: 'Diana se siente muy mal.' },
+    ],
+  },
+  {
+    id: 66, titulo: 'Minnie May y el crup (una cadena del libro)', quienes: ['ana', 'diana', 'barry'],
+    relato: 'Diana tiene prohibido ver a Ana. Una noche llega corriendo a Tejas Verdes: Minnie May tiene crup. Ana toma el jarabe de ipecacuana y corre con ella a La Cuesta del Huerto, donde cuida a Minnie May toda la noche. Al otro día, la Sra. Barry le pide perdón.',
+    pasos: [
+      { quien: 'diana', lugar: /cocina/, texto: 'Diana llega corriendo a la cocina de Tejas Verdes.' },
+      { quien: 'diana', dice: /crup/, texto: 'Diana avisa que Minnie May tiene crup.' },
+      { quien: 'ana', lugar: /Cuesta del Huerto/, texto: 'Ana corre a La Cuesta del Huerto.' },
+      { quien: 'ana', dice: /respira mejor/, texto: 'Ana la cuida hasta que respira mejor.' },
+      { quien: 'barry', dice: /Perdóname/, texto: 'La Sra. Barry le pide perdón.' },
+    ],
+  },
+  {
+    id: 67, titulo: 'El pastel con linimento (una cadena del libro)', quienes: ['ana', 'marilla', 'sraallan'],
+    relato: 'La Sra. Allan viene a tomar el té a Tejas Verdes, invitada por Marilla. Ana sirve su pastel; la Sra. Allan lo prueba con valentía. Marilla descubre que Ana le puso linimento anodino en vez de vainilla. Ana sale a llorar, y la Sra. Allan la consuela y la invita a la casa parroquial.',
+    pasos: [
+      { quien: 'sraallan', lugar: /cocina/, texto: 'La Sra. Allan llega a la cocina de Tejas Verdes.' },
+      { quien: 'ana', dice: /pastel/, texto: 'Ana sirve su pastel.' },
+      { quien: 'marilla', dice: /[Ll]inimento/, texto: 'Marilla descubre el linimento.' },
+      { quien: 'sraallan', dice: /casa parroquial/, texto: 'La Sra. Allan la consuela y la invita.' },
+    ],
+  },
+  {
+    id: 68, titulo: 'La tía Josephine (una cadena del libro)', quienes: ['ana', 'diana'],
+    relato: 'Ana va a casa de Diana. Diana la invita a quedarse a dormir después del concierto; esa noche saltan sobre la cama del cuarto de huéspedes, donde dormía la tía Josephine. Ana confiesa que fue culpa suya, y la tía Josephine se ríe y se hace su amiga.',
+    pasos: [
+      { quien: 'ana', lugar: /Cuesta del Huerto/, texto: 'Ana entra a La Cuesta del Huerto.' },
+      { quien: 'diana', dice: /quedarte a dormir/, texto: 'Diana la invita a quedarse a dormir.' },
+      { quien: 'diana', dice: /alguien en la cama/, texto: 'Saltan sobre la cama… y hay alguien.' },
+      { quien: 'ana', dice: /culpa mía/, texto: 'Ana confiesa.' },
     ],
   },
 ];

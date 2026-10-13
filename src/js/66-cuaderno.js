@@ -22,6 +22,7 @@ function cuadernoLeer(txt){
     if (!m) continue;
     if ((h = l.match(/^pista si (\S+):\s*(.*)$/))) m.pistas.push([h[1], h[2]]);
     else if ((h = l.match(/^(titulo|pista|meta|requiere|antes|acciones):\s*(.*)$/))) m[h[1]] = h[2];
+    else if (l === 'oculta') m.oculta = true;
   }
   for (const g of out) for (const x of g.metas) {
     const [f, ...a] = (x.meta || '').split(/\s+/), args = a.map(cuadernoArg), fn = G[f] || CUADERNO_EXTRA[f];
@@ -61,9 +62,9 @@ const cuadernoPista = m => [...m.pistas].reverse().find(([c]) => dlgCond(c, dlgC
 const cuadernoAntes = m => m.antes || m.requiere.filter(r => !cuadernoCumple(r)).map(r => { const t = cuadernoMeta(r)?.titulo; return t && t[0].toLowerCase() + t.slice(1); }).filter(Boolean).join(', ');
 function cuadernoPanel(open){
   const P = $('cua'); P.hidden = !open; if (!open) return;
-  const n = CUADERNO_METAS.filter(m => cuadernoHecho(m.id)).length;
-  $('cuasub').textContent = n + ' de ' + CUADERNO_METAS.length + ' · ' + (n === CUADERNO_METAS.length ? '¡todo! Ana podría escribir un libro con esto.' : 'las que faltan tienen una pista; 🔒: todavía no');
-  $('cualist').innerHTML = CUADERNO.map(g => '<h4>' + esc(g.nombre) + '</h4>' + g.metas.map(m => {
+  const vis = CUADERNO_METAS.filter(m => !m.oculta || cuadernoHecho(m.id) || cuadernoAbierta(m)), n = vis.filter(m => cuadernoHecho(m.id)).length;
+  $('cuasub').textContent = n + ' de ' + vis.length + ' · ' + (n === vis.length ? '¡todo! Ana podría escribir un libro con esto.' : 'las que faltan tienen una pista; 🔒: todavía no');
+  $('cualist').innerHTML = CUADERNO.map(g => '<h4>' + esc(g.nombre) + '</h4>' + g.metas.filter(m => !m.oculta || cuadernoHecho(m.id) || cuadernoAbierta(m)).map(m => {   // (a hidden goal: once it opens)
     const d = cuadernoHecho(m.id), abierta = cuadernoAbierta(m);
     return d ? `<div class="cm hecha"><b>✓ ${esc(m.titulo)}</b><span>el día ${d}</span></div>`
       : abierta ? `<div class="cm"><b>○ ${esc(m.titulo)}</b><small>${esc(cuadernoPista(m))}</small></div>`

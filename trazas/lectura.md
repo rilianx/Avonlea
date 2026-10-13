@@ -82,3 +82,25 @@ Lo de arriba quedó arreglado. Leyendo de nuevo aparecieron otras cosas, que tam
 - El Sr. Harrison se cura en cuanto termina el jarabe y sale de la casa.
 - La escuela no tiene mapa de Tiled: no se dice «junto a la pizarra».
 - Las cadenas de pedidos fallan de vez en cuando en la regresión (una vez la meta 9, el paseo con Diana; otra la 17, la compota de la Sra. Barry): repetidas, salen bien (26 de 26 y 4 de 4).
+
+## Las cadenas del libro (lectura a mano)
+
+Leyendo los relatos de las cadenas nuevas (zanahorias, broche, té con Diana, crup, pastel, tía Josephine):
+
+| Qué se leía | Arreglo |
+|---|---|
+| El broche aparecía en la prueba del crup (la escena se dispara en cualquier cocina con Ana, si son amigas) | en cada prueba, lo que ya pasó antes en el libro se marca como pasado |
+| Diana, corriendo a avisar del crup, se paraba a conversar con Jerry sobre la botella de leche de Gilbert | lo urgente (prioridad 3) no se detiene a conversar, ni lo detienen |
+| Ana llegaba a La Cuesta del Huerto con el jarabe, salía enseguida y se iba a visitar a la Sra. Lynde | las metas urgentes del guion cortan lo que alguien estaba esperando; Ana se queda en casa de los Barry |
+| La tía Josephine: «Desde que me saltaste encima en la cama…» antes de la cama; la Sra. Barry: «Esta vez el cordial está bien etiquetado» en plena prohibición; Mary Joe y el médico hablando del crup antes del crup | las frases sueltas pueden esperar un hecho: `[hecho:perdonada] …` |
+| La tía Josephine invitaba a Ana la misma noche del crup | `no_hoy:perdonada`: una cosa grande del libro por día |
+| «Ana dice: ¿Un poco más de té, Ana?» | la frase del té no nombra a nadie |
+| Diana, mareada, decía que se iba… y seguía veinte minutos más hablando de su novela | después del vino se va a su casa; y si la otra se va, el té termina |
+| Ana servía el pastel cuando la Sra. Allan todavía estaba en la puerta | la escena espera a que se siente (`sentada:sraallan`) |
+| Minnie May: «¿Va a la tienda de Lawson?» y Mary Joe: «Sí, se me acabó el azúcar» | entre un niño y un grande, frases de niño y de grande |
+| «Las dos saltan sobre la cama… Y dice: ¡Ay!» (¿quién?); «Minnie May arde de fiebre… Y dice: Mary Joe, pon agua…» (parecía que hablaba Minnie May) | si lo contado no es de quien habla, se dice quién habla |
+| «Gilbert Blythe: la escuela · sentada» | sentado, acostado, agachado, para ellos |
+| Gilbert, en el recreo, caminando por el arroyo junto a la escuela (la regla del agua, que el informe no contaba por estar al final) | los niños juegan en tierra seca, y el aviso del final cuenta |
+| «Lo vi esta tarde» a las diez de la mañana; «pasa la noche… a la mañana» en cinco minutos | «Lo vi ayer»; «se queda en su cuarto… al final» |
+
+**Lo que queda, sabido:** en el crup y en la cama de la tía Josephine, la escena cuenta una noche entera («al otro día, la Sra. Barry…») en unos minutos del juego. Es un resumen, como en el libro, pero el reloj no salta.

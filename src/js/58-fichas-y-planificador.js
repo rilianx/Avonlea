@@ -56,13 +56,14 @@ for (const [k, d] of Object.entries(FOLK_DEFS)) { const f = FICHAS[k]; d.ficha =
 for (const [k, c] of Object.entries(CH)) { c.temas = c.temas || ['lo que pasó hoy', 'la granja', 'los vecinos']; if (c.memoria === undefined) c.memoria = true; }
 for (const d of Object.values(FOLK_DEFS)) if (d.memoria === undefined) d.memoria = ['gilbert', 'sraallan', 'farero', 'peg', 'jasper', 'sara'].some(k => FOLK_DEFS[k] === d);
 function fichaOf(k){
-  if (CH[k]) return { nombre: CH[k].fullName, ficha: CH[k].fullName + ', ' + voiceShort(k), temas: CH[k].temas, frases: CH[k].lines, memoria: CH[k].memoria };
-  const d = FOLK_DEFS[k]; return d ? { nombre: d.name, ficha: d.ficha, temas: d.topics, frases: d.lines, memoria: d.memoria } : null;
+  if (CH[k]) return { nombre: CH[k].fullName, ficha: CH[k].fullName + ', ' + voiceShort(k), temas: CH[k].temas, frases: LINES[k], memoria: CH[k].memoria };
+  const d = FOLK_DEFS[k]; return d ? { nombre: d.name, ficha: d.ficha, temas: d.topics, frases: lineasSi(d.lines), memoria: d.memoria } : null;
 }
 const ANA_FICHA = 'Ana Shirley, 11 años, pelirroja y pecosa, huérfana adoptada por Matthew y Marilla Cuthbert de Tejas Verdes; soñadora, muy conversadora, de palabras grandiosas e imaginación desbordante';
 const SEASON_TOPICS = [['las flores de los manzanos', 'la primavera'], ['el calor', 'las vacaciones', 'las bayas'], ['las hojas rojas', 'las manzanas', 'la cosecha'], ['la nieve', 'el frío', 'la Navidad']];
 // written exchanges for two neighbours (when there is no AI)
 const PAIR_LINES = {
+  mixta: [['¿Me da una manzana? Solo una.', 'Toma, pero no le digas a nadie.'], ['¡Mire, encontré un nido!', 'No lo toques, que la madre vuelve.'], ['¿Ya es hora de comer?', 'Todavía no. Anda a jugar un rato.'], ['¡Gané la carrera hasta el portón!', '¡Muy bien! Pero no corras tanto, que te caes.']],
   kids: [['¡Te pillé! ¡Ahora tú la llevas!', '¡No vale, no estaba jugando!'], ['¿Viste? A Gilbert se le fue la botella de leche río abajo.', '¡Ja! Que no se entere el maestro.'], ['¿Jugamos a las escondidas?', 'Bueno, pero yo no cuento esta vez.'], ['Dicen que en el Bosque Encantado hay fantasmas.', 'Eso lo inventó Ana Shirley. ¡Pero igual no voy!']],
   big: [['¡Buenos días! ¿Ya supo lo de la vaca de los Cuthbert?', '¡Si lo sabe todo Avonlea! Esa vaca es más lista que el Sr. Harrison.'], ['Qué lindo día para tender la ropa.', 'Ya lo creo. Y ayer que no paró de llover.'], ['¿Va a la tienda de Lawson?', 'Sí, se me acabó el azúcar. Con tanta compota...'], ['Dicen que el nuevo pastor predica muy bonito.', 'Y la Sra. Allan es un encanto, eso sí.'], ['¿Cómo vienen las papas este año?', 'Buenas, si no llueve demasiado.']],
 };
@@ -86,9 +87,10 @@ async function encAsk(x, y){
   return { parts: [x, y], lines, topic, scene: game.scene, born: TT };
 }
 function encFallback(x, y){
-  if (y === 'ana') { const d = FOLKBY[x].def, l = [{ q: encQ(x), t: pick(d.lines) }]; if (d.ana && Math.random() < .7) l.push({ q: 'ana', t: pick(d.ana) }); return { parts: [x, y], lines: l, topic: '', scene: game.scene, born: TT }; }
-  const [a, b] = pick(PAIR_LINES[FOLKBY[x].kid && FOLKBY[y].kid ? 'kids' : 'big'].filter(p => !(/pastor/.test(p[0]) && [x, y].some(i => /allan/.test(i)))));
-  return { parts: [x, y], lines: [{ q: encQ(x), t: a }, { q: encQ(y), t: b }], topic: '', scene: game.scene, born: TT };
+  if (y === 'ana') { const d = FOLKBY[x].def, l = [{ q: encQ(x), t: pick(lineasSi(d.lines)) }]; if (d.ana && Math.random() < .7) l.push({ q: 'ana', t: pick(d.ana) }); return { parts: [x, y], lines: l, topic: '', scene: game.scene, born: TT }; }
+  const kx = !!FOLKBY[x].kid, ky = !!FOLKBY[y].kid, [a, b] = pick(PAIR_LINES[kx && ky ? 'kids' : kx || ky ? 'mixta' : 'big'].filter(p => !(/pastor/.test(p[0]) && [x, y].some(i => /allan/.test(i)))));
+  const [p, q] = !kx && ky ? [y, x] : [x, y];   // (a child with a grown-up: the child speaks first, as a child)
+  return { parts: [x, y], lines: [{ q: encQ(p), t: a }, { q: encQ(q), t: b }], topic: '', scene: game.scene, born: TT };
 }
 function encStart(s){
   enc.cur = s; s.i = -1; s.wait = .3; bubbles = [];
@@ -223,7 +225,7 @@ const HOUSEHOLDS = [CUTHBERT, ['barry', 'diana'], ['allan', 'sraallan'], ['hetty
 const kin = (a, b) => HOUSEHOLDS.some(h => h.includes(a) && h.includes(b));   // (whose cow it is: the household)
 const wmName = k => k === 'ana' ? 'Ana' : NAMES[k] || FOLKBY[k]?.def.name || k;
 // the model's own memory: inventories of the others, relations and offences, who knows what, facts of the day
-game.wm = game.wm || { inv: {}, rel: { 'ana>gilbert': -2, 'ana>josie': 0 }, ofensa: { 'ana>gilbert': 'zanahorias' }, know: {}, facts: {} };
+game.wm = game.wm || { inv: {}, rel: { 'ana>josie': 0 }, ofensa: {}, know: {}, facts: {} };   // (Gilbert and the «carrots»: at school, cap. 15, not from the start)
 game.wm.perm = game.wm.perm || {};   // (facts for good: friends of the soul, the names Ana gives to places)
 const wmInv = k => { if (k === 'ana') return game.inv; const I = game.wm.inv; if (!I[k]) I[k] = { ...(whoOf(k).inv || {}) }; return I[k]; };
 for (const k of ['cuerda', 'azucar', 'hierbas']) if (!(k in game.inv)) game.inv[k] = 0;
@@ -300,7 +302,7 @@ const FAVORS = {   // what one can ask of someone (ok: whether it can be asked; 
   venir: { eff: (s, me, to, a) => { s.pos[to] = a.lugar || 'h:cp'; }, ok: (s, me, to) => to === 'ana' || me === 'ana' && to === 'diana', wait: 30,
     goal: (me, a, s0) => { const H = teaHour(s0.t), p = a.lugar || 'h:cp';
       return { ...G.estar_en(a.to, p, H + .25, H + .75), quedar: null, quedarMin: 30, te: 1, con: me, teHasta: H + 1.5, desde: H - 1, text: `ir a tomar el té con ${wmName(me)} a las ${fmtHour(H)} (${WP_NAME[p]})`,
-        chat: [[me, '¿Un poco más de té, Ana? Y prueba estas galletas.'], [a.to, '¡Están deliciosas! Es como estar en un libro.'], [me, 'Cuéntame qué estás leyendo ahora.'], [a.to, 'Una novela con un castillo y una dama muy triste… ¡me encanta!']] }; },
+        chat: [[me, '¿Un poco más de té? Y prueba estas galletas.'], [a.to, '¡Están deliciosas! Es como estar en un libro.'], [me, 'Cuéntame qué estás leyendo ahora.'], [a.to, 'Una novela con un castillo y una dama muy triste… ¡me encanta!']] }; },
     say: a => `¿Vendrías a tomar el té conmigo esta tarde, a las ${fmtHour(teaHour(hourNow() * 60))}? En ${(WP_NAME[a.lugar || 'h:cp'] || '').replace(/^(el|la) /, m => m)}.` },
   // (from the book) lending: the one asked hands it over at once (it is to be given back); the chores Marilla asks for; a ride in the cart
   prestar: { eff: (s, me, to, a) => { s.invs[to][a.item] -= 1; s.invs[me][a.item] = (s.invs[me][a.item] || 0) + 1; s.facts['prestado:' + a.item + ':' + to + '>' + me] = 1; }, ok: (s, me, to, a) => (s.invs[to]?.[a.item] || 0) > 0, say: a => `¿Me prestarías ${ITEM_DEFS[a.item]?.gift?.art || itemTextW(a.item, 1)}? Te lo devuelvo, prometido.` },

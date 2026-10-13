@@ -45,17 +45,18 @@ const RELATO_REGLAS = [
 const relatoCuerpos = () => [['ana', ana, game.scene], ...Object.entries(PEOPLE).map(([k, p]) => [k, p, p.where]), ...FOLK.filter(f => f.where !== 'in').map(f => [f.id, f, f.where])];
 // the rules broken now, by id (and what was seen, when the rule says it: RELATO.visto)
 const relatoMal = (k, b, A) => { const sc = wmScene(k), ids = []; for (const r of RELATO_REGLAS) { let v = false; try { v = r.mal(k, b, sc, A); } catch (e) {} if (v) { ids.push(r.id); RELATO.visto[k + '|' + r.id] = typeof v === 'string' ? v : ''; } } return ids; };
-const relatoPostura = (b, A) => b.bed ? 'acostada, en cama' : b.lie ? 'acostada' : b.sit ? 'sentada' : A?.v === 'rezar' && b.crouch ? 'de rodillas' : b.crouch ? 'agachada' : b.moving ? 'caminando' : 'de pie';
+const relatoMasc = k => /^(el |Sr\.|Thomas|Matthew|Gilbert|Jerry|Charlie|Moody|Felix|John|Robert)/.test(wmName(k) || '');   // (he: sentado, acostado)
+const relatoPostura = (b, A, k) => { const p = b.bed ? 'acostada, en cama' : b.lie ? 'acostada' : b.sit ? 'sentada' : A?.v === 'rezar' && b.crouch ? 'de rodillas' : b.crouch ? 'agachada' : b.moving ? 'caminando' : 'de pie'; return k && relatoMasc(k) ? p.replace(/ada\b/, 'ado') : p; };
 function relatoEstado(k){
   const b = wmBody(k); if (!b) return null;
   const ag = AGENTS[k] || (k === 'ana' ? game.playAct : null), A = ag?.acting, s = relatoSitio(k);
   const tiene = Object.entries(wmInv(k) || {}).filter(([, n]) => n > 0), inv = tiene.map(([i, n]) => n + ' ' + i).join(', ');
   let txt = ''; if (A) try { txt = stepText(A.task?.a?.v === A.v ? A.task.a : A); } catch (err) { txt = A.v.replace(/_/g, ' '); }
-  return { _txt: txt, _tiene: tiene.map(([i, n]) => itemTextW(i, n)).join(', '), quien: k, lugar: s.lugar, junto: s.junto, postura: relatoPostura(b, A), accion: A ? A.v + (A.x ? ' ' + A.x : '') : '', lleva: cosa(A?.lleva || (typeof b.carry === 'string' ? b.carry : b.carry ? 'algo' : '')), objeto: A ? [cosa(A.obj !== undefined ? A.obj : ACCION_VISTA[A.v]?.obj), A.mesa ? cosa(A.mesa[3]) + ' sobre la mesa' : ''].filter(Boolean).join(' y ') : '', tiene: inv, pelo: k === 'ana' && game.wm?.perm?.pelo_verde ? 'verde' : '', guia: Object.entries(ANIM).filter(([, c]) => c.state === 'led' && (c.ledBy || 'ana') === k).map(([n]) => ANIMALS[n]?.name || n).join(', '), _mal: relatoMal(k, b, A).join(',') };   // (_: not news, only for the audit)
+  return { _txt: txt, _tiene: tiene.map(([i, n]) => itemTextW(i, n)).join(', '), quien: k, lugar: s.lugar, junto: s.junto, postura: relatoPostura(b, A, k), accion: A ? A.v + (A.x ? ' ' + A.x : '') : '', lleva: cosa(A?.lleva || (typeof b.carry === 'string' ? b.carry : b.carry ? 'algo' : '')), objeto: A ? [cosa(A.obj !== undefined ? A.obj : ACCION_VISTA[A.v]?.obj), A.mesa ? cosa(A.mesa[3]) + ' sobre la mesa' : ''].filter(Boolean).join(' y ') : '', tiene: inv, pelo: k === 'ana' && game.wm?.perm?.pelo_verde ? 'verde' : '', guia: Object.entries(ANIM).filter(([, c]) => c.state === 'led' && (c.ledBy || 'ana') === k).map(([n]) => ANIMALS[n]?.name || n).join(', '), _mal: relatoMal(k, b, A).join(',') };   // (_: not news, only for the audit)
 }
 const relatoHora = () => { const d = dayT % 1, m = Math.floor(((d * 24 + 6) % 24) * 60); return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); };
 // what changed, as a sentence (a: how she was; null when nothing worth telling changed: walking on, stopping a moment)
-const QUIETA = { 'acostada, en cama': 'está en cama', acostada: 'se acuesta', sentada: 'se sienta', agachada: 'se agacha', 'de rodillas': 'se arrodilla' };
+const QUIETA = { 'acostada, en cama': 'está en cama', acostada: 'se acuesta', sentada: 'se sienta', agachada: 'se agacha', 'de rodillas': 'se arrodilla', 'acostado, en cama': 'está en cama', acostado: 'se acuesta', sentado: 'se sienta', agachado: 'se agacha' };
 const relatoFrase = (e, c, a) => {
   const n = relN(e.quien), p = [], sitio = c.has('lugar') || c.has('junto');
   if (sitio) {
@@ -74,7 +75,7 @@ const relatoFrase = (e, c, a) => {
 // a line said, as the tale tells it: what she does (in parentheses) is told, not said; what she writes, written
 function relatoDice(n, t){
   const m = t.match(/^\(([^)]*)\)\s*(.*)$/), q = s => /^«[^«]*»$/.test(s) ? s : '«' + s + '»';
-  if (m) return m[1] + (m[2] ? ' Y dice: ' + q(m[2]) : '');
+  if (m) return m[1] + (m[2] ? (m[1].toLowerCase().startsWith(n.toLowerCase()) ? ' Y dice: ' : ' ' + n[0].toUpperCase() + n.slice(1) + ' dice: ') + q(m[2]) : '');   // (who says it, unless the telling is of her)
   if (t.startsWith('✎ ')) return n + ' escribe: ' + q(t.slice(2));
   return n + ' dice: ' + q(t);
 }

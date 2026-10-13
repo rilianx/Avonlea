@@ -19,37 +19,45 @@ Repaso hecho a partir de los resúmenes de `docs/ACCIONES_DEL_LIBRO.md`. ✅ est
 | Juran ser amigas del alma | cap. 12: en el jardín, tomadas de las manos | ✅ se abre «Tener una amiga del alma» (la acción `jurar`) |
 | (o se encuentran antes por casualidad) | — | ✅ el encuentro `diana_por_casualidad` (solo si Ana todavía no le contó a Marilla): se conocen, pero se quieren menos; para jurar tienen que pasar tiempo juntas (afecto 4) |
 
-Lo que abre la amistad: el picnic, el club de cuentos, el bote de los Barry y el desafío de Josie (abajo).
+Lo que abre la amistad: el broche y el picnic, el té con Diana, el club de cuentos, el bote de los Barry, el desafío de Josie y la tía Josephine (abajo).
 
 ## 2. El picnic de la escuela dominical (cap. 13, 14)
 
-Requiere ser amigas (✅). En el libro también: el permiso de Marilla (✅, la acción `pedir_permiso`), la canasta (✅) y el broche de amatista que se pierde y Ana «confiesa» para que la dejen ir (◻).
+Requiere ser amigas (✅). En el libro también: el permiso de Marilla (✅, la acción `pedir_permiso`), la canasta (✅) y el broche de amatista que se pierde y Ana «confiesa» para que la dejen ir (✅ la escena `broche`, en la cocina, una vez que son amigas; el picnic requiere `hecho:broche`).
 
 ## 3. La escuela y Gilbert (cap. 15, 17, 28, 38)
 
 | Paso | En el libro | En el juego |
 |---|---|---|
 | Ir a la escuela | cap. 15: Diana la lleva el primer día | ✅ meta «Ir a la escuela» (estar en la escuela) |
-| «¡Zanahorias!» y la pizarra | cap. 15 | ◻ la ofensa existe desde el comienzo; falta que pase en la escuela |
+| «¡Zanahorias!» y la pizarra | cap. 15 | ✅ la escena `zanahorias`, la primera vez que Ana entra a la escuela con Gilbert: deja el hecho `zanahorias` y la ofensa (Ana ya no le habla) |
 | Recitar la lección, el concierto, decorar el salón | cap. 17, 24, 25 | ✅ requieren haber ido a la escuela |
 | Gilbert la rescata del bote y ella lo rechaza | cap. 28 | ◻ |
-| Hacen las paces | cap. 38 | ✅ requiere haber ido a la escuela (las acciones de disculparse y perdonar con Gilbert, cerradas antes) |
+| Hacen las paces | cap. 38 | ✅ requiere `hecho:zanahorias` (las acciones de disculparse y perdonar con Gilbert, cerradas antes) |
 
 ## 4. Diana prohibida (cap. 16, 17, 18)
 
-Requiere ser amigas. El té con Diana y el «cordial» que era vino de grosellas → la Sra. Barry prohíbe la amistad → la despedida junto al manantial → Minnie May con crup, Ana la salva → la Sra. Barry pide perdón. En el juego: el té con Diana ✅, consolarla cuando está triste ✅ (por su estado); la prohibición y el perdón como cadena ◻.
+| Paso | En el libro | En el juego |
+|---|---|---|
+| El té con Diana | cap. 16 | ✅ desde el menú de Diana, una vez amigas: «Invitarla a tomar el té en Tejas Verdes» (Ana prepara el té, la invita, la espera) |
+| El «cordial» era vino de grosellas | cap. 16 | ✅ la escena `te_grosella`, sentadas a la mesita: Diana se va a su casa, mareada → hecho `diana_borracha` |
+| La Sra. Barry prohíbe la amistad | cap. 16 | ✅ al día siguiente, la escena `prohibida` → hecho `prohibida`: se cierran el té, el picnic, el club, el bote, el desafío y la cama de la tía Josephine; Diana está triste; no se saludan como amigas ni conversan; en el cuaderno aparece «Recuperar la amistad de los Barry» |
+| Ana pide perdón y no la perdonan | cap. 16 | ✅ la escena `barry_no_perdona` (si Ana va a La Cuesta del Huerto) |
+| Minnie May con crup | cap. 18 | ✅ dos días después, en la noche, Diana corre a Tejas Verdes (agenda urgente: no se para a conversar); la escena `crup_aviso`, y las dos corren a La Cuesta del Huerto |
+| Ana la salva; la Sra. Barry pide perdón | cap. 18 | ✅ la escena `crup_salva` → se olvida la prohibición, hecho `perdonada`, y se quieren más |
 
 ## 5. Los Allan (cap. 21, 22)
 
 | Paso | En el libro | En el juego |
 |---|---|---|
 | Conocer a la Sra. Allan | cap. 21: llega el nuevo pastor con su esposa | ✅ meta «Ir a la escuela dominical» (estar en la iglesia) |
-| El pastel con linimento | cap. 21: Marilla invita a los Allan a tomar el té | ◻ |
-| Invitada a la casa parroquial | cap. 22: por carta | ✅ «Tomar el té con la Sra. Allan» requiere haberla conocido (la invitación, cerrada antes) |
+| Marilla invita a los Allan | cap. 21 | ✅ la escena `invita_allan`, después de la escuela dominical → hecho `allan_invitados` |
+| El pastel con linimento | cap. 21 | ✅ al día siguiente, la Sra. Allan viene a la tarde (agenda); cuando se sienta, la escena `pastel_linimento` → la invita a la casa parroquial |
+| Invitada a la casa parroquial | cap. 22 | ✅ «Tomar el té con la Sra. Allan» requiere `hecho:pastel_linimento` (la invitación a Ana, cerrada antes) |
 
 ## 6. La tía Josephine (cap. 19, 26, 29)
 
-El concierto del Club de Debate con Diana → saltan sobre la cama del cuarto de huéspedes → la tía Josephine se enoja y Ana se gana su amistad → cartas → la visita a Charlottetown. En el juego: la carta a la tía Josephine ✅ (sin requisito todavía); el resto ◻.
+El concierto del Club de Debate con Diana → saltan sobre la cama del cuarto de huéspedes → la tía Josephine se enoja y Ana se gana su amistad → cartas → la visita a Charlottetown. En el juego: ✅ la escena `cama_josephine` en casa de Diana (amigas desde hace dos días, sin prohibición, y no el mismo día del perdón) → hecho `cama_josephine`; las cartas a la tía Josephine se abren después (✅); la visita a Charlottetown ◻.
 
 ## 7. El pelo (cap. 27)
 
@@ -60,9 +68,13 @@ Teñirse el pelo (✅) → queda verde → Marilla se lo corta: «Librarse del p
 - El desafío es en una fiesta en casa de Diana: requiere ser amigas (✅).
 - La doncella de los lirios es un juego con las amigas, en el bote de los Barry: remar requiere ser amigas (✅).
 
+## Las frases sueltas también esperan
+
+Las frases que cada uno dice al pasar pueden esperar a que algo del libro haya pasado: `[hecho:perdonada] Esta vez el cordial de frambuesa está bien etiquetado…` (en `src/datos/personajes.json` y en `src/js/56-gente-de-avonlea.js`). Así la tía Josephine no habla de la cama antes de la cama, ni Gilbert de «Zanahorias» antes de la escuela.
+
 ## Cómo agregar una cadena
 
 1. En el guion, las escenas de cada paso, con sus condiciones (`si:`) y lo que dejan (`al_terminar: hecho x`).
 2. En el cuaderno, la meta con `requiere:` (otra meta o un hecho), `antes:` (cómo se dice lo que falta) y `acciones:` (lo que se cierra mientras tanto); y, si hace falta, una `pista si <condición>:` para cada paso.
 3. Si alguien tiene que hacer algo a cierta hora (Marilla va donde los Barry en la tarde), una entrada de agenda con `when:` (como en `src/js/66-cadenas.js`).
-4. Una meta de prueba con `cadena: true` (las demás pruebas abren todas las cadenas, para probar una cosa a la vez) y sus pasos en la auditoría (`tools/auditoria/esperado.js`).
+4. Una meta de prueba con `cadena: true` (con `tambien:` para que otro espere donde la cadena lo necesita, y `hasta:` para seguirla hasta su último hecho) (las demás pruebas abren todas las cadenas, para probar una cosa a la vez) y sus pasos en la auditoría (`tools/auditoria/esperado.js`).

@@ -79,7 +79,9 @@ function goalEnd(ag, g, st, why){
   if (ag.who === 'ana' && st === 'done') float('✔ ' + g.label, ana.x, ana.y - 64);
 }
 function stayTick(ag, g, dt){
-  if (hourNow() >= g.stayUntil) { if (ag.acting?.v === 'tomar_te') accEnd(ag); g.staying = false; g.stayed = true; agentLog(ag, '🔔 terminó: ' + g.label); goalEnd(ag, g, 'done'); return; }
+  const otro = g.goal.te != null && (g.goal.con || g.goal.people?.find(p => p !== ag.who));   // (tea: with whom)
+  if (otro && wmScene(otro) === wmScene(ag.who)) g.juntos = true;
+  if (hourNow() >= g.stayUntil || activeGoals(ag).some(o => o !== g && (o.goal.urgente || o.prio === 3 && g.prio < 3)) || (g.juntos && wmScene(otro) !== wmScene(ag.who))) { if (ag.acting?.v === 'tomar_te') accEnd(ag); g.staying = false; g.stayed = true; agentLog(ag, '🔔 terminó: ' + g.label); goalEnd(ag, g, 'done'); return; }   // (the stay is over: its hour, or something urgent, as running with the syrup; or the one she had tea with went away)
   ag.st = 'run'; ag.task = null;
   if (g.goal.te != null && teSentar(ag, g, dt)) { if (ag.acting?.v === 'tomar_te') stayChat(g); return; }
   const key = g.goal.room ? 'h:' + g.goal.room : g.goal.places[0], r = wmMove(ag.who, key, dt);

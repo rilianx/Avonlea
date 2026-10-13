@@ -35,7 +35,7 @@ function comparar(esp, lineas){
 function reglasRotas(lineas){
   const activa = {}, out = {};
   let antes = null;
-  for (const l of lineas) { const e = l.estado; if (!e || e.dice) continue; if (e.regla) { const k = Object.keys(out).find(r => !out[r].visto && out[r].primera?.startsWith(l.hora)); if (k) { out[k].visto = 1; out[k].primera = l.hora + ' ' + l.texto + (antes ? ' (antes: ' + antes + ')' : ''); } continue; } antes = l.hora + ' ' + l.texto;
+  for (const l of lineas) { const e = l.estado; if (!e || e.dice) continue; if (e.regla) { const k = Object.keys(out).find(r => !out[r].visto && out[r].primera?.startsWith(l.hora)); if (k) { out[k].visto = 1; out[k].primera = l.hora + ' ' + l.texto + (antes ? ' (antes: ' + antes + ')' : ''); continue; } }   // (a warning with no summary after it, at the very end: it counts too) antes = l.hora + ' ' + l.texto;
     const mal = (e._mal || '').split(',').filter(Boolean);
     for (const r of mal) { const k = e.quien + '|' + r; if (!activa[k]) { activa[k] = true; (out[r] ||= { n: 0, primera: l.hora + ' ' + l.texto }).n++; } }
     for (const k of Object.keys(activa)) if (k.startsWith(e.quien + '|') && !mal.includes(k.split('|')[1])) delete activa[k]; }

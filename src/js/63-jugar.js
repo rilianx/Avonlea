@@ -18,7 +18,7 @@ function jugables(){
   return out;
 }
 function jugar(a){
-  if (a.v === 'escribir_carta' && !a.para) return say('Ana', '¿A quién le escribo?', [...Object.entries(CORREO).map(([k, C]) => [cap(C.nombre) + (C.dias > 1 ? ' (' + C.donde + ')' : ''), () => jugar({ ...a, para: k })]), ['← Volver', anaMenu]]);
+  if (a.v === 'escribir_carta' && !a.para) return say('Ana', '¿A quién le escribo?', [...Object.entries(CORREO).filter(([k]) => cartaPuede(k)).map(([k, C]) => [cap(C.nombre) + (C.dias > 1 ? ' (' + C.donde + ')' : ''), () => jugar({ ...a, para: k })]), ['← Volver', anaMenu]]);
   close(); if (ana.goto) ana.goto = null; ana.sit = false;
   game.playAct = { who: 'ana', a, st: {}, task: { a }, t0: TT };
   game.playAct.task = game.playAct;   // (what accTick and accPush look at)

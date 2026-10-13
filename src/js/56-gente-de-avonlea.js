@@ -5,7 +5,7 @@
 const kidLook = (hair, dress, o = {}) => ({ hair, hairD: o.hairD || hair, dress, dressD: o.dressD || dress, skin: o.skin || '#f2cfb2', h: o.h || .82, ...o });
 const FOLK_DEFS = {
   gilbert: { name: 'Gilbert Blythe', kind: 'alumno', home: 'Casa de los Blythe', play: 'lago', look: kidLook('#5a3a26', '#5a6e8a', { dressD: '#3e5068', coat: true, h: .88 }),
-    lines: ['¡Buenos días, Zanahorias!... Perdón, perdón. Era una broma, Ana.', '¿Me vas a hablar algún día, Ana Shirley?', 'Te gané en ortografía. Pero en composición... bueno, ahí ganas tú.', '¿Quieres que te ayude a cruzar el arroyo? ¿No? Bueno...'],
+    lines: ['[hecho:zanahorias] ¡Buenos días, Zanahorias!... Perdón, perdón. Era una broma, Ana.', '[hecho:zanahorias] ¿Me vas a hablar algún día, Ana Shirley?', '[cuaderno:escuela] Te gané en ortografía. Pero en composición... bueno, ahí ganas tú.', '¿Quieres que te ayude a cruzar el arroyo? ¿No? Bueno...'],
     ana: ['Hmpf.', 'No le hablo a Gilbert Blythe. Nunca jamás.', '(Ana sigue de largo con la nariz en alto.)'] },
   buhonero: { name: 'el buhonero', kind: 'buhonero', home: 'Pensión', look: { hair: '#2a1a14', hairD: '#1a0a04', beard: true, dress: '#6a4a3a', dressD: '#4a2a1a', coat: true, hatDark: true, skin: '#d8a888', h: 1.12 },
     lines: ['¡Cintas, botones, peinetas, tinte para el pelo! ¡Todo lo que una señorita necesita!', 'Un tinte que deja el pelo negro azabache, señorita. Garantizado.'] },
@@ -75,15 +75,15 @@ const FOLK_DEFS = {
   srbarry: { name: 'el Sr. Barry', kind: 'granjero', home: 'La Cuesta del Huerto', look: { hair: '#3a2a20', hairD: '#2a1a10', beard: true, dress: '#5a5040', dressD: '#3a3020', coat: true, hatDark: true, skin: '#e0b090', h: 1.18 },
     lines: ['Buenas, Ana. Diana está en la casa, creo. O en el huerto.', 'El heno está listo para entrar. Si no llueve, mañana lo cargamos.'] },
   maryjoe: { name: 'Mary Joe', kind: 'juego', home: 'La Cuesta del Huerto', look: { hair: '#5a3a2a', hairD: '#3a2010', style: 'bun', dress: '#8a7a6a', dressD: '#6a5a4a', apron: '#f4efe4', skin: '#e8c0a0', h: 1.06 },
-    lines: ['¡Ay, señorita Ana! Yo no sé nada de enfermedades, menos mal que usted vino aquella noche.', 'La señora Barry dice que tienda la ropa antes de que se nuble.'] },
+    lines: ['[hecho:perdonada] ¡Ay, señorita Ana! Yo no sé nada de enfermedades, menos mal que usted vino aquella noche.', 'La señora Barry dice que tienda la ropa antes de que se nuble.'] },
   jerry: { name: 'Jerry Buote', kind: 'granjero', home: 'Tejas Verdes', look: { hair: '#2a1a14', hairD: '#1a0a04', dress: '#6a5a3a', dressD: '#4a3a1a', coat: true, skin: '#e0b090', h: .98 },
     lines: ['El Sr. Cuthbert me pidió que entrara la leña antes de la cena.', 'Oui, oui... ya voy, ya voy. ¡Esa vaca no se quiere mover!'] },
   medico: { name: 'el médico', kind: 'medico', home: 'Pensión', look: { hair: '#8a8278', hairD: '#5a5248', style: 'old', dress: '#2a2a30', dressD: '#18181e', coat: true, hatDark: true, beard: true, skin: '#eecaae', h: 1.14 },
-    lines: ['¿Alguien enfermo en Tejas Verdes? Espero que no.', 'Esa niña Shirley tiene buena cabeza: salvó a la pequeña Barry del crup antes de que yo llegara.'] },
+    lines: ['¿Alguien enfermo en Tejas Verdes? Espero que no.', '[hecho:perdonada] Esa niña Shirley tiene buena cabeza: salvó a la pequeña Barry del crup antes de que yo llegara.'] },
   srbell: { name: 'el Sr. Bell', kind: 'iglesia', home: 'Casa de los Pettibone', look: { hair: '#c8c0b0', hairD: '#9a9080', style: 'old', dress: '#3a3a40', dressD: '#2a2a30', coat: true, beard: true, skin: '#eecaae', h: 1.16 },
     lines: ['Te esperamos el domingo en la escuela dominical, Ana. Y apréndete el versículo.', 'Una oración larga no es mejor que una sincera, niña.'] },
   josephine: { name: 'la Srta. Josephine Barry', kind: 'paseo', home: 'La Cuesta del Huerto', look: { hair: '#d8d4cc', hairD: '#a8a49c', style: 'bun', dress: '#4a2a4a', dressD: '#2a1a2a', brooch: true, skin: '#eecaae', h: 1.06 },
-    lines: ['¡La niña Ana! Desde que me saltaste encima en la cama, no me había reído tanto en años.', 'Cuando vengas a Charlottetown, te alojas en mi casa. Te llevo a la exposición.'], ana: ['¡Srta. Barry! Usted es un espíritu afín, aunque no lo parezca a primera vista.'] },
+    lines: ['Así que tú eres la niña de Tejas Verdes. Hmm. Ya veremos qué clase de niña eres.', '[hecho:cama_josephine] ¡La niña Ana! Desde que me saltaste encima en la cama, no me había reído tanto en años.', '[hecho:cama_josephine] Cuando vengas a Charlottetown, te alojas en mi casa. Te llevo a la exposición.'], ana: ['¡Srta. Barry! Usted es un espíritu afín, aunque no lo parezca a primera vista.'] },
   spencer: { name: 'la Sra. Spencer', kind: 'paseo', home: 'Hotel White Sands', look: { hair: '#7a5a3a', hairD: '#5a3a1a', style: 'bun', dress: '#5a6a8a', dressD: '#3a4a6a', skin: '#f2cfb2', h: 1.06 },
     lines: ['¡Ana! Qué bien te ves. Y yo que creí que los Cuthbert querían una niña… ¡qué enredo!', 'Mi Lily estuvo enferma, por eso no pude llevarte yo a Tejas Verdes.'] },
   blewett: { name: 'la Sra. Blewett', kind: 'recado', home: 'Hotel White Sands', look: { hair: '#3a2a20', hairD: '#2a1a10', style: 'bun', dress: '#4a4a3a', dressD: '#2a2a1a', skin: '#e8c0a0', h: 1.08 },
@@ -119,6 +119,8 @@ const PLAY = { lago: [PLACES.lago[1], PLACES.lago[2]], aldea: [PLACES.aldea[1], 
   campo_rosado: [PLACES.campo_rosado[1], PLACES.campo_rosado[2] + 80], puente: [BRIDGES_COVERED_AT()[0] - 120, BRIDGES_COVERED_AT()[1] + 60], bosque: [WOODS[1].x + WOODS[1].rx * .9, WOODS[1].y] };
 const STROLL_SPOTS = [PLAY.aldea, door('Tienda de Lawson'), door('Ayuntamiento'), door('La Crónica de Avonlea'), CHURCH_DOOR, PLAY.puente, door('Pensión'), door('Rose Cottage')];
 const fieldNear = ([x, y]) => { let best = null, bd = 1e9; for (const f of FIELDS) { const d = dist(x, y, f.x + f.w / 2, f.y + f.h / 2); if (d < bd) { bd = d; best = f; } } return best; };
+// a few steps about the place, on dry land all the way (not across the brook by the school)
+const caminoSeco = (x0, y0, x1, y1) => { for (let i = 1; i <= 8; i++) { const x = x0 + (x1 - x0) * i / 8, y = y0 + (y1 - y0) * i / 8; if (inLake(x, y) || inBrook(x, y) || inSea(x, y)) return false; } return true; };
 const IN = (at, room = 'in') => ({ k: room + ':' + at.map(Math.round), at, in: room, r: 0 });
 const OUT = (at, r = 90) => ({ k: 'out:' + at.map(Math.round), at, r });
 // what each kind does at each hour (h: 6 .. 30)
@@ -178,7 +180,7 @@ function folkTick(dt){
       else { f.x += dx / d * sp; f.y += dy / d * sp; f.moving = true; f.dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 1 : 3) : (dy > 0 ? 2 : 0); f.walk = (f.walk + 1.8 * sp / SPEED) % 1; }
     } else if (f.plan && f.plan.r > 0 && (f.wait -= dt) <= 0) {   // about the place: a few steps here and there (the children play)
       f.wait = f.kid ? 1 + Math.random() * 3 : 3 + Math.random() * 7;
-      for (let k = 0; k < 6; k++) { const a = Math.random() * TAU, q = Math.sqrt(Math.random()) * f.plan.r, x = f.plan.at[0] + Math.cos(a) * q, y = f.plan.at[1] + Math.sin(a) * q * .7; if (!blockedOut(x, y)) { f.route = [[x, y]]; break; } }
+      for (let k = 0; k < 6; k++) { const a = Math.random() * TAU, q = Math.sqrt(Math.random()) * f.plan.r, x = f.plan.at[0] + Math.cos(a) * q, y = f.plan.at[1] + Math.sin(a) * q * .7; if (!blockedOut(x, y) && caminoSeco(f.x, f.y, x, y)) { f.route = [[x, y]]; break; } }
     } else if (!f.moving && Math.random() < dt * .2) f.dir = [0, 1, 2, 3][Math.floor(Math.random() * 4)];
   }
 }

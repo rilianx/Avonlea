@@ -8,6 +8,7 @@
 #   requiere: lo que tiene que pasar antes (separado por comas): otras metas del cuaderno (por su id), o
 #         condiciones del guion («hecho:conocidas_diana», «dias_desde:quiere_amiga:1», «afecto:diana:ana:4»)
 #   antes: cómo se dice lo que falta, mientras está cerrada (si no, los títulos de las metas que requiere)
+#   oculta: no aparece en el cuaderno hasta que se abre (algo que no se puede saber antes, como una prohibición)
 #   acciones: lo que no se puede hacer mientras está cerrada (separado por comas): una acción («jurar»), una
 #         acción con alguien («perdonar:gilbert»), o un pedido («pedir/venir»: invitar a tomar el té)
 #   Las metas que se pueden usar (las del planificador): amigas, picnic, visitar, paces, quehaceres, regalo_gusto,
@@ -37,9 +38,32 @@ acciones: jurar
 === picnic ===
 titulo: Ir de picnic con Diana
 pista: Al lago, con una canasta. Primero hay que pedirle permiso a Marilla.
+pista si !hecho:broche: Marilla tiene que dejarte ir… y Marilla anda buscando algo que perdió.
 meta: picnic ana diana
-requiere: amigas
+requiere: amigas, hecho:broche, !hecho:prohibida
+antes: ser amiga de Diana (y que Marilla te deje ir al picnic)
 acciones: merendar, pedir_permiso
+
+=== te_diana ===
+titulo: Invitar a Diana a tomar el té
+pista: En Tejas Verdes, con el cordial de frambuesa de Marilla. Invítala cuando la veas.
+meta: tomando_te ana diana
+requiere: amigas, !hecho:prohibida
+
+=== perdon_barry ===
+titulo: Recuperar la amistad de los Barry
+pista: La Sra. Barry no quiere que Diana te vea. Solo algo muy grande podría hacerla cambiar de idea.
+pista si hecho:crup: Minnie May tiene crup: ¡corre a La Cuesta del Huerto con el jarabe!
+meta: hecho perdonada
+requiere: hecho:diana_borracha
+oculta
+
+=== josephine ===
+titulo: Hacerse amiga de la tía Josephine
+pista: La tía de la Sra. Barry viene de Charlottetown. Un concierto, una noche en casa de Diana… y una cama de huéspedes.
+meta: hecho cama_josephine
+requiere: amigas, !hecho:prohibida
+antes: ser amiga de Diana
 
 === lynde ===
 titulo: Visitar a la Sra. Lynde
@@ -49,10 +73,11 @@ meta: visitar ana lynde
 === allan ===
 titulo: Tomar el té con la Sra. Allan
 pista: La esposa del pastor vive en la casa parroquial, cerca de la iglesia. A veces invita a tomar el té.
+pista si hecho:allan_invitados: Marilla invitó a los Allan a tomar el té en Tejas Verdes. ¡Hay que hacer el pastel!
 meta: tomando_te ana sraallan
-requiere: escuela_dominical
-antes: conocer a la Sra. Allan (en la iglesia, un domingo)
-acciones: pedir/venir
+requiere: escuela_dominical, hecho:pastel_linimento
+antes: conocer a la Sra. Allan (en la iglesia, un domingo), y que ella venga a tomar el té a Tejas Verdes
+acciones: pedir/venir:ana
 
 == En Tejas Verdes
 
@@ -99,8 +124,8 @@ acciones: recitar
 titulo: Hacer las paces con Gilbert Blythe
 pista: Le dijo «zanahorias». Él quiere disculparse… si Ana lo deja.
 meta: paces ana gilbert
-requiere: escuela
-antes: conocer a Gilbert (en la escuela)
+requiere: hecho:zanahorias
+antes: ir a la escuela, donde está Gilbert Blythe (y que pase algo)
 acciones: disculparse:gilbert, perdonar:gilbert, interceder:gilbert
 
 === leido ===
@@ -117,7 +142,7 @@ meta: carta ana
 titulo: Escribir un cuento para el club de cuentos
 pista: Una historia trágica, con una dama de cabellos de oro… y leérsela a Diana.
 meta: club ana
-requiere: amigas
+requiere: amigas, !hecho:prohibida
 acciones: escribir_cuento, leer_cuento
 
 === concierto ===
@@ -151,7 +176,7 @@ meta: adornado ana
 titulo: Remar en el Lago de las Aguas Brillantes
 pista: El bote de los Barry está en el lago. En verano.
 meta: remo ana
-requiere: amigas
+requiere: amigas, !hecho:prohibida
 antes: ser amiga de Diana (el bote es de los Barry)
 acciones: remar
 
@@ -184,6 +209,6 @@ acciones: cortar_pelo
 titulo: Aceptar el desafío de Josie Pye
 pista: Caminar por el caballete del techo de los Barry. ¿Qué podría salir mal?
 meta: desafio ana
-requiere: amigas
+requiere: amigas, !hecho:prohibida
 antes: ser amiga de Diana (el desafío es en una fiesta en su casa)
 acciones: trepar

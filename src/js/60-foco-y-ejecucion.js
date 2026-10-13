@@ -81,15 +81,16 @@ const inChat = k => CHATS.some(c => c.parts.includes(k)) || FOLKBY[k]?.talkT > T
 function chatTry(ag, F, urg){
   const me = ag.who, b = wmBody(me), sc = wmScene(me), pc = ag.pairCool || (ag.pairCool = {});
   if (writtenTalkOn() && (me === 'ana' || AGENTS.ana?.followOf === me)) return false;   // (who travel together talk by the written lines)
-  if (ocupada(me) || TT < (CHAT_YA[me] || 0)) return false;
+  if (ocupada(me) || TT < (CHAT_YA[me] || 0) || urg >= .9) return false;   // (in a hurry: no stopping to talk)
   { const k = ag.task?.a?.k, o = k && wmBody(k); if (o && wmScene(k) === sc && dist(b.x, b.y, o.x, o.y) < 220) return false; }   // (going up to the one the errand is with: not stopping to talk to someone else on the way)   // (in the middle of doing something: the talk can wait; and one who just talked goes on a while)
   for (const o of ['ana', ...Object.keys(PEOPLE), ...FOLK.map(f => f.id)]) {
     if (o === me || (o === 'ana' && writtenTalkOn()) || wmScene(o) !== sc || (ag.task && JSON.stringify(ag.task.a).includes(`"${o}"`))) continue;   // (not whoever the errand is with: that talk is the errand)
+    if ([me, o].includes('ana') && [me, o].includes('diana') && !dianaAmiga()) continue;   // (Ana and Diana: not before they meet, nor while it is forbidden)
     const ob = wmBody(o); if (!ob || ob.lie || dist(b.x, b.y, ob.x, ob.y) > 64 || pc[o] > TT || inChat(o) || ocupada(o) || TT < (CHAT_YA[o] || 0)) continue;
     pc[o] = TT + 180;
     const anaFree = o === 'ana' && !(wmDriven('ana') && !AGENTS.ana.paused), G = focoOf(o), r = relGetW(me, o), oag = AGENTS[o];
     let p = (F.social * .6 + G.social * .4) * (F.atrae.includes(o) || F.atrae.includes('gente') ? 1.5 : 1) * (1 - urg) * (r >= 4 ? 1.3 : r <= 0 ? .3 : 1);
-    if (oag && activeGoals(oag).length) p *= 1 - urgency(oag);
+    if (oag && activeGoals(oag).length) { if (urgency(oag) >= .9) continue; p *= 1 - urgency(oag); }
     if (Math.random() >= p) continue;
     startChat(me, o, anaFree); return true;
   }
@@ -137,12 +138,12 @@ function chatLines(a, b, anaFree){
   const tu = isKid(a) && isKid(b), nm = k => /^[a-zá-ú]/.test(wmName(k)) ? '' : wmName(k), A = nm(a), B = nm(b), to = n => n ? ', ' + n : '';   // ("un vecino" is no name to call someone by)
   if (anaFree) {   // (Ana, as the player moves her, passing by: a word to her)
     const d = FOLKBY[a]?.def;
-    say(a, a === 'gilbert' && d ? pick(d.lines) : pick([`¡${hi}, Ana!`, '¡Hola, Ana! ¿A dónde vas tan apurada?', '¡Ana Shirley! Saludos a Marilla.']));
+    say(a, a === 'gilbert' && d ? pick(lineasSi(d.lines)) : pick([`¡${hi}, Ana!`, '¡Hola, Ana! ¿A dónde vas tan apurada?', '¡Ana Shirley! Saludos a Marilla.']));
     if (relGetW('ana', a) <= 0) say('ana', pick(FOLKBY[a]?.def.ana || ['Hmpf.']));
     return L;
   }
   const ana_ = a === 'ana' ? a : b === 'ana' ? b : null, other = ana_ && (a === 'ana' ? b : a);
-  if (ana_ && relGetW('ana', other) <= 0) { say(other, FOLKBY[other]?.def.lines ? pick(FOLKBY[other].def.lines) : `${hi}, Ana.`); say('ana', pick(FOLKBY[other]?.def.ana || ['Hmpf.'])); return L; }
+  if (ana_ && relGetW('ana', other) <= 0) { say(other, FOLKBY[other]?.def.lines ? pick(lineasSi(FOLKBY[other].def.lines)) : `${hi}, Ana.`); say('ana', pick(FOLKBY[other]?.def.ana || ['Hmpf.'])); return L; }
   if (a === 'matthew' || b === 'matthew') {   // (Matthew: a greeting, and off he goes)
     const o = a === 'matthew' ? b : a;
     say(o, `¡${hi}, Matthew!`); say('matthew', pick(['Eh... b-buenas.', 'Buenas... sí... buen día, ¿no?', 'Ejem... buenas.']));
@@ -153,7 +154,7 @@ function chatLines(a, b, anaFree){
   const rounds = 1 + Math.round((1 - Math.max(focoOf(a).enfoque, focoOf(b).enfoque)) * 3);
   for (let k = 0; k < rounds; k++) {
     if (a === 'lynde' || b === 'lynde') { const o = a === 'lynde' ? b : a; say('lynde', pick(LYNDE_CHISME)); say(o, pick(CHISME_RE)); }
-    else if (ana_ && other === 'diana' && conoceDiana()) { const [x, y] = ANA_DIANA[(k + Math.floor(TT)) % ANA_DIANA.length]; say('ana', x); say('diana', y); }
+    else if (ana_ && other === 'diana' && dianaAmiga()) { const [x, y] = ANA_DIANA[(k + Math.floor(TT)) % ANA_DIANA.length]; say('ana', x); say('diana', y); }
     else if (ana_) { const [x, y] = suena(); say('ana', isKid(other) ? x.replace('¿No le parece', '¿No te parece').replace('¿Sabía', '¿Sabías') : x); say(other, isKid(other) ? pick(['¡Qué lindo, Ana!', '¿De verdad? ¡Cuéntame más!', '¡Qué cosas dices, Ana!']) : y); }
     else { const [x, y] = pares(); say(a, x); say(b, y); }
   }

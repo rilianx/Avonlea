@@ -15,7 +15,7 @@ const AGENDA = [
   { who: 'marilla', from: 17, to: 19, ana: true, label: 'regañar a Ana por los quehaceres', when: () => realR.fact('falta:ana'), goal: () => G.regañado('ana') },
   { who: 'lynde', from: 14, to: 16.5, label: 'visitar a Marilla', when: () => today() % 2 === 0, goal: () => G.visitar('lynde', 'marilla') },
   { who: 'lynde', from: 14, to: 16.5, label: 'visitar a la Sra. Barry', when: () => today() % 2 === 1, goal: () => G.visitar('lynde', 'barry') },
-  { who: 'diana', from: 15, to: 17, ana: true, season: [0, 1, 2], label: 'dar un paseo con Ana', when: () => !isSunday() && conoceDiana(), goal: () => G.paseo('diana', 'ana', 'lago', 30), favors: [{ f: 'pasear', to: 'ana' }] },
+  { who: 'diana', from: 15, to: 17, ana: true, season: [0, 1, 2], label: 'dar un paseo con Ana', when: () => !isSunday() && dianaAmiga(), goal: () => G.paseo('diana', 'ana', 'lago', 30), favors: [{ f: 'pasear', to: 'ana' }] },
   { who: 'ana', from: 7.5, to: 8.5, ana: true, season: [0, 2, 3], label: 'ir a clases', when: () => !isSunday(), goal: () => G.estar_en('ana', 'escuela', 9, CLASES_FIN) },
   { who: 'ana', from: 12.5, to: 14.5, ana: true, label: 'la tarde libre', goal: () => anaTarde() },
   { who: 'ana', from: 20, to: 22, ana: true, label: 'decir sus oraciones', goal: () => G.rezo('ana') },
@@ -46,7 +46,7 @@ function agendaTick(){
     const ag = AGENTS[e.who]; if (ag && (activeGoals(ag).length >= MAX_GOALS - 1 || ag.hold)) continue;
     if (e.when && !e.when()) continue;
     const goal = e.goal(); realR.setFact('agenda:' + i); if (!goal || goal.test(wmNow())) continue;
-    agentStart(e.who, goal, { label: '🕓 ' + e.label + (e.label === 'la tarde libre' ? ': ' + goal.text.replace(/^Ana /, '') : ''), prio: 1, favors: e.favors || [] });
+    agentStart(e.who, goal, { label: '🕓 ' + e.label + (e.label === 'la tarde libre' ? ': ' + goal.text.replace(/^Ana /, '') : ''), prio: e.prio || 1, favors: e.favors || [] });
   }
 }
 // a whole day, from dawn: the routines of goals on, Ana on her own (for the traces of a day)
@@ -109,6 +109,8 @@ function wmRunTest(i){
     if (T.ask) hs.push(anaAskWalk(T.ask.to, T.ask, T.text));
     ag = { who: T.who, get st() { return hs.some(h => h.st === 'run') ? 'run' : hs.every(h => h.st === 'done') ? 'done' : 'fail'; }, get why() { return hs.filter(h => h.why).map(h => h.label + ': ' + h.why).join('; '); }, log: agentOf(T.who).log, get n() { return hs[0]?.n; } };
   } else ag = T.ask ? anaAskWalk(T.ask.to, T.ask, T.text) : agentStart(T.who, T.goal(), { favors: T.favors || [], label: T.text });
+  for (const [k, goal, label] of T.tambien?.() || []) agentStart(k, goal, { label });   // (what the others do meanwhile: to be where the chain needs them)
+  if (T.hasta) { const g0 = ag; ag = { who: T.who, label: T.text, get st() { return dlgHechos()[T.hasta] ? 'done' : g0.st === 'fail' ? 'fail' : 'run'; }, get why() { return g0.why; }, log: agentOf(T.who).log, get n() { return g0.n; } }; }   // (a chain test: on until the last scene of it has happened)
   ag.test = i; if (T.ask && !T.goals) ag.label = T.text;
   if (T.who !== 'ana') cam.x = wmBody(T.who).x, cam.y = wmBody(T.who).y;
   wmPanelDraw(); return ag;

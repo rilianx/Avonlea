@@ -61,6 +61,12 @@ El silencio también se escribe: después de la Avenida hay escenas de una líne
 | `escena_ana:s` | Ana está en la escena `s` |
 | `sabe:quien:qué` | quien sabe algo (`game.wm.know`) |
 | `y_mayor:quien:y` | quien está más al sur que `y` (en unidades del mapa) |
+| `dias_desde:x:n` | pasaron al menos `n` días desde el hecho `x` |
+| `no_hoy:x` | el hecho `x` no pasó hoy (una cosa grande del libro por día) |
+| `afecto:a:b:n` | `a` quiere a `b` al menos `n` (de 0 a 5) |
+| `cuaderno:id` | Ana cumplió esa meta de su cuaderno |
+| `sentada:quien` | esa persona está sentada |
+| `tomando_te:a:b` | `a` está sentada a la mesita del té con `b` |
 | `carta:quien` | Ana está escribiendo una carta a esa persona, sentada a su escritorio (`diana`, `stacy`, `sraallan`, `josephine`) |
 
 Con `!` delante se niega (`'!hecho:llegaron'`). **`o: [ {...}, {...} ]`**: basta con que se cumpla una de las alternativas (cada una con estas mismas condiciones).

@@ -438,3 +438,178 @@ ana: Sí… soy Ana. Ana con e. ¿Y tú… tú eres Diana Barry?
 diana: Sí. Mamá dice que eres muy rara. Pero no pareces rara. Bueno, un poquito.
 ana: (Ana se pone colorada hasta las orejas.) Tengo una imaginación muy grande, eso es todo. ¿Te… te gustaría que algún día jugáramos juntas?
 diana: Bueno… tal vez. Tengo que volver a casa ahora.
+
+# --- el broche de amatista (cap. 13 y 14): ya amigas, antes del picnic. Marilla no encuentra su broche y Ana, para
+# poder ir al picnic, «confiesa» que lo perdió en el lago… hasta que el broche aparece en el chal de Marilla.
+# Abre el picnic (cuaderno: picnic requiere hecho:broche).
+=== broche ===
+canal: gg
+prioridad: 6
+interrumpe
+sujeta: marilla
+en: ana=gg, marilla=gg
+si: cuaderno:amigas, !hecho:broche
+al_terminar: hecho broche
+al_terminar: log Marilla perdió su broche de amatista y culpó a Ana; Ana «confesó» para poder ir al picnic, y el broche apareció enganchado en el chal de Marilla.
+---
+marilla: Ana, ¿has visto mi broche de amatista? Lo dejé en el alfiletero de mi cuarto y no está.
+ana: Lo vi ayer… me lo probé, solo un minutito, y lo dejé otra vez en el tocador.
+marilla: Pues no está. Ana, te quedas en tu cuarto hasta que me digas la verdad.
+ana: (Ana se queda en su cuarto, pensando en el picnic. Al final, inventa una confesión.) Me lo llevé para ser Lady Cordelia Fitzgerald… y se me cayó al Lago de las Aguas Brillantes. Ya confesé: ¿ahora puedo ir al picnic?
+marilla: ¿Picnic? No irás a ningún picnic, Ana Shirley.
+marilla: (Marilla saca su chal negro para remendarlo… y algo brilla en el encaje.) ¡El broche! Estaba enganchado en mi chal… Ana, ¿por qué dijiste que lo habías perdido?
+ana: Usted dijo que no saldría hasta confesar. Así que inventé una confesión… y bien interesante, además.
+marilla: (Marilla se ríe, a pesar de todo.) Perdóname, Ana. No debí dudar de ti. Ve a prepararte para el picnic.
+
+# --- «¡Zanahorias!» (cap. 15): el primer día de Ana en la escuela con Gilbert Blythe. Desde ahí, Ana no le habla
+# (la ofensa), y hacer las paces se vuelve una meta (cuaderno: paces requiere hecho:zanahorias).
+=== zanahorias ===
+canal: es
+prioridad: 7
+interrumpe
+en: ana=es, gilbert=es
+si: !hecho:zanahorias
+al_terminar: hecho zanahorias
+al_terminar: ofensa ana gilbert zanahorias -2
+al_terminar: log En la escuela, Gilbert Blythe le dijo «¡Zanahorias!» a Ana, y Ana le partió la pizarra en la cabeza.
+---
+gilbert: (Gilbert Blythe alarga la mano, toma la punta de una trenza de Ana y susurra, lo bastante fuerte para que lo oiga toda la clase.) ¡Zanahorias! ¡Zanahorias!
+ana: (Ana se pone de pie de un salto, con los ojos echando chispas.) ¡Odioso, malvado! ¿Cómo te atreves?
+ana: (¡Crac! Ana le parte la pizarra en la cabeza a Gilbert.)
+gilbert: ¡Ay! Perdona, Ana… solo era una broma. De verdad, perdóname.
+ana: ¡Nunca te lo perdonaré! ¡Nunca jamás!
+
+# --- Diana prohibida (cap. 16, 17 y 18): Ana invita a Diana a tomar el té en Tejas Verdes y le sirve, sin saberlo, vino
+# de grosellas en vez de cordial de frambuesa. Al día siguiente, Marilla le cuenta que la Sra. Barry no quiere que
+# Diana la vea más (hecho prohibida: se cierra todo lo de Diana). Dos días después, Minnie May tiene crup, Diana viene
+# corriendo, Ana la salva toda la noche con el jarabe, y la Sra. Barry le pide perdón (se olvida prohibida).
+=== te_grosella ===
+canal: gg
+prioridad: 7
+interrumpe
+en: ana=gg, diana=gg
+si: tomando_te:ana:diana, !hecho:diana_borracha
+al_terminar: hecho diana_borracha
+al_terminar: meta diana estar_en h:os,-,- | Diana se va a su casa, tambaleándose | volver a su casa, mareada | 3
+al_terminar: log Ana invitó a Diana a tomar el té y le sirvió, sin saberlo, vino de grosellas en vez de cordial de frambuesa: Diana se fue a su casa… borracha.
+---
+ana: Toma otro vaso de cordial de frambuesa, Diana. Es de Marilla, y es buenísimo.
+diana: Es el cordial más rico que he probado. Mucho más rico que el de la Sra. Lynde. (Diana se sirve el tercer vaso.)
+ana: (Ana le cuenta a Diana cómo se le cayó un ratón en la salsa de ciruela, con todos los detalles.)
+diana: Ana… me siento… me siento rara. Creo que me voy a casa.
+ana: ¿A casa? ¡Pero si todavía no hemos tomado el té! ¡Diana, no te vayas!
+diana: (Diana se levanta tambaleándose.) Me siento… muy… muy mal.
+
+=== prohibida ===
+canal: gg
+prioridad: 7
+interrumpe
+sujeta: marilla
+en: ana=gg, marilla=gg
+si: dias_desde:diana_borracha:1, !hecho:prohibida, !hecho:perdonada
+al_terminar: hecho prohibida
+al_terminar: triste diana
+al_terminar: ofensa barry ana vino 0
+al_terminar: log La Sra. Barry le prohibió a Diana volver a ver a Ana: el «cordial» era vino de grosellas.
+---
+marilla: Ana Shirley, ¿qué le diste de tomar a Diana? La Sra. Barry dice que la mandaste a su casa borracha.
+ana: ¡Le di cordial de frambuesa, Marilla! ¡Nada más!
+marilla: (Marilla va a la despensa y vuelve con la botella.) Esto no es cordial de frambuesa, Ana. Es mi vino de grosellas.
+ana: ¡Oh, Marilla! ¿Y ahora qué va a pasar?
+marilla: La Sra. Barry dice que Diana no puede volver a jugar contigo. Ve a pedirle perdón, aunque no sé si servirá.
+ana: (Ana se tira en el sofá, desconsolada.) Mi destino es trágico. Es el más trágico de toda la isla.
+
+=== barry_no_perdona ===
+canal: os
+prioridad: 7
+interrumpe
+en: ana=os, barry=os
+si: hecho:prohibida
+---
+ana: Sra. Barry, por favor, perdóneme. No sabía que era vino. Me imaginé que era cordial… bueno, creí que era cordial.
+barry: No, Ana Shirley. No creo que seas compañía para Diana. Vete a tu casa y pórtate bien.
+
+=== crup_aviso ===
+canal: gg
+prioridad: 9
+interrumpe
+en: ana=gg, diana=gg
+si: hecho:prohibida, dias_desde:prohibida:2, !hecho:crup
+al_terminar: hecho crup
+al_terminar: meta ana estar_en h:os,-,23 | Ana corre a La Cuesta del Huerto: Minnie May tiene crup | correr a La Cuesta del Huerto: Minnie May tiene crup (cap. 18) | 3
+al_terminar: meta diana estar_en h:os,-,23 | Diana vuelve corriendo a su casa | volver corriendo a su casa con Ana | 3
+---
+diana: ¡Ana! ¡Ven, por favor! Minnie May está enferma… tiene crup. Papá y mamá fueron al pueblo, y Mary Joe no sabe qué hacer.
+ana: ¡Crup! Yo cuidé a los mellizos de la Sra. Hammond… tres veces tuvieron crup. Tengo el jarabe de ipecacuana.
+ana: (Ana toma el frasco del aparador y su chal.) ¡Vamos, Diana! ¡Corre!
+
+=== crup_salva ===
+canal: os
+prioridad: 9
+interrumpe
+en: ana=os
+si: hecho:crup, hecho:prohibida
+al_terminar: olvidar prohibida
+al_terminar: hecho perdonada
+al_terminar: afecto barry ana 4
+al_terminar: afecto diana ana 5
+al_terminar: log Ana salvó a Minnie May del crup, toda la noche, con el jarabe de ipecacuana. La Sra. Barry le pidió perdón.
+---
+ana: (Minnie May arde de fiebre en el sofá, y apenas puede respirar.)
+ana: Mary Joe, pon agua a calentar. Diana, más leña en la estufa.
+ana: (Ana le da el jarabe de ipecacuana a cucharadas, toda la noche, sin parar.)
+ana: ¡Ya respira mejor! ¡Diana, ya respira mejor!
+barry: (Al otro día, la Sra. Barry viene con los ojos llenos de lágrimas.) Ana, el doctor dice que salvaste a Minnie May. Me porté muy mal contigo. Perdóname, y sé amiga de Diana como antes.
+ana: (Ana no cabe en sí de felicidad.) ¡Oh, Sra. Barry! La perdono con toda mi alma.
+
+# --- el pastel con linimento (cap. 21): después de conocer a los Allan en la iglesia, Marilla los invita a tomar el
+# té; Ana hace el pastel… con linimento en vez de vainilla. La Sra. Allan es tan buena que la invita a la casa
+# parroquial (cuaderno: el té con la Sra. Allan requiere hecho:pastel_linimento).
+=== invita_allan ===
+canal: gg
+prioridad: 5
+en: ana=gg, marilla=gg
+si: cuaderno:escuela_dominical, !hecho:allan_invitados
+al_terminar: hecho allan_invitados
+---
+marilla: Invité al pastor y a la Sra. Allan a tomar el té mañana en la tarde. Tú puedes hacer el pastel en capas.
+ana: ¡Oh, Marilla! Lo haré con toda mi alma. ¡Y con vainilla, como dice la receta!
+
+=== pastel_linimento ===
+canal: gg
+prioridad: 7
+interrumpe
+sujeta: sraallan, marilla
+en: ana=gg, sraallan=gg
+si: hecho:allan_invitados, !hecho:pastel_linimento, sentada:sraallan
+al_terminar: hecho pastel_linimento
+al_terminar: afecto sraallan ana 5
+al_terminar: log Ana le sirvió a la Sra. Allan un pastel con linimento en vez de vainilla; la Sra. Allan fue tan buena que la invitó a la casa parroquial.
+---
+ana: (Ana sirve su pastel en capas, con mermelada roja entre las capas.)
+sraallan: (La Sra. Allan prueba un bocado… y pone una cara rara. Pero sigue comiendo, con valentía.)
+marilla: Ana Shirley, ¿qué le pusiste a este pastel?
+ana: Vainilla, Marilla… solo vainilla.
+marilla: (Marilla trae el frasco y lo huele.) ¡Linimento anodino! Se me rompió la botella la semana pasada y guardé lo que quedaba en el frasco viejo de vainilla.
+ana: (Ana sale corriendo y se tira en su cama a llorar.) ¡Nunca podré borrar esta vergüenza!
+sraallan: (La Sra. Allan sube a verla.) Querida, fue un error muy gracioso, nada más. Ahora muéstrame tus flores… y ven un día a tomar el té a la casa parroquial.
+
+# --- la tía Josephine (cap. 19): ya amigas, Ana se queda a dormir donde Diana después del concierto del Club de Debate;
+# saltan sobre la cama del cuarto de huéspedes… donde dormía la tía Josephine. Ana confiesa y se gana su amistad.
+=== cama_josephine ===
+canal: os
+prioridad: 6
+interrumpe
+en: ana=os, diana=os
+si: cuaderno:amigas, !hecho:prohibida, !hecho:cama_josephine, dias_desde:conocidas_diana:2, no_hoy:perdonada
+al_terminar: hecho cama_josephine
+al_terminar: afecto josephine ana 5
+al_terminar: log Ana y Diana saltaron sobre la cama del cuarto de huéspedes, donde dormía la tía Josephine; Ana confesó y se ganó su amistad.
+---
+diana: ¡Ana! Esta noche hay concierto del Club de Debate en el salón. Mamá dice que puedes quedarte a dormir… ¡en el cuarto de huéspedes!
+ana: (Esa noche, al volver del concierto, las niñas corren por el pasillo.) ¡A la que llegue última a la cama!
+diana: (Las dos saltan sobre la cama del cuarto de huéspedes…) ¡Ay! ¡Hay alguien en la cama!
+josephine: ¡Misericordia! ¿Qué es esto? ¡Niñas sin educación!
+diana: Es… es la tía Josephine, de Charlottetown. ¡Ahora sí que nos va a pasar algo terrible!
+ana: (A la mañana siguiente, Ana va a verla.) Fue culpa mía, Srta. Barry. Diana no tuvo la culpa. Y usted no sabe lo que es tener tanta imaginación.
+josephine: (La tía Josephine se ríe como hacía años.) Vaya, vaya… Ven a verme a menudo mientras esté aquí, niña. Y escríbeme cuando me vaya.
