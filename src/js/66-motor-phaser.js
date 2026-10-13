@@ -69,20 +69,26 @@ function phHoja(b, key, depth, t){
   let H = PH.hojas.get(fk);
   const R = PH.R, fw = Math.ceil((HOJA_BOX[2] - HOJA_BOX[0]) * R), fh = Math.ceil((HOJA_BOX[3] - HOJA_BOX[1]) * R);
   if (!H) { const tk = 'h' + (PH.seq = (PH.seq || 0) + 1); H = { tk, tex: PH.scene.textures.createCanvas(tk, fw * 10, fh), hecho: [] }; PH.hojas.set(fk, H); }
-  if (!H.hecho[col]) {   // (this pose, drawn the first time: a person like her, still, in that pose)
+  if (!H.hecho[col] && !phPuedo()) return false;   // (no time to bake her strip this frame: drawn live)
+  if (!H.hecho[col]) for (let col = 0; col < 10; col++) {   // (her whole strip at once, the first time: each pose, a person like her, still, in that pose)
     const cx = col * fw - HOJA_BOX[0] * R, a = (q - 2) * Math.PI / 4, X = -HOJA_BOX[0], Y = -HOJA_BOX[1];
     const tp = Object.assign(mkPerson(b.look, X, Y), { dir: b.dir, dir8: q, n: b.n, braidBack: b.braidBack, _bstill: 0, _bwait: 1e9, _spd: corre ? 34 + corre * 46 : 0 });
     if (col >= 1 && col <= 8) { tp.moving = true; tp.walk = (col - 1) / 8; tp._fx = X - Math.cos(a); tp._fy = Y - Math.sin(a); }
     else { tp._fx = X; tp._fy = Y; tp._fd = tp.dir; tp.crouch = col === 9; }
     const c = H.tex.getContext(); c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.beginPath(); c.rect(col * fw, 0, fw, fh); c.clip(); c.setTransform(R, 0, 0, R, col * fw, 0);
     const pant = g; g = c; try { drawPerson(c, tp, t); } finally { g = pant; c.restore(); }
-    H.tex.add(String(col), 0, col * fw, 0, fw, fh); H.tex.refresh(); H.hecho[col] = true;
+    H.tex.add(String(col), 0, col * fw, 0, fw, fh); H.hecho[col] = true;
+    if (col === 9) H.tex.refresh();
   }
   let C = PH.caras.get(key);
   if (!C) { C = { img: PH.scene.add.image(0, 0, H.tk, String(col)).setOrigin(0) }; PH.caras.set(key, C); }
   C.img.setTexture(H.tk, String(col)).setPosition(b.x + HOJA_BOX[0], b.y + HOJA_BOX[1]).setScale(1 / R).setDepth(depth).setVisible(true); C.usado = PH.cuadro;
   return true;
 }
+// the heavy jobs (baking a chunk of floor, a tree, a strip of poses) are what makes a frame long: on a phone, copying
+// a new image to the graphics card stops everything. So each frame takes only what fits in a few milliseconds (at least
+// one); the rest waits for the next ones. Things are prepared a little before they come into view.
+const phPuedo = () => { if (PH.hechos === 0 || performance.now() - PH.cuadroT0 < 4) { PH.hechos++; return true; } return false; };
 // does Phaser draw this place? (and shows its canvas, or hides it)
 function phNativo(sitio){
   const si = PH.ready && sitio && (game.scene === 'out' || !!ROOMS[game.scene]);
@@ -123,7 +129,7 @@ function phSala(v){
     P.t = v.t;
     muebles.forEach((m, j) => {
       if (!P.cajas[j]) {   // (measured once: drawn on the whole room, the box is where it painted, and a margin)
-        const R = 2, cv0 = document.createElement('canvas'); cv0.width = W * R; cv0.height = Hh * R; const c = cv0.getContext('2d'); c.setTransform(R, 0, 0, R, 0, 0);
+        const R = .5, cv0 = document.createElement('canvas'); cv0.width = W * R; cv0.height = Hh * R; const c = cv0.getContext('2d'); c.setTransform(R, 0, 0, R, 0, 0);
         const pant = g; g = c; try { I.items(c, v.t)[j].draw(); } finally { g = pant; }
         const d = c.getImageData(0, 0, cv0.width, cv0.height).data; let x0 = 1e9, y0 = 1e9, x1 = -1, y1 = -1;
         for (let y = 0; y < cv0.height; y++) for (let x = 0; x < cv0.width; x++) if (d[(y * cv0.width + x) * 4 + 3]) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
@@ -141,18 +147,19 @@ const FIJO_BOX = [-300, -440, 300, 90];   // (where to look for it the first tim
 const phFijoFuera = F => { F.img?.destroy(); if (F.tk) PH.scene.textures.remove(F.tk); for (const e of F.humo || []) e.destroy(); };
 const phCampos = o => { let s = ''; for (const k in o) { const v = o[k]; if (v === null || typeof v !== 'object' && typeof v !== 'function') s += k + ':' + v + ';'; } return s; };   // (what it is made of: its own plain values)
 function phFijo(o, depth, v){
-  const sc = PH.scene, Rf = Math.min(PH.R, 2.5), noche = Math.round(v.night * 10);
+  const sc = PH.scene, Rf = Math.min(PH.R, 1.75), noche = Math.round(v.night * 10);
   const sig = S + '|' + noche + '|' + Rf + '|' + phCampos(o) + (o.kind === 'pump' ? '|' + game.hasCan + game.ground.some(it => it.k === 'can') : '');
   let F = PH.fijos.get(o);
   if (!F) { F = {}; PH.fijos.set(o, F); }
   const arbol = /^(tree|oak|pine|apple|blossom|manzano)$/.test(o.kind);
-  if (F.sig !== sig) {
-    if (!F.box) {   // (measured once: drawn on a big canvas, the box is where it painted)
-      const B = FIJO_BOX, cv0 = document.createElement('canvas'); cv0.width = B[2] - B[0]; cv0.height = B[3] - B[1]; const c = cv0.getContext('2d'); c.setTransform(1, 0, 0, 1, -(o.x + B[0]), -(o.y + B[1]));
+  if (F.sig !== sig && (phPuedo() || !F.tk)) {
+    if (!F.tk && PH.hechos > 1 && performance.now() - PH.cuadroT0 > 4) return;   // (not baked yet and no time left: next frame; it is still out of sight)
+    if (!F.box) {   // (measured once, small: drawn at a quarter on a big canvas, the box is where it painted)
+      const B = FIJO_BOX, q = .25, cv0 = document.createElement('canvas'); cv0.width = (B[2] - B[0]) * q; cv0.height = (B[3] - B[1]) * q; const c = cv0.getContext('2d'); c.setTransform(q, 0, 0, q, -(o.x + B[0]) * q, -(o.y + B[1]) * q);
       const pant = g; g = c; PH_HUMOS = []; try { drawProp(c, o, arbol ? -o.ph / .9 : v.t, v.night); } finally { g = pant; PH_HUMOS = null; }
       const d = c.getImageData(0, 0, cv0.width, cv0.height).data; let x0 = 1e9, y0 = 1e9, x1 = -1, y1 = -1;
       for (let y = 0; y < cv0.height; y++) for (let x = 0; x < cv0.width; x++) if (d[(y * cv0.width + x) * 4 + 3]) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
-      F.box = x1 < 0 ? [0, 0, 1, 1] : [B[0] + x0 - 8, B[1] + y0 - 10, B[0] + x1 + 8, B[1] + y1 + 6];
+      F.box = x1 < 0 ? [0, 0, 1, 1] : [B[0] + x0 / q - 12, B[1] + y0 / q - 14, B[0] + x1 / q + 12, B[1] + y1 / q + 10];
     }
     const b = F.box, w = Math.max(1, Math.ceil((b[2] - b[0]) * Rf)), h = Math.max(1, Math.ceil((b[3] - b[1]) * Rf));
     if (!F.tk || F.w !== w || F.h !== h) { phFijoFuera(F); F.tk = 'o' + (PH.seq = (PH.seq || 0) + 1); F.tex = sc.textures.createCanvas(F.tk, w, h); F.w = w; F.h = h; F.img = sc.add.image(0, 0, F.tk); F.humo = null; }
@@ -163,6 +170,7 @@ function phFijo(o, depth, v){
     F.humo = humos.map(([x, y, sm, nk]) => sc.add.particles(x, y, phTexHumo(), { lifespan: 4500, frequency: 4500 / nk, speedX: { min: 2, max: 8 }, speedY: { min: -18, max: -13 }, scale: { start: .35, end: 1.1 }, alpha: { start: sm, end: 0 }, rotate: { min: 0, max: 360 } }).setDepth(depth + .5));
     F.img.setOrigin(-b[0] / (b[2] - b[0]), -b[1] / (b[3] - b[1])).setScale(1 / Rf);   // (its origin at its foot: a tree turns on its trunk)
   }
+  if (!F.img) return;
   F.img.setPosition(o.x, o.y).setDepth(depth).setVisible(true).setRotation(arbol ? Math.sin(v.t * .9 + o.ph) * 1.6 * o.s / (110 * o.s) : 0);
   for (const e of F.humo || []) e.setVisible(true);
   F.usado = PH.cuadro;
@@ -205,14 +213,16 @@ function phTexMata(tipo, a, b){
 const TC_PASTO = [['rgba(70,130,45,.85)', 'rgba(110,165,64,.85)'], ['rgba(70,120,45,.85)', 'rgba(96,150,60,.85)'], ['rgba(140,130,60,.85)', 'rgba(175,150,70,.85)'], ['rgba(150,140,110,.7)', 'rgba(150,140,110,.7)']];   // (as the grass of always)
 const LUP_COL = ['#e88ab0', '#f2a6c4', '#d46a9c', '#c98ad8'];
 function phMata(sc, tk, x, y, alto, ancho = alto){ return sc.add.image(x, y, tk).setOrigin(.5, 32 / 34).setScale(ancho / 3, alto / 3).setDepth(-5e8 + y * 1e-4); }   // (alto: how much taller than drawn; ancho: wider)
-function phTrozo(cx, cy, v){
+function phTrozo(cx, cy, v, aviso){   // (aviso: just around the view, prepared ahead if there is time)
   const sc = PH.scene, key = S + '|' + cx + ',' + cy; PH.trozos ??= new Map();
   let C = PH.trozos.get(key);
   // the painted ground and the still part in one image, opaque: one layer for the whole floor (with a unit of margin, so
   // no seam shows). While a tile of ground is still being painted (one per frame), the chunk is baked with the plain one
   // and again when it is ready.
   const listas = () => { for (let tx = Math.floor((cx * TROZO - 1) / TILE); tx * TILE < (cx + 1) * TROZO + 1; tx++) for (let ty = Math.floor((cy * TROZO - 1) / TILE); ty * TILE < (cy + 1) * TROZO + 1; ty++) if (!tiles.has(S + ':' + tx + ',' + ty)) return false; return true; };
-  if (!C || (C.provisorio && listas())) {
+  const falta = !C || (C.provisorio && listas());
+  if (falta && !(phPuedo() || (!C && !aviso))) { if (C) { C.img?.setVisible(true); C.usado = PH.cuadro; } return; }   // (no time: ahead ones wait; one in view always gets made)
+  if (falta) {
     if (!C) { C = {}; PH.trozos.set(key, C); }
     const Rc = 1, x0 = cx * TROZO - 1, y0 = cy * TROZO - 1, n = TROZO + 2, c0 = document.createElement('canvas'); c0.width = c0.height = n * Rc; const c = c0.getContext('2d'); c.setTransform(Rc, 0, 0, Rc, -x0 * Rc, -y0 * Rc);
     const pant = g; g = c; try { sueloPintar(c, x0, y0, n, n, 0, { baldosas: true }); sueloPintar(c, cx * TROZO, cy * TROZO, TROZO, TROZO, 0, { fijo: true }); } finally { g = pant; }
@@ -220,6 +230,7 @@ function phTrozo(cx, cy, v){
     C.img?.destroy(); if (C.tk) sc.textures.remove(C.tk);
     C.tk = 't' + (PH.seq = (PH.seq || 0) + 1); sc.textures.addCanvas(C.tk, c0); C.img = sc.add.image(x0, y0, C.tk).setOrigin(0).setScale(1 / Rc).setDepth(-1e9);
   }
+  if (!C.matas && (aviso || !phPuedo())) { if (C.img) C.img.setVisible(true); C.usado = PH.cuadro; return; }   // (its grass, when there is time)
   if (!C.matas) {
     const D = decorAt(cx, cy), M = C.matas = [];   // (what moves: one sprite each)
     D.tufts.forEach(t => { if (S === 3 && t.c > .25) return; M.push({ k: 'p', o: t, spr: phMata(sc, phTexMata('pasto', TC_PASTO[S][t.c < .5 ? 0 : 1]), t.x, t.y, t.h / 16, 1) }); });
@@ -288,16 +299,18 @@ function phMundo(list, v){
   if (PH.game.scale.width !== cw || PH.game.scale.height !== ch) PH.game.scale.resize(cw, ch);
   const R = Math.min(4, Math.max(1, Math.round(v.Z * dpr * 4) / 4));
   if (R !== PH.R) { PH.R = R; phRepintar(); }   // (another size of screen: everything again, sharp)
-  PH.cuadro = (PH.cuadro || 0) + 1;
+  PH.cuadro = (PH.cuadro || 0) + 1; PH.cuadroT0 = performance.now(); PH.hechos = 0;
   const cam = sc.cameras.main; cam.setZoom(v.Z * dpr); cam.centerOn(v.ox + v.W / v.Z / 2, v.oy + v.H / v.Z / 2);
   const vw = v.W / v.Z, vh = v.H / v.Z;
   if (game.scene !== 'out') phSala(v);
   else {   // (the floor outdoors)
-    for (let cx = Math.floor((v.ox - 20) / TROZO); cx * TROZO < v.ox + vw + 20; cx++) for (let cy = Math.floor((v.oy - 20) / TROZO); cy * TROZO < v.oy + vh + 40; cy++) phTrozo(cx, cy, v);
+    const x0 = Math.floor((v.ox - 20) / TROZO), x1 = Math.floor((v.ox + vw + 20) / TROZO), y0 = Math.floor((v.oy - 20) / TROZO), y1 = Math.floor((v.oy + vh + 40) / TROZO);
+    for (let cx = x0; cx <= x1; cx++) for (let cy = y0; cy <= y1; cy++) phTrozo(cx, cy, v);
+    for (let cx = x0 - 1; cx <= x1 + 1; cx++) for (let cy = y0 - 1; cy <= y1 + 1; cy++) if (cx < x0 || cx > x1 || cy < y0 || cy > y1) phTrozo(cx, cy, v, true);   // (the ring around: ahead)
     if (!PH.apagar?.has('agua')) { phAgua(v, vw, vh); PH.agua.setVisible(true); } if (!PH.apagar?.has('orilla')) phOrilla(v, vw, vh);   // (PH.apagar: to measure what costs, in the tests)
   }
   if (game.scene !== 'out') { PH.agua?.setVisible(false); for (const s of PH.juncos?.spr || []) s.setVisible(false); }
-  for (const [k, C] of PH.trozos || []) if (C.usado !== PH.cuadro) { if (PH.cuadro - C.usado > 900 || !k.startsWith(S + '|')) { phTrozoFuera(C); PH.trozos.delete(k); } else if (C.vis !== false) { C.img?.setVisible(false); for (const m of C.matas) m.spr.setVisible(false); C.vis = false; } } else C.vis = true;
+  for (const [k, C] of PH.trozos || []) if (C.usado !== PH.cuadro) { if (PH.cuadro - C.usado > 900 || !k.startsWith(S + '|')) { phTrozoFuera(C); PH.trozos.delete(k); } else if (C.vis !== false) { C.img?.setVisible(false); for (const m of C.matas || []) m.spr.setVisible(false); C.vis = false; } } else C.vis = true;
   if (!PH.apagar?.has('papel')) phPapel(v); else { PH.papel?.setVisible(false); PH.vineta?.setVisible(false); }   // (anything not told where it is: drawn over the whole view, and noted to be told)
   list.forEach((o, i) => {
     const d = o.y + i * 1e-6, p = o.ph || (((PH.sueltos ??= new Set()).add(o.draw.toString().slice(0, 60))), { key: 'suelto:' + i, at: [v.ox, v.oy], box: [0, 0, vw, vh] });
