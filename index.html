@@ -3588,7 +3588,8 @@ function obsBar(){
   el.hidden = false;
 }
 const blocked = (x, y) => curScene() === 'out' ? blockedOut(x, y) : blockedIn(x, y, curScene());
-function moveBy(o, dx, dy){ if (!blocked(o.x + dx, o.y)) o.x += dx; if (!blocked(o.x, o.y + dy)) o.y += dy; }
+// (one who is already where one cannot be (put there by an action, by a fence's edge) may walk out: else she would never move again)
+function moveBy(o, dx, dy){ if (blocked(o.x, o.y)) { o.x += dx; o.y += dy; return; } if (!blocked(o.x + dx, o.y)) o.x += dx; if (!blocked(o.x, o.y + dy)) o.y += dy; }
 function walkTo(p, tx, ty, sp, dt){
   const dx = tx - p.x, dy = ty - p.y, d = Math.hypot(dx, dy);
   if (d < 4) { p.moving = false; return true; }
@@ -3598,8 +3599,17 @@ function walkTo(p, tx, ty, sp, dt){
 }
 function wander(p, dt, sp){
   if (p.wait > 0) { p.wait -= dt; p.moving = false; return; }
-  const [gx, gy] = p.goals[p.goal % p.goals.length];
+  if (!p.gLibre || p.gLibre.g !== p.goal) p.gLibre = { g: p.goal, at: sitioLibre(p, ...p.goals[p.goal % p.goals.length]) };   // (the spot, or beside it if someone is there or going there)
+  const [gx, gy] = p.gLibre.at;
   if (walkPath(p, gx, gy, sp, dt)) { p.goal = (p.goal + 1 + Math.floor(Math.random() * (p.goals.length - 1))) % p.goals.length; p.wait = 3 + Math.random() * 6; p.dir = 2; }
+}
+// a spot near (x, y), in the scene being worked out, where no one stands nor is going: no one stands on another
+const LIBRE_D = [[0, 0], [30, 0], [-30, 0], [0, 26], [0, -26], [30, 26], [-30, 26], [30, -26], [-30, -26], [60, 0], [-60, 0]];
+function sitioLibre(p, x, y, sc = curScene()){
+  const otros = [['ana', ana, game.scene], ...Object.entries(PEOPLE).map(([k, q]) => [k, q, q.where]), ...FOLK.map(f => [f.id, f, f.where])].filter(([, o, s]) => o !== p && s === sc);
+  for (const [dx, dy] of LIBRE_D) { const qx = x + dx, qy = y + dy; if ((dx || dy) && blocked(qx, qy)) continue;
+    if (!otros.some(([, o]) => Math.hypot(o.x - qx, o.y - qy) < 16 || o.gLibre && o.gLibre.at && Math.hypot(o.gLibre.at[0] - qx, o.gLibre.at[1] - qy) < 16)) return [qx, qy]; }
+  return [x, y];
 }
 
 /* ---------- finding the way: A* over a grid of the fields or of the room ----------
@@ -5952,7 +5962,8 @@ function commute(p, want, dt, sp){
   if (p.dest !== want) { p.dest = want; p.routeT = 0; p.nav = null; }
   p.routeT += dt;
   if (watched('out') && p.routeT < 90 && !walkPath(p, DOOR[want][0], DOOR[want][1], sp, dt, 'out')) return;
-  p.where = want; p.nav = null; p.dest = null; p.moving = false; p.x = KDOOR.x; p.y = KIT.h - 14; p.dir = 0; p.goals = (want === CH[p.look].home ? p.base : CH[p.look].routine?.roomGoals?.[want]) || [[6.5 * T, 6 * T], [5 * T, 5.6 * T]]; p.goal = 0; p.wait = 2;
+  p.where = want; p.nav = null; p.dest = null; p.moving = false; p.x = KDOOR.x; p.y = KIT.h - 14; p.dir = 0; p.goals = (want === CH[p.look].home ? p.base : CH[p.look].routine?.roomGoals?.[want]) || [[6.5 * T, 6 * T], [5 * T, 5.6 * T]]; p.goal = 0; p.wait = 2; p.gLibre = null;
+  if (!watched(want)) inScene(want, () => { [p.x, p.y] = sitioLibre(p, ...p.goals[0]); });   // (no one sees her come in: she is already at her place, not standing at the door)
   logEv(NAMES[p.look] + (want === p.house ? ' volvió a su casa.' : HOUSES[want].arrive), [p.look]);
 }
 
@@ -5963,7 +5974,6 @@ function update(dt){
   if (sleeping) return;
   if (AI.on && provider() === 'manual' && aiq.list.length) return;   // (debugging by hand: the world waits for the answer)
   TT += dt; dayT += dt / (MIN_S * 60 * 24); boil = Math.floor(TT * 6);
-  if (RELATO.on) relatoTick();   // (the account of what happens: 66-relato.js)
   const { night } = light();
   // the season: two days each
   const ns = (seasonCount() % 4 + 4) % 4;
@@ -5983,7 +5993,8 @@ function update(dt){
   if (game.scene === 'camino' && ana.onCart && (mx || my || (ana.goto && !ana.goto.wm))) roadGetOff();   // (moving her: she gets down from the buggy)
   if (ANA_AUTO) { if (mx || my) { freeStart(); const v = 520 / (cam.zoom || 1) / (viewZoom || 1); freeCam.x += mx * v * dt; freeCam.y += my * v * dt; } mx = my = 0; }   // (on her own: the keys move the view)
   if (game.talk?.deadline && TT > game.talk.deadline && !sayOpen) { game.talk.deadline = 0; autoChoose(); }
-  autoTick(); cartTick(dt); roadTick(dt); buggyTick(); roadTalkTick(dt); dlgTick(dt); talkTick(dt); cap1Tick(); momentsTick(); folkTick(dt); faunaTick(dt); agentTick(dt); jugarTick(dt); correoTick(dt); sickTick(); agendaTick(); wmApproachTick(dt); calledTick(); chatTick(dt); wmFollowTick();
+  autoTick(); cartTick(dt); roadTick(dt); buggyTick(); roadTalkTick(dt); dlgTick(dt); talkTick(dt); cap1Tick(); momentsTick(); folkTick(dt); faunaTick(dt); agentTick(dt); jugarTick(dt); correoTick(dt); sickTick(); apartarTick(); agendaTick(); wmApproachTick(dt); calledTick(); chatTick(dt); wmFollowTick();
+  if (RELATO.on) relatoTick();   // (the account of what happens, once all have moved: 66-relato.js)
   ana.torn = !!game.anaStates.rasgado; ana.askew = !!game.anaStates.despeinada;
   ana.savoring = false;
   // walking to something she was sent to (a tap): by the A* path, and doing it on arrival
@@ -7688,7 +7699,7 @@ const ACC_PASOS = {
   batir: me => wmScene(me) === 'gg' ? [{ p: [TABLE.x + 76, TABLE.y + 14], mira: 3, dur: M(30), obj: 'mantequera' }] : null,
   actuar: me => [{ lugar: 'h:sa', p: [SALA.stage.x, SALA.stage.y], mira: 2, dur: M(10), obj: 'recitar' }],   // (on the stage of the hall)
   ensayar: me => wmScene(me) === 'es' || personKey(me) === 'escuela' ? [{ lugar: 'h:es', p: [6.5 * T, 3.5 * T], mira: 2, dur: M(20), obj: 'libro' }] : [{ lugar: 'h:sa', p: [SALA.stage.x, SALA.stage.y], mira: 2, dur: M(20), obj: 'libro' }],
-  decorar_sala: me => [{ lugar: 'h:sa', p: [2 * T, 3 * T], mira: 0, dur: M(8), obj: 'flores' }, { lugar: 'h:sa', p: [6.5 * T, 3.9 * T], mira: 0, dur: M(8), obj: 'flores' }, { lugar: 'h:sa', p: [11 * T, 3 * T], mira: 0, dur: M(8), obj: 'flores' }],   // (garlands along the wall, one stretch after another)
+  decorar_sala: me => [{ lugar: 'h:sa', p: [2 * T, SALA.stage.y + 22], mira: 0, dur: M(8), obj: 'flores' }, { lugar: 'h:sa', p: [6.5 * T, 3.9 * T], mira: 0, dur: M(8), obj: 'flores' }, { lugar: 'h:sa', p: [11 * T, SALA.stage.y + 22], mira: 0, dur: M(8), obj: 'flores' }],   // (garlands along the wall, one stretch after another)
   recoger: (me, a) => {   // (to where it really is: the bushes, the apple trees, the nests, a bed in flower, the herbs of the wood)
     const b = wmBody(me), near = (L, n) => L.filter(Boolean).sort((p, q) => dist(p.x, p.y, b.x, b.y) - dist(q.x, q.y, b.x, b.y)).slice(0, n);
     const at = a.x === 'bayas' ? near(bushes.filter(u => u.berries > 0 && dist(u.x, u.y, b.x, b.y) < 300), 2) : a.x === 'manzanas' ? near(trees.filter(u => u.kind === 'apple' && u.apples > 0 && dist(u.x, u.y, b.x, b.y) < 380), 2)
@@ -7819,6 +7830,21 @@ function sickTick(){
   const sick = game.wm?.sick || [];
   for (const k of sick) { const b = PEOPLE[k], h = CH[k]?.home; if (!b || !HOUSES[h] || b.where === 'away') continue; b.where = h; b.bed ||= [KIT.w * .7, KIT.h * .4]; b.x = b.bed[0]; b.y = b.bed[1]; b.lie = true; b.sit = false; b.moving = false; b.nav = null; }
   for (const [k, b] of Object.entries(PEOPLE)) if (b.bed && !sick.includes(k)) { b.lie = false; delete b.bed; }
+}
+// no one stays standing on another: two at rest on the same spot for a moment, the one less settled (not doing
+// anything, not sitting; Ana last) steps aside to a free spot beside it
+let APARTAR_T = 0;
+function apartarTick(){
+  if (TT < APARTAR_T) return; APARTAR_T = TT + .5;
+  const L = [['ana', ana, game.scene], ...Object.entries(PEOPLE).map(([k, q]) => [k, q, q.where]), ...FOLK.map(f => [f.id, f, f.where])].filter(([, b, s]) => s && s !== 'in' && s !== 'away' && s !== 'camino' && !b.moving && !b.bed);
+  const firme = ([k, b]) => (AGENTS[k]?.acting ? 4 : 0) + (b.sit || b.lie ? 2 : 0) + (k === 'ana' ? 1 : 0);
+  const mueve = new Set();
+  for (let i = 0; i < L.length; i++) for (let j = i + 1; j < L.length; j++) { const A = L[i], B = L[j]; if (A[2] === B[2] && Math.hypot(A[1].x - B[1].x, A[1].y - B[1].y) < 10) mueve.add(firme(A) < firme(B) ? A : B); }
+  for (const [, b] of L) if (![...mueve].some(m => m[1] === b)) delete b.encimaT;
+  for (const [k, b, sc] of mueve) {
+    if (TT - (b.encimaT ??= TT) < 1.5 || k === 'ana' && ana.goto) continue;   // (a moment is no matter)
+    inScene(sc, () => { [b.x, b.y] = sitioLibre(b, b.x, b.y); }); delete b.encimaT; b.nav = null;
+  }
 }
 // into the drawing: the things under the body (before it) and in its hands (after it)
 function accPush(list, g, t){
@@ -8645,7 +8671,7 @@ function relatoSitio(k){
 const RELATO_REGLAS = [
   { id: 'cama', texto: 'quien está enfermo está en cama', mal: (k, b) => (game.wm?.sick || []).includes(k) && !b.bed },
   { id: 'mueble', texto: 'nadie se queda de pie dentro de un mueble', mal: (k, b, sc) => sc !== 'out' && !b.moving && !b.sit && !b.lie && !!ROOMS[sc]?.blocked?.(b.x, b.y) },
-  { id: 'casa', texto: 'nadie se queda dentro de las paredes de una casa', mal: (k, b, sc) => sc === 'out' && !b.moving && inHouses(b.x, b.y) },
+  { id: 'casa', texto: 'nadie se queda dentro de las paredes de una casa', mal: (k, b, sc, A) => sc === 'out' && !b.moving && A?.v !== 'trepar' && inHouses(b.x, b.y) },   // (up on the roof, on a dare, is another thing)
   { id: 'agua', texto: 'nadie está en el agua (salvo en el bote, o patinando sobre el hielo)', mal: (k, b, sc, A) => sc === 'out' && !/^(remar|patinar)$/.test(A?.v || '') && (inLake(b.x, b.y) || inSea(b.x, b.y) || inBrook(b.x, b.y)) },
   { id: 'encima', texto: 'nadie está encima de otro', mal: (k, b, sc) => { const o = !b.moving && relatoCuerpos().find(([q, o, s]) => o !== b && s === sc && !o.moving && Math.hypot(o.x - b.x, o.y - b.y) < 8); const t0 = o ? (RELATO.encima[k] ??= TT) : (delete RELATO.encima[k], 0); return o && TT - t0 > 3 ? 'está encima de ' + wmName(o[0]) + (o[1].sit ? ', que está sentado' : '') : false; } },   // (a moment, coming in at a door, is no matter: staying so is)
   { id: 'cuerda', texto: 'los animales de la cuerda van afuera', mal: (k, b, sc) => sc !== 'out' && sc !== 'camino' && Object.values(ANIM).some(c => c.state === 'led' && (c.ledBy || 'ana') === k) },
