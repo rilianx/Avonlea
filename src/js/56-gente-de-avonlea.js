@@ -36,9 +36,9 @@ const FOLK_DEFS = {
     lines: ['¿Te cuento una historia? Es de un barco fantasma que se ve desde el faro las noches de niebla.', 'La tía Hetty dice que hablo demasiado. Tú también, ¿no? ¡Qué bien!'] },
   phillips: { name: 'el Sr. Phillips', kind: 'maestro', home: 'Pensión', look: { hair: '#3a2a20', hairD: '#2a1a10', dress: '#3a3a44', dressD: '#2a2a30', coat: true, skin: '#eecaae', h: 1.1 },
     lines: ['Señorita Shirley, ¿no debería estar repasando su ortografía?', 'Mañana hay examen de geometría. Que nadie lo olvide.'] },
-  allan: { name: 'el reverendo Allan', kind: 'iglesia', home: 'Casa parroquial', look: { hair: '#5a4a3a', hairD: '#3a2a20', dress: '#26242a', dressD: '#18161a', coat: true, hatDark: true, skin: '#eecaae', h: 1.14 },
+  allan: { name: 'el reverendo Allan', kind: 'iglesia', home: 'Casa parroquial', room: 'cp', look: { hair: '#5a4a3a', hairD: '#3a2a20', dress: '#26242a', dressD: '#18161a', coat: true, hatDark: true, skin: '#eecaae', h: 1.14 },
     lines: ['Que Dios te bendiga, Ana. ¿Te veremos el domingo en la escuela dominical?', 'Hermoso día para dar gracias, ¿no te parece?'] },
-  sraallan: { name: 'la Sra. Allan', kind: 'iglesia', home: 'Casa parroquial', look: { hair: '#8a5a3a', hairD: '#6a3a20', style: 'bun', dress: '#6a8aa8', dressD: '#4a6a88', brooch: true, skin: '#f2cfb2', h: 1.08 },
+  sraallan: { name: 'la Sra. Allan', kind: 'iglesia', home: 'Casa parroquial', room: 'cp', look: { hair: '#8a5a3a', hairD: '#6a3a20', style: 'bun', dress: '#6a8aa8', dressD: '#4a6a88', brooch: true, skin: '#f2cfb2', h: 1.08 },
     lines: ['¡Ana, querida! Tienes que venir a tomar el té a la casa parroquial un día de estos.', 'Me encantó tu recitación. Tienes un don, Ana.'], ana: ['¡Oh, Sra. Allan! Usted es mi espíritu afín.'] },
   lawson: { name: 'el Sr. Lawson', kind: 'tendero', home: 'Tienda de Lawson', look: { hair: '#9a9088', hairD: '#6a6058', style: 'old', dress: '#6a5a4a', dressD: '#4a3a2a', apron: '#f4efe4', coat: true, skin: '#eac6a8', h: 1.12 },
     lines: ['¡Buenos días, Ana! Llegaron caramelos de menta y cintas nuevas.', '¿Qué te manda Marilla hoy? ¿Azúcar? ¿Hilo?'] },
@@ -128,7 +128,7 @@ const FOLK_KINDS = {
   tienda: (h, f) => h >= 7.6 && h < 18.5 ? OUT(f.home, 70) : h >= 18.5 && h < 20 ? OUT(PLAY.aldea, 120) : IN(f.home),
   granjero: (h, f) => (h >= 6.5 && h < 11.8) || (h >= 13 && h < 18.6) ? OUT(f.field, Math.min(f.fieldR, 260)) : h < 21 ? OUT(f.home, 80) : IN(f.home),
   paseo: (h, f) => h >= 9 && h < 18.5 ? OUT(STROLL_SPOTS[(f.n * 3 + Math.floor(h * .8)) % STROLL_SPOTS.length], 110) : h < 20.5 && h >= 7 ? OUT(f.home, 80) : IN(f.home),
-  iglesia: (h, f) => h >= 8 && h < 19 ? OUT(Math.floor(h + f.n) % 3 ? CHURCH_DOOR : f.home, 110) : IN(f.home),
+  iglesia: (h, f) => h >= 8 && h < 19 ? OUT(Math.floor(h + f.n) % 3 ? CHURCH_DOOR : f.home, 110) : IN(f.home, f.def.room),
   peg: (h, f) => h >= 7 && h < 20 ? OUT([WOODS[1].x + Math.cos(Math.floor(h)) * WOODS[1].rx * .7, WOODS[1].y + Math.sin(Math.floor(h)) * WOODS[1].ry * .6], 200) : IN(f.home),
   farero: (h, f) => h >= 6 && h < 21 ? OUT(Math.floor(h) % 3 ? [FARO.x + 60, FARO.y + 60] : PLAY.playa, 120) : OUT([FARO.x + 30, FARO.y + 40], 20),
   playa: (h, f) => h >= 8 && h < 19 ? OUT(PLAY.playa, 260) : IN(f.home),
@@ -149,6 +149,7 @@ const FOLKBY = Object.fromEntries(FOLK.map(f => [f.id, f]));
 const seen = (x, y, m = 160) => viewScene() === 'out' && view.Z && x > view.ox - m && x < view.ox + innerWidth / view.Z + m && y > view.oy - m && y < view.oy + innerHeight / view.Z + m;
 function folkSeat(f){
   if (f.where === 'br') { f.x = BRS.house.x + 50; f.y = BRS.house.y + 26; f.dir = 2; f.sit = false; return; }   // (the stationmaster, at his door)
+  if (f.where === 'cp') { const s = f.id === 'allan' ? [CP.sillon.x, CP.sillon.y - 4, 2] : CP_SILLAS[0]; f.x = s[0]; f.y = s[1]; f.dir = s[2]; f.sit = true; return; }   // (at the parsonage: he in his armchair, she at the tea table)
   if (f.where === 'tl') { f.x = SHOP_IN.counter.x + 30; f.y = SHOP_IN.counter.y - 22; f.dir = 2; f.sit = false; return; }   // (behind the counter)   // in the school: the pupils at their desks (Ana's is the sixth), the teacher by the blackboard
   if (f.def.kind === 'maestro') { f.x = 6.5 * T + 44 + (f.id === 'stacy' ? 70 : 0); f.y = 3.2 * T + 14; f.dir = 2; f.sit = false; return; }
   const pupils = FOLK.filter(q => q.def.kind === 'alumno'), i = pupils.indexOf(f), seats = SCHOOL_DESKS.filter((_, j) => j !== 5);

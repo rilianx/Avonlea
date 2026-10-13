@@ -103,7 +103,8 @@ module.exports = [
     relato: 'La Sra. Allan invita a Ana a tomar el té. Prepara el té en su casa. Ana llega y se sientan juntas a la mesa, con las tazas, a conversar sin apuro, una media hora.',
     pasos: [
       { quien: 'sraallan', accion: /cocinar te/, dura: 10, texto: 'La Sra. Allan prepara el té.' },
-      { quien: 'ana', postura: /sentada/, objeto: /té/, dura: 20, texto: 'Ana toma el té sentada, una media hora.' },
+      { quien: 'ana', lugar: /parroquial/, junto: /té/, postura: /sentada/, objeto: /té/, dura: 20, texto: 'Ana toma el té sentada a la mesita, en la salita de la casa parroquial, una media hora.' },
+      { quien: 'sraallan', lugar: /parroquial/, junto: /té/, postura: /sentada/, objeto: /té/, dura: 20, texto: 'La Sra. Allan se sienta con ella a la mesita, con su taza, una media hora.' },
     ],
   },
   {

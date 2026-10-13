@@ -24,7 +24,7 @@ El juego no usa tiles para dibujar: el paisaje lo pinta el código. De Tiled sol
 - Mover un punto, alargar un camino, agrandar un bosque o agregar un edificio no requiere tocar el código.
 - Los **momentos** (alguien dice algo cuando Ana pasa por ahí) son palabras, no lugares. Por eso siguen en `src/js/02-mapa-avonlea.js`, en `moments`.
 
-## Los interiores (`cocina`, `pieza`, `salita`, `salon`)
+## Los interiores (`cocina`, `pieza`, `salita`, `salon`, `parroquia`)
 
 **Escala.** Son de 13 × 9 tiles de 32 px, igual que el cuarto en pantalla. Cada uno tiene una capa `lugares` con puntos:
 
@@ -34,6 +34,7 @@ El juego no usa tiles para dibujar: el paisaje lo pinta el código. De Tiled sol
 | `pieza` | `ventana`, `cama`, `escritorio`, `lavatorio` | Escribir y estudiar en el escritorio, teñirse frente al espejo |
 | `salita` | `chimenea`, `sofa`, `te` | Las visitas, el té |
 | `salon` | `escenario`, `banco` (varios) | El concierto y las recitaciones del ayuntamiento |
+| `parroquia` | `puerta`, `chimenea`, `sillon`, `te`, `estante`, `ventana` | La salita de la casa parroquial: el té con la Sra. Allan (las dos sillas van a los lados de `te`), el sillón y los libros del pastor |
 
 El código pide los puntos por nombre, con `lugar('cocina', 'mesa')`. Si falta uno, el juego avisa al cargar: `el mapa «cocina» no tiene «mesa»`.
 

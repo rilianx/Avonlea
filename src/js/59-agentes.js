@@ -54,7 +54,7 @@ function goalPlan(ag, g){
   if (!g.goal.test(wmNow())) for (const p of g.pending || []) if (p.h.st === 'done' && !p.reask) { p.reask = true; delete game.wm.facts['pedido:' + p.f.f + ':' + p.to + ':' + today()]; }
   const s = promised(ag, g, wmNow());
   ag.tasks = ag.tasks.filter(t => t.g !== g || t.st === 'done');
-  if (g.goal.test(s) && !pendingOn(g)) { goalEnd(ag, g, 'done'); return false; }
+  if (g.goal.test(s) && (!pendingOn(g) || stayNow(g))) { goalEnd(ag, g, 'done'); return false; }
   if (g.goal.test(s)) { g.waitUntil = TT + 3; return true; }   // (only what was promised is missing: wait for it)
   const r = wmPlan(ag.who, g.goal, g.favors, s, g.chain);
   if (!r.plan) { console.debug('[avonlea plan] sin plan', ag.who, g.label, JSON.stringify({ pos: s.pos, cows: s.cows, follow: s.follow, sick: game.wm.sick, rel: Object.fromEntries(Object.entries(s.rel).filter(([k]) => k.startsWith('ana>'))), facts: s.facts })); agentLog(ag, 'no encuentra cómo: ' + g.label + ' (' + r.n + ' estados)'); goalEnd(ag, g, 'fail', g.partial ? 'avanzó, pero no lo suficiente por hoy' : 'no hay un plan posible'); return false; }
@@ -64,7 +64,9 @@ function goalPlan(ag, g){
   agentLog(ag, (r.partial ? 'plan parcial' : 'plan') + ' (' + g.label + '): ' + steps.map((st, k) => (k + 1) + '. ' + stepText(st.a) + (st.deps.length ? ' [tras ' + st.deps.map(i => i + 1).join(', ') + ']' : '')).join(' · '));
   return true;
 }
-function agentCheck(ag, s = wmNow()){ for (const g of activeGoals(ag)) if (!g.staying && g.goal.test(s) && !pendingOn(g)) goalEnd(ag, g, 'done'); }
+function agentCheck(ag, s = wmNow()){ for (const g of activeGoals(ag)) if (!g.staying && g.goal.test(s) && (!pendingOn(g) || stayNow(g))) goalEnd(ag, g, 'done'); }
+// a goal to stay at (the tea): it begins when it is really so, even while the one who came is still on her own errand (to stay too)
+const stayNow = g => !!g.goal.quedarMin && g.goal.test(wmNow());
 function goalEnd(ag, g, st, why){
   if (st === 'done' && (g.goal.quedar || g.goal.quedarMin) && !g.stayed && !(g.stayUntil && hourNow() >= g.stayUntil)) {   // (arrived: now to stay, until the hour or a while)
     if (!g.staying) { g.staying = true; g.stayUntil = g.goal.quedar ?? hourNow() + g.goal.quedarMin / 60; agentLog(ag, '⏸ llegó: se queda hasta las ' + fmtHour(g.stayUntil)); logEv(`${wmName(ag.who)} llegó ${('a ' + (WP_NAME[g.goal.places[0]] || 'su destino')).replace(/^a el /, 'al ')} y se queda hasta las ${fmtHour(g.stayUntil)}.`, []); }
@@ -77,11 +79,28 @@ function goalEnd(ag, g, st, why){
   if (ag.who === 'ana' && st === 'done') float('✔ ' + g.label, ana.x, ana.y - 64);
 }
 function stayTick(ag, g, dt){
-  if (hourNow() >= g.stayUntil) { g.staying = false; g.stayed = true; agentLog(ag, '🔔 terminó: ' + g.label); goalEnd(ag, g, 'done'); return; }
+  if (hourNow() >= g.stayUntil) { if (ag.acting?.v === 'tomar_te') accEnd(ag); g.staying = false; g.stayed = true; agentLog(ag, '🔔 terminó: ' + g.label); goalEnd(ag, g, 'done'); return; }
   ag.st = 'run'; ag.task = null;
+  if (g.goal.te != null && teSentar(ag, g, dt)) { if (ag.acting?.v === 'tomar_te') stayChat(g); return; }
   const key = g.goal.room ? 'h:' + g.goal.room : g.goal.places[0], r = wmMove(ag.who, key, dt);
-  if (r === 'ok') { const b = wmBody(ag.who); if (ag.who !== 'ana') b.moving = false;
-    const C = g.goal.chat; if (C && TT > (g.chatT || 0)) { g.chatT = TT + 7; const [k, line] = C[g.chatI = ((g.chatI ?? -1) + 1) % C.length]; if (watched(wmScene(k) || 'out')) sayB(qOf(k), line); } }   // (meanwhile they talk)
+  if (r === 'ok') { const b = wmBody(ag.who); if (ag.who !== 'ana') b.moving = false; stayChat(g); }
+}
+// meanwhile they talk
+function stayChat(g){ const C = g.goal.chat; if (C && TT > (g.chatT || 0)) { g.chatT = TT + 7; const [k, line] = C[g.chatI = ((g.chatI ?? -1) + 1) % C.length]; if (watched(wmScene(k) || 'out')) sayB(qOf(k), line); } }
+// tea (te_con, and the visit that comes to it): once in the room, each to her chair at the tea table (she who receives, te 0;
+// the visit, te 1), to sit there with her cup while the stay lasts (false: not there yet, or no chairs in this room)
+const teSillas = sc => sc === 'cp' ? CP_SILLAS : sc === 'gg' ? [SEATS.ana, SEATS.lynde] : sc === 'os' ? [[TEA.x + 40, TEA.y + 6, 3], [TEA.x - 40, TEA.y + 6, 1]] : null;
+function teSentar(ag, g, dt){
+  const who = ag.who, b = wmBody(who), sc = wmScene(who), key = g.goal.places[0], room = key === 'cocina' ? 'gg' : key.startsWith('h:') ? key.slice(2) : null, s = room === sc && teSillas(sc)?.[g.goal.te];
+  if (!b || !s) return false;
+  if (ag.acting?.v === 'tomar_te') {
+    b.x = s[0]; b.y = s[1]; b.dir = s[2]; b.sit = true; b.moving = false;
+    if (g.goal.con && AGENTS[g.goal.con]?.acting?.v !== 'tomar_te' && hourNow() < g.goal.teHasta) g.stayUntil = Math.max(g.stayUntil, hourNow() + .5);   // (the visit waits for the tea: the half hour counts from when the other sits down to it)
+    return true;
+  }
+  if (dist(b.x, b.y, s[0], s[1]) > 26 && !wmWalk(who, s[0], s[1], sc, dt)) return true;
+  wmStop(who); ag.acting = { v: 'tomar_te', t0: TT, dura: (g.stayUntil - hourNow()) * 60 * MIN_S, base: [s[0], s[1]], sit: false, obj: 'te' };
+  b.x = s[0]; b.y = s[1]; b.dir = s[2]; b.sit = true; b.moving = false; return true;
 }
 function agentIdle(ag){ ag.st = 'idle'; ag.task = null; ag.paused = false; ag.seenInput = null; wmRelease(ag.who); }
 function agentEnd(ag, st, why){ for (const g of activeGoals(ag)) goalEnd(ag, g, st, why); agentIdle(ag); }

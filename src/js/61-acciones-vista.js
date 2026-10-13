@@ -19,7 +19,7 @@ const ACCION_VISTA = {
   decorar_sala: { dur: M(24), obj: 'flores' }, adornar: { dur: M(10), obj: 'sombrero' }, cuidar: { obj: 'jarabe' },
   quehacer: { dur: M(15), obj: 'quehacer' }, cocinar: { dur: M(30), obj: 'bol' }, preparar: { dur: M(15), obj: 'bol' }, batir: { dur: M(30), obj: 'mantequera' }, coser: { dur: M(40), obj: 'costura', sentar: true },
   recoger: { dur: M(8), obj: 'canastito' }, jurar: { dur: M(3), obj: 'manos' }, nombrar: { dur: M(2), obj: 'recitar' },
-  visitar: { obj: 'te' }, dar: { obj: 'entregar' }, devolver: { obj: 'entregar' }, tomar: { obj: 'canastito' },
+  visitar: { obj: 'te' }, tomar_te: { obj: 'te', sentar: true }, dar: { obj: 'entregar' }, devolver: { obj: 'entregar' }, tomar: { obj: 'canastito' },
   leer_cuento: { obj: 'cuaderno', sentar: true, con: true }, felicitar: { obj: 'manos' }, consolar: { obj: 'abrazo' },
   trepar: { dur: 10, mov: 'techo', arriba: true }, actuar: { dur: M(10), obj: 'recitar' }, recitar: { dur: M(5), obj: 'recitar' },
 };

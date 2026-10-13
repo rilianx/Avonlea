@@ -30,6 +30,17 @@ function comparar(esp, lineas){
   }
   return out;
 }
+// the rules that must always hold (src/js/66-relato.js, RELATO_REGLAS): each time one is broken (a stretch of lines in
+// which it does not hold, for one person), with the first line where it happened
+function reglasRotas(lineas){
+  const activa = {}, out = {};
+  for (const l of lineas) { const e = l.estado; if (!e || e.dice) continue;
+    const mal = (e._mal || '').split(',').filter(Boolean);
+    for (const r of mal) { const k = e.quien + '|' + r; if (!activa[k]) { activa[k] = true; (out[r] ||= { n: 0, primera: l.hora + ' ' + l.texto }).n++; } }
+    for (const k of Object.keys(activa)) if (k.startsWith(e.quien + '|') && !mal.includes(k.split('|')[1])) delete activa[k]; }
+  return out;
+}
+let REGLAS = [];
 (async () => {
   const b = await chromium.launch({ executablePath: process.env.CHROMIUM || '/opt/pw-browsers/chromium', args: ['--no-sandbox'] });
   const md = ['# Auditoría de las acciones', '', (VECES > 1 ? 'Cada acción se corrió ' + VECES + ' veces; un paso está ✔ solo si salió bien todas. ' : '') + 'Para cada acción: lo que debería pasar (el relato esperado, `tools/auditoria/esperado.js`), cada paso comparado con lo que el juego cuenta que pasó (✔ a qué hora y cuánto duró, ✘ qué se vio en cambio), y el relato completo del juego (`src/js/66-relato.js`). Se genera con `node tools/auditoria.js`.', ''];
@@ -40,8 +51,8 @@ function comparar(esp, lineas){
     await pg.goto('file://' + path.join(root, 'index.html'), { timeout: 0 }); await pg.waitForFunction(() => window.__avonlea, null, { timeout: 0, polling: 100 });
     const r = await pg.evaluate(([id, q]) => { const A = window.__avonlea; document.getElementById('ai').hidden = true; const ag = A.wmRunTest(id); A.relatoEmpezar(q);
       for (let t = 0; t < 3600 && (ag.st === 'run' || ag.st === 'pausa'); t += .5) A.step(.5); for (let k = 0; k < 20; k++) A.step(.5);
-      return { st: ag.st, lineas: A.relato() }; }, [esp.id, esp.quienes]);
-    await pg.close(); return { ...r, res: comparar(esp, r.lineas), errs };
+      return { st: ag.st, lineas: A.relato(), reglas: A.reglas() }; }, [esp.id, esp.quienes]);
+    await pg.close(); REGLAS = r.reglas; return { ...r, res: comparar(esp, r.lineas), rotas: reglasRotas(r.lineas), errs };
   };
   const correr = async (esp, n) => {
     const vs = []; for (let v = 0; v < VECES; v++) vs.push(await una(esp));
@@ -50,14 +61,19 @@ function comparar(esp, lineas){
     const out = []; hechos[n] = { res, out };
     out.push('## ' + esp.titulo + ' (meta ' + esp.id + ': ' + vs.map(x => x.st === 'done' ? 'cumplida' : x.st).join(', ') + ')', '', '**Lo que debería pasar:** ' + esp.relato, '');
     for (const x of res) out.push('- ' + (x.ok ? '✔' : '✘') + ' ' + x.p.texto + ' — ' + x.nota);
+    const rotas = {}; for (const x of vs) for (const [r, o] of Object.entries(x.rotas)) { (rotas[r] ||= { veces: 0, n: 0, primera: o.primera }).veces++; rotas[r].n += o.n; }
+    hechos[n].rotas = Object.keys(rotas).length;
+    out.push('', Object.keys(rotas).length ? '**Reglas que no se cumplieron:**' : '**Reglas:** ✔ se cumplieron todas, siempre.');
+    for (const [r, o] of Object.entries(rotas)) out.push('- ⚠ ' + (REGLAS.find(x => x[0] === r)?.[1] || r) + ' — ' + (VECES > 1 ? 'en ' + o.veces + ' de ' + VECES + ' veces, ' : '') + o.n + (o.n === 1 ? ' vez' : ' veces') + ' (la primera: ' + o.primera + ')');
     out.push('', '<details><summary>Lo que el juego cuenta que pasó (' + r.lineas.length + ' líneas)</summary>', '', '```', ...r.lineas.map(l => l.hora + ' ' + l.texto), '```', '</details>', '');
     const errs = vs.flatMap(x => x.errs);
-    console.log(esp.titulo + ': ' + res.filter(x => x.ok).length + '/' + res.length + (errs.length ? ' · errores: ' + errs.slice(0, 2).join(' | ') : ''));
+    console.log(esp.titulo + ': ' + res.filter(x => x.ok).length + '/' + res.length + (hechos[n].rotas ? ' · reglas rotas: ' + Object.keys(rotas).join(', ') : '') + (errs.length ? ' · errores: ' + errs.slice(0, 2).join(' | ') : ''));
   };
   let sig = 0; await Promise.all(Array.from({ length: Math.min(4, lista.length) }, async () => { while (sig < lista.length) { const n = sig++; await correr(lista[n], n); } }));   // (4 at a time; the report in order)
   for (const h of hechos) { bien += h.res.filter(x => x.ok).length; total += h.res.length; md.push(...h.out); }
-  md.splice(3, 0, '**Pasos que ocurren como deberían: ' + bien + ' de ' + total + '.**', '');
+  const conRotas = hechos.filter(h => h.rotas).length;
+  md.splice(3, 0, '**Pasos que ocurren como deberían: ' + bien + ' de ' + total + '.** **Acciones en que alguna regla no se cumplió: ' + conRotas + ' de ' + hechos.length + '.**', '', '**Las reglas que siempre deben cumplirse**, se haga lo que se haga (se revisan en cada línea del relato): ' + REGLAS.map(r => r[1]).join('; ') + '.', '');
   fs.writeFileSync(path.join(root, 'trazas', 'auditoria.md'), md.join('\n') + '\n');
-  console.log('→ trazas/auditoria.md · ' + bien + '/' + total + ' pasos');
+  console.log('→ trazas/auditoria.md · ' + bien + '/' + total + ' pasos · reglas rotas en ' + conRotas + ' de ' + hechos.length + ' acciones');
   await b.close();
 })();

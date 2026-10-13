@@ -189,7 +189,7 @@ const WP = {
   aldea: PLAY.aldea, lago: [PLACES.lago[1], PLACES.lago[2]], gallinero: [BARN.x + 150, BARN.y + 96], iglesia: CHURCH_DOOR, salon: door('Ayuntamiento'), colina: PLAY.campo_rosado, campo: (f => [f.x + f.w / 2, f.y + f.h / 2])(fieldNear([GG.x + 300, GG.y - 200])),
 };
 WP.casa_bell = door('Casa de los Pettibone');
-const WP_NAME = { casa_bell: 'la casa de Robert Bell', 'h:br': 'la estación de Bright River', 'h:rl': 'la casa de la Sra. Lynde', camino: 'el camino de Bright River', gallinero: 'el gallinero', granero: 'el granero', corral: 'el corral', potrero: 'el potrero del Sr. Harrison', huerta: 'la huerta', arbustos: 'los arbustos de bayas', huerto: 'el huerto de los Barry', cocina: 'la cocina de Tejas Verdes', pieza: 'la pieza de Ana, arriba en Tejas Verdes', tienda: 'la tienda de Lawson', escuela: 'la escuela', casa_parroquial: 'la casa parroquial', bosque_peg: 'el bosque de Peg Bowen', aldea: 'la aldea', iglesia: 'la iglesia', salon: 'el salón del pueblo', colina: 'la colina', campo: 'el campo de heno', lago: 'el lago' };
+const WP_NAME = { casa_bell: 'la casa de Robert Bell', 'h:br': 'la estación de Bright River', 'h:rl': 'la casa de la Sra. Lynde', camino: 'el camino de Bright River', gallinero: 'el gallinero', granero: 'el granero', corral: 'el corral', potrero: 'el potrero del Sr. Harrison', huerta: 'la huerta', arbustos: 'los arbustos de bayas', huerto: 'el huerto de los Barry', cocina: 'la cocina de Tejas Verdes', pieza: 'la pieza de Ana, arriba en Tejas Verdes', tienda: 'la tienda de Lawson', escuela: 'la escuela', casa_parroquial: 'la casa parroquial', 'h:cp': 'la casa parroquial', bosque_peg: 'el bosque de Peg Bowen', aldea: 'la aldea', iglesia: 'la iglesia', salon: 'el salón del pueblo', colina: 'la colina', campo: 'el campo de heno', lago: 'el lago' };
 const OFRECE = { gallinero: { recoger: ['huevos'] }, granero: { tomar: ['cuerda'] }, arbustos: { recoger: ['bayas'] }, huerto: { recoger: ['manzanas'] }, huerta: { recoger: ['ramo'] }, bosque_peg: { recoger: ['hierbas'] }, cocina: { tomar: ['jarabe'] } };
 for (const k of ['granero', 'corral', 'potrero', 'escuela', 'casa_parroquial', 'tienda']) if (!PLACES[k]) PLACES[k] = [WP_NAME[k], ...WP[k]];   // (so errands can name them)
 // --- people: character, likes, what they buy and sell, where they cook, whether they leave the house; and their inventories
@@ -203,7 +203,7 @@ const WHO = {
   harrison: { caracter: ['orgulloso'], le_gusta: ['comida'], inv: { cuerda: 1 } },
   shearer: { caracter: [], compra: { animal: 20 }, inv: { dolares: 60 } },
   gilbert: { caracter: ['orgulloso', 'generoso'], le_gusta: ['comida'] },
-  sraallan: { caracter: ['generoso', 'sensible'], le_gusta: ['hecha_a_mano', 'flores'], cocina: 'casa_parroquial' },
+  sraallan: { caracter: ['generoso', 'sensible'], le_gusta: ['hecha_a_mano', 'flores'], cocina: 'h:cp' },
   peg: { caracter: ['orgulloso'], le_gusta: ['hierba'] },
   medico: { caracter: ['generoso'], le_gusta: [], medico: true },
   buhonero: { caracter: [], le_gusta: [], trueque: true, vende: ['tinte'] },
@@ -296,11 +296,11 @@ const sKey = s => JSON.stringify([s.pos, s.invs, s.cows, s.ofensa, s.follow, s.f
 const FAVORS = {   // what one can ask of someone (ok: whether it can be asked; eff: what it makes true; goal: the goal installed in whoever accepts)
   pasear: { eff: (s, me, to) => { s.follow[to] = me; }, ok: (s, me, to) => to === 'ana' || me === 'ana', say: () => '¿Vamos a dar un paseo juntas? Hace un día precioso.' },   // (the one asked comes along)
   // an invitation for later: to come at an hour (tea at the parsonage, this afternoon); the one asked goes then
-  venir: { eff: (s, me, to, a) => { s.pos[to] = a.lugar || 'casa_parroquial'; }, ok: (s, me, to) => to === 'ana' || me === 'ana' && to === 'diana', wait: 30,
-    goal: (me, a, s0) => { const H = teaHour(s0.t), p = a.lugar || 'casa_parroquial';
-      return { ...G.estar_en(a.to, p, H + .25, H + .75), desde: H - 1, text: `ir a tomar el té con ${wmName(me)} a las ${fmtHour(H)} (${WP_NAME[p]})`,
+  venir: { eff: (s, me, to, a) => { s.pos[to] = a.lugar || 'h:cp'; }, ok: (s, me, to) => to === 'ana' || me === 'ana' && to === 'diana', wait: 30,
+    goal: (me, a, s0) => { const H = teaHour(s0.t), p = a.lugar || 'h:cp';
+      return { ...G.estar_en(a.to, p, H + .25, H + .75), quedar: null, quedarMin: 30, te: 1, con: me, teHasta: H + 1.5, desde: H - 1, text: `ir a tomar el té con ${wmName(me)} a las ${fmtHour(H)} (${WP_NAME[p]})`,
         chat: [[me, '¿Un poco más de té, Ana? Y prueba estas galletas.'], [a.to, '¡Están deliciosas! Es como estar en un libro.'], [me, 'Cuéntame qué estás leyendo ahora.'], [a.to, 'Una novela con un castillo y una dama muy triste… ¡me encanta!']] }; },
-    say: a => `¿Vendrías a tomar el té conmigo esta tarde, a las ${fmtHour(teaHour(hourNow() * 60))}? En ${(WP_NAME[a.lugar || 'casa_parroquial'] || '').replace(/^(el|la) /, m => m)}.` },
+    say: a => `¿Vendrías a tomar el té conmigo esta tarde, a las ${fmtHour(teaHour(hourNow() * 60))}? En ${(WP_NAME[a.lugar || 'h:cp'] || '').replace(/^(el|la) /, m => m)}.` },
   // (from the book) lending: the one asked hands it over at once (it is to be given back); the chores Marilla asks for; a ride in the cart
   prestar: { eff: (s, me, to, a) => { s.invs[to][a.item] -= 1; s.invs[me][a.item] = (s.invs[me][a.item] || 0) + 1; s.facts['prestado:' + a.item + ':' + to + '>' + me] = 1; }, ok: (s, me, to, a) => (s.invs[to]?.[a.item] || 0) > 0, say: a => `¿Me prestarías ${ITEM_DEFS[a.item]?.gift?.art || itemTextW(a.item, 1)}? Te lo devuelvo, prometido.` },
   curar: { eff: (s, me, to, a) => { s.sick = (s.sick || []).filter(x => x !== a.k); }, ok: (s, me, to, a) => !!whoOf(to).medico && (s.sick || []).includes(a.k), wait: 40, goal: (me, a) => G.sano(a.k), say: a => `¡Doctor! ${wmName(a.k)} está enfermo. ¿Podría venir a verlo, por favor?` },
@@ -446,7 +446,7 @@ const G = {
   desafio: k => ({ kind: 'desafio', text: `${wmName(k)} acepta el desafío de Josie y camina por el techo de los Barry`, test: s => !!s.facts['trepo:' + k], h: s => s.facts['trepo:' + k] ? 0 : 1, items: [], people: [k], places: ['huerto'] }),
   llevar: (by, k, p) => ({ kind: 'llevar', text: `${wmName(by)} lleva a ${wmName(k)} en la calesa a ${WP_NAME[p]}`, test: s => s.pos[by] === p && s.pos[k] === p, h: s => (s.follow[k] === by || s.pos[k] === p ? 0 : 1) + (s.pos[by] === p ? 0 : 1 + Math.abs(roadMin(p) - roadMin(s.pos[by])) / 40), items: [], people: [by, k], places: [p], lleva: k }),
   acompana: (a, b) => ({ text: `${wmName(a)} acompaña a ${wmName(b)}`, test: s => s.follow[a] === b, h: s => s.follow[a] === b ? 0 : 1, items: [], people: [a, b] }),
-  te_con: (k, g, p) => ({ text: `${wmName(k)} toma el té con ${wmName(g)} en ${WP_NAME[p]}`, test: s => s.pos[g] === p && s.pos[k] === p && (s.invs[k].te || 0) >= 1, h: s => (s.pos[g] === p ? 0 : 1) + (s.pos[k] === p ? 0 : 1) + ((s.invs[k].te || 0) >= 1 ? 0 : 1), items: ['te'], people: [k, g], places: [p] }),
+  te_con: (k, g, p) => ({ text: `${wmName(k)} toma el té con ${wmName(g)} en ${WP_NAME[p]}`, test: s => s.pos[g] === p && s.pos[k] === p && (s.invs[k].te || 0) >= 1, h: s => (s.pos[g] === p ? 0 : 1) + (s.pos[k] === p ? 0 : 1) + ((s.invs[k].te || 0) >= 1 ? 0 : 1), items: ['te'], people: [k, g], places: [p], quedarMin: 30, te: 0 }),   // (then they sit down to it: she who receives, te 0, and the visit, te 1)
   regalar_cosa: (k, x) => ({ text: `${wmName(k)} regala ${ITEM_NAME[x]?.[0] || x}`, test: s => !!s.facts['dio:' + x], h: s => s.facts['dio:' + x] ? 0 : (s.invs[k][x] ? 1 : 2), items: [x, ...Object.keys(THINGS[x]?.receta || {})], people: [k, 'diana', 'marilla', 'matthew'] }),
 };
 // how many steps, roughly, to n dollars: selling what is made (1), cooking what is gathered (2), gathering (3); a cow, 2 at most

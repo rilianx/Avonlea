@@ -101,3 +101,7 @@ const BUILDINGS = MAP.buildings.map(b => ({ ...b, x: b.at[0] * U, y: b.at[1] * U
 HOUSES.sa = { at: (b => ({ x: b.x, y: b.y, w: b.w }))(BUILDINGS.find(b => b.name === 'Ayuntamiento')), name: 'El salón del pueblo', noProp: true, small: true,
   enter: 'Entrar al salón del pueblo', inText: 'en el salón del pueblo', arrive: ' entró al salón del pueblo.', place: ['salon_pueblo', 'el salón del pueblo', 30, 56],
   describe: 'el salón del pueblo de Avonlea (donde se hacen los conciertos: un escenario con telón, bancos y, para las fiestas, guirnaldas de flores)' };
+// the parsonage, where the minister and Mrs. Allan live: one can go in, to tea in the parlour (the house itself is drawn with the others)
+HOUSES.cp = { at: (b => ({ x: b.x, y: b.y, w: b.w }))(BUILDINGS.find(b => b.name === 'Casa parroquial')), name: 'La casa parroquial', noProp: true, small: true,
+  enter: 'Entrar a la casa parroquial', inText: 'en la salita de la casa parroquial', arrive: ' llegó a la casa parroquial.', place: ['casa_parroquial', 'la casa parroquial', 30, 56],
+  describe: 'la casa parroquial (donde viven el reverendo Allan y la Sra. Allan, cerca de la iglesia, con su salita de las visitas: la chimenea, los libros del pastor y la mesita del té)' };
