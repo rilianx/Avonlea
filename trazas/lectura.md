@@ -81,4 +81,4 @@ Lo de arriba quedó arreglado. Leyendo de nuevo aparecieron otras cosas, que tam
 - Ana conversa con casi todos los que encuentra en el camino (unos cinco minutos cada vez): los recados se alargan. Es su carácter, pero se podría bajar.
 - El Sr. Harrison se cura en cuanto termina el jarabe y sale de la casa.
 - La escuela no tiene mapa de Tiled: no se dice «junto a la pizarra».
-- La meta 9 (el paseo con Diana) falló una vez en la regresión; repetida 26 veces, salió bien todas.
+- Las cadenas de pedidos fallan de vez en cuando en la regresión (una vez la meta 9, el paseo con Diana; otra la 17, la compota de la Sra. Barry): repetidas, salen bien (26 de 26 y 4 de 4).
