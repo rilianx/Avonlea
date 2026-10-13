@@ -155,6 +155,62 @@ function update(dt){
 }
 // what is drawn is the scene being looked at: Ana's, or that of whoever she is watching (Ana and Toby only in hers)
 let RENDER_REAL = 'out';
+// the floor outdoors: the painted ground (baldosas), what stays still (fijo: the rivers, the lake, the pads, the dunes,
+// the rocks) and what moves (vivo: the waves and the glints of the water, the grass, the flowers, the beds, the reeds).
+// The drawing of always asks for all of it, in this order; Phaser bakes the still part by chunks, and moves the rest itself.
+function sueloPintar(g, ox, oy, vw, vh, t, P){
+  const inView = (x, y, m = 80) => x > ox - m && x < ox + vw + m && y > oy - m && y < oy + vh + m * 2;
+  if (P.baldosas) for (let tx = Math.floor(ox / TILE); tx * TILE < ox + vw; tx++) for (let ty = Math.floor(oy / TILE); ty * TILE < oy + vh; ty++) { const cv = groundTile(tx, ty); g.drawImage(cv, .5, .5, cv.width - 1, cv.height - 1, tx * TILE, ty * TILE, TILE, TILE); }
+  // the sea along the coast: waves coming in (lines along the shore, offset towards the sea)
+  if (P.vivo) if (S !== 3) for (const [a, b] of coastSegs) { if (Math.max(a[0], b[0]) < ox - 100 || Math.min(a[0], b[0]) > ox + vw + 100 || Math.max(a[1], b[1]) < oy - 200 || Math.min(a[1], b[1]) > oy + vh + 100) continue; const L = Math.hypot(b[0] - a[0], b[1] - a[1]), nx = (b[1] - a[1]) / L, ny = -(b[0] - a[0]) / L; g.strokeStyle = 'rgba(255,255,255,.55)'; g.lineWidth = 1.4; for (let k = 0; k < 4; k++) { const o = 40 + k * 34 + Math.sin(t * 1.2 + k) * 6; g.beginPath(); for (let q = 0; q <= 1; q += .05) { const x = lerp(a[0], b[0], q) + nx * o, y = lerp(a[1], b[1], q) + ny * o + Math.sin(q * 20 + t * 1.5 + k) * 3; q ? g.lineTo(x, y) : g.moveTo(x, y); } g.stroke(); } }
+  if (P.fijo) for (const w of WATERS.filter(w => w.pts !== brook)) { g.lineCap = 'round'; g.lineJoin = 'round'; g.strokeStyle = S === 3 ? '#cfe2ea' : '#6aa8c4'; g.lineWidth = 40; g.beginPath(); g.moveTo(...w.pts[0]); w.pts.slice(1).forEach(p => g.lineTo(...p)); g.stroke(); }
+  // the brook and the lake: water with the sky's shimmer, lily pads, a fish jumping now and then
+  // (in winter both are frozen: pale ice with cracks, and a glint now and then)
+  const ice = S === 3;
+  if (P.fijo) { g.lineCap = 'round'; g.lineJoin = 'round'; g.strokeStyle = ice ? '#cfe2ea' : '#6aa8c4'; g.lineWidth = 28; g.beginPath(); g.moveTo(...brook[0]); brook.slice(1).forEach(p => g.lineTo(...p)); g.stroke(); }
+  if (P.vivo) { g.strokeStyle = 'rgba(255,255,255,.35)'; g.lineWidth = 1.2;
+  if (!ice) for (let k = 0; k < 40; k++) { const s = brookSegs[k % brookSegs.length], q = ((t * .25 + k * .37) % 1), x = lerp(s[0][0], s[1][0], q) + Math.sin(k * 3) * 6, y = lerp(s[0][1], s[1][1], q); if (inView(x, y)) { g.beginPath(); g.moveTo(x - 4, y); g.lineTo(x + 4, y + 1); g.stroke(); } } }
+  if (P.fijo) { line(g, brook.map(([x, y]) => [x - 14, y]), 'rgba(60,90,110,.55)', 1); line(g, brook.map(([x, y]) => [x + 14, y]), 'rgba(60,90,110,.55)', 1, 5); }
+  g.save(); g.beginPath(); g.ellipse(LAKE.x, LAKE.y, LAKE.rx, LAKE.ry, 0, 0, TAU); g.clip();
+  if (P.fijo) { const wg = g.createLinearGradient(0, LAKE.y - LAKE.ry, 0, LAKE.y + LAKE.ry); wg.addColorStop(0, ice ? '#e2eff4' : '#6fb0cc'); wg.addColorStop(1, ice ? '#b9d4e0' : '#4a86a4'); g.fillStyle = wg; g.fillRect(LAKE.x - LAKE.rx, LAKE.y - LAKE.ry, LAKE.rx * 2, LAKE.ry * 2); }
+  if (P.fijo) if (ice) { const r = rng(9); for (let k = 0; k < 14; k++) { let x = LAKE.x + (r() - .5) * LAKE.rx * 1.6, y = LAKE.y + (r() - .5) * LAKE.ry * 1.4; const pts = [[x, y]]; for (let q = 0; q < 4; q++) { x += (r() - .5) * 60; y += (r() - .5) * 24; pts.push([x, y]); } line(g, pts, 'rgba(120,150,170,.45)', .9, k); } }
+  if (P.vivo) { g.strokeStyle = 'rgba(255,255,255,.3)'; g.lineWidth = 1.2;
+  if (!ice) for (let k = 0; k < 12; k++) { const yy = LAKE.y - LAKE.ry + (k + .5) * LAKE.ry * 2 / 12, xx = LAKE.x + Math.sin(t * .6 + k * 1.7) * LAKE.rx * .55; g.beginPath(); g.moveTo(xx - 20, yy); g.quadraticCurveTo(xx, yy - 2 + Math.sin(t * 2 + k), xx + 20, yy); g.stroke(); }
+  // sparkles: the Lake of Shining Waters shines
+  for (let k = 0; k < 18; k++) { const a = Math.sin(t * 2 + k * 7.1), sx = LAKE.x + Math.sin(k * 12.9) * LAKE.rx * .8, sy = LAKE.y + Math.cos(k * 7.7) * LAKE.ry * .7; if (a > .6) { g.fillStyle = `rgba(255,255,240,${(a - .6) * 2})`; g.fillRect(sx - 2, sy, 4, 1); g.fillRect(sx, sy - 2, 1, 4); } }
+  const jt = (t % 9) / 9, jx = LAKE.x + Math.sin(Math.floor(t / 9) * 3.1) * LAKE.rx * .5, jy = LAKE.y + Math.cos(Math.floor(t / 9) * 2.3) * LAKE.ry * .4;
+  if (jt < .25 && !ice) for (let k = 0; k < 3; k++) { const r = jt * 4 * 26 + k * 7; g.strokeStyle = `rgba(255,255,255,${.5 * (1 - jt * 4)})`; g.beginPath(); g.ellipse(jx, jy, r, r * .45, 0, 0, TAU); g.stroke(); } }
+  g.restore();
+  if (P.fijo) ell(g, LAKE.x, LAKE.y, LAKE.rx, LAKE.ry, 'rgba(0,0,0,0)', 'rgba(60,90,110,.6)');
+  if (P.fijo) if (!ice) for (const p of pads) { ell(g, p.x, p.y, p.r, p.r * .55, '#5c9a4c', true); if (p.bloom) { ell(g, p.x + 2, p.y - 2, 3, 2.2, '#ffd7e8', true); ell(g, p.x + 2, p.y - 2.5, 1.2, 1, '#f7e27a'); } }
+  if (P.vivo) for (const b of BEDS) if (inView(b.x, b.y)) drawBed(g, b, t);
+  // grass and flowers in the breeze, parting as she walks
+  g.lineCap = 'round';
+  const TC = [['rgba(70,130,45,.85)', 'rgba(110,165,64,.85)'], ['rgba(70,120,45,.85)', 'rgba(96,150,60,.85)'], ['rgba(140,130,60,.85)', 'rgba(175,150,70,.85)'], ['rgba(150,140,110,.7)', 'rgba(150,140,110,.7)']][S];
+  const D_ = []; for (let cx = Math.floor((ox - 20) / DCH); cx * DCH < ox + vw + 20; cx++) for (let cy = Math.floor((oy - 20) / DCH); cy * DCH < oy + vh + 40; cy++) D_.push(decorAt(cx, cy));
+  if (P.vivo) for (const d of D_) for (const s of d.tufts) {
+  if (!inView(s.x, s.y, 20) || (S === 3 && s.c > .25)) continue;
+  let bend = Math.sin(t * 1.6 + s.x * .02 + s.ph * .3) * 2.2;
+  const dx = s.x - ana.x, dy = (s.y - ana.y) * 2, d = Math.hypot(dx, dy); if (d < 22) bend += (dx > 0 ? 1 : -1) * (22 - d) * .35;
+  g.strokeStyle = s.c < .5 ? TC[0] : TC[1]; g.lineWidth = 1.2; g.beginPath();
+  for (const o of [-3, 0, 3]) { g.moveTo(s.x + o, s.y); g.quadraticCurveTo(s.x + o * .6 + bend * .4, s.y - s.h * .6, s.x + o * 1.2 + bend, s.y - s.h); }
+  g.stroke();
+  }
+  // flowers: all of them in spring and summer, a few in autumn, none under the snow
+  if (P.vivo) for (const d of D_) for (let i = 0; i < d.flowers.length; i++) {
+  const f = d.flowers[i];
+  if (S === 3 || (S === 2 && i % 3) || !inView(f.x, f.y, 10)) continue;
+  const b = Math.sin(t * 1.8 + f.ph) * 1.2;
+  g.strokeStyle = '#5e9a3e'; g.lineWidth = 1; g.beginPath(); g.moveTo(f.x, f.y); g.lineTo(f.x + b, f.y - 6 * f.s); g.stroke();
+  for (let k = 0; k < 5; k++) { const a = k / 5 * TAU + f.ph; ell(g, f.x + b + Math.cos(a) * 1.8 * f.s, f.y - 6 * f.s + Math.sin(a) * 1.3 * f.s, 1.4 * f.s, 1.1 * f.s, f.c); }
+  ell(g, f.x + b, f.y - 6 * f.s, .9 * f.s, .9 * f.s, '#f2c14e');
+  }
+  if (P.vivo) for (const d of D_) for (const o of d.lupins) { if (S === 3 || (S === 2 && o.c > .3) || !inView(o.x, o.y, 20)) continue; const b = Math.sin(t * 1.4 + o.ph) * 1.4, col = ['#e88ab0', '#f2a6c4', '#d46a9c', '#c98ad8'][Math.floor(o.c * 4)], hg = 10 + o.s * 8; g.strokeStyle = '#5e9a3e'; g.lineWidth = 1; g.beginPath(); g.moveTo(o.x, o.y); g.lineTo(o.x + b, o.y - hg); g.stroke(); for (let k = 0; k < 5; k++) ell(g, o.x + b * (1 - k / 6), o.y - hg + k * 2.4, 2.2 - k * .2, 1.6, col); }
+  if (P.fijo) for (const d of D_) for (const o of d.dunes) { if (!inView(o.x, o.y, 40)) continue; ell(g, o.x, o.y, 26 * o.s, 9 * o.s, S === 3 ? '#f2f5f7' : '#e8cf9a', true); for (let k = -2; k <= 2; k++) line(g, [[o.x + k * 6, o.y - 4], [o.x + k * 7 + Math.sin(t + o.ph + k) * 2, o.y - 16 * o.s]], S === 3 ? '#b9c4cc' : '#9aa85a', 1, k); }
+  if (P.fijo) for (const d of D_) for (const o of d.rocks) if (inView(o.x, o.y, 20)) ell(g, o.x, o.y, 9 * o.s, 6 * o.s, '#a8796a', true);
+  if (P.fijo) if (inView(MILK.x, MILK.y) && S !== 3) for (let k = 0; k < 4; k++) { const x = MILK.x - 14 + k * 9, y = MILK.y + Math.sin(t * 2 + k) * 1.2; blob(g, [[x - 2.6, y], [x + 2.6, y], [x + 2.6, y - 9], [x + 1.2, y - 12], [x - 1.2, y - 12], [x - 2.6, y - 9]], 'rgba(250,250,245,.95)'); line(g, [[x - 1.2, y - 13], [x + 1.2, y - 13]], '#7a5536', 1.6, k); }
+  if (P.vivo) for (const r of reeds) { if (!inView(r.x, r.y)) continue; const b = Math.sin(t * 1.2 + r.ph) * 2; line(g, [[r.x, r.y], [r.x + b * .5, r.y - r.h * .6], [r.x + b, r.y - r.h]], S >= 2 ? '#9a8a4a' : '#6b8f3a', 1.5, r.h); ell(g, r.x + b, r.y - r.h + 3, 1.6, 3.6, '#7a5536'); }
+}
 let PH_NATIVO = false;   // (this frame, does Phaser draw the world? see 66-motor-phaser.js)
 const PERSONA_BOX = [-64, -112, 64, 26];   // (around a person's feet: her hat, her arms, sitting or lying)
 function render(){ const real = game.scene; RENDER_REAL = real; game.scene = viewScene(); try { renderView(); } finally { game.scene = real; } }
@@ -168,8 +224,7 @@ function renderView(){
   const ox = inside ? (KIT.w - vw) / 2 : clamp(cam.x - vw / 2, 0, (road ? RW : WW) - vw), oy = inside ? (KIT.h - vh) / 2 : clamp(cam.y - vh / 2, 0, (road ? RH : WH) - vh);
   view.ox = ox; view.oy = oy; view.Z = Z; view.inside = inside;
   PH_NATIVO = phNativo(!road);   // (Phaser draws this place's world, under a transparent screen with the rest on top)
-  const gPantalla = g; if (PH_NATIVO) { g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H); g = phSuelo(W, H, dpr); }   // (under Phaser, the floor is drawn on a canvas below it)
-  g.setTransform(dpr, 0, 0, dpr, 0, 0); g.fillStyle = '#2b2219'; g.fillRect(0, 0, W, H);
+  g.setTransform(dpr, 0, 0, dpr, 0, 0); if (PH_NATIVO) g.clearRect(0, 0, W, H); else { g.fillStyle = '#2b2219'; g.fillRect(0, 0, W, H); }
   g.setTransform(dpr * Z, 0, 0, dpr * Z, -ox * dpr * Z, -oy * dpr * Z);
   const inView = (x, y, m = 80) => x > ox - m && x < ox + vw + m && y > oy - m && y < oy + vh + m * 2;
   const list = [];
@@ -182,57 +237,7 @@ function renderView(){
     roadView(g, ox, oy, vw, vh, t, night, list);
     for (const it of game.ground) if (it.scene === 'camino') list.push({ y: it.y, draw: () => drawGround(g, it) });
   } else {
-    for (let tx = Math.floor(ox / TILE); tx * TILE < ox + vw; tx++) for (let ty = Math.floor(oy / TILE); ty * TILE < oy + vh; ty++) { const cv = groundTile(tx, ty); g.drawImage(cv, .5, .5, cv.width - 1, cv.height - 1, tx * TILE, ty * TILE, TILE, TILE); }
-    // the sea along the coast: waves coming in (lines along the shore, offset towards the sea)
-    if (S !== 3) for (const [a, b] of coastSegs) { if (Math.max(a[0], b[0]) < ox - 100 || Math.min(a[0], b[0]) > ox + vw + 100 || Math.max(a[1], b[1]) < oy - 200 || Math.min(a[1], b[1]) > oy + vh + 100) continue; const L = Math.hypot(b[0] - a[0], b[1] - a[1]), nx = (b[1] - a[1]) / L, ny = -(b[0] - a[0]) / L; g.strokeStyle = 'rgba(255,255,255,.55)'; g.lineWidth = 1.4; for (let k = 0; k < 4; k++) { const o = 40 + k * 34 + Math.sin(t * 1.2 + k) * 6; g.beginPath(); for (let q = 0; q <= 1; q += .05) { const x = lerp(a[0], b[0], q) + nx * o, y = lerp(a[1], b[1], q) + ny * o + Math.sin(q * 20 + t * 1.5 + k) * 3; q ? g.lineTo(x, y) : g.moveTo(x, y); } g.stroke(); } }
-    for (const w of WATERS.filter(w => w.pts !== brook)) { g.lineCap = 'round'; g.lineJoin = 'round'; g.strokeStyle = S === 3 ? '#cfe2ea' : '#6aa8c4'; g.lineWidth = 40; g.beginPath(); g.moveTo(...w.pts[0]); w.pts.slice(1).forEach(p => g.lineTo(...p)); g.stroke(); }
-    // the brook and the lake: water with the sky's shimmer, lily pads, a fish jumping now and then
-    // (in winter both are frozen: pale ice with cracks, and a glint now and then)
-    const ice = S === 3;
-    g.lineCap = 'round'; g.lineJoin = 'round'; g.strokeStyle = ice ? '#cfe2ea' : '#6aa8c4'; g.lineWidth = 28; g.beginPath(); g.moveTo(...brook[0]); brook.slice(1).forEach(p => g.lineTo(...p)); g.stroke();
-    g.strokeStyle = 'rgba(255,255,255,.35)'; g.lineWidth = 1.2;
-    if (!ice) for (let k = 0; k < 40; k++) { const s = brookSegs[k % brookSegs.length], q = ((t * .25 + k * .37) % 1), x = lerp(s[0][0], s[1][0], q) + Math.sin(k * 3) * 6, y = lerp(s[0][1], s[1][1], q); if (inView(x, y)) { g.beginPath(); g.moveTo(x - 4, y); g.lineTo(x + 4, y + 1); g.stroke(); } }
-    line(g, brook.map(([x, y]) => [x - 14, y]), 'rgba(60,90,110,.55)', 1); line(g, brook.map(([x, y]) => [x + 14, y]), 'rgba(60,90,110,.55)', 1, 5);
-    g.save(); g.beginPath(); g.ellipse(LAKE.x, LAKE.y, LAKE.rx, LAKE.ry, 0, 0, TAU); g.clip();
-    const wg = g.createLinearGradient(0, LAKE.y - LAKE.ry, 0, LAKE.y + LAKE.ry); wg.addColorStop(0, ice ? '#e2eff4' : '#6fb0cc'); wg.addColorStop(1, ice ? '#b9d4e0' : '#4a86a4'); g.fillStyle = wg; g.fillRect(LAKE.x - LAKE.rx, LAKE.y - LAKE.ry, LAKE.rx * 2, LAKE.ry * 2);
-    if (ice) { const r = rng(9); for (let k = 0; k < 14; k++) { let x = LAKE.x + (r() - .5) * LAKE.rx * 1.6, y = LAKE.y + (r() - .5) * LAKE.ry * 1.4; const pts = [[x, y]]; for (let q = 0; q < 4; q++) { x += (r() - .5) * 60; y += (r() - .5) * 24; pts.push([x, y]); } line(g, pts, 'rgba(120,150,170,.45)', .9, k); } }
-    g.strokeStyle = 'rgba(255,255,255,.3)'; g.lineWidth = 1.2;
-    if (!ice) for (let k = 0; k < 12; k++) { const yy = LAKE.y - LAKE.ry + (k + .5) * LAKE.ry * 2 / 12, xx = LAKE.x + Math.sin(t * .6 + k * 1.7) * LAKE.rx * .55; g.beginPath(); g.moveTo(xx - 20, yy); g.quadraticCurveTo(xx, yy - 2 + Math.sin(t * 2 + k), xx + 20, yy); g.stroke(); }
-    // sparkles: the Lake of Shining Waters shines
-    for (let k = 0; k < 18; k++) { const a = Math.sin(t * 2 + k * 7.1), sx = LAKE.x + Math.sin(k * 12.9) * LAKE.rx * .8, sy = LAKE.y + Math.cos(k * 7.7) * LAKE.ry * .7; if (a > .6) { g.fillStyle = `rgba(255,255,240,${(a - .6) * 2})`; g.fillRect(sx - 2, sy, 4, 1); g.fillRect(sx, sy - 2, 1, 4); } }
-    const jt = (t % 9) / 9, jx = LAKE.x + Math.sin(Math.floor(t / 9) * 3.1) * LAKE.rx * .5, jy = LAKE.y + Math.cos(Math.floor(t / 9) * 2.3) * LAKE.ry * .4;
-    if (jt < .25 && !ice) for (let k = 0; k < 3; k++) { const r = jt * 4 * 26 + k * 7; g.strokeStyle = `rgba(255,255,255,${.5 * (1 - jt * 4)})`; g.beginPath(); g.ellipse(jx, jy, r, r * .45, 0, 0, TAU); g.stroke(); }
-    g.restore();
-    ell(g, LAKE.x, LAKE.y, LAKE.rx, LAKE.ry, 'rgba(0,0,0,0)', 'rgba(60,90,110,.6)');
-    if (!ice) for (const p of pads) { ell(g, p.x, p.y, p.r, p.r * .55, '#5c9a4c', true); if (p.bloom) { ell(g, p.x + 2, p.y - 2, 3, 2.2, '#ffd7e8', true); ell(g, p.x + 2, p.y - 2.5, 1.2, 1, '#f7e27a'); } }
-    for (const b of BEDS) if (inView(b.x, b.y)) drawBed(g, b, t);
-    // grass and flowers in the breeze, parting as she walks
-    g.lineCap = 'round';
-    const TC = [['rgba(70,130,45,.85)', 'rgba(110,165,64,.85)'], ['rgba(70,120,45,.85)', 'rgba(96,150,60,.85)'], ['rgba(140,130,60,.85)', 'rgba(175,150,70,.85)'], ['rgba(150,140,110,.7)', 'rgba(150,140,110,.7)']][S];
-    const D_ = []; for (let cx = Math.floor((ox - 20) / DCH); cx * DCH < ox + vw + 20; cx++) for (let cy = Math.floor((oy - 20) / DCH); cy * DCH < oy + vh + 40; cy++) D_.push(decorAt(cx, cy));
-    for (const d of D_) for (const s of d.tufts) {
-      if (!inView(s.x, s.y, 20) || (S === 3 && s.c > .25)) continue;
-      let bend = Math.sin(t * 1.6 + s.x * .02 + s.ph * .3) * 2.2;
-      const dx = s.x - ana.x, dy = (s.y - ana.y) * 2, d = Math.hypot(dx, dy); if (d < 22) bend += (dx > 0 ? 1 : -1) * (22 - d) * .35;
-      g.strokeStyle = s.c < .5 ? TC[0] : TC[1]; g.lineWidth = 1.2; g.beginPath();
-      for (const o of [-3, 0, 3]) { g.moveTo(s.x + o, s.y); g.quadraticCurveTo(s.x + o * .6 + bend * .4, s.y - s.h * .6, s.x + o * 1.2 + bend, s.y - s.h); }
-      g.stroke();
-    }
-    // flowers: all of them in spring and summer, a few in autumn, none under the snow
-    for (const d of D_) for (let i = 0; i < d.flowers.length; i++) {
-      const f = d.flowers[i];
-      if (S === 3 || (S === 2 && i % 3) || !inView(f.x, f.y, 10)) continue;
-      const b = Math.sin(t * 1.8 + f.ph) * 1.2;
-      g.strokeStyle = '#5e9a3e'; g.lineWidth = 1; g.beginPath(); g.moveTo(f.x, f.y); g.lineTo(f.x + b, f.y - 6 * f.s); g.stroke();
-      for (let k = 0; k < 5; k++) { const a = k / 5 * TAU + f.ph; ell(g, f.x + b + Math.cos(a) * 1.8 * f.s, f.y - 6 * f.s + Math.sin(a) * 1.3 * f.s, 1.4 * f.s, 1.1 * f.s, f.c); }
-      ell(g, f.x + b, f.y - 6 * f.s, .9 * f.s, .9 * f.s, '#f2c14e');
-    }
-    for (const d of D_) for (const o of d.lupins) { if (S === 3 || (S === 2 && o.c > .3) || !inView(o.x, o.y, 20)) continue; const b = Math.sin(t * 1.4 + o.ph) * 1.4, col = ['#e88ab0', '#f2a6c4', '#d46a9c', '#c98ad8'][Math.floor(o.c * 4)], hg = 10 + o.s * 8; g.strokeStyle = '#5e9a3e'; g.lineWidth = 1; g.beginPath(); g.moveTo(o.x, o.y); g.lineTo(o.x + b, o.y - hg); g.stroke(); for (let k = 0; k < 5; k++) ell(g, o.x + b * (1 - k / 6), o.y - hg + k * 2.4, 2.2 - k * .2, 1.6, col); }
-    for (const d of D_) for (const o of d.dunes) { if (!inView(o.x, o.y, 40)) continue; ell(g, o.x, o.y, 26 * o.s, 9 * o.s, S === 3 ? '#f2f5f7' : '#e8cf9a', true); for (let k = -2; k <= 2; k++) line(g, [[o.x + k * 6, o.y - 4], [o.x + k * 7 + Math.sin(t + o.ph + k) * 2, o.y - 16 * o.s]], S === 3 ? '#b9c4cc' : '#9aa85a', 1, k); }
-    for (const d of D_) for (const o of d.rocks) if (inView(o.x, o.y, 20)) ell(g, o.x, o.y, 9 * o.s, 6 * o.s, '#a8796a', true);
-    if (inView(MILK.x, MILK.y) && S !== 3) for (let k = 0; k < 4; k++) { const x = MILK.x - 14 + k * 9, y = MILK.y + Math.sin(t * 2 + k) * 1.2; blob(g, [[x - 2.6, y], [x + 2.6, y], [x + 2.6, y - 9], [x + 1.2, y - 12], [x - 1.2, y - 12], [x - 2.6, y - 9]], 'rgba(250,250,245,.95)'); line(g, [[x - 1.2, y - 13], [x + 1.2, y - 13]], '#7a5536', 1.6, k); }
-    for (const r of reeds) { if (!inView(r.x, r.y)) continue; const b = Math.sin(t * 1.2 + r.ph) * 2; line(g, [[r.x, r.y], [r.x + b * .5, r.y - r.h * .6], [r.x + b, r.y - r.h]], S >= 2 ? '#9a8a4a' : '#6b8f3a', 1.5, r.h); ell(g, r.x + b, r.y - r.h + 3, 1.6, 3.6, '#7a5536'); }
-    g = gPantalla; if (PH_NATIVO) g.setTransform(dpr * Z, 0, 0, dpr * Z, -ox * dpr * Z, -oy * dpr * Z);   // (the floor is done: the rest, on the screen or in Phaser)
+    if (!PH_NATIVO) sueloPintar(g, ox, oy, vw, vh, t, { baldosas: true, fijo: true, vivo: true });   // (under Phaser the floor is Phaser's)
     for (const o of [...props, ...trees, ...bushes]) if (inView(o.x, o.y, 170)) list.push({ y: o.y, ph: { fijo: o }, draw: () => drawProp(g, o, t, night) });
     for (const k of Object.keys(PEOPLE)) if (sceneOf(k) === 'out') { const p = PEOPLE[k]; if (p.buggy) pushDriven(list, g, p, t, 'p:' + k); else list.push({ y: p.sortY ?? p.y, ph: { key: 'p:' + k, at: [p.x, p.y], box: PERSONA_BOX, persona: p }, draw: () => drawPerson(g, p, t) }); if (CH[k].vehicle === 'cart') list.push({ y: p.y - .5, ph: { key: 'carreta:' + k, at: [p.x, p.y], box: CARRO_BOX }, draw: () => drawCart(g, p, t) }); }
     if (cart.on && inView(cart.x, cart.y, 120)) pushCart(list, g, cart, t, 'calesa');
@@ -243,7 +248,6 @@ function renderView(){
     for (const [ka, a] of Object.entries(ANIM)) if (a.kind === 'cow' && a.where === 'out' && inView(a.x, a.y)) list.push({ y: a.y, ph: { key: 'vaca:' + ka, at: [a.x, a.y], box: [-60, -70, 60, 24] }, draw: () => drawCow(g, a, t) });
     for (const it of game.ground) if (it.scene === 'out' && inView(it.x, it.y)) list.push({ y: it.y, ph: { key: 'suelo:' + game.ground.indexOf(it), at: [it.x, it.y], box: [-24, -30, 24, 12] }, draw: () => drawGround(g, it) });
   }
-  if (g !== gPantalla) { g = gPantalla; g.setTransform(dpr * Z, 0, 0, dpr * Z, -ox * dpr * Z, -oy * dpr * Z); }   // (indoors under Phaser: back to the screen)
   const anaHere = RENDER_REAL === game.scene;
   if (anaHere && sipping()) list.push({ y: ana.y + .2, ph: { key: 'taza', at: [ana.x, ana.y], box: PERSONA_BOX }, draw: () => drawCup(g, ana) });
   if (anaHere && !ana.hidden) list.push({ y: ana.sortY ?? ana.y + (ana.sit && !inside ? 6 : 0), ph: { key: 'ana', at: [ana.x, ana.y], box: PERSONA_BOX, persona: realR.fact('adorno:ana') ? null : ana }, draw: () => { drawPerson(g, ana, t); if (realR.fact('adorno:ana') && !ana.lie && !ana.sit && LOOKS.ana.hat) ACC_OBJ.sombrero.f(g, ana); } });   // (with the wreath of flowers on her hat, the day she made it)
@@ -307,9 +311,11 @@ function renderView(){
     g.globalCompositeOperation = 'source-over';
   }
   // paper grain and a soft vignette, like a page of a sketchbook
+  if (!PH_NATIVO) {   // (under Phaser, the paper and the vignette are Phaser's: the screen above paints almost nothing)
   g.globalAlpha = .9; g.fillStyle = g.createPattern(paper, 'repeat'); g.fillRect(0, 0, W, H); g.globalAlpha = 1;
   const vg = g.createRadialGradient(W / 2, H / 2, Math.min(W, H) * .42, W / 2, H / 2, Math.max(W, H) * .75);
   vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(60,40,20,.3)'); g.fillStyle = vg; g.fillRect(0, 0, W, H);
+  }
   // speech bubbles over the heads of whoever is talking (on the screen, over the light of the day, so they read at night)
   for (const b of bubbles) { const p = personOf(b.q); if (p && (b.q === 'ana' ? anaHere : (PEOPLE[b.q] ? sceneOf(b.q) : b.q.startsWith('f:') ? FOLKBY[b.q.slice(2)]?.where : animalWhere(b.q)) === game.scene)) drawBubble(g, p, b, W, H); }
   // the little papers: what she has, the hour, what she can do
