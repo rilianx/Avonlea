@@ -25,12 +25,12 @@ function relatoSitio(k){
   let nombre = '', mejor = 1e9; for (const [, P] of Object.entries(PLACES)) { const d = Math.hypot(b.x - P[1], b.y - P[2]); if (d < mejor) { mejor = d; nombre = P[0]; } }
   return { lugar: 'Avonlea', junto: mejor < 260 ? nombre : 'camino de ' + nombre };
 }
-const relatoPostura = b => b.lie ? 'acostada' : b.sit ? 'sentada' : b.crouch ? 'agachada' : b.moving ? 'caminando' : 'de pie';
+const relatoPostura = b => b.bed ? 'acostada, en cama' : b.lie ? 'acostada' : b.sit ? 'sentada' : b.crouch ? 'agachada' : b.moving ? 'caminando' : 'de pie';
 function relatoEstado(k){
   const b = wmBody(k); if (!b) return null;
   const ag = AGENTS[k] || (k === 'ana' ? game.playAct : null), A = ag?.acting, s = relatoSitio(k);
   const inv = Object.entries(wmInv(k) || {}).filter(([, n]) => n > 0).map(([i, n]) => n + ' ' + i).join(', ');
-  return { quien: k, lugar: s.lugar, junto: s.junto, postura: relatoPostura(b), accion: A ? A.v + (A.x ? ' ' + A.x : '') : '', lleva: cosa(A?.lleva || (typeof b.carry === 'string' ? b.carry : b.carry ? 'algo' : '')), objeto: A ? [cosa(A.obj !== undefined ? A.obj : ACCION_VISTA[A.v]?.obj), A.mesa ? cosa(A.mesa[3]) + ' sobre la mesa' : ''].filter(Boolean).join(' y ') : '', tiene: inv, pelo: k === 'ana' && game.wm?.perm?.pelo_verde ? 'verde' : '' };
+  return { quien: k, lugar: s.lugar, junto: s.junto, postura: relatoPostura(b), accion: A ? A.v + (A.x ? ' ' + A.x : '') : '', lleva: cosa(A?.lleva || (typeof b.carry === 'string' ? b.carry : b.carry ? 'algo' : '')), objeto: A ? [cosa(A.obj !== undefined ? A.obj : ACCION_VISTA[A.v]?.obj), A.mesa ? cosa(A.mesa[3]) + ' sobre la mesa' : ''].filter(Boolean).join(' y ') : '', tiene: inv, pelo: k === 'ana' && game.wm?.perm?.pelo_verde ? 'verde' : '', guia: Object.entries(ANIM).filter(([, c]) => c.state === 'led' && (c.ledBy || 'ana') === k).map(([n]) => ANIMALS[n]?.name || n).join(', ') };
 }
 const relatoHora = () => { const d = dayT % 1, m = Math.floor(((d * 24 + 6) % 24) * 60); return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); };
 const relatoFrase = (e, c) => {   // (what changed, as a sentence)
@@ -42,6 +42,7 @@ const relatoFrase = (e, c) => {   // (what changed, as a sentence)
   if (c.has('objeto') && e.objeto) p.push('con ' + e.objeto);
   if (c.has('tiene')) p.push(e.tiene ? 'ahora tiene ' + e.tiene : 'ya no tiene nada');
   if (c.has('pelo') && e.pelo) p.push('tiene el pelo ' + e.pelo);
+  if (c.has('guia')) p.push(e.guia ? 'lleva de la cuerda a ' + e.guia : 'suelta la cuerda');
   return n + ' ' + p.join('; ') + '.';
 };
 function relatoLinea(texto, estado){ const L = { hora: relatoHora(), t: dayT, texto, estado }; RELATO.lineas.push(L); if (/[?&]relato/.test(location.search)) console.log('[relato] ' + L.hora + ' ' + texto); }
@@ -52,7 +53,7 @@ function relatoTick(){
   const ks = RELATO.quienes || ['ana', ...Object.keys(PEOPLE).filter(k => wmScene(k) === game.scene)];
   for (const k of ks) {
     const e = relatoEstado(k); if (!e) continue;
-    const a = RELATO.antes[k], c = new Set(a ? Object.keys(e).filter(f => f !== 'quien' && e[f] !== a[f]) : ['lugar'].concat(['accion', 'lleva', 'objeto', 'tiene', 'pelo'].filter(f => e[f])));
+    const a = RELATO.antes[k], c = new Set(a ? Object.keys(e).filter(f => f !== 'quien' && e[f] !== a[f]) : ['lugar'].concat(['accion', 'lleva', 'objeto', 'tiene', 'pelo', 'guia'].filter(f => e[f])));
     if (a && e.postura === 'caminando' && a.postura === 'caminando') c.delete('junto');   // (walking past things is not news: where she stops is)
     if (c.size) { relatoLinea((a ? '' : 'Al empezar, ') + relatoFrase(e, c), e); RELATO.antes[k] = e; }
     for (const b of bubbles) if (b.q === k && !RELATO.globo.has(b)) { RELATO.globo.add(b); relatoLinea(wmName(k) + ' dice: «' + b.text + '»', { ...e, dice: b.text }); }

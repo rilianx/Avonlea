@@ -64,7 +64,7 @@ module.exports = [
     relato: 'Ana va al granero y descuelga la cuerda de su gancho. Le pone la cuerda a la vaca y la lleva, despacio, hasta quien la compra. Hacen el trato y Ana vuelve con el dinero.',
     pasos: [
       { quien: 'ana', junto: /granero/, accion: /tomar cuerda/, texto: 'Toma la cuerda en el granero.' },
-      { quien: 'ana', accion: /guiar|llevar/, texto: 'Lleva a la vaca de la cuerda.' },
+      { quien: 'ana', guia: /./, texto: 'Lleva a la vaca de la cuerda.' },
       { quien: 'ana', tiene: /dolares/, texto: 'Vuelve con el dinero de la venta.' },
     ],
   },

@@ -83,7 +83,8 @@ function update(dt){
     if (CHAT_HOLD[k] > TT) { p.moving = false; continue; }   // (stopped for a chat)
     if (k === game.tripWith) { p.want = p.where; continue; }   // (he went with Ana to Bright River)
     if (p.where === 'camino') continue;   // (on the road: it takes them home)
-    p.want = (game.wm?.sick || []).includes(k) && HOUSES[c.home] ? c.home : p.story ? p.story.room : (p.away && p.away.day === today() && hr < p.away.until) ? 'away' : c.routine ? c.routine.want(hr, today()) : c.home;
+    p.want = p.recibe && p.recibe.hasta > TT && HOUSES[c.home] ? c.home : (game.wm?.sick || []).includes(k) && HOUSES[c.home] ? c.home :   // (someone is coming to visit her: she stays home, or goes back)
+      p.story ? p.story.room : (p.away && p.away.day === today() && hr < p.away.until) ? 'away' : c.routine ? c.routine.want(hr, today()) : c.home;
     if (p.story?.place && p.where === 'out') p.target = { place: p.story.place, until: 99, story: true };
     if (c.hostGoals) p.goals = Object.keys(PEOPLE).some(o => visiting(o) && PEOPLE[o].where === p.where) ? c.hostGoals : p.base;
     if (p.where === 'br' && p.want !== 'br') { roadStart(k, 0, 1); continue; }

@@ -63,7 +63,7 @@ const ACC_PASOS = {
     { p: [TABLE.x + 20, TABLE.y + 18], mira: 0, dur: M(3), obj: 'recoger', hecho: () => { game.mesa = { dia: today(), sucia: false }; } },
     { p: [KX.fregadero.x, KX.fregadero.y + 34], mira: 0, dur: M(12), lleva: 'platos_sucios', obj: 'lavar' },
     { p: [KX.aparador.x + 46, KX.aparador.y + 6], mira: 3, dur: M(3), lleva: 'platos', obj: 'aparador' }],
-  'quehacer:barrer': me => wmScene(me) !== 'gg' ? null : [[3.2, 6.6], [5, 7.6], [8.6, 7.2], [10.2, 6], [4.4, 4.6]].map(([x, y]) => ({ p: [x * T, y * T], dur: M(2.5), obj: 'escoba' })),
+  'quehacer:barrer': me => wmScene(me) !== 'gg' ? null : [[3.2, 6.6], [5, 7.6], [8.6, 7.2], [10.2, 6], [4.4, 4.6]].map(([x, y]) => ({ p: [x * T, y * T], dur: M(2.5), obj: 'escoba', lleva: 'escoba' })),
   escribir_carta: me => me === 'ana' && enCasa(me) ? [{ lugar: 'pieza', p: [GA.table.x - 12, GA.table.y + 8], mira: 0, sentar: true, dur: M(25), obj: 'banqueta', mesa: [GA.table.x + 15, GA.table.y - 25, GA.table.y + 1, 'carta'] }] : null,
   escribir_cuento: me => me === 'ana' && enCasa(me) ? [{ lugar: 'pieza', p: [GA.table.x - 12, GA.table.y + 8], mira: 0, sentar: true, dur: M(40), obj: 'banqueta', mesa: [GA.table.x + 15, GA.table.y - 25, GA.table.y + 1, 'cuaderno'] }] : null,
   estudiar: me => wmScene(me) === 'gg' ? [{ p: SEATS.ana.slice(0, 2), mira: 2, sentar: true, dur: M(40), obj: null, mesa: [SEATS.ana[0], TABLE.y - 31, TABLE.y + 1, 'libro'] }] : wmScene(me) === 'es' || personKey(me) === 'escuela' ? [{ lugar: 'h:es', p: [SCHOOL_DESKS[5].x - 6, SCHOOL_DESKS[5].y + 10], mira: 0, sentar: true, dur: M(40), obj: null, mesa: [SCHOOL_DESKS[5].x + 10, SCHOOL_DESKS[5].y - 12, SCHOOL_DESKS[5].y + 1, 'libro'] }] : null,   // (at the kitchen table or her desk at school, the book open on it)

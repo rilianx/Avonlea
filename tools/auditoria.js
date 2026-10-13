@@ -8,7 +8,7 @@ const fs = require('fs'), path = require('path');
 const root = path.resolve(__dirname, '..'), ESP = require('./auditoria/esperado.js');
 const pedidos = process.argv.slice(2).map(Number), lista = pedidos.length ? ESP.filter(e => pedidos.includes(e.id)) : ESP;
 const minutos = t => t * 24 * 60, hh = m => String(Math.floor((m / 60 + 6) % 24)).padStart(2, '0') + ':' + String(Math.floor(m % 60)).padStart(2, '0');
-const CAMPOS = ['lugar', 'junto', 'postura', 'accion', 'lleva', 'objeto', 'tiene', 'pelo', 'dice'];
+const CAMPOS = ['lugar', 'junto', 'postura', 'accion', 'lleva', 'objeto', 'tiene', 'pelo', 'guia', 'dice'];
 const cumple = (paso, e) => e && e.quien === paso.quien && CAMPOS.every(f => !paso[f] || paso[f].test(e[f] || ''));
 // each step in order: the first moment it is seen after the previous one; and how long it lasted (until it is not so)
 function comparar(esp, lineas){
@@ -21,7 +21,8 @@ function comparar(esp, lineas){
       continue;
     }
     const t0 = minutos(lineas[i].t); let t1 = null;
-    for (let j = i + 1; j < lineas.length; j++) if (lineas[j].estado?.quien === p.quien && !lineas[j].estado.dice && !cumple(p, lineas[j].estado)) { t1 = minutos(lineas[j].t); break; }
+    const acc = lineas[i].estado.accion;   // (while the same action goes on, its in-betweens (walking from spot to spot, sitting down again) do not cut it)
+    for (let j = i + 1; j < lineas.length; j++) { const e = lineas[j].estado; if (e?.quien === p.quien && !e.dice && !e.resumen && !cumple(p, e) && !(acc && e.accion === acc)) { t1 = minutos(lineas[j].t); break; } }
     const dura = t1 == null ? null : t1 - t0, corto = p.dura && dura != null && dura < p.dura;
     out.push({ ok: !corto, p, nota: hh(t0) + (dura != null ? ', ' + Math.round(dura) + ' min' : ', hasta el final') + (corto ? ' (se esperaban al menos ' + p.dura + ')' : '') });
     desde = i + 1;

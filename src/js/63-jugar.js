@@ -80,12 +80,18 @@ function wmExec0(ag, a, st, dt){
       inv.leche = (inv.leche || 0) + 2; realR.setFact('ordeñada:' + a.cow); float('+2 jarros de leche', b.x, b.y - 50); logEv(`${wmName(me)} ordeñó a ${ANIMALS[a.cow].name}.`, []); return 'ok';
     }
     case 'alimentar': { if (!wait(3)) return 'run'; realR.setFact('alimentados:' + a.p); float('🌾', b.x, b.y - 50); logEv(`${wmName(me)} les dio de comer a los animales en ${WP_NAME[a.p]}.`, []); return 'ok'; }
-    case 'visitar': {
+    case 'visitar': {   // (at her house: if she is out, she goes home to receive the visit, and one waits for her inside)
+      const casa = CH[a.k]?.home, h = PEOPLE[a.k];
+      if (h && HOUSES[casa]) {
+        if (!st.casa) { st.casa = 1; h.recibe = { hasta: TT + M(60), de: me }; }
+        const rc = wmMove(me, 'h:' + casa, dt); if (rc !== 'ok') return rc;
+        if (wmScene(a.k) !== casa) { st.espera = (st.espera || 0) + dt; if (st.espera > M(40)) { delete h.recibe; st.why = wmName(a.k) + ' no llegó a su casa'; return 'fail'; } return 'run'; }
+      }
       const r = reach(a.k); if (r !== 'ok') return r;
       if (!st.said) { st.said = 1; bubble(me, `Buenas tardes, ${callName(a.k)}. Vine a visitarla.`); }
       if (st.said === 1 && wait(2.6)) { st.said = 2; st.w = 0; bubble(a.k, '¡Pasa, pasa! Siéntate, que pongo la tetera.'); }
       if (st.said !== 2 || !wait(3)) return 'run';
-      realR.setFact('visita:' + me + '>' + a.k); relSetW(a.k, me, relGetW(a.k, me) + 1); logEv(`${wmName(me)} visitó a ${wmName(a.k)}.`, []); return 'ok';
+      if (h) delete h.recibe; realR.setFact('visita:' + me + '>' + a.k); relSetW(a.k, me, relGetW(a.k, me) + 1); logEv(`${wmName(me)} visitó a ${wmName(a.k)}.`, []); return 'ok';
     }
     case 'devolver': {
       const r = reach(a.k); if (r !== 'ok') return r;
