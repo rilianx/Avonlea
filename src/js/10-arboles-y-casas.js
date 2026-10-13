@@ -1,4 +1,5 @@
 /* ---------- trees, houses and the rest ---------- */
+let PH_HUMOS = null;   // (while Phaser bakes a house: where its chimneys smoke)
 function drawTree(c, o, t){
   const s = o.s, sway = Math.sin(t * .9 + o.ph) * 1.6 * s, x = o.x, y = o.y;
   ell(c, x + 10 * s, y + 2, 30 * s, 10 * s, 'rgba(30,50,20,.22)');
@@ -117,6 +118,7 @@ function drawHouse(c, o, t, night){
   if (S === 3) ell(c, chx, chy - 31, 9, 3, '#f6f8fb', true);
   // smoke from the chimney (more of it in autumn and winter, when the fires are lit all day)
   const sm = S >= 2 ? .6 : .42, nk = S >= 2 ? 9 : 6;
+  if (PH_HUMOS) { PH_HUMOS.push([chx, chy - 36, sm, nk]); return; }   // (baking it for Phaser: there the smoke is particles, rising for ever)
   for (let k = 0; k < nk; k++) { const q = ((t * .22 + k / nk) % 1), sx = chx + Math.sin(q * 6 + k) * 6 + q * 22, sy = chy - 36 - q * 70; ell(c, sx, sy, 5 + q * 12, 4 + q * 9, `rgba(245,245,240,${sm * (1 - q)})`); }
 }
 function drawBarn(c, o){

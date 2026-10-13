@@ -9,7 +9,7 @@
      into its own little canvas, in the same order of depth. So it looks the same, and from here each kind of thing
      can move to real sprites (sheets) without touching the rest.
    - One clock: Phaser's own loop sleeps and the game steps it after each frame. ---------- */
-const PH = { on: false, ready: false, game: null, scene: null, R: 0, vivos: new Map(), hojas: new Map(), caras: new Map(), sala: null, motivo: {} };   // (motivo: why each one was drawn from a sheet or live, for the tests)
+const PH = { on: false, ready: false, game: null, scene: null, R: 0, vivos: new Map(), hojas: new Map(), caras: new Map(), fijos: new Map(), sala: null, motivo: {} };   // (motivo: why each one was drawn from a sheet or live, for the tests)
 (() => {
   if (/visor/.test(location.search)) return;
   const q = location.search.match(/motor=(phaser|canvas)/);
@@ -22,9 +22,11 @@ const PH = { on: false, ready: false, game: null, scene: null, R: 0, vivos: new 
   document.head.appendChild(s);
 })();
 function phArrancar(){
+  // three layers: the floor (a canvas of its own, drawn as always), Phaser (whatever stands on it), the screen (the rest, on top)
   const div = document.createElement('div'); div.id = 'ph'; div.style.cssText = 'position:fixed;inset:0;display:none'; cv.before(div);
+  PH.suelo = document.createElement('canvas'); PH.suelo.id = 'phsuelo'; PH.suelo.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;display:none'; div.before(PH.suelo);
   const dpr = devicePixelRatio || 1;
-  PH.game = new Phaser.Game({ type: Phaser.AUTO, parent: div, backgroundColor: '#2b2219', banner: false, audio: { noAudio: true },
+  PH.game = new Phaser.Game({ type: Phaser.AUTO, parent: div, transparent: true, banner: false, audio: { noAudio: true },
     input: { keyboard: false, mouse: false, touch: false, gamepad: false },   // (the touches are the game's, on the screen above)
     scale: { mode: Phaser.Scale.NONE, width: Math.round(innerWidth * dpr), height: Math.round(innerHeight * dpr), zoom: 1 / dpr },
     scene: { create(){ PH.scene = this; PH.ready = true; PH.game.loop.sleep();
@@ -39,6 +41,12 @@ function phRepintar(){
   for (const V of PH.vivos.values()) { V.img.destroy(); PH.scene.textures.remove(V.tk); } PH.vivos.clear(); PH.sala = null; PH.fuego?.destroy(); PH.fuego = null;
   for (const H of PH.hojas.values()) PH.scene.textures.remove(H.tk); PH.hojas.clear();
   for (const C of PH.caras.values()) C.img.destroy(); PH.caras.clear();
+  for (const F of PH.fijos.values()) phFijoFuera(F); PH.fijos.clear();
+}
+// the floor's canvas, the size of the screen
+function phSuelo(W, H, dpr){
+  const c = PH.suelo, w = Math.round(W * dpr), h = Math.round(H * dpr); if (c.width !== w || c.height !== h) { c.width = w; c.height = h; }
+  return c.getContext('2d');
 }
 /* ---------- the people from sheets (step 2): each pose drawn once, the first time it is needed, by the same code ----------
    A person standing, walking or bending down, quiet, is shown from a strip of her direction (standing, 8 steps, bending
@@ -78,11 +86,11 @@ function phHoja(b, key, depth, t){
   return true;
 }
 // does Phaser draw this place? (and shows its canvas, or hides it)
-function phNativo(interior){
-  const si = PH.ready && interior && !!ROOMS[game.scene];
+function phNativo(sitio){
+  const si = PH.ready && sitio && (game.scene === 'out' || !!ROOMS[game.scene]);
   if (si && !PH.antes) phRepintar();   // (coming in again from outside: the room baked fresh)
   PH.antes = si;
-  const div = PH.game && PH.game.canvas?.parentNode; if (div) div.style.display = si ? '' : 'none';
+  const div = PH.game && PH.game.canvas?.parentNode; if (div) div.style.display = si ? '' : 'none'; if (PH.suelo) PH.suelo.style.display = si ? '' : 'none';
   return si;
 }
 // a sprite drawn by the game's own code: a little canvas of its own (box: [left, top, right, bottom] around `at`)
@@ -119,6 +127,45 @@ function phSala(v){
     });
   } else muebles.forEach((m, j) => { const V = PH.vivos.get('mueble:' + j); if (V) V.usado = PH.cuadro; });
 }
+/* ---------- Avonlea outdoors (step 3): the trees, the houses, the fences... baked once ----------
+   Each one is drawn once by its own code (again if it changes: the season, the night, the apples on the tree), in a box
+   measured the first time. The trees sway as always, turning a little on their trunk; the smoke of the chimneys is
+   Phaser's particles. */
+const FIJO_BOX = [-300, -440, 300, 90];   // (where to look for it the first time: the biggest house, the tallest tree)
+const phFijoFuera = F => { F.img?.destroy(); if (F.tk) PH.scene.textures.remove(F.tk); for (const e of F.humo || []) e.destroy(); };
+const phCampos = o => { let s = ''; for (const k in o) { const v = o[k]; if (v === null || typeof v !== 'object' && typeof v !== 'function') s += k + ':' + v + ';'; } return s; };   // (what it is made of: its own plain values)
+function phFijo(o, depth, v){
+  const sc = PH.scene, Rf = Math.min(PH.R, 2.5), noche = Math.round(v.night * 10);
+  const sig = S + '|' + noche + '|' + Rf + '|' + phCampos(o) + (o.kind === 'pump' ? '|' + game.hasCan + game.ground.some(it => it.k === 'can') : '');
+  let F = PH.fijos.get(o);
+  if (!F) { F = {}; PH.fijos.set(o, F); }
+  const arbol = /^(tree|oak|pine|apple|blossom|manzano)$/.test(o.kind);
+  if (F.sig !== sig) {
+    if (!F.box) {   // (measured once: drawn on a big canvas, the box is where it painted)
+      const B = FIJO_BOX, cv0 = document.createElement('canvas'); cv0.width = B[2] - B[0]; cv0.height = B[3] - B[1]; const c = cv0.getContext('2d'); c.setTransform(1, 0, 0, 1, -(o.x + B[0]), -(o.y + B[1]));
+      const pant = g; g = c; PH_HUMOS = []; try { drawProp(c, o, arbol ? -o.ph / .9 : v.t, v.night); } finally { g = pant; PH_HUMOS = null; }
+      const d = c.getImageData(0, 0, cv0.width, cv0.height).data; let x0 = 1e9, y0 = 1e9, x1 = -1, y1 = -1;
+      for (let y = 0; y < cv0.height; y++) for (let x = 0; x < cv0.width; x++) if (d[(y * cv0.width + x) * 4 + 3]) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+      F.box = x1 < 0 ? [0, 0, 1, 1] : [B[0] + x0 - 8, B[1] + y0 - 10, B[0] + x1 + 8, B[1] + y1 + 6];
+    }
+    const b = F.box, w = Math.max(1, Math.ceil((b[2] - b[0]) * Rf)), h = Math.max(1, Math.ceil((b[3] - b[1]) * Rf));
+    if (!F.tk || F.w !== w || F.h !== h) { phFijoFuera(F); F.tk = 'o' + (PH.seq = (PH.seq || 0) + 1); F.tex = sc.textures.createCanvas(F.tk, w, h); F.w = w; F.h = h; F.img = sc.add.image(0, 0, F.tk); F.humo = null; }
+    const c = F.tex.getContext(); c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, w, h); c.setTransform(Rf, 0, 0, Rf, -(o.x + b[0]) * Rf, -(o.y + b[1]) * Rf);
+    const humos = []; const pant = g; g = c; PH_HUMOS = humos; try { drawProp(c, o, arbol ? -o.ph / .9 : v.t, v.night); } finally { g = pant; PH_HUMOS = null; }
+    F.tex.refresh(); F.sig = sig;
+    for (const e of F.humo || []) e.destroy();
+    F.humo = humos.map(([x, y, sm, nk]) => sc.add.particles(x, y, phTexHumo(), { lifespan: 4500, frequency: 4500 / nk, speedX: { min: 2, max: 8 }, speedY: { min: -18, max: -13 }, scale: { start: .35, end: 1.1 }, alpha: { start: sm, end: 0 }, rotate: { min: 0, max: 360 } }).setDepth(depth + .5));
+    F.img.setOrigin(-b[0] / (b[2] - b[0]), -b[1] / (b[3] - b[1])).setScale(1 / Rf);   // (its origin at its foot: a tree turns on its trunk)
+  }
+  F.img.setPosition(o.x, o.y).setDepth(depth).setVisible(true).setRotation(arbol ? Math.sin(v.t * .9 + o.ph) * 1.6 * o.s / (110 * o.s) : 0);
+  for (const e of F.humo || []) e.setVisible(true);
+  F.usado = PH.cuadro;
+}
+// a soft puff of smoke, made once
+function phTexHumo(){
+  if (!PH.scene.textures.exists('humo')) { const c = document.createElement('canvas'); c.width = c.height = 32; const x = c.getContext('2d'), gr = x.createRadialGradient(16, 16, 2, 16, 16, 15); gr.addColorStop(0, 'rgba(245,245,240,1)'); gr.addColorStop(1, 'rgba(245,245,240,0)'); x.fillStyle = gr; x.fillRect(0, 0, 32, 32); PH.scene.textures.addCanvas('humo', c); }
+  return 'humo';
+}
 // the little lives of a room that its baked image cannot have: the fire in the stove flickers
 function phEfectos(v){
   let F = PH.fuego;
@@ -134,8 +181,14 @@ function phMundo(list, v){
   if (R !== PH.R) { PH.R = R; phRepintar(); }   // (another size of screen: everything again, sharp)
   PH.cuadro = (PH.cuadro || 0) + 1;
   const cam = sc.cameras.main; cam.setZoom(v.Z * dpr); cam.centerOn(v.ox + v.W / v.Z / 2, v.oy + v.H / v.Z / 2);
-  phSala(v);
-  list.forEach((o, i) => { const p = o.ph || { key: 'suelto:' + i, at: [0, 0], box: [0, 0, KIT.w, KIT.h] }; if (!(p.persona && !PH.sinHojas && phHoja(p.persona, p.key, o.y + i * 1e-6, v.t))) phVivo(p.key, p.at, p.box, o.y + i * 1e-6, o.draw); });
+  if (game.scene !== 'out') phSala(v);
+  const vw = v.W / v.Z, vh = v.H / v.Z;   // (anything not told where it is: drawn over the whole view, and noted to be told)
+  list.forEach((o, i) => {
+    const d = o.y + i * 1e-6, p = o.ph || (((PH.sueltos ??= new Set()).add(o.draw.toString().slice(0, 60))), { key: 'suelto:' + i, at: [v.ox, v.oy], box: [0, 0, vw, vh] });
+    if (p.fijo) return phFijo(p.fijo, d, v);
+    if (!(p.persona && !PH.sinHojas && phHoja(p.persona, p.key, d, v.t))) phVivo(p.key, p.at, p.box, d, o.draw);
+  });
+  for (const [o, F] of PH.fijos) if (F.usado !== PH.cuadro) { if (PH.cuadro - (F.usado || 0) > 900) { phFijoFuera(F); PH.fijos.delete(o); } else { F.img?.setVisible(false); for (const e of F.humo || []) e.setVisible(false); } }   // (out of sight; long out of sight: its memory back)
   for (const [k, C] of PH.caras) if (C.usado !== PH.cuadro) C.img.setVisible(false);   // (drawn live this frame, or gone)
   phEfectos(v);
   for (const [k, V] of PH.vivos) if (V.usado !== PH.cuadro) {

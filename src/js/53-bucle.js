@@ -167,8 +167,9 @@ function renderView(){
   const vw = W / Z, vh = H / Z;
   const ox = inside ? (KIT.w - vw) / 2 : clamp(cam.x - vw / 2, 0, (road ? RW : WW) - vw), oy = inside ? (KIT.h - vh) / 2 : clamp(cam.y - vh / 2, 0, (road ? RH : WH) - vh);
   view.ox = ox; view.oy = oy; view.Z = Z; view.inside = inside;
-  PH_NATIVO = phNativo(inside && !road);   // (Phaser draws this place's world, under a transparent screen with the rest on top)
-  g.setTransform(dpr, 0, 0, dpr, 0, 0); if (PH_NATIVO) g.clearRect(0, 0, W, H); else { g.fillStyle = '#2b2219'; g.fillRect(0, 0, W, H); }
+  PH_NATIVO = phNativo(!road);   // (Phaser draws this place's world, under a transparent screen with the rest on top)
+  const gPantalla = g; if (PH_NATIVO) { g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H); g = phSuelo(W, H, dpr); }   // (under Phaser, the floor is drawn on a canvas below it)
+  g.setTransform(dpr, 0, 0, dpr, 0, 0); g.fillStyle = '#2b2219'; g.fillRect(0, 0, W, H);
   g.setTransform(dpr * Z, 0, 0, dpr * Z, -ox * dpr * Z, -oy * dpr * Z);
   const inView = (x, y, m = 80) => x > ox - m && x < ox + vw + m && y > oy - m && y < oy + vh + m * 2;
   const list = [];
@@ -231,16 +232,18 @@ function renderView(){
     for (const d of D_) for (const o of d.rocks) if (inView(o.x, o.y, 20)) ell(g, o.x, o.y, 9 * o.s, 6 * o.s, '#a8796a', true);
     if (inView(MILK.x, MILK.y) && S !== 3) for (let k = 0; k < 4; k++) { const x = MILK.x - 14 + k * 9, y = MILK.y + Math.sin(t * 2 + k) * 1.2; blob(g, [[x - 2.6, y], [x + 2.6, y], [x + 2.6, y - 9], [x + 1.2, y - 12], [x - 1.2, y - 12], [x - 2.6, y - 9]], 'rgba(250,250,245,.95)'); line(g, [[x - 1.2, y - 13], [x + 1.2, y - 13]], '#7a5536', 1.6, k); }
     for (const r of reeds) { if (!inView(r.x, r.y)) continue; const b = Math.sin(t * 1.2 + r.ph) * 2; line(g, [[r.x, r.y], [r.x + b * .5, r.y - r.h * .6], [r.x + b, r.y - r.h]], S >= 2 ? '#9a8a4a' : '#6b8f3a', 1.5, r.h); ell(g, r.x + b, r.y - r.h + 3, 1.6, 3.6, '#7a5536'); }
-    for (const o of [...props, ...trees, ...bushes]) if (inView(o.x, o.y, 170)) list.push({ y: o.y, draw: () => drawProp(g, o, t, night) });
-    for (const k of Object.keys(PEOPLE)) if (sceneOf(k) === 'out') { const p = PEOPLE[k]; if (p.buggy) pushDriven(list, g, p, t); else list.push({ y: p.sortY ?? p.y, draw: () => drawPerson(g, p, t) }); if (CH[k].vehicle === 'cart') list.push({ y: p.y - .5, draw: () => drawCart(g, p, t) }); }
-    if (cart.on && inView(cart.x, cart.y, 120)) pushCart(list, g, cart, t);
-    for (const f of FOLK) if (f.where === 'out' && inView(f.x, f.y)) list.push({ y: f.sortY ?? f.y, draw: () => drawPerson(g, f, t) });
-    for (const a of FAUNA) if (inView(a.x, a.y - (a.alt || 0), 60)) list.push({ y: a.fly ? a.y + 1e5 : a.water ? a.y - 40 : a.y, draw: () => FAUNA_DRAW[a.kind](g, a, t) });
-    for (const b of BUGGIES) if (inView(b.x, b.y, 120)) list.push({ y: b.y + 1, draw: () => drawBuggy(g, b, t) });
-    if (dest && inView(dest.x, dest.y)) list.push({ y: dest.y, draw: () => { const w = Math.sin(t * 4) * 2; ell(g, dest.x, dest.y, 8, 3, 'rgba(30,40,20,.25)'); line(g, [[dest.x, dest.y], [dest.x, dest.y - 30]], '#5a3a24', 1.6, 1); blob(g, [[dest.x, dest.y - 30], [dest.x + 16, dest.y - 25 + w * .3], [dest.x, dest.y - 20]], '#d9433b'); } });
-    for (const a of Object.values(ANIM)) if (a.kind === 'cow' && a.where === 'out' && inView(a.x, a.y)) list.push({ y: a.y, draw: () => drawCow(g, a, t) });
-    for (const it of game.ground) if (it.scene === 'out' && inView(it.x, it.y)) list.push({ y: it.y, draw: () => drawGround(g, it) });
+    g = gPantalla; if (PH_NATIVO) g.setTransform(dpr * Z, 0, 0, dpr * Z, -ox * dpr * Z, -oy * dpr * Z);   // (the floor is done: the rest, on the screen or in Phaser)
+    for (const o of [...props, ...trees, ...bushes]) if (inView(o.x, o.y, 170)) list.push({ y: o.y, ph: { fijo: o }, draw: () => drawProp(g, o, t, night) });
+    for (const k of Object.keys(PEOPLE)) if (sceneOf(k) === 'out') { const p = PEOPLE[k]; if (p.buggy) pushDriven(list, g, p, t, 'p:' + k); else list.push({ y: p.sortY ?? p.y, ph: { key: 'p:' + k, at: [p.x, p.y], box: PERSONA_BOX, persona: p }, draw: () => drawPerson(g, p, t) }); if (CH[k].vehicle === 'cart') list.push({ y: p.y - .5, ph: { key: 'carreta:' + k, at: [p.x, p.y], box: CARRO_BOX }, draw: () => drawCart(g, p, t) }); }
+    if (cart.on && inView(cart.x, cart.y, 120)) pushCart(list, g, cart, t, 'calesa');
+    for (const f of FOLK) if (f.where === 'out' && inView(f.x, f.y)) list.push({ y: f.sortY ?? f.y, ph: { key: 'f:' + f.id, at: [f.x, f.y], box: PERSONA_BOX, persona: f }, draw: () => drawPerson(g, f, t) });
+    for (const a of FAUNA) if (inView(a.x, a.y - (a.alt || 0), 60)) list.push({ y: a.fly ? a.y + 1e5 : a.water ? a.y - 40 : a.y, ph: { key: 'fauna:' + FAUNA.indexOf(a), at: [a.x, a.y], box: [-70, -90 - (a.alt || 0), 70, 30] }, draw: () => FAUNA_DRAW[a.kind](g, a, t) });
+    for (const b of BUGGIES) if (inView(b.x, b.y, 120)) list.push({ y: b.y + 1, ph: { key: 'buggy:' + BUGGIES.indexOf(b), at: [b.x, b.y], box: CARRO_BOX }, draw: () => drawBuggy(g, b, t) });
+    if (dest && inView(dest.x, dest.y)) list.push({ y: dest.y, ph: { key: 'destino', at: [dest.x, dest.y], box: [-12, -40, 26, 8] }, draw: () => { const w = Math.sin(t * 4) * 2; ell(g, dest.x, dest.y, 8, 3, 'rgba(30,40,20,.25)'); line(g, [[dest.x, dest.y], [dest.x, dest.y - 30]], '#5a3a24', 1.6, 1); blob(g, [[dest.x, dest.y - 30], [dest.x + 16, dest.y - 25 + w * .3], [dest.x, dest.y - 20]], '#d9433b'); } });
+    for (const [ka, a] of Object.entries(ANIM)) if (a.kind === 'cow' && a.where === 'out' && inView(a.x, a.y)) list.push({ y: a.y, ph: { key: 'vaca:' + ka, at: [a.x, a.y], box: [-60, -70, 60, 24] }, draw: () => drawCow(g, a, t) });
+    for (const it of game.ground) if (it.scene === 'out' && inView(it.x, it.y)) list.push({ y: it.y, ph: { key: 'suelo:' + game.ground.indexOf(it), at: [it.x, it.y], box: [-24, -30, 24, 12] }, draw: () => drawGround(g, it) });
   }
+  if (g !== gPantalla) { g = gPantalla; g.setTransform(dpr * Z, 0, 0, dpr * Z, -ox * dpr * Z, -oy * dpr * Z); }   // (indoors under Phaser: back to the screen)
   const anaHere = RENDER_REAL === game.scene;
   if (anaHere && sipping()) list.push({ y: ana.y + .2, ph: { key: 'taza', at: [ana.x, ana.y], box: PERSONA_BOX }, draw: () => drawCup(g, ana) });
   if (anaHere && !ana.hidden) list.push({ y: ana.sortY ?? ana.y + (ana.sit && !inside ? 6 : 0), ph: { key: 'ana', at: [ana.x, ana.y], box: PERSONA_BOX, persona: realR.fact('adorno:ana') ? null : ana }, draw: () => { drawPerson(g, ana, t); if (realR.fact('adorno:ana') && !ana.lie && !ana.sit && LOOKS.ana.hat) ACC_OBJ.sombrero.f(g, ana); } });   // (with the wreath of flowers on her hat, the day she made it)
