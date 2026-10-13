@@ -7196,7 +7196,8 @@ function pickTask(ag){
   walk(start, me, new Set(), [], 0);
   return best;
 }
-// (a task may take longer the farther it is and the slower one walks: its budget of time, set when it is chosen)
+// (a task may take longer the farther it is and the slower one walks, and the longer its action lasts (washing the
+// dishes is a quarter of an hour): its budget of time, set when it is chosen)
 const SELF_MOVING = ['dar', 'vender', 'comprar', 'cambiar', 'conversar', 'disculparse', 'pedir', 'interceder', 'guiar', 'visitar', 'devolver', 'jurar', 'perdonar', 'cuidar', 'regañar', 'subir_calesa', 'leer_cuento', 'felicitar', 'consolar', 'pedir_permiso', 'merendar'];
 // the player gives Ana something else to do (walks her, taps somewhere, talks): her plan waits; after a while with
 // nothing asked of her she takes it up again (planned anew from where she is and what she has now)
@@ -7234,7 +7235,7 @@ function agentTick(dt){
       g.waited = true; g.waitUntil = TT + (pendingOn(g) ? 3 : g.partial ? 2 : 20); if (pendingOn(g)) g.tries--; agentLog(ag, '⏳ espera' + (pendingOn(g) ? ' lo que pidió' : '') + ': ' + g.label);
     }
     if (!activeGoals(ag).length) { agentIdle(ag); continue; }
-    if (!ag.task || ag.task.st !== 'todo') { ag.task = pickTask(ag); if (ag.task) { ag.task.t = 0; ag.task.step = { a: ag.task.a, t: 0 }; const q = taskPoint(ag, ag.task).q, b = wmBody(ag.who); ag.task.budget = 90 + (q && b ? 2 * dist(b.x, b.y, q[0], q[1]) / wmPace(ag) : 60) + accDuracion(ag.task.a, ag.who) * 1.5;   // (and what doing it takes: washing the dishes is a quarter of an hour) agentLog(ag, '→ ' + stepText(ag.task.a) + (activeGoals(ag).length > 1 ? ' (' + ag.task.g.label + ')' : '')); } }
+    if (!ag.task || ag.task.st !== 'todo') { ag.task = pickTask(ag); if (ag.task) { ag.task.t = 0; ag.task.step = { a: ag.task.a, t: 0 }; const q = taskPoint(ag, ag.task).q, b = wmBody(ag.who); ag.task.budget = 90 + (q && b ? 2 * dist(b.x, b.y, q[0], q[1]) / wmPace(ag) : 60) + accDuracion(ag.task.a, ag.who) * 1.5; agentLog(ag, '→ ' + stepText(ag.task.a) + (activeGoals(ag).length > 1 ? ' (' + ag.task.g.label + ')' : '')); } }
     const t = ag.task;
     if (!t) { if (ag.st !== 'wait') { ag.st = 'wait'; wmRelease(ag.who); } continue; }
     if (distractCheck(ag)) continue;
@@ -7950,7 +7951,8 @@ function wmExec0(ag, a, st, dt){
     case 'trineo': { if (!st.said) { st.said = 1; bubble(me, '¡Allá vamos, colina abajo! ¡Agárrate fuerte!'); } if (!wait(5)) return 'run'; realR.setFact('trineo:' + me); logEv(`${wmName(me)} se tiró en trineo por la colina.`, []); return 'ok'; }
     case 'pedir_permiso': { const r = reach('marilla'); if (r !== 'ok') return r; if (!st.said) { st.said = 1; bubble(me, 'Marilla, ¿puedo ir al picnic de la escuela dominical? ¡Va a haber helado!'); } if (st.said === 1 && wait(3)) { st.said = 2; st.w = 0; bubble('marilla', 'Está bien, puedes ir. Y te pongo una canasta con algo rico.'); } if (st.said !== 2 || !wait(2.5)) return 'run'; realR.setFact('permiso:picnic'); logEv(`Marilla le dio permiso a ${wmName(me)} para ir al picnic.`, []); return 'ok'; }
     case 'merendar': { const r = reach(a.k); if (r !== 'ok') return r; if (!(inv.canasta > 0)) { st.why = 'no tiene la canasta'; return 'fail'; } if (!st.said) { st.said = 1; bubble(me, '¡Un picnic junto al lago! Y hay helado… ¡nunca había probado helado! Es indescriptible.'); } if (!wait(5)) return 'run'; inv.canasta -= 1; realR.setFact('picnic:' + me); realR.setFact('picnic:' + a.k); logEv(`${wmName(me)} fue de picnic al lago con ${wmName(a.k)}.`, []); return 'ok'; }
-    case 'teñir': { if (!(inv.tinte > 0)) { st.why = 'no tiene el tinte'; return 'fail'; } if (!wait(4)) return 'run'; bubble(me, 'Ya está… a ver… ¡¿VERDE?! ¡Mi pelo está VERDE!');   // (the surprise, when it is done) inv.tinte -= 1; realR.setFact('pelo_teñido:' + me); if (me === 'ana') realR.setPerm('pelo_verde'); logEv(`${wmName(me)} se tiñó el pelo… y le quedó verde.`, []); return 'ok'; }
+    // (dyeing: the surprise comes when it is done)
+    case 'teñir': { if (!(inv.tinte > 0)) { st.why = 'no tiene el tinte'; return 'fail'; } if (!wait(4)) return 'run'; bubble(me, 'Ya está… a ver… ¡¿VERDE?! ¡Mi pelo está VERDE!'); inv.tinte -= 1; realR.setFact('pelo_teñido:' + me); if (me === 'ana') realR.setPerm('pelo_verde'); logEv(`${wmName(me)} se tiñó el pelo… y le quedó verde.`, []); return 'ok'; }
     case 'cortar_pelo': { if (!st.said) { st.said = 1; bubble('marilla', 'No hay más remedio, Ana: hay que cortarlo. Quédate quieta.'); } if (!wait(4)) return 'run'; delete game.wm.perm['pelo_verde']; realR.setFact('pelo_corto'); realR.setPerm('pelo_corto'); bubble('ana', 'Mi pelo… Bueno, por lo menos ya no es verde.'); logEv('A Ana le cortaron el pelo verde, bien cortito.', []); return 'ok'; }
     case 'trepar': { if (!st.said) { st.said = 1; bubble(me, '¡Josie Pye, mira cómo camino por el techo de los Barry!… ¡Ay!'); } if (!wait(4)) return 'run'; realR.setFact('trepo:' + me); realR.setFact('tobillo:' + me); logEv(`${wmName(me)} aceptó el desafío de Josie, caminó por el techo de los Barry… y se cayó y se torció el tobillo.`, []); return 'ok'; }
     case 'coser':

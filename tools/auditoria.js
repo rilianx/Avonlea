@@ -35,7 +35,7 @@ function comparar(esp, lineas){
   const correr = async (esp, n) => {
     const pg = await b.newPage(); const errs = []; pg.on('pageerror', e => errs.push(e.message));
     await pg.addInitScript(() => { localStorage.clear(); localStorage.setItem('avonlea-ai-asked', '1'); });
-    await pg.goto('file://' + path.join(root, 'index.html'), { timeout: 0 }); await pg.waitForFunction(() => window.__avonlea, null, { timeout: 0 });
+    await pg.goto('file://' + path.join(root, 'index.html'), { timeout: 0 }); await pg.waitForFunction(() => window.__avonlea, null, { timeout: 0, polling: 100 });
     const r = await pg.evaluate(([id, q]) => { const A = window.__avonlea; document.getElementById('ai').hidden = true; const ag = A.wmRunTest(id); A.relatoEmpezar(q);
       for (let t = 0; t < 3600 && (ag.st === 'run' || ag.st === 'pausa'); t += .5) A.step(.5); for (let k = 0; k < 20; k++) A.step(.5);
       return { st: ag.st, lineas: A.relato() }; }, [esp.id, esp.quienes]);

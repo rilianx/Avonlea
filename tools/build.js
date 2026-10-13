@@ -16,6 +16,11 @@ function build(){
 }
 
 const out = build(), target = path.join(root, 'index.html');
+// the code must at least be valid JavaScript: a broken line (a comment that swallows the rest of it) stops the build here,
+// not the game in the browser
+{ const i = out.lastIndexOf('<script>'), j = out.lastIndexOf('</script>');
+  try { new (require('vm').Script)(out.slice(i + 8, j), { filename: 'index.html (el código)' }); }
+  catch (e) { console.error('El código tiene un error de sintaxis; index.html no se escribe.\n' + e.stack.split('\n').slice(0, 5).join('\n')); process.exit(1); } }
 if (process.argv.includes('--check')) {
   const now = fs.readFileSync(target, 'utf8');
   if (now !== out) { console.error('index.html no coincide con src/ (corre: node tools/build.js)'); process.exit(1); }
