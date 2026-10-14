@@ -154,7 +154,7 @@ function wmExec0(ag, a, st, dt){
     }
     case 'escribir_carta': {   // (at her desk: she reads it aloud as she writes, line by line)
       // (Ana: the writing is a scene of the script, carta_<to whom>: what she writes and what goes through her head as she does)
-      if (!st.said) { st.said = 1; st.para = a.para || 'stacy'; st.txt = cartaTexto(st.para); st.lk = -1; if (me === 'ana') game.cartaEscena = null; }
+      if (!st.said) { st.said = 1; st.para = a.para || Object.keys(CORREO).find(cartaPuede) || 'spencer'; st.txt = cartaTexto(st.para); st.lk = -1; if (me === 'ana') game.cartaEscena = null; }
       const escena = me === 'ana' && DIALOGOS.some(d => d.canal === 'carta' && d.id.startsWith('carta_' + st.para));
       if (escena && st.P !== undefined && (st.P ? st.llego && st.pt > 0 : true)) game.cartaAhora = { para: st.para, t: TT };
       if (!escena && (st.llego || !st.P)) { const k = Math.floor((st.pt ?? st.w ?? 0) / 3.4); if (k !== st.lk && st.txt[k]) { st.lk = k; bubble(me, st.txt[k]); } }

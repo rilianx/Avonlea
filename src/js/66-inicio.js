@@ -20,3 +20,5 @@ function inicioLlegada(){
 const yaSeQueda = () => { const H = dlgHechos(); for (const f of ['llegada_tv', 'primera_noche', 'desayuno_prueba', 'a_prueba', 'se_queda']) H[f] ??= today() + 1; };
 if (NUEVA_PARTIDA && !navigator.webdriver) inicioLlegada();
 else if (!NUEVA_PARTIDA && !dlgHechos().a_prueba && !dlgHechos().inicio_juego) yaSeQueda();
+// a game from before: it goes on where it was left, at the hour it was (the day and the hour come back with the rest)
+if (!NUEVA_PARTIDA && !navigator.webdriver) try { seguirDondeQuedo(JSON.parse(localStorage.getItem('avonlea') || 'null')?.donde); } catch (e) {}

@@ -38,7 +38,9 @@ AGENDA.push({ who: 'diana', from: 18.5, to: 22, prio: 3, label: 'correr a Tejas 
 AGENDA.push({ who: 'lynde', from: 15, to: 17.5, label: 'ir a Tejas Verdes a ver a la niña nueva (cap. 9)',
   when: () => !!dlgHechos().a_prueba && dlgCond('dias_desde:a_prueba:1', dlgCtx()) && !dlgHechos().lynde_visita, goal: () => G.visitar('lynde', 'marilla') });
 // a letter received makes the friendship grow (a little: at most so much); to aunt Josephine, once she is a friend
-const cartaPuede = k => k !== 'josephine' || !!dlgHechos().cama_josephine;
+// whom Ana can write to: only someone she has met by now (the Sra. Spencer, who brought her, from the very start)
+const CARTA_CONOCE = { diana: 'hecho:conocidas_diana', stacy: 'cuaderno:escuela', sraallan: 'cuaderno:escuela_dominical', josephine: 'hecho:cama_josephine' };
+const cartaPuede = k => !CARTA_CONOCE[k] || dlgCond(CARTA_CONOCE[k], dlgCtx());
 function cartaAfecto(k){ const b = { diana: 'diana', stacy: 'stacy', sraallan: 'sraallan', josephine: 'josephine' }[k]; if (b) relSetW(b, 'ana', Math.min(5, relGetW(b, 'ana') + 1)); }
 // time together: a friend one sees often is a friend one loves more (half an hour near Diana in a day: +1, once a day)
 let juntasT = 0;
