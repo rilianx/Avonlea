@@ -176,19 +176,22 @@ function kitHeadOn(c, p, t, vi, L){
 // hundiendo la cara en ellos, se puso a llorar»): seen from in front of the table, the hunched back and shoulders, the
 // arms folded on the cloth, the head down on them (the parting of the hair, the braids fallen to each side), the hat
 // left beside her; the shoulders shake with each sob. Drawn after the table (sortY), as it lies on it.
-function drawLlorando(c, p, t){
+function drawLlorando(c, p, t, parte){
   const L = LOOKS[p.look], x = p.x, y = p.y + 4, k = L.h || 1;   // (y: the far edge of the table, where she leans)
   const sob = Math.max(0, Math.sin(t * 6.5)) * 1.8 + Math.sin(t * 19) * .3, sy = y - sob;
   c.save(); c.translate(x, sy); c.scale(k, k); c.translate(-x, -sy);
-  // the back and the shoulders, hunched over
-  blob(c, [[x - 17, y + 8], [x - 19, y - 4], [x - 13, sy - 14], [x, sy - 17], [x + 13, sy - 14], [x + 19, y - 4], [x + 17, y + 8]], L.dressD || L.dress);
-  blob(c, [[x - 12, y + 6], [x - 13, sy - 9], [x, sy - 13], [x + 13, sy - 9], [x + 12, y + 6]], L.dress, false);
+  if (parte === 'espalda') {   // (the back and the shoulders, hunched over, behind the table: the table covers the rest of her)
+    ell(c, x, y + 6, 20, 5, 'rgba(40,25,15,.18)');
+    blob(c, [[x - 18, y + 4], [x - 19, y - 6], [x - 13, sy - 16], [x, sy - 19], [x + 13, sy - 16], [x + 19, y - 6], [x + 18, y + 4]], L.dressD || L.dress);
+    blob(c, [[x - 12, y + 3], [x - 13, sy - 11], [x, sy - 15], [x + 13, sy - 11], [x + 12, y + 3]], L.dress, false);
+    c.restore(); return;
+  }
+  // (the rest, on the table: drawn after it)
   // the upper arms, down to the elbows on the cloth; the forearms folded, one over the other
-  blob(c, [[x - 18, sy - 8], [x - 24, y + 10], [x - 15, y + 14], [x - 10, sy - 2]], L.dress);
-  blob(c, [[x + 18, sy - 8], [x + 24, y + 10], [x + 15, y + 14], [x + 10, sy - 2]], L.dress);
-  ell(c, x - 6, y + 13, 16, 4.6, L.dressD || L.dress, true);
-  ell(c, x + 6, y + 15, 16, 4.6, L.dress, true);
-  ell(c, x + 19, y + 12, 3.6, 3, L.skin, true); ell(c, x - 19, y + 16, 3.6, 3, L.skin, true);   // (the hands, at the elbows)
+  for (const s of [-1, 1]) blob(c, [[x + s * 16, sy - 9], [x + s * 19, y + 7], [x + s * 14, y + 9], [x + s * 11, sy - 5]], L.dressD || L.dress);   // (the upper arms, over the edge)
+  ell(c, x - 4, y + 10, 12, 3.6, L.dressD || L.dress, true);   // (the forearms, folded one over the other)
+  ell(c, x + 4, y + 12, 12, 3.6, L.dress, true);
+  ell(c, x + 15, y + 10, 3, 2.6, L.skin, true); ell(c, x - 15, y + 12.5, 3, 2.6, L.skin, true);   // (the hands, at the elbows)
   // the braids, fallen to each side over the arms, tied with their ribbons
   for (const s of [-1, 1]) {
     const B = [[x + s * 9, sy + 3], [x + s * 14, y + 7], [x + s * 16, y + 13], [x + s * 19, y + 18]];
@@ -197,7 +200,7 @@ function drawLlorando(c, p, t){
     ell(c, x + s * 19.5, y + 19.5, 2.4, 1.6, L.scarf || '#d9433b', true);
   }
   // the head, face down on the arms: the top of it, red, with the parting down the middle
-  ell(c, x, sy + 4, 11.5, 9.5, L.hair, true);
+  ell(c, x, sy + 5, 11, 9, L.hair, true);
   ell(c, x - 3, sy + 1, 6, 4, 'rgba(255,220,180,.18)');
   line(c, [[x, sy - 5.5], [x + .5, sy + 2], [x, sy + 9]], L.hairD, 1.4, 5);
   for (const s of [-1, 1]) line(c, [[x + s * 2, sy - 4], [x + s * 8, sy + 1], [x + s * 10, sy + 8]], L.hairD, .9, s + 3);
@@ -206,7 +209,7 @@ function drawLlorando(c, p, t){
   if (L.hat && !game.wm?.sinSombrero) { ell(c, x + 36, y + 13, 12, 4.4, '#e6c477', true); ell(c, x + 36, y + 10, 6.5, 3.6, '#ecd08a', true); line(c, [[x + 30, y + 10.5], [x + 42, y + 10.5]], L.scarf || '#d9433b', 1.6, 2); }
 }
 function drawPerson(c, p, t){
-  if (p.llora && p.sit) return drawLlorando(c, p, t);   // (crying at the table, the head on it: a pose of its own)
+  if (p.llora && p.sit) return drawLlorando(c, p, t, 'encima');   // (crying at the table, the head on it: a pose of its own)
   if (p.look === 'ana') { const La = LOOKS.ana; La.big = ANA_STYLE === 'mano' ? HEAD_M : 0; La.pencil = ANA_STYLE === 'mano'; if (La.hair0 == null) { La.hair0 = La.hair; La.hairD0 = La.hairD; } const green = !!game.wm?.perm?.pelo_verde; La.hair = green ? '#5a8a3a' : La.hair0; La.hairD = green ? '#3e6a26' : La.hairD0; La.style = game.wm?.perm?.pelo_corto ? 'corto' : 'braids'; La.hat = !game.wm?.sinSombrero; } else if (LOOKS[p.look]) LOOKS[p.look].big = Math.max(1, HEAD_M / 2);   // (green after the dye; short, without braids, after Marilla cuts it)
   if (CACHE_ON && c === G0 && !CACHE.dentro && cachePersona(c, p, t)) return;   // (after her look is set up: a quiet pose, from a kept image: see 66-cache-dibujos.js)
   if (animDraw(c, p, t) || kitDraw(c, p, t)) return;
