@@ -10318,10 +10318,10 @@ function habilidadesTick(dt){
 }
 // a milestone, told by whoever it is: the next time Ana is near them and nothing else is being said
 function hitosTick(){
-  const P = game.wm.hitosPend; if (!P?.length || hablando() || amb.cur || enc.cur || game.talk || ocupada('ana') || TALKS.length) return;
+  const P = game.wm.hitosPend; if (!P?.length || hablando() || amb.cur || enc.cur || game.talk || TALKS.length) return;   // (even while Ana works: Marilla tells her so as she washes up)
   for (const p of P) {
     const c = HABILIDADES.find(x => x.id === p.c), h = c?.hitos.find(x => x.n === p.n); if (!h) { P.splice(P.indexOf(p), 1); return; }
-    const b = wmBody(h.con); if (!b || wmScene(h.con) !== game.scene || dist(ana.x, ana.y, b.x, b.y) > 90 || ocupada(h.con)) continue;
+    const b = wmBody(h.con); if (!b || wmScene(h.con) !== game.scene || dist(ana.x, ana.y, b.x, b.y) > (game.scene === 'out' ? 90 : 220) || ocupada(h.con)) continue;   // (near her; inside, in the same room)
     P.splice(P.indexOf(p), 1); dlgHecho('hito_' + c.id + '_' + h.n);   // (told: a fact, for the script and the tests)
     const escrito = () => talkPlay((h.dice || h.texto).split(' / ').map(t => [h.con, t]), { ch: 'hito', hold: [h.con] });
     if (!aiReady() || !h.ia) return escrito();
@@ -10537,7 +10537,7 @@ function relatoDice(n, t){
   return n + ' dice: ' + q(t);
 }
 // what is said in the talk box (the player's way of talking): into the account as well
-function relatoDicho(k, text){ if (RELATO.on && text) relatoLinea(relN(k) + ' dice: «' + text + '»', { quien: k, dice: text }); }
+function relatoDicho(k, text){ if (RELATO.on && text) relatoLinea(relatoDice(relN(k), text), { quien: k, dice: text }); }   // (with its telling between parentheses, as anywhere else)
 function relatoLinea(texto, estado){ texto = texto.replace(/^(Al empezar, |⚠ |· )?([a-zá-ú])/, (m, p, c) => (p || '') + (p ? c : c.toUpperCase())); const L = { hora: relatoHora(), t: dayT, texto, estado }; RELATO.lineas.push(L); if (/[?&]relato/.test(location.search)) console.log('[relato] ' + L.hora + ' ' + texto); }
 // to start: whom to watch (null: Ana and whoever is in her scene)
 function relatoEmpezar(quienes){ RELATO.on = true; RELATO.quienes = quienes; RELATO.lineas = []; RELATO.antes = {}; RELATO.ultimo = -1; RELATO.globo = new Set(); RELATO.mal = {}; RELATO.encima = {}; }

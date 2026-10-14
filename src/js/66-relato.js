@@ -80,7 +80,7 @@ function relatoDice(n, t){
   return n + ' dice: ' + q(t);
 }
 // what is said in the talk box (the player's way of talking): into the account as well
-function relatoDicho(k, text){ if (RELATO.on && text) relatoLinea(relN(k) + ' dice: «' + text + '»', { quien: k, dice: text }); }
+function relatoDicho(k, text){ if (RELATO.on && text) relatoLinea(relatoDice(relN(k), text), { quien: k, dice: text }); }   // (with its telling between parentheses, as anywhere else)
 function relatoLinea(texto, estado){ texto = texto.replace(/^(Al empezar, |⚠ |· )?([a-zá-ú])/, (m, p, c) => (p || '') + (p ? c : c.toUpperCase())); const L = { hora: relatoHora(), t: dayT, texto, estado }; RELATO.lineas.push(L); if (/[?&]relato/.test(location.search)) console.log('[relato] ' + L.hora + ' ' + texto); }
 // to start: whom to watch (null: Ana and whoever is in her scene)
 function relatoEmpezar(quienes){ RELATO.on = true; RELATO.quienes = quienes; RELATO.lineas = []; RELATO.antes = {}; RELATO.ultimo = -1; RELATO.globo = new Set(); RELATO.mal = {}; RELATO.encima = {}; }

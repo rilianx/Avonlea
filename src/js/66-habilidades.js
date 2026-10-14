@@ -58,10 +58,10 @@ function habilidadesTick(dt){
 }
 // a milestone, told by whoever it is: the next time Ana is near them and nothing else is being said
 function hitosTick(){
-  const P = game.wm.hitosPend; if (!P?.length || hablando() || amb.cur || enc.cur || game.talk || ocupada('ana') || TALKS.length) return;
+  const P = game.wm.hitosPend; if (!P?.length || hablando() || amb.cur || enc.cur || game.talk || TALKS.length) return;   // (even while Ana works: Marilla tells her so as she washes up)
   for (const p of P) {
     const c = HABILIDADES.find(x => x.id === p.c), h = c?.hitos.find(x => x.n === p.n); if (!h) { P.splice(P.indexOf(p), 1); return; }
-    const b = wmBody(h.con); if (!b || wmScene(h.con) !== game.scene || dist(ana.x, ana.y, b.x, b.y) > 90 || ocupada(h.con)) continue;
+    const b = wmBody(h.con); if (!b || wmScene(h.con) !== game.scene || dist(ana.x, ana.y, b.x, b.y) > (game.scene === 'out' ? 90 : 220) || ocupada(h.con)) continue;   // (near her; inside, in the same room)
     P.splice(P.indexOf(p), 1); dlgHecho('hito_' + c.id + '_' + h.n);   // (told: a fact, for the script and the tests)
     const escrito = () => talkPlay((h.dice || h.texto).split(' / ').map(t => [h.con, t]), { ch: 'hito', hold: [h.con] });
     if (!aiReady() || !h.ia) return escrito();
