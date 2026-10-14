@@ -16,10 +16,10 @@ function grafo({ W, H, cw = 210, rh = 92, x0 = 20, y0 = 20, nodos, aristas, leye
     return { x: ca.x + dx * t, y: ca.y + dy * t };
   };
   for (const e of aristas) {
-    const a = P[e.de], b = P[e.a], p = borde(a, b), q = borde(b, a), col = e.tipo === 'cierra' ? '#a3302a' : e.tipo === 'abre' ? '#3d7a2a' : '#555';
+    const a = P[e.de], b = P[e.a], p0 = borde(a, b), q0 = borde(b, a), L = Math.hypot(q0.x - p0.x, q0.y - p0.y) || 1, nx = -(q0.y - p0.y) / L * (e.off || 0), ny = (q0.x - p0.x) / L * (e.off || 0), p = { x: p0.x + nx, y: p0.y + ny }, q = { x: q0.x + nx, y: q0.y + ny }, col = e.tipo === 'cierra' ? '#a3302a' : e.tipo === 'abre' ? '#3d7a2a' : '#555';
     const mx = (p.x + q.x) / 2 + (e.curva || 0), my = (p.y + q.y) / 2 - (e.curva ? Math.abs(e.curva) * .3 : 0);
     svg += `<path d="M${p.x},${p.y} Q${mx},${my} ${q.x},${q.y}" fill="none" stroke="${col}" stroke-width="2" ${e.tipo === 'cierra' ? 'stroke-dasharray="6 4"' : e.tipo === 'alt' ? 'stroke-dasharray="2 4"' : ''} marker-end="url(#m${e.tipo === 'cierra' ? 'r' : e.tipo === 'abre' ? 'g' : 'n'})"/>`;
-    if (e.t) { const hz = Math.abs(q.y - p.y) < 4; const tx = (p.x + 2 * mx + q.x) / 4, ty = hz ? Math.min(a.y, b.y) - 10 : (p.y + 2 * my + q.y) / 4; svg += `<rect x="${tx - e.t.length * 3.3 - 4}" y="${ty - 10}" width="${e.t.length * 6.6 + 8}" height="18" rx="4" fill="#fffdf8" opacity=".92"/><text x="${tx}" y="${ty + 3}" font-size="11.5" text-anchor="middle" fill="${col}" font-style="italic">${esc(e.t)}</text>`; }
+    if (e.t) { const hz = Math.abs(q.y - p.y) < 4; const tx = (p.x + 2 * mx + q.x) / 4 + (hz ? 0 : nx * 1.6), ty = hz ? (Math.abs(q.x - p.x) > 150 ? p.y - 12 : Math.min(a.y, b.y) - 10) : (p.y + 2 * my + q.y) / 4 + ny * 1.6; svg += `<rect x="${tx - e.t.length * 3.3 - 4}" y="${ty - 10}" width="${e.t.length * 6.6 + 8}" height="18" rx="4" fill="#fffdf8" opacity=".92"/><text x="${tx}" y="${ty + 3}" font-size="11.5" text-anchor="middle" fill="${col}" font-style="italic">${esc(e.t)}</text>`; }
   }
   for (const n of nodos) {
     const { x, y, w, h } = P[n.id], [bg, fg] = C[n.tipo];
@@ -71,7 +71,7 @@ D.escuela = grafo({ W: 1520, H: 470, cw: 250, rh: 100, titulo: 'La escuela, Gilb
   { id: 'zan', c: 1, r: 0, tipo: 'escena', t: 'zanahorias|la pizarra en la cabeza' },
   { id: 'paces', c: 2, r: 0, tipo: 'meta', t: 'Hacer las paces|con Gilbert' },
   { id: 'rec', c: 1, r: 1.1, tipo: 'meta', t: 'Recitar la lección,|el concierto, el salón' },
-  { id: 'queens', c: 2, r: 1.1, tipo: 'meta', t: "Entrar a Queen's|(camino del estudio)" },
+  { id: 'queens', c: 2, r: 1.1, tipo: 'meta', t: "Entrar a Queen's|(habilidad: estudio)" },
   { id: 'dom', c: 0, r: 2.3, tipo: 'meta', t: 'Ir a la escuela|dominical' },
   { id: 'inv', c: 1, r: 2.3, tipo: 'escena', t: 'invita_allan|Marilla los invita' },
   { id: 'visita', c: 2, r: 2.3, tipo: 'hecho', t: 'La Sra. Allan|viene a tomar el té' },
@@ -85,16 +85,16 @@ D.escuela = grafo({ W: 1520, H: 470, cw: 250, rh: 100, titulo: 'La escuela, Gilb
   { de: 'tinte', a: 'corto', tipo: 'abre' },
 ] });
 // 3. Cómo funciona un hito
-D.hito = grafo({ W: 1520, H: 400, cw: 250, rh: 110, leyenda: false, titulo: 'Cómo funciona un camino: de lo que Ana hace a lo que alguien le dice', nodos: [
+D.hito = grafo({ W: 1520, H: 400, cw: 250, rh: 110, leyenda: false, titulo: 'Cómo funciona una habilidad: de lo que Ana hace a lo que alguien le dice', nodos: [
   { id: 'hace', c: 0, r: 0.3, tipo: 'menu', t: 'Ana hace algo|unos minutos (o 1 h de clase)' },
-  { id: 'suma', c: 1, r: 0.3, tipo: 'numero', t: '+1 al camino|(máx. 2 por día)' },
+  { id: 'suma', c: 1, r: 0.3, tipo: 'numero', t: '+1 a la habilidad|(máx. 2 por día)' },
   { id: 'cruza', c: 2, r: 0.3, tipo: 'numero', t: '¿Cruzó un hito?|5, 10, 15, 30, 60…' },
   { id: 'aviso', c: 3, r: 0.3, tipo: 'escena', t: 'Aviso 📈|y queda pendiente' },
   { id: 'enc', c: 4, r: 0.3, tipo: 'hecho', t: 'Ana se encuentra|con quien se lo dice' },
   { id: 'ia', c: 5, r: -0.3, h: 52, tipo: 'ia', t: 'Con IA:|escena improvisada' },
   { id: 'esc', c: 5, r: 0.6, h: 52, tipo: 'escena', t: 'Sin IA:|la línea escrita' },
-  { id: 'hecho', c: 4, r: 1.8, tipo: 'meta', t: 'hecho hito_<camino>_<n>|el guion puede seguir' },
-  { id: 'guion', c: 2, r: 1.8, tipo: 'escena', t: 'Escenas con|si: camino:granja:15' },
+  { id: 'hecho', c: 4, r: 1.8, tipo: 'meta', t: 'hecho hito_<habilidad>_<n>|el guion puede seguir' },
+  { id: 'guion', c: 2, r: 1.8, tipo: 'escena', t: 'Escenas con|si: granja:ana>=15' },
 ], aristas: [
   { de: 'hace', a: 'suma' }, { de: 'suma', a: 'cruza' }, { de: 'cruza', a: 'aviso', t: 'sí' }, { de: 'aviso', a: 'enc', t: 'cuando sea' }, { de: 'enc', a: 'ia' }, { de: 'enc', a: 'esc' },
   { de: 'enc', a: 'hecho' }, { de: 'cruza', a: 'guion', tipo: 'abre' },
@@ -106,7 +106,7 @@ function caminos(){
     ['La granja de Tejas Verdes', 'quehaceres, ordeñar, huerta, batir, cocinar, coser…', 30, [[5, 'Marilla', 'cuenta con ella'], [15, 'Matthew', 'el vestido de mangas abullonadas'], [30, 'Marilla', 'Tejas Verdes también es suya']]],
     ['Las letras y la imaginación', 'cuentos, cartas, nombrar lugares, adornar', 30, [[5, 'Diana', 'escribe como en los libros'], [15, 'Srta. Stacy', 'lee su composición'], [30, 'Sra. Allan', 'un cuento para una revista']]],
   ];
-  let s = `<text x="${W / 2}" y="30" font-size="18" font-weight="700" text-anchor="middle" fill="#2a2420">Los tres caminos y sus hitos</text>`;
+  let s = `<text x="${W / 2}" y="30" font-size="18" font-weight="700" text-anchor="middle" fill="#2a2420">Las tres habilidades de Ana y sus hitos</text>`;
   const x0 = 300, x1 = W - 60;
   L.forEach(([t, suma, max, hs], i) => {
     const y = 90 + i * 145, px = n => x0 + (x1 - x0) * n / max;
@@ -120,7 +120,7 @@ function caminos(){
       s += `<text x="${x + (n === max ? 10 : 0)}" y="${ty}" font-size="12" text-anchor="${anc}" fill="#2a2420"><tspan font-weight="700">${esc(quien)}:</tspan> ${esc(que)}</text>`;
     });
   });
-  s += `<text x="20" y="${H - 20}" font-size="12" fill="#5a5248">Cada acción suma +1 una vez al día (como mucho 2 por día en cada camino). Los hitos se leen en el cuaderno y alguien se los dice a Ana.</text>`;
+  s += `<text x="20" y="${H - 20}" font-size="12" fill="#5a5248">Cada acción suma +1 una vez al día (como mucho 2 por día en cada habilidad). Los hitos se leen en el cuaderno y alguien se los dice a Ana.</text>`;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" font-family="Georgia, serif"><rect width="${W}" height="${H}" fill="#fffdf8"/>${s}</svg>`;
 }
 D.caminos = caminos();
@@ -140,14 +140,15 @@ function calendario(){
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" font-family="Georgia, serif"><rect width="${W}" height="${H}" fill="#fffdf8"/><defs><marker id="m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#a3302a"/></marker></defs>${s}</svg>`;
 }
 D.calendario = calendario();
-// 6. Las tres capas
-D.capas = grafo({ W: 1400, H: 390, cw: 470, rh: 120, leyenda: false, titulo: 'Tres piezas, tres archivos de texto', nodos: [
-  { id: 'g', c: 0, r: 0.25, w: 390, h: 90, tipo: 'escena', t: 'El guion (src/datos/guion.txt)|escenas que pasan una vez, por lugar y condición:|dejan hechos (conocidas_diana, prohibida…)' },
-  { id: 'c', c: 1, r: 1.6, w: 390, h: 90, tipo: 'meta', t: 'El cuaderno (src/datos/cuaderno.txt)|metas para el jugador, con pistas;|requiere: abre o cierra metas y acciones' },
-  { id: 'k', c: 2, r: 0.25, w: 390, h: 90, tipo: 'numero', t: 'Los caminos (src/datos/caminos.txt)|números que suben día a día,|con hitos que alguien le dice a Ana' },
+// 6. El motor: estado, escenas y planificador
+D.capas = grafo({ W: 1500, H: 470, cw: 500, rh: 125, leyenda: false, titulo: 'El motor: tres componentes', nodos: [
+  { id: 'e', c: 1, r: 0.2, w: 440, h: 100, tipo: 'numero', t: 'El estado (quality-based narrative)|hechos (con día y con dueño: quién sabe qué),|cualidades: números con dueño (granja:ana, afecto:diana:ana),|y el tiempo' },
+  { id: 's', c: 0, r: 1.7, w: 440, h: 100, tipo: 'escena', t: 'Las escenas (storylets) · guion.txt|precondiciones → contenido → efectos;|gana la más específica; ritmo: una grande al día' },
+  { id: 'p', c: 2, r: 1.7, w: 440, h: 100, tipo: 'menu', t: 'El planificador (GOAP, A*)|cómo cada personaje cumple su meta:|acciones con precondiciones y efectos' },
+  { id: 'c', c: 1, r: 2.85, w: 440, h: 60, tipo: 'meta', t: 'El cuaderno (fuera del motor)|lee el estado y se lo muestra al jugador' },
 ], aristas: [
-  { de: 'g', a: 'c', t: 'requiere: hecho:x' }, { de: 'k', a: 'c', t: 'requiere: camino:x:n' },
-  { de: 'k', a: 'g', t: 'si: camino:granja:15' },
+  { de: 'e', a: 's', t: 'precondiciones', off: 14 }, { de: 's', a: 'e', t: 'efectos', off: 14 },
+  { de: 's', a: 'p', t: 'encargos (metas)' }, { de: 'p', a: 'e', t: 'acciones: leen y cambian el estado' },
 ] });
 const salida = process.argv[2] || '.';
 (async () => {
