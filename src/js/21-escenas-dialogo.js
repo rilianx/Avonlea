@@ -264,12 +264,18 @@ function dlgGuion(txt){
     if (!c) continue;
     if (s === '---') { body = true; continue; }
     const i = s.indexOf(':'), k = i < 0 ? s : s.slice(0, i).trim(), v = i < 0 ? '' : s.slice(i + 1).trim();
-    if (body) { const m = v.match(/^(.*?)\s+#(\S+)$/); c._l.push(m ? [k, m[1], m[2]] : [k, v]); continue; }
+    if (body) {
+      // a choice (as in Yarn Spinner): «-> what Ana can do» (with «->*», what she would do on her own), and under it,
+      // indented, its own lines («quien: texto») and what it does («! hecho x», «! suma afecto:marilla:ana 1»)
+      if (s.startsWith('->')) { const last = c._l.at(-1), op = { texto: s.replace(/^->\*?\s*/, ''), propia: s.startsWith('->*'), lineas: [], efectos: [] }; if (last?.[0] === '?' && c._ultimaOpcion) last[2].push(op); else c._l.push(['?', 'elige', [op]]); c._ultimaOpcion = op; continue; }
+      if (c._ultimaOpcion && /^\s/.test(raw)) { const op = c._ultimaOpcion; if (s.startsWith('!')) op.efectos.push(dlgAccion(s.slice(1).trim())); else op.lineas.push([k, v]); continue; }
+      c._ultimaOpcion = null;
+      const m = v.match(/^(.*?)\s+#(\S+)$/); c._l.push(m ? [k, m[1], m[2]] : [k, v]); continue; }
     if (k === 'al_empezar' || k === 'al_terminar') (c[k] ||= []).push(dlgAccion(v));
     else if (k === 'o') (c.o ||= []).push(dlgCampo('o', v));
     else c[k] = dlgCampo(k, v);
   }
-  return out.map(({ _l, lineas, ...c }) => {   // the lines: from the book (all, or a piece: «libro:x [1,2]»), and/or its own
+  return out.map(({ _l, lineas, _ultimaOpcion, ...c }) => {   // the lines: from the book (all, or a piece: «libro:x [1,2]»), and/or its own
     const ref = lineas && lineas.split('+').map(r => { const m = r.trim().match(/^(\S+)(?:\s*\[([\d,\s]+)\])?$/); return { de: m[1], ...(m[2] ? { elegir: m[2].split(',').map(Number) } : {}) }; });
     return { ...c, lineas: ref ? [...ref, ...(_l.length ? [{ lineas: _l }] : [])] : _l };
   });

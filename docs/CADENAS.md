@@ -23,6 +23,16 @@ Una partida nueva empieza la noche en que Ana llega a Tejas Verdes (`src/js/66-i
 
 En el cuaderno: «Quedarse en Tejas Verdes», con pistas de lo que falta. Lo que espera a que Ana se quede: contarle a Marilla que quiere una amiga, y conocer a Diana.
 
+## 0b. La visita de la Sra. Lynde (cap. 9, 10), con alternativas
+
+Mientras Ana está a prueba, al día siguiente o después, la Sra. Lynde viene en la tarde a ver a la niña (agenda). Cuando se sienta, la escena `lynde_visita` (grande): «Es terriblemente flaca y fea… ¡y el pelo, rojo como zanahoria!». Ana (el jugador) elige:
+
+| Opción | Qué pasa |
+|---|---|
+| «¡La odio! ¡Es una mujer grosera e insensible!» (el libro) | Marilla la manda a su pieza y le exige que pida perdón (`lynde_perdon_marilla`); mientras no lo haga, no se queda en Tejas Verdes. En la casa de la Sra. Lynde, `lynde_disculpa`, otra elección: a lo grande, de rodillas (la Sra. Lynde la perdona y la quiere mucho), o con pocas palabras |
+| Apretar los puños y contar hasta diez (lo que haría Ana sola) | Marilla la quiere un poco más |
+| Salir corriendo a llorar a su pieza | nada más |
+
 ## 1. Diana, la amiga del alma (cap. 8, 12)
 
 | Paso | En el libro | En el juego |

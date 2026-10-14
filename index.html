@@ -972,7 +972,7 @@ interrumpe
 grande
 sujeta: marilla
 en: ana=gg, marilla=gg
-si: hecho:a_prueba, !hecho:se_queda, dias_desde:a_prueba:3, afecto:marilla:ana>=3, cuaderno:rezo, cuaderno:quehaceres
+si: hecho:a_prueba, !hecho:se_queda, !hecho:ofendio_lynde, dias_desde:a_prueba:3, afecto:marilla:ana>=3, cuaderno:rezo, cuaderno:quehaceres
 al_terminar: hecho se_queda
 al_terminar: suma afecto:marilla:ana 1
 al_terminar: log Marilla le dijo a Ana que ya no estaba a prueba: se queda en Tejas Verdes, para siempre.
@@ -1071,6 +1071,75 @@ ana: (Ana pone la vela en la ventana y la tapa y destapa con un cartón: cinco d
 ana: (Un rato después, entre los árboles, en la ventana de Diana, una luz contesta: cinco destellos.)
 ana: Cinco destellos: «ven mañana temprano, que tengo algo importante que contarte». Y todavía no sé qué le voy a contar… pero se me va a ocurrir.
 
+# --- La visita de la Sra. Lynde (cap. 9 y 10): mientras Ana está a prueba, Rachel viene a ver a la niña. Una escena con
+# alternativas (como en Yarn Spinner): «->» lo que Ana puede hacer (con «->*», lo que haría sola, como en el libro);
+# debajo, con sangría, sus líneas y lo que deja («! …»). Si Ana estalla, tiene que ir a pedirle perdón; mientras no lo
+# haga, Marilla no la deja quedarse (se_queda pide !hecho:ofendio_lynde).
+=== lynde_visita ===
+canal: gg
+prioridad: 9
+interrumpe
+grande
+sujeta: lynde, marilla
+en: ana=gg, marilla=gg, lynde=gg
+si: hecho:a_prueba, !hecho:lynde_visita, sentada:lynde
+al_terminar: hecho lynde_visita
+---
+lynde: (La Sra. Lynde mira a Ana de arriba abajo.) Bueno, no te eligieron por tu cara, eso seguro. Es terriblemente flaca y fea, Marilla. ¡Y qué pecas! ¡Y el pelo, rojo como zanahoria!
+-> ¡La odio! ¡Es una mujer grosera e insensible!
+   ana: (Ana se planta frente a ella, temblando de rabia.) ¡La odio! ¡La odio, la odio, la odio! ¿Cómo se atreve a decir que soy flaca y fea? ¿Le gustaría que dijeran que usted es gorda y torpe y que no tiene una chispa de imaginación?
+   lynde: ¡Habráse visto! ¡Qué genio!
+   marilla: Ana, ve a tu pieza y quédate ahí hasta que yo suba.
+   ! hecho ofendio_lynde
+   ! suma afecto:lynde:ana -1
+   ! log Ana estalló con la Sra. Lynde, que la llamó flaca, fea y pelirroja. Marilla la mandó a su pieza.
+->* Apretar los puños y contar hasta diez
+   ana: (Ana aprieta los puños, se pone roja como un tomate… y cuenta hasta diez, muy despacio.) Buenas tardes, Sra. Lynde.
+   lynde: Hmm. Por lo menos tiene modales. Algo es algo.
+   marilla: (Marilla mira a Ana con algo parecido al orgullo.)
+   ! suma afecto:marilla:ana 1
+   ! log Ana se contuvo cuando la Sra. Lynde la llamó flaca y fea. Marilla lo notó.
+-> Salir corriendo a llorar a su pieza
+   ana: (Ana sale corriendo escaleras arriba y se tira en la cama a llorar.)
+   lynde: Vaya, vaya. Sensible, además.
+   marilla: Rachel, a veces eres demasiado franca.
+   ! log Ana se fue llorando cuando la Sra. Lynde la llamó flaca y fea.
+
+=== lynde_perdon_marilla ===
+canal: gg
+prioridad: 8
+en: ana=gg, marilla=gg
+si: hecho:ofendio_lynde, !hecho:perdon_pedido
+al_terminar: hecho perdon_pedido
+---
+marilla: Ana, lo que hiciste no se hace. Vas a ir a la casa de la Sra. Lynde a pedirle perdón.
+ana: ¡Nunca! Puede encerrarme en un calabozo oscuro y húmedo, con sapos y culebras, y darme pan y agua. Pero no le voy a pedir perdón.
+marilla: No tenemos calabozos en Tejas Verdes. Pero hasta que vayas, no hay más que hablar de quedarte.
+
+=== lynde_disculpa ===
+canal: rl
+prioridad: 9
+interrumpe
+sujeta: lynde
+en: ana=rl, lynde=rl
+si: hecho:ofendio_lynde
+al_terminar: hecho disculpa_lynde
+al_terminar: olvidar ofendio_lynde
+---
+ana: (Ana se arrodilla de pronto frente a la Sra. Lynde.)
+->* Disculparse a lo grande, con todo el dramatismo del mundo
+   ana: ¡Oh, Sra. Lynde, lo siento tanto! Nunca podré expresar todo mi dolor, aunque usara un diccionario entero. Me porté terriblemente. Soy una niña mala e ingrata. Merezco que me echen para siempre de la gente respetable.
+   ana: Todo lo que usted dijo era verdad: tengo el pelo rojo, soy flaca y fea, y estoy llena de pecas. Por favor, Sra. Lynde, perdóneme. Si no, va a ser una pena para toda mi vida.
+   lynde: (La Sra. Lynde, que no es mala, se ablanda.) Ya, ya, levántate, niña. Claro que te perdono. Yo fui demasiado dura. Y te diré algo: conocí a una niña con el pelo tan rojo como el tuyo, y de grande se le oscureció a un castaño precioso.
+   ana: ¡Oh, Sra. Lynde! Me ha dado una esperanza. Siempre la voy a considerar una benefactora.
+   ! suma afecto:lynde:ana 3
+   ! log Ana le pidió perdón a la Sra. Lynde a lo grande, de rodillas; la Sra. Lynde la perdonó y terminó encantada con ella.
+-> Pedirle perdón con pocas palabras
+   ana: Sra. Lynde… perdóneme por lo que le dije. No estuvo bien.
+   lynde: Hmm. Está bien, niña. Que no se repita.
+   ! suma afecto:lynde:ana 1
+   ! log Ana le pidió perdón a la Sra. Lynde.
+
 </script>
 <script type="text/plain" id="conversaciones">
 # Las conversaciones de Ana con los suyos (lo lee el juego al empezar). Inspiradas en el libro, largas y cortas.
@@ -1085,6 +1154,8 @@ ana: Cinco destellos: «ven mañana temprano, que tengo algo importante que cont
 #   tema: cómo aparece en el menú (lo que Ana quiere hablar)
 # Las que marcan un paso en la relación suman afecto («al_terminar: suma afecto:marilla:ana 1»); otras, una
 # habilidad («al_terminar: suma letras:ana 1»). El afecto de cada uno hacia Ana empieza en 2 (de 0 a 5).
+# Una conversación puede tener alternativas (como en el guion): «-> lo que Ana puede decir» (con «->*», lo que diría
+# sola), y debajo, con sangría, sus líneas y lo que deja («! suma afecto:marilla:ana 1»).
 
 # ====================================== Marilla ======================================
 
@@ -1155,6 +1226,17 @@ ana: Marilla, los vestidos que me hizo son muy… prácticos. Pero ¿no podría 
 marilla: Las mangas abullonadas son ridículas. Parecen globos.
 ana: Lo sé. Pero preferiría parecer ridícula como todas que práctica yo sola.
 marilla: (Marilla resopla.) Los vestidos sencillos son para niñas sensatas. Ya veremos qué niña eres.
+->* Imaginar que los vestidos sí tienen mangas abullonadas
+   ana: Bueno… entonces voy a imaginar que las tienen. Es casi lo mismo. Casi.
+   marilla: (Marilla mueve la cabeza, pero se le escapa media sonrisa.)
+   ! suma letras:ana 1
+-> Aceptarlo con buena cara
+   ana: Tiene razón, Marilla. Le agradezco los vestidos. De verdad.
+   marilla: (Marilla parpadea, sorprendida.) Bueno. Eso está mejor.
+   ! suma afecto:marilla:ana 1
+-> Insistir un poquito más
+   ana: ¿Ni siquiera unas mangas pequeñitas? ¿Unas mangas abullonadas modestas?
+   marilla: Ana. No.
 
 === conv_marilla_cocina ===
 con: marilla
@@ -1417,6 +1499,14 @@ ana: ¡Diana Barry! Gilbert Blythe es la persona más odiosa de toda la isla. Nu
 diana: Pero si fue solo una broma…
 ana: Una broma imperdonable. Hay cosas que no se olvidan, Diana. Se llevan en el alma.
 diana: (Diana suspira, pero no dice nada más.)
+->* Cambiar de tema
+   ana: Hablemos de otra cosa. De cualquier cosa que no tenga pelo castaño y sonrisa de presumido.
+   diana: (Diana se ríe.) Como quieras, Ana.
+-> Admitir que tiene lindos ojos (solo un poquito)
+   ana: Bueno… está bien. Tiene lindos ojos. Pero eso no cambia nada. ¡Nada!
+   diana: ¡Ana Shirley! ¡Lo sabía!
+   ! hecho ana_admite_gilbert
+   ! suma afecto:diana:ana 1
 
 === conv_diana_tia ===
 con: diana
@@ -1645,6 +1735,7 @@ titulo: Quedarse en Tejas Verdes
 pista: Marilla esperaba un niño. Ana se queda a prueba: hay que ser útil, aprender y ganarse a Marilla.
 pista si !cuaderno:quehaceres: Marilla quiere ver que Ana sirve para algo: ayúdala con los quehaceres.
 pista si cuaderno:quehaceres: Marilla dice que una niña que vive bajo su techo reza todas las noches. Y que todavía no te conoce bien: conversa con ella.
+pista si hecho:ofendio_lynde: Marilla dice que no hay nada que hablar de quedarte hasta que le pidas perdón a la Sra. Lynde. Vive en la Hondonada, junto al camino.
 meta: hecho se_queda
 requiere: hecho:a_prueba
 antes: que Marilla te deje quedarte, al menos un tiempo (mañana van a White Sands, donde la Sra. Spencer)
@@ -3850,7 +3941,7 @@ function buggyTick(){
    other musings; when those too are said, it all starts over. ---------- */
 let TALKS = [];
 function talkPlay(lines, o = {}){
-  const L = lines.map(l => Array.isArray(l) ? { q: l[0], t: l[1], m: l[2] } : l).filter(l => l.t && l.t !== '…');
+  const L = lines.map(l => Array.isArray(l) ? (l[0] === '?' ? { q: '?', t: 'elige', opc: l[2] } : { q: l[0], t: l[1], m: l[2] }) : l).filter(l => l.t && l.t !== '…');
   for (const k of o.hold || []) CHAT_HOLD[k] = TT + 1e6;
   const t = { hold: o.hold, lines: L, i: -1, wait: o.delay ?? .5, gap: o.gap || 0, ch: o.ch, stop: o.stop, end: o.end, budget: o.budget ? o.budget * MIN_S : 0, el: 0, use: o.use, resumen: o.resumen };
   if (o.ch && TALKS.some(x => x.ch === o.ch)) { if (o.queue) (TALK_Q[o.ch] ||= []).push(t); return t; }
@@ -3862,9 +3953,11 @@ const talkBusy = ch => TALKS.some(x => x.ch === ch);
 function talkTick(dt){
   for (const t of TALKS.slice()) {
     t.el += dt;
+    if (t.elige && TT > t.elige.hasta) { const e = t.elige; t.elige = null; e.una(e.propia); }
     if ((t.wait -= dt) > 0) continue;
     if (t.stop?.() || ++t.i >= t.lines.length || (t.budget && t.el > t.budget)) { talkEnd(t); continue; }
-    const l = t.lines[t.i]; sayB(talkQ(l.q), l.t); t.wait = lineDur(l.t) + .35 + t.gap;   // (gap: a scene that takes its time, like a letter being written)
+    const l = t.lines[t.i]; if (l.q === '?') { elegir(t, l.opc); continue; }   // (a choice: the scene waits for it)
+    sayB(talkQ(l.q), l.t); t.wait = lineDur(l.t) + .35 + t.gap;   // (gap: a scene that takes its time, like a letter being written)
     if (l.m) cap1Mark(l.m); t.use?.(t.i, l);
   }
 }
@@ -3965,6 +4058,24 @@ function islaDraw(){
   const mk = (p, name, col) => { const [sx, sy] = P(p); c.beginPath(); c.arc(sx, sy, (6 + Math.sin(TT * 5)) * dpr, 0, TAU); c.fillStyle = col; c.fill(); c.lineWidth = 1.4 * dpr; c.strokeStyle = 'rgba(60,35,20,.9)'; c.stroke(); c.font = `bold ${12 * dpr}px Georgia, serif`; c.fillStyle = '#4a2f1c'; c.fillText(name, sx, sy + 20 * dpr); };
   const m = PEOPLE.matthew; if (m.where === 'camino' && game.scene !== 'camino') mk(onRoad(m.roadS), 'Matthew', LOOKS.matthew.dress);
   mk(game.scene === 'camino' ? onRoad(ana.roadS) : game.scene === 'br' ? br : av, 'Ana', '#d9433b');
+}
+// a choice in a scene: the player chooses (a menu); if Ana goes on her own, she chooses (what she would do, «->*», or
+// the first); the chosen option's lines go on in the scene, and what it does is done at once
+function elegir(t, opciones){
+  t.wait = 1e9;
+  const aplicar = op => {
+    t.lines.splice(t.i + 1, 0, ...op.lineas.map(([q, x]) => ({ q, t: x })));
+    const conv = typeof CONVERSACIONES !== 'undefined' && CONVERSACIONES.some(d => d.id === t.esc);
+    dlgHacer(op.efectos.map(a => a.suma && conv ? { ...a, limitado: true } : a));   // (in a conversation, what it adds: at most once a day)
+    if (typeof relatoLinea === 'function' && RELATO.on) relatoLinea('Ana elige: «' + op.texto + '».', { quien: 'ana', dice: op.texto });
+    logEv('Ana eligió: ' + op.texto.replace(/^./, c => c.toLowerCase()) + '.', []);
+    t.wait = .4; t.elige = null;
+  };
+  const propia = opciones.find(o => o.propia) || opciones[0];
+  if (navigator.webdriver || ana.hidden) return aplicar(propia);   // (no one to ask: what she would do)
+  let hecho = false; const una = op => { if (hecho) return; hecho = true; close(); aplicar(op); };
+  say('ana', '¿Qué hace Ana?', opciones.map(op => [op.texto, () => una(op)]));
+  t.elige = { hasta: auto.on ? TT + 10 : Infinity, una, propia };   // (if the player is away, Ana chooses after a while: what she would do)
 }
 
 /* ---------- the bank of written dialogues for pairs and trios: when two (or three) of them meet, the next block not
@@ -4363,12 +4474,18 @@ function dlgGuion(txt){
     if (!c) continue;
     if (s === '---') { body = true; continue; }
     const i = s.indexOf(':'), k = i < 0 ? s : s.slice(0, i).trim(), v = i < 0 ? '' : s.slice(i + 1).trim();
-    if (body) { const m = v.match(/^(.*?)\s+#(\S+)$/); c._l.push(m ? [k, m[1], m[2]] : [k, v]); continue; }
+    if (body) {
+      // a choice (as in Yarn Spinner): «-> what Ana can do» (with «->*», what she would do on her own), and under it,
+      // indented, its own lines («quien: texto») and what it does («! hecho x», «! suma afecto:marilla:ana 1»)
+      if (s.startsWith('->')) { const last = c._l.at(-1), op = { texto: s.replace(/^->\*?\s*/, ''), propia: s.startsWith('->*'), lineas: [], efectos: [] }; if (last?.[0] === '?' && c._ultimaOpcion) last[2].push(op); else c._l.push(['?', 'elige', [op]]); c._ultimaOpcion = op; continue; }
+      if (c._ultimaOpcion && /^\s/.test(raw)) { const op = c._ultimaOpcion; if (s.startsWith('!')) op.efectos.push(dlgAccion(s.slice(1).trim())); else op.lineas.push([k, v]); continue; }
+      c._ultimaOpcion = null;
+      const m = v.match(/^(.*?)\s+#(\S+)$/); c._l.push(m ? [k, m[1], m[2]] : [k, v]); continue; }
     if (k === 'al_empezar' || k === 'al_terminar') (c[k] ||= []).push(dlgAccion(v));
     else if (k === 'o') (c.o ||= []).push(dlgCampo('o', v));
     else c[k] = dlgCampo(k, v);
   }
-  return out.map(({ _l, lineas, ...c }) => {   // the lines: from the book (all, or a piece: «libro:x [1,2]»), and/or its own
+  return out.map(({ _l, lineas, _ultimaOpcion, ...c }) => {   // the lines: from the book (all, or a piece: «libro:x [1,2]»), and/or its own
     const ref = lineas && lineas.split('+').map(r => { const m = r.trim().match(/^(\S+)(?:\s*\[([\d,\s]+)\])?$/); return { de: m[1], ...(m[2] ? { elegir: m[2].split(',').map(Number) } : {}) }; });
     return { ...c, lineas: ref ? [...ref, ...(_l.length ? [{ lineas: _l }] : [])] : _l };
   });
@@ -5762,7 +5879,7 @@ function autoStep(){
   done();
 }
 // someone in the middle of a conversation or a scene where they speak (or are held to listen): they do not walk off
-const enConversacion = k => (k !== 'ana' && CHAT_HOLD[k] > TT) || TALKS.some(t => t.i < t.lines.length && t.lines.some(l => l.q === k)) || (typeof CHATS !== 'undefined' && CHATS.some(c => c.parts.includes(k)));
+const enConversacion = k => (k !== 'ana' && CHAT_HOLD[k] > TT) || TALKS.some(t => t.i < t.lines.length && t.lines.some(l => l.q === k || (l.q === '?' && k === 'ana')))   /* (a choice ahead is Ana's) */ || (typeof CHATS !== 'undefined' && CHATS.some(c => c.parts.includes(k)));
 function autoTick(){
   if (!autoAllowed() || AGENTS.ana?.followOf || wmDriven('ana') || (CAP1.on && !CAP1.done) || game.scene === 'camino' || ana.hidden || cart.riding) return;   // (in the book's chapter she waits for Matthew; in the cart she rides)   // (a goal of the planner, or following someone who asked: no wandering off)
   const manual = auto.intent?.manual;
@@ -10257,6 +10374,9 @@ AGENDA.push({ who: 'sraallan', from: 15, to: 17.5, label: 'tomar el té en Tejas
 // Minnie May with croup, a good while after the prohibition (in the book, months): Diana runs to Green Gables for Ana, in the evening (cap. 18)
 AGENDA.push({ who: 'diana', from: 18.5, to: 22, prio: 3, label: 'correr a Tejas Verdes: Minnie May tiene crup (cap. 18)',
   when: () => !!dlgHechos().prohibida && dlgCond('dias_desde:prohibida:12', dlgCtx()) && !dlgHechos().crup, goal: () => ({ ...G.estar_en('diana', 'cocina'), quedarMin: 30 }) });
+// Mrs. Rachel comes to see the girl, while she is on trial (cap. 9): a scene with choices (lynde_visita)
+AGENDA.push({ who: 'lynde', from: 15, to: 17.5, label: 'ir a Tejas Verdes a ver a la niña nueva (cap. 9)',
+  when: () => !!dlgHechos().a_prueba && dlgCond('dias_desde:a_prueba:1', dlgCtx()) && !dlgHechos().lynde_visita, goal: () => G.visitar('lynde', 'marilla') });
 // a letter received makes the friendship grow (a little: at most so much); to aunt Josephine, once she is a friend
 const cartaPuede = k => k !== 'josephine' || !!dlgHechos().cama_josephine;
 function cartaAfecto(k){ const b = { diana: 'diana', stacy: 'stacy', sraallan: 'sraallan', josephine: 'josephine' }[k]; if (b) relSetW(b, 'ana', Math.min(5, relGetW(b, 'ana') + 1)); }

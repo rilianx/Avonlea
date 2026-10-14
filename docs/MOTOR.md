@@ -49,6 +49,20 @@ Están en `src/datos/guion.txt`. Cada escena tiene:
 
 **Las conversaciones** (`src/datos/conversaciones.txt`): escenas de Ana con los suyos (Marilla, Matthew, Diana, la Sra. Lynde, la Sra. Barry, el Sr. Harrison), inspiradas en el libro, que dependen sobre todo de la cercanía (`afecto:marilla:ana>=4`). No se disparan por lugar: se tienen desde el menú de la persona (💬) o, a veces, solas, cuando Ana está cerca y libre y la otra persona no está ocupada. Se pueden tener todas las que se quiera, pero lo que suman (las que marcan un paso en la relación suman afecto; otras, una habilidad) sube como mucho una vez al día por cada cualidad: si hoy ya subió, se nota al día siguiente.
 
+**Todas son escenas.** Lo que cambia es qué las dispara (`disparo:`): el lugar y el estado (lo normal), el encuentro de dos personajes, la conversación desde el menú (`conversar`), la primera vez que se hace algo (`primera`), un menú propio (`menu`, como las señas con la vela), un hito.
+
+**Escenas con alternativas** (como en Yarn Spinner, Ink, o los eventos de *Stardew Valley*): en las líneas de una escena, `-> lo que Ana puede hacer` abre una opción; debajo, con sangría, sus propias líneas (`quien: texto`) y lo que deja (`! hecho x`, `! suma afecto:marilla:ana 1`, `! log …`). Con `->*`, lo que Ana haría sola. La escena se detiene en la elección: el jugador elige en un menú; si no está (Ana va sola), después de unos segundos elige Ana. Después sigue con la opción elegida y con lo que venga después, igual para todas.
+
+```
+lynde: Es terriblemente flaca y fea, Marilla. ¡Y el pelo, rojo como zanahoria!
+-> ¡La odio! ¡Es una mujer grosera e insensible!
+   ana: ¡La odio, la odio, la odio!
+   ! hecho ofendio_lynde
+->* Apretar los puños y contar hasta diez
+   ana: Buenas tardes, Sra. Lynde.
+   ! suma afecto:marilla:ana 1
+```
+
 **La primera vez** (`src/js/66-primeras-veces.js`): la primera vez que Ana hace algunas cosas (mirar por la ventana de su pieza, mirarse al espejo, subir a su pieza, abrir el armario, ver el mar desde el faro…), en vez de la frase de siempre sale una escena del guion, `primera_<acción>` con `disparo: primera`. Con `tambien`, la acción se hace igual (subir la escalera).
 
 **Los hitos:** al cruzar un umbral de una habilidad de Ana, alguien se lo dice la próxima vez que se encuentran (con IA, una escena improvisada; sin IA, la línea escrita). Luego queda el hecho `hito_<habilidad>_<n>`.

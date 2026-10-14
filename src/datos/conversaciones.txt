@@ -10,6 +10,8 @@
 #   tema: cómo aparece en el menú (lo que Ana quiere hablar)
 # Las que marcan un paso en la relación suman afecto («al_terminar: suma afecto:marilla:ana 1»); otras, una
 # habilidad («al_terminar: suma letras:ana 1»). El afecto de cada uno hacia Ana empieza en 2 (de 0 a 5).
+# Una conversación puede tener alternativas (como en el guion): «-> lo que Ana puede decir» (con «->*», lo que diría
+# sola), y debajo, con sangría, sus líneas y lo que deja («! suma afecto:marilla:ana 1»).
 
 # ====================================== Marilla ======================================
 
@@ -80,6 +82,17 @@ ana: Marilla, los vestidos que me hizo son muy… prácticos. Pero ¿no podría 
 marilla: Las mangas abullonadas son ridículas. Parecen globos.
 ana: Lo sé. Pero preferiría parecer ridícula como todas que práctica yo sola.
 marilla: (Marilla resopla.) Los vestidos sencillos son para niñas sensatas. Ya veremos qué niña eres.
+->* Imaginar que los vestidos sí tienen mangas abullonadas
+   ana: Bueno… entonces voy a imaginar que las tienen. Es casi lo mismo. Casi.
+   marilla: (Marilla mueve la cabeza, pero se le escapa media sonrisa.)
+   ! suma letras:ana 1
+-> Aceptarlo con buena cara
+   ana: Tiene razón, Marilla. Le agradezco los vestidos. De verdad.
+   marilla: (Marilla parpadea, sorprendida.) Bueno. Eso está mejor.
+   ! suma afecto:marilla:ana 1
+-> Insistir un poquito más
+   ana: ¿Ni siquiera unas mangas pequeñitas? ¿Unas mangas abullonadas modestas?
+   marilla: Ana. No.
 
 === conv_marilla_cocina ===
 con: marilla
@@ -342,6 +355,14 @@ ana: ¡Diana Barry! Gilbert Blythe es la persona más odiosa de toda la isla. Nu
 diana: Pero si fue solo una broma…
 ana: Una broma imperdonable. Hay cosas que no se olvidan, Diana. Se llevan en el alma.
 diana: (Diana suspira, pero no dice nada más.)
+->* Cambiar de tema
+   ana: Hablemos de otra cosa. De cualquier cosa que no tenga pelo castaño y sonrisa de presumido.
+   diana: (Diana se ríe.) Como quieras, Ana.
+-> Admitir que tiene lindos ojos (solo un poquito)
+   ana: Bueno… está bien. Tiene lindos ojos. Pero eso no cambia nada. ¡Nada!
+   diana: ¡Ana Shirley! ¡Lo sabía!
+   ! hecho ana_admite_gilbert
+   ! suma afecto:diana:ana 1
 
 === conv_diana_tia ===
 con: diana

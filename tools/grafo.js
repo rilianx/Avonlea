@@ -33,7 +33,8 @@ const escenas = [];
 for (const raw of guion.split('\n')) {
   const s = raw.trim(); if (!s || s[0] === '#') continue;
   const h = s.match(/^===\s*(.+?)\s*===$/); if (h) { escenas.push(esc = { id: h[1], body: false }); continue; }
-  if (!esc) continue; if (s === '---') { esc.body = true; continue; } if (esc.body) continue;
+  if (!esc) continue; if (s === '---') { esc.body = true; continue; }
+  if (esc.body) { const m = s.match(/^!\s*(hecho|olvidar)\s+(\S+)/); if (m) anota(m[1] === 'hecho' ? hace : pide, m[1] === 'hecho' ? m[2] : m[2] + ' ', 'escena ' + esc.id + ' (una opción)'); if (s.startsWith('->')) esc.opciones = (esc.opciones || 0) + 1; continue; }
   const i = s.indexOf(':'), k = i < 0 ? s : s.slice(0, i).trim(), v = i < 0 ? '' : s.slice(i + 1).trim();
   if (k === 'si') v.split(',').forEach(c => condicion(c, 'escena ' + esc.id));
   if (k === 'o') { const m = v.match(/si=(\S+)/); if (m) m[1].split(',').forEach(c => condicion(c, 'escena ' + esc.id + ' (alternativa)')); }

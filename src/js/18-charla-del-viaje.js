@@ -3,7 +3,7 @@
    other musings; when those too are said, it all starts over. ---------- */
 let TALKS = [];
 function talkPlay(lines, o = {}){
-  const L = lines.map(l => Array.isArray(l) ? { q: l[0], t: l[1], m: l[2] } : l).filter(l => l.t && l.t !== '…');
+  const L = lines.map(l => Array.isArray(l) ? (l[0] === '?' ? { q: '?', t: 'elige', opc: l[2] } : { q: l[0], t: l[1], m: l[2] }) : l).filter(l => l.t && l.t !== '…');
   for (const k of o.hold || []) CHAT_HOLD[k] = TT + 1e6;
   const t = { hold: o.hold, lines: L, i: -1, wait: o.delay ?? .5, gap: o.gap || 0, ch: o.ch, stop: o.stop, end: o.end, budget: o.budget ? o.budget * MIN_S : 0, el: 0, use: o.use, resumen: o.resumen };
   if (o.ch && TALKS.some(x => x.ch === o.ch)) { if (o.queue) (TALK_Q[o.ch] ||= []).push(t); return t; }
@@ -15,9 +15,11 @@ const talkBusy = ch => TALKS.some(x => x.ch === ch);
 function talkTick(dt){
   for (const t of TALKS.slice()) {
     t.el += dt;
+    if (t.elige && TT > t.elige.hasta) { const e = t.elige; t.elige = null; e.una(e.propia); }
     if ((t.wait -= dt) > 0) continue;
     if (t.stop?.() || ++t.i >= t.lines.length || (t.budget && t.el > t.budget)) { talkEnd(t); continue; }
-    const l = t.lines[t.i]; sayB(talkQ(l.q), l.t); t.wait = lineDur(l.t) + .35 + t.gap;   // (gap: a scene that takes its time, like a letter being written)
+    const l = t.lines[t.i]; if (l.q === '?') { elegir(t, l.opc); continue; }   // (a choice: the scene waits for it)
+    sayB(talkQ(l.q), l.t); t.wait = lineDur(l.t) + .35 + t.gap;   // (gap: a scene that takes its time, like a letter being written)
     if (l.m) cap1Mark(l.m); t.use?.(t.i, l);
   }
 }
@@ -118,4 +120,22 @@ function islaDraw(){
   const mk = (p, name, col) => { const [sx, sy] = P(p); c.beginPath(); c.arc(sx, sy, (6 + Math.sin(TT * 5)) * dpr, 0, TAU); c.fillStyle = col; c.fill(); c.lineWidth = 1.4 * dpr; c.strokeStyle = 'rgba(60,35,20,.9)'; c.stroke(); c.font = `bold ${12 * dpr}px Georgia, serif`; c.fillStyle = '#4a2f1c'; c.fillText(name, sx, sy + 20 * dpr); };
   const m = PEOPLE.matthew; if (m.where === 'camino' && game.scene !== 'camino') mk(onRoad(m.roadS), 'Matthew', LOOKS.matthew.dress);
   mk(game.scene === 'camino' ? onRoad(ana.roadS) : game.scene === 'br' ? br : av, 'Ana', '#d9433b');
+}
+// a choice in a scene: the player chooses (a menu); if Ana goes on her own, she chooses (what she would do, «->*», or
+// the first); the chosen option's lines go on in the scene, and what it does is done at once
+function elegir(t, opciones){
+  t.wait = 1e9;
+  const aplicar = op => {
+    t.lines.splice(t.i + 1, 0, ...op.lineas.map(([q, x]) => ({ q, t: x })));
+    const conv = typeof CONVERSACIONES !== 'undefined' && CONVERSACIONES.some(d => d.id === t.esc);
+    dlgHacer(op.efectos.map(a => a.suma && conv ? { ...a, limitado: true } : a));   // (in a conversation, what it adds: at most once a day)
+    if (typeof relatoLinea === 'function' && RELATO.on) relatoLinea('Ana elige: «' + op.texto + '».', { quien: 'ana', dice: op.texto });
+    logEv('Ana eligió: ' + op.texto.replace(/^./, c => c.toLowerCase()) + '.', []);
+    t.wait = .4; t.elige = null;
+  };
+  const propia = opciones.find(o => o.propia) || opciones[0];
+  if (navigator.webdriver || ana.hidden) return aplicar(propia);   // (no one to ask: what she would do)
+  let hecho = false; const una = op => { if (hecho) return; hecho = true; close(); aplicar(op); };
+  say('ana', '¿Qué hace Ana?', opciones.map(op => [op.texto, () => una(op)]));
+  t.elige = { hasta: auto.on ? TT + 10 : Infinity, una, propia };   // (if the player is away, Ana chooses after a while: what she would do)
 }

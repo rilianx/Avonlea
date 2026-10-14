@@ -773,7 +773,7 @@ interrumpe
 grande
 sujeta: marilla
 en: ana=gg, marilla=gg
-si: hecho:a_prueba, !hecho:se_queda, dias_desde:a_prueba:3, afecto:marilla:ana>=3, cuaderno:rezo, cuaderno:quehaceres
+si: hecho:a_prueba, !hecho:se_queda, !hecho:ofendio_lynde, dias_desde:a_prueba:3, afecto:marilla:ana>=3, cuaderno:rezo, cuaderno:quehaceres
 al_terminar: hecho se_queda
 al_terminar: suma afecto:marilla:ana 1
 al_terminar: log Marilla le dijo a Ana que ya no estaba a prueba: se queda en Tejas Verdes, para siempre.
@@ -871,3 +871,72 @@ al_terminar: log Ana le hizo señas a Diana con la vela, desde la ventana de su 
 ana: (Ana pone la vela en la ventana y la tapa y destapa con un cartón: cinco destellos.)
 ana: (Un rato después, entre los árboles, en la ventana de Diana, una luz contesta: cinco destellos.)
 ana: Cinco destellos: «ven mañana temprano, que tengo algo importante que contarte». Y todavía no sé qué le voy a contar… pero se me va a ocurrir.
+
+# --- La visita de la Sra. Lynde (cap. 9 y 10): mientras Ana está a prueba, Rachel viene a ver a la niña. Una escena con
+# alternativas (como en Yarn Spinner): «->» lo que Ana puede hacer (con «->*», lo que haría sola, como en el libro);
+# debajo, con sangría, sus líneas y lo que deja («! …»). Si Ana estalla, tiene que ir a pedirle perdón; mientras no lo
+# haga, Marilla no la deja quedarse (se_queda pide !hecho:ofendio_lynde).
+=== lynde_visita ===
+canal: gg
+prioridad: 9
+interrumpe
+grande
+sujeta: lynde, marilla
+en: ana=gg, marilla=gg, lynde=gg
+si: hecho:a_prueba, !hecho:lynde_visita, sentada:lynde
+al_terminar: hecho lynde_visita
+---
+lynde: (La Sra. Lynde mira a Ana de arriba abajo.) Bueno, no te eligieron por tu cara, eso seguro. Es terriblemente flaca y fea, Marilla. ¡Y qué pecas! ¡Y el pelo, rojo como zanahoria!
+-> ¡La odio! ¡Es una mujer grosera e insensible!
+   ana: (Ana se planta frente a ella, temblando de rabia.) ¡La odio! ¡La odio, la odio, la odio! ¿Cómo se atreve a decir que soy flaca y fea? ¿Le gustaría que dijeran que usted es gorda y torpe y que no tiene una chispa de imaginación?
+   lynde: ¡Habráse visto! ¡Qué genio!
+   marilla: Ana, ve a tu pieza y quédate ahí hasta que yo suba.
+   ! hecho ofendio_lynde
+   ! suma afecto:lynde:ana -1
+   ! log Ana estalló con la Sra. Lynde, que la llamó flaca, fea y pelirroja. Marilla la mandó a su pieza.
+->* Apretar los puños y contar hasta diez
+   ana: (Ana aprieta los puños, se pone roja como un tomate… y cuenta hasta diez, muy despacio.) Buenas tardes, Sra. Lynde.
+   lynde: Hmm. Por lo menos tiene modales. Algo es algo.
+   marilla: (Marilla mira a Ana con algo parecido al orgullo.)
+   ! suma afecto:marilla:ana 1
+   ! log Ana se contuvo cuando la Sra. Lynde la llamó flaca y fea. Marilla lo notó.
+-> Salir corriendo a llorar a su pieza
+   ana: (Ana sale corriendo escaleras arriba y se tira en la cama a llorar.)
+   lynde: Vaya, vaya. Sensible, además.
+   marilla: Rachel, a veces eres demasiado franca.
+   ! log Ana se fue llorando cuando la Sra. Lynde la llamó flaca y fea.
+
+=== lynde_perdon_marilla ===
+canal: gg
+prioridad: 8
+en: ana=gg, marilla=gg
+si: hecho:ofendio_lynde, !hecho:perdon_pedido
+al_terminar: hecho perdon_pedido
+---
+marilla: Ana, lo que hiciste no se hace. Vas a ir a la casa de la Sra. Lynde a pedirle perdón.
+ana: ¡Nunca! Puede encerrarme en un calabozo oscuro y húmedo, con sapos y culebras, y darme pan y agua. Pero no le voy a pedir perdón.
+marilla: No tenemos calabozos en Tejas Verdes. Pero hasta que vayas, no hay más que hablar de quedarte.
+
+=== lynde_disculpa ===
+canal: rl
+prioridad: 9
+interrumpe
+sujeta: lynde
+en: ana=rl, lynde=rl
+si: hecho:ofendio_lynde
+al_terminar: hecho disculpa_lynde
+al_terminar: olvidar ofendio_lynde
+---
+ana: (Ana se arrodilla de pronto frente a la Sra. Lynde.)
+->* Disculparse a lo grande, con todo el dramatismo del mundo
+   ana: ¡Oh, Sra. Lynde, lo siento tanto! Nunca podré expresar todo mi dolor, aunque usara un diccionario entero. Me porté terriblemente. Soy una niña mala e ingrata. Merezco que me echen para siempre de la gente respetable.
+   ana: Todo lo que usted dijo era verdad: tengo el pelo rojo, soy flaca y fea, y estoy llena de pecas. Por favor, Sra. Lynde, perdóneme. Si no, va a ser una pena para toda mi vida.
+   lynde: (La Sra. Lynde, que no es mala, se ablanda.) Ya, ya, levántate, niña. Claro que te perdono. Yo fui demasiado dura. Y te diré algo: conocí a una niña con el pelo tan rojo como el tuyo, y de grande se le oscureció a un castaño precioso.
+   ana: ¡Oh, Sra. Lynde! Me ha dado una esperanza. Siempre la voy a considerar una benefactora.
+   ! suma afecto:lynde:ana 3
+   ! log Ana le pidió perdón a la Sra. Lynde a lo grande, de rodillas; la Sra. Lynde la perdonó y terminó encantada con ella.
+-> Pedirle perdón con pocas palabras
+   ana: Sra. Lynde… perdóneme por lo que le dije. No estuvo bien.
+   lynde: Hmm. Está bien, niña. Que no se repita.
+   ! suma afecto:lynde:ana 1
+   ! log Ana le pidió perdón a la Sra. Lynde.

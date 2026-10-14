@@ -165,7 +165,7 @@ function autoStep(){
   done();
 }
 // someone in the middle of a conversation or a scene where they speak (or are held to listen): they do not walk off
-const enConversacion = k => (k !== 'ana' && CHAT_HOLD[k] > TT) || TALKS.some(t => t.i < t.lines.length && t.lines.some(l => l.q === k)) || (typeof CHATS !== 'undefined' && CHATS.some(c => c.parts.includes(k)));
+const enConversacion = k => (k !== 'ana' && CHAT_HOLD[k] > TT) || TALKS.some(t => t.i < t.lines.length && t.lines.some(l => l.q === k || (l.q === '?' && k === 'ana')))   /* (a choice ahead is Ana's) */ || (typeof CHATS !== 'undefined' && CHATS.some(c => c.parts.includes(k)));
 function autoTick(){
   if (!autoAllowed() || AGENTS.ana?.followOf || wmDriven('ana') || (CAP1.on && !CAP1.done) || game.scene === 'camino' || ana.hidden || cart.riding) return;   // (in the book's chapter she waits for Matthew; in the cart she rides)   // (a goal of the planner, or following someone who asked: no wandering off)
   const manual = auto.intent?.manual;

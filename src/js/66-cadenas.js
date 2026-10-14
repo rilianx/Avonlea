@@ -34,6 +34,9 @@ AGENDA.push({ who: 'sraallan', from: 15, to: 17.5, label: 'tomar el té en Tejas
 // Minnie May with croup, a good while after the prohibition (in the book, months): Diana runs to Green Gables for Ana, in the evening (cap. 18)
 AGENDA.push({ who: 'diana', from: 18.5, to: 22, prio: 3, label: 'correr a Tejas Verdes: Minnie May tiene crup (cap. 18)',
   when: () => !!dlgHechos().prohibida && dlgCond('dias_desde:prohibida:12', dlgCtx()) && !dlgHechos().crup, goal: () => ({ ...G.estar_en('diana', 'cocina'), quedarMin: 30 }) });
+// Mrs. Rachel comes to see the girl, while she is on trial (cap. 9): a scene with choices (lynde_visita)
+AGENDA.push({ who: 'lynde', from: 15, to: 17.5, label: 'ir a Tejas Verdes a ver a la niña nueva (cap. 9)',
+  when: () => !!dlgHechos().a_prueba && dlgCond('dias_desde:a_prueba:1', dlgCtx()) && !dlgHechos().lynde_visita, goal: () => G.visitar('lynde', 'marilla') });
 // a letter received makes the friendship grow (a little: at most so much); to aunt Josephine, once she is a friend
 const cartaPuede = k => k !== 'josephine' || !!dlgHechos().cama_josephine;
 function cartaAfecto(k){ const b = { diana: 'diana', stacy: 'stacy', sraallan: 'sraallan', josephine: 'josephine' }[k]; if (b) relSetW(b, 'ana', Math.min(5, relGetW(b, 'ana') + 1)); }
