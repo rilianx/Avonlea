@@ -103,6 +103,11 @@ const dlgEspecificidad = d => [].concat(d.si || []).length + Object.keys(d.en ||
 // the pacing (as the drama manager of Façade, or RimWorld's storyteller, in small): the scenes marked «grande» start
 // something big of the book; at most RITMO_GRANDES of them a day, so that two never fall on the same evening
 const RITMO_GRANDES = 1;
+// what conversations added beyond the day's once: one a day for each quality, the days after (habilidadesTick)
+function sumasPendientes(){
+  const P = game.wm?.sumaPend; if (!P?.length) return; const H = (game.wm.sumaHoy ||= {});
+  for (const p of P.slice()) if (H[p.q] !== today()) { H[p.q] = today(); const [nombre, dueño, hacia] = p.q.split(':'); cualidadSuma(dueño, nombre, p.n, hacia); P.splice(P.indexOf(p), 1); }
+}
 const ritmoLleno = () => game.wm?.ritmo?.d === today() && game.wm.ritmo.n >= RITMO_GRANDES;
 function ritmoMarca(id){ const R = game.wm.ritmo?.d === today() ? game.wm.ritmo : (game.wm.ritmo = { d: today(), n: 0, escenas: [] }); R.n++; R.escenas.push(id); }
 function dlgHacer(list){   // what a scene does when it starts or ends
@@ -118,7 +123,10 @@ function dlgHacer(list){   // what a scene does when it starts or ends
     if (a.ofensa) { const [k, o, motivo, n] = a.ofensa; game.wm.ofensa[k + '>' + o] = motivo; relSetW(k, o, Math.min(relGetW(k, o), +n)); }   // (k is offended with o)
     if (a.triste) realR.setFact('triste:' + a.triste);
     if (a.afecto) { const [k, o, n] = a.afecto; relSetW(k, o, Math.max(relGetW(k, o), +n)); }   // (how much one cares for the other, at least so much)
-    if (a.suma) { const [q, n] = a.suma, [nombre, dueño, hacia] = q.split(':'); cualidadSuma(dueño, nombre, +n, hacia); }   // (a quality goes up, or down: «suma granja:ana 2», «suma afecto:diana:ana -1»)
+    if (a.suma) { const [q, n] = a.suma, [nombre, dueño, hacia] = q.split(':'), H = (game.wm.sumaHoy ||= {});
+      if (a.limitado && H[q] === today()) { (game.wm.sumaPend ||= []).push({ q, n: +n }); continue; }   // (from conversations, each quality goes up at most once a day: the rest shows on the days after)
+      if (a.limitado) H[q] = today();
+      cualidadSuma(dueño, nombre, +n, hacia); }   // (a quality goes up, or down: «suma granja:ana 2», «suma afecto:diana:ana -1»)
     if (a.fin_capitulo) { CAP1.done = hourNow(); logEv('Fin del capítulo 1 (y del 2): Ana llegó a Tejas Verdes.', []); }
   }
 }
@@ -269,12 +277,11 @@ function dlgGuion(txt){
 const ESCENAS = dlgGuion(document.getElementById('guion')?.textContent || '');
 for (const c of ESCENAS) Dialogo.registrar(c);
 // the conversations of Ana with her own (src/datos/conversaciones.txt): scenes too, available by closeness, had from the
-// menu of the person (or now and then by themselves, when Ana is near and free); at most one a day with each one
-const CONVERSACIONES = dlgGuion(document.getElementById('conversaciones')?.textContent || '').map(c => Dialogo.registrar({ ...c, disparo: 'conversar', canal: 'conv', quienes: [c.con, 'ana'], sujeta: [c.con], tema: c.tema || c.id }));
-const convHoy = k => game.wm?.convHoy?.[k] === today();
-const convDisponibles = k => convHoy(k) ? [] : CONVERSACIONES.filter(d => d.con === k && !d.dicha() && dlgCumple(d, dlgCtx())).sort((a, b) => b.peso - a.peso);
+// menu of the person (or now and then by themselves, when Ana is near and free), as many as she likes; what they add to
+// a quality (affection, a skill), at most once a day for each quality
+const CONVERSACIONES = dlgGuion(document.getElementById('conversaciones')?.textContent || '').map(c => Dialogo.registrar({ ...c, disparo: 'conversar', canal: 'conv', quienes: [c.con, 'ana'], sujeta: [c.con], tema: c.tema || c.id, al_terminar: (c.al_terminar || []).map(a => a.suma ? { ...a, limitado: true } : a) }));
+const convDisponibles = k => CONVERSACIONES.filter(d => d.con === k && !d.dicha() && dlgCumple(d, dlgCtx())).sort((a, b) => b.peso - a.peso);
 function conversar(d){   // a conversation, now: said in its own channel, holding the other still, once
-  (game.wm.convHoy ||= {})[d.con] = today();
   for (const t of TALKS.filter(t => t.ch === 'conv')) talkEnd(t);
   logEv('Ana conversó con ' + wmName(d.con) + ': ' + d.tema.replace(/^./, c => c.toLowerCase()) + '.', []);
   return d.decir();

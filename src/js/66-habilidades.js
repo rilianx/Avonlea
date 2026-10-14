@@ -54,7 +54,7 @@ function habilidadesTick(dt){
       for (const c of HABILIDADES) if (c.suma.includes(v)) { let t = v.replace(/_/g, ' '); try { t = stepText(A.task?.a?.v === v ? A.task.a : A); } catch (e) {} habilidadSube(k, c, D, v === 'clase' ? 'un día de clases' : t); }
     }
   }
-  hitosTick();
+  hitosTick(); sumasPendientes();
 }
 // a milestone, told by whoever it is: the next time Ana is near them and nothing else is being said
 function hitosTick(){
