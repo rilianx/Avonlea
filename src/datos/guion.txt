@@ -2,6 +2,16 @@
 # Cada escena: «=== id ===», sus campos (uno por línea, «campo: valor»), y si tiene líneas propias, «---» y una línea
 # por intervención: «quien: texto» (con « #marca» al final si esa línea marca un momento del libro).
 # Las líneas pueden venir del libro: «lineas: libro:estacion», o un trozo: «lineas: libro:viaje.10 [7]».
+#
+# Cada escena es un «storylet» (docs/MOTOR.md): precondiciones (dónde y quiénes: «en:»; qué tiene que ser cierto: «si:»),
+# contenido (las líneas) y efectos («al_empezar:», «al_terminar:»). El estado que leen y cambian:
+#   hechos: «hecho:x», «!hecho:x», «dias_desde:x:2», «sabe:marilla:x» (un hecho que alguien sabe)
+#   cualidades (números con dueño): «granja:ana>=15», «afecto:diana:ana>=4», «estudio:gilbert<30»
+#   tiempo: «estacion:verano», «dia_estacion:1»
+# Efectos: «hecho x», «olvidar x», «contar quien x», «suma granja:ana 2», «suma afecto:diana:ana -1»,
+#   «meta quien tipo args | texto | etiqueta | prioridad» (un encargo: el planificador busca cómo cumplirlo).
+# Si varias escenas pueden decirse a la vez en un canal, va la de más prioridad; a igual prioridad, la más específica
+# (la que pide más condiciones). «grande»: empieza algo grande del libro; como mucho una grande por día (el ritmo).
 
 # --- el capítulo: Rachel en su ventana, en Tejas Verdes, donde los Bell; la estación; la casa
 === rachel_ventana ===
@@ -443,6 +453,7 @@ diana: Bueno… tal vez. Tengo que volver a casa ahora.
 # poder ir al picnic, «confiesa» que lo perdió en el lago… hasta que el broche aparece en el chal de Marilla.
 # Abre el picnic (cuaderno: picnic requiere hecho:broche).
 === broche ===
+grande
 canal: gg
 prioridad: 6
 interrumpe
@@ -464,6 +475,7 @@ marilla: (Marilla se ríe, a pesar de todo.) Perdóname, Ana. No debí dudar de 
 # --- «¡Zanahorias!» (cap. 15): el primer día de Ana en la escuela con Gilbert Blythe. Desde ahí, Ana no le habla
 # (la ofensa), y hacer las paces se vuelve una meta (cuaderno: paces requiere hecho:zanahorias).
 === zanahorias ===
+grande
 canal: es
 prioridad: 7
 interrumpe
@@ -501,6 +513,7 @@ ana: ¿A casa? ¡Pero si todavía no hemos tomado el té! ¡Diana, no te vayas!
 diana: (Diana se levanta tambaleándose.) Me siento… muy… muy mal.
 
 === prohibida ===
+grande
 canal: gg
 prioridad: 7
 interrumpe
@@ -530,6 +543,7 @@ ana: Sra. Barry, por favor, perdóneme. No sabía que era vino. Me imaginé que 
 barry: No, Ana Shirley. No creo que seas compañía para Diana. Vete a tu casa y pórtate bien.
 
 === crup_aviso ===
+grande
 canal: gg
 prioridad: 9
 interrumpe
@@ -566,6 +580,7 @@ ana: (Ana no cabe en sí de felicidad.) ¡Oh, Sra. Barry! La perdono con toda mi
 # té; Ana hace el pastel… con linimento en vez de vainilla. La Sra. Allan es tan buena que la invita a la casa
 # parroquial (cuaderno: el té con la Sra. Allan requiere hecho:pastel_linimento).
 === invita_allan ===
+grande
 canal: gg
 prioridad: 5
 en: ana=gg, marilla=gg
@@ -576,6 +591,7 @@ marilla: Invité al pastor y a la Sra. Allan a tomar el té mañana en la tarde.
 ana: ¡Oh, Marilla! Lo haré con toda mi alma. ¡Y con vainilla, como dice la receta!
 
 === pastel_linimento ===
+grande
 canal: gg
 prioridad: 7
 interrumpe
@@ -597,11 +613,12 @@ sraallan: (La Sra. Allan sube a verla.) Querida, fue un error muy gracioso, nada
 # --- la tía Josephine (cap. 19): ya amigas, Ana se queda a dormir donde Diana después del concierto del Club de Debate;
 # saltan sobre la cama del cuarto de huéspedes… donde dormía la tía Josephine. Ana confiesa y se gana su amistad.
 === cama_josephine ===
+grande
 canal: os
 prioridad: 6
 interrumpe
 en: ana=os, diana=os
-si: cuaderno:amigas, !hecho:prohibida, !hecho:cama_josephine, dias_desde:conocidas_diana:2, no_hoy:perdonada
+si: cuaderno:amigas, !hecho:prohibida, !hecho:cama_josephine, dias_desde:conocidas_diana:2
 al_terminar: hecho cama_josephine
 al_terminar: afecto josephine ana 5
 al_terminar: log Ana y Diana saltaron sobre la cama del cuarto de huéspedes, donde dormía la tía Josephine; Ana confesó y se ganó su amistad.
@@ -615,13 +632,13 @@ ana: (A la mañana siguiente, Ana va a verla.) Fue culpa mía, Srta. Barry. Dian
 josephine: (La tía Josephine se ríe como hacía años.) Vaya, vaya… Ven a verme a menudo mientras esté aquí, niña. Y escríbeme cuando me vaya.
 
 # --- El examen de ingreso a Queen's (cap. 31, 32): el primer día de cada verano, si Ana estudió lo suficiente para que
-# la Srta. Stacy la mande (estudio:10). Cómo le va sale de lo que estudió: los días de clase y de lecciones (docs/LARGO_PLAZO.md).
+# la Srta. Stacy la mande (estudio:ana>=10). Cómo le va sale de lo que estudió: los días de clase y de lecciones (docs/LARGO_PLAZO.md).
 === examen_primera ===
 canal: gg
 prioridad: 8
 interrumpe
 en: ana=gg, marilla=gg
-si: estacion:verano, dia_estacion:1, estudio:10, estudio:60, !hecho:queens, no_hoy:examen
+si: estacion:verano, dia_estacion:1, estudio:ana>=60, !hecho:queens, no_hoy:examen
 al_terminar: hecho examen
 al_terminar: hecho queens
 al_terminar: hecho queens_primera
@@ -639,7 +656,7 @@ canal: gg
 prioridad: 8
 interrumpe
 en: ana=gg, marilla=gg
-si: estacion:verano, dia_estacion:1, estudio:30, !estudio:60, !hecho:queens, no_hoy:examen
+si: estacion:verano, dia_estacion:1, estudio:ana>=30, estudio:ana<60, !hecho:queens, no_hoy:examen
 al_terminar: hecho examen
 al_terminar: hecho queens
 al_terminar: afecto marilla ana 5
@@ -655,7 +672,7 @@ canal: gg
 prioridad: 8
 interrumpe
 en: ana=gg, marilla=gg
-si: estacion:verano, dia_estacion:1, estudio:10, !estudio:30, !hecho:queens, no_hoy:examen
+si: estacion:verano, dia_estacion:1, estudio:ana>=10, estudio:ana<30, !hecho:queens, no_hoy:examen
 al_terminar: hecho examen
 al_terminar: triste ana
 al_terminar: log Ana dio el examen de ingreso a Queen's en Charlottetown, pero no le alcanzó. El año que viene, otra vez.

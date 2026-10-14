@@ -6,7 +6,7 @@
 #   meta: cuándo está cumplida: una meta del planificador y sus argumentos, separados por espacios
 #         (p. ej. «amigas ana diana», «nombres ana 3»; una lista va con comas: «quehaceres ana platos,barrer»)
 #   requiere: lo que tiene que pasar antes (separado por comas): otras metas del cuaderno (por su id), o
-#         condiciones del guion («hecho:conocidas_diana», «dias_desde:quiere_amiga:1», «afecto:diana:ana:4»)
+#         condiciones del guion («hecho:conocidas_diana», «dias_desde:quiere_amiga:1», «afecto:diana:ana>=4», «estudio:ana>=10»)
 #   antes: cómo se dice lo que falta, mientras está cerrada (si no, los títulos de las metas que requiere)
 #   oculta: no aparece en el cuaderno hasta que se abre (algo que no se puede saber antes, como una prohibición)
 #   acciones: lo que no se puede hacer mientras está cerrada (separado por comas): una acción («jurar»), una
@@ -30,7 +30,7 @@ meta: hecho conocidas_diana
 === amigas ===
 titulo: Tener una amiga del alma
 pista: Una amistad así se jura, en el jardín, tomadas de las manos.
-pista si !afecto:diana:ana:4: Ya conoces a Diana, pero para jurar tienen que quererse mucho: pasen tiempo juntas, conversen, regálale algo.
+pista si afecto:diana:ana<4: Ya conoces a Diana, pero para jurar tienen que quererse mucho: pasen tiempo juntas, conversen, regálale algo.
 meta: amigas ana diana
 requiere: conocer_diana
 acciones: jurar
@@ -123,7 +123,7 @@ acciones: recitar
 === queens ===
 titulo: Entrar a Queen's
 pista: El examen de ingreso es en Charlottetown, el primer día del verano (faltan {dias_examen} días). Se prepara yendo a clases y estudiando la lección: llevas {estudio} días de estudio.
-pista si estudio:10: La Srta. Stacy te va a mandar al examen (faltan {dias_examen} días). Llevas {estudio} días de estudio: con unos 30 se entra; con 60, quizás quedes primera.
+pista si estudio:ana>=10: La Srta. Stacy te va a mandar al examen (faltan {dias_examen} días). Llevas {estudio} días de estudio: con unos 30 se entra; con 60, quizás quedes primera.
 pista si hecho:examen: No alcanzó esta vez. Hay otro examen el próximo verano (faltan {dias_examen} días): llevas {estudio} días de estudio, y con unos 30 se entra.
 meta: hecho queens
 requiere: escuela

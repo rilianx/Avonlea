@@ -1,6 +1,6 @@
 # Lo que se gana de a poco
 
-Las cadenas del libro (`docs/CADENAS.md`) pasan una vez. Lo de largo plazo, en cambio, se gana día a día. Para que se pueda hacer, lo más simple posible: **un número por camino** (como en *Princess Maker* o *Stardew Valley*), y el afecto que ya existía.
+Las cadenas del libro (`docs/CADENAS.md`) pasan una vez. Lo de largo plazo, en cambio, se gana día a día. Para que se pueda hacer, lo más simple posible: **un número por habilidad** (como en *Princess Maker* o *Stardew Valley*), y el afecto que ya existía.
 
 ## El calendario
 
@@ -8,9 +8,9 @@ Las cadenas del libro (`docs/CADENAS.md`) pasan una vez. Lo de largo plazo, en c
 - **No hay clases los domingos ni en verano** (`hayClases()`). Esos días los niños juegan afuera, y la maestra pasea por la aldea.
 - El cuaderno muestra la fecha: «martes, día 3 de la primavera».
 
-## Los caminos
+## Las habilidades
 
-Cada camino es **un número** que sube con lo que Ana hace, día a día. Están escritos aparte, en `src/datos/caminos.txt`, como el guion y el cuaderno: para agregar un camino o un hito basta con escribirlo ahí, a mano o pidiéndoselo a una IA.
+Cada habilidad es **una cualidad** (un número con dueño, ver `docs/MOTOR.md`) que sube con lo que cada uno hace, día a día: Ana, pero también Gilbert o Diana. Están escritas aparte, en `src/datos/habilidades.txt`, como el guion y el cuaderno: para agregar una habilidad o un hito basta con escribirlo ahí, a mano o pidiéndoselo a una IA.
 
 - **`suma:`** las acciones que lo hacen subir. Cada una suma **+1, una vez al día**, si Ana la hace unos minutos. `clase` es una hora en la escuela, un día con clases.
 - **`por_dia:`** cuánto puede subir en un día, como mucho (2).
@@ -18,17 +18,17 @@ Cada camino es **un número** que sube con lo que Ana hace, día a día. Están 
   - con la IA encendida, una escena que improvisa a partir de `ia:`;
   - sin IA, la línea escrita en `dice:`.
 
-  Contado el hito, queda el hecho `hito_<camino>_<N>`, para el guion. Las escenas también pueden esperar un nivel: `si: camino:granja:15`.
+  Contado el hito, queda el hecho `hito_<habilidad>_<N>`, para el guion. Las escenas también pueden esperar un nivel: `si: granja:ana>=15`.
 
-Los caminos que hay:
+Las habilidades que hay:
 
-| Camino | Sube con | Hitos |
+| Habilidad | Sube con | Hitos |
 |---|---|---|
 | El estudio | clases, estudiar, recitar, leer, ensayar | 10: la Srta. Stacy la anota para Queen's · 30: podría entrar · 60: podría quedar primera |
 | La granja de Tejas Verdes | quehaceres, ordeñar, dar de comer, sembrar, regar, batir, leña, heno, cocinar, coser, recoger | 5: Marilla cuenta con ella · 15: el vestido de mangas abullonadas de Matthew · 30: Tejas Verdes también es suya |
 | Las letras y la imaginación | escribir cuentos y cartas, ponerle nombre a los lugares, adornar | 5: Diana la admira · 15: la Srta. Stacy lee su composición · 30: un cuento para una revista |
 
-El cuaderno muestra cada camino con su número, una barra y el próximo hito.
+El cuaderno muestra cada habilidad de Ana con su número, una barra y el próximo hito.
 
 ## El examen de Queen's (cap. 31, 32)
 
@@ -52,8 +52,7 @@ El cuaderno muestra cada camino con su número, una barra y el próximo hito.
 ## Para el guion y el cuaderno
 
 Condiciones nuevas:
-- `estudio:n`: al menos n en el estudio;
-- `camino:id:n`: al menos n en ese camino;
+- `estudio:ana>=n`, `granja:ana>=n`, `estudio:gilbert<n`…: una cualidad comparada con un número;
 - `estacion:verano`;
 - `dia_estacion:n`: el día n de la estación, desde 1.
 

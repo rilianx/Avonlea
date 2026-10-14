@@ -1,14 +1,16 @@
-# Los caminos de Ana: lo que se gana de a poco, según a qué se dedique (lo lee el juego al empezar).
-# Cada camino es un número que sube con lo que Ana hace, día a día. Al cruzar un hito pasa algo: alguien se lo dice
-# la próxima vez que Ana lo encuentra; y el guion puede tener escenas para eso («si: camino:granja:15»).
-# Para escribir más caminos o más hitos, basta con agregarlos aquí (a mano, o pidiéndoselo a una IA).
+# Las habilidades: cualidades (números con dueño) que suben de a poco con lo que cada uno hace (lo lee el juego al empezar).
+# Cada habilidad sube con las acciones de quien las hace (Ana, Gilbert, Diana…), +1 una vez al día por acción.
+# Los hitos son de Ana: al llegar a uno, alguien se lo dice la próxima vez que lo encuentra, y queda el hecho
+# hito_<habilidad>_<N>. El guion puede pedir un nivel de cualquiera: «si: granja:ana>=15», «estudio:gilbert>=30».
+# Para escribir más habilidades o más hitos, basta con agregarlos aquí (a mano, o pidiéndoselo a una IA).
+# Cómo encaja con el resto del motor: docs/MOTOR.md.
 #
 # «=== id ===» y sus campos, uno por línea:
-#   titulo: cómo se llama el camino, en el cuaderno
-#   suma: las acciones de Ana que lo hacen subir (separadas por comas): cada una, +1 una vez al día (si la hace
-#         unos minutos); «clase» es un día de clases en la escuela (una hora adentro, un día con clases)
+#   titulo: cómo se llama, en el cuaderno
+#   suma: las acciones que la hacen subir (separadas por comas): cada una, +1 una vez al día (si se hace unos
+#         minutos); «clase» es un día de clases de Ana en la escuela (una hora adentro, un día con clases)
 #   por_dia: cuánto puede subir en un día, como mucho (si no, 2)
-#   hito N: lo que significa llegar a N (se lee en el cuaderno y en el aviso)
+#   hito N: lo que significa que Ana llegue a N (se lee en el cuaderno y en el aviso)
 #     con: quién se lo dice la próxima vez que Ana lo encuentra (si no, nadie: solo el aviso)
 #     dice: lo que dice, escrito (una línea; varias, separadas por « / »)
 #     ia: lo que pasa, para que la IA improvise la escena (si está encendida; si no, se usa «dice»)

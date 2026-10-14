@@ -62,11 +62,11 @@ El silencio también se escribe: después de la Avenida hay escenas de una líne
 | `sabe:quien:qué` | quien sabe algo (`game.wm.know`) |
 | `y_mayor:quien:y` | quien está más al sur que `y` (en unidades del mapa) |
 | `dias_desde:x:n` | pasaron al menos `n` días desde el hecho `x` |
-| `no_hoy:x` | el hecho `x` no pasó hoy (una cosa grande del libro por día) |
+| `no_hoy:x` | el hecho `x` no pasó hoy (para el ritmo en general, mejor marcar la escena `grande`) |
 | `afecto:a:b:n` | `a` quiere a `b` al menos `n` (de 0 a 5) |
 | `cuaderno:id` | Ana cumplió esa meta de su cuaderno |
 | `estudio:n` | Ana tiene al menos `n` días de estudio (`docs/LARGO_PLAZO.md`) |
-| `camino:id:n` | Ana llegó al menos a `n` en ese camino (`src/datos/caminos.txt`) |
+| `nombre:dueño>=n` | una cualidad comparada con un número: `granja:ana>=15`, `afecto:diana:ana>=4`, `estudio:gilbert<30` (también `>`, `<`, `<=`, `=`; ver `docs/MOTOR.md`) |
 | `estacion:e` | es esa estación (`primavera`, `verano`, `otoño`, `invierno`) |
 | `dia_estacion:n` | es el día `n` de la estación (desde 1; cada estación dura 14 días) |
 | `sentada:quien` | esa persona está sentada |

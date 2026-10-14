@@ -93,7 +93,7 @@ Leyendo los relatos de las cadenas nuevas (zanahorias, broche, té con Diana, cr
 | Diana, corriendo a avisar del crup, se paraba a conversar con Jerry sobre la botella de leche de Gilbert | lo urgente (prioridad 3) no se detiene a conversar, ni lo detienen |
 | Ana llegaba a La Cuesta del Huerto con el jarabe, salía enseguida y se iba a visitar a la Sra. Lynde | las metas urgentes del guion cortan lo que alguien estaba esperando; Ana se queda en casa de los Barry |
 | La tía Josephine: «Desde que me saltaste encima en la cama…» antes de la cama; la Sra. Barry: «Esta vez el cordial está bien etiquetado» en plena prohibición; Mary Joe y el médico hablando del crup antes del crup | las frases sueltas pueden esperar un hecho: `[hecho:perdonada] …` |
-| La tía Josephine invitaba a Ana la misma noche del crup | `no_hoy:perdonada`: una cosa grande del libro por día |
+| La tía Josephine invitaba a Ana la misma noche del crup | el ritmo: las escenas «grandes», como mucho una por día (`docs/MOTOR.md`) |
 | «Ana dice: ¿Un poco más de té, Ana?» | la frase del té no nombra a nadie |
 | Diana, mareada, decía que se iba… y seguía veinte minutos más hablando de su novela | después del vino se va a su casa; y si la otra se va, el té termina |
 | Ana servía el pastel cuando la Sra. Allan todavía estaba en la puerta | la escena espera a que se siente (`sentada:sraallan`) |

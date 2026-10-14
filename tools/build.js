@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Builds index.html from src/: the page (src/shell.html), the script of scenes (src/datos/guion.txt), Ana's notebook of goals (src/datos/cuaderno.txt), her paths (src/datos/caminos.txt), the book
+// Builds index.html from src/: the page (src/shell.html), the script of scenes (src/datos/guion.txt), Ana's notebook of goals (src/datos/cuaderno.txt), her skills (src/datos/habilidades.txt), the book
 // (src/datos/libro1.json), the characters (src/datos/personajes.json), the interiors drawn in Tiled (src/mapas/*.tmj) and the code, in order (src/js/NN-*.js, concatenated as they are: one script, as before).
 // The game is still ONE file, so the link keeps working.
 //   node tools/build.js            → writes index.html
@@ -12,7 +12,7 @@ function build(){
   const js = fs.readdirSync(src('js')).filter(f => /^\d\d-.*\.js$/.test(f)).sort().map(f => read('js/' + f)).join('\n');
   const mapas = Object.fromEntries(fs.readdirSync(src('mapas')).filter(f => f.endsWith('.tmj')).sort().map(f => [f.replace('.tmj', ''), JSON.parse(read('mapas/' + f))]));
   const code = js.replace('/*@libro1*/', () => read('datos/libro1.json')).replace('/*@personajes*/', () => read('datos/personajes.json')).replace('/*@mapas*/', () => JSON.stringify(mapas));
-  return read('shell.html').replace('<!--@guion-->', () => read('datos/guion.txt')).replace('<!--@cuaderno-->', () => read('datos/cuaderno.txt')).replace('<!--@caminos-->', () => read('datos/caminos.txt')).replace('<!--@js-->', () => code);
+  return read('shell.html').replace('<!--@guion-->', () => read('datos/guion.txt')).replace('<!--@cuaderno-->', () => read('datos/cuaderno.txt')).replace('<!--@habilidades-->', () => read('datos/habilidades.txt')).replace('<!--@js-->', () => code);
 }
 
 const out = build(), target = path.join(root, 'index.html');
@@ -31,3 +31,5 @@ if (process.argv.includes('--check')) {
   if (now !== out) { console.error('index.html no coincide con src/ (corre: node tools/build.js)'); process.exit(1); }
   console.log('index.html coincide con src/');
 } else { fs.writeFileSync(target, out); console.log('→ index.html (' + Math.round(out.length / 1024) + ' KB, ' + out.split('\n').length + ' líneas)'); }
+// the graph of the story (tools/grafo.js): a scene or goal that could never happen, or a condition written wrong, is said
+{ const r = require('child_process').spawnSync(process.execPath, [path.join(__dirname, 'grafo.js')], { encoding: 'utf8' }); process.stdout.write(r.stdout || ''); if (r.status) console.error('⚠ el grafo de la historia tiene problemas: ver trazas/grafo.md'); }

@@ -30,6 +30,7 @@ function dlgCtx(){
 }
 function dlgCond(s, c){   // one condition of state, written as text
   if (s[0] === '!') return !dlgCond(s.slice(1), c);
+  { const q = cualidadCond(s); if (q) return q(); }   // (a quality compared with a number: «granja:ana>=15», «afecto:diana:ana>=4»)
   const i = s.indexOf(':'), k = i < 0 ? s : s.slice(0, i), rest = i < 0 ? '' : s.slice(i + 1), [a, b] = k === 'sabe' || k === 'y_mayor' || k === 'dias_desde' ? rest.split(':') : [rest];   // (an id may have ':' in it)
   switch (k) {
     case 'hecho': return !!dlgHechos()[a];
@@ -38,11 +39,11 @@ function dlgCond(s, c){   // one condition of state, written as text
     case 'capitulo': return CAP1.on && !CAP1.done;
     case 'cuaderno': return !!cuadernoHecho(a);   // (a goal of Ana's notebook is done)
     case 'tomando_te': { const [x, y] = rest.split(':'); return AGENTS[x]?.acting?.v === 'tomar_te' && AGENTS[x].acting.k === y; }   // (x at the tea table with y)
-    case 'afecto': { const [x, y, n] = rest.split(':'); return relGetW(x, y) >= +n; }   // (x cares for y at least n, of 0..5)
+    case 'afecto': { const [x, y, n] = rest.split(':'); return relGetW(x, y) >= +n; }   // (x cares for y at least n, of 0..5; the same as «afecto:x:y>=n»)
     case 'dias_desde': { const d = dlgHechos()[a]; return typeof d === 'number' && today() + 1 - d >= +b; }   // (at least b days since a happened)
     case 'sentada': return !!wmBody(a)?.sit;   // (she has sat down: at the table, for the tea)
-    case 'estudio': return estudio() >= +a;   // (she has studied at least so much: days of class and of lessons)
-    case 'camino': { const [x, n] = rest.split(':'); return camino(x) >= +n; }   // (so far on a path: src/datos/caminos.txt)
+    case 'estudio': return cualidad('ana', 'estudio') >= +a;   // (the same as «estudio:ana>=n»)
+    case 'camino': { const [x, n] = rest.split(':'); return cualidad('ana', x) >= +n; }   // (the same as «x:ana>=n»)
     case 'estacion': return SEASONS[S].toLowerCase() === a;   // (primavera, verano, otoño, invierno)
     case 'dia_estacion': return today() % DIAS_ESTACION + 1 === +a;   // (the day of the season, from 1)
     case 'no_hoy': return dlgHechos()[a] !== today() + 1;   // (a did not happen today: one thing of the book per day)
@@ -81,6 +82,27 @@ function dlgFalla(c, x){   // why the conditions of place and state of a configu
   return null;
 }
 const dlgCumple = (c, x) => !dlgFalla(c, x);
+// --- the state of the world, as in quality-based narrative (docs/MOTOR.md): facts (with the day they happened) and
+// qualities, numbers with an owner: «granja» of Ana, «estudio» of Gilbert, «afecto» of Diana towards Ana (0 to 5)
+const cualidad = (dueño, nombre, hacia) => nombre === 'afecto' ? relGetW(dueño, hacia) : game.wm?.num?.[dueño]?.[nombre] || 0;
+function cualidadSuma(dueño, nombre, n, hacia){
+  if (nombre === 'afecto') return relSetW(dueño, hacia, Math.max(0, Math.min(5, relGetW(dueño, hacia) + n)));
+  const N = ((game.wm.num ||= {})[dueño] ||= {}); N[nombre] = Math.max(0, (N[nombre] || 0) + n);
+}
+// a quality compared with a number, as text: «granja:ana>=15», «afecto:diana:ana>=4», «estudio:gilbert<30» (null: it is not one)
+const CUALIDAD_RE = /^([a-zñ_]+):([a-zñ_]+)(?::([a-zñ_]+))?\s*(>=|<=|>|<|==|=)\s*(-?\d+(?:\.\d+)?)$/;
+function cualidadCond(s){
+  const m = s.match(CUALIDAD_RE); if (!m) return null;
+  const [, nombre, dueño, hacia, op, n] = m, v = () => cualidad(dueño, nombre, hacia);
+  return { '>=': () => v() >= +n, '<=': () => v() <= +n, '>': () => v() > +n, '<': () => v() < +n, '==': () => v() === +n, '=': () => v() === +n }[op];
+}
+// how specific a scene is: how much it asks of the moment (of two of the same importance, the most specific goes first)
+const dlgEspecificidad = d => [].concat(d.si || []).length + Object.keys(d.en || {}).length + (d.cerca ? 1 : 0) + (d.o ? 1 : 0);
+// the pacing (as the drama manager of Façade, or RimWorld's storyteller, in small): the scenes marked «grande» start
+// something big of the book; at most RITMO_GRANDES of them a day, so that two never fall on the same evening
+const RITMO_GRANDES = 1;
+const ritmoLleno = () => game.wm?.ritmo?.d === today() && game.wm.ritmo.n >= RITMO_GRANDES;
+function ritmoMarca(id){ const R = game.wm.ritmo?.d === today() ? game.wm.ritmo : (game.wm.ritmo = { d: today(), n: 0, escenas: [] }); R.n++; R.escenas.push(id); }
 function dlgHacer(list){   // what a scene does when it starts or ends
   for (const a of list || []) {
     if (a.hecho) dlgHecho(a.hecho);
@@ -94,6 +116,7 @@ function dlgHacer(list){   // what a scene does when it starts or ends
     if (a.ofensa) { const [k, o, motivo, n] = a.ofensa; game.wm.ofensa[k + '>' + o] = motivo; relSetW(k, o, Math.min(relGetW(k, o), +n)); }   // (k is offended with o)
     if (a.triste) realR.setFact('triste:' + a.triste);
     if (a.afecto) { const [k, o, n] = a.afecto; relSetW(k, o, Math.max(relGetW(k, o), +n)); }   // (how much one cares for the other, at least so much)
+    if (a.suma) { const [q, n] = a.suma, [nombre, dueño, hacia] = q.split(':'); cualidadSuma(dueño, nombre, +n, hacia); }   // (a quality goes up, or down: «suma granja:ana 2», «suma afecto:diana:ana -1»)
     if (a.fin_capitulo) { CAP1.done = hourNow(); logEv('Fin del capítulo 1 (y del 2): Ana llegó a Tejas Verdes.', []); }
   }
 }
@@ -113,16 +136,19 @@ class Dialogo {
   constructor(c){ Object.assign(this, { canal: 'general', tipo: 'conversacion', prioridad: 1, interrumpe: false, repetir: 'una_vez', pausa: 1.4 }, c); }
   dicha(){ const v = dlgDichas()[this.id]; return this.repetir === 'una_vez' ? !!v : this.repetir === 'dia' ? v === today() : false; }
   // (a conversation left halfway goes on before a new one of the same importance)
-  get peso(){ return this.prioridad + (dlgProg()[this.id] ? .04 : 0); }
+  // (and, of two of the same importance, the most specific: the one that asks more of the moment, as in Valve's dialogue rules)
+  get peso(){ return this.prioridad + (dlgProg()[this.id] ? .04 : 0) + dlgEspecificidad(this) * .001; }
   listo(x){
     if (this.disparo === 'encuentro') return false;   // (these only when two of them meet: dlgNext)
     if (this.dicha() || (this.repetir.cada && TT < (this.proxima || 0))) return false;
+    if (this.grande && ritmoLleno()) return false;   // (the pacing: one big thing of the book a day)
     if (this.tipo === 'comentario' && this.prioridad > 0 && TT < (dlgComento[this.canal] || 0)) return false;   // (remarks, not one after another)
     return dlgCumple(this, x);
   }
   porque(x){   // why it is not said now (for the panel)
     if (this.disparo === 'encuentro') return 'cuando se encuentran';
     if (this.dicha()) return 'ya dicha';
+    if (this.grande && ritmoLleno()) return 'hoy ya pasó algo grande';
     if (this.repetir.cada && TT < (this.proxima || 0)) return 'otra vez en ' + Math.ceil(this.proxima - TT) + ' s';
     if (this.tipo === 'comentario' && this.prioridad > 0 && TT < (dlgComento[this.canal] || 0)) return 'hace poco hubo un comentario';
     return dlgFalla(this, x);
@@ -148,7 +174,7 @@ class Dialogo {
     if (this.repetir.cada) this.proxima = TT + this.repetir.cada;
     if (this.tipo === 'comentario') dlgComento[this.canal] = TT + DLG_RESPIRO;
     const L = this.lineas(); if (p >= L.length) delete P[this.id]; if (!L.length || p >= L.length) return null;
-    if (!p) dlgHacer(this.al_empezar);
+    if (!p) { dlgHacer(this.al_empezar); if (this.grande) ritmoMarca(this.id); }
     const pu = p ? this.puenteDe(L[p]) : [], k = pu.length;
     if (this.canal === 'carta') game.cartaEscena = { id: this.id, lineas: L.filter(l => l[0] === 'carta').map(l => l[1]) };   // (what she writes: the letter that goes)
     const escrita = l => l[0] === 'carta' ? ['ana', '✎ ' + l[1], l[2]] : l;   // (the lines of the letter: Ana reads them aloud as she writes them)
@@ -189,7 +215,7 @@ function dlgNext(ks){
 // the scenes, as a script outside the code (the <script type="text/plain" id="guion"> block, at the top): each one
 // «=== id ===», its fields, one per line («field: value»), and its own lines after «---» («who: text #mark»).
 // dlgGuion turns it into the same configurations as anywhere else (docs/ESCENAS.md).
-const DLG_LISTA = ['sujeta', 'quienes', 'si', 'elegir', 'cerca'], DLG_PARES = ['en', 'marcas', 'camino'], DLG_NUM = ['prioridad', 'pausa', 'espera', 'entre'], DLG_SI = ['interrumpe', 'al_paso'];
+const DLG_LISTA = ['sujeta', 'quienes', 'si', 'elegir', 'cerca'], DLG_PARES = ['en', 'marcas', 'camino'], DLG_NUM = ['prioridad', 'pausa', 'espera', 'entre'], DLG_SI = ['interrumpe', 'al_paso', 'grande'];
 const dlgVal = s => { s = s.trim(); return s === '-' ? null : s === 'true' || s === 'sí' ? true : s === 'false' || s === 'no' ? false : s !== '' && !isNaN(+s) ? +s : s; };
 function dlgCampo(k, v){   // a field of the script, from its text
   if (DLG_LISTA.includes(k)) return v.split(',').map(dlgVal);
@@ -206,7 +232,8 @@ function dlgAccion(s){   // an action of the script: «hecho x», «marca id | n
     case 'hecho': return { hecho: rest };
     case 'marca': return { marca: part[0], nota: part[1] || undefined };
     case 'log': return { log: rest };
-    case 'saber': return { saber: r };
+    case 'saber': case 'contar': return { saber: r };   // (a fact that someone knows: «contar marilla diana_borracha»)
+    case 'suma': return { suma: r };
     case 'soltar': return { soltar: rest };
     case 'ana': return { ana: dlgCampo('en', rest) };
     case 'afecto': return { afecto: r };

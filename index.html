@@ -201,6 +201,16 @@ body.visor > *:not(#cv):not(#visor){display:none !important}
 # Cada escena: «=== id ===», sus campos (uno por línea, «campo: valor»), y si tiene líneas propias, «---» y una línea
 # por intervención: «quien: texto» (con « #marca» al final si esa línea marca un momento del libro).
 # Las líneas pueden venir del libro: «lineas: libro:estacion», o un trozo: «lineas: libro:viaje.10 [7]».
+#
+# Cada escena es un «storylet» (docs/MOTOR.md): precondiciones (dónde y quiénes: «en:»; qué tiene que ser cierto: «si:»),
+# contenido (las líneas) y efectos («al_empezar:», «al_terminar:»). El estado que leen y cambian:
+#   hechos: «hecho:x», «!hecho:x», «dias_desde:x:2», «sabe:marilla:x» (un hecho que alguien sabe)
+#   cualidades (números con dueño): «granja:ana>=15», «afecto:diana:ana>=4», «estudio:gilbert<30»
+#   tiempo: «estacion:verano», «dia_estacion:1»
+# Efectos: «hecho x», «olvidar x», «contar quien x», «suma granja:ana 2», «suma afecto:diana:ana -1»,
+#   «meta quien tipo args | texto | etiqueta | prioridad» (un encargo: el planificador busca cómo cumplirlo).
+# Si varias escenas pueden decirse a la vez en un canal, va la de más prioridad; a igual prioridad, la más específica
+# (la que pide más condiciones). «grande»: empieza algo grande del libro; como mucho una grande por día (el ritmo).
 
 # --- el capítulo: Rachel en su ventana, en Tejas Verdes, donde los Bell; la estación; la casa
 === rachel_ventana ===
@@ -642,6 +652,7 @@ diana: Bueno… tal vez. Tengo que volver a casa ahora.
 # poder ir al picnic, «confiesa» que lo perdió en el lago… hasta que el broche aparece en el chal de Marilla.
 # Abre el picnic (cuaderno: picnic requiere hecho:broche).
 === broche ===
+grande
 canal: gg
 prioridad: 6
 interrumpe
@@ -663,6 +674,7 @@ marilla: (Marilla se ríe, a pesar de todo.) Perdóname, Ana. No debí dudar de 
 # --- «¡Zanahorias!» (cap. 15): el primer día de Ana en la escuela con Gilbert Blythe. Desde ahí, Ana no le habla
 # (la ofensa), y hacer las paces se vuelve una meta (cuaderno: paces requiere hecho:zanahorias).
 === zanahorias ===
+grande
 canal: es
 prioridad: 7
 interrumpe
@@ -700,6 +712,7 @@ ana: ¿A casa? ¡Pero si todavía no hemos tomado el té! ¡Diana, no te vayas!
 diana: (Diana se levanta tambaleándose.) Me siento… muy… muy mal.
 
 === prohibida ===
+grande
 canal: gg
 prioridad: 7
 interrumpe
@@ -729,6 +742,7 @@ ana: Sra. Barry, por favor, perdóneme. No sabía que era vino. Me imaginé que 
 barry: No, Ana Shirley. No creo que seas compañía para Diana. Vete a tu casa y pórtate bien.
 
 === crup_aviso ===
+grande
 canal: gg
 prioridad: 9
 interrumpe
@@ -765,6 +779,7 @@ ana: (Ana no cabe en sí de felicidad.) ¡Oh, Sra. Barry! La perdono con toda mi
 # té; Ana hace el pastel… con linimento en vez de vainilla. La Sra. Allan es tan buena que la invita a la casa
 # parroquial (cuaderno: el té con la Sra. Allan requiere hecho:pastel_linimento).
 === invita_allan ===
+grande
 canal: gg
 prioridad: 5
 en: ana=gg, marilla=gg
@@ -775,6 +790,7 @@ marilla: Invité al pastor y a la Sra. Allan a tomar el té mañana en la tarde.
 ana: ¡Oh, Marilla! Lo haré con toda mi alma. ¡Y con vainilla, como dice la receta!
 
 === pastel_linimento ===
+grande
 canal: gg
 prioridad: 7
 interrumpe
@@ -796,11 +812,12 @@ sraallan: (La Sra. Allan sube a verla.) Querida, fue un error muy gracioso, nada
 # --- la tía Josephine (cap. 19): ya amigas, Ana se queda a dormir donde Diana después del concierto del Club de Debate;
 # saltan sobre la cama del cuarto de huéspedes… donde dormía la tía Josephine. Ana confiesa y se gana su amistad.
 === cama_josephine ===
+grande
 canal: os
 prioridad: 6
 interrumpe
 en: ana=os, diana=os
-si: cuaderno:amigas, !hecho:prohibida, !hecho:cama_josephine, dias_desde:conocidas_diana:2, no_hoy:perdonada
+si: cuaderno:amigas, !hecho:prohibida, !hecho:cama_josephine, dias_desde:conocidas_diana:2
 al_terminar: hecho cama_josephine
 al_terminar: afecto josephine ana 5
 al_terminar: log Ana y Diana saltaron sobre la cama del cuarto de huéspedes, donde dormía la tía Josephine; Ana confesó y se ganó su amistad.
@@ -814,13 +831,13 @@ ana: (A la mañana siguiente, Ana va a verla.) Fue culpa mía, Srta. Barry. Dian
 josephine: (La tía Josephine se ríe como hacía años.) Vaya, vaya… Ven a verme a menudo mientras esté aquí, niña. Y escríbeme cuando me vaya.
 
 # --- El examen de ingreso a Queen's (cap. 31, 32): el primer día de cada verano, si Ana estudió lo suficiente para que
-# la Srta. Stacy la mande (estudio:10). Cómo le va sale de lo que estudió: los días de clase y de lecciones (docs/LARGO_PLAZO.md).
+# la Srta. Stacy la mande (estudio:ana>=10). Cómo le va sale de lo que estudió: los días de clase y de lecciones (docs/LARGO_PLAZO.md).
 === examen_primera ===
 canal: gg
 prioridad: 8
 interrumpe
 en: ana=gg, marilla=gg
-si: estacion:verano, dia_estacion:1, estudio:10, estudio:60, !hecho:queens, no_hoy:examen
+si: estacion:verano, dia_estacion:1, estudio:ana>=60, !hecho:queens, no_hoy:examen
 al_terminar: hecho examen
 al_terminar: hecho queens
 al_terminar: hecho queens_primera
@@ -838,7 +855,7 @@ canal: gg
 prioridad: 8
 interrumpe
 en: ana=gg, marilla=gg
-si: estacion:verano, dia_estacion:1, estudio:30, !estudio:60, !hecho:queens, no_hoy:examen
+si: estacion:verano, dia_estacion:1, estudio:ana>=30, estudio:ana<60, !hecho:queens, no_hoy:examen
 al_terminar: hecho examen
 al_terminar: hecho queens
 al_terminar: afecto marilla ana 5
@@ -854,7 +871,7 @@ canal: gg
 prioridad: 8
 interrumpe
 en: ana=gg, marilla=gg
-si: estacion:verano, dia_estacion:1, estudio:10, !estudio:30, !hecho:queens, no_hoy:examen
+si: estacion:verano, dia_estacion:1, estudio:ana>=10, estudio:ana<30, !hecho:queens, no_hoy:examen
 al_terminar: hecho examen
 al_terminar: triste ana
 al_terminar: log Ana dio el examen de ingreso a Queen's en Charlottetown, pero no le alcanzó. El año que viene, otra vez.
@@ -865,18 +882,20 @@ ana: (Semanas después, sale la lista en el diario. Ana la lee tres veces.) No e
 marilla: Bueno. Hay otro examen el año que viene, y tú no eres de las que se rinden. A estudiar, entonces.
 
 </script>
-<script type="text/plain" id="caminos">
-# Los caminos de Ana: lo que se gana de a poco, según a qué se dedique (lo lee el juego al empezar).
-# Cada camino es un número que sube con lo que Ana hace, día a día. Al cruzar un hito pasa algo: alguien se lo dice
-# la próxima vez que Ana lo encuentra; y el guion puede tener escenas para eso («si: camino:granja:15»).
-# Para escribir más caminos o más hitos, basta con agregarlos aquí (a mano, o pidiéndoselo a una IA).
+<script type="text/plain" id="habilidades">
+# Las habilidades: cualidades (números con dueño) que suben de a poco con lo que cada uno hace (lo lee el juego al empezar).
+# Cada habilidad sube con las acciones de quien las hace (Ana, Gilbert, Diana…), +1 una vez al día por acción.
+# Los hitos son de Ana: al llegar a uno, alguien se lo dice la próxima vez que lo encuentra, y queda el hecho
+# hito_<habilidad>_<N>. El guion puede pedir un nivel de cualquiera: «si: granja:ana>=15», «estudio:gilbert>=30».
+# Para escribir más habilidades o más hitos, basta con agregarlos aquí (a mano, o pidiéndoselo a una IA).
+# Cómo encaja con el resto del motor: docs/MOTOR.md.
 #
 # «=== id ===» y sus campos, uno por línea:
-#   titulo: cómo se llama el camino, en el cuaderno
-#   suma: las acciones de Ana que lo hacen subir (separadas por comas): cada una, +1 una vez al día (si la hace
-#         unos minutos); «clase» es un día de clases en la escuela (una hora adentro, un día con clases)
+#   titulo: cómo se llama, en el cuaderno
+#   suma: las acciones que la hacen subir (separadas por comas): cada una, +1 una vez al día (si se hace unos
+#         minutos); «clase» es un día de clases de Ana en la escuela (una hora adentro, un día con clases)
 #   por_dia: cuánto puede subir en un día, como mucho (si no, 2)
-#   hito N: lo que significa llegar a N (se lee en el cuaderno y en el aviso)
+#   hito N: lo que significa que Ana llegue a N (se lee en el cuaderno y en el aviso)
 #     con: quién se lo dice la próxima vez que Ana lo encuentra (si no, nadie: solo el aviso)
 #     dice: lo que dice, escrito (una línea; varias, separadas por « / »)
 #     ia: lo que pasa, para que la IA improvise la escena (si está encendida; si no, se usa «dice»)
@@ -943,7 +962,7 @@ hito 30: Podría escribir de verdad: un cuento para una revista.
 #   meta: cuándo está cumplida: una meta del planificador y sus argumentos, separados por espacios
 #         (p. ej. «amigas ana diana», «nombres ana 3»; una lista va con comas: «quehaceres ana platos,barrer»)
 #   requiere: lo que tiene que pasar antes (separado por comas): otras metas del cuaderno (por su id), o
-#         condiciones del guion («hecho:conocidas_diana», «dias_desde:quiere_amiga:1», «afecto:diana:ana:4»)
+#         condiciones del guion («hecho:conocidas_diana», «dias_desde:quiere_amiga:1», «afecto:diana:ana>=4», «estudio:ana>=10»)
 #   antes: cómo se dice lo que falta, mientras está cerrada (si no, los títulos de las metas que requiere)
 #   oculta: no aparece en el cuaderno hasta que se abre (algo que no se puede saber antes, como una prohibición)
 #   acciones: lo que no se puede hacer mientras está cerrada (separado por comas): una acción («jurar»), una
@@ -967,7 +986,7 @@ meta: hecho conocidas_diana
 === amigas ===
 titulo: Tener una amiga del alma
 pista: Una amistad así se jura, en el jardín, tomadas de las manos.
-pista si !afecto:diana:ana:4: Ya conoces a Diana, pero para jurar tienen que quererse mucho: pasen tiempo juntas, conversen, regálale algo.
+pista si afecto:diana:ana<4: Ya conoces a Diana, pero para jurar tienen que quererse mucho: pasen tiempo juntas, conversen, regálale algo.
 meta: amigas ana diana
 requiere: conocer_diana
 acciones: jurar
@@ -1060,7 +1079,7 @@ acciones: recitar
 === queens ===
 titulo: Entrar a Queen's
 pista: El examen de ingreso es en Charlottetown, el primer día del verano (faltan {dias_examen} días). Se prepara yendo a clases y estudiando la lección: llevas {estudio} días de estudio.
-pista si estudio:10: La Srta. Stacy te va a mandar al examen (faltan {dias_examen} días). Llevas {estudio} días de estudio: con unos 30 se entra; con 60, quizás quedes primera.
+pista si estudio:ana>=10: La Srta. Stacy te va a mandar al examen (faltan {dias_examen} días). Llevas {estudio} días de estudio: con unos 30 se entra; con 60, quizás quedes primera.
 pista si hecho:examen: No alcanzó esta vez. Hay otro examen el próximo verano (faltan {dias_examen} días): llevas {estudio} días de estudio, y con unos 30 se entra.
 meta: hecho queens
 requiere: escuela
@@ -3395,6 +3414,7 @@ function dlgCtx(){
 }
 function dlgCond(s, c){   // one condition of state, written as text
   if (s[0] === '!') return !dlgCond(s.slice(1), c);
+  { const q = cualidadCond(s); if (q) return q(); }   // (a quality compared with a number: «granja:ana>=15», «afecto:diana:ana>=4»)
   const i = s.indexOf(':'), k = i < 0 ? s : s.slice(0, i), rest = i < 0 ? '' : s.slice(i + 1), [a, b] = k === 'sabe' || k === 'y_mayor' || k === 'dias_desde' ? rest.split(':') : [rest];   // (an id may have ':' in it)
   switch (k) {
     case 'hecho': return !!dlgHechos()[a];
@@ -3403,11 +3423,11 @@ function dlgCond(s, c){   // one condition of state, written as text
     case 'capitulo': return CAP1.on && !CAP1.done;
     case 'cuaderno': return !!cuadernoHecho(a);   // (a goal of Ana's notebook is done)
     case 'tomando_te': { const [x, y] = rest.split(':'); return AGENTS[x]?.acting?.v === 'tomar_te' && AGENTS[x].acting.k === y; }   // (x at the tea table with y)
-    case 'afecto': { const [x, y, n] = rest.split(':'); return relGetW(x, y) >= +n; }   // (x cares for y at least n, of 0..5)
+    case 'afecto': { const [x, y, n] = rest.split(':'); return relGetW(x, y) >= +n; }   // (x cares for y at least n, of 0..5; the same as «afecto:x:y>=n»)
     case 'dias_desde': { const d = dlgHechos()[a]; return typeof d === 'number' && today() + 1 - d >= +b; }   // (at least b days since a happened)
     case 'sentada': return !!wmBody(a)?.sit;   // (she has sat down: at the table, for the tea)
-    case 'estudio': return estudio() >= +a;   // (she has studied at least so much: days of class and of lessons)
-    case 'camino': { const [x, n] = rest.split(':'); return camino(x) >= +n; }   // (so far on a path: src/datos/caminos.txt)
+    case 'estudio': return cualidad('ana', 'estudio') >= +a;   // (the same as «estudio:ana>=n»)
+    case 'camino': { const [x, n] = rest.split(':'); return cualidad('ana', x) >= +n; }   // (the same as «x:ana>=n»)
     case 'estacion': return SEASONS[S].toLowerCase() === a;   // (primavera, verano, otoño, invierno)
     case 'dia_estacion': return today() % DIAS_ESTACION + 1 === +a;   // (the day of the season, from 1)
     case 'no_hoy': return dlgHechos()[a] !== today() + 1;   // (a did not happen today: one thing of the book per day)
@@ -3446,6 +3466,27 @@ function dlgFalla(c, x){   // why the conditions of place and state of a configu
   return null;
 }
 const dlgCumple = (c, x) => !dlgFalla(c, x);
+// --- the state of the world, as in quality-based narrative (docs/MOTOR.md): facts (with the day they happened) and
+// qualities, numbers with an owner: «granja» of Ana, «estudio» of Gilbert, «afecto» of Diana towards Ana (0 to 5)
+const cualidad = (dueño, nombre, hacia) => nombre === 'afecto' ? relGetW(dueño, hacia) : game.wm?.num?.[dueño]?.[nombre] || 0;
+function cualidadSuma(dueño, nombre, n, hacia){
+  if (nombre === 'afecto') return relSetW(dueño, hacia, Math.max(0, Math.min(5, relGetW(dueño, hacia) + n)));
+  const N = ((game.wm.num ||= {})[dueño] ||= {}); N[nombre] = Math.max(0, (N[nombre] || 0) + n);
+}
+// a quality compared with a number, as text: «granja:ana>=15», «afecto:diana:ana>=4», «estudio:gilbert<30» (null: it is not one)
+const CUALIDAD_RE = /^([a-zñ_]+):([a-zñ_]+)(?::([a-zñ_]+))?\s*(>=|<=|>|<|==|=)\s*(-?\d+(?:\.\d+)?)$/;
+function cualidadCond(s){
+  const m = s.match(CUALIDAD_RE); if (!m) return null;
+  const [, nombre, dueño, hacia, op, n] = m, v = () => cualidad(dueño, nombre, hacia);
+  return { '>=': () => v() >= +n, '<=': () => v() <= +n, '>': () => v() > +n, '<': () => v() < +n, '==': () => v() === +n, '=': () => v() === +n }[op];
+}
+// how specific a scene is: how much it asks of the moment (of two of the same importance, the most specific goes first)
+const dlgEspecificidad = d => [].concat(d.si || []).length + Object.keys(d.en || {}).length + (d.cerca ? 1 : 0) + (d.o ? 1 : 0);
+// the pacing (as the drama manager of Façade, or RimWorld's storyteller, in small): the scenes marked «grande» start
+// something big of the book; at most RITMO_GRANDES of them a day, so that two never fall on the same evening
+const RITMO_GRANDES = 1;
+const ritmoLleno = () => game.wm?.ritmo?.d === today() && game.wm.ritmo.n >= RITMO_GRANDES;
+function ritmoMarca(id){ const R = game.wm.ritmo?.d === today() ? game.wm.ritmo : (game.wm.ritmo = { d: today(), n: 0, escenas: [] }); R.n++; R.escenas.push(id); }
 function dlgHacer(list){   // what a scene does when it starts or ends
   for (const a of list || []) {
     if (a.hecho) dlgHecho(a.hecho);
@@ -3459,6 +3500,7 @@ function dlgHacer(list){   // what a scene does when it starts or ends
     if (a.ofensa) { const [k, o, motivo, n] = a.ofensa; game.wm.ofensa[k + '>' + o] = motivo; relSetW(k, o, Math.min(relGetW(k, o), +n)); }   // (k is offended with o)
     if (a.triste) realR.setFact('triste:' + a.triste);
     if (a.afecto) { const [k, o, n] = a.afecto; relSetW(k, o, Math.max(relGetW(k, o), +n)); }   // (how much one cares for the other, at least so much)
+    if (a.suma) { const [q, n] = a.suma, [nombre, dueño, hacia] = q.split(':'); cualidadSuma(dueño, nombre, +n, hacia); }   // (a quality goes up, or down: «suma granja:ana 2», «suma afecto:diana:ana -1»)
     if (a.fin_capitulo) { CAP1.done = hourNow(); logEv('Fin del capítulo 1 (y del 2): Ana llegó a Tejas Verdes.', []); }
   }
 }
@@ -3478,16 +3520,19 @@ class Dialogo {
   constructor(c){ Object.assign(this, { canal: 'general', tipo: 'conversacion', prioridad: 1, interrumpe: false, repetir: 'una_vez', pausa: 1.4 }, c); }
   dicha(){ const v = dlgDichas()[this.id]; return this.repetir === 'una_vez' ? !!v : this.repetir === 'dia' ? v === today() : false; }
   // (a conversation left halfway goes on before a new one of the same importance)
-  get peso(){ return this.prioridad + (dlgProg()[this.id] ? .04 : 0); }
+  // (and, of two of the same importance, the most specific: the one that asks more of the moment, as in Valve's dialogue rules)
+  get peso(){ return this.prioridad + (dlgProg()[this.id] ? .04 : 0) + dlgEspecificidad(this) * .001; }
   listo(x){
     if (this.disparo === 'encuentro') return false;   // (these only when two of them meet: dlgNext)
     if (this.dicha() || (this.repetir.cada && TT < (this.proxima || 0))) return false;
+    if (this.grande && ritmoLleno()) return false;   // (the pacing: one big thing of the book a day)
     if (this.tipo === 'comentario' && this.prioridad > 0 && TT < (dlgComento[this.canal] || 0)) return false;   // (remarks, not one after another)
     return dlgCumple(this, x);
   }
   porque(x){   // why it is not said now (for the panel)
     if (this.disparo === 'encuentro') return 'cuando se encuentran';
     if (this.dicha()) return 'ya dicha';
+    if (this.grande && ritmoLleno()) return 'hoy ya pasó algo grande';
     if (this.repetir.cada && TT < (this.proxima || 0)) return 'otra vez en ' + Math.ceil(this.proxima - TT) + ' s';
     if (this.tipo === 'comentario' && this.prioridad > 0 && TT < (dlgComento[this.canal] || 0)) return 'hace poco hubo un comentario';
     return dlgFalla(this, x);
@@ -3513,7 +3558,7 @@ class Dialogo {
     if (this.repetir.cada) this.proxima = TT + this.repetir.cada;
     if (this.tipo === 'comentario') dlgComento[this.canal] = TT + DLG_RESPIRO;
     const L = this.lineas(); if (p >= L.length) delete P[this.id]; if (!L.length || p >= L.length) return null;
-    if (!p) dlgHacer(this.al_empezar);
+    if (!p) { dlgHacer(this.al_empezar); if (this.grande) ritmoMarca(this.id); }
     const pu = p ? this.puenteDe(L[p]) : [], k = pu.length;
     if (this.canal === 'carta') game.cartaEscena = { id: this.id, lineas: L.filter(l => l[0] === 'carta').map(l => l[1]) };   // (what she writes: the letter that goes)
     const escrita = l => l[0] === 'carta' ? ['ana', '✎ ' + l[1], l[2]] : l;   // (the lines of the letter: Ana reads them aloud as she writes them)
@@ -3554,7 +3599,7 @@ function dlgNext(ks){
 // the scenes, as a script outside the code (the <script type="text/plain" id="guion"> block, at the top): each one
 // «=== id ===», its fields, one per line («field: value»), and its own lines after «---» («who: text #mark»).
 // dlgGuion turns it into the same configurations as anywhere else (docs/ESCENAS.md).
-const DLG_LISTA = ['sujeta', 'quienes', 'si', 'elegir', 'cerca'], DLG_PARES = ['en', 'marcas', 'camino'], DLG_NUM = ['prioridad', 'pausa', 'espera', 'entre'], DLG_SI = ['interrumpe', 'al_paso'];
+const DLG_LISTA = ['sujeta', 'quienes', 'si', 'elegir', 'cerca'], DLG_PARES = ['en', 'marcas', 'camino'], DLG_NUM = ['prioridad', 'pausa', 'espera', 'entre'], DLG_SI = ['interrumpe', 'al_paso', 'grande'];
 const dlgVal = s => { s = s.trim(); return s === '-' ? null : s === 'true' || s === 'sí' ? true : s === 'false' || s === 'no' ? false : s !== '' && !isNaN(+s) ? +s : s; };
 function dlgCampo(k, v){   // a field of the script, from its text
   if (DLG_LISTA.includes(k)) return v.split(',').map(dlgVal);
@@ -3571,7 +3616,8 @@ function dlgAccion(s){   // an action of the script: «hecho x», «marca id | n
     case 'hecho': return { hecho: rest };
     case 'marca': return { marca: part[0], nota: part[1] || undefined };
     case 'log': return { log: rest };
-    case 'saber': return { saber: r };
+    case 'saber': case 'contar': return { saber: r };   // (a fact that someone knows: «contar marilla diana_borracha»)
+    case 'suma': return { suma: r };
     case 'soltar': return { soltar: rest };
     case 'ana': return { ana: dlgCampo('en', rest) };
     case 'afecto': return { afecto: r };
@@ -6799,7 +6845,7 @@ function update(dt){
   if (game.scene === 'camino' && ana.onCart && (mx || my || (ana.goto && !ana.goto.wm))) roadGetOff();   // (moving her: she gets down from the buggy)
   if (ANA_AUTO) { if (mx || my) { freeStart(); const v = 520 / (cam.zoom || 1) / (viewZoom || 1); freeCam.x += mx * v * dt; freeCam.y += my * v * dt; } mx = my = 0; }   // (on her own: the keys move the view)
   if (game.talk?.deadline && TT > game.talk.deadline && !sayOpen) { game.talk.deadline = 0; autoChoose(); }
-  autoTick(); cartTick(dt); roadTick(dt); buggyTick(); roadTalkTick(dt); dlgTick(dt); talkTick(dt); cap1Tick(); momentsTick(); folkTick(dt); faunaTick(dt); agentTick(dt); jugarTick(dt); correoTick(dt); sickTick(); apartarTick(); cuadernoTick(dt); caminosTick(dt); juntasTick(dt); agendaTick(); wmApproachTick(dt); calledTick(); chatTick(dt); wmFollowTick();
+  autoTick(); cartTick(dt); roadTick(dt); buggyTick(); roadTalkTick(dt); dlgTick(dt); talkTick(dt); cap1Tick(); momentsTick(); folkTick(dt); faunaTick(dt); agentTick(dt); jugarTick(dt); correoTick(dt); sickTick(); apartarTick(); cuadernoTick(dt); habilidadesTick(dt); juntasTick(dt); agendaTick(); wmApproachTick(dt); calledTick(); chatTick(dt); wmFollowTick();
   if (RELATO.on) relatoTick();   // (the account of what happens, once all have moved: 66-relato.js)
   ana.torn = !!game.anaStates.rasgado; ana.askew = !!game.anaStates.despeinada;
   ana.savoring = false;
@@ -9168,9 +9214,9 @@ const WM_TESTS = [
   { who: 'ana', cadena: true, text: 'La cama del cuarto de huéspedes y la tía Josephine (cap. 19)', setup: () => { if (today() < 3) dayT += 3; dayAt(16); const H = dlgHechos(); delete H.cama_josephine; delete H.prohibida; delete dlgDichas().cama_josephine; H.conocidas_diana = today() - 2; H.broche = today() - 2; game.wm.perm['cuaderno:amigas'] = today() - 2; diana.follow = false; diana.where = 'os'; diana.x = KIT.w / 2 + 40; diana.y = KIT.h / 2; atOut('ana', OS.x, OS.y + 90); },
     goal: () => ({ ...G.estar_en('ana', 'h:os'), quedarMin: 20 }), tambien: () => [['diana', quedarHasta('diana', 'h:os', 'cama_josephine'), 'esperar a Ana en su casa']] },
   // (what is won little by little: the Queen's examination, the first day of summer, with 35 days of study)
-  { who: 'ana', cadena: true, hasta: 'examen', text: 'El examen de ingreso a Queen\'s, con lo estudiado (cap. 31, 32)', setup: () => { dayT = (Math.floor(dayT / DIAS_ESTACION) + 1) * DIAS_ESTACION; dayAt(8); setSeason(1); const H = dlgHechos(); for (const f of ['examen', 'queens', 'queens_primera']) delete H[f]; game.wm.perm['cuaderno:escuela'] = today(); (game.wm.caminos ||= {}).estudio = 35; if (game.scene !== 'gg') goIn('gg'); const M = PEOPLE.marilla; M.where = 'gg'; M.x = STOVE.x + 60; M.y = STOVE.y + 60; },
+  { who: 'ana', cadena: true, hasta: 'examen', text: 'El examen de ingreso a Queen\'s, con lo estudiado (cap. 31, 32)', setup: () => { dayT = (Math.floor(dayT / DIAS_ESTACION) + 1) * DIAS_ESTACION; dayAt(8); setSeason(1); const H = dlgHechos(); for (const f of ['examen', 'queens', 'queens_primera']) delete H[f]; game.wm.perm['cuaderno:escuela'] = today(); ((game.wm.num ||= {}).ana ||= {}).estudio = 35; if (game.scene !== 'gg') goIn('gg'); const M = PEOPLE.marilla; M.where = 'gg'; M.x = STOVE.x + 60; M.y = STOVE.y + 60; },
     goal: () => ({ ...G.estar_en('ana', 'cocina'), quedarMin: 15 }) },
-  { who: 'ana', cadena: true, hasta: 'hito_granja_5', text: 'Ana ayuda en la casa y llega a un hito de la granja: Marilla se lo dice', setup: () => { dayAt(10); (game.wm.caminos ||= {}).granja = 4; delete game.wm.caminosHoy; game.wm.hitosPend = []; delete dlgHechos().hito_granja_5; for (const q of QUEHACERES) delete game.wm.facts['quehacer:' + q + ':' + today()]; if (game.scene !== 'gg') goIn('gg'); const M = PEOPLE.marilla; M.where = 'gg'; M.x = STOVE.x + 60; M.y = STOVE.y + 60; },
+  { who: 'ana', cadena: true, hasta: 'hito_granja_5', text: 'Ana ayuda en la casa y llega a un hito de la granja: Marilla se lo dice', setup: () => { dayAt(10); ((game.wm.num ||= {}).ana ||= {}).granja = 4; delete game.wm.habilidadesHoy; game.wm.hitosPend = []; delete dlgHechos().hito_granja_5; for (const q of QUEHACERES) delete game.wm.facts['quehacer:' + q + ':' + today()]; if (game.scene !== 'gg') goIn('gg'); const M = PEOPLE.marilla; M.where = 'gg'; M.x = STOVE.x + 60; M.y = STOVE.y + 60; },
     goal: () => G.quehaceres('ana', ['platos']) },
 ];
 /* ---------- the routines, made of goals: what each one does each day (from the book), handed to the planner at its
@@ -9277,6 +9323,7 @@ function wmRunTest(i){
   if (PEOPLE.shearer.where !== 'away') { PEOPLE.shearer.where = 'away'; }
   WM_APPROACH = null; game.wm.sinJarabe = false; AGENDA_ON = false; if ($('wmagenda')) $('wmagenda').checked = false;
   if (isSunday()) dayT += 1;   // (the test goals: on a weekday, with school)
+  delete game.wm.ritmo;   // (and with nothing big of the book having happened yet today)
   const keep = { scene: game.scene, x: ana.x, y: ana.y, dir: ana.dir, tx: toby.x, ty: toby.y, cx: cam.x, cy: cam.y };
   T.setup(); S = ((seasonCount() % 4) + 4) % 4;
   game.scene = keep.scene; ana.x = keep.x; ana.y = keep.y; ana.dir = keep.dir; ana.goto = null; toby.x = keep.tx; toby.y = keep.ty; cam.x = keep.cx; cam.y = keep.cy;   // (Ana where she was: no jumping to the test's start)
@@ -9473,70 +9520,6 @@ function juntasTick(dt){
 }
 
 
-/* ---------- Ana's paths: what is won little by little, according to what she gives her days to (docs/LARGO_PLAZO.md) ----------
-   Written apart (src/datos/caminos.txt): each path is one number (game.wm.caminos[id]) that goes up with what Ana does,
-   a little each day; at each milestone something happens: someone tells her, the next time she meets them (with the AI,
-   a scene of its own; without it, the written line), and the script may have scenes for it (camino:id:n). The study is
-   one of them: the Queen's examination comes from it (the scenes examen_* of the script). */
-function caminosLeer(txt){
-  const out = []; let c = null, h = null;
-  for (const raw of txt.split('\n')) {
-    const l = raw.trim(); if (!l || l[0] === '#') continue;
-    let m;
-    if ((m = l.match(/^===\s*(.+?)\s*===$/))) { out.push(c = { id: m[1], titulo: m[1], suma: [], por_dia: 2, hitos: [] }); h = null; continue; }
-    if (!c) continue;
-    if ((m = l.match(/^hito (\d+):\s*(.*)$/))) c.hitos.push(h = { n: +m[1], texto: m[2] });
-    else if (h && /^\s/.test(raw) && (m = l.match(/^(con|dice|ia):\s*(.*)$/))) h[m[1]] = m[2];
-    else if ((m = l.match(/^(titulo|suma|por_dia):\s*(.*)$/))) { c[m[1]] = m[1] === 'suma' ? m[2].split(',').map(x => x.trim()).filter(Boolean) : m[1] === 'por_dia' ? +m[2] : m[2]; h = null; }
-  }
-  for (const x of out) x.hitos.sort((a, b) => a.n - b.n);
-  return out;
-}
-const CAMINOS = caminosLeer(document.getElementById('caminos')?.textContent || '');
-const camino = id => game.wm?.caminos?.[id] || 0;
-const estudio = () => camino('estudio');
-// (a game from before the paths: its days of study)
-if (game.wm && game.wm.estudio != null) { (game.wm.caminos ||= {}).estudio = game.wm.estudio; delete game.wm.estudio; }
-// the next milestone of a path (or none: all of them reached)
-const caminoProximo = c => c.hitos.find(h => h.n > camino(c.id));
-// days until the next first day of summer (the examination)
-function diasExamen(){ const d = today(), y = DIAS_ESTACION * 4, s = ((1 - (game.seasonShift || 0)) % 4 + 4) % 4 * DIAS_ESTACION, n = Math.floor((d - s) / y) * y + s; return (n >= d ? n : n + y) - d; }
-// one more on a path (at most so much a day); a milestone crossed: told, and kept for whoever is to tell her
-function caminoSube(c, por){
-  const W = game.wm, D = W.caminosHoy;
-  if ((D.n[c.id] || 0) >= c.por_dia) return;
-  D.n[c.id] = (D.n[c.id] || 0) + 1; (W.caminos ||= {})[c.id] = camino(c.id) + 1;
-  logEv('Ana avanzó en ' + c.titulo.replace(/^(El|La|Las|Los) /, m => m.toLowerCase()) + ' (' + por + ').', []);
-  for (const h of c.hitos) if (h.n === camino(c.id)) { notice('📈 ' + c.titulo + ': ' + h.texto); logEv('📈 ' + c.titulo + ': ' + h.texto, []); if (h.con) (W.hitosPend ||= []).push({ c: c.id, n: h.n }); }
-}
-// a while doing each thing (or an hour of class) is one more, once a day each: watched every five seconds
-let caminosT = 0;
-function caminosTick(dt){
-  if ((caminosT -= dt) > 0 || !game.wm) return; caminosT = 5;
-  const D = game.wm.caminosHoy?.d === today() ? game.wm.caminosHoy : (game.wm.caminosHoy = { d: today(), t: {}, dado: {}, n: {} });
-  const h = hourNow(), A = (AGENTS.ana || game.playAct)?.acting;
-  const haciendo = [A?.v, hayClases() && h >= 9 && h < 15.5 && wmScene('ana') === 'es' ? 'clase' : null].filter(Boolean);
-  for (const v of haciendo) {
-    D.t[v] = (D.t[v] || 0) + 5; if (D.dado[v] || D.t[v] < M(v === 'clase' ? 60 : 5)) continue;
-    D.dado[v] = true;
-    for (const c of CAMINOS) if (c.suma.includes(v)) { let t = v.replace(/_/g, ' '); try { t = stepText(A.task?.a?.v === v ? A.task.a : A); } catch (e) {} caminoSube(c, v === 'clase' ? 'un día de clases' : t); }
-  }
-  hitosTick();
-}
-// a milestone, told by whoever it is: the next time Ana is near them and nothing else is being said
-function hitosTick(){
-  const P = game.wm.hitosPend; if (!P?.length || hablando() || amb.cur || enc.cur || game.talk || ocupada('ana') || TALKS.length) return;
-  for (const p of P) {
-    const c = CAMINOS.find(x => x.id === p.c), h = c?.hitos.find(x => x.n === p.n); if (!h) { P.splice(P.indexOf(p), 1); return; }
-    const b = wmBody(h.con); if (!b || wmScene(h.con) !== game.scene || dist(ana.x, ana.y, b.x, b.y) > 90 || ocupada(h.con)) continue;
-    P.splice(P.indexOf(p), 1); dlgHecho('hito_' + c.id + '_' + h.n);   // (told: a fact, for the script and the tests)
-    const escrito = () => talkPlay((h.dice || h.texto).split(' / ').map(t => [h.con, t]), { ch: 'hito', hold: [h.con] });
-    if (!aiReady() || !h.ia) return escrito();
-    sceneAsk([h.con], h.ia + ' (Que se note que viene de lo que Ana hizo, día a día.)', 'pasar').then(s => s.lines.length ? talkPlay(s.lines.map(l => [l.q, l.t]), { ch: 'hito', hold: [h.con] }) : escrito()).catch(escrito);
-    return;
-  }
-}
-
 /* ---------- the notebook: what Ana could do (📖), as goals of the book, not as actions ----------
    For the player to know what there is: each goal with a hint of where or when (not the steps: those are hers to find),
    and ✓ with the day, once she has done it. It is checked by the same goals the planner uses (G), now and then; what was
@@ -9608,12 +9591,12 @@ function cuadernoPanel(open){
     return d ? `<div class="cm hecha"><b>✓ ${esc(m.titulo)}</b><span>el día ${d}</span></div>`
       : abierta ? `<div class="cm"><b>○ ${esc(m.titulo)}</b><small>${esc(cuadernoPista(m))}</small></div>`
       : `<div class="cm cerrada"><b>🔒 ${esc(m.titulo)}</b><small>Antes: ${esc(cuadernoAntes(m))}.</small></div>`;
-  }).join('')).join('') + cuadernoCaminos() + cuadernoAmigos();
+  }).join('')).join('') + cuadernoHabilidades() + cuadernoAmigos();
 }
 // the date, as Ana would write it: «martes, día 3 de la primavera»
 const cuadernoFecha = () => ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'][today() % 7] + ', día ' + (today() % DIAS_ESTACION + 1) + ' de ' + (S === 0 ? 'la ' : 'el ') + SEASONS[S].toLowerCase();
-// her paths: how far she has gone on each, and what comes next
-const cuadernoCaminos = () => '<h4>Sus caminos</h4>' + CAMINOS.map(c => { const n = camino(c.id), p = caminoProximo(c), top = c.hitos.at(-1)?.n || 1; return `<div class="cm"><b>${esc(c.titulo)} · ${n}</b><small>${'▰'.repeat(Math.round(Math.min(n, top) / top * 10)) + '▱'.repeat(10 - Math.round(Math.min(n, top) / top * 10))}${p ? ' · en ' + p.n + ': ' + esc(p.texto) : ' · ¡todo!'}</small></div>`; }).join('');
+// her skills: how far she has gone in each, and what comes next
+const cuadernoHabilidades = () => '<h4>Sus habilidades</h4>' + HABILIDADES.map(c => { const n = cualidad('ana', c.id), p = habilidadProxima(c), top = c.hitos.at(-1)?.n || 1; return `<div class="cm"><b>${esc(c.titulo)} · ${n}</b><small>${'▰'.repeat(Math.round(Math.min(n, top) / top * 10)) + '▱'.repeat(10 - Math.round(Math.min(n, top) / top * 10))}${p ? ' · en ' + p.n + ': ' + esc(p.texto) : ' · ¡todo!'}</small></div>`; }).join('');
 // her friends: how much each one loves her (the hearts of 0 to 5), those she knows
 function cuadernoAmigos(){
   const l = ['diana', 'marilla', 'matthew', 'sraallan', 'stacy', 'josephine', 'lynde', 'gilbert'].filter(k => (k !== 'diana' || conoceDiana()) && (k !== 'josephine' || dlgHechos().cama_josephine) && game.wm.rel?.[k + '>ana'] != null);
@@ -9621,6 +9604,77 @@ function cuadernoAmigos(){
 }
 // a game that already had Ana and Diana as friends (before they had to meet): they know each other
 if (game.wm?.perm?.['amigas:ana&diana'] && !dlgHechos().conocidas_diana) dlgHecho('conocidas_diana');
+
+/* ---------- the skills: qualities that grow little by little with what each one does (docs/MOTOR.md) ----------
+   Written apart (src/datos/habilidades.txt): each skill is a quality (a number with an owner: «granja» of Ana,
+   «estudio» of Gilbert) that goes up with the actions of whoever does them, a little each day. Ana's milestones
+   (hitos) are storylets on a quality: when she gets to one, someone tells her the next time she meets them (with the
+   AI, a scene of its own; without it, the written line), and the fact hito_<skill>_<n> stays for the script; the
+   script may also ask for a level («si: granja:ana>=15»). The Queen's examination comes from «estudio» (examen_*). */
+function habilidadesLeer(txt){
+  const out = []; let c = null, h = null;
+  for (const raw of txt.split('\n')) {
+    const l = raw.trim(); if (!l || l[0] === '#') continue;
+    let m;
+    if ((m = l.match(/^===\s*(.+?)\s*===$/))) { out.push(c = { id: m[1], titulo: m[1], suma: [], por_dia: 2, hitos: [] }); h = null; continue; }
+    if (!c) continue;
+    if ((m = l.match(/^hito (\d+):\s*(.*)$/))) c.hitos.push(h = { n: +m[1], texto: m[2] });
+    else if (h && /^\s/.test(raw) && (m = l.match(/^(con|dice|ia):\s*(.*)$/))) h[m[1]] = m[2];
+    else if ((m = l.match(/^(titulo|suma|por_dia):\s*(.*)$/))) { c[m[1]] = m[1] === 'suma' ? m[2].split(',').map(x => x.trim()).filter(Boolean) : m[1] === 'por_dia' ? +m[2] : m[2]; h = null; }
+  }
+  for (const x of out) x.hitos.sort((a, b) => a.n - b.n);
+  return out;
+}
+const HABILIDADES = habilidadesLeer(document.getElementById('habilidades')?.textContent || '');
+const estudio = (k = 'ana') => cualidad(k, 'estudio');
+// (a game from before: Ana's paths, or her days of study, become her qualities)
+if (game.wm) {
+  const N = ((game.wm.num ||= {}).ana ||= {});
+  if (game.wm.estudio != null) { N.estudio = (N.estudio || 0) + game.wm.estudio; delete game.wm.estudio; }
+  if (game.wm.caminos) { for (const [k, v] of Object.entries(game.wm.caminos)) N[k] = Math.max(N[k] || 0, v); delete game.wm.caminos; }
+  delete game.wm.caminosHoy;
+}
+// Ana's next milestone on a skill (or none: all of them reached)
+const habilidadProxima = c => c.hitos.find(h => h.n > cualidad('ana', c.id));
+// days until the next first day of summer (the examination)
+function diasExamen(){ const d = today(), y = DIAS_ESTACION * 4, s = ((1 - (game.seasonShift || 0)) % 4 + 4) % 4 * DIAS_ESTACION, n = Math.floor((d - s) / y) * y + s; return (n >= d ? n : n + y) - d; }
+// one more on a skill, for whoever did it (at most so much a day); Ana's milestones: told, and kept for whoever is to tell her
+function habilidadSube(k, c, D, por){
+  const n = (D.n[k] ||= {}); if ((n[c.id] || 0) >= c.por_dia) return;
+  n[c.id] = (n[c.id] || 0) + 1; cualidadSuma(k, c.id, 1);
+  logEv(wmName(k) + ' avanzó en ' + c.titulo.replace(/^(El|La|Las|Los) /, m => m.toLowerCase()) + ' (' + por + ').', []);
+  if (k === 'ana') for (const h of c.hitos) if (h.n === cualidad('ana', c.id)) { notice('📈 ' + c.titulo + ': ' + h.texto); logEv('📈 ' + c.titulo + ': ' + h.texto, []); if (h.con) (game.wm.hitosPend ||= []).push({ c: c.id, n: h.n }); }
+}
+// a while doing each thing (or, Ana, an hour of class) is one more, once a day each: watched every five seconds, for everyone
+let habilidadesT = 0;
+function habilidadesTick(dt){
+  if ((habilidadesT -= dt) > 0 || !game.wm) return; habilidadesT = 5;
+  const D = game.wm.habilidadesHoy?.d === today() ? game.wm.habilidadesHoy : (game.wm.habilidadesHoy = { d: today(), t: {}, dado: {}, n: {} });
+  const h = hourNow();
+  for (const k of new Set(['ana', ...Object.keys(AGENTS)])) {
+    const A = (AGENTS[k] || (k === 'ana' ? game.playAct : null))?.acting;
+    const haciendo = [A?.v, k === 'ana' && hayClases() && h >= 9 && h < 15.5 && wmScene('ana') === 'es' ? 'clase' : null].filter(Boolean);
+    for (const v of haciendo) {
+      const key = k + ':' + v; D.t[key] = (D.t[key] || 0) + 5; if (D.dado[key] || D.t[key] < M(v === 'clase' ? 60 : 5)) continue;
+      D.dado[key] = true;
+      for (const c of HABILIDADES) if (c.suma.includes(v)) { let t = v.replace(/_/g, ' '); try { t = stepText(A.task?.a?.v === v ? A.task.a : A); } catch (e) {} habilidadSube(k, c, D, v === 'clase' ? 'un día de clases' : t); }
+    }
+  }
+  hitosTick();
+}
+// a milestone, told by whoever it is: the next time Ana is near them and nothing else is being said
+function hitosTick(){
+  const P = game.wm.hitosPend; if (!P?.length || hablando() || amb.cur || enc.cur || game.talk || ocupada('ana') || TALKS.length) return;
+  for (const p of P) {
+    const c = HABILIDADES.find(x => x.id === p.c), h = c?.hitos.find(x => x.n === p.n); if (!h) { P.splice(P.indexOf(p), 1); return; }
+    const b = wmBody(h.con); if (!b || wmScene(h.con) !== game.scene || dist(ana.x, ana.y, b.x, b.y) > 90 || ocupada(h.con)) continue;
+    P.splice(P.indexOf(p), 1); dlgHecho('hito_' + c.id + '_' + h.n);   // (told: a fact, for the script and the tests)
+    const escrito = () => talkPlay((h.dice || h.texto).split(' / ').map(t => [h.con, t]), { ch: 'hito', hold: [h.con] });
+    if (!aiReady() || !h.ia) return escrito();
+    sceneAsk([h.con], h.ia + ' (Que se note que viene de lo que Ana hizo, día a día.)', 'pasar').then(s => s.lines.length ? talkPlay(s.lines.map(l => [l.q, l.t]), { ch: 'hito', hold: [h.con] }) : escrito()).catch(escrito);
+    return;
+  }
+}
 
 /* ---------- the map: Avonlea drawn on a sheet of paper, with where everyone is ---------- */
 let mapBase = null;
@@ -9723,7 +9777,7 @@ function loop(now){
   else { owed = Math.min(owed + Math.min(raw, .25) * k, 3 * k * .05 + 2); const t0 = performance.now(); while (owed > 1e-4 && performance.now() - t0 < 22) { const d = Math.min(.05, owed); update(d); owed -= d; } }
   FRAME++; tripBarDraw(); render(); islaDraw(); requestAnimationFrame(loop);
 }
-window.__avonlea = { relatoEmpezar, relato: () => RELATO.lineas, reglas: () => RELATO_REGLAS.map(r => [r.id, r.texto]), jugables, jugar, anaMenu, correoRetirar, cartaLeer, CORREO, cartaTexto, playAct: () => game.playAct, DIALOGOS, dlgCtx, talks: () => TALKS, dlgGuion, dlgPanel, bubblesNow: () => bubbles, toby, cartSheet: (c, x, y, c8, t) => { const L = [], p = { look: 'matthew', x, y, c8, walk: 0, moving: false }; const [cx, cy] = [x, y]; pushCart(L, c, { x: cx, y: cy, c8, walk: 0, moving: true }, t); for (const [k, look] of [[0, 'matthew'], [1, 'ana']]) { const [sx, sy] = cartSeat(cx, cy, c8, k); L.push({ y: sy, draw: () => drawPerson(c, { ...mkPerson(look, sx, sy), sit: true, dir: c8Dir(c8) }, t) }); } L.sort((a, b) => a.y - b.y).forEach(o => o.draw()); }, startCap1, CAP1, LIBRO1, ROAD_TRAMOS, ROAD_MIN, roadTramo, islaToggle, DLG_BANK, startDay, setSeason, agendaData: () => AGENDA.map(e => ({ who: wmName(e.who), from: e.from, to: e.to, label: e.label, season: e.season, sunday: !!e.sunday, ana: !!(e.ana || e.who === 'ana'), cond: e.when ? String(e.when).replace(/^\(\) => /, '') : '' })), setAgenda: v => { AGENDA_ON = v; }, AGENDA, wmData: () => ({ THINGS, WHO, OFRECE, WP_NAME, TRADE, TREATS, LIBRETA, ITEM_NAME, MAX_GOALS, PACE, FOCO }), paintMapBase, doingText, wmName, wmBody, wmScene, WW, WH, setVec: v => { VEC_ON = v; }, setStyle: v => { ANA_STYLE = v; }, setHead: setHeadM, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+window.__avonlea = { relatoEmpezar, cualidad, cualidadSuma, cualidadCond, dlgCond, dlgEspecificidad, ritmoLleno, ritmoMarca, dlgHacer, dlgAccion, HABILIDADES, relSetW, relato: () => RELATO.lineas, reglas: () => RELATO_REGLAS.map(r => [r.id, r.texto]), jugables, jugar, anaMenu, correoRetirar, cartaLeer, CORREO, cartaTexto, playAct: () => game.playAct, DIALOGOS, dlgCtx, talks: () => TALKS, dlgGuion, dlgPanel, bubblesNow: () => bubbles, toby, cartSheet: (c, x, y, c8, t) => { const L = [], p = { look: 'matthew', x, y, c8, walk: 0, moving: false }; const [cx, cy] = [x, y]; pushCart(L, c, { x: cx, y: cy, c8, walk: 0, moving: true }, t); for (const [k, look] of [[0, 'matthew'], [1, 'ana']]) { const [sx, sy] = cartSeat(cx, cy, c8, k); L.push({ y: sy, draw: () => drawPerson(c, { ...mkPerson(look, sx, sy), sit: true, dir: c8Dir(c8) }, t) }); } L.sort((a, b) => a.y - b.y).forEach(o => o.draw()); }, startCap1, CAP1, LIBRO1, ROAD_TRAMOS, ROAD_MIN, roadTramo, islaToggle, DLG_BANK, startDay, setSeason, agendaData: () => AGENDA.map(e => ({ who: wmName(e.who), from: e.from, to: e.to, label: e.label, season: e.season, sunday: !!e.sunday, ana: !!(e.ana || e.who === 'ana'), cond: e.when ? String(e.when).replace(/^\(\) => /, '') : '' })), setAgenda: v => { AGENDA_ON = v; }, AGENDA, wmData: () => ({ THINGS, WHO, OFRECE, WP_NAME, TRADE, TREATS, LIBRETA, ITEM_NAME, MAX_GOALS, PACE, FOCO }), paintMapBase, doingText, wmName, wmBody, wmScene, WW, WH, setVec: v => { VEC_ON = v; }, setStyle: v => { ANA_STYLE = v; }, setHead: setHeadM, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
 /* ---------- the account of what happens: what can be seen, not what anyone intends ----------
    For the audit of the actions (tools/auditoria.js) and for whoever wants to read the game as a tale (?relato in the
    link writes it in the console). It watches some characters and writes, with the hour of the game:

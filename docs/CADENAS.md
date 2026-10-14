@@ -57,7 +57,7 @@ Requiere ser amigas (✅). En el libro también: el permiso de Marilla (✅, la 
 
 ## 6. La tía Josephine (cap. 19, 26, 29)
 
-El concierto del Club de Debate con Diana → saltan sobre la cama del cuarto de huéspedes → la tía Josephine se enoja y Ana se gana su amistad → cartas → la visita a Charlottetown. En el juego: ✅ la escena `cama_josephine` en casa de Diana (amigas desde hace dos días, sin prohibición, y no el mismo día del perdón) → hecho `cama_josephine`; las cartas a la tía Josephine se abren después (✅); la visita a Charlottetown ◻.
+El concierto del Club de Debate con Diana → saltan sobre la cama del cuarto de huéspedes → la tía Josephine se enoja y Ana se gana su amistad → cartas → la visita a Charlottetown. En el juego: ✅ la escena `cama_josephine` en casa de Diana (amigas desde hace dos días y sin prohibición; es una escena grande, así que no cae el mismo día que otra, como el crup: ver el ritmo en `docs/MOTOR.md`) → hecho `cama_josephine`; las cartas a la tía Josephine se abren después (✅); la visita a Charlottetown ◻.
 
 ## 7. El pelo (cap. 27)
 
