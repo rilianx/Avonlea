@@ -33,7 +33,7 @@ const s1 = [
   B('**El estado**: lo que es cierto del mundo. **Hechos** (algo que pasó, con el día; o algo que alguien sabe), **cualidades** (números con dueño: la granja de Ana, el estudio de Gilbert, el afecto de Diana hacia Ana) y el **tiempo** (hora, día, estación).'),
   B('**Las escenas** (`src/datos/guion.txt`): piezas de historia con **precondiciones** (dónde, quiénes, qué tiene que ser cierto), **contenido** (el diálogo) y **efectos** (dejan hechos, suman a cualidades, le encargan una meta a alguien). Las rutinas son escenas que se repiten.'),
   B('**El planificador**: el «cómo». Cuando una escena le encarga una meta a un personaje («Ana está en La Cuesta del Huerto»), busca con A* las acciones para cumplirla. Las acciones de cualquier personaje también cambian el estado.'),
-  P('**El cuaderno** (📖, `src/datos/cuaderno.txt`) no es parte del motor: lee el estado y le muestra al jugador las metas, con pistas, para que se guíe.'),
+  P('**El cuaderno** (📖, `src/datos/cuaderno.txt`) no es parte del motor: lee el estado y le muestra al jugador las metas, con pistas, para que se guíe. Además pone **guiños** en los diálogos: lo que alguien dice al pasar sobre una meta pendiente («Mamá nunca me deja ir a tomar el té a ninguna parte… ¡me encantaría que alguien me invitara!»), como mucho dos por persona a la vez.'),
   img('capas.png', 640), pie('Figura 1. El motor: el estado, las escenas que lo leen y lo cambian, y el planificador que cumple lo que las escenas encargan.'),
   tabla([['Se escribe', 4], ['Significa', 6]], [
     ['`hecho:prohibida`, `!hecho:crup`', 'pasó (o no) ese hecho'],
@@ -77,7 +77,7 @@ const s3 = [
     ['`prohibida`', 'Tejas Verdes, con Marilla', 'un día después del vino', '`prohibida`; Diana triste'],
     ['`crup_aviso`', 'Tejas Verdes', 'dos días después de la prohibición, de 18:30 a 22:00', '`crup`; las dos corren a La Cuesta del Huerto'],
     ['`crup_salva`', 'La Cuesta del Huerto', 'después del aviso', '`perdonada`; se olvida la prohibición'],
-    ['`cama_josephine`', 'La Cuesta del Huerto, con Diana', 'amigas hace 25 días, sin prohibición; escena grande (no el mismo día que otra)', '`cama_josephine` (abre las cartas)'],
+    ['`cama_josephine`', 'La Cuesta del Huerto, con Diana', 'amigas hace 15 días, Diana la quiere 5, Ana tiene 10 de letras, sin prohibición; escena grande', '`cama_josephine` (abre las cartas)'],
   ]),
 ];
 const s4 = [
@@ -116,11 +116,11 @@ const s5 = [
   tabla([['Cadena', 5], ['En el libro', 4], ['En el juego', 4]], [
     ['Marilla la lleva donde los Barry', 'a los pocos días', '1 día'],
     ['El broche (antes del picnic)', 'un mes después de conocerse', '5 días de amigas'],
-    ['Invitar a Diana al té', 'unos tres meses después', '10 días de amigas'],
+    ['Invitar a Diana al té', 'unos tres meses después', 'que Diana la quiera 5 (y 5 días)'],
     ['La prohibición', 'al día siguiente del vino', '1 día'],
     ['El crup', 'unos tres meses después', '12 días después de la prohibición'],
-    ['La tía Josephine', 'unos ocho meses después de conocerse', '25 días de amigas'],
-    ['Hacer las paces con Gilbert', 'años', '28 días después de «¡Zanahorias!»'],
+    ['La tía Josephine', 'unos ocho meses después de conocerse', 'Diana la quiere 5 y 10 de letras (y 15 días)'],
+    ['Hacer las paces con Gilbert', 'años', '30 de estudio (y 28 días después de «¡Zanahorias!»)'],
     ['Marilla invita a los Allan', 'cuando llegan, mucho después', '14 días después de la primera escuela dominical'],
     ['El pastel con linimento', 'unos días después', '3 días'],
     ['El examen de Queen\'s', 'unos tres años después', 'desde el segundo verano'],

@@ -35,13 +35,13 @@ Requiere ser amigas (✅). En el libro también: el permiso de Marilla (✅, la 
 | «¡Zanahorias!» y la pizarra | cap. 15 | ✅ la escena `zanahorias`, la primera vez que Ana entra a la escuela con Gilbert: deja el hecho `zanahorias` y la ofensa (Ana ya no le habla) |
 | Recitar la lección, el concierto, decorar el salón | cap. 17, 24, 25 | ✅ requieren haber ido a la escuela |
 | Gilbert la rescata del bote y ella lo rechaza | cap. 28 | ◻ |
-| Hacen las paces | cap. 38 | ✅ requiere `hecho:zanahorias` y que pasen 28 días (en el libro, años) (las acciones de disculparse y perdonar con Gilbert, cerradas antes) |
+| Hacen las paces | cap. 38 | ✅ requiere `hecho:zanahorias` y que pasen 28 días con mucha rivalidad en clases (estudio de Ana 30; en el libro, años) (las acciones de disculparse y perdonar con Gilbert, cerradas antes) |
 
 ## 4. Diana prohibida (cap. 16, 17, 18)
 
 | Paso | En el libro | En el juego |
 |---|---|---|
-| El té con Diana | cap. 16 | ✅ desde el menú de Diana, después de 10 días de amigas (en el libro, unos tres meses): «Invitarla a tomar el té en Tejas Verdes» (Ana prepara el té, la invita, la espera) |
+| El té con Diana | cap. 16 | ✅ desde el menú de Diana, cuando Diana la quiere 5 (pasar tiempo juntas, cartas, regalos) y se conocen hace 5 días (en el libro, unos tres meses): «Invitarla a tomar el té en Tejas Verdes» (Ana prepara el té, la invita, la espera) |
 | El «cordial» era vino de grosellas | cap. 16 | ✅ la escena `te_grosella`, sentadas a la mesita: Diana se va a su casa, mareada → hecho `diana_borracha` |
 | La Sra. Barry prohíbe la amistad | cap. 16 | ✅ al día siguiente, la escena `prohibida` → hecho `prohibida`: se cierran el té, el picnic, el club, el bote, el desafío y la cama de la tía Josephine; Diana está triste; no se saludan como amigas ni conversan; en el cuaderno aparece «Recuperar la amistad de los Barry» |
 | Ana pide perdón y no la perdonan | cap. 16 | ✅ la escena `barry_no_perdona` (si Ana va a La Cuesta del Huerto) |
@@ -59,7 +59,7 @@ Requiere ser amigas (✅). En el libro también: el permiso de Marilla (✅, la 
 
 ## 6. La tía Josephine (cap. 19, 26, 29)
 
-El concierto del Club de Debate con Diana → saltan sobre la cama del cuarto de huéspedes → la tía Josephine se enoja y Ana se gana su amistad → cartas → la visita a Charlottetown. En el juego: ✅ la escena `cama_josephine` en casa de Diana (amigas desde hace 25 días, casi dos estaciones, y sin prohibición; es una escena grande, así que no cae el mismo día que otra, como el crup: ver el ritmo en `docs/MOTOR.md`) → hecho `cama_josephine`; las cartas a la tía Josephine se abren después (✅); la visita a Charlottetown ◻.
+El concierto del Club de Debate con Diana → saltan sobre la cama del cuarto de huéspedes → la tía Josephine se enoja y Ana se gana su amistad → cartas → la visita a Charlottetown. En el juego: ✅ la escena `cama_josephine` en casa de Diana (amigas desde hace 15 días, Diana la quiere 5 y Ana tiene 10 de letras —a la tía Josephine le encanta la imaginación—, y sin prohibición; es una escena grande, así que no cae el mismo día que otra, como el crup: ver el ritmo en `docs/MOTOR.md`) → hecho `cama_josephine`; las cartas a la tía Josephine se abren después (✅); la visita a Charlottetown ◻.
 
 ## 7. El pelo (cap. 27)
 
@@ -77,6 +77,6 @@ Las frases que cada uno dice al pasar pueden esperar a que algo del libro haya p
 ## Cómo agregar una cadena
 
 1. En el guion, las escenas de cada paso, con sus condiciones (`si:`) y lo que dejan (`al_terminar: hecho x`).
-2. En el cuaderno, la meta con `requiere:` (otra meta o un hecho), `antes:` (cómo se dice lo que falta) y `acciones:` (lo que se cierra mientras tanto); y, si hace falta, una `pista si <condición>:` para cada paso.
+2. En el cuaderno, la meta con `requiere:` (otra meta, un hecho, una cualidad: `afecto:diana:ana>=5`, `letras:ana>=10`), `antes:` (cómo se dice lo que falta) y `acciones:` (lo que se cierra mientras tanto); si hace falta, una `pista si <condición>:` para cada paso; y **guiños**, lo que alguien dice al pasar para que el jugador se entere (`guiño diana: …`, `guiño cerrada marilla: …`).
 3. Si alguien tiene que hacer algo a cierta hora (Marilla va donde los Barry en la tarde), una entrada de agenda con `when:` (como en `src/js/66-cadenas.js`).
 4. Una meta de prueba con `cadena: true` (con `tambien:` para que otro espere donde la cadena lo necesita, y `hasta:` para seguirla hasta su último hecho) (las demás pruebas abren todas las cadenas, para probar una cosa a la vez) y sus pasos en la auditoría (`tools/auditoria/esperado.js`).

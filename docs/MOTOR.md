@@ -9,7 +9,7 @@ Todo lo que pasa en Avonlea sale de tres componentes. Cada uno sigue un modelo c
 | **El planificador** | cómo cada personaje cumple una meta: acciones con precondiciones y efectos, buscadas con A* | *GOAP* (Jeff Orkin, *F.E.A.R.*) |
 
 Lo que no es motor:
-- **El cuaderno** (`src/datos/cuaderno.txt`) solo lee el estado y lo muestra al jugador, para que se guíe.
+- **El cuaderno** (`src/datos/cuaderno.txt`) solo lee el estado y lo muestra al jugador, para que se guíe. También pone **guiños** en los diálogos: cada meta puede tener frases que alguien dice al pasar (`guiño diana: …`) mientras está abierta y sin cumplir, o mientras está cerrada (`guiño cerrada marilla: …`), para que el jugador se entere sin abrir el cuaderno. Van como mucho dos por persona a la vez: primero los de metas abiertas, después los de metas a las que solo les falta esfuerzo o tiempo.
 - **La gente de fondo** (alumnos, granjeros) sigue un horario de lugares por hora: es ambiente, no historia.
 
 ## 1. El estado

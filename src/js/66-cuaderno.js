@@ -21,6 +21,7 @@ function cuadernoLeer(txt){
     if ((h = l.match(/^==\s*(.+)$/))) { out.push(grupo = { nombre: h[1], metas: [] }); m = null; continue; }
     if (!m) continue;
     if ((h = l.match(/^pista si (\S+):\s*(.*)$/))) m.pistas.push([h[1], h[2]]);
+    else if ((h = l.match(/^guiño (cerrada )?(\S+):\s*(.*)$/))) (m.guiños ||= []).push({ cerrada: !!h[1], quien: h[2], texto: h[3] });
     else if ((h = l.match(/^(titulo|pista|meta|requiere|antes|acciones):\s*(.*)$/))) m[h[1]] = h[2];
     else if (l === 'oculta') m.oculta = true;
   }
@@ -56,6 +57,19 @@ function cuadernoTick(dt){
     let ok = false; s ||= wmNow(); try { ok = !!m.goal().test(s); } catch (e) {}
     if (ok) { game.wm.perm['cuaderno:' + m.id] = today() + 1; notice('📖 ✓ ' + m.titulo); logEv('Ana cumplió en su cuaderno: ' + m.titulo + '.', []); }
   }
+}
+// the winks: what someone says in passing about a goal still to be done (open), or about what it still needs (closed),
+// mixed with their loose lines, so that the player hears of it without opening the notebook
+// (at most GUIÑOS_MAX at a time for each one, changing with the day: first those of open goals; then those of closed
+// goals that only lack effort or time, a quality or some days; then the rest)
+const GUIÑOS_MAX = 2;
+const faltaEsfuerzo = m => m.requiere.every(r => cuadernoCumple(r) || CUALIDAD_RE.test(r) || /^(afecto|dias_desde):/.test(r));
+function guiñosDe(k){
+  if (!game.wm) return [];
+  const c = CUADERNO_METAS.flatMap(m => (m.guiños || []).filter(g => g.quien === k && !cuadernoHecho(m.id) && (!m.oculta || cuadernoAbierta(m)) && g.cerrada === !cuadernoAbierta(m)).map(g => ({ t: g.texto, r: !g.cerrada ? 0 : faltaEsfuerzo(m) ? 1 : 2 })));
+  const out = [];
+  for (const r of [0, 1, 2]) { const l = c.filter(x => x.r === r); for (let i = 0; i < l.length && out.length < GUIÑOS_MAX; i++) out.push(l[(i + today()) % l.length].t); }
+  return out;
 }
 // the hint now: the last whose condition holds, or the plain one
 const cuadernoPista = m => ([...m.pistas].reverse().find(([c]) => dlgCond(c, dlgCtx()))?.[1] || m.pista).replace('{estudio}', estudio()).replace('{dias_examen}', diasExamen());   // ({estudio}: how much she has studied; {dias_examen}: days until the examination)

@@ -45,7 +45,7 @@ El cuaderno muestra cada habilidad de Ana con su número, una barra y el próxim
 
 ## Los tiempos del libro
 
-Un año del juego son 56 días y en el libro pasan unos cuatro años, así que **un mes del libro son unos 4 o 5 días del juego**. Las cadenas esperan lo que corresponde (ver `docs/CADENAS.md`): el broche, 5 días de amigas; el té con Diana, 10; el crup, 12 días después de la prohibición; la tía Josephine, 25 días de amigas; hacer las paces con Gilbert, 28 días después de «¡Zanahorias!»; los Allan, 14 días después de la primera escuela dominical.
+Un año del juego son 56 días y en el libro pasan unos cuatro años, así que **un mes del libro son unos 4 o 5 días del juego**. Las cadenas esperan lo que corresponde (ver `docs/CADENAS.md`): el broche, 5 días de amigas; el crup, 12 días después de la prohibición; los Allan, 14 días después de la primera escuela dominical. Algunas, además del tiempo, piden puntos: el té con Diana, que Diana la quiera 5 (5 días); la tía Josephine, que Diana la quiera 5 y 10 de letras (15 días); hacer las paces con Gilbert, 30 de estudio (28 días después de «¡Zanahorias!»). 
 
 ## Las amistades
 
