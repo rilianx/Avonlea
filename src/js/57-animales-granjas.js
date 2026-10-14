@@ -113,4 +113,3 @@ function drawCat(c, a, t){
 }
 const FAUNA_DRAW = { cow: (c, a, t) => drawCow(c, a, t), sheep: drawSheep, horse: drawHorse, hen: drawHen, pig: drawPig, duck: drawDuck, gull: drawGull, cat: drawCat };
 function drawBuggy(c, b, t){ const c8 = cartC8(b), [sx, sy] = cartSeat(b.x, b.y, c8, 0), who = () => drawPerson(c, { look: b.look, x: sx, y: sy, dir: c8Dir(c8), sit: true, walk: 0, moving: false, blink: 0 }, t); const body = () => { drawCartBody(c, b, t, 'fondo'); who(); drawCartBody(c, b, t, 'frente'); }; if (cartAxes(c8).hy < -.1) { drawCartHorse(c, b, t); body(); } else { body(); drawCartHorse(c, b, t); } }
-const FARO_LINES = ['Desde aquí se ve todo el golfo. ¡Si hasta me parece ver Escocia! Bueno... no, pero casi.', 'Un faro es como un amigo que nunca se duerme. Me gustaría ser farera, o por lo menos gaviota.', 'Las olas rompen contra las rocas como si tuvieran algo urgente que decir.'];

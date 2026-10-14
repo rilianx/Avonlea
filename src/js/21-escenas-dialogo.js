@@ -150,7 +150,7 @@ class Dialogo {
   // (and, of two of the same importance, the most specific: the one that asks more of the moment, as in Valve's dialogue rules)
   get peso(){ return this.prioridad + (dlgProg()[this.id] ? .04 : 0) + dlgEspecificidad(this) * .001; }
   listo(x){
-    if (this.disparo === 'encuentro' || this.disparo === 'conversar' || this.disparo === 'primera' || this.disparo === 'menu' || this.disparo === 'objeto' || this.disparo === 'lugar') return false;   // (these only when two of them meet: dlgNext; or when Ana talks with someone: conversar)
+    if (this.disparo === 'encuentro' || this.disparo === 'conversar' || this.disparo === 'primera' || this.disparo === 'menu' || this.disparo === 'objeto' || this.disparo === 'lugar' || this.disparo === 'comentario') return false;   // (these only when two of them meet: dlgNext; or when Ana talks with someone: conversar)
     if (this.dicha() || (this.repetir.cada && TT < (this.proxima || 0))) return false;
     if (this.grande && ritmoLleno()) return false;   // (the pacing: one big thing of the book a day)
     if (this.tipo === 'comentario' && this.prioridad > 0 && TT < (dlgComento[this.canal] || 0)) return false;   // (remarks, not one after another)
@@ -292,6 +292,37 @@ for (const c of ESCENAS) Dialogo.registrar(c);
 // menu of the person (or now and then by themselves, when Ana is near and free), as many as she likes; what they add to
 // a quality (affection, a skill), at most once a day for each quality
 const CONVERSACIONES = dlgGuion(document.getElementById('conversaciones')?.textContent || '').map(c => Dialogo.registrar({ ...c, disparo: 'conversar', canal: 'conv', quienes: [c.con, 'ana'], sujeta: [c.con], tema: c.tema || c.id, al_terminar: (c.al_terminar || []).map(a => a.suma ? { ...a, limitado: true } : a) }));
+// the comments (src/datos/comentarios.txt): scenes of one line, grouped by the moment they are said in; the same
+// conditions, chosen by the same engine, but they hold no one, do nothing, and can be said again
+function comentariosLeer(txt){
+  const out = []; let g = null;
+  for (const raw of txt.split('\n')) {
+    const s = raw.trim(); if (!s || s[0] === '#') continue;
+    let m;
+    if ((m = s.match(/^===\s*(.+?)\s*===$/))) { g = { momento: m[1], quien: 'ana', si: [] }; continue; }
+    if (!g) continue;
+    if ((m = s.match(/^quien:\s*(\S+)/))) g.quien = m[1];
+    else if ((m = s.match(/^si:\s*(.*)$/))) g.si = m[1].split(',').map(x => x.trim()).filter(Boolean);
+    else if ((m = s.match(/^-\s*(?:\[([^\]]*)\]\s*)?(.+)$/))) { const si = [...g.si, ...(m[1] ? m[1].split(',').map(x => x.trim()).filter(Boolean) : [])]; out.push({ id: 'com:' + g.momento + ':' + out.filter(c => c.momento === g.momento).length, disparo: 'comentario', momento: g.momento, canal: 'comentario', tipo: 'comentario', repetir: 'siempre', prioridad: 0, ...(si.length ? { si: si.map(dlgVal) } : {}), lineas: [[g.quien, m[2]]] }); }
+  }
+  return out;
+}
+const COMENTARIOS = comentariosLeer(document.getElementById('comentarios')?.textContent || '').map(c => Dialogo.registrar(c));
+// one comment of that moment that can be said now (not the one of last time; the more specific ones, twice as often)
+const comentarioUlt = {};
+function comentarioElegir(m){
+  const x = dlgCtx(), C = COMENTARIOS.filter(d => d.momento === m && dlgCumple(d, x)); if (!C.length) return null;
+  const U = C.length > 1 ? C.filter(d => d.id !== comentarioUlt[m]) : C, P = U.flatMap(d => dlgEspecificidad(d) ? [d, d] : [d]), d = pick(P);
+  comentarioUlt[m] = d.id; const [q, t] = d.lineas()[0]; return { q, t };
+}
+const comentarioTexto = m => comentarioElegir(m)?.t || '';
+// said, in a bubble: by Ana, or by whoever (quien, for «quien: *»)
+function comentar(m, quien){
+  const c = comentarioElegir(m); if (!c) return false;
+  const q = c.q === '*' ? quien : c.q; if (!q) return false;
+  if (q === 'ana') anaSays(c.t); else sayB(talkQ(q), c.t);
+  return true;
+}
 const convDisponibles = k => CONVERSACIONES.filter(d => d.con === k && !d.dicha() && dlgCumple(d, dlgCtx())).sort((a, b) => b.peso - a.peso);
 function conversar(d){   // a conversation, now: said in its own channel, holding the other still, once
   for (const t of TALKS.filter(t => t.ch === 'conv')) talkEnd(t);
@@ -396,12 +427,10 @@ ROOMS.es = HOUSES.es.interior = {
   blocked: (x, y) => SCHOOL_DESKS.some(d => Math.abs(x - d.x) < 24 && y > d.y - 18 && y < d.y + 2) || (Math.abs(x - 6.5 * T) < 32 && y > 3.2 * T - 20 && y < 3.2 * T + 2),
   glow: () => [6.5 * T, 3 * T, 170, '255,200,120', .35],
   actions: add => {
-    const d = SCHOOL_DESKS[5]; add('pupitre', d.x, d.y + 10, 40, ana.sit ? 'Levantarse' : 'Sentarse en su pupitre', () => { if (ana.sit) { ana.sit = false; return; } ana.sit = true; ana.x = d.x; ana.y = d.y + 8; ana.dir = 0; logEv('Ana se sentó en su pupitre de la escuela.'); anaSays(pick(SCHOOL_LINES)); }, { pri: 4, hy: 18, hit: 30 });
-    add('pizarra', 6.5 * T, 2.6 * T, 60, 'Mirar la pizarra', () => anaSays(pick(BOARD_LINES)), { pri: 6, hy: 30, hit: 50 });
+    const d = SCHOOL_DESKS[5]; add('pupitre', d.x, d.y + 10, 40, ana.sit ? 'Levantarse' : 'Sentarse en su pupitre', () => { if (ana.sit) { ana.sit = false; return; } ana.sit = true; ana.x = d.x; ana.y = d.y + 8; ana.dir = 0; logEv('Ana se sentó en su pupitre de la escuela.'); comentar('pupitre'); }, { pri: 4, hy: 18, hit: 30 });
+    add('pizarra', 6.5 * T, 2.6 * T, 60, 'Mirar la pizarra', () => comentar('pizarra'), { pri: 6, hy: 30, hit: 50 });
   },
 };
-const SCHOOL_LINES = ['Mi pupitre, junto a la ventana... desde aquí se ve el río donde dejamos las botellas de leche.', 'Aquí fue donde le rompí la pizarra en la cabeza a Gilbert Blythe. ¡Me llamó «Zanahoria»! Todavía no se lo perdono... bueno, casi.', 'Diana y yo nos pasamos papelitos cuando el maestro no mira. Es una forma muy respetable de la amistad.'];
-const BOARD_LINES = ['La pizarra está llena de números. Los números no tienen imaginación, pobrecitos.', '¡Mi nombre escrito en la pizarra, por portarme mal! Pero con «a» al final, como debe ser: Ana.'];
 // the church: pews on both sides of the aisle, the pulpit, the tall windows
 function drawChurch(c, t, night){
   c.fillStyle = '#c9a476'; c.fillRect(0, 0, KIT.w, KIT.h);
@@ -439,7 +468,7 @@ ROOMS.ig = HOUSES.ig.interior = {
   blocked: (x, y) => PEWS.some(p => Math.abs(x - p.x) < 66 && y > p.y - 26 && y < p.y + 2) || (Math.abs(x - 6.5 * T) < 22 && y < 2.4 * T + 22),
   glow: () => [6.5 * T, 2.6 * T, 180, '255,210,140', .35],
   actions: add => {
-    const p = PEWS[2]; add('banco', p.x, p.y + 8, 70, ana.sit ? 'Levantarse' : 'Sentarse en un banco', () => { if (ana.sit) { ana.sit = false; return; } ana.sit = true; ana.x = p.x; ana.y = p.y + 4; ana.dir = 0; logEv('Ana se sentó un rato en la iglesia.'); anaSays(pick(CHURCH_LINES)); }, { pri: 4, hy: 18, hit: 50 });
+    const p = PEWS[2]; add('banco', p.x, p.y + 8, 70, ana.sit ? 'Levantarse' : 'Sentarse en un banco', () => { if (ana.sit) { ana.sit = false; return; } ana.sit = true; ana.x = p.x; ana.y = p.y + 4; ana.dir = 0; logEv('Ana se sentó un rato en la iglesia.'); comentar('iglesia'); }, { pri: 4, hy: 18, hit: 50 });
   },
 };
 
@@ -472,10 +501,9 @@ ROOMS.tl = HOUSES.tl.interior = {
   glow: () => [6.5 * T, 2.8 * T, 170, '255,200,120', .35],
   actions: add => {
     add('mostrador', SHOP_IN.counter.x - 60, SHOP_IN.counter.y + 10, 70, 'Comprar o vender en el mostrador', shopMenu, { pri: 3, hy: 20, hit: 40 });
-    add('frascos', SHOP_IN.counter.x - 140, SHOP_IN.counter.y + 8, 40, 'Mirar los frascos de caramelos', () => anaSays(pick(SHOP_LINES)), { pri: 6, hy: 40, hit: 30 });
+    add('frascos', SHOP_IN.counter.x - 140, SHOP_IN.counter.y + 8, 40, 'Mirar los frascos de caramelos', () => comentar('tienda'), { pri: 6, hy: 40, hit: 30 });
   },
 };
-const SHOP_LINES = ['¡Caramelos de menta, de limón y de rosa! Si yo fuera rica, me compraría uno de cada color solo para mirarlos.', 'Huele a canela, a jabón y a papel de envolver. Las tiendas tienen un olor a promesas.', 'Esas cintas... la azul quedaría preciosa con mi pelo. Bueno, con mi pelo nada queda precioso, pero la azul quedaría menos mal.'];
 // money: dollars and cents (only the cattle dealer pays in money)
 const money = (n, short) => { n = r2(n || 0); return short ? n.toFixed(2).replace('.', ',') : n < 1 ? Math.round(n * 100) + ' centavos' : (n === 1 ? '1 dólar' : (Number.isInteger(n) ? n : n.toFixed(2).replace('.', ',')) + ' dólares'); };
 // the Cuthberts' account book at Lawson's: what the house needs is written down, Marilla pays at the end of the month
@@ -516,10 +544,6 @@ function shopLibreta(x){
   bubbles = [{ q: 'f:lawson', text: 'Anotado en la libreta. Saludos a Marilla.', t: 0, dur: 3 }];
   setTimeout(() => shopMenu('libreta'), 700);
 }
-const CHURCH_LINES = ['Cuando rezo de verdad, me gusta imaginar que estoy en un gran bosque, mirando el cielo... aquí también se puede, si una se esfuerza.', 'La primera vez que vine me puse flores en el sombrero. ¡La Sra. Lynde casi se desmaya!', 'Qué silencio tan bonito. Hasta mis pensamientos andan de puntillas.'];
-const MILK_LINES = ['Las botellas de leche de la escuela, enfriándose en el río hasta la hora del almuerzo. Cada una tiene el nombre de su dueño... ¡la mía no la confundiría nunca!', 'El agua del río es tan fría que la leche sale como si viniera de una cueva encantada.'];
-const STATION_LINES = ['Aquí mismo esperé a Matthew, sentada en estas tablas, con mi bolsa de viaje. Me había imaginado que si no venía me subiría a un cerezo a dormir bajo la luna.', 'Qué raro volver aquí... el día que llegué no sabía que existía Tejas Verdes. Ahora no sabría vivir sin ella.', 'El jefe de estación me dijo que esperara adentro, ¡pero aquí afuera había mucho más lugar para la imaginación!'];
-const RAIL_LINES = ['Las vías se van y se van... ¿no da gusto pensar adónde llegan? Aunque ahora yo ya llegué a donde quería.', 'Cuando pasa el tren tiembla todo, como si el mundo entero tuviera prisa. A mí me gusta más la carreta de Matthew.'];
 ROOMS.ga = {
   parent: 'gg', exitAt: [STAIRS.x, STAIRS.y + 14], exitLabel: 'Bajar a la cocina',
   draw: drawAnaRoom, items: (g, t) => [{ y: GA.bed.y, draw: () => drawAnaBed(g) }, { y: GA.table.y, draw: () => drawAnaTable(g, t) }, { y: GA.wash.y, draw: () => drawAnaWash(g) }, { y: GA.armario.y, draw: () => drawAnaArmario(g) }],
@@ -529,7 +553,7 @@ ROOMS.ga = {
     add('bed', GA.bed.x - 20, GA.bed.y + 14, 60, 'Dormir en mi cama', goToBed, { hy: 30, hit: 0, pri: 2, test: (x, y) => Math.abs(x - GA.bed.x) < 76 && y > GA.bed.y - 62 && y < GA.bed.y + 6 });
     add('gwin', GA.win, 3.9 * T, 70, velaPuede() ? 'La ventana (🕯 la vela)' : 'Mirar por la ventana', ventana, { hy: 40, hit: 0, pri: 3, test: (x, y) => Math.abs(x - GA.win) < 46 && y < 62 });
     add('armario', GA.armario.x, GA.armario.y + 22, 50, game.wm?.sinSombrero ? 'Ponerse el sombrero (el armario)' : 'Guardar el sombrero en el armario', sombrero, { hy: 40, hit: 26, pri: 3 });
-    add('mirror', GA.table.x, GA.table.y + 26, 56, 'Mirarse en el espejo', () => anaSays(pick(MIRROR_LINES)), { hy: 40, hit: 0, pri: 3, test: (x, y) => Math.abs(x - GA.table.x) < 18 && y < 56 });
+    add('mirror', GA.table.x, GA.table.y + 26, 56, 'Mirarse en el espejo', () => comentar('espejo'), { hy: 40, hit: 0, pri: 3, test: (x, y) => Math.abs(x - GA.table.x) < 18 && y < 56 });
   },
 };
 

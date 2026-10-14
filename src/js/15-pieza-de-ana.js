@@ -77,6 +77,3 @@ function drawAnaWash(c){
 // Ana says something out loud (a bubble), when nobody else is talking
 function anaSays(text){ if (amb.cur) return; bubbles = [{ q: 'ana', text, t: 0, dur: lineDur(text) }]; sfx.blip(); }
 const pick = a => a[Math.floor(Math.random() * a.length)];
-const WINDOW_LINES = ['¡Mi Reina de las Nieves, toda vestida de novia! Cada primavera pienso que se casa con el cielo.', 'Ya no tiene flores, pero qué verde está... Seguro que me entiende, aunque no hable.', 'Mi cerezo se puso su vestido rojo y dorado. ¡Es el árbol más elegante de toda la Isla!', 'Mi querida Reina de las Nieves duerme bajo la nieve. Ya despertará, es cuestión de paciencia... ¡y yo tengo muchísima! Bueno, casi.'];
-const MIRROR_LINES = ['¡Ay, mi pelo! Aunque hoy, con esta luz, parece casi... bueno, castaño. Casi.', 'Con tantas pecas parezco un mapa de islas. ¡Tengo toda la Isla del Príncipe Eduardo en la nariz!', 'Algún día seré pálida y de pelo negro azabache. Y mientras tanto, ¡me quedo con mi imaginación!'];
-const SLEEPY_LINES = [['¡Ay, qué sueño! Hasta la luna bosteza esta noche.', 'Creo que ya es hora de subir a mi cuarto... ¿o aún no? ¡Aaah!'], ['Siento los párpados pesados como cortinas de terciopelo. ¡Me caigo de sueño!', 'Mi cama del alero me llama. ¡Ahí me esperan mis sueños más hermosos!']];

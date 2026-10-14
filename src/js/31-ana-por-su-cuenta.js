@@ -47,8 +47,6 @@ function startIntent(intent, manual, said){
 }
 // (lying down, nobody wants a tree crown between them and us)
 const underTree = (x, y) => trees.some(tr => tr.y > y - 10 && Math.abs(tr.x - x) < 50 * tr.s && tr.y - y < 120 * tr.s);
-const LIE_LINES = ['¡Mira esa nube! Parece un dragón... no, un barco de velas blancas. ¡O una oveja con sombrero!', 'Qué bien se está en el pasto. Se oyen las abejas y, si me callo un momento, hasta el crecer de las flores.', 'Las nubes son como las ideas: pasan lentísimo y nunca se repiten.', 'Si me quedo muy quieta, quizás las hadas me confundan con una flor.'];
-const AUTO_SAY = ['¡Qué día para hacer algo bonito!', 'Se me ocurrió una idea... ¡de esas que solo tengo yo!', '¡A ver qué descubro por ahí!', 'Mi imaginación no me deja quieta.', 'Hay tanto por hacer y tan poco tiempo... ¡y yo con tantas ideas!'];
 async function autoDecide(){
   const sa = storyAuto(); if (sa) { auto.hist.push(sa.label); if (auto.hist.length > 6) auto.hist.shift(); startIntent(sa.intent, false, ''); return; }   // (the story of the day comes first)
   const opts = autoOptions(), sc = game.scene; if (!opts.length) { auto.thinkAt = TT + 4; return; }
@@ -60,7 +58,7 @@ async function autoDecide(){
     auto.busy = false;
     if (!autoAllowed() || TT - lastInput < AUTO_IDLE || game.scene !== sc || auto.intent) return;   // (the player took over meanwhile)
   }
-  if (!pick) { let r = Math.random() * opts.reduce((a, o) => a + o.w, 0); pick = opts.find(o => (r -= o.w) <= 0) || opts[0]; said = Math.random() < .35 ? pick5() : ''; }
+  if (!pick) { let r = Math.random() * opts.reduce((a, o) => a + o.w, 0); pick = opts.find(o => (r -= o.w) <= 0) || opts[0]; said = Math.random() < .35 ? comentarioTexto('ana_sola') : ''; }
   auto.hist.push(pick.label); if (auto.hist.length > 6) auto.hist.shift();
   startIntent(pick.intent, false, said);
 }
@@ -111,7 +109,6 @@ function eventIntent(ev){
   if (ev.startsWith('regalo:')) { const k = ev.split(':')[1]; if (PEOPLE[k] && Object.keys(GIFTS).some(g => game.inv[g] > 0)) return { label: 'Ir a darle algo a ' + NAMES[k], intent: { type: 'talkmenu', k } }; }
   return null;
 }
-const pick5 = () => AUTO_SAY[Math.floor(Math.random() * AUTO_SAY.length)];
 function autoCook(){
   const k = ITEMS.find(k => ITEM_DEFS[k].recipe && Object.keys(ITEM_DEFS[k].recipe).length && !hasIt(k) && Object.entries(ITEM_DEFS[k].recipe).every(([i, n]) => game.inv[i] >= n)) || (!hasIt('te') && 'te');
   if (k) return startCook(k);
@@ -141,7 +138,7 @@ function autoStep(){
     case 'lie': {
       if (sc !== 'out') return go(hopTo('out'));
       if (!it.started) { it.started = true; let spot = null; for (let k = 0; k < 30 && !spot; k++) { const [x, y] = randSpot(240); if (!nearPath(x, y, 30) && !inBrook(x, y, 30) && !inLake(x, y, 30) && !underTree(x, y)) spot = [x, y]; } const [x, y] = spot || randSpot(100); return to(x, y); }
-      if (!ana.lie) { if (it.lay) return done(); it.lay = true; ana.lie = true; ana.sit = false; ana.dir = 2; it.until = TT + calm(40, 40); return anaSays(pick(LIE_LINES)); }
+      if (!ana.lie) { if (it.lay) return done(); it.lay = true; ana.lie = true; ana.sit = false; ana.dir = 2; it.until = TT + calm(40, 40); return comentar('pasto'); }
       if (TT > it.until) { ana.lie = false; return done(); }
       return;
     }

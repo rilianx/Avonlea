@@ -12,7 +12,7 @@ function update(dt){
   // late at night Ana gets sleepy (twice, out loud), and past two in the morning she falls asleep
   { const hn = hourNow(); if (hn < 20) sleepyStage = 0;
     else if (hn >= 26 && !game.talk) goSleep(true);
-    else if (sleepyStage < 2 && hn >= [21, 23.5][sleepyStage] && !game.talk && !amb.cur && !writtenTalkOn()) anaSays(pick(SLEEPY_LINES[sleepyStage++])); }
+    else if (sleepyStage < 2 && hn >= [21, 23.5][sleepyStage] && !game.talk && !amb.cur && !writtenTalkOn()) comentar('sueno_' + (++sleepyStage)); }
   // Ana: walks where she is told (not while talking or cooking); sits on the bench until she moves
   let mx = 0, my = 0;
   if (!menuOpen() && !game.cooking && !game.map && $('ai').hidden) {

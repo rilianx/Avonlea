@@ -49,10 +49,10 @@ function lugaresTick(dt){
 // the candle at the window: once they have agreed on the signals, friends still, in the evening
 function velaPuede(){ return dianaAmiga() && !!dlgDichas().conv_diana_vela && hourNow() % 24 >= 19; }
 function ventana(){
-  if (!velaPuede()) return anaSays(WINDOW_LINES[S]);
+  if (!velaPuede()) return comentar('ventana');
   say('Ana', 'Por la ventana, entre los árboles, se ve la luz de la pieza de Diana.', [
     ['🕯 Hacerle señas a Diana con la vela', () => { close(); const d = DIALOGOS.find(x => x.id === 'senas_vela'); if (d && !d.dicha()) d.decir(); else anaSays('Ya le hice señas esta noche. Diana debe estar durmiendo… o imaginando cosas, como yo.'); }],
-    ['Mirar por la ventana', () => { close(); escenaObjeto('gwin', true) || anaSays(WINDOW_LINES[S]); }],
+    ['Mirar por la ventana', () => { close(); escenaObjeto('gwin', true) || comentar('ventana'); }],
     ['Nada por ahora', close],
   ]);
 }

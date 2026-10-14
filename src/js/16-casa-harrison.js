@@ -85,9 +85,9 @@ ROOMS.br = {
   blocked: (x, y) => y < 2.5 * T || (Math.abs(x - BRS.house.x) < 66 && y < BRS.house.y + 4) || (Math.abs(x - BRS.pile.x) < 38 && y > BRS.pile.y - 26 && y < BRS.pile.y + 4),
   glow: () => [BRS.lamp.x, BRS.lamp.y - 60, 170, '255,200,120', .45],
   actions: add => {
-    add('pila', BRS.pile.x, BRS.pile.y + 6, 50, ana.sit ? 'Levantarse' : 'Sentarse en la pila de tablas', () => { if (ana.sit) { ana.sit = false; return; } ana.sit = true; ana.x = BRS.pile.x; ana.y = BRS.pile.y + 2; ana.dir = 2; logEv('Ana se sentó en la pila de tablas de la estación de Bright River, donde esperó a Matthew el día que llegó.'); anaSays(pick(STATION_LINES)); }, { pri: 4, hy: 18, hit: 46 });
-    add('vias', KIT.w / 2, 2.5 * T, 40, 'Mirar las vías', () => anaSays(pick(RAIL_LINES)), { pri: 6, hy: 20, hit: 40 });
-    add('cerezo', KIT.w - 46, 1.5 * T, 50, 'Mirar el gran cerezo silvestre de la curva', () => anaSays(pick(CHERRY_LINES)), { pri: 5, hy: 30, hit: 40 });
+    add('pila', BRS.pile.x, BRS.pile.y + 6, 50, ana.sit ? 'Levantarse' : 'Sentarse en la pila de tablas', () => { if (ana.sit) { ana.sit = false; return; } ana.sit = true; ana.x = BRS.pile.x; ana.y = BRS.pile.y + 2; ana.dir = 2; logEv('Ana se sentó en la pila de tablas de la estación de Bright River, donde esperó a Matthew el día que llegó.'); comentar('estacion'); }, { pri: 4, hy: 18, hit: 46 });
+    add('vias', KIT.w / 2, 2.5 * T, 40, 'Mirar las vías', () => comentar('vias'), { pri: 6, hy: 20, hit: 40 });
+    add('cerezo', KIT.w - 46, 1.5 * T, 50, 'Mirar el gran cerezo silvestre de la curva', () => comentar('cerezo_silvestre'), { pri: 5, hy: 30, hit: 40 });
     const m = PEOPLE.matthew; if (m.where === 'br' && m.buggy && !wmDriven('matthew')) add('calesa', BRS.cart.x, BRS.cart.y - 10, 60, '🐴 Volver a Tejas Verdes en la calesa con Matthew', () => { roadStart('matthew', 0, 1); roadJoin('matthew'); roadTramoIn('matthew', roadTramo(0)); }, { pri: 2, hy: 20, hit: 46 });
   },
 };

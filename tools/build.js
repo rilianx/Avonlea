@@ -12,7 +12,7 @@ function build(){
   const js = fs.readdirSync(src('js')).filter(f => /^\d\d-.*\.js$/.test(f)).sort().map(f => read('js/' + f)).join('\n');
   const mapas = Object.fromEntries(fs.readdirSync(src('mapas')).filter(f => f.endsWith('.tmj')).sort().map(f => [f.replace('.tmj', ''), JSON.parse(read('mapas/' + f))]));
   const code = js.replace('/*@libro1*/', () => read('datos/libro1.json')).replace('/*@personajes*/', () => read('datos/personajes.json')).replace('/*@mapas*/', () => JSON.stringify(mapas));
-  return read('shell.html').replace('<!--@guion-->', () => read('datos/guion.txt')).replace('<!--@cuaderno-->', () => read('datos/cuaderno.txt')).replace('<!--@habilidades-->', () => read('datos/habilidades.txt')).replace('<!--@conversaciones-->', () => read('datos/conversaciones.txt')).replace('<!--@js-->', () => code);
+  return read('shell.html').replace('<!--@guion-->', () => read('datos/guion.txt')).replace('<!--@cuaderno-->', () => read('datos/cuaderno.txt')).replace('<!--@habilidades-->', () => read('datos/habilidades.txt')).replace('<!--@conversaciones-->', () => read('datos/conversaciones.txt')).replace('<!--@comentarios-->', () => read('datos/comentarios.txt')).replace('<!--@js-->', () => code);
 }
 
 const out = build(), target = path.join(root, 'index.html');

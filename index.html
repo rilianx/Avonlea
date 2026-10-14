@@ -1988,6 +1988,113 @@ ana: (Junto al corral, cuatro abedules forman un rincón, como una salita al air
 ana: Idlewild. Aquí Diana y yo vamos a tener nuestra casita de juegos, con platos rotos de porcelana como si fueran la mejor vajilla.
 
 </script>
+<script type="text/plain" id="comentarios">
+# Los comentarios: escenas de una sola línea (lo que alguien dice al pasar, al mirar algo, al hacer algo). Son escenas
+# como las demás (docs/MOTOR.md): cada una con sus condiciones, elegidas por el mismo motor; pero no detienen a nadie,
+# no tienen efectos, y se pueden repetir. Se agrupan por el momento en que se dicen:
+#   === momento ===            (el código pide un comentario de ese momento: comentar('ventana'))
+#   quien: ana                 (quién lo dice; por defecto Ana; «*»: quien sea que el código diga, como el enfermo)
+#   si: …                      (condiciones para todo el grupo)
+#   - [condiciones] texto      (cada comentario; entre corchetes, sus propias condiciones, si tiene)
+# Entre los que se pueden decir, se elige uno al azar (no el mismo de la última vez); los que piden más condiciones
+# salen el doble de seguido. El estilo, el de las escenas de la ventana: algo concreto, la imaginación de Ana, un
+# sentimiento chico. Si una cosa tiene escenas largas (disparo: objeto), los comentarios son lo de las demás veces.
+
+=== ventana ===
+- [estacion:primavera] ¡Mi Reina de las Nieves, toda vestida de novia! Cada primavera pienso que se casa con el cielo.
+- [estacion:primavera] Los pétalos entran volando por la ventana. Me están invitando a salir, estoy segura.
+- [estacion:verano] Ya no tiene flores, pero qué verde está... Seguro que me entiende, aunque no hable.
+- [estacion:verano] Hace tanto calor que hasta el cerezo parece tener sueño. Shhh, Reina: duerme la siesta.
+- [estacion:otoño] Mi cerezo se puso su vestido rojo y dorado. ¡Es el árbol más elegante de toda la Isla!
+- [estacion:otoño] Las hojas caen de a una, como si se despidieran despacito para que no duela tanto.
+- [estacion:invierno] Mi querida Reina de las Nieves duerme bajo la nieve. Ya despertará, es cuestión de paciencia... ¡y yo tengo muchísima! Bueno, casi.
+- [estacion:invierno] El vidrio está tan frío que mi nariz dejó una mancha redonda. Una mancha de nariz con imaginación.
+- [hora:19-24] Ya se ven las primeras estrellas. Siempre me pregunto cuál será la mía.
+
+=== espejo ===
+- ¡Ay, mi pelo! Aunque hoy, con esta luz, parece casi... bueno, castaño. Casi.
+- Con tantas pecas parezco un mapa de islas. ¡Tengo toda la Isla del Príncipe Eduardo en la nariz!
+- Algún día seré pálida y de pelo negro azabache. Y mientras tanto, ¡me quedo con mi imaginación!
+- [estacion:verano] El sol me trajo pecas nuevas. Las voy a bautizar, ya que se instalaron.
+- [hecho:se_queda] La niña del espejo ya no tiene cara de huérfana. Tiene cara de Tejas Verdes.
+
+=== faro ===
+- Desde aquí se ve todo el golfo. ¡Si hasta me parece ver Escocia! Bueno... no, pero casi.
+- Un faro es como un amigo que nunca se duerme. Me gustaría ser farera, o por lo menos gaviota.
+- Las olas rompen contra las rocas como si tuvieran algo urgente que decir.
+- [hora:19-24] La luz del faro da vueltas y vueltas. Le está diciendo buenas noches a cada barco, uno por uno.
+
+=== leche ===
+- Las botellas de leche de la escuela, enfriándose en el río hasta la hora del almuerzo. Cada una tiene el nombre de su dueño... ¡la mía no la confundiría nunca!
+- El agua del río es tan fría que la leche sale como si viniera de una cueva encantada.
+
+=== tienda ===
+- ¡Caramelos de menta, de limón y de rosa! Si yo fuera rica, me compraría uno de cada color solo para mirarlos.
+- Huele a canela, a jabón y a papel de envolver. Las tiendas tienen un olor a promesas.
+- Esas cintas... la azul quedaría preciosa con mi pelo. Bueno, con mi pelo nada queda precioso, pero la azul quedaría menos mal.
+
+=== pupitre ===
+- Mi pupitre, junto a la ventana... desde aquí se ve el río donde dejamos las botellas de leche.
+- [hecho:zanahorias] Aquí fue donde le rompí la pizarra en la cabeza a Gilbert Blythe. ¡Me llamó «Zanahorias»! Todavía no se lo perdono... bueno, casi.
+- [hecho:conocidas_diana] Diana y yo nos pasamos papelitos cuando el maestro no mira. Es una forma muy respetable de la amistad.
+
+=== pizarra ===
+- La pizarra está llena de números. Los números no tienen imaginación, pobrecitos.
+- [hecho:zanahorias] ¡Mi nombre escrito en la pizarra, por portarme mal! Pero con «a» al final, como debe ser: Ana.
+
+=== iglesia ===
+- Cuando rezo de verdad, me gusta imaginar que estoy en un gran bosque, mirando el cielo... aquí también se puede, si una se esfuerza.
+- La primera vez que vine me puse flores en el sombrero. ¡La Sra. Lynde casi se desmaya!
+- Qué silencio tan bonito. Hasta mis pensamientos andan de puntillas.
+
+=== estacion ===
+- Aquí mismo esperé a Matthew, sentada en estas tablas, con mi bolsa de viaje. Me había imaginado que si no venía me subiría a un cerezo a dormir bajo la luna.
+- Qué raro volver aquí... el día que llegué no sabía que existía Tejas Verdes. Ahora no sabría vivir sin ella.
+- El jefe de estación me dijo que esperara adentro, ¡pero aquí afuera había mucho más lugar para la imaginación!
+
+=== vias ===
+- Las vías se van y se van... ¿no da gusto pensar adónde llegan? Aunque ahora yo ya llegué a donde quería.
+- Cuando pasa el tren tiembla todo, como si el mundo entero tuviera prisa. A mí me gusta más la carreta de Matthew.
+
+=== cerezo_silvestre ===
+- Ése es mi cerezo. Si Matthew no hubiera venido, iba a dormir allá arriba, entre las flores, a la luz de la luna. ¿No habría sido precioso?
+- Es todo blanco, como una novia con su velo. Le voy a dar las buenas noches cada vez que pase por aquí.
+- Una podría imaginar que vive en salones de mármol, ahí arriba. Bueno… salones de mármol con olor a cerezo.
+
+# lo que Ana dice cuando sale a hacer algo por su cuenta
+=== ana_sola ===
+- ¡Qué día para hacer algo bonito!
+- Se me ocurrió una idea... ¡de esas que solo tengo yo!
+- ¡A ver qué descubro por ahí!
+- Mi imaginación no me deja quieta.
+- Hay tanto por hacer y tan poco tiempo... ¡y yo con tantas ideas!
+- [estacion:primavera] Hoy el mundo huele a recién hecho. Hay que salir a estrenarlo.
+- [estacion:invierno] Hace frío, pero una no puede quedarse adentro cuando afuera todo brilla.
+- [hora:5-9] Las mañanas son mi hora favorita: todavía no me he equivocado en nada.
+
+# tendida en el pasto, mirando las nubes
+=== pasto ===
+- ¡Mira esa nube! Parece un dragón... no, un barco de velas blancas. ¡O una oveja con sombrero!
+- Qué bien se está en el pasto. Se oyen las abejas y, si me callo un momento, hasta el crecer de las flores.
+- Las nubes son como las ideas: pasan lentísimo y nunca se repiten.
+- Si me quedo muy quieta, quizás las hadas me confundan con una flor.
+
+# de noche, cuando le da sueño (dos veces: a las nueve y a las once y media)
+=== sueno_1 ===
+- ¡Ay, qué sueño! Hasta la luna bosteza esta noche.
+- Siento los párpados pesados como cortinas de terciopelo. ¡Me caigo de sueño!
+=== sueno_2 ===
+- Creo que ya es hora de subir a mi cuarto... ¿o aún no? ¡Aaah!
+- Mi cama del alero me llama. ¡Ahí me esperan mis sueños más hermosos!
+
+# el que está enfermo, desde la cama (quien lo diga)
+=== enfermo ===
+quien: *
+- Ay… este resfrío me tiene molido.
+- No me siento nada bien, niña.
+- Cof, cof… Si no fuera por este pecho…
+
+</script>
 <script type="text/plain" id="conversaciones">
 # Las conversaciones de Ana con los suyos (lo lee el juego al empezar). Inspiradas en el libro, largas y cortas.
 # Son escenas del guion (el mismo formato: docs/ESCENAS.md, docs/MOTOR.md), pero no se disparan solas por lugar:
@@ -4363,9 +4470,6 @@ function drawAnaWash(c){
 // Ana says something out loud (a bubble), when nobody else is talking
 function anaSays(text){ if (amb.cur) return; bubbles = [{ q: 'ana', text, t: 0, dur: lineDur(text) }]; sfx.blip(); }
 const pick = a => a[Math.floor(Math.random() * a.length)];
-const WINDOW_LINES = ['¡Mi Reina de las Nieves, toda vestida de novia! Cada primavera pienso que se casa con el cielo.', 'Ya no tiene flores, pero qué verde está... Seguro que me entiende, aunque no hable.', 'Mi cerezo se puso su vestido rojo y dorado. ¡Es el árbol más elegante de toda la Isla!', 'Mi querida Reina de las Nieves duerme bajo la nieve. Ya despertará, es cuestión de paciencia... ¡y yo tengo muchísima! Bueno, casi.'];
-const MIRROR_LINES = ['¡Ay, mi pelo! Aunque hoy, con esta luz, parece casi... bueno, castaño. Casi.', 'Con tantas pecas parezco un mapa de islas. ¡Tengo toda la Isla del Príncipe Eduardo en la nariz!', 'Algún día seré pálida y de pelo negro azabache. Y mientras tanto, ¡me quedo con mi imaginación!'];
-const SLEEPY_LINES = [['¡Ay, qué sueño! Hasta la luna bosteza esta noche.', 'Creo que ya es hora de subir a mi cuarto... ¿o aún no? ¡Aaah!'], ['Siento los párpados pesados como cortinas de terciopelo. ¡Me caigo de sueño!', 'Mi cama del alero me llama. ¡Ahí me esperan mis sueños más hermosos!']];
 
 /* ---------- Mr. Harrison's house: a mess of unwashed dishes and newspapers, and Ginger in his cage ---------- */
 function drawHarrisonRoom(c, t, night){
@@ -4454,9 +4558,9 @@ ROOMS.br = {
   blocked: (x, y) => y < 2.5 * T || (Math.abs(x - BRS.house.x) < 66 && y < BRS.house.y + 4) || (Math.abs(x - BRS.pile.x) < 38 && y > BRS.pile.y - 26 && y < BRS.pile.y + 4),
   glow: () => [BRS.lamp.x, BRS.lamp.y - 60, 170, '255,200,120', .45],
   actions: add => {
-    add('pila', BRS.pile.x, BRS.pile.y + 6, 50, ana.sit ? 'Levantarse' : 'Sentarse en la pila de tablas', () => { if (ana.sit) { ana.sit = false; return; } ana.sit = true; ana.x = BRS.pile.x; ana.y = BRS.pile.y + 2; ana.dir = 2; logEv('Ana se sentó en la pila de tablas de la estación de Bright River, donde esperó a Matthew el día que llegó.'); anaSays(pick(STATION_LINES)); }, { pri: 4, hy: 18, hit: 46 });
-    add('vias', KIT.w / 2, 2.5 * T, 40, 'Mirar las vías', () => anaSays(pick(RAIL_LINES)), { pri: 6, hy: 20, hit: 40 });
-    add('cerezo', KIT.w - 46, 1.5 * T, 50, 'Mirar el gran cerezo silvestre de la curva', () => anaSays(pick(CHERRY_LINES)), { pri: 5, hy: 30, hit: 40 });
+    add('pila', BRS.pile.x, BRS.pile.y + 6, 50, ana.sit ? 'Levantarse' : 'Sentarse en la pila de tablas', () => { if (ana.sit) { ana.sit = false; return; } ana.sit = true; ana.x = BRS.pile.x; ana.y = BRS.pile.y + 2; ana.dir = 2; logEv('Ana se sentó en la pila de tablas de la estación de Bright River, donde esperó a Matthew el día que llegó.'); comentar('estacion'); }, { pri: 4, hy: 18, hit: 46 });
+    add('vias', KIT.w / 2, 2.5 * T, 40, 'Mirar las vías', () => comentar('vias'), { pri: 6, hy: 20, hit: 40 });
+    add('cerezo', KIT.w - 46, 1.5 * T, 50, 'Mirar el gran cerezo silvestre de la curva', () => comentar('cerezo_silvestre'), { pri: 5, hy: 30, hit: 40 });
     const m = PEOPLE.matthew; if (m.where === 'br' && m.buggy && !wmDriven('matthew')) add('calesa', BRS.cart.x, BRS.cart.y - 10, 60, '🐴 Volver a Tejas Verdes en la calesa con Matthew', () => { roadStart('matthew', 0, 1); roadJoin('matthew'); roadTramoIn('matthew', roadTramo(0)); }, { pri: 2, hy: 20, hit: 46 });
   },
 };
@@ -4723,12 +4827,11 @@ ROOMS.camino = {
   glow: () => [0, 0, 1, '255,200,120', 0],
   actions: add => {
     if (dist(ana.x, ana.y, RSTN.x, RSTN.y + 20) < 260) add('andén', RSTN.x, RSTN.y + 10, 40, 'Entrar al andén de la estación', () => goIn('br'), { pri: 3, hy: 20, hit: 36 });
-    if (dist(ana.x, ana.y, RCHERRY.x, RCHERRY.y) < 360) add('cerezo', RCHERRY.x, RCHERRY.y - 30, 70, 'Mirar el gran cerezo silvestre', () => anaSays(pick(CHERRY_LINES)), { pri: 5, hy: 60, hit: 60 });
+    if (dist(ana.x, ana.y, RCHERRY.x, RCHERRY.y) < 360) add('cerezo', RCHERRY.x, RCHERRY.y - 30, 70, 'Mirar el gran cerezo silvestre', () => comentar('cerezo_silvestre'), { pri: 5, hy: 60, hit: 60 });
     const d = PEOPLE[game.road?.with]; if (d && d.where === 'camino' && !ana.onCart) { const [cx, cy] = cartFromDriver(d.x, d.y, cartC8(d)); add('calesa', cx, cy - 6, 70, '🐴 Subir a la calesa', () => roadBoard(), { pri: 2, hy: 20, hit: 46 }); }
     for (const k of Object.keys(PEOPLE)) { const p = PEOPLE[k]; if (p.where === 'camino' && p.buggy && !game.road && dist(ana.x, ana.y, p.x, p.y) < 200) add('calesa:' + k, p.x, p.y, 60, `🐴 Pedirle a ${wmName(k)} que la lleve`, () => { game.road = { with: k }; roadBoard(); }, { pri: 2, hy: 20, hit: 46 }); }
   },
 };
-const CHERRY_LINES = ['Ése es mi cerezo. Si Matthew no hubiera venido, iba a dormir allá arriba, entre las flores, a la luz de la luna. ¿No habría sido precioso?', 'Es todo blanco, como una novia con su velo. Le voy a dar las buenas noches cada vez que pase por aquí.', 'Una podría imaginar que vive en salones de mármol, ahí arriba. Bueno… salones de mármol con olor a cerezo.'];
 // someone sets off on the road (from the signpost of Avonlea, s = 1, or from the station, s = 0)
 function roadStart(k, s, dir){
   const b = wmBody(k); if (!b) return;
@@ -5235,7 +5338,7 @@ class Dialogo {
   // (and, of two of the same importance, the most specific: the one that asks more of the moment, as in Valve's dialogue rules)
   get peso(){ return this.prioridad + (dlgProg()[this.id] ? .04 : 0) + dlgEspecificidad(this) * .001; }
   listo(x){
-    if (this.disparo === 'encuentro' || this.disparo === 'conversar' || this.disparo === 'primera' || this.disparo === 'menu' || this.disparo === 'objeto' || this.disparo === 'lugar') return false;   // (these only when two of them meet: dlgNext; or when Ana talks with someone: conversar)
+    if (this.disparo === 'encuentro' || this.disparo === 'conversar' || this.disparo === 'primera' || this.disparo === 'menu' || this.disparo === 'objeto' || this.disparo === 'lugar' || this.disparo === 'comentario') return false;   // (these only when two of them meet: dlgNext; or when Ana talks with someone: conversar)
     if (this.dicha() || (this.repetir.cada && TT < (this.proxima || 0))) return false;
     if (this.grande && ritmoLleno()) return false;   // (the pacing: one big thing of the book a day)
     if (this.tipo === 'comentario' && this.prioridad > 0 && TT < (dlgComento[this.canal] || 0)) return false;   // (remarks, not one after another)
@@ -5377,6 +5480,37 @@ for (const c of ESCENAS) Dialogo.registrar(c);
 // menu of the person (or now and then by themselves, when Ana is near and free), as many as she likes; what they add to
 // a quality (affection, a skill), at most once a day for each quality
 const CONVERSACIONES = dlgGuion(document.getElementById('conversaciones')?.textContent || '').map(c => Dialogo.registrar({ ...c, disparo: 'conversar', canal: 'conv', quienes: [c.con, 'ana'], sujeta: [c.con], tema: c.tema || c.id, al_terminar: (c.al_terminar || []).map(a => a.suma ? { ...a, limitado: true } : a) }));
+// the comments (src/datos/comentarios.txt): scenes of one line, grouped by the moment they are said in; the same
+// conditions, chosen by the same engine, but they hold no one, do nothing, and can be said again
+function comentariosLeer(txt){
+  const out = []; let g = null;
+  for (const raw of txt.split('\n')) {
+    const s = raw.trim(); if (!s || s[0] === '#') continue;
+    let m;
+    if ((m = s.match(/^===\s*(.+?)\s*===$/))) { g = { momento: m[1], quien: 'ana', si: [] }; continue; }
+    if (!g) continue;
+    if ((m = s.match(/^quien:\s*(\S+)/))) g.quien = m[1];
+    else if ((m = s.match(/^si:\s*(.*)$/))) g.si = m[1].split(',').map(x => x.trim()).filter(Boolean);
+    else if ((m = s.match(/^-\s*(?:\[([^\]]*)\]\s*)?(.+)$/))) { const si = [...g.si, ...(m[1] ? m[1].split(',').map(x => x.trim()).filter(Boolean) : [])]; out.push({ id: 'com:' + g.momento + ':' + out.filter(c => c.momento === g.momento).length, disparo: 'comentario', momento: g.momento, canal: 'comentario', tipo: 'comentario', repetir: 'siempre', prioridad: 0, ...(si.length ? { si: si.map(dlgVal) } : {}), lineas: [[g.quien, m[2]]] }); }
+  }
+  return out;
+}
+const COMENTARIOS = comentariosLeer(document.getElementById('comentarios')?.textContent || '').map(c => Dialogo.registrar(c));
+// one comment of that moment that can be said now (not the one of last time; the more specific ones, twice as often)
+const comentarioUlt = {};
+function comentarioElegir(m){
+  const x = dlgCtx(), C = COMENTARIOS.filter(d => d.momento === m && dlgCumple(d, x)); if (!C.length) return null;
+  const U = C.length > 1 ? C.filter(d => d.id !== comentarioUlt[m]) : C, P = U.flatMap(d => dlgEspecificidad(d) ? [d, d] : [d]), d = pick(P);
+  comentarioUlt[m] = d.id; const [q, t] = d.lineas()[0]; return { q, t };
+}
+const comentarioTexto = m => comentarioElegir(m)?.t || '';
+// said, in a bubble: by Ana, or by whoever (quien, for «quien: *»)
+function comentar(m, quien){
+  const c = comentarioElegir(m); if (!c) return false;
+  const q = c.q === '*' ? quien : c.q; if (!q) return false;
+  if (q === 'ana') anaSays(c.t); else sayB(talkQ(q), c.t);
+  return true;
+}
 const convDisponibles = k => CONVERSACIONES.filter(d => d.con === k && !d.dicha() && dlgCumple(d, dlgCtx())).sort((a, b) => b.peso - a.peso);
 function conversar(d){   // a conversation, now: said in its own channel, holding the other still, once
   for (const t of TALKS.filter(t => t.ch === 'conv')) talkEnd(t);
@@ -5481,12 +5615,10 @@ ROOMS.es = HOUSES.es.interior = {
   blocked: (x, y) => SCHOOL_DESKS.some(d => Math.abs(x - d.x) < 24 && y > d.y - 18 && y < d.y + 2) || (Math.abs(x - 6.5 * T) < 32 && y > 3.2 * T - 20 && y < 3.2 * T + 2),
   glow: () => [6.5 * T, 3 * T, 170, '255,200,120', .35],
   actions: add => {
-    const d = SCHOOL_DESKS[5]; add('pupitre', d.x, d.y + 10, 40, ana.sit ? 'Levantarse' : 'Sentarse en su pupitre', () => { if (ana.sit) { ana.sit = false; return; } ana.sit = true; ana.x = d.x; ana.y = d.y + 8; ana.dir = 0; logEv('Ana se sentó en su pupitre de la escuela.'); anaSays(pick(SCHOOL_LINES)); }, { pri: 4, hy: 18, hit: 30 });
-    add('pizarra', 6.5 * T, 2.6 * T, 60, 'Mirar la pizarra', () => anaSays(pick(BOARD_LINES)), { pri: 6, hy: 30, hit: 50 });
+    const d = SCHOOL_DESKS[5]; add('pupitre', d.x, d.y + 10, 40, ana.sit ? 'Levantarse' : 'Sentarse en su pupitre', () => { if (ana.sit) { ana.sit = false; return; } ana.sit = true; ana.x = d.x; ana.y = d.y + 8; ana.dir = 0; logEv('Ana se sentó en su pupitre de la escuela.'); comentar('pupitre'); }, { pri: 4, hy: 18, hit: 30 });
+    add('pizarra', 6.5 * T, 2.6 * T, 60, 'Mirar la pizarra', () => comentar('pizarra'), { pri: 6, hy: 30, hit: 50 });
   },
 };
-const SCHOOL_LINES = ['Mi pupitre, junto a la ventana... desde aquí se ve el río donde dejamos las botellas de leche.', 'Aquí fue donde le rompí la pizarra en la cabeza a Gilbert Blythe. ¡Me llamó «Zanahoria»! Todavía no se lo perdono... bueno, casi.', 'Diana y yo nos pasamos papelitos cuando el maestro no mira. Es una forma muy respetable de la amistad.'];
-const BOARD_LINES = ['La pizarra está llena de números. Los números no tienen imaginación, pobrecitos.', '¡Mi nombre escrito en la pizarra, por portarme mal! Pero con «a» al final, como debe ser: Ana.'];
 // the church: pews on both sides of the aisle, the pulpit, the tall windows
 function drawChurch(c, t, night){
   c.fillStyle = '#c9a476'; c.fillRect(0, 0, KIT.w, KIT.h);
@@ -5524,7 +5656,7 @@ ROOMS.ig = HOUSES.ig.interior = {
   blocked: (x, y) => PEWS.some(p => Math.abs(x - p.x) < 66 && y > p.y - 26 && y < p.y + 2) || (Math.abs(x - 6.5 * T) < 22 && y < 2.4 * T + 22),
   glow: () => [6.5 * T, 2.6 * T, 180, '255,210,140', .35],
   actions: add => {
-    const p = PEWS[2]; add('banco', p.x, p.y + 8, 70, ana.sit ? 'Levantarse' : 'Sentarse en un banco', () => { if (ana.sit) { ana.sit = false; return; } ana.sit = true; ana.x = p.x; ana.y = p.y + 4; ana.dir = 0; logEv('Ana se sentó un rato en la iglesia.'); anaSays(pick(CHURCH_LINES)); }, { pri: 4, hy: 18, hit: 50 });
+    const p = PEWS[2]; add('banco', p.x, p.y + 8, 70, ana.sit ? 'Levantarse' : 'Sentarse en un banco', () => { if (ana.sit) { ana.sit = false; return; } ana.sit = true; ana.x = p.x; ana.y = p.y + 4; ana.dir = 0; logEv('Ana se sentó un rato en la iglesia.'); comentar('iglesia'); }, { pri: 4, hy: 18, hit: 50 });
   },
 };
 
@@ -5557,10 +5689,9 @@ ROOMS.tl = HOUSES.tl.interior = {
   glow: () => [6.5 * T, 2.8 * T, 170, '255,200,120', .35],
   actions: add => {
     add('mostrador', SHOP_IN.counter.x - 60, SHOP_IN.counter.y + 10, 70, 'Comprar o vender en el mostrador', shopMenu, { pri: 3, hy: 20, hit: 40 });
-    add('frascos', SHOP_IN.counter.x - 140, SHOP_IN.counter.y + 8, 40, 'Mirar los frascos de caramelos', () => anaSays(pick(SHOP_LINES)), { pri: 6, hy: 40, hit: 30 });
+    add('frascos', SHOP_IN.counter.x - 140, SHOP_IN.counter.y + 8, 40, 'Mirar los frascos de caramelos', () => comentar('tienda'), { pri: 6, hy: 40, hit: 30 });
   },
 };
-const SHOP_LINES = ['¡Caramelos de menta, de limón y de rosa! Si yo fuera rica, me compraría uno de cada color solo para mirarlos.', 'Huele a canela, a jabón y a papel de envolver. Las tiendas tienen un olor a promesas.', 'Esas cintas... la azul quedaría preciosa con mi pelo. Bueno, con mi pelo nada queda precioso, pero la azul quedaría menos mal.'];
 // money: dollars and cents (only the cattle dealer pays in money)
 const money = (n, short) => { n = r2(n || 0); return short ? n.toFixed(2).replace('.', ',') : n < 1 ? Math.round(n * 100) + ' centavos' : (n === 1 ? '1 dólar' : (Number.isInteger(n) ? n : n.toFixed(2).replace('.', ',')) + ' dólares'); };
 // the Cuthberts' account book at Lawson's: what the house needs is written down, Marilla pays at the end of the month
@@ -5601,10 +5732,6 @@ function shopLibreta(x){
   bubbles = [{ q: 'f:lawson', text: 'Anotado en la libreta. Saludos a Marilla.', t: 0, dur: 3 }];
   setTimeout(() => shopMenu('libreta'), 700);
 }
-const CHURCH_LINES = ['Cuando rezo de verdad, me gusta imaginar que estoy en un gran bosque, mirando el cielo... aquí también se puede, si una se esfuerza.', 'La primera vez que vine me puse flores en el sombrero. ¡La Sra. Lynde casi se desmaya!', 'Qué silencio tan bonito. Hasta mis pensamientos andan de puntillas.'];
-const MILK_LINES = ['Las botellas de leche de la escuela, enfriándose en el río hasta la hora del almuerzo. Cada una tiene el nombre de su dueño... ¡la mía no la confundiría nunca!', 'El agua del río es tan fría que la leche sale como si viniera de una cueva encantada.'];
-const STATION_LINES = ['Aquí mismo esperé a Matthew, sentada en estas tablas, con mi bolsa de viaje. Me había imaginado que si no venía me subiría a un cerezo a dormir bajo la luna.', 'Qué raro volver aquí... el día que llegué no sabía que existía Tejas Verdes. Ahora no sabría vivir sin ella.', 'El jefe de estación me dijo que esperara adentro, ¡pero aquí afuera había mucho más lugar para la imaginación!'];
-const RAIL_LINES = ['Las vías se van y se van... ¿no da gusto pensar adónde llegan? Aunque ahora yo ya llegué a donde quería.', 'Cuando pasa el tren tiembla todo, como si el mundo entero tuviera prisa. A mí me gusta más la carreta de Matthew.'];
 ROOMS.ga = {
   parent: 'gg', exitAt: [STAIRS.x, STAIRS.y + 14], exitLabel: 'Bajar a la cocina',
   draw: drawAnaRoom, items: (g, t) => [{ y: GA.bed.y, draw: () => drawAnaBed(g) }, { y: GA.table.y, draw: () => drawAnaTable(g, t) }, { y: GA.wash.y, draw: () => drawAnaWash(g) }, { y: GA.armario.y, draw: () => drawAnaArmario(g) }],
@@ -5614,7 +5741,7 @@ ROOMS.ga = {
     add('bed', GA.bed.x - 20, GA.bed.y + 14, 60, 'Dormir en mi cama', goToBed, { hy: 30, hit: 0, pri: 2, test: (x, y) => Math.abs(x - GA.bed.x) < 76 && y > GA.bed.y - 62 && y < GA.bed.y + 6 });
     add('gwin', GA.win, 3.9 * T, 70, velaPuede() ? 'La ventana (🕯 la vela)' : 'Mirar por la ventana', ventana, { hy: 40, hit: 0, pri: 3, test: (x, y) => Math.abs(x - GA.win) < 46 && y < 62 });
     add('armario', GA.armario.x, GA.armario.y + 22, 50, game.wm?.sinSombrero ? 'Ponerse el sombrero (el armario)' : 'Guardar el sombrero en el armario', sombrero, { hy: 40, hit: 26, pri: 3 });
-    add('mirror', GA.table.x, GA.table.y + 26, 56, 'Mirarse en el espejo', () => anaSays(pick(MIRROR_LINES)), { hy: 40, hit: 0, pri: 3, test: (x, y) => Math.abs(x - GA.table.x) < 18 && y < 56 });
+    add('mirror', GA.table.x, GA.table.y + 26, 56, 'Mirarse en el espejo', () => comentar('espejo'), { hy: 40, hit: 0, pri: 3, test: (x, y) => Math.abs(x - GA.table.x) < 18 && y < 56 });
   },
 };
 
@@ -6294,8 +6421,8 @@ function targets(){
     add('h:br', HOUSES.br.at.x, HOUSES.br.at.y + 6, 30, 'El camino a Bright River (8 millas)', () => say('Ana', '¿Tomar el camino a Bright River a pie? Son ocho millas: más de tres horas caminando.', [['🚶 Vamos, paso a paso', () => { close(); roadOnFoot(1); }], ['Mejor no', close]]), { pri: 4, hy: 30, hit: 30 });
     for (const [id, h] of Object.entries(HOUSES)) if (!h.road) add('h:' + id, h.at.x, h.at.y + 6, 26, h.open && !h.open() ? h.closed : h.enter, () => h.open && !h.open() ? anaSays(pick(['Cerrado... el Sr. Lawson abre a las ocho.', 'La tienda está cerrada. ¡Y yo que soñaba con unos caramelos de menta!'])) : goIn(id), { pri: 4, test: (x, y) => Math.abs(x - h.at.x) < h.at.w / 2 + 8 && y < h.at.y + 10 && y > h.at.y - 80 });
     for (const f of FOLK) if (f.where === 'out' && Math.abs(f.x - ana.x) < 400 && Math.abs(f.y - ana.y) < 400) add('f:' + f.id, f.x, f.y, 34, f.id === 'lawson' ? 'Comprar o vender (Sr. Lawson)' : 'Hablar con ' + f.def.name, () => f.id === 'lawson' ? shopMenu() : folkTalk(f), { hy: 26 * f.def.look.h, hit: 24 });
-    if (dist(ana.x, ana.y, FARO.x, FARO.y) < 260) add('faro', FARO.x, FARO.y + 10, 120, 'Mirar el mar desde el faro', () => { anaSays(pick(FARO_LINES)); logEv('Ana miró el mar desde el faro.'); }, { pri: 5, hy: 60, hit: 40 });
-    if (dist(ana.x, ana.y, MILK.x, MILK.y) < 200) add('leche', MILK.x, MILK.y, 60, 'Mirar las botellas de leche en el río', () => anaSays(pick(MILK_LINES)), { pri: 5, hy: 8, hit: 34 });
+    if (dist(ana.x, ana.y, FARO.x, FARO.y) < 260) add('faro', FARO.x, FARO.y + 10, 120, 'Mirar el mar desde el faro', () => { comentar('faro'); logEv('Ana miró el mar desde el faro.'); }, { pri: 5, hy: 60, hit: 40 });
+    if (dist(ana.x, ana.y, MILK.x, MILK.y) < 200) add('leche', MILK.x, MILK.y, 60, 'Mirar las botellas de leche en el río', () => comentar('leche'), { pri: 5, hy: 8, hit: 34 });
     if (dist(ana.x, ana.y, WP.gallinero[0], WP.gallinero[1]) < 160) add('huevos', WP.gallinero[0], WP.gallinero[1], 50, game.eggDay === today() ? 'Las gallinas ya pusieron hoy' : 'Juntar los huevos', () => { if (game.eggDay === today()) return anaSays('Ya junté los huevos de hoy. Las gallinas no son máquinas, pobrecitas.'); const n = eggsToday(); game.eggDay = today(); game.inv.huevos += n; float('+' + itemText('huevos', n), ana.x, ana.y - 60); logEv('Ana juntó ' + itemText('huevos', n) + ' en el gallinero.'); sfx.happy(); save(); }, { pri: 5, hy: 8, hit: 40 });
     if (!cart.on) add('trip', BARN.x + 70, BARN.y + 60, 60, 'Ir a la estación de Bright River en la carreta', () => tripAsk('br'), { pri: 5, hy: 12, hit: 30 });
     if (cart.on && !cart.riding) add('cart', cart.x, cart.y - 10, 70, 'Subir a la carreta', cartAsk, { pri: 2, hy: 20, hit: 46 });
@@ -6642,8 +6769,6 @@ function startIntent(intent, manual, said){
 }
 // (lying down, nobody wants a tree crown between them and us)
 const underTree = (x, y) => trees.some(tr => tr.y > y - 10 && Math.abs(tr.x - x) < 50 * tr.s && tr.y - y < 120 * tr.s);
-const LIE_LINES = ['¡Mira esa nube! Parece un dragón... no, un barco de velas blancas. ¡O una oveja con sombrero!', 'Qué bien se está en el pasto. Se oyen las abejas y, si me callo un momento, hasta el crecer de las flores.', 'Las nubes son como las ideas: pasan lentísimo y nunca se repiten.', 'Si me quedo muy quieta, quizás las hadas me confundan con una flor.'];
-const AUTO_SAY = ['¡Qué día para hacer algo bonito!', 'Se me ocurrió una idea... ¡de esas que solo tengo yo!', '¡A ver qué descubro por ahí!', 'Mi imaginación no me deja quieta.', 'Hay tanto por hacer y tan poco tiempo... ¡y yo con tantas ideas!'];
 async function autoDecide(){
   const sa = storyAuto(); if (sa) { auto.hist.push(sa.label); if (auto.hist.length > 6) auto.hist.shift(); startIntent(sa.intent, false, ''); return; }   // (the story of the day comes first)
   const opts = autoOptions(), sc = game.scene; if (!opts.length) { auto.thinkAt = TT + 4; return; }
@@ -6655,7 +6780,7 @@ async function autoDecide(){
     auto.busy = false;
     if (!autoAllowed() || TT - lastInput < AUTO_IDLE || game.scene !== sc || auto.intent) return;   // (the player took over meanwhile)
   }
-  if (!pick) { let r = Math.random() * opts.reduce((a, o) => a + o.w, 0); pick = opts.find(o => (r -= o.w) <= 0) || opts[0]; said = Math.random() < .35 ? pick5() : ''; }
+  if (!pick) { let r = Math.random() * opts.reduce((a, o) => a + o.w, 0); pick = opts.find(o => (r -= o.w) <= 0) || opts[0]; said = Math.random() < .35 ? comentarioTexto('ana_sola') : ''; }
   auto.hist.push(pick.label); if (auto.hist.length > 6) auto.hist.shift();
   startIntent(pick.intent, false, said);
 }
@@ -6706,7 +6831,6 @@ function eventIntent(ev){
   if (ev.startsWith('regalo:')) { const k = ev.split(':')[1]; if (PEOPLE[k] && Object.keys(GIFTS).some(g => game.inv[g] > 0)) return { label: 'Ir a darle algo a ' + NAMES[k], intent: { type: 'talkmenu', k } }; }
   return null;
 }
-const pick5 = () => AUTO_SAY[Math.floor(Math.random() * AUTO_SAY.length)];
 function autoCook(){
   const k = ITEMS.find(k => ITEM_DEFS[k].recipe && Object.keys(ITEM_DEFS[k].recipe).length && !hasIt(k) && Object.entries(ITEM_DEFS[k].recipe).every(([i, n]) => game.inv[i] >= n)) || (!hasIt('te') && 'te');
   if (k) return startCook(k);
@@ -6736,7 +6860,7 @@ function autoStep(){
     case 'lie': {
       if (sc !== 'out') return go(hopTo('out'));
       if (!it.started) { it.started = true; let spot = null; for (let k = 0; k < 30 && !spot; k++) { const [x, y] = randSpot(240); if (!nearPath(x, y, 30) && !inBrook(x, y, 30) && !inLake(x, y, 30) && !underTree(x, y)) spot = [x, y]; } const [x, y] = spot || randSpot(100); return to(x, y); }
-      if (!ana.lie) { if (it.lay) return done(); it.lay = true; ana.lie = true; ana.sit = false; ana.dir = 2; it.until = TT + calm(40, 40); return anaSays(pick(LIE_LINES)); }
+      if (!ana.lie) { if (it.lay) return done(); it.lay = true; ana.lie = true; ana.sit = false; ana.dir = 2; it.until = TT + calm(40, 40); return comentar('pasto'); }
       if (TT > it.until) { ana.lie = false; return done(); }
       return;
     }
@@ -8216,7 +8340,6 @@ function ambNote(parts){
   return `Ana pasa cerca de ${names} y se detiene un momento. (Charla al pasar: nadie se lo pidió; Ana también habla. Pueden saludarse o comentar algo del momento.)`;
 }
 const writtenTalkOn = () => !!game.playAct || game.scene === 'camino' || cart.riding || !!(AGENTS.ana?.ride && AGENTS.ana.followOf) || talkBusy('viaje') || (CAP1.on && !CAP1.done);
-const ENFERMO_LINES = ['Ay… este resfrío me tiene molido.', 'No me siento nada bien, niña.', 'Cof, cof… Si no fuera por este pecho…'];   // (the sick, from bed)
 // someone is saying something right now (a loose line would cover it)
 const hablando = () => bubbles.some(b => b.t < b.dur);
 // busy: doing something (or someone doing something with her), or staying somewhere for a goal (at tea)
@@ -8244,7 +8367,7 @@ function ambUpdate(dt){
   if (best === 'diana' && !dianaAmiga()) return;   // (no friend's greeting from one she does not know yet)
   { const C = bd < 90 && !activeGoals(AGENTS[best] || { goals: [] }).length && Math.random() < .3 && convDisponibles(best)[0]; if (C) { amb.mute[best] = TT + 110; amb.seen[best] = true; conversar(C); return; } }   // (now and then, one of the conversations there are with them, by itself)
   if (!aiReady()) {   // (without the AI: just a word from them, from the written lines)
-    if (bd < 90) { const l = (game.wm?.sick || []).includes(best) ? ENFERMO_LINES : LINES[best], u = l.length > 1 ? l.filter(x => x !== amb.ultima?.[best]) : l, t = u[Math.floor(Math.random() * u.length)]; (amb.ultima ||= {})[best] = t;   // (not the same line twice in a row)
+    if (bd < 90) { const l = (game.wm?.sick || []).includes(best) ? [comentarioTexto('enfermo') || 'Cof, cof…'] : LINES[best], u = l.length > 1 ? l.filter(x => x !== amb.ultima?.[best]) : l, t = u[Math.floor(Math.random() * u.length)]; (amb.ultima ||= {})[best] = t;   // (not the same line twice in a row)
     amb.mute[best] = TT + 110; amb.seen[best] = true; sceneStart({ parts: [best], lines: [{ q: best, t }], out: {}, scene: game.scene, resumen: '' }, false); }
     return;
   }
@@ -8596,7 +8719,7 @@ function update(dt){
   // late at night Ana gets sleepy (twice, out loud), and past two in the morning she falls asleep
   { const hn = hourNow(); if (hn < 20) sleepyStage = 0;
     else if (hn >= 26 && !game.talk) goSleep(true);
-    else if (sleepyStage < 2 && hn >= [21, 23.5][sleepyStage] && !game.talk && !amb.cur && !writtenTalkOn()) anaSays(pick(SLEEPY_LINES[sleepyStage++])); }
+    else if (sleepyStage < 2 && hn >= [21, 23.5][sleepyStage] && !game.talk && !amb.cur && !writtenTalkOn()) comentar('sueno_' + (++sleepyStage)); }
   // Ana: walks where she is told (not while talking or cooking); sits on the bench until she moves
   let mx = 0, my = 0;
   if (!menuOpen() && !game.cooking && !game.map && $('ai').hidden) {
@@ -9288,7 +9411,7 @@ function drawCat(c, a, t){
 }
 const FAUNA_DRAW = { cow: (c, a, t) => drawCow(c, a, t), sheep: drawSheep, horse: drawHorse, hen: drawHen, pig: drawPig, duck: drawDuck, gull: drawGull, cat: drawCat };
 function drawBuggy(c, b, t){ const c8 = cartC8(b), [sx, sy] = cartSeat(b.x, b.y, c8, 0), who = () => drawPerson(c, { look: b.look, x: sx, y: sy, dir: c8Dir(c8), sit: true, walk: 0, moving: false, blink: 0 }, t); const body = () => { drawCartBody(c, b, t, 'fondo'); who(); drawCartBody(c, b, t, 'frente'); }; if (cartAxes(c8).hy < -.1) { drawCartHorse(c, b, t); body(); } else { body(); drawCartHorse(c, b, t); } }
-const FARO_LINES = ['Desde aquí se ve todo el golfo. ¡Si hasta me parece ver Escocia! Bueno... no, pero casi.', 'Un faro es como un amigo que nunca se duerme. Me gustaría ser farera, o por lo menos gaviota.', 'Las olas rompen contra las rocas como si tuvieran algo urgente que decir.'];
+
 /* ---------- the names Ana gives to things: the book's, or the player's own ----------
    When Ana names something (the Avenue, Barry's pond, the cherry tree at her window, the places of Avonlea), the
    player chooses: the name of the book, or one of their own, written in a box. From then on the thing is called so
@@ -11658,7 +11781,7 @@ function loop(now){
   else { owed = Math.min(owed + Math.min(raw, .25) * k, 3 * k * .05 + 2); const t0 = performance.now(); while (owed > 1e-4 && performance.now() - t0 < 22) { const d = Math.min(.05, owed); update(d); owed -= d; } }
   FRAME++; tripBarDraw(); render(); islaDraw(); requestAnimationFrame(loop);
 }
-window.__avonlea = { lugaresTick, escenaObjeto, targets, cartaPuede, conNombres, nombrar, nombreDe, nombrarElegir, NOMBRABLES, primeraVez, ventana, velaPuede, sombrero, LOOKS, dlgDichas, chats: () => CHATS, enConversacion, anaPos: () => ({ x: ana.x, y: ana.y }), setDia: (d, h) => { dayT = d + (h - 6) / 24; }, dia: () => today(), PEOPLE, relatoEmpezar, inicioLlegada, dlgHechos, convDisponibles, conversar, convOpciones, guiñosDe, LINES, dlgHecho, cualidad, cualidadSuma, cualidadCond, dlgCond, dlgEspecificidad, ritmoLleno, ritmoMarca, dlgHacer, dlgAccion, HABILIDADES, relSetW, relato: () => RELATO.lineas, reglas: () => RELATO_REGLAS.map(r => [r.id, r.texto]), jugables, jugar, anaMenu, correoRetirar, cartaLeer, CORREO, cartaTexto, playAct: () => game.playAct, DIALOGOS, dlgCtx, talks: () => TALKS, dlgGuion, dlgPanel, bubblesNow: () => bubbles, toby, cartSheet: (c, x, y, c8, t) => { const L = [], p = { look: 'matthew', x, y, c8, walk: 0, moving: false }; const [cx, cy] = [x, y]; pushCart(L, c, { x: cx, y: cy, c8, walk: 0, moving: true }, t); for (const [k, look] of [[0, 'matthew'], [1, 'ana']]) { const [sx, sy] = cartSeat(cx, cy, c8, k); L.push({ y: sy, draw: () => drawPerson(c, { ...mkPerson(look, sx, sy), sit: true, dir: c8Dir(c8) }, t) }); } L.sort((a, b) => a.y - b.y).forEach(o => o.draw()); }, startCap1, CAP1, LIBRO1, ROAD_TRAMOS, ROAD_MIN, roadTramo, islaToggle, DLG_BANK, startDay, setSeason, agendaData: () => AGENDA.map(e => ({ who: wmName(e.who), from: e.from, to: e.to, label: e.label, season: e.season, sunday: !!e.sunday, ana: !!(e.ana || e.who === 'ana'), cond: e.when ? String(e.when).replace(/^\(\) => /, '') : '' })), setAgenda: v => { AGENDA_ON = v; }, AGENDA, wmData: () => ({ THINGS, WHO, OFRECE, WP_NAME, TRADE, TREATS, LIBRETA, ITEM_NAME, MAX_GOALS, PACE, FOCO }), paintMapBase, doingText, wmName, wmBody, wmScene, WW, WH, setVec: v => { VEC_ON = v; }, setStyle: v => { ANA_STYLE = v; }, setHead: setHeadM, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+window.__avonlea = { comentar, comentarioElegir, COMENTARIOS, lugaresTick, escenaObjeto, targets, cartaPuede, conNombres, nombrar, nombreDe, nombrarElegir, NOMBRABLES, primeraVez, ventana, velaPuede, sombrero, LOOKS, dlgDichas, chats: () => CHATS, enConversacion, anaPos: () => ({ x: ana.x, y: ana.y }), setDia: (d, h) => { dayT = d + (h - 6) / 24; }, dia: () => today(), PEOPLE, relatoEmpezar, inicioLlegada, dlgHechos, convDisponibles, conversar, convOpciones, guiñosDe, LINES, dlgHecho, cualidad, cualidadSuma, cualidadCond, dlgCond, dlgEspecificidad, ritmoLleno, ritmoMarca, dlgHacer, dlgAccion, HABILIDADES, relSetW, relato: () => RELATO.lineas, reglas: () => RELATO_REGLAS.map(r => [r.id, r.texto]), jugables, jugar, anaMenu, correoRetirar, cartaLeer, CORREO, cartaTexto, playAct: () => game.playAct, DIALOGOS, dlgCtx, talks: () => TALKS, dlgGuion, dlgPanel, bubblesNow: () => bubbles, toby, cartSheet: (c, x, y, c8, t) => { const L = [], p = { look: 'matthew', x, y, c8, walk: 0, moving: false }; const [cx, cy] = [x, y]; pushCart(L, c, { x: cx, y: cy, c8, walk: 0, moving: true }, t); for (const [k, look] of [[0, 'matthew'], [1, 'ana']]) { const [sx, sy] = cartSeat(cx, cy, c8, k); L.push({ y: sy, draw: () => drawPerson(c, { ...mkPerson(look, sx, sy), sit: true, dir: c8Dir(c8) }, t) }); } L.sort((a, b) => a.y - b.y).forEach(o => o.draw()); }, startCap1, CAP1, LIBRO1, ROAD_TRAMOS, ROAD_MIN, roadTramo, islaToggle, DLG_BANK, startDay, setSeason, agendaData: () => AGENDA.map(e => ({ who: wmName(e.who), from: e.from, to: e.to, label: e.label, season: e.season, sunday: !!e.sunday, ana: !!(e.ana || e.who === 'ana'), cond: e.when ? String(e.when).replace(/^\(\) => /, '') : '' })), setAgenda: v => { AGENDA_ON = v; }, AGENDA, wmData: () => ({ THINGS, WHO, OFRECE, WP_NAME, TRADE, TREATS, LIBRETA, ITEM_NAME, MAX_GOALS, PACE, FOCO }), paintMapBase, doingText, wmName, wmBody, wmScene, WW, WH, setVec: v => { VEC_ON = v; }, setStyle: v => { ANA_STYLE = v; }, setHead: setHeadM, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
 /* ---------- the first time: a scene of its own; the window and the candle; her hat in the wardrobe ----------
    - The first time Ana does some things (looks out of her window, sees herself in the mirror, climbs to her room, sees
      the sea from the lighthouse…), a scene of the script (primera_<what>, disparo: primera) instead of the plain line;
@@ -11710,10 +11833,10 @@ function lugaresTick(dt){
 // the candle at the window: once they have agreed on the signals, friends still, in the evening
 function velaPuede(){ return dianaAmiga() && !!dlgDichas().conv_diana_vela && hourNow() % 24 >= 19; }
 function ventana(){
-  if (!velaPuede()) return anaSays(WINDOW_LINES[S]);
+  if (!velaPuede()) return comentar('ventana');
   say('Ana', 'Por la ventana, entre los árboles, se ve la luz de la pieza de Diana.', [
     ['🕯 Hacerle señas a Diana con la vela', () => { close(); const d = DIALOGOS.find(x => x.id === 'senas_vela'); if (d && !d.dicha()) d.decir(); else anaSays('Ya le hice señas esta noche. Diana debe estar durmiendo… o imaginando cosas, como yo.'); }],
-    ['Mirar por la ventana', () => { close(); escenaObjeto('gwin', true) || anaSays(WINDOW_LINES[S]); }],
+    ['Mirar por la ventana', () => { close(); escenaObjeto('gwin', true) || comentar('ventana'); }],
     ['Nada por ahora', close],
   ]);
 }

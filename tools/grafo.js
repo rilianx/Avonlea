@@ -41,6 +41,11 @@ for (const raw of guion.split('\n')) {
   if (k === 'grande') esc.grande = true;
   if (k === 'al_empezar' || k === 'al_terminar') { const [w, x] = v.split(/\s+/); if (w === 'hecho') anota(hace, x, 'escena ' + esc.id); if (w === 'olvidar') anota(pide, x + ' ', 'escena ' + esc.id); }
 }
+// the comments (src/datos/comentarios.txt): scenes of one line; their conditions too
+{ let g = null; for (const raw of leer('src/datos/comentarios.txt').split('\n')) { const s = raw.trim(); if (!s || s[0] === '#') continue; let m;
+  if ((m = s.match(/^===\s*(.+?)\s*===$/))) { g = m[1]; continue; }
+  if ((m = s.match(/^si:\s*(.*)$/))) m[1].split(',').forEach(c => condicion(c, 'comentarios de ' + g));
+  if ((m = s.match(/^-\s*\[([^\]]*)\]/))) m[1].split(',').forEach(c => condicion(c, 'un comentario de ' + g)); } }
 // the notebook: what each goal requires, its hints, and goals that are a fact
 let meta = null;
 for (const raw of cuaderno.split('\n')) {

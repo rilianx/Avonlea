@@ -259,12 +259,11 @@ ROOMS.camino = {
   glow: () => [0, 0, 1, '255,200,120', 0],
   actions: add => {
     if (dist(ana.x, ana.y, RSTN.x, RSTN.y + 20) < 260) add('andén', RSTN.x, RSTN.y + 10, 40, 'Entrar al andén de la estación', () => goIn('br'), { pri: 3, hy: 20, hit: 36 });
-    if (dist(ana.x, ana.y, RCHERRY.x, RCHERRY.y) < 360) add('cerezo', RCHERRY.x, RCHERRY.y - 30, 70, 'Mirar el gran cerezo silvestre', () => anaSays(pick(CHERRY_LINES)), { pri: 5, hy: 60, hit: 60 });
+    if (dist(ana.x, ana.y, RCHERRY.x, RCHERRY.y) < 360) add('cerezo', RCHERRY.x, RCHERRY.y - 30, 70, 'Mirar el gran cerezo silvestre', () => comentar('cerezo_silvestre'), { pri: 5, hy: 60, hit: 60 });
     const d = PEOPLE[game.road?.with]; if (d && d.where === 'camino' && !ana.onCart) { const [cx, cy] = cartFromDriver(d.x, d.y, cartC8(d)); add('calesa', cx, cy - 6, 70, '🐴 Subir a la calesa', () => roadBoard(), { pri: 2, hy: 20, hit: 46 }); }
     for (const k of Object.keys(PEOPLE)) { const p = PEOPLE[k]; if (p.where === 'camino' && p.buggy && !game.road && dist(ana.x, ana.y, p.x, p.y) < 200) add('calesa:' + k, p.x, p.y, 60, `🐴 Pedirle a ${wmName(k)} que la lleve`, () => { game.road = { with: k }; roadBoard(); }, { pri: 2, hy: 20, hit: 46 }); }
   },
 };
-const CHERRY_LINES = ['Ése es mi cerezo. Si Matthew no hubiera venido, iba a dormir allá arriba, entre las flores, a la luz de la luna. ¿No habría sido precioso?', 'Es todo blanco, como una novia con su velo. Le voy a dar las buenas noches cada vez que pase por aquí.', 'Una podría imaginar que vive en salones de mármol, ahí arriba. Bueno… salones de mármol con olor a cerezo.'];
 // someone sets off on the road (from the signpost of Avonlea, s = 1, or from the station, s = 0)
 function roadStart(k, s, dir){
   const b = wmBody(k); if (!b) return;
