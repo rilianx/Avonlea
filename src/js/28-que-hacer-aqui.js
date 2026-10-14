@@ -2,7 +2,7 @@
 // everything Ana can do here, from wherever she stands: where it is, how close she has to be (reach), where one taps
 // (hit, around a point hy above the feet) and what happens. pri: how late it comes when several are within reach.
 function targets(){
-  const L = [], add = (id, x, y, reach, label, act, o = {}) => L.push({ id, x, y, reach, label, act, hy: 14, hit: 26, pri: 0, ...o });
+  const L = [], add = (id, x, y, reach, label, act, o = {}) => L.push({ id, x, y, reach, label, act: () => primeraVez(id, act) || act(), hy: 14, hit: 26, pri: 0, ...o });   // (the first time: its scene, if it has one)
   add('ana', ana.x, ana.y, 1e9, 'Ana', anaMenu, { hy: 22, hit: 15, self: true });
   for (const k of Object.keys(PEOPLE)) { const q = PEOPLE[k]; if (sceneOf(k) === game.scene) add('p:' + k, q.x, q.y, 34, 'Hablar con ' + CH[k].article + NAMES[k], () => talk(k), { hy: q.lie ? 8 : 26 * LOOKS[k].h, hit: q.lie ? 26 : 28 }); }
   if (game.scene === 'out') {

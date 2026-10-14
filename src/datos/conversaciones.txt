@@ -389,6 +389,17 @@ ana: Yo voy a ser una solterona interesante, que escribe libros. O quizás no. T
 diana: Prométeme que, pase lo que pase, vamos a seguir siendo amigas.
 ana: Mientras el sol y la luna existan, Diana. Ya lo juramos.
 
+=== conv_diana_vela ===
+con: diana
+tema: Inventar con ella unas señas con la vela
+si: afecto:diana:ana>=4, cuaderno:amigas, !hecho:prohibida
+---
+diana: Ana, desde mi ventana se ve la tuya, entre los árboles. ¿Te diste cuenta?
+ana: ¡Diana! Podríamos hacernos señas de noche, con una vela y un cartón. Como en los libros.
+diana: ¿Y cómo sabríamos qué quiere decir cada una?
+ana: Inventamos un código. Dos destellos: «¿estás ahí?». Tres: «sí». Cuatro: «no». Y cinco: «ven mañana temprano, que tengo algo importante que contarte».
+diana: ¡Cinco destellos! Esta noche lo probamos.
+
 # ====================================== La Sra. Lynde ======================================
 
 === conv_lynde_ventana ===

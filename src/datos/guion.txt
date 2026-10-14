@@ -784,3 +784,90 @@ marilla: Para siempre. Si te sigues portando bien.
 ana: (Ana se echa a llorar.) No se preocupe, Marilla: estoy llorando de felicidad. ¿Puedo llamarla tía Marilla?
 marilla: No. Marilla, a secas. No soy tu tía, y no me gusta que llamen a la gente lo que no es.
 ana: Entonces Marilla. Pero voy a imaginar que es mi tía. Por dentro, donde no se ve.
+
+# --- La primera vez (src/js/66-primeras-veces.js): la primera vez que Ana hace algunas cosas, una escena en vez de la
+# frase de siempre («disparo: primera»; el nombre es primera_<la acción>). Con «tambien», la acción se hace igual.
+=== primera_gwin ===
+disparo: primera
+canal: ana_sola
+---
+ana: (Ana corre a la ventana y la abre de par en par. Afuera, un cerezo enorme, todo blanco de flores, le roza el marco.)
+ana: ¡Oh, qué hermoso! Es como si el árbol se hubiera vestido de novia para mí. ¿No es precioso?
+ana: Te voy a llamar la Reina de las Nieves. Ya está: ese es tu nombre, para siempre.
+ana: (Más allá, un huerto de manzanos, un arroyo entre abedules, y a lo lejos, el mar azul y brillante.) Esto es demasiado lindo para ser verdad. Si tengo que irme, al menos lo voy a recordar toda la vida.
+
+=== primera_mirror ===
+disparo: primera
+canal: ana_sola
+---
+ana: (Ana se mira en el espejito. Una cara angosta, llena de pecas, unos ojos grandes y grises… y ese pelo.)
+ana: Si me imagino muy fuerte, el pelo es negro azabache, y yo soy Lady Cordelia Fitzgerald.
+ana: (Ana cierra los ojos un momento. Los abre.) Pecas. Siguen ahí. Pero los ojos… los ojos no están tan mal.
+
+=== primera_armario ===
+disparo: primera
+canal: ana_sola
+tambien
+---
+ana: ¡Un armario! Nunca tuve un armario para mí sola. En el orfanato teníamos un clavo cada una, y a veces ni eso.
+ana: Voy a imaginar que es la puerta de un castillo encantado. Aunque por ahora solo guarde un sombrero.
+
+=== primera_stairs ===
+disparo: primera
+canal: ana_sola
+tambien
+---
+ana: (Ana sube la escalera empinada hasta la pieza del alero: paredes blancas, una cama alta, una mesita, una ventana.)
+ana: Es tan blanca y tan… tan sin adornos. Pero tiene una ventana. Y una ventana es una ventana al mundo entero.
+
+=== primera_toby ===
+disparo: primera
+tambien
+canal: ana_sola
+---
+ana: ¡Una gata! ¿Cómo te llamas? ¿Nadie te puso nombre? Entonces eres Pelusa. Pelusa de Tejas Verdes.
+
+=== primera_faro ===
+disparo: primera
+canal: ana_sola
+---
+ana: (Ana mira el mar, que no se acaba nunca, y las olas que rompen contra la arena roja.)
+ana: Cuando llegué en el tren pensé que había visto todo lo hermoso del mundo. Y ahora esto. Hay demasiadas cosas lindas para una sola niña.
+
+=== primera_frascos ===
+disparo: primera
+canal: ana_sola
+---
+ana: (Ana pega la nariz al vidrio de los frascos de caramelos.) Menta, limón, rosa… Si fuera rica, no me los comería: los pondría en la ventana para que les diera el sol.
+
+=== primera_pizarra ===
+disparo: primera
+canal: ana_sola
+---
+ana: Una pizarra para mí. Voy a escribir aquí las palabras más largas y más bonitas que conozca. «Inefable.» «Melancolía.» «Avonlea.»
+
+=== primera_escenario ===
+disparo: primera
+tambien
+canal: ana_sola
+---
+ana: (Ana sube al escenario. El salón vacío parece enorme desde arriba.) Si algún día recito aquí, me van a temblar las rodillas. Pero la voz no. La voz, nunca.
+
+=== primera_cage ===
+disparo: primera
+canal: ana_sola
+---
+ana: (El loro la mira de reojo, con la cabeza ladeada.) Buenos días, Ginger. ¿Tú también tienes mal genio? Entonces somos espíritus afines… creo.
+
+# --- Las señas con la vela (cap. 18): desde la ventana de la pieza de Ana, de noche, a la ventana de Diana, una vez
+# que se pusieron de acuerdo (la conversación conv_diana_vela). Una vez por noche.
+=== senas_vela ===
+disparo: menu
+canal: ana_sola
+repetir: dia
+al_terminar: suma afecto:diana:ana 1
+al_terminar: log Ana le hizo señas a Diana con la vela, desde la ventana de su pieza; Diana contestó.
+---
+ana: (Ana pone la vela en la ventana y la tapa y destapa con un cartón: cinco destellos.)
+ana: (Un rato después, entre los árboles, en la ventana de Diana, una luz contesta: cinco destellos.)
+ana: Cinco destellos: «ven mañana temprano, que tengo algo importante que contarte». Y todavía no sé qué le voy a contar… pero se me va a ocurrir.

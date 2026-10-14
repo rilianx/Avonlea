@@ -1,6 +1,6 @@
 /* ---------- Ana's room: the east gable (the narrow bed, the muslin curtains, the Snow Queen outside the window) ---------- */
 const STAIRS = lugar('cocina', 'escalera');
-const GA = { win: lugar('pieza', 'ventana').x, bed: lugar('pieza', 'cama'), table: lugar('pieza', 'escritorio'), wash: lugar('pieza', 'lavatorio') };   // (src/mapas/pieza.tmj)
+const GA = { win: lugar('pieza', 'ventana').x, bed: lugar('pieza', 'cama'), table: lugar('pieza', 'escritorio'), wash: lugar('pieza', 'lavatorio'), armario: lugar('pieza', 'armario') };   // (src/mapas/pieza.tmj)
 function drawStairsUp(c){
   const x0 = 11.2 * T, x1 = 12.8 * T, yb = 4.6 * T, yt = 2.3 * T;
   blob(c, [[x0, yb], [x1, yb], [x1, yt], [x0, yt + 10]], '#a67c52');
@@ -58,6 +58,14 @@ function drawAnaTable(c, t){
   blob(c, [[x - 28, y - 20], [x + 28, y - 20], [x + 24, y - 30], [x - 24, y - 30]], '#8a6040');
   for (let k = 0; k < 3; k++) blob(c, [[x - 20, y - 31 - k * 4], [x - 4, y - 31 - k * 4], [x - 4, y - 35 - k * 4], [x - 20, y - 35 - k * 4]], ['#7f9ec0', '#a8554a', '#d9a441'][k]);
   blob(c, [[x + 8, y - 31], [x + 12, y - 31], [x + 12, y - 46], [x + 8, y - 46]], '#fffaf0'); ell(c, x + 10, y - 49 - Math.abs(Math.sin(t * 6)) * 1.5, 2, 4, '#ffd27a');
+}
+// the wardrobe, against the back wall: where her hat is kept when she takes it off (it shows on its peg, then)
+function drawAnaArmario(c){
+  const x = GA.armario.x, y = GA.armario.y, w = 22, h = 72;
+  ell(c, x, y + 2, 26, 5, 'rgba(40,25,15,.22)');
+  blob(c, [[x - w, y], [x + w, y], [x + w, y - h], [x - w, y - h]], '#8a5f3a'); blob(c, [[x - w - 3, y - h], [x + w + 3, y - h], [x + w + 3, y - h - 6], [x - w - 3, y - h - 6]], '#6e4a2c');
+  line(c, [[x, y - 4], [x, y - h + 4]], '#5a3a20', 1.2); for (const dx of [-5, 5]) ell(c, x + dx, y - h / 2, 1.6, 1.6, '#e8c870', true);
+  if (game.wm?.sinSombrero) { ell(c, x + w - 6, y - h - 12, 11, 4, '#ecd08a', true); ell(c, x + w - 6, y - h - 15, 6, 3.4, '#ecd08a', true); line(c, [[x + w - 12, y - h - 14], [x + w, y - h - 14]], '#d9433b', 1.4); }
 }
 function drawAnaWash(c){
   const x = GA.wash.x, y = GA.wash.y;

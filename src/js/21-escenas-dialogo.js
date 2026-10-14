@@ -149,7 +149,7 @@ class Dialogo {
   // (and, of two of the same importance, the most specific: the one that asks more of the moment, as in Valve's dialogue rules)
   get peso(){ return this.prioridad + (dlgProg()[this.id] ? .04 : 0) + dlgEspecificidad(this) * .001; }
   listo(x){
-    if (this.disparo === 'encuentro' || this.disparo === 'conversar') return false;   // (these only when two of them meet: dlgNext; or when Ana talks with someone: conversar)
+    if (this.disparo === 'encuentro' || this.disparo === 'conversar' || this.disparo === 'primera' || this.disparo === 'menu') return false;   // (these only when two of them meet: dlgNext; or when Ana talks with someone: conversar)
     if (this.dicha() || (this.repetir.cada && TT < (this.proxima || 0))) return false;
     if (this.grande && ritmoLleno()) return false;   // (the pacing: one big thing of the book a day)
     if (this.tipo === 'comentario' && this.prioridad > 0 && TT < (dlgComento[this.canal] || 0)) return false;   // (remarks, not one after another)
@@ -226,7 +226,7 @@ function dlgNext(ks){
 // the scenes, as a script outside the code (the <script type="text/plain" id="guion"> block, at the top): each one
 // «=== id ===», its fields, one per line («field: value»), and its own lines after «---» («who: text #mark»).
 // dlgGuion turns it into the same configurations as anywhere else (docs/ESCENAS.md).
-const DLG_LISTA = ['sujeta', 'quienes', 'si', 'elegir', 'cerca'], DLG_PARES = ['en', 'marcas', 'camino'], DLG_NUM = ['prioridad', 'pausa', 'espera', 'entre'], DLG_SI = ['interrumpe', 'al_paso', 'grande'];
+const DLG_LISTA = ['sujeta', 'quienes', 'si', 'elegir', 'cerca'], DLG_PARES = ['en', 'marcas', 'camino'], DLG_NUM = ['prioridad', 'pausa', 'espera', 'entre'], DLG_SI = ['interrumpe', 'al_paso', 'grande', 'tambien'];
 const dlgVal = s => { s = s.trim(); return s === '-' ? null : s === 'true' || s === 'sí' ? true : s === 'false' || s === 'no' ? false : s !== '' && !isNaN(+s) ? +s : s; };
 function dlgCampo(k, v){   // a field of the script, from its text
   if (DLG_LISTA.includes(k)) return v.split(',').map(dlgVal);
@@ -510,12 +510,13 @@ const STATION_LINES = ['Aquí mismo esperé a Matthew, sentada en estas tablas, 
 const RAIL_LINES = ['Las vías se van y se van... ¿no da gusto pensar adónde llegan? Aunque ahora yo ya llegué a donde quería.', 'Cuando pasa el tren tiembla todo, como si el mundo entero tuviera prisa. A mí me gusta más la carreta de Matthew.'];
 ROOMS.ga = {
   parent: 'gg', exitAt: [STAIRS.x, STAIRS.y + 14], exitLabel: 'Bajar a la cocina',
-  draw: drawAnaRoom, items: (g, t) => [{ y: GA.bed.y, draw: () => drawAnaBed(g) }, { y: GA.table.y, draw: () => drawAnaTable(g, t) }, { y: GA.wash.y, draw: () => drawAnaWash(g) }],
-  blocked: (x, y) => (Math.abs(x - GA.bed.x) < 76 && y > GA.bed.y - 30 && y < GA.bed.y + 4) || (Math.abs(x - GA.table.x) < 30 && y > GA.table.y - 24 && y < GA.table.y + 4) || (Math.abs(x - GA.wash.x) < 26 && y > GA.wash.y - 26 && y < GA.wash.y + 4),
+  draw: drawAnaRoom, items: (g, t) => [{ y: GA.bed.y, draw: () => drawAnaBed(g) }, { y: GA.table.y, draw: () => drawAnaTable(g, t) }, { y: GA.wash.y, draw: () => drawAnaWash(g) }, { y: GA.armario.y, draw: () => drawAnaArmario(g) }],
+  blocked: (x, y) => (Math.abs(x - GA.armario.x) < 25 && y > GA.armario.y - 14 && y < GA.armario.y + 4) || (Math.abs(x - GA.bed.x) < 76 && y > GA.bed.y - 30 && y < GA.bed.y + 4) || (Math.abs(x - GA.table.x) < 30 && y > GA.table.y - 24 && y < GA.table.y + 4) || (Math.abs(x - GA.wash.x) < 26 && y > GA.wash.y - 26 && y < GA.wash.y + 4),
   glow: () => [GA.table.x, GA.table.y - 40, 150, '255,190,110', .38], place: 'en su cuarto del alero este de Tejas Verdes, con la ventana donde está el cerezo Reina de las Nieves',
   actions: add => {
     add('bed', GA.bed.x - 20, GA.bed.y + 14, 60, 'Dormir en mi cama', goToBed, { hy: 30, hit: 0, pri: 2, test: (x, y) => Math.abs(x - GA.bed.x) < 76 && y > GA.bed.y - 62 && y < GA.bed.y + 6 });
-    add('gwin', GA.win, 3.9 * T, 70, 'Mirar por la ventana', () => anaSays(WINDOW_LINES[S]), { hy: 40, hit: 0, pri: 3, test: (x, y) => Math.abs(x - GA.win) < 46 && y < 62 });
+    add('gwin', GA.win, 3.9 * T, 70, velaPuede() ? 'La ventana (🕯 la vela)' : 'Mirar por la ventana', ventana, { hy: 40, hit: 0, pri: 3, test: (x, y) => Math.abs(x - GA.win) < 46 && y < 62 });
+    add('armario', GA.armario.x, GA.armario.y + 22, 50, game.wm?.sinSombrero ? 'Ponerse el sombrero (el armario)' : 'Guardar el sombrero en el armario', sombrero, { hy: 40, hit: 26, pri: 3 });
     add('mirror', GA.table.x, GA.table.y + 26, 56, 'Mirarse en el espejo', () => anaSays(pick(MIRROR_LINES)), { hy: 40, hit: 0, pri: 3, test: (x, y) => Math.abs(x - GA.table.x) < 18 && y < 56 });
   },
 };

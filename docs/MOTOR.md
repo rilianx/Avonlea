@@ -49,6 +49,8 @@ Están en `src/datos/guion.txt`. Cada escena tiene:
 
 **Las conversaciones** (`src/datos/conversaciones.txt`): escenas de Ana con los suyos (Marilla, Matthew, Diana, la Sra. Lynde, la Sra. Barry, el Sr. Harrison), inspiradas en el libro, que dependen sobre todo de la cercanía (`afecto:marilla:ana>=4`). No se disparan por lugar: se tienen desde el menú de la persona (💬) o, a veces, solas, cuando Ana está cerca y libre y la otra persona no está ocupada. Se pueden tener todas las que se quiera, pero lo que suman (las que marcan un paso en la relación suman afecto; otras, una habilidad) sube como mucho una vez al día por cada cualidad: si hoy ya subió, se nota al día siguiente.
 
+**La primera vez** (`src/js/66-primeras-veces.js`): la primera vez que Ana hace algunas cosas (mirar por la ventana de su pieza, mirarse al espejo, subir a su pieza, abrir el armario, ver el mar desde el faro…), en vez de la frase de siempre sale una escena del guion, `primera_<acción>` con `disparo: primera`. Con `tambien`, la acción se hace igual (subir la escalera).
+
 **Los hitos:** al cruzar un umbral de una habilidad de Ana, alguien se lo dice la próxima vez que se encuentran (con IA, una escena improvisada; sin IA, la línea escrita). Luego queda el hecho `hito_<habilidad>_<n>`.
 
 ## 3. El planificador (GOAP)

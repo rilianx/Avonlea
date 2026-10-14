@@ -36,6 +36,10 @@ En el cuaderno: «Quedarse en Tejas Verdes», con pistas de lo que falta. Lo que
 
 Lo que abre la amistad: el broche y el picnic, el té con Diana, el club de cuentos, el bote de los Barry, el desafío de Josie y la tía Josephine (abajo).
 
+## 1b. Las señas con la vela (cap. 18)
+
+Una vez juradas amigas y con Diana queriéndola 4, la conversación `conv_diana_vela` (desde el menú de Diana): inventan un código con una vela y un cartón. Desde entonces, de noche (desde las 19:00), la ventana de la pieza de Ana ofrece «🕯 Hacerle señas a Diana con la vela»: la escena `senas_vela`, una vez por noche, y Diana la quiere un poco más. Mientras dure la prohibición, no.
+
 ## 2. El picnic de la escuela dominical (cap. 13, 14)
 
 Requiere ser amigas (✅). En el libro también: el permiso de Marilla (✅, la acción `pedir_permiso`), la canasta (✅) y el broche de amatista que se pierde y Ana «confiesa» para que la dejen ir (✅ la escena `broche`, en la cocina, después de 5 días de amigas (en el libro, un mes); el picnic requiere `hecho:broche`).
