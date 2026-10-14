@@ -42,6 +42,7 @@ function dlgCond(s, c){   // one condition of state, written as text
     case 'dias_desde': { const d = dlgHechos()[a]; return typeof d === 'number' && today() + 1 - d >= +b; }   // (at least b days since a happened)
     case 'sentada': return !!wmBody(a)?.sit;   // (she has sat down: at the table, for the tea)
     case 'estudio': return estudio() >= +a;   // (she has studied at least so much: days of class and of lessons)
+    case 'camino': { const [x, n] = rest.split(':'); return camino(x) >= +n; }   // (so far on a path: src/datos/caminos.txt)
     case 'estacion': return SEASONS[S].toLowerCase() === a;   // (primavera, verano, otoño, invierno)
     case 'dia_estacion': return today() % DIAS_ESTACION + 1 === +a;   // (the day of the season, from 1)
     case 'no_hoy': return dlgHechos()[a] !== today() + 1;   // (a did not happen today: one thing of the book per day)

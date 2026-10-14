@@ -1,0 +1,66 @@
+# Los caminos de Ana: lo que se gana de a poco, según a qué se dedique (lo lee el juego al empezar).
+# Cada camino es un número que sube con lo que Ana hace, día a día. Al cruzar un hito pasa algo: alguien se lo dice
+# la próxima vez que Ana lo encuentra; y el guion puede tener escenas para eso («si: camino:granja:15»).
+# Para escribir más caminos o más hitos, basta con agregarlos aquí (a mano, o pidiéndoselo a una IA).
+#
+# «=== id ===» y sus campos, uno por línea:
+#   titulo: cómo se llama el camino, en el cuaderno
+#   suma: las acciones de Ana que lo hacen subir (separadas por comas): cada una, +1 una vez al día (si la hace
+#         unos minutos); «clase» es un día de clases en la escuela (una hora adentro, un día con clases)
+#   por_dia: cuánto puede subir en un día, como mucho (si no, 2)
+#   hito N: lo que significa llegar a N (se lee en el cuaderno y en el aviso)
+#     con: quién se lo dice la próxima vez que Ana lo encuentra (si no, nadie: solo el aviso)
+#     dice: lo que dice, escrito (una línea; varias, separadas por « / »)
+#     ia: lo que pasa, para que la IA improvise la escena (si está encendida; si no, se usa «dice»)
+# Las líneas que empiezan con # son comentarios.
+
+=== estudio ===
+titulo: El estudio
+suma: clase, estudiar, recitar, leer, ensayar
+por_dia: 2
+hito 10: La Srta. Stacy la anota para el examen de Queen's.
+  con: stacy
+  dice: Ana, vas a dar el examen de Queen's con los demás. Tienes cabeza; ahora, constancia.
+  ia: La Srta. Stacy le cuenta a Ana que la anotó para preparar el examen de ingreso a Queen's, y la anima.
+hito 30: Ya podría entrar a Queen's.
+  con: marilla
+  dice: La Srta. Stacy dice que vas bien. No te llenes de humo, pero… vas bien.
+  ia: Marilla, sin querer demostrarlo demasiado, le cuenta a Ana que la Srta. Stacy cree que entrará a Queen's.
+hito 60: Podría quedar primera… si Gilbert no.
+  con: gilbert
+  dice: Dicen que tú y yo vamos parejos para Queen's. Que gane el mejor, Ana.
+  ia: Gilbert Blythe le dice a Ana, medio en broma y medio en serio, que van parejos para el examen de Queen's.
+
+=== granja ===
+titulo: La granja de Tejas Verdes
+suma: quehacer, ordeñar, alimentar, sembrar, regar, batir, partir_lena, hacer_heno, cocinar, coser, recoger
+por_dia: 2
+hito 5: Marilla empieza a contar con ella.
+  con: marilla
+  dice: Ana, ya sabes dónde va cada cosa en esta cocina. Así se aprende a llevar una casa.
+  ia: Marilla, seca pero contenta, reconoce que Ana ayuda de verdad en la casa.
+hito 15: Matthew le regala un vestido con mangas abullonadas.
+  con: matthew
+  dice: Bueno, pues… es para ti, Ana. Un vestido. Con… con las mangas esas, abullonadas. Si te gusta.
+  ia: Matthew, muy tímido, le regala a Ana un vestido con mangas abullonadas, porque ella ayuda tanto en la granja (como en el capítulo 25).
+hito 30: Marilla le confía la casa: Tejas Verdes también es suya.
+  con: marilla
+  dice: Ana… no sé qué haríamos sin ti. Esta casa es tan tuya como mía.
+  ia: Marilla le dice a Ana, con dificultad porque no es de decir esas cosas, que Tejas Verdes es tan suya como de ella.
+
+=== letras ===
+titulo: Las letras y la imaginación
+suma: escribir_cuento, escribir_carta, nombrar, adornar
+por_dia: 2
+hito 5: Diana dice que Ana escribe como en los libros.
+  con: diana
+  dice: Ana, tus cuentos son mejores que los de los libros. ¡De verdad!
+  ia: Diana le dice a Ana, admirada, que sus cuentos son tan buenos como los de los libros.
+hito 15: La Srta. Stacy lee su composición en voz alta.
+  con: stacy
+  dice: Ana, leí tu composición en voz alta en la clase. Tienes un don. Pero cuida las comas.
+  ia: La Srta. Stacy le cuenta a Ana que leyó su composición en voz alta a la clase, y le da un consejo de escritora.
+hito 30: Podría escribir de verdad: un cuento para una revista.
+  con: sraallan
+  dice: Ana, ¿has pensado en mandar uno de tus cuentos a una revista? Yo lo leería.
+  ia: La Sra. Allan le sugiere a Ana mandar uno de sus cuentos a una revista, y le ofrece ayudarla.

@@ -66,6 +66,7 @@ El silencio también se escribe: después de la Avenida hay escenas de una líne
 | `afecto:a:b:n` | `a` quiere a `b` al menos `n` (de 0 a 5) |
 | `cuaderno:id` | Ana cumplió esa meta de su cuaderno |
 | `estudio:n` | Ana tiene al menos `n` días de estudio (`docs/LARGO_PLAZO.md`) |
+| `camino:id:n` | Ana llegó al menos a `n` en ese camino (`src/datos/caminos.txt`) |
 | `estacion:e` | es esa estación (`primavera`, `verano`, `otoño`, `invierno`) |
 | `dia_estacion:n` | es el día `n` de la estación (desde 1; cada estación dura 14 días) |
 | `sentada:quien` | esa persona está sentada |

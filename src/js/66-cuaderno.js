@@ -69,10 +69,12 @@ function cuadernoPanel(open){
     return d ? `<div class="cm hecha"><b>✓ ${esc(m.titulo)}</b><span>el día ${d}</span></div>`
       : abierta ? `<div class="cm"><b>○ ${esc(m.titulo)}</b><small>${esc(cuadernoPista(m))}</small></div>`
       : `<div class="cm cerrada"><b>🔒 ${esc(m.titulo)}</b><small>Antes: ${esc(cuadernoAntes(m))}.</small></div>`;
-  }).join('')).join('') + cuadernoAmigos();
+  }).join('')).join('') + cuadernoCaminos() + cuadernoAmigos();
 }
 // the date, as Ana would write it: «martes, día 3 de la primavera»
 const cuadernoFecha = () => ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'][today() % 7] + ', día ' + (today() % DIAS_ESTACION + 1) + ' de ' + (S === 0 ? 'la ' : 'el ') + SEASONS[S].toLowerCase();
+// her paths: how far she has gone on each, and what comes next
+const cuadernoCaminos = () => '<h4>Sus caminos</h4>' + CAMINOS.map(c => { const n = camino(c.id), p = caminoProximo(c), top = c.hitos.at(-1)?.n || 1; return `<div class="cm"><b>${esc(c.titulo)} · ${n}</b><small>${'▰'.repeat(Math.round(Math.min(n, top) / top * 10)) + '▱'.repeat(10 - Math.round(Math.min(n, top) / top * 10))}${p ? ' · en ' + p.n + ': ' + esc(p.texto) : ' · ¡todo!'}</small></div>`; }).join('');
 // her friends: how much each one loves her (the hearts of 0 to 5), those she knows
 function cuadernoAmigos(){
   const l = ['diana', 'marilla', 'matthew', 'sraallan', 'stacy', 'josephine', 'lynde', 'gilbert'].filter(k => (k !== 'diana' || conoceDiana()) && (k !== 'josephine' || dlgHechos().cama_josephine) && game.wm.rel?.[k + '>ana'] != null);

@@ -417,4 +417,12 @@ module.exports = [
       { quien: 'marilla', dice: /Lo sabía/, texto: 'Marilla, orgullosa a su manera.' },
     ],
   },
+  {
+    id: 70, titulo: 'Un hito de la granja (los caminos de Ana)', quienes: ['ana', 'marilla'],
+    relato: 'Ana lava los platos; con eso llega al hito 5 de la granja, y Marilla, seca pero contenta, le reconoce que ayuda de verdad.',
+    pasos: [
+      { quien: 'ana', accion: /quehacer/, texto: 'Ana lava los platos.' },
+      { quien: 'marilla', dice: /llevar una casa/, texto: 'Marilla le reconoce lo que ayuda.' },
+    ],
+  },
 ];
