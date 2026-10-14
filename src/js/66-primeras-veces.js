@@ -37,14 +37,31 @@ let lugaresT = 0, lugarRespiro = 0;
 const LUGAR_CERCA = 150, LUGAR_RESPIRO = M(40);
 function lugaresTick(dt){
   if ((lugaresT -= dt) > 0) return; lugaresT = 2;
-  const W = game.wm; if (!W || game.scene !== 'out' || (CAP1.on && !CAP1.done) || ana.sit || ana.goto?.auto || ana.goto?.wm || cart.riding) return;
-  if (TT < lugarRespiro || hablando() || amb.cur || game.talk || TALKS.some(t => t.lines.some(l => l.q === 'ana'))) return;
-  const H = (W.lugarHoy ||= {}), x = dlgCtx();
-  for (const [k, p] of Object.entries(PLACES)) {
-    if (H[k] === today() || dist(ana.x, ana.y, p[1], p[2]) > LUGAR_CERCA) continue;
-    const d = escenaElegir(DIALOGOS.filter(d => d.disparo === 'lugar' && d.lugar === k && !d.dicha() && dlgCumple(d, x))); if (!d) continue;
+  const W = game.wm; if (!W || game.scene !== 'out' || (CAP1.on && !CAP1.done)) return;
+  const H = (W.lugarHoy ||= {}), x = dlgCtx(), cerca = Object.entries(PLACES).filter(([k, p]) => H[k] !== today() && dist(ana.x, ana.y, p[1], p[2]) <= LUGAR_CERCA);
+  const de = (k, f) => DIALOGOS.filter(d => d.disparo === 'lugar' && d.lugar === k && !d.dicha() && f(d) && dlgCumple(d, x));
+  // a scene that interrupts whatever is going on (as the Avenue in bloom, on the way from Bright River): it does not
+  // wait for the talk to end, nor for Ana to be free; it cuts what is being said (unless Ana is choosing something)
+  for (const [k] of cerca) {
+    const d = escenaElegir(de(k, d => d.interrumpe)); if (!d || !interrumpirTodo(d.prioridad || 0)) continue;
     H[k] = today(); lugarRespiro = TT + LUGAR_RESPIRO; d.decir(); return;
   }
+  if (ana.sit || ana.goto?.auto || ana.goto?.wm || cart.riding) return;
+  if (TT < lugarRespiro || hablando() || amb.cur || game.talk || TALKS.some(t => t.lines.some(l => l.q === 'ana'))) return;
+  for (const [k] of cerca) {
+    const d = escenaElegir(de(k, d => !d.interrumpe)); if (!d) continue;
+    H[k] = today(); lugarRespiro = TT + LUGAR_RESPIRO; d.decir(); return;
+  }
+}
+// to interrupt: the loose talk, the bubbles, the chats on the way, the talks of less priority; not a choice of the
+// player (a menu, a choice in a scene, a card being read). Ana stops where she is; what she was doing waits.
+function interrumpirTodo(prio){
+  if (TALKS.some(t => t.elige || t.narra || (t.prio ?? 0) >= prio && t.lines.some(l => l.q === 'ana')) || (game.talk && menuOpen()) || sleeping) return false;
+  if (amb.cur) ambEnd(); bubbles = [];
+  for (const c of CHATS.filter(c => c.parts.includes('ana'))) chatEnd(c);
+  for (const t of TALKS.filter(t => (t.prio ?? 0) < prio)) { t.interrupted = true; talkEnd(t); }
+  if (ana.goto && !ana.goto.auto && !ana.goto.wm) ana.goto = null;   // (the player had sent her somewhere: she stops; her own errands just wait)
+  return true;
 }
 // the candle at the window: once they have agreed on the signals, friends still, in the evening
 function velaPuede(){ return dianaAmiga() && !!dlgDichas().conv_diana_vela && hourNow() % 24 >= 19; }

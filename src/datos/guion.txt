@@ -1787,3 +1787,42 @@ si: !estacion:invierno
 ---
 ana: (Junto al corral, cuatro abedules forman un rincón, como una salita al aire libre.)
 ana: Idlewild. Aquí Diana y yo vamos a tener nuestra casita de juegos, con platos rotos de porcelana como si fueran la mejor vajilla.
+
+# · escenas que interrumpen lo que sea («interrumpe»): como la Avenida en flor en el viaje desde Bright River. No esperan
+# a que termine la charla ni a que Ana esté libre (aunque vaya a un encargo, o en la carreta): cortan lo que se está
+# diciendo, y Ana se detiene; después, todo sigue. No cortan una elección del jugador. Una vez.
+=== lugar_camino_blanco_flor ===
+disparo: lugar
+lugar: camino_blanco
+canal: ana_sola
+prioridad: 6
+interrumpe
+si: estacion:primavera, hecho:se_queda
+---
+narra: Los manzanos del Camino Blanco florecieron todos juntos, en una sola noche.
+ana: (Ana se detiene en seco. Sobre ella, la bóveda de flores es tan blanca que parece hecha de luz. Ya no se acuerda de adónde iba.)
+ana: (No dice nada. Por una vez, Ana Shirley no dice nada.)
+ana: …Es como la primera vez. No: es mejor que la primera vez, porque ahora es mío. Ahora vuelvo a casa por aquí.
+
+=== lugar_mar_primera ===
+disparo: lugar
+lugar: playa
+canal: ana_sola
+prioridad: 6
+interrumpe
+---
+ana: (El camino se abre de golpe y ahí está el mar, enorme, azul, brillando hasta donde se acaba la vista.)
+ana: (Ana se queda quieta, con la boca abierta, el sombrero en la mano.)
+ana: Nunca… nunca había estado tan cerca. Desde el orfanato se veía una rayita gris. Esto no es una rayita: esto es el mundo entero respirando.
+
+=== lugar_primera_nieve ===
+disparo: lugar
+lugar: camino_blanco
+canal: ana_sola
+prioridad: 6
+interrumpe
+si: estacion:invierno, hecho:se_queda
+---
+ana: (Empiezan a caer los primeros copos, grandes y lentos, sobre las ramas desnudas del Camino Blanco.)
+ana: (Ana levanta la cara y saca la lengua para atrapar uno.)
+ana: ¡La primera nieve! El Camino Blanco se acordó de su nombre. Cada copo es distinto, dice la Srta. Stacy. Como las personas. Como las amigas del alma.
