@@ -172,6 +172,7 @@ class Dialogo {
     L = (L || []).map(l => Array.isArray(l) ? l : [l.q, l.t, l.m]);
     if (this.elegir) L = this.elegir.map(i => L[i]).filter(Boolean);
     if (this.marcas) L = L.map((l, j) => this.marcas[j] ? [l[0], l[1], this.marcas[j]] : l);
+    if (this.narra) L = [...this.narra.map(x => ['narra', x]), ...L];   // (what explains it, first)
     // (what changes with the day: the season, and something that really happened to her lately; a line left empty is not said)
     L = L.map(l => l[1] && /\{(estacion|noticia)\}/.test(l[1]) ? [l[0], l[1].replace('{estacion}', ESTACION_TXT[S]).replace('{noticia}', () => cartaNoticia() || ''), l[2]] : l);
     return L.filter(l => l[1] && l[1] !== '…' && l[1].trim() !== '');
@@ -274,6 +275,7 @@ function dlgGuion(txt){
       c._ultimaOpcion = null;
       const m = v.match(/^(.*?)\s+#(\S+)$/); c._l.push(m ? [k, m[1], m[2]] : [k, v]); continue; }
     if (k === 'al_empezar' || k === 'al_terminar') (c[k] ||= []).push(dlgAccion(v));
+    else if (k === 'narra') (c.narra ||= []).push(v);   // (a text that explains, before the scene: a card, as in a book)
     else if (k === 'o') (c.o ||= []).push(dlgCampo('o', v));
     else c[k] = dlgCampo(k, v);
   }

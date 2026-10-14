@@ -10,11 +10,15 @@
 #   tiempo: «estacion:verano», «dia_estacion:1»
 # Efectos: «hecho x», «olvidar x», «contar quien x», «suma granja:ana 2», «suma afecto:diana:ana -1»,
 #   «meta quien tipo args | texto | etiqueta | prioridad» (un encargo: el planificador busca cómo cumplirlo).
+# «narra: texto» (una o varias): lo que explica la escena (quién es quién, qué pasó antes, dónde estamos), en una tarjeta
+#   como la página de un libro, antes de las líneas; el juego espera a que el jugador siga. En las líneas, «narra: texto» igual.
 # Si varias escenas pueden decirse a la vez en un canal, va la de más prioridad; a igual prioridad, la más específica
 # (la que pide más condiciones). «grande»: empieza algo grande del libro; como mucho una grande por día (el ritmo).
 
 # --- el capítulo: Rachel en su ventana, en Tejas Verdes, donde los Bell; la estación; la casa
 === rachel_ventana ===
+narra: Avonlea, un pueblito de granjas en la Isla del Príncipe Eduardo, en Canadá, a fines del siglo XIX. Una tarde de comienzos de junio.
+narra: La Sra. Rachel Lynde vive donde el camino baja a la hondonada, y desde su ventana no se le escapa nada de lo que pasa en Avonlea. Y hoy ve algo rarísimo: Matthew Cuthbert, el hombre más tímido del pueblo, sale en la calesa, de cuello blanco y su mejor traje.
 canal: rl
 prioridad: 6
 en: lynde=rl
@@ -54,6 +58,7 @@ al_terminar: soltar srbell
 al_terminar: meta lynde estar_en h:rl,-,21.5 | Rachel vuelve a su casa, a la ventana | volver a casa, tomar el té y vigilar el camino desde la ventana (cap. 1)
 
 === estacion ===
+narra: En la estación de Bright River, a ocho millas de Avonlea. Matthew viene a buscar al niño del orfanato que la Sra. Spencer quedó en traer. Pero en el andén no hay ningún niño.
 canal: br
 prioridad: 9
 sujeta: matthew
@@ -405,6 +410,7 @@ carta: Su amiga que la recuerda siempre, Ana Shirley.
 # la Sra. Barry las recibe, llama a Diana, y las niñas se conocen. Si se encuentran antes por casualidad, se conocen
 # igual, pero sin la presentación: se quieren menos, y para jurar tendrán que pasar tiempo juntas.
 === quiere_amiga ===
+narra: Ana nunca ha tenido una amiga de verdad. En el orfanato y en las casas donde vivió, sus únicas amigas fueron imaginarias: Katie Maurice, la niña que vivía detrás del vidrio de una vitrina, y Violetta, el eco de un valle.
 canal: gg
 prioridad: 7
 interrumpe
@@ -423,6 +429,7 @@ marilla: Diana es muy bonita: ojos y pelo negros, y mejillas rosadas. Y es buena
 ana: ¡Oh, Marilla! Ahora tengo miedo: ¿y si no le gusto? Sería la desilusión más trágica de mi vida.
 
 === barry_recibe ===
+narra: La Cuesta del Huerto es la granja de los Barry, al otro lado del arroyo, frente a Tejas Verdes. Allí vive Diana, de la edad de Ana, con sus padres y su hermanita Minnie May. La Sra. Barry es una señora muy estricta.
 canal: os
 prioridad: 7
 interrumpe
@@ -474,6 +481,7 @@ diana: Bueno… tal vez. Tengo que volver a casa ahora.
 # poder ir al picnic, «confiesa» que lo perdió en el lago… hasta que el broche aparece en el chal de Marilla.
 # Abre el picnic (cuaderno: picnic requiere hecho:broche).
 === broche ===
+narra: Marilla tiene un broche de amatista que fue de su madre: lo más valioso que posee, y lo usa solo para ir a la iglesia. Y la escuela dominical va a hacer un picnic en el lago, con helado, algo que Ana nunca ha probado.
 grande
 canal: gg
 prioridad: 6
@@ -496,6 +504,7 @@ marilla: (Marilla se ríe, a pesar de todo.) Perdóname, Ana. No debí dudar de 
 # --- «¡Zanahorias!» (cap. 15): el primer día de Ana en la escuela con Gilbert Blythe. Desde ahí, Ana no le habla
 # (la ofensa), y hacer las paces se vuelve una meta (cuaderno: paces requiere hecho:zanahorias).
 === zanahorias ===
+narra: La escuela de Avonlea tiene una sola sala, para todos los niños del pueblo. Gilbert Blythe es el más listo y el más buen mozo, y está acostumbrado a que todas las niñas lo miren. Ana todavía no lo ha mirado.
 grande
 canal: es
 prioridad: 7
@@ -517,6 +526,7 @@ ana: ¡Nunca te lo perdonaré! ¡Nunca jamás!
 # Diana la vea más (hecho prohibida: se cierra todo lo de Diana). Dos días después, Minnie May tiene crup, Diana viene
 # corriendo, Ana la salva toda la noche con el jarabe, y la Sra. Barry le pide perdón (se olvida prohibida).
 === te_grosella ===
+narra: Marilla le dio permiso a Ana para invitar a Diana a tomar el té, como dos señoras, con el juego de té bueno y el cordial de frambuesa de la despensa. Pero Marilla no se acordó de que el cordial ya no estaba en la despensa, sino en el sótano.
 canal: gg
 prioridad: 7
 interrumpe
@@ -534,6 +544,7 @@ ana: ¿A casa? ¡Pero si todavía no hemos tomado el té! ¡Diana, no te vayas!
 diana: (Diana se levanta tambaleándose.) Me siento… muy… muy mal.
 
 === prohibida ===
+narra: La Sra. Barry es una mujer severa, que no perdona fácilmente. Y Diana llegó a su casa mareada, tambaleándose, después de tomar el té en Tejas Verdes.
 grande
 canal: gg
 prioridad: 7
@@ -564,6 +575,8 @@ ana: Sra. Barry, por favor, perdóneme. No sabía que era vino. Me imaginé que 
 barry: No, Ana Shirley. No creo que seas compañía para Diana. Vete a tu casa y pórtate bien.
 
 === crup_aviso ===
+narra: Una noche de invierno. Casi todos los grandes de Avonlea fueron a Charlottetown, a escuchar el discurso del Primer Ministro: también los Barry. Diana se quedó en casa cuidando a Minnie May, su hermanita de tres años.
+narra: El crup es una enfermedad de los niños que cierra la garganta: hay que actuar rápido. Ana sabe de crup, porque cuidó a tres pares de mellizos de la Sra. Hammond.
 grande
 canal: gg
 prioridad: 9
@@ -601,6 +614,7 @@ ana: (Ana no cabe en sí de felicidad.) ¡Oh, Sra. Barry! La perdono con toda mi
 # té; Ana hace el pastel… con linimento en vez de vainilla. La Sra. Allan es tan buena que la invita a la casa
 # parroquial (cuaderno: el té con la Sra. Allan requiere hecho:pastel_linimento).
 === invita_allan ===
+narra: Avonlea tiene un pastor nuevo, el Sr. Allan, que llegó con su esposa, joven y alegre. Ana la quiere desde el primer domingo en la escuela dominical. Y en Avonlea, cuando llega un pastor nuevo, cada familia lo invita a tomar el té.
 grande
 canal: gg
 prioridad: 5
@@ -634,6 +648,7 @@ sraallan: (La Sra. Allan sube a verla.) Querida, fue un error muy gracioso, nada
 # --- la tía Josephine (cap. 19): ya amigas, Ana se queda a dormir donde Diana después del concierto del Club de Debate;
 # saltan sobre la cama del cuarto de huéspedes… donde dormía la tía Josephine. Ana confiesa y se gana su amistad.
 === cama_josephine ===
+narra: La tía de la Sra. Barry, la Srta. Josephine Barry, vino desde Charlottetown. Es una anciana rica, muy de mal genio, y se queda en el cuarto de huéspedes de La Cuesta del Huerto. Ana y Diana no lo saben.
 grande
 canal: os
 prioridad: 6
@@ -655,6 +670,7 @@ josephine: (La tía Josephine se ríe como hacía años.) Vaya, vaya… Ven a ve
 # --- El examen de ingreso a Queen's (cap. 31, 32): el primer día de cada verano, si Ana estudió lo suficiente para que
 # la Srta. Stacy la mande (estudio:ana>=10). Cómo le va sale de lo que estudió: los días de clase y de lecciones (docs/LARGO_PLAZO.md).
 === examen_primera ===
+narra: El examen de ingreso al Queen's, el colegio de Charlottetown donde se preparan los maestros, se da al comenzar el verano. Los mejores alumnos de toda la Isla compiten por entrar. Ana estudió meses con la Srta. Stacy, y Gilbert Blythe también.
 canal: gg
 prioridad: 8
 interrumpe
@@ -673,6 +689,7 @@ ana: (Semanas después, Diana llega corriendo con el diario.) ¡Marilla! ¡Pasé
 marilla: (Marilla no dice nada por un momento. Pero los ojos le brillan.) Bueno, Ana. Bien hecho. Bien hecho, de verdad.
 
 === examen_entra ===
+narra: El examen de ingreso al Queen's, el colegio de Charlottetown donde se preparan los maestros, se da al comenzar el verano. Los mejores alumnos de toda la Isla compiten por entrar. Ana estudió meses con la Srta. Stacy, y Gilbert Blythe también.
 canal: gg
 prioridad: 8
 interrumpe
@@ -689,6 +706,7 @@ ana: (Semanas después, sale la lista en el diario.) ¡Marilla! ¡Entré a Queen
 marilla: Lo sabía. Aunque no te lo iba a decir, para que no te llenaras de humo.
 
 === examen_no ===
+narra: El examen de ingreso al Queen's, el colegio de Charlottetown donde se preparan los maestros, se da al comenzar el verano. Los mejores alumnos de toda la Isla compiten por entrar. Ana estudió meses con la Srta. Stacy, y Gilbert Blythe también.
 canal: gg
 prioridad: 8
 interrumpe
@@ -708,6 +726,10 @@ marilla: Bueno. Hay otro examen el año que viene, y tú no eres de las que se r
 # esa noche, al otro día van a White Sands a arreglar el error, y Ana vuelve… a prueba. Para quedarse de verdad tiene
 # que ganarse a Marilla (el cuaderno: «Quedarse en Tejas Verdes»).
 === inicio_llegada ===
+narra: Tejas Verdes es la granja de los hermanos Cuthbert, en Avonlea, un pueblito de la Isla del Príncipe Eduardo, en Canadá. Matthew y Marilla nunca se casaron; ya no son jóvenes, y él tiene el corazón delicado.
+narra: Por eso decidieron adoptar a un niño de un orfanato de Nueva Escocia, que ayudara a Matthew en la granja. Se lo encargaron a la Sra. Spencer, una vecina de White Sands que iba a ir a buscar a una niña para ella.
+narra: Esta tarde Matthew fue a buscar al niño a la estación de Bright River. Pero allí no había ningún niño: había una niña flaca, de once años, pelo rojo y ojos enormes, con una maleta de alfombra. Se llama Ana Shirley, es huérfana y nunca ha tenido un hogar.
+narra: Matthew no fue capaz de dejarla allí, y la trajo. Ana habló durante todo el camino; Matthew, que le tiene miedo a todas las mujeres, descubrió que le gustaba escucharla. Ahora llegan a Tejas Verdes, donde Marilla espera a un niño.
 canal: gg
 prioridad: 10
 interrumpe
@@ -766,6 +788,7 @@ marilla: Esta tarde vamos a White Sands, a ver a la Sra. Spencer. Ella se equivo
 ana: (Ana baja la mirada al plato y no dice nada más, cosa rara en ella.)
 
 === viaje_spencer ===
+narra: White Sands está a unas millas por el camino de la costa. Allí vive la Sra. Spencer, la que trajo a Ana del orfanato por equivocación: Marilla va a pedirle que la devuelva. Ana sabe que puede ser su último día en Tejas Verdes.
 canal: gg
 prioridad: 9
 interrumpe
@@ -903,6 +926,7 @@ ana: Cinco destellos: «ven mañana temprano, que tengo algo importante que cont
 # debajo, con sangría, sus líneas y lo que deja («! …»). Si Ana estalla, tiene que ir a pedirle perdón; mientras no lo
 # haga, Marilla no la deja quedarse (se_queda pide !hecho:ofendio_lynde).
 === lynde_visita ===
+narra: La Sra. Rachel Lynde, la vecina que todo lo sabe y todo lo dice, ha venido a ver con sus propios ojos a la huérfana de Tejas Verdes. Es la mujer más respetada de Avonlea, y la que tiene la lengua más larga.
 canal: gg
 prioridad: 9
 interrumpe

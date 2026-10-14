@@ -8,6 +8,7 @@ addEventListener('keydown', e => {
   if (e.code === 'KeyT' && !game.map) { e.preventDefault(); openSay(); return; }
   if (e.code === 'KeyM' && !game.talk) { toggleMap(); return; }
   if (e.code === 'KeyL' && !game.map && !game.talk) { callNearest(); return; }
+  { const N = TALKS.find(t => t.narra); if (N && (e.code === 'Space' || e.code === 'Enter')) { e.preventDefault(); N.narra.seguir(); return; } }   // (a card that explains: on)
   if (game.map) { if (e.code === 'Escape' || e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); toggleMap(false); } return; }
   if (game.talk && !menuOpen()) {   // a talk going on: she can walk (walking off ends it), Space skips a line, Esc ends it
     if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); if (amb.cur) amb.cur.wait = 0; return; }

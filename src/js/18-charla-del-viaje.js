@@ -16,15 +16,31 @@ function talkTick(dt){
   for (const t of TALKS.slice()) {
     t.el += dt;
     if (t.elige && TT > t.elige.hasta) { const e = t.elige; t.elige = null; e.una(e.propia); }
+    if (t.narra && TT > t.narra.hasta) { const n = t.narra; t.narra = null; n.seguir(); }
     if ((t.wait -= dt) > 0) continue;
     if (t.stop?.() || ++t.i >= t.lines.length || (t.budget && t.el > t.budget)) { talkEnd(t); continue; }
     const l = t.lines[t.i]; if (l.q === '?') { elegir(t, l.opc); continue; }   // (a choice: the scene waits for it)
+    if (l.q === 'narra') { narrar(t, l.t); continue; }   // (a text that explains: a card, until the player goes on)
     sayB(talkQ(l.q), l.t); t.wait = lineDur(l.t) + .35 + t.gap;   // (gap: a scene that takes its time, like a letter being written)
     if (l.m) cap1Mark(l.m); t.use?.(t.i, l);
   }
 }
+// a text that explains (who is who, what happened before, where we are): a card over the game, as a page of a book;
+// the scene waits until the player goes on (with no one to read it, or Ana on her own, after a while)
+function narrar(t, texto){
+  if (typeof relatoLinea === 'function' && RELATO.on) relatoLinea('(Narración) ' + texto, { quien: 'narra', dice: texto });
+  if (navigator.webdriver || ana.hidden) { t.wait = .2; return; }
+  t.wait = 1e9; let el = $('narra');
+  if (!el) { el = document.createElement('div'); el.id = 'narra'; document.body.appendChild(el);
+    el.style.cssText = 'position:fixed;left:50%;top:14%;transform:translateX(-50%);width:min(520px,calc(100vw - 32px));z-index:40;background:#f6ecd2;color:#3b2a1c;border:1px solid #8a6a48;border-radius:10px;box-shadow:0 6px 24px rgba(40,25,10,.35);padding:16px 20px 12px;font:italic 16px/1.5 Georgia,serif'; }
+  el.innerHTML = '<div class="tx"></div><div style="text-align:right;margin-top:10px"><button style="font:13px Georgia,serif;padding:4px 12px;border:1px solid #8a6a48;border-radius:6px;background:#fffaf0;color:#3b2a1c;cursor:pointer">Seguir ▸</button></div>';
+  el.querySelector('.tx').textContent = conNombres(texto); el.hidden = false;
+  let ya = false; const seguir = () => { if (ya) return; ya = true; t.narra = null; el.hidden = true; if (TALKS.includes(t)) t.wait = .3; };
+  el.querySelector('button').onclick = e => { e.stopPropagation(); seguir(); };
+  t.narra = { seguir, hasta: auto.on ? TT + lineDur(texto) * 1.6 + 3 : Infinity };
+}
 function talkEnd(t){
-  TALKS = TALKS.filter(x => x !== t);
+  TALKS = TALKS.filter(x => x !== t); if (t.narra) { t.narra = null; const el = $('narra'); if (el) el.hidden = true; }
   for (const k of t.hold || []) delete CHAT_HOLD[k];
   t.end?.(t.lines.slice(t.i + 1));
   const q = t.ch && TALK_Q[t.ch]; if (q?.length) { const n = q.shift(); TALKS.push(n); if (n.resumen) logEv(n.resumen, []); }
