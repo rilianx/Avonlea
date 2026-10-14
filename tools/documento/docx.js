@@ -124,7 +124,7 @@ const s5 = [
   B('Cada cadena y cada hito tiene una **meta de prueba**: el juego la juega solo, y el **relato** (lo que el juego cuenta que pasó, línea a línea) se compara con lo que debería pasar (`trazas/auditoria.md`).'),
   B('Además, el relato se **lee a mano**: así aparecieron cosas que las comparaciones automáticas no ven, como la tía Josephine hablando de la cama antes de la cama, o Diana parándose a charlar mientras corría a pedir ayuda por el crup (`trazas/lectura.md`).'),
   B('**El grafo se revisa solo** con cada build (`tools/grafo.js` → `trazas/grafo.md`): avisa si una escena o una meta pide un hecho que nada deja (nunca podría pasar), si una condición está mal escrita (una clave o una cualidad que no existe), y qué hechos se dejan sin que nada los lea. Es lo que hace seguro agregar escenas escritas por una IA.'),
-  B('Estado actual: ESTADO_ACTUAL'),
+  B('Estado actual: el grafo, limpio (46 escenas, 30 metas); las cadenas y las habilidades, 36 de 36 pasos; la auditoría completa y la regresión pasan, salvo fallas al azar que al repetirse salen bien (y las dos pruebas de la regresión que fallan a propósito).'),
   H1('6. El estado del arte'),
   P('El motor sigue modelos conocidos de la narrativa interactiva, y toma sus nombres:'),
   tabla([['En Avonlea', 3], ['Modelo', 3.2], ['Dónde viene', 5]], [
