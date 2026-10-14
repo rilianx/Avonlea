@@ -2,7 +2,8 @@
 const cam = { x: ana.x, y: ana.y };
 let last = performance.now(), TT = 0, here = null, taskTick = 0, storyT = 2;
 // Ana crying with her head on the table: a tear now and then, over its edge (drawn in front of it, with the effects)
-function lagrimas(){ if (!ana.llora || !ana.sit || TT < (ana._lagT || 0) || game.scene !== 'gg') return; ana._lagT = TT + .45; for (const s of [-1, 1]) if (Math.random() < .7) fx.push({ kind: 'drop', x: ana.x + s * (6 + Math.random() * 8), y: ana.y - 14, vy: 4 + Math.random() * 8, t: 0 }); }
+function lagrimas(){ ana.sortY = ana.llora && ana.sit && game.scene === 'gg' ? TABLE.y + 1 : undefined;   // (lying on the table: drawn after it)
+  if (!ana.llora || !ana.sit || TT < (ana._lagT || 0) || game.scene !== 'gg') return; ana._lagT = TT + .45; for (const s of [-1, 1]) if (Math.random() < .7) fx.push({ kind: 'drop', x: ana.x + s * (3 + Math.random() * 8), y: ana.y + 36, vy: 2 + Math.random() * 3, t: 0 }); }
 function update(dt){
   if (sleeping || narraPausa()) return;   // (a card that explains: the world waits while it is read)
   if (AI.on && provider() === 'manual' && aiq.list.length) return;   // (debugging by hand: the world waits for the answer)
