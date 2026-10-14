@@ -164,12 +164,15 @@ function autoStep(){
   }
   done();
 }
+// someone in the middle of a conversation or a scene where they speak (or are held to listen): they do not walk off
+const enConversacion = k => (k !== 'ana' && CHAT_HOLD[k] > TT) || TALKS.some(t => t.i < t.lines.length && t.lines.some(l => l.q === k)) || (typeof CHATS !== 'undefined' && CHATS.some(c => c.parts.includes(k)));
 function autoTick(){
   if (!autoAllowed() || AGENTS.ana?.followOf || wmDriven('ana') || (CAP1.on && !CAP1.done) || game.scene === 'camino' || ana.hidden || cart.riding) return;   // (in the book's chapter she waits for Matthew; in the cart she rides)   // (a goal of the planner, or following someone who asked: no wandering off)
   const manual = auto.intent?.manual;
   if (!manual && TT - lastInput < AUTO_IDLE) { auto.on = false; return; }
   if (!auto.on) { auto.on = true; if (!auto.told && !manual) { auto.told = true; notice('Ana hace lo suyo; muévete o toca algo para retomar el control.'); } }
   if (amb.cur) return;
+  if (enConversacion('ana')) { if (ana.goto?.auto) ana.goto = null; return; }   // (talking with someone: she stays, and goes on with what she meant to do afterwards)
   if (auto.intent) { if (!ana.goto) autoStep(); return; }
   if (TT >= auto.thinkAt && !auto.busy) autoDecide();
 }

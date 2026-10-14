@@ -163,6 +163,7 @@ function agentTick(dt){
     if (ag.hold) { wmHold(ag, dt); continue; }
     if (!activeGoals(ag).length) { if (ag.st !== 'idle') agentIdle(ag); continue; }
     if (ag.who === 'ana' && anaPaused(ag)) continue;
+    if (enConversacion(ag.who)) { wmStop(ag.who); continue; }   // (in the middle of a conversation or a scene: no one walks off; the errand waits)
     { const sg = activeGoals(ag).find(g => g.staying); if (sg) { stayTick(ag, sg, dt); continue; } }   // (at school: in class, the rest waits)
     if (distractTick(ag)) continue;
     for (const g of activeGoals(ag)) if (g.pending.some(p => p.h.st === 'fail' && !p.seen)) { for (const p of g.pending) if (p.h.st === 'fail') { p.seen = true; delete game.wm.facts['pedido:' + p.f.f + ':' + p.to + ':' + today()]; }   // (they tried and could not: one may ask again)
