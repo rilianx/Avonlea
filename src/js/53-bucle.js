@@ -2,7 +2,7 @@
 const cam = { x: ana.x, y: ana.y };
 let last = performance.now(), TT = 0, here = null, taskTick = 0, storyT = 2;
 function update(dt){
-  if (sleeping) return;
+  if (sleeping || narraPausa()) return;   // (a card that explains: the world waits while it is read)
   if (AI.on && provider() === 'manual' && aiq.list.length) return;   // (debugging by hand: the world waits for the answer)
   TT += dt; dayT += dt / (MIN_S * 60 * 24); boil = Math.floor(TT * 6);
   const { night } = light();

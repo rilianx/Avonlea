@@ -16,7 +16,6 @@ function talkTick(dt){
   for (const t of TALKS.slice()) {
     t.el += dt;
     if (t.elige && TT > t.elige.hasta) { const e = t.elige; t.elige = null; e.una(e.propia); }
-    if (t.narra && TT > t.narra.hasta) { const n = t.narra; t.narra = null; n.seguir(); }
     if ((t.wait -= dt) > 0) continue;
     if (t.stop?.() || ++t.i >= t.lines.length || (t.budget && t.el > t.budget)) { talkEnd(t); continue; }
     const l = t.lines[t.i]; if (l.q === '?') { elegir(t, l.opc); continue; }   // (a choice: the scene waits for it)
@@ -37,7 +36,13 @@ function narrar(t, texto){
   el.querySelector('.tx').textContent = conNombres(texto); el.hidden = false;
   let ya = false; const seguir = () => { if (ya) return; ya = true; t.narra = null; el.hidden = true; if (TALKS.includes(t)) t.wait = .3; };
   el.querySelector('button').onclick = e => { e.stopPropagation(); seguir(); };
-  t.narra = { seguir, hasta: auto.on ? TT + lineDur(texto) * 1.6 + 3 : Infinity };
+  t.narra = { seguir, hasta: auto.on ? performance.now() + (lineDur(texto) * 1.6 + 3) * 1000 : Infinity };   // (real time: the game's is stopped)
+}
+// while a card is being read, the world waits: the time does not go on (if no one reads it, after a while it goes on)
+function narraPausa(){
+  const t = TALKS.find(t => t.narra); if (!t) return false;
+  if (performance.now() > t.narra.hasta) { t.narra.seguir(); return false; }
+  return true;
 }
 function talkEnd(t){
   TALKS = TALKS.filter(x => x !== t); if (t.narra) { t.narra = null; const el = $('narra'); if (el) el.hidden = true; }

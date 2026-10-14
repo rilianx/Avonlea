@@ -63,7 +63,7 @@ lynde: Es terriblemente flaca y fea, Marilla. ¡Y el pelo, rojo como zanahoria!
    ! suma afecto:marilla:ana 1
 ```
 
-**La narración:** una escena puede llevar `narra: texto` (una o varias líneas), lo que la explica: quién es quién, qué pasó antes, dónde estamos (la introducción, la Sra. Spencer, la Sra. Lynde, los Barry, el crup, el examen…). Sale en una tarjeta, como la página de un libro, antes de las líneas, y la escena espera a que el jugador siga («Seguir», espacio o Enter); si Ana va sola, sigue después de un rato. Dentro de las líneas, `narra: texto` también vale.
+**La narración:** una escena puede llevar `narra: texto` (una o varias líneas), lo que la explica: quién es quién, qué pasó antes, dónde estamos (la introducción, la Sra. Spencer, la Sra. Lynde, los Barry, el crup, el examen…). Sale en una tarjeta, como la página de un libro, antes de las líneas; mientras está abierta el tiempo se detiene (el mundo espera), y la escena espera a que el jugador siga («Seguir», espacio o Enter); si Ana va sola, sigue después de un rato. Dentro de las líneas, `narra: texto` también vale.
 
 **Los nombres que pone Ana** (`src/js/57-nombres-de-ana.js`): cuando Ana bautiza algo (la Avenida, la laguna de Barry, el cerezo de su ventana, los lugares de Avonlea), el jugador elige entre el nombre del libro y uno propio, que escribe en una caja. Desde entonces esa cosa se llama así en todas partes: en lo que se dice, en el diario, en el mapa, en los letreros y en lo que se le cuenta a la IA. En una escena es una alternativa más; el estado que queda depende del camino elegido:
 
