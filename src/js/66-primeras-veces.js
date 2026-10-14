@@ -9,6 +9,7 @@ function primeraVez(id, act){
   const d = DIALOGOS.find(x => x.id === 'primera_' + id && x.disparo === 'primera');
   if (!d || d.dicha() || !dlgCumple(d, dlgCtx())) return false;
   if (d.tambien) act(true);   // (done too, quietly: the scene tells it)
+  for (const t of TALKS.filter(t => t.ch === d.canal)) talkEnd(t);   // (what she was saying to herself gives way to this)
   d.decir(); return true;
 }
 // the scenes of a thing (disparo: objeto, objeto: <what>): looking out of the window, at the mirror, at the sea… many,
@@ -28,6 +29,7 @@ function escenaObjeto(id, act){
   const H = (W.objHoy ||= {}), k = id.split(':')[0]; if (H[k] === today()) return false;   // (bed:3 is a bed of the garden: «objeto: bed»)
   const x = dlgCtx(), d = escenaElegir(DIALOGOS.filter(d => d.disparo === 'objeto' && d.objeto === k && !d.dicha() && dlgCumple(d, x))); if (!d) return false;
   H[k] = today(); if (d.tambien && typeof act === 'function') act(true);
+  for (const t of TALKS.filter(t => t.ch === d.canal)) talkEnd(t);
   d.decir(); return true;
 }
 // the scenes of a place (disparo: lugar, lugar: <a place of Avonlea>): when Ana passes by on her own feet, free (not on

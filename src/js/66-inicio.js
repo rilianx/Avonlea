@@ -22,3 +22,13 @@ if (NUEVA_PARTIDA && !navigator.webdriver) inicioLlegada();
 else if (!NUEVA_PARTIDA && !dlgHechos().a_prueba && !dlgHechos().inicio_juego) yaSeQueda();
 // a game from before: it goes on where it was left, at the hour it was (the day and the hour come back with the rest)
 if (!NUEVA_PARTIDA && !navigator.webdriver) try { seguirDondeQuedo(JSON.parse(localStorage.getItem('avonlea') || 'null')?.donde); } catch (e) {}
+// the first night: the player takes her up to bed (the scene says so); if no one does (Ana on her own), after a while
+// she goes up by herself and lies down
+let inicioT = 0, inicioFin = 0;
+function inicioTick(dt){
+  if ((inicioT -= dt) > 0) return; inicioT = 3;
+  const H = dlgHechos(); if (!H.primera_noche || H.desayuno_prueba || dlgDichas().primera_bed || sleeping || navigator.webdriver) { inicioFin = 0; return; }
+  if (TALKS.length || game.talk) return;
+  if (!inicioFin) inicioFin = TT;
+  if (auto.on && TT - inicioFin > 60) { if (game.scene !== 'ga') goIn('ga', [GA.bed.x - 20, GA.bed.y + 16]); primeraVez('bed', goToBed) || goSleep(false); }
+}

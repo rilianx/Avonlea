@@ -123,11 +123,17 @@ function dlgHacer(list){   // what a scene does when it starts or ends
     if (a.ofensa) { const [k, o, motivo, n] = a.ofensa; game.wm.ofensa[k + '>' + o] = motivo; relSetW(k, o, Math.min(relGetW(k, o), +n)); }   // (k is offended with o)
     if (a.triste) realR.setFact('triste:' + a.triste);
     if (a.nombrar) nombrar(a.nombrar, a.n);
+    if (a.sentar) { const q = SEATS[a.sentar], b = a.sentar === 'ana' ? ana : PEOPLE[a.sentar]; if (q && b) { b.x = q[0]; b.y = q[1]; b.dir = q[2]; b.sit = true; b.moving = false; b.nav = null; if (b !== ana) b.mealSat = true; else { ana.goto = null; ana.vx = ana.vy = 0; } } }
+    if (a.dormir) goSleep(false);
+    if (a.levantar) { const b = a.levantar === 'ana' ? ana : PEOPLE[a.levantar]; if (b) { b.sit = false; b.llora = false; if (b !== ana) b.mealSat = false; } }
     if (a.afecto) { const [k, o, n] = a.afecto; relSetW(k, o, Math.max(relGetW(k, o), +n)); }   // (how much one cares for the other, at least so much)
     if (a.suma) { const [q, n] = a.suma, [nombre, dueño, hacia] = q.split(':'), H = (game.wm.sumaHoy ||= {});
       if (a.limitado && H[q] === today()) { (game.wm.sumaPend ||= []).push({ q, n: +n }); continue; }   // (from conversations, each quality goes up at most once a day: the rest shows on the days after)
       if (a.limitado) H[q] = today();
-      cualidadSuma(dueño, nombre, +n, hacia); }   // (a quality goes up, or down: «suma granja:ana 2», «suma afecto:diana:ana -1»)
+      cualidadSuma(dueño, nombre, +n, hacia);
+      if (nombre === 'afecto' && hacia === 'ana' && PEOPLE[dueño] && !navigator.webdriver) {   // (Ana, liked a little more or a little less: shown, so the player sees what her choices do)
+        const b = PEOPLE[dueño]; if (sceneOf(dueño) === game.scene && +n > 0) hearts(b.x, b.y - 56);
+        notice(+n > 0 ? '♥ ' + NAMES[dueño] + ' te mira con otros ojos (cariño ' + Math.round(relGetW(dueño, 'ana')) + '/5)' : '💔 ' + NAMES[dueño] + ' se enfrió contigo (cariño ' + Math.round(relGetW(dueño, 'ana')) + '/5)'); } }   // (a quality goes up, or down: «suma granja:ana 2», «suma afecto:diana:ana -1»)
     if (a.fin_capitulo) { CAP1.done = hourNow(); logEv('Fin del capítulo 1 (y del 2): Ana llegó a Tejas Verdes.', []); }
   }
 }
@@ -173,7 +179,7 @@ class Dialogo {
     else if (Array.isArray(L) && L.length && !Array.isArray(L[0]) && (L[0].de || L[0].lineas)) L = L.flatMap(p => { const src = p.de ? dlgFuente(p.de) : p.lineas; return p.elegir ? p.elegir.map(i => src[i]).filter(Boolean) : src; });   // (pieces of several sources)
     L = (L || []).map(l => Array.isArray(l) ? l : [l.q, l.t, l.m]);
     if (this.elegir) L = this.elegir.map(i => L[i]).filter(Boolean);
-    if (this.marcas) L = L.map((l, j) => this.marcas[j] ? [l[0], l[1], this.marcas[j]] : l);
+    if (this.marcas) L = L.map((l, j) => this.marcas[j] && l[0] !== '!' && l[0] !== '?' ? [l[0], l[1], this.marcas[j]] : l);
     if (this.narra) L = [...this.narra.map(x => ['narra', x]), ...L];   // (what explains it, first)
     // (what changes with the day: the season, and something that really happened to her lately; a line left empty is not said)
     L = L.map(l => l[1] && /\{(estacion|noticia)\}/.test(l[1]) ? [l[0], l[1].replace('{estacion}', ESTACION_TXT[S]).replace('{noticia}', () => cartaNoticia() || ''), l[2]] : l);
@@ -256,7 +262,10 @@ function dlgAccion(s){   // an action of the script: «hecho x», «marca id | n
     case 'ofensa': return { ofensa: r };
     case 'triste': return { triste: rest };
     case 'fin_capitulo': return { fin_capitulo: true };
-    case 'nombrar': return { nombrar: r[0], pedir: r[1] === '?' };   // (Ana names a thing: «nombrar lago», the book's name; «nombrar lago ?», the player writes it)
+    case 'nombrar': return { nombrar: r[0], pedir: r[1] === '?' };
+    case 'sentar': return { sentar: r[0] };
+    case 'dormir': return { dormir: true };   // (Ana goes to sleep: the night passes)   // (at her or his place at the kitchen table)
+    case 'levantar': return { levantar: r[0] };   // (Ana names a thing: «nombrar lago», the book's name; «nombrar lago ?», the player writes it)
     case 'meta': { const [quien, tipo, args = ''] = part[0].split(/\s+/); return { meta: { quien, tipo, args: args ? args.split(',').map(dlgVal) : [], texto: part[1] || undefined, etiqueta: part[2] || undefined, prioridad: part[3] ? +part[3] : undefined } }; }
   }
   throw new Error('guion: acción desconocida «' + s + '»');
@@ -276,6 +285,7 @@ function dlgGuion(txt){
       if (s.startsWith('->')) { const last = c._l.at(-1), op = { texto: s.replace(/^->\*?\s*/, ''), propia: s.startsWith('->*'), lineas: [], efectos: [] }; if (last?.[0] === '?' && c._ultimaOpcion) last[2].push(op); else c._l.push(['?', 'elige', [op]]); c._ultimaOpcion = op; continue; }
       if (c._ultimaOpcion && /^\s/.test(raw)) { const op = c._ultimaOpcion; if (s.startsWith('!')) op.efectos.push(dlgAccion(s.slice(1).trim())); else op.lineas.push([k, v]); continue; }
       c._ultimaOpcion = null;
+      if (s.startsWith('!')) { c._l.push(['!', 'accion', dlgAccion(s.slice(1).trim())]); continue; }   // (something done in the middle of the scene, when its turn comes: «! sentar ana», «! ana llora=true»)
       const m = v.match(/^(.*?)\s+#(\S+)$/); c._l.push(m ? [k, m[1], m[2]] : [k, v]); continue; }
     if (k === 'al_empezar' || k === 'al_terminar') (c[k] ||= []).push(dlgAccion(v));
     else if (k === 'narra') (c.narra ||= []).push(v);   // (a text that explains, before the scene: a card, as in a book)

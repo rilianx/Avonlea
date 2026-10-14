@@ -2,7 +2,7 @@
    they arrive a day or a few later (Charlottetown is farther), and the answer comes back days or weeks after: it waits
    at the post office until Ana asks for it, and then she can read it. ---------- */
 const CORREO = {
-  diana: { nombre: 'Diana', donde: 'aquí en Avonlea, en La Cuesta del Huerto', dias: 1, resp: [2, 4], saludo: 'Mi queridísima Diana, amiga del alma:', firma: 'Tu amiga del alma hasta la muerte, Ana (con e)' },
+  diana: { nombre: 'Diana', donde: 'aquí en Avonlea, en La Cuesta del Huerto', dias: 1, resp: [2, 4], saludo: 'Mi queridísima Diana, amiga del alma:', firma: 'Tu amiga del alma hasta la muerte, Ana (con una sola n)' },
   stacy: { nombre: 'la Srta. Stacy', donde: 'en la pensión de Avonlea', dias: 1, resp: [3, 6], saludo: 'Querida Srta. Stacy:', firma: 'Su alumna que la quiere, Ana Shirley' },
   sraallan: { nombre: 'la Sra. Allan', donde: 'en la casa parroquial', dias: 1, resp: [2, 5], saludo: 'Querida Sra. Allan:', firma: 'Con todo cariño, Ana Shirley' },
   josephine: { nombre: 'la Srta. Josephine Barry', donde: 'en Charlottetown', dias: 3, resp: [7, 14], saludo: 'Querida tía Josephine (porque usted me dejó llamarla así):', firma: 'Su amiga que la recuerda siempre, Ana Shirley' },

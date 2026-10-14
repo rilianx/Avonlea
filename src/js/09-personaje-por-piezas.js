@@ -173,6 +173,12 @@ function kitHeadOn(c, p, t, vi, L){
   c.restore(); return true;
 }
 function drawPerson(c, p, t){
+  // crying at the table, the head on it (cap. 3): drawn sunk down behind the table's edge, shaking with each sob, and tears
+  if (p.llora && p.sit && !p._llorando) {
+    const sob = Math.max(0, Math.sin(t * 7)) * 1.6 + Math.sin(t * 23) * .4;
+    p._llorando = true; c.save(); c.translate(p.x, p.y + 23 + sob); c.scale(1.04, .82); c.translate(-p.x, -p.y); drawPerson(c, p, t); c.restore(); p._llorando = false;
+    return;   // (the tears: in front of the table, among the effects: see lagrimas() in 53-bucle.js)
+  }
   if (p.look === 'ana') { const La = LOOKS.ana; La.big = ANA_STYLE === 'mano' ? HEAD_M : 0; La.pencil = ANA_STYLE === 'mano'; if (La.hair0 == null) { La.hair0 = La.hair; La.hairD0 = La.hairD; } const green = !!game.wm?.perm?.pelo_verde; La.hair = green ? '#5a8a3a' : La.hair0; La.hairD = green ? '#3e6a26' : La.hairD0; La.style = game.wm?.perm?.pelo_corto ? 'corto' : 'braids'; La.hat = !game.wm?.sinSombrero; } else if (LOOKS[p.look]) LOOKS[p.look].big = Math.max(1, HEAD_M / 2);   // (green after the dye; short, without braids, after Marilla cuts it)
   if (CACHE_ON && c === G0 && !CACHE.dentro && cachePersona(c, p, t)) return;   // (after her look is set up: a quiet pose, from a kept image: see 66-cache-dibujos.js)
   if (animDraw(c, p, t) || kitDraw(c, p, t)) return;

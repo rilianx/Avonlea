@@ -283,7 +283,7 @@ ana: Pero el correo de Avonlea es casi lo mismo que una paloma, ¿no? Salvo que 
 carta: Prométeme que el sábado vamos al Bosque Encantado, aunque nos dé un poquito de miedo.
 ana: (Mira por la ventana un rato largo, con la pluma en la boca.)
 ana: ¿Y si le cuento lo del fantasma de la Burbuja de la Dríada? No… Marilla dice que esas cosas no se ponen por escrito. Quedan escritas, justamente.
-carta: Tu amiga del alma hasta la muerte, Ana (con e).
+carta: Tu amiga del alma hasta la muerte, Ana (con una sola n).
 ana: Listo. ¡La doblo como un abanico, para que se vea elegante!
 
 === carta_diana_2 ===
@@ -304,7 +304,7 @@ ana: (Dibuja una flor en el margen, y luego otra, y luego una enredadera entera.
 carta: Y una promesa: mientras el sol y la luna existan, serás mi amiga del alma.
 ana: ¡Ay, la enredadera se comió media hoja! Ya no queda lugar para la posdata.
 carta: P. D.: La enredadera la hice yo. Es una enredadera de amistad.
-carta: Tuya siempre, Ana (con e).
+carta: Tuya siempre, Ana (con una sola n).
 
 === carta_stacy_1 ===
 canal: carta
@@ -443,7 +443,7 @@ al_terminar: meta diana estar_en h:os,-,- | Diana entra a conocer a la niña de 
 ---
 barry: Buenas tardes, Marilla. ¡Qué sorpresa! Pasa, pasa. ¿Y ésta es la niña que adoptaron?
 marilla: Sí, ésta es Ana Shirley. Vengo a devolverle el patrón de la falda que me prestó.
-ana: Ana con e, por favor.
+ana: Ana con una sola n, por favor.
 barry: ¿Cómo estás, Ana? Diana está en el jardín. ¡Diana! Ven a conocer a la niña de los Cuthbert.
 
 === conoce_diana ===
@@ -474,7 +474,7 @@ al_terminar: afecto ana diana 4
 al_terminar: log Ana y Diana se conocieron por casualidad.
 ---
 diana: Hola… ¿Tú eres la niña que vino a vivir a Tejas Verdes?
-ana: Sí… soy Ana. Ana con e. ¿Y tú… tú eres Diana Barry?
+ana: Sí… soy Ana. Ana con una sola n. ¿Y tú… tú eres Diana Barry?
 diana: Sí. Mamá dice que eres muy rara. Pero no pareces rara. Bueno, un poquito.
 ana: (Ana se pone colorada hasta las orejas.) Tengo una imaginación muy grande, eso es todo. ¿Te… te gustaría que algún día jugáramos juntas?
 diana: Bueno… tal vez. Tengo que volver a casa ahora.
@@ -728,10 +728,6 @@ marilla: Bueno. Hay otro examen el año que viene, y tú no eres de las que se r
 # esa noche, al otro día van a White Sands a arreglar el error, y Ana vuelve… a prueba. Para quedarse de verdad tiene
 # que ganarse a Marilla (el cuaderno: «Quedarse en Tejas Verdes»).
 === inicio_llegada ===
-narra: Tejas Verdes es la granja de los hermanos Cuthbert, en Avonlea, un pueblito de la Isla del Príncipe Eduardo, en Canadá. Matthew y Marilla nunca se casaron; ya no son jóvenes, y él tiene el corazón delicado.
-narra: Por eso decidieron adoptar a un niño de un orfanato de Nueva Escocia, que ayudara a Matthew en la granja. Se lo encargaron a la Sra. Spencer, una vecina de White Sands que iba a ir a buscar a una niña para ella.
-narra: Esta tarde Matthew fue a buscar al niño a la estación de Bright River. Pero allí no había ningún niño: había una niña flaca, de once años, pelo rojo y ojos enormes, con una maleta de alfombra. Se llama Ana Shirley, es huérfana y nunca ha tenido un hogar.
-narra: Matthew no fue capaz de dejarla allí, y la trajo. Ana habló durante todo el camino; Matthew, que le tiene miedo a todas las mujeres, descubrió que le gustaba escucharla. Ahora llegan a Tejas Verdes, donde Marilla espera a un niño.
 canal: gg
 prioridad: 10
 interrumpe
@@ -742,17 +738,61 @@ lineas: libro:llegada
 al_empezar: log Ana llegó a Tejas Verdes con Matthew, de noche. Marilla esperaba a un niño.
 al_terminar: hecho llegada_tv
 al_terminar: hecho primera_noche
-al_terminar: log Marilla dejó que Ana se quedara esa noche, hasta aclarar el enredo.
+al_terminar: log Marilla dejó que Ana se quedara esa noche, hasta aclarar el enredo. Ana casi no probó la cena.
 ---
-marilla: Bueno, bueno, no hace falta llorar así. No te vamos a echar esta noche. Te quedas hasta que aclaremos este enredo. ¿Cómo te llamas?
-ana: ¿Me llamaría Cordelia, por favor?
-marilla: ¿Cordelia? ¿Así te llamas?
-ana: N-no… no exactamente. Me llamo Ana Shirley. Pero me encantaría que me llamaran Cordelia. Es un nombre tan perfectamente elegante.
-marilla: Ana es un nombre sensato y bonito. No tienes por qué avergonzarte de él.
-ana: Entonces, por favor, llámeme Ana con e.
-matthew: (Matthew mira a Ana y luego a Marilla, sin decir nada. Pero no se le olvida la niña que le habló todo el camino.)
-marilla: Mañana veremos qué se hace contigo. Ahora a cenar, y a la cama. Tu pieza es la del alero.
-ana: (Ana apenas prueba la cena. Esa noche, en la pieza del alero, llora hasta quedarse dormida.)
+! sentar ana
+! ana llora=true
+ana: (Ana se deja caer en una silla junto a la mesa, hunde la cara entre los brazos y llora a mares.)
+matthew: (Matthew y Marilla se miran por encima de la estufa, sin saber qué hacer.)
+marilla: Bueno, bueno, no hace falta llorar así.
+ana: ¡Sí que hace falta! Usted también lloraría si fuera huérfana y llegara a un lugar que creía que iba a ser su hogar, y se encontrara con que no la quieren porque no es un niño. ¡Oh, es lo más trágico que me ha pasado en la vida!
+marilla: (A Marilla se le escapa una sonrisa un poco oxidada, de tan poco usarla.) Bueno, no llores más. No te vamos a echar esta noche. Te quedas hasta que aclaremos este enredo. ¿Cómo te llamas?
+! ana llora=false
+ana: (Ana levanta la cara, toda mojada de lágrimas.)
+->* «¿Me llamaría Cordelia, por favor?»
+   ana: ¿Me llamaría Cordelia, por favor?
+   marilla: ¿Cordelia? ¿Así te llamas?
+   ana: N-no… no exactamente. Me llamo Ana Shirley. Pero me encantaría que me llamaran Cordelia. Es un nombre tan perfectamente elegante.
+   marilla: No sé qué quieres decir con eso. Ana es un nombre sensato y bonito. No tienes por qué avergonzarte de él.
+-> «Ana Shirley», y nada más
+   ana: Ana Shirley.
+   marilla: (Marilla asiente, un poco sorprendida de que la niña conteste derecho.) Bueno. Ana es un nombre sensato y bonito.
+   ! suma afecto:marilla:ana 1
+ana: Si me llama Ana, por favor llámeme Ana con una sola n. A-n-n-a se ve espantoso, pero A-n-a se ve tanto más distinguido.
+marilla: (Marilla aprieta los labios.) Muy bien, Ana con una sola n. Ahora a cenar.
+! sentar marilla
+! sentar matthew
+marilla: (Marilla sirve pan, mantequilla y jalea de manzanitas silvestres. Matthew se sienta en silencio.)
+ana: (Ana mordisquea el pan y empuja la jalea por el plato con la cuchara. No come casi nada.)
+marilla: No estás comiendo nada.
+->* «No puedo. Estoy en las profundidades de la desesperación.»
+   ana: No puedo. Estoy en las profundidades de la desesperación. ¿Usted puede comer cuando está en las profundidades de la desesperación?
+   marilla: Nunca he estado en las profundidades de la desesperación, así que no sabría decirte.
+   ana: ¿Nunca? Bueno, ¿alguna vez trató de imaginar que estaba?
+   marilla: No, nunca.
+   ana: Entonces no creo que pueda entender cómo es.
+-> Probar un bocado, para no desairar a Marilla
+   ana: (Ana se obliga a tragar un bocado de pan. Le cuesta muchísimo.) Está muy rico, Srta. Cuthbert. Es que no tengo nada de hambre.
+   marilla: (Marilla la mira un momento. Algo se le ablanda por dentro, aunque no lo demuestra.)
+   ! suma afecto:marilla:ana 1
+matthew: Bueno, pues… creo que está cansada, Marilla. Lo mejor sería acostarla.
+marilla: (Marilla enciende una vela.) Tu pieza es la del alero este, arriba. Sube y acuéstate.
+! levantar marilla
+! levantar matthew
+! levantar ana
+narra: Así se juega: cuando hay que elegir, eliges tú por Ana (si no eliges, ella elige sola, a su manera). Lo que hace cambia lo que los demás sienten por ella. Ahora mismo Marilla no la quiere, y Ana está a prueba.
+narra: Ahora te toca a ti: lleva a Ana a su pieza. Toca la escalera, al fondo de la cocina; arriba, toca la cama para acostarla. En el cuaderno (📖) verás qué puede hacer Ana para quedarse en Tejas Verdes.
+
+# la primera noche, en la cama de la pieza del alero (la primera vez que Ana se acuesta)
+=== primera_bed ===
+disparo: primera
+canal: ana_sola
+si: hecho:primera_noche, !hecho:se_queda
+---
+ana: (Ana se quita el vestido, se pone el camisón del orfanato, que le queda corto, y salta a la cama. Se tapa hasta la cabeza.)
+ana piensa: Marilla me diría «buenas noches». ¿Cómo va a ser buena una noche que es la peor de toda mi vida?
+ana: (Esa noche, en la pieza del alero, Ana llora hasta quedarse dormida.)
+! dormir
 
 === primera_noche ===
 canal: gg
@@ -769,7 +809,7 @@ ana: ¿Me llamaría Cordelia, por favor?
 marilla: ¿Cordelia? ¿Así te llamas?
 ana: N-no… no exactamente. Me llamo Ana Shirley. Pero me encantaría que me llamaran Cordelia. Es un nombre tan perfectamente elegante.
 marilla: Ana es un nombre sensato y bonito. No tienes por qué avergonzarte de él.
-ana: Entonces, por favor, llámeme Ana con e.
+ana: Entonces, por favor, llámeme Ana. Ana con una sola n: A-n-a se ve tanto más distinguido.
 matthew: (Matthew mira a Ana y luego a Marilla, sin decir nada. Pero no se le olvida la niña que le habló todo el camino.)
 marilla: Mañana veremos qué se hace contigo. Ahora a cenar, y a la cama. Tu pieza es la del alero.
 ana: (Ana apenas prueba la cena. Esa noche, en la pieza del alero, llora hasta quedarse dormida.)

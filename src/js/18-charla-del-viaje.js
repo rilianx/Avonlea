@@ -3,7 +3,7 @@
    other musings; when those too are said, it all starts over. ---------- */
 let TALKS = [];
 function talkPlay(lines, o = {}){
-  const L = lines.map(l => Array.isArray(l) ? (l[0] === '?' ? { q: '?', t: 'elige', opc: l[2] } : { q: l[0], t: l[1], m: l[2] }) : l).filter(l => l.t && l.t !== '…');
+  const L = lines.map(l => Array.isArray(l) ? (l[0] === '?' ? { q: '?', t: 'elige', opc: l[2] } : l[0] === '!' ? { q: '!', t: 'accion', acc: l[2] } : { q: l[0], t: l[1], m: l[2] }) : l).filter(l => l.t && l.t !== '…');
   for (const k of o.hold || []) CHAT_HOLD[k] = TT + 1e6;
   const t = { hold: o.hold, lines: L, i: -1, wait: o.delay ?? .5, gap: o.gap || 0, ch: o.ch, stop: o.stop, end: o.end, budget: o.budget ? o.budget * MIN_S : 0, el: 0, use: o.use, resumen: o.resumen };
   if (o.ch && TALKS.some(x => x.ch === o.ch)) { if (o.queue) (TALK_Q[o.ch] ||= []).push(t); return t; }
@@ -19,7 +19,8 @@ function talkTick(dt){
     if ((t.wait -= dt) > 0) continue;
     if (t.stop?.() || ++t.i >= t.lines.length || (t.budget && t.el > t.budget)) { talkEnd(t); continue; }
     const l = t.lines[t.i]; if (l.q === '?') { elegir(t, l.opc); continue; }   // (a choice: the scene waits for it)
-    if (l.q === 'narra') { narrar(t, l.t); continue; }   // (a text that explains: a card, until the player goes on)
+    if (l.q === 'narra') { narrar(t, l.t); continue; }
+    if (l.q === '!') { dlgHacer([l.acc]); t.wait = .05; continue; }   // (done, and on with the scene)   // (a text that explains: a card, until the player goes on)
     sayB(talkQ(l.q), l.t); t.wait = lineDur(l.t) + .35 + t.gap;   // (gap: a scene that takes its time, like a letter being written)
     if (l.m) cap1Mark(l.m); t.use?.(t.i, l);
   }
@@ -158,6 +159,6 @@ function elegir(t, opciones){
   const propia = opciones.find(o => o.propia) || opciones[0];
   if (navigator.webdriver || ana.hidden) return aplicar(propia);   // (no one to ask: what she would do)
   let hecho = false; const una = op => { if (hecho) return; hecho = true; close(); pide(op); };
-  say('ana', '¿Qué hace Ana?', opciones.map(op => [nombreMay(op.texto), () => una(op)]));
+  say('ana', '¿Qué hace Ana?', opciones.map(op => [nombreMay(op.texto.replace(/^«(.)/, (m, c) => '«' + c.toUpperCase())), () => una(op)]));
   t.elige = { hasta: auto.on ? TT + 10 : Infinity, una, propia };   // (if the player is away, Ana chooses after a while: what she would do)
 }
