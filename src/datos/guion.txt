@@ -187,9 +187,18 @@ interrumpe
 si: dicha:avenida
 o: calesa=camino camino.desde=.955
 o: calesa=avonlea cerca=matthew,letrero_br,2500
-lineas: libro:avonlea.camino_blanco [1,2,3,4,9,11]
+lineas: libro:avonlea.camino_blanco [1,2,3,4]
 marcas: 0=una_milla
-al_empezar: log Matthew rompió el silencio: «solo nos falta una milla». Ana bautizó la Avenida: el Camino Blanco de las Delicias.
+al_empezar: log Matthew rompió el silencio: «solo nos falta una milla».
+---
+ana: Pero no deberían llamar «la Avenida» a ese lugar tan precioso. Ese nombre no significa nada. Deberían llamarlo… a ver…
+->* el Camino Blanco de las Delicias
+   ana: ¡El Camino Blanco de las Delicias! ¿No es un nombre bonito e imaginativo?
+   ! nombrar avenida
+-> Otro nombre…
+   ana: ¡El Camino Blanco de las Delicias! ¿No es un nombre bonito e imaginativo?
+   ! nombrar avenida ?
+ana: Otros podrán llamarlo la Avenida, pero yo siempre le diré el Camino Blanco de las Delicias.
 
 === lago ===
 canal: viaje
@@ -197,9 +206,20 @@ prioridad: 9
 interrumpe
 calesa: avonlea
 cerca: matthew, lago, 1300
-lineas: libro:avonlea.lago [0,1,2,3,10]
+lineas: libro:avonlea.lago [0]
 marcas: 0=lago
-al_empezar: log Matthew le mostró la laguna de Barry; Ana la bautizó el Lago de las Aguas Brillantes.
+al_empezar: log Matthew le mostró la laguna de Barry.
+---
+ana: Oh, ese nombre tampoco me gusta. La llamaré… a ver…
+->* el Lago de las Aguas Brillantes
+   ana: El Lago de las Aguas Brillantes. Sí, ése es su nombre verdadero. Lo sé por el escalofrío.
+   ! nombrar lago
+-> Otro nombre…
+   ana: El Lago de las Aguas Brillantes. Sí, ése es su nombre verdadero. Lo sé por el escalofrío.
+   ! nombrar lago ?
+ana: Cuando doy con un nombre que calza exacto, siento un escalofrío. ¿A usted las cosas le dan escalofríos?
+matthew: Bueno, pues, sí. Siempre me da como un escalofrío ver esos gusanos blancos y feos que salen al cavar en los almácigos de pepinos. Detesto cómo se ven.
+ana: Yo siempre les doy las buenas noches a las cosas que quiero, igual que a las personas. Creo que les gusta. Esa agua parece estar sonriéndome.
 
 === tejas_verdes ===
 canal: viaje
@@ -793,7 +813,13 @@ canal: ana_sola
 ---
 ana: (Ana corre a la ventana y la abre de par en par. Afuera, un cerezo enorme, todo blanco de flores, le roza el marco.)
 ana: ¡Oh, qué hermoso! Es como si el árbol se hubiera vestido de novia para mí. ¿No es precioso?
-ana: Te voy a llamar la Reina de las Nieves. Ya está: ese es tu nombre, para siempre.
+ana: Te voy a llamar…
+->* la Reina de las Nieves
+   ana: La Reina de las Nieves. Ya está: ese es tu nombre, para siempre.
+   ! nombrar cerezo
+-> Otro nombre…
+   ana: La Reina de las Nieves. Ya está: ese es tu nombre, para siempre.
+   ! nombrar cerezo ?
 ana: (Más allá, un huerto de manzanos, un arroyo entre abedules, y a lo lejos, el mar azul y brillante.) Esto es demasiado lindo para ser verdad. Si tengo que irme, al menos lo voy a recordar toda la vida.
 
 === primera_mirror ===

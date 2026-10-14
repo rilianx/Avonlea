@@ -11,7 +11,7 @@ function know(k, text, d = today() + 1){
   a.push({ d, s: S, t: text }); if (a.length > 30) a.splice(0, a.length - 30);
 }
 function logEv(text, who = witnesses()){
-  text = text.replace(/\ba el /g, 'al ').replace(/\bde el /g, 'del ');
+  text = conNombres(text).replace(/\ba el /g, 'al ').replace(/\bde el /g, 'del ');
   const j = game.journal, e = { d: today() + 1, s: S, t: text, h: Math.round(hourNow() * 100) / 100 };
   if (!(j.length && j[j.length - 1].t === text && j[j.length - 1].d === e.d)) { j.push(e); if (j.length > 80) j.splice(0, j.length - 80); }
   for (const k of new Set(who)) know(k, text);

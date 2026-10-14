@@ -36,7 +36,7 @@ addEventListener('pointercancel', () => { stick = null; tapStart = null; panDrag
 let hinted = false; function hint(){ if (hinted) return; hinted = true; setTimeout(() => { $('hint').style.opacity = 0; }, 4000); }
 // a note at the top for a moment (when the season turns)
 let noteTimer = 0;
-function notice(text){ const h = $('hint'); h.textContent = text; h.style.transition = 'none'; h.style.opacity = 1; void h.offsetWidth; h.style.transition = ''; clearTimeout(noteTimer); noteTimer = setTimeout(() => { h.style.opacity = 0; }, 4500); }
+function notice(text){ const h = $('hint'); h.textContent = conNombres(text); h.style.transition = 'none'; h.style.opacity = 1; void h.offsetWidth; h.style.transition = ''; clearTimeout(noteTimer); noteTimer = setTimeout(() => { h.style.opacity = 0; }, 4500); }
 $('mapbtn').addEventListener('pointerdown', e => { e.stopPropagation(); audio(); if (!game.talk) toggleMap(); });
 // the buttons on the right can be put away (they get in the way of touching things there): ☰ shows them again
 { let hide; try { hide = localStorage.getItem('avonlea-lado'); } catch (e) {} hide = hide == null ? innerWidth < 760 || matchMedia('(pointer: coarse)').matches : hide === '1';

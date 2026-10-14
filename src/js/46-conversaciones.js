@@ -219,7 +219,7 @@ function drawTag(g, t){
 function drawBubble(g, p, b, W, H){
   const Z = view.Z, small = W < 520, a = clamp(Math.min(b.t / .15, (b.dur + .35 - b.t) / .3), 0, 1);
   let fs = small ? 12 : 13, maxW = Math.min(small ? 200 : 240, W - 24), rows;
-  const wrap = () => { g.font = fs + 'px Georgia, serif'; rows = []; let cur = ''; for (const w of b.text.split(' ')) { const t = cur ? cur + ' ' + w : w; if (cur && g.measureText(t).width > maxW) { rows.push(cur); cur = w; } else cur = t; } rows.push(cur); };
+  const wrap = () => { g.font = fs + 'px Georgia, serif'; rows = []; let cur = ''; for (const w of conNombres(b.text).split(' ')) { const t = cur ? cur + ' ' + w : w; if (cur && g.measureText(t).width > maxW) { rows.push(cur); cur = w; } else cur = t; } rows.push(cur); };
   wrap(); if (rows.length > 5) { fs -= 1; maxW = Math.min(maxW + 60, W - 24); wrap(); }
   const lh = fs + 3, w = Math.min(Math.max(...rows.map(r => g.measureText(r).width)) + 18, W - 12), h = rows.length * lh + 10, r = 8;
   const headY = p.lie ? p.y - 24 : p.headTop ? p.y - p.headTop : p.y - Math.max(62, 28 + 12 * HEAD_M) * LOOKS[p.look].h - 6;
@@ -253,10 +253,10 @@ function give(who, k){
 function say(who, text, opts, wait = false){
   game.talk = { who, wait }; if (who !== 'ana') relatoDicho(who, text);   // (Ana's own box is a question to the player, not something said)
   const box = $('talk'), f = Math.min(5, game.fond[who] || 0), heartsTxt = who in game.fond ? '♥'.repeat(f) + '♡'.repeat(5 - f) : '';
-  box.innerHTML = `<div class="who">${NAMES[who] || who}<span>${heartsTxt}</span></div><div class="line"></div><div class="opts"></div>`;
-  box.querySelector('.line').textContent = text; box.classList.toggle('wait', wait);
+  box.innerHTML = `<div class="who">${NAMES[who] || (who === 'ana' ? 'Ana' : who)}<span>${heartsTxt}</span></div><div class="line"></div><div class="opts"></div>`;
+  box.querySelector('.line').textContent = conNombres(text); box.classList.toggle('wait', wait);
   const row = box.querySelector('.opts');
-  opts.forEach(([label, fn], k) => { const b = document.createElement('button'); b.textContent = (opts.length > 1 ? (k + 1) + '. ' : '') + label; b.onclick = e => { e.stopPropagation(); fn(); }; row.appendChild(b); });
+  opts.forEach(([label, fn], k) => { const b = document.createElement('button'); b.textContent = (opts.length > 1 ? (k + 1) + '. ' : '') + conNombres(label); b.onclick = e => { e.stopPropagation(); fn(); }; row.appendChild(b); });
   box.hidden = false; game.talkOpts = opts;
   // a decision with a character: if the player does not choose in 10 seconds, Ana chooses by herself
   if (opts.length > 1 && !wait && PEOPLE[who] && AI.auto !== false) { game.talk.deadline = TT + 10; box.insertAdjacentHTML('beforeend', '<div class="tbar"><i></i></div>'); }

@@ -159,9 +159,9 @@ function drawProp(c, o, t, night){
   }
   else if (o.kind === 'sign') {
     ell(c, o.x + 2, o.y + 1, 6, 2, 'rgba(30,40,20,.2)'); c.fillStyle = '#7a5536'; c.fillRect(o.x - 1.5, o.y - 20, 3, 20);
-    c.font = 'italic 8px Georgia, serif'; const tw = c.measureText(o.text).width + 10;
+    c.font = 'italic 8px Georgia, serif'; const T = conNombres(o.text), tw = c.measureText(T).width + 10;
     blob(c, [[o.x - tw / 2, o.y - 30], [o.x + tw / 2, o.y - 30], [o.x + tw / 2, o.y - 18], [o.x - tw / 2, o.y - 18]], '#d9bf8f');
-    c.fillStyle = '#4a2f1c'; c.textAlign = 'center'; c.fillText(o.text, o.x, o.y - 21.5);
+    c.fillStyle = '#4a2f1c'; c.textAlign = 'center'; c.fillText(T, o.x, o.y - 21.5);
   }
 }
 function drawBed(c, b, t){

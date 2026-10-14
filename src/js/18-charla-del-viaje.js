@@ -133,9 +133,10 @@ function elegir(t, opciones){
     logEv('Ana eligió: ' + op.texto.replace(/^./, c => c.toLowerCase()) + '.', []);
     t.wait = .4; t.elige = null;
   };
+  const pide = op => { const e = op.efectos.find(a => a.nombrar && a.pedir); if (!e) return aplicar(op); pedirNombre(e.nombrar, n => aplicar({ ...op, texto: n, efectos: op.efectos.map(a => a === e ? { ...a, n } : a) })); };   // (a name to write: the box first)
   const propia = opciones.find(o => o.propia) || opciones[0];
   if (navigator.webdriver || ana.hidden) return aplicar(propia);   // (no one to ask: what she would do)
-  let hecho = false; const una = op => { if (hecho) return; hecho = true; close(); aplicar(op); };
-  say('ana', '¿Qué hace Ana?', opciones.map(op => [op.texto, () => una(op)]));
+  let hecho = false; const una = op => { if (hecho) return; hecho = true; close(); pide(op); };
+  say('ana', '¿Qué hace Ana?', opciones.map(op => [nombreMay(op.texto), () => una(op)]));
   t.elige = { hasta: auto.on ? TT + 10 : Infinity, una, propia };   // (if the player is away, Ana chooses after a while: what she would do)
 }

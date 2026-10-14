@@ -293,9 +293,21 @@ tema: Inventar nombres para los lugares con ella
 si: afecto:diana:ana>=2, hecho:conocidas_diana, !hecho:prohibida
 al_terminar: suma letras:ana 1
 ---
-ana: Diana, ese sendero entre los abedules necesita un nombre. ¿Qué te parece… el Paseo de los Enamorados?
+ana: Diana, ese sendero entre los abedules necesita un nombre. ¿Qué te parece…
+->* el Paseo de los Enamorados
+   ana: …el Paseo de los Enamorados?
+   ! nombrar senda
+-> Otro nombre…
+   ana: …el Paseo de los Enamorados?
+   ! nombrar senda ?
 diana: ¡Ana! Pero si por ahí no pasea ningún enamorado.
-ana: Por eso. Hay que imaginarlos. Y el arroyo que lo cruza, el Burbujeo de las Dríadas.
+ana: Por eso. Hay que imaginarlos. Y el manantial junto al arroyo…
+->* la Burbuja de la Dríade
+   ana: …la Burbuja de la Dríade.
+   ! nombrar burbuja
+-> Otro nombre…
+   ana: …la Burbuja de la Dríade.
+   ! nombrar burbuja ?
 diana: (Diana se ríe.) Contigo hasta los charcos tienen nombre.
 ana: Los charcos también se lo merecen.
 

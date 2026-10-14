@@ -219,7 +219,7 @@ const d0Home = (here, me) => false;   // (where one can cook: one's own kitchen)
 const ITEM_PLACE = { lena: 'granero', heno: 'campo', leche: 'corral' };
 const QUEHACERES = ['platos', 'barrer', 'mesa'], QUEHACER_TXT = { platos: 'lavar los platos', barrer: 'barrer la cocina', mesa: 'poner la mesa' };
 const JURAN = ['ana', 'diana'];   // (friends of the soul: «mientras duren el sol y la luna»)
-const NOMBRES_ANA = { huerta: 'el Valle de las Violetas', arbustos: 'el Sendero de los Abedules', lago: 'el Lago de las Aguas Brillantes', bosque_peg: 'el Bosque Encantado', corral: 'Idlewild' };
+const NOMBRES_ANA = Object.fromEntries(['huerta', 'arbustos', 'lago', 'bosque_peg', 'corral'].map(p => [p, NOMBRABLES[p].libro]));   // (the places Ana names as she goes: src/js/57-nombres-de-ana.js)
 const FAMILY = o => o === 'ana' || CUTHBERT.includes(o) ? CUTHBERT : [o];
 const HOUSEHOLDS = [CUTHBERT, ['barry', 'diana'], ['allan', 'sraallan'], ['hetty', 'olivia', 'sara'], ['alec', 'janet', 'felicity', 'felix', 'cecily']];
 const kin = (a, b) => HOUSEHOLDS.some(h => h.includes(a) && h.includes(b));   // (whose cow it is: the household)

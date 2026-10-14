@@ -146,7 +146,7 @@ async function openaiCall(messages, schema, strict = true){
 }
 // Claude (Messages API): the fixed prompt is marked for caching
 async function claudeCall(messages, schema, retry = true){
-  const body = { model: AI.model, max_tokens: 4000, system: [{ type: 'text', text: sysFor(schema), cache_control: { type: 'ephemeral' } }], messages, output_config: { format: { type: 'json_schema', schema } } };
+  const body = { model: AI.model, max_tokens: 4000, system: [{ type: 'text', text: conNombres(sysFor(schema)), cache_control: { type: 'ephemeral' } }], messages, output_config: { format: { type: 'json_schema', schema } } };
   const headers = { 'content-type': 'application/json', 'x-api-key': aiKey(), 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' };
   // (low effort: quick answers for a chat; on the Opus and Sonnet models, a declined answer is retried on another model)
   if (AI.model !== 'claude-haiku-4-5') { body.output_config.effort = 'low'; if (retry) { body.fallbacks = 'default'; headers['anthropic-beta'] = 'server-side-fallback-2026-07-01'; } }

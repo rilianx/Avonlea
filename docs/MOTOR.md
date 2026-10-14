@@ -63,6 +63,20 @@ lynde: Es terriblemente flaca y fea, Marilla. ¡Y el pelo, rojo como zanahoria!
    ! suma afecto:marilla:ana 1
 ```
 
+**Los nombres que pone Ana** (`src/js/57-nombres-de-ana.js`): cuando Ana bautiza algo (la Avenida, la laguna de Barry, el cerezo de su ventana, los lugares de Avonlea), el jugador elige entre el nombre del libro y uno propio, que escribe en una caja. Desde entonces esa cosa se llama así en todas partes: en lo que se dice, en el diario, en el mapa, en los letreros y en lo que se le cuenta a la IA. En una escena es una alternativa más; el estado que queda depende del camino elegido:
+
+```
+ana: Oh, ese nombre tampoco me gusta. La llamaré… a ver…
+->* el Lago de las Aguas Brillantes
+   ana: El Lago de las Aguas Brillantes. Sí, ése es su nombre verdadero.
+   ! nombrar lago          (el del libro: hecho nombro_lago)
+-> Otro nombre…
+   ana: El Lago de las Aguas Brillantes. Sí, ése es su nombre verdadero.
+   ! nombrar lago ?        (el que escribe el jugador: nombro_lago y nombre_propio_lago)
+```
+
+Las líneas se escriben con el nombre del libro: el juego lo cambia solo por el de Ana (respetando «del», «al» y la mayúscula). Ana sola, sin jugador, usa el del libro.
+
 **La primera vez** (`src/js/66-primeras-veces.js`): la primera vez que Ana hace algunas cosas (mirar por la ventana de su pieza, mirarse al espejo, subir a su pieza, abrir el armario, ver el mar desde el faro…), en vez de la frase de siempre sale una escena del guion, `primera_<acción>` con `disparo: primera`. Con `tambien`, la acción se hace igual (subir la escalera).
 
 **Los hitos:** al cruzar un umbral de una habilidad de Ana, alguien se lo dice la próxima vez que se encuentran (con IA, una escena improvisada; sin IA, la línea escrita). Luego queda el hecho `hito_<habilidad>_<n>`.

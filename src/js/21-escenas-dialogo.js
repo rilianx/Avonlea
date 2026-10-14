@@ -122,6 +122,7 @@ function dlgHacer(list){   // what a scene does when it starts or ends
     if (a.olvidar) delete dlgHechos()[a.olvidar];   // (it is no longer so: the prohibition, once forgiven)
     if (a.ofensa) { const [k, o, motivo, n] = a.ofensa; game.wm.ofensa[k + '>' + o] = motivo; relSetW(k, o, Math.min(relGetW(k, o), +n)); }   // (k is offended with o)
     if (a.triste) realR.setFact('triste:' + a.triste);
+    if (a.nombrar) nombrar(a.nombrar, a.n);
     if (a.afecto) { const [k, o, n] = a.afecto; relSetW(k, o, Math.max(relGetW(k, o), +n)); }   // (how much one cares for the other, at least so much)
     if (a.suma) { const [q, n] = a.suma, [nombre, dueño, hacia] = q.split(':'), H = (game.wm.sumaHoy ||= {});
       if (a.limitado && H[q] === today()) { (game.wm.sumaPend ||= []).push({ q, n: +n }); continue; }   // (from conversations, each quality goes up at most once a day: the rest shows on the days after)
@@ -252,6 +253,7 @@ function dlgAccion(s){   // an action of the script: «hecho x», «marca id | n
     case 'ofensa': return { ofensa: r };
     case 'triste': return { triste: rest };
     case 'fin_capitulo': return { fin_capitulo: true };
+    case 'nombrar': return { nombrar: r[0], pedir: r[1] === '?' };   // (Ana names a thing: «nombrar lago», the book's name; «nombrar lago ?», the player writes it)
     case 'meta': { const [quien, tipo, args = ''] = part[0].split(/\s+/); return { meta: { quien, tipo, args: args ? args.split(',').map(dlgVal) : [], texto: part[1] || undefined, etiqueta: part[2] || undefined, prioridad: part[3] ? +part[3] : undefined } }; }
   }
   throw new Error('guion: acción desconocida «' + s + '»');

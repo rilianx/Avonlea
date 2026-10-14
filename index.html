@@ -386,9 +386,18 @@ interrumpe
 si: dicha:avenida
 o: calesa=camino camino.desde=.955
 o: calesa=avonlea cerca=matthew,letrero_br,2500
-lineas: libro:avonlea.camino_blanco [1,2,3,4,9,11]
+lineas: libro:avonlea.camino_blanco [1,2,3,4]
 marcas: 0=una_milla
-al_empezar: log Matthew rompió el silencio: «solo nos falta una milla». Ana bautizó la Avenida: el Camino Blanco de las Delicias.
+al_empezar: log Matthew rompió el silencio: «solo nos falta una milla».
+---
+ana: Pero no deberían llamar «la Avenida» a ese lugar tan precioso. Ese nombre no significa nada. Deberían llamarlo… a ver…
+->* el Camino Blanco de las Delicias
+   ana: ¡El Camino Blanco de las Delicias! ¿No es un nombre bonito e imaginativo?
+   ! nombrar avenida
+-> Otro nombre…
+   ana: ¡El Camino Blanco de las Delicias! ¿No es un nombre bonito e imaginativo?
+   ! nombrar avenida ?
+ana: Otros podrán llamarlo la Avenida, pero yo siempre le diré el Camino Blanco de las Delicias.
 
 === lago ===
 canal: viaje
@@ -396,9 +405,20 @@ prioridad: 9
 interrumpe
 calesa: avonlea
 cerca: matthew, lago, 1300
-lineas: libro:avonlea.lago [0,1,2,3,10]
+lineas: libro:avonlea.lago [0]
 marcas: 0=lago
-al_empezar: log Matthew le mostró la laguna de Barry; Ana la bautizó el Lago de las Aguas Brillantes.
+al_empezar: log Matthew le mostró la laguna de Barry.
+---
+ana: Oh, ese nombre tampoco me gusta. La llamaré… a ver…
+->* el Lago de las Aguas Brillantes
+   ana: El Lago de las Aguas Brillantes. Sí, ése es su nombre verdadero. Lo sé por el escalofrío.
+   ! nombrar lago
+-> Otro nombre…
+   ana: El Lago de las Aguas Brillantes. Sí, ése es su nombre verdadero. Lo sé por el escalofrío.
+   ! nombrar lago ?
+ana: Cuando doy con un nombre que calza exacto, siento un escalofrío. ¿A usted las cosas le dan escalofríos?
+matthew: Bueno, pues, sí. Siempre me da como un escalofrío ver esos gusanos blancos y feos que salen al cavar en los almácigos de pepinos. Detesto cómo se ven.
+ana: Yo siempre les doy las buenas noches a las cosas que quiero, igual que a las personas. Creo que les gusta. Esa agua parece estar sonriéndome.
 
 === tejas_verdes ===
 canal: viaje
@@ -992,7 +1012,13 @@ canal: ana_sola
 ---
 ana: (Ana corre a la ventana y la abre de par en par. Afuera, un cerezo enorme, todo blanco de flores, le roza el marco.)
 ana: ¡Oh, qué hermoso! Es como si el árbol se hubiera vestido de novia para mí. ¿No es precioso?
-ana: Te voy a llamar la Reina de las Nieves. Ya está: ese es tu nombre, para siempre.
+ana: Te voy a llamar…
+->* la Reina de las Nieves
+   ana: La Reina de las Nieves. Ya está: ese es tu nombre, para siempre.
+   ! nombrar cerezo
+-> Otro nombre…
+   ana: La Reina de las Nieves. Ya está: ese es tu nombre, para siempre.
+   ! nombrar cerezo ?
 ana: (Más allá, un huerto de manzanos, un arroyo entre abedules, y a lo lejos, el mar azul y brillante.) Esto es demasiado lindo para ser verdad. Si tengo que irme, al menos lo voy a recordar toda la vida.
 
 === primera_mirror ===
@@ -1437,9 +1463,21 @@ tema: Inventar nombres para los lugares con ella
 si: afecto:diana:ana>=2, hecho:conocidas_diana, !hecho:prohibida
 al_terminar: suma letras:ana 1
 ---
-ana: Diana, ese sendero entre los abedules necesita un nombre. ¿Qué te parece… el Paseo de los Enamorados?
+ana: Diana, ese sendero entre los abedules necesita un nombre. ¿Qué te parece…
+->* el Paseo de los Enamorados
+   ana: …el Paseo de los Enamorados?
+   ! nombrar senda
+-> Otro nombre…
+   ana: …el Paseo de los Enamorados?
+   ! nombrar senda ?
 diana: ¡Ana! Pero si por ahí no pasea ningún enamorado.
-ana: Por eso. Hay que imaginarlos. Y el arroyo que lo cruza, el Burbujeo de las Dríadas.
+ana: Por eso. Hay que imaginarlos. Y el manantial junto al arroyo…
+->* la Burbuja de la Dríade
+   ana: …la Burbuja de la Dríade.
+   ! nombrar burbuja
+-> Otro nombre…
+   ana: …la Burbuja de la Dríade.
+   ! nombrar burbuja ?
 diana: (Diana se ríe.) Contigo hasta los charcos tienen nombre.
 ana: Los charcos también se lo merecen.
 
@@ -3114,9 +3152,9 @@ function drawProp(c, o, t, night){
   }
   else if (o.kind === 'sign') {
     ell(c, o.x + 2, o.y + 1, 6, 2, 'rgba(30,40,20,.2)'); c.fillStyle = '#7a5536'; c.fillRect(o.x - 1.5, o.y - 20, 3, 20);
-    c.font = 'italic 8px Georgia, serif'; const tw = c.measureText(o.text).width + 10;
+    c.font = 'italic 8px Georgia, serif'; const T = conNombres(o.text), tw = c.measureText(T).width + 10;
     blob(c, [[o.x - tw / 2, o.y - 30], [o.x + tw / 2, o.y - 30], [o.x + tw / 2, o.y - 18], [o.x - tw / 2, o.y - 18]], '#d9bf8f');
-    c.fillStyle = '#4a2f1c'; c.textAlign = 'center'; c.fillText(o.text, o.x, o.y - 21.5);
+    c.fillStyle = '#4a2f1c'; c.textAlign = 'center'; c.fillText(T, o.x, o.y - 21.5);
   }
 }
 function drawBed(c, b, t){
@@ -4071,10 +4109,11 @@ function elegir(t, opciones){
     logEv('Ana eligió: ' + op.texto.replace(/^./, c => c.toLowerCase()) + '.', []);
     t.wait = .4; t.elige = null;
   };
+  const pide = op => { const e = op.efectos.find(a => a.nombrar && a.pedir); if (!e) return aplicar(op); pedirNombre(e.nombrar, n => aplicar({ ...op, texto: n, efectos: op.efectos.map(a => a === e ? { ...a, n } : a) })); };   // (a name to write: the box first)
   const propia = opciones.find(o => o.propia) || opciones[0];
   if (navigator.webdriver || ana.hidden) return aplicar(propia);   // (no one to ask: what she would do)
-  let hecho = false; const una = op => { if (hecho) return; hecho = true; close(); aplicar(op); };
-  say('ana', '¿Qué hace Ana?', opciones.map(op => [op.texto, () => una(op)]));
+  let hecho = false; const una = op => { if (hecho) return; hecho = true; close(); pide(op); };
+  say('ana', '¿Qué hace Ana?', opciones.map(op => [nombreMay(op.texto), () => una(op)]));
   t.elige = { hasta: auto.on ? TT + 10 : Infinity, una, propia };   // (if the player is away, Ana chooses after a while: what she would do)
 }
 
@@ -4332,6 +4371,7 @@ function dlgHacer(list){   // what a scene does when it starts or ends
     if (a.olvidar) delete dlgHechos()[a.olvidar];   // (it is no longer so: the prohibition, once forgiven)
     if (a.ofensa) { const [k, o, motivo, n] = a.ofensa; game.wm.ofensa[k + '>' + o] = motivo; relSetW(k, o, Math.min(relGetW(k, o), +n)); }   // (k is offended with o)
     if (a.triste) realR.setFact('triste:' + a.triste);
+    if (a.nombrar) nombrar(a.nombrar, a.n);
     if (a.afecto) { const [k, o, n] = a.afecto; relSetW(k, o, Math.max(relGetW(k, o), +n)); }   // (how much one cares for the other, at least so much)
     if (a.suma) { const [q, n] = a.suma, [nombre, dueño, hacia] = q.split(':'), H = (game.wm.sumaHoy ||= {});
       if (a.limitado && H[q] === today()) { (game.wm.sumaPend ||= []).push({ q, n: +n }); continue; }   // (from conversations, each quality goes up at most once a day: the rest shows on the days after)
@@ -4462,6 +4502,7 @@ function dlgAccion(s){   // an action of the script: «hecho x», «marca id | n
     case 'ofensa': return { ofensa: r };
     case 'triste': return { triste: rest };
     case 'fin_capitulo': return { fin_capitulo: true };
+    case 'nombrar': return { nombrar: r[0], pedir: r[1] === '?' };   // (Ana names a thing: «nombrar lago», the book's name; «nombrar lago ?», the player writes it)
     case 'meta': { const [quien, tipo, args = ''] = part[0].split(/\s+/); return { meta: { quien, tipo, args: args ? args.split(',').map(dlgVal) : [], texto: part[1] || undefined, etiqueta: part[2] || undefined, prioridad: part[3] ? +part[3] : undefined } }; }
   }
   throw new Error('guion: acción desconocida «' + s + '»');
@@ -6163,7 +6204,7 @@ function know(k, text, d = today() + 1){
   a.push({ d, s: S, t: text }); if (a.length > 30) a.splice(0, a.length - 30);
 }
 function logEv(text, who = witnesses()){
-  text = text.replace(/\ba el /g, 'al ').replace(/\bde el /g, 'del ');
+  text = conNombres(text).replace(/\ba el /g, 'al ').replace(/\bde el /g, 'del ');
   const j = game.journal, e = { d: today() + 1, s: S, t: text, h: Math.round(hourNow() * 100) / 100 };
   if (!(j.length && j[j.length - 1].t === text && j[j.length - 1].d === e.d)) { j.push(e); if (j.length > 80) j.splice(0, j.length - 80); }
   for (const k of new Set(who)) know(k, text);
@@ -7144,7 +7185,7 @@ async function openaiCall(messages, schema, strict = true){
 }
 // Claude (Messages API): the fixed prompt is marked for caching
 async function claudeCall(messages, schema, retry = true){
-  const body = { model: AI.model, max_tokens: 4000, system: [{ type: 'text', text: sysFor(schema), cache_control: { type: 'ephemeral' } }], messages, output_config: { format: { type: 'json_schema', schema } } };
+  const body = { model: AI.model, max_tokens: 4000, system: [{ type: 'text', text: conNombres(sysFor(schema)), cache_control: { type: 'ephemeral' } }], messages, output_config: { format: { type: 'json_schema', schema } } };
   const headers = { 'content-type': 'application/json', 'x-api-key': aiKey(), 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' };
   // (low effort: quick answers for a chat; on the Opus and Sonnet models, a declined answer is retried on another model)
   if (AI.model !== 'claude-haiku-4-5') { body.output_config.effort = 'low'; if (retry) { body.fallbacks = 'default'; headers['anthropic-beta'] = 'server-side-fallback-2026-07-01'; } }
@@ -7381,7 +7422,7 @@ function drawTag(g, t){
 function drawBubble(g, p, b, W, H){
   const Z = view.Z, small = W < 520, a = clamp(Math.min(b.t / .15, (b.dur + .35 - b.t) / .3), 0, 1);
   let fs = small ? 12 : 13, maxW = Math.min(small ? 200 : 240, W - 24), rows;
-  const wrap = () => { g.font = fs + 'px Georgia, serif'; rows = []; let cur = ''; for (const w of b.text.split(' ')) { const t = cur ? cur + ' ' + w : w; if (cur && g.measureText(t).width > maxW) { rows.push(cur); cur = w; } else cur = t; } rows.push(cur); };
+  const wrap = () => { g.font = fs + 'px Georgia, serif'; rows = []; let cur = ''; for (const w of conNombres(b.text).split(' ')) { const t = cur ? cur + ' ' + w : w; if (cur && g.measureText(t).width > maxW) { rows.push(cur); cur = w; } else cur = t; } rows.push(cur); };
   wrap(); if (rows.length > 5) { fs -= 1; maxW = Math.min(maxW + 60, W - 24); wrap(); }
   const lh = fs + 3, w = Math.min(Math.max(...rows.map(r => g.measureText(r).width)) + 18, W - 12), h = rows.length * lh + 10, r = 8;
   const headY = p.lie ? p.y - 24 : p.headTop ? p.y - p.headTop : p.y - Math.max(62, 28 + 12 * HEAD_M) * LOOKS[p.look].h - 6;
@@ -7415,10 +7456,10 @@ function give(who, k){
 function say(who, text, opts, wait = false){
   game.talk = { who, wait }; if (who !== 'ana') relatoDicho(who, text);   // (Ana's own box is a question to the player, not something said)
   const box = $('talk'), f = Math.min(5, game.fond[who] || 0), heartsTxt = who in game.fond ? '♥'.repeat(f) + '♡'.repeat(5 - f) : '';
-  box.innerHTML = `<div class="who">${NAMES[who] || who}<span>${heartsTxt}</span></div><div class="line"></div><div class="opts"></div>`;
-  box.querySelector('.line').textContent = text; box.classList.toggle('wait', wait);
+  box.innerHTML = `<div class="who">${NAMES[who] || (who === 'ana' ? 'Ana' : who)}<span>${heartsTxt}</span></div><div class="line"></div><div class="opts"></div>`;
+  box.querySelector('.line').textContent = conNombres(text); box.classList.toggle('wait', wait);
   const row = box.querySelector('.opts');
-  opts.forEach(([label, fn], k) => { const b = document.createElement('button'); b.textContent = (opts.length > 1 ? (k + 1) + '. ' : '') + label; b.onclick = e => { e.stopPropagation(); fn(); }; row.appendChild(b); });
+  opts.forEach(([label, fn], k) => { const b = document.createElement('button'); b.textContent = (opts.length > 1 ? (k + 1) + '. ' : '') + conNombres(label); b.onclick = e => { e.stopPropagation(); fn(); }; row.appendChild(b); });
   box.hidden = false; game.talkOpts = opts;
   // a decision with a character: if the player does not choose in 10 seconds, Ana chooses by herself
   if (opts.length > 1 && !wait && PEOPLE[who] && AI.auto !== false) { game.talk.deadline = TT + 10; box.insertAdjacentHTML('beforeend', '<div class="tbar"><i></i></div>'); }
@@ -7505,7 +7546,7 @@ addEventListener('pointercancel', () => { stick = null; tapStart = null; panDrag
 let hinted = false; function hint(){ if (hinted) return; hinted = true; setTimeout(() => { $('hint').style.opacity = 0; }, 4000); }
 // a note at the top for a moment (when the season turns)
 let noteTimer = 0;
-function notice(text){ const h = $('hint'); h.textContent = text; h.style.transition = 'none'; h.style.opacity = 1; void h.offsetWidth; h.style.transition = ''; clearTimeout(noteTimer); noteTimer = setTimeout(() => { h.style.opacity = 0; }, 4500); }
+function notice(text){ const h = $('hint'); h.textContent = conNombres(text); h.style.transition = 'none'; h.style.opacity = 1; void h.offsetWidth; h.style.transition = ''; clearTimeout(noteTimer); noteTimer = setTimeout(() => { h.style.opacity = 0; }, 4500); }
 $('mapbtn').addEventListener('pointerdown', e => { e.stopPropagation(); audio(); if (!game.talk) toggleMap(); });
 // the buttons on the right can be put away (they get in the way of touching things there): ☰ shows them again
 { let hide; try { hide = localStorage.getItem('avonlea-lado'); } catch (e) {} hide = hide == null ? innerWidth < 760 || matchMedia('(pointer: coarse)').matches : hide === '1';
@@ -8391,6 +8432,72 @@ function drawCat(c, a, t){
 const FAUNA_DRAW = { cow: (c, a, t) => drawCow(c, a, t), sheep: drawSheep, horse: drawHorse, hen: drawHen, pig: drawPig, duck: drawDuck, gull: drawGull, cat: drawCat };
 function drawBuggy(c, b, t){ const c8 = cartC8(b), [sx, sy] = cartSeat(b.x, b.y, c8, 0), who = () => drawPerson(c, { look: b.look, x: sx, y: sy, dir: c8Dir(c8), sit: true, walk: 0, moving: false, blink: 0 }, t); const body = () => { drawCartBody(c, b, t, 'fondo'); who(); drawCartBody(c, b, t, 'frente'); }; if (cartAxes(c8).hy < -.1) { drawCartHorse(c, b, t); body(); } else { body(); drawCartHorse(c, b, t); } }
 const FARO_LINES = ['Desde aquí se ve todo el golfo. ¡Si hasta me parece ver Escocia! Bueno... no, pero casi.', 'Un faro es como un amigo que nunca se duerme. Me gustaría ser farera, o por lo menos gaviota.', 'Las olas rompen contra las rocas como si tuvieran algo urgente que decir.'];
+/* ---------- the names Ana gives to things: the book's, or the player's own ----------
+   When Ana names something (the Avenue, Barry's pond, the cherry tree at her window, the places of Avonlea), the
+   player chooses: the name of the book, or one of their own, written in a box. From then on the thing is called so
+   everywhere (what is said, the log, the map, the signs, what the AI is told): it is Ana's name for it. What stays is
+   the name, and the fact nombro_<thing> (with nombre_propio_<thing> if it is not the book's), for the script.
+   In a scene: «-> Otro nombre…» with «! nombrar lago ?» (the box), or «! nombrar lago» (the book's). */
+const NOMBRABLES = {
+  avenida: { libro: 'el Camino Blanco de las Delicias', que: 'la Avenida, el túnel de manzanos en flor' },
+  lago: { libro: 'el Lago de las Aguas Brillantes', que: 'la laguna de Barry' },
+  cerezo: { libro: 'la Reina de las Nieves', que: 'el cerezo de su ventana' },
+  huerta: { libro: 'el Valle de las Violetas', que: 'el valle junto a la huerta' },
+  arbustos: { libro: 'el Sendero de los Abedules', que: 'el sendero de los arbustos', alias: ['Senda de los Abedules'] },
+  bosque_peg: { libro: 'el Bosque Encantado', que: 'el bosque de abetos' },
+  corral: { libro: 'Idlewild', que: 'el rincón de los árboles junto al corral' },
+  senda: { libro: 'el Paseo de los Enamorados', que: 'el sendero entre los abedules', alias: ['Senda de los Enamorados'] },
+  burbuja: { libro: 'la Burbuja de la Dríade', que: 'el manantial del arroyo', alias: ['Burbuja de la Dríada', 'Burbujeo de las Dríadas'] },
+};
+const nombreArt = n => { const m = n.match(/^(el|la|los|las)\s+(.+)$/i); return m ? [m[1].toLowerCase(), m[2]] : ['', n]; };
+const nombreMay = s => s ? s[0].toUpperCase() + s.slice(1) : s;
+// what Ana calls it, with its article («el Lago de las Aguas Brillantes»): hers, or the book's
+const nombreDe = id => game.wm?.nombres?.[id] || NOMBRABLES[id]?.libro || id;
+// a name, given: kept as the player wrote it (the article in lower case, the name itself with a capital)
+const nombreLimpio = n => { const [art, core] = nombreArt(String(n).trim().replace(/\s+/g, ' ').replace(/^[«"]|[»"]$/g, '')); return (art ? art + ' ' : '') + nombreMay(core); };
+function nombrar(id, n){
+  const c = NOMBRABLES[id]; if (!c) return;
+  n = nombreLimpio(n || c.libro);
+  (game.wm.nombres ||= {})[id] = n; dlgHecho('nombro_' + id); if (n !== c.libro) dlgHecho('nombre_propio_' + id);
+  if (typeof NOMBRES_ANA !== 'undefined' && id in NOMBRES_ANA) game.wm.perm['nombre:' + id] = 1;
+  if (typeof mapBase !== 'undefined') mapBase = null;
+  logEv('Ana bautizó ' + c.que + ': ' + n + '.', []);
+}
+// every text, with Ana's names in place of the book's (keeping «del», «al» and the capital at the start)
+function conNombres(s){
+  const N = game?.wm?.nombres; if (!N || typeof s !== 'string' || !s) return s;
+  for (const [id, n] of Object.entries(N)) {
+    const c = NOMBRABLES[id]; if (!c || n === c.libro) continue;
+    c.re ||= new RegExp('(\\b(?:[Ee]l|[Ll]a|[Ll]os|[Ll]as|[Dd]el|[Aa]l)\\s+)?(?:' + [nombreArt(c.libro)[1], ...(c.alias || [])].map(x => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')', 'g');
+    const [art, core] = nombreArt(n);
+    s = s.replace(c.re, (m, p) => {
+      if (!p) return core;   // (as a label, or «el cerezo Reina de las Nieves»)
+      const P = p.trim().toLowerCase(), r = (P === 'del' ? (art === 'el' ? 'del ' : 'de ' + (art ? art + ' ' : '')) : P === 'al' ? (art === 'el' ? 'al ' : 'a ' + (art ? art + ' ' : '')) : art ? art + ' ' : '') + core;
+      return p[0] !== p[0].toLowerCase() ? nombreMay(r) : r;
+    });
+  }
+  return s;
+}
+// the player chooses the name: the book's, or one of their own; with no one to ask, or if no one answers (Ana on her
+// own), the book's
+function nombrarElegir(id, listo){
+  const c = NOMBRABLES[id]; let ya = false; const una = n => { if (ya) return; ya = true; close(); listo(n); };
+  if (navigator.webdriver || ana.hidden || menuOpen()) return listo(c.libro);
+  say('ana', ('¿Cómo llama Ana a ' + c.que + '?').replace(/\ba el /, 'al '), [[nombreMay(c.libro), () => una(c.libro)], ['✎ Otro nombre…', () => { ya = true; pedirNombre(id, listo); }]]);
+  if (auto.on) setTimeout(() => una(c.libro), 10000);
+}
+// the box to write it in
+function pedirNombre(id, listo){
+  const c = NOMBRABLES[id], box = $('talk'); let ya = false;
+  const ok = v => { if (ya) return; v = (v || '').trim(); if (!v) return inp.focus(); ya = true; close(); listo(nombreLimpio(v)); };
+  say('ana', ('Ana le pone nombre a ' + c.que + '. ¿Cuál?').replace(/\ba el /, 'al '), [['✎ Ese', () => ok(inp.value)], ['Mejor ' + c.libro, () => ok(c.libro)]]);
+  const inp = document.createElement('input'); inp.type = 'text'; inp.maxLength = 48; inp.placeholder = 'por ejemplo: ' + nombreMay(c.libro); inp.className = 'nombre-in';
+  inp.style.cssText = 'display:block;width:calc(100% - 8px);margin:6px 0;padding:5px 7px;font:inherit;border:1px solid #6b4a30;border-radius:6px;background:#fffaf0;color:#3b2a1c';
+  inp.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') ok(inp.value); if (e.key === 'Escape') ok(c.libro); });
+  inp.addEventListener('click', e => e.stopPropagation());
+  box.querySelector('.opts').before(inp); setTimeout(() => inp.focus(), 30);
+}
+
 /* ---------- the cards of the people of Avonlea (who they are and what they like to talk about) and their encounters:
    when Ana comes near one of them, when she taps one, or when two of them meet near her, they talk. With the AI, a
    short request: «Eres X de Avonlea y te encuentras con Y. Están en Z, es tal estación y tal hora. Genera una
@@ -8612,7 +8719,7 @@ const d0Home = (here, me) => false;   // (where one can cook: one's own kitchen)
 const ITEM_PLACE = { lena: 'granero', heno: 'campo', leche: 'corral' };
 const QUEHACERES = ['platos', 'barrer', 'mesa'], QUEHACER_TXT = { platos: 'lavar los platos', barrer: 'barrer la cocina', mesa: 'poner la mesa' };
 const JURAN = ['ana', 'diana'];   // (friends of the soul: «mientras duren el sol y la luna»)
-const NOMBRES_ANA = { huerta: 'el Valle de las Violetas', arbustos: 'el Sendero de los Abedules', lago: 'el Lago de las Aguas Brillantes', bosque_peg: 'el Bosque Encantado', corral: 'Idlewild' };
+const NOMBRES_ANA = Object.fromEntries(['huerta', 'arbustos', 'lago', 'bosque_peg', 'corral'].map(p => [p, NOMBRABLES[p].libro]));   // (the places Ana names as she goes: src/js/57-nombres-de-ana.js)
 const FAMILY = o => o === 'ana' || CUTHBERT.includes(o) ? CUTHBERT : [o];
 const HOUSEHOLDS = [CUTHBERT, ['barry', 'diana'], ['allan', 'sraallan'], ['hetty', 'olivia', 'sara'], ['alec', 'janet', 'felicity', 'felix', 'cecily']];
 const kin = (a, b) => HOUSEHOLDS.some(h => h.includes(a) && h.includes(b));   // (whose cow it is: the household)
@@ -9802,7 +9909,9 @@ function wmExec0(ag, a, st, dt){
     case 'rezar': { if (!st.said) { st.said = 1; bubble(me, 'Querido Padre celestial: gracias por el Camino Blanco de las Delicias y por el Lago de las Aguas Brillantes…'); } if (!wait(4)) return 'run'; realR.setFact('rezo:' + me); logEv(`${wmName(me)} dijo sus oraciones.`, []); return 'ok'; }
     case 'adornar': { if (!(inv.ramo > 0)) { st.why = 'no tiene flores'; return 'fail'; } if (!st.said) { st.said = 1; bubble(me, '¡Una corona de ranúnculos y rosas silvestres para mi sombrero!'); } if (!wait(2.5)) return 'run'; inv.ramo -= 1; realR.setFact('adorno:' + me); float('💐 sombrero adornado', b.x, b.y - 50); logEv(`${wmName(me)} adornó su sombrero con flores.`, []); return 'ok'; }
     case 'remar': { if (!st.said) { st.said = 1; bubble(me, '¡Remo en el bote de los Barry! Hay que tener cuidado de no soltar los remos…'); } if (!wait(5)) return 'run'; realR.setFact('remo:' + me); logEv(`${wmName(me)} remó en el lago.`, []); return 'ok'; }
-    case 'nombrar': { if (!st.said) { st.said = 1; bubble(me, `Este lugar se va a llamar ${NOMBRES_ANA[a.p]}. ¿No es un nombre precioso?`); } if (!wait(3)) return 'run'; realR.setPerm('nombre:' + a.p); mapBase = null; logEv(`${wmName(me)} bautizó un lugar: ${NOMBRES_ANA[a.p]}.`, []); return 'ok'; }
+    case 'nombrar': {   // (the name: the player chooses it, the book's or their own; Ana on her own, the book's)
+      if (!st.pide) { st.pide = 1; nombrarElegir(a.p, n => { st.nom = n; }); } if (!st.nom) return 'run';
+      if (!st.said) { st.said = 1; st.w = 0; bubble(me, `Este lugar se va a llamar ${st.nom}. ¿No es un nombre precioso?`); } if (!wait(3)) return 'run'; nombrar(a.p, st.nom); return 'ok'; }
     case 'regañar': {
       if (a.llamar && !st.came) { const here = wmScene('ana') === wmScene(me) && (wmScene(me) !== 'out' || dist(ana.x, ana.y, b.x, b.y) < 90); if (!here) { if (!st.called) { st.called = 1; if (ag.task) ag.task.budget = Math.max(ag.task.budget || 150, 600); notice(`📜 ${wmName(me)} te manda llamar. Parece seria.`); if (WM_OBEY) WM_APPROACH = { who: me, done: () => {} }; } return 'run'; } st.came = 1; }
       else if (!a.llamar) { const r = reach(a.k); if (r !== 'ok') return r; }
@@ -10633,13 +10742,13 @@ function paintMapBase(w, h, z = 1, ox = 0, oy = 0){
   for (const w of WATERS) for (const b of w.bridges) blob(c, [[b.x - 44, b.y - 16], [b.x + 44, b.y - 16], [b.x + 44, b.y + 14], [b.x - 44, b.y + 14]], b.covered ? '#a8463a' : '#a8814f');
   // names, in ink
   c.fillStyle = '#4a2f1c'; c.textAlign = 'center';
-  const label = (text, x, y, size = 46) => { c.font = `italic ${size}px Georgia, serif`; c.fillStyle = 'rgba(241,226,191,.75)'; const tw = c.measureText(text).width; c.fillRect(x - tw / 2 - 8, y - size * .85, tw + 16, size * 1.1); c.fillStyle = '#4a2f1c'; c.fillText(text, x, y); };
+  const label = (text, x, y, size = 46) => { text = conNombres(text); c.font = `italic ${size}px Georgia, serif`; c.fillStyle = 'rgba(241,226,191,.75)'; const tw = c.measureText(text).width; c.fillRect(x - tw / 2 - 8, y - size * .85, tw + 16, size * 1.1); c.fillStyle = '#4a2f1c'; c.fillText(text, x, y); };
   label('Granero', BARN.x, BARN.y - 150, 70);
   for (const [k, h] of Object.entries(HOUSES)) if (!h.road) big(h, BIG[k] || 2);
   for (const [k, h] of Object.entries(HOUSES)) { const s = BIG[k] || 2; label(h.mapLabel?.[0] ?? h.name, h.at.x, h.at.y - (h.style === 'iglesia' ? 280 : h.style === 'escuela' ? 195 : 140) * s - 20, 120); }
   label('Lago de las Aguas Brillantes', LAKE.x, LAKE.y + LAKE.ry + 110, 100); for (const w of WOODS.filter(w => w.haunted)) label('Bosque Encantado', w.x, w.y + w.ry * .3, 100); for (const b of BUILDINGS) { if (b.style === 'faro') { c.save(); c.translate(b.x, b.y); c.scale(1.8, 1.8); c.translate(-b.x, -b.y); blob(c, [[b.x - 30, b.y], [b.x + 30, b.y], [b.x + 16, b.y - 220], [b.x - 16, b.y - 220]], '#f6f2e8'); for (let q = 0; q < 3; q++) c.fillStyle = '#c8463a', c.fillRect(b.x - 26 + q * 4, b.y - 50 - q * 60, 52 - q * 8, 24); blob(c, [[b.x - 22, b.y - 220], [b.x + 22, b.y - 220], [b.x, b.y - 270]], '#3a3436'); c.restore(); label(b.name, b.x, b.y - 520, 120); continue; } house(b.x, b.y, b.w, '#8a6a5a', '#efe4cc'); label(b.name, b.x, b.y - 150, 70); } label('Aldea de Avonlea', 50 * U, 23.2 * U, 150); label('Golfo de San Lorenzo', 40 * U, 4.5 * U, 220); label('Campo rosado', LUPINS[0].x, LUPINS[0].y, 34); label('Río', RIVERS[0].pts[3][0] + 120, RIVERS[0].pts[3][1] + 60, 34);
   label('Camino Blanco de las Delicias', GG.x + 900, BRIDGE.y - 110, 80);
-  for (const [p, n] of Object.entries(NOMBRES_ANA)) if (game.wm.perm?.['nombre:' + p] && p !== 'lago' && p !== 'bosque_peg' && WP[p]) label(n[0].toUpperCase() + n.slice(1) + ' ✎', WP[p][0], WP[p][1] - 70, 64);   // (the names Ana gave to places)
+  for (const [p, n] of Object.entries(NOMBRES_ANA)) if (game.wm.perm?.['nombre:' + p] && p !== 'lago' && p !== 'bosque_peg' && WP[p]) label(nombreMay(nombreDe(p)) + ' ✎', WP[p][0], WP[p][1] - 70, 64);   // (the names Ana gave to places)
   label('Arroyo', brook[2][0] + 160, brook[2][1] + 160, 70);
   // a compass rose and a double border
   const cx = WW - 150, cy = WH - 150;
@@ -10685,7 +10794,7 @@ function loop(now){
   else { owed = Math.min(owed + Math.min(raw, .25) * k, 3 * k * .05 + 2); const t0 = performance.now(); while (owed > 1e-4 && performance.now() - t0 < 22) { const d = Math.min(.05, owed); update(d); owed -= d; } }
   FRAME++; tripBarDraw(); render(); islaDraw(); requestAnimationFrame(loop);
 }
-window.__avonlea = { primeraVez, ventana, velaPuede, sombrero, LOOKS, dlgDichas, chats: () => CHATS, enConversacion, anaPos: () => ({ x: ana.x, y: ana.y }), setDia: (d, h) => { dayT = d + (h - 6) / 24; }, dia: () => today(), PEOPLE, relatoEmpezar, inicioLlegada, dlgHechos, convDisponibles, conversar, convOpciones, guiñosDe, LINES, dlgHecho, cualidad, cualidadSuma, cualidadCond, dlgCond, dlgEspecificidad, ritmoLleno, ritmoMarca, dlgHacer, dlgAccion, HABILIDADES, relSetW, relato: () => RELATO.lineas, reglas: () => RELATO_REGLAS.map(r => [r.id, r.texto]), jugables, jugar, anaMenu, correoRetirar, cartaLeer, CORREO, cartaTexto, playAct: () => game.playAct, DIALOGOS, dlgCtx, talks: () => TALKS, dlgGuion, dlgPanel, bubblesNow: () => bubbles, toby, cartSheet: (c, x, y, c8, t) => { const L = [], p = { look: 'matthew', x, y, c8, walk: 0, moving: false }; const [cx, cy] = [x, y]; pushCart(L, c, { x: cx, y: cy, c8, walk: 0, moving: true }, t); for (const [k, look] of [[0, 'matthew'], [1, 'ana']]) { const [sx, sy] = cartSeat(cx, cy, c8, k); L.push({ y: sy, draw: () => drawPerson(c, { ...mkPerson(look, sx, sy), sit: true, dir: c8Dir(c8) }, t) }); } L.sort((a, b) => a.y - b.y).forEach(o => o.draw()); }, startCap1, CAP1, LIBRO1, ROAD_TRAMOS, ROAD_MIN, roadTramo, islaToggle, DLG_BANK, startDay, setSeason, agendaData: () => AGENDA.map(e => ({ who: wmName(e.who), from: e.from, to: e.to, label: e.label, season: e.season, sunday: !!e.sunday, ana: !!(e.ana || e.who === 'ana'), cond: e.when ? String(e.when).replace(/^\(\) => /, '') : '' })), setAgenda: v => { AGENDA_ON = v; }, AGENDA, wmData: () => ({ THINGS, WHO, OFRECE, WP_NAME, TRADE, TREATS, LIBRETA, ITEM_NAME, MAX_GOALS, PACE, FOCO }), paintMapBase, doingText, wmName, wmBody, wmScene, WW, WH, setVec: v => { VEC_ON = v; }, setStyle: v => { ANA_STYLE = v; }, setHead: setHeadM, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+window.__avonlea = { conNombres, nombrar, nombreDe, nombrarElegir, NOMBRABLES, primeraVez, ventana, velaPuede, sombrero, LOOKS, dlgDichas, chats: () => CHATS, enConversacion, anaPos: () => ({ x: ana.x, y: ana.y }), setDia: (d, h) => { dayT = d + (h - 6) / 24; }, dia: () => today(), PEOPLE, relatoEmpezar, inicioLlegada, dlgHechos, convDisponibles, conversar, convOpciones, guiñosDe, LINES, dlgHecho, cualidad, cualidadSuma, cualidadCond, dlgCond, dlgEspecificidad, ritmoLleno, ritmoMarca, dlgHacer, dlgAccion, HABILIDADES, relSetW, relato: () => RELATO.lineas, reglas: () => RELATO_REGLAS.map(r => [r.id, r.texto]), jugables, jugar, anaMenu, correoRetirar, cartaLeer, CORREO, cartaTexto, playAct: () => game.playAct, DIALOGOS, dlgCtx, talks: () => TALKS, dlgGuion, dlgPanel, bubblesNow: () => bubbles, toby, cartSheet: (c, x, y, c8, t) => { const L = [], p = { look: 'matthew', x, y, c8, walk: 0, moving: false }; const [cx, cy] = [x, y]; pushCart(L, c, { x: cx, y: cy, c8, walk: 0, moving: true }, t); for (const [k, look] of [[0, 'matthew'], [1, 'ana']]) { const [sx, sy] = cartSeat(cx, cy, c8, k); L.push({ y: sy, draw: () => drawPerson(c, { ...mkPerson(look, sx, sy), sit: true, dir: c8Dir(c8) }, t) }); } L.sort((a, b) => a.y - b.y).forEach(o => o.draw()); }, startCap1, CAP1, LIBRO1, ROAD_TRAMOS, ROAD_MIN, roadTramo, islaToggle, DLG_BANK, startDay, setSeason, agendaData: () => AGENDA.map(e => ({ who: wmName(e.who), from: e.from, to: e.to, label: e.label, season: e.season, sunday: !!e.sunday, ana: !!(e.ana || e.who === 'ana'), cond: e.when ? String(e.when).replace(/^\(\) => /, '') : '' })), setAgenda: v => { AGENDA_ON = v; }, AGENDA, wmData: () => ({ THINGS, WHO, OFRECE, WP_NAME, TRADE, TREATS, LIBRETA, ITEM_NAME, MAX_GOALS, PACE, FOCO }), paintMapBase, doingText, wmName, wmBody, wmScene, WW, WH, setVec: v => { VEC_ON = v; }, setStyle: v => { ANA_STYLE = v; }, setHead: setHeadM, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
 /* ---------- the first time: a scene of its own; the window and the candle; her hat in the wardrobe ----------
    - The first time Ana does some things (looks out of her window, sees herself in the mirror, climbs to her room, sees
      the sea from the lighthouse…), a scene of the script (primera_<what>, disparo: primera) instead of the plain line;
@@ -10799,7 +10908,7 @@ function relatoDice(n, t){
 }
 // what is said in the talk box (the player's way of talking): into the account as well
 function relatoDicho(k, text){ if (RELATO.on && text) relatoLinea(relatoDice(relN(k), text), { quien: k, dice: text }); }   // (with its telling between parentheses, as anywhere else)
-function relatoLinea(texto, estado){ texto = texto.replace(/^(Al empezar, |⚠ |· )?([a-zá-ú])/, (m, p, c) => (p || '') + (p ? c : c.toUpperCase())); const L = { hora: relatoHora(), t: dayT, texto, estado }; RELATO.lineas.push(L); if (/[?&]relato/.test(location.search)) console.log('[relato] ' + L.hora + ' ' + texto); }
+function relatoLinea(texto, estado){ texto = conNombres(texto).replace(/^(Al empezar, |⚠ |· )?([a-zá-ú])/, (m, p, c) => (p || '') + (p ? c : c.toUpperCase())); const L = { hora: relatoHora(), t: dayT, texto, estado }; RELATO.lineas.push(L); if (/[?&]relato/.test(location.search)) console.log('[relato] ' + L.hora + ' ' + texto); }
 // to start: whom to watch (null: Ana and whoever is in her scene)
 function relatoEmpezar(quienes){ RELATO.on = true; RELATO.quienes = quienes; RELATO.lineas = []; RELATO.antes = {}; RELATO.ultimo = -1; RELATO.globo = new Set(); RELATO.mal = {}; RELATO.encima = {}; }
 function relatoTick(){
