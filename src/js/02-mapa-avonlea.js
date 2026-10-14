@@ -26,7 +26,6 @@ const MAP = (() => {
     { at: [22, 19.6], estaciones: [0, 1, 2], lines: [['ana', '¡Señor Matthew! ¡Señor Matthew!'], ['matthew', '¿Qué... qué pasa, Ana?'], ['ana', '¡Mire! ¡Todo el campo se volvió rosado! ¿No le dan ganas de llorar de lo hermoso que es?'], ['matthew', 'Bueno, pues... es muy bonito, sí. Ya lo creo.']] },
     { at: [56, 30], lines: [['ana', '¡Un puente con techo! Es como cruzar el río por adentro de una caja de música.']] },
     { at: [12, 16.6], lines: [['ana', '¡El mar! ¡Y la arena es roja! Parece que la isla se hubiera puesto colorada.']] },
-    { at: [34, 66.4], estaciones: [0], lines: [['ana', 'El Camino Blanco de las Delicias... cada vez que paso me dan ganas de hablar en voz baja, como en una iglesia.']] },
   ],
   };
 })();

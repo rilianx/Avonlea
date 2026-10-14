@@ -57,6 +57,7 @@ function momentsTick(){
     if (momentDone[i] === today() || (f.estaciones && !f.estaciones.includes(S)) || dist(ana.x, ana.y, f.at[0] * U, f.at[1] * U) > 160) continue;   // (some only in their season: the pink field is not pink under the snow)
     momentDone[i] = today(); if (amb.cur) continue;
     const mNear = sceneOf('matthew') === 'out' && dist(PEOPLE.matthew.x, PEOPLE.matthew.y, ana.x, ana.y) < 160;
+    if (!mNear && f.lines.some(([q]) => q === 'matthew')) continue;   // (said to Matthew: only with him there; alone, the place has its own scenes)
     const lines = f.lines.filter(([q]) => q === 'ana' || (q === 'matthew' && mNear)).map(([q, t]) => ({ q, t }));
     if (lines.length) sceneStart({ parts: mNear ? ['matthew'] : [], lines, out: {}, scene: 'out', resumen: '' }, false);
   }

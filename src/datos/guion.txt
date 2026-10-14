@@ -1533,3 +1533,257 @@ si: estacion:verano
 ---
 ana: (Pelusa duerme al sol, panza arriba, con las patas en el aire.)
 ana: Qué manera de dormir tan sin vergüenza. Ojalá yo pudiera dormir así, sin preocuparme de lo que diría la Sra. Lynde.
+
+# --- Los lugares (src/js/66-primeras-veces.js): cuando Ana pasa por un lugar de Avonlea, libre (no camino a un encargo),
+# el lugar le dice algo («disparo: lugar», «lugar: <clave de lugar>»: bosque_encantado, puente, camino_blanco, lago,
+# campo_rosado, playa, faro, rio, huerta, granero, cuesta_del_huerto, iglesia, escuela, aldea, corral…). Una al día por
+# lugar, y no una detrás de otra. Se eligen como las de las cosas.
+#
+# El estilo (el de la ventana): escenas que inspiran. Primero lo que se ve, se oye o se huele, concreto, de esa estación
+# y esa hora, entre paréntesis; después Ana lo transforma con su imaginación (una imagen, una personificación, un
+# cuentito); y al final un sentimiento o un pensamiento chico que se queda (gratitud, nostalgia, ganas, un poco de humor
+# sobre sí misma). Dos o tres líneas. Nada que el juego tenga que mostrar; ecos del libro cuando calzan.
+
+=== lugar_bosque_crepusculo ===
+disparo: lugar
+lugar: bosque_encantado
+canal: ana_sola
+repetir: dia
+si: hora:18-22
+---
+ana: (El bosque de abetos se oscurece. Entre los troncos, la niebla se arrastra como un chal blanco.)
+ana: Aquí es donde pasa la dama blanca, retorciéndose las manos… Diana y yo la inventamos, ya lo sé. Pero los bosques no saben que las cosas son inventadas.
+ana: (Ana apura el paso, sin mirar atrás.) Mañana de día me río de esto. Ahora no.
+
+=== lugar_bosque_manana ===
+disparo: lugar
+lugar: bosque_encantado
+canal: ana_sola
+repetir: dia
+si: hora:6-12, !estacion:invierno
+---
+ana: (De día, el Bosque Encantado está lleno de sol entre las ramas, y huele a resina y a musgo.)
+ana: Qué valiente es una a la luz del día. Los fantasmas deben estar durmiendo, enroscados bajo las raíces, como gatos.
+
+=== lugar_bosque_invierno ===
+disparo: lugar
+lugar: bosque_encantado
+canal: ana_sola
+repetir: dia
+si: estacion:invierno
+---
+ana: (La nieve cubre las ramas de los abetos. No se oye nada, ni un pájaro.)
+ana: El bosque está guardando silencio, como en la iglesia. Me parece que está rezando por la primavera.
+
+=== lugar_puente ===
+disparo: lugar
+lugar: puente
+canal: ana_sola
+repetir: dia
+si: !estacion:invierno
+---
+ana: (Ana se asoma por la baranda del puente. El arroyo corre abajo, claro, sobre las piedras.)
+ana: El arroyo nunca está callado. Cuenta lo que vio allá arriba, en el bosque, a todo el que pase. Es el chismoso más simpático de Avonlea.
+ana: (Tira una hojita al agua y la mira irse.) Buen viaje. Saluda al mar de mi parte.
+
+=== lugar_puente_invierno ===
+disparo: lugar
+lugar: puente
+canal: ana_sola
+repetir: dia
+si: estacion:invierno
+---
+ana: (El arroyo está helado por los bordes; en el medio, el agua sigue corriendo, oscura y fría.)
+ana: Sigue corriendo debajo del hielo. Hay cosas así: por fuera parecen dormidas, y por dentro siguen andando.
+
+=== lugar_puente_diana ===
+disparo: lugar
+lugar: puente
+canal: ana_sola
+prioridad: 2
+si: hecho:conocidas_diana, !hecho:prohibida
+---
+ana: (El puente une Tejas Verdes con La Cuesta del Huerto.)
+ana: Este es el puente más importante del mundo. Por aquí voy a ver a Diana y por aquí viene ella. Un puente entre dos amigas del alma.
+
+=== lugar_camino_blanco_primavera ===
+disparo: lugar
+lugar: camino_blanco
+canal: ana_sola
+repetir: dia
+si: estacion:primavera
+---
+ana: (Los manzanos forman un túnel de flores sobre el camino. Los pétalos caen despacio, como nieve tibia.)
+ana: Cada vez que paso me dan ganas de hablar en voz baja, como en una iglesia. Debe ser porque aquí algo muy grande está pasando, en silencio.
+
+=== lugar_camino_blanco_otono ===
+disparo: lugar
+lugar: camino_blanco
+canal: ana_sola
+repetir: dia
+si: estacion:otoño
+---
+ana: (Ya no hay flores. Las hojas de los manzanos se pusieron amarillas y crujen bajo los pies.)
+ana: Ahora es el Camino Dorado de las Delicias. Le voy a dar un nombre para cada estación. Así nunca se aburre de sí mismo.
+
+=== lugar_camino_blanco_invierno ===
+disparo: lugar
+lugar: camino_blanco
+canal: ana_sola
+repetir: dia
+si: estacion:invierno
+---
+ana: (Las ramas desnudas están cargadas de nieve. El túnel vuelve a ser blanco, pero de otra manera.)
+ana: Ves, te dije que eras el Camino Blanco. Hasta en invierno cumples tu nombre. Eso se llama tener carácter.
+
+=== lugar_lago_niebla ===
+disparo: lugar
+lugar: lago
+canal: ana_sola
+repetir: dia
+si: hora:5-9, !estacion:invierno
+---
+ana: (Sobre el lago flota una niebla delgada. Un pato sale de ella como de un sueño.)
+ana: Si una se quedara quieta aquí el tiempo suficiente, vería salir de la niebla a la dama de Shalott en su barca. Bueno, o al pato de nuevo.
+
+=== lugar_lago_verano ===
+disparo: lugar
+lugar: lago
+canal: ana_sola
+repetir: dia
+si: estacion:verano, hora:12-18
+---
+ana: (El sol hace brillar el agua en mil puntitos. Los sauces de la orilla mojan las puntas de sus ramas.)
+ana: Los sauces se agachan a mirarse el pelo en el agua. Me caen bien: también son un poco vanidosos.
+
+=== lugar_campo_rosado ===
+disparo: lugar
+lugar: campo_rosado
+canal: ana_sola
+repetir: dia
+si: !estacion:invierno
+---
+ana: (El campo está cubierto de flores rosadas que se mecen todas juntas cuando pasa el viento.)
+ana: ¡Todo el campo se volvió rosado! Parece que la tierra se ruborizó porque alguien le dijo un cumplido.
+ana: Me dan ganas de llorar de lo lindo. No de pena: de esas lágrimas que salen cuando a una le queda chico el corazón.
+
+=== lugar_playa ===
+disparo: lugar
+lugar: playa
+canal: ana_sola
+repetir: dia
+si: !estacion:invierno
+---
+ana: (La arena es roja, el mar azul, y las olas dejan una espuma blanca que se deshace con un susurro.)
+ana: Rojo, azul y blanco. La Isla se viste como una bandera para recibir al mar todos los días.
+ana: (Ana se saca los zapatos y mete los pies en el agua.) ¡Fría! Pero una no puede venir al mar y no saludarlo con los pies.
+
+=== lugar_playa_invierno ===
+disparo: lugar
+lugar: playa
+canal: ana_sola
+repetir: dia
+si: estacion:invierno
+---
+ana: (El hielo se amontona en la orilla. El mar está gris y el viento corta la cara.)
+ana: El mar en invierno es como Marilla cuando está seria: da un poco de miedo, pero una sabe que en el fondo sigue siendo el mismo.
+
+=== lugar_rio_escuela ===
+disparo: lugar
+lugar: rio
+canal: ana_sola
+repetir: dia
+si: !estacion:invierno
+---
+ana: (En el río, junto a la escuela, se enfrían las botellas de leche de los alumnos, atadas con cordel.)
+ana: El río nos guarda la leche fresca toda la mañana, sin pedir nada a cambio. Es el compañero de curso más generoso.
+
+=== lugar_huerta_brotes ===
+disparo: lugar
+lugar: huerta
+canal: ana_sola
+repetir: dia
+si: estacion:primavera
+---
+ana: (En la tierra oscura asoman unos brotes verdes, tan chiquitos que casi no se ven.)
+ana: ¡Salieron! Toda la noche estuvieron empujando para arriba, sin que nadie las viera. Eso sí que es fe.
+
+=== lugar_huerta_verano ===
+disparo: lugar
+lugar: huerta
+canal: ana_sola
+repetir: dia
+si: estacion:verano
+---
+ana: (Las flores de la huerta están abiertas y zumban las abejas. Huele a tierra tibia.)
+ana: Cuando regué estas flores no eran nada. Ahora mírenlas: se creen las reinas del verano. Y tienen razón.
+
+=== lugar_granero ===
+disparo: lugar
+lugar: granero
+canal: ana_sola
+repetir: dia
+si: !estacion:invierno
+---
+ana: (Del granero sale olor a heno recién cortado. Una golondrina entra y sale por la ventanita del pajar.)
+ana: El heno huele a todo el verano junto, guardado. En invierno voy a venir a olerlo cuando extrañe el sol.
+
+=== lugar_cuesta_huerto ===
+disparo: lugar
+lugar: cuesta_del_huerto
+canal: ana_sola
+repetir: dia
+si: estacion:primavera, hecho:conocidas_diana
+---
+ana: (El huerto de los Barry está en flor. Detrás de esas ventanas está Diana.)
+ana: Debe ser imposible estar triste viviendo en una casa con un huerto así. Aunque Diana dice que su mamá lo consigue igual.
+
+=== lugar_cuesta_prohibida ===
+disparo: lugar
+lugar: cuesta_del_huerto
+canal: ana_sola
+prioridad: 3
+si: hecho:prohibida, !hecho:perdonada
+---
+ana: (Ana pasa frente a La Cuesta del Huerto sin detenerse. Le parece ver una cortina que se mueve.)
+ana: No voy a mirar, para no ponerla en un aprieto. Pero voy a caminar despacito, para que sepa que pasé.
+
+=== lugar_iglesia ===
+disparo: lugar
+lugar: iglesia
+canal: ana_sola
+repetir: dia
+si: !estacion:invierno
+---
+ana: (Junto a la iglesia, el cementerio viejo está lleno de lápidas cubiertas de líquenes, y de rosas silvestres.)
+ana: Las rosas crecen aquí como si quisieran hacerles compañía a los que duermen. Es lo más tierno que hace una rosa.
+
+=== lugar_escuela_abedules ===
+disparo: lugar
+lugar: escuela
+canal: ana_sola
+repetir: dia
+si: hora:7-10
+---
+ana: (El camino a la escuela pasa entre abedules blancos. La luz entra verde por las hojas.)
+ana: Ir a la escuela por aquí es casi como no ir a la escuela. Una llega con el alma ya instruida, aunque la gramática no.
+
+=== lugar_aldea ===
+disparo: lugar
+lugar: aldea
+canal: ana_sola
+repetir: dia
+si: hora:8-18
+---
+ana: (En el cruce de caminos, la gente se saluda de carreta a carreta. Un perro duerme al sol frente a la tienda.)
+ana: Aquí todos saben todo de todos. Al principio me daba miedo; ahora me gusta. Es como vivir dentro de una familia muy grande y un poco metida.
+
+=== lugar_corral_idlewild ===
+disparo: lugar
+lugar: corral
+canal: ana_sola
+repetir: dia
+si: !estacion:invierno
+---
+ana: (Junto al corral, cuatro abedules forman un rincón, como una salita al aire libre.)
+ana: Idlewild. Aquí Diana y yo vamos a tener nuestra casita de juegos, con platos rotos de porcelana como si fueran la mejor vajilla.

@@ -15,15 +15,36 @@ function primeraVez(id, act){
 // each for its moment (the season, the hour, what has happened: «si:»); at most one a day for each thing, the one that
 // fits best (more priority, then more specific; among equals, any). The rest of the times, the plain line as always.
 let ACT_SOLA = false;   // (Ana doing it on her own, on her way to something: the plain line, she has things to do)
+// of the scenes that can be said now, the one that fits best: more priority, then more specific; among equals, one not
+// seen yet (one already seen, again, only now and then: not every day)
+function escenaElegir(C){
+  if (!C.length) return null;
+  const v = d => (d.prioridad || 0) + dlgEspecificidad(d) * .001, top = Math.max(...C.map(v)), T = C.filter(c => v(c) === top), nuevas = T.filter(c => dlgDichas()[c.id] == null);
+  if (!nuevas.length && Math.random() < .5) return null;
+  return pick(nuevas.length ? nuevas : T);
+}
 function escenaObjeto(id, act){
   const W = game.wm; if (!W || ana.sit || ACT_SOLA || (id === 'gwin' && velaPuede() && act !== true)) return false;   // (the window, with the candle: its menu first)
-  const H = (W.objHoy ||= {}); if (H[id] === today()) return false;
-  const x = dlgCtx(), C = DIALOGOS.filter(d => d.disparo === 'objeto' && d.objeto === id && !d.dicha() && dlgCumple(d, x)); if (!C.length) return false;
-  const v = d => (d.prioridad || 0) + dlgEspecificidad(d) * .001, top = Math.max(...C.map(v)), T = C.filter(c => v(c) === top), nuevas = T.filter(c => dlgDichas()[c.id] == null);
-  if (!nuevas.length && Math.random() < .5) return false;   // (one already seen, again: now and then, not every day)
-  const d = pick(nuevas.length ? nuevas : T);
-  H[id] = today(); if (d.tambien && typeof act === 'function') act(true);
+  const H = (W.objHoy ||= {}), k = id.split(':')[0]; if (H[k] === today()) return false;   // (bed:3 is a bed of the garden: «objeto: bed»)
+  const x = dlgCtx(), d = escenaElegir(DIALOGOS.filter(d => d.disparo === 'objeto' && d.objeto === k && !d.dicha() && dlgCumple(d, x))); if (!d) return false;
+  H[k] = today(); if (d.tambien && typeof act === 'function') act(true);
   d.decir(); return true;
+}
+// the scenes of a place (disparo: lugar, lugar: <a place of Avonlea>): when Ana passes by on her own feet, free (not on
+// her way to an errand of hers), the place says something to her: the Haunted Wood at dusk, the bridge over the brook,
+// the White Way… once a day each place, and not one right after another
+let lugaresT = 0, lugarRespiro = 0;
+const LUGAR_CERCA = 150, LUGAR_RESPIRO = M(40);
+function lugaresTick(dt){
+  if ((lugaresT -= dt) > 0) return; lugaresT = 2;
+  const W = game.wm; if (!W || game.scene !== 'out' || (CAP1.on && !CAP1.done) || ana.sit || ana.goto?.auto || ana.goto?.wm || cart.riding) return;
+  if (TT < lugarRespiro || hablando() || amb.cur || game.talk || TALKS.some(t => t.lines.some(l => l.q === 'ana'))) return;
+  const H = (W.lugarHoy ||= {}), x = dlgCtx();
+  for (const [k, p] of Object.entries(PLACES)) {
+    if (H[k] === today() || dist(ana.x, ana.y, p[1], p[2]) > LUGAR_CERCA) continue;
+    const d = escenaElegir(DIALOGOS.filter(d => d.disparo === 'lugar' && d.lugar === k && !d.dicha() && dlgCumple(d, x))); if (!d) continue;
+    H[k] = today(); lugarRespiro = TT + LUGAR_RESPIRO; d.decir(); return;
+  }
 }
 // the candle at the window: once they have agreed on the signals, friends still, in the evening
 function velaPuede(){ return dianaAmiga() && !!dlgDichas().conv_diana_vela && hourNow() % 24 >= 19; }

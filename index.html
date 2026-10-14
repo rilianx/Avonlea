@@ -1733,6 +1733,260 @@ si: estacion:verano
 ana: (Pelusa duerme al sol, panza arriba, con las patas en el aire.)
 ana: Qué manera de dormir tan sin vergüenza. Ojalá yo pudiera dormir así, sin preocuparme de lo que diría la Sra. Lynde.
 
+# --- Los lugares (src/js/66-primeras-veces.js): cuando Ana pasa por un lugar de Avonlea, libre (no camino a un encargo),
+# el lugar le dice algo («disparo: lugar», «lugar: <clave de lugar>»: bosque_encantado, puente, camino_blanco, lago,
+# campo_rosado, playa, faro, rio, huerta, granero, cuesta_del_huerto, iglesia, escuela, aldea, corral…). Una al día por
+# lugar, y no una detrás de otra. Se eligen como las de las cosas.
+#
+# El estilo (el de la ventana): escenas que inspiran. Primero lo que se ve, se oye o se huele, concreto, de esa estación
+# y esa hora, entre paréntesis; después Ana lo transforma con su imaginación (una imagen, una personificación, un
+# cuentito); y al final un sentimiento o un pensamiento chico que se queda (gratitud, nostalgia, ganas, un poco de humor
+# sobre sí misma). Dos o tres líneas. Nada que el juego tenga que mostrar; ecos del libro cuando calzan.
+
+=== lugar_bosque_crepusculo ===
+disparo: lugar
+lugar: bosque_encantado
+canal: ana_sola
+repetir: dia
+si: hora:18-22
+---
+ana: (El bosque de abetos se oscurece. Entre los troncos, la niebla se arrastra como un chal blanco.)
+ana: Aquí es donde pasa la dama blanca, retorciéndose las manos… Diana y yo la inventamos, ya lo sé. Pero los bosques no saben que las cosas son inventadas.
+ana: (Ana apura el paso, sin mirar atrás.) Mañana de día me río de esto. Ahora no.
+
+=== lugar_bosque_manana ===
+disparo: lugar
+lugar: bosque_encantado
+canal: ana_sola
+repetir: dia
+si: hora:6-12, !estacion:invierno
+---
+ana: (De día, el Bosque Encantado está lleno de sol entre las ramas, y huele a resina y a musgo.)
+ana: Qué valiente es una a la luz del día. Los fantasmas deben estar durmiendo, enroscados bajo las raíces, como gatos.
+
+=== lugar_bosque_invierno ===
+disparo: lugar
+lugar: bosque_encantado
+canal: ana_sola
+repetir: dia
+si: estacion:invierno
+---
+ana: (La nieve cubre las ramas de los abetos. No se oye nada, ni un pájaro.)
+ana: El bosque está guardando silencio, como en la iglesia. Me parece que está rezando por la primavera.
+
+=== lugar_puente ===
+disparo: lugar
+lugar: puente
+canal: ana_sola
+repetir: dia
+si: !estacion:invierno
+---
+ana: (Ana se asoma por la baranda del puente. El arroyo corre abajo, claro, sobre las piedras.)
+ana: El arroyo nunca está callado. Cuenta lo que vio allá arriba, en el bosque, a todo el que pase. Es el chismoso más simpático de Avonlea.
+ana: (Tira una hojita al agua y la mira irse.) Buen viaje. Saluda al mar de mi parte.
+
+=== lugar_puente_invierno ===
+disparo: lugar
+lugar: puente
+canal: ana_sola
+repetir: dia
+si: estacion:invierno
+---
+ana: (El arroyo está helado por los bordes; en el medio, el agua sigue corriendo, oscura y fría.)
+ana: Sigue corriendo debajo del hielo. Hay cosas así: por fuera parecen dormidas, y por dentro siguen andando.
+
+=== lugar_puente_diana ===
+disparo: lugar
+lugar: puente
+canal: ana_sola
+prioridad: 2
+si: hecho:conocidas_diana, !hecho:prohibida
+---
+ana: (El puente une Tejas Verdes con La Cuesta del Huerto.)
+ana: Este es el puente más importante del mundo. Por aquí voy a ver a Diana y por aquí viene ella. Un puente entre dos amigas del alma.
+
+=== lugar_camino_blanco_primavera ===
+disparo: lugar
+lugar: camino_blanco
+canal: ana_sola
+repetir: dia
+si: estacion:primavera
+---
+ana: (Los manzanos forman un túnel de flores sobre el camino. Los pétalos caen despacio, como nieve tibia.)
+ana: Cada vez que paso me dan ganas de hablar en voz baja, como en una iglesia. Debe ser porque aquí algo muy grande está pasando, en silencio.
+
+=== lugar_camino_blanco_otono ===
+disparo: lugar
+lugar: camino_blanco
+canal: ana_sola
+repetir: dia
+si: estacion:otoño
+---
+ana: (Ya no hay flores. Las hojas de los manzanos se pusieron amarillas y crujen bajo los pies.)
+ana: Ahora es el Camino Dorado de las Delicias. Le voy a dar un nombre para cada estación. Así nunca se aburre de sí mismo.
+
+=== lugar_camino_blanco_invierno ===
+disparo: lugar
+lugar: camino_blanco
+canal: ana_sola
+repetir: dia
+si: estacion:invierno
+---
+ana: (Las ramas desnudas están cargadas de nieve. El túnel vuelve a ser blanco, pero de otra manera.)
+ana: Ves, te dije que eras el Camino Blanco. Hasta en invierno cumples tu nombre. Eso se llama tener carácter.
+
+=== lugar_lago_niebla ===
+disparo: lugar
+lugar: lago
+canal: ana_sola
+repetir: dia
+si: hora:5-9, !estacion:invierno
+---
+ana: (Sobre el lago flota una niebla delgada. Un pato sale de ella como de un sueño.)
+ana: Si una se quedara quieta aquí el tiempo suficiente, vería salir de la niebla a la dama de Shalott en su barca. Bueno, o al pato de nuevo.
+
+=== lugar_lago_verano ===
+disparo: lugar
+lugar: lago
+canal: ana_sola
+repetir: dia
+si: estacion:verano, hora:12-18
+---
+ana: (El sol hace brillar el agua en mil puntitos. Los sauces de la orilla mojan las puntas de sus ramas.)
+ana: Los sauces se agachan a mirarse el pelo en el agua. Me caen bien: también son un poco vanidosos.
+
+=== lugar_campo_rosado ===
+disparo: lugar
+lugar: campo_rosado
+canal: ana_sola
+repetir: dia
+si: !estacion:invierno
+---
+ana: (El campo está cubierto de flores rosadas que se mecen todas juntas cuando pasa el viento.)
+ana: ¡Todo el campo se volvió rosado! Parece que la tierra se ruborizó porque alguien le dijo un cumplido.
+ana: Me dan ganas de llorar de lo lindo. No de pena: de esas lágrimas que salen cuando a una le queda chico el corazón.
+
+=== lugar_playa ===
+disparo: lugar
+lugar: playa
+canal: ana_sola
+repetir: dia
+si: !estacion:invierno
+---
+ana: (La arena es roja, el mar azul, y las olas dejan una espuma blanca que se deshace con un susurro.)
+ana: Rojo, azul y blanco. La Isla se viste como una bandera para recibir al mar todos los días.
+ana: (Ana se saca los zapatos y mete los pies en el agua.) ¡Fría! Pero una no puede venir al mar y no saludarlo con los pies.
+
+=== lugar_playa_invierno ===
+disparo: lugar
+lugar: playa
+canal: ana_sola
+repetir: dia
+si: estacion:invierno
+---
+ana: (El hielo se amontona en la orilla. El mar está gris y el viento corta la cara.)
+ana: El mar en invierno es como Marilla cuando está seria: da un poco de miedo, pero una sabe que en el fondo sigue siendo el mismo.
+
+=== lugar_rio_escuela ===
+disparo: lugar
+lugar: rio
+canal: ana_sola
+repetir: dia
+si: !estacion:invierno
+---
+ana: (En el río, junto a la escuela, se enfrían las botellas de leche de los alumnos, atadas con cordel.)
+ana: El río nos guarda la leche fresca toda la mañana, sin pedir nada a cambio. Es el compañero de curso más generoso.
+
+=== lugar_huerta_brotes ===
+disparo: lugar
+lugar: huerta
+canal: ana_sola
+repetir: dia
+si: estacion:primavera
+---
+ana: (En la tierra oscura asoman unos brotes verdes, tan chiquitos que casi no se ven.)
+ana: ¡Salieron! Toda la noche estuvieron empujando para arriba, sin que nadie las viera. Eso sí que es fe.
+
+=== lugar_huerta_verano ===
+disparo: lugar
+lugar: huerta
+canal: ana_sola
+repetir: dia
+si: estacion:verano
+---
+ana: (Las flores de la huerta están abiertas y zumban las abejas. Huele a tierra tibia.)
+ana: Cuando regué estas flores no eran nada. Ahora mírenlas: se creen las reinas del verano. Y tienen razón.
+
+=== lugar_granero ===
+disparo: lugar
+lugar: granero
+canal: ana_sola
+repetir: dia
+si: !estacion:invierno
+---
+ana: (Del granero sale olor a heno recién cortado. Una golondrina entra y sale por la ventanita del pajar.)
+ana: El heno huele a todo el verano junto, guardado. En invierno voy a venir a olerlo cuando extrañe el sol.
+
+=== lugar_cuesta_huerto ===
+disparo: lugar
+lugar: cuesta_del_huerto
+canal: ana_sola
+repetir: dia
+si: estacion:primavera, hecho:conocidas_diana
+---
+ana: (El huerto de los Barry está en flor. Detrás de esas ventanas está Diana.)
+ana: Debe ser imposible estar triste viviendo en una casa con un huerto así. Aunque Diana dice que su mamá lo consigue igual.
+
+=== lugar_cuesta_prohibida ===
+disparo: lugar
+lugar: cuesta_del_huerto
+canal: ana_sola
+prioridad: 3
+si: hecho:prohibida, !hecho:perdonada
+---
+ana: (Ana pasa frente a La Cuesta del Huerto sin detenerse. Le parece ver una cortina que se mueve.)
+ana: No voy a mirar, para no ponerla en un aprieto. Pero voy a caminar despacito, para que sepa que pasé.
+
+=== lugar_iglesia ===
+disparo: lugar
+lugar: iglesia
+canal: ana_sola
+repetir: dia
+si: !estacion:invierno
+---
+ana: (Junto a la iglesia, el cementerio viejo está lleno de lápidas cubiertas de líquenes, y de rosas silvestres.)
+ana: Las rosas crecen aquí como si quisieran hacerles compañía a los que duermen. Es lo más tierno que hace una rosa.
+
+=== lugar_escuela_abedules ===
+disparo: lugar
+lugar: escuela
+canal: ana_sola
+repetir: dia
+si: hora:7-10
+---
+ana: (El camino a la escuela pasa entre abedules blancos. La luz entra verde por las hojas.)
+ana: Ir a la escuela por aquí es casi como no ir a la escuela. Una llega con el alma ya instruida, aunque la gramática no.
+
+=== lugar_aldea ===
+disparo: lugar
+lugar: aldea
+canal: ana_sola
+repetir: dia
+si: hora:8-18
+---
+ana: (En el cruce de caminos, la gente se saluda de carreta a carreta. Un perro duerme al sol frente a la tienda.)
+ana: Aquí todos saben todo de todos. Al principio me daba miedo; ahora me gusta. Es como vivir dentro de una familia muy grande y un poco metida.
+
+=== lugar_corral_idlewild ===
+disparo: lugar
+lugar: corral
+canal: ana_sola
+repetir: dia
+si: !estacion:invierno
+---
+ana: (Junto al corral, cuatro abedules forman un rincón, como una salita al aire libre.)
+ana: Idlewild. Aquí Diana y yo vamos a tener nuestra casita de juegos, con platos rotos de porcelana como si fueran la mejor vajilla.
+
 </script>
 <script type="text/plain" id="conversaciones">
 # Las conversaciones de Ana con los suyos (lo lee el juego al empezar). Inspiradas en el libro, largas y cortas.
@@ -2686,7 +2940,6 @@ const MAP = (() => {
     { at: [22, 19.6], estaciones: [0, 1, 2], lines: [['ana', '¡Señor Matthew! ¡Señor Matthew!'], ['matthew', '¿Qué... qué pasa, Ana?'], ['ana', '¡Mire! ¡Todo el campo se volvió rosado! ¿No le dan ganas de llorar de lo hermoso que es?'], ['matthew', 'Bueno, pues... es muy bonito, sí. Ya lo creo.']] },
     { at: [56, 30], lines: [['ana', '¡Un puente con techo! Es como cruzar el río por adentro de una caja de música.']] },
     { at: [12, 16.6], lines: [['ana', '¡El mar! ¡Y la arena es roja! Parece que la isla se hubiera puesto colorada.']] },
-    { at: [34, 66.4], estaciones: [0], lines: [['ana', 'El Camino Blanco de las Delicias... cada vez que paso me dan ganas de hablar en voz baja, como en una iglesia.']] },
   ],
   };
 })();
@@ -4982,7 +5235,7 @@ class Dialogo {
   // (and, of two of the same importance, the most specific: the one that asks more of the moment, as in Valve's dialogue rules)
   get peso(){ return this.prioridad + (dlgProg()[this.id] ? .04 : 0) + dlgEspecificidad(this) * .001; }
   listo(x){
-    if (this.disparo === 'encuentro' || this.disparo === 'conversar' || this.disparo === 'primera' || this.disparo === 'menu' || this.disparo === 'objeto') return false;   // (these only when two of them meet: dlgNext; or when Ana talks with someone: conversar)
+    if (this.disparo === 'encuentro' || this.disparo === 'conversar' || this.disparo === 'primera' || this.disparo === 'menu' || this.disparo === 'objeto' || this.disparo === 'lugar') return false;   // (these only when two of them meet: dlgNext; or when Ana talks with someone: conversar)
     if (this.dicha() || (this.repetir.cada && TT < (this.proxima || 0))) return false;
     if (this.grande && ritmoLleno()) return false;   // (the pacing: one big thing of the book a day)
     if (this.tipo === 'comentario' && this.prioridad > 0 && TT < (dlgComento[this.canal] || 0)) return false;   // (remarks, not one after another)
@@ -4992,6 +5245,7 @@ class Dialogo {
     if (this.disparo === 'encuentro') return 'cuando se encuentran';
     if (this.disparo === 'conversar') return 'cuando Ana conversa con ' + this.con;
     if (this.disparo === 'objeto') return 'cuando Ana usa ' + this.objeto;
+    if (this.disparo === 'lugar') return 'cuando Ana pasa por ' + this.lugar;
     if (this.dicha()) return 'ya dicha';
     if (this.grande && ritmoLleno()) return 'hoy ya pasó algo grande';
     if (this.repetir.cada && TT < (this.proxima || 0)) return 'otra vez en ' + Math.ceil(this.proxima - TT) + ' s';
@@ -6622,6 +6876,7 @@ function momentsTick(){
     if (momentDone[i] === today() || (f.estaciones && !f.estaciones.includes(S)) || dist(ana.x, ana.y, f.at[0] * U, f.at[1] * U) > 160) continue;   // (some only in their season: the pink field is not pink under the snow)
     momentDone[i] = today(); if (amb.cur) continue;
     const mNear = sceneOf('matthew') === 'out' && dist(PEOPLE.matthew.x, PEOPLE.matthew.y, ana.x, ana.y) < 160;
+    if (!mNear && f.lines.some(([q]) => q === 'matthew')) continue;   // (said to Matthew: only with him there; alone, the place has its own scenes)
     const lines = f.lines.filter(([q]) => q === 'ana' || (q === 'matthew' && mNear)).map(([q, t]) => ({ q, t }));
     if (lines.length) sceneStart({ parts: mNear ? ['matthew'] : [], lines, out: {}, scene: 'out', resumen: '' }, false);
   }
@@ -7544,6 +7799,7 @@ ESCENAS DE CONVERSACIÓN (cuando te piden una escena)
 
 ANA POR SU CUENTA (cuando te piden qué hace Ana mientras la jugadora no la controla, o qué hace tras lo que la jugadora le hizo decir)
 - Te dan opciones numeradas: elige la que Ana desearía hacer ahora (su carácter, la hora, la estación, lo que lleva, sus ganas de ver a los demás o de quedarse soñando, el sueño, lo que acaba de hacer: no repitas) y, en "pensamiento", escribe lo que Ana diría en voz alta al decidirlo (una o dos frases, con su voz).
+- Cuando Ana mira algo o pasa por un lugar, la escena inspira: primero algo concreto que se ve, se oye o se huele, de esa estación y esa hora; después Ana lo transforma con su imaginación (una imagen, un cuentito, las cosas como si sintieran); y al final un sentimiento chico que se queda (gratitud, nostalgia, ganas, un poco de humor sobre sí misma).
 - Ana no tiene prisa: disfruta cada cosa con calma, paseando, mirando, respirando; casi una meditación. Cada cosa que hace por su cuenta le toma un buen rato.
 - Si la jugadora le hizo decir algo que indica qué hace o adónde va, elige la opción que corresponde; si ninguna corresponde, 0.
 
@@ -8352,7 +8608,7 @@ function update(dt){
   if (game.scene === 'camino' && ana.onCart && (mx || my || (ana.goto && !ana.goto.wm))) roadGetOff();   // (moving her: she gets down from the buggy)
   if (ANA_AUTO) { if (mx || my) { freeStart(); const v = 520 / (cam.zoom || 1) / (viewZoom || 1); freeCam.x += mx * v * dt; freeCam.y += my * v * dt; } mx = my = 0; }   // (on her own: the keys move the view)
   if (game.talk?.deadline && TT > game.talk.deadline && !sayOpen) { game.talk.deadline = 0; autoChoose(); }
-  autoTick(); cartTick(dt); roadTick(dt); buggyTick(); roadTalkTick(dt); dlgTick(dt); talkTick(dt); cap1Tick(); momentsTick(); folkTick(dt); faunaTick(dt); agentTick(dt); jugarTick(dt); correoTick(dt); sickTick(); apartarTick(); cuadernoTick(dt); habilidadesTick(dt); juntasTick(dt); agendaTick(); wmApproachTick(dt); calledTick(); chatTick(dt); wmFollowTick();
+  autoTick(); cartTick(dt); roadTick(dt); buggyTick(); roadTalkTick(dt); dlgTick(dt); talkTick(dt); cap1Tick(); momentsTick(); lugaresTick(dt); folkTick(dt); faunaTick(dt); agentTick(dt); jugarTick(dt); correoTick(dt); sickTick(); apartarTick(); cuadernoTick(dt); habilidadesTick(dt); juntasTick(dt); agendaTick(); wmApproachTick(dt); calledTick(); chatTick(dt); wmFollowTick();
   if (RELATO.on) relatoTick();   // (the account of what happens, once all have moved: 66-relato.js)
   ana.torn = !!game.anaStates.rasgado; ana.askew = !!game.anaStates.despeinada;
   ana.savoring = false;
@@ -11402,7 +11658,7 @@ function loop(now){
   else { owed = Math.min(owed + Math.min(raw, .25) * k, 3 * k * .05 + 2); const t0 = performance.now(); while (owed > 1e-4 && performance.now() - t0 < 22) { const d = Math.min(.05, owed); update(d); owed -= d; } }
   FRAME++; tripBarDraw(); render(); islaDraw(); requestAnimationFrame(loop);
 }
-window.__avonlea = { escenaObjeto, targets, cartaPuede, conNombres, nombrar, nombreDe, nombrarElegir, NOMBRABLES, primeraVez, ventana, velaPuede, sombrero, LOOKS, dlgDichas, chats: () => CHATS, enConversacion, anaPos: () => ({ x: ana.x, y: ana.y }), setDia: (d, h) => { dayT = d + (h - 6) / 24; }, dia: () => today(), PEOPLE, relatoEmpezar, inicioLlegada, dlgHechos, convDisponibles, conversar, convOpciones, guiñosDe, LINES, dlgHecho, cualidad, cualidadSuma, cualidadCond, dlgCond, dlgEspecificidad, ritmoLleno, ritmoMarca, dlgHacer, dlgAccion, HABILIDADES, relSetW, relato: () => RELATO.lineas, reglas: () => RELATO_REGLAS.map(r => [r.id, r.texto]), jugables, jugar, anaMenu, correoRetirar, cartaLeer, CORREO, cartaTexto, playAct: () => game.playAct, DIALOGOS, dlgCtx, talks: () => TALKS, dlgGuion, dlgPanel, bubblesNow: () => bubbles, toby, cartSheet: (c, x, y, c8, t) => { const L = [], p = { look: 'matthew', x, y, c8, walk: 0, moving: false }; const [cx, cy] = [x, y]; pushCart(L, c, { x: cx, y: cy, c8, walk: 0, moving: true }, t); for (const [k, look] of [[0, 'matthew'], [1, 'ana']]) { const [sx, sy] = cartSeat(cx, cy, c8, k); L.push({ y: sy, draw: () => drawPerson(c, { ...mkPerson(look, sx, sy), sit: true, dir: c8Dir(c8) }, t) }); } L.sort((a, b) => a.y - b.y).forEach(o => o.draw()); }, startCap1, CAP1, LIBRO1, ROAD_TRAMOS, ROAD_MIN, roadTramo, islaToggle, DLG_BANK, startDay, setSeason, agendaData: () => AGENDA.map(e => ({ who: wmName(e.who), from: e.from, to: e.to, label: e.label, season: e.season, sunday: !!e.sunday, ana: !!(e.ana || e.who === 'ana'), cond: e.when ? String(e.when).replace(/^\(\) => /, '') : '' })), setAgenda: v => { AGENDA_ON = v; }, AGENDA, wmData: () => ({ THINGS, WHO, OFRECE, WP_NAME, TRADE, TREATS, LIBRETA, ITEM_NAME, MAX_GOALS, PACE, FOCO }), paintMapBase, doingText, wmName, wmBody, wmScene, WW, WH, setVec: v => { VEC_ON = v; }, setStyle: v => { ANA_STYLE = v; }, setHead: setHeadM, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+window.__avonlea = { lugaresTick, escenaObjeto, targets, cartaPuede, conNombres, nombrar, nombreDe, nombrarElegir, NOMBRABLES, primeraVez, ventana, velaPuede, sombrero, LOOKS, dlgDichas, chats: () => CHATS, enConversacion, anaPos: () => ({ x: ana.x, y: ana.y }), setDia: (d, h) => { dayT = d + (h - 6) / 24; }, dia: () => today(), PEOPLE, relatoEmpezar, inicioLlegada, dlgHechos, convDisponibles, conversar, convOpciones, guiñosDe, LINES, dlgHecho, cualidad, cualidadSuma, cualidadCond, dlgCond, dlgEspecificidad, ritmoLleno, ritmoMarca, dlgHacer, dlgAccion, HABILIDADES, relSetW, relato: () => RELATO.lineas, reglas: () => RELATO_REGLAS.map(r => [r.id, r.texto]), jugables, jugar, anaMenu, correoRetirar, cartaLeer, CORREO, cartaTexto, playAct: () => game.playAct, DIALOGOS, dlgCtx, talks: () => TALKS, dlgGuion, dlgPanel, bubblesNow: () => bubbles, toby, cartSheet: (c, x, y, c8, t) => { const L = [], p = { look: 'matthew', x, y, c8, walk: 0, moving: false }; const [cx, cy] = [x, y]; pushCart(L, c, { x: cx, y: cy, c8, walk: 0, moving: true }, t); for (const [k, look] of [[0, 'matthew'], [1, 'ana']]) { const [sx, sy] = cartSeat(cx, cy, c8, k); L.push({ y: sy, draw: () => drawPerson(c, { ...mkPerson(look, sx, sy), sit: true, dir: c8Dir(c8) }, t) }); } L.sort((a, b) => a.y - b.y).forEach(o => o.draw()); }, startCap1, CAP1, LIBRO1, ROAD_TRAMOS, ROAD_MIN, roadTramo, islaToggle, DLG_BANK, startDay, setSeason, agendaData: () => AGENDA.map(e => ({ who: wmName(e.who), from: e.from, to: e.to, label: e.label, season: e.season, sunday: !!e.sunday, ana: !!(e.ana || e.who === 'ana'), cond: e.when ? String(e.when).replace(/^\(\) => /, '') : '' })), setAgenda: v => { AGENDA_ON = v; }, AGENDA, wmData: () => ({ THINGS, WHO, OFRECE, WP_NAME, TRADE, TREATS, LIBRETA, ITEM_NAME, MAX_GOALS, PACE, FOCO }), paintMapBase, doingText, wmName, wmBody, wmScene, WW, WH, setVec: v => { VEC_ON = v; }, setStyle: v => { ANA_STYLE = v; }, setHead: setHeadM, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
 /* ---------- the first time: a scene of its own; the window and the candle; her hat in the wardrobe ----------
    - The first time Ana does some things (looks out of her window, sees herself in the mirror, climbs to her room, sees
      the sea from the lighthouse…), a scene of the script (primera_<what>, disparo: primera) instead of the plain line;
@@ -11420,15 +11676,36 @@ function primeraVez(id, act){
 // each for its moment (the season, the hour, what has happened: «si:»); at most one a day for each thing, the one that
 // fits best (more priority, then more specific; among equals, any). The rest of the times, the plain line as always.
 let ACT_SOLA = false;   // (Ana doing it on her own, on her way to something: the plain line, she has things to do)
+// of the scenes that can be said now, the one that fits best: more priority, then more specific; among equals, one not
+// seen yet (one already seen, again, only now and then: not every day)
+function escenaElegir(C){
+  if (!C.length) return null;
+  const v = d => (d.prioridad || 0) + dlgEspecificidad(d) * .001, top = Math.max(...C.map(v)), T = C.filter(c => v(c) === top), nuevas = T.filter(c => dlgDichas()[c.id] == null);
+  if (!nuevas.length && Math.random() < .5) return null;
+  return pick(nuevas.length ? nuevas : T);
+}
 function escenaObjeto(id, act){
   const W = game.wm; if (!W || ana.sit || ACT_SOLA || (id === 'gwin' && velaPuede() && act !== true)) return false;   // (the window, with the candle: its menu first)
-  const H = (W.objHoy ||= {}); if (H[id] === today()) return false;
-  const x = dlgCtx(), C = DIALOGOS.filter(d => d.disparo === 'objeto' && d.objeto === id && !d.dicha() && dlgCumple(d, x)); if (!C.length) return false;
-  const v = d => (d.prioridad || 0) + dlgEspecificidad(d) * .001, top = Math.max(...C.map(v)), T = C.filter(c => v(c) === top), nuevas = T.filter(c => dlgDichas()[c.id] == null);
-  if (!nuevas.length && Math.random() < .5) return false;   // (one already seen, again: now and then, not every day)
-  const d = pick(nuevas.length ? nuevas : T);
-  H[id] = today(); if (d.tambien && typeof act === 'function') act(true);
+  const H = (W.objHoy ||= {}), k = id.split(':')[0]; if (H[k] === today()) return false;   // (bed:3 is a bed of the garden: «objeto: bed»)
+  const x = dlgCtx(), d = escenaElegir(DIALOGOS.filter(d => d.disparo === 'objeto' && d.objeto === k && !d.dicha() && dlgCumple(d, x))); if (!d) return false;
+  H[k] = today(); if (d.tambien && typeof act === 'function') act(true);
   d.decir(); return true;
+}
+// the scenes of a place (disparo: lugar, lugar: <a place of Avonlea>): when Ana passes by on her own feet, free (not on
+// her way to an errand of hers), the place says something to her: the Haunted Wood at dusk, the bridge over the brook,
+// the White Way… once a day each place, and not one right after another
+let lugaresT = 0, lugarRespiro = 0;
+const LUGAR_CERCA = 150, LUGAR_RESPIRO = M(40);
+function lugaresTick(dt){
+  if ((lugaresT -= dt) > 0) return; lugaresT = 2;
+  const W = game.wm; if (!W || game.scene !== 'out' || (CAP1.on && !CAP1.done) || ana.sit || ana.goto?.auto || ana.goto?.wm || cart.riding) return;
+  if (TT < lugarRespiro || hablando() || amb.cur || game.talk || TALKS.some(t => t.lines.some(l => l.q === 'ana'))) return;
+  const H = (W.lugarHoy ||= {}), x = dlgCtx();
+  for (const [k, p] of Object.entries(PLACES)) {
+    if (H[k] === today() || dist(ana.x, ana.y, p[1], p[2]) > LUGAR_CERCA) continue;
+    const d = escenaElegir(DIALOGOS.filter(d => d.disparo === 'lugar' && d.lugar === k && !d.dicha() && dlgCumple(d, x))); if (!d) continue;
+    H[k] = today(); lugarRespiro = TT + LUGAR_RESPIRO; d.decir(); return;
+  }
 }
 // the candle at the window: once they have agreed on the signals, friends still, in the evening
 function velaPuede(){ return dianaAmiga() && !!dlgDichas().conv_diana_vela && hourNow() % 24 >= 19; }

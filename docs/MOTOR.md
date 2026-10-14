@@ -81,6 +81,10 @@ Las líneas se escriben con el nombre del libro: el juego lo cambia solo por el 
 
 **Las cosas** (`disparo: objeto`, `objeto: gwin`): cada cosa que Ana usa o mira (la ventana de su pieza, el espejo, el armario, el mar desde el faro, el banco del lago, el fuego, la pizarra, la gata…) tiene muchas escenas, cada una para su momento: por estación y hora (`repetir: dia`, que vuelven de vez en cuando), o por lo que ya pasó (una vez: la ventana después de la prohibición, el espejo después de «¡Zanahorias!»). Como mucho una al día por cosa: la de más prioridad y, a igual, la más específica; entre iguales, una que no se haya visto. Las demás veces, la frase de siempre. Con `tambien`, la cosa se hace igual (sentarse, calentarse).
 
+**Los lugares** (`disparo: lugar`, `lugar: bosque_encantado`): cuando Ana pasa libre por un lugar de Avonlea (el Bosque Encantado, el puente del arroyo, el Camino Blanco, el lago, el campo rosado, la playa, la huerta…), el lugar le dice algo. Una al día por lugar, y con un respiro entre una y otra. Si Ana va camino a un encargo, no.
+
+**El estilo de estas escenas** (el de la ventana): que inspiren. Primero lo que se ve, se oye o se huele, concreto, de esa estación y esa hora; después Ana lo transforma con su imaginación (una imagen, un cuentito, las cosas como si sintieran); al final, un sentimiento chico que se queda (gratitud, nostalgia, ganas, un poco de humor sobre sí misma). Dos o tres líneas. La IA tiene la misma indicación para sus escenas improvisadas.
+
 **La primera vez** (`src/js/66-primeras-veces.js`): la primera vez que Ana hace algunas cosas (mirar por la ventana de su pieza, mirarse al espejo, subir a su pieza, abrir el armario, ver el mar desde el faro…), en vez de la frase de siempre sale una escena del guion, `primera_<acción>` con `disparo: primera`. Con `tambien`, la acción se hace igual (subir la escalera).
 
 **Los hitos:** al cruzar un umbral de una habilidad de Ana, alguien se lo dice la próxima vez que se encuentran (con IA, una escena improvisada; sin IA, la línea escrita). Luego queda el hecho `hito_<habilidad>_<n>`.
