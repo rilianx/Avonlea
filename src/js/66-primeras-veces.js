@@ -11,13 +11,26 @@ function primeraVez(id, act){
   if (d.tambien) act(true);   // (done too, quietly: the scene tells it)
   d.decir(); return true;
 }
+// the scenes of a thing (disparo: objeto, objeto: <what>): looking out of the window, at the mirror, at the sea… many,
+// each for its moment (the season, the hour, what has happened: «si:»); at most one a day for each thing, the one that
+// fits best (more priority, then more specific; among equals, any). The rest of the times, the plain line as always.
+function escenaObjeto(id, act){
+  const W = game.wm; if (!W || ana.sit || (id === 'gwin' && velaPuede() && act !== true)) return false;   // (the window, with the candle: its menu first)
+  const H = (W.objHoy ||= {}); if (H[id] === today()) return false;
+  const x = dlgCtx(), C = DIALOGOS.filter(d => d.disparo === 'objeto' && d.objeto === id && !d.dicha() && dlgCumple(d, x)); if (!C.length) return false;
+  const v = d => (d.prioridad || 0) + dlgEspecificidad(d) * .001, top = Math.max(...C.map(v)), T = C.filter(c => v(c) === top), nuevas = T.filter(c => dlgDichas()[c.id] == null);
+  if (!nuevas.length && Math.random() < .5) return false;   // (one already seen, again: now and then, not every day)
+  const d = pick(nuevas.length ? nuevas : T);
+  H[id] = today(); if (d.tambien && typeof act === 'function') act(true);
+  d.decir(); return true;
+}
 // the candle at the window: once they have agreed on the signals, friends still, in the evening
 function velaPuede(){ return dianaAmiga() && !!dlgDichas().conv_diana_vela && hourNow() % 24 >= 19; }
 function ventana(){
   if (!velaPuede()) return anaSays(WINDOW_LINES[S]);
   say('Ana', 'Por la ventana, entre los árboles, se ve la luz de la pieza de Diana.', [
     ['🕯 Hacerle señas a Diana con la vela', () => { close(); const d = DIALOGOS.find(x => x.id === 'senas_vela'); if (d && !d.dicha()) d.decir(); else anaSays('Ya le hice señas esta noche. Diana debe estar durmiendo… o imaginando cosas, como yo.'); }],
-    ['Mirar por la ventana', () => { close(); anaSays(WINDOW_LINES[S]); }],
+    ['Mirar por la ventana', () => { close(); escenaObjeto('gwin', true) || anaSays(WINDOW_LINES[S]); }],
     ['Nada por ahora', close],
   ]);
 }

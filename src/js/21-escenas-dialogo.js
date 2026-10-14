@@ -150,7 +150,7 @@ class Dialogo {
   // (and, of two of the same importance, the most specific: the one that asks more of the moment, as in Valve's dialogue rules)
   get peso(){ return this.prioridad + (dlgProg()[this.id] ? .04 : 0) + dlgEspecificidad(this) * .001; }
   listo(x){
-    if (this.disparo === 'encuentro' || this.disparo === 'conversar' || this.disparo === 'primera' || this.disparo === 'menu') return false;   // (these only when two of them meet: dlgNext; or when Ana talks with someone: conversar)
+    if (this.disparo === 'encuentro' || this.disparo === 'conversar' || this.disparo === 'primera' || this.disparo === 'menu' || this.disparo === 'objeto') return false;   // (these only when two of them meet: dlgNext; or when Ana talks with someone: conversar)
     if (this.dicha() || (this.repetir.cada && TT < (this.proxima || 0))) return false;
     if (this.grande && ritmoLleno()) return false;   // (the pacing: one big thing of the book a day)
     if (this.tipo === 'comentario' && this.prioridad > 0 && TT < (dlgComento[this.canal] || 0)) return false;   // (remarks, not one after another)
@@ -159,6 +159,7 @@ class Dialogo {
   porque(x){   // why it is not said now (for the panel)
     if (this.disparo === 'encuentro') return 'cuando se encuentran';
     if (this.disparo === 'conversar') return 'cuando Ana conversa con ' + this.con;
+    if (this.disparo === 'objeto') return 'cuando Ana usa ' + this.objeto;
     if (this.dicha()) return 'ya dicha';
     if (this.grande && ritmoLleno()) return 'hoy ya pasó algo grande';
     if (this.repetir.cada && TT < (this.proxima || 0)) return 'otra vez en ' + Math.ceil(this.proxima - TT) + ' s';

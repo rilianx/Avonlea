@@ -990,3 +990,546 @@ ana: (Ana se arrodilla de pronto frente a la Sra. Lynde.)
    lynde: Hmm. Está bien, niña. Que no se repita.
    ! suma afecto:lynde:ana 1
    ! log Ana le pidió perdón a la Sra. Lynde.
+
+# --- Las cosas (src/js/66-primeras-veces.js): cada cosa que Ana usa o mira puede tener muchas escenas, cada una para su
+# momento («disparo: objeto», «objeto: <la cosa>»: gwin la ventana de su pieza, mirror el espejo, armario, faro, bench
+# el banco del lago, fire el fuego, pizarra, pupitre, banco de la iglesia, frascos, cage, libros, toby la gata). Como
+# mucho una al día por cosa: la de más prioridad y, a igual, la más específica (la que pide más condiciones); las demás
+# veces, la frase de siempre. Las de la estación y la hora se repiten («repetir: dia»), de vez en cuando; las de lo que
+# pasó, una vez. Con «tambien», la cosa se hace igual (sentarse, guardar el sombrero, calentarse).
+
+# · la ventana de su pieza: por estación y hora, y por lo que va pasando
+=== ventana_primavera_manana ===
+disparo: objeto
+objeto: gwin
+canal: ana_sola
+repetir: dia
+si: estacion:primavera, hora:5-11
+---
+ana: (Ana abre la ventana. El aire de la mañana entra oliendo a flores de cerezo y a tierra mojada.)
+ana: Las abejas ya están trabajando en la Reina de las Nieves. Zumban como si cantaran un himno muy bajito.
+ana: Allá abajo va Matthew con el arado. Desde aquí parece un caballero saliendo a una cruzada… una cruzada de papas.
+
+=== ventana_primavera_tarde ===
+disparo: objeto
+objeto: gwin
+canal: ana_sola
+repetir: dia
+si: estacion:primavera, hora:14-20
+---
+ana: (Por la ventana se ve el huerto en flor, el arroyo entre los abedules y, más allá, el bosque oscuro.)
+ana: El arroyo se ríe solo. Debe estar acordándose de algo muy gracioso que le pasó en el invierno, cuando estaba bajo el hielo.
+ana: Si una pudiera embotellar esta tarde, la guardaría para un día gris de noviembre.
+
+=== ventana_verano_manana ===
+disparo: objeto
+objeto: gwin
+canal: ana_sola
+repetir: dia
+si: estacion:verano, hora:5-11
+---
+ana: (El sol ya está alto. En el campo de abajo, el heno se mece como un mar verde.)
+ana: Matthew dice que hay que segar antes de que llueva. Yo diría que el heno no quiere que lo sieguen: por eso baila así, para que le tengan lástima.
+
+=== ventana_verano_noche ===
+disparo: objeto
+objeto: gwin
+canal: ana_sola
+repetir: dia
+si: estacion:verano, hora:20-24
+---
+ana: (Es una noche tibia. Cantan los grillos y, sobre el campo, se encienden y se apagan las luciérnagas.)
+ana: Las luciérnagas son estrellas que bajaron a jugar. Por eso se apagan de a ratos: se esconden para que las estrellas de arriba no las reten.
+ana: Buenas noches, estrellas. Buenas noches, Reina de las Nieves. Buenas noches, mundo.
+
+=== ventana_otono ===
+disparo: objeto
+objeto: gwin
+canal: ana_sola
+repetir: dia
+si: estacion:otoño
+---
+ana: (Los arces del bosque están rojos y dorados. Unas hojas entran volando por la ventana.)
+ana: ¡Oh, Marilla tendría que ver esto! Me alegra tanto vivir en un mundo donde hay octubres.
+ana: Sería terrible pasar de septiembre a noviembre de un salto, ¿no es cierto?
+
+=== ventana_otono_gansos ===
+disparo: objeto
+objeto: gwin
+canal: ana_sola
+repetir: dia
+si: estacion:otoño, hora:15-19
+---
+ana: (Una bandada de gansos salvajes cruza el cielo hacia el sur, en forma de punta de flecha.)
+ana: ¿Adónde irán? A algún lugar con palmeras y mares tibios, seguro. Me pregunto si se acuerdan de Avonlea cuando están allá.
+ana: Yo me acordaría. Avonlea es de esos lugares que uno se lleva puesto.
+
+=== ventana_primavera_noche ===
+disparo: objeto
+objeto: gwin
+canal: ana_sola
+repetir: dia
+si: estacion:primavera, hora:20-24
+---
+ana: (La noche está clara. Las flores del cerezo brillan pálidas, como si tuvieran luz propia.)
+ana: De noche la Reina de las Nieves parece un fantasma, pero un fantasma bueno, de esos que cuidan las casas.
+ana: (Ana se arrodilla junto a la ventana.) Gracias por el Camino Blanco de las Delicias, y por el Lago de las Aguas Brillantes, y por esta ventana. Amén.
+
+=== ventana_otono_noche ===
+disparo: objeto
+objeto: gwin
+canal: ana_sola
+repetir: dia
+si: estacion:otoño, hora:19-24
+---
+ana: (Sopla el viento y las ramas del cerezo golpean el vidrio, tac, tac.)
+ana: Es la Reina de las Nieves que pide entrar. Lo siento, Majestad: Marilla no deja entrar a nadie sin limpiarse los pies.
+
+=== ventana_invierno ===
+disparo: objeto
+objeto: gwin
+canal: ana_sola
+repetir: dia
+si: estacion:invierno, hora:6-17
+---
+ana: (El vidrio está cubierto de helechos de escarcha. Ana sopla un círculo para poder mirar.)
+ana: Todo blanco. La Reina de las Nieves está sin flores, pero ahora tiene nieve: no hay quién le gane, se viste de blanco todo el año.
+ana: Los helechos del vidrio los dibujó el Rey del Invierno durante la noche. Debe tener los dedos muy fríos.
+
+=== ventana_invierno_noche ===
+disparo: objeto
+objeto: gwin
+canal: ana_sola
+repetir: dia
+si: estacion:invierno, hora:17-24
+---
+ana: (La luna brilla sobre la nieve. Todo está tan quieto que se oye crujir la casa.)
+ana: La nieve con luna parece de plata. Si una caminara por ahí ahora, dejaría huellas de plata.
+ana: (Ana se mete en la cama temblando.) Bueno, mañana. Hoy me quedo con la idea, que es más tibia.
+
+=== ventana_madrugada ===
+disparo: objeto
+objeto: gwin
+canal: ana_sola
+repetir: dia
+si: hora:4-6
+---
+ana: (Todavía no amanece del todo. Sobre el bosque, el cielo se pone rosado, después dorado.)
+ana: Me gusta levantarme antes que el sol. Es como estar en el teatro antes de que suba el telón.
+
+=== ventana_a_prueba ===
+disparo: objeto
+objeto: gwin
+canal: ana_sola
+prioridad: 2
+si: hecho:a_prueba, !hecho:se_queda
+---
+ana: (Ana apoya la frente en el vidrio.) Si me porto bien… si soy útil… si aprendo…
+ana: Voy a imaginar que esta ventana es mía para siempre. Así, si me tengo que ir, al menos la habré tenido un poco.
+
+=== ventana_se_queda ===
+disparo: objeto
+objeto: gwin
+canal: ana_sola
+prioridad: 3
+si: hecho:se_queda
+---
+ana: (Ana abre la ventana de par en par, como si fuera la primera vez.)
+ana: Mi ventana. Mi cerezo. Mi pieza. ¡Ana de Tejas Verdes! ¿Hay algo más lindo que poder decir «mío» sin miedo?
+
+=== ventana_diana ===
+disparo: objeto
+objeto: gwin
+canal: ana_sola
+prioridad: 2
+si: hecho:conocidas_diana, !hecho:prohibida
+---
+ana: (Entre los árboles se ve el techo de La Cuesta del Huerto.)
+ana: Allí está Diana. Seguro que ahora mismo también está mirando por su ventana. Una amiga del alma es alguien que mira por la ventana al mismo tiempo que tú.
+
+=== ventana_prohibida ===
+disparo: objeto
+objeto: gwin
+canal: ana_sola
+prioridad: 4
+si: hecho:prohibida, !hecho:perdonada
+---
+ana: (Ana mira largo rato hacia La Cuesta del Huerto, con los ojos llenos de lágrimas.)
+ana: Tan cerca, y no puedo ir. Es como en los cuentos, cuando hay un río encantado entre dos castillos.
+ana: Voy a dejar la vela encendida un ratito. Diana no la puede ver… pero yo sé que está.
+
+=== ventana_perdonada ===
+disparo: objeto
+objeto: gwin
+canal: ana_sola
+prioridad: 4
+si: hecho:perdonada
+---
+ana: (La luz de la pieza de Diana brilla entre los árboles desnudos.)
+ana: Minnie May está bien, y la Sra. Barry me perdonó. Creo que nunca había visto una luz tan bonita como esa ventana.
+
+=== ventana_zanahorias ===
+disparo: objeto
+objeto: gwin
+canal: ana_sola
+prioridad: 3
+si: hecho:zanahorias
+---
+ana: (Ana cierra la ventana de un golpe.) ¡Zanahorias! ¡Me llamó Zanahorias delante de toda la escuela!
+ana: Gilbert Blythe puede pasar cien años pidiéndome perdón. El hierro me ha entrado en el alma.
+
+=== ventana_estudia ===
+disparo: objeto
+objeto: gwin
+canal: ana_sola
+prioridad: 1
+si: estudio:ana>=50, !hecho:queens
+---
+ana: (Ana tiene la gramática abierta sobre las rodillas, pero mira por la ventana.)
+ana: Si entro al Queen's, voy a ser maestra. Y entonces Marilla y Matthew… no, primero la gramática. Pero qué ganas de mirar el mundo en vez de los verbos.
+
+=== ventana_queens ===
+disparo: objeto
+objeto: gwin
+canal: ana_sola
+prioridad: 4
+si: hecho:queens
+---
+ana: (Ana mira el cerezo, el arroyo, el bosque, como si quisiera aprendérselos de memoria.)
+ana: En Charlottetown voy a tener otra ventana. Pero esta va a ser siempre la de verdad: las otras van a ser ventanas de visita.
+
+# · el espejo
+=== espejo_pelo ===
+disparo: objeto
+objeto: mirror
+canal: ana_sola
+repetir: dia
+---
+ana: (Ana se mira de frente, después de perfil, después de reojo, como para pillarse distraída.)
+ana: No hay caso: sigue rojo. Ni con imaginación. Puedo imaginarme casi cualquier cosa, pero el pelo rojo no hay forma de imaginármelo de otro color.
+
+=== espejo_cordelia ===
+disparo: objeto
+objeto: mirror
+canal: ana_sola
+repetir: dia
+si: hora:19-24
+---
+ana: (A la luz de la vela, el espejo está oscuro y misterioso.)
+ana: Buenas noches, Lady Cordelia Fitzgerald. Tiene usted un cabello negro como el ala del cuervo y unos ojos de estrella…
+ana: (Ana suspira.) Y una nariz llena de pecas. Qué lástima, Lady Cordelia: casi la convencía.
+
+=== espejo_tejas_verdes ===
+disparo: objeto
+objeto: mirror
+canal: ana_sola
+prioridad: 2
+si: hecho:se_queda
+---
+ana: Ana de Tejas Verdes. (Lo dice despacio, mirándose al espejo.) Ana-de-Tejas-Verdes.
+ana: Suena mucho mejor que Ana de ninguna parte, ¿verdad? Creo que hasta las pecas se ven más contentas.
+
+=== espejo_zanahorias ===
+disparo: objeto
+objeto: mirror
+canal: ana_sola
+prioridad: 3
+si: hecho:zanahorias
+---
+ana: (Ana se tira una trenza, furiosa.) Zanahorias. Así me ve todo el mundo. Así me ve él.
+ana: Bueno. Que me vea así. Pero en las notas le voy a ganar. Eso no tiene color.
+
+=== espejo_invierno ===
+disparo: objeto
+objeto: mirror
+canal: ana_sola
+repetir: dia
+si: estacion:invierno
+---
+ana: (Del frío, Ana tiene las mejillas coloradas como manzanas.)
+ana: Por lo menos el invierno me da color en la cara. Rojo, claro. Todo en mí termina siendo rojo.
+
+=== espejo_estudio ===
+disparo: objeto
+objeto: mirror
+canal: ana_sola
+si: estudio:ana>=30
+---
+ana: (Ana se mira muy seria, con la barbilla levantada.) Señorita Shirley, maestra de la escuela de Avonlea.
+ana: ¿Se puede ser maestra con pecas? La Srta. Stacy no tiene pecas… pero tampoco tiene imaginación roja.
+
+# · el armario (también guarda o saca el sombrero)
+=== armario_vestidos ===
+disparo: objeto
+objeto: armario
+canal: ana_sola
+tambien
+si: hecho:se_queda
+---
+ana: (En el armario cuelgan los tres vestidos que le hizo Marilla: lisos, de mangas angostas.)
+ana: Son útiles y sensatos, como dice Marilla. Voy a imaginar que uno tiene mangas abullonadas. El del medio. Así, por lo menos, tengo uno de mentira.
+
+=== armario_otono ===
+disparo: objeto
+objeto: armario
+canal: ana_sola
+repetir: dia
+tambien
+si: estacion:otoño
+---
+ana: (Ana encuentra en un rincón del armario una hoja de arce, roja, que guardó el otro día.)
+ana: Te guardo aquí, hojita. Cuando sea vieja, voy a abrir este armario y me vas a recordar este octubre.
+
+=== armario_invierno ===
+disparo: objeto
+objeto: armario
+canal: ana_sola
+repetir: dia
+tambien
+si: estacion:invierno
+---
+ana: (Del armario sale olor a lana y a lavanda: Marilla guarda allí las bolsitas para las polillas.)
+ana: Huele a invierno ordenado. Marilla hasta a las polillas las tiene a raya.
+
+# · el mar desde el faro
+=== faro_verano ===
+disparo: objeto
+objeto: faro
+canal: ana_sola
+repetir: dia
+si: estacion:verano, hora:17-21
+---
+ana: (El sol se hunde en el golfo. El mar se pone rojo, después violeta, después de un azul profundo.)
+ana: Ningún pintor podría hacer esto. O si lo hiciera, nadie le creería.
+
+=== faro_invierno ===
+disparo: objeto
+objeto: faro
+canal: ana_sola
+repetir: dia
+si: estacion:invierno
+---
+ana: (El mar está gris y las olas rompen con furia contra las rocas. El viento le arranca el sombrero.)
+ana: ¡El mar está enojado! Debe ser que alguien le dijo «zanahorias». Yo lo entiendo perfectamente.
+
+=== faro_manana ===
+disparo: objeto
+objeto: faro
+canal: ana_sola
+repetir: dia
+si: hora:5-10
+---
+ana: (Un barco de velas blancas pasa a lo lejos, hacia el puerto de Charlottetown.)
+ana: ¿De dónde vendrá? Seguro que trae especias, sedas y una princesa de incógnito. O papas. Pero yo prefiero lo de la princesa.
+
+=== faro_queens ===
+disparo: objeto
+objeto: faro
+canal: ana_sola
+prioridad: 2
+si: hecho:queens
+---
+ana: (Desde el faro se ve, muy lejos, la costa del otro lado.)
+ana: Más allá está Charlottetown, y el Queen's. Y más allá, el mundo. Me da miedo y ganas a la vez. Creo que eso es crecer.
+
+# · el banco junto al lago (también se sienta)
+=== banco_lago_atardecer ===
+disparo: objeto
+objeto: bench
+canal: ana_sola
+repetir: dia
+tambien
+si: hora:17-21, !estacion:invierno
+---
+ana: (El sol se pone y el Lago de las Aguas Brillantes se vuelve de oro, de rosa, de violeta.)
+ana: Por eso le puse ese nombre. A esta hora, si una tira una piedrita, seguro que se convierte en un diamante.
+
+=== banco_lago_invierno ===
+disparo: objeto
+objeto: bench
+canal: ana_sola
+repetir: dia
+tambien
+si: estacion:invierno
+---
+ana: (El lago está helado. Unos niños patinan a lo lejos, con bufandas de colores.)
+ana: El Lago de las Aguas Brillantes duerme bajo el hielo. Pero sigue brillando: no se le quita la costumbre.
+
+=== banco_lago_diana ===
+disparo: objeto
+objeto: bench
+canal: ana_sola
+tambien
+prioridad: 2
+si: hecho:conocidas_diana, !hecho:prohibida
+---
+ana: (En el agua se ven reflejados los manzanos del huerto de los Barry.)
+ana: El huerto de Diana se mira en el lago como en un espejo. Si Diana estuviera aquí, nos reflejaríamos las dos: dos amigas del alma, cabeza abajo.
+
+=== banco_lago_primavera ===
+disparo: objeto
+objeto: bench
+canal: ana_sola
+repetir: dia
+tambien
+si: estacion:primavera
+---
+ana: (Las ranas cantan en la orilla. En el agua flotan pétalos de cerezo.)
+ana: Las ranas tienen un coro. Seguro que ensayan todo el invierno, bajo el barro, para estrenar en primavera.
+
+# · el fuego (también se calienta)
+=== fuego_invierno ===
+disparo: objeto
+objeto: fire
+canal: ana_sola
+repetir: dia
+tambien
+si: estacion:invierno
+---
+ana: (Ana estira las manos hacia el fuego. Las brasas crujen y saltan chispitas.)
+ana: En el fuego se ven castillos. Ese es un castillo con torres, y esa chispa es la princesa escapándose por la ventana.
+
+=== fuego_noche ===
+disparo: objeto
+objeto: fire
+canal: ana_sola
+repetir: dia
+tambien
+si: hora:19-24
+---
+ana: (El fuego ilumina la sala con una luz anaranjada. Afuera sopla el viento.)
+ana: Me gusta oír el viento cuando una está adentro, tibia. Es como si el invierno golpeara la puerta y nadie le abriera.
+
+=== fuego_otono ===
+disparo: objeto
+objeto: fire
+canal: ana_sola
+repetir: dia
+tambien
+si: estacion:otoño
+---
+ana: (Las primeras noches frías. Huele a leña de manzano.)
+ana: El fuego de manzano huele a tarta. Bueno, a lo mejor es que tengo hambre.
+
+# · la escuela
+=== pizarra_zanahorias ===
+disparo: objeto
+objeto: pizarra
+canal: ana_sola
+prioridad: 2
+si: hecho:zanahorias
+---
+ana: (En la pizarra quedó escrito, con letra del maestro: «Ana Shirley tiene muy mal genio».)
+ana: Lo voy a dejar ahí hasta que se borre solo. Que todo el mundo vea que no me arrepiento… mucho.
+
+=== pizarra_estudio ===
+disparo: objeto
+objeto: pizarra
+canal: ana_sola
+si: estudio:ana>=20
+---
+ana: (En la pizarra hay un problema de geometría a medio resolver.)
+ana: La geometría es terrible: no se puede imaginar nada. Un triángulo es un triángulo y no hay más que hablar. Pero esta vez casi lo entiendo.
+
+=== pupitre_gilbert ===
+disparo: objeto
+objeto: pupitre
+canal: ana_sola
+tambien
+prioridad: 2
+si: hecho:zanahorias
+---
+ana: (Ana se sienta muy derecha, sin mirar hacia el pupitre de Gilbert Blythe.)
+ana: No voy a mirar. No voy a mirar. (No mira. Bueno, una vez. De reojo. Para ver si él está mirando. No está mirando.)
+
+=== pupitre_diana ===
+disparo: objeto
+objeto: pupitre
+canal: ana_sola
+tambien
+si: hecho:conocidas_diana, !hecho:prohibida
+---
+ana: (En el pupitre, alguien dejó una manzana roja y un papelito: «Para Ana, de tu D.».)
+ana: Diana. Esta manzana es demasiado linda para comérsela. Me la voy a comer igual, pero despacio.
+
+# · la iglesia (también se sienta)
+=== iglesia_banco ===
+disparo: objeto
+objeto: banco
+canal: ana_sola
+repetir: dia
+tambien
+---
+ana: (Por la ventana de la iglesia se ve una rama de abedul que se mueve con el viento.)
+ana: Rezar sentada en un banco entre tanta gente es difícil. Yo rezo mejor en el bosque, donde Dios está más a la vista.
+
+=== iglesia_allan ===
+disparo: objeto
+objeto: banco
+canal: ana_sola
+tambien
+prioridad: 2
+si: hecho:allan_invitados
+---
+ana: (La Sra. Allan le sonríe desde el primer banco.)
+ana: Cuando la Sra. Allan sonríe, dan ganas de ser buena. No buena de esas aburridas: buena de verdad, de las que se notan por dentro.
+
+# · la tienda, Ginger, los libros, Pelusa
+=== frascos_caramelos ===
+disparo: objeto
+objeto: frascos
+canal: ana_sola
+repetir: dia
+---
+ana: (Los frascos de caramelos brillan en el mostrador: de menta, de canela, de limón.)
+ana: Si yo tuviera un centavo, compraría uno de cada color y los pondría en la ventana de mi pieza, para que el sol los atraviese como vitrales.
+
+=== frascos_matthew ===
+disparo: objeto
+objeto: frascos
+canal: ana_sola
+prioridad: 2
+si: afecto:matthew:ana>=5
+---
+ana: (Ana se acuerda de que Matthew vino una vez a comprar azúcar morena y rastrillos, y salió con veinte libras de azúcar, todo colorado.)
+ana: Pobre Matthew: a la tienda le tiene más miedo que a un toro. Y todo para comprarme algo bonito. Es el hombre más bueno del mundo.
+
+=== ginger_loro ===
+disparo: objeto
+objeto: cage
+canal: ana_sola
+repetir: dia
+---
+ana: (Ginger, el loro del Sr. Harrison, la mira de lado con un ojo amarillo.)
+ana: Buenas tardes, Ginger. Ya sé que dices cosas feas, pero yo creo que en el fondo eres un loro sensible. Te pasa lo mismo que a mí con el genio.
+
+=== libros_pastor ===
+disparo: objeto
+objeto: libros
+canal: ana_sola
+si: letras:ana>=10
+---
+ana: (Entre los sermones hay un libro de poemas de Tennyson, con las tapas gastadas.)
+ana: «La dama de Shalott»… La Srta. Stacy nos la va a hacer recitar. Yo ya me la sé casi entera, de tanto imaginarla.
+
+=== pelusa_invierno ===
+disparo: objeto
+objeto: toby
+canal: ana_sola
+repetir: dia
+tambien
+si: estacion:invierno
+---
+ana: (Pelusa se enrosca contra las piernas de Ana, buscando calor.)
+ana: Ya, ya, gatita. Tú y yo somos de las que no tienen frío si alguien las quiere un poquito.
+
+=== pelusa_verano ===
+disparo: objeto
+objeto: toby
+canal: ana_sola
+repetir: dia
+tambien
+si: estacion:verano
+---
+ana: (Pelusa duerme al sol, panza arriba, con las patas en el aire.)
+ana: Qué manera de dormir tan sin vergüenza. Ojalá yo pudiera dormir así, sin preocuparme de lo que diría la Sra. Lynde.
