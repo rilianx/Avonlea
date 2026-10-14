@@ -8365,10 +8365,10 @@ function update(dt){
     if (gt.id && !t) ana.goto = null;
     else if (gt.auto && amb.cur) { /* a talk is going on: she waits */ }
     else if (gt.stroll && TT < (ana.savor?.until || 0)) { ana.savoring = true; }   // (stopped for a moment, to look around)
-    else if (t && dist(ana.x, ana.y, t.x, t.y) < t.reach * .85) { ana.goto = null; (gt.use || t.act)(); }
+    else if (t && dist(ana.x, ana.y, t.x, t.y) < t.reach * .85) { ana.goto = null; { ACT_SOLA = !!gt.auto; try { (gt.use || t.act)(); } finally { ACT_SOLA = false; } } }
     else {
       const sk = ana.stk; if (!sk || dist(ana.x, ana.y, sk.x, sk.y) > 6) ana.stk = { x: ana.x, y: ana.y, t: TT }; else if (TT - sk.t > 1.5) { ana.nav = null; ana.stk = null; }   // (stuck: find the way again)
-      const n = navStep(ana, t ? t.x : gt.x, t ? t.y : gt.y); if (n.arrived) { if (gt.wm) ana.wmArr = TT; ana.goto = null; if (t && dist(ana.x, ana.y, t.x, t.y) < t.reach) (gt.use || t.act)(); } else { const dx = n.wx - ana.x, dy = n.wy - ana.y, d = Math.hypot(dx, dy) || 1; mx = dx / d; my = dy / d; } }
+      const n = navStep(ana, t ? t.x : gt.x, t ? t.y : gt.y); if (n.arrived) { if (gt.wm) ana.wmArr = TT; ana.goto = null; if (t && dist(ana.x, ana.y, t.x, t.y) < t.reach) { ACT_SOLA = !!gt.auto; try { (gt.use || t.act)(); } finally { ACT_SOLA = false; } } } else { const dx = n.wx - ana.x, dy = n.wy - ana.y, d = Math.hypot(dx, dy) || 1; mx = dx / d; my = dy / d; } }
   }
   // how fast: a walk (Shift to hurry), or a stroll when she is out on her own: every so often she stops to look about
   if (dest && !ana.goto?.dest) dest = null;
@@ -11419,8 +11419,9 @@ function primeraVez(id, act){
 // the scenes of a thing (disparo: objeto, objeto: <what>): looking out of the window, at the mirror, at the sea… many,
 // each for its moment (the season, the hour, what has happened: «si:»); at most one a day for each thing, the one that
 // fits best (more priority, then more specific; among equals, any). The rest of the times, the plain line as always.
+let ACT_SOLA = false;   // (Ana doing it on her own, on her way to something: the plain line, she has things to do)
 function escenaObjeto(id, act){
-  const W = game.wm; if (!W || ana.sit || (id === 'gwin' && velaPuede() && act !== true)) return false;   // (the window, with the candle: its menu first)
+  const W = game.wm; if (!W || ana.sit || ACT_SOLA || (id === 'gwin' && velaPuede() && act !== true)) return false;   // (the window, with the candle: its menu first)
   const H = (W.objHoy ||= {}); if (H[id] === today()) return false;
   const x = dlgCtx(), C = DIALOGOS.filter(d => d.disparo === 'objeto' && d.objeto === id && !d.dicha() && dlgCumple(d, x)); if (!C.length) return false;
   const v = d => (d.prioridad || 0) + dlgEspecificidad(d) * .001, top = Math.max(...C.map(v)), T = C.filter(c => v(c) === top), nuevas = T.filter(c => dlgDichas()[c.id] == null);

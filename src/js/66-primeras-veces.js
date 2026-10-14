@@ -14,8 +14,9 @@ function primeraVez(id, act){
 // the scenes of a thing (disparo: objeto, objeto: <what>): looking out of the window, at the mirror, at the sea… many,
 // each for its moment (the season, the hour, what has happened: «si:»); at most one a day for each thing, the one that
 // fits best (more priority, then more specific; among equals, any). The rest of the times, the plain line as always.
+let ACT_SOLA = false;   // (Ana doing it on her own, on her way to something: the plain line, she has things to do)
 function escenaObjeto(id, act){
-  const W = game.wm; if (!W || ana.sit || (id === 'gwin' && velaPuede() && act !== true)) return false;   // (the window, with the candle: its menu first)
+  const W = game.wm; if (!W || ana.sit || ACT_SOLA || (id === 'gwin' && velaPuede() && act !== true)) return false;   // (the window, with the candle: its menu first)
   const H = (W.objHoy ||= {}); if (H[id] === today()) return false;
   const x = dlgCtx(), C = DIALOGOS.filter(d => d.disparo === 'objeto' && d.objeto === id && !d.dicha() && dlgCumple(d, x)); if (!C.length) return false;
   const v = d => (d.prioridad || 0) + dlgEspecificidad(d) * .001, top = Math.max(...C.map(v)), T = C.filter(c => v(c) === top), nuevas = T.filter(c => dlgDichas()[c.id] == null);

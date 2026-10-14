@@ -37,10 +37,10 @@ function update(dt){
     if (gt.id && !t) ana.goto = null;
     else if (gt.auto && amb.cur) { /* a talk is going on: she waits */ }
     else if (gt.stroll && TT < (ana.savor?.until || 0)) { ana.savoring = true; }   // (stopped for a moment, to look around)
-    else if (t && dist(ana.x, ana.y, t.x, t.y) < t.reach * .85) { ana.goto = null; (gt.use || t.act)(); }
+    else if (t && dist(ana.x, ana.y, t.x, t.y) < t.reach * .85) { ana.goto = null; { ACT_SOLA = !!gt.auto; try { (gt.use || t.act)(); } finally { ACT_SOLA = false; } } }
     else {
       const sk = ana.stk; if (!sk || dist(ana.x, ana.y, sk.x, sk.y) > 6) ana.stk = { x: ana.x, y: ana.y, t: TT }; else if (TT - sk.t > 1.5) { ana.nav = null; ana.stk = null; }   // (stuck: find the way again)
-      const n = navStep(ana, t ? t.x : gt.x, t ? t.y : gt.y); if (n.arrived) { if (gt.wm) ana.wmArr = TT; ana.goto = null; if (t && dist(ana.x, ana.y, t.x, t.y) < t.reach) (gt.use || t.act)(); } else { const dx = n.wx - ana.x, dy = n.wy - ana.y, d = Math.hypot(dx, dy) || 1; mx = dx / d; my = dy / d; } }
+      const n = navStep(ana, t ? t.x : gt.x, t ? t.y : gt.y); if (n.arrived) { if (gt.wm) ana.wmArr = TT; ana.goto = null; if (t && dist(ana.x, ana.y, t.x, t.y) < t.reach) { ACT_SOLA = !!gt.auto; try { (gt.use || t.act)(); } finally { ACT_SOLA = false; } } } else { const dx = n.wx - ana.x, dy = n.wy - ana.y, d = Math.hypot(dx, dy) || 1; mx = dx / d; my = dy / d; } }
   }
   // how fast: a walk (Shift to hurry), or a stroll when she is out on her own: every so often she stops to look about
   if (dest && !ana.goto?.dest) dest = null;
