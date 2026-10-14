@@ -658,7 +658,7 @@ prioridad: 6
 interrumpe
 sujeta: marilla
 en: ana=gg, marilla=gg
-si: cuaderno:amigas, !hecho:broche
+si: cuaderno:amigas, dias_desde:conocidas_diana:5, !hecho:broche
 al_terminar: hecho broche
 al_terminar: log Marilla perdió su broche de amatista y culpó a Ana; Ana «confesó» para poder ir al picnic, y el broche apareció enganchado en el chal de Marilla.
 ---
@@ -747,7 +747,7 @@ canal: gg
 prioridad: 9
 interrumpe
 en: ana=gg, diana=gg
-si: hecho:prohibida, dias_desde:prohibida:2, !hecho:crup
+si: hecho:prohibida, dias_desde:prohibida:12, !hecho:crup
 al_terminar: hecho crup
 al_terminar: meta ana estar_en h:os,-,23 | Ana corre a La Cuesta del Huerto: Minnie May tiene crup | correr a La Cuesta del Huerto: Minnie May tiene crup (cap. 18) | 3
 al_terminar: meta diana estar_en h:os,-,23 | Diana vuelve corriendo a su casa | volver corriendo a su casa con Ana | 3
@@ -783,7 +783,7 @@ grande
 canal: gg
 prioridad: 5
 en: ana=gg, marilla=gg
-si: cuaderno:escuela_dominical, !hecho:allan_invitados
+si: cuaderno:escuela_dominical, dias_desde:escuela_dominical:14, !hecho:allan_invitados
 al_terminar: hecho allan_invitados
 ---
 marilla: Invité al pastor y a la Sra. Allan a tomar el té mañana en la tarde. Tú puedes hacer el pastel en capas.
@@ -817,7 +817,7 @@ canal: os
 prioridad: 6
 interrumpe
 en: ana=os, diana=os
-si: cuaderno:amigas, !hecho:prohibida, !hecho:cama_josephine, dias_desde:conocidas_diana:2
+si: cuaderno:amigas, !hecho:prohibida, !hecho:cama_josephine, dias_desde:conocidas_diana:25
 al_terminar: hecho cama_josephine
 al_terminar: afecto josephine ana 5
 al_terminar: log Ana y Diana saltaron sobre la cama del cuarto de huéspedes, donde dormía la tía Josephine; Ana confesó y se ganó su amistad.
@@ -837,7 +837,7 @@ canal: gg
 prioridad: 8
 interrumpe
 en: ana=gg, marilla=gg
-si: estacion:verano, dia_estacion:1, estudio:ana>=60, !hecho:queens, no_hoy:examen
+si: estacion:verano, dia_estacion:1, dia_juego:56, estudio:ana>=85, !hecho:queens, no_hoy:examen
 al_terminar: hecho examen
 al_terminar: hecho queens
 al_terminar: hecho queens_primera
@@ -855,7 +855,7 @@ canal: gg
 prioridad: 8
 interrumpe
 en: ana=gg, marilla=gg
-si: estacion:verano, dia_estacion:1, estudio:ana>=30, estudio:ana<60, !hecho:queens, no_hoy:examen
+si: estacion:verano, dia_estacion:1, dia_juego:56, estudio:ana>=50, estudio:ana<85, !hecho:queens, no_hoy:examen
 al_terminar: hecho examen
 al_terminar: hecho queens
 al_terminar: afecto marilla ana 5
@@ -871,7 +871,7 @@ canal: gg
 prioridad: 8
 interrumpe
 en: ana=gg, marilla=gg
-si: estacion:verano, dia_estacion:1, estudio:ana>=10, estudio:ana<30, !hecho:queens, no_hoy:examen
+si: estacion:verano, dia_estacion:1, dia_juego:56, estudio:ana>=20, estudio:ana<50, !hecho:queens, no_hoy:examen
 al_terminar: hecho examen
 al_terminar: triste ana
 al_terminar: log Ana dio el examen de ingreso a Queen's en Charlottetown, pero no le alcanzó. El año que viene, otra vez.
@@ -905,15 +905,15 @@ marilla: Bueno. Hay otro examen el año que viene, y tú no eres de las que se r
 titulo: El estudio
 suma: clase, estudiar, recitar, leer, ensayar
 por_dia: 2
-hito 10: La Srta. Stacy la anota para el examen de Queen's.
+hito 20: La Srta. Stacy la anota para el examen de Queen's.
   con: stacy
   dice: Ana, vas a dar el examen de Queen's con los demás. Tienes cabeza; ahora, constancia.
   ia: La Srta. Stacy le cuenta a Ana que la anotó para preparar el examen de ingreso a Queen's, y la anima.
-hito 30: Ya podría entrar a Queen's.
+hito 50: Ya podría entrar a Queen's.
   con: marilla
   dice: La Srta. Stacy dice que vas bien. No te llenes de humo, pero… vas bien.
   ia: Marilla, sin querer demostrarlo demasiado, le cuenta a Ana que la Srta. Stacy cree que entrará a Queen's.
-hito 60: Podría quedar primera… si Gilbert no.
+hito 85: Podría quedar primera… si Gilbert no.
   con: gilbert
   dice: Dicen que tú y yo vamos parejos para Queen's. Que gane el mejor, Ana.
   ia: Gilbert Blythe le dice a Ana, medio en broma y medio en serio, que van parejos para el examen de Queen's.
@@ -922,15 +922,15 @@ hito 60: Podría quedar primera… si Gilbert no.
 titulo: La granja de Tejas Verdes
 suma: quehacer, ordeñar, alimentar, sembrar, regar, batir, partir_lena, hacer_heno, cocinar, coser, recoger
 por_dia: 2
-hito 5: Marilla empieza a contar con ella.
+hito 10: Marilla empieza a contar con ella.
   con: marilla
   dice: Ana, ya sabes dónde va cada cosa en esta cocina. Así se aprende a llevar una casa.
   ia: Marilla, seca pero contenta, reconoce que Ana ayuda de verdad en la casa.
-hito 15: Matthew le regala un vestido con mangas abullonadas.
+hito 40: Matthew le regala un vestido con mangas abullonadas.
   con: matthew
   dice: Bueno, pues… es para ti, Ana. Un vestido. Con… con las mangas esas, abullonadas. Si te gusta.
   ia: Matthew, muy tímido, le regala a Ana un vestido con mangas abullonadas, porque ella ayuda tanto en la granja (como en el capítulo 25).
-hito 30: Marilla le confía la casa: Tejas Verdes también es suya.
+hito 80: Marilla le confía la casa: Tejas Verdes también es suya.
   con: marilla
   dice: Ana… no sé qué haríamos sin ti. Esta casa es tan tuya como mía.
   ia: Marilla le dice a Ana, con dificultad porque no es de decir esas cosas, que Tejas Verdes es tan suya como de ella.
@@ -939,15 +939,15 @@ hito 30: Marilla le confía la casa: Tejas Verdes también es suya.
 titulo: Las letras y la imaginación
 suma: escribir_cuento, escribir_carta, nombrar, adornar
 por_dia: 2
-hito 5: Diana dice que Ana escribe como en los libros.
+hito 10: Diana dice que Ana escribe como en los libros.
   con: diana
   dice: Ana, tus cuentos son mejores que los de los libros. ¡De verdad!
   ia: Diana le dice a Ana, admirada, que sus cuentos son tan buenos como los de los libros.
-hito 15: La Srta. Stacy lee su composición en voz alta.
+hito 30: La Srta. Stacy lee su composición en voz alta.
   con: stacy
   dice: Ana, leí tu composición en voz alta en la clase. Tienes un don. Pero cuida las comas.
   ia: La Srta. Stacy le cuenta a Ana que leyó su composición en voz alta a la clase, y le da un consejo de escritora.
-hito 30: Podría escribir de verdad: un cuento para una revista.
+hito 60: Podría escribir de verdad: un cuento para una revista.
   con: sraallan
   dice: Ana, ¿has pensado en mandar uno de tus cuentos a una revista? Yo lo leería.
   ia: La Sra. Allan le sugiere a Ana mandar uno de sus cuentos a una revista, y le ofrece ayudarla.
@@ -1004,7 +1004,8 @@ acciones: merendar, pedir_permiso
 titulo: Invitar a Diana a tomar el té
 pista: En Tejas Verdes, con el cordial de frambuesa de Marilla. Invítala cuando la veas.
 meta: tomando_te ana diana
-requiere: amigas, !hecho:prohibida
+requiere: amigas, dias_desde:conocidas_diana:10, !hecho:prohibida
+antes: ser amiga de Diana desde hace un tiempo (unos diez días)
 
 === perdon_barry ===
 titulo: Recuperar la amistad de los Barry
@@ -1018,8 +1019,8 @@ oculta
 titulo: Hacerse amiga de la tía Josephine
 pista: La tía de la Sra. Barry viene de Charlottetown. Un concierto, una noche en casa de Diana… y una cama de huéspedes.
 meta: hecho cama_josephine
-requiere: amigas, !hecho:prohibida
-antes: ser amiga de Diana
+requiere: amigas, dias_desde:conocidas_diana:25, !hecho:prohibida
+antes: ser amiga de Diana desde hace mucho (casi dos estaciones)
 
 === lynde ===
 titulo: Visitar a la Sra. Lynde
@@ -1078,9 +1079,9 @@ acciones: recitar
 
 === queens ===
 titulo: Entrar a Queen's
-pista: El examen de ingreso es en Charlottetown, el primer día del verano (faltan {dias_examen} días). Se prepara yendo a clases y estudiando la lección: llevas {estudio} días de estudio.
-pista si estudio:ana>=10: La Srta. Stacy te va a mandar al examen (faltan {dias_examen} días). Llevas {estudio} días de estudio: con unos 30 se entra; con 60, quizás quedes primera.
-pista si hecho:examen: No alcanzó esta vez. Hay otro examen el próximo verano (faltan {dias_examen} días): llevas {estudio} días de estudio, y con unos 30 se entra.
+pista: El examen de ingreso es en Charlottetown, el primer día del verano, desde el segundo año (faltan {dias_examen} días). Se prepara yendo a clases y estudiando la lección: llevas {estudio} días de estudio.
+pista si estudio:ana>=20: La Srta. Stacy te va a mandar al examen (faltan {dias_examen} días). Llevas {estudio} días de estudio: con unos 50 se entra; con 85, quizás quedes primera.
+pista si hecho:examen: No alcanzó esta vez. Hay otro examen el próximo verano (faltan {dias_examen} días): llevas {estudio} días de estudio, y con unos 50 se entra.
 meta: hecho queens
 requiere: escuela
 antes: ir a la escuela (la Srta. Stacy prepara a los que van a dar el examen)
@@ -1089,8 +1090,8 @@ antes: ir a la escuela (la Srta. Stacy prepara a los que van a dar el examen)
 titulo: Hacer las paces con Gilbert Blythe
 pista: Le dijo «zanahorias». Él quiere disculparse… si Ana lo deja.
 meta: paces ana gilbert
-requiere: hecho:zanahorias
-antes: ir a la escuela, donde está Gilbert Blythe (y que pase algo)
+requiere: hecho:zanahorias, dias_desde:zanahorias:28
+antes: ir a la escuela, donde está Gilbert Blythe (y que pase algo); y después, que pase mucho tiempo: Ana no perdona fácil
 acciones: disculparse:gilbert, perdonar:gilbert, interceder:gilbert
 
 === leido ===
@@ -3424,7 +3425,8 @@ function dlgCond(s, c){   // one condition of state, written as text
     case 'cuaderno': return !!cuadernoHecho(a);   // (a goal of Ana's notebook is done)
     case 'tomando_te': { const [x, y] = rest.split(':'); return AGENTS[x]?.acting?.v === 'tomar_te' && AGENTS[x].acting.k === y; }   // (x at the tea table with y)
     case 'afecto': { const [x, y, n] = rest.split(':'); return relGetW(x, y) >= +n; }   // (x cares for y at least n, of 0..5; the same as «afecto:x:y>=n»)
-    case 'dias_desde': { const d = dlgHechos()[a]; return typeof d === 'number' && today() + 1 - d >= +b; }   // (at least b days since a happened)
+    case 'dias_desde': { const d = dlgHechos()[a] ?? cuadernoHecho(a); return typeof d === 'number' && today() + 1 - d >= +b; }   // (at least b days since a happened: a fact, or a goal of the notebook done)
+    case 'dia_juego': return today() + 1 >= +a;   // (the game has gone on at least so many days: 56, a year)
     case 'sentada': return !!wmBody(a)?.sit;   // (she has sat down: at the table, for the tea)
     case 'estudio': return cualidad('ana', 'estudio') >= +a;   // (the same as «estudio:ana>=n»)
     case 'camino': { const [x, n] = rest.split(':'); return cualidad('ana', x) >= +n; }   // (the same as «x:ana>=n»)
@@ -7291,7 +7293,7 @@ const FOLK_DEFS = {
   stacy: { name: 'la Srta. Stacy', kind: 'maestro', home: 'Pensión', look: { hair: '#a8683a', hairD: '#80482a', style: 'bun', dress: '#6a8a6a', dressD: '#4a6a4a', brooch: true, skin: '#f2cfb2', h: 1.08 },
     lines: ['Ana, tu composición fue la mejor de la clase. Pero cuidado con los adjetivos: ¡no hacen falta tantos!', 'El viernes por la tarde salimos al bosque a estudiar botánica. ¿Te apuntas?', 'Este año preparamos a los mejores para el examen de Queen\'s. Tú puedes, Ana.'], ana: ['¡Srta. Stacy! Usted es mi espíritu afín, ¿lo sabía?'] },
   minnie: { name: 'Minnie May Barry', kind: 'juego', home: 'La Cuesta del Huerto', look: kidLook('#2a1a14', '#e8c0d0', { dressD: '#c098a8', style: 'curls', bow: '#c8463a', h: .64 }),
-    lines: ['¡Ana! ¿Me cuentas el cuento del hada otra vez?', 'Diana no me deja jugar con sus muñecas. ¿Tú me dejas?', 'Ya no tengo tos. ¡Mamá dice que tú me salvaste!'] },
+    lines: ['¡Ana! ¿Me cuentas el cuento del hada otra vez?', 'Diana no me deja jugar con sus muñecas. ¿Tú me dejas?', '[hecho:perdonada] Ya no tengo tos. ¡Mamá dice que tú me salvaste!'] },
   srbarry: { name: 'el Sr. Barry', kind: 'granjero', home: 'La Cuesta del Huerto', look: { hair: '#3a2a20', hairD: '#2a1a10', beard: true, dress: '#5a5040', dressD: '#3a3020', coat: true, hatDark: true, skin: '#e0b090', h: 1.18 },
     lines: ['Buenas, Ana. Diana está en la casa, creo. O en el huerto.', 'El heno está listo para entrar. Si no llueve, mañana lo cargamos.'] },
   maryjoe: { name: 'Mary Joe', kind: 'juego', home: 'La Cuesta del Huerto', look: { hair: '#5a3a2a', hairD: '#3a2010', style: 'bun', dress: '#8a7a6a', dressD: '#6a5a4a', apron: '#f4efe4', skin: '#e8c0a0', h: 1.06 },
@@ -9203,20 +9205,20 @@ const WM_TESTS = [
   // (more chains of the book, each from its door: what has to have happened before is set as happened)
   { who: 'ana', cadena: true, text: '«¡Zanahorias!»: el primer día de Ana en la escuela, con Gilbert (cap. 15)', setup: () => { dayAt(10); setSeason(0); const H = dlgHechos(); delete H.zanahorias; delete game.wm.ofensa['ana>gilbert']; delete dlgDichas().zanahorias; atOut('ana', SCHOOL_DOOR[0] + 60, SCHOOL_DOOR[1] + 90); },
     goal: () => ({ ...G.estar_en('ana', 'escuela'), quedarMin: 15 }) },
-  { who: 'ana', cadena: true, text: 'El broche de amatista de Marilla, antes del picnic (cap. 13, 14)', setup: () => { if (today() < 1) dayT += 1; dayAt(10); const H = dlgHechos(); delete H.broche; delete dlgDichas().broche; game.wm.perm['cuaderno:amigas'] = today(); H.conocidas_diana = today(); if (game.scene !== 'gg') goIn('gg'); const M = PEOPLE.marilla; M.where = 'gg'; M.x = STOVE.x + 60; M.y = STOVE.y + 60; },
+  { who: 'ana', cadena: true, text: 'El broche de amatista de Marilla, antes del picnic (cap. 13, 14)', setup: () => { if (today() < 6) dayT += 6; dayAt(10); const H = dlgHechos(); delete H.broche; delete dlgDichas().broche; game.wm.perm['cuaderno:amigas'] = today() - 5; H.conocidas_diana = today() - 5; if (game.scene !== 'gg') goIn('gg'); const M = PEOPLE.marilla; M.where = 'gg'; M.x = STOVE.x + 60; M.y = STOVE.y + 60; },
     goal: () => ({ ...G.estar_en('ana', 'cocina'), quedarMin: 15 }) },
-  { who: 'ana', cadena: true, text: 'Ana invita a Diana a tomar el té… con vino de grosellas (cap. 16)', setup: () => { if (today() < 1) dayT += 1; dayAt(13); const H = dlgHechos(); for (const f of ['diana_borracha', 'prohibida', 'perdonada']) delete H[f]; delete dlgDichas().te_grosella; game.wm.perm['cuaderno:amigas'] = today(); H.conocidas_diana = today(); H.broche = today(); game.inv.te = 0; delete game.wm.facts['pedido:venir:diana:' + today()]; diana.follow = false; atOut('diana', OS.x - 60, OS.y + 80); },
+  { who: 'ana', cadena: true, text: 'Ana invita a Diana a tomar el té… con vino de grosellas (cap. 16)', setup: () => { if (today() < 11) dayT += 11; dayAt(13); const H = dlgHechos(); for (const f of ['diana_borracha', 'prohibida', 'perdonada']) delete H[f]; delete dlgDichas().te_grosella; game.wm.perm['cuaderno:amigas'] = today() - 10; H.conocidas_diana = today() - 10; H.broche = today(); game.inv.te = 0; delete game.wm.facts['pedido:venir:diana:' + today()]; diana.follow = false; atOut('diana', OS.x - 60, OS.y + 80); },
     goal: () => G.te_con('ana', 'diana', 'cocina'), favors: [{ f: 'venir', to: 'diana', lugar: 'cocina' }] },
-  { who: 'diana', cadena: true, text: 'Minnie May tiene crup: Diana viene a buscar a Ana, que la salva, y la Sra. Barry la perdona (cap. 18)', setup: () => { if (today() < 3) dayT += 3; dayAt(19); const H = dlgHechos(); for (const f of ['crup', 'perdonada']) delete H[f]; for (const f of ['crup_aviso', 'crup_salva']) delete dlgDichas()[f]; H.conocidas_diana = today() - 4; H.diana_borracha = today() - 3; H.prohibida = today() - 2; H.broche = today() - 4; game.wm.perm['cuaderno:amigas'] = today() - 4; if (game.scene !== 'gg') goIn('gg'); atOut('diana', OS.x - 60, OS.y + 80); const B = PEOPLE.barry; B.where = 'os'; B.x = KIT.w / 2; B.y = KIT.h / 2; },
+  { who: 'diana', cadena: true, text: 'Minnie May tiene crup: Diana viene a buscar a Ana, que la salva, y la Sra. Barry la perdona (cap. 18)', setup: () => { if (today() < 25) dayT += 25; dayAt(19); const H = dlgHechos(); for (const f of ['crup', 'perdonada']) delete H[f]; for (const f of ['crup_aviso', 'crup_salva']) delete dlgDichas()[f]; H.conocidas_diana = today() - 24; H.diana_borracha = today() - 13; H.prohibida = today() - 12; H.broche = today() - 20; game.wm.perm['cuaderno:amigas'] = today() - 24; if (game.scene !== 'gg') goIn('gg'); atOut('diana', OS.x - 60, OS.y + 80); const B = PEOPLE.barry; B.where = 'os'; B.x = KIT.w / 2; B.y = KIT.h / 2; },
     goal: () => ({ ...G.estar_en('diana', 'cocina'), quedarMin: 40 }), hasta: 'perdonada', tambien: () => [['ana', quedarHasta('ana', 'cocina', 'crup'), 'quedarse en la cocina']] },
-  { who: 'sraallan', cadena: true, text: 'Los Allan toman el té en Tejas Verdes: el pastel con linimento (cap. 21)', setup: () => { if (today() < 2) dayT += 2; dayAt(15); const H = dlgHechos(); delete H.pastel_linimento; delete dlgDichas().pastel_linimento; H.allan_invitados = today(); H.conocidas_diana = H.quiere_amiga = today() - 1; if (game.scene !== 'gg') goIn('gg'); const M = PEOPLE.marilla; M.where = 'gg'; M.x = STOVE.x + 60; M.y = STOVE.y + 60; atOut('sraallan', CHURCH_DOOR[0] + 80, CHURCH_DOOR[1] + 60); delete game.wm.facts['visita:sraallan>marilla:' + today()]; },
+  { who: 'sraallan', cadena: true, text: 'Los Allan toman el té en Tejas Verdes: el pastel con linimento (cap. 21)', setup: () => { if (today() < 4) dayT += 4; dayAt(15); const H = dlgHechos(); delete H.pastel_linimento; delete dlgDichas().pastel_linimento; H.allan_invitados = today() - 3; H.conocidas_diana = H.quiere_amiga = today() - 1; if (game.scene !== 'gg') goIn('gg'); const M = PEOPLE.marilla; M.where = 'gg'; M.x = STOVE.x + 60; M.y = STOVE.y + 60; atOut('sraallan', CHURCH_DOOR[0] + 80, CHURCH_DOOR[1] + 60); delete game.wm.facts['visita:sraallan>marilla:' + today()]; },
     goal: () => G.visitar('sraallan', 'marilla'), tambien: () => [['ana', quedarHasta('ana', 'cocina', 'pastel_linimento'), 'esperar a la Sra. Allan en la cocina']] },
-  { who: 'ana', cadena: true, text: 'La cama del cuarto de huéspedes y la tía Josephine (cap. 19)', setup: () => { if (today() < 3) dayT += 3; dayAt(16); const H = dlgHechos(); delete H.cama_josephine; delete H.prohibida; delete dlgDichas().cama_josephine; H.conocidas_diana = today() - 2; H.broche = today() - 2; game.wm.perm['cuaderno:amigas'] = today() - 2; diana.follow = false; diana.where = 'os'; diana.x = KIT.w / 2 + 40; diana.y = KIT.h / 2; atOut('ana', OS.x, OS.y + 90); },
+  { who: 'ana', cadena: true, text: 'La cama del cuarto de huéspedes y la tía Josephine (cap. 19)', setup: () => { if (today() < 26) dayT += 26; dayAt(16); const H = dlgHechos(); delete H.cama_josephine; delete H.prohibida; delete dlgDichas().cama_josephine; H.conocidas_diana = today() - 25; H.broche = today() - 20; game.wm.perm['cuaderno:amigas'] = today() - 25; diana.follow = false; diana.where = 'os'; diana.x = KIT.w / 2 + 40; diana.y = KIT.h / 2; atOut('ana', OS.x, OS.y + 90); },
     goal: () => ({ ...G.estar_en('ana', 'h:os'), quedarMin: 20 }), tambien: () => [['diana', quedarHasta('diana', 'h:os', 'cama_josephine'), 'esperar a Ana en su casa']] },
   // (what is won little by little: the Queen's examination, the first day of summer, with 35 days of study)
-  { who: 'ana', cadena: true, hasta: 'examen', text: 'El examen de ingreso a Queen\'s, con lo estudiado (cap. 31, 32)', setup: () => { dayT = (Math.floor(dayT / DIAS_ESTACION) + 1) * DIAS_ESTACION; dayAt(8); setSeason(1); const H = dlgHechos(); for (const f of ['examen', 'queens', 'queens_primera']) delete H[f]; game.wm.perm['cuaderno:escuela'] = today(); ((game.wm.num ||= {}).ana ||= {}).estudio = 35; if (game.scene !== 'gg') goIn('gg'); const M = PEOPLE.marilla; M.where = 'gg'; M.x = STOVE.x + 60; M.y = STOVE.y + 60; },
+  { who: 'ana', cadena: true, hasta: 'examen', text: 'El examen de ingreso a Queen\'s, con lo estudiado (cap. 31, 32)', setup: () => { dayT = Math.max(EXAMEN_DESDE, (Math.floor(dayT / DIAS_ESTACION) + 1) * DIAS_ESTACION); dayAt(8); setSeason(1); const H = dlgHechos(); for (const f of ['examen', 'queens', 'queens_primera']) delete H[f]; game.wm.perm['cuaderno:escuela'] = today(); ((game.wm.num ||= {}).ana ||= {}).estudio = 60; if (game.scene !== 'gg') goIn('gg'); const M = PEOPLE.marilla; M.where = 'gg'; M.x = STOVE.x + 60; M.y = STOVE.y + 60; },
     goal: () => ({ ...G.estar_en('ana', 'cocina'), quedarMin: 15 }) },
-  { who: 'ana', cadena: true, hasta: 'hito_granja_5', text: 'Ana ayuda en la casa y llega a un hito de la granja: Marilla se lo dice', setup: () => { dayAt(10); ((game.wm.num ||= {}).ana ||= {}).granja = 4; delete game.wm.habilidadesHoy; game.wm.hitosPend = []; delete dlgHechos().hito_granja_5; for (const q of QUEHACERES) delete game.wm.facts['quehacer:' + q + ':' + today()]; if (game.scene !== 'gg') goIn('gg'); const M = PEOPLE.marilla; M.where = 'gg'; M.x = STOVE.x + 60; M.y = STOVE.y + 60; },
+  { who: 'ana', cadena: true, hasta: 'hito_granja_10', text: 'Ana ayuda en la casa y llega a un hito de la granja: Marilla se lo dice', setup: () => { dayAt(10); ((game.wm.num ||= {}).ana ||= {}).granja = 9; delete game.wm.habilidadesHoy; game.wm.hitosPend = []; delete dlgHechos().hito_granja_10; for (const q of QUEHACERES) delete game.wm.facts['quehacer:' + q + ':' + today()]; if (game.scene !== 'gg') goIn('gg'); const M = PEOPLE.marilla; M.where = 'gg'; M.x = STOVE.x + 60; M.y = STOVE.y + 60; },
     goal: () => G.quehaceres('ana', ['platos']) },
 ];
 /* ---------- the routines, made of goals: what each one does each day (from the book), handed to the planner at its
@@ -9487,8 +9489,8 @@ const dianaAmiga = () => conoceDiana() && !dlgHechos().prohibida;
 function cadenaOpciones(who){
   const o = [];
   if (who === 'marilla' && !dlgHechos().pide_amiga && !conoceDiana()) o.push(['Contarle que quieres una amiga del alma', () => { close(); dlgHecho('pide_amiga'); }]);
-  // (cap. 16: Diana to tea at Green Gables; Ana prepares it and serves the «cordial»)
-  if (who === 'diana' && dianaAmiga() && cuadernoHecho('amigas') && !activeGoals(agentOf('ana')).some(g => g.goal.kind === 'te_con')) o.push(['Invitarla a tomar el té en Tejas Verdes', () => { close(); agentStart('ana', G.te_con('ana', 'diana', 'cocina'), { favors: [{ f: 'venir', to: 'diana', lugar: 'cocina' }], label: 'invitar a Diana a tomar el té en Tejas Verdes (cap. 16)' }); notice('📜 Ana va a invitar a Diana a tomar el té, y a prepararlo.'); }]);
+  // (cap. 16: Diana to tea at Green Gables, once they have been friends a while; Ana prepares it and serves the «cordial»)
+  if (who === 'diana' && dianaAmiga() && cuadernoHecho('amigas') && dlgCond('dias_desde:conocidas_diana:10', dlgCtx()) && !activeGoals(agentOf('ana')).some(g => g.goal.kind === 'te_con')) o.push(['Invitarla a tomar el té en Tejas Verdes', () => { close(); agentStart('ana', G.te_con('ana', 'diana', 'cocina'), { favors: [{ f: 'venir', to: 'diana', lugar: 'cocina' }], label: 'invitar a Diana a tomar el té en Tejas Verdes (cap. 16)' }); notice('📜 Ana va a invitar a Diana a tomar el té, y a prepararlo.'); }]);
   return o;
 }
 // Marilla, the day after, in the afternoon: to Orchard Slope, with Ana
@@ -9501,12 +9503,12 @@ function cadenaEncuentro(k){
   if (k !== 'diana' || conoceDiana()) return null;
   return dlgNext(['ana', 'diana']);
 }
-// the visit of the Allans to Green Gables, the day after Marilla invited them (cap. 21: the cake with liniment)
+// the visit of the Allans to Green Gables, a few days after Marilla invited them (cap. 21: the cake with liniment)
 AGENDA.push({ who: 'sraallan', from: 15, to: 17.5, label: 'tomar el té en Tejas Verdes, invitada por Marilla (cap. 21)',
-  when: () => dlgCond('dias_desde:allan_invitados:1', dlgCtx()) && !dlgHechos().pastel_linimento, goal: () => G.visitar('sraallan', 'marilla') });
-// Minnie May with croup, two days after the prohibition: Diana runs to Green Gables for Ana, in the evening (cap. 18)
+  when: () => dlgCond('dias_desde:allan_invitados:3', dlgCtx()) && !dlgHechos().pastel_linimento, goal: () => G.visitar('sraallan', 'marilla') });
+// Minnie May with croup, a good while after the prohibition (in the book, months): Diana runs to Green Gables for Ana, in the evening (cap. 18)
 AGENDA.push({ who: 'diana', from: 18.5, to: 22, prio: 3, label: 'correr a Tejas Verdes: Minnie May tiene crup (cap. 18)',
-  when: () => !!dlgHechos().prohibida && dlgCond('dias_desde:prohibida:2', dlgCtx()) && !dlgHechos().crup, goal: () => ({ ...G.estar_en('diana', 'cocina'), quedarMin: 30 }) });
+  when: () => !!dlgHechos().prohibida && dlgCond('dias_desde:prohibida:12', dlgCtx()) && !dlgHechos().crup, goal: () => ({ ...G.estar_en('diana', 'cocina'), quedarMin: 30 }) });
 // a letter received makes the friendship grow (a little: at most so much); to aunt Josephine, once she is a friend
 const cartaPuede = k => k !== 'josephine' || !!dlgHechos().cama_josephine;
 function cartaAfecto(k){ const b = { diana: 'diana', stacy: 'stacy', sraallan: 'sraallan', josephine: 'josephine' }[k]; if (b) relSetW(b, 'ana', Math.min(5, relGetW(b, 'ana') + 1)); }
@@ -9636,8 +9638,9 @@ if (game.wm) {
 }
 // Ana's next milestone on a skill (or none: all of them reached)
 const habilidadProxima = c => c.hitos.find(h => h.n > cualidad('ana', c.id));
-// days until the next first day of summer (the examination)
-function diasExamen(){ const d = today(), y = DIAS_ESTACION * 4, s = ((1 - (game.seasonShift || 0)) % 4 + 4) % 4 * DIAS_ESTACION, n = Math.floor((d - s) / y) * y + s; return (n >= d ? n : n + y) - d; }
+// days until the next examination: the first day of a summer, from the second year of the game (dia_juego:56)
+const EXAMEN_DESDE = DIAS_ESTACION * 4;
+function diasExamen(){ const d = today(), y = DIAS_ESTACION * 4, s = ((1 - (game.seasonShift || 0)) % 4 + 4) % 4 * DIAS_ESTACION; let n = Math.floor((d - s) / y) * y + s; if (n < d) n += y; while (n + 1 < EXAMEN_DESDE) n += y; return n - d; }
 // one more on a skill, for whoever did it (at most so much a day); Ana's milestones: told, and kept for whoever is to tell her
 function habilidadSube(k, c, D, por){
   const n = (D.n[k] ||= {}); if ((n[c.id] || 0) >= c.por_dia) return;

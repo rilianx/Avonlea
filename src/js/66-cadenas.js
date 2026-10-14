@@ -14,8 +14,8 @@ const dianaAmiga = () => conoceDiana() && !dlgHechos().prohibida;
 function cadenaOpciones(who){
   const o = [];
   if (who === 'marilla' && !dlgHechos().pide_amiga && !conoceDiana()) o.push(['Contarle que quieres una amiga del alma', () => { close(); dlgHecho('pide_amiga'); }]);
-  // (cap. 16: Diana to tea at Green Gables; Ana prepares it and serves the «cordial»)
-  if (who === 'diana' && dianaAmiga() && cuadernoHecho('amigas') && !activeGoals(agentOf('ana')).some(g => g.goal.kind === 'te_con')) o.push(['Invitarla a tomar el té en Tejas Verdes', () => { close(); agentStart('ana', G.te_con('ana', 'diana', 'cocina'), { favors: [{ f: 'venir', to: 'diana', lugar: 'cocina' }], label: 'invitar a Diana a tomar el té en Tejas Verdes (cap. 16)' }); notice('📜 Ana va a invitar a Diana a tomar el té, y a prepararlo.'); }]);
+  // (cap. 16: Diana to tea at Green Gables, once they have been friends a while; Ana prepares it and serves the «cordial»)
+  if (who === 'diana' && dianaAmiga() && cuadernoHecho('amigas') && dlgCond('dias_desde:conocidas_diana:10', dlgCtx()) && !activeGoals(agentOf('ana')).some(g => g.goal.kind === 'te_con')) o.push(['Invitarla a tomar el té en Tejas Verdes', () => { close(); agentStart('ana', G.te_con('ana', 'diana', 'cocina'), { favors: [{ f: 'venir', to: 'diana', lugar: 'cocina' }], label: 'invitar a Diana a tomar el té en Tejas Verdes (cap. 16)' }); notice('📜 Ana va a invitar a Diana a tomar el té, y a prepararlo.'); }]);
   return o;
 }
 // Marilla, the day after, in the afternoon: to Orchard Slope, with Ana
@@ -28,12 +28,12 @@ function cadenaEncuentro(k){
   if (k !== 'diana' || conoceDiana()) return null;
   return dlgNext(['ana', 'diana']);
 }
-// the visit of the Allans to Green Gables, the day after Marilla invited them (cap. 21: the cake with liniment)
+// the visit of the Allans to Green Gables, a few days after Marilla invited them (cap. 21: the cake with liniment)
 AGENDA.push({ who: 'sraallan', from: 15, to: 17.5, label: 'tomar el té en Tejas Verdes, invitada por Marilla (cap. 21)',
-  when: () => dlgCond('dias_desde:allan_invitados:1', dlgCtx()) && !dlgHechos().pastel_linimento, goal: () => G.visitar('sraallan', 'marilla') });
-// Minnie May with croup, two days after the prohibition: Diana runs to Green Gables for Ana, in the evening (cap. 18)
+  when: () => dlgCond('dias_desde:allan_invitados:3', dlgCtx()) && !dlgHechos().pastel_linimento, goal: () => G.visitar('sraallan', 'marilla') });
+// Minnie May with croup, a good while after the prohibition (in the book, months): Diana runs to Green Gables for Ana, in the evening (cap. 18)
 AGENDA.push({ who: 'diana', from: 18.5, to: 22, prio: 3, label: 'correr a Tejas Verdes: Minnie May tiene crup (cap. 18)',
-  when: () => !!dlgHechos().prohibida && dlgCond('dias_desde:prohibida:2', dlgCtx()) && !dlgHechos().crup, goal: () => ({ ...G.estar_en('diana', 'cocina'), quedarMin: 30 }) });
+  when: () => !!dlgHechos().prohibida && dlgCond('dias_desde:prohibida:12', dlgCtx()) && !dlgHechos().crup, goal: () => ({ ...G.estar_en('diana', 'cocina'), quedarMin: 30 }) });
 // a letter received makes the friendship grow (a little: at most so much); to aunt Josephine, once she is a friend
 const cartaPuede = k => k !== 'josephine' || !!dlgHechos().cama_josephine;
 function cartaAfecto(k){ const b = { diana: 'diana', stacy: 'stacy', sraallan: 'sraallan', josephine: 'josephine' }[k]; if (b) relSetW(b, 'ana', Math.min(5, relGetW(b, 'ana') + 1)); }

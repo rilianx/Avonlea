@@ -410,7 +410,7 @@ module.exports = [
   },
   {
     id: 69, titulo: 'El examen de Queen\'s (lo que se gana de a poco)', quienes: ['ana', 'marilla'],
-    relato: 'El primer día del verano, Marilla le recuerda a Ana que hoy es el examen de Queen\'s, en Charlottetown. Ana estudió lo suficiente (35 días de estudio): entra, aunque no primera. Marilla está orgullosa, aunque no lo diga.',
+    relato: 'El primer día del verano, Marilla le recuerda a Ana que hoy es el examen de Queen\'s, en Charlottetown. Ana estudió lo suficiente (60 días de estudio, en su segundo año): entra, aunque no primera. Marilla está orgullosa, aunque no lo diga.',
     pasos: [
       { quien: 'marilla', dice: /examen de Queen/, texto: 'Marilla le recuerda el examen.' },
       { quien: 'ana', dice: /Entré a Queen/, texto: 'Ana entra a Queen\'s.' },
@@ -419,7 +419,7 @@ module.exports = [
   },
   {
     id: 70, titulo: 'Un hito de la granja (las habilidades de Ana)', quienes: ['ana', 'marilla'],
-    relato: 'Ana lava los platos; con eso llega al hito 5 de la granja, y Marilla, seca pero contenta, le reconoce que ayuda de verdad.',
+    relato: 'Ana lava los platos; con eso llega al hito 10 de la granja, y Marilla, seca pero contenta, le reconoce que ayuda de verdad.',
     pasos: [
       { quien: 'ana', accion: /quehacer/, texto: 'Ana lava los platos.' },
       { quien: 'marilla', dice: /llevar una casa/, texto: 'Marilla le reconoce lo que ayuda.' },

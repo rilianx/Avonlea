@@ -49,7 +49,7 @@ D.diana = grafo({ W: 1760, H: 560, cw: 250, rh: 105, titulo: 'Diana: la amistad,
   { id: 'broche', c: 5, r: 0.3, tipo: 'escena', t: 'broche|el broche de amatista' },
   { id: 'picnic', c: 6, r: 0.3, tipo: 'meta', t: 'Ir de picnic|con Diana' },
   { id: 'otros', c: 5, r: 1.4, tipo: 'meta', t: 'Club de cuentos, bote,|desafío de Josie' },
-  { id: 'cama', c: 6, r: 1.4, tipo: 'escena', t: 'cama_josephine|(2 días de amigas)' },
+  { id: 'cama', c: 6, r: 1.4, tipo: 'escena', t: 'cama_josephine|(25 días de amigas)' },
   { id: 'invita', c: 4, r: 2.6, tipo: 'menu', t: 'Invitarla a tomar el té|(menú de Diana)' },
   { id: 'grosella', c: 3, r: 2.6, tipo: 'escena', t: 'te_grosella|el «cordial» era vino' },
   { id: 'prohib', c: 2, r: 2.6, tipo: 'prohibe', t: 'prohibida|la Sra. Barry la prohíbe' },
@@ -60,9 +60,9 @@ D.diana = grafo({ W: 1760, H: 560, cw: 250, rh: 105, titulo: 'Diana: la amistad,
 ], aristas: [
   { de: 'cuenta', a: 'lleva', t: 'al día siguiente' }, { de: 'lleva', a: 'recibe' }, { de: 'recibe', a: 'conoce' }, { de: 'conoce', a: 'amigas', tipo: 'abre' },
   { de: 'casual', a: 'amigas', tipo: 'alt', t: 'pasar tiempo juntas' },
-  { de: 'amigas', a: 'broche', tipo: 'abre' }, { de: 'broche', a: 'picnic', tipo: 'abre' }, { de: 'amigas', a: 'otros', tipo: 'abre' }, { de: 'amigas', a: 'invita', tipo: 'abre' },
+  { de: 'amigas', a: 'broche', tipo: 'abre', t: '5 días' }, { de: 'broche', a: 'picnic', tipo: 'abre' }, { de: 'amigas', a: 'otros', tipo: 'abre' }, { de: 'amigas', a: 'invita', tipo: 'abre', t: '10 días' },
   { de: 'otros', a: 'cama', tipo: 'abre' }, { de: 'cama', a: 'cartas', tipo: 'abre' },
-  { de: 'invita', a: 'grosella', t: 'sentadas al té' }, { de: 'grosella', a: 'prohib', t: 'al día siguiente' }, { de: 'prohib', a: 'aviso', t: '2 días, de noche' }, { de: 'aviso', a: 'salva', t: 'corren juntas' },
+  { de: 'invita', a: 'grosella', t: 'sentadas al té' }, { de: 'grosella', a: 'prohib', t: 'al día siguiente' }, { de: 'prohib', a: 'aviso', t: '12 días, de noche' }, { de: 'aviso', a: 'salva', t: 'corren juntas' },
   { de: 'prohib', a: 'cierra', tipo: 'cierra' }, { de: 'salva', a: 'cierra', tipo: 'abre', t: 'se levanta' },
 ] });
 // 2. Escuela, Gilbert, los Allan, el pelo
@@ -80,15 +80,15 @@ D.escuela = grafo({ W: 1520, H: 470, cw: 250, rh: 100, titulo: 'La escuela, Gilb
   { id: 'tinte', c: 4, r: 0, tipo: 'meta', t: 'Teñirse el pelo|(queda verde)' },
   { id: 'corto', c: 5, r: 0, tipo: 'meta', t: 'Librarse del|pelo verde' },
 ], aristas: [
-  { de: 'esc', a: 'zan', t: 'con Gilbert adentro' }, { de: 'zan', a: 'paces', tipo: 'abre' }, { de: 'esc', a: 'rec', tipo: 'abre' }, { de: 'esc', a: 'queens', tipo: 'abre' },
-  { de: 'dom', a: 'inv', t: 'en casa, con Marilla' }, { de: 'inv', a: 'visita', t: 'al día siguiente' }, { de: 'visita', a: 'pastel' }, { de: 'pastel', a: 'cp', tipo: 'abre' },
+  { de: 'esc', a: 'zan', t: 'con Gilbert adentro' }, { de: 'zan', a: 'paces', tipo: 'abre', t: '28 días' }, { de: 'esc', a: 'rec', tipo: 'abre' }, { de: 'esc', a: 'queens', tipo: 'abre' },
+  { de: 'dom', a: 'inv', t: '14 días después' }, { de: 'inv', a: 'visita', t: '3 días después' }, { de: 'visita', a: 'pastel' }, { de: 'pastel', a: 'cp', tipo: 'abre' },
   { de: 'tinte', a: 'corto', tipo: 'abre' },
 ] });
 // 3. Cómo funciona un hito
 D.hito = grafo({ W: 1520, H: 400, cw: 250, rh: 110, leyenda: false, titulo: 'Cómo funciona una habilidad: de lo que Ana hace a lo que alguien le dice', nodos: [
   { id: 'hace', c: 0, r: 0.3, tipo: 'menu', t: 'Ana hace algo|unos minutos (o 1 h de clase)' },
   { id: 'suma', c: 1, r: 0.3, tipo: 'numero', t: '+1 a la habilidad|(máx. 2 por día)' },
-  { id: 'cruza', c: 2, r: 0.3, tipo: 'numero', t: '¿Cruzó un hito?|5, 10, 15, 30, 60…' },
+  { id: 'cruza', c: 2, r: 0.3, tipo: 'numero', t: '¿Cruzó un hito?|10, 20, 40, 50…' },
   { id: 'aviso', c: 3, r: 0.3, tipo: 'escena', t: 'Aviso 📈|y queda pendiente' },
   { id: 'enc', c: 4, r: 0.3, tipo: 'hecho', t: 'Ana se encuentra|con quien se lo dice' },
   { id: 'ia', c: 5, r: -0.3, h: 52, tipo: 'ia', t: 'Con IA:|escena improvisada' },
@@ -102,9 +102,9 @@ D.hito = grafo({ W: 1520, H: 400, cw: 250, rh: 110, leyenda: false, titulo: 'Có
 // 4. Los caminos: barras con hitos
 function caminos(){
   const W = 1300, H = 520, L = [
-    ['El estudio', 'clases, estudiar, recitar, leer, ensayar', 60, [[10, 'Srta. Stacy', 'la anota para Queen\'s'], [30, 'Marilla', 'podría entrar'], [60, 'Gilbert', 'podría quedar primera']]],
-    ['La granja de Tejas Verdes', 'quehaceres, ordeñar, huerta, batir, cocinar, coser…', 30, [[5, 'Marilla', 'cuenta con ella'], [15, 'Matthew', 'el vestido de mangas abullonadas'], [30, 'Marilla', 'Tejas Verdes también es suya']]],
-    ['Las letras y la imaginación', 'cuentos, cartas, nombrar lugares, adornar', 30, [[5, 'Diana', 'escribe como en los libros'], [15, 'Srta. Stacy', 'lee su composición'], [30, 'Sra. Allan', 'un cuento para una revista']]],
+    ['El estudio', 'clases, estudiar, recitar, leer, ensayar', 85, [[20, 'Srta. Stacy', 'la anota para Queen\'s'], [50, 'Marilla', 'podría entrar'], [85, 'Gilbert', 'podría quedar primera']]],
+    ['La granja de Tejas Verdes', 'quehaceres, ordeñar, huerta, batir, cocinar, coser…', 80, [[10, 'Marilla', 'cuenta con ella'], [40, 'Matthew', 'el vestido de mangas abullonadas'], [80, 'Marilla', 'Tejas Verdes también es suya']]],
+    ['Las letras y la imaginación', 'cuentos, cartas, nombrar lugares, adornar', 60, [[10, 'Diana', 'escribe como en los libros'], [30, 'Srta. Stacy', 'lee su composición'], [60, 'Sra. Allan', 'un cuento para una revista']]],
   ];
   let s = `<text x="${W / 2}" y="30" font-size="18" font-weight="700" text-anchor="middle" fill="#2a2420">Las tres habilidades de Ana y sus hitos</text>`;
   const x0 = 300, x1 = W - 60;
@@ -133,8 +133,8 @@ function calendario(){
     for (let d = 0; d < 14; d++) { const dx = x + 8 + d * (w - 22) / 14; s += `<rect x="${dx}" y="160" width="${(w - 22) / 14 - 3}" height="14" rx="2" fill="${i === 1 || d % 7 === 6 ? '#e8e4dc' : '#9ac08a'}"/>`; }
   });
   const ex = x0 + w + 8;
-  s += `<path d="M${ex + 6},178 L${ex + 6},215" stroke="#a3302a" stroke-width="2" marker-end="url(#m)"/><text x="${ex - 20}" y="232" font-size="13" font-weight="700" fill="#a3302a">Día 1 del verano: el examen de Queen's (en la cocina, con Marilla)</text>`;
-  const r = [['menos de 10', 'no la mandan todavía', '#e8e4dc'], ['10 a 29', 'examen_no: no alcanza; otra vez el próximo verano', '#f8d9d6'], ['30 a 59', 'examen_entra: entra a Queen\'s', '#dcefd6'], ['60 o más', 'examen_primera: primera, empatada con Gilbert', '#fbefc6']];
+  s += `<path d="M${ex + 6},178 L${ex + 6},215" stroke="#a3302a" stroke-width="2" marker-end="url(#m)"/><text x="${ex - 20}" y="232" font-size="13" font-weight="700" fill="#a3302a">Día 1 del verano, desde el segundo año: el examen de Queen's (en la cocina, con Marilla)</text>`;
+  const r = [['menos de 20', 'no la mandan todavía', '#e8e4dc'], ['20 a 49', 'examen_no: no alcanza; otra vez el próximo verano', '#f8d9d6'], ['50 a 84', 'examen_entra: entra a Queen\'s', '#dcefd6'], ['85 o más', 'examen_primera: primera, empatada con Gilbert', '#fbefc6']];
   r.forEach(([n, t, c], i) => { const y = 255 + i * 34; s += `<rect x="${ex - 20}" y="${y}" width="150" height="26" rx="5" fill="${c}" stroke="#5a5248"/><text x="${ex + 55}" y="${y + 17}" font-size="12.5" text-anchor="middle" font-weight="700">estudio ${n}</text><text x="${ex + 145}" y="${y + 17}" font-size="12.5">${esc(t)}</text>`; });
   s += `<rect x="${W - 330}" y="190" width="14" height="14" fill="#9ac08a"/><text x="${W - 310}" y="202" font-size="12">día con clases</text><rect x="${W - 200}" y="190" width="14" height="14" fill="#e8e4dc"/><text x="${W - 180}" y="202" font-size="12">domingo o verano</text>`;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" font-family="Georgia, serif"><rect width="${W}" height="${H}" fill="#fffdf8"/><defs><marker id="m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#a3302a"/></marker></defs>${s}</svg>`;

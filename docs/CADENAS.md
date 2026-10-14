@@ -6,6 +6,8 @@ En *Ana de las Tejas Verdes* casi nada pasa suelto: una cosa abre la siguiente. 
 - el **cuaderno** (`src/datos/cuaderno.txt`) dice qué meta **requiere** cuáles (otras metas o hechos) y qué **acciones** quedan cerradas mientras tanto: nadie las puede hacer, ni el jugador ni los demás (el planificador no las ve);
 - los hechos se guardan con la partida, con el día en que pasaron (por eso una escena puede esperar «al día siguiente»).
 
+**Los tiempos:** un año del juego son 56 días y en el libro pasan unos cuatro años, así que un mes del libro son unos 4 o 5 días del juego. Las cadenas esperan lo que corresponde (abajo).
+
 Repaso hecho a partir de los resúmenes de `docs/ACCIONES_DEL_LIBRO.md`. ✅ está en el juego; ◻ todavía no.
 
 ## 1. Diana, la amiga del alma (cap. 8, 12)
@@ -23,7 +25,7 @@ Lo que abre la amistad: el broche y el picnic, el té con Diana, el club de cuen
 
 ## 2. El picnic de la escuela dominical (cap. 13, 14)
 
-Requiere ser amigas (✅). En el libro también: el permiso de Marilla (✅, la acción `pedir_permiso`), la canasta (✅) y el broche de amatista que se pierde y Ana «confiesa» para que la dejen ir (✅ la escena `broche`, en la cocina, una vez que son amigas; el picnic requiere `hecho:broche`).
+Requiere ser amigas (✅). En el libro también: el permiso de Marilla (✅, la acción `pedir_permiso`), la canasta (✅) y el broche de amatista que se pierde y Ana «confiesa» para que la dejen ir (✅ la escena `broche`, en la cocina, después de 5 días de amigas (en el libro, un mes); el picnic requiere `hecho:broche`).
 
 ## 3. La escuela y Gilbert (cap. 15, 17, 28, 38)
 
@@ -33,17 +35,17 @@ Requiere ser amigas (✅). En el libro también: el permiso de Marilla (✅, la 
 | «¡Zanahorias!» y la pizarra | cap. 15 | ✅ la escena `zanahorias`, la primera vez que Ana entra a la escuela con Gilbert: deja el hecho `zanahorias` y la ofensa (Ana ya no le habla) |
 | Recitar la lección, el concierto, decorar el salón | cap. 17, 24, 25 | ✅ requieren haber ido a la escuela |
 | Gilbert la rescata del bote y ella lo rechaza | cap. 28 | ◻ |
-| Hacen las paces | cap. 38 | ✅ requiere `hecho:zanahorias` (las acciones de disculparse y perdonar con Gilbert, cerradas antes) |
+| Hacen las paces | cap. 38 | ✅ requiere `hecho:zanahorias` y que pasen 28 días (en el libro, años) (las acciones de disculparse y perdonar con Gilbert, cerradas antes) |
 
 ## 4. Diana prohibida (cap. 16, 17, 18)
 
 | Paso | En el libro | En el juego |
 |---|---|---|
-| El té con Diana | cap. 16 | ✅ desde el menú de Diana, una vez amigas: «Invitarla a tomar el té en Tejas Verdes» (Ana prepara el té, la invita, la espera) |
+| El té con Diana | cap. 16 | ✅ desde el menú de Diana, después de 10 días de amigas (en el libro, unos tres meses): «Invitarla a tomar el té en Tejas Verdes» (Ana prepara el té, la invita, la espera) |
 | El «cordial» era vino de grosellas | cap. 16 | ✅ la escena `te_grosella`, sentadas a la mesita: Diana se va a su casa, mareada → hecho `diana_borracha` |
 | La Sra. Barry prohíbe la amistad | cap. 16 | ✅ al día siguiente, la escena `prohibida` → hecho `prohibida`: se cierran el té, el picnic, el club, el bote, el desafío y la cama de la tía Josephine; Diana está triste; no se saludan como amigas ni conversan; en el cuaderno aparece «Recuperar la amistad de los Barry» |
 | Ana pide perdón y no la perdonan | cap. 16 | ✅ la escena `barry_no_perdona` (si Ana va a La Cuesta del Huerto) |
-| Minnie May con crup | cap. 18 | ✅ dos días después, en la noche, Diana corre a Tejas Verdes (agenda urgente: no se para a conversar); la escena `crup_aviso`, y las dos corren a La Cuesta del Huerto |
+| Minnie May con crup | cap. 18 | ✅ 12 días después (en el libro, unos tres meses), en la noche, Diana corre a Tejas Verdes (agenda urgente: no se para a conversar); la escena `crup_aviso`, y las dos corren a La Cuesta del Huerto |
 | Ana la salva; la Sra. Barry pide perdón | cap. 18 | ✅ la escena `crup_salva` → se olvida la prohibición, hecho `perdonada`, y se quieren más |
 
 ## 5. Los Allan (cap. 21, 22)
@@ -51,13 +53,13 @@ Requiere ser amigas (✅). En el libro también: el permiso de Marilla (✅, la 
 | Paso | En el libro | En el juego |
 |---|---|---|
 | Conocer a la Sra. Allan | cap. 21: llega el nuevo pastor con su esposa | ✅ meta «Ir a la escuela dominical» (estar en la iglesia) |
-| Marilla invita a los Allan | cap. 21 | ✅ la escena `invita_allan`, después de la escuela dominical → hecho `allan_invitados` |
-| El pastel con linimento | cap. 21 | ✅ al día siguiente, la Sra. Allan viene a la tarde (agenda); cuando se sienta, la escena `pastel_linimento` → la invita a la casa parroquial |
+| Marilla invita a los Allan | cap. 21 | ✅ la escena `invita_allan`, 14 días después de la primera escuela dominical → hecho `allan_invitados` |
+| El pastel con linimento | cap. 21 | ✅ 3 días después, la Sra. Allan viene a la tarde (agenda); cuando se sienta, la escena `pastel_linimento` → la invita a la casa parroquial |
 | Invitada a la casa parroquial | cap. 22 | ✅ «Tomar el té con la Sra. Allan» requiere `hecho:pastel_linimento` (la invitación a Ana, cerrada antes) |
 
 ## 6. La tía Josephine (cap. 19, 26, 29)
 
-El concierto del Club de Debate con Diana → saltan sobre la cama del cuarto de huéspedes → la tía Josephine se enoja y Ana se gana su amistad → cartas → la visita a Charlottetown. En el juego: ✅ la escena `cama_josephine` en casa de Diana (amigas desde hace dos días y sin prohibición; es una escena grande, así que no cae el mismo día que otra, como el crup: ver el ritmo en `docs/MOTOR.md`) → hecho `cama_josephine`; las cartas a la tía Josephine se abren después (✅); la visita a Charlottetown ◻.
+El concierto del Club de Debate con Diana → saltan sobre la cama del cuarto de huéspedes → la tía Josephine se enoja y Ana se gana su amistad → cartas → la visita a Charlottetown. En el juego: ✅ la escena `cama_josephine` en casa de Diana (amigas desde hace 25 días, casi dos estaciones, y sin prohibición; es una escena grande, así que no cae el mismo día que otra, como el crup: ver el ritmo en `docs/MOTOR.md`) → hecho `cama_josephine`; las cartas a la tía Josephine se abren después (✅); la visita a Charlottetown ◻.
 
 ## 7. El pelo (cap. 27)
 

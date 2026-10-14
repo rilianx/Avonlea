@@ -48,7 +48,8 @@ acciones: merendar, pedir_permiso
 titulo: Invitar a Diana a tomar el té
 pista: En Tejas Verdes, con el cordial de frambuesa de Marilla. Invítala cuando la veas.
 meta: tomando_te ana diana
-requiere: amigas, !hecho:prohibida
+requiere: amigas, dias_desde:conocidas_diana:10, !hecho:prohibida
+antes: ser amiga de Diana desde hace un tiempo (unos diez días)
 
 === perdon_barry ===
 titulo: Recuperar la amistad de los Barry
@@ -62,8 +63,8 @@ oculta
 titulo: Hacerse amiga de la tía Josephine
 pista: La tía de la Sra. Barry viene de Charlottetown. Un concierto, una noche en casa de Diana… y una cama de huéspedes.
 meta: hecho cama_josephine
-requiere: amigas, !hecho:prohibida
-antes: ser amiga de Diana
+requiere: amigas, dias_desde:conocidas_diana:25, !hecho:prohibida
+antes: ser amiga de Diana desde hace mucho (casi dos estaciones)
 
 === lynde ===
 titulo: Visitar a la Sra. Lynde
@@ -122,9 +123,9 @@ acciones: recitar
 
 === queens ===
 titulo: Entrar a Queen's
-pista: El examen de ingreso es en Charlottetown, el primer día del verano (faltan {dias_examen} días). Se prepara yendo a clases y estudiando la lección: llevas {estudio} días de estudio.
-pista si estudio:ana>=10: La Srta. Stacy te va a mandar al examen (faltan {dias_examen} días). Llevas {estudio} días de estudio: con unos 30 se entra; con 60, quizás quedes primera.
-pista si hecho:examen: No alcanzó esta vez. Hay otro examen el próximo verano (faltan {dias_examen} días): llevas {estudio} días de estudio, y con unos 30 se entra.
+pista: El examen de ingreso es en Charlottetown, el primer día del verano, desde el segundo año (faltan {dias_examen} días). Se prepara yendo a clases y estudiando la lección: llevas {estudio} días de estudio.
+pista si estudio:ana>=20: La Srta. Stacy te va a mandar al examen (faltan {dias_examen} días). Llevas {estudio} días de estudio: con unos 50 se entra; con 85, quizás quedes primera.
+pista si hecho:examen: No alcanzó esta vez. Hay otro examen el próximo verano (faltan {dias_examen} días): llevas {estudio} días de estudio, y con unos 50 se entra.
 meta: hecho queens
 requiere: escuela
 antes: ir a la escuela (la Srta. Stacy prepara a los que van a dar el examen)
@@ -133,8 +134,8 @@ antes: ir a la escuela (la Srta. Stacy prepara a los que van a dar el examen)
 titulo: Hacer las paces con Gilbert Blythe
 pista: Le dijo «zanahorias». Él quiere disculparse… si Ana lo deja.
 meta: paces ana gilbert
-requiere: hecho:zanahorias
-antes: ir a la escuela, donde está Gilbert Blythe (y que pase algo)
+requiere: hecho:zanahorias, dias_desde:zanahorias:28
+antes: ir a la escuela, donde está Gilbert Blythe (y que pase algo); y después, que pase mucho tiempo: Ana no perdona fácil
 acciones: disculparse:gilbert, perdonar:gilbert, interceder:gilbert
 
 === leido ===

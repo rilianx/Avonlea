@@ -29,8 +29,9 @@ if (game.wm) {
 }
 // Ana's next milestone on a skill (or none: all of them reached)
 const habilidadProxima = c => c.hitos.find(h => h.n > cualidad('ana', c.id));
-// days until the next first day of summer (the examination)
-function diasExamen(){ const d = today(), y = DIAS_ESTACION * 4, s = ((1 - (game.seasonShift || 0)) % 4 + 4) % 4 * DIAS_ESTACION, n = Math.floor((d - s) / y) * y + s; return (n >= d ? n : n + y) - d; }
+// days until the next examination: the first day of a summer, from the second year of the game (dia_juego:56)
+const EXAMEN_DESDE = DIAS_ESTACION * 4;
+function diasExamen(){ const d = today(), y = DIAS_ESTACION * 4, s = ((1 - (game.seasonShift || 0)) % 4 + 4) % 4 * DIAS_ESTACION; let n = Math.floor((d - s) / y) * y + s; if (n < d) n += y; while (n + 1 < EXAMEN_DESDE) n += y; return n - d; }
 // one more on a skill, for whoever did it (at most so much a day); Ana's milestones: told, and kept for whoever is to tell her
 function habilidadSube(k, c, D, por){
   const n = (D.n[k] ||= {}); if ((n[c.id] || 0) >= c.por_dia) return;

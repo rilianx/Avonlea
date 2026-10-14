@@ -104,3 +104,5 @@ Leyendo los relatos de las cadenas nuevas (zanahorias, broche, té con Diana, cr
 | «Lo vi esta tarde» a las diez de la mañana; «pasa la noche… a la mañana» en cinco minutos | «Lo vi ayer»; «se queda en su cuarto… al final» |
 
 **Lo que queda, sabido:** en el crup y en la cama de la tía Josephine, la escena cuenta una noche entera («al otro día, la Sra. Barry…») en unos minutos del juego. Es un resumen, como en el libro, pero el reloj no salta.
+
+**Pendiente conocido (falla rara):** en una de cada unas quince corridas del té con Diana, Ana, de vuelta a Tejas Verdes, se queda pegada junto al huerto de los Barry, conversando una y otra vez con Minnie May y Mary Joe sin retomar el camino. Al repetir la prueba sola no aparece (11 de 11 bien); hay que encontrar por qué la tarea no se retoma después de una conversación.

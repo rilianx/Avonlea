@@ -71,7 +71,7 @@ const FOLK_DEFS = {
   stacy: { name: 'la Srta. Stacy', kind: 'maestro', home: 'Pensión', look: { hair: '#a8683a', hairD: '#80482a', style: 'bun', dress: '#6a8a6a', dressD: '#4a6a4a', brooch: true, skin: '#f2cfb2', h: 1.08 },
     lines: ['Ana, tu composición fue la mejor de la clase. Pero cuidado con los adjetivos: ¡no hacen falta tantos!', 'El viernes por la tarde salimos al bosque a estudiar botánica. ¿Te apuntas?', 'Este año preparamos a los mejores para el examen de Queen\'s. Tú puedes, Ana.'], ana: ['¡Srta. Stacy! Usted es mi espíritu afín, ¿lo sabía?'] },
   minnie: { name: 'Minnie May Barry', kind: 'juego', home: 'La Cuesta del Huerto', look: kidLook('#2a1a14', '#e8c0d0', { dressD: '#c098a8', style: 'curls', bow: '#c8463a', h: .64 }),
-    lines: ['¡Ana! ¿Me cuentas el cuento del hada otra vez?', 'Diana no me deja jugar con sus muñecas. ¿Tú me dejas?', 'Ya no tengo tos. ¡Mamá dice que tú me salvaste!'] },
+    lines: ['¡Ana! ¿Me cuentas el cuento del hada otra vez?', 'Diana no me deja jugar con sus muñecas. ¿Tú me dejas?', '[hecho:perdonada] Ya no tengo tos. ¡Mamá dice que tú me salvaste!'] },
   srbarry: { name: 'el Sr. Barry', kind: 'granjero', home: 'La Cuesta del Huerto', look: { hair: '#3a2a20', hairD: '#2a1a10', beard: true, dress: '#5a5040', dressD: '#3a3020', coat: true, hatDark: true, skin: '#e0b090', h: 1.18 },
     lines: ['Buenas, Ana. Diana está en la casa, creo. O en el huerto.', 'El heno está listo para entrar. Si no llueve, mañana lo cargamos.'] },
   maryjoe: { name: 'Mary Joe', kind: 'juego', home: 'La Cuesta del Huerto', look: { hair: '#5a3a2a', hairD: '#3a2010', style: 'bun', dress: '#8a7a6a', dressD: '#6a5a4a', apron: '#f4efe4', skin: '#e8c0a0', h: 1.06 },
