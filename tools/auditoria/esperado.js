@@ -408,4 +408,13 @@ module.exports = [
       { quien: 'ana', dice: /culpa mía/, texto: 'Ana confiesa.' },
     ],
   },
+  {
+    id: 69, titulo: 'El examen de Queen\'s (lo que se gana de a poco)', quienes: ['ana', 'marilla'],
+    relato: 'El primer día del verano, Marilla le recuerda a Ana que hoy es el examen de Queen\'s, en Charlottetown. Ana estudió lo suficiente (35 días de estudio): entra, aunque no primera. Marilla está orgullosa, aunque no lo diga.',
+    pasos: [
+      { quien: 'marilla', dice: /examen de Queen/, texto: 'Marilla le recuerda el examen.' },
+      { quien: 'ana', dice: /Entré a Queen/, texto: 'Ana entra a Queen\'s.' },
+      { quien: 'marilla', dice: /Lo sabía/, texto: 'Marilla, orgullosa a su manera.' },
+    ],
+  },
 ];

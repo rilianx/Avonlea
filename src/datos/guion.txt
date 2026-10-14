@@ -613,3 +613,54 @@ josephine: ¡Misericordia! ¿Qué es esto? ¡Niñas sin educación!
 diana: Es… es la tía Josephine, de Charlottetown. ¡Ahora sí que nos va a pasar algo terrible!
 ana: (A la mañana siguiente, Ana va a verla.) Fue culpa mía, Srta. Barry. Diana no tuvo la culpa. Y usted no sabe lo que es tener tanta imaginación.
 josephine: (La tía Josephine se ríe como hacía años.) Vaya, vaya… Ven a verme a menudo mientras esté aquí, niña. Y escríbeme cuando me vaya.
+
+# --- El examen de ingreso a Queen's (cap. 31, 32): el primer día de cada verano, si Ana estudió lo suficiente para que
+# la Srta. Stacy la mande (estudio:10). Cómo le va sale de lo que estudió: los días de clase y de lecciones (docs/LARGO_PLAZO.md).
+=== examen_primera ===
+canal: gg
+prioridad: 8
+interrumpe
+en: ana=gg, marilla=gg
+si: estacion:verano, dia_estacion:1, estudio:10, estudio:60, !hecho:queens, no_hoy:examen
+al_terminar: hecho examen
+al_terminar: hecho queens
+al_terminar: hecho queens_primera
+al_terminar: afecto marilla ana 5
+al_terminar: afecto matthew ana 5
+al_terminar: log Ana dio el examen de ingreso a Queen's en Charlottetown y quedó primera, empatada con Gilbert Blythe.
+---
+marilla: Ana, hoy es el examen de Queen's. Matthew te lleva a Charlottetown. Toma, no se te olvide el almuerzo.
+ana: (Ana pasa el día en Charlottetown, con la pluma temblándole en la mano. La geometría… ¡la geometría salió bien!)
+ana: (Semanas después, Diana llega corriendo con el diario.) ¡Marilla! ¡Pasé! ¡Primera de toda la isla… empatada con Gilbert Blythe!
+marilla: (Marilla no dice nada por un momento. Pero los ojos le brillan.) Bueno, Ana. Bien hecho. Bien hecho, de verdad.
+
+=== examen_entra ===
+canal: gg
+prioridad: 8
+interrumpe
+en: ana=gg, marilla=gg
+si: estacion:verano, dia_estacion:1, estudio:30, !estudio:60, !hecho:queens, no_hoy:examen
+al_terminar: hecho examen
+al_terminar: hecho queens
+al_terminar: afecto marilla ana 5
+al_terminar: log Ana dio el examen de ingreso a Queen's en Charlottetown y entró.
+---
+marilla: Ana, hoy es el examen de Queen's. Matthew te lleva a Charlottetown. Toma, no se te olvide el almuerzo.
+ana: (Ana pasa el día en Charlottetown, con la pluma temblándole en la mano. La geometría fue terrible… pero el resto, no tanto.)
+ana: (Semanas después, sale la lista en el diario.) ¡Marilla! ¡Entré a Queen's! No primera… pero entré.
+marilla: Lo sabía. Aunque no te lo iba a decir, para que no te llenaras de humo.
+
+=== examen_no ===
+canal: gg
+prioridad: 8
+interrumpe
+en: ana=gg, marilla=gg
+si: estacion:verano, dia_estacion:1, estudio:10, !estudio:30, !hecho:queens, no_hoy:examen
+al_terminar: hecho examen
+al_terminar: triste ana
+al_terminar: log Ana dio el examen de ingreso a Queen's en Charlottetown, pero no le alcanzó. El año que viene, otra vez.
+---
+marilla: Ana, hoy es el examen de Queen's. Matthew te lleva a Charlottetown. Toma, no se te olvide el almuerzo.
+ana: (Ana pasa el día en Charlottetown. La geometría… la geometría fue un desastre.)
+ana: (Semanas después, sale la lista en el diario. Ana la lee tres veces.) No estoy, Marilla. No estoy.
+marilla: Bueno. Hay otro examen el año que viene, y tú no eres de las que se rinden. A estudiar, entonces.

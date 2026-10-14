@@ -58,18 +58,25 @@ function cuadernoTick(dt){
   }
 }
 // the hint now: the last whose condition holds, or the plain one
-const cuadernoPista = m => [...m.pistas].reverse().find(([c]) => dlgCond(c, dlgCtx()))?.[1] || m.pista;
+const cuadernoPista = m => ([...m.pistas].reverse().find(([c]) => dlgCond(c, dlgCtx()))?.[1] || m.pista).replace('{estudio}', estudio()).replace('{dias_examen}', diasExamen());   // ({estudio}: how much she has studied; {dias_examen}: days until the examination)
 const cuadernoAntes = m => m.antes || m.requiere.filter(r => !cuadernoCumple(r)).map(r => { const t = cuadernoMeta(r)?.titulo; return t && t[0].toLowerCase() + t.slice(1); }).filter(Boolean).join(', ');
 function cuadernoPanel(open){
   const P = $('cua'); P.hidden = !open; if (!open) return;
   const vis = CUADERNO_METAS.filter(m => !m.oculta || cuadernoHecho(m.id) || cuadernoAbierta(m)), n = vis.filter(m => cuadernoHecho(m.id)).length;
-  $('cuasub').textContent = n + ' de ' + vis.length + ' · ' + (n === vis.length ? '¡todo! Ana podría escribir un libro con esto.' : 'las que faltan tienen una pista; 🔒: todavía no');
+  $('cuasub').textContent = cuadernoFecha() + ' · ' + n + ' de ' + vis.length + ' · ' + (n === vis.length ? '¡todo! Ana podría escribir un libro con esto.' : 'las que faltan tienen una pista; 🔒: todavía no');
   $('cualist').innerHTML = CUADERNO.map(g => '<h4>' + esc(g.nombre) + '</h4>' + g.metas.filter(m => !m.oculta || cuadernoHecho(m.id) || cuadernoAbierta(m)).map(m => {   // (a hidden goal: once it opens)
     const d = cuadernoHecho(m.id), abierta = cuadernoAbierta(m);
     return d ? `<div class="cm hecha"><b>✓ ${esc(m.titulo)}</b><span>el día ${d}</span></div>`
       : abierta ? `<div class="cm"><b>○ ${esc(m.titulo)}</b><small>${esc(cuadernoPista(m))}</small></div>`
       : `<div class="cm cerrada"><b>🔒 ${esc(m.titulo)}</b><small>Antes: ${esc(cuadernoAntes(m))}.</small></div>`;
-  }).join('')).join('');
+  }).join('')).join('') + cuadernoAmigos();
+}
+// the date, as Ana would write it: «martes, día 3 de la primavera»
+const cuadernoFecha = () => ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'][today() % 7] + ', día ' + (today() % DIAS_ESTACION + 1) + ' de ' + (S === 0 ? 'la ' : 'el ') + SEASONS[S].toLowerCase();
+// her friends: how much each one loves her (the hearts of 0 to 5), those she knows
+function cuadernoAmigos(){
+  const l = ['diana', 'marilla', 'matthew', 'sraallan', 'stacy', 'josephine', 'lynde', 'gilbert'].filter(k => (k !== 'diana' || conoceDiana()) && (k !== 'josephine' || dlgHechos().cama_josephine) && game.wm.rel?.[k + '>ana'] != null);
+  return l.length ? '<h4>Quiénes la quieren</h4>' + l.map(k => { const r = Math.max(0, Math.min(5, Math.round(relGetW(k, 'ana')))); return `<div class="cm"><b>${esc(wmName(k).replace(/^(el|la) /, m => m[0].toUpperCase() + m.slice(1)))}</b><small>${'♥'.repeat(r) + '♡'.repeat(5 - r)}</small></div>`; }).join('') : '';
 }
 // a game that already had Ana and Diana as friends (before they had to meet): they know each other
 if (game.wm?.perm?.['amigas:ana&diana'] && !dlgHechos().conocidas_diana) dlgHecho('conocidas_diana');

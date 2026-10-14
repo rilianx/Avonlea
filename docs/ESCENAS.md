@@ -65,6 +65,9 @@ El silencio también se escribe: después de la Avenida hay escenas de una líne
 | `no_hoy:x` | el hecho `x` no pasó hoy (una cosa grande del libro por día) |
 | `afecto:a:b:n` | `a` quiere a `b` al menos `n` (de 0 a 5) |
 | `cuaderno:id` | Ana cumplió esa meta de su cuaderno |
+| `estudio:n` | Ana tiene al menos `n` días de estudio (`docs/LARGO_PLAZO.md`) |
+| `estacion:e` | es esa estación (`primavera`, `verano`, `otoño`, `invierno`) |
+| `dia_estacion:n` | es el día `n` de la estación (desde 1; cada estación dura 14 días) |
 | `sentada:quien` | esa persona está sentada |
 | `tomando_te:a:b` | `a` está sentada a la mesita del té con `b` |
 | `carta:quien` | Ana está escribiendo una carta a esa persona, sentada a su escritorio (`diana`, `stacy`, `sraallan`, `josephine`) |

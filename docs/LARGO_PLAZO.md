@@ -1,49 +1,46 @@
-# Metas de largo plazo (propuesta)
+# Lo que se gana de a poco
 
-Las cadenas del libro (`docs/CADENAS.md`) son cosas que pasan una vez. El libro también tiene lo que se **acumula**: Ana estudia años para entrar a Queen's, va a la escuela todos los días, le escribe cartas a la tía Josephine, ve a Diana casi todas las tardes. Nada de eso se cumple con una acción: se gana de a poco y se puede perder si se descuida.
+Las cadenas del libro (`docs/CADENAS.md`) pasan una vez. Lo de largo plazo, en cambio, se gana día a día. Para que se pueda hacer, lo más simple posible: **un solo número de estudio** y el afecto que ya existía.
 
-La idea es tener **medidores** que suben con lo que se hace día a día, bajan de a poco si no se hace, y **abren cosas** del libro al llegar a cierto nivel (como las cadenas, pero con `requiere: estudio:geometria:6` en vez de `hecho:x`).
+## El calendario
 
-## 1. Las amistades
+- **Una estación dura 14 días** (`DIAS_ESTACION`, en `src/js/34-hablar.js`), así que un año del juego son 56 días.
+- **No hay clases los domingos ni en verano** (`hayClases()`). Esos días los niños juegan afuera, y la maestra pasea por la aldea.
+- El cuaderno muestra la fecha: «martes, día 3 de la primavera».
 
-- **Ya existe:** el afecto (0 a 5), +1 por día si Ana pasa media hora con Diana (`juntasTick`), +1 por carta entregada.
-- **Falta:**
-  - lo mismo con los demás amigos (Ruby, Jane, la Sra. Allan, la Srta. Stacy, Matthew);
-  - que se **enfríe** si no se ven: −1 cada tantos días sin verse ni escribirse, nunca bajo un mínimo (las amigas del alma no se olvidan, pero se extrañan);
-  - una página en el cuaderno, «Mis amistades», con corazones por persona y una frase de cómo está («Diana te extraña: hace cuatro días que no se ven»).
-- **Lo que abre:**
-  - con 4 de afecto, el juramento (ya está);
-  - con 5, que Diana venga sola a buscarla (una agenda);
-  - con la tía Josephine en 4 (cartas), la invitación a Charlottetown (cap. 29).
+## El estudio
 
-## 2. La escuela
+`game.wm.estudio`: los días de estudio (`src/js/66-escuela.js`). Suma, como mucho, 2 por día:
 
-- Un horario: de lunes a viernes, de 9 a 15:30 (los niños ya lo siguen). Si Ana está en la escuela a las 9, cuenta el día de **asistencia**.
-- Faltar sin motivo: Marilla se entera (la Sra. Lynde se lo cuenta) y la Srta. Stacy la quiere un poco menos.
-- En clase, con lo que Ana ya sabe hacer (`estudiar`, `recitar`), se gana **estudio** por materia: geometría (su punto débil en el libro), historia, inglés y composición. Estudiar en casa también suma, menos.
-- **Lo que abre:**
-  - el concierto (ya está, con «ir a la escuela»);
-  - el club de cuentos;
-  - la clase de Queen's de la Srta. Stacy, después de clases (cap. 29), con suficiente asistencia y estudio.
+- **+1** por un día de clases: una hora dentro de la escuela, entre las 9:00 y las 15:30, un día con clases;
+- **+1** por estudiar la lección: veinte minutos.
 
-## 3. Queen's (cap. 29 a 34)
+No hay materias ni olvido.
 
-- La clase de Queen's: una hora más después de clases, con Gilbert, Ruby, Jane, Josie… Cada sesión suma más estudio.
-- **La rivalidad con Gilbert:** él también estudia (su propia rutina); en la escuela se comparan las notas («Te gané en ortografía…»). Que Ana le gane en algo es una meta del cuaderno.
-- **El examen:** en una fecha fija del calendario del juego (anunciada en el cuaderno con tiempo: «El examen de ingreso a Queen's: en 20 días»). Ana va a Charlottetown y el resultado sale de su estudio:
-  - si no alcanza, no entra (y se puede repetir al año siguiente);
-  - si alcanza, entra;
-  - con mucho estudio, queda primera junto con Gilbert, como en el libro.
-- Lo que sigue (la beca Avery, la muerte de Matthew, quedarse con Marilla) sería otra cadena larga.
+## El examen de Queen's (cap. 31, 32)
 
-## 4. El calendario
+- El primer día de cada verano, en la cocina con Marilla, si Ana tiene al menos **10** días de estudio (para que la Srta. Stacy la mande).
+- Sale una de tres escenas, según el estudio:
 
-Para que esto tenga sentido hace falta que los días cuenten: semanas (domingo: escuela dominical; sábados sin escuela), estaciones (ya están) y un año escolar. Un año de juego puede durar mucho menos que uno real (por ejemplo, cada estación de 7 a 10 días), pero con el mismo orden que el libro.
+  | Escena | Estudio | Resultado |
+  |---|---|---|
+  | `examen_no` | menos de 30 | no entra, y hay otro examen el próximo verano |
+  | `examen_entra` | 30 o más | entra |
+  | `examen_primera` | 60 o más | primera, empatada con Gilbert |
 
-## Por dónde empezar (recomendado)
+- En el cuaderno: «Entrar a Queen's», con cuántos días de estudio lleva y cuántos días faltan para el examen.
+- Con todo el esfuerzo (2 por día de clases), 30 se alcanza durante la primera primavera, antes del primer examen. 60 toma casi un año.
 
-1. **Amistades** visibles en el cuaderno, con frecuentar y enfriarse. Es lo más chico, y casi todo está: `relGetW`, `juntasTick`, `cartaAfecto`.
-2. **Escuela** con horario, asistencia y estudio por materia (un medidor en `game.wm`, condiciones nuevas `estudio:materia:n` y `asistencia:n` para el guion y el cuaderno).
-3. **Queen's**: la clase, la rivalidad con Gilbert y el examen como cadena del libro, con fecha.
+## Las amistades
 
-Cada uno con su meta de prueba de varios días (la regresión ya corre días enteros) y su lectura del relato.
+- No hay mecánicas nuevas: el afecto ya sube estando juntas (`juntasTick`), con cartas (`cartaAfecto`), con regalos y con las escenas.
+- El cuaderno muestra **quiénes la quieren**, con corazones de 0 a 5.
+
+## Para el guion y el cuaderno
+
+Condiciones nuevas:
+- `estudio:n`: al menos n días de estudio;
+- `estacion:verano`;
+- `dia_estacion:n`: el día n de la estación, desde 1.
+
+Una pista del cuaderno puede decir `{estudio}` y `{dias_examen}`.

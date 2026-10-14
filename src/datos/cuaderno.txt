@@ -120,6 +120,15 @@ meta: recito ana
 requiere: escuela
 acciones: recitar
 
+=== queens ===
+titulo: Entrar a Queen's
+pista: El examen de ingreso es en Charlottetown, el primer día del verano (faltan {dias_examen} días). Se prepara yendo a clases y estudiando la lección: llevas {estudio} días de estudio.
+pista si estudio:10: La Srta. Stacy te va a mandar al examen (faltan {dias_examen} días). Llevas {estudio} días de estudio: con unos 30 se entra; con 60, quizás quedes primera.
+pista si hecho:examen: No alcanzó esta vez. Hay otro examen el próximo verano (faltan {dias_examen} días): llevas {estudio} días de estudio, y con unos 30 se entra.
+meta: hecho queens
+requiere: escuela
+antes: ir a la escuela (la Srta. Stacy prepara a los que van a dar el examen)
+
 === paces ===
 titulo: Hacer las paces con Gilbert Blythe
 pista: Le dijo «zanahorias». Él quiere disculparse… si Ana lo deja.

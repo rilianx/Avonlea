@@ -813,6 +813,57 @@ diana: Es… es la tía Josephine, de Charlottetown. ¡Ahora sí que nos va a pa
 ana: (A la mañana siguiente, Ana va a verla.) Fue culpa mía, Srta. Barry. Diana no tuvo la culpa. Y usted no sabe lo que es tener tanta imaginación.
 josephine: (La tía Josephine se ríe como hacía años.) Vaya, vaya… Ven a verme a menudo mientras esté aquí, niña. Y escríbeme cuando me vaya.
 
+# --- El examen de ingreso a Queen's (cap. 31, 32): el primer día de cada verano, si Ana estudió lo suficiente para que
+# la Srta. Stacy la mande (estudio:10). Cómo le va sale de lo que estudió: los días de clase y de lecciones (docs/LARGO_PLAZO.md).
+=== examen_primera ===
+canal: gg
+prioridad: 8
+interrumpe
+en: ana=gg, marilla=gg
+si: estacion:verano, dia_estacion:1, estudio:10, estudio:60, !hecho:queens, no_hoy:examen
+al_terminar: hecho examen
+al_terminar: hecho queens
+al_terminar: hecho queens_primera
+al_terminar: afecto marilla ana 5
+al_terminar: afecto matthew ana 5
+al_terminar: log Ana dio el examen de ingreso a Queen's en Charlottetown y quedó primera, empatada con Gilbert Blythe.
+---
+marilla: Ana, hoy es el examen de Queen's. Matthew te lleva a Charlottetown. Toma, no se te olvide el almuerzo.
+ana: (Ana pasa el día en Charlottetown, con la pluma temblándole en la mano. La geometría… ¡la geometría salió bien!)
+ana: (Semanas después, Diana llega corriendo con el diario.) ¡Marilla! ¡Pasé! ¡Primera de toda la isla… empatada con Gilbert Blythe!
+marilla: (Marilla no dice nada por un momento. Pero los ojos le brillan.) Bueno, Ana. Bien hecho. Bien hecho, de verdad.
+
+=== examen_entra ===
+canal: gg
+prioridad: 8
+interrumpe
+en: ana=gg, marilla=gg
+si: estacion:verano, dia_estacion:1, estudio:30, !estudio:60, !hecho:queens, no_hoy:examen
+al_terminar: hecho examen
+al_terminar: hecho queens
+al_terminar: afecto marilla ana 5
+al_terminar: log Ana dio el examen de ingreso a Queen's en Charlottetown y entró.
+---
+marilla: Ana, hoy es el examen de Queen's. Matthew te lleva a Charlottetown. Toma, no se te olvide el almuerzo.
+ana: (Ana pasa el día en Charlottetown, con la pluma temblándole en la mano. La geometría fue terrible… pero el resto, no tanto.)
+ana: (Semanas después, sale la lista en el diario.) ¡Marilla! ¡Entré a Queen's! No primera… pero entré.
+marilla: Lo sabía. Aunque no te lo iba a decir, para que no te llenaras de humo.
+
+=== examen_no ===
+canal: gg
+prioridad: 8
+interrumpe
+en: ana=gg, marilla=gg
+si: estacion:verano, dia_estacion:1, estudio:10, !estudio:30, !hecho:queens, no_hoy:examen
+al_terminar: hecho examen
+al_terminar: triste ana
+al_terminar: log Ana dio el examen de ingreso a Queen's en Charlottetown, pero no le alcanzó. El año que viene, otra vez.
+---
+marilla: Ana, hoy es el examen de Queen's. Matthew te lleva a Charlottetown. Toma, no se te olvide el almuerzo.
+ana: (Ana pasa el día en Charlottetown. La geometría… la geometría fue un desastre.)
+ana: (Semanas después, sale la lista en el diario. Ana la lee tres veces.) No estoy, Marilla. No estoy.
+marilla: Bueno. Hay otro examen el año que viene, y tú no eres de las que se rinden. A estudiar, entonces.
+
 </script>
 <script type="text/plain" id="cuaderno">
 # El cuaderno de Ana: lo que podría hacer, como metas del libro (lo lee el juego al empezar).
@@ -936,6 +987,15 @@ pista: Hay que estudiarla antes.
 meta: recito ana
 requiere: escuela
 acciones: recitar
+
+=== queens ===
+titulo: Entrar a Queen's
+pista: El examen de ingreso es en Charlottetown, el primer día del verano (faltan {dias_examen} días). Se prepara yendo a clases y estudiando la lección: llevas {estudio} días de estudio.
+pista si estudio:10: La Srta. Stacy te va a mandar al examen (faltan {dias_examen} días). Llevas {estudio} días de estudio: con unos 30 se entra; con 60, quizás quedes primera.
+pista si hecho:examen: No alcanzó esta vez. Hay otro examen el próximo verano (faltan {dias_examen} días): llevas {estudio} días de estudio, y con unos 30 se entra.
+meta: hecho queens
+requiere: escuela
+antes: ir a la escuela (la Srta. Stacy prepara a los que van a dar el examen)
 
 === paces ===
 titulo: Hacer las paces con Gilbert Blythe
@@ -3277,6 +3337,9 @@ function dlgCond(s, c){   // one condition of state, written as text
     case 'afecto': { const [x, y, n] = rest.split(':'); return relGetW(x, y) >= +n; }   // (x cares for y at least n, of 0..5)
     case 'dias_desde': { const d = dlgHechos()[a]; return typeof d === 'number' && today() + 1 - d >= +b; }   // (at least b days since a happened)
     case 'sentada': return !!wmBody(a)?.sit;   // (she has sat down: at the table, for the tea)
+    case 'estudio': return estudio() >= +a;   // (she has studied at least so much: days of class and of lessons)
+    case 'estacion': return SEASONS[S].toLowerCase() === a;   // (primavera, verano, otoño, invierno)
+    case 'dia_estacion': return today() % DIAS_ESTACION + 1 === +a;   // (the day of the season, from 1)
     case 'no_hoy': return dlgHechos()[a] !== today() + 1;   // (a did not happen today: one thing of the book per day)
     case 'canal_libre': return !talkBusy(a);
     case 'ana_visible': return !ana.hidden;
@@ -4991,7 +5054,8 @@ function teaTime(){
    A box with who speaks, how fond of her they are (♥), what they say and what Ana can answer. */
 // once each season, the first thing each of them says is about the season
 /* (LINES and SEASON_LINES come from the characters) */
-const seasonCount = () => Math.floor(dayT / 2) + game.seasonShift;
+const DIAS_ESTACION = 14;   // (a season of the game: two weeks)
+const seasonCount = () => Math.floor(dayT / DIAS_ESTACION) + game.seasonShift;
 /* ---------- the things Ana can carry: one entry each (to add one: an entry here) ----------
    names: one and many; icon; season(): whether it can be had now; prepared: a single serving (nobody offers her
    another while she has one); recipe: what it takes to cook it; gift: how it is given (with its article) and thanked;
@@ -6665,7 +6729,7 @@ function update(dt){
   if (game.scene === 'camino' && ana.onCart && (mx || my || (ana.goto && !ana.goto.wm))) roadGetOff();   // (moving her: she gets down from the buggy)
   if (ANA_AUTO) { if (mx || my) { freeStart(); const v = 520 / (cam.zoom || 1) / (viewZoom || 1); freeCam.x += mx * v * dt; freeCam.y += my * v * dt; } mx = my = 0; }   // (on her own: the keys move the view)
   if (game.talk?.deadline && TT > game.talk.deadline && !sayOpen) { game.talk.deadline = 0; autoChoose(); }
-  autoTick(); cartTick(dt); roadTick(dt); buggyTick(); roadTalkTick(dt); dlgTick(dt); talkTick(dt); cap1Tick(); momentsTick(); folkTick(dt); faunaTick(dt); agentTick(dt); jugarTick(dt); correoTick(dt); sickTick(); apartarTick(); cuadernoTick(dt); juntasTick(dt); agendaTick(); wmApproachTick(dt); calledTick(); chatTick(dt); wmFollowTick();
+  autoTick(); cartTick(dt); roadTick(dt); buggyTick(); roadTalkTick(dt); dlgTick(dt); talkTick(dt); cap1Tick(); momentsTick(); folkTick(dt); faunaTick(dt); agentTick(dt); jugarTick(dt); correoTick(dt); sickTick(); apartarTick(); cuadernoTick(dt); estudioTick(dt); juntasTick(dt); agendaTick(); wmApproachTick(dt); calledTick(); chatTick(dt); wmFollowTick();
   if (RELATO.on) relatoTick();   // (the account of what happens, once all have moved: 66-relato.js)
   ana.torn = !!game.anaStates.rasgado; ana.askew = !!game.anaStates.despeinada;
   ana.savoring = false;
@@ -7163,6 +7227,11 @@ const fieldNear = ([x, y]) => { let best = null, bd = 1e9; for (const f of FIELD
 const caminoSeco = (x0, y0, x1, y1) => { for (let i = 1; i <= 8; i++) { const x = x0 + (x1 - x0) * i / 8, y = y0 + (y1 - y0) * i / 8; if (inLake(x, y) || inBrook(x, y) || inSea(x, y)) return false; } return true; };
 const IN = (at, room = 'in') => ({ k: room + ':' + at.map(Math.round), at, in: room, r: 0 });
 const OUT = (at, r = 90) => ({ k: 'out:' + at.map(Math.round), at, r });
+// a day with no classes (Sunday, summer): the children play, the teacher walks in the village
+const FOLK_LIBRE = {
+  alumno: (h, f) => h < 8 || h >= 20.5 ? IN(f.home) : h < 17.6 ? OUT(PLAY[f.def.play] || PLAY.aldea, 170) : OUT(f.home, 110),
+  maestro: (h, f) => h < 9 || h >= 21 ? IN(f.home) : h < 17 ? OUT(PLAY.aldea, 140) : OUT(f.home, 60),
+};
 // what each kind does at each hour (h: 6 .. 30)
 const FOLK_KINDS = {
   alumno: (h, f) => h < 7.4 || h >= 20.5 ? IN(f.home) : h < 8.4 ? OUT(f.home, 110) : h < 9 || (h >= 10.5 && h < 10.9) || (h >= 12 && h < 13) ? OUT(YARD, 170) : h < 15.5 ? IN(SCHOOL_DOOR, 'es') : h < 17.6 ? OUT(PLAY[f.def.play] || YARD, 170) : OUT(f.home, 110),
@@ -7211,7 +7280,7 @@ function folkTick(dt){
   const h = hourNow();
   for (const f of FOLK) {
     if (wmDriven(f.id)) continue;
-    if ((f.re -= dt) <= 0) { f.re = .8 + Math.random() * .6; const pl = FOLK_KINDS[f.def.kind](h, f); if (pl.k !== f.key) { f.key = pl.k; f.plan = pl; folkGo(f, pl); } }
+    if ((f.re -= dt) <= 0) { f.re = .8 + Math.random() * .6; const pl = (!hayClases() && FOLK_LIBRE[f.def.kind] || FOLK_KINDS[f.def.kind])(h, f); if (pl.k !== f.key) { f.key = pl.k; f.plan = pl; folkGo(f, pl); } }
     if (f.where !== 'out') continue;
     if (f.talkT > TT) { f.moving = false; continue; }
     if (f.route.length) {
@@ -8938,7 +9007,7 @@ function wmFollowTick(){
 /* ---------- the test goals (17, from the design document): each one sets the scene up and hands a goal to someone ---------- */
 const hold = (k, at) => { agentOf(k).hold = at; const b = wmBody(k); b.where = 'out'; b.x = at[0]; b.y = at[1]; b.sit = false; };
 const atOut = (k, x, y) => { const b = wmBody(k); if (b.where !== 'out' && k !== 'ana') b.where = 'out'; if (k === 'ana' && game.scene !== 'out') goOut(); b.x = x; b.y = y; b.nav = null; };
-const setSeason = n => { game.seasonShift = ((n - Math.floor(dayT / 2)) % 4 + 4) % 4; S = n; };
+const setSeason = n => { game.seasonShift = ((n - Math.floor(dayT / DIAS_ESTACION)) % 4 + 4) % 4; S = n; };
 const cowLoose = (id, x, y) => { const c = ANIM[id]; c.state = 'loose'; c.area = areaAt(x, y) || null; c.x = x; c.y = y; c.ledBy = null; c.owner = ANIMALS[id].owner; c.where = 'out'; c.goal = null; c.nav = null; };
 const cowHome = id => { const c = ANIM[id], A = AREAS[ANIMALS[id].home]; c.state = 'home'; c.area = ANIMALS[id].home; c.x = A.x + A.w / 2; c.y = A.y + A.h / 2; c.ledBy = null; c.owner = ANIMALS[id].owner; c.where = 'out'; };
 // (in a chain test, someone else waits where the chain needs her, until the scene has happened)
@@ -8948,7 +9017,7 @@ const WM_TESTS = [
   { who: 'ana', text: 'Conseguir una cinta para el pelo (trueque)', setup: () => { dayAt(9); setSeason(1); game.inv.cinta = 0; game.eggDay = today(); for (const u of bushes) if (dist(u.x, u.y, WP.arbustos[0], WP.arbustos[1]) < 260) u.berries = 3; atOut('ana', GG.x, GG.y + 90); }, goal: () => G.tener('ana', 'cinta', 1) },
   { who: 'ana', text: 'Regalarle a Marilla algo que le guste', setup: () => { dayAt(10); setSeason(0); BEDS[0].stage = 3; BEDS[1].stage = 3; atOut('ana', GG.x + 200, GG.y + 120); }, goal: () => G.regalo_gusto('ana', 'marilla') },
   { who: 'ana', text: 'Reconciliarse con Diana', setup: () => { dayAt(11); game.fond.diana = 1; game.wm.ofensa['diana>ana'] = 'licor'; delete game.wm.facts['disc:diana>ana:' + today()]; diana.follow = false; atOut('diana', OS.x - 60, OS.y + 80); atOut('ana', GG.x, GG.y + 90); }, goal: () => G.reconciliar('ana', 'diana') },
-  { who: 'ana', text: 'Ir a clases: llegar a la escuela antes de las 9 y quedarse hasta el mediodía', setup: () => { dayAt(8.2); atOut('ana', GG.x, GG.y + 90); }, goal: () => G.estar_en('ana', 'escuela', 9, CLASES_FIN) },
+  { who: 'ana', text: 'Ir a clases: llegar a la escuela antes de las 9 y quedarse hasta el mediodía', setup: () => { dayAt(8.2); setSeason(0); atOut('ana', GG.x, GG.y + 90); }, goal: () => G.estar_en('ana', 'escuela', 9, CLASES_FIN) },
   { who: 'ana', text: 'Devolver la vaca escapada del Sr. Harrison', setup: () => { dayAt(10); game.inv.cuerda = 0; const A = AREAS.avena; cowLoose('jersey', A.x + A.w / 2, A.y + A.h / 2); atOut('ana', GG.x, GG.y + 90); }, goal: () => G.vaca_en('jersey', 'potrero') },
   { who: 'matthew', text: 'Matthew le trae azúcar a Marilla', setup: () => { dayAt(10); wmInv('matthew').dolares = 5; wmInv('marilla').azucar = 0; atOut('matthew', BARN.x + 60, BARN.y + 60); }, goal: () => G.tener('marilla', 'azucar', 1) },
   { who: 'matthew', text: 'Matthew encierra a Dolly', setup: () => { dayAt(10); wmInv('matthew').cuerda = 0; cowLoose('dolly', GG.x + 420, GG.y + 260); atOut('matthew', BARN.x + 60, BARN.y + 60); }, goal: () => G.vaca_en('dolly', 'corral') },
@@ -8971,7 +9040,7 @@ const WM_TESTS = [
     goals: () => [[G.tener('ana', 'cinta', 1), 'conseguir una cinta para el pelo'], [G.regalo_gusto('ana', 'diana'), 'regalarle a Diana algo que le guste'], [G.tener('marilla', 'azucar', 1), 'llevarle azúcar a Marilla']] },
   { who: 'matthew', text: 'Matthew encierra a Dolly y, ocupado, acepta además traerle huevos a Ana', setup: () => { dayAt(9); game.eggDay = -1; game.inv.huevos = 0; wmInv('matthew').cuerda = 0; cowLoose('dolly', GG.x + 520, GG.y + 300); atOut('ana', GG.x + 300, GG.y + 140); atOut('matthew', GG.x + 200, GG.y + 150); },
     goals: () => [[G.vaca_en('dolly', 'corral'), 'encerrar a Dolly']], ask: { f: 'traer', to: 'matthew', item: 'huevos', n: 6 } },
-  { who: 'ana', text: 'Ana quiere una cinta, pero antes tiene clases (de 9 a 12)', setup: () => { dayAt(8.1); game.eggDay = -1; game.inv.huevos = 0; game.inv.cinta = 0; atOut('ana', GG.x, GG.y + 90); },
+  { who: 'ana', text: 'Ana quiere una cinta, pero antes tiene clases (de 9 a 12)', setup: () => { dayAt(8.1); setSeason(0); game.eggDay = -1; game.inv.huevos = 0; game.inv.cinta = 0; atOut('ana', GG.x, GG.y + 90); },
     goals: () => [[G.tener('ana', 'cinta', 1), 'conseguir una cinta para el pelo'], [G.estar_en('ana', 'escuela', 9, CLASES_FIN), 'ir a clases (de 9 a 12)']] },
   { who: 'ana', text: 'Regalar una tarta de bayas en invierno (imposible)', setup: () => { dayAt(10); setSeason(3); game.inv.bayas = 0; game.inv.tarta = 0; atOut('ana', GG.x, GG.y + 90); }, goal: () => G.regalar_cosa('ana', 'tarta') },
   // --- from the book (docs/ACCIONES_DEL_LIBRO.md): the first 17 new actions
@@ -8985,7 +9054,7 @@ const WM_TESTS = [
   { who: 'ana', text: 'Gilbert ya se disculpó: Ana lo perdona y hacen las paces (cap. 38)', setup: () => { dayAt(16); game.wm.ofensa['ana>gilbert'] = 'zanahorias'; game.wm.rel['ana>gilbert'] = 0; realR.setFact('disc:ana>gilbert'); atOut('gilbert', PLAY.aldea[0] + 300, PLAY.aldea[1] + 120); }, goal: () => G.paces('ana', 'gilbert') },
   { who: 'ana', text: 'El Sr. Harrison está enfermo: Ana lo cuida con jarabe de ipecacuana (cap. 18)', setup: () => { dayAt(11); game.wm.sick = ['harrison']; game.inv.jarabe = 0; delete game.wm.facts['medico:harrison:' + today()]; const h = PEOPLE.harrison; h.where = 'hh'; h.x = KIT.w / 2; h.y = KIT.h / 2; }, goal: () => G.sano('harrison') },
   { who: 'ana', text: 'El Sr. Harrison está enfermo y no queda jarabe en casa: Ana va a buscar al médico (cap. 18)', setup: () => { dayAt(11); game.wm.sick = ['harrison']; game.inv.jarabe = 0; game.wm.sinJarabe = true; const h = PEOPLE.harrison; h.where = 'hh'; h.x = KIT.w / 2; h.y = KIT.h / 2; atOut('medico', PLAY.aldea[0] + 40, PLAY.aldea[1] + 20); }, goal: () => G.sano('harrison') },
-  { who: 'ana', text: 'Ana estudia la lección y la recita en la escuela (cap. 17, 24)', setup: () => { dayAt(9); game.wm.know.ana = (game.wm.know.ana || []).filter(f => f !== 'leccion'); delete game.wm.facts['recito:ana:' + today()]; }, goal: () => G.recito('ana') },
+  { who: 'ana', text: 'Ana estudia la lección y la recita en la escuela (cap. 17, 24)', setup: () => { dayAt(9); setSeason(0); game.wm.know.ana = (game.wm.know.ana || []).filter(f => f !== 'leccion'); delete game.wm.facts['recito:ana:' + today()]; }, goal: () => G.recito('ana') },
   { who: 'ana', text: 'Ana dice sus oraciones (cap. 7)', setup: () => { dayAt(20); delete game.wm.facts['rezo:ana:' + today()]; }, goal: () => G.rezo('ana') },
   { who: 'marilla', text: 'Marilla cose un vestido con mangas abullonadas (le piden la tela a la tienda) (cap. 25)', setup: () => { dayAt(10); wmInv('marilla').tela = 0; wmInv('marilla').vestido = 0; wmInv('matthew').tela = 0; PEOPLE.marilla.where = 'gg'; atOut('matthew', BARN.x + 60, BARN.y + 60); }, goal: () => G.tener('marilla', 'vestido', 1) },
   { who: 'ana', text: 'Ana adorna su sombrero con flores (cap. 11)', setup: () => { dayAt(10); setSeason(0); BEDS[0].stage = 3; BEDS[1].stage = 3; game.inv.ramo = 0; delete game.wm.facts['adorno:ana:' + today()]; }, goal: () => G.adornado('ana') },
@@ -9016,7 +9085,7 @@ const WM_TESTS = [
   { who: 'marilla', cadena: true, text: 'Marilla lleva a Ana a La Cuesta del Huerto y Ana conoce a Diana (cap. 8 y 12)', setup: () => { if (today() < 1) dayT += 1; dayAt(14.5); const H = dlgHechos(); for (const f of ['conocidas_diana', 'barry_presenta', 'pide_amiga']) delete H[f]; for (const f of Object.keys(game.wm.perm)) if (/^cuaderno:(conocer_diana|amigas)$|^amigas:ana&diana$/.test(f)) delete game.wm.perm[f]; H.quiere_amiga = today(); game.fond.diana = 0; delete game.wm.rel['ana>diana']; for (const k of Object.keys(dlgDichas())) if (/^(barry_recibe|conoce_diana|diana_por_casualidad)$/.test(k)) delete dlgDichas()[k]; const B = PEOPLE.barry; B.where = 'os'; B.x = KIT.w / 2; B.y = KIT.h / 2; atOut('diana', OS.x - 50, OS.y + 60); if (game.scene !== 'gg') goIn('gg'); const M = PEOPLE.marilla; M.where = 'gg'; M.x = STOVE.x + 60; M.y = STOVE.y + 60; },
     goal: () => ({ ...G.paseo('marilla', 'ana', 'h:os', 15), chat: null, sale: true, text: 'Marilla lleva a Ana a La Cuesta del Huerto' }), favors: [{ f: 'pasear', to: 'ana', dice: 'Ana, voy a La Cuesta del Huerto a devolverle un patrón a la Sra. Barry. Ven conmigo: así conoces a Diana. Y pórtate bien.' }] },
   // (more chains of the book, each from its door: what has to have happened before is set as happened)
-  { who: 'ana', cadena: true, text: '«¡Zanahorias!»: el primer día de Ana en la escuela, con Gilbert (cap. 15)', setup: () => { dayAt(10); const H = dlgHechos(); delete H.zanahorias; delete game.wm.ofensa['ana>gilbert']; delete dlgDichas().zanahorias; atOut('ana', SCHOOL_DOOR[0] + 60, SCHOOL_DOOR[1] + 90); },
+  { who: 'ana', cadena: true, text: '«¡Zanahorias!»: el primer día de Ana en la escuela, con Gilbert (cap. 15)', setup: () => { dayAt(10); setSeason(0); const H = dlgHechos(); delete H.zanahorias; delete game.wm.ofensa['ana>gilbert']; delete dlgDichas().zanahorias; atOut('ana', SCHOOL_DOOR[0] + 60, SCHOOL_DOOR[1] + 90); },
     goal: () => ({ ...G.estar_en('ana', 'escuela'), quedarMin: 15 }) },
   { who: 'ana', cadena: true, text: 'El broche de amatista de Marilla, antes del picnic (cap. 13, 14)', setup: () => { if (today() < 1) dayT += 1; dayAt(10); const H = dlgHechos(); delete H.broche; delete dlgDichas().broche; game.wm.perm['cuaderno:amigas'] = today(); H.conocidas_diana = today(); if (game.scene !== 'gg') goIn('gg'); const M = PEOPLE.marilla; M.where = 'gg'; M.x = STOVE.x + 60; M.y = STOVE.y + 60; },
     goal: () => ({ ...G.estar_en('ana', 'cocina'), quedarMin: 15 }) },
@@ -9028,6 +9097,9 @@ const WM_TESTS = [
     goal: () => G.visitar('sraallan', 'marilla'), tambien: () => [['ana', quedarHasta('ana', 'cocina', 'pastel_linimento'), 'esperar a la Sra. Allan en la cocina']] },
   { who: 'ana', cadena: true, text: 'La cama del cuarto de huéspedes y la tía Josephine (cap. 19)', setup: () => { if (today() < 3) dayT += 3; dayAt(16); const H = dlgHechos(); delete H.cama_josephine; delete H.prohibida; delete dlgDichas().cama_josephine; H.conocidas_diana = today() - 2; H.broche = today() - 2; game.wm.perm['cuaderno:amigas'] = today() - 2; diana.follow = false; diana.where = 'os'; diana.x = KIT.w / 2 + 40; diana.y = KIT.h / 2; atOut('ana', OS.x, OS.y + 90); },
     goal: () => ({ ...G.estar_en('ana', 'h:os'), quedarMin: 20 }), tambien: () => [['diana', quedarHasta('diana', 'h:os', 'cama_josephine'), 'esperar a Ana en su casa']] },
+  // (what is won little by little: the Queen's examination, the first day of summer, with 35 days of study)
+  { who: 'ana', cadena: true, hasta: 'examen', text: 'El examen de ingreso a Queen\'s, con lo estudiado (cap. 31, 32)', setup: () => { dayT = (Math.floor(dayT / DIAS_ESTACION) + 1) * DIAS_ESTACION; dayAt(8); setSeason(1); const H = dlgHechos(); for (const f of ['examen', 'queens', 'queens_primera']) delete H[f]; game.wm.perm['cuaderno:escuela'] = today(); game.wm.estudio = 35; if (game.scene !== 'gg') goIn('gg'); const M = PEOPLE.marilla; M.where = 'gg'; M.x = STOVE.x + 60; M.y = STOVE.y + 60; },
+    goal: () => ({ ...G.estar_en('ana', 'cocina'), quedarMin: 15 }) },
 ];
 /* ---------- the routines, made of goals: what each one does each day (from the book), handed to the planner at its
    hour, at most once a day. Low priority (1): what someone asks (2) or what has a deadline (3) goes first; with the
@@ -9035,6 +9107,7 @@ const WM_TESTS = [
    what the others ask of her by routine, only with 🤖 on (so as not to take her from the player). ---------- */
 let AGENDA_ON = true, agendaT = 0;
 const isSunday = () => today() % 7 === 6;
+const hayClases = () => !isSunday() && S !== 1;   // (no school on Sundays, nor in summer)
 const cowIn = (c, pen) => ANIM[c] && ANIM[c].state !== 'led' && areaAt(ANIM[c].x, ANIM[c].y) === pen;
 const AGENDA = [
   { who: 'matthew', from: 6, to: 9, label: 'dar de comer a los animales', goal: () => G.alimentados(['corral', 'gallinero']) },
@@ -9131,6 +9204,7 @@ function wmRunTest(i){
   close(); if (ana.goto) ana.goto = null; diana.follow = false; game.wm.sick = []; for (const f of Object.keys(game.wm.facts)) if (/^(pedido|intercede|disc|gusto|dio):/.test(f)) delete game.wm.facts[f]; game.seasonShift = 0; cowHome('dolly'); cowHome('jersey'); game.inv.cuerda = 0; for (const k of ['matthew', 'harrison', 'shearer']) delete game.wm.inv[k];
   if (PEOPLE.shearer.where !== 'away') { PEOPLE.shearer.where = 'away'; }
   WM_APPROACH = null; game.wm.sinJarabe = false; AGENDA_ON = false; if ($('wmagenda')) $('wmagenda').checked = false;
+  if (isSunday()) dayT += 1;   // (the test goals: on a weekday, with school)
   const keep = { scene: game.scene, x: ana.x, y: ana.y, dir: ana.dir, tx: toby.x, ty: toby.y, cx: cam.x, cy: cam.y };
   T.setup(); S = ((seasonCount() % 4) + 4) % 4;
   game.scene = keep.scene; ana.x = keep.x; ana.y = keep.y; ana.dir = keep.dir; ana.goto = null; toby.x = keep.tx; toby.y = keep.ty; cam.x = keep.cx; cam.y = keep.cy;   // (Ana where she was: no jumping to the test's start)
@@ -9387,21 +9461,47 @@ function cuadernoTick(dt){
   }
 }
 // the hint now: the last whose condition holds, or the plain one
-const cuadernoPista = m => [...m.pistas].reverse().find(([c]) => dlgCond(c, dlgCtx()))?.[1] || m.pista;
+const cuadernoPista = m => ([...m.pistas].reverse().find(([c]) => dlgCond(c, dlgCtx()))?.[1] || m.pista).replace('{estudio}', estudio()).replace('{dias_examen}', diasExamen());   // ({estudio}: how much she has studied; {dias_examen}: days until the examination)
 const cuadernoAntes = m => m.antes || m.requiere.filter(r => !cuadernoCumple(r)).map(r => { const t = cuadernoMeta(r)?.titulo; return t && t[0].toLowerCase() + t.slice(1); }).filter(Boolean).join(', ');
 function cuadernoPanel(open){
   const P = $('cua'); P.hidden = !open; if (!open) return;
   const vis = CUADERNO_METAS.filter(m => !m.oculta || cuadernoHecho(m.id) || cuadernoAbierta(m)), n = vis.filter(m => cuadernoHecho(m.id)).length;
-  $('cuasub').textContent = n + ' de ' + vis.length + ' · ' + (n === vis.length ? '¡todo! Ana podría escribir un libro con esto.' : 'las que faltan tienen una pista; 🔒: todavía no');
+  $('cuasub').textContent = cuadernoFecha() + ' · ' + n + ' de ' + vis.length + ' · ' + (n === vis.length ? '¡todo! Ana podría escribir un libro con esto.' : 'las que faltan tienen una pista; 🔒: todavía no');
   $('cualist').innerHTML = CUADERNO.map(g => '<h4>' + esc(g.nombre) + '</h4>' + g.metas.filter(m => !m.oculta || cuadernoHecho(m.id) || cuadernoAbierta(m)).map(m => {   // (a hidden goal: once it opens)
     const d = cuadernoHecho(m.id), abierta = cuadernoAbierta(m);
     return d ? `<div class="cm hecha"><b>✓ ${esc(m.titulo)}</b><span>el día ${d}</span></div>`
       : abierta ? `<div class="cm"><b>○ ${esc(m.titulo)}</b><small>${esc(cuadernoPista(m))}</small></div>`
       : `<div class="cm cerrada"><b>🔒 ${esc(m.titulo)}</b><small>Antes: ${esc(cuadernoAntes(m))}.</small></div>`;
-  }).join('')).join('');
+  }).join('')).join('') + cuadernoAmigos();
+}
+// the date, as Ana would write it: «martes, día 3 de la primavera»
+const cuadernoFecha = () => ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'][today() % 7] + ', día ' + (today() % DIAS_ESTACION + 1) + ' de ' + (S === 0 ? 'la ' : 'el ') + SEASONS[S].toLowerCase();
+// her friends: how much each one loves her (the hearts of 0 to 5), those she knows
+function cuadernoAmigos(){
+  const l = ['diana', 'marilla', 'matthew', 'sraallan', 'stacy', 'josephine', 'lynde', 'gilbert'].filter(k => (k !== 'diana' || conoceDiana()) && (k !== 'josephine' || dlgHechos().cama_josephine) && game.wm.rel?.[k + '>ana'] != null);
+  return l.length ? '<h4>Quiénes la quieren</h4>' + l.map(k => { const r = Math.max(0, Math.min(5, Math.round(relGetW(k, 'ana')))); return `<div class="cm"><b>${esc(wmName(k).replace(/^(el|la) /, m => m[0].toUpperCase() + m.slice(1)))}</b><small>${'♥'.repeat(r) + '♡'.repeat(5 - r)}</small></div>`; }).join('') : '';
 }
 // a game that already had Ana and Diana as friends (before they had to meet): they know each other
 if (game.wm?.perm?.['amigas:ana&diana'] && !dlgHechos().conocidas_diana) dlgHecho('conocidas_diana');
+
+/* ---------- what is won little by little: school and study (docs/LARGO_PLAZO.md) ----------
+   As simple as can be: one number, game.wm.estudio. A day of class at the school (an hour inside, on a day with school)
+   is one more; a day she studies the lesson (twenty minutes) is one more. The Queen's examination is on the first day of
+   each summer; who goes, and how it goes, comes from that number (the scenes examen_* of the script; the notebook says
+   how much she has studied and how many days are left). */
+const ESTUDIO_EXAMEN = 10, ESTUDIO_ENTRA = 30, ESTUDIO_PRIMERA = 60;   // (to be sent to it; to get in; first, with Gilbert)
+const estudio = () => game.wm?.estudio || 0;
+// days until the next first day of summer (the examination)
+function diasExamen(){ const d = today(), y = DIAS_ESTACION * 4, s = ((1 - game.seasonShift) % 4 + 4) % 4 * DIAS_ESTACION, n = Math.floor((d - s) / y) * y + s; return (n >= d ? n : n + y) - d; }
+let estudioT = 0;
+function estudioTick(dt){
+  if ((estudioT -= dt) > 0 || !game.wm) return; estudioT = 5;
+  const E = game.wm.estudioHoy?.d === today() ? game.wm.estudioHoy : (game.wm.estudioHoy = { d: today(), clase: 0, casa: 0, dado: {} });
+  const sube = (k, min, txt) => { if (!E.dado[k] && E[k] >= M(min)) { E.dado[k] = true; game.wm.estudio = estudio() + 1; logEv(txt, []); } };
+  const h = hourNow();
+  if (hayClases() && h >= 9 && h < 15.5 && wmScene('ana') === 'es') { E.clase += 5; sube('clase', 60, 'Ana pasó el día en clases.'); }
+  const A = (AGENTS.ana || game.playAct)?.acting; if (A?.v === 'estudiar') { E.casa += 5; sube('casa', 20, 'Ana estudió la lección.'); }
+}
 
 /* ---------- the map: Avonlea drawn on a sheet of paper, with where everyone is ---------- */
 let mapBase = null;

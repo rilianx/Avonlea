@@ -123,6 +123,11 @@ const fieldNear = ([x, y]) => { let best = null, bd = 1e9; for (const f of FIELD
 const caminoSeco = (x0, y0, x1, y1) => { for (let i = 1; i <= 8; i++) { const x = x0 + (x1 - x0) * i / 8, y = y0 + (y1 - y0) * i / 8; if (inLake(x, y) || inBrook(x, y) || inSea(x, y)) return false; } return true; };
 const IN = (at, room = 'in') => ({ k: room + ':' + at.map(Math.round), at, in: room, r: 0 });
 const OUT = (at, r = 90) => ({ k: 'out:' + at.map(Math.round), at, r });
+// a day with no classes (Sunday, summer): the children play, the teacher walks in the village
+const FOLK_LIBRE = {
+  alumno: (h, f) => h < 8 || h >= 20.5 ? IN(f.home) : h < 17.6 ? OUT(PLAY[f.def.play] || PLAY.aldea, 170) : OUT(f.home, 110),
+  maestro: (h, f) => h < 9 || h >= 21 ? IN(f.home) : h < 17 ? OUT(PLAY.aldea, 140) : OUT(f.home, 60),
+};
 // what each kind does at each hour (h: 6 .. 30)
 const FOLK_KINDS = {
   alumno: (h, f) => h < 7.4 || h >= 20.5 ? IN(f.home) : h < 8.4 ? OUT(f.home, 110) : h < 9 || (h >= 10.5 && h < 10.9) || (h >= 12 && h < 13) ? OUT(YARD, 170) : h < 15.5 ? IN(SCHOOL_DOOR, 'es') : h < 17.6 ? OUT(PLAY[f.def.play] || YARD, 170) : OUT(f.home, 110),
@@ -171,7 +176,7 @@ function folkTick(dt){
   const h = hourNow();
   for (const f of FOLK) {
     if (wmDriven(f.id)) continue;
-    if ((f.re -= dt) <= 0) { f.re = .8 + Math.random() * .6; const pl = FOLK_KINDS[f.def.kind](h, f); if (pl.k !== f.key) { f.key = pl.k; f.plan = pl; folkGo(f, pl); } }
+    if ((f.re -= dt) <= 0) { f.re = .8 + Math.random() * .6; const pl = (!hayClases() && FOLK_LIBRE[f.def.kind] || FOLK_KINDS[f.def.kind])(h, f); if (pl.k !== f.key) { f.key = pl.k; f.plan = pl; folkGo(f, pl); } }
     if (f.where !== 'out') continue;
     if (f.talkT > TT) { f.moving = false; continue; }
     if (f.route.length) {

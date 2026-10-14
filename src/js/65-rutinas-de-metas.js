@@ -4,6 +4,7 @@
    what the others ask of her by routine, only with 🤖 on (so as not to take her from the player). ---------- */
 let AGENDA_ON = true, agendaT = 0;
 const isSunday = () => today() % 7 === 6;
+const hayClases = () => !isSunday() && S !== 1;   // (no school on Sundays, nor in summer)
 const cowIn = (c, pen) => ANIM[c] && ANIM[c].state !== 'led' && areaAt(ANIM[c].x, ANIM[c].y) === pen;
 const AGENDA = [
   { who: 'matthew', from: 6, to: 9, label: 'dar de comer a los animales', goal: () => G.alimentados(['corral', 'gallinero']) },
@@ -100,6 +101,7 @@ function wmRunTest(i){
   close(); if (ana.goto) ana.goto = null; diana.follow = false; game.wm.sick = []; for (const f of Object.keys(game.wm.facts)) if (/^(pedido|intercede|disc|gusto|dio):/.test(f)) delete game.wm.facts[f]; game.seasonShift = 0; cowHome('dolly'); cowHome('jersey'); game.inv.cuerda = 0; for (const k of ['matthew', 'harrison', 'shearer']) delete game.wm.inv[k];
   if (PEOPLE.shearer.where !== 'away') { PEOPLE.shearer.where = 'away'; }
   WM_APPROACH = null; game.wm.sinJarabe = false; AGENDA_ON = false; if ($('wmagenda')) $('wmagenda').checked = false;
+  if (isSunday()) dayT += 1;   // (the test goals: on a weekday, with school)
   const keep = { scene: game.scene, x: ana.x, y: ana.y, dir: ana.dir, tx: toby.x, ty: toby.y, cx: cam.x, cy: cam.y };
   T.setup(); S = ((seasonCount() % 4) + 4) % 4;
   game.scene = keep.scene; ana.x = keep.x; ana.y = keep.y; ana.dir = keep.dir; ana.goto = null; toby.x = keep.tx; toby.y = keep.ty; cam.x = keep.cx; cam.y = keep.cy;   // (Ana where she was: no jumping to the test's start)
