@@ -145,14 +145,14 @@ function ambMenu(who, text, s){
   }
   opts.push(...taskOptions(who));
   for (const [k, [name]] of Object.entries(GIFTS)) if (game.inv[k] > 0) opts.push(['Regalar ' + name, () => give(who, k)]);
-  opts.push(...walkOption(who));
+  opts.push(...convOpciones(who), ...walkOption(who));
   if (!req && s.turns < 4) opts.push(['Seguir conversando', () => aiTalk(who, `(Ana sigue conversando con ${NAMES[who]}; lo último: ${s.lines.slice(-3).map(l => nameOf(l.q) + ': «' + l.t + '»').join(' ')})`, s.turns)]);
-  opts.push(['Adiós', close]);
+  opts.push([cierre(who), close]);
   say(who, req ? '📜 ' + NAMES[who] + ' te pide: ' + taskText(req) : '¿Qué quieres hacer?', opts);
 }
 function aiTalk(who, note, turns = 0){
   const id = amb.tok = Math.random(), parts = chatGroup(who);
-  say(who, NAMES[who] + ' está pensando…', [['Adiós', close]], true);
+  say(who, NAMES[who] + ' está pensando…', [['Mejor otro día', close]], true);
   sceneAsk(parts, note).then(s => {
     if (amb.tok !== id || game.talk?.who !== who) return;
     if (!s.lines.length) throw new Error('escena vacía');
@@ -197,6 +197,7 @@ function ambUpdate(dt){
   if (!best) return;
   { const L = bd < 90 && cadenaEncuentro(best); if (L) { amb.mute[best] = TT + 110; amb.seen[best] = true; sceneStart({ parts: [best], lines: L, out: {}, scene: game.scene, resumen: '' }, false); return; } }   // (two who have not met: they meet, as in the book)
   if (best === 'diana' && !dianaAmiga()) return;   // (no friend's greeting from one she does not know yet)
+  { const C = bd < 90 && !activeGoals(AGENTS[best] || { goals: [] }).length && Math.random() < .3 && convDisponibles(best)[0]; if (C) { amb.mute[best] = TT + 110; amb.seen[best] = true; conversar(C); return; } }   // (now and then, one of the conversations there are with them, by itself)
   if (!aiReady()) {   // (without the AI: just a word from them, from the written lines)
     if (bd < 90) { const l = (game.wm?.sick || []).includes(best) ? ENFERMO_LINES : LINES[best], u = l.length > 1 ? l.filter(x => x !== amb.ultima?.[best]) : l, t = u[Math.floor(Math.random() * u.length)]; (amb.ultima ||= {})[best] = t;   // (not the same line twice in a row)
     amb.mute[best] = TT + 110; amb.seen[best] = true; sceneStart({ parts: [best], lines: [{ q: best, t }], out: {}, scene: game.scene, resumen: '' }, false); }

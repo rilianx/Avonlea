@@ -1,0 +1,456 @@
+# Las conversaciones de Ana con los suyos (lo lee el juego al empezar). Inspiradas en el libro, largas y cortas.
+# Son escenas del guion (el mismo formato: docs/ESCENAS.md, docs/MOTOR.md), pero no se disparan solas por lugar:
+# están disponibles cuando se cumplen sus condiciones, sobre todo la cercanía (el afecto de esa persona hacia Ana),
+# y se tienen desde el menú de la persona («💬 Conversar: …»), o a veces solas, si Ana está cerca y libre.
+# Con cada persona, como mucho una conversación por día. Cada una se tiene una vez.
+#
+# Campos, además de los del guion:
+#   con: con quién es (marilla, matthew, diana, lynde, barry, harrison…)
+#   tema: cómo aparece en el menú (lo que Ana quiere hablar)
+# Las que marcan un paso en la relación suman afecto («al_terminar: suma afecto:marilla:ana 1»); otras, una
+# habilidad («al_terminar: suma letras:ana 1»). El afecto de cada uno hacia Ana empieza en 2 (de 0 a 5).
+
+# ====================================== Marilla ======================================
+
+=== conv_marilla_e ===
+con: marilla
+tema: Explicarle por qué es «Ana con e»
+si: afecto:marilla:ana>=2
+---
+ana: Marilla, si me va a llamar Ana, ¿podría llamarme Ana con e?
+marilla: ¿Qué diferencia hay, si se pronuncia igual?
+ana: ¡Oh, mucha! Se ve tanto más bonito. Cuando oye un nombre, ¿no lo ve escrito en su cabeza, como impreso? Yo sí. A-n-a se ve horrible, pero A-n-n-e… se ve tan distinguido.
+marilla: (Marilla aprieta los labios, pero casi sonríe.) Está bien. Ana con e, entonces.
+
+=== conv_marilla_oraciones ===
+con: marilla
+tema: Confesarle que nunca aprendió a rezar
+si: afecto:marilla:ana>=2
+al_terminar: suma afecto:marilla:ana 1
+---
+ana: Marilla… tengo que confesarle algo. Nunca he dicho mis oraciones. La Sra. Thomas decía que Dios me había hecho el pelo rojo a propósito, y desde entonces no me interesó mucho.
+marilla: (Marilla se queda de una pieza.) Mientras vivas bajo mi techo, Ana, vas a rezar. Todas las noches, junto a la cama.
+ana: Lo haré, si usted quiere. Pero ¿qué tengo que decir?
+marilla: Dale gracias a Dios por lo que tienes, y pídele humildemente lo que quieres.
+ana: (Ana lo piensa con mucha seriedad.) Entonces le voy a dar gracias por el Camino Blanco de las Delicias y el Lago de las Aguas Brillantes. Y le voy a pedir quedarme en Tejas Verdes… y ser bonita cuando sea grande.
+marilla: (Marilla tiene que darse vuelta para que Ana no la vea reír.) Bueno… es un comienzo.
+
+=== conv_marilla_hablar ===
+con: marilla
+tema: Contarle todo lo que imaginó hoy
+si: afecto:marilla:ana>=2
+---
+ana: Marilla, hoy imaginé que el arroyo era un río de plata que llevaba cartas a la reina, y que yo era la mensajera, y…
+marilla: Ana, hablas demasiado. ¿Por qué no te quedas callada un rato?
+ana: Lo intento, Marilla, de verdad. Pero las cosas se me amontonan adentro y tienen que salir. ¿Prefiere que me calle del todo?
+marilla: (Marilla suspira.) No he dicho eso. Habla… pero de vez en cuando, piensa antes.
+
+=== conv_marilla_errores ===
+con: marilla
+tema: Decirle algo que pensó sobre el día de mañana
+si: afecto:marilla:ana>=2, dia_juego:3
+al_terminar: suma letras:ana 1
+---
+ana: Marilla, ¿no es bonito pensar que mañana es un día nuevo, sin ningún error todavía?
+marilla: Te garantizo que vas a cometer varios antes de la noche.
+ana: Sí, ya lo sé. Pero ¿se ha dado cuenta de algo alentador? Nunca cometo el mismo error dos veces.
+marilla: No sé de qué sirve eso, si siempre estás inventando errores nuevos.
+ana: Bueno, alguna vez se me tendrán que acabar. Es una idea muy consoladora.
+
+=== conv_marilla_por_que ===
+con: marilla
+tema: Preguntarle por qué se quedaron con ella
+si: afecto:marilla:ana>=3
+al_terminar: suma afecto:marilla:ana 1
+---
+ana: Marilla… ¿por qué se quedaron conmigo, si querían un niño?
+marilla: (Marilla deja la costura.) Matthew lo quiso desde que te vio en la estación. Y yo…
+ana: ¿Y usted?
+marilla: Yo pensé que alguien tenía que hacerse cargo de ti. Y que nadie lo haría mejor que yo… aunque no lo parezca.
+ana: Oh, Marilla. Voy a ser tan buena que nunca se va a arrepentir. Bueno… voy a intentarlo con todas mis fuerzas.
+marilla: Con eso basta.
+
+=== conv_marilla_vestidos ===
+con: marilla
+tema: Hablarle de las mangas abullonadas
+si: afecto:marilla:ana>=3
+---
+ana: Marilla, los vestidos que me hizo son muy… prácticos. Pero ¿no podría tener uno, solo uno, con mangas abullonadas?
+marilla: Las mangas abullonadas son ridículas. Parecen globos.
+ana: Lo sé. Pero preferiría parecer ridícula como todas que práctica yo sola.
+marilla: (Marilla resopla.) Los vestidos sencillos son para niñas sensatas. Ya veremos qué niña eres.
+
+=== conv_marilla_cocina ===
+con: marilla
+tema: Pedirle que le enseñe a cocinar
+si: afecto:marilla:ana>=3
+al_terminar: suma granja:ana 1
+---
+ana: Marilla, ¿me enseña a hacer un pastel? Uno de verdad, no de mi imaginación.
+marilla: Primero, a medir bien. Una taza es una taza, no «más o menos una taza».
+ana: (Ana mide la harina con una seriedad solemne.) Una taza. Exactamente una. Ni un granito más.
+marilla: Y no te pongas a soñar mientras se cuece, que se te quema.
+ana: Le prometo vigilarlo con los ojos y con el alma, Marilla.
+
+=== conv_marilla_diana ===
+con: marilla
+tema: Contarle cómo es Diana
+si: afecto:marilla:ana>=3, hecho:conocidas_diana, !hecho:prohibida
+---
+ana: Marilla, Diana es la amiga más perfecta del mundo. Tiene los ojos negros y la risa como un arroyo, y le gustan las mismas cosas que a mí. Bueno, casi.
+marilla: Me alegro. Pero no la canses con tus discursos.
+ana: Ella dice que le encantan mis discursos. ¡Me lo juró!
+marilla: (Marilla mueve la cabeza.) Entre las dos van a terminar en un libro.
+
+=== conv_marilla_genio ===
+con: marilla
+tema: Preguntarle cómo se controla el genio
+si: afecto:marilla:ana>=4, dia_juego:10
+al_terminar: suma afecto:marilla:ana 1
+---
+ana: Marilla, ¿usted también se enojaba así cuando era chica? ¿Como yo, que me sube todo a la cara de golpe?
+marilla: Tenía mi genio, sí. Pero aprendí que lo que se dice con rabia no se puede desdecir.
+ana: Es que cuando me dicen «zanahoria» o «flaca», algo se me enciende adentro, como una estufa.
+marilla: Entonces cuenta hasta diez antes de abrir la boca. Y si a los diez sigues ardiendo, cuenta hasta cien.
+ana: ¡Hasta cien! Para entonces ya me habré olvidado de lo que iba a decir.
+marilla: Esa es la idea.
+
+=== conv_marilla_queens ===
+con: marilla
+tema: Hablarle de ir a Queen's
+si: afecto:marilla:ana>=4, estudio:ana>=20, dia_juego:10
+al_terminar: suma estudio:ana 1
+---
+ana: Marilla, la Srta. Stacy dice que podría dar el examen de Queen's. Pero cuesta tanto…
+marilla: Matthew y yo lo hablamos. Si quieres ir, Ana, vas a ir. Una mujer tiene que poder ganarse la vida, haya o no necesidad.
+ana: (Ana se queda sin palabras, cosa rara.) Oh, Marilla… voy a estudiar como nunca nadie ha estudiado.
+marilla: No te enfermes estudiando. Con estudiar bien basta.
+
+=== conv_marilla_john ===
+con: marilla
+tema: Preguntarle por una foto vieja que encontró
+si: afecto:marilla:ana>=5, hecho:zanahorias, dia_juego:28
+al_terminar: suma afecto:marilla:ana 1
+---
+ana: Marilla, encontré una foto vieja en el cajón. Hay un muchacho muy guapo junto a usted. ¿Quién es?
+marilla: (Marilla toma la foto y se queda callada un rato largo.) John Blythe. El padre de Gilbert.
+ana: ¿El padre de Gilbert? ¿Y usted… y él…?
+marilla: Éramos muy buenos amigos. La gente decía que éramos novios. Nos peleamos, y yo no quise perdonarlo cuando me lo pidió. Quería castigarlo un poco.
+ana: ¿Y después?
+marilla: Después ya no volvió. (Marilla guarda la foto.) Siempre me he arrepentido un poco, Ana. No dejes que el orgullo te gane, como a mí.
+
+=== conv_marilla_quedarse ===
+con: marilla
+tema: Darle las buenas noches
+si: afecto:marilla:ana>=5, dia_juego:14, hora:19-23
+---
+ana: Buenas noches, Marilla.
+marilla: Buenas noches, Ana. (Marilla duda un momento.) Ana…
+ana: ¿Sí?
+marilla: Nada. Que me alegro de que te hayas quedado. Eso es todo. A la cama.
+ana: (Ana sube la escalera dando saltitos y no deja de sonreír hasta que se duerme.)
+
+# ====================================== Matthew ======================================
+
+=== conv_matthew_flores ===
+con: matthew
+tema: Mostrarle las flores que encontró
+si: afecto:matthew:ana>=2
+---
+ana: ¡Matthew! Mire estas violetas. Las encontré junto al arroyo. ¿No le parecen como pedacitos de cielo que se cayeron?
+matthew: Bueno, pues… sí. Ahora que lo dices, sí.
+ana: Usted siempre me entiende. Es tan agradable hablar con alguien que entiende.
+matthew: (Matthew se pone colorado hasta las orejas, pero sonríe.)
+
+=== conv_matthew_nombres ===
+con: matthew
+tema: Contarle los nombres que les puso a los lugares
+si: afecto:matthew:ana>=2
+al_terminar: suma letras:ana 1
+---
+ana: Matthew, ¿sabía que la avenida de los manzanos se llama ahora el Camino Blanco de las Delicias? Y el estanque de los Barry, el Lago de las Aguas Brillantes.
+matthew: ¿Ah, sí? ¿Y quién les puso así?
+ana: ¡Yo! Me pareció que se merecían nombres más bonitos. ¿No le parece?
+matthew: Bueno, pues… me parece muy bien. Ya me acostumbraré.
+ana: Y el cerezo de mi ventana es la Reina de las Nieves. Ya lo conoce.
+matthew: Je. Le queda bien.
+
+=== conv_matthew_estrellas ===
+con: matthew
+tema: Sentarse con él a mirar el cielo
+si: afecto:matthew:ana>=3, hora:19-23
+al_terminar: suma afecto:matthew:ana 1
+---
+ana: (Ana se sienta junto a Matthew. Por la ventana se ven salir las primeras estrellas.)
+ana: Matthew, ¿usted cree que en alguna estrella hay una niña como yo, mirando para acá?
+matthew: Bueno, pues… podría ser. Yo nunca lo pensé.
+ana: Me gusta pensarlo. Así nadie está nunca del todo solo.
+matthew: (Matthew no dice nada. Pero se queda ahí con ella un buen rato, mirando las estrellas.)
+
+=== conv_matthew_mangas ===
+con: matthew
+tema: Contarle que todas tienen mangas abullonadas
+si: afecto:matthew:ana>=3
+---
+ana: Matthew… ¿se fijó en los vestidos de las otras niñas en la escuela dominical? Todas tienen mangas abullonadas. Todas, menos yo.
+matthew: ¿Mangas… abullonadas?
+ana: Infladas, aquí arriba, así. Son lo más elegante del mundo. Pero Marilla dice que son ridículas.
+matthew: (Matthew se rasca la barbilla y mira a Ana un buen rato, pensativo.) Hm. Ya veo.
+
+=== conv_matthew_defensa ===
+con: matthew
+tema: Contarle que Marilla la retó
+si: afecto:matthew:ana>=3
+---
+ana: Matthew, Marilla me retó otra vez. Dice que soy una cabeza de chorlito.
+matthew: Bueno, pues… Marilla es muy buena, ¿sabes? Muy buena. Pero tú… tú haz lo que ella dice, y cuando no puedas, me lo cuentas a mí.
+ana: ¿Usted cree que algún día voy a ser como ella quiere?
+matthew: Yo creo que ya eres bastante buena así. Pero no le digas que te lo dije.
+
+=== conv_matthew_huerta ===
+con: matthew
+tema: Pedirle que le enseñe a sembrar
+si: afecto:matthew:ana>=3
+al_terminar: suma granja:ana 1
+---
+ana: Matthew, ¿me enseña a sembrar las arvejas? Quiero hacerlo bien, no a mi manera.
+matthew: Bueno, pues… se hace un surco así, ¿ves? No muy hondo. Y una semilla cada tanto, no todas juntas.
+ana: (Ana pone las semillas una por una, contándolas en voz alta.) ¡Cuarenta y tres arvejitas que van a dormir hasta la primavera!
+matthew: Hasta la semana que viene, más bien. Je.
+
+=== conv_matthew_mujeres ===
+con: matthew
+tema: Preguntarle por qué le dan miedo las señoras
+si: afecto:matthew:ana>=3
+---
+ana: Matthew, ¿es verdad que a usted le dan miedo todas las mujeres?
+matthew: Bueno, pues… todas no. Marilla no. Y tú tampoco.
+ana: ¿Y la Sra. Lynde?
+matthew: (Matthew se queda pensando.) Un poco. Sí. Un poco.
+ana: ¡A mí también! Somos espíritus afines, Matthew.
+
+=== conv_matthew_queens ===
+con: matthew
+tema: Contarle cómo le fue en la escuela
+si: afecto:matthew:ana>=4, estudio:ana>=20, dia_juego:10
+al_terminar: suma estudio:ana 1
+---
+ana: Matthew, hoy saqué la mejor nota en composición. ¡Le gané a Gilbert Blythe!
+matthew: ¿Ah, sí? Bueno, pues… yo sabía. Siempre supe que eras lista.
+ana: La Srta. Stacy dice que podría ir a Queen's.
+matthew: Entonces vas a ir. No te preocupes por nada más. Yo me encargo.
+
+=== conv_matthew_docena ===
+con: matthew
+tema: Preguntarle si no habría preferido un niño
+si: afecto:matthew:ana>=5, dia_juego:28
+al_terminar: suma afecto:matthew:ana 1
+---
+ana: Matthew… si yo hubiera sido el niño que esperaban, le habría ayudado mucho más en la granja. ¿No habría preferido un niño?
+matthew: Bueno, pues… nunca quise a nadie más que a ti, Ana. Prefiero tenerte a ti que a una docena de muchachos.
+ana: (Ana no sabe qué decir. Le da un beso en la mejilla, y Matthew se pone rojo como un tomate.)
+matthew: Mi niña. Mi niña de la que estoy orgulloso.
+
+# ====================================== Diana ======================================
+
+=== conv_diana_pelo ===
+con: diana
+tema: Decirle cuánto le envidia el pelo
+si: afecto:diana:ana>=2, hecho:conocidas_diana, !hecho:prohibida
+---
+ana: Diana, ¿tú sabes lo que es tener el pelo rojo? Es una pena para toda la vida.
+diana: A mí me parece bonito tu pelo, Ana.
+ana: Eres demasiado buena. Daría cualquier cosa por tener el pelo negro como el tuyo, como el ala de un cuervo.
+diana: Y yo daría cualquier cosa por tener tu imaginación. Así estamos a mano.
+
+=== conv_diana_minnie ===
+con: diana
+tema: Preguntarle por su hermanita
+si: afecto:diana:ana>=2, hecho:conocidas_diana, !hecho:prohibida
+---
+ana: ¿Cómo está Minnie May?
+diana: Pesada, como siempre. Quiere ir a todas partes conmigo. Pero la quiero mucho.
+ana: Yo cuidé a tres pares de mellizos de la Sra. Hammond. Créeme que una hermanita es un regalo, aunque a veces no lo parezca.
+diana: ¡Tres pares! Ana, has vivido tanto.
+
+=== conv_diana_nombres ===
+con: diana
+tema: Inventar nombres para los lugares con ella
+si: afecto:diana:ana>=2, hecho:conocidas_diana, !hecho:prohibida
+al_terminar: suma letras:ana 1
+---
+ana: Diana, ese sendero entre los abedules necesita un nombre. ¿Qué te parece… el Paseo de los Enamorados?
+diana: ¡Ana! Pero si por ahí no pasea ningún enamorado.
+ana: Por eso. Hay que imaginarlos. Y el arroyo que lo cruza, el Burbujeo de las Dríadas.
+diana: (Diana se ríe.) Contigo hasta los charcos tienen nombre.
+ana: Los charcos también se lo merecen.
+
+=== conv_diana_escuela ===
+con: diana
+tema: Hablar de la escuela
+si: afecto:diana:ana>=2, hecho:conocidas_diana, !hecho:prohibida
+---
+diana: ¿Te gusta la escuela, Ana?
+ana: Me gusta aprender. Lo que no me gusta es la geometría. Es lo menos imaginativo que hay en el mundo.
+diana: A mí me cuesta la ortografía. Siempre me equivoco en las mismas palabras.
+ana: Hagamos un trato: yo te ayudo con la ortografía, y tú me ayudas con la geometría.
+diana: ¡Pero si yo tampoco entiendo la geometría!
+ana: Entonces la vamos a odiar juntas. Eso también une.
+
+=== conv_diana_bosque ===
+con: diana
+tema: Contarle historias del Bosque Encantado
+si: afecto:diana:ana>=3, hecho:conocidas_diana, !hecho:prohibida
+al_terminar: suma letras:ana 1
+---
+ana: Diana, ¿sabías que en el Bosque Encantado vive una dama blanca que llora por su amor perdido? Pasa a medianoche junto al arroyo.
+diana: (Diana abre mucho los ojos.) ¿De verdad?
+ana: Y un niño sin cabeza que camina detrás de los árboles. Y unos dedos fríos que te tocan el hombro…
+diana: ¡Ana! ¡Ya no voy a poder pasar por ahí!
+ana: (Ana mira hacia los abetos, que de pronto se ven muy oscuros.) Bueno… yo tampoco, ahora que lo pienso.
+
+=== conv_diana_vestidos ===
+con: diana
+tema: Hablar de vestidos y de la fiesta
+si: afecto:diana:ana>=3, hecho:conocidas_diana, !hecho:prohibida
+---
+diana: Para el concierto me voy a poner el vestido azul, el de las cintas.
+ana: Yo voy a ir con el de siempre. Pero voy a imaginar que es de seda rosa, con mangas abullonadas y un collar de perlas.
+diana: Te vas a ver bonita igual, Ana.
+ana: Con tu ayuda, y con mucha imaginación, quizás.
+
+=== conv_diana_club ===
+con: diana
+tema: Proponerle un club de cuentos
+si: afecto:diana:ana>=3, hecho:conocidas_diana, !hecho:prohibida
+al_terminar: suma letras:ana 1
+---
+ana: Diana, ¿y si hacemos un club de cuentos? Cada una escribe uno por semana y lo leemos juntas.
+diana: Yo no sé escribir cuentos, Ana.
+ana: Claro que sabes. Solo tienes que matar a alguien al final. Los cuentos tristes son los más bonitos.
+diana: (Diana se ríe.) ¡Ana! Bueno… puedo intentarlo. Pero tú me ayudas con los nombres.
+ana: Los nombres son lo más importante. Cordelia, Geraldine, Rosamunda…
+
+=== conv_diana_gilbert ===
+con: diana
+tema: Hablar de Gilbert Blythe
+si: afecto:diana:ana>=3, hecho:zanahorias, !hecho:prohibida
+---
+diana: Ana… Gilbert Blythe es el muchacho más guapo de la escuela, ¿no te parece?
+ana: ¡Diana Barry! Gilbert Blythe es la persona más odiosa de toda la isla. Nunca, nunca le voy a hablar.
+diana: Pero si fue solo una broma…
+ana: Una broma imperdonable. Hay cosas que no se olvidan, Diana. Se llevan en el alma.
+diana: (Diana suspira, pero no dice nada más.)
+
+=== conv_diana_tia ===
+con: diana
+tema: Reírse con ella de la noche de la tía Josephine
+si: afecto:diana:ana>=3, hecho:cama_josephine, !hecho:prohibida
+---
+diana: Ana, cada vez que me acuerdo de la cara de la tía Josephine… cuando saltamos sobre la cama…
+ana: (Las dos se ríen hasta que les duele la barriga.) ¡«Misericordia»! ¡Eso dijo!
+diana: Y ahora te quiere más que a mí. Dice que eres un espíritu afín.
+ana: Es que lo somos. Aunque no lo parezca a primera vista.
+
+=== conv_diana_secreto ===
+con: diana
+tema: Contarle un secreto
+si: afecto:diana:ana>=4, cuaderno:amigas, !hecho:prohibida, dia_juego:10
+al_terminar: suma afecto:diana:ana 1
+---
+ana: Diana, te voy a contar algo que nunca le he contado a nadie. Antes de venir a Tejas Verdes, tenía una amiga imaginaria. Se llamaba Katie Maurice y vivía en el vidrio de un armario.
+diana: ¿En el vidrio?
+ana: Era mi reflejo. Pero yo hacía como que era otra niña, en una sala encantada. Le contaba todo. Era la única con quien podía hablar.
+diana: (Diana le toma la mano.) Ya no la necesitas. Ahora me tienes a mí.
+ana: Ya lo sé. Por eso te lo cuento.
+
+=== conv_diana_futuro ===
+con: diana
+tema: Hablarle de Queen's
+si: afecto:diana:ana>=4, estudio:ana>=20, !hecho:prohibida, dia_juego:10
+---
+ana: Diana, la Srta. Stacy va a preparar a los que quieran dar el examen de Queen's. ¿Te vas a anotar?
+diana: Mamá no quiere. Dice que no hace falta que yo estudie para maestra.
+ana: (Ana se queda callada.) Entonces vamos a estar separadas…
+diana: Solo un tiempo. Y nos vamos a escribir todas las semanas. Todas.
+ana: Todas. Lo juro por el sol y la luna.
+
+=== conv_diana_casarse ===
+con: diana
+tema: Hablar de cuando sean grandes
+si: afecto:diana:ana>=5, cuaderno:amigas, !hecho:prohibida, dia_juego:28
+al_terminar: suma afecto:diana:ana 1
+---
+diana: Ana, ¿tú crees que nos vamos a casar algún día?
+ana: Tú sí, seguro. Con alguien muy guapo y muy bueno. Y yo voy a ser tu dama de honor, con mangas abullonadas.
+diana: ¿Y tú?
+ana: Yo voy a ser una solterona interesante, que escribe libros. O quizás no. Todavía no lo he decidido.
+diana: Prométeme que, pase lo que pase, vamos a seguir siendo amigas.
+ana: Mientras el sol y la luna existan, Diana. Ya lo juramos.
+
+# ====================================== La Sra. Lynde ======================================
+
+=== conv_lynde_ventana ===
+con: lynde
+tema: Preguntarle qué ve desde su ventana
+si: afecto:lynde:ana>=2
+---
+ana: Sra. Lynde, ¿qué ve desde su ventana, todo el día?
+lynde: Todo, niña. Quién pasa, a dónde va y, si me descuido, a qué. Nada se me escapa en Avonlea.
+ana: ¡Debe ser como leer un libro que nunca se acaba!
+lynde: (La Sra. Lynde se queda sin respuesta, cosa que no le pasa nunca.) Bueno… algo así.
+
+=== conv_lynde_pelo ===
+con: lynde
+tema: Hablarle de su pelo
+si: afecto:lynde:ana>=3
+al_terminar: suma afecto:lynde:ana 1
+---
+lynde: Ana, mírate. El pelo se te está oscureciendo. Casi castaño rojizo, diría yo.
+ana: (A Ana se le iluminan los ojos.) ¿De verdad, Sra. Lynde? ¿Castaño rojizo?
+lynde: Yo no digo cosas que no son. Cuando seas grande, vas a ser una muchacha bien parecida.
+ana: Sra. Lynde… la perdono por todo lo que me dijo cuando llegué. Por todo.
+lynde: (La Sra. Lynde parpadea.) Bueno. Gracias, supongo.
+
+=== conv_lynde_queens ===
+con: lynde
+tema: Contarle que quiere ir a Queen's
+si: afecto:lynde:ana>=3, estudio:ana>=50
+---
+lynde: Así que te vas a Queen's. Yo nunca creí que las mujeres necesitaran tanto estudio…
+ana: Pero, Sra. Lynde, ¿no sería bonito que hubiera maestras muy buenas en toda la isla?
+lynde: Hmm. Si son como tú, ruidosas pero buenas… quizás no sería tan malo. No le digas a nadie que dije eso.
+
+# ====================================== La Sra. Barry ======================================
+
+=== conv_barry_diana ===
+con: barry
+tema: Preguntarle si Diana puede salir
+si: afecto:barry:ana>=2, hecho:conocidas_diana, !hecho:prohibida
+---
+ana: Sra. Barry, ¿Diana puede salir a jugar un rato?
+barry: Un rato, sí. Pero que vuelva antes de que oscurezca, y nada de bosques encantados.
+ana: Se lo prometo, Sra. Barry. Solo bosques normales.
+
+=== conv_barry_cordial ===
+con: barry
+tema: Pedirle perdón otra vez por el vino
+si: afecto:barry:ana>=3, hecho:perdonada
+al_terminar: suma afecto:barry:ana 1
+---
+ana: Sra. Barry, nunca le dije bien cuánto sentí lo del vino de grosellas.
+barry: Ya pasó, Ana. Fui muy dura contigo. Lo que hiciste por Minnie May lo borró todo.
+ana: Desde entonces, cada vez que veo una botella roja me tiemblan las rodillas.
+barry: (La Sra. Barry se ríe, por primera vez con Ana.) A mí también, niña. A mí también.
+
+# ====================================== El Sr. Harrison ======================================
+
+=== conv_harrison_loro ===
+con: harrison
+tema: Preguntarle por su loro
+si: afecto:harrison:ana>=2
+---
+ana: Sr. Harrison, ¿es verdad que tiene un loro que dice malas palabras?
+harrison: Ginger dice lo que le da la gana. Como yo. Por eso nos llevamos bien.
+ana: ¿Puedo conocerlo?
+harrison: Si no te asustas con facilidad… Y no le hables de la vaca. Ni a mí tampoco.

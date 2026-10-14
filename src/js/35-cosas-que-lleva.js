@@ -48,9 +48,13 @@ function talk(who, again = false){
   const opts = [...taskOptions(who), ...cadenaOpciones(who)];
   for (const [k, [name]] of Object.entries(GIFTS)) if (game.inv[k] > 0) opts.push(['Regalar ' + name, () => give(who, k)]);
   if (!isQuieto(who) || who === 'marilla') opts.push(['🙏 Pedirle un favor', () => favorMenu(who)]);
-  opts.push(...walkOption(who), ['Adiós', close]);
+  opts.push(...convOpciones(who), ...walkOption(who), [cierre(who), close]);
   say(who, text, opts);
 }
+// the conversations there are with them today (src/datos/conversaciones.txt): at most two in the menu
+const convOpciones = who => convDisponibles(who).slice(0, 2).map(d => ['💬 ' + d.tema, () => { close(); conversar(d); }]);
+// closing the menu is not leaving: «Adiós» only when it is really a goodbye
+const cierre = who => 'Nada por ahora';
 function face(who){
   const p = PEOPLE[who];
   if (!p.sit) { p.dir = ana.x < p.x ? 3 : 1; if (Math.abs(ana.y - p.y) > Math.abs(ana.x - p.x)) p.dir = ana.y < p.y ? 0 : 2; }
@@ -59,6 +63,7 @@ function face(who){
 // walking with Diana (the same with or without AI: the game decides it, so it always works)
 function walkOption(who){
   if (who !== 'diana' || !dianaAmiga()) return [];
-  return [diana.follow ? ['Hasta mañana, Diana', () => { diana.follow = false; logEv('Ana y Diana terminaron su paseo.'); save(); say(who, '¡Hasta mañana, Ana! Que sueñes bonito.', [['Adiós', close]]); }]
+  const tarde = hourNow() >= 18;   // (a goodbye for the hour: «hasta mañana» only in the evening)
+  return [diana.follow ? [tarde ? 'Hasta mañana, Diana' : 'Nos vemos, Diana', () => { diana.follow = false; logEv('Ana y Diana terminaron su paseo.'); save(); say(who, tarde ? '¡Hasta mañana, Ana! Que sueñes bonito.' : '¡Nos vemos, Ana! Fue un paseo precioso.', [[tarde ? 'Buenas noches' : 'Hasta luego', close]]); }]
     : ['¿Paseamos juntas?', () => { diana.follow = true; game.fond.diana = Math.min(5, game.fond.diana + 1); logEv('Ana y Diana salieron a pasear juntas.'); save(); say(who, '¡Sí! Vamos, Ana, a donde tú quieras.', [['¡Vamos!', close]]); }]];
 }

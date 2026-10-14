@@ -47,6 +47,8 @@ Están en `src/datos/guion.txt`. Cada escena tiene:
 - Como mucho hay una grande por día (`RITMO_GRANDES`), así que dos grandes nunca caen la misma tarde.
 - Si una grande no puede pasar hoy, espera a mañana. Las que continúan una cadena ya empezada (salvar a Minnie May después del aviso) no se marcan, para que nada las corte.
 
+**Las conversaciones** (`src/datos/conversaciones.txt`): escenas de Ana con los suyos (Marilla, Matthew, Diana, la Sra. Lynde, la Sra. Barry, el Sr. Harrison), inspiradas en el libro, que dependen sobre todo de la cercanía (`afecto:marilla:ana>=4`). No se disparan por lugar: se tienen desde el menú de la persona (💬) o, a veces, solas, cuando Ana está cerca y libre y la otra persona no está ocupada. Como mucho una por día con cada uno. Las que marcan un paso en la relación suman afecto; otras, una habilidad.
+
 **Los hitos:** al cruzar un umbral de una habilidad de Ana, alguien se lo dice la próxima vez que se encuentran (con IA, una escena improvisada; sin IA, la línea escrita). Luego queda el hecho `hito_<habilidad>_<n>`.
 
 ## 3. El planificador (GOAP)

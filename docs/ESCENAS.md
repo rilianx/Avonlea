@@ -67,6 +67,7 @@ El silencio también se escribe: después de la Avenida hay escenas de una líne
 | `cuaderno:id` | Ana cumplió esa meta de su cuaderno |
 | `estudio:n` | Ana tiene al menos `n` días de estudio (`docs/LARGO_PLAZO.md`) |
 | `nombre:dueño>=n` | una cualidad comparada con un número: `granja:ana>=15`, `afecto:diana:ana>=4`, `estudio:gilbert<30` (también `>`, `<`, `<=`, `=`; ver `docs/MOTOR.md`) |
+| `hora:a-b` | es entre las `a` y las `b` horas (`hora:19-23`) |
 | `estacion:e` | es esa estación (`primavera`, `verano`, `otoño`, `invierno`) |
 | `dia_estacion:n` | es el día `n` de la estación (desde 1; cada estación dura 14 días) |
 | `sentada:quien` | esa persona está sentada |

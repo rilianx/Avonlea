@@ -41,6 +41,7 @@ function dlgCond(s, c){   // one condition of state, written as text
     case 'tomando_te': { const [x, y] = rest.split(':'); return AGENTS[x]?.acting?.v === 'tomar_te' && AGENTS[x].acting.k === y; }   // (x at the tea table with y)
     case 'afecto': { const [x, y, n] = rest.split(':'); return relGetW(x, y) >= +n; }   // (x cares for y at least n, of 0..5; the same as «afecto:x:y>=n»)
     case 'dias_desde': { const d = dlgHechos()[a] ?? cuadernoHecho(a); return typeof d === 'number' && today() + 1 - d >= +b; }   // (at least b days since a happened: a fact, or a goal of the notebook done)
+    case 'hora': { const [x, y] = a.split('-').map(Number), h = hourNow() % 24; return h >= x && h < y; }   // (the hour of the day: «hora:19-23»)
     case 'dia_juego': return today() + 1 >= +a;   // (the game has gone on at least so many days: 56, a year)
     case 'sentada': return !!wmBody(a)?.sit;   // (she has sat down: at the table, for the tea)
     case 'estudio': return cualidad('ana', 'estudio') >= +a;   // (the same as «estudio:ana>=n»)
@@ -140,7 +141,7 @@ class Dialogo {
   // (and, of two of the same importance, the most specific: the one that asks more of the moment, as in Valve's dialogue rules)
   get peso(){ return this.prioridad + (dlgProg()[this.id] ? .04 : 0) + dlgEspecificidad(this) * .001; }
   listo(x){
-    if (this.disparo === 'encuentro') return false;   // (these only when two of them meet: dlgNext)
+    if (this.disparo === 'encuentro' || this.disparo === 'conversar') return false;   // (these only when two of them meet: dlgNext; or when Ana talks with someone: conversar)
     if (this.dicha() || (this.repetir.cada && TT < (this.proxima || 0))) return false;
     if (this.grande && ritmoLleno()) return false;   // (the pacing: one big thing of the book a day)
     if (this.tipo === 'comentario' && this.prioridad > 0 && TT < (dlgComento[this.canal] || 0)) return false;   // (remarks, not one after another)
@@ -148,6 +149,7 @@ class Dialogo {
   }
   porque(x){   // why it is not said now (for the panel)
     if (this.disparo === 'encuentro') return 'cuando se encuentran';
+    if (this.disparo === 'conversar') return 'cuando Ana conversa con ' + this.con;
     if (this.dicha()) return 'ya dicha';
     if (this.grande && ritmoLleno()) return 'hoy ya pasó algo grande';
     if (this.repetir.cada && TT < (this.proxima || 0)) return 'otra vez en ' + Math.ceil(this.proxima - TT) + ' s';
@@ -266,6 +268,17 @@ function dlgGuion(txt){
 }
 const ESCENAS = dlgGuion(document.getElementById('guion')?.textContent || '');
 for (const c of ESCENAS) Dialogo.registrar(c);
+// the conversations of Ana with her own (src/datos/conversaciones.txt): scenes too, available by closeness, had from the
+// menu of the person (or now and then by themselves, when Ana is near and free); at most one a day with each one
+const CONVERSACIONES = dlgGuion(document.getElementById('conversaciones')?.textContent || '').map(c => Dialogo.registrar({ ...c, disparo: 'conversar', canal: 'conv', quienes: [c.con, 'ana'], sujeta: [c.con], tema: c.tema || c.id }));
+const convHoy = k => game.wm?.convHoy?.[k] === today();
+const convDisponibles = k => convHoy(k) ? [] : CONVERSACIONES.filter(d => d.con === k && !d.dicha() && dlgCumple(d, dlgCtx())).sort((a, b) => b.peso - a.peso);
+function conversar(d){   // a conversation, now: said in its own channel, holding the other still, once
+  (game.wm.convHoy ||= {})[d.con] = today();
+  for (const t of TALKS.filter(t => t.ch === 'conv')) talkEnd(t);
+  logEv('Ana conversó con ' + wmName(d.con) + ': ' + d.tema.replace(/^./, c => c.toLowerCase()) + '.', []);
+  return d.decir();
+}
 // the talk of the road, as self-contained scenes: each one a whole topic, with its beginning and its end (they can
 // be said in any order, unless one says it needs another: «si»). Pieces: L<stretch>:<lines> are the book's lines of
 // that stretch (LIBRO1.viaje), M<stretch>:<lines> Ana's own (VIAJE_MAS). Where: a thing in sight (visible), or the
