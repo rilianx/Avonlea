@@ -35,11 +35,13 @@
       "marilla"
     ],
     "lines": [
+      "[!hecho:se_queda] Bueno, pues... Marilla es buena, ¿sabes? Solo que no se le nota mucho al principio.",
+      "[!hecho:se_queda] Ya lo creo que... bueno, ojalá te quedes, Ana. Yo... sí. Eso.",
       "Bueno, pues... sí, es un día precioso, Ana. Ya lo creo.",
       "Las vacas andan contentas hoy. Será por el sol, supongo.",
-      "Marilla dice que hablas mucho. Bueno, a mí me gusta oírte, ¿sabes?",
-      "¿Viste las flores junto al camino? Bueno, pues... me hicieron pensar en ti.",
-      "Ya lo creo, ya lo creo. Anda, ve a jugar un rato, que el día está lindo."
+      "[hecho:se_queda] Marilla dice que hablas mucho. Bueno, a mí me gusta oírte, ¿sabes?",
+      "[hecho:se_queda] ¿Viste las flores junto al camino? Bueno, pues... me hicieron pensar en ti.",
+      "[hecho:se_queda] Ya lo creo, ya lo creo. Anda, ve a jugar un rato, que el día está lindo."
     ],
     "seasonLines": [
       "Bueno, pues... ya brotó todo. La primavera, ¿no? Ya lo creo.",
@@ -89,14 +91,18 @@
       "matthew"
     ],
     "lines": [
-      "Ana, no te quedes soñando despierta. Aunque... la cocina está ordenada, eso sí.",
-      "Si quieres cocinar, la estufa está encendida. Cuidado con no quemar nada esta vez.",
-      "Matthew no lo dice, pero te echa de menos cuando te vas donde Diana.",
-      "Riega la huerta antes de que caiga el sol, que las plantas lo agradecen.",
-      "Hmm. Bueno, admito que hoy te has portado muy bien."
+      "[!hecho:se_queda] Mientras estés en esta casa, harás tus quehaceres como cualquiera. Después veremos.",
+      "[!hecho:se_queda] No te prometo nada, niña. Que te quedes o no, depende de cómo te portes.",
+      "[!hecho:se_queda] Lávate la cara y péinate esas trenzas. Aquí se come con la cara limpia.",
+      "[!hecho:se_queda] ¿Sabes rezar? Pues vas a aprender. En esta casa se reza.",
+      "[hecho:se_queda] Ana, no te quedes soñando despierta. Aunque... la cocina está ordenada, eso sí.",
+      "[hecho:se_queda] Si quieres cocinar, la estufa está encendida. Cuidado con no quemar nada esta vez.",
+      "[hecho:se_queda, hecho:conocidas_diana] Matthew no lo dice, pero te echa de menos cuando te vas donde Diana.",
+      "[hecho:se_queda] Riega la huerta antes de que caiga el sol, que las plantas lo agradecen.",
+      "[hecho:se_queda, afecto:marilla:ana>=3] Hmm. Bueno, admito que hoy te has portado muy bien."
     ],
     "seasonLines": [
-      "Hay que limpiar la casa a fondo, que es primavera. Y tú me vas a ayudar, Ana.",
+      "[hecho:se_queda] Hay que limpiar la casa a fondo, que es primavera. Y tú me vas a ayudar, Ana.",
       "Con este calor, mejor un té y no enciendas mucho la estufa.",
       "Es tiempo de manzanas: una buena compota para el invierno no está de más.",
       "Siéntate cerca de la estufa, niña, que vienes helada."
@@ -137,17 +143,18 @@
     ],
     "kin": [],
     "lines": [
-      "¡Ana, mi alma gemela! Te estaba esperando.",
-      "Mamá dice que puedo salir hasta que se ponga el sol. ¿Vamos al lago?",
-      "¿Te acuerdas de nuestro juramento de amistad? ¡Para siempre!",
-      "Los manzanos están llenos este año. Toma las que quieras.",
-      "El Bosque Encantado me da un poquito de miedo... pero contigo no."
+      "[hecho:conocidas_diana, !hecho:prohibida] ¡Ana, mi alma gemela! Te estaba esperando.",
+      "[hecho:conocidas_diana, !hecho:prohibida] Mamá dice que puedo salir hasta que se ponga el sol. ¿Vamos al lago?",
+      "[hecho:conocidas_diana, !hecho:prohibida, afecto:diana:ana>=4] ¿Te acuerdas de nuestro juramento de amistad? ¡Para siempre!",
+      "[hecho:conocidas_diana] Los manzanos están llenos este año. Toma las que quieras.",
+      "[hecho:conocidas_diana] El Bosque Encantado me da un poquito de miedo... pero contigo no.",
+      "[!hecho:conocidas_diana] Hola. Tú eres la niña nueva de Tejas Verdes, ¿verdad?"
     ],
     "seasonLines": [
-      "¡Mira los manzanos en flor, Ana! Parecen novias vestidas de blanco.",
-      "¡Qué calor! ¿Vamos a remojar los pies en el lago?",
-      "El Bosque Encantado está todo rojo y dorado... ¡como un cuento!",
-      "¡Está nevando! Mamá no me deja salir sin bufanda. Ven, entra a calentarte junto al fuego."
+      "[hecho:conocidas_diana] ¡Mira los manzanos en flor, Ana! Parecen novias vestidas de blanco.",
+      "[hecho:conocidas_diana] ¡Qué calor! ¿Vamos a remojar los pies en el lago?",
+      "[hecho:conocidas_diana] El Bosque Encantado está todo rojo y dorado... ¡como un cuento!",
+      "[hecho:conocidas_diana] ¡Está nevando! Mamá no me deja salir sin bufanda. Ven, entra a calentarte junto al fuego."
     ],
     "giftReply": " ¡Eres la mejor amiga del mundo!"
   },
@@ -185,16 +192,18 @@
     ],
     "kin": [],
     "lines": [
-      "Ana Shirley, siempre es un gusto verte por aquí. Pórtate bien, ¿eh?",
-      "Diana habla de ti todo el día, ¿sabes?",
+      "[!hecho:barry_presenta] Tú debes ser la niña que trajeron los Cuthbert. Buenas tardes.",
+      "[hecho:barry_presenta, !hecho:prohibida] Ana Shirley, siempre es un gusto verte por aquí. Pórtate bien, ¿eh?",
+      "[hecho:conocidas_diana, !hecho:prohibida] Diana habla de ti todo el día, ¿sabes?",
       "[hecho:perdonada] Esta vez el cordial de frambuesa está bien etiquetado, te lo aseguro.",
-      "Saluda a Marilla de mi parte, querida."
+      "[hecho:prohibida, !hecho:perdonada] Buenas tardes. (La Sra. Barry no la invita a pasar.)",
+      "Saluda a Marilla de mi parte."
     ],
     "seasonLines": [
-      "Buenos días, Ana. Diana está deseando verte.",
-      "Qué calor, ¿verdad? Hay limonada en la despensa.",
-      "Diana me ayudó con las manzanas. Llévale algunas a Marilla.",
-      "Pasa, pasa, que hace un frío terrible. Diana está junto al fuego."
+      "[hecho:barry_presenta, !hecho:prohibida] Buenos días, Ana. Diana está deseando verte.",
+      "[hecho:barry_presenta, !hecho:prohibida] Qué calor, ¿verdad? Hay limonada en la despensa.",
+      "[hecho:barry_presenta, !hecho:prohibida] Diana me ayudó con las manzanas. Llévale algunas a Marilla.",
+      "[hecho:barry_presenta, !hecho:prohibida] Pasa, pasa, que hace un frío terrible. Diana está junto al fuego."
     ],
     "giftReply": " Qué amable eres, Ana."
   },
@@ -233,17 +242,19 @@
     ],
     "kin": [],
     "lines": [
-      "Ana Shirley, hablas más que un molino... pero tienes buen corazón, eso lo reconozco.",
+      "[!hecho:lynde_visita] ¿Así que tú eres la huérfana de Tejas Verdes? Ya iré a verte con calma, ya.",
+      "[hecho:ofendio_lynde, !hecho:disculpa_lynde] Hmpf. No tengo nada que hablar contigo, niña malcriada.",
       "Desde mi ventana veo todo el camino: no se me escapa nadie. Lo digo sin mala intención, ¿eh?",
       "Llevo cincuenta y dos cubrecamas de retazos, ¡cincuenta y dos! Y no pienso parar.",
-      "Marilla hizo bien en quedarse contigo, y lo digo yo, que nunca me callo lo que pienso.",
-      "A una niña hay que enseñarle a ser útil. Pero, bueno, tú vas por buen camino."
+      "[hecho:se_queda, hecho:lynde_visita, !hecho:ofendio_lynde] Marilla hizo bien en quedarse contigo, y lo digo yo, que nunca me callo lo que pienso.",
+      "[hecho:lynde_visita] A una niña hay que enseñarle a ser útil. Pero, bueno, tú vas por buen camino.",
+      "[hecho:lynde_visita, !hecho:ofendio_lynde] Ana Shirley, hablas más que un molino... pero tienes buen corazón, eso lo reconozco."
     ],
     "seasonLines": [
-      "¡Vaya, vaya, ya brotó todo! Ya es hora de limpiar la casa, digo yo.",
-      "Con este calor no hay quien teja... ¡pero yo tejo, claro que tejo!",
-      "El otoño siempre me hace pensar en los cubrecamas. Este año haré uno rojo y dorado.",
-      "Pasa, niña, que hace un frío de mil demonios... perdón, de los que dan escalofríos."
+      "[hecho:lynde_visita] ¡Vaya, vaya, ya brotó todo! Ya es hora de limpiar la casa, digo yo.",
+      "[hecho:lynde_visita] Con este calor no hay quien teja... ¡pero yo tejo, claro que tejo!",
+      "[hecho:lynde_visita] El otoño siempre me hace pensar en los cubrecamas. Este año haré uno rojo y dorado.",
+      "[hecho:lynde_visita] Pasa, niña, que hace un frío de mil demonios... perdón, de los que dan escalofríos."
     ],
     "giftReply": " Vaya, vaya... se nota que a ti te criaron bien.",
     "whereText": {

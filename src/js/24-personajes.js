@@ -73,7 +73,7 @@ const NAMES = { toby: 'Pelusa', lawson: 'Sr. Lawson' }; for (const k of Object.k
 const lineasSi = a => (a || []).filter(l => { const m = /^\[([^\]]+)\] /.exec(l); return !m || m[1].split(',').every(c => dlgCond(c.trim(), dlgCtx())); }).map(l => l.replace(/^\[[^\]]+\] /, ''));
 // someone's loose lines now: the written ones, and the winks about the goals of the notebook (src/js/66-cuaderno.js)
 const lineasDe = (k, a) => [...lineasSi(a), ...(typeof guiñosDe === 'function' ? guiñosDe(k) : [])];
-const LINES = {}, SEASON_LINES = {}; for (const k of Object.keys(CH)) { Object.defineProperty(LINES, k, { get: () => lineasDe(k, CH[k].lines), enumerable: true }); SEASON_LINES[k] = CH[k].seasonLines; }
+const LINES = {}, SEASON_LINES = {}; for (const k of Object.keys(CH)) { Object.defineProperty(LINES, k, { get: () => lineasDe(k, CH[k].lines), enumerable: true }); Object.defineProperty(SEASON_LINES, k, { get: () => CH[k].seasonLines.map(l => lineasSi([l])[0] || null), enumerable: true }); }   // (each with its conditions: one that does not hold is null)
 const ABIL = {}; for (const k of Object.keys(CH)) ABIL[k] = CH[k].abil;
 const COOK = Object.keys(CH).find(k => CH[k].abil.cocinar);
 // the people: one per entry (the ones the game names directly are pulled out below)

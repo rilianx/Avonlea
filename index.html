@@ -5109,9 +5109,11 @@ const DLG_BANK = {
     [['ana', 'He decidido que el claro de los abedules se llame la Senda de los Enamorados.'], ['diana', '¡Qué romántico! Pero no se lo digas a mamá.'], ['ana', 'Será nuestro secreto, como todo lo importante.']],
     [['diana', 'Mamá dice que puedo ir a tu casa el sábado, si no hay lluvia.'], ['ana', 'Entonces voy a rezar para que no llueva… y por si acaso, para que llueva solo un poquito.']],
     [['ana', '¿Te imaginas que el Bosque Encantado de verdad tenga fantasmas?'], ['diana', '¡Ana! Ahora no voy a poder pasar por ahí de noche.'], ['ana', 'Yo tampoco. Creo que imaginé demasiado bien.']],
-    [['diana', 'Gilbert Blythe te miró otra vez en clase.'], ['ana', 'Gilbert Blythe puede mirar a la pared. A mí no me interesa en lo más mínimo.'], ['diana', 'Si tú lo dices…']],
+    { si: ["cuaderno:escuela"], l: [['diana', 'Gilbert Blythe te miró otra vez en clase.'], ['ana', 'Gilbert Blythe puede mirar a la pared. A mí no me interesa en lo más mínimo.'], ['diana', 'Si tú lo dices…']] },
   ],
   'ana+marilla': [
+    { si: ['hecho:a_prueba', '!hecho:se_queda'], l: [['marilla', 'Esa cama se tiende apenas te levantas. Aquí no somos desordenados.'], ['ana', 'Sí, Marilla. ¿Y si la tiendo imaginando que es la cama de una princesa?'], ['marilla', 'Tiéndela como la de una niña ordenada. Con eso basta.']] },
+    { si: ['hecho:a_prueba', '!hecho:se_queda'], l: [['ana', 'Marilla, ¿cree que podré quedarme?'], ['marilla', 'Eso depende de ti, no de mí. Haz tus quehaceres y di tus oraciones.'], ['ana', 'Los voy a hacer tan bien que se le van a olvidar los niños del orfanato.']] },
     { at: 'casa', l: [['marilla', 'Ana, ¿barriste el porche como te dije?'], ['ana', 'Sí, Marilla… bueno, casi. Me distraje mirando una araña que tejía, y era tan perfecta…'], ['marilla', 'Las arañas no barren porches, Ana.']] },
     [['ana', 'Marilla, ¿alguna vez fue usted una niña como yo?'], ['marilla', 'Fui una niña. Como tú, espero que no.'], ['ana', 'Entonces se perdió de mucho, Marilla.']],
     { at: 'gg', l: [['marilla', 'Di tus oraciones antes de dormir.'], ['ana', 'Ya sé una de memoria. Pero a veces prefiero inventarlas: me salen más sentidas.'], ['marilla', 'Hmm. Con que sean sinceras, basta.']] },
@@ -5119,42 +5121,44 @@ const DLG_BANK = {
     [['marilla', 'Ese sombrero está lleno de flores otra vez.'], ['ana', 'Es que las flores me quedan mejor que el pelo rojo, Marilla.'], ['marilla', 'Tu pelo no tiene la culpa de nada. Quítate eso antes de ir a la iglesia.']],
   ],
   'ana+matthew': [
+    { si: ['hecho:a_prueba', '!hecho:se_queda'], l: [['matthew', 'Bueno, pues… ¿dormiste bien, Ana?'], ['ana', 'Soñé que me quedaba, señor Matthew. ¿Los sueños se cumplen?'], ['matthew', 'Ya lo creo que… bueno, a veces. Yo hablo con Marilla.']] },
     { at: 'arroyo', l: [['ana', 'Señor Matthew, ¿le parece que el arroyo canta?'], ['matthew', 'Bueno, pues… ahora que lo dices, algo tararea, sí.'], ['ana', '¡Sabía que usted lo entendería!']] },
-    [['matthew', 'Ana… ¿te gustaría un vestido con mangas abullonadas? Digo… por si acaso.'], ['ana', '¡Oh, señor Matthew! ¿De verdad lo dice?'], ['matthew', 'Bueno, pues… no le digas nada a Marilla todavía.']],
+    { si: ["hecho:se_queda", "afecto:matthew:ana>=5"], l: [['matthew', 'Ana… ¿te gustaría un vestido con mangas abullonadas? Digo… por si acaso.'], ['ana', '¡Oh, señor Matthew! ¿De verdad lo dice?'], ['matthew', 'Bueno, pues… no le digas nada a Marilla todavía.']] },
     [['ana', '¿Usted cree que las vacas tienen pensamientos profundos?'], ['matthew', 'Bueno, pues… las nuestras parecen pensar mucho en el pasto.'], ['ana', 'Eso también es una filosofía.']],
     [['matthew', 'Lo hiciste muy bien hoy, Ana.'], ['ana', '¿Usted cree? Yo pensé que me había equivocado en todo.'], ['matthew', 'Ya lo creo que no. Yo lo vi.']],
     [['ana', 'Hoy no hablé casi nada, señor Matthew. ¿Se dio cuenta?'], ['matthew', 'Bueno, pues… no, la verdad. Me pareció lo de siempre.'], ['ana', '¡Ay! Entonces tendré que esforzarme más.']],
   ],
   'lynde+marilla': [
-    [['lynde', 'Marilla, esa niña tuya va a terminar de maestra o de actriz, una de dos.'], ['marilla', 'Mientras termine sus quehaceres primero, Rachel, que termine de lo que quiera.']],
+    { si: ["hecho:se_queda", "hecho:lynde_visita"], l: [['lynde', 'Marilla, esa niña tuya va a terminar de maestra o de actriz, una de dos.'], ['marilla', 'Mientras termine sus quehaceres primero, Rachel, que termine de lo que quiera.']] },
     [['lynde', '¿Supiste que los Pye volvieron a pelear con los Sloane por la cerca?'], ['marilla', 'No, y no me hace falta saberlo.'], ['lynde', 'Bueno, yo solo lo digo. Nadie puede decir que Rachel Lynde no avisa.']],
     { at: 'dentro', l: [['marilla', '¿Más té, Rachel?'], ['lynde', 'Media taza. Y de esa mermelada de ciruelas, que la tuya es mejor que la mía, aunque no se lo digas a nadie.']] },
-    [['lynde', 'La maestra nueva tiene ideas muy modernas. ¡Hacen ejercicios físicos en la escuela!'], ['marilla', 'Mientras no se rompan la cabeza…'], ['lynde', 'Ya veremos, Marilla. Ya veremos.']],
+    { si: ["cuaderno:escuela"], l: [['lynde', 'La maestra nueva tiene ideas muy modernas. ¡Hacen ejercicios físicos en la escuela!'], ['marilla', 'Mientras no se rompan la cabeza…'], ['lynde', 'Ya veremos, Marilla. Ya veremos.']] },
   ],
   'marilla+matthew': [
-    [['marilla', 'Matthew, ¿le estuviste dando caramelos a Ana otra vez?'], ['matthew', 'Bueno, pues… quizás uno. O dos.'], ['marilla', 'Esa niña te tiene en la palma de la mano.']],
-    [['matthew', 'Marilla… la niña está creciendo, ¿no te parece?'], ['marilla', 'Demasiado rápido, Matthew. Demasiado rápido.']],
+    { si: ['hecho:a_prueba', '!hecho:se_queda'], l: [['marilla', 'Hoy no rompió nada, Matthew. Y lavó los platos sin que se lo pidiera.'], ['matthew', 'Bueno, pues… ¿ves? Ya te lo decía yo.'], ['marilla', 'No he dicho nada todavía. Es una prueba.']] },
+    { si: ["hecho:se_queda"], l: [['marilla', 'Matthew, ¿le estuviste dando caramelos a Ana otra vez?'], ['matthew', 'Bueno, pues… quizás uno. O dos.'], ['marilla', 'Esa niña te tiene en la palma de la mano.']] },
+    { si: ["hecho:se_queda", "dia_juego:28"], l: [['matthew', 'Marilla… la niña está creciendo, ¿no te parece?'], ['marilla', 'Demasiado rápido, Matthew. Demasiado rápido.']] },
     [['marilla', 'Hay que arreglar la cerca del potrero antes del invierno.'], ['matthew', 'Ya lo creo. Mañana temprano, si no llueve.']],
   ],
   'ana+gilbert': [
-    [['gilbert', 'Ana, ¿algún día me vas a perdonar lo de «Zanahorias»?'], ['ana', 'Algunas cosas no se perdonan, Gilbert Blythe.'], ['gilbert', 'Bueno… seguiré preguntando.']],
-    [['gilbert', 'Felicitaciones por el examen. Me ganaste por un punto.'], ['ana', '…Gracias.'], ['gilbert', 'La próxima vez no será tan fácil, Ana.']],
-    [['gilbert', '¿Quieres que te ayude con ese canasto?'], ['ana', 'Puedo sola, gracias.'], ['gilbert', 'Ya sé que puedes. Solo preguntaba.']],
+    { si: ["hecho:zanahorias"], l: [['gilbert', 'Ana, ¿algún día me vas a perdonar lo de «Zanahorias»?'], ['ana', 'Algunas cosas no se perdonan, Gilbert Blythe.'], ['gilbert', 'Bueno… seguiré preguntando.']] },
+    { si: ["hecho:queens"], l: [['gilbert', 'Felicitaciones por el examen. Me ganaste por un punto.'], ['ana', '…Gracias.'], ['gilbert', 'La próxima vez no será tan fácil, Ana.']] },
+    { si: ["cuaderno:escuela"], l: [['gilbert', '¿Quieres que te ayude con ese canasto?'], ['ana', 'Puedo sola, gracias.'], ['gilbert', 'Ya sé que puedes. Solo preguntaba.']] },
   ],
   'ana+lynde': [
-    [['lynde', 'Vaya, Ana, se te está oscureciendo el pelo. Ya no es tan colorado.'], ['ana', '¿De verdad, Sra. Lynde? ¡Es lo más lindo que me ha dicho nunca!']],
-    [['lynde', 'Espero que te portes bien en la escuela, niña.'], ['ana', 'Lo intento con todas mis fuerzas, Sra. Lynde. A veces mis fuerzas se distraen.']],
+    { si: ["hecho:lynde_visita", "!hecho:ofendio_lynde", "dia_juego:28"], l: [['lynde', 'Vaya, Ana, se te está oscureciendo el pelo. Ya no es tan colorado.'], ['ana', '¿De verdad, Sra. Lynde? ¡Es lo más lindo que me ha dicho nunca!']] },
+    { si: ["hecho:lynde_visita", "!hecho:ofendio_lynde"], l: [['lynde', 'Espero que te portes bien en la escuela, niña.'], ['ana', 'Lo intento con todas mis fuerzas, Sra. Lynde. A veces mis fuerzas se distraen.']] },
   ],
   'ana+diana+marilla': [
     { at: 'casa', l: [['marilla', 'Niñas, no se alejen más allá del arroyo.'], ['diana', 'No, Srta. Cuthbert.'], ['ana', 'Solo hasta el Bosque Encantado, Marilla… que está más acá del arroyo, casi.'], ['marilla', 'Ana…']] },
-    [['diana', 'Srta. Cuthbert, ¿Ana puede venir a tomar el té mañana?'], ['marilla', 'Si termina sus quehaceres, sí.'], ['ana', '¡Los terminaré hoy mismo! Bueno, mañana temprano.']],
+    { si: ["hecho:conocidas_diana", "!hecho:prohibida"], l: [['diana', 'Srta. Cuthbert, ¿Ana puede venir a tomar el té mañana?'], ['marilla', 'Si termina sus quehaceres, sí.'], ['ana', '¡Los terminaré hoy mismo! Bueno, mañana temprano.']] },
   ],
   'ana+marilla+matthew': [
-    [['ana', '¡Adivinen qué me pasó hoy!'], ['marilla', 'Algo que vamos a lamentar, seguramente.'], ['matthew', 'Déjala contar, Marilla.'], ['ana', '¡Gracias, señor Matthew! Pues verán…']],
+    { si: ["hecho:se_queda"], l: [['ana', '¡Adivinen qué me pasó hoy!'], ['marilla', 'Algo que vamos a lamentar, seguramente.'], ['matthew', 'Déjala contar, Marilla.'], ['ana', '¡Gracias, señor Matthew! Pues verán…']] },
     { at: 'gg', l: [['marilla', 'A la mesa. Y Ana, sin novelas en la mesa.'], ['ana', 'Era solo un capitulito, Marilla.'], ['matthew', '(se ríe bajito) Je.']] },
   ],
   'ana+lynde+marilla': [
-    [['lynde', 'Marilla, esa niña habla más que un loro.'], ['ana', 'Los loros solo repiten, Sra. Lynde. Yo invento.'], ['marilla', 'Ana. A tu cuarto.']],
+    { si: ["hecho:lynde_visita", "!hecho:ofendio_lynde"], l: [['lynde', 'Marilla, esa niña habla más que un loro.'], ['ana', 'Los loros solo repiten, Sra. Lynde. Yo invento.'], ['marilla', 'Ana. A tu cuarto.']] },
   ],
 };
 const dlgKey = ks => [...ks].sort().join('+');
@@ -5641,7 +5645,8 @@ const VIAJE_ESCENAS = [
   });
 }
 // the talks of pairs and trios (DLG_BANK), as scenes too: when they meet, where it makes sense
-for (const [key, list] of Object.entries(DLG_BANK)) list.forEach((blk, i) => Dialogo.registrar({ id: 'par:' + key + ':' + i, disparo: 'encuentro', quienes: key.split('+'), donde: Array.isArray(blk) ? undefined : blk.at, lineas: Array.isArray(blk) ? blk : blk.l, ...(/\bana\b/.test(key) && /\bdiana\b/.test(key) ? { si: ['hecho:conocidas_diana', '!hecho:prohibida'] } : {}) }));   // (Ana and Diana as friends: once they have met, and while they may)
+for (const [key, list] of Object.entries(DLG_BANK)) list.forEach((blk, i) => { const si = [...(Array.isArray(blk) ? [] : blk.si || []), ...(/\bana\b/.test(key) && /\bdiana\b/.test(key) ? ['hecho:conocidas_diana', '!hecho:prohibida'] : [])];   // (each with its conditions: they do not talk as if they knew each other before they do; Ana and Diana, friends, and not forbidden)
+  Dialogo.registrar({ id: 'par:' + key + ':' + i, disparo: 'encuentro', quienes: key.split('+'), donde: Array.isArray(blk) ? undefined : blk.at, lineas: Array.isArray(blk) ? blk : blk.l, ...(si.length ? { si } : {}) }); });
 // the school: rows of desks, the master's desk, the blackboard, the stove, the windows over the river
 function drawSchool(c, t, night){
   c.fillStyle = '#b98a58'; c.fillRect(0, 0, KIT.w, KIT.h);
@@ -5912,11 +5917,13 @@ const PERSONAJES = {
       "marilla"
     ],
     "lines": [
+      "[!hecho:se_queda] Bueno, pues... Marilla es buena, ¿sabes? Solo que no se le nota mucho al principio.",
+      "[!hecho:se_queda] Ya lo creo que... bueno, ojalá te quedes, Ana. Yo... sí. Eso.",
       "Bueno, pues... sí, es un día precioso, Ana. Ya lo creo.",
       "Las vacas andan contentas hoy. Será por el sol, supongo.",
-      "Marilla dice que hablas mucho. Bueno, a mí me gusta oírte, ¿sabes?",
-      "¿Viste las flores junto al camino? Bueno, pues... me hicieron pensar en ti.",
-      "Ya lo creo, ya lo creo. Anda, ve a jugar un rato, que el día está lindo."
+      "[hecho:se_queda] Marilla dice que hablas mucho. Bueno, a mí me gusta oírte, ¿sabes?",
+      "[hecho:se_queda] ¿Viste las flores junto al camino? Bueno, pues... me hicieron pensar en ti.",
+      "[hecho:se_queda] Ya lo creo, ya lo creo. Anda, ve a jugar un rato, que el día está lindo."
     ],
     "seasonLines": [
       "Bueno, pues... ya brotó todo. La primavera, ¿no? Ya lo creo.",
@@ -5966,14 +5973,18 @@ const PERSONAJES = {
       "matthew"
     ],
     "lines": [
-      "Ana, no te quedes soñando despierta. Aunque... la cocina está ordenada, eso sí.",
-      "Si quieres cocinar, la estufa está encendida. Cuidado con no quemar nada esta vez.",
-      "Matthew no lo dice, pero te echa de menos cuando te vas donde Diana.",
-      "Riega la huerta antes de que caiga el sol, que las plantas lo agradecen.",
-      "Hmm. Bueno, admito que hoy te has portado muy bien."
+      "[!hecho:se_queda] Mientras estés en esta casa, harás tus quehaceres como cualquiera. Después veremos.",
+      "[!hecho:se_queda] No te prometo nada, niña. Que te quedes o no, depende de cómo te portes.",
+      "[!hecho:se_queda] Lávate la cara y péinate esas trenzas. Aquí se come con la cara limpia.",
+      "[!hecho:se_queda] ¿Sabes rezar? Pues vas a aprender. En esta casa se reza.",
+      "[hecho:se_queda] Ana, no te quedes soñando despierta. Aunque... la cocina está ordenada, eso sí.",
+      "[hecho:se_queda] Si quieres cocinar, la estufa está encendida. Cuidado con no quemar nada esta vez.",
+      "[hecho:se_queda, hecho:conocidas_diana] Matthew no lo dice, pero te echa de menos cuando te vas donde Diana.",
+      "[hecho:se_queda] Riega la huerta antes de que caiga el sol, que las plantas lo agradecen.",
+      "[hecho:se_queda, afecto:marilla:ana>=3] Hmm. Bueno, admito que hoy te has portado muy bien."
     ],
     "seasonLines": [
-      "Hay que limpiar la casa a fondo, que es primavera. Y tú me vas a ayudar, Ana.",
+      "[hecho:se_queda] Hay que limpiar la casa a fondo, que es primavera. Y tú me vas a ayudar, Ana.",
       "Con este calor, mejor un té y no enciendas mucho la estufa.",
       "Es tiempo de manzanas: una buena compota para el invierno no está de más.",
       "Siéntate cerca de la estufa, niña, que vienes helada."
@@ -6014,17 +6025,18 @@ const PERSONAJES = {
     ],
     "kin": [],
     "lines": [
-      "¡Ana, mi alma gemela! Te estaba esperando.",
-      "Mamá dice que puedo salir hasta que se ponga el sol. ¿Vamos al lago?",
-      "¿Te acuerdas de nuestro juramento de amistad? ¡Para siempre!",
-      "Los manzanos están llenos este año. Toma las que quieras.",
-      "El Bosque Encantado me da un poquito de miedo... pero contigo no."
+      "[hecho:conocidas_diana, !hecho:prohibida] ¡Ana, mi alma gemela! Te estaba esperando.",
+      "[hecho:conocidas_diana, !hecho:prohibida] Mamá dice que puedo salir hasta que se ponga el sol. ¿Vamos al lago?",
+      "[hecho:conocidas_diana, !hecho:prohibida, afecto:diana:ana>=4] ¿Te acuerdas de nuestro juramento de amistad? ¡Para siempre!",
+      "[hecho:conocidas_diana] Los manzanos están llenos este año. Toma las que quieras.",
+      "[hecho:conocidas_diana] El Bosque Encantado me da un poquito de miedo... pero contigo no.",
+      "[!hecho:conocidas_diana] Hola. Tú eres la niña nueva de Tejas Verdes, ¿verdad?"
     ],
     "seasonLines": [
-      "¡Mira los manzanos en flor, Ana! Parecen novias vestidas de blanco.",
-      "¡Qué calor! ¿Vamos a remojar los pies en el lago?",
-      "El Bosque Encantado está todo rojo y dorado... ¡como un cuento!",
-      "¡Está nevando! Mamá no me deja salir sin bufanda. Ven, entra a calentarte junto al fuego."
+      "[hecho:conocidas_diana] ¡Mira los manzanos en flor, Ana! Parecen novias vestidas de blanco.",
+      "[hecho:conocidas_diana] ¡Qué calor! ¿Vamos a remojar los pies en el lago?",
+      "[hecho:conocidas_diana] El Bosque Encantado está todo rojo y dorado... ¡como un cuento!",
+      "[hecho:conocidas_diana] ¡Está nevando! Mamá no me deja salir sin bufanda. Ven, entra a calentarte junto al fuego."
     ],
     "giftReply": " ¡Eres la mejor amiga del mundo!"
   },
@@ -6062,16 +6074,18 @@ const PERSONAJES = {
     ],
     "kin": [],
     "lines": [
-      "Ana Shirley, siempre es un gusto verte por aquí. Pórtate bien, ¿eh?",
-      "Diana habla de ti todo el día, ¿sabes?",
+      "[!hecho:barry_presenta] Tú debes ser la niña que trajeron los Cuthbert. Buenas tardes.",
+      "[hecho:barry_presenta, !hecho:prohibida] Ana Shirley, siempre es un gusto verte por aquí. Pórtate bien, ¿eh?",
+      "[hecho:conocidas_diana, !hecho:prohibida] Diana habla de ti todo el día, ¿sabes?",
       "[hecho:perdonada] Esta vez el cordial de frambuesa está bien etiquetado, te lo aseguro.",
-      "Saluda a Marilla de mi parte, querida."
+      "[hecho:prohibida, !hecho:perdonada] Buenas tardes. (La Sra. Barry no la invita a pasar.)",
+      "Saluda a Marilla de mi parte."
     ],
     "seasonLines": [
-      "Buenos días, Ana. Diana está deseando verte.",
-      "Qué calor, ¿verdad? Hay limonada en la despensa.",
-      "Diana me ayudó con las manzanas. Llévale algunas a Marilla.",
-      "Pasa, pasa, que hace un frío terrible. Diana está junto al fuego."
+      "[hecho:barry_presenta, !hecho:prohibida] Buenos días, Ana. Diana está deseando verte.",
+      "[hecho:barry_presenta, !hecho:prohibida] Qué calor, ¿verdad? Hay limonada en la despensa.",
+      "[hecho:barry_presenta, !hecho:prohibida] Diana me ayudó con las manzanas. Llévale algunas a Marilla.",
+      "[hecho:barry_presenta, !hecho:prohibida] Pasa, pasa, que hace un frío terrible. Diana está junto al fuego."
     ],
     "giftReply": " Qué amable eres, Ana."
   },
@@ -6110,17 +6124,19 @@ const PERSONAJES = {
     ],
     "kin": [],
     "lines": [
-      "Ana Shirley, hablas más que un molino... pero tienes buen corazón, eso lo reconozco.",
+      "[!hecho:lynde_visita] ¿Así que tú eres la huérfana de Tejas Verdes? Ya iré a verte con calma, ya.",
+      "[hecho:ofendio_lynde, !hecho:disculpa_lynde] Hmpf. No tengo nada que hablar contigo, niña malcriada.",
       "Desde mi ventana veo todo el camino: no se me escapa nadie. Lo digo sin mala intención, ¿eh?",
       "Llevo cincuenta y dos cubrecamas de retazos, ¡cincuenta y dos! Y no pienso parar.",
-      "Marilla hizo bien en quedarse contigo, y lo digo yo, que nunca me callo lo que pienso.",
-      "A una niña hay que enseñarle a ser útil. Pero, bueno, tú vas por buen camino."
+      "[hecho:se_queda, hecho:lynde_visita, !hecho:ofendio_lynde] Marilla hizo bien en quedarse contigo, y lo digo yo, que nunca me callo lo que pienso.",
+      "[hecho:lynde_visita] A una niña hay que enseñarle a ser útil. Pero, bueno, tú vas por buen camino.",
+      "[hecho:lynde_visita, !hecho:ofendio_lynde] Ana Shirley, hablas más que un molino... pero tienes buen corazón, eso lo reconozco."
     ],
     "seasonLines": [
-      "¡Vaya, vaya, ya brotó todo! Ya es hora de limpiar la casa, digo yo.",
-      "Con este calor no hay quien teja... ¡pero yo tejo, claro que tejo!",
-      "El otoño siempre me hace pensar en los cubrecamas. Este año haré uno rojo y dorado.",
-      "Pasa, niña, que hace un frío de mil demonios... perdón, de los que dan escalofríos."
+      "[hecho:lynde_visita] ¡Vaya, vaya, ya brotó todo! Ya es hora de limpiar la casa, digo yo.",
+      "[hecho:lynde_visita] Con este calor no hay quien teja... ¡pero yo tejo, claro que tejo!",
+      "[hecho:lynde_visita] El otoño siempre me hace pensar en los cubrecamas. Este año haré uno rojo y dorado.",
+      "[hecho:lynde_visita] Pasa, niña, que hace un frío de mil demonios... perdón, de los que dan escalofríos."
     ],
     "giftReply": " Vaya, vaya... se nota que a ti te criaron bien.",
     "whereText": {
@@ -6238,7 +6254,7 @@ const NAMES = { toby: 'Pelusa', lawson: 'Sr. Lawson' }; for (const k of Object.k
 const lineasSi = a => (a || []).filter(l => { const m = /^\[([^\]]+)\] /.exec(l); return !m || m[1].split(',').every(c => dlgCond(c.trim(), dlgCtx())); }).map(l => l.replace(/^\[[^\]]+\] /, ''));
 // someone's loose lines now: the written ones, and the winks about the goals of the notebook (src/js/66-cuaderno.js)
 const lineasDe = (k, a) => [...lineasSi(a), ...(typeof guiñosDe === 'function' ? guiñosDe(k) : [])];
-const LINES = {}, SEASON_LINES = {}; for (const k of Object.keys(CH)) { Object.defineProperty(LINES, k, { get: () => lineasDe(k, CH[k].lines), enumerable: true }); SEASON_LINES[k] = CH[k].seasonLines; }
+const LINES = {}, SEASON_LINES = {}; for (const k of Object.keys(CH)) { Object.defineProperty(LINES, k, { get: () => lineasDe(k, CH[k].lines), enumerable: true }); Object.defineProperty(SEASON_LINES, k, { get: () => CH[k].seasonLines.map(l => lineasSi([l])[0] || null), enumerable: true }); }   // (each with its conditions: one that does not hold is null)
 const ABIL = {}; for (const k of Object.keys(CH)) ABIL[k] = CH[k].abil;
 const COOK = Object.keys(CH).find(k => CH[k].abil.cocinar);
 // the people: one per entry (the ones the game names directly are pulled out below)
@@ -7123,8 +7139,8 @@ function talk(who, again = false){
   if (!p.sit) { p.dir = ana.x < p.x ? 3 : 1; if (Math.abs(ana.y - p.y) > Math.abs(ana.x - p.x)) p.dir = ana.y < p.y ? 0 : 2; }
   if (!ana.sit) ana.dir = p.x < ana.x ? 3 : 1;
   let text;
-  if (game.saidS[who] !== seasonCount()) { game.saidS[who] = seasonCount(); text = SEASON_LINES[who][S]; }
-  else text = LINES[who][game.said[who] = ((game.said[who] ?? -1) + 1) % LINES[who].length];
+  if (game.saidS[who] !== seasonCount() && SEASON_LINES[who][S]) { game.saidS[who] = seasonCount(); text = SEASON_LINES[who][S]; }
+  else { const L = LINES[who]; text = L.length ? L[game.said[who] = ((game.said[who] ?? -1) + 1) % L.length] : '…'; }   // (only the lines that hold now: not as if they knew her before they do)
   if (pre.some(x => x.startsWith('Ana cumplió'))) text = '¡Gracias por hacer lo que te pedí, Ana! ' + text;
   if (who === 'diana' && !conoceDiana()) { const L = cadenaEncuentro('diana'); if (L) return say('diana', L.map(l => (l.q === 'ana' ? 'Ana: ' : '') + l.t).join('\n'), [['…', close]]); }   // (they have not met: the meeting of the book, not a friend's greeting)
   if (who === 'diana' && dlgHechos().prohibida) return say('diana', pick(['Ana… mamá no me deja hablar contigo. Lo siento tanto, tanto…', 'No puedo, Ana… mamá dice que no. Pero te sigo queriendo, ¿sabes?']), [['…', close]]);   // (forbidden, cap. 17)
@@ -10365,7 +10381,7 @@ function chatTick(dt){
   }
 }
 // what they say (no generative AI: a greeting, a few lines as the characters are, and a goodbye that mentions the errand)
-const LYNDE_CHISME = ['¿Supo que a los Pye se les escapó otra vez el cerdo? Yo siempre lo dije.', '¡Esa niña de los Cuthbert! Pelirroja y con una lengua... aunque buen corazón tiene, eso sí.', 'Dicen que la maestra nueva usa sombrero con plumas. ¡Plumas, en una escuela!', 'Yo no soy de las que hablan, pero el loro del Sr. Harrison dice cada cosa...', 'Matthew Cuthbert fue a la tienda y salió con un rastrillo. ¡En pleno invierno!'];
+const LYNDE_CHISME = ['¿Supo que a los Pye se les escapó otra vez el cerdo? Yo siempre lo dije.', '[hecho:lynde_visita, !hecho:ofendio_lynde] ¡Esa niña de los Cuthbert! Pelirroja y con una lengua... aunque buen corazón tiene, eso sí.', '[hecho:ofendio_lynde] ¡Esa niña de los Cuthbert! Me dijo vieja chismosa en mi propia cara. ¡A mí!', 'Dicen que la maestra nueva usa sombrero con plumas. ¡Plumas, en una escuela!', 'Yo no soy de las que hablan, pero el loro del Sr. Harrison dice cada cosa...', 'Matthew Cuthbert fue a la tienda y salió con un rastrillo. ¡En pleno invierno!'];
 const CHISME_RE = ['¡No me diga!', '¿De veras? ¡Qué cosa!', 'Bueno, yo de eso no sé nada...', 'Ya me lo imaginaba.'];
 const ANA_DIANA = [['¡Diana, amiga del alma! Tengo tanto que contarte.', '¡Ana! Yo también. ¿Nos vemos en el Bosque Encantado?'], ['¿Viste qué color tiene hoy el lago? Como de perla.', 'Yo solo vi que estaba azul... pero tú lo dices más bonito.'], ['Prometamos ser amigas mientras el sol y la luna existan.', '¡Lo prometo, Ana!']];
 const ANA_SUENA = [['¿No le parece que hoy el mundo está recién hecho?', 'Esta niña... qué cosas dice.'], ['Vi una nube con forma de barco. Iba hacia Charlottetown.', 'Ya lo creo, Ana. Ya lo creo.'], ['¿Sabía que los abedules parecen señoras de vestido blanco?', 'Nunca lo había pensado así.'], ['Hoy el lago brillaba como si tuviera estrellas adentro.', '¡Qué imaginación tienes, niña!'], ['Cuando sea grande quiero escribir libros. O ser maestra. O las dos cosas.', 'Tiempo tienes para decidirlo.']];
@@ -10391,7 +10407,7 @@ function chatLines(a, b, anaFree){
   say(a, `¡${hi}${to(B)}!`); say(b, tu ? pick([`¡Hola${to(A)}! ¿A dónde vas?`, `¡Hola${to(A)}!`]) : pick([`¡${hi}${to(A)}! ¿Cómo están todos en casa?`, `¡Qué gusto verle${to(A)}!`]));
   const rounds = 1 + Math.round((1 - Math.max(focoOf(a).enfoque, focoOf(b).enfoque)) * 3);
   for (let k = 0; k < rounds; k++) {
-    if (a === 'lynde' || b === 'lynde') { const o = a === 'lynde' ? b : a; say('lynde', pick(LYNDE_CHISME)); say(o, pick(CHISME_RE)); }
+    if (a === 'lynde' || b === 'lynde') { const o = a === 'lynde' ? b : a; say('lynde', pick(lineasSi(LYNDE_CHISME))); say(o, pick(CHISME_RE)); }
     else if (ana_ && other === 'diana' && dianaAmiga()) { const [x, y] = ANA_DIANA[(k + Math.floor(TT)) % ANA_DIANA.length]; say('ana', x); say('diana', y); }
     else if (ana_) { const [x, y] = suena(); say('ana', isKid(other) ? x.replace('¿No le parece', '¿No te parece').replace('¿Sabía', '¿Sabías') : x); say(other, isKid(other) ? pick(['¡Qué lindo, Ana!', '¿De verdad? ¡Cuéntame más!', '¡Qué cosas dices, Ana!']) : y); }
     else { const [x, y] = pares(); say(a, x); say(b, y); }
@@ -11594,8 +11610,11 @@ function cuadernoTick(dt){
 // goals that only lack effort or time, a quality or some days; then the rest)
 const GUIÑOS_MAX = 2;
 const faltaEsfuerzo = m => m.requiere.every(r => cuadernoCumple(r) || CUALIDAD_RE.test(r) || /^(afecto|dias_desde):/.test(r));
+// whom Ana has met by now: a hint, a greeting as a friend, only from someone who knows her (Diana once they have met…)
+const CONOCE_A = { diana: 'hecho:conocidas_diana', barry: 'hecho:barry_presenta', lynde: 'hecho:lynde_visita', stacy: 'cuaderno:escuela', gilbert: 'cuaderno:escuela', sraallan: 'cuaderno:escuela_dominical', josephine: 'hecho:cama_josephine' };
+const conoceA = k => !CONOCE_A[k] || dlgCond(CONOCE_A[k], dlgCtx());
 function guiñosDe(k){
-  if (!game.wm) return [];
+  if (!game.wm || !conoceA(k)) return [];
   const c = CUADERNO_METAS.flatMap(m => (m.guiños || []).filter(g => g.quien === k && !cuadernoHecho(m.id) && (!m.oculta || cuadernoAbierta(m)) && g.cerrada === !cuadernoAbierta(m)).map(g => ({ t: g.texto, r: !g.cerrada ? 0 : faltaEsfuerzo(m) ? 1 : 2 })));
   const out = [];
   for (const r of [0, 1, 2]) { const l = c.filter(x => x.r === r); for (let i = 0; i < l.length && out.length < GUIÑOS_MAX; i++) out.push(l[(i + today()) % l.length].t); }
@@ -11825,7 +11844,7 @@ function loop(now){
   else { owed = Math.min(owed + Math.min(raw, .25) * k, 3 * k * .05 + 2); const t0 = performance.now(); while (owed > 1e-4 && performance.now() - t0 < 22) { const d = Math.min(.05, owed); update(d); owed -= d; } }
   FRAME++; tripBarDraw(); render(); islaDraw(); requestAnimationFrame(loop);
 }
-window.__avonlea = { comentar, comentarioElegir, COMENTARIOS, lugaresTick, escenaObjeto, targets, cartaPuede, conNombres, nombrar, nombreDe, nombrarElegir, NOMBRABLES, primeraVez, ventana, velaPuede, sombrero, LOOKS, dlgDichas, chats: () => CHATS, enConversacion, anaPos: () => ({ x: ana.x, y: ana.y }), setDia: (d, h) => { dayT = d + (h - 6) / 24; }, dia: () => today(), PEOPLE, relatoEmpezar, inicioLlegada, dlgHechos, convDisponibles, conversar, convOpciones, guiñosDe, LINES, dlgHecho, cualidad, cualidadSuma, cualidadCond, dlgCond, dlgEspecificidad, ritmoLleno, ritmoMarca, dlgHacer, dlgAccion, HABILIDADES, relSetW, relato: () => RELATO.lineas, reglas: () => RELATO_REGLAS.map(r => [r.id, r.texto]), jugables, jugar, anaMenu, correoRetirar, cartaLeer, CORREO, cartaTexto, playAct: () => game.playAct, DIALOGOS, dlgCtx, talks: () => TALKS, dlgGuion, dlgPanel, bubblesNow: () => bubbles, toby, cartSheet: (c, x, y, c8, t) => { const L = [], p = { look: 'matthew', x, y, c8, walk: 0, moving: false }; const [cx, cy] = [x, y]; pushCart(L, c, { x: cx, y: cy, c8, walk: 0, moving: true }, t); for (const [k, look] of [[0, 'matthew'], [1, 'ana']]) { const [sx, sy] = cartSeat(cx, cy, c8, k); L.push({ y: sy, draw: () => drawPerson(c, { ...mkPerson(look, sx, sy), sit: true, dir: c8Dir(c8) }, t) }); } L.sort((a, b) => a.y - b.y).forEach(o => o.draw()); }, startCap1, CAP1, LIBRO1, ROAD_TRAMOS, ROAD_MIN, roadTramo, islaToggle, DLG_BANK, startDay, setSeason, agendaData: () => AGENDA.map(e => ({ who: wmName(e.who), from: e.from, to: e.to, label: e.label, season: e.season, sunday: !!e.sunday, ana: !!(e.ana || e.who === 'ana'), cond: e.when ? String(e.when).replace(/^\(\) => /, '') : '' })), setAgenda: v => { AGENDA_ON = v; }, AGENDA, wmData: () => ({ THINGS, WHO, OFRECE, WP_NAME, TRADE, TREATS, LIBRETA, ITEM_NAME, MAX_GOALS, PACE, FOCO }), paintMapBase, doingText, wmName, wmBody, wmScene, WW, WH, setVec: v => { VEC_ON = v; }, setStyle: v => { ANA_STYLE = v; }, setHead: setHeadM, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+window.__avonlea = { dlgCumple, comentar, comentarioElegir, COMENTARIOS, lugaresTick, escenaObjeto, targets, cartaPuede, conNombres, nombrar, nombreDe, nombrarElegir, NOMBRABLES, primeraVez, ventana, velaPuede, sombrero, LOOKS, dlgDichas, chats: () => CHATS, enConversacion, anaPos: () => ({ x: ana.x, y: ana.y }), setDia: (d, h) => { dayT = d + (h - 6) / 24; }, dia: () => today(), PEOPLE, relatoEmpezar, inicioLlegada, dlgHechos, convDisponibles, conversar, convOpciones, guiñosDe, LINES, dlgHecho, cualidad, cualidadSuma, cualidadCond, dlgCond, dlgEspecificidad, ritmoLleno, ritmoMarca, dlgHacer, dlgAccion, HABILIDADES, relSetW, relato: () => RELATO.lineas, reglas: () => RELATO_REGLAS.map(r => [r.id, r.texto]), jugables, jugar, anaMenu, correoRetirar, cartaLeer, CORREO, cartaTexto, playAct: () => game.playAct, DIALOGOS, dlgCtx, talks: () => TALKS, dlgGuion, dlgPanel, bubblesNow: () => bubbles, toby, cartSheet: (c, x, y, c8, t) => { const L = [], p = { look: 'matthew', x, y, c8, walk: 0, moving: false }; const [cx, cy] = [x, y]; pushCart(L, c, { x: cx, y: cy, c8, walk: 0, moving: true }, t); for (const [k, look] of [[0, 'matthew'], [1, 'ana']]) { const [sx, sy] = cartSeat(cx, cy, c8, k); L.push({ y: sy, draw: () => drawPerson(c, { ...mkPerson(look, sx, sy), sit: true, dir: c8Dir(c8) }, t) }); } L.sort((a, b) => a.y - b.y).forEach(o => o.draw()); }, startCap1, CAP1, LIBRO1, ROAD_TRAMOS, ROAD_MIN, roadTramo, islaToggle, DLG_BANK, startDay, setSeason, agendaData: () => AGENDA.map(e => ({ who: wmName(e.who), from: e.from, to: e.to, label: e.label, season: e.season, sunday: !!e.sunday, ana: !!(e.ana || e.who === 'ana'), cond: e.when ? String(e.when).replace(/^\(\) => /, '') : '' })), setAgenda: v => { AGENDA_ON = v; }, AGENDA, wmData: () => ({ THINGS, WHO, OFRECE, WP_NAME, TRADE, TREATS, LIBRETA, ITEM_NAME, MAX_GOALS, PACE, FOCO }), paintMapBase, doingText, wmName, wmBody, wmScene, WW, WH, setVec: v => { VEC_ON = v; }, setStyle: v => { ANA_STYLE = v; }, setHead: setHeadM, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
 /* ---------- the first time: a scene of its own; the window and the candle; her hat in the wardrobe ----------
    - The first time Ana does some things (looks out of her window, sees herself in the mirror, climbs to her room, sees
      the sea from the lighthouse…), a scene of the script (primera_<what>, disparo: primera) instead of the plain line;

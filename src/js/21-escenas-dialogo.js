@@ -409,7 +409,8 @@ const VIAJE_ESCENAS = [
   });
 }
 // the talks of pairs and trios (DLG_BANK), as scenes too: when they meet, where it makes sense
-for (const [key, list] of Object.entries(DLG_BANK)) list.forEach((blk, i) => Dialogo.registrar({ id: 'par:' + key + ':' + i, disparo: 'encuentro', quienes: key.split('+'), donde: Array.isArray(blk) ? undefined : blk.at, lineas: Array.isArray(blk) ? blk : blk.l, ...(/\bana\b/.test(key) && /\bdiana\b/.test(key) ? { si: ['hecho:conocidas_diana', '!hecho:prohibida'] } : {}) }));   // (Ana and Diana as friends: once they have met, and while they may)
+for (const [key, list] of Object.entries(DLG_BANK)) list.forEach((blk, i) => { const si = [...(Array.isArray(blk) ? [] : blk.si || []), ...(/\bana\b/.test(key) && /\bdiana\b/.test(key) ? ['hecho:conocidas_diana', '!hecho:prohibida'] : [])];   // (each with its conditions: they do not talk as if they knew each other before they do; Ana and Diana, friends, and not forbidden)
+  Dialogo.registrar({ id: 'par:' + key + ':' + i, disparo: 'encuentro', quienes: key.split('+'), donde: Array.isArray(blk) ? undefined : blk.at, lineas: Array.isArray(blk) ? blk : blk.l, ...(si.length ? { si } : {}) }); });
 // the school: rows of desks, the master's desk, the blackboard, the stove, the windows over the river
 function drawSchool(c, t, night){
   c.fillStyle = '#b98a58'; c.fillRect(0, 0, KIT.w, KIT.h);

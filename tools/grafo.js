@@ -46,6 +46,8 @@ for (const raw of guion.split('\n')) {
   if ((m = s.match(/^===\s*(.+?)\s*===$/))) { g = m[1]; continue; }
   if ((m = s.match(/^si:\s*(.*)$/))) m[1].split(',').forEach(c => condicion(c, 'comentarios de ' + g));
   if ((m = s.match(/^-\s*\[([^\]]*)\]/))) m[1].split(',').forEach(c => condicion(c, 'un comentario de ' + g)); } }
+// the characters' own lines (src/datos/personajes.json): «[condiciones] texto»
+for (const [k, c] of Object.entries(JSON.parse(leer('src/datos/personajes.json')))) for (const l of [...(c.lines || []), ...(c.seasonLines || [])]) { const m = /^\[([^\]]+)\]/.exec(l); if (m) m[1].split(',').forEach(x => condicion(x, 'una frase de ' + k)); }
 // the notebook: what each goal requires, its hints, and goals that are a fact
 let meta = null;
 for (const raw of cuaderno.split('\n')) {

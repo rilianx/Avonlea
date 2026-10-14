@@ -18,7 +18,6 @@ Ninguna.
 No es un error (un hecho puede quedar para el registro), pero puede ser algo olvidado:
 
 - `ana_admite_gilbert`: lo deja escena conv_diana_gilbert (una opción)
-- `disculpa_lynde`: lo deja escena lynde_disculpa
 - `nombre_propio_`: lo deja código
 - `nombro_`: lo deja código
 - `queens_primera`: lo deja escena examen_primera
