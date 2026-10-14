@@ -222,6 +222,7 @@ lineas: libro:llegada
 marcas: 0=marilla_nino
 al_empezar: log Marilla vio a la niña de pelo rojo: «Matthew Cuthbert, ¿quién es ésa? ¿Dónde está el niño?»
 al_terminar: fin_capitulo
+al_terminar: hecho llegada_tv
 
 # --- lo que Ana piensa en voz alta en el camino, cuando no hay otra cosa (un comentario: si lo cortan, se pierde)
 === relleno ===
@@ -681,3 +682,105 @@ marilla: Ana, hoy es el examen de Queen's. Matthew te lleva a Charlottetown. Tom
 ana: (Ana pasa el día en Charlottetown. La geometría… la geometría fue un desastre.)
 ana: (Semanas después, sale la lista en el diario. Ana la lee tres veces.) No estoy, Marilla. No estoy.
 marilla: Bueno. Hay otro examen el año que viene, y tú no eres de las que se rinden. A estudiar, entonces.
+
+# --- El comienzo: Ana, a prueba (cap. 3 a 8). Una partida nueva empieza la noche en que Ana llega a Tejas Verdes
+# (src/js/66-inicio.js); si se juega el capítulo 1, se sigue desde su llegada. Marilla quería un niño: Ana se queda
+# esa noche, al otro día van a White Sands a arreglar el error, y Ana vuelve… a prueba. Para quedarse de verdad tiene
+# que ganarse a Marilla (el cuaderno: «Quedarse en Tejas Verdes»).
+=== inicio_llegada ===
+canal: gg
+prioridad: 10
+interrumpe
+sujeta: matthew, marilla
+en: ana=gg, marilla=gg
+si: hecho:inicio_juego, !hecho:llegada_tv
+lineas: libro:llegada
+al_empezar: log Ana llegó a Tejas Verdes con Matthew, de noche. Marilla esperaba a un niño.
+al_terminar: hecho llegada_tv
+al_terminar: hecho primera_noche
+al_terminar: log Marilla dejó que Ana se quedara esa noche, hasta aclarar el enredo.
+---
+marilla: Bueno, bueno, no hace falta llorar así. No te vamos a echar esta noche. Te quedas hasta que aclaremos este enredo. ¿Cómo te llamas?
+ana: ¿Me llamaría Cordelia, por favor?
+marilla: ¿Cordelia? ¿Así te llamas?
+ana: N-no… no exactamente. Me llamo Ana Shirley. Pero me encantaría que me llamaran Cordelia. Es un nombre tan perfectamente elegante.
+marilla: Ana es un nombre sensato y bonito. No tienes por qué avergonzarte de él.
+ana: Entonces, por favor, llámeme Ana con e.
+matthew: (Matthew mira a Ana y luego a Marilla, sin decir nada. Pero no se le olvida la niña que le habló todo el camino.)
+marilla: Mañana veremos qué se hace contigo. Ahora a cenar, y a la cama. Tu pieza es la del alero.
+ana: (Ana apenas prueba la cena. Esa noche, en la pieza del alero, llora hasta quedarse dormida.)
+
+=== primera_noche ===
+canal: gg
+prioridad: 10
+interrumpe
+sujeta: matthew, marilla
+en: ana=gg, marilla=gg
+si: hecho:llegada_tv, !hecho:primera_noche, !capitulo
+al_terminar: hecho primera_noche
+al_terminar: log Marilla dejó que Ana se quedara esa noche, hasta aclarar el enredo.
+---
+marilla: Bueno, bueno, no hace falta llorar así. No te vamos a echar esta noche. Te quedas hasta que aclaremos este enredo. ¿Cómo te llamas?
+ana: ¿Me llamaría Cordelia, por favor?
+marilla: ¿Cordelia? ¿Así te llamas?
+ana: N-no… no exactamente. Me llamo Ana Shirley. Pero me encantaría que me llamaran Cordelia. Es un nombre tan perfectamente elegante.
+marilla: Ana es un nombre sensato y bonito. No tienes por qué avergonzarte de él.
+ana: Entonces, por favor, llámeme Ana con e.
+matthew: (Matthew mira a Ana y luego a Marilla, sin decir nada. Pero no se le olvida la niña que le habló todo el camino.)
+marilla: Mañana veremos qué se hace contigo. Ahora a cenar, y a la cama. Tu pieza es la del alero.
+ana: (Ana apenas prueba la cena. Esa noche, en la pieza del alero, llora hasta quedarse dormida.)
+
+=== desayuno_prueba ===
+canal: gg
+prioridad: 9
+interrumpe
+sujeta: marilla
+en: ana=gg, marilla=gg
+si: hecho:primera_noche, dias_desde:llegada_tv:1, !hecho:desayuno_prueba, hora:6-14
+al_terminar: hecho desayuno_prueba
+---
+ana: ¡Oh, Marilla! ¿Vio la mañana? El cerezo de la ventana está todo en flor. ¿No le da gusto que haya mañanas en el mundo?
+marilla: Es una mañana como cualquier otra. Siéntate y come.
+ana: Me cuesta comer cuando estoy desesperada. Pero es tan difícil estar desesperada en una mañana así…
+marilla: Esta tarde vamos a White Sands, a ver a la Sra. Spencer. Ella se equivocó, y ella lo va a arreglar.
+ana: (Ana baja la mirada al plato y no dice nada más, cosa rara en ella.)
+
+=== viaje_spencer ===
+canal: gg
+prioridad: 9
+interrumpe
+sujeta: marilla
+en: ana=gg, marilla=gg
+si: hecho:desayuno_prueba, !hecho:a_prueba, hora:14-19
+al_terminar: hecho a_prueba
+al_terminar: suma afecto:marilla:ana 1
+al_terminar: log Marilla llevó a Ana a White Sands; la Sra. Blewett la quería de sirvienta, y Marilla no se la dio. Ana se queda en Tejas Verdes, a prueba.
+---
+marilla: (Marilla engancha la yegua alazana a la calesa, y salen las dos hacia White Sands.)
+ana: (En el camino, Ana le cuenta su vida.) Nací en Bolingbroke. Mis padres murieron de fiebre cuando yo tenía tres meses. Después me crió la Sra. Thomas, y después la Sra. Hammond, que tenía tres pares de mellizos. Y después, el orfanato.
+marilla: (Marilla escucha callada, y siente algo parecido a la lástima.) ¿Y esas mujeres te trataban bien?
+ana: Q-querían tratarme bien. Sé que querían ser lo más buenas posible conmigo. Cuando uno quiere ser bueno, no importa tanto si no lo consigue del todo, ¿no?
+blewett: (En casa de la Sra. Spencer está la Sra. Peter Blewett, que busca una niña para cuidarle los hijos.) Esta me sirve. Es flaca, pero dura. Va a tener que ganarse lo que come.
+ana: (Ana se pone pálida y mira a Marilla, sin atreverse a decir nada.)
+marilla: No sé… Matthew quería quedarse con ella. No puedo decidir sin hablarlo con él. Me la llevo de vuelta.
+marilla: (De vuelta en Tejas Verdes, Marilla habla largo con Matthew. Después llama a Ana.) Ana, te quedas. A prueba. Si te portas bien, si eres útil y aprendes, veremos.
+ana: ¡Oh, Marilla! Voy a ser tan buena… Voy a intentar ser tan buena como un ángel. Bueno, como se pueda.
+
+=== se_queda ===
+canal: gg
+prioridad: 9
+interrumpe
+grande
+sujeta: marilla
+en: ana=gg, marilla=gg
+si: hecho:a_prueba, !hecho:se_queda, dias_desde:a_prueba:3, afecto:marilla:ana>=3, cuaderno:rezo, cuaderno:quehaceres
+al_terminar: hecho se_queda
+al_terminar: suma afecto:marilla:ana 1
+al_terminar: log Marilla le dijo a Ana que ya no estaba a prueba: se queda en Tejas Verdes, para siempre.
+---
+marilla: Ana, Matthew y yo lo hablamos. Ya no estás a prueba. Te quedas en Tejas Verdes.
+ana: (Ana se queda quieta, sin respirar.) ¿Para siempre?
+marilla: Para siempre. Si te sigues portando bien.
+ana: (Ana se echa a llorar.) No se preocupe, Marilla: estoy llorando de felicidad. ¿Puedo llamarla tía Marilla?
+marilla: No. Marilla, a secas. No soy tu tía, y no me gusta que llamen a la gente lo que no es.
+ana: Entonces Marilla. Pero voy a imaginar que es mi tía. Por dentro, donde no se ve.

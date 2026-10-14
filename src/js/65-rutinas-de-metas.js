@@ -103,6 +103,7 @@ function wmRunTest(i){
   WM_APPROACH = null; game.wm.sinJarabe = false; AGENDA_ON = false; if ($('wmagenda')) $('wmagenda').checked = false;
   if (isSunday()) dayT += 1;   // (the test goals: on a weekday, with school)
   delete game.wm.ritmo;   // (and with nothing big of the book having happened yet today)
+  yaSeQueda();   // (Ana, staying at Green Gables already: the beginning, on trial, is a chain of its own)
   const keep = { scene: game.scene, x: ana.x, y: ana.y, dir: ana.dir, tx: toby.x, ty: toby.y, cx: cam.x, cy: cam.y };
   T.setup(); S = ((seasonCount() % 4) + 4) % 4;
   game.scene = keep.scene; ana.x = keep.x; ana.y = keep.y; ana.dir = keep.dir; ana.goto = null; toby.x = keep.tx; toby.y = keep.ty; cam.x = keep.cx; cam.y = keep.cy;   // (Ana where she was: no jumping to the test's start)

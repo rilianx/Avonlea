@@ -421,6 +421,7 @@ lineas: libro:llegada
 marcas: 0=marilla_nino
 al_empezar: log Marilla vio a la niña de pelo rojo: «Matthew Cuthbert, ¿quién es ésa? ¿Dónde está el niño?»
 al_terminar: fin_capitulo
+al_terminar: hecho llegada_tv
 
 # --- lo que Ana piensa en voz alta en el camino, cuando no hay otra cosa (un comentario: si lo cortan, se pierde)
 === relleno ===
@@ -880,6 +881,108 @@ marilla: Ana, hoy es el examen de Queen's. Matthew te lleva a Charlottetown. Tom
 ana: (Ana pasa el día en Charlottetown. La geometría… la geometría fue un desastre.)
 ana: (Semanas después, sale la lista en el diario. Ana la lee tres veces.) No estoy, Marilla. No estoy.
 marilla: Bueno. Hay otro examen el año que viene, y tú no eres de las que se rinden. A estudiar, entonces.
+
+# --- El comienzo: Ana, a prueba (cap. 3 a 8). Una partida nueva empieza la noche en que Ana llega a Tejas Verdes
+# (src/js/66-inicio.js); si se juega el capítulo 1, se sigue desde su llegada. Marilla quería un niño: Ana se queda
+# esa noche, al otro día van a White Sands a arreglar el error, y Ana vuelve… a prueba. Para quedarse de verdad tiene
+# que ganarse a Marilla (el cuaderno: «Quedarse en Tejas Verdes»).
+=== inicio_llegada ===
+canal: gg
+prioridad: 10
+interrumpe
+sujeta: matthew, marilla
+en: ana=gg, marilla=gg
+si: hecho:inicio_juego, !hecho:llegada_tv
+lineas: libro:llegada
+al_empezar: log Ana llegó a Tejas Verdes con Matthew, de noche. Marilla esperaba a un niño.
+al_terminar: hecho llegada_tv
+al_terminar: hecho primera_noche
+al_terminar: log Marilla dejó que Ana se quedara esa noche, hasta aclarar el enredo.
+---
+marilla: Bueno, bueno, no hace falta llorar así. No te vamos a echar esta noche. Te quedas hasta que aclaremos este enredo. ¿Cómo te llamas?
+ana: ¿Me llamaría Cordelia, por favor?
+marilla: ¿Cordelia? ¿Así te llamas?
+ana: N-no… no exactamente. Me llamo Ana Shirley. Pero me encantaría que me llamaran Cordelia. Es un nombre tan perfectamente elegante.
+marilla: Ana es un nombre sensato y bonito. No tienes por qué avergonzarte de él.
+ana: Entonces, por favor, llámeme Ana con e.
+matthew: (Matthew mira a Ana y luego a Marilla, sin decir nada. Pero no se le olvida la niña que le habló todo el camino.)
+marilla: Mañana veremos qué se hace contigo. Ahora a cenar, y a la cama. Tu pieza es la del alero.
+ana: (Ana apenas prueba la cena. Esa noche, en la pieza del alero, llora hasta quedarse dormida.)
+
+=== primera_noche ===
+canal: gg
+prioridad: 10
+interrumpe
+sujeta: matthew, marilla
+en: ana=gg, marilla=gg
+si: hecho:llegada_tv, !hecho:primera_noche, !capitulo
+al_terminar: hecho primera_noche
+al_terminar: log Marilla dejó que Ana se quedara esa noche, hasta aclarar el enredo.
+---
+marilla: Bueno, bueno, no hace falta llorar así. No te vamos a echar esta noche. Te quedas hasta que aclaremos este enredo. ¿Cómo te llamas?
+ana: ¿Me llamaría Cordelia, por favor?
+marilla: ¿Cordelia? ¿Así te llamas?
+ana: N-no… no exactamente. Me llamo Ana Shirley. Pero me encantaría que me llamaran Cordelia. Es un nombre tan perfectamente elegante.
+marilla: Ana es un nombre sensato y bonito. No tienes por qué avergonzarte de él.
+ana: Entonces, por favor, llámeme Ana con e.
+matthew: (Matthew mira a Ana y luego a Marilla, sin decir nada. Pero no se le olvida la niña que le habló todo el camino.)
+marilla: Mañana veremos qué se hace contigo. Ahora a cenar, y a la cama. Tu pieza es la del alero.
+ana: (Ana apenas prueba la cena. Esa noche, en la pieza del alero, llora hasta quedarse dormida.)
+
+=== desayuno_prueba ===
+canal: gg
+prioridad: 9
+interrumpe
+sujeta: marilla
+en: ana=gg, marilla=gg
+si: hecho:primera_noche, dias_desde:llegada_tv:1, !hecho:desayuno_prueba, hora:6-14
+al_terminar: hecho desayuno_prueba
+---
+ana: ¡Oh, Marilla! ¿Vio la mañana? El cerezo de la ventana está todo en flor. ¿No le da gusto que haya mañanas en el mundo?
+marilla: Es una mañana como cualquier otra. Siéntate y come.
+ana: Me cuesta comer cuando estoy desesperada. Pero es tan difícil estar desesperada en una mañana así…
+marilla: Esta tarde vamos a White Sands, a ver a la Sra. Spencer. Ella se equivocó, y ella lo va a arreglar.
+ana: (Ana baja la mirada al plato y no dice nada más, cosa rara en ella.)
+
+=== viaje_spencer ===
+canal: gg
+prioridad: 9
+interrumpe
+sujeta: marilla
+en: ana=gg, marilla=gg
+si: hecho:desayuno_prueba, !hecho:a_prueba, hora:14-19
+al_terminar: hecho a_prueba
+al_terminar: suma afecto:marilla:ana 1
+al_terminar: log Marilla llevó a Ana a White Sands; la Sra. Blewett la quería de sirvienta, y Marilla no se la dio. Ana se queda en Tejas Verdes, a prueba.
+---
+marilla: (Marilla engancha la yegua alazana a la calesa, y salen las dos hacia White Sands.)
+ana: (En el camino, Ana le cuenta su vida.) Nací en Bolingbroke. Mis padres murieron de fiebre cuando yo tenía tres meses. Después me crió la Sra. Thomas, y después la Sra. Hammond, que tenía tres pares de mellizos. Y después, el orfanato.
+marilla: (Marilla escucha callada, y siente algo parecido a la lástima.) ¿Y esas mujeres te trataban bien?
+ana: Q-querían tratarme bien. Sé que querían ser lo más buenas posible conmigo. Cuando uno quiere ser bueno, no importa tanto si no lo consigue del todo, ¿no?
+blewett: (En casa de la Sra. Spencer está la Sra. Peter Blewett, que busca una niña para cuidarle los hijos.) Esta me sirve. Es flaca, pero dura. Va a tener que ganarse lo que come.
+ana: (Ana se pone pálida y mira a Marilla, sin atreverse a decir nada.)
+marilla: No sé… Matthew quería quedarse con ella. No puedo decidir sin hablarlo con él. Me la llevo de vuelta.
+marilla: (De vuelta en Tejas Verdes, Marilla habla largo con Matthew. Después llama a Ana.) Ana, te quedas. A prueba. Si te portas bien, si eres útil y aprendes, veremos.
+ana: ¡Oh, Marilla! Voy a ser tan buena… Voy a intentar ser tan buena como un ángel. Bueno, como se pueda.
+
+=== se_queda ===
+canal: gg
+prioridad: 9
+interrumpe
+grande
+sujeta: marilla
+en: ana=gg, marilla=gg
+si: hecho:a_prueba, !hecho:se_queda, dias_desde:a_prueba:3, afecto:marilla:ana>=3, cuaderno:rezo, cuaderno:quehaceres
+al_terminar: hecho se_queda
+al_terminar: suma afecto:marilla:ana 1
+al_terminar: log Marilla le dijo a Ana que ya no estaba a prueba: se queda en Tejas Verdes, para siempre.
+---
+marilla: Ana, Matthew y yo lo hablamos. Ya no estás a prueba. Te quedas en Tejas Verdes.
+ana: (Ana se queda quieta, sin respirar.) ¿Para siempre?
+marilla: Para siempre. Si te sigues portando bien.
+ana: (Ana se echa a llorar.) No se preocupe, Marilla: estoy llorando de felicidad. ¿Puedo llamarla tía Marilla?
+marilla: No. Marilla, a secas. No soy tu tía, y no me gusta que llamen a la gente lo que no es.
+ana: Entonces Marilla. Pero voy a imaginar que es mi tía. Por dentro, donde no se ve.
 
 </script>
 <script type="text/plain" id="conversaciones">
@@ -1436,6 +1539,19 @@ hito 60: Podría escribir de verdad: un cuento para una revista.
 # Las cadenas del libro, de dónde salen y qué abren: docs/CADENAS.md.
 # Las líneas que empiezan con # son comentarios.
 
+== El comienzo
+
+=== quedarse ===
+titulo: Quedarse en Tejas Verdes
+pista: Marilla esperaba un niño. Ana se queda a prueba: hay que ser útil, aprender y ganarse a Marilla.
+pista si !cuaderno:quehaceres: Marilla quiere ver que Ana sirve para algo: ayúdala con los quehaceres.
+pista si cuaderno:quehaceres: Marilla dice que una niña que vive bajo su techo reza todas las noches. Y que todavía no te conoce bien: conversa con ella.
+meta: hecho se_queda
+requiere: hecho:a_prueba
+antes: que Marilla te deje quedarte, al menos un tiempo (mañana van a White Sands, donde la Sra. Spencer)
+guiño matthew: Bueno, pues… Marilla es dura, pero tiene buen corazón. Pórtate bien, ayúdala, y verás.
+guiño cerrada matthew: Bueno, pues… a mí me gustaría que te quedaras. No le digas a Marilla que te lo dije.
+
 == Amistades
 
 === conocer_diana ===
@@ -1443,6 +1559,8 @@ titulo: Conocer a Diana Barry
 pista: Quizás Marilla sepa de alguna niña de tu edad. Habla con ella.
 pista si hecho:quiere_amiga: Marilla dijo que un día de estos iría a La Cuesta del Huerto, donde viven los Barry… y que podrías ir con ella.
 meta: hecho conocidas_diana
+requiere: hecho:se_queda
+antes: quedarse en Tejas Verdes (después, quizás Marilla sepa de alguna niña de tu edad)
 guiño marilla: Los Barry tienen una niña de tu edad, Diana. Si me lo pidieras, quizás un día te llevaría a conocerla.
 
 === amigas ===
@@ -9836,6 +9954,7 @@ function wmRunTest(i){
   WM_APPROACH = null; game.wm.sinJarabe = false; AGENDA_ON = false; if ($('wmagenda')) $('wmagenda').checked = false;
   if (isSunday()) dayT += 1;   // (the test goals: on a weekday, with school)
   delete game.wm.ritmo;   // (and with nothing big of the book having happened yet today)
+  yaSeQueda();   // (Ana, staying at Green Gables already: the beginning, on trial, is a chain of its own)
   const keep = { scene: game.scene, x: ana.x, y: ana.y, dir: ana.dir, tx: toby.x, ty: toby.y, cx: cam.x, cy: cam.y };
   T.setup(); S = ((seasonCount() % 4) + 4) % 4;
   game.scene = keep.scene; ana.x = keep.x; ana.y = keep.y; ana.dir = keep.dir; ana.goto = null; toby.x = keep.tx; toby.y = keep.ty; cam.x = keep.cx; cam.y = keep.cy;   // (Ana where she was: no jumping to the test's start)
@@ -9998,7 +10117,7 @@ const dianaAmiga = () => conoceDiana() && !dlgHechos().prohibida;
 // what Ana can tell Marilla (the player's way: from her menu)
 function cadenaOpciones(who){
   const o = [];
-  if (who === 'marilla' && !dlgHechos().pide_amiga && !conoceDiana()) o.push(['Contarle que quieres una amiga del alma', () => { close(); dlgHecho('pide_amiga'); }]);
+  if (who === 'marilla' && dlgHechos().se_queda && !dlgHechos().pide_amiga && !conoceDiana()) o.push(['Contarle que quieres una amiga del alma', () => { close(); dlgHecho('pide_amiga'); }]);
   // (cap. 16: Diana to tea at Green Gables, once they have been friends a while; Ana prepares it and serves the «cordial»)
   if (who === 'diana' && dianaAmiga() && cuadernoHecho('amigas') && dlgCond('dias_desde:conocidas_diana:5', dlgCtx()) && relGetW('diana', 'ana') >= 5 && !activeGoals(agentOf('ana')).some(g => g.goal.kind === 'te_con')) o.push(['Invitarla a tomar el té en Tejas Verdes', () => { close(); agentStart('ana', G.te_con('ana', 'diana', 'cocina'), { favors: [{ f: 'venir', to: 'diana', lugar: 'cocina' }], label: 'invitar a Diana a tomar el té en Tejas Verdes (cap. 16)' }); notice('📜 Ana va a invitar a Diana a tomar el té, y a prepararlo.'); }]);
   return o;
@@ -10203,6 +10322,29 @@ function hitosTick(){
   }
 }
 
+/* ---------- the beginning: the night Ana comes to Green Gables, on trial (cap. 3 to 8) ----------
+   A new game starts that evening, in the kitchen, with Matthew and Marilla: Marilla expected a boy (the scenes
+   inicio_llegada, primera_noche, desayuno_prueba, viaje_spencer and se_queda of the script). Marilla, who did not want
+   a girl, cares little for her at first; Matthew, who drove her home, already cares a great deal. To stay for good,
+   Ana has to win Marilla over (the notebook: «Quedarse en Tejas Verdes»). A game from before all this has her staying
+   already; and so do the test goals (each tests one thing). */
+const NUEVA_PARTIDA = !localStorage.getItem('avonlea');
+function inicioLlegada(){
+  if (today() % 7 === 6) dayT += 1;   // (a weekday)
+  dayAt(19.75); setSeason(0); S = 0;   // (an evening in early June, at dusk, as in the book: with time for it before bed)
+  const put = (k, x, y) => { const b = PEOPLE[k]; b.where = 'gg'; b.x = x; b.y = y; b.sit = false; b.nav = null; b.buggy = false; b.story = null; b.away = null; };
+  put('marilla', STOVE.x + 30, STOVE.y + 40); put('matthew', KDOOR.x + 50, KIT.h * .55);
+  game.scene = 'gg'; ana.hidden = false; ana.sit = false; ana.x = KDOOR.x + 20; ana.y = KIT.h * .6; ana.dir = 1;
+  relSetW('marilla', 'ana', 1); relSetW('matthew', 'ana', 4);
+  dlgHecho('inicio_juego');
+  for (const k of Object.keys(PEOPLE)) amb.mute[k] = TT + 180;   // (no loose lines while she arrives)
+  logEv('Una noche de comienzos de junio, Matthew llegó a Tejas Verdes con una niña de pelo rojo.', []);
+}
+// (a game from before the beginning: Ana already stays; the test goals too)
+const yaSeQueda = () => { const H = dlgHechos(); for (const f of ['llegada_tv', 'primera_noche', 'desayuno_prueba', 'a_prueba', 'se_queda']) H[f] ??= today() + 1; };
+if (NUEVA_PARTIDA && !navigator.webdriver) inicioLlegada();
+else if (!NUEVA_PARTIDA && !dlgHechos().a_prueba && !dlgHechos().inicio_juego) yaSeQueda();
+
 /* ---------- the map: Avonlea drawn on a sheet of paper, with where everyone is ---------- */
 let mapBase = null;
 function toggleMap(on = !game.map){
@@ -10304,7 +10446,7 @@ function loop(now){
   else { owed = Math.min(owed + Math.min(raw, .25) * k, 3 * k * .05 + 2); const t0 = performance.now(); while (owed > 1e-4 && performance.now() - t0 < 22) { const d = Math.min(.05, owed); update(d); owed -= d; } }
   FRAME++; tripBarDraw(); render(); islaDraw(); requestAnimationFrame(loop);
 }
-window.__avonlea = { relatoEmpezar, convDisponibles, conversar, convOpciones, guiñosDe, LINES, dlgHecho, cualidad, cualidadSuma, cualidadCond, dlgCond, dlgEspecificidad, ritmoLleno, ritmoMarca, dlgHacer, dlgAccion, HABILIDADES, relSetW, relato: () => RELATO.lineas, reglas: () => RELATO_REGLAS.map(r => [r.id, r.texto]), jugables, jugar, anaMenu, correoRetirar, cartaLeer, CORREO, cartaTexto, playAct: () => game.playAct, DIALOGOS, dlgCtx, talks: () => TALKS, dlgGuion, dlgPanel, bubblesNow: () => bubbles, toby, cartSheet: (c, x, y, c8, t) => { const L = [], p = { look: 'matthew', x, y, c8, walk: 0, moving: false }; const [cx, cy] = [x, y]; pushCart(L, c, { x: cx, y: cy, c8, walk: 0, moving: true }, t); for (const [k, look] of [[0, 'matthew'], [1, 'ana']]) { const [sx, sy] = cartSeat(cx, cy, c8, k); L.push({ y: sy, draw: () => drawPerson(c, { ...mkPerson(look, sx, sy), sit: true, dir: c8Dir(c8) }, t) }); } L.sort((a, b) => a.y - b.y).forEach(o => o.draw()); }, startCap1, CAP1, LIBRO1, ROAD_TRAMOS, ROAD_MIN, roadTramo, islaToggle, DLG_BANK, startDay, setSeason, agendaData: () => AGENDA.map(e => ({ who: wmName(e.who), from: e.from, to: e.to, label: e.label, season: e.season, sunday: !!e.sunday, ana: !!(e.ana || e.who === 'ana'), cond: e.when ? String(e.when).replace(/^\(\) => /, '') : '' })), setAgenda: v => { AGENDA_ON = v; }, AGENDA, wmData: () => ({ THINGS, WHO, OFRECE, WP_NAME, TRADE, TREATS, LIBRETA, ITEM_NAME, MAX_GOALS, PACE, FOCO }), paintMapBase, doingText, wmName, wmBody, wmScene, WW, WH, setVec: v => { VEC_ON = v; }, setStyle: v => { ANA_STYLE = v; }, setHead: setHeadM, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+window.__avonlea = { setDia: (d, h) => { dayT = d + (h - 6) / 24; }, dia: () => today(), PEOPLE, relatoEmpezar, inicioLlegada, dlgHechos, convDisponibles, conversar, convOpciones, guiñosDe, LINES, dlgHecho, cualidad, cualidadSuma, cualidadCond, dlgCond, dlgEspecificidad, ritmoLleno, ritmoMarca, dlgHacer, dlgAccion, HABILIDADES, relSetW, relato: () => RELATO.lineas, reglas: () => RELATO_REGLAS.map(r => [r.id, r.texto]), jugables, jugar, anaMenu, correoRetirar, cartaLeer, CORREO, cartaTexto, playAct: () => game.playAct, DIALOGOS, dlgCtx, talks: () => TALKS, dlgGuion, dlgPanel, bubblesNow: () => bubbles, toby, cartSheet: (c, x, y, c8, t) => { const L = [], p = { look: 'matthew', x, y, c8, walk: 0, moving: false }; const [cx, cy] = [x, y]; pushCart(L, c, { x: cx, y: cy, c8, walk: 0, moving: true }, t); for (const [k, look] of [[0, 'matthew'], [1, 'ana']]) { const [sx, sy] = cartSeat(cx, cy, c8, k); L.push({ y: sy, draw: () => drawPerson(c, { ...mkPerson(look, sx, sy), sit: true, dir: c8Dir(c8) }, t) }); } L.sort((a, b) => a.y - b.y).forEach(o => o.draw()); }, startCap1, CAP1, LIBRO1, ROAD_TRAMOS, ROAD_MIN, roadTramo, islaToggle, DLG_BANK, startDay, setSeason, agendaData: () => AGENDA.map(e => ({ who: wmName(e.who), from: e.from, to: e.to, label: e.label, season: e.season, sunday: !!e.sunday, ana: !!(e.ana || e.who === 'ana'), cond: e.when ? String(e.when).replace(/^\(\) => /, '') : '' })), setAgenda: v => { AGENDA_ON = v; }, AGENDA, wmData: () => ({ THINGS, WHO, OFRECE, WP_NAME, TRADE, TREATS, LIBRETA, ITEM_NAME, MAX_GOALS, PACE, FOCO }), paintMapBase, doingText, wmName, wmBody, wmScene, WW, WH, setVec: v => { VEC_ON = v; }, setStyle: v => { ANA_STYLE = v; }, setHead: setHeadM, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
 /* ---------- the account of what happens: what can be seen, not what anyone intends ----------
    For the audit of the actions (tools/auditoria.js) and for whoever wants to read the game as a tale (?relato in the
    link writes it in the console). It watches some characters and writes, with the hour of the game:

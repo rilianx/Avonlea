@@ -21,6 +21,19 @@
 # Las cadenas del libro, de dónde salen y qué abren: docs/CADENAS.md.
 # Las líneas que empiezan con # son comentarios.
 
+== El comienzo
+
+=== quedarse ===
+titulo: Quedarse en Tejas Verdes
+pista: Marilla esperaba un niño. Ana se queda a prueba: hay que ser útil, aprender y ganarse a Marilla.
+pista si !cuaderno:quehaceres: Marilla quiere ver que Ana sirve para algo: ayúdala con los quehaceres.
+pista si cuaderno:quehaceres: Marilla dice que una niña que vive bajo su techo reza todas las noches. Y que todavía no te conoce bien: conversa con ella.
+meta: hecho se_queda
+requiere: hecho:a_prueba
+antes: que Marilla te deje quedarte, al menos un tiempo (mañana van a White Sands, donde la Sra. Spencer)
+guiño matthew: Bueno, pues… Marilla es dura, pero tiene buen corazón. Pórtate bien, ayúdala, y verás.
+guiño cerrada matthew: Bueno, pues… a mí me gustaría que te quedaras. No le digas a Marilla que te lo dije.
+
 == Amistades
 
 === conocer_diana ===
@@ -28,6 +41,8 @@ titulo: Conocer a Diana Barry
 pista: Quizás Marilla sepa de alguna niña de tu edad. Habla con ella.
 pista si hecho:quiere_amiga: Marilla dijo que un día de estos iría a La Cuesta del Huerto, donde viven los Barry… y que podrías ir con ella.
 meta: hecho conocidas_diana
+requiere: hecho:se_queda
+antes: quedarse en Tejas Verdes (después, quizás Marilla sepa de alguna niña de tu edad)
 guiño marilla: Los Barry tienen una niña de tu edad, Diana. Si me lo pidieras, quizás un día te llevaría a conocerla.
 
 === amigas ===

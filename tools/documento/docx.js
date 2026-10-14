@@ -49,6 +49,8 @@ const s1 = [
     ['`grande`', 'la escena empieza algo grande del libro: como mucho una por día (el ritmo)'],
   ]),
   H1('2. Las cadenas del libro, como grafo'),
+  H2('El comienzo: Ana, a prueba'),
+  P('Una partida nueva empieza **la noche en que Ana llega a Tejas Verdes** (cap. 3 a 8). Marilla esperaba un niño: «¿Dónde está el niño?». Ana se queda esa noche; a la mañana siguiente, Marilla anuncia que irán donde la Sra. Spencer a arreglar el error; esa tarde, en White Sands, la Sra. Blewett quiere a Ana de sirvienta y Marilla no se la da: Ana vuelve **a prueba**. Para quedarse para siempre tiene que ganarse a Marilla: ayudar con los quehaceres, decir sus oraciones, y que Marilla la quiera 3 (empieza en 1; Matthew, en 4). Hasta entonces, conocer a Diana espera.'),
   P('Cada cadena es un **grafo**: los nodos son escenas, metas o cosas que hace el jugador, y las flechas dicen qué viene después y con qué condición («al día siguiente», «sentadas al té»…). Las flechas **verdes** abren algo; las **rojas punteadas** lo cierran; las de **puntos** son otro camino posible.'),
   tabla([['Color del nodo', 2], ['Qué es', 5], ['Ejemplo', 4]], [
     ['Azul', 'Lo que hace el jugador (desde un menú)', '«Contarle a Marilla que quieres una amiga»'],

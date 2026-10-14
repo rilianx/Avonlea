@@ -10,6 +10,19 @@ En *Ana de las Tejas Verdes* casi nada pasa suelto: una cosa abre la siguiente. 
 
 Repaso hecho a partir de los resúmenes de `docs/ACCIONES_DEL_LIBRO.md`. ✅ está en el juego; ◻ todavía no.
 
+## 0. El comienzo: Ana, a prueba (cap. 3 a 8)
+
+Una partida nueva empieza la noche en que Ana llega a Tejas Verdes (`src/js/66-inicio.js`); si se juega el capítulo 1, se sigue desde su llegada. Marilla quería un niño: parte queriéndola poco (afecto 1) y Matthew, mucho (4).
+
+| Paso | En el libro | En el juego |
+|---|---|---|
+| «¿Dónde está el niño?» | cap. 3 | ✅ la escena `inicio_llegada`, esa noche en la cocina: el llanto de Ana, «llámeme Cordelia», «Ana con e»; se queda esa noche |
+| El desayuno | cap. 4 | ✅ `desayuno_prueba`, a la mañana siguiente: Marilla anuncia que en la tarde van donde la Sra. Spencer |
+| White Sands y la Sra. Blewett | cap. 5, 6 | ✅ `viaje_spencer`, esa tarde: Ana cuenta su vida en el camino; la Sra. Blewett la quiere de sirvienta; Marilla no se la da → hecho `a_prueba` |
+| Se queda para siempre | cap. 7, 8 | ✅ `se_queda` (grande): cuando Ana ayudó con los quehaceres, dice sus oraciones, Marilla la quiere 3 y pasaron 3 días → hecho `se_queda` |
+
+En el cuaderno: «Quedarse en Tejas Verdes», con pistas de lo que falta. Lo que espera a que Ana se quede: contarle a Marilla que quiere una amiga, y conocer a Diana.
+
 ## 1. Diana, la amiga del alma (cap. 8, 12)
 
 | Paso | En el libro | En el juego |
