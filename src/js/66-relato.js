@@ -74,6 +74,7 @@ const relatoFrase = (e, c, a) => {
 };
 // a line said, as the tale tells it: what she does (in parentheses) is told, not said; what she writes, written
 function relatoDice(n, t){
+  if (t.startsWith('~')) return n + ' piensa: «' + t.slice(1).trim() + '»';
   const m = t.match(/^\(([^)]*)\)\s*(.*)$/), q = s => /^«[^«]*»$/.test(s) ? s : '«' + s + '»';
   if (m) return m[1] + (m[2] ? (m[1].toLowerCase().startsWith(n.toLowerCase()) ? ' Y dice: ' : ' ' + n[0].toUpperCase() + n.slice(1) + ' dice: ') + q(m[2]) : '');   // (who says it, unless the telling is of her)
   if (t.startsWith('✎ ')) return n + ' escribe: ' + q(t.slice(2));

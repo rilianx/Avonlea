@@ -51,6 +51,8 @@ Están en `src/datos/guion.txt`. Cada escena tiene:
 
 **Todas son escenas.** Lo que cambia es qué las dispara (`disparo:`): el lugar y el estado (lo normal), el encuentro de dos personajes, la conversación desde el menú (`conversar`), la primera vez que se hace algo (`primera`), un menú propio (`menu`, como las señas con la vela), un hito.
 
+**Cómo se ve cada línea** (como en una historieta): lo que alguien dice, en un globo con su colita; lo que se cuenta de alguien, cómo se siente o qué hace (entre paréntesis al comienzo de la línea: `ana: (Ana se queda quieta, sin respirar.) ¿Para siempre?`), en un cuadro de narración, sin colita; lo que piensa (`ana piensa: No voy a mirar.`), en una nube de pensamiento. Capturas: `trazas/globos-narra-y-dice.png`, `trazas/globos-piensa.png`.
+
 **Escenas con alternativas** (como en Yarn Spinner, Ink, o los eventos de *Stardew Valley*): en las líneas de una escena, `-> lo que Ana puede hacer` abre una opción; debajo, con sangría, sus propias líneas (`quien: texto`) y lo que deja (`! hecho x`, `! suma afecto:marilla:ana 1`, `! log …`). Con `->*`, lo que Ana haría sola. La escena se detiene en la elección: el jugador elige en un menú; si no está (Ana va sola), después de unos segundos elige Ana. Después sigue con la opción elegida y con lo que venga después, igual para todas.
 
 ```

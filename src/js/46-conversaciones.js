@@ -213,28 +213,59 @@ function drawTag(g, t){
   g.save(); g.globalAlpha = .92; g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + 14, r); g.arcTo(x + w, y + 14, x, y + 14, r); g.arcTo(x, y + 14, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath();
   g.fillStyle = '#fffaf0'; g.fill(); g.strokeStyle = '#6b4a30'; g.lineWidth = 1; g.stroke(); g.fillStyle = '#3b2a1c'; g.fillText(t.label, t.x, y + 10); g.restore();
 }
-// a speech bubble, drawn on the screen (same size whatever the zoom) and kept inside it: above the head if it fits,
-// else below; the tail points at whoever speaks
+// what is said, on the screen (same size whatever the zoom), kept inside it, above the head if it fits, else below.
+// Three kinds, as in a comic: what one says, a bubble with its tail pointing at whoever speaks; what one thinks (a line
+// that starts with «~»: «ana piensa:» in the script), a cloud with little rounds for a tail; and what is told of them,
+// how they feel, what they do (the part in brackets at the start: «(Ana se queda quieta.)»), a square caption, no tail.
 function drawBubble(g, p, b, W, H){
-  const Z = view.Z, small = W < 520, a = clamp(Math.min(b.t / .15, (b.dur + .35 - b.t) / .3), 0, 1);
-  let fs = small ? 12 : 13, maxW = Math.min(small ? 200 : 240, W - 24), rows;
-  const wrap = () => { g.font = fs + 'px Georgia, serif'; rows = []; let cur = ''; for (const w of conNombres(b.text).split(' ')) { const t = cur ? cur + ' ' + w : w; if (cur && g.measureText(t).width > maxW) { rows.push(cur); cur = w; } else cur = t; } rows.push(cur); };
-  wrap(); if (rows.length > 5) { fs -= 1; maxW = Math.min(maxW + 60, W - 24); wrap(); }
-  const lh = fs + 3, w = Math.min(Math.max(...rows.map(r => g.measureText(r).width)) + 18, W - 12), h = rows.length * lh + 10, r = 8;
+  const Z = view.Z, a = clamp(Math.min(b.t / .15, (b.dur + .35 - b.t) / .3), 0, 1);
+  let t = conNombres(b.text), piensa = false, narra = null;
+  if (t[0] === '~') { piensa = true; t = t.slice(1).trim(); }
+  const m = t.match(/^\(([^)]*)\)\s*(.*)$/); if (m) { narra = m[1].trim(); t = m[2].trim(); }
+  if (t[0] === '~') { piensa = true; t = t.slice(1).trim(); }
   const headY = p.lie ? p.y - 24 : p.headTop ? p.y - p.headTop : p.y - Math.max(62, 28 + 12 * HEAD_M) * LOOKS[p.look].h - 6;
   const sx = (p.x - view.ox) * Z, top = (headY - view.oy) * Z - (1 - a) * 5, foot = (p.y - view.oy) * Z;
-  let y = top - h - 8, below = false;
-  if (y < 6) { y = Math.min(foot + 10, H - h - 6); below = true; }
-  y = clamp(y, 6, H - h - 6);
-  const x = clamp(sx - w / 2, 6, W - w - 6), tx = clamp(sx, x + r + 4, x + w - r - 4);
   g.save(); g.globalAlpha = a; g.lineJoin = 'round'; g.textAlign = 'center';
-  g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath();
-  g.fillStyle = '#fffaf0'; g.fill(); g.strokeStyle = p === ana ? '#a8432c' : '#6b4a30'; g.lineWidth = 1.3; g.stroke();
-  // the tail
-  g.beginPath(); if (below) { g.moveTo(tx - 5, y + .5); g.lineTo(clamp(sx, tx - 12, tx + 12), Math.max(foot + 2, y - 7)); g.lineTo(tx + 5, y + .5); } else { g.moveTo(tx - 5, y + h - .5); g.lineTo(clamp(sx, tx - 12, tx + 12), Math.min(top, y + h + 7)); g.lineTo(tx + 5, y + h - .5); }
-  g.fill(); g.stroke(); g.fillRect(tx - 4, below ? y + .5 : y + h - 2, 8, 1.6);
-  g.fillStyle = '#3b2a1c'; rows.forEach((t, k) => g.fillText(t, x + w / 2, y + 4 + (k + 1) * lh - 2));
+  let caja = null;
+  if (t) caja = cajaTexto(g, t, piensa ? 'piensa' : 'dice', p, sx, top, foot, W, H);
+  if (narra) cajaTexto(g, narra, 'narra', p, sx, caja ? (caja.below ? null : caja.y - 4) : top, caja ? (caja.below ? caja.y + caja.h + 4 : null) : foot, W, H, !!caja);
   g.restore();
+}
+// one box: its rows, where it goes (above «top» if it fits, else from «foot» down), its shape and its tail
+function cajaTexto(g, text, kind, p, sx, top, foot, W, H, apilada){
+  const small = W < 520, narra = kind === 'narra';
+  let fs = small ? 12 : 13, maxW = Math.min(small ? 200 : 240, W - 24), rows;
+  const font = () => (narra ? 'italic ' : '') + fs + 'px Georgia, serif';
+  const wrap = () => { g.font = font(); rows = []; let cur = ''; for (const w of text.split(' ')) { const t = cur ? cur + ' ' + w : w; if (cur && g.measureText(t).width > maxW) { rows.push(cur); cur = w; } else cur = t; } rows.push(cur); };
+  wrap(); if (rows.length > 5) { fs -= 1; maxW = Math.min(maxW + 60, W - 24); wrap(); }
+  const lh = fs + 3, w = Math.min(Math.max(...rows.map(r => g.measureText(r).width)) + (kind === 'piensa' ? 26 : 18), W - 12), h = rows.length * lh + (kind === 'piensa' ? 14 : 10);
+  const gap = kind === 'piensa' ? 16 : narra && apilada ? 0 : 8;
+  let y, below = false;
+  if (top != null) { y = top - h - gap; if (y < 6) { y = Math.min((foot ?? top) + 10, H - h - 6); below = true; } }
+  else { y = foot; below = true; }
+  y = clamp(y, 6, H - h - 6);
+  const x = clamp(sx - w / 2, 6, W - w - 6), r = narra ? 2 : kind === 'piensa' ? Math.min(16, h / 2) : 8, tx = clamp(sx, x + r + 4, x + w - r - 4);
+  const rect = rr => { g.beginPath(); g.moveTo(x + rr, y); g.arcTo(x + w, y, x + w, y + h, rr); g.arcTo(x + w, y + h, x, y + h, rr); g.arcTo(x, y + h, x, y, rr); g.arcTo(x, y, x + w, y, rr); g.closePath(); };
+  const tinta = p === ana ? '#a8432c' : '#6b4a30';
+  if (narra) {   // (a caption: parchment, square, no tail)
+    rect(r); g.fillStyle = '#f3e4bf'; g.fill(); g.strokeStyle = '#8a6a48'; g.lineWidth = 1; g.stroke();
+  } else if (kind === 'piensa') {   // (a cloud: its edge in little bumps, and rounds going down to the head)
+    g.fillStyle = '#ffffff'; g.strokeStyle = tinta; g.lineWidth = 1.2;
+    const bumps = []; const nx = Math.max(4, Math.round(w / 15)), ny = Math.max(1, Math.round(h / 15));
+    for (let i = 0; i <= nx; i++) { bumps.push([x + w * i / nx, y]); bumps.push([x + w * i / nx, y + h]); }
+    for (let j = 1; j < ny; j++) { bumps.push([x, y + h * j / ny]); bumps.push([x + w, y + h * j / ny]); }
+    const br = Math.min(8, h / 2.8);
+    g.beginPath(); for (const [bx, by] of bumps) { g.moveTo(bx + br, by); g.arc(bx, by, br, 0, Math.PI * 2); } g.fill(); g.stroke();
+    rect(r); g.fill();
+    const dir = below ? -1 : 1, y0 = below ? y : y + h;
+    for (const [k, rad] of [[1, 4], [2, 2.6]]) { g.beginPath(); g.arc(tx + (sx - tx) * k / 3, y0 + dir * (6 + k * 6), rad, 0, Math.PI * 2); g.fill(); g.stroke(); }
+  } else {   // (what is said: the bubble and its tail)
+    rect(r); g.fillStyle = '#fffaf0'; g.fill(); g.strokeStyle = tinta; g.lineWidth = 1.3; g.stroke();
+    g.beginPath(); if (below) { g.moveTo(tx - 5, y + .5); g.lineTo(clamp(sx, tx - 12, tx + 12), Math.max(foot + 2, y - 7)); g.lineTo(tx + 5, y + .5); } else { g.moveTo(tx - 5, y + h - .5); g.lineTo(clamp(sx, tx - 12, tx + 12), Math.min(top, y + h + 7)); g.lineTo(tx + 5, y + h - .5); }
+    g.fill(); g.stroke(); g.fillRect(tx - 4, below ? y + .5 : y + h - 2, 8, 1.6);
+  }
+  g.font = font(); g.fillStyle = narra ? '#4a3420' : '#3b2a1c'; rows.forEach((t, k) => g.fillText(t, x + w / 2, y + (kind === 'piensa' ? 7 : 4) + (k + 1) * lh - 2));
+  return { y, h, below };
 }
 function askKey(){
   const P = PROV[provider()], k = (prompt(`Para conversar con IA (${AI.model}), pega tu clave de la API de ${P.name} (${P.hint}). Se guarda solo en este navegador.`) || '').trim();

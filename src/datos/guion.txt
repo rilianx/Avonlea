@@ -10,6 +10,8 @@
 #   tiempo: «estacion:verano», «dia_estacion:1»
 # Efectos: «hecho x», «olvidar x», «contar quien x», «suma granja:ana 2», «suma afecto:diana:ana -1»,
 #   «meta quien tipo args | texto | etiqueta | prioridad» (un encargo: el planificador busca cómo cumplirlo).
+# En las líneas: lo que se dice va en un globo; lo que se cuenta de alguien (cómo se siente, qué hace) entre paréntesis al
+#   comienzo, «(Ana se queda quieta.)», en un cuadro de narración; lo que piensa, «ana piensa: texto», en una nube.
 # «narra: texto» (una o varias): lo que explica la escena (quién es quién, qué pasó antes, dónde estamos), en una tarjeta
 #   como la página de un libro, antes de las líneas; el juego espera a que el jugador siga. En las líneas, «narra: texto» igual.
 # Si varias escenas pueden decirse a la vez en un canal, va la de más prioridad; a igual prioridad, la más específica
@@ -182,7 +184,7 @@ calesa: camino
 camino: tramo=campos
 si: dicha:silencio_ranas
 ---
-ana: (Muy bajito, casi para sí misma:) Blanco… de las Delicias… no, todavía no…
+ana piensa: Blanco… de las Delicias… no, todavía no…
 
 # --- entrando a Avonlea: una milla más (y la Avenida tiene nombre), la laguna, Tejas Verdes, la casa
 === nombra_avenida ===
@@ -1124,7 +1126,7 @@ canal: ana_sola
 prioridad: 2
 si: hecho:a_prueba, !hecho:se_queda
 ---
-ana: (Ana apoya la frente en el vidrio.) Si me porto bien… si soy útil… si aprendo…
+ana piensa: (Ana apoya la frente en el vidrio.) Si me porto bien… si soy útil… si aprendo…
 ana: Voy a imaginar que esta ventana es mía para siempre. Así, si me tengo que ir, al menos la habré tenido un poco.
 
 === ventana_se_queda ===
@@ -1237,7 +1239,7 @@ prioridad: 3
 si: hecho:zanahorias
 ---
 ana: (Ana se tira una trenza, furiosa.) Zanahorias. Así me ve todo el mundo. Así me ve él.
-ana: Bueno. Que me vea así. Pero en las notas le voy a ganar. Eso no tiene color.
+ana piensa: Bueno. Que me vea así. Pero en las notas le voy a ganar. Eso no tiene color.
 
 === espejo_invierno ===
 disparo: objeto
@@ -1440,7 +1442,8 @@ prioridad: 2
 si: hecho:zanahorias
 ---
 ana: (Ana se sienta muy derecha, sin mirar hacia el pupitre de Gilbert Blythe.)
-ana: No voy a mirar. No voy a mirar. (No mira. Bueno, una vez. De reojo. Para ver si él está mirando. No está mirando.)
+ana piensa: No voy a mirar. No voy a mirar.
+ana: (No mira. Bueno, una vez. De reojo. Para ver si él está mirando. No está mirando.)
 
 === pupitre_diana ===
 disparo: objeto
@@ -1746,7 +1749,7 @@ prioridad: 3
 si: hecho:prohibida, !hecho:perdonada
 ---
 ana: (Ana pasa frente a La Cuesta del Huerto sin detenerse. Le parece ver una cortina que se mueve.)
-ana: No voy a mirar, para no ponerla en un aprieto. Pero voy a caminar despacito, para que sepa que pasé.
+ana piensa: No voy a mirar, para no ponerla en un aprieto. Pero voy a caminar despacito, para que sepa que pasé.
 
 === lugar_iglesia ===
 disparo: lugar
@@ -1802,7 +1805,7 @@ si: estacion:primavera, hecho:se_queda
 narra: Los manzanos del Camino Blanco florecieron todos juntos, en una sola noche.
 ana: (Ana se detiene en seco. Sobre ella, la bóveda de flores es tan blanca que parece hecha de luz. Ya no se acuerda de adónde iba.)
 ana: (No dice nada. Por una vez, Ana Shirley no dice nada.)
-ana: …Es como la primera vez. No: es mejor que la primera vez, porque ahora es mío. Ahora vuelvo a casa por aquí.
+ana piensa: …Es como la primera vez. No: es mejor que la primera vez, porque ahora es mío. Ahora vuelvo a casa por aquí.
 
 === lugar_mar_primera ===
 disparo: lugar

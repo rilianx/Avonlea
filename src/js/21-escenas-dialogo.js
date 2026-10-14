@@ -268,8 +268,9 @@ function dlgGuion(txt){
     const h = s.match(/^===\s*(.+?)\s*===$/); if (h) { out.push(c = { id: h[1], _l: [] }); body = false; continue; }
     if (!c) continue;
     if (s === '---') { body = true; continue; }
-    const i = s.indexOf(':'), k = i < 0 ? s : s.slice(0, i).trim(), v = i < 0 ? '' : s.slice(i + 1).trim();
+    const i = s.indexOf(':'); let k = i < 0 ? s : s.slice(0, i).trim(), v = i < 0 ? '' : s.slice(i + 1).trim();
     if (body) {
+      { const pm = k.match(/^(\S+)\s+piensa$/); if (pm) { k = pm[1]; v = '~' + v; } }   // (what one thinks: «ana piensa: …», a cloud, not a bubble)
       // a choice (as in Yarn Spinner): «-> what Ana can do» (with «->*», what she would do on her own), and under it,
       // indented, its own lines («quien: texto») and what it does («! hecho x», «! suma afecto:marilla:ana 1»)
       if (s.startsWith('->')) { const last = c._l.at(-1), op = { texto: s.replace(/^->\*?\s*/, ''), propia: s.startsWith('->*'), lineas: [], efectos: [] }; if (last?.[0] === '?' && c._ultimaOpcion) last[2].push(op); else c._l.push(['?', 'elige', [op]]); c._ultimaOpcion = op; continue; }
