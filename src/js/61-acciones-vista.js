@@ -195,7 +195,7 @@ const ACC_MESA = {
 function accTick(ag, a, st, r){
   const V = ACCION_VISTA[a.v], b = wmBody(ag.who); if (!V || !b) return;
   const doing = r === 'run' && (st.w > 0 || st.hg || st.said);
-  if (doing && !ag.acting) { ag.acting = { v: a.v, k: a.k, x: a.x, t0: TT, dura: accDuracion(a, ag.who), base: [b.x, b.y], sit: b.sit, task: ag.task, ...(st.P ? { obj: null } : {}) }; if (V.sentar && !V.mov && !st.P) { b.sit = true; if (V.con && a.k) { const o = wmBody(a.k); if (o && wmScene(a.k) === wmScene(ag.who)) { ag.acting.kb = [o.x, o.y, o.sit]; o.x = b.x + 46; o.y = b.y + 2; o.sit = true; o.dir = 3; b.dir = 1; } } } }
+  if (doing && !ag.acting) { ag.acting = { v: a.v, k: a.k, x: a.x, t0: TT, dura: accDuracion(a, ag.who), base: [b.x, b.y], sit: b.sit, task: ag.task, ...(st.P ? { obj: null } : {}) }; if (V.sentar && !V.mov && !st.P) { b.sit = true; if (V.con && a.k) { const o = wmBody(a.k); if (o && wmScene(a.k) === wmScene(ag.who)) { ag.acting.kb = [o.x, o.y, o.sit]; const mojado = (x, y) => wmScene(ag.who) === 'out' && (inLake(x, y) || inBrook(x, y) || inSea(x, y)), lado = [[46, 2], [-46, 2], [0, 30], [0, -30]].find(([dx, dy]) => !mojado(b.x + dx, b.y + dy)) || [46, 2]; o.x = b.x + lado[0]; o.y = b.y + lado[1]; o.sit = true; o.dir = lado[0] < 0 ? 1 : 3; b.dir = lado[0] < 0 ? 3 : 1; } } } }   // (whoever does it with her, beside her: on the dry side, not in the lake)
   if (doing && ag.acting && V.mov) ACC_MOV[V.mov](b, ag.acting);
   if (doing && ag.acting && V.mira != null && !st.P) b.dir = V.mira;
   if (doing && ag.acting && a.k && !V.mov && !st.P) { const o = wmBody(a.k); if (o && wmScene(a.k) === wmScene(ag.who) && dist(o.x, o.y, b.x, b.y) < 140 && !o.sit) { const sd = o.x < b.x ? 3 : 1; b.dir = sd; o.dir = sd === 1 ? 3 : 1; } }   // (face to face)
