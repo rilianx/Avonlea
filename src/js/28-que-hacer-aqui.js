@@ -61,6 +61,7 @@ function opcionesDe(t){
   const o = [[t.label, t.act]], ya = new Set([t.label]);
   for (const u of targets()) if (u.id !== t.id && !u.self && !/^[pfa]:/.test(u.id) && !ya.has(u.label) && dist(u.x, u.y, t.x, t.y) < 34) { ya.add(u.label); o.push([u.label, u.act]); }
   for (const a of jugables()) {
+    if (['estudiar', 'recitar'].includes(a.v) && !cuadernoHecho('escuela')) continue;   // (lessons: once she goes to school)
     let P = null; try { P = accPasos(a, 'ana'); } catch (e) {} const p0 = P?.[0]; if (!p0) continue;
     if (p0.lugar && p0.lugar !== personKey('ana')) continue;
     let q = null; try { q = typeof p0.p === 'function' ? p0.p() : p0.p; } catch (e) {} if (!q || dist(q[0], q[1], t.x, t.y) > 60) continue;
@@ -71,7 +72,7 @@ function opcionesDe(t){
 function opcionesAct(t){
   if (t.self || /^[pf]:/.test(t.id)) return t.act();
   const o = opcionesDe(t); if (o.length < 2) return t.act();
-  say('Ana', t.label + '…', [...o.map(([l, f]) => [l, () => { close(); f(); }]), ['Nada por ahora', close]]);
+  say('Ana', t.nombre || '¿Qué hace Ana aquí?', [...o.map(([l, f]) => [l, () => { close(); f(); }]), ['Nada por ahora', close]]);
 }
 // a tap: do it at once if she is close enough, otherwise she walks there (A*) and does it on arrival; on bare ground she just walks
 function tapAt(sx, sy){

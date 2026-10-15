@@ -332,7 +332,9 @@ function renderView(){
   }
   // speech bubbles over the heads of whoever is talking (on the screen, over the light of the day, so they read at night)
   cuadrosY = W < 640 ? 100 : 56;   // (the captions, from the top down: under the hint)
-  for (const b of bubbles) { const p = personOf(b.q); if (p && (b.q === 'ana' ? anaHere : (PEOPLE[b.q] ? sceneOf(b.q) : b.q.startsWith('f:') ? FOLKBY[b.q.slice(2)]?.where : animalWhere(b.q)) === game.scene)) drawBubble(g, p, b, W, H); }
+  const aqui = bubbles.map(b => [personOf(b.q), b]).filter(([p, b]) => p && (b.q === 'ana' ? anaHere : (PEOPLE[b.q] ? sceneOf(b.q) : b.q.startsWith('f:') ? FOLKBY[b.q.slice(2)]?.where : animalWhere(b.q)) === game.scene));
+  for (const [p, b] of aqui) drawBubble(g, p, b, W, H, 'cuadros');   // (the captions first, at the top; the bubbles under them)
+  for (const [p, b] of aqui) drawBubble(g, p, b, W, H);
   // the little papers: what she has, the hour, what she can do
   const I = game.inv, bits = [];
   for (const k of ITEMS) if (I[k]) bits.push(ITEM_DEFS[k].icon + ' ' + (k === 'dolares' ? money(I[k], true) : I[k]));

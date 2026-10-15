@@ -75,6 +75,13 @@ function drawTable(c){
   if (M?.puesta) for (let k = 0; k < 3; k++) { const x = TABLE.x - 30 + k * 30, y = TABLE.y - 28; ell(c, x, y, 7, 3, '#ffffff', true); line(c, [[x + 9, y - 2], [x + 9, y + 2]], '#a8a8b0', 1, k); }   // (laid: three places)
   else if (M?.sucia !== false) { ell(c, TABLE.x - 14, TABLE.y - 30, 8, 4, '#fffaf0', true); ell(c, TABLE.x + 16, TABLE.y - 32, 5, 4, '#9db3bf', true); }
   if (game.inv.tarta + game.inv.compota > 0) ell(c, TABLE.x - 14, TABLE.y - 32, 6, 3, '#7a4a8a', true);
+  // a meal on the table: bread, butter and the jam (for dinner), the porridge (for breakfast)
+  const F = game.comida?.dia === today() ? game.comida.que : null;
+  if (F) {
+    ell(c, TABLE.x - 4, TABLE.y - 30, 10, 4.6, '#c8955a', true); ell(c, TABLE.x - 4, TABLE.y - 32, 8, 3, '#dcae72');   // (the loaf)
+    if (F === 'cena') { ell(c, TABLE.x + 18, TABLE.y - 29, 5, 2.4, '#f3e08a', true); blob(c, [[TABLE.x - 26, TABLE.y - 26], [TABLE.x - 18, TABLE.y - 26], [TABLE.x - 18, TABLE.y - 35], [TABLE.x - 26, TABLE.y - 35]], '#b0305a'); }   // (butter, the crab-apple jam)
+    else { for (const dx of [-28, 28]) { ell(c, TABLE.x + dx, TABLE.y - 28, 7, 3, '#ffffff', true); ell(c, TABLE.x + dx, TABLE.y - 28.6, 4.6, 1.8, '#e2cfa0'); } }   // (two bowls of porridge)
+  }
   // what Marilla left on the table for Ana
   if (game.table === 'tarta') { ell(c, TABLE.x + 2, TABLE.y - 30, 10, 4.4, '#d9a46a', true); ell(c, TABLE.x + 2, TABLE.y - 31, 8, 3, '#6a3a6e'); }
   else if (game.table === 'compota') { blob(c, [[TABLE.x - 3, TABLE.y - 28], [TABLE.x + 5, TABLE.y - 28], [TABLE.x + 5, TABLE.y - 38], [TABLE.x - 3, TABLE.y - 38]], '#e0a24a'); }

@@ -47,7 +47,7 @@ function startVisor(){
     for (let y = Math.floor((oy - H / Z) / S_) * S_; y < oy + H / Z; y += S_) { g.beginPath(); g.moveTo(ox - W / Z, y); g.lineTo(ox + W / Z, y); g.stroke(); }
     drawPerson(g, a, t);
     view.ox = ox - W / 2 / Z; view.oy = oy - H * .62 / Z; view.Z = Z;
-    g.setTransform(dpr, 0, 0, dpr, 0, 0); for (const b of bubbles) drawBubble(g, a, b, W, H);
+    g.setTransform(dpr, 0, 0, dpr, 0, 0); cuadrosY = 10; for (const b of bubbles) drawBubble(g, a, b, W, H, 'cuadros'); for (const b of bubbles) drawBubble(g, a, b, W, H);
     requestAnimationFrame(frame);
   };
   requestAnimationFrame(frame);

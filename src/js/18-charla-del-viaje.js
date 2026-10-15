@@ -162,6 +162,6 @@ function elegir(t, opciones){
   const propia = opciones.find(o => o.propia) || opciones[0];
   if (navigator.webdriver || ana.hidden) return aplicar(propia);   // (no one to ask: what she would do)
   let hecho = false; const una = op => { if (hecho) return; hecho = true; close(); pide(op); };
-  say('ana', '¿Qué hace Ana?', opciones.map(op => [nombreMay(op.texto.replace(/^«(.)/, (m, c) => '«' + c.toUpperCase())), () => una(op)]));
+  say('ana', opciones.some(op => op.efectos.some(a => a.nombrar)) ? '¿Cómo lo llama Ana?' : '¿Qué hace Ana?', opciones.map(op => [nombreMay(op.texto.replace(/^«(.)/, (m, c) => '«' + c.toUpperCase())), () => una(op)]));
   t.elige = { hasta: auto.on ? TT + 10 : Infinity, una, propia };   // (if the player is away, Ana chooses after a while: what she would do)
 }

@@ -356,7 +356,8 @@ function drawPerson(c, p, t){
     c.fillStyle = '#d9433b'; c.fillRect(-7.2, by - 1.4, 14.4, 2.4);
     line(c, [[rt, by], [rt + 4 * Math.sign(rt), by + 3], [rt + (6 + wind * 2) * Math.sign(rt), by + 6 + Math.sin(t * 4) * 1.2]], '#d9433b', 1.8, 9);
   }
-  if (L.hatDark) { const by = hy - 7; ell(c, 0, by + 1, 11, 3.4, '#2f2b30', true); blob(c, [[-6, by], [6, by], [5, by - 6], [-5, by - 6]], '#3a353c'); }
+  if (L.hatDark && (typeof game === 'undefined' || game.scene === 'out')) { const by = hy - 7;   // (indoors, the hat comes off)
+    ell(c, 0, by + 1, 11, 3.4, '#2f2b30', true); blob(c, [[-6, by], [6, by], [5, by - 6], [-5, by - 6]], '#3a353c'); }
   }
   c.restore();
   if (fl >= 0) { const [hx, hyy] = hsOut(flickHand(fl, side)), sx = side ? 1 : 5.5; arm(sx, -21, hx, hyy); ell(c, hx, hyy, 1.7, 1.6, L.skin); }   // (with a big head the hand goes as far out as the head is big)

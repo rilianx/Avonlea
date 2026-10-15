@@ -134,7 +134,7 @@ tokDraw();
 // starting over: everything that happened is forgotten (the AI settings stay)
 let wiping = false;
 $('aireset').addEventListener('click', () => { if (!confirm('¿Borrar todo (el día, lo que tiene Ana, lo que recuerdan, las relaciones, la historia) y empezar de cero?')) return; wiping = true; try { localStorage.removeItem('avonlea'); } catch (e) {} location.reload(); });
-try { if (!aiKey() && !localStorage.getItem('avonlea-ai-asked')) { localStorage.setItem('avonlea-ai-asked', '1'); aiPanel(true); } } catch (e) {}
+// (the panel of the AI is not opened by itself at the start: it is in ✒, for whoever wants it; the game begins with Ana)
 $('say').addEventListener('submit', e => { e.preventDefault(); const t = $('sayin').value.trim(); $('sayin').value = ''; closeSay(); if (t) anaSpeak(t); });
 $('sayin').addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); closeSay(); } });
 $('saybtn').addEventListener('pointerdown', e => { e.stopPropagation(); audio(); sayOpen ? closeSay() : openSay(); });

@@ -741,6 +741,7 @@ al_terminar: hecho primera_noche
 al_terminar: log Marilla dejó que Ana se quedara esa noche, hasta aclarar el enredo. Ana casi no probó la cena.
 ---
 ! sentar ana
+! sin_sombrero
 ! ana llora=true
 ana: (Ana se deja caer en una silla junto a la mesa, hunde la cara entre los brazos y llora a mares.)
 matthew: (Matthew y Marilla se miran por encima de la estufa, sin saber qué hacer.)
@@ -762,6 +763,7 @@ ana: Si me llama Ana, por favor llámeme Ana con una sola n. A-n-n-a se ve espan
 marilla: (Marilla aprieta los labios.) Muy bien, Ana con una sola n. Ahora a cenar.
 ! sentar marilla
 ! sentar matthew
+! mesa cena
 marilla: (Marilla sirve pan, mantequilla y jalea de manzanitas silvestres. Matthew se sienta en silencio.)
 ana: (Ana mordisquea el pan y empuja la jalea por el plato con la cuchara. No come casi nada.)
 marilla: No estás comiendo nada.
@@ -780,7 +782,7 @@ marilla: (Marilla enciende una vela.) Tu pieza es la del alero este, arriba. Sub
 ! levantar marilla
 ! levantar matthew
 ! levantar ana
-narra: Así se juega: cuando hay que elegir, eliges tú por Ana (si no eliges, ella elige sola, a su manera). Lo que hace cambia lo que los demás sienten por ella. Ahora mismo Marilla no la quiere, y Ana está a prueba.
+narra: Así se juega: cuando hay que elegir, eliges tú por Ana; el tiempo espera mientras decides. Lo que hace cambia lo que los demás sienten por ella. Ahora mismo Marilla no la quiere: mañana la llevará a White Sands, a devolverla.
 narra: Ahora te toca a ti: lleva a Ana a su pieza. Toca la escalera, al fondo de la cocina. En el cuaderno (📖) verás qué puede hacer Ana para quedarse en Tejas Verdes.
 
 # la primera noche, en la pieza del alero (cap. 3): apenas llega, Ana se tira en la cama, desconsolada; Marilla sube con
@@ -838,6 +840,9 @@ en: ana=gg, marilla=gg
 si: hecho:primera_noche, dias_desde:llegada_tv:1, !hecho:desayuno_prueba, hora:6-14
 al_terminar: hecho desayuno_prueba
 ---
+! sentar ana
+! sentar marilla
+! mesa desayuno
 ana: ¡Oh, Marilla! ¿Vio la mañana? El cerezo de la ventana está todo en flor. ¿No le da gusto que haya mañanas en el mundo?
 marilla: Es una mañana como cualquier otra. Siéntate y come.
 marilla: Y otra cosa: anoche dejaste la ropa tirada por todo el suelo. La doblé yo, pero no pienso hacerlo otra vez. En esta casa, cada una dobla su ropa y la deja en la silla.
@@ -847,6 +852,8 @@ marilla: (Marilla aprieta los labios.) Pues aquí no se te va a olvidar.
 ana: Me cuesta comer cuando estoy desesperada. Pero es tan difícil estar desesperada en una mañana así…
 marilla: Esta tarde vamos a White Sands, a ver a la Sra. Spencer. Ella se equivocó, y ella lo va a arreglar.
 ana: (Ana baja la mirada al plato y no dice nada más, cosa rara en ella.)
+! levantar ana
+! levantar marilla
 
 === viaje_spencer ===
 narra: White Sands está a unas millas por el camino de la costa. Allí vive la Sra. Spencer, la que trajo a Ana del orfanato por equivocación: Marilla va a pedirle que la devuelva. Ana sabe que puede ser su último día en Tejas Verdes.
@@ -860,15 +867,41 @@ al_terminar: hecho a_prueba
 al_terminar: suma afecto:marilla:ana 1
 al_terminar: log Marilla llevó a Ana a White Sands; la Sra. Blewett la quería de sirvienta, y Marilla no se la dio. Ana se queda en Tejas Verdes, a prueba.
 ---
-marilla: (Marilla engancha la yegua alazana a la calesa, y salen las dos hacia White Sands.)
-ana: (En el camino, Ana le cuenta su vida.) Nací en Bolingbroke. Mis padres murieron de fiebre cuando yo tenía tres meses. Después me crió la Sra. Thomas, y después la Sra. Hammond, que tenía tres pares de mellizos. Y después, el orfanato.
-marilla: (Marilla escucha callada, y siente algo parecido a la lástima.) ¿Y esas mujeres te trataban bien?
-ana: Q-querían tratarme bien. Sé que querían ser lo más buenas posible conmigo. Cuando uno quiere ser bueno, no importa tanto si no lo consigue del todo, ¿no?
-blewett: (En casa de la Sra. Spencer está la Sra. Peter Blewett, que busca una niña para cuidarle los hijos.) Esta me sirve. Es flaca, pero dura. Va a tener que ganarse lo que come.
-ana: (Ana se pone pálida y mira a Marilla, sin atreverse a decir nada.)
-marilla: No sé… Matthew quería quedarse con ella. No puedo decidir sin hablarlo con él. Me la llevo de vuelta.
-marilla: (De vuelta en Tejas Verdes, Marilla habla largo con Matthew. Después llama a Ana.) Ana, te quedas. A prueba. Si te portas bien, si eres útil y aprendes, veremos.
-ana: ¡Oh, Marilla! Voy a ser tan buena… Voy a intentar ser tan buena como un ángel. Bueno, como se pueda.
+marilla: Ponte el sombrero, Ana. Nos vamos a White Sands.
+ana piensa: Puede que sea la última vez que veo esta cocina.
+narra: Marilla engancha la yegua alazana a la calesa y salen las dos por el camino de la costa. Ana decide, muy firme, que va a disfrutar del paseo: «He decidido disfrutar de este viaje. Si uno se decide con firmeza, casi siempre puede disfrutar de las cosas.»
+narra: Por el camino, Marilla le pide que le cuente su vida. Ana nació en Bolingbroke; sus padres murieron de fiebre cuando ella tenía tres meses. La crió la Sra. Thomas, que tenía un marido que bebía; después la Sra. Hammond, que tenía tres pares de mellizos. Y después, el orfanato.
+narra: «¿Y esas mujeres te trataban bien?», pregunta Marilla. Ana se pone colorada: «Q-querían tratarme bien. Cuando uno quiere ser bueno, no importa tanto si no lo consigue del todo, ¿no?». Marilla no dice nada, pero por dentro siente algo parecido a la lástima.
+narra: En casa de la Sra. Spencer está la Sra. Peter Blewett, que busca una niña para cuidarle los hijos. Mira a Ana de arriba abajo: «Esta me sirve. Es flaca, pero dura. Va a tener que ganarse lo que come.» Ana se pone pálida y mira a Marilla, sin atreverse a decir una palabra.
+narra: Marilla ve esa carita, y algo se le encoge por dentro. «No sé… Matthew quería quedarse con ella. No puedo decidir sin hablarlo con él. Me la llevo de vuelta.» Y vuelven a Tejas Verdes, ya de tarde.
+! pasa_tiempo 4
+marilla: (Marilla habló largo con Matthew en el corral. Después llama a Ana a la cocina.) Ana, te quedas. A prueba. Si te portas bien, si eres útil y aprendes, veremos.
+ana: ¡Oh, Marilla! ¿De verdad? ¿Me quedo en Tejas Verdes?
+->* «Voy a ser tan buena como un ángel.»
+   ana: Voy a intentar ser tan buena como un ángel. Bueno… como se pueda. ¡Oh, Marilla, gracias, gracias!
+   marilla: (Marilla carraspea, un poco incómoda con tanta gratitud.) Bueno, bueno. Ya veremos.
+-> Abrazar a Marilla, sin decir nada
+   ana: (Ana corre y abraza a Marilla por la cintura, con la cara escondida contra su delantal.)
+   marilla: (Marilla se queda tiesa, sin saber dónde poner las manos. Pero no la aparta.) Bueno, bueno… Ve a lavarte la cara.
+   ! suma afecto:marilla:ana 1
+ana piensa: A prueba. Tengo que ser buena. Muy, muy buena.
+
+# la hora de almorzar: Marilla la llama a la mesa (cada día, si las dos están en la cocina)
+=== llamar_almuerzo ===
+canal: gg
+prioridad: 4
+sujeta: marilla
+repetir: dia
+en: ana=gg, marilla=gg
+si: hecho:desayuno_prueba, hora:12-13.4
+---
+marilla: Ana, a la mesa. La comida no se va a quedar esperando a que termines de imaginar.
+->* Sentarse a la mesa con los Cuthbert
+   ! a_la_mesa
+   ana: ¡Voy! Huele a papas con mantequilla.
+-> «Un minutito, Marilla…»
+   ana: Un minutito, Marilla. Estoy en la mitad de algo importantísimo.
+   marilla: (Marilla suspira.) Todo es importantísimo contigo.
 
 === se_queda ===
 canal: gg

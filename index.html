@@ -948,6 +948,7 @@ al_terminar: hecho primera_noche
 al_terminar: log Marilla dejó que Ana se quedara esa noche, hasta aclarar el enredo. Ana casi no probó la cena.
 ---
 ! sentar ana
+! sin_sombrero
 ! ana llora=true
 ana: (Ana se deja caer en una silla junto a la mesa, hunde la cara entre los brazos y llora a mares.)
 matthew: (Matthew y Marilla se miran por encima de la estufa, sin saber qué hacer.)
@@ -969,6 +970,7 @@ ana: Si me llama Ana, por favor llámeme Ana con una sola n. A-n-n-a se ve espan
 marilla: (Marilla aprieta los labios.) Muy bien, Ana con una sola n. Ahora a cenar.
 ! sentar marilla
 ! sentar matthew
+! mesa cena
 marilla: (Marilla sirve pan, mantequilla y jalea de manzanitas silvestres. Matthew se sienta en silencio.)
 ana: (Ana mordisquea el pan y empuja la jalea por el plato con la cuchara. No come casi nada.)
 marilla: No estás comiendo nada.
@@ -987,7 +989,7 @@ marilla: (Marilla enciende una vela.) Tu pieza es la del alero este, arriba. Sub
 ! levantar marilla
 ! levantar matthew
 ! levantar ana
-narra: Así se juega: cuando hay que elegir, eliges tú por Ana (si no eliges, ella elige sola, a su manera). Lo que hace cambia lo que los demás sienten por ella. Ahora mismo Marilla no la quiere, y Ana está a prueba.
+narra: Así se juega: cuando hay que elegir, eliges tú por Ana; el tiempo espera mientras decides. Lo que hace cambia lo que los demás sienten por ella. Ahora mismo Marilla no la quiere: mañana la llevará a White Sands, a devolverla.
 narra: Ahora te toca a ti: lleva a Ana a su pieza. Toca la escalera, al fondo de la cocina. En el cuaderno (📖) verás qué puede hacer Ana para quedarse en Tejas Verdes.
 
 # la primera noche, en la pieza del alero (cap. 3): apenas llega, Ana se tira en la cama, desconsolada; Marilla sube con
@@ -1045,6 +1047,9 @@ en: ana=gg, marilla=gg
 si: hecho:primera_noche, dias_desde:llegada_tv:1, !hecho:desayuno_prueba, hora:6-14
 al_terminar: hecho desayuno_prueba
 ---
+! sentar ana
+! sentar marilla
+! mesa desayuno
 ana: ¡Oh, Marilla! ¿Vio la mañana? El cerezo de la ventana está todo en flor. ¿No le da gusto que haya mañanas en el mundo?
 marilla: Es una mañana como cualquier otra. Siéntate y come.
 marilla: Y otra cosa: anoche dejaste la ropa tirada por todo el suelo. La doblé yo, pero no pienso hacerlo otra vez. En esta casa, cada una dobla su ropa y la deja en la silla.
@@ -1054,6 +1059,8 @@ marilla: (Marilla aprieta los labios.) Pues aquí no se te va a olvidar.
 ana: Me cuesta comer cuando estoy desesperada. Pero es tan difícil estar desesperada en una mañana así…
 marilla: Esta tarde vamos a White Sands, a ver a la Sra. Spencer. Ella se equivocó, y ella lo va a arreglar.
 ana: (Ana baja la mirada al plato y no dice nada más, cosa rara en ella.)
+! levantar ana
+! levantar marilla
 
 === viaje_spencer ===
 narra: White Sands está a unas millas por el camino de la costa. Allí vive la Sra. Spencer, la que trajo a Ana del orfanato por equivocación: Marilla va a pedirle que la devuelva. Ana sabe que puede ser su último día en Tejas Verdes.
@@ -1067,15 +1074,41 @@ al_terminar: hecho a_prueba
 al_terminar: suma afecto:marilla:ana 1
 al_terminar: log Marilla llevó a Ana a White Sands; la Sra. Blewett la quería de sirvienta, y Marilla no se la dio. Ana se queda en Tejas Verdes, a prueba.
 ---
-marilla: (Marilla engancha la yegua alazana a la calesa, y salen las dos hacia White Sands.)
-ana: (En el camino, Ana le cuenta su vida.) Nací en Bolingbroke. Mis padres murieron de fiebre cuando yo tenía tres meses. Después me crió la Sra. Thomas, y después la Sra. Hammond, que tenía tres pares de mellizos. Y después, el orfanato.
-marilla: (Marilla escucha callada, y siente algo parecido a la lástima.) ¿Y esas mujeres te trataban bien?
-ana: Q-querían tratarme bien. Sé que querían ser lo más buenas posible conmigo. Cuando uno quiere ser bueno, no importa tanto si no lo consigue del todo, ¿no?
-blewett: (En casa de la Sra. Spencer está la Sra. Peter Blewett, que busca una niña para cuidarle los hijos.) Esta me sirve. Es flaca, pero dura. Va a tener que ganarse lo que come.
-ana: (Ana se pone pálida y mira a Marilla, sin atreverse a decir nada.)
-marilla: No sé… Matthew quería quedarse con ella. No puedo decidir sin hablarlo con él. Me la llevo de vuelta.
-marilla: (De vuelta en Tejas Verdes, Marilla habla largo con Matthew. Después llama a Ana.) Ana, te quedas. A prueba. Si te portas bien, si eres útil y aprendes, veremos.
-ana: ¡Oh, Marilla! Voy a ser tan buena… Voy a intentar ser tan buena como un ángel. Bueno, como se pueda.
+marilla: Ponte el sombrero, Ana. Nos vamos a White Sands.
+ana piensa: Puede que sea la última vez que veo esta cocina.
+narra: Marilla engancha la yegua alazana a la calesa y salen las dos por el camino de la costa. Ana decide, muy firme, que va a disfrutar del paseo: «He decidido disfrutar de este viaje. Si uno se decide con firmeza, casi siempre puede disfrutar de las cosas.»
+narra: Por el camino, Marilla le pide que le cuente su vida. Ana nació en Bolingbroke; sus padres murieron de fiebre cuando ella tenía tres meses. La crió la Sra. Thomas, que tenía un marido que bebía; después la Sra. Hammond, que tenía tres pares de mellizos. Y después, el orfanato.
+narra: «¿Y esas mujeres te trataban bien?», pregunta Marilla. Ana se pone colorada: «Q-querían tratarme bien. Cuando uno quiere ser bueno, no importa tanto si no lo consigue del todo, ¿no?». Marilla no dice nada, pero por dentro siente algo parecido a la lástima.
+narra: En casa de la Sra. Spencer está la Sra. Peter Blewett, que busca una niña para cuidarle los hijos. Mira a Ana de arriba abajo: «Esta me sirve. Es flaca, pero dura. Va a tener que ganarse lo que come.» Ana se pone pálida y mira a Marilla, sin atreverse a decir una palabra.
+narra: Marilla ve esa carita, y algo se le encoge por dentro. «No sé… Matthew quería quedarse con ella. No puedo decidir sin hablarlo con él. Me la llevo de vuelta.» Y vuelven a Tejas Verdes, ya de tarde.
+! pasa_tiempo 4
+marilla: (Marilla habló largo con Matthew en el corral. Después llama a Ana a la cocina.) Ana, te quedas. A prueba. Si te portas bien, si eres útil y aprendes, veremos.
+ana: ¡Oh, Marilla! ¿De verdad? ¿Me quedo en Tejas Verdes?
+->* «Voy a ser tan buena como un ángel.»
+   ana: Voy a intentar ser tan buena como un ángel. Bueno… como se pueda. ¡Oh, Marilla, gracias, gracias!
+   marilla: (Marilla carraspea, un poco incómoda con tanta gratitud.) Bueno, bueno. Ya veremos.
+-> Abrazar a Marilla, sin decir nada
+   ana: (Ana corre y abraza a Marilla por la cintura, con la cara escondida contra su delantal.)
+   marilla: (Marilla se queda tiesa, sin saber dónde poner las manos. Pero no la aparta.) Bueno, bueno… Ve a lavarte la cara.
+   ! suma afecto:marilla:ana 1
+ana piensa: A prueba. Tengo que ser buena. Muy, muy buena.
+
+# la hora de almorzar: Marilla la llama a la mesa (cada día, si las dos están en la cocina)
+=== llamar_almuerzo ===
+canal: gg
+prioridad: 4
+sujeta: marilla
+repetir: dia
+en: ana=gg, marilla=gg
+si: hecho:desayuno_prueba, hora:12-13.4
+---
+marilla: Ana, a la mesa. La comida no se va a quedar esperando a que termines de imaginar.
+->* Sentarse a la mesa con los Cuthbert
+   ! a_la_mesa
+   ana: ¡Voy! Huele a papas con mantequilla.
+-> «Un minutito, Marilla…»
+   ana: Un minutito, Marilla. Estoy en la mitad de algo importantísimo.
+   marilla: (Marilla suspira.) Todo es importantísimo contigo.
 
 === se_queda ===
 canal: gg
@@ -4031,7 +4064,8 @@ function drawPerson(c, p, t){
     c.fillStyle = '#d9433b'; c.fillRect(-7.2, by - 1.4, 14.4, 2.4);
     line(c, [[rt, by], [rt + 4 * Math.sign(rt), by + 3], [rt + (6 + wind * 2) * Math.sign(rt), by + 6 + Math.sin(t * 4) * 1.2]], '#d9433b', 1.8, 9);
   }
-  if (L.hatDark) { const by = hy - 7; ell(c, 0, by + 1, 11, 3.4, '#2f2b30', true); blob(c, [[-6, by], [6, by], [5, by - 6], [-5, by - 6]], '#3a353c'); }
+  if (L.hatDark && (typeof game === 'undefined' || game.scene === 'out')) { const by = hy - 7;   // (indoors, the hat comes off)
+    ell(c, 0, by + 1, 11, 3.4, '#2f2b30', true); blob(c, [[-6, by], [6, by], [5, by - 6], [-5, by - 6]], '#3a353c'); }
   }
   c.restore();
   if (fl >= 0) { const [hx, hyy] = hsOut(flickHand(fl, side)), sx = side ? 1 : 5.5; arm(sx, -21, hx, hyy); ell(c, hx, hyy, 1.7, 1.6, L.skin); }   // (with a big head the hand goes as far out as the head is big)
@@ -4315,6 +4349,13 @@ function drawTable(c){
   if (M?.puesta) for (let k = 0; k < 3; k++) { const x = TABLE.x - 30 + k * 30, y = TABLE.y - 28; ell(c, x, y, 7, 3, '#ffffff', true); line(c, [[x + 9, y - 2], [x + 9, y + 2]], '#a8a8b0', 1, k); }   // (laid: three places)
   else if (M?.sucia !== false) { ell(c, TABLE.x - 14, TABLE.y - 30, 8, 4, '#fffaf0', true); ell(c, TABLE.x + 16, TABLE.y - 32, 5, 4, '#9db3bf', true); }
   if (game.inv.tarta + game.inv.compota > 0) ell(c, TABLE.x - 14, TABLE.y - 32, 6, 3, '#7a4a8a', true);
+  // a meal on the table: bread, butter and the jam (for dinner), the porridge (for breakfast)
+  const F = game.comida?.dia === today() ? game.comida.que : null;
+  if (F) {
+    ell(c, TABLE.x - 4, TABLE.y - 30, 10, 4.6, '#c8955a', true); ell(c, TABLE.x - 4, TABLE.y - 32, 8, 3, '#dcae72');   // (the loaf)
+    if (F === 'cena') { ell(c, TABLE.x + 18, TABLE.y - 29, 5, 2.4, '#f3e08a', true); blob(c, [[TABLE.x - 26, TABLE.y - 26], [TABLE.x - 18, TABLE.y - 26], [TABLE.x - 18, TABLE.y - 35], [TABLE.x - 26, TABLE.y - 35]], '#b0305a'); }   // (butter, the crab-apple jam)
+    else { for (const dx of [-28, 28]) { ell(c, TABLE.x + dx, TABLE.y - 28, 7, 3, '#ffffff', true); ell(c, TABLE.x + dx, TABLE.y - 28.6, 4.6, 1.8, '#e2cfa0'); } }   // (two bowls of porridge)
+  }
   // what Marilla left on the table for Ana
   if (game.table === 'tarta') { ell(c, TABLE.x + 2, TABLE.y - 30, 10, 4.4, '#d9a46a', true); ell(c, TABLE.x + 2, TABLE.y - 31, 8, 3, '#6a3a6e'); }
   else if (game.table === 'compota') { blob(c, [[TABLE.x - 3, TABLE.y - 28], [TABLE.x + 5, TABLE.y - 28], [TABLE.x + 5, TABLE.y - 38], [TABLE.x - 3, TABLE.y - 38]], '#e0a24a'); }
@@ -4509,8 +4550,8 @@ HOUSES.gg.interior = {
   blocked: (x, y) => (Math.abs(x - STOVE.x) < 36 && y < STOVE.y + 6) || (Math.abs(x - TABLE.x) < 60 && y > TABLE.y - 26 && y < TABLE.y + 6),
   glow: () => [TABLE.x, TABLE.y - 40, 160, '255,190,110', .4], place: 'en la cocina de Tejas Verdes',
   actions: add => {
-    add('stove', STOVE.x, STOVE.y + 10, 44, 'Cocinar', cookMenu, { hy: 30, hit: 44 });
-    add('mesa', TABLE.x, TABLE.y - 30, 76, ana.meal ? 'Levantarse de la mesa' : 'Sentarse a la mesa', mealSit, { pri: 6, hy: 14, hit: 54 });
+    add('stove', STOVE.x, STOVE.y + 10, 44, 'Cocinar', cookMenu, { nombre: 'La estufa', hy: 30, hit: 44 });
+    add('mesa', TABLE.x, TABLE.y - 30, 76, ana.meal ? 'Levantarse de la mesa' : 'Sentarse a la mesa', mealSit, { nombre: 'La mesa', pri: 6, hy: 14, hit: 54 });
     if (game.table && !hasIt(game.table)) add('table', TABLE.x, TABLE.y, 64, 'Tomar ' + ITEM_NAME[game.table][0] + ' que dejó ' + NAMES[COOK], () => { const k = game.table; game.inv[k]++; game.table = null; float('+' + itemText(k), TABLE.x, TABLE.y - 50); logEv(`Ana tomó ${ITEM_NAME[k][0]} que ${NAMES[COOK]} le dejó en la mesa.`, [COOK, ...witnesses()]); sfx.happy(); save(); }, { pri: 2, hy: 26, hit: 52 });
   },
 };
@@ -5222,7 +5263,7 @@ function elegir(t, opciones){
   const propia = opciones.find(o => o.propia) || opciones[0];
   if (navigator.webdriver || ana.hidden) return aplicar(propia);   // (no one to ask: what she would do)
   let hecho = false; const una = op => { if (hecho) return; hecho = true; close(); pide(op); };
-  say('ana', '¿Qué hace Ana?', opciones.map(op => [nombreMay(op.texto.replace(/^«(.)/, (m, c) => '«' + c.toUpperCase())), () => una(op)]));
+  say('ana', opciones.some(op => op.efectos.some(a => a.nombrar)) ? '¿Cómo lo llama Ana?' : '¿Qué hace Ana?', opciones.map(op => [nombreMay(op.texto.replace(/^«(.)/, (m, c) => '«' + c.toUpperCase())), () => una(op)]));
   t.elige = { hasta: auto.on ? TT + 10 : Infinity, una, propia };   // (if the player is away, Ana chooses after a while: what she would do)
 }
 
@@ -5488,6 +5529,10 @@ function dlgHacer(list){   // what a scene does when it starts or ends
     if (a.sentar) { const q = SEATS[a.sentar], b = a.sentar === 'ana' ? ana : PEOPLE[a.sentar]; if (q && b) { b.x = q[0]; b.y = q[1]; b.dir = q[2]; b.sit = true; b.moving = false; b.nav = null; if (b !== ana) b.mealSat = true; else { ana.goto = null; ana.vx = ana.vy = 0; } } }
     if (a.ropa_tirada) game.wm.ropaTirada = true;
     if (a.camison) { game.wm.camison = true; game.wm.sinSombrero = true; }
+    if (a.sin_sombrero) game.wm.sinSombrero = true;
+    if (a.pasa_tiempo) dayT += a.pasa_tiempo / 24;
+    if (a.a_la_mesa && !ana.meal && game.scene === 'gg') mealSit();
+    if (a.mesa) game.comida = a.mesa === 'nada' ? null : { que: a.mesa, dia: today() };
     if (a.dormir) { ana.enCama = null; ana.llora = false; goSleep(false); }
     if (a.entra) { const b = PEOPLE[a.entra]; if (b) { b.where = a.a; b.x = KDOOR.x + 30; b.y = KIT.h - 30; b.sit = false; b.nav = null; b.moving = false; b.dir = 0; } }
     if (a.sale) { const b = PEOPLE[a.sale]; if (b) { b.where = CH[a.sale]?.home || 'gg'; b.x = STAIRS.x - 30; b.y = STAIRS.y + 30; b.nav = null; } }
@@ -5562,6 +5607,7 @@ class Dialogo {
     if (this.tipo === 'comentario') dlgComento[this.canal] = TT + DLG_RESPIRO;
     const L = this.lineas(); if (p >= L.length) delete P[this.id]; if (!L.length || p >= L.length) return null;
     if (!p) { dlgHacer(this.al_empezar); if (this.grande) ritmoMarca(this.id); }
+    if (this.tipo !== 'comentario' && this.canal !== 'carta' && typeof GAME_SPEED !== 'undefined' && GAME_SPEED > 1 && !navigator.webdriver) setSpeed(1);   // (a scene: the time goes back to normal, so that it can be read)
     const pu = p ? this.puenteDe(L[p]) : [], k = pu.length;
     if (this.canal === 'carta') game.cartaEscena = { id: this.id, lineas: L.filter(l => l[0] === 'carta').map(l => l[1]) };   // (what she writes: the letter that goes)
     const escrita = l => l[0] === 'carta' ? ['ana', '✎ ' + l[1], l[2]] : l;   // (the lines of the letter: Ana reads them aloud as she writes them)
@@ -5633,6 +5679,10 @@ function dlgAccion(s){   // an action of the script: «hecho x», «marca id | n
     case 'dormir': return { dormir: true };
     case 'ropa_tirada': return { ropa_tirada: true };   // (her clothes, left on the floor)
     case 'camison': return { camison: true };
+    case 'sin_sombrero': return { sin_sombrero: true };   // (Ana takes her hat off)
+    case 'pasa_tiempo': return { pasa_tiempo: +r[0] };   // (hours go by: the trip there and back)
+    case 'mesa': return { mesa: r[0] };
+    case 'a_la_mesa': return { a_la_mesa: true };   // (Ana sits down to eat with the Cuthberts)   // (what is on the kitchen table: «mesa cena», «mesa desayuno», «mesa nada»)
     case 'entra': return { entra: r[0], a: r[1] };   // (someone comes into a room: «entra marilla ga», at its door)
     case 'sale': return { sale: r[0] };   // (and goes back down, home)   // (Ana goes to sleep: the night passes)   // (at her or his place at the kitchen table)
     case 'levantar': return { levantar: r[0] };   // (Ana names a thing: «nombrar lago», the book's name; «nombrar lago ?», the player writes it)
@@ -5704,7 +5754,7 @@ function comentar(m, quien){
   if (q === 'ana') anaSays(c.t); else sayB(talkQ(q), c.t);
   return true;
 }
-const convDisponibles = k => CONVERSACIONES.filter(d => d.con === k && !d.dicha() && dlgCumple(d, dlgCtx())).sort((a, b) => b.peso - a.peso);
+const convDisponibles = k => !dlgHechos().desayuno_prueba ? [] : CONVERSACIONES.filter(d => d.con === k && !d.dicha() && dlgCumple(d, dlgCtx())).sort((a, b) => b.peso - a.peso);
 function conversar(d){   // a conversation, now: said in its own channel, holding the other still, once
   for (const t of TALKS.filter(t => t.ch === 'conv')) talkEnd(t);
   logEv('Ana conversó con ' + wmName(d.con) + ': ' + d.tema.replace(/^./, c => c.toLowerCase()) + '.', []);
@@ -5933,10 +5983,10 @@ ROOMS.ga = {
   glow: () => [GA.table.x, GA.table.y - 40, 150, '255,190,110', .38], place: 'en su cuarto del alero este de Tejas Verdes, con la ventana donde está el cerezo Reina de las Nieves',
   actions: add => {
     add('bed', GA.bed.x - 20, GA.bed.y + 14, 60, 'Dormir en mi cama', goToBed, { hy: 30, hit: 0, pri: 2, test: (x, y) => Math.abs(x - GA.bed.x) < 76 && y > GA.bed.y - 62 && y < GA.bed.y + 6 });
-    add('gwin', GA.win, 3.9 * T, 70, velaPuede() ? 'La ventana (🕯 la vela)' : 'Mirar por la ventana', ventana, { hy: 40, hit: 0, pri: 3, test: (x, y) => Math.abs(x - GA.win) < 46 && y < 62 });
-    add('armario', GA.armario.x, GA.armario.y + 22, 50, game.wm?.camison ? 'Vestirse (el armario)' : 'El armario (el sombrero, la ropa)', armario, { hy: 40, hit: 26, pri: 3 });
+    add('gwin', GA.win, 3.9 * T, 34, velaPuede() ? 'La ventana (🕯 la vela)' : 'Mirar por la ventana', ventana, { hy: 40, hit: 0, pri: 3, test: (x, y) => Math.abs(x - GA.win) < 46 && y < 62 });
+    add('armario', GA.armario.x, GA.armario.y + 22, 50, game.wm?.camison ? 'Vestirse (el armario)' : 'El armario (el sombrero, la ropa)', armario, { hy: 40, hit: 26, pri: 3, nombre: 'El armario', test: (x, y) => Math.abs(x - GA.armario.x) < 34 && y > GA.armario.y - 150 && y < GA.armario.y + 12 });
     if (game.wm?.ropaTirada) { const [rx, ry] = ROPA_SUELO(); add('ropa', rx, ry, 50, 'La ropa tirada en el suelo', ropaMenu, { hy: 4, hit: 22, pri: 2 }); }
-    add('mirror', GA.table.x, GA.table.y + 26, 56, 'Mirarse en el espejo', () => comentar('espejo'), { hy: 40, hit: 0, pri: 3, test: (x, y) => Math.abs(x - GA.table.x) < 18 && y < 56 });
+    add('mirror', GA.table.x, GA.table.y + 26, 56, 'Mirarse en el espejo', () => comentar('espejo'), { nombre: 'El escritorio', hy: 40, hit: 0, pri: 3, test: (x, y) => Math.abs(x - GA.table.x) < 18 && y < 56 });
   },
 };
 
@@ -6672,6 +6722,7 @@ function opcionesDe(t){
   const o = [[t.label, t.act]], ya = new Set([t.label]);
   for (const u of targets()) if (u.id !== t.id && !u.self && !/^[pfa]:/.test(u.id) && !ya.has(u.label) && dist(u.x, u.y, t.x, t.y) < 34) { ya.add(u.label); o.push([u.label, u.act]); }
   for (const a of jugables()) {
+    if (['estudiar', 'recitar'].includes(a.v) && !cuadernoHecho('escuela')) continue;   // (lessons: once she goes to school)
     let P = null; try { P = accPasos(a, 'ana'); } catch (e) {} const p0 = P?.[0]; if (!p0) continue;
     if (p0.lugar && p0.lugar !== personKey('ana')) continue;
     let q = null; try { q = typeof p0.p === 'function' ? p0.p() : p0.p; } catch (e) {} if (!q || dist(q[0], q[1], t.x, t.y) > 60) continue;
@@ -6682,7 +6733,7 @@ function opcionesDe(t){
 function opcionesAct(t){
   if (t.self || /^[pf]:/.test(t.id)) return t.act();
   const o = opcionesDe(t); if (o.length < 2) return t.act();
-  say('Ana', t.label + '…', [...o.map(([l, f]) => [l, () => { close(); f(); }]), ['Nada por ahora', close]]);
+  say('Ana', t.nombre || '¿Qué hace Ana aquí?', [...o.map(([l, f]) => [l, () => { close(); f(); }]), ['Nada por ahora', close]]);
 }
 // a tap: do it at once if she is close enough, otherwise she walks there (A*) and does it on arrival; on bare ground she just walks
 function tapAt(sx, sy){
@@ -8624,7 +8675,7 @@ function drawTag(g, t){
 // Three kinds, as in a comic: what one says, a bubble with its tail pointing at whoever speaks; what one thinks (a line
 // that starts with «~»: «ana piensa:» in the script), a cloud with little rounds for a tail; and what is told of them,
 // how they feel, what they do (the part in brackets at the start: «(Ana se queda quieta.)»), a square caption, no tail.
-function drawBubble(g, p, b, W, H){
+function drawBubble(g, p, b, W, H, fase){   // (fase 'cuadros': only the captions, first, so that the bubbles go under them)
   const Z = view.Z, a = clamp(Math.min(b.t / .15, (b.dur + .35 - b.t) / .3), 0, 1);
   let t = conNombres(b.text), piensa = false, narra = null;
   if (t[0] === '~') { piensa = true; t = t.slice(1).trim(); }
@@ -8633,9 +8684,8 @@ function drawBubble(g, p, b, W, H){
   const headY = p.lie ? p.y - 24 : p.headTop ? p.y - p.headTop : p.y - Math.max(62, 28 + 12 * HEAD_M) * LOOKS[p.look].h - 6;
   const sx = (p.x - view.ox) * Z, top = (headY - view.oy) * Z - (1 - a) * 5, foot = (p.y - view.oy) * Z;
   g.save(); g.globalAlpha = a; g.lineJoin = 'round'; g.textAlign = 'center';
-  let caja = null;
-  if (t) caja = cajaTexto(g, t, piensa ? 'piensa' : 'dice', p, sx, top, foot, W, H);
-  if (narra) cuadroArriba(g, narra, W, a);
+  if (fase === 'cuadros') { if (narra) cuadroArriba(g, narra, W, a); }
+  else if (t) cajaTexto(g, t, piensa ? 'piensa' : 'dice', p, sx, top, foot, W, H);
   g.restore();
 }
 // a caption: what is told of someone, fixed at the top of the screen (one under the other, if there are several)
@@ -8660,8 +8710,11 @@ function cajaTexto(g, text, kind, p, sx, top, foot, W, H, apilada){
   let y, below = false;
   if (top != null) { y = top - h - gap; if (y < 6) { y = Math.min((foot ?? top) + 10, H - h - 6); below = true; } }
   else { y = foot; below = true; }
-  y = clamp(y, 6, H - h - 6);
-  const x = clamp(sx - w / 2, 6, W - w - 6), r = narra ? 2 : kind === 'piensa' ? Math.min(16, h / 2) : 8, tx = clamp(sx, x + r + 4, x + w - r - 4);
+  const y0 = Math.min(cuadrosY, H - h - 6);   // (never over the captions at the top)
+  if (y < y0 && !below && foot != null) { const yb = foot + 10; if (yb + h < H - 6) { y = yb; below = true; } }
+  y = clamp(y, y0, H - h - 6);
+  const der = document.body.classList.contains('lado-oculto') || W < 400 ? 6 : 62;   // (and not under the buttons on the right)
+  const x = clamp(sx - w / 2, 6, Math.max(6, W - w - der)), r = narra ? 2 : kind === 'piensa' ? Math.min(16, h / 2) : 8, tx = clamp(sx, x + r + 4, x + w - r - 4);
   const rect = rr => { g.beginPath(); g.moveTo(x + rr, y); g.arcTo(x + w, y, x + w, y + h, rr); g.arcTo(x + w, y + h, x, y + h, rr); g.arcTo(x, y + h, x, y, rr); g.arcTo(x, y, x + w, y, rr); g.closePath(); };
   const tinta = p === ana ? '#a8432c' : '#6b4a30';
   if (narra) {   // (a caption: parchment, square, no tail)
@@ -8715,7 +8768,7 @@ function cookMenu(){
   const can = k => Object.entries(ITEM_DEFS[k].recipe).every(([i, n]) => game.inv[i] >= n);
   const opts = ITEMS.filter(k => ITEM_DEFS[k].recipe && can(k)).map(k => [ITEM_DEFS[k].cook, () => { close(); startCook(k); }]);
   opts.push(['Nada por ahora', close]);
-  say('Ana', opts.length > 2 ? '¿Qué cocino?' : 'Me faltan ingredientes: bayas de los arbustos o manzanas del huerto de Diana. Pero puedo hacer té.', opts);
+  say('Ana', opts.length > 2 ? '¿Qué cocino?' : 'Me faltan ingredientes: bayas de los arbustos o manzanas ' + (conoceA('diana') ? 'del huerto de Diana' : 'del huerto de los vecinos') + '. Pero puedo hacer té.', opts);
 }
 function startCook(k){ for (const [i, n] of Object.entries(ITEM_DEFS[k].recipe)) game.inv[i] -= n; game.cooking = { k, t: 2.6 }; ana.dir = 0; sfx.cook(); }
 
@@ -8902,7 +8955,7 @@ tokDraw();
 // starting over: everything that happened is forgotten (the AI settings stay)
 let wiping = false;
 $('aireset').addEventListener('click', () => { if (!confirm('¿Borrar todo (el día, lo que tiene Ana, lo que recuerdan, las relaciones, la historia) y empezar de cero?')) return; wiping = true; try { localStorage.removeItem('avonlea'); } catch (e) {} location.reload(); });
-try { if (!aiKey() && !localStorage.getItem('avonlea-ai-asked')) { localStorage.setItem('avonlea-ai-asked', '1'); aiPanel(true); } } catch (e) {}
+// (the panel of the AI is not opened by itself at the start: it is in ✒, for whoever wants it; the game begins with Ana)
 $('say').addEventListener('submit', e => { e.preventDefault(); const t = $('sayin').value.trim(); $('sayin').value = ''; closeSay(); if (t) anaSpeak(t); });
 $('sayin').addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); closeSay(); } });
 $('saybtn').addEventListener('pointerdown', e => { e.stopPropagation(); audio(); sayOpen ? closeSay() : openSay(); });
@@ -9326,7 +9379,9 @@ function renderView(){
   }
   // speech bubbles over the heads of whoever is talking (on the screen, over the light of the day, so they read at night)
   cuadrosY = W < 640 ? 100 : 56;   // (the captions, from the top down: under the hint)
-  for (const b of bubbles) { const p = personOf(b.q); if (p && (b.q === 'ana' ? anaHere : (PEOPLE[b.q] ? sceneOf(b.q) : b.q.startsWith('f:') ? FOLKBY[b.q.slice(2)]?.where : animalWhere(b.q)) === game.scene)) drawBubble(g, p, b, W, H); }
+  const aqui = bubbles.map(b => [personOf(b.q), b]).filter(([p, b]) => p && (b.q === 'ana' ? anaHere : (PEOPLE[b.q] ? sceneOf(b.q) : b.q.startsWith('f:') ? FOLKBY[b.q.slice(2)]?.where : animalWhere(b.q)) === game.scene));
+  for (const [p, b] of aqui) drawBubble(g, p, b, W, H, 'cuadros');   // (the captions first, at the top; the bubbles under them)
+  for (const [p, b] of aqui) drawBubble(g, p, b, W, H);
   // the little papers: what she has, the hour, what she can do
   const I = game.inv, bits = [];
   for (const k of ITEMS) if (I[k]) bits.push(ITEM_DEFS[k].icon + ' ' + (k === 'dolares' ? money(I[k], true) : I[k]));
@@ -12397,7 +12452,7 @@ function startVisor(){
     for (let y = Math.floor((oy - H / Z) / S_) * S_; y < oy + H / Z; y += S_) { g.beginPath(); g.moveTo(ox - W / Z, y); g.lineTo(ox + W / Z, y); g.stroke(); }
     drawPerson(g, a, t);
     view.ox = ox - W / 2 / Z; view.oy = oy - H * .62 / Z; view.Z = Z;
-    g.setTransform(dpr, 0, 0, dpr, 0, 0); for (const b of bubbles) drawBubble(g, a, b, W, H);
+    g.setTransform(dpr, 0, 0, dpr, 0, 0); cuadrosY = 10; for (const b of bubbles) drawBubble(g, a, b, W, H, 'cuadros'); for (const b of bubbles) drawBubble(g, a, b, W, H);
     requestAnimationFrame(frame);
   };
   requestAnimationFrame(frame);

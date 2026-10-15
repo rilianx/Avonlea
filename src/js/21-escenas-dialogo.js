@@ -126,6 +126,10 @@ function dlgHacer(list){   // what a scene does when it starts or ends
     if (a.sentar) { const q = SEATS[a.sentar], b = a.sentar === 'ana' ? ana : PEOPLE[a.sentar]; if (q && b) { b.x = q[0]; b.y = q[1]; b.dir = q[2]; b.sit = true; b.moving = false; b.nav = null; if (b !== ana) b.mealSat = true; else { ana.goto = null; ana.vx = ana.vy = 0; } } }
     if (a.ropa_tirada) game.wm.ropaTirada = true;
     if (a.camison) { game.wm.camison = true; game.wm.sinSombrero = true; }
+    if (a.sin_sombrero) game.wm.sinSombrero = true;
+    if (a.pasa_tiempo) dayT += a.pasa_tiempo / 24;
+    if (a.a_la_mesa && !ana.meal && game.scene === 'gg') mealSit();
+    if (a.mesa) game.comida = a.mesa === 'nada' ? null : { que: a.mesa, dia: today() };
     if (a.dormir) { ana.enCama = null; ana.llora = false; goSleep(false); }
     if (a.entra) { const b = PEOPLE[a.entra]; if (b) { b.where = a.a; b.x = KDOOR.x + 30; b.y = KIT.h - 30; b.sit = false; b.nav = null; b.moving = false; b.dir = 0; } }
     if (a.sale) { const b = PEOPLE[a.sale]; if (b) { b.where = CH[a.sale]?.home || 'gg'; b.x = STAIRS.x - 30; b.y = STAIRS.y + 30; b.nav = null; } }
@@ -200,6 +204,7 @@ class Dialogo {
     if (this.tipo === 'comentario') dlgComento[this.canal] = TT + DLG_RESPIRO;
     const L = this.lineas(); if (p >= L.length) delete P[this.id]; if (!L.length || p >= L.length) return null;
     if (!p) { dlgHacer(this.al_empezar); if (this.grande) ritmoMarca(this.id); }
+    if (this.tipo !== 'comentario' && this.canal !== 'carta' && typeof GAME_SPEED !== 'undefined' && GAME_SPEED > 1 && !navigator.webdriver) setSpeed(1);   // (a scene: the time goes back to normal, so that it can be read)
     const pu = p ? this.puenteDe(L[p]) : [], k = pu.length;
     if (this.canal === 'carta') game.cartaEscena = { id: this.id, lineas: L.filter(l => l[0] === 'carta').map(l => l[1]) };   // (what she writes: the letter that goes)
     const escrita = l => l[0] === 'carta' ? ['ana', '✎ ' + l[1], l[2]] : l;   // (the lines of the letter: Ana reads them aloud as she writes them)
@@ -271,6 +276,10 @@ function dlgAccion(s){   // an action of the script: «hecho x», «marca id | n
     case 'dormir': return { dormir: true };
     case 'ropa_tirada': return { ropa_tirada: true };   // (her clothes, left on the floor)
     case 'camison': return { camison: true };
+    case 'sin_sombrero': return { sin_sombrero: true };   // (Ana takes her hat off)
+    case 'pasa_tiempo': return { pasa_tiempo: +r[0] };   // (hours go by: the trip there and back)
+    case 'mesa': return { mesa: r[0] };
+    case 'a_la_mesa': return { a_la_mesa: true };   // (Ana sits down to eat with the Cuthberts)   // (what is on the kitchen table: «mesa cena», «mesa desayuno», «mesa nada»)
     case 'entra': return { entra: r[0], a: r[1] };   // (someone comes into a room: «entra marilla ga», at its door)
     case 'sale': return { sale: r[0] };   // (and goes back down, home)   // (Ana goes to sleep: the night passes)   // (at her or his place at the kitchen table)
     case 'levantar': return { levantar: r[0] };   // (Ana names a thing: «nombrar lago», the book's name; «nombrar lago ?», the player writes it)
@@ -342,7 +351,7 @@ function comentar(m, quien){
   if (q === 'ana') anaSays(c.t); else sayB(talkQ(q), c.t);
   return true;
 }
-const convDisponibles = k => CONVERSACIONES.filter(d => d.con === k && !d.dicha() && dlgCumple(d, dlgCtx())).sort((a, b) => b.peso - a.peso);
+const convDisponibles = k => !dlgHechos().desayuno_prueba ? [] : CONVERSACIONES.filter(d => d.con === k && !d.dicha() && dlgCumple(d, dlgCtx())).sort((a, b) => b.peso - a.peso);
 function conversar(d){   // a conversation, now: said in its own channel, holding the other still, once
   for (const t of TALKS.filter(t => t.ch === 'conv')) talkEnd(t);
   logEv('Ana conversó con ' + wmName(d.con) + ': ' + d.tema.replace(/^./, c => c.toLowerCase()) + '.', []);
@@ -571,10 +580,10 @@ ROOMS.ga = {
   glow: () => [GA.table.x, GA.table.y - 40, 150, '255,190,110', .38], place: 'en su cuarto del alero este de Tejas Verdes, con la ventana donde está el cerezo Reina de las Nieves',
   actions: add => {
     add('bed', GA.bed.x - 20, GA.bed.y + 14, 60, 'Dormir en mi cama', goToBed, { hy: 30, hit: 0, pri: 2, test: (x, y) => Math.abs(x - GA.bed.x) < 76 && y > GA.bed.y - 62 && y < GA.bed.y + 6 });
-    add('gwin', GA.win, 3.9 * T, 70, velaPuede() ? 'La ventana (🕯 la vela)' : 'Mirar por la ventana', ventana, { hy: 40, hit: 0, pri: 3, test: (x, y) => Math.abs(x - GA.win) < 46 && y < 62 });
-    add('armario', GA.armario.x, GA.armario.y + 22, 50, game.wm?.camison ? 'Vestirse (el armario)' : 'El armario (el sombrero, la ropa)', armario, { hy: 40, hit: 26, pri: 3 });
+    add('gwin', GA.win, 3.9 * T, 34, velaPuede() ? 'La ventana (🕯 la vela)' : 'Mirar por la ventana', ventana, { hy: 40, hit: 0, pri: 3, test: (x, y) => Math.abs(x - GA.win) < 46 && y < 62 });
+    add('armario', GA.armario.x, GA.armario.y + 22, 50, game.wm?.camison ? 'Vestirse (el armario)' : 'El armario (el sombrero, la ropa)', armario, { hy: 40, hit: 26, pri: 3, nombre: 'El armario', test: (x, y) => Math.abs(x - GA.armario.x) < 34 && y > GA.armario.y - 150 && y < GA.armario.y + 12 });
     if (game.wm?.ropaTirada) { const [rx, ry] = ROPA_SUELO(); add('ropa', rx, ry, 50, 'La ropa tirada en el suelo', ropaMenu, { hy: 4, hit: 22, pri: 2 }); }
-    add('mirror', GA.table.x, GA.table.y + 26, 56, 'Mirarse en el espejo', () => comentar('espejo'), { hy: 40, hit: 0, pri: 3, test: (x, y) => Math.abs(x - GA.table.x) < 18 && y < 56 });
+    add('mirror', GA.table.x, GA.table.y + 26, 56, 'Mirarse en el espejo', () => comentar('espejo'), { nombre: 'El escritorio', hy: 40, hit: 0, pri: 3, test: (x, y) => Math.abs(x - GA.table.x) < 18 && y < 56 });
   },
 };
 

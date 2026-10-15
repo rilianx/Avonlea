@@ -6,8 +6,8 @@ HOUSES.gg.interior = {
   blocked: (x, y) => (Math.abs(x - STOVE.x) < 36 && y < STOVE.y + 6) || (Math.abs(x - TABLE.x) < 60 && y > TABLE.y - 26 && y < TABLE.y + 6),
   glow: () => [TABLE.x, TABLE.y - 40, 160, '255,190,110', .4], place: 'en la cocina de Tejas Verdes',
   actions: add => {
-    add('stove', STOVE.x, STOVE.y + 10, 44, 'Cocinar', cookMenu, { hy: 30, hit: 44 });
-    add('mesa', TABLE.x, TABLE.y - 30, 76, ana.meal ? 'Levantarse de la mesa' : 'Sentarse a la mesa', mealSit, { pri: 6, hy: 14, hit: 54 });
+    add('stove', STOVE.x, STOVE.y + 10, 44, 'Cocinar', cookMenu, { nombre: 'La estufa', hy: 30, hit: 44 });
+    add('mesa', TABLE.x, TABLE.y - 30, 76, ana.meal ? 'Levantarse de la mesa' : 'Sentarse a la mesa', mealSit, { nombre: 'La mesa', pri: 6, hy: 14, hit: 54 });
     if (game.table && !hasIt(game.table)) add('table', TABLE.x, TABLE.y, 64, 'Tomar ' + ITEM_NAME[game.table][0] + ' que dejó ' + NAMES[COOK], () => { const k = game.table; game.inv[k]++; game.table = null; float('+' + itemText(k), TABLE.x, TABLE.y - 50); logEv(`Ana tomó ${ITEM_NAME[k][0]} que ${NAMES[COOK]} le dejó en la mesa.`, [COOK, ...witnesses()]); sfx.happy(); save(); }, { pri: 2, hy: 26, hit: 52 });
   },
 };

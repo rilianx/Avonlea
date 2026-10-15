@@ -218,7 +218,7 @@ function drawTag(g, t){
 // Three kinds, as in a comic: what one says, a bubble with its tail pointing at whoever speaks; what one thinks (a line
 // that starts with «~»: «ana piensa:» in the script), a cloud with little rounds for a tail; and what is told of them,
 // how they feel, what they do (the part in brackets at the start: «(Ana se queda quieta.)»), a square caption, no tail.
-function drawBubble(g, p, b, W, H){
+function drawBubble(g, p, b, W, H, fase){   // (fase 'cuadros': only the captions, first, so that the bubbles go under them)
   const Z = view.Z, a = clamp(Math.min(b.t / .15, (b.dur + .35 - b.t) / .3), 0, 1);
   let t = conNombres(b.text), piensa = false, narra = null;
   if (t[0] === '~') { piensa = true; t = t.slice(1).trim(); }
@@ -227,9 +227,8 @@ function drawBubble(g, p, b, W, H){
   const headY = p.lie ? p.y - 24 : p.headTop ? p.y - p.headTop : p.y - Math.max(62, 28 + 12 * HEAD_M) * LOOKS[p.look].h - 6;
   const sx = (p.x - view.ox) * Z, top = (headY - view.oy) * Z - (1 - a) * 5, foot = (p.y - view.oy) * Z;
   g.save(); g.globalAlpha = a; g.lineJoin = 'round'; g.textAlign = 'center';
-  let caja = null;
-  if (t) caja = cajaTexto(g, t, piensa ? 'piensa' : 'dice', p, sx, top, foot, W, H);
-  if (narra) cuadroArriba(g, narra, W, a);
+  if (fase === 'cuadros') { if (narra) cuadroArriba(g, narra, W, a); }
+  else if (t) cajaTexto(g, t, piensa ? 'piensa' : 'dice', p, sx, top, foot, W, H);
   g.restore();
 }
 // a caption: what is told of someone, fixed at the top of the screen (one under the other, if there are several)
@@ -254,8 +253,11 @@ function cajaTexto(g, text, kind, p, sx, top, foot, W, H, apilada){
   let y, below = false;
   if (top != null) { y = top - h - gap; if (y < 6) { y = Math.min((foot ?? top) + 10, H - h - 6); below = true; } }
   else { y = foot; below = true; }
-  y = clamp(y, 6, H - h - 6);
-  const x = clamp(sx - w / 2, 6, W - w - 6), r = narra ? 2 : kind === 'piensa' ? Math.min(16, h / 2) : 8, tx = clamp(sx, x + r + 4, x + w - r - 4);
+  const y0 = Math.min(cuadrosY, H - h - 6);   // (never over the captions at the top)
+  if (y < y0 && !below && foot != null) { const yb = foot + 10; if (yb + h < H - 6) { y = yb; below = true; } }
+  y = clamp(y, y0, H - h - 6);
+  const der = document.body.classList.contains('lado-oculto') || W < 400 ? 6 : 62;   // (and not under the buttons on the right)
+  const x = clamp(sx - w / 2, 6, Math.max(6, W - w - der)), r = narra ? 2 : kind === 'piensa' ? Math.min(16, h / 2) : 8, tx = clamp(sx, x + r + 4, x + w - r - 4);
   const rect = rr => { g.beginPath(); g.moveTo(x + rr, y); g.arcTo(x + w, y, x + w, y + h, rr); g.arcTo(x + w, y + h, x, y + h, rr); g.arcTo(x, y + h, x, y, rr); g.arcTo(x, y, x + w, y, rr); g.closePath(); };
   const tinta = p === ana ? '#a8432c' : '#6b4a30';
   if (narra) {   // (a caption: parchment, square, no tail)
@@ -309,6 +311,6 @@ function cookMenu(){
   const can = k => Object.entries(ITEM_DEFS[k].recipe).every(([i, n]) => game.inv[i] >= n);
   const opts = ITEMS.filter(k => ITEM_DEFS[k].recipe && can(k)).map(k => [ITEM_DEFS[k].cook, () => { close(); startCook(k); }]);
   opts.push(['Nada por ahora', close]);
-  say('Ana', opts.length > 2 ? '¿Qué cocino?' : 'Me faltan ingredientes: bayas de los arbustos o manzanas del huerto de Diana. Pero puedo hacer té.', opts);
+  say('Ana', opts.length > 2 ? '¿Qué cocino?' : 'Me faltan ingredientes: bayas de los arbustos o manzanas ' + (conoceA('diana') ? 'del huerto de Diana' : 'del huerto de los vecinos') + '. Pero puedo hacer té.', opts);
 }
 function startCook(k){ for (const [i, n] of Object.entries(ITEM_DEFS[k].recipe)) game.inv[i] -= n; game.cooking = { k, t: 2.6 }; ana.dir = 0; sfx.cook(); }
