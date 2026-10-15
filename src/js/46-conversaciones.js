@@ -178,6 +178,7 @@ const ocupada = k => !!(AGENTS[k]?.acting || (k === 'ana' && game.playAct) || Ob
 function ambUpdate(dt){
   if (amb.cur) return ambTick(dt);
   if (enc.cur) return;
+  { const H = dlgHechos(); if ((H.inicio_juego || H.primera_noche) && !H.desayuno_prueba) return; }   // (the first night: only what the book says)
   if (writtenTalkOn()) return;   // (on the trip, or in the book's chapter: the written lines go, not the loose ones)
   if (TALKS.some(t => t.lines.some(l => l.q === 'ana' || l.q === '?'))) return;   // (Ana in a scene: no loose lines in the middle of it)
   if (game.talk || game.cooking || game.map || !$('ai').hidden) return;
@@ -224,8 +225,9 @@ function drawBubble(g, p, b, W, H, fase){   // (fase 'cuadros': only the caption
   if (t[0] === '~') { piensa = true; t = t.slice(1).trim(); }
   const m = t.match(/^\(([^)]*)\)\s*(.*)$/); if (m) { narra = m[1].trim(); t = m[2].trim(); }
   if (t[0] === '~') { piensa = true; t = t.slice(1).trim(); }
-  const headY = p.lie ? p.y - 24 : p.headTop ? p.y - p.headTop : p.y - Math.max(62, 28 + 12 * HEAD_M) * LOOKS[p.look].h - 6;
-  const sx = (p.x - view.ox) * Z, top = (headY - view.oy) * Z - (1 - a) * 5, foot = (p.y - view.oy) * Z;
+  const enCama = p === ana && ana.enCama && game.scene === 'ga', sxB = enCama ? GA.bed.x + 48 : p.x;   // (in her bed: her head on the pillow)
+  const headY = enCama ? GA.bed.y - 50 : p.lie ? p.y - 24 : p.headTop ? p.y - p.headTop : p.y - Math.max(62, 28 + 12 * HEAD_M) * LOOKS[p.look].h - 6;
+  const sx = (sxB - view.ox) * Z, top = (headY - view.oy) * Z - (1 - a) * 5, foot = (p.y - view.oy) * Z;
   g.save(); g.globalAlpha = a; g.lineJoin = 'round'; g.textAlign = 'center';
   if (fase === 'cuadros') { if (narra) cuadroArriba(g, narra, W, a); }
   else if (t) cajaTexto(g, t, piensa ? 'piensa' : 'dice', p, sx, top, foot, W, H);

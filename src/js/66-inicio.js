@@ -13,6 +13,7 @@ function inicioLlegada(){
   game.scene = 'gg'; ana.hidden = false; ana.sit = false; ana.x = KDOOR.x + 20; ana.y = KIT.h * .6; ana.dir = 1;
   relSetW('marilla', 'ana', 1); relSetW('matthew', 'ana', 4);
   dlgHecho('inicio_juego');
+  { const h = $('hint'); if (h) h.style.opacity = 0; hinted = true; }   // (the controls: the tutorial cards tell them, when the player takes over)
   for (const k of Object.keys(PEOPLE)) amb.mute[k] = TT + 180;   // (no loose lines while she arrives)
   logEv('Una noche de comienzos de junio, Matthew llegó a Tejas Verdes con una niña de pelo rojo.', []);
 }

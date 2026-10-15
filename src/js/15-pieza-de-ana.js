@@ -78,7 +78,7 @@ function drawAnaTable(c, t){
   for (const cx of [-22, 22]) blob(c, [[x + cx - 3, y], [x + cx + 3, y], [x + cx + 3, y - 20], [x + cx - 3, y - 20]], '#7a5536');
   blob(c, [[x - 28, y - 20], [x + 28, y - 20], [x + 24, y - 30], [x - 24, y - 30]], '#8a6040');
   for (let k = 0; k < 3; k++) blob(c, [[x - 20, y - 31 - k * 4], [x - 4, y - 31 - k * 4], [x - 4, y - 35 - k * 4], [x - 20, y - 35 - k * 4]], ['#7f9ec0', '#a8554a', '#d9a441'][k]);
-  blob(c, [[x + 8, y - 31], [x + 12, y - 31], [x + 12, y - 46], [x + 8, y - 46]], '#fffaf0'); ell(c, x + 10, y - 49 - Math.abs(Math.sin(t * 6)) * 1.5, 2, 4, '#ffd27a');
+  blob(c, [[x + 8, y - 31], [x + 12, y - 31], [x + 12, y - 46], [x + 8, y - 46]], '#fffaf0'); { const h = hourNow() % 24; if (h >= 19.5 || h < 5.5) ell(c, x + 10, y - 49 - Math.abs(Math.sin(t * 6)) * 1.5, 2, 4, '#ffd27a'); }   // (the candle: lit only at night)
 }
 // the wardrobe, against the back wall: where her hat is kept when she takes it off (it shows on its peg, then)
 function drawAnaArmario(c){

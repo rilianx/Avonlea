@@ -4,6 +4,7 @@ let last = performance.now(), TT = 0, here = null, taskTick = 0, storyT = 2;
 // Ana crying with her head on the table: a tear now and then, over its edge (drawn in front of it, with the effects)
 function lagrimas(){
   ana.sortY = ana.llora && ana.sit && game.scene === 'gg' ? TABLE.y + 1 : ana.enCama && game.scene === 'ga' ? GA.bed.y + 1 : undefined;   // (lying on the table, in her bed: drawn after it)
+  if (ana.enCama && game.scene === 'ga') { ana.x = GA.bed.x + 30; ana.y = GA.bed.y + 2; ana.goto = null; ana.vx = ana.vy = 0; }   // (in bed: where she is drawn, so the view and what she says follow her there)
   if (TT < (ana._lagT || 0)) return;
   if (ana.llora && ana.sit && game.scene === 'gg') { ana._lagT = TT + .45; for (const s of [-1, 1]) if (Math.random() < .7) fx.push({ kind: 'drop', x: ana.x + s * (3 + Math.random() * 8), y: ana.y + 36, vy: 2 + Math.random() * 3, t: 0 }); }
   else if (ana.enCama === 'boca_abajo' && game.scene === 'ga') { ana._lagT = TT + .55; if (Math.random() < .8) fx.push({ kind: 'drop', x: GA.bed.x + 40 + Math.random() * 14, y: GA.bed.y - 10, vy: 2 + Math.random() * 2, t: 0 }); }
@@ -47,7 +48,8 @@ function update(dt){
     else if (t && dist(ana.x, ana.y, t.x, t.y) < t.reach * .85) { ana.goto = null; { ACT_SOLA = !!gt.auto; try { (gt.use || (gt.auto || gt.wm ? t.act : () => opcionesAct(t)))(); } finally { ACT_SOLA = false; } } }
     else {
       const sk = ana.stk; if (!sk || dist(ana.x, ana.y, sk.x, sk.y) > 6) ana.stk = { x: ana.x, y: ana.y, t: TT }; else if (TT - sk.t > 1.5) { ana.nav = null; ana.stk = null; }   // (stuck: find the way again)
-      const n = navStep(ana, t ? t.x : gt.x, t ? t.y : gt.y); if (n.arrived) { if (gt.wm) ana.wmArr = TT; ana.goto = null; if (t && dist(ana.x, ana.y, t.x, t.y) < t.reach) { ACT_SOLA = !!gt.auto; try { (gt.use || (gt.auto || gt.wm ? t.act : () => opcionesAct(t)))(); } finally { ACT_SOLA = false; } } } else { const dx = n.wx - ana.x, dy = n.wy - ana.y, d = Math.hypot(dx, dy) || 1; mx = dx / d; my = dy / d; } }
+      const n = navStep(ana, t ? t.x : gt.x, t ? t.y : gt.y); if (n.arrived && t && /^[pf]:/.test(t.id) && dist(ana.x, ana.y, t.x, t.y) >= t.reach && TT - (gt.t0 ??= TT) < 15) { ana.nav = null; }   // (someone who moved on: she goes after them, a while)
+      else if (n.arrived) { if (gt.wm) ana.wmArr = TT; ana.goto = null; if (t && dist(ana.x, ana.y, t.x, t.y) < t.reach) { ACT_SOLA = !!gt.auto; try { (gt.use || (gt.auto || gt.wm ? t.act : () => opcionesAct(t)))(); } finally { ACT_SOLA = false; } } } else { const dx = n.wx - ana.x, dy = n.wy - ana.y, d = Math.hypot(dx, dy) || 1; mx = dx / d; my = dy / d; } }
   }
   // how fast: a walk (Shift to hurry), or a stroll when she is out on her own: every so often she stops to look about
   if (dest && !ana.goto?.dest) dest = null;

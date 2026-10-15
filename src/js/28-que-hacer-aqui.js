@@ -61,7 +61,6 @@ function opcionesDe(t){
   const o = [[t.label, t.act]], ya = new Set([t.label]);
   for (const u of targets()) if (u.id !== t.id && !u.self && !/^[pfa]:/.test(u.id) && !ya.has(u.label) && dist(u.x, u.y, t.x, t.y) < 34) { ya.add(u.label); o.push([u.label, u.act]); }
   for (const a of jugables()) {
-    if (['estudiar', 'recitar'].includes(a.v) && !cuadernoHecho('escuela')) continue;   // (lessons: once she goes to school)
     let P = null; try { P = accPasos(a, 'ana'); } catch (e) {} const p0 = P?.[0]; if (!p0) continue;
     if (p0.lugar && p0.lugar !== personKey('ana')) continue;
     let q = null; try { q = typeof p0.p === 'function' ? p0.p() : p0.p; } catch (e) {} if (!q || dist(q[0], q[1], t.x, t.y) > 60) continue;

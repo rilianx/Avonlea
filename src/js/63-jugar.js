@@ -12,6 +12,7 @@ function jugables(){
   const C = { places: [], pts: {}, people, items, favors: [], owner: {}, k: 'ana', jugador: true }, out = [], seen = new Set();
   for (const kind of JUGABLE_TIPOS) for (const v of verbs(s, 'ana', { ...C, kind })) {
     if (JUGABLE_NO.includes(v.v)) continue;
+    if (['estudiar', 'recitar'].includes(v.v) && typeof cuadernoHecho === 'function' && !cuadernoHecho('escuela')) continue;   // (lessons: once she goes to school)
     const key = v.v + ':' + (v.k || '') + ':' + (v.x || '') + ':' + (v.p || ''); if (seen.has(key)) continue; seen.add(key);
     const { eff, cost, ...a } = v; out.push(a);
   }
@@ -26,6 +27,7 @@ function jugar(a){
 }
 let jugT = 0;
 function jugarTick(dt){
+  const H = dlgHechos(); if ((H.inicio_juego || H.primera_noche) && !H.desayuno_prueba) return;   // (the first night: no chores to suggest; she has just arrived)
   if (!game.playAct && (jugT -= dt) < 0) {   // (now and then: can she do something of the book here? a little sign)
     jugT = 1.5; const seen = game.jugVistos?.day === today() ? game.jugVistos : (game.jugVistos = { day: today(), k: [] });
     const here = personKey('ana') + ':' + S, J = here && !seen.k.includes(here) ? jugables() : [];

@@ -34,6 +34,7 @@ for (const raw of guion.split('\n')) {
   const s = raw.trim(); if (!s || s[0] === '#') continue;
   const h = s.match(/^===\s*(.+?)\s*===$/); if (h) { escenas.push(esc = { id: h[1], body: false }); continue; }
   if (!esc) continue; if (s === '---') { esc.body = true; continue; }
+  { const n = s.match(/^!\s*nombrar\s+(\S+)/) || (/^al_(empezar|terminar):\s*nombrar\s/.test(s) && s.match(/nombrar\s+(\S+)/)); if (n) anota(hace, 'nombro_' + n[1], 'escena ' + esc.id); }   // (naming a thing leaves nombro_<thing>)
   if (esc.body) { const m = s.match(/^!\s*(hecho|olvidar)\s+(\S+)/); if (m) anota(m[1] === 'hecho' ? hace : pide, m[1] === 'hecho' ? m[2] : m[2] + ' ', 'escena ' + esc.id + ' (una opción)'); if (s.startsWith('->')) esc.opciones = (esc.opciones || 0) + 1; continue; }
   const i = s.indexOf(':'), k = i < 0 ? s : s.slice(0, i).trim(), v = i < 0 ? '' : s.slice(i + 1).trim();
   if (k === 'si') v.split(',').forEach(c => condicion(c, 'escena ' + esc.id));

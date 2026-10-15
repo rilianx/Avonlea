@@ -63,7 +63,7 @@ ana: Bueno, alguna vez se me tendrán que acabar. Es una idea muy consoladora.
 === conv_marilla_por_que ===
 con: marilla
 tema: Preguntarle por qué se quedaron con ella
-si: afecto:marilla:ana>=3
+si: afecto:marilla:ana>=3, hecho:a_prueba
 al_terminar: suma afecto:marilla:ana 1
 ---
 ana: Marilla… ¿por qué se quedaron conmigo, si querían un niño?
@@ -76,7 +76,7 @@ marilla: Con eso basta.
 === conv_marilla_vestidos ===
 con: marilla
 tema: Hablarle de las mangas abullonadas
-si: afecto:marilla:ana>=3
+si: afecto:marilla:ana>=3, hecho:a_prueba, dia_juego:4
 ---
 ana: Marilla, los vestidos que me hizo son muy… prácticos. Pero ¿no podría tener uno, solo uno, con mangas abullonadas?
 marilla: Las mangas abullonadas son ridículas. Parecen globos.
@@ -171,7 +171,7 @@ con: matthew
 tema: Mostrarle las flores que encontró
 si: afecto:matthew:ana>=2
 ---
-ana: ¡Matthew! Mire estas violetas. Las encontré junto al arroyo. ¿No le parecen como pedacitos de cielo que se cayeron?
+ana: ¡Matthew! Mire estas violetas. Las encontré a la orilla del camino. ¿No le parecen como pedacitos de cielo que se cayeron?
 matthew: Bueno, pues… sí. Ahora que lo dices, sí.
 ana: Usted siempre me entiende. Es tan agradable hablar con alguien que entiende.
 matthew: (Matthew se pone colorado hasta las orejas, pero sonríe.)
@@ -179,7 +179,7 @@ matthew: (Matthew se pone colorado hasta las orejas, pero sonríe.)
 === conv_matthew_nombres ===
 con: matthew
 tema: Contarle los nombres que les puso a los lugares
-si: afecto:matthew:ana>=2
+si: afecto:matthew:ana>=2, hecho:nombro_avenida, hecho:nombro_lago
 al_terminar: suma letras:ana 1
 ---
 ana: Matthew, ¿sabía que la avenida de los manzanos se llama ahora el Camino Blanco de las Delicias? Y el estanque de los Barry, el Lago de las Aguas Brillantes.
@@ -204,7 +204,7 @@ matthew: (Matthew no dice nada. Pero se queda ahí con ella un buen rato, mirand
 === conv_matthew_mangas ===
 con: matthew
 tema: Contarle que todas tienen mangas abullonadas
-si: afecto:matthew:ana>=3
+si: afecto:matthew:ana>=3, cuaderno:escuela_dominical
 ---
 ana: Matthew… ¿se fijó en los vestidos de las otras niñas en la escuela dominical? Todas tienen mangas abullonadas. Todas, menos yo.
 matthew: ¿Mangas… abullonadas?

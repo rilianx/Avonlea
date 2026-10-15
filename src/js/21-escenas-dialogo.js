@@ -62,6 +62,7 @@ function dlgDonde(at, k){   // where a talk of pairs and trios may happen
   const sc = wmScene(k), b = wmBody(k); if (!b) return false;
   if (at === 'gg') return sc === 'gg';
   if (at === 'dentro') return sc !== 'out' && sc !== 'camino';
+  if (at === 'tejas') return sc === 'gg' || sc === 'ga' || (sc === 'out' && dist(b.x, b.y, GG.x, GG.y) < 520);   // (anywhere in Green Gables: the kitchen, her room, the yard)
   if (at === 'casa') return sc === 'gg' || (sc === 'out' && dist(b.x, b.y, GG.x, GG.y) < 520);
   if (at === 'arroyo') return sc === 'out' && brookSegs.some(([p, q]) => segDist(b.x, b.y, p, q) < 300);
   return true;
@@ -128,6 +129,12 @@ function dlgHacer(list){   // what a scene does when it starts or ends
     if (a.camison) { game.wm.camison = true; game.wm.sinSombrero = true; }
     if (a.sin_sombrero) game.wm.sinSombrero = true;
     if (a.pasa_tiempo) dayT += a.pasa_tiempo / 24;
+    if (a.a_cocina) {
+      if (game.scene !== 'gg') { ana.enCama = null; ana.goto = null; goIn('gg', [KDOOR.x + 40, KIT.h * .6]); }
+      const M = PEOPLE.marilla; if (sceneOf('marilla') !== 'gg') { M.where = 'gg'; M.x = STOVE.x + 60; M.y = STOVE.y + 60; M.nav = null; M.moving = false; M.sit = false; }
+    }
+    if (a.junto) { const b = a.junto === 'ana' ? ana : PEOPLE[a.junto], o = a.de === 'ana' ? ana : PEOPLE[a.de]; if (b && o) { b.sit = false; if (b === ana) { ana.meal = null; ana.goto = null; ana.vx = ana.vy = 0; } else { b.nav = null; b.moving = false; } b.x = o.x - 20; b.y = o.y + 2; b.dir = 1; } }
+    if (a.acostarse) { if (game.scene !== 'ga') { ana.meal = null; goIn('ga', [GA.bed.x - 20, GA.bed.y + 16]); } setTimeout(() => { if (!sleeping) goToBed(); }, 500); }
     if (a.a_la_mesa && !ana.meal && game.scene === 'gg') mealSit();
     if (a.mesa) game.comida = a.mesa === 'nada' ? null : { que: a.mesa, dia: today() };
     if (a.dormir) { ana.enCama = null; ana.llora = false; goSleep(false); }
@@ -203,8 +210,9 @@ class Dialogo {
     if (this.repetir.cada) this.proxima = TT + this.repetir.cada;
     if (this.tipo === 'comentario') dlgComento[this.canal] = TT + DLG_RESPIRO;
     const L = this.lineas(); if (p >= L.length) delete P[this.id]; if (!L.length || p >= L.length) return null;
+    if (!p && this.interrumpe && this.tipo !== 'comentario') { if (typeof amb !== 'undefined' && amb.cur) ambEnd(); bubbles = []; }   // (a scene that cuts in: the loose line of a moment ago is not left over it)
     if (!p) { dlgHacer(this.al_empezar); if (this.grande) ritmoMarca(this.id); }
-    if (this.tipo !== 'comentario' && this.canal !== 'carta' && typeof GAME_SPEED !== 'undefined' && GAME_SPEED > 1 && !navigator.webdriver) setSpeed(1);   // (a scene: the time goes back to normal, so that it can be read)
+    if ((this.interrumpe || this.grande || this.narra || L.some(l => l[0] === '?')) && this.tipo !== 'comentario' && this.canal !== 'carta' && typeof GAME_SPEED !== 'undefined' && GAME_SPEED > 1 && !navigator.webdriver) setSpeed(1);   // (a scene: the time goes back to normal, so that it can be read)
     const pu = p ? this.puenteDe(L[p]) : [], k = pu.length;
     if (this.canal === 'carta') game.cartaEscena = { id: this.id, lineas: L.filter(l => l[0] === 'carta').map(l => l[1]) };   // (what she writes: the letter that goes)
     const escrita = l => l[0] === 'carta' ? ['ana', '✎ ' + l[1], l[2]] : l;   // (the lines of the letter: Ana reads them aloud as she writes them)
@@ -215,6 +223,7 @@ class Dialogo {
         if (this.tipo !== 'comentario' && next < L.length) { if (next) P[this.id] = next; delete D[this.id]; return; }
       }
       delete P[this.id]; dlgHacer(this.al_terminar);
+      if (this.interrumpe && typeof amb !== 'undefined') for (const k of Object.keys(PEOPLE)) amb.mute[k] = Math.max(amb.mute[k] || 0, TT + 90);   // (after something big, a while without loose lines: it is left to sink in)
     } });
     t.prio = this.prioridad; t.esc = this.id; t.paso = this.al_paso; t.desde = p; t.puente = k; return t;
   }
@@ -279,7 +288,10 @@ function dlgAccion(s){   // an action of the script: «hecho x», «marca id | n
     case 'sin_sombrero': return { sin_sombrero: true };   // (Ana takes her hat off)
     case 'pasa_tiempo': return { pasa_tiempo: +r[0] };   // (hours go by: the trip there and back)
     case 'mesa': return { mesa: r[0] };
-    case 'a_la_mesa': return { a_la_mesa: true };   // (Ana sits down to eat with the Cuthberts)   // (what is on the kitchen table: «mesa cena», «mesa desayuno», «mesa nada»)
+    case 'a_la_mesa': return { a_la_mesa: true };
+    case 'a_cocina': return { a_cocina: true };
+    case 'acostarse': return { acostarse: true };   // (Ana goes up to bed: her room, and the bed)
+    case 'junto': return { junto: r[0], de: r[1] };   // (one goes to the side of the other: «junto ana marilla», for a hug)   // (Marilla calls her: Ana comes into the kitchen, and Marilla is there)   // (Ana sits down to eat with the Cuthberts)   // (what is on the kitchen table: «mesa cena», «mesa desayuno», «mesa nada»)
     case 'entra': return { entra: r[0], a: r[1] };   // (someone comes into a room: «entra marilla ga», at its door)
     case 'sale': return { sale: r[0] };   // (and goes back down, home)   // (Ana goes to sleep: the night passes)   // (at her or his place at the kitchen table)
     case 'levantar': return { levantar: r[0] };   // (Ana names a thing: «nombrar lago», the book's name; «nombrar lago ?», the player writes it)
@@ -575,7 +587,7 @@ function shopLibreta(x){
 }
 ROOMS.ga = {
   parent: 'gg', exitAt: [STAIRS.x, STAIRS.y + 14], exitLabel: 'Bajar a la cocina',
-  draw: drawAnaRoom, items: (g, t) => [{ y: GA.bed.y, draw: () => drawAnaBed(g) }, { y: GA.table.y, draw: () => drawAnaTable(g, t) }, { y: GA.wash.y, draw: () => drawAnaWash(g) }, { y: GA.armario.y, draw: () => drawAnaArmario(g) }, ...(game.wm?.ropaTirada ? [{ y: ROPA_SUELO()[1] - 6, draw: () => drawRopaTirada(g) }] : []), ...(game.wm?.ropaSilla ? [{ y: ROPA_SILLA()[1], draw: () => drawRopaSilla(g) }] : [])],
+  draw: drawAnaRoom, items: (g, t) => [{ y: GA.bed.y, draw: () => drawAnaBed(g) }, { y: GA.table.y, draw: () => drawAnaTable(g, t) }, { y: GA.wash.y, draw: () => drawAnaWash(g) }, { y: GA.armario.y, draw: () => drawAnaArmario(g) }, ...(game.wm?.ropaTirada ? [{ y: ROPA_SUELO()[1] - 6, draw: () => drawRopaTirada(g) }] : []), { y: ROPA_SILLA()[1], draw: () => game.wm?.ropaSilla ? drawRopaSilla(g) : drawSilla(g, ...ROPA_SILLA()) }],
   blocked: (x, y) => (Math.abs(x - GA.armario.x) < 25 && y > GA.armario.y - 14 && y < GA.armario.y + 4) || (Math.abs(x - GA.bed.x) < 76 && y > GA.bed.y - 30 && y < GA.bed.y + 4) || (Math.abs(x - GA.table.x) < 30 && y > GA.table.y - 24 && y < GA.table.y + 4) || (Math.abs(x - GA.wash.x) < 26 && y > GA.wash.y - 26 && y < GA.wash.y + 4),
   glow: () => [GA.table.x, GA.table.y - 40, 150, '255,190,110', .38], place: 'en su cuarto del alero este de Tejas Verdes, con la ventana donde está el cerezo Reina de las Nieves',
   actions: add => {

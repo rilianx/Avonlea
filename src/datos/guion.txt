@@ -14,6 +14,11 @@
 #   comienzo, «(Ana se queda quieta.)», en un cuadro de narración; lo que piensa, «ana piensa: texto», en una nube.
 # «narra: texto» (una o varias): lo que explica la escena (quién es quién, qué pasó antes, dónde estamos), en una tarjeta
 #   como la página de un libro, antes de las líneas; el juego espera a que el jugador siga. En las líneas, «narra: texto» igual.
+# En medio de las líneas, «! acción» se hace cuando le toca: «! sentar ana», «! levantar marilla», «! entra marilla ga»,
+#   «! ana llora=true», «! sin_sombrero», «! camison», «! ropa_tirada», «! mesa cena» (o desayuno, o nada: lo servido),
+#   «! pasa_tiempo 4» (horas: un viaje), «! a_cocina» (Ana entra a la cocina y Marilla está ahí), «! a_la_mesa» (a comer
+#   con los Cuthbert), «! acostarse» (sube y se acuesta), «! junto ana marilla» (va al lado de: un abrazo).
+# «donde: tejas»: Ana anda por Tejas Verdes (la cocina, su pieza o el patio); «donde: casa», la cocina o el patio.
 # Si varias escenas pueden decirse a la vez en un canal, va la de más prioridad; a igual prioridad, la más específica
 # (la que pide más condiciones). «grande»: empieza algo grande del libro; como mucho una grande por día (el ritmo).
 
@@ -728,6 +733,8 @@ marilla: Bueno. Hay otro examen el año que viene, y tú no eres de las que se r
 # esa noche, al otro día van a White Sands a arreglar el error, y Ana vuelve… a prueba. Para quedarse de verdad tiene
 # que ganarse a Marilla (el cuaderno: «Quedarse en Tejas Verdes»).
 === inicio_llegada ===
+narra: Avonlea, un pueblito de granjas en la Isla del Príncipe Eduardo, en Canadá, a fines del siglo XIX. En la granja de Tejas Verdes viven dos hermanos solterones, Matthew y Marilla Cuthbert. Ya están mayores, y le pidieron a la Sra. Spencer que les trajera del orfanato un niño, para ayudar en el campo.
+narra: Pero en la estación de Bright River, Matthew no encontró a ningún niño: lo esperaba una niña flaca, de pelo rojo, con un sombrero de paja y una maleta vieja. Matthew no se atrevió a dejarla allí. Ahora llegan juntos a Tejas Verdes, ya de noche, y Marilla los está esperando en la puerta de la cocina.
 canal: gg
 prioridad: 10
 interrumpe
@@ -783,7 +790,7 @@ marilla: (Marilla enciende una vela.) Tu pieza es la del alero este, arriba. Sub
 ! levantar matthew
 ! levantar ana
 narra: Así se juega: cuando hay que elegir, eliges tú por Ana; el tiempo espera mientras decides. Lo que hace cambia lo que los demás sienten por ella. Ahora mismo Marilla no la quiere: mañana la llevará a White Sands, a devolverla.
-narra: Ahora te toca a ti: lleva a Ana a su pieza. Toca la escalera, al fondo de la cocina. En el cuaderno (📖) verás qué puede hacer Ana para quedarse en Tejas Verdes.
+narra: Ahora te toca a ti: lleva a Ana a su pieza. Toca el suelo para que camine (o usa las flechas), y toca la escalera, al fondo de la cocina. Si tocas a una persona o una cosa estando Ana al lado, verás qué puede hacer con ella. En el cuaderno (📖), lo que Ana puede hacer para quedarse en Tejas Verdes.
 
 # la primera noche, en la pieza del alero (cap. 3): apenas llega, Ana se tira en la cama, desconsolada; Marilla sube con
 # la vela a darle las buenas noches, y Ana se enoja
@@ -854,6 +861,7 @@ marilla: Esta tarde vamos a White Sands, a ver a la Sra. Spencer. Ella se equivo
 ana: (Ana baja la mirada al plato y no dice nada más, cosa rara en ella.)
 ! levantar ana
 ! levantar marilla
+! mesa nada
 
 === viaje_spencer ===
 narra: White Sands está a unas millas por el camino de la costa. Allí vive la Sra. Spencer, la que trajo a Ana del orfanato por equivocación: Marilla va a pedirle que la devuelva. Ana sabe que puede ser su último día en Tejas Verdes.
@@ -861,7 +869,8 @@ canal: gg
 prioridad: 9
 interrumpe
 sujeta: marilla
-en: ana=gg, marilla=gg
+donde: tejas
+al_empezar: a_cocina
 si: hecho:desayuno_prueba, !hecho:a_prueba, hora:14-19
 al_terminar: hecho a_prueba
 al_terminar: suma afecto:marilla:ana 1
@@ -881,6 +890,7 @@ ana: ¡Oh, Marilla! ¿De verdad? ¿Me quedo en Tejas Verdes?
    ana: Voy a intentar ser tan buena como un ángel. Bueno… como se pueda. ¡Oh, Marilla, gracias, gracias!
    marilla: (Marilla carraspea, un poco incómoda con tanta gratitud.) Bueno, bueno. Ya veremos.
 -> Abrazar a Marilla, sin decir nada
+   ! junto ana marilla
    ana: (Ana corre y abraza a Marilla por la cintura, con la cara escondida contra su delantal.)
    marilla: (Marilla se queda tiesa, sin saber dónde poner las manos. Pero no la aparta.) Bueno, bueno… Ve a lavarte la cara.
    ! suma afecto:marilla:ana 1
@@ -893,7 +903,8 @@ prioridad: 4
 sujeta: marilla
 repetir: dia
 en: ana=gg, marilla=gg
-si: hecho:desayuno_prueba, hora:12-13.4
+si: hecho:desayuno_prueba, hora:12-13.4, no_hoy:llamada_almuerzo
+al_empezar: hecho llamada_almuerzo
 ---
 marilla: Ana, a la mesa. La comida no se va a quedar esperando a que termines de imaginar.
 ->* Sentarse a la mesa con los Cuthbert
@@ -902,6 +913,38 @@ marilla: Ana, a la mesa. La comida no se va a quedar esperando a que termines de
 -> «Un minutito, Marilla…»
    ana: Un minutito, Marilla. Estoy en la mitad de algo importantísimo.
    marilla: (Marilla suspira.) Todo es importantísimo contigo.
+
+# (y si Ana anda afuera, en el patio: Marilla la llama desde la puerta)
+=== llamar_almuerzo_afuera ===
+narra: Desde la puerta de la cocina, Marilla se seca las manos en el delantal y llama: «¡Ana! ¡A la mesa!»
+canal: gg
+prioridad: 4
+repetir: dia
+en: ana=out
+donde: casa
+si: hecho:desayuno_prueba, hora:12-13.4, no_hoy:llamada_almuerzo
+al_empezar: hecho llamada_almuerzo
+---
+->* Entrar a almorzar con los Cuthbert
+   ! a_cocina
+   ! a_la_mesa
+   ana: ¡Voy, Marilla! Huele a papas con mantequilla.
+-> Quedarse afuera un ratito más
+   ana piensa: Un minutito más. Las abejas todavía no terminan su himno.
+
+# la hora de acostarse: Marilla la manda a la cama (cada noche, si anda por Tejas Verdes)
+=== marilla_a_la_cama ===
+narra: Ya es de noche en Tejas Verdes. Marilla se asoma con la vela: «Ana, a la cama. Mañana hay que madrugar.»
+canal: gg
+prioridad: 5
+repetir: dia
+donde: tejas
+si: hecho:a_prueba, hora:21-23.5
+---
+->* Ir a acostarse
+   ! acostarse
+-> «¡Cinco minutitos más, Marilla!»
+   ana: ¡Cinco minutitos más, Marilla! Estoy en la mitad de un sueño despierta.
 
 === se_queda ===
 canal: gg
@@ -961,7 +1004,7 @@ canal: ana_sola
 tambien
 si: hecho:desayuno_prueba
 ---
-ana: (Ana sube la escalera empinada hasta la pieza del alero: paredes blancas, una cama alta, una mesita, una ventana.)
+ana: (Ana sube la escalera empinada hasta la pieza del alero. Con la luz del día, las paredes blancas ya no le parecen tan tristes como anoche.)
 ana: Es tan blanca y tan… tan sin adornos. Pero tiene una ventana. Y una ventana es una ventana al mundo entero.
 
 === primera_toby ===
