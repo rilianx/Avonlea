@@ -9,6 +9,8 @@ function placeNear(x, y){ let best = null, bd = 520; for (const [n, px, py] of N
 const toPlace = n => { const l = /^(La|El|Los|Las) /.test(n) ? n[0].toLowerCase() + n.slice(1) : n; return (l.startsWith('el ') ? 'al ' + l.slice(3) : 'a ' + l); };
 function goDest(x, y){
   let p = [clamp(x, 40, WW - 40), clamp(y, 60, WH - 40)];
+  const casa = Object.entries(HOUSES).find(([, h]) => !h.road && inBox(h.at, h.depth, p[0], p[1], 8));   // (a house one enters: to its door, and in; not to the nearest free spot, which may be behind it)
+  if (casa) p = [casa[1].at.x, casa[1].at.y + 30];
   if (blockedOut(...p)) {   // in the sea, a lake, a house: the nearest place one can stand on
     let best = null;
     for (let r = 24; r < 900 && !best; r += 24) for (let k = 0; k < 24; k++) { const a = k / 24 * TAU, q = [p[0] + Math.cos(a) * r, p[1] + Math.sin(a) * r]; if (q[0] > 40 && q[1] > 60 && q[0] < WW - 40 && q[1] < WH - 40 && !blockedOut(...q)) { best = q; break; } }
@@ -20,6 +22,6 @@ function goDest(x, y){
   if (game.scene !== 'out') return;
   if (cart.riding) cartOff();
   ana.sit = false; ana.lie = false; ana.nav = null;
-  dest = { x: p[0], y: p[1] }; ana.goto = { x: p[0], y: p[1], scene: 'out', dest: true };
+  dest = { x: p[0], y: p[1] }; ana.goto = casa ? { id: 'h:' + casa[0], scene: 'out', dest: true } : { x: p[0], y: p[1], scene: 'out', dest: true };
   const n = placeNear(...p); anaSays(n ? '¡Vamos ' + toPlace(n) + '!' : pick(['¡Allá voy!', '¡En marcha!', '¡A ver qué hay por allá!']));
 }

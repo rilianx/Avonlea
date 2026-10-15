@@ -247,11 +247,12 @@ class Dialogo {
       }
       delete P[this.id]; dlgHacer(this.al_terminar);
       if (this.interrumpe && typeof amb !== 'undefined') for (const k of Object.keys(PEOPLE)) amb.mute[k] = Math.max(amb.mute[k] || 0, TT + 90);   // (after something big, a while without loose lines: it is left to sink in)
+      if (this.interrumpe) dlgRespiro = TT + 90;   // (and the smaller scenes wait too: one thing at a time)
     } });
     t.prio = this.prioridad; t.esc = this.id; t.paso = this.al_paso; t.desde = p; t.puente = k; return t;
   }
 }
-const DIALOGOS = [], dlgPausa = {};
+const DIALOGOS = [], dlgPausa = {}; let dlgRespiro = 0;   // (after a scene that cut in, a breather: only those that cut in too, the chains of the book, before it ends)
 // (the configurations keep their lines under `lineas`; the class reads them through lineas())
 const dlgNuevo = c => { const { lineas, ...r } = c; return new Dialogo({ ...r, lineas_: lineas }); };
 Dialogo.registrar = c => { const d = dlgNuevo(c); DIALOGOS.push(d); return d; };
@@ -259,7 +260,8 @@ let dlgT = 0;
 function dlgTick(dt){
   if ((dlgT -= dt) > 0) return; dlgT = .3;
   const x = dlgCtx(), best = {};
-  for (const d of DIALOGOS) if (d.listo(x) && (!best[d.canal] || d.peso > best[d.canal].peso)) best[d.canal] = d;
+  const conAna = TALKS.some(t => t.lines.slice(t.i).some(l => l.q === 'ana' || l.q === '?' || l.q === 'narra'));   // (a scene with Ana under way: no other starts over it, here or anywhere)
+  for (const d of DIALOGOS) if ((TT >= dlgRespiro || d.interrumpe) && (!conAna || d.interrumpe) && d.listo(x) && (!best[d.canal] || d.peso > best[d.canal].peso)) best[d.canal] = d;
   for (const [ch, d] of Object.entries(best)) {
     const cur = TALKS.find(t => t.ch === ch);
     if (cur) { if (!(d.interrumpe && d.prioridad > (cur.prio ?? 0)) || cur.lines.length - cur.i <= 2) continue; cur.interrupted = true; talkEnd(cur); }   // (a more important one cuts in: the tunnel of trees; but what is about to end ends first)

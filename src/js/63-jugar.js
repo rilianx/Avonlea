@@ -12,7 +12,7 @@ function jugables(){
   const C = { places: [], pts: {}, people, items, favors: [], owner: {}, k: 'ana', jugador: true }, out = [], seen = new Set();
   for (const kind of JUGABLE_TIPOS) for (const v of verbs(s, 'ana', { ...C, kind })) {
     if (JUGABLE_NO.includes(v.v)) continue;
-    if (['estudiar', 'recitar'].includes(v.v) && typeof cuadernoHecho === 'function' && !cuadernoHecho('escuela')) continue;   // (lessons: once she goes to school)
+    if (['estudiar', 'recitar', 'ensayar'].includes(v.v) && typeof cuadernoHecho === 'function' && !cuadernoHecho('escuela')) continue;   // (lessons: once she goes to school)
     const key = v.v + ':' + (v.k || '') + ':' + (v.x || '') + ':' + (v.p || ''); if (seen.has(key)) continue; seen.add(key);
     const { eff, cost, ...a } = v; out.push(a);
   }

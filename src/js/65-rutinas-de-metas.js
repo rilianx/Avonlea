@@ -14,7 +14,7 @@ const AGENDA = [
   { who: 'marilla', from: 8.5, to: 11.5, label: 'batir mantequilla', when: () => (wmInv('marilla').leche || 0) >= 2, goal: () => G.tener('marilla', 'mantequilla', (wmInv('marilla').mantequilla || 0) + 1) },
   { who: 'marilla', from: 13, to: 15, ana: true, chores: true, label: 'encargarle los quehaceres a Ana', goal: () => G.quehaceres('ana', ['platos', 'barrer']), favors: [{ f: 'quehaceres', to: 'ana', q: ['platos', 'barrer'] }] },
   { who: 'marilla', from: 17, to: 19, ana: true, label: 'regañar a Ana por los quehaceres', when: () => realR.fact('falta:ana'), goal: () => G.regañado('ana') },
-  { who: 'lynde', from: 14, to: 16.5, label: 'visitar a Marilla', when: () => today() % 2 === 0, goal: () => G.visitar('lynde', 'marilla') },
+  { who: 'lynde', from: 14, to: 16.5, label: 'visitar a Marilla', when: () => today() % 2 === 0 && (!dlgHechos().inicio_juego || !!dlgHechos().lynde_visita), goal: () => G.visitar('lynde', 'marilla') },   // (in a game from Ana's arrival, only after her visit of cap. 9: until then, as in the book, she does not come)
   { who: 'lynde', from: 14, to: 16.5, label: 'visitar a la Sra. Barry', when: () => today() % 2 === 1, goal: () => G.visitar('lynde', 'barry') },
   { who: 'diana', from: 15, to: 17, ana: true, season: [0, 1, 2], label: 'dar un paseo con Ana', when: () => !isSunday() && dianaAmiga(), goal: () => G.paseo('diana', 'ana', 'lago', 30), favors: [{ f: 'pasear', to: 'ana' }] },
   { who: 'ana', from: 7.5, to: 8.5, ana: true, season: [0, 2, 3], label: 'ir a clases', when: () => !isSunday(), goal: () => G.estar_en('ana', 'escuela', 9, CLASES_FIN) },
