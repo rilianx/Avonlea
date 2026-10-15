@@ -54,10 +54,16 @@ function dlgCond(s, c){   // one condition of state, written as text
     case 'escena_ana': return game.scene === a;
     case 'sabe': return (game.wm.know[a] || []).includes(b);
     case 'y_mayor': { const p = wmBody(a); return !!p && p.y > +b * U; }
+    case 've': return veAna(a);   // (she can see Ana now: the same room, or near her outside)
+    case 'donde': { const [x, l] = rest.split(':'); return dlgDonde(l, x); }   // (someone is somewhere: «donde:ana:tejas», «!donde:ana:tejas»)
+    case 'ana': return !!ANA_ESTADO[a]?.();   // (how Ana is: «ana:camison», «ana:sin_sombrero», «ana:ropa_tirada»)
     case 'carta': return game.cartaAhora?.para === a && TT - game.cartaAhora.t < 1 && !game.cartaEscena;   // (Ana is writing a letter to her, at her desk)
   }
   return false;
 }
+// what someone can see: Ana in the same room as them, or near enough outside (in the dark, a lantern's distance)
+function veAna(k){ const b = wmBody(k); if (!b || ana.hidden || wmScene(k) !== game.scene) return false; return game.scene !== 'out' || dist(b.x, b.y, ana.x, ana.y) < 380; }
+const ANA_ESTADO = { camison: () => !!game.wm?.camison, sin_sombrero: () => !!game.wm?.sinSombrero, ropa_tirada: () => !!game.wm?.ropaTirada, sentada: () => !!ana.sit, en_cama: () => !!ana.enCama };
 function dlgDonde(at, k){   // where a talk of pairs and trios may happen
   const sc = wmScene(k), b = wmBody(k); if (!b) return false;
   if (at === 'gg') return sc === 'gg';
@@ -87,10 +93,20 @@ function dlgFalla(c, x){   // why the conditions of place and state of a configu
 const dlgCumple = (c, x) => !dlgFalla(c, x);
 // --- the state of the world, as in quality-based narrative (docs/MOTOR.md): facts (with the day they happened) and
 // qualities, numbers with an owner: «granja» of Ana, «estudio» of Gilbert, «afecto» of Diana towards Ana (0 to 5)
-const cualidad = (dueño, nombre, hacia) => nombre === 'afecto' ? relGetW(dueño, hacia) : game.wm?.num?.[dueño]?.[nombre] || 0;
+// Each quality may be declared (src/datos/habilidades.txt): where it starts, its range, its milestones up and down;
+// one may be of someone towards someone else («paciencia» of Marilla towards Ana), kept as num[dueño]['paciencia>ana']
+const CUALIDAD_DEF = {};   // (filled by 66-habilidades.js)
+const cualidadClave = (nombre, hacia) => hacia ? nombre + '>' + hacia : nombre;
+function cualidad(dueño, nombre, hacia){
+  if (nombre === 'afecto') return relGetW(dueño, hacia);
+  const v = game.wm?.num?.[dueño]?.[cualidadClave(nombre, hacia)];
+  return v ?? CUALIDAD_DEF[nombre]?.inicial ?? 0;
+}
 function cualidadSuma(dueño, nombre, n, hacia){
   if (nombre === 'afecto') return relSetW(dueño, hacia, Math.max(0, Math.min(5, relGetW(dueño, hacia) + n)));
-  const N = ((game.wm.num ||= {})[dueño] ||= {}); N[nombre] = Math.max(0, (N[nombre] || 0) + n);
+  const d = CUALIDAD_DEF[nombre], [min, max] = d?.rango || [0, Infinity], antes = cualidad(dueño, nombre, hacia);
+  const N = ((game.wm.num ||= {})[dueño] ||= {}), v = Math.max(min, Math.min(max, antes + n)); N[cualidadClave(nombre, hacia)] = v;
+  if (d && v !== antes) cualidadHitos(d, dueño, hacia, antes, v);   // (a milestone crossed, up or down: told, and kept as a fact)
 }
 // a quality compared with a number, as text: «granja:ana>=15», «afecto:diana:ana>=4», «estudio:gilbert<30» (null: it is not one)
 const CUALIDAD_RE = /^([a-zñ_]+):([a-zñ_]+)(?::([a-zñ_]+))?\s*(>=|<=|>|<|==|=)\s*(-?\d+(?:\.\d+)?)$/;
@@ -134,6 +150,9 @@ function dlgHacer(list){   // what a scene does when it starts or ends
       const M = PEOPLE.marilla; if (sceneOf('marilla') !== 'gg') { M.where = 'gg'; M.x = STOVE.x + 60; M.y = STOVE.y + 60; M.nav = null; M.moving = false; M.sit = false; }
     }
     if (a.junto) { const b = a.junto === 'ana' ? ana : PEOPLE[a.junto], o = a.de === 'ana' ? ana : PEOPLE[a.de]; if (b && o) { b.sit = false; if (b === ana) { ana.meal = null; ana.goto = null; ana.vx = ana.vy = 0; } else { b.nav = null; b.moving = false; } b.x = o.x - 20; b.y = o.y + 2; b.dir = 1; } }
+    if (a.vestirse) vestirse(true);
+    if (a.punto) puntoGuardar(a.punto, a.texto);
+    if (a.final) finalMostrar(a.final, a.texto);
     if (a.a_pieza && game.scene !== 'ga') { ana.meal = null; ana.goto = null; if (cart.riding) cartOff(); goIn('ga', [GA.bed.x - 20, GA.bed.y + 16]); }
     if (a.acostarse) { if (game.scene !== 'ga') { ana.meal = null; goIn('ga', [GA.bed.x - 20, GA.bed.y + 16]); } setTimeout(() => { if (!sleeping) goToBed(); }, 500); }
     if (a.a_la_mesa && !ana.meal && game.scene === 'gg') mealSit();
@@ -292,7 +311,10 @@ function dlgAccion(s){   // an action of the script: «hecho x», «marca id | n
     case 'a_la_mesa': return { a_la_mesa: true };
     case 'a_cocina': return { a_cocina: true };
     case 'acostarse': return { acostarse: true };
-    case 'a_pieza': return { a_pieza: true };   // (Ana is taken up to her room)   // (Ana goes up to bed: her room, and the bed)
+    case 'a_pieza': return { a_pieza: true };
+    case 'vestirse': return { vestirse: true };   // (Ana puts on her dress)
+    case 'punto': return { punto: part[0], texto: part[1] };   // (a point to come back to: «punto viaje | Volver a la mañana del viaje»)
+    case 'final': return { final: part[0], texto: part[1] };   // (the story ends here: «final devuelta | Ana se fue con la Sra. Blewett»)   // (Ana is taken up to her room)   // (Ana goes up to bed: her room, and the bed)
     case 'junto': return { junto: r[0], de: r[1] };   // (one goes to the side of the other: «junto ana marilla», for a hug)   // (Marilla calls her: Ana comes into the kitchen, and Marilla is there)   // (Ana sits down to eat with the Cuthberts)   // (what is on the kitchen table: «mesa cena», «mesa desayuno», «mesa nada»)
     case 'entra': return { entra: r[0], a: r[1] };   // (someone comes into a room: «entra marilla ga», at its door)
     case 'sale': return { sale: r[0] };   // (and goes back down, home)   // (Ana goes to sleep: the night passes)   // (at her or his place at the kitchen table)

@@ -81,7 +81,7 @@ function cuadernoPanel(open){
   const P = $('cua'); P.hidden = !open; if (!open) return;
   const vis = CUADERNO_METAS.filter(m => !m.oculta || cuadernoHecho(m.id) || cuadernoAbierta(m)), n = vis.filter(m => cuadernoHecho(m.id)).length;
   $('cuasub').textContent = cuadernoFecha() + ' · ' + n + ' de ' + vis.length + ' · ' + (n === vis.length ? '¡todo! Ana podría escribir un libro con esto.' : 'las que faltan tienen una pista; 🔒: todavía no');
-  $('cualist').innerHTML = CUADERNO.map(g => '<h4>' + esc(g.nombre) + '</h4>' + g.metas.filter(m => !m.oculta || cuadernoHecho(m.id) || cuadernoAbierta(m)).map(m => {   // (a hidden goal: once it opens)
+  $('cualist').innerHTML = cuadernoMiradas() + CUADERNO.map(g => '<h4>' + esc(g.nombre) + '</h4>' + g.metas.filter(m => !m.oculta || cuadernoHecho(m.id) || cuadernoAbierta(m)).map(m => {   // (a hidden goal: once it opens)
     const d = cuadernoHecho(m.id), abierta = cuadernoAbierta(m);
     return d ? `<div class="cm hecha"><b>✓ ${esc(m.titulo)}</b><span>el día ${d}</span></div>`
       : abierta ? `<div class="cm"><b>○ ${esc(m.titulo)}</b><small>${esc(cuadernoPista(m))}</small></div>`
@@ -91,7 +91,12 @@ function cuadernoPanel(open){
 // the date, as Ana would write it: «martes, día 3 de la primavera»
 const cuadernoFecha = () => ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'][today() % 7] + ', día ' + (today() % DIAS_ESTACION + 1) + ' de ' + (S === 0 ? 'la ' : 'el ') + SEASONS[S].toLowerCase();
 // her skills: how far she has gone in each, and what comes next
-const cuadernoHabilidades = () => '<h4>Sus habilidades</h4>' + HABILIDADES.map(c => { const n = cualidad('ana', c.id), p = habilidadProxima(c), top = c.hitos.at(-1)?.n || 1; return `<div class="cm"><b>${esc(c.titulo)} · ${n}</b><small>${'▰'.repeat(Math.round(Math.min(n, top) / top * 10)) + '▱'.repeat(10 - Math.round(Math.min(n, top) / top * 10))}${p ? ' · en ' + p.n + ': ' + esc(p.texto) : ' · ¡todo!'}</small></div>`; }).join('');
+const cuadernoHabilidades = () => '<h4>Sus habilidades</h4>' + HABILIDADES.filter(deAna).map(c => { const n = cualidad('ana', c.id), p = habilidadProxima(c), top = c.hitos.at(-1)?.n || 1; return `<div class="cm"><b>${esc(c.titulo)} · ${n}</b><small>${'▰'.repeat(Math.round(Math.min(n, top) / top * 10)) + '▱'.repeat(10 - Math.round(Math.min(n, top) / top * 10))}${p ? ' · en ' + p.n + ': ' + esc(p.texto) : ' · ¡todo!'}</small></div>`; }).join('');
+// how the others see her (the qualities of someone towards Ana, while they matter: «visible si»): Marilla's patience,
+// with what it means now (the last «bajo» it has fallen to, or the next «hito» up)
+const cuadernoMiradas = () => { const l = HABILIDADES.filter(c => !deAna(c) && (!c.visible || c.visible.every(x => dlgCond(x)))); return l.length ? '<h4>Cómo la ven</h4>' + l.map(c => {
+  const n = cualidad(c.de, c.id, c.hacia), [, max = 5] = c.rango || [], b = c.bajos.filter(h => n <= h.n).at(-1), sube = c.hitos.find(h => h.n > n);
+  return `<div class="cm"><b>${esc(c.titulo)}</b><small>${'●'.repeat(n) + '○'.repeat(Math.max(0, max - n))}${b ? ' · ' + esc(b.texto) : sube ? ' · en ' + sube.n + ': ' + esc(sube.texto) : ''}</small></div>`; }).join('') : ''; };
 // her friends: how much each one loves her (the hearts of 0 to 5), those she knows
 function cuadernoAmigos(){
   const l = ['diana', 'marilla', 'matthew', 'sraallan', 'stacy', 'josephine', 'lynde', 'gilbert'].filter(k => (k !== 'diana' || conoceDiana()) && (k !== 'josephine' || dlgHechos().cama_josephine) && game.wm.rel?.[k + '>ana'] != null);

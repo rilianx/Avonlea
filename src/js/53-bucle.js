@@ -10,7 +10,7 @@ function lagrimas(){
   else if (ana.enCama === 'boca_abajo' && game.scene === 'ga') { ana._lagT = TT + .55; if (Math.random() < .8) fx.push({ kind: 'drop', x: GA.bed.x + 40 + Math.random() * 14, y: GA.bed.y - 10, vy: 2 + Math.random() * 2, t: 0 }); }
 }
 function update(dt){
-  if (sleeping || narraPausa() || decidiendo()) return;   // (a card being read, a decision being taken: the world waits)   // (a card that explains: the world waits while it is read)
+  if (sleeping || game.final || narraPausa() || decidiendo()) return;   // (a card being read, a decision being taken: the world waits)   // (a card that explains: the world waits while it is read)
   if (AI.on && provider() === 'manual' && aiq.list.length) return;   // (debugging by hand: the world waits for the answer)
   TT += dt; dayT += dt / (MIN_S * 60 * 24); boil = Math.floor(TT * 6);
   const { night } = light();

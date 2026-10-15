@@ -14,6 +14,12 @@
 #     con: quién se lo dice la próxima vez que Ana lo encuentra (si no, nadie: solo el aviso)
 #     dice: lo que dice, escrito (una línea; varias, separadas por « / »)
 #     ia: lo que pasa, para que la IA improvise la escena (si está encendida; si no, se usa «dice»)
+#   Una cualidad también puede ser de alguien hacia otra persona (cómo la ve), y subir con lo que hace otra:
+#   de: de quién es (si no, de quien hace las acciones)      hacia: hacia quién (se pide así: «paciencia:marilla:ana<=1»)
+#   por: quién la hace subir con sus acciones (si no, ana)   inicial: dónde empieza (si no, 0)   rango: mínimo-máximo
+#   visible si: cuándo cuenta y se ve en el cuaderno (condiciones del guion, separadas por comas)
+#   bajo N: lo que significa caer a N (como un hito, pero bajando; con «con», «dice», «ia» igual). El guion la baja o
+#     la sube con «! suma paciencia:marilla:ana -1»; al cruzar un hito o un bajo queda el hecho hito_<id>_<N> o bajo_<id>_<N>.
 # Las líneas que empiezan con # son comentarios.
 
 === estudio ===
@@ -66,3 +72,24 @@ hito 60: Podría escribir de verdad: un cuento para una revista.
   con: sraallan
   dice: Ana, ¿has pensado en mandar uno de tus cuentos a una revista? Yo lo leería.
   ia: La Sra. Allan le sugiere a Ana mandar uno de sus cuentos a una revista, y le ofrece ayudarla.
+
+# La paciencia de Marilla con Ana, mientras está a prueba: baja con las faltas (las escenas de «las reglas de la casa»,
+# en el guion), sube cuando Ana ayuda o pide perdón. Si llega a 0, en White Sands puede pasar cualquier cosa.
+=== paciencia ===
+titulo: La paciencia de Marilla
+de: marilla
+hacia: ana
+por: ana
+inicial: 3
+rango: 0-5
+suma: quehacer, rezar, cocinar, coser, recoger
+por_dia: 1
+visible si: hecho:inicio_juego, !hecho:se_queda
+hito 5: Marilla empieza a acostumbrarse a tenerla en casa.
+bajo 2: Marilla está perdiendo la paciencia (ayudarla en la casa la calma).
+  con: marilla
+  dice: Ana, mientras estés a prueba en esta casa, tienes que portarte bien. No me hagas arrepentirme.
+bajo 1: Marilla está pensando en devolverte con la Sra. Spencer: pídele perdón y ayúdala.
+  con: marilla
+  dice: Una más así, Ana, y te llevo de vuelta con la Sra. Spencer. Te lo digo en serio.
+bajo 0: Marilla ya no tiene paciencia contigo: en White Sands puede pasar cualquier cosa.

@@ -1,21 +1,30 @@
-/* ---------- the skills: qualities that grow little by little with what each one does (docs/MOTOR.md) ----------
-   Written apart (src/datos/habilidades.txt): each skill is a quality (a number with an owner: «granja» of Ana,
-   «estudio» of Gilbert) that goes up with the actions of whoever does them, a little each day. Ana's milestones
-   (hitos) are storylets on a quality: when she gets to one, someone tells her the next time she meets them (with the
-   AI, a scene of its own; without it, the written line), and the fact hito_<skill>_<n> stays for the script; the
-   script may also ask for a level («si: granja:ana>=15»). The Queen's examination comes from «estudio» (examen_*). */
+/* ---------- the qualities: numbers with an owner that change little by little (docs/MOTOR.md) ----------
+   Written apart (src/datos/habilidades.txt). Most are Ana's skills («granja», «estudio»), or anyone's (Gilbert's
+   «estudio»), which go up with the actions of whoever does them, a little each day. Others are of someone towards
+   someone else («paciencia» of Marilla towards Ana), go up with what another one does (Ana's chores) and down with
+   what the script says («! suma paciencia:marilla:ana -1»). Each may say where it starts and its range. Milestones,
+   up (hito) and down (bajo), are storylets on a quality: whoever is to tell it says so the next time Ana meets them
+   (with the AI, a scene of its own; without it, the written line), and the fact hito_<q>_<n> or bajo_<q>_<n> stays
+   for the script, which may also ask for a level («si: granja:ana>=15», «paciencia:marilla:ana<=1»). */
 function habilidadesLeer(txt){
   const out = []; let c = null, h = null;
   for (const raw of txt.split('\n')) {
     const l = raw.trim(); if (!l || l[0] === '#') continue;
     let m;
-    if ((m = l.match(/^===\s*(.+?)\s*===$/))) { out.push(c = { id: m[1], titulo: m[1], suma: [], por_dia: 2, hitos: [] }); h = null; continue; }
+    if ((m = l.match(/^===\s*(.+?)\s*===$/))) { out.push(c = { id: m[1], titulo: m[1], suma: [], por_dia: 2, hitos: [], bajos: [] }); h = null; continue; }
     if (!c) continue;
-    if ((m = l.match(/^hito (\d+):\s*(.*)$/))) c.hitos.push(h = { n: +m[1], texto: m[2] });
+    if ((m = l.match(/^(hito|bajo) (\d+):\s*(.*)$/))) (m[1] === 'hito' ? c.hitos : c.bajos).push(h = { n: +m[2], texto: m[3], dir: m[1] });
     else if (h && /^\s/.test(raw) && (m = l.match(/^(con|dice|ia):\s*(.*)$/))) h[m[1]] = m[2];
-    else if ((m = l.match(/^(titulo|suma|por_dia):\s*(.*)$/))) { c[m[1]] = m[1] === 'suma' ? m[2].split(',').map(x => x.trim()).filter(Boolean) : m[1] === 'por_dia' ? +m[2] : m[2]; h = null; }
+    else if ((m = l.match(/^(titulo|suma|por_dia|de|hacia|por|inicial|rango|visible si):\s*(.*)$/))) {
+      const [, k, v] = m; h = null;
+      if (k === 'suma') c.suma = v.split(',').map(x => x.trim()).filter(Boolean);
+      else if (k === 'por_dia' || k === 'inicial') c[k] = +v;
+      else if (k === 'rango') c.rango = v.split('-').map(Number);
+      else if (k === 'visible si') c.visible = v.split(',').map(x => x.trim()).filter(Boolean);
+      else c[k] = v;
+    }
   }
-  for (const x of out) x.hitos.sort((a, b) => a.n - b.n);
+  for (const x of out) { x.hitos.sort((a, b) => a.n - b.n); x.bajos.sort((a, b) => b.n - a.n); CUALIDAD_DEF[x.id] = x; }
   return out;
 }
 const HABILIDADES = habilidadesLeer(document.getElementById('habilidades')?.textContent || '');
@@ -27,23 +36,39 @@ if (game.wm) {
   if (game.wm.caminos) { for (const [k, v] of Object.entries(game.wm.caminos)) N[k] = Math.max(N[k] || 0, v); delete game.wm.caminos; }
   delete game.wm.caminosHoy;
 }
+// whose a quality is, as the notebook shows it: Ana's own (her skills), or someone's towards her (how they see her)
+const deAna = c => !c.de || c.de === 'ana';
 // Ana's next milestone on a skill (or none: all of them reached)
 const habilidadProxima = c => c.hitos.find(h => h.n > cualidad('ana', c.id));
+// a milestone crossed (from cualidadSuma, whatever made it change): only of what concerns Ana. Up, «hito N» when it
+// gets to N; down, «bajo N» when it falls to N. Told (a notice, and whoever is to say it, the next time she meets them)
+function cualidadHitos(c, dueño, hacia, antes, v){
+  if (dueño !== 'ana' && hacia !== 'ana') return;
+  if (!deAna(c) && !navigator.webdriver) notice((v > antes ? '🌱 ' : '🍂 ') + c.titulo + ': ' + v + '/' + (c.rango?.[1] ?? '?'));
+  const pasa = [...c.hitos.filter(h => antes < h.n && v >= h.n), ...c.bajos.filter(h => antes > h.n && v <= h.n)];
+  pasa.forEach((h, i) => {   // (several at once: all are kept as facts, but only the farthest is told)
+    const t = (h.dir === 'hito' ? '📈 ' : '📉 ') + c.titulo + ': ' + h.texto; logEv(t, []); if (i === pasa.length - 1) notice(t);
+    if (!h.con || i < pasa.length - 1) return dlgHecho(h.dir + '_' + c.id + '_' + h.n);
+    const P = (game.wm.hitosPend ||= []); for (const q of P.filter(q => q.c === c.id)) { P.splice(P.indexOf(q), 1); dlgHecho((q.dir || 'hito') + '_' + q.c + '_' + q.n); }   // (one not yet told, of the same: the newest is what is said)
+    P.push({ c: c.id, n: h.n, dir: h.dir });
+  });
+}
 // days until the next examination: the first day of a summer, from the second year of the game (dia_juego:56)
 const EXAMEN_DESDE = DIAS_ESTACION * 4;
 function diasExamen(){ const d = today(), y = DIAS_ESTACION * 4, s = ((1 - (game.seasonShift || 0)) % 4 + 4) % 4 * DIAS_ESTACION; let n = Math.floor((d - s) / y) * y + s; if (n < d) n += y; while (n + 1 < EXAMEN_DESDE) n += y; return n - d; }
-// one more on a skill, for whoever did it (at most so much a day); Ana's milestones: told, and kept for whoever is to tell her
+// one more on a quality, for whoever did it (or, if it is someone's towards another, for its owner: Marilla's patience,
+// when Ana helps), at most so much a day
 function habilidadSube(k, c, D, por){
-  const n = (D.n[k] ||= {}); if ((n[c.id] || 0) >= c.por_dia) return;
-  n[c.id] = (n[c.id] || 0) + 1; cualidadSuma(k, c.id, 1);
-  logEv(wmName(k) + ' avanzó en ' + c.titulo.replace(/^(El|La|Las|Los) /, m => m.toLowerCase()) + ' (' + por + ').', []);
-  if (k === 'ana') for (const h of c.hitos) if (h.n === cualidad('ana', c.id)) { notice('📈 ' + c.titulo + ': ' + h.texto); logEv('📈 ' + c.titulo + ': ' + h.texto, []); if (h.con) (game.wm.hitosPend ||= []).push({ c: c.id, n: h.n }); }
+  const dueño = c.de || k, key = dueño + ':' + c.id, n = D.n;
+  if ((n[key] || 0) >= c.por_dia) return;
+  n[key] = (n[key] || 0) + 1; cualidadSuma(dueño, c.id, 1, c.hacia);
+  logEv(wmName(dueño) + (c.de ? ': ' + c.titulo.replace(/^(El|La|Las|Los) /, m => m.toLowerCase()) + ' sube (' + wmName(k) + ': ' + por + ').' : ' avanzó en ' + c.titulo.replace(/^(El|La|Las|Los) /, m => m.toLowerCase()) + ' (' + por + ').'), []);
 }
 // a while doing each thing (or, Ana, an hour of class) is one more, once a day each: watched every five seconds, for everyone
 let habilidadesT = 0;
 function habilidadesTick(dt){
   if ((habilidadesT -= dt) > 0 || !game.wm) return; habilidadesT = 5;
-  const D = game.wm.habilidadesHoy?.d === today() ? game.wm.habilidadesHoy : (game.wm.habilidadesHoy = { d: today(), t: {}, dado: {}, n: {} });
+  const D = game.wm.habilidadesHoy?.d === today() && game.wm.habilidadesHoy.v === 2 ? game.wm.habilidadesHoy : (game.wm.habilidadesHoy = { v: 2, d: today(), t: {}, dado: {}, n: {} });
   const h = hourNow();
   for (const k of new Set(['ana', ...Object.keys(AGENTS)])) {
     const A = (AGENTS[k] || (k === 'ana' ? game.playAct : null))?.acting;
@@ -51,7 +76,7 @@ function habilidadesTick(dt){
     for (const v of haciendo) {
       const key = k + ':' + v; D.t[key] = (D.t[key] || 0) + 5; if (D.dado[key] || D.t[key] < M(v === 'clase' ? 60 : 5)) continue;
       D.dado[key] = true;
-      for (const c of HABILIDADES) if (c.suma.includes(v)) { let t = v.replace(/_/g, ' '); try { t = stepText(A.task?.a?.v === v ? A.task.a : A); } catch (e) {} habilidadSube(k, c, D, v === 'clase' ? 'un día de clases' : t); }
+      for (const c of HABILIDADES) if (c.suma.includes(v) && (!c.de || k === (c.por || 'ana')) && (!c.visible || c.visible.every(x => dlgCond(x)))) { let t = v.replace(/_/g, ' '); try { t = stepText(A.task?.a?.v === v ? A.task.a : A); } catch (e) {} habilidadSube(k, c, D, v === 'clase' ? 'un día de clases' : t); }
     }
   }
   hitosTick(); sumasPendientes();
@@ -60,9 +85,9 @@ function habilidadesTick(dt){
 function hitosTick(){
   const P = game.wm.hitosPend; if (!P?.length || hablando() || amb.cur || enc.cur || game.talk || TALKS.length) return;   // (even while Ana works: Marilla tells her so as she washes up)
   for (const p of P) {
-    const c = HABILIDADES.find(x => x.id === p.c), h = c?.hitos.find(x => x.n === p.n); if (!h) { P.splice(P.indexOf(p), 1); return; }
+    const c = HABILIDADES.find(x => x.id === p.c), h = c?.[p.dir === 'bajo' ? 'bajos' : 'hitos'].find(x => x.n === p.n); if (!h) { P.splice(P.indexOf(p), 1); return; }
     const b = wmBody(h.con); if (!b || wmScene(h.con) !== game.scene || dist(ana.x, ana.y, b.x, b.y) > (game.scene === 'out' ? 90 : 220) || ocupada(h.con)) continue;   // (near her; inside, in the same room)
-    P.splice(P.indexOf(p), 1); dlgHecho('hito_' + c.id + '_' + h.n);   // (told: a fact, for the script and the tests)
+    P.splice(P.indexOf(p), 1); dlgHecho((p.dir || 'hito') + '_' + c.id + '_' + h.n);   // (told: a fact, for the script and the tests)
     const escrito = () => talkPlay((h.dice || h.texto).split(' / ').map(t => [h.con, t]), { ch: 'hito', hold: [h.con] });
     if (!aiReady() || !h.ia) return escrito();
     sceneAsk([h.con], h.ia + ' (Que se note que viene de lo que Ana hizo, día a día.)', 'pasar').then(s => s.lines.length ? talkPlay(s.lines.map(l => [l.q, l.t]), { ch: 'hito', hold: [h.con] }) : escrito()).catch(escrito);

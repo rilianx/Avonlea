@@ -19,6 +19,10 @@
 #   «! pasa_tiempo 4» (horas: un viaje), «! a_cocina» (Ana entra a la cocina y Marilla está ahí), «! a_la_mesa» (a comer
 #   con los Cuthbert), «! acostarse» (sube y se acuesta), «! junto ana marilla» (va al lado de: un abrazo).
 # «donde: tejas»: Ana anda por Tejas Verdes (la cocina, su pieza o el patio); «donde: casa», la cocina o el patio.
+# En «si:», también: «ve:marilla» (Marilla la ve), «donde:ana:tejas» (o con «!»), «ana:camison», «ana:sin_sombrero»,
+#   «ana:ropa_tirada»; y las cualidades de uno hacia otro: «paciencia:marilla:ana<=1» (src/datos/habilidades.txt).
+# «! vestirse»; «! punto id | texto» (un punto para volver: la partida como está ahora); «! final id | texto» (la
+#   historia termina: una tarjeta, y se puede volver a un punto o empezar de nuevo).
 # Si varias escenas pueden decirse a la vez en un canal, va la de más prioridad; a igual prioridad, la más específica
 # (la que pide más condiciones). «grande»: empieza algo grande del libro; como mucho una grande por día (el ritmo).
 
@@ -855,6 +859,7 @@ interrumpe
 sujeta: marilla
 donde: tejas
 al_empezar: a_cocina
+al_empezar: punto viaje | Volver a la mañana del viaje a White Sands
 si: hecho:primera_noche, dias_desde:llegada_tv:1, !hecho:desayuno_prueba, hora:6.5-14
 al_terminar: hecho desayuno_prueba
 ---
@@ -882,7 +887,7 @@ interrumpe
 sujeta: marilla
 donde: tejas
 al_empezar: a_cocina
-si: hecho:desayuno_prueba, !hecho:a_prueba, hora:14-19
+si: hecho:desayuno_prueba, !hecho:a_prueba, hora:14-19, paciencia:marilla:ana>=1
 al_terminar: hecho a_prueba
 al_terminar: suma afecto:marilla:ana 1
 al_terminar: log Marilla llevó a Ana a White Sands; la Sra. Blewett la quería de sirvienta, y Marilla no se la dio. Ana se queda en Tejas Verdes, a prueba.
@@ -957,6 +962,188 @@ si: hecho:a_prueba, hora:21-23.5
 -> «¡Cinco minutitos más, Marilla!»
    ana: ¡Cinco minutitos más, Marilla! Estoy en la mitad de un sueño despierta.
 
+# --- Las reglas de la casa, mientras Ana está a prueba (cap. 5 a 12). Cada falta es una escena como cualquiera: se
+# dispara cuando Marilla la ve («ve:marilla») haciendo algo que en su casa no se hace («ana:camison», «!donde:ana:tejas»),
+# y baja «la paciencia de Marilla» (una cualidad: src/datos/habilidades.txt). Si Ana pide perdón, no baja: lo que aleja
+# a Marilla no son las travesuras, sino no arrepentirse. Ayudar en la casa y pedirle perdón la hacen subir de nuevo.
+=== falta_camison ===
+canal: gg
+prioridad: 6
+repetir: dia
+sujeta: marilla
+si: hecho:desayuno_prueba, !hecho:se_queda, ana:camison, ve:marilla, hora:9-19
+---
+marilla: ¡Ana! ¿Todavía en camisón a esta hora? En esta casa una se viste apenas se levanta.
+-> «Perdón, Marilla. Ahora mismo me visto.»
+   ana: Perdón, Marilla. Se me olvidó por completo: estaba ocupadísima imaginando.
+   ! vestirse
+   marilla: (Marilla suspira.) Imaginando. Claro.
+->* «Es que en camisón me siento como un hada…»
+   ana: Es que en camisón me siento como un hada del bosque. Las hadas nunca se visten, ¿sabía?
+   marilla: Tú no eres un hada. Eres una niña a prueba en mi casa. Ve a vestirte.
+   ! suma paciencia:marilla:ana -1
+
+=== falta_ropa ===
+canal: gg
+prioridad: 6
+repetir: dia
+sujeta: marilla
+si: hecho:ropa_tirada_otra, !hecho:se_queda, ve:marilla, hora:6-13
+---
+marilla: Otra vez la ropa por el suelo, Ana. ¿No habíamos quedado en que la doblabas en la silla?
+-> «Tiene razón. Esta noche la doblo, se lo prometo.»
+   ana: Tiene razón, Marilla. Esta noche la doblo. Se lo prometo con todo mi corazón.
+   ! olvidar ropa_tirada_otra
+->* «En el orfanato nadie se fijaba…»
+   ana: En el orfanato nadie se fijaba en esas cosas.
+   marilla: Aquí sí. Aquí todo se ve.
+   ! suma paciencia:marilla:ana -1
+
+# (de noche, lejos de Tejas Verdes: Marilla sale con el farol a buscarla)
+=== falta_noche ===
+narra: Ya es noche cerrada y Ana no ha vuelto. Marilla enciende el farol y sale a buscarla por los caminos, con el chal sobre los hombros y la boca apretada. La encuentra, y la trae a casa sin decir una palabra.
+canal: gg
+prioridad: 9
+interrumpe
+repetir: dia
+si: hecho:desayuno_prueba, !hecho:se_queda, !donde:ana:tejas, hora:21.5-29
+al_empezar: suma paciencia:marilla:ana -1
+al_terminar: a_pieza
+---
+->* «¡Perdón, Marilla! Se me pasó la hora mirando las estrellas.»
+   ana: ¡Perdón, Marilla! Se me pasó la hora mirando las estrellas. No pensé que se iba a preocupar.
+-> «No tenía por qué buscarme. Sé volver sola.»
+   ana: No tenía por qué buscarme. Sé volver sola.
+   ! suma paciencia:marilla:ana -1
+
+# (el día del viaje, si Ana no está: Marilla la busca, y la trae)
+=== falta_viaje ===
+narra: Marilla tiene la calesa lista para ir a White Sands, y Ana no aparece por ninguna parte. La busca por la granja, por el huerto, por el camino… y la encuentra lejos, muy lejos. Vuelven a Tejas Verdes en un silencio que da miedo.
+canal: gg
+prioridad: 10
+interrumpe
+si: hecho:desayuno_prueba, !hecho:a_prueba, !donde:ana:tejas, hora:14.5-19
+al_empezar: suma paciencia:marilla:ana -1
+al_terminar: a_cocina
+
+# White Sands, cuando a Marilla ya no le queda paciencia: duda de verdad. Lo que Ana haga, y lo que la quieran los
+# Cuthbert, decide qué pasa después (las escenas de abajo, por prioridad: la de más arriba que se cumpla).
+=== viaje_spencer_duda ===
+narra: White Sands está a unas millas por el camino de la costa. Marilla lleva las riendas y no dice nada en todo el viaje: piensa en el camisón a mediodía, en la ropa por el suelo, en lo que ha tenido que aguantar. Ana tampoco habla. Mira el mar y aprieta su maleta vieja.
+canal: gg
+prioridad: 9
+interrumpe
+sujeta: marilla
+donde: tejas
+al_empezar: a_cocina
+si: hecho:desayuno_prueba, !hecho:a_prueba, hora:14-19, paciencia:marilla:ana<1
+al_terminar: hecho blewett_duda
+---
+narra: En casa de la Sra. Spencer está la Sra. Peter Blewett, que busca una niña para cuidarle los hijos. Mira a Ana de arriba abajo: «Esta me sirve. Es flaca, pero dura. Va a tener que ganarse lo que come.»
+narra: Esta vez Marilla no contesta enseguida. Mira a la Sra. Blewett, mira a Ana, y por primera vez duda de verdad. El silencio dura una eternidad.
+-> «¡Por favor, Srta. Cuthbert! Voy a ser buena, se lo juro…»
+   ana: (Ana se aferra a la manga de Marilla.) ¡Por favor, Srta. Cuthbert! Voy a ser buena, se lo juro. Voy a doblar la ropa y a vestirme temprano y a no imaginar nada en horas de trabajo…
+   ! hecho blewett_suplica
+-> Quedarse callada, mirando el suelo
+   ana: (Ana no dice nada. Se queda mirando el suelo, muy pálida, con los labios apretados para no llorar.)
+   ! hecho blewett_calla
+->* «Prefiero volver al orfanato antes que irme con esa señora.»
+   ana: (Ana levanta la barbilla.) Prefiero volver al orfanato antes que irme con esa señora.
+   ! hecho blewett_orgullo
+
+# (Matthew la quiere mucho: la salva él, como en el libro, cuando Marilla vuelve a hablarlo con él)
+=== duda_matthew ===
+narra: «No puedo decidir sin hablarlo con Matthew», dice al fin Marilla. Vuelven a Tejas Verdes ya de tarde. En el corral, Matthew escucha todo sin interrumpir, y después dice, muy bajito: «Bueno, pues… yo creo que podríamos quedarnos con ella, Marilla. Podríamos hacerle algún bien.»
+canal: gg
+prioridad: 9
+interrumpe
+sujeta: marilla
+si: hecho:blewett_duda, !hecho:a_prueba, afecto:matthew:ana>=4
+al_empezar: a_cocina
+al_terminar: hecho a_prueba
+al_terminar: hecho ultima_oportunidad
+al_terminar: suma paciencia:marilla:ana 2
+al_terminar: log Marilla casi le dio Ana a la Sra. Blewett; Matthew pidió que se quedara. Ana se queda a prueba, por última vez.
+---
+! pasa_tiempo 4
+marilla: Ana, Matthew quiere que te quedes. Te quedas a prueba. Pero es la última vez, ¿me oyes? La última.
+ana: (Ana corre al corral, se le cuelga del cuello a Matthew y lo deja colorado hasta las orejas.)
+
+# (Ana suplica, y Marilla le tiene algo de cariño: no puede dársela a esa mujer)
+=== duda_suplica ===
+narra: Marilla mira esa manito aferrada a su manga, y algo se le quiebra por dentro. «No», dice. «No puedo. Me la llevo de vuelta.» La Sra. Blewett se encoge de hombros. En la calesa, Ana llora todo el camino, de puro alivio.
+canal: gg
+prioridad: 8
+interrumpe
+sujeta: marilla
+si: hecho:blewett_duda, !hecho:a_prueba, hecho:blewett_suplica, afecto:marilla:ana>=2
+al_empezar: a_cocina
+al_terminar: hecho a_prueba
+al_terminar: hecho ultima_oportunidad
+al_terminar: suma paciencia:marilla:ana 2
+al_terminar: log Ana le suplicó a Marilla en White Sands, y Marilla no la entregó. Se queda a prueba, por última vez.
+---
+! pasa_tiempo 4
+marilla: Te quedas a prueba, Ana. Pero no me hagas arrepentirme. Es la última vez.
+
+# (calla, y Marilla la quiere: esa carita pálida basta)
+=== duda_calla ===
+narra: Marilla ve esa carita pálida que no pide nada, y se acuerda de lo que Ana le contó en el camino: la Sra. Thomas, los mellizos, el orfanato. «No», dice de pronto. «Me la llevo de vuelta.»
+canal: gg
+prioridad: 7
+interrumpe
+sujeta: marilla
+si: hecho:blewett_duda, !hecho:a_prueba, hecho:blewett_calla, afecto:marilla:ana>=3
+al_empezar: a_cocina
+al_terminar: hecho a_prueba
+al_terminar: hecho ultima_oportunidad
+al_terminar: suma paciencia:marilla:ana 2
+---
+! pasa_tiempo 4
+marilla: Te quedas a prueba, Ana. Es la última vez.
+
+# (y si no: Ana se va con la Sra. Blewett. Un final: la jugadora puede volver a la mañana del viaje)
+=== devuelta_blewett ===
+narra: Marilla aprieta los labios y asiente. Esa misma tarde, Ana se va con la Sra. Blewett, con su maleta vieja y su sombrero de paja. No mira hacia atrás, porque si mira hacia atrás va a llorar. En Tejas Verdes, Matthew no dice nada durante días.
+canal: gg
+prioridad: 1
+interrumpe
+si: hecho:blewett_duda, !hecho:a_prueba
+al_terminar: hecho devuelta
+al_terminar: log Marilla le entregó Ana a la Sra. Blewett.
+al_terminar: final devuelta | Ana se fue con la Sra. Blewett. En el libro, Marilla no la entregó: Ana se ganó, poco a poco, su lugar en Tejas Verdes.
+
+# (después del viaje, a prueba todavía: si a Marilla se le vuelve a acabar la paciencia, una conversación seria; y si
+# ya la tuvo, la lleva de vuelta con la Sra. Spencer)
+=== ultima_oportunidad ===
+canal: gg
+prioridad: 9
+interrumpe
+sujeta: marilla
+en: ana=gg, marilla=gg
+si: hecho:a_prueba, !hecho:se_queda, !hecho:ultima_oportunidad, paciencia:marilla:ana<1
+al_empezar: punto ultima | Volver al día de la última oportunidad
+al_terminar: hecho ultima_oportunidad
+al_terminar: suma paciencia:marilla:ana 2
+---
+marilla: Siéntate, Ana. Tenemos que hablar.
+marilla: Estás a prueba en esta casa, y no lo estás haciendo bien. Si esto sigue así, te llevo con la Sra. Spencer. Esta es tu última oportunidad.
+-> «Voy a cambiar, Marilla. Ya va a ver.»
+   ana: (Ana tiene los ojos llenos de lágrimas.) Voy a cambiar, Marilla. Ya va a ver. Voy a ser tan buena que no me va a reconocer.
+->* Asentir en silencio
+   ana: (Ana asiente, sin poder decir nada.)
+
+=== devuelta_spencer ===
+narra: Esta vez Marilla no duda. Engancha la yegua alazana, sube a Ana a la calesa con su maleta vieja, y la lleva de vuelta con la Sra. Spencer, a White Sands. Matthew las mira irse desde el portón del corral, con el sombrero en la mano.
+canal: gg
+prioridad: 9
+interrumpe
+donde: tejas
+si: hecho:a_prueba, !hecho:se_queda, hecho:ultima_oportunidad, paciencia:marilla:ana<1, !hecho:devuelta
+al_terminar: hecho devuelta
+al_terminar: log Marilla llevó a Ana de vuelta con la Sra. Spencer.
+al_terminar: final devuelta | Marilla llevó a Ana de vuelta al orfanato. En el libro, Ana se quedó en Tejas Verdes para siempre.
+
 === se_queda ===
 canal: gg
 prioridad: 9
@@ -964,7 +1151,7 @@ interrumpe
 grande
 sujeta: marilla
 en: ana=gg, marilla=gg
-si: hecho:a_prueba, !hecho:se_queda, !hecho:ofendio_lynde, dias_desde:a_prueba:3, afecto:marilla:ana>=3, cuaderno:rezo, cuaderno:quehaceres
+si: hecho:a_prueba, !hecho:se_queda, !hecho:ofendio_lynde, dias_desde:a_prueba:3, afecto:marilla:ana>=3, paciencia:marilla:ana>=3, cuaderno:rezo, cuaderno:quehaceres
 al_terminar: hecho se_queda
 al_terminar: suma afecto:marilla:ana 1
 al_terminar: log Marilla le dijo a Ana que ya no estaba a prueba: se queda en Tejas Verdes, para siempre.
@@ -1092,6 +1279,7 @@ lynde: (La Sra. Lynde mira a Ana de arriba abajo.) Bueno, no te eligieron por tu
    marilla: Ana, ve a tu pieza y quédate ahí hasta que yo suba.
    ! hecho ofendio_lynde
    ! suma afecto:lynde:ana -1
+   ! suma paciencia:marilla:ana -1
    ! log Ana estalló con la Sra. Lynde, que la llamó flaca, fea y pelirroja. Marilla la mandó a su pieza.
 ->* Apretar los puños y contar hasta diez
    ana: (Ana aprieta los puños, se pone roja como un tomate… y cuenta hasta diez, muy despacio.) Buenas tardes, Sra. Lynde.
@@ -1125,6 +1313,7 @@ en: ana=rl, lynde=rl
 si: hecho:ofendio_lynde
 al_terminar: hecho disculpa_lynde
 al_terminar: olvidar ofendio_lynde
+al_terminar: suma paciencia:marilla:ana 1
 ---
 ana: (Ana se arrodilla de pronto frente a la Sra. Lynde.)
 ->* Disculparse a lo grande, con todo el dramatismo del mundo

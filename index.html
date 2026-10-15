@@ -227,6 +227,10 @@ body:not(.dev) #spdbtn{top:298px!important;right:10px!important}
 #   «! pasa_tiempo 4» (horas: un viaje), «! a_cocina» (Ana entra a la cocina y Marilla está ahí), «! a_la_mesa» (a comer
 #   con los Cuthbert), «! acostarse» (sube y se acuesta), «! junto ana marilla» (va al lado de: un abrazo).
 # «donde: tejas»: Ana anda por Tejas Verdes (la cocina, su pieza o el patio); «donde: casa», la cocina o el patio.
+# En «si:», también: «ve:marilla» (Marilla la ve), «donde:ana:tejas» (o con «!»), «ana:camison», «ana:sin_sombrero»,
+#   «ana:ropa_tirada»; y las cualidades de uno hacia otro: «paciencia:marilla:ana<=1» (src/datos/habilidades.txt).
+# «! vestirse»; «! punto id | texto» (un punto para volver: la partida como está ahora); «! final id | texto» (la
+#   historia termina: una tarjeta, y se puede volver a un punto o empezar de nuevo).
 # Si varias escenas pueden decirse a la vez en un canal, va la de más prioridad; a igual prioridad, la más específica
 # (la que pide más condiciones). «grande»: empieza algo grande del libro; como mucho una grande por día (el ritmo).
 
@@ -1063,6 +1067,7 @@ interrumpe
 sujeta: marilla
 donde: tejas
 al_empezar: a_cocina
+al_empezar: punto viaje | Volver a la mañana del viaje a White Sands
 si: hecho:primera_noche, dias_desde:llegada_tv:1, !hecho:desayuno_prueba, hora:6.5-14
 al_terminar: hecho desayuno_prueba
 ---
@@ -1090,7 +1095,7 @@ interrumpe
 sujeta: marilla
 donde: tejas
 al_empezar: a_cocina
-si: hecho:desayuno_prueba, !hecho:a_prueba, hora:14-19
+si: hecho:desayuno_prueba, !hecho:a_prueba, hora:14-19, paciencia:marilla:ana>=1
 al_terminar: hecho a_prueba
 al_terminar: suma afecto:marilla:ana 1
 al_terminar: log Marilla llevó a Ana a White Sands; la Sra. Blewett la quería de sirvienta, y Marilla no se la dio. Ana se queda en Tejas Verdes, a prueba.
@@ -1165,6 +1170,188 @@ si: hecho:a_prueba, hora:21-23.5
 -> «¡Cinco minutitos más, Marilla!»
    ana: ¡Cinco minutitos más, Marilla! Estoy en la mitad de un sueño despierta.
 
+# --- Las reglas de la casa, mientras Ana está a prueba (cap. 5 a 12). Cada falta es una escena como cualquiera: se
+# dispara cuando Marilla la ve («ve:marilla») haciendo algo que en su casa no se hace («ana:camison», «!donde:ana:tejas»),
+# y baja «la paciencia de Marilla» (una cualidad: src/datos/habilidades.txt). Si Ana pide perdón, no baja: lo que aleja
+# a Marilla no son las travesuras, sino no arrepentirse. Ayudar en la casa y pedirle perdón la hacen subir de nuevo.
+=== falta_camison ===
+canal: gg
+prioridad: 6
+repetir: dia
+sujeta: marilla
+si: hecho:desayuno_prueba, !hecho:se_queda, ana:camison, ve:marilla, hora:9-19
+---
+marilla: ¡Ana! ¿Todavía en camisón a esta hora? En esta casa una se viste apenas se levanta.
+-> «Perdón, Marilla. Ahora mismo me visto.»
+   ana: Perdón, Marilla. Se me olvidó por completo: estaba ocupadísima imaginando.
+   ! vestirse
+   marilla: (Marilla suspira.) Imaginando. Claro.
+->* «Es que en camisón me siento como un hada…»
+   ana: Es que en camisón me siento como un hada del bosque. Las hadas nunca se visten, ¿sabía?
+   marilla: Tú no eres un hada. Eres una niña a prueba en mi casa. Ve a vestirte.
+   ! suma paciencia:marilla:ana -1
+
+=== falta_ropa ===
+canal: gg
+prioridad: 6
+repetir: dia
+sujeta: marilla
+si: hecho:ropa_tirada_otra, !hecho:se_queda, ve:marilla, hora:6-13
+---
+marilla: Otra vez la ropa por el suelo, Ana. ¿No habíamos quedado en que la doblabas en la silla?
+-> «Tiene razón. Esta noche la doblo, se lo prometo.»
+   ana: Tiene razón, Marilla. Esta noche la doblo. Se lo prometo con todo mi corazón.
+   ! olvidar ropa_tirada_otra
+->* «En el orfanato nadie se fijaba…»
+   ana: En el orfanato nadie se fijaba en esas cosas.
+   marilla: Aquí sí. Aquí todo se ve.
+   ! suma paciencia:marilla:ana -1
+
+# (de noche, lejos de Tejas Verdes: Marilla sale con el farol a buscarla)
+=== falta_noche ===
+narra: Ya es noche cerrada y Ana no ha vuelto. Marilla enciende el farol y sale a buscarla por los caminos, con el chal sobre los hombros y la boca apretada. La encuentra, y la trae a casa sin decir una palabra.
+canal: gg
+prioridad: 9
+interrumpe
+repetir: dia
+si: hecho:desayuno_prueba, !hecho:se_queda, !donde:ana:tejas, hora:21.5-29
+al_empezar: suma paciencia:marilla:ana -1
+al_terminar: a_pieza
+---
+->* «¡Perdón, Marilla! Se me pasó la hora mirando las estrellas.»
+   ana: ¡Perdón, Marilla! Se me pasó la hora mirando las estrellas. No pensé que se iba a preocupar.
+-> «No tenía por qué buscarme. Sé volver sola.»
+   ana: No tenía por qué buscarme. Sé volver sola.
+   ! suma paciencia:marilla:ana -1
+
+# (el día del viaje, si Ana no está: Marilla la busca, y la trae)
+=== falta_viaje ===
+narra: Marilla tiene la calesa lista para ir a White Sands, y Ana no aparece por ninguna parte. La busca por la granja, por el huerto, por el camino… y la encuentra lejos, muy lejos. Vuelven a Tejas Verdes en un silencio que da miedo.
+canal: gg
+prioridad: 10
+interrumpe
+si: hecho:desayuno_prueba, !hecho:a_prueba, !donde:ana:tejas, hora:14.5-19
+al_empezar: suma paciencia:marilla:ana -1
+al_terminar: a_cocina
+
+# White Sands, cuando a Marilla ya no le queda paciencia: duda de verdad. Lo que Ana haga, y lo que la quieran los
+# Cuthbert, decide qué pasa después (las escenas de abajo, por prioridad: la de más arriba que se cumpla).
+=== viaje_spencer_duda ===
+narra: White Sands está a unas millas por el camino de la costa. Marilla lleva las riendas y no dice nada en todo el viaje: piensa en el camisón a mediodía, en la ropa por el suelo, en lo que ha tenido que aguantar. Ana tampoco habla. Mira el mar y aprieta su maleta vieja.
+canal: gg
+prioridad: 9
+interrumpe
+sujeta: marilla
+donde: tejas
+al_empezar: a_cocina
+si: hecho:desayuno_prueba, !hecho:a_prueba, hora:14-19, paciencia:marilla:ana<1
+al_terminar: hecho blewett_duda
+---
+narra: En casa de la Sra. Spencer está la Sra. Peter Blewett, que busca una niña para cuidarle los hijos. Mira a Ana de arriba abajo: «Esta me sirve. Es flaca, pero dura. Va a tener que ganarse lo que come.»
+narra: Esta vez Marilla no contesta enseguida. Mira a la Sra. Blewett, mira a Ana, y por primera vez duda de verdad. El silencio dura una eternidad.
+-> «¡Por favor, Srta. Cuthbert! Voy a ser buena, se lo juro…»
+   ana: (Ana se aferra a la manga de Marilla.) ¡Por favor, Srta. Cuthbert! Voy a ser buena, se lo juro. Voy a doblar la ropa y a vestirme temprano y a no imaginar nada en horas de trabajo…
+   ! hecho blewett_suplica
+-> Quedarse callada, mirando el suelo
+   ana: (Ana no dice nada. Se queda mirando el suelo, muy pálida, con los labios apretados para no llorar.)
+   ! hecho blewett_calla
+->* «Prefiero volver al orfanato antes que irme con esa señora.»
+   ana: (Ana levanta la barbilla.) Prefiero volver al orfanato antes que irme con esa señora.
+   ! hecho blewett_orgullo
+
+# (Matthew la quiere mucho: la salva él, como en el libro, cuando Marilla vuelve a hablarlo con él)
+=== duda_matthew ===
+narra: «No puedo decidir sin hablarlo con Matthew», dice al fin Marilla. Vuelven a Tejas Verdes ya de tarde. En el corral, Matthew escucha todo sin interrumpir, y después dice, muy bajito: «Bueno, pues… yo creo que podríamos quedarnos con ella, Marilla. Podríamos hacerle algún bien.»
+canal: gg
+prioridad: 9
+interrumpe
+sujeta: marilla
+si: hecho:blewett_duda, !hecho:a_prueba, afecto:matthew:ana>=4
+al_empezar: a_cocina
+al_terminar: hecho a_prueba
+al_terminar: hecho ultima_oportunidad
+al_terminar: suma paciencia:marilla:ana 2
+al_terminar: log Marilla casi le dio Ana a la Sra. Blewett; Matthew pidió que se quedara. Ana se queda a prueba, por última vez.
+---
+! pasa_tiempo 4
+marilla: Ana, Matthew quiere que te quedes. Te quedas a prueba. Pero es la última vez, ¿me oyes? La última.
+ana: (Ana corre al corral, se le cuelga del cuello a Matthew y lo deja colorado hasta las orejas.)
+
+# (Ana suplica, y Marilla le tiene algo de cariño: no puede dársela a esa mujer)
+=== duda_suplica ===
+narra: Marilla mira esa manito aferrada a su manga, y algo se le quiebra por dentro. «No», dice. «No puedo. Me la llevo de vuelta.» La Sra. Blewett se encoge de hombros. En la calesa, Ana llora todo el camino, de puro alivio.
+canal: gg
+prioridad: 8
+interrumpe
+sujeta: marilla
+si: hecho:blewett_duda, !hecho:a_prueba, hecho:blewett_suplica, afecto:marilla:ana>=2
+al_empezar: a_cocina
+al_terminar: hecho a_prueba
+al_terminar: hecho ultima_oportunidad
+al_terminar: suma paciencia:marilla:ana 2
+al_terminar: log Ana le suplicó a Marilla en White Sands, y Marilla no la entregó. Se queda a prueba, por última vez.
+---
+! pasa_tiempo 4
+marilla: Te quedas a prueba, Ana. Pero no me hagas arrepentirme. Es la última vez.
+
+# (calla, y Marilla la quiere: esa carita pálida basta)
+=== duda_calla ===
+narra: Marilla ve esa carita pálida que no pide nada, y se acuerda de lo que Ana le contó en el camino: la Sra. Thomas, los mellizos, el orfanato. «No», dice de pronto. «Me la llevo de vuelta.»
+canal: gg
+prioridad: 7
+interrumpe
+sujeta: marilla
+si: hecho:blewett_duda, !hecho:a_prueba, hecho:blewett_calla, afecto:marilla:ana>=3
+al_empezar: a_cocina
+al_terminar: hecho a_prueba
+al_terminar: hecho ultima_oportunidad
+al_terminar: suma paciencia:marilla:ana 2
+---
+! pasa_tiempo 4
+marilla: Te quedas a prueba, Ana. Es la última vez.
+
+# (y si no: Ana se va con la Sra. Blewett. Un final: la jugadora puede volver a la mañana del viaje)
+=== devuelta_blewett ===
+narra: Marilla aprieta los labios y asiente. Esa misma tarde, Ana se va con la Sra. Blewett, con su maleta vieja y su sombrero de paja. No mira hacia atrás, porque si mira hacia atrás va a llorar. En Tejas Verdes, Matthew no dice nada durante días.
+canal: gg
+prioridad: 1
+interrumpe
+si: hecho:blewett_duda, !hecho:a_prueba
+al_terminar: hecho devuelta
+al_terminar: log Marilla le entregó Ana a la Sra. Blewett.
+al_terminar: final devuelta | Ana se fue con la Sra. Blewett. En el libro, Marilla no la entregó: Ana se ganó, poco a poco, su lugar en Tejas Verdes.
+
+# (después del viaje, a prueba todavía: si a Marilla se le vuelve a acabar la paciencia, una conversación seria; y si
+# ya la tuvo, la lleva de vuelta con la Sra. Spencer)
+=== ultima_oportunidad ===
+canal: gg
+prioridad: 9
+interrumpe
+sujeta: marilla
+en: ana=gg, marilla=gg
+si: hecho:a_prueba, !hecho:se_queda, !hecho:ultima_oportunidad, paciencia:marilla:ana<1
+al_empezar: punto ultima | Volver al día de la última oportunidad
+al_terminar: hecho ultima_oportunidad
+al_terminar: suma paciencia:marilla:ana 2
+---
+marilla: Siéntate, Ana. Tenemos que hablar.
+marilla: Estás a prueba en esta casa, y no lo estás haciendo bien. Si esto sigue así, te llevo con la Sra. Spencer. Esta es tu última oportunidad.
+-> «Voy a cambiar, Marilla. Ya va a ver.»
+   ana: (Ana tiene los ojos llenos de lágrimas.) Voy a cambiar, Marilla. Ya va a ver. Voy a ser tan buena que no me va a reconocer.
+->* Asentir en silencio
+   ana: (Ana asiente, sin poder decir nada.)
+
+=== devuelta_spencer ===
+narra: Esta vez Marilla no duda. Engancha la yegua alazana, sube a Ana a la calesa con su maleta vieja, y la lleva de vuelta con la Sra. Spencer, a White Sands. Matthew las mira irse desde el portón del corral, con el sombrero en la mano.
+canal: gg
+prioridad: 9
+interrumpe
+donde: tejas
+si: hecho:a_prueba, !hecho:se_queda, hecho:ultima_oportunidad, paciencia:marilla:ana<1, !hecho:devuelta
+al_terminar: hecho devuelta
+al_terminar: log Marilla llevó a Ana de vuelta con la Sra. Spencer.
+al_terminar: final devuelta | Marilla llevó a Ana de vuelta al orfanato. En el libro, Ana se quedó en Tejas Verdes para siempre.
+
 === se_queda ===
 canal: gg
 prioridad: 9
@@ -1172,7 +1359,7 @@ interrumpe
 grande
 sujeta: marilla
 en: ana=gg, marilla=gg
-si: hecho:a_prueba, !hecho:se_queda, !hecho:ofendio_lynde, dias_desde:a_prueba:3, afecto:marilla:ana>=3, cuaderno:rezo, cuaderno:quehaceres
+si: hecho:a_prueba, !hecho:se_queda, !hecho:ofendio_lynde, dias_desde:a_prueba:3, afecto:marilla:ana>=3, paciencia:marilla:ana>=3, cuaderno:rezo, cuaderno:quehaceres
 al_terminar: hecho se_queda
 al_terminar: suma afecto:marilla:ana 1
 al_terminar: log Marilla le dijo a Ana que ya no estaba a prueba: se queda en Tejas Verdes, para siempre.
@@ -1300,6 +1487,7 @@ lynde: (La Sra. Lynde mira a Ana de arriba abajo.) Bueno, no te eligieron por tu
    marilla: Ana, ve a tu pieza y quédate ahí hasta que yo suba.
    ! hecho ofendio_lynde
    ! suma afecto:lynde:ana -1
+   ! suma paciencia:marilla:ana -1
    ! log Ana estalló con la Sra. Lynde, que la llamó flaca, fea y pelirroja. Marilla la mandó a su pieza.
 ->* Apretar los puños y contar hasta diez
    ana: (Ana aprieta los puños, se pone roja como un tomate… y cuenta hasta diez, muy despacio.) Buenas tardes, Sra. Lynde.
@@ -1333,6 +1521,7 @@ en: ana=rl, lynde=rl
 si: hecho:ofendio_lynde
 al_terminar: hecho disculpa_lynde
 al_terminar: olvidar ofendio_lynde
+al_terminar: suma paciencia:marilla:ana 1
 ---
 ana: (Ana se arrodilla de pronto frente a la Sra. Lynde.)
 ->* Disculparse a lo grande, con todo el dramatismo del mundo
@@ -2311,6 +2500,17 @@ quien: *
 
 # ====================================== Marilla ======================================
 
+=== conv_marilla_perdon ===
+con: marilla
+tema: Pedirle perdón por portarse mal
+repetir: dia
+prioridad: 2
+si: hecho:inicio_juego, !hecho:se_queda, paciencia:marilla:ana<=2
+al_terminar: suma paciencia:marilla:ana 1
+---
+ana: Marilla… quería pedirle perdón. Sé que no me he portado como debía. No es que quiera ser mala: es que a veces se me olvida ser buena.
+marilla: (Marilla la mira un largo rato, con los labios apretados.) Bueno. Pedir perdón es un comienzo. Lo que importa es lo que hagas después.
+
 === conv_marilla_e ===
 con: marilla
 tema: Explicarle por qué es «Ana con una sola n»
@@ -2814,6 +3014,12 @@ harrison: Si no te asustas con facilidad… Y no le hables de la vaca. Ni a mí 
 #     con: quién se lo dice la próxima vez que Ana lo encuentra (si no, nadie: solo el aviso)
 #     dice: lo que dice, escrito (una línea; varias, separadas por « / »)
 #     ia: lo que pasa, para que la IA improvise la escena (si está encendida; si no, se usa «dice»)
+#   Una cualidad también puede ser de alguien hacia otra persona (cómo la ve), y subir con lo que hace otra:
+#   de: de quién es (si no, de quien hace las acciones)      hacia: hacia quién (se pide así: «paciencia:marilla:ana<=1»)
+#   por: quién la hace subir con sus acciones (si no, ana)   inicial: dónde empieza (si no, 0)   rango: mínimo-máximo
+#   visible si: cuándo cuenta y se ve en el cuaderno (condiciones del guion, separadas por comas)
+#   bajo N: lo que significa caer a N (como un hito, pero bajando; con «con», «dice», «ia» igual). El guion la baja o
+#     la sube con «! suma paciencia:marilla:ana -1»; al cruzar un hito o un bajo queda el hecho hito_<id>_<N> o bajo_<id>_<N>.
 # Las líneas que empiezan con # son comentarios.
 
 === estudio ===
@@ -2867,6 +3073,27 @@ hito 60: Podría escribir de verdad: un cuento para una revista.
   dice: Ana, ¿has pensado en mandar uno de tus cuentos a una revista? Yo lo leería.
   ia: La Sra. Allan le sugiere a Ana mandar uno de sus cuentos a una revista, y le ofrece ayudarla.
 
+# La paciencia de Marilla con Ana, mientras está a prueba: baja con las faltas (las escenas de «las reglas de la casa»,
+# en el guion), sube cuando Ana ayuda o pide perdón. Si llega a 0, en White Sands puede pasar cualquier cosa.
+=== paciencia ===
+titulo: La paciencia de Marilla
+de: marilla
+hacia: ana
+por: ana
+inicial: 3
+rango: 0-5
+suma: quehacer, rezar, cocinar, coser, recoger
+por_dia: 1
+visible si: hecho:inicio_juego, !hecho:se_queda
+hito 5: Marilla empieza a acostumbrarse a tenerla en casa.
+bajo 2: Marilla está perdiendo la paciencia (ayudarla en la casa la calma).
+  con: marilla
+  dice: Ana, mientras estés a prueba en esta casa, tienes que portarte bien. No me hagas arrepentirme.
+bajo 1: Marilla está pensando en devolverte con la Sra. Spencer: pídele perdón y ayúdala.
+  con: marilla
+  dice: Una más así, Ana, y te llevo de vuelta con la Sra. Spencer. Te lo digo en serio.
+bajo 0: Marilla ya no tiene paciencia contigo: en White Sands puede pasar cualquier cosa.
+
 </script>
 <script type="text/plain" id="cuaderno">
 # El cuaderno de Ana: lo que podría hacer, como metas del libro (lo lee el juego al empezar).
@@ -2899,6 +3126,7 @@ titulo: Quedarse en Tejas Verdes
 pista: Marilla esperaba un niño. Ana se queda a prueba: hay que ser útil, aprender y ganarse a Marilla.
 pista si !cuaderno:quehaceres: Marilla quiere ver que Ana sirve para algo: ayúdala con los quehaceres.
 pista si cuaderno:quehaceres: Marilla dice que una niña que vive bajo su techo reza todas las noches. Y que todavía no te conoce bien: conversa con ella.
+pista si paciencia:marilla:ana<=1: Marilla está pensando en devolverte con la Sra. Spencer. Pídele perdón, ayúdala en la casa, y no le des motivos.
 pista si hecho:ofendio_lynde: Marilla dice que no hay nada que hablar de quedarte hasta que le pidas perdón a la Sra. Lynde. Vive en la Hondonada, junto al camino.
 meta: hecho se_queda
 requiere: hecho:a_prueba
@@ -5512,10 +5740,16 @@ function dlgCond(s, c){   // one condition of state, written as text
     case 'escena_ana': return game.scene === a;
     case 'sabe': return (game.wm.know[a] || []).includes(b);
     case 'y_mayor': { const p = wmBody(a); return !!p && p.y > +b * U; }
+    case 've': return veAna(a);   // (she can see Ana now: the same room, or near her outside)
+    case 'donde': { const [x, l] = rest.split(':'); return dlgDonde(l, x); }   // (someone is somewhere: «donde:ana:tejas», «!donde:ana:tejas»)
+    case 'ana': return !!ANA_ESTADO[a]?.();   // (how Ana is: «ana:camison», «ana:sin_sombrero», «ana:ropa_tirada»)
     case 'carta': return game.cartaAhora?.para === a && TT - game.cartaAhora.t < 1 && !game.cartaEscena;   // (Ana is writing a letter to her, at her desk)
   }
   return false;
 }
+// what someone can see: Ana in the same room as them, or near enough outside (in the dark, a lantern's distance)
+function veAna(k){ const b = wmBody(k); if (!b || ana.hidden || wmScene(k) !== game.scene) return false; return game.scene !== 'out' || dist(b.x, b.y, ana.x, ana.y) < 380; }
+const ANA_ESTADO = { camison: () => !!game.wm?.camison, sin_sombrero: () => !!game.wm?.sinSombrero, ropa_tirada: () => !!game.wm?.ropaTirada, sentada: () => !!ana.sit, en_cama: () => !!ana.enCama };
 function dlgDonde(at, k){   // where a talk of pairs and trios may happen
   const sc = wmScene(k), b = wmBody(k); if (!b) return false;
   if (at === 'gg') return sc === 'gg';
@@ -5545,10 +5779,20 @@ function dlgFalla(c, x){   // why the conditions of place and state of a configu
 const dlgCumple = (c, x) => !dlgFalla(c, x);
 // --- the state of the world, as in quality-based narrative (docs/MOTOR.md): facts (with the day they happened) and
 // qualities, numbers with an owner: «granja» of Ana, «estudio» of Gilbert, «afecto» of Diana towards Ana (0 to 5)
-const cualidad = (dueño, nombre, hacia) => nombre === 'afecto' ? relGetW(dueño, hacia) : game.wm?.num?.[dueño]?.[nombre] || 0;
+// Each quality may be declared (src/datos/habilidades.txt): where it starts, its range, its milestones up and down;
+// one may be of someone towards someone else («paciencia» of Marilla towards Ana), kept as num[dueño]['paciencia>ana']
+const CUALIDAD_DEF = {};   // (filled by 66-habilidades.js)
+const cualidadClave = (nombre, hacia) => hacia ? nombre + '>' + hacia : nombre;
+function cualidad(dueño, nombre, hacia){
+  if (nombre === 'afecto') return relGetW(dueño, hacia);
+  const v = game.wm?.num?.[dueño]?.[cualidadClave(nombre, hacia)];
+  return v ?? CUALIDAD_DEF[nombre]?.inicial ?? 0;
+}
 function cualidadSuma(dueño, nombre, n, hacia){
   if (nombre === 'afecto') return relSetW(dueño, hacia, Math.max(0, Math.min(5, relGetW(dueño, hacia) + n)));
-  const N = ((game.wm.num ||= {})[dueño] ||= {}); N[nombre] = Math.max(0, (N[nombre] || 0) + n);
+  const d = CUALIDAD_DEF[nombre], [min, max] = d?.rango || [0, Infinity], antes = cualidad(dueño, nombre, hacia);
+  const N = ((game.wm.num ||= {})[dueño] ||= {}), v = Math.max(min, Math.min(max, antes + n)); N[cualidadClave(nombre, hacia)] = v;
+  if (d && v !== antes) cualidadHitos(d, dueño, hacia, antes, v);   // (a milestone crossed, up or down: told, and kept as a fact)
 }
 // a quality compared with a number, as text: «granja:ana>=15», «afecto:diana:ana>=4», «estudio:gilbert<30» (null: it is not one)
 const CUALIDAD_RE = /^([a-zñ_]+):([a-zñ_]+)(?::([a-zñ_]+))?\s*(>=|<=|>|<|==|=)\s*(-?\d+(?:\.\d+)?)$/;
@@ -5592,6 +5836,9 @@ function dlgHacer(list){   // what a scene does when it starts or ends
       const M = PEOPLE.marilla; if (sceneOf('marilla') !== 'gg') { M.where = 'gg'; M.x = STOVE.x + 60; M.y = STOVE.y + 60; M.nav = null; M.moving = false; M.sit = false; }
     }
     if (a.junto) { const b = a.junto === 'ana' ? ana : PEOPLE[a.junto], o = a.de === 'ana' ? ana : PEOPLE[a.de]; if (b && o) { b.sit = false; if (b === ana) { ana.meal = null; ana.goto = null; ana.vx = ana.vy = 0; } else { b.nav = null; b.moving = false; } b.x = o.x - 20; b.y = o.y + 2; b.dir = 1; } }
+    if (a.vestirse) vestirse(true);
+    if (a.punto) puntoGuardar(a.punto, a.texto);
+    if (a.final) finalMostrar(a.final, a.texto);
     if (a.a_pieza && game.scene !== 'ga') { ana.meal = null; ana.goto = null; if (cart.riding) cartOff(); goIn('ga', [GA.bed.x - 20, GA.bed.y + 16]); }
     if (a.acostarse) { if (game.scene !== 'ga') { ana.meal = null; goIn('ga', [GA.bed.x - 20, GA.bed.y + 16]); } setTimeout(() => { if (!sleeping) goToBed(); }, 500); }
     if (a.a_la_mesa && !ana.meal && game.scene === 'gg') mealSit();
@@ -5750,7 +5997,10 @@ function dlgAccion(s){   // an action of the script: «hecho x», «marca id | n
     case 'a_la_mesa': return { a_la_mesa: true };
     case 'a_cocina': return { a_cocina: true };
     case 'acostarse': return { acostarse: true };
-    case 'a_pieza': return { a_pieza: true };   // (Ana is taken up to her room)   // (Ana goes up to bed: her room, and the bed)
+    case 'a_pieza': return { a_pieza: true };
+    case 'vestirse': return { vestirse: true };   // (Ana puts on her dress)
+    case 'punto': return { punto: part[0], texto: part[1] };   // (a point to come back to: «punto viaje | Volver a la mañana del viaje»)
+    case 'final': return { final: part[0], texto: part[1] };   // (the story ends here: «final devuelta | Ana se fue con la Sra. Blewett»)   // (Ana is taken up to her room)   // (Ana goes up to bed: her room, and the bed)
     case 'junto': return { junto: r[0], de: r[1] };   // (one goes to the side of the other: «junto ana marilla», for a hug)   // (Marilla calls her: Ana comes into the kitchen, and Marilla is there)   // (Ana sits down to eat with the Cuthberts)   // (what is on the kitchen table: «mesa cena», «mesa desayuno», «mesa nada»)
     case 'entra': return { entra: r[0], a: r[1] };   // (someone comes into a room: «entra marilla ga», at its door)
     case 'sale': return { sale: r[0] };   // (and goes back down, home)   // (Ana goes to sleep: the night passes)   // (at her or his place at the kitchen table)
@@ -6253,8 +6503,7 @@ const PERSONAJES = {
       "[hecho:se_queda, hecho:conocidas_diana] Matthew no lo dice, pero te echa de menos cuando te vas donde Diana.",
       "[hecho:se_queda] Riega la huerta antes de que caiga el sol, que las plantas lo agradecen.",
       "[hecho:se_queda, afecto:marilla:ana>=3] Hmm. Bueno, admito que hoy te has portado muy bien.",
-      "[hecho:ropa_arrugada, !hecho:ropa_ordenada] Ese vestido parece que durmió en el suelo, Ana. Ah, claro: es que durmió en el suelo.",
-      "[hecho:ropa_tirada_otra] Otra vez la ropa por el suelo, Ana. ¿No habíamos quedado en que la doblabas en la silla?"
+      "[hecho:ropa_arrugada, !hecho:ropa_ordenada] Ese vestido parece que durmió en el suelo, Ana. Ah, claro: es que durmió en el suelo."
     ],
     "seasonLines": [
       "[hecho:se_queda] Hay que limpiar la casa a fondo, que es primavera. Y tú me vas a ayudar, Ana.",
@@ -8883,8 +9132,8 @@ function escenasEnCurso(){
   for (const t of TALKS) { const d = t.esc && DIALOGOS.find(x => x.id === t.esc); if (!d || d.tipo === 'comentario' || t.interrupted) continue; delete done[t.esc]; prog[t.esc] = Math.max(0, (t.desde || 0) + t.i - (t.puente || 0)); }
   return { escDone: done, dlgProg: prog };
 }
-function save(){ if (wiping) return; try { localStorage.setItem('avonlea', JSON.stringify({ wm: game.wm, libreta: game.libreta, eggDay: game.eggDay, inv: game.inv, hasCan: game.hasCan, water: game.water, fond: game.fond, said: game.said, saidS: game.saidS, seasonShift: game.seasonShift, teaDay: game.teaDay, journal: game.journal, mem: game.mem, know: game.know, tasks: game.tasks, plans: game.plans, table: game.table, giftFor: game.giftFor, npcGiftDay: game.npcGiftDay, lastDay: game.lastDay, taskSeq: game.taskSeq, rel: game.rel, relLog: game.relLog, impr: game.impr, story: game.story, stories: game.stories, nextStory: game.nextStory, ground: game.ground, groundSeq: game.groundSeq, anaStates: game.anaStates, animals: Object.fromEntries(Object.entries(ANIM).map(([k, a]) => [k, { x: a.x, y: a.y, where: a.where, state: a.state, area: a.area, owner: a.owner }])), beds: BEDS.map(b => [b.stage, b.wet, b.grow]), cartas: game.cartas, mesa: game.mesa, heno: game.heno, lena: game.lena, ...escenasEnCurso(), comida: game.comida, dayT, donde: dondeQuedo() })); } catch (e) {} }   // (the letters, and what the day's work left, too)
-try { const s = JSON.parse(localStorage.getItem('avonlea') || 'null'); if (s) { if (s.wm) game.wm = s.wm; game.libreta = s.libreta || []; game.eggDay = s.eggDay; Object.assign(game.inv, s.inv); game.hasCan = s.hasCan; game.water = s.water; Object.assign(game.fond, s.fond); game.said = s.said || {}; game.saidS = s.saidS || {}; game.seasonShift = s.seasonShift || 0; game.teaDay = s.teaDay ?? -1; game.journal = s.journal || []; game.mem = s.mem || {}; for (const k of ['know', 'plans', 'giftFor', 'npcGiftDay']) game[k] = s[k] || {}; game.tasks = s.tasks || []; game.table = s.table || null; game.lastDay = s.lastDay ?? null; game.taskSeq = s.taskSeq || 0; game.rel = s.rel || null; game.relLog = s.relLog || []; game.impr = s.impr || {}; game.story = s.story?.v === 2 ? s.story : null; if (game.story) game.story.gen = false; game.stories = s.stories || []; game.nextStory = s.nextStory || null; game.ground = s.ground || []; game.groundSeq = s.groundSeq || 0; game.anaStates = s.anaStates || {}; for (const [k, v] of Object.entries(s.animals || {})) if (ANIM[k]) Object.assign(ANIM[k], v); (s.beds || []).forEach((v, k) => { if (BEDS[k]) [BEDS[k].stage, BEDS[k].wet, BEDS[k].grow] = v; }); if (s.dayT) dayT = s.dayT; if (game.hasCan) ana.carry = 'can'; for (const k of ['cartas', 'mesa', 'heno', 'lena', 'escDone', 'dlgProg', 'comida']) if (s[k]) game[k] = s[k]; } } catch (e) {}
+function save(){ if (wiping) return; try { localStorage.setItem('avonlea', JSON.stringify({ wm: game.wm, libreta: game.libreta, eggDay: game.eggDay, inv: game.inv, hasCan: game.hasCan, water: game.water, fond: game.fond, said: game.said, saidS: game.saidS, seasonShift: game.seasonShift, teaDay: game.teaDay, journal: game.journal, mem: game.mem, know: game.know, tasks: game.tasks, plans: game.plans, table: game.table, giftFor: game.giftFor, npcGiftDay: game.npcGiftDay, lastDay: game.lastDay, taskSeq: game.taskSeq, rel: game.rel, relLog: game.relLog, impr: game.impr, story: game.story, stories: game.stories, nextStory: game.nextStory, ground: game.ground, groundSeq: game.groundSeq, anaStates: game.anaStates, animals: Object.fromEntries(Object.entries(ANIM).map(([k, a]) => [k, { x: a.x, y: a.y, where: a.where, state: a.state, area: a.area, owner: a.owner }])), beds: BEDS.map(b => [b.stage, b.wet, b.grow]), cartas: game.cartas, mesa: game.mesa, heno: game.heno, lena: game.lena, ...escenasEnCurso(), comida: game.comida, final: game.final, dayT, donde: dondeQuedo() })); } catch (e) {} }   // (the letters, and what the day's work left, too)
+try { const s = JSON.parse(localStorage.getItem('avonlea') || 'null'); if (s) { if (s.wm) game.wm = s.wm; game.libreta = s.libreta || []; game.eggDay = s.eggDay; Object.assign(game.inv, s.inv); game.hasCan = s.hasCan; game.water = s.water; Object.assign(game.fond, s.fond); game.said = s.said || {}; game.saidS = s.saidS || {}; game.seasonShift = s.seasonShift || 0; game.teaDay = s.teaDay ?? -1; game.journal = s.journal || []; game.mem = s.mem || {}; for (const k of ['know', 'plans', 'giftFor', 'npcGiftDay']) game[k] = s[k] || {}; game.tasks = s.tasks || []; game.table = s.table || null; game.lastDay = s.lastDay ?? null; game.taskSeq = s.taskSeq || 0; game.rel = s.rel || null; game.relLog = s.relLog || []; game.impr = s.impr || {}; game.story = s.story?.v === 2 ? s.story : null; if (game.story) game.story.gen = false; game.stories = s.stories || []; game.nextStory = s.nextStory || null; game.ground = s.ground || []; game.groundSeq = s.groundSeq || 0; game.anaStates = s.anaStates || {}; for (const [k, v] of Object.entries(s.animals || {})) if (ANIM[k]) Object.assign(ANIM[k], v); (s.beds || []).forEach((v, k) => { if (BEDS[k]) [BEDS[k].stage, BEDS[k].wet, BEDS[k].grow] = v; }); if (s.dayT) dayT = s.dayT; if (game.hasCan) ana.carry = 'can'; for (const k of ['cartas', 'mesa', 'heno', 'lena', 'escDone', 'dlgProg', 'comida', 'final']) if (s[k]) game[k] = s[k]; } } catch (e) {}
 relInit();
 // where everyone was when the game was closed: Ana (the room or out of doors, the spot) and the people, to go on from there
 function dondeQuedo(){
@@ -9140,7 +9389,7 @@ function lagrimas(){
   else if (ana.enCama === 'boca_abajo' && game.scene === 'ga') { ana._lagT = TT + .55; if (Math.random() < .8) fx.push({ kind: 'drop', x: GA.bed.x + 40 + Math.random() * 14, y: GA.bed.y - 10, vy: 2 + Math.random() * 2, t: 0 }); }
 }
 function update(dt){
-  if (sleeping || narraPausa() || decidiendo()) return;   // (a card being read, a decision being taken: the world waits)   // (a card that explains: the world waits while it is read)
+  if (sleeping || game.final || narraPausa() || decidiendo()) return;   // (a card being read, a decision being taken: the world waits)   // (a card that explains: the world waits while it is read)
   if (AI.on && provider() === 'manual' && aiq.list.length) return;   // (debugging by hand: the world waits for the answer)
   TT += dt; dayT += dt / (MIN_S * 60 * 24); boil = Math.floor(TT * 6);
   const { night } = light();
@@ -12014,7 +12263,7 @@ function cuadernoPanel(open){
   const P = $('cua'); P.hidden = !open; if (!open) return;
   const vis = CUADERNO_METAS.filter(m => !m.oculta || cuadernoHecho(m.id) || cuadernoAbierta(m)), n = vis.filter(m => cuadernoHecho(m.id)).length;
   $('cuasub').textContent = cuadernoFecha() + ' · ' + n + ' de ' + vis.length + ' · ' + (n === vis.length ? '¡todo! Ana podría escribir un libro con esto.' : 'las que faltan tienen una pista; 🔒: todavía no');
-  $('cualist').innerHTML = CUADERNO.map(g => '<h4>' + esc(g.nombre) + '</h4>' + g.metas.filter(m => !m.oculta || cuadernoHecho(m.id) || cuadernoAbierta(m)).map(m => {   // (a hidden goal: once it opens)
+  $('cualist').innerHTML = cuadernoMiradas() + CUADERNO.map(g => '<h4>' + esc(g.nombre) + '</h4>' + g.metas.filter(m => !m.oculta || cuadernoHecho(m.id) || cuadernoAbierta(m)).map(m => {   // (a hidden goal: once it opens)
     const d = cuadernoHecho(m.id), abierta = cuadernoAbierta(m);
     return d ? `<div class="cm hecha"><b>✓ ${esc(m.titulo)}</b><span>el día ${d}</span></div>`
       : abierta ? `<div class="cm"><b>○ ${esc(m.titulo)}</b><small>${esc(cuadernoPista(m))}</small></div>`
@@ -12024,7 +12273,12 @@ function cuadernoPanel(open){
 // the date, as Ana would write it: «martes, día 3 de la primavera»
 const cuadernoFecha = () => ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'][today() % 7] + ', día ' + (today() % DIAS_ESTACION + 1) + ' de ' + (S === 0 ? 'la ' : 'el ') + SEASONS[S].toLowerCase();
 // her skills: how far she has gone in each, and what comes next
-const cuadernoHabilidades = () => '<h4>Sus habilidades</h4>' + HABILIDADES.map(c => { const n = cualidad('ana', c.id), p = habilidadProxima(c), top = c.hitos.at(-1)?.n || 1; return `<div class="cm"><b>${esc(c.titulo)} · ${n}</b><small>${'▰'.repeat(Math.round(Math.min(n, top) / top * 10)) + '▱'.repeat(10 - Math.round(Math.min(n, top) / top * 10))}${p ? ' · en ' + p.n + ': ' + esc(p.texto) : ' · ¡todo!'}</small></div>`; }).join('');
+const cuadernoHabilidades = () => '<h4>Sus habilidades</h4>' + HABILIDADES.filter(deAna).map(c => { const n = cualidad('ana', c.id), p = habilidadProxima(c), top = c.hitos.at(-1)?.n || 1; return `<div class="cm"><b>${esc(c.titulo)} · ${n}</b><small>${'▰'.repeat(Math.round(Math.min(n, top) / top * 10)) + '▱'.repeat(10 - Math.round(Math.min(n, top) / top * 10))}${p ? ' · en ' + p.n + ': ' + esc(p.texto) : ' · ¡todo!'}</small></div>`; }).join('');
+// how the others see her (the qualities of someone towards Ana, while they matter: «visible si»): Marilla's patience,
+// with what it means now (the last «bajo» it has fallen to, or the next «hito» up)
+const cuadernoMiradas = () => { const l = HABILIDADES.filter(c => !deAna(c) && (!c.visible || c.visible.every(x => dlgCond(x)))); return l.length ? '<h4>Cómo la ven</h4>' + l.map(c => {
+  const n = cualidad(c.de, c.id, c.hacia), [, max = 5] = c.rango || [], b = c.bajos.filter(h => n <= h.n).at(-1), sube = c.hitos.find(h => h.n > n);
+  return `<div class="cm"><b>${esc(c.titulo)}</b><small>${'●'.repeat(n) + '○'.repeat(Math.max(0, max - n))}${b ? ' · ' + esc(b.texto) : sube ? ' · en ' + sube.n + ': ' + esc(sube.texto) : ''}</small></div>`; }).join('') : ''; };
 // her friends: how much each one loves her (the hearts of 0 to 5), those she knows
 function cuadernoAmigos(){
   const l = ['diana', 'marilla', 'matthew', 'sraallan', 'stacy', 'josephine', 'lynde', 'gilbert'].filter(k => (k !== 'diana' || conoceDiana()) && (k !== 'josephine' || dlgHechos().cama_josephine) && game.wm.rel?.[k + '>ana'] != null);
@@ -12033,24 +12287,64 @@ function cuadernoAmigos(){
 // a game that already had Ana and Diana as friends (before they had to meet): they know each other
 if (game.wm?.perm?.['amigas:ana&diana'] && !dlgHechos().conocidas_diana) dlgHecho('conocidas_diana');
 
-/* ---------- the skills: qualities that grow little by little with what each one does (docs/MOTOR.md) ----------
-   Written apart (src/datos/habilidades.txt): each skill is a quality (a number with an owner: «granja» of Ana,
-   «estudio» of Gilbert) that goes up with the actions of whoever does them, a little each day. Ana's milestones
-   (hitos) are storylets on a quality: when she gets to one, someone tells her the next time she meets them (with the
-   AI, a scene of its own; without it, the written line), and the fact hito_<skill>_<n> stays for the script; the
-   script may also ask for a level («si: granja:ana>=15»). The Queen's examination comes from «estudio» (examen_*). */
+/* ---------- endings, and points to come back to ----------
+   A story may end (the script says so: «! final devuelta | Ana se fue con la Sra. Blewett»): a card, as a book's last
+   page, and the world stops. It is not the end of the game: the player may go back to a point the script kept before
+   («! punto viaje | Volver a la mañana del viaje a White Sands»: the game as it was then), or begin again. The points
+   are kept apart from the game (localStorage 'avonlea:puntos'), the ending in the game itself (it is shown again if
+   the page is opened again). */
+const PUNTOS_KEY = 'avonlea:puntos';
+const puntosLeer = () => { try { return JSON.parse(localStorage.getItem(PUNTOS_KEY) || '{}'); } catch (e) { return {}; } };
+// a point: the game as it is now, once the scene that keeps it is under way (so that it goes on from there)
+function puntoGuardar(id, texto){
+  setTimeout(() => { if (game.final) return; save(); try { const P = puntosLeer(); P[id] = { texto: texto || 'Volver atrás', dia: today(), data: localStorage.getItem('avonlea') }; localStorage.setItem(PUNTOS_KEY, JSON.stringify(P)); } catch (e) {} }, 100);
+}
+function puntoVolver(id){ const p = puntosLeer()[id]; if (!p?.data) return; wiping = true; try { localStorage.setItem('avonlea', p.data); } catch (e) {} location.reload(); }
+function empezarDeNuevo(){ wiping = true; try { localStorage.removeItem('avonlea'); localStorage.removeItem(PUNTOS_KEY); } catch (e) {} location.reload(); }
+// the ending: its card (the text is the scene's; the buttons, the points kept and a new beginning)
+function finalMostrar(id, texto){
+  game.final = { id, texto: texto || '', dia: today() }; logEv('Fin: ' + (texto || id) + '.', []); save();
+  if (navigator.webdriver && !/[?&]dev\b/.test(location.search)) return;
+  let el = $('final'); if (!el) { el = document.createElement('div'); el.id = 'final'; document.body.appendChild(el); }
+  el.style.cssText = 'position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;background:rgba(40,28,16,.55);padding:16px';
+  const P = Object.entries(puntosLeer());
+  el.innerHTML = '<div style="width:min(480px,100%);background:#f6ecd2;color:#3b2a1c;border:1px solid #8a6a48;border-radius:10px;box-shadow:0 8px 30px rgba(20,10,0,.45);padding:22px 24px;font:17px/1.5 Georgia,serif;text-align:center">'
+    + '<div style="font-size:13px;letter-spacing:.2em;color:#8a6a48">FIN</div><p class="tx" style="font-style:italic;margin:10px 0 18px"></p><div class="bt" style="display:flex;flex-direction:column;gap:8px;align-items:center"></div></div>';
+  el.querySelector('.tx').textContent = conNombres(texto || 'Aquí termina esta historia.');
+  const bt = el.querySelector('.bt'), boton = (t, f) => { const b = document.createElement('button'); b.textContent = t; b.style.cssText = 'font:15px Georgia,serif;padding:6px 14px;border:1.5px solid #6b4a30;border-radius:8px;background:#fffaf0;color:#3b2a1c;cursor:pointer'; b.onclick = e => { e.stopPropagation(); f(); }; bt.appendChild(b); };
+  for (const [k, p] of P) boton('↺ ' + p.texto, () => puntoVolver(k));
+  boton('Empezar de nuevo', () => { if (confirm('¿Empezar una partida nueva, desde la llegada de Ana?')) empezarDeNuevo(); });
+}
+// a game that had ended: the card again
+if (game.final) setTimeout(() => finalMostrar(game.final.id, game.final.texto), 300);
+
+/* ---------- the qualities: numbers with an owner that change little by little (docs/MOTOR.md) ----------
+   Written apart (src/datos/habilidades.txt). Most are Ana's skills («granja», «estudio»), or anyone's (Gilbert's
+   «estudio»), which go up with the actions of whoever does them, a little each day. Others are of someone towards
+   someone else («paciencia» of Marilla towards Ana), go up with what another one does (Ana's chores) and down with
+   what the script says («! suma paciencia:marilla:ana -1»). Each may say where it starts and its range. Milestones,
+   up (hito) and down (bajo), are storylets on a quality: whoever is to tell it says so the next time Ana meets them
+   (with the AI, a scene of its own; without it, the written line), and the fact hito_<q>_<n> or bajo_<q>_<n> stays
+   for the script, which may also ask for a level («si: granja:ana>=15», «paciencia:marilla:ana<=1»). */
 function habilidadesLeer(txt){
   const out = []; let c = null, h = null;
   for (const raw of txt.split('\n')) {
     const l = raw.trim(); if (!l || l[0] === '#') continue;
     let m;
-    if ((m = l.match(/^===\s*(.+?)\s*===$/))) { out.push(c = { id: m[1], titulo: m[1], suma: [], por_dia: 2, hitos: [] }); h = null; continue; }
+    if ((m = l.match(/^===\s*(.+?)\s*===$/))) { out.push(c = { id: m[1], titulo: m[1], suma: [], por_dia: 2, hitos: [], bajos: [] }); h = null; continue; }
     if (!c) continue;
-    if ((m = l.match(/^hito (\d+):\s*(.*)$/))) c.hitos.push(h = { n: +m[1], texto: m[2] });
+    if ((m = l.match(/^(hito|bajo) (\d+):\s*(.*)$/))) (m[1] === 'hito' ? c.hitos : c.bajos).push(h = { n: +m[2], texto: m[3], dir: m[1] });
     else if (h && /^\s/.test(raw) && (m = l.match(/^(con|dice|ia):\s*(.*)$/))) h[m[1]] = m[2];
-    else if ((m = l.match(/^(titulo|suma|por_dia):\s*(.*)$/))) { c[m[1]] = m[1] === 'suma' ? m[2].split(',').map(x => x.trim()).filter(Boolean) : m[1] === 'por_dia' ? +m[2] : m[2]; h = null; }
+    else if ((m = l.match(/^(titulo|suma|por_dia|de|hacia|por|inicial|rango|visible si):\s*(.*)$/))) {
+      const [, k, v] = m; h = null;
+      if (k === 'suma') c.suma = v.split(',').map(x => x.trim()).filter(Boolean);
+      else if (k === 'por_dia' || k === 'inicial') c[k] = +v;
+      else if (k === 'rango') c.rango = v.split('-').map(Number);
+      else if (k === 'visible si') c.visible = v.split(',').map(x => x.trim()).filter(Boolean);
+      else c[k] = v;
+    }
   }
-  for (const x of out) x.hitos.sort((a, b) => a.n - b.n);
+  for (const x of out) { x.hitos.sort((a, b) => a.n - b.n); x.bajos.sort((a, b) => b.n - a.n); CUALIDAD_DEF[x.id] = x; }
   return out;
 }
 const HABILIDADES = habilidadesLeer(document.getElementById('habilidades')?.textContent || '');
@@ -12062,23 +12356,39 @@ if (game.wm) {
   if (game.wm.caminos) { for (const [k, v] of Object.entries(game.wm.caminos)) N[k] = Math.max(N[k] || 0, v); delete game.wm.caminos; }
   delete game.wm.caminosHoy;
 }
+// whose a quality is, as the notebook shows it: Ana's own (her skills), or someone's towards her (how they see her)
+const deAna = c => !c.de || c.de === 'ana';
 // Ana's next milestone on a skill (or none: all of them reached)
 const habilidadProxima = c => c.hitos.find(h => h.n > cualidad('ana', c.id));
+// a milestone crossed (from cualidadSuma, whatever made it change): only of what concerns Ana. Up, «hito N» when it
+// gets to N; down, «bajo N» when it falls to N. Told (a notice, and whoever is to say it, the next time she meets them)
+function cualidadHitos(c, dueño, hacia, antes, v){
+  if (dueño !== 'ana' && hacia !== 'ana') return;
+  if (!deAna(c) && !navigator.webdriver) notice((v > antes ? '🌱 ' : '🍂 ') + c.titulo + ': ' + v + '/' + (c.rango?.[1] ?? '?'));
+  const pasa = [...c.hitos.filter(h => antes < h.n && v >= h.n), ...c.bajos.filter(h => antes > h.n && v <= h.n)];
+  pasa.forEach((h, i) => {   // (several at once: all are kept as facts, but only the farthest is told)
+    const t = (h.dir === 'hito' ? '📈 ' : '📉 ') + c.titulo + ': ' + h.texto; logEv(t, []); if (i === pasa.length - 1) notice(t);
+    if (!h.con || i < pasa.length - 1) return dlgHecho(h.dir + '_' + c.id + '_' + h.n);
+    const P = (game.wm.hitosPend ||= []); for (const q of P.filter(q => q.c === c.id)) { P.splice(P.indexOf(q), 1); dlgHecho((q.dir || 'hito') + '_' + q.c + '_' + q.n); }   // (one not yet told, of the same: the newest is what is said)
+    P.push({ c: c.id, n: h.n, dir: h.dir });
+  });
+}
 // days until the next examination: the first day of a summer, from the second year of the game (dia_juego:56)
 const EXAMEN_DESDE = DIAS_ESTACION * 4;
 function diasExamen(){ const d = today(), y = DIAS_ESTACION * 4, s = ((1 - (game.seasonShift || 0)) % 4 + 4) % 4 * DIAS_ESTACION; let n = Math.floor((d - s) / y) * y + s; if (n < d) n += y; while (n + 1 < EXAMEN_DESDE) n += y; return n - d; }
-// one more on a skill, for whoever did it (at most so much a day); Ana's milestones: told, and kept for whoever is to tell her
+// one more on a quality, for whoever did it (or, if it is someone's towards another, for its owner: Marilla's patience,
+// when Ana helps), at most so much a day
 function habilidadSube(k, c, D, por){
-  const n = (D.n[k] ||= {}); if ((n[c.id] || 0) >= c.por_dia) return;
-  n[c.id] = (n[c.id] || 0) + 1; cualidadSuma(k, c.id, 1);
-  logEv(wmName(k) + ' avanzó en ' + c.titulo.replace(/^(El|La|Las|Los) /, m => m.toLowerCase()) + ' (' + por + ').', []);
-  if (k === 'ana') for (const h of c.hitos) if (h.n === cualidad('ana', c.id)) { notice('📈 ' + c.titulo + ': ' + h.texto); logEv('📈 ' + c.titulo + ': ' + h.texto, []); if (h.con) (game.wm.hitosPend ||= []).push({ c: c.id, n: h.n }); }
+  const dueño = c.de || k, key = dueño + ':' + c.id, n = D.n;
+  if ((n[key] || 0) >= c.por_dia) return;
+  n[key] = (n[key] || 0) + 1; cualidadSuma(dueño, c.id, 1, c.hacia);
+  logEv(wmName(dueño) + (c.de ? ': ' + c.titulo.replace(/^(El|La|Las|Los) /, m => m.toLowerCase()) + ' sube (' + wmName(k) + ': ' + por + ').' : ' avanzó en ' + c.titulo.replace(/^(El|La|Las|Los) /, m => m.toLowerCase()) + ' (' + por + ').'), []);
 }
 // a while doing each thing (or, Ana, an hour of class) is one more, once a day each: watched every five seconds, for everyone
 let habilidadesT = 0;
 function habilidadesTick(dt){
   if ((habilidadesT -= dt) > 0 || !game.wm) return; habilidadesT = 5;
-  const D = game.wm.habilidadesHoy?.d === today() ? game.wm.habilidadesHoy : (game.wm.habilidadesHoy = { d: today(), t: {}, dado: {}, n: {} });
+  const D = game.wm.habilidadesHoy?.d === today() && game.wm.habilidadesHoy.v === 2 ? game.wm.habilidadesHoy : (game.wm.habilidadesHoy = { v: 2, d: today(), t: {}, dado: {}, n: {} });
   const h = hourNow();
   for (const k of new Set(['ana', ...Object.keys(AGENTS)])) {
     const A = (AGENTS[k] || (k === 'ana' ? game.playAct : null))?.acting;
@@ -12086,7 +12396,7 @@ function habilidadesTick(dt){
     for (const v of haciendo) {
       const key = k + ':' + v; D.t[key] = (D.t[key] || 0) + 5; if (D.dado[key] || D.t[key] < M(v === 'clase' ? 60 : 5)) continue;
       D.dado[key] = true;
-      for (const c of HABILIDADES) if (c.suma.includes(v)) { let t = v.replace(/_/g, ' '); try { t = stepText(A.task?.a?.v === v ? A.task.a : A); } catch (e) {} habilidadSube(k, c, D, v === 'clase' ? 'un día de clases' : t); }
+      for (const c of HABILIDADES) if (c.suma.includes(v) && (!c.de || k === (c.por || 'ana')) && (!c.visible || c.visible.every(x => dlgCond(x)))) { let t = v.replace(/_/g, ' '); try { t = stepText(A.task?.a?.v === v ? A.task.a : A); } catch (e) {} habilidadSube(k, c, D, v === 'clase' ? 'un día de clases' : t); }
     }
   }
   hitosTick(); sumasPendientes();
@@ -12095,9 +12405,9 @@ function habilidadesTick(dt){
 function hitosTick(){
   const P = game.wm.hitosPend; if (!P?.length || hablando() || amb.cur || enc.cur || game.talk || TALKS.length) return;   // (even while Ana works: Marilla tells her so as she washes up)
   for (const p of P) {
-    const c = HABILIDADES.find(x => x.id === p.c), h = c?.hitos.find(x => x.n === p.n); if (!h) { P.splice(P.indexOf(p), 1); return; }
+    const c = HABILIDADES.find(x => x.id === p.c), h = c?.[p.dir === 'bajo' ? 'bajos' : 'hitos'].find(x => x.n === p.n); if (!h) { P.splice(P.indexOf(p), 1); return; }
     const b = wmBody(h.con); if (!b || wmScene(h.con) !== game.scene || dist(ana.x, ana.y, b.x, b.y) > (game.scene === 'out' ? 90 : 220) || ocupada(h.con)) continue;   // (near her; inside, in the same room)
-    P.splice(P.indexOf(p), 1); dlgHecho('hito_' + c.id + '_' + h.n);   // (told: a fact, for the script and the tests)
+    P.splice(P.indexOf(p), 1); dlgHecho((p.dir || 'hito') + '_' + c.id + '_' + h.n);   // (told: a fact, for the script and the tests)
     const escrito = () => talkPlay((h.dice || h.texto).split(' / ').map(t => [h.con, t]), { ch: 'hito', hold: [h.con] });
     if (!aiReady() || !h.ia) return escrito();
     sceneAsk([h.con], h.ia + ' (Que se note que viene de lo que Ana hizo, día a día.)', 'pasar').then(s => s.lines.length ? talkPlay(s.lines.map(l => [l.q, l.t]), { ch: 'hito', hold: [h.con] }) : escrito()).catch(escrito);
@@ -12120,6 +12430,7 @@ function inicioLlegada(){
   game.scene = 'gg'; ana.hidden = false; ana.sit = false; ana.x = KDOOR.x + 20; ana.y = KIT.h * .6; ana.dir = 1;
   relSetW('marilla', 'ana', 1); relSetW('matthew', 'ana', 4);
   dlgHecho('inicio_juego');
+  try { localStorage.removeItem(PUNTOS_KEY); } catch (e) {}   // (a new game: the points of the one before are no longer its own)
   { const h = $('hint'); if (h) h.style.opacity = 0; hinted = true; }   // (the controls: the tutorial cards tell them, when the player takes over)
   for (const k of Object.keys(PEOPLE)) amb.mute[k] = TT + 180;   // (no loose lines while she arrives)
   logEv('Una noche de comienzos de junio, Matthew llegó a Tejas Verdes con una niña de pelo rojo.', []);
