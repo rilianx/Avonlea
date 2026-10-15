@@ -2,11 +2,16 @@
 let sleeping = false, sleepyStage = 0;
 function goToBed(){
   if (hourNow() < 20) { anaSays('Todavía no tengo sueño... ¡hay tanto que imaginar antes de dormir!'); return; }
+  // (from the second night: her clothes, folded on the chair, or thrown on the floor; the player decides)
+  if (game.wm && dlgHechos().desayuno_prueba && !game.wm.camison && !ANA_AUTO && !navigator.webdriver) return say('Ana', 'Antes de meterse en la cama…', [
+    ['🧺 Doblar la ropa en la silla y acostarse', () => { close(); ropaAlAcostarse(true); goSleep(false); }],
+    ['Dejarla tirada y meterse a la cama', () => { close(); ropaAlAcostarse(false); goSleep(false); }]]);
   goSleep(false);
 }
 function goSleep(forced, skip){
   if (sleeping) return; sleeping = true; close(); ana.goto = null; ana.sit = false;
   if (game.wm) { game.wm.camison = true; game.wm.sinSombrero = true; }   // (to bed in her nightgown, the hat put away: she wakes so, and dresses when she will)
+  if (game.wm?.ropaTirada && !dlgHechos().desayuno_prueba) { game.wm.ropaTirada = false; game.wm.ropaSilla = true; dlgHecho('marilla_doblo_ropa'); }   // (the first night, Marilla folds them while she sleeps: in the morning, on the chair)
   const el = $('sleep'); el.textContent = forced ? 'Ana se quedó dormida…' : skip ? 'Pasa la noche…' : 'Zzz…'; el.classList.add('on');
   setTimeout(() => {
     goIn('ga', [GA.bed.x - 20, GA.bed.y + 16]); ana.dir = 0; bubbles = [];

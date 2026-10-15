@@ -84,24 +84,32 @@ function sombrero(callada){
 // her clothes: to bed in her nightgown, and up in it; she dresses when the player decides (at the wardrobe, as with the
 // hat). The first night she leaves her dress and shoes thrown on the floor: the player decides, the next day, whether
 // she folds them and puts them away (Marilla notices: a little more affection) or puts them on just as they are
-const ROPA_SUELO = () => [GA.bed.x - 98, GA.bed.y + 22];
+const ROPA_SUELO = () => [GA.bed.x - 98, GA.bed.y + 22], ROPA_SILLA = () => [GA.table.x + 46, GA.table.y + 6];
+// going to bed: folded on the chair (Marilla notices it the first time: a little more affection), or thrown on the floor
+// (and in the morning Marilla says so)
+function ropaAlAcostarse(dobla){
+  const W = game.wm;
+  if (dobla) { W.ropaSilla = true; W.ropaTirada = false; delete dlgHechos().ropa_tirada_otra; logEv('Ana dobló su ropa en la silla antes de acostarse.', []); if (!dlgHechos().ropa_ordenada) { dlgHecho('ropa_ordenada'); dlgHacer([{ suma: ['afecto:marilla:ana', 1] }]); } }
+  else { W.ropaTirada = true; W.ropaSilla = false; dlgHecho('ropa_tirada_otra'); logEv('Ana dejó la ropa tirada en el suelo.', []); }
+}
+function drawRopaSilla(c){ const [x, y] = ROPA_SILLA(), L = LOOKS.ana; drawSilla(c, x, y); blob(c, [[x - 8, y - 15], [x + 8, y - 15], [x + 8, y - 11], [x - 8, y - 11]], L.dress0 || L.dress); blob(c, [[x - 7, y - 18], [x + 7, y - 18], [x + 7, y - 15], [x - 7, y - 15]], L.dressD0 || L.dressD); ell(c, x - 6, y + 2, 3.6, 2, '#5b3a28', true); ell(c, x + 6, y + 2, 3.6, 2, '#5b3a28', true); }
 function vestirse(callada){
   const W = game.wm; if (!W?.camison) return;
-  W.camison = false; if (W.ropaTirada) { W.ropaTirada = false; dlgHecho('ropa_arrugada'); }
+  W.camison = false; W.ropaSilla = false; if (W.ropaTirada) { W.ropaTirada = false; dlgHecho('ropa_arrugada'); }
   if (!callada) anaSays(pick(['El vestido de todos los días. Ni mangas abullonadas ni nada… pero limpio, y mío.', 'Lista. Una se siente otra persona vestida: más valiente, o por lo menos más abrochada.']));
   logEv('Ana se vistió.', []); save();
 }
 function ponerseCamison(){ const W = game.wm; W.camison = true; W.sinSombrero = true; anaSays('El camisón. Ahora sí que es de noche.'); logEv('Ana se puso el camisón.', []); save(); }
 function ropaOrdenar(callada){
-  const W = game.wm; if (!W?.ropaTirada) return; W.ropaTirada = false;
+  const W = game.wm; if (!W?.ropaTirada) return; W.ropaTirada = false; W.ropaSilla = true; delete dlgHechos().ropa_tirada_otra;
   if (!callada) anaSays('Bien dobladita, como le gusta a Marilla. Una ropa ordenada es casi una ropa contenta.');
-  logEv('Ana dobló su ropa y la guardó en el armario.', []);
+  logEv('Ana dobló su ropa y la dejó en la silla.', []);
   if (!dlgHechos().ropa_ordenada) { dlgHecho('ropa_ordenada'); dlgHacer([{ suma: ['afecto:marilla:ana', 1] }]); }   // (Marilla sees it: she says nothing, but she sees it)
   save();
 }
 function ropaPonerse(){ anaSays('Está toda arrugada… Bueno, voy a imaginar que es seda recién planchada.'); vestirse(true); }
 function ropaMenu(){
-  say('Ana', 'Su vestido y sus zapatos, tirados en el suelo desde anoche.', [['🧺 Doblar la ropa y guardarla en el armario', () => { close(); ropaOrdenar(); }], ...(game.wm.camison ? [['👗 Ponérsela así, arrugada', () => { close(); ropaPonerse(); }]] : []), ['Nada por ahora', close]]);
+  say('Ana', 'Su vestido y sus zapatos, tirados en el suelo desde anoche.', [['🧺 Doblar la ropa y dejarla en la silla', () => { close(); ropaOrdenar(); }], ...(game.wm.camison ? [['👗 Ponérsela así, arrugada', () => { close(); ropaPonerse(); }]] : []), ['Nada por ahora', close]]);
 }
 // the wardrobe: dress (or, at night, the nightgown), and the hat
 function armario(callada){
