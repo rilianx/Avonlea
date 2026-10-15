@@ -54,12 +54,31 @@ function targetAt(wx, wy){
   }
   return best;
 }
+// a tap on a thing with Ana beside it: if more can be done there (another thing in the same spot, or something of hers
+// that is done right there: cooking at the stove, writing at her desk, milking by the cow…), a little menu with it all;
+// if only one, it is done at once. People (and Ana herself) have their own menus.
+function opcionesDe(t){
+  const o = [[t.label, t.act]], ya = new Set([t.label]);
+  for (const u of targets()) if (u.id !== t.id && !u.self && !/^[pfa]:/.test(u.id) && !ya.has(u.label) && dist(u.x, u.y, t.x, t.y) < 34) { ya.add(u.label); o.push([u.label, u.act]); }
+  for (const a of jugables()) {
+    let P = null; try { P = accPasos(a, 'ana'); } catch (e) {} const p0 = P?.[0]; if (!p0) continue;
+    if (p0.lugar && p0.lugar !== personKey('ana')) continue;
+    let q = null; try { q = typeof p0.p === 'function' ? p0.p() : p0.p; } catch (e) {} if (!q || dist(q[0], q[1], t.x, t.y) > 60) continue;
+    const l = stepText(a); if (ya.has(l)) continue; ya.add(l); o.push([l[0].toUpperCase() + l.slice(1), () => jugar(a)]);
+  }
+  return o;
+}
+function opcionesAct(t){
+  if (t.self || /^[pf]:/.test(t.id)) return t.act();
+  const o = opcionesDe(t); if (o.length < 2) return t.act();
+  say('Ana', t.label + '…', [...o.map(([l, f]) => [l, () => { close(); f(); }]), ['Nada por ahora', close]]);
+}
 // a tap: do it at once if she is close enough, otherwise she walks there (A*) and does it on arrival; on bare ground she just walks
 function tapAt(sx, sy){
   if (sleeping) return;
   if (OBS) { observe(null); return; }   // (watching someone: a tap brings the view back to Ana)
   const wx = view.ox + sx / view.Z, wy = view.oy + sy / view.Z, t = targetAt(wx, wy);
-  if (t && (t.self || dist(ana.x, ana.y, t.x, t.y) < t.reach * .85)) { ana.goto = null; t.act(); }
+  if (t && (t.self || dist(ana.x, ana.y, t.x, t.y) < t.reach * .85)) { ana.goto = null; opcionesAct(t); }
   else { ana.goto = t ? { id: t.id, scene: game.scene } : { x: wx, y: wy, scene: game.scene };
     if (t && /^[pf]:/.test(t.id)) { const k = t.id.slice(2), b = wmBody(k); if (b && b.moving && !b.called) callPerson('ana', k, { come: false }); } }   // (someone walking off: «¡Espera!»)
 }

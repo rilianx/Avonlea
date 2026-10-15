@@ -1004,9 +1004,11 @@ ana: (Se tira en la cama boca abajo, con zapatos y todo, y llora desconsolada co
 ana piensa: Nadie me quiere. Nadie me ha querido nunca. Y ahora tampoco aquí.
 ! entra marilla ga
 marilla: (Marilla sube con la vela. Mira la ropa, los zapatos, a la niña hecha un ovillo.) Desvístete y métete en la cama como corresponde, niña.
-ana: (Ana se quita el vestido de mala gana, se pone el camisón del orfanato, que le queda corto, y se mete bajo las sábanas.)
+ana: (Ana se quita el vestido de mala gana y lo deja tirado en el suelo, con los zapatos. Se pone el camisón del orfanato, que le queda corto, y se mete bajo las sábanas.)
+! camison
+! ropa_tirada
 ! ana enCama=tapada
-marilla: (Marilla recoge la ropa tirada en el suelo y la dobla sobre la silla.) Buenas noches.
+marilla: (Marilla mira la ropa tirada en el suelo y aprieta los labios. Esta noche no dice nada.) Buenas noches.
 ana: (Ana asoma la cara, blanca, entre las sábanas.) ¿Cómo puede decir que son buenas noches, cuando sabe que tiene que ser la peor noche de toda mi vida?
 ana: (Y se vuelve a meter debajo de las sábanas, hasta la cabeza.)
 marilla: (Marilla baja la escalera despacio, con la vela, sin saber muy bien qué pensar.)
@@ -3870,7 +3872,9 @@ function drawLlorando(c, p, t, parte){
 function drawPerson(c, p, t){
   if (p.llora && p.sit) return drawLlorando(c, p, t, 'encima');
   if (p.enCama && game.scene === 'ga') return drawEnCama(c, p, t);   // (in her bed: face down crying, or under the sheets)   // (crying at the table, the head on it: a pose of its own)
-  if (p.look === 'ana') { const La = LOOKS.ana; La.big = ANA_STYLE === 'mano' ? HEAD_M : 0; La.pencil = ANA_STYLE === 'mano'; if (La.hair0 == null) { La.hair0 = La.hair; La.hairD0 = La.hairD; } const green = !!game.wm?.perm?.pelo_verde; La.hair = green ? '#5a8a3a' : La.hair0; La.hairD = green ? '#3e6a26' : La.hairD0; La.style = game.wm?.perm?.pelo_corto ? 'corto' : 'braids'; La.hat = !game.wm?.sinSombrero; } else if (LOOKS[p.look]) LOOKS[p.look].big = Math.max(1, HEAD_M / 2);   // (green after the dye; short, without braids, after Marilla cuts it)
+  if (p.look === 'ana') { const La = LOOKS.ana; La.big = ANA_STYLE === 'mano' ? HEAD_M : 0; La.pencil = ANA_STYLE === 'mano'; if (La.hair0 == null) { La.hair0 = La.hair; La.hairD0 = La.hairD; } const green = !!game.wm?.perm?.pelo_verde; La.hair = green ? '#5a8a3a' : La.hair0; La.hairD = green ? '#3e6a26' : La.hairD0; La.style = game.wm?.perm?.pelo_corto ? 'corto' : 'braids'; La.hat = !game.wm?.sinSombrero;
+    const cam = !!game.wm?.camison; La.camison = cam; if (La.dress0 == null) { La.dress0 = La.dress; La.dressD0 = La.dressD; } La.dress = cam ? '#f4efe2' : La.dress0; La.dressD = cam ? '#d8cfbc' : La.dressD0; if (cam) La.hat = false;   // (in her nightgown, from bed until she dresses)
+    if (typeof CKIT !== 'undefined' && CKIT.ana) { const K = CKIT.ana; K.pal0 ||= K.pal.slice(); K.pal[5] = cam ? '#f4efe2' : K.pal0[5]; K.pal[6] = cam ? '#d8cfbc' : K.pal0[6]; } } else if (LOOKS[p.look]) LOOKS[p.look].big = Math.max(1, HEAD_M / 2);   // (green after the dye; short, without braids, after Marilla cuts it)
   if (CACHE_ON && c === G0 && !CACHE.dentro && cachePersona(c, p, t)) return;   // (after her look is set up: a quiet pose, from a kept image: see 66-cache-dibujos.js)
   if (animDraw(c, p, t) || kitDraw(c, p, t)) return;
   if (p.lie) { drawLying(c, p, t); return; }
@@ -5478,6 +5482,8 @@ function dlgHacer(list){   // what a scene does when it starts or ends
     if (a.triste) realR.setFact('triste:' + a.triste);
     if (a.nombrar) nombrar(a.nombrar, a.n);
     if (a.sentar) { const q = SEATS[a.sentar], b = a.sentar === 'ana' ? ana : PEOPLE[a.sentar]; if (q && b) { b.x = q[0]; b.y = q[1]; b.dir = q[2]; b.sit = true; b.moving = false; b.nav = null; if (b !== ana) b.mealSat = true; else { ana.goto = null; ana.vx = ana.vy = 0; } } }
+    if (a.ropa_tirada) game.wm.ropaTirada = true;
+    if (a.camison) { game.wm.camison = true; game.wm.sinSombrero = true; }
     if (a.dormir) { ana.enCama = null; ana.llora = false; goSleep(false); }
     if (a.entra) { const b = PEOPLE[a.entra]; if (b) { b.where = a.a; b.x = KDOOR.x + 30; b.y = KIT.h - 30; b.sit = false; b.nav = null; b.moving = false; b.dir = 0; } }
     if (a.sale) { const b = PEOPLE[a.sale]; if (b) { b.where = CH[a.sale]?.home || 'gg'; b.x = STAIRS.x - 30; b.y = STAIRS.y + 30; b.nav = null; } }
@@ -5621,6 +5627,8 @@ function dlgAccion(s){   // an action of the script: «hecho x», «marca id | n
     case 'nombrar': return { nombrar: r[0], pedir: r[1] === '?' };
     case 'sentar': return { sentar: r[0] };
     case 'dormir': return { dormir: true };
+    case 'ropa_tirada': return { ropa_tirada: true };   // (her clothes, left on the floor)
+    case 'camison': return { camison: true };
     case 'entra': return { entra: r[0], a: r[1] };   // (someone comes into a room: «entra marilla ga», at its door)
     case 'sale': return { sale: r[0] };   // (and goes back down, home)   // (Ana goes to sleep: the night passes)   // (at her or his place at the kitchen table)
     case 'levantar': return { levantar: r[0] };   // (Ana names a thing: «nombrar lago», the book's name; «nombrar lago ?», the player writes it)
@@ -5916,13 +5924,14 @@ function shopLibreta(x){
 }
 ROOMS.ga = {
   parent: 'gg', exitAt: [STAIRS.x, STAIRS.y + 14], exitLabel: 'Bajar a la cocina',
-  draw: drawAnaRoom, items: (g, t) => [{ y: GA.bed.y, draw: () => drawAnaBed(g) }, { y: GA.table.y, draw: () => drawAnaTable(g, t) }, { y: GA.wash.y, draw: () => drawAnaWash(g) }, { y: GA.armario.y, draw: () => drawAnaArmario(g) }],
+  draw: drawAnaRoom, items: (g, t) => [{ y: GA.bed.y, draw: () => drawAnaBed(g) }, { y: GA.table.y, draw: () => drawAnaTable(g, t) }, { y: GA.wash.y, draw: () => drawAnaWash(g) }, { y: GA.armario.y, draw: () => drawAnaArmario(g) }, ...(game.wm?.ropaTirada ? [{ y: ROPA_SUELO()[1] - 6, draw: () => drawRopaTirada(g) }] : [])],
   blocked: (x, y) => (Math.abs(x - GA.armario.x) < 25 && y > GA.armario.y - 14 && y < GA.armario.y + 4) || (Math.abs(x - GA.bed.x) < 76 && y > GA.bed.y - 30 && y < GA.bed.y + 4) || (Math.abs(x - GA.table.x) < 30 && y > GA.table.y - 24 && y < GA.table.y + 4) || (Math.abs(x - GA.wash.x) < 26 && y > GA.wash.y - 26 && y < GA.wash.y + 4),
   glow: () => [GA.table.x, GA.table.y - 40, 150, '255,190,110', .38], place: 'en su cuarto del alero este de Tejas Verdes, con la ventana donde está el cerezo Reina de las Nieves',
   actions: add => {
     add('bed', GA.bed.x - 20, GA.bed.y + 14, 60, 'Dormir en mi cama', goToBed, { hy: 30, hit: 0, pri: 2, test: (x, y) => Math.abs(x - GA.bed.x) < 76 && y > GA.bed.y - 62 && y < GA.bed.y + 6 });
     add('gwin', GA.win, 3.9 * T, 70, velaPuede() ? 'La ventana (🕯 la vela)' : 'Mirar por la ventana', ventana, { hy: 40, hit: 0, pri: 3, test: (x, y) => Math.abs(x - GA.win) < 46 && y < 62 });
-    add('armario', GA.armario.x, GA.armario.y + 22, 50, game.wm?.sinSombrero ? 'Ponerse el sombrero (el armario)' : 'Guardar el sombrero en el armario', sombrero, { hy: 40, hit: 26, pri: 3 });
+    add('armario', GA.armario.x, GA.armario.y + 22, 50, game.wm?.camison ? 'Vestirse (el armario)' : 'El armario (el sombrero, la ropa)', armario, { hy: 40, hit: 26, pri: 3 });
+    if (game.wm?.ropaTirada) { const [rx, ry] = ROPA_SUELO(); add('ropa', rx, ry, 50, 'La ropa tirada en el suelo', ropaMenu, { hy: 4, hit: 22, pri: 2 }); }
     add('mirror', GA.table.x, GA.table.y + 26, 56, 'Mirarse en el espejo', () => comentar('espejo'), { hy: 40, hit: 0, pri: 3, test: (x, y) => Math.abs(x - GA.table.x) < 18 && y < 56 });
   },
 };
@@ -5940,6 +5949,7 @@ function goToBed(){
 }
 function goSleep(forced, skip){
   if (sleeping) return; sleeping = true; close(); ana.goto = null; ana.sit = false;
+  if (game.wm) { game.wm.camison = true; game.wm.sinSombrero = true; }   // (to bed in her nightgown, the hat put away: she wakes so, and dresses when she will)
   const el = $('sleep'); el.textContent = forced ? 'Ana se quedó dormida…' : skip ? 'Pasa la noche…' : 'Zzz…'; el.classList.add('on');
   setTimeout(() => {
     goIn('ga', [GA.bed.x - 20, GA.bed.y + 16]); ana.dir = 0; bubbles = [];
@@ -6114,7 +6124,8 @@ const PERSONAJES = {
       "[hecho:se_queda] Si quieres cocinar, la estufa está encendida. Cuidado con no quemar nada esta vez.",
       "[hecho:se_queda, hecho:conocidas_diana] Matthew no lo dice, pero te echa de menos cuando te vas donde Diana.",
       "[hecho:se_queda] Riega la huerta antes de que caiga el sol, que las plantas lo agradecen.",
-      "[hecho:se_queda, afecto:marilla:ana>=3] Hmm. Bueno, admito que hoy te has portado muy bien."
+      "[hecho:se_queda, afecto:marilla:ana>=3] Hmm. Bueno, admito que hoy te has portado muy bien.",
+      "[hecho:ropa_arrugada, !hecho:ropa_ordenada] Ese vestido parece que durmió en el suelo, Ana. Ah, claro: es que durmió en el suelo."
     ],
     "seasonLines": [
       "[hecho:se_queda] Hay que limpiar la casa a fondo, que es primavera. Y tú me vas a ayudar, Ana.",
@@ -6644,12 +6655,31 @@ function targetAt(wx, wy){
   }
   return best;
 }
+// a tap on a thing with Ana beside it: if more can be done there (another thing in the same spot, or something of hers
+// that is done right there: cooking at the stove, writing at her desk, milking by the cow…), a little menu with it all;
+// if only one, it is done at once. People (and Ana herself) have their own menus.
+function opcionesDe(t){
+  const o = [[t.label, t.act]], ya = new Set([t.label]);
+  for (const u of targets()) if (u.id !== t.id && !u.self && !/^[pfa]:/.test(u.id) && !ya.has(u.label) && dist(u.x, u.y, t.x, t.y) < 34) { ya.add(u.label); o.push([u.label, u.act]); }
+  for (const a of jugables()) {
+    let P = null; try { P = accPasos(a, 'ana'); } catch (e) {} const p0 = P?.[0]; if (!p0) continue;
+    if (p0.lugar && p0.lugar !== personKey('ana')) continue;
+    let q = null; try { q = typeof p0.p === 'function' ? p0.p() : p0.p; } catch (e) {} if (!q || dist(q[0], q[1], t.x, t.y) > 60) continue;
+    const l = stepText(a); if (ya.has(l)) continue; ya.add(l); o.push([l[0].toUpperCase() + l.slice(1), () => jugar(a)]);
+  }
+  return o;
+}
+function opcionesAct(t){
+  if (t.self || /^[pf]:/.test(t.id)) return t.act();
+  const o = opcionesDe(t); if (o.length < 2) return t.act();
+  say('Ana', t.label + '…', [...o.map(([l, f]) => [l, () => { close(); f(); }]), ['Nada por ahora', close]]);
+}
 // a tap: do it at once if she is close enough, otherwise she walks there (A*) and does it on arrival; on bare ground she just walks
 function tapAt(sx, sy){
   if (sleeping) return;
   if (OBS) { observe(null); return; }   // (watching someone: a tap brings the view back to Ana)
   const wx = view.ox + sx / view.Z, wy = view.oy + sy / view.Z, t = targetAt(wx, wy);
-  if (t && (t.self || dist(ana.x, ana.y, t.x, t.y) < t.reach * .85)) { ana.goto = null; t.act(); }
+  if (t && (t.self || dist(ana.x, ana.y, t.x, t.y) < t.reach * .85)) { ana.goto = null; opcionesAct(t); }
   else { ana.goto = t ? { id: t.id, scene: game.scene } : { x: wx, y: wy, scene: game.scene };
     if (t && /^[pf]:/.test(t.id)) { const k = t.id.slice(2), b = wmBody(k); if (b && b.moving && !b.called) callPerson('ana', k, { come: false }); } }   // (someone walking off: «¡Espera!»)
 }
@@ -8985,7 +9015,7 @@ function update(dt){
   if (game.scene === 'camino' && ana.onCart && (mx || my || (ana.goto && !ana.goto.wm))) roadGetOff();   // (moving her: she gets down from the buggy)
   if (ANA_AUTO) { if (mx || my) { freeStart(); const v = 520 / (cam.zoom || 1) / (viewZoom || 1); freeCam.x += mx * v * dt; freeCam.y += my * v * dt; } mx = my = 0; }   // (on her own: the keys move the view)
   if (game.talk?.deadline && TT > game.talk.deadline && !sayOpen) { game.talk.deadline = 0; autoChoose(); }
-  autoTick(); cartTick(dt); roadTick(dt); buggyTick(); roadTalkTick(dt); dlgTick(dt); talkTick(dt); cap1Tick(); momentsTick(); lugaresTick(dt); inicioTick(dt); lagrimas(); folkTick(dt); faunaTick(dt); agentTick(dt); jugarTick(dt); correoTick(dt); sickTick(); apartarTick(); cuadernoTick(dt); habilidadesTick(dt); juntasTick(dt); agendaTick(); wmApproachTick(dt); calledTick(); chatTick(dt); wmFollowTick();
+  autoTick(); cartTick(dt); roadTick(dt); buggyTick(); roadTalkTick(dt); dlgTick(dt); talkTick(dt); cap1Tick(); momentsTick(); lugaresTick(dt); inicioTick(dt); lagrimas(); ropaTick(); folkTick(dt); faunaTick(dt); agentTick(dt); jugarTick(dt); correoTick(dt); sickTick(); apartarTick(); cuadernoTick(dt); habilidadesTick(dt); juntasTick(dt); agendaTick(); wmApproachTick(dt); calledTick(); chatTick(dt); wmFollowTick();
   if (RELATO.on) relatoTick();   // (the account of what happens, once all have moved: 66-relato.js)
   ana.torn = !!game.anaStates.rasgado; ana.askew = !!game.anaStates.despeinada;
   ana.savoring = false;
@@ -8998,10 +9028,10 @@ function update(dt){
     if (gt.id && !t) ana.goto = null;
     else if (gt.auto && amb.cur) { /* a talk is going on: she waits */ }
     else if (gt.stroll && TT < (ana.savor?.until || 0)) { ana.savoring = true; }   // (stopped for a moment, to look around)
-    else if (t && dist(ana.x, ana.y, t.x, t.y) < t.reach * .85) { ana.goto = null; { ACT_SOLA = !!gt.auto; try { (gt.use || t.act)(); } finally { ACT_SOLA = false; } } }
+    else if (t && dist(ana.x, ana.y, t.x, t.y) < t.reach * .85) { ana.goto = null; { ACT_SOLA = !!gt.auto; try { (gt.use || (gt.auto || gt.wm ? t.act : () => opcionesAct(t)))(); } finally { ACT_SOLA = false; } } }
     else {
       const sk = ana.stk; if (!sk || dist(ana.x, ana.y, sk.x, sk.y) > 6) ana.stk = { x: ana.x, y: ana.y, t: TT }; else if (TT - sk.t > 1.5) { ana.nav = null; ana.stk = null; }   // (stuck: find the way again)
-      const n = navStep(ana, t ? t.x : gt.x, t ? t.y : gt.y); if (n.arrived) { if (gt.wm) ana.wmArr = TT; ana.goto = null; if (t && dist(ana.x, ana.y, t.x, t.y) < t.reach) { ACT_SOLA = !!gt.auto; try { (gt.use || t.act)(); } finally { ACT_SOLA = false; } } } else { const dx = n.wx - ana.x, dy = n.wy - ana.y, d = Math.hypot(dx, dy) || 1; mx = dx / d; my = dy / d; } }
+      const n = navStep(ana, t ? t.x : gt.x, t ? t.y : gt.y); if (n.arrived) { if (gt.wm) ana.wmArr = TT; ana.goto = null; if (t && dist(ana.x, ana.y, t.x, t.y) < t.reach) { ACT_SOLA = !!gt.auto; try { (gt.use || (gt.auto || gt.wm ? t.act : () => opcionesAct(t)))(); } finally { ACT_SOLA = false; } } } else { const dx = n.wx - ana.x, dy = n.wy - ana.y, d = Math.hypot(dx, dy) || 1; mx = dx / d; my = dy / d; } }
   }
   // how fast: a walk (Shift to hurry), or a stroll when she is out on her own: every so often she stops to look about
   if (dest && !ana.goto?.dest) dest = null;
@@ -12059,7 +12089,7 @@ function loop(now){
   else { owed = Math.min(owed + Math.min(raw, .25) * k, 3 * k * .05 + 2); const t0 = performance.now(); while (owed > 1e-4 && performance.now() - t0 < 22) { const d = Math.min(.05, owed); update(d); owed -= d; } }
   FRAME++; tripBarDraw(); render(); islaDraw(); requestAnimationFrame(loop);
 }
-window.__avonlea = { dlgCumple, comentar, comentarioElegir, COMENTARIOS, lugaresTick, escenaObjeto, targets, cartaPuede, conNombres, nombrar, nombreDe, nombrarElegir, NOMBRABLES, primeraVez, ventana, velaPuede, sombrero, LOOKS, dlgDichas, chats: () => CHATS, enConversacion, anaPos: () => ({ x: ana.x, y: ana.y }), setDia: (d, h) => { dayT = d + (h - 6) / 24; }, dia: () => today(), PEOPLE, relatoEmpezar, inicioLlegada, dlgHechos, convDisponibles, conversar, convOpciones, guiñosDe, LINES, dlgHecho, cualidad, cualidadSuma, cualidadCond, dlgCond, dlgEspecificidad, ritmoLleno, ritmoMarca, dlgHacer, dlgAccion, HABILIDADES, relSetW, relato: () => RELATO.lineas, reglas: () => RELATO_REGLAS.map(r => [r.id, r.texto]), jugables, jugar, anaMenu, correoRetirar, cartaLeer, CORREO, cartaTexto, playAct: () => game.playAct, DIALOGOS, dlgCtx, talks: () => TALKS, dlgGuion, dlgPanel, bubblesNow: () => bubbles, toby, cartSheet: (c, x, y, c8, t) => { const L = [], p = { look: 'matthew', x, y, c8, walk: 0, moving: false }; const [cx, cy] = [x, y]; pushCart(L, c, { x: cx, y: cy, c8, walk: 0, moving: true }, t); for (const [k, look] of [[0, 'matthew'], [1, 'ana']]) { const [sx, sy] = cartSeat(cx, cy, c8, k); L.push({ y: sy, draw: () => drawPerson(c, { ...mkPerson(look, sx, sy), sit: true, dir: c8Dir(c8) }, t) }); } L.sort((a, b) => a.y - b.y).forEach(o => o.draw()); }, startCap1, CAP1, LIBRO1, ROAD_TRAMOS, ROAD_MIN, roadTramo, islaToggle, DLG_BANK, startDay, setSeason, agendaData: () => AGENDA.map(e => ({ who: wmName(e.who), from: e.from, to: e.to, label: e.label, season: e.season, sunday: !!e.sunday, ana: !!(e.ana || e.who === 'ana'), cond: e.when ? String(e.when).replace(/^\(\) => /, '') : '' })), setAgenda: v => { AGENDA_ON = v; }, AGENDA, wmData: () => ({ THINGS, WHO, OFRECE, WP_NAME, TRADE, TREATS, LIBRETA, ITEM_NAME, MAX_GOALS, PACE, FOCO }), paintMapBase, doingText, wmName, wmBody, wmScene, WW, WH, setVec: v => { VEC_ON = v; }, setStyle: v => { ANA_STYLE = v; }, setHead: setHeadM, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+window.__avonlea = { vista: () => view, opcionesDe, dlgCumple, comentar, comentarioElegir, COMENTARIOS, lugaresTick, escenaObjeto, targets, cartaPuede, conNombres, nombrar, nombreDe, nombrarElegir, NOMBRABLES, primeraVez, ventana, velaPuede, sombrero, LOOKS, dlgDichas, chats: () => CHATS, enConversacion, anaPos: () => ({ x: ana.x, y: ana.y }), setDia: (d, h) => { dayT = d + (h - 6) / 24; }, dia: () => today(), PEOPLE, relatoEmpezar, inicioLlegada, dlgHechos, convDisponibles, conversar, convOpciones, guiñosDe, LINES, dlgHecho, cualidad, cualidadSuma, cualidadCond, dlgCond, dlgEspecificidad, ritmoLleno, ritmoMarca, dlgHacer, dlgAccion, HABILIDADES, relSetW, relato: () => RELATO.lineas, reglas: () => RELATO_REGLAS.map(r => [r.id, r.texto]), jugables, jugar, anaMenu, correoRetirar, cartaLeer, CORREO, cartaTexto, playAct: () => game.playAct, DIALOGOS, dlgCtx, talks: () => TALKS, dlgGuion, dlgPanel, bubblesNow: () => bubbles, toby, cartSheet: (c, x, y, c8, t) => { const L = [], p = { look: 'matthew', x, y, c8, walk: 0, moving: false }; const [cx, cy] = [x, y]; pushCart(L, c, { x: cx, y: cy, c8, walk: 0, moving: true }, t); for (const [k, look] of [[0, 'matthew'], [1, 'ana']]) { const [sx, sy] = cartSeat(cx, cy, c8, k); L.push({ y: sy, draw: () => drawPerson(c, { ...mkPerson(look, sx, sy), sit: true, dir: c8Dir(c8) }, t) }); } L.sort((a, b) => a.y - b.y).forEach(o => o.draw()); }, startCap1, CAP1, LIBRO1, ROAD_TRAMOS, ROAD_MIN, roadTramo, islaToggle, DLG_BANK, startDay, setSeason, agendaData: () => AGENDA.map(e => ({ who: wmName(e.who), from: e.from, to: e.to, label: e.label, season: e.season, sunday: !!e.sunday, ana: !!(e.ana || e.who === 'ana'), cond: e.when ? String(e.when).replace(/^\(\) => /, '') : '' })), setAgenda: v => { AGENDA_ON = v; }, AGENDA, wmData: () => ({ THINGS, WHO, OFRECE, WP_NAME, TRADE, TREATS, LIBRETA, ITEM_NAME, MAX_GOALS, PACE, FOCO }), paintMapBase, doingText, wmName, wmBody, wmScene, WW, WH, setVec: v => { VEC_ON = v; }, setStyle: v => { ANA_STYLE = v; }, setHead: setHeadM, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
 /* ---------- the first time: a scene of its own; the window and the candle; her hat in the wardrobe ----------
    - The first time Ana does some things (looks out of her window, sees herself in the mirror, climbs to her room, sees
      the sea from the lighthouse…), a scene of the script (primera_<what>, disparo: primera) instead of the plain line;
@@ -12142,6 +12172,51 @@ function sombrero(callada){
   const W = game.wm, sin = !W.sinSombrero; W.sinSombrero = sin;
   if (!callada) anaSays(sin ? pick(['Lo guardo en el armario. Un sombrero merece descansar, como cualquiera.', 'Ahí queda, colgado de su gancho. Sin sombrero me siento más… libre. Como una náyade.']) : pick(['El sombrero, otra vez. Marilla dice que una niña decente no sale sin sombrero.', 'Listo. Si tuviera flores, sería el sombrero más bonito de Avonlea.']));
   logEv(sin ? 'Ana se sacó el sombrero y lo guardó en el armario.' : 'Ana sacó su sombrero del armario y se lo puso.', []); save();
+}
+// her clothes: to bed in her nightgown, and up in it; she dresses when the player decides (at the wardrobe, as with the
+// hat). The first night she leaves her dress and shoes thrown on the floor: the player decides, the next day, whether
+// she folds them and puts them away (Marilla notices: a little more affection) or puts them on just as they are
+const ROPA_SUELO = () => [GA.bed.x - 98, GA.bed.y + 22];
+function vestirse(callada){
+  const W = game.wm; if (!W?.camison) return;
+  W.camison = false; if (W.ropaTirada) { W.ropaTirada = false; dlgHecho('ropa_arrugada'); }
+  if (!callada) anaSays(pick(['El vestido de todos los días. Ni mangas abullonadas ni nada… pero limpio, y mío.', 'Lista. Una se siente otra persona vestida: más valiente, o por lo menos más abrochada.']));
+  logEv('Ana se vistió.', []); save();
+}
+function ponerseCamison(){ const W = game.wm; W.camison = true; W.sinSombrero = true; anaSays('El camisón. Ahora sí que es de noche.'); logEv('Ana se puso el camisón.', []); save(); }
+function ropaOrdenar(callada){
+  const W = game.wm; if (!W?.ropaTirada) return; W.ropaTirada = false;
+  if (!callada) anaSays('Bien dobladita, como le gusta a Marilla. Una ropa ordenada es casi una ropa contenta.');
+  logEv('Ana dobló su ropa y la guardó en el armario.', []);
+  if (!dlgHechos().ropa_ordenada) { dlgHecho('ropa_ordenada'); dlgHacer([{ suma: ['afecto:marilla:ana', 1] }]); }   // (Marilla sees it: she says nothing, but she sees it)
+  save();
+}
+function ropaPonerse(){ anaSays('Está toda arrugada… Bueno, voy a imaginar que es seda recién planchada.'); vestirse(true); }
+function ropaMenu(){
+  say('Ana', 'Su vestido y sus zapatos, tirados en el suelo desde anoche.', [['🧺 Doblar la ropa y guardarla en el armario', () => { close(); ropaOrdenar(); }], ...(game.wm.camison ? [['👗 Ponérsela así, arrugada', () => { close(); ropaPonerse(); }]] : []), ['Nada por ahora', close]]);
+}
+// the wardrobe: dress (or, at night, the nightgown), and the hat
+function armario(callada){
+  const W = game.wm, o = [];
+  if (W.camison) o.push([W.ropaTirada ? '👗 Ponerse el vestido (está tirado en el suelo)' : '👗 Vestirse', () => { close(); W.ropaTirada ? ropaPonerse() : vestirse(); }]);
+  else { if (hourNow() % 24 >= 19 || hourNow() % 24 < 5) o.push(['🌙 Ponerse el camisón', () => { close(); ponerseCamison(); }]); o.push([W.sinSombrero ? '👒 Ponerse el sombrero' : '👒 Guardar el sombrero', () => { close(); sombrero(); }]); }
+  if (callada === true) { if (W.camison) vestirse(true); else sombrero(true); return; }
+  if (o.length === 1) return o[0][1]();
+  say('Ana', 'El armario.', [...o, ['Nada por ahora', close]]);
+}
+// the dress on the floor, crumpled, and the shoes
+function drawRopaTirada(c){
+  const [x, y] = ROPA_SUELO(), L = LOOKS.ana, d = L.dress0 || L.dress, dd = L.dressD0 || L.dressD;
+  blob(c, [[x - 18, y - 2], [x - 6, y - 9], [x + 10, y - 7], [x + 20, y - 1], [x + 12, y + 5], [x - 10, y + 6]], d);
+  blob(c, [[x - 4, y - 6], [x + 8, y - 4], [x + 4, y + 2], [x - 6, y + 1]], dd, false);
+  ell(c, x - 2, y - 5, 5, 2, L.collar || '#fbf6ea', true);
+  ell(c, x + 30, y + 4, 5, 2.4, '#5b3a28', true); ell(c, x + 38, y + 8, 5, 2.4, '#5b3a28', true);
+}
+// with Ana on her own (🤖): she dresses in the morning (and, the first day, folds her clothes first)
+function ropaTick(){
+  const W = game.wm; if (!ANA_AUTO || !W?.camison || sleeping || TALKS.length || game.talk || game.playAct) return;
+  const h = hourNow() % 24; if (h < 6 || h >= 20 || game.scene !== 'ga') return;
+  if (W.ropaTirada) ropaOrdenar(true); vestirse(true);
 }
 
 /* ---------- the account of what happens: what can be seen, not what anyone intends ----------

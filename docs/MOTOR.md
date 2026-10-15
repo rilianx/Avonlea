@@ -97,6 +97,10 @@ Las líneas se escriben con el nombre del libro: el juego lo cambia solo por el 
 
 **El estilo de estas escenas** (el de la ventana): que inspiren. Primero lo que se ve, se oye o se huele, concreto, de esa estación y esa hora; después Ana lo transforma con su imaginación (una imagen, un cuentito, las cosas como si sintieran); al final, un sentimiento chico que se queda (gratitud, nostalgia, ganas, un poco de humor sobre sí misma). Dos o tres líneas. La IA tiene la misma indicación para sus escenas improvisadas.
 
+**La ropa:** Ana se acuesta en camisón y amanece en camisón (sin sombrero); se viste cuando el jugador lo decide, en el armario, igual que el sombrero. La primera noche deja el vestido y los zapatos tirados en el suelo: al día siguiente el jugador decide si los dobla y los guarda (Marilla lo nota: más cariño) o se los pone arrugados (y Marilla lo nota también). Con 🤖, Ana se viste sola en la mañana.
+
+**Tocar una cosa:** con Ana al lado, si allí se puede hacer más de una cosa (otra cosa en el mismo lugar, o algo de ella que se hace justo ahí: lavar los platos en la mesa, escribir en el escritorio), sale un menú con todo; si hay una sola, se hace.
+
 **La primera vez** (`src/js/66-primeras-veces.js`): la primera vez que Ana hace algunas cosas (mirar por la ventana de su pieza, mirarse al espejo, subir a su pieza, abrir el armario, ver el mar desde el faro…), en vez de la frase de siempre sale una escena del guion, `primera_<acción>` con `disparo: primera`. Con `tambien`, la acción se hace igual (subir la escalera).
 
 **Los hitos:** al cruzar un umbral de una habilidad de Ana, alguien se lo dice la próxima vez que se encuentran (con IA, una escena improvisada; sin IA, la línea escrita). Luego queda el hecho `hito_<habilidad>_<n>`.

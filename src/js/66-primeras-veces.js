@@ -81,3 +81,48 @@ function sombrero(callada){
   if (!callada) anaSays(sin ? pick(['Lo guardo en el armario. Un sombrero merece descansar, como cualquiera.', 'Ahí queda, colgado de su gancho. Sin sombrero me siento más… libre. Como una náyade.']) : pick(['El sombrero, otra vez. Marilla dice que una niña decente no sale sin sombrero.', 'Listo. Si tuviera flores, sería el sombrero más bonito de Avonlea.']));
   logEv(sin ? 'Ana se sacó el sombrero y lo guardó en el armario.' : 'Ana sacó su sombrero del armario y se lo puso.', []); save();
 }
+// her clothes: to bed in her nightgown, and up in it; she dresses when the player decides (at the wardrobe, as with the
+// hat). The first night she leaves her dress and shoes thrown on the floor: the player decides, the next day, whether
+// she folds them and puts them away (Marilla notices: a little more affection) or puts them on just as they are
+const ROPA_SUELO = () => [GA.bed.x - 98, GA.bed.y + 22];
+function vestirse(callada){
+  const W = game.wm; if (!W?.camison) return;
+  W.camison = false; if (W.ropaTirada) { W.ropaTirada = false; dlgHecho('ropa_arrugada'); }
+  if (!callada) anaSays(pick(['El vestido de todos los días. Ni mangas abullonadas ni nada… pero limpio, y mío.', 'Lista. Una se siente otra persona vestida: más valiente, o por lo menos más abrochada.']));
+  logEv('Ana se vistió.', []); save();
+}
+function ponerseCamison(){ const W = game.wm; W.camison = true; W.sinSombrero = true; anaSays('El camisón. Ahora sí que es de noche.'); logEv('Ana se puso el camisón.', []); save(); }
+function ropaOrdenar(callada){
+  const W = game.wm; if (!W?.ropaTirada) return; W.ropaTirada = false;
+  if (!callada) anaSays('Bien dobladita, como le gusta a Marilla. Una ropa ordenada es casi una ropa contenta.');
+  logEv('Ana dobló su ropa y la guardó en el armario.', []);
+  if (!dlgHechos().ropa_ordenada) { dlgHecho('ropa_ordenada'); dlgHacer([{ suma: ['afecto:marilla:ana', 1] }]); }   // (Marilla sees it: she says nothing, but she sees it)
+  save();
+}
+function ropaPonerse(){ anaSays('Está toda arrugada… Bueno, voy a imaginar que es seda recién planchada.'); vestirse(true); }
+function ropaMenu(){
+  say('Ana', 'Su vestido y sus zapatos, tirados en el suelo desde anoche.', [['🧺 Doblar la ropa y guardarla en el armario', () => { close(); ropaOrdenar(); }], ...(game.wm.camison ? [['👗 Ponérsela así, arrugada', () => { close(); ropaPonerse(); }]] : []), ['Nada por ahora', close]]);
+}
+// the wardrobe: dress (or, at night, the nightgown), and the hat
+function armario(callada){
+  const W = game.wm, o = [];
+  if (W.camison) o.push([W.ropaTirada ? '👗 Ponerse el vestido (está tirado en el suelo)' : '👗 Vestirse', () => { close(); W.ropaTirada ? ropaPonerse() : vestirse(); }]);
+  else { if (hourNow() % 24 >= 19 || hourNow() % 24 < 5) o.push(['🌙 Ponerse el camisón', () => { close(); ponerseCamison(); }]); o.push([W.sinSombrero ? '👒 Ponerse el sombrero' : '👒 Guardar el sombrero', () => { close(); sombrero(); }]); }
+  if (callada === true) { if (W.camison) vestirse(true); else sombrero(true); return; }
+  if (o.length === 1) return o[0][1]();
+  say('Ana', 'El armario.', [...o, ['Nada por ahora', close]]);
+}
+// the dress on the floor, crumpled, and the shoes
+function drawRopaTirada(c){
+  const [x, y] = ROPA_SUELO(), L = LOOKS.ana, d = L.dress0 || L.dress, dd = L.dressD0 || L.dressD;
+  blob(c, [[x - 18, y - 2], [x - 6, y - 9], [x + 10, y - 7], [x + 20, y - 1], [x + 12, y + 5], [x - 10, y + 6]], d);
+  blob(c, [[x - 4, y - 6], [x + 8, y - 4], [x + 4, y + 2], [x - 6, y + 1]], dd, false);
+  ell(c, x - 2, y - 5, 5, 2, L.collar || '#fbf6ea', true);
+  ell(c, x + 30, y + 4, 5, 2.4, '#5b3a28', true); ell(c, x + 38, y + 8, 5, 2.4, '#5b3a28', true);
+}
+// with Ana on her own (🤖): she dresses in the morning (and, the first day, folds her clothes first)
+function ropaTick(){
+  const W = game.wm; if (!ANA_AUTO || !W?.camison || sleeping || TALKS.length || game.talk || game.playAct) return;
+  const h = hourNow() % 24; if (h < 6 || h >= 20 || game.scene !== 'ga') return;
+  if (W.ropaTirada) ropaOrdenar(true); vestirse(true);
+}

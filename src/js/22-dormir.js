@@ -6,6 +6,7 @@ function goToBed(){
 }
 function goSleep(forced, skip){
   if (sleeping) return; sleeping = true; close(); ana.goto = null; ana.sit = false;
+  if (game.wm) { game.wm.camison = true; game.wm.sinSombrero = true; }   // (to bed in her nightgown, the hat put away: she wakes so, and dresses when she will)
   const el = $('sleep'); el.textContent = forced ? 'Ana se quedó dormida…' : skip ? 'Pasa la noche…' : 'Zzz…'; el.classList.add('on');
   setTimeout(() => {
     goIn('ga', [GA.bed.x - 20, GA.bed.y + 16]); ana.dir = 0; bubbles = [];

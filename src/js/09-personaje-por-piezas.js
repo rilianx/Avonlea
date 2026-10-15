@@ -201,7 +201,9 @@ function drawLlorando(c, p, t, parte){
 function drawPerson(c, p, t){
   if (p.llora && p.sit) return drawLlorando(c, p, t, 'encima');
   if (p.enCama && game.scene === 'ga') return drawEnCama(c, p, t);   // (in her bed: face down crying, or under the sheets)   // (crying at the table, the head on it: a pose of its own)
-  if (p.look === 'ana') { const La = LOOKS.ana; La.big = ANA_STYLE === 'mano' ? HEAD_M : 0; La.pencil = ANA_STYLE === 'mano'; if (La.hair0 == null) { La.hair0 = La.hair; La.hairD0 = La.hairD; } const green = !!game.wm?.perm?.pelo_verde; La.hair = green ? '#5a8a3a' : La.hair0; La.hairD = green ? '#3e6a26' : La.hairD0; La.style = game.wm?.perm?.pelo_corto ? 'corto' : 'braids'; La.hat = !game.wm?.sinSombrero; } else if (LOOKS[p.look]) LOOKS[p.look].big = Math.max(1, HEAD_M / 2);   // (green after the dye; short, without braids, after Marilla cuts it)
+  if (p.look === 'ana') { const La = LOOKS.ana; La.big = ANA_STYLE === 'mano' ? HEAD_M : 0; La.pencil = ANA_STYLE === 'mano'; if (La.hair0 == null) { La.hair0 = La.hair; La.hairD0 = La.hairD; } const green = !!game.wm?.perm?.pelo_verde; La.hair = green ? '#5a8a3a' : La.hair0; La.hairD = green ? '#3e6a26' : La.hairD0; La.style = game.wm?.perm?.pelo_corto ? 'corto' : 'braids'; La.hat = !game.wm?.sinSombrero;
+    const cam = !!game.wm?.camison; La.camison = cam; if (La.dress0 == null) { La.dress0 = La.dress; La.dressD0 = La.dressD; } La.dress = cam ? '#f4efe2' : La.dress0; La.dressD = cam ? '#d8cfbc' : La.dressD0; if (cam) La.hat = false;   // (in her nightgown, from bed until she dresses)
+    if (typeof CKIT !== 'undefined' && CKIT.ana) { const K = CKIT.ana; K.pal0 ||= K.pal.slice(); K.pal[5] = cam ? '#f4efe2' : K.pal0[5]; K.pal[6] = cam ? '#d8cfbc' : K.pal0[6]; } } else if (LOOKS[p.look]) LOOKS[p.look].big = Math.max(1, HEAD_M / 2);   // (green after the dye; short, without braids, after Marilla cuts it)
   if (CACHE_ON && c === G0 && !CACHE.dentro && cachePersona(c, p, t)) return;   // (after her look is set up: a quiet pose, from a kept image: see 66-cache-dibujos.js)
   if (animDraw(c, p, t) || kitDraw(c, p, t)) return;
   if (p.lie) { drawLying(c, p, t); return; }
