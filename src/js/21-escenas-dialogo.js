@@ -105,6 +105,7 @@ function cualidad(dueño, nombre, hacia){
 function cualidadSuma(dueño, nombre, n, hacia){
   if (nombre === 'afecto') return relSetW(dueño, hacia, Math.max(0, Math.min(5, relGetW(dueño, hacia) + n)));
   const d = CUALIDAD_DEF[nombre], [min, max] = d?.rango || [0, Infinity], antes = cualidad(dueño, nombre, hacia);
+  if (d?.visible && !d.visible.every(x => dlgCond(x))) return;   // (a quality that counts only for a while: Marilla's patience, until White Sands)
   const N = ((game.wm.num ||= {})[dueño] ||= {}), v = Math.max(min, Math.min(max, antes + n)); N[cualidadClave(nombre, hacia)] = v;
   if (d && v !== antes) cualidadHitos(d, dueño, hacia, antes, v);   // (a milestone crossed, up or down: told, and kept as a fact)
 }

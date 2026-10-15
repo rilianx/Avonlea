@@ -17,7 +17,7 @@
 #   Una cualidad también puede ser de alguien hacia otra persona (cómo la ve), y subir con lo que hace otra:
 #   de: de quién es (si no, de quien hace las acciones)      hacia: hacia quién (se pide así: «paciencia:marilla:ana<=1»)
 #   por: quién la hace subir con sus acciones (si no, ana)   inicial: dónde empieza (si no, 0)   rango: mínimo-máximo
-#   visible si: cuándo cuenta y se ve en el cuaderno (condiciones del guion, separadas por comas)
+#   visible si: cuándo cuenta (fuera de eso no cambia) y se ve en el cuaderno (condiciones del guion, separadas por comas)
 #   bajo N: lo que significa caer a N (como un hito, pero bajando; con «con», «dice», «ia» igual). El guion la baja o
 #     la sube con «! suma paciencia:marilla:ana -1»; al cruzar un hito o un bajo queda el hecho hito_<id>_<N> o bajo_<id>_<N>.
 # Las líneas que empiezan con # son comentarios.
@@ -73,23 +73,22 @@ hito 60: Podría escribir de verdad: un cuento para una revista.
   dice: Ana, ¿has pensado en mandar uno de tus cuentos a una revista? Yo lo leería.
   ia: La Sra. Allan le sugiere a Ana mandar uno de sus cuentos a una revista, y le ofrece ayudarla.
 
-# La paciencia de Marilla con Ana, mientras está a prueba: baja con las faltas (las escenas de «las reglas de la casa»,
-# en el guion), sube cuando Ana ayuda o pide perdón. Si llega a 0, en White Sands puede pasar cualquier cosa.
+# La paciencia de Marilla con Ana, desde que llega hasta White Sands (el día después), donde Marilla decide: baja con
+# las faltas (las escenas de «las reglas de la casa», en el guion), sube cuando Ana ayuda o pide perdón. Si llega a 0,
+# en White Sands Marilla duda de verdad. Empieza en 2: Marilla no quería una niña.
 === paciencia ===
 titulo: La paciencia de Marilla
 de: marilla
 hacia: ana
 por: ana
-inicial: 3
-rango: 0-5
+inicial: 2
+rango: 0-4
 suma: quehacer, rezar, cocinar, coser, recoger
 por_dia: 1
-visible si: hecho:inicio_juego, !hecho:se_queda
-hito 5: Marilla empieza a acostumbrarse a tenerla en casa.
-bajo 2: Marilla está perdiendo la paciencia (ayudarla en la casa la calma).
+visible si: hecho:inicio_juego, !hecho:a_prueba
+hito 3: Marilla empieza a pensar que la niña quizás sirva para algo.
+hito 4: Marilla ya casi no piensa en devolverla.
+bajo 1: Marilla está pensando en dejarla en White Sands: pídele perdón y ayúdala.
   con: marilla
-  dice: Ana, mientras estés a prueba en esta casa, tienes que portarte bien. No me hagas arrepentirme.
-bajo 1: Marilla está pensando en devolverte con la Sra. Spencer: pídele perdón y ayúdala.
-  con: marilla
-  dice: Una más así, Ana, y te llevo de vuelta con la Sra. Spencer. Te lo digo en serio.
+  dice: Una más así, Ana, y te dejo con la Sra. Spencer. Te lo digo en serio.
 bajo 0: Marilla ya no tiene paciencia contigo: en White Sands puede pasar cualquier cosa.

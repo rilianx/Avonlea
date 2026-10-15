@@ -39,31 +39,40 @@ async function caso(nombre, fn){
     await T.manana(10); await T.ev(`game.wm.camison = true`);
     let v = await T.jugar('Perdón', 'dlgDichas().falta_camison && !TALKS.length', 60);
     ok(v.includes('falta_camison'), 'la escena de la falta: ' + v.join(' · '));
-    ok(await T.pac() === 3 && !(await T.ev(`game.wm.camison`)), 'pidió perdón y se vistió: paciencia ' + await T.pac());
+    ok(await T.pac() === 2 && !(await T.ev(`game.wm.camison`)), 'pidió perdón y se vistió: paciencia ' + await T.pac());
     await T.ev(`(() => { delete dlgDichas().falta_camison; game.wm.camison = true; })()`);
     v = await T.jugar('hada', 'dlgDichas().falta_camison && !TALKS.length', 60);
-    ok(await T.pac() === 2, 'con la excusa baja: paciencia ' + await T.pac());
+    ok(await T.pac() === 1, 'con la excusa baja: paciencia ' + await T.pac());
   });
   await caso('2. el aviso al bajar a 1, la pista del cuaderno, el perdón y la ayuda', async T => {
-    await T.manana(10); await T.ev(`cualidadSuma('marilla', 'paciencia', -2, 'ana')`);
+    await T.manana(10); await T.ev(`cualidadSuma('marilla', 'paciencia', -1, 'ana')`);
     ok(await T.ev(`(game.wm.hitosPend || []).some(p => p.dir === 'bajo' && p.n === 1)`), 'Marilla tiene pendiente decirle «una más así…»');
     await T.run(12); ok(await T.ev(`!!dlgHechos().bajo_paciencia_1`), 'y se lo dice (bajo_paciencia_1)');
-    ok(/devolverte/.test(await T.ev(`cuadernoPista(CUADERNO_METAS.find(m => m.id === 'quedarse'))`)), 'el cuaderno lo dice');
+    ok(/White Sands/.test(await T.ev(`cuadernoPista(CUADERNO_METAS.find(m => m.id === 'quedarse'))`)), 'el cuaderno lo dice');
     ok(/Cómo la ven[\s\S]*paciencia de Marilla/.test(await T.ev(`cuadernoMiradas()`)), 'y muestra la paciencia de Marilla');
     ok(await T.ev(`convDisponibles('marilla').some(d => d.id === 'conv_marilla_perdon')`), 'puede pedirle perdón');
     await T.ev(`conversar(CONVERSACIONES.find(d => d.id === 'conv_marilla_perdon'))`); await T.jugar(null, '!TALKS.length', 60);
     ok(await T.pac() === 2, 'tras pedir perdón: paciencia ' + await T.pac());
     ok(await T.ev(`!convDisponibles('marilla').some(d => d.id === 'conv_marilla_perdon')`), 'una vez al día');
-    await T.ev(`(() => { const D = { v: 2, d: today(), t: {}, dado: {}, n: {} }; for (const c of HABILIDADES) if (c.suma.includes('quehacer') && c.de) habilidadSube('ana', c, D, 'lavar los platos'); habilidadSube('ana', HABILIDADES.find(c => c.id === 'paciencia'), D, 'barrer'); })()`);
+    await T.ev(`(() => { const D = { v: 2, d: today(), t: {}, dado: {}, n: {} }, c = HABILIDADES.find(c => c.id === 'paciencia'); habilidadSube('ana', c, D, 'lavar los platos'); habilidadSube('ana', c, D, 'barrer'); })()`);
     ok(await T.pac() === 3, 'ayudar en la casa la sube, una vez al día: paciencia ' + await T.pac());
   });
-  await caso('3. el día del viaje, lejos: Marilla la busca, baja, y el viaje sigue', async T => {
+  await caso('3. el día del viaje, lejos: Marilla la busca, baja, y el viaje sigue; después, la paciencia ya no cuenta', async T => {
     await T.manana(14.6); await T.ev(`(() => { goOut(); ana.x = 900; ana.y = 900; })()`);
-    const v = await T.jugar(null, 'dlgHechos().a_prueba', 200);
+    const v = await T.jugar(null, 'dlgHechos().a_prueba && !TALKS.length', 200);
     ok(v[0] === 'falta_viaje' && v.includes('viaje_spencer'), 'la busca y van: ' + v.join(' · '));
-    ok(await T.pac() === 2 && await T.ev(`!!dlgHechos().a_prueba`), 'a prueba, con paciencia ' + await T.pac());
+    ok(await T.pac() === 1 && await T.ev(`!!dlgHechos().a_prueba && !dlgHechos().se_queda`), 'Marilla decidió (paciencia ' + await T.pac() + '), pero no se lo dice todavía');
+    await T.ev(`cualidadSuma('marilla', 'paciencia', -1, 'ana')`); ok(await T.pac() === 1, 'después de White Sands la paciencia ya no cambia');
+    ok(await T.ev(`!/Cómo la ven/.test(cuadernoMiradas())`), 'ni se muestra');
   });
-  await caso('4. sin paciencia, Ana orgullosa y Matthew sin cariño: se va con la Sra. Blewett; y se puede volver atrás', async T => {
+  await caso('4. el anuncio, como en el libro: la tarde siguiente, no antes', async T => {
+    await T.manana(20); await T.ev(`dlgHecho('a_prueba')`);
+    await T.jugar(null, 'false', 30); ok(await T.ev(`!dlgHechos().se_queda`), 'esa noche, todavía no');
+    await T.ev(`(() => { dayT = 2 + (14.5 - 6) / 24; goOut(); ana.x = GG.x + 60; ana.y = GG.y + 140; })()`);
+    const v = await T.jugar('ángel', 'dlgHechos().se_queda && !TALKS.length', 120);
+    ok(v.includes('se_queda') && await T.ev(`today()`) === 2, 'el día 3 en la tarde: ' + v.join(' · '));
+  });
+  await caso('5. sin paciencia, Ana orgullosa y Matthew sin cariño: se va con la Sra. Blewett; y se puede volver atrás', async T => {
     await T.manana(13.9); await T.ev(`(() => { relSetW('matthew', 'ana', 2); relSetW('marilla', 'ana', 1); puntoGuardar('viaje', 'Volver a la mañana del viaje a White Sands'); })()`);
     await T.pg.waitForTimeout(300); await T.ev(`cualidadSuma('marilla', 'paciencia', -3, 'ana')`);
     const v = await T.jugar('Prefiero', 'game.final', 200);
@@ -73,30 +82,27 @@ async function caso(nombre, fn){
     ok(/Volver a la mañana del viaje/.test(await T.ev(`document.getElementById('final')?.innerText || ''`)), 'la tarjeta ofrece volver a la mañana del viaje');
     await T.pg.close(); await T.abrir(); ok(/FIN/.test(await T.ev(`document.getElementById('final')?.innerText || ''`)), 'al abrir de nuevo, sigue el final');
     await Promise.all([T.pg.waitForNavigation(), T.ev(`[...document.querySelectorAll('#final button')].find(b => /Volver/.test(b.innerText)).click()`)]); await T.pg.waitForTimeout(1500);
-    ok(await T.ev(`!game.final && !dlgHechos().devuelta && cualidad('marilla', 'paciencia', 'ana') === 3`), 'volvió a la mañana: sin final, con su paciencia (' + await T.ev(`cualidad('marilla', 'paciencia', 'ana')`) + ')');
+    ok(await T.ev(`!game.final && !dlgHechos().devuelta && cualidad('marilla', 'paciencia', 'ana') === 2`), 'volvió a la mañana: sin final, con su paciencia (' + await T.ev(`cualidad('marilla', 'paciencia', 'ana')`) + ')');
   });
-  await caso('5. sin paciencia, pero Matthew la quiere mucho: la salva él', async T => {
+  await caso('6. sin paciencia, pero Matthew la quiere mucho: la salva él', async T => {
     await T.manana(13.9); await T.ev(`(() => { relSetW('matthew', 'ana', 4); relSetW('marilla', 'ana', 1); cualidadSuma('marilla', 'paciencia', -3, 'ana'); })()`);
-    const v = await T.jugar('Prefiero', 'dlgHechos().a_prueba', 200);
-    ok(v.includes('duda_matthew') && !(await T.ev(`!!game.final`)), 'Matthew: ' + v.join(' · '));
-    ok(await T.pac() === 2 && await T.ev(`!!dlgHechos().ultima_oportunidad`), 'a prueba, por última vez (paciencia ' + await T.pac() + ')');
+    const v = await T.jugar('Prefiero', 'dlgHechos().a_prueba && !TALKS.length', 200);
+    ok(v.includes('duda_matthew') && !(await T.ev(`!!game.final`)) && await T.ev(`!dlgHechos().se_queda`), 'Matthew (y el anuncio, al otro día): ' + v.join(' · '));
   });
-  await caso('6. sin paciencia, suplica y Marilla le tiene cariño: no se la da', async T => {
+  await caso('7. sin paciencia, suplica y Marilla le tiene cariño: no se la da', async T => {
     await T.manana(13.9); await T.ev(`(() => { relSetW('matthew', 'ana', 2); relSetW('marilla', 'ana', 2); cualidadSuma('marilla', 'paciencia', -3, 'ana'); })()`);
     const v = await T.jugar('Por favor', 'dlgHechos().a_prueba', 200);
     ok(v.includes('duda_suplica'), 'suplica: ' + v.join(' · '));
   });
-  await caso('7. ya a prueba: sin paciencia, la última oportunidad; y otra vez sin paciencia, la devuelve', async T => {
-    await T.manana(10); await T.ev(`(() => { dlgHecho('a_prueba'); cualidadSuma('marilla', 'paciencia', -3, 'ana'); })()`);
-    let v = await T.jugar(null, 'dlgHechos().ultima_oportunidad && !TALKS.length', 100);
-    ok(v.includes('ultima_oportunidad') && await T.pac() === 2, 'la conversación seria: ' + v.join(' · ') + ' (paciencia ' + await T.pac() + ')');
-    await T.ev(`cualidadSuma('marilla', 'paciencia', -2, 'ana')`); v = await T.jugar(null, 'game.final', 100);
-    ok(v.includes('devuelta_spencer') && await T.ev(`game.final?.id === 'devuelta'`), 'la lleva de vuelta: ' + v.join(' · '));
-  });
-  await caso('8. de noche, lejos: Marilla sale con el farol, baja la paciencia, y Ana duerme en su pieza', async T => {
+  await caso('8. de noche, lejos: Marilla sale con el farol y la trae a su pieza', async T => {
     await T.manana(21.6); await T.ev(`(() => { dlgHecho('a_prueba'); goOut(); ana.x = 900; ana.y = 900; })()`);
     const v = await T.jugar('estrellas', 'dlgDichas().falta_noche && !TALKS.length', 100);
-    ok(v.includes('falta_noche') && await T.ev(`game.scene`) === 'ga' && await T.pac() === 2, 'la busca: ' + v.join(' · ') + ' · en ' + await T.ev(`game.scene`) + ' (paciencia ' + await T.pac() + ')');
+    ok(v.includes('falta_noche') && await T.ev(`game.scene`) === 'ga', 'la busca: ' + v.join(' · ') + ' · en ' + await T.ev(`game.scene`));
+  });
+  await caso('9. la Sra. Lynde viene a los quince días, como en el libro', async T => {
+    await T.manana(16); await T.ev(`(() => { dlgHecho('a_prueba'); dlgHecho('se_queda'); })()`);
+    const vino = d => T.ev(`(() => { dayT = ${d} + (16 - 6) / 24; return AGENDA.find(e => e.who === 'lynde' && /niña nueva/.test(e.label)).when(); })()`);
+    ok(!(await vino(3)) && !(await vino(13)) && await vino(14), 'no el día 4 ni el 14; sí el 15');
   });
   console.log('\n' + (fallas ? fallas + ' comprobaciones fallaron' : 'todo bien'));
   process.exit(fallas ? 1 : 0);

@@ -23,7 +23,7 @@ Lo que no es motor:
 
 - Las **cualidades declaradas** (`src/datos/habilidades.txt`) dicen dónde empiezan (`inicial`), su rango (`rango: 0-5`) y sus umbrales: subiendo (`hito N`) y bajando (`bajo N`).
   - Las **habilidades** (estudio, granja, letras) suben con las acciones de quien las hace. Cualquier personaje las tiene, no solo Ana.
-  - Otras son **de alguien hacia otro** y suben con lo que hace otro (`de: marilla`, `hacia: ana`, `por: ana`). Ejemplo: **la paciencia de Marilla** con Ana mientras está a prueba (`paciencia:marilla:ana<=1`). Baja con las faltas, que son escenas del guion (`! suma paciencia:marilla:ana -1`), y sube cuando Ana ayuda en la casa o pide perdón. `visible si:` dice cuándo cuenta y se ve en el cuaderno («Cómo la ven»).
+  - Otras son **de alguien hacia otro** y suben con lo que hace otro (`de: marilla`, `hacia: ana`, `por: ana`). Ejemplo: **la paciencia de Marilla** con Ana, desde que llega hasta White Sands (`paciencia:marilla:ana<=1`). Baja con las faltas, que son escenas del guion (`! suma paciencia:marilla:ana -1`), y sube cuando Ana ayuda en la casa o pide perdón. `visible si:` dice cuándo cuenta (fuera de eso no cambia) y cuándo se ve en el cuaderno («Cómo la ven»).
 - El **afecto** es una cualidad de uno hacia otro, de 0 a 5.
 - **Lo que alguien ve y dónde está:** `ve:marilla` (Ana está en la misma pieza, o cerca afuera), `donde:ana:tejas` (en la cocina, su pieza o el patio de Tejas Verdes), `ana:camison`, `ana:sin_sombrero`, `ana:ropa_tirada`. Todas se pueden negar con `!`.
 - Las formas antiguas siguen valiendo: `afecto:diana:ana:4` es `afecto:diana:ana>=4`; `estudio:30` es `estudio:ana>=30`; `camino:granja:15` es `granja:ana>=15`.
@@ -108,15 +108,24 @@ Las líneas se escriben con el nombre del libro: el juego lo cambia solo por el 
 
 **Los hitos:** al cruzar un umbral de una cualidad que tiene que ver con Ana (suya, o de alguien hacia ella), subiendo (`hito N`) o bajando (`bajo N`), alguien se lo dice la próxima vez que se encuentran (con IA, una escena improvisada; sin IA, la línea escrita), y queda el hecho `hito_<cualidad>_<n>` o `bajo_<cualidad>_<n>`. Si se cruzan varios a la vez, o se cruza otro antes de que se lo digan, se dice solo el último.
 
-**Las reglas de la casa** (cap. 5 a 12): mientras Ana está a prueba, cada falta es una escena como cualquiera. Se dispara cuando Marilla la ve haciendo algo que en su casa no se hace (`ve:marilla`, `ana:camison`), cuando la ropa vuelve a quedar en el suelo, o cuando Ana anda lejos de noche o el día del viaje (`!donde:ana:tejas`: Marilla sale a buscarla). Cada falta baja la paciencia de Marilla; si Ana pide perdón en la escena, no baja. La lógica es que lo que aleja a Marilla no son las travesuras, sino no arrepentirse. Marilla avisa al bajar a 2 y a 1, y el cuaderno lo muestra.
+**Las reglas de la casa** (cap. 4 a 8): cada falta es una escena como cualquiera. Se dispara cuando Marilla la ve haciendo algo que en su casa no se hace (`ve:marilla`, `ana:camison`), cuando la ropa vuelve a quedar en el suelo, o cuando Ana anda lejos de noche o el día del viaje (`!donde:ana:tejas`: Marilla sale a buscarla). Cada falta baja la paciencia de Marilla; si Ana pide perdón en la escena, no baja. La lógica es que lo que aleja a Marilla no son las travesuras, sino no arrepentirse. Marilla avisa al bajar a 1, y el cuaderno lo muestra.
 
 **White Sands, sin paciencia:** si Ana llega al viaje con la paciencia en 0, la escena es otra (`viaje_spencer_duda`): Marilla duda de verdad ante la Sra. Blewett y Ana elige cómo reacciona. Lo que pasa después son escenas elegidas por prioridad, según lo que Ana eligió y lo que la quieren:
-1. si Matthew la quiere mucho, la salva él (como en el libro);
+1. si Matthew la quiere mucho, la salva él (como en el libro, donde Matthew es quien quiere quedársela);
 2. si suplica y Marilla le tiene cariño, no la entrega;
 3. si calla y Marilla la quiere, tampoco;
 4. si no, se va con la Sra. Blewett.
 
-Ya a prueba, si la paciencia vuelve a 0, hay una conversación seria (la última oportunidad); y si vuelve a caer, Marilla la lleva de vuelta.
+**Los días del libro:** la decisión se toma en White Sands, como en el libro, y no hay una prueba larga después.
+
+| Día | Qué pasa | Capítulo |
+|---|---|---|
+| 1 | Ana llega de noche, cena y pasa la primera noche | 2 y 3 |
+| 2 | el desayuno; en la tarde, White Sands, donde Marilla decide; esa noche se lo dice a Matthew, pero no a Ana | 4 a 6 |
+| 3 | en la tarde, Marilla le dice a Ana que se queda | 8 |
+| 15 | la Sra. Lynde viene a verla («Ana llevaba quince días en Tejas Verdes») | 9 |
+
+La paciencia de Marilla solo cuenta hasta White Sands (`visible si: !hecho:a_prueba`): fuera de eso una cualidad no cambia ni se ve. Las reglas de la casa siguen después, pero ya sin ese peso.
 
 **Finales y puntos para volver:** `! punto viaje | Volver a la mañana del viaje a White Sands` guarda la partida tal como está en ese momento (el desayuno del viaje la guarda). `! final devuelta | texto` termina la historia: una tarjeta «FIN» y el mundo se detiene. La tarjeta ofrece volver a cada punto guardado o empezar de nuevo, y se muestra otra vez si se abre el juego. Una partida nueva borra los puntos de la anterior.
 
