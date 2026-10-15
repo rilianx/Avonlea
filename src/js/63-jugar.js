@@ -77,7 +77,8 @@ function wmExec0(ag, a, st, dt){
       float('✔ ' + QUEHACER_TXT[a.x], b.x, b.y - 50); logEv(`${wmName(me)} ${{ platos: 'lavó los platos', barrer: 'barrió la cocina', mesa: 'puso la mesa' }[a.x]}.`, []); return 'ok';
     }
     case 'ordeñar': {
-      const c = ANIM[a.cow]; if (!c || areaAt(c.x, c.y) !== 'corral') { st.why = 'la vaca no está en el corral'; return 'fail'; }
+      const c = ANIM[a.cow]; if (!c || (!st.said && areaAt(c.x, c.y) !== 'corral')) { st.why = 'la vaca no está en el corral'; return 'fail'; }
+      c.quieta = TT + 1; c.moving = false; if (st.llego) c.dir = 3;   // (she stays still for it, where she is, facing whoever milks her: no grazing off)
       if (!st.said) { st.said = 1; bubble(me, 'Tranquila, ' + ANIMALS[a.cow].name + '… ya está, ya está.'); }
       if (!wait(4)) return 'run';
       inv.leche = (inv.leche || 0) + 2; realR.setFact('ordeñada:' + a.cow); float('+2 jarros de leche', b.x, b.y - 50); logEv(`${wmName(me)} ordeñó a ${ANIMALS[a.cow].name}.`, []); return 'ok';

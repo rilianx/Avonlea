@@ -27,6 +27,7 @@ function animalsThink(dt){
     if (viewScene() !== 'out') continue;   // (out in the fields, things only move while someone looks: Ana, or whoever is watched)
     if (a.state === 'led' && game.scene !== 'out') continue;
     if (a.state === 'led') { const bx = ana.x + (ana.dir === 3 ? 30 : -30), by = ana.y + 6; if (dist(a.x, a.y, bx, by) > 16) cowGo(a, bx, by, Math.max(34, ana.pace) * 1.3, dt); else a.moving = false; continue; }
+    if (TT < (a.quieta || 0)) { a.moving = false; a.munch = (a.munch || 0) + dt; continue; }   // (being milked: still, beside whoever milks her)
     const A = AREAS[a.area];
     if (a.state === 'loose' && ana.moving && dist(a.x, a.y, ana.x, ana.y) < 56) { const d = dist(a.x, a.y, ana.x, ana.y) || 1; a.flee = TT + 1.1; a.fx = (a.x - ana.x) / d; a.fy = (a.y - ana.y) / d; }
     if (TT < (a.flee || 0)) { moveBy(a, a.fx * 52 * dt, a.fy * 52 * dt); a.moving = true; a.dir = a.fx > 0 ? 1 : 3; a.walk = (a.walk + dt * 3) % 1; a.munch = 0; continue; }

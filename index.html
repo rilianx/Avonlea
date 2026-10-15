@@ -6733,6 +6733,7 @@ function animalsThink(dt){
     if (viewScene() !== 'out') continue;   // (out in the fields, things only move while someone looks: Ana, or whoever is watched)
     if (a.state === 'led' && game.scene !== 'out') continue;
     if (a.state === 'led') { const bx = ana.x + (ana.dir === 3 ? 30 : -30), by = ana.y + 6; if (dist(a.x, a.y, bx, by) > 16) cowGo(a, bx, by, Math.max(34, ana.pace) * 1.3, dt); else a.moving = false; continue; }
+    if (TT < (a.quieta || 0)) { a.moving = false; a.munch = (a.munch || 0) + dt; continue; }   // (being milked: still, beside whoever milks her)
     const A = AREAS[a.area];
     if (a.state === 'loose' && ana.moving && dist(a.x, a.y, ana.x, ana.y) < 56) { const d = dist(a.x, a.y, ana.x, ana.y) || 1; a.flee = TT + 1.1; a.fx = (a.x - ana.x) / d; a.fy = (a.y - ana.y) / d; }
     if (TT < (a.flee || 0)) { moveBy(a, a.fx * 52 * dt, a.fy * 52 * dt); a.moving = true; a.dir = a.fx > 0 ? 1 : 3; a.walk = (a.walk + dt * 3) % 1; a.munch = 0; continue; }
@@ -7079,7 +7080,7 @@ function autoStep(){
 // someone in the middle of a conversation or a scene where they speak (or are held to listen): they do not walk off
 const enConversacion = k => (k !== 'ana' && CHAT_HOLD[k] > TT) || TALKS.some(t => t.i < t.lines.length && t.lines.some(l => l.q === k || (l.q === '?' && k === 'ana')))   /* (a choice ahead is Ana's) */ || (typeof CHATS !== 'undefined' && CHATS.some(c => c.parts.includes(k)));
 function autoTick(){
-  if (!autoAllowed() || AGENTS.ana?.followOf || wmDriven('ana') || (CAP1.on && !CAP1.done) || game.scene === 'camino' || ana.hidden || cart.riding) return;   // (in the book's chapter she waits for Matthew; in the cart she rides)   // (a goal of the planner, or following someone who asked: no wandering off)
+  if (!autoAllowed() || game.playAct || AGENTS.ana?.followOf || wmDriven('ana') || (CAP1.on && !CAP1.done) || game.scene === 'camino' || ana.hidden || cart.riding) return;   // (in the book's chapter she waits for Matthew; in the cart she rides)   // (a goal of the planner, or following someone who asked: no wandering off)
   const manual = auto.intent?.manual;
   // (Ana goes on her own only with the button 🤖 on: not because the player stopped for a while. The traces, with no
   //  player, keep the old way: on her own after a while without input)
@@ -11099,7 +11100,8 @@ function wmExec0(ag, a, st, dt){
       float('✔ ' + QUEHACER_TXT[a.x], b.x, b.y - 50); logEv(`${wmName(me)} ${{ platos: 'lavó los platos', barrer: 'barrió la cocina', mesa: 'puso la mesa' }[a.x]}.`, []); return 'ok';
     }
     case 'ordeñar': {
-      const c = ANIM[a.cow]; if (!c || areaAt(c.x, c.y) !== 'corral') { st.why = 'la vaca no está en el corral'; return 'fail'; }
+      const c = ANIM[a.cow]; if (!c || (!st.said && areaAt(c.x, c.y) !== 'corral')) { st.why = 'la vaca no está en el corral'; return 'fail'; }
+      c.quieta = TT + 1; c.moving = false; if (st.llego) c.dir = 3;   // (she stays still for it, where she is, facing whoever milks her: no grazing off)
       if (!st.said) { st.said = 1; bubble(me, 'Tranquila, ' + ANIMALS[a.cow].name + '… ya está, ya está.'); }
       if (!wait(4)) return 'run';
       inv.leche = (inv.leche || 0) + 2; realR.setFact('ordeñada:' + a.cow); float('+2 jarros de leche', b.x, b.y - 50); logEv(`${wmName(me)} ordeñó a ${ANIMALS[a.cow].name}.`, []); return 'ok';
