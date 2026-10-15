@@ -9179,9 +9179,16 @@ function renderView(){
   if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
   const { night, dusk } = light(), t = TT, road = game.scene === 'camino', inside = game.scene !== 'out' && !road;
   drawingOut = !inside;
-  const Z = inside ? Math.min(W / KIT.w, H / KIT.h) * .94 : clamp(Math.min(W / ((H > W ? 8 : 12) * T), H / (9 * T)), 1.1, 3.2) * (cam.zoom ?? 1) * viewZoom;
+  const Z = inside ? Math.max(W / KIT.w, H / KIT.h) : clamp(Math.min(W / ((H > W ? 8 : 12) * T), H / (9 * T)), 1.1, 3.2) * (cam.zoom ?? 1) * viewZoom;
   const vw = W / Z, vh = H / Z;
-  const ox = inside ? (KIT.w - vw) / 2 : clamp(cam.x - vw / 2, 0, (road ? RW : WW) - vw), oy = inside ? (KIT.h - vh) / 2 : clamp(cam.y - vh / 2, 0, (road ? RH : WH) - vh);
+  // (inside, the room fills the screen: what does not fit, the view follows Ana there, or whoever is being watched)
+  let ox, oy;
+  if (inside) {
+    const ob = OBS && wmScene(OBS) === game.scene ? wmBody(OBS) : null, f = ob || ana, sn = view.salaScene !== game.scene;
+    const tx = vw >= KIT.w ? (KIT.w - vw) / 2 : clamp(f.x - vw / 2, 0, KIT.w - vw), ty = vh >= KIT.h ? (KIT.h - vh) / 2 : clamp(f.y - vh * .66, 0, KIT.h - vh);   // (Ana low on the screen: the wall, its window and its things, above)
+    view.sx = sn ? tx : lerp(view.sx, tx, .1); view.sy = sn ? ty : lerp(view.sy, ty, .1); view.salaScene = game.scene;
+    ox = view.sx; oy = view.sy;
+  } else { view.salaScene = null; ox = clamp(cam.x - vw / 2, 0, (road ? RW : WW) - vw); oy = clamp(cam.y - vh / 2, 0, (road ? RH : WH) - vh); }
   view.ox = ox; view.oy = oy; view.Z = Z; view.inside = inside;
   g.setTransform(dpr, 0, 0, dpr, 0, 0); g.fillStyle = '#2b2219'; g.fillRect(0, 0, W, H);
   g.setTransform(dpr * Z, 0, 0, dpr * Z, -ox * dpr * Z, -oy * dpr * Z);
