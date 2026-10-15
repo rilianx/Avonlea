@@ -87,8 +87,10 @@ function update(dt){
   if ((taskTick -= dt) < 0) { taskTick = .5; taskEvent('ir'); }
   // everyone but Diana follows their routine: where they are wanted (home, or visiting), walking there, or about the place
   const hr = hourNow(), visiting = k => !!CH[k].routine && PEOPLE[k].where !== 'out' && PEOPLE[k].where !== CH[k].home;
+  // (away from Avonlea while the book says so, «ausente_si» in personajes.json: Diana, at her aunt's in Carmody)
+  for (const [k, p] of Object.entries(PEOPLE)) if (ausente(k)) { if (p.where !== 'away') { p.where = 'away'; p.nav = null; p.dest = null; p.moving = false; p.sit = false; } p.story = null; p.follow = false; p.want = 'away'; }
   for (const [k, p] of Object.entries(PEOPLE)) {
-    const c = CH[k]; if (wmDriven(k) || c.companion) continue;
+    const c = CH[k]; if (ausente(k) || wmDriven(k) || c.companion) continue;
     if (CHAT_HOLD[k] > TT) { p.moving = false; continue; }   // (stopped for a chat)
     if (k === game.tripWith) { p.want = p.where; continue; }   // (he went with Ana to Bright River)
     if (p.where === 'camino') continue;   // (on the road: it takes them home)
@@ -105,7 +107,7 @@ function update(dt){
     else if (p.where === 'out') { if (!goTarget(p, dt, c.speed.walk) && watched('out')) inScene('out', () => wander(p, dt, c.speed.out)); }
     else if (watched(p.where)) inScene(p.where, () => wander(p, dt, c.speed.room));
   }
-  if (!wmDriven('diana') && !(CHAT_HOLD.diana > TT)) {   // (unless she is carrying out a goal of her own)
+  if (!ausente('diana') && !wmDriven('diana') && !(CHAT_HOLD.diana > TT)) {   // (unless she is carrying out a goal of her own)
   if (diana.sit && !ana.sit) diana.sit = false;
   const wantHomeD = wantHome && diana.story?.room !== 'out';
   const dianaIn = () => { diana.where = 'os'; diana.goals = DIANA_IN; diana.x = DIANA_IN[0][0]; diana.y = DIANA_IN[0][1]; diana.homeT = 0; diana.moving = false; };

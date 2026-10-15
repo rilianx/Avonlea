@@ -5,7 +5,7 @@ const { chromium } = require('playwright'); const fs = require('fs'), path = req
 const URL = 'file://' + path.join(__dirname, '..', 'index.html') + '?dev', EXE = fs.existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chromium' : undefined;
 let fallas = 0; const ok = (c, t) => { console.log((c ? '  ✔ ' : '  ✘ ') + t); if (!c) fallas++; };
 // a game on the morning of the second day, after breakfast (the first night and the breakfast already happened)
-const MANANA = `(() => { const H = dlgHechos(); Object.assign(H, { inicio_juego: 1, llegada_tv: 1, primera_noche: 1, desayuno_prueba: 2 }); Object.assign(dlgDichas(), { inicio_llegada: true, primera_bed: true, desayuno_prueba: 2 });
+const MANANA = `(() => { const H = dlgHechos(); Object.assign(H, { inicio_juego: 1, llegada_tv: 1, primera_noche: 1, desayuno_prueba: 2 }); Object.assign(dlgDichas(), { inicio_llegada: true, primera_bed: true, desayuno_prueba: 2, lynde_se_entera: true }); wmKnow('lynde', 'nina_cuthbert');
   for (const t of [...TALKS]) { t.interrupted = true; talkEnd(t); } bubbles = []; game.wm.camison = false; dayT = 1 + (H0 - 6) / 24; goIn('gg', [KDOOR.x + 40, KIT.h * .6]);
   const M = PEOPLE.marilla; M.where = 'gg'; M.x = STOVE.x + 60; M.y = STOVE.y + 60; M.nav = null; for (const k of Object.keys(PEOPLE)) amb.mute[k] = TT + 9999; })()`;
 async function caso(nombre, fn){

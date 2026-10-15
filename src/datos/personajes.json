@@ -111,6 +111,7 @@
     "giftReply": " Vaya, Ana. Muy bien hecho."
   },
   "diana": {
+    "ausente_si": ["hecho:inicio_juego", "!dia_juego:18"],
     "name": "Diana",
     "fullName": "Diana Barry",
     "article": "",
@@ -160,6 +161,7 @@
     "giftReply": " ¡Eres la mejor amiga del mundo!"
   },
   "barry": {
+    "presentacion": [["barry", "Buenas tardes. Tú debes ser la niña de los Cuthbert."], ["ana", "Sí, señora. Ana Shirley. Con una sola n, por favor."], ["barry", "Hmm. Yo soy la Sra. Barry, de La Cuesta del Huerto. Saluda a Marilla de mi parte."]],
     "name": "Sra. Barry",
     "fullName": "Sra. Barry",
     "article": "la ",
@@ -193,7 +195,7 @@
     ],
     "kin": [],
     "lines": [
-      "[!hecho:barry_presenta] Tú debes ser la niña que trajeron los Cuthbert. Buenas tardes.",
+      "[!hecho:barry_presenta, !conoce:barry, sabe:barry:nina_cuthbert] Tú debes ser la niña que trajeron los Cuthbert. Buenas tardes.",
       "[hecho:barry_presenta, !hecho:prohibida] Ana Shirley, siempre es un gusto verte por aquí. Pórtate bien, ¿eh?",
       "[hecho:conocidas_diana, !hecho:prohibida] Diana habla de ti todo el día, ¿sabes?",
       "[hecho:perdonada] Esta vez el cordial de frambuesa está bien etiquetado, te lo aseguro.",
@@ -209,6 +211,7 @@
     "giftReply": " Qué amable eres, Ana."
   },
   "lynde": {
+    "presentacion": [["lynde", "¡Vaya! ¿Así que tú eres la huérfana que trajeron a Tejas Verdes? Hmm. Ya iré a verte con calma, ya."], ["ana", "Sí, señora. Ana Shirley… con una sola n, por favor."], ["lynde", "Con una sola n. Habráse visto. Yo soy la Sra. Lynde, la vecina de la Hondonada."]],
     "name": "Sra. Lynde",
     "fullName": "Sra. Rachel Lynde",
     "article": "la ",
@@ -243,7 +246,7 @@
     ],
     "kin": [],
     "lines": [
-      "[!hecho:lynde_visita] ¿Así que tú eres la huérfana de Tejas Verdes? Ya iré a verte con calma, ya.",
+      "[!hecho:lynde_visita, sabe:lynde:nina_cuthbert] ¿Así que tú eres la huérfana de Tejas Verdes? Ya iré a verte con calma, ya.",
       "[hecho:ofendio_lynde, !hecho:disculpa_lynde] Hmpf. No tengo nada que hablar contigo, niña malcriada.",
       "Desde mi ventana veo todo el camino: no se me escapa nadie. Lo digo sin mala intención, ¿eh?",
       "Llevo cincuenta y dos cubrecamas de retazos, ¡cincuenta y dos! Y no pienso parar.",
@@ -266,6 +269,7 @@
     }
   },
   "harrison": {
+    "presentacion": [["harrison", "¿Y tú quién eres? Ah… la niña de los Cuthbert. Yo soy Harrison, el de al lado. No me pises la avena."], ["ana", "Ana Shirley, señor. Con una sola n."]],
     "name": "Sr. Harrison",
     "fullName": "Sr. J. A. Harrison",
     "article": "el ",
@@ -296,7 +300,7 @@
     "kin": [],
     "lines": [
       "Hmpf. Buenos días... si es que son buenos.",
-      "¿Esa vaca tuya se ha portado bien hoy? Más le vale.",
+      "[conoce:harrison] ¿Esa vaca tuya se ha portado bien hoy? Más le vale.",
       "No me mires la casa, que el desorden es mío.",
       "Ginger, ¡silencio!... No le hagas caso, muchacha."
     ],

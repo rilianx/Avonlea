@@ -20,13 +20,13 @@ function cadenaOpciones(who){
 }
 // Marilla, the day after, in the afternoon: to Orchard Slope, with Ana
 AGENDA.push({ who: 'marilla', from: 14, to: 17.5, label: 'llevar a Ana a La Cuesta del Huerto, a conocer a Diana (cap. 12)',
-  when: () => dlgCond('dias_desde:quiere_amiga:1', dlgCtx()) && !conoceDiana() && !dlgHechos().barry_presenta,
+  when: () => dlgCond('dias_desde:quiere_amiga:1', dlgCtx()) && !conoceDiana() && !dlgHechos().barry_presenta && !ausente('diana'),   // (once Diana is back from Carmody)
   goal: () => ({ ...G.paseo('marilla', 'ana', 'h:os', 15), chat: null, sale: true, text: 'Marilla lleva a Ana a La Cuesta del Huerto' }),
   favors: [{ f: 'pasear', to: 'ana', dice: 'Ana, voy a La Cuesta del Huerto a devolverle un patrón a la Sra. Barry. Ven conmigo: así conoces a Diana. Y pórtate bien.' }] });
 // meeting Diana before knowing her, by chance: the encounter of the script (once); and no talk as friends before that
 function cadenaEncuentro(k){
-  if (k !== 'diana' || conoceDiana()) return null;
-  return dlgNext(['ana', 'diana']);
+  if (k === 'diana') return conoceDiana() ? null : dlgNext(['ana', 'diana']);
+  return conoceA(k) ? null : presentar(k);   // (anyone else Ana has not met: who they are, the first time)
 }
 // the visit of the Allans to Green Gables, a few days after Marilla invited them (cap. 21: the cake with liniment)
 AGENDA.push({ who: 'sraallan', from: 15, to: 17.5, label: 'tomar el té en Tejas Verdes, invitada por Marilla (cap. 21)',

@@ -84,6 +84,7 @@ function tapAt(sx, sy){
   const wx = view.ox + sx / view.Z, wy = view.oy + sy / view.Z, t = targetAt(wx, wy);
   if (t && (t.self || dist(ana.x, ana.y, t.x, t.y) < t.reach * .85)) { ana.goto = null; opcionesAct(t); }
   else { ana.goto = t ? { id: t.id, scene: game.scene } : { x: wx, y: wy, scene: game.scene };
-    if (t && /^[pf]:/.test(t.id)) { const k = t.id.slice(2), b = wmBody(k); if (b && b.moving && !b.called) callPerson('ana', k, { come: false }); } }   // (someone walking off: «¡Espera!»)
+    if (t && /^[pf]:/.test(t.id)) { const k = t.id.slice(2), b = wmBody(k); if (b && b.moving && !b.called) callPerson('ana', k, { come: false });
+      if (t.id[0] === 'p') CHAT_HOLD[k] = Math.max(CHAT_HOLD[k] || 0, TT + 8); else if (FOLKBY[k]) { const f = FOLKBY[k]; f.route = []; f.moving = false; f.talkT = Math.max(f.talkT || 0, TT + 8); } } }   // (someone walking off: «¡Espera!»; and whoever she goes to, waits for her a moment)
 }
 const view = { ox: 0, oy: 0, Z: 1 };

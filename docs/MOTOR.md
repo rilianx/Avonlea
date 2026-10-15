@@ -116,6 +116,12 @@ Las líneas se escriben con el nombre del libro: el juego lo cambia solo por el 
 3. si calla y Marilla la quiere, tampoco;
 4. si no, se va con la Sra. Blewett.
 
+**Conocerse, y las noticias** (`src/js/66-conocidos.js`): Ana llega conociendo solo a Matthew, a Marilla y a la Sra. Spencer.
+- La primera vez que habla con alguien, se presentan (una presentación propia en `personajes.json`, `presentacion`, o la de un adulto o un niño), y queda el hecho `conoce_<quien>` (`conoce:diana` en el guion). Algunos se conocen como en el libro: Diana, la Sra. Barry, la Sra. Lynde (`CONOCE_POR`).
+- Quien no la conoce no la llama por su nombre (una frase con «Ana» no se dice) ni habla de algo que no pasó: esas frases piden lo que hace falta (`[cuaderno:escuela] …`, `[conoce:minnie] …`).
+- Tampoco nadie sabe que los Cuthbert tienen una niña hasta que se entera: es una **noticia** (`sabe:barry:nina_cuthbert`). Al principio la saben Matthew, Marilla y la Sra. Spencer. La Sra. Rachel la ve desde su ventana la primera mañana (una tarjeta, como en el cap. 1) y desde ella pasa de uno a otro cuando los vecinos conversan (`CHISMES`). Quien conoce a Ana también la aprende. Quien no sabía, se sorprende: «¡No sabía que los Cuthbert tenían una niña!».
+- **Ausencias del libro:** una persona puede estar fuera de Avonlea mientras se cumple una condición (`ausente_si` en `personajes.json`; `presente:diana` en el guion). Diana está en Carmody, donde una tía, hasta el día 18: como en el libro, Ana la conoce después de la visita de la Sra. Lynde.
+
 **Los días del libro:** la decisión se toma en White Sands, como en el libro, y no hay una prueba larga después.
 
 | Día | Qué pasa | Capítulo |

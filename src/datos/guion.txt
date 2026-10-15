@@ -852,6 +852,15 @@ matthew: (Matthew mira a Ana y luego a Marilla, sin decir nada. Pero no se le ol
 marilla: Mañana veremos qué se hace contigo. Ahora a cenar, y a la cama. Tu pieza es la del alero.
 ana: (Ana apenas prueba la cena. Esa noche, en la pieza del alero, llora hasta quedarse dormida.)
 
+# (la primera mañana: la Sra. Rachel lo vio anoche desde su ventana, y ya lo sabe; desde ella, todo Avonlea: la noticia
+# va de uno a otro cuando los vecinos conversan; ver src/js/66-conocidos.js)
+=== lynde_se_entera ===
+narra: Anoche, desde su ventana, la Sra. Rachel Lynde vio pasar la calesa de Matthew… y en ella, una niña de trenzas rojas. Esta mañana, antes de que el sol esté alto, ya se lo ha contado a medio Avonlea. A la otra mitad se lo contará en la tarde.
+canal: rl
+prioridad: 2
+si: hecho:inicio_juego, hecho:desayuno_prueba, hora:7-12, !sabe:lynde:nina_cuthbert
+al_empezar: saber lynde nina_cuthbert
+
 === desayuno_prueba ===
 narra: Huele a pan tostado en toda la casa. Marilla llama: «¡Ana! ¡El desayuno!».
 canal: gg
@@ -889,6 +898,7 @@ sujeta: marilla
 donde: tejas
 al_empezar: a_cocina
 si: hecho:desayuno_prueba, !hecho:a_prueba, hora:14-19, paciencia:marilla:ana>=1
+al_terminar: hecho conoce_blewett
 al_terminar: hecho a_prueba
 al_terminar: suma afecto:marilla:ana 1
 al_terminar: log Marilla llevó a Ana a White Sands; la Sra. Blewett la quería de sirvienta, y Marilla no se la dio. Esa noche le dijo a Matthew que se la quedaba; a Ana, todavía no.
@@ -992,6 +1002,42 @@ marilla: Otra vez la ropa por el suelo, Ana. ¿No habíamos quedado en que la do
    marilla: Aquí sí. Aquí todo se ve.
    ! suma paciencia:marilla:ana -1
 
+# (en camisón por Avonlea: la vecina que la ve se escandaliza, y se lo cuenta a Marilla; y Marilla, a Ana)
+=== camison_barry ===
+canal: os
+prioridad: 6
+repetir: dia
+sujeta: barry
+si: ana:camison, ve:barry, hora:7-21
+al_terminar: hecho visto_en_camison
+---
+barry: (La Sra. Barry se lleva la mano al pecho.) ¡Niña! ¿Andas en camisón por las casas ajenas? ¡Qué va a decir la gente! Ya hablaré con Marilla.
+
+=== camison_lynde ===
+canal: rl
+prioridad: 6
+repetir: dia
+sujeta: lynde
+si: ana:camison, ve:lynde, hora:7-21
+al_terminar: hecho visto_en_camison
+---
+lynde: ¡Habráse visto! ¡La huérfana de los Cuthbert, en camisón por el camino! Esto lo sabe Marilla antes de que se ponga el sol, como que me llamo Rachel Lynde.
+
+=== marilla_sabe_camison ===
+canal: gg
+prioridad: 6
+sujeta: marilla
+si: hecho:visto_en_camison, ve:marilla
+al_terminar: olvidar visto_en_camison
+---
+marilla: Ana. Me contaron que andabas en camisón por Avonlea. En camisón. ¿Tienes idea de lo que va a decir la gente?
+-> «Perdón, Marilla. No pensé que fuera tan grave.»
+   ana: Perdón, Marilla. No pensé que fuera tan grave. Es que el camisón es tan cómodo… pero no lo vuelvo a hacer.
+->* «Pero es que la mañana estaba tan linda…»
+   ana: Pero es que la mañana estaba tan linda que no podía perder tiempo vistiéndome.
+   marilla: (Marilla aprieta los labios hasta que se le ponen blancos.)
+   ! suma paciencia:marilla:ana -1
+
 # (de noche, lejos de Tejas Verdes: Marilla sale con el farol a buscarla)
 === falta_noche ===
 narra: Ya es noche cerrada y Ana no ha vuelto. Marilla enciende el farol y sale a buscarla por los caminos, con el chal sobre los hombros y la boca apretada. La encuentra, y la trae a casa sin decir una palabra.
@@ -1030,6 +1076,7 @@ sujeta: marilla
 donde: tejas
 al_empezar: a_cocina
 si: hecho:desayuno_prueba, !hecho:a_prueba, hora:14-19, paciencia:marilla:ana<1
+al_terminar: hecho conoce_blewett
 al_terminar: hecho blewett_duda
 ---
 narra: En casa de la Sra. Spencer está la Sra. Peter Blewett, que busca una niña para cuidarle los hijos. Mira a Ana de arriba abajo: «Esta me sirve. Es flaca, pero dura. Va a tener que ganarse lo que come.»

@@ -64,9 +64,6 @@ function cuadernoTick(dt){
 // goals that only lack effort or time, a quality or some days; then the rest)
 const GUIÑOS_MAX = 2;
 const faltaEsfuerzo = m => m.requiere.every(r => cuadernoCumple(r) || CUALIDAD_RE.test(r) || /^(afecto|dias_desde):/.test(r));
-// whom Ana has met by now: a hint, a greeting as a friend, only from someone who knows her (Diana once they have met…)
-const CONOCE_A = { diana: 'hecho:conocidas_diana', barry: 'hecho:barry_presenta', lynde: 'hecho:lynde_visita', stacy: 'cuaderno:escuela', gilbert: 'cuaderno:escuela', sraallan: 'cuaderno:escuela_dominical', josephine: 'hecho:cama_josephine' };
-const conoceA = k => !CONOCE_A[k] || dlgCond(CONOCE_A[k], dlgCtx());
 function guiñosDe(k){
   if (!game.wm || !conoceA(k)) return [];
   const c = CUADERNO_METAS.flatMap(m => (m.guiños || []).filter(g => g.quien === k && !cuadernoHecho(m.id) && (!m.oculta || cuadernoAbierta(m)) && g.cerrada === !cuadernoAbierta(m)).map(g => ({ t: g.texto, r: !g.cerrada ? 0 : faltaEsfuerzo(m) ? 1 : 2 })));

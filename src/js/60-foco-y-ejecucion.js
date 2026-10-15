@@ -99,6 +99,7 @@ function chatTry(ag, F, urg){
 const CHAT_YA = {};   // (who talked a moment ago → until when they go on without stopping to talk again)
 function startChat(a, b, anaFree){
   CHAT_YA[a] = CHAT_YA[b] = TT + M(20);
+  if (a !== 'ana' && b !== 'ana') chismear(a, b);   // (two neighbours talking: the news goes from one to the other)
   const third = Object.keys(DLG_BANK).length && [...Object.keys(PEOPLE), ...FOLK.map(f => f.id)].find(o => o !== a && o !== b && wmScene(o) === wmScene(a) && !inChat(o) && DLG_BANK[dlgKey([a, b, o])] && dist(wmBody(o).x, wmBody(o).y, wmBody(a).x, wmBody(a).y) < 120);
   const bank = (third && dlgNext([a, b, third])) || dlgNext([a, b]);
   const c = { parts: [a, b], lines: bank || chatLines(a, b, anaFree), i: -1, wait: .2, anaFree }; CHATS.push(c);
@@ -127,7 +128,7 @@ function chatTick(dt){
   }
 }
 // what they say (no generative AI: a greeting, a few lines as the characters are, and a goodbye that mentions the errand)
-const LYNDE_CHISME = ['¿Supo que a los Pye se les escapó otra vez el cerdo? Yo siempre lo dije.', '[hecho:lynde_visita, !hecho:ofendio_lynde] ¡Esa niña de los Cuthbert! Pelirroja y con una lengua... aunque buen corazón tiene, eso sí.', '[hecho:ofendio_lynde] ¡Esa niña de los Cuthbert! Me dijo vieja chismosa en mi propia cara. ¡A mí!', 'Dicen que la maestra nueva usa sombrero con plumas. ¡Plumas, en una escuela!', 'Yo no soy de las que hablan, pero el loro del Sr. Harrison dice cada cosa...', 'Matthew Cuthbert fue a la tienda y salió con un rastrillo. ¡En pleno invierno!'];
+const LYNDE_CHISME = ['[sabe:lynde:nina_cuthbert] ¿Supo lo de los Cuthbert? ¡Pidieron un niño y les llegó una niña! Pelirroja, dicen. Yo siempre dije que eso de traer huérfanos…', '¿Supo que a los Pye se les escapó otra vez el cerdo? Yo siempre lo dije.', '[hecho:lynde_visita, !hecho:ofendio_lynde] ¡Esa niña de los Cuthbert! Pelirroja y con una lengua... aunque buen corazón tiene, eso sí.', '[hecho:ofendio_lynde] ¡Esa niña de los Cuthbert! Me dijo vieja chismosa en mi propia cara. ¡A mí!', 'Dicen que la maestra nueva usa sombrero con plumas. ¡Plumas, en una escuela!', 'Yo no soy de las que hablan, pero el loro del Sr. Harrison dice cada cosa...', 'Matthew Cuthbert fue a la tienda y salió con un rastrillo. ¡En pleno invierno!'];
 const CHISME_RE = ['¡No me diga!', '¿De veras? ¡Qué cosa!', 'Bueno, yo de eso no sé nada...', 'Ya me lo imaginaba.'];
 const ANA_DIANA = [['¡Diana, amiga del alma! Tengo tanto que contarte.', '¡Ana! Yo también. ¿Nos vemos en el Bosque Encantado?'], ['¿Viste qué color tiene hoy el lago? Como de perla.', 'Yo solo vi que estaba azul... pero tú lo dices más bonito.'], ['Prometamos ser amigas mientras el sol y la luna existan.', '¡Lo prometo, Ana!']];
 const ANA_SUENA = [['¿No le parece que hoy el mundo está recién hecho?', 'Esta niña... qué cosas dice.'], ['Vi una nube con forma de barco. Iba hacia Charlottetown.', 'Ya lo creo, Ana. Ya lo creo.'], ['¿Sabía que los abedules parecen señoras de vestido blanco?', 'Nunca lo había pensado así.'], ['Hoy el lago brillaba como si tuviera estrellas adentro.', '¡Qué imaginación tienes, niña!'], ['Cuando sea grande quiero escribir libros. O ser maestra. O las dos cosas.', 'Tiempo tienes para decidirlo.']];
@@ -138,12 +139,14 @@ function chatLines(a, b, anaFree){
   const tu = isKid(a) && isKid(b), nm = k => /^[a-zá-ú]/.test(wmName(k)) ? '' : wmName(k), A = nm(a), B = nm(b), to = n => n ? ', ' + n : '';   // ("un vecino" is no name to call someone by)
   if (anaFree) {   // (Ana, as the player moves her, passing by: a word to her)
     const d = FOLKBY[a]?.def;
-    say(a, a === 'gilbert' && d ? pick(lineasDe('gilbert', d.lines)) : pick([`¡${hi}, Ana!`, '¡Hola, Ana! ¿A dónde vas tan apurada?', '¡Ana Shirley! Saludos a Marilla.']));
-    if (relGetW('ana', a) <= 0) say('ana', pick(FOLKBY[a]?.def.ana || ['Hmpf.']));
+    if (!conoceA(a) && !sinNombre(a)) { for (const l of presentar(a)) say(l.q === 'ana' ? 'ana' : a, l.t); return L; }   // (the first time: who they are)
+    say(a, (a === 'gilbert' && d ? pick(lineasDe('gilbert', d.lines)) : null) || pick(lineasAjenas(a, [`¡${hi}, Ana!`, '¡Hola, Ana! ¿A dónde vas tan apurada?', '¡Ana Shirley! Saludos a Marilla.', `¡${hi}, niña!`])));
+    const r = lineasSi(FOLKBY[a]?.def.ana || ['Hmpf.']); if (relGetW('ana', a) <= 0 && r.length) say('ana', pick(r));
     return L;
   }
   const ana_ = a === 'ana' ? a : b === 'ana' ? b : null, other = ana_ && (a === 'ana' ? b : a);
-  if (ana_ && relGetW('ana', other) <= 0) { say(other, FOLKBY[other]?.def.lines ? pick(lineasDe(other, FOLKBY[other].def.lines)) : `${hi}, Ana.`); say('ana', pick(FOLKBY[other]?.def.ana || ['Hmpf.'])); return L; }
+  if (ana_ && !conoceA(other) && !sinNombre(other)) { for (const l of presentar(other)) say(l.q === 'ana' ? 'ana' : other, l.t); return L; }   // (the first time: who they are)
+  if (ana_ && relGetW('ana', other) <= 0) { say(other, (FOLKBY[other]?.def.lines ? pick(lineasDe(other, FOLKBY[other].def.lines)) : null) || pick(lineasAjenas(other, [`${hi}, Ana.`, `${hi}, niña.`]))); const r = lineasSi(FOLKBY[other]?.def.ana || ['Hmpf.']); if (r.length) say('ana', pick(r)); return L; }
   if (a === 'matthew' || b === 'matthew') {   // (Matthew: a greeting, and off he goes)
     const o = a === 'matthew' ? b : a;
     say(o, `¡${hi}, Matthew!`); say('matthew', pick(['Eh... b-buenas.', 'Buenas... sí... buen día, ¿no?', 'Ejem... buenas.']));

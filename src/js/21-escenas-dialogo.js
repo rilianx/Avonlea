@@ -54,6 +54,8 @@ function dlgCond(s, c){   // one condition of state, written as text
     case 'escena_ana': return game.scene === a;
     case 'sabe': return (game.wm.know[a] || []).includes(b);
     case 'y_mayor': { const p = wmBody(a); return !!p && p.y > +b * U; }
+    case 'conoce': return conoceA(a);   // (Ana and they have met: «conoce:diana»)
+    case 'presente': return wmScene(a) !== 'away';   // (they are in Avonlea, not away: «presente:diana»)
     case 've': return veAna(a);   // (she can see Ana now: the same room, or near her outside)
     case 'donde': { const [x, l] = rest.split(':'); return dlgDonde(l, x); }   // (someone is somewhere: «donde:ana:tejas», «!donde:ana:tejas»)
     case 'ana': return !!ANA_ESTADO[a]?.();   // (how Ana is: «ana:camison», «ana:sin_sombrero», «ana:ropa_tirada»)
@@ -597,7 +599,7 @@ function shopMenu(step){
   const opts = [['🧺 Cambiar algo que traigo por un capricho', () => shopMenu('cambiar')], ['📒 Llevar algo para la casa (a la libreta)', () => shopMenu('libreta')], ['📬 ¿Hay correo para mí?', correoRetirar]];
   if (L) opts.push(['Conversar con el Sr. Lawson', () => { close(); folkTalk(L); }]);
   opts.push(['Adiós', close]);
-  say('lawson', pick(['¡Buenos días, Ana! ¿Qué se te ofrece?', 'Pasa, pasa. ¿Vienes a cambiar algo o te manda Marilla?', 'Llegaron cintas nuevas, Ana. ¿Qué se te ofrece?']), opts);
+  say('lawson', conoceA('lawson') ? pick(lineasAjenas('lawson', ['¡Buenos días, Ana! ¿Qué se te ofrece?', 'Pasa, pasa. ¿Vienes a cambiar algo o te manda Marilla?', 'Llegaron cintas nuevas, Ana. ¿Qué se te ofrece?'])) : (conocer('lawson'), sabeK('lawson', 'nina_cuthbert') ? 'Pasa, pasa. Tú debes ser la niña de los Cuthbert. Yo soy el Sr. Lawson: aquí hay de todo. ¿Qué se te ofrece?' : 'Pasa, pasa. ¡Una cara nueva en Avonlea, qué novedad! Yo soy el Sr. Lawson: aquí hay de todo. ¿Qué se te ofrece?'), opts);   // (the first time: who he is)
 }
 function shopTrade(c, o){
   const I = game.inv; I[o.g] -= o.k; I[c] = (I[c] || 0) + 1;
