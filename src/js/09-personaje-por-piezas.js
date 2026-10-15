@@ -180,18 +180,8 @@ function drawLlorando(c, p, t, parte){
   const L = LOOKS[p.look], x = p.x, y = p.y + 4, k = L.h || 1;   // (y: the far edge of the table, where she leans)
   const sob = Math.max(0, Math.sin(t * 6.5)) * 1.8 + Math.sin(t * 19) * .3, sy = y - sob;
   c.save(); c.translate(x, sy); c.scale(k, k); c.translate(-x, -sy);
-  if (parte === 'espalda') {   // (the back and the shoulders, hunched over, behind the table: the table covers the rest of her)
-    ell(c, x, y + 6, 20, 5, 'rgba(40,25,15,.18)');
-    blob(c, [[x - 18, y + 4], [x - 19, y - 6], [x - 13, sy - 16], [x, sy - 19], [x + 13, sy - 16], [x + 19, y - 6], [x + 18, y + 4]], L.dressD || L.dress);
-    blob(c, [[x - 12, y + 3], [x - 13, sy - 11], [x, sy - 15], [x + 13, sy - 11], [x + 12, y + 3]], L.dress, false);
-    c.restore(); return;
-  }
-  // (the rest, on the table: drawn after it)
-  // the upper arms, down to the elbows on the cloth; the forearms folded, one over the other
-  for (const s of [-1, 1]) blob(c, [[x + s * 16, sy - 9], [x + s * 19, y + 7], [x + s * 14, y + 9], [x + s * 11, sy - 5]], L.dressD || L.dress);   // (the upper arms, over the edge)
-  ell(c, x - 4, y + 10, 12, 3.6, L.dressD || L.dress, true);   // (the forearms, folded one over the other)
-  ell(c, x + 4, y + 12, 12, 3.6, L.dress, true);
-  ell(c, x + 15, y + 10, 3, 2.6, L.skin, true); ell(c, x - 15, y + 12.5, 3, 2.6, L.skin, true);   // (the hands, at the elbows)
+  if (parte === 'espalda') { c.restore(); return; }   // (behind the table nothing shows: only her head, on it)
+  ell(c, x - 11, y + 12, 3.2, 2.4, L.skin, true); ell(c, x + 11, y + 12.5, 3.2, 2.4, L.skin, true);   // (just her fingers, peeping out under her head)
   // the braids, fallen to each side over the arms, tied with their ribbons
   for (const s of [-1, 1]) {
     const B = [[x + s * 9, sy + 3], [x + s * 14, y + 7], [x + s * 16, y + 13], [x + s * 19, y + 18]];
