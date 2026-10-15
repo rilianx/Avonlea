@@ -4,7 +4,7 @@
 const JUGABLE_TIPOS = ['visitar', 'devuelto', 'amigas', 'paces', 'sano', 'club', 'felicitar', 'consolado', 'picnic', 'quehaceres', 'alimentados', 'recito', 'rezo', 'adornado', 'remo', 'nombres', 'carta', 'leido', 'concierto', 'sala', 'huerta', 'patinar', 'trineo', 'teñido', 'pelo_corto', 'desafio'];
 const JUGABLE_NO = ['ir', 'tomar', 'recoger', 'dar', 'vender', 'cambiar', 'comprar', 'conversar', 'pedir', 'guiar', 'soltar', 'regañar', 'subir_calesa', 'interceder', 'cocinar', 'preparar', 'batir'];   // (these the player already has in her own way, or are not hers)
 function jugables(){
-  if (game.playAct || game.scene === 'camino') return [];
+  if (game.playAct || game.scene === 'camino' || retenida()) return [];   // (in the middle of a scene with her: no chores)
   const s = wmNow(); let here = s.pos.ana; if (!here) return [];
   if (game.scene === 'out' && (here === 'cocina' || here === 'pieza')) here = s.pos.ana = 'p:ana';   // (by the kitchen door is not in the kitchen: the chores, inside)
   for (const k of WM_PEOPLE()) { const o = wmBody(k); if (k !== 'ana' && o && wmScene(k) === game.scene && dist(o.x, o.y, ana.x, ana.y) < 110) s.pos[k] = here; }   // (whoever is beside her counts as here)

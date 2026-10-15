@@ -134,6 +134,7 @@ function dlgHacer(list){   // what a scene does when it starts or ends
       const M = PEOPLE.marilla; if (sceneOf('marilla') !== 'gg') { M.where = 'gg'; M.x = STOVE.x + 60; M.y = STOVE.y + 60; M.nav = null; M.moving = false; M.sit = false; }
     }
     if (a.junto) { const b = a.junto === 'ana' ? ana : PEOPLE[a.junto], o = a.de === 'ana' ? ana : PEOPLE[a.de]; if (b && o) { b.sit = false; if (b === ana) { ana.meal = null; ana.goto = null; ana.vx = ana.vy = 0; } else { b.nav = null; b.moving = false; } b.x = o.x - 20; b.y = o.y + 2; b.dir = 1; } }
+    if (a.a_pieza && game.scene !== 'ga') { ana.meal = null; ana.goto = null; if (cart.riding) cartOff(); goIn('ga', [GA.bed.x - 20, GA.bed.y + 16]); }
     if (a.acostarse) { if (game.scene !== 'ga') { ana.meal = null; goIn('ga', [GA.bed.x - 20, GA.bed.y + 16]); } setTimeout(() => { if (!sleeping) goToBed(); }, 500); }
     if (a.a_la_mesa && !ana.meal && game.scene === 'gg') mealSit();
     if (a.mesa) game.comida = a.mesa === 'nada' ? null : { que: a.mesa, dia: today() };
@@ -201,7 +202,7 @@ class Dialogo {
     return L.filter(l => l[1] && l[1] !== '…' && l[1].trim() !== '');
   }
   puenteDe(l){   // the line that picks it up again
-    if (this.puente === false) return [];
+    if (this.puente === false || ['?', '!', 'narra', 'carta'].includes(l[0])) return [];   // (a choice, an action, a card: no one to pick it up)
     if (Array.isArray(this.puente)) return this.puente.map(p => Array.isArray(p) ? p : [l[0], p]);
     return [[l[0], pick(DLG_PUENTE[l[0]] || DLG_PUENTE.otro)]];
   }
@@ -290,7 +291,8 @@ function dlgAccion(s){   // an action of the script: «hecho x», «marca id | n
     case 'mesa': return { mesa: r[0] };
     case 'a_la_mesa': return { a_la_mesa: true };
     case 'a_cocina': return { a_cocina: true };
-    case 'acostarse': return { acostarse: true };   // (Ana goes up to bed: her room, and the bed)
+    case 'acostarse': return { acostarse: true };
+    case 'a_pieza': return { a_pieza: true };   // (Ana is taken up to her room)   // (Ana goes up to bed: her room, and the bed)
     case 'junto': return { junto: r[0], de: r[1] };   // (one goes to the side of the other: «junto ana marilla», for a hug)   // (Marilla calls her: Ana comes into the kitchen, and Marilla is there)   // (Ana sits down to eat with the Cuthberts)   // (what is on the kitchen table: «mesa cena», «mesa desayuno», «mesa nada»)
     case 'entra': return { entra: r[0], a: r[1] };   // (someone comes into a room: «entra marilla ga», at its door)
     case 'sale': return { sale: r[0] };   // (and goes back down, home)   // (Ana goes to sleep: the night passes)   // (at her or his place at the kitchen table)
@@ -602,4 +604,4 @@ ROOMS.ga = {
 // the kitchen has the stairs up to her room
 HOUSES.gg.interior.draw = (c, t, night) => { drawKitchen(c, t, night); drawStairsUp(c); };
 { const b0 = HOUSES.gg.interior.blocked; HOUSES.gg.interior.blocked = (x, y) => b0(x, y) || (x > 11.1 * T && y < 4.5 * T); }
-{ const a0 = HOUSES.gg.interior.actions; HOUSES.gg.interior.actions = add => { a0(add); add('stairs', STAIRS.x, STAIRS.y, 44, 'Subir a la pieza de Ana', () => goIn('ga', [KDOOR.x, KIT.h - 28]), { hy: 40, hit: 0, pri: 1, test: (x, y) => x > 11.1 * T && x < 12.9 * T && y > 2.2 * T && y < 4.7 * T }); }; }
+{ const a0 = HOUSES.gg.interior.actions; HOUSES.gg.interior.actions = add => { a0(add); add('stairs', STAIRS.x, STAIRS.y, 44, 'Subir a la pieza de Ana', () => salirSiPuede(() => goIn('ga', [KDOOR.x, KIT.h - 28])), { hy: 40, hit: 0, pri: 1, test: (x, y) => x > 11.1 * T && x < 12.9 * T && y > 2.2 * T && y < 4.7 * T }); }; }

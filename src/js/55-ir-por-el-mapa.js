@@ -15,6 +15,7 @@ function goDest(x, y){
     if (!best) return; p = best;
   }
   toggleMap(false); userInput();
+  if (game.scene !== 'out' && retenida()) { salirSiPuede(() => {}); return; }
   if (game.scene !== 'out') { let sc = game.scene; while (game.scene !== 'out' && sc) { goOut(); if (game.scene === sc) break; sc = game.scene; } }
   if (game.scene !== 'out') return;
   if (cart.riding) cartOff();

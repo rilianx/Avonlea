@@ -236,11 +236,12 @@ function drawBubble(g, p, b, W, H, fase){   // (fase 'cuadros': only the caption
 // a caption: what is told of someone, fixed at the top of the screen (one under the other, if there are several)
 let cuadrosY = 56;
 function cuadroArriba(g, text, W, a){
-  const fs = W < 520 ? 13 : 14, maxW = Math.min(520, W - 32); g.font = 'italic ' + fs + 'px Georgia, serif';
+  const der = document.body.classList.contains('lado-oculto') ? 0 : 64;   // (beside the buttons on the right, not under them)
+  const fs = W < 520 ? 13 : 14, maxW = Math.min(520, W - 32 - der); g.font = 'italic ' + fs + 'px Georgia, serif';
   const rows = []; let cur = ''; for (const w of text.split(' ')) { const t = cur ? cur + ' ' + w : w; if (cur && g.measureText(t).width > maxW - 24) { rows.push(cur); cur = w; } else cur = t; } rows.push(cur);
-  const lh = fs + 4, w = Math.min(maxW, Math.max(...rows.map(r => g.measureText(r).width)) + 28), h = rows.length * lh + 14, x = (W - w) / 2, y = cuadrosY;
+  const lh = fs + 4, w = Math.min(maxW, Math.max(...rows.map(r => g.measureText(r).width)) + 28), h = rows.length * lh + 14, x = (W - der - w) / 2, y = cuadrosY;
   g.save(); g.globalAlpha = a; g.beginPath(); g.rect(x, y, w, h); g.fillStyle = '#f3e4bf'; g.fill(); g.strokeStyle = '#8a6a48'; g.lineWidth = 1.2; g.stroke();
-  g.fillStyle = '#4a3420'; g.textAlign = 'center'; rows.forEach((r, k) => g.fillText(r, W / 2, y + 7 + (k + 1) * lh - 3)); g.restore();
+  g.fillStyle = '#4a3420'; g.textAlign = 'center'; rows.forEach((r, k) => g.fillText(r, x + w / 2, y + 7 + (k + 1) * lh - 3)); g.restore();
   cuadrosY += h + 6;
 }
 // one box: its rows, where it goes (above «top» if it fits, else from «foot» down), its shape and its tail

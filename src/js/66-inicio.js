@@ -22,6 +22,7 @@ const yaSeQueda = () => { const H = dlgHechos(); for (const f of ['llegada_tv', 
 if (NUEVA_PARTIDA && !navigator.webdriver) inicioLlegada();
 else if (!NUEVA_PARTIDA && !dlgHechos().a_prueba && !dlgHechos().inicio_juego) yaSeQueda();
 // a game from before: it goes on where it was left, at the hour it was (the day and the hour come back with the rest)
+if (!NUEVA_PARTIDA && dlgHechos().inicio_juego && !dlgHechos().desayuno_prueba) { const h = $('hint'); if (h) h.style.opacity = 0; hinted = true; }   // (back in the middle of the first night: the cards tell the controls)
 if (!NUEVA_PARTIDA && !navigator.webdriver) try { seguirDondeQuedo(JSON.parse(localStorage.getItem('avonlea') || 'null')?.donde); } catch (e) {}
 // the first night: the player takes her up to bed (the scene says so); if no one does (Ana on her own), after a while
 // she goes up by herself and lies down

@@ -98,7 +98,7 @@ body.visor > *:not(#cv):not(#visor){display:none !important}
 #saybtn{position:fixed;right:10px;top:130px;width:42px;height:36px;font-size:19px;line-height:30px;padding:0;cursor:pointer}
 #sleep{position:fixed;inset:0;z-index:30;background:#0d1020;color:#e8e2c8;font:italic 34px Georgia,serif;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 1.2s ease}
 #sleep.on{opacity:1;pointer-events:auto}
-#talk{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(560px,calc(100% - 28px));padding:12px 16px 12px;font-size:17px;line-height:1.4}
+#talk{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(560px,calc(100% - 28px));box-sizing:border-box;padding:12px 16px 12px;font-size:17px;line-height:1.4}
 #talk .who{font-weight:bold;color:#7a3a22;margin-bottom:2px} #talk .who span{color:#d24a4a;font-weight:normal;margin-left:6px;letter-spacing:1px}
 #talk .opts{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
 #talk button{font:15px Georgia,serif;background:#fffaf0;color:#3b2a1c;border:1.5px solid #6b4a30;border-radius:8px 11px 7px 10px;padding:6px 11px;cursor:pointer}
@@ -118,6 +118,7 @@ body.visor > *:not(#cv):not(#visor){display:none !important}
 #aiq pre{white-space:pre-wrap;max-height:220px;overflow:auto;font-size:11px;background:rgba(255,255,255,.5);padding:4px}
 #aiq textarea{width:100%;box-sizing:border-box;height:120px;font:11px monospace;margin-top:4px}
 #aiq button{font:13px Georgia,serif;background:#fffaf0;color:#3b2a1c;border:1.5px solid #6b4a30;border-radius:8px 11px 7px 10px;padding:3px 9px;cursor:pointer;margin:3px 3px 0 0}
+@media (max-height:560px){body:not(.lado-oculto) #talk{left:14px;transform:none;width:min(560px,calc(100% - 150px));padding:8px 12px;font-size:15px}body:not(.lado-oculto) #talk button{padding:4px 9px;font-size:14px}}
 @media (max-width:640px){#hint{top:58px !important;max-width:calc(100% - 30px) !important}}
 #obs{position:fixed;left:50%;top:52px;transform:translateX(-50%);z-index:13;padding:4px 6px 4px 12px;font-size:13.5px;max-width:calc(100% - 24px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #obs[hidden]{display:none}
@@ -999,6 +1000,15 @@ marilla: (Marilla enciende una vela.) Tu pieza es la del alero este, arriba. Sub
 narra: Así se juega: cuando hay que elegir, eliges tú por Ana; el tiempo espera mientras decides. Lo que hace cambia lo que los demás sienten por ella. Ahora mismo Marilla no la quiere: mañana la llevará a White Sands, a devolverla.
 narra: Ahora te toca a ti: lleva a Ana a su pieza. Toca el suelo para que camine (o usa las flechas), y toca la escalera, al fondo de la cocina. Si tocas a una persona o una cosa estando Ana al lado, verás qué puede hacer con ella. En el cuaderno (📖), lo que Ana puede hacer para quedarse en Tejas Verdes.
 
+# la primera noche, si Ana no sube (se queda abajo, o se escapa afuera): Marilla la lleva a su pieza
+=== primera_noche_sube ===
+narra: Ya es noche cerrada. Marilla toma la vela, busca a Ana y la lleva hasta la pieza del alero, sin decir palabra.
+canal: gg
+prioridad: 9
+interrumpe
+si: hecho:primera_noche, !hecho:desayuno_prueba, !dicha:primera_bed, hora:21-29
+al_terminar: a_pieza
+
 # la primera noche, en la pieza del alero (cap. 3): apenas llega, Ana se tira en la cama, desconsolada; Marilla sube con
 # la vela a darle las buenas noches, y Ana se enoja
 === primera_bed ===
@@ -1046,12 +1056,14 @@ marilla: Mañana veremos qué se hace contigo. Ahora a cenar, y a la cama. Tu pi
 ana: (Ana apenas prueba la cena. Esa noche, en la pieza del alero, llora hasta quedarse dormida.)
 
 === desayuno_prueba ===
+narra: Huele a pan tostado en toda la casa. Marilla llama: «¡Ana! ¡El desayuno!».
 canal: gg
 prioridad: 9
 interrumpe
 sujeta: marilla
-en: ana=gg, marilla=gg
-si: hecho:primera_noche, dias_desde:llegada_tv:1, !hecho:desayuno_prueba, hora:6-14
+donde: tejas
+al_empezar: a_cocina
+si: hecho:primera_noche, dias_desde:llegada_tv:1, !hecho:desayuno_prueba, hora:6.5-14
 al_terminar: hecho desayuno_prueba
 ---
 ! sentar ana
@@ -5580,6 +5592,7 @@ function dlgHacer(list){   // what a scene does when it starts or ends
       const M = PEOPLE.marilla; if (sceneOf('marilla') !== 'gg') { M.where = 'gg'; M.x = STOVE.x + 60; M.y = STOVE.y + 60; M.nav = null; M.moving = false; M.sit = false; }
     }
     if (a.junto) { const b = a.junto === 'ana' ? ana : PEOPLE[a.junto], o = a.de === 'ana' ? ana : PEOPLE[a.de]; if (b && o) { b.sit = false; if (b === ana) { ana.meal = null; ana.goto = null; ana.vx = ana.vy = 0; } else { b.nav = null; b.moving = false; } b.x = o.x - 20; b.y = o.y + 2; b.dir = 1; } }
+    if (a.a_pieza && game.scene !== 'ga') { ana.meal = null; ana.goto = null; if (cart.riding) cartOff(); goIn('ga', [GA.bed.x - 20, GA.bed.y + 16]); }
     if (a.acostarse) { if (game.scene !== 'ga') { ana.meal = null; goIn('ga', [GA.bed.x - 20, GA.bed.y + 16]); } setTimeout(() => { if (!sleeping) goToBed(); }, 500); }
     if (a.a_la_mesa && !ana.meal && game.scene === 'gg') mealSit();
     if (a.mesa) game.comida = a.mesa === 'nada' ? null : { que: a.mesa, dia: today() };
@@ -5647,7 +5660,7 @@ class Dialogo {
     return L.filter(l => l[1] && l[1] !== '…' && l[1].trim() !== '');
   }
   puenteDe(l){   // the line that picks it up again
-    if (this.puente === false) return [];
+    if (this.puente === false || ['?', '!', 'narra', 'carta'].includes(l[0])) return [];   // (a choice, an action, a card: no one to pick it up)
     if (Array.isArray(this.puente)) return this.puente.map(p => Array.isArray(p) ? p : [l[0], p]);
     return [[l[0], pick(DLG_PUENTE[l[0]] || DLG_PUENTE.otro)]];
   }
@@ -5736,7 +5749,8 @@ function dlgAccion(s){   // an action of the script: «hecho x», «marca id | n
     case 'mesa': return { mesa: r[0] };
     case 'a_la_mesa': return { a_la_mesa: true };
     case 'a_cocina': return { a_cocina: true };
-    case 'acostarse': return { acostarse: true };   // (Ana goes up to bed: her room, and the bed)
+    case 'acostarse': return { acostarse: true };
+    case 'a_pieza': return { a_pieza: true };   // (Ana is taken up to her room)   // (Ana goes up to bed: her room, and the bed)
     case 'junto': return { junto: r[0], de: r[1] };   // (one goes to the side of the other: «junto ana marilla», for a hug)   // (Marilla calls her: Ana comes into the kitchen, and Marilla is there)   // (Ana sits down to eat with the Cuthberts)   // (what is on the kitchen table: «mesa cena», «mesa desayuno», «mesa nada»)
     case 'entra': return { entra: r[0], a: r[1] };   // (someone comes into a room: «entra marilla ga», at its door)
     case 'sale': return { sale: r[0] };   // (and goes back down, home)   // (Ana goes to sleep: the night passes)   // (at her or his place at the kitchen table)
@@ -6048,7 +6062,7 @@ ROOMS.ga = {
 // the kitchen has the stairs up to her room
 HOUSES.gg.interior.draw = (c, t, night) => { drawKitchen(c, t, night); drawStairsUp(c); };
 { const b0 = HOUSES.gg.interior.blocked; HOUSES.gg.interior.blocked = (x, y) => b0(x, y) || (x > 11.1 * T && y < 4.5 * T); }
-{ const a0 = HOUSES.gg.interior.actions; HOUSES.gg.interior.actions = add => { a0(add); add('stairs', STAIRS.x, STAIRS.y, 44, 'Subir a la pieza de Ana', () => goIn('ga', [KDOOR.x, KIT.h - 28]), { hy: 40, hit: 0, pri: 1, test: (x, y) => x > 11.1 * T && x < 12.9 * T && y > 2.2 * T && y < 4.7 * T }); }; }
+{ const a0 = HOUSES.gg.interior.actions; HOUSES.gg.interior.actions = add => { a0(add); add('stairs', STAIRS.x, STAIRS.y, 44, 'Subir a la pieza de Ana', () => salirSiPuede(() => goIn('ga', [KDOOR.x, KIT.h - 28])), { hy: 40, hit: 0, pri: 1, test: (x, y) => x > 11.1 * T && x < 12.9 * T && y > 2.2 * T && y < 4.7 * T }); }; }
 
 /* ---------- sleep: Ana gets sleepy at night, and goes to bed (the day starts again at dawn) ---------- */
 let sleeping = false, sleepyStage = 0;
@@ -6749,7 +6763,7 @@ function targets(){
   } else {
     ROOMS[game.scene].actions?.(add);
     for (const f of FOLK) if (f.where === game.scene) add('f:' + f.id, f.x, f.y, f.id === 'lawson' ? 60 : 34, f.id === 'lawson' ? 'Comprar o vender (Sr. Lawson)' : 'Hablar con ' + f.def.name, () => f.id === 'lawson' ? shopMenu() : folkTalk(f), { hy: 26 * f.def.look.h, hit: 22, pri: 3 });
-    if (game.scene !== 'camino') add('door', KDOOR.x, KIT.h, 26, ROOMS[game.scene].exitLabel ?? 'Salir', () => goOut(), { hy: 10, hit: 30 });
+    if (game.scene !== 'camino') add('door', KDOOR.x, KIT.h, 26, ROOMS[game.scene].exitLabel ?? 'Salir', () => salirSiPuede(goOut), { hy: 10, hit: 30 });
   }
   game.ground.forEach(it => { if (it.scene === game.scene) add('g:' + it.id, it.x, it.y, 28, it.k === 'can' ? 'Recoger la regadera' : 'Recoger ' + itemText(it.k, it.n), () => pickUp(it), { hy: 8, hit: 20 }); });
   return L;
@@ -6789,6 +6803,10 @@ function opcionesAct(t){
   const o = opcionesDe(t); if (o.length < 2) return t.act();
   say('Ana', t.nombre || '¿Qué hace Ana aquí?', [...o.map(([l, f]) => [l, () => { close(); f(); }]), ['Nada por ahora', close]]);
 }
+// in the middle of a scene here that still needs her (she has lines left, or a choice to make), Ana does not walk out:
+// the door, the stairs and the map wait (otherwise the scene would be left waiting for her, forever)
+const retenida = () => TALKS.some(t => t.ch === game.scene && t.lines.slice(t.i).some(l => l.q === 'ana' || l.q === '?'));
+function salirSiPuede(f){ if (retenida()) { notice('Ahora no: la están mirando, esperan lo que Ana diga.'); return false; } f(); return true; }
 // a tap: do it at once if she is close enough, otherwise she walks there (A*) and does it on arrival; on bare ground she just walks
 function tapAt(sx, sy){
   if (sleeping) return;
@@ -7010,6 +7028,7 @@ const ACC_GRUPOS = [
 ];
 const cap = s => s[0].toUpperCase() + s.slice(1);
 function anaMenu(){
+  if (retenida()) { notice('Ahora no: la están mirando, esperan lo que Ana diga.'); return; }
   const J = jugables(), mine = cartas().filter(c => c.para === 'ana' && c.estado === 'recibida').map(c => ['📜 Leer la carta de ' + CORREO[c.de].nombre, () => cartaLeer(c)]);
   for (const k of Object.keys(game.anaStates)) if (ANA_STATES[k].fix) mine.push([ANA_STATES[k].fix, () => { close(); setAnaState(k, false); }]);
   if (game.inv.te > 0) mine.push(['☕ Tomar la taza de té', sipTea]);
@@ -8747,11 +8766,12 @@ function drawBubble(g, p, b, W, H, fase){   // (fase 'cuadros': only the caption
 // a caption: what is told of someone, fixed at the top of the screen (one under the other, if there are several)
 let cuadrosY = 56;
 function cuadroArriba(g, text, W, a){
-  const fs = W < 520 ? 13 : 14, maxW = Math.min(520, W - 32); g.font = 'italic ' + fs + 'px Georgia, serif';
+  const der = document.body.classList.contains('lado-oculto') ? 0 : 64;   // (beside the buttons on the right, not under them)
+  const fs = W < 520 ? 13 : 14, maxW = Math.min(520, W - 32 - der); g.font = 'italic ' + fs + 'px Georgia, serif';
   const rows = []; let cur = ''; for (const w of text.split(' ')) { const t = cur ? cur + ' ' + w : w; if (cur && g.measureText(t).width > maxW - 24) { rows.push(cur); cur = w; } else cur = t; } rows.push(cur);
-  const lh = fs + 4, w = Math.min(maxW, Math.max(...rows.map(r => g.measureText(r).width)) + 28), h = rows.length * lh + 14, x = (W - w) / 2, y = cuadrosY;
+  const lh = fs + 4, w = Math.min(maxW, Math.max(...rows.map(r => g.measureText(r).width)) + 28), h = rows.length * lh + 14, x = (W - der - w) / 2, y = cuadrosY;
   g.save(); g.globalAlpha = a; g.beginPath(); g.rect(x, y, w, h); g.fillStyle = '#f3e4bf'; g.fill(); g.strokeStyle = '#8a6a48'; g.lineWidth = 1.2; g.stroke();
-  g.fillStyle = '#4a3420'; g.textAlign = 'center'; rows.forEach((r, k) => g.fillText(r, W / 2, y + 7 + (k + 1) * lh - 3)); g.restore();
+  g.fillStyle = '#4a3420'; g.textAlign = 'center'; rows.forEach((r, k) => g.fillText(r, x + w / 2, y + 7 + (k + 1) * lh - 3)); g.restore();
   cuadrosY += h + 6;
 }
 // one box: its rows, where it goes (above «top» if it fits, else from «foot» down), its shape and its tail
@@ -8856,8 +8876,15 @@ function note(f, d, vol = .03, type = 'sine', at = 0){ if (!AC) return; const o 
 const sfx = { happy: () => { note(660, .3); note(880, .35, .03, 'sine', .12); note(990, .4, .025, 'sine', .24); }, water: () => { for (let k = 0; k < 4; k++) note(1200 + k * 160, .08, .015, 'triangle', k * .05); }, cook: () => note(330, .5, .02, 'triangle'), blip: () => note(420 + Math.random() * 160, .07, .012, 'triangle'), done: () => { note(523, .25); note(659, .25, .03, 'sine', .1); note(784, .4, .03, 'sine', .2); } };
 
 /* ---------- keeping the day: in the browser ---------- */
-function save(){ if (wiping) return; try { localStorage.setItem('avonlea', JSON.stringify({ wm: game.wm, libreta: game.libreta, eggDay: game.eggDay, inv: game.inv, hasCan: game.hasCan, water: game.water, fond: game.fond, said: game.said, saidS: game.saidS, seasonShift: game.seasonShift, teaDay: game.teaDay, journal: game.journal, mem: game.mem, know: game.know, tasks: game.tasks, plans: game.plans, table: game.table, giftFor: game.giftFor, npcGiftDay: game.npcGiftDay, lastDay: game.lastDay, taskSeq: game.taskSeq, rel: game.rel, relLog: game.relLog, impr: game.impr, story: game.story, stories: game.stories, nextStory: game.nextStory, ground: game.ground, groundSeq: game.groundSeq, anaStates: game.anaStates, animals: Object.fromEntries(Object.entries(ANIM).map(([k, a]) => [k, { x: a.x, y: a.y, where: a.where, state: a.state, area: a.area, owner: a.owner }])), beds: BEDS.map(b => [b.stage, b.wet, b.grow]), cartas: game.cartas, mesa: game.mesa, heno: game.heno, lena: game.lena, escDone: game.escDone, comida: game.comida, dayT, donde: dondeQuedo() })); } catch (e) {} }   // (the letters, and what the day's work left, too)
-try { const s = JSON.parse(localStorage.getItem('avonlea') || 'null'); if (s) { if (s.wm) game.wm = s.wm; game.libreta = s.libreta || []; game.eggDay = s.eggDay; Object.assign(game.inv, s.inv); game.hasCan = s.hasCan; game.water = s.water; Object.assign(game.fond, s.fond); game.said = s.said || {}; game.saidS = s.saidS || {}; game.seasonShift = s.seasonShift || 0; game.teaDay = s.teaDay ?? -1; game.journal = s.journal || []; game.mem = s.mem || {}; for (const k of ['know', 'plans', 'giftFor', 'npcGiftDay']) game[k] = s[k] || {}; game.tasks = s.tasks || []; game.table = s.table || null; game.lastDay = s.lastDay ?? null; game.taskSeq = s.taskSeq || 0; game.rel = s.rel || null; game.relLog = s.relLog || []; game.impr = s.impr || {}; game.story = s.story?.v === 2 ? s.story : null; if (game.story) game.story.gen = false; game.stories = s.stories || []; game.nextStory = s.nextStory || null; game.ground = s.ground || []; game.groundSeq = s.groundSeq || 0; game.anaStates = s.anaStates || {}; for (const [k, v] of Object.entries(s.animals || {})) if (ANIM[k]) Object.assign(ANIM[k], v); (s.beds || []).forEach((v, k) => { if (BEDS[k]) [BEDS[k].stage, BEDS[k].wet, BEDS[k].grow] = v; }); if (s.dayT) dayT = s.dayT; if (game.hasCan) ana.carry = 'can'; for (const k of ['cartas', 'mesa', 'heno', 'lena', 'escDone', 'comida']) if (s[k]) game[k] = s[k]; } } catch (e) {}
+// the scenes being said when the game is kept: not yet said, and where they were (they go on from that line when it is
+// opened again: a game closed in the middle of the arrival does not lose it)
+function escenasEnCurso(){
+  const done = { ...(game.escDone || {}) }, prog = { ...(game.dlgProg || {}) };
+  for (const t of TALKS) { const d = t.esc && DIALOGOS.find(x => x.id === t.esc); if (!d || d.tipo === 'comentario' || t.interrupted) continue; delete done[t.esc]; prog[t.esc] = Math.max(0, (t.desde || 0) + t.i - (t.puente || 0)); }
+  return { escDone: done, dlgProg: prog };
+}
+function save(){ if (wiping) return; try { localStorage.setItem('avonlea', JSON.stringify({ wm: game.wm, libreta: game.libreta, eggDay: game.eggDay, inv: game.inv, hasCan: game.hasCan, water: game.water, fond: game.fond, said: game.said, saidS: game.saidS, seasonShift: game.seasonShift, teaDay: game.teaDay, journal: game.journal, mem: game.mem, know: game.know, tasks: game.tasks, plans: game.plans, table: game.table, giftFor: game.giftFor, npcGiftDay: game.npcGiftDay, lastDay: game.lastDay, taskSeq: game.taskSeq, rel: game.rel, relLog: game.relLog, impr: game.impr, story: game.story, stories: game.stories, nextStory: game.nextStory, ground: game.ground, groundSeq: game.groundSeq, anaStates: game.anaStates, animals: Object.fromEntries(Object.entries(ANIM).map(([k, a]) => [k, { x: a.x, y: a.y, where: a.where, state: a.state, area: a.area, owner: a.owner }])), beds: BEDS.map(b => [b.stage, b.wet, b.grow]), cartas: game.cartas, mesa: game.mesa, heno: game.heno, lena: game.lena, ...escenasEnCurso(), comida: game.comida, dayT, donde: dondeQuedo() })); } catch (e) {} }   // (the letters, and what the day's work left, too)
+try { const s = JSON.parse(localStorage.getItem('avonlea') || 'null'); if (s) { if (s.wm) game.wm = s.wm; game.libreta = s.libreta || []; game.eggDay = s.eggDay; Object.assign(game.inv, s.inv); game.hasCan = s.hasCan; game.water = s.water; Object.assign(game.fond, s.fond); game.said = s.said || {}; game.saidS = s.saidS || {}; game.seasonShift = s.seasonShift || 0; game.teaDay = s.teaDay ?? -1; game.journal = s.journal || []; game.mem = s.mem || {}; for (const k of ['know', 'plans', 'giftFor', 'npcGiftDay']) game[k] = s[k] || {}; game.tasks = s.tasks || []; game.table = s.table || null; game.lastDay = s.lastDay ?? null; game.taskSeq = s.taskSeq || 0; game.rel = s.rel || null; game.relLog = s.relLog || []; game.impr = s.impr || {}; game.story = s.story?.v === 2 ? s.story : null; if (game.story) game.story.gen = false; game.stories = s.stories || []; game.nextStory = s.nextStory || null; game.ground = s.ground || []; game.groundSeq = s.groundSeq || 0; game.anaStates = s.anaStates || {}; for (const [k, v] of Object.entries(s.animals || {})) if (ANIM[k]) Object.assign(ANIM[k], v); (s.beds || []).forEach((v, k) => { if (BEDS[k]) [BEDS[k].stage, BEDS[k].wet, BEDS[k].grow] = v; }); if (s.dayT) dayT = s.dayT; if (game.hasCan) ana.carry = 'can'; for (const k of ['cartas', 'mesa', 'heno', 'lena', 'escDone', 'dlgProg', 'comida']) if (s[k]) game[k] = s[k]; } } catch (e) {}
 relInit();
 // where everyone was when the game was closed: Ana (the room or out of doors, the spot) and the people, to go on from there
 function dondeQuedo(){
@@ -8873,7 +8900,7 @@ function seguirDondeQuedo(D){
   for (const [k, g] of Object.entries(D.gente || {})) { const p = PEOPLE[k]; if (!p || g.where === 'away' || p.buggy) continue; p.where = g.where; p.x = g.x; p.y = g.y; p.nav = null; p.sit = false; }
   return true;
 }
-addEventListener('pagehide', save); setInterval(save, 10000);
+addEventListener('pagehide', save); document.addEventListener('visibilitychange', () => { if (document.hidden) save(); }); setInterval(save, 10000);   // (and when the tab is left: on a phone, the game is often left without closing it)
 
 /* ---------- input ---------- */
 const keys = new Set();
@@ -9512,6 +9539,7 @@ function goDest(x, y){
     if (!best) return; p = best;
   }
   toggleMap(false); userInput();
+  if (game.scene !== 'out' && retenida()) { salirSiPuede(() => {}); return; }
   if (game.scene !== 'out') { let sc = game.scene; while (game.scene !== 'out' && sc) { goOut(); if (game.scene === sc) break; sc = game.scene; } }
   if (game.scene !== 'out') return;
   if (cart.riding) cartOff();
@@ -11180,7 +11208,7 @@ function cartaLeer(c, i = 0){
 const JUGABLE_TIPOS = ['visitar', 'devuelto', 'amigas', 'paces', 'sano', 'club', 'felicitar', 'consolado', 'picnic', 'quehaceres', 'alimentados', 'recito', 'rezo', 'adornado', 'remo', 'nombres', 'carta', 'leido', 'concierto', 'sala', 'huerta', 'patinar', 'trineo', 'teñido', 'pelo_corto', 'desafio'];
 const JUGABLE_NO = ['ir', 'tomar', 'recoger', 'dar', 'vender', 'cambiar', 'comprar', 'conversar', 'pedir', 'guiar', 'soltar', 'regañar', 'subir_calesa', 'interceder', 'cocinar', 'preparar', 'batir'];   // (these the player already has in her own way, or are not hers)
 function jugables(){
-  if (game.playAct || game.scene === 'camino') return [];
+  if (game.playAct || game.scene === 'camino' || retenida()) return [];   // (in the middle of a scene with her: no chores)
   const s = wmNow(); let here = s.pos.ana; if (!here) return [];
   if (game.scene === 'out' && (here === 'cocina' || here === 'pieza')) here = s.pos.ana = 'p:ana';   // (by the kitchen door is not in the kitchen: the chores, inside)
   for (const k of WM_PEOPLE()) { const o = wmBody(k); if (k !== 'ana' && o && wmScene(k) === game.scene && dist(o.x, o.y, ana.x, ana.y) < 110) s.pos[k] = here; }   // (whoever is beside her counts as here)
@@ -12101,6 +12129,7 @@ const yaSeQueda = () => { const H = dlgHechos(); for (const f of ['llegada_tv', 
 if (NUEVA_PARTIDA && !navigator.webdriver) inicioLlegada();
 else if (!NUEVA_PARTIDA && !dlgHechos().a_prueba && !dlgHechos().inicio_juego) yaSeQueda();
 // a game from before: it goes on where it was left, at the hour it was (the day and the hour come back with the rest)
+if (!NUEVA_PARTIDA && dlgHechos().inicio_juego && !dlgHechos().desayuno_prueba) { const h = $('hint'); if (h) h.style.opacity = 0; hinted = true; }   // (back in the middle of the first night: the cards tell the controls)
 if (!NUEVA_PARTIDA && !navigator.webdriver) try { seguirDondeQuedo(JSON.parse(localStorage.getItem('avonlea') || 'null')?.donde); } catch (e) {}
 // the first night: the player takes her up to bed (the scene says so); if no one does (Ana on her own), after a while
 // she goes up by herself and lies down
@@ -12215,7 +12244,7 @@ function loop(now){
   else { owed = Math.min(owed + Math.min(raw, .25) * k, 3 * k * .05 + 2); const t0 = performance.now(); while (owed > 1e-4 && performance.now() - t0 < 22) { const d = Math.min(.05, owed); update(d); owed -= d; } }
   FRAME++; tripBarDraw(); render(); islaDraw(); requestAnimationFrame(loop);
 }
-window.__avonlea = { vista: () => view, opcionesDe, dlgCumple, comentar, comentarioElegir, COMENTARIOS, lugaresTick, escenaObjeto, targets, cartaPuede, conNombres, nombrar, nombreDe, nombrarElegir, NOMBRABLES, primeraVez, ventana, velaPuede, sombrero, LOOKS, dlgDichas, chats: () => CHATS, enConversacion, anaPos: () => ({ x: ana.x, y: ana.y }), setDia: (d, h) => { dayT = d + (h - 6) / 24; }, dia: () => today(), PEOPLE, relatoEmpezar, inicioLlegada, dlgHechos, convDisponibles, conversar, convOpciones, guiñosDe, LINES, dlgHecho, cualidad, cualidadSuma, cualidadCond, dlgCond, dlgEspecificidad, ritmoLleno, ritmoMarca, dlgHacer, dlgAccion, HABILIDADES, relSetW, relato: () => RELATO.lineas, reglas: () => RELATO_REGLAS.map(r => [r.id, r.texto]), jugables, jugar, anaMenu, correoRetirar, cartaLeer, CORREO, cartaTexto, playAct: () => game.playAct, DIALOGOS, dlgCtx, talks: () => TALKS, dlgGuion, dlgPanel, bubblesNow: () => bubbles, toby, cartSheet: (c, x, y, c8, t) => { const L = [], p = { look: 'matthew', x, y, c8, walk: 0, moving: false }; const [cx, cy] = [x, y]; pushCart(L, c, { x: cx, y: cy, c8, walk: 0, moving: true }, t); for (const [k, look] of [[0, 'matthew'], [1, 'ana']]) { const [sx, sy] = cartSeat(cx, cy, c8, k); L.push({ y: sy, draw: () => drawPerson(c, { ...mkPerson(look, sx, sy), sit: true, dir: c8Dir(c8) }, t) }); } L.sort((a, b) => a.y - b.y).forEach(o => o.draw()); }, startCap1, CAP1, LIBRO1, ROAD_TRAMOS, ROAD_MIN, roadTramo, islaToggle, DLG_BANK, startDay, setSeason, agendaData: () => AGENDA.map(e => ({ who: wmName(e.who), from: e.from, to: e.to, label: e.label, season: e.season, sunday: !!e.sunday, ana: !!(e.ana || e.who === 'ana'), cond: e.when ? String(e.when).replace(/^\(\) => /, '') : '' })), setAgenda: v => { AGENDA_ON = v; }, AGENDA, wmData: () => ({ THINGS, WHO, OFRECE, WP_NAME, TRADE, TREATS, LIBRETA, ITEM_NAME, MAX_GOALS, PACE, FOCO }), paintMapBase, doingText, wmName, wmBody, wmScene, WW, WH, setVec: v => { VEC_ON = v; }, setStyle: v => { ANA_STYLE = v; }, setHead: setHeadM, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+window.__avonlea = { ...(/[?&]dev\b/.test(location.search) ? { ev: s => eval(s) } : {}), vista: () => view, opcionesDe, dlgCumple, comentar, comentarioElegir, COMENTARIOS, lugaresTick, escenaObjeto, targets, cartaPuede, conNombres, nombrar, nombreDe, nombrarElegir, NOMBRABLES, primeraVez, ventana, velaPuede, sombrero, LOOKS, dlgDichas, chats: () => CHATS, enConversacion, anaPos: () => ({ x: ana.x, y: ana.y }), setDia: (d, h) => { dayT = d + (h - 6) / 24; }, dia: () => today(), PEOPLE, relatoEmpezar, inicioLlegada, dlgHechos, convDisponibles, conversar, convOpciones, guiñosDe, LINES, dlgHecho, cualidad, cualidadSuma, cualidadCond, dlgCond, dlgEspecificidad, ritmoLleno, ritmoMarca, dlgHacer, dlgAccion, HABILIDADES, relSetW, relato: () => RELATO.lineas, reglas: () => RELATO_REGLAS.map(r => [r.id, r.texto]), jugables, jugar, anaMenu, correoRetirar, cartaLeer, CORREO, cartaTexto, playAct: () => game.playAct, DIALOGOS, dlgCtx, talks: () => TALKS, dlgGuion, dlgPanel, bubblesNow: () => bubbles, toby, cartSheet: (c, x, y, c8, t) => { const L = [], p = { look: 'matthew', x, y, c8, walk: 0, moving: false }; const [cx, cy] = [x, y]; pushCart(L, c, { x: cx, y: cy, c8, walk: 0, moving: true }, t); for (const [k, look] of [[0, 'matthew'], [1, 'ana']]) { const [sx, sy] = cartSeat(cx, cy, c8, k); L.push({ y: sy, draw: () => drawPerson(c, { ...mkPerson(look, sx, sy), sit: true, dir: c8Dir(c8) }, t) }); } L.sort((a, b) => a.y - b.y).forEach(o => o.draw()); }, startCap1, CAP1, LIBRO1, ROAD_TRAMOS, ROAD_MIN, roadTramo, islaToggle, DLG_BANK, startDay, setSeason, agendaData: () => AGENDA.map(e => ({ who: wmName(e.who), from: e.from, to: e.to, label: e.label, season: e.season, sunday: !!e.sunday, ana: !!(e.ana || e.who === 'ana'), cond: e.when ? String(e.when).replace(/^\(\) => /, '') : '' })), setAgenda: v => { AGENDA_ON = v; }, AGENDA, wmData: () => ({ THINGS, WHO, OFRECE, WP_NAME, TRADE, TREATS, LIBRETA, ITEM_NAME, MAX_GOALS, PACE, FOCO }), paintMapBase, doingText, wmName, wmBody, wmScene, WW, WH, setVec: v => { VEC_ON = v; }, setStyle: v => { ANA_STYLE = v; }, setHead: setHeadM, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
 /* ---------- the first time: a scene of its own; the window and the candle; her hat in the wardrobe ----------
    - The first time Ana does some things (looks out of her window, sees herself in the mirror, climbs to her room, sees
      the sea from the lighthouse…), a scene of the script (primera_<what>, disparo: primera) instead of the plain line;

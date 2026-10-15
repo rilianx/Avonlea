@@ -33,7 +33,7 @@ function targets(){
   } else {
     ROOMS[game.scene].actions?.(add);
     for (const f of FOLK) if (f.where === game.scene) add('f:' + f.id, f.x, f.y, f.id === 'lawson' ? 60 : 34, f.id === 'lawson' ? 'Comprar o vender (Sr. Lawson)' : 'Hablar con ' + f.def.name, () => f.id === 'lawson' ? shopMenu() : folkTalk(f), { hy: 26 * f.def.look.h, hit: 22, pri: 3 });
-    if (game.scene !== 'camino') add('door', KDOOR.x, KIT.h, 26, ROOMS[game.scene].exitLabel ?? 'Salir', () => goOut(), { hy: 10, hit: 30 });
+    if (game.scene !== 'camino') add('door', KDOOR.x, KIT.h, 26, ROOMS[game.scene].exitLabel ?? 'Salir', () => salirSiPuede(goOut), { hy: 10, hit: 30 });
   }
   game.ground.forEach(it => { if (it.scene === game.scene) add('g:' + it.id, it.x, it.y, 28, it.k === 'can' ? 'Recoger la regadera' : 'Recoger ' + itemText(it.k, it.n), () => pickUp(it), { hy: 8, hit: 20 }); });
   return L;
@@ -73,6 +73,10 @@ function opcionesAct(t){
   const o = opcionesDe(t); if (o.length < 2) return t.act();
   say('Ana', t.nombre || '¿Qué hace Ana aquí?', [...o.map(([l, f]) => [l, () => { close(); f(); }]), ['Nada por ahora', close]]);
 }
+// in the middle of a scene here that still needs her (she has lines left, or a choice to make), Ana does not walk out:
+// the door, the stairs and the map wait (otherwise the scene would be left waiting for her, forever)
+const retenida = () => TALKS.some(t => t.ch === game.scene && t.lines.slice(t.i).some(l => l.q === 'ana' || l.q === '?'));
+function salirSiPuede(f){ if (retenida()) { notice('Ahora no: la están mirando, esperan lo que Ana diga.'); return false; } f(); return true; }
 // a tap: do it at once if she is close enough, otherwise she walks there (A*) and does it on arrival; on bare ground she just walks
 function tapAt(sx, sy){
   if (sleeping) return;

@@ -792,6 +792,15 @@ marilla: (Marilla enciende una vela.) Tu pieza es la del alero este, arriba. Sub
 narra: Así se juega: cuando hay que elegir, eliges tú por Ana; el tiempo espera mientras decides. Lo que hace cambia lo que los demás sienten por ella. Ahora mismo Marilla no la quiere: mañana la llevará a White Sands, a devolverla.
 narra: Ahora te toca a ti: lleva a Ana a su pieza. Toca el suelo para que camine (o usa las flechas), y toca la escalera, al fondo de la cocina. Si tocas a una persona o una cosa estando Ana al lado, verás qué puede hacer con ella. En el cuaderno (📖), lo que Ana puede hacer para quedarse en Tejas Verdes.
 
+# la primera noche, si Ana no sube (se queda abajo, o se escapa afuera): Marilla la lleva a su pieza
+=== primera_noche_sube ===
+narra: Ya es noche cerrada. Marilla toma la vela, busca a Ana y la lleva hasta la pieza del alero, sin decir palabra.
+canal: gg
+prioridad: 9
+interrumpe
+si: hecho:primera_noche, !hecho:desayuno_prueba, !dicha:primera_bed, hora:21-29
+al_terminar: a_pieza
+
 # la primera noche, en la pieza del alero (cap. 3): apenas llega, Ana se tira en la cama, desconsolada; Marilla sube con
 # la vela a darle las buenas noches, y Ana se enoja
 === primera_bed ===
@@ -839,12 +848,14 @@ marilla: Mañana veremos qué se hace contigo. Ahora a cenar, y a la cama. Tu pi
 ana: (Ana apenas prueba la cena. Esa noche, en la pieza del alero, llora hasta quedarse dormida.)
 
 === desayuno_prueba ===
+narra: Huele a pan tostado en toda la casa. Marilla llama: «¡Ana! ¡El desayuno!».
 canal: gg
 prioridad: 9
 interrumpe
 sujeta: marilla
-en: ana=gg, marilla=gg
-si: hecho:primera_noche, dias_desde:llegada_tv:1, !hecho:desayuno_prueba, hora:6-14
+donde: tejas
+al_empezar: a_cocina
+si: hecho:primera_noche, dias_desde:llegada_tv:1, !hecho:desayuno_prueba, hora:6.5-14
 al_terminar: hecho desayuno_prueba
 ---
 ! sentar ana

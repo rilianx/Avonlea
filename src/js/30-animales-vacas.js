@@ -159,6 +159,7 @@ const ACC_GRUPOS = [
 ];
 const cap = s => s[0].toUpperCase() + s.slice(1);
 function anaMenu(){
+  if (retenida()) { notice('Ahora no: la están mirando, esperan lo que Ana diga.'); return; }
   const J = jugables(), mine = cartas().filter(c => c.para === 'ana' && c.estado === 'recibida').map(c => ['📜 Leer la carta de ' + CORREO[c.de].nombre, () => cartaLeer(c)]);
   for (const k of Object.keys(game.anaStates)) if (ANA_STATES[k].fix) mine.push([ANA_STATES[k].fix, () => { close(); setAnaState(k, false); }]);
   if (game.inv.te > 0) mine.push(['☕ Tomar la taza de té', sipTea]);
