@@ -29,6 +29,7 @@ function inicioTick(dt){
   if ((inicioT -= dt) > 0) return; inicioT = 3;
   const H = dlgHechos(); if (!H.primera_noche || H.desayuno_prueba || dlgDichas().primera_bed || sleeping || navigator.webdriver) { inicioFin = 0; return; }
   if (TALKS.length || game.talk) return;
+  if (game.scene === 'ga') { primeraVez('bed', goToBed); return; }   // (up in her room: she throws herself on the bed at once)
   if (!inicioFin) inicioFin = TT;
   if (auto.on && TT - inicioFin > 60) { if (game.scene !== 'ga') goIn('ga', [GA.bed.x - 20, GA.bed.y + 16]); primeraVez('bed', goToBed) || goSleep(false); }
 }

@@ -40,6 +40,9 @@ function narrar(t, texto){
   t.narra = { seguir, hasta: auto.on ? performance.now() + (lineDur(texto) * 1.6 + 3) * 1000 : Infinity };   // (real time: the game's is stopped)
 }
 // while a card is being read, the world waits: the time does not go on (if no one reads it, after a while it goes on)
+// while the player decides (a choice in a scene, a menu, a name to write), the world waits too; with Ana on her own
+// (the button 🤖), it goes on, and she decides after a while
+function decidiendo(){ return !ANA_AUTO && !navigator.webdriver && (TALKS.some(t => t.elige) || menuOpen() || !!document.querySelector('#talk:not([hidden]) input')); }
 function narraPausa(){
   const t = TALKS.find(t => t.narra); if (!t) return false;
   if (performance.now() > t.narra.hasta) { t.narra.seguir(); return false; }

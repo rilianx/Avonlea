@@ -40,6 +40,27 @@ function drawAnaRoom(c, t, night){
   for (let k = 0; k < 3; k++) line(c, [[KDOOR.x - 24 + k * 2, KIT.h - 4 - k * 6], [KDOOR.x + 24 - k * 2, KIT.h - 4 - k * 6]], 'rgba(230,200,160,.5)', 1.4, k);
   line(c, [[KDOOR.x - 30, KIT.h - 4], [KDOOR.x - 30, KIT.h - 30]], '#6a4a30', 3); line(c, [[KDOOR.x + 30, KIT.h - 4], [KDOOR.x + 30, KIT.h - 30]], '#6a4a30', 3);
 }
+// Ana in her bed (drawn after it): «boca_abajo», thrown face down on the quilt, crying into the pillow, her shoulders
+// shaking; «tapada», under the sheets up to her head, only her red hair on the pillow
+function drawEnCama(c, p, t){
+  const L = LOOKS[p.look], x = GA.bed.x, y = GA.bed.y;
+  if (p.enCama === 'tapada') {
+    blob(c, [[x - 58, y - 30], [x - 50, y - 41], [x - 10, y - 47], [x + 28, y - 45], [x + 40, y - 38], [x + 40, y - 30]], '#e9dcc4');
+    const cols = ['#d9433b', '#d9a441', '#5c8c63', '#7f9ec0', '#a58ad8', '#f2c94c'];
+    for (let k = 0; k < 9; k++) { c.fillStyle = cols[(k * 3) % cols.length]; c.globalAlpha = .55; c.fillRect(x - 52 + k * 10, y - 41 + Math.abs(k - 4) * .6, 9, 9); } c.globalAlpha = 1;
+    ell(c, x + 50, y - 36, 12, 6, '#fbf6ea', true);   // (the pillow)
+    ell(c, x + 47, y - 39, 8.5, 6.5, L.hair, true); line(c, [[x + 41, y - 37], [x + 36, y - 33]], L.hairD, 2.6, 3);   // (only her hair shows)
+    return;
+  }
+  const sob = Math.max(0, Math.sin(t * 6.5)) * 1.6, dy = -sob;
+  ell(c, x + 50, y - 36, 12, 6, '#fbf6ea', true);   // (the pillow)
+  for (const s of [0, 1]) { line(c, [[x - 46, y - 34 + s * 4], [x - 14, y - 36 + s * 3]], '#4a3a30', 3.4, s + 4); ell(c, x - 49, y - 34 + s * 4, 4, 2.6, '#5b3a28', true); }   // (legs and shoes: she threw herself down shoes and all)
+  blob(c, [[x - 16, y - 30], [x - 14, y - 43 + dy], [x + 10, y - 47 + dy], [x + 34, y - 45 + dy], [x + 38, y - 32], [x + 10, y - 29]], L.dress);   // (her dress, her back)
+  blob(c, [[x + 28, y - 44 + dy], [x + 44, y - 47 + dy], [x + 46, y - 42 + dy], [x + 30, y - 38 + dy]], L.dressD || L.dress);   // (the arm round the pillow)
+  ell(c, x + 47, y - 44 + dy, 3, 2.4, L.skin, true);
+  ell(c, x + 48, y - 37 + dy, 9.5, 7.5, L.hair, true);   // (her head, face down in the pillow)
+  for (const s of [-1, 1]) { line(c, [[x + 44, y - 33 + dy], [x + 38 + s * 4, y - 26], [x + 36 + s * 6, y - 20]], L.hair, 2.6, s + 6); ell(c, x + 36 + s * 6, y - 19, 2.2, 1.5, L.scarf || '#d9433b', true); }
+}
 function drawAnaBed(c){
   const x = GA.bed.x, y = GA.bed.y;
   ell(c, x, y + 3, 80, 9, 'rgba(40,25,15,.22)');

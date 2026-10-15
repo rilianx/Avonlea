@@ -2,10 +2,14 @@
 const cam = { x: ana.x, y: ana.y };
 let last = performance.now(), TT = 0, here = null, taskTick = 0, storyT = 2;
 // Ana crying with her head on the table: a tear now and then, over its edge (drawn in front of it, with the effects)
-function lagrimas(){ ana.sortY = ana.llora && ana.sit && game.scene === 'gg' ? TABLE.y + 1 : undefined;   // (lying on the table: drawn after it)
-  if (!ana.llora || !ana.sit || TT < (ana._lagT || 0) || game.scene !== 'gg') return; ana._lagT = TT + .45; for (const s of [-1, 1]) if (Math.random() < .7) fx.push({ kind: 'drop', x: ana.x + s * (3 + Math.random() * 8), y: ana.y + 36, vy: 2 + Math.random() * 3, t: 0 }); }
+function lagrimas(){
+  ana.sortY = ana.llora && ana.sit && game.scene === 'gg' ? TABLE.y + 1 : ana.enCama && game.scene === 'ga' ? GA.bed.y + 1 : undefined;   // (lying on the table, in her bed: drawn after it)
+  if (TT < (ana._lagT || 0)) return;
+  if (ana.llora && ana.sit && game.scene === 'gg') { ana._lagT = TT + .45; for (const s of [-1, 1]) if (Math.random() < .7) fx.push({ kind: 'drop', x: ana.x + s * (3 + Math.random() * 8), y: ana.y + 36, vy: 2 + Math.random() * 3, t: 0 }); }
+  else if (ana.enCama === 'boca_abajo' && game.scene === 'ga') { ana._lagT = TT + .55; if (Math.random() < .8) fx.push({ kind: 'drop', x: GA.bed.x + 40 + Math.random() * 14, y: GA.bed.y - 10, vy: 2 + Math.random() * 2, t: 0 }); }
+}
 function update(dt){
-  if (sleeping || narraPausa()) return;   // (a card that explains: the world waits while it is read)
+  if (sleeping || narraPausa() || decidiendo()) return;   // (a card being read, a decision being taken: the world waits)   // (a card that explains: the world waits while it is read)
   if (AI.on && provider() === 'manual' && aiq.list.length) return;   // (debugging by hand: the world waits for the answer)
   TT += dt; dayT += dt / (MIN_S * 60 * 24); boil = Math.floor(TT * 6);
   const { night } = light();
@@ -320,6 +324,7 @@ function renderView(){
   vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(60,40,20,.3)'); g.fillStyle = vg; g.fillRect(0, 0, W, H);
   }
   // speech bubbles over the heads of whoever is talking (on the screen, over the light of the day, so they read at night)
+  cuadrosY = W < 640 ? 100 : 56;   // (the captions, from the top down: under the hint)
   for (const b of bubbles) { const p = personOf(b.q); if (p && (b.q === 'ana' ? anaHere : (PEOPLE[b.q] ? sceneOf(b.q) : b.q.startsWith('f:') ? FOLKBY[b.q.slice(2)]?.where : animalWhere(b.q)) === game.scene)) drawBubble(g, p, b, W, H); }
   // the little papers: what she has, the hour, what she can do
   const I = game.inv, bits = [];

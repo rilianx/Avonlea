@@ -124,7 +124,9 @@ function dlgHacer(list){   // what a scene does when it starts or ends
     if (a.triste) realR.setFact('triste:' + a.triste);
     if (a.nombrar) nombrar(a.nombrar, a.n);
     if (a.sentar) { const q = SEATS[a.sentar], b = a.sentar === 'ana' ? ana : PEOPLE[a.sentar]; if (q && b) { b.x = q[0]; b.y = q[1]; b.dir = q[2]; b.sit = true; b.moving = false; b.nav = null; if (b !== ana) b.mealSat = true; else { ana.goto = null; ana.vx = ana.vy = 0; } } }
-    if (a.dormir) goSleep(false);
+    if (a.dormir) { ana.enCama = null; ana.llora = false; goSleep(false); }
+    if (a.entra) { const b = PEOPLE[a.entra]; if (b) { b.where = a.a; b.x = KDOOR.x + 30; b.y = KIT.h - 30; b.sit = false; b.nav = null; b.moving = false; b.dir = 0; } }
+    if (a.sale) { const b = PEOPLE[a.sale]; if (b) { b.where = CH[a.sale]?.home || 'gg'; b.x = STAIRS.x - 30; b.y = STAIRS.y + 30; b.nav = null; } }
     if (a.levantar) { const b = a.levantar === 'ana' ? ana : PEOPLE[a.levantar]; if (b) { b.sit = false; b.llora = false; if (b !== ana) b.mealSat = false; } }
     if (a.afecto) { const [k, o, n] = a.afecto; relSetW(k, o, Math.max(relGetW(k, o), +n)); }   // (how much one cares for the other, at least so much)
     if (a.suma) { const [q, n] = a.suma, [nombre, dueño, hacia] = q.split(':'), H = (game.wm.sumaHoy ||= {});
@@ -264,7 +266,9 @@ function dlgAccion(s){   // an action of the script: «hecho x», «marca id | n
     case 'fin_capitulo': return { fin_capitulo: true };
     case 'nombrar': return { nombrar: r[0], pedir: r[1] === '?' };
     case 'sentar': return { sentar: r[0] };
-    case 'dormir': return { dormir: true };   // (Ana goes to sleep: the night passes)   // (at her or his place at the kitchen table)
+    case 'dormir': return { dormir: true };
+    case 'entra': return { entra: r[0], a: r[1] };   // (someone comes into a room: «entra marilla ga», at its door)
+    case 'sale': return { sale: r[0] };   // (and goes back down, home)   // (Ana goes to sleep: the night passes)   // (at her or his place at the kitchen table)
     case 'levantar': return { levantar: r[0] };   // (Ana names a thing: «nombrar lago», the book's name; «nombrar lago ?», the player writes it)
     case 'meta': { const [quien, tipo, args = ''] = part[0].split(/\s+/); return { meta: { quien, tipo, args: args ? args.split(',').map(dlgVal) : [], texto: part[1] || undefined, etiqueta: part[2] || undefined, prioridad: part[3] ? +part[3] : undefined } }; }
   }

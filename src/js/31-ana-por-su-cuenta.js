@@ -166,8 +166,10 @@ const enConversacion = k => (k !== 'ana' && CHAT_HOLD[k] > TT) || TALKS.some(t =
 function autoTick(){
   if (!autoAllowed() || AGENTS.ana?.followOf || wmDriven('ana') || (CAP1.on && !CAP1.done) || game.scene === 'camino' || ana.hidden || cart.riding) return;   // (in the book's chapter she waits for Matthew; in the cart she rides)   // (a goal of the planner, or following someone who asked: no wandering off)
   const manual = auto.intent?.manual;
-  if (!manual && TT - lastInput < AUTO_IDLE) { auto.on = false; return; }
-  if (!auto.on) { auto.on = true; if (!auto.told && !manual) { auto.told = true; notice('Ana hace lo suyo; muévete o toca algo para retomar el control.'); } }
+  // (Ana goes on her own only with the button 🤖 on: not because the player stopped for a while. The traces, with no
+  //  player, keep the old way: on her own after a while without input)
+  if (!manual && !(navigator.webdriver ? TT - lastInput >= AUTO_IDLE : ANA_AUTO)) { auto.on = false; return; }
+  if (!auto.on) auto.on = true;
   if (amb.cur) return;
   if (enConversacion('ana')) { if (ana.goto?.auto) ana.goto = null; return; }   // (talking with someone: she stays, and goes on with what she meant to do afterwards)
   if (auto.intent) { if (!ana.goto) autoStep(); return; }

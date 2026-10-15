@@ -166,7 +166,7 @@ body.visor > *:not(#cv):not(#visor){display:none !important}
 <div id="obsmenu" class="paper" hidden></div>
 <button id="wmbtn" class="paper" title="Metas de prueba (el planificador, sin IA)">🎯</button>
 <button id="headbtn" class="paper" title="Tamaño de las cabezas">🙂</button>
-<button id="autobtn" class="paper" title="Ana en automático (y mover el mapa libremente)">🤖</button>
+<button id="autobtn" class="paper" title="Ana en automático: tócalo para que Ana haga sus cosas sola (y mover el mapa libremente); tócalo otra vez para tomar el control">🤖</button>
 <button id="callbtn" class="paper" title="Llamar a quien esté cerca (L): se detiene, o viene si te quiere">📣</button>
 <div id="autobar" class="paper" hidden>🤖 Ana en automático · flechas o arrastrar: mover el mapa <button id="autocenter">Centrar en Ana</button><button id="autooff">Tomar el control</button></div>
 <div id="headp" class="paper" hidden><label>Cabezas <b id="headv"></b><input id="headr" type="range" min="1" max="5" step="0.1"></label></div>
@@ -980,16 +980,29 @@ marilla: (Marilla enciende una vela.) Tu pieza es la del alero este, arriba. Sub
 ! levantar matthew
 ! levantar ana
 narra: Así se juega: cuando hay que elegir, eliges tú por Ana (si no eliges, ella elige sola, a su manera). Lo que hace cambia lo que los demás sienten por ella. Ahora mismo Marilla no la quiere, y Ana está a prueba.
-narra: Ahora te toca a ti: lleva a Ana a su pieza. Toca la escalera, al fondo de la cocina; arriba, toca la cama para acostarla. En el cuaderno (📖) verás qué puede hacer Ana para quedarse en Tejas Verdes.
+narra: Ahora te toca a ti: lleva a Ana a su pieza. Toca la escalera, al fondo de la cocina. En el cuaderno (📖) verás qué puede hacer Ana para quedarse en Tejas Verdes.
 
-# la primera noche, en la cama de la pieza del alero (la primera vez que Ana se acuesta)
+# la primera noche, en la pieza del alero (cap. 3): apenas llega, Ana se tira en la cama, desconsolada; Marilla sube con
+# la vela a darle las buenas noches, y Ana se enoja
 === primera_bed ===
 disparo: primera
 canal: ana_sola
+sujeta: marilla
 si: hecho:primera_noche, !hecho:se_queda
 ---
-ana: (Ana se quita el vestido, se pone el camisón del orfanato, que le queda corto, y salta a la cama. Se tapa hasta la cabeza.)
-ana piensa: Marilla me diría «buenas noches». ¿Cómo va a ser buena una noche que es la peor de toda mi vida?
+ana: (La pieza del alero: paredes blancas y desnudas, una cama alta, una mesita, una silla. Ana la mira con espanto.)
+! ana enCama=boca_abajo
+ana: (Se tira en la cama boca abajo, con zapatos y todo, y llora desconsolada contra la almohada.)
+ana piensa: Nadie me quiere. Nadie me ha querido nunca. Y ahora tampoco aquí.
+! entra marilla ga
+marilla: (Marilla sube con la vela. Mira la ropa, los zapatos, a la niña hecha un ovillo.) Desvístete y métete en la cama como corresponde, niña.
+ana: (Ana se quita el vestido de mala gana, se pone el camisón del orfanato, que le queda corto, y se mete bajo las sábanas.)
+! ana enCama=tapada
+marilla: (Marilla recoge la ropa tirada en el suelo y la dobla sobre la silla.) Buenas noches.
+ana: (Ana asoma la cara, blanca, entre las sábanas.) ¿Cómo puede decir que son buenas noches, cuando sabe que tiene que ser la peor noche de toda mi vida?
+ana: (Y se vuelve a meter debajo de las sábanas, hasta la cabeza.)
+marilla: (Marilla baja la escalera despacio, con la vela, sin saber muy bien qué pensar.)
+! sale marilla
 ana: (Esa noche, en la pieza del alero, Ana llora hasta quedarse dormida.)
 ! dormir
 
@@ -1106,6 +1119,7 @@ ana: Voy a imaginar que es la puerta de un castillo encantado. Aunque por ahora 
 disparo: primera
 canal: ana_sola
 tambien
+si: hecho:desayuno_prueba
 ---
 ana: (Ana sube la escalera empinada hasta la pieza del alero: paredes blancas, una cama alta, una mesita, una ventana.)
 ana: Es tan blanca y tan… tan sin adornos. Pero tiene una ventana. Y una ventana es una ventana al mundo entero.
@@ -3846,7 +3860,8 @@ function drawLlorando(c, p, t, parte){
   if (L.hat && !game.wm?.sinSombrero) { ell(c, x + 36, y + 13, 12, 4.4, '#e6c477', true); ell(c, x + 36, y + 10, 6.5, 3.6, '#ecd08a', true); line(c, [[x + 30, y + 10.5], [x + 42, y + 10.5]], L.scarf || '#d9433b', 1.6, 2); }
 }
 function drawPerson(c, p, t){
-  if (p.llora && p.sit) return drawLlorando(c, p, t, 'encima');   // (crying at the table, the head on it: a pose of its own)
+  if (p.llora && p.sit) return drawLlorando(c, p, t, 'encima');
+  if (p.enCama && game.scene === 'ga') return drawEnCama(c, p, t);   // (in her bed: face down crying, or under the sheets)   // (crying at the table, the head on it: a pose of its own)
   if (p.look === 'ana') { const La = LOOKS.ana; La.big = ANA_STYLE === 'mano' ? HEAD_M : 0; La.pencil = ANA_STYLE === 'mano'; if (La.hair0 == null) { La.hair0 = La.hair; La.hairD0 = La.hairD; } const green = !!game.wm?.perm?.pelo_verde; La.hair = green ? '#5a8a3a' : La.hair0; La.hairD = green ? '#3e6a26' : La.hairD0; La.style = game.wm?.perm?.pelo_corto ? 'corto' : 'braids'; La.hat = !game.wm?.sinSombrero; } else if (LOOKS[p.look]) LOOKS[p.look].big = Math.max(1, HEAD_M / 2);   // (green after the dye; short, without braids, after Marilla cuts it)
   if (CACHE_ON && c === G0 && !CACHE.dentro && cachePersona(c, p, t)) return;   // (after her look is set up: a quiet pose, from a kept image: see 66-cache-dibujos.js)
   if (animDraw(c, p, t) || kitDraw(c, p, t)) return;
@@ -4542,6 +4557,27 @@ function drawAnaRoom(c, t, night){
   for (let k = 0; k < 3; k++) line(c, [[KDOOR.x - 24 + k * 2, KIT.h - 4 - k * 6], [KDOOR.x + 24 - k * 2, KIT.h - 4 - k * 6]], 'rgba(230,200,160,.5)', 1.4, k);
   line(c, [[KDOOR.x - 30, KIT.h - 4], [KDOOR.x - 30, KIT.h - 30]], '#6a4a30', 3); line(c, [[KDOOR.x + 30, KIT.h - 4], [KDOOR.x + 30, KIT.h - 30]], '#6a4a30', 3);
 }
+// Ana in her bed (drawn after it): «boca_abajo», thrown face down on the quilt, crying into the pillow, her shoulders
+// shaking; «tapada», under the sheets up to her head, only her red hair on the pillow
+function drawEnCama(c, p, t){
+  const L = LOOKS[p.look], x = GA.bed.x, y = GA.bed.y;
+  if (p.enCama === 'tapada') {
+    blob(c, [[x - 58, y - 30], [x - 50, y - 41], [x - 10, y - 47], [x + 28, y - 45], [x + 40, y - 38], [x + 40, y - 30]], '#e9dcc4');
+    const cols = ['#d9433b', '#d9a441', '#5c8c63', '#7f9ec0', '#a58ad8', '#f2c94c'];
+    for (let k = 0; k < 9; k++) { c.fillStyle = cols[(k * 3) % cols.length]; c.globalAlpha = .55; c.fillRect(x - 52 + k * 10, y - 41 + Math.abs(k - 4) * .6, 9, 9); } c.globalAlpha = 1;
+    ell(c, x + 50, y - 36, 12, 6, '#fbf6ea', true);   // (the pillow)
+    ell(c, x + 47, y - 39, 8.5, 6.5, L.hair, true); line(c, [[x + 41, y - 37], [x + 36, y - 33]], L.hairD, 2.6, 3);   // (only her hair shows)
+    return;
+  }
+  const sob = Math.max(0, Math.sin(t * 6.5)) * 1.6, dy = -sob;
+  ell(c, x + 50, y - 36, 12, 6, '#fbf6ea', true);   // (the pillow)
+  for (const s of [0, 1]) { line(c, [[x - 46, y - 34 + s * 4], [x - 14, y - 36 + s * 3]], '#4a3a30', 3.4, s + 4); ell(c, x - 49, y - 34 + s * 4, 4, 2.6, '#5b3a28', true); }   // (legs and shoes: she threw herself down shoes and all)
+  blob(c, [[x - 16, y - 30], [x - 14, y - 43 + dy], [x + 10, y - 47 + dy], [x + 34, y - 45 + dy], [x + 38, y - 32], [x + 10, y - 29]], L.dress);   // (her dress, her back)
+  blob(c, [[x + 28, y - 44 + dy], [x + 44, y - 47 + dy], [x + 46, y - 42 + dy], [x + 30, y - 38 + dy]], L.dressD || L.dress);   // (the arm round the pillow)
+  ell(c, x + 47, y - 44 + dy, 3, 2.4, L.skin, true);
+  ell(c, x + 48, y - 37 + dy, 9.5, 7.5, L.hair, true);   // (her head, face down in the pillow)
+  for (const s of [-1, 1]) { line(c, [[x + 44, y - 33 + dy], [x + 38 + s * 4, y - 26], [x + 36 + s * 6, y - 20]], L.hair, 2.6, s + 6); ell(c, x + 36 + s * 6, y - 19, 2.2, 1.5, L.scarf || '#d9433b', true); }
+}
 function drawAnaBed(c){
   const x = GA.bed.x, y = GA.bed.y;
   ell(c, x, y + 3, 80, 9, 'rgba(40,25,15,.22)');
@@ -5048,6 +5084,9 @@ function narrar(t, texto){
   t.narra = { seguir, hasta: auto.on ? performance.now() + (lineDur(texto) * 1.6 + 3) * 1000 : Infinity };   // (real time: the game's is stopped)
 }
 // while a card is being read, the world waits: the time does not go on (if no one reads it, after a while it goes on)
+// while the player decides (a choice in a scene, a menu, a name to write), the world waits too; with Ana on her own
+// (the button 🤖), it goes on, and she decides after a while
+function decidiendo(){ return !ANA_AUTO && !navigator.webdriver && (TALKS.some(t => t.elige) || menuOpen() || !!document.querySelector('#talk:not([hidden]) input')); }
 function narraPausa(){
   const t = TALKS.find(t => t.narra); if (!t) return false;
   if (performance.now() > t.narra.hasta) { t.narra.seguir(); return false; }
@@ -5431,7 +5470,9 @@ function dlgHacer(list){   // what a scene does when it starts or ends
     if (a.triste) realR.setFact('triste:' + a.triste);
     if (a.nombrar) nombrar(a.nombrar, a.n);
     if (a.sentar) { const q = SEATS[a.sentar], b = a.sentar === 'ana' ? ana : PEOPLE[a.sentar]; if (q && b) { b.x = q[0]; b.y = q[1]; b.dir = q[2]; b.sit = true; b.moving = false; b.nav = null; if (b !== ana) b.mealSat = true; else { ana.goto = null; ana.vx = ana.vy = 0; } } }
-    if (a.dormir) goSleep(false);
+    if (a.dormir) { ana.enCama = null; ana.llora = false; goSleep(false); }
+    if (a.entra) { const b = PEOPLE[a.entra]; if (b) { b.where = a.a; b.x = KDOOR.x + 30; b.y = KIT.h - 30; b.sit = false; b.nav = null; b.moving = false; b.dir = 0; } }
+    if (a.sale) { const b = PEOPLE[a.sale]; if (b) { b.where = CH[a.sale]?.home || 'gg'; b.x = STAIRS.x - 30; b.y = STAIRS.y + 30; b.nav = null; } }
     if (a.levantar) { const b = a.levantar === 'ana' ? ana : PEOPLE[a.levantar]; if (b) { b.sit = false; b.llora = false; if (b !== ana) b.mealSat = false; } }
     if (a.afecto) { const [k, o, n] = a.afecto; relSetW(k, o, Math.max(relGetW(k, o), +n)); }   // (how much one cares for the other, at least so much)
     if (a.suma) { const [q, n] = a.suma, [nombre, dueño, hacia] = q.split(':'), H = (game.wm.sumaHoy ||= {});
@@ -5571,7 +5612,9 @@ function dlgAccion(s){   // an action of the script: «hecho x», «marca id | n
     case 'fin_capitulo': return { fin_capitulo: true };
     case 'nombrar': return { nombrar: r[0], pedir: r[1] === '?' };
     case 'sentar': return { sentar: r[0] };
-    case 'dormir': return { dormir: true };   // (Ana goes to sleep: the night passes)   // (at her or his place at the kitchen table)
+    case 'dormir': return { dormir: true };
+    case 'entra': return { entra: r[0], a: r[1] };   // (someone comes into a room: «entra marilla ga», at its door)
+    case 'sale': return { sale: r[0] };   // (and goes back down, home)   // (Ana goes to sleep: the night passes)   // (at her or his place at the kitchen table)
     case 'levantar': return { levantar: r[0] };   // (Ana names a thing: «nombrar lago», the book's name; «nombrar lago ?», the player writes it)
     case 'meta': { const [quien, tipo, args = ''] = part[0].split(/\s+/); return { meta: { quien, tipo, args: args ? args.split(',').map(dlgVal) : [], texto: part[1] || undefined, etiqueta: part[2] || undefined, prioridad: part[3] ? +part[3] : undefined } }; }
   }
@@ -7030,8 +7073,10 @@ const enConversacion = k => (k !== 'ana' && CHAT_HOLD[k] > TT) || TALKS.some(t =
 function autoTick(){
   if (!autoAllowed() || AGENTS.ana?.followOf || wmDriven('ana') || (CAP1.on && !CAP1.done) || game.scene === 'camino' || ana.hidden || cart.riding) return;   // (in the book's chapter she waits for Matthew; in the cart she rides)   // (a goal of the planner, or following someone who asked: no wandering off)
   const manual = auto.intent?.manual;
-  if (!manual && TT - lastInput < AUTO_IDLE) { auto.on = false; return; }
-  if (!auto.on) { auto.on = true; if (!auto.told && !manual) { auto.told = true; notice('Ana hace lo suyo; muévete o toca algo para retomar el control.'); } }
+  // (Ana goes on her own only with the button 🤖 on: not because the player stopped for a while. The traces, with no
+  //  player, keep the old way: on her own after a while without input)
+  if (!manual && !(navigator.webdriver ? TT - lastInput >= AUTO_IDLE : ANA_AUTO)) { auto.on = false; return; }
+  if (!auto.on) auto.on = true;
   if (amb.cur) return;
   if (enConversacion('ana')) { if (ana.goto?.auto) ana.goto = null; return; }   // (talking with someone: she stays, and goes on with what she meant to do afterwards)
   if (auto.intent) { if (!ana.goto) autoStep(); return; }
@@ -8491,6 +8536,7 @@ function ambUpdate(dt){
   if (amb.cur) return ambTick(dt);
   if (enc.cur) return;
   if (writtenTalkOn()) return;   // (on the trip, or in the book's chapter: the written lines go, not the loose ones)
+  if (TALKS.some(t => t.lines.some(l => l.q === 'ana' || l.q === '?'))) return;   // (Ana in a scene: no loose lines in the middle of it)
   if (game.talk || game.cooking || game.map || !$('ai').hidden) return;
   const all = Object.keys(PEOPLE).filter(k => sceneOf(k) === game.scene), dd = k => dist(ana.x, ana.y, PEOPLE[k].x, PEOPLE[k].y);
   for (const k of Object.keys(PEOPLE)) if (sceneOf(k) !== game.scene || dd(k) > 280) amb.seen[k] = false;
@@ -8540,8 +8586,18 @@ function drawBubble(g, p, b, W, H){
   g.save(); g.globalAlpha = a; g.lineJoin = 'round'; g.textAlign = 'center';
   let caja = null;
   if (t) caja = cajaTexto(g, t, piensa ? 'piensa' : 'dice', p, sx, top, foot, W, H);
-  if (narra) cajaTexto(g, narra, 'narra', p, sx, caja ? (caja.below ? null : caja.y - 4) : top, caja ? (caja.below ? caja.y + caja.h + 4 : null) : foot, W, H, !!caja);
+  if (narra) cuadroArriba(g, narra, W, a);
   g.restore();
+}
+// a caption: what is told of someone, fixed at the top of the screen (one under the other, if there are several)
+let cuadrosY = 56;
+function cuadroArriba(g, text, W, a){
+  const fs = W < 520 ? 13 : 14, maxW = Math.min(520, W - 32); g.font = 'italic ' + fs + 'px Georgia, serif';
+  const rows = []; let cur = ''; for (const w of text.split(' ')) { const t = cur ? cur + ' ' + w : w; if (cur && g.measureText(t).width > maxW - 24) { rows.push(cur); cur = w; } else cur = t; } rows.push(cur);
+  const lh = fs + 4, w = Math.min(maxW, Math.max(...rows.map(r => g.measureText(r).width)) + 28), h = rows.length * lh + 14, x = (W - w) / 2, y = cuadrosY;
+  g.save(); g.globalAlpha = a; g.beginPath(); g.rect(x, y, w, h); g.fillStyle = '#f3e4bf'; g.fill(); g.strokeStyle = '#8a6a48'; g.lineWidth = 1.2; g.stroke();
+  g.fillStyle = '#4a3420'; g.textAlign = 'center'; rows.forEach((r, k) => g.fillText(r, W / 2, y + 7 + (k + 1) * lh - 3)); g.restore();
+  cuadrosY += h + 6;
 }
 // one box: its rows, where it goes (above «top» if it fits, else from «foot» down), its shape and its tail
 function cajaTexto(g, text, kind, p, sx, top, foot, W, H, apilada){
@@ -8601,7 +8657,7 @@ function say(who, text, opts, wait = false){
   opts.forEach(([label, fn], k) => { const b = document.createElement('button'); b.textContent = (opts.length > 1 ? (k + 1) + '. ' : '') + conNombres(label); b.onclick = e => { e.stopPropagation(); fn(); }; row.appendChild(b); });
   box.hidden = false; game.talkOpts = opts;
   // a decision with a character: if the player does not choose in 10 seconds, Ana chooses by herself
-  if (opts.length > 1 && !wait && PEOPLE[who] && AI.auto !== false) { game.talk.deadline = TT + 10; box.insertAdjacentHTML('beforeend', '<div class="tbar"><i></i></div>'); }
+  if (opts.length > 1 && !wait && PEOPLE[who] && AI.auto !== false && (ANA_AUTO || navigator.webdriver)) { game.talk.deadline = TT + 10; box.insertAdjacentHTML('beforeend', '<div class="tbar"><i></i></div>'); }
 }
 // a decision box is open (the talk itself, or waiting for the AI, does not hold anyone still)
 const menuOpen = () => !!game.talk && !game.talk.scene && !game.talk.wait;
@@ -8883,10 +8939,14 @@ function commute(p, want, dt, sp){
 const cam = { x: ana.x, y: ana.y };
 let last = performance.now(), TT = 0, here = null, taskTick = 0, storyT = 2;
 // Ana crying with her head on the table: a tear now and then, over its edge (drawn in front of it, with the effects)
-function lagrimas(){ ana.sortY = ana.llora && ana.sit && game.scene === 'gg' ? TABLE.y + 1 : undefined;   // (lying on the table: drawn after it)
-  if (!ana.llora || !ana.sit || TT < (ana._lagT || 0) || game.scene !== 'gg') return; ana._lagT = TT + .45; for (const s of [-1, 1]) if (Math.random() < .7) fx.push({ kind: 'drop', x: ana.x + s * (3 + Math.random() * 8), y: ana.y + 36, vy: 2 + Math.random() * 3, t: 0 }); }
+function lagrimas(){
+  ana.sortY = ana.llora && ana.sit && game.scene === 'gg' ? TABLE.y + 1 : ana.enCama && game.scene === 'ga' ? GA.bed.y + 1 : undefined;   // (lying on the table, in her bed: drawn after it)
+  if (TT < (ana._lagT || 0)) return;
+  if (ana.llora && ana.sit && game.scene === 'gg') { ana._lagT = TT + .45; for (const s of [-1, 1]) if (Math.random() < .7) fx.push({ kind: 'drop', x: ana.x + s * (3 + Math.random() * 8), y: ana.y + 36, vy: 2 + Math.random() * 3, t: 0 }); }
+  else if (ana.enCama === 'boca_abajo' && game.scene === 'ga') { ana._lagT = TT + .55; if (Math.random() < .8) fx.push({ kind: 'drop', x: GA.bed.x + 40 + Math.random() * 14, y: GA.bed.y - 10, vy: 2 + Math.random() * 2, t: 0 }); }
+}
 function update(dt){
-  if (sleeping || narraPausa()) return;   // (a card that explains: the world waits while it is read)
+  if (sleeping || narraPausa() || decidiendo()) return;   // (a card being read, a decision being taken: the world waits)   // (a card that explains: the world waits while it is read)
   if (AI.on && provider() === 'manual' && aiq.list.length) return;   // (debugging by hand: the world waits for the answer)
   TT += dt; dayT += dt / (MIN_S * 60 * 24); boil = Math.floor(TT * 6);
   const { night } = light();
@@ -9201,6 +9261,7 @@ function renderView(){
   vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(60,40,20,.3)'); g.fillStyle = vg; g.fillRect(0, 0, W, H);
   }
   // speech bubbles over the heads of whoever is talking (on the screen, over the light of the day, so they read at night)
+  cuadrosY = W < 640 ? 100 : 56;   // (the captions, from the top down: under the hint)
   for (const b of bubbles) { const p = personOf(b.q); if (p && (b.q === 'ana' ? anaHere : (PEOPLE[b.q] ? sceneOf(b.q) : b.q.startsWith('f:') ? FOLKBY[b.q.slice(2)]?.where : animalWhere(b.q)) === game.scene)) drawBubble(g, p, b, W, H); }
   // the little papers: what she has, the hour, what she can do
   const I = game.inv, bits = [];
@@ -11867,6 +11928,7 @@ function inicioTick(dt){
   if ((inicioT -= dt) > 0) return; inicioT = 3;
   const H = dlgHechos(); if (!H.primera_noche || H.desayuno_prueba || dlgDichas().primera_bed || sleeping || navigator.webdriver) { inicioFin = 0; return; }
   if (TALKS.length || game.talk) return;
+  if (game.scene === 'ga') { primeraVez('bed', goToBed); return; }   // (up in her room: she throws herself on the bed at once)
   if (!inicioFin) inicioFin = TT;
   if (auto.on && TT - inicioFin > 60) { if (game.scene !== 'ga') goIn('ga', [GA.bed.x - 20, GA.bed.y + 16]); primeraVez('bed', goToBed) || goSleep(false); }
 }

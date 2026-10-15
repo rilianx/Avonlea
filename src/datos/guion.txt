@@ -781,16 +781,29 @@ marilla: (Marilla enciende una vela.) Tu pieza es la del alero este, arriba. Sub
 ! levantar matthew
 ! levantar ana
 narra: Así se juega: cuando hay que elegir, eliges tú por Ana (si no eliges, ella elige sola, a su manera). Lo que hace cambia lo que los demás sienten por ella. Ahora mismo Marilla no la quiere, y Ana está a prueba.
-narra: Ahora te toca a ti: lleva a Ana a su pieza. Toca la escalera, al fondo de la cocina; arriba, toca la cama para acostarla. En el cuaderno (📖) verás qué puede hacer Ana para quedarse en Tejas Verdes.
+narra: Ahora te toca a ti: lleva a Ana a su pieza. Toca la escalera, al fondo de la cocina. En el cuaderno (📖) verás qué puede hacer Ana para quedarse en Tejas Verdes.
 
-# la primera noche, en la cama de la pieza del alero (la primera vez que Ana se acuesta)
+# la primera noche, en la pieza del alero (cap. 3): apenas llega, Ana se tira en la cama, desconsolada; Marilla sube con
+# la vela a darle las buenas noches, y Ana se enoja
 === primera_bed ===
 disparo: primera
 canal: ana_sola
+sujeta: marilla
 si: hecho:primera_noche, !hecho:se_queda
 ---
-ana: (Ana se quita el vestido, se pone el camisón del orfanato, que le queda corto, y salta a la cama. Se tapa hasta la cabeza.)
-ana piensa: Marilla me diría «buenas noches». ¿Cómo va a ser buena una noche que es la peor de toda mi vida?
+ana: (La pieza del alero: paredes blancas y desnudas, una cama alta, una mesita, una silla. Ana la mira con espanto.)
+! ana enCama=boca_abajo
+ana: (Se tira en la cama boca abajo, con zapatos y todo, y llora desconsolada contra la almohada.)
+ana piensa: Nadie me quiere. Nadie me ha querido nunca. Y ahora tampoco aquí.
+! entra marilla ga
+marilla: (Marilla sube con la vela. Mira la ropa, los zapatos, a la niña hecha un ovillo.) Desvístete y métete en la cama como corresponde, niña.
+ana: (Ana se quita el vestido de mala gana, se pone el camisón del orfanato, que le queda corto, y se mete bajo las sábanas.)
+! ana enCama=tapada
+marilla: (Marilla recoge la ropa tirada en el suelo y la dobla sobre la silla.) Buenas noches.
+ana: (Ana asoma la cara, blanca, entre las sábanas.) ¿Cómo puede decir que son buenas noches, cuando sabe que tiene que ser la peor noche de toda mi vida?
+ana: (Y se vuelve a meter debajo de las sábanas, hasta la cabeza.)
+marilla: (Marilla baja la escalera despacio, con la vela, sin saber muy bien qué pensar.)
+! sale marilla
 ana: (Esa noche, en la pieza del alero, Ana llora hasta quedarse dormida.)
 ! dormir
 
@@ -907,6 +920,7 @@ ana: Voy a imaginar que es la puerta de un castillo encantado. Aunque por ahora 
 disparo: primera
 canal: ana_sola
 tambien
+si: hecho:desayuno_prueba
 ---
 ana: (Ana sube la escalera empinada hasta la pieza del alero: paredes blancas, una cama alta, una mesita, una ventana.)
 ana: Es tan blanca y tan… tan sin adornos. Pero tiene una ventana. Y una ventana es una ventana al mundo entero.

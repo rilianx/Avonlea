@@ -179,6 +179,7 @@ function ambUpdate(dt){
   if (amb.cur) return ambTick(dt);
   if (enc.cur) return;
   if (writtenTalkOn()) return;   // (on the trip, or in the book's chapter: the written lines go, not the loose ones)
+  if (TALKS.some(t => t.lines.some(l => l.q === 'ana' || l.q === '?'))) return;   // (Ana in a scene: no loose lines in the middle of it)
   if (game.talk || game.cooking || game.map || !$('ai').hidden) return;
   const all = Object.keys(PEOPLE).filter(k => sceneOf(k) === game.scene), dd = k => dist(ana.x, ana.y, PEOPLE[k].x, PEOPLE[k].y);
   for (const k of Object.keys(PEOPLE)) if (sceneOf(k) !== game.scene || dd(k) > 280) amb.seen[k] = false;
@@ -228,8 +229,18 @@ function drawBubble(g, p, b, W, H){
   g.save(); g.globalAlpha = a; g.lineJoin = 'round'; g.textAlign = 'center';
   let caja = null;
   if (t) caja = cajaTexto(g, t, piensa ? 'piensa' : 'dice', p, sx, top, foot, W, H);
-  if (narra) cajaTexto(g, narra, 'narra', p, sx, caja ? (caja.below ? null : caja.y - 4) : top, caja ? (caja.below ? caja.y + caja.h + 4 : null) : foot, W, H, !!caja);
+  if (narra) cuadroArriba(g, narra, W, a);
   g.restore();
+}
+// a caption: what is told of someone, fixed at the top of the screen (one under the other, if there are several)
+let cuadrosY = 56;
+function cuadroArriba(g, text, W, a){
+  const fs = W < 520 ? 13 : 14, maxW = Math.min(520, W - 32); g.font = 'italic ' + fs + 'px Georgia, serif';
+  const rows = []; let cur = ''; for (const w of text.split(' ')) { const t = cur ? cur + ' ' + w : w; if (cur && g.measureText(t).width > maxW - 24) { rows.push(cur); cur = w; } else cur = t; } rows.push(cur);
+  const lh = fs + 4, w = Math.min(maxW, Math.max(...rows.map(r => g.measureText(r).width)) + 28), h = rows.length * lh + 14, x = (W - w) / 2, y = cuadrosY;
+  g.save(); g.globalAlpha = a; g.beginPath(); g.rect(x, y, w, h); g.fillStyle = '#f3e4bf'; g.fill(); g.strokeStyle = '#8a6a48'; g.lineWidth = 1.2; g.stroke();
+  g.fillStyle = '#4a3420'; g.textAlign = 'center'; rows.forEach((r, k) => g.fillText(r, W / 2, y + 7 + (k + 1) * lh - 3)); g.restore();
+  cuadrosY += h + 6;
 }
 // one box: its rows, where it goes (above «top» if it fits, else from «foot» down), its shape and its tail
 function cajaTexto(g, text, kind, p, sx, top, foot, W, H, apilada){
@@ -289,7 +300,7 @@ function say(who, text, opts, wait = false){
   opts.forEach(([label, fn], k) => { const b = document.createElement('button'); b.textContent = (opts.length > 1 ? (k + 1) + '. ' : '') + conNombres(label); b.onclick = e => { e.stopPropagation(); fn(); }; row.appendChild(b); });
   box.hidden = false; game.talkOpts = opts;
   // a decision with a character: if the player does not choose in 10 seconds, Ana chooses by herself
-  if (opts.length > 1 && !wait && PEOPLE[who] && AI.auto !== false) { game.talk.deadline = TT + 10; box.insertAdjacentHTML('beforeend', '<div class="tbar"><i></i></div>'); }
+  if (opts.length > 1 && !wait && PEOPLE[who] && AI.auto !== false && (ANA_AUTO || navigator.webdriver)) { game.talk.deadline = TT + 10; box.insertAdjacentHTML('beforeend', '<div class="tbar"><i></i></div>'); }
 }
 // a decision box is open (the talk itself, or waiting for the AI, does not hold anyone still)
 const menuOpen = () => !!game.talk && !game.talk.scene && !game.talk.wait;
