@@ -141,6 +141,14 @@ body.visor > *:not(#cv):not(#visor){display:none !important}
 #ai .note{font-size:13px;color:#6b4a30;margin-top:4px}
 #ai pre{white-space:pre-wrap;font:13px Georgia,serif;background:#fffaf0;border:1px solid #d9bf8f;border-radius:6px;padding:8px;max-height:40vh;overflow:auto}
 #ai button,#map button,#rels button{font:15px Georgia,serif;background:#fffaf0;color:#3b2a1c;border:1.5px solid #6b4a30;border-radius:8px 11px 7px 10px;padding:5px 11px;cursor:pointer}
+/* the buttons on the right: the ones a player uses (the rest, for development, only with ?dev in the address) */
+body:not(.dev) :is(#daybtn,#wmbtn,#headbtn,#callbtn,#obsbtn){display:none!important}
+body:not(.dev) #cuabtn{top:214px!important;right:10px!important}
+body:not(.dev) #autobtn{top:256px!important;right:10px!important}
+body:not(.dev) #spdbtn{top:298px!important;right:10px!important}
+#spdbtn{width:72px!important;touch-action:none;user-select:none;display:flex;align-items:center;justify-content:space-between;padding:0 4px!important}#spdbtn i{font-style:normal;opacity:.45;font-size:11px}
+#spdbtn.slow{outline:2px solid #6a8fb0;color:#3a5a7a}
+@media (max-height:560px){body:not(.dev) #cuabtn{top:198px!important}body:not(.dev) #autobtn{top:236px!important}body:not(.dev) #spdbtn{top:274px!important}}
 </style>
 </head>
 <body>
@@ -161,7 +169,7 @@ body.visor > *:not(#cv):not(#visor){display:none !important}
 <button id="relbtn" class="paper" title="La historia de hoy y quién quiere a quién">👥</button>
 <button id="cuabtn" class="paper" title="Lo que Ana podría hacer (su cuaderno)">📖</button>
 <button id="daybtn" class="paper" title="Pasar al día siguiente">⏭</button>
-<button id="spdbtn" class="paper" title="Velocidad del tiempo: toca para cambiarla (1×, 2×, 5×, 10×, 25×, 50×) · teclas + y −">1×</button>
+<button id="spdbtn" class="paper" title="Velocidad del tiempo: desliza a la derecha para acelerar, a la izquierda para ir más lento (o toca un lado) · teclas + y −">1×</button>
 <button id="obsbtn" class="paper" title="Observar a un personaje (que la vista lo siga)">👁</button>
 <div id="obsmenu" class="paper" hidden></div>
 <button id="wmbtn" class="paper" title="Metas de prueba (el planificador, sin IA)">🎯</button>

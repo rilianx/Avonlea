@@ -1,5 +1,6 @@
 /* ---------- input ---------- */
 const keys = new Set();
+if (/[?&]dev\b/.test(location.search)) document.body.classList.add('dev');   // (the development buttons: test goals, heads, watching, calling, the next day)
 let actNow = false;
 addEventListener('keydown', e => {
   if (e.target.closest && e.target.closest('input,select,textarea')) return;
@@ -113,9 +114,16 @@ $('aiq').querySelector('.no').addEventListener('click', () => { const r = aiq.li
 $('aiq').querySelector('.all').addEventListener('click', () => { const r = aiq.list[0]; if (!r) return; aiq.skip.add(r.kind); for (const x of aiq.list.filter(x => x.kind === r.kind)) aiqFail(x.id, 'omitido'); notice('🐞 Desde ahora no se pregunta: ' + r.kind); });
 $('aiq').querySelector('.cp').addEventListener('click', () => { const r = aiq.list[0]; if (!r) return; try { navigator.clipboard.writeText(`INSTRUCCIONES:\n${sysFor(r.schema)}\n\nPEDIDO:\n${r.prompt}\n\nResponde solo con un objeto JSON que siga este esquema:\n${JSON.stringify(r.schema)}`); notice('📋 Copiado: pégalo en otra IA y trae su respuesta'); } catch (e) {} });
 $('aiq').addEventListener('keydown', e => e.stopPropagation());
-const SPEEDS_T = [1, 2, 5, 10, 25, 50];
-function setSpeed(k){ GAME_SPEED = k; owed = 0; $('spdbtn').textContent = k + '×'; $('spdbtn').classList.toggle('fast', k > 1); if (k > 1) notice('⏩ El tiempo va ' + k + ' veces más rápido'); }
-$('spdbtn').addEventListener('pointerdown', e => { e.stopPropagation(); setSpeed(SPEEDS_T[(SPEEDS_T.indexOf(GAME_SPEED) + (e.shiftKey || e.button === 2 ? SPEEDS_T.length - 1 : 1)) % SPEEDS_T.length]); });
+const SPEEDS_T = [.25, .5, 1, 2, 5, 10, 25, 50];
+const velTxt = k => (k === .25 ? '¼' : k === .5 ? '½' : k) + '×';
+function setSpeed(k){ GAME_SPEED = k; owed = 0; $('spdbtn').innerHTML = '<i>◂</i>' + velTxt(k) + '<i>▸</i>'; $('spdbtn').classList.toggle('fast', k > 1); $('spdbtn').classList.toggle('slow', k < 1); notice(k > 1 ? '⏩ El tiempo va ' + k + ' veces más rápido' : k < 1 ? '🐢 El tiempo va más lento (' + velTxt(k) + ')' : '⏵ El tiempo va normal'); }
+// the speed: slide the button to the right to hurry the time, to the left to slow it down (a tap: on its right half,
+// faster; on its left half, slower)
+{ let arr = null; const B = $('spdbtn'), paso = d => { const i = SPEEDS_T.indexOf(GAME_SPEED); setSpeed(SPEEDS_T[clamp(i + d, 0, SPEEDS_T.length - 1)]); };
+  B.addEventListener('pointerdown', e => { e.stopPropagation(); e.preventDefault(); B.setPointerCapture(e.pointerId); arr = { x: e.clientX, x0: e.clientX, movio: false }; });
+  B.addEventListener('pointermove', e => { if (!arr) return; const dx = e.clientX - arr.x; if (Math.abs(dx) >= 22) { arr.x = e.clientX; arr.movio = true; paso(Math.sign(dx)); } });
+  B.addEventListener('pointerup', e => { if (!arr) return; if (!arr.movio) { const r = B.getBoundingClientRect(); paso(e.clientX > r.left + r.width / 2 ? 1 : -1); } arr = null; });
+  B.addEventListener('pointercancel', () => { arr = null; }); B.innerHTML = '<i>◂</i>' + velTxt(GAME_SPEED) + '<i>▸</i>'; }
 $('spdbtn').addEventListener('contextmenu', e => e.preventDefault());
 addEventListener('keydown', e => { if (e.target.closest?.('input, textarea')) return; const i = SPEEDS_T.indexOf(GAME_SPEED); if (e.key === '+') setSpeed(SPEEDS_T[Math.min(i + 1, SPEEDS_T.length - 1)]); else if (e.key === '-') setSpeed(SPEEDS_T[Math.max(i - 1, 0)]); });
 $('tripisla').addEventListener('pointerdown', e => { e.stopPropagation(); islaToggle(); });
