@@ -265,6 +265,17 @@ if D['metas']:
     encabezado(ME, 1, ['Grupo', 'Meta', 'Qué es', 'Requiere', 'Pista'], [16, 18, 34, 30, 70])
     tabla(ME, [[m['grupo'], m['id'], m['titulo'], m['requiere'], m['pista']] for m in D['metas']], wrap_cols=(3, 5))
 
+# --- Cobertura (para revisar qué falta): tools/cobertura.py; también trazas/cobertura.md
+import cobertura
+COB = cobertura.analizar(D, RAIZ)
+cobertura.escribir_md(COB, RAIZ, D['generado'])
+CO = wb.create_sheet('Cobertura', 1)
+encabezado(CO, 1, ['Prioridad', 'Área', 'Qué', 'Falta', 'Idea'], [9, 16, 44, 60, 60])
+tabla(CO, COB, wrap_cols=(3, 4, 5))
+CO.freeze_panes = 'C2'; CO.auto_filter.ref = f'A1:E{len(COB) + 1}'
+CO.conditional_formatting.add(f'A2:A{len(COB) + 1}', FormulaRule(formula=['A2="alta"'], fill=FILL_ROJO))
+CO.conditional_formatting.add(f'A2:A{len(COB) + 1}', FormulaRule(formula=['A2="media"'], fill=FILL_AMAR))
+
 # --- Cómo usar (la primera hoja)
 C = wb.create_sheet('Cómo usar', 0)
 C.column_dimensions['A'].width = 120
@@ -305,10 +316,11 @@ for i, (t, f) in enumerate(texto, 1):
         c.font = f
 L.sheet_state = 'hidden'
 for ws in wb.worksheets:
-    if ws.title not in ('Frases', 'Cómo usar', 'Listas', 'Escenas', 'Noticias', 'Llegadas'):
+    if ws.title not in ('Frases', 'Cómo usar', 'Listas', 'Escenas', 'Noticias', 'Llegadas', 'Cobertura'):
         ws.protection.sheet = True; ws.protection.autoFilter = False; ws.protection.sort = False
 os.makedirs(os.path.join(RAIZ, 'planilla'), exist_ok=True)
 salida = os.path.join(RAIZ, 'planilla/avonlea.xlsx')
 wb.save(salida)
 huecos = sum(1 for m in D['momentos'] for g in gente for k in ('sin', 'con') if D['huecos'][m['id']].get(g['id'], {}).get(k) == 0)
+print(f'→ trazas/cobertura.md · {len(COB)} pendientes')
 print(f'→ planilla/avonlea.xlsx · {len(frases)} frases de {len(set(f[0] for f in frases))} personas · {len(D["escenas"])} escenas · {len(D["noticias"])} noticias · huecos: {huecos} casillas en 0')

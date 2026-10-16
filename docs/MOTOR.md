@@ -153,6 +153,8 @@ Para ver todo junto y encontrar lo que falta, como se hace en los estudios (una 
   - **Frases** (se edita): una fila por frase, y las condiciones en columnas con listas desplegables (¿conoce a Ana?, después de un hecho o meta, días después, antes de, estación; lo demás, tal cual en «Otras condiciones»).
   - **Huecos**: cada personaje en cada momento de la historia (día 2, día 4, la visita de la Sra. Lynde, Diana, la escuela, el invierno, los Allan, la Srta. Stacy), cuántas frases valen si todavía no conoce a Ana y si ya la conoce. Rojo: ninguna.
   - **Personas, Escenas, Noticias, Llegadas, Hechos, Metas**: para mirar (se editan en `src/datos/`).
+- **Escenas, Noticias, Llegadas** también se editan en la planilla (los campos de cada bloque, en columnas; los diálogos se leen en la hoja «Diálogos» y se escriben en `guion.txt`).
+- **Cobertura** (`tools/cobertura.py`, también `trazas/cobertura.md`): lo que falta, con prioridad: lugares × cómo anda Ana (en camisón, sin sombrero, de noche) sin escena que reaccione; quién nunca reacciona al camisón; noticias que nadie usa; llegadas que nadie nota; gente sin presentación propia, con pocas frases o sin escena; metas sin guiño ni pista; hechos que nunca pasan o que nadie lee.
 - `python3 tools/importar_planilla.py` lleva la hoja «Frases» de vuelta a `src/datos/frases.txt`: revisa cada fila (quién, tipo, condiciones) y, si algo está mal, no cambia nada y dice en qué fila; después compila, y si el revisor de la historia encuentra un problema en una frase, vuelve atrás.
 
 ## 4. Cómo se comprueba
