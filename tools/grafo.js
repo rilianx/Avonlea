@@ -80,7 +80,7 @@ if (sinReaccion.length) malas.push(...sinReaccion.map(x => 'noticia sin reacció
     if (/^(llega si|de visita):/.test(s)) anota(hace, 'llego_' + q, 'llegadas'); if (/^(se va si|de visita):/.test(s)) anota(hace, 'se_fue_' + q, 'llegadas');   // (arriving and leaving are facts of the story)
     if ((m = s.match(/^(?:llega|se va) si:\s*(.*)$/))) m[1].split(',').forEach(c => condicion(c.trim(), 'llegadas de ' + q)); } }
 // the notebook: what each goal requires, its hints, and goals that are a fact
-let meta = null;
+let meta = null; const REQ = {}, A_PRUEBA = new Set();
 for (const raw of cuaderno.split('\n')) {
   const s = raw.trim(); if (!s || s[0] === '#') continue;
   const h = s.match(/^===\s*(.+?)\s*===$/); if (h) { meta = h[1]; continue; } if (!meta) continue;
@@ -90,7 +90,11 @@ for (const raw of cuaderno.split('\n')) {
   }
   if ((m = s.match(/^pista si (.+?):\s/))) m[1].split(',').forEach(c => condicion(c.trim(), 'meta ' + meta + ' (pista)'));
   if ((m = s.match(/^meta:\s*hecho\s+(\S+)/))) anota(pide, m[1] + ' ', 'meta ' + meta);
+  if ((m = s.match(/^requiere:\s*(.*)$/))) REQ[meta] = m[1].split(',').map(x => x.trim()); if (s === 'a prueba') A_PRUEBA.add(meta);
 }
+// before Marilla decides (days 1 to 3), only what is marked «a prueba»: every other goal waits for «quedarse»
+{ const llega = (k, vis = new Set()) => k === 'quedarse' || (REQ[k] || []).some(x => x === 'hecho:se_queda' || (metas.has(x) && !vis.has(x) && llega(x, new Set([...vis, k]))));
+  for (const k of metas) if (!A_PRUEBA.has(k) && !llega(k)) malas.push(`meta ${k}: se puede hacer antes de que acepten a Ana (que pida «quedarse», o márquela «a prueba»)`); }
 // the skills: Ana's milestones that someone tells leave a fact
 let hab = null;
 for (const raw of habilidades.split('\n')) {

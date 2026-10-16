@@ -306,6 +306,21 @@ for raw in leer('src/datos/frases.txt').split('\n'):
             GRUPO_FRASES.append((q, m.group(1), conds, m.group(3)))
         else:
             agregar_frase(q, m.group(1), conds, m.group(3))
+# the notebook's winks (src/datos/cuaderno.txt, «guiño quien:»): what someone says while a goal is open and not done
+# (its «requiere» done). A goal done is its fact, if it is one («meta: hecho se_queda»), or else «cuaderno:id»
+CUAD = {}
+for b in re.split(r'(?m)^(?==== )', leer('src/datos/cuaderno.txt')):
+    m = re.match(r'=== (\S+) ===', b)
+    if not m: continue
+    r = re.search(r'(?m)^requiere: (.*)$', b); h = re.search(r'(?m)^meta: hecho (\S+)', b)
+    CUAD[m.group(1)] = {'req': [x.strip() for x in r.group(1).split(',')] if r else [], 'hecho': h.group(1) if h else None,
+                        'guiños': re.findall(r'(?m)^guiño (\S+): (.*)$', b)}
+hecha = lambda k: 'hecho:' + CUAD[k]['hecho'] if CUAD[k]['hecho'] else 'cuaderno:' + k
+for k, c in CUAD.items():
+    abierta = [hecha(x) if x in CUAD else x for x in c['req']] + ['!' + hecha(k)]
+    for quien, texto in c['guiños']:
+        mc = re.match(r'^\[([^\]]+)\]\s*(.*)$', texto); propias = [x.strip() for x in mc.group(1).split(',')] if mc else []; texto = mc.group(2) if mc else texto
+        if quien in UNIDADES or quien in NOMBRE: agregar_frase(quien, 'dice', abierta + propias, texto); UNIDADES[quien][-1]['tipo'] = 'guiño del cuaderno'
 # a group's lines: each one of them; but a group's line gives way to one's own voice (as the game: lineasConVoz): it
 # holds only when none of one's own lines for the same thing (ana:camison, the hour) holds
 claves = lambda cs: {m.group(1) for c in cs for m in [re.match(r'^(ana:\w+|hora:\d+)', c)] if m}   # (what a line reacts to: «ana:camison», «hora:21»; not «!donde:ana:tejas»)

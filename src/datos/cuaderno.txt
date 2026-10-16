@@ -9,8 +9,11 @@
 #         condiciones del guion («hecho:conocidas_diana», «dias_desde:quiere_amiga:1», «afecto:diana:ana>=4», «estudio:ana>=10»)
 #   antes: cómo se dice lo que falta, mientras está cerrada (si no, los títulos de las metas que requiere)
 #   oculta: no aparece en el cuaderno hasta que se abre (algo que no se puede saber antes, como una prohibición)
+#   a prueba: se puede hacer antes de que Marilla decida que Ana se queda (los días 1 a 3, como en los cap. 2 a 8 del libro:
+#         rezar, ayudar, ponerle nombre a las cosas); las demás piden «quedarse» (lo revisa tools/grafo.js)
 #   guiño quien: lo que esa persona dice al pasar mientras la meta está abierta y sin cumplir (un guiño para el
-#         jugador, en el diálogo mismo, sin abrir el cuaderno); «guiño cerrada quien:» mientras está cerrada (lo que falta)
+#         jugador, en el diálogo mismo, sin abrir el cuaderno); «guiño cerrada quien:» mientras está cerrada (lo que falta).
+#         Con «[condiciones]» al principio, como en frases.txt: «guiño diana: [!hecho:prohibida] …»
 #   acciones: lo que no se puede hacer mientras está cerrada (separado por comas): una acción («jurar»), una
 #         acción con alguien («perdonar:gilbert»), o un pedido («pedir/venir»: invitar a tomar el té)
 #   Las metas que se pueden usar (las del planificador): amigas, picnic, visitar, paces, quehaceres, regalo_gusto,
@@ -49,7 +52,7 @@ pista si afecto:diana:ana<4: Ya conoces a Diana, pero para jurar tienen que quer
 meta: amigas ana diana
 requiere: conocer_diana
 acciones: jurar
-guiño diana: Mamá dice que las amigas de verdad se juran amistad para siempre… ¿tú crees en esas cosas, Ana?
+guiño diana: [!hecho:prohibida] Mamá dice que las amigas de verdad se juran amistad para siempre… ¿tú crees en esas cosas, Ana?
 
 === picnic ===
 titulo: Ir de picnic con Diana
@@ -59,7 +62,7 @@ meta: picnic ana diana
 requiere: amigas, hecho:broche, !hecho:prohibida
 antes: ser amiga de Diana (y que Marilla te deje ir al picnic)
 acciones: merendar, pedir_permiso
-guiño diana: ¿Supiste? ¡La escuela dominical va a hacer un picnic en el Lago de las Aguas Brillantes! Con helado, dicen.
+guiño diana: [!hecho:prohibida] ¿Supiste? ¡La escuela dominical va a hacer un picnic en el Lago de las Aguas Brillantes! Con helado, dicen.
 guiño cerrada marilla: ¿Alguien ha visto mi broche de amatista? Juraría que lo dejé en el alfiletero…
 
 === te_diana ===
@@ -68,7 +71,7 @@ pista: En Tejas Verdes, con el cordial de frambuesa de Marilla. Invítala cuando
 meta: tomando_te ana diana
 requiere: amigas, dias_desde:conocidas_diana:5, afecto:diana:ana>=5, !hecho:prohibida
 antes: que Diana te quiera mucho, mucho (pasen tiempo juntas, escríbele, regálale algo) y que se conozcan desde hace unos días
-guiño diana: Mamá nunca me deja ir a tomar el té a ninguna parte… ¡me encantaría que alguien me invitara de verdad!
+guiño diana: [!hecho:prohibida] Mamá nunca me deja ir a tomar el té a ninguna parte… ¡me encantaría que alguien me invitara de verdad!
 guiño cerrada marilla: Diana Barry es una niña buena. Si te sigues portando así con ella, algún día podrías invitarla a tomar el té.
 
 === perdon_barry ===
@@ -76,7 +79,7 @@ titulo: Recuperar la amistad de los Barry
 pista: La Sra. Barry no quiere que Diana te vea. Solo algo muy grande podría hacerla cambiar de idea.
 pista si hecho:crup: Minnie May tiene crup: ¡corre a La Cuesta del Huerto con el jarabe!
 meta: hecho perdonada
-requiere: hecho:diana_borracha
+requiere: quedarse, hecho:diana_borracha
 oculta
 
 === josephine ===
@@ -85,11 +88,12 @@ pista: La tía de la Sra. Barry viene de Charlottetown. Un concierto, una noche 
 meta: hecho cama_josephine
 requiere: amigas, dias_desde:conocidas_diana:15, afecto:diana:ana>=5, letras:ana>=10, !hecho:prohibida
 antes: ser muy amiga de Diana desde hace tiempo, y tener imaginación de sobra (escribe cuentos y cartas, ponle nombre a los lugares): a la tía Josephine le encanta
-guiño diana: Mi tía Josephine viene de Charlottetown para el concierto del Club de Debate. Es un poco… temible.
+guiño diana: [!hecho:prohibida] Mi tía Josephine viene de Charlottetown para el concierto del Club de Debate. Es un poco… temible.
 guiño cerrada diana: Mi tía Josephine dice que las niñas de hoy no tienen imaginación. ¡Si te conociera a ti!
 
 === lynde ===
 titulo: Visitar a la Sra. Lynde
+requiere: quedarse
 pista: Vive en la Hondonada, junto al camino; desde su ventana lo ve todo. Por la tarde está en casa.
 meta: visitar ana lynde
 guiño marilla: Rachel Lynde dice que todavía no la has ido a ver. Es mejor ir que dar que hablar.
@@ -107,6 +111,7 @@ guiño sraallan: Ana, ven un día a tomar el té a la casa parroquial. Me gustar
 == En Tejas Verdes
 
 === quehaceres ===
+a prueba
 titulo: Ayudar con los quehaceres
 pista: Lavar los platos, barrer… Marilla los pide, y se notan.
 meta: quehaceres ana platos,barrer
@@ -114,17 +119,20 @@ guiño marilla: Los platos no se lavan solos, Ana. Y el piso tampoco se barre so
 
 === regalo ===
 titulo: Hacerle un regalo a Marilla que le guste
+requiere: quedarse
 pista: A Marilla le gusta lo hecho a mano. Las flores de la huerta también alegran.
 meta: regalo_gusto ana marilla
 guiño matthew: Bueno, pues… a Marilla le gustan las cosas hechas a mano, ¿sabes? No lo dice, pero le gustan.
 
 === huerta ===
+a prueba
 titulo: Sembrar y regar la huerta
 pista: Los canteros junto a la casa, con semillas y la regadera de la bomba.
 meta: huerta ana
 guiño matthew: La huerta está pidiendo semillas y agua, me parece. Bueno, digo yo.
 
 === rezo ===
+a prueba
 titulo: Decir sus oraciones
 pista: Junto a su cama, en la pieza del alero.
 meta: rezo ana
@@ -134,6 +142,7 @@ guiño marilla: ¿Dijiste tus oraciones anoche, Ana? Junto a la cama, como corre
 
 === escuela_dominical ===
 titulo: Ir a la escuela dominical
+requiere: quedarse
 pista: En la iglesia, camino a Bright River.
 pista si presente:sraallan: En la iglesia, camino a Bright River. Allí está el pastor nuevo, y su esposa, la Sra. Allan.
 meta: estar_en ana iglesia
@@ -141,9 +150,10 @@ guiño marilla: El domingo vamos a la iglesia. Hay escuela dominical para los ni
 
 === escuela ===
 titulo: Ir a la escuela
+requiere: quedarse
 pista: La escuela está junto al río, más allá de la aldea. Allí van Diana, Gilbert Blythe y los demás.
 meta: estar_en ana escuela
-guiño diana: ¿Vienes conmigo a la escuela? Está junto al río. Te presento a todos.
+guiño diana: [!hecho:prohibida] ¿Vienes conmigo a la escuela? Está junto al río. Te presento a todos.
 
 === recito ===
 titulo: Recitar la lección en la escuela
@@ -151,7 +161,7 @@ pista: Hay que estudiarla antes.
 meta: recito ana
 requiere: escuela
 acciones: recitar
-guiño diana: Mañana toca recitar la lección… ¿tú ya te la aprendiste? Yo ni la miré.
+guiño diana: [!hecho:prohibida] Mañana toca recitar la lección… ¿tú ya te la aprendiste? Yo ni la miré.
 
 === queens ===
 titulo: Entrar a Queen's
@@ -169,20 +179,22 @@ guiño cerrada marilla: Dicen que en la escuela preparan a los mejores para Quee
 titulo: Hacer las paces con Gilbert Blythe
 pista: Le dijo «zanahorias». Él quiere disculparse… si Ana lo deja.
 meta: paces ana gilbert
-requiere: hecho:zanahorias, dias_desde:zanahorias:28, estudio:ana>=30
+requiere: quedarse, hecho:zanahorias, dias_desde:zanahorias:28, estudio:ana>=30
 antes: ir a la escuela, donde está Gilbert Blythe (y que pase algo); y después, mucho tiempo y mucha rivalidad en clases (estudiar, competir con él): Ana no perdona fácil
 acciones: disculparse:gilbert, perdonar:gilbert, interceder:gilbert
-guiño diana: Gilbert te mira todo el tiempo en clase, Ana… Creo que quiere pedirte perdón.
+guiño diana: [!hecho:prohibida] Gilbert te mira todo el tiempo en clase, Ana… Creo que quiere pedirte perdón.
 guiño cerrada diana: Gilbert sacó otra vez la mejor nota… Si estudiaras un poco más, le ganarías, Ana.
 
 === leido ===
 titulo: Leer un libro de principio a fin
+requiere: quedarse
 pista: Diana presta libros. Un buen rincón: la silla junto a la ventana de la cocina.
 meta: leido ana
-guiño diana: Te presto mi libro, si quieres. Es de una dama muy triste, en un castillo.
+guiño diana: [!hecho:prohibida] Te presto mi libro, si quieres. Es de una dama muy triste, en un castillo.
 
 === carta ===
 titulo: Escribir una carta y mandarla
+requiere: quedarse
 pista: Se escribe en el escritorio de su pieza; el correo está en la tienda de Lawson.
 meta: carta ana
 
@@ -192,7 +204,7 @@ pista: Una historia trágica, con una dama de cabellos de oro… y leérsela a D
 meta: club ana
 requiere: amigas, !hecho:prohibida
 acciones: escribir_cuento, leer_cuento
-guiño diana: ¿Y si hacemos un club de cuentos? Tú escribes tan bonito…
+guiño diana: [!hecho:prohibida] ¿Y si hacemos un club de cuentos? Tú escribes tan bonito…
 
 === concierto ===
 titulo: Recitar en el concierto
@@ -201,7 +213,7 @@ meta: concierto ana
 requiere: escuela
 antes: ir a la escuela (el concierto lo organizan la maestra y sus alumnos)
 acciones: ensayar, actuar
-guiño diana: ¡Va a haber un concierto en el salón! ¿Vas a recitar algo, Ana?
+guiño diana: [!hecho:prohibida] ¡Va a haber un concierto en el salón! ¿Vas a recitar algo, Ana?
 
 === sala ===
 titulo: Decorar el salón para el concierto
@@ -213,6 +225,7 @@ acciones: decorar_sala
 == Al aire libre
 
 === nombres ===
+a prueba
 titulo: Ponerle nombre a tres lugares
 pista: Hay lugares que se merecen un nombre más bonito que el que tienen.
 meta: nombres ana 3
@@ -220,6 +233,7 @@ guiño matthew: Tú le pones nombre a todo, Ana. Bueno, pues… ¿cómo le dirí
 
 === sombrero ===
 titulo: Adornar su sombrero con flores
+requiere: quedarse
 pista: Con un ramo de la huerta (Marilla no lo va a aprobar).
 meta: adornado ana
 
@@ -230,24 +244,27 @@ meta: remo ana
 requiere: amigas, !hecho:prohibida
 antes: ser amiga de Diana (el bote es de los Barry)
 acciones: remar
-guiño diana: Papá dejó el bote en el lago… ¿Jugamos a la doncella de los lirios?
+guiño diana: [!hecho:prohibida] Papá dejó el bote en el lago… ¿Jugamos a la doncella de los lirios?
 
 === patinar ===
 titulo: Patinar en el lago helado
+requiere: quedarse
 pista: Solo en invierno.
 meta: patinar ana
-guiño diana: Cuando el lago se hiele, ¡vamos a patinar! Es lo más lindo del invierno.
+guiño diana: [!hecho:prohibida] Cuando el lago se hiele, ¡vamos a patinar! Es lo más lindo del invierno.
 
 === trineo ===
 titulo: Tirarse en trineo colina abajo
+requiere: quedarse
 pista: Solo en invierno, en la colina.
 meta: trineo ana
-guiño diana: ¡Si nieva, nos tiramos en trineo por la colina!
+guiño diana: [!hecho:prohibida] ¡Si nieva, nos tiramos en trineo por la colina!
 
 == Travesuras
 
 === tinte ===
 titulo: Teñirse el pelo de negro azabache
+requiere: quedarse
 pista: El buhonero vende un tinte que promete maravillas… y acepta huevos.
 meta: teñido ana
 

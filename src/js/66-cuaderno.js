@@ -24,6 +24,7 @@ function cuadernoLeer(txt){
     else if ((h = l.match(/^guiño (cerrada )?(\S+):\s*(.*)$/))) (m.guiños ||= []).push({ cerrada: !!h[1], quien: h[2], texto: h[3] });
     else if ((h = l.match(/^(titulo|pista|meta|requiere|antes|acciones):\s*(.*)$/))) m[h[1]] = h[2];
     else if (l === 'oculta') m.oculta = true;
+    else if (l === 'a prueba') m.aPrueba = true;   // (before Marilla decides: tools/grafo.js checks the rest wait for «quedarse»)
   }
   for (const g of out) for (const x of g.metas) {
     const [f, ...a] = (x.meta || '').split(/\s+/), args = a.map(cuadernoArg), fn = G[f] || CUADERNO_EXTRA[f];
@@ -66,7 +67,7 @@ const GUIÑOS_MAX = 2;
 const faltaEsfuerzo = m => m.requiere.every(r => cuadernoCumple(r) || CUALIDAD_RE.test(r) || /^(afecto|dias_desde):/.test(r));
 function guiñosDe(k){
   if (!game.wm || !conoceA(k)) return [];
-  const c = CUADERNO_METAS.flatMap(m => (m.guiños || []).filter(g => g.quien === k && !cuadernoHecho(m.id) && (!m.oculta || cuadernoAbierta(m)) && g.cerrada === !cuadernoAbierta(m)).map(g => ({ t: g.texto, r: !g.cerrada ? 0 : faltaEsfuerzo(m) ? 1 : 2 })));
+  const c = CUADERNO_METAS.flatMap(m => (m.guiños || []).filter(g => g.quien === k && lineasSi([g.texto], k).length && !cuadernoHecho(m.id) && (!m.oculta || cuadernoAbierta(m)) && g.cerrada === !cuadernoAbierta(m)).map(g => ({ t: lineasSi([g.texto], k)[0], r: !g.cerrada ? 0 : faltaEsfuerzo(m) ? 1 : 2 })));
   const out = [];
   for (const r of [0, 1, 2]) { const l = c.filter(x => x.r === r); for (let i = 0; i < l.length && out.length < GUIÑOS_MAX; i++) out.push(l[(i + today()) % l.length].t); }
   return out;
