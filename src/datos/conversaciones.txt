@@ -143,7 +143,7 @@ marilla: Esa es la idea.
 === conv_marilla_queens ===
 con: marilla
 tema: Hablarle de ir a Queen's
-si: afecto:marilla:ana>=4, estudio:ana>=20, dia_juego:10
+si: afecto:marilla:ana>=4, estudio:ana>=20, dia_juego:10, conoce:stacy
 al_terminar: suma estudio:ana 1
 ---
 ana: Marilla, la Srta. Stacy dice que podría dar el examen de Queen's. Pero cuesta tanto…
@@ -257,7 +257,7 @@ ana: ¡A mí también! Somos espíritus afines, Matthew.
 === conv_matthew_queens ===
 con: matthew
 tema: Contarle cómo le fue en la escuela
-si: afecto:matthew:ana>=4, estudio:ana>=20, dia_juego:10
+si: afecto:matthew:ana>=4, estudio:ana>=20, dia_juego:10, conoce:stacy
 al_terminar: suma estudio:ana 1
 ---
 ana: Matthew, hoy saqué la mejor nota en composición. ¡Le gané a Gilbert Blythe!
@@ -412,7 +412,7 @@ ana: Ya lo sé. Por eso te lo cuento.
 === conv_diana_futuro ===
 con: diana
 tema: Hablarle de Queen's
-si: afecto:diana:ana>=4, estudio:ana>=20, !hecho:prohibida, dia_juego:10
+si: afecto:diana:ana>=4, estudio:ana>=20, !hecho:prohibida, dia_juego:10, conoce:stacy
 ---
 ana: Diana, la Srta. Stacy va a preparar a los que quieran dar el examen de Queen's. ¿Te vas a anotar?
 diana: Mamá no quiere. Dice que no hace falta que yo estudie para maestra.

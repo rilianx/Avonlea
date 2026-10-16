@@ -20,7 +20,7 @@ function cuadernoLeer(txt){
     if ((h = l.match(/^===\s*(.+?)\s*===$/))) { if (!grupo) out.push(grupo = { nombre: '', metas: [] }); grupo.metas.push(m = { id: h[1], pistas: [] }); continue; }
     if ((h = l.match(/^==\s*(.+)$/))) { out.push(grupo = { nombre: h[1], metas: [] }); m = null; continue; }
     if (!m) continue;
-    if ((h = l.match(/^pista si (\S+):\s*(.*)$/))) m.pistas.push([h[1], h[2]]);
+    if ((h = l.match(/^pista si (.+?):\s+(.*)$/))) m.pistas.push([h[1], h[2]]);   // (one condition or more, with commas)
     else if ((h = l.match(/^guiño (cerrada )?(\S+):\s*(.*)$/))) (m.guiños ||= []).push({ cerrada: !!h[1], quien: h[2], texto: h[3] });
     else if ((h = l.match(/^(titulo|pista|meta|requiere|antes|acciones):\s*(.*)$/))) m[h[1]] = h[2];
     else if (l === 'oculta') m.oculta = true;
@@ -72,7 +72,7 @@ function guiñosDe(k){
   return out;
 }
 // the hint now: the last whose condition holds, or the plain one
-const cuadernoPista = m => ([...m.pistas].reverse().find(([c]) => dlgCond(c, dlgCtx()))?.[1] || m.pista).replace('{estudio}', estudio()).replace('{dias_examen}', diasExamen());   // ({estudio}: how much she has studied; {dias_examen}: days until the examination)
+const cuadernoPista = m => ([...m.pistas].reverse().find(([c]) => c.split(',').every(x => dlgCond(x.trim(), dlgCtx())))?.[1] || m.pista).replace('{estudio}', estudio()).replace('{dias_examen}', diasExamen());   // ({estudio}: how much she has studied; {dias_examen}: days until the examination)
 const cuadernoAntes = m => m.antes || m.requiere.filter(r => !cuadernoCumple(r)).map(r => { const t = cuadernoMeta(r)?.titulo; return t && t[0].toLowerCase() + t.slice(1); }).filter(Boolean).join(', ');
 function cuadernoPanel(open){
   const P = $('cua'); P.hidden = !open; if (!open) return;
@@ -96,7 +96,7 @@ const cuadernoMiradas = () => { const l = HABILIDADES.filter(c => !deAna(c) && (
   return `<div class="cm"><b>${esc(c.titulo)}</b><small>${'●'.repeat(n) + '○'.repeat(Math.max(0, max - n))}${b ? ' · ' + esc(b.texto) : sube ? ' · en ' + sube.n + ': ' + esc(sube.texto) : ''}</small></div>`; }).join('') : ''; };
 // her friends: how much each one loves her (the hearts of 0 to 5), those she knows
 function cuadernoAmigos(){
-  const l = ['diana', 'marilla', 'matthew', 'sraallan', 'stacy', 'josephine', 'lynde', 'gilbert'].filter(k => (k !== 'diana' || conoceDiana()) && (k !== 'josephine' || dlgHechos().cama_josephine) && game.wm.rel?.[k + '>ana'] != null);
+  const l = ['diana', 'marilla', 'matthew', 'sraallan', 'stacy', 'josephine', 'lynde', 'gilbert'].filter(k => conoceA(k) && game.wm.rel?.[k + '>ana'] != null);
   return l.length ? '<h4>Quiénes la quieren</h4>' + l.map(k => { const r = Math.max(0, Math.min(5, Math.round(relGetW(k, 'ana')))); return `<div class="cm"><b>${esc(wmName(k).replace(/^(el|la) /, m => m[0].toUpperCase() + m.slice(1)))}</b><small>${'♥'.repeat(r) + '♡'.repeat(5 - r)}</small></div>`; }).join('') : '';
 }
 // a game that already had Ana and Diana as friends (before they had to meet): they know each other

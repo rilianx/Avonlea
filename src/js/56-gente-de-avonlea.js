@@ -175,8 +175,10 @@ function folkGo(f, pl){
 function folkTick(dt){
   const h = hourNow();
   for (const f of FOLK) {
+    if (f.where === 'away') { if ((f.re -= dt) > 0 || (f.re = 1, ausente(f.id))) continue; f.where = 'in'; [f.x, f.y] = f.inAt = f.home; f.key = ''; }   // (back in Avonlea: at home)
     if (wmDriven(f.id)) continue;
-    if ((f.re -= dt) <= 0) { f.re = .8 + Math.random() * .6; const pl = (!hayClases() && FOLK_LIBRE[f.def.kind] || FOLK_KINDS[f.def.kind])(h, f); if (pl.k !== f.key) { f.key = pl.k; f.plan = pl; folkGo(f, pl); } }
+    if ((f.re -= dt) <= 0) { f.re = .8 + Math.random() * .6; if (ausente(f.id)) { Object.assign(f, { where: 'away', route: [], moving: false, sit: false, key: '', plan: null }); continue; }   // (away from Avonlea, as in the book: src/datos/llegadas.txt)
+      const pl = (!hayClases() && FOLK_LIBRE[f.def.kind] || FOLK_KINDS[f.def.kind])(h, f); if (pl.k !== f.key) { f.key = pl.k; f.plan = pl; folkGo(f, pl); } }
     if (f.where !== 'out') continue;
     if (f.talkT > TT) { f.moving = false; continue; }
     if (f.route.length) {

@@ -2,7 +2,7 @@
 # «== Grupo» empieza un grupo. Cada meta: «=== id ===» y sus campos, uno por línea:
 #   titulo: lo que se lee en el cuaderno (una meta, no una acción)
 #   pista: dónde o cuándo, sin los pasos
-#   pista si <condición>: otra pista, cuando se cumple la condición (vale la última que se cumpla)
+#   pista si <condiciones>: otra pista, cuando se cumplen las condiciones, separadas por comas (vale la última que se cumpla)
 #   meta: cuándo está cumplida: una meta del planificador y sus argumentos, separados por espacios
 #         (p. ej. «amigas ana diana», «nombres ana 3»; una lista va con comas: «quehaceres ana platos,barrer»)
 #   requiere: lo que tiene que pasar antes (separado por comas): otras metas del cuaderno (por su id), o
@@ -134,7 +134,8 @@ guiño marilla: ¿Dijiste tus oraciones anoche, Ana? Junto a la cama, como corre
 
 === escuela_dominical ===
 titulo: Ir a la escuela dominical
-pista: En la iglesia, camino a Bright River. Allí está el pastor, y su esposa, la Sra. Allan.
+pista: En la iglesia, camino a Bright River.
+pista si presente:sraallan: En la iglesia, camino a Bright River. Allí está el pastor nuevo, y su esposa, la Sra. Allan.
 meta: estar_en ana iglesia
 guiño marilla: El domingo vamos a la iglesia. Hay escuela dominical para los niños, y vas a ir.
 
@@ -155,11 +156,12 @@ guiño diana: Mañana toca recitar la lección… ¿tú ya te la aprendiste? Yo 
 === queens ===
 titulo: Entrar a Queen's
 pista: El examen de ingreso es en Charlottetown, el primer día del verano, desde el segundo año (faltan {dias_examen} días). Se prepara yendo a clases y estudiando la lección: llevas {estudio} días de estudio.
-pista si estudio:ana>=20: La Srta. Stacy te va a mandar al examen (faltan {dias_examen} días). Llevas {estudio} días de estudio: con unos 50 se entra; con 85, quizás quedes primera.
+pista si estudio:ana>=20: En la escuela te van a mandar al examen (faltan {dias_examen} días). Llevas {estudio} días de estudio: con unos 50 se entra; con 85, quizás quedes primera.
+pista si estudio:ana>=20, conoce:stacy: La Srta. Stacy te va a mandar al examen (faltan {dias_examen} días). Llevas {estudio} días de estudio: con unos 50 se entra; con 85, quizás quedes primera.
 pista si hecho:examen: No alcanzó esta vez. Hay otro examen el próximo verano (faltan {dias_examen} días): llevas {estudio} días de estudio, y con unos 50 se entra.
 meta: hecho queens
 requiere: escuela
-antes: ir a la escuela (la Srta. Stacy prepara a los que van a dar el examen)
+antes: ir a la escuela (allí preparan a los que van a dar el examen)
 guiño stacy: Los que quieran dar el examen de Queen's, que se queden después de clases. Ana… tú también, ¿no?
 guiño cerrada marilla: Dicen que en la escuela preparan a los mejores para Queen's. Ya veremos si vas a clases, Ana.
 

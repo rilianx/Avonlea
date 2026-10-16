@@ -87,7 +87,7 @@ function update(dt){
   if ((taskTick -= dt) < 0) { taskTick = .5; taskEvent('ir'); }
   // everyone but Diana follows their routine: where they are wanted (home, or visiting), walking there, or about the place
   const hr = hourNow(), visiting = k => !!CH[k].routine && PEOPLE[k].where !== 'out' && PEOPLE[k].where !== CH[k].home;
-  // (away from Avonlea while the book says so, «ausente_si» in personajes.json: Diana, at her aunt's in Carmody)
+  // (away from Avonlea while the book says so, src/datos/llegadas.txt: Diana, at her aunt's in Carmody)
   for (const [k, p] of Object.entries(PEOPLE)) if (ausente(k)) { if (p.where !== 'away') { p.where = 'away'; p.nav = null; p.dest = null; p.moving = false; p.sit = false; } p.story = null; p.follow = false; p.want = 'away'; }
   for (const [k, p] of Object.entries(PEOPLE)) {
     const c = CH[k]; if (ausente(k) || wmDriven(k) || c.companion) continue;

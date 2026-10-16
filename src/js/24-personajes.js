@@ -73,8 +73,25 @@ const NAMES = { toby: 'Pelusa', lawson: 'Sr. Lawson' }; for (const k of Object.k
 const lineasSi = a => (a || []).filter(l => { const m = /^\[([^\]]+)\] /.exec(l); return !m || m[1].split(',').every(c => dlgCond(c.trim(), dlgCtx())); }).map(l => l.replace(/^\[[^\]]+\] /, ''));
 // someone's loose lines now: the written ones, and the winks about the goals of the notebook (src/js/66-cuaderno.js)
 const lineasDe = (k, a) => [...(typeof lineasAjenas === 'function' ? lineasAjenas(k, lineasSi(a)) : lineasSi(a)), ...(typeof guiñosDe === 'function' ? guiñosDe(k) : [])].map(t => typeof saludoHora === 'function' ? t.replace(/Buenos días|Buenas tardes|Buenas noches/, saludoHora) : t);   // (the greeting, as the hour is)   // (someone who does not know Ana: none with her name)
-// someone away from Avonlea now («ausente_si»: conditions of the script, all of them)
-const ausente = k => !!CH[k]?.ausente_si && CH[k].ausente_si.every(x => dlgCond(x, dlgCtx()));
+// who is in Avonlea, and from/until when, as in the book (src/datos/llegadas.txt): «llega si» (in Avonlea only while
+// one of them holds), «se va si» (gone once one holds); conditions of the script, with commas. Away, they are on no map
+// and in no scene, and their goals wait. A game begun before Ana came to Green Gables (no inicio_juego) has everyone.
+function llegadasLeer(txt){
+  const L = {}; let e = null; const conds = v => v.split(',').map(x => x.trim()).filter(Boolean);
+  for (const raw of txt.split('\n')) {
+    const l = raw.trim(); if (!l || l[0] === '#') continue; let m;
+    if ((m = l.match(/^===\s*(.+?)\s*===$/))) { L[m[1]] = e = { llega: [], seVa: [], fuera: '' }; continue; }
+    if (!e) continue;
+    if ((m = l.match(/^llega si:\s*(.*)$/))) e.llega.push(conds(m[1]));
+    else if ((m = l.match(/^se va si:\s*(.*)$/))) e.seVa.push(conds(m[1]));
+    else if ((m = l.match(/^fuera:\s*(.*)$/))) e.fuera = m[1];
+  }
+  return L;
+}
+const LLEGADAS = llegadasLeer(document.getElementById('llegadas')?.textContent || '');
+const ausente = k => { const e = LLEGADAS[String(k).replace(/^f:/, '')]; if (!e || !dlgHechos().inicio_juego) return false;
+  const x = dlgCtx(), vale = g => g.every(c => dlgCond(c, x));
+  return (e.llega.length && !e.llega.some(vale)) || e.seVa.some(vale); };
 const LINES = {}, SEASON_LINES = {}; for (const k of Object.keys(CH)) { Object.defineProperty(LINES, k, { get: () => lineasDe(k, CH[k].lines), enumerable: true }); Object.defineProperty(SEASON_LINES, k, { get: () => CH[k].seasonLines.map(l => lineasSi([l])[0] || null), enumerable: true }); }   // (each with its conditions: one that does not hold is null)
 const ABIL = {}; for (const k of Object.keys(CH)) ABIL[k] = CH[k].abil;
 const COOK = Object.keys(CH).find(k => CH[k].abil.cocinar);

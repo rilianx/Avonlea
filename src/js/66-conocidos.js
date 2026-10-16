@@ -9,7 +9,7 @@
    Nor does anyone know the Cuthberts have a girl until they are told: it is news (src/datos/noticias.txt,
    nina_cuthbert), and those who had not heard are surprised. */
 const CONOCE_BASE = ['marilla', 'matthew', 'spencer'];
-const CONOCE_POR = { diana: 'hecho:conocidas_diana', barry: 'hecho:barry_presenta', lynde: 'hecho:lynde_visita', stacy: 'cuaderno:escuela', gilbert: 'cuaderno:escuela', sraallan: 'cuaderno:escuela_dominical', josephine: 'hecho:cama_josephine' };
+const CONOCE_POR = { diana: 'hecho:conocidas_diana', barry: 'hecho:barry_presenta', lynde: 'hecho:lynde_visita', josephine: 'hecho:cama_josephine' };
 const sinF = k => String(k).replace(/^f:/, '');
 // a game from before all this (Ana already stays, she has lived in Avonlea a while): everyone knows her
 const conoceTodos = () => !dlgHechos().inicio_juego && !!dlgHechos().se_queda;

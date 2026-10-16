@@ -282,7 +282,7 @@ entre: 5
 ---
 ana: (Ana moja la pluma en el tintero y se queda mirando el papel en blanco.)
 carta: Mi queridísima Diana, amiga del alma:
-ana: «Queridísima» es poco. ¿Existirá «requetequeridísima»? La Srta. Stacy diría que es un adjetivo de más… pero el corazón no cuenta adjetivos.
+ana: «Queridísima» es poco. ¿Existirá «requetequeridísima»? En la escuela dirían que es un adjetivo de más… pero el corazón no cuenta adjetivos.
 carta: Te escribo desde mi cuarto del alero, con la ventana abierta. Aquí en Tejas Verdes {estacion}.
 carta: {noticia}
 ana: (Se le escapa una gota de tinta.) ¡Ay, no! Una mancha justo encima de «alero». Bueno, ahora parece una golondrina. Una golondrina de tinta. Lo dejo así: es poético.
@@ -523,6 +523,7 @@ interrumpe
 en: ana=es, gilbert=es
 si: !hecho:zanahorias
 al_terminar: hecho zanahorias
+al_terminar: hecho conoce_gilbert
 al_terminar: ofensa ana gilbert zanahorias -2
 al_terminar: log En la escuela, Gilbert Blythe le dijo «¡Zanahorias!» a Ana, y Ana le partió la pizarra en la cabeza.
 ---
@@ -630,8 +631,9 @@ grande
 canal: gg
 prioridad: 5
 en: ana=gg, marilla=gg
-si: cuaderno:escuela_dominical, dias_desde:escuela_dominical:14, !hecho:allan_invitados
+si: cuaderno:escuela_dominical, dias_desde:escuela_dominical:14, presente:sraallan, !hecho:allan_invitados
 al_terminar: hecho allan_invitados
+al_terminar: hecho conoce_sraallan
 ---
 marilla: Invité al pastor y a la Sra. Allan a tomar el té mañana en la tarde. Tú puedes hacer el pastel en capas.
 ana: ¡Oh, Marilla! Lo haré con toda mi alma. ¡Y con vainilla, como dice la receta!
@@ -1600,7 +1602,7 @@ ana: Por lo menos el invierno me da color en la cara. Rojo, claro. Todo en mí t
 disparo: objeto
 objeto: mirror
 canal: ana_sola
-si: estudio:ana>=30
+si: estudio:ana>=30, conoce:stacy
 ---
 ana: (Ana se mira muy seria, con la barbilla levantada.) Señorita Shirley, maestra de la escuela de Avonlea.
 ana: ¿Se puede ser maestra con pecas? La Srta. Stacy no tiene pecas… pero tampoco tiene imaginación roja.
@@ -1858,7 +1860,7 @@ canal: ana_sola
 si: letras:ana>=10
 ---
 ana: (Entre los sermones hay un libro de poemas de Tennyson, con las tapas gastadas.)
-ana: «La dama de Shalott»… La Srta. Stacy nos la va a hacer recitar. Yo ya me la sé casi entera, de tanto imaginarla.
+ana: «La dama de Shalott»… En la escuela nos la van a hacer recitar. Yo ya me la sé casi entera, de tanto imaginarla.
 
 === pelusa_invierno ===
 disparo: objeto
@@ -2173,4 +2175,4 @@ si: estacion:invierno, hecho:se_queda
 ---
 ana: (Empiezan a caer los primeros copos, grandes y lentos, sobre las ramas desnudas del Camino Blanco.)
 ana: (Ana levanta la cara y saca la lengua para atrapar uno.)
-ana: ¡La primera nieve! El Camino Blanco se acordó de su nombre. Cada copo es distinto, dice la Srta. Stacy. Como las personas. Como las amigas del alma.
+ana: ¡La primera nieve! El Camino Blanco se acordó de su nombre. Cada copo es distinto, dicen en la escuela. Como las personas. Como las amigas del alma.

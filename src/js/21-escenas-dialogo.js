@@ -76,6 +76,7 @@ function dlgDonde(at, k){   // where a talk of pairs and trios may happen
   return true;
 }
 function dlgFalla(c, x){   // why the conditions of place and state of a configuration (or of one of its alternatives) are not met (null: they are)
+  if (c.hablan) { const a = c.hablan().find(k => ausente(k)); if (a) return a + ' no está en Avonlea'; }   // (someone who speaks in it is away: src/datos/llegadas.txt)
   if (c.en) for (const [k, sc] of Object.entries(c.en)) if (dlgEscena(k) !== sc) return `${k} no está en ${sc}`;
   if (c.cerca) { const [k, l, r] = c.cerca, b = k === 'ana' ? ana : wmBody(k), p = DLG_LUGARES[l]?.(); if (!b || !p || dlgEscena(k) !== 'out' || dist(b.x, b.y, p[0], p[1]) > r) return `${k} no está cerca de ${l}`; }
   if (c.calesa) { const ok = c.calesa === 'camino' ? x.road : c.calesa === 'avonlea' ? x.ride : x.road || x.ride; if (!ok) return c.calesa === 'avonlea' ? 'Ana no va en la calesa por Avonlea' : 'Ana no va en la calesa por el camino'; }
@@ -210,6 +211,11 @@ class Dialogo {
     if (this.repetir.cada && TT < (this.proxima || 0)) return 'otra vez en ' + Math.ceil(this.proxima - TT) + ' s';
     if (this.tipo === 'comentario' && this.prioridad > 0 && TT < (dlgComento[this.canal] || 0)) return 'hace poco hubo un comentario';
     return dlgFalla(this, x);
+  }
+  hablan(){   // who speaks in it (in its written lines, and in those of its choices)
+    if (this._hablan) return this._hablan; const H = new Set();
+    const ver = L => { if (Array.isArray(L)) for (const l of L) if (Array.isArray(l)) { if (l[0] === '?') for (const op of l[2] || []) ver(op.lineas); else if (!['!', 'narra', 'carta', 'ana'].includes(l[0])) H.add(l[0]); } else if (l?.lineas) ver(l.lineas); };
+    ver(this.lineas_); return this._hablan = [...H];
   }
   lineas(){
     let L = this.lineas_;

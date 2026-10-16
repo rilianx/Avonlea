@@ -490,7 +490,7 @@ entre: 5
 ---
 ana: (Ana moja la pluma en el tintero y se queda mirando el papel en blanco.)
 carta: Mi queridísima Diana, amiga del alma:
-ana: «Queridísima» es poco. ¿Existirá «requetequeridísima»? La Srta. Stacy diría que es un adjetivo de más… pero el corazón no cuenta adjetivos.
+ana: «Queridísima» es poco. ¿Existirá «requetequeridísima»? En la escuela dirían que es un adjetivo de más… pero el corazón no cuenta adjetivos.
 carta: Te escribo desde mi cuarto del alero, con la ventana abierta. Aquí en Tejas Verdes {estacion}.
 carta: {noticia}
 ana: (Se le escapa una gota de tinta.) ¡Ay, no! Una mancha justo encima de «alero». Bueno, ahora parece una golondrina. Una golondrina de tinta. Lo dejo así: es poético.
@@ -731,6 +731,7 @@ interrumpe
 en: ana=es, gilbert=es
 si: !hecho:zanahorias
 al_terminar: hecho zanahorias
+al_terminar: hecho conoce_gilbert
 al_terminar: ofensa ana gilbert zanahorias -2
 al_terminar: log En la escuela, Gilbert Blythe le dijo «¡Zanahorias!» a Ana, y Ana le partió la pizarra en la cabeza.
 ---
@@ -838,8 +839,9 @@ grande
 canal: gg
 prioridad: 5
 en: ana=gg, marilla=gg
-si: cuaderno:escuela_dominical, dias_desde:escuela_dominical:14, !hecho:allan_invitados
+si: cuaderno:escuela_dominical, dias_desde:escuela_dominical:14, presente:sraallan, !hecho:allan_invitados
 al_terminar: hecho allan_invitados
+al_terminar: hecho conoce_sraallan
 ---
 marilla: Invité al pastor y a la Sra. Allan a tomar el té mañana en la tarde. Tú puedes hacer el pastel en capas.
 ana: ¡Oh, Marilla! Lo haré con toda mi alma. ¡Y con vainilla, como dice la receta!
@@ -1808,7 +1810,7 @@ ana: Por lo menos el invierno me da color en la cara. Rojo, claro. Todo en mí t
 disparo: objeto
 objeto: mirror
 canal: ana_sola
-si: estudio:ana>=30
+si: estudio:ana>=30, conoce:stacy
 ---
 ana: (Ana se mira muy seria, con la barbilla levantada.) Señorita Shirley, maestra de la escuela de Avonlea.
 ana: ¿Se puede ser maestra con pecas? La Srta. Stacy no tiene pecas… pero tampoco tiene imaginación roja.
@@ -2066,7 +2068,7 @@ canal: ana_sola
 si: letras:ana>=10
 ---
 ana: (Entre los sermones hay un libro de poemas de Tennyson, con las tapas gastadas.)
-ana: «La dama de Shalott»… La Srta. Stacy nos la va a hacer recitar. Yo ya me la sé casi entera, de tanto imaginarla.
+ana: «La dama de Shalott»… En la escuela nos la van a hacer recitar. Yo ya me la sé casi entera, de tanto imaginarla.
 
 === pelusa_invierno ===
 disparo: objeto
@@ -2381,7 +2383,7 @@ si: estacion:invierno, hecho:se_queda
 ---
 ana: (Empiezan a caer los primeros copos, grandes y lentos, sobre las ramas desnudas del Camino Blanco.)
 ana: (Ana levanta la cara y saca la lengua para atrapar uno.)
-ana: ¡La primera nieve! El Camino Blanco se acordó de su nombre. Cada copo es distinto, dice la Srta. Stacy. Como las personas. Como las amigas del alma.
+ana: ¡La primera nieve! El Camino Blanco se acordó de su nombre. Cada copo es distinto, dicen en la escuela. Como las personas. Como las amigas del alma.
 
 </script>
 <script type="text/plain" id="comentarios">
@@ -2637,7 +2639,7 @@ marilla: Esa es la idea.
 === conv_marilla_queens ===
 con: marilla
 tema: Hablarle de ir a Queen's
-si: afecto:marilla:ana>=4, estudio:ana>=20, dia_juego:10
+si: afecto:marilla:ana>=4, estudio:ana>=20, dia_juego:10, conoce:stacy
 al_terminar: suma estudio:ana 1
 ---
 ana: Marilla, la Srta. Stacy dice que podría dar el examen de Queen's. Pero cuesta tanto…
@@ -2751,7 +2753,7 @@ ana: ¡A mí también! Somos espíritus afines, Matthew.
 === conv_matthew_queens ===
 con: matthew
 tema: Contarle cómo le fue en la escuela
-si: afecto:matthew:ana>=4, estudio:ana>=20, dia_juego:10
+si: afecto:matthew:ana>=4, estudio:ana>=20, dia_juego:10, conoce:stacy
 al_terminar: suma estudio:ana 1
 ---
 ana: Matthew, hoy saqué la mejor nota en composición. ¡Le gané a Gilbert Blythe!
@@ -2906,7 +2908,7 @@ ana: Ya lo sé. Por eso te lo cuento.
 === conv_diana_futuro ===
 con: diana
 tema: Hablarle de Queen's
-si: afecto:diana:ana>=4, estudio:ana>=20, !hecho:prohibida, dia_juego:10
+si: afecto:diana:ana>=4, estudio:ana>=20, !hecho:prohibida, dia_juego:10, conoce:stacy
 ---
 ana: Diana, la Srta. Stacy va a preparar a los que quieran dar el examen de Queen's. ¿Te vas a anotar?
 diana: Mamá no quiere. Dice que no hace falta que yo estudie para maestra.
@@ -3004,6 +3006,81 @@ ana: Sr. Harrison, ¿es verdad que tiene un loro que dice malas palabras?
 harrison: Ginger dice lo que le da la gana. Como yo. Por eso nos llevamos bien.
 ana: ¿Puedo conocerlo?
 harrison: Si no te asustas con facilidad… Y no le hables de la vaca. Ni a mí tampoco.
+
+</script>
+<script type="text/plain" id="llegadas">
+# Quién está en Avonlea, y desde/hasta cuándo, como en el libro (lo lee el juego al empezar; el motor: ausente() en
+# src/js/24-personajes.js). Sirve igual para la gente de la casa (personajes.json) y la del pueblo
+# (src/js/56-gente-de-avonlea.js). Quien no está en Avonlea no aparece en el mapa ni en ninguna escena (una escena en
+# la que habla espera a que llegue), y sus metas esperan.
+#
+# «=== quien ===» y sus campos, uno por línea:
+#   llega si: <condiciones>   está en Avonlea solo mientras se cumplen (condiciones del guion, separadas por comas);
+#                             si hay varias líneas, basta con una. Sin «llega si», está desde el principio.
+#   se va si: <condiciones>   desde que se cumplen, ya no está (varias líneas: basta con una)
+#   fuera: dónde anda mientras tanto (para el que lea esto, y el panel)
+# Las partidas que empezaron antes de que Ana llegara a Tejas Verdes (sin el hecho inicio_juego) tienen a todos.
+#
+# El año del juego tiene 56 días (14 por estación) y empieza en primavera: los días del libro se respetan al principio
+# (Diana vuelve el día 18); después, el orden del libro, más apretado: el primer año de escuela con el Sr. Phillips,
+# el invierno de la tía Josephine, los Allan en la primavera siguiente, la Srta. Stacy al otoño.
+#   año 1: primavera 1–14 · verano 15–28 · otoño 29–42 · invierno 43–56
+#   año 2: primavera 57–70 · verano 71–84 (el primer examen de Queen's) · otoño 85–98 · invierno 99–112
+
+# --- Diana (cap. 12): cuando Ana llega, está en Carmody, donde su tía. Vuelve a las tres semanas, más o menos.
+=== diana ===
+llega si: dia_juego:18
+fuera: en Carmody, donde su tía
+
+# --- Gilbert Blythe (cap. 15): pasó el verano con sus primos en Nuevo Brunswick, y vuelve a la escuela cuando Ana
+# ya lleva unos días yendo (o, si no va, a más tardar en el invierno).
+=== gilbert ===
+llega si: dias_desde:escuela:4
+llega si: dia_juego:43
+fuera: con sus primos en Nuevo Brunswick
+
+# --- El Sr. Phillips (cap. 15 y 21): el maestro del primer año de Ana. Se va al terminar el año escolar, y Prissy
+# Andrews, a la que preparaba, se va a Queen's.
+=== phillips ===
+se va si: dia_juego:71
+fuera: se fue de Avonlea al terminar el año escolar
+
+=== prissy ===
+se va si: dia_juego:71
+fuera: en Queen's, en Charlottetown
+
+# --- El pastor nuevo y su esposa (cap. 21): llegan en la primavera del segundo año, cuando el Sr. Bentley ya se fue.
+=== allan ===
+llega si: dia_juego:64
+fuera: todavía no llega a Avonlea
+
+=== sraallan ===
+llega si: dia_juego:64
+fuera: todavía no llega a Avonlea
+
+# --- La Srta. Stacy (cap. 24): la maestra nueva, desde el otoño del segundo año.
+=== stacy ===
+llega si: dia_juego:85
+fuera: todavía no llega a Avonlea
+
+# --- La tía Josephine (cap. 19): vive en Charlottetown, y viene a La Cuesta del Huerto en invierno.
+=== josephine ===
+llega si: estacion:invierno
+fuera: en su casa de Charlottetown
+
+# --- El buhonero (cap. 27): pasa por Avonlea de vez en cuando, con su baúl.
+=== buhonero ===
+llega si: dia_estacion:4
+llega si: dia_estacion:11
+fuera: recorriendo otros pueblos
+
+# --- Los veraneantes del hotel de White Sands, en verano.
+=== veraneante ===
+llega si: estacion:verano
+fuera: en Boston
+
+# --- El Sr. Harrison y el Sr. Shearer son de «Ana de Avonlea»; en el juego están desde el principio, porque la
+# historia de la vaca es de todos los días.
 
 </script>
 <script type="text/plain" id="noticias">
@@ -3127,8 +3204,8 @@ hito 20: La Srta. Stacy la anota para el examen de Queen's.
   ia: La Srta. Stacy le cuenta a Ana que la anotó para preparar el examen de ingreso a Queen's, y la anima.
 hito 50: Ya podría entrar a Queen's.
   con: marilla
-  dice: La Srta. Stacy dice que vas bien. No te llenes de humo, pero… vas bien.
-  ia: Marilla, sin querer demostrarlo demasiado, le cuenta a Ana que la Srta. Stacy cree que entrará a Queen's.
+  dice: En la escuela dicen que vas bien. No te llenes de humo, pero… vas bien.
+  ia: Marilla, sin querer demostrarlo demasiado, le cuenta a Ana que en la escuela creen que entrará a Queen's.
 hito 85: Podría quedar primera… si Gilbert no.
   con: gilbert
   dice: Dicen que tú y yo vamos parejos para Queen's. Que gane el mejor, Ana.
@@ -3194,7 +3271,7 @@ bajo 0: Marilla ya no tiene paciencia contigo: en White Sands puede pasar cualqu
 # «== Grupo» empieza un grupo. Cada meta: «=== id ===» y sus campos, uno por línea:
 #   titulo: lo que se lee en el cuaderno (una meta, no una acción)
 #   pista: dónde o cuándo, sin los pasos
-#   pista si <condición>: otra pista, cuando se cumple la condición (vale la última que se cumpla)
+#   pista si <condiciones>: otra pista, cuando se cumplen las condiciones, separadas por comas (vale la última que se cumpla)
 #   meta: cuándo está cumplida: una meta del planificador y sus argumentos, separados por espacios
 #         (p. ej. «amigas ana diana», «nombres ana 3»; una lista va con comas: «quehaceres ana platos,barrer»)
 #   requiere: lo que tiene que pasar antes (separado por comas): otras metas del cuaderno (por su id), o
@@ -3326,7 +3403,8 @@ guiño marilla: ¿Dijiste tus oraciones anoche, Ana? Junto a la cama, como corre
 
 === escuela_dominical ===
 titulo: Ir a la escuela dominical
-pista: En la iglesia, camino a Bright River. Allí está el pastor, y su esposa, la Sra. Allan.
+pista: En la iglesia, camino a Bright River.
+pista si presente:sraallan: En la iglesia, camino a Bright River. Allí está el pastor nuevo, y su esposa, la Sra. Allan.
 meta: estar_en ana iglesia
 guiño marilla: El domingo vamos a la iglesia. Hay escuela dominical para los niños, y vas a ir.
 
@@ -3347,11 +3425,12 @@ guiño diana: Mañana toca recitar la lección… ¿tú ya te la aprendiste? Yo 
 === queens ===
 titulo: Entrar a Queen's
 pista: El examen de ingreso es en Charlottetown, el primer día del verano, desde el segundo año (faltan {dias_examen} días). Se prepara yendo a clases y estudiando la lección: llevas {estudio} días de estudio.
-pista si estudio:ana>=20: La Srta. Stacy te va a mandar al examen (faltan {dias_examen} días). Llevas {estudio} días de estudio: con unos 50 se entra; con 85, quizás quedes primera.
+pista si estudio:ana>=20: En la escuela te van a mandar al examen (faltan {dias_examen} días). Llevas {estudio} días de estudio: con unos 50 se entra; con 85, quizás quedes primera.
+pista si estudio:ana>=20, conoce:stacy: La Srta. Stacy te va a mandar al examen (faltan {dias_examen} días). Llevas {estudio} días de estudio: con unos 50 se entra; con 85, quizás quedes primera.
 pista si hecho:examen: No alcanzó esta vez. Hay otro examen el próximo verano (faltan {dias_examen} días): llevas {estudio} días de estudio, y con unos 50 se entra.
 meta: hecho queens
 requiere: escuela
-antes: ir a la escuela (la Srta. Stacy prepara a los que van a dar el examen)
+antes: ir a la escuela (allí preparan a los que van a dar el examen)
 guiño stacy: Los que quieran dar el examen de Queen's, que se queden después de clases. Ana… tú también, ¿no?
 guiño cerrada marilla: Dicen que en la escuela preparan a los mejores para Queen's. Ya veremos si vas a clases, Ana.
 
@@ -5851,6 +5930,7 @@ function dlgDonde(at, k){   // where a talk of pairs and trios may happen
   return true;
 }
 function dlgFalla(c, x){   // why the conditions of place and state of a configuration (or of one of its alternatives) are not met (null: they are)
+  if (c.hablan) { const a = c.hablan().find(k => ausente(k)); if (a) return a + ' no está en Avonlea'; }   // (someone who speaks in it is away: src/datos/llegadas.txt)
   if (c.en) for (const [k, sc] of Object.entries(c.en)) if (dlgEscena(k) !== sc) return `${k} no está en ${sc}`;
   if (c.cerca) { const [k, l, r] = c.cerca, b = k === 'ana' ? ana : wmBody(k), p = DLG_LUGARES[l]?.(); if (!b || !p || dlgEscena(k) !== 'out' || dist(b.x, b.y, p[0], p[1]) > r) return `${k} no está cerca de ${l}`; }
   if (c.calesa) { const ok = c.calesa === 'camino' ? x.road : c.calesa === 'avonlea' ? x.ride : x.road || x.ride; if (!ok) return c.calesa === 'avonlea' ? 'Ana no va en la calesa por Avonlea' : 'Ana no va en la calesa por el camino'; }
@@ -5985,6 +6065,11 @@ class Dialogo {
     if (this.repetir.cada && TT < (this.proxima || 0)) return 'otra vez en ' + Math.ceil(this.proxima - TT) + ' s';
     if (this.tipo === 'comentario' && this.prioridad > 0 && TT < (dlgComento[this.canal] || 0)) return 'hace poco hubo un comentario';
     return dlgFalla(this, x);
+  }
+  hablan(){   // who speaks in it (in its written lines, and in those of its choices)
+    if (this._hablan) return this._hablan; const H = new Set();
+    const ver = L => { if (Array.isArray(L)) for (const l of L) if (Array.isArray(l)) { if (l[0] === '?') for (const op of l[2] || []) ver(op.lineas); else if (!['!', 'narra', 'carta', 'ana'].includes(l[0])) H.add(l[0]); } else if (l?.lineas) ver(l.lineas); };
+    ver(this.lineas_); return this._hablan = [...H];
   }
   lineas(){
     let L = this.lineas_;
@@ -6608,7 +6693,6 @@ const PERSONAJES = {
     "giftReply": " Vaya, Ana. Muy bien hecho."
   },
   "diana": {
-    "ausente_si": ["hecho:inicio_juego", "!dia_juego:18"],
     "name": "Diana",
     "fullName": "Diana Barry",
     "article": "",
@@ -6874,8 +6958,25 @@ const NAMES = { toby: 'Pelusa', lawson: 'Sr. Lawson' }; for (const k of Object.k
 const lineasSi = a => (a || []).filter(l => { const m = /^\[([^\]]+)\] /.exec(l); return !m || m[1].split(',').every(c => dlgCond(c.trim(), dlgCtx())); }).map(l => l.replace(/^\[[^\]]+\] /, ''));
 // someone's loose lines now: the written ones, and the winks about the goals of the notebook (src/js/66-cuaderno.js)
 const lineasDe = (k, a) => [...(typeof lineasAjenas === 'function' ? lineasAjenas(k, lineasSi(a)) : lineasSi(a)), ...(typeof guiñosDe === 'function' ? guiñosDe(k) : [])].map(t => typeof saludoHora === 'function' ? t.replace(/Buenos días|Buenas tardes|Buenas noches/, saludoHora) : t);   // (the greeting, as the hour is)   // (someone who does not know Ana: none with her name)
-// someone away from Avonlea now («ausente_si»: conditions of the script, all of them)
-const ausente = k => !!CH[k]?.ausente_si && CH[k].ausente_si.every(x => dlgCond(x, dlgCtx()));
+// who is in Avonlea, and from/until when, as in the book (src/datos/llegadas.txt): «llega si» (in Avonlea only while
+// one of them holds), «se va si» (gone once one holds); conditions of the script, with commas. Away, they are on no map
+// and in no scene, and their goals wait. A game begun before Ana came to Green Gables (no inicio_juego) has everyone.
+function llegadasLeer(txt){
+  const L = {}; let e = null; const conds = v => v.split(',').map(x => x.trim()).filter(Boolean);
+  for (const raw of txt.split('\n')) {
+    const l = raw.trim(); if (!l || l[0] === '#') continue; let m;
+    if ((m = l.match(/^===\s*(.+?)\s*===$/))) { L[m[1]] = e = { llega: [], seVa: [], fuera: '' }; continue; }
+    if (!e) continue;
+    if ((m = l.match(/^llega si:\s*(.*)$/))) e.llega.push(conds(m[1]));
+    else if ((m = l.match(/^se va si:\s*(.*)$/))) e.seVa.push(conds(m[1]));
+    else if ((m = l.match(/^fuera:\s*(.*)$/))) e.fuera = m[1];
+  }
+  return L;
+}
+const LLEGADAS = llegadasLeer(document.getElementById('llegadas')?.textContent || '');
+const ausente = k => { const e = LLEGADAS[String(k).replace(/^f:/, '')]; if (!e || !dlgHechos().inicio_juego) return false;
+  const x = dlgCtx(), vale = g => g.every(c => dlgCond(c, x));
+  return (e.llega.length && !e.llega.some(vale)) || e.seVa.some(vale); };
 const LINES = {}, SEASON_LINES = {}; for (const k of Object.keys(CH)) { Object.defineProperty(LINES, k, { get: () => lineasDe(k, CH[k].lines), enumerable: true }); Object.defineProperty(SEASON_LINES, k, { get: () => CH[k].seasonLines.map(l => lineasSi([l])[0] || null), enumerable: true }); }   // (each with its conditions: one that does not hold is null)
 const ABIL = {}; for (const k of Object.keys(CH)) ABIL[k] = CH[k].abil;
 const COOK = Object.keys(CH).find(k => CH[k].abil.cocinar);
@@ -8605,7 +8706,7 @@ Pasear; acariciar a Pelusa, la gata de Tejas Verdes (no habla; anda por su cuent
 
 LOS PERSONAJES
 ${CAST}
-Fuera de escena existen la escuela, la señorita Stacy, Gilbert Blythe (que una vez le dijo "Zanahorias" a Ana) y la iglesia; se pueden nombrar en la conversación, pero no aparecen en el juego.
+Fuera de escena existen la escuela (con el Sr. Phillips; desde el segundo año, la señorita Stacy), Gilbert Blythe (que una vez le dijo "Zanahorias" a Ana) y la iglesia; se pueden nombrar en la conversación, pero no aparecen en el juego.
 
 LAS RUTINAS (el juego las cumple solo)
 ${ROUTINES}
@@ -9568,7 +9669,7 @@ function update(dt){
   if ((taskTick -= dt) < 0) { taskTick = .5; taskEvent('ir'); }
   // everyone but Diana follows their routine: where they are wanted (home, or visiting), walking there, or about the place
   const hr = hourNow(), visiting = k => !!CH[k].routine && PEOPLE[k].where !== 'out' && PEOPLE[k].where !== CH[k].home;
-  // (away from Avonlea while the book says so, «ausente_si» in personajes.json: Diana, at her aunt's in Carmody)
+  // (away from Avonlea while the book says so, src/datos/llegadas.txt: Diana, at her aunt's in Carmody)
   for (const [k, p] of Object.entries(PEOPLE)) if (ausente(k)) { if (p.where !== 'away') { p.where = 'away'; p.nav = null; p.dest = null; p.moving = false; p.sit = false; } p.story = null; p.follow = false; p.want = 'away'; }
   for (const [k, p] of Object.entries(PEOPLE)) {
     const c = CH[k]; if (ausente(k) || wmDriven(k) || c.companion) continue;
@@ -10080,8 +10181,10 @@ function folkGo(f, pl){
 function folkTick(dt){
   const h = hourNow();
   for (const f of FOLK) {
+    if (f.where === 'away') { if ((f.re -= dt) > 0 || (f.re = 1, ausente(f.id))) continue; f.where = 'in'; [f.x, f.y] = f.inAt = f.home; f.key = ''; }   // (back in Avonlea: at home)
     if (wmDriven(f.id)) continue;
-    if ((f.re -= dt) <= 0) { f.re = .8 + Math.random() * .6; const pl = (!hayClases() && FOLK_LIBRE[f.def.kind] || FOLK_KINDS[f.def.kind])(h, f); if (pl.k !== f.key) { f.key = pl.k; f.plan = pl; folkGo(f, pl); } }
+    if ((f.re -= dt) <= 0) { f.re = .8 + Math.random() * .6; if (ausente(f.id)) { Object.assign(f, { where: 'away', route: [], moving: false, sit: false, key: '', plan: null }); continue; }   // (away from Avonlea, as in the book: src/datos/llegadas.txt)
+      const pl = (!hayClases() && FOLK_LIBRE[f.def.kind] || FOLK_KINDS[f.def.kind])(h, f); if (pl.k !== f.key) { f.key = pl.k; f.plan = pl; folkGo(f, pl); } }
     if (f.where !== 'out') continue;
     if (f.talkT > TT) { f.moving = false; continue; }
     if (f.route.length) {
@@ -12279,7 +12382,7 @@ AGENDA.push({ who: 'lynde', from: 15, to: 17.5, label: 'ir a Tejas Verdes a ver 
   when: () => !!dlgHechos().se_queda && dlgCond('dias_desde:llegada_tv:14', dlgCtx()) && !dlgHechos().lynde_visita, goal: () => G.visitar('lynde', 'marilla') });
 // a letter received makes the friendship grow (a little: at most so much); to aunt Josephine, once she is a friend
 // whom Ana can write to: only someone she has met by now (the Sra. Spencer, who brought her, from the very start)
-const CARTA_CONOCE = { diana: 'hecho:conocidas_diana', stacy: 'cuaderno:escuela', sraallan: 'cuaderno:escuela_dominical', josephine: 'hecho:cama_josephine' };
+const CARTA_CONOCE = { diana: 'hecho:conocidas_diana', stacy: 'conoce:stacy', sraallan: 'conoce:sraallan', josephine: 'hecho:cama_josephine' };
 const cartaPuede = k => !CARTA_CONOCE[k] || dlgCond(CARTA_CONOCE[k], dlgCtx());
 function cartaAfecto(k){ const b = { diana: 'diana', stacy: 'stacy', sraallan: 'sraallan', josephine: 'josephine' }[k]; if (b) relSetW(b, 'ana', Math.min(5, relGetW(b, 'ana') + 1)); }
 // time together: a friend one sees often is a friend one loves more (half an hour near Diana in a day: +1, once a day)
@@ -12303,7 +12406,7 @@ function juntasTick(dt){
    Nor does anyone know the Cuthberts have a girl until they are told: it is news (src/datos/noticias.txt,
    nina_cuthbert), and those who had not heard are surprised. */
 const CONOCE_BASE = ['marilla', 'matthew', 'spencer'];
-const CONOCE_POR = { diana: 'hecho:conocidas_diana', barry: 'hecho:barry_presenta', lynde: 'hecho:lynde_visita', stacy: 'cuaderno:escuela', gilbert: 'cuaderno:escuela', sraallan: 'cuaderno:escuela_dominical', josephine: 'hecho:cama_josephine' };
+const CONOCE_POR = { diana: 'hecho:conocidas_diana', barry: 'hecho:barry_presenta', lynde: 'hecho:lynde_visita', josephine: 'hecho:cama_josephine' };
 const sinF = k => String(k).replace(/^f:/, '');
 // a game from before all this (Ana already stays, she has lived in Avonlea a while): everyone knows her
 const conoceTodos = () => !dlgHechos().inicio_juego && !!dlgHechos().se_queda;
@@ -12354,7 +12457,7 @@ function cuadernoLeer(txt){
     if ((h = l.match(/^===\s*(.+?)\s*===$/))) { if (!grupo) out.push(grupo = { nombre: '', metas: [] }); grupo.metas.push(m = { id: h[1], pistas: [] }); continue; }
     if ((h = l.match(/^==\s*(.+)$/))) { out.push(grupo = { nombre: h[1], metas: [] }); m = null; continue; }
     if (!m) continue;
-    if ((h = l.match(/^pista si (\S+):\s*(.*)$/))) m.pistas.push([h[1], h[2]]);
+    if ((h = l.match(/^pista si (.+?):\s+(.*)$/))) m.pistas.push([h[1], h[2]]);   // (one condition or more, with commas)
     else if ((h = l.match(/^guiño (cerrada )?(\S+):\s*(.*)$/))) (m.guiños ||= []).push({ cerrada: !!h[1], quien: h[2], texto: h[3] });
     else if ((h = l.match(/^(titulo|pista|meta|requiere|antes|acciones):\s*(.*)$/))) m[h[1]] = h[2];
     else if (l === 'oculta') m.oculta = true;
@@ -12406,7 +12509,7 @@ function guiñosDe(k){
   return out;
 }
 // the hint now: the last whose condition holds, or the plain one
-const cuadernoPista = m => ([...m.pistas].reverse().find(([c]) => dlgCond(c, dlgCtx()))?.[1] || m.pista).replace('{estudio}', estudio()).replace('{dias_examen}', diasExamen());   // ({estudio}: how much she has studied; {dias_examen}: days until the examination)
+const cuadernoPista = m => ([...m.pistas].reverse().find(([c]) => c.split(',').every(x => dlgCond(x.trim(), dlgCtx())))?.[1] || m.pista).replace('{estudio}', estudio()).replace('{dias_examen}', diasExamen());   // ({estudio}: how much she has studied; {dias_examen}: days until the examination)
 const cuadernoAntes = m => m.antes || m.requiere.filter(r => !cuadernoCumple(r)).map(r => { const t = cuadernoMeta(r)?.titulo; return t && t[0].toLowerCase() + t.slice(1); }).filter(Boolean).join(', ');
 function cuadernoPanel(open){
   const P = $('cua'); P.hidden = !open; if (!open) return;
@@ -12430,7 +12533,7 @@ const cuadernoMiradas = () => { const l = HABILIDADES.filter(c => !deAna(c) && (
   return `<div class="cm"><b>${esc(c.titulo)}</b><small>${'●'.repeat(n) + '○'.repeat(Math.max(0, max - n))}${b ? ' · ' + esc(b.texto) : sube ? ' · en ' + sube.n + ': ' + esc(sube.texto) : ''}</small></div>`; }).join('') : ''; };
 // her friends: how much each one loves her (the hearts of 0 to 5), those she knows
 function cuadernoAmigos(){
-  const l = ['diana', 'marilla', 'matthew', 'sraallan', 'stacy', 'josephine', 'lynde', 'gilbert'].filter(k => (k !== 'diana' || conoceDiana()) && (k !== 'josephine' || dlgHechos().cama_josephine) && game.wm.rel?.[k + '>ana'] != null);
+  const l = ['diana', 'marilla', 'matthew', 'sraallan', 'stacy', 'josephine', 'lynde', 'gilbert'].filter(k => conoceA(k) && game.wm.rel?.[k + '>ana'] != null);
   return l.length ? '<h4>Quiénes la quieren</h4>' + l.map(k => { const r = Math.max(0, Math.min(5, Math.round(relGetW(k, 'ana')))); return `<div class="cm"><b>${esc(wmName(k).replace(/^(el|la) /, m => m[0].toUpperCase() + m.slice(1)))}</b><small>${'♥'.repeat(r) + '♡'.repeat(5 - r)}</small></div>`; }).join('') : '';
 }
 // a game that already had Ana and Diana as friends (before they had to meet): they know each other

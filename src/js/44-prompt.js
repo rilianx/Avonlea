@@ -13,7 +13,7 @@ Pasear; acariciar a Pelusa, la gata de Tejas Verdes (no habla; anda por su cuent
 
 LOS PERSONAJES
 ${CAST}
-Fuera de escena existen la escuela, la señorita Stacy, Gilbert Blythe (que una vez le dijo "Zanahorias" a Ana) y la iglesia; se pueden nombrar en la conversación, pero no aparecen en el juego.
+Fuera de escena existen la escuela (con el Sr. Phillips; desde el segundo año, la señorita Stacy), Gilbert Blythe (que una vez le dijo "Zanahorias" a Ana) y la iglesia; se pueden nombrar en la conversación, pero no aparecen en el juego.
 
 LAS RUTINAS (el juego las cumple solo)
 ${ROUTINES}

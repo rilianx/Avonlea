@@ -27,6 +27,7 @@ function condicion(c, donde){
   if (!CLAVES.includes(k)) return malas.push(`${donde}: «${c}» (no es una condición conocida)`);
   if (k === 'sabe' && !NOTICIAS.has(s.split(':')[2])) return malas.push(`${donde}: «${c}» (no hay una noticia «${s.split(':')[2]}» en src/datos/noticias.txt)`);
   if (!neg && (k === 'hecho' || (k === 'dias_desde' && !metas.has(a)))) anota(pide, a, donde);
+  if (k === 'conoce') anota(pide, 'conoce_' + a + ' ', donde);   // (whom Ana knows: the fact conoce_<who>, or how the book has them meet)
   if (neg || k === 'no_hoy') anota(pide, a + ' ', donde);   // (read, but not needed: «!hecho:x» holds while x has not happened)
 }
 // the script: each scene, its conditions and what it does
@@ -52,6 +53,11 @@ for (const raw of guion.split('\n')) {
   if ((m = s.match(/^-\s*\[([^\]]*)\]/))) m[1].split(',').forEach(c => condicion(c, 'un comentario de ' + g)); } }
 // the characters' own lines (src/datos/personajes.json): «[condiciones] texto»
 for (const [k, c] of Object.entries(JSON.parse(leer('src/datos/personajes.json')))) for (const l of [...(c.lines || []), ...(c.seasonLines || [])]) { const m = /^\[([^\]]+)\]/.exec(l); if (m) m[1].split(',').forEach(x => condicion(x, 'una frase de ' + k)); }
+// who is in Avonlea when (src/datos/llegadas.txt): someone of the game, and conditions well written
+{ const quienes = new Set([...Object.keys(JSON.parse(leer('src/datos/personajes.json'))), ...[...codigo.matchAll(/^  (\w+): \{ name: /gm)].map(m => m[1])]); let q = null;
+  for (const raw of leer('src/datos/llegadas.txt').split('\n')) { const s = raw.trim(); if (!s || s[0] === '#') continue; let m;
+    if ((m = s.match(/^===\s*(.+?)\s*===$/))) { q = m[1]; if (!quienes.has(q)) malas.push(`llegadas: «${q}» no es nadie del juego (personajes.json, ni la gente de src/js/56-gente-de-avonlea.js)`); continue; }
+    if ((m = s.match(/^(?:llega|se va) si:\s*(.*)$/))) m[1].split(',').forEach(c => condicion(c.trim(), 'llegadas de ' + q)); } }
 // the notebook: what each goal requires, its hints, and goals that are a fact
 let meta = null;
 for (const raw of cuaderno.split('\n')) {
@@ -61,7 +67,7 @@ for (const raw of cuaderno.split('\n')) {
   if ((m = s.match(/^requiere:\s*(.*)$/))) for (const r of m[1].split(',').map(x => x.trim()).filter(Boolean)) {
     if (r.includes(':') || r[0] === '!') condicion(r, 'meta ' + meta); else if (!metas.has(r)) malas.push(`meta ${meta}: requiere «${r}», que no es una meta del cuaderno`);
   }
-  if ((m = s.match(/^pista si (\S+):/))) condicion(m[1], 'meta ' + meta + ' (pista)');
+  if ((m = s.match(/^pista si (.+?):\s/))) m[1].split(',').forEach(c => condicion(c.trim(), 'meta ' + meta + ' (pista)'));
   if ((m = s.match(/^meta:\s*hecho\s+(\S+)/))) anota(pide, m[1] + ' ', 'meta ' + meta);
 }
 // the skills: Ana's milestones that someone tells leave a fact
@@ -76,6 +82,7 @@ for (const raw of habilidades.split('\n')) {
 for (const m of codigo.matchAll(/dlgHecho\('([a-z_0-9]+)'/g)) anota(hace, m[1], 'código');
 for (const m of codigo.matchAll(/dlgHechos\(\)(?:\.([a-z_0-9]+)|\['([a-z_0-9]+)'\])/g)) anota(pide, (m[1] || m[2]) + ' ', 'código');
 for (const m of codigo.matchAll(/['"`](?:hecho|dias_desde):([a-z_0-9]+)/g)) anota(pide, m[1] + ' ', 'código');
+for (const m of codigo.matchAll(/['"`\[]conoce:([a-z_0-9]+)/g)) anota(pide, 'conoce_' + m[1] + ' ', 'código');
 // the report
 const necesita = Object.keys(pide).filter(h => !h.endsWith(' ')), lee = new Set(Object.keys(pide).map(h => h.trim()));
 const nunca = necesita.filter(h => !hace[h]).sort(), sinUso = Object.keys(hace).filter(h => !lee.has(h) && !/^hito_/.test(h)).sort();
