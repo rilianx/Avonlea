@@ -3035,6 +3035,319 @@ ana: ¿Puedo conocerlo?
 harrison: Si no te asustas con facilidad… Y no le hables de la vaca. Ni a mí tampoco.
 
 </script>
+<script type="text/plain" id="frases">
+# Las frases sueltas de cada uno: lo que dice al pasar, al tocarlo, al encontrarse con Ana (lo lee el juego al
+# empezar). La gente de la casa (personajes.json) y la del pueblo (src/js/56-gente-de-avonlea.js) por igual.
+# Se edita aquí o en la planilla (planilla/avonlea.xlsx, hoja «Frases»: node tools/planilla.js la genera desde aquí,
+# y python3 tools/importar_planilla.py la vuelve a escribir aquí).
+#
+# «=== quien ===» y una frase por línea:
+#   dice: lo que dice (una al azar, entre las que valen ahora)
+#   primavera: / verano: / otoño: / invierno: lo que dice esa estación, la primera vez (solo la gente de la casa)
+#   ana: lo que Ana le contesta, a veces (la gente del pueblo)
+# Una frase puede esperar a algo de la historia, con condiciones del guion entre corchetes y con comas:
+#   dice: [conoce:harrison, dias_desde:conoce_harrison:3] ¿Esa vaca tuya se ha portado bien hoy?
+# Quien no conoce a Ana no dice las frases con su nombre («Ana», «Shirley»).
+# «=== vecino ===» y «=== niño ===»: los vecinos sin nombre del pueblo (los grandes y los chicos).
+
+=== matthew ===
+dice: [!hecho:se_queda] Bueno, pues... Marilla es buena, ¿sabes? Solo que no se le nota mucho al principio.
+dice: [!hecho:se_queda] Ya lo creo que... bueno, ojalá te quedes, Ana. Yo... sí. Eso.
+dice: Bueno, pues... sí, es un día precioso, Ana. Ya lo creo.
+dice: Las vacas andan contentas hoy. Será por el sol, supongo.
+dice: [hecho:se_queda] Marilla dice que hablas mucho. Bueno, a mí me gusta oírte, ¿sabes?
+dice: [hecho:se_queda] ¿Viste las flores junto al camino? Bueno, pues... me hicieron pensar en ti.
+dice: [hecho:se_queda] Ya lo creo, ya lo creo. Anda, ve a jugar un rato, que el día está lindo.
+primavera: Bueno, pues... ya brotó todo. La primavera, ¿no? Ya lo creo.
+verano: Hace calor para la siega, ya lo creo. Bueno, el heno no se corta solo.
+otoño: Las manzanas de los Barry están en su punto. Marilla querrá hacer compota, supongo.
+invierno: Abrígate bien, Ana. El frío... bueno, pues, no es broma.
+
+=== marilla ===
+dice: [!hecho:se_queda] Mientras estés en esta casa, harás tus quehaceres como cualquiera. Después veremos.
+dice: [!hecho:se_queda] No te prometo nada, niña. Que te quedes o no, depende de cómo te portes.
+dice: [!hecho:se_queda] Lávate la cara y péinate esas trenzas. Aquí se come con la cara limpia.
+dice: [!hecho:se_queda] ¿Sabes rezar? Pues vas a aprender. En esta casa se reza.
+dice: [hecho:se_queda] Ana, no te quedes soñando despierta. Aunque... la cocina está ordenada, eso sí.
+dice: [hecho:se_queda] Si quieres cocinar, la estufa está encendida. Cuidado con no quemar nada esta vez.
+dice: [hecho:se_queda, hecho:conocidas_diana] Matthew no lo dice, pero te echa de menos cuando te vas donde Diana.
+dice: [hecho:se_queda] Riega la huerta antes de que caiga el sol, que las plantas lo agradecen.
+dice: [hecho:se_queda, afecto:marilla:ana>=3] Hmm. Bueno, admito que hoy te has portado muy bien.
+dice: [hecho:ropa_arrugada, !hecho:ropa_ordenada] Ese vestido parece que durmió en el suelo, Ana. Ah, claro: es que durmió en el suelo.
+primavera: [hecho:se_queda] Hay que limpiar la casa a fondo, que es primavera. Y tú me vas a ayudar, Ana.
+verano: Con este calor, mejor un té y no enciendas mucho la estufa.
+otoño: Es tiempo de manzanas: una buena compota para el invierno no está de más.
+invierno: Siéntate cerca de la estufa, niña, que vienes helada.
+
+=== diana ===
+dice: [hecho:conocidas_diana, !hecho:prohibida] ¡Ana, mi alma gemela! Te estaba esperando.
+dice: [hecho:conocidas_diana, !hecho:prohibida] Mamá dice que puedo salir hasta que se ponga el sol. ¿Vamos al lago?
+dice: [hecho:conocidas_diana, !hecho:prohibida, afecto:diana:ana>=4] ¿Te acuerdas de nuestro juramento de amistad? ¡Para siempre!
+dice: [hecho:conocidas_diana] Los manzanos están llenos este año. Toma las que quieras.
+dice: [hecho:conocidas_diana] El Bosque Encantado me da un poquito de miedo... pero contigo no.
+dice: [!hecho:conocidas_diana] Hola. Tú eres la niña nueva de Tejas Verdes, ¿verdad?
+primavera: [hecho:conocidas_diana] ¡Mira los manzanos en flor, Ana! Parecen novias vestidas de blanco.
+verano: [hecho:conocidas_diana] ¡Qué calor! ¿Vamos a remojar los pies en el lago?
+otoño: [hecho:conocidas_diana] El Bosque Encantado está todo rojo y dorado... ¡como un cuento!
+invierno: [hecho:conocidas_diana] ¡Está nevando! Mamá no me deja salir sin bufanda. Ven, entra a calentarte junto al fuego.
+
+=== barry ===
+dice: [!conoce:barry, !hecho:barry_presenta, sabe:barry:nina_cuthbert] Tú debes ser la niña que trajeron los Cuthbert. Buenas tardes.
+dice: [hecho:barry_presenta, !hecho:prohibida] Ana Shirley, siempre es un gusto verte por aquí. Pórtate bien, ¿eh?
+dice: [hecho:conocidas_diana, !hecho:prohibida] Diana habla de ti todo el día, ¿sabes?
+dice: [hecho:perdonada] Esta vez el cordial de frambuesa está bien etiquetado, te lo aseguro.
+dice: [hecho:prohibida, !hecho:perdonada] Buenas tardes. (La Sra. Barry no la invita a pasar.)
+dice: Saluda a Marilla de mi parte.
+primavera: [hecho:barry_presenta, !hecho:prohibida] Buenos días, Ana. Diana está deseando verte.
+verano: [hecho:barry_presenta, !hecho:prohibida] Qué calor, ¿verdad? Hay limonada en la despensa.
+otoño: [hecho:barry_presenta, !hecho:prohibida] Diana me ayudó con las manzanas. Llévale algunas a Marilla.
+invierno: [hecho:barry_presenta, !hecho:prohibida] Pasa, pasa, que hace un frío terrible. Diana está junto al fuego.
+
+=== lynde ===
+dice: [!conoce:lynde, !hecho:lynde_visita, sabe:lynde:nina_cuthbert] ¿Así que tú eres la huérfana de Tejas Verdes? Ya iré a verte con calma, ya.
+dice: [hecho:ofendio_lynde, !hecho:disculpa_lynde] Hmpf. No tengo nada que hablar contigo, niña malcriada.
+dice: Desde mi ventana veo todo el camino: no se me escapa nadie. Lo digo sin mala intención, ¿eh?
+dice: Llevo cincuenta y dos cubrecamas de retazos, ¡cincuenta y dos! Y no pienso parar.
+dice: [hecho:se_queda, !hecho:ofendio_lynde, hecho:lynde_visita] Marilla hizo bien en quedarse contigo, y lo digo yo, que nunca me callo lo que pienso.
+dice: [hecho:lynde_visita] A una niña hay que enseñarle a ser útil. Pero, bueno, tú vas por buen camino.
+dice: [hecho:lynde_visita, !hecho:ofendio_lynde] Ana Shirley, hablas más que un molino... pero tienes buen corazón, eso lo reconozco.
+primavera: [hecho:lynde_visita] ¡Vaya, vaya, ya brotó todo! Ya es hora de limpiar la casa, digo yo.
+verano: [hecho:lynde_visita] Con este calor no hay quien teja... ¡pero yo tejo, claro que tejo!
+otoño: [hecho:lynde_visita] El otoño siempre me hace pensar en los cubrecamas. Este año haré uno rojo y dorado.
+invierno: [hecho:lynde_visita] Pasa, niña, que hace un frío de mil demonios... perdón, de los que dan escalofríos.
+
+=== harrison ===
+dice: Hmpf. Buenos días... si es que son buenos.
+dice: [dias_desde:conoce_harrison:3] ¿Esa vaca tuya se ha portado bien hoy? Más le vale.
+dice: No me mires la casa, que el desorden es mío.
+dice: Ginger, ¡silencio!... No le hagas caso, muchacha.
+primavera: La avena ya asoma. Que nadie la pise, ¿eh?
+verano: Calor de mil demonios para segar... con perdón.
+otoño: Buena cosecha este año, aunque no lo diga mucho.
+invierno: Con este frío, ni Ginger quiere hablar. Bueno, sí quiere.
+
+=== shearer ===
+dice: Buen día, señorita. ¿Algún animal para vender?
+dice: Ando apurado: me esperan en Carmody.
+dice: Buena tierra la de por aquí, sí señor.
+primavera: Primavera: buen tiempo para comprar terneros.
+verano: Con este calor las vacas dan menos leche, ¿sabía?
+otoño: En otoño se vende bien el ganado.
+invierno: En invierno casi no salgo, pero hoy hacía falta.
+
+=== gilbert ===
+dice: [hecho:zanahorias] ¡Buenos días, Zanahorias!... Perdón, perdón. Era una broma, Ana.
+dice: [hecho:zanahorias] ¿Me vas a hablar algún día, Ana Shirley?
+dice: [dias_desde:escuela:3] Te gané en ortografía. Pero en composición... bueno, ahí ganas tú.
+dice: [conoce:gilbert] ¿Quieres que te ayude a cruzar el arroyo? ¿No? Bueno...
+ana: [hecho:zanahorias] Hmpf.
+ana: [hecho:zanahorias] No le hablo a Gilbert Blythe. Nunca jamás.
+ana: [hecho:zanahorias] (Ana sigue de largo con la nariz en alto.)
+
+=== buhonero ===
+dice: ¡Cintas, botones, peinetas, tinte para el pelo! ¡Todo lo que una señorita necesita!
+dice: Un tinte que deja el pelo negro azabache, señorita. Garantizado.
+
+=== josie ===
+dice: ¿Ese vestido es nuevo, Ana? Ah, no... es el de siempre.
+dice: Te apuesto a que no te atreves a caminar por el techo de la casa de los Barry.
+dice: Mi mamá dice que las pelirrojas tienen mal genio. ¿Es verdad?
+ana: Josie Pye, eres... ¡eres una Pye!
+ana: No pienso contestarte eso.
+
+=== gertie ===
+dice: [dias_desde:escuela:3] Josie dice que tú inventas palabras difíciles para lucirte.
+dice: [dias_desde:escuela:3] ¿Me prestas tu lápiz? El mío se perdió... otra vez.
+
+=== ruby ===
+dice: ¡Ay, Ana! ¿Viste cómo me miró Charlie Sloane?
+dice: Mi hermana tiene un pretendiente nuevo. ¡Es tan romántico!
+dice: ¿Vamos a ver las botellas de leche en el río? La mía tiene una cinta azul.
+
+=== jane ===
+dice: [dias_desde:escuela:3] ¿Hiciste los problemas de aritmética? Yo los hice dos veces, por si acaso.
+dice: [conoce:jane] Mi mamá dice que eres muy imaginativa. No sé si lo dice como algo bueno.
+
+=== prissy ===
+dice: El año que viene voy a estudiar para entrar a Queen's.
+dice: Ya tengo dieciséis años, ¿sabes? Casi una señorita.
+
+=== charlie ===
+dice: [dias_desde:escuela:3] Ana, ¿quieres... quieres usar mi pizarra nueva? Prestada, digo.
+dice: [conoce:charlie] Mi mamá hizo tarta de grosellas. Te guardé un pedazo... si quieres.
+
+=== moody ===
+dice: Voy a ser pastor cuando sea grande. Ya practico los sermones con las vacas.
+dice: Ayer el maestro me dejó sin recreo. Fue injusto, aunque sí me reí en la oración.
+
+=== tillie ===
+dice: ¿Juegas a la mancha? ¡Tú la llevas!
+dice: Encontré un nido de petirrojos detrás de la escuela. ¡No le digas a nadie!
+
+=== felicity ===
+dice: Mi madre dice que una señorita nunca corre. Pero yo corro si llego tarde.
+dice: Esta mañana hice pan yo solita. Bueno, casi solita.
+
+=== felix ===
+dice: ¿Sabías que en el bosque de Peg Bowen vive una bruja de verdad?
+dice: Estoy juntando valor para tocar la puerta de Peg Bowen. Mañana. O pasado.
+
+=== cecily ===
+dice: [dias_desde:escuela:3] ¿Me enseñas a recitar como tú? Cuando tú recitas, me dan escalofríos.
+dice: [sabe:cecily:nina_cuthbert] ¿Tú eres la niña de Tejas Verdes? Dicen que hablas como en los libros.
+
+=== sara ===
+dice: ¿Te cuento una historia? Es de un barco fantasma que se ve desde el faro las noches de niebla.
+dice: [conoce:sara] La tía Hetty dice que hablo demasiado. Tú también, ¿no? ¡Qué bien!
+
+=== phillips ===
+dice: [dias_desde:escuela:3] Señorita Shirley, ¿no debería estar repasando su ortografía?
+dice: Mañana hay examen de geometría. Que nadie lo olvide.
+
+=== allan ===
+dice: Que Dios te bendiga, Ana. ¿Te veremos el domingo en la escuela dominical?
+dice: Hermoso día para dar gracias, ¿no te parece?
+
+=== sraallan ===
+dice: ¡Ana, querida! ¡Qué gusto verte! ¿Cómo van tus estudios?
+dice: [cuaderno:escuela_dominical] Me encantó tu recitación. Tienes un don, Ana.
+dice: Qué tarde tan linda para pasear, ¿verdad?
+ana: [conoce:sraallan] ¡Oh, Sra. Allan! Usted es mi espíritu afín.
+
+=== lawson ===
+dice: ¡Buenos días, Ana! Llegaron caramelos de menta y cintas nuevas.
+dice: ¿Qué te manda Marilla hoy? ¿Azúcar? ¿Hilo?
+
+=== herrero ===
+dice: ¡Cuidado con las chispas, niña!
+dice: El caballo del Sr. Barry perdió una herradura. Otra vez.
+
+=== editor ===
+dice: ¿Tienes alguna noticia para La Crónica, Ana? Se me acabaron las historias.
+dice: Si escribes un cuento bonito, te lo publico. Palabra de editor.
+
+=== hetty ===
+dice: Los niños de hoy no saben estarse quietos. En mis tiempos...
+dice: Señorita, no se corre por la calle principal. ¡Y menos con el sombrero torcido!
+
+=== olivia ===
+dice: ¡Hola, Ana! ¿No es un día perfecto para un picnic?
+dice: Jasper Dale me saludó esta mañana. Bueno... casi me saludó.
+
+=== jasper ===
+dice: B-buenos días. Estoy... estoy probando un invento. Para la lluvia.
+dice: Si ves a la Srta. Olivia... no, nada. No le digas nada.
+
+=== alec ===
+dice: Buen día para la siega, Ana. ¡Si no llueve!
+dice: Saluda a Matthew de mi parte. Hace tiempo que no conversamos.
+
+=== janet ===
+dice: ¿Has visto a Felix? Tendría que estar trayendo leña.
+dice: Dile a Marilla que le devuelvo la fuente el sábado.
+
+=== srapye ===
+dice: ¿Ya supiste lo del Sr. Harrison? Dicen que su loro dice cosas terribles.
+dice: Pelo rojo, genio vivo, como dice el refrán.
+
+=== sloane ===
+dice: Las papas vienen buenas este año. Ya lo verás.
+
+=== andrews ===
+dice: Buenas tardes. ¿Va todo bien en Tejas Verdes?
+
+=== peg ===
+dice: Je, je. ¿Tú eres la pelirroja de los Cuthbert? Dile a Marilla que Peg Bowen la saluda.
+dice: En el bosque no hay brujas, niña. Solo estoy yo... je, je.
+ana: (¡Es Peg Bowen! Felix dice que es una bruja...)
+
+=== farero ===
+dice: Ese faro lleva cuarenta años encendido, y yo con él. Las noches de tormenta son las más hermosas.
+dice: ¿Ves esa vela allá lejos? Va a Charlottetown. Antes yo navegaba hasta las Antillas.
+dice: Si subes al faro al atardecer, el mar se pone de oro. Pregúntale a cualquier gaviota.
+ana: ¡Capitán Jim, cuénteme una historia del mar!
+ana: ¡Qué vida tan romántica la de un farero!
+
+=== stacy ===
+dice: [dias_desde:escuela:3] Ana, tu composición fue la mejor de la clase. Pero cuidado con los adjetivos: ¡no hacen falta tantos!
+dice: El viernes por la tarde salimos al bosque a estudiar botánica. ¿Te apuntas?
+dice: [estudio:ana>=20] Este año preparamos a los mejores para el examen de Queen's. Tú puedes, Ana.
+ana: [conoce:stacy] ¡Srta. Stacy! Usted es mi espíritu afín, ¿lo sabía?
+
+=== minnie ===
+dice: [conoce:minnie] ¡Ana! ¿Me cuentas el cuento del hada otra vez?
+dice: [conoce:minnie] Diana no me deja jugar con sus muñecas. ¿Tú me dejas?
+dice: [sabe:minnie:nina_cuthbert] ¿Tú eres la niña nueva de Tejas Verdes? Mamá dice que eres pelirroja. ¡Y es verdad!
+dice: [hecho:perdonada] Ya no tengo tos. ¡Mamá dice que tú me salvaste!
+
+=== srbarry ===
+dice: Buenas, Ana. Diana está en la casa, creo. O en el huerto.
+dice: El heno está listo para entrar. Si no llueve, mañana lo cargamos.
+
+=== maryjoe ===
+dice: [hecho:perdonada] ¡Ay, señorita Ana! Yo no sé nada de enfermedades, menos mal que usted vino aquella noche.
+dice: La señora Barry dice que tienda la ropa antes de que se nuble.
+
+=== jerry ===
+dice: El Sr. Cuthbert me pidió que entrara la leña antes de la cena.
+dice: Oui, oui... ya voy, ya voy. ¡Esa vaca no se quiere mover!
+
+=== medico ===
+dice: ¿Alguien enfermo en Tejas Verdes? Espero que no.
+dice: [hecho:perdonada] Esa niña Shirley tiene buena cabeza: salvó a la pequeña Barry del crup antes de que yo llegara.
+
+=== srbell ===
+dice: Te esperamos el domingo en la escuela dominical, Ana. Y apréndete el versículo.
+dice: Una oración larga no es mejor que una sincera, niña.
+
+=== josephine ===
+dice: [sabe:josephine:nina_cuthbert] Así que tú eres la niña de Tejas Verdes. Hmm. Ya veremos qué clase de niña eres.
+dice: [hecho:cama_josephine] ¡La niña Ana! Desde que me saltaste encima en la cama, no me había reído tanto en años.
+dice: [hecho:cama_josephine] Cuando vengas a Charlottetown, te alojas en mi casa. Te llevo a la exposición.
+ana: ¡Srta. Barry! Usted es un espíritu afín, aunque no lo parezca a primera vista.
+
+=== spencer ===
+dice: ¡Ana! Qué bien te ves. Y yo que creí que los Cuthbert querían una niña… ¡qué enredo!
+dice: Mi Lily estuvo enferma, por eso no pude llevarte yo a Tejas Verdes.
+
+=== blewett ===
+dice: [hecho:a_prueba] Así que te quedaste con los Cuthbert. Hmm. Yo te habría hecho trabajar de verdad.
+dice: Hmm. Flacucha. En mi casa no hay tiempo para mirar las nubes, ¿sabes?
+ana: [hecho:a_prueba] (Ana se esconde detrás de un árbol. ¡Menos mal que Marilla no la dejó irse con ella!)
+
+=== carrie ===
+dice: [dias_desde:escuela:3] ¿Viste la composición de Ana? ¡La señorita Stacy la leyó en voz alta!
+dice: [sabe:carrie:nina_cuthbert] Mi mamá dice que en Tejas Verdes hay una niña nueva. ¿Eres tú?
+
+=== jefe ===
+dice: El tren de las cinco y media ya pasó, ¿sabe? Hoy no viene otro.
+dice: Esa niñita de pelo rojo... se sentó en las tejuelas a imaginar cosas. Todo un caso.
+
+=== thomas ===
+dice: Buenas. Rachel está adentro. Ella habla por los dos, ¿sabes?
+
+=== veraneante ===
+dice: ¡Qué playa tan encantadora! En Boston no hay nada parecido.
+dice: ¿Eres de aquí, niña? ¡Qué suerte vivir en un lugar así!
+
+=== pescador ===
+dice: Hoy vienen buenas las caballas. Si Marilla quiere pescado, que mande a Matthew.
+
+=== vecino ===
+dice: [dias_desde:llegada_tv:14] ¡Buenos días, Ana! ¿Cómo están Matthew y Marilla?
+dice: Lindo día, ¿verdad? Dicen que mañana llueve.
+dice: [dias_desde:llegada_tv:56] ¡Qué grande estás, niña! Saludos a Marilla.
+dice: [!dias_desde:llegada_tv:14] Buenas. Tú no eres de por aquí, ¿no?
+dice: ¿Vas para la aldea? Yo vengo de la tienda de Lawson.
+dice: Buenas, buenas. No te entretengas, que se hace tarde.
+dice: Mira qué cielo. Así da gusto salir.
+
+=== niño ===
+dice: ¿Tú eres Ana? ¡Tienes el pelo como una zanahoria!... ¡Es bonito!
+dice: ¡Mira, encontré una piedra que brilla!
+dice: ¿Jugamos? Yo me escondo y tú cuentas hasta cien.
+
+</script>
 <script type="text/plain" id="llegadas">
 # Quién está en Avonlea, y desde/hasta cuándo, como en el libro (lo lee el juego al empezar; el motor: ausente() y
 # llegadasTick() en src/js/24-personajes.js). Sirve igual para la gente de la casa (personajes.json) y la del pueblo
@@ -6657,7 +6970,8 @@ const CHARACTERS = {
     home: 'away', plans: false,
   },
 };
-// what each one is and says (name, look, voice for the AI, lines, abilities, gossip...) is plain data: src/datos/personajes.json;
+// what each one is (name, look, voice for the AI, abilities, gossip...) is plain data: src/datos/personajes.json (what they say in passing:
+// src/datos/frases.txt);
 // here is only where they stand and walk, which is measured on the maps.
 const PERSONAJES = {
   "matthew": {
@@ -6694,21 +7008,6 @@ const PERSONAJES = {
     ],
     "kin": [
       "marilla"
-    ],
-    "lines": [
-      "[!hecho:se_queda] Bueno, pues... Marilla es buena, ¿sabes? Solo que no se le nota mucho al principio.",
-      "[!hecho:se_queda] Ya lo creo que... bueno, ojalá te quedes, Ana. Yo... sí. Eso.",
-      "Bueno, pues... sí, es un día precioso, Ana. Ya lo creo.",
-      "Las vacas andan contentas hoy. Será por el sol, supongo.",
-      "[hecho:se_queda] Marilla dice que hablas mucho. Bueno, a mí me gusta oírte, ¿sabes?",
-      "[hecho:se_queda] ¿Viste las flores junto al camino? Bueno, pues... me hicieron pensar en ti.",
-      "[hecho:se_queda] Ya lo creo, ya lo creo. Anda, ve a jugar un rato, que el día está lindo."
-    ],
-    "seasonLines": [
-      "Bueno, pues... ya brotó todo. La primavera, ¿no? Ya lo creo.",
-      "Hace calor para la siega, ya lo creo. Bueno, el heno no se corta solo.",
-      "Las manzanas de los Barry están en su punto. Marilla querrá hacer compota, supongo.",
-      "Abrígate bien, Ana. El frío... bueno, pues, no es broma."
     ],
     "giftReply": " Bueno, pues... gracias, Ana.",
     "whereText": {
@@ -6751,24 +7050,6 @@ const PERSONAJES = {
     "kin": [
       "matthew"
     ],
-    "lines": [
-      "[!hecho:se_queda] Mientras estés en esta casa, harás tus quehaceres como cualquiera. Después veremos.",
-      "[!hecho:se_queda] No te prometo nada, niña. Que te quedes o no, depende de cómo te portes.",
-      "[!hecho:se_queda] Lávate la cara y péinate esas trenzas. Aquí se come con la cara limpia.",
-      "[!hecho:se_queda] ¿Sabes rezar? Pues vas a aprender. En esta casa se reza.",
-      "[hecho:se_queda] Ana, no te quedes soñando despierta. Aunque... la cocina está ordenada, eso sí.",
-      "[hecho:se_queda] Si quieres cocinar, la estufa está encendida. Cuidado con no quemar nada esta vez.",
-      "[hecho:se_queda, hecho:conocidas_diana] Matthew no lo dice, pero te echa de menos cuando te vas donde Diana.",
-      "[hecho:se_queda] Riega la huerta antes de que caiga el sol, que las plantas lo agradecen.",
-      "[hecho:se_queda, afecto:marilla:ana>=3] Hmm. Bueno, admito que hoy te has portado muy bien.",
-      "[hecho:ropa_arrugada, !hecho:ropa_ordenada] Ese vestido parece que durmió en el suelo, Ana. Ah, claro: es que durmió en el suelo."
-    ],
-    "seasonLines": [
-      "[hecho:se_queda] Hay que limpiar la casa a fondo, que es primavera. Y tú me vas a ayudar, Ana.",
-      "Con este calor, mejor un té y no enciendas mucho la estufa.",
-      "Es tiempo de manzanas: una buena compota para el invierno no está de más.",
-      "Siéntate cerca de la estufa, niña, que vienes helada."
-    ],
     "giftReply": " Vaya, Ana. Muy bien hecho."
   },
   "diana": {
@@ -6804,24 +7085,23 @@ const PERSONAJES = {
       "barry"
     ],
     "kin": [],
-    "lines": [
-      "[hecho:conocidas_diana, !hecho:prohibida] ¡Ana, mi alma gemela! Te estaba esperando.",
-      "[hecho:conocidas_diana, !hecho:prohibida] Mamá dice que puedo salir hasta que se ponga el sol. ¿Vamos al lago?",
-      "[hecho:conocidas_diana, !hecho:prohibida, afecto:diana:ana>=4] ¿Te acuerdas de nuestro juramento de amistad? ¡Para siempre!",
-      "[hecho:conocidas_diana] Los manzanos están llenos este año. Toma las que quieras.",
-      "[hecho:conocidas_diana] El Bosque Encantado me da un poquito de miedo... pero contigo no.",
-      "[!hecho:conocidas_diana] Hola. Tú eres la niña nueva de Tejas Verdes, ¿verdad?"
-    ],
-    "seasonLines": [
-      "[hecho:conocidas_diana] ¡Mira los manzanos en flor, Ana! Parecen novias vestidas de blanco.",
-      "[hecho:conocidas_diana] ¡Qué calor! ¿Vamos a remojar los pies en el lago?",
-      "[hecho:conocidas_diana] El Bosque Encantado está todo rojo y dorado... ¡como un cuento!",
-      "[hecho:conocidas_diana] ¡Está nevando! Mamá no me deja salir sin bufanda. Ven, entra a calentarte junto al fuego."
-    ],
     "giftReply": " ¡Eres la mejor amiga del mundo!"
   },
   "barry": {
-    "presentacion": [["barry", "Buenas tardes. Tú debes ser la niña de los Cuthbert."], ["ana", "Sí, señora. Ana Shirley. Con una sola n, por favor."], ["barry", "Hmm. Yo soy la Sra. Barry, de La Cuesta del Huerto. Saluda a Marilla de mi parte."]],
+    "presentacion": [
+      [
+        "barry",
+        "Buenas tardes. Tú debes ser la niña de los Cuthbert."
+      ],
+      [
+        "ana",
+        "Sí, señora. Ana Shirley. Con una sola n, por favor."
+      ],
+      [
+        "barry",
+        "Hmm. Yo soy la Sra. Barry, de La Cuesta del Huerto. Saluda a Marilla de mi parte."
+      ]
+    ],
     "name": "Sra. Barry",
     "fullName": "Sra. Barry",
     "article": "la ",
@@ -6854,24 +7134,23 @@ const PERSONAJES = {
       "lynde"
     ],
     "kin": [],
-    "lines": [
-      "[!hecho:barry_presenta, !conoce:barry, sabe:barry:nina_cuthbert] Tú debes ser la niña que trajeron los Cuthbert. Buenas tardes.",
-      "[hecho:barry_presenta, !hecho:prohibida] Ana Shirley, siempre es un gusto verte por aquí. Pórtate bien, ¿eh?",
-      "[hecho:conocidas_diana, !hecho:prohibida] Diana habla de ti todo el día, ¿sabes?",
-      "[hecho:perdonada] Esta vez el cordial de frambuesa está bien etiquetado, te lo aseguro.",
-      "[hecho:prohibida, !hecho:perdonada] Buenas tardes. (La Sra. Barry no la invita a pasar.)",
-      "Saluda a Marilla de mi parte."
-    ],
-    "seasonLines": [
-      "[hecho:barry_presenta, !hecho:prohibida] Buenos días, Ana. Diana está deseando verte.",
-      "[hecho:barry_presenta, !hecho:prohibida] Qué calor, ¿verdad? Hay limonada en la despensa.",
-      "[hecho:barry_presenta, !hecho:prohibida] Diana me ayudó con las manzanas. Llévale algunas a Marilla.",
-      "[hecho:barry_presenta, !hecho:prohibida] Pasa, pasa, que hace un frío terrible. Diana está junto al fuego."
-    ],
     "giftReply": " Qué amable eres, Ana."
   },
   "lynde": {
-    "presentacion": [["lynde", "¡Vaya! ¿Así que tú eres la huérfana que trajeron a Tejas Verdes? Hmm. Ya iré a verte con calma, ya."], ["ana", "Sí, señora. Ana Shirley… con una sola n, por favor."], ["lynde", "Con una sola n. Habráse visto. Yo soy la Sra. Lynde, la vecina de la Hondonada."]],
+    "presentacion": [
+      [
+        "lynde",
+        "¡Vaya! ¿Así que tú eres la huérfana que trajeron a Tejas Verdes? Hmm. Ya iré a verte con calma, ya."
+      ],
+      [
+        "ana",
+        "Sí, señora. Ana Shirley… con una sola n, por favor."
+      ],
+      [
+        "lynde",
+        "Con una sola n. Habráse visto. Yo soy la Sra. Lynde, la vecina de la Hondonada."
+      ]
+    ],
     "name": "Sra. Lynde",
     "fullName": "Sra. Rachel Lynde",
     "article": "la ",
@@ -6905,21 +7184,6 @@ const PERSONAJES = {
       "barry"
     ],
     "kin": [],
-    "lines": [
-      "[!hecho:lynde_visita, !conoce:lynde, sabe:lynde:nina_cuthbert] ¿Así que tú eres la huérfana de Tejas Verdes? Ya iré a verte con calma, ya.",
-      "[hecho:ofendio_lynde, !hecho:disculpa_lynde] Hmpf. No tengo nada que hablar contigo, niña malcriada.",
-      "Desde mi ventana veo todo el camino: no se me escapa nadie. Lo digo sin mala intención, ¿eh?",
-      "Llevo cincuenta y dos cubrecamas de retazos, ¡cincuenta y dos! Y no pienso parar.",
-      "[hecho:se_queda, hecho:lynde_visita, !hecho:ofendio_lynde] Marilla hizo bien en quedarse contigo, y lo digo yo, que nunca me callo lo que pienso.",
-      "[hecho:lynde_visita] A una niña hay que enseñarle a ser útil. Pero, bueno, tú vas por buen camino.",
-      "[hecho:lynde_visita, !hecho:ofendio_lynde] Ana Shirley, hablas más que un molino... pero tienes buen corazón, eso lo reconozco."
-    ],
-    "seasonLines": [
-      "[hecho:lynde_visita] ¡Vaya, vaya, ya brotó todo! Ya es hora de limpiar la casa, digo yo.",
-      "[hecho:lynde_visita] Con este calor no hay quien teja... ¡pero yo tejo, claro que tejo!",
-      "[hecho:lynde_visita] El otoño siempre me hace pensar en los cubrecamas. Este año haré uno rojo y dorado.",
-      "[hecho:lynde_visita] Pasa, niña, que hace un frío de mil demonios... perdón, de los que dan escalofríos."
-    ],
     "giftReply": " Vaya, vaya... se nota que a ti te criaron bien.",
     "whereText": {
       "rl": "en su casa, junto a la ventana",
@@ -6929,7 +7193,16 @@ const PERSONAJES = {
     }
   },
   "harrison": {
-    "presentacion": [["harrison", "¿Y tú quién eres? Ah… la niña de los Cuthbert. Yo soy Harrison, el de al lado. No me pises la avena."], ["ana", "Ana Shirley, señor. Con una sola n."]],
+    "presentacion": [
+      [
+        "harrison",
+        "¿Y tú quién eres? Ah… la niña de los Cuthbert. Yo soy Harrison, el de al lado. No me pises la avena."
+      ],
+      [
+        "ana",
+        "Ana Shirley, señor. Con una sola n."
+      ]
+    ],
     "name": "Sr. Harrison",
     "fullName": "Sr. J. A. Harrison",
     "article": "el ",
@@ -6958,18 +7231,6 @@ const PERSONAJES = {
     },
     "gossip": [],
     "kin": [],
-    "lines": [
-      "Hmpf. Buenos días... si es que son buenos.",
-      "[dias_desde:conoce_harrison:3] ¿Esa vaca tuya se ha portado bien hoy? Más le vale.",
-      "No me mires la casa, que el desorden es mío.",
-      "Ginger, ¡silencio!... No le hagas caso, muchacha."
-    ],
-    "seasonLines": [
-      "La avena ya asoma. Que nadie la pise, ¿eh?",
-      "Calor de mil demonios para segar... con perdón.",
-      "Buena cosecha este año, aunque no lo diga mucho.",
-      "Con este frío, ni Ginger quiere hablar. Bueno, sí quiere."
-    ],
     "giftReply": " Hmpf... gracias, muchacha. De verdad.",
     "whereText": {
       "out": "afuera, en su campo y su potrero"
@@ -7002,23 +7263,26 @@ const PERSONAJES = {
     },
     "gossip": [],
     "kin": [],
-    "lines": [
-      "Buen día, señorita. ¿Algún animal para vender?",
-      "Ando apurado: me esperan en Carmody.",
-      "Buena tierra la de por aquí, sí señor."
-    ],
-    "seasonLines": [
-      "Primavera: buen tiempo para comprar terneros.",
-      "Con este calor las vacas dan menos leche, ¿sabía?",
-      "En otoño se vende bien el ganado.",
-      "En invierno casi no salgo, pero hoy hacía falta."
-    ],
     "giftReply": " Muy amable, señorita."
   }
 }
 ;
 for (const k of Object.keys(CHARACTERS)) CHARACTERS[k] = { ...PERSONAJES[k], ...CHARACTERS[k] };
 const CH = CHARACTERS;
+// what each one says in passing (src/datos/frases.txt, the same for the people of the house and of the village):
+// «=== quien ===», and «dice:», «primavera:»… «invierno:», «ana:» (what Ana answers), each with its conditions in [ ]
+function frasesLeer(txt){
+  const F = {}; let q = null; const EST = { primavera: 0, verano: 1, 'otoño': 2, invierno: 3 };
+  for (const raw of txt.split('\n')) {
+    const l = raw.trim(); if (!l || l[0] === '#') continue; let m;
+    if ((m = l.match(/^===\s*(.+?)\s*===$/))) { q = F[m[1]] = { dice: [], ana: [], est: ['', '', '', ''] }; continue; }
+    if (!q || !(m = l.match(/^(dice|ana|primavera|verano|otoño|invierno):\s*(.*)$/))) continue;
+    if (m[1] in EST) q.est[EST[m[1]]] = m[2]; else q[m[1]].push(m[2]);
+  }
+  return F;
+}
+const FRASES = frasesLeer(document.getElementById('frases')?.textContent || '');
+for (const k of Object.keys(CH)) { CH[k].lines = FRASES[k]?.dice || []; CH[k].seasonLines = FRASES[k]?.est || ['', '', '', '']; }
 // how each one feels about the others at the start (from the book); the graph then changes day by day
 ANA.rels = { matthew: [5, 'su espíritu afín: el que siempre la entiende'], marilla: [4, 'la quiere aunque la rete; quiere que esté orgullosa de ella'], diana: [5, 'su amiga del alma; se juraron amistad eterna'], barry: [2, 'la respeta y le teme un poco desde lo del vino de grosellas'], lynde: [2, 'al principio le gritó por lo de su pelo; ahora se llevan mejor'] };
 CH.matthew.rels = { ana: [4, 'la adora y siempre se pone de su lado'], marilla: [5, 'su hermana; se entienden sin hablar'], diana: [2, 'la amiga de Ana; le da timidez'], barry: [2, 'vecina; lo intimida'], lynde: [1, 'le da miedo su lengua'] };
@@ -10113,114 +10377,66 @@ function goDest(x, y){
    not in the stories nor in the prompts of the AI (they cost nothing). ---------- */
 const kidLook = (hair, dress, o = {}) => ({ hair, hairD: o.hairD || hair, dress, dressD: o.dressD || dress, skin: o.skin || '#f2cfb2', h: o.h || .82, ...o });
 const FOLK_DEFS = {
-  gilbert: { name: 'Gilbert Blythe', kind: 'alumno', home: 'Casa de los Blythe', play: 'lago', look: kidLook('#5a3a26', '#5a6e8a', { dressD: '#3e5068', coat: true, h: .88 }),
-    lines: ['[hecho:zanahorias] ¡Buenos días, Zanahorias!... Perdón, perdón. Era una broma, Ana.', '[hecho:zanahorias] ¿Me vas a hablar algún día, Ana Shirley?', '[dias_desde:escuela:3] Te gané en ortografía. Pero en composición... bueno, ahí ganas tú.', '[conoce:gilbert] ¿Quieres que te ayude a cruzar el arroyo? ¿No? Bueno...'],
-    ana: ['[hecho:zanahorias] Hmpf.', '[hecho:zanahorias] No le hablo a Gilbert Blythe. Nunca jamás.', '[hecho:zanahorias] (Ana sigue de largo con la nariz en alto.)'] },
-  buhonero: { name: 'el buhonero', kind: 'buhonero', home: 'Pensión', look: { hair: '#2a1a14', hairD: '#1a0a04', beard: true, dress: '#6a4a3a', dressD: '#4a2a1a', coat: true, hatDark: true, skin: '#d8a888', h: 1.12 },
-    lines: ['¡Cintas, botones, peinetas, tinte para el pelo! ¡Todo lo que una señorita necesita!', 'Un tinte que deja el pelo negro azabache, señorita. Garantizado.'] },
-  josie: { name: 'Josie Pye', kind: 'alumno', home: 'Casa de los Pye', play: 'aldea', look: kidLook('#e8cf86', '#c8a0d0', { dressD: '#a07ab0', style: 'curls', bow: '#f6d0e0' }),
-    lines: ['¿Ese vestido es nuevo, Ana? Ah, no... es el de siempre.', 'Te apuesto a que no te atreves a caminar por el techo de la casa de los Barry.', 'Mi mamá dice que las pelirrojas tienen mal genio. ¿Es verdad?'],
-    ana: ['Josie Pye, eres... ¡eres una Pye!', 'No pienso contestarte eso.'] },
-  gertie: { name: 'Gertie Pye', kind: 'alumno', home: 'Casa de los Pye', play: 'aldea', look: kidLook('#d8bf76', '#e0b090', { h: .76, bow: '#c84a5a' }),
-    lines: ['[dias_desde:escuela:3] Josie dice que tú inventas palabras difíciles para lucirte.', '[dias_desde:escuela:3] ¿Me prestas tu lápiz? El mío se perdió... otra vez.'] },
-  ruby: { name: 'Ruby Gillis', kind: 'alumno', home: 'Casa de los Gillis', play: 'rio', look: kidLook('#f0d070', '#f0a0a8', { dressD: '#c87a84', style: 'curls', bow: '#fff4f6' }),
-    lines: ['¡Ay, Ana! ¿Viste cómo me miró Charlie Sloane?', 'Mi hermana tiene un pretendiente nuevo. ¡Es tan romántico!', '¿Vamos a ver las botellas de leche en el río? La mía tiene una cinta azul.'] },
-  jane: { name: 'Jane Andrews', kind: 'alumno', home: 'Granja Andrews', play: 'escuela', look: kidLook('#8a5a3a', '#7a9a6a', { dressD: '#5a7a4a', style: 'braids' }),
-    lines: ['[dias_desde:escuela:3] ¿Hiciste los problemas de aritmética? Yo los hice dos veces, por si acaso.', '[conoce:jane] Mi mamá dice que eres muy imaginativa. No sé si lo dice como algo bueno.'] },
-  prissy: { name: 'Prissy Andrews', kind: 'alumno', home: 'Granja Andrews', play: 'aldea', look: kidLook('#8a5a3a', '#b0a0c8', { dressD: '#8a7aa0', style: 'bun', h: .96 }),
-    lines: ['El año que viene voy a estudiar para entrar a Queen\'s.', 'Ya tengo dieciséis años, ¿sabes? Casi una señorita.'] },
-  charlie: { name: 'Charlie Sloane', kind: 'alumno', home: 'Granja Sloane', play: 'playa', look: kidLook('#c8a070', '#6a7a5a', { dressD: '#4a5a3a', coat: true, h: .86 }),
-    lines: ['[dias_desde:escuela:3] Ana, ¿quieres... quieres usar mi pizarra nueva? Prestada, digo.', '[conoce:charlie] Mi mamá hizo tarta de grosellas. Te guardé un pedazo... si quieres.'] },
-  moody: { name: 'Moody Spurgeon', kind: 'alumno', home: 'Pensión', play: 'aldea', look: kidLook('#3a2a20', '#4a4a5a', { dressD: '#2a2a3a', coat: true, h: .84 }),
-    lines: ['Voy a ser pastor cuando sea grande. Ya practico los sermones con las vacas.', 'Ayer el maestro me dejó sin recreo. Fue injusto, aunque sí me reí en la oración.'] },
-  tillie: { name: 'Tillie Boulter', kind: 'alumno', home: 'Casa de los Potts', play: 'campo_rosado', look: kidLook('#6a4a30', '#e8c070', { dressD: '#c09a50', style: 'braids', h: .8 }),
-    lines: ['¿Juegas a la mancha? ¡Tú la llevas!', 'Encontré un nido de petirrojos detrás de la escuela. ¡No le digas a nadie!'] },
-  felicity: { name: 'Felicity King', kind: 'alumno', home: 'Granja King', play: 'aldea', look: kidLook('#e0b860', '#a8c8e8', { dressD: '#7aa0c0', style: 'curls', bow: '#7aa0c0' }),
-    lines: ['Mi madre dice que una señorita nunca corre. Pero yo corro si llego tarde.', 'Esta mañana hice pan yo solita. Bueno, casi solita.'] },
-  felix: { name: 'Felix King', kind: 'alumno', home: 'Granja King', play: 'bosque', look: kidLook('#c89050', '#8a6a4a', { dressD: '#6a4a2a', coat: true, h: .8 }),
-    lines: ['¿Sabías que en el bosque de Peg Bowen vive una bruja de verdad?', 'Estoy juntando valor para tocar la puerta de Peg Bowen. Mañana. O pasado.'] },
-  cecily: { name: 'Cecily King', kind: 'alumno', home: 'Granja King', play: 'escuela', look: kidLook('#a87848', '#f0d8e0', { dressD: '#c8a8b0', style: 'braids', h: .76 }),
-    lines: ['[dias_desde:escuela:3] ¿Me enseñas a recitar como tú? Cuando tú recitas, me dan escalofríos.', '[sabe:cecily:nina_cuthbert] ¿Tú eres la niña de Tejas Verdes? Dicen que hablas como en los libros.'] },
-  sara: { name: 'Sara Stanley', kind: 'alumno', home: 'Rose Cottage', play: 'puente', look: kidLook('#5a3a2a', '#e8e0c8', { dressD: '#c0b8a0', style: 'curls', bow: '#c8463a', h: .84 }),
-    lines: ['¿Te cuento una historia? Es de un barco fantasma que se ve desde el faro las noches de niebla.', '[conoce:sara] La tía Hetty dice que hablo demasiado. Tú también, ¿no? ¡Qué bien!'] },
-  phillips: { name: 'el Sr. Phillips', kind: 'maestro', home: 'Pensión', look: { hair: '#3a2a20', hairD: '#2a1a10', dress: '#3a3a44', dressD: '#2a2a30', coat: true, skin: '#eecaae', h: 1.1 },
-    lines: ['[dias_desde:escuela:3] Señorita Shirley, ¿no debería estar repasando su ortografía?', 'Mañana hay examen de geometría. Que nadie lo olvide.'] },
-  allan: { name: 'el reverendo Allan', kind: 'iglesia', home: 'Casa parroquial', room: 'cp', look: { hair: '#5a4a3a', hairD: '#3a2a20', dress: '#26242a', dressD: '#18161a', coat: true, hatDark: true, skin: '#eecaae', h: 1.14 },
-    lines: ['Que Dios te bendiga, Ana. ¿Te veremos el domingo en la escuela dominical?', 'Hermoso día para dar gracias, ¿no te parece?'] },
-  sraallan: { name: 'la Sra. Allan', kind: 'iglesia', home: 'Casa parroquial', room: 'cp', look: { hair: '#8a5a3a', hairD: '#6a3a20', style: 'bun', dress: '#6a8aa8', dressD: '#4a6a88', brooch: true, skin: '#f2cfb2', h: 1.08 },
-    lines: ['¡Ana, querida! ¡Qué gusto verte! ¿Cómo van tus estudios?', '[cuaderno:escuela_dominical] Me encantó tu recitación. Tienes un don, Ana.', 'Qué tarde tan linda para pasear, ¿verdad?'], ana: ['[conoce:sraallan] ¡Oh, Sra. Allan! Usted es mi espíritu afín.'] },
-  lawson: { name: 'el Sr. Lawson', kind: 'tendero', home: 'Tienda de Lawson', look: { hair: '#9a9088', hairD: '#6a6058', style: 'old', dress: '#6a5a4a', dressD: '#4a3a2a', apron: '#f4efe4', coat: true, skin: '#eac6a8', h: 1.12 },
-    lines: ['¡Buenos días, Ana! Llegaron caramelos de menta y cintas nuevas.', '¿Qué te manda Marilla hoy? ¿Azúcar? ¿Hilo?'] },
-  herrero: { name: 'el herrero', kind: 'tienda', home: 'Herrería', look: { hair: '#2a1a14', hairD: '#1a0a04', beard: true, dress: '#5a4a3a', dressD: '#3a2a1a', apron: '#4a3a2a', coat: true, skin: '#d8a888', h: 1.2 },
-    lines: ['¡Cuidado con las chispas, niña!', 'El caballo del Sr. Barry perdió una herradura. Otra vez.'] },
-  editor: { name: 'el editor de La Crónica', kind: 'tienda', home: 'La Crónica de Avonlea', look: { hair: '#7a6a5a', hairD: '#5a4a3a', dress: '#4a5a6a', dressD: '#3a4a5a', coat: true, skin: '#eecaae', h: 1.1 },
-    lines: ['¿Tienes alguna noticia para La Crónica, Ana? Se me acabaron las historias.', 'Si escribes un cuento bonito, te lo publico. Palabra de editor.'] },
-  hetty: { name: 'la Srta. Hetty King', kind: 'paseo', home: 'Rose Cottage', look: { hair: '#4a3a30', hairD: '#2a1a10', style: 'bun', dress: '#3a3a4a', dressD: '#2a2a3a', brooch: true, skin: '#eecaae', h: 1.12 },
-    lines: ['Los niños de hoy no saben estarse quietos. En mis tiempos...', 'Señorita, no se corre por la calle principal. ¡Y menos con el sombrero torcido!'] },
-  olivia: { name: 'Olivia King', kind: 'paseo', home: 'Rose Cottage', look: { hair: '#8a6a4a', hairD: '#6a4a2a', style: 'bun', dress: '#c8a0b0', dressD: '#a07a8a', skin: '#f2cfb2', h: 1.06 },
-    lines: ['¡Hola, Ana! ¿No es un día perfecto para un picnic?', 'Jasper Dale me saludó esta mañana. Bueno... casi me saludó.'] },
-  jasper: { name: 'Jasper Dale', kind: 'paseo', home: 'Casa de Jasper', look: { hair: '#6a5a4a', hairD: '#4a3a2a', dress: '#5a6a5a', dressD: '#3a4a3a', coat: true, skin: '#eecaae', h: 1.18 },
-    lines: ['B-buenos días. Estoy... estoy probando un invento. Para la lluvia.', 'Si ves a la Srta. Olivia... no, nada. No le digas nada.'] },
-  alec: { name: 'Alec King', kind: 'granjero', home: 'Granja King', look: { hair: '#6a4a30', hairD: '#4a2a10', dress: '#7a6a4a', dressD: '#5a4a2a', coat: true, hatDark: true, skin: '#e0b090', h: 1.16 },
-    lines: ['Buen día para la siega, Ana. ¡Si no llueve!', 'Saluda a Matthew de mi parte. Hace tiempo que no conversamos.'] },
-  janet: { name: 'Janet King', kind: 'paseo', home: 'Granja King', look: { hair: '#7a5a3a', hairD: '#5a3a1a', style: 'bun', dress: '#8a7a6a', dressD: '#6a5a4a', apron: '#f4efe4', skin: '#f0c8a8', h: 1.08 },
-    lines: ['¿Has visto a Felix? Tendría que estar trayendo leña.', 'Dile a Marilla que le devuelvo la fuente el sábado.'] },
-  srapye: { name: 'la Sra. Pye', kind: 'paseo', home: 'Casa de los Pye', look: { hair: '#6a5a4a', hairD: '#4a3a2a', style: 'bun', dress: '#7a4a5a', dressD: '#5a2a3a', skin: '#eecaae', h: 1.1 },
-    lines: ['¿Ya supiste lo del Sr. Harrison? Dicen que su loro dice cosas terribles.', 'Pelo rojo, genio vivo, como dice el refrán.'] },
-  sloane: { name: 'el Sr. Sloane', kind: 'granjero', home: 'Granja Sloane', look: { hair: '#8a7a6a', hairD: '#6a5a4a', style: 'old', dress: '#6a5a40', dressD: '#4a3a20', coat: true, skin: '#e0b090', h: 1.14 },
-    lines: ['Las papas vienen buenas este año. Ya lo verás.'] },
-  andrews: { name: 'el Sr. Andrews', kind: 'granjero', home: 'Granja Andrews', look: { hair: '#5a4a3a', hairD: '#3a2a1a', beard: true, dress: '#5a5a40', dressD: '#3a3a20', coat: true, hatDark: true, skin: '#e0b090', h: 1.16 },
-    lines: ['Buenas tardes. ¿Va todo bien en Tejas Verdes?'] },
-  peg: { name: 'Peg Bowen', kind: 'peg', home: 'Casa de Peg Bowen', look: { hair: '#8a8a88', hairD: '#5a5a58', style: 'old', dress: '#4a3a30', dressD: '#2a1a10', apron: '#6a5a40', skin: '#d8b090', h: 1.04 },
-    lines: ['Je, je. ¿Tú eres la pelirroja de los Cuthbert? Dile a Marilla que Peg Bowen la saluda.', 'En el bosque no hay brujas, niña. Solo estoy yo... je, je.'], ana: ['(¡Es Peg Bowen! Felix dice que es una bruja...)'] },
-  farero: { name: 'el capitán Jim', kind: 'farero', home: 'Casa del farero', look: { hair: '#e8e4dc', hairD: '#b8b4ac', beard: true, style: 'old', dress: '#2a3a5a', dressD: '#1a2a40', coat: true, skin: '#e0b090', h: 1.16 },
-    lines: ['Ese faro lleva cuarenta años encendido, y yo con él. Las noches de tormenta son las más hermosas.', '¿Ves esa vela allá lejos? Va a Charlottetown. Antes yo navegaba hasta las Antillas.', 'Si subes al faro al atardecer, el mar se pone de oro. Pregúntale a cualquier gaviota.'],
-    ana: ['¡Capitán Jim, cuénteme una historia del mar!', '¡Qué vida tan romántica la de un farero!'] },
+  gilbert: { name: 'Gilbert Blythe', kind: 'alumno', home: 'Casa de los Blythe', play: 'lago', look: kidLook('#5a3a26', '#5a6e8a', { dressD: '#3e5068', coat: true, h: .88 }) },
+  buhonero: { name: 'el buhonero', kind: 'buhonero', home: 'Pensión', look: { hair: '#2a1a14', hairD: '#1a0a04', beard: true, dress: '#6a4a3a', dressD: '#4a2a1a', coat: true, hatDark: true, skin: '#d8a888', h: 1.12 } },
+  josie: { name: 'Josie Pye', kind: 'alumno', home: 'Casa de los Pye', play: 'aldea', look: kidLook('#e8cf86', '#c8a0d0', { dressD: '#a07ab0', style: 'curls', bow: '#f6d0e0' }) },
+  gertie: { name: 'Gertie Pye', kind: 'alumno', home: 'Casa de los Pye', play: 'aldea', look: kidLook('#d8bf76', '#e0b090', { h: .76, bow: '#c84a5a' }) },
+  ruby: { name: 'Ruby Gillis', kind: 'alumno', home: 'Casa de los Gillis', play: 'rio', look: kidLook('#f0d070', '#f0a0a8', { dressD: '#c87a84', style: 'curls', bow: '#fff4f6' }) },
+  jane: { name: 'Jane Andrews', kind: 'alumno', home: 'Granja Andrews', play: 'escuela', look: kidLook('#8a5a3a', '#7a9a6a', { dressD: '#5a7a4a', style: 'braids' }) },
+  prissy: { name: 'Prissy Andrews', kind: 'alumno', home: 'Granja Andrews', play: 'aldea', look: kidLook('#8a5a3a', '#b0a0c8', { dressD: '#8a7aa0', style: 'bun', h: .96 }) },
+  charlie: { name: 'Charlie Sloane', kind: 'alumno', home: 'Granja Sloane', play: 'playa', look: kidLook('#c8a070', '#6a7a5a', { dressD: '#4a5a3a', coat: true, h: .86 }) },
+  moody: { name: 'Moody Spurgeon', kind: 'alumno', home: 'Pensión', play: 'aldea', look: kidLook('#3a2a20', '#4a4a5a', { dressD: '#2a2a3a', coat: true, h: .84 }) },
+  tillie: { name: 'Tillie Boulter', kind: 'alumno', home: 'Casa de los Potts', play: 'campo_rosado', look: kidLook('#6a4a30', '#e8c070', { dressD: '#c09a50', style: 'braids', h: .8 }) },
+  felicity: { name: 'Felicity King', kind: 'alumno', home: 'Granja King', play: 'aldea', look: kidLook('#e0b860', '#a8c8e8', { dressD: '#7aa0c0', style: 'curls', bow: '#7aa0c0' }) },
+  felix: { name: 'Felix King', kind: 'alumno', home: 'Granja King', play: 'bosque', look: kidLook('#c89050', '#8a6a4a', { dressD: '#6a4a2a', coat: true, h: .8 }) },
+  cecily: { name: 'Cecily King', kind: 'alumno', home: 'Granja King', play: 'escuela', look: kidLook('#a87848', '#f0d8e0', { dressD: '#c8a8b0', style: 'braids', h: .76 }) },
+  sara: { name: 'Sara Stanley', kind: 'alumno', home: 'Rose Cottage', play: 'puente', look: kidLook('#5a3a2a', '#e8e0c8', { dressD: '#c0b8a0', style: 'curls', bow: '#c8463a', h: .84 }) },
+  phillips: { name: 'el Sr. Phillips', kind: 'maestro', home: 'Pensión', look: { hair: '#3a2a20', hairD: '#2a1a10', dress: '#3a3a44', dressD: '#2a2a30', coat: true, skin: '#eecaae', h: 1.1 } },
+  allan: { name: 'el reverendo Allan', kind: 'iglesia', home: 'Casa parroquial', room: 'cp', look: { hair: '#5a4a3a', hairD: '#3a2a20', dress: '#26242a', dressD: '#18161a', coat: true, hatDark: true, skin: '#eecaae', h: 1.14 } },
+  sraallan: { name: 'la Sra. Allan', kind: 'iglesia', home: 'Casa parroquial', room: 'cp', look: { hair: '#8a5a3a', hairD: '#6a3a20', style: 'bun', dress: '#6a8aa8', dressD: '#4a6a88', brooch: true, skin: '#f2cfb2', h: 1.08 } },
+  lawson: { name: 'el Sr. Lawson', kind: 'tendero', home: 'Tienda de Lawson', look: { hair: '#9a9088', hairD: '#6a6058', style: 'old', dress: '#6a5a4a', dressD: '#4a3a2a', apron: '#f4efe4', coat: true, skin: '#eac6a8', h: 1.12 } },
+  herrero: { name: 'el herrero', kind: 'tienda', home: 'Herrería', look: { hair: '#2a1a14', hairD: '#1a0a04', beard: true, dress: '#5a4a3a', dressD: '#3a2a1a', apron: '#4a3a2a', coat: true, skin: '#d8a888', h: 1.2 } },
+  editor: { name: 'el editor de La Crónica', kind: 'tienda', home: 'La Crónica de Avonlea', look: { hair: '#7a6a5a', hairD: '#5a4a3a', dress: '#4a5a6a', dressD: '#3a4a5a', coat: true, skin: '#eecaae', h: 1.1 } },
+  hetty: { name: 'la Srta. Hetty King', kind: 'paseo', home: 'Rose Cottage', look: { hair: '#4a3a30', hairD: '#2a1a10', style: 'bun', dress: '#3a3a4a', dressD: '#2a2a3a', brooch: true, skin: '#eecaae', h: 1.12 } },
+  olivia: { name: 'Olivia King', kind: 'paseo', home: 'Rose Cottage', look: { hair: '#8a6a4a', hairD: '#6a4a2a', style: 'bun', dress: '#c8a0b0', dressD: '#a07a8a', skin: '#f2cfb2', h: 1.06 } },
+  jasper: { name: 'Jasper Dale', kind: 'paseo', home: 'Casa de Jasper', look: { hair: '#6a5a4a', hairD: '#4a3a2a', dress: '#5a6a5a', dressD: '#3a4a3a', coat: true, skin: '#eecaae', h: 1.18 } },
+  alec: { name: 'Alec King', kind: 'granjero', home: 'Granja King', look: { hair: '#6a4a30', hairD: '#4a2a10', dress: '#7a6a4a', dressD: '#5a4a2a', coat: true, hatDark: true, skin: '#e0b090', h: 1.16 } },
+  janet: { name: 'Janet King', kind: 'paseo', home: 'Granja King', look: { hair: '#7a5a3a', hairD: '#5a3a1a', style: 'bun', dress: '#8a7a6a', dressD: '#6a5a4a', apron: '#f4efe4', skin: '#f0c8a8', h: 1.08 } },
+  srapye: { name: 'la Sra. Pye', kind: 'paseo', home: 'Casa de los Pye', look: { hair: '#6a5a4a', hairD: '#4a3a2a', style: 'bun', dress: '#7a4a5a', dressD: '#5a2a3a', skin: '#eecaae', h: 1.1 } },
+  sloane: { name: 'el Sr. Sloane', kind: 'granjero', home: 'Granja Sloane', look: { hair: '#8a7a6a', hairD: '#6a5a4a', style: 'old', dress: '#6a5a40', dressD: '#4a3a20', coat: true, skin: '#e0b090', h: 1.14 } },
+  andrews: { name: 'el Sr. Andrews', kind: 'granjero', home: 'Granja Andrews', look: { hair: '#5a4a3a', hairD: '#3a2a1a', beard: true, dress: '#5a5a40', dressD: '#3a3a20', coat: true, hatDark: true, skin: '#e0b090', h: 1.16 } },
+  peg: { name: 'Peg Bowen', kind: 'peg', home: 'Casa de Peg Bowen', look: { hair: '#8a8a88', hairD: '#5a5a58', style: 'old', dress: '#4a3a30', dressD: '#2a1a10', apron: '#6a5a40', skin: '#d8b090', h: 1.04 } },
+  farero: { name: 'el capitán Jim', kind: 'farero', home: 'Casa del farero', look: { hair: '#e8e4dc', hairD: '#b8b4ac', beard: true, style: 'old', dress: '#2a3a5a', dressD: '#1a2a40', coat: true, skin: '#e0b090', h: 1.16 } },
   // --- the ones from the book that were missing
-  stacy: { name: 'la Srta. Stacy', kind: 'maestro', home: 'Pensión', look: { hair: '#a8683a', hairD: '#80482a', style: 'bun', dress: '#6a8a6a', dressD: '#4a6a4a', brooch: true, skin: '#f2cfb2', h: 1.08 },
-    lines: ['[dias_desde:escuela:3] Ana, tu composición fue la mejor de la clase. Pero cuidado con los adjetivos: ¡no hacen falta tantos!', 'El viernes por la tarde salimos al bosque a estudiar botánica. ¿Te apuntas?', '[estudio:ana>=20] Este año preparamos a los mejores para el examen de Queen\'s. Tú puedes, Ana.'], ana: ['[conoce:stacy] ¡Srta. Stacy! Usted es mi espíritu afín, ¿lo sabía?'] },
-  minnie: { name: 'Minnie May Barry', kind: 'juego', home: 'La Cuesta del Huerto', look: kidLook('#2a1a14', '#e8c0d0', { dressD: '#c098a8', style: 'curls', bow: '#c8463a', h: .64 }),
-    lines: ['[conoce:minnie] ¡Ana! ¿Me cuentas el cuento del hada otra vez?', '[conoce:minnie] Diana no me deja jugar con sus muñecas. ¿Tú me dejas?', '[sabe:minnie:nina_cuthbert] ¿Tú eres la niña nueva de Tejas Verdes? Mamá dice que eres pelirroja. ¡Y es verdad!', '[hecho:perdonada] Ya no tengo tos. ¡Mamá dice que tú me salvaste!'] },
-  srbarry: { name: 'el Sr. Barry', kind: 'granjero', home: 'La Cuesta del Huerto', look: { hair: '#3a2a20', hairD: '#2a1a10', beard: true, dress: '#5a5040', dressD: '#3a3020', coat: true, hatDark: true, skin: '#e0b090', h: 1.18 },
-    lines: ['Buenas, Ana. Diana está en la casa, creo. O en el huerto.', 'El heno está listo para entrar. Si no llueve, mañana lo cargamos.'] },
-  maryjoe: { name: 'Mary Joe', kind: 'juego', home: 'La Cuesta del Huerto', look: { hair: '#5a3a2a', hairD: '#3a2010', style: 'bun', dress: '#8a7a6a', dressD: '#6a5a4a', apron: '#f4efe4', skin: '#e8c0a0', h: 1.06 },
-    lines: ['[hecho:perdonada] ¡Ay, señorita Ana! Yo no sé nada de enfermedades, menos mal que usted vino aquella noche.', 'La señora Barry dice que tienda la ropa antes de que se nuble.'] },
-  jerry: { name: 'Jerry Buote', kind: 'granjero', home: 'Tejas Verdes', look: { hair: '#2a1a14', hairD: '#1a0a04', dress: '#6a5a3a', dressD: '#4a3a1a', coat: true, skin: '#e0b090', h: .98 },
-    lines: ['El Sr. Cuthbert me pidió que entrara la leña antes de la cena.', 'Oui, oui... ya voy, ya voy. ¡Esa vaca no se quiere mover!'] },
-  medico: { name: 'el médico', kind: 'medico', home: 'Pensión', look: { hair: '#8a8278', hairD: '#5a5248', style: 'old', dress: '#2a2a30', dressD: '#18181e', coat: true, hatDark: true, beard: true, skin: '#eecaae', h: 1.14 },
-    lines: ['¿Alguien enfermo en Tejas Verdes? Espero que no.', '[hecho:perdonada] Esa niña Shirley tiene buena cabeza: salvó a la pequeña Barry del crup antes de que yo llegara.'] },
-  srbell: { name: 'el Sr. Bell', kind: 'iglesia', home: 'Casa de los Pettibone', look: { hair: '#c8c0b0', hairD: '#9a9080', style: 'old', dress: '#3a3a40', dressD: '#2a2a30', coat: true, beard: true, skin: '#eecaae', h: 1.16 },
-    lines: ['Te esperamos el domingo en la escuela dominical, Ana. Y apréndete el versículo.', 'Una oración larga no es mejor que una sincera, niña.'] },
-  josephine: { name: 'la Srta. Josephine Barry', kind: 'paseo', home: 'La Cuesta del Huerto', look: { hair: '#d8d4cc', hairD: '#a8a49c', style: 'bun', dress: '#4a2a4a', dressD: '#2a1a2a', brooch: true, skin: '#eecaae', h: 1.06 },
-    lines: ['[sabe:josephine:nina_cuthbert] Así que tú eres la niña de Tejas Verdes. Hmm. Ya veremos qué clase de niña eres.', '[hecho:cama_josephine] ¡La niña Ana! Desde que me saltaste encima en la cama, no me había reído tanto en años.', '[hecho:cama_josephine] Cuando vengas a Charlottetown, te alojas en mi casa. Te llevo a la exposición.'], ana: ['¡Srta. Barry! Usted es un espíritu afín, aunque no lo parezca a primera vista.'] },
-  spencer: { name: 'la Sra. Spencer', kind: 'paseo', home: 'Hotel White Sands', look: { hair: '#7a5a3a', hairD: '#5a3a1a', style: 'bun', dress: '#5a6a8a', dressD: '#3a4a6a', skin: '#f2cfb2', h: 1.06 },
-    lines: ['¡Ana! Qué bien te ves. Y yo que creí que los Cuthbert querían una niña… ¡qué enredo!', 'Mi Lily estuvo enferma, por eso no pude llevarte yo a Tejas Verdes.'] },
-  blewett: { name: 'la Sra. Blewett', kind: 'recado', home: 'Hotel White Sands', look: { hair: '#3a2a20', hairD: '#2a1a10', style: 'bun', dress: '#4a4a3a', dressD: '#2a2a1a', skin: '#e8c0a0', h: 1.08 },
-    lines: ['[hecho:a_prueba] Así que te quedaste con los Cuthbert. Hmm. Yo te habría hecho trabajar de verdad.', 'Hmm. Flacucha. En mi casa no hay tiempo para mirar las nubes, ¿sabes?'], ana: ['[hecho:a_prueba] (Ana se esconde detrás de un árbol. ¡Menos mal que Marilla no la dejó irse con ella!)'] },
-  carrie: { name: 'Carrie Sloane', kind: 'alumno', home: 'Granja Sloane', play: 'escuela', look: kidLook('#c8a070', '#e8d0a0', { dressD: '#c0a878', style: 'braids', h: .8 }),
-    lines: ['[dias_desde:escuela:3] ¿Viste la composición de Ana? ¡La señorita Stacy la leyó en voz alta!', '[sabe:carrie:nina_cuthbert] Mi mamá dice que en Tejas Verdes hay una niña nueva. ¿Eres tú?'] },
-  jefe: { name: 'el jefe de estación', kind: 'jefe', home: 'Hotel White Sands', look: { hair: '#5a4a3a', hairD: '#3a2a1a', dress: '#2a3a5a', dressD: '#1a2a40', coat: true, hatDark: true, beard: true, skin: '#e8c0a0', h: 1.14 },
-    lines: ['El tren de las cinco y media ya pasó, ¿sabe? Hoy no viene otro.', 'Esa niñita de pelo rojo... se sentó en las tejuelas a imaginar cosas. Todo un caso.'] },
-  thomas: { name: 'Thomas Lynde', kind: 'granjero', home: 'La Hondonada de Lynde', look: { hair: '#8a7a6a', hairD: '#6a5a4a', style: 'old', dress: '#5a5a48', dressD: '#3a3a28', coat: true, skin: '#e0b090', h: 1.12 },
-    lines: ['Buenas. Rachel está adentro. Ella habla por los dos, ¿sabes?'] },
-  veraneante: { name: 'una veraneante del hotel', kind: 'playa', home: 'Hotel White Sands', look: { hair: '#c8a060', hairD: '#a07a40', style: 'bun', dress: '#f4f0f8', dressD: '#c8c0d8', collar: '#c8a0d0', skin: '#f6dcc8', h: 1.08 },
-    lines: ['¡Qué playa tan encantadora! En Boston no hay nada parecido.', '¿Eres de aquí, niña? ¡Qué suerte vivir en un lugar así!'] },
-  pescador: { name: 'un pescador', kind: 'playa', home: 'Casa del farero', look: { hair: '#5a4a3a', hairD: '#3a2a1a', beard: true, dress: '#c8a040', dressD: '#a07a20', coat: true, skin: '#d8a080', h: 1.16 },
-    lines: ['Hoy vienen buenas las caballas. Si Marilla quiere pescado, que mande a Matthew.'] },
+  stacy: { name: 'la Srta. Stacy', kind: 'maestro', home: 'Pensión', look: { hair: '#a8683a', hairD: '#80482a', style: 'bun', dress: '#6a8a6a', dressD: '#4a6a4a', brooch: true, skin: '#f2cfb2', h: 1.08 } },
+  minnie: { name: 'Minnie May Barry', kind: 'juego', home: 'La Cuesta del Huerto', look: kidLook('#2a1a14', '#e8c0d0', { dressD: '#c098a8', style: 'curls', bow: '#c8463a', h: .64 }) },
+  srbarry: { name: 'el Sr. Barry', kind: 'granjero', home: 'La Cuesta del Huerto', look: { hair: '#3a2a20', hairD: '#2a1a10', beard: true, dress: '#5a5040', dressD: '#3a3020', coat: true, hatDark: true, skin: '#e0b090', h: 1.18 } },
+  maryjoe: { name: 'Mary Joe', kind: 'juego', home: 'La Cuesta del Huerto', look: { hair: '#5a3a2a', hairD: '#3a2010', style: 'bun', dress: '#8a7a6a', dressD: '#6a5a4a', apron: '#f4efe4', skin: '#e8c0a0', h: 1.06 } },
+  jerry: { name: 'Jerry Buote', kind: 'granjero', home: 'Tejas Verdes', look: { hair: '#2a1a14', hairD: '#1a0a04', dress: '#6a5a3a', dressD: '#4a3a1a', coat: true, skin: '#e0b090', h: .98 } },
+  medico: { name: 'el médico', kind: 'medico', home: 'Pensión', look: { hair: '#8a8278', hairD: '#5a5248', style: 'old', dress: '#2a2a30', dressD: '#18181e', coat: true, hatDark: true, beard: true, skin: '#eecaae', h: 1.14 } },
+  srbell: { name: 'el Sr. Bell', kind: 'iglesia', home: 'Casa de los Pettibone', look: { hair: '#c8c0b0', hairD: '#9a9080', style: 'old', dress: '#3a3a40', dressD: '#2a2a30', coat: true, beard: true, skin: '#eecaae', h: 1.16 } },
+  josephine: { name: 'la Srta. Josephine Barry', kind: 'paseo', home: 'La Cuesta del Huerto', look: { hair: '#d8d4cc', hairD: '#a8a49c', style: 'bun', dress: '#4a2a4a', dressD: '#2a1a2a', brooch: true, skin: '#eecaae', h: 1.06 } },
+  spencer: { name: 'la Sra. Spencer', kind: 'paseo', home: 'Hotel White Sands', look: { hair: '#7a5a3a', hairD: '#5a3a1a', style: 'bun', dress: '#5a6a8a', dressD: '#3a4a6a', skin: '#f2cfb2', h: 1.06 } },
+  blewett: { name: 'la Sra. Blewett', kind: 'recado', home: 'Hotel White Sands', look: { hair: '#3a2a20', hairD: '#2a1a10', style: 'bun', dress: '#4a4a3a', dressD: '#2a2a1a', skin: '#e8c0a0', h: 1.08 } },
+  carrie: { name: 'Carrie Sloane', kind: 'alumno', home: 'Granja Sloane', play: 'escuela', look: kidLook('#c8a070', '#e8d0a0', { dressD: '#c0a878', style: 'braids', h: .8 }) },
+  jefe: { name: 'el jefe de estación', kind: 'jefe', home: 'Hotel White Sands', look: { hair: '#5a4a3a', hairD: '#3a2a1a', dress: '#2a3a5a', dressD: '#1a2a40', coat: true, hatDark: true, beard: true, skin: '#e8c0a0', h: 1.14 } },
+  thomas: { name: 'Thomas Lynde', kind: 'granjero', home: 'La Hondonada de Lynde', look: { hair: '#8a7a6a', hairD: '#6a5a4a', style: 'old', dress: '#5a5a48', dressD: '#3a3a28', coat: true, skin: '#e0b090', h: 1.12 } },
+  veraneante: { name: 'una veraneante del hotel', kind: 'playa', home: 'Hotel White Sands', look: { hair: '#c8a060', hairD: '#a07a40', style: 'bun', dress: '#f4f0f8', dressD: '#c8c0d8', collar: '#c8a0d0', skin: '#f6dcc8', h: 1.08 } },
+  pescador: { name: 'un pescador', kind: 'playa', home: 'Casa del farero', look: { hair: '#5a4a3a', hairD: '#3a2a1a', beard: true, dress: '#c8a040', dressD: '#a07a20', coat: true, skin: '#d8a080', h: 1.16 } },
 };
 // and the neighbours one does not know by name: on their errands along the roads, strolling, the little ones at play
 { const r = rng(2024), pk = a => a[Math.floor(r() * a.length)], homes = BUILDINGS.filter(b => b.style === 'casa' || b.style === 'granja').map(b => b.name);
   const DRESS = ['#8a6a8a', '#6a8aa8', '#a86a5a', '#7a9a6a', '#c8a070', '#5a6a8a', '#b88aa0', '#8a7a5a'], COAT = ['#4a4a54', '#5a4a3a', '#6a5a40', '#3a4a5a', '#5a5a40'], HAIR = ['#3a2a20', '#6a4a30', '#8a6a4a', '#c8a070', '#2a1a14', '#9a9088'];
-  const GREET = [   // (one who does not know her by name: a stranger, the first weeks; by then all Avonlea knows the girl of Green Gables)
-    '[dias_desde:llegada_tv:14] ¡Buenos días, Ana! ¿Cómo están Matthew y Marilla?', 'Lindo día, ¿verdad? Dicen que mañana llueve.', '[dias_desde:llegada_tv:56] ¡Qué grande estás, niña! Saludos a Marilla.', '[!dias_desde:llegada_tv:14] Buenas. Tú no eres de por aquí, ¿no?', '¿Vas para la aldea? Yo vengo de la tienda de Lawson.', 'Buenas, buenas. No te entretengas, que se hace tarde.', 'Mira qué cielo. Así da gusto salir.'];
   for (let n = 0; n < 18; n++) {
     const kind = n < 9 ? 'recado' : n < 14 ? 'paseo' : 'juego', woman = r() < .5, kid = kind === 'juego', hair = pk(HAIR);
     const look = kid ? { hair, dress: pk(DRESS), skin: '#f2cfb2', h: .7 + r() * .08, ...(woman ? { style: r() < .5 ? 'braids' : 'curls', bow: pk(DRESS) } : { coat: true }) }
       : woman ? { hair, style: 'bun', dress: pk(DRESS), skin: pk(['#f2cfb2', '#eecaae', '#e8c0a0']), h: 1.04 + r() * .08, ...(r() < .4 ? { apron: '#f4efe4' } : {}) }
       : { hair, dress: pk(COAT), coat: true, skin: pk(['#eecaae', '#e0b090', '#e8c0a0']), h: 1.1 + r() * .1, ...(r() < .4 ? { hatDark: true } : {}), ...(r() < .3 ? { beard: true } : {}), ...(hair === '#9a9088' ? { style: 'old' } : {}) };
     FOLK_DEFS['v' + n] = { name: kid ? (woman ? 'una niñita' : 'un niñito') : woman ? pk(['una vecina', 'una señora de la aldea', 'una granjera']) : pk(['un vecino', 'un granjero', 'un señor de Carmody']), kind, home: pk(homes), look,
-      lines: kid ? ['¿Tú eres Ana? ¡Tienes el pelo como una zanahoria!... ¡Es bonito!', '¡Mira, encontré una piedra que brilla!', '¿Jugamos? Yo me escondo y tú cuentas hasta cien.'] : GREET };
+      lines: (kid ? FRASES['niño'] : FRASES.vecino)?.dice || [] };
   } }
+// (what they say: src/datos/frases.txt)
+for (const [k, d] of Object.entries(FOLK_DEFS)) if (!/^v\d+$/.test(k)) { d.lines = FRASES[k]?.dice || []; d.ana = FRASES[k]?.ana || []; }
 for (const [k, d] of Object.entries(FOLK_DEFS)) LOOKS['f:' + k] = { hairD: d.look.hair, dressD: d.look.dress, scarf: '#a85a4a', ...d.look };
 const BLD = n => BUILDINGS.find(b => b.name === n) || Object.values(HOUSES).find(h => h.name === n)?.at;
 const door = n => { const b = BLD(n); return [b.x, b.y + 36]; };

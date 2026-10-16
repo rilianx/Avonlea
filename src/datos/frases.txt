@@ -1,0 +1,310 @@
+# Las frases sueltas de cada uno: lo que dice al pasar, al tocarlo, al encontrarse con Ana (lo lee el juego al
+# empezar). La gente de la casa (personajes.json) y la del pueblo (src/js/56-gente-de-avonlea.js) por igual.
+# Se edita aquí o en la planilla (planilla/avonlea.xlsx, hoja «Frases»: node tools/planilla.js la genera desde aquí,
+# y python3 tools/importar_planilla.py la vuelve a escribir aquí).
+#
+# «=== quien ===» y una frase por línea:
+#   dice: lo que dice (una al azar, entre las que valen ahora)
+#   primavera: / verano: / otoño: / invierno: lo que dice esa estación, la primera vez (solo la gente de la casa)
+#   ana: lo que Ana le contesta, a veces (la gente del pueblo)
+# Una frase puede esperar a algo de la historia, con condiciones del guion entre corchetes y con comas:
+#   dice: [conoce:harrison, dias_desde:conoce_harrison:3] ¿Esa vaca tuya se ha portado bien hoy?
+# Quien no conoce a Ana no dice las frases con su nombre («Ana», «Shirley»).
+# «=== vecino ===» y «=== niño ===»: los vecinos sin nombre del pueblo (los grandes y los chicos).
+
+=== matthew ===
+dice: [!hecho:se_queda] Bueno, pues... Marilla es buena, ¿sabes? Solo que no se le nota mucho al principio.
+dice: [!hecho:se_queda] Ya lo creo que... bueno, ojalá te quedes, Ana. Yo... sí. Eso.
+dice: Bueno, pues... sí, es un día precioso, Ana. Ya lo creo.
+dice: Las vacas andan contentas hoy. Será por el sol, supongo.
+dice: [hecho:se_queda] Marilla dice que hablas mucho. Bueno, a mí me gusta oírte, ¿sabes?
+dice: [hecho:se_queda] ¿Viste las flores junto al camino? Bueno, pues... me hicieron pensar en ti.
+dice: [hecho:se_queda] Ya lo creo, ya lo creo. Anda, ve a jugar un rato, que el día está lindo.
+primavera: Bueno, pues... ya brotó todo. La primavera, ¿no? Ya lo creo.
+verano: Hace calor para la siega, ya lo creo. Bueno, el heno no se corta solo.
+otoño: Las manzanas de los Barry están en su punto. Marilla querrá hacer compota, supongo.
+invierno: Abrígate bien, Ana. El frío... bueno, pues, no es broma.
+
+=== marilla ===
+dice: [!hecho:se_queda] Mientras estés en esta casa, harás tus quehaceres como cualquiera. Después veremos.
+dice: [!hecho:se_queda] No te prometo nada, niña. Que te quedes o no, depende de cómo te portes.
+dice: [!hecho:se_queda] Lávate la cara y péinate esas trenzas. Aquí se come con la cara limpia.
+dice: [!hecho:se_queda] ¿Sabes rezar? Pues vas a aprender. En esta casa se reza.
+dice: [hecho:se_queda] Ana, no te quedes soñando despierta. Aunque... la cocina está ordenada, eso sí.
+dice: [hecho:se_queda] Si quieres cocinar, la estufa está encendida. Cuidado con no quemar nada esta vez.
+dice: [hecho:se_queda, hecho:conocidas_diana] Matthew no lo dice, pero te echa de menos cuando te vas donde Diana.
+dice: [hecho:se_queda] Riega la huerta antes de que caiga el sol, que las plantas lo agradecen.
+dice: [hecho:se_queda, afecto:marilla:ana>=3] Hmm. Bueno, admito que hoy te has portado muy bien.
+dice: [hecho:ropa_arrugada, !hecho:ropa_ordenada] Ese vestido parece que durmió en el suelo, Ana. Ah, claro: es que durmió en el suelo.
+primavera: [hecho:se_queda] Hay que limpiar la casa a fondo, que es primavera. Y tú me vas a ayudar, Ana.
+verano: Con este calor, mejor un té y no enciendas mucho la estufa.
+otoño: Es tiempo de manzanas: una buena compota para el invierno no está de más.
+invierno: Siéntate cerca de la estufa, niña, que vienes helada.
+
+=== diana ===
+dice: [hecho:conocidas_diana, !hecho:prohibida] ¡Ana, mi alma gemela! Te estaba esperando.
+dice: [hecho:conocidas_diana, !hecho:prohibida] Mamá dice que puedo salir hasta que se ponga el sol. ¿Vamos al lago?
+dice: [hecho:conocidas_diana, !hecho:prohibida, afecto:diana:ana>=4] ¿Te acuerdas de nuestro juramento de amistad? ¡Para siempre!
+dice: [hecho:conocidas_diana] Los manzanos están llenos este año. Toma las que quieras.
+dice: [hecho:conocidas_diana] El Bosque Encantado me da un poquito de miedo... pero contigo no.
+dice: [!hecho:conocidas_diana] Hola. Tú eres la niña nueva de Tejas Verdes, ¿verdad?
+primavera: [hecho:conocidas_diana] ¡Mira los manzanos en flor, Ana! Parecen novias vestidas de blanco.
+verano: [hecho:conocidas_diana] ¡Qué calor! ¿Vamos a remojar los pies en el lago?
+otoño: [hecho:conocidas_diana] El Bosque Encantado está todo rojo y dorado... ¡como un cuento!
+invierno: [hecho:conocidas_diana] ¡Está nevando! Mamá no me deja salir sin bufanda. Ven, entra a calentarte junto al fuego.
+
+=== barry ===
+dice: [!conoce:barry, !hecho:barry_presenta, sabe:barry:nina_cuthbert] Tú debes ser la niña que trajeron los Cuthbert. Buenas tardes.
+dice: [hecho:barry_presenta, !hecho:prohibida] Ana Shirley, siempre es un gusto verte por aquí. Pórtate bien, ¿eh?
+dice: [hecho:conocidas_diana, !hecho:prohibida] Diana habla de ti todo el día, ¿sabes?
+dice: [hecho:perdonada] Esta vez el cordial de frambuesa está bien etiquetado, te lo aseguro.
+dice: [hecho:prohibida, !hecho:perdonada] Buenas tardes. (La Sra. Barry no la invita a pasar.)
+dice: Saluda a Marilla de mi parte.
+primavera: [hecho:barry_presenta, !hecho:prohibida] Buenos días, Ana. Diana está deseando verte.
+verano: [hecho:barry_presenta, !hecho:prohibida] Qué calor, ¿verdad? Hay limonada en la despensa.
+otoño: [hecho:barry_presenta, !hecho:prohibida] Diana me ayudó con las manzanas. Llévale algunas a Marilla.
+invierno: [hecho:barry_presenta, !hecho:prohibida] Pasa, pasa, que hace un frío terrible. Diana está junto al fuego.
+
+=== lynde ===
+dice: [!conoce:lynde, !hecho:lynde_visita, sabe:lynde:nina_cuthbert] ¿Así que tú eres la huérfana de Tejas Verdes? Ya iré a verte con calma, ya.
+dice: [hecho:ofendio_lynde, !hecho:disculpa_lynde] Hmpf. No tengo nada que hablar contigo, niña malcriada.
+dice: Desde mi ventana veo todo el camino: no se me escapa nadie. Lo digo sin mala intención, ¿eh?
+dice: Llevo cincuenta y dos cubrecamas de retazos, ¡cincuenta y dos! Y no pienso parar.
+dice: [hecho:se_queda, !hecho:ofendio_lynde, hecho:lynde_visita] Marilla hizo bien en quedarse contigo, y lo digo yo, que nunca me callo lo que pienso.
+dice: [hecho:lynde_visita] A una niña hay que enseñarle a ser útil. Pero, bueno, tú vas por buen camino.
+dice: [hecho:lynde_visita, !hecho:ofendio_lynde] Ana Shirley, hablas más que un molino... pero tienes buen corazón, eso lo reconozco.
+primavera: [hecho:lynde_visita] ¡Vaya, vaya, ya brotó todo! Ya es hora de limpiar la casa, digo yo.
+verano: [hecho:lynde_visita] Con este calor no hay quien teja... ¡pero yo tejo, claro que tejo!
+otoño: [hecho:lynde_visita] El otoño siempre me hace pensar en los cubrecamas. Este año haré uno rojo y dorado.
+invierno: [hecho:lynde_visita] Pasa, niña, que hace un frío de mil demonios... perdón, de los que dan escalofríos.
+
+=== harrison ===
+dice: Hmpf. Buenos días... si es que son buenos.
+dice: [dias_desde:conoce_harrison:3] ¿Esa vaca tuya se ha portado bien hoy? Más le vale.
+dice: No me mires la casa, que el desorden es mío.
+dice: Ginger, ¡silencio!... No le hagas caso, muchacha.
+primavera: La avena ya asoma. Que nadie la pise, ¿eh?
+verano: Calor de mil demonios para segar... con perdón.
+otoño: Buena cosecha este año, aunque no lo diga mucho.
+invierno: Con este frío, ni Ginger quiere hablar. Bueno, sí quiere.
+
+=== shearer ===
+dice: Buen día, señorita. ¿Algún animal para vender?
+dice: Ando apurado: me esperan en Carmody.
+dice: Buena tierra la de por aquí, sí señor.
+primavera: Primavera: buen tiempo para comprar terneros.
+verano: Con este calor las vacas dan menos leche, ¿sabía?
+otoño: En otoño se vende bien el ganado.
+invierno: En invierno casi no salgo, pero hoy hacía falta.
+
+=== gilbert ===
+dice: [hecho:zanahorias] ¡Buenos días, Zanahorias!... Perdón, perdón. Era una broma, Ana.
+dice: [hecho:zanahorias] ¿Me vas a hablar algún día, Ana Shirley?
+dice: [dias_desde:escuela:3] Te gané en ortografía. Pero en composición... bueno, ahí ganas tú.
+dice: [conoce:gilbert] ¿Quieres que te ayude a cruzar el arroyo? ¿No? Bueno...
+ana: [hecho:zanahorias] Hmpf.
+ana: [hecho:zanahorias] No le hablo a Gilbert Blythe. Nunca jamás.
+ana: [hecho:zanahorias] (Ana sigue de largo con la nariz en alto.)
+
+=== buhonero ===
+dice: ¡Cintas, botones, peinetas, tinte para el pelo! ¡Todo lo que una señorita necesita!
+dice: Un tinte que deja el pelo negro azabache, señorita. Garantizado.
+
+=== josie ===
+dice: ¿Ese vestido es nuevo, Ana? Ah, no... es el de siempre.
+dice: Te apuesto a que no te atreves a caminar por el techo de la casa de los Barry.
+dice: Mi mamá dice que las pelirrojas tienen mal genio. ¿Es verdad?
+ana: Josie Pye, eres... ¡eres una Pye!
+ana: No pienso contestarte eso.
+
+=== gertie ===
+dice: [dias_desde:escuela:3] Josie dice que tú inventas palabras difíciles para lucirte.
+dice: [dias_desde:escuela:3] ¿Me prestas tu lápiz? El mío se perdió... otra vez.
+
+=== ruby ===
+dice: ¡Ay, Ana! ¿Viste cómo me miró Charlie Sloane?
+dice: Mi hermana tiene un pretendiente nuevo. ¡Es tan romántico!
+dice: ¿Vamos a ver las botellas de leche en el río? La mía tiene una cinta azul.
+
+=== jane ===
+dice: [dias_desde:escuela:3] ¿Hiciste los problemas de aritmética? Yo los hice dos veces, por si acaso.
+dice: [conoce:jane] Mi mamá dice que eres muy imaginativa. No sé si lo dice como algo bueno.
+
+=== prissy ===
+dice: El año que viene voy a estudiar para entrar a Queen's.
+dice: Ya tengo dieciséis años, ¿sabes? Casi una señorita.
+
+=== charlie ===
+dice: [dias_desde:escuela:3] Ana, ¿quieres... quieres usar mi pizarra nueva? Prestada, digo.
+dice: [conoce:charlie] Mi mamá hizo tarta de grosellas. Te guardé un pedazo... si quieres.
+
+=== moody ===
+dice: Voy a ser pastor cuando sea grande. Ya practico los sermones con las vacas.
+dice: Ayer el maestro me dejó sin recreo. Fue injusto, aunque sí me reí en la oración.
+
+=== tillie ===
+dice: ¿Juegas a la mancha? ¡Tú la llevas!
+dice: Encontré un nido de petirrojos detrás de la escuela. ¡No le digas a nadie!
+
+=== felicity ===
+dice: Mi madre dice que una señorita nunca corre. Pero yo corro si llego tarde.
+dice: Esta mañana hice pan yo solita. Bueno, casi solita.
+
+=== felix ===
+dice: ¿Sabías que en el bosque de Peg Bowen vive una bruja de verdad?
+dice: Estoy juntando valor para tocar la puerta de Peg Bowen. Mañana. O pasado.
+
+=== cecily ===
+dice: [dias_desde:escuela:3] ¿Me enseñas a recitar como tú? Cuando tú recitas, me dan escalofríos.
+dice: [sabe:cecily:nina_cuthbert] ¿Tú eres la niña de Tejas Verdes? Dicen que hablas como en los libros.
+
+=== sara ===
+dice: ¿Te cuento una historia? Es de un barco fantasma que se ve desde el faro las noches de niebla.
+dice: [conoce:sara] La tía Hetty dice que hablo demasiado. Tú también, ¿no? ¡Qué bien!
+
+=== phillips ===
+dice: [dias_desde:escuela:3] Señorita Shirley, ¿no debería estar repasando su ortografía?
+dice: Mañana hay examen de geometría. Que nadie lo olvide.
+
+=== allan ===
+dice: Que Dios te bendiga, Ana. ¿Te veremos el domingo en la escuela dominical?
+dice: Hermoso día para dar gracias, ¿no te parece?
+
+=== sraallan ===
+dice: ¡Ana, querida! ¡Qué gusto verte! ¿Cómo van tus estudios?
+dice: [cuaderno:escuela_dominical] Me encantó tu recitación. Tienes un don, Ana.
+dice: Qué tarde tan linda para pasear, ¿verdad?
+ana: [conoce:sraallan] ¡Oh, Sra. Allan! Usted es mi espíritu afín.
+
+=== lawson ===
+dice: ¡Buenos días, Ana! Llegaron caramelos de menta y cintas nuevas.
+dice: ¿Qué te manda Marilla hoy? ¿Azúcar? ¿Hilo?
+
+=== herrero ===
+dice: ¡Cuidado con las chispas, niña!
+dice: El caballo del Sr. Barry perdió una herradura. Otra vez.
+
+=== editor ===
+dice: ¿Tienes alguna noticia para La Crónica, Ana? Se me acabaron las historias.
+dice: Si escribes un cuento bonito, te lo publico. Palabra de editor.
+
+=== hetty ===
+dice: Los niños de hoy no saben estarse quietos. En mis tiempos...
+dice: Señorita, no se corre por la calle principal. ¡Y menos con el sombrero torcido!
+
+=== olivia ===
+dice: ¡Hola, Ana! ¿No es un día perfecto para un picnic?
+dice: Jasper Dale me saludó esta mañana. Bueno... casi me saludó.
+
+=== jasper ===
+dice: B-buenos días. Estoy... estoy probando un invento. Para la lluvia.
+dice: Si ves a la Srta. Olivia... no, nada. No le digas nada.
+
+=== alec ===
+dice: Buen día para la siega, Ana. ¡Si no llueve!
+dice: Saluda a Matthew de mi parte. Hace tiempo que no conversamos.
+
+=== janet ===
+dice: ¿Has visto a Felix? Tendría que estar trayendo leña.
+dice: Dile a Marilla que le devuelvo la fuente el sábado.
+
+=== srapye ===
+dice: ¿Ya supiste lo del Sr. Harrison? Dicen que su loro dice cosas terribles.
+dice: Pelo rojo, genio vivo, como dice el refrán.
+
+=== sloane ===
+dice: Las papas vienen buenas este año. Ya lo verás.
+
+=== andrews ===
+dice: Buenas tardes. ¿Va todo bien en Tejas Verdes?
+
+=== peg ===
+dice: Je, je. ¿Tú eres la pelirroja de los Cuthbert? Dile a Marilla que Peg Bowen la saluda.
+dice: En el bosque no hay brujas, niña. Solo estoy yo... je, je.
+ana: (¡Es Peg Bowen! Felix dice que es una bruja...)
+
+=== farero ===
+dice: Ese faro lleva cuarenta años encendido, y yo con él. Las noches de tormenta son las más hermosas.
+dice: ¿Ves esa vela allá lejos? Va a Charlottetown. Antes yo navegaba hasta las Antillas.
+dice: Si subes al faro al atardecer, el mar se pone de oro. Pregúntale a cualquier gaviota.
+ana: ¡Capitán Jim, cuénteme una historia del mar!
+ana: ¡Qué vida tan romántica la de un farero!
+
+=== stacy ===
+dice: [dias_desde:escuela:3] Ana, tu composición fue la mejor de la clase. Pero cuidado con los adjetivos: ¡no hacen falta tantos!
+dice: El viernes por la tarde salimos al bosque a estudiar botánica. ¿Te apuntas?
+dice: [estudio:ana>=20] Este año preparamos a los mejores para el examen de Queen's. Tú puedes, Ana.
+ana: [conoce:stacy] ¡Srta. Stacy! Usted es mi espíritu afín, ¿lo sabía?
+
+=== minnie ===
+dice: [conoce:minnie] ¡Ana! ¿Me cuentas el cuento del hada otra vez?
+dice: [conoce:minnie] Diana no me deja jugar con sus muñecas. ¿Tú me dejas?
+dice: [sabe:minnie:nina_cuthbert] ¿Tú eres la niña nueva de Tejas Verdes? Mamá dice que eres pelirroja. ¡Y es verdad!
+dice: [hecho:perdonada] Ya no tengo tos. ¡Mamá dice que tú me salvaste!
+
+=== srbarry ===
+dice: Buenas, Ana. Diana está en la casa, creo. O en el huerto.
+dice: El heno está listo para entrar. Si no llueve, mañana lo cargamos.
+
+=== maryjoe ===
+dice: [hecho:perdonada] ¡Ay, señorita Ana! Yo no sé nada de enfermedades, menos mal que usted vino aquella noche.
+dice: La señora Barry dice que tienda la ropa antes de que se nuble.
+
+=== jerry ===
+dice: El Sr. Cuthbert me pidió que entrara la leña antes de la cena.
+dice: Oui, oui... ya voy, ya voy. ¡Esa vaca no se quiere mover!
+
+=== medico ===
+dice: ¿Alguien enfermo en Tejas Verdes? Espero que no.
+dice: [hecho:perdonada] Esa niña Shirley tiene buena cabeza: salvó a la pequeña Barry del crup antes de que yo llegara.
+
+=== srbell ===
+dice: Te esperamos el domingo en la escuela dominical, Ana. Y apréndete el versículo.
+dice: Una oración larga no es mejor que una sincera, niña.
+
+=== josephine ===
+dice: [sabe:josephine:nina_cuthbert] Así que tú eres la niña de Tejas Verdes. Hmm. Ya veremos qué clase de niña eres.
+dice: [hecho:cama_josephine] ¡La niña Ana! Desde que me saltaste encima en la cama, no me había reído tanto en años.
+dice: [hecho:cama_josephine] Cuando vengas a Charlottetown, te alojas en mi casa. Te llevo a la exposición.
+ana: ¡Srta. Barry! Usted es un espíritu afín, aunque no lo parezca a primera vista.
+
+=== spencer ===
+dice: ¡Ana! Qué bien te ves. Y yo que creí que los Cuthbert querían una niña… ¡qué enredo!
+dice: Mi Lily estuvo enferma, por eso no pude llevarte yo a Tejas Verdes.
+
+=== blewett ===
+dice: [hecho:a_prueba] Así que te quedaste con los Cuthbert. Hmm. Yo te habría hecho trabajar de verdad.
+dice: Hmm. Flacucha. En mi casa no hay tiempo para mirar las nubes, ¿sabes?
+ana: [hecho:a_prueba] (Ana se esconde detrás de un árbol. ¡Menos mal que Marilla no la dejó irse con ella!)
+
+=== carrie ===
+dice: [dias_desde:escuela:3] ¿Viste la composición de Ana? ¡La señorita Stacy la leyó en voz alta!
+dice: [sabe:carrie:nina_cuthbert] Mi mamá dice que en Tejas Verdes hay una niña nueva. ¿Eres tú?
+
+=== jefe ===
+dice: El tren de las cinco y media ya pasó, ¿sabe? Hoy no viene otro.
+dice: Esa niñita de pelo rojo... se sentó en las tejuelas a imaginar cosas. Todo un caso.
+
+=== thomas ===
+dice: Buenas. Rachel está adentro. Ella habla por los dos, ¿sabes?
+
+=== veraneante ===
+dice: ¡Qué playa tan encantadora! En Boston no hay nada parecido.
+dice: ¿Eres de aquí, niña? ¡Qué suerte vivir en un lugar así!
+
+=== pescador ===
+dice: Hoy vienen buenas las caballas. Si Marilla quiere pescado, que mande a Matthew.
+
+=== vecino ===
+dice: [dias_desde:llegada_tv:14] ¡Buenos días, Ana! ¿Cómo están Matthew y Marilla?
+dice: Lindo día, ¿verdad? Dicen que mañana llueve.
+dice: [dias_desde:llegada_tv:56] ¡Qué grande estás, niña! Saludos a Marilla.
+dice: [!dias_desde:llegada_tv:14] Buenas. Tú no eres de por aquí, ¿no?
+dice: ¿Vas para la aldea? Yo vengo de la tienda de Lawson.
+dice: Buenas, buenas. No te entretengas, que se hace tarde.
+dice: Mira qué cielo. Así da gusto salir.
+
+=== niño ===
+dice: ¿Tú eres Ana? ¡Tienes el pelo como una zanahoria!... ¡Es bonito!
+dice: ¡Mira, encontré una piedra que brilla!
+dice: ¿Jugamos? Yo me escondo y tú cuentas hasta cien.

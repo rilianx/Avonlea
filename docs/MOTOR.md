@@ -144,6 +144,17 @@ Un encargo puede ser:
 - **una meta:** un estado a lograr («Ana está en La Cuesta del Huerto»); el planificador busca los pasos;
 - **una coreografía:** pasos exactos, en orden, cuando el libro pide un gesto preciso.
 
+## La planilla (`planilla/avonlea.xlsx`)
+
+Para ver todo junto y encontrar lo que falta, como se hace en los estudios (una tabla por tipo de contenido y una **matriz de cobertura**: personajes × momentos de la historia).
+
+- **Las frases sueltas** de todos (la gente de la casa y la del pueblo, y los vecinos sin nombre) viven en un solo archivo: `src/datos/frases.txt` (`=== quien ===`, `dice:`, `ana:`, `primavera:`…, con sus condiciones entre corchetes).
+- `node tools/planilla.js` abre el juego por dentro y arma la planilla:
+  - **Frases** (se edita): una fila por frase, y las condiciones en columnas con listas desplegables (¿conoce a Ana?, después de un hecho o meta, días después, antes de, estación; lo demás, tal cual en «Otras condiciones»).
+  - **Huecos**: cada personaje en cada momento de la historia (día 2, día 4, la visita de la Sra. Lynde, Diana, la escuela, el invierno, los Allan, la Srta. Stacy), cuántas frases valen si todavía no conoce a Ana y si ya la conoce. Rojo: ninguna.
+  - **Personas, Escenas, Noticias, Llegadas, Hechos, Metas**: para mirar (se editan en `src/datos/`).
+- `python3 tools/importar_planilla.py` lleva la hoja «Frases» de vuelta a `src/datos/frases.txt`: revisa cada fila (quién, tipo, condiciones) y, si algo está mal, no cambia nada y dice en qué fila; después compila, y si el revisor de la historia encuentra un problema en una frase, vuelve atrás.
+
 ## 4. Cómo se comprueba
 
 | Herramienta | Qué hace | Salida |

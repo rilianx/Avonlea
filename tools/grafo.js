@@ -51,8 +51,12 @@ for (const raw of guion.split('\n')) {
   if ((m = s.match(/^===\s*(.+?)\s*===$/))) { g = m[1]; continue; }
   if ((m = s.match(/^si:\s*(.*)$/))) m[1].split(',').forEach(c => condicion(c, 'comentarios de ' + g));
   if ((m = s.match(/^-\s*\[([^\]]*)\]/))) m[1].split(',').forEach(c => condicion(c, 'un comentario de ' + g)); } }
-// the characters' own lines (src/datos/personajes.json): «[condiciones] texto»
-for (const [k, c] of Object.entries(JSON.parse(leer('src/datos/personajes.json')))) for (const l of [...(c.lines || []), ...(c.seasonLines || [])]) { const m = /^\[([^\]]+)\]/.exec(l); if (m) m[1].split(',').forEach(x => condicion(x, 'una frase de ' + k)); }
+// the lines of each one (src/datos/frases.txt): someone of the game, and «[condiciones] texto»
+{ const quienes = new Set([...Object.keys(JSON.parse(leer('src/datos/personajes.json'))), ...[...codigo.matchAll(/^  (\w+): \{ name: /gm)].map(m => m[1]), 'vecino', 'niño']); let q = null;
+  for (const raw of leer('src/datos/frases.txt').split('\n')) { const s = raw.trim(); if (!s || s[0] === '#') continue; let m;
+    if ((m = s.match(/^===\s*(.+?)\s*===$/))) { q = m[1]; if (!quienes.has(q)) malas.push(`frases: «${q}» no es nadie del juego`); continue; }
+    if (!/^(dice|ana|primavera|verano|otoño|invierno):/.test(s)) { malas.push(`frases de ${q}: «${s.slice(0, 60)}» (empieza con dice:, ana:, o una estación)`); continue; }
+    if ((m = /^\S+:\s*\[([^\]]+)\]/.exec(s))) m[1].split(',').forEach(c => condicion(c, 'una frase de ' + q)); } }
 // the news (src/datos/noticias.txt): the conditions of who knows it
 { let q = null; for (const raw of leer('src/datos/noticias.txt').split('\n')) { const s = raw.trim(); if (!s || s[0] === '#') continue; let m;
   if ((m = s.match(/^===\s*(.+?)\s*===$/))) { q = m[1]; continue; }
@@ -100,5 +104,8 @@ const md = ['# El grafo de la historia, revisado', '', 'Lo genera `node tools/gr
   ...(sinUso.length ? sinUso.map(h => `- \`${h}\`: lo deja ${[...hace[h]].join(', ')}`) : ['Ninguno.']), ''];
 fs.mkdirSync(path.join(root, 'trazas'), { recursive: true });
 fs.writeFileSync(path.join(root, 'trazas/grafo.md'), md.join('\n'));
+// the same, as data (for the spreadsheet: tools/planilla.js, tools/importar_planilla.py)
+const lista = o => Object.fromEntries(Object.entries(o).map(([h, w]) => [h.trim(), [...w]]));
+fs.writeFileSync(path.join(root, 'trazas/grafo.json'), JSON.stringify({ hechos: lista(hace), piden: lista(pide), metas: [...metas], claves: CLAVES, cualidades: [...CUALIDADES], noticias: [...NOTICIAS], nunca, sinUso, malas }, null, 1));
 console.log(`→ trazas/grafo.md · ${escenas.length} escenas, ${metas.size} metas · nunca pasarían: ${nunca.length} · mal escritas: ${malas.length} · sin uso: ${sinUso.length}`);
 process.exitCode = nunca.length || malas.length ? 1 : 0;

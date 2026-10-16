@@ -34,21 +34,6 @@
     "kin": [
       "marilla"
     ],
-    "lines": [
-      "[!hecho:se_queda] Bueno, pues... Marilla es buena, ¿sabes? Solo que no se le nota mucho al principio.",
-      "[!hecho:se_queda] Ya lo creo que... bueno, ojalá te quedes, Ana. Yo... sí. Eso.",
-      "Bueno, pues... sí, es un día precioso, Ana. Ya lo creo.",
-      "Las vacas andan contentas hoy. Será por el sol, supongo.",
-      "[hecho:se_queda] Marilla dice que hablas mucho. Bueno, a mí me gusta oírte, ¿sabes?",
-      "[hecho:se_queda] ¿Viste las flores junto al camino? Bueno, pues... me hicieron pensar en ti.",
-      "[hecho:se_queda] Ya lo creo, ya lo creo. Anda, ve a jugar un rato, que el día está lindo."
-    ],
-    "seasonLines": [
-      "Bueno, pues... ya brotó todo. La primavera, ¿no? Ya lo creo.",
-      "Hace calor para la siega, ya lo creo. Bueno, el heno no se corta solo.",
-      "Las manzanas de los Barry están en su punto. Marilla querrá hacer compota, supongo.",
-      "Abrígate bien, Ana. El frío... bueno, pues, no es broma."
-    ],
     "giftReply": " Bueno, pues... gracias, Ana.",
     "whereText": {
       "gg": "en la cocina de Tejas Verdes, a la hora de comer"
@@ -90,24 +75,6 @@
     "kin": [
       "matthew"
     ],
-    "lines": [
-      "[!hecho:se_queda] Mientras estés en esta casa, harás tus quehaceres como cualquiera. Después veremos.",
-      "[!hecho:se_queda] No te prometo nada, niña. Que te quedes o no, depende de cómo te portes.",
-      "[!hecho:se_queda] Lávate la cara y péinate esas trenzas. Aquí se come con la cara limpia.",
-      "[!hecho:se_queda] ¿Sabes rezar? Pues vas a aprender. En esta casa se reza.",
-      "[hecho:se_queda] Ana, no te quedes soñando despierta. Aunque... la cocina está ordenada, eso sí.",
-      "[hecho:se_queda] Si quieres cocinar, la estufa está encendida. Cuidado con no quemar nada esta vez.",
-      "[hecho:se_queda, hecho:conocidas_diana] Matthew no lo dice, pero te echa de menos cuando te vas donde Diana.",
-      "[hecho:se_queda] Riega la huerta antes de que caiga el sol, que las plantas lo agradecen.",
-      "[hecho:se_queda, afecto:marilla:ana>=3] Hmm. Bueno, admito que hoy te has portado muy bien.",
-      "[hecho:ropa_arrugada, !hecho:ropa_ordenada] Ese vestido parece que durmió en el suelo, Ana. Ah, claro: es que durmió en el suelo."
-    ],
-    "seasonLines": [
-      "[hecho:se_queda] Hay que limpiar la casa a fondo, que es primavera. Y tú me vas a ayudar, Ana.",
-      "Con este calor, mejor un té y no enciendas mucho la estufa.",
-      "Es tiempo de manzanas: una buena compota para el invierno no está de más.",
-      "Siéntate cerca de la estufa, niña, que vienes helada."
-    ],
     "giftReply": " Vaya, Ana. Muy bien hecho."
   },
   "diana": {
@@ -143,24 +110,23 @@
       "barry"
     ],
     "kin": [],
-    "lines": [
-      "[hecho:conocidas_diana, !hecho:prohibida] ¡Ana, mi alma gemela! Te estaba esperando.",
-      "[hecho:conocidas_diana, !hecho:prohibida] Mamá dice que puedo salir hasta que se ponga el sol. ¿Vamos al lago?",
-      "[hecho:conocidas_diana, !hecho:prohibida, afecto:diana:ana>=4] ¿Te acuerdas de nuestro juramento de amistad? ¡Para siempre!",
-      "[hecho:conocidas_diana] Los manzanos están llenos este año. Toma las que quieras.",
-      "[hecho:conocidas_diana] El Bosque Encantado me da un poquito de miedo... pero contigo no.",
-      "[!hecho:conocidas_diana] Hola. Tú eres la niña nueva de Tejas Verdes, ¿verdad?"
-    ],
-    "seasonLines": [
-      "[hecho:conocidas_diana] ¡Mira los manzanos en flor, Ana! Parecen novias vestidas de blanco.",
-      "[hecho:conocidas_diana] ¡Qué calor! ¿Vamos a remojar los pies en el lago?",
-      "[hecho:conocidas_diana] El Bosque Encantado está todo rojo y dorado... ¡como un cuento!",
-      "[hecho:conocidas_diana] ¡Está nevando! Mamá no me deja salir sin bufanda. Ven, entra a calentarte junto al fuego."
-    ],
     "giftReply": " ¡Eres la mejor amiga del mundo!"
   },
   "barry": {
-    "presentacion": [["barry", "Buenas tardes. Tú debes ser la niña de los Cuthbert."], ["ana", "Sí, señora. Ana Shirley. Con una sola n, por favor."], ["barry", "Hmm. Yo soy la Sra. Barry, de La Cuesta del Huerto. Saluda a Marilla de mi parte."]],
+    "presentacion": [
+      [
+        "barry",
+        "Buenas tardes. Tú debes ser la niña de los Cuthbert."
+      ],
+      [
+        "ana",
+        "Sí, señora. Ana Shirley. Con una sola n, por favor."
+      ],
+      [
+        "barry",
+        "Hmm. Yo soy la Sra. Barry, de La Cuesta del Huerto. Saluda a Marilla de mi parte."
+      ]
+    ],
     "name": "Sra. Barry",
     "fullName": "Sra. Barry",
     "article": "la ",
@@ -193,24 +159,23 @@
       "lynde"
     ],
     "kin": [],
-    "lines": [
-      "[!hecho:barry_presenta, !conoce:barry, sabe:barry:nina_cuthbert] Tú debes ser la niña que trajeron los Cuthbert. Buenas tardes.",
-      "[hecho:barry_presenta, !hecho:prohibida] Ana Shirley, siempre es un gusto verte por aquí. Pórtate bien, ¿eh?",
-      "[hecho:conocidas_diana, !hecho:prohibida] Diana habla de ti todo el día, ¿sabes?",
-      "[hecho:perdonada] Esta vez el cordial de frambuesa está bien etiquetado, te lo aseguro.",
-      "[hecho:prohibida, !hecho:perdonada] Buenas tardes. (La Sra. Barry no la invita a pasar.)",
-      "Saluda a Marilla de mi parte."
-    ],
-    "seasonLines": [
-      "[hecho:barry_presenta, !hecho:prohibida] Buenos días, Ana. Diana está deseando verte.",
-      "[hecho:barry_presenta, !hecho:prohibida] Qué calor, ¿verdad? Hay limonada en la despensa.",
-      "[hecho:barry_presenta, !hecho:prohibida] Diana me ayudó con las manzanas. Llévale algunas a Marilla.",
-      "[hecho:barry_presenta, !hecho:prohibida] Pasa, pasa, que hace un frío terrible. Diana está junto al fuego."
-    ],
     "giftReply": " Qué amable eres, Ana."
   },
   "lynde": {
-    "presentacion": [["lynde", "¡Vaya! ¿Así que tú eres la huérfana que trajeron a Tejas Verdes? Hmm. Ya iré a verte con calma, ya."], ["ana", "Sí, señora. Ana Shirley… con una sola n, por favor."], ["lynde", "Con una sola n. Habráse visto. Yo soy la Sra. Lynde, la vecina de la Hondonada."]],
+    "presentacion": [
+      [
+        "lynde",
+        "¡Vaya! ¿Así que tú eres la huérfana que trajeron a Tejas Verdes? Hmm. Ya iré a verte con calma, ya."
+      ],
+      [
+        "ana",
+        "Sí, señora. Ana Shirley… con una sola n, por favor."
+      ],
+      [
+        "lynde",
+        "Con una sola n. Habráse visto. Yo soy la Sra. Lynde, la vecina de la Hondonada."
+      ]
+    ],
     "name": "Sra. Lynde",
     "fullName": "Sra. Rachel Lynde",
     "article": "la ",
@@ -244,21 +209,6 @@
       "barry"
     ],
     "kin": [],
-    "lines": [
-      "[!hecho:lynde_visita, !conoce:lynde, sabe:lynde:nina_cuthbert] ¿Así que tú eres la huérfana de Tejas Verdes? Ya iré a verte con calma, ya.",
-      "[hecho:ofendio_lynde, !hecho:disculpa_lynde] Hmpf. No tengo nada que hablar contigo, niña malcriada.",
-      "Desde mi ventana veo todo el camino: no se me escapa nadie. Lo digo sin mala intención, ¿eh?",
-      "Llevo cincuenta y dos cubrecamas de retazos, ¡cincuenta y dos! Y no pienso parar.",
-      "[hecho:se_queda, hecho:lynde_visita, !hecho:ofendio_lynde] Marilla hizo bien en quedarse contigo, y lo digo yo, que nunca me callo lo que pienso.",
-      "[hecho:lynde_visita] A una niña hay que enseñarle a ser útil. Pero, bueno, tú vas por buen camino.",
-      "[hecho:lynde_visita, !hecho:ofendio_lynde] Ana Shirley, hablas más que un molino... pero tienes buen corazón, eso lo reconozco."
-    ],
-    "seasonLines": [
-      "[hecho:lynde_visita] ¡Vaya, vaya, ya brotó todo! Ya es hora de limpiar la casa, digo yo.",
-      "[hecho:lynde_visita] Con este calor no hay quien teja... ¡pero yo tejo, claro que tejo!",
-      "[hecho:lynde_visita] El otoño siempre me hace pensar en los cubrecamas. Este año haré uno rojo y dorado.",
-      "[hecho:lynde_visita] Pasa, niña, que hace un frío de mil demonios... perdón, de los que dan escalofríos."
-    ],
     "giftReply": " Vaya, vaya... se nota que a ti te criaron bien.",
     "whereText": {
       "rl": "en su casa, junto a la ventana",
@@ -268,7 +218,16 @@
     }
   },
   "harrison": {
-    "presentacion": [["harrison", "¿Y tú quién eres? Ah… la niña de los Cuthbert. Yo soy Harrison, el de al lado. No me pises la avena."], ["ana", "Ana Shirley, señor. Con una sola n."]],
+    "presentacion": [
+      [
+        "harrison",
+        "¿Y tú quién eres? Ah… la niña de los Cuthbert. Yo soy Harrison, el de al lado. No me pises la avena."
+      ],
+      [
+        "ana",
+        "Ana Shirley, señor. Con una sola n."
+      ]
+    ],
     "name": "Sr. Harrison",
     "fullName": "Sr. J. A. Harrison",
     "article": "el ",
@@ -297,18 +256,6 @@
     },
     "gossip": [],
     "kin": [],
-    "lines": [
-      "Hmpf. Buenos días... si es que son buenos.",
-      "[dias_desde:conoce_harrison:3] ¿Esa vaca tuya se ha portado bien hoy? Más le vale.",
-      "No me mires la casa, que el desorden es mío.",
-      "Ginger, ¡silencio!... No le hagas caso, muchacha."
-    ],
-    "seasonLines": [
-      "La avena ya asoma. Que nadie la pise, ¿eh?",
-      "Calor de mil demonios para segar... con perdón.",
-      "Buena cosecha este año, aunque no lo diga mucho.",
-      "Con este frío, ni Ginger quiere hablar. Bueno, sí quiere."
-    ],
     "giftReply": " Hmpf... gracias, muchacha. De verdad.",
     "whereText": {
       "out": "afuera, en su campo y su potrero"
@@ -341,17 +288,6 @@
     },
     "gossip": [],
     "kin": [],
-    "lines": [
-      "Buen día, señorita. ¿Algún animal para vender?",
-      "Ando apurado: me esperan en Carmody.",
-      "Buena tierra la de por aquí, sí señor."
-    ],
-    "seasonLines": [
-      "Primavera: buen tiempo para comprar terneros.",
-      "Con este calor las vacas dan menos leche, ¿sabía?",
-      "En otoño se vende bien el ganado.",
-      "En invierno casi no salgo, pero hoy hacía falta."
-    ],
     "giftReply": " Muy amable, señorita."
   }
 }

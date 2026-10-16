@@ -50,11 +50,26 @@ const CHARACTERS = {
     home: 'away', plans: false,
   },
 };
-// what each one is and says (name, look, voice for the AI, lines, abilities, gossip...) is plain data: src/datos/personajes.json;
+// what each one is (name, look, voice for the AI, abilities, gossip...) is plain data: src/datos/personajes.json (what they say in passing:
+// src/datos/frases.txt);
 // here is only where they stand and walk, which is measured on the maps.
 const PERSONAJES = /*@personajes*/;
 for (const k of Object.keys(CHARACTERS)) CHARACTERS[k] = { ...PERSONAJES[k], ...CHARACTERS[k] };
 const CH = CHARACTERS;
+// what each one says in passing (src/datos/frases.txt, the same for the people of the house and of the village):
+// «=== quien ===», and «dice:», «primavera:»… «invierno:», «ana:» (what Ana answers), each with its conditions in [ ]
+function frasesLeer(txt){
+  const F = {}; let q = null; const EST = { primavera: 0, verano: 1, 'otoño': 2, invierno: 3 };
+  for (const raw of txt.split('\n')) {
+    const l = raw.trim(); if (!l || l[0] === '#') continue; let m;
+    if ((m = l.match(/^===\s*(.+?)\s*===$/))) { q = F[m[1]] = { dice: [], ana: [], est: ['', '', '', ''] }; continue; }
+    if (!q || !(m = l.match(/^(dice|ana|primavera|verano|otoño|invierno):\s*(.*)$/))) continue;
+    if (m[1] in EST) q.est[EST[m[1]]] = m[2]; else q[m[1]].push(m[2]);
+  }
+  return F;
+}
+const FRASES = frasesLeer(document.getElementById('frases')?.textContent || '');
+for (const k of Object.keys(CH)) { CH[k].lines = FRASES[k]?.dice || []; CH[k].seasonLines = FRASES[k]?.est || ['', '', '', '']; }
 // how each one feels about the others at the start (from the book); the graph then changes day by day
 ANA.rels = { matthew: [5, 'su espíritu afín: el que siempre la entiende'], marilla: [4, 'la quiere aunque la rete; quiere que esté orgullosa de ella'], diana: [5, 'su amiga del alma; se juraron amistad eterna'], barry: [2, 'la respeta y le teme un poco desde lo del vino de grosellas'], lynde: [2, 'al principio le gritó por lo de su pelo; ahora se llevan mejor'] };
 CH.matthew.rels = { ana: [4, 'la adora y siempre se pone de su lado'], marilla: [5, 'su hermana; se entienden sin hablar'], diana: [2, 'la amiga de Ana; le da timidez'], barry: [2, 'vecina; lo intimida'], lynde: [1, 'le da miedo su lengua'] };
