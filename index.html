@@ -966,7 +966,6 @@ al_terminar: hecho primera_noche
 al_terminar: log Marilla dejó que Ana se quedara esa noche, hasta aclarar el enredo. Ana casi no probó la cena.
 ---
 ! sentar ana
-! sin_sombrero
 ! ana llora=true
 ana: (Ana se deja caer en una silla junto a la mesa, hunde la cara entre los brazos y llora a mares.)
 matthew: (Matthew y Marilla se miran por encima de la estufa, sin saber qué hacer.)
@@ -1025,19 +1024,20 @@ al_terminar: a_pieza
 disparo: primera
 canal: ana_sola
 sujeta: marilla
-si: hecho:primera_noche, !hecho:se_queda
+si: hecho:primera_noche, !hecho:desayuno_prueba, !hecho:se_queda
 ---
 ana: (La pieza del alero: paredes blancas y desnudas, una cama alta, una mesita, una silla. Ana la mira con espanto.)
-! ana enCama=boca_abajo
-ana: (Se tira en la cama boca abajo, con zapatos y todo, y llora desconsolada contra la almohada.)
-ana piensa: Nadie me quiere. Nadie me ha querido nunca. Y ahora tampoco aquí.
-! entra marilla ga
-marilla: (Marilla sube con la vela. Mira la ropa, los zapatos, a la niña hecha un ovillo.) Desvístete y métete en la cama como corresponde, niña.
-ana: (Ana se quita el vestido de mala gana y lo deja tirado en el suelo, con los zapatos. Se pone el camisón del orfanato, que le queda corto, y se mete bajo las sábanas.)
+ana: (Se arranca el vestido a tirones y lo tira al suelo, con los zapatos. El sombrero lo lanza lejos: por casualidad, queda colgando de la percha. Se pone el camisón del orfanato, que le queda corto.)
 ! camison
 ! ropa_tirada
+! ana enCama=boca_abajo
+ana: (Se tira en la cama boca abajo y llora desconsolada contra la almohada.)
+ana piensa: Nadie me quiere. Nadie me ha querido nunca. Y ahora tampoco aquí.
+! entra marilla ga
+marilla: (Marilla sube con la vela. Mira la ropa tirada por el suelo, los zapatos, a la niña hecha un ovillo encima de la colcha.) Métete debajo de las sábanas como corresponde, niña.
+ana: (Ana se mete bajo las sábanas sin mirarla.)
 ! ana enCama=tapada
-marilla: (Marilla mira la ropa tirada en el suelo y aprieta los labios. Esta noche no dice nada.) Buenas noches.
+marilla: (Marilla mira otra vez la ropa tirada en el suelo y aprieta los labios. Esta noche no dice nada.) Buenas noches.
 ana: (Ana asoma la cara, blanca, entre las sábanas.) ¿Cómo puede decir que son buenas noches, cuando sabe que tiene que ser la peor noche de toda mi vida?
 ana: (Y se vuelve a meter debajo de las sábanas, hasta la cabeza.)
 marilla: (Marilla baja la escalera despacio, con la vela, sin saber muy bien qué pensar.)
@@ -1417,27 +1417,6 @@ si: hecho:blewett_duda, !hecho:a_prueba
 al_terminar: hecho devuelta
 al_terminar: log Marilla le entregó Ana a la Sra. Blewett.
 al_terminar: final devuelta | Ana se fue con la Sra. Blewett. En el libro, Marilla no la entregó: Ana se ganó, poco a poco, su lugar en Tejas Verdes.
-
-# --- La tarjeta del Padrenuestro (cap. 8): la mañana del día en que Marilla le va a decir que se queda, le da una
-# tarjeta con la oración para que la aprenda; Ana la apoya contra el jarro mientras lava los platos
-=== tarjeta_oracion ===
-canal: gg
-prioridad: 5
-sujeta: marilla
-si: hecho:a_prueba, !hecho:se_queda, ve:marilla, hora:7.5-13
-al_terminar: hecho tarjeta_oracion
----
-marilla: Toma, Ana. Es el Padrenuestro, impreso. Lo vas a aprender de memoria. Se acabó eso de rezar inventando.
-ana: (Ana apoya la tarjeta contra el jarro del agua y la va leyendo mientras lava los platos, moviendo los labios.)
-ana: «Padre nuestro, que estás en los cielos, santificado sea tu nombre…» ¡Marilla, es como música! Como cuando una lee un poema.
-marilla: No es un poema, es una oración. Y no te distraigas, que tienes la loza en la mano.
--> «Lo voy a aprender aunque me devuelvan.»
-   ana: Lo voy a aprender igual, aunque me devuelvan. Así me lo llevo conmigo, y es mío.
-   marilla: (Marilla se queda mirándola un momento, con el paño en la mano, y no dice nada.)
-   ! suma paciencia:marilla:ana 1
-->* «Santificado… ¿qué quiere decir santificado?»
-   ana: Santificado… ¿qué quiere decir santificado? Suena como una campana grande, muy lejos.
-   marilla: Quiere decir sagrado, que se respeta. Apréndetelo primero, y no hables tanto: entenderlo viene después.
 
 === se_queda ===
 narra: «Por razones que solo ella sabía, Marilla no le dijo a Ana que se quedaba en Tejas Verdes hasta la tarde siguiente.» Ana se ha pasado el día con el corazón en la boca, sin atreverse a preguntar.
@@ -7070,6 +7049,7 @@ HOUSES.gg.interior.draw = (c, t, night) => { drawKitchen(c, t, night); drawStair
 /* ---------- sleep: Ana gets sleepy at night, and goes to bed (the day starts again at dawn) ---------- */
 let sleeping = false, sleepyStage = 0;
 function goToBed(){
+  if (primeraVez('bed', goToBed)) return;   // (the first night, her bed is the scene of that night: not plain sleep)
   if (hourNow() < 20) { anaSays('Todavía no tengo sueño... ¡hay tanto que imaginar antes de dormir!'); return; }
   // (from the second night: her clothes, folded on the chair, or thrown on the floor; the player decides)
   if (game.wm && dlgHechos().desayuno_prueba && !game.wm.camison && !ANA_AUTO && !navigator.webdriver) return say('Ana', 'Antes de meterse en la cama…', [
@@ -8469,6 +8449,20 @@ const ITEM_DEFS = {
   dolares:  { names: ['dólar', 'dólares'], icon: '💵', season: () => game.inv.dolares > 0, giveAll: true, gift: { name: 'el dinero', art: 'el dinero', reply: 'Vaya... bueno, pues gracias.' }, note: 'dinero' },
 };
 for (const k of Object.keys(ITEM_DEFS)) if (!(k in game.inv)) game.inv[k] = 0;
+// what is not a gift but for the house: who uses it, and what they say when Ana brings it (the wood she chopped, the
+// eggs, the milk): she can hand it over to them, all of it
+const PARA_LA_CASA = {
+  lena: ['marilla', '¡Leña para la cocina! Bien partida, además. Déjala junto a la estufa.'], huevos: ['marilla', 'Huevos frescos. Justo lo que me faltaba para el bizcocho.'],
+  leche: ['marilla', 'La leche, gracias. La pongo a enfriar en la despensa.'], mantequilla: ['marilla', 'Mantequilla. Bien, a la despensa.'],
+  azucar: ['marilla', 'El azúcar. Gracias, Ana.'], hierbas: ['marilla', 'Hierbas para el guiso. Gracias.'], heno: ['matthew', 'Bueno, pues… heno para Dolly. Gracias, Ana.'],
+};
+const entregaOpciones = who => Object.entries(PARA_LA_CASA).filter(([k, [p]]) => p === who && game.inv[k] > 0).map(([k]) => [ITEM_DEFS[k].icon + ' Darle ' + itemText(k, game.inv[k]).replace(/^1 /, 'el ').replace(/^(\d+) /, 'los $1 '), () => entregar(who, k)]);
+function entregar(who, k){
+  const n = game.inv[k], [, dice] = PARA_LA_CASA[k]; game.inv[k] = 0; const I = wmInv(who); I[k] = (I[k] || 0) + n;
+  logEv('Ana le dio ' + itemText(k, n) + ' a ' + NAMES[who] + '.', [who, ...witnesses()]); planSoon(who, 'Ana te acaba de traer ' + itemText(k, n));
+  if (who === 'marilla') cualidadSuma('marilla', 'paciencia', 1, 'ana');   // (a help for the house: while she is on trial, it counts)
+  sfx.happy(); say(who, dice, [['De nada', close]]); save();
+}
 const GIFTS = Object.fromEntries(Object.entries(ITEM_DEFS).filter(([, d]) => d.gift).map(([k, d]) => [k, [d.gift.name, d.gift.reply]]));
 function talk(who, again = false){
   const p = PEOPLE[who]; p.lie = false;
@@ -8487,6 +8481,7 @@ function talk(who, again = false){
   if (who === 'diana' && dlgHechos().prohibida) return say('diana', pick(['Ana… mamá no me deja hablar contigo. Lo siento tanto, tanto…', 'No puedo, Ana… mamá dice que no. Pero te sigo queriendo, ¿sabes?']), [['…', close]]);   // (forbidden, cap. 17)
   const opts = [...taskOptions(who), ...cadenaOpciones(who)];
   for (const [k, [name]] of Object.entries(GIFTS)) if (game.inv[k] > 0) opts.push(['Regalar ' + name, () => give(who, k)]);
+  opts.push(...entregaOpciones(who));   // (and what Ana brings for the house: the wood, the eggs…)
   if (!isQuieto(who) || who === 'marilla') opts.push(['🙏 Pedirle un favor', () => favorMenu(who)]);
   opts.push(...convOpciones(who), ...walkOption(who), [cierre(who), close]);
   say(who, text, opts);
@@ -12047,7 +12042,8 @@ function coreoTick(ag, a, st, dt, P){
     if (d > 16 && st.tw < 9) { wmWalk(me, q[0], q[1], wmScene(me), dt); return false; }
     wmStop(me); b.x = q[0]; b.y = q[1]; st.llego = 1; st.tw = 0;   // (there; or, stuck for a while, as good as there)
   }
-  if (!st.pt) { st.pt = 0; if (A) { A.obj = p.obj; A.mesa = p.mesa || null; A.lleva = null; A.base = [b.x, b.y]; } if (p.decir) wmSay(me, p.decir); if (p.adentro && b.where === 'out') { b.where = 'in'; st.salir = 1; } }
+  if (!st.pt) { st.pt = 0; if (p.decir) wmSay(me, p.decir); if (p.adentro && b.where === 'out') { b.where = 'in'; st.salir = 1; } }
+  if (A && A.paso !== (st.ci || 0)) { A.paso = st.ci || 0; A.obj = p.obj; A.mesa = p.mesa || null; A.lleva = null; A.base = [b.x, b.y]; }   // (what it is done with, in her hands: as soon as the doing is there, even if it began where she stood)
   if (p.mira != null) b.dir = p.mira; b.sit = !!p.sentar; b.crouch = !!p.agachar; if (me !== 'ana') b.moving = false;
   if (p.sentado) { const [k, x, y, od] = p.sentado, o = wmBody(k); if (o && wmScene(k) === wmScene(me)) { o.x = x; o.y = y; o.dir = od; o.sit = true; o.moving = false; o.nav = null; o.wait = Math.max(o.wait || 0, 1); } }   // (the other, sitting with her the while)
   if (p.con) { const [k, dx, dy, od] = p.con, o = wmBody(k); if (o && wmScene(k) === wmScene(me)) { o.x = b.x + dx; o.y = b.y + dy; o.dir = od ?? b.dir; o.moving = false; o.sit = false; if (A) A.con = k; } }   // (whoever does it with her, at her side)
@@ -12083,7 +12079,19 @@ const ACC_OBJ = {
   papel: { f(c, b, A){ const x = b.x + (b.dir === 3 ? -9 : 9), y = b.y - 24; blob(c, [[x - 7, y - 5], [x + 7, y - 5], [x + 7, y + 6], [x - 7, y + 6]], '#fbf6ea'); for (let k = 0; k < 3; k++) line(c, [[x - 5, y - 2 + k * 3], [x + 4, y - 2 + k * 3]], 'rgba(60,60,90,.5)', .6, k); const w = Math.sin(TT * 6) * 3; line(c, [[x + w, y + 1], [x + 6 + w, y - 9]], '#efe6d6', 1.6, 4); } },   // (the quill moving)
   cuaderno: { f(c, b, A){ ACC_OBJ.papel.f(c, b, A); } },
   hacha: { u(c, b, A){ const x = b.x + (b.dir === 3 ? -16 : 16), y = b.y + 2; ell(c, x, y, 10, 4, '#a07a52', true); ell(c, x, y - 2, 8, 3, '#d8b88a'); for (let k = 0; k < Math.min(6, Math.floor((TT - A.t0) / 1.5)); k++) ell(c, x - 22 + (k % 3) * 6, y + 8 - Math.floor(k / 3) * 4, 5, 2.4, '#c99a66', true); },
-    f(c, b, A){ const s = (b.dir === 3 ? -1 : 1), u = Math.abs(Math.sin(TT * 3)), hx = b.x + s * 4, hy = b.y - 34, ex = hx + s * (8 + u * 10), ey = hy - 18 + u * 30; line(c, [[hx, hy], [ex, ey]], '#7a5a3a', 2, 1); blob(c, [[ex, ey - 3], [ex + s * 7, ey - 5], [ex + s * 7, ey + 3], [ex, ey + 2]], '#8a9098'); } },
+    // a real blow: the axe rises slowly over her head, falls fast on the log on the block, and the log splits in two
+    f(c, b, A){ const s = b.dir === 3 ? -1 : 1, P = 1.7, p = ((TT - A.t0) % P) / P, SUBE = .55, CAE = .62, ease = t => t * t * (3 - 2 * t);
+      const ang = p < SUBE ? lerp(.5, -2.05, ease(p / SUBE)) : p < CAE ? lerp(-2.05, 1.15, (p - SUBE) / (CAE - SUBE)) : 1.15;   // (0: straight ahead; negative: up, over her head)
+      const hx = b.x + s * 5, hy = b.y - 30, L = 25, ex = hx + s * Math.cos(ang) * L, ey = hy + Math.sin(ang) * L;
+      const lx = b.x + s * 16, ly = b.y - 2;   // (the log, standing on the block)
+      if (p < CAE) blob(c, [[lx - 4, ly], [lx + 4, ly], [lx + 4, ly - 9], [lx - 4, ly - 9]], '#c99a66');
+      else { const q = (p - CAE) / (1 - CAE), d = 3 + ease(Math.min(1, q * 2.5)) * 9, h = Math.sin(Math.min(1, q * 2.5) * Math.PI) * 5;
+        for (const o of [-1, 1]) blob(c, [[lx + o * d - 2.5, ly - h * .3], [lx + o * d + 2.5, ly - h * .3], [lx + o * d + 2.5, ly - 8 - h], [lx + o * d - 2.5, ly - 8 - h]], '#d8ad78');
+        if (q < .25) for (let k = 0; k < 4; k++) ell(c, lx + (k - 1.5) * 4, ly - 10 - q * 30 - k, 1.2, 1, '#e8c89a', true); }   // (chips, at the blow)
+      line(c, [[hx, hy], [ex, ey]], '#7a5a3a', 2.2, 1);
+      const nx = -Math.sin(ang) * s, ny = Math.cos(ang);   // (the head of the axe, across the handle)
+      blob(c, [[ex - nx * 2, ey - ny * 2], [ex + s * Math.cos(ang) * 6 - nx * 3, ey + Math.sin(ang) * 6 - ny * 3], [ex + s * Math.cos(ang) * 6 + nx * 5, ey + Math.sin(ang) * 6 + ny * 5], [ex + nx * 3, ey + ny * 3]], '#8a9098');
+      ell(c, hx, hy, 2.6, 2.2, '#f2d2b8', true); } },   // (her hands, on the handle)
   horquilla: { u(c, b, A){ const n = Math.min(3, 1 + Math.floor((TT - A.t0) / 4)); for (let k = 0; k < n; k++) { const x = b.x + 26 + k * 18, y = b.y + 4; blob(c, [[x - 8, y], [x + 8, y], [x + 8, y - 10], [x - 8, y - 10]], '#e0c870'); line(c, [[x - 8, y - 5], [x + 8, y - 5]], '#a88a3a', .8, k); } },
     f(c, b, A){ const u = Math.sin(TT * 2.5), x = b.x + 8, y = b.y - 30; line(c, [[x - 10, y + 16 + u * 4], [x + 14, y - 10 - u * 6]], '#8a6a4a', 1.8, 1); for (const o of [-2, 0, 2]) line(c, [[x + 14 + o, y - 10 - u * 6], [x + 18 + o, y - 18 - u * 6]], '#8a9098', 1, o); ell(c, x + 18, y - 20 - u * 6, 6, 3, '#e0c870'); } },
   semillas: { f(c, b, A){ for (let k = 0; k < 5; k++) { const q = (TT * 1.4 + k * .2) % 1; ell(c, b.x + 10 + k * 3, b.y - 24 + q * 26, 1.2, 1.2, '#6a4a2a'); } for (let k = 0; k < 3; k++) line(c, [[b.x - 24, b.y + 8 + k * 6], [b.x + 34, b.y + 8 + k * 6]], 'rgba(110,70,40,.45)', 1.2, k); } },

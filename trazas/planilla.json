@@ -62,7 +62,7 @@
    "viven": []
   }
  ],
- "generado": "2026-10-16 20:00",
+ "generado": "2026-10-16 22:38",
  "momentos": [
   {
    "id": "dia2",
@@ -3404,7 +3404,7 @@
    "si": "hecho:inicio_juego, !hecho:llegada_tv",
    "en": "ana=gg, marilla=gg",
    "hablan": "matthew, marilla",
-   "lineas": 36,
+   "lineas": 35,
    "primera": "narra: Avonlea, un pueblito de granjas en la Isla del Príncipe Eduardo, en Canadá, a fines del siglo XIX. En la granja de Tejas Verdes viven dos hermanos solterones, Matthew y Marilla Cuthbert. Ya están mayores, y le pidieron a la Sra. Spencer que les trajera del orfanato un niño, para ayudar en el campo.",
    "quienes": [],
    "con": "",
@@ -3464,21 +3464,22 @@
    "interrumpe": false,
    "grande": false,
    "repetir": "una_vez",
-   "si": "hecho:primera_noche, !hecho:se_queda",
+   "si": "hecho:primera_noche, !hecho:desayuno_prueba, !hecho:se_queda",
    "en": "",
    "hablan": "marilla",
-   "lineas": 17,
+   "lineas": 18,
    "primera": "ana: (La pieza del alero: paredes blancas y desnudas, una cama alta, una mesita, una silla. Ana la mira con espanto.)",
    "quienes": [],
    "con": "",
    "una_vez": true,
    "texto": [
     "ana: (La pieza del alero: paredes blancas y desnudas, una cama alta, una mesita, una silla. Ana la mira con espanto.)",
-    "ana: (Se tira en la cama boca abajo, con zapatos y todo, y llora desconsolada contra la almohada.)",
+    "ana: (Se arranca el vestido a tirones y lo tira al suelo, con los zapatos. El sombrero lo lanza lejos: por casualidad, queda colgando de la percha. Se pone el camisón del orfanato, que le queda corto.)",
+    "ana: (Se tira en la cama boca abajo y llora desconsolada contra la almohada.)",
     "ana: ~Nadie me quiere. Nadie me ha querido nunca. Y ahora tampoco aquí.",
-    "marilla: (Marilla sube con la vela. Mira la ropa, los zapatos, a la niña hecha un ovillo.) Desvístete y métete en la cama como corresponde, niña.",
-    "ana: (Ana se quita el vestido de mala gana y lo deja tirado en el suelo, con los zapatos. Se pone el camisón del orfanato, que le queda corto, y se mete bajo las sábanas.)",
-    "marilla: (Marilla mira la ropa tirada en el suelo y aprieta los labios. Esta noche no dice nada.) Buenas noches.",
+    "marilla: (Marilla sube con la vela. Mira la ropa tirada por el suelo, los zapatos, a la niña hecha un ovillo encima de la colcha.) Métete debajo de las sábanas como corresponde, niña.",
+    "ana: (Ana se mete bajo las sábanas sin mirarla.)",
+    "marilla: (Marilla mira otra vez la ropa tirada en el suelo y aprieta los labios. Esta noche no dice nada.) Buenas noches.",
     "ana: (Ana asoma la cara, blanca, entre las sábanas.) ¿Cómo puede decir que son buenas noches, cuando sabe que tiene que ser la peor noche de toda mi vida?",
     "ana: (Y se vuelve a meter debajo de las sábanas, hasta la cabeza.)",
     "marilla: (Marilla baja la escalera despacio, con la vela, sin saber muy bien qué pensar.)",
@@ -3976,29 +3977,6 @@
    "una_vez": true,
    "texto": [
     "narra: Marilla aprieta los labios y asiente. Esa misma tarde, Ana se va con la Sra. Blewett, con su maleta vieja y su sombrero de paja. No mira hacia atrás, porque si mira hacia atrás va a llorar. En Tejas Verdes, Matthew no dice nada durante días."
-   ]
-  },
-  {
-   "id": "tarjeta_oracion",
-   "canal": "gg",
-   "disparo": "",
-   "prioridad": 5,
-   "interrumpe": false,
-   "grande": false,
-   "repetir": "una_vez",
-   "si": "hecho:a_prueba, !hecho:se_queda, ve:marilla, hora:7.5-13",
-   "en": "",
-   "hablan": "marilla",
-   "lineas": 5,
-   "primera": "marilla: Toma, Ana. Es el Padrenuestro, impreso. Lo vas a aprender de memoria. Se acabó eso de rezar inventando.",
-   "quienes": [],
-   "con": "",
-   "una_vez": true,
-   "texto": [
-    "marilla: Toma, Ana. Es el Padrenuestro, impreso. Lo vas a aprender de memoria. Se acabó eso de rezar inventando.",
-    "ana: (Ana apoya la tarjeta contra el jarro del agua y la va leyendo mientras lava los platos, moviendo los labios.)",
-    "ana: «Padre nuestro, que estás en los cielos, santificado sea tu nombre…» ¡Marilla, es como música! Como cuando una lee un poema.",
-    "marilla: No es un poema, es una oración. Y no te distraigas, que tienes la loza en la mano."
    ]
   },
   {
@@ -11074,9 +11052,6 @@
    "devuelta": [
     "escena devuelta_blewett"
    ],
-   "tarjeta_oracion": [
-    "escena tarjeta_oracion"
-   ],
    "se_queda": [
     "escena se_queda"
    ],
@@ -11397,7 +11372,6 @@
    ],
    "a_prueba": [
     "escena marilla_a_la_cama",
-    "escena tarjeta_oracion",
     "escena se_queda",
     "escena ventana_a_prueba",
     "escena conv_marilla_vestidos",
@@ -11683,8 +11657,7 @@
    "nombro_burbuja",
    "nombro_cerezo",
    "nombro_senda",
-   "queens_primera",
-   "tarjeta_oracion"
+   "queens_primera"
   ],
   "malas": []
  },

@@ -114,7 +114,8 @@ function coreoTick(ag, a, st, dt, P){
     if (d > 16 && st.tw < 9) { wmWalk(me, q[0], q[1], wmScene(me), dt); return false; }
     wmStop(me); b.x = q[0]; b.y = q[1]; st.llego = 1; st.tw = 0;   // (there; or, stuck for a while, as good as there)
   }
-  if (!st.pt) { st.pt = 0; if (A) { A.obj = p.obj; A.mesa = p.mesa || null; A.lleva = null; A.base = [b.x, b.y]; } if (p.decir) wmSay(me, p.decir); if (p.adentro && b.where === 'out') { b.where = 'in'; st.salir = 1; } }
+  if (!st.pt) { st.pt = 0; if (p.decir) wmSay(me, p.decir); if (p.adentro && b.where === 'out') { b.where = 'in'; st.salir = 1; } }
+  if (A && A.paso !== (st.ci || 0)) { A.paso = st.ci || 0; A.obj = p.obj; A.mesa = p.mesa || null; A.lleva = null; A.base = [b.x, b.y]; }   // (what it is done with, in her hands: as soon as the doing is there, even if it began where she stood)
   if (p.mira != null) b.dir = p.mira; b.sit = !!p.sentar; b.crouch = !!p.agachar; if (me !== 'ana') b.moving = false;
   if (p.sentado) { const [k, x, y, od] = p.sentado, o = wmBody(k); if (o && wmScene(k) === wmScene(me)) { o.x = x; o.y = y; o.dir = od; o.sit = true; o.moving = false; o.nav = null; o.wait = Math.max(o.wait || 0, 1); } }   // (the other, sitting with her the while)
   if (p.con) { const [k, dx, dy, od] = p.con, o = wmBody(k); if (o && wmScene(k) === wmScene(me)) { o.x = b.x + dx; o.y = b.y + dy; o.dir = od ?? b.dir; o.moving = false; o.sit = false; if (A) A.con = k; } }   // (whoever does it with her, at her side)
@@ -150,7 +151,19 @@ const ACC_OBJ = {
   papel: { f(c, b, A){ const x = b.x + (b.dir === 3 ? -9 : 9), y = b.y - 24; blob(c, [[x - 7, y - 5], [x + 7, y - 5], [x + 7, y + 6], [x - 7, y + 6]], '#fbf6ea'); for (let k = 0; k < 3; k++) line(c, [[x - 5, y - 2 + k * 3], [x + 4, y - 2 + k * 3]], 'rgba(60,60,90,.5)', .6, k); const w = Math.sin(TT * 6) * 3; line(c, [[x + w, y + 1], [x + 6 + w, y - 9]], '#efe6d6', 1.6, 4); } },   // (the quill moving)
   cuaderno: { f(c, b, A){ ACC_OBJ.papel.f(c, b, A); } },
   hacha: { u(c, b, A){ const x = b.x + (b.dir === 3 ? -16 : 16), y = b.y + 2; ell(c, x, y, 10, 4, '#a07a52', true); ell(c, x, y - 2, 8, 3, '#d8b88a'); for (let k = 0; k < Math.min(6, Math.floor((TT - A.t0) / 1.5)); k++) ell(c, x - 22 + (k % 3) * 6, y + 8 - Math.floor(k / 3) * 4, 5, 2.4, '#c99a66', true); },
-    f(c, b, A){ const s = (b.dir === 3 ? -1 : 1), u = Math.abs(Math.sin(TT * 3)), hx = b.x + s * 4, hy = b.y - 34, ex = hx + s * (8 + u * 10), ey = hy - 18 + u * 30; line(c, [[hx, hy], [ex, ey]], '#7a5a3a', 2, 1); blob(c, [[ex, ey - 3], [ex + s * 7, ey - 5], [ex + s * 7, ey + 3], [ex, ey + 2]], '#8a9098'); } },
+    // a real blow: the axe rises slowly over her head, falls fast on the log on the block, and the log splits in two
+    f(c, b, A){ const s = b.dir === 3 ? -1 : 1, P = 1.7, p = ((TT - A.t0) % P) / P, SUBE = .55, CAE = .62, ease = t => t * t * (3 - 2 * t);
+      const ang = p < SUBE ? lerp(.5, -2.05, ease(p / SUBE)) : p < CAE ? lerp(-2.05, 1.15, (p - SUBE) / (CAE - SUBE)) : 1.15;   // (0: straight ahead; negative: up, over her head)
+      const hx = b.x + s * 5, hy = b.y - 30, L = 25, ex = hx + s * Math.cos(ang) * L, ey = hy + Math.sin(ang) * L;
+      const lx = b.x + s * 16, ly = b.y - 2;   // (the log, standing on the block)
+      if (p < CAE) blob(c, [[lx - 4, ly], [lx + 4, ly], [lx + 4, ly - 9], [lx - 4, ly - 9]], '#c99a66');
+      else { const q = (p - CAE) / (1 - CAE), d = 3 + ease(Math.min(1, q * 2.5)) * 9, h = Math.sin(Math.min(1, q * 2.5) * Math.PI) * 5;
+        for (const o of [-1, 1]) blob(c, [[lx + o * d - 2.5, ly - h * .3], [lx + o * d + 2.5, ly - h * .3], [lx + o * d + 2.5, ly - 8 - h], [lx + o * d - 2.5, ly - 8 - h]], '#d8ad78');
+        if (q < .25) for (let k = 0; k < 4; k++) ell(c, lx + (k - 1.5) * 4, ly - 10 - q * 30 - k, 1.2, 1, '#e8c89a', true); }   // (chips, at the blow)
+      line(c, [[hx, hy], [ex, ey]], '#7a5a3a', 2.2, 1);
+      const nx = -Math.sin(ang) * s, ny = Math.cos(ang);   // (the head of the axe, across the handle)
+      blob(c, [[ex - nx * 2, ey - ny * 2], [ex + s * Math.cos(ang) * 6 - nx * 3, ey + Math.sin(ang) * 6 - ny * 3], [ex + s * Math.cos(ang) * 6 + nx * 5, ey + Math.sin(ang) * 6 + ny * 5], [ex + nx * 3, ey + ny * 3]], '#8a9098');
+      ell(c, hx, hy, 2.6, 2.2, '#f2d2b8', true); } },   // (her hands, on the handle)
   horquilla: { u(c, b, A){ const n = Math.min(3, 1 + Math.floor((TT - A.t0) / 4)); for (let k = 0; k < n; k++) { const x = b.x + 26 + k * 18, y = b.y + 4; blob(c, [[x - 8, y], [x + 8, y], [x + 8, y - 10], [x - 8, y - 10]], '#e0c870'); line(c, [[x - 8, y - 5], [x + 8, y - 5]], '#a88a3a', .8, k); } },
     f(c, b, A){ const u = Math.sin(TT * 2.5), x = b.x + 8, y = b.y - 30; line(c, [[x - 10, y + 16 + u * 4], [x + 14, y - 10 - u * 6]], '#8a6a4a', 1.8, 1); for (const o of [-2, 0, 2]) line(c, [[x + 14 + o, y - 10 - u * 6], [x + 18 + o, y - 18 - u * 6]], '#8a9098', 1, o); ell(c, x + 18, y - 20 - u * 6, 6, 3, '#e0c870'); } },
   semillas: { f(c, b, A){ for (let k = 0; k < 5; k++) { const q = (TT * 1.4 + k * .2) % 1; ell(c, b.x + 10 + k * 3, b.y - 24 + q * 26, 1.2, 1.2, '#6a4a2a'); } for (let k = 0; k < 3; k++) line(c, [[b.x - 24, b.y + 8 + k * 6], [b.x + 34, b.y + 8 + k * 6]], 'rgba(110,70,40,.45)', 1.2, k); } },

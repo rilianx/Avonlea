@@ -30,6 +30,20 @@ const ITEM_DEFS = {
   dolares:  { names: ['dólar', 'dólares'], icon: '💵', season: () => game.inv.dolares > 0, giveAll: true, gift: { name: 'el dinero', art: 'el dinero', reply: 'Vaya... bueno, pues gracias.' }, note: 'dinero' },
 };
 for (const k of Object.keys(ITEM_DEFS)) if (!(k in game.inv)) game.inv[k] = 0;
+// what is not a gift but for the house: who uses it, and what they say when Ana brings it (the wood she chopped, the
+// eggs, the milk): she can hand it over to them, all of it
+const PARA_LA_CASA = {
+  lena: ['marilla', '¡Leña para la cocina! Bien partida, además. Déjala junto a la estufa.'], huevos: ['marilla', 'Huevos frescos. Justo lo que me faltaba para el bizcocho.'],
+  leche: ['marilla', 'La leche, gracias. La pongo a enfriar en la despensa.'], mantequilla: ['marilla', 'Mantequilla. Bien, a la despensa.'],
+  azucar: ['marilla', 'El azúcar. Gracias, Ana.'], hierbas: ['marilla', 'Hierbas para el guiso. Gracias.'], heno: ['matthew', 'Bueno, pues… heno para Dolly. Gracias, Ana.'],
+};
+const entregaOpciones = who => Object.entries(PARA_LA_CASA).filter(([k, [p]]) => p === who && game.inv[k] > 0).map(([k]) => [ITEM_DEFS[k].icon + ' Darle ' + itemText(k, game.inv[k]).replace(/^1 /, 'el ').replace(/^(\d+) /, 'los $1 '), () => entregar(who, k)]);
+function entregar(who, k){
+  const n = game.inv[k], [, dice] = PARA_LA_CASA[k]; game.inv[k] = 0; const I = wmInv(who); I[k] = (I[k] || 0) + n;
+  logEv('Ana le dio ' + itemText(k, n) + ' a ' + NAMES[who] + '.', [who, ...witnesses()]); planSoon(who, 'Ana te acaba de traer ' + itemText(k, n));
+  if (who === 'marilla') cualidadSuma('marilla', 'paciencia', 1, 'ana');   // (a help for the house: while she is on trial, it counts)
+  sfx.happy(); say(who, dice, [['De nada', close]]); save();
+}
 const GIFTS = Object.fromEntries(Object.entries(ITEM_DEFS).filter(([, d]) => d.gift).map(([k, d]) => [k, [d.gift.name, d.gift.reply]]));
 function talk(who, again = false){
   const p = PEOPLE[who]; p.lie = false;
@@ -48,6 +62,7 @@ function talk(who, again = false){
   if (who === 'diana' && dlgHechos().prohibida) return say('diana', pick(['Ana… mamá no me deja hablar contigo. Lo siento tanto, tanto…', 'No puedo, Ana… mamá dice que no. Pero te sigo queriendo, ¿sabes?']), [['…', close]]);   // (forbidden, cap. 17)
   const opts = [...taskOptions(who), ...cadenaOpciones(who)];
   for (const [k, [name]] of Object.entries(GIFTS)) if (game.inv[k] > 0) opts.push(['Regalar ' + name, () => give(who, k)]);
+  opts.push(...entregaOpciones(who));   // (and what Ana brings for the house: the wood, the eggs…)
   if (!isQuieto(who) || who === 'marilla') opts.push(['🙏 Pedirle un favor', () => favorMenu(who)]);
   opts.push(...convOpciones(who), ...walkOption(who), [cierre(who), close]);
   say(who, text, opts);

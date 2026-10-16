@@ -758,7 +758,6 @@ al_terminar: hecho primera_noche
 al_terminar: log Marilla dejó que Ana se quedara esa noche, hasta aclarar el enredo. Ana casi no probó la cena.
 ---
 ! sentar ana
-! sin_sombrero
 ! ana llora=true
 ana: (Ana se deja caer en una silla junto a la mesa, hunde la cara entre los brazos y llora a mares.)
 matthew: (Matthew y Marilla se miran por encima de la estufa, sin saber qué hacer.)
@@ -817,19 +816,20 @@ al_terminar: a_pieza
 disparo: primera
 canal: ana_sola
 sujeta: marilla
-si: hecho:primera_noche, !hecho:se_queda
+si: hecho:primera_noche, !hecho:desayuno_prueba, !hecho:se_queda
 ---
 ana: (La pieza del alero: paredes blancas y desnudas, una cama alta, una mesita, una silla. Ana la mira con espanto.)
-! ana enCama=boca_abajo
-ana: (Se tira en la cama boca abajo, con zapatos y todo, y llora desconsolada contra la almohada.)
-ana piensa: Nadie me quiere. Nadie me ha querido nunca. Y ahora tampoco aquí.
-! entra marilla ga
-marilla: (Marilla sube con la vela. Mira la ropa, los zapatos, a la niña hecha un ovillo.) Desvístete y métete en la cama como corresponde, niña.
-ana: (Ana se quita el vestido de mala gana y lo deja tirado en el suelo, con los zapatos. Se pone el camisón del orfanato, que le queda corto, y se mete bajo las sábanas.)
+ana: (Se arranca el vestido a tirones y lo tira al suelo, con los zapatos. El sombrero lo lanza lejos: por casualidad, queda colgando de la percha. Se pone el camisón del orfanato, que le queda corto.)
 ! camison
 ! ropa_tirada
+! ana enCama=boca_abajo
+ana: (Se tira en la cama boca abajo y llora desconsolada contra la almohada.)
+ana piensa: Nadie me quiere. Nadie me ha querido nunca. Y ahora tampoco aquí.
+! entra marilla ga
+marilla: (Marilla sube con la vela. Mira la ropa tirada por el suelo, los zapatos, a la niña hecha un ovillo encima de la colcha.) Métete debajo de las sábanas como corresponde, niña.
+ana: (Ana se mete bajo las sábanas sin mirarla.)
 ! ana enCama=tapada
-marilla: (Marilla mira la ropa tirada en el suelo y aprieta los labios. Esta noche no dice nada.) Buenas noches.
+marilla: (Marilla mira otra vez la ropa tirada en el suelo y aprieta los labios. Esta noche no dice nada.) Buenas noches.
 ana: (Ana asoma la cara, blanca, entre las sábanas.) ¿Cómo puede decir que son buenas noches, cuando sabe que tiene que ser la peor noche de toda mi vida?
 ana: (Y se vuelve a meter debajo de las sábanas, hasta la cabeza.)
 marilla: (Marilla baja la escalera despacio, con la vela, sin saber muy bien qué pensar.)
@@ -1209,27 +1209,6 @@ si: hecho:blewett_duda, !hecho:a_prueba
 al_terminar: hecho devuelta
 al_terminar: log Marilla le entregó Ana a la Sra. Blewett.
 al_terminar: final devuelta | Ana se fue con la Sra. Blewett. En el libro, Marilla no la entregó: Ana se ganó, poco a poco, su lugar en Tejas Verdes.
-
-# --- La tarjeta del Padrenuestro (cap. 8): la mañana del día en que Marilla le va a decir que se queda, le da una
-# tarjeta con la oración para que la aprenda; Ana la apoya contra el jarro mientras lava los platos
-=== tarjeta_oracion ===
-canal: gg
-prioridad: 5
-sujeta: marilla
-si: hecho:a_prueba, !hecho:se_queda, ve:marilla, hora:7.5-13
-al_terminar: hecho tarjeta_oracion
----
-marilla: Toma, Ana. Es el Padrenuestro, impreso. Lo vas a aprender de memoria. Se acabó eso de rezar inventando.
-ana: (Ana apoya la tarjeta contra el jarro del agua y la va leyendo mientras lava los platos, moviendo los labios.)
-ana: «Padre nuestro, que estás en los cielos, santificado sea tu nombre…» ¡Marilla, es como música! Como cuando una lee un poema.
-marilla: No es un poema, es una oración. Y no te distraigas, que tienes la loza en la mano.
--> «Lo voy a aprender aunque me devuelvan.»
-   ana: Lo voy a aprender igual, aunque me devuelvan. Así me lo llevo conmigo, y es mío.
-   marilla: (Marilla se queda mirándola un momento, con el paño en la mano, y no dice nada.)
-   ! suma paciencia:marilla:ana 1
-->* «Santificado… ¿qué quiere decir santificado?»
-   ana: Santificado… ¿qué quiere decir santificado? Suena como una campana grande, muy lejos.
-   marilla: Quiere decir sagrado, que se respeta. Apréndetelo primero, y no hables tanto: entenderlo viene después.
 
 === se_queda ===
 narra: «Por razones que solo ella sabía, Marilla no le dijo a Ana que se quedaba en Tejas Verdes hasta la tarde siguiente.» Ana se ha pasado el día con el corazón en la boca, sin atreverse a preguntar.

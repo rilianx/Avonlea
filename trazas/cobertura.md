@@ -1,6 +1,6 @@
 # Cobertura de la historia: lo que falta
 
-Generado el 2026-10-16 20:00 por `node tools/planilla.js` (también en la hoja «Cobertura» de planilla/avonlea.xlsx).
+Generado el 2026-10-16 22:38 por `node tools/planilla.js` (también en la hoja «Cobertura» de planilla/avonlea.xlsx).
 
 No son errores: son situaciones que el juego deja que pasen y nadie considera, noticias o llegadas sin consecuencias, gente con poco que decir.
 
@@ -13,7 +13,7 @@ No son errores: son situaciones que el juego deja que pasen y nadie considera, n
 | Exploración | 0 | 0 | 12 |
 | Llegadas | 0 | 0 | 3 |
 | Personas | 0 | 0 | 36 |
-| Hechos | 0 | 0 | 6 |
+| Hechos | 0 | 0 | 5 |
 
 ## Situaciones
 
@@ -146,4 +146,3 @@ No son errores: son situaciones que el juego deja que pasen y nadie considera, n
 - [baja] **«devuelta»**: se deja y nadie lo lee: algo pasó y no tiene consecuencias. _Idea: una escena, una frase o una noticia que lo recuerde._
 - [baja] **«marilla_doblo_ropa»**: se deja y nadie lo lee: algo pasó y no tiene consecuencias. _Idea: una escena, una frase o una noticia que lo recuerde._
 - [baja] **«queens_primera»**: se deja y nadie lo lee: algo pasó y no tiene consecuencias. _Idea: una escena, una frase o una noticia que lo recuerde._
-- [baja] **«tarjeta_oracion»**: se deja y nadie lo lee: algo pasó y no tiene consecuencias. _Idea: una escena, una frase o una noticia que lo recuerde._

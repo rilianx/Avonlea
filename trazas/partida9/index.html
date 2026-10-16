@@ -1,7 +1,7 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Prueba de usuaria: a prueba</title>
 <style>body{margin:0;background:#f6efe0;color:#3b2a1c;font:16px/1.5 Georgia,serif}main{max-width:1040px;margin:0 auto;padding:24px 16px}h1{font-weight:normal;margin:0 0 4px}h2{font-weight:normal;margin:26px 0 10px}.sub{color:#6b4a30;margin:0 0 18px}.res{background:#fffaf0;border:1px solid #d9c6a0;border-radius:10px;padding:12px 16px;margin:0 0 18px}.fotos{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}figure{margin:0;background:#fffaf0;border:1px solid #d9c6a0;border-radius:8px;padding:8px}figure img{width:100%;border-radius:4px}figcaption{font-size:14px;color:#6b4a30}code{background:#efe2c4;padding:1px 4px;border-radius:3px}li{margin:6px 0}.ok{color:#2f6b3a}.mal{color:#9a3b2a}.regla{color:#3b4a7a}</style></head><body><main>
 <h1>Prueba de usuaria: los días a prueba, desde la estación de Bright River</h1>
-<p class="sub">Del primer minuto hasta que Marilla le dice que se queda (días 1 a 3, cap. 2 a 8 del libro), con lo nuevo: el comienzo en la estación, el viaje con Matthew, Bonny y la tarjeta del Padrenuestro. Jugada con clics. Cada error, una regla general. <a href="../partida8/">← Partida 8</a> · <a href="../aprueba/aprueba.md">las siete jugadoras automáticas</a></p>
+<p class="sub">Del primer minuto hasta que Marilla le dice que se queda (días 1 a 3, cap. 2 a 8 del libro), con lo nuevo: el comienzo en la estación, el viaje con Matthew y Bonny. Jugada con clics. Cada error, una regla general. <a href="../partida8/">← Partida 8</a> · <a href="../aprueba/aprueba.md">las siete jugadoras automáticas</a></p>
 
 <div class="res"><b>Lo que pasó, y la regla que salió de cada error</b><ol>
 <li>Al empezar, un botón: <span class="ok">«🚉 Empezar antes: en la estación de Bright River, esperando a Matthew»</span> (hay que tocarlo dos veces; si no, la partida empieza como siempre, en Tejas Verdes). <span class="mal">La primera versión preguntaba con una caja que paraba todo, y las pruebas automáticas se trababan; y la jugadora impaciente lo confirmaba sin querer con Enter.</span> <span class="regla">Regla: lo que se ofrece al empezar no detiene el juego, ni toma el teclado.</span></li>
@@ -11,7 +11,7 @@
 <li>Llegaron a las 21:40. La tarjeta dice <span class="ok">«Ahora te toca a ti: lleva a Ana a su pieza»</span>, y <span class="mal">en el mismo instante Marilla se la llevaba sola</span> («Ya es noche cerrada»). <span class="regla">Regla: lo que una tarjeta le pide a la jugadora, le da tiempo para hacerlo</span> (<code>horas_desde:llegada_tv:0.5</code>, una condición nueva).</li>
 <li>Al día siguiente, en la cocina: el geranio de la ventana. <span class="ok">«Marilla, ¿cómo se llama ese geranio?» … «¿De qué sirve ponerle nombre a un geranio?» … Bonny</span> (o el nombre que la jugadora quiera; sola, también puede bautizarlo).</li>
 <li><span class="mal">Matthew: «¿Cómo le dirías al estanque de los Barry?»</span>, cuando ella lo bautizó delante de él en la calesa; y <span class="mal">Ana le contaba los nombres que les puso a los lugares</span>, que él vio poner. <span class="regla">Regla (reglas.txt): preguntarle cómo llamaría algo, mientras todavía no le puso nombre.</span></li>
-<li>El día 3, a media mañana: <span class="ok">Marilla le da la tarjeta del Padrenuestro; Ana la apoya contra el jarro mientras lava: «¡Es como música!» — «Lo voy a aprender igual, aunque me devuelvan»</span>.</li>
+<li>El día 3, a media mañana: Marilla le daba la tarjeta del Padrenuestro (cap. 8). <span class="mal">Después se sacó: no era necesaria.</span></li>
 <li>Antes del anuncio de las 14:00, <span class="mal">Marilla ya le explicaba por qué se quedaban con ella</span> («Matthew lo quiso desde que te vio…»). <span class="regla">Regla (reglas.txt): lo que revela que se quedan con ella, después de que se lo dicen.</span></li>
 <li><span class="mal">La Sra. Lynde la conoció el día 3 en Tejas Verdes</span> (en el libro viene a las dos semanas): iba a «visitar a la Sra. Barry», y la Sra. Barry estaba de visita en Tejas Verdes. <span class="regla">Regla: visitar a alguien es ir a su casa, con esa persona adentro; no seguirla adonde esté de visita.</span></li>
 <li><span class="mal">Arriba a la izquierda decía «Ana · Tejas Verdes» en todas partes</span> (en Bright River, donde la Sra. Lynde). Ahora dice dónde está.</li>
@@ -24,12 +24,10 @@
 <figure><img src="04-lago.jpg" alt=""><figcaption>La laguna de Barry: el Lago de las Aguas Brillantes.</figcaption></figure>
 <figure><img src="05-llegada.jpg" alt=""><figcaption>Tejas Verdes: «¿Me llamaría Cordelia, por favor?»</figcaption></figure>
 <figure><img src="06-bonny.jpg" alt=""><figcaption>El geranio de la ventana de la cocina: Bonny.</figcaption></figure>
-<figure><img src="07-tarjeta.jpg" alt=""><figcaption>La tarjeta del Padrenuestro, contra el jarro, mientras lava los platos.</figcaption></figure>
 </div>
 
 <h2>Lo que queda anotado</h2>
 <ul>
-<li>La tarjeta del Padrenuestro solo pasa si Ana está con Marilla esa mañana: de las siete jugadoras automáticas, solo la exploradora la vio (las demás se quedan en su pieza). Si importa, Marilla podría subir a dársela.</li>
 <li>Bonny solo se bautiza si la jugadora mira el geranio: está a la vista en la ventana, con su flor roja.</li>
 </ul>
 </main></body></html>
