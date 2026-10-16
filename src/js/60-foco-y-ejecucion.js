@@ -132,7 +132,7 @@ const ANA_SUENA = [['¿No le parece que hoy el mundo está recién hecho?', 'Est
 const saludoHora = () => { const h = hourNow() % 24; return h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches'; };
 function chatLines(a, b, anaFree){
   const L = [], h = hourNow(), hi = saludoHora(), say = (q, t) => L.push({ q, t: t.replace(/Buenos días|Buenas tardes|Buenas noches/, hi) });   // (the greeting, as the hour is)
-  const sin = A => { const u = [...A].sort(() => Math.random() - .5); return () => u.length > 1 ? u.pop() : u[0]; }, suena = sin(ANA_SUENA), pares = sin(PAIR_LINES[isKid(a) && isKid(b) ? 'kids' : 'big']);   // (in one talk, no line twice)
+  const sin = A => { const u = [...A].sort(() => Math.random() - .5); return () => u.length > 1 ? u.pop() : u[0]; }, suena = sin(ANA_SUENA), pares = sin(paresSi(PAIR_LINES[isKid(a) && isKid(b) ? 'kids' : 'big']));   // (in one talk, no line twice)
   const tu = isKid(a) && isKid(b), nm = k => /^[a-zá-ú]/.test(wmName(k)) ? '' : wmName(k), A = nm(a), B = nm(b), to = n => n ? ', ' + n : '';   // ("un vecino" is no name to call someone by)
   if (anaFree) {   // (Ana, as the player moves her, passing by: a word to her)
     const d = FOLKBY[a]?.def;

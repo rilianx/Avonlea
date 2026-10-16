@@ -5829,7 +5829,7 @@ const DLG_BANK = {
     { si: ["hecho:se_queda", "hecho:lynde_visita"], l: [['lynde', 'Marilla, esa niña tuya va a terminar de maestra o de actriz, una de dos.'], ['marilla', 'Mientras termine sus quehaceres primero, Rachel, que termine de lo que quiera.']] },
     [['lynde', '¿Supiste que los Pye volvieron a pelear con los Sloane por la cerca?'], ['marilla', 'No, y no me hace falta saberlo.'], ['lynde', 'Bueno, yo solo lo digo. Nadie puede decir que Rachel Lynde no avisa.']],
     { at: 'dentro', l: [['marilla', '¿Más té, Rachel?'], ['lynde', 'Media taza. Y de esa mermelada de ciruelas, que la tuya es mejor que la mía, aunque no se lo digas a nadie.']] },
-    { si: ["cuaderno:escuela"], l: [['lynde', 'La maestra nueva tiene ideas muy modernas. ¡Hacen ejercicios físicos en la escuela!'], ['marilla', 'Mientras no se rompan la cabeza…'], ['lynde', 'Ya veremos, Marilla. Ya veremos.']] },
+    { si: ["hecho:llego_stacy"], l: [['lynde', 'La maestra nueva tiene ideas muy modernas. ¡Hacen ejercicios físicos en la escuela!'], ['marilla', 'Mientras no se rompan la cabeza…'], ['lynde', 'Ya veremos, Marilla. Ya veremos.']] },
   ],
   'marilla+matthew': [
     { si: ['hecho:a_prueba', '!hecho:se_queda'], l: [['marilla', 'Hoy no rompió nada, Matthew. Y lavó los platos sin que se lo pidiera.'], ['matthew', 'Bueno, pues… ¿ves? Ya te lo decía yo.'], ['marilla', 'No he dicho nada todavía. Es una prueba.']] },
@@ -10079,10 +10079,14 @@ const NAMED = [...Object.values(HOUSES).map(h => [h.name, h.at.x, h.at.y + 40]),
   ...WOODS.filter(w => w.name !== 'el bosque').map(w => [w.name, w.x, w.y])];
 function BRIDGES_COVERED_AT(){ for (const w of WATERS) for (const b of w.bridges) if (b.covered) return [b.x, b.y]; return [0, 0]; }
 function placeNear(x, y){ let best = null, bd = 520; for (const [n, px, py] of NAMED) { const d = dist(x, y, px, py); if (d < bd) { bd = d; best = n; } } return best; }
-const toPlace = n => { const l = /^(La|El|Los|Las) /.test(n) ? n[0].toLowerCase() + n.slice(1) : n; return (l.startsWith('el ') ? 'al ' + l.slice(3) : 'a ' + l); };
+// (with its article: «a la pensión», «al hotel White Sands», «a la casa de los Pye»; a name of its own, as it is: «a Rose Cottage»)
+const LUGAR_COMUN = { Hotel: 'el', Ayuntamiento: 'el', Casa: 'la', Herrería: 'la', Pensión: 'la', Fábrica: 'la', Granja: 'la' };
+const toPlace = n => { const w = n.split(' ')[0], l = /^(La|El|Los|Las) /.test(n) ? n[0].toLowerCase() + n.slice(1) : LUGAR_COMUN[w] ? LUGAR_COMUN[w] + ' ' + w.toLowerCase() + n.slice(w.length) : n; return (l.startsWith('el ') ? 'al ' + l.slice(3) : 'a ' + l); };
 function goDest(x, y){
   let p = [clamp(x, 40, WW - 40), clamp(y, 60, WH - 40)];
-  const casa = Object.entries(HOUSES).find(([, h]) => !h.road && inBox(h.at, h.depth, p[0], p[1], 8));   // (a house one enters: to its door, and in; not to the nearest free spot, which may be behind it)
+  // (a house one enters: to its door, and in; not to the nearest free spot, which may be behind it. On the map a finger
+  // is wide and the roof and the name are drawn above the house: a tap on them, or near, is the house too)
+  const casa = Object.entries(HOUSES).filter(([, h]) => !h.road && (inBox(h.at, h.depth, p[0], p[1], 40) || dist(p[0], p[1], h.at.x, h.at.y - h.depth / 2) < 360)).sort(([, a], [, b]) => dist(p[0], p[1], a.at.x, a.at.y) - dist(p[0], p[1], b.at.x, b.at.y))[0];
   if (casa) p = [casa[1].at.x, casa[1].at.y + 30];
   if (blockedOut(...p)) {   // in the sea, a lake, a house: the nearest place one can stand on
     let best = null;
@@ -10539,11 +10543,14 @@ function fichaOf(k){
 const ANA_FICHA = 'Ana Shirley, 11 años, pelirroja y pecosa, huérfana adoptada por Matthew y Marilla Cuthbert de Tejas Verdes; soñadora, muy conversadora, de palabras grandiosas e imaginación desbordante';
 const SEASON_TOPICS = [['las flores de los manzanos', 'la primavera'], ['el calor', 'las vacaciones', 'las bayas'], ['las hojas rojas', 'las manzanas', 'la cosecha'], ['la nieve', 'el frío', 'la Navidad']];
 // written exchanges for two neighbours (when there is no AI)
+// (two who meet, a line each; one may wait for something of the story: «[presente:allan] …»; the news, they tell
+// as src/datos/noticias.txt says)
 const PAIR_LINES = {
   mixta: [['¿Me da una manzana? Solo una.', 'Toma, pero no le digas a nadie.'], ['¡Mire, encontré un nido!', 'No lo toques, que la madre vuelve.'], ['¿Ya es hora de comer?', 'Todavía no. Anda a jugar un rato.'], ['¡Gané la carrera hasta el portón!', '¡Muy bien! Pero no corras tanto, que te caes.']],
-  kids: [['¡Te pillé! ¡Ahora tú la llevas!', '¡No vale, no estaba jugando!'], ['¿Viste? A Gilbert se le fue la botella de leche río abajo.', '¡Ja! Que no se entere el maestro.'], ['¿Jugamos a las escondidas?', 'Bueno, pero yo no cuento esta vez.'], ['Dicen que en el Bosque Encantado hay fantasmas.', 'Eso lo inventó Ana Shirley. ¡Pero igual no voy!']],
-  big: [['¡Buenos días! ¿Ya supo lo de la vaca de los Cuthbert?', '¡Si lo sabe todo Avonlea! Esa vaca es más lista que el Sr. Harrison.'], ['Qué lindo día para tender la ropa.', 'Ya lo creo. Y ayer que no paró de llover.'], ['¿Va a la tienda de Lawson?', 'Sí, se me acabó el azúcar. Con tanta compota...'], ['Dicen que el nuevo pastor predica muy bonito.', 'Y la Sra. Allan es un encanto, eso sí.'], ['¿Cómo vienen las papas este año?', 'Buenas, si no llueve demasiado.']],
+  kids: [['¡Te pillé! ¡Ahora tú la llevas!', '¡No vale, no estaba jugando!'], ['[presente:gilbert] ¿Viste? A Gilbert se le fue la botella de leche río abajo.', '¡Ja! Que no se entere el maestro.'], ['¿Jugamos a las escondidas?', 'Bueno, pero yo no cuento esta vez.'], ['[dias_desde:conocidas_diana:7] Dicen que en el Bosque Encantado hay fantasmas.', 'Eso lo inventó Ana Shirley. ¡Pero igual no voy!']],
+  big: [['Qué lindo día para tender la ropa.', 'Ya lo creo. Y ayer que no paró de llover.'], ['¿Va a la tienda de Lawson?', 'Sí, se me acabó el azúcar. Con tanta compota...'], ['[presente:allan] Dicen que el nuevo pastor predica muy bonito.', 'Y la Sra. Allan es un encanto, eso sí.'], ['¿Cómo vienen las papas este año?', 'Buenas, si no llueve demasiado.']],
 };
+const paresSi = P => P.filter(p => lineasSi([p[0]]).length).map(([a, b]) => [lineasSi([a])[0], b]);   // (the pairs whose time has come)
 const memOn = k => !!AI.memoria && !!fichaOf(k)?.memoria;
 const enc = { cur: null, ready: null, busy: false, mute: {}, cool: 0, err: 0 };
 const encP = id => id === 'ana' ? ana : FOLKBY[id];
@@ -10567,7 +10574,7 @@ function encFallback(x, y){
   if (y === 'ana') {
     if (!conoceA(x) && !sinNombre(x)) return { parts: [x, y], lines: presentar(x), topic: '', scene: game.scene, born: TT };   // (the first time: who they are)
     const d = FOLKBY[x].def, l = [{ q: encQ(x), t: pick(lineasDe(x, d.lines)) || saludoHora() + ', niña.' }], a = lineasSi(d.ana); if (a.length && Math.random() < .7) l.push({ q: 'ana', t: pick(a) }); return { parts: [x, y], lines: l, topic: '', scene: game.scene, born: TT }; }
-  const kx = !!FOLKBY[x].kid, ky = !!FOLKBY[y].kid, [a, b] = pick(PAIR_LINES[kx && ky ? 'kids' : kx || ky ? 'mixta' : 'big'].filter(p => !(/pastor/.test(p[0]) && [x, y].some(i => /allan/.test(i)))));
+  const kx = !!FOLKBY[x].kid, ky = !!FOLKBY[y].kid, [a, b] = pick(paresSi(PAIR_LINES[kx && ky ? 'kids' : kx || ky ? 'mixta' : 'big']).filter(p => !(/pastor/.test(p[0]) && [x, y].some(i => /allan/.test(i)))));
   const [p, q] = !kx && ky ? [y, x] : [x, y];   // (a child with a grown-up: the child speaks first, as a child)
   return { parts: [x, y], lines: [{ q: encQ(p), t: a }, { q: encQ(q), t: b }], topic: '', scene: game.scene, born: TT };
 }
@@ -11328,7 +11335,7 @@ const ANA_SUENA = [['¿No le parece que hoy el mundo está recién hecho?', 'Est
 const saludoHora = () => { const h = hourNow() % 24; return h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches'; };
 function chatLines(a, b, anaFree){
   const L = [], h = hourNow(), hi = saludoHora(), say = (q, t) => L.push({ q, t: t.replace(/Buenos días|Buenas tardes|Buenas noches/, hi) });   // (the greeting, as the hour is)
-  const sin = A => { const u = [...A].sort(() => Math.random() - .5); return () => u.length > 1 ? u.pop() : u[0]; }, suena = sin(ANA_SUENA), pares = sin(PAIR_LINES[isKid(a) && isKid(b) ? 'kids' : 'big']);   // (in one talk, no line twice)
+  const sin = A => { const u = [...A].sort(() => Math.random() - .5); return () => u.length > 1 ? u.pop() : u[0]; }, suena = sin(ANA_SUENA), pares = sin(paresSi(PAIR_LINES[isKid(a) && isKid(b) ? 'kids' : 'big']));   // (in one talk, no line twice)
   const tu = isKid(a) && isKid(b), nm = k => /^[a-zá-ú]/.test(wmName(k)) ? '' : wmName(k), A = nm(a), B = nm(b), to = n => n ? ', ' + n : '';   // ("un vecino" is no name to call someone by)
   if (anaFree) {   // (Ana, as the player moves her, passing by: a word to her)
     const d = FOLKBY[a]?.def;
@@ -12894,7 +12901,7 @@ function drawMap(){
     const fx = dest.x * k, fy = dest.y * k; line(c, [[fx, fy], [fx, fy - 16 * dpr]], '#4a2f1c', 1.4 * dpr, 1); blob(c, [[fx, fy - 16 * dpr], [fx + 10 * dpr, fy - 13 * dpr], [fx, fy - 10 * dpr]], '#d9433b');
   }
   mark('Ana', at(game.scene, ana.x, ana.y), '#d9433b', 0, true);
-  $('maptitle').textContent = 'Avonlea · ' + SEASONS[S] + ', día ' + (Math.floor(dayT) % 2 + 1) + ' · ' + SICON[S] + ' · toca un lugar para ir allí · rueda o pellizco: acercar · arrastra para moverte';
+  $('maptitle').textContent = 'Avonlea · ' + SEASONS[S] + ', día ' + (today() % DIAS_ESTACION + 1) + ' · ' + SICON[S] + ' · toca un lugar para ir allí · rueda o pellizco: acercar · arrastra para moverte';
 }
 let owed = 0;   // (faster: the game time owed is made up in steps of at most 0.05 s, within a budget of time per frame; a slow frame is not lost)
 function loop(now){

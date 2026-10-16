@@ -30,7 +30,7 @@ const DLG_BANK = {
     { si: ["hecho:se_queda", "hecho:lynde_visita"], l: [['lynde', 'Marilla, esa niña tuya va a terminar de maestra o de actriz, una de dos.'], ['marilla', 'Mientras termine sus quehaceres primero, Rachel, que termine de lo que quiera.']] },
     [['lynde', '¿Supiste que los Pye volvieron a pelear con los Sloane por la cerca?'], ['marilla', 'No, y no me hace falta saberlo.'], ['lynde', 'Bueno, yo solo lo digo. Nadie puede decir que Rachel Lynde no avisa.']],
     { at: 'dentro', l: [['marilla', '¿Más té, Rachel?'], ['lynde', 'Media taza. Y de esa mermelada de ciruelas, que la tuya es mejor que la mía, aunque no se lo digas a nadie.']] },
-    { si: ["cuaderno:escuela"], l: [['lynde', 'La maestra nueva tiene ideas muy modernas. ¡Hacen ejercicios físicos en la escuela!'], ['marilla', 'Mientras no se rompan la cabeza…'], ['lynde', 'Ya veremos, Marilla. Ya veremos.']] },
+    { si: ["hecho:llego_stacy"], l: [['lynde', 'La maestra nueva tiene ideas muy modernas. ¡Hacen ejercicios físicos en la escuela!'], ['marilla', 'Mientras no se rompan la cabeza…'], ['lynde', 'Ya veremos, Marilla. Ya veremos.']] },
   ],
   'marilla+matthew': [
     { si: ['hecho:a_prueba', '!hecho:se_queda'], l: [['marilla', 'Hoy no rompió nada, Matthew. Y lavó los platos sin que se lo pidiera.'], ['matthew', 'Bueno, pues… ¿ves? Ya te lo decía yo.'], ['marilla', 'No he dicho nada todavía. Es una prueba.']] },

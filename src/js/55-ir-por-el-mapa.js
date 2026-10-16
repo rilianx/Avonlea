@@ -6,10 +6,14 @@ const NAMED = [...Object.values(HOUSES).map(h => [h.name, h.at.x, h.at.y + 40]),
   ...WOODS.filter(w => w.name !== 'el bosque').map(w => [w.name, w.x, w.y])];
 function BRIDGES_COVERED_AT(){ for (const w of WATERS) for (const b of w.bridges) if (b.covered) return [b.x, b.y]; return [0, 0]; }
 function placeNear(x, y){ let best = null, bd = 520; for (const [n, px, py] of NAMED) { const d = dist(x, y, px, py); if (d < bd) { bd = d; best = n; } } return best; }
-const toPlace = n => { const l = /^(La|El|Los|Las) /.test(n) ? n[0].toLowerCase() + n.slice(1) : n; return (l.startsWith('el ') ? 'al ' + l.slice(3) : 'a ' + l); };
+// (with its article: «a la pensión», «al hotel White Sands», «a la casa de los Pye»; a name of its own, as it is: «a Rose Cottage»)
+const LUGAR_COMUN = { Hotel: 'el', Ayuntamiento: 'el', Casa: 'la', Herrería: 'la', Pensión: 'la', Fábrica: 'la', Granja: 'la' };
+const toPlace = n => { const w = n.split(' ')[0], l = /^(La|El|Los|Las) /.test(n) ? n[0].toLowerCase() + n.slice(1) : LUGAR_COMUN[w] ? LUGAR_COMUN[w] + ' ' + w.toLowerCase() + n.slice(w.length) : n; return (l.startsWith('el ') ? 'al ' + l.slice(3) : 'a ' + l); };
 function goDest(x, y){
   let p = [clamp(x, 40, WW - 40), clamp(y, 60, WH - 40)];
-  const casa = Object.entries(HOUSES).find(([, h]) => !h.road && inBox(h.at, h.depth, p[0], p[1], 8));   // (a house one enters: to its door, and in; not to the nearest free spot, which may be behind it)
+  // (a house one enters: to its door, and in; not to the nearest free spot, which may be behind it. On the map a finger
+  // is wide and the roof and the name are drawn above the house: a tap on them, or near, is the house too)
+  const casa = Object.entries(HOUSES).filter(([, h]) => !h.road && (inBox(h.at, h.depth, p[0], p[1], 40) || dist(p[0], p[1], h.at.x, h.at.y - h.depth / 2) < 360)).sort(([, a], [, b]) => dist(p[0], p[1], a.at.x, a.at.y) - dist(p[0], p[1], b.at.x, b.at.y))[0];
   if (casa) p = [casa[1].at.x, casa[1].at.y + 30];
   if (blockedOut(...p)) {   // in the sea, a lake, a house: the nearest place one can stand on
     let best = null;

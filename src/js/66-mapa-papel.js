@@ -90,7 +90,7 @@ function drawMap(){
     const fx = dest.x * k, fy = dest.y * k; line(c, [[fx, fy], [fx, fy - 16 * dpr]], '#4a2f1c', 1.4 * dpr, 1); blob(c, [[fx, fy - 16 * dpr], [fx + 10 * dpr, fy - 13 * dpr], [fx, fy - 10 * dpr]], '#d9433b');
   }
   mark('Ana', at(game.scene, ana.x, ana.y), '#d9433b', 0, true);
-  $('maptitle').textContent = 'Avonlea · ' + SEASONS[S] + ', día ' + (Math.floor(dayT) % 2 + 1) + ' · ' + SICON[S] + ' · toca un lugar para ir allí · rueda o pellizco: acercar · arrastra para moverte';
+  $('maptitle').textContent = 'Avonlea · ' + SEASONS[S] + ', día ' + (today() % DIAS_ESTACION + 1) + ' · ' + SICON[S] + ' · toca un lugar para ir allí · rueda o pellizco: acercar · arrastra para moverte';
 }
 let owed = 0;   // (faster: the game time owed is made up in steps of at most 0.05 s, within a budget of time per frame; a slow frame is not lost)
 function loop(now){
