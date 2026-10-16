@@ -53,10 +53,11 @@ for (const raw of guion.split('\n')) {
   if ((m = s.match(/^-\s*\[([^\]]*)\]/))) m[1].split(',').forEach(c => condicion(c, 'un comentario de ' + g)); } }
 // the characters' own lines (src/datos/personajes.json): «[condiciones] texto»
 for (const [k, c] of Object.entries(JSON.parse(leer('src/datos/personajes.json')))) for (const l of [...(c.lines || []), ...(c.seasonLines || [])]) { const m = /^\[([^\]]+)\]/.exec(l); if (m) m[1].split(',').forEach(x => condicion(x, 'una frase de ' + k)); }
-// who is in Avonlea when (src/datos/llegadas.txt): someone of the game, and conditions well written
+// who is in Avonlea when (src/datos/llegadas.txt): someone of the game, conditions well written, and the facts their comings and goings leave
 { const quienes = new Set([...Object.keys(JSON.parse(leer('src/datos/personajes.json'))), ...[...codigo.matchAll(/^  (\w+): \{ name: /gm)].map(m => m[1])]); let q = null;
   for (const raw of leer('src/datos/llegadas.txt').split('\n')) { const s = raw.trim(); if (!s || s[0] === '#') continue; let m;
     if ((m = s.match(/^===\s*(.+?)\s*===$/))) { q = m[1]; if (!quienes.has(q)) malas.push(`llegadas: «${q}» no es nadie del juego (personajes.json, ni la gente de src/js/56-gente-de-avonlea.js)`); continue; }
+    if (/^(llega si|de visita):/.test(s)) anota(hace, 'llego_' + q, 'llegadas'); if (/^(se va si|de visita):/.test(s)) anota(hace, 'se_fue_' + q, 'llegadas');   // (arriving and leaving are facts of the story)
     if ((m = s.match(/^(?:llega|se va) si:\s*(.*)$/))) m[1].split(',').forEach(c => condicion(c.trim(), 'llegadas de ' + q)); } }
 // the notebook: what each goal requires, its hints, and goals that are a fact
 let meta = null;
@@ -85,7 +86,7 @@ for (const m of codigo.matchAll(/['"`](?:hecho|dias_desde):([a-z_0-9]+)/g)) anot
 for (const m of codigo.matchAll(/['"`\[]conoce:([a-z_0-9]+)/g)) anota(pide, 'conoce_' + m[1] + ' ', 'código');
 // the report
 const necesita = Object.keys(pide).filter(h => !h.endsWith(' ')), lee = new Set(Object.keys(pide).map(h => h.trim()));
-const nunca = necesita.filter(h => !hace[h]).sort(), sinUso = Object.keys(hace).filter(h => !lee.has(h) && !/^hito_/.test(h)).sort();
+const nunca = necesita.filter(h => !hace[h]).sort(), sinUso = Object.keys(hace).filter(h => !lee.has(h) && !/^(hito_|llego_|se_fue_)/.test(h)).sort();
 const md = ['# El grafo de la historia, revisado', '', 'Lo genera `node tools/grafo.js` (ver `docs/MOTOR.md`). Lee el guion, el cuaderno, las habilidades y el código.', '',
   `**${escenas.length} escenas** (${escenas.filter(e => e.grande).length} grandes), **${metas.size} metas** del cuaderno, **${Object.keys(hace).length} hechos** que algo deja.`, '',
   '## Escenas o metas que nunca podrían pasar', '', nunca.length ? 'Piden un hecho que nada deja:' : 'Ninguna: todo hecho que se pide, algo lo deja.', '',

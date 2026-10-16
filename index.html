@@ -3009,73 +3009,91 @@ harrison: Si no te asustas con facilidad… Y no le hables de la vaca. Ni a mí 
 
 </script>
 <script type="text/plain" id="llegadas">
-# Quién está en Avonlea, y desde/hasta cuándo, como en el libro (lo lee el juego al empezar; el motor: ausente() en
-# src/js/24-personajes.js). Sirve igual para la gente de la casa (personajes.json) y la del pueblo
+# Quién está en Avonlea, y desde/hasta cuándo, como en el libro (lo lee el juego al empezar; el motor: ausente() y
+# llegadasTick() en src/js/24-personajes.js). Sirve igual para la gente de la casa (personajes.json) y la del pueblo
 # (src/js/56-gente-de-avonlea.js). Quien no está en Avonlea no aparece en el mapa ni en ninguna escena (una escena en
 # la que habla espera a que llegue), y sus metas esperan.
 #
+# Llegar e irse son hechos de la historia: cuando se cumple «llega si», llegó (queda el hecho llego_<quien>, con su día)
+# y se queda; cuando se cumple «se va si», se fue (se_fue_<quien>). Así una llegada se ancla en otra, como en el libro
+# («la Srta. Stacy llega el otoño después de que se fue el Sr. Phillips»: hecho:se_fue_phillips), y no en un día fijo.
+# Los demás pueden usar esos hechos: el guion («si: hecho:llego_stacy»), las noticias («saben si hecho:llego_stacy»).
+#
 # «=== quien ===» y sus campos, uno por línea:
-#   llega si: <condiciones>   está en Avonlea solo mientras se cumplen (condiciones del guion, separadas por comas);
-#                             si hay varias líneas, basta con una. Sin «llega si», está desde el principio.
-#   se va si: <condiciones>   desde que se cumplen, ya no está (varias líneas: basta con una)
-#   fuera: dónde anda mientras tanto (para el que lea esto, y el panel)
+#   llega si: <condiciones>   cuándo llega (condiciones del guion, separadas por comas; varias líneas: basta con una).
+#                             Sin «llega si», está desde el principio.
+#   se va si: <condiciones>   cuándo se va (varias líneas: basta con una)
+#   de visita: sí             no se queda: está solo mientras se cumple «llega si» (cada visita deja su llego_ y se_fue_)
+#   al llegar: / al irse:     lo que queda en el diario de ese día
+#   fuera: dónde anda mientras tanto (para el que lea esto)
 # Las partidas que empezaron antes de que Ana llegara a Tejas Verdes (sin el hecho inicio_juego) tienen a todos.
 #
-# El año del juego tiene 56 días (14 por estación) y empieza en primavera: los días del libro se respetan al principio
-# (Diana vuelve el día 18); después, el orden del libro, más apretado: el primer año de escuela con el Sr. Phillips,
-# el invierno de la tía Josephine, los Allan en la primavera siguiente, la Srta. Stacy al otoño.
-#   año 1: primavera 1–14 · verano 15–28 · otoño 29–42 · invierno 43–56
-#   año 2: primavera 57–70 · verano 71–84 (el primer examen de Queen's) · otoño 85–98 · invierno 99–112
+# El año del juego tiene 56 días (14 por estación) y empieza en primavera. Con estas anclas, en una partida que sigue el
+# libro queda así: Diana el día 18; la tía Josephine, el invierno (43–56); los Allan, el día 64; el Sr. Phillips se va
+# al empezar el verano del segundo año (71); la Srta. Stacy llega el otoño siguiente (85).
 
-# --- Diana (cap. 12): cuando Ana llega, está en Carmody, donde su tía. Vuelve a las tres semanas, más o menos.
+# --- Diana (cap. 12): cuando Ana llega, está en Carmody, donde su tía. Vuelve a las tres semanas, más o menos (la
+# Sra. Lynde viene a las dos: Ana la conoce después).
 === diana ===
-llega si: dia_juego:18
+llega si: dias_desde:llegada_tv:17
+al llegar: Diana Barry volvió de Carmody, donde su tía.
 fuera: en Carmody, donde su tía
 
 # --- Gilbert Blythe (cap. 15): pasó el verano con sus primos en Nuevo Brunswick, y vuelve a la escuela cuando Ana
 # ya lleva unos días yendo (o, si no va, a más tardar en el invierno).
 === gilbert ===
 llega si: dias_desde:escuela:4
-llega si: dia_juego:43
+llega si: estacion:invierno
+al llegar: Gilbert Blythe volvió de Nuevo Brunswick.
 fuera: con sus primos en Nuevo Brunswick
-
-# --- El Sr. Phillips (cap. 15 y 21): el maestro del primer año de Ana. Se va al terminar el año escolar, y Prissy
-# Andrews, a la que preparaba, se va a Queen's.
-=== phillips ===
-se va si: dia_juego:71
-fuera: se fue de Avonlea al terminar el año escolar
-
-=== prissy ===
-se va si: dia_juego:71
-fuera: en Queen's, en Charlottetown
-
-# --- El pastor nuevo y su esposa (cap. 21): llegan en la primavera del segundo año, cuando el Sr. Bentley ya se fue.
-=== allan ===
-llega si: dia_juego:64
-fuera: todavía no llega a Avonlea
-
-=== sraallan ===
-llega si: dia_juego:64
-fuera: todavía no llega a Avonlea
-
-# --- La Srta. Stacy (cap. 24): la maestra nueva, desde el otoño del segundo año.
-=== stacy ===
-llega si: dia_juego:85
-fuera: todavía no llega a Avonlea
 
 # --- La tía Josephine (cap. 19): vive en Charlottetown, y viene a La Cuesta del Huerto en invierno.
 === josephine ===
+de visita: sí
 llega si: estacion:invierno
+al llegar: La tía Josephine llegó de Charlottetown a La Cuesta del Huerto.
+al irse: La tía Josephine se volvió a Charlottetown.
 fuera: en su casa de Charlottetown
+
+# --- El pastor nuevo y su esposa (cap. 21): el Sr. Bentley se fue, y los Allan llegan en la primavera, después del
+# invierno de la tía Josephine.
+=== allan ===
+llega si: estacion:primavera, dias_desde:se_fue_josephine:7
+al llegar: Llegó el pastor nuevo, el Sr. Allan, con su esposa.
+fuera: todavía no llega a Avonlea
+
+=== sraallan ===
+llega si: estacion:primavera, dias_desde:se_fue_josephine:7
+fuera: todavía no llega a Avonlea
+
+# --- El Sr. Phillips (cap. 21): el maestro del primer año de Ana. Se va al terminar ese año escolar (el verano
+# después del invierno de la tía Josephine), y Prissy Andrews, a la que preparaba, se va a Queen's.
+=== phillips ===
+se va si: estacion:verano, hecho:llego_josephine
+al irse: El Sr. Phillips se despidió de la escuela: todas las niñas lloraron.
+fuera: se fue de Avonlea al terminar el año escolar
+
+=== prissy ===
+se va si: hecho:se_fue_phillips
+al irse: Prissy Andrews se fue a Queen's.
+fuera: en Queen's, en Charlottetown
+
+# --- La Srta. Stacy (cap. 24): la maestra nueva, el otoño después de que se fue el Sr. Phillips.
+=== stacy ===
+llega si: estacion:otoño, hecho:se_fue_phillips
+al llegar: Llegó la maestra nueva, la Srta. Stacy.
+fuera: todavía no llega a Avonlea
 
 # --- El buhonero (cap. 27): pasa por Avonlea de vez en cuando, con su baúl.
 === buhonero ===
+de visita: sí
 llega si: dia_estacion:4
 llega si: dia_estacion:11
 fuera: recorriendo otros pueblos
 
 # --- Los veraneantes del hotel de White Sands, en verano.
 === veraneante ===
+de visita: sí
 llega si: estacion:verano
 fuera: en Boston
 
@@ -6958,25 +6976,41 @@ const NAMES = { toby: 'Pelusa', lawson: 'Sr. Lawson' }; for (const k of Object.k
 const lineasSi = a => (a || []).filter(l => { const m = /^\[([^\]]+)\] /.exec(l); return !m || m[1].split(',').every(c => dlgCond(c.trim(), dlgCtx())); }).map(l => l.replace(/^\[[^\]]+\] /, ''));
 // someone's loose lines now: the written ones, and the winks about the goals of the notebook (src/js/66-cuaderno.js)
 const lineasDe = (k, a) => [...(typeof lineasAjenas === 'function' ? lineasAjenas(k, lineasSi(a)) : lineasSi(a)), ...(typeof guiñosDe === 'function' ? guiñosDe(k) : [])].map(t => typeof saludoHora === 'function' ? t.replace(/Buenos días|Buenas tardes|Buenas noches/, saludoHora) : t);   // (the greeting, as the hour is)   // (someone who does not know Ana: none with her name)
-// who is in Avonlea, and from/until when, as in the book (src/datos/llegadas.txt): «llega si» (in Avonlea only while
-// one of them holds), «se va si» (gone once one holds); conditions of the script, with commas. Away, they are on no map
-// and in no scene, and their goals wait. A game begun before Ana came to Green Gables (no inicio_juego) has everyone.
+// who is in Avonlea, and from/until when, as in the book (src/datos/llegadas.txt). Arriving and leaving are events of
+// the story: once «llega si» holds, they have come (the fact llego_<who>, with its day) and they stay; once «se va si»
+// holds, they have gone (se_fue_<who>). So one can be anchored to another («la Srta. Stacy llega el otoño después de que
+// se fue el Sr. Phillips»: hecho:se_fue_phillips). Someone «de visita» is here only while «llega si» holds, and each
+// visit leaves its llego_/se_fue_. Away, they are on no map and in no scene, and their goals wait. A game begun before
+// Ana came to Green Gables (no inicio_juego) has everyone.
 function llegadasLeer(txt){
   const L = {}; let e = null; const conds = v => v.split(',').map(x => x.trim()).filter(Boolean);
   for (const raw of txt.split('\n')) {
     const l = raw.trim(); if (!l || l[0] === '#') continue; let m;
-    if ((m = l.match(/^===\s*(.+?)\s*===$/))) { L[m[1]] = e = { llega: [], seVa: [], fuera: '' }; continue; }
+    if ((m = l.match(/^===\s*(.+?)\s*===$/))) { L[m[1]] = e = { llega: [], seVa: [], fuera: '', visita: false, alLlegar: '', alIrse: '' }; continue; }
     if (!e) continue;
     if ((m = l.match(/^llega si:\s*(.*)$/))) e.llega.push(conds(m[1]));
     else if ((m = l.match(/^se va si:\s*(.*)$/))) e.seVa.push(conds(m[1]));
-    else if ((m = l.match(/^fuera:\s*(.*)$/))) e.fuera = m[1];
+    else if ((m = l.match(/^de visita:\s*(.*)$/))) e.visita = /^s/.test(m[1]);
+    else if ((m = l.match(/^(fuera|al llegar|al irse):\s*(.*)$/))) e[{ fuera: 'fuera', 'al llegar': 'alLlegar', 'al irse': 'alIrse' }[m[1]]] = m[2];
   }
   return L;
 }
 const LLEGADAS = llegadasLeer(document.getElementById('llegadas')?.textContent || '');
-const ausente = k => { const e = LLEGADAS[String(k).replace(/^f:/, '')]; if (!e || !dlgHechos().inicio_juego) return false;
-  const x = dlgCtx(), vale = g => g.every(c => dlgCond(c, x));
-  return (e.llega.length && !e.llega.some(vale)) || e.seVa.some(vale); };
+const llegadaVale = gs => { const x = dlgCtx(); return gs.some(g => g.every(c => dlgCond(c, x))); };
+const ausente = k => { k = String(k).replace(/^f:/, ''); const e = LLEGADAS[k], H = dlgHechos(); if (!e || !H.inicio_juego) return false;
+  if (e.visita) return !llegadaVale(e.llega) || llegadaVale(e.seVa);
+  return !!H['se_fue_' + k] || (e.llega.length > 0 && !H['llego_' + k] && !llegadaVale(e.llega)) || llegadaVale(e.seVa); };
+// the comings and goings, as they happen: the facts, and a line in the diary
+let llegadasT = 0; const llegadasAqui = {};
+function llegadasTick(dt){
+  if ((llegadasT -= dt) > 0 || !dlgHechos().inicio_juego) return; llegadasT = 2; const H = dlgHechos();
+  for (const [k, e] of Object.entries(LLEGADAS)) {
+    const aqui = !ausente(k), antes = llegadasAqui[k] ?? (e.visita ? !!H['llego_' + k] && !(H['se_fue_' + k] >= H['llego_' + k]) : !H['se_fue_' + k] && (!e.llega.length || !!H['llego_' + k]));
+    if (aqui && !antes) { dlgHecho('llego_' + k); if (e.alLlegar) logEv(e.alLlegar, []); }
+    if (!aqui && antes && (e.visita || e.seVa.length)) { dlgHecho('se_fue_' + k); if (e.alIrse) logEv(e.alIrse, []); }
+    llegadasAqui[k] = aqui;
+  }
+}
 const LINES = {}, SEASON_LINES = {}; for (const k of Object.keys(CH)) { Object.defineProperty(LINES, k, { get: () => lineasDe(k, CH[k].lines), enumerable: true }); Object.defineProperty(SEASON_LINES, k, { get: () => CH[k].seasonLines.map(l => lineasSi([l])[0] || null), enumerable: true }); }   // (each with its conditions: one that does not hold is null)
 const ABIL = {}; for (const k of Object.keys(CH)) ABIL[k] = CH[k].abil;
 const COOK = Object.keys(CH).find(k => CH[k].abil.cocinar);
@@ -9614,7 +9648,7 @@ function update(dt){
   if (game.scene === 'camino' && ana.onCart && (mx || my || (ana.goto && !ana.goto.wm))) roadGetOff();   // (moving her: she gets down from the buggy)
   if (ANA_AUTO) { if (mx || my) { freeStart(); const v = 520 / (cam.zoom || 1) / (viewZoom || 1); freeCam.x += mx * v * dt; freeCam.y += my * v * dt; } mx = my = 0; }   // (on her own: the keys move the view)
   if (game.talk?.deadline && TT > game.talk.deadline && !sayOpen) { game.talk.deadline = 0; autoChoose(); }
-  autoTick(); cartTick(dt); roadTick(dt); buggyTick(); roadTalkTick(dt); dlgTick(dt); talkTick(dt); cap1Tick(); momentsTick(); lugaresTick(dt); inicioTick(dt); lagrimas(); ropaTick(); folkTick(dt); faunaTick(dt); agentTick(dt); jugarTick(dt); correoTick(dt); sickTick(); apartarTick(); cuadernoTick(dt); habilidadesTick(dt); noticiasTick(dt); juntasTick(dt); agendaTick(); wmApproachTick(dt); calledTick(); chatTick(dt); wmFollowTick();
+  autoTick(); cartTick(dt); roadTick(dt); buggyTick(); roadTalkTick(dt); dlgTick(dt); talkTick(dt); cap1Tick(); momentsTick(); lugaresTick(dt); inicioTick(dt); lagrimas(); ropaTick(); folkTick(dt); faunaTick(dt); agentTick(dt); jugarTick(dt); correoTick(dt); sickTick(); apartarTick(); cuadernoTick(dt); habilidadesTick(dt); noticiasTick(dt); llegadasTick(dt); juntasTick(dt); agendaTick(); wmApproachTick(dt); calledTick(); chatTick(dt); wmFollowTick();
   if (RELATO.on) relatoTick();   // (the account of what happens, once all have moved: 66-relato.js)
   ana.torn = !!game.anaStates.rasgado; ana.askew = !!game.anaStates.despeinada;
   ana.savoring = false;

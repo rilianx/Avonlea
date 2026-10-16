@@ -73,25 +73,41 @@ const NAMES = { toby: 'Pelusa', lawson: 'Sr. Lawson' }; for (const k of Object.k
 const lineasSi = a => (a || []).filter(l => { const m = /^\[([^\]]+)\] /.exec(l); return !m || m[1].split(',').every(c => dlgCond(c.trim(), dlgCtx())); }).map(l => l.replace(/^\[[^\]]+\] /, ''));
 // someone's loose lines now: the written ones, and the winks about the goals of the notebook (src/js/66-cuaderno.js)
 const lineasDe = (k, a) => [...(typeof lineasAjenas === 'function' ? lineasAjenas(k, lineasSi(a)) : lineasSi(a)), ...(typeof guiñosDe === 'function' ? guiñosDe(k) : [])].map(t => typeof saludoHora === 'function' ? t.replace(/Buenos días|Buenas tardes|Buenas noches/, saludoHora) : t);   // (the greeting, as the hour is)   // (someone who does not know Ana: none with her name)
-// who is in Avonlea, and from/until when, as in the book (src/datos/llegadas.txt): «llega si» (in Avonlea only while
-// one of them holds), «se va si» (gone once one holds); conditions of the script, with commas. Away, they are on no map
-// and in no scene, and their goals wait. A game begun before Ana came to Green Gables (no inicio_juego) has everyone.
+// who is in Avonlea, and from/until when, as in the book (src/datos/llegadas.txt). Arriving and leaving are events of
+// the story: once «llega si» holds, they have come (the fact llego_<who>, with its day) and they stay; once «se va si»
+// holds, they have gone (se_fue_<who>). So one can be anchored to another («la Srta. Stacy llega el otoño después de que
+// se fue el Sr. Phillips»: hecho:se_fue_phillips). Someone «de visita» is here only while «llega si» holds, and each
+// visit leaves its llego_/se_fue_. Away, they are on no map and in no scene, and their goals wait. A game begun before
+// Ana came to Green Gables (no inicio_juego) has everyone.
 function llegadasLeer(txt){
   const L = {}; let e = null; const conds = v => v.split(',').map(x => x.trim()).filter(Boolean);
   for (const raw of txt.split('\n')) {
     const l = raw.trim(); if (!l || l[0] === '#') continue; let m;
-    if ((m = l.match(/^===\s*(.+?)\s*===$/))) { L[m[1]] = e = { llega: [], seVa: [], fuera: '' }; continue; }
+    if ((m = l.match(/^===\s*(.+?)\s*===$/))) { L[m[1]] = e = { llega: [], seVa: [], fuera: '', visita: false, alLlegar: '', alIrse: '' }; continue; }
     if (!e) continue;
     if ((m = l.match(/^llega si:\s*(.*)$/))) e.llega.push(conds(m[1]));
     else if ((m = l.match(/^se va si:\s*(.*)$/))) e.seVa.push(conds(m[1]));
-    else if ((m = l.match(/^fuera:\s*(.*)$/))) e.fuera = m[1];
+    else if ((m = l.match(/^de visita:\s*(.*)$/))) e.visita = /^s/.test(m[1]);
+    else if ((m = l.match(/^(fuera|al llegar|al irse):\s*(.*)$/))) e[{ fuera: 'fuera', 'al llegar': 'alLlegar', 'al irse': 'alIrse' }[m[1]]] = m[2];
   }
   return L;
 }
 const LLEGADAS = llegadasLeer(document.getElementById('llegadas')?.textContent || '');
-const ausente = k => { const e = LLEGADAS[String(k).replace(/^f:/, '')]; if (!e || !dlgHechos().inicio_juego) return false;
-  const x = dlgCtx(), vale = g => g.every(c => dlgCond(c, x));
-  return (e.llega.length && !e.llega.some(vale)) || e.seVa.some(vale); };
+const llegadaVale = gs => { const x = dlgCtx(); return gs.some(g => g.every(c => dlgCond(c, x))); };
+const ausente = k => { k = String(k).replace(/^f:/, ''); const e = LLEGADAS[k], H = dlgHechos(); if (!e || !H.inicio_juego) return false;
+  if (e.visita) return !llegadaVale(e.llega) || llegadaVale(e.seVa);
+  return !!H['se_fue_' + k] || (e.llega.length > 0 && !H['llego_' + k] && !llegadaVale(e.llega)) || llegadaVale(e.seVa); };
+// the comings and goings, as they happen: the facts, and a line in the diary
+let llegadasT = 0; const llegadasAqui = {};
+function llegadasTick(dt){
+  if ((llegadasT -= dt) > 0 || !dlgHechos().inicio_juego) return; llegadasT = 2; const H = dlgHechos();
+  for (const [k, e] of Object.entries(LLEGADAS)) {
+    const aqui = !ausente(k), antes = llegadasAqui[k] ?? (e.visita ? !!H['llego_' + k] && !(H['se_fue_' + k] >= H['llego_' + k]) : !H['se_fue_' + k] && (!e.llega.length || !!H['llego_' + k]));
+    if (aqui && !antes) { dlgHecho('llego_' + k); if (e.alLlegar) logEv(e.alLlegar, []); }
+    if (!aqui && antes && (e.visita || e.seVa.length)) { dlgHecho('se_fue_' + k); if (e.alIrse) logEv(e.alIrse, []); }
+    llegadasAqui[k] = aqui;
+  }
+}
 const LINES = {}, SEASON_LINES = {}; for (const k of Object.keys(CH)) { Object.defineProperty(LINES, k, { get: () => lineasDe(k, CH[k].lines), enumerable: true }); Object.defineProperty(SEASON_LINES, k, { get: () => CH[k].seasonLines.map(l => lineasSi([l])[0] || null), enumerable: true }); }   // (each with its conditions: one that does not hold is null)
 const ABIL = {}; for (const k of Object.keys(CH)) ABIL[k] = CH[k].abil;
 const COOK = Object.keys(CH).find(k => CH[k].abil.cocinar);

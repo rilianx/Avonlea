@@ -1,70 +1,88 @@
-# Quién está en Avonlea, y desde/hasta cuándo, como en el libro (lo lee el juego al empezar; el motor: ausente() en
-# src/js/24-personajes.js). Sirve igual para la gente de la casa (personajes.json) y la del pueblo
+# Quién está en Avonlea, y desde/hasta cuándo, como en el libro (lo lee el juego al empezar; el motor: ausente() y
+# llegadasTick() en src/js/24-personajes.js). Sirve igual para la gente de la casa (personajes.json) y la del pueblo
 # (src/js/56-gente-de-avonlea.js). Quien no está en Avonlea no aparece en el mapa ni en ninguna escena (una escena en
 # la que habla espera a que llegue), y sus metas esperan.
 #
+# Llegar e irse son hechos de la historia: cuando se cumple «llega si», llegó (queda el hecho llego_<quien>, con su día)
+# y se queda; cuando se cumple «se va si», se fue (se_fue_<quien>). Así una llegada se ancla en otra, como en el libro
+# («la Srta. Stacy llega el otoño después de que se fue el Sr. Phillips»: hecho:se_fue_phillips), y no en un día fijo.
+# Los demás pueden usar esos hechos: el guion («si: hecho:llego_stacy»), las noticias («saben si hecho:llego_stacy»).
+#
 # «=== quien ===» y sus campos, uno por línea:
-#   llega si: <condiciones>   está en Avonlea solo mientras se cumplen (condiciones del guion, separadas por comas);
-#                             si hay varias líneas, basta con una. Sin «llega si», está desde el principio.
-#   se va si: <condiciones>   desde que se cumplen, ya no está (varias líneas: basta con una)
-#   fuera: dónde anda mientras tanto (para el que lea esto, y el panel)
+#   llega si: <condiciones>   cuándo llega (condiciones del guion, separadas por comas; varias líneas: basta con una).
+#                             Sin «llega si», está desde el principio.
+#   se va si: <condiciones>   cuándo se va (varias líneas: basta con una)
+#   de visita: sí             no se queda: está solo mientras se cumple «llega si» (cada visita deja su llego_ y se_fue_)
+#   al llegar: / al irse:     lo que queda en el diario de ese día
+#   fuera: dónde anda mientras tanto (para el que lea esto)
 # Las partidas que empezaron antes de que Ana llegara a Tejas Verdes (sin el hecho inicio_juego) tienen a todos.
 #
-# El año del juego tiene 56 días (14 por estación) y empieza en primavera: los días del libro se respetan al principio
-# (Diana vuelve el día 18); después, el orden del libro, más apretado: el primer año de escuela con el Sr. Phillips,
-# el invierno de la tía Josephine, los Allan en la primavera siguiente, la Srta. Stacy al otoño.
-#   año 1: primavera 1–14 · verano 15–28 · otoño 29–42 · invierno 43–56
-#   año 2: primavera 57–70 · verano 71–84 (el primer examen de Queen's) · otoño 85–98 · invierno 99–112
+# El año del juego tiene 56 días (14 por estación) y empieza en primavera. Con estas anclas, en una partida que sigue el
+# libro queda así: Diana el día 18; la tía Josephine, el invierno (43–56); los Allan, el día 64; el Sr. Phillips se va
+# al empezar el verano del segundo año (71); la Srta. Stacy llega el otoño siguiente (85).
 
-# --- Diana (cap. 12): cuando Ana llega, está en Carmody, donde su tía. Vuelve a las tres semanas, más o menos.
+# --- Diana (cap. 12): cuando Ana llega, está en Carmody, donde su tía. Vuelve a las tres semanas, más o menos (la
+# Sra. Lynde viene a las dos: Ana la conoce después).
 === diana ===
-llega si: dia_juego:18
+llega si: dias_desde:llegada_tv:17
+al llegar: Diana Barry volvió de Carmody, donde su tía.
 fuera: en Carmody, donde su tía
 
 # --- Gilbert Blythe (cap. 15): pasó el verano con sus primos en Nuevo Brunswick, y vuelve a la escuela cuando Ana
 # ya lleva unos días yendo (o, si no va, a más tardar en el invierno).
 === gilbert ===
 llega si: dias_desde:escuela:4
-llega si: dia_juego:43
+llega si: estacion:invierno
+al llegar: Gilbert Blythe volvió de Nuevo Brunswick.
 fuera: con sus primos en Nuevo Brunswick
-
-# --- El Sr. Phillips (cap. 15 y 21): el maestro del primer año de Ana. Se va al terminar el año escolar, y Prissy
-# Andrews, a la que preparaba, se va a Queen's.
-=== phillips ===
-se va si: dia_juego:71
-fuera: se fue de Avonlea al terminar el año escolar
-
-=== prissy ===
-se va si: dia_juego:71
-fuera: en Queen's, en Charlottetown
-
-# --- El pastor nuevo y su esposa (cap. 21): llegan en la primavera del segundo año, cuando el Sr. Bentley ya se fue.
-=== allan ===
-llega si: dia_juego:64
-fuera: todavía no llega a Avonlea
-
-=== sraallan ===
-llega si: dia_juego:64
-fuera: todavía no llega a Avonlea
-
-# --- La Srta. Stacy (cap. 24): la maestra nueva, desde el otoño del segundo año.
-=== stacy ===
-llega si: dia_juego:85
-fuera: todavía no llega a Avonlea
 
 # --- La tía Josephine (cap. 19): vive en Charlottetown, y viene a La Cuesta del Huerto en invierno.
 === josephine ===
+de visita: sí
 llega si: estacion:invierno
+al llegar: La tía Josephine llegó de Charlottetown a La Cuesta del Huerto.
+al irse: La tía Josephine se volvió a Charlottetown.
 fuera: en su casa de Charlottetown
+
+# --- El pastor nuevo y su esposa (cap. 21): el Sr. Bentley se fue, y los Allan llegan en la primavera, después del
+# invierno de la tía Josephine.
+=== allan ===
+llega si: estacion:primavera, dias_desde:se_fue_josephine:7
+al llegar: Llegó el pastor nuevo, el Sr. Allan, con su esposa.
+fuera: todavía no llega a Avonlea
+
+=== sraallan ===
+llega si: estacion:primavera, dias_desde:se_fue_josephine:7
+fuera: todavía no llega a Avonlea
+
+# --- El Sr. Phillips (cap. 21): el maestro del primer año de Ana. Se va al terminar ese año escolar (el verano
+# después del invierno de la tía Josephine), y Prissy Andrews, a la que preparaba, se va a Queen's.
+=== phillips ===
+se va si: estacion:verano, hecho:llego_josephine
+al irse: El Sr. Phillips se despidió de la escuela: todas las niñas lloraron.
+fuera: se fue de Avonlea al terminar el año escolar
+
+=== prissy ===
+se va si: hecho:se_fue_phillips
+al irse: Prissy Andrews se fue a Queen's.
+fuera: en Queen's, en Charlottetown
+
+# --- La Srta. Stacy (cap. 24): la maestra nueva, el otoño después de que se fue el Sr. Phillips.
+=== stacy ===
+llega si: estacion:otoño, hecho:se_fue_phillips
+al llegar: Llegó la maestra nueva, la Srta. Stacy.
+fuera: todavía no llega a Avonlea
 
 # --- El buhonero (cap. 27): pasa por Avonlea de vez en cuando, con su baúl.
 === buhonero ===
+de visita: sí
 llega si: dia_estacion:4
 llega si: dia_estacion:11
 fuera: recorriendo otros pueblos
 
 # --- Los veraneantes del hotel de White Sands, en verano.
 === veraneante ===
+de visita: sí
 llega si: estacion:verano
 fuera: en Boston
 
