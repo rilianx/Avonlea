@@ -52,7 +52,7 @@ for (const raw of guion.split('\n')) {
   if ((m = s.match(/^si:\s*(.*)$/))) m[1].split(',').forEach(c => condicion(c, 'comentarios de ' + g));
   if ((m = s.match(/^-\s*\[([^\]]*)\]/))) m[1].split(',').forEach(c => condicion(c, 'un comentario de ' + g)); } }
 // the lines of each one (src/datos/frases.txt): someone of the game, and «[condiciones] texto»
-{ const quienes = new Set([...Object.keys(JSON.parse(leer('src/datos/personajes.json'))), ...[...codigo.matchAll(/^  (\w+): \{ name: /gm)].map(m => m[1]), 'vecino', 'niño']); let q = null;
+{ const quienes = new Set([...Object.keys(JSON.parse(leer('src/datos/personajes.json'))), ...[...codigo.matchAll(/^  (\w+): \{ name: /gm)].map(m => m[1]), 'vecino', 'niño', 'adultos', 'niños']); let q = null;
   for (const raw of leer('src/datos/frases.txt').split('\n')) { const s = raw.trim(); if (!s || s[0] === '#') continue; let m;
     if ((m = s.match(/^===\s*(.+?)\s*===$/))) { q = m[1]; if (!quienes.has(q)) malas.push(`frases: «${q}» no es nadie del juego`); continue; }
     if (!/^(dice|ana|primavera|verano|otoño|invierno):/.test(s)) { malas.push(`frases de ${q}: «${s.slice(0, 60)}» (empieza con dice:, ana:, o una estación)`); continue; }

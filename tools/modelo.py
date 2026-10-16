@@ -29,7 +29,7 @@ AFUERA = {'patio', 'camino'}
 GRUPOS_LUGAR = {'tejas': {'ga', 'gg', 'patio'}, 'casa': {'gg', 'patio'}, 'dentro': set(LUGARES) - AFUERA, 'arroyo': {'camino'}, 'out': AFUERA, 'afuera': AFUERA,
                 'publico': {'es', 'ig', 'tl', 'sa', 'cp'}}
 L = {l: i for i, l in enumerate(LUGARES)}
-gente = {g['id']: g for g in D['gente']}
+gente = {g['id']: g for g in D['gente'] if g['grupo'] != 'grupos'}   # (the groups are not people: their lines go to each one)
 NOMBRE = {k: g['nombre'] for k, g in gente.items()}
 NOMBRE['ana'] = 'Ana'
 CASA = {}   # where each one lives
@@ -156,6 +156,10 @@ def todos(cs, k=None, t=None):
     return z3.And([atomo(c, k, t) for c in cs]) if cs else z3.BoolVal(True)
 
 
+def vale(u, k):   # (a unit holds: its conditions; and, for a group's line, none of one's own lines for the same thing)
+    return z3.And(todos(u['conds'], k), *[z3.Not(todos(p['conds'], k)) for p in u.get('cede', [])])
+
+
 def presente(k, t=None):
     e = LLEG.get(k); t = dia if t is None else t
     if not e: return z3.BoolVal(True)
@@ -277,6 +281,15 @@ def grupo(qs):
 
 # ---------------------------------------------------------------- lo que cada uno le puede decir a Ana
 UNIDADES = collections.defaultdict(list)   # k → [{tipo, id, texto, conds}]
+
+
+def agregar_frase(k, tipo, conds, texto):
+    conds = list(conds) + ([] if tipo == 'dice' else ['estacion:' + tipo])
+    if re.search(r'\b(Ana|Shirley)\b', re.sub(r'\([^)]*\)', '', texto)) and k not in CONOCE_BASE: conds.append('conoce:' + k)   # (a stage direction is not saying it)   # (whoever does not know her does not say her name)
+    UNIDADES[k].append({'tipo': 'frase' if tipo == 'dice' else 'frase de ' + tipo, 'id': f'{k}·{texto[:40]}', 'texto': texto, 'conds': conds + ['ve:' + k]})
+
+
+GRUPO_FRASES, PROPIAS = [], collections.defaultdict(set)
 q = None
 for raw in leer('src/datos/frases.txt').split('\n'):
     l = raw.strip()
@@ -284,9 +297,19 @@ for raw in leer('src/datos/frases.txt').split('\n'):
     if m: q = m.group(1); continue
     m = re.match(r'^(dice|primavera|verano|otoño|invierno):\s*(?:\[([^\]]+)\]\s*)?(.*)$', l)
     if q and m:
-        conds = [c.strip() for c in (m.group(2) or '').split(',') if c.strip()] + ([] if m.group(1) == 'dice' else ['estacion:' + m.group(1)])
-        if re.search(r'\b(Ana|Shirley)\b', m.group(3)) and q not in CONOCE_BASE: conds.append('conoce:' + q)   # (whoever does not know her does not say her name)
-        UNIDADES[q].append({'tipo': 'frase' if m.group(1) == 'dice' else 'frase de ' + m.group(1), 'id': f'{q}·{m.group(3)[:40]}', 'texto': m.group(3), 'conds': conds + ['ve:' + q]})
+        conds = [c.strip() for c in (m.group(2) or '').split(',') if c.strip()]
+        if q in ('adultos', 'niños'):
+            GRUPO_FRASES.append((q, m.group(1), conds, m.group(3)))
+        else:
+            agregar_frase(q, m.group(1), conds, m.group(3))
+# a group's lines: each one of them; but a group's line gives way to one's own voice (as the game: lineasConVoz): it
+# holds only when none of one's own lines for the same thing (ana:camison, the hour) holds
+claves = lambda cs: {m.group(1) for c in cs for m in [re.match(r'^(ana:\w+|hora:\d+)', c)] if m}   # (what a line reacts to: «ana:camison», «hora:21»; not «!donde:ana:tejas»)
+for g, tipo, conds, texto in GRUPO_FRASES:
+    for k in [x for x in gente if (x in NINOS) == (g == 'niños')]:
+        propias = [u for u in UNIDADES[k] if u['tipo'].startswith('frase') and not u.get('grupo') and claves(u['conds']) & claves(conds)]
+        agregar_frase(k, tipo, conds, texto)
+        UNIDADES[k][-1].update(grupo=True, cede=propias)
 for e in D['escenas']:
     if e['disparo'] in ('objeto', 'menu', 'comentario', 'lugar'): continue
     hablan = [x.strip() for x in e['hablan'].split(',') if x.strip()]
@@ -350,7 +373,7 @@ for e in REGLAS['espera']:
         if hay.startswith('reacción'):
             a = hay.split(None, 1)[1]
             us = [u for u in us if any(c == a or (a == 'hora' and c.startswith('hora:') and float(c.split(':')[1].split('-')[0]) >= 20) for c in u['conds'])]
-        S = z3.Solver(); S.add(R); S.add(todos(e.get('cuando', []), k)); S.add(z3.Not(z3.Or([todos(u['conds'], k) for u in us])) if us else z3.BoolVal(True))
+        S = z3.Solver(); S.add(R); S.add(todos(e.get('cuando', []), k)); S.add(z3.Not(z3.Or([vale(u, k) for u in us])) if us else z3.BoolVal(True))
         casos = []
         while len(casos) < 4 and S.check() == z3.sat:
             m = S.model()
@@ -371,7 +394,7 @@ for r in REGLAS['referencia']:
             hit = next((t for t in textos if pat.search(t)), None)
             if not hit: continue
             if any(c.startswith('hecho:') and c[6:] in u.get('deja', set()) for g in r['exige'] for c in g): continue   # (the scene that makes it happen)
-            S = z3.Solver(); S.add(R); S.add(todos(u['conds'], k)); S.add(z3.Not(z3.Or([todos(g, k) for g in r['exige']])))
+            S = z3.Solver(); S.add(R); S.add(vale(u, k)); S.add(z3.Not(z3.Or([todos(g, k) for g in r['exige']])))
             if S.check() == z3.sat:
                 hallazgos['incoherencias'].append({'regla': r['nombre'], 'quien': k, 'nombre': NOMBRE.get(k, k), 'tipo': u['tipo'], 'id': u['id'], 'texto': hit, 'exige': ' o '.join(', '.join(g) for g in r['exige']).replace('{k}', k), 'situación': situacion(S.model(), k)})
 
@@ -380,7 +403,7 @@ for r in REGLAS['solo']:
     for k in sorted(grupo(r.get('quiénes', ['todos']))):
         for u in UNIDADES.get(k, []):
             if u['tipo'] == 'presentación' or any(p in c for p in r.get('pide', []) for c in u['conds']): continue
-            S = z3.Solver(); S.add(R); S.add(todos(r.get('cuando', []), k)); S.add(todos(u['conds'], k))
+            S = z3.Solver(); S.add(R); S.add(todos(r.get('cuando', []), k)); S.add(vale(u, k))
             if S.check() == z3.sat:
                 hallazgos['incoherencias'].append({'regla': r['nombre'], 'quien': k, 'nombre': NOMBRE.get(k, k), 'tipo': u['tipo'], 'id': u['id'], 'texto': u['texto'],
                                                    'exige': 'que pida ' + ' o '.join(r.get('pide', [])), 'situación': situacion(S.model(), k)})
@@ -388,7 +411,8 @@ for r in REGLAS['solo']:
 # 3. lo que nunca puede decirse (sus condiciones se contradicen con el mundo)
 for k, us in UNIDADES.items():
     for u in us:
-        S = z3.Solver(); S.add(R); S.add(todos(u['conds'], k))
+        if u.get('grupo'): continue   # (a group's line that always gives way to one's own: as it should)
+        S = z3.Solver(); S.add(R); S.add(vale(u, k))
         if S.check() == z3.unsat:
             hallazgos['imposibles'].append({'quien': k, 'nombre': NOMBRE.get(k, k), 'tipo': u['tipo'], 'id': u['id'], 'texto': u['texto'], 'conds': u['conds']})
 

@@ -17,7 +17,8 @@ const { BASE, MOMENTOS, PREPARAR } = require('./momentos');
   // quiénes: la gente de la casa, la del pueblo con nombre, y los vecinos sin nombre (grandes y chicos)
   const gente = await ev(`(() => [...Object.keys(CH).map(k => ({ id: k, nombre: (CH[k].article || '') + NAMES[k], grupo: 'casa', presenta: !!CH[k].presentacion, vive: CH[k].home, ficha: (CH[k].voice || '').slice(0, 160) })),
     ...Object.entries(FOLK_DEFS).filter(([k]) => !/^v\\d+$/.test(k)).map(([k, d]) => ({ id: k, nombre: d.name, grupo: d.kind === 'alumno' ? 'niños' : 'pueblo', presenta: !!d.presenta, vive: d.home, ficha: (fichaOf(k)?.ficha || '').slice(0, 160) })),
-    { id: 'vecino', nombre: 'un vecino (sin nombre)', grupo: 'vecinos', vive: '', ficha: 'los vecinos del pueblo que no tienen nombre' }, { id: 'niño', nombre: 'un niño (sin nombre)', grupo: 'vecinos', vive: '', ficha: 'los niños del pueblo que no tienen nombre' }])()`);
+    { id: 'vecino', nombre: 'un vecino (sin nombre)', grupo: 'vecinos', vive: '', ficha: 'los vecinos del pueblo que no tienen nombre' }, { id: 'niño', nombre: 'un niño (sin nombre)', grupo: 'vecinos', vive: '', ficha: 'los niños del pueblo que no tienen nombre' },
+    { id: 'adultos', nombre: '(todos los grandes)', grupo: 'grupos', vive: '', ficha: 'lo que dice cualquier grande, además de lo suyo' }, { id: 'niños', nombre: '(todos los niños)', grupo: 'grupos', vive: '', ficha: 'lo que dice cualquier niño, además de lo suyo' }])()`);
   // los huecos: en cada momento, cuántas frases valen de cada uno, si todavía no conoce a Ana y si ya la conoce
   const huecos = {};
   for (const M of MOMENTOS) {

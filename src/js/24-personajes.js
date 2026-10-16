@@ -69,7 +69,10 @@ function frasesLeer(txt){
   return F;
 }
 const FRASES = frasesLeer(document.getElementById('frases')?.textContent || '');
-for (const k of Object.keys(CH)) { CH[k].lines = FRASES[k]?.dice || []; CH[k].seasonLines = FRASES[k]?.est || ['', '', '', '']; }
+// (and those of their group: «=== adultos ===», «=== niños ===», what anyone of them says: when Ana goes about in her nightgown…)
+// (marked «grupo»: when it is said, it gives way to one's own voice —see lineasDe)
+const frasesGrupo = nino => (FRASES[nino ? 'niños' : 'adultos']?.dice || []).map(l => /^\[/.test(l) ? l.replace(/^\[/, '[grupo, ') : '[grupo] ' + l);
+for (const k of Object.keys(CH)) { CH[k].lines = [...(FRASES[k]?.dice || []), ...frasesGrupo(k === 'diana')]; CH[k].seasonLines = FRASES[k]?.est || ['', '', '', '']; }
 // how each one feels about the others at the start (from the book); the graph then changes day by day
 ANA.rels = { matthew: [5, 'su espíritu afín: el que siempre la entiende'], marilla: [4, 'la quiere aunque la rete; quiere que esté orgullosa de ella'], diana: [5, 'su amiga del alma; se juraron amistad eterna'], barry: [2, 'la respeta y le teme un poco desde lo del vino de grosellas'], lynde: [2, 'al principio le gritó por lo de su pelo; ahora se llevan mejor'] };
 CH.matthew.rels = { ana: [4, 'la adora y siempre se pone de su lado'], marilla: [5, 'su hermana; se entienden sin hablar'], diana: [2, 'la amiga de Ana; le da timidez'], barry: [2, 'vecina; lo intimida'], lynde: [1, 'le da miedo su lengua'] };
@@ -85,9 +88,21 @@ CH.matthew.routine.describe = "Matthew entra a la cocina de Tejas Verdes a comer
 const LOOKS = { ana: ANA.look }; for (const k of Object.keys(CH)) LOOKS[k] = CH[k].look;
 const NAMES = { toby: 'Pelusa', lawson: 'Sr. Lawson' }; for (const k of Object.keys(CH)) NAMES[k] = CH[k].name;
 // a loose line may wait for something of the book to have happened: «[hecho:perdonada] …» (conditions of the script, with commas)
-const lineasSi = a => (a || []).filter(l => { const m = /^\[([^\]]+)\] /.exec(l); return !m || m[1].split(',').every(c => dlgCond(c.trim(), dlgCtx())); }).map(l => l.replace(/^\[[^\]]+\] /, ''));
+// ({k} in a condition: whoever says it; for the lines of a group: «[!afecto:{k}:ana>=3] …», only those who do not love her)
+const lineasSi = (a, k) => (a || []).filter(l => { const m = /^\[([^\]]+)\] /.exec(l); return !m || m[1].split(',').every(c => c.trim() === 'grupo' || dlgCond(c.trim().replace(/\{k\}/g, String(k || '').replace(/^f:/, '')), dlgCtx())); }).map(l => l.replace(/^\[[^\]]+\] /, ''));
 // someone's loose lines now: the written ones, and the winks about the goals of the notebook (src/js/66-cuaderno.js)
-const lineasDe = (k, a) => [...(typeof lineasAjenas === 'function' ? lineasAjenas(k, lineasSi(a)) : lineasSi(a)), ...(typeof guiñosDe === 'function' ? guiñosDe(k) : [])].map(t => typeof saludoHora === 'function' ? t.replace(/Buenos días|Buenas tardes|Buenas noches/, saludoHora) : t);   // (the greeting, as the hour is)   // (someone who does not know Ana: none with her name)
+// a group's line gives way to one's own voice: where one has a line of their own for the same thing (ana:camison, the
+// hour) that holds now, the group's is not said
+const reaccionDe = cs => cs.map(c => /^(ana:\w+|hora:\d+)/.exec(c)?.[1]).filter(Boolean);   // (what a line reacts to: its own conditions «ana:camison», «hora:21-…»; not «!donde:ana:tejas»)
+function lineasConVoz(k, a){
+  const conds = l => (/^\[([^\]]+)\] /.exec(l)?.[1] || '').split(',').map(c => c.trim()).filter(Boolean);
+  const vale = l => lineasSi([l], k).length > 0 && (typeof lineasAjenas !== 'function' || lineasAjenas(k, lineasSi([l], k)).length > 0);
+  const propias = (a || []).filter(l => !conds(l).includes('grupo') && vale(l));
+  const tiene = new Set(propias.flatMap(l => reaccionDe(conds(l))));
+  const grupo = (a || []).filter(l => conds(l).includes('grupo') && vale(l) && !reaccionDe(conds(l)).some(c => tiene.has(c)));
+  return [...propias, ...grupo].map(l => l.replace(/^\[[^\]]+\] /, ''));
+}
+const lineasDe = (k, a) => [...lineasConVoz(k, a), ...(typeof guiñosDe === 'function' ? guiñosDe(k) : [])].map(t => typeof saludoHora === 'function' ? t.replace(/Buenos días|Buenas tardes|Buenas noches/, saludoHora) : t);   // (the greeting, as the hour is)   // (someone who does not know Ana: none with her name)
 // who is in Avonlea, and from/until when, as in the book (src/datos/llegadas.txt). Arriving and leaving are events of
 // the story: once «llega si» holds, they have come (the fact llego_<who>, with its day) and they stay; once «se va si»
 // holds, they have gone (se_fue_<who>). So one can be anchored to another («la Srta. Stacy llega el otoño después de que

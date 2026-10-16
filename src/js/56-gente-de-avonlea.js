@@ -60,10 +60,10 @@ const FOLK_DEFS = {
       : woman ? { hair, style: 'bun', dress: pk(DRESS), skin: pk(['#f2cfb2', '#eecaae', '#e8c0a0']), h: 1.04 + r() * .08, ...(r() < .4 ? { apron: '#f4efe4' } : {}) }
       : { hair, dress: pk(COAT), coat: true, skin: pk(['#eecaae', '#e0b090', '#e8c0a0']), h: 1.1 + r() * .1, ...(r() < .4 ? { hatDark: true } : {}), ...(r() < .3 ? { beard: true } : {}), ...(hair === '#9a9088' ? { style: 'old' } : {}) };
     FOLK_DEFS['v' + n] = { name: kid ? (woman ? 'una niñita' : 'un niñito') : woman ? pk(['una vecina', 'una señora de la aldea', 'una granjera']) : pk(['un vecino', 'un granjero', 'un señor de Carmody']), kind, home: pk(homes), look,
-      lines: (kid ? FRASES['niño'] : FRASES.vecino)?.dice || [] };
+      lines: [...((kid ? FRASES['niño'] : FRASES.vecino)?.dice || []), ...frasesGrupo(kid)] };
   } }
 // (what they say: src/datos/frases.txt)
-for (const [k, d] of Object.entries(FOLK_DEFS)) if (!/^v\d+$/.test(k)) { d.lines = FRASES[k]?.dice || []; d.ana = FRASES[k]?.ana || []; }
+for (const [k, d] of Object.entries(FOLK_DEFS)) if (!/^v\d+$/.test(k)) { d.lines = [...(FRASES[k]?.dice || []), ...frasesGrupo(d.look.h < .99)]; d.ana = FRASES[k]?.ana || []; }
 for (const [k, d] of Object.entries(FOLK_DEFS)) LOOKS['f:' + k] = { hairD: d.look.hair, dressD: d.look.dress, scarf: '#a85a4a', ...d.look };
 const BLD = n => BUILDINGS.find(b => b.name === n) || Object.values(HOUSES).find(h => h.name === n)?.at;
 const door = n => { const b = BLD(n); return [b.x, b.y + 36]; };

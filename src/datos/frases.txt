@@ -11,8 +11,11 @@
 #   dice: [conoce:harrison, dias_desde:conoce_harrison:3] ¿Esa vaca tuya se ha portado bien hoy?
 # Quien no conoce a Ana no dice las frases con su nombre («Ana», «Shirley»).
 # «=== vecino ===» y «=== niño ===»: los vecinos sin nombre del pueblo (los grandes y los chicos).
+# «=== adultos ===» y «=== niños ===»: lo que dice cualquiera de ellos (todos los grandes, todos los chicos), además de lo suyo.
 
 === matthew ===
+dice: [ana:camison, !donde:ana:tejas] (Matthew se pone colorado y mira para otro lado.) Bueno, pues… quizás… ¿no tienes frío, Ana?
+dice: [hora:21-26, !donde:ana:tejas] Bueno, pues… es tarde, Ana. Marilla se va a preocupar. Te acompaño, ¿sí?
 dice: [!hecho:se_queda] Bueno, pues... Marilla es buena, ¿sabes? Solo que no se le nota mucho al principio.
 dice: [!hecho:se_queda] Ya lo creo que... bueno, ojalá te quedes, Ana. Yo... sí. Eso.
 dice: Bueno, pues... sí, es un día precioso, Ana. Ya lo creo.
@@ -26,6 +29,9 @@ otoño: Las manzanas de los Barry están en su punto. Marilla querrá hacer comp
 invierno: Abrígate bien, Ana. El frío... bueno, pues, no es broma.
 
 === marilla ===
+dice: [ana:camison, !donde:ana:tejas] ¡Ana Shirley! ¡A casa ahora mismo, y te vistes como una persona decente!
+dice: [hora:21-26, !donde:ana:tejas] ¿Qué haces afuera a estas horas? ¡A casa, y sin chistar!
+dice: [ana:sin_sombrero, escena_ana:ig] (Marilla le susurra, sin mover los labios.) ¿Y tu sombrero? ¡En la iglesia!
 dice: [!hecho:se_queda] Mientras estés en esta casa, harás tus quehaceres como cualquiera. Después veremos.
 dice: [!hecho:se_queda] No te prometo nada, niña. Que te quedes o no, depende de cómo te portes.
 dice: [!hecho:se_queda] Lávate la cara y péinate esas trenzas. Aquí se come con la cara limpia.
@@ -42,6 +48,9 @@ otoño: Es tiempo de manzanas: una buena compota para el invierno no está de m�
 invierno: Siéntate cerca de la estufa, niña, que vienes helada.
 
 === diana ===
+dice: [ana:camison, !donde:ana:tejas] ¡Ana! ¿Saliste así? ¡Ven, te presto mi chal antes de que te vea mamá!
+dice: [ana:sin_sombrero, escena_ana:ig] (Diana le pasa su pañuelo, a escondidas.) Póntelo en la cabeza, rápido.
+dice: [hora:21-26, !donde:ana:tejas] ¡Ana! ¿Qué haces afuera a esta hora? Si mamá te ve, no me deja verte nunca más.
 dice: [hecho:conocidas_diana, !hecho:prohibida] ¡Ana, mi alma gemela! Te estaba esperando.
 dice: [hecho:conocidas_diana, !hecho:prohibida] Mamá dice que puedo salir hasta que se ponga el sol. ¿Vamos al lago?
 dice: [hecho:conocidas_diana, !hecho:prohibida, afecto:diana:ana>=4] ¿Te acuerdas de nuestro juramento de amistad? ¡Para siempre!
@@ -81,6 +90,8 @@ otoño: [hecho:lynde_visita, !hecho:ofendio_lynde] El otoño siempre me hace pen
 invierno: [hecho:lynde_visita, !hecho:ofendio_lynde, escena_ana:rl] Pasa, niña, que hace un frío de mil demonios... perdón, de los que dan escalofríos.
 
 === harrison ===
+dice: [ana:camison, !donde:ana:tejas] ¡Hmpf! ¡En camisón! Ni Ginger anda tan mal vestido, muchacha.
+dice: [hora:21-26, !donde:ana:tejas] ¿Tú, a esta hora? Vete a casa antes de que te confunda con un zorro.
 dice: Hmpf. Buenos días... si es que son buenos.
 dice: [dias_desde:conoce_harrison:3] ¿Esa vaca tuya se ha portado bien hoy? Más le vale.
 dice: No me mires la casa, que el desorden es mío.
@@ -171,10 +182,14 @@ dice: [dias_desde:escuela:3, !estacion:verano] Señorita Shirley, ¿no debería 
 dice: [!estacion:verano] Mañana hay examen de geometría. Que nadie lo olvide.
 
 === allan ===
+dice: [ana:camison, !donde:ana:tejas] (El reverendo carraspea.) Ana… quizás deberías volver a casa a vestirte.
+dice: [ana:sin_sombrero, escena_ana:ig] Bienvenida, Ana. El Señor no mira los sombreros… pero la Sra. Lynde sí.
 dice: Que Dios te bendiga, Ana. ¿Te veremos el domingo en la escuela dominical?
 dice: Hermoso día para dar gracias, ¿no te parece?
 
 === sraallan ===
+dice: [ana:camison, !donde:ana:tejas] ¡Ana! Ven, ven, que te vas a resfriar. ¿Pasó algo en casa?
+dice: [ana:sin_sombrero, escena_ana:ig] (La Sra. Allan le sonríe, y le alisa el pelo con la mano.) Así estás bien, querida.
 dice: ¡Ana, querida! ¡Qué gusto verte! ¿Cómo van tus estudios?
 dice: [cuaderno:escuela_dominical] Me encantó tu recitación. Tienes un don, Ana.
 dice: Qué tarde tan linda para pasear, ¿verdad?
@@ -235,6 +250,8 @@ ana: ¡Capitán Jim, cuénteme una historia del mar!
 ana: ¡Qué vida tan romántica la de un farero!
 
 === stacy ===
+dice: [ana:camison, !donde:ana:tejas] Señorita Shirley, ¿una nueva moda? Me temo que Avonlea no está preparada. A casa, a vestirse.
+dice: [hora:21-26, !donde:ana:tejas] ¿Estudiando las estrellas, Ana? Mejor desde la ventana de tu cuarto. Buenas noches.
 dice: [dias_desde:escuela:3] Ana, tu composición fue la mejor de la clase. Pero cuidado con los adjetivos: ¡no hacen falta tantos!
 dice: El viernes por la tarde salimos al bosque a estudiar botánica. ¿Te apuntas?
 dice: [estudio:ana>=20] Este año preparamos a los mejores para el examen de Queen's. Tú puedes, Ana.
@@ -312,3 +329,18 @@ dice: Mira qué cielo. Así da gusto salir.
 dice: ¿Tú eres Ana? ¡Tienes el pelo como una zanahoria!... ¡Es bonito!
 dice: ¡Mira, encontré una piedra que brilla!
 dice: ¿Jugamos? Yo me escondo y tú cuentas hasta cien.
+
+=== adultos ===
+dice: [ana:camison, !donde:ana:tejas] ¡Niña! ¿Andas en camisón por la calle? ¡Qué va a decir la gente!
+dice: [ana:camison, !donde:ana:tejas] ¡Válgame Dios! La niña de los Cuthbert, en camisón… Ya verás cuando lo sepa Marilla.
+dice: [ana:camison, !donde:ana:tejas] (Se le queda mirando, con la boca abierta, sin saber qué decir.)
+dice: [hora:21-26, !donde:ana:tejas] ¿Qué haces sola a estas horas, niña? Vete derechito a tu casa.
+dice: [hora:21-26, !donde:ana:tejas] ¡A esta hora, por el camino! ¿Saben los Cuthbert dónde andas?
+dice: [ana:sin_sombrero, escena_ana:ig] (Mira a Ana de arriba abajo.) ¿A la iglesia sin sombrero? En mis tiempos, eso no se veía.
+dice: [ana:sin_sombrero, escena_ana:ig] Hmm. Sin sombrero, en la casa del Señor… Alguien tendría que decírselo a Marilla.
+
+=== niños ===
+dice: [ana:camison, !donde:ana:tejas, !afecto:{k}:ana>=3] ¡Miren a la de Tejas Verdes! ¡Anda en camisón! (Se ríe tapándose la boca.)
+dice: [ana:camison, !donde:ana:tejas] ¿Saliste en camisón? ¡Mi mamá me mataría!
+dice: [hora:21-26, !donde:ana:tejas] ¿Tú puedes andar afuera a esta hora? A mí no me dejan.
+dice: [ana:sin_sombrero, escena_ana:ig, !afecto:{k}:ana>=3] (Le susurra a la de al lado, mirando a Ana sin sombrero, y las dos se ríen.)

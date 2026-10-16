@@ -12,10 +12,11 @@ function noticiasLeer(txt){
     const l = raw.trim(); if (!l || l[0] === '#') continue; let m;
     if (!n && (m = l.match(/^respuestas( ya sabidas| exageradas)?:\s*(.*)$/))) { R[{ '': 'nuevas', ' ya sabidas': 'sabidas', ' exageradas': 'exageradas' }[m[1] || '']] = varias(m[2]); continue; }
     if (!n && (m = l.match(/^exageran:\s*(.*)$/))) { X.push(...lista(m[1])); continue; }
-    if ((m = l.match(/^===\s*(.+?)\s*===$/))) { N.push(n = { id: m[1], titulo: m[1], saben: [], cuentaPor: 0, dice: [], diceDe: {}, exagerada: [], responde: [], llega: [] }); continue; }
+    if ((m = l.match(/^===\s*(.+?)\s*===$/))) { N.push(n = { id: m[1], titulo: m[1], saben: [], testigos: null, cuentaPor: 0, dice: [], diceDe: {}, exagerada: [], responde: [], llega: [] }); continue; }
     if (!n) continue;
     if ((m = l.match(/^saben(?: si (.+?))?:\s+(.*)$/)))   // (the conditions have ':' in them: the list comes after «: »)
       n.saben.push({ si: m[1] ? lista(m[1]) : [], quien: lista(m[2]) });
+    else if ((m = l.match(/^se entera quien la ve si:\s*(.*)$/))) n.testigos = lista(m[1]);
     else if ((m = l.match(/^llega a (\S+) en:\s*([\d.]+)$/))) n.llega.push({ quien: m[1], horas: +m[2] });
     else if ((m = l.match(/^se cuenta por:\s*(\d+)/))) n.cuentaPor = +m[1];
     else if ((m = l.match(/^dice (\S+):\s*(.*)$/))) (n.diceDe[m[1]] ||= []).push(m[2]);
@@ -55,6 +56,8 @@ function noticiasTick(dt){
   if ((noticiasT -= dt) > 0 || !game.wm) return; noticiasT = 2;
   for (const n of NOTICIAS) for (const g of n.saben) if (g.si.every(c => dlgCond(c))) for (const k of g.quien) if (!sabeK(k, n.id)) { wmKnow(k, n.id); ((game.wm.creencias ||= {})[k] ||= {})[n.id] = { de: null, dia: today() + 1, v: 1 }; }
   const P = game.wm.noticiasPend; if (P?.length) for (const p of P.slice()) if (dayT >= p.at) { P.splice(P.indexOf(p), 1); enterarse(p.k, p.f, p.de, p.v); }
+  // whoever sees Ana as the news says (in her nightgown out of Green Gables, alone at night…): they saw it
+  for (const n of NOTICIAS) if (n.testigos && n.testigos.every(c => dlgCond(c, dlgCtx()))) for (const k of [...Object.keys(PEOPLE), ...FOLK.map(f => f.id)]) if (!sabeK(k, n.id) && veAna(k)) enterarse(k, n.id);
   chismeLejos();
 }
 // and out of Ana's sight, too: now and then, two of Avonlea meet (at the store, after church, over the fence) and one

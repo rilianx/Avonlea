@@ -12,6 +12,7 @@
 #   saben: quiénes la saben desde el principio (con comas)
 #   saben si <condiciones>: quiénes — los que la saben desde que se cumplen («saben si hecho:llego_stacy: lynde»)
 #   al conocer a ana: sí — quien conoce a Ana se entera
+#   se entera quien la ve si: <condiciones> — quien ve a Ana mientras se cumplen, se entera (lo vio)
 #   llega a <quien> en: <horas> — cuando alguien se entera, le llega a esa persona unas horas después, aunque no se
 #         encuentren (la vecina que dice «ya hablaré con Marilla»)
 #   se cuenta por: N — los días que alguien la cuenta después de oírla (después, ya es cosa vieja)
@@ -50,6 +51,7 @@ responde: ¡No me diga! ¿Y Marilla qué dice?
 # cuenta a Marilla (y Marilla, a Ana: la escena marilla_sabe_camison)
 === ana_en_camison ===
 titulo: la niña de los Cuthbert anda en camisón por Avonlea
+se entera quien la ve si: ana:camison, !donde:ana:tejas
 llega a marilla en: 3
 se cuenta por: 10
 dice: ¿Supo que la niña de los Cuthbert anda en camisón por las casas? ¡En camisón!
@@ -116,3 +118,22 @@ saben si hecho:se_fue_phillips: lynde, barry, srapye, josie
 se cuenta por: 10
 dice: ¿Supo que el Sr. Phillips se fue? En la despedida lloraron todas las niñas, hasta las que no lo querían.
 exagerada: Dicen que en la despedida del Sr. Phillips lloró toda la escuela, y Prissy Andrews se desmayó. ¡Se desmayó!
+
+# --- Lo que la gente ve de Ana (src/datos/reglas.txt: cualquiera que la ve, reacciona; y se cuenta)
+=== ana_de_noche ===
+titulo: la niña de los Cuthbert anda sola por los caminos de noche
+se entera quien la ve si: hora:21-26, !donde:ana:tejas
+llega a marilla en: 4
+se cuenta por: 7
+dice: ¿Supo que anoche vieron a la niña de los Cuthbert sola por el camino? ¡A esas horas!
+exagerada: Dicen que la niña de los Cuthbert sale todas las noches, sola, a mirar la luna. ¡Como una gitana!
+responde: ¡Sola, de noche! Marilla tendría que tenerla más cortita.
+
+=== ana_sin_sombrero ===
+titulo: la niña de los Cuthbert fue a la iglesia sin sombrero
+se entera quien la ve si: ana:sin_sombrero, escena_ana:ig
+llega a marilla en: 3
+se cuenta por: 7
+dice: ¿Vio a la niña de los Cuthbert en la iglesia? ¡Sin sombrero! En la casa del Señor.
+exagerada: Dicen que la niña de los Cuthbert fue a la iglesia despeinada y sin sombrero, ¡y cantó más fuerte que nadie!
+

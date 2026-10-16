@@ -1,18 +1,18 @@
 # Cobertura de la historia: lo que falta
 
-Generado el 2026-10-16 12:30 por `node tools/planilla.js` (también en la hoja «Cobertura» de planilla/avonlea.xlsx).
+Generado el 2026-10-16 13:04 por `node tools/planilla.js` (también en la hoja «Cobertura» de planilla/avonlea.xlsx).
 
 No son errores: son situaciones que el juego deja que pasen y nadie considera, noticias o llegadas sin consecuencias, gente con poco que decir.
 
 | Área | Alta | Media | Baja |
 |---|---|---|---|
 | Situaciones | 2 | 13 | 11 |
-| Noticias | 2 | 0 | 9 |
+| Noticias | 4 | 0 | 9 |
 | Frases | 0 | 8 | 0 |
 | Metas | 0 | 7 | 0 |
 | Exploración | 0 | 0 | 12 |
 | Llegadas | 0 | 0 | 3 |
-| Personas | 0 | 0 | 37 |
+| Personas | 0 | 0 | 36 |
 | Hechos | 0 | 0 | 5 |
 
 ## Situaciones
@@ -48,6 +48,8 @@ No son errores: son situaciones que el juego deja que pasen y nadie considera, n
 
 - [alta] **«ana_lengua»: la niña de los Cuthbert tiene una lengua, pero buen corazón**: nadie reacciona a ella (solo se cuenta). _Idea: una escena o una frase con «sabe:quien:ana_lengua» (alguien que se entera y hace o dice algo)._
 - [alta] **«ana_ofendio_lynde»: la niña de los Cuthbert le dijo vieja chismosa a la Sra. Lynde**: nadie reacciona a ella (solo se cuenta). _Idea: una escena o una frase con «sabe:quien:ana_ofendio_lynde» (alguien que se entera y hace o dice algo)._
+- [alta] **«ana_de_noche»: la niña de los Cuthbert anda sola por los caminos de noche**: nadie reacciona a ella (solo se cuenta). _Idea: una escena o una frase con «sabe:quien:ana_de_noche» (alguien que se entera y hace o dice algo)._
+- [alta] **«ana_sin_sombrero»: la niña de los Cuthbert fue a la iglesia sin sombrero**: nadie reacciona a ella (solo se cuenta). _Idea: una escena o una frase con «sabe:quien:ana_sin_sombrero» (alguien que se entera y hace o dice algo)._
 - [baja] **«huerfano»: los Cuthbert van a traer un niño del orfanato**: nadie reacciona a ella (solo se cuenta); es un chisme del pueblo: puede bastar. _Idea: una escena o una frase con «sabe:quien:huerfano» (alguien que se entera y hace o dice algo)._
 - [baja] **«cerdo_pye»: a los Pye se les escapó otra vez el cerdo**: nadie reacciona a ella (solo se cuenta); es un chisme del pueblo: puede bastar. _Idea: una escena o una frase con «sabe:quien:cerdo_pye» (alguien que se entera y hace o dice algo)._
 - [baja] **«maestra_plumas»: la maestra nueva usa sombrero con plumas**: nadie reacciona a ella (solo se cuenta); es un chisme del pueblo: puede bastar. _Idea: una escena o una frase con «sabe:quien:maestra_plumas» (alguien que se entera y hace o dice algo)._
@@ -113,7 +115,6 @@ No son errores: son situaciones que el juego deja que pasen y nadie considera, n
 - [baja] **Felix King**: tiene 2 frase(s) suelta(s). _Idea: unas frases más en la hoja «Frases»._
 - [baja] **Cecily King**: tiene 2 frase(s) suelta(s). _Idea: unas frases más en la hoja «Frases»._
 - [baja] **Sara Stanley**: tiene 2 frase(s) suelta(s). _Idea: unas frases más en la hoja «Frases»._
-- [baja] **el reverendo Allan**: tiene 2 frase(s) suelta(s). _Idea: unas frases más en la hoja «Frases»._
 - [baja] **el Sr. Lawson**: tiene 2 frase(s) suelta(s). _Idea: unas frases más en la hoja «Frases»._
 - [baja] **el herrero**: tiene 2 frase(s) suelta(s). _Idea: unas frases más en la hoja «Frases»._
 - [baja] **el editor de La Crónica**: tiene 2 frase(s) suelta(s). _Idea: unas frases más en la hoja «Frases»._

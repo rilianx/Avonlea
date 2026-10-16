@@ -16,7 +16,7 @@ const conoceTodos = () => !dlgHechos().inicio_juego && !!dlgHechos().se_queda;
 function conoceA(k){ k = sinF(k); return CONOCE_BASE.includes(k) || conoceTodos() || !!dlgHechos()['conoce_' + k] || (!!CONOCE_POR[k] && dlgCond(CONOCE_POR[k], dlgCtx())); }
 const sinNombre = k => /^(un|una) /.test(FOLKBY[sinF(k)]?.def.name || '');   // («un vecino»: no one to get to know)
 // the lines of someone who does not know Ana yet: none that call her by her name
-const lineasAjenas = (k, L) => conoceA(k) ? L : L.filter(t => !/\b(Ana|Shirley)\b/.test(t));
+const lineasAjenas = (k, L) => conoceA(k) ? L : L.filter(t => !/\b(Ana|Shirley)\b/.test(t.replace(/\([^)]*\)/g, '')));   // (a stage direction «(Mira a Ana…)» is not saying her name)
 // the first time: who they are, and who she is. Their own (personajes.json «presentacion», or «presenta» of the
 // people of the village), or, if not, as a grown-up or a child greets the new girl of Green Gables
 function presentacion(k){

@@ -14,7 +14,8 @@
 #   si: <condiciones del guion>
 #
 # «=== solo: nombre ===»  mientras pasa algo, esa persona solo dice lo que lo tiene en cuenta
-#   quiénes: …   cuando: <condiciones>   pide: <lo que tiene que nombrar su condición> (ofendio_lynde; o reaccionar a cómo anda Ana: ana:camison)
+#   quiénes: …   cuando: <condiciones>   pide: <lo que tiene que nombrar su condición> (ofendio_lynde; o reaccionar a cómo anda Ana:
+#   ana:camison, ana:sin_sombrero, hora:21: aunque esté ofendida, si la ve así, reacciona)
 #
 # «=== referencia: nombre ===»  una frase que dice esto exige que se cumpla aquello
 #   palabras: <expresiones, separadas por |>  (tal como se escriben, con mayúsculas)
@@ -42,6 +43,11 @@ quiénes: adultos
 cuando: ve:{k}, hora:21-26, !donde:ana:tejas
 hay: reacción hora
 
+=== espera: los niños se ríen si la ven en camisón ===
+quiénes: niños
+cuando: ve:{k}, ana:camison, !donde:ana:tejas
+hay: reacción ana:camison
+
 # ---------------------------------------------------------------- lo que no puede pasar
 === nunca: la escuela, la iglesia, la tienda y el salón, de noche ===
 si: hora:21-26, donde:ana:publico
@@ -57,17 +63,17 @@ si: hecho:prohibida, !hecho:conocidas_diana
 === solo: la Sra. Lynde ofendida no le habla como si nada ===
 quiénes: lynde
 cuando: hecho:ofendio_lynde, !hecho:disculpa_lynde
-pide: ofendio_lynde, disculpa_lynde, ana:camison
+pide: ofendio_lynde, disculpa_lynde, ana:camison, ana:sin_sombrero, hora:21
 
 === solo: la Sra. Barry, mientras le prohíbe ver a Diana, no la trata como antes ===
 quiénes: barry
 cuando: hecho:prohibida, !hecho:perdonada
-pide: prohibida, perdonada, ana:camison
+pide: prohibida, perdonada, ana:camison, ana:sin_sombrero, hora:21
 
 === solo: Diana, mientras se lo prohíben, no la invita ni juega como si nada ===
 quiénes: diana
 cuando: hecho:prohibida, !hecho:perdonada
-pide: prohibida, perdonada
+pide: prohibida, perdonada, ana:camison, ana:sin_sombrero, hora:21
 
 # ---------------------------------------------------------------- lo que una frase supone
 === referencia: «pasa» invita a entrar ===
@@ -121,3 +127,8 @@ exige: !estacion:verano
 === referencia: Queen's, después del examen ===
 palabras: Felicitaciones por el examen | Me ganaste por un punto | entraste a Queen | quedaste primera
 exige: hecho:queens
+
+=== referencia: quien la quiere no se burla de ella ===
+palabras: ¡Miren a la de | se ríen | (Se ríe tapándose
+exige: !afecto:{k}:ana>=3
+
