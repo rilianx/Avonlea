@@ -56,6 +56,9 @@ si: hora:21-26, donde:ana:publico
 === nunca: Ana y Diana se conocen sin que la Sra. Barry las presente ===
 si: hecho:conocidas_diana, !hecho:barry_presenta
 
+=== nunca: el día 5 sin que la acepten (Marilla decide el día 3: se queda, o se va con la Sra. Blewett y el juego termina) ===
+si: dia_juego:5, !hecho:se_queda
+
 === nunca: la prohibición (lo del vino de grosellas), sin conocer a Diana ===
 si: hecho:prohibida, !hecho:conocidas_diana
 
@@ -142,3 +145,8 @@ salvo: marilla, matthew, spencer
 palabras: camisón por el camino | camisón por la calle | camisón por Avonlea | camisón por las casas | sola por el camino
 exige: !donde:ana:tejas
 salvo: marilla
+
+=== referencia: lo que supone que Ana se queda, cuando ya se queda ===
+# (antes de que Marilla decida, nadie habla de su futuro en Avonlea: la escuela, la amiga, «el año que viene»)
+palabras: la escuela | Escuela | escuela dominical | el año que viene | cuando seas grande | cuando crezcas | vivir aquí | vives aquí | tu pieza
+exige: hecho:se_queda
