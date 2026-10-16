@@ -186,20 +186,67 @@ for i in range(2 * len(D['momentos'])):
     col = get_column_letter(3 + i)
     c = H.cell(row=tot, column=3 + i, value=f'=COUNTIF({col}{fila0 + 2}:{col}{fin},0)'); c.font, c.alignment = F_BOLD, Alignment(horizontal='center')
 
-# --- Escenas, Noticias, Llegadas, Hechos, Metas (para mirar)
-E = wb.create_sheet('Escenas')
-encabezado(E, 1, ['Escena', 'Canal', 'Cómo empieza', 'Prioridad', 'Interrumpe', 'Grande', 'Se repite', 'Si…', 'Dónde (en)', 'Hablan', 'Líneas', 'Empieza con'], [26, 10, 11, 8, 9, 7, 10, 50, 22, 22, 7, 60])
-tabla(E, [[e['id'], e['canal'], e['disparo'] or 'sola', e['prioridad'], 'sí' if e['interrumpe'] else '', 'sí' if e['grande'] else '', e['repetir'], e['si'], e['en'], e['hablan'], e['lineas'], e['primera']] for e in D['escenas']], wrap_cols=(8, 12))
-E.freeze_panes = 'B2'; E.auto_filter.ref = f'A1:L{len(D["escenas"]) + 1}'
+# --- Escenas, Noticias, Llegadas: se editan (los campos de cada bloque, en columnas; tools/bloques.py dice cuál va dónde)
+import sys
+sys.path.insert(0, os.path.dirname(__file__))
+import bloques as B
+info = {e['id']: e for e in D['escenas']}
+for hoja, H_ in B.HOJAS.items():
+    ws = wb.create_sheet(hoja)
+    extra = [('Hablan', 20), ('Líneas', 7), ('Empieza con', 50)] if hoja == 'Escenas' else []
+    cols = [(H_['id'], 22)] + [(t, w) for _, t, w in H_['columnas']] + ([H_['otros']] if H_['otros'] else []) + extra
+    encabezado(ws, 1, [c[0] for c in cols], [c[1] for c in cols])
+    partes = B.partir(open(os.path.join(RAIZ, H_['archivo']), encoding='utf-8').read())
+    r = 1
+    for p_ in partes:
+        if p_[0] != 'bloque':
+            continue
+        r += 1
+        fila = [p_[1]] + B.a_celdas(hoja, B.campos(p_[2], H_['clasificar']))
+        n_edit = len(fila)
+        if hoja == 'Escenas':
+            e = info.get(p_[1], {})
+            fila += [e.get('hablan', ''), e.get('lineas', ''), e.get('primera', '')]
+        for c, v in enumerate(fila, 1):
+            cell = ws.cell(row=r, column=c, value=(int(v) if isinstance(v, str) and v.isdigit() and c > 1 and cols[c - 1][0] in ('Prioridad', 'Se cuenta por (días)') else (v if v != '' else None)))
+            cell.font, cell.border, cell.alignment = F_NORMAL, BORDE, WRAP
+            if 1 < c <= n_edit or (c == 1 and H_['nuevas']):
+                cell.fill = FILL_EDIT
+            elif c > n_edit:
+                cell.font = F_GRIS
+    ws.freeze_panes = 'B2'; ws.auto_filter.ref = f'A1:{get_column_letter(len(cols))}{max(r, 2)}'
+    if hoja == 'Escenas':
+        for col, lista_ in (('E', '"sí"'), ('F', '"sí"')):
+            dv = DataValidation(type='list', formula1=lista_, allow_blank=True); dv.add(f'{col}2:{col}{r}'); ws.add_data_validation(dv)
+    if hoja == 'Llegadas':
+        dv = DataValidation(type='list', formula1='"sí"', allow_blank=True); dv.add(f'B2:B{r + 200}'); ws.add_data_validation(dv)
+    if hoja == 'Noticias':
+        dv = DataValidation(type='list', formula1='"sí"', allow_blank=True); dv.add(f'E2:E{r + 200}'); ws.add_data_validation(dv)
 
-N = wb.create_sheet('Noticias')
-encabezado(N, 1, ['Noticia', 'Qué es', 'La saben (y desde cuándo)', 'Al conocer a Ana', 'Le llega a', 'Se cuenta por (días)', 'Versiones', 'Cómo se cuenta', 'Exagerada'], [18, 40, 40, 10, 16, 10, 9, 60, 60])
-tabla(N, [[n['id'], n['titulo'], n['saben'], 'sí' if n['alConocer'] else '', n['llega'], n['cuentaPor'], n['versiones'], n['dice'], n['exagerada']] for n in D['noticias']], wrap_cols=(2, 3, 8, 9))
-N.freeze_panes = 'B2'
-
-LL = wb.create_sheet('Llegadas')
-encabezado(LL, 1, ['Quién', 'De visita', 'Llega si…', 'Se va si…', 'Al llegar (diario)', 'Al irse (diario)'], [12, 9, 44, 30, 50, 50])
-tabla(LL, [[l['id'], 'sí' if l['visita'] else '', l['llega'], l['seVa'], l['alLlegar'], l['alIrse']] for l in D['llegadas']], wrap_cols=(3, 5, 6))
+# --- Diálogos (para leer): las líneas de cada escena del guion, con sus elecciones
+DI = wb.create_sheet('Diálogos')
+encabezado(DI, 1, ['Escena', 'Quién', 'Qué dice (o hace)'], [26, 14, 110])
+filas, gris = [], []
+for p_ in B.partir(open(os.path.join(RAIZ, 'src/datos/guion.txt'), encoding='utf-8').read()):
+    if p_[0] != 'bloque' or not p_[3]:
+        continue
+    for l in p_[3][1:]:
+        s_ = l.strip()
+        if not s_ or s_.startswith('#'):
+            continue
+        sangria = l.startswith((' ', '\t'))
+        if s_.startswith('->'):
+            filas.append([p_[1], '→ elige', ('(propia) ' if s_.startswith('->*') else '') + s_.lstrip('->* ').strip()])
+        elif s_.startswith('!'):
+            filas.append([p_[1], ('    ' if sangria else '') + '(acción)', s_[1:].strip()]); gris.append(len(filas))
+        else:
+            q, _, t = s_.partition(':')
+            filas.append([p_[1], ('    ' if sangria else '') + q.strip(), t.strip()])
+tabla(DI, filas, wrap_cols=(3,))
+for i in gris:
+    for c in (2, 3):
+        DI.cell(row=i + 1, column=c).font = F_GRIS
+DI.freeze_panes = 'B2'; DI.auto_filter.ref = f'A1:C{len(filas) + 1}'
 
 HE = wb.create_sheet('Hechos')
 encabezado(HE, 1, ['Hecho', 'Lo dejan', 'Lo piden', 'Estado'], [26, 60, 60, 24])
@@ -225,27 +272,32 @@ texto = [
     ('Planilla de Avonlea', F_TITULO),
     (f'Generada el {D["generado"]} desde los datos del juego (node tools/planilla.js).', F_GRIS),
     ('', None),
-    ('Qué se edita', F_BOLD),
-    ('• Solo la hoja «Frases»: las celdas amarillas claras. Cada fila es una frase: quién la dice, el tipo (dice / ana / una estación), el texto y cuándo vale.', F_NORMAL),
-    ('• «¿Conoce a Ana?»: sí (solo después de presentarse), no (solo antes), o vacío (da igual). Quien no la conoce no dice frases con su nombre.', F_NORMAL),
-    ('• «Después de»: un hecho de la historia o una meta del cuaderno (lista desplegable). Con «Días después», vale desde N días después; sin días, desde que pasó.', F_NORMAL),
-    ('• «Antes de»: vale solo mientras ese hecho o meta todavía no pasó. «Estación»: solo en esa estación.', F_NORMAL),
-    ('• «Otras condiciones»: cualquier otra condición del guion, escrita tal cual y con comas (por ejemplo: presente:allan, afecto:diana:ana>=4).', F_NORMAL),
-    ('• Para agregar una frase, escríbela en una fila nueva al final (las listas llegan hasta la fila 2000). Para quitarla, borra la fila.', F_NORMAL),
+    ('Qué se edita (las celdas amarillas claras)', F_BOLD),
+    ('• «Frases»: lo que dice cada uno al pasar. Una fila por frase: quién, el tipo (dice / ana / una estación), el texto y cuándo vale.', F_NORMAL),
+    ('    ¿Conoce a Ana?: sí (solo después de presentarse), no (solo antes), o vacío. «Después de»: un hecho o una meta (lista); con «Días después», desde N días después.', F_NORMAL),
+    ('    «Antes de»: solo mientras ese hecho o meta no pasó. «Estación»: solo esa estación. «Otras condiciones»: cualquier otra, tal cual, con comas.', F_NORMAL),
+    ('    Para agregar una frase, una fila nueva al final; para quitarla, borra la fila.', F_NORMAL),
+    ('• «Escenas»: cuándo empieza cada escena del guion y qué deja (canal, prioridad, condiciones, dónde, quiénes, el cartel, las acciones al empezar y al terminar).', F_NORMAL),
+    ('    Los campos que se repiten (por ejemplo, «Al terminar») van uno por línea dentro de la celda (Alt+Enter). Lo que dicen está en la hoja «Diálogos» y se edita en src/datos/guion.txt.', F_NORMAL),
+    ('    Las escenas nuevas se escriben en src/datos/guion.txt (con sus líneas); aquí se cambian las que hay.', F_NORMAL),
+    ('• «Noticias»: quién sabe cada noticia, a quién le llega, cuánto se cuenta, cómo se cuenta y sus versiones exageradas. Una fila nueva es una noticia nueva.', F_NORMAL),
+    ('• «Llegadas»: cuándo llega y se va cada uno (una alternativa por línea), si viene de visita, y lo que queda en el diario. Una fila nueva es alguien que llega.', F_NORMAL),
     ('', None),
-    ('Ejemplo de una fila', F_BOLD),
-    ('harrison · dice · «¿Esa vaca tuya se ha portado bien hoy? Más le vale.» · ¿Conoce a Ana? (vacío) · Después de: conoce_harrison · Días después: 3', F_NORMAL),
-    ('→ el Sr. Harrison lo dice desde tres días después de conocer a Ana.', F_GRIS),
+    ('Ejemplos', F_BOLD),
+    ('Frases · harrison · dice · «¿Esa vaca tuya se ha portado bien hoy?» · Después de: conoce_harrison · Días después: 3 → desde tres días después de conocer a Ana.', F_NORMAL),
+    ('Escenas · marilla_sabe_camison_descalza · Si…: sabe:marilla:ana_en_camison:2, ve:marilla → cuando a Marilla le llegó el chisme agrandado, y ve a Ana.', F_NORMAL),
+    ('Llegadas · stacy · Llega si…: estacion:otoño, hecho:se_fue_phillips → el otoño después de que se fue el Sr. Phillips.', F_NORMAL),
     ('', None),
     ('Cómo vuelve al juego', F_BOLD),
     ('1. Guarda la planilla (como .xlsx, con el mismo nombre: planilla/avonlea.xlsx).', F_NORMAL),
-    ('2. python3 tools/importar_planilla.py — revisa cada fila (quién, tipo, condiciones) y escribe src/datos/frases.txt; si algo está mal, no cambia nada y dice en qué fila.', F_NORMAL),
-    ('3. node tools/build.js y node tools/planilla.js — el juego con las frases nuevas, y la planilla al día (con los huecos recalculados).', F_NORMAL),
+    ('2. python3 tools/importar_planilla.py — revisa cada fila de cada hoja; si algo está mal, no cambia nada y dice la hoja y la fila. Si todo está bien, escribe los', F_NORMAL),
+    ('    archivos de src/datos/ (en su lugar: los comentarios y los diálogos quedan), compila el juego y lo abre para ver que carga; si no, vuelve todo atrás.', F_NORMAL),
+    ('3. node tools/planilla.js — la planilla al día (con los huecos recalculados).', F_NORMAL),
     ('', None),
     ('Para mirar', F_BOLD),
     ('• «Huecos»: cada personaje en cada momento de la historia, cuántas frases tiene si todavía no conoce a Ana y si ya la conoce. Rojo = ninguna.', F_NORMAL),
-    ('• «Personas»: quién es cada uno, dónde vive, cuándo llega a Avonlea, cuántas frases tiene.', F_NORMAL),
-    ('• «Escenas», «Noticias», «Llegadas», «Metas»: lo que hay en src/datos/ (se editan allí). «Hechos»: quién deja cada hecho y quién lo pide (rojo: nunca pasa; amarillo: nadie lo lee).', F_NORMAL),
+    ('• «Diálogos»: lo que se dice en cada escena, con las elecciones de Ana (→ elige) y lo que pasa (acción).', F_NORMAL),
+    ('• «Personas», «Hechos» (quién deja y quién pide cada hecho; rojo: nunca pasa; amarillo: nadie lo lee), «Metas» (el cuaderno de Ana).', F_NORMAL),
 ]
 for i, (t, f) in enumerate(texto, 1):
     c = C.cell(row=i, column=1, value=t); c.alignment = Alignment(wrap_text=True)
@@ -253,7 +305,7 @@ for i, (t, f) in enumerate(texto, 1):
         c.font = f
 L.sheet_state = 'hidden'
 for ws in wb.worksheets:
-    if ws.title not in ('Frases', 'Cómo usar', 'Listas'):
+    if ws.title not in ('Frases', 'Cómo usar', 'Listas', 'Escenas', 'Noticias', 'Llegadas'):
         ws.protection.sheet = True; ws.protection.autoFilter = False; ws.protection.sort = False
 os.makedirs(os.path.join(RAIZ, 'planilla'), exist_ok=True)
 salida = os.path.join(RAIZ, 'planilla/avonlea.xlsx')
