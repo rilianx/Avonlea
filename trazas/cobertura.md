@@ -1,18 +1,48 @@
 # Cobertura de la historia: lo que falta
 
-Generado el 2026-10-16 06:50 por `node tools/planilla.js` (también en la hoja «Cobertura» de planilla/avonlea.xlsx).
+Generado el 2026-10-16 07:00 por `node tools/planilla.js` (también en la hoja «Cobertura» de planilla/avonlea.xlsx).
 
 No son errores: son situaciones que el juego deja que pasen y nadie considera, noticias o llegadas sin consecuencias, gente con poco que decir.
 
 | Área | Alta | Media | Baja |
 |---|---|---|---|
+| Situaciones | 2 | 13 | 11 |
 | Noticias | 2 | 0 | 9 |
-| Ana y los lugares | 0 | 11 | 3 |
 | Frases | 0 | 7 | 0 |
 | Metas | 0 | 7 | 0 |
+| Exploración | 0 | 0 | 12 |
 | Llegadas | 0 | 0 | 3 |
 | Personas | 0 | 0 | 39 |
 | Hechos | 0 | 0 | 5 |
+
+## Situaciones
+
+- [alta] **Ana en camisón en la tienda de Lawson**: nadie reacciona, en ningún momento (estaban: el Sr. Lawson, la Sra. Pye). _Idea: una escena con «si: ana:camison» (o la hora), y «ve:quien» o «en: quien=tl»._
+- [alta] **Ana en camisón en la escuela**: nadie reacciona, en ningún momento (estaban: el Sr. Phillips, la Srta. Stacy). _Idea: una escena con «si: ana:camison» (o la hora), y «ve:quien» o «en: quien=es»._
+- [media] **Ana en camisón en La Cuesta del Huerto**: nadie reacciona, en ningún momento (estaban: Mary Joe, el Sr. Barry, la Sra. Barry). _Idea: una escena con «si: ana:camison» (o la hora), y «ve:quien» o «en: quien=os»._
+- [media] **Ana en camisón en la casa del Sr. Harrison**: nadie reacciona, en ningún momento (estaban: el Sr. Harrison). _Idea: una escena con «si: ana:camison» (o la hora), y «ve:quien» o «en: quien=hh»._
+- [media] **Ana en camisón en la casa parroquial**: nadie reacciona, en ningún momento (estaban: el reverendo Allan, la Sra. Allan). _Idea: una escena con «si: ana:camison» (o la hora), y «ve:quien» o «en: quien=cp»._
+- [media] **Ana sin sombrero en Tejas Verdes**: nadie reacciona, en ningún momento (estaban: Marilla, Matthew, la Sra. Lynde). _Idea: una escena con «si: ana:sin_sombrero» (o la hora), y «ve:quien» o «en: quien=gg»._
+- [media] **Ana sin sombrero en La Cuesta del Huerto**: nadie reacciona, en ningún momento (estaban: Mary Joe, el Sr. Barry, la Sra. Barry). _Idea: una escena con «si: ana:sin_sombrero» (o la hora), y «ve:quien» o «en: quien=os»._
+- [media] **Ana sin sombrero en la Hondonada (Sra. Lynde)**: nadie reacciona, en ningún momento (estaban: Thomas Lynde, la Sra. Lynde). _Idea: una escena con «si: ana:sin_sombrero» (o la hora), y «ve:quien» o «en: quien=rl»._
+- [media] **Ana sin sombrero en la casa del Sr. Harrison**: nadie reacciona, en ningún momento (estaban: el Sr. Harrison). _Idea: una escena con «si: ana:sin_sombrero» (o la hora), y «ve:quien» o «en: quien=hh»._
+- [media] **Ana sin sombrero en la tienda de Lawson**: nadie reacciona, en ningún momento (estaban: el Sr. Lawson, la Sra. Pye). _Idea: una escena con «si: ana:sin_sombrero» (o la hora), y «ve:quien» o «en: quien=tl»._
+- [media] **Ana sin sombrero en la escuela**: nadie reacciona, en ningún momento (estaban: el Sr. Phillips, la Srta. Stacy). _Idea: una escena con «si: ana:sin_sombrero» (o la hora), y «ve:quien» o «en: quien=es»._
+- [media] **Ana sin sombrero en la iglesia**: nadie reacciona, en ningún momento (estaban: el Sr. Bell, el reverendo Allan, la Sra. Allan, la Sra. Lynde, la Sra. Pye). _Idea: una escena con «si: ana:sin_sombrero» (o la hora), y «ve:quien» o «en: quien=ig»._
+- [media] **Ana sin sombrero en la casa parroquial**: nadie reacciona, en ningún momento (estaban: el reverendo Allan, la Sra. Allan). _Idea: una escena con «si: ana:sin_sombrero» (o la hora), y «ve:quien» o «en: quien=cp»._
+- [media] **Ana sin sombrero en la aldea (afuera)**: nadie reacciona, en ningún momento (estaban: el Sr. Harrison, el Sr. Lawson, la Sra. Barry, la Sra. Lynde, la Sra. Pye, v0). _Idea: una escena con «si: ana:sin_sombrero» (o la hora), y «ve:quien» o «en: quien=out»._
+- [media] **Quién ve a Ana en camisón y no dice nada**: Mary Joe, Matthew, Thomas Lynde, el Sr. Barry, el Sr. Bell, el Sr. Harrison, el Sr. Lawson, el Sr. Phillips, el reverendo Allan, la Sra. Allan, la Sra. Barry, la Sra. Pye, la Srta. Stacy, v0. _Idea: una escena «si: ana:camison, ve:quien» (o una frase con [ana:camison])._
+- [baja] **Ana de noche en Tejas Verdes**: nadie reacciona, en ningún momento (estaban: Marilla, Matthew, la Sra. Lynde). _Idea: una escena de noche (hora:21-26) con quien esté._
+- [baja] **Ana de noche en La Cuesta del Huerto**: nadie reacciona, en ningún momento (estaban: Mary Joe, el Sr. Barry, la Sra. Barry). _Idea: una escena de noche (hora:21-26) con quien esté._
+- [baja] **Ana de noche en la Hondonada (Sra. Lynde)**: nadie reacciona, en ningún momento (estaban: Thomas Lynde, la Sra. Lynde). _Idea: una escena de noche (hora:21-26) con quien esté._
+- [baja] **Ana de noche en la casa del Sr. Harrison**: nadie reacciona, en ningún momento (estaban: el Sr. Harrison). _Idea: una escena de noche (hora:21-26) con quien esté._
+- [baja] **Ana de noche en la tienda de Lawson**: nadie reacciona, en ningún momento (estaban: el Sr. Lawson, la Sra. Pye). _Idea: una escena de noche (hora:21-26) con quien esté._
+- [baja] **Ana de noche en la escuela**: nadie reacciona, en ningún momento (estaban: el Sr. Phillips, la Srta. Stacy). _Idea: una escena de noche (hora:21-26) con quien esté._
+- [baja] **Ana de noche en la iglesia**: nadie reacciona, en ningún momento (estaban: el Sr. Bell, el reverendo Allan, la Sra. Allan, la Sra. Lynde, la Sra. Pye). _Idea: una escena de noche (hora:21-26) con quien esté._
+- [baja] **Ana de noche en la casa parroquial**: nadie reacciona, en ningún momento (estaban: el reverendo Allan, la Sra. Allan). _Idea: una escena de noche (hora:21-26) con quien esté._
+- [baja] **Ana de noche en la aldea (afuera)**: nadie reacciona, en ningún momento (estaban: el Sr. Harrison, el Sr. Lawson, la Sra. Barry, la Sra. Lynde, la Sra. Pye, v0). _Idea: una escena de noche (hora:21-26) con quien esté._
+- [baja] **Ana en camisón: ella misma no lo nota**: en Tejas Verdes, La Cuesta del Huerto, la Hondonada (Sra. Lynde), la casa del Sr. Harrison, la tienda de Lawson, la escuela, la iglesia, la casa parroquial, la aldea (afuera). _Idea: un comentario de Ana con «si: ana:camison»._
+- [baja] **Ana sin sombrero: ella misma no lo nota**: en Tejas Verdes, La Cuesta del Huerto, la Hondonada (Sra. Lynde), la casa del Sr. Harrison, la tienda de Lawson, la escuela, la iglesia, la casa parroquial, la aldea (afuera). _Idea: un comentario de Ana con «si: ana:sin_sombrero»._
 
 ## Noticias
 
@@ -27,23 +57,6 @@ No son errores: son situaciones que el juego deja que pasen y nadie considera, n
 - [baja] **«pastor_nuevo»: llegó un pastor nuevo, el Sr. Allan, con su esposa**: nadie reacciona a ella (solo se cuenta); es un chisme del pueblo: puede bastar. _Idea: una escena o una frase con «sabe:quien:pastor_nuevo» (alguien que se entera y hace o dice algo)._
 - [baja] **«tia_josephine»: la tía Josephine de los Barry vino de Charlottetown**: nadie reacciona a ella (solo se cuenta); es un chisme del pueblo: puede bastar. _Idea: una escena o una frase con «sabe:quien:tia_josephine» (alguien que se entera y hace o dice algo)._
 - [baja] **«se_va_phillips»: el Sr. Phillips se va de la escuela de Avonlea**: nadie reacciona a ella (solo se cuenta); es un chisme del pueblo: puede bastar. _Idea: una escena o una frase con «sabe:quien:se_va_phillips» (alguien que se entera y hace o dice algo)._
-
-## Ana y los lugares
-
-- [media] **Ana en camisón en la casa del Sr. Harrison**: ninguna escena reacciona. _Idea: una escena con «si: ana:camison» (o la hora) y «en: …=hh»._
-- [media] **Ana en camisón en la tienda de Lawson**: ninguna escena reacciona. _Idea: una escena con «si: ana:camison» (o la hora) y «en: …=tl»._
-- [media] **Ana en camisón en la escuela**: ninguna escena reacciona. _Idea: una escena con «si: ana:camison» (o la hora) y «en: …=es»._
-- [media] **Ana en camisón en la iglesia**: ninguna escena reacciona. _Idea: una escena con «si: ana:camison» (o la hora) y «en: …=ig»._
-- [media] **Ana en camisón en la casa parroquial**: ninguna escena reacciona. _Idea: una escena con «si: ana:camison» (o la hora) y «en: …=cp»._
-- [media] **Ana en camisón en afuera (los caminos, la aldea)**: ninguna escena reacciona. _Idea: una escena con «si: ana:camison» (o la hora) y «en: …=out»._
-- [media] **Ana sin sombrero en afuera (los caminos, la aldea)**: ninguna escena reacciona. _Idea: una escena con «si: ana:sin_sombrero» (o la hora) y «en: …=out»._
-- [media] **Ana sin sombrero en la iglesia**: ninguna escena reacciona. _Idea: una escena con «si: ana:sin_sombrero» (o la hora) y «en: …=ig»._
-- [media] **Ana sin sombrero en la escuela**: ninguna escena reacciona. _Idea: una escena con «si: ana:sin_sombrero» (o la hora) y «en: …=es»._
-- [media] **Ana de noche en afuera (los caminos, la aldea)**: ninguna escena reacciona. _Idea: una escena de noche (hora:21-26) en out._
-- [media] **Quién la ve en camisón**: no reaccionan: Matthew, Diana, el Sr. Harrison, el Sr. Shearer. _Idea: una escena «si: ana:camison, ve:quien» para cada uno._
-- [baja] **Ana de noche en La Cuesta del Huerto (los Barry)**: ninguna escena reacciona. _Idea: una escena de noche (hora:21-26) en os._
-- [baja] **Ana de noche en la Hondonada (la Sra. Lynde)**: ninguna escena reacciona. _Idea: una escena de noche (hora:21-26) en rl._
-- [baja] **Ana de noche en la casa del Sr. Harrison**: ninguna escena reacciona. _Idea: una escena de noche (hora:21-26) en hh._
 
 ## Frases
 
@@ -64,6 +77,21 @@ No son errores: son situaciones que el juego deja que pasen y nadie considera, n
 - [media] **«tinte»**: nadie le sugiere a Ana hacerla (sin guiño). _Idea: «guiño quien: …» en src/datos/cuaderno.txt._
 - [media] **«pelo_corto»**: nadie le sugiere a Ana hacerla (sin guiño). _Idea: «guiño quien: …» en src/datos/cuaderno.txt._
 - [media] **«techo»**: nadie le sugiere a Ana hacerla (sin guiño). _Idea: «guiño quien: …» en src/datos/cuaderno.txt._
+
+## Exploración
+
+- [baja] **70 escena(s) que no pasaron en 4 días**: les falta: Ana no va en la calesa por el camino. _Idea: ej.: avenida, newbridge, avenida_petalos, avenida_paso._
+- [baja] **56 escena(s) que no pasaron en 4 días**: les falta: podía pasar (no tocó). _Idea: ej.: primera_gwin, primera_mirror, primera_armario, primera_stairs._
+- [baja] **38 escena(s) que no pasaron en 4 días**: les falta: cuando se encuentran. _Idea: ej.: diana_por_casualidad, par:ana+diana:0, par:ana+diana:1, par:ana+diana:2._
+- [baja] **19 escena(s) que no pasaron en 4 días**: les falta: cuando Ana usa gwin. _Idea: ej.: ventana_primavera_manana, ventana_primavera_tarde, ventana_verano_manana, ventana_verano_noche._
+- [baja] **13 escena(s) que no pasaron en 4 días**: les falta: cuando Ana conversa con diana. _Idea: ej.: conv_diana_pelo, conv_diana_minnie, conv_diana_nombres, conv_diana_escuela._
+- [baja] **8 escena(s) que no pasaron en 4 días**: les falta: ana no está en gg. _Idea: ej.: quiere_amiga, broche, prohibida, invita_allan._
+- [baja] **7 escena(s) que no pasaron en 4 días**: les falta: cuando Ana conversa con marilla. _Idea: ej.: conv_marilla_perdon, conv_marilla_cocina, conv_marilla_diana, conv_marilla_genio._
+- [baja] **6 escena(s) que no pasaron en 4 días**: les falta: cuando Ana usa mirror. _Idea: ej.: espejo_pelo, espejo_cordelia, espejo_tejas_verdes, espejo_zanahorias._
+- [baja] **5 escena(s) que no pasaron en 4 días**: les falta: cuando Ana conversa con matthew. _Idea: ej.: conv_matthew_nombres, conv_matthew_mangas, conv_matthew_mujeres, conv_matthew_queens._
+- [baja] **4 escena(s) que no pasaron en 4 días**: les falta: diana no está en Avonlea. _Idea: ej.: conoce_diana, te_grosella, crup_aviso, cama_josephine._
+- [baja] **4 escena(s) que no pasaron en 4 días**: les falta: falta hecho:blewett_duda. _Idea: ej.: duda_matthew, duda_suplica, duda_calla, devuelta_blewett._
+- [baja] **4 escena(s) que no pasaron en 4 días**: les falta: cuando Ana usa faro. _Idea: ej.: faro_verano, faro_invierno, faro_manana, faro_queens._
 
 ## Llegadas
 

@@ -14,6 +14,12 @@ def leer(raiz, *rutas):
     return '\n'.join(open(os.path.join(raiz, r), encoding='utf-8').read() for r in rutas if os.path.exists(os.path.join(raiz, r)))
 
 
+def cargar(raiz):
+    p = os.path.join(raiz, 'trazas/cobertura.json')
+    import json
+    return json.load(open(p, encoding='utf-8')) if os.path.exists(p) else None
+
+
 def analizar(D, raiz):
     H = []   # [(prioridad, área, qué, falta, idea)]
     add = lambda pri, *x: H.append((pri,) + x)
@@ -21,32 +27,74 @@ def analizar(D, raiz):
     codigo = '\n'.join(open(f, encoding='utf-8').read() for f in sorted(glob.glob(os.path.join(raiz, 'src/js/*.js'))))
     nombre = {g['id']: g['nombre'] for g in D['gente']}
 
-    # 1. lugares × cómo anda Ana: ¿hay una escena que reaccione?
-    def lugares(e):
-        ls = {e['canal']} | {x.split('=')[1] for x in e['en'].split(', ') if '=' in x}
-        return {l for l in ls if l in LUGARES_GENTE} or ({'out'} if e['canal'] in ('general', 'ana_sola') and 'ana:' in e['si'] else set())
-    def estados(e):
-        s = set(re.findall(r'ana:(camison|sin_sombrero)', e['si']))
-        for a, b in re.findall(r'hora:(\d+)-(\d+)', e['si']):
-            if int(a) >= 20 or int(b) <= 7:
-                s.add('noche')
-        return s
-    hay = collections.defaultdict(list)
-    reaccionan = collections.defaultdict(set)
-    for e in D['escenas']:
-        for est in estados(e):
-            for l in lugares(e):
-                hay[(est, l)].append(e['id'])
-            reaccionan[est] |= set(re.findall(r'\bve:(\w+)', e['si'])) | set(x.strip() for x in e['hablan'].split(',') if x.strip() and x.strip() != 'ana')
-    for est, ls in IMPORTAN.items():
-        for l in ls:
-            if not hay[(est, l)]:
-                add('media' if est != 'noche' or l == 'out' else 'baja', 'Ana y los lugares', f'Ana {ESTADOS[est]} en {LUGARES_GENTE[l]}', 'ninguna escena reacciona',
-                          f'una escena con «si: ana:{est}» (o la hora) y «en: …={l}»' if est != 'noche' else f'una escena de noche (hora:21-26) en {l}')
-    adultos = [g for g in D['gente'] if g['grupo'] in ('casa', 'pueblo') and g['id'] not in ('vecino',)]
-    sin_reaccion = [g['nombre'] for g in adultos if g['id'] not in reaccionan['camison'] and g['grupo'] == 'casa']
-    if sin_reaccion:
-        add('media', 'Ana y los lugares', 'Quién la ve en camisón', 'no reaccionan: ' + ', '.join(sin_reaccion), 'una escena «si: ana:camison, ve:quien» para cada uno')
+    # 1. lugares × cómo anda Ana × quién está: lo que dice el juego (las sondas de tools/cobertura.js)
+    C = cargar(raiz)
+    if C:
+        S = [x for x in C['sondas'] if x['k'] != 'ana' and not x.get('fuera')]
+        kids = {g['id'] for g in D['gente'] if g['grupo'] == 'niños'} | {'diana', 'minnie'}
+        tit = {m['id']: m['titulo'].split(' · ')[0] for m in C['momentos']}
+        for est in ('camison', 'sin_sombrero', 'noche'):
+            for lugar, L in C['lugares'].items():
+                xs = [x for x in S if x['lugar'] == lugar and x['estado'] == est and x['k'] not in kids]
+                if not xs: continue
+                nadie = [m for m in tit if not any(x['delEstado'] for x in xs if x['momento'] == m) and any(x['momento'] == m for x in xs)]
+                if len(nadie) == len({x['momento'] for x in xs}):
+                    pri = 'alta' if est == 'camison' and lugar in ('out', 'ig', 'es', 'tl') else 'media' if est != 'noche' else 'baja'
+                    add(pri, 'Situaciones', f'Ana {ESTADOS[est]} en {L["nombre"]}', 'nadie reacciona, en ningún momento (estaban: ' + ', '.join(sorted({nombre.get(x["k"], x["k"]) for x in xs})) + ')',
+                        f'una escena con «si: ana:{est}» (o la hora), y «ve:quien» o «en: quien={lugar}»' if est != 'noche' else 'una escena de noche (hora:21-26) con quien esté')
+                elif nadie:
+                    add('baja', 'Situaciones', f'Ana {ESTADOS[est]} en {L["nombre"]}', 'nadie reacciona en: ' + ', '.join(tit[m] for m in nadie), 'revisar las condiciones de la escena que reacciona (¿pide algo que todavía no pasa?)')
+        adultos = {x['k'] for x in S if x['k'] not in kids}
+        nunca = sorted(nombre.get(k, k) for k in adultos if not any(x['delEstado'] for x in S if x['k'] == k and x['estado'] == 'camison'))
+        if nunca:
+            add('media', 'Situaciones', 'Quién ve a Ana en camisón y no dice nada', ', '.join(nunca), 'una escena «si: ana:camison, ve:quien» (o una frase con [ana:camison])')
+        mudos = collections.defaultdict(list)
+        for x in S:
+            if x['estado'] == 'normal' and not x['escenas'] and not x['frases'] and not x['presenta']:
+                mudos[x['k']].append(f'{tit[x["momento"]]} en {C["lugares"][x["lugar"]]["nombre"]}')
+        for k, v in mudos.items():
+            add('media', 'Situaciones', f'{nombre.get(k, k)} no tiene nada que decirle', '; '.join(v[:5]) + ('…' if len(v) > 5 else ''), 'frases (hoja «Frases») o una escena para ese momento')
+        anas = [x for x in C['sondas'] if x['k'] == 'ana' and x['estado'] != 'normal']
+        for est in ('camison', 'sin_sombrero'):
+            sin = [C['lugares'][l]['nombre'] for l in C['lugares'] if not any(x['anaComenta'] for x in anas if x['lugar'] == l and x['estado'] == est)]
+            if sin: add('baja', 'Situaciones', f'Ana {ESTADOS[est]}: ella misma no lo nota', 'en ' + ', '.join(sin), f'un comentario de Ana con «si: ana:{est}»')
+        # the exploration: the scenes never reached, by what they lack
+        E = C.get('exploracion')
+        if E:
+            falta = collections.Counter(); ejemplos = collections.defaultdict(list)
+            for n in E['nunca']:
+                r = re.sub(r'\d+(\.\d+)? s$', 'N s', n['porque'])
+                falta[r] += 1; ejemplos[r].append(n['id'])
+            for r, c in falta.most_common(12):
+                add('baja', 'Exploración', f'{c} escena(s) que no pasaron en {E["dias"]} días', f'les falta: {r}', 'ej.: ' + ', '.join(ejemplos[r][:4]))
+    else:
+        # 1. lugares × cómo anda Ana: ¿hay una escena que reaccione?
+        def lugares(e):
+            ls = {e['canal']} | {x.split('=')[1] for x in e['en'].split(', ') if '=' in x}
+            return {l for l in ls if l in LUGARES_GENTE} or ({'out'} if e['canal'] in ('general', 'ana_sola') and 'ana:' in e['si'] else set())
+        def estados(e):
+            s = set(re.findall(r'ana:(camison|sin_sombrero)', e['si']))
+            for a, b in re.findall(r'hora:(\d+)-(\d+)', e['si']):
+                if int(a) >= 20 or int(b) <= 7:
+                    s.add('noche')
+            return s
+        hay = collections.defaultdict(list)
+        reaccionan = collections.defaultdict(set)
+        for e in D['escenas']:
+            for est in estados(e):
+                for l in lugares(e):
+                    hay[(est, l)].append(e['id'])
+                reaccionan[est] |= set(re.findall(r'\bve:(\w+)', e['si'])) | set(x.strip() for x in e['hablan'].split(',') if x.strip() and x.strip() != 'ana')
+        for est, ls in IMPORTAN.items():
+            for l in ls:
+                if not hay[(est, l)]:
+                    add('media' if est != 'noche' or l == 'out' else 'baja', 'Ana y los lugares', f'Ana {ESTADOS[est]} en {LUGARES_GENTE[l]}', 'ninguna escena reacciona',
+                              f'una escena con «si: ana:{est}» (o la hora) y «en: …={l}»' if est != 'noche' else f'una escena de noche (hora:21-26) en {l}')
+        adultos = [g for g in D['gente'] if g['grupo'] in ('casa', 'pueblo') and g['id'] not in ('vecino',)]
+        sin_reaccion = [g['nombre'] for g in adultos if g['id'] not in reaccionan['camison'] and g['grupo'] == 'casa']
+        if sin_reaccion:
+            add('media', 'Ana y los lugares', 'Quién la ve en camisón', 'no reaccionan: ' + ', '.join(sin_reaccion), 'una escena «si: ana:camison, ve:quien» para cada uno')
+
 
     # 2. noticias que nadie usa (solo se cuentan al conversar)
     for n in D['noticias']:

@@ -10,6 +10,7 @@ const goalPrio = (goal, o) => o.prio ?? (goal.deadline ? 3 : o.parent ? 2 : 1);
 let goalSeq = 0, taskSeq = 0;
 function agentStart(who, goal, o = {}){
   const ag = agentOf(who); delete ag.hold;
+  if (!goal || !Array.isArray(goal.people)) return null;   // (a goal the planner cannot pursue: a fact of the story, «que pase x»)
   if (activeGoals(ag).length >= MAX_GOALS) return null;
   const g = { who, goal, favors: o.favors || [], chain: o.chain || [], st: 'run', label: o.label || goal.text, parent: o.parent, since: TT, log: ag.log, prio: goalPrio(goal, o), seq: ++goalSeq, tries: 0, pending: [] };
   ag.goals.push(g); if (ag.goals.length > 12) ag.goals.splice(0, ag.goals.length - 12);
