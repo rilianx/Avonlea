@@ -157,6 +157,10 @@ Para ver todo junto y encontrar lo que falta, como se hace en los estudios (una 
 - **Cobertura** (`tools/cobertura.py`, también `trazas/cobertura.md`): lo que falta, con prioridad: lugares × cómo anda Ana (en camisón, sin sombrero, de noche) sin escena que reaccione; quién nunca reacciona al camisón; noticias que nadie usa; llegadas que nadie nota; gente sin presentación propia, con pocas frases o sin escena; metas sin guiño ni pista; hechos que nunca pasan o que nadie lee.
 - `python3 tools/importar_planilla.py` lleva la hoja «Frases» de vuelta a `src/datos/frases.txt`: revisa cada fila (quién, tipo, condiciones) y, si algo está mal, no cambia nada y dice en qué fila; después compila, y si el revisor de la historia encuentra un problema en una frase, vuelve atrás.
 
+## El modelo de las interacciones (`tools/modelo.py`)
+
+Un modelo lógico de lo que la gente le dice a Ana, revisado con un solucionador (Z3): busca, en todas las situaciones posibles, dónde no hay nada que decir, dónde nadie reacciona (a Ana en camisón, sola de noche…) y qué frases suponen algo que puede no cumplirse. Lo único escrito a mano son las reglas (`src/datos/reglas.txt`); el resto sale de los datos. Ver `docs/MODELO_INTERACCIONES.md`.
+
 ## 4. Cómo se comprueba
 
 | Herramienta | Qué hace | Salida |

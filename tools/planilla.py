@@ -276,6 +276,25 @@ CO.freeze_panes = 'C2'; CO.auto_filter.ref = f'A1:E{len(COB) + 1}'
 CO.conditional_formatting.add(f'A2:A{len(COB) + 1}', FormulaRule(formula=['A2="alta"'], fill=FILL_ROJO))
 CO.conditional_formatting.add(f'A2:A{len(COB) + 1}', FormulaRule(formula=['A2="media"'], fill=FILL_AMAR))
 
+# --- Modelo (tools/modelo.py, si se corrió): los huecos y las incoherencias que encontró el solucionador
+pm = os.path.join(RAIZ, 'trazas/modelo.json')
+if os.path.exists(pm):
+    MO = json.load(open(pm, encoding='utf-8'))
+    MD = wb.create_sheet('Modelo', 1)
+    encabezado(MD, 1, ['Clase', 'Regla', 'Quién', 'Tiene', 'Una situación', 'Lo que falta'], [12, 34, 22, 7, 60, 60])
+    filas = []
+    sit = lambda s_: ' · '.join(f'{a}: {b}' for a, b in s_.items())
+    for h in MO['huecos']:
+        c = h['casos'][0]
+        filas.append(['hueco', h['regla'], h['nombre'], h['tiene'], sit(c['situación']), '; '.join(f'{a} ({n})' for a, n, _ in c['por qué']) or 'no tiene ninguna'])
+    for h in MO['incoherencias']:
+        filas.append(['incoherencia', h['regla'], h['nombre'], h['tipo'], sit(h['situación']), f'«{h["texto"][:80]}» exige {h["exige"]}'])
+    for h in MO['imposibles']:
+        filas.append(['nunca se da', '', h['nombre'], h['tipo'], '', f'«{h["texto"][:60]}»: {", ".join(h["conds"])}'])
+    tabla(MD, filas, wrap_cols=(5, 6))
+    MD.freeze_panes = 'C2'; MD.auto_filter.ref = f'A1:F{len(filas) + 1}'
+    MD.conditional_formatting.add(f'A2:A{len(filas) + 1}', FormulaRule(formula=['A2="incoherencia"'], fill=FILL_ROJO))
+
 # --- Cómo usar (la primera hoja)
 C = wb.create_sheet('Cómo usar', 0)
 C.column_dimensions['A'].width = 120
@@ -316,7 +335,7 @@ for i, (t, f) in enumerate(texto, 1):
         c.font = f
 L.sheet_state = 'hidden'
 for ws in wb.worksheets:
-    if ws.title not in ('Frases', 'Cómo usar', 'Listas', 'Escenas', 'Noticias', 'Llegadas', 'Cobertura'):
+    if ws.title not in ('Frases', 'Cómo usar', 'Listas', 'Escenas', 'Noticias', 'Llegadas', 'Cobertura', 'Modelo'):
         ws.protection.sheet = True; ws.protection.autoFilter = False; ws.protection.sort = False
 os.makedirs(os.path.join(RAIZ, 'planilla'), exist_ok=True)
 salida = os.path.join(RAIZ, 'planilla/avonlea.xlsx')

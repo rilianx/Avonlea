@@ -1,0 +1,84 @@
+# Las reglas de la historia: lo que el juego no puede saber solo (el resto, el modelo lo saca de los datos).
+# Las usa tools/modelo.py, que le pregunta a un solucionador lógico (Z3) si existe alguna situación posible del juego
+# en que una regla no se cumple, y la muestra (un contraejemplo). Ver docs/MODELO_INTERACCIONES.md.
+#
+# Tres clases de reglas:
+#
+# «=== espera: nombre ===»  dónde debería haber algo
+#   quiénes: todos | adultos | niños | casa | pueblo | una lista (lynde, barry…)
+#   cuando: <condiciones del guion>     la situación ({k} es cada uno de «quiénes»)
+#   hay: algo                           alguna frase, escena, conversación o presentación suya que valga ahí
+#   hay: reacción <condición>           alguna frase o escena suya que pida esa condición (que reaccione a eso)
+#
+# «=== nunca: nombre ===»  una situación imposible (lo que los datos no dicen)
+#   si: <condiciones del guion>
+#
+# «=== referencia: nombre ===»  una frase que dice esto exige que se cumpla aquello
+#   palabras: <expresiones, separadas por |>  (tal como se escriben, con mayúsculas)
+#   exige: <condiciones del guion>          ({k}: quien la dice; donde:{k}:propia: en su propia casa); varias líneas: una u otra
+#   salvo: <quienes>                        (no vale para ellos)
+
+# ---------------------------------------------------------------- lo que debería haber
+=== espera: algo que decirle ===
+quiénes: todos
+cuando: ve:{k}
+hay: algo
+
+=== espera: reacciona al camisón fuera de Tejas Verdes ===
+quiénes: adultos
+cuando: ve:{k}, ana:camison, !donde:ana:tejas
+hay: reacción ana:camison
+
+=== espera: reacciona si Ana está sin sombrero en la iglesia ===
+quiénes: adultos
+cuando: ve:{k}, ana:sin_sombrero, donde:ana:ig
+hay: reacción ana:sin_sombrero
+
+=== espera: reacciona si Ana anda sola de noche ===
+quiénes: adultos
+cuando: ve:{k}, hora:21-26, !donde:ana:tejas
+hay: reacción hora
+
+# ---------------------------------------------------------------- lo que no puede pasar
+=== nunca: la escuela, la iglesia, la tienda y el salón, de noche ===
+si: hora:21-26, donde:ana:publico
+
+# ---------------------------------------------------------------- lo que una frase supone
+=== referencia: «pasa» invita a entrar ===
+palabras: Pasa, pasa | Pasa, niña | Pasa,
+exige: donde:{k}:propia
+
+=== referencia: la nieve y el frío son del invierno ===
+palabras: nieve | helad | frío terrible | frío de mil demonios | Nieve
+exige: estacion:invierno
+
+=== referencia: el calor es del verano ===
+palabras: calor | Calor
+exige: estacion:verano
+
+=== referencia: la Srta. Stacy, cuando ya llegó ===
+palabras: Stacy
+exige: hecho:llego_stacy
+
+=== referencia: los Allan, cuando ya llegaron ===
+palabras: Sra. Allan | pastor nuevo | nuevo pastor
+exige: presente:sraallan
+
+=== referencia: «Zanahorias» y la pizarra, después de la escuela ===
+palabras: Zanahorias | pizarra rota
+exige: hecho:zanahorias
+
+=== referencia: la tía Josephine, cuando ya vino ===
+palabras: Josephine
+exige: presente:josephine
+exige: hecho:cama_josephine
+salvo: josephine
+
+=== referencia: Gilbert, cuando ya volvió ===
+palabras: Gilbert
+exige: hecho:llego_gilbert
+salvo: gilbert
+
+=== referencia: «saludos a Marilla», fuera de Tejas Verdes ===
+palabras: Saludos a Marilla | Saluda a Marilla
+exige: !donde:ana:tejas
