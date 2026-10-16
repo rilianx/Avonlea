@@ -20,7 +20,7 @@ function update(dt){
   // late at night Ana gets sleepy (twice, out loud), and past two in the morning she falls asleep
   { const hn = hourNow(); if (hn < 20) sleepyStage = 0;
     else if (hn >= 26 && !game.talk) goSleep(true);
-    else if (sleepyStage < 2 && hn >= [21, 23.5][sleepyStage] && !game.talk && !amb.cur && !writtenTalkOn()) comentar('sueno_' + (++sleepyStage)); }
+    else if (sleepyStage < 2 && hn >= [21, 23.5][sleepyStage] && !game.talk && !amb.cur && !writtenTalkOn() && !(dlgHechos().inicio_juego && !dlgHechos().llegada_tv) && !CAP1.on) comentar('sueno_' + (++sleepyStage)); }
   // Ana: walks where she is told (not while talking or cooking); sits on the bench until she moves
   let mx = 0, my = 0;
   if (!menuOpen() && !game.cooking && !game.map && $('ai').hidden) {
@@ -343,7 +343,7 @@ function renderView(){
   const I = game.inv, bits = [];
   for (const k of ITEMS) if (I[k]) bits.push(ITEM_DEFS[k].icon + ' ' + (k === 'dolares' ? money(I[k], true) : I[k]));
   if (game.hasCan) bits.push('💧 ' + game.water + '/6');
-  $('inv').textContent = bits.length ? bits.join('  ') : 'Ana · Tejas Verdes';
+  $('inv').textContent = bits.length ? bits.join('  ') : 'Ana · ' + dondeAna();   // (with nothing in her hands: where she is)
   const ts = activeTasks(), tl = [...storyOpen().filter(e => !e.played).slice(0, 2).map(e => '📖 ' + e.hora + ':00 · ' + e.pista), ...ts.map(t => '📜 ' + taskText(t) + (t.para !== t.from || t.tipo !== 'traer' ? ' · ' + NAMES[t.from] : ''))].join('\n');
   if ($('tasks').dataset.t !== tl) { $('tasks').dataset.t = tl; $('tasks').textContent = tl; $('tasks').style.whiteSpace = 'pre-line'; $('tasks').hidden = !tl; }
   const d = dayT % 1, hh = Math.floor((d * 24 + 6) % 24), mm = Math.floor(((d * 24 + 6) % 1) * 60);

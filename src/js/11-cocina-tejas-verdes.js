@@ -37,7 +37,7 @@ function drawKitchen(c, t, night){
   c.strokeStyle = 'rgba(120,100,80,.2)'; for (let x = 10; x < KIT.w; x += 10) { c.beginPath(); c.moveTo(x, 2); c.lineTo(x, 2.4 * T - 2); c.stroke(); }
   blob(c, [[KIT.w / 2 - 34, 10], [KIT.w / 2 + 34, 10], [KIT.w / 2 + 34, 52], [KIT.w / 2 - 34, 52]], night > .3 ? '#3b4a72' : '#bfe0ea');
   c.strokeStyle = '#7a5536'; c.lineWidth = 3; c.beginPath(); c.moveTo(KIT.w / 2, 10); c.lineTo(KIT.w / 2, 52); c.moveTo(KIT.w / 2 - 34, 31); c.lineTo(KIT.w / 2 + 34, 31); c.stroke();
-  ell(c, KIT.w / 2 - 30, 58, 6, 4, '#c54a3c', true); ell(c, KIT.w / 2 + 30, 58, 6, 4, '#f2c14e', true);
+  blob(c, [[KIT.w / 2 - 36, 60], [KIT.w / 2 - 24, 60], [KIT.w / 2 - 26, 70], [KIT.w / 2 - 34, 70]], '#a0522d'); ell(c, KIT.w / 2 - 30, 57, 9, 5, '#5c8c4a', true); ell(c, KIT.w / 2 - 33, 52, 4, 3, '#c54a3c', true); ell(c, KIT.w / 2 - 26, 51, 4, 3, '#d8584a', true); ell(c, KIT.w / 2 + 30, 58, 6, 4, '#f2c14e', true);   // (the apple-scented geranium, red: Bonny, cap. 4)
   for (const sx of [10.5 * T]) { blob(c, [[sx - 34, 30], [sx + 34, 30], [sx + 34, 34], [sx - 34, 34]], '#8a6040'); for (let k = 0; k < 4; k++) ell(c, sx - 24 + k * 16, 25, 5, 5, ['#e8d9b8', '#d9a441', '#b5604c', '#9db3bf'][k], true); }
   ell(c, 7 * T, 6.8 * T, 70, 30, '#b9655a', true); ell(c, 7 * T, 6.8 * T, 52, 21, '#d9a441'); ell(c, 7 * T, 6.8 * T, 32, 12, '#5c8c63');
   // the stove: black iron with a kettle (steam when she cooks)

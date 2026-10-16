@@ -5,7 +5,7 @@ let TALKS = [];
 function talkPlay(lines, o = {}){
   const L = lines.map(l => Array.isArray(l) ? (l[0] === '?' ? { q: '?', t: 'elige', opc: l[2] } : l[0] === '!' ? { q: '!', t: 'accion', acc: l[2] } : { q: l[0], t: l[1], m: l[2] }) : l).filter(l => l.t && l.t !== '…');
   for (const k of o.hold || []) CHAT_HOLD[k] = TT + 1e6;
-  const t = { hold: o.hold, lines: L, i: -1, wait: o.delay ?? .5, gap: o.gap || 0, ch: o.ch, stop: o.stop, end: o.end, budget: o.budget ? o.budget * MIN_S : 0, el: 0, use: o.use, resumen: o.resumen };
+  const t = { hold: o.hold, lines: L, i: -1, wait: o.delay ?? .5, gap: o.gap || 0, ch: o.ch, stop: o.stop, end: o.end, siempre: o.siempre, budget: o.budget ? o.budget * MIN_S : 0, el: 0, use: o.use, resumen: o.resumen };
   if (o.ch && TALKS.some(x => x.ch === o.ch)) { if (o.queue) (TALK_Q[o.ch] ||= []).push(t); return t; }
   TALKS.push(t); if (t.resumen) logEv(t.resumen, []); return t;
 }
@@ -29,7 +29,7 @@ function talkTick(dt){
 // the scene waits until the player goes on (with no one to read it, or Ana on her own, after a while)
 function narrar(t, texto){
   if (typeof relatoLinea === 'function' && RELATO.on) relatoLinea('(Narración) ' + texto, { quien: 'narra', dice: texto });
-  if (navigator.webdriver || ana.hidden) { t.wait = .2; return; }
+  if (navigator.webdriver || (ana.hidden && !t.siempre)) { t.wait = .2; return; }   // (siempre: a card even before she is to be seen: the beginning at the station, before the train)
   t.wait = 1e9; let el = $('narra');
   if (!el) { el = document.createElement('div'); el.id = 'narra'; document.body.appendChild(el);
     el.style.cssText = 'position:fixed;left:50%;top:14%;transform:translateX(-50%);width:min(520px,calc(100vw - 32px));z-index:40;background:#f6ecd2;color:#3b2a1c;border:1px solid #8a6a48;border-radius:10px;box-shadow:0 6px 24px rgba(40,25,10,.35);padding:16px 20px 12px;font:italic 16px/1.5 Georgia,serif'; }
@@ -111,10 +111,10 @@ const tripOn = () => game.scene === 'camino' || cart.riding || (!!AGENTS.ana?.ri
 const tripSpeed = () => GAME_SPEED;   // (the time can go faster anywhere: up to 50×)
 let tripTxt = '';
 function tripBarDraw(){
-  const on = tripOn(); $('tripbar').hidden = !on; if (!on) return;
+  const on = tripOn() && $('talk').hidden && !document.querySelector('#narra:not([hidden])'); $('tripbar').hidden = !on; if (!on) return;   // (not over a choice or a card: it would hide them)
   let s = '🐴 En la calesa';
   if (game.scene === 'camino') { const d = PEOPLE[game.road?.with], dir = d?.roadDir || 1, tr = roadTramo(ana.roadS); s = ana.onCart ? `🐴 ${dir > 0 ? 'Hacia Avonlea' : 'Hacia Bright River'} · ${tr.name} · faltan ${millas(roadMiles(ana.roadS, dir))}` : `🚶 A pie · ${tr.name} · ${millas(roadMiles(ana.roadS, 1))} a Tejas Verdes, ${millas(roadMiles(ana.roadS, -1))} a la estación`; }
-  else if (CAP1.on && !CAP1.done) s = '📖 Capítulo 1 · ' + fmtHour(hourNow());
+  else if (CAP1.on && !CAP1.done) s = CAP1.juego ? (game.scene === 'br' ? '🚉 Bright River · ' : '🐴 Con Matthew, camino a Avonlea · ') + fmtHour(hourNow()) : '📖 Capítulo 1 · ' + fmtHour(hourNow());   // (the beginning at the station: where she is, not a chapter of the tests)
   if (s !== tripTxt) { tripTxt = s; $('tripstop').textContent = s; }
 }
 // the island, the big map: only the towns, the roads between them, and where Ana is

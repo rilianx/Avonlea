@@ -122,13 +122,14 @@ const reacDeTexto = t => { if (!REAC_TXT) { REAC_TXT = new Map(); const add = l 
     for (const c of Object.values(CH)) (c.lines || []).forEach(add); for (const f of Object.values(FOLKBY)) (f.def.lines || []).forEach(add);
     for (const d of (typeof DIALOGOS !== 'undefined' ? DIALOGOS : [])) { const r = reaccionDe([].concat(d.si || []).map(String)).map(claveReac); if (r.length) try { for (const l of d.lineas()) if (typeof l[1] === 'string') REAC_TXT.set(l[1], r); } catch (e) {} } }
   return REAC_TXT.get(t) || []; };
-// what Ana has heard from each one today (a gesture alone, «(Asiente.)», is not a thing said): no one says the same thing twice in a day (when they have said all they have,
+// what Ana has heard from each one today (a gesture alone, «(Asiente.)», is not a thing said, nor a little word of theirs): no one says the same thing twice in a day (when they have said all they have,
 // they say nothing more: silence, not a repeat)
 const OIDO = { dia: -1, k: {}, r: {} };
 const oidoHoy = k => { k = String(k).replace(/^f:/, ''); if (OIDO.dia !== today()) { OIDO.dia = today(); OIDO.k = {}; OIDO.r = {}; } return OIDO.k[k] ||= new Set(); };
 const comentoHoy = k => { oidoHoy(k); return OIDO.r[String(k).replace(/^f:/, '')] ||= new Set(); };   // (what they remarked of her today: «ana:camison», «hora»)
 // something said aloud: Ana heard it (and, if it remarks how she is, it was remarked)
-const oido = (q, t) => { if (q === 'ana') return; for (const r of reacDeTexto(t)) comentoHoy(q).add(r); if (!/^\([^)]*\)$/.test(t)) oidoHoy(q).add(t); };
+const oido = (q, t) => { if (q === 'ana') return; for (const r of reacDeTexto(t)) comentoHoy(q).add(r); if (!/^\([^)]*\)$/.test(t) && !muletilla(t)) oidoHoy(q).add(t); };
+const muletilla = t => t.replace(/\([^)]*\)/g, '').trim().split(/\s+/).length <= 3;   // («Ya lo creo.», «Gracias.», «Hmpf.»: one's way of talking, said again and again)
 const sinRepetir = (k, L) => { const o = oidoHoy(k); return L.filter(t => !o.has(t)); };
 const lineasDe = (k, a) => sinRepetir(k, [...lineasConVoz(k, a), ...(typeof guiñosDe === 'function' ? guiñosDe(k) : [])].map(t => typeof saludoHora === 'function' ? t.replace(/Buenos días|Buenas tardes|Buenas noches/, saludoHora) : t));   // (the greeting, as the hour is)   // (someone who does not know Ana: none with her name)
 // who is in Avonlea, and from/until when, as in the book (src/datos/llegadas.txt). Arriving and leaving are events of

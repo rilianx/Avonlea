@@ -261,6 +261,8 @@ const wmFact = (f, who = []) => { for (const k of who) wmKnow(k, f); };
 
 // --- where everyone is, as the model sees it: a place key ('p:k' = out of doors where k stands; 'cocina'; 'h:room')
 const wmBody = k => k === 'ana' ? ana : PEOPLE[k] || FOLKBY[k];
+// where someone lives, as the planner sees it (the kitchen of Green Gables, or a house): where one visits them
+const casaPos = k => { const h = CH[k]?.home; return !h || !HOUSES[h] ? null : h === 'gg' ? 'cocina' : 'h:' + h; };
 const wmScene = k => k === 'ana' ? game.scene : wmBody(k)?.where;
 function personKey(k){
   const b = wmBody(k), w = wmScene(k); if (!b || !w || w === 'away' || w === 'in') return null;
@@ -360,7 +362,7 @@ function verbs(s, me, C){
     if (s.ofensa[k + '>' + me] && !s.facts['disc:' + k + '>' + me]) add('disculparse', 2, t => { socialRule(stateR(t), 'disculparse', me, k); }, { k });
     if (C.intercede && C.intercede[0] === k && !s.facts['intercede:' + k + '>' + C.intercede[1]]) add('interceder', 2, t => { socialRule(stateR(t), 'interceder', me, k, C.intercede[1]); t.facts['intercede:' + k + '>' + C.intercede[1]] = 1; }, { k, por: C.intercede[1] });
     // (from the book) a visit to someone at home; giving back what was lent; friends of the soul; forgiving; caring for the sick; scolding; taking someone in the cart
-    if (C.kind === 'visitar' && ((s.pos[k] || '').startsWith('h:') || s.pos[k] === 'cocina' && !CUTHBERT.includes(me))) if (!s.facts['visita:' + me + '>' + k]) add('visitar', 12, t => { t.facts['visita:' + me + '>' + k] = 1; t.rel[k + '>' + me] = Math.min(5, (t.rel[k + '>' + me] ?? 2) + 1); }, { k });
+    if (C.kind === 'visitar' && (casaPos(k) ? s.pos[k] === casaPos(k) && !(casaPos(k) === 'cocina' && CUTHBERT.includes(me)) : (s.pos[k] || '').startsWith('h:') || s.pos[k] === 'cocina' && !CUTHBERT.includes(me))) if (!s.facts['visita:' + me + '>' + k]) add('visitar', 12, t => { t.facts['visita:' + me + '>' + k] = 1; t.rel[k + '>' + me] = Math.min(5, (t.rel[k + '>' + me] ?? 2) + 1); }, { k });   // (a visit is to their own house, with them at home: not wherever they are visiting)
     if (C.kind === 'devuelto') for (const f of Object.keys(s.facts)) { const m = f.match(/^prestado:(\w+):(\w+)>(\w+)$/); if (m && m[2] === k && m[3] === me && inv[m[1]] > 0) add('devolver', 1, t => { t.invs[me][m[1]] -= 1; t.invs[k][m[1]] = (t.invs[k][m[1]] || 0) + 1; delete t.facts[f]; t.facts['devuelto:' + m[1] + ':' + me + '>' + k] = 1; t.rel[k + '>' + me] = Math.min(5, (t.rel[k + '>' + me] ?? 2) + 1); }, { k, x: m[1] }); }
     { const pair = 'amigas:' + [me, k].sort().join('&'); if (C.kind === 'amigas' && !s.facts[pair] && JURAN.includes(me) && JURAN.includes(k) && (s.rel[k + '>' + me] ?? 2) >= 4 && (s.rel[me + '>' + k] ?? 3) >= 4) add('jurar', 5, t => { t.facts[pair] = 1; t.rel[k + '>' + me] = 5; t.rel[me + '>' + k] = 5; }, { k }); }
     if (C.kind === 'paces' && s.ofensa[me + '>' + k] && (s.facts['disc:' + me + '>' + k] || (s.rel[me + '>' + k] ?? 2) >= 1)) add('perdonar', 2, t => { delete t.ofensa[me + '>' + k]; t.rel[me + '>' + k] = Math.min(5, (t.rel[me + '>' + k] ?? 2) + 1); }, { k });

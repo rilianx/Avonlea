@@ -67,6 +67,6 @@ function cap1Tick(){
   // home: Matthew helps her down; Marilla comes out: where is the boy?
   if (f.st && !f.arrived && M.where === 'gg' && !wmDriven('matthew')) { f.arrived = 1; dlgHecho('matthew_llego_casa'); CHAT_HOLD.matthew = TT + 1e6; }   // (home: he waits in the kitchen while what was being said on the way is said to the end)
   if (f.arrived && !f.home && !talkBusy('viaje') && !TALKS.some(t => t.esc === 'tejas_verdes')) {
-    f.home = 1; dlgHecho('llegaron'); if (game.scene !== 'gg') goIn('gg'); ana.sit = false; cap1Mark('baja_ana', 'Matthew bajó a Ana de la calesa en el patio oscuro de Tejas Verdes, entre los álamos, y entraron a la casa.');
+    f.home = 1; dlgHecho('llegaron'); if (CAP1.juego) { cap1AlJuego(); return; } if (game.scene !== 'gg') goIn('gg'); ana.sit = false; cap1Mark('baja_ana', 'Matthew bajó a Ana de la calesa en el patio oscuro de Tejas Verdes, entre los álamos, y entraron a la casa.');
   }
 }

@@ -12,7 +12,7 @@ const root = path.resolve(__dirname, '..'), leer = f => fs.readFileSync(path.joi
 const guion = leer('src/datos/guion.txt') + '\n' + leer('src/datos/conversaciones.txt'), cuaderno = leer('src/datos/cuaderno.txt'), habilidades = leer('src/datos/habilidades.txt');
 const codigo = fs.readdirSync(path.join(root, 'src/js')).filter(f => /^\d\d-.*\.js$/.test(f) && !/metas-de-prueba/.test(f)).map(f => leer('src/js/' + f)).join('\n');
 // the keys the engine knows (dlgCond in src/js/21-escenas-dialogo.js), and a quality compared with a number
-const CLAVES = ['hecho', 'dicha', 've', 'donde', 'ana', 'conoce', 'presente', 'marca', 'capitulo', 'cuaderno', 'tomando_te', 'afecto', 'dias_desde', 'sentada', 'estudio', 'camino', 'estacion', 'dia_estacion', 'dia_juego', 'hora', 'no_hoy', 'canal_libre', 'ana_visible', 'escena_ana', 'sabe', 'comento', 'y_mayor', 'carta'];
+const CLAVES = ['hecho', 'dicha', 've', 'donde', 'ana', 'conoce', 'presente', 'marca', 'capitulo', 'cuaderno', 'tomando_te', 'afecto', 'dias_desde', 'sentada', 'estudio', 'camino', 'estacion', 'dia_estacion', 'dia_juego', 'hora', 'no_hoy', 'canal_libre', 'ana_visible', 'escena_ana', 'sabe', 'comento', 'horas_desde', 'y_mayor', 'carta'];
 const CUALIDAD = /^([a-zñ_]+):([a-zñ_]+)(?::([a-zñ_]+))?\s*(>=|<=|>|<|==|=)\s*(-?\d+(?:\.\d+)?)$/;
 // the qualities there are: the affection, the skills (src/datos/habilidades.txt), and whatever a scene adds to («suma x:…»)
 const CUALIDADES = new Set(['afecto', ...[...habilidades.matchAll(/^===\s*(.+?)\s*===$/gm)].map(m => m[1]), ...[...guion.matchAll(/al_(?:empezar|terminar):\s*suma\s+([a-zñ_]+):/g)].map(m => m[1])]);
@@ -44,6 +44,7 @@ for (const raw of guion.split('\n')) {
   if (esc.body) { const m = s.match(/^!\s*(hecho|olvidar)\s+(\S+)/); if (m) anota(m[1] === 'hecho' ? hace : pide, m[1] === 'hecho' ? m[2] : m[2] + ' ', 'escena ' + esc.id + ' (una opción)'); if (s.startsWith('->')) esc.opciones = (esc.opciones || 0) + 1; continue; }
   const i = s.indexOf(':'), k = i < 0 ? s : s.slice(0, i).trim(), v = i < 0 ? '' : s.slice(i + 1).trim();
   if (k === 'si') { esc.si = v; v.split(',').forEach(c => condicion(c, 'escena ' + esc.id)); }
+  if (k === 'narra salvo') v.split(',').forEach(c => condicion(c.trim(), 'escena ' + esc.id + ' (narra salvo)'));
   if (k === 'o') { const m = v.match(/si=(\S+)/); if (m) m[1].split(',').forEach(c => condicion(c, 'escena ' + esc.id + ' (alternativa)')); }
   if (k === 'grande') esc.grande = true;
   if (k === 'al_empezar' || k === 'al_terminar') { const [w, x] = v.split(/\s+/); if (w === 'hecho') anota(hace, x, 'escena ' + esc.id); if (w === 'olvidar') anota(pide, x + ' ', 'escena ' + esc.id); }

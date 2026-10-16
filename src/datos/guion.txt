@@ -19,7 +19,8 @@
 #   «! pasa_tiempo 4» (horas: un viaje), «! a_cocina» (Ana entra a la cocina y Marilla está ahí), «! a_la_mesa» (a comer
 #   con los Cuthbert), «! acostarse» (sube y se acuesta), «! junto ana marilla» (va al lado de: un abrazo).
 # «donde: tejas»: Ana anda por Tejas Verdes (la cocina, su pieza o el patio); «donde: casa», la cocina o el patio.
-# En «si:», también: «comento:lynde:ana:camison» (ya le comentó hoy eso: el camisón, «hora», el sombrero), «ve:marilla» (Marilla la ve), «donde:ana:tejas» (o con «!»), «ana:camison», «ana:sin_sombrero»,
+# «narra salvo: <condiciones>»: las tarjetas de «narra:», salvo cuando se cumple (lo que cuentan, la jugadora lo acaba de jugar).
+# En «si:», también: «horas_desde:llegada_tv:0.5» (pasó por lo menos media hora desde ese hecho), «comento:lynde:ana:camison» (ya le comentó hoy eso: el camisón, «hora», el sombrero), «ve:marilla» (Marilla la ve), «donde:ana:tejas» (o con «!»), «ana:camison», «ana:sin_sombrero»,
 #   «ana:ropa_tirada»; y las cualidades de uno hacia otro: «paciencia:marilla:ana<=1» (src/datos/habilidades.txt).
 # «! vestirse»; «! punto id | texto» (un punto para volver: la partida como está ahora); «! final id | texto» (la
 #   historia termina: una tarjeta, y se puede volver a un punto o empezar de nuevo).
@@ -743,6 +744,7 @@ marilla: Bueno. Hay otro examen el año que viene, y tú no eres de las que se r
 === inicio_llegada ===
 narra: Avonlea, un pueblito de granjas en la Isla del Príncipe Eduardo, en Canadá, a fines del siglo XIX. En la granja de Tejas Verdes viven dos hermanos solterones, Matthew y Marilla Cuthbert. Ya están mayores, y le pidieron a la Sra. Spencer que les trajera del orfanato un niño, para ayudar en el campo.
 narra: Pero en la estación de Bright River, Matthew no encontró a ningún niño: lo esperaba una niña flaca, de pelo rojo, con un sombrero de paja y una maleta vieja. Matthew no se atrevió a dejarla allí. Ahora llegan juntos a Tejas Verdes, ya de noche, y Marilla los está esperando en la puerta de la cocina.
+narra salvo: hecho:desde_estacion
 canal: gg
 prioridad: 10
 interrumpe
@@ -806,7 +808,7 @@ narra: Ya es noche cerrada. Marilla toma la vela, busca a Ana y la lleva hasta l
 canal: gg
 prioridad: 9
 interrumpe
-si: hecho:primera_noche, !hecho:desayuno_prueba, !dicha:primera_bed, hora:21-29
+si: hecho:primera_noche, !hecho:desayuno_prueba, !dicha:primera_bed, hora:21-29, horas_desde:llegada_tv:0.5
 al_terminar: a_pieza
 
 # la primera noche, en la pieza del alero (cap. 3): apenas llega, Ana se tira en la cama, desconsolada; Marilla sube con
@@ -1208,6 +1210,27 @@ al_terminar: hecho devuelta
 al_terminar: log Marilla le entregó Ana a la Sra. Blewett.
 al_terminar: final devuelta | Ana se fue con la Sra. Blewett. En el libro, Marilla no la entregó: Ana se ganó, poco a poco, su lugar en Tejas Verdes.
 
+# --- La tarjeta del Padrenuestro (cap. 8): la mañana del día en que Marilla le va a decir que se queda, le da una
+# tarjeta con la oración para que la aprenda; Ana la apoya contra el jarro mientras lava los platos
+=== tarjeta_oracion ===
+canal: gg
+prioridad: 5
+sujeta: marilla
+si: hecho:a_prueba, !hecho:se_queda, ve:marilla, hora:7.5-13
+al_terminar: hecho tarjeta_oracion
+---
+marilla: Toma, Ana. Es el Padrenuestro, impreso. Lo vas a aprender de memoria. Se acabó eso de rezar inventando.
+ana: (Ana apoya la tarjeta contra el jarro del agua y la va leyendo mientras lava los platos, moviendo los labios.)
+ana: «Padre nuestro, que estás en los cielos, santificado sea tu nombre…» ¡Marilla, es como música! Como cuando una lee un poema.
+marilla: No es un poema, es una oración. Y no te distraigas, que tienes la loza en la mano.
+-> «Lo voy a aprender aunque me devuelvan.»
+   ana: Lo voy a aprender igual, aunque me devuelvan. Así me lo llevo conmigo, y es mío.
+   marilla: (Marilla se queda mirándola un momento, con el paño en la mano, y no dice nada.)
+   ! suma paciencia:marilla:ana 1
+->* «Santificado… ¿qué quiere decir santificado?»
+   ana: Santificado… ¿qué quiere decir santificado? Suena como una campana grande, muy lejos.
+   marilla: Quiere decir sagrado, que se respeta. Apréndetelo primero, y no hables tanto: entenderlo viene después.
+
 === se_queda ===
 narra: «Por razones que solo ella sabía, Marilla no le dijo a Ana que se quedaba en Tejas Verdes hasta la tarde siguiente.» Ana se ha pasado el día con el corazón en la boca, sin atreverse a preguntar.
 canal: gg
@@ -1268,6 +1291,40 @@ tambien
 ---
 ana: ¡Un armario! Nunca tuve un armario para mí sola. En el orfanato teníamos un clavo cada una, y a veces ni eso.
 ana: Voy a imaginar que es la puerta de un castillo encantado. Aunque por ahora solo guarde un sombrero.
+
+# --- Bonny, el geranio (cap. 4): la mañana en que Ana espera que la devuelvan, le pone nombre al geranio de la cocina
+=== primera_geranio ===
+disparo: primera
+canal: ana_sola
+si: ve:marilla
+---
+ana: (Ana se acerca a la ventana de la cocina. En una maceta, un geranio con olor a manzana, lleno de flores rojas.)
+ana: Marilla, ¿cómo se llama ese geranio?
+marilla: ¿Llamarse? Es un geranio con olor a manzana. No se llama de ninguna manera.
+ana: Oh, pero tiene que tener un nombre, como las personas. ¿Puedo ponerle uno, mientras esté aquí?
+->* Bonny
+   ana: Bonny. Le voy a decir Bonny. ¡Oh, déjeme, por favor!
+   ! nombrar geranio
+-> Otro nombre…
+   ana: Ya sé cómo se va a llamar. ¡Oh, déjeme, por favor!
+   ! nombrar geranio ?
+marilla: Por mí, como quieras. Pero ¿de qué sirve ponerle nombre a un geranio?
+ana: Me gusta que las cosas tengan nombre, aunque sean geranios. Las hace más personas. ¿Cómo sabe usted que no le duele que le digan «el geranio» y nada más?
+
+=== geranio_sola ===
+disparo: objeto
+objeto: geranio
+canal: ana_sola
+si: !hecho:nombro_geranio, !ve:marilla
+---
+ana: (Ana mete la nariz entre las hojas del geranio de la cocina. Huele a manzana.)
+ana: Nadie te ha puesto nombre, ¿verdad? Pobrecito. Vivir sin nombre es casi tan triste como no tener a nadie.
+->* Bonny
+   ana: Te voy a llamar Bonny. Mientras yo esté aquí, al menos, vas a tener nombre.
+   ! nombrar geranio
+-> Otro nombre…
+   ana: Te voy a poner un nombre. Mientras yo esté aquí, al menos, vas a tener uno.
+   ! nombrar geranio ?
 
 === primera_stairs ===
 disparo: primera

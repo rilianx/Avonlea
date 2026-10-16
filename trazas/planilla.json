@@ -62,7 +62,7 @@
    "viven": []
   }
  ],
- "generado": "2026-10-16 18:42",
+ "generado": "2026-10-16 20:00",
  "momentos": [
   {
    "id": "dia2",
@@ -2343,12 +2343,12 @@
    "en": "",
    "hablan": "",
    "lineas": 6,
-   "primera": "lynde: (Escena inventada) ¡Robert, señora Bell, no van a creer lo que les vengo a contar! Siéntense, que es para caerse de espaldas, eso es lo que es.",
+   "primera": "lynde: ¡Robert, señora Bell, no van a creer lo que les vengo a contar! Siéntense, que es para caerse de espaldas, eso es lo que es.",
    "quienes": [],
    "con": "",
    "una_vez": true,
    "texto": [
-    "lynde: (Escena inventada) ¡Robert, señora Bell, no van a creer lo que les vengo a contar! Siéntense, que es para caerse de espaldas, eso es lo que es.",
+    "lynde: ¡Robert, señora Bell, no van a creer lo que les vengo a contar! Siéntense, que es para caerse de espaldas, eso es lo que es.",
     "bell: ¿Qué pasa, Rachel? ¿Hay alguien enfermo?",
     "lynde: ¡Matthew y Marilla Cuthbert van a adoptar a un niño! ¡De un orfanato de Nueva Escocia! Matthew fue a buscarlo a Bright River esta misma tarde, con cuello blanco.",
     "bell: ¡No me diga! ¿Los Cuthbert? ¿Ellos, que no saben nada de niños?",
@@ -3444,7 +3444,7 @@
    "interrumpe": true,
    "grande": false,
    "repetir": "una_vez",
-   "si": "hecho:primera_noche, !hecho:desayuno_prueba, !dicha:primera_bed, hora:21-29",
+   "si": "hecho:primera_noche, !hecho:desayuno_prueba, !dicha:primera_bed, hora:21-29, horas_desde:llegada_tv:0.5",
    "en": "",
    "hablan": "",
    "lineas": 1,
@@ -3979,6 +3979,29 @@
    ]
   },
   {
+   "id": "tarjeta_oracion",
+   "canal": "gg",
+   "disparo": "",
+   "prioridad": 5,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "hecho:a_prueba, !hecho:se_queda, ve:marilla, hora:7.5-13",
+   "en": "",
+   "hablan": "marilla",
+   "lineas": 5,
+   "primera": "marilla: Toma, Ana. Es el Padrenuestro, impreso. Lo vas a aprender de memoria. Se acabó eso de rezar inventando.",
+   "quienes": [],
+   "con": "",
+   "una_vez": true,
+   "texto": [
+    "marilla: Toma, Ana. Es el Padrenuestro, impreso. Lo vas a aprender de memoria. Se acabó eso de rezar inventando.",
+    "ana: (Ana apoya la tarjeta contra el jarro del agua y la va leyendo mientras lava los platos, moviendo los labios.)",
+    "ana: «Padre nuestro, que estás en los cielos, santificado sea tu nombre…» ¡Marilla, es como música! Como cuando una lee un poema.",
+    "marilla: No es un poema, es una oración. Y no te distraigas, que tienes la loza en la mano."
+   ]
+  },
+  {
    "id": "se_queda",
    "canal": "gg",
    "disparo": "",
@@ -4067,6 +4090,52 @@
    "texto": [
     "ana: ¡Un armario! Nunca tuve un armario para mí sola. En el orfanato teníamos un clavo cada una, y a veces ni eso.",
     "ana: Voy a imaginar que es la puerta de un castillo encantado. Aunque por ahora solo guarde un sombrero."
+   ]
+  },
+  {
+   "id": "primera_geranio",
+   "canal": "ana_sola",
+   "disparo": "primera",
+   "prioridad": 1,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "ve:marilla",
+   "en": "",
+   "hablan": "marilla",
+   "lineas": 7,
+   "primera": "ana: (Ana se acerca a la ventana de la cocina. En una maceta, un geranio con olor a manzana, lleno de flores rojas.)",
+   "quienes": [],
+   "con": "",
+   "una_vez": true,
+   "texto": [
+    "ana: (Ana se acerca a la ventana de la cocina. En una maceta, un geranio con olor a manzana, lleno de flores rojas.)",
+    "ana: Marilla, ¿cómo se llama ese geranio?",
+    "marilla: ¿Llamarse? Es un geranio con olor a manzana. No se llama de ninguna manera.",
+    "ana: Oh, pero tiene que tener un nombre, como las personas. ¿Puedo ponerle uno, mientras esté aquí?",
+    "marilla: Por mí, como quieras. Pero ¿de qué sirve ponerle nombre a un geranio?",
+    "ana: Me gusta que las cosas tengan nombre, aunque sean geranios. Las hace más personas. ¿Cómo sabe usted que no le duele que le digan «el geranio» y nada más?"
+   ]
+  },
+  {
+   "id": "geranio_sola",
+   "canal": "ana_sola",
+   "disparo": "objeto",
+   "prioridad": 1,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "!hecho:nombro_geranio, !ve:marilla",
+   "en": "",
+   "hablan": "",
+   "lineas": 3,
+   "primera": "ana: (Ana mete la nariz entre las hojas del geranio de la cocina. Huele a manzana.)",
+   "quienes": [],
+   "con": "",
+   "una_vez": true,
+   "texto": [
+    "ana: (Ana mete la nariz entre las hojas del geranio de la cocina. Huele a manzana.)",
+    "ana: Nadie te ha puesto nombre, ¿verdad? Pobrecito. Vivir sin nombre es casi tan triste como no tener a nadie."
    ]
   },
   {
@@ -6011,7 +6080,7 @@
    "interrumpe": false,
    "grande": false,
    "repetir": "una_vez",
-   "si": "afecto:marilla:ana>=2",
+   "si": "afecto:marilla:ana>=2, !hecho:se_queda",
    "en": "",
    "hablan": "marilla",
    "lineas": 6,
@@ -6092,7 +6161,7 @@
    "interrumpe": false,
    "grande": false,
    "repetir": "una_vez",
-   "si": "afecto:marilla:ana>=3, hecho:a_prueba",
+   "si": "afecto:marilla:ana>=3, hecho:se_queda",
    "en": "",
    "hablan": "marilla",
    "lineas": 6,
@@ -6334,7 +6403,7 @@
    "interrumpe": false,
    "grande": false,
    "repetir": "una_vez",
-   "si": "afecto:matthew:ana>=2, hecho:nombro_avenida, hecho:nombro_lago",
+   "si": "afecto:matthew:ana>=2, hecho:nombro_avenida, hecho:nombro_lago, !dicha:nombra_avenida",
    "en": "",
    "hablan": "matthew",
    "lineas": 6,
@@ -8070,7 +8139,7 @@
    "interrumpe": false,
    "grande": false,
    "repetir": "siempre",
-   "si": "",
+   "si": "!capitulo",
    "en": "",
    "hablan": "",
    "lineas": 1,
@@ -8090,7 +8159,7 @@
    "interrumpe": false,
    "grande": false,
    "repetir": "siempre",
-   "si": "",
+   "si": "!capitulo",
    "en": "",
    "hablan": "",
    "lineas": 1,
@@ -8110,7 +8179,7 @@
    "interrumpe": false,
    "grande": false,
    "repetir": "siempre",
-   "si": "",
+   "si": "!capitulo",
    "en": "",
    "hablan": "",
    "lineas": 1,
@@ -11005,11 +11074,18 @@
    "devuelta": [
     "escena devuelta_blewett"
    ],
+   "tarjeta_oracion": [
+    "escena tarjeta_oracion"
+   ],
    "se_queda": [
     "escena se_queda"
    ],
    "nombro_cerezo": [
     "escena primera_gwin"
+   ],
+   "nombro_geranio": [
+    "escena primera_geranio",
+    "escena geranio_sola"
    ],
    "lynde_visita": [
     "escena lynde_visita"
@@ -11140,6 +11216,9 @@
    "inicio_juego": [
     "código"
    ],
+   "desde_estacion": [
+    "código"
+   ],
    "ropa_ordenada": [
     "código"
    ],
@@ -11260,6 +11339,9 @@
    "examen": [
     "meta queens (pista)"
    ],
+   "desde_estacion": [
+    "escena inicio_llegada (narra salvo)"
+   ],
    "inicio_juego": [
     "código"
    ],
@@ -11293,6 +11375,7 @@
     "escena armario_vestidos",
     "escena lugar_camino_blanco_flor",
     "escena lugar_primera_nieve",
+    "escena conv_marilla_por_que",
     "un comentario de espejo",
     "una frase de matthew",
     "una frase de marilla",
@@ -11303,7 +11386,9 @@
     "meta conocer_diana"
    ],
    "undefined": [
-    "escena primera_noche"
+    "escena primera_noche",
+    "un comentario de sueno_1",
+    "un comentario de sueno_2"
    ],
    "lynde": [
     "escena lynde_se_entera",
@@ -11312,9 +11397,9 @@
    ],
    "a_prueba": [
     "escena marilla_a_la_cama",
+    "escena tarjeta_oracion",
     "escena se_queda",
     "escena ventana_a_prueba",
-    "escena conv_marilla_por_que",
     "escena conv_marilla_vestidos",
     "una frase de blewett",
     "meta quedarse (pista)"
@@ -11353,7 +11438,8 @@
    ],
    "marilla": [
     "escena marilla_sabe_camison",
-    "escena marilla_sabe_camison_descalza"
+    "escena marilla_sabe_camison_descalza",
+    "escena geranio_sola"
    ],
    "marilla_sabe_camison": [
     "escena marilla_sabe_camison_descalza"
@@ -11369,6 +11455,9 @@
    ],
    "blewett_calla": [
     "escena duda_calla"
+   ],
+   "nombro_geranio": [
+    "escena geranio_sola"
    ],
    "lynde_visita": [
     "una frase de lynde",
@@ -11410,6 +11499,9 @@
     "escena conv_matthew_nombres"
    ],
    "nombro_lago": [
+    "escena conv_matthew_nombres"
+   ],
+   "nombra_avenida": [
     "escena conv_matthew_nombres"
    ],
    "ropa_arrugada": [
@@ -11550,6 +11642,7 @@
    "escena_ana",
    "sabe",
    "comento",
+   "horas_desde",
    "y_mayor",
    "carta"
   ],
@@ -11590,7 +11683,8 @@
    "nombro_burbuja",
    "nombro_cerezo",
    "nombro_senda",
-   "queens_primera"
+   "queens_primera",
+   "tarjeta_oracion"
   ],
   "malas": []
  },

@@ -50,3 +50,13 @@ se pregunta **qué regla general se rompió**, se escribe esa regla, y se deja q
 5. **¿El modelo no lo vio?** → el modelo entiende mal algo del juego, y se corrige el modelo (en la partida 8: leía `canal:` como el lugar de Ana, y es la cola de conversación).
 
 Después: `python3 tools/modelo.py`, se arregla lo que aparezca, y se juega de nuevo. La partida 8 (`trazas/partida8/`) es el primer ejemplo completo.
+
+## Los días a prueba (del 1 al 3)
+
+Lo que pasa entre que Ana llega y que Marilla decide (los cap. 2 a 8 del libro) se revisa de tres maneras:
+
+1. **Las metas** (`src/datos/cuaderno.txt`): solo las marcadas `a prueba` (rezar, ayudar en la casa, la huerta, ponerle nombre a las cosas) se pueden hacer antes de «quedarse»; las demás lo piden. `tools/grafo.js` lo revisa.
+2. **Las reglas** (`src/datos/reglas.txt`): nada supone que Ana se queda (la escuela, la escuela dominical, «cuando seas grande»); nadie le dice «ojalá te quedes» después de que se queda; Marilla y Matthew, mientras está a prueba, tienen algo que lo tenga en cuenta; no se llega al día 5 sin que Marilla decida. El modelo también lee los guiños del cuaderno (con sus `[condiciones]`).
+3. **Las jugadoras** (`node tools/aprueba.js`): siete estilos juegan desde la llegada hasta que Marilla decide (la obediente, la rebelde, la exploradora, la fugitiva, la encantadora, la insoportable, y la que empieza en Bright River). En lo que de verdad se dijo, revisa lo que el modelo no puede ver: que nadie repita una frase el mismo día ni vuelva a comentar lo mismo de ella, que nadie la llame por su nombre antes de conocerla, que nadie hable de su futuro antes de que la acepten, y que la historia termine a tiempo. Deja `trazas/aprueba/aprueba.md`, con todo lo que oyó cada una, para leerlo.
+
+Lo que salió de ahí, como reglas del motor: lo que alguien ya comentó de Ana (el camisón, la noche) no lo vuelve a comentar ese día, y si una escena suya va a comentarlo, la frase suelta le cede el turno (`comento:k:x`); nada se repite delante de ella (saludos, charlas entre vecinos, avisos), salvo las muletillas cortas y los gestos; los niños cuentan una noticia solo si tiene `dice niños:`; una respuesta solo nombra a quien cuenta la noticia.

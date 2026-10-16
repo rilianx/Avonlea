@@ -163,7 +163,8 @@ function chatLines(a, b, anaFree){
     else { const [x, y] = pares(); say(a, x); say(b, y); }
   }
   const t = AGENTS[a]?.task || AGENTS[b]?.task, who = AGENTS[a]?.task ? a : b;
-  say(who, t ? `Bueno, me voy, que tengo que ${stepText(t.a).replace(/^(\S+r)se\b/, '$1me')}.` : pick(['Bueno, ¡que le vaya bien!', 'Me voy, que se hace tarde.']));
+  const va = t && `Bueno, me voy, que tengo que ${stepText(t.a).replace(/^(\S+r)se\b/, '$1me')}.`;
+  say(who, va && !nombra(va, who) ? va : pick(['Bueno, ¡que le vaya bien!', 'Me voy, que se hace tarde.']));   // (not «ir a la casa de la Sra. Lynde», said by her)
   return L;
 }
 

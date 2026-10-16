@@ -20,7 +20,7 @@ const DLG_LUGARES = { lago: () => [LAKE.x, LAKE.y], tejas_verdes: () => [GG.x, G
 // what has happened (kept with the game: the chains of the book go on from one day to another); each with the day it
 // happened (from 1), so that a scene can wait a day or two after another (dias_desde)
 const dlgHechos = () => game.wm ? (game.wm.hechos ||= {}) : (game.dlgHechos ||= {});
-const dlgHecho = (n, v = today() + 1) => { dlgHechos()[n] = v; };
+const dlgHecho = (n, v = today() + 1) => { dlgHechos()[n] = v; if (game.wm) (game.wm.hechoT ||= {})[n] = dayT; };   // (and when, to the minute: «horas_desde:x:0.5»)
 const dlgDichas = () => game.escDone || (game.escDone = {});
 const dlgEscena = k => k === 'ana' ? game.scene : wmScene(k);
 function dlgCtx(){
@@ -52,6 +52,7 @@ function dlgCond(s, c){   // one condition of state, written as text
     case 'canal_libre': return !talkBusy(a);
     case 'ana_visible': return !ana.hidden;
     case 'escena_ana': return game.scene === a;
+    case 'horas_desde': { const [x, n] = rest.split(':'); const t = game.wm?.hechoT?.[x]; return !!dlgHechos()[x] && (t == null || (dayT - t) * 24 >= +n); }   // (at least n hours since x happened: time for what a card asked of the player)
     case 'comento': { const [x, ...y] = rest.split(':'); return comentoHoy(x).has(claveReac(y.join(':'))); }   // (a already remarked today how Ana is: «comento:lynde:ana:camison», «comento:barry:hora»)
     case 'sabe': return sabeCond(a, b, rest.split(':')[2]);   // (and which version they heard, or who told them: src/js/66-noticias.js)
     case 'y_mayor': { const p = wmBody(a); return !!p && p.y > +b * U; }
@@ -225,7 +226,7 @@ class Dialogo {
     L = (L || []).map(l => Array.isArray(l) ? l : [l.q, l.t, l.m]);
     if (this.elegir) L = this.elegir.map(i => L[i]).filter(Boolean);
     if (this.marcas) L = L.map((l, j) => this.marcas[j] && l[0] !== '!' && l[0] !== '?' ? [l[0], l[1], this.marcas[j]] : l);
-    if (this.narra) L = [...this.narra.map(x => ['narra', x]), ...L];   // (what explains it, first)
+    if (this.narra && !(this.narraSalvo && this.narraSalvo.every(c => dlgCond(c)))) L = [...this.narra.map(x => ['narra', x]), ...L];   // (what explains it, first; not what the player has just played)
     // (what changes with the day: the season, and something that really happened to her lately; a line left empty is not said)
     L = L.map(l => l[1] && /\{(estacion|noticia|[dD]e:)/.test(l[1]) ? [l[0], l[1].replace('{estacion}', ESTACION_TXT[S]).replace('{noticia}', () => cartaNoticia() || '').replace(/\{([dD])e:(\w+):(\w+)\}/g, (_, d, k, f) => { const q = quienConto(k, f); return d === 'D' ? q[0].toUpperCase() + q.slice(1) : q; }), l[2]] : l);   // ({de:marilla:x}: who told her; {De:…}, at the start of a sentence)
     return L.filter(l => l[1] && l[1] !== '…' && l[1].trim() !== '');
@@ -354,6 +355,7 @@ function dlgGuion(txt){
       const m = v.match(/^(.*?)\s+#(\S+)$/); c._l.push(m ? [k, m[1], m[2]] : [k, v]); continue; }
     if (k === 'al_empezar' || k === 'al_terminar') (c[k] ||= []).push(dlgAccion(v));
     else if (k === 'narra') (c.narra ||= []).push(v);   // (a text that explains, before the scene: a card, as in a book)
+    else if (k === 'narra salvo') c.narraSalvo = v.split(',').map(x => x.trim());   // (the cards, unless this holds: what they tell, the player has just played)
     else if (k === 'o') (c.o ||= []).push(dlgCampo('o', v));
     else c[k] = dlgCampo(k, v);
   }
@@ -638,4 +640,5 @@ ROOMS.ga = {
 // the kitchen has the stairs up to her room
 HOUSES.gg.interior.draw = (c, t, night) => { drawKitchen(c, t, night); drawStairsUp(c); };
 { const b0 = HOUSES.gg.interior.blocked; HOUSES.gg.interior.blocked = (x, y) => b0(x, y) || (x > 11.1 * T && y < 4.5 * T); }
-{ const a0 = HOUSES.gg.interior.actions; HOUSES.gg.interior.actions = add => { a0(add); add('stairs', STAIRS.x, STAIRS.y, 44, 'Subir a la pieza de Ana', () => salirSiPuede(() => goIn('ga', [KDOOR.x, KIT.h - 28])), { hy: 40, hit: 0, pri: 1, test: (x, y) => x > 11.1 * T && x < 12.9 * T && y > 2.2 * T && y < 4.7 * T }); }; }
+{ const a0 = HOUSES.gg.interior.actions; HOUSES.gg.interior.actions = add => { a0(add);
+  add('geranio', KIT.w / 2 - 30, 2.4 * T + 18, 40, game.wm?.nombres?.geranio ? 'Mirar a ' + nombreDe('geranio') + ' (el geranio)' : 'Mirar el geranio de la ventana', () => primeraVez('geranio') || escenaObjeto('geranio') || anaSays(nombreMay(nombreDe('geranio')) + '. Huele a manzana, si una cierra los ojos.'), { hy: 40, hit: 0, pri: 2, test: (x, y) => Math.abs(x - (KIT.w / 2 - 30)) < 22 && y < 2.6 * T }); add('stairs', STAIRS.x, STAIRS.y, 44, 'Subir a la pieza de Ana', () => salirSiPuede(() => goIn('ga', [KDOOR.x, KIT.h - 28])), { hy: 40, hit: 0, pri: 1, test: (x, y) => x > 11.1 * T && x < 12.9 * T && y > 2.2 * T && y < 4.7 * T }); }; }

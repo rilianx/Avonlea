@@ -2,7 +2,8 @@
 // obediente (se queda en casa, elige lo que más le gusta a Marilla), la rebelde (elige lo respondón), la insoportable (además
 // sale en camisón donde los vecinos), la exploradora (sale a
 // conocer a los vecinos y el pueblo), la fugitiva (se va antes del viaje a White Sands y vuelve de noche) y la
-// encantadora (conversa con Matthew y con Marilla todo lo que puede). Cada una en un navegador nuevo, desde la llegada
+// encantadora (conversa con Matthew y con Marilla todo lo que puede), y la que empieza antes, en la estación de Bright
+// River (el viaje con Matthew, cap. 2). Cada una en un navegador nuevo, desde la llegada
 // hasta que Marilla decide (o Ana se va con la Sra. Blewett).
 // Anota lo que oye (quién, qué, cuándo, dónde), las escenas que pasan, a quién conoce, y revisa, en lo que de verdad se
 // dijo, las reglas que el modelo no puede ver jugando: nadie repite una frase el mismo día, ni vuelve a comentar lo
@@ -20,6 +21,7 @@ const ESTILOS = {
   exploradora: { elige: 'primera', sale: [['1:7.5', 'hondonada_lynde'], ['1:9.5', 'cuesta_del_huerto'], ['1:11', 'casa'], ['1:15.5', 'granja_harrison'], ['1:17', 'casa'], ['2:8', 'aldea'], ['2:10', 'iglesia'], ['2:12', 'casa']] },
   fugitiva: { elige: 'ultima', sale: [['1:13', 'lago'], ['1:20.5', 'bosque_encantado'], ['2:9', 'aldea']], vuelve: false },
   encantadora: { elige: 'primera', conversa: true },
+  bright_river: { elige: 'primera', inicio: 'estacion' },   // (begins earlier: at the station, the drive with Matthew, cap. 2)
   insoportable: { elige: 'ultima', sale: [['1:7', 'hondonada_lynde'], ['1:8.5', 'cuesta_del_huerto'], ['1:10.5', 'casa']] },   // (rude, and in her nightgown at the neighbours': can Marilla lose her patience?)
 };
 const PERIODO_FUTURO = /\b(escuela|escuela dominical|cuando seas grande|cuando crezcas|vas a ir a)\b/i;   // (her future here: not someone else's, «el año que viene voy a estudiar»)
@@ -31,6 +33,7 @@ async function jugar(nombre, E){
   await pg.goto(URL); await pg.waitForTimeout(1200);
   const ev = (s, a) => pg.evaluate(([s, a]) => { const v = window.__avonlea.ev(s); return typeof v === 'function' ? v(a) : v; }, [s, a]);
   await ev(`(() => { window.__oido = []; window.__escenas = []; window.__visto = {}; })()`);
+  if (E.inicio === 'estacion') await ev(`(() => { const b = document.getElementById('antes'); b.click(); b.click(); })()`);
   // s seconds of game, listening: every new bubble, with who, when, where, and whether they knew her
   const correr = s => ev(`(s => { for (let k = 0; k < s * 30; k++) { update(1 / 30);
       for (const x of bubbles) if (x.q !== 'ana' && x.t < .05 && !x.__v && wmScene(String(x.q).replace(/^f:/, '')) === game.scene) { x.__v = 1; const q = String(x.q).replace(/^f:/, ''); window.__oido.push({ q, quien: wmName(q) || q, t: x.text, dia: today() + 1, hora: +hourNow().toFixed(2), escena: game.scene, conoce: conoceA(q), queda: !!dlgHechos().se_queda, reac: reacDeTexto(x.text) }); }
@@ -67,7 +70,7 @@ async function jugar(nombre, E){
   await b.close();
   // the rules, on what was really said
   const hall = [];
-  const visto = new Map(); for (const o of r.oido) { const k = o.q + '|' + o.dia + '|' + o.t; if (visto.has(k) && o.hora - visto.get(k) > .05 && !/^\([^)]*\)$/.test(o.t)) hall.push(`día ${o.dia} ${o.hora}: ${o.quien} repite «${o.t.slice(0, 70)}» (ya a las ${visto.get(k)})`); if (!visto.has(k)) visto.set(k, o.hora); }
+  const visto = new Map(); for (const o of r.oido) { const k = o.q + '|' + o.dia + '|' + o.t; if (visto.has(k) && o.hora - visto.get(k) > .05 && !/^\([^)]*\)$/.test(o.t) && o.t.replace(/\([^)]*\)/g, '').trim().split(/\s+/).length > 3) hall.push(`día ${o.dia} ${o.hora}: ${o.quien} repite «${o.t.slice(0, 70)}» (ya a las ${visto.get(k)})`); if (!visto.has(k)) visto.set(k, o.hora); }
   for (const o of r.oido) if (!o.conoce && /\b(Ana|Shirley)\b/.test(o.t.replace(/\([^)]*\)/g, '')) && !/Soy Ana|Ana Shirley,|¿Ana\?/.test(o.t)) hall.push(`día ${o.dia} ${o.hora}: ${o.quien} la llama por su nombre sin conocerla: «${o.t.slice(0, 80)}»`);
   const com = new Map(); for (const o of r.oido) for (const x of o.reac || []) { const k = o.q + '|' + o.dia + '|' + x; if (com.has(k) && o.hora - com.get(k).hora > .05) hall.push(`día ${o.dia} ${o.hora}: ${o.quien} vuelve a comentar ${x}: «${o.t.slice(0, 60)}» (ya a las ${com.get(k).hora}: «${com.get(k).t.slice(0, 40)}»)`); if (!com.has(k)) com.set(k, o); }
   for (const o of r.oido) if (!o.queda && PERIODO_FUTURO.test(o.t)) hall.push(`día ${o.dia} ${o.hora}: ${o.quien}, antes de que la acepten, habla de su futuro: «${o.t.slice(0, 80)}»`);

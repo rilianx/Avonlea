@@ -5,6 +5,13 @@ const NAMED = [...Object.values(HOUSES).map(h => [h.name, h.at.x, h.at.y + 40]),
   ['el puente cubierto', BRIDGES_COVERED_AT()[0], BRIDGES_COVERED_AT()[1]], ['la aldea', PLACES.aldea[1], PLACES.aldea[2]], ['el granero', BARN.x, BARN.y + 40],
   ...WOODS.filter(w => w.name !== 'el bosque').map(w => [w.name, w.x, w.y])];
 function BRIDGES_COVERED_AT(){ for (const w of WATERS) for (const b of w.bridges) if (b.covered) return [b.x, b.y]; return [0, 0]; }
+// where Ana is, in words: the room or house she is in, the station, the road, or the nearest named place out of doors
+function dondeAna(){
+  const sc = game.scene, R = ROOMS[sc], H = HOUSES[R?.parent ?? sc];
+  if (sc === 'camino') return 'el camino de Bright River'; if (sc === 'br') return 'Bright River';
+  if (sc === 'ga') return 'su pieza, en Tejas Verdes'; if (H) return H.name;
+  const n = sc === 'out' ? placeNear(ana.x, ana.y) : null; return n || 'Avonlea';
+}
 function placeNear(x, y){ let best = null, bd = 520; for (const [n, px, py] of NAMED) { const d = dist(x, y, px, py); if (d < bd) { bd = d; best = n; } } return best; }
 // (with its article: «a la pensión», «al hotel White Sands», «a la casa de los Pye»; a name of its own, as it is: «a Rose Cottage»)
 const LUGAR_COMUN = { Hotel: 'el', Ayuntamiento: 'el', Casa: 'la', Herrería: 'la', Pensión: 'la', Fábrica: 'la', Granja: 'la', Tienda: 'la' };

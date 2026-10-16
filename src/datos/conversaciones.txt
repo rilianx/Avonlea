@@ -39,7 +39,7 @@ marilla: (Marilla aprieta los labios, pero casi sonríe.) Está bien. Ana con un
 === conv_marilla_oraciones ===
 con: marilla
 tema: Confesarle que nunca aprendió a rezar
-si: afecto:marilla:ana>=2
+si: afecto:marilla:ana>=2, !hecho:se_queda
 al_terminar: suma afecto:marilla:ana 1
 ---
 ana: Marilla… tengo que confesarle algo. Nunca he dicho mis oraciones. La Sra. Thomas decía que Dios me había hecho el pelo rojo a propósito, y desde entonces no me interesó mucho.
@@ -74,7 +74,7 @@ ana: Bueno, alguna vez se me tendrán que acabar. Es una idea muy consoladora.
 === conv_marilla_por_que ===
 con: marilla
 tema: Preguntarle por qué se quedaron con ella
-si: afecto:marilla:ana>=3, hecho:a_prueba
+si: afecto:marilla:ana>=3, hecho:se_queda
 al_terminar: suma afecto:marilla:ana 1
 ---
 ana: Marilla… ¿por qué se quedaron conmigo, si querían un niño?
@@ -190,7 +190,7 @@ matthew: (Matthew se pone colorado hasta las orejas, pero sonríe.)
 === conv_matthew_nombres ===
 con: matthew
 tema: Contarle los nombres que les puso a los lugares
-si: afecto:matthew:ana>=2, hecho:nombro_avenida, hecho:nombro_lago
+si: afecto:matthew:ana>=2, hecho:nombro_avenida, hecho:nombro_lago, !dicha:nombra_avenida
 al_terminar: suma letras:ana 1
 ---
 ana: Matthew, ¿sabía que la avenida de los manzanos se llama ahora el Camino Blanco de las Delicias? Y el estanque de los Barry, el Lago de las Aguas Brillantes.

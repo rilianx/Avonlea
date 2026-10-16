@@ -3,7 +3,8 @@
 // revisan las invariantes: sin errores, sin posiciones imposibles, una escena por canal, el tiempo avanza salvo que algo
 // espere a la jugadora, ninguna caja sin salida. Lo raro queda en trazas/partida3/ (fotos y hallazgos.json).
 // Uso: NODE_PATH=… node tools/caos.js [impaciente,fugitiva,rebelde,recargas,tiempo,nombres,telefono,metiche,ropa]
-// (mira el juego por dentro con index.html?dev, que expone __avonlea.ev)
+// (mira el juego por dentro con index.html?dev, que expone __avonlea.ev; sin el botón «Empezar antes, en Bright River»:
+// estas jugadoras prueban la llegada a Tejas Verdes)
 const { chromium } = require('playwright'); const fs = require('fs');
 const EXE = fs.existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chromium' : undefined;
 const path = require('path'), RAIZ = path.join(__dirname, '..'), OUT = path.join(RAIZ, 'trazas', 'partida3') + '/', SOLO = process.argv[2];
@@ -19,7 +20,7 @@ async function jugadora(nombre, fn, opts = {}){
   const b = await chromium.launch({ executablePath: EXE, args: ['--no-sandbox'] });
   const ctx = await b.newContext({ viewport: opts.vp || { width: 900, height: 640 } });
   const errs = []; let pg;
-  const nueva = async init => { pg = await ctx.newPage(); pg.on('pageerror', e => errs.push(e.message)); await pg.addInitScript(() => { Object.defineProperty(navigator, 'webdriver', { get: () => false }); }); if (init) await pg.addInitScript(init); await pg.goto('file://' + path.join(RAIZ, 'index.html') + '?dev'); await pg.waitForTimeout(1200); return pg; };
+  const nueva = async init => { pg = await ctx.newPage(); pg.on('pageerror', e => errs.push(e.message)); await pg.addInitScript(() => { Object.defineProperty(navigator, 'webdriver', { get: () => false }); }); if (init) await pg.addInitScript(init); await pg.goto('file://' + path.join(RAIZ, 'index.html') + '?dev'); await pg.evaluate(() => document.getElementById('antes')?.remove()); await pg.waitForTimeout(1200); return pg; };
   await nueva(opts.init);
   let n = 0, quieto = 0, ultimo = null; const hallazgos = [];
   const H = { get pg(){ return pg; }, errs, nueva,

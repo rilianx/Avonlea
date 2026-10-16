@@ -110,6 +110,8 @@ def atomo(c, k=None, t=None):
     a = rest.split(':')
     if key == 'hecho':
         return hecho(a[0], now)
+    if key == 'horas_desde':
+        return atomo('hecho:' + a[0], k, t)   # (the hours do not matter to the model: that it happened)
     if key == 'dias_desde':
         x, n = a[0], int(a[1])
         if x in G['metas'] and x not in G['hechos']:

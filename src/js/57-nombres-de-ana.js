@@ -13,6 +13,7 @@ const NOMBRABLES = {
   bosque_peg: { libro: 'el Bosque Encantado', que: 'el bosque de abetos' },
   corral: { libro: 'Idlewild', que: 'el rincón de los árboles junto al corral' },
   senda: { libro: 'el Paseo de los Enamorados', que: 'el sendero entre los abedules', alias: ['Senda de los Enamorados'] },
+  geranio: { libro: 'Bonny', que: 'el geranio de la ventana de la cocina' },
   burbuja: { libro: 'la Burbuja de la Dríade', que: 'el manantial del arroyo', alias: ['Burbuja de la Dríada', 'Burbujeo de las Dríadas'] },
 };
 const nombreArt = n => { const m = n.match(/^(el|la|los|las)\s+(.+)$/i); return m ? [m[1].toLowerCase(), m[2]] : ['', n]; };
