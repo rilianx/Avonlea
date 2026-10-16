@@ -153,6 +153,7 @@ function encUpdate(dt){
   const near = here.filter(f => free(f) && dd(f) < 360);
   for (let i = 0; i < near.length; i++) for (let j = i + 1; j < near.length; j++) {
     const a = near[i], b = near[j]; if (dist(a.x, a.y, b.x, b.y) > 70 || Math.random() > .02) continue;
+    { const ch = chisme(a.id, b.id) || chisme(b.id, a.id); if (ch) return encStart({ parts: [a.id, b.id], lines: ch.map(([q, t]) => ({ q: encQ(q), t })), topic: '', scene: game.scene, born: TT }); }   // (a piece of news, aloud: src/datos/noticias.txt)
     if (!aiReady()) return encStart(encFallback(a.id, b.id));
     enc.busy = true; a.talkT = b.talkT = TT + 1e6; a.route = []; b.route = []; a.moving = b.moving = false;
     return encAsk(a.id, b.id).then(s => { if (s.lines.length && !amb.cur && !enc.cur) encStart(s); else a.talkT = b.talkT = TT; })

@@ -1030,15 +1030,42 @@ lynde: ¡Habráse visto! ¡La huérfana de los Cuthbert, en camisón por el cami
 canal: gg
 prioridad: 6
 sujeta: marilla
-si: sabe:marilla:ana_en_camison, ve:marilla
+si: sabe:marilla:ana_en_camison, !sabe:marilla:ana_en_camison:2, ve:marilla
 ---
-marilla: Ana. Me contaron que andabas en camisón por Avonlea. En camisón. ¿Tienes idea de lo que va a decir la gente?
+marilla: Ana. Me vino a contar {de:marilla:ana_en_camison} que andabas en camisón por Avonlea. En camisón. ¿Tienes idea de lo que va a decir la gente?
 -> «Perdón, Marilla. No pensé que fuera tan grave.»
    ana: Perdón, Marilla. No pensé que fuera tan grave. Es que el camisón es tan cómodo… pero no lo vuelvo a hacer.
 ->* «Pero es que la mañana estaba tan linda…»
    ana: Pero es que la mañana estaba tan linda que no podía perder tiempo vistiéndome.
    marilla: (Marilla aprieta los labios hasta que se le ponen blancos.)
    ! suma paciencia:marilla:ana -1
+
+# --- lo mismo, pero a Marilla le llegó agrandado (src/datos/noticias.txt: los chismosos exageran): Ana se defiende
+# de lo que no hizo; y Marilla, que conoce a Avonlea, le cree... a medias
+=== marilla_sabe_camison_descalza ===
+canal: gg
+prioridad: 6
+sujeta: marilla
+si: sabe:marilla:ana_en_camison:2, !sabe:marilla:ana_en_camison:3, !dicha:marilla_sabe_camison, ve:marilla
+---
+marilla: Ana Shirley. {De:marilla:ana_en_camison} me dice que anduviste en camisón por todo Avonlea, y descalza. ¡Descalza, con este tiempo!
+-> «¡Descalza no, Marilla! Llevaba los zapatos. Y no fue por todo Avonlea.»
+   ana: ¡Descalza no, Marilla! Llevaba los zapatos puestos. Y no fue por todo Avonlea: fue un ratito nomás.
+   marilla: (Marilla suspira.) En Avonlea las cosas crecen al contarlas, eso es verdad. Pero en camisón anduviste, ¿o no? Que no se repita.
+->* «¿Y qué importa? La mañana estaba preciosa.»
+   ana: ¿Y qué importa, Marilla? La mañana estaba preciosa, y el camisón es casi un vestido, si una lo imagina.
+   marilla: (Marilla aprieta los labios hasta que se le ponen blancos.)
+   ! suma paciencia:marilla:ana -1
+
+=== marilla_sabe_camison_cementerio ===
+canal: gg
+prioridad: 6
+sujeta: marilla
+si: sabe:marilla:ana_en_camison:3, ve:marilla
+---
+marilla: Ana. Ahora dicen en Avonlea que sales de noche en camisón a bailar en el cementerio. ¿Me quieres explicar de dónde sacan eso?
+ana: (Ana abre los ojos como platos.) ¡¿En el cementerio?! ¡Marilla, yo jamás! Le tengo terror a los cementerios de noche… salvo en los poemas.
+marilla: (Marilla se tapa la boca, y por un momento parece que se ríe.) Ya me parecía. Así es Avonlea: sales en camisón al patio y a la semana bailas con los muertos. Que esto te sirva, Ana: lo que haces aquí, lo cuenta todo el mundo.
 
 # (de noche, lejos de Tejas Verdes: Marilla sale con el farol a buscarla)
 === falta_noche ===

@@ -1,28 +1,48 @@
-# Las noticias de Avonlea: lo que alguien sabe, y que se cuenta (lo lee el juego al empezar; el motor: src/js/66-noticias.js).
-# Una noticia es un hecho con dueño: no «pasó x», sino «la Sra. Barry sabe que pasó x». El guion la pide como condición
-# («si: sabe:barry:nina_cuthbert», «!sabe:lynde:…») y la da con una acción («! contar barry ana_en_camison»).
-# Cuando dos vecinos conversan, quien la sabe se la cuenta al otro, en voz alta (una línea de «dice», y la respuesta).
+# Las noticias de Avonlea: lo que alguien cree, quién se lo contó, y cómo crece al contarse (lo lee el juego al empezar;
+# el motor: src/js/66-noticias.js). Una noticia es una creencia con dueño: no «pasó x», sino «la Sra. Barry cree que
+# pasó x, porque se lo contó la Sra. Lynde, y así como se lo contó». Cada uno recuerda quién se lo dijo y qué versión
+# oyó; los chismosos de Avonlea («exageran») la cuentan un poco más grande de lo que la oyeron (las versiones
+# «exagerada:», una tras otra), y quien la oye más grande, se la cree.
+# El guion la pide como condición: «sabe:barry:nina_cuthbert»; «sabe:marilla:ana_en_camison:2» (oyó por lo menos la
+# segunda versión); «sabe:marilla:ana_en_camison:lynde» (se lo contó la Sra. Lynde); y la da con una acción
+# («! contar barry ana_en_camison»). En una línea, «{de:marilla:ana_en_camison}» es quien se lo contó («la Sra. Lynde»;
+# «{De:…}», con mayúscula, al empezar una oración).
+# Cuando dos vecinos conversan (cerca de Ana, en voz alta; o lejos, en la tienda o a la salida de la iglesia), quien la
+# sabe se la cuenta al otro.
+#
+# Arriba, para todas:
+#   exageran: quiénes cuentan las cosas más grandes de lo que son
+#   respuestas: / respuestas ya sabidas: / respuestas exageradas: / respuestas distintas: lo que se contesta a una
+#         noticia nueva, a una que ya se sabía, a una exagerada, y a una que se había oído de otra manera (más chica)
 #
 # «=== id ===» y sus campos, uno por línea:
 #   titulo: qué es, en pocas palabras (para el diario y la IA)
 #   saben: quiénes la saben desde el principio (separados por comas)
-#   saben si <condición>: quiénes la saben desde que se cumple la condición (condiciones del guion)
+#   saben si <condiciones>: quiénes la saben desde que se cumplen las condiciones (del guion, con comas; la lista
+#         va después de «: »). Sirve para lo que pasa en la historia: «saben si hecho:llego_stacy: lynde»
 #   cuentan: quiénes la cuentan al conversar: «todos» (si no se dice), «nadie» (un secreto), o una lista
+#   se cuenta si: <condiciones> — mientras se cumplen (una noticia vieja ya no se cuenta)
+#   se cuenta por: N — los días que alguien la cuenta después de oírla (después, ya es cosa sabida)
 #   al conocer a ana: sí — quien conoce a Ana se entera (se la cuenta ella misma)
 #   llega a <quien> en <horas>: cuando alguien que la cuenta se entera, la noticia le llega a esa persona después de
-#         unas horas, aunque no se encuentren (la vecina que dice «ya hablaré con Marilla»)
+#         unas horas, aunque no se encuentren (la vecina que dice «ya hablaré con Marilla»), como la contaría
 #   dice: cómo se cuenta (una o varias líneas; «dice lynde:», cómo la cuenta esa persona)
-#   responde: lo que dice quien se entera (una o varias; si no, las respuestas de siempre, abajo)
+#   exagerada: cómo se cuenta un poco más grande (cada línea, una versión más: la 2, la 3…)
+#   responde: lo que dice quien se entera (una o varias; si no, las respuestas de arriba); responde exagerada: a una exagerada
 # Las líneas que empiezan con # son comentarios.
 
+exageran: lynde, srapye, josie
 respuestas: ¡No me diga! | ¿De veras? ¡Qué cosa! | Bueno, yo de eso no sé nada... | Ya me lo imaginaba.
 respuestas ya sabidas: Sí, ya me lo contaron. | ¡Si lo sabe todo Avonlea! | Eso ya lo sabía, Rachel.
+respuestas exageradas: ¡Válgame Dios! ¿Será cierto? | Eso me suena a cuento de Rachel Lynde... pero ¡qué cosa! | ¡No puede ser! ¿Y quién lo vio?
+respuestas distintas: ¿Ah, sí? A mí me lo contaron más chico. | ¡No me diga! Yo había oído otra cosa. | Bueno, si usted lo dice...
 
 # --- El huérfano de los Cuthbert (cap. 1): la Sra. Rachel ve a Matthew salir de traje a Bright River, va a
 # preguntarle a Marilla y se entera (la escena rachel_marilla)
 === huerfano ===
 titulo: los Cuthbert van a traer un niño del orfanato
 saben: marilla, matthew, spencer
+se cuenta si: !hecho:llegada_tv
 dice: ¿Supo? ¡Los Cuthbert van a traer un niño del orfanato! A su edad... ya les dije que es un riesgo.
 dice lynde: ¿Supo? ¡Los Cuthbert van a traer un huérfano de Nueva Escocia! Yo se lo dije a Marilla: es un riesgo.
 responde: ¿Un huérfano? ¿Marilla Cuthbert? ¡Quién lo diría!
@@ -43,8 +63,12 @@ responde: ¡No me diga! ¿Y Marilla qué dice?
 === ana_en_camison ===
 titulo: la niña de los Cuthbert anda en camisón por Avonlea
 llega a marilla en: 3
+se cuenta por: 10
 dice: ¿Supo que la niña de los Cuthbert anda en camisón por las casas? ¡En camisón!
+exagerada: ¿Supo? ¡La niña de los Cuthbert anda en camisón por todo Avonlea, y descalza! Con este frío.
+exagerada: Dicen que la niña de los Cuthbert sale de noche en camisón, descalza, a bailar en el cementerio. ¡Yo no digo nada!
 responde: ¡Qué vergüenza! Marilla debe estar furiosa.
+responde exagerada: ¡Válgame Dios! Pobre Marilla... ¿Quién la mandó traer huérfanos?
 
 # --- Lo que la Sra. Rachel cuenta siempre (cap. 1 y 9): las noticias de Avonlea
 === cerdo_pye ===
@@ -54,7 +78,8 @@ dice: ¿Supo que a los Pye se les escapó otra vez el cerdo? Yo siempre lo dije.
 
 === maestra_plumas ===
 titulo: la maestra nueva usa sombrero con plumas
-saben: lynde
+saben si hecho:llego_stacy: lynde, srapye
+se cuenta por: 14
 dice: Dicen que la maestra nueva usa sombrero con plumas. ¡Plumas, en una escuela!
 
 === loro_harrison ===
@@ -76,8 +101,31 @@ dice: ¡Esa niña de los Cuthbert! Pelirroja y con una lengua... aunque buen cor
 titulo: la niña de los Cuthbert le dijo vieja chismosa a la Sra. Lynde
 saben si hecho:ofendio_lynde: lynde
 dice: ¡Esa niña de los Cuthbert! Me dijo vieja chismosa en mi propia cara. ¡A mí!
+exagerada: ¿Supo? La niña de los Cuthbert le gritó a Rachel Lynde que era una vieja gorda y chismosa, ¡y pataleando!
 responde: ¡Qué niña! ¿Y qué hizo Marilla?
 
 === vendio_vaca ===
 titulo: Ana vendió una vaca
 dice: ¿Supo que la niña de los Cuthbert vendió una vaca? ¡Una niña vendiendo vacas!
+exagerada: Dicen que la niña de los Cuthbert vendió la vaca del Sr. Harrison, ¡y con la plata se compró un sombrero!
+
+# --- Lo que pasa en Avonlea, con las llegadas y las idas (src/datos/llegadas.txt): se sabe en cuanto pasa
+=== pastor_nuevo ===
+titulo: llegó un pastor nuevo, el Sr. Allan, con su esposa
+saben si hecho:llego_allan: lynde, barry, srapye
+se cuenta por: 14
+dice: ¿Ya vio al pastor nuevo? El Sr. Allan. Y la esposa, tan joven... a ver si sabe llevar una casa parroquial.
+dice lynde: El pastor nuevo predica bien, no digo que no. Pero la esposa es una niña. ¡Una niña, en la casa parroquial!
+
+=== tia_josephine ===
+titulo: la tía Josephine de los Barry vino de Charlottetown
+saben si presente:josephine: barry, diana, lynde
+se cuenta si: presente:josephine
+dice: La tía Josephine de los Barry está de visita. Rica, y con un genio... que Dios nos libre.
+
+=== se_va_phillips ===
+titulo: el Sr. Phillips se va de la escuela de Avonlea
+saben si hecho:se_fue_phillips: lynde, barry, srapye, josie
+se cuenta por: 10
+dice: ¿Supo que el Sr. Phillips se fue? En la despedida lloraron todas las niñas, hasta las que no lo querían.
+exagerada: Dicen que en la despedida del Sr. Phillips lloró toda la escuela, y Prissy Andrews se desmayó. ¡Se desmayó!

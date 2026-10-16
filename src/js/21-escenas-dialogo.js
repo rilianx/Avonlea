@@ -52,7 +52,7 @@ function dlgCond(s, c){   // one condition of state, written as text
     case 'canal_libre': return !talkBusy(a);
     case 'ana_visible': return !ana.hidden;
     case 'escena_ana': return game.scene === a;
-    case 'sabe': return (game.wm.know[a] || []).includes(b);
+    case 'sabe': return sabeCond(a, b, rest.split(':')[2]);   // (and which version they heard, or who told them: src/js/66-noticias.js)
     case 'y_mayor': { const p = wmBody(a); return !!p && p.y > +b * U; }
     case 'conoce': return conoceA(a);   // (Ana and they have met: «conoce:diana»)
     case 'presente': return wmScene(a) !== 'away';   // (they are in Avonlea, not away: «presente:diana»)
@@ -226,7 +226,7 @@ class Dialogo {
     if (this.marcas) L = L.map((l, j) => this.marcas[j] && l[0] !== '!' && l[0] !== '?' ? [l[0], l[1], this.marcas[j]] : l);
     if (this.narra) L = [...this.narra.map(x => ['narra', x]), ...L];   // (what explains it, first)
     // (what changes with the day: the season, and something that really happened to her lately; a line left empty is not said)
-    L = L.map(l => l[1] && /\{(estacion|noticia)\}/.test(l[1]) ? [l[0], l[1].replace('{estacion}', ESTACION_TXT[S]).replace('{noticia}', () => cartaNoticia() || ''), l[2]] : l);
+    L = L.map(l => l[1] && /\{(estacion|noticia|[dD]e:)/.test(l[1]) ? [l[0], l[1].replace('{estacion}', ESTACION_TXT[S]).replace('{noticia}', () => cartaNoticia() || '').replace(/\{([dD])e:(\w+):(\w+)\}/g, (_, d, k, f) => { const q = quienConto(k, f); return d === 'D' ? q[0].toUpperCase() + q.slice(1) : q; }), l[2]] : l);   // ({de:marilla:x}: who told her; {De:…}, at the start of a sentence)
     return L.filter(l => l[1] && l[1] !== '…' && l[1].trim() !== '');
   }
   puenteDe(l){   // the line that picks it up again
