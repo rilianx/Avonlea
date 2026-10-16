@@ -87,7 +87,8 @@ function hitosTick(){
   for (const p of P) {
     const c = HABILIDADES.find(x => x.id === p.c), h = c?.[p.dir === 'bajo' ? 'bajos' : 'hitos'].find(x => x.n === p.n); if (!h) { P.splice(P.indexOf(p), 1); return; }
     const b = wmBody(h.con); if (!b || wmScene(h.con) !== game.scene || dist(ana.x, ana.y, b.x, b.y) > (game.scene === 'out' ? 90 : 220) || ocupada(h.con)) continue;   // (near her; inside, in the same room)
-    P.splice(P.indexOf(p), 1); dlgHecho((p.dir || 'hito') + '_' + c.id + '_' + h.n);   // (told: a fact, for the script and the tests)
+    P.splice(P.indexOf(p), 1); dlgHecho((p.dir || 'hito') + '_' + c.id + '_' + h.n);
+    if ((h.dice || h.texto).split(' / ').every(t => oidoHoy(h.con).has(t))) return;   // (already told her today: not again)   // (told: a fact, for the script and the tests)
     const escrito = () => talkPlay((h.dice || h.texto).split(' / ').map(t => [h.con, t]), { ch: 'hito', hold: [h.con] });
     if (!aiReady() || !h.ia) return escrito();
     sceneAsk([h.con], h.ia + ' (Que se note que viene de lo que Ana hizo, día a día.)', 'pasar').then(s => s.lines.length ? talkPlay(s.lines.map(l => [l.q, l.t]), { ch: 'hito', hold: [h.con] }) : escrito()).catch(escrito);

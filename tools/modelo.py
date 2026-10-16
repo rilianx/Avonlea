@@ -323,7 +323,7 @@ for k, c in CUAD.items():
         if quien in UNIDADES or quien in NOMBRE: agregar_frase(quien, 'dice', abierta + propias, texto); UNIDADES[quien][-1]['tipo'] = 'guiño del cuaderno'
 # a group's lines: each one of them; but a group's line gives way to one's own voice (as the game: lineasConVoz): it
 # holds only when none of one's own lines for the same thing (ana:camison, the hour) holds
-claves = lambda cs: {m.group(1) for c in cs for m in [re.match(r'^(ana:\w+|hora:\d+)', c)] if m}   # (what a line reacts to: «ana:camison», «hora:21»; not «!donde:ana:tejas»)
+claves = lambda cs: {m.group(1) for c in cs for m in [re.match(r'^(ana:\w+|hora:2\d)', c)] if m}   # (what a line reacts to: «ana:camison», «hora:21»; not «!donde:ana:tejas»)
 for g, tipo, conds, texto in GRUPO_FRASES:
     for k in [x for x in gente if (x in NINOS) == (g == 'niños')]:
         propias = [u for u in UNIDADES[k] if u['tipo'].startswith('frase') and not u.get('grupo') and claves(u['conds']) & claves(conds)]

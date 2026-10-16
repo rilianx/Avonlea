@@ -19,7 +19,7 @@
 #   «! pasa_tiempo 4» (horas: un viaje), «! a_cocina» (Ana entra a la cocina y Marilla está ahí), «! a_la_mesa» (a comer
 #   con los Cuthbert), «! acostarse» (sube y se acuesta), «! junto ana marilla» (va al lado de: un abrazo).
 # «donde: tejas»: Ana anda por Tejas Verdes (la cocina, su pieza o el patio); «donde: casa», la cocina o el patio.
-# En «si:», también: «ve:marilla» (Marilla la ve), «donde:ana:tejas» (o con «!»), «ana:camison», «ana:sin_sombrero»,
+# En «si:», también: «comento:lynde:ana:camison» (ya le comentó hoy eso: el camisón, «hora», el sombrero), «ve:marilla» (Marilla la ve), «donde:ana:tejas» (o con «!»), «ana:camison», «ana:sin_sombrero»,
 #   «ana:ropa_tirada»; y las cualidades de uno hacia otro: «paciencia:marilla:ana<=1» (src/datos/habilidades.txt).
 # «! vestirse»; «! punto id | texto» (un punto para volver: la partida como está ahora); «! final id | texto» (la
 #   historia termina: una tarjeta, y se puede volver a un punto o empezar de nuevo).
@@ -1012,7 +1012,7 @@ canal: os
 prioridad: 6
 repetir: dia
 sujeta: barry
-si: ana:camison, !donde:ana:tejas, ve:barry, sabe:barry:nina_cuthbert, hora:7-21
+si: ana:camison, !donde:ana:tejas, ve:barry, sabe:barry:nina_cuthbert, !comento:barry:ana:camison, hora:7-21
 al_terminar: contar barry ana_en_camison
 ---
 barry: (La Sra. Barry se lleva la mano al pecho.) ¡Niña! ¿Andas en camisón por las casas ajenas? ¡Qué va a decir la gente! Ya hablaré con Marilla.
@@ -1022,7 +1022,7 @@ canal: rl
 prioridad: 6
 repetir: dia
 sujeta: lynde
-si: ana:camison, !donde:ana:tejas, ve:lynde, sabe:lynde:nina_cuthbert, hora:7-21
+si: ana:camison, !donde:ana:tejas, ve:lynde, sabe:lynde:nina_cuthbert, !comento:lynde:ana:camison, hora:7-21
 al_terminar: contar lynde ana_en_camison
 ---
 lynde: ¡Habráse visto! ¡La huérfana de los Cuthbert, en camisón por el camino! Esto lo sabe Marilla antes de que se ponga el sol, como que me llamo Rachel Lynde.

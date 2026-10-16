@@ -83,7 +83,7 @@ function update(dt){
   }
   runPlans(dt);
   if ((storyT -= dt) < 0 && AI.stories) { storyT = .5; storyTick(); if (!storyBusy && (!game.story || game.story.day !== today()) && hourNow() < 18 && TT > 4) makeStory(); }
-  mealTick(); ambUpdate(dt); encUpdate(dt); for (const b of bubbles) { if (!b.t && b.q !== 'ana') oidoHoy(b.q).add(b.text); b.t += dt; } bubbles = bubbles.filter(b => b.t < b.dur + .35);   // (what is said, Ana heard it today: src/js/24-personajes.js)
+  mealTick(); ambUpdate(dt); encUpdate(dt); for (const b of bubbles) { if (!b.t) oido(b.q, b.text); b.t += dt; } bubbles = bubbles.filter(b => b.t < b.dur + .35);   // (what is said, Ana heard it today: src/js/24-personajes.js)
   if ((taskTick -= dt) < 0) { taskTick = .5; taskEvent('ir'); }
   // everyone but Diana follows their routine: where they are wanted (home, or visiting), walking there, or about the place
   const hr = hourNow(), visiting = k => !!CH[k].routine && PEOPLE[k].where !== 'out' && PEOPLE[k].where !== CH[k].home;

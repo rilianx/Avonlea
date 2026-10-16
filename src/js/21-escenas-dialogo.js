@@ -52,6 +52,7 @@ function dlgCond(s, c){   // one condition of state, written as text
     case 'canal_libre': return !talkBusy(a);
     case 'ana_visible': return !ana.hidden;
     case 'escena_ana': return game.scene === a;
+    case 'comento': { const [x, ...y] = rest.split(':'); return comentoHoy(x).has(claveReac(y.join(':'))); }   // (a already remarked today how Ana is: «comento:lynde:ana:camison», «comento:barry:hora»)
     case 'sabe': return sabeCond(a, b, rest.split(':')[2]);   // (and which version they heard, or who told them: src/js/66-noticias.js)
     case 'y_mayor': { const p = wmBody(a); return !!p && p.y > +b * U; }
     case 'conoce': return conoceA(a);   // (Ana and they have met: «conoce:diana»)

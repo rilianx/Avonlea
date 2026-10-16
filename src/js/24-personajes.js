@@ -93,22 +93,42 @@ const lineasSi = (a, k) => (a || []).filter(l => { const m = /^\[([^\]]+)\] /.ex
 // someone's loose lines now: the written ones, and the winks about the goals of the notebook (src/js/66-cuaderno.js)
 // a group's line gives way to one's own voice: where one has a line of their own for the same thing (ana:camison, the
 // hour) that holds now, the group's is not said
-const reaccionDe = cs => cs.map(c => /^(ana:\w+|hora:\d+)/.exec(c)?.[1]).filter(Boolean);   // (what a line reacts to: its own conditions «ana:camison», «hora:21-…»; not «!donde:ana:tejas»)
+const reaccionDe = cs => cs.map(c => /^(ana:\w+|hora:(2\d)(\.\d+)?(?=-|$))/.exec(c)?.[1]).filter(Boolean);   // (what a line reacts to: how Ana is, «ana:camison», or the night, «hora:21-26»; not «!donde:ana:tejas», nor the hours of a scene)
 function lineasConVoz(k, a){
   const conds = l => (/^\[([^\]]+)\] /.exec(l)?.[1] || '').split(',').map(c => c.trim()).filter(Boolean);
   const vale = l => lineasSi([l], k).length > 0 && (typeof lineasAjenas !== 'function' || lineasAjenas(k, lineasSi([l], k)).length > 0);
   const propias = (a || []).filter(l => !conds(l).includes('grupo') && vale(l));
   const tiene = new Set(propias.flatMap(l => reaccionDe(conds(l))));
   const grupo = (a || []).filter(l => conds(l).includes('grupo') && vale(l) && !reaccionDe(conds(l)).some(c => tiene.has(c)));
-  const L = [...propias, ...grupo], ve = L.filter(l => reaccionDe(conds(l)).length);   // (what they see of her comes first: in a nightgown, at night…)
+  const ya = typeof comentoHoy === 'function' && k ? comentoHoy(k) : new Set(), nueva = l => reaccionDe(conds(l)).map(claveReac).some(x => !ya.has(x));
+  const L = [...propias, ...grupo].filter(l => !reaccionDe(conds(l)).length || nueva(l)), ve = L.filter(l => reaccionDe(conds(l)).length);   // (what they see of her comes first: in a nightgown, at night…; and what they already remarked today, not again)
   return (ve.length ? ve : L).map(l => l.replace(/^\[[^\]]+\] /, ''));
 }
 // what someone says on seeing how Ana is (a nightgown, out at night, no hat), or null: the first time too, and before any greeting
-const reaccionAlVerla = k => { const d = FOLKBY[String(k).replace(/^f:/, '')]?.def, a = d ? d.lines : CH[k]?.lines; return pick(sinRepetir(k, lineasConVoz(k, (a || []).filter(l => reaccionDe((/^\[([^\]]+)\] /.exec(l)?.[1] || '').split(',').map(c => c.trim())).length)))) || null; };   // (and once said, not again today)
-// what Ana has heard from each one today: no one says the same thing twice in a day (when they have said all they have,
+// what someone says on seeing how Ana is (a nightgown, out at night, no hat), or null: the first time too, and before any
+// greeting; and what they already remarked today (the nightgown, the hour), they do not remark again
+const claveReac = c => /^hora:/.test(c) ? 'hora' : c;
+// the scenes of someone that remark how Ana is (camison_lynde: «¡en camisón por el camino!»): when one is ready, it goes
+// first, and the loose line gives way
+let REAC_ESC = null;
+const escenaReacciona = k => { if (!REAC_ESC) { REAC_ESC = {}; for (const d of (typeof DIALOGOS !== 'undefined' ? DIALOGOS : [])) { const r = reaccionDe([].concat(d.si || []).map(String)).map(claveReac); if (r.length) for (const h of d.hablan()) (REAC_ESC[h] ||= []).push([d, r]); } }
+  const x = dlgCtx(); return (REAC_ESC[String(k).replace(/^f:/, '')] || []).filter(([d]) => d.listo(x)).flatMap(([, r]) => r); };
+const reaccionAlVerla = k => { const d = FOLKBY[String(k).replace(/^f:/, '')]?.def, a = d ? d.lines : CH[k]?.lines, ya = new Set([...comentoHoy(k), ...escenaReacciona(k)]);
+  const L = (a || []).filter(l => { const r = reaccionDe((/^\[([^\]]+)\] /.exec(l)?.[1] || '').split(',').map(c => c.trim())).map(claveReac); return r.length && !r.every(x => ya.has(x)); });
+  return pick(sinRepetir(k, lineasConVoz(k, L))) || null; };   // (and once said, not again today)
+// the remarks of each line or scene (text → what it remarks), to know, when it is said, what was remarked
+let REAC_TXT = null;
+const reacDeTexto = t => { if (!REAC_TXT) { REAC_TXT = new Map(); const add = l => { const m = /^\[([^\]]+)\] (.*)$/.exec(l); if (!m) return; const r = reaccionDe(m[1].split(',').map(c => c.trim())).map(claveReac); if (r.length) REAC_TXT.set(m[2], r); };
+    for (const c of Object.values(CH)) (c.lines || []).forEach(add); for (const f of Object.values(FOLKBY)) (f.def.lines || []).forEach(add);
+    for (const d of (typeof DIALOGOS !== 'undefined' ? DIALOGOS : [])) { const r = reaccionDe([].concat(d.si || []).map(String)).map(claveReac); if (r.length) try { for (const l of d.lineas()) if (typeof l[1] === 'string') REAC_TXT.set(l[1], r); } catch (e) {} } }
+  return REAC_TXT.get(t) || []; };
+// what Ana has heard from each one today (a gesture alone, «(Asiente.)», is not a thing said): no one says the same thing twice in a day (when they have said all they have,
 // they say nothing more: silence, not a repeat)
-const OIDO = { dia: -1, k: {} };
-const oidoHoy = k => { k = String(k).replace(/^f:/, ''); if (OIDO.dia !== today()) { OIDO.dia = today(); OIDO.k = {}; } return OIDO.k[k] ||= new Set(); };
+const OIDO = { dia: -1, k: {}, r: {} };
+const oidoHoy = k => { k = String(k).replace(/^f:/, ''); if (OIDO.dia !== today()) { OIDO.dia = today(); OIDO.k = {}; OIDO.r = {}; } return OIDO.k[k] ||= new Set(); };
+const comentoHoy = k => { oidoHoy(k); return OIDO.r[String(k).replace(/^f:/, '')] ||= new Set(); };   // (what they remarked of her today: «ana:camison», «hora»)
+// something said aloud: Ana heard it (and, if it remarks how she is, it was remarked)
+const oido = (q, t) => { if (q === 'ana') return; for (const r of reacDeTexto(t)) comentoHoy(q).add(r); if (!/^\([^)]*\)$/.test(t)) oidoHoy(q).add(t); };
 const sinRepetir = (k, L) => { const o = oidoHoy(k); return L.filter(t => !o.has(t)); };
 const lineasDe = (k, a) => sinRepetir(k, [...lineasConVoz(k, a), ...(typeof guiñosDe === 'function' ? guiñosDe(k) : [])].map(t => typeof saludoHora === 'function' ? t.replace(/Buenos días|Buenas tardes|Buenas noches/, saludoHora) : t));   // (the greeting, as the hour is)   // (someone who does not know Ana: none with her name)
 // who is in Avonlea, and from/until when, as in the book (src/datos/llegadas.txt). Arriving and leaving are events of

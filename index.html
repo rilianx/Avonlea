@@ -227,7 +227,7 @@ body:not(.dev) #spdbtn{top:298px!important;right:10px!important}
 #   «! pasa_tiempo 4» (horas: un viaje), «! a_cocina» (Ana entra a la cocina y Marilla está ahí), «! a_la_mesa» (a comer
 #   con los Cuthbert), «! acostarse» (sube y se acuesta), «! junto ana marilla» (va al lado de: un abrazo).
 # «donde: tejas»: Ana anda por Tejas Verdes (la cocina, su pieza o el patio); «donde: casa», la cocina o el patio.
-# En «si:», también: «ve:marilla» (Marilla la ve), «donde:ana:tejas» (o con «!»), «ana:camison», «ana:sin_sombrero»,
+# En «si:», también: «comento:lynde:ana:camison» (ya le comentó hoy eso: el camisón, «hora», el sombrero), «ve:marilla» (Marilla la ve), «donde:ana:tejas» (o con «!»), «ana:camison», «ana:sin_sombrero»,
 #   «ana:ropa_tirada»; y las cualidades de uno hacia otro: «paciencia:marilla:ana<=1» (src/datos/habilidades.txt).
 # «! vestirse»; «! punto id | texto» (un punto para volver: la partida como está ahora); «! final id | texto» (la
 #   historia termina: una tarjeta, y se puede volver a un punto o empezar de nuevo).
@@ -1220,7 +1220,7 @@ canal: os
 prioridad: 6
 repetir: dia
 sujeta: barry
-si: ana:camison, !donde:ana:tejas, ve:barry, sabe:barry:nina_cuthbert, hora:7-21
+si: ana:camison, !donde:ana:tejas, ve:barry, sabe:barry:nina_cuthbert, !comento:barry:ana:camison, hora:7-21
 al_terminar: contar barry ana_en_camison
 ---
 barry: (La Sra. Barry se lleva la mano al pecho.) ¡Niña! ¿Andas en camisón por las casas ajenas? ¡Qué va a decir la gente! Ya hablaré con Marilla.
@@ -1230,7 +1230,7 @@ canal: rl
 prioridad: 6
 repetir: dia
 sujeta: lynde
-si: ana:camison, !donde:ana:tejas, ve:lynde, sabe:lynde:nina_cuthbert, hora:7-21
+si: ana:camison, !donde:ana:tejas, ve:lynde, sabe:lynde:nina_cuthbert, !comento:lynde:ana:camison, hora:7-21
 al_terminar: contar lynde ana_en_camison
 ---
 lynde: ¡Habráse visto! ¡La huérfana de los Cuthbert, en camisón por el camino! Esto lo sabe Marilla antes de que se ponga el sol, como que me llamo Rachel Lynde.
@@ -3532,7 +3532,8 @@ llega si: estacion:verano
 #         a lo más 1: lo revisa tools/grafo.js)
 #   la callan: quiénes — no la cuentan fuera de su casa (lo que avergüenza a los suyos: Marilla no anda contando que
 #         Ana salió en camisón; a Matthew sí se lo cuenta)
-#   dice: cómo se cuenta (varias: una al azar; «dice lynde:», como la cuenta ella)
+#   dice: cómo se cuenta (varias: una al azar; «dice lynde:», como la cuenta ella; «dice niños:», como la cuenta un niño:
+#         sin esa línea, los niños no la cuentan)
 #   exagerada: una versión más grande (cada línea, una más: la 2, la 3…)
 #   responde: lo que contesta quien se entera (si no, las respuestas de arriba)
 # Las líneas que empiezan con # son comentarios.
@@ -3561,6 +3562,7 @@ saben: marilla, matthew, spencer
 al conocer a ana: sí
 dice: ¿Supo lo de los Cuthbert? ¡Pidieron un niño al orfanato y les llegó una niña! Pelirroja, dicen.
 dice lynde: ¿Supo lo de los Cuthbert? ¡Pidieron un niño y les llegó una niña! Pelirroja, dicen. Yo siempre dije que eso de traer huérfanos…
+dice niños: ¿Sabías? ¡En Tejas Verdes hay una niña nueva! Del orfanato. Y es pelirroja, pelirroja como una zanahoria.
 responde: ¿Una niña? ¿Y qué van a hacer los Cuthbert con una niña?
 responde: ¡No me diga! ¿Y Marilla qué dice?
 
@@ -3573,6 +3575,7 @@ se entera quien la ve si: ana:camison, !donde:ana:tejas
 llega a marilla en: 3
 se cuenta por: 10
 dice: ¿Supo que la niña de los Cuthbert anda en camisón por las casas? ¡En camisón!
+dice niños: ¿Sabías que la niña nueva de Tejas Verdes salió en camisón a la calle? ¡En camisón! Mi mamá dice que eso no se hace.
 exagerada: ¿Supo? ¡La niña de los Cuthbert anda en camisón por todo Avonlea, y descalza! Con este frío.
 exagerada: Dicen que la niña de los Cuthbert sale de noche en camisón, descalza, a bailar en el cementerio. ¡Yo no digo nada!
 responde: ¡Qué vergüenza! Marilla debe estar furiosa.
@@ -3582,6 +3585,7 @@ responde: ¡Qué vergüenza! Marilla debe estar furiosa.
 titulo: a los Pye se les escapó otra vez el cerdo
 saben: lynde
 dice: ¿Supo que a los Pye se les escapó otra vez el cerdo? Yo siempre lo dije.
+dice niños: ¡Se les escapó el chancho a los Pye otra vez! Lo vi correr por el camino.
 
 === maestra_plumas ===
 titulo: la maestra nueva usa sombrero con plumas
@@ -6415,6 +6419,7 @@ function dlgCond(s, c){   // one condition of state, written as text
     case 'canal_libre': return !talkBusy(a);
     case 'ana_visible': return !ana.hidden;
     case 'escena_ana': return game.scene === a;
+    case 'comento': { const [x, ...y] = rest.split(':'); return comentoHoy(x).has(claveReac(y.join(':'))); }   // (a already remarked today how Ana is: «comento:lynde:ana:camison», «comento:barry:hora»)
     case 'sabe': return sabeCond(a, b, rest.split(':')[2]);   // (and which version they heard, or who told them: src/js/66-noticias.js)
     case 'y_mayor': { const p = wmBody(a); return !!p && p.y > +b * U; }
     case 'conoce': return conoceA(a);   // (Ana and they have met: «conoce:diana»)
@@ -7423,22 +7428,42 @@ const lineasSi = (a, k) => (a || []).filter(l => { const m = /^\[([^\]]+)\] /.ex
 // someone's loose lines now: the written ones, and the winks about the goals of the notebook (src/js/66-cuaderno.js)
 // a group's line gives way to one's own voice: where one has a line of their own for the same thing (ana:camison, the
 // hour) that holds now, the group's is not said
-const reaccionDe = cs => cs.map(c => /^(ana:\w+|hora:\d+)/.exec(c)?.[1]).filter(Boolean);   // (what a line reacts to: its own conditions «ana:camison», «hora:21-…»; not «!donde:ana:tejas»)
+const reaccionDe = cs => cs.map(c => /^(ana:\w+|hora:(2\d)(\.\d+)?(?=-|$))/.exec(c)?.[1]).filter(Boolean);   // (what a line reacts to: how Ana is, «ana:camison», or the night, «hora:21-26»; not «!donde:ana:tejas», nor the hours of a scene)
 function lineasConVoz(k, a){
   const conds = l => (/^\[([^\]]+)\] /.exec(l)?.[1] || '').split(',').map(c => c.trim()).filter(Boolean);
   const vale = l => lineasSi([l], k).length > 0 && (typeof lineasAjenas !== 'function' || lineasAjenas(k, lineasSi([l], k)).length > 0);
   const propias = (a || []).filter(l => !conds(l).includes('grupo') && vale(l));
   const tiene = new Set(propias.flatMap(l => reaccionDe(conds(l))));
   const grupo = (a || []).filter(l => conds(l).includes('grupo') && vale(l) && !reaccionDe(conds(l)).some(c => tiene.has(c)));
-  const L = [...propias, ...grupo], ve = L.filter(l => reaccionDe(conds(l)).length);   // (what they see of her comes first: in a nightgown, at night…)
+  const ya = typeof comentoHoy === 'function' && k ? comentoHoy(k) : new Set(), nueva = l => reaccionDe(conds(l)).map(claveReac).some(x => !ya.has(x));
+  const L = [...propias, ...grupo].filter(l => !reaccionDe(conds(l)).length || nueva(l)), ve = L.filter(l => reaccionDe(conds(l)).length);   // (what they see of her comes first: in a nightgown, at night…; and what they already remarked today, not again)
   return (ve.length ? ve : L).map(l => l.replace(/^\[[^\]]+\] /, ''));
 }
 // what someone says on seeing how Ana is (a nightgown, out at night, no hat), or null: the first time too, and before any greeting
-const reaccionAlVerla = k => { const d = FOLKBY[String(k).replace(/^f:/, '')]?.def, a = d ? d.lines : CH[k]?.lines; return pick(sinRepetir(k, lineasConVoz(k, (a || []).filter(l => reaccionDe((/^\[([^\]]+)\] /.exec(l)?.[1] || '').split(',').map(c => c.trim())).length)))) || null; };   // (and once said, not again today)
-// what Ana has heard from each one today: no one says the same thing twice in a day (when they have said all they have,
+// what someone says on seeing how Ana is (a nightgown, out at night, no hat), or null: the first time too, and before any
+// greeting; and what they already remarked today (the nightgown, the hour), they do not remark again
+const claveReac = c => /^hora:/.test(c) ? 'hora' : c;
+// the scenes of someone that remark how Ana is (camison_lynde: «¡en camisón por el camino!»): when one is ready, it goes
+// first, and the loose line gives way
+let REAC_ESC = null;
+const escenaReacciona = k => { if (!REAC_ESC) { REAC_ESC = {}; for (const d of (typeof DIALOGOS !== 'undefined' ? DIALOGOS : [])) { const r = reaccionDe([].concat(d.si || []).map(String)).map(claveReac); if (r.length) for (const h of d.hablan()) (REAC_ESC[h] ||= []).push([d, r]); } }
+  const x = dlgCtx(); return (REAC_ESC[String(k).replace(/^f:/, '')] || []).filter(([d]) => d.listo(x)).flatMap(([, r]) => r); };
+const reaccionAlVerla = k => { const d = FOLKBY[String(k).replace(/^f:/, '')]?.def, a = d ? d.lines : CH[k]?.lines, ya = new Set([...comentoHoy(k), ...escenaReacciona(k)]);
+  const L = (a || []).filter(l => { const r = reaccionDe((/^\[([^\]]+)\] /.exec(l)?.[1] || '').split(',').map(c => c.trim())).map(claveReac); return r.length && !r.every(x => ya.has(x)); });
+  return pick(sinRepetir(k, lineasConVoz(k, L))) || null; };   // (and once said, not again today)
+// the remarks of each line or scene (text → what it remarks), to know, when it is said, what was remarked
+let REAC_TXT = null;
+const reacDeTexto = t => { if (!REAC_TXT) { REAC_TXT = new Map(); const add = l => { const m = /^\[([^\]]+)\] (.*)$/.exec(l); if (!m) return; const r = reaccionDe(m[1].split(',').map(c => c.trim())).map(claveReac); if (r.length) REAC_TXT.set(m[2], r); };
+    for (const c of Object.values(CH)) (c.lines || []).forEach(add); for (const f of Object.values(FOLKBY)) (f.def.lines || []).forEach(add);
+    for (const d of (typeof DIALOGOS !== 'undefined' ? DIALOGOS : [])) { const r = reaccionDe([].concat(d.si || []).map(String)).map(claveReac); if (r.length) try { for (const l of d.lineas()) if (typeof l[1] === 'string') REAC_TXT.set(l[1], r); } catch (e) {} } }
+  return REAC_TXT.get(t) || []; };
+// what Ana has heard from each one today (a gesture alone, «(Asiente.)», is not a thing said): no one says the same thing twice in a day (when they have said all they have,
 // they say nothing more: silence, not a repeat)
-const OIDO = { dia: -1, k: {} };
-const oidoHoy = k => { k = String(k).replace(/^f:/, ''); if (OIDO.dia !== today()) { OIDO.dia = today(); OIDO.k = {}; } return OIDO.k[k] ||= new Set(); };
+const OIDO = { dia: -1, k: {}, r: {} };
+const oidoHoy = k => { k = String(k).replace(/^f:/, ''); if (OIDO.dia !== today()) { OIDO.dia = today(); OIDO.k = {}; OIDO.r = {}; } return OIDO.k[k] ||= new Set(); };
+const comentoHoy = k => { oidoHoy(k); return OIDO.r[String(k).replace(/^f:/, '')] ||= new Set(); };   // (what they remarked of her today: «ana:camison», «hora»)
+// something said aloud: Ana heard it (and, if it remarks how she is, it was remarked)
+const oido = (q, t) => { if (q === 'ana') return; for (const r of reacDeTexto(t)) comentoHoy(q).add(r); if (!/^\([^)]*\)$/.test(t)) oidoHoy(q).add(t); };
 const sinRepetir = (k, L) => { const o = oidoHoy(k); return L.filter(t => !o.has(t)); };
 const lineasDe = (k, a) => sinRepetir(k, [...lineasConVoz(k, a), ...(typeof guiñosDe === 'function' ? guiñosDe(k) : [])].map(t => typeof saludoHora === 'function' ? t.replace(/Buenos días|Buenas tardes|Buenas noches/, saludoHora) : t));   // (the greeting, as the hour is)   // (someone who does not know Ana: none with her name)
 // who is in Avonlea, and from/until when, as in the book (src/datos/llegadas.txt). Arriving and leaving are events of
@@ -10171,7 +10196,7 @@ function update(dt){
   }
   runPlans(dt);
   if ((storyT -= dt) < 0 && AI.stories) { storyT = .5; storyTick(); if (!storyBusy && (!game.story || game.story.day !== today()) && hourNow() < 18 && TT > 4) makeStory(); }
-  mealTick(); ambUpdate(dt); encUpdate(dt); for (const b of bubbles) { if (!b.t && b.q !== 'ana') oidoHoy(b.q).add(b.text); b.t += dt; } bubbles = bubbles.filter(b => b.t < b.dur + .35);   // (what is said, Ana heard it today: src/js/24-personajes.js)
+  mealTick(); ambUpdate(dt); encUpdate(dt); for (const b of bubbles) { if (!b.t) oido(b.q, b.text); b.t += dt; } bubbles = bubbles.filter(b => b.t < b.dur + .35);   // (what is said, Ana heard it today: src/js/24-personajes.js)
   if ((taskTick -= dt) < 0) { taskTick = .5; taskEvent('ir'); }
   // everyone but Diana follows their routine: where they are wanted (home, or visiting), walking there, or about the place
   const hr = hourNow(), visiting = k => !!CH[k].routine && PEOPLE[k].where !== 'out' && PEOPLE[k].where !== CH[k].home;
@@ -10937,12 +10962,13 @@ async function encAsk(x, y){
 function encFallback(x, y){
   if (y === 'ana') {
     if (!conoceA(x) && !sinNombre(x)) return { parts: [x, y], lines: presentar(x), topic: '', scene: game.scene, born: TT, presenta: true };   // (the first time: who they are)
-    const d = FOLKBY[x].def, l = [{ q: encQ(x), t: pick(lineasDe(x, d.lines)) || saludoHora() + ', niña.' }], a = lineasSi(d.ana); if (a.length && Math.random() < .7) l.push({ q: 'ana', t: pick(a) }); return { parts: [x, y], lines: l, topic: '', scene: game.scene, born: TT }; }
+    const d = FOLKBY[x].def, l = [{ q: encQ(x), t: pick(lineasDe(x, d.lines)) || pick(sinRepetir(x, [saludoHora() + ', niña.'])) || '(La saluda con la cabeza.)' }], a = lineasSi(d.ana); if (a.length && Math.random() < .7) l.push({ q: 'ana', t: pick(a) }); return { parts: [x, y], lines: l, topic: '', scene: game.scene, born: TT }; }
   const kx = !!FOLKBY[x].kid, ky = !!FOLKBY[y].kid, [a, b] = pick(paresSi(PAIR_LINES[kx && ky ? 'kids' : kx || ky ? 'mixta' : 'big']).filter(p => !(/pastor/.test(p[0]) && [x, y].some(i => /allan/.test(i)))));
   const [p, q] = !kx && ky ? [y, x] : [x, y];   // (a child with a grown-up: the child speaks first, as a child)
   return { parts: [x, y], lines: [{ q: encQ(p), t: a }, { q: encQ(q), t: b }], topic: '', scene: game.scene, born: TT };
 }
 function encStart(s){
+  if (!s?.lines?.length || (!s.presenta && s.scene === game.scene && s.lines.some(l => l.q !== 'ana' && oidoHoy(l.q).has(l.t)))) return;   // (nothing to say, or what Ana already heard them say today: not again in front of her)
   enc.cur = s; s.i = -1; s.wait = .3; bubbles = [];
   const [a, b] = s.parts.map(encP);
   for (const id of s.parts) if (id !== 'ana') { const f = FOLKBY[id]; f.talkT = TT + 1e6; f.route = []; f.moving = false; }
@@ -11671,7 +11697,9 @@ function startChat(a, b, anaFree){
   CHAT_YA[a] = CHAT_YA[b] = TT + M(20);
   const third = Object.keys(DLG_BANK).length && [...Object.keys(PEOPLE), ...FOLK.map(f => f.id)].find(o => o !== a && o !== b && wmScene(o) === wmScene(a) && !inChat(o) && DLG_BANK[dlgKey([a, b, o])] && dist(wmBody(o).x, wmBody(o).y, wmBody(a).x, wmBody(a).y) < 120);
   const bank = (third && dlgNext([a, b, third])) || dlgNext([a, b]);
-  const c = { parts: [a, b], lines: bank || chatLines(a, b, anaFree), i: -1, wait: .2, anaFree }; CHATS.push(c);
+  const lines = bank || chatLines(a, b, anaFree);
+  if (!lines.length || (wmScene(a) === game.scene && lines.some(l => l.q !== 'ana' && oidoHoy(l.q).has(l.t)))) return;   // (nothing new to say, or what Ana already heard them say today, in front of her: they only nod)
+  const c = { parts: [a, b], lines, i: -1, wait: .2, anaFree }; CHATS.push(c);
   for (const [p, o] of [[a, b], [b, a]]) {
     const body = wmBody(p);
     if (p === 'ana' && anaFree) continue;   // (Ana, when the player has her: not held)
@@ -11702,19 +11730,19 @@ const ANA_DIANA = [['¡Diana, amiga del alma! Tengo tanto que contarte.', '¡Ana
 const ANA_SUENA = [['¿No le parece que hoy el mundo está recién hecho?', 'Esta niña... qué cosas dice.'], ['Vi una nube con forma de barco. Iba hacia Charlottetown.', 'Ya lo creo, Ana. Ya lo creo.'], ['¿Sabía que los abedules parecen señoras de vestido blanco?', 'Nunca lo había pensado así.'], ['Hoy el lago brillaba como si tuviera estrellas adentro.', '¡Qué imaginación tienes, niña!'], ['Cuando sea grande quiero escribir libros. O ser maestra. O las dos cosas.', 'Tiempo tienes para decidirlo.']];
 const saludoHora = () => { const h = hourNow() % 24; return h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches'; };
 function chatLines(a, b, anaFree){
-  const L = [], h = hourNow(), hi = saludoHora(), say = (q, t) => L.push({ q, t: t.replace(/Buenos días|Buenas tardes|Buenas noches/, hi) });   // (the greeting, as the hour is)
+  const L = [], h = hourNow(), hi = saludoHora(), say = (q, t) => t && L.push({ q, t: t.replace(/Buenos días|Buenas tardes|Buenas noches/, hi) });   // (nothing left to say today: nothing)   // (the greeting, as the hour is)
   const sin = A => { const u = [...A].sort(() => Math.random() - .5); return () => u.length > 1 ? u.pop() : u[0]; }, suena = sin(ANA_SUENA), pares = sin(paresSi(PAIR_LINES[isKid(a) && isKid(b) ? 'kids' : 'big']));   // (in one talk, no line twice)
   const tu = isKid(a) && isKid(b), nm = k => /^[a-zá-ú]/.test(wmName(k)) ? '' : wmName(k), A = nm(a), B = nm(b), to = n => n ? ', ' + n : '';   // ("un vecino" is no name to call someone by)
   if (anaFree) {   // (Ana, as the player moves her, passing by: a word to her)
     const d = FOLKBY[a]?.def;
     if (!conoceA(a) && !sinNombre(a)) { for (const l of presentar(a)) say(l.q === 'ana' ? 'ana' : a, l.t); L.presenta = a; L.hasta = L.findIndex(l => l.q === 'ana'); return L; }   // (the first time: who they are)
-    say(a, reaccionAlVerla(a) || (a === 'gilbert' && d ? pick(lineasDe('gilbert', d.lines)) : null) || pick(lineasAjenas(a, [`¡${hi}, Ana!`, '¡Hola, Ana! ¿A dónde vas tan apurada?', '¡Ana Shirley! Saludos a Marilla.', `¡${hi}, niña!`])));
-    const r = lineasSi(FOLKBY[a]?.def.ana || ['Hmpf.']); if (relGetW('ana', a) <= 0 && r.length) say('ana', pick(r));
+    say(a, reaccionAlVerla(a) || (a === 'gilbert' && d ? pick(lineasDe('gilbert', d.lines)) : null) || pick(sinRepetir(a, lineasAjenas(a, [`¡${hi}, Ana!`, '¡Hola, Ana! ¿A dónde vas tan apurada?', '¡Ana Shirley! Saludos a Marilla.', `¡${hi}, niña!`]))));
+    const r = lineasSi(FOLKBY[a]?.def.ana || ['Hmpf.']); if (relGetW('ana', a) <= 0 && r.length && L.length) say('ana', pick(r));
     return L;
   }
   const ana_ = a === 'ana' ? a : b === 'ana' ? b : null, other = ana_ && (a === 'ana' ? b : a);
   if (ana_ && !conoceA(other) && !sinNombre(other)) { for (const l of presentar(other)) say(l.q === 'ana' ? 'ana' : other, l.t); L.presenta = other; L.hasta = L.findIndex(l => l.q === 'ana'); return L; }   // (the first time: who they are)
-  if (ana_ && relGetW('ana', other) <= 0) { say(other, reaccionAlVerla(other) || (FOLKBY[other]?.def.lines ? pick(lineasDe(other, FOLKBY[other].def.lines)) : null) || pick(lineasAjenas(other, [`${hi}, Ana.`, `${hi}, niña.`]))); const r = lineasSi(FOLKBY[other]?.def.ana || ['Hmpf.']); if (r.length) say('ana', pick(r)); return L; }
+  if (ana_ && relGetW('ana', other) <= 0) { say(other, reaccionAlVerla(other) || (FOLKBY[other]?.def.lines ? pick(lineasDe(other, FOLKBY[other].def.lines)) : null) || pick(sinRepetir(other, lineasAjenas(other, [`${hi}, Ana.`, `${hi}, niña.`])))); const r = lineasSi(FOLKBY[other]?.def.ana || ['Hmpf.']); if (r.length && L.length) say('ana', pick(r)); return L; }
   if (a === 'matthew' || b === 'matthew') {   // (Matthew: a greeting, and off he goes)
     const o = a === 'matthew' ? b : a;
     say(o, `¡${hi}, Matthew!`); say('matthew', pick(['Eh... b-buenas.', 'Buenas... sí... buen día, ¿no?', 'Ejem... buenas.']));
@@ -13133,7 +13161,8 @@ function hitosTick(){
   for (const p of P) {
     const c = HABILIDADES.find(x => x.id === p.c), h = c?.[p.dir === 'bajo' ? 'bajos' : 'hitos'].find(x => x.n === p.n); if (!h) { P.splice(P.indexOf(p), 1); return; }
     const b = wmBody(h.con); if (!b || wmScene(h.con) !== game.scene || dist(ana.x, ana.y, b.x, b.y) > (game.scene === 'out' ? 90 : 220) || ocupada(h.con)) continue;   // (near her; inside, in the same room)
-    P.splice(P.indexOf(p), 1); dlgHecho((p.dir || 'hito') + '_' + c.id + '_' + h.n);   // (told: a fact, for the script and the tests)
+    P.splice(P.indexOf(p), 1); dlgHecho((p.dir || 'hito') + '_' + c.id + '_' + h.n);
+    if ((h.dice || h.texto).split(' / ').every(t => oidoHoy(h.con).has(t))) return;   // (already told her today: not again)   // (told: a fact, for the script and the tests)
     const escrito = () => talkPlay((h.dice || h.texto).split(' / ').map(t => [h.con, t]), { ch: 'hito', hold: [h.con] });
     if (!aiReady() || !h.ia) return escrito();
     sceneAsk([h.con], h.ia + ' (Que se note que viene de lo que Ana hizo, día a día.)', 'pasar').then(s => s.lines.length ? talkPlay(s.lines.map(l => [l.q, l.t]), { ch: 'hito', hold: [h.con] }) : escrito()).catch(escrito);
@@ -13301,7 +13330,7 @@ function noticiasLeer(txt){
     if (!n && (m = l.match(/^respuestas( ya sabidas| exageradas)?:\s*(.*)$/))) { R[{ '': 'nuevas', ' ya sabidas': 'sabidas', ' exageradas': 'exageradas' }[m[1] || '']] = varias(m[2]); continue; }
     if (!n && (m = l.match(/^exageran:\s*(.*)$/))) { X.push(...lista(m[1])); continue; }
     if (!n && (m = l.match(/^callados:\s*(.*)$/))) { Q.push(...lista(m[1])); continue; }
-    if ((m = l.match(/^===\s*(.+?)\s*===$/))) { N.push(n = { id: m[1], titulo: m[1], saben: [], testigos: null, callan: [], cuentaPor: 0, dice: [], diceDe: {}, exagerada: [], responde: [], llega: [] }); continue; }
+    if ((m = l.match(/^===\s*(.+?)\s*===$/))) { N.push(n = { id: m[1], titulo: m[1], saben: [], testigos: null, callan: [], cuentaPor: 0, dice: [], diceNinos: [], diceDe: {}, exagerada: [], responde: [], llega: [] }); continue; }
     if (!n) continue;
     if ((m = l.match(/^saben(?: si (.+?))?:\s+(.*)$/)))   // (the conditions have ':' in them: the list comes after «: »)
       n.saben.push({ si: m[1] ? lista(m[1]) : [], quien: lista(m[2]) });
@@ -13309,6 +13338,7 @@ function noticiasLeer(txt){
     else if ((m = l.match(/^la callan:\s*(.*)$/))) n.callan = lista(m[1]);
     else if ((m = l.match(/^llega a (\S+) en:\s*([\d.]+)$/))) n.llega.push({ quien: m[1], horas: +m[2] });
     else if ((m = l.match(/^se cuenta por:\s*(\d+)/))) n.cuentaPor = +m[1];
+    else if ((m = l.match(/^dice niños:\s*(.*)$/))) n.diceNinos.push(m[1]);
     else if ((m = l.match(/^dice (\S+):\s*(.*)$/))) (n.diceDe[m[1]] ||= []).push(m[2]);
     else if ((m = l.match(/^(titulo|al conocer a ana|dice|exagerada|responde):\s*(.*)$/))) {
       const [, k, v] = m;
@@ -13328,7 +13358,7 @@ const seCuenta = (k, n) => (!n.cuentaPor || today() + 1 - (creencia(k, n.id)?.di
 const versiones = n => 1 + n.exagerada.length;
 // how big it comes out of someone's mouth: as they heard it, or a little bigger, if they are one who exaggerates
 const versionAlContar = (k, n) => { const v = creencia(k, n.id)?.v || 1; return EXAGERAN.includes(sinF(k)) ? Math.min(v + 1, versiones(n)) : v; };
-const lineaVersion = (k, n, v) => v > 1 ? n.exagerada[v - 2] : pick(n.diceDe[sinF(k)] || n.dice);
+const lineaVersion = (k, n, v) => isKid(sinF(k)) ? pick(n.diceNinos) : v > 1 ? n.exagerada[v - 2] : pick(n.diceDe[sinF(k)] || n.dice);   // (a child tells it as a child)
 // someone learns it (from someone, in some version): and, if they are one to tell it, it reaches whoever it reaches,
 // a few hours later, the way they would tell it. Hearing it bigger than they had it, they believe the bigger one.
 function enterarse(k, f, de = null, v = 1){
@@ -13375,14 +13405,14 @@ const nombra = (t, k) => nombresDe(k).some(w => new RegExp('(^|[^\\wáéíóúñ
 function chisme(a, b){
   const callan = n => n.callan.includes(sinF(a)) && !n.callan.includes(sinF(b));   // (what shames their own house, they tell no one outside it)
   if (CALLADOS.includes(sinF(a)) && wmScene(a) !== wmScene(b)) return null;   // (the quiet ones tell only who is at home with them)
-  const puede = n => (n.diceDe[sinF(a)] || n.dice).length && sabeK(a, n.id) && seCuenta(a, n) && !callan(n);
+  const puede = n => (isKid(sinF(a)) ? n.diceNinos : n.diceDe[sinF(a)] || n.dice).length && sabeK(a, n.id) && seCuenta(a, n) && !callan(n);   // (a child tells only what has a child's way of telling)
   const nueva = NOTICIAS.find(n => puede(n) && !sabeK(b, n.id));
   const n = nueva || (Math.random() < .3 && pick(NOTICIAS.filter(n => puede(n) && sabeK(b, n.id))));
   if (!n) return null;
   const v = versionAlContar(a, n), antes = creencia(b, n.id)?.v || 0, dice = lineaVersion(a, n, v);
   if (nombra(dice, b)) return null;   // (not «la niña de los Cuthbert» to Marilla Cuthbert)
   enterarse(b, n.id, a, v);
-  const R = NOTICIAS_RESP, ajena = L => L.filter(t => !nombra(t, a) && !nombra(t, b)), resp = ajena(v > Math.max(antes, 1) ? R.exageradas : nueva ? (n.responde.length ? n.responde : R.nuevas) : R.sabidas);   // (bigger than they had it: amazed)
+  const R = NOTICIAS_RESP, ajena = L => L.filter(t => !nombra(t, b) && !CHISMOSOS().some(x => x !== sinF(a) && nombra(t, x))), resp = ajena(v > Math.max(antes, 1) ? R.exageradas : nueva ? (n.responde.length ? n.responde : R.nuevas) : R.sabidas);   // (bigger than they had it: amazed)
   return Object.assign([[a, dice], [b, pick(resp.length ? resp : ajena(R.nuevas)) || '¡No me diga!']], { f: n.id, v });
 }
 // «sabe:quien:noticia», and «sabe:quien:noticia:2» (heard at least the second version, the bigger one)

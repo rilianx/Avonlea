@@ -92,12 +92,13 @@ async function encAsk(x, y){
 function encFallback(x, y){
   if (y === 'ana') {
     if (!conoceA(x) && !sinNombre(x)) return { parts: [x, y], lines: presentar(x), topic: '', scene: game.scene, born: TT, presenta: true };   // (the first time: who they are)
-    const d = FOLKBY[x].def, l = [{ q: encQ(x), t: pick(lineasDe(x, d.lines)) || saludoHora() + ', niña.' }], a = lineasSi(d.ana); if (a.length && Math.random() < .7) l.push({ q: 'ana', t: pick(a) }); return { parts: [x, y], lines: l, topic: '', scene: game.scene, born: TT }; }
+    const d = FOLKBY[x].def, l = [{ q: encQ(x), t: pick(lineasDe(x, d.lines)) || pick(sinRepetir(x, [saludoHora() + ', niña.'])) || '(La saluda con la cabeza.)' }], a = lineasSi(d.ana); if (a.length && Math.random() < .7) l.push({ q: 'ana', t: pick(a) }); return { parts: [x, y], lines: l, topic: '', scene: game.scene, born: TT }; }
   const kx = !!FOLKBY[x].kid, ky = !!FOLKBY[y].kid, [a, b] = pick(paresSi(PAIR_LINES[kx && ky ? 'kids' : kx || ky ? 'mixta' : 'big']).filter(p => !(/pastor/.test(p[0]) && [x, y].some(i => /allan/.test(i)))));
   const [p, q] = !kx && ky ? [y, x] : [x, y];   // (a child with a grown-up: the child speaks first, as a child)
   return { parts: [x, y], lines: [{ q: encQ(p), t: a }, { q: encQ(q), t: b }], topic: '', scene: game.scene, born: TT };
 }
 function encStart(s){
+  if (!s?.lines?.length || (!s.presenta && s.scene === game.scene && s.lines.some(l => l.q !== 'ana' && oidoHoy(l.q).has(l.t)))) return;   // (nothing to say, or what Ana already heard them say today: not again in front of her)
   enc.cur = s; s.i = -1; s.wait = .3; bubbles = [];
   const [a, b] = s.parts.map(encP);
   for (const id of s.parts) if (id !== 'ana') { const f = FOLKBY[id]; f.talkT = TT + 1e6; f.route = []; f.moving = false; }

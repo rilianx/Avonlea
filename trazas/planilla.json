@@ -62,7 +62,7 @@
    "viven": []
   }
  ],
- "generado": "2026-10-16 17:36",
+ "generado": "2026-10-16 18:42",
  "momentos": [
   {
    "id": "dia2",
@@ -3699,7 +3699,7 @@
    "interrumpe": false,
    "grande": false,
    "repetir": "dia",
-   "si": "ana:camison, !donde:ana:tejas, ve:barry, sabe:barry:nina_cuthbert, hora:7-21",
+   "si": "ana:camison, !donde:ana:tejas, ve:barry, sabe:barry:nina_cuthbert, !comento:barry:ana:camison, hora:7-21",
    "en": "",
    "hablan": "barry",
    "lineas": 1,
@@ -3719,7 +3719,7 @@
    "interrumpe": false,
    "grande": false,
    "repetir": "dia",
-   "si": "ana:camison, !donde:ana:tejas, ve:lynde, sabe:lynde:nina_cuthbert, hora:7-21",
+   "si": "ana:camison, !donde:ana:tejas, ve:lynde, sabe:lynde:nina_cuthbert, !comento:lynde:ana:camison, hora:7-21",
    "en": "",
    "hablan": "lynde",
    "lineas": 1,
@@ -11307,6 +11307,7 @@
    ],
    "lynde": [
     "escena lynde_se_entera",
+    "escena camison_lynde",
     "una frase de lynde"
    ],
    "a_prueba": [
@@ -11345,6 +11346,10 @@
     "una frase de niños",
     "noticia ana_en_camison",
     "noticia ana_de_noche"
+   ],
+   "barry": [
+    "escena camison_barry",
+    "una frase de barry"
    ],
    "marilla": [
     "escena marilla_sabe_camison",
@@ -11415,9 +11420,6 @@
     "código"
    ],
    "conoce_barry": [
-    "una frase de barry"
-   ],
-   "barry": [
     "una frase de barry"
    ],
    "conoce_lynde": [
@@ -11547,6 +11549,7 @@
    "ana_visible",
    "escena_ana",
    "sabe",
+   "comento",
    "y_mayor",
    "carta"
   ],

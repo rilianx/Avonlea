@@ -13,7 +13,7 @@ function noticiasLeer(txt){
     if (!n && (m = l.match(/^respuestas( ya sabidas| exageradas)?:\s*(.*)$/))) { R[{ '': 'nuevas', ' ya sabidas': 'sabidas', ' exageradas': 'exageradas' }[m[1] || '']] = varias(m[2]); continue; }
     if (!n && (m = l.match(/^exageran:\s*(.*)$/))) { X.push(...lista(m[1])); continue; }
     if (!n && (m = l.match(/^callados:\s*(.*)$/))) { Q.push(...lista(m[1])); continue; }
-    if ((m = l.match(/^===\s*(.+?)\s*===$/))) { N.push(n = { id: m[1], titulo: m[1], saben: [], testigos: null, callan: [], cuentaPor: 0, dice: [], diceDe: {}, exagerada: [], responde: [], llega: [] }); continue; }
+    if ((m = l.match(/^===\s*(.+?)\s*===$/))) { N.push(n = { id: m[1], titulo: m[1], saben: [], testigos: null, callan: [], cuentaPor: 0, dice: [], diceNinos: [], diceDe: {}, exagerada: [], responde: [], llega: [] }); continue; }
     if (!n) continue;
     if ((m = l.match(/^saben(?: si (.+?))?:\s+(.*)$/)))   // (the conditions have ':' in them: the list comes after «: »)
       n.saben.push({ si: m[1] ? lista(m[1]) : [], quien: lista(m[2]) });
@@ -21,6 +21,7 @@ function noticiasLeer(txt){
     else if ((m = l.match(/^la callan:\s*(.*)$/))) n.callan = lista(m[1]);
     else if ((m = l.match(/^llega a (\S+) en:\s*([\d.]+)$/))) n.llega.push({ quien: m[1], horas: +m[2] });
     else if ((m = l.match(/^se cuenta por:\s*(\d+)/))) n.cuentaPor = +m[1];
+    else if ((m = l.match(/^dice niños:\s*(.*)$/))) n.diceNinos.push(m[1]);
     else if ((m = l.match(/^dice (\S+):\s*(.*)$/))) (n.diceDe[m[1]] ||= []).push(m[2]);
     else if ((m = l.match(/^(titulo|al conocer a ana|dice|exagerada|responde):\s*(.*)$/))) {
       const [, k, v] = m;
@@ -40,7 +41,7 @@ const seCuenta = (k, n) => (!n.cuentaPor || today() + 1 - (creencia(k, n.id)?.di
 const versiones = n => 1 + n.exagerada.length;
 // how big it comes out of someone's mouth: as they heard it, or a little bigger, if they are one who exaggerates
 const versionAlContar = (k, n) => { const v = creencia(k, n.id)?.v || 1; return EXAGERAN.includes(sinF(k)) ? Math.min(v + 1, versiones(n)) : v; };
-const lineaVersion = (k, n, v) => v > 1 ? n.exagerada[v - 2] : pick(n.diceDe[sinF(k)] || n.dice);
+const lineaVersion = (k, n, v) => isKid(sinF(k)) ? pick(n.diceNinos) : v > 1 ? n.exagerada[v - 2] : pick(n.diceDe[sinF(k)] || n.dice);   // (a child tells it as a child)
 // someone learns it (from someone, in some version): and, if they are one to tell it, it reaches whoever it reaches,
 // a few hours later, the way they would tell it. Hearing it bigger than they had it, they believe the bigger one.
 function enterarse(k, f, de = null, v = 1){
@@ -87,14 +88,14 @@ const nombra = (t, k) => nombresDe(k).some(w => new RegExp('(^|[^\\wáéíóúñ
 function chisme(a, b){
   const callan = n => n.callan.includes(sinF(a)) && !n.callan.includes(sinF(b));   // (what shames their own house, they tell no one outside it)
   if (CALLADOS.includes(sinF(a)) && wmScene(a) !== wmScene(b)) return null;   // (the quiet ones tell only who is at home with them)
-  const puede = n => (n.diceDe[sinF(a)] || n.dice).length && sabeK(a, n.id) && seCuenta(a, n) && !callan(n);
+  const puede = n => (isKid(sinF(a)) ? n.diceNinos : n.diceDe[sinF(a)] || n.dice).length && sabeK(a, n.id) && seCuenta(a, n) && !callan(n);   // (a child tells only what has a child's way of telling)
   const nueva = NOTICIAS.find(n => puede(n) && !sabeK(b, n.id));
   const n = nueva || (Math.random() < .3 && pick(NOTICIAS.filter(n => puede(n) && sabeK(b, n.id))));
   if (!n) return null;
   const v = versionAlContar(a, n), antes = creencia(b, n.id)?.v || 0, dice = lineaVersion(a, n, v);
   if (nombra(dice, b)) return null;   // (not «la niña de los Cuthbert» to Marilla Cuthbert)
   enterarse(b, n.id, a, v);
-  const R = NOTICIAS_RESP, ajena = L => L.filter(t => !nombra(t, a) && !nombra(t, b)), resp = ajena(v > Math.max(antes, 1) ? R.exageradas : nueva ? (n.responde.length ? n.responde : R.nuevas) : R.sabidas);   // (bigger than they had it: amazed)
+  const R = NOTICIAS_RESP, ajena = L => L.filter(t => !nombra(t, b) && !CHISMOSOS().some(x => x !== sinF(a) && nombra(t, x))), resp = ajena(v > Math.max(antes, 1) ? R.exageradas : nueva ? (n.responde.length ? n.responde : R.nuevas) : R.sabidas);   // (bigger than they had it: amazed)
   return Object.assign([[a, dice], [b, pick(resp.length ? resp : ajena(R.nuevas)) || '¡No me diga!']], { f: n.id, v });
 }
 // «sabe:quien:noticia», and «sabe:quien:noticia:2» (heard at least the second version, the bigger one)

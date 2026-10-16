@@ -101,7 +101,9 @@ function startChat(a, b, anaFree){
   CHAT_YA[a] = CHAT_YA[b] = TT + M(20);
   const third = Object.keys(DLG_BANK).length && [...Object.keys(PEOPLE), ...FOLK.map(f => f.id)].find(o => o !== a && o !== b && wmScene(o) === wmScene(a) && !inChat(o) && DLG_BANK[dlgKey([a, b, o])] && dist(wmBody(o).x, wmBody(o).y, wmBody(a).x, wmBody(a).y) < 120);
   const bank = (third && dlgNext([a, b, third])) || dlgNext([a, b]);
-  const c = { parts: [a, b], lines: bank || chatLines(a, b, anaFree), i: -1, wait: .2, anaFree }; CHATS.push(c);
+  const lines = bank || chatLines(a, b, anaFree);
+  if (!lines.length || (wmScene(a) === game.scene && lines.some(l => l.q !== 'ana' && oidoHoy(l.q).has(l.t)))) return;   // (nothing new to say, or what Ana already heard them say today, in front of her: they only nod)
+  const c = { parts: [a, b], lines, i: -1, wait: .2, anaFree }; CHATS.push(c);
   for (const [p, o] of [[a, b], [b, a]]) {
     const body = wmBody(p);
     if (p === 'ana' && anaFree) continue;   // (Ana, when the player has her: not held)
@@ -132,19 +134,19 @@ const ANA_DIANA = [['¡Diana, amiga del alma! Tengo tanto que contarte.', '¡Ana
 const ANA_SUENA = [['¿No le parece que hoy el mundo está recién hecho?', 'Esta niña... qué cosas dice.'], ['Vi una nube con forma de barco. Iba hacia Charlottetown.', 'Ya lo creo, Ana. Ya lo creo.'], ['¿Sabía que los abedules parecen señoras de vestido blanco?', 'Nunca lo había pensado así.'], ['Hoy el lago brillaba como si tuviera estrellas adentro.', '¡Qué imaginación tienes, niña!'], ['Cuando sea grande quiero escribir libros. O ser maestra. O las dos cosas.', 'Tiempo tienes para decidirlo.']];
 const saludoHora = () => { const h = hourNow() % 24; return h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches'; };
 function chatLines(a, b, anaFree){
-  const L = [], h = hourNow(), hi = saludoHora(), say = (q, t) => L.push({ q, t: t.replace(/Buenos días|Buenas tardes|Buenas noches/, hi) });   // (the greeting, as the hour is)
+  const L = [], h = hourNow(), hi = saludoHora(), say = (q, t) => t && L.push({ q, t: t.replace(/Buenos días|Buenas tardes|Buenas noches/, hi) });   // (nothing left to say today: nothing)   // (the greeting, as the hour is)
   const sin = A => { const u = [...A].sort(() => Math.random() - .5); return () => u.length > 1 ? u.pop() : u[0]; }, suena = sin(ANA_SUENA), pares = sin(paresSi(PAIR_LINES[isKid(a) && isKid(b) ? 'kids' : 'big']));   // (in one talk, no line twice)
   const tu = isKid(a) && isKid(b), nm = k => /^[a-zá-ú]/.test(wmName(k)) ? '' : wmName(k), A = nm(a), B = nm(b), to = n => n ? ', ' + n : '';   // ("un vecino" is no name to call someone by)
   if (anaFree) {   // (Ana, as the player moves her, passing by: a word to her)
     const d = FOLKBY[a]?.def;
     if (!conoceA(a) && !sinNombre(a)) { for (const l of presentar(a)) say(l.q === 'ana' ? 'ana' : a, l.t); L.presenta = a; L.hasta = L.findIndex(l => l.q === 'ana'); return L; }   // (the first time: who they are)
-    say(a, reaccionAlVerla(a) || (a === 'gilbert' && d ? pick(lineasDe('gilbert', d.lines)) : null) || pick(lineasAjenas(a, [`¡${hi}, Ana!`, '¡Hola, Ana! ¿A dónde vas tan apurada?', '¡Ana Shirley! Saludos a Marilla.', `¡${hi}, niña!`])));
-    const r = lineasSi(FOLKBY[a]?.def.ana || ['Hmpf.']); if (relGetW('ana', a) <= 0 && r.length) say('ana', pick(r));
+    say(a, reaccionAlVerla(a) || (a === 'gilbert' && d ? pick(lineasDe('gilbert', d.lines)) : null) || pick(sinRepetir(a, lineasAjenas(a, [`¡${hi}, Ana!`, '¡Hola, Ana! ¿A dónde vas tan apurada?', '¡Ana Shirley! Saludos a Marilla.', `¡${hi}, niña!`]))));
+    const r = lineasSi(FOLKBY[a]?.def.ana || ['Hmpf.']); if (relGetW('ana', a) <= 0 && r.length && L.length) say('ana', pick(r));
     return L;
   }
   const ana_ = a === 'ana' ? a : b === 'ana' ? b : null, other = ana_ && (a === 'ana' ? b : a);
   if (ana_ && !conoceA(other) && !sinNombre(other)) { for (const l of presentar(other)) say(l.q === 'ana' ? 'ana' : other, l.t); L.presenta = other; L.hasta = L.findIndex(l => l.q === 'ana'); return L; }   // (the first time: who they are)
-  if (ana_ && relGetW('ana', other) <= 0) { say(other, reaccionAlVerla(other) || (FOLKBY[other]?.def.lines ? pick(lineasDe(other, FOLKBY[other].def.lines)) : null) || pick(lineasAjenas(other, [`${hi}, Ana.`, `${hi}, niña.`]))); const r = lineasSi(FOLKBY[other]?.def.ana || ['Hmpf.']); if (r.length) say('ana', pick(r)); return L; }
+  if (ana_ && relGetW('ana', other) <= 0) { say(other, reaccionAlVerla(other) || (FOLKBY[other]?.def.lines ? pick(lineasDe(other, FOLKBY[other].def.lines)) : null) || pick(sinRepetir(other, lineasAjenas(other, [`${hi}, Ana.`, `${hi}, niña.`])))); const r = lineasSi(FOLKBY[other]?.def.ana || ['Hmpf.']); if (r.length && L.length) say('ana', pick(r)); return L; }
   if (a === 'matthew' || b === 'matthew') {   // (Matthew: a greeting, and off he goes)
     const o = a === 'matthew' ? b : a;
     say(o, `¡${hi}, Matthew!`); say('matthew', pick(['Eh... b-buenas.', 'Buenas... sí... buen día, ¿no?', 'Ejem... buenas.']));
