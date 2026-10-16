@@ -6906,7 +6906,7 @@ const PERSONAJES = {
     ],
     "kin": [],
     "lines": [
-      "[!hecho:lynde_visita, sabe:lynde:nina_cuthbert] ¿Así que tú eres la huérfana de Tejas Verdes? Ya iré a verte con calma, ya.",
+      "[!hecho:lynde_visita, !conoce:lynde, sabe:lynde:nina_cuthbert] ¿Así que tú eres la huérfana de Tejas Verdes? Ya iré a verte con calma, ya.",
       "[hecho:ofendio_lynde, !hecho:disculpa_lynde] Hmpf. No tengo nada que hablar contigo, niña malcriada.",
       "Desde mi ventana veo todo el camino: no se me escapa nadie. Lo digo sin mala intención, ¿eh?",
       "Llevo cincuenta y dos cubrecamas de retazos, ¡cincuenta y dos! Y no pienso parar.",
@@ -6960,7 +6960,7 @@ const PERSONAJES = {
     "kin": [],
     "lines": [
       "Hmpf. Buenos días... si es que son buenos.",
-      "[conoce:harrison] ¿Esa vaca tuya se ha portado bien hoy? Más le vale.",
+      "[dias_desde:conoce_harrison:3] ¿Esa vaca tuya se ha portado bien hoy? Más le vale.",
       "No me mires la casa, que el desorden es mío.",
       "Ginger, ¡silencio!... No le hagas caso, muchacha."
     ],
@@ -7297,7 +7297,7 @@ function targets(){
       else if (game.hasCan && game.water <= 0 && !b.wet) add(id, b.x, b.y, 30, 'La regadera está vacía (llénala en la bomba)', say_('La regadera está vacía: llénala en la bomba'), { ...o, pri: 50 });
     });
     add('h:br', HOUSES.br.at.x, HOUSES.br.at.y + 6, 30, 'El camino a Bright River (8 millas)', () => say('Ana', '¿Tomar el camino a Bright River a pie? Son ocho millas: más de tres horas caminando.', [['🚶 Vamos, paso a paso', () => { close(); roadOnFoot(1); }], ['Mejor no', close]]), { pri: 4, hy: 30, hit: 30 });
-    for (const [id, h] of Object.entries(HOUSES)) if (!h.road) add('h:' + id, h.at.x, h.at.y + 6, 26, h.open && !h.open() ? h.closed : h.enter, () => h.open && !h.open() ? anaSays(pick(['Cerrado... el Sr. Lawson abre a las ocho.', 'La tienda está cerrada. ¡Y yo que soñaba con unos caramelos de menta!'])) : goIn(id), { pri: 4, test: (x, y) => Math.abs(x - h.at.x) < h.at.w / 2 + 8 && y < h.at.y + 10 && y > h.at.y - 80 });
+    for (const [id, h] of Object.entries(HOUSES)) if (!h.road) add('h:' + id, h.at.x, h.at.y + 6, 26, h.open && !h.open() ? h.closed : nadieEnCasa(id) ? 'Golpear la puerta' : h.enter, () => h.open && !h.open() ? anaSays(pick(['Cerrado... el Sr. Lawson abre a las ocho.', 'La tienda está cerrada. ¡Y yo que soñaba con unos caramelos de menta!'])) : nadieEnCasa(id) ? anaSays(pick(['Toc, toc… Nadie contesta.', '¿Hola? … No hay nadie en casa.', '(Ana golpea la puerta. Nada.) Habrá salido.'])) : goIn(id), { pri: 4, test: (x, y) => Math.abs(x - h.at.x) < h.at.w / 2 + 8 && y < h.at.y + 10 && y > h.at.y - 80 });
     for (const f of FOLK) if (f.where === 'out' && Math.abs(f.x - ana.x) < 400 && Math.abs(f.y - ana.y) < 400) add('f:' + f.id, f.x, f.y, 34, f.id === 'lawson' ? 'Comprar o vender (Sr. Lawson)' : 'Hablar con ' + f.def.name, () => f.id === 'lawson' ? shopMenu() : folkTalk(f), { hy: 26 * f.def.look.h, hit: 24 });
     if (dist(ana.x, ana.y, FARO.x, FARO.y) < 260) add('faro', FARO.x, FARO.y + 10, 120, 'Mirar el mar desde el faro', () => { comentar('faro'); logEv('Ana miró el mar desde el faro.'); }, { pri: 5, hy: 60, hit: 40 });
     if (dist(ana.x, ana.y, MILK.x, MILK.y) < 200) add('leche', MILK.x, MILK.y, 60, 'Mirar las botellas de leche en el río', () => comentar('leche'), { pri: 5, hy: 8, hit: 34 });
@@ -7363,6 +7363,10 @@ function tapAt(sx, sy){
       if (t.id[0] === 'p') CHAT_HOLD[k] = Math.max(CHAT_HOLD[k] || 0, TT + 8); else if (FOLKBY[k]) { const f = FOLKBY[k]; f.route = []; f.moving = false; f.talkT = Math.max(f.talkT || 0, TT + 8); } } }   // (someone walking off: «¡Espera!»; and whoever she goes to, waits for her a moment)
 }
 const view = { ox: 0, oy: 0, Z: 1 };
+// a neighbour's house: one goes in when someone who lives there is at home (otherwise one knocks, and no one answers)
+const vivenEn = id => [...Object.keys(CH).filter(k => CH[k].home === id), ...FOLK.filter(f => f.def.home === HOUSES[id]?.name).map(f => 'f:' + f.id)];
+const nadieEnCasa = id => { if (id === 'gg' || !HOUSES[id]) return false; const V = vivenEn(id); return V.length > 0 && !V.some(k => k.startsWith('f:') ? ['in', id].includes(FOLKBY[k.slice(2)].where) && FOLKBY[k.slice(2)].inAt === FOLKBY[k.slice(2)].home : sceneOf(k) === id); };
+
 /* ---------- (a walker by the paths; it was Toby the dog's; Pelusa the cat walks with catGo, below) ---------- */
 function dogGo(tx, ty, sp, dt){
   const n = navStep(toby, tx, ty); if (n.arrived) { toby.moving = false; return true; }
@@ -10080,7 +10084,7 @@ const NAMED = [...Object.values(HOUSES).map(h => [h.name, h.at.x, h.at.y + 40]),
 function BRIDGES_COVERED_AT(){ for (const w of WATERS) for (const b of w.bridges) if (b.covered) return [b.x, b.y]; return [0, 0]; }
 function placeNear(x, y){ let best = null, bd = 520; for (const [n, px, py] of NAMED) { const d = dist(x, y, px, py); if (d < bd) { bd = d; best = n; } } return best; }
 // (with its article: «a la pensión», «al hotel White Sands», «a la casa de los Pye»; a name of its own, as it is: «a Rose Cottage»)
-const LUGAR_COMUN = { Hotel: 'el', Ayuntamiento: 'el', Casa: 'la', Herrería: 'la', Pensión: 'la', Fábrica: 'la', Granja: 'la' };
+const LUGAR_COMUN = { Hotel: 'el', Ayuntamiento: 'el', Casa: 'la', Herrería: 'la', Pensión: 'la', Fábrica: 'la', Granja: 'la', Tienda: 'la' };
 const toPlace = n => { const w = n.split(' ')[0], l = /^(La|El|Los|Las) /.test(n) ? n[0].toLowerCase() + n.slice(1) : LUGAR_COMUN[w] ? LUGAR_COMUN[w] + ' ' + w.toLowerCase() + n.slice(w.length) : n; return (l.startsWith('el ') ? 'al ' + l.slice(3) : 'a ' + l); };
 function goDest(x, y){
   let p = [clamp(x, 40, WW - 40), clamp(y, 60, WH - 40)];
@@ -10207,7 +10211,8 @@ const FOLK_DEFS = {
 // and the neighbours one does not know by name: on their errands along the roads, strolling, the little ones at play
 { const r = rng(2024), pk = a => a[Math.floor(r() * a.length)], homes = BUILDINGS.filter(b => b.style === 'casa' || b.style === 'granja').map(b => b.name);
   const DRESS = ['#8a6a8a', '#6a8aa8', '#a86a5a', '#7a9a6a', '#c8a070', '#5a6a8a', '#b88aa0', '#8a7a5a'], COAT = ['#4a4a54', '#5a4a3a', '#6a5a40', '#3a4a5a', '#5a5a40'], HAIR = ['#3a2a20', '#6a4a30', '#8a6a4a', '#c8a070', '#2a1a14', '#9a9088'];
-  const GREET = ['¡Buenos días, Ana! ¿Cómo están Matthew y Marilla?', 'Lindo día, ¿verdad? Dicen que mañana llueve.', '¡Qué grande estás, niña! Saludos a Marilla.', '¿Vas para la aldea? Yo vengo de la tienda de Lawson.', 'Buenas, buenas. No te entretengas, que se hace tarde.', 'Mira qué cielo. Así da gusto salir.'];
+  const GREET = [   // (one who does not know her by name: a stranger, the first weeks; by then all Avonlea knows the girl of Green Gables)
+    '[dias_desde:llegada_tv:14] ¡Buenos días, Ana! ¿Cómo están Matthew y Marilla?', 'Lindo día, ¿verdad? Dicen que mañana llueve.', '[dias_desde:llegada_tv:56] ¡Qué grande estás, niña! Saludos a Marilla.', '[!dias_desde:llegada_tv:14] Buenas. Tú no eres de por aquí, ¿no?', '¿Vas para la aldea? Yo vengo de la tienda de Lawson.', 'Buenas, buenas. No te entretengas, que se hace tarde.', 'Mira qué cielo. Así da gusto salir.'];
   for (let n = 0; n < 18; n++) {
     const kind = n < 9 ? 'recado' : n < 14 ? 'paseo' : 'juego', woman = r() < .5, kid = kind === 'juego', hair = pk(HAIR);
     const look = kid ? { hair, dress: pk(DRESS), skin: '#f2cfb2', h: .7 + r() * .08, ...(woman ? { style: r() < .5 ? 'braids' : 'curls', bow: pk(DRESS) } : { coat: true }) }
@@ -10572,7 +10577,7 @@ async function encAsk(x, y){
 }
 function encFallback(x, y){
   if (y === 'ana') {
-    if (!conoceA(x) && !sinNombre(x)) return { parts: [x, y], lines: presentar(x), topic: '', scene: game.scene, born: TT };   // (the first time: who they are)
+    if (!conoceA(x) && !sinNombre(x)) return { parts: [x, y], lines: presentar(x), topic: '', scene: game.scene, born: TT, presenta: true };   // (the first time: who they are)
     const d = FOLKBY[x].def, l = [{ q: encQ(x), t: pick(lineasDe(x, d.lines)) || saludoHora() + ', niña.' }], a = lineasSi(d.ana); if (a.length && Math.random() < .7) l.push({ q: 'ana', t: pick(a) }); return { parts: [x, y], lines: l, topic: '', scene: game.scene, born: TT }; }
   const kx = !!FOLKBY[x].kid, ky = !!FOLKBY[y].kid, [a, b] = pick(paresSi(PAIR_LINES[kx && ky ? 'kids' : kx || ky ? 'mixta' : 'big']).filter(p => !(/pastor/.test(p[0]) && [x, y].some(i => /allan/.test(i)))));
   const [p, q] = !kx && ky ? [y, x] : [x, y];   // (a child with a grown-up: the child speaks first, as a child)
@@ -10596,7 +10601,8 @@ function encEnd(){
 }
 function encTick(dt){
   const s = enc.cur, withAna = s.parts.includes('ana');
-  if (game.scene !== s.scene || game.talk || game.map || s.parts.some(id => id !== 'ana' && FOLKBY[id].where !== game.scene) || s.parts.every(id => id === 'ana' || dist(ana.x, ana.y, encP(id).x, encP(id).y) > (withAna ? 230 : 420))) { bubbles = []; return encEnd(); }
+  if (game.scene !== s.scene || game.talk || game.map || s.parts.some(id => id !== 'ana' && FOLKBY[id].where !== game.scene) || (!s.presenta && s.parts.every(id => id === 'ana' || dist(ana.x, ana.y, encP(id).x, encP(id).y) > (withAna ? 230 : 420)))) {   // (meeting for the first time is not cut halfway: they already count as met)
+    bubbles = []; return encEnd(); }
   if ((s.wait -= dt) > 0) return;
   if (++s.i >= s.lines.length) return encEnd();
   const l = s.lines[s.i], dur = lineDur(l.t); bubbles = [{ q: l.q, text: l.t, t: 0, dur }]; s.wait = dur + .35; sfx.blip();
@@ -10606,7 +10612,7 @@ function folkTalk(f){
   if (enc.cur?.parts.includes(f.id)) return;
   if (enc.cur) encEnd(); if (amb.cur) ambAbort();
   enc.ready = null; f.talkT = TT + 1e6; f.route = []; f.moving = false;
-  if (!conoceA(f.id) && !sinNombre(f.id)) return encStart({ parts: [f.id, 'ana'], lines: presentar(f.id), topic: '', scene: game.scene, born: TT });   // (the first time: who they are)
+  if (!conoceA(f.id) && !sinNombre(f.id)) return encStart({ parts: [f.id, 'ana'], lines: presentar(f.id), topic: '', scene: game.scene, born: TT, presenta: true });   // (the first time: who they are)
   if (!aiReady()) return encStart(encFallback(f.id, 'ana'));
   bubbles = [{ q: 'f:' + f.id, text: '…', t: 0, dur: 30 }]; const id = enc.tok = Math.random();
   encAsk(f.id, 'ana').then(s => { if (enc.tok !== id) return; if (!s.lines.length) throw new Error('vacía'); encStart(s); })

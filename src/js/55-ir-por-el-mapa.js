@@ -7,7 +7,7 @@ const NAMED = [...Object.values(HOUSES).map(h => [h.name, h.at.x, h.at.y + 40]),
 function BRIDGES_COVERED_AT(){ for (const w of WATERS) for (const b of w.bridges) if (b.covered) return [b.x, b.y]; return [0, 0]; }
 function placeNear(x, y){ let best = null, bd = 520; for (const [n, px, py] of NAMED) { const d = dist(x, y, px, py); if (d < bd) { bd = d; best = n; } } return best; }
 // (with its article: «a la pensión», «al hotel White Sands», «a la casa de los Pye»; a name of its own, as it is: «a Rose Cottage»)
-const LUGAR_COMUN = { Hotel: 'el', Ayuntamiento: 'el', Casa: 'la', Herrería: 'la', Pensión: 'la', Fábrica: 'la', Granja: 'la' };
+const LUGAR_COMUN = { Hotel: 'el', Ayuntamiento: 'el', Casa: 'la', Herrería: 'la', Pensión: 'la', Fábrica: 'la', Granja: 'la', Tienda: 'la' };
 const toPlace = n => { const w = n.split(' ')[0], l = /^(La|El|Los|Las) /.test(n) ? n[0].toLowerCase() + n.slice(1) : LUGAR_COMUN[w] ? LUGAR_COMUN[w] + ' ' + w.toLowerCase() + n.slice(w.length) : n; return (l.startsWith('el ') ? 'al ' + l.slice(3) : 'a ' + l); };
 function goDest(x, y){
   let p = [clamp(x, 40, WW - 40), clamp(y, 60, WH - 40)];

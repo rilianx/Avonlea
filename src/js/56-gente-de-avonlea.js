@@ -102,7 +102,8 @@ const FOLK_DEFS = {
 // and the neighbours one does not know by name: on their errands along the roads, strolling, the little ones at play
 { const r = rng(2024), pk = a => a[Math.floor(r() * a.length)], homes = BUILDINGS.filter(b => b.style === 'casa' || b.style === 'granja').map(b => b.name);
   const DRESS = ['#8a6a8a', '#6a8aa8', '#a86a5a', '#7a9a6a', '#c8a070', '#5a6a8a', '#b88aa0', '#8a7a5a'], COAT = ['#4a4a54', '#5a4a3a', '#6a5a40', '#3a4a5a', '#5a5a40'], HAIR = ['#3a2a20', '#6a4a30', '#8a6a4a', '#c8a070', '#2a1a14', '#9a9088'];
-  const GREET = ['¡Buenos días, Ana! ¿Cómo están Matthew y Marilla?', 'Lindo día, ¿verdad? Dicen que mañana llueve.', '¡Qué grande estás, niña! Saludos a Marilla.', '¿Vas para la aldea? Yo vengo de la tienda de Lawson.', 'Buenas, buenas. No te entretengas, que se hace tarde.', 'Mira qué cielo. Así da gusto salir.'];
+  const GREET = [   // (one who does not know her by name: a stranger, the first weeks; by then all Avonlea knows the girl of Green Gables)
+    '[dias_desde:llegada_tv:14] ¡Buenos días, Ana! ¿Cómo están Matthew y Marilla?', 'Lindo día, ¿verdad? Dicen que mañana llueve.', '[dias_desde:llegada_tv:56] ¡Qué grande estás, niña! Saludos a Marilla.', '[!dias_desde:llegada_tv:14] Buenas. Tú no eres de por aquí, ¿no?', '¿Vas para la aldea? Yo vengo de la tienda de Lawson.', 'Buenas, buenas. No te entretengas, que se hace tarde.', 'Mira qué cielo. Así da gusto salir.'];
   for (let n = 0; n < 18; n++) {
     const kind = n < 9 ? 'recado' : n < 14 ? 'paseo' : 'juego', woman = r() < .5, kid = kind === 'juego', hair = pk(HAIR);
     const look = kid ? { hair, dress: pk(DRESS), skin: '#f2cfb2', h: .7 + r() * .08, ...(woman ? { style: r() < .5 ? 'braids' : 'curls', bow: pk(DRESS) } : { coat: true }) }

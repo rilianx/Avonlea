@@ -91,7 +91,7 @@ async function encAsk(x, y){
 }
 function encFallback(x, y){
   if (y === 'ana') {
-    if (!conoceA(x) && !sinNombre(x)) return { parts: [x, y], lines: presentar(x), topic: '', scene: game.scene, born: TT };   // (the first time: who they are)
+    if (!conoceA(x) && !sinNombre(x)) return { parts: [x, y], lines: presentar(x), topic: '', scene: game.scene, born: TT, presenta: true };   // (the first time: who they are)
     const d = FOLKBY[x].def, l = [{ q: encQ(x), t: pick(lineasDe(x, d.lines)) || saludoHora() + ', niña.' }], a = lineasSi(d.ana); if (a.length && Math.random() < .7) l.push({ q: 'ana', t: pick(a) }); return { parts: [x, y], lines: l, topic: '', scene: game.scene, born: TT }; }
   const kx = !!FOLKBY[x].kid, ky = !!FOLKBY[y].kid, [a, b] = pick(paresSi(PAIR_LINES[kx && ky ? 'kids' : kx || ky ? 'mixta' : 'big']).filter(p => !(/pastor/.test(p[0]) && [x, y].some(i => /allan/.test(i)))));
   const [p, q] = !kx && ky ? [y, x] : [x, y];   // (a child with a grown-up: the child speaks first, as a child)
@@ -115,7 +115,8 @@ function encEnd(){
 }
 function encTick(dt){
   const s = enc.cur, withAna = s.parts.includes('ana');
-  if (game.scene !== s.scene || game.talk || game.map || s.parts.some(id => id !== 'ana' && FOLKBY[id].where !== game.scene) || s.parts.every(id => id === 'ana' || dist(ana.x, ana.y, encP(id).x, encP(id).y) > (withAna ? 230 : 420))) { bubbles = []; return encEnd(); }
+  if (game.scene !== s.scene || game.talk || game.map || s.parts.some(id => id !== 'ana' && FOLKBY[id].where !== game.scene) || (!s.presenta && s.parts.every(id => id === 'ana' || dist(ana.x, ana.y, encP(id).x, encP(id).y) > (withAna ? 230 : 420)))) {   // (meeting for the first time is not cut halfway: they already count as met)
+    bubbles = []; return encEnd(); }
   if ((s.wait -= dt) > 0) return;
   if (++s.i >= s.lines.length) return encEnd();
   const l = s.lines[s.i], dur = lineDur(l.t); bubbles = [{ q: l.q, text: l.t, t: 0, dur }]; s.wait = dur + .35; sfx.blip();
@@ -125,7 +126,7 @@ function folkTalk(f){
   if (enc.cur?.parts.includes(f.id)) return;
   if (enc.cur) encEnd(); if (amb.cur) ambAbort();
   enc.ready = null; f.talkT = TT + 1e6; f.route = []; f.moving = false;
-  if (!conoceA(f.id) && !sinNombre(f.id)) return encStart({ parts: [f.id, 'ana'], lines: presentar(f.id), topic: '', scene: game.scene, born: TT });   // (the first time: who they are)
+  if (!conoceA(f.id) && !sinNombre(f.id)) return encStart({ parts: [f.id, 'ana'], lines: presentar(f.id), topic: '', scene: game.scene, born: TT, presenta: true });   // (the first time: who they are)
   if (!aiReady()) return encStart(encFallback(f.id, 'ana'));
   bubbles = [{ q: 'f:' + f.id, text: '…', t: 0, dur: 30 }]; const id = enc.tok = Math.random();
   encAsk(f.id, 'ana').then(s => { if (enc.tok !== id) return; if (!s.lines.length) throw new Error('vacía'); encStart(s); })
