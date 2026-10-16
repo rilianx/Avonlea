@@ -1210,14 +1210,15 @@ marilla: Otra vez la ropa por el suelo, Ana. ¿No habíamos quedado en que la do
    marilla: Aquí sí. Aquí todo se ve.
    ! suma paciencia:marilla:ana -1
 
-# (en camisón por Avonlea: la vecina que la ve se escandaliza, y se lo cuenta a Marilla; y Marilla, a Ana)
+# (en camisón por Avonlea: la vecina que la ve se escandaliza, y se lo cuenta a Marilla, unas horas después: la noticia
+# ana_en_camison, src/datos/noticias.txt; y Marilla, a Ana)
 === camison_barry ===
 canal: os
 prioridad: 6
 repetir: dia
 sujeta: barry
 si: ana:camison, ve:barry, sabe:barry:nina_cuthbert, hora:7-21
-al_terminar: hecho visto_en_camison
+al_terminar: contar barry ana_en_camison
 ---
 barry: (La Sra. Barry se lleva la mano al pecho.) ¡Niña! ¿Andas en camisón por las casas ajenas? ¡Qué va a decir la gente! Ya hablaré con Marilla.
 
@@ -1227,7 +1228,7 @@ prioridad: 6
 repetir: dia
 sujeta: lynde
 si: ana:camison, ve:lynde, sabe:lynde:nina_cuthbert, hora:7-21
-al_terminar: hecho visto_en_camison
+al_terminar: contar lynde ana_en_camison
 ---
 lynde: ¡Habráse visto! ¡La huérfana de los Cuthbert, en camisón por el camino! Esto lo sabe Marilla antes de que se ponga el sol, como que me llamo Rachel Lynde.
 
@@ -1235,8 +1236,7 @@ lynde: ¡Habráse visto! ¡La huérfana de los Cuthbert, en camisón por el cami
 canal: gg
 prioridad: 6
 sujeta: marilla
-si: hecho:visto_en_camison, ve:marilla
-al_terminar: olvidar visto_en_camison
+si: sabe:marilla:ana_en_camison, ve:marilla
 ---
 marilla: Ana. Me contaron que andabas en camisón por Avonlea. En camisón. ¿Tienes idea de lo que va a decir la gente?
 -> «Perdón, Marilla. No pensé que fuera tan grave.»
@@ -3004,6 +3004,92 @@ ana: Sr. Harrison, ¿es verdad que tiene un loro que dice malas palabras?
 harrison: Ginger dice lo que le da la gana. Como yo. Por eso nos llevamos bien.
 ana: ¿Puedo conocerlo?
 harrison: Si no te asustas con facilidad… Y no le hables de la vaca. Ni a mí tampoco.
+
+</script>
+<script type="text/plain" id="noticias">
+# Las noticias de Avonlea: lo que alguien sabe, y que se cuenta (lo lee el juego al empezar; el motor: src/js/66-noticias.js).
+# Una noticia es un hecho con dueño: no «pasó x», sino «la Sra. Barry sabe que pasó x». El guion la pide como condición
+# («si: sabe:barry:nina_cuthbert», «!sabe:lynde:…») y la da con una acción («! contar barry ana_en_camison»).
+# Cuando dos vecinos conversan, quien la sabe se la cuenta al otro, en voz alta (una línea de «dice», y la respuesta).
+#
+# «=== id ===» y sus campos, uno por línea:
+#   titulo: qué es, en pocas palabras (para el diario y la IA)
+#   saben: quiénes la saben desde el principio (separados por comas)
+#   saben si <condición>: quiénes la saben desde que se cumple la condición (condiciones del guion)
+#   cuentan: quiénes la cuentan al conversar: «todos» (si no se dice), «nadie» (un secreto), o una lista
+#   al conocer a ana: sí — quien conoce a Ana se entera (se la cuenta ella misma)
+#   llega a <quien> en <horas>: cuando alguien que la cuenta se entera, la noticia le llega a esa persona después de
+#         unas horas, aunque no se encuentren (la vecina que dice «ya hablaré con Marilla»)
+#   dice: cómo se cuenta (una o varias líneas; «dice lynde:», cómo la cuenta esa persona)
+#   responde: lo que dice quien se entera (una o varias; si no, las respuestas de siempre, abajo)
+# Las líneas que empiezan con # son comentarios.
+
+respuestas: ¡No me diga! | ¿De veras? ¡Qué cosa! | Bueno, yo de eso no sé nada... | Ya me lo imaginaba.
+respuestas ya sabidas: Sí, ya me lo contaron. | ¡Si lo sabe todo Avonlea! | Eso ya lo sabía, Rachel.
+
+# --- El huérfano de los Cuthbert (cap. 1): la Sra. Rachel ve a Matthew salir de traje a Bright River, va a
+# preguntarle a Marilla y se entera (la escena rachel_marilla)
+=== huerfano ===
+titulo: los Cuthbert van a traer un niño del orfanato
+saben: marilla, matthew, spencer
+dice: ¿Supo? ¡Los Cuthbert van a traer un niño del orfanato! A su edad... ya les dije que es un riesgo.
+dice lynde: ¿Supo? ¡Los Cuthbert van a traer un huérfano de Nueva Escocia! Yo se lo dije a Marilla: es un riesgo.
+responde: ¿Un huérfano? ¿Marilla Cuthbert? ¡Quién lo diría!
+
+# --- La niña de Tejas Verdes (cap. 1 a 9): al principio solo la saben los Cuthbert y la Sra. Spencer. La Sra. Rachel
+# la ve desde su ventana la primera mañana (la escena lynde_se_entera), y desde ella, todo Avonlea.
+=== nina_cuthbert ===
+titulo: los Cuthbert, que pidieron un niño, tienen una niña
+saben: marilla, matthew, spencer
+al conocer a ana: sí
+dice: ¿Supo lo de los Cuthbert? ¡Pidieron un niño al orfanato y les llegó una niña! Pelirroja, dicen.
+dice lynde: ¿Supo lo de los Cuthbert? ¡Pidieron un niño y les llegó una niña! Pelirroja, dicen. Yo siempre dije que eso de traer huérfanos…
+responde: ¿Una niña? ¿Y qué van a hacer los Cuthbert con una niña?
+responde: ¡No me diga! ¿Y Marilla qué dice?
+
+# --- Ana en camisón por Avonlea: la vecina que la ve se escandaliza (las escenas camison_barry y camison_lynde) y se lo
+# cuenta a Marilla (y Marilla, a Ana: la escena marilla_sabe_camison)
+=== ana_en_camison ===
+titulo: la niña de los Cuthbert anda en camisón por Avonlea
+llega a marilla en: 3
+dice: ¿Supo que la niña de los Cuthbert anda en camisón por las casas? ¡En camisón!
+responde: ¡Qué vergüenza! Marilla debe estar furiosa.
+
+# --- Lo que la Sra. Rachel cuenta siempre (cap. 1 y 9): las noticias de Avonlea
+=== cerdo_pye ===
+titulo: a los Pye se les escapó otra vez el cerdo
+saben: lynde
+dice: ¿Supo que a los Pye se les escapó otra vez el cerdo? Yo siempre lo dije.
+
+=== maestra_plumas ===
+titulo: la maestra nueva usa sombrero con plumas
+saben: lynde
+dice: Dicen que la maestra nueva usa sombrero con plumas. ¡Plumas, en una escuela!
+
+=== loro_harrison ===
+titulo: el loro del Sr. Harrison dice cosas terribles
+saben: lynde
+dice: Yo no soy de las que hablan, pero el loro del Sr. Harrison dice cada cosa...
+
+=== rastrillo_matthew ===
+titulo: Matthew Cuthbert compró un rastrillo en invierno
+saben si estacion:invierno: lynde
+dice: Matthew Cuthbert fue a la tienda y salió con un rastrillo. ¡En pleno invierno!
+
+=== ana_lengua ===
+titulo: la niña de los Cuthbert tiene una lengua, pero buen corazón
+saben si hecho:lynde_visita, !hecho:ofendio_lynde: lynde
+dice: ¡Esa niña de los Cuthbert! Pelirroja y con una lengua... aunque buen corazón tiene, eso sí.
+
+=== ana_ofendio_lynde ===
+titulo: la niña de los Cuthbert le dijo vieja chismosa a la Sra. Lynde
+saben si hecho:ofendio_lynde: lynde
+dice: ¡Esa niña de los Cuthbert! Me dijo vieja chismosa en mi propia cara. ¡A mí!
+responde: ¡Qué niña! ¿Y qué hizo Marilla?
+
+=== vendio_vaca ===
+titulo: Ana vendió una vaca
+dice: ¿Supo que la niña de los Cuthbert vendió una vaca? ¡Una niña vendiendo vacas!
 
 </script>
 <script type="text/plain" id="habilidades">
@@ -5824,7 +5910,7 @@ function dlgHacer(list){   // what a scene does when it starts or ends
     if (a.hecho) dlgHecho(a.hecho);
     if (a.marca) cap1Mark(a.marca, a.nota);
     if (a.log) logEv(a.log, []);
-    if (a.saber) { const [k, f] = a.saber; game.wm.know[k] = [...new Set([...(game.wm.know[k] || []), f])]; }
+    if (a.saber) { const [k, f] = a.saber; enterarse(k, f); }   // (someone learns a piece of news: and it goes on as src/datos/noticias.txt says)
     if (a.meta) { const m = a.meta; agentStart(m.quien, { ...G[m.tipo](m.quien, ...(m.args || [])), ...(m.texto ? { text: m.texto } : {}), ...(m.prioridad === 3 ? { urgente: true } : {}) }, { label: m.etiqueta || m.texto, prio: m.prioridad }); }   // (urgent, from the story: it cuts short whatever she was staying for)
     if (a.soltar && FOLKBY[a.soltar]) FOLKBY[a.soltar].talkT = TT + 1;
     if (a.ana) Object.assign(ana, a.ana);
@@ -9427,7 +9513,7 @@ function update(dt){
   if (game.scene === 'camino' && ana.onCart && (mx || my || (ana.goto && !ana.goto.wm))) roadGetOff();   // (moving her: she gets down from the buggy)
   if (ANA_AUTO) { if (mx || my) { freeStart(); const v = 520 / (cam.zoom || 1) / (viewZoom || 1); freeCam.x += mx * v * dt; freeCam.y += my * v * dt; } mx = my = 0; }   // (on her own: the keys move the view)
   if (game.talk?.deadline && TT > game.talk.deadline && !sayOpen) { game.talk.deadline = 0; autoChoose(); }
-  autoTick(); cartTick(dt); roadTick(dt); buggyTick(); roadTalkTick(dt); dlgTick(dt); talkTick(dt); cap1Tick(); momentsTick(); lugaresTick(dt); inicioTick(dt); lagrimas(); ropaTick(); folkTick(dt); faunaTick(dt); agentTick(dt); jugarTick(dt); correoTick(dt); sickTick(); apartarTick(); cuadernoTick(dt); habilidadesTick(dt); juntasTick(dt); agendaTick(); wmApproachTick(dt); calledTick(); chatTick(dt); wmFollowTick();
+  autoTick(); cartTick(dt); roadTick(dt); buggyTick(); roadTalkTick(dt); dlgTick(dt); talkTick(dt); cap1Tick(); momentsTick(); lugaresTick(dt); inicioTick(dt); lagrimas(); ropaTick(); folkTick(dt); faunaTick(dt); agentTick(dt); jugarTick(dt); correoTick(dt); sickTick(); apartarTick(); cuadernoTick(dt); habilidadesTick(dt); noticiasTick(dt); juntasTick(dt); agendaTick(); wmApproachTick(dt); calledTick(); chatTick(dt); wmFollowTick();
   if (RELATO.on) relatoTick();   // (the account of what happens, once all have moved: 66-relato.js)
   ana.torn = !!game.anaStates.rasgado; ana.askew = !!game.anaStates.despeinada;
   ana.savoring = false;
@@ -11010,7 +11096,6 @@ function chatTry(ag, F, urg){
 const CHAT_YA = {};   // (who talked a moment ago → until when they go on without stopping to talk again)
 function startChat(a, b, anaFree){
   CHAT_YA[a] = CHAT_YA[b] = TT + M(20);
-  if (a !== 'ana' && b !== 'ana') chismear(a, b);   // (two neighbours talking: the news goes from one to the other)
   const third = Object.keys(DLG_BANK).length && [...Object.keys(PEOPLE), ...FOLK.map(f => f.id)].find(o => o !== a && o !== b && wmScene(o) === wmScene(a) && !inChat(o) && DLG_BANK[dlgKey([a, b, o])] && dist(wmBody(o).x, wmBody(o).y, wmBody(a).x, wmBody(a).y) < 120);
   const bank = (third && dlgNext([a, b, third])) || dlgNext([a, b]);
   const c = { parts: [a, b], lines: bank || chatLines(a, b, anaFree), i: -1, wait: .2, anaFree }; CHATS.push(c);
@@ -11039,8 +11124,6 @@ function chatTick(dt){
   }
 }
 // what they say (no generative AI: a greeting, a few lines as the characters are, and a goodbye that mentions the errand)
-const LYNDE_CHISME = ['[sabe:lynde:nina_cuthbert] ¿Supo lo de los Cuthbert? ¡Pidieron un niño y les llegó una niña! Pelirroja, dicen. Yo siempre dije que eso de traer huérfanos…', '¿Supo que a los Pye se les escapó otra vez el cerdo? Yo siempre lo dije.', '[hecho:lynde_visita, !hecho:ofendio_lynde] ¡Esa niña de los Cuthbert! Pelirroja y con una lengua... aunque buen corazón tiene, eso sí.', '[hecho:ofendio_lynde] ¡Esa niña de los Cuthbert! Me dijo vieja chismosa en mi propia cara. ¡A mí!', 'Dicen que la maestra nueva usa sombrero con plumas. ¡Plumas, en una escuela!', 'Yo no soy de las que hablan, pero el loro del Sr. Harrison dice cada cosa...', 'Matthew Cuthbert fue a la tienda y salió con un rastrillo. ¡En pleno invierno!'];
-const CHISME_RE = ['¡No me diga!', '¿De veras? ¡Qué cosa!', 'Bueno, yo de eso no sé nada...', 'Ya me lo imaginaba.'];
 const ANA_DIANA = [['¡Diana, amiga del alma! Tengo tanto que contarte.', '¡Ana! Yo también. ¿Nos vemos en el Bosque Encantado?'], ['¿Viste qué color tiene hoy el lago? Como de perla.', 'Yo solo vi que estaba azul... pero tú lo dices más bonito.'], ['Prometamos ser amigas mientras el sol y la luna existan.', '¡Lo prometo, Ana!']];
 const ANA_SUENA = [['¿No le parece que hoy el mundo está recién hecho?', 'Esta niña... qué cosas dice.'], ['Vi una nube con forma de barco. Iba hacia Charlottetown.', 'Ya lo creo, Ana. Ya lo creo.'], ['¿Sabía que los abedules parecen señoras de vestido blanco?', 'Nunca lo había pensado así.'], ['Hoy el lago brillaba como si tuviera estrellas adentro.', '¡Qué imaginación tienes, niña!'], ['Cuando sea grande quiero escribir libros. O ser maestra. O las dos cosas.', 'Tiempo tienes para decidirlo.']];
 const saludoHora = () => { const h = hourNow() % 24; return h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches'; };
@@ -11067,7 +11150,8 @@ function chatLines(a, b, anaFree){
   say(a, `¡${hi}${to(B)}!`); say(b, tu ? pick([`¡Hola${to(A)}! ¿A dónde vas?`, `¡Hola${to(A)}!`]) : pick([`¡${hi}${to(A)}! ¿Cómo están todos en casa?`, `¡Qué gusto verle${to(A)}!`]));
   const rounds = 1 + Math.round((1 - Math.max(focoOf(a).enfoque, focoOf(b).enfoque)) * 3);
   for (let k = 0; k < rounds; k++) {
-    if (a === 'lynde' || b === 'lynde') { const o = a === 'lynde' ? b : a; say('lynde', pick(lineasSi(LYNDE_CHISME))); say(o, pick(CHISME_RE)); }
+    const ch = !ana_ && !k && (chisme(a, b) || chisme(b, a));   // (two neighbours: a piece of news, told aloud: src/datos/noticias.txt)
+    if (ch) for (const [q, t] of ch) say(q, t);
     else if (ana_ && other === 'diana' && dianaAmiga()) { const [x, y] = ANA_DIANA[(k + Math.floor(TT)) % ANA_DIANA.length]; say('ana', x); say('diana', y); }
     else if (ana_) { const [x, y] = suena(); say('ana', isKid(other) ? x.replace('¿No le parece', '¿No te parece').replace('¿Sabía', '¿Sabías') : x); say(other, isKid(other) ? pick(['¡Qué lindo, Ana!', '¿De verdad? ¡Cuéntame más!', '¡Qué cosas dices, Ana!']) : y); }
     else { const [x, y] = pares(); say(a, x); say(b, y); }
@@ -12216,20 +12300,14 @@ function juntasTick(dt){
    count too). Until then, no one calls her by her name (a line with «Ana» in it is not said) nor speaks as if they
    had known her (the lines that need something past say so: «[cuaderno:escuela] …»). Someone with no name of their
    own («un vecino») says hello as to anyone.
-   Nor does anyone know the Cuthberts have a girl until they are told: it is news (nina_cuthbert, what each one knows:
-   «sabe:barry:nina_cuthbert»). At first only Matthew, Marilla and the Sra. Spencer know it; the Sra. Rachel sees it
-   from her window the first morning (as in cap. 1, nothing gets past her), and the news goes from one to another as
-   the neighbours talk (CHISMES: the news that spread so). Whoever meets Ana learns it too. */
+   Nor does anyone know the Cuthberts have a girl until they are told: it is news (src/datos/noticias.txt,
+   nina_cuthbert), and those who had not heard are surprised. */
 const CONOCE_BASE = ['marilla', 'matthew', 'spencer'];
 const CONOCE_POR = { diana: 'hecho:conocidas_diana', barry: 'hecho:barry_presenta', lynde: 'hecho:lynde_visita', stacy: 'cuaderno:escuela', gilbert: 'cuaderno:escuela', sraallan: 'cuaderno:escuela_dominical', josephine: 'hecho:cama_josephine' };
 const sinF = k => String(k).replace(/^f:/, '');
 // a game from before all this (Ana already stays, she has lived in Avonlea a while): everyone knows her
 const conoceTodos = () => !dlgHechos().inicio_juego && !!dlgHechos().se_queda;
 function conoceA(k){ k = sinF(k); return CONOCE_BASE.includes(k) || conoceTodos() || !!dlgHechos()['conoce_' + k] || (!!CONOCE_POR[k] && dlgCond(CONOCE_POR[k], dlgCtx())); }
-const CHISMES = ['nina_cuthbert'];
-const sabeK = (k, f) => conoceTodos() || (game.wm?.know?.[sinF(k)] || []).includes(f);
-// two neighbours talking: what one knows of the news, now the other knows too
-function chismear(a, b){ for (const f of CHISMES) { if (sabeK(a, f) && !sabeK(b, f)) wmKnow(sinF(b), f); else if (sabeK(b, f) && !sabeK(a, f)) wmKnow(sinF(a), f); } }
 const sinNombre = k => /^(un|una) /.test(FOLKBY[sinF(k)]?.def.name || '');   // («un vecino»: no one to get to know)
 // the lines of someone who does not know Ana yet: none that call her by her name
 const lineasAjenas = (k, L) => conoceA(k) ? L : L.filter(t => !/\b(Ana|Shirley)\b/.test(t));
@@ -12252,7 +12330,7 @@ function presentacion(k){
 }
 // they meet: the lines, and from now on they know each other
 function conocer(k){ k = sinF(k); if (conoceA(k) || sinNombre(k)) return; dlgHecho('conoce_' + k); logEv('Ana conoció a ' + (FOLKBY[k]?.def.name || CH[k]?.article + NAMES[k]) + '.', []); }
-function presentar(k){ const L = presentacion(k); conocer(k); wmKnow(sinF(k), 'nina_cuthbert'); return L; }   // (and now they know there is a girl at Green Gables)
+function presentar(k){ const L = presentacion(k); conocer(k); presentarseNoticias(k); return L; }   // (and now they know what she tells of herself: that she lives at Green Gables)
 
 /* ---------- the notebook: what Ana could do (📖), as goals of the book, not as actions ----------
    For the player to know what there is: each goal with a hint of where or when (not the steps: those are hers to find),
@@ -12501,7 +12579,6 @@ function inicioLlegada(){
   game.scene = 'gg'; ana.hidden = false; ana.sit = false; ana.x = KDOOR.x + 20; ana.y = KIT.h * .6; ana.dir = 1;
   relSetW('marilla', 'ana', 1); relSetW('matthew', 'ana', 4);
   dlgHecho('inicio_juego');
-  for (const k of ['marilla', 'matthew', 'spencer']) wmKnow(k, 'nina_cuthbert');   // (only they know there is a girl at Green Gables: the rest of Avonlea, not yet)
   try { localStorage.removeItem(PUNTOS_KEY); } catch (e) {}   // (a new game: the points of the one before are no longer its own)
   { const h = $('hint'); if (h) h.style.opacity = 0; hinted = true; }   // (the controls: the tutorial cards tell them, when the player takes over)
   for (const k of Object.keys(PEOPLE)) amb.mute[k] = TT + 180;   // (no loose lines while she arrives)
@@ -12628,6 +12705,60 @@ function loop(now){
   FRAME++; tripBarDraw(); render(); islaDraw(); requestAnimationFrame(loop);
 }
 window.__avonlea = { ...(/[?&]dev\b/.test(location.search) ? { ev: s => eval(s) } : {}), vista: () => view, opcionesDe, dlgCumple, comentar, comentarioElegir, COMENTARIOS, lugaresTick, escenaObjeto, targets, cartaPuede, conNombres, nombrar, nombreDe, nombrarElegir, NOMBRABLES, primeraVez, ventana, velaPuede, sombrero, LOOKS, dlgDichas, chats: () => CHATS, enConversacion, anaPos: () => ({ x: ana.x, y: ana.y }), setDia: (d, h) => { dayT = d + (h - 6) / 24; }, dia: () => today(), PEOPLE, relatoEmpezar, inicioLlegada, dlgHechos, convDisponibles, conversar, convOpciones, guiñosDe, LINES, dlgHecho, cualidad, cualidadSuma, cualidadCond, dlgCond, dlgEspecificidad, ritmoLleno, ritmoMarca, dlgHacer, dlgAccion, HABILIDADES, relSetW, relato: () => RELATO.lineas, reglas: () => RELATO_REGLAS.map(r => [r.id, r.texto]), jugables, jugar, anaMenu, correoRetirar, cartaLeer, CORREO, cartaTexto, playAct: () => game.playAct, DIALOGOS, dlgCtx, talks: () => TALKS, dlgGuion, dlgPanel, bubblesNow: () => bubbles, toby, cartSheet: (c, x, y, c8, t) => { const L = [], p = { look: 'matthew', x, y, c8, walk: 0, moving: false }; const [cx, cy] = [x, y]; pushCart(L, c, { x: cx, y: cy, c8, walk: 0, moving: true }, t); for (const [k, look] of [[0, 'matthew'], [1, 'ana']]) { const [sx, sy] = cartSeat(cx, cy, c8, k); L.push({ y: sy, draw: () => drawPerson(c, { ...mkPerson(look, sx, sy), sit: true, dir: c8Dir(c8) }, t) }); } L.sort((a, b) => a.y - b.y).forEach(o => o.draw()); }, startCap1, CAP1, LIBRO1, ROAD_TRAMOS, ROAD_MIN, roadTramo, islaToggle, DLG_BANK, startDay, setSeason, agendaData: () => AGENDA.map(e => ({ who: wmName(e.who), from: e.from, to: e.to, label: e.label, season: e.season, sunday: !!e.sunday, ana: !!(e.ana || e.who === 'ana'), cond: e.when ? String(e.when).replace(/^\(\) => /, '') : '' })), setAgenda: v => { AGENDA_ON = v; }, AGENDA, wmData: () => ({ THINGS, WHO, OFRECE, WP_NAME, TRADE, TREATS, LIBRETA, ITEM_NAME, MAX_GOALS, PACE, FOCO }), paintMapBase, doingText, wmName, wmBody, wmScene, WW, WH, setVec: v => { VEC_ON = v; }, setStyle: v => { ANA_STYLE = v; }, setHead: setHeadM, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
+/* ---------- the news of Avonlea: what someone knows, and tells (src/datos/noticias.txt) ----------
+   A piece of news is a fact with an owner: not «x happened» but «Mrs. Barry knows x happened» (game.wm.know, the
+   same the planner uses). The script asks for it («sabe:barry:nina_cuthbert») and gives it («! contar barry x»).
+   Here, only how it goes about, as the data says: who knows it from the start (or from when a condition holds), who
+   tells it, how it is told and answered; whoever meets Ana learns what she tells of herself; and some reach someone
+   a few hours later, though they do not meet («ya hablaré con Marilla»). When two neighbours talk, one who knows tells
+   the other, aloud (chatLines, in src/js/60-foco-y-ejecucion.js). */
+function noticiasLeer(txt){
+  const N = [], R = { nuevas: [], sabidas: [] }; let n = null;
+  const lista = v => v.split(',').map(x => x.trim()).filter(Boolean);
+  for (const raw of txt.split('\n')) {
+    const l = raw.trim(); if (!l || l[0] === '#') continue; let m;
+    if ((m = l.match(/^respuestas( ya sabidas)?:\s*(.*)$/))) { R[m[1] ? 'sabidas' : 'nuevas'] = m[2].split('|').map(x => x.trim()); continue; }
+    if ((m = l.match(/^===\s*(.+?)\s*===$/))) { N.push(n = { id: m[1], titulo: m[1], saben: [], cuentan: null, dice: [], diceDe: {}, responde: [], llega: [] }); continue; }
+    if (!n) continue;
+    if ((m = l.match(/^saben(?: si (.+?))?:\s*(.*)$/))) n.saben.push({ si: m[1] ? lista(m[1]) : [], quien: lista(m[2]) });
+    else if ((m = l.match(/^llega a (\S+) en:\s*([\d.]+)$/))) n.llega.push({ quien: m[1], horas: +m[2] });
+    else if ((m = l.match(/^dice (\S+):\s*(.*)$/))) (n.diceDe[m[1]] ||= []).push(m[2]);
+    else if ((m = l.match(/^(titulo|cuentan|al conocer a ana|dice|responde):\s*(.*)$/))) {
+      const [, k, v] = m;
+      if (k === 'dice' || k === 'responde') n[k].push(v); else if (k === 'cuentan') n.cuentan = v === 'todos' ? null : v === 'nadie' ? [] : lista(v); else if (k === 'al conocer a ana') n.alConocer = /^s/.test(v); else n.titulo = v;
+    }
+  }
+  return { N, R };
+}
+const { N: NOTICIAS, R: NOTICIAS_RESP } = noticiasLeer(document.getElementById('noticias')?.textContent || '');
+const NOTICIA = Object.fromEntries(NOTICIAS.map(n => [n.id, n]));
+// (a game from before Ana's arrival was played: she has lived in Avonlea a while, and the news of her are old)
+const sabeK = (k, f) => (NOTICIA[f]?.alConocer && conoceTodos()) || (game.wm?.know?.[sinF(k)] || []).includes(f);
+const cuenta = (k, n) => !n.cuentan || n.cuentan.includes(sinF(k));
+// someone learns it: and, if they are one to tell it, it reaches whoever it reaches, a few hours later
+function enterarse(k, f){
+  k = sinF(k); if (sabeK(k, f)) return; wmKnow(k, f); const n = NOTICIA[f]; if (!n || !cuenta(k, n)) return;
+  for (const L of n.llega) if (L.quien !== k && !sabeK(L.quien, f)) (game.wm.noticiasPend ||= []).push({ k: L.quien, f, at: dayT + L.horas / 24 });
+}
+// who knows it from the start, or from when its condition holds; and what is on its way to someone
+let noticiasT = 0;
+function noticiasTick(dt){
+  if ((noticiasT -= dt) > 0 || !game.wm) return; noticiasT = 2;
+  for (const n of NOTICIAS) for (const g of n.saben) if (g.si.every(c => dlgCond(c))) for (const k of g.quien) if (!sabeK(k, n.id)) wmKnow(k, n.id);
+  const P = game.wm.noticiasPend; if (P?.length) for (const p of P.slice()) if (dayT >= p.at) { P.splice(P.indexOf(p), 1); enterarse(p.k, p.f); }
+}
+// what Ana tells of herself to whoever meets her (the news that say so)
+const presentarseNoticias = k => { for (const n of NOTICIAS) if (n.alConocer) enterarse(k, n.id); };
+// two neighbours talking: a piece of news one knows and the other does not, told aloud (and now the other knows it);
+// if there is none new, now and then one the gossips of Avonlea tell again anyway
+function chisme(a, b){
+  const nueva = NOTICIAS.find(n => (n.diceDe[sinF(a)] || n.dice).length && cuenta(a, n) && sabeK(a, n.id) && !sabeK(b, n.id));
+  const n = nueva || (Math.random() < .3 && pick(NOTICIAS.filter(n => (n.diceDe[sinF(a)] || n.dice).length && cuenta(a, n) && sabeK(a, n.id) && sabeK(b, n.id))));
+  if (!n) return null;
+  if (nueva) enterarse(b, n.id);
+  return [[a, pick(n.diceDe[sinF(a)] || n.dice)], [b, pick(nueva ? (n.responde.length ? n.responde : NOTICIAS_RESP.nuevas) : NOTICIAS_RESP.sabidas)]];
+}
+
 /* ---------- the first time: a scene of its own; the window and the candle; her hat in the wardrobe ----------
    - The first time Ana does some things (looks out of her window, sees herself in the mirror, climbs to her room, sees
      the sea from the lighthouse…), a scene of the script (primera_<what>, disparo: primera) instead of the plain line;

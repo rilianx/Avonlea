@@ -1,0 +1,83 @@
+# Las noticias de Avonlea: lo que alguien sabe, y que se cuenta (lo lee el juego al empezar; el motor: src/js/66-noticias.js).
+# Una noticia es un hecho con dueño: no «pasó x», sino «la Sra. Barry sabe que pasó x». El guion la pide como condición
+# («si: sabe:barry:nina_cuthbert», «!sabe:lynde:…») y la da con una acción («! contar barry ana_en_camison»).
+# Cuando dos vecinos conversan, quien la sabe se la cuenta al otro, en voz alta (una línea de «dice», y la respuesta).
+#
+# «=== id ===» y sus campos, uno por línea:
+#   titulo: qué es, en pocas palabras (para el diario y la IA)
+#   saben: quiénes la saben desde el principio (separados por comas)
+#   saben si <condición>: quiénes la saben desde que se cumple la condición (condiciones del guion)
+#   cuentan: quiénes la cuentan al conversar: «todos» (si no se dice), «nadie» (un secreto), o una lista
+#   al conocer a ana: sí — quien conoce a Ana se entera (se la cuenta ella misma)
+#   llega a <quien> en <horas>: cuando alguien que la cuenta se entera, la noticia le llega a esa persona después de
+#         unas horas, aunque no se encuentren (la vecina que dice «ya hablaré con Marilla»)
+#   dice: cómo se cuenta (una o varias líneas; «dice lynde:», cómo la cuenta esa persona)
+#   responde: lo que dice quien se entera (una o varias; si no, las respuestas de siempre, abajo)
+# Las líneas que empiezan con # son comentarios.
+
+respuestas: ¡No me diga! | ¿De veras? ¡Qué cosa! | Bueno, yo de eso no sé nada... | Ya me lo imaginaba.
+respuestas ya sabidas: Sí, ya me lo contaron. | ¡Si lo sabe todo Avonlea! | Eso ya lo sabía, Rachel.
+
+# --- El huérfano de los Cuthbert (cap. 1): la Sra. Rachel ve a Matthew salir de traje a Bright River, va a
+# preguntarle a Marilla y se entera (la escena rachel_marilla)
+=== huerfano ===
+titulo: los Cuthbert van a traer un niño del orfanato
+saben: marilla, matthew, spencer
+dice: ¿Supo? ¡Los Cuthbert van a traer un niño del orfanato! A su edad... ya les dije que es un riesgo.
+dice lynde: ¿Supo? ¡Los Cuthbert van a traer un huérfano de Nueva Escocia! Yo se lo dije a Marilla: es un riesgo.
+responde: ¿Un huérfano? ¿Marilla Cuthbert? ¡Quién lo diría!
+
+# --- La niña de Tejas Verdes (cap. 1 a 9): al principio solo la saben los Cuthbert y la Sra. Spencer. La Sra. Rachel
+# la ve desde su ventana la primera mañana (la escena lynde_se_entera), y desde ella, todo Avonlea.
+=== nina_cuthbert ===
+titulo: los Cuthbert, que pidieron un niño, tienen una niña
+saben: marilla, matthew, spencer
+al conocer a ana: sí
+dice: ¿Supo lo de los Cuthbert? ¡Pidieron un niño al orfanato y les llegó una niña! Pelirroja, dicen.
+dice lynde: ¿Supo lo de los Cuthbert? ¡Pidieron un niño y les llegó una niña! Pelirroja, dicen. Yo siempre dije que eso de traer huérfanos…
+responde: ¿Una niña? ¿Y qué van a hacer los Cuthbert con una niña?
+responde: ¡No me diga! ¿Y Marilla qué dice?
+
+# --- Ana en camisón por Avonlea: la vecina que la ve se escandaliza (las escenas camison_barry y camison_lynde) y se lo
+# cuenta a Marilla (y Marilla, a Ana: la escena marilla_sabe_camison)
+=== ana_en_camison ===
+titulo: la niña de los Cuthbert anda en camisón por Avonlea
+llega a marilla en: 3
+dice: ¿Supo que la niña de los Cuthbert anda en camisón por las casas? ¡En camisón!
+responde: ¡Qué vergüenza! Marilla debe estar furiosa.
+
+# --- Lo que la Sra. Rachel cuenta siempre (cap. 1 y 9): las noticias de Avonlea
+=== cerdo_pye ===
+titulo: a los Pye se les escapó otra vez el cerdo
+saben: lynde
+dice: ¿Supo que a los Pye se les escapó otra vez el cerdo? Yo siempre lo dije.
+
+=== maestra_plumas ===
+titulo: la maestra nueva usa sombrero con plumas
+saben: lynde
+dice: Dicen que la maestra nueva usa sombrero con plumas. ¡Plumas, en una escuela!
+
+=== loro_harrison ===
+titulo: el loro del Sr. Harrison dice cosas terribles
+saben: lynde
+dice: Yo no soy de las que hablan, pero el loro del Sr. Harrison dice cada cosa...
+
+=== rastrillo_matthew ===
+titulo: Matthew Cuthbert compró un rastrillo en invierno
+saben si estacion:invierno: lynde
+dice: Matthew Cuthbert fue a la tienda y salió con un rastrillo. ¡En pleno invierno!
+
+=== ana_lengua ===
+titulo: la niña de los Cuthbert tiene una lengua, pero buen corazón
+saben si hecho:lynde_visita, !hecho:ofendio_lynde: lynde
+dice: ¡Esa niña de los Cuthbert! Pelirroja y con una lengua... aunque buen corazón tiene, eso sí.
+
+=== ana_ofendio_lynde ===
+titulo: la niña de los Cuthbert le dijo vieja chismosa a la Sra. Lynde
+saben si hecho:ofendio_lynde: lynde
+dice: ¡Esa niña de los Cuthbert! Me dijo vieja chismosa en mi propia cara. ¡A mí!
+responde: ¡Qué niña! ¿Y qué hizo Marilla?
+
+=== vendio_vaca ===
+titulo: Ana vendió una vaca
+dice: ¿Supo que la niña de los Cuthbert vendió una vaca? ¡Una niña vendiendo vacas!

@@ -16,6 +16,7 @@ const CLAVES = ['hecho', 'dicha', 've', 'donde', 'ana', 'conoce', 'presente', 'm
 const CUALIDAD = /^([a-zñ_]+):([a-zñ_]+)(?::([a-zñ_]+))?\s*(>=|<=|>|<|==|=)\s*(-?\d+(?:\.\d+)?)$/;
 // the qualities there are: the affection, the skills (src/datos/habilidades.txt), and whatever a scene adds to («suma x:…»)
 const CUALIDADES = new Set(['afecto', ...[...habilidades.matchAll(/^===\s*(.+?)\s*===$/gm)].map(m => m[1]), ...[...guion.matchAll(/al_(?:empezar|terminar):\s*suma\s+([a-zñ_]+):/g)].map(m => m[1])]);
+const NOTICIAS = new Set([...leer('src/datos/noticias.txt').matchAll(/^===\s*(.+?)\s*===$/gm)].map(m => m[1]));   // (the news there are: src/datos/noticias.txt)
 const metas = new Set([...cuaderno.matchAll(/^===\s*(.+?)\s*===$/gm)].map(m => m[1]));   // (the goals of the notebook: «dias_desde» may count from one of them)
 const pide = {}, hace = {}, malas = [];   // (fact → where it is asked for / made)
 const anota = (o, h, donde) => (o[h] ||= new Set()).add(donde);
@@ -24,6 +25,7 @@ function condicion(c, donde){
   const q = s.match(CUALIDAD); if (q) { if (!CUALIDADES.has(q[1])) malas.push(`${donde}: «${c}» (no hay una cualidad «${q[1]}»: ni el afecto, ni una habilidad, ni algo que sume una escena)`); return; }
   const [k, a] = s.split(':');
   if (!CLAVES.includes(k)) return malas.push(`${donde}: «${c}» (no es una condición conocida)`);
+  if (k === 'sabe' && !NOTICIAS.has(s.split(':')[2])) return malas.push(`${donde}: «${c}» (no hay una noticia «${s.split(':')[2]}» en src/datos/noticias.txt)`);
   if (!neg && (k === 'hecho' || (k === 'dias_desde' && !metas.has(a)))) anota(pide, a, donde);
   if (neg || k === 'no_hoy') anota(pide, a + ' ', donde);   // (read, but not needed: «!hecho:x» holds while x has not happened)
 }
@@ -35,6 +37,7 @@ for (const raw of guion.split('\n')) {
   const h = s.match(/^===\s*(.+?)\s*===$/); if (h) { escenas.push(esc = { id: h[1], body: false }); continue; }
   if (!esc) continue; if (s === '---') { esc.body = true; continue; }
   { const n = s.match(/^!\s*nombrar\s+(\S+)/) || (/^al_(empezar|terminar):\s*nombrar\s/.test(s) && s.match(/nombrar\s+(\S+)/)); if (n) anota(hace, 'nombro_' + n[1], 'escena ' + esc.id); }   // (naming a thing leaves nombro_<thing>)
+  { const n = s.match(/^(?:!\s*|al_(?:empezar|terminar):\s*)(?:contar|saber)\s+\S+\s+(\S+)/); if (n && !NOTICIAS.has(n[1])) malas.push(`escena ${esc.id}: «${s}» (no hay una noticia «${n[1]}» en src/datos/noticias.txt)`); }
   if (esc.body) { const m = s.match(/^!\s*(hecho|olvidar)\s+(\S+)/); if (m) anota(m[1] === 'hecho' ? hace : pide, m[1] === 'hecho' ? m[2] : m[2] + ' ', 'escena ' + esc.id + ' (una opción)'); if (s.startsWith('->')) esc.opciones = (esc.opciones || 0) + 1; continue; }
   const i = s.indexOf(':'), k = i < 0 ? s : s.slice(0, i).trim(), v = i < 0 ? '' : s.slice(i + 1).trim();
   if (k === 'si') v.split(',').forEach(c => condicion(c, 'escena ' + esc.id));

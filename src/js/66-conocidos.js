@@ -6,20 +6,14 @@
    count too). Until then, no one calls her by her name (a line with «Ana» in it is not said) nor speaks as if they
    had known her (the lines that need something past say so: «[cuaderno:escuela] …»). Someone with no name of their
    own («un vecino») says hello as to anyone.
-   Nor does anyone know the Cuthberts have a girl until they are told: it is news (nina_cuthbert, what each one knows:
-   «sabe:barry:nina_cuthbert»). At first only Matthew, Marilla and the Sra. Spencer know it; the Sra. Rachel sees it
-   from her window the first morning (as in cap. 1, nothing gets past her), and the news goes from one to another as
-   the neighbours talk (CHISMES: the news that spread so). Whoever meets Ana learns it too. */
+   Nor does anyone know the Cuthberts have a girl until they are told: it is news (src/datos/noticias.txt,
+   nina_cuthbert), and those who had not heard are surprised. */
 const CONOCE_BASE = ['marilla', 'matthew', 'spencer'];
 const CONOCE_POR = { diana: 'hecho:conocidas_diana', barry: 'hecho:barry_presenta', lynde: 'hecho:lynde_visita', stacy: 'cuaderno:escuela', gilbert: 'cuaderno:escuela', sraallan: 'cuaderno:escuela_dominical', josephine: 'hecho:cama_josephine' };
 const sinF = k => String(k).replace(/^f:/, '');
 // a game from before all this (Ana already stays, she has lived in Avonlea a while): everyone knows her
 const conoceTodos = () => !dlgHechos().inicio_juego && !!dlgHechos().se_queda;
 function conoceA(k){ k = sinF(k); return CONOCE_BASE.includes(k) || conoceTodos() || !!dlgHechos()['conoce_' + k] || (!!CONOCE_POR[k] && dlgCond(CONOCE_POR[k], dlgCtx())); }
-const CHISMES = ['nina_cuthbert'];
-const sabeK = (k, f) => conoceTodos() || (game.wm?.know?.[sinF(k)] || []).includes(f);
-// two neighbours talking: what one knows of the news, now the other knows too
-function chismear(a, b){ for (const f of CHISMES) { if (sabeK(a, f) && !sabeK(b, f)) wmKnow(sinF(b), f); else if (sabeK(b, f) && !sabeK(a, f)) wmKnow(sinF(a), f); } }
 const sinNombre = k => /^(un|una) /.test(FOLKBY[sinF(k)]?.def.name || '');   // («un vecino»: no one to get to know)
 // the lines of someone who does not know Ana yet: none that call her by her name
 const lineasAjenas = (k, L) => conoceA(k) ? L : L.filter(t => !/\b(Ana|Shirley)\b/.test(t));
@@ -42,4 +36,4 @@ function presentacion(k){
 }
 // they meet: the lines, and from now on they know each other
 function conocer(k){ k = sinF(k); if (conoceA(k) || sinNombre(k)) return; dlgHecho('conoce_' + k); logEv('Ana conoció a ' + (FOLKBY[k]?.def.name || CH[k]?.article + NAMES[k]) + '.', []); }
-function presentar(k){ const L = presentacion(k); conocer(k); wmKnow(sinF(k), 'nina_cuthbert'); return L; }   // (and now they know there is a girl at Green Gables)
+function presentar(k){ const L = presentacion(k); conocer(k); presentarseNoticias(k); return L; }   // (and now they know what she tells of herself: that she lives at Green Gables)

@@ -135,7 +135,7 @@ function dlgHacer(list){   // what a scene does when it starts or ends
     if (a.hecho) dlgHecho(a.hecho);
     if (a.marca) cap1Mark(a.marca, a.nota);
     if (a.log) logEv(a.log, []);
-    if (a.saber) { const [k, f] = a.saber; game.wm.know[k] = [...new Set([...(game.wm.know[k] || []), f])]; }
+    if (a.saber) { const [k, f] = a.saber; enterarse(k, f); }   // (someone learns a piece of news: and it goes on as src/datos/noticias.txt says)
     if (a.meta) { const m = a.meta; agentStart(m.quien, { ...G[m.tipo](m.quien, ...(m.args || [])), ...(m.texto ? { text: m.texto } : {}), ...(m.prioridad === 3 ? { urgente: true } : {}) }, { label: m.etiqueta || m.texto, prio: m.prioridad }); }   // (urgent, from the story: it cuts short whatever she was staying for)
     if (a.soltar && FOLKBY[a.soltar]) FOLKBY[a.soltar].talkT = TT + 1;
     if (a.ana) Object.assign(ana, a.ana);

@@ -13,7 +13,6 @@ function inicioLlegada(){
   game.scene = 'gg'; ana.hidden = false; ana.sit = false; ana.x = KDOOR.x + 20; ana.y = KIT.h * .6; ana.dir = 1;
   relSetW('marilla', 'ana', 1); relSetW('matthew', 'ana', 4);
   dlgHecho('inicio_juego');
-  for (const k of ['marilla', 'matthew', 'spencer']) wmKnow(k, 'nina_cuthbert');   // (only they know there is a girl at Green Gables: the rest of Avonlea, not yet)
   try { localStorage.removeItem(PUNTOS_KEY); } catch (e) {}   // (a new game: the points of the one before are no longer its own)
   { const h = $('hint'); if (h) h.style.opacity = 0; hinted = true; }   // (the controls: the tutorial cards tell them, when the player takes over)
   for (const k of Object.keys(PEOPLE)) amb.mute[k] = TT + 180;   // (no loose lines while she arrives)

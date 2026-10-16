@@ -2,7 +2,7 @@
 
 Lo genera `node tools/grafo.js` (ver `docs/MOTOR.md`). Lee el guion, el cuaderno, las habilidades y el código.
 
-**202 escenas** (9 grandes), **31 metas** del cuaderno, **63 hechos** que algo deja.
+**202 escenas** (9 grandes), **31 metas** del cuaderno, **62 hechos** que algo deja.
 
 ## Escenas o metas que nunca podrían pasar
 
