@@ -3,7 +3,7 @@
    Each one keeps who told them and which version they heard (game.wm.creencias[who][news] = { de, dia, v }; knowing it
    is game.wm.know, the same the planner uses), as in James Ryan's «Talk of the Town»: the gossips («exageran») tell it
    one version bigger than they heard it, and whoever hears it bigger believes the bigger one. The script asks for it
-   («sabe:barry:x», «sabe:marilla:x:2»: at least the second version), names who told («{De:marilla:x}») and gives it
+   («sabe:barry:x», «sabe:marilla:x:2»: at least the second version, «sabe:marilla:x:contada»: someone told her), names who told («{De:marilla:x}») and gives it
    («! contar barry x»). Neighbours tell each other when they talk: near Ana, aloud; away from her, too. */
 function noticiasLeer(txt){
   const N = [], R = { nuevas: [], sabidas: [], exageradas: [] }, X = []; let n = null;
@@ -60,12 +60,17 @@ function noticiasTick(dt){
   for (const n of NOTICIAS) if (n.testigos && n.testigos.every(c => dlgCond(c, dlgCtx()))) for (const k of [...Object.keys(PEOPLE), ...FOLK.map(f => f.id)]) if (!sabeK(k, n.id) && veAna(k)) enterarse(k, n.id);
   chismeLejos();
 }
-// and out of Ana's sight, too: now and then, two of Avonlea meet (at the store, after church, over the fence) and one
-// tells the other what they know, as it is told (the last ones are kept in game.wm.chismes, for whoever wants to read them)
+// and out of Ana's sight, too: two who are together in a house (a visit, the family at home) tell each other what they
+// know, soon; and now and then, two of Avonlea meet (at the store, after church, over the fence) and one tells the other.
+// As it is told (the last ones are kept in game.wm.chismes, for whoever wants to read them)
 const CHISMOSOS = () => [...Object.keys(PEOPLE), ...FOLK.map(f => f.id)].filter(k => !ausente(k) && wmScene(k) !== 'away' && !(game.road?.with === k));
 function chismeLejos(){
-  const h = hourNow(); if (h < 8 || h > 20 || Math.random() > .04) return;
-  const L = CHISMOSOS(), a = pick(L), b = pick(L.filter(k => k !== a)); if (!a || !b) return;
+  const h = hourNow(); if (h < 7 || h > 22) return;
+  const L = CHISMOSOS(), juntos = k => wmScene(k) === 'out' || wmScene(k) === game.scene ? [] : L.filter(x => x !== k && wmScene(x) === wmScene(k));   // (in a house, without Ana there)
+  const conQuien = L.filter(k => juntos(k).length);
+  let a, b; if (conQuien.length && Math.random() < .25) { a = pick(conQuien); b = pick(juntos(a)); }
+  else if (h >= 8 && h <= 20 && Math.random() < .04) { a = pick(L); b = pick(L.filter(k => k !== a)); }
+  if (!a || !b) return;
   const ch = chisme(a, b); if (!ch) return;
   (game.wm.chismes ||= []).push({ dia: today() + 1, de: a, a: b, f: ch.f, v: ch.v, dice: ch[0][1] }); if (game.wm.chismes.length > 80) game.wm.chismes.shift();
 }
@@ -85,4 +90,4 @@ function chisme(a, b){
   return Object.assign([[a, lineaVersion(a, n, v)], [b, pick(resp)]], { f: n.id, v });
 }
 // «sabe:quien:noticia», and «sabe:quien:noticia:2» (heard at least the second version, the bigger one)
-function sabeCond(k, f, v){ const c = creencia(k, f); return !!c && (!v || c.v >= +v); }
+function sabeCond(k, f, v){ const c = creencia(k, f); return !!c && (!v || (v === 'contada' ? !!c.de && c.de !== sinF(k) : c.v >= +v)); }   // («sabe:marilla:x:contada»: someone told her; she did not see it herself)

@@ -70,6 +70,7 @@ for p in B.partir(leer('src/datos/llegadas.txt')):
 # who leaves each fact (the scenes, with their conditions; or the code)
 QUIEN_DEJA = collections.defaultdict(list)
 DEJA = collections.defaultdict(set)   # scene → the facts it leaves
+CUENTA = collections.defaultdict(set)   # scene → the news someone hears at its start («sabe:barry:nina_cuthbert»)
 for archivo in ('src/datos/guion.txt', 'src/datos/conversaciones.txt'):
     for p in B.partir(leer(archivo)):
         if p[0] != 'bloque': continue
@@ -82,6 +83,7 @@ for archivo in ('src/datos/guion.txt', 'src/datos/conversaciones.txt'):
         siempre = [v.split()[1] for k, v in f if k in ('al_terminar', 'al_empezar') and v.split()[0] == 'hecho' and len(v.split()) > 1]   # (what it leaves whatever she chooses)
         for x in deja:
             QUIEN_DEJA[x].append((p[1], si, [y for y in siempre if y != x])); DEJA[p[1]].add(x)
+        CUENTA[p[1]] |= {'sabe:' + ':'.join(v.split()[1:3]) for k, v in f if k == 'al_empezar' and v.split()[0] == 'contar' and len(v.split()) > 2}   # (someone hears it there: «ésta es Ana»)
 EXCLUYE = set()
 for archivo in ('src/datos/guion.txt', 'src/datos/conversaciones.txt'):
     for p_ in B.partir(leer(archivo)):
@@ -146,6 +148,8 @@ def atomo(c, k=None, t=None):
         b = B_('sabe_' + a[0] + '_' + a[1])
         if len(a) > 2 and a[2].isdigit():
             return z3.And(b, I_('v_' + a[0] + '_' + a[1]) >= int(a[2]))
+        if len(a) > 2 and a[2] == 'contada':
+            return z3.And(b, B_('contada_' + a[0] + '_' + a[1]))   # (someone told them: they did not see it themselves)
         return b
     if key == 'capitulo':
         return z3.BoolVal(False)   # (the book's first chapter: before the game proper)
@@ -318,7 +322,7 @@ for e in D['escenas']:
     quienes = (set(hablan) | set(e['quienes']) | ({e['con']} if e['con'] else set())) - {'ana', 'narra', 'carta'}
     si = [c.strip() for c in e['si'].split(',') if c.strip()]
     en = [f'donde:{x.split("=")[0]}:{x.split("=")[1]}' for x in e['en'].split(', ') if '=' in x]
-    canal = [f'donde:ana:{e["canal"]}'] if e['canal'] in L else []
+    canal = []   # («canal:» is the queue of talk, not a place: the scene plays wherever its «si:» and «en:» hold)
     for k in quienes:
         if k not in gente: continue
         tipo = {'conversar': 'conversación', 'encuentro': 'escena al encontrarse', 'primera': 'escena'}.get(e['disparo'], 'escena')
@@ -393,7 +397,7 @@ for r in REGLAS['referencia']:
             textos = [u['texto']] if u['tipo'].startswith('frase') else [t for t in u.get('textos', []) if t.split(':')[0] == k]
             hit = next((t for t in textos if pat.search(t)), None)
             if not hit: continue
-            if any(c.startswith('hecho:') and c[6:] in u.get('deja', set()) for g in r['exige'] for c in g): continue   # (the scene that makes it happen)
+            if any(c.startswith('hecho:') and c[6:] in u.get('deja', set()) or c.replace('{k}', k) in CUENTA.get(u['id'], ()) for g in r['exige'] for c in g): continue   # (the scene that makes it happen, or tells it)
             S = z3.Solver(); S.add(R); S.add(vale(u, k)); S.add(z3.Not(z3.Or([todos(g, k) for g in r['exige']])))
             if S.check() == z3.sat:
                 hallazgos['incoherencias'].append({'regla': r['nombre'], 'quien': k, 'nombre': NOMBRE.get(k, k), 'tipo': u['tipo'], 'id': u['id'], 'texto': hit, 'exige': ' o '.join(', '.join(g) for g in r['exige']).replace('{k}', k), 'situación': situacion(S.model(), k)})

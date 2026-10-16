@@ -200,7 +200,7 @@ function ambUpdate(dt){
   if (best === 'diana' && !dianaAmiga()) return;   // (no friend's greeting from one she does not know yet)
   { const C = bd < 90 && !activeGoals(AGENTS[best] || { goals: [] }).length && Math.random() < .3 && convDisponibles(best)[0]; if (C) { amb.mute[best] = TT + 110; amb.seen[best] = true; conversar(C); return; } }   // (now and then, one of the conversations there are with them, by itself)
   if (!aiReady()) {   // (without the AI: just a word from them, from the written lines)
-    if (bd < 90) { const l = (game.wm?.sick || []).includes(best) ? [comentarioTexto('enfermo') || 'Cof, cof…'] : LINES[best], u = l.length > 1 ? l.filter(x => x !== amb.ultima?.[best]) : l, t = u[Math.floor(Math.random() * u.length)]; (amb.ultima ||= {})[best] = t;   // (not the same line twice in a row)
+    if (bd < 90) { const l = (game.wm?.sick || []).includes(best) ? [comentarioTexto('enfermo') || 'Cof, cof…'] : LINES[best], u = l.length > 1 ? l.filter(x => x !== amb.ultima?.[best]) : l, t = u[Math.floor(Math.random() * u.length)]; (amb.ultima ||= {})[best] = t; if (!t) { amb.mute[best] = TT + 110; return; }   // (not the same line twice in a row; and if they have said all they have today, nothing)
     amb.mute[best] = TT + 110; amb.seen[best] = true; sceneStart({ parts: [best], lines: [{ q: best, t }], out: {}, scene: game.scene, resumen: '' }, false); }
     return;
   }

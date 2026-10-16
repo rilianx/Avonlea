@@ -39,9 +39,11 @@ for (const raw of guion.split('\n')) {
   if (!esc) continue; if (s === '---') { esc.body = true; continue; }
   { const n = s.match(/^!\s*nombrar\s+(\S+)/) || (/^al_(empezar|terminar):\s*nombrar\s/.test(s) && s.match(/nombrar\s+(\S+)/)); if (n) anota(hace, 'nombro_' + n[1], 'escena ' + esc.id); }   // (naming a thing leaves nombro_<thing>)
   { const n = s.match(/^(?:!\s*|al_(?:empezar|terminar):\s*)(?:contar|saber)\s+\S+\s+(\S+)/); if (n && !NOTICIAS.has(n[1])) malas.push(`escena ${esc.id}: «${s}» (no hay una noticia «${n[1]}» en src/datos/noticias.txt)`); }
+  // «{De:marilla:x}» (who told her): only if someone did; if she saw it herself, there is no one to name
+  if (esc.body) for (const [, k, f] of s.matchAll(/\{[dD]e:(\w+):(\w+)\}/g)) if (!new RegExp(`(?<!!)sabe:${k}:${f}:(contada|[2-9])\\b`).test(esc.si || '')) malas.push(`escena ${esc.id}: nombra quién le contó a ${k} «${f}», y su «si:» no pide que se lo hayan contado (\`sabe:${k}:${f}:contada\`, o una versión 2 o más)`);
   if (esc.body) { const m = s.match(/^!\s*(hecho|olvidar)\s+(\S+)/); if (m) anota(m[1] === 'hecho' ? hace : pide, m[1] === 'hecho' ? m[2] : m[2] + ' ', 'escena ' + esc.id + ' (una opción)'); if (s.startsWith('->')) esc.opciones = (esc.opciones || 0) + 1; continue; }
   const i = s.indexOf(':'), k = i < 0 ? s : s.slice(0, i).trim(), v = i < 0 ? '' : s.slice(i + 1).trim();
-  if (k === 'si') v.split(',').forEach(c => condicion(c, 'escena ' + esc.id));
+  if (k === 'si') { esc.si = v; v.split(',').forEach(c => condicion(c, 'escena ' + esc.id)); }
   if (k === 'o') { const m = v.match(/si=(\S+)/); if (m) m[1].split(',').forEach(c => condicion(c, 'escena ' + esc.id + ' (alternativa)')); }
   if (k === 'grande') esc.grande = true;
   if (k === 'al_empezar' || k === 'al_terminar') { const [w, x] = v.split(/\s+/); if (w === 'hecho') anota(hace, x, 'escena ' + esc.id); if (w === 'olvidar') anota(pide, x + ' ', 'escena ' + esc.id); }
@@ -58,9 +60,15 @@ for (const raw of guion.split('\n')) {
     if (!/^(dice|ana|primavera|verano|otoño|invierno):/.test(s)) { malas.push(`frases de ${q}: «${s.slice(0, 60)}» (empieza con dice:, ana:, o una estación)`); continue; }
     if ((m = /^\S+:\s*\[([^\]]+)\]/.exec(s))) m[1].split(',').forEach(c => condicion(c, 'una frase de ' + q)); } }
 // the news (src/datos/noticias.txt): the conditions of who knows it
+const llegaA = [];
 { let q = null; for (const raw of leer('src/datos/noticias.txt').split('\n')) { const s = raw.trim(); if (!s || s[0] === '#') continue; let m;
   if ((m = s.match(/^===\s*(.+?)\s*===$/))) { q = m[1]; continue; }
-  if ((m = s.match(/^saben si (.+?):\s/))) m[1].split(',').forEach(c => condicion(c.trim(), 'noticia ' + q)); } }
+  if ((m = s.match(/^saben si (.+?):\s/))) m[1].split(',').forEach(c => condicion(c.trim(), 'noticia ' + q));
+  if ((m = s.match(/^se entera quien la ve si:\s*(.+)$/))) m[1].split(',').forEach(c => condicion(c.trim(), 'noticia ' + q));
+  if ((m = s.match(/^llega a (\w+) en:/))) llegaA.push([q, m[1]]); } }
+// a piece of news that reaches someone (the neighbour who says «I'll tell Marilla»), and they never react: something forgotten
+const sinReaccion = llegaA.filter(([f, k]) => !['src/datos/guion.txt', 'src/datos/conversaciones.txt', 'src/datos/frases.txt'].some(a => new RegExp(`(?<!!)sabe:${k}:${f}\\b`).test(leer(a)))).map(([f, k]) => `\`${f}\` le llega a ${k}, y ninguna escena ni frase suya pide \`sabe:${k}:${f}\``);
+if (sinReaccion.length) malas.push(...sinReaccion.map(x => 'noticia sin reacción: ' + x));
 // who is in Avonlea when (src/datos/llegadas.txt): someone of the game, conditions well written, and the facts their comings and goings leave
 { const quienes = new Set([...Object.keys(JSON.parse(leer('src/datos/personajes.json'))), ...[...codigo.matchAll(/^  (\w+): \{ name: /gm)].map(m => m[1])]); let q = null;
   for (const raw of leer('src/datos/llegadas.txt').split('\n')) { const s = raw.trim(); if (!s || s[0] === '#') continue; let m;

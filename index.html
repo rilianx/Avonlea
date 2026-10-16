@@ -655,6 +655,7 @@ interrumpe
 sujeta: marilla, barry
 en: ana=os, marilla=os
 si: hecho:quiere_amiga, !hecho:conocidas_diana, !hecho:barry_presenta
+al_empezar: contar barry nina_cuthbert
 al_terminar: hecho barry_presenta
 al_terminar: meta diana estar_en h:os,-,- | Diana entra a conocer a la niña de Tejas Verdes | entrar a conocer a la niña de Tejas Verdes (cap. 12) | 3
 ---
@@ -1219,7 +1220,7 @@ canal: os
 prioridad: 6
 repetir: dia
 sujeta: barry
-si: ana:camison, ve:barry, sabe:barry:nina_cuthbert, hora:7-21
+si: ana:camison, !donde:ana:tejas, ve:barry, sabe:barry:nina_cuthbert, hora:7-21
 al_terminar: contar barry ana_en_camison
 ---
 barry: (La Sra. Barry se lleva la mano al pecho.) ¡Niña! ¿Andas en camisón por las casas ajenas? ¡Qué va a decir la gente! Ya hablaré con Marilla.
@@ -1229,7 +1230,7 @@ canal: rl
 prioridad: 6
 repetir: dia
 sujeta: lynde
-si: ana:camison, ve:lynde, sabe:lynde:nina_cuthbert, hora:7-21
+si: ana:camison, !donde:ana:tejas, ve:lynde, sabe:lynde:nina_cuthbert, hora:7-21
 al_terminar: contar lynde ana_en_camison
 ---
 lynde: ¡Habráse visto! ¡La huérfana de los Cuthbert, en camisón por el camino! Esto lo sabe Marilla antes de que se ponga el sol, como que me llamo Rachel Lynde.
@@ -1238,7 +1239,7 @@ lynde: ¡Habráse visto! ¡La huérfana de los Cuthbert, en camisón por el cami
 canal: gg
 prioridad: 6
 sujeta: marilla
-si: sabe:marilla:ana_en_camison, !sabe:marilla:ana_en_camison:2, ve:marilla
+si: sabe:marilla:ana_en_camison:contada, !sabe:marilla:ana_en_camison:2, ve:marilla
 ---
 marilla: Ana. Me vino a contar {de:marilla:ana_en_camison} que andabas en camisón por Avonlea. En camisón. ¿Tienes idea de lo que va a decir la gente?
 -> «Perdón, Marilla. No pensé que fuera tan grave.»
@@ -1246,6 +1247,37 @@ marilla: Ana. Me vino a contar {de:marilla:ana_en_camison} que andabas en camis�
 ->* «Pero es que la mañana estaba tan linda…»
    ana: Pero es que la mañana estaba tan linda que no podía perder tiempo vistiéndome.
    marilla: (Marilla aprieta los labios hasta que se le ponen blancos.)
+   ! suma paciencia:marilla:ana -1
+
+# --- lo que la gente ve de Ana y le llega a Marilla (src/datos/noticias.txt: «llega a marilla»): ella reacciona
+=== marilla_sabe_noche ===
+canal: gg
+prioridad: 6
+sujeta: marilla
+si: sabe:marilla:ana_de_noche:contada, ve:marilla, hora:6-21
+---
+marilla: Ana. {De:marilla:ana_de_noche} me dijo que anoche te vieron sola por el camino, a esas horas. ¿Es cierto?
+-> «Sí, Marilla. Perdón.»
+   ana: Sí, Marilla. Perdón. La luna estaba tan grande que quise verla de cerca… pero ya sé que no se hace.
+   marilla: Una niña no anda sola de noche por los caminos. Ni con luna ni sin luna. Que no se repita.
+->* «¡Pero la noche es tan hermosa!»
+   ana: ¡Pero la noche es tan hermosa! Los árboles parecen otros, y el lago brilla como si tuviera estrellas adentro.
+   marilla: (Marilla deja la cuchara en la mesa, despacio.) Lo hermosa que sea la noche no me importa. Lo que diga Avonlea, sí. A la cama a las nueve, y punto.
+   ! suma paciencia:marilla:ana -1
+
+=== marilla_sabe_sombrero ===
+canal: gg
+prioridad: 6
+sujeta: marilla
+si: sabe:marilla:ana_sin_sombrero:contada, ve:marilla, !donde:ana:ig
+---
+marilla: Ana Shirley. {De:marilla:ana_sin_sombrero} me contó que fuiste a la iglesia sin sombrero. ¡A la iglesia! ¿Qué va a pensar el reverendo de cómo te crío?
+-> «Perdón, Marilla. Se me olvidó.»
+   ana: Perdón, Marilla. Se me olvidó por completo. Iba pensando en otra cosa… siempre voy pensando en otra cosa.
+   marilla: Pues la próxima vez piensa en el sombrero. Una niña decente va a la casa del Señor como corresponde.
+->* «Es que el sombrero me aprieta las ideas…»
+   ana: Es que el sombrero me aprieta las ideas, Marilla. Sin sombrero, las oraciones me salen mucho más bonitas.
+   marilla: (Marilla cierra los ojos un momento.) Las oraciones no se rezan con el pelo. El domingo que viene, sombrero. Y no quiero oír más.
    ! suma paciencia:marilla:ana -1
 
 # --- lo mismo, pero a Marilla le llegó agrandado (src/datos/noticias.txt: los chismosos exageran): Ana se defiende
@@ -1284,6 +1316,7 @@ interrumpe
 repetir: dia
 si: hecho:desayuno_prueba, !donde:ana:tejas, hora:21.5-29
 al_empezar: suma paciencia:marilla:ana -1
+al_empezar: contar marilla ana_de_noche
 al_terminar: a_pieza
 ---
 ->* «¡Perdón, Marilla! Se me pasó la hora mirando las estrellas.»
@@ -3370,7 +3403,7 @@ dice: ¿Jugamos? Yo me escondo y tú cuentas hasta cien.
 
 === adultos ===
 dice: [ana:camison, !donde:ana:tejas] ¡Niña! ¿Andas en camisón por la calle? ¡Qué va a decir la gente!
-dice: [ana:camison, !donde:ana:tejas] ¡Válgame Dios! La niña de los Cuthbert, en camisón… Ya verás cuando lo sepa Marilla.
+dice: [ana:camison, !donde:ana:tejas, sabe:{k}:nina_cuthbert] ¡Válgame Dios! La niña de los Cuthbert, en camisón… Ya verás cuando lo sepa Marilla.
 dice: [ana:camison, !donde:ana:tejas] (Se le queda mirando, con la boca abierta, sin saber qué decir.)
 dice: [hora:21-26, !donde:ana:tejas] ¿Qué haces sola a estas horas, niña? Vete derechito a tu casa.
 dice: [hora:21-26, !donde:ana:tejas] ¡A esta hora, por el camino! ¿Saben los Cuthbert dónde andas?
@@ -3378,7 +3411,7 @@ dice: [ana:sin_sombrero, escena_ana:ig] (Mira a Ana de arriba abajo.) ¿A la igl
 dice: [ana:sin_sombrero, escena_ana:ig] Hmm. Sin sombrero, en la casa del Señor… Alguien tendría que decírselo a Marilla.
 
 === niños ===
-dice: [ana:camison, !donde:ana:tejas, !afecto:{k}:ana>=3] ¡Miren a la de Tejas Verdes! ¡Anda en camisón! (Se ríe tapándose la boca.)
+dice: [ana:camison, !donde:ana:tejas, !afecto:{k}:ana>=3, sabe:{k}:nina_cuthbert] ¡Miren a la de Tejas Verdes! ¡Anda en camisón! (Se ríe tapándose la boca.)
 dice: [ana:camison, !donde:ana:tejas] ¿Saliste en camisón? ¡Mi mamá me mataría!
 dice: [hora:21-26, !donde:ana:tejas] ¿Tú puedes andar afuera a esta hora? A mí no me dejan.
 dice: [ana:sin_sombrero, escena_ana:ig, !afecto:{k}:ana>=3] (Le susurra a la de al lado, mirando a Ana sin sombrero, y las dos se ríen.)
@@ -5199,7 +5232,7 @@ function mealTick(){
   const w = mealWord(hr); m.rounds++;
   if (!m.logged) { m.logged = true; logEv(`Ana se sentó a ${w.verb} con ${parts.map(k => NAMES[k]).join(' y ')} (${w.menu}).`, parts); }
   const note = `Están sentados a la mesa de la cocina de Tejas Verdes, ${w.ing} (${w.menu}). Charla de sobremesa, tranquila${m.rounds > 1 ? ' (siguen conversando; no repitan lo que ya se dijo)' : ''}: cómo va el día, lo que ha pasado, lo que viene, algún chisme del pueblo; Ana habla mucho y con imaginación, Marilla le recuerda que coma, Matthew dice poco pero tierno.`;
-  if (!aiReady()) { const ls = [{ q: 'ana', t: pick(['¡Qué rico huele todo! Comer en esta mesa me hace sentir parte de una familia de verdad.', 'Marilla, ¿no te parece que el pan sabe distinto cuando una está feliz?', 'Hoy imaginé que esta mesa era un banquete en un castillo... pero esto es mucho mejor, porque es de verdad.']) }, ...parts.slice(0, 2).map(k => ({ q: k, t: pick(LINES[k]) }))]; sceneStart({ parts, lines: ls, out: {}, scene: 'gg', resumen: '' }, false); return; }
+  if (!aiReady()) { const ls = [{ q: 'ana', t: pick(['¡Qué rico huele todo! Comer en esta mesa me hace sentir parte de una familia de verdad.', 'Marilla, ¿no te parece que el pan sabe distinto cuando una está feliz?', 'Hoy imaginé que esta mesa era un banquete en un castillo... pero esto es mucho mejor, porque es de verdad.']) }, ...parts.slice(0, 2).map(k => ({ q: k, t: pick(LINES[k]) })).filter(l => l.t)]; sceneStart({ parts, lines: ls, out: {}, scene: 'gg', resumen: '' }, false); return; }
   amb.busy = true;
   sceneAsk(parts, note, 'pasar').then(s => { if (ana.meal === m && !amb.cur && !game.talk && s.lines.length) sceneStart(s, false); }).catch(e => console.debug('[avonlea IA] comida', e.message)).finally(() => { amb.busy = false; });
 }
@@ -7370,9 +7403,17 @@ function lineasConVoz(k, a){
   const propias = (a || []).filter(l => !conds(l).includes('grupo') && vale(l));
   const tiene = new Set(propias.flatMap(l => reaccionDe(conds(l))));
   const grupo = (a || []).filter(l => conds(l).includes('grupo') && vale(l) && !reaccionDe(conds(l)).some(c => tiene.has(c)));
-  return [...propias, ...grupo].map(l => l.replace(/^\[[^\]]+\] /, ''));
+  const L = [...propias, ...grupo], ve = L.filter(l => reaccionDe(conds(l)).length);   // (what they see of her comes first: in a nightgown, at night…)
+  return (ve.length ? ve : L).map(l => l.replace(/^\[[^\]]+\] /, ''));
 }
-const lineasDe = (k, a) => [...lineasConVoz(k, a), ...(typeof guiñosDe === 'function' ? guiñosDe(k) : [])].map(t => typeof saludoHora === 'function' ? t.replace(/Buenos días|Buenas tardes|Buenas noches/, saludoHora) : t);   // (the greeting, as the hour is)   // (someone who does not know Ana: none with her name)
+// what someone says on seeing how Ana is (a nightgown, out at night, no hat), or null: the first time too, and before any greeting
+const reaccionAlVerla = k => { const d = FOLKBY[String(k).replace(/^f:/, '')]?.def, a = d ? d.lines : CH[k]?.lines; return pick(lineasConVoz(k, (a || []).filter(l => reaccionDe((/^\[([^\]]+)\] /.exec(l)?.[1] || '').split(',').map(c => c.trim())).length))) || null; };
+// what Ana has heard from each one today: no one says the same thing twice in a day (when they have said all they have,
+// they say nothing more: silence, not a repeat)
+const OIDO = { dia: -1, k: {} };
+const oidoHoy = k => { k = String(k).replace(/^f:/, ''); if (OIDO.dia !== today()) { OIDO.dia = today(); OIDO.k = {}; } return OIDO.k[k] ||= new Set(); };
+const sinRepetir = (k, L) => { const o = oidoHoy(k); return L.filter(t => !o.has(t)); };
+const lineasDe = (k, a) => sinRepetir(k, [...lineasConVoz(k, a), ...(typeof guiñosDe === 'function' ? guiñosDe(k) : [])].map(t => typeof saludoHora === 'function' ? t.replace(/Buenos días|Buenas tardes|Buenas noches/, saludoHora) : t));   // (the greeting, as the hour is)   // (someone who does not know Ana: none with her name)
 // who is in Avonlea, and from/until when, as in the book (src/datos/llegadas.txt). Arriving and leaving are events of
 // the story: once «llega si» holds, they have come (the fact llego_<who>, with its day) and they stay; once «se va si»
 // holds, they have gone (se_fue_<who>). So one can be anchored to another («la Srta. Stacy llega el otoño después de que
@@ -8167,7 +8208,7 @@ async function anaSpeak(text){
   bubbles = [{ q: 'ana', text, t: 0, dur: lineDur(text) }]; sfx.blip();
   const parts = nearbyGroup(), id = amb.tok = Math.random();
   if (!aiReady()) {
-    if (parts.length) setTimeout(() => { if (amb.tok === id && !game.talk && !amb.cur) { const k = parts[0]; sceneStart({ parts: [k], lines: [{ q: k, t: LINES[k][Math.floor(Math.random() * LINES[k].length)] }], out: {}, scene: game.scene, resumen: '' }, false); } }, 1800);
+    if (parts.length) setTimeout(() => { if (amb.tok === id && !game.talk && !amb.cur && LINES[parts[0]].length) { const k = parts[0]; sceneStart({ parts: [k], lines: [{ q: k, t: LINES[k][Math.floor(Math.random() * LINES[k].length)] }], out: {}, scene: game.scene, resumen: '' }, false); } }, 1800);
     return;
   }
   try {
@@ -8326,7 +8367,7 @@ function talk(who, again = false){
   if (!ana.sit) ana.dir = p.x < ana.x ? 3 : 1;
   let text;
   if (game.saidS[who] !== seasonCount() && SEASON_LINES[who][S]) { game.saidS[who] = seasonCount(); text = SEASON_LINES[who][S]; }
-  else { const L = LINES[who]; text = L.length ? L[game.said[who] = ((game.said[who] ?? -1) + 1) % L.length] : '…'; }   // (only the lines that hold now: not as if they knew her before they do)
+  else { const L = LINES[who]; text = L.length ? L[game.said[who] = ((game.said[who] ?? -1) + 1) % L.length] : `(${NAMES[who] || 'Le'} la mira y asiente, sin decir nada.)`; }   // (said all they had today: no repeating)   // (only the lines that hold now: not as if they knew her before they do)
   if (pre.some(x => x.startsWith('Ana cumplió'))) text = '¡Gracias por hacer lo que te pedí, Ana! ' + text;
   if (who !== 'diana' && !conoceA(who)) { face(who); const L = presentar(who); return talkPlay(L.map(l => [l.q, l.t]), { ch: 'presenta', hold: [who] }); }   // (they have not met: first, who they are)
   if (who === 'diana' && !conoceDiana()) { const L = cadenaEncuentro('diana'); if (L) return say('diana', L.map(l => (l.q === 'ana' ? 'Ana: ' : '') + l.t).join('\n'), [['…', close]]); }   // (they have not met: the meeting of the book, not a friend's greeting)
@@ -8949,7 +8990,7 @@ async function storyPlay(e, present){
   const fr = (e.frases || []).filter(f => f.quien === 'ana' || present.includes(f.quien) || talkersHere().includes(f.quien));
   if ((!s || !s.lines.length) && fr.length) s = { parts: present, lines: fr.map(f => ({ q: f.quien, t: f.texto })), out: { encargo: NO_TASK, accion: { tipo: 'ninguna' } }, scene: game.scene, resumen: '' };
   else if (s && fr.length) { const has = f => s.lines.some(l => l.t.toLowerCase().includes(f.texto.toLowerCase().slice(0, 24))); s.lines = [...fr.filter(f => !has(f)).map(f => ({ q: f.quien, t: f.texto })), ...s.lines].slice(0, 12); }
-  if (!s || !s.lines.length) s = { parts: present, lines: [{ q: present[0] || 'ana', t: present.length ? LINES[present[0]][Math.floor(Math.random() * LINES[present[0]].length)] : '¡Qué día este! Parece sacado de un libro.' }], out: { encargo: NO_TASK, accion: { tipo: 'ninguna' } }, scene: game.scene, resumen: '' };
+  if (!s || !s.lines.length) s = { parts: present, lines: [{ q: present[0] || 'ana', t: present.length && LINES[present[0]].length ? pick(LINES[present[0]]) : '¡Qué día este! Parece sacado de un libro.' }], out: { encargo: NO_TASK, accion: { tipo: 'ninguna' } }, scene: game.scene, resumen: '' };
   if (!s.resumen) s.resumen = `${st.titulo}: ${e.que_pasa}`;
   if (e.encargo && present.length && (!s.out.encargo || s.out.encargo.tipo === 'ninguno')) s.out.encargo = { ...e.encargo };
   if (!aiReady()) notice('📖 ' + e.que_pasa);
@@ -9617,7 +9658,7 @@ function ambUpdate(dt){
   if (best === 'diana' && !dianaAmiga()) return;   // (no friend's greeting from one she does not know yet)
   { const C = bd < 90 && !activeGoals(AGENTS[best] || { goals: [] }).length && Math.random() < .3 && convDisponibles(best)[0]; if (C) { amb.mute[best] = TT + 110; amb.seen[best] = true; conversar(C); return; } }   // (now and then, one of the conversations there are with them, by itself)
   if (!aiReady()) {   // (without the AI: just a word from them, from the written lines)
-    if (bd < 90) { const l = (game.wm?.sick || []).includes(best) ? [comentarioTexto('enfermo') || 'Cof, cof…'] : LINES[best], u = l.length > 1 ? l.filter(x => x !== amb.ultima?.[best]) : l, t = u[Math.floor(Math.random() * u.length)]; (amb.ultima ||= {})[best] = t;   // (not the same line twice in a row)
+    if (bd < 90) { const l = (game.wm?.sick || []).includes(best) ? [comentarioTexto('enfermo') || 'Cof, cof…'] : LINES[best], u = l.length > 1 ? l.filter(x => x !== amb.ultima?.[best]) : l, t = u[Math.floor(Math.random() * u.length)]; (amb.ultima ||= {})[best] = t; if (!t) { amb.mute[best] = TT + 110; return; }   // (not the same line twice in a row; and if they have said all they have today, nothing)
     amb.mute[best] = TT + 110; amb.seen[best] = true; sceneStart({ parts: [best], lines: [{ q: best, t }], out: {}, scene: game.scene, resumen: '' }, false); }
     return;
   }
@@ -10100,7 +10141,7 @@ function update(dt){
   }
   runPlans(dt);
   if ((storyT -= dt) < 0 && AI.stories) { storyT = .5; storyTick(); if (!storyBusy && (!game.story || game.story.day !== today()) && hourNow() < 18 && TT > 4) makeStory(); }
-  mealTick(); ambUpdate(dt); encUpdate(dt); for (const b of bubbles) b.t += dt; bubbles = bubbles.filter(b => b.t < b.dur + .35);
+  mealTick(); ambUpdate(dt); encUpdate(dt); for (const b of bubbles) { if (!b.t && b.q !== 'ana') oidoHoy(b.q).add(b.text); b.t += dt; } bubbles = bubbles.filter(b => b.t < b.dur + .35);   // (what is said, Ana heard it today: src/js/24-personajes.js)
   if ((taskTick -= dt) < 0) { taskTick = .5; taskEvent('ir'); }
   // everyone but Diana follows their routine: where they are wanted (home, or visiting), walking there, or about the place
   const hr = hourNow(), visiting = k => !!CH[k].routine && PEOPLE[k].where !== 'out' && PEOPLE[k].where !== CH[k].home;
@@ -10890,7 +10931,8 @@ function encEnd(){
 function encTick(dt){
   const s = enc.cur, withAna = s.parts.includes('ana');
   if (game.scene !== s.scene || game.talk || game.map || s.parts.some(id => id !== 'ana' && FOLKBY[id].where !== game.scene) || (!s.presenta && s.parts.every(id => id === 'ana' || dist(ana.x, ana.y, encP(id).x, encP(id).y) > (withAna ? 230 : 420)))) {   // (meeting for the first time is not cut halfway: they already count as met)
-    bubbles = []; return encEnd(); }
+    bubbles = []; if (s.presenta && s.i < s.lines.findIndex(l => l.q === 'ana')) desconocer(s.parts.find(p => p !== 'ana'));   // (cut before Ana said who she is: they have not met)
+    return encEnd(); }
   if ((s.wait -= dt) > 0) return;
   if (++s.i >= s.lines.length) return encEnd();
   const l = s.lines[s.i], dur = lineDur(l.t); bubbles = [{ q: l.q, text: l.t, t: 0, dur }]; s.wait = dur + .35; sfx.blip();
@@ -11612,6 +11654,7 @@ function startChat(a, b, anaFree){
 }
 function chatEnd(c){
   CHATS = CHATS.filter(x => x !== c);
+  if (c.lines.presenta && c.i < c.lines.hasta) desconocer(c.lines.presenta);   // (cut before Ana said who she is: they have not met)
   for (const p of c.parts) { if (FOLKBY[p]?.talkT > TT + 1000) FOLKBY[p].talkT = TT + 1; delete CHAT_HOLD[p]; }
   if (c.i >= 1) logEv(`${wmName(c.parts[0])} y ${wmName(c.parts[1])} conversaron un rato${wmScene(c.parts[0]) === 'out' ? ' en el camino' : ''}.`, []);
 }
@@ -11634,14 +11677,14 @@ function chatLines(a, b, anaFree){
   const tu = isKid(a) && isKid(b), nm = k => /^[a-zá-ú]/.test(wmName(k)) ? '' : wmName(k), A = nm(a), B = nm(b), to = n => n ? ', ' + n : '';   // ("un vecino" is no name to call someone by)
   if (anaFree) {   // (Ana, as the player moves her, passing by: a word to her)
     const d = FOLKBY[a]?.def;
-    if (!conoceA(a) && !sinNombre(a)) { for (const l of presentar(a)) say(l.q === 'ana' ? 'ana' : a, l.t); return L; }   // (the first time: who they are)
-    say(a, (a === 'gilbert' && d ? pick(lineasDe('gilbert', d.lines)) : null) || pick(lineasAjenas(a, [`¡${hi}, Ana!`, '¡Hola, Ana! ¿A dónde vas tan apurada?', '¡Ana Shirley! Saludos a Marilla.', `¡${hi}, niña!`])));
+    if (!conoceA(a) && !sinNombre(a)) { for (const l of presentar(a)) say(l.q === 'ana' ? 'ana' : a, l.t); L.presenta = a; L.hasta = L.findIndex(l => l.q === 'ana'); return L; }   // (the first time: who they are)
+    say(a, reaccionAlVerla(a) || (a === 'gilbert' && d ? pick(lineasDe('gilbert', d.lines)) : null) || pick(lineasAjenas(a, [`¡${hi}, Ana!`, '¡Hola, Ana! ¿A dónde vas tan apurada?', '¡Ana Shirley! Saludos a Marilla.', `¡${hi}, niña!`])));
     const r = lineasSi(FOLKBY[a]?.def.ana || ['Hmpf.']); if (relGetW('ana', a) <= 0 && r.length) say('ana', pick(r));
     return L;
   }
   const ana_ = a === 'ana' ? a : b === 'ana' ? b : null, other = ana_ && (a === 'ana' ? b : a);
-  if (ana_ && !conoceA(other) && !sinNombre(other)) { for (const l of presentar(other)) say(l.q === 'ana' ? 'ana' : other, l.t); return L; }   // (the first time: who they are)
-  if (ana_ && relGetW('ana', other) <= 0) { say(other, (FOLKBY[other]?.def.lines ? pick(lineasDe(other, FOLKBY[other].def.lines)) : null) || pick(lineasAjenas(other, [`${hi}, Ana.`, `${hi}, niña.`]))); const r = lineasSi(FOLKBY[other]?.def.ana || ['Hmpf.']); if (r.length) say('ana', pick(r)); return L; }
+  if (ana_ && !conoceA(other) && !sinNombre(other)) { for (const l of presentar(other)) say(l.q === 'ana' ? 'ana' : other, l.t); L.presenta = other; L.hasta = L.findIndex(l => l.q === 'ana'); return L; }   // (the first time: who they are)
+  if (ana_ && relGetW('ana', other) <= 0) { say(other, reaccionAlVerla(other) || (FOLKBY[other]?.def.lines ? pick(lineasDe(other, FOLKBY[other].def.lines)) : null) || pick(lineasAjenas(other, [`${hi}, Ana.`, `${hi}, niña.`]))); const r = lineasSi(FOLKBY[other]?.def.ana || ['Hmpf.']); if (r.length) say('ana', pick(r)); return L; }
   if (a === 'matthew' || b === 'matthew') {   // (Matthew: a greeting, and off he goes)
     const o = a === 'matthew' ? b : a;
     say(o, `¡${hi}, Matthew!`); say('matthew', pick(['Eh... b-buenas.', 'Buenas... sí... buen día, ¿no?', 'Ejem... buenas.']));
@@ -12831,7 +12874,9 @@ function presentacion(k){
 }
 // they meet: the lines, and from now on they know each other
 function conocer(k){ k = sinF(k); if (conoceA(k) || sinNombre(k)) return; dlgHecho('conoce_' + k); logEv('Ana conoció a ' + (FOLKBY[k]?.def.name || CH[k]?.article + NAMES[k]) + '.', []); }
-function presentar(k){ const L = presentacion(k); conocer(k); presentarseNoticias(k); return L; }   // (and now they know what she tells of herself: that she lives at Green Gables)
+// a presentation cut short (Ana walked on before saying who she is): they have not met after all
+function desconocer(k){ k = sinF(k); delete dlgHechos()['conoce_' + k]; const C = game.wm?.creencias?.[k]; for (const n of NOTICIAS) if (n.alConocer && C?.[n.id]?.de === 'ana') { delete C[n.id]; const K = game.wm.know?.[k]; if (K?.includes(n.id)) K.splice(K.indexOf(n.id), 1); } }
+function presentar(k){ const r = reaccionAlVerla(sinF(k)), L = presentacion(k); conocer(k); presentarseNoticias(k); if (r) L.unshift({ q: L[0]?.q || k, t: r }); return L; }   // (and if she is in a nightgown, at night…: that first, it is the first thing they see)   // (and now they know what she tells of herself: that she lives at Green Gables)
 
 /* ---------- the notebook: what Ana could do (📖), as goals of the book, not as actions ----------
    For the player to know what there is: each goal with a hint of where or when (not the steps: those are hers to find),
@@ -13211,7 +13256,7 @@ window.__avonlea = { ...(/[?&]dev\b/.test(location.search) ? { ev: s => eval(s) 
    Each one keeps who told them and which version they heard (game.wm.creencias[who][news] = { de, dia, v }; knowing it
    is game.wm.know, the same the planner uses), as in James Ryan's «Talk of the Town»: the gossips («exageran») tell it
    one version bigger than they heard it, and whoever hears it bigger believes the bigger one. The script asks for it
-   («sabe:barry:x», «sabe:marilla:x:2»: at least the second version), names who told («{De:marilla:x}») and gives it
+   («sabe:barry:x», «sabe:marilla:x:2»: at least the second version, «sabe:marilla:x:contada»: someone told her), names who told («{De:marilla:x}») and gives it
    («! contar barry x»). Neighbours tell each other when they talk: near Ana, aloud; away from her, too. */
 function noticiasLeer(txt){
   const N = [], R = { nuevas: [], sabidas: [], exageradas: [] }, X = []; let n = null;
@@ -13268,12 +13313,17 @@ function noticiasTick(dt){
   for (const n of NOTICIAS) if (n.testigos && n.testigos.every(c => dlgCond(c, dlgCtx()))) for (const k of [...Object.keys(PEOPLE), ...FOLK.map(f => f.id)]) if (!sabeK(k, n.id) && veAna(k)) enterarse(k, n.id);
   chismeLejos();
 }
-// and out of Ana's sight, too: now and then, two of Avonlea meet (at the store, after church, over the fence) and one
-// tells the other what they know, as it is told (the last ones are kept in game.wm.chismes, for whoever wants to read them)
+// and out of Ana's sight, too: two who are together in a house (a visit, the family at home) tell each other what they
+// know, soon; and now and then, two of Avonlea meet (at the store, after church, over the fence) and one tells the other.
+// As it is told (the last ones are kept in game.wm.chismes, for whoever wants to read them)
 const CHISMOSOS = () => [...Object.keys(PEOPLE), ...FOLK.map(f => f.id)].filter(k => !ausente(k) && wmScene(k) !== 'away' && !(game.road?.with === k));
 function chismeLejos(){
-  const h = hourNow(); if (h < 8 || h > 20 || Math.random() > .04) return;
-  const L = CHISMOSOS(), a = pick(L), b = pick(L.filter(k => k !== a)); if (!a || !b) return;
+  const h = hourNow(); if (h < 7 || h > 22) return;
+  const L = CHISMOSOS(), juntos = k => wmScene(k) === 'out' || wmScene(k) === game.scene ? [] : L.filter(x => x !== k && wmScene(x) === wmScene(k));   // (in a house, without Ana there)
+  const conQuien = L.filter(k => juntos(k).length);
+  let a, b; if (conQuien.length && Math.random() < .25) { a = pick(conQuien); b = pick(juntos(a)); }
+  else if (h >= 8 && h <= 20 && Math.random() < .04) { a = pick(L); b = pick(L.filter(k => k !== a)); }
+  if (!a || !b) return;
   const ch = chisme(a, b); if (!ch) return;
   (game.wm.chismes ||= []).push({ dia: today() + 1, de: a, a: b, f: ch.f, v: ch.v, dice: ch[0][1] }); if (game.wm.chismes.length > 80) game.wm.chismes.shift();
 }
@@ -13293,7 +13343,7 @@ function chisme(a, b){
   return Object.assign([[a, lineaVersion(a, n, v)], [b, pick(resp)]], { f: n.id, v });
 }
 // «sabe:quien:noticia», and «sabe:quien:noticia:2» (heard at least the second version, the bigger one)
-function sabeCond(k, f, v){ const c = creencia(k, f); return !!c && (!v || c.v >= +v); }
+function sabeCond(k, f, v){ const c = creencia(k, f); return !!c && (!v || (v === 'contada' ? !!c.de && c.de !== sinF(k) : c.v >= +v)); }   // («sabe:marilla:x:contada»: someone told her; she did not see it herself)
 
 /* ---------- the first time: a scene of its own; the window and the candle; her hat in the wardrobe ----------
    - The first time Ana does some things (looks out of her window, sees herself in the mirror, climbs to her room, sees

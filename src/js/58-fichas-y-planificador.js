@@ -116,7 +116,8 @@ function encEnd(){
 function encTick(dt){
   const s = enc.cur, withAna = s.parts.includes('ana');
   if (game.scene !== s.scene || game.talk || game.map || s.parts.some(id => id !== 'ana' && FOLKBY[id].where !== game.scene) || (!s.presenta && s.parts.every(id => id === 'ana' || dist(ana.x, ana.y, encP(id).x, encP(id).y) > (withAna ? 230 : 420)))) {   // (meeting for the first time is not cut halfway: they already count as met)
-    bubbles = []; return encEnd(); }
+    bubbles = []; if (s.presenta && s.i < s.lines.findIndex(l => l.q === 'ana')) desconocer(s.parts.find(p => p !== 'ana'));   // (cut before Ana said who she is: they have not met)
+    return encEnd(); }
   if ((s.wait -= dt) > 0) return;
   if (++s.i >= s.lines.length) return encEnd();
   const l = s.lines[s.i], dur = lineDur(l.t); bubbles = [{ q: l.q, text: l.t, t: 0, dur }]; s.wait = dur + .35; sfx.blip();

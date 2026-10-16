@@ -62,7 +62,7 @@
    "viven": []
   }
  ],
- "generado": "2026-10-16 13:04",
+ "generado": "2026-10-16 13:43",
  "momentos": [
   {
    "id": "dia2",
@@ -3699,7 +3699,7 @@
    "interrumpe": false,
    "grande": false,
    "repetir": "dia",
-   "si": "ana:camison, ve:barry, sabe:barry:nina_cuthbert, hora:7-21",
+   "si": "ana:camison, !donde:ana:tejas, ve:barry, sabe:barry:nina_cuthbert, hora:7-21",
    "en": "",
    "hablan": "barry",
    "lineas": 1,
@@ -3719,7 +3719,7 @@
    "interrumpe": false,
    "grande": false,
    "repetir": "dia",
-   "si": "ana:camison, ve:lynde, sabe:lynde:nina_cuthbert, hora:7-21",
+   "si": "ana:camison, !donde:ana:tejas, ve:lynde, sabe:lynde:nina_cuthbert, hora:7-21",
    "en": "",
    "hablan": "lynde",
    "lineas": 1,
@@ -3739,7 +3739,7 @@
    "interrumpe": false,
    "grande": false,
    "repetir": "una_vez",
-   "si": "sabe:marilla:ana_en_camison, !sabe:marilla:ana_en_camison:2, ve:marilla",
+   "si": "sabe:marilla:ana_en_camison:contada, !sabe:marilla:ana_en_camison:2, ve:marilla",
    "en": "",
    "hablan": "marilla",
    "lineas": 2,
@@ -3749,6 +3749,46 @@
    "una_vez": true,
    "texto": [
     "marilla: Ana. Me vino a contar alguien que andabas en camisón por Avonlea. En camisón. ¿Tienes idea de lo que va a decir la gente?"
+   ]
+  },
+  {
+   "id": "marilla_sabe_noche",
+   "canal": "gg",
+   "disparo": "",
+   "prioridad": 6,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "sabe:marilla:ana_de_noche:contada, ve:marilla, hora:6-21",
+   "en": "",
+   "hablan": "marilla",
+   "lineas": 2,
+   "primera": "marilla: Ana. Alguien me dijo que anoche te vieron sola por el camino, a esas horas. ¿Es cierto?",
+   "quienes": [],
+   "con": "",
+   "una_vez": true,
+   "texto": [
+    "marilla: Ana. Alguien me dijo que anoche te vieron sola por el camino, a esas horas. ¿Es cierto?"
+   ]
+  },
+  {
+   "id": "marilla_sabe_sombrero",
+   "canal": "gg",
+   "disparo": "",
+   "prioridad": 6,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "sabe:marilla:ana_sin_sombrero:contada, ve:marilla, !donde:ana:ig",
+   "en": "",
+   "hablan": "marilla",
+   "lineas": 2,
+   "primera": "marilla: Ana Shirley. Alguien me contó que fuiste a la iglesia sin sombrero. ¡A la iglesia! ¿Qué va a pensar el reverendo de cómo te crío?",
+   "quienes": [],
+   "con": "",
+   "una_vez": true,
+   "texto": [
+    "marilla: Ana Shirley. Alguien me contó que fuiste a la iglesia sin sombrero. ¡A la iglesia! ¿Qué va a pensar el reverendo de cómo te crío?"
    ]
   },
   {
@@ -11283,14 +11323,10 @@
     "escena falta_ropa (una opción)",
     "código"
    ],
-   "marilla": [
-    "escena marilla_sabe_camison",
-    "escena marilla_sabe_camison_descalza"
-   ],
-   "marilla_sabe_camison": [
-    "escena marilla_sabe_camison_descalza"
-   ],
    "ana": [
+    "escena camison_barry",
+    "escena camison_lynde",
+    "escena marilla_sabe_sombrero",
     "escena falta_noche",
     "escena falta_viaje",
     "una frase de matthew",
@@ -11303,7 +11339,16 @@
     "una frase de stacy",
     "una frase de vecino",
     "una frase de adultos",
-    "una frase de niños"
+    "una frase de niños",
+    "noticia ana_en_camison",
+    "noticia ana_de_noche"
+   ],
+   "marilla": [
+    "escena marilla_sabe_camison",
+    "escena marilla_sabe_camison_descalza"
+   ],
+   "marilla_sabe_camison": [
+    "escena marilla_sabe_camison_descalza"
    ],
    "blewett_duda": [
     "escena duda_matthew",

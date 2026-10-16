@@ -293,7 +293,7 @@ if os.path.exists(pm):
         filas.append(['nunca se da', '', h['nombre'], h['tipo'], '', f'«{h["texto"][:60]}»: {", ".join(h["conds"])}'])
     tabla(MD, filas, wrap_cols=(5, 6))
     MD.freeze_panes = 'C2'; MD.auto_filter.ref = f'A1:F{len(filas) + 1}'
-    MD.conditional_formatting.add(f'A2:A{len(filas) + 1}', FormulaRule(formula=['A2="incoherencia"'], fill=FILL_ROJO))
+    if filas: MD.conditional_formatting.add(f'A2:A{len(filas) + 1}', FormulaRule(formula=['A2="incoherencia"'], fill=FILL_ROJO))
 
 # --- Cómo usar (la primera hoja)
 C = wb.create_sheet('Cómo usar', 0)

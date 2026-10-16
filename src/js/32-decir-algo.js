@@ -23,7 +23,7 @@ async function anaSpeak(text){
   bubbles = [{ q: 'ana', text, t: 0, dur: lineDur(text) }]; sfx.blip();
   const parts = nearbyGroup(), id = amb.tok = Math.random();
   if (!aiReady()) {
-    if (parts.length) setTimeout(() => { if (amb.tok === id && !game.talk && !amb.cur) { const k = parts[0]; sceneStart({ parts: [k], lines: [{ q: k, t: LINES[k][Math.floor(Math.random() * LINES[k].length)] }], out: {}, scene: game.scene, resumen: '' }, false); } }, 1800);
+    if (parts.length) setTimeout(() => { if (amb.tok === id && !game.talk && !amb.cur && LINES[parts[0]].length) { const k = parts[0]; sceneStart({ parts: [k], lines: [{ q: k, t: LINES[k][Math.floor(Math.random() * LINES[k].length)] }], out: {}, scene: game.scene, resumen: '' }, false); } }, 1800);
     return;
   }
   try {

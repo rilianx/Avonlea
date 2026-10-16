@@ -100,9 +100,17 @@ function lineasConVoz(k, a){
   const propias = (a || []).filter(l => !conds(l).includes('grupo') && vale(l));
   const tiene = new Set(propias.flatMap(l => reaccionDe(conds(l))));
   const grupo = (a || []).filter(l => conds(l).includes('grupo') && vale(l) && !reaccionDe(conds(l)).some(c => tiene.has(c)));
-  return [...propias, ...grupo].map(l => l.replace(/^\[[^\]]+\] /, ''));
+  const L = [...propias, ...grupo], ve = L.filter(l => reaccionDe(conds(l)).length);   // (what they see of her comes first: in a nightgown, at night…)
+  return (ve.length ? ve : L).map(l => l.replace(/^\[[^\]]+\] /, ''));
 }
-const lineasDe = (k, a) => [...lineasConVoz(k, a), ...(typeof guiñosDe === 'function' ? guiñosDe(k) : [])].map(t => typeof saludoHora === 'function' ? t.replace(/Buenos días|Buenas tardes|Buenas noches/, saludoHora) : t);   // (the greeting, as the hour is)   // (someone who does not know Ana: none with her name)
+// what someone says on seeing how Ana is (a nightgown, out at night, no hat), or null: the first time too, and before any greeting
+const reaccionAlVerla = k => { const d = FOLKBY[String(k).replace(/^f:/, '')]?.def, a = d ? d.lines : CH[k]?.lines; return pick(lineasConVoz(k, (a || []).filter(l => reaccionDe((/^\[([^\]]+)\] /.exec(l)?.[1] || '').split(',').map(c => c.trim())).length))) || null; };
+// what Ana has heard from each one today: no one says the same thing twice in a day (when they have said all they have,
+// they say nothing more: silence, not a repeat)
+const OIDO = { dia: -1, k: {} };
+const oidoHoy = k => { k = String(k).replace(/^f:/, ''); if (OIDO.dia !== today()) { OIDO.dia = today(); OIDO.k = {}; } return OIDO.k[k] ||= new Set(); };
+const sinRepetir = (k, L) => { const o = oidoHoy(k); return L.filter(t => !o.has(t)); };
+const lineasDe = (k, a) => sinRepetir(k, [...lineasConVoz(k, a), ...(typeof guiñosDe === 'function' ? guiñosDe(k) : [])].map(t => typeof saludoHora === 'function' ? t.replace(/Buenos días|Buenas tardes|Buenas noches/, saludoHora) : t));   // (the greeting, as the hour is)   // (someone who does not know Ana: none with her name)
 // who is in Avonlea, and from/until when, as in the book (src/datos/llegadas.txt). Arriving and leaving are events of
 // the story: once «llega si» holds, they have come (the fact llego_<who>, with its day) and they stay; once «se va si»
 // holds, they have gone (se_fue_<who>). So one can be anchored to another («la Srta. Stacy llega el otoño después de que

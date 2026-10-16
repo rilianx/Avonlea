@@ -41,7 +41,7 @@ function talk(who, again = false){
   if (!ana.sit) ana.dir = p.x < ana.x ? 3 : 1;
   let text;
   if (game.saidS[who] !== seasonCount() && SEASON_LINES[who][S]) { game.saidS[who] = seasonCount(); text = SEASON_LINES[who][S]; }
-  else { const L = LINES[who]; text = L.length ? L[game.said[who] = ((game.said[who] ?? -1) + 1) % L.length] : '…'; }   // (only the lines that hold now: not as if they knew her before they do)
+  else { const L = LINES[who]; text = L.length ? L[game.said[who] = ((game.said[who] ?? -1) + 1) % L.length] : `(${NAMES[who] || 'Le'} la mira y asiente, sin decir nada.)`; }   // (said all they had today: no repeating)   // (only the lines that hold now: not as if they knew her before they do)
   if (pre.some(x => x.startsWith('Ana cumplió'))) text = '¡Gracias por hacer lo que te pedí, Ana! ' + text;
   if (who !== 'diana' && !conoceA(who)) { face(who); const L = presentar(who); return talkPlay(L.map(l => [l.q, l.t]), { ch: 'presenta', hold: [who] }); }   // (they have not met: first, who they are)
   if (who === 'diana' && !conoceDiana()) { const L = cadenaEncuentro('diana'); if (L) return say('diana', L.map(l => (l.q === 'ana' ? 'Ana: ' : '') + l.t).join('\n'), [['…', close]]); }   // (they have not met: the meeting of the book, not a friend's greeting)

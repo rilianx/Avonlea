@@ -36,4 +36,6 @@ function presentacion(k){
 }
 // they meet: the lines, and from now on they know each other
 function conocer(k){ k = sinF(k); if (conoceA(k) || sinNombre(k)) return; dlgHecho('conoce_' + k); logEv('Ana conoció a ' + (FOLKBY[k]?.def.name || CH[k]?.article + NAMES[k]) + '.', []); }
-function presentar(k){ const L = presentacion(k); conocer(k); presentarseNoticias(k); return L; }   // (and now they know what she tells of herself: that she lives at Green Gables)
+// a presentation cut short (Ana walked on before saying who she is): they have not met after all
+function desconocer(k){ k = sinF(k); delete dlgHechos()['conoce_' + k]; const C = game.wm?.creencias?.[k]; for (const n of NOTICIAS) if (n.alConocer && C?.[n.id]?.de === 'ana') { delete C[n.id]; const K = game.wm.know?.[k]; if (K?.includes(n.id)) K.splice(K.indexOf(n.id), 1); } }
+function presentar(k){ const r = reaccionAlVerla(sinF(k)), L = presentacion(k); conocer(k); presentarseNoticias(k); if (r) L.unshift({ q: L[0]?.q || k, t: r }); return L; }   // (and if she is in a nightgown, at night…: that first, it is the first thing they see)   // (and now they know what she tells of herself: that she lives at Green Gables)

@@ -282,7 +282,7 @@ async function storyPlay(e, present){
   const fr = (e.frases || []).filter(f => f.quien === 'ana' || present.includes(f.quien) || talkersHere().includes(f.quien));
   if ((!s || !s.lines.length) && fr.length) s = { parts: present, lines: fr.map(f => ({ q: f.quien, t: f.texto })), out: { encargo: NO_TASK, accion: { tipo: 'ninguna' } }, scene: game.scene, resumen: '' };
   else if (s && fr.length) { const has = f => s.lines.some(l => l.t.toLowerCase().includes(f.texto.toLowerCase().slice(0, 24))); s.lines = [...fr.filter(f => !has(f)).map(f => ({ q: f.quien, t: f.texto })), ...s.lines].slice(0, 12); }
-  if (!s || !s.lines.length) s = { parts: present, lines: [{ q: present[0] || 'ana', t: present.length ? LINES[present[0]][Math.floor(Math.random() * LINES[present[0]].length)] : '¡Qué día este! Parece sacado de un libro.' }], out: { encargo: NO_TASK, accion: { tipo: 'ninguna' } }, scene: game.scene, resumen: '' };
+  if (!s || !s.lines.length) s = { parts: present, lines: [{ q: present[0] || 'ana', t: present.length && LINES[present[0]].length ? pick(LINES[present[0]]) : '¡Qué día este! Parece sacado de un libro.' }], out: { encargo: NO_TASK, accion: { tipo: 'ninguna' } }, scene: game.scene, resumen: '' };
   if (!s.resumen) s.resumen = `${st.titulo}: ${e.que_pasa}`;
   if (e.encargo && present.length && (!s.out.encargo || s.out.encargo.tipo === 'ninguno')) s.out.encargo = { ...e.encargo };
   if (!aiReady()) notice('📖 ' + e.que_pasa);
