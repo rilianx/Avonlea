@@ -37,3 +37,16 @@ El solucionador revisa todas las combinaciones a la vez, sin enumerarlas (son mi
 - Mira lo que **puede** pasar según las condiciones, no lo que pasa jugando: que una situación sea posible no quiere decir que una jugadora llegue a ella (para eso, la exploración de `tools/cobertura.js`).
 - Las condiciones que el modelo no entiende (por ejemplo `canal_libre`, `dicha:x`) quedan libres: pueden valer o no. Puede haber huecos que el juego no tiene por eso; se corrige enseñándole esa condición al modelo.
 - El tono (que una recién conocida no sea cariñosa) no se puede revisar con reglas de palabras: queda para una lectura (o para un modelo de lenguaje que marque las dudosas).
+
+## De un error a una regla
+
+Cuando una prueba (una partida de usuaria, una exploración) encuentra algo que no cuadra, no se arregla solo esa frase:
+se pregunta **qué regla general se rompió**, se escribe esa regla, y se deja que el modelo encuentre todos los casos parecidos.
+
+1. **¿Es algo que una frase o escena supone?** → una regla `referencia` en `src/datos/reglas.txt` («la niña de los Cuthbert» supone que se sabe que hay una; «en camisón por el camino» supone que Ana está fuera de Tejas Verdes). El modelo las busca en todas las frases y escenas.
+2. **¿Falta algo que debería haber?** → una regla `espera` (alguien la ve así y no tiene nada que decir).
+3. **¿Es algo que el juego hace mal, aunque los datos estén bien?** → una regla del motor, con su prueba (`tools/reacciones.js`: lo que se ve de Ana se dice; nadie repite la misma frase el mismo día; una presentación cortada no deja conocidos).
+4. **¿Es algo de cómo están escritos los datos?** → una revisión en `tools/grafo.js` (toda noticia que «llega a» alguien tiene su reacción; una escena que nombra quién le contó algo a alguien pide `sabe:k:f:contada`; una noticia que dice «anoche» no se cuenta por días).
+5. **¿El modelo no lo vio?** → el modelo entiende mal algo del juego, y se corrige el modelo (en la partida 8: leía `canal:` como el lugar de Ana, y es la cola de conversación).
+
+Después: `python3 tools/modelo.py`, se arregla lo que aparezca, y se juega de nuevo. La partida 8 (`trazas/partida8/`) es el primer ejemplo completo.

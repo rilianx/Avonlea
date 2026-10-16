@@ -104,7 +104,7 @@ function lineasConVoz(k, a){
   return (ve.length ? ve : L).map(l => l.replace(/^\[[^\]]+\] /, ''));
 }
 // what someone says on seeing how Ana is (a nightgown, out at night, no hat), or null: the first time too, and before any greeting
-const reaccionAlVerla = k => { const d = FOLKBY[String(k).replace(/^f:/, '')]?.def, a = d ? d.lines : CH[k]?.lines; return pick(lineasConVoz(k, (a || []).filter(l => reaccionDe((/^\[([^\]]+)\] /.exec(l)?.[1] || '').split(',').map(c => c.trim())).length))) || null; };
+const reaccionAlVerla = k => { const d = FOLKBY[String(k).replace(/^f:/, '')]?.def, a = d ? d.lines : CH[k]?.lines; return pick(sinRepetir(k, lineasConVoz(k, (a || []).filter(l => reaccionDe((/^\[([^\]]+)\] /.exec(l)?.[1] || '').split(',').map(c => c.trim())).length)))) || null; };   // (and once said, not again today)
 // what Ana has heard from each one today: no one says the same thing twice in a day (when they have said all they have,
 // they say nothing more: silence, not a repeat)
 const OIDO = { dia: -1, k: {} };

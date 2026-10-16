@@ -111,7 +111,7 @@ function ambTick(dt){
   if (!s.directed && (game.scene !== s.scene || game.talk || game.cooking || game.map || !$('ai').hidden || far(190))) return ambEnd();
   if (s.directed && (game.scene !== s.scene || far(260))) { s.noMenu = true; if (game.talk?.scene) { game.talk = null; $('talk').hidden = true; } return ambEnd(); }   // (Ana walked off: the talk is over)
   if ((s.wait -= dt) > 0) return;
-  if (!s.directed && ['ana', ...s.parts].some(ocupada)) return ambEnd();   // (one of them got busy: the loose talk is dropped)
+  if (!s.directed && ['ana', ...s.parts].some(k => ocupada(k) && !(s.ve && !AGENTS[k]?.acting))) return ambEnd();   // (one of them got busy: the loose talk is dropped; not a remark on what they see, if they are only staying)
   if (hablando()) return;   // (someone else is saying something: after it)
   if (++s.i >= s.lines.length) return ambEnd();
   const l = s.lines[s.i], sp = personOf(l.q), dur = lineDur(l.t);
@@ -194,11 +194,14 @@ function ambUpdate(dt){
   { const se = storyNow(); if (se && storyHere(se)) return; }   // (here a scene of the story is about to be played: it goes first)
   if (ocupada('ana') || hablando()) return;   // (in the middle of something with Ana, or Ana herself busy, or someone speaking: no loose lines)
   let best = null, bd = 1e9;
-  for (const k of all) { const d = dd(k); if (TT < (amb.mute[k] || 0) || d > 240 || d >= bd || ocupada(k)) continue; best = k; bd = d; }
+  for (const k of all) { const d = dd(k); if (TT < (amb.mute[k] || 0) || d > 240 || d >= bd || (ocupada(k) && (AGENTS[k]?.acting || !reaccionAlVerla(k)))) continue; best = k; bd = d; }   // (staying somewhere, at church, one still remarks what one sees)
   if (!best) return;
   { const L = bd < 90 && cadenaEncuentro(best); if (L) { amb.mute[best] = TT + 110; amb.seen[best] = true; sceneStart({ parts: [best], lines: L, out: {}, scene: game.scene, resumen: '' }, false); return; } }   // (two who have not met: they meet, as in the book)
   if (best === 'diana' && !dianaAmiga()) return;   // (no friend's greeting from one she does not know yet)
-  { const C = bd < 90 && !activeGoals(AGENTS[best] || { goals: [] }).length && Math.random() < .3 && convDisponibles(best)[0]; if (C) { amb.mute[best] = TT + 110; amb.seen[best] = true; conversar(C); return; } }   // (now and then, one of the conversations there are with them, by itself)
+  { const C = bd < 90 && !reaccionAlVerla(best) && !activeGoals(AGENTS[best] || { goals: [] }).length && Math.random() < .3 && convDisponibles(best)[0]; if (C) { amb.mute[best] = TT + 110; amb.seen[best] = true; conversar(C); return; } }   // (now and then, one of the conversations there are with them, by itself)
+  // what they see of her (in a nightgown, out at night, no hat), they say first, from where they see it (not only beside
+  // her), with the AI or without it
+  { const ve = reaccionAlVerla(best); if (ve) { amb.mute[best] = TT + 110; amb.seen[best] = true; sceneStart({ parts: [best], lines: [{ q: best, t: ve }], out: {}, scene: game.scene, resumen: '', ve: true }, false); return; } }
   if (!aiReady()) {   // (without the AI: just a word from them, from the written lines)
     if (bd < 90) { const l = (game.wm?.sick || []).includes(best) ? [comentarioTexto('enfermo') || 'Cof, cof…'] : LINES[best], u = l.length > 1 ? l.filter(x => x !== amb.ultima?.[best]) : l, t = u[Math.floor(Math.random() * u.length)]; (amb.ultima ||= {})[best] = t; if (!t) { amb.mute[best] = TT + 110; return; }   // (not the same line twice in a row; and if they have said all they have today, nothing)
     amb.mute[best] = TT + 110; amb.seen[best] = true; sceneStart({ parts: [best], lines: [{ q: best, t }], out: {}, scene: game.scene, resumen: '' }, false); }

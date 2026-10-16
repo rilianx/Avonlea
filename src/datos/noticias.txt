@@ -5,7 +5,8 @@
 # «! contar barry ana_en_camison» (se entera), y en una línea «{De:marilla:ana_en_camison}» (quién se lo contó:
 # «La Sra. Lynde»; con minúscula, «{de:…}»).
 #
-# Arriba, para todas: exageran (quiénes), y las respuestas a una noticia nueva, a una ya sabida y a una exagerada.
+# Arriba, para todas: exageran (quiénes), callados (los que no andan contando nada: solo a los de su casa, y no van a
+# contárselo a nadie: «llega a»), y las respuestas a una noticia nueva, a una ya sabida y a una exagerada.
 #
 # «=== id ===» y sus campos, uno por línea:
 #   titulo: qué es, en pocas palabras
@@ -15,13 +16,17 @@
 #   se entera quien la ve si: <condiciones> — quien ve a Ana mientras se cumplen, se entera (lo vio)
 #   llega a <quien> en: <horas> — cuando alguien se entera, le llega a esa persona unas horas después, aunque no se
 #         encuentren (la vecina que dice «ya hablaré con Marilla»)
-#   se cuenta por: N — los días que alguien la cuenta después de oírla (después, ya es cosa vieja)
+#   se cuenta por: N — los días que alguien la cuenta después de oírla (después, ya es cosa vieja; si dice «anoche» u «hoy»,
+#         a lo más 1: lo revisa tools/grafo.js)
+#   la callan: quiénes — no la cuentan fuera de su casa (lo que avergüenza a los suyos: Marilla no anda contando que
+#         Ana salió en camisón; a Matthew sí se lo cuenta)
 #   dice: cómo se cuenta (varias: una al azar; «dice lynde:», como la cuenta ella)
 #   exagerada: una versión más grande (cada línea, una más: la 2, la 3…)
 #   responde: lo que contesta quien se entera (si no, las respuestas de arriba)
 # Las líneas que empiezan con # son comentarios.
 
 exageran: lynde, srapye, josie
+callados: thomas, matthew
 respuestas: ¡No me diga! | ¿De veras? ¡Qué cosa! | Bueno, yo de eso no sé nada... | Ya me lo imaginaba.
 respuestas ya sabidas: Sí, ya me lo contaron. | ¡Si lo sabe todo Avonlea! | Eso ya lo sabía, Rachel.
 respuestas exageradas: ¡Válgame Dios! ¿Será cierto? | Eso me suena a cuento de Rachel Lynde... pero ¡qué cosa! | ¡No puede ser! A mí me lo contaron más chico.
@@ -50,6 +55,7 @@ responde: ¡No me diga! ¿Y Marilla qué dice?
 # --- Ana en camisón por Avonlea: la vecina que la ve se escandaliza (las escenas camison_barry y camison_lynde) y se lo
 # cuenta a Marilla (y Marilla, a Ana: la escena marilla_sabe_camison)
 === ana_en_camison ===
+la callan: marilla, matthew
 titulo: la niña de los Cuthbert anda en camisón por Avonlea
 se entera quien la ve si: ana:camison, !donde:ana:tejas
 llega a marilla en: 3
@@ -87,6 +93,7 @@ saben si hecho:lynde_visita, !hecho:ofendio_lynde: lynde
 dice: ¡Esa niña de los Cuthbert! Pelirroja y con una lengua... aunque buen corazón tiene, eso sí.
 
 === ana_ofendio_lynde ===
+la callan: marilla, matthew
 titulo: la niña de los Cuthbert le dijo vieja chismosa a la Sra. Lynde
 saben si hecho:ofendio_lynde: lynde
 dice: ¡Esa niña de los Cuthbert! Me dijo vieja chismosa en mi propia cara. ¡A mí!
@@ -94,6 +101,7 @@ exagerada: ¿Supo? La niña de los Cuthbert le gritó a Rachel Lynde que era una
 responde: ¡Qué niña! ¿Y qué hizo Marilla?
 
 === vendio_vaca ===
+la callan: marilla, matthew
 titulo: Ana vendió una vaca
 dice: ¿Supo que la niña de los Cuthbert vendió una vaca? ¡Una niña vendiendo vacas!
 exagerada: Dicen que la niña de los Cuthbert vendió la vaca del Sr. Harrison, ¡y con la plata se compró un sombrero!
@@ -121,15 +129,17 @@ exagerada: Dicen que en la despedida del Sr. Phillips lloró toda la escuela, y 
 
 # --- Lo que la gente ve de Ana (src/datos/reglas.txt: cualquiera que la ve, reacciona; y se cuenta)
 === ana_de_noche ===
+la callan: marilla, matthew
 titulo: la niña de los Cuthbert anda sola por los caminos de noche
 se entera quien la ve si: hora:21-26, !donde:ana:tejas
 llega a marilla en: 4
 se cuenta por: 7
-dice: ¿Supo que anoche vieron a la niña de los Cuthbert sola por el camino? ¡A esas horas!
+dice: ¿Supo que vieron a la niña de los Cuthbert sola por el camino, de noche? ¡A esas horas!
 exagerada: Dicen que la niña de los Cuthbert sale todas las noches, sola, a mirar la luna. ¡Como una gitana!
 responde: ¡Sola, de noche! Marilla tendría que tenerla más cortita.
 
 === ana_sin_sombrero ===
+la callan: marilla, matthew
 titulo: la niña de los Cuthbert fue a la iglesia sin sombrero
 se entera quien la ve si: ana:sin_sombrero, escena_ana:ig
 llega a marilla en: 3

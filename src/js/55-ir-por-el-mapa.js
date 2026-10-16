@@ -13,7 +13,7 @@ function goDest(x, y){
   let p = [clamp(x, 40, WW - 40), clamp(y, 60, WH - 40)];
   // (a house one enters: to its door, and in; not to the nearest free spot, which may be behind it. On the map a finger
   // is wide and the roof and the name are drawn above the house: a tap on them, or near, is the house too)
-  const casa = Object.entries(HOUSES).filter(([, h]) => !h.road && (inBox(h.at, h.depth, p[0], p[1], 40) || dist(p[0], p[1], h.at.x, h.at.y - h.depth / 2) < 360)).sort(([, a], [, b]) => dist(p[0], p[1], a.at.x, a.at.y) - dist(p[0], p[1], b.at.x, b.at.y))[0];
+  const casa = Object.entries(HOUSES).filter(([k, h]) => !h.road && (inBox(h.at, h.depth, p[0], p[1], 40) || dist(p[0], p[1], h.at.x, h.at.y - h.depth / 2) < 360 || (game.map && enDibujo(k, h, ...p)))).sort(([, a], [, b]) => dist(p[0], p[1], a.at.x, a.at.y) - dist(p[0], p[1], b.at.x, b.at.y))[0];
   if (casa) p = [casa[1].at.x, casa[1].at.y + 30];
   if (blockedOut(...p)) {   // in the sea, a lake, a house: the nearest place one can stand on
     let best = null;

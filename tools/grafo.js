@@ -60,12 +60,16 @@ for (const raw of guion.split('\n')) {
     if (!/^(dice|ana|primavera|verano|otoño|invierno):/.test(s)) { malas.push(`frases de ${q}: «${s.slice(0, 60)}» (empieza con dice:, ana:, o una estación)`); continue; }
     if ((m = /^\S+:\s*\[([^\]]+)\]/.exec(s))) m[1].split(',').forEach(c => condicion(c, 'una frase de ' + q)); } }
 // the news (src/datos/noticias.txt): the conditions of who knows it
-const llegaA = [];
+const llegaA = [], cuentaPor = {}, cuandoDice = {};
 { let q = null; for (const raw of leer('src/datos/noticias.txt').split('\n')) { const s = raw.trim(); if (!s || s[0] === '#') continue; let m;
   if ((m = s.match(/^===\s*(.+?)\s*===$/))) { q = m[1]; continue; }
   if ((m = s.match(/^saben si (.+?):\s/))) m[1].split(',').forEach(c => condicion(c.trim(), 'noticia ' + q));
   if ((m = s.match(/^se entera quien la ve si:\s*(.+)$/))) m[1].split(',').forEach(c => condicion(c.trim(), 'noticia ' + q));
-  if ((m = s.match(/^llega a (\w+) en:/))) llegaA.push([q, m[1]]); } }
+  if ((m = s.match(/^llega a (\w+) en:/))) llegaA.push([q, m[1]]);
+  if ((m = s.match(/^se cuenta por:\s*(\d+)/))) cuentaPor[q] = +m[1];
+  if ((m = s.match(/^(?:dice(?: \w+)?|exagerada):\s*(.*)$/)) && /\b(anoche|ayer|hoy|esta mañana|esta tarde|esta noche)\b/i.test(m[1])) cuandoDice[q] = m[1]; } }
+// a piece of news that says «anoche» or «hoy», told for days: by then it is not «anoche»
+for (const [f, t] of Object.entries(cuandoDice)) if ((cuentaPor[f] ?? 99) > 1) malas.push(`noticia ${f}: «${t.slice(0, 60)}» dice cuándo fue, y se cuenta por ${cuentaPor[f] ?? 'siempre'} días (que diga solo qué pasó, o «se cuenta por: 1»)`);
 // a piece of news that reaches someone (the neighbour who says «I'll tell Marilla»), and they never react: something forgotten
 const sinReaccion = llegaA.filter(([f, k]) => !['src/datos/guion.txt', 'src/datos/conversaciones.txt', 'src/datos/frases.txt'].some(a => new RegExp(`(?<!!)sabe:${k}:${f}\\b`).test(leer(a)))).map(([f, k]) => `\`${f}\` le llega a ${k}, y ninguna escena ni frase suya pide \`sabe:${k}:${f}\``);
 if (sinReaccion.length) malas.push(...sinReaccion.map(x => 'noticia sin reacción: ' + x));

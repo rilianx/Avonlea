@@ -3517,7 +3517,8 @@ llega si: estacion:verano
 # «! contar barry ana_en_camison» (se entera), y en una línea «{De:marilla:ana_en_camison}» (quién se lo contó:
 # «La Sra. Lynde»; con minúscula, «{de:…}»).
 #
-# Arriba, para todas: exageran (quiénes), y las respuestas a una noticia nueva, a una ya sabida y a una exagerada.
+# Arriba, para todas: exageran (quiénes), callados (los que no andan contando nada: solo a los de su casa, y no van a
+# contárselo a nadie: «llega a»), y las respuestas a una noticia nueva, a una ya sabida y a una exagerada.
 #
 # «=== id ===» y sus campos, uno por línea:
 #   titulo: qué es, en pocas palabras
@@ -3527,13 +3528,17 @@ llega si: estacion:verano
 #   se entera quien la ve si: <condiciones> — quien ve a Ana mientras se cumplen, se entera (lo vio)
 #   llega a <quien> en: <horas> — cuando alguien se entera, le llega a esa persona unas horas después, aunque no se
 #         encuentren (la vecina que dice «ya hablaré con Marilla»)
-#   se cuenta por: N — los días que alguien la cuenta después de oírla (después, ya es cosa vieja)
+#   se cuenta por: N — los días que alguien la cuenta después de oírla (después, ya es cosa vieja; si dice «anoche» u «hoy»,
+#         a lo más 1: lo revisa tools/grafo.js)
+#   la callan: quiénes — no la cuentan fuera de su casa (lo que avergüenza a los suyos: Marilla no anda contando que
+#         Ana salió en camisón; a Matthew sí se lo cuenta)
 #   dice: cómo se cuenta (varias: una al azar; «dice lynde:», como la cuenta ella)
 #   exagerada: una versión más grande (cada línea, una más: la 2, la 3…)
 #   responde: lo que contesta quien se entera (si no, las respuestas de arriba)
 # Las líneas que empiezan con # son comentarios.
 
 exageran: lynde, srapye, josie
+callados: thomas, matthew
 respuestas: ¡No me diga! | ¿De veras? ¡Qué cosa! | Bueno, yo de eso no sé nada... | Ya me lo imaginaba.
 respuestas ya sabidas: Sí, ya me lo contaron. | ¡Si lo sabe todo Avonlea! | Eso ya lo sabía, Rachel.
 respuestas exageradas: ¡Válgame Dios! ¿Será cierto? | Eso me suena a cuento de Rachel Lynde... pero ¡qué cosa! | ¡No puede ser! A mí me lo contaron más chico.
@@ -3562,6 +3567,7 @@ responde: ¡No me diga! ¿Y Marilla qué dice?
 # --- Ana en camisón por Avonlea: la vecina que la ve se escandaliza (las escenas camison_barry y camison_lynde) y se lo
 # cuenta a Marilla (y Marilla, a Ana: la escena marilla_sabe_camison)
 === ana_en_camison ===
+la callan: marilla, matthew
 titulo: la niña de los Cuthbert anda en camisón por Avonlea
 se entera quien la ve si: ana:camison, !donde:ana:tejas
 llega a marilla en: 3
@@ -3599,6 +3605,7 @@ saben si hecho:lynde_visita, !hecho:ofendio_lynde: lynde
 dice: ¡Esa niña de los Cuthbert! Pelirroja y con una lengua... aunque buen corazón tiene, eso sí.
 
 === ana_ofendio_lynde ===
+la callan: marilla, matthew
 titulo: la niña de los Cuthbert le dijo vieja chismosa a la Sra. Lynde
 saben si hecho:ofendio_lynde: lynde
 dice: ¡Esa niña de los Cuthbert! Me dijo vieja chismosa en mi propia cara. ¡A mí!
@@ -3606,6 +3613,7 @@ exagerada: ¿Supo? La niña de los Cuthbert le gritó a Rachel Lynde que era una
 responde: ¡Qué niña! ¿Y qué hizo Marilla?
 
 === vendio_vaca ===
+la callan: marilla, matthew
 titulo: Ana vendió una vaca
 dice: ¿Supo que la niña de los Cuthbert vendió una vaca? ¡Una niña vendiendo vacas!
 exagerada: Dicen que la niña de los Cuthbert vendió la vaca del Sr. Harrison, ¡y con la plata se compró un sombrero!
@@ -3633,15 +3641,17 @@ exagerada: Dicen que en la despedida del Sr. Phillips lloró toda la escuela, y 
 
 # --- Lo que la gente ve de Ana (src/datos/reglas.txt: cualquiera que la ve, reacciona; y se cuenta)
 === ana_de_noche ===
+la callan: marilla, matthew
 titulo: la niña de los Cuthbert anda sola por los caminos de noche
 se entera quien la ve si: hora:21-26, !donde:ana:tejas
 llega a marilla en: 4
 se cuenta por: 7
-dice: ¿Supo que anoche vieron a la niña de los Cuthbert sola por el camino? ¡A esas horas!
+dice: ¿Supo que vieron a la niña de los Cuthbert sola por el camino, de noche? ¡A esas horas!
 exagerada: Dicen que la niña de los Cuthbert sale todas las noches, sola, a mirar la luna. ¡Como una gitana!
 responde: ¡Sola, de noche! Marilla tendría que tenerla más cortita.
 
 === ana_sin_sombrero ===
+la callan: marilla, matthew
 titulo: la niña de los Cuthbert fue a la iglesia sin sombrero
 se entera quien la ve si: ana:sin_sombrero, escena_ana:ig
 llega a marilla en: 3
@@ -7407,7 +7417,7 @@ function lineasConVoz(k, a){
   return (ve.length ? ve : L).map(l => l.replace(/^\[[^\]]+\] /, ''));
 }
 // what someone says on seeing how Ana is (a nightgown, out at night, no hat), or null: the first time too, and before any greeting
-const reaccionAlVerla = k => { const d = FOLKBY[String(k).replace(/^f:/, '')]?.def, a = d ? d.lines : CH[k]?.lines; return pick(lineasConVoz(k, (a || []).filter(l => reaccionDe((/^\[([^\]]+)\] /.exec(l)?.[1] || '').split(',').map(c => c.trim())).length))) || null; };
+const reaccionAlVerla = k => { const d = FOLKBY[String(k).replace(/^f:/, '')]?.def, a = d ? d.lines : CH[k]?.lines; return pick(sinRepetir(k, lineasConVoz(k, (a || []).filter(l => reaccionDe((/^\[([^\]]+)\] /.exec(l)?.[1] || '').split(',').map(c => c.trim())).length)))) || null; };   // (and once said, not again today)
 // what Ana has heard from each one today: no one says the same thing twice in a day (when they have said all they have,
 // they say nothing more: silence, not a repeat)
 const OIDO = { dia: -1, k: {} };
@@ -9569,7 +9579,7 @@ function ambTick(dt){
   if (!s.directed && (game.scene !== s.scene || game.talk || game.cooking || game.map || !$('ai').hidden || far(190))) return ambEnd();
   if (s.directed && (game.scene !== s.scene || far(260))) { s.noMenu = true; if (game.talk?.scene) { game.talk = null; $('talk').hidden = true; } return ambEnd(); }   // (Ana walked off: the talk is over)
   if ((s.wait -= dt) > 0) return;
-  if (!s.directed && ['ana', ...s.parts].some(ocupada)) return ambEnd();   // (one of them got busy: the loose talk is dropped)
+  if (!s.directed && ['ana', ...s.parts].some(k => ocupada(k) && !(s.ve && !AGENTS[k]?.acting))) return ambEnd();   // (one of them got busy: the loose talk is dropped; not a remark on what they see, if they are only staying)
   if (hablando()) return;   // (someone else is saying something: after it)
   if (++s.i >= s.lines.length) return ambEnd();
   const l = s.lines[s.i], sp = personOf(l.q), dur = lineDur(l.t);
@@ -9652,11 +9662,14 @@ function ambUpdate(dt){
   { const se = storyNow(); if (se && storyHere(se)) return; }   // (here a scene of the story is about to be played: it goes first)
   if (ocupada('ana') || hablando()) return;   // (in the middle of something with Ana, or Ana herself busy, or someone speaking: no loose lines)
   let best = null, bd = 1e9;
-  for (const k of all) { const d = dd(k); if (TT < (amb.mute[k] || 0) || d > 240 || d >= bd || ocupada(k)) continue; best = k; bd = d; }
+  for (const k of all) { const d = dd(k); if (TT < (amb.mute[k] || 0) || d > 240 || d >= bd || (ocupada(k) && (AGENTS[k]?.acting || !reaccionAlVerla(k)))) continue; best = k; bd = d; }   // (staying somewhere, at church, one still remarks what one sees)
   if (!best) return;
   { const L = bd < 90 && cadenaEncuentro(best); if (L) { amb.mute[best] = TT + 110; amb.seen[best] = true; sceneStart({ parts: [best], lines: L, out: {}, scene: game.scene, resumen: '' }, false); return; } }   // (two who have not met: they meet, as in the book)
   if (best === 'diana' && !dianaAmiga()) return;   // (no friend's greeting from one she does not know yet)
-  { const C = bd < 90 && !activeGoals(AGENTS[best] || { goals: [] }).length && Math.random() < .3 && convDisponibles(best)[0]; if (C) { amb.mute[best] = TT + 110; amb.seen[best] = true; conversar(C); return; } }   // (now and then, one of the conversations there are with them, by itself)
+  { const C = bd < 90 && !reaccionAlVerla(best) && !activeGoals(AGENTS[best] || { goals: [] }).length && Math.random() < .3 && convDisponibles(best)[0]; if (C) { amb.mute[best] = TT + 110; amb.seen[best] = true; conversar(C); return; } }   // (now and then, one of the conversations there are with them, by itself)
+  // what they see of her (in a nightgown, out at night, no hat), they say first, from where they see it (not only beside
+  // her), with the AI or without it
+  { const ve = reaccionAlVerla(best); if (ve) { amb.mute[best] = TT + 110; amb.seen[best] = true; sceneStart({ parts: [best], lines: [{ q: best, t: ve }], out: {}, scene: game.scene, resumen: '', ve: true }, false); return; } }
   if (!aiReady()) {   // (without the AI: just a word from them, from the written lines)
     if (bd < 90) { const l = (game.wm?.sick || []).includes(best) ? [comentarioTexto('enfermo') || 'Cof, cof…'] : LINES[best], u = l.length > 1 ? l.filter(x => x !== amb.ultima?.[best]) : l, t = u[Math.floor(Math.random() * u.length)]; (amb.ultima ||= {})[best] = t; if (!t) { amb.mute[best] = TT + 110; return; }   // (not the same line twice in a row; and if they have said all they have today, nothing)
     amb.mute[best] = TT + 110; amb.seen[best] = true; sceneStart({ parts: [best], lines: [{ q: best, t }], out: {}, scene: game.scene, resumen: '' }, false); }
@@ -10467,7 +10480,7 @@ function goDest(x, y){
   let p = [clamp(x, 40, WW - 40), clamp(y, 60, WH - 40)];
   // (a house one enters: to its door, and in; not to the nearest free spot, which may be behind it. On the map a finger
   // is wide and the roof and the name are drawn above the house: a tap on them, or near, is the house too)
-  const casa = Object.entries(HOUSES).filter(([, h]) => !h.road && (inBox(h.at, h.depth, p[0], p[1], 40) || dist(p[0], p[1], h.at.x, h.at.y - h.depth / 2) < 360)).sort(([, a], [, b]) => dist(p[0], p[1], a.at.x, a.at.y) - dist(p[0], p[1], b.at.x, b.at.y))[0];
+  const casa = Object.entries(HOUSES).filter(([k, h]) => !h.road && (inBox(h.at, h.depth, p[0], p[1], 40) || dist(p[0], p[1], h.at.x, h.at.y - h.depth / 2) < 360 || (game.map && enDibujo(k, h, ...p)))).sort(([, a], [, b]) => dist(p[0], p[1], a.at.x, a.at.y) - dist(p[0], p[1], b.at.x, b.at.y))[0];
   if (casa) p = [casa[1].at.x, casa[1].at.y + 30];
   if (blockedOut(...p)) {   // in the sea, a lake, a house: the nearest place one can stand on
     let best = null;
@@ -13151,6 +13164,11 @@ function inicioTick(dt){
 
 /* ---------- the map: Avonlea drawn on a sheet of paper, with where everyone is ---------- */
 let mapBase = null;
+// the places that matter are drawn big on the paper map (BIG: how much), up to their name: what a finger on the map
+// touches as that place (src/js/55-ir-por-el-mapa.js)
+const BIG = { gg: 2.6, os: 2.2, rl: 2, hh: 2, br: 2.2, ig: 2.4, es: 2.4 };
+const mapaArriba = (k, h) => h.at.y - (h.style === 'iglesia' ? 280 : h.style === 'escuela' ? 195 : 140) * (BIG[k] || 2);
+const enDibujo = (k, h, x, y) => Math.abs(x - h.at.x) < (h.at.w || 160) * (BIG[k] || 2) / 2 + 40 && y > mapaArriba(k, h) - 140 && y < h.at.y + 60;
 function toggleMap(on = !game.map){
   game.map = on; $('map').hidden = !on;
   if (!on) return;
@@ -13193,7 +13211,6 @@ function paintMapBase(w, h, z = 1, ox = 0, oy = 0){
     if (h.style === 'iglesia') { blob(c, [[x - 16, y - 120], [x + 16, y - 120], [x + 16, y - 190], [x - 16, y - 190]], h.wall); blob(c, [[x - 20, y - 188], [x + 20, y - 188], [x, y - 250]], h.roof); line(c, [[x, y - 250], [x, y - 272]], '#4a2f1c', 4, 1); line(c, [[x - 8, y - 264], [x + 8, y - 264]], '#4a2f1c', 4, 2); }
     if (h.style === 'escuela') { blob(c, [[x - 12, y - 126], [x + 12, y - 126], [x + 12, y - 160], [x - 12, y - 160]], '#f2ede2'); blob(c, [[x - 16, y - 158], [x + 16, y - 158], [x, y - 184]], h.roof); ell(c, x, y - 142, 5, 6, '#c8a040', true); }
     c.strokeStyle = 'rgba(74,47,28,.7)'; c.lineWidth = 3; c.strokeRect(x - h.at.w / 2, y - 60, h.at.w, 60); c.restore(); };
-  const BIG = { gg: 2.6, os: 2.2, rl: 2, hh: 2, br: 2.2, ig: 2.4, es: 2.4 };
   house(BARN.x, BARN.y, BARN.w, '#6f6a66', '#b5523c');
   for (const w of WATERS) for (const b of w.bridges) blob(c, [[b.x - 44, b.y - 16], [b.x + 44, b.y - 16], [b.x + 44, b.y + 14], [b.x - 44, b.y + 14]], b.covered ? '#a8463a' : '#a8814f');
   // names, in ink
@@ -13201,7 +13218,7 @@ function paintMapBase(w, h, z = 1, ox = 0, oy = 0){
   const label = (text, x, y, size = 46) => { text = conNombres(text); c.font = `italic ${size}px Georgia, serif`; c.fillStyle = 'rgba(241,226,191,.75)'; const tw = c.measureText(text).width; c.fillRect(x - tw / 2 - 8, y - size * .85, tw + 16, size * 1.1); c.fillStyle = '#4a2f1c'; c.fillText(text, x, y); };
   label('Granero', BARN.x, BARN.y - 150, 70);
   for (const [k, h] of Object.entries(HOUSES)) if (!h.road) big(h, BIG[k] || 2);
-  for (const [k, h] of Object.entries(HOUSES)) { const s = BIG[k] || 2; label(h.mapLabel?.[0] ?? h.name, h.at.x, h.at.y - (h.style === 'iglesia' ? 280 : h.style === 'escuela' ? 195 : 140) * s - 20, 120); }
+  for (const [k, h] of Object.entries(HOUSES)) label(h.mapLabel?.[0] ?? h.name, h.at.x, mapaArriba(k, h) - 20, 120);
   label('Lago de las Aguas Brillantes', LAKE.x, LAKE.y + LAKE.ry + 110, 100); for (const w of WOODS.filter(w => w.haunted)) label('Bosque Encantado', w.x, w.y + w.ry * .3, 100); for (const b of BUILDINGS) { if (b.style === 'faro') { c.save(); c.translate(b.x, b.y); c.scale(1.8, 1.8); c.translate(-b.x, -b.y); blob(c, [[b.x - 30, b.y], [b.x + 30, b.y], [b.x + 16, b.y - 220], [b.x - 16, b.y - 220]], '#f6f2e8'); for (let q = 0; q < 3; q++) c.fillStyle = '#c8463a', c.fillRect(b.x - 26 + q * 4, b.y - 50 - q * 60, 52 - q * 8, 24); blob(c, [[b.x - 22, b.y - 220], [b.x + 22, b.y - 220], [b.x, b.y - 270]], '#3a3436'); c.restore(); label(b.name, b.x, b.y - 520, 120); continue; } house(b.x, b.y, b.w, '#8a6a5a', '#efe4cc'); label(b.name, b.x, b.y - 150, 70); } label('Aldea de Avonlea', 50 * U, 23.2 * U, 150); label('Golfo de San Lorenzo', 40 * U, 4.5 * U, 220); label('Campo rosado', LUPINS[0].x, LUPINS[0].y, 34); label('Río', RIVERS[0].pts[3][0] + 120, RIVERS[0].pts[3][1] + 60, 34);
   label('Camino Blanco de las Delicias', GG.x + 900, BRIDGE.y - 110, 80);
   for (const [p, n] of Object.entries(NOMBRES_ANA)) if (game.wm.perm?.['nombre:' + p] && p !== 'lago' && p !== 'bosque_peg' && WP[p]) label(nombreMay(nombreDe(p)) + ' ✎', WP[p][0], WP[p][1] - 70, 64);   // (the names Ana gave to places)
@@ -13259,17 +13276,19 @@ window.__avonlea = { ...(/[?&]dev\b/.test(location.search) ? { ev: s => eval(s) 
    («sabe:barry:x», «sabe:marilla:x:2»: at least the second version, «sabe:marilla:x:contada»: someone told her), names who told («{De:marilla:x}») and gives it
    («! contar barry x»). Neighbours tell each other when they talk: near Ana, aloud; away from her, too. */
 function noticiasLeer(txt){
-  const N = [], R = { nuevas: [], sabidas: [], exageradas: [] }, X = []; let n = null;
+  const N = [], R = { nuevas: [], sabidas: [], exageradas: [] }, X = [], Q = []; let n = null;
   const lista = v => v.split(',').map(x => x.trim()).filter(Boolean), varias = v => v.split('|').map(x => x.trim()).filter(Boolean);
   for (const raw of txt.split('\n')) {
     const l = raw.trim(); if (!l || l[0] === '#') continue; let m;
     if (!n && (m = l.match(/^respuestas( ya sabidas| exageradas)?:\s*(.*)$/))) { R[{ '': 'nuevas', ' ya sabidas': 'sabidas', ' exageradas': 'exageradas' }[m[1] || '']] = varias(m[2]); continue; }
     if (!n && (m = l.match(/^exageran:\s*(.*)$/))) { X.push(...lista(m[1])); continue; }
-    if ((m = l.match(/^===\s*(.+?)\s*===$/))) { N.push(n = { id: m[1], titulo: m[1], saben: [], testigos: null, cuentaPor: 0, dice: [], diceDe: {}, exagerada: [], responde: [], llega: [] }); continue; }
+    if (!n && (m = l.match(/^callados:\s*(.*)$/))) { Q.push(...lista(m[1])); continue; }
+    if ((m = l.match(/^===\s*(.+?)\s*===$/))) { N.push(n = { id: m[1], titulo: m[1], saben: [], testigos: null, callan: [], cuentaPor: 0, dice: [], diceDe: {}, exagerada: [], responde: [], llega: [] }); continue; }
     if (!n) continue;
     if ((m = l.match(/^saben(?: si (.+?))?:\s+(.*)$/)))   // (the conditions have ':' in them: the list comes after «: »)
       n.saben.push({ si: m[1] ? lista(m[1]) : [], quien: lista(m[2]) });
     else if ((m = l.match(/^se entera quien la ve si:\s*(.*)$/))) n.testigos = lista(m[1]);
+    else if ((m = l.match(/^la callan:\s*(.*)$/))) n.callan = lista(m[1]);
     else if ((m = l.match(/^llega a (\S+) en:\s*([\d.]+)$/))) n.llega.push({ quien: m[1], horas: +m[2] });
     else if ((m = l.match(/^se cuenta por:\s*(\d+)/))) n.cuentaPor = +m[1];
     else if ((m = l.match(/^dice (\S+):\s*(.*)$/))) (n.diceDe[m[1]] ||= []).push(m[2]);
@@ -13278,9 +13297,9 @@ function noticiasLeer(txt){
       if (k === 'dice' || k === 'responde' || k === 'exagerada') n[k].push(v); else if (k === 'al conocer a ana') n.alConocer = /^s/.test(v); else n.titulo = v;
     }
   }
-  return { N, R, X };
+  return { N, R, X, Q };
 }
-const { N: NOTICIAS, R: NOTICIAS_RESP, X: EXAGERAN } = noticiasLeer(document.getElementById('noticias')?.textContent || '');
+const { N: NOTICIAS, R: NOTICIAS_RESP, X: EXAGERAN, Q: CALLADOS } = noticiasLeer(document.getElementById('noticias')?.textContent || '');
 const NOTICIA = Object.fromEntries(NOTICIAS.map(n => [n.id, n]));
 // (a game from before Ana's arrival was played: she has lived in Avonlea a while, and the news of her are old)
 const sabeK = (k, f) => (NOTICIA[f]?.alConocer && conoceTodos()) || (game.wm?.know?.[sinF(k)] || []).includes(f);
@@ -13299,7 +13318,7 @@ function enterarse(k, f, de = null, v = 1){
   if (c) { if (v > c.v) C[f] = { ...c, de: de ? sinF(de) : c.de, v }; return; }
   wmKnow(k, f); C[f] = { de: de ? sinF(de) : null, dia: today() + 1, v };
   const n = NOTICIA[f]; if (!n) return;
-  for (const L of n.llega) if (L.quien !== k) (game.wm.noticiasPend ||= []).push({ k: L.quien, f, at: dayT + L.horas / 24, de: k, v: versionAlContar(k, n) });
+  for (const L of n.llega) if (L.quien !== k && !CALLADOS.includes(k)) (game.wm.noticiasPend ||= []).push({ k: L.quien, f, at: dayT + L.horas / 24, de: k, v: versionAlContar(k, n) });
 }
 // who told someone (for a line: «{de:marilla:ana_en_camison}» → «la Sra. Lynde»)
 const quienConto = (k, f) => { const d = creencia(k, f)?.de; return !d ? 'alguien' : FOLKBY[d] ? FOLKBY[d].def.name : (CH[d]?.article || '') + (NAMES[d] || d); };
@@ -13332,15 +13351,21 @@ const presentarseNoticias = k => { for (const n of NOTICIAS) if (n.alConocer) en
 // two neighbours talking: a piece of news one knows and the other does not, told aloud (and now the other believes it,
 // as it was told); if there is none new, now and then one the gossips of Avonlea tell again anyway: and if it comes out
 // bigger than the other had it, the other believes the bigger one
+// the names someone answers to (a line that names them is not said to them, nor by them: «Marilla tendría que…»)
+const nombresDe = k => { k = sinF(k); return [...new Set(String(CH[k]?.fullName || FOLKBY[k]?.def.name || NAMES[k] || '').split(/\s+/).filter(w => /^[A-ZÁÉÍÓÚ][a-záéíóúñ]{2,}$/.test(w)))]; };
+const nombra = (t, k) => nombresDe(k).some(w => new RegExp('(^|[^\\wáéíóúñ])' + w + '($|[^\\wáéíóúñ])').test(t));
 function chisme(a, b){
-  const puede = n => (n.diceDe[sinF(a)] || n.dice).length && sabeK(a, n.id) && seCuenta(a, n);
+  const callan = n => n.callan.includes(sinF(a)) && !n.callan.includes(sinF(b));   // (what shames their own house, they tell no one outside it)
+  if (CALLADOS.includes(sinF(a)) && wmScene(a) !== wmScene(b)) return null;   // (the quiet ones tell only who is at home with them)
+  const puede = n => (n.diceDe[sinF(a)] || n.dice).length && sabeK(a, n.id) && seCuenta(a, n) && !callan(n);
   const nueva = NOTICIAS.find(n => puede(n) && !sabeK(b, n.id));
   const n = nueva || (Math.random() < .3 && pick(NOTICIAS.filter(n => puede(n) && sabeK(b, n.id))));
   if (!n) return null;
-  const v = versionAlContar(a, n), antes = creencia(b, n.id)?.v || 0;
+  const v = versionAlContar(a, n), antes = creencia(b, n.id)?.v || 0, dice = lineaVersion(a, n, v);
+  if (nombra(dice, b)) return null;   // (not «la niña de los Cuthbert» to Marilla Cuthbert)
   enterarse(b, n.id, a, v);
-  const R = NOTICIAS_RESP, resp = v > Math.max(antes, 1) ? R.exageradas : nueva ? (n.responde.length ? n.responde : R.nuevas) : R.sabidas;   // (bigger than they had it: amazed)
-  return Object.assign([[a, lineaVersion(a, n, v)], [b, pick(resp)]], { f: n.id, v });
+  const R = NOTICIAS_RESP, ajena = L => L.filter(t => !nombra(t, a) && !nombra(t, b)), resp = ajena(v > Math.max(antes, 1) ? R.exageradas : nueva ? (n.responde.length ? n.responde : R.nuevas) : R.sabidas);   // (bigger than they had it: amazed)
+  return Object.assign([[a, dice], [b, pick(resp.length ? resp : ajena(R.nuevas)) || '¡No me diga!']], { f: n.id, v });
 }
 // «sabe:quien:noticia», and «sabe:quien:noticia:2» (heard at least the second version, the bigger one)
 function sabeCond(k, f, v){ const c = creencia(k, f); return !!c && (!v || (v === 'contada' ? !!c.de && c.de !== sinF(k) : c.v >= +v)); }   // («sabe:marilla:x:contada»: someone told her; she did not see it herself)

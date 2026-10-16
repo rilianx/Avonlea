@@ -1,6 +1,6 @@
 # Cobertura de la historia: lo que falta
 
-Generado el 2026-10-16 13:43 por `node tools/planilla.js` (también en la hoja «Cobertura» de planilla/avonlea.xlsx).
+Generado el 2026-10-16 14:19 por `node tools/planilla.js` (también en la hoja «Cobertura» de planilla/avonlea.xlsx).
 
 No son errores: son situaciones que el juego deja que pasen y nadie considera, noticias o llegadas sin consecuencias, gente con poco que decir.
 

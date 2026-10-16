@@ -1,5 +1,10 @@
 /* ---------- the map: Avonlea drawn on a sheet of paper, with where everyone is ---------- */
 let mapBase = null;
+// the places that matter are drawn big on the paper map (BIG: how much), up to their name: what a finger on the map
+// touches as that place (src/js/55-ir-por-el-mapa.js)
+const BIG = { gg: 2.6, os: 2.2, rl: 2, hh: 2, br: 2.2, ig: 2.4, es: 2.4 };
+const mapaArriba = (k, h) => h.at.y - (h.style === 'iglesia' ? 280 : h.style === 'escuela' ? 195 : 140) * (BIG[k] || 2);
+const enDibujo = (k, h, x, y) => Math.abs(x - h.at.x) < (h.at.w || 160) * (BIG[k] || 2) / 2 + 40 && y > mapaArriba(k, h) - 140 && y < h.at.y + 60;
 function toggleMap(on = !game.map){
   game.map = on; $('map').hidden = !on;
   if (!on) return;
@@ -42,7 +47,6 @@ function paintMapBase(w, h, z = 1, ox = 0, oy = 0){
     if (h.style === 'iglesia') { blob(c, [[x - 16, y - 120], [x + 16, y - 120], [x + 16, y - 190], [x - 16, y - 190]], h.wall); blob(c, [[x - 20, y - 188], [x + 20, y - 188], [x, y - 250]], h.roof); line(c, [[x, y - 250], [x, y - 272]], '#4a2f1c', 4, 1); line(c, [[x - 8, y - 264], [x + 8, y - 264]], '#4a2f1c', 4, 2); }
     if (h.style === 'escuela') { blob(c, [[x - 12, y - 126], [x + 12, y - 126], [x + 12, y - 160], [x - 12, y - 160]], '#f2ede2'); blob(c, [[x - 16, y - 158], [x + 16, y - 158], [x, y - 184]], h.roof); ell(c, x, y - 142, 5, 6, '#c8a040', true); }
     c.strokeStyle = 'rgba(74,47,28,.7)'; c.lineWidth = 3; c.strokeRect(x - h.at.w / 2, y - 60, h.at.w, 60); c.restore(); };
-  const BIG = { gg: 2.6, os: 2.2, rl: 2, hh: 2, br: 2.2, ig: 2.4, es: 2.4 };
   house(BARN.x, BARN.y, BARN.w, '#6f6a66', '#b5523c');
   for (const w of WATERS) for (const b of w.bridges) blob(c, [[b.x - 44, b.y - 16], [b.x + 44, b.y - 16], [b.x + 44, b.y + 14], [b.x - 44, b.y + 14]], b.covered ? '#a8463a' : '#a8814f');
   // names, in ink
@@ -50,7 +54,7 @@ function paintMapBase(w, h, z = 1, ox = 0, oy = 0){
   const label = (text, x, y, size = 46) => { text = conNombres(text); c.font = `italic ${size}px Georgia, serif`; c.fillStyle = 'rgba(241,226,191,.75)'; const tw = c.measureText(text).width; c.fillRect(x - tw / 2 - 8, y - size * .85, tw + 16, size * 1.1); c.fillStyle = '#4a2f1c'; c.fillText(text, x, y); };
   label('Granero', BARN.x, BARN.y - 150, 70);
   for (const [k, h] of Object.entries(HOUSES)) if (!h.road) big(h, BIG[k] || 2);
-  for (const [k, h] of Object.entries(HOUSES)) { const s = BIG[k] || 2; label(h.mapLabel?.[0] ?? h.name, h.at.x, h.at.y - (h.style === 'iglesia' ? 280 : h.style === 'escuela' ? 195 : 140) * s - 20, 120); }
+  for (const [k, h] of Object.entries(HOUSES)) label(h.mapLabel?.[0] ?? h.name, h.at.x, mapaArriba(k, h) - 20, 120);
   label('Lago de las Aguas Brillantes', LAKE.x, LAKE.y + LAKE.ry + 110, 100); for (const w of WOODS.filter(w => w.haunted)) label('Bosque Encantado', w.x, w.y + w.ry * .3, 100); for (const b of BUILDINGS) { if (b.style === 'faro') { c.save(); c.translate(b.x, b.y); c.scale(1.8, 1.8); c.translate(-b.x, -b.y); blob(c, [[b.x - 30, b.y], [b.x + 30, b.y], [b.x + 16, b.y - 220], [b.x - 16, b.y - 220]], '#f6f2e8'); for (let q = 0; q < 3; q++) c.fillStyle = '#c8463a', c.fillRect(b.x - 26 + q * 4, b.y - 50 - q * 60, 52 - q * 8, 24); blob(c, [[b.x - 22, b.y - 220], [b.x + 22, b.y - 220], [b.x, b.y - 270]], '#3a3436'); c.restore(); label(b.name, b.x, b.y - 520, 120); continue; } house(b.x, b.y, b.w, '#8a6a5a', '#efe4cc'); label(b.name, b.x, b.y - 150, 70); } label('Aldea de Avonlea', 50 * U, 23.2 * U, 150); label('Golfo de San Lorenzo', 40 * U, 4.5 * U, 220); label('Campo rosado', LUPINS[0].x, LUPINS[0].y, 34); label('Río', RIVERS[0].pts[3][0] + 120, RIVERS[0].pts[3][1] + 60, 34);
   label('Camino Blanco de las Delicias', GG.x + 900, BRIDGE.y - 110, 80);
   for (const [p, n] of Object.entries(NOMBRES_ANA)) if (game.wm.perm?.['nombre:' + p] && p !== 'lago' && p !== 'bosque_peg' && WP[p]) label(nombreMay(nombreDe(p)) + ' ✎', WP[p][0], WP[p][1] - 70, 64);   // (the names Ana gave to places)
