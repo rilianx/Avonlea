@@ -62,7 +62,7 @@
    "viven": []
   }
  ],
- "generado": "2026-10-16 07:20",
+ "generado": "2026-10-16 12:30",
  "momentos": [
   {
    "id": "dia2",
@@ -543,7 +543,7 @@
     "fuera": true
    },
    "barry": {
-    "sin": 1,
+    "sin": 0,
     "con": 1
    },
    "lynde": {
@@ -570,7 +570,7 @@
    },
    "gertie": {
     "sin": 0,
-    "con": 0
+    "con": 1
    },
    "ruby": {
     "sin": 2,
@@ -753,7 +753,7 @@
     "fuera": true
    },
    "barry": {
-    "sin": 1,
+    "sin": 0,
     "con": 1
    },
    "lynde": {
@@ -781,7 +781,7 @@
    },
    "gertie": {
     "sin": 0,
-    "con": 0
+    "con": 1
    },
    "ruby": {
     "sin": 2,
@@ -964,7 +964,7 @@
     "fuera": true
    },
    "barry": {
-    "sin": 1,
+    "sin": 0,
     "con": 1
    },
    "lynde": {
@@ -991,7 +991,7 @@
    },
    "gertie": {
     "sin": 0,
-    "con": 0
+    "con": 1
    },
    "ruby": {
     "sin": 2,
@@ -1176,8 +1176,8 @@
     "con": 6
    },
    "barry": {
-    "sin": 3,
-    "con": 4
+    "sin": 2,
+    "con": 3
    },
    "lynde": {
     "sin": 5,
@@ -1203,7 +1203,7 @@
    },
    "gertie": {
     "sin": 0,
-    "con": 0
+    "con": 1
    },
    "ruby": {
     "sin": 2,
@@ -1388,8 +1388,8 @@
     "con": 6
    },
    "barry": {
-    "sin": 3,
-    "con": 4
+    "sin": 2,
+    "con": 3
    },
    "lynde": {
     "sin": 5,
@@ -1560,7 +1560,7 @@
    },
    "carrie": {
     "sin": 0,
-    "con": 1
+    "con": 0
    },
    "jefe": {
     "sin": 2,
@@ -1600,12 +1600,12 @@
     "con": 6
    },
    "barry": {
-    "sin": 3,
-    "con": 4
+    "sin": 1,
+    "con": 2
    },
    "lynde": {
-    "sin": 5,
-    "con": 6
+    "sin": 4,
+    "con": 5
    },
    "harrison": {
     "sin": 4,
@@ -1773,7 +1773,7 @@
    },
    "carrie": {
     "sin": 0,
-    "con": 1
+    "con": 0
    },
    "jefe": {
     "sin": 2,
@@ -1813,8 +1813,8 @@
     "con": 6
    },
    "barry": {
-    "sin": 2,
-    "con": 4
+    "sin": 1,
+    "con": 3
    },
    "lynde": {
     "sin": 5,
@@ -1987,7 +1987,7 @@
    },
    "carrie": {
     "sin": 0,
-    "con": 1
+    "con": 0
    },
    "jefe": {
     "sin": 2,
@@ -2005,8 +2005,8 @@
     "con": 1
    },
    "vecino": {
-    "sin": 5,
-    "con": 6
+    "sin": 4,
+    "con": 5
    },
    "niño": {
     "sin": 2,
@@ -2027,8 +2027,8 @@
     "con": 6
    },
    "barry": {
-    "sin": 3,
-    "con": 4
+    "sin": 2,
+    "con": 3
    },
    "lynde": {
     "sin": 5,
@@ -2218,8 +2218,8 @@
     "con": 1
    },
    "vecino": {
-    "sin": 5,
-    "con": 6
+    "sin": 4,
+    "con": 5
    },
    "niño": {
     "sin": 2,
@@ -6841,7 +6841,7 @@
    "interrumpe": false,
    "grande": false,
    "repetir": "una_vez",
-   "si": "afecto:lynde:ana>=2",
+   "si": "afecto:lynde:ana>=2, !hecho:ofendio_lynde",
    "en": "",
    "hablan": "lynde",
    "lineas": 4,
@@ -6867,7 +6867,7 @@
    "interrumpe": false,
    "grande": false,
    "repetir": "una_vez",
-   "si": "afecto:lynde:ana>=3",
+   "si": "afecto:lynde:ana>=3, !hecho:ofendio_lynde",
    "en": "",
    "hablan": "lynde",
    "lineas": 5,
@@ -6894,7 +6894,7 @@
    "interrumpe": false,
    "grande": false,
    "repetir": "una_vez",
-   "si": "afecto:lynde:ana>=3, estudio:ana>=50",
+   "si": "afecto:lynde:ana>=3, estudio:ana>=50, !hecho:ofendio_lynde",
    "en": "",
    "hablan": "lynde",
    "lineas": 3,
@@ -9583,7 +9583,7 @@
    "interrumpe": false,
    "grande": false,
    "repetir": "una_vez",
-   "si": "cuaderno:escuela, hecho:conocidas_diana, !hecho:prohibida",
+   "si": "cuaderno:escuela, hecho:llego_gilbert, !estacion:verano, hecho:conocidas_diana, !hecho:prohibida",
    "en": "",
    "hablan": "diana",
    "lineas": 3,
@@ -11150,6 +11150,7 @@
     "escena crup_salva",
     "escena ventana_prohibida",
     "escena lugar_cuesta_prohibida",
+    "una frase de diana",
     "una frase de barry"
    ],
    "perdonada": [
@@ -11255,7 +11256,9 @@
    ],
    "ana": [
     "escena falta_noche",
-    "escena falta_viaje"
+    "escena falta_viaje",
+    "una frase de barry",
+    "una frase de vecino"
    ],
    "blewett_duda": [
     "escena duda_matthew",
@@ -11275,6 +11278,9 @@
    ],
    "ofendio_lynde": [
     "escena lynde_disculpa",
+    "escena conv_lynde_ventana",
+    "escena conv_lynde_pelo",
+    "escena conv_lynde_queens",
     "una frase de lynde",
     "noticia ana_lengua"
    ],
@@ -11333,6 +11339,12 @@
    "conoce_gilbert": [
     "una frase de gilbert"
    ],
+   "conoce_gertie": [
+    "una frase de gertie"
+   ],
+   "escuela": [
+    "una frase de gertie"
+   ],
    "conoce_jane": [
     "una frase de jane"
    ],
@@ -11341,6 +11353,9 @@
    ],
    "conoce_sara": [
     "una frase de sara"
+   ],
+   "verano": [
+    "una frase de phillips"
    ],
    "conoce_sraallan": [
     "una frase de sraallan",
@@ -11368,6 +11383,9 @@
     "llegadas de phillips"
    ],
    "rachel_lo_sabe": [
+    "código"
+   ],
+   "llego_gilbert": [
     "código"
    ],
    "x": [

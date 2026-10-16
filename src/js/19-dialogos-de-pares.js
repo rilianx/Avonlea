@@ -7,7 +7,7 @@ const DLG_BANK = {
     [['ana', 'He decidido que el claro de los abedules se llame la Senda de los Enamorados.'], ['diana', '¡Qué romántico! Pero no se lo digas a mamá.'], ['ana', 'Será nuestro secreto, como todo lo importante.']],
     [['diana', 'Mamá dice que puedo ir a tu casa el sábado, si no hay lluvia.'], ['ana', 'Entonces voy a rezar para que no llueva… y por si acaso, para que llueva solo un poquito.']],
     [['ana', '¿Te imaginas que el Bosque Encantado de verdad tenga fantasmas?'], ['diana', '¡Ana! Ahora no voy a poder pasar por ahí de noche.'], ['ana', 'Yo tampoco. Creo que imaginé demasiado bien.']],
-    { si: ["cuaderno:escuela"], l: [['diana', 'Gilbert Blythe te miró otra vez en clase.'], ['ana', 'Gilbert Blythe puede mirar a la pared. A mí no me interesa en lo más mínimo.'], ['diana', 'Si tú lo dices…']] },
+    { si: ["cuaderno:escuela", "hecho:llego_gilbert", "!estacion:verano"], l: [['diana', 'Gilbert Blythe te miró otra vez en clase.'], ['ana', 'Gilbert Blythe puede mirar a la pared. A mí no me interesa en lo más mínimo.'], ['diana', 'Si tú lo dices…']] },
   ],
   'ana+marilla': [
     { si: ['hecho:a_prueba', '!hecho:se_queda'], l: [['marilla', 'Esa cama se tiende apenas te levantas. Aquí no somos desordenados.'], ['ana', 'Sí, Marilla. ¿Y si la tiendo imaginando que es la cama de una princesa?'], ['marilla', 'Tiéndela como la de una niña ordenada. Con eso basta.']] },

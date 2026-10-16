@@ -1,6 +1,6 @@
 # Cobertura de la historia: lo que falta
 
-Generado el 2026-10-16 07:20 por `node tools/planilla.js` (también en la hoja «Cobertura» de planilla/avonlea.xlsx).
+Generado el 2026-10-16 12:30 por `node tools/planilla.js` (también en la hoja «Cobertura» de planilla/avonlea.xlsx).
 
 No son errores: son situaciones que el juego deja que pasen y nadie considera, noticias o llegadas sin consecuencias, gente con poco que decir.
 
@@ -8,11 +8,11 @@ No son errores: son situaciones que el juego deja que pasen y nadie considera, n
 |---|---|---|---|
 | Situaciones | 2 | 13 | 11 |
 | Noticias | 2 | 0 | 9 |
-| Frases | 0 | 7 | 0 |
+| Frases | 0 | 8 | 0 |
 | Metas | 0 | 7 | 0 |
 | Exploración | 0 | 0 | 12 |
 | Llegadas | 0 | 0 | 3 |
-| Personas | 0 | 0 | 39 |
+| Personas | 0 | 0 | 37 |
 | Hechos | 0 | 0 | 5 |
 
 ## Situaciones
@@ -60,7 +60,8 @@ No son errores: son situaciones que el juego deja que pasen y nadie considera, n
 
 ## Frases
 
-- [media] **Gertie Pye**: no tiene qué decir: Día 2 (sin conocerla), Día 2 (conociéndola), Día 4 (sin conocerla), Día 4 (conociéndola), Día 16 (sin conocerla), Día 16 (conociéndola)…. _Idea: frases para esos momentos (hoja «Huecos»)._
+- [media] **la Sra. Barry**: no tiene qué decir: Día 2 (sin conocerla), Día 4 (sin conocerla), Día 16 (sin conocerla). _Idea: frases para esos momentos (hoja «Huecos»)._
+- [media] **Gertie Pye**: no tiene qué decir: Día 2 (sin conocerla), Día 4 (sin conocerla), Día 16 (sin conocerla), Día 20 (sin conocerla). _Idea: frases para esos momentos (hoja «Huecos»)._
 - [media] **Jane Andrews**: no tiene qué decir: Día 2 (sin conocerla), Día 4 (sin conocerla), Día 16 (sin conocerla), Día 20 (sin conocerla). _Idea: frases para esos momentos (hoja «Huecos»)._
 - [media] **Charlie Sloane**: no tiene qué decir: Día 2 (sin conocerla), Día 4 (sin conocerla), Día 16 (sin conocerla), Día 20 (sin conocerla), Día 33 (sin conocerla), Día 45 (sin conocerla)…. _Idea: frases para esos momentos (hoja «Huecos»)._
 - [media] **Cecily King**: no tiene qué decir: Día 2 (sin conocerla), Día 2 (conociéndola), Día 4 (sin conocerla), Día 4 (conociéndola), Día 16 (sin conocerla), Día 16 (conociéndola)…. _Idea: frases para esos momentos (hoja «Huecos»)._
@@ -103,7 +104,6 @@ No son errores: son situaciones que el juego deja que pasen y nadie considera, n
 
 - [baja] **Presentación propia (cómo se presenta la primera vez)**: 32 usan la de siempre: Diana, el Sr. Shearer, el buhonero, el Sr. Phillips, el reverendo Allan, la Sra. Allan, el Sr. Lawson, el herrero, el editor de La Crónica, la Srta. Hetty King, Olivia King, Jasper Dale, Alec King, Janet King…. _Idea: «presentacion» en personajes.json, o «presenta» en src/js/56-gente-de-avonlea.js, con su voz._
 - [baja] **el buhonero**: tiene 2 frase(s) suelta(s). _Idea: unas frases más en la hoja «Frases»._
-- [baja] **Gertie Pye**: tiene 2 frase(s) suelta(s). _Idea: unas frases más en la hoja «Frases»._
 - [baja] **Jane Andrews**: tiene 2 frase(s) suelta(s). _Idea: unas frases más en la hoja «Frases»._
 - [baja] **Prissy Andrews**: tiene 2 frase(s) suelta(s). _Idea: unas frases más en la hoja «Frases»._
 - [baja] **Charlie Sloane**: tiene 2 frase(s) suelta(s). _Idea: unas frases más en la hoja «Frases»._
@@ -113,7 +113,6 @@ No son errores: son situaciones que el juego deja que pasen y nadie considera, n
 - [baja] **Felix King**: tiene 2 frase(s) suelta(s). _Idea: unas frases más en la hoja «Frases»._
 - [baja] **Cecily King**: tiene 2 frase(s) suelta(s). _Idea: unas frases más en la hoja «Frases»._
 - [baja] **Sara Stanley**: tiene 2 frase(s) suelta(s). _Idea: unas frases más en la hoja «Frases»._
-- [baja] **el Sr. Phillips**: tiene 2 frase(s) suelta(s). _Idea: unas frases más en la hoja «Frases»._
 - [baja] **el reverendo Allan**: tiene 2 frase(s) suelta(s). _Idea: unas frases más en la hoja «Frases»._
 - [baja] **el Sr. Lawson**: tiene 2 frase(s) suelta(s). _Idea: unas frases más en la hoja «Frases»._
 - [baja] **el herrero**: tiene 2 frase(s) suelta(s). _Idea: unas frases más en la hoja «Frases»._

@@ -53,6 +53,8 @@ def I_(n): return V.setdefault(n, z3.Int(n))
 lugar = lambda k: I_('L_' + k)
 def hecho(x, t=None):   # (a fact, by time t: it happened, and on or before that day)
     h, d = B_('h_' + x), I_('d_' + x)
+    if t is not None and t is not dia and x in OLVIDABLES:   # (in the past: it happened then, even if it is forgotten now)
+        return z3.And(B_('e_' + x), d <= t)
     return h if t is None else z3.And(h, d <= t)
 
 # the arrivals (src/datos/llegadas.txt): who is in Avonlea, and since when
@@ -77,8 +79,18 @@ for archivo in ('src/datos/guion.txt', 'src/datos/conversaciones.txt'):
         si += ['presente:' + h for h in hablan if h in LLEG]   # (who speaks in it was here)
         deja = [v.split()[1] for k, v in f if k in ('al_terminar', 'al_empezar') and v.split()[0] == 'hecho' and len(v.split()) > 1]
         deja += [m.group(1) for l in p[3] for m in [re.match(r'^\s*!\s*hecho\s+(\w+)', l)] if m]
+        siempre = [v.split()[1] for k, v in f if k in ('al_terminar', 'al_empezar') and v.split()[0] == 'hecho' and len(v.split()) > 1]   # (what it leaves whatever she chooses)
         for x in deja:
-            QUIEN_DEJA[x].append((p[1], si)); DEJA[p[1]].add(x)
+            QUIEN_DEJA[x].append((p[1], si, [y for y in siempre if y != x])); DEJA[p[1]].add(x)
+EXCLUYE = set()
+for archivo in ('src/datos/guion.txt', 'src/datos/conversaciones.txt'):
+    for p_ in B.partir(leer(archivo)):
+        if p_[0] != 'bloque': continue
+        f_ = B.campos(p_[2], B.guion_clasificar)
+        olv = [v.split()[1] for k, v in f_ if k in ('al_terminar', 'al_empezar') and v.split()[0] == 'olvidar' and len(v.split()) > 1]
+        dej = [v.split()[1] for k, v in f_ if k in ('al_terminar', 'al_empezar') and v.split()[0] == 'hecho' and len(v.split()) > 1]
+        EXCLUYE |= {(x, y) for x in olv for y in dej}
+OLVIDABLES = set(re.findall(r'olvidar\s+(\w+)', leer('src/datos/guion.txt') + leer('src/datos/conversaciones.txt')))   # (facts that can be forgotten: one cannot say they stay)
 DEL_CODIGO = {h for h, w in G['hechos'].items() if any(x == 'código' or x.startswith('habilidad') or x == 'llegadas' for x in w)}
 
 
@@ -100,7 +112,7 @@ def atomo(c, k=None, t=None):
         x, n = a[0], int(a[1])
         if x in G['metas'] and x not in G['hechos']:
             return z3.And(B_('m_' + x), now - I_('dm_' + x) >= n)
-        return z3.And(B_('h_' + x), now - I_('d_' + x) >= n)
+        return z3.And(B_('e_' + x) if t is not None and x in OLVIDABLES else B_('h_' + x), now - I_('d_' + x) >= n)
     if key == 'cuaderno':
         return z3.And(B_('m_' + a[0]), I_('dm_' + a[0]) <= now)
     if key == 'dia_juego':
@@ -126,6 +138,10 @@ def atomo(c, k=None, t=None):
         return z3.Or([lugar(quien) == L[x] for x in ls]) if ls else z3.BoolVal(False)
     if key == 'ana':
         return B_('ana_' + a[0])
+    if key == 'escena_ana':
+        return lugar('ana') == L[a[0]] if a[0] in L else (z3.Or([lugar('ana') == L[x] for x in AFUERA]) if a[0] == 'out' else z3.BoolVal(False))
+    if key == 'ana_visible':
+        return z3.BoolVal(True)
     if key == 'sabe':
         b = B_('sabe_' + a[0] + '_' + a[1])
         if len(a) > 2 and a[2].isdigit():
@@ -192,6 +208,7 @@ def restricciones(quienes):
     hechos = {n[2:] for n in V if n.startswith('h_')} | {n[2:] for n in V if n.startswith('d_')}
     for x in sorted(hechos):
         R += [z3.Implies(B_('h_' + x), z3.And(I_('d_' + x) >= 1, I_('d_' + x) <= dia))]
+        if x in OLVIDABLES: R += [z3.Implies(B_('h_' + x), B_('e_' + x)), z3.Implies(B_('e_' + x), z3.And(I_('d_' + x) >= 1, I_('d_' + x) <= dia))]
         if x.startswith(('llego_', 'se_fue_')):
             k = x.split('_', 1)[1] if x.startswith('llego_') else x[len('se_fue_'):]
             e = LLEG.get(k)
@@ -203,7 +220,8 @@ def restricciones(quienes):
             continue
         if x in DEL_CODIGO or x not in QUIEN_DEJA:
             continue
-        R += [z3.Implies(B_('h_' + x), z3.Or([z3.And([atomo(c, t=I_('d_' + x)) for c in si if re.match(r'^(hecho|cuaderno|dias_desde|dia_juego|presente):', c)] or [z3.BoolVal(True)]) for _, si in QUIEN_DEJA[x]]))]
+        R += [z3.Implies(B_('h_' + x), z3.Or([z3.And([atomo(c, t=I_('d_' + x)) for c in si if re.match(r'^(hecho|cuaderno|dias_desde|dia_juego|presente):', c)]
+                                                          + [z3.And(B_('h_' + y), I_('d_' + y) == I_('d_' + x)) for y in junto if y not in OLVIDABLES] or [z3.BoolVal(True)]) for _, si, junto in QUIEN_DEJA[x]]))]   # (and the facts the same scene leaves, the same day)
     for n in list(V):
         if n.startswith('dm_'):
             R += [z3.Implies(B_('m_' + n[3:]), z3.And(V[n] >= 1, V[n] <= dia))]
@@ -223,19 +241,22 @@ def restricciones(quienes):
     R += [z3.Implies(z3.Or(B_('ana_en_cama'), B_('ana_sentada')), z3.BoolVal(True))]
     for r in REGLAS['nunca']:
         R += [z3.Not(todos(r['si']))]
+    # a scene that forgets X and leaves Y: after it, not both (the apology forgets the offense)
+    for x, y in EXCLUYE:
+        R += [z3.Not(z3.And(hecho(x), hecho(y)))]
     return R
 
 
 # ---------------------------------------------------------------- las reglas (src/datos/reglas.txt)
 def reglas_leer(txt):
-    out = {'espera': [], 'nunca': [], 'referencia': []}; r = None
+    out = {'espera': [], 'nunca': [], 'referencia': [], 'solo': []}; r = None
     for raw in txt.split('\n'):
         l = raw.strip()
         if not l or l.startswith('#'): continue
-        m = re.match(r'^===\s*(espera|nunca|referencia):\s*(.+?)\s*===$', l)
+        m = re.match(r'^===\s*(espera|nunca|referencia|solo):\s*(.+?)\s*===$', l)
         if m:
             r = {'nombre': m.group(2)}; out[m.group(1)].append(r); continue
-        m = re.match(r'^(quiénes|cuando|hay|si|palabras|exige|salvo):\s*(.*)$', l)
+        m = re.match(r'^(quiénes|cuando|hay|si|palabras|exige|salvo|pide):\s*(.*)$', l)
         if r is not None and m:
             k, v = m.groups()
             if k == 'exige': r.setdefault('exige', []).append([x.strip() for x in v.split(',') if x.strip()])   # (several lines: one or the other)
@@ -313,7 +334,7 @@ todos_quienes = set(gente)
 for k in list(UNIDADES):
     for u in UNIDADES[k]:
         for c in u['conds']: atomo(c, k)   # (all the variables, before the restrictions)
-for e in REGLAS['espera']:
+for e in REGLAS['espera'] + REGLAS['solo']:
     for k in grupo(e.get('quiénes', ['todos'])):
         for c in e.get('cuando', []): atomo(c, k)
 R = restricciones(todos_quienes)
@@ -353,6 +374,16 @@ for r in REGLAS['referencia']:
             S = z3.Solver(); S.add(R); S.add(todos(u['conds'], k)); S.add(z3.Not(z3.Or([todos(g, k) for g in r['exige']])))
             if S.check() == z3.sat:
                 hallazgos['incoherencias'].append({'regla': r['nombre'], 'quien': k, 'nombre': NOMBRE.get(k, k), 'tipo': u['tipo'], 'id': u['id'], 'texto': hit, 'exige': ' o '.join(', '.join(g) for g in r['exige']).replace('{k}', k), 'situación': situacion(S.model(), k)})
+
+# 2b. mientras pasa algo, solo lo que lo tiene en cuenta: ¿hay una situación en que vale otra cosa?
+for r in REGLAS['solo']:
+    for k in sorted(grupo(r.get('quiénes', ['todos']))):
+        for u in UNIDADES.get(k, []):
+            if u['tipo'] == 'presentación' or any(p in c for p in r.get('pide', []) for c in u['conds']): continue
+            S = z3.Solver(); S.add(R); S.add(todos(r.get('cuando', []), k)); S.add(todos(u['conds'], k))
+            if S.check() == z3.sat:
+                hallazgos['incoherencias'].append({'regla': r['nombre'], 'quien': k, 'nombre': NOMBRE.get(k, k), 'tipo': u['tipo'], 'id': u['id'], 'texto': u['texto'],
+                                                   'exige': 'que pida ' + ' o '.join(r.get('pide', [])), 'situación': situacion(S.model(), k)})
 
 # 3. lo que nunca puede decirse (sus condiciones se contradicen con el mundo)
 for k, us in UNIDADES.items():

@@ -45,13 +45,14 @@ invierno: Siéntate cerca de la estufa, niña, que vienes helada.
 dice: [hecho:conocidas_diana, !hecho:prohibida] ¡Ana, mi alma gemela! Te estaba esperando.
 dice: [hecho:conocidas_diana, !hecho:prohibida] Mamá dice que puedo salir hasta que se ponga el sol. ¿Vamos al lago?
 dice: [hecho:conocidas_diana, !hecho:prohibida, afecto:diana:ana>=4] ¿Te acuerdas de nuestro juramento de amistad? ¡Para siempre!
-dice: [hecho:conocidas_diana] Los manzanos están llenos este año. Toma las que quieras.
-dice: [hecho:conocidas_diana] El Bosque Encantado me da un poquito de miedo... pero contigo no.
+dice: [hecho:conocidas_diana, !hecho:prohibida] Los manzanos están llenos este año. Toma las que quieras.
+dice: [hecho:conocidas_diana, !hecho:prohibida] El Bosque Encantado me da un poquito de miedo... pero contigo no.
 dice: [!hecho:conocidas_diana] Hola. Tú eres la niña nueva de Tejas Verdes, ¿verdad?
-primavera: [hecho:conocidas_diana] ¡Mira los manzanos en flor, Ana! Parecen novias vestidas de blanco.
-verano: [hecho:conocidas_diana] ¡Qué calor! ¿Vamos a remojar los pies en el lago?
-otoño: [hecho:conocidas_diana] El Bosque Encantado está todo rojo y dorado... ¡como un cuento!
-invierno: [hecho:conocidas_diana] ¡Está nevando! Mamá no me deja salir sin bufanda. Ven, entra a calentarte junto al fuego.
+dice: [hecho:prohibida] (Diana baja la vista.) Mamá dice que no puedo hablar contigo, Ana... Lo siento tanto.
+primavera: [hecho:conocidas_diana, !hecho:prohibida] ¡Mira los manzanos en flor, Ana! Parecen novias vestidas de blanco.
+verano: [hecho:conocidas_diana, !hecho:prohibida] ¡Qué calor! ¿Vamos a remojar los pies en el lago?
+otoño: [hecho:conocidas_diana, !hecho:prohibida] El Bosque Encantado está todo rojo y dorado... ¡como un cuento!
+invierno: [hecho:conocidas_diana, !hecho:prohibida] ¡Está nevando! Mamá no me deja salir sin bufanda. Ven, entra a calentarte junto al fuego.
 
 === barry ===
 dice: [!conoce:barry, !hecho:barry_presenta, sabe:barry:nina_cuthbert] Tú debes ser la niña que trajeron los Cuthbert. Buenas tardes.
@@ -59,24 +60,25 @@ dice: [hecho:barry_presenta, !hecho:prohibida] Ana Shirley, siempre es un gusto 
 dice: [hecho:conocidas_diana, !hecho:prohibida] Diana habla de ti todo el día, ¿sabes?
 dice: [hecho:perdonada] Esta vez el cordial de frambuesa está bien etiquetado, te lo aseguro.
 dice: [hecho:prohibida, !hecho:perdonada] Buenas tardes. (La Sra. Barry no la invita a pasar.)
-dice: Saluda a Marilla de mi parte.
+dice: [!donde:ana:tejas, !hecho:prohibida] Saluda a Marilla de mi parte.
+dice: [conoce:barry, !hecho:barry_presenta] Buenos días, niña. ¿Y Marilla, cómo está? Hace tiempo que no la veo.
 primavera: [hecho:barry_presenta, !hecho:prohibida] Buenos días, Ana. Diana está deseando verte.
 verano: [hecho:barry_presenta, !hecho:prohibida] Qué calor, ¿verdad? Hay limonada en la despensa.
 otoño: [hecho:barry_presenta, !hecho:prohibida] Diana me ayudó con las manzanas. Llévale algunas a Marilla.
-invierno: [hecho:barry_presenta, !hecho:prohibida] Pasa, pasa, que hace un frío terrible. Diana está junto al fuego.
+invierno: [hecho:barry_presenta, !hecho:prohibida, escena_ana:os] Pasa, pasa, que hace un frío terrible. Diana está junto al fuego.
 
 === lynde ===
 dice: [!conoce:lynde, !hecho:lynde_visita, sabe:lynde:nina_cuthbert] ¿Así que tú eres la huérfana de Tejas Verdes? Ya iré a verte con calma, ya.
 dice: [hecho:ofendio_lynde, !hecho:disculpa_lynde] Hmpf. No tengo nada que hablar contigo, niña malcriada.
-dice: Desde mi ventana veo todo el camino: no se me escapa nadie. Lo digo sin mala intención, ¿eh?
-dice: Llevo cincuenta y dos cubrecamas de retazos, ¡cincuenta y dos! Y no pienso parar.
+dice: [!hecho:ofendio_lynde] Desde mi ventana veo todo el camino: no se me escapa nadie. Lo digo sin mala intención, ¿eh?
+dice: [!hecho:ofendio_lynde] Llevo cincuenta y dos cubrecamas de retazos, ¡cincuenta y dos! Y no pienso parar.
 dice: [hecho:se_queda, !hecho:ofendio_lynde, hecho:lynde_visita] Marilla hizo bien en quedarse contigo, y lo digo yo, que nunca me callo lo que pienso.
-dice: [hecho:lynde_visita] A una niña hay que enseñarle a ser útil. Pero, bueno, tú vas por buen camino.
+dice: [hecho:lynde_visita, !hecho:ofendio_lynde] A una niña hay que enseñarle a ser útil. Pero, bueno, tú vas por buen camino.
 dice: [hecho:lynde_visita, !hecho:ofendio_lynde] Ana Shirley, hablas más que un molino... pero tienes buen corazón, eso lo reconozco.
-primavera: [hecho:lynde_visita] ¡Vaya, vaya, ya brotó todo! Ya es hora de limpiar la casa, digo yo.
-verano: [hecho:lynde_visita] Con este calor no hay quien teja... ¡pero yo tejo, claro que tejo!
-otoño: [hecho:lynde_visita] El otoño siempre me hace pensar en los cubrecamas. Este año haré uno rojo y dorado.
-invierno: [hecho:lynde_visita] Pasa, niña, que hace un frío de mil demonios... perdón, de los que dan escalofríos.
+primavera: [hecho:lynde_visita, !hecho:ofendio_lynde] ¡Vaya, vaya, ya brotó todo! Ya es hora de limpiar la casa, digo yo.
+verano: [hecho:lynde_visita, !hecho:ofendio_lynde] Con este calor no hay quien teja... ¡pero yo tejo, claro que tejo!
+otoño: [hecho:lynde_visita, !hecho:ofendio_lynde] El otoño siempre me hace pensar en los cubrecamas. Este año haré uno rojo y dorado.
+invierno: [hecho:lynde_visita, !hecho:ofendio_lynde, escena_ana:rl] Pasa, niña, que hace un frío de mil demonios... perdón, de los que dan escalofríos.
 
 === harrison ===
 dice: Hmpf. Buenos días... si es que son buenos.
@@ -118,6 +120,7 @@ ana: Josie Pye, eres... ¡eres una Pye!
 ana: No pienso contestarte eso.
 
 === gertie ===
+dice: [conoce:gertie, !dias_desde:escuela:3] Josie dice que tú hablas como un libro. ¿Es verdad? Di algo difícil.
 dice: [dias_desde:escuela:3] Josie dice que tú inventas palabras difíciles para lucirte.
 dice: [dias_desde:escuela:3] ¿Me prestas tu lápiz? El mío se perdió... otra vez.
 
@@ -163,8 +166,9 @@ dice: ¿Te cuento una historia? Es de un barco fantasma que se ve desde el faro 
 dice: [conoce:sara] La tía Hetty dice que hablo demasiado. Tú también, ¿no? ¡Qué bien!
 
 === phillips ===
-dice: [dias_desde:escuela:3] Señorita Shirley, ¿no debería estar repasando su ortografía?
-dice: Mañana hay examen de geometría. Que nadie lo olvide.
+dice: [estacion:verano] ¡Vacaciones, por fin! Hasta los maestros las necesitamos, señorita.
+dice: [dias_desde:escuela:3, !estacion:verano] Señorita Shirley, ¿no debería estar repasando su ortografía?
+dice: [!estacion:verano] Mañana hay examen de geometría. Que nadie lo olvide.
 
 === allan ===
 dice: Que Dios te bendiga, Ana. ¿Te veremos el domingo en la escuela dominical?
@@ -278,7 +282,7 @@ dice: Hmm. Flacucha. En mi casa no hay tiempo para mirar las nubes, ¿sabes?
 ana: [hecho:a_prueba] (Ana se esconde detrás de un árbol. ¡Menos mal que Marilla no la dejó irse con ella!)
 
 === carrie ===
-dice: [dias_desde:escuela:3] ¿Viste la composición de Ana? ¡La señorita Stacy la leyó en voz alta!
+dice: [dias_desde:escuela:3, hecho:llego_stacy] ¿Viste la composición de Ana? ¡La señorita Stacy la leyó en voz alta!
 dice: [sabe:carrie:nina_cuthbert] Mi mamá dice que en Tejas Verdes hay una niña nueva. ¿Eres tú?
 
 === jefe ===
@@ -298,7 +302,7 @@ dice: Hoy vienen buenas las caballas. Si Marilla quiere pescado, que mande a Mat
 === vecino ===
 dice: [dias_desde:llegada_tv:14] ¡Buenos días, Ana! ¿Cómo están Matthew y Marilla?
 dice: Lindo día, ¿verdad? Dicen que mañana llueve.
-dice: [dias_desde:llegada_tv:56] ¡Qué grande estás, niña! Saludos a Marilla.
+dice: [dias_desde:llegada_tv:56, !donde:ana:tejas] ¡Qué grande estás, niña! Saludos a Marilla.
 dice: [!dias_desde:llegada_tv:14] Buenas. Tú no eres de por aquí, ¿no?
 dice: ¿Vas para la aldea? Yo vengo de la tienda de Lawson.
 dice: Buenas, buenas. No te entretengas, que se hace tarde.

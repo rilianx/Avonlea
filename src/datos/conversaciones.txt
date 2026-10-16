@@ -449,7 +449,7 @@ diana: ¡Cinco destellos! Esta noche lo probamos.
 === conv_lynde_ventana ===
 con: lynde
 tema: Preguntarle qué ve desde su ventana
-si: afecto:lynde:ana>=2
+si: afecto:lynde:ana>=2, !hecho:ofendio_lynde
 ---
 ana: Sra. Lynde, ¿qué ve desde su ventana, todo el día?
 lynde: Todo, niña. Quién pasa, a dónde va y, si me descuido, a qué. Nada se me escapa en Avonlea.
@@ -459,7 +459,7 @@ lynde: (La Sra. Lynde se queda sin respuesta, cosa que no le pasa nunca.) Bueno�
 === conv_lynde_pelo ===
 con: lynde
 tema: Hablarle de su pelo
-si: afecto:lynde:ana>=3
+si: afecto:lynde:ana>=3, !hecho:ofendio_lynde
 al_terminar: suma afecto:lynde:ana 1
 ---
 lynde: Ana, mírate. El pelo se te está oscureciendo. Casi castaño rojizo, diría yo.
@@ -471,7 +471,7 @@ lynde: (La Sra. Lynde parpadea.) Bueno. Gracias, supongo.
 === conv_lynde_queens ===
 con: lynde
 tema: Contarle que quiere ir a Queen's
-si: afecto:lynde:ana>=3, estudio:ana>=50
+si: afecto:lynde:ana>=3, estudio:ana>=50, !hecho:ofendio_lynde
 ---
 lynde: Así que te vas a Queen's. Yo nunca creí que las mujeres necesitaran tanto estudio…
 ana: Pero, Sra. Lynde, ¿no sería bonito que hubiera maestras muy buenas en toda la isla?

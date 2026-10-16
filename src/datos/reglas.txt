@@ -13,6 +13,9 @@
 # «=== nunca: nombre ===»  una situación imposible (lo que los datos no dicen)
 #   si: <condiciones del guion>
 #
+# «=== solo: nombre ===»  mientras pasa algo, esa persona solo dice lo que lo tiene en cuenta
+#   quiénes: …   cuando: <condiciones>   pide: <lo que tiene que nombrar su condición> (ofendio_lynde; o reaccionar a cómo anda Ana: ana:camison)
+#
 # «=== referencia: nombre ===»  una frase que dice esto exige que se cumpla aquello
 #   palabras: <expresiones, separadas por |>  (tal como se escriben, con mayúsculas)
 #   exige: <condiciones del guion>          ({k}: quien la dice; donde:{k}:propia: en su propia casa); varias líneas: una u otra
@@ -42,6 +45,29 @@ hay: reacción hora
 # ---------------------------------------------------------------- lo que no puede pasar
 === nunca: la escuela, la iglesia, la tienda y el salón, de noche ===
 si: hora:21-26, donde:ana:publico
+
+# (el orden del libro, cuando los hechos los deja el código y no una escena)
+=== nunca: Ana y Diana se conocen sin que la Sra. Barry las presente ===
+si: hecho:conocidas_diana, !hecho:barry_presenta
+
+=== nunca: la prohibición (lo del vino de grosellas), sin conocer a Diana ===
+si: hecho:prohibida, !hecho:conocidas_diana
+
+# ---------------------------------------------------------------- mientras pasa algo
+=== solo: la Sra. Lynde ofendida no le habla como si nada ===
+quiénes: lynde
+cuando: hecho:ofendio_lynde, !hecho:disculpa_lynde
+pide: ofendio_lynde, disculpa_lynde, ana:camison
+
+=== solo: la Sra. Barry, mientras le prohíbe ver a Diana, no la trata como antes ===
+quiénes: barry
+cuando: hecho:prohibida, !hecho:perdonada
+pide: prohibida, perdonada, ana:camison
+
+=== solo: Diana, mientras se lo prohíben, no la invita ni juega como si nada ===
+quiénes: diana
+cuando: hecho:prohibida, !hecho:perdonada
+pide: prohibida, perdonada
 
 # ---------------------------------------------------------------- lo que una frase supone
 === referencia: «pasa» invita a entrar ===
@@ -82,3 +108,16 @@ salvo: gilbert
 === referencia: «saludos a Marilla», fuera de Tejas Verdes ===
 palabras: Saludos a Marilla | Saluda a Marilla
 exige: !donde:ana:tejas
+
+=== referencia: el cariño, cuando ya se quieren ===
+palabras: querida | Querida | cariño | mi niña
+exige: afecto:{k}:ana>=3
+salvo: marilla, matthew, sraallan
+
+=== referencia: la escuela, con clases (no en verano) ===
+palabras: examen de geometría | en clase | Mañana toca recitar | repasando su ortografía
+exige: !estacion:verano
+
+=== referencia: Queen's, después del examen ===
+palabras: Felicitaciones por el examen | Me ganaste por un punto | entraste a Queen | quedaste primera
+exige: hecho:queens
