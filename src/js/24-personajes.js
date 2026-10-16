@@ -83,12 +83,12 @@ function llegadasLeer(txt){
   const L = {}; let e = null; const conds = v => v.split(',').map(x => x.trim()).filter(Boolean);
   for (const raw of txt.split('\n')) {
     const l = raw.trim(); if (!l || l[0] === '#') continue; let m;
-    if ((m = l.match(/^===\s*(.+?)\s*===$/))) { L[m[1]] = e = { llega: [], seVa: [], fuera: '', visita: false, alLlegar: '', alIrse: '' }; continue; }
+    if ((m = l.match(/^===\s*(.+?)\s*===$/))) { L[m[1]] = e = { llega: [], seVa: [], visita: false, alLlegar: '', alIrse: '' }; continue; }
     if (!e) continue;
     if ((m = l.match(/^llega si:\s*(.*)$/))) e.llega.push(conds(m[1]));
     else if ((m = l.match(/^se va si:\s*(.*)$/))) e.seVa.push(conds(m[1]));
     else if ((m = l.match(/^de visita:\s*(.*)$/))) e.visita = /^s/.test(m[1]);
-    else if ((m = l.match(/^(fuera|al llegar|al irse):\s*(.*)$/))) e[{ fuera: 'fuera', 'al llegar': 'alLlegar', 'al irse': 'alIrse' }[m[1]]] = m[2];
+    else if ((m = l.match(/^(al llegar|al irse):\s*(.*)$/))) e[m[1] === 'al llegar' ? 'alLlegar' : 'alIrse'] = m[2];
   }
   return L;
 }

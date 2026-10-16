@@ -3052,7 +3052,6 @@ harrison: Si no te asustas con facilidad… Y no le hables de la vaca. Ni a mí 
 #   se va si: <condiciones>   cuándo se va (varias líneas: basta con una)
 #   de visita: sí             no se queda: está solo mientras se cumple «llega si» (cada visita deja su llego_ y se_fue_)
 #   al llegar: / al irse:     lo que queda en el diario de ese día
-#   fuera: dónde anda mientras tanto (para el que lea esto)
 # Las partidas que empezaron antes de que Ana llegara a Tejas Verdes (sin el hecho inicio_juego) tienen a todos.
 #
 # El año del juego tiene 56 días (14 por estación) y empieza en primavera. Con estas anclas, en una partida que sigue el
@@ -3064,7 +3063,7 @@ harrison: Si no te asustas con facilidad… Y no le hables de la vaca. Ni a mí 
 === diana ===
 llega si: dias_desde:llegada_tv:17
 al llegar: Diana Barry volvió de Carmody, donde su tía.
-fuera: en Carmody, donde su tía
+# (fuera: en Carmody, donde su tía)
 
 # --- Gilbert Blythe (cap. 15): pasó el verano con sus primos en Nuevo Brunswick, y vuelve a la escuela cuando Ana
 # ya lleva unos días yendo (o, si no va, a más tardar en el invierno).
@@ -3072,7 +3071,7 @@ fuera: en Carmody, donde su tía
 llega si: dias_desde:escuela:4
 llega si: estacion:invierno
 al llegar: Gilbert Blythe volvió de Nuevo Brunswick.
-fuera: con sus primos en Nuevo Brunswick
+# (fuera: con sus primos en Nuevo Brunswick)
 
 # --- La tía Josephine (cap. 19): vive en Charlottetown, y viene a La Cuesta del Huerto en invierno.
 === josephine ===
@@ -3080,49 +3079,49 @@ de visita: sí
 llega si: estacion:invierno
 al llegar: La tía Josephine llegó de Charlottetown a La Cuesta del Huerto.
 al irse: La tía Josephine se volvió a Charlottetown.
-fuera: en su casa de Charlottetown
+# (fuera: en su casa de Charlottetown)
 
 # --- El pastor nuevo y su esposa (cap. 21): el Sr. Bentley se fue, y los Allan llegan en la primavera, después del
 # invierno de la tía Josephine.
 === allan ===
 llega si: estacion:primavera, dias_desde:se_fue_josephine:7
 al llegar: Llegó el pastor nuevo, el Sr. Allan, con su esposa.
-fuera: todavía no llega a Avonlea
+# (fuera: todavía no llega a Avonlea)
 
 === sraallan ===
 llega si: estacion:primavera, dias_desde:se_fue_josephine:7
-fuera: todavía no llega a Avonlea
+# (fuera: todavía no llega a Avonlea)
 
 # --- El Sr. Phillips (cap. 21): el maestro del primer año de Ana. Se va al terminar ese año escolar (el verano
 # después del invierno de la tía Josephine), y Prissy Andrews, a la que preparaba, se va a Queen's.
 === phillips ===
 se va si: estacion:verano, hecho:llego_josephine
 al irse: El Sr. Phillips se despidió de la escuela: todas las niñas lloraron.
-fuera: se fue de Avonlea al terminar el año escolar
+# (fuera: se fue de Avonlea al terminar el año escolar)
 
 === prissy ===
 se va si: hecho:se_fue_phillips
 al irse: Prissy Andrews se fue a Queen's.
-fuera: en Queen's, en Charlottetown
+# (fuera: en Queen's, en Charlottetown)
 
 # --- La Srta. Stacy (cap. 24): la maestra nueva, el otoño después de que se fue el Sr. Phillips.
 === stacy ===
 llega si: estacion:otoño, hecho:se_fue_phillips
 al llegar: Llegó la maestra nueva, la Srta. Stacy.
-fuera: todavía no llega a Avonlea
+# (fuera: todavía no llega a Avonlea)
 
 # --- El buhonero (cap. 27): pasa por Avonlea de vez en cuando, con su baúl.
 === buhonero ===
 de visita: sí
 llega si: dia_estacion:4
 llega si: dia_estacion:11
-fuera: recorriendo otros pueblos
+# (fuera: recorriendo otros pueblos)
 
 # --- Los veraneantes del hotel de White Sands, en verano.
 === veraneante ===
 de visita: sí
 llega si: estacion:verano
-fuera: en Boston
+# (fuera: en Boston)
 
 # --- El Sr. Harrison y el Sr. Shearer son de «Ana de Avonlea»; en el juego están desde el principio, porque la
 # historia de la vaca es de todos los días.
@@ -3130,50 +3129,38 @@ fuera: en Boston
 </script>
 <script type="text/plain" id="noticias">
 # Las noticias de Avonlea: lo que alguien cree, quién se lo contó, y cómo crece al contarse (lo lee el juego al empezar;
-# el motor: src/js/66-noticias.js). Una noticia es una creencia con dueño: no «pasó x», sino «la Sra. Barry cree que
-# pasó x, porque se lo contó la Sra. Lynde, y así como se lo contó». Cada uno recuerda quién se lo dijo y qué versión
-# oyó; los chismosos de Avonlea («exageran») la cuentan un poco más grande de lo que la oyeron (las versiones
-# «exagerada:», una tras otra), y quien la oye más grande, se la cree.
-# El guion la pide como condición: «sabe:barry:nina_cuthbert»; «sabe:marilla:ana_en_camison:2» (oyó por lo menos la
-# segunda versión); «sabe:marilla:ana_en_camison:lynde» (se lo contó la Sra. Lynde); y la da con una acción
-# («! contar barry ana_en_camison»). En una línea, «{de:marilla:ana_en_camison}» es quien se lo contó («la Sra. Lynde»;
-# «{De:…}», con mayúscula, al empezar una oración).
-# Cuando dos vecinos conversan (cerca de Ana, en voz alta; o lejos, en la tienda o a la salida de la iglesia), quien la
-# sabe se la cuenta al otro.
+# el motor: src/js/66-noticias.js). Cada uno recuerda quién le contó una noticia y qué versión oyó. Los chismosos
+# («exageran») la cuentan una versión más grande, y quien la oye más grande, se la cree.
+# En el guion: «si: sabe:barry:nina_cuthbert», «si: sabe:marilla:ana_en_camison:2» (oyó por lo menos la versión 2),
+# «! contar barry ana_en_camison» (se entera), y en una línea «{De:marilla:ana_en_camison}» (quién se lo contó:
+# «La Sra. Lynde»; con minúscula, «{de:…}»).
 #
-# Arriba, para todas:
-#   exageran: quiénes cuentan las cosas más grandes de lo que son
-#   respuestas: / respuestas ya sabidas: / respuestas exageradas: / respuestas distintas: lo que se contesta a una
-#         noticia nueva, a una que ya se sabía, a una exagerada, y a una que se había oído de otra manera (más chica)
+# Arriba, para todas: exageran (quiénes), y las respuestas a una noticia nueva, a una ya sabida y a una exagerada.
 #
 # «=== id ===» y sus campos, uno por línea:
-#   titulo: qué es, en pocas palabras (para el diario y la IA)
-#   saben: quiénes la saben desde el principio (separados por comas)
-#   saben si <condiciones>: quiénes la saben desde que se cumplen las condiciones (del guion, con comas; la lista
-#         va después de «: »). Sirve para lo que pasa en la historia: «saben si hecho:llego_stacy: lynde»
-#   cuentan: quiénes la cuentan al conversar: «todos» (si no se dice), «nadie» (un secreto), o una lista
-#   se cuenta si: <condiciones> — mientras se cumplen (una noticia vieja ya no se cuenta)
-#   se cuenta por: N — los días que alguien la cuenta después de oírla (después, ya es cosa sabida)
-#   al conocer a ana: sí — quien conoce a Ana se entera (se la cuenta ella misma)
-#   llega a <quien> en <horas>: cuando alguien que la cuenta se entera, la noticia le llega a esa persona después de
-#         unas horas, aunque no se encuentren (la vecina que dice «ya hablaré con Marilla»), como la contaría
-#   dice: cómo se cuenta (una o varias líneas; «dice lynde:», cómo la cuenta esa persona)
-#   exagerada: cómo se cuenta un poco más grande (cada línea, una versión más: la 2, la 3…)
-#   responde: lo que dice quien se entera (una o varias; si no, las respuestas de arriba); responde exagerada: a una exagerada
+#   titulo: qué es, en pocas palabras
+#   saben: quiénes la saben desde el principio (con comas)
+#   saben si <condiciones>: quiénes — los que la saben desde que se cumplen («saben si hecho:llego_stacy: lynde»)
+#   al conocer a ana: sí — quien conoce a Ana se entera
+#   llega a <quien> en: <horas> — cuando alguien se entera, le llega a esa persona unas horas después, aunque no se
+#         encuentren (la vecina que dice «ya hablaré con Marilla»)
+#   se cuenta por: N — los días que alguien la cuenta después de oírla (después, ya es cosa vieja)
+#   dice: cómo se cuenta (varias: una al azar; «dice lynde:», como la cuenta ella)
+#   exagerada: una versión más grande (cada línea, una más: la 2, la 3…)
+#   responde: lo que contesta quien se entera (si no, las respuestas de arriba)
 # Las líneas que empiezan con # son comentarios.
 
 exageran: lynde, srapye, josie
 respuestas: ¡No me diga! | ¿De veras? ¡Qué cosa! | Bueno, yo de eso no sé nada... | Ya me lo imaginaba.
 respuestas ya sabidas: Sí, ya me lo contaron. | ¡Si lo sabe todo Avonlea! | Eso ya lo sabía, Rachel.
-respuestas exageradas: ¡Válgame Dios! ¿Será cierto? | Eso me suena a cuento de Rachel Lynde... pero ¡qué cosa! | ¡No puede ser! ¿Y quién lo vio?
-respuestas distintas: ¿Ah, sí? A mí me lo contaron más chico. | ¡No me diga! Yo había oído otra cosa. | Bueno, si usted lo dice...
+respuestas exageradas: ¡Válgame Dios! ¿Será cierto? | Eso me suena a cuento de Rachel Lynde... pero ¡qué cosa! | ¡No puede ser! A mí me lo contaron más chico.
 
 # --- El huérfano de los Cuthbert (cap. 1): la Sra. Rachel ve a Matthew salir de traje a Bright River, va a
 # preguntarle a Marilla y se entera (la escena rachel_marilla)
 === huerfano ===
 titulo: los Cuthbert van a traer un niño del orfanato
 saben: marilla, matthew, spencer
-se cuenta si: !hecho:llegada_tv
+se cuenta por: 1
 dice: ¿Supo? ¡Los Cuthbert van a traer un niño del orfanato! A su edad... ya les dije que es un riesgo.
 dice lynde: ¿Supo? ¡Los Cuthbert van a traer un huérfano de Nueva Escocia! Yo se lo dije a Marilla: es un riesgo.
 responde: ¿Un huérfano? ¿Marilla Cuthbert? ¡Quién lo diría!
@@ -3199,7 +3186,6 @@ dice: ¿Supo que la niña de los Cuthbert anda en camisón por las casas? ¡En c
 exagerada: ¿Supo? ¡La niña de los Cuthbert anda en camisón por todo Avonlea, y descalza! Con este frío.
 exagerada: Dicen que la niña de los Cuthbert sale de noche en camisón, descalza, a bailar en el cementerio. ¡Yo no digo nada!
 responde: ¡Qué vergüenza! Marilla debe estar furiosa.
-responde exagerada: ¡Válgame Dios! Pobre Marilla... ¿Quién la mandó traer huérfanos?
 
 # --- Lo que la Sra. Rachel cuenta siempre (cap. 1 y 9): las noticias de Avonlea
 === cerdo_pye ===
@@ -3251,7 +3237,7 @@ dice lynde: El pastor nuevo predica bien, no digo que no. Pero la esposa es una 
 === tia_josephine ===
 titulo: la tía Josephine de los Barry vino de Charlottetown
 saben si presente:josephine: barry, diana, lynde
-se cuenta si: presente:josephine
+se cuenta por: 7
 dice: La tía Josephine de los Barry está de visita. Rica, y con un genio... que Dios nos libre.
 
 === se_va_phillips ===
@@ -7061,12 +7047,12 @@ function llegadasLeer(txt){
   const L = {}; let e = null; const conds = v => v.split(',').map(x => x.trim()).filter(Boolean);
   for (const raw of txt.split('\n')) {
     const l = raw.trim(); if (!l || l[0] === '#') continue; let m;
-    if ((m = l.match(/^===\s*(.+?)\s*===$/))) { L[m[1]] = e = { llega: [], seVa: [], fuera: '', visita: false, alLlegar: '', alIrse: '' }; continue; }
+    if ((m = l.match(/^===\s*(.+?)\s*===$/))) { L[m[1]] = e = { llega: [], seVa: [], visita: false, alLlegar: '', alIrse: '' }; continue; }
     if (!e) continue;
     if ((m = l.match(/^llega si:\s*(.*)$/))) e.llega.push(conds(m[1]));
     else if ((m = l.match(/^se va si:\s*(.*)$/))) e.seVa.push(conds(m[1]));
     else if ((m = l.match(/^de visita:\s*(.*)$/))) e.visita = /^s/.test(m[1]);
-    else if ((m = l.match(/^(fuera|al llegar|al irse):\s*(.*)$/))) e[{ fuera: 'fuera', 'al llegar': 'alLlegar', 'al irse': 'alIrse' }[m[1]]] = m[2];
+    else if ((m = l.match(/^(al llegar|al irse):\s*(.*)$/))) e[m[1] === 'al llegar' ? 'alLlegar' : 'alIrse'] = m[2];
   }
   return L;
 }
@@ -12919,36 +12905,29 @@ function loop(now){
 }
 window.__avonlea = { ...(/[?&]dev\b/.test(location.search) ? { ev: s => eval(s) } : {}), vista: () => view, opcionesDe, dlgCumple, comentar, comentarioElegir, COMENTARIOS, lugaresTick, escenaObjeto, targets, cartaPuede, conNombres, nombrar, nombreDe, nombrarElegir, NOMBRABLES, primeraVez, ventana, velaPuede, sombrero, LOOKS, dlgDichas, chats: () => CHATS, enConversacion, anaPos: () => ({ x: ana.x, y: ana.y }), setDia: (d, h) => { dayT = d + (h - 6) / 24; }, dia: () => today(), PEOPLE, relatoEmpezar, inicioLlegada, dlgHechos, convDisponibles, conversar, convOpciones, guiñosDe, LINES, dlgHecho, cualidad, cualidadSuma, cualidadCond, dlgCond, dlgEspecificidad, ritmoLleno, ritmoMarca, dlgHacer, dlgAccion, HABILIDADES, relSetW, relato: () => RELATO.lineas, reglas: () => RELATO_REGLAS.map(r => [r.id, r.texto]), jugables, jugar, anaMenu, correoRetirar, cartaLeer, CORREO, cartaTexto, playAct: () => game.playAct, DIALOGOS, dlgCtx, talks: () => TALKS, dlgGuion, dlgPanel, bubblesNow: () => bubbles, toby, cartSheet: (c, x, y, c8, t) => { const L = [], p = { look: 'matthew', x, y, c8, walk: 0, moving: false }; const [cx, cy] = [x, y]; pushCart(L, c, { x: cx, y: cy, c8, walk: 0, moving: true }, t); for (const [k, look] of [[0, 'matthew'], [1, 'ana']]) { const [sx, sy] = cartSeat(cx, cy, c8, k); L.push({ y: sy, draw: () => drawPerson(c, { ...mkPerson(look, sx, sy), sit: true, dir: c8Dir(c8) }, t) }); } L.sort((a, b) => a.y - b.y).forEach(o => o.draw()); }, startCap1, CAP1, LIBRO1, ROAD_TRAMOS, ROAD_MIN, roadTramo, islaToggle, DLG_BANK, startDay, setSeason, agendaData: () => AGENDA.map(e => ({ who: wmName(e.who), from: e.from, to: e.to, label: e.label, season: e.season, sunday: !!e.sunday, ana: !!(e.ana || e.who === 'ana'), cond: e.when ? String(e.when).replace(/^\(\) => /, '') : '' })), setAgenda: v => { AGENDA_ON = v; }, AGENDA, wmData: () => ({ THINGS, WHO, OFRECE, WP_NAME, TRADE, TREATS, LIBRETA, ITEM_NAME, MAX_GOALS, PACE, FOCO }), paintMapBase, doingText, wmName, wmBody, wmScene, WW, WH, setVec: v => { VEC_ON = v; }, setStyle: v => { ANA_STYLE = v; }, setHead: setHeadM, focoOf, chats: () => CHATS, setDistract: v => { WM_DISTRACT = v; }, observe, obs: () => OBS, viewScene, AGENTS, WM_TESTS, wmRunTest, wmPlan, wmNow, G, agentStart, wmInv, relGetW, WP, enc, encAsk, encMsg, folkTalk, FOLK, FAUNA, BUGGIES, NET, netRoute, goDest, dest: () => dest, FARO, MAP, cart, cartStart, cartOn, cartOff, CART_LEN, FIELDS, WOODS, BUILDINGS, MILK, decorAt, BRS, U, ailog: () => AILOG, sysFor, aiGate, tok: () => TOK, aiq: { list: () => aiq.list.map(r => ({ id: r.id, kind: r.kind, prompt: r.prompt, schema: r.schema })), answer: aiqAnswer, fail: aiqFail, system: () => AI_SYSTEM }, SEATS, mealSit, autoChoose, storyAuto, menuOpen, STORIES, PLACES, PEOPLE, ANIM, ANIMALS, leadCow, releaseCow, sellCow, AREAS, setAnaState, relGet, relSet, relText, validStory, validBeats, fallbackStory, makeStory, storyNow, storyOpen, storyTick, storyBranch, offerSale, reflectDay, relPanel, drawPerson, LOOKS, setS: v => { S = v; }, touch: () => { lastInput = TT; }, toby, paces: () => [WALK, RUN, STROLL], idle: () => { lastInput = -100; }, auto, autoOptions, startIntent, anaSpeak, ROOMS, goSleep, anaSays, view, targets, findPath, HOUSES, CHARACTERS, reg: () => ({ NAMES, ABIL, LINES, SEASON_LINES, PLACES, LOOKS, AI_SYSTEM, fond: game.fond, people: Object.keys(PEOPLE), props: props.filter(p => p.kind === 'house' || p.kind === 'sign').map(p => [p.kind, Math.round(p.x), Math.round(p.y), p.text || p.roof || '', p.small || false]), paths: paths.map(p => p.map(q => q.map(Math.round))) }), lynde, LY, RLC, RLQ, TABLE, amb, bubbles: () => bubbles, sceneAsk, game, ana, matthew, diana, marilla, barry, toby, BEDS, PUMP, GG, OS, BENCH, STOVE, FIRE, SOFA, TEA, KDOOR, KIT, act: () => { actNow = true; }, setDay: v => { dayT = v; }, season: () => S, toggleMap, goIn, goOut, AI, stateText, aiTalk, logEv, PLACES, makePlan, planQ, hourNow, taskOptions, activeTasks, near: () => near() && near().label, step: s => { for (let k = 0; k < s * 60; k++) update(1 / 60); } };
 /* ---------- the news of Avonlea: what someone believes, who told them, and how it grows (src/datos/noticias.txt) ----------
-   A piece of news is a belief with an owner: not «x happened» but «Mrs. Barry believes x happened, because Mrs. Lynde
-   told her, and the way she heard it». Besides knowing it (game.wm.know, the same the planner uses), each one keeps
-   where it came from and which version reached them (game.wm.creencias[who][news] = { de, dia, v }), as in the
-   simulated towns of James Ryan's «Talk of the Town»: a piece of news passes from mouth to mouth, and the gossips of
-   Avonlea (those the data says «exageran») tell it a little bigger than they heard it (the «exagerada:» versions).
-   The script asks for it («sabe:barry:x»; with the version: «sabe:marilla:x:2»; with who told: «sabe:marilla:x:lynde»),
-   names who told («{de:marilla:x}» in a line) and gives it («! contar barry x»). Here, how it goes about, as the data
-   says: who knows it from the start (or from when a condition holds), who tells it and while when, how it is told and
-   answered; whoever meets Ana learns what she tells of herself; and some reach someone a few hours later, though they
-   do not meet («ya hablaré con Marilla»). When two neighbours talk, one tells the other, aloud (chatLines, in
-   src/js/60-foco-y-ejecucion.js). */
+   A piece of news is a belief with an owner: «Mrs. Barry believes x, because Mrs. Lynde told her, the way she told it».
+   Each one keeps who told them and which version they heard (game.wm.creencias[who][news] = { de, dia, v }; knowing it
+   is game.wm.know, the same the planner uses), as in James Ryan's «Talk of the Town»: the gossips («exageran») tell it
+   one version bigger than they heard it, and whoever hears it bigger believes the bigger one. The script asks for it
+   («sabe:barry:x», «sabe:marilla:x:2»: at least the second version), names who told («{De:marilla:x}») and gives it
+   («! contar barry x»). Neighbours tell each other when they talk: near Ana, aloud; away from her, too. */
 function noticiasLeer(txt){
-  const N = [], R = { nuevas: [], sabidas: [], exageradas: [], distintas: [] }, X = []; let n = null;
+  const N = [], R = { nuevas: [], sabidas: [], exageradas: [] }, X = []; let n = null;
   const lista = v => v.split(',').map(x => x.trim()).filter(Boolean), varias = v => v.split('|').map(x => x.trim()).filter(Boolean);
   for (const raw of txt.split('\n')) {
     const l = raw.trim(); if (!l || l[0] === '#') continue; let m;
-    if (!n && (m = l.match(/^respuestas( ya sabidas| exageradas| distintas)?:\s*(.*)$/))) { R[{ '': 'nuevas', ' ya sabidas': 'sabidas', ' exageradas': 'exageradas', ' distintas': 'distintas' }[m[1] || '']] = varias(m[2]); continue; }
+    if (!n && (m = l.match(/^respuestas( ya sabidas| exageradas)?:\s*(.*)$/))) { R[{ '': 'nuevas', ' ya sabidas': 'sabidas', ' exageradas': 'exageradas' }[m[1] || '']] = varias(m[2]); continue; }
     if (!n && (m = l.match(/^exageran:\s*(.*)$/))) { X.push(...lista(m[1])); continue; }
-    if ((m = l.match(/^===\s*(.+?)\s*===$/))) { N.push(n = { id: m[1], titulo: m[1], saben: [], cuentan: null, cuentaSi: [], cuentaPor: 0, dice: [], diceDe: {}, exagerada: [], responde: [], respondeEx: [], llega: [] }); continue; }
+    if ((m = l.match(/^===\s*(.+?)\s*===$/))) { N.push(n = { id: m[1], titulo: m[1], saben: [], cuentaPor: 0, dice: [], diceDe: {}, exagerada: [], responde: [], llega: [] }); continue; }
     if (!n) continue;
     if ((m = l.match(/^saben(?: si (.+?))?:\s+(.*)$/)))   // (the conditions have ':' in them: the list comes after «: »)
       n.saben.push({ si: m[1] ? lista(m[1]) : [], quien: lista(m[2]) });
     else if ((m = l.match(/^llega a (\S+) en:\s*([\d.]+)$/))) n.llega.push({ quien: m[1], horas: +m[2] });
-    else if ((m = l.match(/^se cuenta si:\s*(.*)$/))) n.cuentaSi.push(...lista(m[1]));
     else if ((m = l.match(/^se cuenta por:\s*(\d+)/))) n.cuentaPor = +m[1];
     else if ((m = l.match(/^dice (\S+):\s*(.*)$/))) (n.diceDe[m[1]] ||= []).push(m[2]);
-    else if ((m = l.match(/^responde exagerada:\s*(.*)$/))) n.respondeEx.push(m[1]);
-    else if ((m = l.match(/^(titulo|cuentan|al conocer a ana|dice|exagerada|responde):\s*(.*)$/))) {
+    else if ((m = l.match(/^(titulo|al conocer a ana|dice|exagerada|responde):\s*(.*)$/))) {
       const [, k, v] = m;
-      if (k === 'dice' || k === 'responde' || k === 'exagerada') n[k].push(v); else if (k === 'cuentan') n.cuentan = v === 'todos' ? null : v === 'nadie' ? [] : lista(v); else if (k === 'al conocer a ana') n.alConocer = /^s/.test(v); else n.titulo = v;
+      if (k === 'dice' || k === 'responde' || k === 'exagerada') n[k].push(v); else if (k === 'al conocer a ana') n.alConocer = /^s/.test(v); else n.titulo = v;
     }
   }
   return { N, R, X };
@@ -12959,9 +12938,8 @@ const NOTICIA = Object.fromEntries(NOTICIAS.map(n => [n.id, n]));
 const sabeK = (k, f) => (NOTICIA[f]?.alConocer && conoceTodos()) || (game.wm?.know?.[sinF(k)] || []).includes(f);
 // what someone believes of it: who told them (null: they saw it, or knew it), since when, and which version (1: as it was)
 const creencia = (k, f) => sabeK(k, f) ? { de: null, dia: 0, v: 1, ...game.wm?.creencias?.[sinF(k)]?.[f] } : null;
-const cuenta = (k, n) => !n.cuentan || n.cuentan.includes(sinF(k));
-// it is still told: while its condition holds, and for so many days after one has heard it (news gets old)
-const seCuenta = (k, n) => n.cuentaSi.every(c => dlgCond(c, dlgCtx())) && (!n.cuentaPor || today() + 1 - (creencia(k, n.id)?.dia || 0) < n.cuentaPor);
+// it is still told for so many days after one has heard it (news gets old)
+const seCuenta = (k, n) => (!n.cuentaPor || today() + 1 - (creencia(k, n.id)?.dia || 0) < n.cuentaPor);
 const versiones = n => 1 + n.exagerada.length;
 // how big it comes out of someone's mouth: as they heard it, or a little bigger, if they are one who exaggerates
 const versionAlContar = (k, n) => { const v = creencia(k, n.id)?.v || 1; return EXAGERAN.includes(sinF(k)) ? Math.min(v + 1, versiones(n)) : v; };
@@ -12972,7 +12950,7 @@ function enterarse(k, f, de = null, v = 1){
   k = sinF(k); const c = creencia(k, f); const C = ((game.wm.creencias ||= {})[k] ||= {});
   if (c) { if (v > c.v) C[f] = { ...c, de: de ? sinF(de) : c.de, v }; return; }
   wmKnow(k, f); C[f] = { de: de ? sinF(de) : null, dia: today() + 1, v };
-  const n = NOTICIA[f]; if (!n || !cuenta(k, n)) return;
+  const n = NOTICIA[f]; if (!n) return;
   for (const L of n.llega) if (L.quien !== k) (game.wm.noticiasPend ||= []).push({ k: L.quien, f, at: dayT + L.horas / 24, de: k, v: versionAlContar(k, n) });
 }
 // who told someone (for a line: «{de:marilla:ana_en_camison}» → «la Sra. Lynde»)
@@ -13000,20 +12978,17 @@ const presentarseNoticias = k => { for (const n of NOTICIAS) if (n.alConocer) en
 // as it was told); if there is none new, now and then one the gossips of Avonlea tell again anyway: and if it comes out
 // bigger than the other had it, the other believes the bigger one
 function chisme(a, b){
-  const puede = n => (n.diceDe[sinF(a)] || n.dice).length && cuenta(a, n) && sabeK(a, n.id) && seCuenta(a, n);
+  const puede = n => (n.diceDe[sinF(a)] || n.dice).length && sabeK(a, n.id) && seCuenta(a, n);
   const nueva = NOTICIAS.find(n => puede(n) && !sabeK(b, n.id));
   const n = nueva || (Math.random() < .3 && pick(NOTICIAS.filter(n => puede(n) && sabeK(b, n.id))));
   if (!n) return null;
   const v = versionAlContar(a, n), antes = creencia(b, n.id)?.v || 0;
   enterarse(b, n.id, a, v);
-  const R = NOTICIAS_RESP, resp = nueva ? (v > 1 && (n.respondeEx.length || R.exageradas.length) ? (n.respondeEx.length ? n.respondeEx : R.exageradas) : n.responde.length ? n.responde : R.nuevas) : v > antes ? R.distintas : R.sabidas;
+  const R = NOTICIAS_RESP, resp = v > Math.max(antes, 1) ? R.exageradas : nueva ? (n.responde.length ? n.responde : R.nuevas) : R.sabidas;   // (bigger than they had it: amazed)
   return Object.assign([[a, lineaVersion(a, n, v)], [b, pick(resp)]], { f: n.id, v });
 }
-// «sabe:quien:noticia», and «sabe:quien:noticia:2» (heard at least the second version), «sabe:quien:noticia:lynde» (from her)
-function sabeCond(k, f, x){
-  const c = creencia(k, f); if (!c) return false; if (x == null || x === '') return true;
-  return /^\d+$/.test(x) ? c.v >= +x : c.de === x;
-}
+// «sabe:quien:noticia», and «sabe:quien:noticia:2» (heard at least the second version, the bigger one)
+function sabeCond(k, f, v){ const c = creencia(k, f); return !!c && (!v || c.v >= +v); }
 
 /* ---------- the first time: a scene of its own; the window and the candle; her hat in the wardrobe ----------
    - The first time Ana does some things (looks out of her window, sees herself in the mirror, climbs to her room, sees

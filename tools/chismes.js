@@ -21,7 +21,7 @@ const EXE = fs.existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chrom
   await ev(pasar, 3.2);
   R.marilla = await ev(`creencia('marilla', 'ana_en_camison')`);
   R.marilla_quien = await ev(`quienConto('marilla', 'ana_en_camison')`);
-  R.condiciones = await ev(`['sabe:marilla:ana_en_camison', 'sabe:marilla:ana_en_camison:2', 'sabe:marilla:ana_en_camison:3', 'sabe:marilla:ana_en_camison:lynde', 'sabe:marilla:ana_en_camison:barry'].map(c => c + ' → ' + dlgCond(c, dlgCtx()))`);
+  R.condiciones = await ev(`['sabe:marilla:ana_en_camison', 'sabe:marilla:ana_en_camison:2', 'sabe:marilla:ana_en_camison:3'].map(c => c + ' → ' + dlgCond(c, dlgCtx()))`);
   R.escenas = await ev(`(() => { for (const id of ['marilla_sabe_camison', 'marilla_sabe_camison_descalza', 'marilla_sabe_camison_cementerio']) delete dlgDichas()[id]; return ['marilla_sabe_camison', 'marilla_sabe_camison_descalza', 'marilla_sabe_camison_cementerio'].map(id => { const d = DIALOGOS.find(x => x.id === id); return id + ': ' + (d.porque(dlgCtx()) || 'puede decirse') + (d.porque(dlgCtx()) ? '' : ' → «' + d.lineas().find(l => l[0] === 'marilla')[1] + '»'); }); })()`);
   ok(R.lynde?.v === 1 && !R.lynde.de, 'la Sra. Lynde lo vio: versión 1, sin que nadie se lo contara');
   ok(R.marilla?.v === 2 && R.marilla.de === 'lynde', 'a Marilla le llega agrandado, de la Sra. Lynde: ' + JSON.stringify(R.marilla));

@@ -28,7 +28,7 @@ const ESPERA = {
   for (const d of DIAS) {
     const r = await ev(`(d => { dayT = d - 1 + (11 - 6) / 24; for (let j = 0; j < 240; j++) { for (const t of TALKS.filter(t => t.narra)) { t.interrupted = true; talkEnd(t); } update(1 / 30); }
       const fuera = [...Object.keys(PEOPLE).filter(k => PEOPLE[k].where === 'away' && ausente(k)), ...FOLK.filter(f => f.where === 'away').map(f => f.id)];
-      return { dia: d, estacion: SEASONS[S], fuera, donde: Object.fromEntries(fuera.map(k => [k, LLEGADAS[k]?.fuera || ''])) }; })`, d);
+      return { dia: d, estacion: SEASONS[S], fuera }; })`, d);
     const E = ESPERA[d] || {};
     for (const k of E.fuera || []) if (!r.fuera.includes(k)) malos.push(`día ${d}: ${k} debería estar fuera`);
     for (const k of E.dentro || []) if (r.fuera.includes(k)) malos.push(`día ${d}: ${k} debería estar en Avonlea`);

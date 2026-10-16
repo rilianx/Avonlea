@@ -53,10 +53,10 @@ for (const raw of guion.split('\n')) {
   if ((m = s.match(/^-\s*\[([^\]]*)\]/))) m[1].split(',').forEach(c => condicion(c, 'un comentario de ' + g)); } }
 // the characters' own lines (src/datos/personajes.json): «[condiciones] texto»
 for (const [k, c] of Object.entries(JSON.parse(leer('src/datos/personajes.json')))) for (const l of [...(c.lines || []), ...(c.seasonLines || [])]) { const m = /^\[([^\]]+)\]/.exec(l); if (m) m[1].split(',').forEach(x => condicion(x, 'una frase de ' + k)); }
-// the news (src/datos/noticias.txt): the conditions of who knows it and while when it is told
+// the news (src/datos/noticias.txt): the conditions of who knows it
 { let q = null; for (const raw of leer('src/datos/noticias.txt').split('\n')) { const s = raw.trim(); if (!s || s[0] === '#') continue; let m;
   if ((m = s.match(/^===\s*(.+?)\s*===$/))) { q = m[1]; continue; }
-  if ((m = s.match(/^saben si (.+?):\s/)) || (m = s.match(/^se cuenta si:\s*(.*)$/))) m[1].split(',').forEach(c => condicion(c.trim(), 'noticia ' + q)); } }
+  if ((m = s.match(/^saben si (.+?):\s/))) m[1].split(',').forEach(c => condicion(c.trim(), 'noticia ' + q)); } }
 // who is in Avonlea when (src/datos/llegadas.txt): someone of the game, conditions well written, and the facts their comings and goings leave
 { const quienes = new Set([...Object.keys(JSON.parse(leer('src/datos/personajes.json'))), ...[...codigo.matchAll(/^  (\w+): \{ name: /gm)].map(m => m[1])]); let q = null;
   for (const raw of leer('src/datos/llegadas.txt').split('\n')) { const s = raw.trim(); if (!s || s[0] === '#') continue; let m;
