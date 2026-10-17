@@ -1,0 +1,12 @@
+# Los dichos: lo que se dice en un momento que el código nombra, y que no es una escena (un «gracias» al recibir algo,
+# lo que alguien dice mientras hace una tarea, un saludo, una respuesta corta). Están aquí, y no en el código, para
+# que se puedan cambiar, ampliar (a mano o con una IA) y revisar con las mismas reglas que las escenas.
+# Es el formato de los comentarios (src/datos/comentarios.txt):
+#   === momento ===            (el código pide uno: dicho('gracias_regalo', { cosa: 'la tarta' }))
+#   quien: marilla             (quién lo dice, si es siempre el mismo; si no, lo dice el código)
+#   si: …                      (condiciones para todo el grupo)
+#   - [condiciones] texto      (cada línea; entre corchetes, sus propias condiciones)
+# Entre las que se cumplen, una al azar (no la misma de la vez anterior); las que piden condiciones, el doble de seguido.
+# Huecos: {nombre} en el texto o en las condiciones, los llena el código (cada momento dice cuáles trae).
+# Cada momento tiene que tener al menos una línea sin condiciones propias (para que nunca quede callado):
+# lo revisa tools/grafo.js. Un archivo por tema (acciones, regalos, gente…).

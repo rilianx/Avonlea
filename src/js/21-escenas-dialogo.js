@@ -397,6 +397,29 @@ function comentarioElegir(m){
   comentarioUlt[m] = d.id; const [q, t] = d.lineas()[0]; return { q, t };
 }
 const comentarioTexto = m => comentarioElegir(m)?.t || '';
+// what is said at a moment the code names (src/datos/dichos/*.txt, the same format as the comments): the lines of the
+// game that are not scenes (a thank-you, what one says while doing something, a greeting) live there, not in the code,
+// with their conditions; the code asks for them by moment, with what fills their blanks: dicho(«gracias_regalo»,
+// { cosa: 'la tarta' }). Blanks go in the text and in the conditions («[afecto:{k}:ana>=3]»).
+const DICHOS = (() => { const out = []; let g = null;
+  for (const raw of (document.getElementById('dichos')?.textContent || '').split('\n')) {
+    const s = raw.trim(); if (!s || s[0] === '#') continue; let m;
+    if ((m = s.match(/^===\s*(.+?)\s*===$/))) { g = { momento: m[1], quien: null, si: [] }; continue; }
+    if (!g) continue;
+    if ((m = s.match(/^quien:\s*(\S+)/))) g.quien = m[1];
+    else if ((m = s.match(/^si:\s*(.*)$/))) g.si = m[1].split(',').map(x => x.trim()).filter(Boolean);
+    else if ((m = s.match(/^-\s*(?:\[([^\]]*)\]\s*)?(.+)$/))) out.push({ id: 'dicho:' + g.momento + ':' + out.length, momento: g.momento, quien: g.quien, si: [...g.si, ...(m[1] ? m[1].split(',').map(x => x.trim()).filter(Boolean) : [])], t: m[2] });
+  }
+  return out; })();
+const DICHOS_DE = DICHOS.reduce((o, d) => ((o[d.momento] ||= []).push(d), o), {});
+const dichoUlt = {};
+const rellenar = (t, v) => t.replace(/\{(\w+)\}/g, (x, k) => v[k] ?? x);
+function dichoElegir(m, v = {}){   // { q, t } of one that holds now (not the last one said, if there are more), or null
+  const x = dlgCtx(), C = (DICHOS_DE[m] || []).filter(d => dlgCumple({ si: d.si.map(c => dlgVal(rellenar(c, v))) }, x)); if (!C.length) return null;
+  const U = C.length > 1 ? C.filter(d => d.id !== dichoUlt[m]) : C, P = U.flatMap(d => d.si.length ? [d, d] : [d]), d = pick(P);
+  dichoUlt[m] = d.id; return { q: d.quien && d.quien !== '*' ? d.quien : v.quien, t: rellenar(d.t, v) };
+}
+const dicho = (m, v) => dichoElegir(m, v)?.t ?? '';
 // said, in a bubble: by Ana, or by whoever (quien, for «quien: *»)
 function comentar(m, quien){
   const c = comentarioElegir(m); if (!c) return false;

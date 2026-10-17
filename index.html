@@ -2621,6 +2621,21 @@ ana: (Ana levanta la cara y saca la lengua para atrapar uno.)
 ana: ¡La primera nieve! El Camino Blanco se acordó de su nombre. Cada copo es distinto, dicen en la escuela. Como las personas. Como las amigas del alma.
 
 </script>
+<script type="text/plain" id="dichos">
+# Los dichos: lo que se dice en un momento que el código nombra, y que no es una escena (un «gracias» al recibir algo,
+# lo que alguien dice mientras hace una tarea, un saludo, una respuesta corta). Están aquí, y no en el código, para
+# que se puedan cambiar, ampliar (a mano o con una IA) y revisar con las mismas reglas que las escenas.
+# Es el formato de los comentarios (src/datos/comentarios.txt):
+#   === momento ===            (el código pide uno: dicho('gracias_regalo', { cosa: 'la tarta' }))
+#   quien: marilla             (quién lo dice, si es siempre el mismo; si no, lo dice el código)
+#   si: …                      (condiciones para todo el grupo)
+#   - [condiciones] texto      (cada línea; entre corchetes, sus propias condiciones)
+# Entre las que se cumplen, una al azar (no la misma de la vez anterior); las que piden condiciones, el doble de seguido.
+# Huecos: {nombre} en el texto o en las condiciones, los llena el código (cada momento dice cuáles trae).
+# Cada momento tiene que tener al menos una línea sin condiciones propias (para que nunca quede callado):
+# lo revisa tools/grafo.js. Un archivo por tema (acciones, regalos, gente…).
+
+</script>
 <script type="text/plain" id="comentarios">
 # Los comentarios: escenas de una sola línea (lo que alguien dice al pasar, al mirar algo, al hacer algo). Son escenas
 # como las demás (docs/MOTOR.md): cada una con sus condiciones, elegidas por el mismo motor; pero no detienen a nadie,
@@ -7000,6 +7015,29 @@ function comentarioElegir(m){
   comentarioUlt[m] = d.id; const [q, t] = d.lineas()[0]; return { q, t };
 }
 const comentarioTexto = m => comentarioElegir(m)?.t || '';
+// what is said at a moment the code names (src/datos/dichos/*.txt, the same format as the comments): the lines of the
+// game that are not scenes (a thank-you, what one says while doing something, a greeting) live there, not in the code,
+// with their conditions; the code asks for them by moment, with what fills their blanks: dicho(«gracias_regalo»,
+// { cosa: 'la tarta' }). Blanks go in the text and in the conditions («[afecto:{k}:ana>=3]»).
+const DICHOS = (() => { const out = []; let g = null;
+  for (const raw of (document.getElementById('dichos')?.textContent || '').split('\n')) {
+    const s = raw.trim(); if (!s || s[0] === '#') continue; let m;
+    if ((m = s.match(/^===\s*(.+?)\s*===$/))) { g = { momento: m[1], quien: null, si: [] }; continue; }
+    if (!g) continue;
+    if ((m = s.match(/^quien:\s*(\S+)/))) g.quien = m[1];
+    else if ((m = s.match(/^si:\s*(.*)$/))) g.si = m[1].split(',').map(x => x.trim()).filter(Boolean);
+    else if ((m = s.match(/^-\s*(?:\[([^\]]*)\]\s*)?(.+)$/))) out.push({ id: 'dicho:' + g.momento + ':' + out.length, momento: g.momento, quien: g.quien, si: [...g.si, ...(m[1] ? m[1].split(',').map(x => x.trim()).filter(Boolean) : [])], t: m[2] });
+  }
+  return out; })();
+const DICHOS_DE = DICHOS.reduce((o, d) => ((o[d.momento] ||= []).push(d), o), {});
+const dichoUlt = {};
+const rellenar = (t, v) => t.replace(/\{(\w+)\}/g, (x, k) => v[k] ?? x);
+function dichoElegir(m, v = {}){   // { q, t } of one that holds now (not the last one said, if there are more), or null
+  const x = dlgCtx(), C = (DICHOS_DE[m] || []).filter(d => dlgCumple({ si: d.si.map(c => dlgVal(rellenar(c, v))) }, x)); if (!C.length) return null;
+  const U = C.length > 1 ? C.filter(d => d.id !== dichoUlt[m]) : C, P = U.flatMap(d => d.si.length ? [d, d] : [d]), d = pick(P);
+  dichoUlt[m] = d.id; return { q: d.quien && d.quien !== '*' ? d.quien : v.quien, t: rellenar(d.t, v) };
+}
+const dicho = (m, v) => dichoElegir(m, v)?.t ?? '';
 // said, in a bubble: by Ana, or by whoever (quien, for «quien: *»)
 function comentar(m, quien){
   const c = comentarioElegir(m); if (!c) return false;

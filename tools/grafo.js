@@ -54,6 +54,17 @@ for (const raw of guion.split('\n')) {
   if ((m = s.match(/^===\s*(.+?)\s*===$/))) { g = m[1]; continue; }
   if ((m = s.match(/^si:\s*(.*)$/))) m[1].split(',').forEach(c => condicion(c, 'comentarios de ' + g));
   if ((m = s.match(/^-\s*\[([^\]]*)\]/))) m[1].split(',').forEach(c => condicion(c, 'un comentario de ' + g)); } }
+// the sayings (src/datos/dichos/*.txt): their conditions (blanks aside); each moment the code asks for exists, with one
+// line at least that needs nothing of its own (never silent); and each moment written is asked for by the code
+{ const dir = path.join(root, 'src/datos/dichos'), M = {}; for (const f of fs.readdirSync(dir).filter(f => f.endsWith('.txt')).sort()) { let g = null;
+  for (const raw of leer('src/datos/dichos/' + f).split('\n')) { const s = raw.trim(); if (!s || s[0] === '#') continue; let m;
+    if ((m = s.match(/^===\s*(.+?)\s*===$/))) { g = m[1]; if (M[g]) malas.push(`dichos: el momento «${g}» está dos veces (${M[g].f} y ${f})`); M[g] = { f, libre: false, n: 0 }; continue; } if (!g) continue;
+    if ((m = s.match(/^si:\s*(.*)$/))) { M[g].si = true; m[1].split(',').forEach(c => /\{/.test(c) || condicion(c.trim(), 'dichos de ' + g)); }
+    if ((m = s.match(/^-\s*(\[([^\]]*)\])?/))) { M[g].n++; if (!m[1]) M[g].libre = true; else m[2].split(',').forEach(c => /\{/.test(c) || condicion(c.trim(), 'un dicho de ' + g)); } } }
+  for (const [g, x] of Object.entries(M)) { if (!x.n) malas.push(`dichos: «${g}» no tiene ninguna línea`); else if (!x.libre && !x.si) malas.push(`dichos: «${g}» no tiene ninguna línea sin condiciones (alguna vez quedaría callado)`); }
+  const pedidos = new Set([...codigo.matchAll(/\b(?:dicho|dichoElegir|decirDicho)\('([\w:]+)'/g)].map(m => m[1]));
+  for (const g of pedidos) if (!g.endsWith(':') && !M[g]) malas.push(`dichos: el código pide «${g}», y no está en src/datos/dichos/`);
+  for (const g of Object.keys(M)) if (!pedidos.has(g) && !/^[\w]+:/.test(g)) malas.push(`dichos: «${g}» no lo pide el código (¿un nombre mal escrito?)`); }
 // the lines of each one (src/datos/frases.txt): someone of the game, and «[condiciones] texto»
 { const quienes = new Set([...Object.keys(JSON.parse(leer('src/datos/personajes.json'))), ...[...codigo.matchAll(/^  (\w+): \{ name: /gm)].map(m => m[1]), 'vecino', 'niño', 'adultos', 'niños']); let q = null;
   for (const raw of leer('src/datos/frases.txt').split('\n')) { const s = raw.trim(); if (!s || s[0] === '#') continue; let m;
