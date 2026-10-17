@@ -9,8 +9,8 @@ const CART_LEN = CART_ROUTE.slice(1).reduce((a, p, i) => a + dist(p[0], p[1], CA
 function cartAt(sv){ let left = clamp(sv, 0, CART_LEN); for (let i = 1; i < CART_ROUTE.length; i++) { const a = CART_ROUTE[i - 1], b = CART_ROUTE[i], L = dist(a[0], a[1], b[0], b[1]); if (left <= L || i === CART_ROUTE.length - 1) { const k = clamp(left / L, 0, 1); return [lerp(a[0], b[0], k), lerp(a[1], b[1], k), b[0] - a[0]]; } left -= L; } return [...CART_ROUTE[0], 1]; }
 function tripAsk(to){
   const hn = hourNow(), m = PEOPLE.matthew;
-  if (m.where === 'away') return anaSays('Matthew no está, y sin él y la carreta Bright River queda lejísimos.');
-  if (hn > 20) return anaSays('Ya es muy tarde para ir hasta Bright River. Mejor mañana temprano.');
+  if (m.where === 'away') return anaSays(dicho('carreta_sin_matthew'));
+  if (hn > 20) return anaSays(dicho('carreta_tarde'));
   say('Ana', '¿Ir hasta la estación de Bright River con Matthew en la carreta? Es un buen trecho, pasando por la aldea.', [['🐴 Vamos', () => { close(); cartStart(); }], ['Mejor no', close]]);
 }
 function cartStart(){
@@ -29,7 +29,7 @@ function cartAsk(){
   if (!nearSt) o.push([nearAv ? '🐴 Ir a Bright River' : '🐴 Seguir a Bright River', () => cartOn('br')]);
   if (!nearAv) o.push(['🐴 Volver a Tejas Verdes', () => cartOn('av')]);
   o.push(['Todavía no', close]);
-  say('matthew', 'Bueno, pues... ¿seguimos?', o);
+  say('matthew', dicho('carreta_seguimos'), o);
 }
 function cartTick(dt){
   if (!cart.on) return;
@@ -81,9 +81,9 @@ function teaTime(){
   diana.sit = true; diana.moving = false; diana.x = SOFA.x + 20; diana.y = SOFA.y - 4; diana.dir = 2;
   const first = game.teaDay !== today();
   if (first) { logEv('Ana y Diana tomaron el té en la salita de los Barry.'); game.teaDay = today(); game.fond.diana = Math.min(5, game.fond.diana + 1); hearts(SOFA.x, SOFA.y - 60); sfx.happy(); save(); }
-  const TEA_LINES = ['Mamá nos dejó té y galletas. ¡Y cordial de frambuesa!', '¿Más té, Ana? Me encanta tomar el té contigo, como dos señoras de verdad.', 'Cuando seamos mayores tomaremos el té así todas las tardes, ¿verdad?', 'Mira cómo nieva afuera... ¡y aquí tan calentitas!'];
-  say('diana', first ? TEA_LINES[S === 3 ? 3 : today() % 3] : 'Ya tomamos el té hoy, Ana... ¡pero podemos quedarnos conversando!', [
-    ['¿Seguro que es cordial de frambuesa?', () => say('diana', '¡Sí, sí! Esta vez lo revisé dos veces. Nada de vino de grosellas... ¡qué susto el de aquella vez!', [['Brindemos por nuestra amistad', () => { hearts(diana.x, diana.y - 50); sfx.happy(); close(); }]])],
+  const TEA_LINES = dichosEnOrden('te_diana:primera').map(([, t]) => t);   // (src/datos/dichos/31-llegada-y-noche.txt: by the day; the last, in winter)
+  say('diana', first ? TEA_LINES[S === 3 ? 3 : today() % 3] : dicho('te_diana_otra_vez'), [
+    ['¿Seguro que es cordial de frambuesa?', () => say('diana', dicho('te_diana_cordial'), [['Brindemos por nuestra amistad', () => { hearts(diana.x, diana.y - 50); sfx.happy(); close(); }]])],
     ['Qué rico', close],
   ]);
 }

@@ -7,6 +7,22 @@
    its willows, the Avenue under the apple blossom, Newbridge, and three miles of fields at dusk.
    One can drive it (about two hours and a half, as in the book), walk it, get off the buggy and on again.
    Whoever goes along it: b.where = 'camino', b.roadS (0 at the station, 1 at Avonlea), b.roadDir (+1, -1, 0). ---------- */
+// the sayings of a moment, all of them, in the order they are written (src/datos/dichos/, «=== viaje:M3 ===»): the
+// tables said one line after another (Ana's chatter on each stretch), not one line chosen as dicho() does. Read from the
+// text itself, so that they can be used while the code loads (DICHOS is built later, in 21). [[who, text], …]: who is
+// the group's «quien:», or the line's own («- matthew: Bueno, pues…»).
+function dichosEnOrden(m){
+  const out = []; let en = false, quien = null;
+  for (const raw of (document.getElementById('dichos')?.textContent || '').split('\n')) {
+    const s = raw.trim(); if (!s || s[0] === '#') continue; let x;
+    if ((x = s.match(/^===\s*(.+?)\s*===$/))) { en = x[1] === m; quien = null; continue; }
+    if (!en) continue;
+    if ((x = s.match(/^quien:\s*(\S+)/))) quien = x[1];
+    else if ((x = s.match(/^-\s*(?:\[[^\]]*\]\s*)?(.+)$/))) { const y = !quien && x[1].match(/^(\w+):\s+(.+)$/); out.push(y ? [y[1], y[2]] : [quien, x[1]]); }
+  }
+  if (!out.length) console.warn('[avonlea] dichos: «' + m + '» no está (src/datos/dichos/)');
+  return out;
+}
 const ROAD_MIN = 145, ROAD_MILES = 7, RW = 60000, RH = 2400;
 const ROAD_TRAMOS = [
   { s: 0, kind: 'pueblo', name: 'Bright River', v: -1 },
@@ -286,10 +302,10 @@ function roadJoin(withK){
   const c8_ = cartC8(d), [cx_, cy_] = cartFromDriver(d.x, d.y, c8_), [ax_, ay_] = cartSeat(cx_, cy_, c8_, 1); ana.x = ax_; ana.y = ay_; ana.dir = c8Dir(c8_);
   if (!obsScene()) { cam.x = ana.x; cam.y = ana.y; cam.snap = true; }
 }
-function roadBoard(){ const d = PEOPLE[game.road?.with]; if (!d) return; ana.onCart = true; ana.sit = true; ana.goto = null; sayB(qOf(game.road.with), pick(['Bueno, pues… sube.', 'Ya lo creo. Arriba.', 'Sube, sube. Seguimos.'])); }
-function roadGetOff(){ if (!ana.onCart) return; ana.onCart = false; ana.sit = false; ana.y += 24; ana.offT = TT; const d = PEOPLE[game.road?.with]; if (d) sayB(qOf(game.road.with), pick(['Bueno, pues… te espero aquí.', 'No te alejes mucho, ¿eh?', 'Estira las piernas, que queda un buen trecho.'])); }
+function roadBoard(){ const d = PEOPLE[game.road?.with]; if (!d) return; ana.onCart = true; ana.sit = true; ana.goto = null; sayB(qOf(game.road.with), dicho('camino_subir')); }
+function roadGetOff(){ if (!ana.onCart) return; ana.onCart = false; ana.sit = false; ana.y += 24; ana.offT = TT; const d = PEOPLE[game.road?.with]; if (d) sayB(qOf(game.road.with), dicho('camino_bajar')); }
 // Ana walks on to the edge of Avonlea, or into the road from the signpost, on foot
-function roadOnFoot(s){ game.scene = 'camino'; game.road = null; ana.onCart = false; ana.sit = false; const [x, y] = roadAt(s); ana.x = x + (s > .5 ? -60 : 60); ana.y = y + 20; ana.roadS = s; if (!obsScene()) { cam.x = ana.x; cam.y = ana.y; cam.snap = true; } anaSays(s > .5 ? '¡Ocho millas hasta Bright River! Bueno… paso a paso se llega a cualquier parte, ¿no?' : 'Tejas Verdes queda para allá. Ocho millas… ¡qué aventura!'); }
+function roadOnFoot(s){ game.scene = 'camino'; game.road = null; ana.onCart = false; ana.sit = false; const [x, y] = roadAt(s); ana.x = x + (s > .5 ? -60 : 60); ana.y = y + 20; ana.roadS = s; if (!obsScene()) { cam.x = ana.x; cam.y = ana.y; cam.snap = true; } anaSays(s > .5 ? dicho('camino_a_pie_hacia_br') : dicho('camino_a_pie_hacia_avonlea')); }
 function roadTick(dt){
   for (const k of Object.keys(PEOPLE)) {
     const b = PEOPLE[k]; if (b.where !== 'camino') continue;

@@ -1,0 +1,185 @@
+# El viaje: el largo camino rojo entre Bright River y Avonlea (src/js/17-camino-bright-river.js, 18-charla-del-viaje.js,
+# 20-capitulo-1.js), y la carreta de Matthew hasta la estación (33-viaje-bright-river.js).
+#
+# Dos clases de momentos:
+#  - los de siempre (00-leeme.txt): el código pide uno, y se elige una línea al azar entre las que se cumplen;
+#  - las TABLAS EN ORDEN (los que empiezan con «viaje:»): no se elige una; se dicen todas, una tras otra, en el orden
+#    en que están escritas (el código las lee con dichosEnOrden, en 17). Ahí no van condiciones, y cada línea puede
+#    decir quién la dice: «- matthew: Bueno, pues…» (si el grupo no tiene «quien:»).
+#      viaje:M<tramo>   lo que Ana (y Matthew) dicen de suyo en cada tramo del camino, después de lo del libro
+#                       (<tramo> es el «v» del tramo en ROAD_TRAMOS: 0 la cuesta de los cerezos … 10 la curva del
+#                       atardecer). Las escenas del viaje toman pedazos por número de línea («M3:0-2», contando desde 0,
+#                       en VIAJE_ESCENAS de 21): una línea nueva, al final del tramo, para no correr las demás.
+#      viaje:relleno    lo que Ana va diciendo cuando ya se dijo todo lo de los tramos (se agregan a las del libro,
+#                       LIBRO1.relleno, y se dicen en orden, sin repetir, hasta que se acaban y vuelven a empezar).
+
+# subir otra vez a la calesa, en el camino (lo dice quien maneja)
+=== camino_subir ===
+- Bueno, pues… sube.
+- Ya lo creo. Arriba.
+- Sube, sube. Seguimos.
+
+# Ana se baja de la calesa en el camino (lo dice quien maneja)
+=== camino_bajar ===
+- Bueno, pues… te espero aquí.
+- No te alejes mucho, ¿eh?
+- Estira las piernas, que queda un buen trecho.
+
+# Ana entra a pie al camino: desde Avonlea (hacia Bright River) o desde la estación (hacia Avonlea)
+=== camino_a_pie_hacia_br ===
+quien: ana
+- ¡Ocho millas hasta Bright River! Bueno… paso a paso se llega a cualquier parte, ¿no?
+
+=== camino_a_pie_hacia_avonlea ===
+quien: ana
+- Tejas Verdes queda para allá. Ocho millas… ¡qué aventura!
+
+# en la estación, cuando Ana se sienta en la pila de tejuelas (capítulo 2)
+=== estacion_pila ===
+quien: ana
+- Prefiero quedarme afuera, gracias. Aquí hay más campo para la imaginación.
+
+# Ana pide ir a Bright River en la carreta: Matthew no está, o es muy tarde
+=== carreta_sin_matthew ===
+quien: ana
+- Matthew no está, y sin él y la carreta Bright River queda lejísimos.
+
+=== carreta_tarde ===
+quien: ana
+- Ya es muy tarde para ir hasta Bright River. Mejor mañana temprano.
+
+# Ana se bajó de la carreta a medio camino: ¿seguimos?
+=== carreta_seguimos ===
+quien: matthew
+- Bueno, pues... ¿seguimos?
+
+=== viaje:M0 ===
+- ana: ¿Vio cómo el barranco nos tapa el cielo de a ratos? Es como ir por un pasillo de un castillo, pero con flores en vez de tapices.
+- matthew: Bueno, pues… sí, es alto el barranco.
+- ana: La tierra es tan roja que parece que la isla se hubiera ruborizado al vernos pasar.
+- ana: Estos abedules son tan blancos y delgados… parecen damas de honor esperando a la novia del cerezo.
+- matthew: Je. Damas de honor.
+- ana: ¿Puedo quedarme con esta rama de ciruelo? La voy a poner en agua apenas lleguemos. Bueno, si es que me dejan quedarme… digo, si me dejan poner flores.
+- matthew: Bueno, pues, quédatela.
+- ana: Huele a algo que todavía no tiene nombre. Le voy a buscar uno de aquí a Avonlea.
+
+=== viaje:M1 ===
+- ana: ¡Mire, una señora viene en su carreta! ¿Por qué la saludó, si no la conoce?
+- matthew: Aquí en la Isla se saluda a todos, Ana.
+- ana: Me gusta eso. Es como si la isla entera fuera una sola familia grande que todavía no se ha presentado.
+- ana: Esos manzanos parecen nubes que se cansaron de flotar y se sentaron en el pasto.
+- ana: ¿Usted cree que las granjas se ponen celosas unas de otras cuando una tiene más flores?
+- matthew: Bueno, pues… nunca lo pensé.
+- ana: Yo creo que no. Seguro que se prestan las abejas.
+- ana: Si yo viviera en una granja así, le pondría nombre a cada manzano. Ése se llamaría Lady Blanca, y ése, Sir Rosado.
+
+=== viaje:M2 ===
+- ana: ¡Ay, qué sombra tan fresca! Los abetos son como señores muy serios que en el fondo son tiernos.
+- ana: Cierre los ojos un momento, señor Cuthbert… ¿siente el olor? Es como si alguien hubiera abierto un frasco de bosque.
+- matthew: Bueno, pues, yo manejo… mejor no cierro los ojos.
+- ana: ¡Tiene razón! Qué sensato es usted. Yo los cerraré por los dos.
+- ana: ¿Sabe que en el orfanato soñaba con un bosque así? Lo imaginaba tanto que casi podía tocarlo. Y ahora es de verdad.
+- ana: Ese pájaro canta como si alguien lo hubiera invitado a una fiesta y llegara tarde.
+- matthew: Es un zorzal, me parece.
+- ana: Un zorzal. Hasta el nombre suena a canción.
+
+=== viaje:M3 ===
+- ana: Esta hondonada es como un tazón lleno de nieve que no se derrite.
+- ana: Los ciruelos silvestres se ven tan vaporosos… como si los hubieran pintado con el dedo.
+- matthew: Bueno, pues, este año florecieron bien.
+- ana: ¿Usted se acuerda de cuántas primaveras ha visto, señor Cuthbert?
+- matthew: Unas sesenta, más o menos.
+- ana: ¡Sesenta primaveras! Qué rico debe ser tener tantas guardadas. Yo solo tengo once, y la mitad las pasé cuidando mellizos.
+- ana: Pero ésta va a ser la mejor de todas, lo sé. Ya empezó a serlo.
+- matthew: Ya lo creo.
+
+=== viaje:M4 ===
+- ana: Desde aquí arriba se ve todo el mundo. Bueno, todo el mundo de la isla, que debe ser la parte más bonita.
+- ana: El mar se ve tan azul… ¿será que el cielo se mira en él como en un espejo para peinarse?
+- matthew: Bueno, pues… puede ser.
+- ana: Ojalá un día pueda ir a la playa y mojarme los pies. ¿La arena también es roja?
+- matthew: Roja, sí. Y en White Sands, blanca.
+- ana: ¡Arena de dos colores! Esta isla tiene de todo, como un baúl de tesoros.
+- ana: Las granjas con sus graneros rojos parecen juguetes que alguien olvidó en el pasto.
+- matthew: Je. Juguetes.
+
+=== viaje:M5 ===
+- ana: Estos arces son tan grandes… deben haber visto pasar a mucha gente. Me pregunto si se acuerdan de alguien.
+- ana: Escuche las abejas en el huerto: zumban como si estuvieran rezando.
+- matthew: Bueno, pues, están trabajando, más bien.
+- ana: Trabajar y rezar a la vez. Las abejas son muy virtuosas.
+- ana: Ese arroyito que pasa por debajo del camino… ¿adónde irá? Seguro que va a contarle algo al mar.
+- ana: ¿El arroyo de Tejas Verdes también va al mar?
+- matthew: Va al lago, y el lago, al mar.
+- ana: Entonces todo está conectado. Me encanta pensar eso.
+
+=== viaje:M6 ===
+- ana: Huele a madera recién cortada. Es un olor muy honrado, ¿no le parece?
+- matthew: Bueno, pues, sí. Huele bien.
+- ana: Mire a esos niñitos jugando junto a la ropa tendida. Ojalá alguien les cuente cuentos de noche.
+- ana: Yo les contaba cuentos a los mellizos de la señora Hammond. Los inventaba, porque libros no había.
+- matthew: ¿Y les gustaban?
+- ana: Se dormían a la mitad. Yo prefería pensar que era porque estaban muy tranquilos, no aburridos.
+- ana: La rueda del aserradero da vueltas y vueltas, como mis pensamientos cuando no puedo dormir.
+- matthew: Je. Ya lo creo.
+
+=== viaje:M7 ===
+- ana: Ese hombre sembrando a mano parece que le estuviera echando semillas de esperanza a la tierra.
+- ana: Las vacas nos miran como si fuéramos el acontecimiento del día.
+- matthew: Bueno, pues, aquí no pasa mucho.
+- ana: ¡Entonces me alegro de darles algo que contar! ¿Las vacas se cuentan cosas?
+- matthew: Mugen, nomás.
+- ana: Seguro que en vaca eso quiere decir algo muy profundo.
+- ana: Estas cercas en zigzag parecen costuras que unen un campo con otro, para que no se separen.
+- matthew: Bueno, pues… algo así.
+
+=== viaje:M8 ===
+- ana: Ese cementerio tan tranquilo, con sus piedras blancas… no me da miedo. Parece un jardín donde se descansa.
+- ana: Las lilas de esa casita huelen tan dulce que casi se oyen.
+- matthew: Bueno, pues, a Marilla le gustan las lilas.
+- ana: ¿De verdad? ¡Entonces ya tenemos algo en común! Eso es un buen comienzo, ¿no?
+- matthew: Ya lo creo.
+- ana: Me pregunto si en Avonlea hay una iglesia así. Me gustaría ir los domingos con un sombrero con flores.
+- matthew: Bueno, pues… eso ya lo dirá Marilla.
+- ana: Lo pensaré con mucho cuidado, entonces.
+
+=== viaje:M9 ===
+- ana: Los sauces se inclinan sobre el arroyo como si quisieran tomar agua sin mojarse el pelo.
+- ana: Este puentecito de tablas suena distinto al de la estación. Más alegre, como un tambor chiquito.
+- matthew: Bueno, pues, es de tablas.
+- ana: La luz se está poniendo dorada. A esta hora todo parece más importante, ¿no le parece?
+- matthew: Bueno, pues… se pone bonito, sí.
+- ana: Si yo pudiera embotellar esta luz, la guardaría para los días de lluvia.
+- ana: Aunque la lluvia también me gusta. Es que me gusta casi todo, eso es lo malo.
+- matthew: Je. Eso no tiene nada de malo.
+
+=== viaje:M10 ===
+- ana: El cielo se está poniendo rosado y lila… parece un vestido de baile.
+- ana: ¿Falta mucho, señor Cuthbert? No es que quiera llegar… bueno, sí quiero, pero también quiero que esto no se acabe.
+- matthew: Bueno, pues… todavía un buen trecho.
+- ana: ¡Qué bien! Digo… qué lástima. No, qué bien.
+- ana: Allá adelante el camino da una vuelta. Me encantan las vueltas del camino: nunca se sabe qué hay detrás.
+- matthew: Ya vas a ver.
+- ana: Ay, lo dijo de un modo… como si fuera una sorpresa. ¿Es una sorpresa?
+- matthew: Bueno, pues… algo así.
+
+=== viaje:relleno ===
+quien: ana
+- ¿Usted cree que los caminos se cansan de que los pisen todo el día?
+- Me parece que esa nube tiene forma de castillo con una princesa asomada a la ventana.
+- Si yo fuera un caballo, me gustaría que me llamaran Esperanza.
+- Cuando sea grande quiero escribir un libro sobre un viaje en calesa. Éste, por ejemplo.
+- ¿No le pasa que a veces está tan contento que le dan ganas de llorar?
+- La yegua mueve las orejas como si nos estuviera escuchando. Seguro que entiende todo.
+- Me pregunto qué estarán haciendo ahora los niños del orfanato. Ojalá alguien los lleve de paseo algún día.
+- Ese pájaro voló tan bajo que casi me toca el sombrero. ¡Qué atrevido!
+- Tengo tantas preguntas que si las dijera todas llegaríamos a Avonlea y todavía me quedarían.
+- Las ruedas hacen un ruido que parece decir «Tejas Verdes, Tejas Verdes, Tejas Verdes».
+- ¿Cree que la señorita Cuthbert sabrá hacer tarta de cerezas? Es que nunca he comido una.
+- El viento me desordena las trenzas, pero no me importa. Hoy nada me importa.
+- Si cierro los ojos, el ruido de los cascos parece música de una banda lejana.
+- Una vez leí que en Arabia hay caminos de arena dorada. Pero apuesto a que no son rojos como éstos.
+- Me encanta cómo dice usted «bueno, pues». Suena como alguien que piensa las cosas antes de decirlas.
+- ¿Sabía que yo nunca había andado en calesa? Solo en carreta de leche, una vez, y olía a queso.
+- El aire de la tarde sabe distinto, como a pan recién hecho y a flores mezcladas.
+- Ya no me pellizco más: si es un sueño, que dure. Y si no lo es… ¡mejor todavía!

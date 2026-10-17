@@ -2,7 +2,7 @@
 let sleeping = false, sleepyStage = 0;
 function goToBed(){
   if (primeraVez('bed', goToBed)) return;   // (the first night, her bed is the scene of that night: not plain sleep)
-  if (hourNow() < 20) { anaSays('Todavía no tengo sueño... ¡hay tanto que imaginar antes de dormir!'); return; }
+  if (hourNow() < 20) { anaSays(dicho('dormir_sin_sueno')); return; }
   // (from the second night: her clothes, folded on the chair, or thrown on the floor; the player decides)
   if (game.wm && dlgHechos().desayuno_prueba && !game.wm.camison && !ANA_AUTO && !navigator.webdriver) return say('Ana', 'Antes de meterse en la cama…', [
     ['🧺 Doblar la ropa en la silla y acostarse', () => { close(); ropaAlAcostarse(true); goSleep(false); }],

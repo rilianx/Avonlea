@@ -56,7 +56,7 @@ function cap1Tick(){
   // the train comes in at Bright River: Ana gets off, and Mrs. Spencer goes on to White Sands
   if (h >= 17.5 && !f.train) { f.train = TT; game.train = { t0: TT }; if (OBS === 'lynde') observe(null); }
   if (f.train && !f.anaOn && TT - f.train > 7) { f.anaOn = 1; ana.hidden = false; ana.x = KIT.w * .45; ana.y = 3.4 * T; ana.dir = 2; cap1Mark('ana_tren', 'Ana bajó del tren de las cinco y media con la Sra. Spencer, que la dejó a cargo del jefe de estación.'); cap1Mark('spencer_sigue', 'La Sra. Spencer siguió viaje en el mismo tren hasta White Sands.'); }
-  if (f.anaOn && !f.pila && TT - f.train > 20) { f.pila = 1; ana.sit = true; ana.x = BRS.pile.x; ana.y = BRS.pile.y + 2; ana.dir = 2; cap1Mark('ana_pila', 'Ana no quiso entrar a la sala de espera de señoras («hay más campo para la imaginación») y se sentó en la pila de tejuelas.'); sayB('ana', 'Prefiero quedarme afuera, gracias. Aquí hay más campo para la imaginación.'); }
+  if (f.anaOn && !f.pila && TT - f.train > 20) { f.pila = 1; ana.sit = true; ana.x = BRS.pile.x; ana.y = BRS.pile.y + 2; ana.dir = 2; cap1Mark('ana_pila', 'Ana no quiso entrar a la sala de espera de señoras («hay más campo para la imaginación») y se sentó en la pila de tejuelas.'); sayB('ana', dicho('estacion_pila')); }
   // Matthew at the station: the stationmaster, the girl on the shingles; and home in the buggy
   if (M.where === 'br' && !f.st) {
     f.st = 1; dlgHecho('matthew_en_estacion'); CHAT_HOLD.matthew = TT + 1e6; cap1Mark('matthew_estacion', 'Matthew ató la yegua en el patio del hotel de Bright River, pasó junto a la niña sin mirarla y fue a la estación.');   // (he waits there for the scene)

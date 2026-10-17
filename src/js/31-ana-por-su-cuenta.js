@@ -112,7 +112,7 @@ function eventIntent(ev){
 function autoCook(){
   const k = ITEMS.find(k => ITEM_DEFS[k].recipe && Object.keys(ITEM_DEFS[k].recipe).length && !hasIt(k) && Object.entries(ITEM_DEFS[k].recipe).every(([i, n]) => game.inv[i] >= n)) || (!hasIt('te') && 'te');
   if (k) return startCook(k);
-  anaSays('Hmm, no tengo con qué cocinar nada nuevo... ¡ni siquiera cabe otra taza de té!');
+  anaSays(dicho('cocinar_nada_nuevo'));
 }
 // carrying out the intent, one step each time she is free
 function autoStep(){

@@ -70,7 +70,7 @@ function velaPuede(){ return dianaAmiga() && !!dlgDichas().conv_diana_vela && ho
 function ventana(){
   if (!velaPuede()) return comentar('ventana');
   say('Ana', 'Por la ventana, entre los árboles, se ve la luz de la pieza de Diana.', [
-    ['🕯 Hacerle señas a Diana con la vela', () => { close(); const d = DIALOGOS.find(x => x.id === 'senas_vela'); if (d && !d.dicha()) d.decir(); else anaSays('Ya le hice señas esta noche. Diana debe estar durmiendo… o imaginando cosas, como yo.'); }],
+    ['🕯 Hacerle señas a Diana con la vela', () => { close(); const d = DIALOGOS.find(x => x.id === 'senas_vela'); if (d && !d.dicha()) d.decir(); else anaSays(dicho('vela_ya_hecha')); }],
     ['Mirar por la ventana', () => { close(); escenaObjeto('gwin', true) || comentar('ventana'); }],
     ['Nada por ahora', close],
   ]);
@@ -78,7 +78,7 @@ function ventana(){
 // her hat: off, into the wardrobe (it hangs there on its peg); and on again
 function sombrero(callada){
   const W = game.wm, sin = !W.sinSombrero; W.sinSombrero = sin;
-  if (!callada) anaSays(sin ? pick(['Lo guardo en el armario. Un sombrero merece descansar, como cualquiera.', 'Ahí queda, colgado de su gancho. Sin sombrero me siento más… libre. Como una náyade.']) : pick(['El sombrero, otra vez. Marilla dice que una niña decente no sale sin sombrero.', 'Listo. Si tuviera flores, sería el sombrero más bonito de Avonlea.']));
+  if (!callada) anaSays(sin ? dicho('sombrero_guardar') : dicho('sombrero_poner'));
   logEv(sin ? 'Ana se sacó el sombrero y lo guardó en el armario.' : 'Ana sacó su sombrero del armario y se lo puso.', []); save();
 }
 // her clothes: to bed in her nightgown, and up in it; she dresses when the player decides (at the wardrobe, as with the
@@ -96,18 +96,18 @@ function drawRopaSilla(c){ const [x, y] = ROPA_SILLA(), L = LOOKS.ana; drawSilla
 function vestirse(callada){
   const W = game.wm; if (!W?.camison) return;
   W.camison = false; W.ropaSilla = false; if (W.ropaTirada) { W.ropaTirada = false; dlgHecho('ropa_arrugada'); }
-  if (!callada) anaSays(pick(['El vestido de todos los días. Ni mangas abullonadas ni nada… pero limpio, y mío.', 'Lista. Una se siente otra persona vestida: más valiente, o por lo menos más abrochada.']));
+  if (!callada) anaSays(dicho('ropa_vestirse'));
   logEv('Ana se vistió.', []); save();
 }
-function ponerseCamison(){ const W = game.wm; W.camison = true; W.sinSombrero = true; anaSays('El camisón. Ahora sí que es de noche.'); logEv('Ana se puso el camisón.', []); save(); }
+function ponerseCamison(){ const W = game.wm; W.camison = true; W.sinSombrero = true; anaSays(dicho('ropa_camison')); logEv('Ana se puso el camisón.', []); save(); }
 function ropaOrdenar(callada){
   const W = game.wm; if (!W?.ropaTirada) return; W.ropaTirada = false; W.ropaSilla = true; delete dlgHechos().ropa_tirada_otra;
-  if (!callada) anaSays('Bien dobladita, como le gusta a Marilla. Una ropa ordenada es casi una ropa contenta.');
+  if (!callada) anaSays(dicho('ropa_doblar'));
   logEv('Ana dobló su ropa y la dejó en la silla.', []);
   if (!dlgHechos().ropa_ordenada) { dlgHecho('ropa_ordenada'); dlgHacer([{ suma: ['afecto:marilla:ana', 1] }]); }   // (Marilla sees it: she says nothing, but she sees it)
   save();
 }
-function ropaPonerse(){ anaSays('Está toda arrugada… Bueno, voy a imaginar que es seda recién planchada.'); vestirse(true); }
+function ropaPonerse(){ anaSays(dicho('ropa_arrugada')); vestirse(true); }
 function ropaMenu(){
   say('Ana', 'Su vestido y sus zapatos, tirados en el suelo desde anoche.', [['🧺 Doblar la ropa y dejarla en la silla', () => { close(); ropaOrdenar(); }], ...(game.wm.camison ? [['👗 Ponérsela así, arrugada', () => { close(); ropaPonerse(); }]] : []), ['Nada por ahora', close]]);
 }
