@@ -8,6 +8,9 @@
 # Campos, además de los del guion:
 #   con: con quién es (marilla, matthew, diana, lynde, barry, harrison…)
 #   tema: cómo aparece en el menú (lo que Ana quiere hablar)
+#   se_hace_en: dónde se hace, si es algo que se hace con las manos (sembrar, cocinar): un lugar de afuera o una pieza
+#         («huertito, huerta»: el primero que haya; «gg»: la cocina de Tejas Verdes). Si están en otra parte, primero
+#         van juntos allá, y empieza cuando llegan los dos.
 # Las que marcan un paso en la relación suman afecto («al_terminar: suma afecto:marilla:ana 1»); otras, una
 # habilidad («al_terminar: suma letras:ana 1»). El afecto de cada uno hacia Ana empieza en 2 (de 0 a 5).
 # Una conversación puede tener alternativas (como en el guion): «-> lo que Ana puede decir» (con «->*», lo que diría
@@ -109,6 +112,7 @@ marilla: (Marilla resopla.) Los vestidos sencillos son para niñas sensatas. Ya 
 con: marilla
 tema: Pedirle que le enseñe a cocinar
 si: afecto:marilla:ana>=3
+se_hace_en: gg
 al_terminar: suma granja:ana 1
 ---
 ana: Marilla, ¿me enseña a hacer un pastel? Uno de verdad, no de mi imaginación.
@@ -235,13 +239,17 @@ matthew: Yo creo que ya eres bastante buena así. Pero no le digas que te lo dij
 === conv_matthew_huerta ===
 con: matthew
 tema: Pedirle que le enseñe a sembrar
-si: afecto:matthew:ana>=3
+si: afecto:matthew:ana>=3, !estacion:invierno
+se_hace_en: huertito, huerta
 al_terminar: suma granja:ana 1
+al_terminar: cosa ana semillas 1
 ---
-ana: Matthew, ¿me enseña a sembrar las arvejas? Quiero hacerlo bien, no a mi manera.
-matthew: Bueno, pues… se hace un surco así, ¿ves? No muy hondo. Y una semilla cada tanto, no todas juntas.
-ana: (Ana pone las semillas una por una, contándolas en voz alta.) ¡Cuarenta y tres arvejitas que van a dormir hasta la primavera!
-matthew: Hasta la semana que viene, más bien. Je.
+ana: Matthew, ¿me enseña a sembrar? Quiero hacerlo bien, no a mi manera. Y quiero tener un huertito mío, chiquito.
+matthew: (Matthew se agacha junto a la tierra y hace un surco con el dedo.) Bueno, pues… un surco así, ¿ves? No muy hondo. Y una semilla cada tanto, no todas juntas.
+ana: (Ana pone las semillas una por una, contándolas en voz alta.) …siete, ocho, nueve. ¡Ya están acostadas! ¿Mañana salen?
+matthew: Je. No, no… Agua todos los días, y paciencia. Unas dos semanas para que asomen las hojas, y más para las flores. Las cosas que crecen se demoran, ¿sabes?
+matthew: (Saca del bolsillo un sobrecito de papel doblado.) Toma. Capuchinas. Para tu huertito… donde tú quieras.
+ana: ¡Donde yo quiera! Oh, Matthew, es el regalo más lleno de futuro que me han hecho nunca.
 
 === conv_matthew_mujeres ===
 con: matthew

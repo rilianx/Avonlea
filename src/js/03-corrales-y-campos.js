@@ -23,9 +23,25 @@ const nearFence = (x, y, m = 5) => FENCES.some(([a, b]) => segDist(x, y, a, b) <
 const ROADS = Object.fromEntries(Object.entries(MAP.roads).map(([k, p]) => [k, p.map(mU)]));
 const paths = [...Object.values(ROADS), [[GG.x - 60, GG.y + 70], [BARN.x + 20, BARN.y + 30]]];
 for (const h of Object.values(HOUSES)) if (h.path) paths.push(h.path);
-for (const h of [OS, STATION, CHURCH, SCHOOL]) { let best = null, bd = 1e9; for (const p of Object.values(ROADS)) for (const q of p) { const d = dist(q[0], q[1], h.x, h.y + 40); if (d < bd) { bd = d; best = q; } } if (best && bd > 30) paths.push([[h.x, h.y + 8], [h.x, h.y + 50], best]); }
-for (const b of BUILDINGS) if (b.style !== 'faro') { let best = null, bd = 1e9; for (const p of Object.values(ROADS)) for (let i = 1; i < p.length; i++) { const [a, c] = [p[i - 1], p[i]], dx = c[0] - a[0], dy = c[1] - a[1], t = clamp(((b.x - a[0]) * dx + (b.y + 40 - a[1]) * dy) / (dx * dx + dy * dy), 0, 1), q = [a[0] + dx * t, a[1] + dy * t], d = dist(q[0], q[1], b.x, b.y + 40); if (d < bd) { bd = d; best = q; } } if (best && bd > 20 && bd < 12 * U) paths.push([[b.x, b.y + 8], best]); }
+// (a path to a door leaves from the front of the house; if the road is behind it, around the house, not through it)
+const entrada = (x, y, w, best) => { const pie = [x, y + 44]; if (best[1] > y - 10 || Math.abs(best[0] - x) > w / 2 + 30) return [[x, y + 8], pie, best];
+  const lado = Math.sign(best[0] - x) || 1, cx = x + lado * (w / 2 + 34); return [[x, y + 8], pie, [cx, y + 44], [cx, best[1]], best]; };
+for (const h of [OS, STATION, CHURCH, SCHOOL]) { let best = null, bd = 1e9; for (const p of Object.values(ROADS)) for (const q of p) { const d = dist(q[0], q[1], h.x, h.y + 40); if (d < bd) { bd = d; best = q; } } if (best && bd > 30) paths.push(entrada(h.x, h.y, h.w || 160, best)); }
+for (const b of BUILDINGS) if (b.style !== 'faro') { let best = null, bd = 1e9; for (const p of Object.values(ROADS)) for (let i = 1; i < p.length; i++) { const [a, c] = [p[i - 1], p[i]], dx = c[0] - a[0], dy = c[1] - a[1], t = clamp(((b.x - a[0]) * dx + (b.y + 40 - a[1]) * dy) / (dx * dx + dy * dy), 0, 1), q = [a[0] + dx * t, a[1] + dy * t], d = dist(q[0], q[1], b.x, b.y + 40); if (d < bd) { bd = d; best = q; } } if (best && bd > 20 && bd < 12 * U) paths.push(entrada(b.x, b.y, b.w || 4.6 * T, best)); }
 paths.push([[TOWN[0], TOWN[1]], [WW - 2, TOWN[1] + 4]]);
+// (no road goes through a house: a point of it inside one goes out in front, by the door; a stretch that crosses one goes
+// around it, by the shorter side, along its front or its sides; the same for every road and every path to a door)
+{ const cajas = [...Object.values(HOUSES).filter(h => !h.road).map(h => [h.at, h.depth]), [BARN, 96], ...BUILDINGS.filter(b => b.style !== 'faro').map(b => [b, 100])].map(([b, d]) => ({ x0: b.x - b.w / 2, x1: b.x + b.w / 2, y0: b.y - d, y1: b.y }));
+  const dentro = (c, x, y, m) => x > c.x0 - m && x < c.x1 + m && y > c.y0 - m && y < c.y1 + m;
+  const corta = (c, a, b) => { for (let k = 1; k < 40; k++) { const t = k / 40; if (dentro(c, a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, -4)) return true; } return false; };
+  const largo = q => q.slice(1).reduce((s, v, i) => s + dist(q[i][0], q[i][1], v[0], v[1]), 0);
+  for (const p of paths) for (const c of cajas) {
+    for (const v of p) if (dentro(c, v[0], v[1], 0)) v[1] = c.y1 + 40;
+    const E = [[c.x0 - 34, c.y0 - 34], [c.x1 + 34, c.y0 - 34], [c.x1 + 34, c.y1 + 40], [c.x0 - 34, c.y1 + 40]];
+    for (let i = 1; i < p.length; i++) { const a = p[i - 1], b = p[i]; if (!corta(c, a, b)) continue;
+      let mejor = null; for (let s = 0; s < 4; s++) for (let e = 0; e < 4; e++) for (const dir of [1, 3]) { if (corta(c, a, E[s]) || corta(c, E[e], b)) continue;
+        const q = [a]; for (let k = s; ; k = (k + dir) % 4) { q.push(E[k]); if (k === e) break; } q.push(b); const L = largo(q); if (!mejor || L < mejor.L) mejor = { L, q }; }
+      if (mejor) { p.splice(i, 0, ...mejor.q.slice(1, -1).map(v => [...v])); i += mejor.q.length - 2; } } } }
 const segs = []; paths.forEach(p => { for (let i = 0; i + 1 < p.length; i++) segs.push([p[i], p[i + 1]]); });
 const nearPathI = segIndex(segs), nearPath = (x, y, w) => nearPathI(x, y, w);
 const brookSegs = []; for (let i = 0; i + 1 < brook.length; i++) brookSegs.push([brook[i], brook[i + 1]]);
@@ -40,9 +56,10 @@ const WOODS = MAP.woods.map(w => ({ ...w, x: w.at[0] * U, y: w.at[1] * U, rx: w.
 const inWood = (x, y) => WOODS.find(w => ((x - w.x) / w.rx) ** 2 + ((y - w.y) / w.ry) ** 2 < 1);
 const LUPINS = MAP.lupins.map(l => ({ x: l.at[0] * U, y: l.at[1] * U, rx: l.r[0] * U, ry: l.r[1] * U }));
 const inLupins = (x, y) => LUPINS.some(l => ((x - l.x) / l.rx) ** 2 + ((y - l.y) / l.ry) ** 2 < 1);
-// the kitchen garden: six beds by Green Gables; each grows when watered (seed, sprout, leaves, flowers)
-const BEDS = []; for (let r = 0; r < 2; r++) for (let k = 0; k < 3; k++) BEDS.push({ x: GG.x + GG.w / 2 + 80 + k * 46, y: GG.y + 20 + r * 44, stage: 1, wet: 0, grow: 0, kind: (r * 3 + k) % 3 });
-const FLOWER_KINDS = [['#f08aa0', 'rosas'], ['#f2c94c', 'girasoles'], ['#a58ad8', 'lilas']];
+// the kitchen garden: six beds by Green Gables, Marilla's flowers (already in leaf: they come back every year); each
+// grows when watered, slowly, night by night (seed, sprout, leaves, flowers: src/js/51-huertito.js)
+const BEDS = []; for (let r = 0; r < 2; r++) for (let k = 0; k < 3; k++) BEDS.push({ x: GG.x + GG.w / 2 + 80 + k * 46, y: GG.y + 20 + r * 44, stage: 2, wet: 0, grow: 0, dias: 0, kind: (r * 3 + k) % 3 });
+const FLOWER_KINDS = [['#f08aa0', 'rosas'], ['#f2c94c', 'girasoles'], ['#a58ad8', 'lilas'], ['#f08a3a', 'capuchinas']];
 const inBeds = (x, y) => BEDS.some(b => Math.abs(x - b.x) < 24 && Math.abs(y - b.y) < 18);
 const free = (x, y, m) => !inLake(x, y, m) && !inSea(x, y, m + 20) && !inHouses(x, y, m + 24) && !inAreas(x, y, m + 12) && !nearPath(x, y, m + 22) && !inBrook(x, y, m + 10) && !inBeds(x, y) && dist(x, y, PUMP.x, PUMP.y) > 40;
 // the patchwork of fields: plots of wheat, oats, potatoes, hay and ploughed earth, where the land is open

@@ -31,10 +31,28 @@ LOOKS['f:cartero'] = { hair: '#3a2a20', hairD: '#2a1a10', dress: '#2a3a6a', dres
 LOOKS['f:carretero'] = { hair: '#8a7a6a', hairD: '#6a5a4a', style: 'old', dress: '#6a5a40', dressD: '#4a3a20', coat: true, skin: '#e0b090', h: 1.14, scarf: '#a85a4a' };
 for (const b of BUGGIES) { const r = netRoute(...b.from, ...b.to); b.route = r ? [b.from, ...r.pts, b.to] : [b.from, b.to]; b.len = b.route.slice(1).reduce((s, p, i) => s + dist(...b.route[i], ...p), 0); b.s = Math.random() * b.len; }
 function buggyAt(b, s){ let acc = 0; for (let i = 1; i < b.route.length; i++) { const a = b.route[i - 1], c = b.route[i], d = dist(...a, ...c); if (acc + d >= s) { const q = (s - acc) / (d || 1); return [lerp(a[0], c[0], q), lerp(a[1], c[1], q), c[0] - a[0], c[1] - a[1]]; } acc += d; } const e = b.route[b.route.length - 1]; return [e[0], e[1], 1, 0]; }
+// (a horse and buggy goes at a horse's walk, about as fast as one walks, and nobody is run over: it stops for whoever is
+// on the road just in front of it; the grown-ups step aside to let it by, Ana it waits for)
+const CARRO = 46;
+function alguienDelante(b, dx, dy){
+  const L = Math.hypot(dx, dy); if (L < .01) return null; const ux = dx / L, uy = dy / L;
+  const delante = q => { const ax = q.x - b.x, ay = q.y - b.y, f = ax * ux + ay * uy; return f > 6 && f < 90 && Math.abs(ax * uy - ay * ux) < 30; };
+  if (viewScene() === 'out' && game.scene === 'out' && !ana.onCart && !AGENTS.ana?.ride && delante(ana)) return { q: ana, ux, uy };
+  for (const q of [...Object.values(PEOPLE), ...FOLK]) if (q !== b && !q.buggy && q.where === 'out' && delante(q)) return { q, ux, uy };
+  return null;
+}
+function cedePaso(b, dx, dy, dt){   // true: it has to wait
+  const o = alguienDelante(b, dx, dy); if (!o) { b.cede = 0; return false; }
+  b.cede = (b.cede || 0) + dt;
+  if (o.q !== ana && b.cede > .6) { const ax = o.q.x - b.x, ay = o.q.y - b.y, lado = ax * o.uy - ay * o.ux >= 0 ? 1 : -1; o.q.x += o.uy * lado * 40 * dt; o.q.y -= o.ux * lado * 40 * dt; }
+  return true;
+}
 function faunaTick(dt){
   for (const b of BUGGIES) {
+    const [, , fx, fy] = buggyAt(b, b.s), sg = b.back ? -1 : 1;
     if ((b.wait || 0) > 0) { b.wait -= dt; b.moving = false; }
-    else { b.s += (b.back ? -1 : 1) * 70 * dt; if (b.s > b.len || b.s < 0) { b.s = clamp(b.s, 0, b.len); b.back = !b.back; b.wait = 20 + Math.random() * 30; } b.moving = true; b.walk = (b.walk + 1.8 * 70 * dt / SPEED) % 1; }
+    else if (cedePaso(b, fx * sg, fy * sg, dt)) b.moving = false;
+    else { b.s += (b.back ? -1 : 1) * CARRO * dt; if (b.s > b.len || b.s < 0) { b.s = clamp(b.s, 0, b.len); b.back = !b.back; b.wait = 20 + Math.random() * 30; } b.moving = true; b.walk = (b.walk + 1.8 * CARRO * dt / SPEED) % 1; }
     const [x, y, dx] = buggyAt(b, b.s); b.x = x; b.y = y; if (Math.abs(dx) > 1) b.dir = (dx > 0) !== b.back ? 1 : 3; cartTrack(b);
   }
   if (viewScene() !== 'out') return;

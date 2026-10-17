@@ -152,7 +152,7 @@ function setAnaState(k, on = true){
 // the menu when Ana is touched: what the book's Ana could do here (from the planner), in a few groups so that a long
 // list does not swamp it (the ones that serve what she has to do first), and what to do with what she carries
 const ACC_GRUPOS = [
-  ['🏠 Quehaceres', ['quehacer', 'coser', 'batir', 'ordeñar', 'alimentar', 'sembrar', 'regar', 'hacer_heno', 'partir_lena', 'decorar_sala']],
+  ['🏠 Quehaceres', ['quehacer', 'coser', 'batir', 'ordeñar', 'alimentar', 'sembrar', 'regar', 'hacer_heno', 'acarrear_lena', 'partir_lena', 'decorar_sala']],
   ['📖 Leer y escribir', ['estudiar', 'leer', 'escribir_carta', 'enviar_carta', 'escribir_cuento', 'ensayar', 'recitar', 'actuar', 'rezar']],
   ['🌸 Jugar e imaginar', ['trineo', 'patinar', 'remar', 'nombrar', 'trepar']],
   ['🎀 Arreglarme', ['teñir', 'cortar_pelo', 'adornar']],
@@ -164,6 +164,7 @@ function anaMenu(){
   for (const k of Object.keys(game.anaStates)) if (ANA_STATES[k].fix) mine.push([ANA_STATES[k].fix, () => { close(); setAnaState(k, false); }]);
   if (game.inv.te > 0) mine.push(['☕ Tomar la taza de té', sipTea]);
   if (game.scene === 'out' && (S !== 3 || ana.lie)) mine.push([ana.lie ? 'Levantarse' : '🌿 Recostarme en el pasto', () => { close(); if (ana.lie) { ana.lie = false; return; } if (nearPath(ana.x, ana.y, 26)) return anaSays('Aquí es camino... busco un pedacito de pasto.'); if (underTree(ana.x, ana.y)) return anaSays('Aquí el árbol me tapa el cielo... busco un lugar con más nubes.'); ana.lie = true; ana.sit = false; ana.goto = null; ana.dir = 2; logEv('Ana se recostó en el pasto a mirar las nubes.'); }]);
+  if (game.scene === 'out' && game.inv.semillas > 0 && !game.huertito) mine.push(['🌱 Hacer mi huertito aquí', hacerHuertito]);   // (where she wants it)
   if (game.hasCan) mine.push(['Dejar la regadera', () => dropItem('can')]);
   for (const k of ITEMS) if (game.inv[k] > 0) mine.push(['Dejar ' + itemText(k, game.inv[k]), () => dropItem(k)]);
   if (!J.length && !mine.length) { float('No llevo nada en las manos', ana.x, ana.y - 60); return; }

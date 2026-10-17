@@ -32,7 +32,7 @@ function update(dt){
   if (game.scene === 'camino' && ana.onCart && (mx || my || (ana.goto && !ana.goto.wm))) roadGetOff();   // (moving her: she gets down from the buggy)
   if (ANA_AUTO) { if (mx || my) { freeStart(); const v = 520 / (cam.zoom || 1) / (viewZoom || 1); freeCam.x += mx * v * dt; freeCam.y += my * v * dt; } mx = my = 0; }   // (on her own: the keys move the view)
   if (game.talk?.deadline && TT > game.talk.deadline && !sayOpen) { game.talk.deadline = 0; autoChoose(); }
-  autoTick(); cartTick(dt); roadTick(dt); buggyTick(); roadTalkTick(dt); dlgTick(dt); talkTick(dt); cap1Tick(); momentsTick(); lugaresTick(dt); inicioTick(dt); lagrimas(); ropaTick(); folkTick(dt); faunaTick(dt); agentTick(dt); jugarTick(dt); correoTick(dt); sickTick(); apartarTick(); cuadernoTick(dt); habilidadesTick(dt); noticiasTick(dt); llegadasTick(dt); juntasTick(dt); agendaTick(); wmApproachTick(dt); calledTick(); chatTick(dt); wmFollowTick();
+  autoTick(); cartTick(dt); roadTick(dt); buggyTick(); roadTalkTick(dt); dlgTick(dt); talkTick(dt); cap1Tick(); momentsTick(); lugaresTick(dt); inicioTick(dt); lagrimas(); ropaTick(); folkTick(dt); faunaTick(dt); agentTick(dt); jugarTick(dt); correoTick(dt); sickTick(); apartarTick(); cuadernoTick(dt); habilidadesTick(dt); noticiasTick(dt); llegadasTick(dt); juntasTick(dt); agendaTick(); wmApproachTick(dt); calledTick(); convIrTick(); chatTick(dt); wmFollowTick();
   if (RELATO.on) relatoTick();   // (the account of what happens, once all have moved: 66-relato.js)
   ana.torn = !!game.anaStates.rasgado; ana.askew = !!game.anaStates.despeinada;
   ana.savoring = false;
@@ -98,6 +98,7 @@ function update(dt){
     p.want = p.recibe && p.recibe.hasta > TT && HOUSES[c.home] ? c.home : (game.wm?.sick || []).includes(k) && HOUSES[c.home] ? c.home :   // (someone is coming to visit her: she stays home, or goes back)
       p.story ? p.story.room : (p.away && p.away.day === today() && hr < p.away.until) ? 'away' : c.routine ? c.routine.want(hr, today()) : c.home;
     if (p.story?.place && p.where === 'out') p.target = { place: p.story.place, until: 99, story: true };
+    if (p.vamos && TT < p.vamos.hasta) { if (ROOMS[p.vamos.place]) p.want = p.vamos.place; else { p.want = 'out'; if (p.where === 'out') p.target = { place: p.vamos.place, until: 99 }; } }   // (going somewhere with Ana: «se_hace_en»)
     if (c.hostGoals) p.goals = Object.keys(PEOPLE).some(o => visiting(o) && PEOPLE[o].where === p.where) ? c.hostGoals : p.base;
     if (p.where === 'br' && p.want !== 'br') { roadStart(k, 0, 1); continue; }
     if (busy(k)) continue;
@@ -143,9 +144,7 @@ function update(dt){
   }
   tobyThink(dt); animalsThink(dt);
   // the garden grows (a watered bed comes up a stage after a while); berries and apples come back
-  if (S !== 3) for (const b of BEDS) if (b.wet && (b.grow += dt) > 25) { b.wet = 0; b.grow = 0; b.stage = Math.min(3, b.stage + 1); }
-  for (const b of bushes) if (!b.berries && (b.regrow -= dt) <= 0) b.berries = 3;
-  for (const t of trees) if (t.kind === 'apple' && !t.apples && (t.regrow -= dt) <= 0) t.apples = 3;
+  // (what grows, grows at night: a bush picked clean has berries again tomorrow, not in a quarter of an hour; src/js/22-dormir.js)
   // what she can do here, and doing it
   here = menuOpen() || game.cooking || game.map || !$('ai').hidden ? null : near();
   if (actNow) { actNow = false; if (here) here.act(); }

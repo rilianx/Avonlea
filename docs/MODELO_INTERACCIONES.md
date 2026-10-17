@@ -51,6 +51,17 @@ se pregunta **qué regla general se rompió**, se escribe esa regla, y se deja q
 
 Después: `python3 tools/modelo.py`, se arregla lo que aparezca, y se juega de nuevo. La partida 8 (`trazas/partida8/`) es el primer ejemplo completo.
 
+## Lo que se ve tiene que ser verdad (y de una niña de 11 años, en 1880)
+
+De la revisión crítica de las animaciones salieron estas reglas, cada una general:
+
+- **Lo que hace una niña es de niña.** Lo de los grandes (el hacha, la horquilla) lo hacen los grandes; una niña hace su versión: Ana no parte leña, **entra la leña a la cocina**, una brazada a la vez, desde la pila del tajo hasta la caja de la estufa (`acarrear_lena`); en el heno, **rastrilla** y junta un fardo, no tres. El planificador lo decide con `isKid(k)` para cualquier niño, no solo para Ana.
+- **Lo que se hace con las manos se hace donde se hace.** Una conversación que es una lección (sembrar, cocinar) dice dónde se hace (`se_hace_en:` en `src/datos/conversaciones.txt`: un lugar de afuera o una pieza). Si están en otra parte, primero van juntos allá, y empieza cuando llegan los dos. `tools/grafo.js` avisa de toda conversación con las manos (surco, harina, ordeñar…) que no lo diga.
+- **Lo que crece, crece de noche, y despacio.** Un cantero crece solo si se regó ese día, de a una etapa cada varias noches (`ETAPA_DIAS` en `src/js/51-huertito.js`: unas dos semanas de semilla a flor); las bayas y las manzanas vuelven a estar al día siguiente, no a los quince minutos. Cortar flores deja la planta con hojas.
+- **El huertito de Ana es suyo.** Matthew, en la lección, le da un sobrecito de semillas (`! cosa ana semillas 1`); Ana lo siembra donde quiera, en el pasto, lejos de caminos, casas, cercos y agua.
+- **Ningún camino atraviesa una casa.** Todo tramo que cruza el cuerpo de una casa la rodea (por delante o por el costado más corto), y todo camino a una puerta sale del frente (`src/js/03-corrales-y-campos.js`).
+- **Nadie es atropellado.** Un carro va al paso de un caballo (`CARRO`, casi como quien camina) y se detiene ante quien está en el camino justo delante; los grandes se hacen a un lado, a Ana la espera.
+
 ## Los días a prueba (del 1 al 3)
 
 Lo que pasa entre que Ana llega y que Marilla decide (los cap. 2 a 8 del libro) se revisa de tres maneras:

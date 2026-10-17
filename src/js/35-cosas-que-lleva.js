@@ -21,7 +21,8 @@ const ITEM_DEFS = {
   carta:    { names: ['carta', 'cartas'], icon: '✉️', season: () => game.inv.carta > 0 },
   cuento:   { names: ['cuento escrito a mano', 'cuentos escritos a mano'], icon: '📜', season: () => game.inv.cuento > 0 },
   heno:     { names: ['fardo de heno', 'fardos de heno'], icon: '🌾', season: () => game.inv.heno > 0 },
-  lena:     { names: ['atado de leña', 'atados de leña'], icon: '🪵', season: () => game.inv.lena > 0 },
+  lena:     { names: ['brazada de leña', 'brazadas de leña'], icon: '🪵', season: () => game.inv.lena > 0 },
+  semillas: { names: ['sobrecito de semillas', 'sobrecitos de semillas'], icon: '🌱', season: () => game.inv.semillas > 0 },
   mantequilla: { names: ['pan de mantequilla', 'panes de mantequilla'], icon: '🧈', season: () => game.inv.mantequilla > 0, gift: { name: 'mantequilla', art: 'un pan de mantequilla', reply: '¡Mantequilla fresca! Gracias.' } },
   canasta:  { names: ['canasta de picnic', 'canastas de picnic'], icon: '🧺', season: () => game.inv.canasta > 0 },
   tinte:    { names: ['frasco de tinte para el pelo', 'frascos de tinte para el pelo'], icon: '🧪', season: () => game.inv.tinte > 0 },
@@ -30,10 +31,10 @@ const ITEM_DEFS = {
   dolares:  { names: ['dólar', 'dólares'], icon: '💵', season: () => game.inv.dolares > 0, giveAll: true, gift: { name: 'el dinero', art: 'el dinero', reply: 'Vaya... bueno, pues gracias.' }, note: 'dinero' },
 };
 for (const k of Object.keys(ITEM_DEFS)) if (!(k in game.inv)) game.inv[k] = 0;
-// what is not a gift but for the house: who uses it, and what they say when Ana brings it (the wood she chopped, the
+// what is not a gift but for the house: who uses it, and what they say when Ana brings it (the wood she carried in, the
 // eggs, the milk): she can hand it over to them, all of it
 const PARA_LA_CASA = {
-  lena: ['marilla', '¡Leña para la cocina! Bien partida, además. Déjala junto a la estufa.'], huevos: ['marilla', 'Huevos frescos. Justo lo que me faltaba para el bizcocho.'],
+  lena: ['marilla', 'Leña para la caja de la estufa. Bien. Y sacúdete el delantal, que traes media astilla encima.'], huevos: ['marilla', 'Huevos frescos. Justo lo que me faltaba para el bizcocho.'],
   leche: ['marilla', 'La leche, gracias. La pongo a enfriar en la despensa.'], mantequilla: ['marilla', 'Mantequilla. Bien, a la despensa.'],
   azucar: ['marilla', 'El azúcar. Gracias, Ana.'], hierbas: ['marilla', 'Hierbas para el guiso. Gracias.'], heno: ['matthew', 'Bueno, pues… heno para Dolly. Gracias, Ana.'],
 };

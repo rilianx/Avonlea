@@ -163,6 +163,7 @@ function dlgHacer(list){   // what a scene does when it starts or ends
     if (a.acostarse) { if (game.scene !== 'ga') { ana.meal = null; goIn('ga', [GA.bed.x - 20, GA.bed.y + 16]); } setTimeout(() => { if (!sleeping) goToBed(); }, 500); }
     if (a.a_la_mesa && !ana.meal && game.scene === 'gg') mealSit();
     if (a.mesa) game.comida = a.mesa === 'nada' ? null : { que: a.mesa, dia: today() };
+    if (a.cosa) { const [k, it, n] = a.cosa; if (k === 'ana') game.inv[it] = (game.inv[it] || 0) + n; else { const I = wmInv(k); I[it] = (I[it] || 0) + n; } if (k === 'ana' && ITEM_DEFS[it]) float('+' + itemText(it, n), ana.x, ana.y - 60); }
     if (a.dormir) { ana.enCama = null; ana.llora = false; goSleep(false, false, true); }   // (the scene itself puts her to sleep)
     if (a.entra) { const b = PEOPLE[a.entra]; if (b) { b.where = a.a; b.x = KDOOR.x + 30; b.y = KIT.h - 30; b.sit = false; b.nav = null; b.moving = false; b.dir = 0; } }
     if (a.sale) { const b = PEOPLE[a.sale]; if (b) { b.where = CH[a.sale]?.home || 'gg'; b.x = STAIRS.x - 30; b.y = STAIRS.y + 30; b.nav = null; } }
@@ -316,6 +317,7 @@ function dlgAccion(s){   // an action of the script: «hecho x», «marca id | n
     case 'nombrar': return { nombrar: r[0], pedir: r[1] === '?' };
     case 'sentar': return { sentar: r[0] };
     case 'dormir': return { dormir: true };
+    case 'cosa': return { cosa: [r[0], r[1], +(r[2] || 1)] };   // (someone gets a thing: «cosa ana semillas 1»)
     case 'ropa_tirada': return { ropa_tirada: true };   // (her clothes, left on the floor)
     case 'camison': return { camison: true };
     case 'sin_sombrero': return { sin_sombrero: true };   // (Ana takes her hat off)
@@ -401,8 +403,27 @@ function comentar(m, quien){
   if (q === 'ana') anaSays(c.t); else sayB(talkQ(q), c.t);
   return true;
 }
-const convDisponibles = k => !dlgHechos().desayuno_prueba ? [] : CONVERSACIONES.filter(d => d.con === k && !d.dicha() && dlgCumple(d, dlgCtx())).sort((a, b) => b.peso - a.peso);
+const convDisponibles = k => !dlgHechos().desayuno_prueba ? [] : CONVERSACIONES.filter(d => d.con === k && !d.dicha() && game.convDejada?.[d.id] !== today() && dlgCumple(d, dlgCtx())).sort((a, b) => b.peso - a.peso);   // (one they set out to have somewhere and left halfway, not again today)
+// a conversation done with the hands is had where it is done («se_hace_en: huertito, huerta»: the first of those places
+// there is; a place outdoors, or a room: «gg», the kitchen of Green Gables): if they are elsewhere, they go there
+// together first (Ana, and whoever it is with), and it begins when both have arrived (not sowing in the kitchen, nor
+// baking in the garden)
+const convSitio = d => String(d.se_hace_en || '').split(',').map(s => s.trim()).find(p => PLACES[p] || ROOMS[p]) || null;
+const convEnSitio = (d, s) => { if (ROOMS[s]) return game.scene === s && wmScene(d.con) === s; const [, x, y] = PLACES[s], p = wmBody(d.con); return game.scene === 'out' && dist(ana.x, ana.y, x, y) < 110 && wmScene(d.con) === 'out' && dist(p.x, p.y, x, y) < 130; };
+function convIr(d, s){
+  const sala = ROOMS[s] && HOUSES[s], nombre = sala ? 'la cocina' : PLACES[s][0]; close();
+  game.convIr = { id: d.id, s, hasta: TT + M(90) }; PEOPLE[d.con].vamos = { place: s, hasta: TT + M(90) };
+  if (sala) { if (game.scene !== s) { if (game.scene !== 'out') goOut(); ana.goto = { id: 'h:' + s, scene: 'out', dest: true }; } }
+  else goDest(PLACES[s][1] - 34, PLACES[s][2] + 10);
+  sayB(talkQ(d.con), d.con === 'matthew' && !sala ? `Bueno, pues… eso se aprende en ${nombre}, con las manos en la tierra. Vamos.` : `Eso se aprende en ${nombre}, no aquí. Vamos.`);
+}
+function convIrTick(){
+  const g = game.convIr; if (!g) return; const d = CONVERSACIONES.find(c => c.id === g.id);
+  if (!d || TT > g.hasta || d.dicha()) { if (d) { delete PEOPLE[d.con].vamos; (game.convDejada ||= {})[d.id] = today(); } game.convIr = null; return; }
+  if (convEnSitio(d, g.s)) { delete PEOPLE[d.con].vamos; game.convIr = null; conversar(d); }
+}
 function conversar(d){   // a conversation, now: said in its own channel, holding the other still, once
+  const s = convSitio(d); if (s && !convEnSitio(d, s)) return convIr(d, s);
   for (const t of TALKS.filter(t => t.ch === 'conv')) talkEnd(t);
   logEv('Ana conversó con ' + wmName(d.con) + ': ' + d.tema.replace(/^./, c => c.toLowerCase()) + '.', []);
   return d.decir();

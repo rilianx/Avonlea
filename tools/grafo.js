@@ -109,6 +109,11 @@ for (const m of codigo.matchAll(/dlgHecho\('([a-z_0-9]+)'/g)) anota(hace, m[1], 
 for (const m of codigo.matchAll(/dlgHechos\(\)(?:\.([a-z_0-9]+)|\['([a-z_0-9]+)'\])/g)) anota(pide, (m[1] || m[2]) + ' ', 'código');
 for (const m of codigo.matchAll(/['"`](?:hecho|dias_desde):([a-z_0-9]+)/g)) anota(pide, m[1] + ' ', 'código');
 for (const m of codigo.matchAll(/['"`\[]conoce:([a-z_0-9]+)/g)) anota(pide, 'conoce_' + m[1] + ' ', 'código');
+// a conversation that is done with the hands (sowing, baking, milking, sewing) says where it is done («se_hace_en»):
+// otherwise it is had wherever they are (sowing in the kitchen)
+for (const bloque of leer('src/datos/conversaciones.txt').split(/^(?====)/m)) { const id = bloque.match(/^===\s*(.+?)\s*===/)?.[1]; if (!id) continue;
+  const cuerpo = bloque.split(/^---$/m)[1] || '';
+  if (/\b(surco|sembr\w*|semillas? una|harina|al horno|amasa\w*|orde[ñn]\w*|el balde|aguja|hilv\w*)\b/i.test(cuerpo) && !/^se_hace_en:/m.test(bloque)) malas.push(`conversación ${id}: es con las manos (${cuerpo.match(/\b(surco|sembr\w*|semillas? una|harina|al horno|amasa\w*|orde[ñn]\w*|el balde|aguja|hilv\w*)\b/i)[0]}), y no dice dónde se hace («se_hace_en:»)`); }
 // the report
 const necesita = Object.keys(pide).filter(h => !h.endsWith(' ')), lee = new Set(Object.keys(pide).map(h => h.trim()));
 const nunca = necesita.filter(h => !hace[h] && !/^conoce_/.test(h)).sort()   /* (conoce_<who>: whoever Ana meets, src/js/66-conocidos.js) */, sinUso = Object.keys(hace).filter(h => !lee.has(h) && !/^(hito_|llego_|se_fue_)/.test(h)).sort();

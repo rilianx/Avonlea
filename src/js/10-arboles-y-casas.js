@@ -167,9 +167,11 @@ function drawProp(c, o, t, night){
 function drawBed(c, b, t){
   // the plants of a garden bed: seed, sprout, leaves, flowers; wet earth darker
   // in winter the garden sleeps under the snow
+  if (b.ana) { ell(c, b.x, b.y, 21, 14, '#7a5a3c', 'rgba(60,40,25,.5)'); for (let k = 0; k < 7; k++) ell(c, b.x - 24 + k * 8, b.y + 13 - Math.abs(k - 3) * 2.4, 3, 2.2, '#b8b0a4', true); }   // (Ana's: its own earth, edged with little stones)
   if (S === 3) { ell(c, b.x, b.y - 2, 19, 9, '#f6f8fb', 'rgba(140,150,170,.6)'); return; }
   if (b.wet) { c.fillStyle = 'rgba(60,40,25,.35)'; c.beginPath(); c.ellipse(b.x, b.y, 20, 13, 0, 0, TAU); c.fill(); }
   const [col] = FLOWER_KINDS[b.kind];
+  if (b.stage < 1) { for (let k = -1; k <= 1; k++) line(c, [[b.x - 14, b.y + k * 6], [b.x + 14, b.y + k * 6]], 'rgba(60,40,25,.45)', 1.2, k + 2); if (b.ana) { line(c, [[b.x + 17, b.y + 2], [b.x + 17, b.y - 14]], '#8a6a4a', 1.4, 1); blob(c, [[b.x + 13, b.y - 18], [b.x + 21, b.y - 18], [b.x + 21, b.y - 10], [b.x + 13, b.y - 10]], '#efe2c4'); ell(c, b.x + 17, b.y - 14, 2, 2, col); } return; }   // (sown: only the furrows; on Ana's, the empty packet on a stick, to know what will come up)
   for (let k = 0; k < 5; k++) {
     const px = b.x - 13 + (k % 3) * 13 + (k > 2 ? 6 : 0), py = b.y - 6 + (k > 2 ? 9 : 0), sw = Math.sin(t * 1.6 + k + b.x) * 1;
     if (b.stage >= 1) line(c, [[px, py], [px + sw, py - 3 - b.stage * 3]], '#4f8a3c', 1.3, k);
