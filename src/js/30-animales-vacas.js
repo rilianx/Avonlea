@@ -146,7 +146,7 @@ function pushDriven(list, g, p, t){
 // putting things down and picking them up again (the watering can too), and drinking the tea she made
 function setAnaState(k, on = true){
   if (!!game.anaStates[k] === on) return;
-  if (on) { game.anaStates[k] = true; anaSays(ANA_STATES[k].say); logEv('Ana ' + ANA_STATES[k].desc + '.'); } else delete game.anaStates[k];
+  if (on) { game.anaStates[k] = true; anaSays(dicho('estado:' + k)); logEv('Ana ' + ANA_STATES[k].desc + '.'); } else delete game.anaStates[k];
   save();
 }
 // the menu when Ana is touched: what the book's Ana could do here (from the planner), in a few groups so that a long

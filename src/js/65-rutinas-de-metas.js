@@ -63,17 +63,17 @@ function favorMenu(who){
   for (const [x, n] of wants) if (inSeason(x) || x === 'huevos' || x === 'azucar') opts.push([`Que me traiga ${itemText(x, n)}`, () => playerAsk(who, { f: 'traer', to: who, item: x, n })]);
   for (const c of Object.values(ANIM)) if (c.kind === 'cow' && cowKey(c).startsWith('c:')) opts.push([`Que lleve a ${ANIMALS[c.id].name} a su corral`, () => playerAsk(who, { f: 'encerrar_vaca', to: who, cow: c.id, pen: ANIMALS[c.id].home })]);
   opts.push(['← Volver', () => talk(who, true)]);
-  say(who, '¿Qué necesitas, Ana?', opts);
+  say(who, dicho('favor_que_necesitas'), opts);
 }
 function playerAsk(who, f){
   close();
   const F = FAVORS[f.f], s0 = wmNow();
-  if (!socialRule(realR, 'pedir', 'ana', who)) return say(who, 'Ahora no, Ana.', [['Bueno', close]]), null;
-  if (activeGoals(AGENTS[who]).length >= MAX_GOALS) return say(who, 'Ahora no puedo, tengo demasiado que hacer. Más tarde, ¿sí?', [['Bueno', close]]), null;
+  if (!socialRule(realR, 'pedir', 'ana', who)) return say(who, dicho('favor_ahora_no'), [['Bueno', close]]), null;
+  if (activeGoals(AGENTS[who]).length >= MAX_GOALS) return say(who, dicho('favor_ocupado'), [['Bueno', close]]), null;
   const goal = F.goal('ana', f, s0), r = wmPlan(who, goal, [], s0, ['ana']);
-  if (!r.plan) return say(who, pick(['Bueno, pues... no sé cómo podría, Ana.', 'Me gustaría, pero no veo cómo.']), [['Bueno', close]]), null;
-  logEv(`Ana le pidió a ${wmName(who)}: ${goal.text}.`, [who]); relatoDicho('ana', F.say ? F.say(f) : '¿Me harías un favor?');
-  say(who, pick(['¡Claro que sí! Ya vuelvo.', 'Bueno, pues... ya lo creo, Ana. Deja eso en mis manos.', 'Por supuesto, querida.']), [['¡Gracias!', close]]);
+  if (!r.plan) return say(who, dicho('favor_no_puede'), [['Bueno', close]]), null;
+  logEv(`Ana le pidió a ${wmName(who)}: ${goal.text}.`, [who]); relatoDicho('ana', F.say ? F.say(f) : dicho('favor_pedir'));
+  say(who, dicho('favor_si'), [['¡Gracias!', close]]);
   return agentStart(who, goal, { label: goal.text + ' (se lo pidió Ana)', parent: 'ana', chain: ['ana'] });
 }
 function dayAt(h){ dayT = Math.floor(dayT) + (h - 6) / 24; }

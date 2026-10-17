@@ -2,8 +2,8 @@
    Each is drawn at its feet, about 46 to 54 pixels tall, from the front, the back or the side. */
 const SKIN_LINE = 'rgba(150,90,60,.7)';
 const ANA_STATES = {
-  rasgado: { desc: 'tiene el vestido rasgado (se le enganchó en una cerca)', say: '¡Ay, mi vestido! Marilla me va a mirar con esa cara...' },
-  despeinada: { desc: 'tiene el sombrero torcido y el pelo revuelto', say: '¡Mi sombrero! Debo parecer un espantapájaros con trenzas.', fix: 'Arreglarme el sombrero' },
+  rasgado: { desc: 'tiene el vestido rasgado (se le enganchó en una cerca)' },
+  despeinada: { desc: 'tiene el sombrero torcido y el pelo revuelto', fix: 'Arreglarme el sombrero' },
 };
 // lying on the grass on her back, hands behind her head, one knee up, looking at the clouds (head to the left).
 // Seen from above and in front, like everything: the face looks up at us, the top of her head to the left.
