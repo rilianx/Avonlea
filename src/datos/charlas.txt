@@ -1,0 +1,476 @@
+# Las charlas: lo que se dicen dos (o tres) cuando se encuentran, o mientras hacen algo juntos. Son líneas escritas
+# (sin IA); el juego las lee al empezar (src/js/19-dialogos-de-pares.js). Están aquí, y no en el código, para que se
+# puedan cambiar, ampliar (a mano o con una IA) y revisar con las mismas reglas que las escenas (tools/grafo.js revisa
+# las condiciones).
+#
+# Cada charla: «=== id ===», sus campos (uno por línea, «campo: valor»), «---» y una línea por intervención,
+# «quien: texto» (como en src/datos/guion.txt). Lo que se cuenta de alguien, entre paréntesis al comienzo: «(se ríe bajito)».
+# Campos:
+#   quienes: quiénes hablan (las personas: ana, diana, marilla…; o papeles: a, b, otro, que el código llena)
+#   si: condiciones (las del guion: «hecho:se_queda», «!hecho:a_prueba», «estacion:verano», «afecto:matthew:ana>=5»…)
+#   donde: dónde tiene sentido («casa»: la cocina o el patio de Tejas Verdes; «gg»: la cocina; «dentro», «arroyo»…)
+#
+# Las clases de charla, por cómo empieza su id:
+#   par:<quienes>:<n>   cuando esos dos o tres se encuentran (n: su número, desde 0; van en este orden). La primera que
+#                       no se haya dicho y cuyas condiciones se cumplan; cuando se dijeron todas, saludos y chismes.
+#                       Ana y Diana, además, solo cuando ya se conocen y no las tienen separadas.
+#   pares:<clase>:<n>   dos vecinos que se cruzan, una línea cada uno (a y b): mixta (un niño, que habla primero, y un
+#                       grande), kids (dos niños), big (dos grandes). Una al azar, de las que se cumplen.
+#   ana_diana:<n>       Ana y Diana al cruzarse en el camino, una línea cada una.
+#   suena:<n>           Ana sueña en voz alta con quien se cruza (otro le contesta; a un niño, el código lo tutea).
+#   te, paseo           mientras toman el té (a: la que invita, b: la invitada) o pasean (a: la que invita, b: la otra).
+#
+# ====================================== cuando se encuentran (par:) ======================================
+
+# --- Ana y Diana
+
+=== par:ana+diana:0 ===
+quienes: ana, diana
+---
+ana: ¿Juras ser mi amiga del alma, Diana, mientras el sol y la luna existan?
+diana: ¡Lo juro! Aunque no sé muy bien cómo se jura… ¿así está bien?
+ana: Perfecto. Ahora es para siempre.
+
+=== par:ana+diana:1 ===
+quienes: ana, diana
+---
+diana: Ana, ¿cómo se te ocurren tantas palabras largas?
+ana: Las tengo guardadas para las ideas grandes. Las chicas no caben en palabras chicas.
+diana: Yo solo tengo palabras medianas…
+
+=== par:ana+diana:2 ===
+quienes: ana, diana
+---
+ana: He decidido que el claro de los abedules se llame la Senda de los Enamorados.
+diana: ¡Qué romántico! Pero no se lo digas a mamá.
+ana: Será nuestro secreto, como todo lo importante.
+
+=== par:ana+diana:3 ===
+quienes: ana, diana
+---
+diana: Mamá dice que puedo ir a tu casa el sábado, si no hay lluvia.
+ana: Entonces voy a rezar para que no llueva… y por si acaso, para que llueva solo un poquito.
+
+=== par:ana+diana:4 ===
+quienes: ana, diana
+---
+ana: ¿Te imaginas que el Bosque Encantado de verdad tenga fantasmas?
+diana: ¡Ana! Ahora no voy a poder pasar por ahí de noche.
+ana: Yo tampoco. Creo que imaginé demasiado bien.
+
+=== par:ana+diana:5 ===
+quienes: ana, diana
+si: cuaderno:escuela, hecho:llego_gilbert, !estacion:verano
+---
+diana: Gilbert Blythe te miró otra vez en clase.
+ana: Gilbert Blythe puede mirar a la pared. A mí no me interesa en lo más mínimo.
+diana: Si tú lo dices…
+
+# --- Ana y Marilla
+
+=== par:ana+marilla:0 ===
+quienes: ana, marilla
+si: hecho:a_prueba, !hecho:se_queda
+---
+marilla: Esa cama se tiende apenas te levantas. Aquí no somos desordenados.
+ana: Sí, Marilla. ¿Y si la tiendo imaginando que es la cama de una princesa?
+marilla: Tiéndela como la de una niña ordenada. Con eso basta.
+
+=== par:ana+marilla:1 ===
+quienes: ana, marilla
+si: hecho:a_prueba, !hecho:se_queda
+---
+ana: Marilla, ¿cree que podré quedarme?
+marilla: Eso depende de ti, no de mí. Haz tus quehaceres y di tus oraciones.
+ana: Los voy a hacer tan bien que se le van a olvidar los niños del orfanato.
+
+=== par:ana+marilla:2 ===
+quienes: ana, marilla
+donde: casa
+---
+marilla: Ana, ¿barriste el porche como te dije?
+ana: Sí, Marilla… bueno, casi. Me distraje mirando una araña que tejía, y era tan perfecta…
+marilla: Las arañas no barren porches, Ana.
+
+=== par:ana+marilla:3 ===
+quienes: ana, marilla
+---
+ana: Marilla, ¿alguna vez fue usted una niña como yo?
+marilla: Fui una niña. Como tú, espero que no.
+ana: Entonces se perdió de mucho, Marilla.
+
+=== par:ana+marilla:4 ===
+quienes: ana, marilla
+donde: gg
+---
+marilla: Di tus oraciones antes de dormir.
+ana: Ya sé una de memoria. Pero a veces prefiero inventarlas: me salen más sentidas.
+marilla: Hmm. Con que sean sinceras, basta.
+
+=== par:ana+marilla:5 ===
+quienes: ana, marilla
+donde: gg
+---
+ana: ¿Puedo poner flores en la mesa? Una mesa sin flores es como una cara sin sonrisa.
+marilla: Pon las que quieras, mientras no traigas medio jardín y las abejas con él.
+
+=== par:ana+marilla:6 ===
+quienes: ana, marilla
+---
+marilla: Ese sombrero está lleno de flores otra vez.
+ana: Es que las flores me quedan mejor que el pelo rojo, Marilla.
+marilla: Tu pelo no tiene la culpa de nada. Quítate eso antes de ir a la iglesia.
+
+# --- Ana y Matthew
+
+=== par:ana+matthew:0 ===
+quienes: ana, matthew
+si: hecho:a_prueba, !hecho:se_queda
+---
+matthew: Bueno, pues… ¿dormiste bien, Ana?
+ana: Soñé que me quedaba, señor Matthew. ¿Los sueños se cumplen?
+matthew: Ya lo creo que… bueno, a veces. Yo hablo con Marilla.
+
+=== par:ana+matthew:1 ===
+quienes: ana, matthew
+donde: arroyo
+---
+ana: Señor Matthew, ¿le parece que el arroyo canta?
+matthew: Bueno, pues… ahora que lo dices, algo tararea, sí.
+ana: ¡Sabía que usted lo entendería!
+
+=== par:ana+matthew:2 ===
+quienes: ana, matthew
+si: hecho:se_queda, afecto:matthew:ana>=5
+---
+matthew: Ana… ¿te gustaría un vestido con mangas abullonadas? Digo… por si acaso.
+ana: ¡Oh, señor Matthew! ¿De verdad lo dice?
+matthew: Bueno, pues… no le digas nada a Marilla todavía.
+
+=== par:ana+matthew:3 ===
+quienes: ana, matthew
+---
+ana: ¿Usted cree que las vacas tienen pensamientos profundos?
+matthew: Bueno, pues… las nuestras parecen pensar mucho en el pasto.
+ana: Eso también es una filosofía.
+
+=== par:ana+matthew:4 ===
+quienes: ana, matthew
+---
+matthew: Lo hiciste muy bien hoy, Ana.
+ana: ¿Usted cree? Yo pensé que me había equivocado en todo.
+matthew: Ya lo creo que no. Yo lo vi.
+
+=== par:ana+matthew:5 ===
+quienes: ana, matthew
+---
+ana: Hoy no hablé casi nada, señor Matthew. ¿Se dio cuenta?
+matthew: Bueno, pues… no, la verdad. Me pareció lo de siempre.
+ana: ¡Ay! Entonces tendré que esforzarme más.
+
+# --- la Sra. Lynde y Marilla
+
+=== par:lynde+marilla:0 ===
+quienes: lynde, marilla
+si: hecho:se_queda, hecho:lynde_visita
+---
+lynde: Marilla, esa niña tuya va a terminar de maestra o de actriz, una de dos.
+marilla: Mientras termine sus quehaceres primero, Rachel, que termine de lo que quiera.
+
+=== par:lynde+marilla:1 ===
+quienes: lynde, marilla
+---
+lynde: ¿Supiste que los Pye volvieron a pelear con los Sloane por la cerca?
+marilla: No, y no me hace falta saberlo.
+lynde: Bueno, yo solo lo digo. Nadie puede decir que Rachel Lynde no avisa.
+
+=== par:lynde+marilla:2 ===
+quienes: lynde, marilla
+donde: dentro
+---
+marilla: ¿Más té, Rachel?
+lynde: Media taza. Y de esa mermelada de ciruelas, que la tuya es mejor que la mía, aunque no se lo digas a nadie.
+
+=== par:lynde+marilla:3 ===
+quienes: lynde, marilla
+si: hecho:llego_stacy
+---
+lynde: La maestra nueva tiene ideas muy modernas. ¡Hacen ejercicios físicos en la escuela!
+marilla: Mientras no se rompan la cabeza…
+lynde: Ya veremos, Marilla. Ya veremos.
+
+# --- Marilla y Matthew
+
+=== par:marilla+matthew:0 ===
+quienes: marilla, matthew
+si: hecho:a_prueba, !hecho:se_queda
+---
+marilla: Hoy no rompió nada, Matthew. Y lavó los platos sin que se lo pidiera.
+matthew: Bueno, pues… ¿ves? Ya te lo decía yo.
+marilla: No he dicho nada todavía. Es una prueba.
+
+=== par:marilla+matthew:1 ===
+quienes: marilla, matthew
+si: hecho:se_queda
+---
+marilla: Matthew, ¿le estuviste dando caramelos a Ana otra vez?
+matthew: Bueno, pues… quizás uno. O dos.
+marilla: Esa niña te tiene en la palma de la mano.
+
+=== par:marilla+matthew:2 ===
+quienes: marilla, matthew
+si: hecho:se_queda, dia_juego:28
+---
+matthew: Marilla… la niña está creciendo, ¿no te parece?
+marilla: Demasiado rápido, Matthew. Demasiado rápido.
+
+=== par:marilla+matthew:3 ===
+quienes: marilla, matthew
+---
+marilla: Hay que arreglar la cerca del potrero antes del invierno.
+matthew: Ya lo creo. Mañana temprano, si no llueve.
+
+# --- Ana y Gilbert
+
+=== par:ana+gilbert:0 ===
+quienes: ana, gilbert
+si: hecho:zanahorias
+---
+gilbert: Ana, ¿algún día me vas a perdonar lo de «Zanahorias»?
+ana: Algunas cosas no se perdonan, Gilbert Blythe.
+gilbert: Bueno… seguiré preguntando.
+
+=== par:ana+gilbert:1 ===
+quienes: ana, gilbert
+si: hecho:queens
+---
+gilbert: Felicitaciones por el examen. Me ganaste por un punto.
+ana: …Gracias.
+gilbert: La próxima vez no será tan fácil, Ana.
+
+=== par:ana+gilbert:2 ===
+quienes: ana, gilbert
+si: cuaderno:escuela
+---
+gilbert: ¿Quieres que te ayude con ese canasto?
+ana: Puedo sola, gracias.
+gilbert: Ya sé que puedes. Solo preguntaba.
+
+# --- Ana y la Sra. Lynde
+
+=== par:ana+lynde:0 ===
+quienes: ana, lynde
+si: hecho:lynde_visita, !hecho:ofendio_lynde, dia_juego:28
+---
+lynde: Vaya, Ana, se te está oscureciendo el pelo. Ya no es tan colorado.
+ana: ¿De verdad, Sra. Lynde? ¡Es lo más lindo que me ha dicho nunca!
+
+=== par:ana+lynde:1 ===
+quienes: ana, lynde
+si: hecho:lynde_visita, !hecho:ofendio_lynde
+---
+lynde: Espero que te portes bien en la escuela, niña.
+ana: Lo intento con todas mis fuerzas, Sra. Lynde. A veces mis fuerzas se distraen.
+
+# --- Ana, Diana y Marilla
+
+=== par:ana+diana+marilla:0 ===
+quienes: ana, diana, marilla
+donde: casa
+---
+marilla: Niñas, no se alejen más allá del arroyo.
+diana: No, Srta. Cuthbert.
+ana: Solo hasta el Bosque Encantado, Marilla… que está más acá del arroyo, casi.
+marilla: Ana…
+
+=== par:ana+diana+marilla:1 ===
+quienes: ana, diana, marilla
+si: hecho:conocidas_diana, !hecho:prohibida
+---
+diana: Srta. Cuthbert, ¿Ana puede venir a tomar el té mañana?
+marilla: Si termina sus quehaceres, sí.
+ana: ¡Los terminaré hoy mismo! Bueno, mañana temprano.
+
+# --- Ana, Marilla y Matthew
+
+=== par:ana+marilla+matthew:0 ===
+quienes: ana, marilla, matthew
+si: hecho:se_queda
+---
+ana: ¡Adivinen qué me pasó hoy!
+marilla: Algo que vamos a lamentar, seguramente.
+matthew: Déjala contar, Marilla.
+ana: ¡Gracias, señor Matthew! Pues verán…
+
+=== par:ana+marilla+matthew:1 ===
+quienes: ana, marilla, matthew
+donde: gg
+---
+marilla: A la mesa. Y Ana, sin novelas en la mesa.
+ana: Era solo un capitulito, Marilla.
+matthew: (se ríe bajito) Je.
+
+# --- Ana, la Sra. Lynde y Marilla
+
+=== par:ana+lynde+marilla:0 ===
+quienes: ana, lynde, marilla
+si: hecho:lynde_visita, !hecho:ofendio_lynde
+---
+lynde: Marilla, esa niña habla más que un loro.
+ana: Los loros solo repiten, Sra. Lynde. Yo invento.
+marilla: Ana. A tu cuarto.
+
+# ====================================== dos vecinos que se cruzan (pares:) ======================================
+
+# --- un niño y un grande (habla primero el niño)
+
+=== pares:mixta:0 ===
+quienes: a, b
+---
+a: ¿Me da una manzana? Solo una.
+b: Toma, pero no le digas a nadie.
+
+=== pares:mixta:1 ===
+quienes: a, b
+---
+a: ¡Mire, encontré un nido!
+b: No lo toques, que la madre vuelve.
+
+=== pares:mixta:2 ===
+quienes: a, b
+---
+a: ¿Ya es hora de comer?
+b: Todavía no. Anda a jugar un rato.
+
+=== pares:mixta:3 ===
+quienes: a, b
+---
+a: ¡Gané la carrera hasta el portón!
+b: ¡Muy bien! Pero no corras tanto, que te caes.
+
+# --- dos niños
+
+=== pares:kids:0 ===
+quienes: a, b
+---
+a: ¡Te pillé! ¡Ahora tú la llevas!
+b: ¡No vale, no estaba jugando!
+
+=== pares:kids:1 ===
+quienes: a, b
+si: presente:gilbert
+---
+a: ¿Viste? A Gilbert se le fue la botella de leche río abajo.
+b: ¡Ja! Que no se entere el maestro.
+
+=== pares:kids:2 ===
+quienes: a, b
+---
+a: ¿Jugamos a las escondidas?
+b: Bueno, pero yo no cuento esta vez.
+
+=== pares:kids:3 ===
+quienes: a, b
+si: dias_desde:conocidas_diana:7
+---
+a: Dicen que en el Bosque Encantado hay fantasmas.
+b: Eso lo inventó Ana Shirley. ¡Pero igual no voy!
+
+# --- dos grandes
+
+=== pares:big:0 ===
+quienes: a, b
+---
+a: Qué lindo día para tender la ropa.
+b: Ya lo creo. Y ayer que no paró de llover.
+
+=== pares:big:1 ===
+quienes: a, b
+---
+a: ¿Va a la tienda de Lawson?
+b: Sí, se me acabó el azúcar. Con tanta compota...
+
+=== pares:big:2 ===
+quienes: a, b
+si: presente:allan
+---
+a: Dicen que el nuevo pastor predica muy bonito.
+b: Y la Sra. Allan es un encanto, eso sí.
+
+=== pares:big:3 ===
+quienes: a, b
+---
+a: ¿Cómo vienen las papas este año?
+b: Buenas, si no llueve demasiado.
+
+# ====================================== Ana y Diana, al cruzarse en el camino (ana_diana:) ======================================
+
+=== ana_diana:0 ===
+quienes: ana, diana
+---
+ana: ¡Diana, amiga del alma! Tengo tanto que contarte.
+diana: ¡Ana! Yo también. ¿Nos vemos en el Bosque Encantado?
+
+=== ana_diana:1 ===
+quienes: ana, diana
+---
+ana: ¿Viste qué color tiene hoy el lago? Como de perla.
+diana: Yo solo vi que estaba azul... pero tú lo dices más bonito.
+
+=== ana_diana:2 ===
+quienes: ana, diana
+---
+ana: Prometamos ser amigas mientras el sol y la luna existan.
+diana: ¡Lo prometo, Ana!
+
+# ====================================== Ana, soñando en voz alta con quien se cruza (suena:) ======================================
+
+=== suena:0 ===
+quienes: ana, otro
+---
+ana: ¿No le parece que hoy el mundo está recién hecho?
+otro: Esta niña... qué cosas dice.
+
+=== suena:1 ===
+quienes: ana, otro
+---
+ana: Vi una nube con forma de barco. Iba hacia Charlottetown.
+otro: Ya lo creo, Ana. Ya lo creo.
+
+=== suena:2 ===
+quienes: ana, otro
+---
+ana: ¿Sabía que los abedules parecen señoras de vestido blanco?
+otro: Nunca lo había pensado así.
+
+=== suena:3 ===
+quienes: ana, otro
+---
+ana: Hoy el lago brillaba como si tuviera estrellas adentro.
+otro: ¡Qué imaginación tienes, niña!
+
+=== suena:4 ===
+quienes: ana, otro
+---
+ana: Cuando sea grande quiero escribir libros. O ser maestra. O las dos cosas.
+otro: Tiempo tienes para decidirlo.
+
+# ====================================== mientras están juntas (te, paseo) ======================================
+
+=== te ===
+quienes: a, b
+---
+a: ¿Un poco más de té? Y prueba estas galletas.
+b: ¡Están deliciosas! Es como estar en un libro.
+a: Cuéntame qué estás leyendo ahora.
+b: Una novela con un castillo y una dama muy triste… ¡me encanta!
+
+=== paseo ===
+quienes: a, b
+---
+a: ¡Mira cómo brilla el agua!
+b: Es el Lago de las Aguas Brillantes: yo le puse el nombre, ¿sabes?
+a: ¿Y si fuéramos amigas del alma para siempre?
+b: ¡Para siempre jamás!
+a: Qué lindo es esto…
+b: Podríamos quedarnos aquí toda la tarde.

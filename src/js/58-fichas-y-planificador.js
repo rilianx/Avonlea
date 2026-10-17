@@ -61,14 +61,13 @@ function fichaOf(k){
 }
 const ANA_FICHA = 'Ana Shirley, 11 años, pelirroja y pecosa, huérfana adoptada por Matthew y Marilla Cuthbert de Tejas Verdes; soñadora, muy conversadora, de palabras grandiosas e imaginación desbordante';
 const SEASON_TOPICS = [['las flores de los manzanos', 'la primavera'], ['el calor', 'las vacaciones', 'las bayas'], ['las hojas rojas', 'las manzanas', 'la cosecha'], ['la nieve', 'el frío', 'la Navidad']];
-// written exchanges for two neighbours (when there is no AI)
-// (two who meet, a line each; one may wait for something of the story: «[presente:allan] …»; the news, they tell
+// written exchanges for two neighbours (when there is no AI): src/datos/charlas.txt
+// (two who meet, a line each; one may wait for something of the story: «si: presente:allan»; the news, they tell
 // as src/datos/noticias.txt says)
-const PAIR_LINES = {
-  mixta: [['¿Me da una manzana? Solo una.', 'Toma, pero no le digas a nadie.'], ['¡Mire, encontré un nido!', 'No lo toques, que la madre vuelve.'], ['¿Ya es hora de comer?', 'Todavía no. Anda a jugar un rato.'], ['¡Gané la carrera hasta el portón!', '¡Muy bien! Pero no corras tanto, que te caes.']],
-  kids: [['¡Te pillé! ¡Ahora tú la llevas!', '¡No vale, no estaba jugando!'], ['[presente:gilbert] ¿Viste? A Gilbert se le fue la botella de leche río abajo.', '¡Ja! Que no se entere el maestro.'], ['¿Jugamos a las escondidas?', 'Bueno, pero yo no cuento esta vez.'], ['[dias_desde:conocidas_diana:7] Dicen que en el Bosque Encantado hay fantasmas.', 'Eso lo inventó Ana Shirley. ¡Pero igual no voy!']],
-  big: [['Qué lindo día para tender la ropa.', 'Ya lo creo. Y ayer que no paró de llover.'], ['¿Va a la tienda de Lawson?', 'Sí, se me acabó el azúcar. Con tanta compota...'], ['[presente:allan] Dicen que el nuevo pastor predica muy bonito.', 'Y la Sra. Allan es un encanto, eso sí.'], ['¿Cómo vienen las papas este año?', 'Buenas, si no llueve demasiado.']],
-};
+const PAIR_LINES = { mixta: charlaPares('pares:mixta'), kids: charlaPares('pares:kids'), big: charlaPares('pares:big') };   // (src/datos/charlas.txt, «pares:»)
+// all the lines of a saying (src/datos/dichos/) that hold now, with their blanks filled: for a list the code still
+// filters (not what was heard today, not naming Ana before they know her) before picking one
+const dichosTodos = (m, v = {}) => (DICHOS_DE[m] || []).filter(d => dlgCumple({ si: d.si.map(c => dlgVal(rellenar(c, v))) }, dlgCtx())).map(d => rellenar(d.t, v));
 const paresSi = P => P.filter(p => lineasSi([p[0]]).length).map(([a, b]) => [lineasSi([a])[0], b]);   // (the pairs whose time has come)
 const memOn = k => !!AI.memoria && !!fichaOf(k)?.memoria;
 const enc = { cur: null, ready: null, busy: false, mute: {}, cool: 0, err: 0 };
@@ -92,7 +91,7 @@ async function encAsk(x, y){
 function encFallback(x, y){
   if (y === 'ana') {
     if (!conoceA(x) && !sinNombre(x)) return { parts: [x, y], lines: presentar(x), topic: '', scene: game.scene, born: TT, presenta: true };   // (the first time: who they are)
-    const d = FOLKBY[x].def, l = [{ q: encQ(x), t: pick(lineasDe(x, d.lines)) || pick(sinRepetir(x, [saludoHora() + ', niña.'])) || '(La saluda con la cabeza.)' }], a = lineasSi(d.ana); if (a.length && Math.random() < .7) l.push({ q: 'ana', t: pick(a) }); return { parts: [x, y], lines: l, topic: '', scene: game.scene, born: TT }; }
+    const d = FOLKBY[x].def, l = [{ q: encQ(x), t: pick(lineasDe(x, d.lines)) || pick(sinRepetir(x, dichosTodos('encuentro:saluda_nina', { hola: saludoHora() }))) || dicho('encuentro:saluda_con_la_cabeza') }], a = lineasSi(d.ana); if (a.length && Math.random() < .7) l.push({ q: 'ana', t: pick(a) }); return { parts: [x, y], lines: l, topic: '', scene: game.scene, born: TT }; }
   const kx = !!FOLKBY[x].kid, ky = !!FOLKBY[y].kid, [a, b] = pick(paresSi(PAIR_LINES[kx && ky ? 'kids' : kx || ky ? 'mixta' : 'big']).filter(p => !(/pastor/.test(p[0]) && [x, y].some(i => /allan/.test(i)))));
   const [p, q] = !kx && ky ? [y, x] : [x, y];   // (a child with a grown-up: the child speaks first, as a child)
   return { parts: [x, y], lines: [{ q: encQ(p), t: a }, { q: encQ(q), t: b }], topic: '', scene: game.scene, born: TT };
@@ -308,26 +307,26 @@ const clone = s => ({ t: s.t, pos: { ...s.pos }, invs: Object.fromEntries(Object
 const sKey = s => JSON.stringify([s.pos, s.invs, s.cows, s.ofensa, s.follow, s.facts, s.stock, s.sick, Object.entries(s.rel).filter(([k, v]) => v !== 2).sort(), Object.entries(s.know).map(([k, v]) => k + v.length)]);
 
 // --- the verbs: for the one who acts (me) in state s, what can be done, what it costs (minutes) and what it changes
-const FAVORS = {   // what one can ask of someone (ok: whether it can be asked; eff: what it makes true; goal: the goal installed in whoever accepts)
-  pasear: { eff: (s, me, to) => { s.follow[to] = me; }, ok: (s, me, to) => to === 'ana' || me === 'ana', say: () => '¿Vamos a dar un paseo juntas? Hace un día precioso.' },   // (the one asked comes along)
+const FAVORS = {   // what one can ask of someone (ok: whether it can be asked; eff: what it makes true; goal: the goal installed in whoever accepts; say: how it is asked, src/datos/dichos/21-planes.txt)
+  pasear: { eff: (s, me, to) => { s.follow[to] = me; }, ok: (s, me, to) => to === 'ana' || me === 'ana', say: () => dicho('pide:pasear') },   // (the one asked comes along)
   // an invitation for later: to come at an hour (tea at the parsonage, this afternoon); the one asked goes then
   venir: { eff: (s, me, to, a) => { s.pos[to] = a.lugar || 'h:cp'; }, ok: (s, me, to) => to === 'ana' || me === 'ana' && to === 'diana', wait: 30,
     goal: (me, a, s0) => { const H = teaHour(s0.t), p = a.lugar || 'h:cp';
       return { ...G.estar_en(a.to, p, H + .25, H + .75), quedar: null, quedarMin: 30, te: 1, con: me, teHasta: H + 1.5, desde: H - 1, text: `ir a tomar el té con ${wmName(me)} a las ${fmtHour(H)} (${WP_NAME[p]})`,
-        chat: [[me, '¿Un poco más de té? Y prueba estas galletas.'], [a.to, '¡Están deliciosas! Es como estar en un libro.'], [me, 'Cuéntame qué estás leyendo ahora.'], [a.to, 'Una novela con un castillo y una dama muy triste… ¡me encanta!']] }; },
-    say: a => `¿Vendrías a tomar el té conmigo esta tarde, a las ${fmtHour(teaHour(hourNow() * 60))}? En ${(WP_NAME[a.lugar || 'h:cp'] || '').replace(/^(el|la) /, m => m)}.` },
+        chat: charlaCon('te', { a: me, b: a.to }) }; },
+    say: a => dicho('pide:venir', { hora: fmtHour(teaHour(hourNow() * 60)), lugar: (WP_NAME[a.lugar || 'h:cp'] || '').replace(/^(el|la) /, m => m) }) },
   // (from the book) lending: the one asked hands it over at once (it is to be given back); the chores Marilla asks for; a ride in the cart
-  prestar: { eff: (s, me, to, a) => { s.invs[to][a.item] -= 1; s.invs[me][a.item] = (s.invs[me][a.item] || 0) + 1; s.facts['prestado:' + a.item + ':' + to + '>' + me] = 1; }, ok: (s, me, to, a) => (s.invs[to]?.[a.item] || 0) > 0, say: a => `¿Me prestarías ${ITEM_DEFS[a.item]?.gift?.art || itemTextW(a.item, 1)}? Te lo devuelvo, prometido.` },
-  curar: { eff: (s, me, to, a) => { s.sick = (s.sick || []).filter(x => x !== a.k); }, ok: (s, me, to, a) => !!whoOf(to).medico && (s.sick || []).includes(a.k), wait: 40, goal: (me, a) => G.sano(a.k), say: a => `¡Doctor! ${wmName(a.k)} está enfermo. ¿Podría venir a verlo, por favor?` },
-  quehaceres: { eff: (s, me, to, a) => { for (const q of a.q) s.facts['quehacer:' + q] = 1; }, ok: (s, me, to) => to === 'ana', wait: 30, goal: (me, a) => G.quehaceres(a.to, a.q), say: a => `Ana, hay que ${a.q.map(q => QUEHACER_TXT[q]).join(' y ')}. Y nada de quedarse soñando despierta.` },
-  llevar: { eff: (s, me, to, a) => { s.pos[me] = a.lugar; s.pos[to] = a.lugar; }, ok: (s, me, to) => to === 'matthew' && me !== 'matthew', wait: 15, goal: (me, a) => G.llevar(a.to, me, a.lugar), say: a => `Matthew, ¿me llevarías en la calesa a ${WP_NAME[a.lugar]}?` },
+  prestar: { eff: (s, me, to, a) => { s.invs[to][a.item] -= 1; s.invs[me][a.item] = (s.invs[me][a.item] || 0) + 1; s.facts['prestado:' + a.item + ':' + to + '>' + me] = 1; }, ok: (s, me, to, a) => (s.invs[to]?.[a.item] || 0) > 0, say: a => dicho('pide:prestar', { cosa: ITEM_DEFS[a.item]?.gift?.art || itemTextW(a.item, 1) }) },
+  curar: { eff: (s, me, to, a) => { s.sick = (s.sick || []).filter(x => x !== a.k); }, ok: (s, me, to, a) => !!whoOf(to).medico && (s.sick || []).includes(a.k), wait: 40, goal: (me, a) => G.sano(a.k), say: a => dicho('pide:curar', { enfermo: wmName(a.k) }) },
+  quehaceres: { eff: (s, me, to, a) => { for (const q of a.q) s.facts['quehacer:' + q] = 1; }, ok: (s, me, to) => to === 'ana', wait: 30, goal: (me, a) => G.quehaceres(a.to, a.q), say: a => dicho('pide:quehaceres', { tareas: a.q.map(q => QUEHACER_TXT[q]).join(' y ') }) },
+  llevar: { eff: (s, me, to, a) => { s.pos[me] = a.lugar; s.pos[to] = a.lugar; }, ok: (s, me, to) => to === 'matthew' && me !== 'matthew', wait: 15, goal: (me, a) => G.llevar(a.to, me, a.lugar), say: a => dicho('pide:llevar', { lugar: WP_NAME[a.lugar] }) },
   traer: { eff: (s, me, to, a) => { s.invs[me][a.item] = (s.invs[me][a.item] || 0) + a.n; }, ok: (s, me, to, a) => to !== me && (!isQuieto(to) || (s.invs[to]?.[a.item] || 0) >= a.n) && (!THINGS[a.item]?.hace || (s.invs[to]?.[a.item] || 0) >= a.n), wait: 45,   // (a dress is sewn, not fetched: one asks for the cloth)
-    goal: (me, a, s0) => G.tener(me, a.item, (s0.invs[me][a.item] || 0) + a.n), say: a => `¿Me traerías ${itemTextW(a.item, a.n)}?` },
-  vender_vaca: { eff: (s, me, to, a) => { s.cows[a.cow] = 'sold:' + me; }, ok: (s, me, to, a) => CUTHBERT.includes(to) && s.cows[a.cow] && !s.cows[a.cow].startsWith('sold'), wait: 45, goal: (me, a) => G.vaca_vendida(a.cow, me), say: () => '¿Me vendería la vaca?' },
+    goal: (me, a, s0) => G.tener(me, a.item, (s0.invs[me][a.item] || 0) + a.n), say: a => dicho('pide:traer', { cosa: itemTextW(a.item, a.n) }) },
+  vender_vaca: { eff: (s, me, to, a) => { s.cows[a.cow] = 'sold:' + me; }, ok: (s, me, to, a) => CUTHBERT.includes(to) && s.cows[a.cow] && !s.cows[a.cow].startsWith('sold'), wait: 45, goal: (me, a) => G.vaca_vendida(a.cow, me), say: () => dicho('pide:vender_vaca') },
   encerrar_vaca: { eff: (s, me, to, a) => { s.cows[a.cow] = a.pen; }, ok: (s, me, to, a) => to !== me && !isQuieto(to) && !String(s.cows[a.cow]).startsWith('led') && !String(s.cows[a.cow]).startsWith('sold'), wait: 45, goal: (me, a) => G.vaca_en(a.cow, a.pen),
-    say: a => a.cow === 'jersey' && a.pen === 'potrero' ? '¿Me harías el favor de devolver mi vaca al potrero? Yo no me puedo ni levantar.' : `¡${ANIMALS[a.cow].name} anda suelta otra vez! ¿Podrías llevarla a ${WP_NAME[a.pen]}?` },
+    say: a => a.cow === 'jersey' && a.pen === 'potrero' ? dicho('pide:devolver_mi_vaca') : dicho('pide:encerrar_vaca', { vaca: ANIMALS[a.cow].name, lugar: WP_NAME[a.pen] }) },
   interceder: { eff: (s, me, to, a) => { socialRule(stateR(s), 'interceder', to, a.target, me); }, ok: (s, me, to, a) => (s.rel[a.target + '>' + to] ?? 2) >= 4 && !s.facts['intercede:' + a.target + '>' + me], wait: 20,
-    goal: (me, a) => G.intercede(a.target, me), say: a => `¿Hablarías con ${wmName(a.target)} por mí? A ti te escucha.` },
+    goal: (me, a) => G.intercede(a.target, me), say: a => dicho('pide:interceder', { quien: wmName(a.target) }) },
 };
 // whom one could ask for help with a goal (anyone present who is not in the chain of who asked whom)
 function autoFavors(me, goal, s0, exclude = []){
@@ -431,7 +430,7 @@ const G = {
   conoce: (k, f) => ({ text: `${wmName(k)} se entera (${f.replace(/_/g, ' ')})`, test: s => (s.know[k] || []).includes(f), h: s => (s.know[k] || []).includes(f) ? 0 : 1, items: [], people: [k, ...WM_PEOPLE().filter(p => (game.wm.know[p] || []).includes(f))] }),
   paseo: (a, b, p = 'lago', min = 30) => ({ kind: 'paseo', a, b, text: `${wmName(a)} y ${wmName(b)} dan un paseo hasta ${WP_NAME[p]}`, test: s => s.pos[a] === p && s.pos[b] === p && s.follow[b] === a,
     h: s => (s.follow[b] === a ? 0 : 1) + (s.pos[a] === p ? 0 : 1), items: [], people: [a, b], places: [p], quedarMin: min,
-    chat: [[a, '¡Mira cómo brilla el agua!'], [b, 'Es el Lago de las Aguas Brillantes: yo le puse el nombre, ¿sabes?'], [a, '¿Y si fuéramos amigas del alma para siempre?'], [b, '¡Para siempre jamás!'], [a, 'Qué lindo es esto…'], [b, 'Podríamos quedarnos aquí toda la tarde.']] }),
+    chat: charlaCon('paseo', { a, b }) }),
   // (from the book)
   quehaceres: (k, list) => ({ kind: 'quehaceres', k, text: `${wmName(k)} hace los quehaceres (${list.map(q => QUEHACER_TXT[q]).join(', ')})`, test: s => list.every(q => s.facts['quehacer:' + q]), h: s => list.filter(q => !s.facts['quehacer:' + q]).length, items: [], people: [k], places: ['cocina'] }),
   alimentados: list => ({ kind: 'alimentados', text: 'los animales comieron (' + list.map(p => WP_NAME[p]).join(', ') + ')', test: s => list.every(p => s.facts['alimentados:' + p]), h: s => list.filter(p => !s.facts['alimentados:' + p]).length, items: [], people: [], places: list }),

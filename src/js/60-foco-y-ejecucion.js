@@ -39,12 +39,7 @@ function stimuli(b){
   return L;
 }
 const LOOK_TEXT = { lago: s => 'se quedó mirando ' + s.name, flores: () => 'se detuvo a mirar las flores', arboles: () => 'se quedó mirando los árboles en flor', mar: () => 'se quedó mirando el mar', animales: s => 'se detuvo a mirar ' + s.name, campo: () => 'se detuvo a ver cómo va el campo' };
-const LOOK_LINES = {
-  ana: { lago: ['¡El Lago de las Aguas Brillantes! Podría quedarme aquí la vida entera.', 'El agua tiene hoy un color de perla... ¿o de ópalo?'], flores: ['¡Qué flores! Parecen pensamientos de alguien muy feliz.', 'Si yo fuera flor, querría ser una de estas.'], arboles: ['Los cerezos en flor parecen novias vestidas de blanco.', '¡La Blanca Senda de las Delicias, otra vez!'], mar: ['El mar... ¿qué habrá del otro lado?', 'Cuando sea grande voy a cruzar el mar. O a escribir sobre él.'], animales: ['¡Hola, pequeño! ¿Cómo te llamas? Yo te diré Lord Fitzgerald.', '¿Qué pensarán los animales de nosotros?'], campo: ['Todo crece tan callado... como un secreto.'] },
-  matthew: { animales: ['Buen animal, sí... buen animal.', 'Ejem... tranquila, tranquila.'], campo: ['Hmm. Va bien la avena. Sí... va bien.'] },
-  diana: { flores: ['¡Ay, qué lindas! Le llevaré unas a mamá.'], lago: ['Ana diría algo precioso de este lago...'] },
-  _: { lago: ['¡Qué lindo está el lago hoy!'], flores: ['Qué bonitas las flores este año.'], arboles: ['Mire nada más esos árboles.'], mar: ['Qué brisa trae el mar.'], animales: ['Mira tú...'], campo: ['Buena tierra, esta.'] },
-};
+// what one says on stopping to look (src/datos/dichos/20-encuentros.txt, «mira:<who>:<what>»; if they have nothing for it, «otros», save Ana)
 // on the way to a task: something to look at, or someone to talk with?
 function distractCheck(ag){
   if (!WM_DISTRACT || ag.hold || ag.followOf || TT < (ag.calmUntil || 0) || TT < (ag.nextCheck || 0)) return false;
@@ -66,8 +61,8 @@ function startLook(ag, s, F, urg){
   wmRelease(ag.who); b.moving = false; b.dir = s.x < b.x ? 3 : 1;
   ag.distract = { kind: s.kind, text: LOOK_TEXT[s.kind](s), until: TT + dur };
   agentLog(ag, '💭 ' + ag.distract.text + ' (' + Math.round(dur) + ' s)');
-  const L = (LOOK_LINES[ag.who] || LOOK_LINES._)[s.kind] || (ag.who === 'ana' ? null : LOOK_LINES._[s.kind]);
-  if (L && Math.random() < .8) sayB(qOf(ag.who), pick(L));
+  const t = dicho('mira:' + ag.who + ':' + s.kind) || (ag.who === 'ana' ? '' : dicho('mira:otros:' + s.kind));
+  if (t && Math.random() < .8) sayB(qOf(ag.who), t);
 }
 // while distracted the task waits; then on with it
 function distractTick(ag){
@@ -129,42 +124,42 @@ function chatTick(dt){
     const l = c.lines[c.i]; sayB(qOf(l.q), l.t); c.wait = lineDur(l.t) + .35;
   }
 }
-// what they say (no generative AI: a greeting, a few lines as the characters are, and a goodbye that mentions the errand)
-const ANA_DIANA = [['¡Diana, amiga del alma! Tengo tanto que contarte.', '¡Ana! Yo también. ¿Nos vemos en el Bosque Encantado?'], ['¿Viste qué color tiene hoy el lago? Como de perla.', 'Yo solo vi que estaba azul... pero tú lo dices más bonito.'], ['Prometamos ser amigas mientras el sol y la luna existan.', '¡Lo prometo, Ana!']];
-const ANA_SUENA = [['¿No le parece que hoy el mundo está recién hecho?', 'Esta niña... qué cosas dice.'], ['Vi una nube con forma de barco. Iba hacia Charlottetown.', 'Ya lo creo, Ana. Ya lo creo.'], ['¿Sabía que los abedules parecen señoras de vestido blanco?', 'Nunca lo había pensado así.'], ['Hoy el lago brillaba como si tuviera estrellas adentro.', '¡Qué imaginación tienes, niña!'], ['Cuando sea grande quiero escribir libros. O ser maestra. O las dos cosas.', 'Tiempo tienes para decidirlo.']];
+// what they say (no generative AI: a greeting, a few lines as the characters are, and a goodbye that mentions the errand;
+// the lines, in src/datos/dichos/20-encuentros.txt and src/datos/charlas.txt)
+const ANA_DIANA = charlaPares('ana_diana'), ANA_SUENA = charlaPares('suena');   // (src/datos/charlas.txt: two lines, Ana's and the other's; «[conditions] » before the first, if any)
 const saludoHora = () => { const h = hourNow() % 24; return h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches'; };
 function chatLines(a, b, anaFree){
   const L = [], h = hourNow(), hi = saludoHora(), say = (q, t) => t && L.push({ q, t: t.replace(/Buenos días|Buenas tardes|Buenas noches/, hi) });   // (nothing left to say today: nothing)   // (the greeting, as the hour is)
-  const sin = A => { const u = [...A].sort(() => Math.random() - .5); return () => u.length > 1 ? u.pop() : u[0]; }, suena = sin(ANA_SUENA), pares = sin(paresSi(PAIR_LINES[isKid(a) && isKid(b) ? 'kids' : 'big']));   // (in one talk, no line twice)
+  const sin = A => { const u = [...A].sort(() => Math.random() - .5); return () => u.length > 1 ? u.pop() : u[0]; }, suena = sin(paresSi(ANA_SUENA)), anaDiana = paresSi(ANA_DIANA), pares = sin(paresSi(PAIR_LINES[isKid(a) && isKid(b) ? 'kids' : 'big']));   // (in one talk, no line twice)
   const tu = isKid(a) && isKid(b), nm = k => /^[a-zá-ú]/.test(wmName(k)) ? '' : wmName(k), A = nm(a), B = nm(b), to = n => n ? ', ' + n : '';   // ("un vecino" is no name to call someone by)
   if (anaFree) {   // (Ana, as the player moves her, passing by: a word to her)
     const d = FOLKBY[a]?.def;
     if (!conoceA(a) && !sinNombre(a)) { for (const l of presentar(a)) say(l.q === 'ana' ? 'ana' : a, l.t); L.presenta = a; L.hasta = L.findIndex(l => l.q === 'ana'); return L; }   // (the first time: who they are)
-    say(a, reaccionAlVerla(a) || (a === 'gilbert' && d ? pick(lineasDe('gilbert', d.lines)) : null) || pick(sinRepetir(a, lineasAjenas(a, [`¡${hi}, Ana!`, '¡Hola, Ana! ¿A dónde vas tan apurada?', '¡Ana Shirley! Saludos a Marilla.', `¡${hi}, niña!`]))));
-    const r = lineasSi(FOLKBY[a]?.def.ana || ['Hmpf.']); if (relGetW('ana', a) <= 0 && r.length && L.length) say('ana', pick(r));
+    say(a, reaccionAlVerla(a) || (a === 'gilbert' && d ? pick(lineasDe('gilbert', d.lines)) : null) || pick(sinRepetir(a, lineasAjenas(a, dichosTodos('encuentro:saluda_a_ana', { hola: hi })))));
+    const r = lineasSi(FOLKBY[a]?.def.ana || [dicho('encuentro:ana_seca')]); if (relGetW('ana', a) <= 0 && r.length && L.length) say('ana', pick(r));
     return L;
   }
   const ana_ = a === 'ana' ? a : b === 'ana' ? b : null, other = ana_ && (a === 'ana' ? b : a);
   if (ana_ && !conoceA(other) && !sinNombre(other)) { for (const l of presentar(other)) say(l.q === 'ana' ? 'ana' : other, l.t); L.presenta = other; L.hasta = L.findIndex(l => l.q === 'ana'); return L; }   // (the first time: who they are)
-  if (ana_ && relGetW('ana', other) <= 0) { say(other, reaccionAlVerla(other) || (FOLKBY[other]?.def.lines ? pick(lineasDe(other, FOLKBY[other].def.lines)) : null) || pick(sinRepetir(other, lineasAjenas(other, [`${hi}, Ana.`, `${hi}, niña.`])))); const r = lineasSi(FOLKBY[other]?.def.ana || ['Hmpf.']); if (r.length && L.length) say('ana', pick(r)); return L; }
+  if (ana_ && relGetW('ana', other) <= 0) { say(other, reaccionAlVerla(other) || (FOLKBY[other]?.def.lines ? pick(lineasDe(other, FOLKBY[other].def.lines)) : null) || pick(sinRepetir(other, lineasAjenas(other, dichosTodos('encuentro:saluda_seco', { hola: hi }))))); const r = lineasSi(FOLKBY[other]?.def.ana || [dicho('encuentro:ana_seca')]); if (r.length && L.length) say('ana', pick(r)); return L; }
   if (a === 'matthew' || b === 'matthew') {   // (Matthew: a greeting, and off he goes)
     const o = a === 'matthew' ? b : a;
-    say(o, `¡${hi}, Matthew!`); say('matthew', pick(['Eh... b-buenas.', 'Buenas... sí... buen día, ¿no?', 'Ejem... buenas.']));
-    if (focoOf(o).social > .7) say(o, pick(['¡Qué raro verlo por aquí! ¿Cómo anda todo?', '¿Y Marilla? ¿Bien?']));
-    say('matthew', pick(['Bueno... tengo que seguir, ¿sabe? Sí... eso.', 'Pues... sí... tengo un encargo. Hasta luego.'])); return L;
+    say(o, dicho('encuentro:saluda_a_matthew', { hola: hi })); say('matthew', dicho('encuentro:matthew_saluda'));
+    if (focoOf(o).social > .7) say(o, dicho('encuentro:pregunta_a_matthew'));
+    say('matthew', dicho('encuentro:matthew_se_va')); return L;
   }
-  say(a, `¡${hi}${to(B)}!`); say(b, tu ? pick([`¡Hola${to(A)}! ¿A dónde vas?`, `¡Hola${to(A)}!`]) : pick([`¡${hi}${to(A)}! ¿Cómo están todos en casa?`, `¡Qué gusto verle${to(A)}!`]));
+  say(a, dicho('encuentro:saluda', { hola: hi, nombre: to(B) })); say(b, dicho(tu ? 'encuentro:responde_nino' : 'encuentro:responde_grande', { hola: hi, nombre: to(A) }));
   const rounds = 1 + Math.round((1 - Math.max(focoOf(a).enfoque, focoOf(b).enfoque)) * 3);
   for (let k = 0; k < rounds; k++) {
     const ch = !ana_ && !k && (chisme(a, b) || chisme(b, a));   // (two neighbours: a piece of news, told aloud: src/datos/noticias.txt)
     if (ch) for (const [q, t] of ch) say(q, t);
-    else if (ana_ && other === 'diana' && dianaAmiga()) { const [x, y] = ANA_DIANA[(k + Math.floor(TT)) % ANA_DIANA.length]; say('ana', x); say('diana', y); }
-    else if (ana_) { const [x, y] = suena(); say('ana', isKid(other) ? x.replace('¿No le parece', '¿No te parece').replace('¿Sabía', '¿Sabías') : x); say(other, isKid(other) ? pick(['¡Qué lindo, Ana!', '¿De verdad? ¡Cuéntame más!', '¡Qué cosas dices, Ana!']) : y); }
+    else if (ana_ && other === 'diana' && dianaAmiga() && anaDiana.length) { const [x, y] = anaDiana[(k + Math.floor(TT)) % anaDiana.length]; say('ana', x); say('diana', y); }
+    else if (ana_) { const [x, y] = suena(); say('ana', isKid(other) ? x.replace('¿No le parece', '¿No te parece').replace('¿Sabía', '¿Sabías') : x); say(other, isKid(other) ? dicho('encuentro:nino_responde_a_ana') : y); }
     else { const [x, y] = pares(); say(a, x); say(b, y); }
   }
   const t = AGENTS[a]?.task || AGENTS[b]?.task, who = AGENTS[a]?.task ? a : b;
-  const va = t && `Bueno, me voy, que tengo que ${stepText(t.a).replace(/^(\S+r)se\b/, '$1me')}.`;
-  say(who, va && !nombra(va, who) ? va : pick(['Bueno, ¡que le vaya bien!', 'Me voy, que se hace tarde.']));   // (not «ir a la casa de la Sra. Lynde», said by her)
+  const va = t && dicho('encuentro:me_voy_a', { tarea: stepText(t.a).replace(/^(\S+r)se\b/, '$1me') });
+  say(who, va && !nombra(va, who) ? va : dicho('encuentro:despedida'));   // (not «ir a la casa de la Sra. Lynde», said by her)
   return L;
 }
 

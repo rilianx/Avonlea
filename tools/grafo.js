@@ -54,6 +54,11 @@ for (const raw of guion.split('\n')) {
   if ((m = s.match(/^===\s*(.+?)\s*===$/))) { g = m[1]; continue; }
   if ((m = s.match(/^si:\s*(.*)$/))) m[1].split(',').forEach(c => condicion(c, 'comentarios de ' + g));
   if ((m = s.match(/^-\s*\[([^\]]*)\]/))) m[1].split(',').forEach(c => condicion(c, 'un comentario de ' + g)); } }
+// the talks (src/datos/charlas.txt): what two or three say when they meet; their conditions too
+{ let g = null; for (const raw of leer('src/datos/charlas.txt').split('\n')) { const s = raw.trim(); if (!s || s[0] === '#') continue; let m;
+  if ((m = s.match(/^===\s*(.+?)\s*===$/))) { g = m[1]; continue; }
+  if (s === '---') { g = null; continue; }
+  if (g && (m = s.match(/^si:\s*(.*)$/))) m[1].split(',').forEach(c => condicion(c, 'charla ' + g)); } }
 // the sayings (src/datos/dichos/*.txt): their conditions (blanks aside); each moment the code asks for exists, with one
 // line at least that needs nothing of its own (never silent); and each moment written is asked for by the code
 { const dir = path.join(root, 'src/datos/dichos'), M = {}; for (const f of fs.readdirSync(dir).filter(f => f.endsWith('.txt')).sort()) { let g = null;
