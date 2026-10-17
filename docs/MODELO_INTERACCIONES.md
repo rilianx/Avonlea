@@ -62,6 +62,16 @@ De la revisión crítica de las animaciones salieron estas reglas, cada una gene
 - **Ningún camino atraviesa una casa.** Todo tramo que cruza el cuerpo de una casa la rodea (por delante o por el costado más corto), y todo camino a una puerta sale del frente (`src/js/03-corrales-y-campos.js`).
 - **Nadie es atropellado.** Un carro va al paso de un caballo (`CARRO`, casi como quien camina) y se detiene ante quien está en el camino justo delante; los grandes se hacen a un lado, a Ana la espera.
 
+## Los textos viven en los datos, no en el código
+
+Todo lo que alguien dice o escribe en el juego está en `src/datos/`, con sus condiciones, para que se pueda ampliar (a mano o con una IA) y lo revisen las mismas reglas:
+- las escenas, conversaciones y cartas (con sus respuestas: `canal: respuesta`), en `guion.txt` y `conversaciones.txt`;
+- las charlas de a dos y de a tres, en `charlas.txt`;
+- **los dichos** (`src/datos/dichos/*.txt`): lo que se dice en un momento que el código nombra (un «gracias», lo que se dice al hacer una tarea, un saludo, el camino a Bright River), con condiciones y huecos `{nombre}`; el código los pide con `dicho('momento', {…})`;
+- las historias del día escritas a mano, en `historias.json`.
+
+`tools/grafo.js` revisa que cada momento que pide el código exista, que ninguno quede callado y que las condiciones estén bien escritas; `tools/modelo.py` lee los dichos que dicen quién los dice (`quien:`) y les aplica las reglas de `reglas.txt` (así aparecieron líneas de Diana que no decían «mientras no se lo prohíban»).
+
 ## Los días a prueba (del 1 al 3)
 
 Lo que pasa entre que Ana llega y que Marilla decide (los cap. 2 a 8 del libro) se revisa de tres maneras:

@@ -3076,20 +3076,24 @@ quien: matthew
 
 === diana_prohibida ===
 quien: diana
+si: hecho:prohibida
 - Ana… mamá no me deja hablar contigo. Lo siento tanto, tanto…
 - No puedo, Ana… mamá dice que no. Pero te sigo queriendo, ¿sabes?
 
 # (pasear con Diana, 35-cosas-que-lleva.js, walkOption(): la despedida, de tarde o no; y el sí)
 === paseo_fin_tarde ===
 quien: diana
+si: !hecho:prohibida
 - ¡Hasta mañana, Ana! Que sueñes bonito.
 
 === paseo_fin ===
 quien: diana
+si: !hecho:prohibida
 - ¡Nos vemos, Ana! Fue un paseo precioso.
 
 === paseo_si ===
 quien: diana
+si: !hecho:prohibida
 - ¡Sí! Vamos, Ana, a donde tú quieras.
 
 # --- los encargos (38-encargos.js): al entregarle lo que pidió, y al darle un recado
@@ -3254,10 +3258,12 @@ quien: matthew
 
 === mira:diana:flores ===
 quien: diana
+si: !hecho:prohibida
 - ¡Ay, qué lindas! Le llevaré unas a mamá.
 
 === mira:diana:lago ===
 quien: diana
+si: !hecho:prohibida
 - Ana diría algo precioso de este lago...
 
 === mira:otros:lago ===
@@ -3636,6 +3642,7 @@ quien: ana
 # mismo día, y lo del cordial de frambuesa
 === te_diana:primera ===
 quien: diana
+si: !hecho:prohibida
 - Mamá nos dejó té y galletas. ¡Y cordial de frambuesa!
 - ¿Más té, Ana? Me encanta tomar el té contigo, como dos señoras de verdad.
 - Cuando seamos mayores tomaremos el té así todas las tardes, ¿verdad?
@@ -3643,10 +3650,12 @@ quien: diana
 
 === te_diana_otra_vez ===
 quien: diana
+si: !hecho:prohibida
 - Ya tomamos el té hoy, Ana... ¡pero podemos quedarnos conversando!
 
 === te_diana_cordial ===
 quien: diana
+si: !hecho:prohibida
 - ¡Sí, sí! Esta vez lo revisé dos veces. Nada de vino de grosellas... ¡qué susto el de aquella vez!
 
 # La gente: lo que dicen los demás en momentos que el código nombra (el Sr. Lawson en su tienda, quien es llamado de
@@ -12531,7 +12540,7 @@ function ambUpdate(dt){
   if (!best) return;
   { const L = bd < 90 && cadenaEncuentro(best); if (L) { amb.mute[best] = TT + 110; amb.seen[best] = true; sceneStart({ parts: [best], lines: L, out: {}, scene: game.scene, resumen: '' }, false); return; } }   // (two who have not met: they meet, as in the book)
   if (best === 'diana' && !dianaAmiga()) return;   // (no friend's greeting from one she does not know yet)
-  { const C = bd < 90 && !reaccionAlVerla(best) && !activeGoals(AGENTS[best] || { goals: [] }).length && Math.random() < .3 && convDisponibles(best).filter(d => !convSitio(d) || convEnSitio(d, convSitio(d)))[0]; if (C) { amb.mute[best] = TT + 110; amb.seen[best] = true; conversar(C); return; } }   // (now and then, one of the conversations there are with them, by itself)
+  { const C = bd < 90 && !reaccionAlVerla(best) && !activeGoals(AGENTS[best] || { goals: [] }).length && !activeGoals(AGENTS.ana).length && !ocupada(best) && !ocupada('ana') && Math.random() < .3 && convDisponibles(best).filter(d => !convSitio(d) || convEnSitio(d, convSitio(d)))[0]; if (C) { amb.mute[best] = TT + 110; amb.seen[best] = true; conversar(C); return; } }   // (now and then, one of the conversations there are with them, by itself)
   // what they see of her (in a nightgown, out at night, no hat), they say first, from where they see it (not only beside
   // her), with the AI or without it
   { const ve = reaccionAlVerla(best); if (ve) { amb.mute[best] = TT + 110; amb.seen[best] = true; sceneStart({ parts: [best], lines: [{ q: best, t: ve }], out: {}, scene: game.scene, resumen: '', ve: true }, false); return; } }
