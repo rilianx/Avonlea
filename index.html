@@ -2635,6 +2635,574 @@ ana: ¡La primera nieve! El Camino Blanco se acordó de su nombre. Cada copo es 
 # Cada momento tiene que tener al menos una línea sin condiciones propias (para que nunca quede callado):
 # lo revisa tools/grafo.js. Un archivo por tema (acciones, regalos, gente…).
 
+# Lo que se dice mientras se hace algo: las acciones del planificador y de la jugadora (src/js/63-jugar.js, wmExec0),
+# lo que se dice al llegar a un paso de una acción (src/js/61-acciones-vista.js) y el huertito de Ana (src/js/51-huertito.js).
+# Lo dice quien hace la acción (me) o a quien se la hacen (a.k): lo decide el código.
+
+# --- quehaceres (63-jugar.js: dicho('quehacer:' + a.x), con a.x = platos, barrer, mesa)
+=== quehacer:platos ===
+- Lavo los platos con agua bien caliente… ¡y no rompo ninguno!
+
+=== quehacer:barrer ===
+- Barro la cocina, y el patio también.
+
+=== quehacer:mesa ===
+- Pongo la mesa: los platos de todos los días y la compota.
+
+# (61-acciones-vista.js: al llegar al aparador, para poner la mesa)
+=== aparador_platos ===
+- Los platos de todos los días…
+
+# --- el corral (63-jugar.js); huecos: {vaca}, el nombre de la vaca
+=== ordenar_vaca ===
+- Tranquila, {vaca}… ya está, ya está.
+
+# --- una visita (63-jugar.js); huecos: {saludo} (buenos días, buenas tardes…), {nombre} (como la llama)
+=== visitar_saludo ===
+- {saludo}, {nombre}. Vine a visitarla.
+
+# (la que recibe la visita)
+=== visitar_pasa ===
+- ¡Pasa, pasa! Siéntate, que pongo la tetera.
+
+# --- devolver un libro prestado (63-jugar.js): quien lo devuelve, y quien lo recibe
+=== devolver_libro ===
+- Aquí tienes tu libro. ¡Me encantó! Lo leí dos veces.
+
+=== devolver_libro_responde ===
+- ¡Qué bueno que te gustó! Te presto otro cuando quieras.
+
+# --- el juramento de amigas del alma (63-jugar.js); hueco: {amiga}, el nombre de la otra
+=== jurar ===
+- Juro solemnemente ser fiel a mi amiga del alma, {amiga}, mientras duren el sol y la luna.
+
+=== jurar_responde ===
+- Juro ser fiel a mi amiga del alma, {amiga}, mientras duren el sol y la luna.
+
+# --- perdonar (63-jugar.js): a Gilbert, a cualquier otro; y la respuesta del perdonado
+=== perdonar_gilbert ===
+- Está bien, Gilbert Blythe… te perdono. Y no me digas más «Zanahorias».
+
+=== perdonar ===
+- Está bien… te perdono. Hagamos las paces.
+
+=== perdonar_gracias ===
+- ¡Gracias! Amigos, entonces.
+
+# --- cuidar a un enfermo (63-jugar.js): el doctor, o con el jarabe de ipecacuana; y lo que dice el enfermo
+=== cuidar_doctor ===
+- Veamos… una gripe fuerte. Tome esto, y a guardar cama unos días.
+
+=== cuidar_jarabe ===
+- Una cucharadita de jarabe de ipecacuana… y otra más. Ya va a pasar.
+
+=== cuidado_doctor_gracias ===
+- Gracias, doctor. Ya me siento mejor.
+
+=== cuidado_gracias ===
+- Ya me siento mucho mejor. Gracias, niña.
+
+# --- la escuela, la casa, el lago (63-jugar.js): lo dice quien lo hace
+=== estudiar ===
+- «El cuadrado de la hipotenusa es igual…» Repaso y repaso.
+
+=== recitar ===
+- «Y a lo largo del río, en su barca, iba la doncella de Shalott…»
+
+=== rezar ===
+- Querido Padre celestial: gracias por el Camino Blanco de las Delicias y por el Lago de las Aguas Brillantes…
+
+=== adornar_sombrero ===
+- ¡Una corona de ranúnculos y rosas silvestres para mi sombrero!
+
+=== remar ===
+- ¡Remo en el bote de los Barry! Hay que tener cuidado de no soltar los remos…
+
+# (nombrar un lugar; hueco: {nombre}, el nombre que le pone)
+=== nombrar_lugar ===
+- Este lugar se va a llamar {nombre}. ¿No es un nombre precioso?
+
+# --- regañar (63-jugar.js): Marilla a Ana, o cualquiera a cualquiera; y la respuesta
+=== regano_ana ===
+quien: marilla
+- ¡Ana Shirley! Otra vez se te olvidaron los quehaceres. Estás castigada: a la cocina media hora, y a pensar.
+
+=== regano ===
+- Esto no puede ser. Que no se repita.
+
+=== regano_ana_responde ===
+quien: ana
+- Lo siento, Marilla… me distraje imaginando que era una princesa.
+
+=== regano_responde ===
+- Sí, señora.
+
+# --- la calesa (63-jugar.js)
+=== subir_calesa ===
+- Sube, Ana. Engancho la yegua y te llevo en la calesa.
+
+# --- leer, escribir, recitar en el concierto (63-jugar.js)
+=== leer ===
+- «Ben-Hur»… ¡No puedo parar de leer! La carrera de cuadrigas…
+
+=== escribir_cuento ===
+- «Los celos de Cordelia»: una historia trágica, con un ahogado y una dama de cabellos de oro…
+
+=== leer_cuento ===
+- Escucha, Diana: «La dama Geraldine caminaba a la luz de la luna…»
+
+=== leer_cuento_responde ===
+- ¡Ay, Ana, qué triste! ¡Lloré en la parte del ahogado!
+
+=== ensayar ===
+- «La doncella de Shalott»… otra vez desde el principio, con más sentimiento.
+
+=== actuar ===
+- «…y la barca siguió flotando río abajo, hacia Camelot.»
+
+# --- felicitar y consolar (63-jugar.js): quien lo hace, y la respuesta
+=== felicitar ===
+- ¡Felicitaciones! Lo hiciste maravillosamente.
+
+=== felicitar_responde ===
+- ¡Gracias! Estaba tan nerviosa…
+
+=== consolar ===
+- No llores… todo se va a arreglar, ya verás. Yo estoy contigo.
+
+=== consolar_responde ===
+- Gracias… ya me siento mejor.
+
+# --- el campo y la leña (63-jugar.js)
+=== hacer_heno ===
+- A juntar el heno antes de que llueva…
+
+=== acarrear_lena ===
+- Una brazada para la caja de la leña… ¡pesa como un tesoro de piratas!
+- Leña para la estufa de Marilla. Que no se me caiga ninguna.
+
+=== partir_lena ===
+- ¡Zas! ¡Zas! Leña para la cocina de Marilla.
+
+# --- el invierno (63-jugar.js): patinar (con Diana cerca, o sin ella) y el trineo
+=== patinar_con_diana ===
+- ¡Mira, Diana! ¡Vuelo sobre el hielo como una golondrina!
+
+=== patinar ===
+- ¡Vuelo sobre el hielo como una golondrina!
+
+=== trineo ===
+- ¡Allá vamos, colina abajo! ¡Agárrate fuerte!
+
+# --- el picnic (63-jugar.js): el permiso de Marilla, y la merienda junto al lago
+=== pedir_permiso_picnic ===
+- Marilla, ¿puedo ir al picnic de la escuela dominical? ¡Va a haber helado!
+
+=== permiso_picnic_si ===
+quien: marilla
+- Está bien, puedes ir. Y te pongo una canasta con algo rico.
+
+=== merendar ===
+- ¡Un picnic junto al lago! Y hay helado… ¡nunca había probado helado! Es indescriptible.
+
+# --- el pelo verde (63-jugar.js) y el tinte frente al espejo (61-acciones-vista.js)
+=== tenir_espejo ===
+- ¡Negro azabache como el ala de un cuervo! Ya verán…
+
+=== tenir_verde ===
+- Ya está… a ver… ¡¿VERDE?! ¡Mi pelo está VERDE!
+
+=== cortar_pelo ===
+quien: marilla
+- No hay más remedio, Ana: hay que cortarlo. Quédate quieta.
+
+=== cortar_pelo_ana ===
+quien: ana
+- Mi pelo… Bueno, por lo menos ya no es verde.
+
+# --- el desafío de Josie (63-jugar.js) y la caída del techo (61-acciones-vista.js)
+=== trepar_techo ===
+- ¡Josie Pye, mira cómo camino por el techo de los Barry!… ¡Ay!
+
+=== techo_caida ===
+quien: ana
+- ¡Aaay!
+
+=== techo_tobillo ===
+quien: ana
+- ¡Mi tobillo! Creo que me lo torcí… Diana, no puedo pararme.
+
+# --- coser (63-jugar.js)
+=== coser ===
+- Coso el vestido… y le pongo unas mangas abullonadas, como las que usan ahora.
+
+# --- vender la vaca (63-jugar.js): quien vende pregunta, el otro la mira, y el trato
+=== vender_vaca_pide ===
+- ¿Le interesaría comprar esta vaca? Es buena lechera.
+
+=== vender_vaca_mira ===
+- Déjeme verla bien… los dientes, las patas… Sí, me conviene.
+
+=== vender_vaca_trato ===
+- ¡Trato hecho! Buena vaca.
+
+# --- cambiar una cosa por otra (63-jugar.js); huecos: {saludo}, {da} (lo que da), {por} (lo que pide)
+=== cambiar_pide_lawson ===
+- {saludo}, Sr. Lawson. ¿Me cambiaría {da} por {por}?
+
+=== cambiar_pide ===
+- {saludo}. ¿Me cambiaría {da} por {por}?
+
+=== cambiar_buhonero_mira ===
+quien: buhonero
+- Este tinte deja el pelo negro como el ala de un cuervo, señorita. ¡Y no se va con el lavado!
+
+=== cambiar_mira ===
+- Veamos lo que traes… Sí, me sirven. Un momento.
+
+=== cambiar_buhonero_trato ===
+quien: buhonero
+- ¡Negro azabache garantizado! Palabra de honor.
+
+=== cambiar_trato ===
+- Trato hecho. ¡Que lo disfrutes!
+
+# --- comprar en la tienda, a la libreta (63-jugar.js); huecos: {saludo}, {cosa} (con su artículo)
+=== comprar_pide ===
+- {saludo}, Sr. Lawson. ¿Me daría {cosa}? A la libreta de los Cuthbert.
+
+=== comprar_azucar ===
+quien: lawson
+- Cómo no. Déjame pesarla…
+
+=== comprar_mira ===
+quien: lawson
+- Cómo no, aquí tengo una. Un momento…
+
+=== comprar_anotado ===
+quien: lawson
+- Anotado en la libreta de los Cuthbert. Saludos a Marilla.
+
+# --- conversar (63-jugar.js): si hay la noticia de la vaca vendida, o no
+=== conversar_vaca ===
+- ¿Es verdad lo que dicen, que vendieron la vaca?
+
+=== conversar ===
+- ¿Qué hay de nuevo?
+
+# --- disculparse (63-jugar.js): Gilbert con Ana, o cualquiera; y las respuestas (Ana a Gilbert; una amiga que
+# perdona del todo; otro que perdona a medias). «hmpf»: quien no perdona (también al interceder)
+=== disculparse_gilbert ===
+quien: gilbert
+- Ana, perdóname lo de «Zanahorias». Fue una tontería.
+
+=== disculparse ===
+- Perdóname, de verdad. No quise hacerte daño.
+
+=== disculpa_ana_acepta ===
+quien: ana
+- Bueno... está bien, Gilbert Blythe.
+
+=== disculpa_amiga ===
+- ¡Claro que te perdono! Eres mi amiga del alma.
+
+=== disculpa_acepta ===
+- Está bien... pero que no se repita.
+
+=== hmpf ===
+- Hmpf.
+
+# --- pedir un favor (63-jugar.js): cuando no quiere, o no puede
+=== pedir_no ===
+- No, ahora no.
+
+=== pedir_ocupado ===
+- Ahora no puedo, tengo demasiado que hacer.
+
+# (lo que se pide, cuando el favor no trae sus palabras: dicho('pedir_favor:' + f) || dicho('pedir_favor'))
+=== pedir_favor:pasear ===
+- ¿Vamos a pasear juntas?
+
+=== pedir_favor:venir ===
+- ¿Vienes a tomar el té conmigo?
+
+=== pedir_favor ===
+- ¿Me harías un favor?
+
+# (prestar algo: lo dice quien lo presta)
+=== prestar_si ===
+- Claro que sí. Cuídalo mucho, ¿eh?
+
+# (decir que sí a lo que se pide: dicho('si_a:' + f) || dicho('si_a'))
+=== si_a:venir ===
+- ¡Sí, me encantaría! Allí estaré.
+
+=== si_a:traer ===
+- Sí, cómo no. Ahora mismo.
+
+=== si_a:pasear ===
+- ¡Vamos!
+
+=== si_a:prestar ===
+- Toma. Pero cuídalo, ¿eh?
+
+=== si_a:curar ===
+- Voy enseguida.
+
+=== si_a:quehaceres ===
+- Sí, Marilla.
+
+=== si_a:llevar ===
+- Eh... sí, sí. Sube.
+
+=== si_a:encerrar_vaca ===
+- Ahora mismo la llevo.
+
+=== si_a:interceder ===
+- Hablaré con ella.
+
+=== si_a ===
+- Está bien.
+
+# --- interceder por alguien (63-jugar.js); huecos: {nombre} (a quien se le pide), {por} (por quien se pide).
+# Y la respuesta: Ana a Diana, o cualquiera («hmpf» si no)
+=== interceder ===
+- {nombre}, {por} está arrepentido de verdad. ¿No le darías otra oportunidad?
+
+=== interceder_ana_si ===
+quien: ana
+- Bueno... si tú lo dices, Diana. Lo pensaré.
+
+=== interceder_si ===
+- Está bien, lo pensaré.
+
+# --- el huertito de Ana (51-huertito.js): en invierno no se puede; un sitio en el camino, u otro malo; y hecho
+=== huertito_helado ===
+quien: ana
+- Con la tierra helada no se puede sembrar. Hay que esperar la primavera.
+
+=== huertito_camino ===
+quien: ana
+- Aquí pasa la gente… mejor un rincón donde nadie lo pise.
+
+=== huertito_no_aqui ===
+quien: ana
+- Aquí no… busco un pedacito de tierra libre, con sol.
+
+=== huertito_hecho ===
+quien: ana
+- Aquí. Mi propio huertito. Las voy a regar todos los días… y a contarles cuentos, para que se animen a salir.
+
+# Lo que se dice al recibir algo, al hablar con alguien sin IA (src/js/35-cosas-que-lleva.js), al recibir un encargo
+# o un recado (src/js/38-encargos.js), y al recibir algo en el mundo (src/js/63-jugar.js, «dar»).
+
+# --- un regalo de Ana (35-cosas-que-lleva.js: ITEM_DEFS[k].gift.reply es dicho('regalo:' + k) || dicho('gracias_dar');
+# lo usa give() en 46-conversaciones.js, que le añade el agradecimiento propio de cada uno)
+=== regalo:tarta ===
+- ¡Una tarta! Huele de maravilla.
+
+=== regalo:compota ===
+- ¡Qué rica compota! Gracias.
+
+=== regalo:te ===
+- Un té calentito, justo lo que me hacía falta.
+
+=== regalo:ramo ===
+- ¡Qué flores tan lindas! Las pondré en agua.
+
+=== regalo:libro ===
+- ¡Un libro! Lo voy a leer de una sentada.
+
+=== regalo:vestido ===
+- ¡Mangas abullonadas! ¡Es el vestido más lindo del mundo!
+
+=== regalo:mantequilla ===
+- ¡Mantequilla fresca! Gracias.
+
+=== regalo:cinta ===
+- ¡Una cinta preciosa! Me la pondré el domingo.
+
+=== regalo:caramelos ===
+- ¡Caramelos de menta! Son mis favoritos.
+
+=== regalo:dolares ===
+- Vaya... bueno, pues gracias.
+
+# --- lo que se da en el mundo (63-jugar.js, «dar»): si le gusta, o no tanto
+=== gracias_gusta ===
+- ¡Qué lindo detalle! Muchas gracias.
+- ¡Oh! Justo lo que me gusta.
+
+=== gracias_dar ===
+- Gracias.
+
+# --- lo que Ana trae para la casa (35-cosas-que-lleva.js, PARA_LA_CASA: dicho('para_la_casa:' + k)); lo dice quien lo
+# usa (marilla, o matthew el heno)
+=== para_la_casa:lena ===
+quien: marilla
+- Leña para la caja de la estufa. Bien. Y sacúdete el delantal, que traes media astilla encima.
+
+=== para_la_casa:huevos ===
+quien: marilla
+- Huevos frescos. Justo lo que me faltaba para el bizcocho.
+
+=== para_la_casa:leche ===
+quien: marilla
+- La leche, gracias. La pongo a enfriar en la despensa.
+
+=== para_la_casa:mantequilla ===
+quien: marilla
+- Mantequilla. Bien, a la despensa.
+
+=== para_la_casa:azucar ===
+quien: marilla
+- El azúcar. Gracias, Ana.
+
+=== para_la_casa:hierbas ===
+quien: marilla
+- Hierbas para el guiso. Gracias.
+
+=== para_la_casa:heno ===
+quien: matthew
+- Bueno, pues… heno para Dolly. Gracias, Ana.
+
+# --- hablar sin IA (35-cosas-que-lleva.js, talk()): las gracias por un encargo cumplido (va antes de lo que dice);
+# cuando ya dijo todo lo que tenía (hueco: {nombre}); Diana cuando su madre no la deja hablar con Ana (cap. 17)
+=== gracias_encargo ===
+- ¡Gracias por hacer lo que te pedí, Ana!
+
+=== sin_nada_que_decir ===
+- ({nombre} la mira y asiente, sin decir nada.)
+
+=== diana_prohibida ===
+quien: diana
+- Ana… mamá no me deja hablar contigo. Lo siento tanto, tanto…
+- No puedo, Ana… mamá dice que no. Pero te sigo queriendo, ¿sabes?
+
+# (pasear con Diana, 35-cosas-que-lleva.js, walkOption(): la despedida, de tarde o no; y el sí)
+=== paseo_fin_tarde ===
+quien: diana
+- ¡Hasta mañana, Ana! Que sueñes bonito.
+
+=== paseo_fin ===
+quien: diana
+- ¡Nos vemos, Ana! Fue un paseo precioso.
+
+=== paseo_si ===
+quien: diana
+- ¡Sí! Vamos, Ana, a donde tú quieras.
+
+# --- los encargos (38-encargos.js): al entregarle lo que pidió, y al darle un recado
+=== gracias_entrega ===
+- ¡Gracias, Ana! Justo lo que hacía falta.
+
+=== gracias_recado ===
+- Vaya, gracias por avisarme, Ana.
+
+# Las cartas (src/js/62-cartas.js) y el correo (src/js/62-cartas.js, src/js/63-jugar.js).
+# Una carta entera va en una sola línea: sus renglones separados por « / » (el código los separa).
+
+# --- cómo empieza y termina Ana una carta, según a quién (cartaTexto: dicho('carta_saludo:' + para),
+# dicho('carta_firma:' + para); para = diana, stacy, sraallan, josephine, spencer)
+=== carta_saludo:diana ===
+- Mi queridísima Diana, amiga del alma:
+
+=== carta_firma:diana ===
+- Tu amiga del alma hasta la muerte, Ana (con una sola n)
+
+=== carta_saludo:stacy ===
+- Querida Srta. Stacy:
+
+=== carta_firma:stacy ===
+- Su alumna que la quiere, Ana Shirley
+
+=== carta_saludo:sraallan ===
+- Querida Sra. Allan:
+
+=== carta_firma:sraallan ===
+- Con todo cariño, Ana Shirley
+
+=== carta_saludo:josephine ===
+- Querida tía Josephine (porque usted me dejó llamarla así):
+
+=== carta_firma:josephine ===
+- Su amiga que la recuerda siempre, Ana Shirley
+
+=== carta_saludo:spencer ===
+- Querida Sra. Spencer:
+
+=== carta_firma:spencer ===
+- Su agradecida, Ana Shirley (de Tejas Verdes)
+
+# (el primer renglón, después del saludo; hueco: {estacion}, la frase de la estación: «los cerezos están en flor»)
+=== carta_apertura ===
+- Aquí en Tejas Verdes {estacion}.
+
+# --- el cuerpo de la carta (cartaTexto: dicho('carta_cuerpo:' + para, { estacion })), cuando no hay una escena de
+# la carta en el guion (src/datos/guion.txt, carta_<para>) o la escribe otra que no es Ana. Una carta por línea.
+=== carta_cuerpo:diana ===
+- Te escribo desde mi cuarto del alero, con la ventana abierta y el cerezo Reina de las Nieves mirándome. / Hoy pensé que si fuéramos princesas encerradas en una torre, nos mandaríamos cartas con una paloma blanca. Pero el correo de Avonlea también sirve. / ¿Mañana nos vemos en el Bosque Encantado? Lleva tu libro de poemas.
+- No puedo esperar a verte para contarte todo, así que te lo escribo. / Marilla dice que hablo demasiado, pero en el papel nadie me puede interrumpir. / Guárdame un lugar a tu lado en la escuela, ¿sí?
+
+=== carta_cuerpo:stacy ===
+- Le escribo para contarle que terminé de leer el libro que nos recomendó, y que lloré en el capítulo once. / Estuve pensando en lo que dijo de los adjetivos: esta carta tiene solo los indispensables. Bueno, casi. / Quería decirle que gracias a usted estudiar ya no me parece un castigo, sino una aventura.
+- Le escribo desde Tejas Verdes con una pregunta muy importante: ¿cree usted que yo podría llegar a escribir un libro de verdad? / Ya tengo el título. Lo que me falta es todo lo demás.
+
+=== carta_cuerpo:sraallan ===
+- Le escribo para darle las gracias por el té de la otra tarde. Fue uno de los momentos más elegantes de mi vida. / Sigo pensando en lo que usted dijo de ser buena. Lo estoy intentando todos los días, aunque algunos días me resulta mejor que otros.
+- Quería contarle que ya no le pongo linimento a las tartas. Aprendí la lección para siempre. / Ojalá todas las personas fueran tan comprensivas como usted.
+
+=== carta_cuerpo:josephine ===
+- Le escribo desde Avonlea, donde todo sigue igual de bonito que cuando usted vino de visita. / Diana y yo todavía nos reímos de la noche en que saltamos sobre su cama. Bueno, ahora nos reímos; esa noche no tanto. / Si alguna vez se aburre en Charlottetown, acuérdese de que aquí tiene una amiga con mucha imaginación.
+- Le cuento que este año en Tejas Verdes {estacion}. / Marilla dice que no hay que molestar a las personas importantes con cartas largas, así que esta es corta. Para mí, al menos.
+
+# (las cartas de Ana a la Sra. Spencer son escenas: carta_spencer_* en src/datos/guion.txt)
+=== carta_cuerpo:spencer ===
+- Le escribo desde Tejas Verdes, porque usted fue quien me trajo, aunque fuera por equivocación. / Aquí hay un cerezo debajo de mi ventana, y un arroyo.
+
+# --- una respuesta, cuando el guion no tiene ninguna que se pueda decir (cartaRespuesta); hueco: {firma}, quien la
+# manda («La Srta. Stacy»)
+=== carta_respuesta ===
+- Querida Ana: / Gracias por tu carta. Me dio mucho gusto saber de ti. / {firma}
+
+# --- en la oficina de correos (62-cartas.js, correoRetirar): nada, una carta (hueco: {de}), varias (hueco: {n})
+=== correo_nada ===
+quien: lawson
+- Nada para ti hoy, Ana. Pero el correo llega todos los días: vuelve pronto.
+
+=== correo_una_carta ===
+quien: lawson
+- Sí, hay una carta para ti, de {de}. Aquí tienes.
+
+=== correo_cartas ===
+quien: lawson
+- ¡{n} cartas para ti! Eres la niña más escrita de Avonlea.
+
+# --- mandar una carta (63-jugar.js, «enviar_carta»): Lawson pregunta; para quién (huecos: {nombre}, {donde}),
+# lejos o aquí mismo; y cuánto tarda (hueco: {dias})
+=== correo_para_quien ===
+quien: lawson
+- ¿Una carta, Ana? ¿Para quién es?
+
+=== correo_para_lejos ===
+- Para {nombre}, {donde}. ¿Cuánto tarda en llegar?
+
+=== correo_para ===
+- Para {nombre}, {donde}.
+
+=== correo_tarda ===
+quien: lawson
+- Unos {dias} días, con suerte. Sale mañana con el correo.
+
+=== correo_manana ===
+quien: lawson
+- Le llega mañana mismo. Ya la pongo en la saca.
+
+# --- escribir una carta (63-jugar.js, «escribir_carta»): la pregunta de Ana, antes de elegir a quién
+=== escribir_carta_a_quien ===
+quien: ana
+- ¿A quién le escribo?
+
 # La historia del día (src/js/42-historia-del-dia.js). Las historias escritas a mano, con sus frases, están en
 # src/datos/historias.json; aquí, lo que se dice cuando una escena de la historia se juega sin la IA y sin frases.
 
@@ -8691,52 +9259,50 @@ const DIAS_ESTACION = 14;   // (a season of the game: two weeks)
 const seasonCount = () => Math.floor(dayT / DIAS_ESTACION) + game.seasonShift;
 /* ---------- the things Ana can carry: one entry each (to add one: an entry here) ----------
    names: one and many; icon; season(): whether it can be had now; prepared: a single serving (nobody offers her
-   another while she has one); recipe: what it takes to cook it; gift: how it is given (with its article) and thanked;
+   another while she has one); recipe: what it takes to cook it; gift: how it is given (with its article; how it is
+   thanked, gift.reply, is the saying regalo:<thing> in src/datos/dichos/11-regalos-y-encargos.txt);
    giveAll: given all at once (money); note: what the AI is told about it when she carries it */
 const ITEM_DEFS = {
   bayas:    { names: ['baya', 'bayas'], icon: '🫐', season: () => S === 1 || S === 2 },
   manzanas: { names: ['manzana', 'manzanas'], icon: '🍎', season: () => S === 1 || S === 2 },
-  tarta:    { names: ['tarta de bayas', 'tartas de bayas'], icon: '🥧', season: () => S === 1 || S === 2 || game.inv.bayas >= 3 || game.inv.tarta > 0, prepared: true, recipe: { bayas: 3 }, cook: 'Tarta de bayas (3 bayas)', gift: { name: 'tarta de bayas', art: 'una tarta de bayas', reply: '¡Una tarta! Huele de maravilla.' } },
-  compota:  { names: ['compota de manzana', 'compotas de manzana'], icon: '🍯', season: () => S === 1 || S === 2 || game.inv.manzanas >= 3 || game.inv.compota > 0, prepared: true, recipe: { manzanas: 3 }, cook: 'Compota de manzana (3 manzanas)', gift: { name: 'compota de manzana', art: 'una compota de manzana', reply: '¡Qué rica compota! Gracias.' } },
-  te:       { names: ['taza de té', 'tazas de té'], icon: '☕', season: () => true, prepared: true, recipe: {}, cook: 'Té', gift: { name: 'taza de té', art: 'una taza de té', reply: 'Un té calentito, justo lo que me hacía falta.' }, note: 'la preparó ella y puede ofrecérsela a alguien' },
-  ramo:     { names: ['ramo de flores', 'ramos de flores'], icon: '💐', season: () => S !== 3 || game.inv.ramo > 0, prepared: true, gift: { name: 'ramo de flores', art: 'un ramo de flores', reply: '¡Qué flores tan lindas! Las pondré en agua.' } },
+  tarta:    { names: ['tarta de bayas', 'tartas de bayas'], icon: '🥧', season: () => S === 1 || S === 2 || game.inv.bayas >= 3 || game.inv.tarta > 0, prepared: true, recipe: { bayas: 3 }, cook: 'Tarta de bayas (3 bayas)', gift: { name: 'tarta de bayas', art: 'una tarta de bayas' } },
+  compota:  { names: ['compota de manzana', 'compotas de manzana'], icon: '🍯', season: () => S === 1 || S === 2 || game.inv.manzanas >= 3 || game.inv.compota > 0, prepared: true, recipe: { manzanas: 3 }, cook: 'Compota de manzana (3 manzanas)', gift: { name: 'compota de manzana', art: 'una compota de manzana' } },
+  te:       { names: ['taza de té', 'tazas de té'], icon: '☕', season: () => true, prepared: true, recipe: {}, cook: 'Té', gift: { name: 'taza de té', art: 'una taza de té' }, note: 'la preparó ella y puede ofrecérsela a alguien' },
+  ramo:     { names: ['ramo de flores', 'ramos de flores'], icon: '💐', season: () => S !== 3 || game.inv.ramo > 0, prepared: true, gift: { name: 'ramo de flores', art: 'un ramo de flores' } },
   cuerda:   { names: ['cuerda', 'cuerdas'], icon: '🪢', season: () => true },
   azucar:   { names: ['taza de azúcar', 'tazas de azúcar'], icon: '🥄', season: () => true },
   hierbas:  { names: ['manojo de hierbas', 'manojos de hierbas'], icon: '🌿', season: () => S !== 3 },
   huevos:   { names: ['huevo', 'huevos'], icon: '🥚', season: () => true },
   leche:    { names: ['jarro de leche', 'jarros de leche'], icon: '🥛', season: () => game.inv.leche > 0 },
-  libro:    { names: ['libro', 'libros'], icon: '📕', season: () => game.inv.libro > 0, gift: { name: 'libro', art: 'un libro', reply: '¡Un libro! Lo voy a leer de una sentada.' } },
+  libro:    { names: ['libro', 'libros'], icon: '📕', season: () => game.inv.libro > 0, gift: { name: 'libro', art: 'un libro' } },
   jarabe:   { names: ['frasco de jarabe de ipecacuana', 'frascos de jarabe de ipecacuana'], icon: '🧴', season: () => game.inv.jarabe > 0 },
   tela:     { names: ['corte de tela', 'cortes de tela'], icon: '🧵', season: () => game.inv.tela > 0 },
-  vestido:  { names: ['vestido con mangas abullonadas', 'vestidos con mangas abullonadas'], icon: '👗', season: () => game.inv.vestido > 0, gift: { name: 'vestido', art: 'un vestido con mangas abullonadas', reply: '¡Mangas abullonadas! ¡Es el vestido más lindo del mundo!' } },
+  vestido:  { names: ['vestido con mangas abullonadas', 'vestidos con mangas abullonadas'], icon: '👗', season: () => game.inv.vestido > 0, gift: { name: 'vestido', art: 'un vestido con mangas abullonadas' } },
   carta:    { names: ['carta', 'cartas'], icon: '✉️', season: () => game.inv.carta > 0 },
   cuento:   { names: ['cuento escrito a mano', 'cuentos escritos a mano'], icon: '📜', season: () => game.inv.cuento > 0 },
   heno:     { names: ['fardo de heno', 'fardos de heno'], icon: '🌾', season: () => game.inv.heno > 0 },
   lena:     { names: ['brazada de leña', 'brazadas de leña'], icon: '🪵', season: () => game.inv.lena > 0 },
   semillas: { names: ['sobrecito de semillas', 'sobrecitos de semillas'], icon: '🌱', season: () => game.inv.semillas > 0 },
-  mantequilla: { names: ['pan de mantequilla', 'panes de mantequilla'], icon: '🧈', season: () => game.inv.mantequilla > 0, gift: { name: 'mantequilla', art: 'un pan de mantequilla', reply: '¡Mantequilla fresca! Gracias.' } },
+  mantequilla: { names: ['pan de mantequilla', 'panes de mantequilla'], icon: '🧈', season: () => game.inv.mantequilla > 0, gift: { name: 'mantequilla', art: 'un pan de mantequilla' } },
   canasta:  { names: ['canasta de picnic', 'canastas de picnic'], icon: '🧺', season: () => game.inv.canasta > 0 },
   tinte:    { names: ['frasco de tinte para el pelo', 'frascos de tinte para el pelo'], icon: '🧪', season: () => game.inv.tinte > 0 },
-  cinta:    { names: ['cinta para el pelo', 'cintas para el pelo'], icon: '🎀', season: () => true, gift: { name: 'cinta para el pelo', art: 'una cinta para el pelo', reply: '¡Una cinta preciosa! Me la pondré el domingo.' } },
-  caramelos: { names: ['bolsita de caramelos de menta', 'bolsitas de caramelos de menta'], icon: '🍬', season: () => true, gift: { name: 'bolsita de caramelos', art: 'una bolsita de caramelos de menta', reply: '¡Caramelos de menta! Son mis favoritos.' } },
-  dolares:  { names: ['dólar', 'dólares'], icon: '💵', season: () => game.inv.dolares > 0, giveAll: true, gift: { name: 'el dinero', art: 'el dinero', reply: 'Vaya... bueno, pues gracias.' }, note: 'dinero' },
+  cinta:    { names: ['cinta para el pelo', 'cintas para el pelo'], icon: '🎀', season: () => true, gift: { name: 'cinta para el pelo', art: 'una cinta para el pelo' } },
+  caramelos: { names: ['bolsita de caramelos de menta', 'bolsitas de caramelos de menta'], icon: '🍬', season: () => true, gift: { name: 'bolsita de caramelos', art: 'una bolsita de caramelos de menta' } },
+  dolares:  { names: ['dólar', 'dólares'], icon: '💵', season: () => game.inv.dolares > 0, giveAll: true, gift: { name: 'el dinero', art: 'el dinero' }, note: 'dinero' },
 };
 for (const k of Object.keys(ITEM_DEFS)) if (!(k in game.inv)) game.inv[k] = 0;
-// what is not a gift but for the house: who uses it, and what they say when Ana brings it (the wood she carried in, the
-// eggs, the milk): she can hand it over to them, all of it
-const PARA_LA_CASA = {
-  lena: ['marilla', 'Leña para la caja de la estufa. Bien. Y sacúdete el delantal, que traes media astilla encima.'], huevos: ['marilla', 'Huevos frescos. Justo lo que me faltaba para el bizcocho.'],
-  leche: ['marilla', 'La leche, gracias. La pongo a enfriar en la despensa.'], mantequilla: ['marilla', 'Mantequilla. Bien, a la despensa.'],
-  azucar: ['marilla', 'El azúcar. Gracias, Ana.'], hierbas: ['marilla', 'Hierbas para el guiso. Gracias.'], heno: ['matthew', 'Bueno, pues… heno para Dolly. Gracias, Ana.'],
-};
-const entregaOpciones = who => Object.entries(PARA_LA_CASA).filter(([k, [p]]) => p === who && game.inv[k] > 0).map(([k]) => [ITEM_DEFS[k].icon + ' Darle ' + itemText(k, game.inv[k]).replace(/^1 /, 'el ').replace(/^(\d+) /, 'los $1 '), () => entregar(who, k)]);
+for (const [k, d] of Object.entries(ITEM_DEFS)) if (d.gift) Object.defineProperty(d.gift, 'reply', { get: () => dicho('regalo:' + k) || dicho('gracias_dar') });   // (the thanks: said when it is given, one of its lines)
+// what is not a gift but for the house: who uses it (the wood she carried in, the eggs, the milk): she can hand it over
+// to them, all of it; what they say then is the saying para_la_casa:<thing> (src/datos/dichos/11-regalos-y-encargos.txt)
+const PARA_LA_CASA = { lena: 'marilla', huevos: 'marilla', leche: 'marilla', mantequilla: 'marilla', azucar: 'marilla', hierbas: 'marilla', heno: 'matthew' };
+const entregaOpciones = who => Object.entries(PARA_LA_CASA).filter(([k, p]) => p === who && game.inv[k] > 0).map(([k]) => [ITEM_DEFS[k].icon + ' Darle ' + itemText(k, game.inv[k]).replace(/^1 /, 'el ').replace(/^(\d+) /, 'los $1 '), () => entregar(who, k)]);
 function entregar(who, k){
-  const n = game.inv[k], [, dice] = PARA_LA_CASA[k]; game.inv[k] = 0; const I = wmInv(who); I[k] = (I[k] || 0) + n;
+  const n = game.inv[k], dice = dicho('para_la_casa:' + k); game.inv[k] = 0; const I = wmInv(who); I[k] = (I[k] || 0) + n;
   logEv('Ana le dio ' + itemText(k, n) + ' a ' + NAMES[who] + '.', [who, ...witnesses()]); planSoon(who, 'Ana te acaba de traer ' + itemText(k, n));
   if (who === 'marilla') cualidadSuma('marilla', 'paciencia', 1, 'ana');   // (a help for the house: while she is on trial, it counts)
   sfx.happy(); say(who, dice, [['De nada', close]]); save();
 }
-const GIFTS = Object.fromEntries(Object.entries(ITEM_DEFS).filter(([, d]) => d.gift).map(([k, d]) => [k, [d.gift.name, d.gift.reply]]));
+const GIFTS = Object.fromEntries(Object.entries(ITEM_DEFS).filter(([, d]) => d.gift).map(([k, d]) => [k, [d.gift.name]]));
 function talk(who, again = false){
   const p = PEOPLE[who]; p.lie = false;
   ambAbort();
@@ -8747,11 +9313,11 @@ function talk(who, again = false){
   if (!ana.sit) ana.dir = p.x < ana.x ? 3 : 1;
   let text;
   if (game.saidS[who] !== seasonCount() && SEASON_LINES[who][S]) { game.saidS[who] = seasonCount(); text = SEASON_LINES[who][S]; }
-  else { const L = LINES[who]; text = L.length ? L[game.said[who] = ((game.said[who] ?? -1) + 1) % L.length] : `(${NAMES[who] || 'Le'} la mira y asiente, sin decir nada.)`; }   // (said all they had today: no repeating)   // (only the lines that hold now: not as if they knew her before they do)
-  if (pre.some(x => x.startsWith('Ana cumplió'))) text = '¡Gracias por hacer lo que te pedí, Ana! ' + text;
+  else { const L = LINES[who]; text = L.length ? L[game.said[who] = ((game.said[who] ?? -1) + 1) % L.length] : dicho('sin_nada_que_decir', { nombre: NAMES[who] || 'Le' }); }   // (said all they had today: no repeating)   // (only the lines that hold now: not as if they knew her before they do)
+  if (pre.some(x => x.startsWith('Ana cumplió'))) text = dicho('gracias_encargo') + ' ' + text;
   if (who !== 'diana' && !conoceA(who)) { face(who); const L = presentar(who); return talkPlay(L.map(l => [l.q, l.t]), { ch: 'presenta', hold: [who] }); }   // (they have not met: first, who they are)
   if (who === 'diana' && !conoceDiana()) { const L = cadenaEncuentro('diana'); if (L) return say('diana', L.map(l => (l.q === 'ana' ? 'Ana: ' : '') + l.t).join('\n'), [['…', close]]); }   // (they have not met: the meeting of the book, not a friend's greeting)
-  if (who === 'diana' && dlgHechos().prohibida) return say('diana', pick(['Ana… mamá no me deja hablar contigo. Lo siento tanto, tanto…', 'No puedo, Ana… mamá dice que no. Pero te sigo queriendo, ¿sabes?']), [['…', close]]);   // (forbidden, cap. 17)
+  if (who === 'diana' && dlgHechos().prohibida) return say('diana', dicho('diana_prohibida'), [['…', close]]);   // (forbidden, cap. 17)
   const opts = [...taskOptions(who), ...cadenaOpciones(who)];
   for (const [k, [name]] of Object.entries(GIFTS)) if (game.inv[k] > 0) opts.push(['Regalar ' + name, () => give(who, k)]);
   opts.push(...entregaOpciones(who));   // (and what Ana brings for the house: the wood, the eggs…)
@@ -8772,8 +9338,8 @@ function face(who){
 function walkOption(who){
   if (who !== 'diana' || !dianaAmiga()) return [];
   const tarde = hourNow() >= 18;   // (a goodbye for the hour: «hasta mañana» only in the evening)
-  return [diana.follow ? [tarde ? 'Hasta mañana, Diana' : 'Nos vemos, Diana', () => { diana.follow = false; logEv('Ana y Diana terminaron su paseo.'); save(); say(who, tarde ? '¡Hasta mañana, Ana! Que sueñes bonito.' : '¡Nos vemos, Ana! Fue un paseo precioso.', [[tarde ? 'Buenas noches' : 'Hasta luego', close]]); }]
-    : ['¿Paseamos juntas?', () => { diana.follow = true; game.fond.diana = Math.min(5, game.fond.diana + 1); logEv('Ana y Diana salieron a pasear juntas.'); save(); say(who, '¡Sí! Vamos, Ana, a donde tú quieras.', [['¡Vamos!', close]]); }]];
+  return [diana.follow ? [tarde ? 'Hasta mañana, Diana' : 'Nos vemos, Diana', () => { diana.follow = false; logEv('Ana y Diana terminaron su paseo.'); save(); say(who, tarde ? dicho('paseo_fin_tarde') : dicho('paseo_fin'), [[tarde ? 'Buenas noches' : 'Hasta luego', close]]); }]
+    : ['¿Paseamos juntas?', () => { diana.follow = true; game.fond.diana = Math.min(5, game.fond.diana + 1); logEv('Ana y Diana salieron a pasear juntas.'); save(); say(who, dicho('paseo_si'), [['¡Vamos!', close]]); }]];
 }
 
 /* ---------- dialogue with AI (Claude) ----------
@@ -8903,12 +9469,12 @@ function deliver(t){
   if (t.from !== who) planSoon(t.from, `Ana cumplió el encargo que le diste (${taskText(t)})`);
   save();
   const note = t.from === who ? `(Ana te entrega ${itemText(t.item, t.n)}: el encargo que tú le pediste.)` : `(Ana te entrega ${itemText(t.item, t.n)} de parte de ${NAMES[t.from]}, que se lo encargó.)`;
-  if (aiReady()) aiTalk(who, note); else say(who, '¡Gracias, Ana! Justo lo que hacía falta.', [['De nada', close]]);
+  if (aiReady()) aiTalk(who, note); else say(who, dicho('gracias_entrega'), [['De nada', close]]);
 }
 function passMessage(t){
   const who = t.para; t.done = true; know(who, `${NAMES[t.from]} le mandó a decir con Ana: «${t.recado}»`);
   logEv(`Ana le dio a ${NAMES[who]} el recado de ${NAMES[t.from]}.`, [who]); planSoon(t.from, `Ana le dio tu recado a ${NAMES[who]}`); planSoon(who, `Ana te trajo un recado de ${NAMES[t.from]}: «${t.recado}»`); sfx.done(); save();
-  if (aiReady()) aiTalk(who, `(Ana te trae un recado de ${NAMES[t.from]}: «${t.recado}»)`); else say(who, 'Vaya, gracias por avisarme, Ana.', [['De nada', close]]);
+  if (aiReady()) aiTalk(who, `(Ana te trae un recado de ${NAMES[t.from]}: «${t.recado}»)`); else say(who, dicho('gracias_recado'), [['De nada', close]]);
 }
 // on meeting someone: thanks for an errand done, a present they had planned, why they came looking for her
 function talkPrelude(who){
@@ -11158,12 +11724,12 @@ function huertitoPoner(h){
 }
 function hacerHuertito(){
   close();
-  if (S === 3) return anaSays('Con la tierra helada no se puede sembrar. Hay que esperar la primavera.');
+  if (S === 3) return anaSays(dicho('huertito_helado'));
   const x = ana.x, y = ana.y - 20;
-  if (!sitioHuertito(x, y)) return anaSays(nearPath(x, y, 34) ? 'Aquí pasa la gente… mejor un rincón donde nadie lo pise.' : 'Aquí no… busco un pedacito de tierra libre, con sol.');
+  if (!sitioHuertito(x, y)) return anaSays(nearPath(x, y, 34) ? dicho('huertito_camino') : dicho('huertito_no_aqui'));
   game.inv.semillas--; game.huertito = { x, y, dia: today() }; huertitoPoner(game.huertito);
   ana.crouch = true; ana.dir = 0; setTimeout(() => { ana.crouch = false; }, 3000);
-  anaSays('Aquí. Mi propio huertito. Las voy a regar todos los días… y a contarles cuentos, para que se animen a salir.');
+  anaSays(dicho('huertito_hecho'));
   logEv('Ana hizo su huertito y sembró las semillas que le dio Matthew.', witnesses()); save();
 }
 if (game.huertito) huertitoPoner(game.huertito);
@@ -13016,8 +13582,8 @@ const ACC_MOV = {
   techo(b, A){   // up on the roof of the Barrys' house, arms out, along the ridge… and down she comes: the ankle
     const H = HOUSES.os.at, e = TT - A.t0;
     if (e < 6.5) { const u = (e % 6) / 6; b.x = H.x - 40 + Math.abs(u * 2 - 1) * 80; b.y = H.y - 74; b.dir = u < .5 ? 1 : 3; b.moving = true; b.walk = ((b.walk || 0) + .01) % 1; b.sit = false; b.sortY = H.y + 2; return; }
-    if (!A.cayo) { A.cayo = [b.x + 30, H.y + 26]; wmSay('ana', '¡Aaay!'); }
-    const u = Math.min(1, (e - 6.5) / .6); b.x = lerp(b.x, A.cayo[0], u); b.y = lerp(H.y - 74, A.cayo[1], u * u); b.moving = false; if (u >= 1) { delete b.sortY; b.sit = true; if (!A.dolor) { A.dolor = 1; wmSay('ana', '¡Mi tobillo! Creo que me lo torcí… Diana, no puedo pararme.'); } }
+    if (!A.cayo) { A.cayo = [b.x + 30, H.y + 26]; wmSay('ana', dicho('techo_caida')); }
+    const u = Math.min(1, (e - 6.5) / .6); b.x = lerp(b.x, A.cayo[0], u); b.y = lerp(H.y - 74, A.cayo[1], u * u); b.moving = false; if (u >= 1) { delete b.sortY; b.sit = true; if (!A.dolor) { A.dolor = 1; wmSay('ana', dicho('techo_tobillo')); } }
   },
 };
 // (all the durations, in minutes of the game: M(n))
@@ -13030,7 +13596,7 @@ const KX = { aparador: lugar('cocina', 'aparador'), fregadero: lugar('cocina', '
 const enCasa = me => wmScene(me) === 'gg' || wmScene(me) === 'ga';
 const ACC_PASOS = {
   'quehacer:mesa': me => wmScene(me) !== 'gg' ? null : [
-    { p: [KX.aparador.x + 46, KX.aparador.y + 6], mira: 3, dur: M(2), obj: 'aparador', decir: 'Los platos de todos los días…' },
+    { p: [KX.aparador.x + 46, KX.aparador.y + 6], mira: 3, dur: M(2), obj: 'aparador', decir: dicho('aparador_platos') },
     { p: [TABLE.x - 20, TABLE.y + 18], mira: 0, dur: M(5), lleva: 'platos', obj: 'poner', hecho: () => { game.mesa = { dia: today(), puesta: true }; } }],
   'quehacer:platos': me => wmScene(me) !== 'gg' ? null : [
     { p: [TABLE.x + 20, TABLE.y + 18], mira: 0, dur: M(3), obj: 'recoger', hecho: () => { game.mesa = { dia: today(), sucia: false }; } },
@@ -13061,7 +13627,7 @@ const ACC_PASOS = {
     return at.length && wmScene(me) === 'out' ? at.map(u => ({ p: [u.x + (a.x === 'manzanas' ? 0 : 0), u.y + (a.x === 'manzanas' ? 14 : 18)], mira: 0, agachar: a.x !== 'manzanas', dur: M(a.x === 'manzanas' ? 5 : 3), obj: 'canastito' })) : null;
   },
   tomar: (me, a) => a.x === 'cuerda' && wmScene(me) === 'out' ? [{ p: [BARN.x + 40, BARN.y + 34], mira: 0, dur: M(1), obj: 'cuerda' }] : wmScene(me) === 'gg' ? [{ p: [KX.aparador.x + 46, KX.aparador.y + 6], mira: 3, dur: M(1), obj: 'aparador' }] : null,   // (the rope on its hook in the barn; the syrup, the basket, from the dresser)
-  'teñir': me => me === 'ana' && enCasa(me) ? [{ lugar: 'pieza', p: [GA.wash.x, GA.wash.y + 24], mira: 0, dur: M(15), obj: 'tinte', decir: '¡Negro azabache como el ala de un cuervo! Ya verán…' }] : null,   // (upstairs, at the washstand with its mirror)
+  'teñir': me => me === 'ana' && enCasa(me) ? [{ lugar: 'pieza', p: [GA.wash.x, GA.wash.y + 24], mira: 0, dur: M(15), obj: 'tinte', decir: dicho('tenir_espejo') }] : null,   // (upstairs, at the washstand with its mirror)
   cortar_pelo: me => wmScene(me) === 'gg' ? [{ p: [KIT.w / 2 - 60, 6.6 * T], mira: 2, sentar: true, dur: M(15), obj: 'corte', con: ['marilla', 16, -6] }] : null,   // (sitting on a chair in the middle of the kitchen, Marilla behind her with the scissors)
   jurar: (me, a) => { const b = wmBody(me), g = [OS.x + 50, OS.y + 44], near = wmScene(me) === 'out' && dist(b.x, b.y, g[0], g[1]) < 700; return [{ p: near ? g : [b.x, b.y], mira: 1, dur: M(3), obj: 'manos', con: [a.k, 30, 0, 3] }]; },   // (in the Barrys' garden, face to face, hand in hand)
   'ordeñar': (me, a) => { const c = ANIM[a.cow]; return c ? [{ p: () => [c.x - 26, c.y + 6], mira: 1, sentar: true, dur: M(15), obj: 'balde' }] : null; },
@@ -13242,19 +13808,15 @@ function accPush(list, g, t){
    they arrive a day or a few later (Charlottetown is farther), and the answer comes back days or weeks after: it waits
    at the post office until Ana asks for it, and then she can read it. ---------- */
 const CORREO = {
-  diana: { nombre: 'Diana', donde: 'aquí en Avonlea, en La Cuesta del Huerto', dias: 1, resp: [2, 4], saludo: 'Mi queridísima Diana, amiga del alma:', firma: 'Tu amiga del alma hasta la muerte, Ana (con una sola n)' },
-  stacy: { nombre: 'la Srta. Stacy', donde: 'en la pensión de Avonlea', dias: 1, resp: [3, 6], saludo: 'Querida Srta. Stacy:', firma: 'Su alumna que la quiere, Ana Shirley' },
-  sraallan: { nombre: 'la Sra. Allan', donde: 'en la casa parroquial', dias: 1, resp: [2, 5], saludo: 'Querida Sra. Allan:', firma: 'Con todo cariño, Ana Shirley' },
-  josephine: { nombre: 'la Srta. Josephine Barry', donde: 'en Charlottetown', dias: 3, resp: [7, 14], saludo: 'Querida tía Josephine (porque usted me dejó llamarla así):', firma: 'Su amiga que la recuerda siempre, Ana Shirley' },
-  spencer: { nombre: 'la Sra. Spencer', donde: 'en White Sands', dias: 2, resp: [5, 10], saludo: 'Querida Sra. Spencer:', firma: 'Su agradecida, Ana Shirley (de Tejas Verdes)' },
+  diana: { nombre: 'Diana', donde: 'aquí en Avonlea, en La Cuesta del Huerto', dias: 1, resp: [2, 4] },
+  stacy: { nombre: 'la Srta. Stacy', donde: 'en la pensión de Avonlea', dias: 1, resp: [3, 6] },
+  sraallan: { nombre: 'la Sra. Allan', donde: 'en la casa parroquial', dias: 1, resp: [2, 5] },
+  josephine: { nombre: 'la Srta. Josephine Barry', donde: 'en Charlottetown', dias: 3, resp: [7, 14] },
+  spencer: { nombre: 'la Sra. Spencer', donde: 'en White Sands', dias: 2, resp: [5, 10] },
 };
-const CARTA_CUERPO = {
-  diana: [['Te escribo desde mi cuarto del alero, con la ventana abierta y el cerezo Reina de las Nieves mirándome.', 'Hoy pensé que si fuéramos princesas encerradas en una torre, nos mandaríamos cartas con una paloma blanca. Pero el correo de Avonlea también sirve.', '¿Mañana nos vemos en el Bosque Encantado? Lleva tu libro de poemas.'], ['No puedo esperar a verte para contarte todo, así que te lo escribo.', 'Marilla dice que hablo demasiado, pero en el papel nadie me puede interrumpir.', 'Guárdame un lugar a tu lado en la escuela, ¿sí?']],
-  stacy: [['Le escribo para contarle que terminé de leer el libro que nos recomendó, y que lloré en el capítulo once.', 'Estuve pensando en lo que dijo de los adjetivos: esta carta tiene solo los indispensables. Bueno, casi.', 'Quería decirle que gracias a usted estudiar ya no me parece un castigo, sino una aventura.'], ['Le escribo desde Tejas Verdes con una pregunta muy importante: ¿cree usted que yo podría llegar a escribir un libro de verdad?', 'Ya tengo el título. Lo que me falta es todo lo demás.']],
-  sraallan: [['Le escribo para darle las gracias por el té de la otra tarde. Fue uno de los momentos más elegantes de mi vida.', 'Sigo pensando en lo que usted dijo de ser buena. Lo estoy intentando todos los días, aunque algunos días me resulta mejor que otros.'], ['Quería contarle que ya no le pongo linimento a las tartas. Aprendí la lección para siempre.', 'Ojalá todas las personas fueran tan comprensivas como usted.']],
-  josephine: [['Le escribo desde Avonlea, donde todo sigue igual de bonito que cuando usted vino de visita.', 'Diana y yo todavía nos reímos de la noche en que saltamos sobre su cama. Bueno, ahora nos reímos; esa noche no tanto.', 'Si alguna vez se aburre en Charlottetown, acuérdese de que aquí tiene una amiga con mucha imaginación.'], ['Le cuento que este año en Tejas Verdes {estacion}.', 'Marilla dice que no hay que molestar a las personas importantes con cartas largas, así que esta es corta. Para mí, al menos.']],
-};
-CARTA_CUERPO.spencer = [['Le escribo desde Tejas Verdes, porque usted fue quien me trajo, aunque fuera por equivocación.', 'Aquí hay un cerezo debajo de mi ventana, y un arroyo.']];   // (Ana's own letters to her are scenes: carta_spencer_* in src/datos/guion.txt, with what she can say then)
+// what Ana writes (the greeting, the body, the signature) is in src/datos/dichos/12-cartas.txt: carta_saludo:<to whom>,
+// carta_cuerpo:<to whom> (one letter per line, its lines split by « / »; used when the writing is not a scene: Ana's own
+// letters to Mrs. Spencer are scenes, carta_spencer_* in src/datos/guion.txt), carta_firma:<to whom>
 // the answers are scenes of the script too (src/datos/guion.txt, «canal: respuesta»): who answers (de), to which of Ana's
 // letters (responde: the scene she wrote it in), and what must be true when they answer (si); one not said yet, if there is
 function cartaRespuesta(c){
@@ -13262,7 +13824,7 @@ function cartaRespuesta(c){
   const L = DIALOGOS.filter(d => d.canal === 'respuesta' && d.de === c.para && (!d.responde || d.responde === c.escena) && dlgCumple(d, dlgCtx()));
   game.respAhora = null;
   const d = [...L].sort((a, b) => (!!b.responde - !!a.responde) || (a.dicha() - b.dicha()))[0];
-  if (!d) return ['Querida Ana:', 'Gracias por tu carta. Me dio mucho gusto saber de ti.', cap(CORREO[c.para].nombre)];
+  if (!d) return dicho('carta_respuesta', { firma: cap(CORREO[c.para].nombre) }).split(' / ');
   dlgDichas()[d.id] = true;
   return d.lineas().filter(l => l[0] === 'carta').map(l => l[1].replace('{estacion}', ESTACION_TXT[S]));
 }
@@ -13275,9 +13837,9 @@ function cartaNoticia(){   // something that really happened to her lately, told
   return null;
 }
 function cartaTexto(para){
-  const C = CORREO[para] || CORREO.stacy, body = pick(CARTA_CUERPO[para] || CARTA_CUERPO.stacy).map(l => l.replace('{estacion}', ESTACION_TXT[S]));
+  const k = CORREO[para] ? para : 'stacy', estacion = ESTACION_TXT[S], body = dicho('carta_cuerpo:' + k, { estacion }).split(' / ');
   const nov = cartaNoticia();
-  return [C.saludo, 'Aquí en Tejas Verdes ' + ESTACION_TXT[S] + '.', ...(nov ? [nov] : []), ...body, C.firma];
+  return [dicho('carta_saludo:' + k), dicho('carta_apertura', { estacion }), ...(nov ? [nov] : []), ...body, dicho('carta_firma:' + k)];
 }
 // the post goes round once in a while: what was sent arrives; what was answered comes back to the post office
 let correoT = 0;
@@ -13292,9 +13854,9 @@ function correoTick(dt){
 }
 // at the post office: Ana asks for her mail; at home (or anywhere), she reads it
 function correoRetirar(){
-  const L = cartas().filter(c => c.para === 'ana' && c.estado === 'en_correo'); if (!L.length) return say('lawson', 'Nada para ti hoy, Ana. Pero el correo llega todos los días: vuelve pronto.', [['← Volver', () => shopMenu()]]);
+  const L = cartas().filter(c => c.para === 'ana' && c.estado === 'en_correo'); if (!L.length) return say('lawson', dicho('correo_nada'), [['← Volver', () => shopMenu()]]);
   for (const c of L) c.estado = 'recibida'; logEv(`Ana retiró del correo ${L.length === 1 ? 'una carta de ' + CORREO[L[0].de].nombre : L.length + ' cartas'}.`, []); save();
-  say('lawson', L.length === 1 ? `Sí, hay una carta para ti, de ${CORREO[L[0].de].nombre}. Aquí tienes.` : `¡${L.length} cartas para ti! Eres la niña más escrita de Avonlea.`, [['📜 Leerla ahora', () => cartaLeer(L[0])], ['← Volver', () => shopMenu()]]);
+  say('lawson', L.length === 1 ? dicho('correo_una_carta', { de: CORREO[L[0].de].nombre }) : dicho('correo_cartas', { n: L.length }), [['📜 Leerla ahora', () => cartaLeer(L[0])], ['← Volver', () => shopMenu()]]);
 }
 function cartaLeer(c, i = 0){
   c.estado = 'leida'; if (!i) logEv(`Ana leyó la carta de ${CORREO[c.de].nombre}.`, []);
@@ -13322,7 +13884,7 @@ function jugables(){
   return out;
 }
 function jugar(a){
-  if (a.v === 'escribir_carta' && !a.para) return say('Ana', '¿A quién le escribo?', [...Object.entries(CORREO).filter(([k]) => cartaPuede(k)).map(([k, C]) => [cap(C.nombre) + (C.dias > 1 ? ' (' + C.donde + ')' : ''), () => jugar({ ...a, para: k })]), ['← Volver', anaMenu]]);
+  if (a.v === 'escribir_carta' && !a.para) return say('Ana', dicho('escribir_carta_a_quien'), [...Object.entries(CORREO).filter(([k]) => cartaPuede(k)).map(([k, C]) => [cap(C.nombre) + (C.dias > 1 ? ' (' + C.donde + ')' : ''), () => jugar({ ...a, para: k })]), ['← Volver', anaMenu]]);
   close(); if (ana.goto) ana.goto = null; ana.sit = false;
   game.playAct = { who: 'ana', a, st: {}, task: { a }, t0: TT };
   game.playAct.task = game.playAct;   // (what accTick and accPush look at)
@@ -13345,8 +13907,8 @@ function jugarTick(dt){
   save();
 }
 // --- doing each verb in the world (when the body has arrived): 'run' while it takes, 'ok', or 'fail'
-// saying yes to what one is asked
-const SI_A = { venir: '¡Sí, me encantaría! Allí estaré.', traer: 'Sí, cómo no. Ahora mismo.', pasear: '¡Vamos!', prestar: 'Toma. Pero cuídalo, ¿eh?', curar: 'Voy enseguida.', quehaceres: 'Sí, Marilla.', llevar: 'Eh... sí, sí. Sube.', encerrar_vaca: 'Ahora mismo la llevo.', interceder: 'Hablaré con ella.' };
+// (what is said while doing each one: the sayings of src/datos/dichos/10-acciones.txt, 11-regalos-y-encargos.txt and 12-cartas.txt;
+// saying yes to what one is asked: si_a:<favor>)
 function wmExec(ag, a, st, dt){ const r = wmExec0(ag, a, st, dt); accTick(ag, a, st, r); return r; }
 function wmExec0(ag, a, st, dt){
   const me = ag.who, inv = wmInv(me), b = wmBody(me);
@@ -13376,7 +13938,7 @@ function wmExec0(ag, a, st, dt){
       inv[a.x] = (inv[a.x] || 0) + got; float('+' + itemTextW(a.x, got), b.x, b.y - 50); logEv(`${wmName(me)} recogió ${itemTextW(a.x, got)}.`, []); return 'ok';
     }
     case 'quehacer': {
-      if (!st.said) { st.said = 1; bubble(me, { platos: 'Lavo los platos con agua bien caliente… ¡y no rompo ninguno!', barrer: 'Barro la cocina, y el patio también.', mesa: 'Pongo la mesa: los platos de todos los días y la compota.' }[a.x]); }
+      if (!st.said) { st.said = 1; bubble(me, dicho('quehacer:' + a.x)); }
       if (!wait(3.5)) return 'run';
       realR.setFact('quehacer:' + a.x); if (me !== 'marilla' && !realR.fact('gracias:' + me)) { realR.setFact('gracias:' + me); relSetW('marilla', me, relGetW('marilla', me) + 1); }
       float('✔ ' + QUEHACER_TXT[a.x], b.x, b.y - 50); logEv(`${wmName(me)} ${{ platos: 'lavó los platos', barrer: 'barrió la cocina', mesa: 'puso la mesa' }[a.x]}.`, []); return 'ok';
@@ -13384,7 +13946,7 @@ function wmExec0(ag, a, st, dt){
     case 'ordeñar': {
       const c = ANIM[a.cow]; if (!c || (!st.said && areaAt(c.x, c.y) !== 'corral')) { st.why = 'la vaca no está en el corral'; return 'fail'; }
       c.quieta = TT + 1; c.moving = false; if (st.llego) c.dir = 3;   // (she stays still for it, where she is, facing whoever milks her: no grazing off)
-      if (!st.said) { st.said = 1; bubble(me, 'Tranquila, ' + ANIMALS[a.cow].name + '… ya está, ya está.'); }
+      if (!st.said) { st.said = 1; bubble(me, dicho('ordenar_vaca', { vaca: ANIMALS[a.cow].name })); }
       if (!wait(4)) return 'run';
       { const o = oficio(me, 'ordeñar'), n = o.sale ? o.rinde ?? 2 : 0; if (!o.sale) bubble(me, '~' + o.mal);   // (Ana learns it, a day at a time: at first, half of it ends on the ground)
         if (n) { inv.leche = (inv.leche || 0) + n; float('+' + n + ' ' + (n > 1 ? 'jarros' : 'jarro') + ' de leche', b.x, b.y - 50); } else float('Nada de leche esta vez', b.x, b.y - 50); }
@@ -13398,56 +13960,56 @@ function wmExec0(ag, a, st, dt){
         const rc = wmMove(me, 'h:' + casa, dt); if (rc !== 'ok') return rc;
         if (wmScene(a.k) !== casa) { st.espera = (st.espera || 0) + dt; if (st.espera > M(40)) { delete h.recibe; st.why = wmName(a.k) + ' no llegó a su casa'; return 'fail'; } return 'run'; }
       }
-      if (!st.said) { const r = reach(a.k); if (r !== 'ok') return r; st.said = 1; st.t1 = TT; bubble(me, `${saludoHora()}, ${callName(a.k)}. Vine a visitarla.`); }   // (up to her, to greet her; then to the chair, not after her)
-      if (st.said === 1 && TT - st.t1 > 2.6) { st.said = 2; st.w = 0; bubble(a.k, '¡Pasa, pasa! Siéntate, que pongo la tetera.'); }
+      if (!st.said) { const r = reach(a.k); if (r !== 'ok') return r; st.said = 1; st.t1 = TT; bubble(me, dicho('visitar_saludo', { saludo: saludoHora(), nombre: callName(a.k) })); }   // (up to her, to greet her; then to the chair, not after her)
+      if (st.said === 1 && TT - st.t1 > 2.6) { st.said = 2; st.w = 0; bubble(a.k, dicho('visitar_pasa')); }
       if (st.said !== 2 || !wait(3)) return 'run';
       if (h) delete h.recibe; realR.setFact('visita:' + me + '>' + a.k); relSetW(a.k, me, relGetW(a.k, me) + 1); logEv(`${wmName(me)} visitó a ${wmName(a.k)}.`, []); return 'ok';
     }
     case 'devolver': {
       const r = reach(a.k); if (r !== 'ok') return r;
       if (!(inv[a.x] > 0)) { st.why = 'no lo tiene'; return 'fail'; }
-      if (!st.said) { st.said = 1; bubble(me, 'Aquí tienes tu libro. ¡Me encantó! Lo leí dos veces.'); }
+      if (!st.said) { st.said = 1; bubble(me, dicho('devolver_libro')); }
       if (!wait(2.6)) return 'run';
       inv[a.x] -= 1; const I = wmInv(a.k); I[a.x] = (I[a.x] || 0) + 1; delete game.wm.facts['prestado:' + a.x + ':' + a.k + '>' + me + ':' + today()];
-      realR.setFact('devuelto:' + a.x + ':' + me + '>' + a.k); relSetW(a.k, me, relGetW(a.k, me) + 1); bubble(a.k, '¡Qué bueno que te gustó! Te presto otro cuando quieras.');
+      realR.setFact('devuelto:' + a.x + ':' + me + '>' + a.k); relSetW(a.k, me, relGetW(a.k, me) + 1); bubble(a.k, dicho('devolver_libro_responde'));
       logEv(`${wmName(me)} le devolvió ${ITEM_DEFS[a.x]?.gift?.art || a.x} a ${wmName(a.k)}.`, []); return 'ok';
     }
     case 'jurar': {
       const r = reach(a.k); if (r !== 'ok') return r;
-      if (!st.said) { st.said = 1; bubble(me, `Juro solemnemente ser fiel a mi amiga del alma, ${wmName(a.k)}, mientras duren el sol y la luna.`); }
-      if (st.said === 1 && wait(3.5)) { st.said = 2; st.w = 0; bubble(a.k, `Juro ser fiel a mi amiga del alma, ${wmName(me)}, mientras duren el sol y la luna.`); }
+      if (!st.said) { st.said = 1; bubble(me, dicho('jurar', { amiga: wmName(a.k) })); }
+      if (st.said === 1 && wait(3.5)) { st.said = 2; st.w = 0; bubble(a.k, dicho('jurar_responde', { amiga: wmName(me) })); }
       if (st.said !== 2 || !wait(3.5)) return 'run';
       realR.setPerm('amigas:' + [me, a.k].sort().join('&')); relSetW(a.k, me, 5); relSetW(me, a.k, 5); const tb = wmBody(a.k); if (tb) hearts(tb.x, tb.y - 56);
       logEv(`${wmName(me)} y ${wmName(a.k)} juraron ser amigas del alma.`, []); return 'ok';
     }
     case 'perdonar': {
       const r = reach(a.k); if (r !== 'ok') return r;
-      if (!st.said) { st.said = 1; bubble(me, a.k === 'gilbert' ? 'Está bien, Gilbert Blythe… te perdono. Y no me digas más «Zanahorias».' : 'Está bien… te perdono. Hagamos las paces.'); }
+      if (!st.said) { st.said = 1; bubble(me, a.k === 'gilbert' ? dicho('perdonar_gilbert') : dicho('perdonar')); }
       if (!wait(3)) return 'run';
-      delete game.wm.ofensa[me + '>' + a.k]; relSetW(me, a.k, relGetW(me, a.k) + 1); bubble(a.k, '¡Gracias! Amigos, entonces.');
+      delete game.wm.ofensa[me + '>' + a.k]; relSetW(me, a.k, relGetW(me, a.k) + 1); bubble(a.k, dicho('perdonar_gracias'));
       logEv(`${wmName(me)} perdonó a ${wmName(a.k)}: hicieron las paces.`, []); return 'ok';
     }
     case 'cuidar': {
       const r = reach(a.k); if (r !== 'ok') return r;
       const doc = !!whoOf(me).medico; if (!doc && !(inv.jarabe > 0)) { st.why = 'no tiene el jarabe'; return 'fail'; }
-      if (!st.said) { st.said = 1; bubble(me, doc ? 'Veamos… una gripe fuerte. Tome esto, y a guardar cama unos días.' : 'Una cucharadita de jarabe de ipecacuana… y otra más. Ya va a pasar.'); }
+      if (!st.said) { st.said = 1; bubble(me, doc ? dicho('cuidar_doctor') : dicho('cuidar_jarabe')); }
       if (!wait(5)) return 'run';
-      if (!doc) inv.jarabe -= 1; game.wm.sick = (game.wm.sick || []).filter(x => x !== a.k); relSetW(a.k, me, relGetW(a.k, me) + 2); bubble(a.k, doc ? 'Gracias, doctor. Ya me siento mejor.' : 'Ya me siento mucho mejor. Gracias, niña.');
+      if (!doc) inv.jarabe -= 1; game.wm.sick = (game.wm.sick || []).filter(x => x !== a.k); relSetW(a.k, me, relGetW(a.k, me) + 2); bubble(a.k, doc ? dicho('cuidado_doctor_gracias') : dicho('cuidado_gracias'));
       logEv(doc ? `${wmName(me)} atendió a ${wmName(a.k)}, que se mejoró.` : `${wmName(me)} cuidó a ${wmName(a.k)} con jarabe de ipecacuana, y se mejoró.`, []); return 'ok';
     }
-    case 'estudiar': { if (!st.said) { st.said = 1; bubble(me, '«El cuadrado de la hipotenusa es igual…» Repaso y repaso.'); } if (!wait(4)) return 'run'; wmKnow(me, 'leccion'); logEv(`${wmName(me)} estudió la lección.`, []); return 'ok'; }
-    case 'recitar': { if (!st.said) { st.said = 1; bubble(me, '«Y a lo largo del río, en su barca, iba la doncella de Shalott…»'); } if (!wait(4)) return 'run'; realR.setFact('recito:' + me); logEv(`${wmName(me)} recitó la lección en la escuela.`, []); return 'ok'; }
-    case 'rezar': { if (!st.said) { st.said = 1; bubble(me, 'Querido Padre celestial: gracias por el Camino Blanco de las Delicias y por el Lago de las Aguas Brillantes…'); } if (!wait(4)) return 'run'; realR.setFact('rezo:' + me); logEv(`${wmName(me)} dijo sus oraciones.`, []); return 'ok'; }
-    case 'adornar': { if (!(inv.ramo > 0)) { st.why = 'no tiene flores'; return 'fail'; } if (!st.said) { st.said = 1; bubble(me, '¡Una corona de ranúnculos y rosas silvestres para mi sombrero!'); } if (!wait(2.5)) return 'run'; inv.ramo -= 1; realR.setFact('adorno:' + me); float('💐 sombrero adornado', b.x, b.y - 50); logEv(`${wmName(me)} adornó su sombrero con flores.`, []); return 'ok'; }
-    case 'remar': { if (!st.said) { st.said = 1; bubble(me, '¡Remo en el bote de los Barry! Hay que tener cuidado de no soltar los remos…'); } if (!wait(5)) return 'run'; realR.setFact('remo:' + me); logEv(`${wmName(me)} remó en el lago.`, []); return 'ok'; }
+    case 'estudiar': { if (!st.said) { st.said = 1; bubble(me, dicho('estudiar')); } if (!wait(4)) return 'run'; wmKnow(me, 'leccion'); logEv(`${wmName(me)} estudió la lección.`, []); return 'ok'; }
+    case 'recitar': { if (!st.said) { st.said = 1; bubble(me, dicho('recitar')); } if (!wait(4)) return 'run'; realR.setFact('recito:' + me); logEv(`${wmName(me)} recitó la lección en la escuela.`, []); return 'ok'; }
+    case 'rezar': { if (!st.said) { st.said = 1; bubble(me, dicho('rezar')); } if (!wait(4)) return 'run'; realR.setFact('rezo:' + me); logEv(`${wmName(me)} dijo sus oraciones.`, []); return 'ok'; }
+    case 'adornar': { if (!(inv.ramo > 0)) { st.why = 'no tiene flores'; return 'fail'; } if (!st.said) { st.said = 1; bubble(me, dicho('adornar_sombrero')); } if (!wait(2.5)) return 'run'; inv.ramo -= 1; realR.setFact('adorno:' + me); float('💐 sombrero adornado', b.x, b.y - 50); logEv(`${wmName(me)} adornó su sombrero con flores.`, []); return 'ok'; }
+    case 'remar': { if (!st.said) { st.said = 1; bubble(me, dicho('remar')); } if (!wait(5)) return 'run'; realR.setFact('remo:' + me); logEv(`${wmName(me)} remó en el lago.`, []); return 'ok'; }
     case 'nombrar': {   // (the name: the player chooses it, the book's or their own; Ana on her own, the book's)
       if (!st.pide) { st.pide = 1; nombrarElegir(a.p, n => { st.nom = n; }); } if (!st.nom) return 'run';
-      if (!st.said) { st.said = 1; st.w = 0; bubble(me, `Este lugar se va a llamar ${st.nom}. ¿No es un nombre precioso?`); } if (!wait(3)) return 'run'; nombrar(a.p, st.nom); return 'ok'; }
+      if (!st.said) { st.said = 1; st.w = 0; bubble(me, dicho('nombrar_lugar', { nombre: st.nom })); } if (!wait(3)) return 'run'; nombrar(a.p, st.nom); return 'ok'; }
     case 'regañar': {
       if (a.llamar && !st.came) { const here = wmScene('ana') === wmScene(me) && (wmScene(me) !== 'out' || dist(ana.x, ana.y, b.x, b.y) < 90); if (!here) { if (!st.called) { st.called = 1; if (ag.task) ag.task.budget = Math.max(ag.task.budget || 150, 600); notice(`📜 ${wmName(me)} te manda llamar. Parece seria.`); if (WM_OBEY) WM_APPROACH = { who: me, done: () => {} }; } return 'run'; } st.came = 1; }
       else if (!a.llamar) { const r = reach(a.k); if (r !== 'ok') return r; }
-      if (!st.said) { st.said = 1; bubble(me, a.k === 'ana' ? '¡Ana Shirley! Otra vez se te olvidaron los quehaceres. Estás castigada: a la cocina media hora, y a pensar.' : 'Esto no puede ser. Que no se repita.'); }
-      if (st.said === 1 && wait(3.5)) { st.said = 2; st.w = 0; bubble(a.k, a.k === 'ana' ? 'Lo siento, Marilla… me distraje imaginando que era una princesa.' : 'Sí, señora.'); }
+      if (!st.said) { st.said = 1; bubble(me, a.k === 'ana' ? dicho('regano_ana') : dicho('regano')); }
+      if (st.said === 1 && wait(3.5)) { st.said = 2; st.w = 0; bubble(a.k, a.k === 'ana' ? dicho('regano_ana_responde') : dicho('regano_responde')); }
       if (st.said !== 2 || !wait(3)) return 'run';
       realR.setFact('regaño:' + a.k); delete game.wm.facts['falta:' + a.k + ':' + today()]; logEv(`${wmName(me)} regañó a ${wmName(a.k)}.`, []);
       if (a.k === 'ana' && WM_OBEY) agentStart('ana', { ...G.estar_en('ana', 'cocina', null, hourNow() + .5), text: 'castigada en la cocina media hora' }, { label: 'castigada en la cocina media hora (Marilla)', prio: 3 });
@@ -13455,7 +14017,7 @@ function wmExec0(ag, a, st, dt){
     }
     case 'subir_calesa': {
       const r = reach(a.k); if (r !== 'ok') return r;
-      if (!st.said) { st.said = 1; bubble(me, 'Sube, Ana. Engancho la yegua y te llevo en la calesa.'); }
+      if (!st.said) { st.said = 1; bubble(me, dicho('subir_calesa')); }
       if (!wait(2.5)) return 'run';
       if (a.k === 'ana') { const A = agentOf('ana'); A.followOf = me; A.ride = true; agentLog(A, 'va en la calesa con ' + wmName(me)); } else agentOf(a.k).followOf = me;
       logEv(`${wmName(me)} llevó a ${wmName(a.k)} en la calesa.`, []); return 'ok';
@@ -13475,39 +14037,39 @@ function wmExec0(ag, a, st, dt){
     case 'enviar_carta': {   // (at the post office: who it is for, and off it goes with tomorrow's mail)
       if (!(inv.carta > 0)) { st.why = 'no tiene la carta'; return 'fail'; }
       const c = cartas().find(x => x.de === me && x.estado === 'escrita'), C = CORREO[c?.para] || CORREO.stacy;
-      if (!st.said) { st.said = 1; bubble('lawson', '¿Una carta, Ana? ¿Para quién es?'); }
-      if (st.said === 1 && st.w >= 2.6) { st.said = 2; bubble(me, `Para ${C.nombre}, ${C.donde}.${C.dias > 1 ? ' ¿Cuánto tarda en llegar?' : ''}`); }
-      if (st.said === 2 && st.w >= 5.4) { st.said = 3; bubble('lawson', C.dias > 1 ? `Unos ${C.dias} días, con suerte. Sale mañana con el correo.` : 'Le llega mañana mismo. Ya la pongo en la saca.'); }
+      if (!st.said) { st.said = 1; bubble('lawson', dicho('correo_para_quien')); }
+      if (st.said === 1 && st.w >= 2.6) { st.said = 2; bubble(me, C.dias > 1 ? dicho('correo_para_lejos', { nombre: C.nombre, donde: C.donde }) : dicho('correo_para', { nombre: C.nombre, donde: C.donde })); }
+      if (st.said === 2 && st.w >= 5.4) { st.said = 3; bubble('lawson', C.dias > 1 ? dicho('correo_tarda', { dias: C.dias }) : dicho('correo_manana')); }
       if (!wait(7.6)) return 'run';
       inv.carta -= 1; if (c) { c.estado = 'enviada'; c.envio = today(); } realR.setFact('carta_enviada:' + me); logEv(`${wmName(me)} mandó por correo una carta para ${C.nombre}.`, []); return 'ok';
     }
-    case 'leer': { if (!st.said) { st.said = 1; bubble(me, '«Ben-Hur»… ¡No puedo parar de leer! La carrera de cuadrigas…'); } if (!wait(5)) return 'run'; realR.setFact('leido:' + me); logEv(`${wmName(me)} leyó un libro.`, []); return 'ok'; }
-    case 'escribir_cuento': { if (!st.said) { st.said = 1; bubble(me, '«Los celos de Cordelia»: una historia trágica, con un ahogado y una dama de cabellos de oro…'); } if (!wait(5)) return 'run'; inv.cuento = (inv.cuento || 0) + 1; float('+1 cuento', b.x, b.y - 50); logEv(`${wmName(me)} escribió un cuento.`, []); return 'ok'; }
-    case 'leer_cuento': { const r = reach(a.k); if (r !== 'ok') return r; if (!st.said) { st.said = 1; bubble(me, 'Escucha, Diana: «La dama Geraldine caminaba a la luz de la luna…»'); } if (st.said === 1 && wait(4)) { st.said = 2; st.w = 0; bubble(a.k, '¡Ay, Ana, qué triste! ¡Lloré en la parte del ahogado!'); } if (st.said !== 2 || !wait(3)) return 'run'; inv.cuento -= 1; realR.setFact('club:' + me); logEv(`${wmName(me)} le leyó su cuento a ${wmName(a.k)} en el club de cuentos.`, []); return 'ok'; }
-    case 'ensayar': { if (!st.said) { st.said = 1; bubble(me, '«La doncella de Shalott»… otra vez desde el principio, con más sentimiento.'); } if (!wait(4)) return 'run'; wmKnow(me, 'poema'); logEv(`${wmName(me)} ensayó su recitación.`, []); return 'ok'; }
-    case 'actuar': { if (!st.said) { st.said = 1; bubble(me, '«…y la barca siguió flotando río abajo, hacia Camelot.»'); } if (!wait(5)) return 'run'; realR.setFact('concierto:' + me); hearts(b.x, b.y - 56); logEv(`${wmName(me)} recitó en el concierto del salón, y la aplaudieron mucho.`, []); return 'ok'; }
+    case 'leer': { if (!st.said) { st.said = 1; bubble(me, dicho('leer')); } if (!wait(5)) return 'run'; realR.setFact('leido:' + me); logEv(`${wmName(me)} leyó un libro.`, []); return 'ok'; }
+    case 'escribir_cuento': { if (!st.said) { st.said = 1; bubble(me, dicho('escribir_cuento')); } if (!wait(5)) return 'run'; inv.cuento = (inv.cuento || 0) + 1; float('+1 cuento', b.x, b.y - 50); logEv(`${wmName(me)} escribió un cuento.`, []); return 'ok'; }
+    case 'leer_cuento': { const r = reach(a.k); if (r !== 'ok') return r; if (!st.said) { st.said = 1; bubble(me, dicho('leer_cuento')); } if (st.said === 1 && wait(4)) { st.said = 2; st.w = 0; bubble(a.k, dicho('leer_cuento_responde')); } if (st.said !== 2 || !wait(3)) return 'run'; inv.cuento -= 1; realR.setFact('club:' + me); logEv(`${wmName(me)} le leyó su cuento a ${wmName(a.k)} en el club de cuentos.`, []); return 'ok'; }
+    case 'ensayar': { if (!st.said) { st.said = 1; bubble(me, dicho('ensayar')); } if (!wait(4)) return 'run'; wmKnow(me, 'poema'); logEv(`${wmName(me)} ensayó su recitación.`, []); return 'ok'; }
+    case 'actuar': { if (!st.said) { st.said = 1; bubble(me, dicho('actuar')); } if (!wait(5)) return 'run'; realR.setFact('concierto:' + me); hearts(b.x, b.y - 56); logEv(`${wmName(me)} recitó en el concierto del salón, y la aplaudieron mucho.`, []); return 'ok'; }
     case 'decorar_sala': { if (!(inv.ramo > 0)) { st.why = 'no tiene flores'; return 'fail'; } if (!wait(4)) return 'run'; inv.ramo -= 1; realR.setFact('sala_decorada'); float('💐 sala decorada', b.x, b.y - 50); logEv(`${wmName(me)} decoró el salón con flores para el concierto.`, []); return 'ok'; }
-    case 'felicitar': { const r = reach(a.k); if (r !== 'ok') return r; if (!st.said) { st.said = 1; bubble(me, '¡Felicitaciones! Lo hiciste maravillosamente.'); } if (!wait(2.5)) return 'run'; realR.setFact('felicito:' + me + '>' + a.k); relSetW(a.k, me, relGetW(a.k, me) + 1); bubble(a.k, '¡Gracias! Estaba tan nerviosa…'); logEv(`${wmName(me)} felicitó a ${wmName(a.k)}.`, []); return 'ok'; }
-    case 'consolar': { const r = reach(a.k); if (r !== 'ok') return r; if (!st.said) { st.said = 1; bubble(me, 'No llores… todo se va a arreglar, ya verás. Yo estoy contigo.'); } if (!wait(3.5)) return 'run'; delete game.wm.facts['triste:' + a.k + ':' + today()]; realR.setFact('consolo:' + me + '>' + a.k); relSetW(a.k, me, relGetW(a.k, me) + 1); bubble(a.k, 'Gracias… ya me siento mejor.'); logEv(`${wmName(me)} consoló a ${wmName(a.k)}.`, []); return 'ok'; }
-    case 'hacer_heno': { if (!st.said) { st.said = 1; bubble(me, 'A juntar el heno antes de que llueva…'); } if (!wait(5)) return 'run'; { const n = isKid(me) ? 1 : 3; inv.heno = (inv.heno || 0) + n; float('+' + n + (n > 1 ? ' fardos' : ' fardo') + ' de heno', b.x, b.y - 50); } realR.setFact('heno_hecho'); logEv(`${wmName(me)} hizo heno en el campo.`, []); return 'ok'; }
-    case 'acarrear_lena': { if (!st.said) { st.said = 1; bubble(me, pick(['Una brazada para la caja de la leña… ¡pesa como un tesoro de piratas!', 'Leña para la estufa de Marilla. Que no se me caiga ninguna.'])); } if (!wait(3)) return 'run'; inv.lena = (inv.lena || 0) + 1; float('+1 brazada de leña', b.x, b.y - 50); logEv(`${wmName(me)} entró leña a la cocina.`, []); return 'ok'; }
-    case 'partir_lena': { if (!st.said) { st.said = 1; bubble(me, '¡Zas! ¡Zas! Leña para la cocina de Marilla.'); } if (!wait(4)) return 'run'; { const o = oficio(me, 'partir_lena'), n = o.sale ? o.rinde ?? 3 : 0; if (!o.sale) bubble(me, '~' + o.mal); if (n) { inv.lena = (inv.lena || 0) + n; float('+' + n + ' ' + (n > 1 ? 'atados' : 'atado') + ' de leña', b.x, b.y - 50); } else float('Nada de leña esta vez', b.x, b.y - 50); } logEv(`${wmName(me)} partió leña.`, []); return 'ok'; }
+    case 'felicitar': { const r = reach(a.k); if (r !== 'ok') return r; if (!st.said) { st.said = 1; bubble(me, dicho('felicitar')); } if (!wait(2.5)) return 'run'; realR.setFact('felicito:' + me + '>' + a.k); relSetW(a.k, me, relGetW(a.k, me) + 1); bubble(a.k, dicho('felicitar_responde')); logEv(`${wmName(me)} felicitó a ${wmName(a.k)}.`, []); return 'ok'; }
+    case 'consolar': { const r = reach(a.k); if (r !== 'ok') return r; if (!st.said) { st.said = 1; bubble(me, dicho('consolar')); } if (!wait(3.5)) return 'run'; delete game.wm.facts['triste:' + a.k + ':' + today()]; realR.setFact('consolo:' + me + '>' + a.k); relSetW(a.k, me, relGetW(a.k, me) + 1); bubble(a.k, dicho('consolar_responde')); logEv(`${wmName(me)} consoló a ${wmName(a.k)}.`, []); return 'ok'; }
+    case 'hacer_heno': { if (!st.said) { st.said = 1; bubble(me, dicho('hacer_heno')); } if (!wait(5)) return 'run'; { const n = isKid(me) ? 1 : 3; inv.heno = (inv.heno || 0) + n; float('+' + n + (n > 1 ? ' fardos' : ' fardo') + ' de heno', b.x, b.y - 50); } realR.setFact('heno_hecho'); logEv(`${wmName(me)} hizo heno en el campo.`, []); return 'ok'; }
+    case 'acarrear_lena': { if (!st.said) { st.said = 1; bubble(me, dicho('acarrear_lena')); } if (!wait(3)) return 'run'; inv.lena = (inv.lena || 0) + 1; float('+1 brazada de leña', b.x, b.y - 50); logEv(`${wmName(me)} entró leña a la cocina.`, []); return 'ok'; }
+    case 'partir_lena': { if (!st.said) { st.said = 1; bubble(me, dicho('partir_lena')); } if (!wait(4)) return 'run'; { const o = oficio(me, 'partir_lena'), n = o.sale ? o.rinde ?? 3 : 0; if (!o.sale) bubble(me, '~' + o.mal); if (n) { inv.lena = (inv.lena || 0) + n; float('+' + n + ' ' + (n > 1 ? 'atados' : 'atado') + ' de leña', b.x, b.y - 50); } else float('Nada de leña esta vez', b.x, b.y - 50); } logEv(`${wmName(me)} partió leña.`, []); return 'ok'; }
     case 'sembrar': { if (!wait(4)) return 'run'; realR.setFact('sembrado'); float('🌱 sembrado', b.x, b.y - 50); logEv(`${wmName(me)} sembró la huerta.`, []); return 'ok'; }
     case 'regar': { if (!wait(3)) return 'run'; realR.setFact('regado'); float('💧 regado', b.x, b.y - 50); logEv(`${wmName(me)} regó la huerta.`, []); return 'ok'; }
-    case 'patinar': { if (!st.said) { st.said = 1; bubble(me, (dist(diana.x, diana.y, b.x, b.y) < 200 && wmScene('diana') === 'out' ? '¡Mira, Diana! ' : '') + '¡Vuelo sobre el hielo como una golondrina!'); } if (!wait(5)) return 'run'; realR.setFact('patino:' + me); logEv(`${wmName(me)} patinó en el lago helado.`, []); return 'ok'; }
-    case 'trineo': { if (!st.said) { st.said = 1; bubble(me, '¡Allá vamos, colina abajo! ¡Agárrate fuerte!'); } if (!wait(5)) return 'run'; realR.setFact('trineo:' + me); logEv(`${wmName(me)} se tiró en trineo por la colina.`, []); return 'ok'; }
-    case 'pedir_permiso': { const r = reach('marilla'); if (r !== 'ok') return r; if (!st.said) { st.said = 1; bubble(me, 'Marilla, ¿puedo ir al picnic de la escuela dominical? ¡Va a haber helado!'); } if (st.said === 1 && wait(3)) { st.said = 2; st.w = 0; bubble('marilla', 'Está bien, puedes ir. Y te pongo una canasta con algo rico.'); } if (st.said !== 2 || !wait(2.5)) return 'run'; realR.setFact('permiso:picnic'); logEv(`Marilla le dio permiso a ${wmName(me)} para ir al picnic.`, []); return 'ok'; }
-    case 'merendar': { const r = reach(a.k); if (r !== 'ok') return r; if (!(inv.canasta > 0)) { st.why = 'no tiene la canasta'; return 'fail'; } if (!st.said) { st.said = 1; bubble(me, '¡Un picnic junto al lago! Y hay helado… ¡nunca había probado helado! Es indescriptible.'); } if (!wait(5)) return 'run'; inv.canasta -= 1; realR.setFact('picnic:' + me); realR.setFact('picnic:' + a.k); logEv(`${wmName(me)} fue de picnic al lago con ${wmName(a.k)}.`, []); return 'ok'; }
+    case 'patinar': { if (!st.said) { st.said = 1; bubble(me, dist(diana.x, diana.y, b.x, b.y) < 200 && wmScene('diana') === 'out' ? dicho('patinar_con_diana') : dicho('patinar')); } if (!wait(5)) return 'run'; realR.setFact('patino:' + me); logEv(`${wmName(me)} patinó en el lago helado.`, []); return 'ok'; }
+    case 'trineo': { if (!st.said) { st.said = 1; bubble(me, dicho('trineo')); } if (!wait(5)) return 'run'; realR.setFact('trineo:' + me); logEv(`${wmName(me)} se tiró en trineo por la colina.`, []); return 'ok'; }
+    case 'pedir_permiso': { const r = reach('marilla'); if (r !== 'ok') return r; if (!st.said) { st.said = 1; bubble(me, dicho('pedir_permiso_picnic')); } if (st.said === 1 && wait(3)) { st.said = 2; st.w = 0; bubble('marilla', dicho('permiso_picnic_si')); } if (st.said !== 2 || !wait(2.5)) return 'run'; realR.setFact('permiso:picnic'); logEv(`Marilla le dio permiso a ${wmName(me)} para ir al picnic.`, []); return 'ok'; }
+    case 'merendar': { const r = reach(a.k); if (r !== 'ok') return r; if (!(inv.canasta > 0)) { st.why = 'no tiene la canasta'; return 'fail'; } if (!st.said) { st.said = 1; bubble(me, dicho('merendar')); } if (!wait(5)) return 'run'; inv.canasta -= 1; realR.setFact('picnic:' + me); realR.setFact('picnic:' + a.k); logEv(`${wmName(me)} fue de picnic al lago con ${wmName(a.k)}.`, []); return 'ok'; }
     // (dyeing: the surprise comes when it is done)
-    case 'teñir': { if (!(inv.tinte > 0)) { st.why = 'no tiene el tinte'; return 'fail'; } if (!wait(4)) return 'run'; bubble(me, 'Ya está… a ver… ¡¿VERDE?! ¡Mi pelo está VERDE!'); inv.tinte -= 1; realR.setFact('pelo_teñido:' + me); if (me === 'ana') realR.setPerm('pelo_verde'); logEv(`${wmName(me)} se tiñó el pelo… y le quedó verde.`, []); return 'ok'; }
-    case 'cortar_pelo': { if (!st.said) { st.said = 1; bubble('marilla', 'No hay más remedio, Ana: hay que cortarlo. Quédate quieta.'); } if (!wait(4)) return 'run'; delete game.wm.perm['pelo_verde']; realR.setFact('pelo_corto'); realR.setPerm('pelo_corto'); bubble('ana', 'Mi pelo… Bueno, por lo menos ya no es verde.'); logEv('A Ana le cortaron el pelo verde, bien cortito.', []); return 'ok'; }
-    case 'trepar': { if (!st.said) { st.said = 1; bubble(me, '¡Josie Pye, mira cómo camino por el techo de los Barry!… ¡Ay!'); } if (!wait(4)) return 'run'; realR.setFact('trepo:' + me); realR.setFact('tobillo:' + me); logEv(`${wmName(me)} aceptó el desafío de Josie, caminó por el techo de los Barry… y se cayó y se torció el tobillo.`, []); return 'ok'; }
+    case 'teñir': { if (!(inv.tinte > 0)) { st.why = 'no tiene el tinte'; return 'fail'; } if (!wait(4)) return 'run'; bubble(me, dicho('tenir_verde')); inv.tinte -= 1; realR.setFact('pelo_teñido:' + me); if (me === 'ana') realR.setPerm('pelo_verde'); logEv(`${wmName(me)} se tiñó el pelo… y le quedó verde.`, []); return 'ok'; }
+    case 'cortar_pelo': { if (!st.said) { st.said = 1; bubble('marilla', dicho('cortar_pelo')); } if (!wait(4)) return 'run'; delete game.wm.perm['pelo_verde']; realR.setFact('pelo_corto'); realR.setPerm('pelo_corto'); bubble('ana', dicho('cortar_pelo_ana')); logEv('A Ana le cortaron el pelo verde, bien cortito.', []); return 'ok'; }
+    case 'trepar': { if (!st.said) { st.said = 1; bubble(me, dicho('trepar_techo')); } if (!wait(4)) return 'run'; realR.setFact('trepo:' + me); realR.setFact('tobillo:' + me); logEv(`${wmName(me)} aceptó el desafío de Josie, caminó por el techo de los Barry… y se cayó y se torció el tobillo.`, []); return 'ok'; }
     case 'coser':
     case 'batir':
     case 'preparar':
     case 'cocinar': {
       const d = THINGS[a.x]; if (!Object.entries(d.receta).every(([i, n]) => (inv[i] || 0) >= n)) { st.why = 'faltan ingredientes'; return 'fail'; }
-      if (!st.said && a.v === 'coser') { st.said = 1; bubble(me, 'Coso el vestido… y le pongo unas mangas abullonadas, como las que usan ahora.'); }
+      if (!st.said && a.v === 'coser') { st.said = 1; bubble(me, dicho('coser')); }
       if (!wait(a.v === 'coser' ? 5 : 3)) return 'run';
       for (const [i, n] of Object.entries(d.receta)) inv[i] -= n; inv[a.x] = (inv[a.x] || 0) + 1;
       float('+1 ' + ITEM_NAME[a.x][0], b.x, b.y - 50); logEv(`${wmName(me)} ${{ coser: 'cosió', batir: 'batió', preparar: 'preparó' }[a.v] ? { coser: 'cosió', batir: 'batió', preparar: 'preparó' }[a.v] + ' ' + (ITEM_DEFS[a.x]?.gift?.art || ITEM_NAME[a.x][0]) : 'cocinó ' + ITEM_NAME[a.x][0]}.`, []); if (me === 'ana' && a.v === 'cocinar') taskEvent('cocinar', a.x); return 'ok';
@@ -13520,16 +14082,16 @@ function wmExec0(ag, a, st, dt){
       for (const tag of THINGS[a.x].tags) realR.setFact('dio:' + a.k + ':' + tag); realR.setFact('dio:' + a.k + ':' + a.x); realR.setFact('dio:' + a.x);
       const liked = socialRule(realR, 'dar', me, a.k, a.x);
       const tb = wmBody(a.k); if (liked && tb) hearts(tb.x, tb.y - 56);
-      logEv(`${wmName(me)} le dio ${itemTextW(a.x, n)} a ${wmName(a.k)}.`, []); bubble(a.k, liked ? pick(['¡Qué lindo detalle! Muchas gracias.', '¡Oh! Justo lo que me gusta.']) : 'Gracias.'); return 'ok';
+      logEv(`${wmName(me)} le dio ${itemTextW(a.x, n)} a ${wmName(a.k)}.`, []); bubble(a.k, liked ? dicho('gracias_gusta') : dicho('gracias_dar')); return 'ok';
     }
     case 'vender': {
       const r = reach(a.k); if (r !== 'ok') return r;
       if (a.x === 'vaca') {
         const c = ANIM[a.cow]; if (c.state !== 'led' || (c.ledBy || 'ana') !== me) { st.why = 'la vaca no viene con ' + wmName(me); return 'fail'; }
-        if (!haggle('¿Le interesaría comprar esta vaca? Es buena lechera.', 'Déjeme verla bien… los dientes, las patas… Sí, me conviene.')) return 'run';
+        if (!haggle(dicho('vender_vaca_pide'), dicho('vender_vaca_mira'))) return 'run';
         const price = whoOf(a.k).compra.animal;
         if (me === 'ana' && CH[a.k]) sellCow(a.k, c, price); else { c.state = 'bought'; c.owner = a.k; c.ledBy = null; c.nav = null; inv.dolares = (inv.dolares || 0) + price; logEv(`${wmName(me)} le vendió ${ANIMALS[c.id].name} a ${wmName(a.k)} por ${price} dólares.`, []); }
-        wmFact('vendio_vaca', [me, a.k]); bubble(a.k, '¡Trato hecho! Buena vaca.'); return 'ok';
+        wmFact('vendio_vaca', [me, a.k]); bubble(a.k, dicho('vender_vaca_trato')); return 'ok';
       }
       st.why = 'eso no se vende'; return 'fail';
     }
@@ -13537,29 +14099,30 @@ function wmExec0(ag, a, st, dt){
       const r = reach(a.k); if (r !== 'ok') return r;
       const W = whoOf(a.k), hr = hourNow() % 24; if (W.abre && (hr < W.abre[0] || hr >= W.abre[1])) { st.why = 'la tienda está cerrada'; return 'fail'; }
       if ((inv[a.g] || 0) < a.n) { st.why = 'no tiene qué cambiar'; return 'fail'; }
-      if (!haggle(`${saludoHora()}${a.k === 'lawson' ? ', Sr. Lawson' : ''}. ¿Me cambiaría ${itemTextW(a.g, a.n)} por ${ITEM_DEFS[a.x]?.gift?.art || itemTextW(a.x, 1)}?`, a.k === 'buhonero' ? 'Este tinte deja el pelo negro como el ala de un cuervo, señorita. ¡Y no se va con el lavado!' : 'Veamos lo que traes… Sí, me sirven. Un momento.')) return 'run';
+      const v = { saludo: saludoHora(), da: itemTextW(a.g, a.n), por: ITEM_DEFS[a.x]?.gift?.art || itemTextW(a.x, 1) };
+      if (!haggle(a.k === 'lawson' ? dicho('cambiar_pide_lawson', v) : dicho('cambiar_pide', v), a.k === 'buhonero' ? dicho('cambiar_buhonero_mira') : dicho('cambiar_mira'))) return 'run';
       inv[a.g] -= a.n; inv[a.x] = (inv[a.x] || 0) + 1; float('+' + itemTextW(a.x, 1), b.x, b.y - 50);
-      logEv(`${wmName(me)} cambió ${itemTextW(a.g, a.n)} por ${ITEM_DEFS[a.x]?.gift?.art || itemTextW(a.x, 1)}${a.k === 'lawson' ? ' en la tienda de Lawson' : ' con ' + wmName(a.k)}.`, []); bubble(a.k, a.k === 'buhonero' ? '¡Negro azabache garantizado! Palabra de honor.' : 'Trato hecho. ¡Que lo disfrutes!'); return 'ok';
+      logEv(`${wmName(me)} cambió ${itemTextW(a.g, a.n)} por ${ITEM_DEFS[a.x]?.gift?.art || itemTextW(a.x, 1)}${a.k === 'lawson' ? ' en la tienda de Lawson' : ' con ' + wmName(a.k)}.`, []); bubble(a.k, a.k === 'buhonero' ? dicho('cambiar_buhonero_trato') : dicho('cambiar_trato')); return 'ok';
     }
     case 'comprar': {
       const r = reach(a.k); if (r !== 'ok') return r;
       const W = whoOf(a.k), hr = hourNow() % 24; if (W.abre && (hr < W.abre[0] || hr >= W.abre[1])) { st.why = 'la tienda está cerrada'; return 'fail'; }
-      if (!haggle(`${saludoHora()}, Sr. Lawson. ¿Me daría ${LIBRETA_ART[a.x] || itemTextW(a.x, 1)}? A la libreta de los Cuthbert.`, a.x === 'azucar' ? 'Cómo no. Déjame pesarla…' : 'Cómo no, aquí tengo una. Un momento…')) return 'run';
-      inv[a.x] = (inv[a.x] || 0) + 1; libretaAdd(me, a.x); float('+' + itemTextW(a.x, 1), b.x, b.y - 50); bubble(a.k, 'Anotado en la libreta de los Cuthbert. Saludos a Marilla.'); return 'ok';
+      if (!haggle(dicho('comprar_pide', { saludo: saludoHora(), cosa: LIBRETA_ART[a.x] || itemTextW(a.x, 1) }), a.x === 'azucar' ? dicho('comprar_azucar') : dicho('comprar_mira'))) return 'run';
+      inv[a.x] = (inv[a.x] || 0) + 1; libretaAdd(me, a.x); float('+' + itemTextW(a.x, 1), b.x, b.y - 50); bubble(a.k, dicho('comprar_anotado')); return 'ok';
     }
     case 'conversar': {
       const r = reach(a.k); if (r !== 'ok') return r;
-      if (!st.said) { st.said = 1; const news = (game.wm.know[a.k] || []).find(f => !(game.wm.know[me] || []).includes(f)) || (game.wm.know[me] || []).find(f => !(game.wm.know[a.k] || []).includes(f)); bubble(me, news === 'vendio_vaca' ? '¿Es verdad lo que dicen, que vendieron la vaca?' : '¿Qué hay de nuevo?'); }
+      if (!st.said) { st.said = 1; const news = (game.wm.know[a.k] || []).find(f => !(game.wm.know[me] || []).includes(f)) || (game.wm.know[me] || []).find(f => !(game.wm.know[a.k] || []).includes(f)); bubble(me, news === 'vendio_vaca' ? dicho('conversar_vaca') : dicho('conversar')); }
       if (!wait(2.5)) return 'run';
       const u = [...new Set([...(game.wm.know[me] || []), ...(game.wm.know[a.k] || [])])]; game.wm.know[me] = [...u]; game.wm.know[a.k] = [...u];
       logEv(`${wmName(me)} conversó con ${wmName(a.k)}.`, []); return 'ok';
     }
     case 'disculparse': {
       const r = reach(a.k); if (r !== 'ok') return r;
-      if (!st.said) { st.said = 1; bubble(me, me === 'gilbert' ? 'Ana, perdóname lo de «Zanahorias». Fue una tontería.' : 'Perdóname, de verdad. No quise hacerte daño.'); }
+      if (!st.said) { st.said = 1; bubble(me, me === 'gilbert' ? dicho('disculparse_gilbert') : dicho('disculparse')); }
       if (!wait(2.6)) return 'run';
       const before = relGetW(a.k, me); socialRule(realR, 'disculparse', me, a.k); const after = relGetW(a.k, me);
-      bubble(a.k, a.k === 'ana' ? (after >= 0 ? 'Bueno... está bien, Gilbert Blythe.' : 'Hmpf.') : after - before >= 2 ? '¡Claro que te perdono! Eres mi amiga del alma.' : 'Está bien... pero que no se repita.');
+      bubble(a.k, a.k === 'ana' ? (after >= 0 ? dicho('disculpa_ana_acepta') : dicho('hmpf')) : after - before >= 2 ? dicho('disculpa_amiga') : dicho('disculpa_acepta'));
       logEv(`${wmName(me)} se disculpó con ${wmName(a.k)}.`, []); return 'ok';
     }
     case 'pedir': {
@@ -13573,29 +14136,29 @@ function wmExec0(ag, a, st, dt){
       if (!st.asked) {
         const r = a.llamar ? 'ok' : reach(a.k); if (r !== 'ok') return r;
         if (hablando()) return 'run';   // (the other is still answering the call: one asks after)
-        if (!socialRule(realR, 'pedir', me, a.k)) { bubble(a.k, 'No, ahora no.'); st.why = wmName(a.k) + ' no quiso'; realR.setFact('pedido:' + a.favor.f + ':' + a.k); return 'fail'; }
-        if (a.k !== 'ana' && activeGoals(AGENTS[a.k]).length >= MAX_GOALS) { bubble(a.k, 'Ahora no puedo, tengo demasiado que hacer.'); st.why = wmName(a.k) + ' está ocupado'; realR.setFact('pedido:' + a.favor.f + ':' + a.k); return 'fail'; }
+        if (!socialRule(realR, 'pedir', me, a.k)) { bubble(a.k, dicho('pedir_no')); st.why = wmName(a.k) + ' no quiso'; realR.setFact('pedido:' + a.favor.f + ':' + a.k); return 'fail'; }
+        if (a.k !== 'ana' && activeGoals(AGENTS[a.k]).length >= MAX_GOALS) { bubble(a.k, dicho('pedir_ocupado')); st.why = wmName(a.k) + ' está ocupado'; realR.setFact('pedido:' + a.favor.f + ':' + a.k); return 'fail'; }
         st.asked = 1; realR.setFact('pedido:' + a.favor.f + ':' + a.k); for (const k of [me, a.k]) amb.mute[k] = Math.max(amb.mute[k] || 0, TT + 30);   // (asking and answering: no loose lines in between)
  if (a.llamar && WM_APPROACH && WM_APPROACH.who === me) { WM_APPROACH = null; wmStop('ana'); }
         const F = FAVORS[a.favor.f], f = a.favor;
-        bubble(me, f.dice ? f.dice : F.say ? F.say(f) : { pasear: '¿Vamos a pasear juntas?', venir: '¿Vienes a tomar el té conmigo?' }[f.f] || '¿Me harías un favor?');
+        bubble(me, f.dice ? f.dice : F.say ? F.say(f) : dicho('pedir_favor:' + f.f) || dicho('pedir_favor'));
         logEv(`${wmName(me)} le pidió a ${wmName(a.k)}: ${f.f.replace('_', ' ')}.`, []);
-        if (f.f === 'prestar') { const I = wmInv(a.k); if (!(I[f.item] > 0)) { st.why = wmName(a.k) + ' no lo tiene'; return 'fail'; } I[f.item] -= 1; inv[f.item] = (inv[f.item] || 0) + 1; realR.setFact('prestado:' + f.item + ':' + a.k + '>' + me); float('+' + itemTextW(f.item, 1), b.x, b.y - 50); bubble(a.k, 'Claro que sí. Cuídalo mucho, ¿eh?'); logEv(`${wmName(a.k)} le prestó ${ITEM_DEFS[f.item]?.gift?.art || itemTextW(f.item, 1)} a ${wmName(me)}.`, []); return 'ok'; }
+        if (f.f === 'prestar') { const I = wmInv(a.k); if (!(I[f.item] > 0)) { st.why = wmName(a.k) + ' no lo tiene'; return 'fail'; } I[f.item] -= 1; inv[f.item] = (inv[f.item] || 0) + 1; realR.setFact('prestado:' + f.item + ':' + a.k + '>' + me); float('+' + itemTextW(f.item, 1), b.x, b.y - 50); bubble(a.k, dicho('prestar_si')); logEv(`${wmName(a.k)} le prestó ${ITEM_DEFS[f.item]?.gift?.art || itemTextW(f.item, 1)} a ${wmName(me)}.`, []); return 'ok'; }
         if (f.f === 'pasear') { if (a.k === 'ana') { if (WM_OBEY) { const A = agentOf('ana'); A.followOf = me; agentLog(A, 'pasea con ' + wmName(me)); } else notice(`📜 ${wmName(me)} quiere dar un paseo contigo: síguela.`); } else if (a.k === 'diana' && me === 'ana') diana.follow = true; else agentOf(a.k).followOf = me; return 'ok'; }
         const sub = F.goal(me, f, wmNow());
         if (a.k === 'ana' && !WM_OBEY) { if (f.f === 'traer' && CH[me]) addTask({ from: me, tipo: 'traer', n: f.n, para: me, d: today(), item: f.item }); else notice(`📜 ${wmName(me)} te pide: ${sub.text}.`); }
         else { const h = agentStart(a.k, sub, { label: sub.text + ' (se lo pidió ' + wmName(me) + ')', parent: me, chain: [...agentChain(ag), me] }); if (!h) { st.why = wmName(a.k) + ' tiene demasiado que hacer'; return 'fail'; } const gg = ag.goalNow; if (gg) gg.pending = [...(gg.pending || []).filter(p => p.h.st === 'run'), { h, f, to: a.k }]; }
         st.sub = sub; st.t1 = TT;
       }
-      if (st.asked === 1) { if (TT - st.t1 < 2.6 || hablando()) return 'run'; st.asked = 2; bubble(a.k, SI_A[a.favor.f] || 'Está bien.'); }   // (and the answer, yes)
+      if (st.asked === 1) { if (TT - st.t1 < 2.6 || hablando()) return 'run'; st.asked = 2; bubble(a.k, dicho('si_a:' + a.favor.f) || dicho('si_a')); }   // (and the answer, yes)
       return 'ok';   // (asked: on with the rest of the plan; what was promised is waited for only where it is needed)
     }
     case 'interceder': {
       const r = reach(a.k); if (r !== 'ok') return r;
-      if (!st.said) { st.said = 1; bubble(me, `${wmName(a.k)}, ${wmName(a.por)} está arrepentido de verdad. ¿No le darías otra oportunidad?`); }
+      if (!st.said) { st.said = 1; bubble(me, dicho('interceder', { nombre: wmName(a.k), por: wmName(a.por) })); }
       if (!wait(2.8)) return 'run';
       const ok = socialRule(realR, 'interceder', me, a.k, a.por); realR.setFact('intercede:' + a.k + '>' + a.por);
-      bubble(a.k, ok ? (a.k === 'ana' ? 'Bueno... si tú lo dices, Diana. Lo pensaré.' : 'Está bien, lo pensaré.') : 'Hmpf.'); logEv(`${wmName(me)} habló con ${wmName(a.k)} por ${wmName(a.por)}.`, []); return 'ok';
+      bubble(a.k, ok ? (a.k === 'ana' ? dicho('interceder_ana_si') : dicho('interceder_si')) : dicho('hmpf')); logEv(`${wmName(me)} habló con ${wmName(a.k)} por ${wmName(a.por)}.`, []); return 'ok';
     }
     case 'guiar': {
       const c = ANIM[a.cow]; if (!(inv.cuerda > 0)) { st.why = 'no tiene cuerda'; return 'fail'; }
