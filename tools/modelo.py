@@ -308,6 +308,24 @@ for raw in leer('src/datos/frases.txt').split('\n'):
             GRUPO_FRASES.append((q, m.group(1), conds, m.group(3)))
         else:
             agregar_frase(q, m.group(1), conds, m.group(3))
+# the sayings (src/datos/dichos/*.txt): the ones whose group says who says them («quien: marilla»), as their lines
+# (the conditions with blanks, which the code fills, are left out: the line may hold in any of its cases)
+for nombre in sorted(os.listdir(os.path.join(RAIZ, 'src/datos/dichos'))):
+    if not nombre.endswith('.txt'): continue
+    q, si_g = None, []
+    for raw in leer('src/datos/dichos/' + nombre).split('\n'):
+        l = raw.strip()
+        if not l or l[0] == '#': continue
+        m = re.match(r'^===\s*(.+?)\s*===$', l)
+        if m: q, si_g = None, []; continue
+        m = re.match(r'^quien:\s*(\S+)', l)
+        if m: q = m.group(1); continue
+        m = re.match(r'^si:\s*(.*)$', l)
+        if m: si_g = [c.strip() for c in m.group(1).split(',') if c.strip()]; continue
+        m = re.match(r'^-\s*(?:\[([^\]]*)\]\s*)?(.+)$', l)
+        if m and q and q in gente:
+            conds = [c for c in si_g + [c.strip() for c in (m.group(1) or '').split(',') if c.strip()] if '{' not in c]
+            agregar_frase(q, 'dice', conds, m.group(2)); UNIDADES[q][-1]['tipo'] = 'dicho'
 # the notebook's winks (src/datos/cuaderno.txt, «guiño quien:»): what someone says while a goal is open and not done
 # (its «requiere» done). A goal done is its fact, if it is one («meta: hecho se_queda»), or else «cuaderno:id»
 CUAD = {}
