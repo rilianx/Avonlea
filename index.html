@@ -6566,7 +6566,7 @@ function dlgHacer(list){   // what a scene does when it starts or ends
     if (a.acostarse) { if (game.scene !== 'ga') { ana.meal = null; goIn('ga', [GA.bed.x - 20, GA.bed.y + 16]); } setTimeout(() => { if (!sleeping) goToBed(); }, 500); }
     if (a.a_la_mesa && !ana.meal && game.scene === 'gg') mealSit();
     if (a.mesa) game.comida = a.mesa === 'nada' ? null : { que: a.mesa, dia: today() };
-    if (a.dormir) { ana.enCama = null; ana.llora = false; goSleep(false); }
+    if (a.dormir) { ana.enCama = null; ana.llora = false; goSleep(false, false, true); }   // (the scene itself puts her to sleep)
     if (a.entra) { const b = PEOPLE[a.entra]; if (b) { b.where = a.a; b.x = KDOOR.x + 30; b.y = KIT.h - 30; b.sit = false; b.nav = null; b.moving = false; b.dir = 0; } }
     if (a.sale) { const b = PEOPLE[a.sale]; if (b) { b.where = CH[a.sale]?.home || 'gg'; b.x = STAIRS.x - 30; b.y = STAIRS.y + 30; b.nav = null; } }
     if (a.levantar) { const b = a.levantar === 'ana' ? ana : PEOPLE[a.levantar]; if (b) { b.sit = false; b.llora = false; if (b !== ana) b.mealSat = false; } }
@@ -7057,8 +7057,11 @@ function goToBed(){
     ['Dejarla tirada y meterse a la cama', () => { close(); ropaAlAcostarse(false); goSleep(false); }]]);
   goSleep(false);
 }
-function goSleep(forced, skip){
-  if (sleeping) return; sleeping = true; close(); ana.goto = null; ana.sit = false;
+// (a scene with Ana under way, the first night's above all: she does not fall asleep in the middle of it; it ends, and
+// then she sleeps, if the scene says so)
+const enEscena = () => TALKS.some(t => t.lines.slice(Math.max(0, t.i)).some(l => l.q === 'ana' || l.q === 'narra' || l.q === '?' || l.q === '!'));
+function goSleep(forced, skip, porEscena){
+  if (sleeping || (!forced && !porEscena && enEscena())) return; sleeping = true; close(); ana.goto = null; ana.sit = false;
   if (game.wm) { game.wm.camison = true; game.wm.sinSombrero = true; }   // (to bed in her nightgown, the hat put away: she wakes so, and dresses when she will)
   if (game.wm?.ropaTirada && !dlgHechos().desayuno_prueba) { game.wm.ropaTirada = false; game.wm.ropaSilla = true; dlgHecho('marilla_doblo_ropa'); }   // (the first night, Marilla folds them while she sleeps: in the morning, on the chair)
   const el = $('sleep'); el.textContent = forced ? 'Ana se quedó dormida…' : skip ? 'Pasa la noche…' : 'Zzz…'; el.classList.add('on');
