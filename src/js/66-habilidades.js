@@ -37,7 +37,7 @@ function oficio(k, accion){
   const c = k === 'ana' && HABILIDADES.find(c => c.oficio === accion); if (!c) return { rinde: null, sale: true };
   const v = OFICIOS_DIESTRA ? 99 : cualidad('ana', c.id), segun = L => { let r = null; for (const [n, x] of L || []) if (v >= n) r = x; return r; };
   const sale = Math.random() >= (segun(c.falla) ?? 0);
-  return { c, nivel: v, rinde: segun(c.rinde), sale, mal: sale ? null : pick(c.mal || ['No le salió bien esta vez.']) };
+  return { c, nivel: v, rinde: segun(c.rinde), sale, mal: sale ? null : c.mal ? pick(c.mal) : dicho('no_salio') };
 }
 // a day of practice, for what is not watched as a doing (the stove): once a day, as the rest
 function practicar(k, accion){

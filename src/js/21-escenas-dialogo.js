@@ -183,12 +183,6 @@ function dlgHacer(list){   // what a scene does when it starts or ends
 const dlgPath = p => p.split('.').reduce((o, k) => o?.[k], LIBRO1);
 // where the lines of a scene come from: 'libro:path' (LIBRO1), 'mas:n' (Ana's own on the road), 'relleno:n' (her loose musings)
 function dlgFuente(s){ const i = s.indexOf(':'), k = s.slice(0, i), p = s.slice(i + 1); return k === 'libro' ? dlgPath(p) || [] : k === 'mas' ? VIAJE_MAS[+p] || [] : k === 'relleno' ? fillLines(+p || 1).map(l => [l.q, l.t]) : []; }
-// what is said to pick up a conversation that was cut short (by who speaks next), unless the scene has its own `puente`
-const DLG_PUENTE = {
-  ana: ['Bueno, como le decía…', '¿Dónde iba? ¡Ah, sí!', 'Perdón, me distraje. Le estaba contando…', 'Pero volviendo a lo de antes…', 'Ya sé, ya sé, me fui por las ramas. ¿En qué estaba? Ah, sí…'],
-  matthew: ['Bueno, pues… como decía…', 'Je. ¿En qué íbamos?'],
-  otro: ['Como decía…', 'Bueno, lo que le contaba…'],
-};
 const dlgProg = () => game.dlgProg || (game.dlgProg = {});   // (where each conversation cut short was left)
 const ROAD_PASO = .7;
 const DLG_RESPIRO = 60, dlgComento = {};   // (a remark, at most one a minute in each channel: they go between the conversations)   // (the buggy at a walk, while something that matters is said)
@@ -236,7 +230,7 @@ class Dialogo {
   puenteDe(l){   // the line that picks it up again
     if (this.puente === false || ['?', '!', 'narra', 'carta'].includes(l[0])) return [];   // (a choice, an action, a card: no one to pick it up)
     if (Array.isArray(this.puente)) return this.puente.map(p => Array.isArray(p) ? p : [l[0], p]);
-    return [[l[0], pick(DLG_PUENTE[l[0]] || DLG_PUENTE.otro)]];
+    return [[l[0], dicho('puente:' + l[0]) || dicho('puente:otro')]];   // (what is said to pick up a conversation cut short, by who speaks next: src/datos/dichos/40-gente.txt)
   }
   decir(){
     const D = dlgDichas(), P = dlgProg(), p = P[this.id] || 0; if (this.repetir === 'una_vez') D[this.id] = true; else if (this.repetir === 'dia') D[this.id] = today();
@@ -439,7 +433,7 @@ function convIr(d, s){
   game.convIr = { id: d.id, s, hasta: TT + M(90) }; PEOPLE[d.con].vamos = { place: s, hasta: TT + M(90) };
   if (sala) { if (game.scene !== s) { if (game.scene !== 'out') goOut(); ana.goto = { id: 'h:' + s, scene: 'out', dest: true }; } }
   else goDest(PLACES[s][1] - 34, PLACES[s][2] + 10);
-  sayB(talkQ(d.con), d.con === 'matthew' && !sala ? `Bueno, pues… eso se aprende en ${nombre}, con las manos en la tierra. Vamos.` : `Eso se aprende en ${nombre}, no aquí. Vamos.`);
+  sayB(talkQ(d.con), d.con === 'matthew' && !sala ? dicho('conv_ir_matthew', { lugar: nombre }) : dicho('conv_ir', { lugar: nombre }));
 }
 function convIrTick(){
   const g = game.convIr; if (!g) return; const d = CONVERSACIONES.find(c => c.id === g.id);
@@ -584,7 +578,7 @@ ROOMS.sa = HOUSES.sa.interior = {
   items: g => SALA.benches.map(p => ({ y: p.y, draw: () => drawBench(g, p) })),
   blocked: (x, y) => (y < SALA.stage.y + 14 && Math.abs(x - SALA.stage.x) > 4.2 * T) || SALA.benches.some(p => Math.abs(x - p.x) < 72 && y > p.y - 14 && y < p.y),
   glow: () => [SALA.stage.x, SALA.stage.y - 10, 200, '255,210,140', .3],
-  actions: add => { add('escenario', SALA.stage.x, SALA.stage.y, 80, 'Subir al escenario', () => { ana.goto = { x: SALA.stage.x, y: SALA.stage.y, scene: 'sa' }; anaSays(pick(['Desde aquí arriba el salón parece enorme. ¡Cuánta gente cabría!', '«Señoras y señores…» ¡Ay, qué nervios, y eso que no hay nadie!'])); }, { pri: 5 }); },
+  actions: add => { add('escenario', SALA.stage.x, SALA.stage.y, 80, 'Subir al escenario', () => { ana.goto = { x: SALA.stage.x, y: SALA.stage.y, scene: 'sa' }; anaSays(dicho('escenario_salon')); }, { pri: 5 }); },
 };
 ROOMS.ig = HOUSES.ig.interior = {
   draw: drawChurch, place: 'en la iglesia de Avonlea, entre los bancos', exitLabel: 'Salir',
@@ -639,33 +633,33 @@ const libretaToday = () => (game.libreta || []).filter(e => e.d === today() + 1 
 // at Mr. Lawson's (his counter, or himself): two steps — what kind of errand, then what
 function shopMenu(step){
   const L = FOLKBY.lawson, open = HOUSES.tl.open(), here = L && L.where !== 'in' && game.scene === L.where && dist(ana.x, ana.y, L.x, L.y) < 140;
-  if (!open) return say('lawson', 'Ya cerré, Ana. Abro mañana a las ocho en punto, como siempre.', [['Adiós', close]]);
-  if (!here && game.scene !== 'tl') return say('lawson', 'Pasa, pasa, que el mostrador está adentro.', [['Adiós', close]]);
+  if (!open) return say('lawson', dicho('lawson_cerrado'), [['Adiós', close]]);
+  if (!here && game.scene !== 'tl') return say('lawson', dicho('lawson_adentro'), [['Adiós', close]]);
   const I = game.inv, back = ['← Volver', () => shopMenu()];
   if (step === 'cambiar') {
     const opts = [];
     for (const c of Object.keys(TREATS)) { const o = tradeFor(I, c)[0]; if (o) opts.push([`${ITEM_DEFS[c].gift.art[0].toUpperCase() + ITEM_DEFS[c].gift.art.slice(1)}, por ${itemText(o.g, o.k)}`, () => shopTrade(c, o)]); }
     const has = Object.keys(TRADE).filter(g => I[g] > 0).map(g => itemText(g, I[g])).join(', ');
-    return say('lawson', opts.length ? `Veamos qué traes: ${has}. ¿Qué te gustaría llevarte?` : has ? `Con ${has} todavía no alcanza para un capricho, Ana. Junta un poco más.` : 'No traes nada para cambiar. Huevos, fruta, una tarta de las tuyas... todo me sirve.', [...opts, back]);
+    return say('lawson', opts.length ? dicho('lawson_cambiar', { trae: has }) : has ? dicho('lawson_cambiar_poco', { trae: has }) : dicho('lawson_cambiar_nada'), [...opts, back]);
   }
   if (step === 'libreta') {
-    if (libretaToday() >= 2) return say('lawson', 'Ya llevas dos cosas anotadas hoy, Ana. Marilla me lo agradecerá si paramos aquí.', [back]);
-    return say('lawson', '¿Qué hace falta en Tejas Verdes? Lo anoto en la libreta de los Cuthbert.', [...LIBRETA.map(x => [LIBRETA_ART[x][0].toUpperCase() + LIBRETA_ART[x].slice(1), () => shopLibreta(x)]), back]);
+    if (libretaToday() >= 2) return say('lawson', dicho('lawson_libreta_llena'), [back]);
+    return say('lawson', dicho('lawson_libreta'), [...LIBRETA.map(x => [LIBRETA_ART[x][0].toUpperCase() + LIBRETA_ART[x].slice(1), () => shopLibreta(x)]), back]);
   }
   const opts = [['🧺 Cambiar algo que traigo por un capricho', () => shopMenu('cambiar')], ['📒 Llevar algo para la casa (a la libreta)', () => shopMenu('libreta')], ['📬 ¿Hay correo para mí?', correoRetirar]];
   if (L) opts.push(['Conversar con el Sr. Lawson', () => { close(); folkTalk(L); }]);
   opts.push(['Adiós', close]);
-  say('lawson', conoceA('lawson') ? pick(lineasAjenas('lawson', ['¡Buenos días, Ana! ¿Qué se te ofrece?', 'Pasa, pasa. ¿Vienes a cambiar algo o te manda Marilla?', 'Llegaron cintas nuevas, Ana. ¿Qué se te ofrece?'])) : (conocer('lawson'), sabeK('lawson', 'nina_cuthbert') ? 'Pasa, pasa. Tú debes ser la niña de los Cuthbert. Yo soy el Sr. Lawson: aquí hay de todo. ¿Qué se te ofrece?' : 'Pasa, pasa. ¡Una cara nueva en Avonlea, qué novedad! Yo soy el Sr. Lawson: aquí hay de todo. ¿Qué se te ofrece?'), opts);   // (the first time: who he is)
+  say('lawson', conoceA('lawson') ? dicho('lawson_saludo') : (conocer('lawson'), sabeK('lawson', 'nina_cuthbert') ? dicho('lawson_presenta') : dicho('lawson_presenta_nueva')), opts);   // (the first time: who he is; what he says: src/datos/dichos/40-gente.txt)
 }
 function shopTrade(c, o){
   const I = game.inv; I[o.g] -= o.k; I[c] = (I[c] || 0) + 1;
   logEv(`Ana cambió ${itemText(o.g, o.k)} por ${ITEM_DEFS[c].gift.art} en la tienda de Lawson.`); float('+' + itemText(c, 1), ana.x, ana.y - 60); sfx.happy(); save(); close();
-  bubbles = [{ q: 'f:lawson', text: pick(['Trato hecho. ¡Que lo disfrutes!', 'Buen cambio, niña. Tus cosas tienen fama.', 'Te lo envuelvo en papel de estraza.']), t: 0, dur: 3 }];
+  bubbles = [{ q: 'f:lawson', text: dicho('lawson_trato'), t: 0, dur: 3 }];
   setTimeout(() => shopMenu('cambiar'), 700);
 }
 function shopLibreta(x){
   game.inv[x] = (game.inv[x] || 0) + 1; libretaAdd('ana', x); float('+' + itemText(x, 1), ana.x, ana.y - 60); sfx.happy(); close();
-  bubbles = [{ q: 'f:lawson', text: 'Anotado en la libreta. Saludos a Marilla.', t: 0, dur: 3 }];
+  bubbles = [{ q: 'f:lawson', text: dicho('lawson_anotado'), t: 0, dur: 3 }];
   setTimeout(() => shopMenu('libreta'), 700);
 }
 ROOMS.ga = {
@@ -686,4 +680,4 @@ ROOMS.ga = {
 HOUSES.gg.interior.draw = (c, t, night) => { drawKitchen(c, t, night); drawStairsUp(c); };
 { const b0 = HOUSES.gg.interior.blocked; HOUSES.gg.interior.blocked = (x, y) => b0(x, y) || (x > 11.1 * T && y < 4.5 * T); }
 { const a0 = HOUSES.gg.interior.actions; HOUSES.gg.interior.actions = add => { a0(add);
-  add('geranio', KIT.w / 2 - 30, 2.4 * T + 18, 40, game.wm?.nombres?.geranio ? 'Mirar a ' + nombreDe('geranio') + ' (el geranio)' : 'Mirar el geranio de la ventana', () => primeraVez('geranio') || escenaObjeto('geranio') || anaSays(nombreMay(nombreDe('geranio')) + '. Huele a manzana, si una cierra los ojos.'), { hy: 40, hit: 0, pri: 2, test: (x, y) => Math.abs(x - (KIT.w / 2 - 30)) < 22 && y < 2.6 * T }); add('stairs', STAIRS.x, STAIRS.y, 44, 'Subir a la pieza de Ana', () => salirSiPuede(() => goIn('ga', [KDOOR.x, KIT.h - 28])), { hy: 40, hit: 0, pri: 1, test: (x, y) => x > 11.1 * T && x < 12.9 * T && y > 2.2 * T && y < 4.7 * T }); }; }
+  add('geranio', KIT.w / 2 - 30, 2.4 * T + 18, 40, game.wm?.nombres?.geranio ? 'Mirar a ' + nombreDe('geranio') + ' (el geranio)' : 'Mirar el geranio de la ventana', () => primeraVez('geranio') || escenaObjeto('geranio') || anaSays(dicho('mirar_geranio', { nombre: nombreMay(nombreDe('geranio')) })), { hy: 40, hit: 0, pri: 2, test: (x, y) => Math.abs(x - (KIT.w / 2 - 30)) < 22 && y < 2.6 * T }); add('stairs', STAIRS.x, STAIRS.y, 44, 'Subir a la pieza de Ana', () => salirSiPuede(() => goIn('ga', [KDOOR.x, KIT.h - 28])), { hy: 40, hit: 0, pri: 1, test: (x, y) => x > 11.1 * T && x < 12.9 * T && y > 2.2 * T && y < 4.7 * T }); }; }

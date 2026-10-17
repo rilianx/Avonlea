@@ -1,0 +1,188 @@
+# La gente: lo que dicen los demás en momentos que el código nombra (el Sr. Lawson en su tienda, quien es llamado de
+# lejos, quien retoma una conversación cortada, quien conoce a Ana por primera vez, quien compra una vaca).
+
+# --- retomar una conversación cortada (por quien habla después; si la escena no trae su propio «puente») ---
+=== puente:ana ===
+quien: ana
+- Bueno, como le decía…
+- ¿Dónde iba? ¡Ah, sí!
+- Perdón, me distraje. Le estaba contando…
+- Pero volviendo a lo de antes…
+- Ya sé, ya sé, me fui por las ramas. ¿En qué estaba? Ah, sí…
+
+=== puente:matthew ===
+quien: matthew
+- Bueno, pues… como decía…
+- Je. ¿En qué íbamos?
+
+=== puente:otro ===
+- Como decía…
+- Bueno, lo que le contaba…
+
+# --- una conversación que se hace con las manos, en otro lugar: «vamos allá» ({lugar}: «el huertito», «la cocina») ---
+=== conv_ir_matthew ===
+quien: matthew
+- Bueno, pues… eso se aprende en {lugar}, con las manos en la tierra. Vamos.
+
+=== conv_ir ===
+- Eso se aprende en {lugar}, no aquí. Vamos.
+
+# --- llamar a alguien de lejos ({nombre}: como se le llama, con mayúscula) ---
+=== llamar_formal ===
+- ¡{nombre}! ¡Espere un momento, por favor!
+
+=== llamar_ven ===
+- ¡{nombre}! ¡Ven un momento!
+
+=== llamar_espera ===
+- ¡{nombre}! ¡Espera!
+
+# (y lo que contesta el llamado: si viene, o si solo se detiene)
+=== llamada_voy ===
+- ¿Sí? ¡Ya voy!
+- ¡Voy!
+- ¿Me llamabas? Ya voy.
+
+=== llamada_que ===
+- ¿Sí?
+- ¿Me llamabas?
+- ¿Qué pasa?
+
+# --- quien está enfermo, sin nada mejor que decir ---
+=== tos ===
+- Cof, cof…
+
+# --- una noticia que le cuentan a alguien que no tiene nada propio que contestar ---
+=== noticia_respuesta ===
+- ¡No me diga!
+
+# --- quien compra la vaca jersey de Ana ({precio}: en dólares) ---
+=== comprar_vaca ===
+- ¡Buena vaca esa! Le doy {precio} dólares por ella, señorita. ¿Trato hecho?
+
+# --- Marilla, el día después de que Ana pidió una amiga: a La Cuesta del Huerto (cap. 12) ---
+=== marilla_lleva_a_diana ===
+quien: marilla
+- Ana, voy a La Cuesta del Huerto a devolverle un patrón a la Sra. Barry. Ven conmigo: así conoces a Diana. Y pórtate bien.
+
+# --- el Sr. Lawson, en su tienda ---
+=== lawson_cerrado ===
+quien: lawson
+- Ya cerré, Ana. Abro mañana a las ocho en punto, como siempre.
+
+=== lawson_adentro ===
+quien: lawson
+- Pasa, pasa, que el mostrador está adentro.
+
+# (lo que Ana trae para cambiar: {trae}, «6 huevos, 3 manzanas»)
+=== lawson_cambiar ===
+quien: lawson
+- Veamos qué traes: {trae}. ¿Qué te gustaría llevarte?
+
+=== lawson_cambiar_poco ===
+quien: lawson
+- Con {trae} todavía no alcanza para un capricho, Ana. Junta un poco más.
+
+=== lawson_cambiar_nada ===
+quien: lawson
+- No traes nada para cambiar. Huevos, fruta, una tarta de las tuyas... todo me sirve.
+
+=== lawson_libreta_llena ===
+quien: lawson
+- Ya llevas dos cosas anotadas hoy, Ana. Marilla me lo agradecerá si paramos aquí.
+
+=== lawson_libreta ===
+quien: lawson
+- ¿Qué hace falta en Tejas Verdes? Lo anoto en la libreta de los Cuthbert.
+
+=== lawson_saludo ===
+quien: lawson
+- ¡Buenos días, Ana! ¿Qué se te ofrece?
+- Pasa, pasa. ¿Vienes a cambiar algo o te manda Marilla?
+- Llegaron cintas nuevas, Ana. ¿Qué se te ofrece?
+
+# (la primera vez: quién es él; si ya sabía que los Cuthbert tienen una niña, o no)
+=== lawson_presenta ===
+quien: lawson
+- Pasa, pasa. Tú debes ser la niña de los Cuthbert. Yo soy el Sr. Lawson: aquí hay de todo. ¿Qué se te ofrece?
+
+=== lawson_presenta_nueva ===
+quien: lawson
+- Pasa, pasa. ¡Una cara nueva en Avonlea, qué novedad! Yo soy el Sr. Lawson: aquí hay de todo. ¿Qué se te ofrece?
+
+=== lawson_trato ===
+quien: lawson
+- Trato hecho. ¡Que lo disfrutes!
+- Buen cambio, niña. Tus cosas tienen fama.
+- Te lo envuelvo en papel de estraza.
+
+=== lawson_anotado ===
+quien: lawson
+- Anotado en la libreta. Saludos a Marilla.
+
+# --- conocerse: la primera vez que alguien habla con Ana, si no tiene presentación propia (personajes.json
+# «presentacion», o «presenta» de la gente del pueblo). Una línea por momento, en orden (:1, :2, :3…, tantas como
+# haya); las de Ana, «quien: ana». Huecos: {hola} (el saludo según la hora), {yo} (quién es: «el Sr. Andrews»), {corto} (su nombre
+# corto: «Andrews»), {senor} («señor» o «señora»).
+# (no sabían que los Cuthbert tienen una niña: se enteran por ella. «vecino»: alguien sin nombre propio)
+=== presenta:nueva_vecino:1 ===
+- {hola}, niña. No te había visto nunca por aquí. ¿De quién eres?
+
+=== presenta:nueva_vecino:2 ===
+quien: ana
+- De Tejas Verdes. Soy Ana Shirley, con una sola n.
+
+=== presenta:nueva_vecino:3 ===
+- ¿De Tejas Verdes? ¡No sabía que los Cuthbert tenían una niña!
+
+=== presenta:nueva_nino:1 ===
+- ¡Hola! Nunca te había visto. ¿Cómo te llamas?
+
+=== presenta:nueva_nino:2 ===
+quien: ana
+- Ana Shirley, con una sola n. Vivo en Tejas Verdes, con Matthew y Marilla Cuthbert.
+
+# (la respuesta del niño: una de tres, siempre la misma para el mismo niño, según su nombre)
+=== presenta:nueva_nino:3:0 ===
+- ¿Con los Cuthbert? ¡Pero si son viejísimos! Yo soy {corto}.
+
+=== presenta:nueva_nino:3:1 ===
+- ¿Con Matthew Cuthbert, el que no habla? Yo soy {corto}.
+
+=== presenta:nueva_nino:3:2 ===
+- ¡Nadie me había contado nada! Yo soy {corto}.
+
+=== presenta:nueva_adulto:1 ===
+- {hola}. No te había visto nunca por aquí. ¿De quién eres, niña?
+
+=== presenta:nueva_adulto:2 ===
+quien: ana
+- Soy Ana Shirley, {senor}, con una sola n. Vivo en Tejas Verdes, con Matthew y Marilla Cuthbert.
+
+=== presenta:nueva_adulto:3 ===
+- ¿Con los Cuthbert? ¡Vaya! No sabía que tenían una niña. Mucho gusto, Ana. Yo soy {yo}.
+
+# (ya sabían que hay una niña nueva en Tejas Verdes)
+=== presenta:sabe_vecino:1 ===
+- {hola}, niña. ¿Tú eres la que trajeron los Cuthbert?
+
+=== presenta:sabe_vecino:2 ===
+quien: ana
+- Sí. Ana Shirley… Ana con una sola n.
+
+=== presenta:sabe_nino:1 ===
+- ¿Tú eres la niña nueva de Tejas Verdes? Yo soy {corto}.
+
+=== presenta:sabe_nino:2 ===
+quien: ana
+- Ana Shirley. Ana con una sola n, por favor. ¡Mucho gusto!
+
+=== presenta:sabe_adulto:1 ===
+- {hola}. ¿Tú eres la niña que trajeron los Cuthbert?
+
+=== presenta:sabe_adulto:2 ===
+quien: ana
+- Sí, {senor}. Ana Shirley… con una sola n, por favor.
+
+=== presenta:sabe_adulto:3 ===
+- Mucho gusto, Ana. Yo soy {yo}.

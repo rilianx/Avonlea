@@ -22,7 +22,7 @@ function cadenaOpciones(who){
 AGENDA.push({ who: 'marilla', from: 14, to: 17.5, label: 'llevar a Ana a La Cuesta del Huerto, a conocer a Diana (cap. 12)',
   when: () => dlgCond('dias_desde:quiere_amiga:1', dlgCtx()) && !conoceDiana() && !dlgHechos().barry_presenta && !ausente('diana'),   // (once Diana is back from Carmody)
   goal: () => ({ ...G.paseo('marilla', 'ana', 'h:os', 15), chat: null, sale: true, text: 'Marilla lleva a Ana a La Cuesta del Huerto' }),
-  favors: [{ f: 'pasear', to: 'ana', dice: 'Ana, voy a La Cuesta del Huerto a devolverle un patrón a la Sra. Barry. Ven conmigo: así conoces a Diana. Y pórtate bien.' }] });
+  favors: [{ f: 'pasear', to: 'ana', get dice(){ return dicho('marilla_lleva_a_diana'); } }] });   // (what she says: src/datos/dichos/40-gente.txt)
 // meeting Diana before knowing her, by chance: the encounter of the script (once); and no talk as friends before that
 function cadenaEncuentro(k){
   if (k === 'diana') return conoceDiana() ? null : dlgNext(['ana', 'diana']);
