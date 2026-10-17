@@ -67,8 +67,8 @@ for (const raw of guion.split('\n')) {
     if ((m = s.match(/^si:\s*(.*)$/))) { M[g].si = true; m[1].split(',').forEach(c => /\{/.test(c) || condicion(c.trim(), 'dichos de ' + g)); }
     if ((m = s.match(/^-\s*(\[([^\]]*)\])?/))) { M[g].n++; if (!m[1]) M[g].libre = true; else m[2].split(',').forEach(c => /\{/.test(c) || condicion(c.trim(), 'un dicho de ' + g)); } } }
   for (const [g, x] of Object.entries(M)) { if (!x.n) malas.push(`dichos: «${g}» no tiene ninguna línea`); else if (!x.libre && !x.si) malas.push(`dichos: «${g}» no tiene ninguna línea sin condiciones (alguna vez quedaría callado)`); }
-  const pedidos = new Set([...codigo.matchAll(/\b(?:dicho|dichoElegir|decirDicho|dichosTodos)\('([\w:]+)'/g)].map(m => m[1]));
-  for (const g of pedidos) if (!g.endsWith(':') && !M[g]) malas.push(`dichos: el código pide «${g}», y no está en src/datos/dichos/`);
+  const pedidos = new Set([...codigo.matchAll(/\b(?:dicho|dichoElegir|decirDicho|dichosTodos|dichosEnOrden)\('([\w:]+)'/g)].map(m => m[1]));
+  for (const g of pedidos) if (!M[g] && !Object.keys(M).some(x => x.startsWith(g) && (g.endsWith(':') || /^\d/.test(x.slice(g.length))))) malas.push(`dichos: el código pide «${g}», y no está en src/datos/dichos/`);
   for (const g of Object.keys(M)) if (!pedidos.has(g) && !/^[\w]+:/.test(g)) malas.push(`dichos: «${g}» no lo pide el código (¿un nombre mal escrito?)`); }
 // the lines of each one (src/datos/frases.txt): someone of the game, and «[condiciones] texto»
 { const quienes = new Set([...Object.keys(JSON.parse(leer('src/datos/personajes.json'))), ...[...codigo.matchAll(/^  (\w+): \{ name: /gm)].map(m => m[1]), 'vecino', 'niño', 'adultos', 'niños']); let q = null;

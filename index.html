@@ -3395,6 +3395,260 @@ quien: matthew
 === pide:interceder ===
 - ¿Hablarías con {quien} por mí? A ti te escucha.
 
+# El viaje: el largo camino rojo entre Bright River y Avonlea (src/js/17-camino-bright-river.js, 18-charla-del-viaje.js,
+# 20-capitulo-1.js), y la carreta de Matthew hasta la estación (33-viaje-bright-river.js).
+#
+# Dos clases de momentos:
+#  - los de siempre (00-leeme.txt): el código pide uno, y se elige una línea al azar entre las que se cumplen;
+#  - las TABLAS EN ORDEN (los que empiezan con «viaje:»): no se elige una; se dicen todas, una tras otra, en el orden
+#    en que están escritas (el código las lee con dichosEnOrden, en 17). Ahí no van condiciones, y cada línea puede
+#    decir quién la dice: «- matthew: Bueno, pues…» (si el grupo no tiene «quien:»).
+#      viaje:M<tramo>   lo que Ana (y Matthew) dicen de suyo en cada tramo del camino, después de lo del libro
+#                       (<tramo> es el «v» del tramo en ROAD_TRAMOS: 0 la cuesta de los cerezos … 10 la curva del
+#                       atardecer). Las escenas del viaje toman pedazos por número de línea («M3:0-2», contando desde 0,
+#                       en VIAJE_ESCENAS de 21): una línea nueva, al final del tramo, para no correr las demás.
+#      viaje:relleno    lo que Ana va diciendo cuando ya se dijo todo lo de los tramos (se agregan a las del libro,
+#                       LIBRO1.relleno, y se dicen en orden, sin repetir, hasta que se acaban y vuelven a empezar).
+
+# subir otra vez a la calesa, en el camino (lo dice quien maneja)
+=== camino_subir ===
+- Bueno, pues… sube.
+- Ya lo creo. Arriba.
+- Sube, sube. Seguimos.
+
+# Ana se baja de la calesa en el camino (lo dice quien maneja)
+=== camino_bajar ===
+- Bueno, pues… te espero aquí.
+- No te alejes mucho, ¿eh?
+- Estira las piernas, que queda un buen trecho.
+
+# Ana entra a pie al camino: desde Avonlea (hacia Bright River) o desde la estación (hacia Avonlea)
+=== camino_a_pie_hacia_br ===
+quien: ana
+- ¡Ocho millas hasta Bright River! Bueno… paso a paso se llega a cualquier parte, ¿no?
+
+=== camino_a_pie_hacia_avonlea ===
+quien: ana
+- Tejas Verdes queda para allá. Ocho millas… ¡qué aventura!
+
+# en la estación, cuando Ana se sienta en la pila de tejuelas (capítulo 2)
+=== estacion_pila ===
+quien: ana
+- Prefiero quedarme afuera, gracias. Aquí hay más campo para la imaginación.
+
+# Ana pide ir a Bright River en la carreta: Matthew no está, o es muy tarde
+=== carreta_sin_matthew ===
+quien: ana
+- Matthew no está, y sin él y la carreta Bright River queda lejísimos.
+
+=== carreta_tarde ===
+quien: ana
+- Ya es muy tarde para ir hasta Bright River. Mejor mañana temprano.
+
+# Ana se bajó de la carreta a medio camino: ¿seguimos?
+=== carreta_seguimos ===
+quien: matthew
+- Bueno, pues... ¿seguimos?
+
+=== viaje:M0 ===
+- ana: ¿Vio cómo el barranco nos tapa el cielo de a ratos? Es como ir por un pasillo de un castillo, pero con flores en vez de tapices.
+- matthew: Bueno, pues… sí, es alto el barranco.
+- ana: La tierra es tan roja que parece que la isla se hubiera ruborizado al vernos pasar.
+- ana: Estos abedules son tan blancos y delgados… parecen damas de honor esperando a la novia del cerezo.
+- matthew: Je. Damas de honor.
+- ana: ¿Puedo quedarme con esta rama de ciruelo? La voy a poner en agua apenas lleguemos. Bueno, si es que me dejan quedarme… digo, si me dejan poner flores.
+- matthew: Bueno, pues, quédatela.
+- ana: Huele a algo que todavía no tiene nombre. Le voy a buscar uno de aquí a Avonlea.
+
+=== viaje:M1 ===
+- ana: ¡Mire, una señora viene en su carreta! ¿Por qué la saludó, si no la conoce?
+- matthew: Aquí en la Isla se saluda a todos, Ana.
+- ana: Me gusta eso. Es como si la isla entera fuera una sola familia grande que todavía no se ha presentado.
+- ana: Esos manzanos parecen nubes que se cansaron de flotar y se sentaron en el pasto.
+- ana: ¿Usted cree que las granjas se ponen celosas unas de otras cuando una tiene más flores?
+- matthew: Bueno, pues… nunca lo pensé.
+- ana: Yo creo que no. Seguro que se prestan las abejas.
+- ana: Si yo viviera en una granja así, le pondría nombre a cada manzano. Ése se llamaría Lady Blanca, y ése, Sir Rosado.
+
+=== viaje:M2 ===
+- ana: ¡Ay, qué sombra tan fresca! Los abetos son como señores muy serios que en el fondo son tiernos.
+- ana: Cierre los ojos un momento, señor Cuthbert… ¿siente el olor? Es como si alguien hubiera abierto un frasco de bosque.
+- matthew: Bueno, pues, yo manejo… mejor no cierro los ojos.
+- ana: ¡Tiene razón! Qué sensato es usted. Yo los cerraré por los dos.
+- ana: ¿Sabe que en el orfanato soñaba con un bosque así? Lo imaginaba tanto que casi podía tocarlo. Y ahora es de verdad.
+- ana: Ese pájaro canta como si alguien lo hubiera invitado a una fiesta y llegara tarde.
+- matthew: Es un zorzal, me parece.
+- ana: Un zorzal. Hasta el nombre suena a canción.
+
+=== viaje:M3 ===
+- ana: Esta hondonada es como un tazón lleno de nieve que no se derrite.
+- ana: Los ciruelos silvestres se ven tan vaporosos… como si los hubieran pintado con el dedo.
+- matthew: Bueno, pues, este año florecieron bien.
+- ana: ¿Usted se acuerda de cuántas primaveras ha visto, señor Cuthbert?
+- matthew: Unas sesenta, más o menos.
+- ana: ¡Sesenta primaveras! Qué rico debe ser tener tantas guardadas. Yo solo tengo once, y la mitad las pasé cuidando mellizos.
+- ana: Pero ésta va a ser la mejor de todas, lo sé. Ya empezó a serlo.
+- matthew: Ya lo creo.
+
+=== viaje:M4 ===
+- ana: Desde aquí arriba se ve todo el mundo. Bueno, todo el mundo de la isla, que debe ser la parte más bonita.
+- ana: El mar se ve tan azul… ¿será que el cielo se mira en él como en un espejo para peinarse?
+- matthew: Bueno, pues… puede ser.
+- ana: Ojalá un día pueda ir a la playa y mojarme los pies. ¿La arena también es roja?
+- matthew: Roja, sí. Y en White Sands, blanca.
+- ana: ¡Arena de dos colores! Esta isla tiene de todo, como un baúl de tesoros.
+- ana: Las granjas con sus graneros rojos parecen juguetes que alguien olvidó en el pasto.
+- matthew: Je. Juguetes.
+
+=== viaje:M5 ===
+- ana: Estos arces son tan grandes… deben haber visto pasar a mucha gente. Me pregunto si se acuerdan de alguien.
+- ana: Escuche las abejas en el huerto: zumban como si estuvieran rezando.
+- matthew: Bueno, pues, están trabajando, más bien.
+- ana: Trabajar y rezar a la vez. Las abejas son muy virtuosas.
+- ana: Ese arroyito que pasa por debajo del camino… ¿adónde irá? Seguro que va a contarle algo al mar.
+- ana: ¿El arroyo de Tejas Verdes también va al mar?
+- matthew: Va al lago, y el lago, al mar.
+- ana: Entonces todo está conectado. Me encanta pensar eso.
+
+=== viaje:M6 ===
+- ana: Huele a madera recién cortada. Es un olor muy honrado, ¿no le parece?
+- matthew: Bueno, pues, sí. Huele bien.
+- ana: Mire a esos niñitos jugando junto a la ropa tendida. Ojalá alguien les cuente cuentos de noche.
+- ana: Yo les contaba cuentos a los mellizos de la señora Hammond. Los inventaba, porque libros no había.
+- matthew: ¿Y les gustaban?
+- ana: Se dormían a la mitad. Yo prefería pensar que era porque estaban muy tranquilos, no aburridos.
+- ana: La rueda del aserradero da vueltas y vueltas, como mis pensamientos cuando no puedo dormir.
+- matthew: Je. Ya lo creo.
+
+=== viaje:M7 ===
+- ana: Ese hombre sembrando a mano parece que le estuviera echando semillas de esperanza a la tierra.
+- ana: Las vacas nos miran como si fuéramos el acontecimiento del día.
+- matthew: Bueno, pues, aquí no pasa mucho.
+- ana: ¡Entonces me alegro de darles algo que contar! ¿Las vacas se cuentan cosas?
+- matthew: Mugen, nomás.
+- ana: Seguro que en vaca eso quiere decir algo muy profundo.
+- ana: Estas cercas en zigzag parecen costuras que unen un campo con otro, para que no se separen.
+- matthew: Bueno, pues… algo así.
+
+=== viaje:M8 ===
+- ana: Ese cementerio tan tranquilo, con sus piedras blancas… no me da miedo. Parece un jardín donde se descansa.
+- ana: Las lilas de esa casita huelen tan dulce que casi se oyen.
+- matthew: Bueno, pues, a Marilla le gustan las lilas.
+- ana: ¿De verdad? ¡Entonces ya tenemos algo en común! Eso es un buen comienzo, ¿no?
+- matthew: Ya lo creo.
+- ana: Me pregunto si en Avonlea hay una iglesia así. Me gustaría ir los domingos con un sombrero con flores.
+- matthew: Bueno, pues… eso ya lo dirá Marilla.
+- ana: Lo pensaré con mucho cuidado, entonces.
+
+=== viaje:M9 ===
+- ana: Los sauces se inclinan sobre el arroyo como si quisieran tomar agua sin mojarse el pelo.
+- ana: Este puentecito de tablas suena distinto al de la estación. Más alegre, como un tambor chiquito.
+- matthew: Bueno, pues, es de tablas.
+- ana: La luz se está poniendo dorada. A esta hora todo parece más importante, ¿no le parece?
+- matthew: Bueno, pues… se pone bonito, sí.
+- ana: Si yo pudiera embotellar esta luz, la guardaría para los días de lluvia.
+- ana: Aunque la lluvia también me gusta. Es que me gusta casi todo, eso es lo malo.
+- matthew: Je. Eso no tiene nada de malo.
+
+=== viaje:M10 ===
+- ana: El cielo se está poniendo rosado y lila… parece un vestido de baile.
+- ana: ¿Falta mucho, señor Cuthbert? No es que quiera llegar… bueno, sí quiero, pero también quiero que esto no se acabe.
+- matthew: Bueno, pues… todavía un buen trecho.
+- ana: ¡Qué bien! Digo… qué lástima. No, qué bien.
+- ana: Allá adelante el camino da una vuelta. Me encantan las vueltas del camino: nunca se sabe qué hay detrás.
+- matthew: Ya vas a ver.
+- ana: Ay, lo dijo de un modo… como si fuera una sorpresa. ¿Es una sorpresa?
+- matthew: Bueno, pues… algo así.
+
+=== viaje:relleno ===
+quien: ana
+- ¿Usted cree que los caminos se cansan de que los pisen todo el día?
+- Me parece que esa nube tiene forma de castillo con una princesa asomada a la ventana.
+- Si yo fuera un caballo, me gustaría que me llamaran Esperanza.
+- Cuando sea grande quiero escribir un libro sobre un viaje en calesa. Éste, por ejemplo.
+- ¿No le pasa que a veces está tan contento que le dan ganas de llorar?
+- La yegua mueve las orejas como si nos estuviera escuchando. Seguro que entiende todo.
+- Me pregunto qué estarán haciendo ahora los niños del orfanato. Ojalá alguien los lleve de paseo algún día.
+- Ese pájaro voló tan bajo que casi me toca el sombrero. ¡Qué atrevido!
+- Tengo tantas preguntas que si las dijera todas llegaríamos a Avonlea y todavía me quedarían.
+- Las ruedas hacen un ruido que parece decir «Tejas Verdes, Tejas Verdes, Tejas Verdes».
+- ¿Cree que la señorita Cuthbert sabrá hacer tarta de cerezas? Es que nunca he comido una.
+- El viento me desordena las trenzas, pero no me importa. Hoy nada me importa.
+- Si cierro los ojos, el ruido de los cascos parece música de una banda lejana.
+- Una vez leí que en Arabia hay caminos de arena dorada. Pero apuesto a que no son rojos como éstos.
+- Me encanta cómo dice usted «bueno, pues». Suena como alguien que piensa las cosas antes de decirlas.
+- ¿Sabía que yo nunca había andado en calesa? Solo en carreta de leche, una vez, y olía a queso.
+- El aire de la tarde sabe distinto, como a pan recién hecho y a flores mezcladas.
+- Ya no me pellizco más: si es un sueño, que dure. Y si no lo es… ¡mejor todavía!
+
+# La llegada y la noche: irse a dormir (src/js/22-dormir.js), la ropa, el camisón y el sombrero, la vela en la ventana
+# (66-primeras-veces.js); y unas pocas más de los mismos días: Ana sola en la cocina (31-ana-por-su-cuenta.js), el té
+# con Diana en la salita de los Barry (33-viaje-bright-river.js).
+# Formato: el de 00-leeme.txt. «te_diana:primera» es una TABLA EN ORDEN (como las «viaje:» de 30-viaje.txt): el código
+# toma una por su número (0 a 2, según el día; 3, la de invierno), así que van en ese orden y sin condiciones.
+
+# a la cama antes de las ocho
+=== dormir_sin_sueno ===
+quien: ana
+- Todavía no tengo sueño... ¡hay tanto que imaginar antes de dormir!
+
+# la ropa: el vestido, el camisón (en el armario de su pieza)
+=== ropa_vestirse ===
+quien: ana
+- El vestido de todos los días. Ni mangas abullonadas ni nada… pero limpio, y mío.
+- Lista. Una se siente otra persona vestida: más valiente, o por lo menos más abrochada.
+
+=== ropa_camison ===
+quien: ana
+- El camisón. Ahora sí que es de noche.
+
+# la ropa tirada en el suelo desde anoche: la dobla, o se la pone así
+=== ropa_doblar ===
+quien: ana
+- Bien dobladita, como le gusta a Marilla. Una ropa ordenada es casi una ropa contenta.
+
+=== ropa_arrugada ===
+quien: ana
+- Está toda arrugada… Bueno, voy a imaginar que es seda recién planchada.
+
+# el sombrero: lo guarda en el armario, o se lo pone otra vez
+=== sombrero_guardar ===
+quien: ana
+- Lo guardo en el armario. Un sombrero merece descansar, como cualquiera.
+- Ahí queda, colgado de su gancho. Sin sombrero me siento más… libre. Como una náyade.
+
+=== sombrero_poner ===
+quien: ana
+- El sombrero, otra vez. Marilla dice que una niña decente no sale sin sombrero.
+- Listo. Si tuviera flores, sería el sombrero más bonito de Avonlea.
+
+# la vela en la ventana: ya le hizo señas a Diana esta noche
+=== vela_ya_hecha ===
+quien: ana
+- Ya le hice señas esta noche. Diana debe estar durmiendo… o imaginando cosas, como yo.
+
+# Ana sola, en la cocina: no tiene con qué cocinar nada nuevo
+=== cocinar_nada_nuevo ===
+quien: ana
+- Hmm, no tengo con qué cocinar nada nuevo... ¡ni siquiera cabe otra taza de té!
+
+# el té con Diana en la salita: la primera vez del día (en orden: 0 a 2 según el día, 3 en invierno), otra vez el
+# mismo día, y lo del cordial de frambuesa
+=== te_diana:primera ===
+quien: diana
+- Mamá nos dejó té y galletas. ¡Y cordial de frambuesa!
+- ¿Más té, Ana? Me encanta tomar el té contigo, como dos señoras de verdad.
+- Cuando seamos mayores tomaremos el té así todas las tardes, ¿verdad?
+- Mira cómo nieva afuera... ¡y aquí tan calentitas!
+
+=== te_diana_otra_vez ===
+quien: diana
+- Ya tomamos el té hoy, Ana... ¡pero podemos quedarnos conversando!
+
+=== te_diana_cordial ===
+quien: diana
+- ¡Sí, sí! Esta vez lo revisé dos veces. Nada de vino de grosellas... ¡qué susto el de aquella vez!
+
 # La historia del día (src/js/42-historia-del-dia.js). Las historias escritas a mano, con sus frases, están en
 # src/datos/historias.json; aquí, lo que se dice cuando una escena de la historia se juega sin la IA y sin frases.
 
@@ -7239,6 +7493,22 @@ const LIBRO1 = {"verdad":[["telegrama",12.0,0,"marilla","Tejas Verdes","recibe e
    its willows, the Avenue under the apple blossom, Newbridge, and three miles of fields at dusk.
    One can drive it (about two hours and a half, as in the book), walk it, get off the buggy and on again.
    Whoever goes along it: b.where = 'camino', b.roadS (0 at the station, 1 at Avonlea), b.roadDir (+1, -1, 0). ---------- */
+// the sayings of a moment, all of them, in the order they are written (src/datos/dichos/, «=== viaje:M3 ===»): the
+// tables said one line after another (Ana's chatter on each stretch), not one line chosen as dicho() does. Read from the
+// text itself, so that they can be used while the code loads (DICHOS is built later, in 21). [[who, text], …]: who is
+// the group's «quien:», or the line's own («- matthew: Bueno, pues…»).
+function dichosEnOrden(m){
+  const out = []; let en = false, quien = null;
+  for (const raw of (document.getElementById('dichos')?.textContent || '').split('\n')) {
+    const s = raw.trim(); if (!s || s[0] === '#') continue; let x;
+    if ((x = s.match(/^===\s*(.+?)\s*===$/))) { en = x[1] === m; quien = null; continue; }
+    if (!en) continue;
+    if ((x = s.match(/^quien:\s*(\S+)/))) quien = x[1];
+    else if ((x = s.match(/^-\s*(?:\[[^\]]*\]\s*)?(.+)$/))) { const y = !quien && x[1].match(/^(\w+):\s+(.+)$/); out.push(y ? [y[1], y[2]] : [quien, x[1]]); }
+  }
+  if (!out.length) console.warn('[avonlea] dichos: «' + m + '» no está (src/datos/dichos/)');
+  return out;
+}
 const ROAD_MIN = 145, ROAD_MILES = 7, RW = 60000, RH = 2400;
 const ROAD_TRAMOS = [
   { s: 0, kind: 'pueblo', name: 'Bright River', v: -1 },
@@ -7518,10 +7788,10 @@ function roadJoin(withK){
   const c8_ = cartC8(d), [cx_, cy_] = cartFromDriver(d.x, d.y, c8_), [ax_, ay_] = cartSeat(cx_, cy_, c8_, 1); ana.x = ax_; ana.y = ay_; ana.dir = c8Dir(c8_);
   if (!obsScene()) { cam.x = ana.x; cam.y = ana.y; cam.snap = true; }
 }
-function roadBoard(){ const d = PEOPLE[game.road?.with]; if (!d) return; ana.onCart = true; ana.sit = true; ana.goto = null; sayB(qOf(game.road.with), pick(['Bueno, pues… sube.', 'Ya lo creo. Arriba.', 'Sube, sube. Seguimos.'])); }
-function roadGetOff(){ if (!ana.onCart) return; ana.onCart = false; ana.sit = false; ana.y += 24; ana.offT = TT; const d = PEOPLE[game.road?.with]; if (d) sayB(qOf(game.road.with), pick(['Bueno, pues… te espero aquí.', 'No te alejes mucho, ¿eh?', 'Estira las piernas, que queda un buen trecho.'])); }
+function roadBoard(){ const d = PEOPLE[game.road?.with]; if (!d) return; ana.onCart = true; ana.sit = true; ana.goto = null; sayB(qOf(game.road.with), dicho('camino_subir')); }
+function roadGetOff(){ if (!ana.onCart) return; ana.onCart = false; ana.sit = false; ana.y += 24; ana.offT = TT; const d = PEOPLE[game.road?.with]; if (d) sayB(qOf(game.road.with), dicho('camino_bajar')); }
 // Ana walks on to the edge of Avonlea, or into the road from the signpost, on foot
-function roadOnFoot(s){ game.scene = 'camino'; game.road = null; ana.onCart = false; ana.sit = false; const [x, y] = roadAt(s); ana.x = x + (s > .5 ? -60 : 60); ana.y = y + 20; ana.roadS = s; if (!obsScene()) { cam.x = ana.x; cam.y = ana.y; cam.snap = true; } anaSays(s > .5 ? '¡Ocho millas hasta Bright River! Bueno… paso a paso se llega a cualquier parte, ¿no?' : 'Tejas Verdes queda para allá. Ocho millas… ¡qué aventura!'); }
+function roadOnFoot(s){ game.scene = 'camino'; game.road = null; ana.onCart = false; ana.sit = false; const [x, y] = roadAt(s); ana.x = x + (s > .5 ? -60 : 60); ana.y = y + 20; ana.roadS = s; if (!obsScene()) { cam.x = ana.x; cam.y = ana.y; cam.snap = true; } anaSays(s > .5 ? dicho('camino_a_pie_hacia_br') : dicho('camino_a_pie_hacia_avonlea')); }
 function roadTick(dt){
   for (const k of Object.keys(PEOPLE)) {
     const b = PEOPLE[k]; if (b.where !== 'camino') continue;
@@ -7563,7 +7833,9 @@ function buggyTick(){
 
 /* ---------- the trip's talk: Ana's chatter (the book's, stretch by stretch) and Matthew's few words. Nothing is said
    twice: each stretch goes on, next time, where it was left (game.dlgUsed), and when all of it has been said, Ana's
-   other musings; when those too are said, it all starts over. ---------- */
+   other musings; when those too are said, it all starts over. What Ana (and Matthew) say of their own is not here but
+   in src/datos/dichos/30-viaje.txt, as tables in order: «=== viaje:M<stretch> ===» (one line after another, each with
+   who says it: «- matthew: Bueno, pues…») and «=== viaje:relleno ===» (her loose musings); read with dichosEnOrden (17). ---------- */
 let TALKS = [];
 function talkPlay(lines, o = {}){
   const L = lines.map(l => Array.isArray(l) ? (l[0] === '?' ? { q: '?', t: 'elige', opc: l[2] } : l[0] === '!' ? { q: '!', t: 'accion', acc: l[2] } : { q: l[0], t: l[1], m: l[2] }) : l).filter(l => l.t && l.t !== '…');
@@ -7618,28 +7890,12 @@ function talkEnd(t){
   const q = t.ch && TALK_Q[t.ch]; if (q?.length) { const n = q.shift(); TALKS.push(n); if (n.resumen) logEv(n.resumen, []); }
 }
 // what is said on each stretch of the road, in order, from where it was left
-// more of Ana's chatter on the way home (improvised in her voice, about what is seen on each stretch), after the book's
-const VIAJE_MAS = [
-  [['ana', '¿Vio cómo el barranco nos tapa el cielo de a ratos? Es como ir por un pasillo de un castillo, pero con flores en vez de tapices.'], ['matthew', 'Bueno, pues… sí, es alto el barranco.'], ['ana', 'La tierra es tan roja que parece que la isla se hubiera ruborizado al vernos pasar.'], ['ana', 'Estos abedules son tan blancos y delgados… parecen damas de honor esperando a la novia del cerezo.'], ['matthew', 'Je. Damas de honor.'], ['ana', '¿Puedo quedarme con esta rama de ciruelo? La voy a poner en agua apenas lleguemos. Bueno, si es que me dejan quedarme… digo, si me dejan poner flores.'], ['matthew', 'Bueno, pues, quédatela.'], ['ana', 'Huele a algo que todavía no tiene nombre. Le voy a buscar uno de aquí a Avonlea.']],
-  [['ana', '¡Mire, una señora viene en su carreta! ¿Por qué la saludó, si no la conoce?'], ['matthew', 'Aquí en la Isla se saluda a todos, Ana.'], ['ana', 'Me gusta eso. Es como si la isla entera fuera una sola familia grande que todavía no se ha presentado.'], ['ana', 'Esos manzanos parecen nubes que se cansaron de flotar y se sentaron en el pasto.'], ['ana', '¿Usted cree que las granjas se ponen celosas unas de otras cuando una tiene más flores?'], ['matthew', 'Bueno, pues… nunca lo pensé.'], ['ana', 'Yo creo que no. Seguro que se prestan las abejas.'], ['ana', 'Si yo viviera en una granja así, le pondría nombre a cada manzano. Ése se llamaría Lady Blanca, y ése, Sir Rosado.']],
-  [['ana', '¡Ay, qué sombra tan fresca! Los abetos son como señores muy serios que en el fondo son tiernos.'], ['ana', 'Cierre los ojos un momento, señor Cuthbert… ¿siente el olor? Es como si alguien hubiera abierto un frasco de bosque.'], ['matthew', 'Bueno, pues, yo manejo… mejor no cierro los ojos.'], ['ana', '¡Tiene razón! Qué sensato es usted. Yo los cerraré por los dos.'], ['ana', '¿Sabe que en el orfanato soñaba con un bosque así? Lo imaginaba tanto que casi podía tocarlo. Y ahora es de verdad.'], ['ana', 'Ese pájaro canta como si alguien lo hubiera invitado a una fiesta y llegara tarde.'], ['matthew', 'Es un zorzal, me parece.'], ['ana', 'Un zorzal. Hasta el nombre suena a canción.']],
-  [['ana', 'Esta hondonada es como un tazón lleno de nieve que no se derrite.'], ['ana', 'Los ciruelos silvestres se ven tan vaporosos… como si los hubieran pintado con el dedo.'], ['matthew', 'Bueno, pues, este año florecieron bien.'], ['ana', '¿Usted se acuerda de cuántas primaveras ha visto, señor Cuthbert?'], ['matthew', 'Unas sesenta, más o menos.'], ['ana', '¡Sesenta primaveras! Qué rico debe ser tener tantas guardadas. Yo solo tengo once, y la mitad las pasé cuidando mellizos.'], ['ana', 'Pero ésta va a ser la mejor de todas, lo sé. Ya empezó a serlo.'], ['matthew', 'Ya lo creo.']],
-  [['ana', 'Desde aquí arriba se ve todo el mundo. Bueno, todo el mundo de la isla, que debe ser la parte más bonita.'], ['ana', 'El mar se ve tan azul… ¿será que el cielo se mira en él como en un espejo para peinarse?'], ['matthew', 'Bueno, pues… puede ser.'], ['ana', 'Ojalá un día pueda ir a la playa y mojarme los pies. ¿La arena también es roja?'], ['matthew', 'Roja, sí. Y en White Sands, blanca.'], ['ana', '¡Arena de dos colores! Esta isla tiene de todo, como un baúl de tesoros.'], ['ana', 'Las granjas con sus graneros rojos parecen juguetes que alguien olvidó en el pasto.'], ['matthew', 'Je. Juguetes.']],
-  [['ana', 'Estos arces son tan grandes… deben haber visto pasar a mucha gente. Me pregunto si se acuerdan de alguien.'], ['ana', 'Escuche las abejas en el huerto: zumban como si estuvieran rezando.'], ['matthew', 'Bueno, pues, están trabajando, más bien.'], ['ana', 'Trabajar y rezar a la vez. Las abejas son muy virtuosas.'], ['ana', 'Ese arroyito que pasa por debajo del camino… ¿adónde irá? Seguro que va a contarle algo al mar.'], ['ana', '¿El arroyo de Tejas Verdes también va al mar?'], ['matthew', 'Va al lago, y el lago, al mar.'], ['ana', 'Entonces todo está conectado. Me encanta pensar eso.']],
-  [['ana', 'Huele a madera recién cortada. Es un olor muy honrado, ¿no le parece?'], ['matthew', 'Bueno, pues, sí. Huele bien.'], ['ana', 'Mire a esos niñitos jugando junto a la ropa tendida. Ojalá alguien les cuente cuentos de noche.'], ['ana', 'Yo les contaba cuentos a los mellizos de la señora Hammond. Los inventaba, porque libros no había.'], ['matthew', '¿Y les gustaban?'], ['ana', 'Se dormían a la mitad. Yo prefería pensar que era porque estaban muy tranquilos, no aburridos.'], ['ana', 'La rueda del aserradero da vueltas y vueltas, como mis pensamientos cuando no puedo dormir.'], ['matthew', 'Je. Ya lo creo.']],
-  [['ana', 'Ese hombre sembrando a mano parece que le estuviera echando semillas de esperanza a la tierra.'], ['ana', 'Las vacas nos miran como si fuéramos el acontecimiento del día.'], ['matthew', 'Bueno, pues, aquí no pasa mucho.'], ['ana', '¡Entonces me alegro de darles algo que contar! ¿Las vacas se cuentan cosas?'], ['matthew', 'Mugen, nomás.'], ['ana', 'Seguro que en vaca eso quiere decir algo muy profundo.'], ['ana', 'Estas cercas en zigzag parecen costuras que unen un campo con otro, para que no se separen.'], ['matthew', 'Bueno, pues… algo así.']],
-  [['ana', 'Ese cementerio tan tranquilo, con sus piedras blancas… no me da miedo. Parece un jardín donde se descansa.'], ['ana', 'Las lilas de esa casita huelen tan dulce que casi se oyen.'], ['matthew', 'Bueno, pues, a Marilla le gustan las lilas.'], ['ana', '¿De verdad? ¡Entonces ya tenemos algo en común! Eso es un buen comienzo, ¿no?'], ['matthew', 'Ya lo creo.'], ['ana', 'Me pregunto si en Avonlea hay una iglesia así. Me gustaría ir los domingos con un sombrero con flores.'], ['matthew', 'Bueno, pues… eso ya lo dirá Marilla.'], ['ana', 'Lo pensaré con mucho cuidado, entonces.']],
-  [['ana', 'Los sauces se inclinan sobre el arroyo como si quisieran tomar agua sin mojarse el pelo.'], ['ana', 'Este puentecito de tablas suena distinto al de la estación. Más alegre, como un tambor chiquito.'], ['matthew', 'Bueno, pues, es de tablas.'], ['ana', 'La luz se está poniendo dorada. A esta hora todo parece más importante, ¿no le parece?'], ['matthew', 'Bueno, pues… se pone bonito, sí.'], ['ana', 'Si yo pudiera embotellar esta luz, la guardaría para los días de lluvia.'], ['ana', 'Aunque la lluvia también me gusta. Es que me gusta casi todo, eso es lo malo.'], ['matthew', 'Je. Eso no tiene nada de malo.']],
-  [['ana', 'El cielo se está poniendo rosado y lila… parece un vestido de baile.'], ['ana', '¿Falta mucho, señor Cuthbert? No es que quiera llegar… bueno, sí quiero, pero también quiero que esto no se acabe.'], ['matthew', 'Bueno, pues… todavía un buen trecho.'], ['ana', '¡Qué bien! Digo… qué lástima. No, qué bien.'], ['ana', 'Allá adelante el camino da una vuelta. Me encantan las vueltas del camino: nunca se sabe qué hay detrás.'], ['matthew', 'Ya vas a ver.'], ['ana', 'Ay, lo dijo de un modo… como si fuera una sorpresa. ¿Es una sorpresa?'], ['matthew', 'Bueno, pues… algo así.']],
-];
-LIBRO1.relleno.push(
-  '¿Usted cree que los caminos se cansan de que los pisen todo el día?', 'Me parece que esa nube tiene forma de castillo con una princesa asomada a la ventana.', 'Si yo fuera un caballo, me gustaría que me llamaran Esperanza.',
-  'Cuando sea grande quiero escribir un libro sobre un viaje en calesa. Éste, por ejemplo.', '¿No le pasa que a veces está tan contento que le dan ganas de llorar?', 'La yegua mueve las orejas como si nos estuviera escuchando. Seguro que entiende todo.',
-  'Me pregunto qué estarán haciendo ahora los niños del orfanato. Ojalá alguien los lleve de paseo algún día.', 'Ese pájaro voló tan bajo que casi me toca el sombrero. ¡Qué atrevido!', 'Tengo tantas preguntas que si las dijera todas llegaríamos a Avonlea y todavía me quedarían.',
-  'Las ruedas hacen un ruido que parece decir «Tejas Verdes, Tejas Verdes, Tejas Verdes».', '¿Cree que la señorita Cuthbert sabrá hacer tarta de cerezas? Es que nunca he comido una.', 'El viento me desordena las trenzas, pero no me importa. Hoy nada me importa.',
-  'Si cierro los ojos, el ruido de los cascos parece música de una banda lejana.', 'Una vez leí que en Arabia hay caminos de arena dorada. Pero apuesto a que no son rojos como éstos.', 'Me encanta cómo dice usted «bueno, pues». Suena como alguien que piensa las cosas antes de decirlas.',
-  '¿Sabía que yo nunca había andado en calesa? Solo en carreta de leche, una vez, y olía a queso.', 'El aire de la tarde sabe distinto, como a pan recién hecho y a flores mezcladas.', 'Ya no me pellizco más: si es un sueño, que dure. Y si no lo es… ¡mejor todavía!',
-);
+// more of Ana's chatter on the way home (improvised in her voice, about what is seen on each stretch), after the book's:
+// one table for each stretch (its «v»), in src/datos/dichos/30-viaje.txt («=== viaje:M3 ===», in order, each line with
+// who says it); the scenes of the road take pieces of them by number (M3:0-2, VIAJE_ESCENAS in 21)
+const VIAJE_MAS = Array.from({ length: Math.max(...ROAD_TRAMOS.map(t => t.v)) + 1 }, (_, v) => dichosEnOrden('viaje:M' + v));
+// and her loose musings, after the book's (viaje:relleno, in order)
+LIBRO1.relleno.push(...dichosEnOrden('viaje:relleno').map(([, t]) => t));
 function roadTramoIn(k, tr){
   if (tr.m) cap1Mark(tr.m, tr.note);
   else if (tr.note) logEv(tr.note, []);
@@ -7817,7 +8073,7 @@ function cap1Tick(){
   // the train comes in at Bright River: Ana gets off, and Mrs. Spencer goes on to White Sands
   if (h >= 17.5 && !f.train) { f.train = TT; game.train = { t0: TT }; if (OBS === 'lynde') observe(null); }
   if (f.train && !f.anaOn && TT - f.train > 7) { f.anaOn = 1; ana.hidden = false; ana.x = KIT.w * .45; ana.y = 3.4 * T; ana.dir = 2; cap1Mark('ana_tren', 'Ana bajó del tren de las cinco y media con la Sra. Spencer, que la dejó a cargo del jefe de estación.'); cap1Mark('spencer_sigue', 'La Sra. Spencer siguió viaje en el mismo tren hasta White Sands.'); }
-  if (f.anaOn && !f.pila && TT - f.train > 20) { f.pila = 1; ana.sit = true; ana.x = BRS.pile.x; ana.y = BRS.pile.y + 2; ana.dir = 2; cap1Mark('ana_pila', 'Ana no quiso entrar a la sala de espera de señoras («hay más campo para la imaginación») y se sentó en la pila de tejuelas.'); sayB('ana', 'Prefiero quedarme afuera, gracias. Aquí hay más campo para la imaginación.'); }
+  if (f.anaOn && !f.pila && TT - f.train > 20) { f.pila = 1; ana.sit = true; ana.x = BRS.pile.x; ana.y = BRS.pile.y + 2; ana.dir = 2; cap1Mark('ana_pila', 'Ana no quiso entrar a la sala de espera de señoras («hay más campo para la imaginación») y se sentó en la pila de tejuelas.'); sayB('ana', dicho('estacion_pila')); }
   // Matthew at the station: the stationmaster, the girl on the shingles; and home in the buggy
   if (M.where === 'br' && !f.st) {
     f.st = 1; dlgHecho('matthew_en_estacion'); CHAT_HOLD.matthew = TT + 1e6; cap1Mark('matthew_estacion', 'Matthew ató la yegua en el patio del hotel de Bright River, pasó junto a la niña sin mirarla y fue a la estación.');   // (he waits there for the scene)
@@ -8525,7 +8781,7 @@ HOUSES.gg.interior.draw = (c, t, night) => { drawKitchen(c, t, night); drawStair
 let sleeping = false, sleepyStage = 0;
 function goToBed(){
   if (primeraVez('bed', goToBed)) return;   // (the first night, her bed is the scene of that night: not plain sleep)
-  if (hourNow() < 20) { anaSays('Todavía no tengo sueño... ¡hay tanto que imaginar antes de dormir!'); return; }
+  if (hourNow() < 20) { anaSays(dicho('dormir_sin_sueno')); return; }
   // (from the second night: her clothes, folded on the chair, or thrown on the floor; the player decides)
   if (game.wm && dlgHechos().desayuno_prueba && !game.wm.camison && !ANA_AUTO && !navigator.webdriver) return say('Ana', 'Antes de meterse en la cama…', [
     ['🧺 Doblar la ropa en la silla y acostarse', () => { close(); ropaAlAcostarse(true); goSleep(false); }],
@@ -9691,7 +9947,7 @@ function eventIntent(ev){
 function autoCook(){
   const k = ITEMS.find(k => ITEM_DEFS[k].recipe && Object.keys(ITEM_DEFS[k].recipe).length && !hasIt(k) && Object.entries(ITEM_DEFS[k].recipe).every(([i, n]) => game.inv[i] >= n)) || (!hasIt('te') && 'te');
   if (k) return startCook(k);
-  anaSays('Hmm, no tengo con qué cocinar nada nuevo... ¡ni siquiera cabe otra taza de té!');
+  anaSays(dicho('cocinar_nada_nuevo'));
 }
 // carrying out the intent, one step each time she is free
 function autoStep(){
@@ -9811,8 +10067,8 @@ const CART_LEN = CART_ROUTE.slice(1).reduce((a, p, i) => a + dist(p[0], p[1], CA
 function cartAt(sv){ let left = clamp(sv, 0, CART_LEN); for (let i = 1; i < CART_ROUTE.length; i++) { const a = CART_ROUTE[i - 1], b = CART_ROUTE[i], L = dist(a[0], a[1], b[0], b[1]); if (left <= L || i === CART_ROUTE.length - 1) { const k = clamp(left / L, 0, 1); return [lerp(a[0], b[0], k), lerp(a[1], b[1], k), b[0] - a[0]]; } left -= L; } return [...CART_ROUTE[0], 1]; }
 function tripAsk(to){
   const hn = hourNow(), m = PEOPLE.matthew;
-  if (m.where === 'away') return anaSays('Matthew no está, y sin él y la carreta Bright River queda lejísimos.');
-  if (hn > 20) return anaSays('Ya es muy tarde para ir hasta Bright River. Mejor mañana temprano.');
+  if (m.where === 'away') return anaSays(dicho('carreta_sin_matthew'));
+  if (hn > 20) return anaSays(dicho('carreta_tarde'));
   say('Ana', '¿Ir hasta la estación de Bright River con Matthew en la carreta? Es un buen trecho, pasando por la aldea.', [['🐴 Vamos', () => { close(); cartStart(); }], ['Mejor no', close]]);
 }
 function cartStart(){
@@ -9831,7 +10087,7 @@ function cartAsk(){
   if (!nearSt) o.push([nearAv ? '🐴 Ir a Bright River' : '🐴 Seguir a Bright River', () => cartOn('br')]);
   if (!nearAv) o.push(['🐴 Volver a Tejas Verdes', () => cartOn('av')]);
   o.push(['Todavía no', close]);
-  say('matthew', 'Bueno, pues... ¿seguimos?', o);
+  say('matthew', dicho('carreta_seguimos'), o);
 }
 function cartTick(dt){
   if (!cart.on) return;
@@ -9883,9 +10139,9 @@ function teaTime(){
   diana.sit = true; diana.moving = false; diana.x = SOFA.x + 20; diana.y = SOFA.y - 4; diana.dir = 2;
   const first = game.teaDay !== today();
   if (first) { logEv('Ana y Diana tomaron el té en la salita de los Barry.'); game.teaDay = today(); game.fond.diana = Math.min(5, game.fond.diana + 1); hearts(SOFA.x, SOFA.y - 60); sfx.happy(); save(); }
-  const TEA_LINES = ['Mamá nos dejó té y galletas. ¡Y cordial de frambuesa!', '¿Más té, Ana? Me encanta tomar el té contigo, como dos señoras de verdad.', 'Cuando seamos mayores tomaremos el té así todas las tardes, ¿verdad?', 'Mira cómo nieva afuera... ¡y aquí tan calentitas!'];
-  say('diana', first ? TEA_LINES[S === 3 ? 3 : today() % 3] : 'Ya tomamos el té hoy, Ana... ¡pero podemos quedarnos conversando!', [
-    ['¿Seguro que es cordial de frambuesa?', () => say('diana', '¡Sí, sí! Esta vez lo revisé dos veces. Nada de vino de grosellas... ¡qué susto el de aquella vez!', [['Brindemos por nuestra amistad', () => { hearts(diana.x, diana.y - 50); sfx.happy(); close(); }]])],
+  const TEA_LINES = dichosEnOrden('te_diana:primera').map(([, t]) => t);   // (src/datos/dichos/31-llegada-y-noche.txt: by the day; the last, in winter)
+  say('diana', first ? TEA_LINES[S === 3 ? 3 : today() % 3] : dicho('te_diana_otra_vez'), [
+    ['¿Seguro que es cordial de frambuesa?', () => say('diana', dicho('te_diana_cordial'), [['Brindemos por nuestra amistad', () => { hearts(diana.x, diana.y - 50); sfx.happy(); close(); }]])],
     ['Qué rico', close],
   ]);
 }
@@ -15878,7 +16134,7 @@ function velaPuede(){ return dianaAmiga() && !!dlgDichas().conv_diana_vela && ho
 function ventana(){
   if (!velaPuede()) return comentar('ventana');
   say('Ana', 'Por la ventana, entre los árboles, se ve la luz de la pieza de Diana.', [
-    ['🕯 Hacerle señas a Diana con la vela', () => { close(); const d = DIALOGOS.find(x => x.id === 'senas_vela'); if (d && !d.dicha()) d.decir(); else anaSays('Ya le hice señas esta noche. Diana debe estar durmiendo… o imaginando cosas, como yo.'); }],
+    ['🕯 Hacerle señas a Diana con la vela', () => { close(); const d = DIALOGOS.find(x => x.id === 'senas_vela'); if (d && !d.dicha()) d.decir(); else anaSays(dicho('vela_ya_hecha')); }],
     ['Mirar por la ventana', () => { close(); escenaObjeto('gwin', true) || comentar('ventana'); }],
     ['Nada por ahora', close],
   ]);
@@ -15886,7 +16142,7 @@ function ventana(){
 // her hat: off, into the wardrobe (it hangs there on its peg); and on again
 function sombrero(callada){
   const W = game.wm, sin = !W.sinSombrero; W.sinSombrero = sin;
-  if (!callada) anaSays(sin ? pick(['Lo guardo en el armario. Un sombrero merece descansar, como cualquiera.', 'Ahí queda, colgado de su gancho. Sin sombrero me siento más… libre. Como una náyade.']) : pick(['El sombrero, otra vez. Marilla dice que una niña decente no sale sin sombrero.', 'Listo. Si tuviera flores, sería el sombrero más bonito de Avonlea.']));
+  if (!callada) anaSays(sin ? dicho('sombrero_guardar') : dicho('sombrero_poner'));
   logEv(sin ? 'Ana se sacó el sombrero y lo guardó en el armario.' : 'Ana sacó su sombrero del armario y se lo puso.', []); save();
 }
 // her clothes: to bed in her nightgown, and up in it; she dresses when the player decides (at the wardrobe, as with the
@@ -15904,18 +16160,18 @@ function drawRopaSilla(c){ const [x, y] = ROPA_SILLA(), L = LOOKS.ana; drawSilla
 function vestirse(callada){
   const W = game.wm; if (!W?.camison) return;
   W.camison = false; W.ropaSilla = false; if (W.ropaTirada) { W.ropaTirada = false; dlgHecho('ropa_arrugada'); }
-  if (!callada) anaSays(pick(['El vestido de todos los días. Ni mangas abullonadas ni nada… pero limpio, y mío.', 'Lista. Una se siente otra persona vestida: más valiente, o por lo menos más abrochada.']));
+  if (!callada) anaSays(dicho('ropa_vestirse'));
   logEv('Ana se vistió.', []); save();
 }
-function ponerseCamison(){ const W = game.wm; W.camison = true; W.sinSombrero = true; anaSays('El camisón. Ahora sí que es de noche.'); logEv('Ana se puso el camisón.', []); save(); }
+function ponerseCamison(){ const W = game.wm; W.camison = true; W.sinSombrero = true; anaSays(dicho('ropa_camison')); logEv('Ana se puso el camisón.', []); save(); }
 function ropaOrdenar(callada){
   const W = game.wm; if (!W?.ropaTirada) return; W.ropaTirada = false; W.ropaSilla = true; delete dlgHechos().ropa_tirada_otra;
-  if (!callada) anaSays('Bien dobladita, como le gusta a Marilla. Una ropa ordenada es casi una ropa contenta.');
+  if (!callada) anaSays(dicho('ropa_doblar'));
   logEv('Ana dobló su ropa y la dejó en la silla.', []);
   if (!dlgHechos().ropa_ordenada) { dlgHecho('ropa_ordenada'); dlgHacer([{ suma: ['afecto:marilla:ana', 1] }]); }   // (Marilla sees it: she says nothing, but she sees it)
   save();
 }
-function ropaPonerse(){ anaSays('Está toda arrugada… Bueno, voy a imaginar que es seda recién planchada.'); vestirse(true); }
+function ropaPonerse(){ anaSays(dicho('ropa_arrugada')); vestirse(true); }
 function ropaMenu(){
   say('Ana', 'Su vestido y sus zapatos, tirados en el suelo desde anoche.', [['🧺 Doblar la ropa y dejarla en la silla', () => { close(); ropaOrdenar(); }], ...(game.wm.camison ? [['👗 Ponérsela así, arrugada', () => { close(); ropaPonerse(); }]] : []), ['Nada por ahora', close]]);
 }
