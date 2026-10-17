@@ -1,0 +1,148 @@
+# Lo que se dice al encontrarse en el camino, sin IA (src/js/60-foco-y-ejecucion.js, src/js/58-fichas-y-planificador.js):
+# los saludos, lo que contesta Matthew, las despedidas, lo que uno dice al quedarse mirando algo. Formato: 00-leeme.txt.
+# Las charlas de dos o tres (una línea cada uno, o más) están en src/datos/charlas.txt.
+#
+# Huecos: {hola} es «Buenos días», «Buenas tardes» o «Buenas noches», según la hora; {nombre} es «, Diana» (con la coma)
+# o nada, si no se le dice por su nombre; {tarea} es lo que va a hacer, en infinitivo («ir a la tienda»).
+
+# ---------------------------------------------------- al quedarse mirando algo (mira:<quien>:<qué>)
+# Qué: lago, flores, arboles, mar, animales, campo. Si esa persona no tiene líneas para eso, las de «otros» (salvo Ana,
+# que entonces no dice nada). Ocho de cada diez veces dice algo.
+
+=== mira:ana:lago ===
+quien: ana
+- ¡El Lago de las Aguas Brillantes! Podría quedarme aquí la vida entera.
+- El agua tiene hoy un color de perla... ¿o de ópalo?
+
+=== mira:ana:flores ===
+quien: ana
+- ¡Qué flores! Parecen pensamientos de alguien muy feliz.
+- Si yo fuera flor, querría ser una de estas.
+
+=== mira:ana:arboles ===
+quien: ana
+- Los cerezos en flor parecen novias vestidas de blanco.
+- ¡La Blanca Senda de las Delicias, otra vez!
+
+=== mira:ana:mar ===
+quien: ana
+- El mar... ¿qué habrá del otro lado?
+- Cuando sea grande voy a cruzar el mar. O a escribir sobre él.
+
+=== mira:ana:animales ===
+quien: ana
+- ¡Hola, pequeño! ¿Cómo te llamas? Yo te diré Lord Fitzgerald.
+- ¿Qué pensarán los animales de nosotros?
+
+=== mira:ana:campo ===
+quien: ana
+- Todo crece tan callado... como un secreto.
+
+=== mira:matthew:animales ===
+quien: matthew
+- Buen animal, sí... buen animal.
+- Ejem... tranquila, tranquila.
+
+=== mira:matthew:campo ===
+quien: matthew
+- Hmm. Va bien la avena. Sí... va bien.
+
+=== mira:diana:flores ===
+quien: diana
+- ¡Ay, qué lindas! Le llevaré unas a mamá.
+
+=== mira:diana:lago ===
+quien: diana
+- Ana diría algo precioso de este lago...
+
+=== mira:otros:lago ===
+- ¡Qué lindo está el lago hoy!
+
+=== mira:otros:flores ===
+- Qué bonitas las flores este año.
+
+=== mira:otros:arboles ===
+- Mire nada más esos árboles.
+
+=== mira:otros:mar ===
+- Qué brisa trae el mar.
+
+=== mira:otros:animales ===
+- Mira tú...
+
+=== mira:otros:campo ===
+- Buena tierra, esta.
+
+# ---------------------------------------------------- alguien saluda a Ana al pasar (Ana, como la mueve la jugadora)
+# (las que dicen «Ana» no las dice quien todavía no la conoce; ni lo que ya le oyó decir hoy)
+=== encuentro:saluda_a_ana ===
+- ¡{hola}, Ana!
+- ¡Hola, Ana! ¿A dónde vas tan apurada?
+- ¡Ana Shirley! Saludos a Marilla.
+- ¡{hola}, niña!
+
+# quien no quiere mucho a Ana: un saludo seco
+=== encuentro:saluda_seco ===
+- {hola}, Ana.
+- {hola}, niña.
+
+# un vecino del pueblo a Ana, cuando no tiene nada suyo que decir (o, si ya se lo dijo hoy, la saluda con la cabeza)
+=== encuentro:saluda_nina ===
+- {hola}, niña.
+
+=== encuentro:saluda_con_la_cabeza ===
+- (La saluda con la cabeza.)
+
+# lo que Ana le contesta a quien no la quiere, si esa persona no tiene una línea para eso (src/datos/frases.txt, «ana:»)
+=== encuentro:ana_seca ===
+quien: ana
+- Hmpf.
+
+# ---------------------------------------------------- Matthew, que se cruza con alguien: un saludo, y sigue
+=== encuentro:saluda_a_matthew ===
+- ¡{hola}, Matthew!
+
+=== encuentro:matthew_saluda ===
+quien: matthew
+- Eh... b-buenas.
+- Buenas... sí... buen día, ¿no?
+- Ejem... buenas.
+
+# (solo quien es conversador)
+=== encuentro:pregunta_a_matthew ===
+- ¡Qué raro verlo por aquí! ¿Cómo anda todo?
+- ¿Y Marilla? ¿Bien?
+
+=== encuentro:matthew_se_va ===
+quien: matthew
+- Bueno... tengo que seguir, ¿sabe? Sí... eso.
+- Pues... sí... tengo un encargo. Hasta luego.
+
+# ---------------------------------------------------- dos que se cruzan: el saludo y la respuesta
+=== encuentro:saluda ===
+- ¡{hola}{nombre}!
+
+# entre dos niños
+=== encuentro:responde_nino ===
+- ¡Hola{nombre}! ¿A dónde vas?
+- ¡Hola{nombre}!
+
+# entre grandes
+=== encuentro:responde_grande ===
+- ¡{hola}{nombre}! ¿Cómo están todos en casa?
+- ¡Qué gusto verle{nombre}!
+
+# un niño, cuando Ana le cuenta lo que sueña (src/datos/charlas.txt, «suena:»)
+=== encuentro:nino_responde_a_ana ===
+- ¡Qué lindo, Ana!
+- ¿De verdad? ¡Cuéntame más!
+- ¡Qué cosas dices, Ana!
+
+# ---------------------------------------------------- y la despedida
+# quien va a hacer algo, lo dice (salvo que nombre a quien lo dice: «ir a la casa de la Sra. Lynde», dicho por ella)
+=== encuentro:me_voy_a ===
+- Bueno, me voy, que tengo que {tarea}.
+
+=== encuentro:despedida ===
+- Bueno, ¡que le vaya bien!
+- Me voy, que se hace tarde.

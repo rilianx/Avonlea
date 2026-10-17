@@ -3203,6 +3203,198 @@ quien: lawson
 quien: ana
 - ¿A quién le escribo?
 
+# Lo que se dice al encontrarse en el camino, sin IA (src/js/60-foco-y-ejecucion.js, src/js/58-fichas-y-planificador.js):
+# los saludos, lo que contesta Matthew, las despedidas, lo que uno dice al quedarse mirando algo. Formato: 00-leeme.txt.
+# Las charlas de dos o tres (una línea cada uno, o más) están en src/datos/charlas.txt.
+#
+# Huecos: {hola} es «Buenos días», «Buenas tardes» o «Buenas noches», según la hora; {nombre} es «, Diana» (con la coma)
+# o nada, si no se le dice por su nombre; {tarea} es lo que va a hacer, en infinitivo («ir a la tienda»).
+
+# ---------------------------------------------------- al quedarse mirando algo (mira:<quien>:<qué>)
+# Qué: lago, flores, arboles, mar, animales, campo. Si esa persona no tiene líneas para eso, las de «otros» (salvo Ana,
+# que entonces no dice nada). Ocho de cada diez veces dice algo.
+
+=== mira:ana:lago ===
+quien: ana
+- ¡El Lago de las Aguas Brillantes! Podría quedarme aquí la vida entera.
+- El agua tiene hoy un color de perla... ¿o de ópalo?
+
+=== mira:ana:flores ===
+quien: ana
+- ¡Qué flores! Parecen pensamientos de alguien muy feliz.
+- Si yo fuera flor, querría ser una de estas.
+
+=== mira:ana:arboles ===
+quien: ana
+- Los cerezos en flor parecen novias vestidas de blanco.
+- ¡La Blanca Senda de las Delicias, otra vez!
+
+=== mira:ana:mar ===
+quien: ana
+- El mar... ¿qué habrá del otro lado?
+- Cuando sea grande voy a cruzar el mar. O a escribir sobre él.
+
+=== mira:ana:animales ===
+quien: ana
+- ¡Hola, pequeño! ¿Cómo te llamas? Yo te diré Lord Fitzgerald.
+- ¿Qué pensarán los animales de nosotros?
+
+=== mira:ana:campo ===
+quien: ana
+- Todo crece tan callado... como un secreto.
+
+=== mira:matthew:animales ===
+quien: matthew
+- Buen animal, sí... buen animal.
+- Ejem... tranquila, tranquila.
+
+=== mira:matthew:campo ===
+quien: matthew
+- Hmm. Va bien la avena. Sí... va bien.
+
+=== mira:diana:flores ===
+quien: diana
+- ¡Ay, qué lindas! Le llevaré unas a mamá.
+
+=== mira:diana:lago ===
+quien: diana
+- Ana diría algo precioso de este lago...
+
+=== mira:otros:lago ===
+- ¡Qué lindo está el lago hoy!
+
+=== mira:otros:flores ===
+- Qué bonitas las flores este año.
+
+=== mira:otros:arboles ===
+- Mire nada más esos árboles.
+
+=== mira:otros:mar ===
+- Qué brisa trae el mar.
+
+=== mira:otros:animales ===
+- Mira tú...
+
+=== mira:otros:campo ===
+- Buena tierra, esta.
+
+# ---------------------------------------------------- alguien saluda a Ana al pasar (Ana, como la mueve la jugadora)
+# (las que dicen «Ana» no las dice quien todavía no la conoce; ni lo que ya le oyó decir hoy)
+=== encuentro:saluda_a_ana ===
+- ¡{hola}, Ana!
+- ¡Hola, Ana! ¿A dónde vas tan apurada?
+- ¡Ana Shirley! Saludos a Marilla.
+- ¡{hola}, niña!
+
+# quien no quiere mucho a Ana: un saludo seco
+=== encuentro:saluda_seco ===
+- {hola}, Ana.
+- {hola}, niña.
+
+# un vecino del pueblo a Ana, cuando no tiene nada suyo que decir (o, si ya se lo dijo hoy, la saluda con la cabeza)
+=== encuentro:saluda_nina ===
+- {hola}, niña.
+
+=== encuentro:saluda_con_la_cabeza ===
+- (La saluda con la cabeza.)
+
+# lo que Ana le contesta a quien no la quiere, si esa persona no tiene una línea para eso (src/datos/frases.txt, «ana:»)
+=== encuentro:ana_seca ===
+quien: ana
+- Hmpf.
+
+# ---------------------------------------------------- Matthew, que se cruza con alguien: un saludo, y sigue
+=== encuentro:saluda_a_matthew ===
+- ¡{hola}, Matthew!
+
+=== encuentro:matthew_saluda ===
+quien: matthew
+- Eh... b-buenas.
+- Buenas... sí... buen día, ¿no?
+- Ejem... buenas.
+
+# (solo quien es conversador)
+=== encuentro:pregunta_a_matthew ===
+- ¡Qué raro verlo por aquí! ¿Cómo anda todo?
+- ¿Y Marilla? ¿Bien?
+
+=== encuentro:matthew_se_va ===
+quien: matthew
+- Bueno... tengo que seguir, ¿sabe? Sí... eso.
+- Pues... sí... tengo un encargo. Hasta luego.
+
+# ---------------------------------------------------- dos que se cruzan: el saludo y la respuesta
+=== encuentro:saluda ===
+- ¡{hola}{nombre}!
+
+# entre dos niños
+=== encuentro:responde_nino ===
+- ¡Hola{nombre}! ¿A dónde vas?
+- ¡Hola{nombre}!
+
+# entre grandes
+=== encuentro:responde_grande ===
+- ¡{hola}{nombre}! ¿Cómo están todos en casa?
+- ¡Qué gusto verle{nombre}!
+
+# un niño, cuando Ana le cuenta lo que sueña (src/datos/charlas.txt, «suena:»)
+=== encuentro:nino_responde_a_ana ===
+- ¡Qué lindo, Ana!
+- ¿De verdad? ¡Cuéntame más!
+- ¡Qué cosas dices, Ana!
+
+# ---------------------------------------------------- y la despedida
+# quien va a hacer algo, lo dice (salvo que nombre a quien lo dice: «ir a la casa de la Sra. Lynde», dicho por ella)
+=== encuentro:me_voy_a ===
+- Bueno, me voy, que tengo que {tarea}.
+
+=== encuentro:despedida ===
+- Bueno, ¡que le vaya bien!
+- Me voy, que se hace tarde.
+
+# Lo que uno le pide a otro (src/js/58-fichas-y-planificador.js, FAVORS): cuando alguien (Ana o los demás) necesita
+# ayuda para lo que quiere hacer, se lo pide a alguien con estas palabras. Formato: 00-leeme.txt.
+# Huecos (los llena el código): {hora} («4:00 p. m.»), {lugar} («la casa parroquial»), {cosa} («la cuerda», «2 huevos»),
+# {enfermo} (un nombre), {tareas} («barrer el porche y lavar los platos»), {vaca} (su nombre), {quien} (un nombre).
+# Lo que se dicen mientras toman el té o pasean juntas está en src/datos/charlas.txt («te», «paseo»).
+
+=== pide:pasear ===
+- ¿Vamos a dar un paseo juntas? Hace un día precioso.
+
+=== pide:venir ===
+- ¿Vendrías a tomar el té conmigo esta tarde, a las {hora}? En {lugar}.
+
+# (lo que se presta se devuelve)
+=== pide:prestar ===
+- ¿Me prestarías {cosa}? Te lo devuelvo, prometido.
+
+# (al médico)
+=== pide:curar ===
+- ¡Doctor! {enfermo} está enfermo. ¿Podría venir a verlo, por favor?
+
+# (Marilla a Ana)
+=== pide:quehaceres ===
+- Ana, hay que {tareas}. Y nada de quedarse soñando despierta.
+
+=== pide:llevar ===
+- Matthew, ¿me llevarías en la calesa a {lugar}?
+
+=== pide:traer ===
+- ¿Me traerías {cosa}?
+
+=== pide:vender_vaca ===
+- ¿Me vendería la vaca?
+
+=== pide:encerrar_vaca ===
+- ¡{vaca} anda suelta otra vez! ¿Podrías llevarla a {lugar}?
+
+# (la Sra. Lynde, en cama, por su vaca jersey, que hay que devolver al potrero)
+=== pide:devolver_mi_vaca ===
+- ¿Me harías el favor de devolver mi vaca al potrero? Yo no me puedo ni levantar.
+
+=== pide:interceder ===
+- ¿Hablarías con {quien} por mí? A ti te escucha.
+
 # La historia del día (src/js/42-historia-del-dia.js). Las historias escritas a mano, con sus frases, están en
 # src/datos/historias.json; aquí, lo que se dice cuando una escena de la historia se juega sin la IA y sin frases.
 
@@ -3317,6 +3509,485 @@ quien: *
 - Ay… este resfrío me tiene molido.
 - No me siento nada bien, niña.
 - Cof, cof… Si no fuera por este pecho…
+
+</script>
+<script type="text/plain" id="charlas">
+# Las charlas: lo que se dicen dos (o tres) cuando se encuentran, o mientras hacen algo juntos. Son líneas escritas
+# (sin IA); el juego las lee al empezar (src/js/19-dialogos-de-pares.js). Están aquí, y no en el código, para que se
+# puedan cambiar, ampliar (a mano o con una IA) y revisar con las mismas reglas que las escenas (tools/grafo.js revisa
+# las condiciones).
+#
+# Cada charla: «=== id ===», sus campos (uno por línea, «campo: valor»), «---» y una línea por intervención,
+# «quien: texto» (como en src/datos/guion.txt). Lo que se cuenta de alguien, entre paréntesis al comienzo: «(se ríe bajito)».
+# Campos:
+#   quienes: quiénes hablan (las personas: ana, diana, marilla…; o papeles: a, b, otro, que el código llena)
+#   si: condiciones (las del guion: «hecho:se_queda», «!hecho:a_prueba», «estacion:verano», «afecto:matthew:ana>=5»…)
+#   donde: dónde tiene sentido («casa»: la cocina o el patio de Tejas Verdes; «gg»: la cocina; «dentro», «arroyo»…)
+#
+# Las clases de charla, por cómo empieza su id:
+#   par:<quienes>:<n>   cuando esos dos o tres se encuentran (n: su número, desde 0; van en este orden). La primera que
+#                       no se haya dicho y cuyas condiciones se cumplan; cuando se dijeron todas, saludos y chismes.
+#                       Ana y Diana, además, solo cuando ya se conocen y no las tienen separadas.
+#   pares:<clase>:<n>   dos vecinos que se cruzan, una línea cada uno (a y b): mixta (un niño, que habla primero, y un
+#                       grande), kids (dos niños), big (dos grandes). Una al azar, de las que se cumplen.
+#   ana_diana:<n>       Ana y Diana al cruzarse en el camino, una línea cada una.
+#   suena:<n>           Ana sueña en voz alta con quien se cruza (otro le contesta; a un niño, el código lo tutea).
+#   te, paseo           mientras toman el té (a: la que invita, b: la invitada) o pasean (a: la que invita, b: la otra).
+#
+# ====================================== cuando se encuentran (par:) ======================================
+
+# --- Ana y Diana
+
+=== par:ana+diana:0 ===
+quienes: ana, diana
+---
+ana: ¿Juras ser mi amiga del alma, Diana, mientras el sol y la luna existan?
+diana: ¡Lo juro! Aunque no sé muy bien cómo se jura… ¿así está bien?
+ana: Perfecto. Ahora es para siempre.
+
+=== par:ana+diana:1 ===
+quienes: ana, diana
+---
+diana: Ana, ¿cómo se te ocurren tantas palabras largas?
+ana: Las tengo guardadas para las ideas grandes. Las chicas no caben en palabras chicas.
+diana: Yo solo tengo palabras medianas…
+
+=== par:ana+diana:2 ===
+quienes: ana, diana
+---
+ana: He decidido que el claro de los abedules se llame la Senda de los Enamorados.
+diana: ¡Qué romántico! Pero no se lo digas a mamá.
+ana: Será nuestro secreto, como todo lo importante.
+
+=== par:ana+diana:3 ===
+quienes: ana, diana
+---
+diana: Mamá dice que puedo ir a tu casa el sábado, si no hay lluvia.
+ana: Entonces voy a rezar para que no llueva… y por si acaso, para que llueva solo un poquito.
+
+=== par:ana+diana:4 ===
+quienes: ana, diana
+---
+ana: ¿Te imaginas que el Bosque Encantado de verdad tenga fantasmas?
+diana: ¡Ana! Ahora no voy a poder pasar por ahí de noche.
+ana: Yo tampoco. Creo que imaginé demasiado bien.
+
+=== par:ana+diana:5 ===
+quienes: ana, diana
+si: cuaderno:escuela, hecho:llego_gilbert, !estacion:verano
+---
+diana: Gilbert Blythe te miró otra vez en clase.
+ana: Gilbert Blythe puede mirar a la pared. A mí no me interesa en lo más mínimo.
+diana: Si tú lo dices…
+
+# --- Ana y Marilla
+
+=== par:ana+marilla:0 ===
+quienes: ana, marilla
+si: hecho:a_prueba, !hecho:se_queda
+---
+marilla: Esa cama se tiende apenas te levantas. Aquí no somos desordenados.
+ana: Sí, Marilla. ¿Y si la tiendo imaginando que es la cama de una princesa?
+marilla: Tiéndela como la de una niña ordenada. Con eso basta.
+
+=== par:ana+marilla:1 ===
+quienes: ana, marilla
+si: hecho:a_prueba, !hecho:se_queda
+---
+ana: Marilla, ¿cree que podré quedarme?
+marilla: Eso depende de ti, no de mí. Haz tus quehaceres y di tus oraciones.
+ana: Los voy a hacer tan bien que se le van a olvidar los niños del orfanato.
+
+=== par:ana+marilla:2 ===
+quienes: ana, marilla
+donde: casa
+---
+marilla: Ana, ¿barriste el porche como te dije?
+ana: Sí, Marilla… bueno, casi. Me distraje mirando una araña que tejía, y era tan perfecta…
+marilla: Las arañas no barren porches, Ana.
+
+=== par:ana+marilla:3 ===
+quienes: ana, marilla
+---
+ana: Marilla, ¿alguna vez fue usted una niña como yo?
+marilla: Fui una niña. Como tú, espero que no.
+ana: Entonces se perdió de mucho, Marilla.
+
+=== par:ana+marilla:4 ===
+quienes: ana, marilla
+donde: gg
+---
+marilla: Di tus oraciones antes de dormir.
+ana: Ya sé una de memoria. Pero a veces prefiero inventarlas: me salen más sentidas.
+marilla: Hmm. Con que sean sinceras, basta.
+
+=== par:ana+marilla:5 ===
+quienes: ana, marilla
+donde: gg
+---
+ana: ¿Puedo poner flores en la mesa? Una mesa sin flores es como una cara sin sonrisa.
+marilla: Pon las que quieras, mientras no traigas medio jardín y las abejas con él.
+
+=== par:ana+marilla:6 ===
+quienes: ana, marilla
+---
+marilla: Ese sombrero está lleno de flores otra vez.
+ana: Es que las flores me quedan mejor que el pelo rojo, Marilla.
+marilla: Tu pelo no tiene la culpa de nada. Quítate eso antes de ir a la iglesia.
+
+# --- Ana y Matthew
+
+=== par:ana+matthew:0 ===
+quienes: ana, matthew
+si: hecho:a_prueba, !hecho:se_queda
+---
+matthew: Bueno, pues… ¿dormiste bien, Ana?
+ana: Soñé que me quedaba, señor Matthew. ¿Los sueños se cumplen?
+matthew: Ya lo creo que… bueno, a veces. Yo hablo con Marilla.
+
+=== par:ana+matthew:1 ===
+quienes: ana, matthew
+donde: arroyo
+---
+ana: Señor Matthew, ¿le parece que el arroyo canta?
+matthew: Bueno, pues… ahora que lo dices, algo tararea, sí.
+ana: ¡Sabía que usted lo entendería!
+
+=== par:ana+matthew:2 ===
+quienes: ana, matthew
+si: hecho:se_queda, afecto:matthew:ana>=5
+---
+matthew: Ana… ¿te gustaría un vestido con mangas abullonadas? Digo… por si acaso.
+ana: ¡Oh, señor Matthew! ¿De verdad lo dice?
+matthew: Bueno, pues… no le digas nada a Marilla todavía.
+
+=== par:ana+matthew:3 ===
+quienes: ana, matthew
+---
+ana: ¿Usted cree que las vacas tienen pensamientos profundos?
+matthew: Bueno, pues… las nuestras parecen pensar mucho en el pasto.
+ana: Eso también es una filosofía.
+
+=== par:ana+matthew:4 ===
+quienes: ana, matthew
+---
+matthew: Lo hiciste muy bien hoy, Ana.
+ana: ¿Usted cree? Yo pensé que me había equivocado en todo.
+matthew: Ya lo creo que no. Yo lo vi.
+
+=== par:ana+matthew:5 ===
+quienes: ana, matthew
+---
+ana: Hoy no hablé casi nada, señor Matthew. ¿Se dio cuenta?
+matthew: Bueno, pues… no, la verdad. Me pareció lo de siempre.
+ana: ¡Ay! Entonces tendré que esforzarme más.
+
+# --- la Sra. Lynde y Marilla
+
+=== par:lynde+marilla:0 ===
+quienes: lynde, marilla
+si: hecho:se_queda, hecho:lynde_visita
+---
+lynde: Marilla, esa niña tuya va a terminar de maestra o de actriz, una de dos.
+marilla: Mientras termine sus quehaceres primero, Rachel, que termine de lo que quiera.
+
+=== par:lynde+marilla:1 ===
+quienes: lynde, marilla
+---
+lynde: ¿Supiste que los Pye volvieron a pelear con los Sloane por la cerca?
+marilla: No, y no me hace falta saberlo.
+lynde: Bueno, yo solo lo digo. Nadie puede decir que Rachel Lynde no avisa.
+
+=== par:lynde+marilla:2 ===
+quienes: lynde, marilla
+donde: dentro
+---
+marilla: ¿Más té, Rachel?
+lynde: Media taza. Y de esa mermelada de ciruelas, que la tuya es mejor que la mía, aunque no se lo digas a nadie.
+
+=== par:lynde+marilla:3 ===
+quienes: lynde, marilla
+si: hecho:llego_stacy
+---
+lynde: La maestra nueva tiene ideas muy modernas. ¡Hacen ejercicios físicos en la escuela!
+marilla: Mientras no se rompan la cabeza…
+lynde: Ya veremos, Marilla. Ya veremos.
+
+# --- Marilla y Matthew
+
+=== par:marilla+matthew:0 ===
+quienes: marilla, matthew
+si: hecho:a_prueba, !hecho:se_queda
+---
+marilla: Hoy no rompió nada, Matthew. Y lavó los platos sin que se lo pidiera.
+matthew: Bueno, pues… ¿ves? Ya te lo decía yo.
+marilla: No he dicho nada todavía. Es una prueba.
+
+=== par:marilla+matthew:1 ===
+quienes: marilla, matthew
+si: hecho:se_queda
+---
+marilla: Matthew, ¿le estuviste dando caramelos a Ana otra vez?
+matthew: Bueno, pues… quizás uno. O dos.
+marilla: Esa niña te tiene en la palma de la mano.
+
+=== par:marilla+matthew:2 ===
+quienes: marilla, matthew
+si: hecho:se_queda, dia_juego:28
+---
+matthew: Marilla… la niña está creciendo, ¿no te parece?
+marilla: Demasiado rápido, Matthew. Demasiado rápido.
+
+=== par:marilla+matthew:3 ===
+quienes: marilla, matthew
+---
+marilla: Hay que arreglar la cerca del potrero antes del invierno.
+matthew: Ya lo creo. Mañana temprano, si no llueve.
+
+# --- Ana y Gilbert
+
+=== par:ana+gilbert:0 ===
+quienes: ana, gilbert
+si: hecho:zanahorias
+---
+gilbert: Ana, ¿algún día me vas a perdonar lo de «Zanahorias»?
+ana: Algunas cosas no se perdonan, Gilbert Blythe.
+gilbert: Bueno… seguiré preguntando.
+
+=== par:ana+gilbert:1 ===
+quienes: ana, gilbert
+si: hecho:queens
+---
+gilbert: Felicitaciones por el examen. Me ganaste por un punto.
+ana: …Gracias.
+gilbert: La próxima vez no será tan fácil, Ana.
+
+=== par:ana+gilbert:2 ===
+quienes: ana, gilbert
+si: cuaderno:escuela
+---
+gilbert: ¿Quieres que te ayude con ese canasto?
+ana: Puedo sola, gracias.
+gilbert: Ya sé que puedes. Solo preguntaba.
+
+# --- Ana y la Sra. Lynde
+
+=== par:ana+lynde:0 ===
+quienes: ana, lynde
+si: hecho:lynde_visita, !hecho:ofendio_lynde, dia_juego:28
+---
+lynde: Vaya, Ana, se te está oscureciendo el pelo. Ya no es tan colorado.
+ana: ¿De verdad, Sra. Lynde? ¡Es lo más lindo que me ha dicho nunca!
+
+=== par:ana+lynde:1 ===
+quienes: ana, lynde
+si: hecho:lynde_visita, !hecho:ofendio_lynde
+---
+lynde: Espero que te portes bien en la escuela, niña.
+ana: Lo intento con todas mis fuerzas, Sra. Lynde. A veces mis fuerzas se distraen.
+
+# --- Ana, Diana y Marilla
+
+=== par:ana+diana+marilla:0 ===
+quienes: ana, diana, marilla
+donde: casa
+---
+marilla: Niñas, no se alejen más allá del arroyo.
+diana: No, Srta. Cuthbert.
+ana: Solo hasta el Bosque Encantado, Marilla… que está más acá del arroyo, casi.
+marilla: Ana…
+
+=== par:ana+diana+marilla:1 ===
+quienes: ana, diana, marilla
+si: hecho:conocidas_diana, !hecho:prohibida
+---
+diana: Srta. Cuthbert, ¿Ana puede venir a tomar el té mañana?
+marilla: Si termina sus quehaceres, sí.
+ana: ¡Los terminaré hoy mismo! Bueno, mañana temprano.
+
+# --- Ana, Marilla y Matthew
+
+=== par:ana+marilla+matthew:0 ===
+quienes: ana, marilla, matthew
+si: hecho:se_queda
+---
+ana: ¡Adivinen qué me pasó hoy!
+marilla: Algo que vamos a lamentar, seguramente.
+matthew: Déjala contar, Marilla.
+ana: ¡Gracias, señor Matthew! Pues verán…
+
+=== par:ana+marilla+matthew:1 ===
+quienes: ana, marilla, matthew
+donde: gg
+---
+marilla: A la mesa. Y Ana, sin novelas en la mesa.
+ana: Era solo un capitulito, Marilla.
+matthew: (se ríe bajito) Je.
+
+# --- Ana, la Sra. Lynde y Marilla
+
+=== par:ana+lynde+marilla:0 ===
+quienes: ana, lynde, marilla
+si: hecho:lynde_visita, !hecho:ofendio_lynde
+---
+lynde: Marilla, esa niña habla más que un loro.
+ana: Los loros solo repiten, Sra. Lynde. Yo invento.
+marilla: Ana. A tu cuarto.
+
+# ====================================== dos vecinos que se cruzan (pares:) ======================================
+
+# --- un niño y un grande (habla primero el niño)
+
+=== pares:mixta:0 ===
+quienes: a, b
+---
+a: ¿Me da una manzana? Solo una.
+b: Toma, pero no le digas a nadie.
+
+=== pares:mixta:1 ===
+quienes: a, b
+---
+a: ¡Mire, encontré un nido!
+b: No lo toques, que la madre vuelve.
+
+=== pares:mixta:2 ===
+quienes: a, b
+---
+a: ¿Ya es hora de comer?
+b: Todavía no. Anda a jugar un rato.
+
+=== pares:mixta:3 ===
+quienes: a, b
+---
+a: ¡Gané la carrera hasta el portón!
+b: ¡Muy bien! Pero no corras tanto, que te caes.
+
+# --- dos niños
+
+=== pares:kids:0 ===
+quienes: a, b
+---
+a: ¡Te pillé! ¡Ahora tú la llevas!
+b: ¡No vale, no estaba jugando!
+
+=== pares:kids:1 ===
+quienes: a, b
+si: presente:gilbert
+---
+a: ¿Viste? A Gilbert se le fue la botella de leche río abajo.
+b: ¡Ja! Que no se entere el maestro.
+
+=== pares:kids:2 ===
+quienes: a, b
+---
+a: ¿Jugamos a las escondidas?
+b: Bueno, pero yo no cuento esta vez.
+
+=== pares:kids:3 ===
+quienes: a, b
+si: dias_desde:conocidas_diana:7
+---
+a: Dicen que en el Bosque Encantado hay fantasmas.
+b: Eso lo inventó Ana Shirley. ¡Pero igual no voy!
+
+# --- dos grandes
+
+=== pares:big:0 ===
+quienes: a, b
+---
+a: Qué lindo día para tender la ropa.
+b: Ya lo creo. Y ayer que no paró de llover.
+
+=== pares:big:1 ===
+quienes: a, b
+---
+a: ¿Va a la tienda de Lawson?
+b: Sí, se me acabó el azúcar. Con tanta compota...
+
+=== pares:big:2 ===
+quienes: a, b
+si: presente:allan
+---
+a: Dicen que el nuevo pastor predica muy bonito.
+b: Y la Sra. Allan es un encanto, eso sí.
+
+=== pares:big:3 ===
+quienes: a, b
+---
+a: ¿Cómo vienen las papas este año?
+b: Buenas, si no llueve demasiado.
+
+# ====================================== Ana y Diana, al cruzarse en el camino (ana_diana:) ======================================
+
+=== ana_diana:0 ===
+quienes: ana, diana
+---
+ana: ¡Diana, amiga del alma! Tengo tanto que contarte.
+diana: ¡Ana! Yo también. ¿Nos vemos en el Bosque Encantado?
+
+=== ana_diana:1 ===
+quienes: ana, diana
+---
+ana: ¿Viste qué color tiene hoy el lago? Como de perla.
+diana: Yo solo vi que estaba azul... pero tú lo dices más bonito.
+
+=== ana_diana:2 ===
+quienes: ana, diana
+---
+ana: Prometamos ser amigas mientras el sol y la luna existan.
+diana: ¡Lo prometo, Ana!
+
+# ====================================== Ana, soñando en voz alta con quien se cruza (suena:) ======================================
+
+=== suena:0 ===
+quienes: ana, otro
+---
+ana: ¿No le parece que hoy el mundo está recién hecho?
+otro: Esta niña... qué cosas dice.
+
+=== suena:1 ===
+quienes: ana, otro
+---
+ana: Vi una nube con forma de barco. Iba hacia Charlottetown.
+otro: Ya lo creo, Ana. Ya lo creo.
+
+=== suena:2 ===
+quienes: ana, otro
+---
+ana: ¿Sabía que los abedules parecen señoras de vestido blanco?
+otro: Nunca lo había pensado así.
+
+=== suena:3 ===
+quienes: ana, otro
+---
+ana: Hoy el lago brillaba como si tuviera estrellas adentro.
+otro: ¡Qué imaginación tienes, niña!
+
+=== suena:4 ===
+quienes: ana, otro
+---
+ana: Cuando sea grande quiero escribir libros. O ser maestra. O las dos cosas.
+otro: Tiempo tienes para decidirlo.
+
+# ====================================== mientras están juntas (te, paseo) ======================================
+
+=== te ===
+quienes: a, b
+---
+a: ¿Un poco más de té? Y prueba estas galletas.
+b: ¡Están deliciosas! Es como estar en un libro.
+a: Cuéntame qué estás leyendo ahora.
+b: Una novela con un castillo y una dama muy triste… ¡me encanta!
+
+=== paseo ===
+quienes: a, b
+---
+a: ¡Mira cómo brilla el agua!
+b: Es el Lago de las Aguas Brillantes: yo le puse el nombre, ¿sabes?
+a: ¿Y si fuéramos amigas del alma para siempre?
+b: ¡Para siempre jamás!
+a: Qué lindo es esto…
+b: Podríamos quedarnos aquí toda la tarde.
 
 </script>
 <script type="text/plain" id="conversaciones">
@@ -7060,66 +7731,34 @@ function elegir(t, opciones){
 
 /* ---------- the bank of written dialogues for pairs and trios: when two (or three) of them meet, the next block not
    yet said (game.dlgUsed); when all have been said, the usual greetings and gossip ---------- */
-const DLG_BANK = {
-  'ana+diana': [
-    [['ana', '¿Juras ser mi amiga del alma, Diana, mientras el sol y la luna existan?'], ['diana', '¡Lo juro! Aunque no sé muy bien cómo se jura… ¿así está bien?'], ['ana', 'Perfecto. Ahora es para siempre.']],
-    [['diana', 'Ana, ¿cómo se te ocurren tantas palabras largas?'], ['ana', 'Las tengo guardadas para las ideas grandes. Las chicas no caben en palabras chicas.'], ['diana', 'Yo solo tengo palabras medianas…']],
-    [['ana', 'He decidido que el claro de los abedules se llame la Senda de los Enamorados.'], ['diana', '¡Qué romántico! Pero no se lo digas a mamá.'], ['ana', 'Será nuestro secreto, como todo lo importante.']],
-    [['diana', 'Mamá dice que puedo ir a tu casa el sábado, si no hay lluvia.'], ['ana', 'Entonces voy a rezar para que no llueva… y por si acaso, para que llueva solo un poquito.']],
-    [['ana', '¿Te imaginas que el Bosque Encantado de verdad tenga fantasmas?'], ['diana', '¡Ana! Ahora no voy a poder pasar por ahí de noche.'], ['ana', 'Yo tampoco. Creo que imaginé demasiado bien.']],
-    { si: ["cuaderno:escuela", "hecho:llego_gilbert", "!estacion:verano"], l: [['diana', 'Gilbert Blythe te miró otra vez en clase.'], ['ana', 'Gilbert Blythe puede mirar a la pared. A mí no me interesa en lo más mínimo.'], ['diana', 'Si tú lo dices…']] },
-  ],
-  'ana+marilla': [
-    { si: ['hecho:a_prueba', '!hecho:se_queda'], l: [['marilla', 'Esa cama se tiende apenas te levantas. Aquí no somos desordenados.'], ['ana', 'Sí, Marilla. ¿Y si la tiendo imaginando que es la cama de una princesa?'], ['marilla', 'Tiéndela como la de una niña ordenada. Con eso basta.']] },
-    { si: ['hecho:a_prueba', '!hecho:se_queda'], l: [['ana', 'Marilla, ¿cree que podré quedarme?'], ['marilla', 'Eso depende de ti, no de mí. Haz tus quehaceres y di tus oraciones.'], ['ana', 'Los voy a hacer tan bien que se le van a olvidar los niños del orfanato.']] },
-    { at: 'casa', l: [['marilla', 'Ana, ¿barriste el porche como te dije?'], ['ana', 'Sí, Marilla… bueno, casi. Me distraje mirando una araña que tejía, y era tan perfecta…'], ['marilla', 'Las arañas no barren porches, Ana.']] },
-    [['ana', 'Marilla, ¿alguna vez fue usted una niña como yo?'], ['marilla', 'Fui una niña. Como tú, espero que no.'], ['ana', 'Entonces se perdió de mucho, Marilla.']],
-    { at: 'gg', l: [['marilla', 'Di tus oraciones antes de dormir.'], ['ana', 'Ya sé una de memoria. Pero a veces prefiero inventarlas: me salen más sentidas.'], ['marilla', 'Hmm. Con que sean sinceras, basta.']] },
-    { at: 'gg', l: [['ana', '¿Puedo poner flores en la mesa? Una mesa sin flores es como una cara sin sonrisa.'], ['marilla', 'Pon las que quieras, mientras no traigas medio jardín y las abejas con él.']] },
-    [['marilla', 'Ese sombrero está lleno de flores otra vez.'], ['ana', 'Es que las flores me quedan mejor que el pelo rojo, Marilla.'], ['marilla', 'Tu pelo no tiene la culpa de nada. Quítate eso antes de ir a la iglesia.']],
-  ],
-  'ana+matthew': [
-    { si: ['hecho:a_prueba', '!hecho:se_queda'], l: [['matthew', 'Bueno, pues… ¿dormiste bien, Ana?'], ['ana', 'Soñé que me quedaba, señor Matthew. ¿Los sueños se cumplen?'], ['matthew', 'Ya lo creo que… bueno, a veces. Yo hablo con Marilla.']] },
-    { at: 'arroyo', l: [['ana', 'Señor Matthew, ¿le parece que el arroyo canta?'], ['matthew', 'Bueno, pues… ahora que lo dices, algo tararea, sí.'], ['ana', '¡Sabía que usted lo entendería!']] },
-    { si: ["hecho:se_queda", "afecto:matthew:ana>=5"], l: [['matthew', 'Ana… ¿te gustaría un vestido con mangas abullonadas? Digo… por si acaso.'], ['ana', '¡Oh, señor Matthew! ¿De verdad lo dice?'], ['matthew', 'Bueno, pues… no le digas nada a Marilla todavía.']] },
-    [['ana', '¿Usted cree que las vacas tienen pensamientos profundos?'], ['matthew', 'Bueno, pues… las nuestras parecen pensar mucho en el pasto.'], ['ana', 'Eso también es una filosofía.']],
-    [['matthew', 'Lo hiciste muy bien hoy, Ana.'], ['ana', '¿Usted cree? Yo pensé que me había equivocado en todo.'], ['matthew', 'Ya lo creo que no. Yo lo vi.']],
-    [['ana', 'Hoy no hablé casi nada, señor Matthew. ¿Se dio cuenta?'], ['matthew', 'Bueno, pues… no, la verdad. Me pareció lo de siempre.'], ['ana', '¡Ay! Entonces tendré que esforzarme más.']],
-  ],
-  'lynde+marilla': [
-    { si: ["hecho:se_queda", "hecho:lynde_visita"], l: [['lynde', 'Marilla, esa niña tuya va a terminar de maestra o de actriz, una de dos.'], ['marilla', 'Mientras termine sus quehaceres primero, Rachel, que termine de lo que quiera.']] },
-    [['lynde', '¿Supiste que los Pye volvieron a pelear con los Sloane por la cerca?'], ['marilla', 'No, y no me hace falta saberlo.'], ['lynde', 'Bueno, yo solo lo digo. Nadie puede decir que Rachel Lynde no avisa.']],
-    { at: 'dentro', l: [['marilla', '¿Más té, Rachel?'], ['lynde', 'Media taza. Y de esa mermelada de ciruelas, que la tuya es mejor que la mía, aunque no se lo digas a nadie.']] },
-    { si: ["hecho:llego_stacy"], l: [['lynde', 'La maestra nueva tiene ideas muy modernas. ¡Hacen ejercicios físicos en la escuela!'], ['marilla', 'Mientras no se rompan la cabeza…'], ['lynde', 'Ya veremos, Marilla. Ya veremos.']] },
-  ],
-  'marilla+matthew': [
-    { si: ['hecho:a_prueba', '!hecho:se_queda'], l: [['marilla', 'Hoy no rompió nada, Matthew. Y lavó los platos sin que se lo pidiera.'], ['matthew', 'Bueno, pues… ¿ves? Ya te lo decía yo.'], ['marilla', 'No he dicho nada todavía. Es una prueba.']] },
-    { si: ["hecho:se_queda"], l: [['marilla', 'Matthew, ¿le estuviste dando caramelos a Ana otra vez?'], ['matthew', 'Bueno, pues… quizás uno. O dos.'], ['marilla', 'Esa niña te tiene en la palma de la mano.']] },
-    { si: ["hecho:se_queda", "dia_juego:28"], l: [['matthew', 'Marilla… la niña está creciendo, ¿no te parece?'], ['marilla', 'Demasiado rápido, Matthew. Demasiado rápido.']] },
-    [['marilla', 'Hay que arreglar la cerca del potrero antes del invierno.'], ['matthew', 'Ya lo creo. Mañana temprano, si no llueve.']],
-  ],
-  'ana+gilbert': [
-    { si: ["hecho:zanahorias"], l: [['gilbert', 'Ana, ¿algún día me vas a perdonar lo de «Zanahorias»?'], ['ana', 'Algunas cosas no se perdonan, Gilbert Blythe.'], ['gilbert', 'Bueno… seguiré preguntando.']] },
-    { si: ["hecho:queens"], l: [['gilbert', 'Felicitaciones por el examen. Me ganaste por un punto.'], ['ana', '…Gracias.'], ['gilbert', 'La próxima vez no será tan fácil, Ana.']] },
-    { si: ["cuaderno:escuela"], l: [['gilbert', '¿Quieres que te ayude con ese canasto?'], ['ana', 'Puedo sola, gracias.'], ['gilbert', 'Ya sé que puedes. Solo preguntaba.']] },
-  ],
-  'ana+lynde': [
-    { si: ["hecho:lynde_visita", "!hecho:ofendio_lynde", "dia_juego:28"], l: [['lynde', 'Vaya, Ana, se te está oscureciendo el pelo. Ya no es tan colorado.'], ['ana', '¿De verdad, Sra. Lynde? ¡Es lo más lindo que me ha dicho nunca!']] },
-    { si: ["hecho:lynde_visita", "!hecho:ofendio_lynde"], l: [['lynde', 'Espero que te portes bien en la escuela, niña.'], ['ana', 'Lo intento con todas mis fuerzas, Sra. Lynde. A veces mis fuerzas se distraen.']] },
-  ],
-  'ana+diana+marilla': [
-    { at: 'casa', l: [['marilla', 'Niñas, no se alejen más allá del arroyo.'], ['diana', 'No, Srta. Cuthbert.'], ['ana', 'Solo hasta el Bosque Encantado, Marilla… que está más acá del arroyo, casi.'], ['marilla', 'Ana…']] },
-    { si: ["hecho:conocidas_diana", "!hecho:prohibida"], l: [['diana', 'Srta. Cuthbert, ¿Ana puede venir a tomar el té mañana?'], ['marilla', 'Si termina sus quehaceres, sí.'], ['ana', '¡Los terminaré hoy mismo! Bueno, mañana temprano.']] },
-  ],
-  'ana+marilla+matthew': [
-    { si: ["hecho:se_queda"], l: [['ana', '¡Adivinen qué me pasó hoy!'], ['marilla', 'Algo que vamos a lamentar, seguramente.'], ['matthew', 'Déjala contar, Marilla.'], ['ana', '¡Gracias, señor Matthew! Pues verán…']] },
-    { at: 'gg', l: [['marilla', 'A la mesa. Y Ana, sin novelas en la mesa.'], ['ana', 'Era solo un capitulito, Marilla.'], ['matthew', '(se ríe bajito) Je.']] },
-  ],
-  'ana+lynde+marilla': [
-    { si: ["hecho:lynde_visita", "!hecho:ofendio_lynde"], l: [['lynde', 'Marilla, esa niña habla más que un loro.'], ['ana', 'Los loros solo repiten, Sra. Lynde. Yo invento.'], ['marilla', 'Ana. A tu cuarto.']] },
-  ],
-};
+// the talks (src/datos/charlas.txt): «=== id ===», its fields (quienes, si, donde), «---» and «quien: texto» lines. Read
+// here (before the engine of scenes, 21, which registers the «par:» ones as scenes), with a parser of its own
+function charlasLeer(txt){
+  const out = []; let c = null;
+  for (const raw of txt.split('\n')) {
+    const s = raw.trim(); if (!s || s[0] === '#') continue;
+    const h = s.match(/^===\s*(.+?)\s*===$/); if (h) { out.push(c = { id: h[1], quienes: [], l: [], cuerpo: false }); continue; }
+    if (!c) continue;
+    if (s === '---') { c.cuerpo = true; continue; }
+    const i = s.indexOf(':'); if (i < 0) continue; const k = s.slice(0, i).trim(), v = s.slice(i + 1).trim();
+    if (c.cuerpo) c.l.push([k, v]);
+    else if (k === 'quienes') c.quienes = v.split(',').map(x => x.trim()).filter(Boolean);
+    else if (k === 'si') c.si = v.split(',').map(x => x.trim()).filter(Boolean);
+    else if (k === 'donde') c.donde = v;
+  }
+  return out.map(({ cuerpo, ...c }) => c);
+}
+const CHARLAS = charlasLeer(document.getElementById('charlas')?.textContent || '');
+const charlasDe = pre => CHARLAS.filter(c => c.id.startsWith(pre + ':'));
+// the talks of two, a line each, as [«[conditions] line of the first», line of the second] (paresSi keeps those that hold)
+const charlaPares = pre => charlasDe(pre).map(c => [(c.si?.length ? '[' + c.si.join(', ') + '] ' : '') + c.l[0][1], c.l[1][1]]);
+// a talk with its parts filled: charlaCon('te', { a: 'sraallan', b: 'ana' }) → [['sraallan', '¿Un poco más de té?…'], …]
+const charlaCon = (id, papeles) => (CHARLAS.find(c => c.id === id)?.l || []).map(([q, t]) => [papeles[q] ?? q, t]);
 const dlgKey = ks => [...ks].sort().join('+');
+// the bank, as the rest of the code knows it: { 'ana+diana': [ lines | { si, at, l } ], … }
+const DLG_BANK = {};
+for (const c of charlasDe('par')) (DLG_BANK[dlgKey(c.quienes)] ||= []).push(c.si || c.donde ? { ...(c.si ? { si: c.si } : {}), ...(c.donde ? { at: c.donde } : {}), l: c.l } : c.l);
+
 /* ---------- chapter I of the book (with chapter II and the start of III), played by the planner and the routines:
    Mrs. Rachel at her window sees Matthew drive by in his best suit; after tea she goes to Green Gables to find out;
    Marilla has set the table for three and tells her (an orphan boy!); Rachel takes the news up the road to the Bells.
@@ -12608,14 +13247,13 @@ function fichaOf(k){
 }
 const ANA_FICHA = 'Ana Shirley, 11 años, pelirroja y pecosa, huérfana adoptada por Matthew y Marilla Cuthbert de Tejas Verdes; soñadora, muy conversadora, de palabras grandiosas e imaginación desbordante';
 const SEASON_TOPICS = [['las flores de los manzanos', 'la primavera'], ['el calor', 'las vacaciones', 'las bayas'], ['las hojas rojas', 'las manzanas', 'la cosecha'], ['la nieve', 'el frío', 'la Navidad']];
-// written exchanges for two neighbours (when there is no AI)
-// (two who meet, a line each; one may wait for something of the story: «[presente:allan] …»; the news, they tell
+// written exchanges for two neighbours (when there is no AI): src/datos/charlas.txt
+// (two who meet, a line each; one may wait for something of the story: «si: presente:allan»; the news, they tell
 // as src/datos/noticias.txt says)
-const PAIR_LINES = {
-  mixta: [['¿Me da una manzana? Solo una.', 'Toma, pero no le digas a nadie.'], ['¡Mire, encontré un nido!', 'No lo toques, que la madre vuelve.'], ['¿Ya es hora de comer?', 'Todavía no. Anda a jugar un rato.'], ['¡Gané la carrera hasta el portón!', '¡Muy bien! Pero no corras tanto, que te caes.']],
-  kids: [['¡Te pillé! ¡Ahora tú la llevas!', '¡No vale, no estaba jugando!'], ['[presente:gilbert] ¿Viste? A Gilbert se le fue la botella de leche río abajo.', '¡Ja! Que no se entere el maestro.'], ['¿Jugamos a las escondidas?', 'Bueno, pero yo no cuento esta vez.'], ['[dias_desde:conocidas_diana:7] Dicen que en el Bosque Encantado hay fantasmas.', 'Eso lo inventó Ana Shirley. ¡Pero igual no voy!']],
-  big: [['Qué lindo día para tender la ropa.', 'Ya lo creo. Y ayer que no paró de llover.'], ['¿Va a la tienda de Lawson?', 'Sí, se me acabó el azúcar. Con tanta compota...'], ['[presente:allan] Dicen que el nuevo pastor predica muy bonito.', 'Y la Sra. Allan es un encanto, eso sí.'], ['¿Cómo vienen las papas este año?', 'Buenas, si no llueve demasiado.']],
-};
+const PAIR_LINES = { mixta: charlaPares('pares:mixta'), kids: charlaPares('pares:kids'), big: charlaPares('pares:big') };   // (src/datos/charlas.txt, «pares:»)
+// all the lines of a saying (src/datos/dichos/) that hold now, with their blanks filled: for a list the code still
+// filters (not what was heard today, not naming Ana before they know her) before picking one
+const dichosTodos = (m, v = {}) => (DICHOS_DE[m] || []).filter(d => dlgCumple({ si: d.si.map(c => dlgVal(rellenar(c, v))) }, dlgCtx())).map(d => rellenar(d.t, v));
 const paresSi = P => P.filter(p => lineasSi([p[0]]).length).map(([a, b]) => [lineasSi([a])[0], b]);   // (the pairs whose time has come)
 const memOn = k => !!AI.memoria && !!fichaOf(k)?.memoria;
 const enc = { cur: null, ready: null, busy: false, mute: {}, cool: 0, err: 0 };
@@ -12639,7 +13277,7 @@ async function encAsk(x, y){
 function encFallback(x, y){
   if (y === 'ana') {
     if (!conoceA(x) && !sinNombre(x)) return { parts: [x, y], lines: presentar(x), topic: '', scene: game.scene, born: TT, presenta: true };   // (the first time: who they are)
-    const d = FOLKBY[x].def, l = [{ q: encQ(x), t: pick(lineasDe(x, d.lines)) || pick(sinRepetir(x, [saludoHora() + ', niña.'])) || '(La saluda con la cabeza.)' }], a = lineasSi(d.ana); if (a.length && Math.random() < .7) l.push({ q: 'ana', t: pick(a) }); return { parts: [x, y], lines: l, topic: '', scene: game.scene, born: TT }; }
+    const d = FOLKBY[x].def, l = [{ q: encQ(x), t: pick(lineasDe(x, d.lines)) || pick(sinRepetir(x, dichosTodos('encuentro:saluda_nina', { hola: saludoHora() }))) || dicho('encuentro:saluda_con_la_cabeza') }], a = lineasSi(d.ana); if (a.length && Math.random() < .7) l.push({ q: 'ana', t: pick(a) }); return { parts: [x, y], lines: l, topic: '', scene: game.scene, born: TT }; }
   const kx = !!FOLKBY[x].kid, ky = !!FOLKBY[y].kid, [a, b] = pick(paresSi(PAIR_LINES[kx && ky ? 'kids' : kx || ky ? 'mixta' : 'big']).filter(p => !(/pastor/.test(p[0]) && [x, y].some(i => /allan/.test(i)))));
   const [p, q] = !kx && ky ? [y, x] : [x, y];   // (a child with a grown-up: the child speaks first, as a child)
   return { parts: [x, y], lines: [{ q: encQ(p), t: a }, { q: encQ(q), t: b }], topic: '', scene: game.scene, born: TT };
@@ -12855,26 +13493,26 @@ const clone = s => ({ t: s.t, pos: { ...s.pos }, invs: Object.fromEntries(Object
 const sKey = s => JSON.stringify([s.pos, s.invs, s.cows, s.ofensa, s.follow, s.facts, s.stock, s.sick, Object.entries(s.rel).filter(([k, v]) => v !== 2).sort(), Object.entries(s.know).map(([k, v]) => k + v.length)]);
 
 // --- the verbs: for the one who acts (me) in state s, what can be done, what it costs (minutes) and what it changes
-const FAVORS = {   // what one can ask of someone (ok: whether it can be asked; eff: what it makes true; goal: the goal installed in whoever accepts)
-  pasear: { eff: (s, me, to) => { s.follow[to] = me; }, ok: (s, me, to) => to === 'ana' || me === 'ana', say: () => '¿Vamos a dar un paseo juntas? Hace un día precioso.' },   // (the one asked comes along)
+const FAVORS = {   // what one can ask of someone (ok: whether it can be asked; eff: what it makes true; goal: the goal installed in whoever accepts; say: how it is asked, src/datos/dichos/21-planes.txt)
+  pasear: { eff: (s, me, to) => { s.follow[to] = me; }, ok: (s, me, to) => to === 'ana' || me === 'ana', say: () => dicho('pide:pasear') },   // (the one asked comes along)
   // an invitation for later: to come at an hour (tea at the parsonage, this afternoon); the one asked goes then
   venir: { eff: (s, me, to, a) => { s.pos[to] = a.lugar || 'h:cp'; }, ok: (s, me, to) => to === 'ana' || me === 'ana' && to === 'diana', wait: 30,
     goal: (me, a, s0) => { const H = teaHour(s0.t), p = a.lugar || 'h:cp';
       return { ...G.estar_en(a.to, p, H + .25, H + .75), quedar: null, quedarMin: 30, te: 1, con: me, teHasta: H + 1.5, desde: H - 1, text: `ir a tomar el té con ${wmName(me)} a las ${fmtHour(H)} (${WP_NAME[p]})`,
-        chat: [[me, '¿Un poco más de té? Y prueba estas galletas.'], [a.to, '¡Están deliciosas! Es como estar en un libro.'], [me, 'Cuéntame qué estás leyendo ahora.'], [a.to, 'Una novela con un castillo y una dama muy triste… ¡me encanta!']] }; },
-    say: a => `¿Vendrías a tomar el té conmigo esta tarde, a las ${fmtHour(teaHour(hourNow() * 60))}? En ${(WP_NAME[a.lugar || 'h:cp'] || '').replace(/^(el|la) /, m => m)}.` },
+        chat: charlaCon('te', { a: me, b: a.to }) }; },
+    say: a => dicho('pide:venir', { hora: fmtHour(teaHour(hourNow() * 60)), lugar: (WP_NAME[a.lugar || 'h:cp'] || '').replace(/^(el|la) /, m => m) }) },
   // (from the book) lending: the one asked hands it over at once (it is to be given back); the chores Marilla asks for; a ride in the cart
-  prestar: { eff: (s, me, to, a) => { s.invs[to][a.item] -= 1; s.invs[me][a.item] = (s.invs[me][a.item] || 0) + 1; s.facts['prestado:' + a.item + ':' + to + '>' + me] = 1; }, ok: (s, me, to, a) => (s.invs[to]?.[a.item] || 0) > 0, say: a => `¿Me prestarías ${ITEM_DEFS[a.item]?.gift?.art || itemTextW(a.item, 1)}? Te lo devuelvo, prometido.` },
-  curar: { eff: (s, me, to, a) => { s.sick = (s.sick || []).filter(x => x !== a.k); }, ok: (s, me, to, a) => !!whoOf(to).medico && (s.sick || []).includes(a.k), wait: 40, goal: (me, a) => G.sano(a.k), say: a => `¡Doctor! ${wmName(a.k)} está enfermo. ¿Podría venir a verlo, por favor?` },
-  quehaceres: { eff: (s, me, to, a) => { for (const q of a.q) s.facts['quehacer:' + q] = 1; }, ok: (s, me, to) => to === 'ana', wait: 30, goal: (me, a) => G.quehaceres(a.to, a.q), say: a => `Ana, hay que ${a.q.map(q => QUEHACER_TXT[q]).join(' y ')}. Y nada de quedarse soñando despierta.` },
-  llevar: { eff: (s, me, to, a) => { s.pos[me] = a.lugar; s.pos[to] = a.lugar; }, ok: (s, me, to) => to === 'matthew' && me !== 'matthew', wait: 15, goal: (me, a) => G.llevar(a.to, me, a.lugar), say: a => `Matthew, ¿me llevarías en la calesa a ${WP_NAME[a.lugar]}?` },
+  prestar: { eff: (s, me, to, a) => { s.invs[to][a.item] -= 1; s.invs[me][a.item] = (s.invs[me][a.item] || 0) + 1; s.facts['prestado:' + a.item + ':' + to + '>' + me] = 1; }, ok: (s, me, to, a) => (s.invs[to]?.[a.item] || 0) > 0, say: a => dicho('pide:prestar', { cosa: ITEM_DEFS[a.item]?.gift?.art || itemTextW(a.item, 1) }) },
+  curar: { eff: (s, me, to, a) => { s.sick = (s.sick || []).filter(x => x !== a.k); }, ok: (s, me, to, a) => !!whoOf(to).medico && (s.sick || []).includes(a.k), wait: 40, goal: (me, a) => G.sano(a.k), say: a => dicho('pide:curar', { enfermo: wmName(a.k) }) },
+  quehaceres: { eff: (s, me, to, a) => { for (const q of a.q) s.facts['quehacer:' + q] = 1; }, ok: (s, me, to) => to === 'ana', wait: 30, goal: (me, a) => G.quehaceres(a.to, a.q), say: a => dicho('pide:quehaceres', { tareas: a.q.map(q => QUEHACER_TXT[q]).join(' y ') }) },
+  llevar: { eff: (s, me, to, a) => { s.pos[me] = a.lugar; s.pos[to] = a.lugar; }, ok: (s, me, to) => to === 'matthew' && me !== 'matthew', wait: 15, goal: (me, a) => G.llevar(a.to, me, a.lugar), say: a => dicho('pide:llevar', { lugar: WP_NAME[a.lugar] }) },
   traer: { eff: (s, me, to, a) => { s.invs[me][a.item] = (s.invs[me][a.item] || 0) + a.n; }, ok: (s, me, to, a) => to !== me && (!isQuieto(to) || (s.invs[to]?.[a.item] || 0) >= a.n) && (!THINGS[a.item]?.hace || (s.invs[to]?.[a.item] || 0) >= a.n), wait: 45,   // (a dress is sewn, not fetched: one asks for the cloth)
-    goal: (me, a, s0) => G.tener(me, a.item, (s0.invs[me][a.item] || 0) + a.n), say: a => `¿Me traerías ${itemTextW(a.item, a.n)}?` },
-  vender_vaca: { eff: (s, me, to, a) => { s.cows[a.cow] = 'sold:' + me; }, ok: (s, me, to, a) => CUTHBERT.includes(to) && s.cows[a.cow] && !s.cows[a.cow].startsWith('sold'), wait: 45, goal: (me, a) => G.vaca_vendida(a.cow, me), say: () => '¿Me vendería la vaca?' },
+    goal: (me, a, s0) => G.tener(me, a.item, (s0.invs[me][a.item] || 0) + a.n), say: a => dicho('pide:traer', { cosa: itemTextW(a.item, a.n) }) },
+  vender_vaca: { eff: (s, me, to, a) => { s.cows[a.cow] = 'sold:' + me; }, ok: (s, me, to, a) => CUTHBERT.includes(to) && s.cows[a.cow] && !s.cows[a.cow].startsWith('sold'), wait: 45, goal: (me, a) => G.vaca_vendida(a.cow, me), say: () => dicho('pide:vender_vaca') },
   encerrar_vaca: { eff: (s, me, to, a) => { s.cows[a.cow] = a.pen; }, ok: (s, me, to, a) => to !== me && !isQuieto(to) && !String(s.cows[a.cow]).startsWith('led') && !String(s.cows[a.cow]).startsWith('sold'), wait: 45, goal: (me, a) => G.vaca_en(a.cow, a.pen),
-    say: a => a.cow === 'jersey' && a.pen === 'potrero' ? '¿Me harías el favor de devolver mi vaca al potrero? Yo no me puedo ni levantar.' : `¡${ANIMALS[a.cow].name} anda suelta otra vez! ¿Podrías llevarla a ${WP_NAME[a.pen]}?` },
+    say: a => a.cow === 'jersey' && a.pen === 'potrero' ? dicho('pide:devolver_mi_vaca') : dicho('pide:encerrar_vaca', { vaca: ANIMALS[a.cow].name, lugar: WP_NAME[a.pen] }) },
   interceder: { eff: (s, me, to, a) => { socialRule(stateR(s), 'interceder', to, a.target, me); }, ok: (s, me, to, a) => (s.rel[a.target + '>' + to] ?? 2) >= 4 && !s.facts['intercede:' + a.target + '>' + me], wait: 20,
-    goal: (me, a) => G.intercede(a.target, me), say: a => `¿Hablarías con ${wmName(a.target)} por mí? A ti te escucha.` },
+    goal: (me, a) => G.intercede(a.target, me), say: a => dicho('pide:interceder', { quien: wmName(a.target) }) },
 };
 // whom one could ask for help with a goal (anyone present who is not in the chain of who asked whom)
 function autoFavors(me, goal, s0, exclude = []){
@@ -12978,7 +13616,7 @@ const G = {
   conoce: (k, f) => ({ text: `${wmName(k)} se entera (${f.replace(/_/g, ' ')})`, test: s => (s.know[k] || []).includes(f), h: s => (s.know[k] || []).includes(f) ? 0 : 1, items: [], people: [k, ...WM_PEOPLE().filter(p => (game.wm.know[p] || []).includes(f))] }),
   paseo: (a, b, p = 'lago', min = 30) => ({ kind: 'paseo', a, b, text: `${wmName(a)} y ${wmName(b)} dan un paseo hasta ${WP_NAME[p]}`, test: s => s.pos[a] === p && s.pos[b] === p && s.follow[b] === a,
     h: s => (s.follow[b] === a ? 0 : 1) + (s.pos[a] === p ? 0 : 1), items: [], people: [a, b], places: [p], quedarMin: min,
-    chat: [[a, '¡Mira cómo brilla el agua!'], [b, 'Es el Lago de las Aguas Brillantes: yo le puse el nombre, ¿sabes?'], [a, '¿Y si fuéramos amigas del alma para siempre?'], [b, '¡Para siempre jamás!'], [a, 'Qué lindo es esto…'], [b, 'Podríamos quedarnos aquí toda la tarde.']] }),
+    chat: charlaCon('paseo', { a, b }) }),
   // (from the book)
   quehaceres: (k, list) => ({ kind: 'quehaceres', k, text: `${wmName(k)} hace los quehaceres (${list.map(q => QUEHACER_TXT[q]).join(', ')})`, test: s => list.every(q => s.facts['quehacer:' + q]), h: s => list.filter(q => !s.facts['quehacer:' + q]).length, items: [], people: [k], places: ['cocina'] }),
   alimentados: list => ({ kind: 'alimentados', text: 'los animales comieron (' + list.map(p => WP_NAME[p]).join(', ') + ')', test: s => list.every(p => s.facts['alimentados:' + p]), h: s => list.filter(p => !s.facts['alimentados:' + p]).length, items: [], people: [], places: list }),
@@ -13314,12 +13952,7 @@ function stimuli(b){
   return L;
 }
 const LOOK_TEXT = { lago: s => 'se quedó mirando ' + s.name, flores: () => 'se detuvo a mirar las flores', arboles: () => 'se quedó mirando los árboles en flor', mar: () => 'se quedó mirando el mar', animales: s => 'se detuvo a mirar ' + s.name, campo: () => 'se detuvo a ver cómo va el campo' };
-const LOOK_LINES = {
-  ana: { lago: ['¡El Lago de las Aguas Brillantes! Podría quedarme aquí la vida entera.', 'El agua tiene hoy un color de perla... ¿o de ópalo?'], flores: ['¡Qué flores! Parecen pensamientos de alguien muy feliz.', 'Si yo fuera flor, querría ser una de estas.'], arboles: ['Los cerezos en flor parecen novias vestidas de blanco.', '¡La Blanca Senda de las Delicias, otra vez!'], mar: ['El mar... ¿qué habrá del otro lado?', 'Cuando sea grande voy a cruzar el mar. O a escribir sobre él.'], animales: ['¡Hola, pequeño! ¿Cómo te llamas? Yo te diré Lord Fitzgerald.', '¿Qué pensarán los animales de nosotros?'], campo: ['Todo crece tan callado... como un secreto.'] },
-  matthew: { animales: ['Buen animal, sí... buen animal.', 'Ejem... tranquila, tranquila.'], campo: ['Hmm. Va bien la avena. Sí... va bien.'] },
-  diana: { flores: ['¡Ay, qué lindas! Le llevaré unas a mamá.'], lago: ['Ana diría algo precioso de este lago...'] },
-  _: { lago: ['¡Qué lindo está el lago hoy!'], flores: ['Qué bonitas las flores este año.'], arboles: ['Mire nada más esos árboles.'], mar: ['Qué brisa trae el mar.'], animales: ['Mira tú...'], campo: ['Buena tierra, esta.'] },
-};
+// what one says on stopping to look (src/datos/dichos/20-encuentros.txt, «mira:<who>:<what>»; if they have nothing for it, «otros», save Ana)
 // on the way to a task: something to look at, or someone to talk with?
 function distractCheck(ag){
   if (!WM_DISTRACT || ag.hold || ag.followOf || TT < (ag.calmUntil || 0) || TT < (ag.nextCheck || 0)) return false;
@@ -13341,8 +13974,8 @@ function startLook(ag, s, F, urg){
   wmRelease(ag.who); b.moving = false; b.dir = s.x < b.x ? 3 : 1;
   ag.distract = { kind: s.kind, text: LOOK_TEXT[s.kind](s), until: TT + dur };
   agentLog(ag, '💭 ' + ag.distract.text + ' (' + Math.round(dur) + ' s)');
-  const L = (LOOK_LINES[ag.who] || LOOK_LINES._)[s.kind] || (ag.who === 'ana' ? null : LOOK_LINES._[s.kind]);
-  if (L && Math.random() < .8) sayB(qOf(ag.who), pick(L));
+  const t = dicho('mira:' + ag.who + ':' + s.kind) || (ag.who === 'ana' ? '' : dicho('mira:otros:' + s.kind));
+  if (t && Math.random() < .8) sayB(qOf(ag.who), t);
 }
 // while distracted the task waits; then on with it
 function distractTick(ag){
@@ -13404,42 +14037,42 @@ function chatTick(dt){
     const l = c.lines[c.i]; sayB(qOf(l.q), l.t); c.wait = lineDur(l.t) + .35;
   }
 }
-// what they say (no generative AI: a greeting, a few lines as the characters are, and a goodbye that mentions the errand)
-const ANA_DIANA = [['¡Diana, amiga del alma! Tengo tanto que contarte.', '¡Ana! Yo también. ¿Nos vemos en el Bosque Encantado?'], ['¿Viste qué color tiene hoy el lago? Como de perla.', 'Yo solo vi que estaba azul... pero tú lo dices más bonito.'], ['Prometamos ser amigas mientras el sol y la luna existan.', '¡Lo prometo, Ana!']];
-const ANA_SUENA = [['¿No le parece que hoy el mundo está recién hecho?', 'Esta niña... qué cosas dice.'], ['Vi una nube con forma de barco. Iba hacia Charlottetown.', 'Ya lo creo, Ana. Ya lo creo.'], ['¿Sabía que los abedules parecen señoras de vestido blanco?', 'Nunca lo había pensado así.'], ['Hoy el lago brillaba como si tuviera estrellas adentro.', '¡Qué imaginación tienes, niña!'], ['Cuando sea grande quiero escribir libros. O ser maestra. O las dos cosas.', 'Tiempo tienes para decidirlo.']];
+// what they say (no generative AI: a greeting, a few lines as the characters are, and a goodbye that mentions the errand;
+// the lines, in src/datos/dichos/20-encuentros.txt and src/datos/charlas.txt)
+const ANA_DIANA = charlaPares('ana_diana'), ANA_SUENA = charlaPares('suena');   // (src/datos/charlas.txt: two lines, Ana's and the other's; «[conditions] » before the first, if any)
 const saludoHora = () => { const h = hourNow() % 24; return h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches'; };
 function chatLines(a, b, anaFree){
   const L = [], h = hourNow(), hi = saludoHora(), say = (q, t) => t && L.push({ q, t: t.replace(/Buenos días|Buenas tardes|Buenas noches/, hi) });   // (nothing left to say today: nothing)   // (the greeting, as the hour is)
-  const sin = A => { const u = [...A].sort(() => Math.random() - .5); return () => u.length > 1 ? u.pop() : u[0]; }, suena = sin(ANA_SUENA), pares = sin(paresSi(PAIR_LINES[isKid(a) && isKid(b) ? 'kids' : 'big']));   // (in one talk, no line twice)
+  const sin = A => { const u = [...A].sort(() => Math.random() - .5); return () => u.length > 1 ? u.pop() : u[0]; }, suena = sin(paresSi(ANA_SUENA)), anaDiana = paresSi(ANA_DIANA), pares = sin(paresSi(PAIR_LINES[isKid(a) && isKid(b) ? 'kids' : 'big']));   // (in one talk, no line twice)
   const tu = isKid(a) && isKid(b), nm = k => /^[a-zá-ú]/.test(wmName(k)) ? '' : wmName(k), A = nm(a), B = nm(b), to = n => n ? ', ' + n : '';   // ("un vecino" is no name to call someone by)
   if (anaFree) {   // (Ana, as the player moves her, passing by: a word to her)
     const d = FOLKBY[a]?.def;
     if (!conoceA(a) && !sinNombre(a)) { for (const l of presentar(a)) say(l.q === 'ana' ? 'ana' : a, l.t); L.presenta = a; L.hasta = L.findIndex(l => l.q === 'ana'); return L; }   // (the first time: who they are)
-    say(a, reaccionAlVerla(a) || (a === 'gilbert' && d ? pick(lineasDe('gilbert', d.lines)) : null) || pick(sinRepetir(a, lineasAjenas(a, [`¡${hi}, Ana!`, '¡Hola, Ana! ¿A dónde vas tan apurada?', '¡Ana Shirley! Saludos a Marilla.', `¡${hi}, niña!`]))));
-    const r = lineasSi(FOLKBY[a]?.def.ana || ['Hmpf.']); if (relGetW('ana', a) <= 0 && r.length && L.length) say('ana', pick(r));
+    say(a, reaccionAlVerla(a) || (a === 'gilbert' && d ? pick(lineasDe('gilbert', d.lines)) : null) || pick(sinRepetir(a, lineasAjenas(a, dichosTodos('encuentro:saluda_a_ana', { hola: hi })))));
+    const r = lineasSi(FOLKBY[a]?.def.ana || [dicho('encuentro:ana_seca')]); if (relGetW('ana', a) <= 0 && r.length && L.length) say('ana', pick(r));
     return L;
   }
   const ana_ = a === 'ana' ? a : b === 'ana' ? b : null, other = ana_ && (a === 'ana' ? b : a);
   if (ana_ && !conoceA(other) && !sinNombre(other)) { for (const l of presentar(other)) say(l.q === 'ana' ? 'ana' : other, l.t); L.presenta = other; L.hasta = L.findIndex(l => l.q === 'ana'); return L; }   // (the first time: who they are)
-  if (ana_ && relGetW('ana', other) <= 0) { say(other, reaccionAlVerla(other) || (FOLKBY[other]?.def.lines ? pick(lineasDe(other, FOLKBY[other].def.lines)) : null) || pick(sinRepetir(other, lineasAjenas(other, [`${hi}, Ana.`, `${hi}, niña.`])))); const r = lineasSi(FOLKBY[other]?.def.ana || ['Hmpf.']); if (r.length && L.length) say('ana', pick(r)); return L; }
+  if (ana_ && relGetW('ana', other) <= 0) { say(other, reaccionAlVerla(other) || (FOLKBY[other]?.def.lines ? pick(lineasDe(other, FOLKBY[other].def.lines)) : null) || pick(sinRepetir(other, lineasAjenas(other, dichosTodos('encuentro:saluda_seco', { hola: hi }))))); const r = lineasSi(FOLKBY[other]?.def.ana || [dicho('encuentro:ana_seca')]); if (r.length && L.length) say('ana', pick(r)); return L; }
   if (a === 'matthew' || b === 'matthew') {   // (Matthew: a greeting, and off he goes)
     const o = a === 'matthew' ? b : a;
-    say(o, `¡${hi}, Matthew!`); say('matthew', pick(['Eh... b-buenas.', 'Buenas... sí... buen día, ¿no?', 'Ejem... buenas.']));
-    if (focoOf(o).social > .7) say(o, pick(['¡Qué raro verlo por aquí! ¿Cómo anda todo?', '¿Y Marilla? ¿Bien?']));
-    say('matthew', pick(['Bueno... tengo que seguir, ¿sabe? Sí... eso.', 'Pues... sí... tengo un encargo. Hasta luego.'])); return L;
+    say(o, dicho('encuentro:saluda_a_matthew', { hola: hi })); say('matthew', dicho('encuentro:matthew_saluda'));
+    if (focoOf(o).social > .7) say(o, dicho('encuentro:pregunta_a_matthew'));
+    say('matthew', dicho('encuentro:matthew_se_va')); return L;
   }
-  say(a, `¡${hi}${to(B)}!`); say(b, tu ? pick([`¡Hola${to(A)}! ¿A dónde vas?`, `¡Hola${to(A)}!`]) : pick([`¡${hi}${to(A)}! ¿Cómo están todos en casa?`, `¡Qué gusto verle${to(A)}!`]));
+  say(a, dicho('encuentro:saluda', { hola: hi, nombre: to(B) })); say(b, dicho(tu ? 'encuentro:responde_nino' : 'encuentro:responde_grande', { hola: hi, nombre: to(A) }));
   const rounds = 1 + Math.round((1 - Math.max(focoOf(a).enfoque, focoOf(b).enfoque)) * 3);
   for (let k = 0; k < rounds; k++) {
     const ch = !ana_ && !k && (chisme(a, b) || chisme(b, a));   // (two neighbours: a piece of news, told aloud: src/datos/noticias.txt)
     if (ch) for (const [q, t] of ch) say(q, t);
-    else if (ana_ && other === 'diana' && dianaAmiga()) { const [x, y] = ANA_DIANA[(k + Math.floor(TT)) % ANA_DIANA.length]; say('ana', x); say('diana', y); }
-    else if (ana_) { const [x, y] = suena(); say('ana', isKid(other) ? x.replace('¿No le parece', '¿No te parece').replace('¿Sabía', '¿Sabías') : x); say(other, isKid(other) ? pick(['¡Qué lindo, Ana!', '¿De verdad? ¡Cuéntame más!', '¡Qué cosas dices, Ana!']) : y); }
+    else if (ana_ && other === 'diana' && dianaAmiga() && anaDiana.length) { const [x, y] = anaDiana[(k + Math.floor(TT)) % anaDiana.length]; say('ana', x); say('diana', y); }
+    else if (ana_) { const [x, y] = suena(); say('ana', isKid(other) ? x.replace('¿No le parece', '¿No te parece').replace('¿Sabía', '¿Sabías') : x); say(other, isKid(other) ? dicho('encuentro:nino_responde_a_ana') : y); }
     else { const [x, y] = pares(); say(a, x); say(b, y); }
   }
   const t = AGENTS[a]?.task || AGENTS[b]?.task, who = AGENTS[a]?.task ? a : b;
-  const va = t && `Bueno, me voy, que tengo que ${stepText(t.a).replace(/^(\S+r)se\b/, '$1me')}.`;
-  say(who, va && !nombra(va, who) ? va : pick(['Bueno, ¡que le vaya bien!', 'Me voy, que se hace tarde.']));   // (not «ir a la casa de la Sra. Lynde», said by her)
+  const va = t && dicho('encuentro:me_voy_a', { tarea: stepText(t.a).replace(/^(\S+r)se\b/, '$1me') });
+  say(who, va && !nombra(va, who) ? va : dicho('encuentro:despedida'));   // (not «ir a la casa de la Sra. Lynde», said by her)
   return L;
 }
 
