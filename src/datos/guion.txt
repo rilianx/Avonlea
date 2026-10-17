@@ -421,6 +421,145 @@ carta: Su amiga que la recuerda siempre, Ana Shirley.
 # al día siguiente, en la tarde, Marilla va a La Cuesta del Huerto y la lleva (la agenda de Marilla, src/js/66-cadenas.js);
 # la Sra. Barry las recibe, llama a Diana, y las niñas se conocen. Si se encuentran antes por casualidad, se conocen
 # igual, pero sin la presentación: se quieren menos, y para jurar tendrán que pasar tiempo juntas.
+=== carta_spencer_prueba ===
+canal: carta
+prioridad: 5
+si: carta:spencer, !hecho:se_queda
+entre: 5
+---
+ana: (Ana moja la pluma y se queda quieta un rato largo. Le tiembla un poco la mano.)
+carta: Querida Sra. Spencer:
+carta: Le escribo desde Tejas Verdes, donde estoy a prueba. Usted ya sabe que los Cuthbert querían un niño, para ayudar a Matthew en la granja.
+ana: «A prueba». Suena como un pastel que todavía no saben si se les cayó o no.
+carta: Marilla todavía no decide si me quedo. Yo me porto lo mejor que puedo, aunque a veces se me olvida.
+carta: Aquí hay un cerezo debajo de mi ventana, y un arroyo, y una niña que se llama Diana en la granja de al lado.
+ana: (Escribe una línea, la mira mucho rato, y no la tacha.)
+carta: Si me devuelven, ¿podría buscarme una casa donde haya árboles? Pero ojalá no haga falta.
+carta: Su servidora, Ana Shirley
+
+=== carta_spencer_1 ===
+canal: carta
+prioridad: 5
+repetir: siempre
+si: carta:spencer, hecho:se_queda
+entre: 5
+---
+ana: (Ana escribe con su mejor letra, como si la Sra. Spencer fuera a corregirla.)
+carta: Querida Sra. Spencer:
+carta: Aquí en Tejas Verdes {estacion}.
+carta: Le escribo para contarle cómo me va, porque usted fue quien me trajo, aunque fuera por equivocación.
+carta: {noticia}
+carta: Marilla es seria pero justa, y Matthew es la persona más buena del mundo. Creo que aquí sí me quieren un poquito.
+ana: «Un poquito» es por modestia. Pero no le voy a poner «mucho», no vaya a ser que se gaste.
+carta: Le doy las gracias por la equivocación: fue la más afortunada de mi vida.
+carta: Su agradecida, Ana Shirley (de Tejas Verdes)
+
+# ---------- las respuestas: lo que contestan a las cartas de Ana (llegan días después, al correo de la tienda de Lawson).
+# canal: respuesta · de: quién contesta · responde: a qué carta (la escena que Ana escribió; si no, a cualquiera)
+# · si: lo que tiene que ser verdad cuando contestan. Las líneas «carta:» son la carta. Se elige una que no se haya dicho.
+
+=== resp_diana_1 ===
+canal: respuesta
+de: diana
+si: respuesta:diana
+---
+carta: Querida Ana:
+carta: ¡Qué carta tan bonita! La leí tres veces y la guardé en mi caja de cartas, con la cinta azul.
+carta: Mamá dice que mañana puedo ir a Tejas Verdes después de los quehaceres. ¡Llevo el libro de poemas!
+carta: Tu amiga del alma, Diana
+
+=== resp_diana_2 ===
+canal: respuesta
+de: diana
+si: respuesta:diana
+---
+carta: Queridísima Ana:
+carta: Tu carta me hizo reír tanto que Minnie May me preguntó qué pasaba. No le dije: es un secreto de amigas del alma.
+carta: Guardé tu lugar en la escuela. Ruby quería sentarse, pero le dije que no.
+carta: Siempre tuya, Diana
+
+=== resp_stacy_1 ===
+canal: respuesta
+de: stacy
+si: respuesta:stacy
+---
+carta: Querida Ana:
+carta: Me alegró mucho recibir tu carta. Escribes con el corazón, y eso no se enseña.
+carta: Sigue leyendo y escribiendo todos los días, aunque sea un poco. Y sí: usa menos adjetivos.
+carta: Con cariño, Muriel Stacy
+
+=== resp_stacy_2 ===
+canal: respuesta
+de: stacy
+si: respuesta:stacy
+---
+carta: Querida Ana:
+carta: Claro que podrías escribir un libro. Empieza por una página, y después otra. Así se hacen todos.
+carta: Te espero el lunes con tu composición.
+carta: Tu maestra, M. Stacy
+
+=== resp_sraallan_1 ===
+canal: respuesta
+de: sraallan
+si: respuesta:sraallan
+---
+carta: Querida Ana:
+carta: Qué alegría me dio tu carta. A mí también me gustó mucho la tarde del té.
+carta: Ser buena no es no equivocarse nunca, Ana: es seguir intentándolo. Y tú lo haces muy bien.
+carta: Te quiere, la Sra. Allan
+
+=== resp_josephine_1 ===
+canal: respuesta
+de: josephine
+si: respuesta:josephine
+---
+carta: Querida Ana:
+carta: Tu carta me hizo reír más que cualquier cosa en todo el invierno. Hacía años que no me reía así.
+carta: Charlottetown es muy aburrido sin una niña como tú. Cuando vengas con Diana, iremos a la exposición.
+carta: Tu vieja amiga, Josephine Barry
+
+=== resp_josephine_2 ===
+canal: respuesta
+de: josephine
+si: respuesta:josephine
+---
+carta: Mi querida Ana:
+carta: Recibí tu carta y la leí junto a la chimenea. Escribes como hablas, y eso es un gran elogio viniendo de mí.
+carta: Te mando un saludo para Marilla, y para ti, mi cariño.
+carta: J. Barry
+
+=== resp_spencer_prueba ===
+canal: respuesta
+de: spencer
+responde: carta_spencer_prueba
+si: respuesta:spencer, !hecho:se_queda
+---
+carta: Querida Ana:
+carta: Recibí tu carta. No te preocupes antes de tiempo, niña: la Srta. Cuthbert es una mujer seria, pero justa.
+carta: Ayuda en la casa, haz lo que te dicen y, sobre todo, no hables tanto. Eso es lo que más cansa a la gente mayor.
+carta: Afectuosamente, la Sra. Spencer
+
+=== resp_spencer_prueba_quedo ===
+canal: respuesta
+de: spencer
+responde: carta_spencer_prueba
+si: respuesta:spencer, hecho:se_queda
+---
+carta: Querida Ana:
+carta: Cuando llegó tu carta ya me había enterado: ¡los Cuthbert se quedaron contigo! Ya ves que las cosas se arreglan, cuando una se porta bien.
+carta: Ahora tienes casa, niña. Cuídala, y no hables tanto.
+carta: Afectuosamente, la Sra. Spencer
+
+=== resp_spencer_1 ===
+canal: respuesta
+de: spencer
+si: respuesta:spencer, hecho:se_queda
+---
+carta: Querida Ana:
+carta: Me dio mucho gusto saber de ti. Ya ves que las cosas se arreglan solas, cuando una se porta bien.
+carta: Saludos a la Srta. Cuthbert. Y no hables tanto, niña.
+carta: Afectuosamente, la Sra. Spencer
+
 === quiere_amiga ===
 narra: Ana nunca ha tenido una amiga de verdad. En el orfanato y en las casas donde vivió, sus únicas amigas fueron imaginarias: Katie Maurice, la niña que vivía detrás del vidrio de una vitrina, y Violetta, el eco de un valle.
 canal: gg

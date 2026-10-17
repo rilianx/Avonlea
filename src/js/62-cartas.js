@@ -14,14 +14,18 @@ const CARTA_CUERPO = {
   sraallan: [['Le escribo para darle las gracias por el té de la otra tarde. Fue uno de los momentos más elegantes de mi vida.', 'Sigo pensando en lo que usted dijo de ser buena. Lo estoy intentando todos los días, aunque algunos días me resulta mejor que otros.'], ['Quería contarle que ya no le pongo linimento a las tartas. Aprendí la lección para siempre.', 'Ojalá todas las personas fueran tan comprensivas como usted.']],
   josephine: [['Le escribo desde Avonlea, donde todo sigue igual de bonito que cuando usted vino de visita.', 'Diana y yo todavía nos reímos de la noche en que saltamos sobre su cama. Bueno, ahora nos reímos; esa noche no tanto.', 'Si alguna vez se aburre en Charlottetown, acuérdese de que aquí tiene una amiga con mucha imaginación.'], ['Le cuento que este año en Tejas Verdes {estacion}.', 'Marilla dice que no hay que molestar a las personas importantes con cartas largas, así que esta es corta. Para mí, al menos.']],
 };
-CARTA_CUERPO.spencer = [['Le escribo para contarle cómo me va en Tejas Verdes, porque usted fue quien me trajo, aunque fuera por equivocación.', 'Marilla es seria pero justa, y Matthew es la persona más buena del mundo. Creo que aquí sí me quieren un poquito.', 'Le doy las gracias por la equivocación: fue la más afortunada de mi vida.']];
-const CARTA_RESP = {
-  diana: [['Querida Ana:', '¡Qué carta tan bonita! La leí tres veces y la guardé en mi caja de cartas, con la cinta azul.', 'Mamá dice que mañana puedo ir a Tejas Verdes después de los quehaceres. ¡Llevo el libro de poemas!', 'Tu amiga del alma, Diana'], ['Queridísima Ana:', 'Tu carta me hizo reír tanto que Minnie May me preguntó qué pasaba. No le dije: es un secreto de amigas del alma.', 'Guardé tu lugar en la escuela. Ruby quería sentarse, pero le dije que no.', 'Siempre tuya, Diana']],
-  stacy: [['Querida Ana:', 'Me alegró mucho recibir tu carta. Escribes con el corazón, y eso no se enseña.', 'Sigue leyendo y escribiendo todos los días, aunque sea un poco. Y sí: usa menos adjetivos.', 'Con cariño, Muriel Stacy'], ['Querida Ana:', 'Claro que podrías escribir un libro. Empieza por una página, y después otra. Así se hacen todos.', 'Te espero el lunes con tu composición.', 'Tu maestra, M. Stacy']],
-  sraallan: [['Querida Ana:', 'Qué alegría me dio tu carta. A mí también me gustó mucho la tarde del té.', 'Ser buena no es no equivocarse nunca, Ana: es seguir intentándolo. Y tú lo haces muy bien.', 'Te quiere, la Sra. Allan']],
-  josephine: [['Querida Ana:', 'Tu carta me hizo reír más que cualquier cosa en todo el invierno. Hacía años que no me reía así.', 'Charlottetown es muy aburrido sin una niña como tú. Cuando vengas con Diana, iremos a la exposición.', 'Tu vieja amiga, Josephine Barry'], ['Mi querida Ana:', 'Recibí tu carta y la leí junto a la chimenea. Escribes como hablas, y eso es un gran elogio viniendo de mí.', 'Te mando un saludo para Marilla, y para ti, mi cariño.', 'J. Barry']],
-};
-CARTA_RESP.spencer = [['Querida Ana:', 'Me dio mucho gusto saber de ti. Ya ves que las cosas se arreglan solas, cuando una se porta bien.', 'Saludos a la Srta. Cuthbert. Y no hables tanto, niña.', 'Afectuosamente, la Sra. Spencer']];
+CARTA_CUERPO.spencer = [['Le escribo desde Tejas Verdes, porque usted fue quien me trajo, aunque fuera por equivocación.', 'Aquí hay un cerezo debajo de mi ventana, y un arroyo.']];   // (Ana's own letters to her are scenes: carta_spencer_* in src/datos/guion.txt, with what she can say then)
+// the answers are scenes of the script too (src/datos/guion.txt, «canal: respuesta»): who answers (de), to which of Ana's
+// letters (responde: the scene she wrote it in), and what must be true when they answer (si); one not said yet, if there is
+function cartaRespuesta(c){
+  game.respAhora = c.para;
+  const L = DIALOGOS.filter(d => d.canal === 'respuesta' && d.de === c.para && (!d.responde || d.responde === c.escena) && dlgCumple(d, dlgCtx()));
+  game.respAhora = null;
+  const d = [...L].sort((a, b) => (!!b.responde - !!a.responde) || (a.dicha() - b.dicha()))[0];
+  if (!d) return ['Querida Ana:', 'Gracias por tu carta. Me dio mucho gusto saber de ti.', cap(CORREO[c.para].nombre)];
+  dlgDichas()[d.id] = true;
+  return d.lineas().filter(l => l[0] === 'carta').map(l => l[1].replace('{estacion}', ESTACION_TXT[S]));
+}
 const ESTACION_TXT = ['los cerezos están en flor', 'el sol de verano madura las bayas', 'los arces se pusieron rojos', 'la nieve cubre el Camino Blanco de las Delicias'];
 const cartas = () => game.cartas || (game.cartas = []);
 const YO = { 'fue': 'fui', 'recogió': 'recogí', 'cocinó': 'cociné', 'preparó': 'preparé', 'regó': 'regué', 'sembró': 'sembré', 'visitó': 'visité', 'patinó': 'patiné', 'remó': 'remé', 'leyó': 'leí', 'juró': 'juré', 'adornó': 'adorné', 'estudió': 'estudié', 'recitó': 'recité', 'decoró': 'decoré', 'lavó': 'lavé', 'barrió': 'barrí', 'puso': 'puse', 'cuidó': 'cuidé', 'consoló': 'consolé', 'felicitó': 'felicité', 'perdonó': 'perdoné', 'bautizó': 'bauticé', 'se tiró': 'me tiré', 'se tiñó': 'me teñí', 'le dio': 'le di', 'le regaló': 'le regalé', 'le devolvió': 'le devolví', 'ensayó': 'ensayé', 'se sentó': 'me senté' };
@@ -43,7 +47,7 @@ function correoTick(dt){
   for (const c of cartas()) {
     const C = CORREO[c.para];
     if (c.estado === 'enviada' && C && d >= c.envio + C.dias) { c.estado = 'entregada'; c.llego = d; cartaAfecto(c.para); c.resp = d + C.resp[0] + Math.floor(Math.random() * (C.resp[1] - C.resp[0] + 1)); logEv(`${cap(C.nombre)} recibió la carta de Ana.`, []); }
-    if (c.estado === 'entregada' && d >= c.resp) { c.estado = 'respondida'; cartas().push({ id: cartas().length + 1, de: c.para, para: 'ana', texto: pick(CARTA_RESP[c.para] || CARTA_RESP.stacy), dia: d, estado: 'en_correo' }); notice(`📬 Llegó una carta para Ana de ${CORREO[c.para].nombre}: está en la oficina de correos (la tienda de Lawson).`); logEv(`Llegó al correo una carta de ${CORREO[c.para].nombre} para Ana.`, []); }
+    if (c.estado === 'entregada' && d >= c.resp) { c.estado = 'respondida'; cartas().push({ id: cartas().length + 1, de: c.para, para: 'ana', texto: cartaRespuesta(c), dia: d, estado: 'en_correo' }); notice(`📬 Llegó una carta para Ana de ${CORREO[c.para].nombre}: está en la oficina de correos (la tienda de Lawson).`); logEv(`Llegó al correo una carta de ${CORREO[c.para].nombre} para Ana.`, []); }
   }
 }
 // at the post office: Ana asks for her mail; at home (or anywhere), she reads it

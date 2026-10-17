@@ -629,6 +629,145 @@ carta: Su amiga que la recuerda siempre, Ana Shirley.
 # al día siguiente, en la tarde, Marilla va a La Cuesta del Huerto y la lleva (la agenda de Marilla, src/js/66-cadenas.js);
 # la Sra. Barry las recibe, llama a Diana, y las niñas se conocen. Si se encuentran antes por casualidad, se conocen
 # igual, pero sin la presentación: se quieren menos, y para jurar tendrán que pasar tiempo juntas.
+=== carta_spencer_prueba ===
+canal: carta
+prioridad: 5
+si: carta:spencer, !hecho:se_queda
+entre: 5
+---
+ana: (Ana moja la pluma y se queda quieta un rato largo. Le tiembla un poco la mano.)
+carta: Querida Sra. Spencer:
+carta: Le escribo desde Tejas Verdes, donde estoy a prueba. Usted ya sabe que los Cuthbert querían un niño, para ayudar a Matthew en la granja.
+ana: «A prueba». Suena como un pastel que todavía no saben si se les cayó o no.
+carta: Marilla todavía no decide si me quedo. Yo me porto lo mejor que puedo, aunque a veces se me olvida.
+carta: Aquí hay un cerezo debajo de mi ventana, y un arroyo, y una niña que se llama Diana en la granja de al lado.
+ana: (Escribe una línea, la mira mucho rato, y no la tacha.)
+carta: Si me devuelven, ¿podría buscarme una casa donde haya árboles? Pero ojalá no haga falta.
+carta: Su servidora, Ana Shirley
+
+=== carta_spencer_1 ===
+canal: carta
+prioridad: 5
+repetir: siempre
+si: carta:spencer, hecho:se_queda
+entre: 5
+---
+ana: (Ana escribe con su mejor letra, como si la Sra. Spencer fuera a corregirla.)
+carta: Querida Sra. Spencer:
+carta: Aquí en Tejas Verdes {estacion}.
+carta: Le escribo para contarle cómo me va, porque usted fue quien me trajo, aunque fuera por equivocación.
+carta: {noticia}
+carta: Marilla es seria pero justa, y Matthew es la persona más buena del mundo. Creo que aquí sí me quieren un poquito.
+ana: «Un poquito» es por modestia. Pero no le voy a poner «mucho», no vaya a ser que se gaste.
+carta: Le doy las gracias por la equivocación: fue la más afortunada de mi vida.
+carta: Su agradecida, Ana Shirley (de Tejas Verdes)
+
+# ---------- las respuestas: lo que contestan a las cartas de Ana (llegan días después, al correo de la tienda de Lawson).
+# canal: respuesta · de: quién contesta · responde: a qué carta (la escena que Ana escribió; si no, a cualquiera)
+# · si: lo que tiene que ser verdad cuando contestan. Las líneas «carta:» son la carta. Se elige una que no se haya dicho.
+
+=== resp_diana_1 ===
+canal: respuesta
+de: diana
+si: respuesta:diana
+---
+carta: Querida Ana:
+carta: ¡Qué carta tan bonita! La leí tres veces y la guardé en mi caja de cartas, con la cinta azul.
+carta: Mamá dice que mañana puedo ir a Tejas Verdes después de los quehaceres. ¡Llevo el libro de poemas!
+carta: Tu amiga del alma, Diana
+
+=== resp_diana_2 ===
+canal: respuesta
+de: diana
+si: respuesta:diana
+---
+carta: Queridísima Ana:
+carta: Tu carta me hizo reír tanto que Minnie May me preguntó qué pasaba. No le dije: es un secreto de amigas del alma.
+carta: Guardé tu lugar en la escuela. Ruby quería sentarse, pero le dije que no.
+carta: Siempre tuya, Diana
+
+=== resp_stacy_1 ===
+canal: respuesta
+de: stacy
+si: respuesta:stacy
+---
+carta: Querida Ana:
+carta: Me alegró mucho recibir tu carta. Escribes con el corazón, y eso no se enseña.
+carta: Sigue leyendo y escribiendo todos los días, aunque sea un poco. Y sí: usa menos adjetivos.
+carta: Con cariño, Muriel Stacy
+
+=== resp_stacy_2 ===
+canal: respuesta
+de: stacy
+si: respuesta:stacy
+---
+carta: Querida Ana:
+carta: Claro que podrías escribir un libro. Empieza por una página, y después otra. Así se hacen todos.
+carta: Te espero el lunes con tu composición.
+carta: Tu maestra, M. Stacy
+
+=== resp_sraallan_1 ===
+canal: respuesta
+de: sraallan
+si: respuesta:sraallan
+---
+carta: Querida Ana:
+carta: Qué alegría me dio tu carta. A mí también me gustó mucho la tarde del té.
+carta: Ser buena no es no equivocarse nunca, Ana: es seguir intentándolo. Y tú lo haces muy bien.
+carta: Te quiere, la Sra. Allan
+
+=== resp_josephine_1 ===
+canal: respuesta
+de: josephine
+si: respuesta:josephine
+---
+carta: Querida Ana:
+carta: Tu carta me hizo reír más que cualquier cosa en todo el invierno. Hacía años que no me reía así.
+carta: Charlottetown es muy aburrido sin una niña como tú. Cuando vengas con Diana, iremos a la exposición.
+carta: Tu vieja amiga, Josephine Barry
+
+=== resp_josephine_2 ===
+canal: respuesta
+de: josephine
+si: respuesta:josephine
+---
+carta: Mi querida Ana:
+carta: Recibí tu carta y la leí junto a la chimenea. Escribes como hablas, y eso es un gran elogio viniendo de mí.
+carta: Te mando un saludo para Marilla, y para ti, mi cariño.
+carta: J. Barry
+
+=== resp_spencer_prueba ===
+canal: respuesta
+de: spencer
+responde: carta_spencer_prueba
+si: respuesta:spencer, !hecho:se_queda
+---
+carta: Querida Ana:
+carta: Recibí tu carta. No te preocupes antes de tiempo, niña: la Srta. Cuthbert es una mujer seria, pero justa.
+carta: Ayuda en la casa, haz lo que te dicen y, sobre todo, no hables tanto. Eso es lo que más cansa a la gente mayor.
+carta: Afectuosamente, la Sra. Spencer
+
+=== resp_spencer_prueba_quedo ===
+canal: respuesta
+de: spencer
+responde: carta_spencer_prueba
+si: respuesta:spencer, hecho:se_queda
+---
+carta: Querida Ana:
+carta: Cuando llegó tu carta ya me había enterado: ¡los Cuthbert se quedaron contigo! Ya ves que las cosas se arreglan, cuando una se porta bien.
+carta: Ahora tienes casa, niña. Cuídala, y no hables tanto.
+carta: Afectuosamente, la Sra. Spencer
+
+=== resp_spencer_1 ===
+canal: respuesta
+de: spencer
+si: respuesta:spencer, hecho:se_queda
+---
+carta: Querida Ana:
+carta: Me dio mucho gusto saber de ti. Ya ves que las cosas se arreglan solas, cuando una se porta bien.
+carta: Saludos a la Srta. Cuthbert. Y no hables tanto, niña.
+carta: Afectuosamente, la Sra. Spencer
+
 === quiere_amiga ===
 narra: Ana nunca ha tenido una amiga de verdad. En el orfanato y en las casas donde vivió, sus únicas amigas fueron imaginarias: Katie Maurice, la niña que vivía detrás del vidrio de una vitrina, y Violetta, el eco de un valle.
 canal: gg
@@ -6525,6 +6664,7 @@ function dlgCond(s, c){   // one condition of state, written as text
     case 've': return veAna(a);   // (she can see Ana now: the same room, or near her outside)
     case 'donde': { const [x, l] = rest.split(':'); return dlgDonde(l, x); }   // (someone is somewhere: «donde:ana:tejas», «!donde:ana:tejas»)
     case 'ana': return !!ANA_ESTADO[a]?.();   // (how Ana is: «ana:camison», «ana:sin_sombrero», «ana:ropa_tirada»)
+    case 'respuesta': return game.respAhora === a;   // (someone is answering a letter of Ana's: src/js/62-cartas.js)
     case 'carta': return game.cartaAhora?.para === a && TT - game.cartaAhora.t < 1 && !game.cartaEscena;   // (Ana is writing a letter to her, at her desk)
   }
   return false;
@@ -12345,14 +12485,18 @@ const CARTA_CUERPO = {
   sraallan: [['Le escribo para darle las gracias por el té de la otra tarde. Fue uno de los momentos más elegantes de mi vida.', 'Sigo pensando en lo que usted dijo de ser buena. Lo estoy intentando todos los días, aunque algunos días me resulta mejor que otros.'], ['Quería contarle que ya no le pongo linimento a las tartas. Aprendí la lección para siempre.', 'Ojalá todas las personas fueran tan comprensivas como usted.']],
   josephine: [['Le escribo desde Avonlea, donde todo sigue igual de bonito que cuando usted vino de visita.', 'Diana y yo todavía nos reímos de la noche en que saltamos sobre su cama. Bueno, ahora nos reímos; esa noche no tanto.', 'Si alguna vez se aburre en Charlottetown, acuérdese de que aquí tiene una amiga con mucha imaginación.'], ['Le cuento que este año en Tejas Verdes {estacion}.', 'Marilla dice que no hay que molestar a las personas importantes con cartas largas, así que esta es corta. Para mí, al menos.']],
 };
-CARTA_CUERPO.spencer = [['Le escribo para contarle cómo me va en Tejas Verdes, porque usted fue quien me trajo, aunque fuera por equivocación.', 'Marilla es seria pero justa, y Matthew es la persona más buena del mundo. Creo que aquí sí me quieren un poquito.', 'Le doy las gracias por la equivocación: fue la más afortunada de mi vida.']];
-const CARTA_RESP = {
-  diana: [['Querida Ana:', '¡Qué carta tan bonita! La leí tres veces y la guardé en mi caja de cartas, con la cinta azul.', 'Mamá dice que mañana puedo ir a Tejas Verdes después de los quehaceres. ¡Llevo el libro de poemas!', 'Tu amiga del alma, Diana'], ['Queridísima Ana:', 'Tu carta me hizo reír tanto que Minnie May me preguntó qué pasaba. No le dije: es un secreto de amigas del alma.', 'Guardé tu lugar en la escuela. Ruby quería sentarse, pero le dije que no.', 'Siempre tuya, Diana']],
-  stacy: [['Querida Ana:', 'Me alegró mucho recibir tu carta. Escribes con el corazón, y eso no se enseña.', 'Sigue leyendo y escribiendo todos los días, aunque sea un poco. Y sí: usa menos adjetivos.', 'Con cariño, Muriel Stacy'], ['Querida Ana:', 'Claro que podrías escribir un libro. Empieza por una página, y después otra. Así se hacen todos.', 'Te espero el lunes con tu composición.', 'Tu maestra, M. Stacy']],
-  sraallan: [['Querida Ana:', 'Qué alegría me dio tu carta. A mí también me gustó mucho la tarde del té.', 'Ser buena no es no equivocarse nunca, Ana: es seguir intentándolo. Y tú lo haces muy bien.', 'Te quiere, la Sra. Allan']],
-  josephine: [['Querida Ana:', 'Tu carta me hizo reír más que cualquier cosa en todo el invierno. Hacía años que no me reía así.', 'Charlottetown es muy aburrido sin una niña como tú. Cuando vengas con Diana, iremos a la exposición.', 'Tu vieja amiga, Josephine Barry'], ['Mi querida Ana:', 'Recibí tu carta y la leí junto a la chimenea. Escribes como hablas, y eso es un gran elogio viniendo de mí.', 'Te mando un saludo para Marilla, y para ti, mi cariño.', 'J. Barry']],
-};
-CARTA_RESP.spencer = [['Querida Ana:', 'Me dio mucho gusto saber de ti. Ya ves que las cosas se arreglan solas, cuando una se porta bien.', 'Saludos a la Srta. Cuthbert. Y no hables tanto, niña.', 'Afectuosamente, la Sra. Spencer']];
+CARTA_CUERPO.spencer = [['Le escribo desde Tejas Verdes, porque usted fue quien me trajo, aunque fuera por equivocación.', 'Aquí hay un cerezo debajo de mi ventana, y un arroyo.']];   // (Ana's own letters to her are scenes: carta_spencer_* in src/datos/guion.txt, with what she can say then)
+// the answers are scenes of the script too (src/datos/guion.txt, «canal: respuesta»): who answers (de), to which of Ana's
+// letters (responde: the scene she wrote it in), and what must be true when they answer (si); one not said yet, if there is
+function cartaRespuesta(c){
+  game.respAhora = c.para;
+  const L = DIALOGOS.filter(d => d.canal === 'respuesta' && d.de === c.para && (!d.responde || d.responde === c.escena) && dlgCumple(d, dlgCtx()));
+  game.respAhora = null;
+  const d = [...L].sort((a, b) => (!!b.responde - !!a.responde) || (a.dicha() - b.dicha()))[0];
+  if (!d) return ['Querida Ana:', 'Gracias por tu carta. Me dio mucho gusto saber de ti.', cap(CORREO[c.para].nombre)];
+  dlgDichas()[d.id] = true;
+  return d.lineas().filter(l => l[0] === 'carta').map(l => l[1].replace('{estacion}', ESTACION_TXT[S]));
+}
 const ESTACION_TXT = ['los cerezos están en flor', 'el sol de verano madura las bayas', 'los arces se pusieron rojos', 'la nieve cubre el Camino Blanco de las Delicias'];
 const cartas = () => game.cartas || (game.cartas = []);
 const YO = { 'fue': 'fui', 'recogió': 'recogí', 'cocinó': 'cociné', 'preparó': 'preparé', 'regó': 'regué', 'sembró': 'sembré', 'visitó': 'visité', 'patinó': 'patiné', 'remó': 'remé', 'leyó': 'leí', 'juró': 'juré', 'adornó': 'adorné', 'estudió': 'estudié', 'recitó': 'recité', 'decoró': 'decoré', 'lavó': 'lavé', 'barrió': 'barrí', 'puso': 'puse', 'cuidó': 'cuidé', 'consoló': 'consolé', 'felicitó': 'felicité', 'perdonó': 'perdoné', 'bautizó': 'bauticé', 'se tiró': 'me tiré', 'se tiñó': 'me teñí', 'le dio': 'le di', 'le regaló': 'le regalé', 'le devolvió': 'le devolví', 'ensayó': 'ensayé', 'se sentó': 'me senté' };
@@ -12374,7 +12518,7 @@ function correoTick(dt){
   for (const c of cartas()) {
     const C = CORREO[c.para];
     if (c.estado === 'enviada' && C && d >= c.envio + C.dias) { c.estado = 'entregada'; c.llego = d; cartaAfecto(c.para); c.resp = d + C.resp[0] + Math.floor(Math.random() * (C.resp[1] - C.resp[0] + 1)); logEv(`${cap(C.nombre)} recibió la carta de Ana.`, []); }
-    if (c.estado === 'entregada' && d >= c.resp) { c.estado = 'respondida'; cartas().push({ id: cartas().length + 1, de: c.para, para: 'ana', texto: pick(CARTA_RESP[c.para] || CARTA_RESP.stacy), dia: d, estado: 'en_correo' }); notice(`📬 Llegó una carta para Ana de ${CORREO[c.para].nombre}: está en la oficina de correos (la tienda de Lawson).`); logEv(`Llegó al correo una carta de ${CORREO[c.para].nombre} para Ana.`, []); }
+    if (c.estado === 'entregada' && d >= c.resp) { c.estado = 'respondida'; cartas().push({ id: cartas().length + 1, de: c.para, para: 'ana', texto: cartaRespuesta(c), dia: d, estado: 'en_correo' }); notice(`📬 Llegó una carta para Ana de ${CORREO[c.para].nombre}: está en la oficina de correos (la tienda de Lawson).`); logEv(`Llegó al correo una carta de ${CORREO[c.para].nombre} para Ana.`, []); }
   }
 }
 // at the post office: Ana asks for her mail; at home (or anywhere), she reads it
@@ -12556,7 +12700,7 @@ function wmExec0(ag, a, st, dt){
       if (!wait(st.txt.length * 3.4)) return 'run';
       if (escena && game.cartaEscena?.lineas.length) st.txt = game.cartaEscena.lineas;
       for (const t of TALKS.filter(t => t.ch === 'carta')) talkEnd(t);   // (the letter is done: what she was saying over it, too)
-      inv.carta = (inv.carta || 0) + 1; cartas().push({ id: cartas().length + 1, de: me, para: st.para, texto: st.txt, dia: today(), estado: 'escrita' });
+      inv.carta = (inv.carta || 0) + 1; cartas().push({ id: cartas().length + 1, de: me, para: st.para, texto: st.txt, dia: today(), estado: 'escrita', escena: me === 'ana' ? game.cartaEscena?.id : undefined });
       float('+1 carta para ' + CORREO[st.para].nombre, b.x, b.y - 50); logEv(`${wmName(me)} escribió una carta para ${CORREO[st.para].nombre}.`, []); return 'ok';
     }
     case 'enviar_carta': {   // (at the post office: who it is for, and off it goes with tomorrow's mail)

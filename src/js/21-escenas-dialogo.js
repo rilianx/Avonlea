@@ -61,6 +61,7 @@ function dlgCond(s, c){   // one condition of state, written as text
     case 've': return veAna(a);   // (she can see Ana now: the same room, or near her outside)
     case 'donde': { const [x, l] = rest.split(':'); return dlgDonde(l, x); }   // (someone is somewhere: «donde:ana:tejas», «!donde:ana:tejas»)
     case 'ana': return !!ANA_ESTADO[a]?.();   // (how Ana is: «ana:camison», «ana:sin_sombrero», «ana:ropa_tirada»)
+    case 'respuesta': return game.respAhora === a;   // (someone is answering a letter of Ana's: src/js/62-cartas.js)
     case 'carta': return game.cartaAhora?.para === a && TT - game.cartaAhora.t < 1 && !game.cartaEscena;   // (Ana is writing a letter to her, at her desk)
   }
   return false;

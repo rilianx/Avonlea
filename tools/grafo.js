@@ -12,7 +12,7 @@ const root = path.resolve(__dirname, '..'), leer = f => fs.readFileSync(path.joi
 const guion = leer('src/datos/guion.txt') + '\n' + leer('src/datos/conversaciones.txt'), cuaderno = leer('src/datos/cuaderno.txt'), habilidades = leer('src/datos/habilidades.txt');
 const codigo = fs.readdirSync(path.join(root, 'src/js')).filter(f => /^\d\d-.*\.js$/.test(f) && !/metas-de-prueba/.test(f)).map(f => leer('src/js/' + f)).join('\n');
 // the keys the engine knows (dlgCond in src/js/21-escenas-dialogo.js), and a quality compared with a number
-const CLAVES = ['hecho', 'dicha', 've', 'donde', 'ana', 'conoce', 'presente', 'marca', 'capitulo', 'cuaderno', 'tomando_te', 'afecto', 'dias_desde', 'sentada', 'estudio', 'camino', 'estacion', 'dia_estacion', 'dia_juego', 'hora', 'no_hoy', 'canal_libre', 'ana_visible', 'escena_ana', 'sabe', 'comento', 'horas_desde', 'y_mayor', 'carta'];
+const CLAVES = ['hecho', 'dicha', 've', 'donde', 'ana', 'conoce', 'presente', 'marca', 'capitulo', 'cuaderno', 'tomando_te', 'afecto', 'dias_desde', 'sentada', 'estudio', 'camino', 'estacion', 'dia_estacion', 'dia_juego', 'hora', 'no_hoy', 'canal_libre', 'ana_visible', 'escena_ana', 'sabe', 'comento', 'horas_desde', 'y_mayor', 'carta', 'respuesta'];
 const CUALIDAD = /^([a-zñ_]+):([a-zñ_]+)(?::([a-zñ_]+))?\s*(>=|<=|>|<|==|=)\s*(-?\d+(?:\.\d+)?)$/;
 // the qualities there are: the affection, the skills (src/datos/habilidades.txt), and whatever a scene adds to («suma x:…»)
 const CUALIDADES = new Set(['afecto', ...[...habilidades.matchAll(/^===\s*(.+?)\s*===$/gm)].map(m => m[1]), ...[...guion.matchAll(/al_(?:empezar|terminar):\s*suma\s+([a-zñ_]+):/g)].map(m => m[1])]);
@@ -114,6 +114,11 @@ for (const m of codigo.matchAll(/['"`\[]conoce:([a-z_0-9]+)/g)) anota(pide, 'con
 for (const bloque of leer('src/datos/conversaciones.txt').split(/^(?====)/m)) { const id = bloque.match(/^===\s*(.+?)\s*===/)?.[1]; if (!id) continue;
   const cuerpo = bloque.split(/^---$/m)[1] || '';
   if (/\b(surco|sembr\w*|semillas? una|harina|al horno|amasa\w*|orde[ñn]\w*|el balde|aguja|hilv\w*)\b/i.test(cuerpo) && !/^se_hace_en:/m.test(bloque)) malas.push(`conversación ${id}: es con las manos (${cuerpo.match(/\b(surco|sembr\w*|semillas? una|harina|al horno|amasa\w*|orde[ñn]\w*|el balde|aguja|hilv\w*)\b/i)[0]}), y no dice dónde se hace («se_hace_en:»)`); }
+// every letter Ana writes and every answer she gets is a scene of the script, with its conditions (the model reads them):
+// for each one she can write to (src/js/62-cartas.js, CORREO), at least one letter and one answer
+for (const k of [...leer('src/js/62-cartas.js').matchAll(/^  (\w+): \{ nombre:/gm)].map(m => m[1])) {
+  if (!new RegExp(`^=== carta_${k}`, 'm').test(guion)) malas.push(`cartas: no hay escena para escribirle a ${k} (carta_${k}_…, «si: carta:${k}»): saldría un texto fijo, sin condiciones`);
+  if (!new RegExp(`^de: ${k}$`, 'm').test(guion)) malas.push(`cartas: ${k} no tiene ninguna respuesta en el guion («canal: respuesta», «de: ${k}»)`); }
 // the report
 const necesita = Object.keys(pide).filter(h => !h.endsWith(' ')), lee = new Set(Object.keys(pide).map(h => h.trim()));
 const nunca = necesita.filter(h => !hace[h] && !/^conoce_/.test(h)).sort()   /* (conoce_<who>: whoever Ana meets, src/js/66-conocidos.js) */, sinUso = Object.keys(hace).filter(h => !lee.has(h) && !/^(hito_|llego_|se_fue_)/.test(h)).sort();
