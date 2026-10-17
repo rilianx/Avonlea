@@ -11,7 +11,7 @@ const read = p => fs.readFileSync(src(p), 'utf8');
 function build(){
   const js = fs.readdirSync(src('js')).filter(f => /^\d\d-.*\.js$/.test(f)).sort().map(f => read('js/' + f)).join('\n');
   const mapas = Object.fromEntries(fs.readdirSync(src('mapas')).filter(f => f.endsWith('.tmj')).sort().map(f => [f.replace('.tmj', ''), JSON.parse(read('mapas/' + f))]));
-  const code = js.replace('/*@libro1*/', () => read('datos/libro1.json')).replace('/*@personajes*/', () => read('datos/personajes.json')).replace('/*@mapas*/', () => JSON.stringify(mapas));
+  const code = js.replace('/*@libro1*/', () => read('datos/libro1.json')).replace('/*@historias*/', () => read('datos/historias.json')).replace('/*@personajes*/', () => read('datos/personajes.json')).replace('/*@mapas*/', () => JSON.stringify(mapas));
   return read('shell.html').replace('<!--@guion-->', () => read('datos/guion.txt')).replace('<!--@cuaderno-->', () => read('datos/cuaderno.txt')).replace('<!--@habilidades-->', () => read('datos/habilidades.txt')).replace('<!--@noticias-->', () => read('datos/noticias.txt')).replace('<!--@llegadas-->', () => read('datos/llegadas.txt')).replace('<!--@frases-->', () => read('datos/frases.txt')).replace('<!--@conversaciones-->', () => read('datos/conversaciones.txt')).replace('<!--@comentarios-->', () => read('datos/comentarios.txt')).replace('<!--@dichos-->', () => fs.readdirSync(src('datos/dichos')).filter(f => f.endsWith('.txt')).sort().map(f => read('datos/dichos/' + f)).join('\n')).replace('<!--@js-->', () => code);
 }
 

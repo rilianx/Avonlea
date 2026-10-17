@@ -2635,6 +2635,14 @@ ana: ¡La primera nieve! El Camino Blanco se acordó de su nombre. Cada copo es 
 # Cada momento tiene que tener al menos una línea sin condiciones propias (para que nunca quede callado):
 # lo revisa tools/grafo.js. Un archivo por tema (acciones, regalos, gente…).
 
+# La historia del día (src/js/42-historia-del-dia.js). Las historias escritas a mano, con sus frases, están en
+# src/datos/historias.json; aquí, lo que se dice cuando una escena de la historia se juega sin la IA y sin frases.
+
+=== historia_sin_frases ===
+# una escena de la historia que se juega sin IA, sin frases escritas y sin nadie que tenga las suyas: casi siempre Ana
+# (el código dice quién: el primero de los presentes, o Ana)
+- ¡Qué día este! Parece sacado de un libro.
+
 </script>
 <script type="text/plain" id="comentarios">
 # Los comentarios: escenas de una sola línea (lo que alguien dice al pasar, al mirar algo, al hacer algo). Son escenas
@@ -9144,63 +9152,786 @@ function validStory(o, h0 = Math.max(8, Math.ceil(hourNow() + .5))){
   return { v: 2, day: today(), titulo: String(o.titulo || 'Un día en Avonlea').slice(0, 80), inspiracion: String(o.inspiracion || '').slice(0, 120), resumen: String(o.resumen || '').slice(0, 300), escenas: esc, ev: {}, hechos: [], ramas: [], gen: false, fin: false };
 }
 const runEffects = (e, when) => { for (const f of e.efectos || []) if (f.cuando === when) STORY_EFFECTS[f.tipo].run(f); };
-// a few stories written by hand, for when there is no AI (or it does not answer)
-const STORIES = [
-  { titulo: 'La vaca del señor Harrison', inspiracion: 'Ana de Avonlea, capítulo 2: vender con prisa y arrepentirse con calma', resumen: 'Con Marilla y Matthew en Charlottetown, Ana encuentra una vaca jersey en la avena del Sr. Harrison y, furiosa, se la vende al Sr. Shearer... pero Dolly estaba en el corral. Termina pidiendo disculpas, con algo cocinado por ella y los veinte dólares.', escenas: [
-    { id: 'despedida', hora: 8, lugar: 'gg', personajes: ['marilla', 'matthew'], que_pasa: 'Marilla y Matthew salen a Charlottetown y no vuelven hasta la noche; Marilla le deja a Ana la casa a su cargo y le advierte, muy seria, que Dolly no vuelva a meterse en la avena del Sr. Harrison, que ya vino a quejarse dos veces.', pista: 'Marilla y Matthew se van al pueblo: despídete en la cocina', encargo: NO_TASK, fin: 'llega_ana', evento: '',
-      efectos: [{ tipo: 'ausente', quien: ['marilla', 'matthew'], hasta: 19, cuando: 'despues' }, { tipo: 'ausente', quien: ['harrison'], hasta: 15, cuando: 'antes' }],
-      frases: [{ quien: 'marilla', texto: 'La casa queda en tus manos, Ana. Y por lo que más quieras: que Dolly no vuelva a meterse en la avena del señor Harrison.' }, { quien: 'ana', texto: '¡Marilla, puedes confiar en mí como en una roca! Bueno... como en una roca un poquito soñadora.' }, { quien: 'matthew', texto: 'Bueno, pues... yo confío, ya lo creo.' }] },
-    { id: 'carta', hora: 9, lugar: 'huerta', personajes: ['diana'], que_pasa: 'Diana viene a ver a Ana a la huerta; Ana le cuenta, indignadísima, la carta del Sr. Harrison, que amenaza con "tomar medidas" si la vaca vuelve a su avena, y le habla de Ginger, el loro que dice cosas.', pista: 'Diana viene a verte a la huerta', encargo: NO_TASK, fin: 'llega_ana', evento: '', efectos: [],
-      frases: [{ quien: 'ana', texto: 'El señor Harrison me escribió una carta, Diana. ¡Una carta! Dice que si mi vaca vuelve a pisar su avena, "tomará medidas".' }] },
-    { id: 'vaca_avena', clave: true, hora: 11, lugar: 'avena_porton', personajes: ['diana'], que_pasa: 'Hay una vaca jersey en plena avena del Sr. Harrison, comiendo feliz. Ana está segura de que es Dolly; Diana la ayuda a perseguirla, entre gritos y risas, mientras la vaca se escapa una y otra vez.', pista: '¡Hay una vaca en la avena del Sr. Harrison!', encargo: NO_TASK, fin: 'evento', evento: 'vaca_agarrada',
-      efectos: [{ tipo: 'vaca_suelta', animal: 'jersey', lugar: 'avena', cuando: 'antes' }],
-      frases: [{ quien: 'ana', texto: '¡Dolly! ¡Traidora! ¡Después de todo lo que hemos hablado!' }] },
-    { id: 'shearer', requiere: ['vaca_agarrada'], clave: true, contra: ['venta_rechazada', 'vaca_en_potrero'], hora: 12, lugar: 'avena_porton', personajes: ['shearer'], que_pasa: 'El Sr. Shearer, que pasa por el camino en su carreta comprando ganado, ve a Ana con la vaca de la cuerda, toda despeinada y furiosa, y le ofrece veinte dólares por ella.', pista: 'Por el camino viene alguien con una carreta', encargo: NO_TASK, fin: 'evento', evento: 'vaca_vendida', efectos: [],
-      frases: [{ quien: 'shearer', texto: 'Buena vaca esa. Ando comprando ganado: le doy veinte dólares por ella, señorita.' }] },
-    { id: 'dolly', requiere: ['vaca_vendida'], margen: 4, hora: 13, lugar: 'corral_porton', personajes: ['diana'], que_pasa: 'De vuelta en Tejas Verdes, orgullosa de su sentido práctico, Ana descubre a Dolly masticando tan tranquila en el corral: la vaca que vendió era la del Sr. Harrison. Desesperación total.', pista: 'Vuelve al corral de Tejas Verdes', encargo: NO_TASK, fin: 'llega_ana', evento: '', efectos: [],
-      frases: [{ quien: 'ana', texto: '...Diana. Dime que esa vaca es un fantasma del Bosque Encantado.' }, { quien: 'diana', texto: 'Ana... es Dolly.' }, { quien: 'ana', texto: '¡Vendí la vaca del señor Harrison! ¡Oh, Diana, estoy en un abismo de desesperación!' }] },
-    { id: 'cocinar', requiere: ['vaca_vendida'], hora: 14, lugar: 'gg', personajes: [], que_pasa: 'Sola en la cocina, Ana decide que una disculpa como corresponde necesita algo cocinado por ella (y revisa tres veces que no sea linimento).', pista: 'Cocina algo para pedir disculpas', encargo: NO_TASK, fin: 'evento', evento: 'cocinado', efectos: [],
-      frases: [{ quien: 'ana', texto: 'Una disculpa sin algo cocinado es como un poema sin rima. Y esta vez reviso que sea vainilla... ¡no linimento!' }] },
-    { id: 'confesion', requiere: ['vaca_vendida'], clave: true, hora: 16, lugar: 'hh', personajes: ['harrison'], que_pasa: 'Ana va a casa del Sr. Harrison a confesar: le vendió su vaca. Ginger chilla; Ana hace una disculpa grandiosa; el Sr. Harrison gruñe, pero se le escapa la risa, acepta lo que Ana le trae y admite que su cerca era un desastre. Terminan casi amigos.', pista: 'Ve a confesarle todo al Sr. Harrison', encargo: NO_TASK, fin: 'evento', evento: 'regalo:harrison', efectos: [],
-      frases: [{ quien: 'ginger', texto: '¡Pelirroja! ¡Pelirroja! ¡Cuidado con la pelirroja!' }, { quien: 'ana', texto: 'Señor Harrison, vengo a confesar un crimen: vendí su vaca. No por maldad, sino por un exceso de indignación justa, que es mucho peor.' }, { quien: 'harrison', texto: 'Vaya, vaya... siéntate, muchacha. La verdad, la cerca de mi avena es un desastre.' }] },
-    { id: 'vuelta', requiere: ['vaca_vendida'], hora: 19, lugar: 'gg', personajes: ['marilla', 'matthew', 'lynde'], que_pasa: 'Vuelven Marilla y Matthew; Ana lo cuenta todo de un tirón. Marilla, con su humor seco; Matthew, de su lado; y la Sra. Lynde llega con la noticia que ya corre por el pueblo.', pista: 'Marilla y Matthew vuelven a casa', encargo: NO_TASK, fin: 'llega_ana', evento: '', efectos: [],
-      frases: [{ quien: 'marilla', texto: 'Ana Shirley, ¿alguna vez pasará un día sin que te metas en un lío?' }, { quien: 'matthew', texto: 'Bueno, pues... era una vaca muy parecida. Ya lo creo.' }, { quien: 'lynde', texto: 'Me contaron en el pueblo que alguien vendió una vaca... ¡que no era suya!' }] },
-    { id: 'noche', hora: 21, lugar: 'ga', personajes: [], que_pasa: 'En su cuarto, frente a la ventana y el cerezo Reina de las Nieves, Ana piensa en el día.', pista: 'Sube a tu cuarto', encargo: NO_TASK, fin: 'llega_ana', evento: '', efectos: [],
-      frases: [{ quien: 'ana', texto: 'Marilla dice que mañana es un día nuevo, todavía sin ningún error. Voy a hacer lo posible por dejarlo así... por lo menos hasta el desayuno.' }] }],
-    // the other ways the day can go (when there is no AI to write them)
-    ramas: [
-      { desde: 'shearer', titulo: 'Ana no vende la vaca', resumen: 'Ana estuvo a punto de vender la vaca del Sr. Harrison, pero no lo hizo; al final todo queda en un susto, una cerca por arreglar y una Marilla sorprendida.', escenas: [
-        { id: 'alivio', hora: 13, lugar: 'corral_porton', personajes: ['diana'], que_pasa: 'De vuelta en Tejas Verdes, Ana encuentra a Dolly masticando en el corral: la vaca de la avena era la del Sr. Harrison. ¡Y ella casi la vende! Alivio, risas nerviosas y un escalofrío.', pista: 'Vuelve al corral de Tejas Verdes', encargo: NO_TASK, fin: 'llega_ana', evento: '', efectos: [],
-          frases: [{ quien: 'ana', texto: '¡Diana! Dolly está en el corral... ¡y yo casi vendo la vaca del señor Harrison! Mi ángel de la guarda me tiró de la trenza justo a tiempo.' }, { quien: 'diana', texto: '¡Ana! ¿Te imaginas si se la hubieras vendido?' }] },
-        { id: 'devolver', hora: 16, lugar: 'hh', personajes: ['harrison'], que_pasa: 'Ana va a contarle al Sr. Harrison que su vaca anduvo en la avena (por su propia cerca rota). Ginger chilla; el Sr. Harrison gruñe, pero tiene que admitir que la cerca es un desastre, y le cae en gracia esa muchacha que habla tanto.', pista: 'Ve a contarle al Sr. Harrison lo de su vaca', encargo: NO_TASK, fin: 'llega_ana', evento: '', efectos: [],
-          frases: [{ quien: 'ginger', texto: '¡Pelirroja! ¡Pelirroja!' }, { quien: 'harrison', texto: 'Hmpf. ¿Así que era mi vaca la de la avena? Bueno... la cerca está hecha un desastre, eso lo admito.' }] },
-        { id: 'vuelta', hora: 19, lugar: 'gg', personajes: ['marilla', 'matthew'], que_pasa: 'Vuelven Marilla y Matthew; Ana les cuenta que casi vende la vaca del Sr. Harrison, pero que esta vez lo pensó dos veces. Marilla, sorprendida, la elogia a su manera; Matthew, orgullosísimo.', pista: 'Marilla y Matthew vuelven a casa', encargo: NO_TASK, fin: 'llega_ana', evento: '', efectos: [],
-          frases: [{ quien: 'marilla', texto: 'Vaya, Ana. Por una vez pensaste antes de actuar. Habrá que marcar el día en el calendario.' }, { quien: 'matthew', texto: 'Bueno, pues... yo sabía que lo harías bien. Ya lo creo.' }] },
-        { id: 'noche', hora: 21, lugar: 'ga', personajes: [], que_pasa: 'En su cuarto, Ana piensa en el error que estuvo a punto de cometer.', pista: 'Sube a tu cuarto', encargo: NO_TASK, fin: 'llega_ana', evento: '', efectos: [],
-          frases: [{ quien: 'ana', texto: 'Hoy casi cometo el error más grande de mi vida... y no lo cometí. Es una sensación rarísima, como estrenar zapatos.' }] }] },
-      { desde: 'vaca_avena', titulo: 'La vaca se queda en la avena', resumen: 'La vaca siguió en la avena, y el Sr. Harrison vino furioso a reclamar por una vaca que resultó ser suya.', escenas: [
-        { id: 'reclamo', hora: 16, lugar: 'corral_porton', personajes: ['harrison'], que_pasa: 'El Sr. Harrison, de vuelta del pueblo, encuentra una vaca en su avena y llega furioso a Tejas Verdes a reclamar... pero en el corral está Dolly, tan tranquila: la vaca de la avena es la suya. Entre el enojo y la vergüenza, termina riéndose de sí mismo.', pista: 'Alguien viene muy enojado a Tejas Verdes', encargo: NO_TASK, fin: 'llega_ana', evento: '', efectos: [],
-          frases: [{ quien: 'harrison', texto: '¡Muchacha! ¡Tu vaca está otra vez en mi avena, y esta vez tomo medidas!' }, { quien: 'ana', texto: 'Señor Harrison, con todo respeto... Dolly está aquí, en el corral. Esa vaca es suya.' }] },
-        { id: 'vuelta', hora: 19, lugar: 'gg', personajes: ['marilla', 'matthew'], que_pasa: 'Vuelven Marilla y Matthew; Ana les cuenta que el Sr. Harrison vino a reclamar por una vaca que era de él mismo.', pista: 'Marilla y Matthew vuelven a casa', encargo: NO_TASK, fin: 'llega_ana', evento: '', efectos: [],
-          frases: [{ quien: 'marilla', texto: 'Ese hombre debería arreglar su cerca antes de andar escribiendo cartas.' }] },
-        { id: 'noche', hora: 21, lugar: 'ga', personajes: [], que_pasa: 'En su cuarto, Ana se ríe sola del día.', pista: 'Sube a tu cuarto', encargo: NO_TASK, fin: 'llega_ana', evento: '', efectos: [],
-          frases: [{ quien: 'ana', texto: 'Hoy el lío fue de otro, para variar. Es casi decepcionante.' }] }] }] },
-  { titulo: 'El cordial de frambuesa', inspiracion: 'el capítulo 16 del libro: el té con Diana', resumen: 'Diana invita a Ana a tomar el té, y Marilla, que no olvida lo del vino de grosellas, manda un recado de paz a la Sra. Barry.', escenas: [
-    { hora: 10, lugar: 'os', personajes: ['diana', 'barry'], que_pasa: 'Diana invita a Ana a tomar el té en la salita; la Sra. Barry les deja el cordial de frambuesa, esta vez bien etiquetado, y las mira con cierta cautela.', pista: 'Diana te invita a tomar el té en su casa', encargo: NO_TASK, fin: 'llega_ana' },
-    { hora: 13, lugar: 'gg', personajes: ['marilla'], que_pasa: 'Marilla, que se acuerda del lío del vino de grosellas, le pide a Ana que le lleve un recado de paz a la Sra. Barry.', pista: 'Marilla quiere hablar contigo en la cocina', encargo: { ...NO_TASK, tipo: 'recado', para: 'barry', recado: 'Marilla le manda saludos y dice que esta vez el cordial es cordial de verdad' }, fin: 'encargo_cumplido' },
-    { hora: 17, lugar: 'lago', personajes: ['diana'], que_pasa: 'Ana y Diana se ríen de aquella tarde del vino de grosellas y renuevan su juramento de amistad junto al lago.', pista: 'Diana te espera junto al Lago de las Aguas Brillantes', encargo: NO_TASK, fin: 'llega_ana' }] },
-  { titulo: 'El Bosque Encantado', inspiracion: 'el capítulo 20 del libro: una imaginación demasiado buena', resumen: 'Ana y Diana pueblan el Bosque Encantado de fantasmas, y Marilla decide curarle a Ana el miedo a su propia imaginación.', escenas: [
-    { hora: 10, lugar: 'bosque_encantado', personajes: ['diana'], que_pasa: 'Diana y Ana inventan fantasmas para el Bosque Encantado y terminan asustándose de su propia imaginación.', pista: 'Diana te espera a la entrada del Bosque Encantado', encargo: NO_TASK, fin: 'llega_ana' },
-    { hora: 14, lugar: 'gg', personajes: ['marilla'], que_pasa: 'Marilla, que se enteró del susto, decide curarle a Ana la imaginación: tendrá que ir sola al Bosque Encantado.', pista: 'Marilla te llama a la cocina', encargo: { ...NO_TASK, tipo: 'ir', lugar: 'bosque_encantado' }, fin: 'encargo_cumplido' },
-    { hora: 18, lugar: 'ga', personajes: [], que_pasa: 'De vuelta en su cuarto, Ana promete, muy solemne, imaginar con más cuidado... o por lo menos con más luz.', pista: 'Al atardecer, sube a tu cuarto', encargo: NO_TASK, fin: 'llega_ana' }] },
-  { titulo: 'La visita de la Sra. Lynde', inspiracion: 'los capítulos 9 y 10 del libro: la Sra. Lynde conoce a Ana', resumen: 'La Sra. Lynde viene a ver de cerca a la niña de Tejas Verdes, y Ana termina pidiéndole disculpas con todo el dramatismo del mundo.', escenas: [
-    { hora: 11, lugar: 'gg', personajes: ['marilla', 'lynde'], que_pasa: 'La Sra. Lynde vino a ver de cerca a "la huérfana" y opina de todo sin pedir permiso; Marilla la escucha con paciencia.', pista: 'Hay visita en la cocina de Tejas Verdes', encargo: NO_TASK, fin: 'llega_ana' },
-    { hora: 14, lugar: 'rl', personajes: ['lynde'], que_pasa: 'Ana va a casa de la Sra. Lynde a pedirle disculpas por haberle gritado aquella vez, de rodillas y con palabras grandiosas; la Sra. Lynde se ablanda.', pista: 'Ve a la casa de la Sra. Lynde a pedir disculpas', encargo: NO_TASK, fin: 'llega_ana' },
-    { hora: 17, lugar: 'granero', personajes: ['matthew'], que_pasa: 'Matthew, tímido, le dice a Ana que lo hizo muy bien; bueno, pues... que está orgulloso de ella.', pista: 'Matthew te busca cerca del granero', encargo: NO_TASK, fin: 'llega_ana' }] },
-  { titulo: 'Un té para Matthew', inspiracion: 'el cariño de Matthew y Ana, a lo largo del libro', resumen: 'Matthew anda cansado con el trabajo de la granja, y Ana decide cuidarlo con un té preparado por ella.', escenas: [
-    { hora: 9, lugar: 'granero', personajes: ['matthew'], que_pasa: 'Matthew trabaja en el granero y se le nota cansado; Ana se propone prepararle un té como una verdadera dama.', pista: 'Matthew trabaja en el granero', encargo: { ...NO_TASK, tipo: 'cocinar', item: 'te' }, fin: 'encargo_cumplido' },
-    { hora: 13, lugar: 'gg', personajes: ['marilla', 'matthew'], que_pasa: 'A la hora de comer, Matthew le cuenta a Marilla, a su manera, lo bien que lo cuida Ana; Marilla disimula una sonrisa.', pista: 'La comida en Tejas Verdes', encargo: NO_TASK, fin: 'llega_ana' }] },
-];
+// a few stories written by hand, for when there is no AI (or it does not answer): src/datos/historias.json, put here by
+// tools/build.js (each one: titulo, inspiracion, resumen, escenas, and maybe ramas, the other ways the day can go)
+const STORIES = [[
+  {
+    "titulo": "La vaca del señor Harrison",
+    "inspiracion": "Ana de Avonlea, capítulo 2: vender con prisa y arrepentirse con calma",
+    "resumen": "Con Marilla y Matthew en Charlottetown, Ana encuentra una vaca jersey en la avena del Sr. Harrison y, furiosa, se la vende al Sr. Shearer... pero Dolly estaba en el corral. Termina pidiendo disculpas, con algo cocinado por ella y los veinte dólares.",
+    "escenas": [
+      {
+        "id": "despedida",
+        "hora": 8,
+        "lugar": "gg",
+        "personajes": [
+          "marilla",
+          "matthew"
+        ],
+        "que_pasa": "Marilla y Matthew salen a Charlottetown y no vuelven hasta la noche; Marilla le deja a Ana la casa a su cargo y le advierte, muy seria, que Dolly no vuelva a meterse en la avena del Sr. Harrison, que ya vino a quejarse dos veces.",
+        "pista": "Marilla y Matthew se van al pueblo: despídete en la cocina",
+        "encargo": {
+          "tipo": "ninguno",
+          "item": "",
+          "cantidad": 0,
+          "para": "",
+          "lugar": "",
+          "recado": ""
+        },
+        "fin": "llega_ana",
+        "evento": "",
+        "efectos": [
+          {
+            "tipo": "ausente",
+            "quien": [
+              "marilla",
+              "matthew"
+            ],
+            "hasta": 19,
+            "cuando": "despues"
+          },
+          {
+            "tipo": "ausente",
+            "quien": [
+              "harrison"
+            ],
+            "hasta": 15,
+            "cuando": "antes"
+          }
+        ],
+        "frases": [
+          {
+            "quien": "marilla",
+            "texto": "La casa queda en tus manos, Ana. Y por lo que más quieras: que Dolly no vuelva a meterse en la avena del señor Harrison."
+          },
+          {
+            "quien": "ana",
+            "texto": "¡Marilla, puedes confiar en mí como en una roca! Bueno... como en una roca un poquito soñadora."
+          },
+          {
+            "quien": "matthew",
+            "texto": "Bueno, pues... yo confío, ya lo creo."
+          }
+        ]
+      },
+      {
+        "id": "carta",
+        "hora": 9,
+        "lugar": "huerta",
+        "personajes": [
+          "diana"
+        ],
+        "que_pasa": "Diana viene a ver a Ana a la huerta; Ana le cuenta, indignadísima, la carta del Sr. Harrison, que amenaza con \"tomar medidas\" si la vaca vuelve a su avena, y le habla de Ginger, el loro que dice cosas.",
+        "pista": "Diana viene a verte a la huerta",
+        "encargo": {
+          "tipo": "ninguno",
+          "item": "",
+          "cantidad": 0,
+          "para": "",
+          "lugar": "",
+          "recado": ""
+        },
+        "fin": "llega_ana",
+        "evento": "",
+        "efectos": [],
+        "frases": [
+          {
+            "quien": "ana",
+            "texto": "El señor Harrison me escribió una carta, Diana. ¡Una carta! Dice que si mi vaca vuelve a pisar su avena, \"tomará medidas\"."
+          }
+        ]
+      },
+      {
+        "id": "vaca_avena",
+        "clave": true,
+        "hora": 11,
+        "lugar": "avena_porton",
+        "personajes": [
+          "diana"
+        ],
+        "que_pasa": "Hay una vaca jersey en plena avena del Sr. Harrison, comiendo feliz. Ana está segura de que es Dolly; Diana la ayuda a perseguirla, entre gritos y risas, mientras la vaca se escapa una y otra vez.",
+        "pista": "¡Hay una vaca en la avena del Sr. Harrison!",
+        "encargo": {
+          "tipo": "ninguno",
+          "item": "",
+          "cantidad": 0,
+          "para": "",
+          "lugar": "",
+          "recado": ""
+        },
+        "fin": "evento",
+        "evento": "vaca_agarrada",
+        "efectos": [
+          {
+            "tipo": "vaca_suelta",
+            "animal": "jersey",
+            "lugar": "avena",
+            "cuando": "antes"
+          }
+        ],
+        "frases": [
+          {
+            "quien": "ana",
+            "texto": "¡Dolly! ¡Traidora! ¡Después de todo lo que hemos hablado!"
+          }
+        ]
+      },
+      {
+        "id": "shearer",
+        "requiere": [
+          "vaca_agarrada"
+        ],
+        "clave": true,
+        "contra": [
+          "venta_rechazada",
+          "vaca_en_potrero"
+        ],
+        "hora": 12,
+        "lugar": "avena_porton",
+        "personajes": [
+          "shearer"
+        ],
+        "que_pasa": "El Sr. Shearer, que pasa por el camino en su carreta comprando ganado, ve a Ana con la vaca de la cuerda, toda despeinada y furiosa, y le ofrece veinte dólares por ella.",
+        "pista": "Por el camino viene alguien con una carreta",
+        "encargo": {
+          "tipo": "ninguno",
+          "item": "",
+          "cantidad": 0,
+          "para": "",
+          "lugar": "",
+          "recado": ""
+        },
+        "fin": "evento",
+        "evento": "vaca_vendida",
+        "efectos": [],
+        "frases": [
+          {
+            "quien": "shearer",
+            "texto": "Buena vaca esa. Ando comprando ganado: le doy veinte dólares por ella, señorita."
+          }
+        ]
+      },
+      {
+        "id": "dolly",
+        "requiere": [
+          "vaca_vendida"
+        ],
+        "margen": 4,
+        "hora": 13,
+        "lugar": "corral_porton",
+        "personajes": [
+          "diana"
+        ],
+        "que_pasa": "De vuelta en Tejas Verdes, orgullosa de su sentido práctico, Ana descubre a Dolly masticando tan tranquila en el corral: la vaca que vendió era la del Sr. Harrison. Desesperación total.",
+        "pista": "Vuelve al corral de Tejas Verdes",
+        "encargo": {
+          "tipo": "ninguno",
+          "item": "",
+          "cantidad": 0,
+          "para": "",
+          "lugar": "",
+          "recado": ""
+        },
+        "fin": "llega_ana",
+        "evento": "",
+        "efectos": [],
+        "frases": [
+          {
+            "quien": "ana",
+            "texto": "...Diana. Dime que esa vaca es un fantasma del Bosque Encantado."
+          },
+          {
+            "quien": "diana",
+            "texto": "Ana... es Dolly."
+          },
+          {
+            "quien": "ana",
+            "texto": "¡Vendí la vaca del señor Harrison! ¡Oh, Diana, estoy en un abismo de desesperación!"
+          }
+        ]
+      },
+      {
+        "id": "cocinar",
+        "requiere": [
+          "vaca_vendida"
+        ],
+        "hora": 14,
+        "lugar": "gg",
+        "personajes": [],
+        "que_pasa": "Sola en la cocina, Ana decide que una disculpa como corresponde necesita algo cocinado por ella (y revisa tres veces que no sea linimento).",
+        "pista": "Cocina algo para pedir disculpas",
+        "encargo": {
+          "tipo": "ninguno",
+          "item": "",
+          "cantidad": 0,
+          "para": "",
+          "lugar": "",
+          "recado": ""
+        },
+        "fin": "evento",
+        "evento": "cocinado",
+        "efectos": [],
+        "frases": [
+          {
+            "quien": "ana",
+            "texto": "Una disculpa sin algo cocinado es como un poema sin rima. Y esta vez reviso que sea vainilla... ¡no linimento!"
+          }
+        ]
+      },
+      {
+        "id": "confesion",
+        "requiere": [
+          "vaca_vendida"
+        ],
+        "clave": true,
+        "hora": 16,
+        "lugar": "hh",
+        "personajes": [
+          "harrison"
+        ],
+        "que_pasa": "Ana va a casa del Sr. Harrison a confesar: le vendió su vaca. Ginger chilla; Ana hace una disculpa grandiosa; el Sr. Harrison gruñe, pero se le escapa la risa, acepta lo que Ana le trae y admite que su cerca era un desastre. Terminan casi amigos.",
+        "pista": "Ve a confesarle todo al Sr. Harrison",
+        "encargo": {
+          "tipo": "ninguno",
+          "item": "",
+          "cantidad": 0,
+          "para": "",
+          "lugar": "",
+          "recado": ""
+        },
+        "fin": "evento",
+        "evento": "regalo:harrison",
+        "efectos": [],
+        "frases": [
+          {
+            "quien": "ginger",
+            "texto": "¡Pelirroja! ¡Pelirroja! ¡Cuidado con la pelirroja!"
+          },
+          {
+            "quien": "ana",
+            "texto": "Señor Harrison, vengo a confesar un crimen: vendí su vaca. No por maldad, sino por un exceso de indignación justa, que es mucho peor."
+          },
+          {
+            "quien": "harrison",
+            "texto": "Vaya, vaya... siéntate, muchacha. La verdad, la cerca de mi avena es un desastre."
+          }
+        ]
+      },
+      {
+        "id": "vuelta",
+        "requiere": [
+          "vaca_vendida"
+        ],
+        "hora": 19,
+        "lugar": "gg",
+        "personajes": [
+          "marilla",
+          "matthew",
+          "lynde"
+        ],
+        "que_pasa": "Vuelven Marilla y Matthew; Ana lo cuenta todo de un tirón. Marilla, con su humor seco; Matthew, de su lado; y la Sra. Lynde llega con la noticia que ya corre por el pueblo.",
+        "pista": "Marilla y Matthew vuelven a casa",
+        "encargo": {
+          "tipo": "ninguno",
+          "item": "",
+          "cantidad": 0,
+          "para": "",
+          "lugar": "",
+          "recado": ""
+        },
+        "fin": "llega_ana",
+        "evento": "",
+        "efectos": [],
+        "frases": [
+          {
+            "quien": "marilla",
+            "texto": "Ana Shirley, ¿alguna vez pasará un día sin que te metas en un lío?"
+          },
+          {
+            "quien": "matthew",
+            "texto": "Bueno, pues... era una vaca muy parecida. Ya lo creo."
+          },
+          {
+            "quien": "lynde",
+            "texto": "Me contaron en el pueblo que alguien vendió una vaca... ¡que no era suya!"
+          }
+        ]
+      },
+      {
+        "id": "noche",
+        "hora": 21,
+        "lugar": "ga",
+        "personajes": [],
+        "que_pasa": "En su cuarto, frente a la ventana y el cerezo Reina de las Nieves, Ana piensa en el día.",
+        "pista": "Sube a tu cuarto",
+        "encargo": {
+          "tipo": "ninguno",
+          "item": "",
+          "cantidad": 0,
+          "para": "",
+          "lugar": "",
+          "recado": ""
+        },
+        "fin": "llega_ana",
+        "evento": "",
+        "efectos": [],
+        "frases": [
+          {
+            "quien": "ana",
+            "texto": "Marilla dice que mañana es un día nuevo, todavía sin ningún error. Voy a hacer lo posible por dejarlo así... por lo menos hasta el desayuno."
+          }
+        ]
+      }
+    ],
+    "ramas": [
+      {
+        "desde": "shearer",
+        "titulo": "Ana no vende la vaca",
+        "resumen": "Ana estuvo a punto de vender la vaca del Sr. Harrison, pero no lo hizo; al final todo queda en un susto, una cerca por arreglar y una Marilla sorprendida.",
+        "escenas": [
+          {
+            "id": "alivio",
+            "hora": 13,
+            "lugar": "corral_porton",
+            "personajes": [
+              "diana"
+            ],
+            "que_pasa": "De vuelta en Tejas Verdes, Ana encuentra a Dolly masticando en el corral: la vaca de la avena era la del Sr. Harrison. ¡Y ella casi la vende! Alivio, risas nerviosas y un escalofrío.",
+            "pista": "Vuelve al corral de Tejas Verdes",
+            "encargo": {
+              "tipo": "ninguno",
+              "item": "",
+              "cantidad": 0,
+              "para": "",
+              "lugar": "",
+              "recado": ""
+            },
+            "fin": "llega_ana",
+            "evento": "",
+            "efectos": [],
+            "frases": [
+              {
+                "quien": "ana",
+                "texto": "¡Diana! Dolly está en el corral... ¡y yo casi vendo la vaca del señor Harrison! Mi ángel de la guarda me tiró de la trenza justo a tiempo."
+              },
+              {
+                "quien": "diana",
+                "texto": "¡Ana! ¿Te imaginas si se la hubieras vendido?"
+              }
+            ]
+          },
+          {
+            "id": "devolver",
+            "hora": 16,
+            "lugar": "hh",
+            "personajes": [
+              "harrison"
+            ],
+            "que_pasa": "Ana va a contarle al Sr. Harrison que su vaca anduvo en la avena (por su propia cerca rota). Ginger chilla; el Sr. Harrison gruñe, pero tiene que admitir que la cerca es un desastre, y le cae en gracia esa muchacha que habla tanto.",
+            "pista": "Ve a contarle al Sr. Harrison lo de su vaca",
+            "encargo": {
+              "tipo": "ninguno",
+              "item": "",
+              "cantidad": 0,
+              "para": "",
+              "lugar": "",
+              "recado": ""
+            },
+            "fin": "llega_ana",
+            "evento": "",
+            "efectos": [],
+            "frases": [
+              {
+                "quien": "ginger",
+                "texto": "¡Pelirroja! ¡Pelirroja!"
+              },
+              {
+                "quien": "harrison",
+                "texto": "Hmpf. ¿Así que era mi vaca la de la avena? Bueno... la cerca está hecha un desastre, eso lo admito."
+              }
+            ]
+          },
+          {
+            "id": "vuelta",
+            "hora": 19,
+            "lugar": "gg",
+            "personajes": [
+              "marilla",
+              "matthew"
+            ],
+            "que_pasa": "Vuelven Marilla y Matthew; Ana les cuenta que casi vende la vaca del Sr. Harrison, pero que esta vez lo pensó dos veces. Marilla, sorprendida, la elogia a su manera; Matthew, orgullosísimo.",
+            "pista": "Marilla y Matthew vuelven a casa",
+            "encargo": {
+              "tipo": "ninguno",
+              "item": "",
+              "cantidad": 0,
+              "para": "",
+              "lugar": "",
+              "recado": ""
+            },
+            "fin": "llega_ana",
+            "evento": "",
+            "efectos": [],
+            "frases": [
+              {
+                "quien": "marilla",
+                "texto": "Vaya, Ana. Por una vez pensaste antes de actuar. Habrá que marcar el día en el calendario."
+              },
+              {
+                "quien": "matthew",
+                "texto": "Bueno, pues... yo sabía que lo harías bien. Ya lo creo."
+              }
+            ]
+          },
+          {
+            "id": "noche",
+            "hora": 21,
+            "lugar": "ga",
+            "personajes": [],
+            "que_pasa": "En su cuarto, Ana piensa en el error que estuvo a punto de cometer.",
+            "pista": "Sube a tu cuarto",
+            "encargo": {
+              "tipo": "ninguno",
+              "item": "",
+              "cantidad": 0,
+              "para": "",
+              "lugar": "",
+              "recado": ""
+            },
+            "fin": "llega_ana",
+            "evento": "",
+            "efectos": [],
+            "frases": [
+              {
+                "quien": "ana",
+                "texto": "Hoy casi cometo el error más grande de mi vida... y no lo cometí. Es una sensación rarísima, como estrenar zapatos."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "desde": "vaca_avena",
+        "titulo": "La vaca se queda en la avena",
+        "resumen": "La vaca siguió en la avena, y el Sr. Harrison vino furioso a reclamar por una vaca que resultó ser suya.",
+        "escenas": [
+          {
+            "id": "reclamo",
+            "hora": 16,
+            "lugar": "corral_porton",
+            "personajes": [
+              "harrison"
+            ],
+            "que_pasa": "El Sr. Harrison, de vuelta del pueblo, encuentra una vaca en su avena y llega furioso a Tejas Verdes a reclamar... pero en el corral está Dolly, tan tranquila: la vaca de la avena es la suya. Entre el enojo y la vergüenza, termina riéndose de sí mismo.",
+            "pista": "Alguien viene muy enojado a Tejas Verdes",
+            "encargo": {
+              "tipo": "ninguno",
+              "item": "",
+              "cantidad": 0,
+              "para": "",
+              "lugar": "",
+              "recado": ""
+            },
+            "fin": "llega_ana",
+            "evento": "",
+            "efectos": [],
+            "frases": [
+              {
+                "quien": "harrison",
+                "texto": "¡Muchacha! ¡Tu vaca está otra vez en mi avena, y esta vez tomo medidas!"
+              },
+              {
+                "quien": "ana",
+                "texto": "Señor Harrison, con todo respeto... Dolly está aquí, en el corral. Esa vaca es suya."
+              }
+            ]
+          },
+          {
+            "id": "vuelta",
+            "hora": 19,
+            "lugar": "gg",
+            "personajes": [
+              "marilla",
+              "matthew"
+            ],
+            "que_pasa": "Vuelven Marilla y Matthew; Ana les cuenta que el Sr. Harrison vino a reclamar por una vaca que era de él mismo.",
+            "pista": "Marilla y Matthew vuelven a casa",
+            "encargo": {
+              "tipo": "ninguno",
+              "item": "",
+              "cantidad": 0,
+              "para": "",
+              "lugar": "",
+              "recado": ""
+            },
+            "fin": "llega_ana",
+            "evento": "",
+            "efectos": [],
+            "frases": [
+              {
+                "quien": "marilla",
+                "texto": "Ese hombre debería arreglar su cerca antes de andar escribiendo cartas."
+              }
+            ]
+          },
+          {
+            "id": "noche",
+            "hora": 21,
+            "lugar": "ga",
+            "personajes": [],
+            "que_pasa": "En su cuarto, Ana se ríe sola del día.",
+            "pista": "Sube a tu cuarto",
+            "encargo": {
+              "tipo": "ninguno",
+              "item": "",
+              "cantidad": 0,
+              "para": "",
+              "lugar": "",
+              "recado": ""
+            },
+            "fin": "llega_ana",
+            "evento": "",
+            "efectos": [],
+            "frases": [
+              {
+                "quien": "ana",
+                "texto": "Hoy el lío fue de otro, para variar. Es casi decepcionante."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "titulo": "El cordial de frambuesa",
+    "inspiracion": "el capítulo 16 del libro: el té con Diana",
+    "resumen": "Diana invita a Ana a tomar el té, y Marilla, que no olvida lo del vino de grosellas, manda un recado de paz a la Sra. Barry.",
+    "escenas": [
+      {
+        "hora": 10,
+        "lugar": "os",
+        "personajes": [
+          "diana",
+          "barry"
+        ],
+        "que_pasa": "Diana invita a Ana a tomar el té en la salita; la Sra. Barry les deja el cordial de frambuesa, esta vez bien etiquetado, y las mira con cierta cautela.",
+        "pista": "Diana te invita a tomar el té en su casa",
+        "encargo": {
+          "tipo": "ninguno",
+          "item": "",
+          "cantidad": 0,
+          "para": "",
+          "lugar": "",
+          "recado": ""
+        },
+        "fin": "llega_ana"
+      },
+      {
+        "hora": 13,
+        "lugar": "gg",
+        "personajes": [
+          "marilla"
+        ],
+        "que_pasa": "Marilla, que se acuerda del lío del vino de grosellas, le pide a Ana que le lleve un recado de paz a la Sra. Barry.",
+        "pista": "Marilla quiere hablar contigo en la cocina",
+        "encargo": {
+          "tipo": "recado",
+          "item": "",
+          "cantidad": 0,
+          "para": "barry",
+          "lugar": "",
+          "recado": "Marilla le manda saludos y dice que esta vez el cordial es cordial de verdad"
+        },
+        "fin": "encargo_cumplido"
+      },
+      {
+        "hora": 17,
+        "lugar": "lago",
+        "personajes": [
+          "diana"
+        ],
+        "que_pasa": "Ana y Diana se ríen de aquella tarde del vino de grosellas y renuevan su juramento de amistad junto al lago.",
+        "pista": "Diana te espera junto al Lago de las Aguas Brillantes",
+        "encargo": {
+          "tipo": "ninguno",
+          "item": "",
+          "cantidad": 0,
+          "para": "",
+          "lugar": "",
+          "recado": ""
+        },
+        "fin": "llega_ana"
+      }
+    ]
+  },
+  {
+    "titulo": "El Bosque Encantado",
+    "inspiracion": "el capítulo 20 del libro: una imaginación demasiado buena",
+    "resumen": "Ana y Diana pueblan el Bosque Encantado de fantasmas, y Marilla decide curarle a Ana el miedo a su propia imaginación.",
+    "escenas": [
+      {
+        "hora": 10,
+        "lugar": "bosque_encantado",
+        "personajes": [
+          "diana"
+        ],
+        "que_pasa": "Diana y Ana inventan fantasmas para el Bosque Encantado y terminan asustándose de su propia imaginación.",
+        "pista": "Diana te espera a la entrada del Bosque Encantado",
+        "encargo": {
+          "tipo": "ninguno",
+          "item": "",
+          "cantidad": 0,
+          "para": "",
+          "lugar": "",
+          "recado": ""
+        },
+        "fin": "llega_ana"
+      },
+      {
+        "hora": 14,
+        "lugar": "gg",
+        "personajes": [
+          "marilla"
+        ],
+        "que_pasa": "Marilla, que se enteró del susto, decide curarle a Ana la imaginación: tendrá que ir sola al Bosque Encantado.",
+        "pista": "Marilla te llama a la cocina",
+        "encargo": {
+          "tipo": "ir",
+          "item": "",
+          "cantidad": 0,
+          "para": "",
+          "lugar": "bosque_encantado",
+          "recado": ""
+        },
+        "fin": "encargo_cumplido"
+      },
+      {
+        "hora": 18,
+        "lugar": "ga",
+        "personajes": [],
+        "que_pasa": "De vuelta en su cuarto, Ana promete, muy solemne, imaginar con más cuidado... o por lo menos con más luz.",
+        "pista": "Al atardecer, sube a tu cuarto",
+        "encargo": {
+          "tipo": "ninguno",
+          "item": "",
+          "cantidad": 0,
+          "para": "",
+          "lugar": "",
+          "recado": ""
+        },
+        "fin": "llega_ana"
+      }
+    ]
+  },
+  {
+    "titulo": "La visita de la Sra. Lynde",
+    "inspiracion": "los capítulos 9 y 10 del libro: la Sra. Lynde conoce a Ana",
+    "resumen": "La Sra. Lynde viene a ver de cerca a la niña de Tejas Verdes, y Ana termina pidiéndole disculpas con todo el dramatismo del mundo.",
+    "escenas": [
+      {
+        "hora": 11,
+        "lugar": "gg",
+        "personajes": [
+          "marilla",
+          "lynde"
+        ],
+        "que_pasa": "La Sra. Lynde vino a ver de cerca a \"la huérfana\" y opina de todo sin pedir permiso; Marilla la escucha con paciencia.",
+        "pista": "Hay visita en la cocina de Tejas Verdes",
+        "encargo": {
+          "tipo": "ninguno",
+          "item": "",
+          "cantidad": 0,
+          "para": "",
+          "lugar": "",
+          "recado": ""
+        },
+        "fin": "llega_ana"
+      },
+      {
+        "hora": 14,
+        "lugar": "rl",
+        "personajes": [
+          "lynde"
+        ],
+        "que_pasa": "Ana va a casa de la Sra. Lynde a pedirle disculpas por haberle gritado aquella vez, de rodillas y con palabras grandiosas; la Sra. Lynde se ablanda.",
+        "pista": "Ve a la casa de la Sra. Lynde a pedir disculpas",
+        "encargo": {
+          "tipo": "ninguno",
+          "item": "",
+          "cantidad": 0,
+          "para": "",
+          "lugar": "",
+          "recado": ""
+        },
+        "fin": "llega_ana"
+      },
+      {
+        "hora": 17,
+        "lugar": "granero",
+        "personajes": [
+          "matthew"
+        ],
+        "que_pasa": "Matthew, tímido, le dice a Ana que lo hizo muy bien; bueno, pues... que está orgulloso de ella.",
+        "pista": "Matthew te busca cerca del granero",
+        "encargo": {
+          "tipo": "ninguno",
+          "item": "",
+          "cantidad": 0,
+          "para": "",
+          "lugar": "",
+          "recado": ""
+        },
+        "fin": "llega_ana"
+      }
+    ]
+  },
+  {
+    "titulo": "Un té para Matthew",
+    "inspiracion": "el cariño de Matthew y Ana, a lo largo del libro",
+    "resumen": "Matthew anda cansado con el trabajo de la granja, y Ana decide cuidarlo con un té preparado por ella.",
+    "escenas": [
+      {
+        "hora": 9,
+        "lugar": "granero",
+        "personajes": [
+          "matthew"
+        ],
+        "que_pasa": "Matthew trabaja en el granero y se le nota cansado; Ana se propone prepararle un té como una verdadera dama.",
+        "pista": "Matthew trabaja en el granero",
+        "encargo": {
+          "tipo": "cocinar",
+          "item": "te",
+          "cantidad": 0,
+          "para": "",
+          "lugar": "",
+          "recado": ""
+        },
+        "fin": "encargo_cumplido"
+      },
+      {
+        "hora": 13,
+        "lugar": "gg",
+        "personajes": [
+          "marilla",
+          "matthew"
+        ],
+        "que_pasa": "A la hora de comer, Matthew le cuenta a Marilla, a su manera, lo bien que lo cuida Ana; Marilla disimula una sonrisa.",
+        "pista": "La comida en Tejas Verdes",
+        "encargo": {
+          "tipo": "ninguno",
+          "item": "",
+          "cantidad": 0,
+          "para": "",
+          "lugar": "",
+          "recado": ""
+        },
+        "fin": "llega_ana"
+      }
+    ]
+  }
+]
+][0] || [];
 function fallbackStory(){
   const ok = STORIES.filter(st => dianaAmiga() || !JSON.stringify(st).includes('"diana"'));   // (with Diana: once Ana knows her)
   const done = game.stories || [], fresh = ok.filter(st => !done.includes(st.titulo)), pool = fresh.length ? fresh : ok.length ? ok : STORIES;
@@ -9363,7 +10094,7 @@ async function storyPlay(e, present){
   const fr = (e.frases || []).filter(f => f.quien === 'ana' || present.includes(f.quien) || talkersHere().includes(f.quien));
   if ((!s || !s.lines.length) && fr.length) s = { parts: present, lines: fr.map(f => ({ q: f.quien, t: f.texto })), out: { encargo: NO_TASK, accion: { tipo: 'ninguna' } }, scene: game.scene, resumen: '' };
   else if (s && fr.length) { const has = f => s.lines.some(l => l.t.toLowerCase().includes(f.texto.toLowerCase().slice(0, 24))); s.lines = [...fr.filter(f => !has(f)).map(f => ({ q: f.quien, t: f.texto })), ...s.lines].slice(0, 12); }
-  if (!s || !s.lines.length) s = { parts: present, lines: [{ q: present[0] || 'ana', t: present.length && LINES[present[0]].length ? pick(LINES[present[0]]) : '¡Qué día este! Parece sacado de un libro.' }], out: { encargo: NO_TASK, accion: { tipo: 'ninguna' } }, scene: game.scene, resumen: '' };
+  if (!s || !s.lines.length) s = { parts: present, lines: [{ q: present[0] || 'ana', t: present.length && LINES[present[0]].length ? pick(LINES[present[0]]) : dicho('historia_sin_frases') }], out: { encargo: NO_TASK, accion: { tipo: 'ninguna' } }, scene: game.scene, resumen: '' };
   if (!s.resumen) s.resumen = `${st.titulo}: ${e.que_pasa}`;
   if (e.encargo && present.length && (!s.out.encargo || s.out.encargo.tipo === 'ninguno')) s.out.encargo = { ...e.encargo };
   if (!aiReady()) notice('📖 ' + e.que_pasa);
