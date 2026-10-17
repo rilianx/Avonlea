@@ -23,7 +23,7 @@ const exe = process.env.PLAYWRIGHT_CHROMIUM || (fs.existsSync('/opt/pw-browsers/
 (async () => {
   const b = await pw.chromium.launch({ executablePath: exe, args: ['--no-sandbox'] });
   const errs = [];
-  const newPage = async () => { const p = await b.newPage({ viewport: { width: 900, height: 640 } }); p.on('pageerror', e => errs.push(e.message)); await p.addInitScript(() => { localStorage.clear(); localStorage.setItem('avonlea-ai-asked', '1'); }); return p; };
+  const newPage = async () => { const p = await b.newPage({ viewport: { width: 900, height: 640 } }); p.on('pageerror', e => errs.push(e.message)); await p.addInitScript(() => { localStorage.clear(); localStorage.setItem('avonlea-oficios', 'diestra'); localStorage.setItem('avonlea-ai-asked', '1'); }); return p; };
   const pg = await newPage();
   const loadOn = async p => { await p.goto('file://' + path.resolve(__dirname, '..', 'index.html')); await p.waitForFunction(() => window.__avonlea); };
   const load = () => loadOn(pg);

@@ -18,6 +18,10 @@
 #   de: de quién es (si no, de quien hace las acciones)      hacia: hacia quién (se pide así: «paciencia:marilla:ana<=1»)
 #   por: quién la hace subir con sus acciones (si no, ana)   inicial: dónde empieza (si no, 0)   rango: mínimo-máximo
 #   visible si: cuándo cuenta (fuera de eso no cambia) y se ve en el cuaderno (condiciones del guion, separadas por comas)
+#   Un oficio (algo que se aprende con la práctica, de a un día: ordeñar, partir leña, cocinar) dice cómo le sale a Ana
+#   según cuántos días lo ha practicado (su nivel):
+#   oficio: la acción (ordeñar, partir_lena, cocinar)        rinde: nivel:cuánto, … («0:1, 3:2, 6:3»: de 3 días, 2)
+#   falla: nivel:probabilidad, … (que le salga mal)            mal: lo que pasa cuando le sale mal (varias, con « | »)
 #   bajo N: lo que significa caer a N (como un hito, pero bajando; con «con», «dice», «ia» igual). El guion la baja o
 #     la sube con «! suma paciencia:marilla:ana -1»; al cruzar un hito o un bajo queda el hecho hito_<id>_<N> o bajo_<id>_<N>.
 # Las líneas que empiezan con # son comentarios.
@@ -55,6 +59,51 @@ hito 80: Marilla le confía la casa: Tejas Verdes también es suya.
   con: marilla
   dice: Ana… no sé qué haríamos sin ti. Esta casa es tan tuya como mía.
   ia: Marilla le dice a Ana, con dificultad porque no es de decir esas cosas, que Tejas Verdes es tan suya como de ella.
+
+# --- los oficios: no basta con hacerlo una vez; se aprende de a un día (por_dia: 1)
+=== mano_leche ===
+titulo: Ordeñar
+oficio: ordeñar
+suma: ordeñar
+por_dia: 1
+rinde: 0:2, 6:3
+falla: 0:0.5, 2:0.3, 4:0.1, 7:0
+mal: La vaca se mueve y patea el balde: se derrama casi toda la leche. | Ana aprieta mal, la vaca se impacienta y se va. Apenas un poco de leche en el fondo del balde. | Ana se pone a imaginar que la vaca es una princesa encantada… y se le olvida ordeñar.
+hito 3: Ya no se le escapa la vaca.
+  con: matthew
+  dice: Bueno, pues… ya le tomaste la mano, ¿eh? La vaca ya no se te escapa.
+hito 7: Ordeña como Matthew.
+  con: matthew
+  dice: Ya lo creo… ordeñas mejor que yo, Ana. No le digas a Marilla.
+
+=== mano_lena ===
+titulo: Partir leña
+oficio: partir_lena
+suma: partir_lena
+por_dia: 1
+rinde: 0:2, 4:3
+falla: 0:0.45, 2:0.2, 4:0.05, 6:0
+mal: El hacha rebota en un nudo del tronco y casi se le cae de las manos. | El hacha queda clavada en el tajo, y le cuesta un mundo sacarla. | Ana le pega de lado al tronco, que sale volando hasta el gallinero.
+hito 2: Ya le pega al tronco.
+  con: matthew
+  dice: Bueno, pues… las piernas así, separadas, y que el hacha caiga sola. Así. Ya vas aprendiendo.
+hito 5: Parte leña como un leñador.
+  con: marilla
+  dice: Leña bien partida, y del tamaño de la estufa. Esto ya es otra cosa, Ana.
+
+=== mano_cocina ===
+titulo: Cocinar
+oficio: cocinar
+suma: cocinar
+por_dia: 1
+falla: 0:0.5, 2:0.3, 4:0.12, 7:0.03
+mal: ¡Se quemó! Ana se puso a imaginar y se olvidó del horno: olor a humo en toda la cocina. | Le salió dura como una piedra: se le olvidó el polvo de hornear. | Se le pasó la mano con la sal en vez del azúcar.
+hito 2: Ya no se le quema todo.
+  con: marilla
+  dice: Hmm. Comestible. Sigue así, que la práctica hace la mano.
+hito 7: Cocina como Marilla.
+  con: marilla
+  dice: Esto está… muy bueno, Ana. No sé si mejor que el mío. Casi.
 
 === letras ===
 titulo: Las letras y la imaginación

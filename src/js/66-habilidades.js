@@ -15,7 +15,9 @@ function habilidadesLeer(txt){
     if (!c) continue;
     if ((m = l.match(/^(hito|bajo) (\d+):\s*(.*)$/))) (m[1] === 'hito' ? c.hitos : c.bajos).push(h = { n: +m[2], texto: m[3], dir: m[1] });
     else if (h && /^\s/.test(raw) && (m = l.match(/^(con|dice|ia):\s*(.*)$/))) h[m[1]] = m[2];
-    else if ((m = l.match(/^(titulo|suma|por_dia|de|hacia|por|inicial|rango|visible si):\s*(.*)$/))) {
+    else if ((m = l.match(/^(rinde|falla):\s*(.*)$/))) { c[m[1]] = m[2].split(',').map(x => x.trim().split(':').map(Number)).filter(x => x.length === 2); h = null; }
+    else if ((m = l.match(/^mal:\s*(.*)$/))) { c.mal = m[1].split('|').map(x => x.trim()).filter(Boolean); h = null; }
+    else if ((m = l.match(/^(titulo|suma|por_dia|de|hacia|por|inicial|rango|visible si|oficio):\s*(.*)$/))) {
       const [, k, v] = m; h = null;
       if (k === 'suma') c.suma = v.split(',').map(x => x.trim()).filter(Boolean);
       else if (k === 'por_dia' || k === 'inicial') c[k] = +v;
@@ -28,6 +30,21 @@ function habilidadesLeer(txt){
   return out;
 }
 const HABILIDADES = habilidadesLeer(document.getElementById('habilidades')?.textContent || '');
+// a craft («oficio:»): how it turns out for Ana, by the days she has practiced it: how much it gives, and whether it goes
+// wrong this time (and how: «mal:»). For anyone else, as always
+const OFICIOS_DIESTRA = (() => { try { return localStorage.getItem('avonlea-oficios') === 'diestra'; } catch (e) { return false; } })();   // (the tests of chains of the book: Ana already knows how; they test the chain, not the learning)
+function oficio(k, accion){
+  const c = k === 'ana' && HABILIDADES.find(c => c.oficio === accion); if (!c) return { rinde: null, sale: true };
+  const v = OFICIOS_DIESTRA ? 99 : cualidad('ana', c.id), segun = L => { let r = null; for (const [n, x] of L || []) if (v >= n) r = x; return r; };
+  const sale = Math.random() >= (segun(c.falla) ?? 0);
+  return { c, nivel: v, rinde: segun(c.rinde), sale, mal: sale ? null : pick(c.mal || ['No le salió bien esta vez.']) };
+}
+// a day of practice, for what is not watched as a doing (the stove): once a day, as the rest
+function practicar(k, accion){
+  if (!game.wm) return; const D = game.wm.habilidadesHoy?.d === today() && game.wm.habilidadesHoy.v === 2 ? game.wm.habilidadesHoy : (game.wm.habilidadesHoy = { v: 2, d: today(), t: {}, dado: {}, n: {} });
+  const key = k + ':' + accion; if (D.dado[key]) return; D.dado[key] = true;
+  for (const c of HABILIDADES) if (c.suma.includes(accion) && (!c.de || k === (c.por || 'ana')) && (!c.visible || c.visible.every(x => dlgCond(x)))) habilidadSube(k, c, D, accion.replace(/_/g, ' '));
+}
 const estudio = (k = 'ana') => cualidad(k, 'estudio');
 // (a game from before: Ana's paths, or her days of study, become her qualities)
 if (game.wm) {
