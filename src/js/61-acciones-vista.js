@@ -43,8 +43,8 @@ const ACC_MOV = {
   techo(b, A){   // up on the roof of the Barrys' house, arms out, along the ridge… and down she comes: the ankle
     const H = HOUSES.os.at, e = TT - A.t0;
     if (e < 6.5) { const u = (e % 6) / 6; b.x = H.x - 40 + Math.abs(u * 2 - 1) * 80; b.y = H.y - 74; b.dir = u < .5 ? 1 : 3; b.moving = true; b.walk = ((b.walk || 0) + .01) % 1; b.sit = false; b.sortY = H.y + 2; return; }
-    if (!A.cayo) { A.cayo = [b.x + 30, H.y + 26]; wmSay('ana', '¡Aaay!'); }
-    const u = Math.min(1, (e - 6.5) / .6); b.x = lerp(b.x, A.cayo[0], u); b.y = lerp(H.y - 74, A.cayo[1], u * u); b.moving = false; if (u >= 1) { delete b.sortY; b.sit = true; if (!A.dolor) { A.dolor = 1; wmSay('ana', '¡Mi tobillo! Creo que me lo torcí… Diana, no puedo pararme.'); } }
+    if (!A.cayo) { A.cayo = [b.x + 30, H.y + 26]; wmSay('ana', dicho('techo_caida')); }
+    const u = Math.min(1, (e - 6.5) / .6); b.x = lerp(b.x, A.cayo[0], u); b.y = lerp(H.y - 74, A.cayo[1], u * u); b.moving = false; if (u >= 1) { delete b.sortY; b.sit = true; if (!A.dolor) { A.dolor = 1; wmSay('ana', dicho('techo_tobillo')); } }
   },
 };
 // (all the durations, in minutes of the game: M(n))
@@ -57,7 +57,7 @@ const KX = { aparador: lugar('cocina', 'aparador'), fregadero: lugar('cocina', '
 const enCasa = me => wmScene(me) === 'gg' || wmScene(me) === 'ga';
 const ACC_PASOS = {
   'quehacer:mesa': me => wmScene(me) !== 'gg' ? null : [
-    { p: [KX.aparador.x + 46, KX.aparador.y + 6], mira: 3, dur: M(2), obj: 'aparador', decir: 'Los platos de todos los días…' },
+    { p: [KX.aparador.x + 46, KX.aparador.y + 6], mira: 3, dur: M(2), obj: 'aparador', decir: dicho('aparador_platos') },
     { p: [TABLE.x - 20, TABLE.y + 18], mira: 0, dur: M(5), lleva: 'platos', obj: 'poner', hecho: () => { game.mesa = { dia: today(), puesta: true }; } }],
   'quehacer:platos': me => wmScene(me) !== 'gg' ? null : [
     { p: [TABLE.x + 20, TABLE.y + 18], mira: 0, dur: M(3), obj: 'recoger', hecho: () => { game.mesa = { dia: today(), sucia: false }; } },
@@ -88,7 +88,7 @@ const ACC_PASOS = {
     return at.length && wmScene(me) === 'out' ? at.map(u => ({ p: [u.x + (a.x === 'manzanas' ? 0 : 0), u.y + (a.x === 'manzanas' ? 14 : 18)], mira: 0, agachar: a.x !== 'manzanas', dur: M(a.x === 'manzanas' ? 5 : 3), obj: 'canastito' })) : null;
   },
   tomar: (me, a) => a.x === 'cuerda' && wmScene(me) === 'out' ? [{ p: [BARN.x + 40, BARN.y + 34], mira: 0, dur: M(1), obj: 'cuerda' }] : wmScene(me) === 'gg' ? [{ p: [KX.aparador.x + 46, KX.aparador.y + 6], mira: 3, dur: M(1), obj: 'aparador' }] : null,   // (the rope on its hook in the barn; the syrup, the basket, from the dresser)
-  'teñir': me => me === 'ana' && enCasa(me) ? [{ lugar: 'pieza', p: [GA.wash.x, GA.wash.y + 24], mira: 0, dur: M(15), obj: 'tinte', decir: '¡Negro azabache como el ala de un cuervo! Ya verán…' }] : null,   // (upstairs, at the washstand with its mirror)
+  'teñir': me => me === 'ana' && enCasa(me) ? [{ lugar: 'pieza', p: [GA.wash.x, GA.wash.y + 24], mira: 0, dur: M(15), obj: 'tinte', decir: dicho('tenir_espejo') }] : null,   // (upstairs, at the washstand with its mirror)
   cortar_pelo: me => wmScene(me) === 'gg' ? [{ p: [KIT.w / 2 - 60, 6.6 * T], mira: 2, sentar: true, dur: M(15), obj: 'corte', con: ['marilla', 16, -6] }] : null,   // (sitting on a chair in the middle of the kitchen, Marilla behind her with the scissors)
   jurar: (me, a) => { const b = wmBody(me), g = [OS.x + 50, OS.y + 44], near = wmScene(me) === 'out' && dist(b.x, b.y, g[0], g[1]) < 700; return [{ p: near ? g : [b.x, b.y], mira: 1, dur: M(3), obj: 'manos', con: [a.k, 30, 0, 3] }]; },   // (in the Barrys' garden, face to face, hand in hand)
   'ordeñar': (me, a) => { const c = ANIM[a.cow]; return c ? [{ p: () => [c.x - 26, c.y + 6], mira: 1, sentar: true, dur: M(15), obj: 'balde' }] : null; },

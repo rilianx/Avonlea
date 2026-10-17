@@ -1,0 +1,357 @@
+# Lo que se dice mientras se hace algo: las acciones del planificador y de la jugadora (src/js/63-jugar.js, wmExec0),
+# lo que se dice al llegar a un paso de una acción (src/js/61-acciones-vista.js) y el huertito de Ana (src/js/51-huertito.js).
+# Lo dice quien hace la acción (me) o a quien se la hacen (a.k): lo decide el código.
+
+# --- quehaceres (63-jugar.js: dicho('quehacer:' + a.x), con a.x = platos, barrer, mesa)
+=== quehacer:platos ===
+- Lavo los platos con agua bien caliente… ¡y no rompo ninguno!
+
+=== quehacer:barrer ===
+- Barro la cocina, y el patio también.
+
+=== quehacer:mesa ===
+- Pongo la mesa: los platos de todos los días y la compota.
+
+# (61-acciones-vista.js: al llegar al aparador, para poner la mesa)
+=== aparador_platos ===
+- Los platos de todos los días…
+
+# --- el corral (63-jugar.js); huecos: {vaca}, el nombre de la vaca
+=== ordenar_vaca ===
+- Tranquila, {vaca}… ya está, ya está.
+
+# --- una visita (63-jugar.js); huecos: {saludo} (buenos días, buenas tardes…), {nombre} (como la llama)
+=== visitar_saludo ===
+- {saludo}, {nombre}. Vine a visitarla.
+
+# (la que recibe la visita)
+=== visitar_pasa ===
+- ¡Pasa, pasa! Siéntate, que pongo la tetera.
+
+# --- devolver un libro prestado (63-jugar.js): quien lo devuelve, y quien lo recibe
+=== devolver_libro ===
+- Aquí tienes tu libro. ¡Me encantó! Lo leí dos veces.
+
+=== devolver_libro_responde ===
+- ¡Qué bueno que te gustó! Te presto otro cuando quieras.
+
+# --- el juramento de amigas del alma (63-jugar.js); hueco: {amiga}, el nombre de la otra
+=== jurar ===
+- Juro solemnemente ser fiel a mi amiga del alma, {amiga}, mientras duren el sol y la luna.
+
+=== jurar_responde ===
+- Juro ser fiel a mi amiga del alma, {amiga}, mientras duren el sol y la luna.
+
+# --- perdonar (63-jugar.js): a Gilbert, a cualquier otro; y la respuesta del perdonado
+=== perdonar_gilbert ===
+- Está bien, Gilbert Blythe… te perdono. Y no me digas más «Zanahorias».
+
+=== perdonar ===
+- Está bien… te perdono. Hagamos las paces.
+
+=== perdonar_gracias ===
+- ¡Gracias! Amigos, entonces.
+
+# --- cuidar a un enfermo (63-jugar.js): el doctor, o con el jarabe de ipecacuana; y lo que dice el enfermo
+=== cuidar_doctor ===
+- Veamos… una gripe fuerte. Tome esto, y a guardar cama unos días.
+
+=== cuidar_jarabe ===
+- Una cucharadita de jarabe de ipecacuana… y otra más. Ya va a pasar.
+
+=== cuidado_doctor_gracias ===
+- Gracias, doctor. Ya me siento mejor.
+
+=== cuidado_gracias ===
+- Ya me siento mucho mejor. Gracias, niña.
+
+# --- la escuela, la casa, el lago (63-jugar.js): lo dice quien lo hace
+=== estudiar ===
+- «El cuadrado de la hipotenusa es igual…» Repaso y repaso.
+
+=== recitar ===
+- «Y a lo largo del río, en su barca, iba la doncella de Shalott…»
+
+=== rezar ===
+- Querido Padre celestial: gracias por el Camino Blanco de las Delicias y por el Lago de las Aguas Brillantes…
+
+=== adornar_sombrero ===
+- ¡Una corona de ranúnculos y rosas silvestres para mi sombrero!
+
+=== remar ===
+- ¡Remo en el bote de los Barry! Hay que tener cuidado de no soltar los remos…
+
+# (nombrar un lugar; hueco: {nombre}, el nombre que le pone)
+=== nombrar_lugar ===
+- Este lugar se va a llamar {nombre}. ¿No es un nombre precioso?
+
+# --- regañar (63-jugar.js): Marilla a Ana, o cualquiera a cualquiera; y la respuesta
+=== regano_ana ===
+quien: marilla
+- ¡Ana Shirley! Otra vez se te olvidaron los quehaceres. Estás castigada: a la cocina media hora, y a pensar.
+
+=== regano ===
+- Esto no puede ser. Que no se repita.
+
+=== regano_ana_responde ===
+quien: ana
+- Lo siento, Marilla… me distraje imaginando que era una princesa.
+
+=== regano_responde ===
+- Sí, señora.
+
+# --- la calesa (63-jugar.js)
+=== subir_calesa ===
+- Sube, Ana. Engancho la yegua y te llevo en la calesa.
+
+# --- leer, escribir, recitar en el concierto (63-jugar.js)
+=== leer ===
+- «Ben-Hur»… ¡No puedo parar de leer! La carrera de cuadrigas…
+
+=== escribir_cuento ===
+- «Los celos de Cordelia»: una historia trágica, con un ahogado y una dama de cabellos de oro…
+
+=== leer_cuento ===
+- Escucha, Diana: «La dama Geraldine caminaba a la luz de la luna…»
+
+=== leer_cuento_responde ===
+- ¡Ay, Ana, qué triste! ¡Lloré en la parte del ahogado!
+
+=== ensayar ===
+- «La doncella de Shalott»… otra vez desde el principio, con más sentimiento.
+
+=== actuar ===
+- «…y la barca siguió flotando río abajo, hacia Camelot.»
+
+# --- felicitar y consolar (63-jugar.js): quien lo hace, y la respuesta
+=== felicitar ===
+- ¡Felicitaciones! Lo hiciste maravillosamente.
+
+=== felicitar_responde ===
+- ¡Gracias! Estaba tan nerviosa…
+
+=== consolar ===
+- No llores… todo se va a arreglar, ya verás. Yo estoy contigo.
+
+=== consolar_responde ===
+- Gracias… ya me siento mejor.
+
+# --- el campo y la leña (63-jugar.js)
+=== hacer_heno ===
+- A juntar el heno antes de que llueva…
+
+=== acarrear_lena ===
+- Una brazada para la caja de la leña… ¡pesa como un tesoro de piratas!
+- Leña para la estufa de Marilla. Que no se me caiga ninguna.
+
+=== partir_lena ===
+- ¡Zas! ¡Zas! Leña para la cocina de Marilla.
+
+# --- el invierno (63-jugar.js): patinar (con Diana cerca, o sin ella) y el trineo
+=== patinar_con_diana ===
+- ¡Mira, Diana! ¡Vuelo sobre el hielo como una golondrina!
+
+=== patinar ===
+- ¡Vuelo sobre el hielo como una golondrina!
+
+=== trineo ===
+- ¡Allá vamos, colina abajo! ¡Agárrate fuerte!
+
+# --- el picnic (63-jugar.js): el permiso de Marilla, y la merienda junto al lago
+=== pedir_permiso_picnic ===
+- Marilla, ¿puedo ir al picnic de la escuela dominical? ¡Va a haber helado!
+
+=== permiso_picnic_si ===
+quien: marilla
+- Está bien, puedes ir. Y te pongo una canasta con algo rico.
+
+=== merendar ===
+- ¡Un picnic junto al lago! Y hay helado… ¡nunca había probado helado! Es indescriptible.
+
+# --- el pelo verde (63-jugar.js) y el tinte frente al espejo (61-acciones-vista.js)
+=== tenir_espejo ===
+- ¡Negro azabache como el ala de un cuervo! Ya verán…
+
+=== tenir_verde ===
+- Ya está… a ver… ¡¿VERDE?! ¡Mi pelo está VERDE!
+
+=== cortar_pelo ===
+quien: marilla
+- No hay más remedio, Ana: hay que cortarlo. Quédate quieta.
+
+=== cortar_pelo_ana ===
+quien: ana
+- Mi pelo… Bueno, por lo menos ya no es verde.
+
+# --- el desafío de Josie (63-jugar.js) y la caída del techo (61-acciones-vista.js)
+=== trepar_techo ===
+- ¡Josie Pye, mira cómo camino por el techo de los Barry!… ¡Ay!
+
+=== techo_caida ===
+quien: ana
+- ¡Aaay!
+
+=== techo_tobillo ===
+quien: ana
+- ¡Mi tobillo! Creo que me lo torcí… Diana, no puedo pararme.
+
+# --- coser (63-jugar.js)
+=== coser ===
+- Coso el vestido… y le pongo unas mangas abullonadas, como las que usan ahora.
+
+# --- vender la vaca (63-jugar.js): quien vende pregunta, el otro la mira, y el trato
+=== vender_vaca_pide ===
+- ¿Le interesaría comprar esta vaca? Es buena lechera.
+
+=== vender_vaca_mira ===
+- Déjeme verla bien… los dientes, las patas… Sí, me conviene.
+
+=== vender_vaca_trato ===
+- ¡Trato hecho! Buena vaca.
+
+# --- cambiar una cosa por otra (63-jugar.js); huecos: {saludo}, {da} (lo que da), {por} (lo que pide)
+=== cambiar_pide_lawson ===
+- {saludo}, Sr. Lawson. ¿Me cambiaría {da} por {por}?
+
+=== cambiar_pide ===
+- {saludo}. ¿Me cambiaría {da} por {por}?
+
+=== cambiar_buhonero_mira ===
+quien: buhonero
+- Este tinte deja el pelo negro como el ala de un cuervo, señorita. ¡Y no se va con el lavado!
+
+=== cambiar_mira ===
+- Veamos lo que traes… Sí, me sirven. Un momento.
+
+=== cambiar_buhonero_trato ===
+quien: buhonero
+- ¡Negro azabache garantizado! Palabra de honor.
+
+=== cambiar_trato ===
+- Trato hecho. ¡Que lo disfrutes!
+
+# --- comprar en la tienda, a la libreta (63-jugar.js); huecos: {saludo}, {cosa} (con su artículo)
+=== comprar_pide ===
+- {saludo}, Sr. Lawson. ¿Me daría {cosa}? A la libreta de los Cuthbert.
+
+=== comprar_azucar ===
+quien: lawson
+- Cómo no. Déjame pesarla…
+
+=== comprar_mira ===
+quien: lawson
+- Cómo no, aquí tengo una. Un momento…
+
+=== comprar_anotado ===
+quien: lawson
+- Anotado en la libreta de los Cuthbert. Saludos a Marilla.
+
+# --- conversar (63-jugar.js): si hay la noticia de la vaca vendida, o no
+=== conversar_vaca ===
+- ¿Es verdad lo que dicen, que vendieron la vaca?
+
+=== conversar ===
+- ¿Qué hay de nuevo?
+
+# --- disculparse (63-jugar.js): Gilbert con Ana, o cualquiera; y las respuestas (Ana a Gilbert; una amiga que
+# perdona del todo; otro que perdona a medias). «hmpf»: quien no perdona (también al interceder)
+=== disculparse_gilbert ===
+quien: gilbert
+- Ana, perdóname lo de «Zanahorias». Fue una tontería.
+
+=== disculparse ===
+- Perdóname, de verdad. No quise hacerte daño.
+
+=== disculpa_ana_acepta ===
+quien: ana
+- Bueno... está bien, Gilbert Blythe.
+
+=== disculpa_amiga ===
+- ¡Claro que te perdono! Eres mi amiga del alma.
+
+=== disculpa_acepta ===
+- Está bien... pero que no se repita.
+
+=== hmpf ===
+- Hmpf.
+
+# --- pedir un favor (63-jugar.js): cuando no quiere, o no puede
+=== pedir_no ===
+- No, ahora no.
+
+=== pedir_ocupado ===
+- Ahora no puedo, tengo demasiado que hacer.
+
+# (lo que se pide, cuando el favor no trae sus palabras: dicho('pedir_favor:' + f) || dicho('pedir_favor'))
+=== pedir_favor:pasear ===
+- ¿Vamos a pasear juntas?
+
+=== pedir_favor:venir ===
+- ¿Vienes a tomar el té conmigo?
+
+=== pedir_favor ===
+- ¿Me harías un favor?
+
+# (prestar algo: lo dice quien lo presta)
+=== prestar_si ===
+- Claro que sí. Cuídalo mucho, ¿eh?
+
+# (decir que sí a lo que se pide: dicho('si_a:' + f) || dicho('si_a'))
+=== si_a:venir ===
+- ¡Sí, me encantaría! Allí estaré.
+
+=== si_a:traer ===
+- Sí, cómo no. Ahora mismo.
+
+=== si_a:pasear ===
+- ¡Vamos!
+
+=== si_a:prestar ===
+- Toma. Pero cuídalo, ¿eh?
+
+=== si_a:curar ===
+- Voy enseguida.
+
+=== si_a:quehaceres ===
+- Sí, Marilla.
+
+=== si_a:llevar ===
+- Eh... sí, sí. Sube.
+
+=== si_a:encerrar_vaca ===
+- Ahora mismo la llevo.
+
+=== si_a:interceder ===
+- Hablaré con ella.
+
+=== si_a ===
+- Está bien.
+
+# --- interceder por alguien (63-jugar.js); huecos: {nombre} (a quien se le pide), {por} (por quien se pide).
+# Y la respuesta: Ana a Diana, o cualquiera («hmpf» si no)
+=== interceder ===
+- {nombre}, {por} está arrepentido de verdad. ¿No le darías otra oportunidad?
+
+=== interceder_ana_si ===
+quien: ana
+- Bueno... si tú lo dices, Diana. Lo pensaré.
+
+=== interceder_si ===
+- Está bien, lo pensaré.
+
+# --- el huertito de Ana (51-huertito.js): en invierno no se puede; un sitio en el camino, u otro malo; y hecho
+=== huertito_helado ===
+quien: ana
+- Con la tierra helada no se puede sembrar. Hay que esperar la primavera.
+
+=== huertito_camino ===
+quien: ana
+- Aquí pasa la gente… mejor un rincón donde nadie lo pise.
+
+=== huertito_no_aqui ===
+quien: ana
+- Aquí no… busco un pedacito de tierra libre, con sol.
+
+=== huertito_hecho ===
+quien: ana
+- Aquí. Mi propio huertito. Las voy a regar todos los días… y a contarles cuentos, para que se animen a salir.

@@ -18,12 +18,12 @@ function huertitoPoner(h){
 }
 function hacerHuertito(){
   close();
-  if (S === 3) return anaSays('Con la tierra helada no se puede sembrar. Hay que esperar la primavera.');
+  if (S === 3) return anaSays(dicho('huertito_helado'));
   const x = ana.x, y = ana.y - 20;
-  if (!sitioHuertito(x, y)) return anaSays(nearPath(x, y, 34) ? 'Aquí pasa la gente… mejor un rincón donde nadie lo pise.' : 'Aquí no… busco un pedacito de tierra libre, con sol.');
+  if (!sitioHuertito(x, y)) return anaSays(nearPath(x, y, 34) ? dicho('huertito_camino') : dicho('huertito_no_aqui'));
   game.inv.semillas--; game.huertito = { x, y, dia: today() }; huertitoPoner(game.huertito);
   ana.crouch = true; ana.dir = 0; setTimeout(() => { ana.crouch = false; }, 3000);
-  anaSays('Aquí. Mi propio huertito. Las voy a regar todos los días… y a contarles cuentos, para que se animen a salir.');
+  anaSays(dicho('huertito_hecho'));
   logEv('Ana hizo su huertito y sembró las semillas que le dio Matthew.', witnesses()); save();
 }
 if (game.huertito) huertitoPoner(game.huertito);

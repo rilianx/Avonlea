@@ -51,12 +51,12 @@ function deliver(t){
   if (t.from !== who) planSoon(t.from, `Ana cumplió el encargo que le diste (${taskText(t)})`);
   save();
   const note = t.from === who ? `(Ana te entrega ${itemText(t.item, t.n)}: el encargo que tú le pediste.)` : `(Ana te entrega ${itemText(t.item, t.n)} de parte de ${NAMES[t.from]}, que se lo encargó.)`;
-  if (aiReady()) aiTalk(who, note); else say(who, '¡Gracias, Ana! Justo lo que hacía falta.', [['De nada', close]]);
+  if (aiReady()) aiTalk(who, note); else say(who, dicho('gracias_entrega'), [['De nada', close]]);
 }
 function passMessage(t){
   const who = t.para; t.done = true; know(who, `${NAMES[t.from]} le mandó a decir con Ana: «${t.recado}»`);
   logEv(`Ana le dio a ${NAMES[who]} el recado de ${NAMES[t.from]}.`, [who]); planSoon(t.from, `Ana le dio tu recado a ${NAMES[who]}`); planSoon(who, `Ana te trajo un recado de ${NAMES[t.from]}: «${t.recado}»`); sfx.done(); save();
-  if (aiReady()) aiTalk(who, `(Ana te trae un recado de ${NAMES[t.from]}: «${t.recado}»)`); else say(who, 'Vaya, gracias por avisarme, Ana.', [['De nada', close]]);
+  if (aiReady()) aiTalk(who, `(Ana te trae un recado de ${NAMES[t.from]}: «${t.recado}»)`); else say(who, dicho('gracias_recado'), [['De nada', close]]);
 }
 // on meeting someone: thanks for an errand done, a present they had planned, why they came looking for her
 function talkPrelude(who){

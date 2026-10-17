@@ -1,0 +1,105 @@
+# Lo que se dice al recibir algo, al hablar con alguien sin IA (src/js/35-cosas-que-lleva.js), al recibir un encargo
+# o un recado (src/js/38-encargos.js), y al recibir algo en el mundo (src/js/63-jugar.js, «dar»).
+
+# --- un regalo de Ana (35-cosas-que-lleva.js: ITEM_DEFS[k].gift.reply es dicho('regalo:' + k) || dicho('gracias_dar');
+# lo usa give() en 46-conversaciones.js, que le añade el agradecimiento propio de cada uno)
+=== regalo:tarta ===
+- ¡Una tarta! Huele de maravilla.
+
+=== regalo:compota ===
+- ¡Qué rica compota! Gracias.
+
+=== regalo:te ===
+- Un té calentito, justo lo que me hacía falta.
+
+=== regalo:ramo ===
+- ¡Qué flores tan lindas! Las pondré en agua.
+
+=== regalo:libro ===
+- ¡Un libro! Lo voy a leer de una sentada.
+
+=== regalo:vestido ===
+- ¡Mangas abullonadas! ¡Es el vestido más lindo del mundo!
+
+=== regalo:mantequilla ===
+- ¡Mantequilla fresca! Gracias.
+
+=== regalo:cinta ===
+- ¡Una cinta preciosa! Me la pondré el domingo.
+
+=== regalo:caramelos ===
+- ¡Caramelos de menta! Son mis favoritos.
+
+=== regalo:dolares ===
+- Vaya... bueno, pues gracias.
+
+# --- lo que se da en el mundo (63-jugar.js, «dar»): si le gusta, o no tanto
+=== gracias_gusta ===
+- ¡Qué lindo detalle! Muchas gracias.
+- ¡Oh! Justo lo que me gusta.
+
+=== gracias_dar ===
+- Gracias.
+
+# --- lo que Ana trae para la casa (35-cosas-que-lleva.js, PARA_LA_CASA: dicho('para_la_casa:' + k)); lo dice quien lo
+# usa (marilla, o matthew el heno)
+=== para_la_casa:lena ===
+quien: marilla
+- Leña para la caja de la estufa. Bien. Y sacúdete el delantal, que traes media astilla encima.
+
+=== para_la_casa:huevos ===
+quien: marilla
+- Huevos frescos. Justo lo que me faltaba para el bizcocho.
+
+=== para_la_casa:leche ===
+quien: marilla
+- La leche, gracias. La pongo a enfriar en la despensa.
+
+=== para_la_casa:mantequilla ===
+quien: marilla
+- Mantequilla. Bien, a la despensa.
+
+=== para_la_casa:azucar ===
+quien: marilla
+- El azúcar. Gracias, Ana.
+
+=== para_la_casa:hierbas ===
+quien: marilla
+- Hierbas para el guiso. Gracias.
+
+=== para_la_casa:heno ===
+quien: matthew
+- Bueno, pues… heno para Dolly. Gracias, Ana.
+
+# --- hablar sin IA (35-cosas-que-lleva.js, talk()): las gracias por un encargo cumplido (va antes de lo que dice);
+# cuando ya dijo todo lo que tenía (hueco: {nombre}); Diana cuando su madre no la deja hablar con Ana (cap. 17)
+=== gracias_encargo ===
+- ¡Gracias por hacer lo que te pedí, Ana!
+
+=== sin_nada_que_decir ===
+- ({nombre} la mira y asiente, sin decir nada.)
+
+=== diana_prohibida ===
+quien: diana
+- Ana… mamá no me deja hablar contigo. Lo siento tanto, tanto…
+- No puedo, Ana… mamá dice que no. Pero te sigo queriendo, ¿sabes?
+
+# (pasear con Diana, 35-cosas-que-lleva.js, walkOption(): la despedida, de tarde o no; y el sí)
+=== paseo_fin_tarde ===
+quien: diana
+- ¡Hasta mañana, Ana! Que sueñes bonito.
+
+=== paseo_fin ===
+quien: diana
+- ¡Nos vemos, Ana! Fue un paseo precioso.
+
+=== paseo_si ===
+quien: diana
+- ¡Sí! Vamos, Ana, a donde tú quieras.
+
+# --- los encargos (38-encargos.js): al entregarle lo que pidió, y al darle un recado
+=== gracias_entrega ===
+- ¡Gracias, Ana! Justo lo que hacía falta.
+
+=== gracias_recado ===
+- Vaya, gracias por avisarme, Ana.
