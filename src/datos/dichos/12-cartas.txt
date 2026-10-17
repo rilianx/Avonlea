@@ -1,0 +1,103 @@
+# Las cartas (src/js/62-cartas.js) y el correo (src/js/62-cartas.js, src/js/63-jugar.js).
+# Una carta entera va en una sola línea: sus renglones separados por « / » (el código los separa).
+
+# --- cómo empieza y termina Ana una carta, según a quién (cartaTexto: dicho('carta_saludo:' + para),
+# dicho('carta_firma:' + para); para = diana, stacy, sraallan, josephine, spencer)
+=== carta_saludo:diana ===
+- Mi queridísima Diana, amiga del alma:
+
+=== carta_firma:diana ===
+- Tu amiga del alma hasta la muerte, Ana (con una sola n)
+
+=== carta_saludo:stacy ===
+- Querida Srta. Stacy:
+
+=== carta_firma:stacy ===
+- Su alumna que la quiere, Ana Shirley
+
+=== carta_saludo:sraallan ===
+- Querida Sra. Allan:
+
+=== carta_firma:sraallan ===
+- Con todo cariño, Ana Shirley
+
+=== carta_saludo:josephine ===
+- Querida tía Josephine (porque usted me dejó llamarla así):
+
+=== carta_firma:josephine ===
+- Su amiga que la recuerda siempre, Ana Shirley
+
+=== carta_saludo:spencer ===
+- Querida Sra. Spencer:
+
+=== carta_firma:spencer ===
+- Su agradecida, Ana Shirley (de Tejas Verdes)
+
+# (el primer renglón, después del saludo; hueco: {estacion}, la frase de la estación: «los cerezos están en flor»)
+=== carta_apertura ===
+- Aquí en Tejas Verdes {estacion}.
+
+# --- el cuerpo de la carta (cartaTexto: dicho('carta_cuerpo:' + para, { estacion })), cuando no hay una escena de
+# la carta en el guion (src/datos/guion.txt, carta_<para>) o la escribe otra que no es Ana. Una carta por línea.
+=== carta_cuerpo:diana ===
+- Te escribo desde mi cuarto del alero, con la ventana abierta y el cerezo Reina de las Nieves mirándome. / Hoy pensé que si fuéramos princesas encerradas en una torre, nos mandaríamos cartas con una paloma blanca. Pero el correo de Avonlea también sirve. / ¿Mañana nos vemos en el Bosque Encantado? Lleva tu libro de poemas.
+- No puedo esperar a verte para contarte todo, así que te lo escribo. / Marilla dice que hablo demasiado, pero en el papel nadie me puede interrumpir. / Guárdame un lugar a tu lado en la escuela, ¿sí?
+
+=== carta_cuerpo:stacy ===
+- Le escribo para contarle que terminé de leer el libro que nos recomendó, y que lloré en el capítulo once. / Estuve pensando en lo que dijo de los adjetivos: esta carta tiene solo los indispensables. Bueno, casi. / Quería decirle que gracias a usted estudiar ya no me parece un castigo, sino una aventura.
+- Le escribo desde Tejas Verdes con una pregunta muy importante: ¿cree usted que yo podría llegar a escribir un libro de verdad? / Ya tengo el título. Lo que me falta es todo lo demás.
+
+=== carta_cuerpo:sraallan ===
+- Le escribo para darle las gracias por el té de la otra tarde. Fue uno de los momentos más elegantes de mi vida. / Sigo pensando en lo que usted dijo de ser buena. Lo estoy intentando todos los días, aunque algunos días me resulta mejor que otros.
+- Quería contarle que ya no le pongo linimento a las tartas. Aprendí la lección para siempre. / Ojalá todas las personas fueran tan comprensivas como usted.
+
+=== carta_cuerpo:josephine ===
+- Le escribo desde Avonlea, donde todo sigue igual de bonito que cuando usted vino de visita. / Diana y yo todavía nos reímos de la noche en que saltamos sobre su cama. Bueno, ahora nos reímos; esa noche no tanto. / Si alguna vez se aburre en Charlottetown, acuérdese de que aquí tiene una amiga con mucha imaginación.
+- Le cuento que este año en Tejas Verdes {estacion}. / Marilla dice que no hay que molestar a las personas importantes con cartas largas, así que esta es corta. Para mí, al menos.
+
+# (las cartas de Ana a la Sra. Spencer son escenas: carta_spencer_* en src/datos/guion.txt)
+=== carta_cuerpo:spencer ===
+- Le escribo desde Tejas Verdes, porque usted fue quien me trajo, aunque fuera por equivocación. / Aquí hay un cerezo debajo de mi ventana, y un arroyo.
+
+# --- una respuesta, cuando el guion no tiene ninguna que se pueda decir (cartaRespuesta); hueco: {firma}, quien la
+# manda («La Srta. Stacy»)
+=== carta_respuesta ===
+- Querida Ana: / Gracias por tu carta. Me dio mucho gusto saber de ti. / {firma}
+
+# --- en la oficina de correos (62-cartas.js, correoRetirar): nada, una carta (hueco: {de}), varias (hueco: {n})
+=== correo_nada ===
+quien: lawson
+- Nada para ti hoy, Ana. Pero el correo llega todos los días: vuelve pronto.
+
+=== correo_una_carta ===
+quien: lawson
+- Sí, hay una carta para ti, de {de}. Aquí tienes.
+
+=== correo_cartas ===
+quien: lawson
+- ¡{n} cartas para ti! Eres la niña más escrita de Avonlea.
+
+# --- mandar una carta (63-jugar.js, «enviar_carta»): Lawson pregunta; para quién (huecos: {nombre}, {donde}),
+# lejos o aquí mismo; y cuánto tarda (hueco: {dias})
+=== correo_para_quien ===
+quien: lawson
+- ¿Una carta, Ana? ¿Para quién es?
+
+=== correo_para_lejos ===
+- Para {nombre}, {donde}. ¿Cuánto tarda en llegar?
+
+=== correo_para ===
+- Para {nombre}, {donde}.
+
+=== correo_tarda ===
+quien: lawson
+- Unos {dias} días, con suerte. Sale mañana con el correo.
+
+=== correo_manana ===
+quien: lawson
+- Le llega mañana mismo. Ya la pongo en la saca.
+
+# --- escribir una carta (63-jugar.js, «escribir_carta»): la pregunta de Ana, antes de elegir a quién
+=== escribir_carta_a_quien ===
+quien: ana
+- ¿A quién le escribo?
