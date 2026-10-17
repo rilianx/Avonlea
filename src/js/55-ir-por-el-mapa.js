@@ -34,5 +34,5 @@ function goDest(x, y){
   if (cart.riding) cartOff();
   ana.sit = false; ana.lie = false; ana.nav = null;
   dest = { x: p[0], y: p[1] }; ana.goto = casa ? { id: 'h:' + casa[0], scene: 'out', dest: true } : { x: p[0], y: p[1], scene: 'out', dest: true };
-  const n = placeNear(...p); anaSays(n ? '¡Vamos ' + toPlace(n) + '!' : pick(['¡Allá voy!', '¡En marcha!', '¡A ver qué hay por allá!']));
+  const n = placeNear(...p); anaSays(n ? dicho('ir_a', { lugar: toPlace(n) }) : dicho('ir_alla'));
 }

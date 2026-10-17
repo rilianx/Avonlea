@@ -1,10 +1,11 @@
 /* ---------- animals (to add one: an entry here) ----------
    kind 'cow': grazes in its home (a pen or a field of AREAS), can get loose, be led on a rope, be sold; kind 'parrot':
-   lives in a room and talks (talks: it can say a line in the scenes, and says its own when Ana is there) */
+   lives in a room and talks (talks: it can say a line in the scenes, and says its own when Ana is there: «animal:<id>»
+   in src/datos/dichos/41-mundo.txt) */
 const ANIMALS = {
   dolly: { name: 'Dolly', kind: 'cow', owner: 'ana', home: 'corral', desc: 'la vaquita jersey de Ana, que vive en el corral de Tejas Verdes y es experta en escaparse' },
   jersey: { name: 'la vaca jersey del Sr. Harrison', kind: 'cow', owner: 'harrison', home: 'potrero', desc: 'la vaca jersey del Sr. Harrison, idéntica a Dolly' },
-  ginger: { name: 'Ginger', kind: 'parrot', owner: 'harrison', room: 'hh', talks: true, lines: ['¡Pelirroja! ¡Pelirroja!', '¡Cuidado con la pelirroja!', '¡Cara de pepino! ¡Cara de pepino!', '¡Ginger quiere galletas!', '¡Qué escándalo! ¡Qué escándalo!', '¡Hmpf! ¡Hmpf!'], desc: 'el loro del Sr. Harrison, que suelta frases inoportunas (nunca groserías de verdad)' },
+  ginger: { name: 'Ginger', kind: 'parrot', owner: 'harrison', room: 'hh', talks: true, desc: 'el loro del Sr. Harrison, que suelta frases inoportunas (nunca groserías de verdad)' },
 };
 const ANIM = {};
 for (const [k, d] of Object.entries(ANIMALS)) { const A = d.home && AREAS[d.home], at = d.kind === 'parrot' ? [HHR.cage.x, HHR.cage.y] : [A.x + A.w / 2 + (k.length % 3 - 1) * 20, A.y + A.h / 2]; ANIM[k] = { id: k, look: k, kind: d.kind, x: at[0], y: at[1], dir: 1, walk: 0, moving: false, where: d.room || 'out', state: 'home', area: d.home || null, owner: d.owner, headTop: d.kind === 'cow' ? 30 : 64 }; }

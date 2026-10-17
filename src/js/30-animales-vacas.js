@@ -1,6 +1,6 @@
 /* ---------- the animals: cows graze, get loose, are led and sold; Ginger talks ---------- */
 const animalWhere = k => ANIM[k]?.where;
-function animalSays(k, text){ const a = ANIM[k]; if (!a || amb.cur) return; text = text || pick(ANIMALS[k].lines); bubbles = [{ q: k, text, t: 0, dur: lineDur(text) }]; a.talkT = TT + 1.6; sfx.blip(); }
+function animalSays(k, text){ const a = ANIM[k]; if (!a || amb.cur) return; text = text || dicho('animal:' + k); if (!text) return; bubbles = [{ q: k, text, t: 0, dur: lineDur(text) }]; a.talkT = TT + 1.6; sfx.blip(); }
 const ledCow = () => Object.values(ANIM).find(a => a.state === 'led' && (!a.ledBy || a.ledBy === 'ana'));
 function cowGo(a, tx, ty, sp, dt){
   const n = navStep(a, tx, ty); if (n.arrived) { a.moving = false; return true; }
@@ -47,7 +47,7 @@ function releaseCow(a){
 }
 function offerSale(k, a){
   const price = CH[k].buys[a.kind];
-  say(k, `¡Buena vaca esa! Le doy ${price} dólares por ella, señorita. ¿Trato hecho?`, [[`🤝 Vender la vaca (${price} dólares)`, () => { close(); sellCow(k, a, price); }], ['Mejor no', () => { close(); logEv(`Ana no quiso venderle la vaca jersey a ${NAMES[k]}.`, [k, ...witnesses()]); storyEvent('venta_rechazada'); save(); }]]);
+  say(k, dicho('comprar_vaca', { precio: price }), [[`🤝 Vender la vaca (${price} dólares)`, () => { close(); sellCow(k, a, price); }], ['Mejor no', () => { close(); logEv(`Ana no quiso venderle la vaca jersey a ${NAMES[k]}.`, [k, ...witnesses()]); storyEvent('venta_rechazada'); save(); }]]);
 }
 function sellCow(k, a, price){
   a.state = 'bought'; a.owner = k; a.nav = null; game.inv.dolares += price;
@@ -163,7 +163,7 @@ function anaMenu(){
   const J = jugables(), mine = cartas().filter(c => c.para === 'ana' && c.estado === 'recibida').map(c => ['📜 Leer la carta de ' + CORREO[c.de].nombre, () => cartaLeer(c)]);
   for (const k of Object.keys(game.anaStates)) if (ANA_STATES[k].fix) mine.push([ANA_STATES[k].fix, () => { close(); setAnaState(k, false); }]);
   if (game.inv.te > 0) mine.push(['☕ Tomar la taza de té', sipTea]);
-  if (game.scene === 'out' && (S !== 3 || ana.lie)) mine.push([ana.lie ? 'Levantarse' : '🌿 Recostarme en el pasto', () => { close(); if (ana.lie) { ana.lie = false; return; } if (nearPath(ana.x, ana.y, 26)) return anaSays('Aquí es camino... busco un pedacito de pasto.'); if (underTree(ana.x, ana.y)) return anaSays('Aquí el árbol me tapa el cielo... busco un lugar con más nubes.'); ana.lie = true; ana.sit = false; ana.goto = null; ana.dir = 2; logEv('Ana se recostó en el pasto a mirar las nubes.'); }]);
+  if (game.scene === 'out' && (S !== 3 || ana.lie)) mine.push([ana.lie ? 'Levantarse' : '🌿 Recostarme en el pasto', () => { close(); if (ana.lie) { ana.lie = false; return; } if (nearPath(ana.x, ana.y, 26)) return anaSays(dicho('pasto_camino')); if (underTree(ana.x, ana.y)) return anaSays(dicho('pasto_arbol')); ana.lie = true; ana.sit = false; ana.goto = null; ana.dir = 2; logEv('Ana se recostó en el pasto a mirar las nubes.'); }]);
   if (game.scene === 'out' && game.inv.semillas > 0 && !game.huertito) mine.push(['🌱 Hacer mi huertito aquí', hacerHuertito]);   // (where she wants it)
   if (game.hasCan) mine.push(['Dejar la regadera', () => dropItem('can')]);
   for (const k of ITEMS) if (game.inv[k] > 0) mine.push(['Dejar ' + itemText(k, game.inv[k]), () => dropItem(k)]);

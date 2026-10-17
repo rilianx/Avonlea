@@ -15,7 +15,7 @@ function callPerson(by, k, o = {}){
   const d = dist(b.x, b.y, cb.x, cb.y); if (d > CALL_R || d < 50) return false;
   const come = o.come ?? (relGetW(k, by) >= 3 || kin(k, by) || !!FOLKBY[k]?.kid);
   b.called = { by, t0: TT, until: TT + (o.wait || CALL_WAIT), come };
-  if (o.say !== false) { const n = callName(k), formal = /^(Sr|Sra|Srta)\.|Rev|Sr\. /.test(n) && by === 'ana'; sayB(qOf(by), `¡${n[0].toUpperCase() + n.slice(1)}! ` + (formal ? '¡Espere un momento, por favor!' : come ? '¡Ven un momento!' : '¡Espera!')); }
+  if (o.say !== false) { const n = callName(k), formal = /^(Sr|Sra|Srta)\.|Rev|Sr\. /.test(n) && by === 'ana'; const v = { nombre: n[0].toUpperCase() + n.slice(1) }; sayB(qOf(by), formal ? dicho('llamar_formal', v) : come ? dicho('llamar_ven', v) : dicho('llamar_espera', v)); }
   return true;
 }
 // a called one: facing whoever called, waiting (or walking up to them); 'null' when the call is over
@@ -33,7 +33,7 @@ function calledTick(){
     const c = p.called; if (!c) continue;
     if (TT > c.until) { p.called = null; continue; }
     const k = PEOPLE[p.id] === p ? p.id : Object.keys(PEOPLE).find(x => PEOPLE[x] === p) || p.id;
-    if (!c.ans && TT > c.t0 + 1.2 && watched(p.where || 'out')) { c.ans = 1; sayB(qOf(k), c.come ? pick(['¿Sí? ¡Ya voy!', '¡Voy!', '¿Me llamabas? Ya voy.']) : pick(['¿Sí?', '¿Me llamabas?', '¿Qué pasa?'])); }
+    if (!c.ans && TT > c.t0 + 1.2 && watched(p.where || 'out')) { c.ans = 1; sayB(qOf(k), c.come ? dicho('llamada_voy') : dicho('llamada_que')); }
   }
 }
 // the player: call whoever is nearest (not right beside her) within reach of a voice
@@ -203,7 +203,7 @@ function ambUpdate(dt){
   // her), with the AI or without it
   { const ve = reaccionAlVerla(best); if (ve) { amb.mute[best] = TT + 110; amb.seen[best] = true; sceneStart({ parts: [best], lines: [{ q: best, t: ve }], out: {}, scene: game.scene, resumen: '', ve: true }, false); return; } }
   if (!aiReady()) {   // (without the AI: just a word from them, from the written lines)
-    if (bd < 90) { const l = (game.wm?.sick || []).includes(best) ? [comentarioTexto('enfermo') || 'Cof, cof…'] : LINES[best], u = l.length > 1 ? l.filter(x => x !== amb.ultima?.[best]) : l, t = u[Math.floor(Math.random() * u.length)]; (amb.ultima ||= {})[best] = t; if (!t) { amb.mute[best] = TT + 110; return; }   // (not the same line twice in a row; and if they have said all they have today, nothing)
+    if (bd < 90) { const l = (game.wm?.sick || []).includes(best) ? [comentarioTexto('enfermo') || dicho('tos')] : LINES[best], u = l.length > 1 ? l.filter(x => x !== amb.ultima?.[best]) : l, t = u[Math.floor(Math.random() * u.length)]; (amb.ultima ||= {})[best] = t; if (!t) { amb.mute[best] = TT + 110; return; }   // (not the same line twice in a row; and if they have said all they have today, nothing)
     amb.mute[best] = TT + 110; amb.seen[best] = true; sceneStart({ parts: [best], lines: [{ q: best, t }], out: {}, scene: game.scene, resumen: '' }, false); }
     return;
   }
@@ -317,6 +317,6 @@ function cookMenu(){
   const can = k => Object.entries(ITEM_DEFS[k].recipe).every(([i, n]) => game.inv[i] >= n);
   const opts = ITEMS.filter(k => ITEM_DEFS[k].recipe && can(k)).map(k => [ITEM_DEFS[k].cook, () => { close(); startCook(k); }]);
   opts.push(['Nada por ahora', close]);
-  say('Ana', opts.length > 2 ? '¿Qué cocino?' : 'Me faltan ingredientes: bayas de los arbustos o manzanas ' + (conoceA('diana') ? 'del huerto de Diana' : 'del huerto de los vecinos') + '. Pero puedo hacer té.', opts);
+  say('Ana', opts.length > 2 ? '¿Qué cocino?' : dicho('faltan_ingredientes:' + (conoceA('diana') ? 'diana' : 'vecinos')), opts);
 }
 function startCook(k){ for (const [i, n] of Object.entries(ITEM_DEFS[k].recipe)) game.inv[i] -= n; game.cooking = { k, t: 2.6 }; ana.dir = 0; sfx.cook(); }

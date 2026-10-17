@@ -25,14 +25,15 @@ function presentacion(k){
   const propia = f ? f.def.presenta : CH[k]?.presentacion; if (propia && sabe) return propia.map(([w, t]) => ({ q: w === 'ana' ? 'ana' : q, t: t.replace(/Buenos días|Buenas tardes|Buenas noches/, saludoHora()) }));   // (the greeting, as the hour is)
   const hi = saludoHora(), yo = nombre.replace(/^(el|la) /, m => m), corto = nombre.replace(/^(el|la) (Sr\.|Sra\.|Srta\.|reverendo) /, '').split(' ')[0];
   const señ = /^la /.test(nombre) || /Sra|Srta/.test(nombre) ? 'señora' : 'señor';
-  if (!sabe) {   // (they did not know: a girl they have never seen, and the news, from her own mouth)
-    if (sinNombre(k)) return [{ q, t: hi + ', niña. No te había visto nunca por aquí. ¿De quién eres?' }, { q: 'ana', t: 'De Tejas Verdes. Soy Ana Shirley, con una sola n.' }, { q, t: '¿De Tejas Verdes? ¡No sabía que los Cuthbert tenían una niña!' }];
-    if (kid) return [{ q, t: '¡Hola! Nunca te había visto. ¿Cómo te llamas?' }, { q: 'ana', t: 'Ana Shirley, con una sola n. Vivo en Tejas Verdes, con Matthew y Marilla Cuthbert.' }, { q, t: ['¿Con los Cuthbert? ¡Pero si son viejísimos! ', '¿Con Matthew Cuthbert, el que no habla? ', '¡Nadie me había contado nada! '][corto.length % 3] + 'Yo soy ' + corto + '.' }];
-    return [{ q, t: hi + '. No te había visto nunca por aquí. ¿De quién eres, niña?' }, { q: 'ana', t: 'Soy Ana Shirley, ' + señ + ', con una sola n. Vivo en Tejas Verdes, con Matthew y Marilla Cuthbert.' }, { q, t: '¿Con los Cuthbert? ¡Vaya! No sabía que tenían una niña. Mucho gusto, Ana. Yo soy ' + yo + '.' }];
+  // (the lines: src/datos/dichos/40-gente.txt, «presenta:<caso>:1», «:2»… in order, as many as there are; if they did
+  // not know, a girl they have never seen, and the news from her own mouth: «nueva_…»; if they had heard, «sabe_…». A
+  // line may come in variants by the length of the name, «…:3:0», «…:3:1», «…:3:2»: always the same one for the same one)
+  const caso = (sabe ? 'sabe_' : 'nueva_') + (sinNombre(k) ? 'vecino' : kid ? 'nino' : 'adulto'), v = { hola: hi, yo, corto, senor: señ }, out = [];
+  for (let i = 1; ; i++) {
+    const m = 'presenta:' + caso + ':' + i, alt = m + ':' + corto.length % 3, d = dichoElegir(DICHOS_DE[alt] ? alt : m, v); if (!d) break;
+    out.push({ q: d.q === 'ana' ? 'ana' : q, t: d.t });
   }
-  if (sinNombre(k)) return [{ q, t: hi + ', niña. ¿Tú eres la que trajeron los Cuthbert?' }, { q: 'ana', t: 'Sí. Ana Shirley… Ana con una sola n.' }];
-  if (kid) return [{ q, t: '¿Tú eres la niña nueva de Tejas Verdes? Yo soy ' + corto + '.' }, { q: 'ana', t: 'Ana Shirley. Ana con una sola n, por favor. ¡Mucho gusto!' }];
-  return [{ q, t: hi + '. ¿Tú eres la niña que trajeron los Cuthbert?' }, { q: 'ana', t: 'Sí, ' + señ + '. Ana Shirley… con una sola n, por favor.' }, { q, t: 'Mucho gusto, Ana. Yo soy ' + yo + '.' }];
+  return out;
 }
 // they meet: the lines, and from now on they know each other
 function conocer(k){ k = sinF(k); if (conoceA(k) || sinNombre(k)) return; dlgHecho('conoce_' + k); logEv('Ana conoció a ' + (FOLKBY[k]?.def.name || CH[k]?.article + NAMES[k]) + '.', []); }

@@ -76,7 +76,7 @@ HOUSES.cp.interior = {
   glow: t => [CP.fuego.x, CP.fuego.y - 20, 190, '255,170,90', .45 + .05 * Math.sin(t * 7)], place: 'en la salita de la casa parroquial, junto a la chimenea y la mesita del té',
   actions: add => {
     add('fire', CP.fuego.x, CP.fuego.y + 10, 50, 'Calentarse junto al fuego', warmUp, { pri: 6, hy: 40, hit: 50 });
-    add('libros', CP.estante.x, CP.estante.y, 46, 'Mirar los libros del pastor', () => anaSays(pick(['¡Cuántos libros! Sermones, y uno de poesía… «Los idilios del rey». ¡Oh!', 'Si yo tuviera tantos libros, no saldría nunca de mi pieza. Bueno, casi nunca.'])), { pri: 4, hy: 50, hit: 46 });
+    add('libros', CP.estante.x, CP.estante.y, 46, 'Mirar los libros del pastor', () => anaSays(dicho('libros_pastor')), { pri: 4, hy: 50, hit: 46 });
     const [sx, sy, sd] = CP_SILLAS[1];
     add('te', CP.te.x, CP.te.y, 50, ana.sit ? 'Levantarse' : 'Sentarse a la mesita del té', () => { if (ana.sit) { ana.sit = false; return; } ana.x = sx; ana.y = sy; ana.dir = sd; ana.sit = true; ana.moving = false; ana.goto = null; }, { pri: 8, hy: 26, hit: 38 });
   },

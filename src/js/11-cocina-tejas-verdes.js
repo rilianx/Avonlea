@@ -25,7 +25,7 @@ function mealTick(){
   const w = mealWord(hr); m.rounds++;
   if (!m.logged) { m.logged = true; logEv(`Ana se sentó a ${w.verb} con ${parts.map(k => NAMES[k]).join(' y ')} (${w.menu}).`, parts); }
   const note = `Están sentados a la mesa de la cocina de Tejas Verdes, ${w.ing} (${w.menu}). Charla de sobremesa, tranquila${m.rounds > 1 ? ' (siguen conversando; no repitan lo que ya se dijo)' : ''}: cómo va el día, lo que ha pasado, lo que viene, algún chisme del pueblo; Ana habla mucho y con imaginación, Marilla le recuerda que coma, Matthew dice poco pero tierno.`;
-  if (!aiReady()) { const ls = [{ q: 'ana', t: pick(['¡Qué rico huele todo! Comer en esta mesa me hace sentir parte de una familia de verdad.', 'Marilla, ¿no te parece que el pan sabe distinto cuando una está feliz?', 'Hoy imaginé que esta mesa era un banquete en un castillo... pero esto es mucho mejor, porque es de verdad.']) }, ...parts.slice(0, 2).map(k => ({ q: k, t: pick(LINES[k]) })).filter(l => l.t)]; sceneStart({ parts, lines: ls, out: {}, scene: 'gg', resumen: '' }, false); return; }
+  if (!aiReady()) { const ls = [{ q: 'ana', t: dicho('comida_ana') }, ...parts.slice(0, 2).map(k => ({ q: k, t: pick(LINES[k]) })).filter(l => l.t)]; sceneStart({ parts, lines: ls, out: {}, scene: 'gg', resumen: '' }, false); return; }
   amb.busy = true;
   sceneAsk(parts, note, 'pasar').then(s => { if (ana.meal === m && !amb.cur && !game.talk && s.lines.length) sceneStart(s, false); }).catch(e => console.debug('[avonlea IA] comida', e.message)).finally(() => { amb.busy = false; });
 }
