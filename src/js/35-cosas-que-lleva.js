@@ -59,7 +59,7 @@ function talk(who, again = false){
   if (who === 'diana' && dlgHechos().prohibida) return say('diana', dicho('diana_prohibida'), [['…', close]]);   // (forbidden, cap. 17)
   const opts = [...taskOptions(who), ...cadenaOpciones(who)];
   for (const [k, [name]] of Object.entries(GIFTS)) if (game.inv[k] > 0) opts.push(['Regalar ' + name, () => give(who, k)]);
-  opts.push(...entregaOpciones(who));   // (and what Ana brings for the house: the wood, the eggs…)
+  opts.push(...entregaOpciones(who), ...cartaEncargoOpciones(who));   // (and what Ana brings for the house: the wood, the eggs…)
   if (!isQuieto(who) || who === 'marilla') opts.push(['🙏 Pedirle un favor', () => favorMenu(who)]);
   opts.push(...convOpciones(who), ...walkOption(who), [cierre(who), close]);
   say(who, text, opts);

@@ -35,6 +35,18 @@ function cartaTexto(para){
   const nov = cartaNoticia();
   return [dicho('carta_saludo:' + k), dicho('carta_apertura', { estacion }), ...(nov ? [nov] : []), ...body, dicho('carta_firma:' + k)];
 }
+// a letter can also be given to someone of the house who goes by the village (Matthew, Marilla): they leave it at the
+// post office the next day, with the mail
+const LLEVAN_CARTAS = ['matthew', 'marilla'];
+function cartaEncargoOpciones(who){
+  const c = cartas().find(x => x.de === 'ana' && x.estado === 'escrita');
+  if (!LLEVAN_CARTAS.includes(who) || !c || !(game.inv.carta > 0)) return [];
+  return [['✉️ Pedirle que lleve la carta para ' + CORREO[c.para].nombre + ' al correo', () => {
+    game.inv.carta -= 1; c.estado = 'encargada'; c.lleva = who; c.envio = today() + 1;
+    logEv(`Ana le pidió a ${wmName(who)} que llevara al correo su carta para ${CORREO[c.para].nombre}.`, [who]);
+    say(who, dicho('lleva_carta:' + who, { nombre: CORREO[c.para].nombre }), [['¡Gracias!', close]]); save();
+  }]];
+}
 // the post goes round once in a while: what was sent arrives; what was answered comes back to the post office
 let correoT = 0;
 function correoTick(dt){
@@ -42,6 +54,7 @@ function correoTick(dt){
   const d = today();
   for (const c of cartas()) {
     const C = CORREO[c.para];
+    if (c.estado === 'encargada' && d >= c.envio) { c.estado = 'enviada'; logEv(`${cap(wmName(c.lleva))} dejó en el correo la carta de Ana para ${C?.nombre || '…'}.`, []); }   // (taken by someone of the house: it goes with the next day's mail)
     if (c.estado === 'enviada' && C && d >= c.envio + C.dias) { c.estado = 'entregada'; c.llego = d; cartaAfecto(c.para); c.resp = d + C.resp[0] + Math.floor(Math.random() * (C.resp[1] - C.resp[0] + 1)); logEv(`${cap(C.nombre)} recibió la carta de Ana.`, []); }
     if (c.estado === 'entregada' && d >= c.resp) { c.estado = 'respondida'; cartas().push({ id: cartas().length + 1, de: c.para, para: 'ana', texto: cartaRespuesta(c), dia: d, estado: 'en_correo' }); notice(`📬 Llegó una carta para Ana de ${CORREO[c.para].nombre}: está en la oficina de correos (la tienda de Lawson).`); logEv(`Llegó al correo una carta de ${CORREO[c.para].nombre} para Ana.`, []); }
   }
