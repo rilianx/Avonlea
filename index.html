@@ -16243,7 +16243,7 @@ LA GENTE (id: su voz; solo estos hablan):
 ${voces}
 COSAS (para «cosa»): ${Object.keys(ITEM_DEFS).join(', ')}
 
-${n >= 2 ? `LAS SITUACIONES ABIERTAS (vienen en la partida, abajo): momentos que la historia de Ana todavía puede necesitar. Si una escena trae una, ponle «situacion: <clave>» y el juego se encarga del resto (ningún hecho para eso). Cuida su «sin»: es lo que la volvería otra cosa.
+${n >= 2 ? `LAS SITUACIONES ABIERTAS (vienen en la partida, abajo): momentos que la historia de Ana todavía puede necesitar. Si una escena ES una de ellas (lo que dice la situación pasa en la escena), ponle «situacion: <clave>» y el juego se encarga del resto (ningún hecho para eso); cualquier otra escena, aunque llene una falta de la partida, no lleva «situacion:». Cuida su «sin»: es lo que la volvería otra cosa.
 - Cómo reacciona Ana lo elige quien juega, nunca tú: si la situación dice «Ana puede reaccionar», da una opción «->» por cada reacción, cada una con «! responde <reacción>».
 - Una situación que ya pasó y «podría volver» es opcional: tráela solo si la partida lo pide.
 
@@ -16571,10 +16571,14 @@ function nocheRevisar(b, ctx){
 // is always here, a scene plays once without guarding itself with its own id, a scene that brings a milestone starts
 // by leaving its situation, and Ana is where the others are. Each one is told («reparado: …»)
 let nocheNom = null;
+const nocheDistancia = (a, b) => { const d = Array.from({ length: b.length + 1 }, (_, j) => j); for (let i = 1; i <= a.length; i++) { let p = d[0]; d[0] = i; for (let j = 1; j <= b.length; j++) { const t = d[j]; d[j] = Math.min(d[j] + 1, d[j - 1] + 1, p + (a[i - 1] === b[j - 1] ? 0 : 1)); p = t; } } return d[b.length]; };
 function nocheQuien(q){   // a speaker as the AI may write it («Ana», «Marilla», «la Sra. Lynde») → its id, or null
   const V = nocheVocab(), k = String(q || '').trim().toLowerCase(); if (V.habla.has(k)) return k;
   if (!nocheNom) { nocheNom = {}; for (const id of V.personas) for (const n of [NAMES[id], FOLK_DEFS[id]?.name, CH[id]?.fullName]) if (n) { const x = n.toLowerCase(); nocheNom[x] = nocheNom[x] && nocheNom[x] !== id ? '?' : id; nocheNom[nocheSinArt(x)] ??= id; } }
-  const id = nocheNom[k] ?? nocheNom[nocheSinArt(k)]; return id && id !== '?' ? id : null;
+  const id = nocheNom[k] ?? nocheNom[nocheSinArt(k)]; if (id && id !== '?') return id;
+  // a slip of one letter («mattthew», «marila»): the only id that close, if there is just one
+  const cerca = k.length >= 5 ? [...V.habla].filter(x => x.length >= 5 && nocheDistancia(x, k) === 1) : [];
+  return cerca.length === 1 ? cerca[0] : null;
 }
 function nocheReparar(b){
   const R = [], tipo = b?.tipo; if (!b || !['dicho', 'conversacion', 'respuesta', 'escena'].includes(tipo)) return { bloque: b, reparado: R };
