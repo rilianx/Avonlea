@@ -135,6 +135,21 @@ for (const bloque of leer('src/datos/conversaciones.txt').split(/^(?====)/m)) { 
 for (const k of [...leer('src/js/62-cartas.js').matchAll(/^  (\w+): \{ nombre:/gm)].map(m => m[1])) {
   if (!new RegExp(`^=== carta_${k}`, 'm').test(guion)) malas.push(`cartas: no hay escena para escribirle a ${k} (carta_${k}_…, «si: carta:${k}»): saldría un texto fijo, sin condiciones`);
   if (!new RegExp(`^de: ${k}$`, 'm').test(guion)) malas.push(`cartas: ${k} no tiene ninguna respuesta en el guion («canal: respuesta», «de: ${k}»)`); }
+// the milestones (src/datos/hitos.txt): what each needs is another milestone or a condition; what says it happened,
+// well-written conditions; no milestone needs itself, round and round
+{ const H = {}; let h = null;
+  for (const raw of leer('src/datos/hitos.txt').split('\n')) { const s = raw.trim(); if (!s || s[0] === '#') continue; let m;
+    if ((m = s.match(/^===\s*(.+?)\s*===$/))) { h = H[m[1]] = { necesita: [], cumple: [], peso: null }; continue; } if (!h) continue;
+    if ((m = s.match(/^necesita:\s*(.*)$/))) h.necesita = m[1].split(',').map(x => x.trim()).filter(Boolean);
+    if ((m = s.match(/^se cumple si:\s*(.*)$/))) h.cumple = m[1].split('|').map(x => x.trim()).filter(Boolean);
+    if ((m = s.match(/^peso:\s*(\S+)/))) h.peso = m[1]; }
+  for (const [k, x] of Object.entries(H)) {
+    if (!x.cumple.length) malas.push(`hito ${k}: no dice cuándo se cumple («se cumple si:»)`);
+    if (!['nucleo', 'menor'].includes(x.peso)) malas.push(`hito ${k}: peso «${x.peso}» (nucleo o menor)`);
+    for (const c of x.cumple) c.split(',').forEach(y => condicion(y.trim(), 'hito ' + k));
+    for (const n of x.necesita) if (/[:!]/.test(n)) condicion(n, 'hito ' + k); else if (!H[n]) malas.push(`hito ${k}: necesita «${n}», que no es un hito`);
+    const ve = (n, vis) => vis.has(n) ? true : (H[n]?.necesita || []).some(y => H[y] && ve(y, new Set([...vis, n])));
+    if (x.necesita.some(n => H[n] && ve(n, new Set([k])))) malas.push(`hito ${k}: se necesita a sí mismo (en círculo)`); } }
 // the report
 const necesita = Object.keys(pide).filter(h => !h.endsWith(' ')), lee = new Set(Object.keys(pide).map(h => h.trim()));
 const nunca = necesita.filter(h => !hace[h] && !/^conoce_/.test(h)).sort()   /* (conoce_<who>: whoever Ana meets, src/js/66-conocidos.js) */, sinUso = Object.keys(hace).filter(h => !lee.has(h) && !/^(hito_|llego_|se_fue_)/.test(h)).sort();

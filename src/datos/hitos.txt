@@ -1,0 +1,126 @@
+# Los hitos de la historia: lo que no puede faltar, escrito por lo que SIGNIFICA y no por cómo pasa en el libro.
+# Es el esqueleto que se mantiene aunque la partida se desvíe del libro (docs/MODELO_INTERACCIONES.md, «Los hitos»):
+# la forma del libro es una manera de cumplirlo; otra (escrita a mano, o por la IA de la noche) puede cumplirlo
+# también, y deja el mismo hecho: hito_<id>.
+#
+#   === id ===
+#   capitulos: de dónde viene, en el libro
+#   significa: qué pasa en el fondo (lo que una variante tiene que conservar)
+#   necesita: los hitos que tienen que haber pasado antes (sus id), y otras condiciones del guion
+#   se cumple si: las condiciones que dicen que pasó (la forma del libro, con los hechos del juego);
+#                 separadas por « | », cualquiera de ellas (una variante agrega la suya: hecho:hito_<id>)
+#   libro: cómo lo cuenta el libro, en una línea (la realización canónica)
+#   no puede: lo que una variante no debe hacer (para que siga siendo el mismo hito)
+#   variantes: ideas de otras formas de que pase (para quien escriba una, a mano o la IA)
+#   peso: nucleo (no puede faltar) o menor (puede no pasar si la partida va por otro lado)
+# tools/grafo.js revisa las condiciones y que cada hito que se necesita exista.
+
+=== llegada ===
+capitulos: 1–3
+significa: Ana llega a Tejas Verdes llena de esperanza, y ahí descubren que no es lo que esperaban: querían un niño.
+necesita:
+se cumple si: hecho:llegada_tv
+libro: Matthew la encuentra en la estación de Bright River; Marilla dice «¿Dónde está el niño?».
+no puede: que la reciban como esperada; quitarle a Ana la ilusión del camino
+variantes: (es el comienzo del juego: siempre pasa así)
+peso: nucleo
+
+=== a_prueba ===
+capitulos: 4–6
+significa: Ana vive unos días sin saber si la devuelven al orfanato; tiene que ganarse un lugar.
+necesita: llegada
+se cumple si: hecho:a_prueba
+libro: Marilla la lleva donde la Sra. Spencer; la Sra. Blewett la quiere de criada; Marilla decide probarla.
+no puede: que la acepten sin dudas; que Ana sepa desde el principio que se queda
+variantes: Marilla la pone a prueba con los quehaceres de la casa; alguien del pueblo opina que hay que devolverla
+peso: nucleo
+
+=== se_queda ===
+capitulos: 6–8
+significa: Los Cuthbert deciden quedarse con Ana: por primera vez tiene un hogar.
+necesita: a_prueba
+se cumple si: hecho:se_queda
+libro: Marilla le dice que se queda, «si te portas bien y te muestras agradecida».
+no puede: que lo decida Ana sola; que pase sin que Marilla lo diga
+variantes: Matthew lo pide con pocas palabras y Marilla cede; algo que Ana hace por la casa inclina la balanza
+peso: nucleo
+
+=== matthew_aliado ===
+capitulos: 2–8
+significa: Matthew, el tímido, queda del lado de Ana para siempre: es su primer aliado.
+necesita: llegada
+se cumple si: afecto:matthew:ana>=4
+libro: el viaje desde Bright River; Matthew le dice a Marilla «podríamos hacerle algún bien a ella».
+no puede: que Matthew se vuelva conversador o la regañe
+variantes: Ana lo ayuda en el granero y él le cuenta algo de su vida; él la defiende callado frente a otro
+peso: nucleo
+
+=== pelea_adulta ===
+capitulos: 9
+significa: Una persona mayor la humilla por su aspecto y Ana estalla: su orgullo herido choca con las reglas del pueblo.
+necesita: se_queda
+se cumple si: hecho:ofendio_lynde
+libro: la Sra. Lynde dice que es flaca, fea y pelirroja; Ana le grita «¡La odio!».
+no puede: que Ana tenga toda la culpa o ninguna; que pase sin testigos de la casa
+variantes: otra vecina se burla de sus pecas en la iglesia; un adulto la reta en público por su pelo
+peso: nucleo
+
+=== pedir_perdon ===
+capitulos: 10
+significa: Ana aprende a pedir perdón a quien ofendió, y lo hace a su manera (con mucho teatro), y el perdón los acerca.
+necesita: pelea_adulta
+se cumple si: hecho:disculpa_lynde
+libro: Marilla la deja en su pieza hasta que se disculpe; Ana le pide perdón a la Sra. Lynde de rodillas, con un discurso.
+no puede: que la obliguen a la fuerza sin que ella lo decida; que la disculpa sea seca
+variantes: Matthew la convence en voz baja; Ana escribe una carta de disculpas larguísima
+peso: nucleo
+
+=== sombrero_iglesia ===
+capitulos: 11
+significa: La imaginación de Ana choca con las costumbres del pueblo, y el pueblo habla.
+necesita: se_queda
+se cumple si: cuaderno:sombrero
+libro: Ana va sola a la iglesia con el sombrero cubierto de flores; todos lo comentan.
+no puede: que Ana lo haga para burlarse
+variantes: Ana adorna la mesa de la escuela dominical con ramas; le pone nombre a la vaca del pastor
+peso: menor
+
+=== amiga_del_alma ===
+capitulos: 12
+significa: Ana encuentra a la amiga que siempre soñó, y se juran amistad para siempre.
+necesita: se_queda
+se cumple si: cuaderno:amigas
+libro: Marilla la lleva a La Cuesta del Huerto; en el jardín, Ana y Diana juran «mientras el sol y la luna existan».
+no puede: que la amiga no sea Diana; que la amistad nazca sin un juramento o algo tan solemne como eso
+variantes: se conocen en la escuela dominical y juran junto al arroyo
+peso: nucleo
+
+=== confianza_marilla ===
+capitulos: 13–14
+significa: La confianza entre Marilla y Ana se pone a prueba por un malentendido, y sale más fuerte cuando se aclara.
+necesita: se_queda
+se cumple si: hecho:broche
+libro: se pierde el broche de amatista; Ana confiesa algo que no hizo para poder ir al picnic; aparece enganchado en el chal de Marilla.
+no puede: que Ana sea de verdad culpable; que no se aclare
+variantes: desaparece la llave de la despensa; Marilla cree que Ana rompió algo de su madre
+peso: nucleo
+
+=== rival ===
+capitulos: 15
+significa: Nace la rivalidad con Gilbert: él la hiere en lo que más le duele, ella no lo perdona, y empiezan a competir.
+necesita: se_queda
+se cumple si: hecho:zanahorias
+libro: Gilbert le dice «¡Zanahorias!»; Ana le rompe la pizarra en la cabeza y deja de ir a la escuela.
+no puede: que Gilbert sea malo de verdad; que se reconcilien enseguida
+variantes: Gilbert se ríe de una composición suya delante de todos; le gana en un deletreo y la mira
+peso: nucleo
+
+=== amistad_a_prueba ===
+capitulos: 16–19
+significa: La amistad con Diana se pone a prueba por un error de Ana, y Ana la recupera con un acto de valentía.
+necesita: amiga_del_alma
+se cumple si: hecho:perdonada
+libro: Ana le da vino de grosellas creyendo que es cordial; la Sra. Barry prohíbe la amistad; Ana salva a Minnie May del crup y la perdona.
+no puede: que el error sea a propósito; que el perdón llegue sin que Ana haga algo grande
+variantes: Ana pierde a Minnie May en el bosque y después la encuentra de noche, con el farol
+peso: nucleo

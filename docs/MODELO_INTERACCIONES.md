@@ -74,6 +74,10 @@ Todo lo que alguien dice o escribe en el juego está en `src/datos/`, con sus co
 
 `tools/grafo.js` revisa que cada momento que pide el código exista, que ninguno quede callado y que las condiciones estén bien escritas; `tools/modelo.py` lee los dichos que dicen quién los dice (`quien:`) y les aplica las reglas de `reglas.txt` (así aparecieron líneas de Diana que no decían «mientras no se lo prohíban»).
 
+## Los hitos
+
+`src/datos/hitos.txt` es el esqueleto de la historia: lo que no puede faltar, escrito por lo que **significa** («la amistad con Diana se pone a prueba por un error de Ana, y Ana la recupera con valentía») y no por cómo pasa en el libro (el vino de grosellas, el crup). La forma del libro es una manera de cumplirlo («se cumple si: hecho:perdonada»); otra, escrita a mano o por la IA de la noche, puede cumplirlo también y deja `hecho:hito_<id>`. Cada hito dice qué necesita (otros hitos), qué no puede hacer una variante para seguir siendo el mismo hito, ideas de variantes y su peso (núcleo o menor). Es la distinción de Chatman entre núcleos y satélites: los satélites se pueden cambiar libremente; los núcleos se conservan. `tools/grafo.js` revisa sus condiciones y que no se necesiten en círculo; la IA de la noche tendrá una regla más: nada de lo que escriba puede dejar un hito pendiente imposible.
+
 ## Los días a prueba (del 1 al 3)
 
 Lo que pasa entre que Ana llega y que Marilla decide (los cap. 2 a 8 del libro) se revisa de tres maneras:
