@@ -144,6 +144,7 @@ for (const k of [...leer('src/js/62-cartas.js').matchAll(/^  (\w+): \{ nombre:/g
     if ((m = s.match(/^se cumple si:\s*(.*)$/))) h.cumple = m[1].split('|').map(x => x.trim()).filter(Boolean);
     if ((m = s.match(/^peso:\s*(\S+)/))) h.peso = m[1]; }
   for (const [k, x] of Object.entries(H)) {
+    anota(hace, 'hito_' + k, 'hitos');   // (src/js/66-hitos.js leaves it when it happens)
     if (!x.cumple.length) malas.push(`hito ${k}: no dice cuándo se cumple («se cumple si:»)`);
     if (!['nucleo', 'menor'].includes(x.peso)) malas.push(`hito ${k}: peso «${x.peso}» (nucleo o menor)`);
     for (const c of x.cumple) c.split(',').forEach(y => condicion(y.trim(), 'hito ' + k));

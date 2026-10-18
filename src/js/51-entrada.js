@@ -86,7 +86,7 @@ $('ajcerrar').addEventListener('click', () => { ajustesSync(); ajustesPanel(fals
 $('ajsaben').addEventListener('click', () => {
   const o = $('ajout'); o.hidden = false;
   const per = Object.keys(PEOPLE).map(w => `— ${NAMES[w]} —\nSabe:\n` + ((game.know[w] || []).slice(-8).map(e => '  · día ' + e.d + ': ' + e.t).join('\n') || '  (nada)')).join('\n\n');
-  o.textContent = per + '\n\n— Encargos —\n' + (game.tasks.map(t => '  ' + (t.done ? '✓ ' : '· ') + taskText(t) + ' (de ' + NAMES[t.from] + ')').join('\n') || '  (ninguno)') + '\n\n— Diario de Ana —\n' + (game.journal.slice(-30).map(e => '  · día ' + e.d + ': ' + e.t).join('\n') || '  (nada todavía)');
+  o.textContent = '— Los hitos de la historia —\n' + hitosTexto() + '\n\n' + per + '\n\n— Encargos —\n' + (game.tasks.map(t => '  ' + (t.done ? '✓ ' : '· ') + taskText(t) + ' (de ' + NAMES[t.from] + ')').join('\n') || '  (ninguno)') + '\n\n— Diario de Ana —\n' + (game.journal.slice(-30).map(e => '  · día ' + e.d + ': ' + e.t).join('\n') || '  (nada todavía)');
 });
 $('ajolvidar').addEventListener('click', () => { if (!confirm('¿Borrar todo lo que saben y el diario de lo que ha pasado?')) return; game.journal = []; game.know = {}; game.tasks = []; game.giftFor = {}; save(); $('ajout').hidden = false; $('ajout').textContent = 'Listo: es como si fuera el primer día.'; });
 const SPEEDS_T = [.25, .5, 1, 2, 5, 10, 25, 50];
