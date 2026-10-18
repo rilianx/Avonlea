@@ -68,7 +68,7 @@ let azar = SEMILLA; const rnd = () => (azar = (azar * 16807) % 2147483647) / 214
     }
     // curious: whoever is here and has something to talk about
     if (!s.ocupada && rnd() < E.conversa / 6) {
-      const c = await ev(`(() => { for (const k of Object.keys(FOLK_DEFS).concat(Object.keys(CH))) { if (k === 'ana' || sceneOf(k) !== game.scene) continue; const C = convDisponibles(k)[0]; if (C) { conversar(C); return C.id; } } return null; })()`).catch(() => null);
+      const c = await ev(`(() => { for (const k of Object.keys(FOLK_DEFS).concat(Object.keys(CH))) { let aqui = false; try { aqui = k !== 'ana' && sceneOf(k) === game.scene; } catch (e) {} if (!aqui) continue; const C = convDisponibles(k)[0]; if (C) { conversar(C); return C.id; } } return null; })()`).catch(() => null);
       if (c) D.conversaciones.push(c);
     }
     await correr(4);
