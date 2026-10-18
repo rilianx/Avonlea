@@ -1,126 +1,153 @@
-# Los hitos de la historia: lo que no puede faltar, escrito por lo que SIGNIFICA y no por cómo pasa en el libro.
-# Es el esqueleto que se mantiene aunque la partida se desvíe del libro (docs/MODELO_INTERACCIONES.md, «Los hitos»):
-# la forma del libro es una manera de cumplirlo; otra (escrita a mano, o por la IA de la noche) puede cumplirlo
-# también, y deja el mismo hecho: hito_<id>.
+# Los hitos de la historia: las SITUACIONES que la historia garantiza, escritas por lo que significan y no por cómo
+# pasan en el libro. Lo que Ana hace en cada una lo decide quien juega: cada respuesta abre su propio camino
+# (docs/MODELO_INTERACCIONES.md, «Los hitos»). Una variante (escrita a mano o por la IA de la noche) puede traer la
+# situación de otra forma, y deja hecho:hito_<id>; nunca elige la respuesta.
 #
 #   === id ===
 #   capitulos: de dónde viene, en el libro
-#   significa: qué pasa en el fondo (lo que una variante tiene que conservar)
-#   necesita: los hitos que tienen que haber pasado antes (sus id), y otras condiciones del guion
-#   se cumple si: las condiciones que dicen que pasó (la forma del libro, con los hechos del juego);
-#                 separadas por « | », cualquiera de ellas (una variante agrega la suya: hecho:hito_<id>)
-#   libro: cómo lo cuenta el libro, en una línea (la realización canónica)
-#   no puede: lo que una variante no debe hacer (para que siga siendo el mismo hito)
-#   variantes: ideas de otras formas de que pase (para quien escriba una, a mano o la IA)
-#   peso: nucleo (no puede faltar) o menor (puede no pasar si la partida va por otro lado)
-# tools/grafo.js revisa las condiciones y que cada hito que se necesita exista.
+#   situacion: lo que pasa (lo que una variante tiene que conservar)
+#   necesita: lo que tiene que haber pasado antes: otros hitos (su id), o un hito con cierta respuesta
+#             (id:respuesta: «humillada:estalla»), u otras condiciones del guion
+#   pasa si: las condiciones que dicen que la situación ocurrió, con cualquier respuesta (la forma del libro, con los
+#            hechos del juego); separadas por « | », cualquiera (una variante agrega la suya: hecho:hito_<id>)
+#   respuesta <nombre>: las condiciones que dicen que Ana respondió así (la primera que se cumpla queda: hecho
+#            hito_<id>_<nombre>); sin respuestas, la situación es todo el hito
+#   libro: la respuesta del libro (su nombre), y cómo lo cuenta, en una línea
+#   no puede: lo que una variante no debe hacer (para que siga siendo la misma situación)
+#   variantes: ideas de otras formas de la situación (para quien escriba una, a mano o la IA)
+#   otra oportunidad: si Ana no responde como en el libro, cuántas veces más puede la IA de la noche traerle la
+#            situación de otra forma (normalmente 1; la IA puede decidir menos si la partida va claramente por otro
+#            lado, o «0»: lo que decidió, decidido)
+#   peso: nucleo (la situación no puede faltar) o menor (puede no pasar)
+# Un hito que necesita otro con cierta respuesta queda CERRADO si ese otro tuvo otra respuesta (hecho hito_<id>_cerrado):
+# no es un error, es su historia. tools/grafo.js revisa las condiciones, los nombres y que nada se necesite en círculo.
 
 === llegada ===
 capitulos: 1–3
-significa: Ana llega a Tejas Verdes llena de esperanza, y ahí descubren que no es lo que esperaban: querían un niño.
-necesita:
-se cumple si: hecho:llegada_tv
+situacion: Ana llega a Tejas Verdes llena de esperanza, y ahí descubren que no es lo que esperaban: querían un niño.
+pasa si: hecho:llegada_tv
 libro: Matthew la encuentra en la estación de Bright River; Marilla dice «¿Dónde está el niño?».
 no puede: que la reciban como esperada; quitarle a Ana la ilusión del camino
-variantes: (es el comienzo del juego: siempre pasa así)
+otra oportunidad: 0
 peso: nucleo
 
 === a_prueba ===
 capitulos: 4–6
-significa: Ana vive unos días sin saber si la devuelven al orfanato; tiene que ganarse un lugar.
+situacion: Ana vive unos días sin saber si la devuelven al orfanato; tiene que ganarse un lugar.
 necesita: llegada
-se cumple si: hecho:a_prueba
+pasa si: hecho:a_prueba
 libro: Marilla la lleva donde la Sra. Spencer; la Sra. Blewett la quiere de criada; Marilla decide probarla.
 no puede: que la acepten sin dudas; que Ana sepa desde el principio que se queda
 variantes: Marilla la pone a prueba con los quehaceres de la casa; alguien del pueblo opina que hay que devolverla
+otra oportunidad: 0
 peso: nucleo
 
-=== se_queda ===
+=== decision ===
 capitulos: 6–8
-significa: Los Cuthbert deciden quedarse con Ana: por primera vez tiene un hogar.
+situacion: Los Cuthbert deciden qué hacer con Ana.
 necesita: a_prueba
-se cumple si: hecho:se_queda
-libro: Marilla le dice que se queda, «si te portas bien y te muestras agradecida».
+pasa si: hecho:se_queda | hecho:devuelta
+respuesta se_queda: hecho:se_queda
+respuesta devuelta: hecho:devuelta
+libro: se_queda — Marilla le dice que se queda, «si te portas bien y te muestras agradecida».
 no puede: que lo decida Ana sola; que pase sin que Marilla lo diga
 variantes: Matthew lo pide con pocas palabras y Marilla cede; algo que Ana hace por la casa inclina la balanza
+otra oportunidad: 0
 peso: nucleo
 
 === matthew_aliado ===
 capitulos: 2–8
-significa: Matthew, el tímido, queda del lado de Ana para siempre: es su primer aliado.
+situacion: Matthew, el tímido, queda del lado de Ana para siempre: es su primer aliado.
 necesita: llegada
-se cumple si: afecto:matthew:ana>=5
-libro: el viaje desde Bright River; Matthew le dice a Marilla «podríamos hacerle algún bien a ella». (En el juego, Matthew empieza queriéndola 4 de 5: el hito es llegar a 5.)
+pasa si: afecto:matthew:ana>=5
+libro: el viaje desde Bright River; «podríamos hacerle algún bien a ella». (En el juego, Matthew empieza queriéndola 4 de 5: el hito es llegar a 5.)
 no puede: que Matthew se vuelva conversador o la regañe
 variantes: Ana lo ayuda en el granero y él le cuenta algo de su vida; él la defiende callado frente a otro
+otra oportunidad: 1
 peso: nucleo
 
-=== pelea_adulta ===
+=== humillada ===
 capitulos: 9
-significa: Una persona mayor la humilla por su aspecto y Ana estalla: su orgullo herido choca con las reglas del pueblo.
-necesita: se_queda
-se cumple si: hecho:ofendio_lynde
-libro: la Sra. Lynde dice que es flaca, fea y pelirroja; Ana le grita «¡La odio!».
-no puede: que Ana tenga toda la culpa o ninguna; que pase sin testigos de la casa
+situacion: Una persona mayor humilla a Ana por su aspecto, delante de los de la casa.
+necesita: decision:se_queda
+pasa si: hecho:lynde_visita
+respuesta estalla: hecho:ofendio_lynde | hecho:disculpa_lynde
+respuesta se_contiene: hecho:lynde_contenida
+respuesta llora: hecho:lynde_llanto
+libro: estalla — la Sra. Lynde dice que es flaca, fea y pelirroja; Ana le grita «¡La odio!».
+no puede: que la humillación sea leve; que pase sin testigos de la casa
 variantes: otra vecina se burla de sus pecas en la iglesia; un adulto la reta en público por su pelo
+otra oportunidad: 0
 peso: nucleo
 
 === pedir_perdon ===
 capitulos: 10
-significa: Ana aprende a pedir perdón a quien ofendió, y lo hace a su manera (con mucho teatro), y el perdón los acerca.
-necesita: pelea_adulta
-se cumple si: hecho:disculpa_lynde
-libro: Marilla la deja en su pieza hasta que se disculpe; Ana le pide perdón a la Sra. Lynde de rodillas, con un discurso.
+situacion: Ana tiene que pedir perdón a quien ofendió, aunque le cueste el orgullo.
+necesita: humillada:estalla
+pasa si: hecho:disculpa_lynde
+respuesta a_lo_grande: hecho:disculpa_lynde
+libro: a_lo_grande — Marilla la deja en su pieza hasta que se disculpe; Ana le pide perdón de rodillas, con un discurso.
 no puede: que la obliguen a la fuerza sin que ella lo decida; que la disculpa sea seca
 variantes: Matthew la convence en voz baja; Ana escribe una carta de disculpas larguísima
+otra oportunidad: 1
 peso: nucleo
 
 === sombrero_iglesia ===
 capitulos: 11
-significa: La imaginación de Ana choca con las costumbres del pueblo, y el pueblo habla.
-necesita: se_queda
-se cumple si: cuaderno:sombrero
-libro: Ana va sola a la iglesia con el sombrero cubierto de flores; todos lo comentan.
+situacion: La imaginación de Ana choca con las costumbres del pueblo, y el pueblo habla.
+necesita: decision:se_queda
+pasa si: cuaderno:sombrero
+libro: Ana va a la iglesia con el sombrero cubierto de flores; todos lo comentan.
 no puede: que Ana lo haga para burlarse
 variantes: Ana adorna la mesa de la escuela dominical con ramas; le pone nombre a la vaca del pastor
+otra oportunidad: 1
 peso: menor
 
 === amiga_del_alma ===
 capitulos: 12
-significa: Ana encuentra a la amiga que siempre soñó, y se juran amistad para siempre.
-necesita: se_queda
-se cumple si: cuaderno:amigas
-libro: Marilla la lleva a La Cuesta del Huerto; en el jardín, Ana y Diana juran «mientras el sol y la luna existan».
-no puede: que la amiga no sea Diana; que la amistad nazca sin un juramento o algo tan solemne como eso
+situacion: Ana conoce a la niña que podría ser la amiga que siempre soñó.
+necesita: decision:se_queda
+pasa si: hecho:conocidas_diana
+respuesta juran: cuaderno:amigas
+respuesta no_juran: dias_desde:conocidas_diana:14, !cuaderno:amigas
+libro: juran — en el jardín de La Cuesta del Huerto, «mientras el sol y la luna existan».
+no puede: que la amiga no sea Diana; que la amistad nazca sin algo tan solemne como un juramento
 variantes: se conocen en la escuela dominical y juran junto al arroyo
+otra oportunidad: 1
 peso: nucleo
 
 === confianza_marilla ===
 capitulos: 13–14
-significa: La confianza entre Marilla y Ana se pone a prueba por un malentendido, y sale más fuerte cuando se aclara.
-necesita: se_queda
-se cumple si: hecho:broche
-libro: se pierde el broche de amatista; Ana confiesa algo que no hizo para poder ir al picnic; aparece enganchado en el chal de Marilla.
+situacion: Un malentendido pone a prueba la confianza entre Marilla y Ana.
+necesita: amiga_del_alma:juran
+pasa si: hecho:broche
+respuesta confiesa_en_falso: hecho:broche
+libro: confiesa_en_falso — se pierde el broche de amatista; Ana «confiesa» para poder ir al picnic; aparece en el chal de Marilla. (La escena todavía no deja elegir: solo la respuesta del libro.)
 no puede: que Ana sea de verdad culpable; que no se aclare
 variantes: desaparece la llave de la despensa; Marilla cree que Ana rompió algo de su madre
+otra oportunidad: 1
 peso: nucleo
 
 === rival ===
 capitulos: 15
-significa: Nace la rivalidad con Gilbert: él la hiere en lo que más le duele, ella no lo perdona, y empiezan a competir.
-necesita: se_queda
-se cumple si: hecho:zanahorias
-libro: Gilbert le dice «¡Zanahorias!»; Ana le rompe la pizarra en la cabeza y deja de ir a la escuela.
-no puede: que Gilbert sea malo de verdad; que se reconcilien enseguida
+situacion: Un niño de la escuela la hiere en lo que más le duele, delante de todos.
+necesita: decision:se_queda
+pasa si: hecho:zanahorias
+respuesta pizarra: hecho:zanahorias
+libro: pizarra — Gilbert le dice «¡Zanahorias!»; Ana le rompe la pizarra en la cabeza y no lo perdona. (La escena todavía no deja elegir.)
+no puede: que Gilbert sea malo de verdad
 variantes: Gilbert se ríe de una composición suya delante de todos; le gana en un deletreo y la mira
+otra oportunidad: 1
 peso: nucleo
 
 === amistad_a_prueba ===
 capitulos: 16–19
-significa: La amistad con Diana se pone a prueba por un error de Ana, y Ana la recupera con un acto de valentía.
-necesita: amiga_del_alma
-se cumple si: hecho:perdonada
-libro: Ana le da vino de grosellas creyendo que es cordial; la Sra. Barry prohíbe la amistad; Ana salva a Minnie May del crup y la perdona.
+situacion: Un error de Ana pone a prueba la amistad con Diana: la familia de Diana se la prohíbe.
+necesita: amiga_del_alma:juran
+pasa si: hecho:diana_borracha
+respuesta la_recupera: hecho:perdonada
+libro: la_recupera — Ana le da vino de grosellas creyendo que es cordial; la Sra. Barry prohíbe la amistad; Ana salva a Minnie May del crup y la perdona.
 no puede: que el error sea a propósito; que el perdón llegue sin que Ana haga algo grande
 variantes: Ana pierde a Minnie May en el bosque y después la encuentra de noche, con el farol
+otra oportunidad: 1
 peso: nucleo

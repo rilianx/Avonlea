@@ -135,22 +135,29 @@ for (const bloque of leer('src/datos/conversaciones.txt').split(/^(?====)/m)) { 
 for (const k of [...leer('src/js/62-cartas.js').matchAll(/^  (\w+): \{ nombre:/gm)].map(m => m[1])) {
   if (!new RegExp(`^=== carta_${k}`, 'm').test(guion)) malas.push(`cartas: no hay escena para escribirle a ${k} (carta_${k}_…, «si: carta:${k}»): saldría un texto fijo, sin condiciones`);
   if (!new RegExp(`^de: ${k}$`, 'm').test(guion)) malas.push(`cartas: ${k} no tiene ninguna respuesta en el guion («canal: respuesta», «de: ${k}»)`); }
-// the milestones (src/datos/hitos.txt): what each needs is another milestone or a condition; what says it happened,
-// well-written conditions; no milestone needs itself, round and round
-{ const H = {}; let h = null;
+// the milestones (src/datos/hitos.txt): what each needs is another milestone (with one of its answers, if it says
+// one) or a condition; what says it happened and its answers, well-written conditions; nothing needed round and round
+{ const H = {}; let h = null; const alts = v => v.split('|').map(x => x.split(',').map(c => c.trim()).filter(Boolean)).filter(a => a.length);
   for (const raw of leer('src/datos/hitos.txt').split('\n')) { const s = raw.trim(); if (!s || s[0] === '#') continue; let m;
-    if ((m = s.match(/^===\s*(.+?)\s*===$/))) { h = H[m[1]] = { necesita: [], cumple: [], peso: null }; continue; } if (!h) continue;
+    if ((m = s.match(/^===\s*(.+?)\s*===$/))) { h = H[m[1]] = { necesita: [], pasa: [], resp: {}, peso: null, libro: '', otra: null }; continue; } if (!h) continue;
+    if ((m = s.match(/^respuesta (\w+):\s*(.*)$/))) { h.resp[m[1]] = alts(m[2]); continue; }
     if ((m = s.match(/^necesita:\s*(.*)$/))) h.necesita = m[1].split(',').map(x => x.trim()).filter(Boolean);
-    if ((m = s.match(/^se cumple si:\s*(.*)$/))) h.cumple = m[1].split('|').map(x => x.trim()).filter(Boolean);
+    if ((m = s.match(/^pasa si:\s*(.*)$/))) h.pasa = alts(m[1]);
+    if ((m = s.match(/^libro:\s*(.*)$/))) h.libro = m[1];
+    if ((m = s.match(/^otra oportunidad:\s*(.*)$/))) h.otra = m[1];
     if ((m = s.match(/^peso:\s*(\S+)/))) h.peso = m[1]; }
   for (const [k, x] of Object.entries(H)) {
-    anota(hace, 'hito_' + k, 'hitos');   // (src/js/66-hitos.js leaves it when it happens)
-    if (!x.cumple.length) malas.push(`hito ${k}: no dice cuándo se cumple («se cumple si:»)`);
+    anota(hace, 'hito_' + k, 'hitos'); for (const r of Object.keys(x.resp)) anota(hace, 'hito_' + k + '_' + r, 'hitos'); anota(hace, 'hito_' + k + '_cerrado', 'hitos');   // (src/js/66-hitos.js leaves them)
+    if (!x.pasa.length) malas.push(`hito ${k}: no dice cuándo pasa («pasa si:»)`);
     if (!['nucleo', 'menor'].includes(x.peso)) malas.push(`hito ${k}: peso «${x.peso}» (nucleo o menor)`);
-    for (const c of x.cumple) c.split(',').forEach(y => condicion(y.trim(), 'hito ' + k));
-    for (const n of x.necesita) if (/[:!]/.test(n)) condicion(n, 'hito ' + k); else if (!H[n]) malas.push(`hito ${k}: necesita «${n}», que no es un hito`);
-    const ve = (n, vis) => vis.has(n) ? true : (H[n]?.necesita || []).some(y => H[y] && ve(y, new Set([...vis, n])));
-    if (x.necesita.some(n => H[n] && ve(n, new Set([k])))) malas.push(`hito ${k}: se necesita a sí mismo (en círculo)`); } }
+    if (x.otra == null || !/^\d+$/.test(x.otra)) malas.push(`hito ${k}: «otra oportunidad» tiene que ser un número (0, 1…)`);
+    const lr = x.libro.match(/^(\w+) —/)?.[1]; if (Object.keys(x.resp).length && !x.resp[lr]) malas.push(`hito ${k}: «libro:» tiene que empezar con la respuesta del libro (una de: ${Object.keys(x.resp).join(', ')}) y « — »`);
+    for (const a of [...x.pasa, ...Object.values(x.resp).flat()]) a.forEach(y => condicion(y, 'hito ' + k));
+    for (const n of x.necesita) { const [id, r] = n.split(':');
+      if (H[id]) { if (r && !H[id].resp[r]) malas.push(`hito ${k}: necesita «${n}», y ${id} no tiene la respuesta «${r}»`); }
+      else if (/[:!]/.test(n)) condicion(n, 'hito ' + k); else malas.push(`hito ${k}: necesita «${n}», que no es un hito`); }
+    const ve = (n, vis) => vis.has(n) ? true : (H[n]?.necesita || []).map(y => y.split(':')[0]).some(y => H[y] && ve(y, new Set([...vis, n])));
+    if (x.necesita.map(y => y.split(':')[0]).some(n => H[n] && ve(n, new Set([k])))) malas.push(`hito ${k}: se necesita a sí mismo (en círculo)`); } }
 // the report
 const necesita = Object.keys(pide).filter(h => !h.endsWith(' ')), lee = new Set(Object.keys(pide).map(h => h.trim()));
 const nunca = necesita.filter(h => !hace[h] && !/^conoce_/.test(h)).sort()   /* (conoce_<who>: whoever Ana meets, src/js/66-conocidos.js) */, sinUso = Object.keys(hace).filter(h => !lee.has(h) && !/^(hito_|llego_|se_fue_)/.test(h)).sort();
