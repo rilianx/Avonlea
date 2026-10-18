@@ -1,0 +1,25 @@
+{
+ "_nota": "Una escena escrita como ahora se le pide a la IA: «situacion: rival» y «! responde <reacción>» en cada opción, sin ningún hecho de los hitos; el juego pone «hito:», «historia_rival» y la guarda, y traduce cada reacción a su hecho. La segunda solo ofrece una reacción (se descarta), y la tercera inventa una (se descarta, con las que hay). Uso: node tools/noche.js --respuesta tools/noche/ejemplos/situacion.json",
+ "escenario": "spencer_rachel",
+ "nivel": "efectos",
+ "bloques": [
+  {
+   "tipo": "escena",
+   "esperado": "aceptado",
+   "porque": "Gilbert todavía no la hiere: la situación «rival» de otra forma, y elige quien juega.",
+   "texto": "=== ia_rival_composicion ===\ncanal: es\nprioridad: 4\nen: ana=es, gilbert=es\nsujeta: gilbert\nsituacion: rival\nsi: hecho:llego_gilbert\nnarra: En la escuela, el maestro lee en voz alta la composición de Ana sobre el Lago de las Aguas Brillantes.\n---\ngilbert: (Gilbert Blythe sonríe de lado.) «Aguas brillantes»… ¡Con ese pelo, el lago se debe haber puesto colorado!\n-> Romperle la pizarra en la cabeza\n   ana: ¡Cómo te atreves!\n   ! responde pizarra\n-> Hacer como que no lo oyó\n   ana: (Ana mira por la ventana, muy derecha.)\n   ! responde lo_ignora\n-> Contestarle\n   ana: Por lo menos mi composición tiene algo adentro.\n   ! responde le_contesta"
+  },
+  {
+   "tipo": "escena",
+   "esperado": "rechazado",
+   "porque": "(a mano: una sola reacción es elegir por Ana)",
+   "texto": "=== ia_rival_deletreo ===\ncanal: es\nprioridad: 4\nen: ana=es, gilbert=es\nsituacion: rival\nsi: hecho:llego_gilbert\n---\ngilbert: (Gilbert le gana en el deletreo y la mira.)\n-> Mirarlo con desprecio\n   ana: (Ana levanta la barbilla.)\n   ! responde lo_ignora"
+  },
+  {
+   "tipo": "escena",
+   "esperado": "rechazado",
+   "porque": "(a mano: una reacción que no existe)",
+   "texto": "=== ia_rival_tinta ===\ncanal: es\nprioridad: 4\nen: ana=es, gilbert=es\nsituacion: rival\nsi: hecho:llego_gilbert\n---\ngilbert: (Gilbert le moja la trenza en el tintero.)\n-> Llorar\n   ana: (Ana se tapa la cara.)\n   ! responde llora\n-> Ignorarlo\n   ana: (Ana sigue escribiendo.)\n   ! responde lo_ignora"
+  }
+ ]
+}

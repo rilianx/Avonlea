@@ -149,13 +149,30 @@ function nocheCabos(){
   for (const [k, L] of Object.entries(sin)) C.push({ tipo: 'carta', quien: k, texto: `Ana le escribió ${L.length === 1 ? 'una carta' : L.length + ' cartas'} a ${CORREO[k]?.nombre || k} que todavía no ${L.length === 1 ? 'tiene' : 'tienen'} respuesta (${L.map(c => c.estado).join(', ')}); puede contestar: «canal: respuesta», «de: ${k}»` });
   for (const t of activeTasks()) C.push({ tipo: 'encargo', quien: t.from, texto: `${NAMES[t.from] || t.from} le pidió a Ana: ${taskText(t)} (día ${t.d + 1})` });
   for (const e of (game.journal || []).filter(e => hoy - e.d <= 10 && /prometi|prometió|le pidió|le preguntó|pidió permiso/.test(e.t)).slice(-6)) C.push({ tipo: 'promesa', texto: `Día ${e.d}: ${e.t}` });
-  for (const h of HITOS) {
-    const s = nocheHitoEstado(h);
-    if (s.listo) C.push({ tipo: 'hito', hito: h.id, texto: `El hito «${h.id}» puede pasar ahora (todavía no pasó): ${h.situacion}${s.quedan ? ` La IA puede traerlo de otra forma (le quedan ${s.quedan}).` : ' (Sin oportunidades para la IA: pasará a su manera, o no.)'}` });
-    else if (s.distinta && s.quedan) C.push({ tipo: 'oportunidad', hito: h.id, texto: `El hito «${h.id}» pasó y Ana respondió «${s.respuesta || 'nada todavía'}» (en el libro: «${s.libro}»): le quedan ${s.quedan} oportunidad(es) de vivir la situación de otra forma, si la partida lo pide.` });
-  }
   for (const [k, v] of Object.entries(game.noche?.visitas || {})) if (v.n >= 3) C.push({ tipo: 'lugar', lugar: k, texto: `Ana va seguido a ${PLACES[k]?.[0] || HOUSES[k]?.name || k} (${v.n} días)` });
   return C;
+}
+
+// the open situations (the milestones, told as the AI needs them: what happens, how Ana may react, what it must not
+// be); the ids, the facts and the chances stay in the game, which puts them on what is accepted (nocheReparar)
+function nocheSituaciones(){
+  const out = [];
+  for (const h of HITOS) {
+    const s = nocheHitoEstado(h); if (!s.oportunidad) continue;
+    const R = [...new Set(nocheRespuestasDe(h.id).map(([, r]) => r))];
+    out.push(`- ${h.id}: ${h.situacion}${s.distinta ? ` (Ya pasó: Ana reaccionó «${s.respuesta}»; en el libro, «${s.libro}». Podría volver de otra forma, si la partida lo pide.)` : ''}`
+      + (R.length ? `\n  Ana puede reaccionar: ${R.join(', ')}` : '') + (h.noPuede ? `\n  sin: ${h.noPuede}` : '') + (h.variantes ? `\n  ideas: ${h.variantes}` : ''));
+  }
+  return out.join('\n') || '(ninguna esta noche)';
+}
+// each one Ana knows: how fond of her, and the last things that happened between them (from the journal)
+function nocheGente(){
+  const V = nocheVocab(), J = (game.journal || []).filter(e => /\bAna\b/.test(e.t));
+  return [...V.personas].filter(k => conoceA(k)).map(k => {
+    const N = [...new Set([nocheSinArt(NAMES[k] || FOLK_DEFS[k]?.name), CH[k]?.fullName].filter(Boolean).flatMap(n => [n, ...n.split(' ').filter(w => /^[A-ZÁÉÍÓÚ][a-záéíóúñ]{3,}$/.test(w))]))];
+    const ult = J.filter(e => N.some(n => e.t.includes(n))).slice(-3).map(e => `día ${e.d}: ${e.t}`);
+    return `- ${k}${CH[k] ? ` (cariño hacia Ana ${Math.round(relGetW(k, 'ana'))}/5)` : ''}${ult.length ? ': ' + ult.join(' · ') : ''}`;
+  }).join('\n');
 }
 
 // ---------------------------------------------------------------- the request
@@ -176,11 +193,10 @@ function nocheSistema(nivel){
   const V = nocheVocab(), n = NOCHE_N[nivel];
   const voces = [...Object.keys(CH).map(k => `- ${k} (${CH[k].fullName || NAMES[k]}): ${voiceShort(k)}`), ...Object.entries(FOLK_DEFS).filter(([k]) => !/^v\d+$/.test(k)).map(([k, d]) => `- ${k} (${nocheSinArt(d.name)})${fichaOf(k)?.ficha ? ': ' + String(fichaOf(k).ficha).slice(0, 140) : ''}`)].join('\n');
   const momentos = Object.entries(V.momentos).filter(([, m]) => m.quien && !m.fijo && V.habla.has(m.quien)).map(([k, m]) => `${k} (${m.quien}${m.huecos.size ? '; huecos: ' + [...m.huecos].map(h => '{' + h + '}').join(' ') : ''}${m.si.length ? '; ya pide: ' + m.si.join(', ') : ''})`).join(' · ');
-  const hitos = HITOS.map(h => `=== ${h.id} === (otra oportunidad: ${h.otra})\nsituación: ${h.situacion}\nlibro: ${h.libro}${h.respuestas.length ? '\nsus respuestas (las elige quien juega; en una escena con «hito: ' + h.id + '», cada opción deja una): ' + h.respuestas.map(r => { const F = nocheRespuestasDe(h.id).filter(([, y]) => y === r.id).map(([x]) => 'hecho ' + x); return F.length ? F.join(' o ') + ' (' + r.id + ')' : r.id + ' (' + r.si.map(a => a.join(', ')).join(' | ') + ': no la deja una escena)'; }).join(', ') : ''}${h.noPuede ? '\nno puede: ' + h.noPuede : ''}${h.variantes ? '\nvariantes: ' + h.variantes : ''}`).join('\n\n');
   const tipos = ['dicho', 'conversacion', 'respuesta', ...(n >= 2 ? ['escena'] : [])];
   return `Eres quien escribe, de noche, cosas nuevas para «Un día en Avonlea», un juego tranquilo inspirado en «Ana de las Tejas Verdes» (L. M. Montgomery): Avonlea, un pueblito de granjas de la Isla del Príncipe Eduardo, hacia 1880. Ana Shirley tiene 11 años, es pelirroja, huérfana, soñadora, conversadora, de palabras grandiosas e imaginación desbordante; vive con Marilla y Matthew Cuthbert en Tejas Verdes. El tono es el del libro: tierno, con humor, sin nada moderno. Español; en la familia se tutea a Ana; Ana trata de usted a los grandes.
 
-Mientras Ana duerme, escribes como mucho ${NOCHE_MAX} bloques NUEVOS para ESTA partida, pensados para lo que a quien juega le interesa (el perfil) y para lo que quedó abierto (los cabos sueltos). Cada bloque se escribe en el formato de los archivos de datos del juego, y el juego lo revisa con las mismas reglas que lo escrito a mano: lo que no las cumple se descarta. Mejor pocos y buenos.
+Mientras Ana duerme, escribes como mucho ${NOCHE_MAX} bloques NUEVOS para ESTA partida, pensados para cómo está cada personaje con Ana, para lo que a quien juega le interesa (el perfil) y para lo que quedó abierto (los cabos sueltos y las situaciones abiertas). Cada bloque se escribe en el formato de los archivos de datos del juego, y el juego lo revisa con las mismas reglas que lo escrito a mano: lo que no las cumple se descarta. Mejor pocos y buenos.
 
 NIVEL: ${nivel}. Tipos permitidos: ${tipos.join(', ')}.
 ${n === 1 ? '- Solo palabras: ningún efecto (nada de «al_empezar:», «al_terminar:» ni líneas «! …»; las opciones «->», sin «! …»).' : ''}${n >= 2 ? `- Efectos permitidos: «hecho x» (solo hechos que ya existen en el juego, y pidiendo en «si:» lo que suponen), «suma <cualidad>:<dueño>[:<hacia>] n» con n = 1 o -1 (p. ej. «suma afecto:lynde:ana 1»), «cosa <quien> <cosa> n» (n de 1 a 3), «saber <quien> <noticia>», y para mover a la gente en escena: «sentar», «levantar», «junto», «log texto».` : ''}${n >= 3 ? '\n- Libre: además, hechos NUEVOS, todos con prefijo «ia_» («hecho ia_algo», «olvidar ia_algo»), y cadenas de escenas propias («si: hecho:ia_algo», «dicha:ia_otra»).' : n === 2 ? '\n- Nada de hechos nuevos (ni «ia_…»).' : ''}
@@ -222,7 +238,7 @@ prioridad: <1 a 6>
 en: <quien=lugar, …> (ana=gg: Ana en la cocina de Tejas Verdes; lugares: ${[...V.escenas].join(', ')}; quien habla tiene que estar en «en:»)
 sujeta: <quienes se quedan quietos mientras se dice>
 grande (opcional: algo grande; como mucho una por día)
-hito: <id> (solo si trae una situación de un hito: ver abajo)
+situacion: <clave> (opcional: solo si trae una de las situaciones abiertas)
 si: <condiciones>
 al_empezar: <efecto> / al_terminar: <efecto>
 narra: <una tarjeta antes de las líneas, opcional>
@@ -231,6 +247,7 @@ narra: <una tarjeta antes de las líneas, opcional>
 -> <opción de Ana>
    ana: <línea>
    ! hecho <x>
+   ! responde <reacción> (solo en una escena con «situacion:»: cómo reacciona Ana con esta opción)
 ` : ''}
 LAS CONDICIONES (en «si:» y entre corchetes; separadas por comas; «!» delante niega):
 hecho:x · dias_desde:x:n (pasaron n días desde x) · dicha:id (ya se dijo esa escena o conversación) · conoce:quien (Ana y esa persona se conocen) · presente:quien (está en Avonlea) · ve:quien (la ve ahora) · donde:quien:${NOCHE_DONDE.join('|')} · ana:${Object.keys(ANA_ESTADO).join('|')} · cuaderno:meta (cumplió esa meta: ${[...V.metas].join(', ')}) · afecto:quien:ana>=n (de 0 a 5; también <, <=, >) · <cualidad>:<dueño>>=n (cualidades: ${[...V.cualidades].join(', ')}) · sabe:quien:noticia (noticias: ${[...V.noticias].join(', ')}) · estacion:primavera|verano|otoño|invierno · dia_estacion:n (1 a 14) · dia_juego:n · hora:a-b · no_hoy:x · carta:quien · respuesta:quien
@@ -242,15 +259,11 @@ LA GENTE (id: su voz; solo estos hablan):
 ${voces}
 COSAS (para «cosa»): ${Object.keys(ITEM_DEFS).join(', ')}
 
-LOS HITOS DE LA HISTORIA: son SITUACIONES, no respuestas. Lo que Ana responde lo decide quien juega.
-- No elijas nunca la respuesta de Ana: ningún bloque deja un hecho de una respuesta (ni «historia_<id>_<respuesta>») por su cuenta, ni los hechos que dicen cómo pasa un hito en el libro (p. ej. «lynde_visita», «zanahorias»).
-- Puedes traer la situación de un hito que «puede pasar ahora» de otra forma (ver los cabos sueltos), solo si le quedan oportunidades: una escena con «hito: <id>» que deja «hecho historia_<id>» al empezar, y que conserva la situación y respeta su «no puede»; si quieres que Ana responda ahí, dale opciones «->» con TODAS sus respuestas posibles (cada una con su «! hecho …»): elige quien juega.
-- A un hito que ya pasó y Ana respondió distinto que en el libro, puedes darle otra oportunidad (si le quedan): una escena con «hito: <id>», con la situación de otra forma y las opciones de respuesta. Puedes decidir no hacerlo si la partida va claramente por otro lado.
-- Nada de lo que escribas puede volver imposible una situación pendiente.
+${n >= 2 ? `LAS SITUACIONES ABIERTAS (vienen en la partida, abajo): momentos que la historia de Ana todavía puede necesitar. Si una escena trae una, ponle «situacion: <clave>» y el juego se encarga del resto (ningún hecho para eso). Cuida su «sin»: es lo que la volvería otra cosa.
+- Cómo reacciona Ana lo elige quien juega, nunca tú: si la situación dice «Ana puede reaccionar», da una opción «->» por cada reacción, cada una con «! responde <reacción>».
+- Una situación que ya pasó y «podría volver» es opcional: tráela solo si la partida lo pide.
 
-${hitos}
-
-LAS REGLAS (las revisa un solucionador lógico; lo que las rompe se descarta):
+` : ''}LAS REGLAS (las revisa un solucionador lógico; lo que las rompe se descarta):
 ${nocheReglasProsa()}
 - Quien no conoce a Ana no la nombra («Ana», «Shirley»): pide «conoce:<quien>».
 - Una frase o escena tiene que poder darse: sus condiciones no se contradicen.
@@ -263,7 +276,7 @@ ${nocheEjemplo('guion', 'resp_diana_1')}
 Una conversación:
 ${nocheEjemplo('conversaciones', 'conv_marilla_oraciones')}
 ${n >= 2 ? `
-Una escena con opciones (la forma del libro de un hito; la tuya, que lo trae de otra forma, agrega «hito: rival» y empieza con «al_empezar: hecho historia_rival», no deja «zanahorias» ni «conoce_gilbert», y no lleva «interrumpe» ni «ofensa»):
+Una escena con opciones (así pasa en el libro la situación «rival»; la tuya, si la trae de otra forma, lleva «situacion: rival» y en cada opción «! responde <reacción>», y no lleva «interrumpe», «ofensa» ni «! hecho …» de esta):
 ${nocheEjemplo('guion', 'zanahorias')}
 ` : ''}
 Un dicho (tu bloque repite el encabezado del momento y agrega sus líneas):
@@ -273,10 +286,6 @@ LO QUE EL JUEGO YA TUVO QUE DESCARTAR (no lo repitas):
 - Cada línea después de «---» es «quien: texto», con el id de quien habla, en minúsculas («ana:», «marilla:», «lynde:»; no «Ana:»). Ninguna línea sin «quien:».
 - Una carta («canal: respuesta») son SOLO líneas «carta: …», una por línea: el saludo, cada frase y la firma.
 - En una escena, todos los que hablan, Ana también, están en «en:» («en: ana=gg, matthew=gg»); «sujeta:» y «en:» usan los ids.
-- Una escena con «hito: <id>» que trae una situación que todavía no pasó empieza con «al_empezar: hecho historia_<id>».
-- En una escena con «hito: <id>», cada opción deja una de las respuestas de ese hito, con su hecho de verdad (ver «sus respuestas» en cada hito); no inventes hechos «ia_» para las respuestas.
-- Los ids de tus bloques empiezan con «ia_». Un hito no es un hecho: se pide «hecho:historia_<id>», no «hecho:<id>».
-- No te protejas con tu propio id («!hecho:ia_…», «!dicha:ia_…»): cada escena se dice una vez. Ni «presente:ana»: Ana siempre está.
 - Solo los hechos de la lista${n >= 3 ? ', o los «ia_…» que tus propios bloques dejan' : ''}.
 
 RESPONDE solo con el JSON pedido: { "bloques": [ { "tipo": "${tipos.join('" | "')}", "texto": "<el bloque, con saltos de línea>", "porque": "<una frase: por qué para esta partida>" } ] }.`;
@@ -290,20 +299,16 @@ function nocheCartasTexto(){
 function nocheUsuario(nivel){
   const H = dlgHechos(), hoy = today() + 1, V = nocheVocab();
   const hechos = Object.entries(H).filter(([k]) => !/^(hito_|historia_)/.test(k)).sort((a, b) => b[1] - a[1]).slice(0, 80).map(([k, d]) => `${k} (día ${d})`).join(', ');
-  const conoce = [...V.personas].filter(k => conoceA(k)).join(', ');
-  const afectos = [...V.personas].filter(k => conoceA(k) && CH[k]).map(k => `${k} ${Math.round(relGetW(k, 'ana'))}/5`).join(', ');
   const habilidades = Object.keys(CUALIDAD_DEF).map(k => `${k} ${cualidad('ana', k)}`).join(', ');
-  const hitos = HITOS.map(h => { const s = nocheHitoEstado(h); return `- ${h.id}: ${s.paso ? 'pasó' + (s.respuesta ? `, Ana respondió «${s.respuesta}»` : '') + (s.libro ? ` (libro: «${s.libro}»)` : '') : s.cerrado ? 'cerrado: su historia fue por otro lado' : s.listo ? 'puede pasar ahora' : 'todavía no'}; oportunidades que le quedan: ${s.quedan}`; }).join('\n');
   const P = nochePerfil(), f = L => L.map(([k, w]) => `${k} (${w})`).join(', ') || '(nada todavía)';
   const ya = (game.noche?.bloques || []).map(b => `${b.tipo} ${b.id}`).join(', ');
   return `LA PARTIDA, ESTA NOCHE
 Día ${hoy} (${SEASONS[S].toLowerCase()}, día ${today() % DIAS_ESTACION + 1} de la estación).
-Ana conoce a: ${conoce}.
-Cariño de cada uno hacia Ana: ${afectos}.
 Lo de Ana: ${habilidades}.
 Lo que pasó (los hechos, los últimos primero): ${hechos}.
-Los hitos:
-${hitos}
+
+LA GENTE QUE ANA CONOCE (y lo último entre ellos)
+${nocheGente()}
 
 EL PERFIL (lo que a quien juega le interesa, con lo de los últimos días pesando más)
 Personas: ${f(P.personas)}
@@ -312,7 +317,7 @@ Lugares: ${f(P.lugares)}
 
 LOS CABOS SUELTOS
 ${nocheCabos().map(c => '- ' + c.texto).join('\n') || '(ninguno)'}
-${nocheCartasTexto()}
+${nocheCartasTexto()}${NOCHE_N[nivel] >= 2 ? '\nLAS SITUACIONES ABIERTAS (para una escena con «situacion: <clave>»)\n' + nocheSituaciones() + '\n' : ''}
 ${ya ? '\nYA AGREGADO OTRAS NOCHES (no repetir): ' + ya + '\n' : ''}
 Escribe hasta ${NOCHE_MAX} bloques, nivel «${nivel}».`;
 }
@@ -550,28 +555,28 @@ function nocheRevisar(b, ctx){
     if (/^ia_/.test(x)) { if (n < 3) M.push(`«hecho ${x}»: los hechos nuevos son del nivel libre`); else if (!/^ia_[a-z0-9_]+$/.test(x)) M.push(`«hecho ${x}»: mal escrito`); else out.iaDeja.push(x); continue; }
     if (!V.hechos.has(x)) { M.push(`«hecho ${x}»: no existe en el juego${n < 3 ? '' : ' (los nuevos, con «ia_»)'}`); continue; }
     const H = V.hitoHechos[x], r = V.respuestas[x];
-    if (r) { if (opcion) (respuestasOfrecidas[r.hito] ||= new Set()).add(r.r); else M.push(`deja «${x}»: elige la respuesta de Ana en el hito «${r.hito}» (eso lo decide quien juega)`); continue; }
+    if (r) { if (opcion) (respuestasOfrecidas[r.hito] ||= new Set()).add(r.r); else M.push(`deja «${x}»: decide por Ana cómo reacciona en «${r.hito}» (eso lo elige quien juega: opciones con «! responde …»)`); continue; }
     if (H && x === 'historia_' + H) { if (opcion) M.push(`«historia_${H}» se deja al empezar, no en una opción`); (out.hitos ||= new Set()).add(H); continue; }
-    if (H) { M.push(/^historia_/.test(x) ? `deja «${x}»: ese hecho de los hitos lo pone el juego` : `deja «${x}»: es cómo pasa el hito «${H}» en el libro (una variante deja «historia_${H}»)`); continue; }
+    if (H) { M.push(/^historia_/.test(x) ? `deja «${x}»: ese hecho lo pone el juego` : `deja «${x}»: es cómo pasa «${H}» en el libro (una escena que la trae de otra forma lleva «situacion: ${H}», sin ese hecho)`); continue; }
     if (!V.deEscena.has(x)) { M.push(`deja «${x}»: ese hecho lo pone el juego, no una escena`); continue; }
     const falta = (V.supone[x] || []).filter(y => !nocheImplica(S, y));
     if (falta.length) M.push(`deja «${x}», y no pide lo que ese hecho supone: ${falta.join(', ')}`);
   }
   // the milestones: one at a time, ready for it and with chances left; the answers, all offered, for the player to choose
   const hs2 = new Set([...(out.hitos || []), ...(c.hito ? [String(c.hito)] : []), ...Object.keys(respuestasOfrecidas)]);
-  if (hs2.size > 1) M.push('una escena trae un solo hito');
+  if (hs2.size > 1) M.push('una escena trae una sola situación');
   for (const h of hs2) {
-    const H = HITO_DE[h]; if (!H) { M.push(`«hito: ${h}»: no hay un hito con ese nombre`); continue; }
+    const H = HITO_DE[h]; if (!H) { M.push(`«situacion: ${h}»: no es una de las situaciones abiertas`); continue; }
     const e = nocheHitoEstado(H), usadas = ctx.oportunidades[h] || 0, quedan = Math.max(0, H.otra - usadas);
-    if (!c.hito) M.push(`trae el hito «${h}»: tiene que decirlo («hito: ${h}»)`);
-    if (!e.listo && !e.distinta) M.push(`el hito «${h}» no puede traerse ahora (${e.paso ? 'ya pasó como en el libro' : e.cerrado ? 'está cerrado: su historia fue por otro lado' : 'todavía le falta lo que necesita'})`);
-    else if (!quedan) M.push(`el hito «${h}» no tiene más oportunidades («otra oportunidad: ${H.otra}»)`);
+    if (!c.hito) M.push(`trae la situación «${h}»: tiene que decirlo («situacion: ${h}»)`);
+    if (!e.listo && !e.distinta) M.push(`«${h}» no es una situación abierta ahora (${e.paso ? 'ya pasó como en el libro' : e.cerrado ? 'su historia fue por otro lado' : 'todavía le falta lo que necesita'})`);
+    else if (!quedan) M.push(`«${h}» ya no se puede traer de nuevo`);
     if (e.listo && !(out.hitos || new Set()).has(h)) M.push(`trae la situación de «${h}»: tiene que dejar «hecho historia_${h}» al empezar`);
-    if (e.distinta && (out.hitos || new Set()).has(h)) M.push(`«historia_${h}» ya pasó: la otra oportunidad no la deja de nuevo`);
+    if (e.distinta && (out.hitos || new Set()).has(h)) M.push(`«historia_${h}» lo pone el juego (y ya pasó): sin ese hecho`);
     const F = nocheRespuestasDe(h), ops = L.filter(l => l[0] === '?').flatMap(l => l[2] || []);
-    if (F.length) for (const o of ops) if (!(o.efectos || []).some(a => F.some(([x]) => x === a.hecho))) M.push(`la opción «${String(o.texto).slice(0, 60)}» no deja ninguna respuesta del hito «${h}»: cada opción deja una de ${F.map(([x, r]) => `«! hecho ${x}» (${r})`).join(', ')}`);
+    if (F.length) for (const o of ops) if (!(o.efectos || []).some(a => F.some(([x]) => x === a.hecho))) M.push(`la opción «${String(o.texto).slice(0, 60)}» no dice cómo reacciona Ana en «${h}»: cada opción lleva una de ${[...new Set(F.map(([, r]) => `«! responde ${r}»`))].join(', ')}`);
     const of = respuestasOfrecidas[h];
-    if (of && of.size < 2) M.push(`ofrece una sola respuesta del hito «${h}» (${[...of].join('')}): eso es elegirla por Ana; que estén todas`);
+    if (of && of.size < 2) M.push(`ofrece una sola reacción en «${h}» (${[...of].join('')}): eso es elegir por Ana; que estén todas`);
     out.hito = h;
   }
   if (!M.length) M.push(...nocheReglas(b, c));
@@ -594,6 +599,20 @@ function nocheReparar(b){
     texto = texto.replace(/^(\s*quien:\s*)(\S+)/m, (x, a, q) => { const k = nocheQuien(q); if (!k || k === q) return x; R.push(`quien: ${q} → ${k}`); return a + k; });
     return { bloque: { ...b, texto }, reparado: R };
   }
+  // an open situation, as the AI says it («situacion: rival»), is a milestone for the game; «! responde x» in an option
+  // is the fact that says Ana reacted that way; and the scene plays while the situation is still to happen
+  const F = [];
+  texto = texto.replace(/^(\s*)situaci[oó]n:/m, '$1hito:');
+  { const h = (texto.match(/^\s*hito:\s*(\S+)/m) || [])[1], H = h && HITO_DE[h];
+    texto = texto.replace(/^(\s*)!\s*responde\s+(\S+)\s*$/gm, (x, ind, r) => {
+      const f = H && nocheRespuestasDe(h).find(([, y]) => y === r)?.[0];
+      if (f) { R.push(`«responde ${r}» → «hecho ${f}»`); return `${ind}! hecho ${f}`; }
+      F.push(H ? `«! responde ${r}»: Ana no puede reaccionar así en «${h}» (${[...new Set(nocheRespuestasDe(h).map(([, y]) => y))].join(', ') || 'esta situación no tiene reacciones que elegir'})` : `«! responde ${r}»: va en una escena con «situacion: <clave>»`);
+      return x; });
+    if (tipo === 'escena' && H && nocheHitoEstado(H).listo && !new RegExp(`!hecho:historia_${h}(?!\\w)`).test(texto)) {
+      if (/^\s*si:/m.test(texto)) texto = texto.replace(/^(\s*si:\s*)(.*)$/m, (x, a, c) => a + (c.trim() ? c.trim() + ', ' : '') + '!hecho:historia_' + h);
+      else texto = texto.replace(/^(\s*hito:.*)$/m, `$1\nsi: !hecho:historia_${h}`);
+      R.push(`agregado «!hecho:historia_${h}» (mientras la situación no pase)`); } }
   { const id0 = (texto.match(/^\s*===\s*(.+?)\s*===/m) || [])[1];   // (its id starts with «ia_»: and what in it names the id)
     if (id0 && !/^ia_/.test(id0) && /^[A-Za-z0-9_]+$/.test(id0)) { const id = 'ia_' + id0.toLowerCase(); texto = texto.replace(/^(\s*===\s*).+?(\s*===)/m, `$1${id}$2`).replace(new RegExp(`(hecho:|dicha:|dias_desde:|hecho\\s+|olvidar\\s+)${id0}(?![\\w])`, 'g'), `$1${id}`); R.push(`id «${id0}» → «${id}»`); } }
   texto = texto.replace(/(hecho:|dias_desde:|hecho[ \t]+)([a-z_]+)(?![\w])/g, (x, a, h) => { if (!HITO_DE[h] || nocheVocab().hechos.has(h)) return x; R.push(`«${a.trim()}${a.endsWith(':') ? '' : ' '}${h}» → «${a.trim()}${a.endsWith(':') ? '' : ' '}historia_${h}» (un hito no es un hecho)`); return a + 'historia_' + h; });
@@ -632,7 +651,7 @@ function nocheReparar(b){
     const lugares = en ? new Set([...hablan].filter(k => k !== 'ana' && k !== 'narra' && en[k]).map(k => en[k])) : new Set();
     if (en && !en.ana && lugares.size === 1) { const l = [...lugares][0]; L[i] = L[i].replace(/\s*$/, '') + ', ana=' + l; R.push(`agregado «ana=${l}» a «en:» (donde están los demás)`); }
   }
-  return { bloque: { ...b, texto: L.join('\n') }, reparado: [...new Set(R)] };
+  return { bloque: { ...b, texto: L.join('\n') }, reparado: [...new Set(R)], motivos: F };
 }
 // the blocks of one night, in order (what one accepts, the next can use, in «libre»): { aceptados, rechazados }; antes:
 // what this night already accepted (the second round, after the AI corrected what was rejected)
@@ -644,7 +663,7 @@ function nocheValidar(bloques, nivel = nocheNivel(), antes = []){
   const aceptados = [], rechazados = [], veredictos = [];   // (veredictos: one per block, in order: for tools/noche.js)
   for (const b0 of [].concat(bloques || []).slice(0, NOCHE_MAX)) {
     let r, b = b0, reparado = [], iaAntes = new Set(ctx.iaHechos);
-    try { ({ bloque: b, reparado } = nocheReparar(b0)); r = nocheRevisar(b, ctx); } catch (e) { r = { motivos: ['no se pudo revisar: ' + (e.message || e)] }; }
+    try { let F; ({ bloque: b, reparado, motivos: F = [] } = nocheReparar(b0)); r = nocheRevisar(b, ctx); r.motivos.unshift(...F); } catch (e) { r = { motivos: ['no se pudo revisar: ' + (e.message || e)] }; }
     if (r.motivos.length) { ctx.iaHechos = iaAntes; rechazados.push({ bloque: b0, motivos: r.motivos, reparado }); veredictos.push({ aceptado: false, id: r.id || null, motivos: r.motivos, reparado, texto: String(b.texto) }); continue; }
     if (ctx.iaIds.has(r.id)) r.id += '_' + (ctx.iaIds.size + 1);   // (two sayings of the same moment: told apart)
     const a = { tipo: b.tipo, id: r.id, texto: String(b.texto), porque: String(b.porque || ''), iaDeja: r.iaDeja, hito: r.hito || undefined, ...(reparado.length ? { reparado } : {}) };
