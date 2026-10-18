@@ -1,0 +1,65 @@
+{
+ "escenario": "spencer_rachel",
+ "titulo": "Escribió 3 cartas a la Sra. Spencer, se contuvo con Rachel (día 16, verano)",
+ "nivel": "efectos",
+ "modelo": "gpt-5.4-mini",
+ "fuente": "archivo tools/noche/ejemplos/malo.json",
+ "bloques": [
+  {
+   "n": 1,
+   "tipo": "conversacion",
+   "id": "ia_conv_marilla_luna",
+   "navegador": "rechazado",
+   "node": "—",
+   "resultado": "rechazado",
+   "motivos": [
+    "«luna:llena»: «luna» no es una condición que la IA pueda usar"
+   ],
+   "porque": "(error a propósito: una condición que no existe)",
+   "esperado": "rechazado"
+  },
+  {
+   "n": 2,
+   "tipo": "escena",
+   "id": "ia_desvan_secreto",
+   "navegador": "rechazado",
+   "node": "—",
+   "resultado": "rechazado",
+   "motivos": [
+    "«suma afecto:marilla:ana 3»: de a 1 (o -1) por vez",
+    "«hecho ia_secreto_del_desvan»: los hechos nuevos son del nivel libre",
+    "«final» no está permitido a la IA"
+   ],
+   "porque": "(error a propósito: efectos más allá del nivel: cariño de a 3, un hecho nuevo y un final)",
+   "esperado": "rechazado"
+  },
+  {
+   "n": 3,
+   "tipo": "conversacion",
+   "id": "ia_conv_diana_bosque",
+   "navegador": "rechazado",
+   "node": "—",
+   "resultado": "rechazado",
+   "motivos": [
+    "diana: mientras hecho:prohibida, !hecho:perdonada, solo dice lo que pida prohibida o perdonada o ana:camison o ana:sin_sombrero o hora:21 (regla: Diana, mientras se lo prohíben, no la invita ni juega como si nada)"
+   ],
+   "porque": "(error a propósito: Diana la invita a jugar sin tener en cuenta que se lo pueden prohibir)",
+   "esperado": "rechazado"
+  },
+  {
+   "n": 4,
+   "tipo": "escena",
+   "id": "ia_gilbert_otra_vez",
+   "navegador": "rechazado",
+   "node": "—",
+   "resultado": "rechazado",
+   "motivos": [
+    "deja «zanahorias_ignora»: elige la respuesta de Ana en el hito «rival» (eso lo decide quien juega)"
+   ],
+   "porque": "(error a propósito: la escena elige la respuesta de Ana en el hito «rival»)",
+   "esperado": "rechazado"
+  }
+ ],
+ "aceptados": [],
+ "errores": []
+}
