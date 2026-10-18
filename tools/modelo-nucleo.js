@@ -524,6 +524,11 @@
           }
         } else if (r.de === 'conocidos') {   // con quien Ana conoce: queda alguna escena o conversación que todavía puede darse
           for (const k of conocidos.sort()) {
+            // (only who had scenes with her, and can still be here: someone the game never gave a scene, or who left
+            // for good, has no gap; the letters count, from afar)
+            const suyas = [...(UNIDADES.get(k) || []), ...(CARTAS.get(k) || [])].filter(u => ESCENA.has(u.tipo));
+            if (!suyas.length) continue;
+            if (!(CARTAS.get(k) || []).length) { const S = nuevo(); for (const x of [...P, presente(k)]) S.add(x); const aqui = await S.check() === 'sat'; S.release(); if (!aqui) continue; }
             let hay = null;
             for (const u of [...(UNIDADES.get(k) || []), ...(CARTAS.get(k) || [])]) if (ESCENA.has(u.tipo) && !jugada(u) && await puede(u, k)) { hay = u; break; }
             if (!hay) out.push({ regla: r.nombre, de: 'conocidos', quien: k, nombre: nombre(k) });
