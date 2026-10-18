@@ -18,4 +18,6 @@ const PREPARAR = `(M => {
   ((game.wm.num ||= {}).ana ||= {}).estudio = M.estudio || 0;
   dayT = M.dia - 1 + 5 / 24; game.seasonShift = ((M.estacion - Math.floor(dayT / DIAS_ESTACION)) % 4 + 4) % 4; S = M.estacion;
   return H; })`;
-module.exports = { BASE, MOMENTOS, PREPARAR };
+// (en el juego: una escena como la ve el modelo, una fila de trazas/planilla.json: tools/planilla.js, tools/noche.js)
+const FILA_ESCENA = `d => ({ id: d.id, canal: d.canal, disparo: d.disparo || '', prioridad: d.prioridad, interrumpe: !!d.interrumpe, grande: !!d.grande, repetir: typeof d.repetir === 'string' ? d.repetir : 'cada ' + (d.repetir?.cada || ''), si: [].concat(d.si || []).join(', '), en: Object.entries(d.en || {}).map(([k, v]) => k + '=' + v).join(', '), hablan: (() => { try { return d.hablan().join(', '); } catch (e) { return ''; } })(), lineas: (() => { try { return d.lineas().length; } catch (e) { return 0; } })(), primera: (() => { try { const l = d.lineas().find(l => !['!', '?'].includes(l[0])); return l ? l[0] + ': ' + l[1] : ''; } catch (e) { return ''; } })(), quienes: (d.quienes || []).map(String), con: d.con || '', una_vez: d.repetir === 'una_vez', texto: (() => { try { return d.lineas().filter(l => !['!', '?'].includes(l[0])).map(l => l[0] + ': ' + l[1]); } catch (e) { return []; } })() })`;
+module.exports = { BASE, MOMENTOS, PREPARAR, FILA_ESCENA };

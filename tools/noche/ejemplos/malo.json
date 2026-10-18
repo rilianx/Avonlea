@@ -1,0 +1,29 @@
+{
+ "_nota": "Una respuesta con errores a propósito, para el escenario «spencer_rachel», nivel «efectos»: todos sus bloques se tienen que descartar. Uso: node tools/noche.js --respuesta tools/noche/ejemplos/malo.json",
+ "bloques": [
+  {
+   "tipo": "conversacion",
+   "esperado": "rechazado",
+   "porque": "(error a propósito: una condición que no existe)",
+   "texto": "=== ia_conv_marilla_luna ===\ncon: marilla\ntema: Preguntarle por la luna llena\nsi: hecho:se_queda, luna:llena\n---\nana: Marilla, ¿usted cree que la luna llena escucha los deseos?\nmarilla: Creo que la luna tiene cosas más importantes que hacer, Ana."
+  },
+  {
+   "tipo": "escena",
+   "esperado": "rechazado",
+   "porque": "(error a propósito: efectos más allá del nivel: cariño de a 3, un hecho nuevo y un final)",
+   "texto": "=== ia_desvan_secreto ===\ncanal: gg\nprioridad: 3\nen: ana=gg, marilla=gg\nsi: hecho:se_queda\nal_terminar: suma afecto:marilla:ana 3\nal_terminar: hecho ia_secreto_del_desvan\nal_terminar: final desvan | Ana se quedó a vivir en el desván\n---\nmarilla: Ana, en el desván hay un baúl que era de mi madre. Puedes mirarlo.\nana: ¡Oh, Marilla! ¡Un baúl con secretos!"
+  },
+  {
+   "tipo": "conversacion",
+   "esperado": "rechazado",
+   "porque": "(error a propósito: Diana la invita a jugar sin tener en cuenta que se lo pueden prohibir)",
+   "texto": "=== ia_conv_diana_bosque ===\ncon: diana\ntema: Invitarla a jugar al Bosque Encantado\nsi: conoce:diana\n---\nana: Diana, ¿jugamos al Bosque Encantado? Yo hago de dríada.\ndiana: ¡Sí! ¡Vamos a jugar al bosque encantado hasta que se ponga el sol!"
+  },
+  {
+   "tipo": "escena",
+   "esperado": "rechazado",
+   "porque": "(error a propósito: la escena elige la respuesta de Ana en el hito «rival»)",
+   "texto": "=== ia_gilbert_otra_vez ===\ncanal: es\nprioridad: 4\nen: ana=es, gilbert=es\nhito: rival\nsi: hecho:llego_gilbert, hecho:se_queda\nal_empezar: hecho historia_rival\nal_terminar: hecho zanahorias_ignora\n---\ngilbert: Oye, Ana, ¿me prestas tu goma de borrar?\nana: (Ana hace como que no lo oye, y mira por la ventana.)"
+  }
+ ]
+}

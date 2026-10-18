@@ -366,7 +366,8 @@ for (const c of ESCENAS) Dialogo.registrar(c);
 // the conversations of Ana with her own (src/datos/conversaciones.txt): scenes too, available by closeness, had from the
 // menu of the person (or now and then by themselves, when Ana is near and free), as many as she likes; what they add to
 // a quality (affection, a skill), at most once a day for each quality
-const CONVERSACIONES = dlgGuion(document.getElementById('conversaciones')?.textContent || '').map(c => Dialogo.registrar({ ...c, disparo: 'conversar', canal: 'conv', quienes: [c.con, 'ana'], sujeta: [c.con], tema: c.tema || c.id, al_terminar: (c.al_terminar || []).map(a => a.suma ? { ...a, limitado: true } : a) }));
+const convRegistrar = c => Dialogo.registrar({ ...c, disparo: 'conversar', canal: 'conv', quienes: [c.con, 'ana'], sujeta: [c.con], tema: c.tema || c.id, al_terminar: (c.al_terminar || []).map(a => a.suma ? { ...a, limitado: true } : a) });   // (and those the night adds: src/js/66-noche.js)
+const CONVERSACIONES = dlgGuion(document.getElementById('conversaciones')?.textContent || '').map(convRegistrar);
 // the comments (src/datos/comentarios.txt): scenes of one line, grouped by the moment they are said in; the same
 // conditions, chosen by the same engine, but they hold no one, do nothing, and can be said again
 function comentariosLeer(txt){
@@ -395,8 +396,9 @@ const comentarioTexto = m => comentarioElegir(m)?.t || '';
 // game that are not scenes (a thank-you, what one says while doing something, a greeting) live there, not in the code,
 // with their conditions; the code asks for them by moment, with what fills their blanks: dicho(«gracias_regalo»,
 // { cosa: 'la tarta' }). Blanks go in the text and in the conditions («[afecto:{k}:ana>=3]»).
-const DICHOS = (() => { const out = []; let g = null;
-  for (const raw of (document.getElementById('dichos')?.textContent || '').split('\n')) {
+function dichosLeer(txt){   // (the files, and what the night adds: src/js/66-noche.js)
+  const out = []; let g = null;
+  for (const raw of txt.split('\n')) {
     const s = raw.trim(); if (!s || s[0] === '#') continue; let m;
     if ((m = s.match(/^===\s*(.+?)\s*===$/))) { g = { momento: m[1], quien: null, si: [] }; continue; }
     if (!g) continue;
@@ -404,7 +406,9 @@ const DICHOS = (() => { const out = []; let g = null;
     else if ((m = s.match(/^si:\s*(.*)$/))) g.si = m[1].split(',').map(x => x.trim()).filter(Boolean);
     else if ((m = s.match(/^-\s*(?:\[([^\]]*)\]\s*)?(.+)$/))) out.push({ id: 'dicho:' + g.momento + ':' + out.length, momento: g.momento, quien: g.quien, si: [...g.si, ...(m[1] ? m[1].split(',').map(x => x.trim()).filter(Boolean) : [])], t: m[2] });
   }
-  return out; })();
+  return out;
+}
+const DICHOS = dichosLeer(document.getElementById('dichos')?.textContent || '');
 const DICHOS_DE = DICHOS.reduce((o, d) => ((o[d.momento] ||= []).push(d), o), {});
 const dichoUlt = {};
 const rellenar = (t, v) => t.replace(/\{(\w+)\}/g, (x, k) => v[k] ?? x);

@@ -1,0 +1,29 @@
+{
+ "_nota": "Una respuesta escrita a mano, como la daría la IA para el escenario «spencer_rachel», nivel «efectos». Cada bloque dice lo que se espera de él («esperado»). Uso: node tools/noche.js --respuesta tools/noche/ejemplos/bueno.json",
+ "bloques": [
+  {
+   "tipo": "respuesta",
+   "esperado": "aceptado",
+   "porque": "Ana le escribió tres cartas a la Sra. Spencer y ninguna tiene respuesta: que alguien le conteste las tres.",
+   "texto": "=== ia_resp_spencer_tres ===\ncanal: respuesta\nde: spencer\nsi: respuesta:spencer, hecho:se_queda\n---\ncarta: Querida Ana:\ncarta: Recibí tus tres cartas, una detrás de otra, y las leí en orden, como los capítulos de un libro.\ncarta: Me alegra saber que en Tejas Verdes {estacion}, y que Marilla es justa contigo, aunque sea seria.\ncarta: Escríbeme cuando quieras. A mi edad, una carta tuya es mejor que una taza de té.\ncarta: Afectuosamente, la Sra. Spencer"
+  },
+  {
+   "tipo": "conversacion",
+   "esperado": "aceptado",
+   "porque": "Ana se contuvo cuando la Sra. Lynde se burló de ella: la Sra. Lynde lo notó.",
+   "texto": "=== ia_conv_lynde_contenida ===\ncon: lynde\ntema: Decirle que se quedó pensando en lo que dijo\nsi: hecho:lynde_contenida, !hecho:ofendio_lynde, afecto:lynde:ana>=1\nal_terminar: suma afecto:lynde:ana 1\n---\nana: Sra. Lynde… el otro día no le contesté, pero me quedé pensando en lo que dijo de mi pelo. Toda la noche.\nlynde: (La Sra. Lynde se acomoda el chal, sorprendida.) Bueno, bueno. Una niña que se calla cuando le hablan así… eso no se ve todos los días.\nana: Marilla dice que callarse a tiempo es una virtud. A mí me pareció más bien un dolor de estómago.\nlynde: (Se le escapa una risa.) Puede que no seas tan mala pieza, después de todo."
+  },
+  {
+   "tipo": "dicho",
+   "esperado": "aceptado",
+   "porque": "Ana escribe muchas cartas: Marilla, al llevarle otra, se acuerda de cómo se portó con Rachel.",
+   "texto": "=== lleva_carta:marilla ===\nquien: marilla\nsi: hecho:se_queda\n- [hecho:lynde_contenida] Para {nombre}, otra vez… Está bien, mañana la dejo. Y te diré una cosa: con Rachel te portaste mejor que yo a tu edad."
+  },
+  {
+   "tipo": "escena",
+   "esperado": "aceptado",
+   "porque": "El hito «rival» todavía no pasa y le queda una oportunidad: la situación de otra forma (Gilbert se ríe de una composición), con todas las respuestas para que elija quien juega.",
+   "texto": "=== ia_rival_composicion ===\ncanal: es\nprioridad: 4\ngrande\nen: ana=es, gilbert=es\nsujeta: gilbert\nhito: rival\nsi: hecho:llego_gilbert, hecho:se_queda, !hecho:historia_rival, !hecho:zanahorias, afecto:gilbert:ana<3\nal_empezar: hecho historia_rival\nnarra: En la escuela, el maestro lee en voz alta la composición de Ana sobre el Lago de las Aguas Brillantes.\n---\ngilbert: (Gilbert Blythe sonríe de lado y susurra, lo bastante fuerte para que lo oiga toda la clase.) «Aguas brillantes»… ¡Con ese pelo, el lago se debe haber puesto colorado!\n-> Romperle la pizarra en la cabeza\n   ana: (Ana se pone de pie de un salto.) ¡Cómo te atreves!\n   ! hecho zanahorias_pizarra\n-> Hacer como que no lo oyó\n   ana: (Ana mira por la ventana, muy derecha, como si Gilbert Blythe no existiera.)\n   ! hecho zanahorias_ignora\n-> Contestarle\n   ana: Por lo menos mi composición tiene algo adentro. No como otras cabezas.\n   ! hecho zanahorias_contesta"
+  }
+ ]
+}

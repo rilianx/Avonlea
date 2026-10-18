@@ -102,7 +102,11 @@ El mapa tiene un botón «Siguiente estación (prueba)» para verlas sin esperar
 
 ## La IA
 
-El juego ya no usa IA mientras se juega: todo lo que dicen y hacen los personajes está escrito a mano o lo decide el juego. La IA volverá más adelante de otra forma, como un repaso nocturno que escribe escenas nuevas mientras Ana duerme (notas en [docs/MODELO_INTERACCIONES.md](docs/MODELO_INTERACCIONES.md)). Los datos pensados para ella siguen ahí: la voz de cada personaje (`voice` en `src/datos/personajes.json`), las líneas `ia:` de `src/datos/habilidades.txt` y las descripciones (`describe`) de las casas.
+El juego no usa IA mientras se juega: todo lo que dicen y hacen los personajes está escrito a mano o lo decide el juego. La IA vuelve de otra forma, de noche, y apagada de inicio:
+
+- **🌙 Mientras Ana duerme (la IA de la noche):** en ✒ Ajustes → «Mientras Ana duerme», elige un nivel (*palabras*: solo lo que dicen; *efectos*: también hechos que ya existen, cariño de a uno, cosas; *libre*: también hechos y escenas propias, con prefijo `ia_`) y pega tu clave de OpenAI (queda solo en ese navegador; el modelo, `gpt-5.4-mini` de inicio, se puede cambiar). Cada noche, cuando Ana se duerme, le pide a OpenAI hasta cuatro cosas nuevas para esa partida (un dicho, una conversación, la respuesta a una carta, una escena), pensadas para lo que te interesa y lo que quedó abierto; las revisa con las mismas reglas que lo escrito a mano y guarda en la partida solo las que pasan («🌙 Mientras dormías, Avonlea pensó en ti: 3 cosas nuevas»). «Probar ahora» lo hace sin dormir; «Ver lo que agregó la noche» muestra lo aceptado (con su porqué) y lo descartado (con sus motivos). Nunca elige lo que Ana responde en los momentos de la historia (ver [docs/MODELO_INTERACCIONES.md](docs/MODELO_INTERACCIONES.md), «La IA de la noche»). Para probarla sin jugar: `node tools/noche.js` (o el flujo «La IA de la noche» de GitHub Actions, con el secreto `OPENAI_API_KEY`).
+
+Los datos pensados para ella: la voz de cada personaje (`voice` en `src/datos/personajes.json`), los hitos (`src/datos/hitos.txt`: situaciones, «no puede», variantes, otra oportunidad), las reglas (`src/datos/reglas.txt`), las líneas `ia:` de `src/datos/habilidades.txt` y las descripciones (`describe`) de las casas.
 
 ## Cómo está hecho
 

@@ -7,7 +7,7 @@
 const { chromium } = require('playwright'); const fs = require('fs'), path = require('path'), { execFileSync } = require('child_process');
 const RAIZ = path.join(__dirname, '..'), URL = 'file://' + path.join(RAIZ, 'index.html') + '?dev';
 const EXE = fs.existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chromium' : undefined;
-const { BASE, MOMENTOS, PREPARAR } = require('./momentos');
+const { BASE, MOMENTOS, PREPARAR, FILA_ESCENA } = require('./momentos');
 (async () => {
   const b = await chromium.launch({ executablePath: EXE, args: ['--no-sandbox'] }); const pg = await b.newPage(); const errs = [];
   pg.on('pageerror', e => errs.push(e.message));
@@ -37,7 +37,7 @@ const { BASE, MOMENTOS, PREPARAR } = require('./momentos');
       return out; })`, M);
   }
   const casas = await ev(`Object.entries(HOUSES).filter(([, h]) => !h.road).map(([k, h]) => ({ id: k, nombre: h.name, viven: vivenEn(k) }))`);
-  const escenas = await ev(`DIALOGOS.map(d => ({ id: d.id, canal: d.canal, disparo: d.disparo || '', prioridad: d.prioridad, interrumpe: !!d.interrumpe, grande: !!d.grande, repetir: typeof d.repetir === 'string' ? d.repetir : 'cada ' + (d.repetir?.cada || ''), si: [].concat(d.si || []).join(', '), en: Object.entries(d.en || {}).map(([k, v]) => k + '=' + v).join(', '), hablan: (() => { try { return d.hablan().join(', '); } catch (e) { return ''; } })(), lineas: (() => { try { return d.lineas().length; } catch (e) { return 0; } })(), primera: (() => { try { const l = d.lineas().find(l => !['!', '?'].includes(l[0])); return l ? l[0] + ': ' + l[1] : ''; } catch (e) { return ''; } })(), quienes: (d.quienes || []).map(String), con: d.con || '', una_vez: d.repetir === 'una_vez', texto: (() => { try { return d.lineas().filter(l => !['!', '?'].includes(l[0])).map(l => l[0] + ': ' + l[1]); } catch (e) { return []; } })() }))`);
+  const escenas = await ev(`DIALOGOS.map(${FILA_ESCENA})`);
   const noticias = await ev(`NOTICIAS.map(n => ({ id: n.id, titulo: n.titulo, saben: n.saben.map(g => (g.si.length ? '[' + g.si.join(', ') + '] ' : '') + g.quien.join(', ')).join(' · '), alConocer: !!n.alConocer, llega: n.llega.map(l => l.quien + ' en ' + l.horas + ' h').join(', '), cuentaPor: n.cuentaPor || '', versiones: 1 + n.exagerada.length, dice: n.dice[0] || Object.values(n.diceDe)[0]?.[0] || '', exagerada: n.exagerada.join(' / ') }))`);
   const llegadas = await ev(`Object.entries(LLEGADAS).map(([k, e]) => ({ id: k, visita: e.visita, llega: e.llega.map(g => g.join(', ')).join(' · o · '), seVa: e.seVa.map(g => g.join(', ')).join(' · o · '), alLlegar: e.alLlegar, alIrse: e.alIrse }))`);
   const metas = await ev(`(typeof CUADERNO !== 'undefined' ? CUADERNO : []).flatMap(g => g.metas.map(m => ({ grupo: g.nombre, id: m.id, titulo: m.titulo || m.id, requiere: (m.requiere || []).join ? (m.requiere || []).join(', ') : String(m.requiere || ''), pista: m.pista || '' })))`).catch(() => []);

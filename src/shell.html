@@ -141,6 +141,10 @@ body.visor > *:not(#cv):not(#visor){display:none !important}
 #ajustes .sheet{padding:12px 16px;width:min(520px,calc(100% - 28px));max-height:calc(100% - 40px);overflow:auto;font-size:15px;line-height:1.45}
 #ajustes h3{margin:0 0 6px;font-style:italic;font-weight:normal;font-size:20px}
 #ajustes label{display:block;margin:8px 0 2px}
+#ajustes fieldset{border:1px solid #d9bf8f;border-radius:8px;margin:10px 0 0;padding:4px 10px 8px}
+#ajustes legend{font-style:italic}
+#ajustes select,#ajustes input[type=password],#ajustes input[type=text]{font:14px Georgia,serif;background:#fffaf0;color:#3b2a1c;border:1px solid #b89a6a;border-radius:6px;padding:3px 6px;max-width:100%;box-sizing:border-box}
+#ajustes input[type=password],#ajustes input[type=text]{display:block;width:100%}
 #ajustes .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 #ajustes pre{white-space:pre-wrap;font:13px Georgia,serif;background:#fffaf0;border:1px solid #d9bf8f;border-radius:6px;padding:8px;max-height:40vh;overflow:auto}
 #ajustes button,#map button,#rels button{font:15px Georgia,serif;background:#fffaf0;color:#3b2a1c;border:1.5px solid #6b4a30;border-radius:8px 11px 7px 10px;padding:5px 11px;cursor:pointer}
@@ -189,6 +193,12 @@ body:not(.dev) #spdbtn{top:298px!important;right:10px!important}
   <h3>Ajustes</h3>
   <label><input type="checkbox" id="ajauto"> Ana hace lo suyo sola cuando no la controlo</label>
   <label><input type="checkbox" id="ajhistorias"> Historia del día (un guion escrito a mano, inspirado en los libros)</label>
+  <fieldset id="ajnoche"><legend>🌙 Mientras Ana duerme</legend>
+    <label>La IA de la noche escribe cosas nuevas para esta partida: <select id="ajnivel"></select></label>
+    <label>Clave de OpenAI (queda solo en este navegador) <input type="password" id="ajclave" autocomplete="off" placeholder="sk-…"></label>
+    <label>Modelo <input type="text" id="ajmodelo" autocomplete="off"></label>
+    <div class="row"><button id="ajprobar">Probar ahora</button><button id="ajnocheve">Ver lo que agregó la noche</button></div>
+  </fieldset>
   <div class="row"><button id="ajsaben">Ver lo que saben</button><button id="ajolvidar">Borrar lo que saben</button><button id="ajcero">Empezar de cero</button><button id="ajcerrar">Cerrar</button></div>
   <pre id="ajout" hidden></pre>
 </div></div>
@@ -198,6 +208,9 @@ body:not(.dev) #spdbtn{top:298px!important;right:10px!important}
 </script>
 <script type="text/plain" id="hitos">
 <!--@hitos-->
+</script>
+<script type="text/plain" id="reglas">
+<!--@reglas-->
 </script>
 <script type="text/plain" id="dichos">
 <!--@dichos-->

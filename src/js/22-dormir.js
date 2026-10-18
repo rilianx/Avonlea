@@ -14,6 +14,7 @@ function goToBed(){
 const enEscena = () => TALKS.some(t => t.lines.slice(Math.max(0, t.i)).some(l => l.q === 'ana' || l.q === 'narra' || l.q === '?' || l.q === '!'));
 function goSleep(forced, skip, porEscena){
   if (sleeping || (!forced && !porEscena && enEscena())) return; sleeping = true; close(); ana.goto = null; ana.sit = false;
+  nocheDormir();   // (the AI of the night, if the player turned it on: it thinks while she sleeps; src/js/66-noche.js)
   if (game.wm) { game.wm.camison = true; game.wm.sinSombrero = true; }   // (to bed in her nightgown, the hat put away: she wakes so, and dresses when she will)
   if (game.wm?.ropaTirada && !dlgHechos().desayuno_prueba) { game.wm.ropaTirada = false; game.wm.ropaSilla = true; dlgHecho('marilla_doblo_ropa'); }   // (the first night, Marilla folds them while she sleeps: in the morning, on the chair)
   const el = $('sleep'); el.textContent = forced ? 'Ana se quedó dormida…' : skip ? 'Pasa la noche…' : 'Zzz…'; el.classList.add('on');

@@ -17,6 +17,7 @@ const HITOS = (() => { const out = []; let h = null;
     else if (k === 'pasa si') h.pasa = alts(v);
     else if (k === 'otra oportunidad') h.otra = +v || 0;
     else if (k === 'situacion' || k === 'peso' || k === 'capitulos' || k === 'libro') h[k] = v;
+    else if (k === 'no puede') h.noPuede = v; else if (k === 'variantes') h.variantes = v;   // (for the AI of the night: src/js/66-noche.js)
   }
   return out; })();
 const HITO_DE = Object.fromEntries(HITOS.map(h => [h.id, h]));

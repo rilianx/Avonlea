@@ -1,0 +1,64 @@
+# «Mientras Ana duerme»: la IA de la noche, probada en GitHub (donde api.openai.com sí se alcanza).
+# Arma el pedido para un escenario (tools/noche.js), se lo hace a OpenAI con el secreto OPENAI_API_KEY, revisa los bloques
+# en el juego y con el grafo y el modelo (Z3), y deja el informe como artefacto y en el resumen del trabajo.
+name: La IA de la noche
+
+on:
+  workflow_dispatch:
+    inputs:
+      escenario:
+        description: 'Escenario (spencer_rachel, rival_ignora) o la ruta de una partida guardada (.json) en el repositorio'
+        default: spencer_rachel
+        required: true
+      nivel:
+        description: 'Nivel de la IA de la noche'
+        type: choice
+        options: [palabras, efectos, libre]
+        default: efectos
+      modelo:
+        description: 'Modelo de OpenAI'
+        default: gpt-5.4-mini
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  noche:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Instalar (z3-solver; Playwright y su Chromium)
+        run: |
+          npm ci
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Armar el juego
+        run: node tools/build.js
+      - name: Pedirle a la IA y revisar lo que escribe
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ESCENARIO: ${{ inputs.escenario }}
+          NIVEL: ${{ inputs.nivel }}
+          MODELO: ${{ inputs.modelo }}
+        run: node tools/noche.js --escenario "$ESCENARIO" --nivel "$NIVEL" --modelo "$MODELO" --salida trazas/noche
+      - name: El informe, en el resumen
+        if: always()
+        run: |
+          if [ -f trazas/noche/noche.md ]; then cat trazas/noche/noche.md >> "$GITHUB_STEP_SUMMARY"; else echo "No hubo informe (ver el registro del paso anterior)." >> "$GITHUB_STEP_SUMMARY"; fi
+      - name: Guardar el informe
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: noche-${{ inputs.escenario }}-${{ inputs.nivel }}
+          path: |
+            trazas/noche/noche.md
+            trazas/noche/noche.json
+            trazas/noche/pedido.md
+            trazas/noche/pedido.json
+            trazas/noche/respuesta.json
+          if-no-files-found: warn

@@ -77,7 +77,7 @@ cv.addEventListener('wheel', e => { e.preventDefault(); if (game.scene === 'out'
 // the settings (✒): Ana on her own when idle, the story of the day; and a look at what they know
 function ajustesPanel(on){
   $('ajustes').hidden = !on; if (!on) return;
-  close(); $('ajauto').checked = AJUSTES.auto !== false; $('ajhistorias').checked = !!AJUSTES.stories; $('ajout').hidden = true;
+  close(); $('ajauto').checked = AJUSTES.auto !== false; $('ajhistorias').checked = !!AJUSTES.stories; $('ajout').hidden = true; nocheAjustesMostrar();
 }
 const ajustesSync = () => { AJUSTES.auto = $('ajauto').checked; AJUSTES.stories = $('ajhistorias').checked; saveAjustes(); };
 for (const id of ['ajauto', 'ajhistorias']) $(id).addEventListener('change', ajustesSync);
