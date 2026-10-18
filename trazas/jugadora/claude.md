@@ -4,9 +4,22 @@ Jugué como lo haría una jugadora, con `tools/mano.js`. Ese control abre el jue
 
 El estilo fue el de una curiosa bastante obediente: hace lo que le piden (vestirse, lavar los platos, sentarse a la mesa, doblar la ropa), pero a veces elige por ver qué pasa («Cordelia», «Un minutito, Marilla…»), conversa con todos y sale a conocer.
 
-La partida va de la llegada al día 3 a las 20 h. Pasa por la llegada, el primer desayuno, la conversación de rezar, la huerta, La Cuesta del Huerto, el almuerzo, White Sands, la decisión, el Camino Blanco, el lago y la tienda. Quedó guardada en `tools/noche/partidas/claude.json`.
+La partida tiene dos tramos:
+- **Días 1 a 3:** la llegada, el primer desayuno, rezar, la huerta, La Cuesta del Huerto, White Sands, la decisión, el Camino Blanco, el lago y la tienda.
+- **Días 3 a 19 (segunda tanda):**
+  - escribí cartas a la Sra. Spencer y recibí su respuesta;
+  - hice la lección de sembrar con Matthew y mi huertito;
+  - viví la visita de la Sra. Lynde (huí llorando) y el «¡Zanahorias!» de Gilbert (le contesté delante de todos);
+  - conocí a Diana y conversé con ella de todo.
 
-**Lagunas (Z3) al final:** 0. Todavía no hay decisiones con consecuencias pendientes.
+Para los días de rutina usé un ayudante que responde lo rutinario (acostarse, la mesa, doblar la ropa) y se detiene en cada decisión nueva, que elegí yo. La partida quedó guardada en `tools/noche/partidas/claude.json`.
+
+**Lagunas (Z3) al día 19:** 3. Nada de lo que todavía puede pasar toma en cuenta que Ana:
+- huyó llorando de la Sra. Lynde (`lynde_llanto`);
+- le contestó a Gilbert delante de todos (`zanahorias_contesta`);
+- le admitió a Diana que Gilbert tiene lindos ojos (`ana_admite_gilbert`).
+
+Hasta el día 4 hubo 0; la primera apareció el día 5.
 
 ## Lo que funciona muy bien
 
@@ -81,6 +94,47 @@ Matthew dice «eso se aprende en la huerta… Vamos.» y se va a trabajar al cam
 - «Ir a la huerta» desde afuera hace entrar a Ana a la cocina. Para el juego, la huerta es «Tejas Verdes».
 - Ana baja a desayunar en camisón y nadie dice nada: la regla del camisón empieza después del desayuno. ¿Es a propósito?
 
+## Segunda tanda: días 3 a 19
+
+### Errores (rompen lo que la jugadora hizo o ve)
+
+- **Se pierde una carta.** Escribí la carta a la Sra. Spencer a las 20:52 del día 3. Ana leyó todas sus líneas, pero llegó la tarjeta «Ana, a la cama» y la acción se cortó antes de guardarse. Al día siguiente no había carta ni en sus manos ni en el correo. Regla: una acción que una escena interrumpe sigue después, o se da por hecha si su trabajo ya está hecho (la carta se guarda en `63-jugar.js` al terminar la acción).
+- **El cuerpo no hace lo que dice el texto.** En la visita de la Sra. Lynde elegí «Salir corriendo a llorar a su pieza». El texto dice «Ana sale corriendo escaleras arriba y se tira en la cama a llorar», pero Ana siguió sentada a la mesa de la cocina, sonriendo, dos horas después (foto `trazas/mano/003.jpg`). Regla: lo que una línea dice que alguien hace con el cuerpo (sale, sube, se sienta) va con su efecto.
+- **Un encargo en bucle.** Marilla: «¿Me traerías un pan de mantequilla?» → Matthew: «Sí, cómo no» → Marilla: «¡Qué lindo detalle!», cinco veces en nueve minutos. Regla: un encargo cumplido no se pide de nuevo el mismo día.
+- **Conocer a Diana depende de estar en casa a la hora justa.** Marilla lleva a Ana a La Cuesta del Huerto entre las 14 y las 17:30, solo si Ana está en casa. La jugadora automática andaba afuera a esa hora y no conoció a Diana en 12 días. Y si Ana ya le pidió una amiga del alma, el encuentro por casualidad queda cerrado. Regla: lo que lleva a un hito avisa antes («Esta tarde vamos donde los Barry, no te vayas lejos») o espera a la jugadora.
+
+### Lo que no sabe lo que pasó (la causa de las lagunas, vista desde adentro)
+
+- **Gilbert.** Con Diana, Ana dice «Gilbert Blythe es la persona más odiosa de toda la isla. Nunca, nunca le voy a hablar… una broma imperdonable». Es el texto del libro, el de la pizarra. En esta partida Ana le contestó delante de todos, la clase se rió de él y Gilbert dijo «me lo merezco». Ese mismo día, en el almuerzo, nadie mencionó nada. Es la laguna `zanahorias_contesta` que marca Z3.
+- **El juramento.** Diana: «¿Te acuerdas de nuestro juramento de amistad? ¡Para siempre!», y todavía no se habían jurado nada.
+- **Recuerdos inventados.** Minnie May: «¿Me cuentas el cuento del hada otra vez?», y Ana nunca le contó ninguno. Ana, frente al huertito: «Cuando regué estas flores…», y nunca las regó, porque no hay cómo. Marilla: «Rachel Lynde dice que todavía no la has ido a ver», y Ana fue el día 4. Marilla: «Cuidado con no quemar nada esta vez», y Ana nunca quemó nada.
+- **Las cartas.** La primera cuenta «Hoy bauticé la laguna», muy bien, pero la reescrita al día siguiente sigue diciendo «hoy». La del día 10 cuenta el almuerzo («guiso de cordero») y no lo grande del día, que fue contestarle a Gilbert. Regla: la carta elige lo más importante que le pasó a Ana (una decisión, un hito) antes que la rutina.
+- **La respuesta de la Sra. Spencer es genérica.** «Las cosas se arreglan solas, cuando una se porta bien… Y no hables tanto, niña.» No menciona nada de lo que Ana le contó. Las respuestas de la IA de la noche sí lo hacían.
+- **Marilla chismea sobre sí misma.** Le dice a Minnie May: «¿Supo lo de los Cuthbert? ¡Pidieron un niño al orfanato y les llegó una niña!». Es un dicho de vecina que le tocó a ella. Después: «Bueno, me voy, que tengo que ir a donde está Ana».
+
+### La rueda de cada día
+
+- **Marilla** repite cada día las mismas frases: «¿Dijiste tus oraciones anoche?», «El domingo vamos a la iglesia» (en 19 días no llegó ningún domingo), «Riega la huerta antes de que caiga el sol» (a las 6:30 de la mañana).
+- **Matthew:** «Las vacas andan contentas hoy». Y el «Gracias.» de Marilla de cada mañana es por la leche que le da Matthew, pero la entrega no se ve.
+- **La Sra. Lynde** pasa cada tarde por Tejas Verdes diciendo sus cinco frases seguidas, cada 20 minutos.
+- **Ana**, frente al huertito, dice todos los días a las 14:47 «¡Salieron!…». En el almuerzo repite dos veces sus dos frases («¡Qué rico huele todo!», el banquete en el castillo).
+- **«¡En Tejas Verdes hay una niña nueva!… pelirroja como una zanahoria»** lo dicen cuatro niños distintos entre los días 3 y 19, a veces delante de Ana.
+- **Los días de escuela están vacíos.** Ana llega a las 7:40 y hasta las 14 no pasa nada. El día 6 la escuela estaba vacía a mediodía; el Sr. Phillips solo dijo «Mañana hay examen de geometría».
+
+### Lo que la jugadora no puede hacer
+
+- Marilla dice «Si me lo pidieras, quizás un día te llevaría a conocer [a Diana]», pero sus favores son huevos, azúcar o té: no hay cómo pedírselo.
+- Los menús muestran pocas conversaciones de las que hay. Diana tenía seis; su menú mostraba dos, y las otras (como Gilbert) solo aparecían a medida que se gastaban las primeras.
+- El ayudante dejó a Ana en la escuela hasta la noche. Marilla salió a buscarla con el farol (una escena muy buena), pero la disculpa decía «se me pasó la hora mirando las estrellas», cuando estaba en la escuela.
+
+### Lo que encanta
+
+- Marilla al acostarla: «Nada. Que me alegro de que te hayas quedado. Eso es todo. A la cama.»
+- La lección de sembrar con Matthew y las capuchinas («el regalo más lleno de futuro»), y el huertito «para contarles cuentos, para que se animen a salir».
+- El camino a la escuela («Una llega con el alma ya instruida, aunque la gramática no»).
+- Conocer a Diana («¿crees que podrías quererme un poquito…?»); ponerle nombre al Paseo de los Enamorados y a la Burbuja de la Dríade; los fantasmas del Bosque Encantado; el club de cuentos («Solo tienes que matar a alguien al final»).
+- Pedirle a Marilla que lleve la carta («Ojalá no hayas escrito ninguna tontería») y leer la respuesta en la tienda, línea por línea.
+
 ## Cómo repetirlo
 
 ```
@@ -93,4 +147,4 @@ curl -s "localhost:8765/pasar?s=300"        # dejar pasar el tiempo (se detiene 
 curl -s localhost:8765/foto                 # una captura
 ```
 
-Las fotos citadas están en `trazas/mano/`.
+Las fotos citadas están en `trazas/mano/dias1-3/`.
