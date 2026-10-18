@@ -4,7 +4,7 @@ if (/[?&]dev\b/.test(location.search)) document.body.classList.add('dev');   // 
 let actNow = false;
 addEventListener('keydown', e => {
   if (e.target.closest && e.target.closest('input,select,textarea')) return;
-  if (!$('ai').hidden) { if (e.code === 'Escape') aiPanel(false); return; }
+  if (!$('ajustes').hidden) { if (e.code === 'Escape') ajustesPanel(false); return; }
   audio(); hint(); if (!ANA_AUTO) userInput();
   if (e.code === 'KeyT' && !game.map) { e.preventDefault(); openSay(); return; }
   if (e.code === 'KeyM' && !game.talk) { toggleMap(); return; }
@@ -31,7 +31,7 @@ cv.addEventListener('pointerdown', e => { audio(); hint(); if (ANA_AUTO && !menu
 addEventListener('pointermove', e => { if (panDrag) { const Z = view.Z || 1; freeCam.x = panDrag.cx - (e.clientX - panDrag.x) / Z; freeCam.y = panDrag.cy - (e.clientY - panDrag.y) / Z; } if (stick) { stick.x = e.clientX; stick.y = e.clientY; } hoverAt = e.pointerType === 'mouse' && e.target === cv ? [e.clientX, e.clientY] : null; });
 addEventListener('pointerup', e => {
   panDrag = null;
-  if (tapStart && !menuOpen() && !game.map && $('ai').hidden && Math.hypot(e.clientX - tapStart.x, e.clientY - tapStart.y) < 10 && performance.now() - tapStart.t < 500) tapAt(e.clientX, e.clientY);
+  if (tapStart && !menuOpen() && !game.map && $('ajustes').hidden && Math.hypot(e.clientX - tapStart.x, e.clientY - tapStart.y) < 10 && performance.now() - tapStart.t < 500) tapAt(e.clientX, e.clientY);
   tapStart = null; stick = null;
 });
 addEventListener('pointercancel', () => { stick = null; tapStart = null; panDrag = null; });
@@ -74,46 +74,21 @@ $('mapzin').addEventListener('click', () => mapZoom(1.5)); $('mapzout').addEvent
 // the view of the fields: the wheel brings it closer or farther (out of doors)
 let viewZoom = 1;
 cv.addEventListener('wheel', e => { e.preventDefault(); if (game.scene === 'out' || viewScene() === 'out') viewZoom = clamp(viewZoom * Math.exp(-e.deltaY * .0012), .55, 2.2); }, { passive: false });
-// the AI settings: on/off, the key (kept in this browser only), the model; and a look at what they remember
-function aiPanel(on){
-  $('ai').hidden = !on; if (!on) return;
-  close(); tokDraw(); $('aion').checked = AI.on; $('aiauto').checked = AI.auto !== false; $('aiplans').checked = AI.plans !== false; $('aistories').checked = !!AI.stories; $('aimem').checked = !!AI.memoria; $('aimode').value = FULL() ? 'completo' : 'minimo'; $('aimodel').value = AI.model; $('aiout').hidden = true; aiKeyField();
+// the settings (✒): Ana on her own when idle, the story of the day; and a look at what they know
+function ajustesPanel(on){
+  $('ajustes').hidden = !on; if (!on) return;
+  close(); $('ajauto').checked = AJUSTES.auto !== false; $('ajhistorias').checked = !!AJUSTES.stories; $('ajout').hidden = true;
 }
-// the key field shows the key of the chosen model's provider
-function aiKeyField(){
-  const pv = provider($('aimodel').value), P = PROV[pv], man = pv === 'manual';
-  $('aikey').hidden = $('aikeylab').hidden = man;
-  $('aikey').value = AI.keys[pv] || ''; $('aikey').placeholder = P.hint; $('aikeylab').textContent = 'Tu clave de la API de ' + P.name;
-  $('ainote').textContent = man ? 'Para depurar: cada vez que el juego le pida algo a la IA, aparece abajo a la derecha el pedido y un JSON por completar; lo respondes tú (o lo copias a otra IA y pegas su respuesta). Mientras no respondas, eso espera.' : `La clave la pones tú: se guarda solo en este navegador y se envía directamente a ${pv === 'openai' ? 'api.openai.com' : 'api.anthropic.com'}. No compartas el archivo ni el navegador con la clave puesta.`;
-}
-const aiSync = () => { AI.on = $('aion').checked; AI.auto = $('aiauto').checked; AI.plans = $('aiplans').checked; AI.stories = $('aistories').checked; AI.memoria = $('aimem').checked; AI.mode = $('aimode').value; AI.model = $('aimodel').value; if (provider() !== 'manual') AI.keys[provider()] = $('aikey').value.trim(); saveAI(); };
-$('aimodel').addEventListener('change', () => { AI.model = $('aimodel').value; saveAI(); aiKeyField(); });
-for (const id of ['aion', 'aiauto', 'aiplans', 'aistories', 'aimem', 'aimode', 'aikey']) $(id).addEventListener('change', aiSync);
-$('aibtn').addEventListener('pointerdown', e => { e.stopPropagation(); audio(); if (!game.talk) aiPanel(true); });
-$('aiclose').addEventListener('click', () => { aiSync(); aiPanel(false); });
-$('aitest').addEventListener('click', async () => {
-  aiSync(); const o = $('aiout'); o.hidden = false;
-  if (!aiKey()) { o.textContent = 'Falta tu clave de la API de ' + PROV[provider()].name + '.'; return; }
-  o.textContent = 'Preguntándole a Diana…';
-  try { const r = await sceneAsk(['diana'], 'Ana saluda a Diana (esto es solo una prueba de la voz).', 'pasar'); o.textContent = r.lines.map(l => nameOf(l.q) + ': ' + l.t).join('\n') || '(no dijeron nada)'; }
-  catch (e) { o.textContent = 'No funcionó: ' + e.message; }
-});
-$('ailog').addEventListener('click', aiLogShow);
-$('aimem').addEventListener('click', () => {
-  const o = $('aiout'); o.hidden = false;
-  const per = Object.keys(PEOPLE).map(w => {
-    const P = game.plans[w], k = game.know[w] || [], m = game.mem[w] || [];
-    return `— ${NAMES[w]} —\n` + (P && P.day === today() ? `Plan de hoy: ${P.thought}\n` + P.steps.map(s => `  ${s.done ? '✓' : '·'} ${s.hora}:00 ${s.accion.replace(/_/g, ' ')}${s.lugar ? ' a ' + PLACES[s.lugar][0] : ''}${s.item ? ' (' + ITEM_NAME[s.item][0] + ')' : ''}${s.motivo ? ': ' + s.motivo : ''}`).join('\n') + '\n' : 'Sin plan todavía.\n')
-      + 'Sabe:\n' + (k.slice(-8).map(e => '  · día ' + e.d + ': ' + e.t).join('\n') || '  (nada)') + '\nRecuerda de sus conversaciones:\n' + (m.map(x => '  · ' + x).join('\n') || '  (nada)');
-  }).join('\n\n');
+const ajustesSync = () => { AJUSTES.auto = $('ajauto').checked; AJUSTES.stories = $('ajhistorias').checked; saveAjustes(); };
+for (const id of ['ajauto', 'ajhistorias']) $(id).addEventListener('change', ajustesSync);
+$('ajbtn').addEventListener('pointerdown', e => { e.stopPropagation(); audio(); if (!game.talk) ajustesPanel(true); });
+$('ajcerrar').addEventListener('click', () => { ajustesSync(); ajustesPanel(false); });
+$('ajsaben').addEventListener('click', () => {
+  const o = $('ajout'); o.hidden = false;
+  const per = Object.keys(PEOPLE).map(w => `— ${NAMES[w]} —\nSabe:\n` + ((game.know[w] || []).slice(-8).map(e => '  · día ' + e.d + ': ' + e.t).join('\n') || '  (nada)')).join('\n\n');
   o.textContent = per + '\n\n— Encargos —\n' + (game.tasks.map(t => '  ' + (t.done ? '✓ ' : '· ') + taskText(t) + ' (de ' + NAMES[t.from] + ')').join('\n') || '  (ninguno)') + '\n\n— Diario de Ana —\n' + (game.journal.slice(-30).map(e => '  · día ' + e.d + ': ' + e.t).join('\n') || '  (nada todavía)');
 });
-$('aiforget').addEventListener('click', () => { if (!confirm('¿Borrar todo lo que recuerdan y el diario de lo que ha pasado?')) return; game.mem = {}; game.journal = []; game.know = {}; game.plans = {}; game.tasks = []; game.giftFor = {}; save(); $('aiout').hidden = false; $('aiout').textContent = 'Listo: es como si fuera el primer día.'; });
-$('aiq').querySelector('.ok').addEventListener('click', () => { const r = aiq.list[0]; if (!r) return; try { parseJSON($('aiq').querySelector('textarea').value); } catch (e) { notice('🐞 Eso no es un JSON válido'); return; } aiqAnswer(r.id, $('aiq').querySelector('textarea').value); });
-$('aiq').querySelector('.no').addEventListener('click', () => { const r = aiq.list[0]; if (r) aiqFail(r.id); });
-$('aiq').querySelector('.all').addEventListener('click', () => { const r = aiq.list[0]; if (!r) return; aiq.skip.add(r.kind); for (const x of aiq.list.filter(x => x.kind === r.kind)) aiqFail(x.id, 'omitido'); notice('🐞 Desde ahora no se pregunta: ' + r.kind); });
-$('aiq').querySelector('.cp').addEventListener('click', () => { const r = aiq.list[0]; if (!r) return; try { navigator.clipboard.writeText(`INSTRUCCIONES:\n${sysFor(r.schema)}\n\nPEDIDO:\n${r.prompt}\n\nResponde solo con un objeto JSON que siga este esquema:\n${JSON.stringify(r.schema)}`); notice('📋 Copiado: pégalo en otra IA y trae su respuesta'); } catch (e) {} });
-$('aiq').addEventListener('keydown', e => e.stopPropagation());
+$('ajolvidar').addEventListener('click', () => { if (!confirm('¿Borrar todo lo que saben y el diario de lo que ha pasado?')) return; game.journal = []; game.know = {}; game.tasks = []; game.giftFor = {}; save(); $('ajout').hidden = false; $('ajout').textContent = 'Listo: es como si fuera el primer día.'; });
 const SPEEDS_T = [.25, .5, 1, 2, 5, 10, 25, 50];
 const velTxt = k => (k === .25 ? '¼' : k === .5 ? '½' : k) + '×';
 function setSpeed(k){ GAME_SPEED = k; owed = 0; $('spdbtn').innerHTML = '<i>◂</i>' + velTxt(k) + '<i>▸</i>'; $('spdbtn').classList.toggle('fast', k > 1); $('spdbtn').classList.toggle('slow', k < 1); notice(k > 1 ? '⏩ El tiempo va ' + k + ' veces más rápido' : k < 1 ? '🐢 El tiempo va más lento (' + velTxt(k) + ')' : '⏵ El tiempo va normal'); }
@@ -129,12 +104,9 @@ addEventListener('keydown', e => { if (e.target.closest?.('input, textarea')) re
 $('tripisla').addEventListener('pointerdown', e => { e.stopPropagation(); islaToggle(); });
 $('mapisla').addEventListener('click', () => islaToggle(true));
 $('islaclose').addEventListener('click', () => islaToggle(false));
-$('tok').addEventListener('pointerdown', e => { e.stopPropagation(); if (!game.talk) aiPanel(true); });
-tokDraw();
-// starting over: everything that happened is forgotten (the AI settings stay)
+// starting over: everything that happened is forgotten (the settings stay)
 let wiping = false;
-$('aireset').addEventListener('click', () => { if (!confirm('¿Borrar todo (el día, lo que tiene Ana, lo que recuerdan, las relaciones, la historia) y empezar de cero?')) return; wiping = true; try { localStorage.removeItem('avonlea'); } catch (e) {} location.reload(); });
-// (the panel of the AI is not opened by itself at the start: it is in ✒, for whoever wants it; the game begins with Ana)
+$('ajcero').addEventListener('click', () => { if (!confirm('¿Borrar todo (el día, lo que tiene Ana, lo que recuerdan, las relaciones, la historia) y empezar de cero?')) return; wiping = true; try { localStorage.removeItem('avonlea'); } catch (e) {} location.reload(); });
 $('say').addEventListener('submit', e => { e.preventDefault(); const t = $('sayin').value.trim(); $('sayin').value = ''; closeSay(); if (t) anaSpeak(t); });
 $('sayin').addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); closeSay(); } });
 $('saybtn').addEventListener('pointerdown', e => { e.stopPropagation(); audio(); sayOpen ? closeSay() : openSay(); });

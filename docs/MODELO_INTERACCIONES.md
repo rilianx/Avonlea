@@ -70,6 +70,8 @@ Todo lo que alguien dice o escribe en el juego está en `src/datos/`, con sus co
 - **los dichos** (`src/datos/dichos/*.txt`): lo que se dice en un momento que el código nombra (un «gracias», lo que se dice al hacer una tarea, un saludo, el camino a Bright River), con condiciones y huecos `{nombre}`; el código los pide con `dicho('momento', {…})`;
 - las historias del día escritas a mano, en `historias.json`.
 
+**La IA, más adelante, de noche.** El juego ya no llama a ninguna IA mientras se juega (se quitaron las charlas, los planes, el juez y el repaso de la noche con IA). Volverá como un *repaso nocturno*: mientras Ana duerme, escribirá escenas nuevas en estos mismos archivos de datos, y las mismas reglas las revisarán antes de que se jueguen. Para eso quedan la voz de cada personaje (`voice`), las líneas `ia:` de los hitos y las descripciones (`describe`) del mapa.
+
 `tools/grafo.js` revisa que cada momento que pide el código exista, que ninguno quede callado y que las condiciones estén bien escritas; `tools/modelo.py` lee los dichos que dicen quién los dice (`quien:`) y les aplica las reglas de `reglas.txt` (así aparecieron líneas de Diana que no decían «mientras no se lo prohíban»).
 
 ## Los días a prueba (del 1 al 3)

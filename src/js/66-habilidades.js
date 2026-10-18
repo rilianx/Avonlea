@@ -4,7 +4,7 @@
    someone else («paciencia» of Marilla towards Ana), go up with what another one does (Ana's chores) and down with
    what the script says («! suma paciencia:marilla:ana -1»). Each may say where it starts and its range. Milestones,
    up (hito) and down (bajo), are storylets on a quality: whoever is to tell it says so the next time Ana meets them
-   (with the AI, a scene of its own; without it, the written line), and the fact hito_<q>_<n> or bajo_<q>_<n> stays
+   (the written line, «dice»; the «ia:» line is kept for the AI to come), and the fact hito_<q>_<n> or bajo_<q>_<n> stays
    for the script, which may also ask for a level («si: granja:ana>=15», «paciencia:marilla:ana<=1»). */
 function habilidadesLeer(txt){
   const out = []; let c = null, h = null;
@@ -106,9 +106,6 @@ function hitosTick(){
     const b = wmBody(h.con); if (!b || wmScene(h.con) !== game.scene || dist(ana.x, ana.y, b.x, b.y) > (game.scene === 'out' ? 90 : 220) || ocupada(h.con)) continue;   // (near her; inside, in the same room)
     P.splice(P.indexOf(p), 1); dlgHecho((p.dir || 'hito') + '_' + c.id + '_' + h.n);
     if ((h.dice || h.texto).split(' / ').every(t => oidoHoy(h.con).has(t))) return;   // (already told her today: not again)   // (told: a fact, for the script and the tests)
-    const escrito = () => talkPlay((h.dice || h.texto).split(' / ').map(t => [h.con, t]), { ch: 'hito', hold: [h.con] });
-    if (!aiReady() || !h.ia) return escrito();
-    sceneAsk([h.con], h.ia + ' (Que se note que viene de lo que Ana hizo, día a día.)', 'pasar').then(s => s.lines.length ? talkPlay(s.lines.map(l => [l.q, l.t]), { ch: 'hito', hold: [h.con] }) : escrito()).catch(escrito);
-    return;
+    return talkPlay((h.dice || h.texto).split(' / ').map(t => [h.con, t]), { ch: 'hito', hold: [h.con] });
   }
 }

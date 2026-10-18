@@ -2,7 +2,7 @@
    arrows (Shift to run), and buttons for everything she can do. ---------- */
 function startVisor(){
   document.body.classList.add('visor');
-  $('ai').hidden = true; close();   // (no settings dialog over her: the keys must reach her)
+  $('ajustes').hidden = true; close();   // (no settings dialog over her: the keys must reach her)
   const P = document.createElement('div'); P.id = 'visor'; P.className = 'paper';
   P.innerHTML = `<b>Visor</b> <select id="vwho"><option value="ana">Ana</option><option value="marilla">Marilla</option><option value="matthew">Matthew</option><option value="f:ruby">Ruby (recoloreada)</option><option value="f:jane">Jane (recoloreada)</option><option value="f:josie">Josie (recoloreada)</option></select> <small>flechas para caminar · Shift para correr · rueda: zoom</small><div>
     <button data-a="sit">Sentarse</button><button data-a="crouch">Agacharse</button><button data-a="lie">Acostarse</button>

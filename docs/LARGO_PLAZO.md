@@ -15,8 +15,7 @@ Cada habilidad es **una cualidad** (un número con dueño, ver `docs/MOTOR.md`) 
 - **`suma:`** las acciones que lo hacen subir. Cada una suma **+1, una vez al día**, si Ana la hace unos minutos. `clase` es una hora en la escuela, un día con clases.
 - **`por_dia:`** cuánto puede subir en un día, como mucho (2).
 - **`hito N:`** lo que significa llegar a N. Se avisa (📈), se lee en el cuaderno, y quien dice `con:` se lo dice a Ana la próxima vez que la encuentra:
-  - con la IA encendida, una escena que improvisa a partir de `ia:`;
-  - sin IA, la línea escrita en `dice:`.
+  la línea escrita en `dice:` (la línea `ia:` queda guardada para la IA que vendrá).
 
   Contado el hito, queda el hecho `hito_<habilidad>_<N>`, para el guion. Las escenas también pueden esperar un nivel: `si: granja:ana>=15`.
 

@@ -63,8 +63,8 @@ const HHR = { table: { x: 6.4 * T, y: 5.4 * T }, cage: { x: 10.8 * T, y: 4.6 * T
 const PUMP = { x: GG.x + GG.w / 2 + 34, y: GG.y + 56 };
 const BENCH = { x: LAKE.x - 50, y: LAKE.y - LAKE.ry - 30 };
 const STOVE_SPOT = 'stove';
-// the houses: where they stand and how they look from outside, what they are called and how the AI describes them. Each gets its interior below (HOUSES[id].interior).
-// To add a house: a place in MAP.places, an entry here, its interior with the others, and it shows up in the world, the map and the prompt.
+// the houses: where they stand and how they look from outside, what they are called and how they are described («describe»: kept for the AI to come). Each gets its interior below (HOUSES[id].interior).
+// To add a house: a place in MAP.places, an entry here, its interior with the others, and it shows up in the world and the map.
 const HOUSES = {
   gg: { at: GG, name: 'Tejas Verdes', depth: 110, roof: '#5f9a58', wall: '#f7f2e6', trim: '#4f7d47', small: false, sign: [-70, 96],
     enter: 'Entrar a casa', inText: 'en la cocina de Tejas Verdes', arrive: ' entró a la cocina de Tejas Verdes.', place: ['tejas_verdes', 'Tejas Verdes', -60, 76],

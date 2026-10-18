@@ -2,7 +2,7 @@
    names: one and many; icon; season(): whether it can be had now; prepared: a single serving (nobody offers her
    another while she has one); recipe: what it takes to cook it; gift: how it is given (with its article; how it is
    thanked, gift.reply, is the saying regalo:<thing> in src/datos/dichos/11-regalos-y-encargos.txt);
-   giveAll: given all at once (money); note: what the AI is told about it when she carries it */
+   giveAll: given all at once (money) */
 const ITEM_DEFS = {
   bayas:    { names: ['baya', 'bayas'], icon: '🫐', season: () => S === 1 || S === 2 },
   manzanas: { names: ['manzana', 'manzanas'], icon: '🍎', season: () => S === 1 || S === 2 },
@@ -29,7 +29,7 @@ const ITEM_DEFS = {
   tinte:    { names: ['frasco de tinte para el pelo', 'frascos de tinte para el pelo'], icon: '🧪', season: () => game.inv.tinte > 0 },
   cinta:    { names: ['cinta para el pelo', 'cintas para el pelo'], icon: '🎀', season: () => true, gift: { name: 'cinta para el pelo', art: 'una cinta para el pelo' } },
   caramelos: { names: ['bolsita de caramelos de menta', 'bolsitas de caramelos de menta'], icon: '🍬', season: () => true, gift: { name: 'bolsita de caramelos', art: 'una bolsita de caramelos de menta' } },
-  dolares:  { names: ['dólar', 'dólares'], icon: '💵', season: () => game.inv.dolares > 0, giveAll: true, gift: { name: 'el dinero', art: 'el dinero' }, note: 'dinero' },
+  dolares:  { names: ['dólar', 'dólares'], icon: '💵', season: () => game.inv.dolares > 0, giveAll: true, gift: { name: 'el dinero', art: 'el dinero' } },
 };
 for (const k of Object.keys(ITEM_DEFS)) if (!(k in game.inv)) game.inv[k] = 0;
 for (const [k, d] of Object.entries(ITEM_DEFS)) if (d.gift) Object.defineProperty(d.gift, 'reply', { get: () => dicho('regalo:' + k) || dicho('gracias_dar') });   // (the thanks: said when it is given, one of its lines)
@@ -39,7 +39,7 @@ const PARA_LA_CASA = { lena: 'marilla', huevos: 'marilla', leche: 'marilla', man
 const entregaOpciones = who => Object.entries(PARA_LA_CASA).filter(([k, p]) => p === who && game.inv[k] > 0).map(([k]) => [ITEM_DEFS[k].icon + ' Darle ' + itemText(k, game.inv[k]).replace(/^1 /, 'el ').replace(/^(\d+) /, 'los $1 '), () => entregar(who, k)]);
 function entregar(who, k){
   const n = game.inv[k], dice = dicho('para_la_casa:' + k); game.inv[k] = 0; const I = wmInv(who); I[k] = (I[k] || 0) + n;
-  logEv('Ana le dio ' + itemText(k, n) + ' a ' + NAMES[who] + '.', [who, ...witnesses()]); planSoon(who, 'Ana te acaba de traer ' + itemText(k, n));
+  logEv('Ana le dio ' + itemText(k, n) + ' a ' + NAMES[who] + '.', [who, ...witnesses()]);
   if (who === 'marilla') cualidadSuma('marilla', 'paciencia', 1, 'ana');   // (a help for the house: while she is on trial, it counts)
   sfx.happy(); say(who, dice, [['De nada', close]]); save();
 }
@@ -47,9 +47,7 @@ const GIFTS = Object.fromEntries(Object.entries(ITEM_DEFS).filter(([, d]) => d.g
 function talk(who, again = false){
   const p = PEOPLE[who]; p.lie = false;
   ambAbort();
-  if (AI.on && !aiKey()) askKey();
   const pre = again ? [] : talkPrelude(who);
-  if (aiReady()) { face(who); aiTalk(who, 'Ana se acerca a conversar con ' + NAMES[who] + '.' + pre.map(x => ' (' + x + ')').join('')); return; }
   if (!p.sit) { p.dir = ana.x < p.x ? 3 : 1; if (Math.abs(ana.y - p.y) > Math.abs(ana.x - p.x)) p.dir = ana.y < p.y ? 0 : 2; }
   if (!ana.sit) ana.dir = p.x < ana.x ? 3 : 1;
   let text;
@@ -75,7 +73,7 @@ function face(who){
   if (!p.sit) { p.dir = ana.x < p.x ? 3 : 1; if (Math.abs(ana.y - p.y) > Math.abs(ana.x - p.x)) p.dir = ana.y < p.y ? 0 : 2; }
   if (!ana.sit) ana.dir = p.x < ana.x ? 3 : 1;
 }
-// walking with Diana (the same with or without AI: the game decides it, so it always works)
+// walking with Diana (the game decides it)
 function walkOption(who){
   if (who !== 'diana' || !dianaAmiga()) return [];
   const tarde = hourNow() >= 18;   // (a goodbye for the hour: «hasta mañana» only in the evening)

@@ -4,8 +4,8 @@ let relSel = null;
 function relPanel(on){
   $('rels').hidden = !on; if (!on) return;
   close();
-  const st = AI.stories ? game.story : null, sp = $('story');
-  if (!AI.stories) sp.innerHTML = '<div class="si">📖 Las historias del día están en pausa (se activan en ✒).</div>';
+  const st = AJUSTES.stories ? game.story : null, sp = $('story');
+  if (!AJUSTES.stories) sp.innerHTML = '<div class="si">📖 Las historias del día están en pausa (se activan en ✒).</div>';
   else if (st && st.day === today()) {
     const mark = { hecha: '✓', ya: '✓ <i>(antes de tiempo)</i>', perdida: '<i>(no llegaste)</i>', sin_evento: '<i>(no pasó)</i>', sin_encargo: '<i>(sin encargo)</i>', rota: '<i>↯ aquí se desvió</i>' };
     let rows = '';
@@ -17,7 +17,7 @@ function relPanel(on){
     }
     if (st.gen) rows += '<li class="rama">🌿 La historia está tomando otro camino…</li>';
     sp.innerHTML = `<div class="st">📖 «${esc(st.titulo)}»</div><div class="si">${esc(st.inspiracion)}</div>` + (storyDbg ? storyDbgHtml(st) : `<ul>${rows}</ul>`);
-  } else if (AI.stories) sp.innerHTML = '<div class="si">📖 La historia de hoy se está escribiendo…</div>';
+  } else if (AJUSTES.stories) sp.innerHTML = '<div class="si">📖 La historia de hoy empieza en un momento…</div>';
   sp.innerHTML += `<div class="si">Historias escritas a mano (para mañana): ${STORIES.map((x, k) => `<button class="pick" data-k="${k}">${game.nextStory === x.titulo ? '✓ ' : ''}${esc(x.titulo)}</button>`).join(' ')}</div>`;
   if (storyDbg) sp.innerHTML += STORIES.map(x => `<details><summary>🐞 Guion completo de «${esc(x.titulo)}»${x.ramas?.length ? ' (con ' + x.ramas.length + ' ramas escritas a mano)' : ''}</summary>${x.escenas.map(e => beatHtml(e)).join('')}${(x.ramas || []).map(r => `<div class="dh">🌿 Rama «${esc(r.titulo)}» · si se rompe «${esc(r.desde)}»${r.por ? ' por ' + r.por.join(', ') : ''}</div>${r.resumen ? `<div class="si">${esc(r.resumen)}</div>` : ''}${r.escenas.map(e => beatHtml(e)).join('')}`).join('')}</details>`).join('');
   sp.innerHTML += `<div class="si"><button class="dbg" id="dbgbtn">🐞 ${storyDbg ? 'Ocultar el detalle' : 'Ver toda la historia (depurar)'}</button>${storyDbg && st ? ' <button class="dbg" id="dbgcopy">📋 Copiar como JSON</button>' : ''}</div>`;
@@ -44,7 +44,7 @@ function beatHtml(e, st){
     + (req ? `<br><span class="k">requiere:</span> ${req}` : '') + (e.contra?.length ? `<br><span class="k">en contra:</span> ${e.contra.map(c => esc(c) + (has(c) ? ' ⚠' + hh(st.ev[c]) : '')).join(', ')}` : '')
     + (efx ? `<br><span class="k">efectos:</span> ${esc(efx)}` : '') + (enc ? `<br><span class="k">encargo:</span> ${esc(enc)}` : '')
     + (e.frases?.length ? `<br><span class="k">frases:</span> ${e.frases.map(f => `${esc(nameOf(f.quien))}: «${esc(f.texto)}»`).join(' ')}` : '')
-    + (e.juicio ? `<br><span class="k">juez (${fmtHour(e.juicio.h)}):</span> ${esc(e.juicio.v)}${e.juicio.nota ? ' — ' + esc(e.juicio.nota) : ''}` : '') + (run ? `<br><span class="k">ahora:</span> ${run}` : '') + (e.porque ? `<br><span class="k">por qué se rompió:</span> ${esc(e.porque)}` : '') + '</div>';
+    + (run ? `<br><span class="k">ahora:</span> ${run}` : '') + (e.porque ? `<br><span class="k">por qué se rompió:</span> ${esc(e.porque)}` : '') + '</div>';
 }
 function storyDbgHtml(st){
   let h = '', pre = '';
@@ -53,8 +53,6 @@ function storyDbgHtml(st){
     if (r && r.pre !== pre) { pre = r.pre; h += `<div class="dh">🌿 Rama «${esc(r.titulo)}» (desde «${esc(r.desde)}», a las ${fmtHour(r.hora)})</div><div class="si">${esc(r.por)}${r.resumen ? ' → ' + esc(r.resumen) : ''}</div>`; }
     h += beatHtml(e, st);
   }
-  if (st.gen) h += '<div class="dh">🌿 La IA está escribiendo la rama…</div>';
-  if (st.judging) h += '<div class="dh">⚖ El juez está mirando la bitácora…</div>';
   const src = STORIES.find(x => x.titulo === st.titulo), left = (src?.ramas || []).filter(r => !st.ramas.some(x => x.desde === r.desde));
   if (left.length) h += `<details><summary>Ramas escritas a mano que no se tomaron (${left.length})</summary>${left.map(r => `<div class="dh">🌿 «${esc(r.titulo)}» · si se rompe «${esc(r.desde)}»</div>${r.escenas.map(e => beatHtml(e)).join('')}`).join('')}</details>`;
   const ev = Object.entries(st.ev || {}).sort((a, b) => a[1] - b[1]);
@@ -84,10 +82,8 @@ function drawRels(){
   const det = $('reldet');
   if (relSel) {
     const out = N.filter(t => t !== relSel).map(t => { const r = relGet(relSel, t); return `<li><b>${esc(nodeName(relSel))} → ${esc(nodeName(t))}</b> <span class="h">${'♥'.repeat(r.a)}${'♡'.repeat(5 - r.a)}</span> ${esc(r.n)}</li>`; }).join('');
-    const imp = (game.impr[relSel] || []).slice(-3).map(x => `<li>${esc(x)}</li>`).join('');
-    det.innerHTML = `<ul>${out}</ul>` + (imp ? `<div class="si">Lo que se le quedó de estos días:</div><ul>${imp}</ul>` : '');
+    det.innerHTML = `<ul>${out}</ul>`;
   } else {
-    const log = (game.relLog || []).slice(-5).reverse().map(c => `<li>día ${c.d}: ${esc(nodeName(c.de))} → ${esc(nodeName(c.a))} ${c.cambio > 0 ? '▲' : c.cambio < 0 ? '▼' : '·'} ${esc(c.nota)}</li>`).join('');
-    det.innerHTML = '<div class="si">Toca a alguien para ver lo que siente por los demás. Las flechas van de quien siente hacia quien es querido (más gruesas y verdes, más cariño).</div>' + (log ? `<div class="si">Lo que cambió en las últimas noches:</div><ul>${log}</ul>` : '');
+    det.innerHTML = '<div class="si">Toca a alguien para ver lo que siente por los demás. Las flechas van de quien siente hacia quien es querido (más gruesas y verdes, más cariño).</div>';
   }
 }

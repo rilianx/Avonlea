@@ -24,7 +24,7 @@ function addTask(t){ t.id = (game.taskSeq = (game.taskSeq || 0) + 1); game.tasks
 function taskDone(t){
   t.done = true; float('📜 ¡Encargo cumplido!', ana.x, ana.y - 64); sfx.done();
   logEv(`Ana cumplió el encargo de ${NAMES[t.from]}: ${taskText(t)}.`);
-  planSoon(t.from, `Ana cumplió el encargo que le diste (${taskText(t)})`); save();
+  save();
 }
 // (watering, cooking and going somewhere are seen by the game itself)
 function taskEvent(kind, k){
@@ -48,15 +48,13 @@ function deliver(t){
   if (t.from === who) { t.thanked = true; game.fond[who] = Math.min(5, game.fond[who] + 1); }
   hearts(PEOPLE[who].x, PEOPLE[who].y - 56); sfx.done();
   logEv(`Ana le llevó ${itemText(t.item, t.n)} a ${NAMES[who]}` + (t.from === who ? ', como le había pedido.' : `, de parte de ${NAMES[t.from]}.`), [who, ...witnesses()]);
-  if (t.from !== who) planSoon(t.from, `Ana cumplió el encargo que le diste (${taskText(t)})`);
   save();
-  const note = t.from === who ? `(Ana te entrega ${itemText(t.item, t.n)}: el encargo que tú le pediste.)` : `(Ana te entrega ${itemText(t.item, t.n)} de parte de ${NAMES[t.from]}, que se lo encargó.)`;
-  if (aiReady()) aiTalk(who, note); else say(who, dicho('gracias_entrega'), [['De nada', close]]);
+  say(who, dicho('gracias_entrega'), [['De nada', close]]);
 }
 function passMessage(t){
   const who = t.para; t.done = true; know(who, `${NAMES[t.from]} le mandó a decir con Ana: «${t.recado}»`);
-  logEv(`Ana le dio a ${NAMES[who]} el recado de ${NAMES[t.from]}.`, [who]); planSoon(t.from, `Ana le dio tu recado a ${NAMES[who]}`); planSoon(who, `Ana te trajo un recado de ${NAMES[t.from]}: «${t.recado}»`); sfx.done(); save();
-  if (aiReady()) aiTalk(who, `(Ana te trae un recado de ${NAMES[t.from]}: «${t.recado}»)`); else say(who, dicho('gracias_recado'), [['De nada', close]]);
+  logEv(`Ana le dio a ${NAMES[who]} el recado de ${NAMES[t.from]}.`, [who]); sfx.done(); save();
+  say(who, dicho('gracias_recado'), [['De nada', close]]);
 }
 // on meeting someone: thanks for an errand done, a present they had planned, why they came looking for her
 function talkPrelude(who){
@@ -69,15 +67,4 @@ function talkPrelude(who){
   if (p.wantsTalk) { n.push(`Tú fuiste a buscar a Ana${p.why ? ' (' + p.why + ')' : ''}.`); p.wantsTalk = false; }
   save();
   return n;
-}
-// something a character does right away, decided in a conversation (checked against what they can do)
-function applyAction(who, a){
-  if (!a || !a.tipo || a.tipo === 'ninguna') return;
-  const A = ABIL[who], p = PEOPLE[who];
-  if (a.tipo === 'regalar' && A.regalar.includes(a.item) && inSeason(a.item) && game.npcGiftDay[who] !== today() && !(PREPARED.includes(a.item) && hasIt(a.item))) {
-    const q = clamp(Math.round(+a.cantidad || 1), 1, 3); game.inv[a.item] += q; game.npcGiftDay[who] = today();
-    float('+' + itemText(a.item, q), ana.x, ana.y - 60); logEv(`${NAMES[who]} le regaló a Ana ${itemText(a.item, q)}.`, [who, ...witnesses()]); sfx.happy();
-  } else if (a.tipo === 'acompanar' && A.acompanar && diana.where === game.scene && !diana.follow) { diana.follow = true; logEv('Ana y Diana salieron a pasear juntas.', ['diana', ...witnesses()]); }
-  else if (a.tipo === 'ir' && A.ir && PLACES[a.lugar]) { p.target = { place: a.lugar, until: hourNow() + 2 }; if (who === 'diana') diana.follow = false; }
-  save();
 }

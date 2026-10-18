@@ -1,7 +1,7 @@
 /* ---------- the people of Avonlea: the children who go to school, the teacher, the shopkeeper, the minister, the
    farmers... (to add one: an entry here). Each goes about the day as its kind says (home: the building where it lives),
    along the roads; tapped, it says one of its lines (and Ana may answer). They are the village around Ana: they are
-   not in the stories nor in the prompts of the AI (they cost nothing). ---------- */
+   not in the stories. ---------- */
 const kidLook = (hair, dress, o = {}) => ({ hair, hairD: o.hairD || hair, dress, dressD: o.dressD || dress, skin: o.skin || '#f2cfb2', h: o.h || .82, ...o });
 const FOLK_DEFS = {
   gilbert: { name: 'Gilbert Blythe', kind: 'alumno', home: 'Casa de los Blythe', play: 'lago', look: kidLook('#5a3a26', '#5a6e8a', { dressD: '#3e5068', coat: true, h: .88 }) },

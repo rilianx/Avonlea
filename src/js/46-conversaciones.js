@@ -1,11 +1,10 @@
 /* ---------- conversations: scenes played as speech bubbles ----------
-   The AI writes a short scene (what Ana and whoever is near say, one line each, Ana included: the player chooses
-   nothing) and the game plays it as bubbles over their heads, one at a time, then lets it end by itself.
-   - Passing by: when Ana comes near someone (or walks with Diana) the scene is asked for a little before she gets
-     there, and plays without stopping her. It can be empty: sometimes nobody says anything.
-   - On purpose (Space on someone): the same scene, and at the end the player decides only what matters (an errand,
-     a present, a walk). Space or a tap skips a line; Esc leaves. */
-const amb = { cur: null, ready: null, busy: false, tok: 0, cool: 0, err: 0, mute: {}, seen: {}, recent: null, hist: [] };
+   A short scene (what Ana and whoever is near say, one line each, from the written lines) is played as bubbles over
+   their heads, one at a time, and then ends by itself.
+   - Passing by: when Ana comes near someone, a word from them, without stopping her.
+   - A scene of the story of the day: at the end the player decides only what matters (an errand, a present, a walk).
+   Space or a tap skips a line; Esc leaves. */
+const amb = { cur: null, tok: 0, cool: 0, mute: {}, seen: {}, recent: null, hist: [] };
 let bubbles = [];
 // --- calling someone from a distance: they stop and look (and, if they get on with whoever calls, come over), a while
 const CALL_R = 520, CALL_WAIT = 14;
@@ -53,53 +52,9 @@ function chatGroup(main){
   return [main, ...Object.keys(PEOPLE).filter(k => k !== main && sceneOf(k) === game.scene && dist(PEOPLE[k].x, PEOPLE[k].y, p.x, p.y) < 140 && dist(PEOPLE[k].x, PEOPLE[k].y, ana.x, ana.y) < 200).slice(0, 2)];
 }
 const talkersHere = () => Object.keys(ANIMALS).filter(k => ANIMALS[k].talks && ANIM[k].where === game.scene);
-// what a character knows lately, without repeats nor comings and goings (for the short request)
-const BORING = /^\S+(?: \S+)? (entró a|volvió a su casa|llegó a|llegó por|salió|se fue al pueblo)/;
-function factsOf(k, n = 3){
-  const seen = new Set(), out = [];
-  for (const t of [...(game.know[k] || []).map(e => e.t), ...(memOn(k) ? game.mem[k] || [] : []).map(x => x.replace(/^día \d+: /, ''))].reverse()) {
-    const c = t.replace(/^\([^)]*\) /, ''); if (seen.has(c) || BORING.test(c)) continue; seen.add(c); out.push(c.slice(0, 150)); if (out.length >= n) break;
-  }
-  return out.reverse();
-}
-function sceneMsgMin(parts, note, full){
-  const top = stateText(Object.keys(CH)[0]).split('\n').slice(0, 3);
-  let m = top.join('\n').replace('; Pelusa, la gata, se le restriega en los tobillos', '') + (parts.length ? '' : '\nAna está sola.');
-  for (const k of parts) {
-    const f = factsOf(k), r = relGet(k, 'ana').n;
-    m += `\n- ${NAMES[k]} (cariño hacia Ana ${game.fond[k] ?? 2}/5${r ? ': ' + r : ''}; ${whereText(k)}): ${voiceShort(k)}` + (f.length ? ` Sabe: ${f.join(' / ')}` : '');
-    if (full) { const mine = activeTasks().filter(t => t.from === k); m += ` Puede: ${abilText(k)}.` + (mine.length ? ` Le encargó a Ana: ${mine.map(taskText).join('; ')}.` : ''); }
-  }
-  if (full) m += `\nAna tiene ${activeTasks().length} encargo(s) pendiente(s).`;
-  if (!/ESCENA DE LA HISTORIA/.test(note)) { const st = game.story, e = st && st.v === 2 && st.day === today() ? st.escenas.find(e => !isFinal(e) && e.personajes.some(k => parts.includes(k))) : null; if (e) m += `\nLA HISTORIA DE HOY («${st.titulo}»), lo que viene: hacia las ${e.hora}:00, ${e.que_pasa.slice(0, 160)} (sin adelantarlo).`; }
-  for (const k of talkersHere()) m += `\nAhí está ${ANIMALS[k].name} ("quien": "${k}"): ${ANIMALS[k].desc}; puede soltar una frase corta.`;
-  if (amb.hist.length) m += '\nLO ÚLTIMO QUE SE DIJERON (no lo repitas): ' + amb.hist.slice(-4).map(x => x.slice(0, 120)).join(' / ');
-  return m + `\nPRESENTES: Ana${parts.map(k => ', ' + NAMES[k]).join('')}.\nAHORA PASA: ${note}`;
-}
-function sceneMsg(parts, note, full = true){
-  if (!FULL()) return sceneMsgMin(parts, note, full);
-  let m = parts.length ? stateText(parts[0]) : worldText() + '\n\nAna está sola.';
-  for (const k of parts.slice(1)) {
-    const kn = (game.know[k] || []).slice(-6).map(e => '  - ' + e.t).join('\n') || '  (nada)', mm = (memOn(k) && (game.mem[k] || []).slice(-4).map(x => '  - ' + x).join('\n')) || '  (nada)';
-    m += `\n\nTAMBIÉN PRESENTE: ${NAMES[k]} (cariño hacia Ana: ${game.fond[k]}). Lo que siente: ${relText(k, ['ana', ...parts])}. ${storyText(k)}\nLo que sabe:\n${kn}\nLo que recuerda de sus conversaciones con Ana:\n${mm}`;
-  }
-  for (const k of talkersHere()) m += `\n\nAHÍ ESTÁ TAMBIÉN ${ANIMALS[k].name}: ${ANIMALS[k].desc}. Puede soltar alguna frase corta en la escena ("quien": "${k}").`;
-  if (amb.hist.length) m += '\n\nLO ÚLTIMO QUE SE DIJERON (no lo repitas):\n' + amb.hist.slice(-8).map(x => '- ' + x).join('\n');
-  const ctx = [];
-  for (const k of parts) if (CH[k].routine && PEOPLE[k].where !== CH[k].home) ctx.push(NAMES[k] + ' está ' + whereText(k) + '.');
-  if (ctx.length) m += '\n\n' + ctx.join(' ');
-  return m + `\n\nPRESENTES: Ana${parts.map(k => ', ' + NAMES[k]).join('')}.\nAHORA PASA: ${note}\nEscribe la escena.`;
-}
-// kind: 'pasar' (a passing chat: only the lines), 'dicho' (after something Ana said: also where she goes), or a talk she started (all)
-async function sceneAsk(parts, note, kind = 'charla'){
-  const sch = kind === 'pasar' ? SCHEMA_PASS() : kind === 'dicho' ? SCHEMA_SAID() : AI_SCHEMA;
-  const r = await aiCall([{ role: 'user', content: sceneMsg(parts, note, kind === 'charla') }], sch), o = { encargo: NO_TASK, accion: { tipo: 'ninguna' }, ana_va: { tipo: 'ninguna', destino: '' }, ...r.out }, ok = ['ana', ...parts, ...talkersHere()];
-  const lines = (Array.isArray(o.lineas) ? o.lineas : []).filter(l => l && ok.includes(l.quien) && typeof l.texto === 'string' && l.texto.trim()).slice(0, 9).map(l => ({ q: l.quien, t: l.texto.trim().slice(0, 320) }));
-  return { parts, lines, out: o, scene: game.scene, born: TT, resumen: typeof o.resumen === 'string' ? o.resumen.trim() : '' };
-}
 function sceneStart(s, directed){
   s.i = -1; s.wait = .5; s.directed = directed; amb.cur = s; bubbles = [];
-  if (directed) { game.talk = { who: s.parts[0], scene: true }; game.talkOpts = null; $('talk').hidden = true; applyAction(s.parts[0], s.out.accion); }
+  if (directed) { game.talk = { who: s.parts[0], scene: true }; game.talkOpts = null; $('talk').hidden = true; }
 }
 function turnTo(p, to){
   if (p === ana ? ana.moving : p.sit || (p === diana && diana.follow && p.moving)) return;
@@ -108,7 +63,7 @@ function turnTo(p, to){
 function ambTick(dt){
   const s = amb.cur;
   const far = (r) => s.parts.length && s.parts.every(k => sceneOf(k) !== game.scene || dist(ana.x, ana.y, PEOPLE[k].x, PEOPLE[k].y) > r);
-  if (!s.directed && (game.scene !== s.scene || game.talk || game.cooking || game.map || !$('ai').hidden || far(190))) return ambEnd();
+  if (!s.directed && (game.scene !== s.scene || game.talk || game.cooking || game.map || !$('ajustes').hidden || far(190))) return ambEnd();
   if (s.directed && (game.scene !== s.scene || far(260))) { s.noMenu = true; if (game.talk?.scene) { game.talk = null; $('talk').hidden = true; } return ambEnd(); }   // (Ana walked off: the talk is over)
   if ((s.wait -= dt) > 0) return;
   if (!s.directed && ['ana', ...s.parts].some(k => ocupada(k) && !(s.ve && !AGENTS[k]?.acting))) return ambEnd();   // (one of them got busy: the loose talk is dropped; not a remark on what they see, if they are only staying)
@@ -125,50 +80,31 @@ function ambEnd(){
   if (said.length && (s.resumen || s.directed)) {
     for (const l of said) amb.hist.push(nameOf(l.q) + ': ' + l.t); if (amb.hist.length > 16) amb.hist.splice(0, amb.hist.length - 16);
     const sum = s.resumen || (s.parts.length > 1 ? 'Ana conversó con ' + s.parts.map(k => NAMES[k]).join(' y ') + '.' : 'Ana conversó con ' + NAMES[who] + '.');
-    logEv(sum, [...s.parts, ...witnesses()]); if (s.resumen) for (const k of s.parts) remember(k, sum);
+    logEv(sum, [...s.parts, ...witnesses()]);
     amb.recent = { parts: s.parts, summary: said.map(l => nameOf(l.q) + ': «' + l.t + '»').join(' '), t: TT };
   }
-  amb.cool = TT + (FULL() ? 35 : 60);
+  amb.cool = TT + 60;
   for (const k of s.parts) { amb.mute[k] = TT + (k === 'diana' && diana.follow ? 70 : 110); amb.seen[k] = true; }
   if (s.after) startIntent(s.after, true);
   if (s.directed && s.noMenu && game.talk?.scene) game.talk = null;   // (nothing to decide: the talk just ends)
   if (s.directed && !s.noMenu) { const last = [...s.lines].reverse().find(l => l.q === who) || s.lines[s.lines.length - 1]; ambMenu(who, last ? last.t : '…', s); }
 }
 // stops whatever is being said (Ana is going to talk, or leaves)
-function ambAbort(){ amb.tok = 0; amb.ready = null; if (amb.cur) { amb.cur.directed = false; ambEnd(); } bubbles = []; }
-// at the end of a talk she started: the player decides only what matters
+function ambAbort(){ amb.tok = 0; if (amb.cur) { amb.cur.directed = false; ambEnd(); } bubbles = []; }
+// at the end of a scene of the story: the player decides only what matters (and then the talk goes on as always)
+const talkAgain = who => { close(); talk(who, true); };
 function ambMenu(who, text, s){
   const opts = [], req = validTask(who, s.out.encargo);
   if (req) {
-    opts.push(['📜 Sí, lo haré', () => { addTask(req); if (s.story) s.story.taskId = req.id; aiTalk(who, `(Ana acepta el encargo: ${taskText(req)}.)`, s.turns); }]);
-    opts.push(['Ahora no puedo', () => aiTalk(who, '(Ana dice que ahora no puede hacer ese encargo.)', s.turns)]);
+    opts.push(['📜 Sí, lo haré', () => { addTask(req); if (s.story) s.story.taskId = req.id; talkAgain(who); }]);
+    opts.push(['Ahora no puedo', () => talkAgain(who)]);
   }
   opts.push(...taskOptions(who));
   for (const [k, [name]] of Object.entries(GIFTS)) if (game.inv[k] > 0) opts.push(['Regalar ' + name, () => give(who, k)]);
   opts.push(...convOpciones(who), ...walkOption(who));
-  if (!req && s.turns < 4) opts.push(['Seguir conversando', () => aiTalk(who, `(Ana sigue conversando con ${NAMES[who]}; lo último: ${s.lines.slice(-3).map(l => nameOf(l.q) + ': «' + l.t + '»').join(' ')})`, s.turns)]);
+  if (!req && s.turns < 4) opts.push(['Seguir conversando', () => talkAgain(who)]);
   opts.push([cierre(who), close]);
   say(who, req ? '📜 ' + NAMES[who] + ' te pide: ' + taskText(req) : '¿Qué quieres hacer?', opts);
-}
-function aiTalk(who, note, turns = 0){
-  const id = amb.tok = Math.random(), parts = chatGroup(who);
-  say(who, NAMES[who] + ' está pensando…', [['Mejor otro día', close]], true);
-  sceneAsk(parts, note).then(s => {
-    if (amb.tok !== id || game.talk?.who !== who) return;
-    if (!s.lines.length) throw new Error('escena vacía');
-    s.turns = turns + 1; sceneStart(s, true);
-  }).catch(err => {
-    if (amb.tok !== id) return;
-    amb.tok = 0; notice('✒ La IA no respondió (' + err.message + '). Uso las frases de siempre.');
-    if (game.talk?.who === who) { close(); talkFixed(who); }
-  });
-}
-// passing by: the scene is asked for a little before Ana arrives and starts when she is near
-function ambNote(parts){
-  const names = parts.map(k => NAMES[k]).join(' y ');
-  if (parts.includes('diana') && diana.follow) return `Ana y Diana ${ana.lie ? 'están recostadas en el pasto mirando las nubes, conversando con calma' : 'pasean juntas y van conversando mientras caminan'}${parts.length > 1 ? '; cerca está ' + parts.filter(k => k !== 'diana').map(k => NAMES[k]).join(' y ') : ''}. (Charla al pasar: nadie se lo pidió; Ana también habla.)`;
-  if (parts.length > 1) return `Ana llega donde están ${names}, que conversan entre ellos. (Charla al pasar: nadie se lo pidió. Hablan sobre todo entre ellos —los vecinos, la comida, el tiempo, la cosecha, los chismes, lo que Ana hizo—; Ana se une enseguida y habla bastante.)`;
-  return `Ana pasa cerca de ${names} y se detiene un momento. (Charla al pasar: nadie se lo pidió; Ana también habla. Pueden saludarse o comentar algo del momento.)`;
 }
 const writtenTalkOn = () => !!game.playAct || game.scene === 'camino' || cart.riding || !!(AGENTS.ana?.ride && AGENTS.ana.followOf) || talkBusy('viaje') || (CAP1.on && !CAP1.done);
 // someone is saying something right now (a loose line would cover it)
@@ -181,16 +117,10 @@ function ambUpdate(dt){
   { const H = dlgHechos(); if ((H.inicio_juego || H.primera_noche) && !H.desayuno_prueba) return; }   // (the first night: only what the book says)
   if (writtenTalkOn()) return;   // (on the trip, or in the book's chapter: the written lines go, not the loose ones)
   if (TALKS.some(t => t.lines.some(l => l.q === 'ana' || l.q === '?'))) return;   // (Ana in a scene: no loose lines in the middle of it)
-  if (game.talk || game.cooking || game.map || !$('ai').hidden) return;
+  if (game.talk || game.cooking || game.map || !$('ajustes').hidden) return;
   const all = Object.keys(PEOPLE).filter(k => sceneOf(k) === game.scene), dd = k => dist(ana.x, ana.y, PEOPLE[k].x, PEOPLE[k].y);
   for (const k of Object.keys(PEOPLE)) if (sceneOf(k) !== game.scene || dd(k) > 280) amb.seen[k] = false;
-  if (amb.ready) {
-    const s = amb.ready;
-    if (s.scene !== game.scene || TT - s.born > 50 || s.parts.every(k => sceneOf(k) !== game.scene || dd(k) > 420)) amb.ready = null;
-    else if (s.parts.some(k => sceneOf(k) === game.scene && dd(k) < 100)) { amb.ready = null; sceneStart(s, false); }
-    return;
-  }
-  if (amb.busy || TT < amb.cool || TT < amb.err) return;
+  if (TT < amb.cool) return;
   { const se = storyNow(); if (se && storyHere(se)) return; }   // (here a scene of the story is about to be played: it goes first)
   if (ocupada('ana') || hablando()) return;   // (in the middle of something with Ana, or Ana herself busy, or someone speaking: no loose lines)
   let best = null, bd = 1e9;
@@ -200,17 +130,11 @@ function ambUpdate(dt){
   if (best === 'diana' && !dianaAmiga()) return;   // (no friend's greeting from one she does not know yet)
   { const C = bd < 90 && !reaccionAlVerla(best) && !activeGoals(AGENTS[best] || { goals: [] }).length && !activeGoals(AGENTS.ana).length && !ocupada(best) && !ocupada('ana') && Math.random() < .3 && convDisponibles(best).filter(d => !convSitio(d) || convEnSitio(d, convSitio(d)))[0]; if (C) { amb.mute[best] = TT + 110; amb.seen[best] = true; conversar(C); return; } }   // (now and then, one of the conversations there are with them, by itself)
   // what they see of her (in a nightgown, out at night, no hat), they say first, from where they see it (not only beside
-  // her), with the AI or without it
+  // her)
   { const ve = reaccionAlVerla(best); if (ve) { amb.mute[best] = TT + 110; amb.seen[best] = true; sceneStart({ parts: [best], lines: [{ q: best, t: ve }], out: {}, scene: game.scene, resumen: '', ve: true }, false); return; } }
-  if (!aiReady()) {   // (without the AI: just a word from them, from the written lines)
-    if (bd < 90) { const l = (game.wm?.sick || []).includes(best) ? [comentarioTexto('enfermo') || dicho('tos')] : LINES[best], u = l.length > 1 ? l.filter(x => x !== amb.ultima?.[best]) : l, t = u[Math.floor(Math.random() * u.length)]; (amb.ultima ||= {})[best] = t; if (!t) { amb.mute[best] = TT + 110; return; }   // (not the same line twice in a row; and if they have said all they have today, nothing)
+  // just a word from them, from the written lines
+  if (bd < 90) { const l = (game.wm?.sick || []).includes(best) ? [comentarioTexto('enfermo') || dicho('tos')] : LINES[best], u = l.length > 1 ? l.filter(x => x !== amb.ultima?.[best]) : l, t = u[Math.floor(Math.random() * u.length)]; (amb.ultima ||= {})[best] = t; if (!t) { amb.mute[best] = TT + 110; return; }   // (not the same line twice in a row; and if they have said all they have today, nothing)
     amb.mute[best] = TT + 110; amb.seen[best] = true; sceneStart({ parts: [best], lines: [{ q: best, t }], out: {}, scene: game.scene, resumen: '' }, false); }
-    return;
-  }
-  const parts = chatGroup(best); amb.busy = true;
-  sceneAsk(parts, ambNote(parts), 'pasar').then(s => {
-    if (s.lines.length) amb.ready = s; else for (const k of parts) { amb.mute[k] = TT + 60; amb.seen[k] = true; }
-  }).catch(e => { console.debug('[avonlea IA] charla', e.message); amb.err = TT + 60; }).finally(() => { amb.busy = false; });
 }
 function drawTag(g, t){
   g.font = '9px Georgia, serif'; g.textAlign = 'center';
@@ -286,17 +210,11 @@ function cajaTexto(g, text, kind, p, sx, top, foot, W, H, apilada){
   g.font = font(); g.fillStyle = narra ? '#4a3420' : '#3b2a1c'; rows.forEach((t, k) => g.fillText(t, x + w / 2, y + (kind === 'piensa' ? 7 : 4) + (k + 1) * lh - 2));
   return { y, h, below };
 }
-function askKey(){
-  const P = PROV[provider()], k = (prompt(`Para conversar con IA (${AI.model}), pega tu clave de la API de ${P.name} (${P.hint}). Se guarda solo en este navegador.`) || '').trim();
-  if (k) { AI.keys[provider()] = k; saveAI(); } else { AI.on = false; saveAI(); }
-}
-function talkFixed(who){ const on = AI.on; AI.on = false; try { talk(who, true); } finally { AI.on = on; } }
 function give(who, k){
   const d = ITEM_DEFS[k], n = d.giveAll ? game.inv[k] : 1, what = d.giveAll ? itemText(k, n) : d.gift.art;
   game.inv[k] -= n; game.fond[who] = Math.min(5, game.fond[who] + 1);
   const p = PEOPLE[who]; hearts(p.x, p.y - 56); sfx.happy();
-  logEv('Ana le ' + (d.giveAll ? 'dio ' : 'regaló ') + what + ' a ' + NAMES[who] + '.', [who, ...witnesses()]); planSoon(who, 'Ana te acaba de dar ' + what); storyEvent('regalo:' + who); storyEvent('regalo:' + who + ':' + k); save();
-  if (aiReady()) { aiTalk(who, '(Ana le ' + (d.giveAll ? 'da ' : 'regala ') + 'a ' + NAMES[who] + ' ' + what + (d.recipe ? ', hecha por ella.)' : '.)')); return; }
+  logEv('Ana le ' + (d.giveAll ? 'dio ' : 'regaló ') + what + ' a ' + NAMES[who] + '.', [who, ...witnesses()]); storyEvent('regalo:' + who); storyEvent('regalo:' + who + ':' + k); save();
   say(who, d.gift.reply + CH[who].giftReply, [['De nada', close]]);
 }
 function say(who, text, opts, wait = false){
@@ -308,9 +226,9 @@ function say(who, text, opts, wait = false){
   opts.forEach(([label, fn], k) => { const b = document.createElement('button'); b.textContent = (opts.length > 1 ? (k + 1) + '. ' : '') + conNombres(label); b.onclick = e => { e.stopPropagation(); fn(); }; row.appendChild(b); });
   box.hidden = false; game.talkOpts = opts;
   // a decision with a character: if the player does not choose in 10 seconds, Ana chooses by herself
-  if (opts.length > 1 && !wait && PEOPLE[who] && AI.auto !== false && (ANA_AUTO || navigator.webdriver)) { game.talk.deadline = TT + 10; box.insertAdjacentHTML('beforeend', '<div class="tbar"><i></i></div>'); }
+  if (opts.length > 1 && !wait && PEOPLE[who] && AJUSTES.auto !== false && (ANA_AUTO || navigator.webdriver)) { game.talk.deadline = TT + 10; box.insertAdjacentHTML('beforeend', '<div class="tbar"><i></i></div>'); }
 }
-// a decision box is open (the talk itself, or waiting for the AI, does not hold anyone still)
+// a decision box is open (the talk itself, or a box that waits, does not hold anyone still)
 const menuOpen = () => !!game.talk && !game.talk.scene && !game.talk.wait;
 function close(){ $('talk').hidden = true; game.talk = null; game.talkOpts = null; ambAbort(); }
 function cookMenu(){

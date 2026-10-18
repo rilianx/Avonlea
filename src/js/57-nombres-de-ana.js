@@ -1,7 +1,7 @@
 /* ---------- the names Ana gives to things: the book's, or the player's own ----------
    When Ana names something (the Avenue, Barry's pond, the cherry tree at her window, the places of Avonlea), the
    player chooses: the name of the book, or one of their own, written in a box. From then on the thing is called so
-   everywhere (what is said, the log, the map, the signs, what the AI is told): it is Ana's name for it. What stays is
+   everywhere (what is said, the log, the map, the signs): it is Ana's name for it. What stays is
    the name, and the fact nombro_<thing> (with nombre_propio_<thing> if it is not the book's), for the script.
    In a scene: «-> Otro nombre…» with «! nombrar lago ?» (the box), or «! nombrar lago» (the book's). */
 const NOMBRABLES = {

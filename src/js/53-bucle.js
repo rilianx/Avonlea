@@ -11,7 +11,6 @@ function lagrimas(){
 }
 function update(dt){
   if (sleeping || game.final || narraPausa() || decidiendo()) return;   // (a card being read, a decision being taken: the world waits)   // (a card that explains: the world waits while it is read)
-  if (AI.on && provider() === 'manual' && aiq.list.length) return;   // (debugging by hand: the world waits for the answer)
   TT += dt; dayT += dt / (MIN_S * 60 * 24); boil = Math.floor(TT * 6);
   const { night } = light();
   // the season: two days each
@@ -23,7 +22,7 @@ function update(dt){
     else if (sleepyStage < 2 && hn >= [21, 23.5][sleepyStage] && !game.talk && !amb.cur && !writtenTalkOn() && !(dlgHechos().inicio_juego && !dlgHechos().llegada_tv) && !CAP1.on) comentar('sueno_' + (++sleepyStage)); }
   // Ana: walks where she is told (not while talking or cooking); sits on the bench until she moves
   let mx = 0, my = 0;
-  if (!menuOpen() && !game.cooking && !game.map && $('ai').hidden) {
+  if (!menuOpen() && !game.cooking && !game.map && $('ajustes').hidden) {
     if (keys.has('ArrowLeft') || keys.has('KeyA')) mx--; if (keys.has('ArrowRight') || keys.has('KeyD')) mx++;
     if (keys.has('ArrowUp') || keys.has('KeyW')) my--; if (keys.has('ArrowDown') || keys.has('KeyS')) my++;
     if (stick) { const dx = stick.x - stick.x0, dy = stick.y - stick.y0, l = Math.hypot(dx, dy); if (l > 10) { mx = dx / Math.max(l, 50); my = dy / Math.max(l, 50); } }
@@ -82,8 +81,7 @@ function update(dt){
     }
     game.lastDay = today(); save();
   }
-  runPlans(dt);
-  if ((storyT -= dt) < 0 && AI.stories) { storyT = .5; storyTick(); if (!storyBusy && (!game.story || game.story.day !== today()) && hourNow() < 18 && TT > 4) makeStory(); }
+  if ((storyT -= dt) < 0 && AJUSTES.stories) { storyT = .5; storyTick(); if ((!game.story || game.story.day !== today()) && hourNow() < 18 && TT > 4) makeStory(); }
   mealTick(); ambUpdate(dt); encUpdate(dt); for (const b of bubbles) { if (!b.t) oido(b.q, b.text); b.t += dt; } bubbles = bubbles.filter(b => b.t < b.dur + .35);   // (what is said, Ana heard it today: src/js/24-personajes.js)
   if ((taskTick -= dt) < 0) { taskTick = .5; taskEvent('ir'); }
   // everyone but Diana follows their routine: where they are wanted (home, or visiting), walking there, or about the place
@@ -146,7 +144,7 @@ function update(dt){
   // the garden grows (a watered bed comes up a stage after a while); berries and apples come back
   // (what grows, grows at night: a bush picked clean has berries again tomorrow, not in a quarter of an hour; src/js/22-dormir.js)
   // what she can do here, and doing it
-  here = menuOpen() || game.cooking || game.map || !$('ai').hidden ? null : near();
+  here = menuOpen() || game.cooking || game.map || !$('ajustes').hidden ? null : near();
   if (actNow) { actNow = false; if (here) here.act(); }
   // life about
   for (const b of butterflies) { b.ph += dt * 9; const dx = b.tx - b.x, dy = b.ty - b.y, dd = Math.hypot(dx, dy); if (dd < 8) { b.tx = clamp(b.x + (Math.random() - .5) * 300, 0, WW); b.ty = clamp(b.y + (Math.random() - .5) * 300, 0, WH); } else { b.x += dx / dd * 22 * dt; b.y += dy / dd * 22 * dt; } }
@@ -300,7 +298,7 @@ function renderView(){
   // the rope, when she leads a cow
   { const a = ledCow(); if (a && anaHere && a.where === game.scene) { const hx = ana.x + (ana.dir === 3 ? -7 : 7), hy = ana.y - 14, nx = a.x + (a.dir === 3 ? -14 : 14), ny = a.y - 17; g.strokeStyle = '#8a6a48'; g.lineWidth = 1.1; g.beginPath(); g.moveTo(hx, hy); g.quadraticCurveTo((hx + nx) / 2, Math.max(hy, ny) + 10, nx, ny); g.stroke(); } }
   // a little tag over what the pointer is on (or what she could do right here)
-  const hov = hoverAt && anaHere && !menuOpen() && !game.map && $('ai').hidden ? targetAt(ox + hoverAt[0] / Z, oy + hoverAt[1] / Z) : null;
+  const hov = hoverAt && anaHere && !menuOpen() && !game.map && $('ajustes').hidden ? targetAt(ox + hoverAt[0] / Z, oy + hoverAt[1] / Z) : null;
   cv.style.cursor = hov ? 'pointer' : '';
   // (no labels over things: what can be done is discovered by trying)
   // the light of the day (indoors a warm lamp at night)
