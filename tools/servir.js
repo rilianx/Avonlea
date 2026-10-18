@@ -4,7 +4,7 @@
 // The browser only gives threads to a "secure" page: on the computer itself, http://localhost is enough; from the
 // phone it has to be https. So:
 //   node tools/servir.js                 → http://localhost:8000 (the computer) and http://<your ip>:8000 (the phone, without threads)
-//   node tools/servir.js --crear-cert    → makes a certificate of its own for your ip (once; needs openssl), in tools/cert/
+//   node tools/servir.js --crear-cert    → makes a certificate of its own for your ip (needs openssl), in tools/cert/ (--https makes it the first time)
 //   node tools/servir.js --https         → https://<your ip>:8443 (the phone, with threads: the first time it warns that
 //                                           the certificate is not known; «Advanced → continue» and it is remembered)
 // No packages to install: only Node. Ctrl+C to stop it.
@@ -30,7 +30,7 @@ function atender(q, r){
   fs.createReadStream(f).pipe(r);
 }
 if (arg.includes('--https')) {
-  if (!fs.existsSync(path.join(CERT, 'cert.pem'))) { console.log('Primero: node tools/servir.js --crear-cert'); process.exit(1); }
+  if (!fs.existsSync(path.join(CERT, 'cert.pem'))) execFileSync(process.execPath, [__filename, '--crear-cert'], { stdio: 'inherit' });   // (the first time, it makes its certificate by itself)
   const port = +(arg[arg.indexOf('--puerto') + 1]) || 8443;
   https.createServer({ key: fs.readFileSync(path.join(CERT, 'clave.pem')), cert: fs.readFileSync(path.join(CERT, 'cert.pem')) }, atender).listen(port, () => {
     console.log('Avonlea, con https:'); for (const ip of ['localhost', ...ips()]) console.log('  https://' + ip + ':' + port + '/');
