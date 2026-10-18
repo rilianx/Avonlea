@@ -20,5 +20,3 @@ function shareNews(){
   for (const x of Object.keys(CH)) for (const y of CH[x].gossip)
     for (const e of (game.know[x] || []).filter(e => e.d === today() && !e.t.startsWith('(') && !(game.know[y] || []).some(f => f.t === e.t))) know(y, '(' + NAMES[x] + ' le contó) ' + e.t, e.d);
 }
-// what was said in conversations, as the character will remember it
-function remember(who, text){ if (!memOn(who)) return; const m = game.mem[who] = game.mem[who] || []; if (m.some(x => x.endsWith(': ' + text))) return; m.push('día ' + (today() + 1) + ': ' + text); if (m.length > 16) m.splice(0, m.length - 16); save(); }

@@ -10,7 +10,7 @@ const exe = process.env.PLAYWRIGHT_CHROMIUM || (fs.existsSync('/opt/pw-browsers/
 (async () => {
   const b = await pw.chromium.launch({ executablePath: exe, args: ['--no-sandbox'] });
   const pg = await b.newPage();
-  await pg.addInitScript(() => { localStorage.clear(); localStorage.setItem('avonlea-ai-asked', '1'); });
+  await pg.addInitScript(() => { localStorage.clear(); });
   await pg.goto('file://' + path.resolve(__dirname, '..', 'index.html')); await pg.waitForFunction(() => window.__avonlea);
   const D = await pg.evaluate(() => {
     const A = window.__avonlea, d = A.wmData(), s = A.wmNow();

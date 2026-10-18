@@ -1,7 +1,6 @@
 /* ---------- the cards of the people of Avonlea (who they are and what they like to talk about) and their encounters:
-   when Ana comes near one of them, when she taps one, or when two of them meet near her, they talk. With the AI, a
-   short request: «Eres X de Avonlea y te encuentras con Y. Están en Z, es tal estación y tal hora. Genera una
-   conversación sobre L.» Without it (or if it fails), the written lines. ---------- */
+   when Ana comes near one of them, when she taps one, or when two of them meet near her, they talk (the written
+   lines). ---------- */
 const FICHAS = {
   gilbert: ['Gilbert Blythe, 13 años, el chico más listo y simpático de la escuela; una vez llamó «Zanahorias» a Ana y ella le rompió la pizarra en la cabeza; desde entonces Ana no le habla, aunque él lo intenta', ['el concurso de ortografía', 'la pizarra rota', 'el puente del estanque', 'los exámenes para entrar a Queen\'s']],
   josie: ['Josie Pye, compañera de escuela de Ana, presumida, envidiosa y de lengua afilada; siempre está desafiando a los demás', ['el vestido nuevo de alguien', 'un desafío peligroso', 'los chismes de la escuela']],
@@ -50,18 +49,17 @@ const FICHAS = {
 };
 for (const [k, d] of Object.entries(FOLK_DEFS)) { const f = FICHAS[k]; d.ficha = f ? f[0] : d.look.h < .99 ? d.name + ', un niño de Avonlea que juega cerca de su casa' : d.name + ', de Avonlea, que vive en ' + d.home.replace(/^Casa de /, 'la casa de ').replace(/^Granja /, 'la granja '); d.topics = f ? f[1] : d.look.h < .99 ? ['un juego', 'un bicho que encontró'] : ['el tiempo', 'la cosecha', 'los vecinos', 'las noticias de la aldea']; }
 /* THE CARD (the same for everyone, the main characters and the people of the village):
-     nombre, ficha (who they are, in a sentence or two), temas (what they like to talk about), frases (what they say
-     without the AI) and memoria (true: they keep what they talked about with Ana, when «Memoria de los personajes» is on).
+     nombre, ficha (who they are, in a sentence or two), temas (what they like to talk about) and frases (what they
+     say).
    The main characters have more besides (errands, presents, routines: CHARACTERS); fichaOf gives the card of anyone. */
-for (const [k, c] of Object.entries(CH)) { c.temas = c.temas || ['lo que pasó hoy', 'la granja', 'los vecinos']; if (c.memoria === undefined) c.memoria = true; }
-for (const d of Object.values(FOLK_DEFS)) if (d.memoria === undefined) d.memoria = ['gilbert', 'sraallan', 'farero', 'peg', 'jasper', 'sara'].some(k => FOLK_DEFS[k] === d);
+for (const c of Object.values(CH)) c.temas = c.temas || ['lo que pasó hoy', 'la granja', 'los vecinos'];
+// the voice of a main character, short: its first sentences (src/datos/personajes.json, «voice»)
+const voiceShort = k => CH[k].voice.split(/(?<=\.)\s/).reduce((a, x) => a.length < 110 ? (a ? a + ' ' : '') + x : a, '');
 function fichaOf(k){
-  if (CH[k]) return { nombre: CH[k].fullName, ficha: CH[k].fullName + ', ' + voiceShort(k), temas: CH[k].temas, frases: LINES[k], memoria: CH[k].memoria };
-  const d = FOLK_DEFS[k]; return d ? { nombre: d.name, ficha: d.ficha, temas: d.topics, frases: lineasDe(k, d.lines), memoria: d.memoria } : null;
+  if (CH[k]) return { nombre: CH[k].fullName, ficha: CH[k].fullName + ', ' + voiceShort(k), temas: CH[k].temas, frases: LINES[k] };
+  const d = FOLK_DEFS[k]; return d ? { nombre: d.name, ficha: d.ficha, temas: d.topics, frases: lineasDe(k, d.lines) } : null;
 }
-const ANA_FICHA = 'Ana Shirley, 11 años, pelirroja y pecosa, huérfana adoptada por Matthew y Marilla Cuthbert de Tejas Verdes; soñadora, muy conversadora, de palabras grandiosas e imaginación desbordante';
-const SEASON_TOPICS = [['las flores de los manzanos', 'la primavera'], ['el calor', 'las vacaciones', 'las bayas'], ['las hojas rojas', 'las manzanas', 'la cosecha'], ['la nieve', 'el frío', 'la Navidad']];
-// written exchanges for two neighbours (when there is no AI): src/datos/charlas.txt
+// written exchanges for two neighbours: src/datos/charlas.txt
 // (two who meet, a line each; one may wait for something of the story: «si: presente:allan»; the news, they tell
 // as src/datos/noticias.txt says)
 const PAIR_LINES = { mixta: charlaPares('pares:mixta'), kids: charlaPares('pares:kids'), big: charlaPares('pares:big') };   // (src/datos/charlas.txt, «pares:»)
@@ -69,25 +67,9 @@ const PAIR_LINES = { mixta: charlaPares('pares:mixta'), kids: charlaPares('pares
 // filters (not what was heard today, not naming Ana before they know her) before picking one
 const dichosTodos = (m, v = {}) => (DICHOS_DE[m] || []).filter(d => dlgCumple({ si: d.si.map(c => dlgVal(rellenar(c, v))) }, dlgCtx())).map(d => rellenar(d.t, v));
 const paresSi = P => P.filter(p => lineasSi([p[0]]).length).map(([a, b]) => [lineasSi([a])[0], b]);   // (the pairs whose time has come)
-const memOn = k => !!AI.memoria && !!fichaOf(k)?.memoria;
-const enc = { cur: null, ready: null, busy: false, mute: {}, cool: 0, err: 0 };
+const enc = { cur: null, mute: {}, cool: 0 };
 const encP = id => id === 'ana' ? ana : FOLKBY[id];
-const encName = id => id === 'ana' ? 'Ana' : FOLKBY[id].def.name;
 const encQ = id => id === 'ana' ? 'ana' : 'f:' + id;
-const encPlace = (x, y) => game.scene === 'es' ? 'la escuela de Avonlea, en plena clase' : game.scene !== 'out' ? (HOUSES[game.scene]?.inText || 'una casa de Avonlea') : (n => n ? ('Avonlea, cerca de ' + n.replace(/^(La|El|Los) /, m => m.toLowerCase())).replace(/ de el /, ' del ') : 'un camino de Avonlea')(placeNear(x, y));
-function encTopic(x, y){ const f = [x, y].filter(i => i !== 'ana').map(i => FOLKBY[i].def.topics).flat(); return pick(Math.random() < .75 && f.length ? f : SEASON_TOPICS[S]); }
-// the request, as simple as can be (and the answer: who says what, in order)
-function encMsg(x, y, topic){
-  const p = encP(x), mem = memOn(x) ? (game.mem[x] || []).slice(-3).map(m => m.replace(/^día \d+: /, '').replace(/\.$/, '')) : [];
-  return `Eres ${fichaOf(x).ficha}, de Avonlea («Ana de las Tejas Verdes», L. M. Montgomery). Te encuentras con ${y === 'ana' ? ANA_FICHA : fichaOf(y).ficha}.` + (mem.length ? ` Recuerdas: ${mem.join(' / ')}.` : '') + ` Están en ${encPlace(p.x, p.y)}; es ${SEASONS[S].toLowerCase()} y son las ${fmtHour(hourNow())}. Genera una conversación breve (de 2 a 4 líneas, de hasta 20 palabras) sobre ${topic}.` + (y === 'ana' ? ' Ana también habla.' : '');
-}
-const ENC_SYS = 'Escribes diálogos breves para un juego tranquilo inspirado en «Ana de las Tejas Verdes» (L. M. Montgomery), hacia 1880, en la isla del Príncipe Eduardo. Español; cada uno con su voz; tono tierno y con humor, como el libro. Responde solo con el JSON pedido.';
-async function encAsk(x, y){
-  const topic = encTopic(x, y), sch = { type: 'object', additionalProperties: false, required: ['conversacion'], properties: { conversacion: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['quien', 'texto'], properties: { quien: { type: 'string', enum: [x, y] }, texto: { type: 'string' } } } } } };
-  const r = await aiCall([{ role: 'user', content: encMsg(x, y, topic) }], sch);
-  const lines = (r.out.conversacion || []).filter(l => l && [x, y].includes(l.quien) && typeof l.texto === 'string' && l.texto.trim()).slice(0, 6).map(l => ({ q: encQ(l.quien), t: l.texto.trim().slice(0, 220) }));
-  return { parts: [x, y], lines, topic, scene: game.scene, born: TT };
-}
 function encFallback(x, y){
   if (y === 'ana') {
     if (!conoceA(x) && !sinNombre(x)) return { parts: [x, y], lines: presentar(x), topic: '', scene: game.scene, born: TT, presenta: true };   // (the first time: who they are)
@@ -108,9 +90,8 @@ function encEnd(){
   for (const id of s.parts) if (id !== 'ana') { FOLKBY[id].talkT = TT + 1.5; enc.mute[id] = TT + (s.parts.includes('ana') ? 150 : 90); }
   enc.cool = TT + (s.parts.includes('ana') ? 20 : 40);
   if (s.parts.includes('ana') && s.i >= 0) {
-    const o = s.parts.find(i => i !== 'ana'), last = s.lines[Math.min(s.i, s.lines.length - 1)];
+    const o = s.parts.find(i => i !== 'ana');
     logEv('Ana conversó con ' + FOLKBY[o].def.name + (s.topic ? ' sobre ' + s.topic : '') + '.', []);
-    remember(o, 'Conversé con Ana' + (s.topic ? ' sobre ' + s.topic : '') + (last ? '; lo último: «' + last.t.slice(0, 90) + '»' : '') + '.');   // (only if they have memory)
   }
 }
 function encTick(dt){
@@ -122,47 +103,31 @@ function encTick(dt){
   if (++s.i >= s.lines.length) return encEnd();
   const l = s.lines[s.i], dur = lineDur(l.t); bubbles = [{ q: l.q, text: l.t, t: 0, dur }]; s.wait = dur + .35; sfx.blip();
 }
-// Ana taps someone: they talk now (with the AI, after a moment: «…»)
+// Ana taps someone: they talk now
 function folkTalk(f){
   if (enc.cur?.parts.includes(f.id)) return;
   if (enc.cur) encEnd(); if (amb.cur) ambAbort();
-  enc.ready = null; f.talkT = TT + 1e6; f.route = []; f.moving = false;
+  f.talkT = TT + 1e6; f.route = []; f.moving = false;
   if (!conoceA(f.id) && !sinNombre(f.id)) return encStart({ parts: [f.id, 'ana'], lines: presentar(f.id), topic: '', scene: game.scene, born: TT, presenta: true });   // (the first time: who they are)
-  if (!aiReady()) return encStart(encFallback(f.id, 'ana'));
-  bubbles = [{ q: 'f:' + f.id, text: '…', t: 0, dur: 30 }]; const id = enc.tok = Math.random();
-  encAsk(f.id, 'ana').then(s => { if (enc.tok !== id) return; if (!s.lines.length) throw new Error('vacía'); encStart(s); })
-    .catch(e => { if (enc.tok !== id) return; console.debug('[avonlea IA] encuentro', e.message); encStart(encFallback(f.id, 'ana')); });
+  encStart(encFallback(f.id, 'ana'));
 }
 function encUpdate(dt){
   if (enc.cur) return encTick(dt);
   if (writtenTalkOn()) return;
-  if (amb.cur || amb.ready || game.talk || game.map || game.cooking || !$('ai').hidden || sleeping) return;
+  if (amb.cur || game.talk || game.map || game.cooking || !$('ajustes').hidden || sleeping) return;
   if (ocupada('ana') || hablando() || CHATS.some(c => c.parts.includes('ana'))) return;   // (Ana in the middle of something, or talking with someone, or someone speaking: no loose greetings over it)
   const here = FOLK.filter(f => f.where === game.scene), dd = f => dist(ana.x, ana.y, f.x, f.y), free = f => TT >= (enc.mute[f.id] || 0) && !(f.talkT > TT);
-  if (enc.ready) {   // (asked for as Ana came near: it starts when she is there)
-    const s = enc.ready, f = FOLKBY[s.parts[0]];
-    if (s.scene !== game.scene || TT - s.born > 50 || f.where !== game.scene || dd(f) > 420) enc.ready = null;
-    else if (dd(f) < 100) { enc.ready = null; encStart(s); }
-    return;
-  }
-  if (enc.busy || TT < enc.cool || TT < enc.err) return;
+  if (TT < enc.cool) return;
   // Ana comes near someone
-  let best = null, bd = 1e9; for (const f of here) { const d = dd(f); if (free(f) && d < (aiReady() ? 240 : 90) && d < bd && !f.sit && !ocupada(f.id)) { best = f; bd = d; } }
-  if (best) {
-    if (!aiReady()) return encStart(encFallback(best.id, 'ana'));
-    enc.busy = true;
-    return encAsk(best.id, 'ana').then(s => { if (s.lines.length) enc.ready = s; else enc.mute[best.id] = TT + 60; }).catch(e => { console.debug('[avonlea IA] encuentro', e.message); enc.err = TT + 60; }).finally(() => { enc.busy = false; });
-  }
+  let best = null, bd = 1e9; for (const f of here) { const d = dd(f); if (free(f) && d < 90 && d < bd && !f.sit && !ocupada(f.id)) { best = f; bd = d; } }
+  if (best) return encStart(encFallback(best.id, 'ana'));
   // two of them meet near her (out of doors)
   if (game.scene !== 'out') return;
   const near = here.filter(f => free(f) && dd(f) < 360);
   for (let i = 0; i < near.length; i++) for (let j = i + 1; j < near.length; j++) {
     const a = near[i], b = near[j]; if (dist(a.x, a.y, b.x, b.y) > 70 || Math.random() > .02) continue;
     { const ch = chisme(a.id, b.id) || chisme(b.id, a.id); if (ch) return encStart({ parts: [a.id, b.id], lines: ch.map(([q, t]) => ({ q: encQ(q), t })), topic: '', scene: game.scene, born: TT }); }   // (a piece of news, aloud: src/datos/noticias.txt)
-    if (!aiReady()) return encStart(encFallback(a.id, b.id));
-    enc.busy = true; a.talkT = b.talkT = TT + 1e6; a.route = []; b.route = []; a.moving = b.moving = false;
-    return encAsk(a.id, b.id).then(s => { if (s.lines.length && !amb.cur && !enc.cur) encStart(s); else a.talkT = b.talkT = TT; })
-      .catch(e => { a.talkT = b.talkT = TT; enc.err = TT + 60; console.debug('[avonlea IA] encuentro', e.message); }).finally(() => { enc.busy = false; enc.cool = TT + 40; });
+    return encStart(encFallback(a.id, b.id));
   }
 }
 /* ========== THE WORLD MODEL: things, places, people, verbs, goals and a planner (traditional AI, no generative AI) ==========

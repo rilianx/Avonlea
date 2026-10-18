@@ -50,9 +50,9 @@ const relatoMd = l => { const t = l.texto.replace(/([*_\\`<>])/g, '\\$1'); retur
   let bien = 0, total = 0; const hechos = new Array(lista.length);
   const una = async esp => {
     const pg = await b.newPage(); const errs = []; pg.on('pageerror', e => errs.push(e.message));
-    await pg.addInitScript(() => { localStorage.clear(); localStorage.setItem('avonlea-ai-asked', '1'); localStorage.setItem('avonlea-oficios', 'diestra'); });   // (Ana knows her crafts: the chains are tested, not the learning)
+    await pg.addInitScript(() => { localStorage.clear(); localStorage.setItem('avonlea-oficios', 'diestra'); });   // (Ana knows her crafts: the chains are tested, not the learning)
     await pg.goto('file://' + path.join(root, 'index.html'), { timeout: 0 }); await pg.waitForFunction(() => window.__avonlea, null, { timeout: 0, polling: 100 });
-    const r = await pg.evaluate(([id, q]) => { const A = window.__avonlea; document.getElementById('ai').hidden = true; const ag = A.wmRunTest(id); A.relatoEmpezar(q);
+    const r = await pg.evaluate(([id, q]) => { const A = window.__avonlea; document.getElementById('ajustes').hidden = true; const ag = A.wmRunTest(id); A.relatoEmpezar(q);
       for (let t = 0; t < 3600 && (ag.st === 'run' || ag.st === 'pausa'); t += .5) A.step(.5); for (let k = 0; k < 20; k++) A.step(.5);
       return { st: ag.st, lineas: A.relato(), reglas: A.reglas() }; }, [esp.id, esp.quienes]);
     await pg.close(); REGLAS = r.reglas; return { ...r, res: comparar(esp, r.lineas), rotas: reglasRotas(r.lineas), errs };

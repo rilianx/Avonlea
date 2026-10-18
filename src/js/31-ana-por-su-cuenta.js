@@ -1,11 +1,11 @@
 /* ---------- Ana on her own ----------
-   When the player has not touched anything for a while Ana does what she wants: the AI picks one of the things she
-   could do here (or the game does, by weights), says it out loud, and she goes and does it (A* paths, through the
-   doors and up the stairs). Any key or tap gives control back. What the player makes her say can also send her off. */
+   When the player has not touched anything for a while Ana does what she wants: the game picks one of the things she
+   could do here (by weights), sometimes says it out loud, and she goes and does it (A* paths, through the doors and
+   up the stairs). Any key or tap gives control back. */
 const AUTO_IDLE = 15;
 let lastInput = 0, sayOpen = false;
-const auto = { on: false, intent: null, thinkAt: 0, busy: false, err: 0, told: false, hist: [] };
-const autoAllowed = () => AI.auto !== false && !game.talk && !game.cooking && !game.map && $('ai').hidden && $('rels').hidden && !sleeping && !sayOpen;
+const auto = { on: false, intent: null, thinkAt: 0, told: false, hist: [] };
+const autoAllowed = () => AJUSTES.auto !== false && !game.talk && !game.cooking && !game.map && $('ajustes').hidden && $('rels').hidden && !sleeping && !sayOpen;
 function userInput(){ lastInput = TT; auto.on = false; if (auto.intent) { auto.intent = null; if (ana.goto?.auto) ana.goto = null; } }
 const randSpot = r => { for (let k = 0; k < 14; k++) { const x = ana.x + (Math.random() - .5) * 2 * r, y = ana.y + (Math.random() - .5) * 2 * r; if (!blocked(x, y)) return [x, y]; } return [ana.x, ana.y]; };
 // the next thing to walk to on the way to a room ('out' = the fields)
@@ -34,12 +34,6 @@ function autoOptions(){
   const fresh = O.filter(o => !auto.hist.slice(-2).includes(o.label));
   return fresh.length ? fresh : O;
 }
-function autoMsg(opts, text){
-  const near = Object.keys(PEOPLE).filter(k => sceneOf(k) === game.scene).map(k => NAMES[k] + ' (' + whereText(k) + ')'), tasks = activeTasks().map(t => taskText(t) + ' (de ' + NAMES[t.from] + ')');
-  return worldText() + `\n\nEn este lugar están: ${near.join(', ') || 'nadie más'}.` + (tasks.length ? `\nEncargos pendientes de Ana: ${tasks.join('; ')}.` : '') + (auto.hist.length ? `\nLo último que Ana hizo por su cuenta: ${auto.hist.join('; ')}.` : '')
-    + (text ? `\n\nLa jugadora hizo decir a Ana, en voz alta: «${text}».\nANA POR SU CUENTA: ¿qué hace Ana a continuación? Opciones:\n0. Nada especial (solo lo dijo)\n` : '\n\nANA POR SU CUENTA: la jugadora no la controla ahora. Opciones:\n')
-    + opts.map((o, i) => `${i + 1}. ${o.label}`).join('\n') + (text ? '\nElige el número que corresponde a lo que dijo (0 si no dijo qué hace ni adónde va).' : '\nElige una (número en "eleccion") y escribe en "pensamiento" lo que Ana dice en voz alta al decidirlo.');
-}
 function startIntent(intent, manual, said){
   if (!intent) return;
   auto.intent = { ...intent, manual }; auto.thinkAt = 0; if (manual) auto.on = true;
@@ -47,48 +41,22 @@ function startIntent(intent, manual, said){
 }
 // (lying down, nobody wants a tree crown between them and us)
 const underTree = (x, y) => trees.some(tr => tr.y > y - 10 && Math.abs(tr.x - x) < 50 * tr.s && tr.y - y < 120 * tr.s);
-async function autoDecide(){
+function autoDecide(){
   const sa = storyAuto(); if (sa) { auto.hist.push(sa.label); if (auto.hist.length > 6) auto.hist.shift(); startIntent(sa.intent, false, ''); return; }   // (the story of the day comes first)
-  const opts = autoOptions(), sc = game.scene; if (!opts.length) { auto.thinkAt = TT + 4; return; }
-  let pick = null, said = '';
-  if (aiReady() && FULL() && TT >= auto.err) {
-    auto.busy = true;
-    try { const r = await aiCall([{ role: 'user', content: autoMsg(opts) }], AUTO_SCHEMA), o = opts[Math.round(+r.out.eleccion) - 1]; if (o) { pick = o; said = typeof r.out.pensamiento === 'string' ? r.out.pensamiento.trim() : ''; } }
-    catch (e) { console.debug('[avonlea IA] Ana sola', e.message); auto.err = TT + 60; }
-    auto.busy = false;
-    if (!autoAllowed() || TT - lastInput < AUTO_IDLE || game.scene !== sc || auto.intent) return;   // (the player took over meanwhile)
-  }
-  if (!pick) { let r = Math.random() * opts.reduce((a, o) => a + o.w, 0); pick = opts.find(o => (r -= o.w) <= 0) || opts[0]; said = Math.random() < .35 ? comentarioTexto('ana_sola') : ''; }
+  const opts = autoOptions(); if (!opts.length) { auto.thinkAt = TT + 4; return; }
+  let r = Math.random() * opts.reduce((a, o) => a + o.w, 0); const pick = opts.find(o => (r -= o.w) <= 0) || opts[0], said = Math.random() < .35 ? comentarioTexto('ana_sola') : '';
   auto.hist.push(pick.label); if (auto.hist.length > 6) auto.hist.shift();
   startIntent(pick.intent, false, said);
 }
-// a decision the player let pass: Ana takes it, by her character (the AI) or by what the story of the day needs
+// a decision the player let pass: Ana takes it, by her character (weights) or by what the story of the day needs
 const CHOICE_W = [[/Sí, lo haré/, 6], [/Vender/, 5], [/Paseamos/, 3], [/Seguir conversando/, 2.5], [/^Regalar|dinero/, 1.5], [/Adiós|Ahora no|Mejor no|Nada por ahora/, .5]];
-const storyLive = () => { const st = AI.stories && game.story; return st && st.v === 2 && st.day === today() && !st.gen ? st.escenas.filter(e => e.estado === 'abierta' || e.estado === 'jugada' || e.estado === 'jugando').sort((a, b) => a.hora - b.hora) : []; };
-function chooseMsg(who, q, opts){
-  const live = storyLive();
-  return worldText() + `\n\nAna está con ${NAMES[who]}.` + (amb.hist.length ? ` Lo último que se dijeron: ${amb.hist.slice(-5).join(' / ')}` : '')
-    + (live.length ? `\nLA HISTORIA DE HOY («${game.story.titulo}») va por aquí: ${live.map(e => e.que_pasa).join(' Luego: ')}` : '')
-    + `\n\nLo que se le plantea a Ana: «${q}»\nANA POR SU CUENTA: la jugadora no eligió a tiempo y Ana decide sola, con su carácter (impulsiva, entusiasta, de buen corazón). Opciones:\n` + opts.map((o, i) => `${i + 1}. ${o[0]}`).join('\n') + '\nElige una (número en "eleccion") y escribe en "pensamiento" lo que Ana dice en voz alta al decidirlo (una frase).';
-}
-async function autoChoose(){
+const storyLive = () => { const st = AJUSTES.stories && game.story; return st && st.v === 2 && st.day === today() && !st.gen ? st.escenas.filter(e => e.estado === 'abierta' || e.estado === 'jugada' || e.estado === 'jugando').sort((a, b) => a.hora - b.hora) : []; };
+function autoChoose(){
   const tk = game.talk, opts = game.talkOpts; if (!tk || !opts?.length) return;
-  const who = tk.who, q = $('talk').querySelector('.line')?.textContent || '';
-  let k = -1, said = '';
-  if (aiReady() && FULL()) {
-    $('talk').classList.add('wait');
-    try { const r = await aiCall([{ role: 'user', content: chooseMsg(who, q, opts) }], AUTO_SCHEMA); k = Math.round(+r.out.eleccion) - 1; said = typeof r.out.pensamiento === 'string' ? r.out.pensamiento.trim() : ''; }
-    catch (e) { console.debug('[avonlea IA] Ana elige', e.message); }
-    if (game.talk !== tk || game.talkOpts !== opts) return;   // (the player chose meanwhile)
-    $('talk').classList.remove('wait');
-  }
-  if (!(k >= 0 && k < opts.length)) {
-    const need = storyLive().filter(e => e.fin === 'evento').map(e => e.evento), score = l => (CHOICE_W.find(([rx]) => rx.test(l))?.[1] ?? 1) + (need.includes('vaca_vendida') && /Vender/.test(l) ? 10 : 0) + (need.includes('regalo:' + who) && /^Regalar|dinero/.test(l) ? 10 : 0);
-    k = opts.reduce((b, o, i) => score(o[0]) > score(opts[b][0]) ? i : b, 0);
-  }
+  const who = tk.who, need = storyLive().filter(e => e.fin === 'evento').map(e => e.evento), score = l => (CHOICE_W.find(([rx]) => rx.test(l))?.[1] ?? 1) + (need.includes('vaca_vendida') && /Vender/.test(l) ? 10 : 0) + (need.includes('regalo:' + who) && /^Regalar|dinero/.test(l) ? 10 : 0);
+  const k = opts.reduce((b, o, i) => score(o[0]) > score(opts[b][0]) ? i : b, 0);
   logEv('Ana decidió por su cuenta: ' + opts[k][0].replace(/^\W+/, '') + '.', [who, ...witnesses()]);
   opts[k][1]();
-  if (said) setTimeout(() => { if (!amb.cur) anaSays(said); }, 50);
 }
 // what the story of the day needs from Ana right now (when she is on her own): go where it happens, and do what it waits for
 function storyAuto(){
@@ -173,5 +141,5 @@ function autoTick(){
   if (amb.cur) return;
   if (enConversacion('ana')) { if (ana.goto?.auto) ana.goto = null; return; }   // (talking with someone: she stays, and goes on with what she meant to do afterwards)
   if (auto.intent) { if (!ana.goto) autoStep(); return; }
-  if (TT >= auto.thinkAt && !auto.busy) autoDecide();
+  if (TT >= auto.thinkAt) autoDecide();
 }

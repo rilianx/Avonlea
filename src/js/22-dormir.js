@@ -19,12 +19,12 @@ function goSleep(forced, skip, porEscena){
   const el = $('sleep'); el.textContent = forced ? 'Ana se quedó dormida…' : skip ? 'Pasa la noche…' : 'Zzz…'; el.classList.add('on');
   setTimeout(() => {
     goIn('ga', [GA.bed.x - 20, GA.bed.y + 16]); ana.dir = 0; bubbles = [];
-    const ended = today() + 1; dayT = Math.floor(dayT) + 1; sleepyStage = 0; game.anaStates = {};   // (Marilla mended the dress overnight)
+    dayT = Math.floor(dayT) + 1; sleepyStage = 0; game.anaStates = {};   // (Marilla mended the dress overnight)
     const grew = crecerDeNoche();
     for (const b of bushes) if (!b.berries) b.berries = 3;
     for (const t of trees) if (t.kind === 'apple' && !t.apples) t.apples = 3;
     logEv(forced ? 'Ana se quedó dormida y la llevaron a su cama.' : 'Ana durmió toda la noche en su cuarto del alero este.', []);
-    el.textContent = '☀ Buenos días, Avonlea'; save(); newDay(ended);
+    el.textContent = '☀ Buenos días, Avonlea'; save(); newDay();
     setTimeout(() => { el.classList.remove('on'); sleeping = false; if (grew) notice('🌱 Algo creció en la huerta durante la noche.'); }, 1400);
   }, 1500);
 }

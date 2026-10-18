@@ -40,7 +40,7 @@ const CASOS = [
         update(1 / 30);
         for (const x of bubbles) if (x.q === C.con && !oido.includes(x.text)) oido.push(x.text);
       }
-      const q = wmBody(C.con), traba = { distancia: Math.round(dist(ana.x, ana.y, q.x, q.y)), donde: q.where, ocupada: ocupada(C.con), actuando: !!AGENTS[C.con]?.acting, reaccion: reaccionAlVerla(C.con), mudo: Math.round((amb.mute[C.con] || 0) - TT), amb: !!amb.cur, enc: !!enc.cur, talks: TALKS.length, hablando: hablando(), anaOcupada: ocupada('ana'), cool: Math.round(amb.cool - TT), busy: amb.busy, err: Math.round(amb.err - TT), escrito: writtenTalkOn(), talk: !!game.talk, story: !!storyNow(), sceneOf: sceneOf(C.con), ready: !!amb.ready, seen: amb.seen[C.con] };
+      const q = wmBody(C.con), traba = { distancia: Math.round(dist(ana.x, ana.y, q.x, q.y)), donde: q.where, ocupada: ocupada(C.con), actuando: !!AGENTS[C.con]?.acting, reaccion: reaccionAlVerla(C.con), mudo: Math.round((amb.mute[C.con] || 0) - TT), amb: !!amb.cur, enc: !!enc.cur, talks: TALKS.length, hablando: hablando(), anaOcupada: ocupada('ana'), cool: Math.round(amb.cool - TT), escrito: writtenTalkOn(), talk: !!game.talk, story: !!storyNow(), sceneOf: sceneOf(C.con), ready: !!amb.ready, seen: amb.seen[C.con] };
       return { nombre: C.nombre, quien: C.con, ok: oido.some(t => suyas.includes(t)), oido, hora: +hourNow().toFixed(2), escena: game.scene, ...(oido.some(t => suyas.includes(t)) ? {} : { traba }) };
     })`, C);
     res.push(r); console.log(`${r.ok ? '✔' : '✘'} ${r.nombre}: ${r.oido.join(' / ') || '(nada)'}`);

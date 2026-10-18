@@ -1,6 +1,6 @@
 /* ---------- the characters: all there is to know about each one is here ----------
-   To add a character: one more entry in src/datos/personajes.json (name, look, voice for the AI, lines, abilities)
-   and one below (where it lives, and a routine if it goes visiting) and nothing else: the names, the prompt for the AI, the dialogue, the map, the
+   To add a character: one more entry in src/datos/personajes.json (name, look, voice, lines, abilities)
+   and one below (where it lives, and a routine if it goes visiting) and nothing else: the names, the dialogue, the map, the
    routines and the "Hablar con" prompts are all derived from the entries.
    - home: 'out' (Avonlea) or the house it lives in; spawn/goals: where it starts and strolls (in its home place)
    - routine (optional): where it is wanted at each hour, how it crosses the fields (home 'out') and where it stands
@@ -50,7 +50,7 @@ const CHARACTERS = {
     home: 'away', plans: false,
   },
 };
-// what each one is (name, look, voice for the AI, abilities, gossip...) is plain data: src/datos/personajes.json (what they say in passing:
+// what each one is (name, look, voice, abilities, gossip...) is plain data: src/datos/personajes.json (what they say in passing:
 // src/datos/frases.txt);
 // here is only where they stand and walk, which is measured on the maps.
 const PERSONAJES = /*@personajes*/;

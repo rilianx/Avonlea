@@ -22,3 +22,14 @@ function commute(p, want, dt, sp){
   if (!watched(want)) inScene(want, () => { [p.x, p.y] = sitioLibre(p, ...p.goals[0]); });   // (no one sees her come in: she is already at her place, not standing at the door)
   logEv(NAMES[p.look] + (want === p.house ? ' volvió a su casa.' : HOUSES[want].arrive), [p.look]);
 }
+// someone with a place to go walks there (if Ana is indoors they just get there); stuck behind a tree, they step aside
+function goTarget(p, dt, sp){
+  const tg = p.target;
+  if (!tg || hourNow() > tg.until) { p.target = null; return false; }
+  if (tg.ana && game.scene !== 'out') return false;
+  const [tx, ty] = tg.ana ? [ana.x + (p.x < ana.x ? -30 : 30), ana.y] : PLACES[tg.place].slice(1);
+  if (game.scene !== 'out') { p.x = tx; p.y = ty; return true; }
+  if (dist(p.x, p.y, tx, ty) < 26) { p.moving = false; if (tg.ana) { p.target = null; p.wantsTalk = true; p.dir = ana.x < p.x ? 3 : 1; float(NAMES[p.look] + ' te buscaba', p.x, p.y - 64); } return true; }
+  walkPath(p, tx, ty, sp, dt);
+  return true;
+}
