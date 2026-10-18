@@ -2975,6 +2975,16 @@ palabras: quedarnos contigo | se quedaron conmigo | hacerse cargo de ti | Me la 
 exige: hecho:se_queda
 salvo: matthew
 
+# ---------------------------------------------------------------- las lagunas de una partida (para la IA de la noche)
+# «=== laguna: nombre ===»  lo que en una partida debería seguir; el modelo lo pregunta desde lo que ya pasó en ella
+#   de: decisiones   lo que Ana eligió en una opción: algo que todavía puede darse lo toma en cuenta («hecho:x»)
+#   de: conocidos    con cada uno que Ana conoce queda alguna escena o conversación que todavía puede darse
+=== laguna: lo que Ana decide, alguien lo toma en cuenta ===
+de: decisiones
+
+=== laguna: con quien Ana conoce, siempre queda algo por pasar ===
+de: conocidos
+
 </script>
 <script type="text/plain" id="dichos">
 # Los dichos: lo que se dice en un momento que el código nombra, y que no es una escena (un «gracias» al recibir algo,
@@ -16123,6 +16133,22 @@ function nocheSituaciones(){
   }
   return out.join('\n') || '(ninguna esta noche)';
 }
+// the gaps of this game, as the logic model finds them (tools/modelo-nucleo.js, «laguna:» in src/datos/reglas.txt): a
+// choice of Ana's that nothing still to come takes into account, someone she knows with no scene left. Z3 does not run
+// in the game yet: tools/noche.js puts them here (nocheModelo, later); without them, the request goes without
+let NOCHE_LAGUNAS = null;
+const nocheLagunasPoner = L => { NOCHE_LAGUNAS = L; };
+// this game, as the model asks it: the day, what happened and when, the goals done, whom Ana knows, what was said
+function nochePartida(){
+  const P = game.wm?.perm || {};
+  return { dia: today() + 1, hechos: { ...dlgHechos() }, metas: Object.fromEntries(Object.entries(P).filter(([k]) => k.startsWith('cuaderno:')).map(([k, d]) => [k.slice(9), d])),
+    conoce: [...nocheVocab().personas].filter(k => conoceA(k)), dichas: Object.keys(dlgDichas()) };
+}
+function nocheLagunasTexto(){
+  return (NOCHE_LAGUNAS || []).map(l => l.de === 'decisiones'
+    ? `- Ana eligió «${l.opcion}» (día ${l.dia}), y nada de lo que todavía puede pasar lo toma en cuenta: algo que lo recuerde o le dé consecuencias (que pida «hecho:${l.hecho}»).`
+    : `- Con ${l.nombre} (${l.quien}) ya no queda ninguna escena ni conversación por pasar: algo nuevo entre ${l.quien} y Ana.`).join('\n');
+}
 // each one Ana knows: how fond of her, and the last things that happened between them (from the journal)
 function nocheGente(){
   const V = nocheVocab(), J = (game.journal || []).filter(e => /\bAna\b/.test(e.t));
@@ -16154,7 +16180,7 @@ function nocheSistema(nivel){
   const tipos = ['dicho', 'conversacion', 'respuesta', ...(n >= 2 ? ['escena'] : [])];
   return `Eres quien escribe, de noche, cosas nuevas para «Un día en Avonlea», un juego tranquilo inspirado en «Ana de las Tejas Verdes» (L. M. Montgomery): Avonlea, un pueblito de granjas de la Isla del Príncipe Eduardo, hacia 1880. Ana Shirley tiene 11 años, es pelirroja, huérfana, soñadora, conversadora, de palabras grandiosas e imaginación desbordante; vive con Marilla y Matthew Cuthbert en Tejas Verdes. El tono es el del libro: tierno, con humor, sin nada moderno. Español; en la familia se tutea a Ana; Ana trata de usted a los grandes.
 
-Mientras Ana duerme, escribes como mucho ${NOCHE_MAX} bloques NUEVOS para ESTA partida, pensados para cómo está cada personaje con Ana, para lo que a quien juega le interesa (el perfil) y para lo que quedó abierto (los cabos sueltos y las situaciones abiertas). Cada bloque se escribe en el formato de los archivos de datos del juego, y el juego lo revisa con las mismas reglas que lo escrito a mano: lo que no las cumple se descarta. Mejor pocos y buenos.
+Mientras Ana duerme, escribes como mucho ${NOCHE_MAX} bloques NUEVOS para ESTA partida, pensados para cómo está cada personaje con Ana, para lo que a quien juega le interesa (el perfil) y para lo que quedó abierto (lo que le falta a la partida, si viene: primero eso; los cabos sueltos; las situaciones abiertas). Cada bloque se escribe en el formato de los archivos de datos del juego, y el juego lo revisa con las mismas reglas que lo escrito a mano: lo que no las cumple se descarta. Mejor pocos y buenos.
 
 NIVEL: ${nivel}. Tipos permitidos: ${tipos.join(', ')}.
 ${n === 1 ? '- Solo palabras: ningún efecto (nada de «al_empezar:», «al_terminar:» ni líneas «! …»; las opciones «->», sin «! …»).' : ''}${n >= 2 ? `- Efectos permitidos: «hecho x» (solo hechos que ya existen en el juego, y pidiendo en «si:» lo que suponen), «suma <cualidad>:<dueño>[:<hacia>] n» con n = 1 o -1 (p. ej. «suma afecto:lynde:ana 1»), «cosa <quien> <cosa> n» (n de 1 a 3), «saber <quien> <noticia>», y para mover a la gente en escena: «sentar», «levantar», «junto», «log texto».` : ''}${n >= 3 ? '\n- Libre: además, hechos NUEVOS, todos con prefijo «ia_» («hecho ia_algo», «olvidar ia_algo»), y cadenas de escenas propias («si: hecho:ia_algo», «dicha:ia_otra»).' : n === 2 ? '\n- Nada de hechos nuevos (ni «ia_…»).' : ''}
@@ -16275,7 +16301,7 @@ Lugares: ${f(P.lugares)}
 
 LOS CABOS SUELTOS
 ${nocheCabos().map(c => '- ' + c.texto).join('\n') || '(ninguno)'}
-${nocheCartasTexto()}${NOCHE_N[nivel] >= 2 ? '\nLAS SITUACIONES ABIERTAS (para una escena con «situacion: <clave>»)\n' + nocheSituaciones() + '\n' : ''}
+${nocheCartasTexto()}${NOCHE_LAGUNAS?.length ? '\nLO QUE LE FALTA A ESTA PARTIDA (lo encontró un solucionador lógico: lo más importante para escribir esta noche)\n' + nocheLagunasTexto() + '\n' : ''}${NOCHE_N[nivel] >= 2 ? '\nLAS SITUACIONES ABIERTAS (para una escena con «situacion: <clave>»)\n' + nocheSituaciones() + '\n' : ''}
 ${ya ? '\nYA AGREGADO OTRAS NOCHES (no repetir): ' + ya + '\n' : ''}
 Escribe hasta ${NOCHE_MAX} bloques, nivel «${nivel}».`;
 }

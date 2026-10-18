@@ -169,3 +169,13 @@ exige: !hecho:nombro_lago
 palabras: quedarnos contigo | se quedaron conmigo | hacerse cargo de ti | Me la quedo
 exige: hecho:se_queda
 salvo: matthew
+
+# ---------------------------------------------------------------- las lagunas de una partida (para la IA de la noche)
+# «=== laguna: nombre ===»  lo que en una partida debería seguir; el modelo lo pregunta desde lo que ya pasó en ella
+#   de: decisiones   lo que Ana eligió en una opción: algo que todavía puede darse lo toma en cuenta («hecho:x»)
+#   de: conocidos    con cada uno que Ana conoce queda alguna escena o conversación que todavía puede darse
+=== laguna: lo que Ana decide, alguien lo toma en cuenta ===
+de: decisiones
+
+=== laguna: con quien Ana conoce, siempre queda algo por pasar ===
+de: conocidos

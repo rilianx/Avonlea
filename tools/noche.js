@@ -94,7 +94,7 @@ const hallazgos = j => [...j.huecos.map(h => ['hueco', h]), ...j.incoherencias.m
 function deQuien(texto, aceptados){
   return aceptados.find(b => texto.includes(b.id) || (b.tipo === 'dicho' && [...b.texto.matchAll(/^-\s*(?:\[[^\]]*\]\s*)?(.+)$/gm)].some(m => texto.includes(m[1].trim().slice(0, 30)) || texto.includes(b.texto.match(/===\s*(.+?)\s*===/)[1]))));
 }
-async function completo(aceptados, ev){
+async function completo(aceptados, ev, partidaZ){
   const nm = nodeModules(); if (!nm) return { error: 'falta z3-solver (npm install): no se corre el modelo' };
   const base = copia(nm), con = copia(nm), out = { porBloque: {}, otros: [] };
   try {
@@ -113,6 +113,7 @@ async function completo(aceptados, ev){
       const b = deQuien(`${h.id || ''} ${h.texto || ''}`, aceptados); if (b) (out.porBloque[b.id] ||= []).push(txt); else out.otros.push(txt);
     }
     out.modeloCon = mc.j;
+    try { out.lagunasCon = await require('./modelo.js').lagunas(partidaZ, con); } catch (e) { out.lagunasCon = { error: String(e.message || e) }; }   // (what the blocks filled)
     return out;
   } finally { for (const d of [base, con]) fs.rmSync(d, { recursive: true, force: true }); }
 }
@@ -143,6 +144,9 @@ async function openai(cuerpos){
   await pg.goto('file://' + path.join(RAIZ, 'index.html') + '?dev'); await pg.waitForFunction(() => window.__avonlea?.ev && window.__avonlea.ev('DIALOGOS.length') > 0, null, { timeout: 30000 });
   const ev = (s, a) => pg.evaluate(([s, a]) => { const v = window.__avonlea.ev(s); return typeof v === 'function' ? v(a) : v; }, [s, a]);
   const hitos = await ev(PREPARAR, E || {});
+  // the gaps of this game, with Z3 (tools/modelo.js): into the page, for the request (as nocheModelo will, in the game)
+  const partidaZ = await ev('nochePartida()'); let lag = null;
+  if (nodeModules() && !SIN_MODELO) { try { lag = await require('./modelo.js').lagunas(partidaZ); await ev('(L => nocheLagunasPoner(L))', lag.lagunas); } catch (e) { lag = { error: String(e.message || e) }; } }
   const pedido = await ev(`(([n, m]) => nochePedido(n, m || undefined))`, [NIVEL, MODELO]);
   const cuerpos = await ev(`(p => nocheCuerpos(p))`, pedido);
   fs.writeFileSync(path.join(SALIDA, 'pedido.json'), JSON.stringify({ escenario: ESCENARIO, nivel: NIVEL, modelo: pedido.modelo, cuerpo: cuerpos[0] }, null, 1));
@@ -177,7 +181,7 @@ async function openai(cuerpos){
   }
   const aceptados = rondas.flatMap(r => r.v.aceptados);
   // 2. with the tools: the graph and the model, with the accepted blocks in the data
-  const C = SIN_MODELO || !aceptados.length ? null : await completo(aceptados, ev);
+  const C = SIN_MODELO || !aceptados.length ? null : await completo(aceptados, ev, partidaZ);
   // (what the tools rejected goes out: the final summary is of what stays)
   if (C && !C.error && Object.keys(C.porBloque).length) { const quedan = aceptados.filter(a => !C.porBloque[a.id]), F = quedan.length ? await completo(quedan, ev) : null; C.final = F ? { grafo: F.grafo?.con, modelo: F.modelo?.con } : { grafo: C.grafo.base, modelo: C.modelo.base }; }
   await b.close();
@@ -192,6 +196,10 @@ async function openai(cuerpos){
     '| Ronda | # | Tipo | Bloque | Navegador | Grafo y modelo (Node) | Queda | Reparado | Motivos | Esperado |', '|---|---|---|---|---|---|---|---|---|---|',
     ...filas.map(f => `| ${f.ronda} | ${f.n} | ${f.tipo} | \`${md(f.id)}\` | ${f.navegador} | ${f.node} | **${f.resultado}** | ${md(f.reparado.join(' · ') || '—')} | ${md(f.motivos.map(m => corto(m, 220)).join(' · ') || '—')} | ${f.esperado ? (f.esperado === f.resultado ? '✔ ' : '✘ ') + f.esperado : ''} |`), '',
     ...(nota2 ? [`_(${nota2})_`, ''] : [])];
+  { const k = l => l.de + ':' + (l.hecho || l.quien), txt = l => l.de === 'decisiones' ? `Ana eligió «${l.opcion}» (\`${l.hecho}\`, en \`${l.escena}\`): nada de lo que todavía puede pasar lo toma en cuenta` : `${l.nombre}: no queda ninguna escena ni conversación`;
+    const despues = C?.lagunasCon?.lagunas ? new Set(C.lagunasCon.lagunas.map(k)) : null;
+    L.push('## Lo que le faltaba a la partida (Z3)', '', !lag ? '_(sin el modelo: no se buscaron)_' : lag.error ? `_(no se pudo: ${lag.error})_` : `${lag.resumen}${despues ? ` · con los aceptados: ${C.lagunasCon.resumen}` : ''}`, '',
+      ...(lag?.lagunas || []).map(l => `- ${despues ? (despues.has(k(l)) ? '· ' : '✓ ') : ''}${txt(l)}`), ...(despues ? ['', '(✓ lo llenó un bloque aceptado · · sigue faltando)'] : []), ''); }
   if (C) L.push('## Con todas las revisiones', '', `- El grafo, sin los bloques: ${C.grafo?.base || '—'}`, `- El grafo, con los aceptados: ${C.grafo?.con || '—'}`, `- El modelo (Z3), sin los bloques: ${C.modelo?.base || '—'}`, `- El modelo (Z3), con los aceptados: ${C.modelo?.con || '—'}`, ...(C.final ? [`- Con lo que queda (sin lo que descartaron el grafo o el modelo): ${C.final.grafo || '—'} · ${C.final.modelo || '—'}`] : []), ...(C.error ? [`- ⚠ ${C.error}`] : []), ...(C.otros?.length ? ['', 'Hallazgos nuevos que no son de un bloque en particular:', ...C.otros.map(o => '- ' + o)] : []), '');
   else L.push(SIN_MODELO ? '_(--sin-modelo: no se corrieron el grafo ni el modelo)_' : '_(ningún bloque pasó la revisión del juego: no hay nada que agregar al modelo)_', '');
   L.push('## Lo que escribió la IA', '', ...filas.flatMap(f => [`### Ronda ${f.ronda} · ${f.n}. ${f.tipo} \`${md(f.id)}\` → ${f.resultado}`, '', `Por qué: ${f.porque || '—'}`, '', '```', f.texto.trim(), '```', ...(f.reparado.length ? ['', 'Reparado: ' + f.reparado.join(' · '), '', '```', String(f.textoFinal || '').trim(), '```'] : []), '']));
@@ -200,7 +208,7 @@ async function openai(cuerpos){
   if (mal.length) L.push(`**✘ ${mal.length} bloque(s) no se juzgaron como se esperaba.**`, '');
   const informe = L.join('\n');
   fs.writeFileSync(path.join(SALIDA, 'noche.md'), informe);
-  fs.writeFileSync(path.join(SALIDA, 'noche.json'), JSON.stringify({ escenario: ESCENARIO, titulo: E?.titulo, nivel: NIVEL, modelo: pedido.modelo, fuente, segundaRonda: nota2 || (rondas[1] ? 'sí' : 'no hizo falta'), bloques: filas, aceptados: aceptados.filter(a => !C?.porBloque?.[a.id]), grafo: C?.grafo, modeloZ3: C?.modelo, final: C?.final, otros: C?.otros, errores: errs }, null, 1));
+  fs.writeFileSync(path.join(SALIDA, 'noche.json'), JSON.stringify({ escenario: ESCENARIO, titulo: E?.titulo, nivel: NIVEL, modelo: pedido.modelo, fuente, lagunas: lag, lagunasCon: C?.lagunasCon || null, segundaRonda: nota2 || (rondas[1] ? 'sí' : 'no hizo falta'), bloques: filas, aceptados: aceptados.filter(a => !C?.porBloque?.[a.id]), grafo: C?.grafo, modeloZ3: C?.modelo, final: C?.final, otros: C?.otros, errores: errs }, null, 1));
   console.log(informe);
   console.log(`→ ${path.relative(RAIZ, SALIDA)}/noche.md, noche.json, pedido.md`);
   process.exit(mal.length || errs.length ? 1 : 0);

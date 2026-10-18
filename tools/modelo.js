@@ -12,10 +12,33 @@ const RAIZ = path.join(__dirname, '..');
 // what the model reads (by path from the repo root, as the core names them)
 const ARCHIVOS = ['src/datos/llegadas.txt', 'src/datos/guion.txt', 'src/datos/conversaciones.txt', 'src/datos/reglas.txt', 'src/datos/frases.txt', 'src/datos/cuaderno.txt'];
 
-(async () => {
+// the texts the model reads, from a checkout (this one, or a copy with more scenes)
+function leerTextos(raiz = RAIZ){
   const textos = {};
-  for (const r of ARCHIVOS) textos[r] = fs.readFileSync(path.join(RAIZ, r), 'utf8');
-  for (const n of fs.readdirSync(path.join(RAIZ, 'src/datos/dichos'))) if (n.endsWith('.txt')) textos['src/datos/dichos/' + n] = fs.readFileSync(path.join(RAIZ, 'src/datos/dichos', n), 'utf8');
+  for (const r of ARCHIVOS) textos[r] = fs.readFileSync(path.join(raiz, r), 'utf8');
+  for (const n of fs.readdirSync(path.join(raiz, 'src/datos/dichos'))) if (n.endsWith('.txt')) textos['src/datos/dichos/' + n] = fs.readFileSync(path.join(raiz, 'src/datos/dichos', n), 'utf8');
+  return textos;
+}
+// the gaps of one game (src/datos/reglas.txt, «laguna:»): partida = { dia, hechos: {x: día}, metas: {m: día}, conoce: [...], dichas: [...] }
+let z3ctx = null;
+async function lagunas(partida, raiz = RAIZ){
+  if (!z3ctx) { const z3 = await init(); z3ctx = z3.Context('main'); }
+  const planilla = JSON.parse(fs.readFileSync(path.join(raiz, 'trazas/planilla.json'), 'utf8'));
+  return modelo({ Z3ctx: z3ctx, textos: leerTextos(raiz), datos: { planilla }, partida });
+}
+module.exports = { leerTextos, lagunas };
+
+// Uso, para una partida: node tools/modelo.js --partida partida.json (sus lagunas, en la salida y en trazas/lagunas.json)
+if (require.main === module) (async () => {
+  const i = process.argv.indexOf('--partida');
+  if (i > 0) {
+    const r = await lagunas(JSON.parse(fs.readFileSync(path.resolve(process.argv[i + 1]), 'utf8')));
+    fs.writeFileSync(path.join(RAIZ, 'trazas/lagunas.json'), JSON.stringify(r.lagunas, null, 1));
+    for (const l of r.lagunas) console.log('-', l.de === 'decisiones' ? `${l.hecho} (en ${l.escena}: «${l.opcion}»): nada lo toma en cuenta` : `${l.nombre}: no queda ninguna escena`);
+    console.log(r.resumen); process.exit(0);
+  }
+
+  const textos = leerTextos();
   const planilla = JSON.parse(fs.readFileSync(path.join(RAIZ, 'trazas/planilla.json'), 'utf8'));
   const z3 = await init(); const Z3ctx = z3.Context('main');
   let r;

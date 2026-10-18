@@ -72,23 +72,23 @@
 
   // ---------------------------------------------------------------- las reglas (src/datos/reglas.txt)
   function reglasLeer(txt) {
-    const out = { espera: [], nunca: [], referencia: [], solo: [] }; let r = null;
+    const out = { espera: [], nunca: [], referencia: [], solo: [], laguna: [] }; let r = null;
     for (const raw of txt.split('\n')) {
       const l = raw.trim();
       if (!l || l.startsWith('#')) continue;
-      let m = /^===\s*(espera|nunca|referencia|solo):\s*(.+?)\s*===$/u.exec(l);
+      let m = /^===\s*(espera|nunca|referencia|solo|laguna):\s*(.+?)\s*===$/u.exec(l);
       if (m) { r = { nombre: m[2] }; out[m[1]].push(r); continue; }
-      m = /^(quiénes|cuando|hay|si|palabras|exige|salvo|pide):\s*(.*)$/u.exec(l);
+      m = /^(quiénes|cuando|hay|si|palabras|exige|salvo|pide|de):\s*(.*)$/u.exec(l);
       if (r !== null && m) {
         const [, k, v] = m;
         if (k === 'exige') (r.exige = r.exige || []).push(comas(v));   // (several lines: one or the other)
-        else r[k] = k === 'palabras' ? v.split('|').map(x => x.trim()) : k === 'hay' ? v : comas(v);
+        else r[k] = k === 'palabras' ? v.split('|').map(x => x.trim()) : k === 'hay' || k === 'de' ? v : comas(v);
       }
     }
     return out;
   }
 
-  async function modelo({ Z3ctx: Z, textos, datos, incremental = true }) {
+  async function modelo({ Z3ctx: Z, textos, datos, incremental = true, partida = null }) {
     const leer = r => {
       if (typeof textos[r] !== 'string') throw new Error('Falta el texto de ' + r);
       return textos[r].replace(/\r\n?/g, '\n');   // (Python reads with universal newlines)
@@ -150,6 +150,7 @@
     }
     // who leaves each fact (the scenes, with their conditions; or the code)
     const QUIEN_DEJA = new Map(), DEJA = new Map(), CUENTA = new Map();   // (fact → scenes; scene → facts it leaves; scene → news heard at its start)
+    const DECIDE = new Map(), SIEMPRE = new Map();   // (a fact only an option of Ana's leaves → that scene and option; scene → what it leaves whatever she chooses)
     const addTo = (m, k, v) => { if (!m.has(k)) m.set(k, new Set()); m.get(k).add(v); };
     const esHecho = (k, v) => (k === 'al_terminar' || k === 'al_empezar') && ws(v)[0] === 'hecho' && ws(v).length > 1;
     for (const archivo of ['src/datos/guion.txt', 'src/datos/conversaciones.txt']) {
@@ -163,6 +164,14 @@
         const deja = f.filter(([k, v]) => esHecho(k, v)).map(([, v]) => ws(v)[1]);
         for (const l of p[3]) { const m = rx('^\\s*!\\s*hecho\\s+(\\w+)').exec(l); if (m) deja.push(m[1]); }
         const siempre = f.filter(([k, v]) => esHecho(k, v)).map(([, v]) => ws(v)[1]);   // (what it leaves whatever she chooses)
+        SIEMPRE.set(p[1], new Set(siempre));
+        let op = null;   // (the option a line is under: its lines are indented)
+        for (const l of p[3]) {
+          const o = /^\s*->\*?\s*(.*)$/u.exec(l); if (o) { op = o[1].trim(); continue; }
+          if (!/^\s/u.test(l) && l.trim()) op = null;
+          const m = rx('^\\s+!\\s*hecho\\s+(\\w+)').exec(l);
+          if (m && op && !siempre.includes(m[1]) && !DECIDE.has(m[1])) DECIDE.set(m[1], { escena: p[1], opcion: op });
+        }
         for (const x of deja) {
           if (!QUIEN_DEJA.has(x)) QUIEN_DEJA.set(x, []);
           QUIEN_DEJA.get(x).push([p[1], si, siempre.filter(y => y !== x)]); addTo(DEJA, p[1], x);
@@ -469,6 +478,61 @@
         release: () => { if (S !== base) S.release(); base.pop(); },
       };
     };
+
+    if (partida) { const r = await lagunas(); base.release(); return r; }
+
+    // las lagunas de una partida (src/datos/reglas.txt, «laguna:»): desde lo que ya pasó en ella, ¿puede todavía darse
+    // algo que siga? Lo que ya pasó queda como pasó (sus hechos, sus días); lo que no, solo puede pasar desde hoy
+    async function lagunas() {
+      const hoy = partida.dia, H = partida.hechos || {}, M = partida.metas || {}, dichas = new Set(partida.dichas || []);
+      const P = [dia.ge(hoy)], aun = [];   // (aun: what has not happened yet, as [name, «only from today»])
+      for (const x of Object.keys(H)) { B_('h_' + x); I_('d_' + x); }
+      for (const n of [...V.keys()]) {
+        if (n.startsWith('h_')) {
+          const x = n.slice(2), e = OLVIDABLES.has(x) ? B_('e_' + x) : B_('h_' + x);
+          if (has(H, x)) P.push(And([e, I_('d_' + x).eq(H[x])])); else aun.push([x, Z.Implies(e, I_('d_' + x).ge(hoy))]);
+        } else if (n.startsWith('m_')) {
+          const x = n.slice(2);
+          if (has(M, x)) P.push(And([B_('m_' + x), I_('dm_' + x).eq(M[x])])); else aun.push(['cuaderno:' + x, Z.Implies(B_('m_' + x), I_('dm_' + x).ge(hoy))]);
+        }
+      }
+      const conocidos = [...new Set([...CONOCE_BASE, ...(partida.conoce || [])])].filter(k => gente.has(k) && !SIN_NOMBRE.has(k));
+      for (const k of conocidos) P.push(conoce(k));
+      // what has not happened yet happens only from today; unless, for the model, what did happen needs it before (a fact
+      // the code leaves, or a save from before a scene changed): then it is left free, and told («supone»)
+      const S0 = new Z.Solver(); S0.add(...R, ...P);
+      const posible = await S0.check() === 'sat', supone = [];
+      if (posible) for (const [x, c] of aun) { S0.push(); S0.add(c); if (await S0.check() === 'sat') P.push(c); else { S0.pop(); supone.push(x); } }
+      const jugada = u => dichas.has(u.id) || [...(SIEMPRE.get(u.id) || [])].some(x => has(H, x));   // (played: it says so, or what it always leaves is there)
+      const ESCENA = new Set(['escena', 'conversación', 'escena al encontrarse', 'carta']);
+      const CARTAS = new Map();   // (the answers to Ana's letters, «canal: respuesta»: what is still to come with whoever writes them)
+      for (const p of partir(leer('src/datos/guion.txt'))) {
+        if (p[0] !== 'bloque') continue;
+        const f = campos(p[2], guionClasificar), v = k => (f.find(([x]) => x === k) || [])[1];
+        if (v('canal') === 'respuesta' && v('de')) { if (!CARTAS.has(v('de'))) CARTAS.set(v('de'), []); CARTAS.get(v('de')).push({ tipo: 'carta', id: p[1], conds: f.filter(([x]) => x === 'si').flatMap(([, c]) => comas(c)) }); }
+      }
+      const puede = async (u, k) => { const S = nuevo(); for (const x of [...P, vale(u, k)]) S.add(x); const r = await S.check() === 'sat'; S.release(); return r; };
+      const out = [];
+      for (const r of REGLAS.laguna) {
+        if (r.de === 'decisiones') {   // lo que Ana decidió: algo que todavía puede darse lo toma en cuenta
+          for (const x of Object.keys(H).filter(x => DECIDE.has(x)).sort()) {
+            const toma = c => c === 'hecho:' + x || c.startsWith('dias_desde:' + x + ':');
+            let hay = null;
+            for (const [k, us] of UNIDADES) { for (const u of us) if (u.conds.some(toma) && !(ESCENA.has(u.tipo) && jugada(u)) && await puede(u, k)) { hay = u; break; } if (hay) break; }
+            if (!hay) out.push({ regla: r.nombre, de: 'decisiones', hecho: x, dia: H[x], ...DECIDE.get(x) });
+          }
+        } else if (r.de === 'conocidos') {   // con quien Ana conoce: queda alguna escena o conversación que todavía puede darse
+          for (const k of conocidos.sort()) {
+            let hay = null;
+            for (const u of [...(UNIDADES.get(k) || []), ...(CARTAS.get(k) || [])]) if (ESCENA.has(u.tipo) && !jugada(u) && await puede(u, k)) { hay = u; break; }
+            if (!hay) out.push({ regla: r.nombre, de: 'conocidos', quien: k, nombre: nombre(k) });
+          }
+        }
+      }
+      S0.release();
+      const seg = Math.round((Date.now() - t0) / 100) / 10;
+      return { lagunas: out, posible, supone, segundos: seg, variables: V.size, resumen: `lagunas: ${out.length}${posible ? '' : ' (¡lo que pasó en la partida no es posible para el modelo!)'}${supone.length ? ` · supone que ya pasó: ${supone.join(', ')}` : ''} · ${V.size} variables · ${pyFloat(seg)} s` };
+    }
 
     // 1. lo que debería haber: ¿hay una situación en que no hay nada?
     for (const e of REGLAS.espera) {
