@@ -50,11 +50,17 @@ jobs:
         if: always()
         run: |
           if [ -f trazas/noche/noche.md ]; then cat trazas/noche/noche.md >> "$GITHUB_STEP_SUMMARY"; else echo "No hubo informe (ver el registro del paso anterior)." >> "$GITHUB_STEP_SUMMARY"; fi
+      - name: El nombre del informe (sin la ruta de una partida guardada)
+        id: nombre
+        if: always()
+        env:
+          ESCENARIO: ${{ inputs.escenario }}
+        run: n="$(basename "$ESCENARIO" .json)"; echo "n=${n//[^A-Za-z0-9_-]/_}" >> "$GITHUB_OUTPUT"
       - name: Guardar el informe
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: noche-${{ inputs.escenario }}-${{ inputs.nivel }}
+          name: noche-${{ steps.nombre.outputs.n }}-${{ inputs.nivel }}
           path: |
             trazas/noche/noche.md
             trazas/noche/noche.json
