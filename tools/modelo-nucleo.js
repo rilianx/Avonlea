@@ -515,7 +515,8 @@
       const out = [];
       for (const r of REGLAS.laguna) {
         if (r.de === 'decisiones') {   // lo que Ana decidió: algo que todavía puede darse lo toma en cuenta
-          for (const x of Object.keys(H).filter(x => DECIDE.has(x)).sort()) {
+          const borrado = x => EXCLUYE.some(([a, y]) => a === x && has(H, y));   // (what a later scene forgot: the apology forgets the offense)
+          for (const x of Object.keys(H).filter(x => DECIDE.has(x) && !borrado(x)).sort()) {
             const toma = c => c === 'hecho:' + x || c.startsWith('dias_desde:' + x + ':');
             let hay = null;
             for (const [k, us] of UNIDADES) { for (const u of us) if (u.conds.some(toma) && !(ESCENA.has(u.tipo) && jugada(u)) && await puede(u, k)) { hay = u; break; } if (hay) break; }

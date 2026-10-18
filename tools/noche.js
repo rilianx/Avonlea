@@ -31,7 +31,7 @@ const ESCENARIOS = {
       D(15, 'Ana le escribió una carta a la Sra. Spencer.'), D(15, 'La Sra. Lynde vino a Tejas Verdes a conocer a Ana, y le dijo que era flaca, fea y pelirroja. Ana se contuvo.'), D(16, 'Ana fue al Lago de las Aguas Brillantes.')],
     conversaciones: ['conv_marilla_e', 'conv_marilla_hablar'], visitas: { lago: { n: 4, d: 16 } } },
   rival_ignora: { titulo: 'En la escuela, Ana ignoró a Gilbert («¡Zanahorias!»): el libro dice otra cosa (día 33, otoño)', dia: 33, estacion: 2,
-    hechos: { ...BASE, a_prueba: 2, se_queda: 3, lynde_visita: 15, ofendio_lynde: 15, disculpa_lynde: 16, llego_diana: 18, barry_presenta: 18, conocidas_diana: 19, llego_gilbert: 29, zanahorias: 30, zanahorias_ignora: 30, conoce_gilbert: 30 },
+    hechos: { ...BASE, a_prueba: 2, se_queda: 3, lynde_visita: 15, disculpa_lynde: 16, llego_diana: 18, barry_presenta: 18, conocidas_diana: 19, llego_gilbert: 29, zanahorias: 30, zanahorias_ignora: 30, conoce_gilbert: 30 },
     metas: { amigas: 20 }, diario: [D(30, 'Ana fue a la escuela por primera vez. Gilbert Blythe le dijo «¡Zanahorias!», y Ana hizo como que no lo oía.'), D(31, 'Ana y Diana fueron juntas a la escuela.'), D(32, 'Ana leyó un libro de poemas.')] },
 };
 // (in the game: the facts, the day, the season, the letters, the diary, the conversations had; then the milestones)
