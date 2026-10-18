@@ -1,0 +1,25 @@
+{
+ "_nota": "Lo que contestó gpt-5.4-mini en GitHub (tercera corrida: spencer_rachel, efectos), reconstruido a partir de sus motivos: los ids sin «ia_», y «!hecho:matthew_aliado» (el id de un hito usado como hecho). Se reparan y se aceptan. El tercer bloque es a mano: una escena con «hito: rival» cuyas opciones no dejan ninguna respuesta del hito; se descarta con el motivo preciso (las respuestas permitidas). Uso: node tools/noche.js --respuesta tools/noche/ejemplos/real3.json",
+ "escenario": "spencer_rachel",
+ "nivel": "efectos",
+ "bloques": [
+  {
+   "tipo": "respuesta",
+   "esperado": "aceptado",
+   "porque": "La Sra. Spencer contesta las cartas de Ana, que le contó del lago, de Marilla y de Matthew.",
+   "texto": "=== resp_spencer_lago ===\ncanal: respuesta\nde: spencer\nsi: respuesta:spencer, hecho:se_queda\n---\ncarta: Querida Ana:\ncarta: Recibí tus cartas. Me alegró saber que fuiste al Lago de las Aguas Brillantes: con ese nombre, debe ser precioso.\ncarta: Y más todavía saber que Marilla es justa y que Matthew es tan bueno contigo. Te lo dije: los Cuthbert son buena gente.\ncarta: Afectuosamente, la Sra. Spencer"
+  },
+  {
+   "tipo": "escena",
+   "esperado": "aceptado",
+   "porque": "Matthew todavía no queda del todo de su lado: Ana le cuenta del Lago de las Aguas Brillantes, adonde va tan seguido.",
+   "texto": "=== matthew_aliado_lago ===\ncanal: gg\nprioridad: 3\nen: ana=gg, matthew=gg\nsujeta: matthew\nhito: matthew_aliado\nsi: hecho:se_queda, !hecho:matthew_aliado, afecto:matthew:ana>=4\nal_terminar: suma afecto:matthew:ana 1\n---\nana: Matthew, hoy fui otra vez al Lago de las Aguas Brillantes. ¿Usted cree que el lago se acuerda de mí?\nmatthew: Bueno, pues… yo creo que sí. Ya lo creo. Uno no se olvida de alguien que lo mira así.\nana: (Ana se queda callada un momento, cosa rarísima.) A veces pienso que usted entiende todo sin que yo tenga que explicarlo.\nmatthew: (Matthew se pone colorado y mira por la ventana.) Je. Puede ser."
+  },
+  {
+   "tipo": "escena",
+   "esperado": "rechazado",
+   "porque": "(a mano: las opciones no dejan ninguna de las respuestas del hito «rival»)",
+   "texto": "=== ia_rival_deletreo ===\ncanal: es\nprioridad: 4\nen: ana=es, gilbert=es\nhito: rival\nsi: hecho:llego_gilbert, hecho:se_queda, !hecho:historia_rival, !hecho:zanahorias\nal_empezar: hecho historia_rival\n---\ngilbert: (Gilbert gana el concurso de deletreo por una letra, y mira a Ana de reojo, sonriendo.)\n-> Mirarlo con desprecio\n   ana: (Ana levanta la barbilla.)\n-> Felicitarlo, aunque le cueste\n   ana: Bien hecho, Gilbert Blythe. La próxima vez gano yo."
+  }
+ ]
+}

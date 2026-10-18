@@ -25,7 +25,7 @@ const D = (d, t) => ({ d, s: 1, t, h: 15 });
 const ESCENARIOS = {
   spencer_rachel: { titulo: 'Escribió 3 cartas a la Sra. Spencer, se contuvo con Rachel (día 16, verano)', dia: 16, estacion: 1,
     hechos: { ...BASE, a_prueba: 2, se_queda: 3, lynde_visita: 15, lynde_contenida: 15 },
-    cartas: [{ id: 1, de: 'ana', para: 'spencer', texto: [], dia: 5, estado: 'entregada', escena: 'carta_spencer_1', resp: 25 }, { id: 2, de: 'ana', para: 'spencer', texto: [], dia: 9, estado: 'enviada', escena: 'carta_spencer_1', envio: 10 },
+    cartas: [{ id: 1, de: 'ana', para: 'spencer', texto: [], dia: 2, estado: 'entregada', escena: 'carta_spencer_prueba', resp: 25 }, { id: 2, de: 'ana', para: 'spencer', texto: [], dia: 9, estado: 'enviada', escena: 'carta_spencer_1', envio: 10 },
       { id: 3, de: 'ana', para: 'spencer', texto: [], dia: 14, estado: 'escrita', escena: 'carta_spencer_1' }],
     diario: [D(6, 'Ana le escribió una carta a la Sra. Spencer.'), D(8, 'Ana fue al Lago de las Aguas Brillantes.'), D(10, 'Ana le escribió una carta a la Sra. Spencer.'), D(12, 'Ana regó la huerta de Tejas Verdes.'),
       D(15, 'Ana le escribió una carta a la Sra. Spencer.'), D(15, 'La Sra. Lynde vino a Tejas Verdes a conocer a Ana, y le dijo que era flaca, fea y pelirroja. Ana se contuvo.'), D(16, 'Ana fue al Lago de las Aguas Brillantes.')],
@@ -40,6 +40,7 @@ const PREPARAR = `(E => {
   const P = game.wm.perm ||= {}; for (const [m, d] of Object.entries(E.metas || {})) P['cuaderno:' + m] = d;
   if (E.dia) { dayT = E.dia - 1 + 21 / 24; game.seasonShift = ((E.estacion - Math.floor(dayT / DIAS_ESTACION)) % 4 + 4) % 4; S = E.estacion; }
   if (E.cartas) game.cartas = E.cartas; if (E.diario) game.journal = E.diario;
+  for (const c of game.cartas || []) if (c.escena && !(c.texto || []).length) { const d = DIALOGOS.find(x => x.id === c.escena); if (d) c.texto = d.lineas().filter(l => l[0] === 'carta').map(l => l[1]); }   // (what she wrote: the letter scene's lines)
   for (const id of E.conversaciones || []) dlgDichas()[id] = true;
   if (E.visitas) noche().visitas = E.visitas;
   historiaT = 0; historiaTick(1); nocheV = null;
@@ -167,7 +168,11 @@ async function openai(cuerpos){
     try {
       const b2 = RESP ? (RESP.reparacion ? await leer(RESP.reparacion) : null) : (await pedirIA(p2, 2)).bloques;
       if (!b2) nota2 = 'sin segunda ronda: la respuesta es de un archivo que no trae «reparacion»';
-      else rondas.push({ bloques: b2.slice(0, v1.rechazados.length), v: await ev(`(([B, n, A]) => nocheValidar(B, n, A))`, [b2.slice(0, v1.rechazados.length), NIVEL, v1.aceptados]) });
+      else {
+        rondas.push({ bloques: b2.slice(0, v1.rechazados.length), v: await ev(`(([B, n, A]) => nocheValidar(B, n, A))`, [b2.slice(0, v1.rechazados.length), NIVEL, v1.aceptados]) });
+        const ids = await ev(`(B => B.map(nocheIdDe))`, b2), antes = await ev(`(B => B.map(nocheIdDe))`, v1.rechazados.map(x => x.bloque));   // (what round 2 left out: told)
+        for (const [i, x] of v1.rechazados.entries()) if (!ids.includes(antes[i])) { rondas[1].bloques.push({ tipo: x.bloque.tipo, texto: x.bloque.texto, porque: x.bloque.porque, esperado: x.bloque.esperado2 }); rondas[1].v.veredictos.push({ aceptado: false, id: antes[i], motivos: ['la IA no la volvió a mandar'], reparado: [], texto: '' }); }
+      }
     } catch (e) { nota2 = 'la segunda ronda no pudo: ' + (e.message || e); }
   }
   const aceptados = rondas.flatMap(r => r.v.aceptados);

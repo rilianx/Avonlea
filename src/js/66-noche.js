@@ -176,7 +176,7 @@ function nocheSistema(nivel){
   const V = nocheVocab(), n = NOCHE_N[nivel];
   const voces = [...Object.keys(CH).map(k => `- ${k} (${CH[k].fullName || NAMES[k]}): ${voiceShort(k)}`), ...Object.entries(FOLK_DEFS).filter(([k]) => !/^v\d+$/.test(k)).map(([k, d]) => `- ${k} (${nocheSinArt(d.name)})${fichaOf(k)?.ficha ? ': ' + String(fichaOf(k).ficha).slice(0, 140) : ''}`)].join('\n');
   const momentos = Object.entries(V.momentos).filter(([, m]) => m.quien && !m.fijo && V.habla.has(m.quien)).map(([k, m]) => `${k} (${m.quien}${m.huecos.size ? '; huecos: ' + [...m.huecos].map(h => '{' + h + '}').join(' ') : ''}${m.si.length ? '; ya pide: ' + m.si.join(', ') : ''})`).join(' · ');
-  const hitos = HITOS.map(h => `=== ${h.id} === (otra oportunidad: ${h.otra})\nsituación: ${h.situacion}\nlibro: ${h.libro}${h.respuestas.length ? '\nrespuestas (las elige quien juega): ' + h.respuestas.map(r => r.id + ' = ' + r.si.map(a => a.join(', ')).join(' | ')).join(' · ') : ''}${h.noPuede ? '\nno puede: ' + h.noPuede : ''}${h.variantes ? '\nvariantes: ' + h.variantes : ''}`).join('\n\n');
+  const hitos = HITOS.map(h => `=== ${h.id} === (otra oportunidad: ${h.otra})\nsituación: ${h.situacion}\nlibro: ${h.libro}${h.respuestas.length ? '\nsus respuestas (las elige quien juega; en una escena con «hito: ' + h.id + '», cada opción deja una): ' + h.respuestas.map(r => { const F = nocheRespuestasDe(h.id).filter(([, y]) => y === r.id).map(([x]) => 'hecho ' + x); return F.length ? F.join(' o ') + ' (' + r.id + ')' : r.id + ' (' + r.si.map(a => a.join(', ')).join(' | ') + ': no la deja una escena)'; }).join(', ') : ''}${h.noPuede ? '\nno puede: ' + h.noPuede : ''}${h.variantes ? '\nvariantes: ' + h.variantes : ''}`).join('\n\n');
   const tipos = ['dicho', 'conversacion', 'respuesta', ...(n >= 2 ? ['escena'] : [])];
   return `Eres quien escribe, de noche, cosas nuevas para «Un día en Avonlea», un juego tranquilo inspirado en «Ana de las Tejas Verdes» (L. M. Montgomery): Avonlea, un pueblito de granjas de la Isla del Príncipe Eduardo, hacia 1880. Ana Shirley tiene 11 años, es pelirroja, huérfana, soñadora, conversadora, de palabras grandiosas e imaginación desbordante; vive con Marilla y Matthew Cuthbert en Tejas Verdes. El tono es el del libro: tierno, con humor, sin nada moderno. Español; en la familia se tutea a Ana; Ana trata de usted a los grandes.
 
@@ -213,6 +213,7 @@ de: <${Object.keys(CORREO).join(' | ')}>
 si: respuesta:<el mismo>, <otras condiciones>
 ---
 carta: <cada línea de la carta: saludo, cuerpo, firma; {estacion} es lo que se ve en Avonlea en esta estación>
+(La respuesta solo puede referirse a lo que Ana escribió de verdad: sus cartas están en la partida, abajo. Nada de inventar lo que ella contó.)
 ${n >= 2 ? `
 escena (pasa sola cuando se cumplen sus condiciones; el director pone en cada canal la de más prioridad):
 === ia_<id> ===
@@ -273,10 +274,18 @@ LO QUE EL JUEGO YA TUVO QUE DESCARTAR (no lo repitas):
 - Una carta («canal: respuesta») son SOLO líneas «carta: …», una por línea: el saludo, cada frase y la firma.
 - En una escena, todos los que hablan, Ana también, están en «en:» («en: ana=gg, matthew=gg»); «sujeta:» y «en:» usan los ids.
 - Una escena con «hito: <id>» que trae una situación que todavía no pasó empieza con «al_empezar: hecho historia_<id>».
+- En una escena con «hito: <id>», cada opción deja una de las respuestas de ese hito, con su hecho de verdad (ver «sus respuestas» en cada hito); no inventes hechos «ia_» para las respuestas.
+- Los ids de tus bloques empiezan con «ia_». Un hito no es un hecho: se pide «hecho:historia_<id>», no «hecho:<id>».
 - No te protejas con tu propio id («!hecho:ia_…», «!dicha:ia_…»): cada escena se dice una vez. Ni «presente:ana»: Ana siempre está.
 - Solo los hechos de la lista${n >= 3 ? ', o los «ia_…» que tus propios bloques dejan' : ''}.
 
 RESPONDE solo con el JSON pedido: { "bloques": [ { "tipo": "${tipos.join('" | "')}", "texto": "<el bloque, con saltos de línea>", "porque": "<una frase: por qué para esta partida>" } ] }.`;
+}
+// what Ana really wrote to whoever has not answered yet (the last two letters to each): an answer may only refer to this
+function nocheCartasTexto(){
+  const P = {}; for (const c of cartas()) if (c.de === 'ana' && c.estado !== 'respondida') (P[c.para] ||= []).push(c);
+  const L = Object.entries(P).flatMap(([k, cs]) => cs.slice(-2).map(c => { const t = [].concat(c.texto || []).map(String).filter(x => x.trim()).join(' / '); return `- A ${CORREO[k]?.nombre || k} (día ${c.dia + 1}): «${t.length > 600 ? t.slice(0, 599) + '…' : t || '(sin texto guardado)'}»`; }));
+  return L.length ? '\nLAS CARTAS DE ANA SIN RESPUESTA (lo que escribió de verdad; una respuesta solo puede referirse a esto):\n' + L.join('\n') + '\n' : '';
 }
 function nocheUsuario(nivel){
   const H = dlgHechos(), hoy = today() + 1, V = nocheVocab();
@@ -303,6 +312,7 @@ Lugares: ${f(P.lugares)}
 
 LOS CABOS SUELTOS
 ${nocheCabos().map(c => '- ' + c.texto).join('\n') || '(ninguno)'}
+${nocheCartasTexto()}
 ${ya ? '\nYA AGREGADO OTRAS NOCHES (no repetir): ' + ya + '\n' : ''}
 Escribe hasta ${NOCHE_MAX} bloques, nivel «${nivel}».`;
 }
@@ -345,6 +355,9 @@ const NOCHE_CAMPOS = {
   escena: ['canal', 'prioridad', 'en', 'sujeta', 'si', 'al_empezar', 'al_terminar', 'repetir', 'grande', 'tipo', 'hito', 'narra', 'pausa', 'espera'] };
 const NOCHE_ACCIONES = ['hecho', 'olvidar', 'suma', 'cosa', 'saber', 'log', 'sentar', 'levantar', 'junto'];   // (efectos; olvidar, only «ia_» facts, in «libre»)
 const nocheId = id => /^ia_[a-z0-9_]+$/.test(id);
+// the answers of a milestone that a scene can leave (the facts its «respuesta» lines ask for): [[fact, answer]]
+const nocheRespuestasDe = h => (HITO_DE[h]?.respuestas || []).flatMap(r => [...new Set(r.si.flat().map(c => c.match(/^hecho:(\w+)$/)?.[1]).filter(Boolean))].map(x => [x, r.id]));
+const nocheIdDe = b => { const t = String(b?.texto || ''); if (b?.tipo === 'dicho') return 'dicho:' + ((t.match(/^\s*===\s*(.+?)\s*===/m) || [])[1] || ''); const id = (t.match(/^\s*===\s*(.+?)\s*===/m) || [])[1] || ''; return /^ia_/.test(id) ? id : 'ia_' + id.toLowerCase(); };
 // one condition: null if it is well written and names what exists; else why not
 function nocheCondMal(c, ctx){
   const V = nocheVocab(); c = String(c).trim(); const s = c[0] === '!' ? c.slice(1) : c;
@@ -555,6 +568,8 @@ function nocheRevisar(b, ctx){
     else if (!quedan) M.push(`el hito «${h}» no tiene más oportunidades («otra oportunidad: ${H.otra}»)`);
     if (e.listo && !(out.hitos || new Set()).has(h)) M.push(`trae la situación de «${h}»: tiene que dejar «hecho historia_${h}» al empezar`);
     if (e.distinta && (out.hitos || new Set()).has(h)) M.push(`«historia_${h}» ya pasó: la otra oportunidad no la deja de nuevo`);
+    const F = nocheRespuestasDe(h), ops = L.filter(l => l[0] === '?').flatMap(l => l[2] || []);
+    if (F.length) for (const o of ops) if (!(o.efectos || []).some(a => F.some(([x]) => x === a.hecho))) M.push(`la opción «${String(o.texto).slice(0, 60)}» no deja ninguna respuesta del hito «${h}»: cada opción deja una de ${F.map(([x, r]) => `«! hecho ${x}» (${r})`).join(', ')}`);
     const of = respuestasOfrecidas[h];
     if (of && of.size < 2) M.push(`ofrece una sola respuesta del hito «${h}» (${[...of].join('')}): eso es elegirla por Ana; que estén todas`);
     out.hito = h;
@@ -579,6 +594,10 @@ function nocheReparar(b){
     texto = texto.replace(/^(\s*quien:\s*)(\S+)/m, (x, a, q) => { const k = nocheQuien(q); if (!k || k === q) return x; R.push(`quien: ${q} → ${k}`); return a + k; });
     return { bloque: { ...b, texto }, reparado: R };
   }
+  { const id0 = (texto.match(/^\s*===\s*(.+?)\s*===/m) || [])[1];   // (its id starts with «ia_»: and what in it names the id)
+    if (id0 && !/^ia_/.test(id0) && /^[A-Za-z0-9_]+$/.test(id0)) { const id = 'ia_' + id0.toLowerCase(); texto = texto.replace(/^(\s*===\s*).+?(\s*===)/m, `$1${id}$2`).replace(new RegExp(`(hecho:|dicha:|dias_desde:|hecho\\s+|olvidar\\s+)${id0}(?![\\w])`, 'g'), `$1${id}`); R.push(`id «${id0}» → «${id}»`); } }
+  texto = texto.replace(/(hecho:|dias_desde:|hecho[ \t]+)([a-z_]+)(?![\w])/g, (x, a, h) => { if (!HITO_DE[h] || nocheVocab().hechos.has(h)) return x; R.push(`«${a.trim()}${a.endsWith(':') ? '' : ' '}${h}» → «${a.trim()}${a.endsWith(':') ? '' : ' '}historia_${h}» (un hito no es un hecho)`); return a + 'historia_' + h; });
+  const hitoYa = (h => h && HITO_DE[h] && hitoHecho(h) ? h : null)((texto.match(/^\s*hito:\s*(\S+)/m) || [])[1]);   // (a second chance: its own guard would keep it from ever playing)
   const L = texto.split('\n'), own = (texto.match(/^\s*===\s*(.+?)\s*===/m) || [])[1], repite = /^\s*repetir:\s*(?!una_vez)\S/m.test(texto);
   const hablan = new Set(); let cuerpo = false, cartas = 0;
   const ids = (v, sep) => v.split(sep).map(x => { const [k, ...r] = x.split('='), q = k.trim(), id = nocheQuien(q); if (id && id !== q) R.push(`${q} → ${id}`); return [id && id !== q ? id : q, ...r].join('='); }).join(sep);
@@ -588,8 +607,8 @@ function nocheReparar(b){
     if (!cuerpo) {
       const m = s.match(/^(en|sujeta|con|de|si):\s*(.*)$/); if (!m) continue;
       if (m[1] === 'si') {
-        const cs = m[2].split(',').map(x => x.trim()).filter(Boolean), quedan = cs.filter(c => !(c === 'presente:ana' || (!repite && own && (c === '!hecho:' + own || c === '!dicha:' + own))));
-        for (const c of cs.filter(c => !quedan.includes(c))) R.push(c === 'presente:ana' ? 'sin «presente:ana» (Ana siempre está)' : `sin «${c}» (una escena se dice una vez)`);
+        const cs = m[2].split(',').map(x => x.trim()).filter(Boolean), quedan = cs.filter(c => !(c === 'presente:ana' || (!repite && own && (c === '!hecho:' + own || c === '!dicha:' + own)) || (hitoYa && c === '!hecho:historia_' + hitoYa)));
+        for (const c of cs.filter(c => !quedan.includes(c))) R.push(c === 'presente:ana' ? 'sin «presente:ana» (Ana siempre está)' : hitoYa && c === '!hecho:historia_' + hitoYa ? `sin «${c}» (es otra oportunidad: el hito ya pasó)` : `sin «${c}» (una escena se dice una vez)`);
         if (quedan.length !== cs.length) L[i] = quedan.length ? 'si: ' + quedan.join(', ') : '';
       } else if (m[1] === 'con' || m[1] === 'de') { const k = nocheQuien(m[2]); if (k && k !== m[2].trim()) { R.push(`${m[1]}: ${m[2].trim()} → ${k}`); L[i] = m[1] + ': ' + k; } }
       else L[i] = m[1] + ': ' + ids(m[2], ',').replace(/,(?=\S)/g, ', ');
@@ -669,7 +688,9 @@ async function nochePasar(){
   try {
     const r = await nocheLlamar(p, NOCHE_AJ.clave), v = nocheValidar(r.bloques, nivel); modelo = r.modelo || modelo; rondas.push(v);
     if (v.rechazados.length) {   // (once: what was rejected, back to the AI with why)
-      try { const r2 = await nocheLlamar(nocheReparacionPedido(p, r.bloques, v.rechazados), NOCHE_AJ.clave); rondas.push(nocheValidar(r2.bloques.slice(0, v.rechazados.length), nivel, v.aceptados)); }
+      try { const r2 = await nocheLlamar(nocheReparacionPedido(p, r.bloques, v.rechazados), NOCHE_AJ.clave), v2 = nocheValidar(r2.bloques.slice(0, v.rechazados.length), nivel, v.aceptados), ids = new Set(r2.bloques.map(nocheIdDe));
+        for (const x of v.rechazados) if (!ids.has(nocheIdDe(x.bloque))) v2.rechazados.push({ bloque: { tipo: x.bloque?.tipo, texto: x.bloque?.texto, porque: x.bloque?.porque }, motivos: ['la IA no la volvió a mandar'], reparado: [] });
+        rondas.push(v2); }
       catch (e) { rondas.push({ aceptados: [], rechazados: [], error: String(e.message || e) }); }
     }
     nocheAceptar(rondas.flatMap(x => x.aceptados));
