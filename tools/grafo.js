@@ -147,7 +147,7 @@ for (const k of [...leer('src/js/62-cartas.js').matchAll(/^  (\w+): \{ nombre:/g
     if ((m = s.match(/^otra oportunidad:\s*(.*)$/))) h.otra = m[1];
     if ((m = s.match(/^peso:\s*(\S+)/))) h.peso = m[1]; }
   for (const [k, x] of Object.entries(H)) {
-    anota(hace, 'hito_' + k, 'hitos'); for (const r of Object.keys(x.resp)) anota(hace, 'hito_' + k + '_' + r, 'hitos'); anota(hace, 'hito_' + k + '_cerrado', 'hitos');   // (src/js/66-hitos.js leaves them)
+    anota(hace, 'historia_' + k, 'hitos'); for (const r of Object.keys(x.resp)) anota(hace, 'historia_' + k + '_' + r, 'hitos'); anota(hace, 'historia_' + k + '_cerrado', 'hitos');   // (src/js/66-hitos.js leaves them)
     if (!x.pasa.length) malas.push(`hito ${k}: no dice cuándo pasa («pasa si:»)`);
     if (!['nucleo', 'menor'].includes(x.peso)) malas.push(`hito ${k}: peso «${x.peso}» (nucleo o menor)`);
     if (x.otra == null || !/^\d+$/.test(x.otra)) malas.push(`hito ${k}: «otra oportunidad» tiene que ser un número (0, 1…)`);
@@ -160,7 +160,7 @@ for (const k of [...leer('src/js/62-cartas.js').matchAll(/^  (\w+): \{ nombre:/g
     if (x.necesita.map(y => y.split(':')[0]).some(n => H[n] && ve(n, new Set([k])))) malas.push(`hito ${k}: se necesita a sí mismo (en círculo)`); } }
 // the report
 const necesita = Object.keys(pide).filter(h => !h.endsWith(' ')), lee = new Set(Object.keys(pide).map(h => h.trim()));
-const nunca = necesita.filter(h => !hace[h] && !/^conoce_/.test(h)).sort()   /* (conoce_<who>: whoever Ana meets, src/js/66-conocidos.js) */, sinUso = Object.keys(hace).filter(h => !lee.has(h) && !/^(hito_|llego_|se_fue_)/.test(h)).sort();
+const nunca = necesita.filter(h => !hace[h] && !/^conoce_/.test(h)).sort()   /* (conoce_<who>: whoever Ana meets, src/js/66-conocidos.js) */, sinUso = Object.keys(hace).filter(h => !lee.has(h) && !/^(hito_|historia_|llego_|se_fue_)/.test(h)).sort();
 const md = ['# El grafo de la historia, revisado', '', 'Lo genera `node tools/grafo.js` (ver `docs/MOTOR.md`). Lee el guion, el cuaderno, las habilidades y el código.', '',
   `**${escenas.length} escenas** (${escenas.filter(e => e.grande).length} grandes), **${metas.size} metas** del cuaderno, **${Object.keys(hace).length} hechos** que algo deja.`, '',
   '## Escenas o metas que nunca podrían pasar', '', nunca.length ? 'Piden un hecho que nada deja:' : 'Ninguna: todo hecho que se pide, algo lo deja.', '',

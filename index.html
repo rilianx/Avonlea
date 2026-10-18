@@ -2615,7 +2615,7 @@ ana: ¡La primera nieve! El Camino Blanco se acordó de su nombre. Cada copo es 
 # Los hitos de la historia: las SITUACIONES que la historia garantiza, escritas por lo que significan y no por cómo
 # pasan en el libro. Lo que Ana hace en cada una lo decide quien juega: cada respuesta abre su propio camino
 # (docs/MODELO_INTERACCIONES.md, «Los hitos»). Una variante (escrita a mano o por la IA de la noche) puede traer la
-# situación de otra forma, y deja hecho:hito_<id>; nunca elige la respuesta.
+# situación de otra forma, y deja hecho:historia_<id>; nunca elige la respuesta.
 #
 #   === id ===
 #   capitulos: de dónde viene, en el libro
@@ -2623,9 +2623,9 @@ ana: ¡La primera nieve! El Camino Blanco se acordó de su nombre. Cada copo es 
 #   necesita: lo que tiene que haber pasado antes: otros hitos (su id), o un hito con cierta respuesta
 #             (id:respuesta: «humillada:estalla»), u otras condiciones del guion
 #   pasa si: las condiciones que dicen que la situación ocurrió, con cualquier respuesta (la forma del libro, con los
-#            hechos del juego); separadas por « | », cualquiera (una variante agrega la suya: hecho:hito_<id>)
+#            hechos del juego); separadas por « | », cualquiera (una variante agrega la suya: hecho:historia_<id>)
 #   respuesta <nombre>: las condiciones que dicen que Ana respondió así (la primera que se cumpla queda: hecho
-#            hito_<id>_<nombre>); sin respuestas, la situación es todo el hito
+#            historia_<id>_<nombre>); sin respuestas, la situación es todo el hito
 #   libro: la respuesta del libro (su nombre), y cómo lo cuenta, en una línea
 #   no puede: lo que una variante no debe hacer (para que siga siendo la misma situación)
 #   variantes: ideas de otras formas de la situación (para quien escriba una, a mano o la IA)
@@ -2633,7 +2633,7 @@ ana: ¡La primera nieve! El Camino Blanco se acordó de su nombre. Cada copo es 
 #            situación de otra forma (normalmente 1; la IA puede decidir menos si la partida va claramente por otro
 #            lado, o «0»: lo que decidió, decidido)
 #   peso: nucleo (la situación no puede faltar) o menor (puede no pasar)
-# Un hito que necesita otro con cierta respuesta queda CERRADO si ese otro tuvo otra respuesta (hecho hito_<id>_cerrado):
+# Un hito que necesita otro con cierta respuesta queda CERRADO si ese otro tuvo otra respuesta (hecho historia_<id>_cerrado):
 # no es un error, es su historia. tools/grafo.js revisa las condiciones, los nombres y que nada se necesite en círculo.
 
 === llegada ===
@@ -12244,7 +12244,7 @@ $('ajcerrar').addEventListener('click', () => { ajustesSync(); ajustesPanel(fals
 $('ajsaben').addEventListener('click', () => {
   const o = $('ajout'); o.hidden = false;
   const per = Object.keys(PEOPLE).map(w => `— ${NAMES[w]} —\nSabe:\n` + ((game.know[w] || []).slice(-8).map(e => '  · día ' + e.d + ': ' + e.t).join('\n') || '  (nada)')).join('\n\n');
-  o.textContent = '— Los hitos de la historia —\n' + hitosTexto() + '\n\n' + per + '\n\n— Encargos —\n' + (game.tasks.map(t => '  ' + (t.done ? '✓ ' : '· ') + taskText(t) + ' (de ' + NAMES[t.from] + ')').join('\n') || '  (ninguno)') + '\n\n— Diario de Ana —\n' + (game.journal.slice(-30).map(e => '  · día ' + e.d + ': ' + e.t).join('\n') || '  (nada todavía)');
+  o.textContent = '— Los hitos de la historia —\n' + historiaTexto() + '\n\n' + per + '\n\n— Encargos —\n' + (game.tasks.map(t => '  ' + (t.done ? '✓ ' : '· ') + taskText(t) + ' (de ' + NAMES[t.from] + ')').join('\n') || '  (ninguno)') + '\n\n— Diario de Ana —\n' + (game.journal.slice(-30).map(e => '  · día ' + e.d + ': ' + e.t).join('\n') || '  (nada todavía)');
 });
 $('ajolvidar').addEventListener('click', () => { if (!confirm('¿Borrar todo lo que saben y el diario de lo que ha pasado?')) return; game.journal = []; game.know = {}; game.tasks = []; game.giftFor = {}; save(); $('ajout').hidden = false; $('ajout').textContent = 'Listo: es como si fuera el primer día.'; });
 const SPEEDS_T = [.25, .5, 1, 2, 5, 10, 25, 50];
@@ -12429,7 +12429,7 @@ function update(dt){
   if (game.scene === 'camino' && ana.onCart && (mx || my || (ana.goto && !ana.goto.wm))) roadGetOff();   // (moving her: she gets down from the buggy)
   if (ANA_AUTO) { if (mx || my) { freeStart(); const v = 520 / (cam.zoom || 1) / (viewZoom || 1); freeCam.x += mx * v * dt; freeCam.y += my * v * dt; } mx = my = 0; }   // (on her own: the keys move the view)
   if (game.talk?.deadline && TT > game.talk.deadline && !sayOpen) { game.talk.deadline = 0; autoChoose(); }
-  autoTick(); cartTick(dt); roadTick(dt); buggyTick(); roadTalkTick(dt); dlgTick(dt); talkTick(dt); cap1Tick(); momentsTick(); lugaresTick(dt); inicioTick(dt); lagrimas(); ropaTick(); folkTick(dt); faunaTick(dt); agentTick(dt); jugarTick(dt); correoTick(dt); sickTick(); apartarTick(); cuadernoTick(dt); habilidadesTick(dt); hitosTick(dt); noticiasTick(dt); llegadasTick(dt); juntasTick(dt); agendaTick(); wmApproachTick(dt); calledTick(); convIrTick(); chatTick(dt); wmFollowTick();
+  autoTick(); cartTick(dt); roadTick(dt); buggyTick(); roadTalkTick(dt); dlgTick(dt); talkTick(dt); cap1Tick(); momentsTick(); lugaresTick(dt); inicioTick(dt); lagrimas(); ropaTick(); folkTick(dt); faunaTick(dt); agentTick(dt); jugarTick(dt); correoTick(dt); sickTick(); apartarTick(); cuadernoTick(dt); habilidadesTick(dt); historiaTick(dt); noticiasTick(dt); llegadasTick(dt); juntasTick(dt); agendaTick(); wmApproachTick(dt); calledTick(); convIrTick(); chatTick(dt); wmFollowTick();
   if (RELATO.on) relatoTick();   // (the account of what happens, once all have moved: 66-relato.js)
   ana.torn = !!game.anaStates.rasgado; ana.askew = !!game.anaStates.despeinada;
   ana.savoring = false;
@@ -15483,9 +15483,9 @@ function hitosTick(){
 
 /* ---------- the milestones of the story (src/datos/hitos.txt): the SITUATIONS the story guarantees, and how Ana
    answered each one (the player's choice). A situation happens when what says so holds (the book's way, or another
-   that leaves hecho:hito_<id>) and what it needs has happened; then it leaves hecho:hito_<id> and a line in Ana's
-   diary, and, as soon as one of its answers holds, hecho:hito_<id>_<answer>. A milestone that needs another one with a
-   certain answer is CLOSED if that one got another answer (hecho:hito_<id>_cerrado): her story went another way.
+   that leaves hecho:historia_<id>) and what it needs has happened; then it leaves hecho:historia_<id> and a line in Ana's
+   diary, and, as soon as one of its answers holds, hecho:historia_<id>_<answer>. A milestone that needs another one with a
+   certain answer is CLOSED if that one got another answer (hecho:historia_<id>_cerrado): her story went another way.
    Checked now and then, not every frame. ---------- */
 const HITOS = (() => { const out = []; let h = null;
   const alts = v => v.split('|').map(x => x.split(',').map(c => c.trim()).filter(Boolean)).filter(a => a.length);
@@ -15503,10 +15503,10 @@ const HITOS = (() => { const out = []; let h = null;
   }
   return out; })();
 const HITO_DE = Object.fromEntries(HITOS.map(h => [h.id, h]));
-const hitoHecho = id => !!dlgHechos()['hito_' + id];
-const hitoRespuesta = id => HITO_DE[id]?.respuestas.find(r => dlgHechos()['hito_' + id + '_' + r.id])?.id || null;
-const hitoCerrado = id => !!dlgHechos()['hito_' + id + '_cerrado'];
-const cumple = alts => alts.some(a => dlgCumple({ si: a.map(dlgVal) }, dlgCtx()));
+const hitoHecho = id => !!dlgHechos()['historia_' + id];
+const hitoRespuesta = id => HITO_DE[id]?.respuestas.find(r => dlgHechos()['historia_' + id + '_' + r.id])?.id || null;
+const hitoCerrado = id => !!dlgHechos()['historia_' + id + '_cerrado'];
+const hitoCumple = alts => alts.some(a => dlgCumple({ si: a.map(dlgVal) }, dlgCtx()));
 // one thing it needs: a milestone (happened), a milestone with an answer («humillada:estalla»), or a condition
 function hitoNecesita(n){
   const [id, r] = n.split(':');
@@ -15514,23 +15514,23 @@ function hitoNecesita(n){
   return dlgCumple({ si: [dlgVal(n)] }, dlgCtx()) ? 'si' : 'falta';
 }
 const hitoEstado = h => { const e = h.necesita.map(hitoNecesita); return e.includes('cerrado') ? 'cerrado' : e.every(x => x === 'si') ? 'listo' : 'falta'; };
-let hitosT = 0;
-function hitosTick(dt){
-  if ((hitosT -= dt) > 0) return; hitosT = 2;
+let historiaT = 0;
+function historiaTick(dt){
+  if ((historiaT -= dt) > 0) return; historiaT = 2;
   for (let otra = true; otra;) { otra = false;   // (one can open the next at once: a chain in one go)
     for (const h of HITOS) {
       if (hitoCerrado(h.id)) continue;
       if (!hitoHecho(h.id)) {
         const e = hitoEstado(h);
-        if (e === 'cerrado') { dlgHecho('hito_' + h.id + '_cerrado'); otra = true; continue; }
-        if (e !== 'listo' || !cumple(h.pasa)) continue;
-        dlgHecho('hito_' + h.id); otra = true; logEv('Un momento de la historia: ' + h.situacion.replace(/\.$/, '') + '.', []);
+        if (e === 'cerrado') { dlgHecho('historia_' + h.id + '_cerrado'); otra = true; continue; }
+        if (e !== 'listo' || !hitoCumple(h.pasa)) continue;
+        dlgHecho('historia_' + h.id); otra = true; logEv('Un momento de la historia: ' + h.situacion.replace(/\.$/, '') + '.', []);
       }
-      if (h.respuestas.length && !hitoRespuesta(h.id)) { const r = h.respuestas.find(r => cumple(r.si)); if (r) { dlgHecho('hito_' + h.id + '_' + r.id); otra = true; } }
+      if (h.respuestas.length && !hitoRespuesta(h.id)) { const r = h.respuestas.find(r => hitoCumple(r.si)); if (r) { dlgHecho('historia_' + h.id + '_' + r.id); otra = true; } }
     } }
 }
 // for the settings panel: what happened (and how Ana answered), what can happen now, what was closed, what is far
-const hitosTexto = () => HITOS.map(h => {
+const historiaTexto = () => HITOS.map(h => {
   const r = hitoRespuesta(h.id), libro = (h.libro || '').match(/^(\w+) —/)?.[1];
   const marca = hitoHecho(h.id) ? '✓' : hitoCerrado(h.id) ? '✗' : hitoEstado(h) === 'listo' ? '…' : '·';
   return '  ' + marca + ' ' + h.id + (h.capitulos ? ' (cap. ' + h.capitulos + ')' : '') + (h.peso === 'menor' ? ' [menor]' : '') + ': ' + h.situacion + (r ? '\n      → ' + r.replace(/_/g, ' ') + (libro && r !== libro ? ' (el libro: ' + libro.replace(/_/g, ' ') + ')' : ' (como en el libro)') : '');
