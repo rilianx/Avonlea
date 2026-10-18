@@ -165,6 +165,13 @@ function nocheReglasProsa(){
     ...R.solo.map(r => `- Mientras ${(r.cuando || []).map(q).join(' y ')}, ${(r['quiénes'] || ['todos']).join(', ')} solo dice cosas cuyas condiciones nombren alguna de: ${(r.pide || []).join(', ')} (por ejemplo «!hecho:${(r.pide || [''])[0]}»). [${r.nombre}]`),
     ...R.nunca.map(r => `- Nunca: ${(r.si || []).join(', ')} (${r.nombre}).`)].join('\n');
 }
+// a block of the data, verbatim (from the texts the game carries): the examples of the request
+function nocheEjemplo(el, id){
+  const L = (document.getElementById(el)?.textContent || '').split('\n'), i = L.findIndex(l => l.trim() === `=== ${id} ===`); if (i < 0) return '';
+  let j = i + 1; while (j < L.length && !/^===/.test(L[j].trim())) j++;
+  while (j > i + 1 && (!L[j - 1].trim() || L[j - 1].trim()[0] === '#')) j--;
+  return L.slice(i, j).join('\n');
+}
 function nocheSistema(nivel){
   const V = nocheVocab(), n = NOCHE_N[nivel];
   const voces = [...Object.keys(CH).map(k => `- ${k} (${CH[k].fullName || NAMES[k]}): ${voiceShort(k)}`), ...Object.entries(FOLK_DEFS).filter(([k]) => !/^v\d+$/.test(k)).map(([k, d]) => `- ${k} (${nocheSinArt(d.name)})${fichaOf(k)?.ficha ? ': ' + String(fichaOf(k).ficha).slice(0, 140) : ''}`)].join('\n');
@@ -247,6 +254,28 @@ ${nocheReglasProsa()}
 - Quien no conoce a Ana no la nombra («Ana», «Shirley»): pide «conoce:<quien>».
 - Una frase o escena tiene que poder darse: sus condiciones no se contradicen.
 
+EJEMPLOS DE VERDAD (copiados tal cual de los datos del juego; los tuyos llevan id «ia_…»):
+
+Una respuesta a una carta:
+${nocheEjemplo('guion', 'resp_diana_1')}
+
+Una conversación:
+${nocheEjemplo('conversaciones', 'conv_marilla_oraciones')}
+${n >= 2 ? `
+Una escena con opciones (la forma del libro de un hito; la tuya, que lo trae de otra forma, agrega «hito: rival» y empieza con «al_empezar: hecho historia_rival», no deja «zanahorias» ni «conoce_gilbert», y no lleva «interrumpe» ni «ofensa»):
+${nocheEjemplo('guion', 'zanahorias')}
+` : ''}
+Un dicho (tu bloque repite el encabezado del momento y agrega sus líneas):
+${nocheEjemplo('dichos', 'lleva_carta:marilla')}
+
+LO QUE EL JUEGO YA TUVO QUE DESCARTAR (no lo repitas):
+- Cada línea después de «---» es «quien: texto», con el id de quien habla, en minúsculas («ana:», «marilla:», «lynde:»; no «Ana:»). Ninguna línea sin «quien:».
+- Una carta («canal: respuesta») son SOLO líneas «carta: …», una por línea: el saludo, cada frase y la firma.
+- En una escena, todos los que hablan, Ana también, están en «en:» («en: ana=gg, matthew=gg»); «sujeta:» y «en:» usan los ids.
+- Una escena con «hito: <id>» que trae una situación que todavía no pasó empieza con «al_empezar: hecho historia_<id>».
+- No te protejas con tu propio id («!hecho:ia_…», «!dicha:ia_…»): cada escena se dice una vez. Ni «presente:ana»: Ana siempre está.
+- Solo los hechos de la lista${n >= 3 ? ', o los «ia_…» que tus propios bloques dejan' : ''}.
+
 RESPONDE solo con el JSON pedido: { "bloques": [ { "tipo": "${tipos.join('" | "')}", "texto": "<el bloque, con saltos de línea>", "porque": "<una frase: por qué para esta partida>" } ] }.`;
 }
 function nocheUsuario(nivel){
@@ -288,7 +317,7 @@ function nochePedido(nivel = nocheNivel(), modelo = NOCHE_AJ.modelo || NOCHE_MOD
 function nocheCuerpos(p){
   const base = { model: p.modelo, max_completion_tokens: 12000, messages: p.mensajes }, fmt = { type: 'json_schema', json_schema: { name: 'bloques_de_la_noche', strict: true, schema: NOCHE_ESQUEMA } };
   return [{ ...base, response_format: fmt, reasoning_effort: 'low' }, { ...base, response_format: fmt },
-    { ...base, messages: [{ ...p.mensajes[0], content: p.mensajes[0].content + '\n\nResponde solo con un objeto JSON que siga este esquema: ' + JSON.stringify(NOCHE_ESQUEMA) }, p.mensajes[1]], response_format: { type: 'json_object' } }];
+    { ...base, messages: [{ ...p.mensajes[0], content: p.mensajes[0].content + '\n\nResponde solo con un objeto JSON que siga este esquema: ' + JSON.stringify(NOCHE_ESQUEMA) }, ...p.mensajes.slice(1)], response_format: { type: 'json_object' } }];
 }
 // the answer of the API → the blocks (at most NOCHE_MAX); an error says why, in words
 function nocheLeerRespuesta(data){
@@ -328,7 +357,8 @@ function nocheCondMal(c, ctx){
     case 'hecho': case 'no_hoy': return hecho(a[0]) ? null : `«${c}»: el hecho «${a[0]}» no existe en el juego` + (/^ia_/.test(a[0]) && NOCHE_N[ctx.nivel] < 3 ? ' (los hechos «ia_» son del nivel libre)' : '');
     case 'dias_desde': case 'horas_desde': return !(hecho(a[0]) || V.metas.has(a[0])) ? `«${c}»: el hecho «${a[0]}» no existe en el juego` : num(a[1], 0) ? null : malo;
     case 'dicha': return V.dichas.has(a[0]) || ctx.iaIds.has(a[0]) ? null : `«${c}»: no hay una escena «${a[0]}»`;
-    case 'conoce': case 'presente': case 've': case 'sentada': return V.personas.has(a[0]) ? null : `«${c}»: «${a[0]}» no es nadie del juego`;
+    case 'presente': case 'sentada': return persona(a[0]) ? null : `«${c}»: «${a[0]}» no es nadie del juego`;   // (Ana too: she is always here)
+    case 'conoce': case 've': return V.personas.has(a[0]) ? null : a[0] === 'ana' ? `«${c}»: se escribe con quien la conoce o la ve («${k}:diana»), no con Ana` : `«${c}»: «${a[0]}» no es nadie del juego`;
     case 'donde': return persona(a[0]) && NOCHE_DONDE.includes(a[1]) ? null : `«${c}»: se escribe donde:<quien>:${NOCHE_DONDE.join('|')}`;
     case 'ana': return ANA_ESTADO[a[0]] ? null : `«${c}»: Ana no puede estar «${a[0]}»`;
     case 'cuaderno': return V.metas.has(a[0]) ? null : `«${c}»: no hay una meta «${a[0]}» en el cuaderno`;
@@ -464,9 +494,10 @@ function nocheRevisar(b, ctx){
   if (!c) { M.push('no se entiende el bloque'); return out; }
   out.c = c; const L = Array.isArray(c.lineas) ? c.lineas : [];
   if (!L.length) M.push('no tiene líneas (van después de «---»)');
+  if (n >= 3) for (const m of texto.matchAll(/\bhecho\s+(ia_[a-z0-9_]+)/g)) ctx.iaHechos.add(m[1]);   // (its own «ia_» facts, in «libre»: undone below if it is rejected)
   const si = [].concat(c.si ?? []).filter(x => x != null && x !== '').map(String); conds(si);
   // who speaks
-  const quienes = new Set(), ver = X => { for (const l of X || []) { if (l[0] === '?') for (const o of l[2] || []) { if (!o.texto) M.push('una opción sin texto'); ver(o.lineas); } else if (l[0] !== '!') { quienes.add(l[0]); if (!String(l[1] || '').trim()) M.push('una línea vacía'); else if (String(l[1]).length > 400) M.push('una línea demasiado larga'); } } };
+  const quienes = new Set(), ver = X => { for (const l of X || []) { if (l[0] === '?') for (const o of l[2] || []) { if (!o.texto) M.push('una opción sin texto'); ver(o.lineas); } else if (l[0] !== '!') { if (!String(l[1] || '').trim()) { M.push(`una línea sin «quien:» («${String(l[0]).slice(0, 50)}»): cada línea es «quien: texto»${tipo === 'respuesta' ? ' (en una carta, «carta: texto»)' : ''}`); continue; } quienes.add(String(l[0]).toLowerCase()); if (String(l[1]).length > 400) M.push('una línea demasiado larga'); } } };
   ver(L);
   for (const q of quienes) if (!V.habla.has(q)) M.push(`«${q}» no es nadie del juego`);
   if (L.some(l => typeof l[1] === 'string' && /\{(?!estacion\})/.test(l[1]))) M.push('un hueco {…} que nadie llena (solo {estacion}, en las cartas)');
@@ -487,7 +518,7 @@ function nocheRevisar(b, ctx){
     if (!(c.prioridad >= 0 && c.prioridad <= 6)) M.push('«prioridad:» de 0 a 6');
     for (const [k, v] of Object.entries(c.en || {})) if (!V.habla.has(k) || !V.escenas.has(v)) M.push(`«en: ${k}=${v}»: no se entiende (lugares: ${[...V.escenas].join(', ')})`);
     for (const q of quienes) if (!['ana', 'narra'].includes(q) && !(c.en && c.en[q])) M.push(`${q} habla, y no está en «en:» (dónde está)`);
-    for (const k of [].concat(c.sujeta || [])) if (!V.personas.has(String(k))) M.push(`«sujeta: ${k}»: no es nadie del juego`);
+    for (const k of [].concat(c.sujeta || [])) if (!V.habla.has(String(k).toLowerCase()) || ['narra', 'carta'].includes(String(k).toLowerCase())) M.push(`«sujeta: ${k}»: no es nadie del juego`);
   }
   // what it does
   const A = nocheAcciones(c), S = nocheCierre([...si, ...Object.entries(c.en || {}).map(([k, v]) => `donde:${k}:${v}`)]);
@@ -531,21 +562,83 @@ function nocheRevisar(b, ctx){
   if (!M.length) M.push(...nocheReglas(b, c));
   return out;
 }
-// the blocks of one night, in order (what one accepts, the next can use, in «libre»): { aceptados, rechazados }
-function nocheValidar(bloques, nivel = nocheNivel()){
-  nocheV = null;   // (what exists now: tonight's facts, and what other nights added)
-  const prev = game.noche?.bloques || [];
-  const ctx = { nivel, iaHechos: new Set(prev.flatMap(b => b.iaDeja || [])), iaIds: new Set(prev.map(b => b.id)), oportunidades: { ...(game.noche?.oportunidades || {}) } };
-  const aceptados = [], rechazados = [];
-  for (const b of [].concat(bloques || []).slice(0, NOCHE_MAX)) {
-    let r; try { r = nocheRevisar(b, ctx); } catch (e) { r = { motivos: ['no se pudo revisar: ' + (e.message || e)] }; }
-    if (r.motivos.length) { rechazados.push({ bloque: b, motivos: r.motivos }); continue; }
-    if (ctx.iaIds.has(r.id)) r.id += '_' + (ctx.iaIds.size + 1);   // (two sayings of the same moment: told apart)
-    const a = { tipo: b.tipo, id: r.id, texto: String(b.texto), porque: String(b.porque || ''), iaDeja: r.iaDeja, hito: r.hito || undefined };
-    aceptados.push(a); ctx.iaIds.add(a.id); for (const x of r.iaDeja) ctx.iaHechos.add(x); if (r.hito) ctx.oportunidades[r.hito] = (ctx.oportunidades[r.hito] || 0) + 1;
+// ---------------------------------------------------------------- the repairs: only how a block is written, never what
+// it means (what the AI got wrong in its first nights on GitHub): «Ana:» is «ana:», a letter's lines are «carta:», Ana
+// is always here, a scene plays once without guarding itself with its own id, a scene that brings a milestone starts
+// by leaving its situation, and Ana is where the others are. Each one is told («reparado: …»)
+let nocheNom = null;
+function nocheQuien(q){   // a speaker as the AI may write it («Ana», «Marilla», «la Sra. Lynde») → its id, or null
+  const V = nocheVocab(), k = String(q || '').trim().toLowerCase(); if (V.habla.has(k)) return k;
+  if (!nocheNom) { nocheNom = {}; for (const id of V.personas) for (const n of [NAMES[id], FOLK_DEFS[id]?.name, CH[id]?.fullName]) if (n) { const x = n.toLowerCase(); nocheNom[x] = nocheNom[x] && nocheNom[x] !== id ? '?' : id; nocheNom[nocheSinArt(x)] ??= id; } }
+  const id = nocheNom[k] ?? nocheNom[nocheSinArt(k)]; return id && id !== '?' ? id : null;
+}
+function nocheReparar(b){
+  const R = [], tipo = b?.tipo; if (!b || !['dicho', 'conversacion', 'respuesta', 'escena'].includes(tipo)) return { bloque: b, reparado: R };
+  let texto = String(b.texto ?? '').replace(/\r\n?/g, '\n');
+  if (tipo === 'dicho') {
+    texto = texto.replace(/^(\s*quien:\s*)(\S+)/m, (x, a, q) => { const k = nocheQuien(q); if (!k || k === q) return x; R.push(`quien: ${q} → ${k}`); return a + k; });
+    return { bloque: { ...b, texto }, reparado: R };
   }
-  for (const b of [].concat(bloques || []).slice(NOCHE_MAX)) rechazados.push({ bloque: b, motivos: [`más de ${NOCHE_MAX} bloques en una noche`] });
-  return { aceptados, rechazados, completo: false };   // (completo: the full model, with Z3, is not run here: tools/noche.js runs it in Node; nocheModelo is the hook)
+  const L = texto.split('\n'), own = (texto.match(/^\s*===\s*(.+?)\s*===/m) || [])[1], repite = /^\s*repetir:\s*(?!una_vez)\S/m.test(texto);
+  const hablan = new Set(); let cuerpo = false, cartas = 0;
+  const ids = (v, sep) => v.split(sep).map(x => { const [k, ...r] = x.split('='), q = k.trim(), id = nocheQuien(q); if (id && id !== q) R.push(`${q} → ${id}`); return [id && id !== q ? id : q, ...r].join('='); }).join(sep);
+  for (let i = 0; i < L.length; i++) {
+    const raw = L[i], s = raw.trim(); if (!s || s[0] === '#' || /^===/.test(s)) continue;
+    if (s === '---') { cuerpo = true; continue; }
+    if (!cuerpo) {
+      const m = s.match(/^(en|sujeta|con|de|si):\s*(.*)$/); if (!m) continue;
+      if (m[1] === 'si') {
+        const cs = m[2].split(',').map(x => x.trim()).filter(Boolean), quedan = cs.filter(c => !(c === 'presente:ana' || (!repite && own && (c === '!hecho:' + own || c === '!dicha:' + own))));
+        for (const c of cs.filter(c => !quedan.includes(c))) R.push(c === 'presente:ana' ? 'sin «presente:ana» (Ana siempre está)' : `sin «${c}» (una escena se dice una vez)`);
+        if (quedan.length !== cs.length) L[i] = quedan.length ? 'si: ' + quedan.join(', ') : '';
+      } else if (m[1] === 'con' || m[1] === 'de') { const k = nocheQuien(m[2]); if (k && k !== m[2].trim()) { R.push(`${m[1]}: ${m[2].trim()} → ${k}`); L[i] = m[1] + ': ' + k; } }
+      else L[i] = m[1] + ': ' + ids(m[2], ',').replace(/,(?=\S)/g, ', ');
+      continue;
+    }
+    if (s.startsWith('->') || s.startsWith('!')) continue;
+    const ind = raw.match(/^\s*/)[0], m = s.match(/^([^:]{1,40}?)(\s+piensa)?:\s*(.*)$/), k = m && nocheQuien(m[1]);
+    if (tipo === 'respuesta') {   // (a letter is its «carta:» lines: what has no «carta:» is the letter too)
+      if (k === 'carta') continue;
+      L[i] = ind + 'carta: ' + (k && m[3] ? m[3] : s); cartas++; continue;
+    }
+    if (k) { if (k !== m[1]) { L[i] = ind + k + (m[2] || '') + ': ' + m[3]; R.push(`«${m[1]}:» → «${k}:»`); } hablan.add(k); }
+  }
+  if (cartas) R.push(`${cartas} línea(s) de la carta con «carta:»`);
+  // a scene with «hito:» starts by leaving the situation (if the milestone is still to happen)
+  { const h = (texto.match(/^\s*hito:\s*(\S+)/m) || [])[1], H = h && HITO_DE[h];
+    if (tipo === 'escena' && H && nocheHitoEstado(H).listo && !new RegExp(`^\\s*al_empezar:\\s*hecho\\s+historia_${h}\\s*$`, 'm').test(texto)) { const i = L.findIndex(l => /^\s*hito:/.test(l)); L.splice(i + 1, 0, 'al_empezar: hecho historia_' + h); R.push(`agregado «al_empezar: hecho historia_${h}»`); } }
+  // Ana speaks, and «en:» says where the others are but not her: where they all are
+  if (tipo === 'escena' && hablan.has('ana')) {
+    const i = L.findIndex(l => /^\s*en:/.test(l)), en = i < 0 ? null : Object.fromEntries(L[i].replace(/^\s*en:\s*/, '').split(',').map(x => x.split('=').map(y => y.trim())).filter(x => x[0]));
+    const lugares = en ? new Set([...hablan].filter(k => k !== 'ana' && k !== 'narra' && en[k]).map(k => en[k])) : new Set();
+    if (en && !en.ana && lugares.size === 1) { const l = [...lugares][0]; L[i] = L[i].replace(/\s*$/, '') + ', ana=' + l; R.push(`agregado «ana=${l}» a «en:» (donde están los demás)`); }
+  }
+  return { bloque: { ...b, texto: L.join('\n') }, reparado: [...new Set(R)] };
+}
+// the blocks of one night, in order (what one accepts, the next can use, in «libre»): { aceptados, rechazados }; antes:
+// what this night already accepted (the second round, after the AI corrected what was rejected)
+function nocheValidar(bloques, nivel = nocheNivel(), antes = []){
+  nocheV = null; nocheNom = null;   // (what exists now: tonight's facts, and what other nights added)
+  const prev = [...(game.noche?.bloques || []), ...antes];
+  const ctx = { nivel, iaHechos: new Set(prev.flatMap(b => b.iaDeja || [])), iaIds: new Set(prev.map(b => b.id)), oportunidades: { ...(game.noche?.oportunidades || {}) } };
+  for (const b of antes) if (b.hito) ctx.oportunidades[b.hito] = (ctx.oportunidades[b.hito] || 0) + 1;
+  const aceptados = [], rechazados = [], veredictos = [];   // (veredictos: one per block, in order: for tools/noche.js)
+  for (const b0 of [].concat(bloques || []).slice(0, NOCHE_MAX)) {
+    let r, b = b0, reparado = [], iaAntes = new Set(ctx.iaHechos);
+    try { ({ bloque: b, reparado } = nocheReparar(b0)); r = nocheRevisar(b, ctx); } catch (e) { r = { motivos: ['no se pudo revisar: ' + (e.message || e)] }; }
+    if (r.motivos.length) { ctx.iaHechos = iaAntes; rechazados.push({ bloque: b0, motivos: r.motivos, reparado }); veredictos.push({ aceptado: false, id: r.id || null, motivos: r.motivos, reparado, texto: String(b.texto) }); continue; }
+    if (ctx.iaIds.has(r.id)) r.id += '_' + (ctx.iaIds.size + 1);   // (two sayings of the same moment: told apart)
+    const a = { tipo: b.tipo, id: r.id, texto: String(b.texto), porque: String(b.porque || ''), iaDeja: r.iaDeja, hito: r.hito || undefined, ...(reparado.length ? { reparado } : {}) };
+    aceptados.push(a); veredictos.push({ aceptado: true, id: a.id, motivos: [], reparado, texto: a.texto }); ctx.iaIds.add(a.id); for (const x of r.iaDeja) ctx.iaHechos.add(x); if (r.hito) ctx.oportunidades[r.hito] = (ctx.oportunidades[r.hito] || 0) + 1;
+  }
+  for (const b of [].concat(bloques || []).slice(NOCHE_MAX)) { const motivos = [`más de ${NOCHE_MAX} bloques en una noche`]; rechazados.push({ bloque: b, motivos, reparado: [] }); veredictos.push({ aceptado: false, id: null, motivos, reparado: [], texto: String(b?.texto || '') }); }
+  return { aceptados, rechazados, veredictos, completo: false };   // (completo: the full model, with Z3, is not run here: tools/noche.js runs it in Node; nocheModelo is the hook)
+}
+// the second round: what was rejected goes back to the AI with why, once, for corrected versions (the same schema)
+function nocheReparacionPedido(p, bloques, rechazados){
+  const lista = rechazados.map((x, i) => `${i + 1}. (${x.bloque?.tipo})\n${String(x.bloque?.texto || '').trim()}\nMOTIVOS: ${x.motivos.join(' · ')}`).join('\n\n');
+  return { ...p, mensajes: [...p.mensajes, { role: 'assistant', content: JSON.stringify({ bloques }) },
+    { role: 'user', content: `El juego revisó tus bloques y descartó estos, por estos motivos:\n\n${lista}\n\nDevuelve versiones corregidas SOLO de estos bloques (el mismo esquema; como mucho ${rechazados.length}), cumpliendo los formatos y las reglas. Si alguno no tiene arreglo sin cambiar lo que quiere decir, déjalo fuera.` }] };
 }
 // the hook for the full model in the browser (later): the data and the accepted blocks, as tools/modelo-nucleo.js reads
 // them (textos by path); running it needs z3-solver's bundle and trazas/planilla.json, which the game does not carry yet
@@ -571,13 +664,20 @@ for (const b of game.noche?.bloques || []) try { nocheRegistrar(b); } catch (e) 
 // ---------------------------------------------------------------- the pass: when she goes to sleep, or «Probar ahora»
 let nocheEnCurso = null;
 async function nochePasar(){
-  const nivel = nocheNivel(), p = nochePedido(nivel), dia = today() + 1;
-  let r, v, error = null;
-  try { r = await nocheLlamar(p, NOCHE_AJ.clave); v = nocheValidar(r.bloques, nivel); nocheAceptar(v.aceptados); }
-  catch (e) { error = String(e.message || e); }
-  const N = noche(); N.log.push({ dia, nivel, modelo: r?.modelo || p.modelo, error, aceptados: (v?.aceptados || []).map(b => b.id), rechazados: (v?.rechazados || []).map(x => ({ tipo: x.bloque?.tipo, texto: String(x.bloque?.texto || '').slice(0, 2000), porque: x.bloque?.porque || '', motivos: x.motivos })) });
+  const nivel = nocheNivel(), p = nochePedido(nivel), dia = today() + 1, rondas = [];
+  let modelo = p.modelo, error = null;
+  try {
+    const r = await nocheLlamar(p, NOCHE_AJ.clave), v = nocheValidar(r.bloques, nivel); modelo = r.modelo || modelo; rondas.push(v);
+    if (v.rechazados.length) {   // (once: what was rejected, back to the AI with why)
+      try { const r2 = await nocheLlamar(nocheReparacionPedido(p, r.bloques, v.rechazados), NOCHE_AJ.clave); rondas.push(nocheValidar(r2.bloques.slice(0, v.rechazados.length), nivel, v.aceptados)); }
+      catch (e) { rondas.push({ aceptados: [], rechazados: [], error: String(e.message || e) }); }
+    }
+    nocheAceptar(rondas.flatMap(x => x.aceptados));
+  } catch (e) { error = String(e.message || e); }
+  const N = noche(), A = rondas.flatMap((x, i) => x.aceptados.map(b => ({ id: b.id, ronda: i + 1, reparado: b.reparado || [] })));
+  N.log.push({ dia, nivel, modelo, error, aceptados: A, rechazados: rondas.flatMap((x, i) => x.rechazados.map(y => ({ ronda: i + 1, tipo: y.bloque?.tipo, texto: String(y.bloque?.texto || '').slice(0, 2000), porque: y.bloque?.porque || '', motivos: y.motivos, reparado: y.reparado || [] }))), ...(rondas[1]?.error ? { error2: rondas[1].error } : {}) });
   if (N.log.length > 30) N.log.splice(0, N.log.length - 30);
-  save(); return { error, n: v?.aceptados.length || 0, v };
+  save(); return { error, n: A.length, rondas };
 }
 function nocheDormir(){
   if (nocheNivel() === 'apagado' || !NOCHE_AJ.clave || nocheEnCurso) return;
@@ -594,8 +694,10 @@ const nocheAjustesLeer = () => { NOCHE_AJ.nivel = $('ajnivel').value; NOCHE_AJ.c
 for (const id of ['ajnivel', 'ajclave', 'ajmodelo']) $(id)?.addEventListener('change', nocheAjustesLeer);
 function nocheInforme(){
   const N = game.noche; if (!N || (!N.bloques.length && !N.log.length)) return 'La noche todavía no agregó nada en esta partida.';
-  const acept = N.bloques.map(b => `✓ [${b.tipo}] ${b.id}${b.hito ? ' (hito: ' + b.hito + ')' : ''}\n   por qué: ${b.porque || '—'}\n   ${b.texto.split('\n').filter(l => l.trim()).slice(0, 8).join('\n   ')}`).join('\n\n');
-  const noches = N.log.slice(-8).reverse().map(l => `— Noche del día ${l.dia} (${l.nivel}, ${l.modelo})${l.error ? ': no pudo (' + l.error + ')' : `: ${l.aceptados.length} aceptadas, ${l.rechazados.length} descartadas`}` + l.rechazados.map(x => `\n   ✗ [${x.tipo}] ${(String(x.texto).match(/===\s*(.+?)\s*===/) || [])[1] || ''}: ${x.motivos.join('; ')}`).join('')).join('\n');
+  const acept = N.bloques.map(b => `✓ [${b.tipo}] ${b.id}${b.hito ? ' (hito: ' + b.hito + ')' : ''}\n   por qué: ${b.porque || '—'}${b.reparado?.length ? '\n   reparado: ' + b.reparado.join('; ') : ''}\n   ${b.texto.split('\n').filter(l => l.trim()).slice(0, 8).join('\n   ')}`).join('\n\n');
+  const noches = N.log.slice(-8).reverse().map(l => `— Noche del día ${l.dia} (${l.nivel}, ${l.modelo})${l.error ? ': no pudo (' + l.error + ')' : `: ${l.aceptados.length} aceptadas, ${l.rechazados.length} descartadas`}${l.error2 ? ' (la segunda ronda no pudo: ' + l.error2 + ')' : ''}`
+    + l.aceptados.map(x => typeof x === 'string' ? '' : `\n   ✓ ${x.id}${x.ronda > 1 ? ' (corregido por la IA)' : ''}${x.reparado?.length ? ' — reparado: ' + x.reparado.join('; ') : ''}`).join('')
+    + l.rechazados.map(x => `\n   ✗ ${x.ronda ? 'ronda ' + x.ronda + ' ' : ''}[${x.tipo}] ${(String(x.texto).match(/===\s*(.+?)\s*===/) || [])[1] || ''}: ${x.motivos.join('; ')}${x.reparado?.length ? ' (reparado: ' + x.reparado.join('; ') + ')' : ''}`).join('')).join('\n');
   return '— Lo que agregó la noche —\n' + (acept || '(nada aceptado todavía)') + '\n\n— Las noches —\n' + (noches || '(ninguna)');
 }
 $('ajnocheve')?.addEventListener('click', () => { const o = $('ajout'); o.hidden = false; o.textContent = nocheInforme(); });

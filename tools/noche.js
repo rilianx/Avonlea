@@ -8,13 +8,17 @@
 //                          [--respuesta archivo.json] [--salida trazas/noche] [--sin-modelo]
 //   --respuesta: lo que contestó la IA ({ bloques: [...] }, o la respuesta entera de la API); cada bloque puede decir
 //                «esperado»: aceptado | rechazado (los ejemplos de tools/noche/ejemplos/): si no se cumple, sale con 1.
+//                El archivo puede traer «escenario» y «nivel» (los suyos, si no se dan aquí) y «reparacion»: lo que la IA
+//                contestaría en la segunda ronda (sin eso, de un archivo no hay segunda ronda).
+//   Dos rondas, como en el juego: lo descartado vuelve una vez a la IA, con sus motivos, para que lo corrija.
 //   Sin --respuesta: llama a OpenAI con process.env.OPENAI_API_KEY; si no se puede (sin clave, sin red), lo dice y sale con 2.
 const fs = require('fs'), os = require('os'), path = require('path'), { spawn, spawnSync } = require('child_process');
 const RAIZ = path.join(__dirname, '..');
 const { BASE, FILA_ESCENA } = require('./momentos');
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 && process.argv[i + 1] && !process.argv[i + 1].startsWith('--') ? process.argv[i + 1] : d; };
-const NIVEL = arg('nivel', 'efectos'), MODELO = arg('modelo', ''), RESPUESTA = arg('respuesta', null), SALIDA = path.resolve(RAIZ, arg('salida', 'trazas/noche'));
-const ESCENARIO = arg('escenario', 'spencer_rachel'), SIN_MODELO = process.argv.includes('--sin-modelo');
+const RESPUESTA = arg('respuesta', null), RESP = RESPUESTA ? JSON.parse(fs.readFileSync(path.resolve(RESPUESTA), 'utf8')) : null;   // (an example may say its scenario and level)
+const NIVEL = arg('nivel', RESP?.nivel || 'efectos'), MODELO = arg('modelo', ''), SALIDA = path.resolve(RAIZ, arg('salida', 'trazas/noche'));
+const ESCENARIO = arg('escenario', RESP?.escenario || 'spencer_rachel'), SIN_MODELO = process.argv.includes('--sin-modelo');
 
 // ---------------------------------------------------------------- the scenarios: a game at a certain point (in the game: dev)
 const D = (d, t) => ({ d, s: 1, t, h: 15 });
@@ -142,42 +146,56 @@ async function openai(cuerpos){
   const cuerpos = await ev(`(p => nocheCuerpos(p))`, pedido);
   fs.writeFileSync(path.join(SALIDA, 'pedido.json'), JSON.stringify({ escenario: ESCENARIO, nivel: NIVEL, modelo: pedido.modelo, cuerpo: cuerpos[0] }, null, 1));
   fs.writeFileSync(path.join(SALIDA, 'pedido.md'), `# El pedido de la noche (${ESCENARIO}, ${NIVEL}, ${pedido.modelo})\n\n## Sistema\n\n\`\`\`\n${pedido.mensajes[0].content}\n\`\`\`\n\n## La partida\n\n\`\`\`\n${pedido.mensajes[1].content}\n\`\`\`\n`);
-  // the answer: from a file, or from OpenAI
+  // the answer: from a file, or from OpenAI (the raw answers are kept: respuesta.json, respuesta2.json)
+  const leer = async j => j.choices ? (await ev(`(d => nocheLeerRespuesta(d))`, j)).bloques : (j.bloques || []);
+  const pedirIA = async (p, n) => { const data = await openai(await ev(`(p => nocheCuerpos(p))`, p)); fs.writeFileSync(path.join(SALIDA, `respuesta${n > 1 ? n : ''}.json`), JSON.stringify(data, null, 1)); return { bloques: await leer(data), modelo: data.model }; };
   let bloques, fuente;
   try {
-    if (RESPUESTA) { const j = JSON.parse(fs.readFileSync(path.resolve(RESPUESTA), 'utf8')); bloques = j.choices ? (await ev(`(d => nocheLeerRespuesta(d))`, j)).bloques : j.bloques; fuente = 'archivo ' + path.relative(RAIZ, path.resolve(RESPUESTA)); }
-    else { const data = await openai(cuerpos); bloques = (await ev(`(d => nocheLeerRespuesta(d))`, data)).bloques; fuente = 'OpenAI (' + (data.model || pedido.modelo) + ')'; fs.writeFileSync(path.join(SALIDA, 'respuesta.json'), JSON.stringify(data, null, 1)); }
+    if (RESP) { bloques = await leer(RESP); fuente = 'archivo ' + path.relative(RAIZ, path.resolve(RESPUESTA)); }
+    else { const r = await pedirIA(pedido, 1); bloques = r.bloques; fuente = 'OpenAI (' + (r.modelo || pedido.modelo) + ')'; }
   } catch (e) {
     const msg = 'No hay respuesta de la IA: ' + (e.message || e);
     console.error(msg); fs.writeFileSync(path.join(SALIDA, 'noche.md'), `# La IA de la noche\n\nEscenario: ${E?.titulo || ESCENARIO} · nivel ${NIVEL} · modelo ${pedido.modelo}\n\n**${msg}**\n\nEl pedido quedó en \`pedido.md\`.\n`);
     fs.writeFileSync(path.join(SALIDA, 'noche.json'), JSON.stringify({ escenario: ESCENARIO, nivel: NIVEL, modelo: pedido.modelo, error: msg }, null, 1));
     await b.close(); process.exit(2);
   }
-  // 1. in the game: the same check as at night
-  const v = await ev(`(([B, n]) => nocheValidar(B, n))`, [bloques, NIVEL]);
+  // 1. in the game: the same check as at night (with its repairs), and the second round for what was rejected
+  const rondas = [{ bloques, v: await ev(`(([B, n]) => nocheValidar(B, n))`, [bloques, NIVEL]) }];
+  const v1 = rondas[0].v; let nota2 = null;
+  if (v1.rechazados.length) {
+    const p2 = await ev(`(([p, B, R]) => nocheReparacionPedido(p, B, R))`, [pedido, bloques, v1.rechazados]);
+    try {
+      const b2 = RESP ? (RESP.reparacion ? await leer(RESP.reparacion) : null) : (await pedirIA(p2, 2)).bloques;
+      if (!b2) nota2 = 'sin segunda ronda: la respuesta es de un archivo que no trae «reparacion»';
+      else rondas.push({ bloques: b2.slice(0, v1.rechazados.length), v: await ev(`(([B, n, A]) => nocheValidar(B, n, A))`, [b2.slice(0, v1.rechazados.length), NIVEL, v1.aceptados]) });
+    } catch (e) { nota2 = 'la segunda ronda no pudo: ' + (e.message || e); }
+  }
+  const aceptados = rondas.flatMap(r => r.v.aceptados);
   // 2. with the tools: the graph and the model, with the accepted blocks in the data
-  const C = SIN_MODELO || !v.aceptados.length ? null : await completo(v.aceptados, ev);
+  const C = SIN_MODELO || !aceptados.length ? null : await completo(aceptados, ev);
   // (what the tools rejected goes out: the final summary is of what stays)
-  if (C && !C.error && Object.keys(C.porBloque).length) { const quedan = v.aceptados.filter(a => !C.porBloque[a.id]), F = quedan.length ? await completo(quedan, ev) : null; C.final = F ? { grafo: F.grafo?.con, modelo: F.modelo?.con } : { grafo: C.grafo.base, modelo: C.modelo.base }; }
+  if (C && !C.error && Object.keys(C.porBloque).length) { const quedan = aceptados.filter(a => !C.porBloque[a.id]), F = quedan.length ? await completo(quedan, ev) : null; C.final = F ? { grafo: F.grafo?.con, modelo: F.modelo?.con } : { grafo: C.grafo.base, modelo: C.modelo.base }; }
   await b.close();
-  const filas = bloques.slice(0, 99).map((x, i) => {
-    const a = v.aceptados.find(y => y.texto === String(x.texto)), r = v.rechazados.find(y => y.bloque === x || y.bloque?.texto === x.texto);
-    const id = a?.id || (String(x.texto).match(/===\s*(.+?)\s*===/) || [])[1] || '?', nodo = a && C?.porBloque?.[a.id] || [];
-    const res = !a ? 'rechazado' : nodo.length ? 'rechazado' : 'aceptado';
-    return { n: i + 1, tipo: x.tipo, id, navegador: a ? 'aceptado' : 'rechazado', node: !a ? '—' : C ? (C.error ? '¿?' : nodo.length ? 'rechazado' : 'aceptado') : 'sin correr', resultado: res, motivos: [...(r?.motivos || []), ...nodo], porque: x.porque || '', esperado: x.esperado || null };
-  });
+  const filas = rondas.flatMap((r, k) => r.bloques.slice(0, 99).map((x, i) => {
+    const w = r.v.veredictos[i] || { aceptado: false, motivos: ['no se revisó'], reparado: [] };
+    const id = w.id || (String(x.texto).match(/===\s*(.+?)\s*===/) || [])[1] || '?', nodo = w.aceptado && C?.porBloque?.[w.id] || [];
+    const res = !w.aceptado || nodo.length ? 'rechazado' : 'aceptado';
+    return { ronda: k + 1, n: i + 1, tipo: x.tipo, id, navegador: w.aceptado ? 'aceptado' : 'rechazado', node: !w.aceptado ? '—' : C ? (C.error ? '¿?' : nodo.length ? 'rechazado' : 'aceptado') : 'sin correr', resultado: res, reparado: w.reparado || [], motivos: [...w.motivos, ...nodo], porque: x.porque || '', esperado: x.esperado || null, texto: String(x.texto || ''), textoFinal: w.texto };
+  }));
   const mal = filas.filter(f => f.esperado && f.esperado !== f.resultado);
   const L = [`# La IA de la noche: lo que propuso y lo que quedó`, '', `Escenario: **${E?.titulo || ESCENARIO}** · nivel **${NIVEL}** · modelo ${pedido.modelo} · respuesta: ${fuente}`, '',
-    '| # | Tipo | Bloque | Navegador | Grafo y modelo (Node) | Queda | Motivos | Esperado |', '|---|---|---|---|---|---|---|---|',
-    ...filas.map(f => `| ${f.n} | ${f.tipo} | \`${md(f.id)}\` | ${f.navegador} | ${f.node} | **${f.resultado}** | ${md(f.motivos.map(m => corto(m, 220)).join(' · ') || '—')} | ${f.esperado ? (f.esperado === f.resultado ? '✔ ' : '✘ ') + f.esperado : ''} |`), ''];
+    '| Ronda | # | Tipo | Bloque | Navegador | Grafo y modelo (Node) | Queda | Reparado | Motivos | Esperado |', '|---|---|---|---|---|---|---|---|---|---|',
+    ...filas.map(f => `| ${f.ronda} | ${f.n} | ${f.tipo} | \`${md(f.id)}\` | ${f.navegador} | ${f.node} | **${f.resultado}** | ${md(f.reparado.join(' · ') || '—')} | ${md(f.motivos.map(m => corto(m, 220)).join(' · ') || '—')} | ${f.esperado ? (f.esperado === f.resultado ? '✔ ' : '✘ ') + f.esperado : ''} |`), '',
+    ...(nota2 ? [`_(${nota2})_`, ''] : [])];
   if (C) L.push('## Con todas las revisiones', '', `- El grafo, sin los bloques: ${C.grafo?.base || '—'}`, `- El grafo, con los aceptados: ${C.grafo?.con || '—'}`, `- El modelo (Z3), sin los bloques: ${C.modelo?.base || '—'}`, `- El modelo (Z3), con los aceptados: ${C.modelo?.con || '—'}`, ...(C.final ? [`- Con lo que queda (sin lo que descartaron el grafo o el modelo): ${C.final.grafo || '—'} · ${C.final.modelo || '—'}`] : []), ...(C.error ? [`- ⚠ ${C.error}`] : []), ...(C.otros?.length ? ['', 'Hallazgos nuevos que no son de un bloque en particular:', ...C.otros.map(o => '- ' + o)] : []), '');
   else L.push(SIN_MODELO ? '_(--sin-modelo: no se corrieron el grafo ni el modelo)_' : '_(ningún bloque pasó la revisión del juego: no hay nada que agregar al modelo)_', '');
-  L.push('## Los hitos de la partida', '', '```', hitos, '```', '', '## Por qué (lo que dijo la IA)', '', ...filas.map(f => `- ${f.n}. \`${md(f.id)}\`: ${md(f.porque)}`), '');
+  L.push('## Lo que escribió la IA', '', ...filas.flatMap(f => [`### Ronda ${f.ronda} · ${f.n}. ${f.tipo} \`${md(f.id)}\` → ${f.resultado}`, '', `Por qué: ${f.porque || '—'}`, '', '```', f.texto.trim(), '```', ...(f.reparado.length ? ['', 'Reparado: ' + f.reparado.join(' · '), '', '```', String(f.textoFinal || '').trim(), '```'] : []), '']));
+  L.push('## Los hitos de la partida', '', '```', hitos, '```', '');
   if (errs.length) L.push('## Errores del juego', '', ...errs.map(e => '- ' + e), '');
   if (mal.length) L.push(`**✘ ${mal.length} bloque(s) no se juzgaron como se esperaba.**`, '');
   const informe = L.join('\n');
   fs.writeFileSync(path.join(SALIDA, 'noche.md'), informe);
-  fs.writeFileSync(path.join(SALIDA, 'noche.json'), JSON.stringify({ escenario: ESCENARIO, titulo: E?.titulo, nivel: NIVEL, modelo: pedido.modelo, fuente, bloques: filas, aceptados: v.aceptados.filter(a => !C?.porBloque?.[a.id]), grafo: C?.grafo, modeloZ3: C?.modelo, final: C?.final, otros: C?.otros, errores: errs }, null, 1));
+  fs.writeFileSync(path.join(SALIDA, 'noche.json'), JSON.stringify({ escenario: ESCENARIO, titulo: E?.titulo, nivel: NIVEL, modelo: pedido.modelo, fuente, segundaRonda: nota2 || (rondas[1] ? 'sí' : 'no hizo falta'), bloques: filas, aceptados: aceptados.filter(a => !C?.porBloque?.[a.id]), grafo: C?.grafo, modeloZ3: C?.modelo, final: C?.final, otros: C?.otros, errores: errs }, null, 1));
   console.log(informe);
   console.log(`→ ${path.relative(RAIZ, SALIDA)}/noche.md, noche.json, pedido.md`);
   process.exit(mal.length || errs.length ? 1 : 0);

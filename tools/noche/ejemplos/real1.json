@@ -1,0 +1,25 @@
+{
+ "_nota": "Lo que contestó gpt-5.4-mini-2026-03-17 en GitHub (primera corrida: spencer_rachel, efectos), reconstruido a partir de sus motivos de rechazo: la carta sin «carta:», «Ana:» con mayúscula, «presente:ana», Ana fuera de «en:», «hito:» sin «al_empezar: hecho historia_<id>». Todo eso es forma, no sentido: ahora se repara y se acepta. Uso: node tools/noche.js --respuesta tools/noche/ejemplos/real1.json",
+ "escenario": "spencer_rachel",
+ "nivel": "efectos",
+ "bloques": [
+  {
+   "tipo": "respuesta",
+   "esperado": "aceptado",
+   "porque": "Ana le escribió tres cartas a la Sra. Spencer y ninguna tiene respuesta todavía.",
+   "texto": "=== ia_spencer_1 ===\ncanal: respuesta\nde: spencer\nsi: respuesta:spencer, hecho:se_queda\n---\nQuerida Ana:\n\nHe recibido tus cartas y las he leído con mucho gusto.\n\nMe alegra saber que en Tejas Verdes {estacion}.\n\nSe nota que Marilla y Matthew te cuidan, y que tú pones todo tu corazón.\n\nSigue escribiéndome cuando quieras.\n\nCon afecto,\n\nla Sra. Spencer"
+  },
+  {
+   "tipo": "escena",
+   "esperado": "aceptado",
+   "porque": "Matthew todavía no queda del todo de su lado (hito «matthew_aliado»): un momento callado en el granero, de otra forma que en el libro.",
+   "texto": "=== ia_matthew_aliado_1 ===\ncanal: gg\nprioridad: 3\nen: matthew=gg\nsujeta: matthew\nhito: matthew_aliado\nsi: hecho:se_queda, presente:ana, afecto:matthew:ana>=4\nal_terminar: suma afecto:matthew:ana 1\n---\nmatthew: (Matthew deja la taza en la mesa y se aclara la garganta.) Bueno, pues… Marilla dice que hoy regaste toda la huerta sin que nadie te lo pidiera.\nAna: ¡Es que los canteros parecían tener sed, Matthew! Casi podía oírlos suspirar.\nmatthew: Ya lo creo, ya lo creo. (Se queda callado un rato.) Yo… me alegro mucho de que te hayas quedado, Ana.\nAna: (Ana se pone colorada hasta las orejas.) Y yo, Matthew. Más que de ninguna otra cosa en el mundo."
+  },
+  {
+   "tipo": "escena",
+   "esperado": "aceptado",
+   "porque": "El sombrero de flores (hito «sombrero_iglesia») todavía no pasó: que la imaginación de Ana choque con las costumbres, en la iglesia.",
+   "texto": "=== ia_sombrero_iglesia_1 ===\ncanal: ig\nprioridad: 3\nen: marilla=ig\nsujeta: marilla\nhito: sombrero_iglesia\nsi: hecho:se_queda, presente:ana\nnarra: Domingo en la iglesia de Avonlea. Ana llegó sola, por el camino, y le puso a su sombrero una corona de ranúnculos y rosas silvestres.\n---\nmarilla: (Marilla ve el sombrero desde su banco y se pone pálida.) Ana Shirley… ¿qué tienes en la cabeza?\nAna: ¡Flores, Marilla! Las otras niñas llevan flores de mentira en el sombrero. Pensé que unas de verdad serían todavía más bonitas.\nmarilla: (Marilla mira a su alrededor: todo el mundo las está mirando.) Siéntate, y quédate quieta. Hablaremos en casa."
+  }
+ ]
+}

@@ -1,5 +1,5 @@
 {
- "_nota": "Una respuesta con errores a propósito, para el escenario «spencer_rachel», nivel «efectos»: todos sus bloques se tienen que descartar. Uso: node tools/noche.js --respuesta tools/noche/ejemplos/malo.json",
+ "_nota": "Una respuesta con errores a propósito, para el escenario «spencer_rachel», nivel «efectos»: todos sus bloques se tienen que descartar. Uso: node tools/noche.js --respuesta tools/noche/ejemplos/malo.json «reparacion» es lo que la IA contestaría en la segunda ronda: una corrige bien (se acepta), otra no (se vuelve a descartar).",
  "bloques": [
   {
    "tipo": "conversacion",
@@ -25,5 +25,21 @@
    "porque": "(error a propósito: la escena elige la respuesta de Ana en el hito «rival»)",
    "texto": "=== ia_gilbert_otra_vez ===\ncanal: es\nprioridad: 4\nen: ana=es, gilbert=es\nhito: rival\nsi: hecho:llego_gilbert, hecho:se_queda\nal_empezar: hecho historia_rival\nal_terminar: hecho zanahorias_ignora\n---\ngilbert: Oye, Ana, ¿me prestas tu goma de borrar?\nana: (Ana hace como que no lo oye, y mira por la ventana.)"
   }
- ]
+ ],
+ "reparacion": {
+  "bloques": [
+   {
+    "tipo": "conversacion",
+    "esperado": "aceptado",
+    "porque": "(segunda ronda: sin la condición que no existe)",
+    "texto": "=== ia_conv_marilla_luna ===\ncon: marilla\ntema: Preguntarle por la luna llena\nsi: hecho:se_queda\n---\nana: Marilla, ¿usted cree que la luna llena escucha los deseos?\nmarilla: Creo que la luna tiene cosas más importantes que hacer, Ana."
+   },
+   {
+    "tipo": "conversacion",
+    "esperado": "rechazado",
+    "porque": "(segunda ronda: sigue sin tener en cuenta la prohibición)",
+    "texto": "=== ia_conv_diana_bosque ===\ncon: diana\ntema: Invitarla a jugar al Bosque Encantado\nsi: conoce:diana, hecho:se_queda\n---\nana: Diana, ¿jugamos al Bosque Encantado?\ndiana: ¡Sí! ¡Vamos ahora mismo!"
+   }
+  ]
+ }
 }

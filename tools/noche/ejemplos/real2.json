@@ -1,0 +1,19 @@
+{
+ "_nota": "Lo que contestó gpt-5.4-mini-2026-03-17 en GitHub (segunda corrida: rival_ignora, libre), reconstruido a partir de sus motivos de rechazo: se protegía con su propio id («!hecho:ia_…»), «sujeta: ana», «hito:» sin «al_empezar: hecho historia_<id>». Es forma, no sentido: ahora se repara y se acepta. (En otro archivo que real1.json: es otro escenario y otro nivel.) Uso: node tools/noche.js --respuesta tools/noche/ejemplos/real2.json",
+ "escenario": "rival_ignora",
+ "nivel": "libre",
+ "bloques": [
+  {
+   "tipo": "escena",
+   "esperado": "aceptado",
+   "porque": "Matthew todavía no es del todo su aliado: una tarde en el granero en que él la defiende sin muchas palabras.",
+   "texto": "=== ia_matthew_aliado_nuevo ===\ncanal: gg\nprioridad: 3\nen: ana=gg, matthew=gg\nsujeta: ana, matthew\nhito: matthew_aliado\nsi: hecho:se_queda, !hecho:ia_matthew_aliado_nuevo, afecto:matthew:ana>=4\nal_terminar: suma afecto:matthew:ana 1\n---\nana: Matthew, hoy en la escuela Gilbert Blythe me miró como si yo fuera una zanahoria con trenzas. Y yo hice como que no existía.\nmatthew: (Matthew piensa un largo rato, dándole vueltas al sombrero entre las manos.) Bueno, pues… hiciste bien. Y si alguien te molesta de verdad… me lo dices. Ya lo creo que sí.\nana: (A Ana le brillan los ojos.) ¿Sabe una cosa, Matthew? Usted es la persona más valiente que conozco, aunque nunca lo diga."
+  },
+  {
+   "tipo": "escena",
+   "esperado": "aceptado",
+   "porque": "Ana y Diana ya juraron: un malentendido que pone a prueba la confianza con Marilla (hito «confianza_marilla»), de otra forma que el broche; elige quien juega.",
+   "texto": "=== ia_confianza_marilla_nuevo ===\ncanal: gg\nprioridad: 4\ngrande\nen: ana=gg, marilla=gg\nsujeta: ana, marilla\nhito: confianza_marilla\nsi: hecho:se_queda, !hecho:ia_confianza_marilla_nuevo, !hecho:broche\n---\nmarilla: (Marilla revuelve el cajón de la despensa, cada vez más seria.) Ana, la llave de la despensa no está. Esta mañana estaba aquí. ¿La tomaste tú?\n-> Decir que sí, aunque no fue ella, para que Marilla deje de enojarse\n   ana: (Ana traga saliva.) Sí… fui yo. La perdí. Lo siento mucho, Marilla.\n   marilla: (Marilla la mira largo rato.) Entonces vas a quedarte en tu pieza hasta que aparezca.\n   ! hecho broche_confeso\n-> Decir la verdad: no la tomó\n   ana: No la tomé, Marilla. Se lo digo aunque no me crea.\n   marilla: (Marilla aprieta los labios.) Ya veremos.\n   ! hecho broche_verdad\nmarilla: (Más tarde, Marilla encuentra la llave en el bolsillo de su propio delantal. Se queda quieta un momento.) Ana… estaba en mi delantal. Perdóname."
+  }
+ ]
+}
