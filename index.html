@@ -838,16 +838,23 @@ sujeta: marilla
 en: ana=gg, marilla=gg
 si: cuaderno:amigas, dias_desde:conocidas_diana:5, !hecho:broche
 al_terminar: hecho broche
-al_terminar: log Marilla perdió su broche de amatista y culpó a Ana; Ana «confesó» para poder ir al picnic, y el broche apareció enganchado en el chal de Marilla.
 ---
 marilla: Ana, ¿has visto mi broche de amatista? Lo dejé en el alfiletero de mi cuarto y no está.
 ana: Lo vi ayer… me lo probé, solo un minutito, y lo dejé otra vez en el tocador.
 marilla: Pues no está. Ana, te quedas en tu cuarto hasta que me digas la verdad.
-ana: (Ana se queda en su cuarto, pensando en el picnic. Al final, inventa una confesión.) Me lo llevé para ser Lady Cordelia Fitzgerald… y se me cayó al Lago de las Aguas Brillantes. Ya confesé: ¿ahora puedo ir al picnic?
-marilla: ¿Picnic? No irás a ningún picnic, Ana Shirley.
-marilla: (Marilla saca su chal negro para remendarlo… y algo brilla en el encaje.) ¡El broche! Estaba enganchado en mi chal… Ana, ¿por qué dijiste que lo habías perdido?
-ana: Usted dijo que no saldría hasta confesar. Así que inventé una confesión… y bien interesante, además.
-marilla: (Marilla se ríe, a pesar de todo.) Perdóname, Ana. No debí dudar de ti. Ve a prepararte para el picnic.
+->* Inventar una confesión, para poder ir al picnic
+   ana: (Ana se queda en su cuarto, pensando en el picnic. Al final, inventa una confesión.) Me lo llevé para ser Lady Cordelia Fitzgerald… y se me cayó al Lago de las Aguas Brillantes. Ya confesé: ¿ahora puedo ir al picnic?
+   marilla: ¿Picnic? No irás a ningún picnic, Ana Shirley.
+   ! hecho broche_confeso
+   ! log Marilla perdió su broche de amatista y culpó a Ana; Ana «confesó» para poder ir al picnic.
+-> Decir la verdad, aunque se quede sin picnic
+   ana: (Ana se queda en su cuarto, con el picnic doliéndole en el pecho, y no inventa nada.) No lo tomé, Marilla. Se lo digo aunque me quede sin helado para siempre.
+   marilla: Entonces tampoco hay picnic. Cuando quieras decir otra cosa, me avisas.
+   ! hecho broche_verdad
+   ! log Marilla perdió su broche de amatista y culpó a Ana; Ana siguió diciendo la verdad, aunque se quedara sin picnic.
+marilla: (Marilla saca su chal negro para remendarlo… y algo brilla en el encaje.) ¡El broche! Estaba enganchado en mi chal…
+marilla: (Marilla sube la escalera, despacio.) Ana… lo encontré. Perdóname: no debí dudar de ti. Ve a prepararte para el picnic.
+ana: (Ana baja la escalera de un salto, con los ojos brillando.) ¡Helado! ¡Por fin voy a probar el helado!
 
 # --- «¡Zanahorias!» (cap. 15): el primer día de Ana en la escuela con Gilbert Blythe. Desde ahí, Ana no le habla
 # (la ofensa), y hacer las paces se vuelve una meta (cuaderno: paces requiere hecho:zanahorias).
@@ -861,14 +868,29 @@ en: ana=es, gilbert=es
 si: !hecho:zanahorias
 al_terminar: hecho zanahorias
 al_terminar: hecho conoce_gilbert
-al_terminar: ofensa ana gilbert zanahorias -2
-al_terminar: log En la escuela, Gilbert Blythe le dijo «¡Zanahorias!» a Ana, y Ana le partió la pizarra en la cabeza.
 ---
 gilbert: (Gilbert Blythe alarga la mano, toma la punta de una trenza de Ana y susurra, lo bastante fuerte para que lo oiga toda la clase.) ¡Zanahorias! ¡Zanahorias!
-ana: (Ana se pone de pie de un salto, con los ojos echando chispas.) ¡Odioso, malvado! ¿Cómo te atreves?
-ana: (¡Crac! Ana le parte la pizarra en la cabeza a Gilbert.)
-gilbert: ¡Ay! Perdona, Ana… solo era una broma. De verdad, perdóname.
-ana: ¡Nunca te lo perdonaré! ¡Nunca jamás!
+->* Partirle la pizarra en la cabeza
+   ana: (Ana se pone de pie de un salto, con los ojos echando chispas.) ¡Odioso, malvado! ¿Cómo te atreves?
+   ana: (¡Crac! Ana le parte la pizarra en la cabeza a Gilbert.)
+   gilbert: ¡Ay! Perdona, Ana… solo era una broma. De verdad, perdóname.
+   ana: ¡Nunca te lo perdonaré! ¡Nunca jamás!
+   ! hecho zanahorias_pizarra
+   ! ofensa ana gilbert zanahorias -2
+   ! log En la escuela, Gilbert Blythe le dijo «¡Zanahorias!» a Ana, y Ana le partió la pizarra en la cabeza.
+-> Hacer como que no lo oyó, con la frente en alto
+   ana: (Ana se pone roja hasta las orejas… pero no se da vuelta. Mira el pizarrón como si Gilbert Blythe no existiera en el mundo.)
+   gilbert: (Gilbert se queda con la trenza en la mano, desconcertado. Nadie lo había ignorado nunca.) Oye… solo era una broma.
+   ana: (Ana sigue mirando el pizarrón. Por dentro, le está partiendo mil pizarras en la cabeza.)
+   ! hecho zanahorias_ignora
+   ! ofensa ana gilbert zanahorias -1
+   ! log En la escuela, Gilbert Blythe le dijo «¡Zanahorias!» a Ana, y Ana hizo como que no existía.
+-> Contestarle, delante de todos
+   ana: (Ana se da vuelta despacio.) Mejor zanahoria que cabeza hueca, Gilbert Blythe. Las zanahorias, por lo menos, sirven para algo.
+   gilbert: (Toda la clase se ríe… de Gilbert. Él se pone colorado.) Bueno… me lo merezco, supongo.
+   ! hecho zanahorias_contesta
+   ! ofensa ana gilbert zanahorias -2
+   ! log En la escuela, Gilbert Blythe le dijo «¡Zanahorias!» a Ana, y Ana le contestó delante de toda la clase.
 
 # --- Diana prohibida (cap. 16, 17 y 18): Ana invita a Diana a tomar el té en Tejas Verdes y le sirve, sin saberlo, vino
 # de grosellas en vez de cordial de frambuesa. Al día siguiente, Marilla le cuenta que la Sra. Barry no quiere que
@@ -2735,8 +2757,9 @@ capitulos: 13–14
 situacion: Un malentendido pone a prueba la confianza entre Marilla y Ana.
 necesita: amiga_del_alma:juran
 pasa si: hecho:broche
-respuesta confiesa_en_falso: hecho:broche
-libro: confiesa_en_falso — se pierde el broche de amatista; Ana «confiesa» para poder ir al picnic; aparece en el chal de Marilla. (La escena todavía no deja elegir: solo la respuesta del libro.)
+respuesta confiesa_en_falso: hecho:broche_confeso
+respuesta dice_la_verdad: hecho:broche_verdad
+libro: confiesa_en_falso — se pierde el broche de amatista; Ana «confiesa» para poder ir al picnic; aparece en el chal de Marilla.
 no puede: que Ana sea de verdad culpable; que no se aclare
 variantes: desaparece la llave de la despensa; Marilla cree que Ana rompió algo de su madre
 otra oportunidad: 1
@@ -2747,8 +2770,10 @@ capitulos: 15
 situacion: Un niño de la escuela la hiere en lo que más le duele, delante de todos.
 necesita: decision:se_queda
 pasa si: hecho:zanahorias
-respuesta pizarra: hecho:zanahorias
-libro: pizarra — Gilbert le dice «¡Zanahorias!»; Ana le rompe la pizarra en la cabeza y no lo perdona. (La escena todavía no deja elegir.)
+respuesta pizarra: hecho:zanahorias_pizarra
+respuesta lo_ignora: hecho:zanahorias_ignora
+respuesta le_contesta: hecho:zanahorias_contesta
+libro: pizarra — Gilbert le dice «¡Zanahorias!»; Ana le rompe la pizarra en la cabeza y no lo perdona.
 no puede: que Gilbert sea malo de verdad
 variantes: Gilbert se ríe de una composición suya delante de todos; le gana en un deletreo y la mira
 otra oportunidad: 1
@@ -9214,6 +9239,7 @@ function shopMenu(step){
     return say('lawson', dicho('lawson_libreta'), [...LIBRETA.map(x => [LIBRETA_ART[x][0].toUpperCase() + LIBRETA_ART[x].slice(1), () => shopLibreta(x)]), back]);
   }
   const opts = [['🧺 Cambiar algo que traigo por un capricho', () => shopMenu('cambiar')], ['📒 Llevar algo para la casa (a la libreta)', () => shopMenu('libreta')], ['📬 ¿Hay correo para mí?', correoRetirar]];
+  { const c = cartas().find(x => x.de === 'ana' && x.estado === 'escrita'); if (c && game.inv.carta > 0) opts.unshift(['✉️ Mandar mi carta para ' + CORREO[c.para].nombre, () => { close(); jugar({ v: 'enviar_carta' }); }]); }   // (the post office is here: a letter she wrote goes from here)
   if (L) opts.push(['Conversar con el Sr. Lawson', () => { close(); folkTalk(L); }]);
   opts.push(['Adiós', close]);
   say('lawson', conoceA('lawson') ? dicho('lawson_saludo') : (conocer('lawson'), sabeK('lawson', 'nina_cuthbert') ? dicho('lawson_presenta') : dicho('lawson_presenta_nueva')), opts);   // (the first time: who he is; what he says: src/datos/dichos/40-gente.txt)

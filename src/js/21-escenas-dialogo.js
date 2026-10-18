@@ -647,6 +647,7 @@ function shopMenu(step){
     return say('lawson', dicho('lawson_libreta'), [...LIBRETA.map(x => [LIBRETA_ART[x][0].toUpperCase() + LIBRETA_ART[x].slice(1), () => shopLibreta(x)]), back]);
   }
   const opts = [['🧺 Cambiar algo que traigo por un capricho', () => shopMenu('cambiar')], ['📒 Llevar algo para la casa (a la libreta)', () => shopMenu('libreta')], ['📬 ¿Hay correo para mí?', correoRetirar]];
+  { const c = cartas().find(x => x.de === 'ana' && x.estado === 'escrita'); if (c && game.inv.carta > 0) opts.unshift(['✉️ Mandar mi carta para ' + CORREO[c.para].nombre, () => { close(); jugar({ v: 'enviar_carta' }); }]); }   // (the post office is here: a letter she wrote goes from here)
   if (L) opts.push(['Conversar con el Sr. Lawson', () => { close(); folkTalk(L); }]);
   opts.push(['Adiós', close]);
   say('lawson', conoceA('lawson') ? dicho('lawson_saludo') : (conocer('lawson'), sabeK('lawson', 'nina_cuthbert') ? dicho('lawson_presenta') : dicho('lawson_presenta_nueva')), opts);   // (the first time: who he is; what he says: src/datos/dichos/40-gente.txt)
