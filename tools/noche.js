@@ -183,7 +183,7 @@ async function openai(cuerpos){
   // 2. with the tools: the graph and the model, with the accepted blocks in the data
   const C = SIN_MODELO || !aceptados.length ? null : await completo(aceptados, ev, partidaZ);
   // (what the tools rejected goes out: the final summary is of what stays)
-  if (C && !C.error && Object.keys(C.porBloque).length) { const quedan = aceptados.filter(a => !C.porBloque[a.id]), F = quedan.length ? await completo(quedan, ev) : null; C.final = F ? { grafo: F.grafo?.con, modelo: F.modelo?.con } : { grafo: C.grafo.base, modelo: C.modelo.base }; }
+  if (C && !C.error && Object.keys(C.porBloque).length) { const quedan = aceptados.filter(a => !C.porBloque[a.id]), F = quedan.length ? await completo(quedan, ev, partidaZ) : null; C.final = F ? { grafo: F.grafo?.con, modelo: F.modelo?.con } : { grafo: C.grafo.base, modelo: C.modelo.base }; C.lagunasCon = F ? F.lagunasCon : null; }   // (what fills the gaps is what stays)
   await b.close();
   const filas = rondas.flatMap((r, k) => r.bloques.slice(0, 99).map((x, i) => {
     const w = r.v.veredictos[i] || { aceptado: false, motivos: ['no se revisó'], reparado: [] };
