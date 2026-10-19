@@ -57,18 +57,21 @@ function talk(who, again = false){
   if (who !== 'diana' && !conoceA(who)) { face(who); const L = presentar(who); return talkPlay(L.map(l => [l.q, l.t]), { ch: 'presenta', hold: [who] }); }   // (they have not met: first, who they are)
   if (who === 'diana' && !conoceDiana()) { const L = cadenaEncuentro('diana'); if (L) return say('diana', L.map(l => (l.q === 'ana' ? 'Ana: ' : '') + l.t).join('\n'), [['…', close]]); }   // (they have not met: the meeting of the book, not a friend's greeting)
   if (who === 'diana' && dlgHechos().prohibida) return say('diana', dicho('diana_prohibida'), [['…', close]]);   // (forbidden, cap. 17)
-  const opts = [...taskOptions(who), ...cadenaOpciones(who)];
+  // first, what to talk about (each topic a scene, had once: src/datos/conversaciones.txt, and the night writes new ones
+  // when they run out); then what there is to do with them
+  const opts = [...convOpciones(who), ...taskOptions(who), ...cadenaOpciones(who)];
   for (const [k, [name]] of Object.entries(GIFTS)) if (game.inv[k] > 0) opts.push(['Regalar ' + name, () => give(who, k)]);
   opts.push(...entregaOpciones(who), ...cartaEncargoOpciones(who));   // (and what Ana brings for the house: the wood, the eggs…)
   if (!isQuieto(who) || who === 'marilla') opts.push(['🙏 Pedirle un favor', () => favorMenu(who)]);
-  opts.push(...convOpciones(who), ...walkOption(who), [cierre(who), close]);
+  opts.push(...walkOption(who), [cierre(who), close]);
   say(who, text, opts);
 }
-// the conversations there are with them today (src/datos/conversaciones.txt): two in the menu, and the rest behind
-// «Hablar de otra cosa…» (none hidden: what is not shown, the player cannot choose)
-const convOpciones = who => {
-  const C = convDisponibles(who), op = d => ['💬 ' + d.tema, () => { close(); conversar(d); }];
-  return [...C.slice(0, 2).map(op), ...(C.length > 2 ? [['💬 Hablar de otra cosa… (' + (C.length - 2) + ')', () => say(who, dicho('hablar_de_que'), [...C.slice(2).map(op), ['← Volver', () => talk(who, true)]])]] : [])];
+// the conversations there are with them today (src/datos/conversaciones.txt): up to four in the menu, and the rest
+// behind «Hablar de otra cosa…» (none hidden: what is not shown, the player cannot choose); volver: back to the menu
+const CONV_MENU = 4;
+const convOpciones = (who, volver = () => talk(who, true)) => {
+  const C = convDisponibles(who), op = d => ['💬 ' + d.tema, () => { close(); conversar(d); }], n = C.length > CONV_MENU ? CONV_MENU - 1 : CONV_MENU;
+  return [...C.slice(0, n).map(op), ...(C.length > n ? [['💬 Hablar de otra cosa… (' + (C.length - n) + ')', () => say(who, dicho('hablar_de_que'), [...C.slice(n).map(op), ['← Volver', volver]])]] : [])];
 };
 // closing the menu is not leaving: «Adiós» only when it is really a goodbye
 const cierre = who => 'Nada por ahora';

@@ -1,6 +1,6 @@
 # Cobertura de la historia: lo que falta
 
-Generado el 2026-10-19 00:41 por `node tools/planilla.js` (también en la hoja «Cobertura» de planilla/avonlea.xlsx).
+Generado el 2026-10-19 12:50 por `node tools/planilla.js` (también en la hoja «Cobertura» de planilla/avonlea.xlsx).
 
 No son errores: son situaciones que el juego deja que pasen y nadie considera, noticias o llegadas sin consecuencias, gente con poco que decir.
 
@@ -8,10 +8,10 @@ No son errores: son situaciones que el juego deja que pasen y nadie considera, n
 |---|---|---|---|
 | Situaciones | 2 | 13 | 11 |
 | Noticias | 2 | 0 | 9 |
-| Llegadas | 0 | 1 | 3 |
 | Frases | 0 | 9 | 0 |
 | Metas | 0 | 7 | 0 |
 | Exploración | 0 | 0 | 12 |
+| Llegadas | 0 | 0 | 3 |
 | Personas | 0 | 0 | 36 |
 | Hechos | 0 | 0 | 4 |
 
@@ -58,13 +58,6 @@ No son errores: son situaciones que el juego deja que pasen y nadie considera, n
 - [baja] **«tia_josephine»: la tía Josephine de los Barry vino de Charlottetown**: nadie reacciona a ella (solo se cuenta); es un chisme del pueblo: puede bastar. _Idea: una escena o una frase con «sabe:quien:tia_josephine» (alguien que se entera y hace o dice algo)._
 - [baja] **«se_va_phillips»: el Sr. Phillips se va de la escuela de Avonlea**: nadie reacciona a ella (solo se cuenta); es un chisme del pueblo: puede bastar. _Idea: una escena o una frase con «sabe:quien:se_va_phillips» (alguien que se entera y hace o dice algo)._
 
-## Llegadas
-
-- [media] **Gilbert Blythe llega**: nadie lo nota (solo queda en el diario). _Idea: una noticia «saben si hecho:llego_gilbert: …» o una escena «si: hecho:llego_gilbert»._
-- [baja] **Prissy Andrews se va**: nadie lo nota. _Idea: una noticia o una escena con «hecho:se_fue_prissy»._
-- [baja] **el buhonero llega (de visita)**: nadie lo nota (solo queda en el diario). _Idea: una noticia «saben si hecho:llego_buhonero: …» o una escena «si: hecho:llego_buhonero»._
-- [baja] **una veraneante del hotel llega (de visita)**: nadie lo nota (solo queda en el diario). _Idea: una noticia «saben si hecho:llego_veraneante: …» o una escena «si: hecho:llego_veraneante»._
-
 ## Frases
 
 - [media] **la Sra. Barry**: no tiene qué decir: Día 2 (sin conocerla), Día 4 (sin conocerla), Día 16 (sin conocerla). _Idea: frases para esos momentos (hoja «Huecos»)._
@@ -101,6 +94,12 @@ No son errores: son situaciones que el juego deja que pasen y nadie considera, n
 - [baja] **4 escena(s) que no pasaron en 4 días**: les falta: diana no está en Avonlea. _Idea: ej.: conoce_diana, te_grosella, crup_aviso, cama_josephine._
 - [baja] **4 escena(s) que no pasaron en 4 días**: les falta: falta hecho:blewett_duda. _Idea: ej.: duda_matthew, duda_suplica, duda_calla, devuelta_blewett._
 - [baja] **4 escena(s) que no pasaron en 4 días**: les falta: cuando Ana usa faro. _Idea: ej.: faro_verano, faro_invierno, faro_manana, faro_queens._
+
+## Llegadas
+
+- [baja] **Prissy Andrews se va**: nadie lo nota. _Idea: una noticia o una escena con «hecho:se_fue_prissy»._
+- [baja] **el buhonero llega (de visita)**: nadie lo nota (solo queda en el diario). _Idea: una noticia «saben si hecho:llego_buhonero: …» o una escena «si: hecho:llego_buhonero»._
+- [baja] **una veraneante del hotel llega (de visita)**: nadie lo nota (solo queda en el diario). _Idea: una noticia «saben si hecho:llego_veraneante: …» o una escena «si: hecho:llego_veraneante»._
 
 ## Personas
 
@@ -139,7 +138,7 @@ No son errores: son situaciones que el juego deja que pasen y nadie considera, n
 - [baja] **Thomas Lynde**: tiene 1 frase(s) suelta(s). _Idea: unas frases más en la hoja «Frases»._
 - [baja] **una veraneante del hotel**: tiene 2 frase(s) suelta(s). _Idea: unas frases más en la hoja «Frases»._
 - [baja] **un pescador**: tiene 1 frase(s) suelta(s). _Idea: unas frases más en la hoja «Frases»._
-- [baja] **Sin ninguna escena**: 40 de la gente del pueblo solo tienen frases sueltas: el buhonero, Josie Pye, Gertie Pye, Ruby Gillis, Jane Andrews, Prissy Andrews, Charlie Sloane, Moody Spurgeon, Tillie Boulter, Felicity King, Felix King, Cecily King, Sara Stanley, el reverendo Allan, el Sr. Lawson, el herrero…. _Idea: una escena pequeña para los que importan en el libro._
+- [baja] **Sin ninguna escena**: 36 de la gente del pueblo solo tienen frases sueltas: el buhonero, Gertie Pye, Prissy Andrews, Charlie Sloane, Moody Spurgeon, Tillie Boulter, Felicity King, Felix King, Cecily King, Sara Stanley, el reverendo Allan, el Sr. Lawson, el herrero, el editor de La Crónica, la Srta. Hetty King, Olivia King…. _Idea: una escena pequeña para los que importan en el libro._
 
 ## Hechos
 

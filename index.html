@@ -1065,7 +1065,7 @@ canal: es
 prioridad: 4
 en: ana=es, stacy=es
 repetir: cada 5
-si: hora:9.2-12, no_hoy:clase
+si: hora:9.2-12, no_hoy:clase, hecho:llego_stacy
 al_terminar: hecho clase
 ---
 stacy: Escriban lo que ven, niños. Pero miren bien: con los ojos, y con algo más.
@@ -1083,7 +1083,7 @@ canal: es
 prioridad: 4
 en: ana=es, stacy=es
 repetir: cada 5
-si: hora:9.2-12, no_hoy:clase
+si: hora:9.2-12, no_hoy:clase, hecho:llego_stacy
 al_terminar: hecho clase
 ---
 stacy: (La Srta. Stacy saca una florcita blanca, de siete pétalos.) ¿Quién sabe cómo se llama esta flor?
@@ -3150,6 +3150,31 @@ salvo: marilla
 palabras: la escuela | Escuela | escuela dominical | el año que viene | cuando seas grande | cuando crezcas | vivir aquí | vives aquí | tu pieza
 exige: hecho:se_queda
 
+# (lo que una frase recuerda tiene que haber pasado: la partida jugada a mano, trazas/jugadora/claude.md)
+=== referencia: el juramento, cuando ya se juraron ===
+palabras: nuestro juramento
+exige: cuaderno:amigas
+
+=== referencia: la huerta regada, cuando Ana ya la regó ===
+palabras: Cuando regué | asoman unos brotes
+exige: hecho:regado
+
+=== referencia: una amistad de días, después de unos días ===
+palabras: mi alma gemela! Te estaba esperando | habla de ti todo el día
+exige: dias_desde:conocidas_diana:2
+
+=== referencia: «al principio», cuando ya pasó un tiempo ===
+palabras: Al principio me daba | al principio me daba
+exige: dias_desde:llegada_tv:7
+
+=== referencia: «hoy es domingo», el domingo ===
+palabras: Hoy es domingo
+exige: domingo
+
+=== referencia: «todavía no la has ido a ver», mientras no la visita ===
+palabras: todavía no la has ido a ver
+exige: !cuaderno:lynde
+
 # ---------------------------------------------------------------- los días a prueba (del 1 al 3: cap. 2 a 8 del libro)
 === espera: Marilla y Matthew, mientras está a prueba, tienen algo que lo tenga en cuenta ===
 quiénes: marilla, matthew
@@ -3193,6 +3218,13 @@ de: pocas
 quiénes: diana
 hay: conversación
 mínimo: 2
+
+=== laguna: Ana quiere conversar con todos los que conoce ===
+# (tocar a alguien es conversar: sus temas primero; cada conversación se tiene una vez, y las que se acaban se renuevan)
+de: pocas
+quiénes: todos
+hay: conversación
+mínimo: 1
 
 === laguna: con los de cerca pasan cosas estos días ===
 de: pocas
@@ -3882,6 +3914,13 @@ si: !hecho:prohibida
 - ¡Hola, Ana! ¿A dónde vas tan apurada?
 - ¡Ana Shirley! Saludos a Marilla.
 - ¡{hola}, niña!
+
+# un niño o una niña de la escuela a Ana, cuando Ana se le acerca a conversar
+=== encuentro:nino_saluda_a_ana ===
+- ¡Hola, Ana!
+- ¡Ana! Ven, ven un ratito.
+- ¡Ana Shirley! ¿Qué haces por aquí?
+- ¡Hola! ¿Jugamos a algo?
 
 # quien no quiere mucho a Ana: un saludo seco
 === encuentro:saluda_seco ===
@@ -5566,7 +5605,7 @@ diana: (Diana suspira, pero no dice nada más.)
 === conv_diana_gilbert_contesta ===
 con: diana
 tema: Hablar de lo que le contestó a Gilbert
-si: afecto:diana:ana>=3, hecho:zanahorias_contesta, !hecho:prohibida
+si: afecto:diana:ana>=3, hecho:zanahorias_contesta, hecho:llego_gilbert, !hecho:prohibida
 ---
 diana: Ana… toda la escuela habla de lo que le dijiste a Gilbert. ¡Nadie le había contestado así nunca! Se puso más rojo que tu pelo.
 ana: Se lo merecía, Diana. Una no puede dejar que le digan zanahoria delante de todos y quedarse callada como un pez.
@@ -5710,6 +5749,138 @@ ana: Sr. Harrison, ¿es verdad que tiene un loro que dice malas palabras?
 harrison: Ginger dice lo que le da la gana. Como yo. Por eso nos llevamos bien.
 ana: ¿Puedo conocerlo?
 harrison: Si no te asustas con facilidad… Y no le hables de la vaca. Ni a mí tampoco.
+
+# ====================================== la gente del pueblo ======================================
+# (tocándolos, como a los de la casa: sus temas primero)
+
+=== conv_gilbert_caramelo ===
+con: gilbert
+tema: Gilbert le ofrece un caramelo
+si: hecho:zanahorias, hecho:llego_gilbert, !cuaderno:paces
+---
+gilbert: (Gilbert deja sobre el pupitre de Ana un caramelo rosado con forma de corazón. Tiene escrito, en letras doradas: «Eres dulce».)
+gilbert: Es para ti, Ana. Para… bueno, para que me perdones.
+->* Tirarlo al suelo y aplastarlo con el talón
+   ana: (Ana toma el corazón con la punta de los dedos, lo deja caer y lo pisa con el talón, sin mirarlo.)
+   ana: Hay cosas que no se arreglan con azúcar, Gilbert Blythe.
+   gilbert: (Gilbert se pone rojo. Pero no se va enojado: se va pensativo.)
+-> Dejarlo en el pupitre, sin tocarlo
+   ana: (Ana no lo toca. Tampoco lo tira. El corazón se queda ahí toda la tarde, rosado y paciente, mientras ella mira el pizarrón.)
+   gilbert: (Cuando termina la clase, el caramelo sigue ahí. Gilbert no sabe si eso es bueno o malo.)
+   ! suma afecto:ana:gilbert 1
+
+=== conv_gilbert_estudiar ===
+con: gilbert
+tema: Estudiar con Gilbert para Queen's
+si: cuaderno:paces, hecho:llego_gilbert
+---
+gilbert: Ana, ¿te parece si repasamos juntos la geometría? Tú me explicas la historia y yo te explico los triángulos.
+ana: (Ana duda un segundo. Antes se habría muerto antes que aceptar.) Bueno. Pero que conste que la historia es mucho más difícil que los triángulos.
+gilbert: (Gilbert se ríe.) Eso lo veremos.
+ana: (Pasan la tarde entre libros. Por primera vez, la proposición cinco tiene sentido. Ana no piensa decírselo.)
+al_terminar: suma estudio:ana 1
+al_terminar: suma afecto:ana:gilbert 1
+
+=== conv_stacy_queens ===
+con: stacy
+tema: Preguntarle por la clase de Queen's
+si: conoce:stacy, hecho:llego_stacy
+---
+ana: Srta. Stacy… ¿es verdad que va a preparar a algunos para el examen de Queen's?
+stacy: Es verdad. A los que quieran estudiar en serio, después de clases. ¿Te interesa, Ana?
+ana: ¡Más que nada en el mundo! Quiero ser maestra… como usted. Pero tendría que preguntarle a Marilla.
+stacy: Pregúntale. Y Ana: tienes cabeza para eso y mucho más. Solo te falta la constancia. La imaginación ya la tienes de sobra.
+al_terminar: suma estudio:ana 1
+
+=== conv_stacy_escribir ===
+con: stacy
+tema: Contarle que escribe cuentos
+si: conoce:stacy, hecho:llego_stacy
+---
+ana: Srta. Stacy, Diana y yo tenemos un club de cuentos. Yo escribo tragedias. En la última se mueren todos.
+stacy: (La Srta. Stacy sonríe.) ¿Todos? ¿Y no queda nadie para contarlo?
+ana: Bueno… queda la madre. Para llorar en la tumba.
+stacy: Ana, escribe de lo que conoces. Avonlea tiene más historias que cualquier castillo. Un arce, una vieja que teje, un niño que espera el tren.
+ana: (Ana se queda pensando. Nunca se le había ocurrido que Avonlea pudiera salir en un cuento.)
+al_terminar: suma afecto:stacy:ana 1
+
+=== conv_sraallan_ser_buena ===
+con: sraallan
+tema: Preguntarle cómo se hace para ser buena
+si: conoce:sraallan, presente:sraallan
+---
+ana: Sra. Allan… ¿usted cree que una persona puede ser buena aunque le cueste muchísimo?
+sraallan: Creo que esas son las que más valen, Ana. A los que les sale fácil no tienen tanto mérito.
+ana: Es que a mí me cuesta tanto. Me enojo, digo cosas, y después me arrepiento… y al día siguiente lo hago otra vez.
+sraallan: (La Sra. Allan le toma la mano.) Mientras te arrepientas, vas bien. Yo también me equivoco, ¿sabes? Hasta la esposa del pastor.
+ana: (Ana la mira con los ojos muy abiertos. ¡La Sra. Allan se equivoca!) Eso me consuela más que un sermón entero.
+al_terminar: suma afecto:sraallan:ana 1
+
+=== conv_ruby_muchachos ===
+con: ruby
+tema: Hablar con Ruby de los muchachos
+si: conoce:ruby
+---
+ruby: Ana, ¿a ti quién te gusta? A mí me gustan casi todos. Charlie Sloane me miró dos veces hoy.
+ana: A mí no me gusta nadie, Ruby. Bueno, me gustan los héroes de los libros, que son mucho más nobles y nunca tiran de las trenzas.
+ruby: (Ruby se ríe tapándose la boca.) Pero esos no existen.
+ana: Por eso son perfectos.
+->* «Algún día vendrá uno de verdad, alto y moreno, con ojos melancólicos.»
+   ana: Algún día vendrá uno de verdad, alto y moreno, con ojos melancólicos y palabras de poeta. Y hasta entonces, nada.
+   ruby: ¡Ay, Ana, qué bonito lo dices!
+-> «Prefiero ser la primera de la clase.»
+   ana: Además, yo prefiero ser la primera de la clase. Eso dura más que una mirada de Charlie Sloane.
+   ruby: (Ruby la mira como si hubiera dicho algo muy raro.)
+   ! suma estudio:ana 1
+
+=== conv_jane_maestra ===
+con: jane
+tema: Preguntarle a Jane qué quiere ser
+si: conoce:jane
+---
+ana: Jane, ¿tú qué quieres ser cuando seas grande?
+jane: Maestra. En una escuela de campo, con un sueldo fijo. Y después, ya veremos.
+ana: ¡Qué práctico! Yo también quiero ser maestra, pero me imagino una escuela junto al mar, y niños que nunca se portan mal.
+jane: (Jane se ríe.) Eso no existe, Ana. Pero si existiera, te tocaría a ti.
+
+=== conv_josie_cerca ===
+con: josie
+tema: Responderle a Josie Pye
+si: conoce:josie
+---
+josie: Ana Shirley, apuesto a que no te atreves a caminar por arriba de la cerca del jardín de los Barry. Yo lo hice. Bueno, casi.
+->* Aceptar el desafío, por orgullo
+   ana: Una Shirley no se echa para atrás ante un desafío, Josie Pye.
+   ana: (Ana camina por la cerca con los brazos abiertos, como una equilibrista. Llega hasta la mitad… y salta al pasto antes de caerse.)
+   josie: (Josie hace una mueca.) Bueno. No está mal. Para una pelirroja.
+-> No hacerle caso
+   ana: No tengo nada que demostrarte, Josie. Ni a ti ni a nadie.
+   josie: (Josie se encoge de hombros.) Miedosa.
+   ana: (Ana se va con la frente en alto. Por dentro, le arde. Pero se va.)
+
+=== conv_minnie_cuento ===
+con: minnie
+tema: Contarle un cuento de hadas a Minnie May
+si: conoce:minnie
+---
+minnie: Ana, ¿sabes cuentos? Diana dice que tú inventas los mejores.
+ana: ¡Claro! Había una vez una niña que vivía en una burbuja, adentro de un arroyo. Una burbuja de cristal, y cuando llovía, sonaba como campanitas.
+minnie: (Minnie abre la boca.) ¿Y qué comía?
+ana: Rocío. Y pétalos de violeta los domingos. Hasta que un día vino un sapo con corona…
+minnie: (Minnie May escucha hasta el final sin moverse, que para Minnie May es un milagro.) ¡Otro!
+al_terminar: suma afecto:minnie:ana 1
+
+=== conv_phillips_libro ===
+con: phillips
+tema: Pedirle otro libro al Sr. Phillips
+si: conoce:phillips
+---
+ana: Sr. Phillips, ¿me prestaría otro libro? Ya terminé el de cuarto grado. Dos veces.
+phillips: (El Sr. Phillips no la oye. Está mirando por la ventana a Prissy Andrews, que resuelve un problema en el pizarrón.)
+ana: ¿Sr. Phillips?
+phillips: ¿Eh? Ah. Sí, sí, Ana. Tome. Sea lo que sea.
+ana: (Le pasa un libro de aritmética. Ana suspira. No era eso lo que tenía en mente, pero un libro es un libro.)
+al_terminar: suma estudio:ana 1
 
 </script>
 <script type="text/plain" id="frases">
@@ -8783,7 +8954,7 @@ function buggyTick(){
 let TALKS = [];
 function talkPlay(lines, o = {}){
   const L = lines.map(l => Array.isArray(l) ? (l[0] === '?' ? { q: '?', t: 'elige', opc: l[2] } : l[0] === '!' ? { q: '!', t: 'accion', acc: l[2] } : { q: l[0], t: l[1], m: l[2] }) : l).filter(l => l.t && l.t !== '…');
-  for (const k of o.hold || []) CHAT_HOLD[k] = TT + 1e6;
+  for (const k of o.hold || []) { if (FOLKBY[k]) { FOLKBY[k].talkT = TT + 1e6; FOLKBY[k].route = []; FOLKBY[k].moving = false; } else CHAT_HOLD[k] = TT + 1e6; }   // (someone of the village too: still while it is said)
   const t = { hold: o.hold, lines: L, i: -1, wait: o.delay ?? .5, gap: o.gap || 0, ch: o.ch, stop: o.stop, end: o.end, siempre: o.siempre, budget: o.budget ? o.budget * MIN_S : 0, el: 0, use: o.use, resumen: o.resumen };
   if (o.ch && TALKS.some(x => x.ch === o.ch)) { if (o.queue) (TALK_Q[o.ch] ||= []).push(t); return t; }
   TALKS.push(t); if (t.resumen) logEv(t.resumen, []); return t;
@@ -8829,7 +9000,7 @@ function narraPausa(){
 }
 function talkEnd(t){
   TALKS = TALKS.filter(x => x !== t); if (t.narra) { t.narra = null; const el = $('narra'); if (el) el.hidden = true; }
-  for (const k of t.hold || []) delete CHAT_HOLD[k];
+  for (const k of t.hold || []) { delete CHAT_HOLD[k]; if (FOLKBY[k]?.talkT > TT + 1000) FOLKBY[k].talkT = TT + 1; }
   t.end?.(t.lines.slice(t.i + 1));
   const q = t.ch && TALK_Q[t.ch]; if (q?.length) { const n = q.shift(); TALKS.push(n); if (n.resumen) logEv(n.resumen, []); }
 }
@@ -11110,18 +11281,21 @@ function talk(who, again = false){
   if (who !== 'diana' && !conoceA(who)) { face(who); const L = presentar(who); return talkPlay(L.map(l => [l.q, l.t]), { ch: 'presenta', hold: [who] }); }   // (they have not met: first, who they are)
   if (who === 'diana' && !conoceDiana()) { const L = cadenaEncuentro('diana'); if (L) return say('diana', L.map(l => (l.q === 'ana' ? 'Ana: ' : '') + l.t).join('\n'), [['…', close]]); }   // (they have not met: the meeting of the book, not a friend's greeting)
   if (who === 'diana' && dlgHechos().prohibida) return say('diana', dicho('diana_prohibida'), [['…', close]]);   // (forbidden, cap. 17)
-  const opts = [...taskOptions(who), ...cadenaOpciones(who)];
+  // first, what to talk about (each topic a scene, had once: src/datos/conversaciones.txt, and the night writes new ones
+  // when they run out); then what there is to do with them
+  const opts = [...convOpciones(who), ...taskOptions(who), ...cadenaOpciones(who)];
   for (const [k, [name]] of Object.entries(GIFTS)) if (game.inv[k] > 0) opts.push(['Regalar ' + name, () => give(who, k)]);
   opts.push(...entregaOpciones(who), ...cartaEncargoOpciones(who));   // (and what Ana brings for the house: the wood, the eggs…)
   if (!isQuieto(who) || who === 'marilla') opts.push(['🙏 Pedirle un favor', () => favorMenu(who)]);
-  opts.push(...convOpciones(who), ...walkOption(who), [cierre(who), close]);
+  opts.push(...walkOption(who), [cierre(who), close]);
   say(who, text, opts);
 }
-// the conversations there are with them today (src/datos/conversaciones.txt): two in the menu, and the rest behind
-// «Hablar de otra cosa…» (none hidden: what is not shown, the player cannot choose)
-const convOpciones = who => {
-  const C = convDisponibles(who), op = d => ['💬 ' + d.tema, () => { close(); conversar(d); }];
-  return [...C.slice(0, 2).map(op), ...(C.length > 2 ? [['💬 Hablar de otra cosa… (' + (C.length - 2) + ')', () => say(who, dicho('hablar_de_que'), [...C.slice(2).map(op), ['← Volver', () => talk(who, true)]])]] : [])];
+// the conversations there are with them today (src/datos/conversaciones.txt): up to four in the menu, and the rest
+// behind «Hablar de otra cosa…» (none hidden: what is not shown, the player cannot choose); volver: back to the menu
+const CONV_MENU = 4;
+const convOpciones = (who, volver = () => talk(who, true)) => {
+  const C = convDisponibles(who), op = d => ['💬 ' + d.tema, () => { close(); conversar(d); }], n = C.length > CONV_MENU ? CONV_MENU - 1 : CONV_MENU;
+  return [...C.slice(0, n).map(op), ...(C.length > n ? [['💬 Hablar de otra cosa… (' + (C.length - n) + ')', () => say(who, dicho('hablar_de_que'), [...C.slice(n).map(op), ['← Volver', volver]])]] : [])];
 };
 // closing the menu is not leaving: «Adiós» only when it is really a goodbye
 const cierre = who => 'Nada por ahora';
@@ -12579,7 +12753,7 @@ function give(who, k){
 function say(who, text, opts, wait = false){
   game.talk = { who, wait }; if (who !== 'ana') relatoDicho(who, text);   // (Ana's own box is a question to the player, not something said)
   const box = $('talk'), f = Math.min(5, game.fond[who] || 0), heartsTxt = who in game.fond ? '♥'.repeat(f) + '♡'.repeat(5 - f) : '';
-  box.innerHTML = `<div class="who">${NAMES[who] || (who === 'ana' ? 'Ana' : who)}<span>${heartsTxt}</span></div><div class="line"></div><div class="opts"></div>`;
+  box.innerHTML = `<div class="who">${NAMES[who] || (who === 'ana' ? 'Ana' : FOLKBY[who] ? cap(FOLKBY[who].def.name) : who)}<span>${heartsTxt}</span></div><div class="line"></div><div class="opts"></div>`;
   box.querySelector('.line').textContent = conNombres(text); box.classList.toggle('wait', wait);
   const row = box.querySelector('.opts');
   opts.forEach(([label, fn], k) => { const b = document.createElement('button'); b.textContent = (opts.length > 1 ? (k + 1) + '. ' : '') + conNombres(label); b.onclick = e => { e.stopPropagation(); fn(); }; row.appendChild(b); });
@@ -13792,7 +13966,12 @@ function folkTalk(f){
   if (enc.cur) encEnd(); if (amb.cur) ambAbort();
   f.talkT = TT + 1e6; f.route = []; f.moving = false;
   if (!conoceA(f.id) && !sinNombre(f.id)) return encStart({ parts: [f.id, 'ana'], lines: presentar(f.id), topic: '', scene: game.scene, born: TT, presenta: true });   // (the first time: who they are)
-  encStart(encFallback(f.id, 'ana'));
+  // someone she knows, with something to talk about: the topics, as with those of the house (src/js/35-cosas-que-lleva.js)
+  const temas = sinNombre(f.id) ? [] : convOpciones(f.id, () => folkTalk(f));
+  if (!temas.length) return encStart(encFallback(f.id, 'ana'));
+  const saludo = pick(sinRepetir(f.id, lineasAjenas(f.id, dichosTodos(isKid(f.id) ? 'encuentro:nino_saluda_a_ana' : 'encuentro:saluda_a_ana', { hola: saludoHora() })))) || dicho('encuentro:saluda_con_la_cabeza');   // (a greeting: what to talk about comes next, in the topics)
+  f.talkT = TT + 90;   // (still while Ana chooses, and a while for the talk: not for good)
+  say(f.id, saludo, [...temas, ['Nada por ahora', () => { close(); f.talkT = 0; }]]);
 }
 function encUpdate(dt){
   if (enc.cur) return encTick(dt);
@@ -16425,8 +16604,17 @@ function nocheCualidades(){
   for (const [dueño, N] of Object.entries(game.wm?.num || {})) for (const [c, v] of Object.entries(N)) { const [n, h] = c.split('>'); Q[[n, dueño, h].filter(Boolean).join('_')] = v; }
   return Q;
 }
+// what runs out (de: pocas), only the closest ones first: those of the house, then whoever Ana has had to do with
+// lately (the journal); at most NOCHE_POCAS a night (the rest, on the nights after: the ones she sees, renewed first)
+const NOCHE_POCAS = 6;
+const nocheNombres = k => [...new Set([nocheSinArt(NAMES[k] || FOLK_DEFS[k]?.name), CH[k]?.fullName].filter(Boolean).flatMap(n => [n, ...n.split(' ').filter(w => /^[A-ZÁÉÍÓÚ][a-záéíóúñ]{3,}$/.test(w))]))];
+const nocheUltimoDia = k => { const N = nocheNombres(k); return Math.max(0, ...(game.journal || []).filter(e => N.some(n => e.t.includes(n))).map(e => e.d)); };
+function nocheLagunasElegidas(){
+  const L = NOCHE_LAGUNAS || [], cerca = k => CH[k] ? 1e6 : nocheUltimoDia(k);
+  return [...L.filter(l => l.de !== 'pocas'), ...L.filter(l => l.de === 'pocas').sort((a, b) => cerca(b.quien) - cerca(a.quien)).slice(0, NOCHE_POCAS)];
+}
 function nocheLagunasTexto(){
-  return (NOCHE_LAGUNAS || []).map(l => l.de === 'decisiones'
+  return nocheLagunasElegidas().map(l => l.de === 'decisiones'
     ? `- ${l.tema ? `En la conversación «${l.tema}»` : 'En una escena'}${l.conNombres?.length ? ` con ${l.conNombres.join(' y ')}` : ''}, Ana eligió «${l.opcion}» (día ${l.dia}), y nada de lo que todavía puede pasar lo toma en cuenta: algo que lo recuerde o le dé consecuencias (que pida «hecho:${l.hecho}»; ojo: lo que eligió lo dijo o lo hizo ahí, con ${l.conNombres?.join(' y ') || 'quienes estaban'}).`
     : l.de === 'pocas' ? `- Ana quiere ${l.hay === 'frase' ? 'oír cosas nuevas de' : 'conversar con'} ${l.nombre} (${l.quien}), y estos días ${l.quedan ? 'solo ' + (l.quedan === 1 ? 'queda 1' : 'quedan ' + l.quedan) : 'no queda ninguna'} ${l.hay === 'frase' ? 'frase distinta (repite siempre lo mismo)' : l.hay === 'escena' ? 'escena' : 'conversación'}: ${l.hay === 'frase' ? 'líneas nuevas para ' + l.quien + ' (dichos)' : l.hay === 'escena' ? 'una escena nueva con ' + l.quien : 'una conversación nueva con ' + l.quien + ' (que pueda darse ya)'}.`
     : `- Con ${l.nombre} (${l.quien}) ya no queda ninguna escena ni conversación por pasar: algo nuevo entre ${l.quien} y Ana.`).join('\n');
@@ -16435,7 +16623,7 @@ function nocheLagunasTexto(){
 function nocheGente(){
   const V = nocheVocab(), J = (game.journal || []).filter(e => /\bAna\b/.test(e.t));
   return [...V.personas].filter(k => conoceA(k)).map(k => {
-    const N = [...new Set([nocheSinArt(NAMES[k] || FOLK_DEFS[k]?.name), CH[k]?.fullName].filter(Boolean).flatMap(n => [n, ...n.split(' ').filter(w => /^[A-ZÁÉÍÓÚ][a-záéíóúñ]{3,}$/.test(w))]))];
+    const N = nocheNombres(k);
     const ult = J.filter(e => N.some(n => e.t.includes(n))).slice(-3).map(e => `día ${e.d}: ${e.t}`);
     return `- ${k}${CH[k] ? ` (cariño hacia Ana ${Math.round(relGetW(k, 'ana'))}/5)` : ''}${ult.length ? ': ' + ult.join(' · ') : ''}`;
   }).join('\n');

@@ -6,7 +6,7 @@
 let TALKS = [];
 function talkPlay(lines, o = {}){
   const L = lines.map(l => Array.isArray(l) ? (l[0] === '?' ? { q: '?', t: 'elige', opc: l[2] } : l[0] === '!' ? { q: '!', t: 'accion', acc: l[2] } : { q: l[0], t: l[1], m: l[2] }) : l).filter(l => l.t && l.t !== '…');
-  for (const k of o.hold || []) CHAT_HOLD[k] = TT + 1e6;
+  for (const k of o.hold || []) { if (FOLKBY[k]) { FOLKBY[k].talkT = TT + 1e6; FOLKBY[k].route = []; FOLKBY[k].moving = false; } else CHAT_HOLD[k] = TT + 1e6; }   // (someone of the village too: still while it is said)
   const t = { hold: o.hold, lines: L, i: -1, wait: o.delay ?? .5, gap: o.gap || 0, ch: o.ch, stop: o.stop, end: o.end, siempre: o.siempre, budget: o.budget ? o.budget * MIN_S : 0, el: 0, use: o.use, resumen: o.resumen };
   if (o.ch && TALKS.some(x => x.ch === o.ch)) { if (o.queue) (TALK_Q[o.ch] ||= []).push(t); return t; }
   TALKS.push(t); if (t.resumen) logEv(t.resumen, []); return t;
@@ -52,7 +52,7 @@ function narraPausa(){
 }
 function talkEnd(t){
   TALKS = TALKS.filter(x => x !== t); if (t.narra) { t.narra = null; const el = $('narra'); if (el) el.hidden = true; }
-  for (const k of t.hold || []) delete CHAT_HOLD[k];
+  for (const k of t.hold || []) { delete CHAT_HOLD[k]; if (FOLKBY[k]?.talkT > TT + 1000) FOLKBY[k].talkT = TT + 1; }
   t.end?.(t.lines.slice(t.i + 1));
   const q = t.ch && TALK_Q[t.ch]; if (q?.length) { const n = q.shift(); TALKS.push(n); if (n.resumen) logEv(n.resumen, []); }
 }

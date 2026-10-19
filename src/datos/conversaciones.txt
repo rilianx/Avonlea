@@ -394,7 +394,7 @@ diana: (Diana suspira, pero no dice nada más.)
 === conv_diana_gilbert_contesta ===
 con: diana
 tema: Hablar de lo que le contestó a Gilbert
-si: afecto:diana:ana>=3, hecho:zanahorias_contesta, !hecho:prohibida
+si: afecto:diana:ana>=3, hecho:zanahorias_contesta, hecho:llego_gilbert, !hecho:prohibida
 ---
 diana: Ana… toda la escuela habla de lo que le dijiste a Gilbert. ¡Nadie le había contestado así nunca! Se puso más rojo que tu pelo.
 ana: Se lo merecía, Diana. Una no puede dejar que le digan zanahoria delante de todos y quedarse callada como un pez.
@@ -538,3 +538,135 @@ ana: Sr. Harrison, ¿es verdad que tiene un loro que dice malas palabras?
 harrison: Ginger dice lo que le da la gana. Como yo. Por eso nos llevamos bien.
 ana: ¿Puedo conocerlo?
 harrison: Si no te asustas con facilidad… Y no le hables de la vaca. Ni a mí tampoco.
+
+# ====================================== la gente del pueblo ======================================
+# (tocándolos, como a los de la casa: sus temas primero)
+
+=== conv_gilbert_caramelo ===
+con: gilbert
+tema: Gilbert le ofrece un caramelo
+si: hecho:zanahorias, hecho:llego_gilbert, !cuaderno:paces
+---
+gilbert: (Gilbert deja sobre el pupitre de Ana un caramelo rosado con forma de corazón. Tiene escrito, en letras doradas: «Eres dulce».)
+gilbert: Es para ti, Ana. Para… bueno, para que me perdones.
+->* Tirarlo al suelo y aplastarlo con el talón
+   ana: (Ana toma el corazón con la punta de los dedos, lo deja caer y lo pisa con el talón, sin mirarlo.)
+   ana: Hay cosas que no se arreglan con azúcar, Gilbert Blythe.
+   gilbert: (Gilbert se pone rojo. Pero no se va enojado: se va pensativo.)
+-> Dejarlo en el pupitre, sin tocarlo
+   ana: (Ana no lo toca. Tampoco lo tira. El corazón se queda ahí toda la tarde, rosado y paciente, mientras ella mira el pizarrón.)
+   gilbert: (Cuando termina la clase, el caramelo sigue ahí. Gilbert no sabe si eso es bueno o malo.)
+   ! suma afecto:ana:gilbert 1
+
+=== conv_gilbert_estudiar ===
+con: gilbert
+tema: Estudiar con Gilbert para Queen's
+si: cuaderno:paces, hecho:llego_gilbert
+---
+gilbert: Ana, ¿te parece si repasamos juntos la geometría? Tú me explicas la historia y yo te explico los triángulos.
+ana: (Ana duda un segundo. Antes se habría muerto antes que aceptar.) Bueno. Pero que conste que la historia es mucho más difícil que los triángulos.
+gilbert: (Gilbert se ríe.) Eso lo veremos.
+ana: (Pasan la tarde entre libros. Por primera vez, la proposición cinco tiene sentido. Ana no piensa decírselo.)
+al_terminar: suma estudio:ana 1
+al_terminar: suma afecto:ana:gilbert 1
+
+=== conv_stacy_queens ===
+con: stacy
+tema: Preguntarle por la clase de Queen's
+si: conoce:stacy, hecho:llego_stacy
+---
+ana: Srta. Stacy… ¿es verdad que va a preparar a algunos para el examen de Queen's?
+stacy: Es verdad. A los que quieran estudiar en serio, después de clases. ¿Te interesa, Ana?
+ana: ¡Más que nada en el mundo! Quiero ser maestra… como usted. Pero tendría que preguntarle a Marilla.
+stacy: Pregúntale. Y Ana: tienes cabeza para eso y mucho más. Solo te falta la constancia. La imaginación ya la tienes de sobra.
+al_terminar: suma estudio:ana 1
+
+=== conv_stacy_escribir ===
+con: stacy
+tema: Contarle que escribe cuentos
+si: conoce:stacy, hecho:llego_stacy
+---
+ana: Srta. Stacy, Diana y yo tenemos un club de cuentos. Yo escribo tragedias. En la última se mueren todos.
+stacy: (La Srta. Stacy sonríe.) ¿Todos? ¿Y no queda nadie para contarlo?
+ana: Bueno… queda la madre. Para llorar en la tumba.
+stacy: Ana, escribe de lo que conoces. Avonlea tiene más historias que cualquier castillo. Un arce, una vieja que teje, un niño que espera el tren.
+ana: (Ana se queda pensando. Nunca se le había ocurrido que Avonlea pudiera salir en un cuento.)
+al_terminar: suma afecto:stacy:ana 1
+
+=== conv_sraallan_ser_buena ===
+con: sraallan
+tema: Preguntarle cómo se hace para ser buena
+si: conoce:sraallan, presente:sraallan
+---
+ana: Sra. Allan… ¿usted cree que una persona puede ser buena aunque le cueste muchísimo?
+sraallan: Creo que esas son las que más valen, Ana. A los que les sale fácil no tienen tanto mérito.
+ana: Es que a mí me cuesta tanto. Me enojo, digo cosas, y después me arrepiento… y al día siguiente lo hago otra vez.
+sraallan: (La Sra. Allan le toma la mano.) Mientras te arrepientas, vas bien. Yo también me equivoco, ¿sabes? Hasta la esposa del pastor.
+ana: (Ana la mira con los ojos muy abiertos. ¡La Sra. Allan se equivoca!) Eso me consuela más que un sermón entero.
+al_terminar: suma afecto:sraallan:ana 1
+
+=== conv_ruby_muchachos ===
+con: ruby
+tema: Hablar con Ruby de los muchachos
+si: conoce:ruby
+---
+ruby: Ana, ¿a ti quién te gusta? A mí me gustan casi todos. Charlie Sloane me miró dos veces hoy.
+ana: A mí no me gusta nadie, Ruby. Bueno, me gustan los héroes de los libros, que son mucho más nobles y nunca tiran de las trenzas.
+ruby: (Ruby se ríe tapándose la boca.) Pero esos no existen.
+ana: Por eso son perfectos.
+->* «Algún día vendrá uno de verdad, alto y moreno, con ojos melancólicos.»
+   ana: Algún día vendrá uno de verdad, alto y moreno, con ojos melancólicos y palabras de poeta. Y hasta entonces, nada.
+   ruby: ¡Ay, Ana, qué bonito lo dices!
+-> «Prefiero ser la primera de la clase.»
+   ana: Además, yo prefiero ser la primera de la clase. Eso dura más que una mirada de Charlie Sloane.
+   ruby: (Ruby la mira como si hubiera dicho algo muy raro.)
+   ! suma estudio:ana 1
+
+=== conv_jane_maestra ===
+con: jane
+tema: Preguntarle a Jane qué quiere ser
+si: conoce:jane
+---
+ana: Jane, ¿tú qué quieres ser cuando seas grande?
+jane: Maestra. En una escuela de campo, con un sueldo fijo. Y después, ya veremos.
+ana: ¡Qué práctico! Yo también quiero ser maestra, pero me imagino una escuela junto al mar, y niños que nunca se portan mal.
+jane: (Jane se ríe.) Eso no existe, Ana. Pero si existiera, te tocaría a ti.
+
+=== conv_josie_cerca ===
+con: josie
+tema: Responderle a Josie Pye
+si: conoce:josie
+---
+josie: Ana Shirley, apuesto a que no te atreves a caminar por arriba de la cerca del jardín de los Barry. Yo lo hice. Bueno, casi.
+->* Aceptar el desafío, por orgullo
+   ana: Una Shirley no se echa para atrás ante un desafío, Josie Pye.
+   ana: (Ana camina por la cerca con los brazos abiertos, como una equilibrista. Llega hasta la mitad… y salta al pasto antes de caerse.)
+   josie: (Josie hace una mueca.) Bueno. No está mal. Para una pelirroja.
+-> No hacerle caso
+   ana: No tengo nada que demostrarte, Josie. Ni a ti ni a nadie.
+   josie: (Josie se encoge de hombros.) Miedosa.
+   ana: (Ana se va con la frente en alto. Por dentro, le arde. Pero se va.)
+
+=== conv_minnie_cuento ===
+con: minnie
+tema: Contarle un cuento de hadas a Minnie May
+si: conoce:minnie
+---
+minnie: Ana, ¿sabes cuentos? Diana dice que tú inventas los mejores.
+ana: ¡Claro! Había una vez una niña que vivía en una burbuja, adentro de un arroyo. Una burbuja de cristal, y cuando llovía, sonaba como campanitas.
+minnie: (Minnie abre la boca.) ¿Y qué comía?
+ana: Rocío. Y pétalos de violeta los domingos. Hasta que un día vino un sapo con corona…
+minnie: (Minnie May escucha hasta el final sin moverse, que para Minnie May es un milagro.) ¡Otro!
+al_terminar: suma afecto:minnie:ana 1
+
+=== conv_phillips_libro ===
+con: phillips
+tema: Pedirle otro libro al Sr. Phillips
+si: conoce:phillips
+---
+ana: Sr. Phillips, ¿me prestaría otro libro? Ya terminé el de cuarto grado. Dos veces.
+phillips: (El Sr. Phillips no la oye. Está mirando por la ventana a Prissy Andrews, que resuelve un problema en el pizarrón.)
+ana: ¿Sr. Phillips?
+phillips: ¿Eh? Ah. Sí, sí, Ana. Tome. Sea lo que sea.
+ana: (Le pasa un libro de aritmética. Ana suspira. No era eso lo que tenía en mente, pero un libro es un libro.)
+al_terminar: suma estudio:ana 1

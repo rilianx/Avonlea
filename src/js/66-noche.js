@@ -185,8 +185,17 @@ function nocheCualidades(){
   for (const [dueño, N] of Object.entries(game.wm?.num || {})) for (const [c, v] of Object.entries(N)) { const [n, h] = c.split('>'); Q[[n, dueño, h].filter(Boolean).join('_')] = v; }
   return Q;
 }
+// what runs out (de: pocas), only the closest ones first: those of the house, then whoever Ana has had to do with
+// lately (the journal); at most NOCHE_POCAS a night (the rest, on the nights after: the ones she sees, renewed first)
+const NOCHE_POCAS = 6;
+const nocheNombres = k => [...new Set([nocheSinArt(NAMES[k] || FOLK_DEFS[k]?.name), CH[k]?.fullName].filter(Boolean).flatMap(n => [n, ...n.split(' ').filter(w => /^[A-ZÁÉÍÓÚ][a-záéíóúñ]{3,}$/.test(w))]))];
+const nocheUltimoDia = k => { const N = nocheNombres(k); return Math.max(0, ...(game.journal || []).filter(e => N.some(n => e.t.includes(n))).map(e => e.d)); };
+function nocheLagunasElegidas(){
+  const L = NOCHE_LAGUNAS || [], cerca = k => CH[k] ? 1e6 : nocheUltimoDia(k);
+  return [...L.filter(l => l.de !== 'pocas'), ...L.filter(l => l.de === 'pocas').sort((a, b) => cerca(b.quien) - cerca(a.quien)).slice(0, NOCHE_POCAS)];
+}
 function nocheLagunasTexto(){
-  return (NOCHE_LAGUNAS || []).map(l => l.de === 'decisiones'
+  return nocheLagunasElegidas().map(l => l.de === 'decisiones'
     ? `- ${l.tema ? `En la conversación «${l.tema}»` : 'En una escena'}${l.conNombres?.length ? ` con ${l.conNombres.join(' y ')}` : ''}, Ana eligió «${l.opcion}» (día ${l.dia}), y nada de lo que todavía puede pasar lo toma en cuenta: algo que lo recuerde o le dé consecuencias (que pida «hecho:${l.hecho}»; ojo: lo que eligió lo dijo o lo hizo ahí, con ${l.conNombres?.join(' y ') || 'quienes estaban'}).`
     : l.de === 'pocas' ? `- Ana quiere ${l.hay === 'frase' ? 'oír cosas nuevas de' : 'conversar con'} ${l.nombre} (${l.quien}), y estos días ${l.quedan ? 'solo ' + (l.quedan === 1 ? 'queda 1' : 'quedan ' + l.quedan) : 'no queda ninguna'} ${l.hay === 'frase' ? 'frase distinta (repite siempre lo mismo)' : l.hay === 'escena' ? 'escena' : 'conversación'}: ${l.hay === 'frase' ? 'líneas nuevas para ' + l.quien + ' (dichos)' : l.hay === 'escena' ? 'una escena nueva con ' + l.quien : 'una conversación nueva con ' + l.quien + ' (que pueda darse ya)'}.`
     : `- Con ${l.nombre} (${l.quien}) ya no queda ninguna escena ni conversación por pasar: algo nuevo entre ${l.quien} y Ana.`).join('\n');
@@ -195,7 +204,7 @@ function nocheLagunasTexto(){
 function nocheGente(){
   const V = nocheVocab(), J = (game.journal || []).filter(e => /\bAna\b/.test(e.t));
   return [...V.personas].filter(k => conoceA(k)).map(k => {
-    const N = [...new Set([nocheSinArt(NAMES[k] || FOLK_DEFS[k]?.name), CH[k]?.fullName].filter(Boolean).flatMap(n => [n, ...n.split(' ').filter(w => /^[A-ZÁÉÍÓÚ][a-záéíóúñ]{3,}$/.test(w))]))];
+    const N = nocheNombres(k);
     const ult = J.filter(e => N.some(n => e.t.includes(n))).slice(-3).map(e => `día ${e.d}: ${e.t}`);
     return `- ${k}${CH[k] ? ` (cariño hacia Ana ${Math.round(relGetW(k, 'ana'))}/5)` : ''}${ult.length ? ': ' + ult.join(' · ') : ''}`;
   }).join('\n');

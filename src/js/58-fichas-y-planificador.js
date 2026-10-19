@@ -109,7 +109,12 @@ function folkTalk(f){
   if (enc.cur) encEnd(); if (amb.cur) ambAbort();
   f.talkT = TT + 1e6; f.route = []; f.moving = false;
   if (!conoceA(f.id) && !sinNombre(f.id)) return encStart({ parts: [f.id, 'ana'], lines: presentar(f.id), topic: '', scene: game.scene, born: TT, presenta: true });   // (the first time: who they are)
-  encStart(encFallback(f.id, 'ana'));
+  // someone she knows, with something to talk about: the topics, as with those of the house (src/js/35-cosas-que-lleva.js)
+  const temas = sinNombre(f.id) ? [] : convOpciones(f.id, () => folkTalk(f));
+  if (!temas.length) return encStart(encFallback(f.id, 'ana'));
+  const saludo = pick(sinRepetir(f.id, lineasAjenas(f.id, dichosTodos(isKid(f.id) ? 'encuentro:nino_saluda_a_ana' : 'encuentro:saluda_a_ana', { hola: saludoHora() })))) || dicho('encuentro:saluda_con_la_cabeza');   // (a greeting: what to talk about comes next, in the topics)
+  f.talkT = TT + 90;   // (still while Ana chooses, and a while for the talk: not for good)
+  say(f.id, saludo, [...temas, ['Nada por ahora', () => { close(); f.talkT = 0; }]]);
 }
 function encUpdate(dt){
   if (enc.cur) return encTick(dt);

@@ -62,7 +62,7 @@
    "viven": []
   }
  ],
- "generado": "2026-10-19 00:41",
+ "generado": "2026-10-19 12:50",
  "momentos": [
   {
    "id": "dia2",
@@ -7711,6 +7711,272 @@
    ]
   },
   {
+   "id": "conv_gilbert_caramelo",
+   "canal": "conv",
+   "disparo": "conversar",
+   "prioridad": 1,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "hecho:zanahorias, !cuaderno:paces",
+   "en": "",
+   "hablan": "gilbert",
+   "lineas": 3,
+   "primera": "gilbert: (Gilbert deja sobre el pupitre de Ana un caramelo rosado con forma de corazón. Tiene escrito, en letras doradas: «Eres dulce».)",
+   "quienes": [
+    "gilbert",
+    "ana"
+   ],
+   "con": "gilbert",
+   "una_vez": true,
+   "texto": [
+    "gilbert: (Gilbert deja sobre el pupitre de Ana un caramelo rosado con forma de corazón. Tiene escrito, en letras doradas: «Eres dulce».)",
+    "gilbert: Es para ti, Ana. Para… bueno, para que me perdones."
+   ]
+  },
+  {
+   "id": "conv_gilbert_estudiar",
+   "canal": "conv",
+   "disparo": "conversar",
+   "prioridad": 1,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "cuaderno:paces",
+   "en": "",
+   "hablan": "gilbert, al_terminar",
+   "lineas": 6,
+   "primera": "gilbert: Ana, ¿te parece si repasamos juntos la geometría? Tú me explicas la historia y yo te explico los triángulos.",
+   "quienes": [
+    "gilbert",
+    "ana"
+   ],
+   "con": "gilbert",
+   "una_vez": true,
+   "texto": [
+    "gilbert: Ana, ¿te parece si repasamos juntos la geometría? Tú me explicas la historia y yo te explico los triángulos.",
+    "ana: (Ana duda un segundo. Antes se habría muerto antes que aceptar.) Bueno. Pero que conste que la historia es mucho más difícil que los triángulos.",
+    "gilbert: (Gilbert se ríe.) Eso lo veremos.",
+    "ana: (Pasan la tarde entre libros. Por primera vez, la proposición cinco tiene sentido. Ana no piensa decírselo.)",
+    "al_terminar: suma estudio:ana 1",
+    "al_terminar: suma afecto:ana:gilbert 1"
+   ]
+  },
+  {
+   "id": "conv_stacy_queens",
+   "canal": "conv",
+   "disparo": "conversar",
+   "prioridad": 1,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "conoce:stacy",
+   "en": "",
+   "hablan": "stacy, al_terminar",
+   "lineas": 5,
+   "primera": "ana: Srta. Stacy… ¿es verdad que va a preparar a algunos para el examen de Queen's?",
+   "quienes": [
+    "stacy",
+    "ana"
+   ],
+   "con": "stacy",
+   "una_vez": true,
+   "texto": [
+    "ana: Srta. Stacy… ¿es verdad que va a preparar a algunos para el examen de Queen's?",
+    "stacy: Es verdad. A los que quieran estudiar en serio, después de clases. ¿Te interesa, Ana?",
+    "ana: ¡Más que nada en el mundo! Quiero ser maestra… como usted. Pero tendría que preguntarle a Marilla.",
+    "stacy: Pregúntale. Y Ana: tienes cabeza para eso y mucho más. Solo te falta la constancia. La imaginación ya la tienes de sobra.",
+    "al_terminar: suma estudio:ana 1"
+   ]
+  },
+  {
+   "id": "conv_stacy_escribir",
+   "canal": "conv",
+   "disparo": "conversar",
+   "prioridad": 1,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "conoce:stacy",
+   "en": "",
+   "hablan": "stacy, al_terminar",
+   "lineas": 6,
+   "primera": "ana: Srta. Stacy, Diana y yo tenemos un club de cuentos. Yo escribo tragedias. En la última se mueren todos.",
+   "quienes": [
+    "stacy",
+    "ana"
+   ],
+   "con": "stacy",
+   "una_vez": true,
+   "texto": [
+    "ana: Srta. Stacy, Diana y yo tenemos un club de cuentos. Yo escribo tragedias. En la última se mueren todos.",
+    "stacy: (La Srta. Stacy sonríe.) ¿Todos? ¿Y no queda nadie para contarlo?",
+    "ana: Bueno… queda la madre. Para llorar en la tumba.",
+    "stacy: Ana, escribe de lo que conoces. Avonlea tiene más historias que cualquier castillo. Un arce, una vieja que teje, un niño que espera el tren.",
+    "ana: (Ana se queda pensando. Nunca se le había ocurrido que Avonlea pudiera salir en un cuento.)",
+    "al_terminar: suma afecto:stacy:ana 1"
+   ]
+  },
+  {
+   "id": "conv_sraallan_ser_buena",
+   "canal": "conv",
+   "disparo": "conversar",
+   "prioridad": 1,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "conoce:sraallan",
+   "en": "",
+   "hablan": "sraallan, al_terminar",
+   "lineas": 6,
+   "primera": "ana: Sra. Allan… ¿usted cree que una persona puede ser buena aunque le cueste muchísimo?",
+   "quienes": [
+    "sraallan",
+    "ana"
+   ],
+   "con": "sraallan",
+   "una_vez": true,
+   "texto": [
+    "ana: Sra. Allan… ¿usted cree que una persona puede ser buena aunque le cueste muchísimo?",
+    "sraallan: Creo que esas son las que más valen, Ana. A los que les sale fácil no tienen tanto mérito.",
+    "ana: Es que a mí me cuesta tanto. Me enojo, digo cosas, y después me arrepiento… y al día siguiente lo hago otra vez.",
+    "sraallan: (La Sra. Allan le toma la mano.) Mientras te arrepientas, vas bien. Yo también me equivoco, ¿sabes? Hasta la esposa del pastor.",
+    "ana: (Ana la mira con los ojos muy abiertos. ¡La Sra. Allan se equivoca!) Eso me consuela más que un sermón entero.",
+    "al_terminar: suma afecto:sraallan:ana 1"
+   ]
+  },
+  {
+   "id": "conv_ruby_muchachos",
+   "canal": "conv",
+   "disparo": "conversar",
+   "prioridad": 1,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "conoce:ruby",
+   "en": "",
+   "hablan": "ruby",
+   "lineas": 5,
+   "primera": "ruby: Ana, ¿a ti quién te gusta? A mí me gustan casi todos. Charlie Sloane me miró dos veces hoy.",
+   "quienes": [
+    "ruby",
+    "ana"
+   ],
+   "con": "ruby",
+   "una_vez": true,
+   "texto": [
+    "ruby: Ana, ¿a ti quién te gusta? A mí me gustan casi todos. Charlie Sloane me miró dos veces hoy.",
+    "ana: A mí no me gusta nadie, Ruby. Bueno, me gustan los héroes de los libros, que son mucho más nobles y nunca tiran de las trenzas.",
+    "ruby: (Ruby se ríe tapándose la boca.) Pero esos no existen.",
+    "ana: Por eso son perfectos."
+   ]
+  },
+  {
+   "id": "conv_jane_maestra",
+   "canal": "conv",
+   "disparo": "conversar",
+   "prioridad": 1,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "conoce:jane",
+   "en": "",
+   "hablan": "jane",
+   "lineas": 4,
+   "primera": "ana: Jane, ¿tú qué quieres ser cuando seas grande?",
+   "quienes": [
+    "jane",
+    "ana"
+   ],
+   "con": "jane",
+   "una_vez": true,
+   "texto": [
+    "ana: Jane, ¿tú qué quieres ser cuando seas grande?",
+    "jane: Maestra. En una escuela de campo, con un sueldo fijo. Y después, ya veremos.",
+    "ana: ¡Qué práctico! Yo también quiero ser maestra, pero me imagino una escuela junto al mar, y niños que nunca se portan mal.",
+    "jane: (Jane se ríe.) Eso no existe, Ana. Pero si existiera, te tocaría a ti."
+   ]
+  },
+  {
+   "id": "conv_josie_cerca",
+   "canal": "conv",
+   "disparo": "conversar",
+   "prioridad": 1,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "conoce:josie",
+   "en": "",
+   "hablan": "josie",
+   "lineas": 2,
+   "primera": "josie: Ana Shirley, apuesto a que no te atreves a caminar por arriba de la cerca del jardín de los Barry. Yo lo hice. Bueno, casi.",
+   "quienes": [
+    "josie",
+    "ana"
+   ],
+   "con": "josie",
+   "una_vez": true,
+   "texto": [
+    "josie: Ana Shirley, apuesto a que no te atreves a caminar por arriba de la cerca del jardín de los Barry. Yo lo hice. Bueno, casi."
+   ]
+  },
+  {
+   "id": "conv_minnie_cuento",
+   "canal": "conv",
+   "disparo": "conversar",
+   "prioridad": 1,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "conoce:minnie",
+   "en": "",
+   "hablan": "minnie, al_terminar",
+   "lineas": 6,
+   "primera": "minnie: Ana, ¿sabes cuentos? Diana dice que tú inventas los mejores.",
+   "quienes": [
+    "minnie",
+    "ana"
+   ],
+   "con": "minnie",
+   "una_vez": true,
+   "texto": [
+    "minnie: Ana, ¿sabes cuentos? Diana dice que tú inventas los mejores.",
+    "ana: ¡Claro! Había una vez una niña que vivía en una burbuja, adentro de un arroyo. Una burbuja de cristal, y cuando llovía, sonaba como campanitas.",
+    "minnie: (Minnie abre la boca.) ¿Y qué comía?",
+    "ana: Rocío. Y pétalos de violeta los domingos. Hasta que un día vino un sapo con corona…",
+    "minnie: (Minnie May escucha hasta el final sin moverse, que para Minnie May es un milagro.) ¡Otro!",
+    "al_terminar: suma afecto:minnie:ana 1"
+   ]
+  },
+  {
+   "id": "conv_phillips_libro",
+   "canal": "conv",
+   "disparo": "conversar",
+   "prioridad": 1,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "conoce:phillips",
+   "en": "",
+   "hablan": "phillips, al_terminar",
+   "lineas": 6,
+   "primera": "ana: Sr. Phillips, ¿me prestaría otro libro? Ya terminé el de cuarto grado. Dos veces.",
+   "quienes": [
+    "phillips",
+    "ana"
+   ],
+   "con": "phillips",
+   "una_vez": true,
+   "texto": [
+    "ana: Sr. Phillips, ¿me prestaría otro libro? Ya terminé el de cuarto grado. Dos veces.",
+    "phillips: (El Sr. Phillips no la oye. Está mirando por la ventana a Prissy Andrews, que resuelve un problema en el pizarrón.)",
+    "ana: ¿Sr. Phillips?",
+    "phillips: ¿Eh? Ah. Sí, sí, Ana. Tome. Sea lo que sea.",
+    "ana: (Le pasa un libro de aritmética. Ana suspira. No era eso lo que tenía en mente, pero un libro es un libro.)",
+    "al_terminar: suma estudio:ana 1"
+   ]
+  },
+  {
    "id": "com:ventana:0",
    "canal": "comentario",
    "disparo": "comentario",
@@ -12131,6 +12397,7 @@
     "escena pupitre_gilbert",
     "escena conv_marilla_john",
     "escena conv_diana_gilbert",
+    "escena conv_gilbert_caramelo",
     "un comentario de pupitre",
     "un comentario de pizarra",
     "charla par:ana+gilbert:0",
@@ -12311,6 +12578,8 @@
     "escena conv_marilla_queens",
     "escena conv_matthew_queens",
     "escena conv_diana_futuro",
+    "escena conv_stacy_queens",
+    "escena conv_stacy_escribir",
     "una frase de stacy",
     "meta queens (pista)",
     "código"
@@ -12339,6 +12608,31 @@
    ],
    "nombra_avenida": [
     "escena conv_matthew_nombres"
+   ],
+   "paces": [
+    "escena conv_gilbert_caramelo"
+   ],
+   "conoce_sraallan": [
+    "escena conv_sraallan_ser_buena",
+    "una frase de sraallan",
+    "código"
+   ],
+   "conoce_ruby": [
+    "escena conv_ruby_muchachos"
+   ],
+   "conoce_jane": [
+    "escena conv_jane_maestra",
+    "una frase de jane"
+   ],
+   "conoce_josie": [
+    "escena conv_josie_cerca"
+   ],
+   "conoce_minnie": [
+    "escena conv_minnie_cuento",
+    "una frase de minnie"
+   ],
+   "conoce_phillips": [
+    "escena conv_phillips_libro"
    ],
    "llego_gilbert": [
     "charla par:ana+diana:5"
@@ -12384,24 +12678,14 @@
    "escuela": [
     "una frase de gertie"
    ],
-   "conoce_jane": [
-    "una frase de jane"
-   ],
    "conoce_charlie": [
     "una frase de charlie"
    ],
    "conoce_sara": [
     "una frase de sara"
    ],
-   "conoce_sraallan": [
-    "una frase de sraallan",
-    "código"
-   ],
    "conoce_lawson": [
     "una frase de lawson"
-   ],
-   "conoce_minnie": [
-    "una frase de minnie"
    ],
    "{k}": [
     "una frase de niños"

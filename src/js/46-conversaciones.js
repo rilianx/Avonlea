@@ -220,7 +220,7 @@ function give(who, k){
 function say(who, text, opts, wait = false){
   game.talk = { who, wait }; if (who !== 'ana') relatoDicho(who, text);   // (Ana's own box is a question to the player, not something said)
   const box = $('talk'), f = Math.min(5, game.fond[who] || 0), heartsTxt = who in game.fond ? '♥'.repeat(f) + '♡'.repeat(5 - f) : '';
-  box.innerHTML = `<div class="who">${NAMES[who] || (who === 'ana' ? 'Ana' : who)}<span>${heartsTxt}</span></div><div class="line"></div><div class="opts"></div>`;
+  box.innerHTML = `<div class="who">${NAMES[who] || (who === 'ana' ? 'Ana' : FOLKBY[who] ? cap(FOLKBY[who].def.name) : who)}<span>${heartsTxt}</span></div><div class="line"></div><div class="opts"></div>`;
   box.querySelector('.line').textContent = conNombres(text); box.classList.toggle('wait', wait);
   const row = box.querySelector('.opts');
   opts.forEach(([label, fn], k) => { const b = document.createElement('button'); b.textContent = (opts.length > 1 ? (k + 1) + '. ' : '') + conNombres(label); b.onclick = e => { e.stopPropagation(); fn(); }; row.appendChild(b); });
