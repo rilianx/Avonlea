@@ -62,7 +62,7 @@
    "viven": []
   }
  ],
- "generado": "2026-10-17 06:08",
+ "generado": "2026-10-19 00:41",
  "momentos": [
   {
    "id": "dia2",
@@ -637,8 +637,8 @@
     "fuera": true
    },
    "lawson": {
-    "sin": 1,
-    "con": 2
+    "sin": 0,
+    "con": 1
    },
    "herrero": {
     "sin": 2,
@@ -761,7 +761,7 @@
    },
    "marilla": {
     "sin": null,
-    "con": 4
+    "con": 3
    },
    "diana": {
     "fuera": true
@@ -848,8 +848,8 @@
     "fuera": true
    },
    "lawson": {
-    "sin": 1,
-    "con": 2
+    "sin": 0,
+    "con": 1
    },
    "herrero": {
     "sin": 2,
@@ -972,7 +972,7 @@
    },
    "marilla": {
     "sin": null,
-    "con": 4
+    "con": 3
    },
    "diana": {
     "fuera": true
@@ -1058,7 +1058,7 @@
     "fuera": true
    },
    "lawson": {
-    "sin": 1,
+    "sin": 0,
     "con": 2
    },
    "herrero": {
@@ -1183,15 +1183,15 @@
    },
    "marilla": {
     "sin": null,
-    "con": 5
+    "con": 4
    },
    "diana": {
     "sin": 5,
-    "con": 6
+    "con": 5
    },
    "barry": {
-    "sin": 2,
-    "con": 3
+    "sin": 1,
+    "con": 2
    },
    "lynde": {
     "sin": 5,
@@ -1270,7 +1270,7 @@
     "fuera": true
    },
    "lawson": {
-    "sin": 1,
+    "sin": 0,
     "con": 2
    },
    "herrero": {
@@ -1395,7 +1395,7 @@
    },
    "marilla": {
     "sin": null,
-    "con": 5
+    "con": 4
    },
    "diana": {
     "sin": 5,
@@ -1483,7 +1483,7 @@
     "fuera": true
    },
    "lawson": {
-    "sin": 1,
+    "sin": 0,
     "con": 2
    },
    "herrero": {
@@ -1607,7 +1607,7 @@
    },
    "marilla": {
     "sin": null,
-    "con": 5
+    "con": 4
    },
    "diana": {
     "sin": 5,
@@ -1695,7 +1695,7 @@
     "fuera": true
    },
    "lawson": {
-    "sin": 1,
+    "sin": 0,
     "con": 2
    },
    "herrero": {
@@ -1820,7 +1820,7 @@
    },
    "marilla": {
     "sin": null,
-    "con": 5
+    "con": 4
    },
    "diana": {
     "sin": 4,
@@ -1910,7 +1910,7 @@
     "con": 3
    },
    "lawson": {
-    "sin": 1,
+    "sin": 0,
     "con": 2
    },
    "herrero": {
@@ -2034,7 +2034,7 @@
    },
    "marilla": {
     "sin": null,
-    "con": 5
+    "con": 4
    },
    "diana": {
     "sin": 5,
@@ -2122,7 +2122,7 @@
     "con": 3
    },
    "lawson": {
-    "sin": 1,
+    "sin": 0,
     "con": 2
    },
    "herrero": {
@@ -2971,6 +2971,452 @@
    ]
   },
   {
+   "id": "carta_spencer_prueba",
+   "canal": "carta",
+   "disparo": "",
+   "prioridad": 5,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "carta:spencer, !hecho:se_queda",
+   "en": "",
+   "hablan": "",
+   "lineas": 9,
+   "primera": "ana: (Ana moja la pluma y se queda quieta un rato largo. Le tiembla un poco la mano.)",
+   "quienes": [],
+   "con": "",
+   "una_vez": true,
+   "texto": [
+    "ana: (Ana moja la pluma y se queda quieta un rato largo. Le tiembla un poco la mano.)",
+    "carta: Querida Sra. Spencer:",
+    "carta: Le escribo desde Tejas Verdes, donde estoy a prueba. Usted ya sabe que los Cuthbert querían un niño, para ayudar a Matthew en la granja.",
+    "ana: «A prueba». Suena como un pastel que todavía no saben si se les cayó o no.",
+    "carta: Marilla todavía no decide si me quedo. Yo me porto lo mejor que puedo, aunque a veces se me olvida.",
+    "carta: Aquí hay un cerezo debajo de mi ventana, y un arroyo, y una niña que se llama Diana en la granja de al lado.",
+    "ana: (Escribe una línea, la mira mucho rato, y no la tacha.)",
+    "carta: Si me devuelven, ¿podría buscarme una casa donde haya árboles? Pero ojalá no haga falta.",
+    "carta: Su servidora, Ana Shirley"
+   ]
+  },
+  {
+   "id": "carta_spencer_1",
+   "canal": "carta",
+   "disparo": "",
+   "prioridad": 5,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "siempre",
+   "si": "carta:spencer, hecho:se_queda",
+   "en": "",
+   "hablan": "",
+   "lineas": 8,
+   "primera": "ana: (Ana escribe con su mejor letra, como si la Sra. Spencer fuera a corregirla.)",
+   "quienes": [],
+   "con": "",
+   "una_vez": false,
+   "texto": [
+    "ana: (Ana escribe con su mejor letra, como si la Sra. Spencer fuera a corregirla.)",
+    "carta: Querida Sra. Spencer:",
+    "carta: Aquí en Tejas Verdes los arces se pusieron rojos.",
+    "carta: Le escribo para contarle cómo me va, porque usted fue quien me trajo, aunque fuera por equivocación.",
+    "carta: Marilla es seria pero justa, y Matthew es la persona más buena del mundo. Creo que aquí sí me quieren un poquito.",
+    "ana: «Un poquito» es por modestia. Pero no le voy a poner «mucho», no vaya a ser que se gaste.",
+    "carta: Le doy las gracias por la equivocación: fue la más afortunada de mi vida.",
+    "carta: Su agradecida, Ana Shirley (de Tejas Verdes)"
+   ]
+  },
+  {
+   "id": "resp_diana_1",
+   "canal": "respuesta",
+   "disparo": "",
+   "prioridad": 1,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "respuesta:diana",
+   "en": "",
+   "hablan": "",
+   "lineas": 4,
+   "primera": "carta: Querida Ana:",
+   "quienes": [],
+   "con": "",
+   "una_vez": true,
+   "texto": [
+    "carta: Querida Ana:",
+    "carta: ¡Qué carta tan bonita! La leí tres veces y la guardé en mi caja de cartas, con la cinta azul.",
+    "carta: Mamá dice que mañana puedo ir a Tejas Verdes después de los quehaceres. ¡Llevo el libro de poemas!",
+    "carta: Tu amiga del alma, Diana"
+   ]
+  },
+  {
+   "id": "resp_diana_2",
+   "canal": "respuesta",
+   "disparo": "",
+   "prioridad": 1,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "respuesta:diana",
+   "en": "",
+   "hablan": "",
+   "lineas": 4,
+   "primera": "carta: Queridísima Ana:",
+   "quienes": [],
+   "con": "",
+   "una_vez": true,
+   "texto": [
+    "carta: Queridísima Ana:",
+    "carta: Tu carta me hizo reír tanto que Minnie May me preguntó qué pasaba. No le dije: es un secreto de amigas del alma.",
+    "carta: Guardé tu lugar en la escuela. Ruby quería sentarse, pero le dije que no.",
+    "carta: Siempre tuya, Diana"
+   ]
+  },
+  {
+   "id": "resp_stacy_1",
+   "canal": "respuesta",
+   "disparo": "",
+   "prioridad": 1,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "respuesta:stacy",
+   "en": "",
+   "hablan": "",
+   "lineas": 4,
+   "primera": "carta: Querida Ana:",
+   "quienes": [],
+   "con": "",
+   "una_vez": true,
+   "texto": [
+    "carta: Querida Ana:",
+    "carta: Me alegró mucho recibir tu carta. Escribes con el corazón, y eso no se enseña.",
+    "carta: Sigue leyendo y escribiendo todos los días, aunque sea un poco. Y sí: usa menos adjetivos.",
+    "carta: Con cariño, Muriel Stacy"
+   ]
+  },
+  {
+   "id": "resp_stacy_2",
+   "canal": "respuesta",
+   "disparo": "",
+   "prioridad": 1,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "respuesta:stacy",
+   "en": "",
+   "hablan": "",
+   "lineas": 4,
+   "primera": "carta: Querida Ana:",
+   "quienes": [],
+   "con": "",
+   "una_vez": true,
+   "texto": [
+    "carta: Querida Ana:",
+    "carta: Claro que podrías escribir un libro. Empieza por una página, y después otra. Así se hacen todos.",
+    "carta: Te espero el lunes con tu composición.",
+    "carta: Tu maestra, M. Stacy"
+   ]
+  },
+  {
+   "id": "resp_sraallan_1",
+   "canal": "respuesta",
+   "disparo": "",
+   "prioridad": 1,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "respuesta:sraallan",
+   "en": "",
+   "hablan": "",
+   "lineas": 4,
+   "primera": "carta: Querida Ana:",
+   "quienes": [],
+   "con": "",
+   "una_vez": true,
+   "texto": [
+    "carta: Querida Ana:",
+    "carta: Qué alegría me dio tu carta. A mí también me gustó mucho la tarde del té.",
+    "carta: Ser buena no es no equivocarse nunca, Ana: es seguir intentándolo. Y tú lo haces muy bien.",
+    "carta: Te quiere, la Sra. Allan"
+   ]
+  },
+  {
+   "id": "resp_josephine_1",
+   "canal": "respuesta",
+   "disparo": "",
+   "prioridad": 1,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "respuesta:josephine",
+   "en": "",
+   "hablan": "",
+   "lineas": 4,
+   "primera": "carta: Querida Ana:",
+   "quienes": [],
+   "con": "",
+   "una_vez": true,
+   "texto": [
+    "carta: Querida Ana:",
+    "carta: Tu carta me hizo reír más que cualquier cosa en todo el invierno. Hacía años que no me reía así.",
+    "carta: Charlottetown es muy aburrido sin una niña como tú. Cuando vengas con Diana, iremos a la exposición.",
+    "carta: Tu vieja amiga, Josephine Barry"
+   ]
+  },
+  {
+   "id": "resp_josephine_2",
+   "canal": "respuesta",
+   "disparo": "",
+   "prioridad": 1,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "respuesta:josephine",
+   "en": "",
+   "hablan": "",
+   "lineas": 4,
+   "primera": "carta: Mi querida Ana:",
+   "quienes": [],
+   "con": "",
+   "una_vez": true,
+   "texto": [
+    "carta: Mi querida Ana:",
+    "carta: Recibí tu carta y la leí junto a la chimenea. Escribes como hablas, y eso es un gran elogio viniendo de mí.",
+    "carta: Te mando un saludo para Marilla, y para ti, mi cariño.",
+    "carta: J. Barry"
+   ]
+  },
+  {
+   "id": "resp_spencer_prueba",
+   "canal": "respuesta",
+   "disparo": "",
+   "prioridad": 1,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "respuesta:spencer, !hecho:se_queda",
+   "en": "",
+   "hablan": "",
+   "lineas": 4,
+   "primera": "carta: Querida Ana:",
+   "quienes": [],
+   "con": "",
+   "una_vez": true,
+   "texto": [
+    "carta: Querida Ana:",
+    "carta: Recibí tu carta. No te preocupes antes de tiempo, niña: la Srta. Cuthbert es una mujer seria, pero justa.",
+    "carta: Ayuda en la casa, haz lo que te dicen y, sobre todo, no hables tanto. Eso es lo que más cansa a la gente mayor.",
+    "carta: Afectuosamente, la Sra. Spencer"
+   ]
+  },
+  {
+   "id": "resp_spencer_prueba_quedo",
+   "canal": "respuesta",
+   "disparo": "",
+   "prioridad": 1,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "respuesta:spencer, hecho:se_queda",
+   "en": "",
+   "hablan": "",
+   "lineas": 4,
+   "primera": "carta: Querida Ana:",
+   "quienes": [],
+   "con": "",
+   "una_vez": true,
+   "texto": [
+    "carta: Querida Ana:",
+    "carta: Cuando llegó tu carta ya me había enterado: ¡los Cuthbert se quedaron contigo! Ya ves que las cosas se arreglan, cuando una se porta bien.",
+    "carta: Ahora tienes casa, niña. Cuídala, y no hables tanto.",
+    "carta: Afectuosamente, la Sra. Spencer"
+   ]
+  },
+  {
+   "id": "resp_spencer_conocidas_diana",
+   "canal": "respuesta",
+   "disparo": "",
+   "prioridad": 1,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "respuesta:spencer, hecho:se_queda, hecho:conocidas_diana",
+   "en": "",
+   "hablan": "",
+   "lineas": 4,
+   "primera": "carta: Querida Ana:",
+   "quienes": [],
+   "con": "",
+   "una_vez": true,
+   "texto": [
+    "carta: Querida Ana:",
+    "carta: ¿Así que ya tienes una amiga, la niña de los Barry? Me alegro, Ana. Una buena amiga vale más que un vestido nuevo. Pero no la marees con tanta palabra.",
+    "carta: Y pórtate bien en casa de los Barry, que la Sra. Barry es muy estricta.",
+    "carta: Afectuosamente, la Sra. Spencer"
+   ]
+  },
+  {
+   "id": "resp_spencer_zanahorias_pizarra",
+   "canal": "respuesta",
+   "disparo": "",
+   "prioridad": 1,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "respuesta:spencer, hecho:se_queda, hecho:zanahorias_pizarra",
+   "en": "",
+   "hablan": "",
+   "lineas": 4,
+   "primera": "carta: Querida Ana:",
+   "quienes": [],
+   "con": "",
+   "una_vez": true,
+   "texto": [
+    "carta: Querida Ana:",
+    "carta: ¡Ana Shirley! ¿Cómo que le partiste la pizarra en la cabeza a un muchacho? Ya sé que te dijo zanahoria, pero una señorita no anda rompiendo pizarras.",
+    "carta: Pídele perdón, o por lo menos no lo hagas otra vez. Lo que se dice del pelo se olvida; lo que se hace, no.",
+    "carta: Afectuosamente, la Sra. Spencer"
+   ]
+  },
+  {
+   "id": "resp_spencer_zanahorias_contesta",
+   "canal": "respuesta",
+   "disparo": "",
+   "prioridad": 1,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "respuesta:spencer, hecho:se_queda, hecho:zanahorias_contesta",
+   "en": "",
+   "hablan": "",
+   "lineas": 4,
+   "primera": "carta: Querida Ana:",
+   "quienes": [],
+   "con": "",
+   "una_vez": true,
+   "texto": [
+    "carta: Querida Ana:",
+    "carta: Así que le contestaste a ese muchacho delante de toda la escuela. Hmm. No te voy a decir que hiciste mal, porque se lo buscó. Pero cuida esa lengua, Ana.",
+    "carta: Una lengua rápida da más disgustos que alegrías. Te lo digo yo, que tengo cuarenta años de práctica.",
+    "carta: Afectuosamente, la Sra. Spencer"
+   ]
+  },
+  {
+   "id": "resp_spencer_zanahorias_ignora",
+   "canal": "respuesta",
+   "disparo": "",
+   "prioridad": 1,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "respuesta:spencer, hecho:se_queda, hecho:zanahorias_ignora",
+   "en": "",
+   "hablan": "",
+   "lineas": 4,
+   "primera": "carta: Querida Ana:",
+   "quienes": [],
+   "con": "",
+   "una_vez": true,
+   "texto": [
+    "carta: Querida Ana:",
+    "carta: Me cuentas que un muchacho se burló de tu pelo y que hiciste como si no existiera. Eso, Ana, es tener más juicio que muchas señoras que conozco.",
+    "carta: Sigue así. Y el pelo rojo se oscurece con los años, ya verás.",
+    "carta: Afectuosamente, la Sra. Spencer"
+   ]
+  },
+  {
+   "id": "resp_spencer_ofendio_lynde",
+   "canal": "respuesta",
+   "disparo": "",
+   "prioridad": 1,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "respuesta:spencer, hecho:se_queda, hecho:ofendio_lynde",
+   "en": "",
+   "hablan": "",
+   "lineas": 4,
+   "primera": "carta: Querida Ana:",
+   "quienes": [],
+   "con": "",
+   "una_vez": true,
+   "texto": [
+    "carta: Querida Ana:",
+    "carta: Me enteré, Ana. Rachel Lynde me escribió. ¿Cómo se te ocurre gritarle a una señora así, en la casa que te recibió?",
+    "carta: Ve a pedirle perdón, niña. Aunque ella haya dicho lo que dijo. Así se hacen las cosas.",
+    "carta: Afectuosamente, la Sra. Spencer"
+   ]
+  },
+  {
+   "id": "resp_spencer_lynde_llanto",
+   "canal": "respuesta",
+   "disparo": "",
+   "prioridad": 1,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "respuesta:spencer, hecho:se_queda, hecho:lynde_llanto",
+   "en": "",
+   "hablan": "",
+   "lineas": 4,
+   "primera": "carta: Querida Ana:",
+   "quienes": [],
+   "con": "",
+   "una_vez": true,
+   "texto": [
+    "carta: Querida Ana:",
+    "carta: Me dices que la Sra. Lynde te llamó flaca y fea, y que te fuiste llorando. Ay, Ana. Rachel Lynde dice lo que piensa, y piensa demasiado.",
+    "carta: No le hagas caso. Y come más, que algo de razón tiene en lo de flaca.",
+    "carta: Afectuosamente, la Sra. Spencer"
+   ]
+  },
+  {
+   "id": "resp_spencer_prohibida",
+   "canal": "respuesta",
+   "disparo": "",
+   "prioridad": 1,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "respuesta:spencer, hecho:se_queda, hecho:prohibida",
+   "en": "",
+   "hablan": "",
+   "lineas": 4,
+   "primera": "carta: Querida Ana:",
+   "quienes": [],
+   "con": "",
+   "una_vez": true,
+   "texto": [
+    "carta: Querida Ana:",
+    "carta: Qué pena lo de la niña de los Barry. Vino de grosellas… ¡quién iba a pensar! Ten paciencia, Ana: las madres se ablandan con el tiempo.",
+    "carta: Mientras tanto, no la vayas a buscar a escondidas. Eso lo empeoraría todo.",
+    "carta: Afectuosamente, la Sra. Spencer"
+   ]
+  },
+  {
+   "id": "resp_spencer_1",
+   "canal": "respuesta",
+   "disparo": "",
+   "prioridad": 1,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "respuesta:spencer, hecho:se_queda",
+   "en": "",
+   "hablan": "",
+   "lineas": 4,
+   "primera": "carta: Querida Ana:",
+   "quienes": [],
+   "con": "",
+   "una_vez": true,
+   "texto": [
+    "carta: Querida Ana:",
+    "carta: Me dio mucho gusto saber de ti. Ya ves que las cosas se arreglan solas, cuando una se porta bien.",
+    "carta: Saludos a la Srta. Cuthbert. Y no hables tanto, niña.",
+    "carta: Afectuosamente, la Sra. Spencer"
+   ]
+  },
+  {
    "id": "quiere_amiga",
    "canal": "gg",
    "disparo": "",
@@ -2995,6 +3441,27 @@
     "ana: ¡Oh! ¿Y cómo es? ¿Tiene el pelo rojo? Espero que no. Ya es bastante malo que yo lo tenga.",
     "marilla: Diana es muy bonita: ojos y pelo negros, y mejillas rosadas. Y es buena e inteligente, que es mejor que ser bonita. Un día de estos tengo que ir a ver a la Sra. Barry; si te portas bien, puedes venir conmigo.",
     "ana: ¡Oh, Marilla! Ahora tengo miedo: ¿y si no le gusto? Sería la desilusión más trágica de mi vida."
+   ]
+  },
+  {
+   "id": "aviso_barry",
+   "canal": "gg",
+   "disparo": "",
+   "prioridad": 5,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "dia",
+   "si": "dias_desde:quiere_amiga:1, !hecho:conocidas_diana, !hecho:barry_presenta, presente:diana, hora:6-13",
+   "en": "ana=gg, marilla=gg",
+   "hablan": "marilla",
+   "lineas": 2,
+   "primera": "marilla: Ana, esta tarde, después del almuerzo, voy a La Cuesta del Huerto a devolverle un patrón a la Sra. Barry. Si quieres conocer a Diana, no te vayas lejos.",
+   "quienes": [],
+   "con": "",
+   "una_vez": false,
+   "texto": [
+    "marilla: Ana, esta tarde, después del almuerzo, voy a La Cuesta del Huerto a devolverle un patrón a la Sra. Barry. Si quieres conocer a Diana, no te vayas lejos.",
+    "ana: ¡Oh, Marilla! Voy a estar aquí, quietecita como una estatua. Bueno… casi como una estatua."
    ]
   },
   {
@@ -3082,7 +3549,7 @@
    "si": "cuaderno:amigas, dias_desde:conocidas_diana:5, !hecho:broche",
    "en": "ana=gg, marilla=gg",
    "hablan": "marilla",
-   "lineas": 9,
+   "lineas": 8,
    "primera": "narra: Marilla tiene un broche de amatista que fue de su madre: lo más valioso que posee, y lo usa solo para ir a la iglesia. Y la escuela dominical va a hacer un picnic en el lago, con helado, algo que Ana nunca ha probado.",
    "quienes": [],
    "con": "",
@@ -3092,11 +3559,9 @@
     "marilla: Ana, ¿has visto mi broche de amatista? Lo dejé en el alfiletero de mi cuarto y no está.",
     "ana: Lo vi ayer… me lo probé, solo un minutito, y lo dejé otra vez en el tocador.",
     "marilla: Pues no está. Ana, te quedas en tu cuarto hasta que me digas la verdad.",
-    "ana: (Ana se queda en su cuarto, pensando en el picnic. Al final, inventa una confesión.) Me lo llevé para ser Lady Cordelia Fitzgerald… y se me cayó al Lago de las Aguas Brillantes. Ya confesé: ¿ahora puedo ir al picnic?",
-    "marilla: ¿Picnic? No irás a ningún picnic, Ana Shirley.",
-    "marilla: (Marilla saca su chal negro para remendarlo… y algo brilla en el encaje.) ¡El broche! Estaba enganchado en mi chal… Ana, ¿por qué dijiste que lo habías perdido?",
-    "ana: Usted dijo que no saldría hasta confesar. Así que inventé una confesión… y bien interesante, además.",
-    "marilla: (Marilla se ríe, a pesar de todo.) Perdóname, Ana. No debí dudar de ti. Ve a prepararte para el picnic."
+    "marilla: (Marilla saca su chal negro para remendarlo… y algo brilla en el encaje.) ¡El broche! Estaba enganchado en mi chal…",
+    "marilla: (Marilla sube la escalera, despacio.) Ana… lo encontré. Perdóname: no debí dudar de ti. Ve a prepararte para el picnic.",
+    "ana: (Ana baja la escalera de un salto, con los ojos brillando.) ¡Helado! ¡Por fin voy a probar el helado!"
    ]
   },
   {
@@ -3110,18 +3575,145 @@
    "si": "!hecho:zanahorias",
    "en": "ana=es, gilbert=es",
    "hablan": "gilbert",
-   "lineas": 6,
+   "lineas": 3,
    "primera": "narra: La escuela de Avonlea tiene una sola sala, para todos los niños del pueblo. Gilbert Blythe es el más listo y el más buen mozo, y está acostumbrado a que todas las niñas lo miren. Ana todavía no lo ha mirado.",
    "quienes": [],
    "con": "",
    "una_vez": true,
    "texto": [
     "narra: La escuela de Avonlea tiene una sola sala, para todos los niños del pueblo. Gilbert Blythe es el más listo y el más buen mozo, y está acostumbrado a que todas las niñas lo miren. Ana todavía no lo ha mirado.",
-    "gilbert: (Gilbert Blythe alarga la mano, toma la punta de una trenza de Ana y susurra, lo bastante fuerte para que lo oiga toda la clase.) ¡Zanahorias! ¡Zanahorias!",
-    "ana: (Ana se pone de pie de un salto, con los ojos echando chispas.) ¡Odioso, malvado! ¿Cómo te atreves?",
-    "ana: (¡Crac! Ana le parte la pizarra en la cabeza a Gilbert.)",
-    "gilbert: ¡Ay! Perdona, Ana… solo era una broma. De verdad, perdóname.",
-    "ana: ¡Nunca te lo perdonaré! ¡Nunca jamás!"
+    "gilbert: (Gilbert Blythe alarga la mano, toma la punta de una trenza de Ana y susurra, lo bastante fuerte para que lo oiga toda la clase.) ¡Zanahorias! ¡Zanahorias!"
+   ]
+  },
+  {
+   "id": "clase_geografia",
+   "canal": "es",
+   "disparo": "",
+   "prioridad": 4,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "cada 6",
+   "si": "hora:9.2-12, no_hoy:clase",
+   "en": "ana=es, phillips=es",
+   "hablan": "phillips",
+   "lineas": 3,
+   "primera": "narra: Clase de geografía. El Sr. Phillips señala el mapa del Canadá con una varilla, y las provincias parecen manchas de colores.",
+   "quienes": [],
+   "con": "",
+   "una_vez": false,
+   "texto": [
+    "narra: Clase de geografía. El Sr. Phillips señala el mapa del Canadá con una varilla, y las provincias parecen manchas de colores.",
+    "phillips: Ana Shirley. ¿Cuál es la capital de la Isla del Príncipe Eduardo?"
+   ]
+  },
+  {
+   "id": "clase_dictado",
+   "canal": "es",
+   "disparo": "",
+   "prioridad": 4,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "cada 6",
+   "si": "hora:9.2-12, no_hoy:clase",
+   "en": "ana=es, phillips=es",
+   "hablan": "phillips",
+   "lineas": 4,
+   "primera": "narra: Dictado. Se oye el rasgueo de las plumas sobre las pizarras, y una mosca que choca contra el vidrio.",
+   "quienes": [],
+   "con": "",
+   "una_vez": false,
+   "texto": [
+    "narra: Dictado. Se oye el rasgueo de las plumas sobre las pizarras, y una mosca que choca contra el vidrio.",
+    "phillips: «El… invierno… en… Avonlea… es… largo… y… blanco.» Punto.",
+    "ana: (Ana escribe «blanco», y después, sin poder evitarlo, «como el vestido de una novia que espera junto a la ventana».)"
+   ]
+  },
+  {
+   "id": "clase_geometria",
+   "canal": "es",
+   "disparo": "",
+   "prioridad": 4,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "cada 6",
+   "si": "hora:9.2-12, no_hoy:clase",
+   "en": "ana=es, phillips=es",
+   "hablan": "phillips",
+   "lineas": 4,
+   "primera": "narra: Geometría. En el pizarrón hay un triángulo con letras en las puntas, y para Ana es un misterio tan grande como las pirámides.",
+   "quienes": [],
+   "con": "",
+   "una_vez": false,
+   "texto": [
+    "narra: Geometría. En el pizarrón hay un triángulo con letras en las puntas, y para Ana es un misterio tan grande como las pirámides.",
+    "phillips: Ana Shirley, al pizarrón. Demuestre que estos dos ángulos son iguales.",
+    "ana: (Ana se queda mirando el triángulo. El triángulo la mira a ella.)"
+   ]
+  },
+  {
+   "id": "clase_lectura",
+   "canal": "es",
+   "disparo": "",
+   "prioridad": 4,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "cada 6",
+   "si": "hora:9.2-12, no_hoy:clase",
+   "en": "ana=es, phillips=es",
+   "hablan": "phillips",
+   "lineas": 5,
+   "primera": "narra: Lectura en voz alta. Le toca a Ana leer un poema del libro de cuarto grado.",
+   "quienes": [],
+   "con": "",
+   "una_vez": false,
+   "texto": [
+    "narra: Lectura en voz alta. Le toca a Ana leer un poema del libro de cuarto grado.",
+    "phillips: Ana Shirley, «La batalla de Hohenlinden». Desde el principio.",
+    "ana: (Ana se pone de pie y lee. Al principio despacio; después, con la voz temblando, como si la batalla pasara ahí mismo, entre los bancos.)",
+    "ana: «…y de Hohenlinden en la nieve, corría el río, rojo y frío…»"
+   ]
+  },
+  {
+   "id": "clase_composicion_stacy",
+   "canal": "es",
+   "disparo": "",
+   "prioridad": 4,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "cada 5",
+   "si": "hora:9.2-12, no_hoy:clase",
+   "en": "ana=es, stacy=es",
+   "hablan": "stacy",
+   "lineas": 4,
+   "primera": "narra: La Srta. Stacy abre las ventanas para que entre el aire. «Hoy», dice, «van a escribir sobre algo que vean desde aquí».",
+   "quienes": [],
+   "con": "",
+   "una_vez": false,
+   "texto": [
+    "narra: La Srta. Stacy abre las ventanas para que entre el aire. «Hoy», dice, «van a escribir sobre algo que vean desde aquí».",
+    "stacy: Escriban lo que ven, niños. Pero miren bien: con los ojos, y con algo más.",
+    "ana: (Ana mira por la ventana. Un arce, el camino, un pedazo de cielo. Y empieza a escribir sin parar.)"
+   ]
+  },
+  {
+   "id": "clase_botanica_stacy",
+   "canal": "es",
+   "disparo": "",
+   "prioridad": 4,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "cada 5",
+   "si": "hora:9.2-12, no_hoy:clase",
+   "en": "ana=es, stacy=es",
+   "hablan": "stacy",
+   "lineas": 3,
+   "primera": "narra: Clase de botánica. La Srta. Stacy trajo del bosque un ramo de flores silvestres, y lo pone en un frasco sobre su mesa.",
+   "quienes": [],
+   "con": "",
+   "una_vez": false,
+   "texto": [
+    "narra: Clase de botánica. La Srta. Stacy trajo del bosque un ramo de flores silvestres, y lo pone en un frasco sobre su mesa.",
+    "stacy: (La Srta. Stacy saca una florcita blanca, de siete pétalos.) ¿Quién sabe cómo se llama esta flor?"
    ]
   },
   {
@@ -5752,7 +6344,7 @@
    "interrumpe": false,
    "grande": false,
    "repetir": "dia",
-   "si": "estacion:primavera",
+   "si": "estacion:primavera, dias_desde:regado:2",
    "en": "",
    "hablan": "",
    "lineas": 2,
@@ -5773,7 +6365,7 @@
    "interrumpe": false,
    "grande": false,
    "repetir": "dia",
-   "si": "estacion:verano",
+   "si": "estacion:verano, hecho:regado",
    "en": "",
    "hablan": "",
    "lineas": 2,
@@ -5899,7 +6491,7 @@
    "interrumpe": false,
    "grande": false,
    "repetir": "dia",
-   "si": "hora:8-18",
+   "si": "hora:8-18, dias_desde:llegada_tv:10",
    "en": "",
    "hablan": "",
    "lineas": 2,
@@ -6359,7 +6951,7 @@
    "en": "",
    "hablan": "matthew",
    "lineas": 4,
-   "primera": "ana: ¡Matthew! Mire estas violetas. Las encontré a la orilla del camino. ¿No le parecen como pedacitos de cielo que se cayeron?",
+   "primera": "ana: ¡Matthew! ¿Ha visto las violetas a la orilla del camino? ¿No le parecen como pedacitos de cielo que se cayeron?",
    "quienes": [
     "matthew",
     "ana"
@@ -6367,7 +6959,7 @@
    "con": "matthew",
    "una_vez": true,
    "texto": [
-    "ana: ¡Matthew! Mire estas violetas. Las encontré a la orilla del camino. ¿No le parecen como pedacitos de cielo que se cayeron?",
+    "ana: ¡Matthew! ¿Ha visto las violetas a la orilla del camino? ¿No le parecen como pedacitos de cielo que se cayeron?",
     "matthew: Bueno, pues… sí. Ahora que lo dices, sí.",
     "ana: Usted siempre me entiende. Es tan agradable hablar con alguien que entiende.",
     "matthew: (Matthew se pone colorado hasta las orejas, pero sonríe.)"
@@ -6466,7 +7058,7 @@
    "en": "",
    "hablan": "matthew",
    "lineas": 4,
-   "primera": "ana: Matthew, Marilla me retó otra vez. Dice que soy una cabeza de chorlito.",
+   "primera": "ana: Matthew, ¿usted cree que soy una cabeza de chorlito? A veces Marilla me mira como si lo pensara, y se le escapa un suspiro.",
    "quienes": [
     "matthew",
     "ana"
@@ -6474,7 +7066,7 @@
    "con": "matthew",
    "una_vez": true,
    "texto": [
-    "ana: Matthew, Marilla me retó otra vez. Dice que soy una cabeza de chorlito.",
+    "ana: Matthew, ¿usted cree que soy una cabeza de chorlito? A veces Marilla me mira como si lo pensara, y se le escapa un suspiro.",
     "matthew: Bueno, pues… Marilla es muy buena, ¿sabes? Muy buena. Pero tú… tú haz lo que ella dice, y cuando no puedas, me lo cuentas a mí.",
     "ana: ¿Usted cree que algún día voy a ser como ella quiere?",
     "matthew: Yo creo que ya eres bastante buena así. Pero no le digas que te lo dije."
@@ -6488,11 +7080,11 @@
    "interrumpe": false,
    "grande": false,
    "repetir": "una_vez",
-   "si": "afecto:matthew:ana>=3",
+   "si": "afecto:matthew:ana>=3, !estacion:invierno",
    "en": "",
    "hablan": "matthew",
-   "lineas": 4,
-   "primera": "ana: Matthew, ¿me enseña a sembrar las arvejas? Quiero hacerlo bien, no a mi manera.",
+   "lineas": 6,
+   "primera": "ana: Matthew, ¿me enseña a sembrar? Quiero hacerlo bien, no a mi manera. Y quiero tener un huertito mío, chiquito.",
    "quienes": [
     "matthew",
     "ana"
@@ -6500,10 +7092,12 @@
    "con": "matthew",
    "una_vez": true,
    "texto": [
-    "ana: Matthew, ¿me enseña a sembrar las arvejas? Quiero hacerlo bien, no a mi manera.",
-    "matthew: Bueno, pues… se hace un surco así, ¿ves? No muy hondo. Y una semilla cada tanto, no todas juntas.",
-    "ana: (Ana pone las semillas una por una, contándolas en voz alta.) ¡Cuarenta y tres arvejitas que van a dormir hasta la primavera!",
-    "matthew: Hasta la semana que viene, más bien. Je."
+    "ana: Matthew, ¿me enseña a sembrar? Quiero hacerlo bien, no a mi manera. Y quiero tener un huertito mío, chiquito.",
+    "matthew: (Matthew se agacha junto a la tierra y hace un surco con el dedo.) Bueno, pues… un surco así, ¿ves? No muy hondo. Y una semilla cada tanto, no todas juntas.",
+    "ana: (Ana pone las semillas una por una, contándolas en voz alta.) …siete, ocho, nueve. ¡Ya están acostadas! ¿Mañana salen?",
+    "matthew: Je. No, no… Agua todos los días, y paciencia. Unas dos semanas para que asomen las hojas, y más para las flores. Las cosas que crecen se demoran, ¿sabes?",
+    "matthew: (Saca del bolsillo un sobrecito de papel doblado.) Toma. Capuchinas. Para tu huertito… donde tú quieras.",
+    "ana: ¡Donde yo quiera! Oh, Matthew, es el regalo más lleno de futuro que me han hecho nunca."
    ]
   },
   {
@@ -6780,7 +7374,7 @@
    "interrumpe": false,
    "grande": false,
    "repetir": "una_vez",
-   "si": "afecto:diana:ana>=3, hecho:zanahorias, !hecho:prohibida",
+   "si": "afecto:diana:ana>=3, hecho:zanahorias, !hecho:zanahorias_contesta, !hecho:prohibida",
    "en": "",
    "hablan": "diana",
    "lineas": 6,
@@ -6797,6 +7391,33 @@
     "diana: Pero si fue solo una broma…",
     "ana: Una broma imperdonable. Hay cosas que no se olvidan, Diana. Se llevan en el alma.",
     "diana: (Diana suspira, pero no dice nada más.)"
+   ]
+  },
+  {
+   "id": "conv_diana_gilbert_contesta",
+   "canal": "conv",
+   "disparo": "conversar",
+   "prioridad": 1,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "afecto:diana:ana>=3, hecho:zanahorias_contesta, !hecho:prohibida",
+   "en": "",
+   "hablan": "diana",
+   "lineas": 6,
+   "primera": "diana: Ana… toda la escuela habla de lo que le dijiste a Gilbert. ¡Nadie le había contestado así nunca! Se puso más rojo que tu pelo.",
+   "quienes": [
+    "diana",
+    "ana"
+   ],
+   "con": "diana",
+   "una_vez": true,
+   "texto": [
+    "diana: Ana… toda la escuela habla de lo que le dijiste a Gilbert. ¡Nadie le había contestado así nunca! Se puso más rojo que tu pelo.",
+    "ana: Se lo merecía, Diana. Una no puede dejar que le digan zanahoria delante de todos y quedarse callada como un pez.",
+    "diana: Pero él dijo «me lo merezco». Y después, en el recreo, te miraba. Yo creo que le gustaste, Ana.",
+    "ana: (Ana se pone colorada hasta las orejas.) ¡Diana Barry! No digas esas cosas. Gilbert Blythe puede mirar todo lo que quiera: yo no pienso mirarlo nunca.",
+    "diana: (Diana sonríe, pero no dice nada.)"
    ]
   },
   {
@@ -10495,7 +11116,7 @@
    "saben": "marilla, matthew, spencer",
    "alConocer": true,
    "llega": "",
-   "cuentaPor": "",
+   "cuentaPor": 6,
    "versiones": 1,
    "dice": "¿Supo lo de los Cuthbert? ¡Pidieron un niño al orfanato y les llegó una niña! Pelirroja, dicen.",
    "exagerada": ""
@@ -10974,11 +11595,34 @@
    "broche": [
     "escena broche"
    ],
+   "broche_confeso": [
+    "escena broche (una opción)"
+   ],
+   "broche_verdad": [
+    "escena broche (una opción)"
+   ],
    "zanahorias": [
     "escena zanahorias"
    ],
    "conoce_gilbert": [
     "escena zanahorias"
+   ],
+   "zanahorias_pizarra": [
+    "escena zanahorias (una opción)"
+   ],
+   "zanahorias_ignora": [
+    "escena zanahorias (una opción)"
+   ],
+   "zanahorias_contesta": [
+    "escena zanahorias (una opción)"
+   ],
+   "clase": [
+    "escena clase_geografia",
+    "escena clase_dictado",
+    "escena clase_geometria",
+    "escena clase_lectura",
+    "escena clase_composicion_stacy",
+    "escena clase_botanica_stacy"
    ],
    "diana_borracha": [
     "escena te_grosella"
@@ -11068,6 +11712,12 @@
    "ofendio_lynde": [
     "escena lynde_visita (una opción)"
    ],
+   "lynde_contenida": [
+    "escena lynde_visita (una opción)"
+   ],
+   "lynde_llanto": [
+    "escena lynde_visita (una opción)"
+   ],
    "perdon_pedido": [
     "escena lynde_perdon_marilla"
    ],
@@ -11081,7 +11731,7 @@
     "escena conv_diana_nombres"
    ],
    "ana_admite_gilbert": [
-    "escena conv_diana_gilbert (una opción)"
+    "escena conv_diana_gilbert_contesta (una opción)"
    ],
    "llego_diana": [
     "llegadas"
@@ -11146,12 +11796,6 @@
    "hito_mano_leche_7": [
     "habilidad mano_leche"
    ],
-   "hito_mano_lena_2": [
-    "habilidad mano_lena"
-   ],
-   "hito_mano_lena_5": [
-    "habilidad mano_lena"
-   ],
    "hito_mano_cocina_2": [
     "habilidad mano_cocina"
    ],
@@ -11194,6 +11838,9 @@
    "se_fue_": [
     "código"
    ],
+   "regado": [
+    "código"
+   ],
    "nombro_": [
     "código"
    ],
@@ -11204,6 +11851,9 @@
     "código"
    ],
    "conoce_": [
+    "código"
+   ],
+   "historia_": [
     "código"
    ],
    "inicio_juego": [
@@ -11220,6 +11870,114 @@
    ],
    "ropa_arrugada": [
     "código"
+   ],
+   "historia_llegada": [
+    "hitos"
+   ],
+   "historia_llegada_cerrado": [
+    "hitos"
+   ],
+   "historia_a_prueba": [
+    "hitos"
+   ],
+   "historia_a_prueba_cerrado": [
+    "hitos"
+   ],
+   "historia_decision": [
+    "hitos"
+   ],
+   "historia_decision_se_queda": [
+    "hitos"
+   ],
+   "historia_decision_devuelta": [
+    "hitos"
+   ],
+   "historia_decision_cerrado": [
+    "hitos"
+   ],
+   "historia_matthew_aliado": [
+    "hitos"
+   ],
+   "historia_matthew_aliado_cerrado": [
+    "hitos"
+   ],
+   "historia_humillada": [
+    "hitos"
+   ],
+   "historia_humillada_estalla": [
+    "hitos"
+   ],
+   "historia_humillada_se_contiene": [
+    "hitos"
+   ],
+   "historia_humillada_llora": [
+    "hitos"
+   ],
+   "historia_humillada_cerrado": [
+    "hitos"
+   ],
+   "historia_pedir_perdon": [
+    "hitos"
+   ],
+   "historia_pedir_perdon_a_lo_grande": [
+    "hitos"
+   ],
+   "historia_pedir_perdon_cerrado": [
+    "hitos"
+   ],
+   "historia_sombrero_iglesia": [
+    "hitos"
+   ],
+   "historia_sombrero_iglesia_cerrado": [
+    "hitos"
+   ],
+   "historia_amiga_del_alma": [
+    "hitos"
+   ],
+   "historia_amiga_del_alma_juran": [
+    "hitos"
+   ],
+   "historia_amiga_del_alma_no_juran": [
+    "hitos"
+   ],
+   "historia_amiga_del_alma_cerrado": [
+    "hitos"
+   ],
+   "historia_confianza_marilla": [
+    "hitos"
+   ],
+   "historia_confianza_marilla_confiesa_en_falso": [
+    "hitos"
+   ],
+   "historia_confianza_marilla_dice_la_verdad": [
+    "hitos"
+   ],
+   "historia_confianza_marilla_cerrado": [
+    "hitos"
+   ],
+   "historia_rival": [
+    "hitos"
+   ],
+   "historia_rival_pizarra": [
+    "hitos"
+   ],
+   "historia_rival_lo_ignora": [
+    "hitos"
+   ],
+   "historia_rival_le_contesta": [
+    "hitos"
+   ],
+   "historia_rival_cerrado": [
+    "hitos"
+   ],
+   "historia_amistad_a_prueba": [
+    "hitos"
+   ],
+   "historia_amistad_a_prueba_la_recupera": [
+    "hitos"
+   ],
+   "historia_amistad_a_prueba_cerrado": [
+    "hitos"
    ]
   },
   "piden": {
@@ -11238,21 +11996,83 @@
    "llegaron": [
     "escena llegada"
    ],
-   "pide_amiga": [
-    "código"
-   ],
-   "quiere_amiga": [
-    "escena barry_recibe",
-    "meta conocer_diana (pista)"
+   "se_queda": [
+    "escena carta_spencer_1",
+    "escena resp_spencer_prueba_quedo",
+    "escena resp_spencer_conocidas_diana",
+    "escena resp_spencer_zanahorias_pizarra",
+    "escena resp_spencer_zanahorias_contesta",
+    "escena resp_spencer_zanahorias_ignora",
+    "escena resp_spencer_ofendio_lynde",
+    "escena resp_spencer_lynde_llanto",
+    "escena resp_spencer_prohibida",
+    "escena resp_spencer_1",
+    "escena lynde_visita",
+    "escena ventana_se_queda",
+    "escena espejo_tejas_verdes",
+    "escena armario_vestidos",
+    "escena lugar_camino_blanco_flor",
+    "escena lugar_primera_nieve",
+    "escena conv_marilla_por_que",
+    "un comentario de espejo",
+    "charla par:ana+matthew:2",
+    "charla par:lynde+marilla:0",
+    "charla par:marilla+matthew:1",
+    "charla par:marilla+matthew:2",
+    "charla par:ana+marilla+matthew:0",
+    "una frase de matthew",
+    "una frase de marilla",
+    "una frase de lynde",
+    "una frase de tillie",
+    "una frase de allan",
+    "una frase de srbell",
+    "meta conocer_diana",
+    "hito decision"
    ],
    "conocidas_diana": [
-    "escena broche",
+    "escena quiere_amiga",
+    "escena aviso_barry",
+    "escena barry_recibe",
+    "escena conoce_diana",
+    "escena diana_por_casualidad",
+    "una frase de diana",
+    "meta conocer_diana",
+    "código"
+   ],
+   "zanahorias_pizarra": [
+    "escena resp_spencer_zanahorias_pizarra",
+    "hito rival"
+   ],
+   "zanahorias_contesta": [
+    "escena conv_diana_gilbert"
+   ],
+   "zanahorias_ignora": [
+    "escena resp_spencer_zanahorias_ignora",
+    "hito rival"
+   ],
+   "ofendio_lynde": [
+    "escena lynde_disculpa",
+    "escena conv_lynde_ventana",
+    "escena conv_lynde_pelo",
+    "escena conv_lynde_queens",
+    "charla par:ana+lynde:0",
+    "charla par:ana+lynde:1",
+    "charla par:ana+lynde+marilla:0",
+    "una frase de lynde",
+    "noticia ana_lengua"
+   ],
+   "lynde_llanto": [
+    "escena resp_spencer_lynde_llanto",
+    "hito humillada"
+   ],
+   "prohibida": [
+    "escena prohibida",
+    "escena crup_salva",
     "escena cama_josephine",
     "escena ventana_diana",
     "escena banco_lago_diana",
     "escena pupitre_diana",
     "escena lugar_puente_diana",
-    "escena lugar_cuesta_huerto",
     "escena conv_marilla_diana",
     "escena conv_diana_pelo",
     "escena conv_diana_minnie",
@@ -11261,20 +12081,48 @@
     "escena conv_diana_bosque",
     "escena conv_diana_vestidos",
     "escena conv_diana_club",
+    "escena conv_diana_gilbert",
+    "escena conv_diana_gilbert_contesta",
+    "escena conv_diana_tia",
+    "escena conv_diana_secreto",
+    "escena conv_diana_futuro",
+    "escena conv_diana_casarse",
+    "escena conv_diana_vela",
     "escena conv_barry_diana",
-    "un comentario de pupitre",
-    "una frase de marilla",
+    "charla par:ana+diana+marilla:1",
+    "dichos de paseo_fin_tarde",
+    "dichos de paseo_fin",
+    "dichos de paseo_si",
+    "dichos de mira:diana:flores",
+    "dichos de mira:diana:lago",
+    "dichos de te_diana:primera",
+    "dichos de te_diana_otra_vez",
+    "dichos de te_diana_cordial",
     "una frase de diana",
     "una frase de barry",
+    "meta picnic",
     "meta te_diana",
-    "meta josephine"
+    "meta josephine",
+    "meta club",
+    "meta remo",
+    "meta techo",
+    "código"
+   ],
+   "pide_amiga": [
+    "código"
+   ],
+   "quiere_amiga": [
+    "escena aviso_barry",
+    "escena barry_recibe",
+    "meta conocer_diana (pista)"
    ],
    "barry_presenta": [
     "escena conoce_diana",
     "una frase de barry"
    ],
    "broche": [
-    "meta picnic"
+    "meta picnic",
+    "hito confianza_marilla"
    ],
    "zanahorias": [
     "escena ventana_zanahorias",
@@ -11285,21 +12133,23 @@
     "escena conv_diana_gilbert",
     "un comentario de pupitre",
     "un comentario de pizarra",
+    "charla par:ana+gilbert:0",
     "una frase de gilbert",
-    "meta paces"
+    "meta paces",
+    "hito rival"
+   ],
+   "clase": [
+    "escena clase_geografia",
+    "escena clase_dictado",
+    "escena clase_geometria",
+    "escena clase_lectura",
+    "escena clase_composicion_stacy",
+    "escena clase_botanica_stacy"
    ],
    "diana_borracha": [
     "escena prohibida",
-    "meta perdon_barry"
-   ],
-   "prohibida": [
-    "escena barry_no_perdona",
-    "escena crup_aviso",
-    "escena crup_salva",
-    "escena ventana_prohibida",
-    "escena lugar_cuesta_prohibida",
-    "una frase de diana",
-    "una frase de barry"
+    "meta perdon_barry",
+    "hito amistad_a_prueba"
    ],
    "perdonada": [
     "escena ventana_perdonada",
@@ -11307,7 +12157,8 @@
     "una frase de barry",
     "una frase de minnie",
     "una frase de maryjoe",
-    "una frase de medico"
+    "una frase de medico",
+    "hito amistad_a_prueba"
    ],
    "crup": [
     "escena crup_salva",
@@ -11327,7 +12178,8 @@
    ],
    "queens": [
     "escena ventana_queens",
-    "escena faro_queens"
+    "escena faro_queens",
+    "charla par:ana+gilbert:1"
    ],
    "examen": [
     "meta queens (pista)"
@@ -11341,8 +12193,11 @@
    "llegada_tv": [
     "escena primera_noche",
     "escena desayuno_prueba",
+    "escena lugar_aldea",
+    "una frase de lawson",
     "una frase de vecino",
-    "llegadas de diana"
+    "llegadas de diana",
+    "hito llegada"
    ],
    "primera_noche": [
     "escena primera_noche"
@@ -11361,23 +12216,6 @@
    "primera_bed": [
     "escena primera_noche_sube"
    ],
-   "se_queda": [
-    "escena lynde_visita",
-    "escena ventana_se_queda",
-    "escena espejo_tejas_verdes",
-    "escena armario_vestidos",
-    "escena lugar_camino_blanco_flor",
-    "escena lugar_primera_nieve",
-    "escena conv_marilla_por_que",
-    "un comentario de espejo",
-    "una frase de matthew",
-    "una frase de marilla",
-    "una frase de lynde",
-    "una frase de tillie",
-    "una frase de allan",
-    "una frase de srbell",
-    "meta conocer_diana"
-   ],
    "undefined": [
     "escena primera_noche",
     "un comentario de sueno_1",
@@ -11393,8 +12231,13 @@
     "escena se_queda",
     "escena ventana_a_prueba",
     "escena conv_marilla_vestidos",
+    "charla par:ana+marilla:0",
+    "charla par:ana+marilla:1",
+    "charla par:ana+matthew:0",
+    "charla par:marilla+matthew:0",
     "una frase de blewett",
-    "meta quedarse (pista)"
+    "meta quedarse (pista)",
+    "hito a_prueba"
    ],
    "llamada_almuerzo": [
     "escena llamar_almuerzo",
@@ -11452,16 +12295,13 @@
     "escena geranio_sola"
    ],
    "lynde_visita": [
+    "charla par:lynde+marilla:0",
+    "charla par:ana+lynde:0",
+    "charla par:ana+lynde:1",
+    "charla par:ana+lynde+marilla:0",
     "una frase de lynde",
-    "noticia ana_lengua"
-   ],
-   "ofendio_lynde": [
-    "escena lynde_disculpa",
-    "escena conv_lynde_ventana",
-    "escena conv_lynde_pelo",
-    "escena conv_lynde_queens",
-    "una frase de lynde",
-    "noticia ana_lengua"
+    "noticia ana_lengua",
+    "hito humillada"
    ],
    "perdon_pedido": [
     "escena lynde_perdon_marilla"
@@ -11485,7 +12325,11 @@
     "escena lugar_rio_escuela",
     "escena lugar_granero",
     "escena lugar_iglesia",
-    "escena lugar_corral_idlewild"
+    "escena lugar_corral_idlewild",
+    "escena conv_matthew_huerta"
+   ],
+   "regado": [
+    "una frase de marilla"
    ],
    "nombro_avenida": [
     "escena conv_matthew_nombres"
@@ -11495,6 +12339,21 @@
    ],
    "nombra_avenida": [
     "escena conv_matthew_nombres"
+   ],
+   "llego_gilbert": [
+    "charla par:ana+diana:5"
+   ],
+   "verano": [
+    "charla par:ana+diana:5",
+    "una frase de phillips"
+   ],
+   "llego_stacy": [
+    "charla par:lynde+marilla:3",
+    "una frase de carrie",
+    "noticia maestra_plumas"
+   ],
+   "conv_marilla_oraciones": [
+    "una frase de marilla"
    ],
    "ropa_arrugada": [
     "una frase de marilla"
@@ -11510,7 +12369,8 @@
     "una frase de lynde"
    ],
    "disculpa_lynde": [
-    "una frase de lynde"
+    "hito humillada",
+    "hito pedir_perdon"
    ],
    "conoce_harrison": [
     "una frase de harrison"
@@ -11533,18 +12393,15 @@
    "conoce_sara": [
     "una frase de sara"
    ],
-   "verano": [
-    "una frase de phillips"
-   ],
    "conoce_sraallan": [
     "una frase de sraallan",
     "código"
    ],
+   "conoce_lawson": [
+    "una frase de lawson"
+   ],
    "conoce_minnie": [
     "una frase de minnie"
-   ],
-   "llego_stacy": [
-    "código"
    ],
    "{k}": [
     "una frase de niños"
@@ -11567,11 +12424,29 @@
    "rachel_lo_sabe": [
     "código"
    ],
-   "llego_gilbert": [
-    "código"
-   ],
    "x": [
     "código"
+   ],
+   "historia_": [
+    "código"
+   ],
+   "llego_": [
+    "código"
+   ],
+   "devuelta": [
+    "hito decision"
+   ],
+   "lynde_contenida": [
+    "hito humillada"
+   ],
+   "amigas": [
+    "hito amiga_del_alma"
+   ],
+   "broche_confeso": [
+    "hito confianza_marilla"
+   ],
+   "broche_verdad": [
+    "hito confianza_marilla"
    ]
   },
   "metas": [
@@ -11625,6 +12500,7 @@
    "estudio",
    "camino",
    "estacion",
+   "domingo",
    "dia_estacion",
    "dia_juego",
    "hora",
@@ -11636,14 +12512,14 @@
    "comento",
    "horas_desde",
    "y_mayor",
-   "carta"
+   "carta",
+   "respuesta"
   ],
   "cualidades": [
    "afecto",
    "estudio",
    "granja",
    "mano_leche",
-   "mano_lena",
    "mano_cocina",
    "letras",
    "paciencia"
@@ -11671,7 +12547,6 @@
    "blewett_orgullo",
    "conoce_",
    "conoce_blewett",
-   "devuelta",
    "marilla_doblo_ropa",
    "nombre_propio_",
    "nombro_",
