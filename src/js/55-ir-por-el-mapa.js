@@ -19,8 +19,9 @@ const toPlace = n => { const w = n.split(' ')[0], l = /^(La|El|Los|Las) /.test(n
 function goDest(x, y){
   let p = [clamp(x, 40, WW - 40), clamp(y, 60, WH - 40)];
   // (a house one enters: to its door, and in; not to the nearest free spot, which may be behind it. On the map a finger
-  // is wide and the roof and the name are drawn above the house: a tap on them, or near, is the house too)
-  const casa = Object.entries(HOUSES).filter(([k, h]) => !h.road && (inBox(h.at, h.depth, p[0], p[1], 40) || dist(p[0], p[1], h.at.x, h.at.y - h.depth / 2) < 360 || (game.map && enDibujo(k, h, ...p)))).sort(([, a], [, b]) => dist(p[0], p[1], a.at.x, a.at.y) - dist(p[0], p[1], b.at.x, b.at.y))[0];
+  // is wide and the roof and the name are drawn above the house: a tap on them, or near, is the house too; a place
+  // given exactly, as a conversation that goes on in the garden, is that place, though a house is near)
+  const casa = Object.entries(HOUSES).filter(([k, h]) => !h.road && (inBox(h.at, h.depth, p[0], p[1], 40) || (game.map && (dist(p[0], p[1], h.at.x, h.at.y - h.depth / 2) < 360 || enDibujo(k, h, ...p))))).sort(([, a], [, b]) => dist(p[0], p[1], a.at.x, a.at.y) - dist(p[0], p[1], b.at.x, b.at.y))[0];
   if (casa) p = [casa[1].at.x, casa[1].at.y + 30];
   if (blockedOut(...p)) {   // in the sea, a lake, a house: the nearest place one can stand on
     let best = null;
@@ -34,5 +35,6 @@ function goDest(x, y){
   if (cart.riding) cartOff();
   ana.sit = false; ana.lie = false; ana.nav = null;
   dest = { x: p[0], y: p[1] }; ana.goto = casa ? { id: 'h:' + casa[0], scene: 'out', dest: true } : { x: p[0], y: p[1], scene: 'out', dest: true };
-  const n = placeNear(...p); anaSays(n ? dicho('ir_a', { lugar: toPlace(n) }) : dicho('ir_alla'));
+  const n = placeNear(...p), aqui = n && placeNear(ana.x, ana.y) === n;   // (going somewhere in the place she is already in, the garden of Tejas Verdes: not «¡Vamos a Tejas Verdes!»)
+  anaSays(n && !aqui ? dicho('ir_a', { lugar: toPlace(n) }) : dicho('ir_alla'));
 }

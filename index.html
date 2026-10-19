@@ -785,6 +785,18 @@ ana: ¡Oh! ¿Y cómo es? ¿Tiene el pelo rojo? Espero que no. Ya es bastante mal
 marilla: Diana es muy bonita: ojos y pelo negros, y mejillas rosadas. Y es buena e inteligente, que es mejor que ser bonita. Un día de estos tengo que ir a ver a la Sra. Barry; si te portas bien, puedes venir conmigo.
 ana: ¡Oh, Marilla! Ahora tengo miedo: ¿y si no le gusto? Sería la desilusión más trágica de mi vida.
 
+=== aviso_barry ===
+# (a la mañana, el día que Marilla va a llevarla: para que Ana no ande lejos a esa hora, 66-cadenas.js)
+canal: gg
+prioridad: 5
+repetir: dia
+sujeta: marilla
+en: ana=gg, marilla=gg
+si: dias_desde:quiere_amiga:1, !hecho:conocidas_diana, !hecho:barry_presenta, presente:diana, hora:6-13
+---
+marilla: Ana, esta tarde, después del almuerzo, voy a La Cuesta del Huerto a devolverle un patrón a la Sra. Barry. Si quieres conocer a Diana, no te vayas lejos.
+ana: ¡Oh, Marilla! Voy a estar aquí, quietecita como una estatua. Bueno… casi como una estatua.
+
 === barry_recibe ===
 narra: La Cuesta del Huerto es la granja de los Barry, al otro lado del arroyo, frente a Tejas Verdes. Allí vive Diana, de la edad de Ana, con sus padres y su hermanita Minnie May. La Sra. Barry es una señora muy estricta.
 canal: os
@@ -1768,6 +1780,7 @@ lynde: (La Sra. Lynde mira a Ana de arriba abajo.) Bueno, no te eligieron por tu
    lynde: Vaya, vaya. Sensible, además.
    marilla: Rachel, a veces eres demasiado franca.
    ! hecho lynde_llanto
+   ! a_pieza
    ! log Ana se fue llorando cuando la Sra. Lynde la llamó flaca y fea.
 
 === lynde_perdon_marilla ===
@@ -4084,6 +4097,11 @@ quien: matthew
 === conv_ir ===
 - Eso se aprende en {lugar}, no aquí. Vamos.
 
+# (quien dijo «vamos» y la esperó, cuando Ana no llegó: la próxima vez que la ve)
+=== conv_ir_espero ===
+- Te estuve esperando en {lugar}, Ana. Bueno… otro día será.
+- Fui a {lugar} y no llegaste. No importa. Cuando quieras, me avisas.
+
 # --- llamar a alguien de lejos ({nombre}: como se le llama, con mayúscula) ---
 === llamar_formal ===
 - ¡{nombre}! ¡Espere un momento, por favor!
@@ -5140,6 +5158,7 @@ marilla: Después ya no volvió. (Marilla guarda la foto.) Siempre me he arrepen
 con: marilla
 tema: Darle las buenas noches
 si: afecto:marilla:ana>=5, dia_juego:14, hora:19-23
+al_terminar: acostarse
 ---
 ana: Buenas noches, Marilla.
 marilla: Buenas noches, Ana. (Marilla duda un momento.) Ana…
@@ -9248,8 +9267,16 @@ function convIr(d, s){
 }
 function convIrTick(){
   const g = game.convIr; if (!g) return; const d = CONVERSACIONES.find(c => c.id === g.id);
-  if (!d || TT > g.hasta || d.dicha()) { if (d) { delete PEOPLE[d.con].vamos; (game.convDejada ||= {})[d.id] = today(); } game.convIr = null; return; }
+  if (!d || TT > g.hasta || d.dicha()) {
+    if (d) { delete PEOPLE[d.con].vamos; (game.convDejada ||= {})[d.id] = today();
+      if (!d.dicha()) { const sala = ROOMS[g.s] && HOUSES[g.s]; game.convEspero = { con: d.con, lugar: sala ? 'la cocina' : PLACES[g.s][0] }; logEv(`${wmName(d.con)} esperó a Ana en ${game.convEspero.lugar}, y Ana no llegó.`, []); } }   // (said when they next see each other)
+    game.convIr = null; return; }
   if (convEnSitio(d, g.s)) { delete PEOPLE[d.con].vamos; game.convIr = null; conversar(d); }
+}
+// who waited for her and she did not come: says so the next time they are together (once)
+function convEsperoTick(){
+  const e = game.convEspero; if (!e || TALKS.length || sleeping) return;
+  if (sceneOf(e.con) === game.scene && (game.scene !== 'out' || dist(PEOPLE[e.con].x, PEOPLE[e.con].y, ana.x, ana.y) < 160)) { sayB(talkQ(e.con), dicho('conv_ir_espero', { lugar: e.lugar })); game.convEspero = null; }
 }
 function conversar(d){   // a conversation, now: said in its own channel, holding the other still, once
   const s = convSitio(d); if (s && !convEnSitio(d, s)) return convIr(d, s);
@@ -12686,7 +12713,7 @@ function update(dt){
   if (game.scene === 'camino' && ana.onCart && (mx || my || (ana.goto && !ana.goto.wm))) roadGetOff();   // (moving her: she gets down from the buggy)
   if (ANA_AUTO) { if (mx || my) { freeStart(); const v = 520 / (cam.zoom || 1) / (viewZoom || 1); freeCam.x += mx * v * dt; freeCam.y += my * v * dt; } mx = my = 0; }   // (on her own: the keys move the view)
   if (game.talk?.deadline && TT > game.talk.deadline && !sayOpen) { game.talk.deadline = 0; autoChoose(); }
-  autoTick(); cartTick(dt); roadTick(dt); buggyTick(); roadTalkTick(dt); dlgTick(dt); talkTick(dt); cap1Tick(); momentsTick(); lugaresTick(dt); inicioTick(dt); lagrimas(); ropaTick(); folkTick(dt); faunaTick(dt); agentTick(dt); jugarTick(dt); correoTick(dt); sickTick(); apartarTick(); cuadernoTick(dt); habilidadesTick(dt); historiaTick(dt); nocheTick(dt); noticiasTick(dt); llegadasTick(dt); juntasTick(dt); agendaTick(); wmApproachTick(dt); calledTick(); convIrTick(); chatTick(dt); wmFollowTick();
+  autoTick(); cartTick(dt); roadTick(dt); buggyTick(); roadTalkTick(dt); dlgTick(dt); talkTick(dt); cap1Tick(); momentsTick(); lugaresTick(dt); inicioTick(dt); lagrimas(); ropaTick(); folkTick(dt); faunaTick(dt); agentTick(dt); jugarTick(dt); correoTick(dt); sickTick(); apartarTick(); cuadernoTick(dt); habilidadesTick(dt); historiaTick(dt); nocheTick(dt); noticiasTick(dt); llegadasTick(dt); juntasTick(dt); agendaTick(); wmApproachTick(dt); calledTick(); convIrTick(); convEsperoTick(); chatTick(dt); wmFollowTick();
   if (RELATO.on) relatoTick();   // (the account of what happens, once all have moved: 66-relato.js)
   ana.torn = !!game.anaStates.rasgado; ana.askew = !!game.anaStates.despeinada;
   ana.savoring = false;
@@ -13070,8 +13097,9 @@ const toPlace = n => { const w = n.split(' ')[0], l = /^(La|El|Los|Las) /.test(n
 function goDest(x, y){
   let p = [clamp(x, 40, WW - 40), clamp(y, 60, WH - 40)];
   // (a house one enters: to its door, and in; not to the nearest free spot, which may be behind it. On the map a finger
-  // is wide and the roof and the name are drawn above the house: a tap on them, or near, is the house too)
-  const casa = Object.entries(HOUSES).filter(([k, h]) => !h.road && (inBox(h.at, h.depth, p[0], p[1], 40) || dist(p[0], p[1], h.at.x, h.at.y - h.depth / 2) < 360 || (game.map && enDibujo(k, h, ...p)))).sort(([, a], [, b]) => dist(p[0], p[1], a.at.x, a.at.y) - dist(p[0], p[1], b.at.x, b.at.y))[0];
+  // is wide and the roof and the name are drawn above the house: a tap on them, or near, is the house too; a place
+  // given exactly, as a conversation that goes on in the garden, is that place, though a house is near)
+  const casa = Object.entries(HOUSES).filter(([k, h]) => !h.road && (inBox(h.at, h.depth, p[0], p[1], 40) || (game.map && (dist(p[0], p[1], h.at.x, h.at.y - h.depth / 2) < 360 || enDibujo(k, h, ...p))))).sort(([, a], [, b]) => dist(p[0], p[1], a.at.x, a.at.y) - dist(p[0], p[1], b.at.x, b.at.y))[0];
   if (casa) p = [casa[1].at.x, casa[1].at.y + 30];
   if (blockedOut(...p)) {   // in the sea, a lake, a house: the nearest place one can stand on
     let best = null;
@@ -13085,7 +13113,8 @@ function goDest(x, y){
   if (cart.riding) cartOff();
   ana.sit = false; ana.lie = false; ana.nav = null;
   dest = { x: p[0], y: p[1] }; ana.goto = casa ? { id: 'h:' + casa[0], scene: 'out', dest: true } : { x: p[0], y: p[1], scene: 'out', dest: true };
-  const n = placeNear(...p); anaSays(n ? dicho('ir_a', { lugar: toPlace(n) }) : dicho('ir_alla'));
+  const n = placeNear(...p), aqui = n && placeNear(ana.x, ana.y) === n;   // (going somewhere in the place she is already in, the garden of Tejas Verdes: not «¡Vamos a Tejas Verdes!»)
+  anaSays(n && !aqui ? dicho('ir_a', { lugar: toPlace(n) }) : dicho('ir_alla'));
 }
 
 /* ---------- the people of Avonlea: the children who go to school, the teacher, the shopkeeper, the minister, the
@@ -13723,7 +13752,7 @@ const FAVORS = {   // what one can ask of someone (ok: whether it can be asked; 
   curar: { eff: (s, me, to, a) => { s.sick = (s.sick || []).filter(x => x !== a.k); }, ok: (s, me, to, a) => !!whoOf(to).medico && (s.sick || []).includes(a.k), wait: 40, goal: (me, a) => G.sano(a.k), say: a => dicho('pide:curar', { enfermo: wmName(a.k) }) },
   quehaceres: { eff: (s, me, to, a) => { for (const q of a.q) s.facts['quehacer:' + q] = 1; }, ok: (s, me, to) => to === 'ana', wait: 30, goal: (me, a) => G.quehaceres(a.to, a.q), say: a => dicho('pide:quehaceres', { tareas: a.q.map(q => QUEHACER_TXT[q]).join(' y ') }) },
   llevar: { eff: (s, me, to, a) => { s.pos[me] = a.lugar; s.pos[to] = a.lugar; }, ok: (s, me, to) => to === 'matthew' && me !== 'matthew', wait: 15, goal: (me, a) => G.llevar(a.to, me, a.lugar), say: a => dicho('pide:llevar', { lugar: WP_NAME[a.lugar] }) },
-  traer: { eff: (s, me, to, a) => { s.invs[me][a.item] = (s.invs[me][a.item] || 0) + a.n; }, ok: (s, me, to, a) => to !== me && (!isQuieto(to) || (s.invs[to]?.[a.item] || 0) >= a.n) && (!THINGS[a.item]?.hace || (s.invs[to]?.[a.item] || 0) >= a.n), wait: 45,   // (a dress is sewn, not fetched: one asks for the cloth)
+  traer: { eff: (s, me, to, a) => { s.invs[me][a.item] = (s.invs[me][a.item] || 0) + a.n; }, ok: (s, me, to, a) => to !== me && !s.facts['dio_de:' + me + '>' + to + ':' + a.item] && !s.facts['dio_de:' + to + '>' + me + ':' + a.item] && /* (not what went between the two today, either way) */ (!isQuieto(to) || (s.invs[to]?.[a.item] || 0) >= a.n) && (!THINGS[a.item]?.hace || (s.invs[to]?.[a.item] || 0) >= a.n), wait: 45,   // (a dress is sewn, not fetched: one asks for the cloth)
     goal: (me, a, s0) => G.tener(me, a.item, (s0.invs[me][a.item] || 0) + a.n), say: a => dicho('pide:traer', { cosa: itemTextW(a.item, a.n) }) },
   vender_vaca: { eff: (s, me, to, a) => { s.cows[a.cow] = 'sold:' + me; }, ok: (s, me, to, a) => CUTHBERT.includes(to) && s.cows[a.cow] && !s.cows[a.cow].startsWith('sold'), wait: 45, goal: (me, a) => G.vaca_vendida(a.cow, me), say: () => dicho('pide:vender_vaca') },
   encerrar_vaca: { eff: (s, me, to, a) => { s.cows[a.cow] = a.pen; }, ok: (s, me, to, a) => to !== me && !isQuieto(to) && !String(s.cows[a.cow]).startsWith('led') && !String(s.cows[a.cow]).startsWith('sold'), wait: 45, goal: (me, a) => G.vaca_en(a.cow, a.pen),
@@ -13752,7 +13781,7 @@ function verbs(s, me, C){
   for (const x of of.recoger || []) if (s.stock[x] > 0 && (inv[x] || 0) < 9) { const n = Math.min(x === 'ramo' ? 1 : x === 'huevos' ? 9 : 3, s.stock[x]); add('recoger', 3, t => { t.invs[me][x] = (t.invs[me][x] || 0) + n; t.stock[x] -= n; }, { x, n }); }
   if (here === W.cocina || d0Home(here, me)) for (const [x, d] of Object.entries(THINGS)) if (d.receta && C.items.includes(x) && (d.hace !== 'coser' || W.cose) && Object.entries(d.receta).every(([i, n]) => (inv[i] || 0) >= n) && (inv[x] || 0) < 3) add(d.hace || 'cocinar', d.hace === 'coser' ? 30 : 10, t => { for (const [i, n] of Object.entries(d.receta)) t.invs[me][i] -= n; t.invs[me][x] = (t.invs[me][x] || 0) + 1; }, { x });
   for (const k of C.people) if (at(k)) {
-    for (const x of Object.keys(inv)) if (inv[x] > 0 && THINGS[x] && x !== 'cuerda' && C.items.includes(x)) { const n = ALL_AT_ONCE.includes(x) ? inv[x] : 1; add('dar', 1, t => { t.invs[me][x] -= n; t.invs[k][x] = (t.invs[k][x] || 0) + n; for (const tag of THINGS[x].tags) t.facts['dio:' + k + ':' + tag] = 1; t.facts['dio:' + k + ':' + x] = 1; t.facts['dio:' + x] = 1; socialRule(stateR(t), 'dar', me, k, x); }, { x, k, n }); }
+    for (const x of Object.keys(inv)) if (inv[x] > 0 && THINGS[x] && x !== 'cuerda' && C.items.includes(x) && !s.facts['dio_de:' + k + '>' + me + ':' + x]) {   /* (not back to who gave it today: no gifts going round in a circle) */ const n = ALL_AT_ONCE.includes(x) ? inv[x] : 1; add('dar', 1, t => { t.invs[me][x] -= n; t.invs[k][x] = (t.invs[k][x] || 0) + n; for (const tag of THINGS[x].tags) t.facts['dio:' + k + ':' + tag] = 1; t.facts['dio:' + k + ':' + x] = 1; t.facts['dio:' + x] = 1; socialRule(stateR(t), 'dar', me, k, x); }, { x, k, n }); }
     const buys = whoOf(k).compra || {};
     if (buys.animal) for (const [c, st] of Object.entries(s.cows)) if (st === 'led:' + me && FAMILY(C.owner[c]).includes(me)) add('vender', 5, t => { t.cows[c] = 'sold:' + k; t.invs[me].dolares = (t.invs[me].dolares || 0) + buys.animal; t.know[me].push('vendio_vaca'); t.know[k].push('vendio_vaca'); }, { x: 'vaca', cow: c, k });
     const open = !whoOf(k).abre || (s.t >= whoOf(k).abre[0] * 60 && s.t < whoOf(k).abre[1] * 60);
@@ -14891,7 +14920,10 @@ function wmExec0(ag, a, st, dt){
       const escena = me === 'ana' && DIALOGOS.some(d => d.canal === 'carta' && d.id.startsWith('carta_' + st.para));
       if (escena && st.P !== undefined && (st.P ? st.llego && st.pt > 0 : true)) game.cartaAhora = { para: st.para, t: TT };
       if (!escena && (st.llego || !st.P)) { const k = Math.floor((st.pt ?? st.w ?? 0) / 3.4); if (k !== st.lk && st.txt[k]) { st.lk = k; bubble(me, st.txt[k]); } }
-      if (!wait(st.txt.length * 3.4)) return 'run';
+      // (done when its scene is done: the letter is written as soon as she signs it, so nothing that comes after, the
+      // bedtime card, Marilla calling, takes it away half-saved)
+      const firmada = escena && game.cartaEscena?.lineas.length && !TALKS.some(t => t.ch === 'carta');
+      if (!firmada && !wait(st.txt.length * 3.4)) return 'run';
       if (escena && game.cartaEscena?.lineas.length) st.txt = game.cartaEscena.lineas;
       for (const t of TALKS.filter(t => t.ch === 'carta')) talkEnd(t);   // (the letter is done: what she was saying over it, too)
       inv.carta = (inv.carta || 0) + 1; cartas().push({ id: cartas().length + 1, de: me, para: st.para, texto: st.txt, dia: today(), estado: 'escrita', escena: me === 'ana' ? game.cartaEscena?.id : undefined });
@@ -14942,7 +14974,7 @@ function wmExec0(ag, a, st, dt){
       const n = ALL_AT_ONCE.includes(a.x) ? inv[a.x] || 0 : Math.min(1, inv[a.x] || 0); if (!n) { st.why = 'no lo tiene'; return 'fail'; }
       if (!wait(1.8)) return 'run';   // (handing it over)
       inv[a.x] -= n; const to = wmInv(a.k); to[a.x] = (to[a.x] || 0) + n;
-      for (const tag of THINGS[a.x].tags) realR.setFact('dio:' + a.k + ':' + tag); realR.setFact('dio:' + a.k + ':' + a.x); realR.setFact('dio:' + a.x);
+      for (const tag of THINGS[a.x].tags) realR.setFact('dio:' + a.k + ':' + tag); realR.setFact('dio:' + a.k + ':' + a.x); realR.setFact('dio:' + a.x); realR.setFact('dio_de:' + me + '>' + a.k + ':' + a.x);
       const liked = socialRule(realR, 'dar', me, a.k, a.x);
       const tb = wmBody(a.k); if (liked && tb) hearts(tb.x, tb.y - 56);
       logEv(`${wmName(me)} le dio ${itemTextW(a.x, n)} a ${wmName(a.k)}.`, []); bubble(a.k, liked ? dicho('gracias_gusta') : dicho('gracias_dar')); return 'ok';

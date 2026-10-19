@@ -579,6 +579,18 @@ ana: ¡Oh! ¿Y cómo es? ¿Tiene el pelo rojo? Espero que no. Ya es bastante mal
 marilla: Diana es muy bonita: ojos y pelo negros, y mejillas rosadas. Y es buena e inteligente, que es mejor que ser bonita. Un día de estos tengo que ir a ver a la Sra. Barry; si te portas bien, puedes venir conmigo.
 ana: ¡Oh, Marilla! Ahora tengo miedo: ¿y si no le gusto? Sería la desilusión más trágica de mi vida.
 
+=== aviso_barry ===
+# (a la mañana, el día que Marilla va a llevarla: para que Ana no ande lejos a esa hora, 66-cadenas.js)
+canal: gg
+prioridad: 5
+repetir: dia
+sujeta: marilla
+en: ana=gg, marilla=gg
+si: dias_desde:quiere_amiga:1, !hecho:conocidas_diana, !hecho:barry_presenta, presente:diana, hora:6-13
+---
+marilla: Ana, esta tarde, después del almuerzo, voy a La Cuesta del Huerto a devolverle un patrón a la Sra. Barry. Si quieres conocer a Diana, no te vayas lejos.
+ana: ¡Oh, Marilla! Voy a estar aquí, quietecita como una estatua. Bueno… casi como una estatua.
+
 === barry_recibe ===
 narra: La Cuesta del Huerto es la granja de los Barry, al otro lado del arroyo, frente a Tejas Verdes. Allí vive Diana, de la edad de Ana, con sus padres y su hermanita Minnie May. La Sra. Barry es una señora muy estricta.
 canal: os
@@ -1562,6 +1574,7 @@ lynde: (La Sra. Lynde mira a Ana de arriba abajo.) Bueno, no te eligieron por tu
    lynde: Vaya, vaya. Sensible, además.
    marilla: Rachel, a veces eres demasiado franca.
    ! hecho lynde_llanto
+   ! a_pieza
    ! log Ana se fue llorando cuando la Sra. Lynde la llamó flaca y fea.
 
 === lynde_perdon_marilla ===

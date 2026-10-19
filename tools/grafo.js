@@ -158,6 +158,20 @@ for (const k of [...leer('src/js/62-cartas.js').matchAll(/^  (\w+): \{ nombre:/g
       else if (/[:!]/.test(n)) condicion(n, 'hito ' + k); else malas.push(`hito ${k}: necesita «${n}», que no es un hito`); }
     const ve = (n, vis) => vis.has(n) ? true : (H[n]?.necesita || []).map(y => y.split(':')[0]).some(y => H[y] && ve(y, new Set([...vis, n])));
     if (x.necesita.map(y => y.split(':')[0]).some(n => H[n] && ve(n, new Set([k])))) malas.push(`hito ${k}: se necesita a sí mismo (en círculo)`); } }
+// what a line says Ana does with her body, the scene does: «sube a su pieza», «escaleras arriba» needs «a_pieza» or
+// «acostarse» in the same option (or the whole scene); otherwise the text says she left and she is still there
+const MUEVE = [[/escaleras? arriba|sube la escalera|corre a su pieza|se va a su pieza|sube a su pieza/i, /(^|\s)(a_pieza|acostarse)\b/, '«a_pieza» o «acostarse»']];
+for (const bloque of guion.split(/^(?====)/m)) {
+  const id = bloque.match(/^===\s*(.+?)\s*===/)?.[1]; if (!id) continue;
+  const [cab, ...resto] = bloque.split(/^---\s*$/m), cuerpo = resto.join('---'), partes = [[]]; let enOpcion = false;
+  if (/^disparo:\s*primera/m.test(cab)) continue;   // (a «primera» scene tells what she is doing as she does it: she is already on the stairs)
+  for (const l of cuerpo.split('\n')) { if (/^\s*->/.test(l)) { partes.push([l]); enOpcion = true; } else if (enOpcion && /^\S/.test(l)) { partes.push([l]); enOpcion = false; } else partes[partes.length - 1].push(l); }
+  for (const P of partes) for (const [dice, hace, que] of MUEVE) {
+    const l = P.find(x => /^\s*ana(\s+piensa)?:/.test(x) && dice.test(x));
+    if (l && !P.some(x => /^\s*!/.test(x) && hace.test(x.replace(/^\s*!\s*/, ' '))) && !cab.split('\n').some(x => /^al_(empezar|terminar):/.test(x) && hace.test(x.replace(/^al_\w+:\s*/, ' '))))
+      malas.push(`escena ${id}: «${l.trim().slice(0, 70)}» dice que Ana se mueve, y la escena no la mueve (falta ${que})`);
+  }
+}
 // the report
 const necesita = Object.keys(pide).filter(h => !h.endsWith(' ')), lee = new Set(Object.keys(pide).map(h => h.trim()));
 const nunca = necesita.filter(h => !hace[h] && !/^conoce_/.test(h)).sort()   /* (conoce_<who>: whoever Ana meets, src/js/66-conocidos.js) */, sinUso = Object.keys(hace).filter(h => !lee.has(h) && !/^(hito_|historia_|llego_|se_fue_)/.test(h)).sort();

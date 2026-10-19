@@ -441,8 +441,16 @@ function convIr(d, s){
 }
 function convIrTick(){
   const g = game.convIr; if (!g) return; const d = CONVERSACIONES.find(c => c.id === g.id);
-  if (!d || TT > g.hasta || d.dicha()) { if (d) { delete PEOPLE[d.con].vamos; (game.convDejada ||= {})[d.id] = today(); } game.convIr = null; return; }
+  if (!d || TT > g.hasta || d.dicha()) {
+    if (d) { delete PEOPLE[d.con].vamos; (game.convDejada ||= {})[d.id] = today();
+      if (!d.dicha()) { const sala = ROOMS[g.s] && HOUSES[g.s]; game.convEspero = { con: d.con, lugar: sala ? 'la cocina' : PLACES[g.s][0] }; logEv(`${wmName(d.con)} esperó a Ana en ${game.convEspero.lugar}, y Ana no llegó.`, []); } }   // (said when they next see each other)
+    game.convIr = null; return; }
   if (convEnSitio(d, g.s)) { delete PEOPLE[d.con].vamos; game.convIr = null; conversar(d); }
+}
+// who waited for her and she did not come: says so the next time they are together (once)
+function convEsperoTick(){
+  const e = game.convEspero; if (!e || TALKS.length || sleeping) return;
+  if (sceneOf(e.con) === game.scene && (game.scene !== 'out' || dist(PEOPLE[e.con].x, PEOPLE[e.con].y, ana.x, ana.y) < 160)) { sayB(talkQ(e.con), dicho('conv_ir_espero', { lugar: e.lugar })); game.convEspero = null; }
 }
 function conversar(d){   // a conversation, now: said in its own channel, holding the other still, once
   const s = convSitio(d); if (s && !convEnSitio(d, s)) return convIr(d, s);

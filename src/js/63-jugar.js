@@ -163,7 +163,10 @@ function wmExec0(ag, a, st, dt){
       const escena = me === 'ana' && DIALOGOS.some(d => d.canal === 'carta' && d.id.startsWith('carta_' + st.para));
       if (escena && st.P !== undefined && (st.P ? st.llego && st.pt > 0 : true)) game.cartaAhora = { para: st.para, t: TT };
       if (!escena && (st.llego || !st.P)) { const k = Math.floor((st.pt ?? st.w ?? 0) / 3.4); if (k !== st.lk && st.txt[k]) { st.lk = k; bubble(me, st.txt[k]); } }
-      if (!wait(st.txt.length * 3.4)) return 'run';
+      // (done when its scene is done: the letter is written as soon as she signs it, so nothing that comes after, the
+      // bedtime card, Marilla calling, takes it away half-saved)
+      const firmada = escena && game.cartaEscena?.lineas.length && !TALKS.some(t => t.ch === 'carta');
+      if (!firmada && !wait(st.txt.length * 3.4)) return 'run';
       if (escena && game.cartaEscena?.lineas.length) st.txt = game.cartaEscena.lineas;
       for (const t of TALKS.filter(t => t.ch === 'carta')) talkEnd(t);   // (the letter is done: what she was saying over it, too)
       inv.carta = (inv.carta || 0) + 1; cartas().push({ id: cartas().length + 1, de: me, para: st.para, texto: st.txt, dia: today(), estado: 'escrita', escena: me === 'ana' ? game.cartaEscena?.id : undefined });
@@ -214,7 +217,7 @@ function wmExec0(ag, a, st, dt){
       const n = ALL_AT_ONCE.includes(a.x) ? inv[a.x] || 0 : Math.min(1, inv[a.x] || 0); if (!n) { st.why = 'no lo tiene'; return 'fail'; }
       if (!wait(1.8)) return 'run';   // (handing it over)
       inv[a.x] -= n; const to = wmInv(a.k); to[a.x] = (to[a.x] || 0) + n;
-      for (const tag of THINGS[a.x].tags) realR.setFact('dio:' + a.k + ':' + tag); realR.setFact('dio:' + a.k + ':' + a.x); realR.setFact('dio:' + a.x);
+      for (const tag of THINGS[a.x].tags) realR.setFact('dio:' + a.k + ':' + tag); realR.setFact('dio:' + a.k + ':' + a.x); realR.setFact('dio:' + a.x); realR.setFact('dio_de:' + me + '>' + a.k + ':' + a.x);
       const liked = socialRule(realR, 'dar', me, a.k, a.x);
       const tb = wmBody(a.k); if (liked && tb) hearts(tb.x, tb.y - 56);
       logEv(`${wmName(me)} le dio ${itemTextW(a.x, n)} a ${wmName(a.k)}.`, []); bubble(a.k, liked ? dicho('gracias_gusta') : dicho('gracias_dar')); return 'ok';
