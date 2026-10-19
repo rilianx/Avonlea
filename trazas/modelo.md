@@ -1,6 +1,6 @@
 # El modelo de las interacciones: huecos e incoherencias
 
-Lo genera `python3 tools/modelo.py` con un solucionador lógico (Z3): para cada regla de `src/datos/reglas.txt` le pregunta si existe alguna situación posible del juego en que no se cumple, y la muestra. 349 variables, 795 cosas que alguien le puede decir a Ana, 10.2 s. Ver `docs/MODELO_INTERACCIONES.md`.
+Lo genera `python3 tools/modelo.py` con un solucionador lógico (Z3): para cada regla de `src/datos/reglas.txt` le pregunta si existe alguna situación posible del juego en que no se cumple, y la muestra. 349 variables, 805 cosas que alguien le puede decir a Ana, 12.2 s. Ver `docs/MODELO_INTERACCIONES.md`.
 
 | Qué | Cuántos |
 |---|---|
