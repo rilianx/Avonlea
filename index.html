@@ -16541,7 +16541,7 @@ const NOCHE_DEJA = 3;
 const nochePalabras = t => new Set(String(t).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').split(/[^a-zñ]+/).filter(w => w.length > 3 && !/^(pedirle|contarle|preguntarle|hablar|hablarle|decirle|mostrarle|ensenarle|sobre|como|cuando|porque|para|algo|todo|todas|todos|esta|este|ella|tiene|quiere)$/.test(w)).map(w => w.replace(/(es|s)$/, '')));
 function nocheTemaParecido(con, tema){
   const A = nochePalabras(tema); if (!A.size) return null;
-  return CONVERSACIONES.find(d => d.con === con && d.tema && (B => { const n = [...A].filter(w => B.has(w)).length; return n && n / Math.min(A.size, B.size) >= .6; })(nochePalabras(d.tema))) || null;
+  return CONVERSACIONES.find(d => d.con === con && d.tema && (B => { const n = [...A].filter(w => B.has(w)).length; return n >= 2 ? n / Math.min(A.size, B.size) >= .6 : n / Math.max(A.size, B.size) >= .6; /* (one word in common is not the same topic: «escuela») */ })(nochePalabras(d.tema))) || null;
 }
 function nocheTemas(){
   const E = (game.wm || game).temasElegidos || CONVERSACIONES.filter(d => d.dicha()).map(d => ({ con: d.con, tema: d.tema }));   // (a game saved before: the ones had, without their day)
@@ -16688,7 +16688,7 @@ conversacion (Ana la elige del menú de esa persona; una vez):
 === ia_<id> ===
 con: <persona>
 tema: <cómo aparece en el menú: lo que Ana quiere hablar>
-si: <condiciones>
+(sin «si:»: es para cómo están las cosas ahora, y el juego le pone lo que haga falta)
 ${n >= 2 ? 'al_terminar: <efecto> (una línea por efecto)\n' : ''}---
 ana: <línea>
 <persona>: <línea>
@@ -16909,15 +16909,16 @@ function nocheUnidades(b, c){
   for (const k of new Set(L.map(l => l[0]).filter(k => V.personas.has(k)))) out.push({ k, conds: [...[].concat(c.si || []).map(String), ...en, 've:' + k], textos: L.filter(l => l[0] === k).map(l => l[1]), deja });
   return out;
 }
+// the words of a rule «referencia:», as a pattern (whole words)
+const nochePatron = r => new RegExp(r.palabras.map(p => '(?<![\\p{L}\\p{N}_])' + p.replace(/[\\^$.*+?()[\]{}|/]/g, '\\$&')).join('|'), 'u');
 function nocheReglas(b, c){
   const R = nocheVocab().reglas, motivos = [];
-  const pat = r => new RegExp(r.palabras.map(p => '(?<![\\p{L}\\p{N}_])' + p.replace(/[\\^$.*+?()[\]{}|/]/g, '\\$&')).join('|'), 'u');
   for (const u of nocheUnidades(b, c)) {
     const S = nocheCierre(u.conds), sub = x => x.split('{k}').join(u.k);
     for (const x of u.conds) if (u.conds.includes(x[0] === '!' ? x.slice(1) : '!' + x)) { motivos.push(`${u.k}: sus condiciones se contradicen (${x})`); break; }
     for (const r of R.referencia) {
       if ((r.salvo || []).includes(u.k)) continue;
-      const hit = u.textos.find(t => pat(r).test(t)); if (hit == null) continue;
+      const hit = u.textos.find(t => nochePatron(r).test(t)); if (hit == null) continue;
       if (r.exige.some(g => g.some(x => x.startsWith('hecho:') && u.deja.has(x.slice(6))))) continue;   // (the scene that makes it so)
       if (!r.exige.some(g => g.every(x => nocheImplica(S, sub(x))))) motivos.push(`${u.k} dice «${hit.slice(0, 60)}», y eso exige ${r.exige.map(g => g.map(sub).join(', ')).join(' o ')} (regla: ${r.nombre})`);
     }
@@ -16991,6 +16992,7 @@ function nocheRevisar(b, ctx){
   const si = [].concat(c.si ?? []).filter(x => x != null && x !== '').map(String); conds(si);
   // what is new is for this game: a condition that already cannot hold in it (it asks that something not have happened,
   // and it did) leaves the block dead, never to be seen
+  if (tipo === 'conversacion') for (const x of si) { let ok = false; try { ok = dlgCond(x, dlgCtx()); } catch (e) {} if (!ok) M.push(`«${x}» no se cumple ahora: una conversación nueva es para cómo están las cosas ahora (sin condiciones de más)`); }
   for (const x of si) { const m = x.match(/^!(hecho|cuaderno|dicha):(.+)$/); if (!m) continue;
     const ya = m[1] === 'hecho' ? dlgHechos()[m[2]] : m[1] === 'cuaderno' ? cuadernoHecho(m[2]) : dlgDichas()[m[2]];
     if (ya != null && ya !== false) M.push(`«${x}»: eso ya pasó en esta partida${typeof ya === 'number' ? ' (día ' + ya + ')' : ''}: así nunca se daría`); }
@@ -17145,7 +17147,25 @@ function nocheReparar(b){
     const lugares = en ? new Set([...hablan].filter(k => k !== 'ana' && k !== 'narra' && en[k]).map(k => en[k])) : new Set();
     if (en && !en.ana && lugares.size === 1) { const l = [...lugares][0]; L[i] = L[i].replace(/\s*$/, '') + ', ana=' + l; R.push(`agregado «ana=${l}» a «en:» (donde están los demás)`); }
   }
+  if (tipo === 'conversacion') nocheCondicionesDeAhora(L, R);
   return { bloque: { ...b, texto: L.join('\n') }, reparado: [...new Set(R)], motivos: F };
+}
+// a new conversation is for how things are now: what the rules ask of what it says (it names the Srta. Stacy: she has
+// come), the game puts in its «si:» itself, if it holds now (the AI need not write any; what does not hold now, the
+// check rejects)
+function nocheCondicionesDeAhora(L, R){
+  const fin = L.findIndex(l => l.trim() === '---'); if (fin < 0) return;
+  let i = L.slice(0, fin).findIndex(l => /^\s*si:/.test(l)); if (i < 0) { L.splice(fin, 0, 'si: '); i = fin; }
+  const si = L[i].replace(/^\s*si:\s*/, '').split(',').map(x => x.trim()).filter(Boolean), ctx = dlgCtx();
+  const dichos = {}; for (const l of L.slice(fin + 1)) { const m = l.trim().match(/^(?:->\*?\s*)?([a-z]+):\s*(.*)$/); if (m && !['narra', 'carta'].includes(m[1])) (dichos[m[1]] ||= []).push(m[2]); }
+  for (const r of nocheVocab().reglas.referencia) for (const [k, T] of Object.entries(dichos)) {
+    if ((r.salvo || []).includes(k) || !T.some(t => nochePatron(r).test(t))) continue;
+    const alts = r.exige.map(g => g.map(x => x.split('{k}').join(k)));
+    if (alts.some(g => g.every(x => si.includes(x)))) continue;
+    const g = alts.find(g => g.every(x => { try { return dlgCond(x, ctx); } catch (e) { return false; } })); if (!g) continue;
+    for (const x of g) if (!si.includes(x)) { si.push(x); R.push(`agregado «${x}» a «si:» (es verdad ahora, y lo pide: ${r.nombre})`); }
+  }
+  if (si.length) L[i] = 'si: ' + si.join(', '); else L.splice(i, 1);
 }
 // the blocks of one night, in order (what one accepts, the next can use, in «libre»): { aceptados, rechazados }; antes:
 // what this night already accepted (the second round, after the AI corrected what was rejected)

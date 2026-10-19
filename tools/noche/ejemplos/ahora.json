@@ -1,0 +1,19 @@
+{
+ "_nota": "Las conversaciones nuevas son para cómo están las cosas ahora (partida de la jugadora curiosa, día 16): la primera no trae «si:» y nombra a Gilbert, y el juego le pone «hecho:llego_gilbert», que es verdad ahora: aceptada. La segunda pide «hecho:prohibida», que en esta partida no ha pasado: rechazada. Uso: node tools/noche.js --respuesta tools/noche/ejemplos/ahora.json",
+ "escenario": "tools/noche/partidas/curiosa.json",
+ "nivel": "efectos",
+ "bloques": [
+  {
+   "tipo": "conversacion",
+   "esperado": "aceptado",
+   "porque": "Sin condiciones: el juego pone lo que pide lo que dice.",
+   "texto": "=== ia_matthew_gilbert ===\ncon: matthew\ntema: Contarle lo que pasó con Gilbert Blythe en la escuela\nal_terminar: suma afecto:matthew:ana 1\n---\nana: Matthew, ¿usted conoce a Gilbert Blythe? Es el muchacho más insoportable de toda la escuela, y el más listo, que es lo peor.\nmatthew: (Matthew se rasca la barba.) Bueno, pues… conozco a su padre. John Blythe. Fue… fue muy amigo de Marilla, hace mucho.\nana: ¿De Marilla? ¿Marilla tuvo un amigo? Matthew, ¡eso es casi un secreto de novela!\nmatthew: (Matthew se pone colorado.) Bueno… no le digas que te lo dije. Eso fue hace mucho, mucho tiempo.\n-> Prometerle guardar el secreto\n   ana: Se lo juro por el Lago de las Aguas Refulgentes. No diré nada.\n   matthew: (Matthew sonríe, aliviado.) Eres una buena niña, Ana.\n   ! suma afecto:matthew:ana 1\n-> Preguntarle por qué dejaron de ser amigos\n   ana: ¿Y por qué dejaron de ser amigos? Algo terrible tuvo que pasar.\n   matthew: Bueno, pues… orgullo, creo. De los dos. Y después ya era tarde.\n   ! suma afecto:matthew:ana 1"
+  },
+  {
+   "tipo": "conversacion",
+   "esperado": "rechazado",
+   "porque": "Pide algo que no es verdad ahora.",
+   "texto": "=== ia_matthew_diana_prohibida ===\ncon: matthew\ntema: Contarle que la Sra. Barry no la deja ver a Diana\nsi: hecho:prohibida\n---\nana: Matthew, la Sra. Barry dice que nunca más podré ver a Diana. Mi vida está en ruinas.\nmatthew: (Matthew se queda callado un rato largo.) Bueno, pues… las madres a veces cambian de idea, Ana.\nana: ¿Usted cree?\nmatthew: Yo creo que sí. Hay que darle tiempo."
+  }
+ ]
+}
