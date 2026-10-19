@@ -62,6 +62,11 @@ function momentsTick(){
     if (lines.length) sceneStart({ parts: mNear ? ['matthew'] : [], lines, out: {}, scene: 'out', resumen: '' }, false);
   }
 }
+// a scene takes Ana to another room: not in a jump, but as a page turns (a moment of paper, what happens, and there)
+function fundido(texto, f){
+  const el = $('fundido'); if (!el || navigator.webdriver) return f();
+  el.textContent = texto; el.classList.add('on'); setTimeout(() => { f(); setTimeout(() => el.classList.remove('on'), 650); }, 380);
+}
 function goIn(room, at){ game.scene = room; ana.lie = false; diana.lie = false; ana.x = at ? at[0] : KDOOR.x; ana.y = at ? at[1] : KIT.h - 14; ana.dir = 0; ana.sit = false; if (diana.follow) { diana.where = room; diana.sit = false; diana.x = ana.x - 26; diana.y = ana.y; } if (!obsScene()) { cam.x = KIT.w / 2; cam.y = KIT.h / 2; } }
 function goOut(){
   if (game.scene === 'camino') return;

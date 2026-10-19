@@ -113,6 +113,7 @@ body.visor > *:not(#cv):not(#visor){display:none !important}
 #comin{font:15px Georgia,serif;padding:6px 8px;border:1.5px solid #6b4a30;border-radius:8px;background:#fffaf0;color:#3b2a1c;resize:vertical}
 #comf .row{display:flex;gap:6px;justify-content:flex-end}
 #saybtn{position:fixed;right:10px;top:130px;width:42px;height:36px;font-size:19px;line-height:30px;padding:0;cursor:pointer}
+#fundido{position:fixed;inset:0;z-index:29;background:#f6ecd2;color:#5a3a24;font:italic 26px Georgia,serif;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .35s}#fundido.on{opacity:1}
 #sleep{position:fixed;inset:0;z-index:30;background:#0d1020;color:#e8e2c8;font:italic 34px Georgia,serif;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 1.2s ease}
 #sleep.on{opacity:1;pointer-events:auto}
 #talk{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(560px,calc(100% - 28px));box-sizing:border-box;padding:12px 16px 12px;font-size:17px;line-height:1.4}
@@ -176,6 +177,7 @@ body:not(.dev) #spdbtn{top:298px!important;right:10px!important}
 <div id="tripbar" class="paper" hidden><span id="tripstop"></span> <button id="tripisla" title="El mapa de la isla">🗺 La isla</button></div>
 <div id="isla" hidden><div class="paper sheet"><div class="mt">La Isla del Príncipe Eduardo · los pueblos y los caminos</div><canvas id="islacv"></canvas><div><button id="islaclose">Cerrar</button></div></div></div>
 <div id="sleep"></div>
+<div id="fundido"></div>
 <form id="say" class="paper" hidden autocomplete="off"><input id="sayin" maxlength="240" placeholder="Lo que dice Ana… (Enter para decir · Esc para cerrar)" spellcheck="false"><button type="submit">Decir</button></form>
 <button id="saybtn" class="paper" title="Decir algo (Enter o T)">💬</button>
 <button id="combtn" class="paper" title="Dejar un comentario sobre este momento (C): se guarda con lo que estaba pasando">📝</button>

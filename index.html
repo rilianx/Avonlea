@@ -113,6 +113,7 @@ body.visor > *:not(#cv):not(#visor){display:none !important}
 #comin{font:15px Georgia,serif;padding:6px 8px;border:1.5px solid #6b4a30;border-radius:8px;background:#fffaf0;color:#3b2a1c;resize:vertical}
 #comf .row{display:flex;gap:6px;justify-content:flex-end}
 #saybtn{position:fixed;right:10px;top:130px;width:42px;height:36px;font-size:19px;line-height:30px;padding:0;cursor:pointer}
+#fundido{position:fixed;inset:0;z-index:29;background:#f6ecd2;color:#5a3a24;font:italic 26px Georgia,serif;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .35s}#fundido.on{opacity:1}
 #sleep{position:fixed;inset:0;z-index:30;background:#0d1020;color:#e8e2c8;font:italic 34px Georgia,serif;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 1.2s ease}
 #sleep.on{opacity:1;pointer-events:auto}
 #talk{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(560px,calc(100% - 28px));box-sizing:border-box;padding:12px 16px 12px;font-size:17px;line-height:1.4}
@@ -176,6 +177,7 @@ body:not(.dev) #spdbtn{top:298px!important;right:10px!important}
 <div id="tripbar" class="paper" hidden><span id="tripstop"></span> <button id="tripisla" title="El mapa de la isla">🗺 La isla</button></div>
 <div id="isla" hidden><div class="paper sheet"><div class="mt">La Isla del Príncipe Eduardo · los pueblos y los caminos</div><canvas id="islacv"></canvas><div><button id="islaclose">Cerrar</button></div></div></div>
 <div id="sleep"></div>
+<div id="fundido"></div>
 <form id="say" class="paper" hidden autocomplete="off"><input id="sayin" maxlength="240" placeholder="Lo que dice Ana… (Enter para decir · Esc para cerrar)" spellcheck="false"><button type="submit">Decir</button></form>
 <button id="saybtn" class="paper" title="Decir algo (Enter o T)">💬</button>
 <button id="combtn" class="paper" title="Dejar un comentario sobre este momento (C): se guarda con lo que estaba pasando">📝</button>
@@ -2806,7 +2808,7 @@ disparo: lugar
 lugar: corral
 canal: ana_sola
 repetir: dia
-si: !estacion:invierno
+si: !estacion:invierno, hecho:conocidas_diana
 ---
 ana: (Junto al corral, cuatro abedules forman un rincón, como una salita al aire libre.)
 ana: Idlewild. Aquí Diana y yo vamos a tener nuestra casita de juegos, con platos rotos de porcelana como si fueran la mejor vajilla.
@@ -3370,6 +3372,12 @@ quien: ana
 # --- leer, escribir, recitar en el concierto (63-jugar.js)
 === leer ===
 - «Ben-Hur»… ¡No puedo parar de leer! La carrera de cuadrigas…
+
+# (los libros de su pieza: los de la escuela, y uno de poemas gastado del orfanato)
+=== leer_pieza ===
+- (Ana abre el libro de lectura de cuarto grado.) «La batalla de Hohenlinden»… Me la sé de memoria, pero cada vez me da escalofríos.
+- (Ana hojea su libro de poemas, el del orfanato, con las tapas despegadas.) «La dama de Shalott»… Algún día voy a flotar en un bote, como ella. Pero sin morirme.
+- (Ana abre la geografía y busca la Isla del Príncipe Eduardo en el mapa.) Qué chiquita se ve. Y qué grande es por dentro.
 
 === escribir_cuento ===
 - «Los celos de Cordelia»: una historia trágica, con un ahogado y una dama de cabellos de oro…
@@ -4572,6 +4580,13 @@ quien: ana
 - Marilla, ¿no te parece que el pan sabe distinto cuando una está feliz?
 - Hoy imaginé que esta mesa era un banquete en un castillo... pero esto es mucho mejor, porque es de verdad.
 
+# --- la cama de Ana, de día (no es hora de dormir) ---
+=== cama_de_dia ===
+quien: ana
+- (Ana se sienta en la orilla de la cama.) No tengo sueño: es de día. Pero una cama es el mejor lugar del mundo para soñar despierta.
+- (Ana se sienta en la cama y mira por la ventana.) Si la cama fuera un barco, esta ventana sería el mar. Y yo, la capitana.
+- No, todavía no es hora de dormir. Marilla diría que la cama es para la noche, y que el día es para ser útil.
+
 # --- el estante de libros del pastor, en la casa parroquial ---
 === libros_pastor ===
 quien: ana
@@ -5762,6 +5777,40 @@ barry: (La Sra. Barry se ríe, por primera vez con Ana.) A mí también, niña. 
 
 # ====================================== El Sr. Harrison ======================================
 
+=== conv_harrison_avena ===
+con: harrison
+tema: Preguntarle por su campo de avena
+si: conoce:harrison
+---
+ana: Sr. Harrison, su campo de avena se ve tan verde que parece un mar chiquito. Cuando sopla el viento hace olas.
+harrison: (El Sr. Harrison se rasca la barba, desconfiado.) Olas. Hmpf. Lo que hace es crecer, si las vacas de los vecinos lo dejan en paz.
+ana: ¿Las vacas de los vecinos se lo comen?
+harrison: Una vaca jersey que no voy a nombrar. Se mete por la cerca como si fuera suya la avena.
+->* «Si la veo, la espanto yo.»
+   ana: Si alguna vez la veo, yo misma la espanto. Soy muy buena espantando cosas: en el orfanato espantaba los ratones.
+   harrison: (Por primera vez, al Sr. Harrison se le escapa media sonrisa.) Bueno. Eso sí que me serviría.
+   ! suma afecto:harrison:ana 1
+-> «A lo mejor la vaca también encuentra que es como un mar.»
+   ana: A lo mejor la vaca también encuentra que es como un mar, y por eso no se puede resistir.
+   harrison: (El Sr. Harrison la mira como si hubiera dicho una barbaridad.) Las vacas no piensan en mares, niña. Piensan en avena.
+
+=== conv_harrison_solo ===
+con: harrison
+tema: Preguntarle si no se aburre viviendo solo
+si: conoce:harrison
+---
+ana: Sr. Harrison, ¿no se aburre viviendo solo? Yo, cuando estaba sola, inventaba amigas en los vidrios de las vitrinas.
+harrison: No estoy solo. Tengo a Ginger. Y a mí mismo, que soy buena compañía cuando nadie me molesta.
+ana: Ginger es su loro, ¿verdad? Dicen que dice cosas terribles.
+harrison: Dice la verdad, que a la gente le parece terrible. No es lo mismo.
+->* «Me gustaría conocerlo algún día.»
+   ana: Me gustaría conocerlo algún día. Prometo no escandalizarme. Bueno… prometo intentarlo.
+   harrison: (El Sr. Harrison gruñe, pero no dice que no.) Algún día. Si te portas bien con mi avena.
+   ! suma afecto:harrison:ana 1
+-> «Yo creo que nadie debería vivir solo.»
+   ana: Yo creo que nadie debería vivir solo. Hasta los ermitaños de los libros tienen una cabra.
+   harrison: (El Sr. Harrison frunce el ceño.) Lo que tú creas no es asunto mío, niña. Buenos días.
+
 === conv_harrison_loro ===
 con: harrison
 tema: Preguntarle por su loro
@@ -5973,6 +6022,7 @@ invierno: [hecho:conocidas_diana, !hecho:prohibida] ¡Está nevando! Mamá no me
 
 === barry ===
 dice: [!conoce:barry, !hecho:barry_presenta, sabe:barry:nina_cuthbert] Tú debes ser la niña que trajeron los Cuthbert. Buenas tardes.
+dice: [conoce:barry, !hecho:prohibida] ¿Cómo estás, Ana? Abrígate bien, que el viento de la isla es traicionero.
 dice: [dias_desde:barry_presenta:3, !hecho:prohibida] Ana Shirley, siempre es un gusto verte por aquí. Pórtate bien, ¿eh?
 dice: [dias_desde:conocidas_diana:3, !hecho:prohibida] Diana habla de ti todo el día, ¿sabes?
 dice: [hecho:perdonada] Esta vez el cordial de frambuesa está bien etiquetado, te lo aseguro.
@@ -8455,11 +8505,11 @@ function drawAnaRoom(c, t, night){
   c.restore();
   c.strokeStyle = '#8a6a48'; c.lineWidth = 3; c.beginPath(); c.moveTo(wx, 10); c.lineTo(wx, 60); c.moveTo(wx - 42, 35); c.lineTo(wx + 42, 35); c.stroke();
   for (const sd of [-1, 1]) blob(c, [[wx + sd * 46, 8], [wx + sd * 28, 8], [wx + sd * 34, 40], [wx + sd * 48, 64]], 'rgba(255,253,246,.92)');
-  // pegs on the wall: her straw hat and the brown dress with the puffed sleeves
+  // a row of pegs on the wall (empty: her hat is kept in the wardrobe, and the dress with puffed sleeves comes later,
+  // from Matthew, if it comes)
   const px = 1.3 * T;
   blob(c, [[px - 22, 20], [px + 30, 20], [px + 30, 25], [px - 22, 25]], '#7a5536');
-  ell(c, px - 12, 17, 11, 4, '#e8c46a', true); ell(c, px - 12, 14, 6, 4, '#e8c46a', true); line(c, [[px - 18, 16], [px - 6, 16]], '#c0582e', 1.6);
-  blob(c, [[px + 14, 24], [px + 26, 24], [px + 28, 58], [px + 12, 58]], '#8a5a3a'); ell(c, px + 10, 30, 6, 6, '#8a5a3a', true); ell(c, px + 30, 30, 6, 6, '#8a5a3a', true);
+  for (const k of [-12, 6, 22]) ell(c, px + k, 22, 2.2, 2.2, '#5a3a24', true);
   // the looking-glass over the little table
   ell(c, GA.table.x, 34, 14, 19, '#c9a04a', true); ell(c, GA.table.x, 34, 10.5, 15.5, '#cfe2ea');
   // a hooked mat
@@ -9376,21 +9426,22 @@ function dlgHacer(list){   // what a scene does when it starts or ends
     if (a.ofensa) { const [k, o, motivo, n] = a.ofensa; game.wm.ofensa[k + '>' + o] = motivo; relSetW(k, o, Math.min(relGetW(k, o), +n)); }   // (k is offended with o)
     if (a.triste) realR.setFact('triste:' + a.triste);
     if (a.nombrar) nombrar(a.nombrar, a.n);
-    if (a.sentar) { const q = SEATS[a.sentar], b = a.sentar === 'ana' ? ana : PEOPLE[a.sentar]; if (q && b) { b.x = q[0]; b.y = q[1]; b.dir = q[2]; b.sit = true; b.moving = false; b.nav = null; if (b !== ana) b.mealSat = true; else { ana.goto = null; ana.vx = ana.vy = 0; } } }
+    if (a.sentar) { const q = SEATS[a.sentar], b = a.sentar === 'ana' ? ana : PEOPLE[a.sentar], sentarse = () => { b.x = q[0]; b.y = q[1]; b.dir = q[2]; b.sit = true; b.moving = false; b.nav = null; if (b !== ana) b.mealSat = true; else { ana.goto = null; ana.vx = ana.vy = 0; } };
+      if (q && b) { if (b === ana && game.scene === 'gg' && dist(ana.x, ana.y, q[0], q[1]) > 30 && !navigator.webdriver) { ana.sit = false; ana.goto = { x: q[0], y: q[1] + 8, scene: game.scene, alLlegar: sentarse }; } else sentarse(); } }   // (Ana walks to her chair, and sits: not a jump)
     if (a.ropa_tirada) game.wm.ropaTirada = true;
     if (a.camison) { game.wm.camison = true; game.wm.sinSombrero = true; }
     if (a.sin_sombrero) game.wm.sinSombrero = true;
     if (a.pasa_tiempo) dayT += a.pasa_tiempo / 24;
     if (a.a_cocina) {
-      if (game.scene !== 'gg') { ana.enCama = null; ana.goto = null; goIn('gg', [KDOOR.x + 40, KIT.h * .6]); }
+      if (game.scene !== 'gg') { ana.enCama = null; ana.goto = null; fundido(game.scene === 'ga' ? 'Ana baja a la cocina…' : 'Ana vuelve a la cocina…', () => goIn('gg', [KDOOR.x + 40, KIT.h * .6])); }
       const M = PEOPLE.marilla; if (sceneOf('marilla') !== 'gg') { M.where = 'gg'; M.x = STOVE.x + 60; M.y = STOVE.y + 60; M.nav = null; M.moving = false; M.sit = false; }
     }
     if (a.junto) { const b = a.junto === 'ana' ? ana : PEOPLE[a.junto], o = a.de === 'ana' ? ana : PEOPLE[a.de]; if (b && o) { b.sit = false; if (b === ana) { ana.meal = null; ana.goto = null; ana.vx = ana.vy = 0; } else { b.nav = null; b.moving = false; } b.x = o.x - 20; b.y = o.y + 2; b.dir = 1; } }
     if (a.vestirse) vestirse(true);
     if (a.punto) puntoGuardar(a.punto, a.texto);
     if (a.final) finalMostrar(a.final, a.texto);
-    if (a.a_pieza && game.scene !== 'ga') { ana.meal = null; ana.goto = null; if (cart.riding) cartOff(); goIn('ga', [GA.bed.x - 20, GA.bed.y + 16]); }
-    if (a.acostarse) { if (game.scene !== 'ga') { ana.meal = null; goIn('ga', [GA.bed.x - 20, GA.bed.y + 16]); } setTimeout(() => { if (!sleeping) goToBed(); }, 500); }
+    if (a.a_pieza && game.scene !== 'ga') { ana.meal = null; ana.goto = null; if (cart.riding) cartOff(); fundido('Ana sube a su pieza…', () => goIn('ga', [GA.bed.x - 20, GA.bed.y + 16])); }
+    if (a.acostarse) { if (game.scene !== 'ga') { ana.meal = null; fundido('Ana sube a su pieza…', () => goIn('ga', [GA.bed.x - 20, GA.bed.y + 16])); } setTimeout(() => { if (!sleeping) goToBed(); }, 900); }
     if (a.a_la_mesa && !ana.meal && game.scene === 'gg') mealSit();
     if (a.mesa) game.comida = a.mesa === 'nada' ? null : { que: a.mesa, dia: today() };
     if (a.cosa) { const [k, it, n] = a.cosa; if (k === 'ana') game.inv[it] = (game.inv[it] || 0) + n; else { const I = wmInv(k); I[it] = (I[it] || 0) + n; } if (k === 'ana' && ITEM_DEFS[it]) float('+' + itemText(it, n), ana.x, ana.y - 60); }
@@ -9914,7 +9965,10 @@ ROOMS.ga = {
   blocked: (x, y) => (Math.abs(x - GA.armario.x) < 25 && y > GA.armario.y - 14 && y < GA.armario.y + 4) || (Math.abs(x - GA.bed.x) < 76 && y > GA.bed.y - 30 && y < GA.bed.y + 4) || (Math.abs(x - GA.table.x) < 30 && y > GA.table.y - 24 && y < GA.table.y + 4) || (Math.abs(x - GA.wash.x) < 26 && y > GA.wash.y - 26 && y < GA.wash.y + 4),
   glow: () => [GA.table.x, GA.table.y - 40, 150, '255,190,110', .38], place: 'en su cuarto del alero este de Tejas Verdes, con la ventana donde está el cerezo Reina de las Nieves',
   actions: add => {
-    add('bed', GA.bed.x - 20, GA.bed.y + 14, 60, 'Dormir en mi cama', goToBed, { hy: 30, hit: 0, pri: 2, test: (x, y) => Math.abs(x - GA.bed.x) < 76 && y > GA.bed.y - 62 && y < GA.bed.y + 6 });
+    { const noche = (h => h >= 19 || h < 5)(hourNow() % 24);   // (to sleep, at night; by day, the bed is for dreaming awake)
+      add('bed', GA.bed.x - 20, GA.bed.y + 14, 60, noche ? 'Dormir en mi cama' : 'Sentarse en la cama a soñar despierta', noche ? goToBed : () => anaSays(dicho('cama_de_dia')), { hy: 30, hit: 0, pri: 2, test: (x, y) => Math.abs(x - GA.bed.x) < 76 && y > GA.bed.y - 46 && y < GA.bed.y + 6 }); }   // (not up to the chair beside it: the dress on the chair is the chair's)
+    if (game.wm?.ropaSilla && game.wm?.camison) { const [sx, sy] = ROPA_SILLA(); add('ropasilla', sx, sy, 44, 'Ponerse el vestido (en la silla)', () => vestirse(), { hy: 14, hit: 22, pri: 1 }); }
+    add('libros', GA.table.x - 12, GA.table.y + 20, 50, 'Leer uno de sus libros', () => jugar({ v: 'leer', pieza: true }), { hy: 34, hit: 14, pri: 2 });
     add('gwin', GA.win, 3.9 * T, 34, velaPuede() ? 'La ventana (🕯 la vela)' : 'Mirar por la ventana', ventana, { hy: 40, hit: 0, pri: 3, test: (x, y) => Math.abs(x - GA.win) < 46 && y < 62 });
     add('armario', GA.armario.x, GA.armario.y + 22, 50, game.wm?.camison ? 'Vestirse (el armario)' : 'El armario (el sombrero, la ropa)', armario, { hy: 40, hit: 26, pri: 3, nombre: 'El armario', test: (x, y) => Math.abs(x - GA.armario.x) < 34 && y > GA.armario.y - 150 && y < GA.armario.y + 12 });
     if (game.wm?.ropaTirada) { const [rx, ry] = ROPA_SUELO(); add('ropa', rx, ry, 50, 'La ropa tirada en el suelo', ropaMenu, { hy: 4, hit: 22, pri: 2 }); }
@@ -10709,11 +10763,21 @@ function opcionesAct(t){
 // in the middle of a scene here that still needs her (she has lines left, or a choice to make), Ana does not walk out:
 // the door, the stairs and the map wait (otherwise the scene would be left waiting for her, forever)
 const retenida = () => TALKS.some(t => t.ch === game.scene && t.lines.slice(t.i).some(l => l.q === 'ana' || l.q === '?'));
+// why Ana cannot be moved now, if she cannot: a scene with her in it is going on (she cries, she eats, they look at her:
+// what she does is what the scene says), or it is night and she is in bed
+function anaQuieta(){
+  if (retenida()) return 'Ahora no: la escena sigue (Espacio o Enter para pasar).';
+  const h = hourNow() % 24; if (ana.enCama && game.scene === 'ga' && (h >= 20 || h < 5)) return 'Ana duerme. (⏭ pasa al día siguiente)';
+  return null;
+}
+let anaQuietaAviso = 0;
+const anaQuietaAvisar = m => { if (TT - anaQuietaAviso > 4) { anaQuietaAviso = TT; notice(m); } };
 function salirSiPuede(f){ if (retenida()) { notice('Ahora no: la están mirando, esperan lo que Ana diga.'); return false; } f(); return true; }
 // a tap: do it at once if she is close enough, otherwise she walks there (A*) and does it on arrival; on bare ground she just walks
 function tapAt(sx, sy){
   if (sleeping) return;
   if (OBS) { observe(null); return; }   // (watching someone: a tap brings the view back to Ana)
+  { const q = anaQuieta(); if (q) { anaQuietaAvisar(q); return; } }
   const wx = view.ox + sx / view.Z, wy = view.oy + sy / view.Z, t = targetAt(wx, wy);
   if (t && (t.self || dist(ana.x, ana.y, t.x, t.y) < t.reach * .85)) { ana.goto = null; opcionesAct(t); }
   else { ana.goto = t ? { id: t.id, scene: game.scene } : { x: wx, y: wy, scene: game.scene };
@@ -11216,6 +11280,11 @@ function momentsTick(){
     const lines = f.lines.filter(([q]) => q === 'ana' || (q === 'matthew' && mNear)).map(([q, t]) => ({ q, t }));
     if (lines.length) sceneStart({ parts: mNear ? ['matthew'] : [], lines, out: {}, scene: 'out', resumen: '' }, false);
   }
+}
+// a scene takes Ana to another room: not in a jump, but as a page turns (a moment of paper, what happens, and there)
+function fundido(texto, f){
+  const el = $('fundido'); if (!el || navigator.webdriver) return f();
+  el.textContent = texto; el.classList.add('on'); setTimeout(() => { f(); setTimeout(() => el.classList.remove('on'), 650); }, 380);
 }
 function goIn(room, at){ game.scene = room; ana.lie = false; diana.lie = false; ana.x = at ? at[0] : KDOOR.x; ana.y = at ? at[1] : KIT.h - 14; ana.dir = 0; ana.sit = false; if (diana.follow) { diana.where = room; diana.sit = false; diana.x = ana.x - 26; diana.y = ana.y; } if (!obsScene()) { cam.x = KIT.w / 2; cam.y = KIT.h / 2; } }
 function goOut(){
@@ -13136,6 +13205,7 @@ function update(dt){
     if (stick) { const dx = stick.x - stick.x0, dy = stick.y - stick.y0, l = Math.hypot(dx, dy); if (l > 10) { mx = dx / Math.max(l, 50); my = dy / Math.max(l, 50); } }
   }
   if (ana.hidden) { mx = my = 0; if (ana.goto && !ana.goto.wm) ana.goto = null; }
+  if ((mx || my) && !ANA_AUTO) { const q = anaQuieta(); if (q) { mx = my = 0; anaQuietaAvisar(q); } }   // (in the middle of a scene with her, or asleep: she stays)
   if (game.scene === 'camino' && ana.onCart && (mx || my || (ana.goto && !ana.goto.wm))) roadGetOff();   // (moving her: she gets down from the buggy)
   if (ANA_AUTO) { if (mx || my) { freeStart(); const v = 520 / (cam.zoom || 1) / (viewZoom || 1); freeCam.x += mx * v * dt; freeCam.y += my * v * dt; } mx = my = 0; }   // (on her own: the keys move the view)
   if (game.talk?.deadline && TT > game.talk.deadline && !sayOpen) { game.talk.deadline = 0; autoChoose(); }
@@ -13156,7 +13226,7 @@ function update(dt){
     else {
       const sk = ana.stk; if (!sk || dist(ana.x, ana.y, sk.x, sk.y) > 6) ana.stk = { x: ana.x, y: ana.y, t: TT }; else if (TT - sk.t > 1.5) { ana.nav = null; ana.stk = null; }   // (stuck: find the way again)
       const n = navStep(ana, t ? t.x : gt.x, t ? t.y : gt.y); if (n.arrived && t && /^[pf]:/.test(t.id) && dist(ana.x, ana.y, t.x, t.y) >= t.reach && TT - (gt.t0 ??= TT) < 15) { ana.nav = null; }   // (someone who moved on: she goes after them, a while)
-      else if (n.arrived) { if (gt.wm) ana.wmArr = TT; ana.goto = null; if (t && dist(ana.x, ana.y, t.x, t.y) < t.reach) { ACT_SOLA = !!gt.auto; try { (gt.use || (gt.auto || gt.wm ? t.act : () => opcionesAct(t)))(); } finally { ACT_SOLA = false; } } } else { const dx = n.wx - ana.x, dy = n.wy - ana.y, d = Math.hypot(dx, dy) || 1; mx = dx / d; my = dy / d; } }
+      else if (n.arrived) { if (gt.wm) ana.wmArr = TT; ana.goto = null; if (gt.alLlegar) gt.alLlegar(); if (t && dist(ana.x, ana.y, t.x, t.y) < t.reach) { ACT_SOLA = !!gt.auto; try { (gt.use || (gt.auto || gt.wm ? t.act : () => opcionesAct(t)))(); } finally { ACT_SOLA = false; } } } else { const dx = n.wx - ana.x, dy = n.wy - ana.y, d = Math.hypot(dx, dy) || 1; mx = dx / d; my = dy / d; } }
   }
   // how fast: a walk (Shift to hurry), or a stroll when she is out on her own: every so often she stops to look about
   if (dest && !ana.goto?.dest) dest = null;
@@ -15373,7 +15443,7 @@ function wmExec0(ag, a, st, dt){
       if (!wait(7.6)) return 'run';
       inv.carta -= 1; if (c) { c.estado = 'enviada'; c.envio = today(); } realR.setFact('carta_enviada:' + me); logEv(`${wmName(me)} mandó por correo una carta para ${C.nombre}.`, []); return 'ok';
     }
-    case 'leer': { if (!st.said) { st.said = 1; bubble(me, dicho('leer')); } if (!wait(5)) return 'run'; realR.setFact('leido:' + me); logEv(`${wmName(me)} leyó un libro.`, []); return 'ok'; }
+    case 'leer': { if (!st.said) { st.said = 1; bubble(me, a.pieza ? dicho('leer_pieza') : dicho('leer')); } if (!wait(5)) return 'run'; if (a.pieza) { logEv(`${wmName(me)} leyó un rato en su pieza.`, []); return 'ok'; } realR.setFact('leido:' + me); logEv(`${wmName(me)} leyó un libro.`, []); return 'ok'; }   // (her own schoolbooks, a while: not the book of the notebook, the one Diana lends)
     case 'escribir_cuento': { if (!st.said) { st.said = 1; bubble(me, dicho('escribir_cuento')); } if (!wait(5)) return 'run'; inv.cuento = (inv.cuento || 0) + 1; float('+1 cuento', b.x, b.y - 50); logEv(`${wmName(me)} escribió un cuento.`, []); return 'ok'; }
     case 'leer_cuento': { const r = reach(a.k); if (r !== 'ok') return r; if (!st.said) { st.said = 1; bubble(me, dicho('leer_cuento')); } if (st.said === 1 && wait(4)) { st.said = 2; st.w = 0; bubble(a.k, dicho('leer_cuento_responde')); } if (st.said !== 2 || !wait(3)) return 'run'; inv.cuento -= 1; realR.setFact('club:' + me); logEv(`${wmName(me)} le leyó su cuento a ${wmName(a.k)} en el club de cuentos.`, []); return 'ok'; }
     case 'ensayar': { if (!st.said) { st.said = 1; bubble(me, dicho('ensayar')); } if (!wait(4)) return 'run'; wmKnow(me, 'poema'); logEv(`${wmName(me)} ensayó su recitación.`, []); return 'ok'; }
@@ -15385,7 +15455,7 @@ function wmExec0(ag, a, st, dt){
     case 'acarrear_lena': { if (!st.said) { st.said = 1; bubble(me, dicho('acarrear_lena')); } if (!wait(3)) return 'run'; inv.lena = (inv.lena || 0) + 1; float('+1 brazada de leña', b.x, b.y - 50); logEv(`${wmName(me)} entró leña a la cocina.`, []); return 'ok'; }
     case 'partir_lena': { if (!st.said) { st.said = 1; bubble(me, dicho('partir_lena')); } if (!wait(4)) return 'run'; { const o = oficio(me, 'partir_lena'), n = o.sale ? o.rinde ?? 3 : 0; if (!o.sale) bubble(me, '~' + o.mal); if (n) { inv.lena = (inv.lena || 0) + n; float('+' + n + ' ' + (n > 1 ? 'atados' : 'atado') + ' de leña', b.x, b.y - 50); } else float('Nada de leña esta vez', b.x, b.y - 50); } logEv(`${wmName(me)} partió leña.`, []); return 'ok'; }
     case 'sembrar': { if (!wait(4)) return 'run'; realR.setFact('sembrado'); float('🌱 sembrado', b.x, b.y - 50); logEv(`${wmName(me)} sembró la huerta.`, []); return 'ok'; }
-    case 'regar': { if (!wait(3)) return 'run'; realR.setFact('regado'); dlgHecho('regado'); float('💧 regado', b.x, b.y - 50); logEv(`${wmName(me)} regó la huerta.`, []); return 'ok'; }
+    case 'regar': { if (!wait(3)) return 'run'; realR.setFact('regado'); if (me === 'ana') dlgHecho('regado'); float('💧 regado', b.x, b.y - 50); logEv(`${wmName(me)} regó la huerta.`, []); return 'ok'; }
     case 'patinar': { if (!st.said) { st.said = 1; bubble(me, dist(diana.x, diana.y, b.x, b.y) < 200 && wmScene('diana') === 'out' ? dicho('patinar_con_diana') : dicho('patinar')); } if (!wait(5)) return 'run'; realR.setFact('patino:' + me); logEv(`${wmName(me)} patinó en el lago helado.`, []); return 'ok'; }
     case 'trineo': { if (!st.said) { st.said = 1; bubble(me, dicho('trineo')); } if (!wait(5)) return 'run'; realR.setFact('trineo:' + me); logEv(`${wmName(me)} se tiró en trineo por la colina.`, []); return 'ok'; }
     case 'pedir_permiso': { const r = reach('marilla'); if (r !== 'ok') return r; if (!st.said) { st.said = 1; bubble(me, dicho('pedir_permiso_picnic')); } if (st.said === 1 && wait(3)) { st.said = 2; st.w = 0; bubble('marilla', dicho('permiso_picnic_si')); } if (st.said !== 2 || !wait(2.5)) return 'run'; realR.setFact('permiso:picnic'); logEv(`Marilla le dio permiso a ${wmName(me)} para ir al picnic.`, []); return 'ok'; }
@@ -15636,7 +15706,7 @@ const AGENDA = [
   { who: 'matthew', from: 6, to: 9, label: 'dar de comer a los animales', goal: () => G.alimentados(['corral', 'gallinero']) },
   { who: 'matthew', from: 6, to: 9.5, label: 'ordeñar y llevarle la leche a Marilla', when: () => !realR.fact('ordeñada:dolly') && cowIn('dolly', 'corral'), goal: () => G.tener('marilla', 'leche', (wmInv('marilla').leche || 0) + 2) },
   { who: 'matthew', from: 9.5, to: 12, season: [1], label: 'hacer heno', when: () => !realR.fact('heno_hecho'), goal: () => G.tener('matthew', 'heno', (wmInv('matthew').heno || 0) + 3) },
-  { who: 'matthew', from: 9.5, to: 12, season: [2, 3], label: 'partir leña para Marilla', goal: () => G.tener('marilla', 'lena', (wmInv('marilla').lena || 0) + 3) },
+  { who: 'matthew', from: 9.5, to: 12, season: [0, 2, 3], label: 'partir leña para Marilla', goal: () => G.tener('marilla', 'lena', (wmInv('marilla').lena || 0) + 3) },
   { who: 'marilla', from: 8.5, to: 11.5, label: 'batir mantequilla', when: () => (wmInv('marilla').leche || 0) >= 2, goal: () => G.tener('marilla', 'mantequilla', (wmInv('marilla').mantequilla || 0) + 1) },
   { who: 'marilla', from: 13, to: 15, ana: true, chores: true, label: 'encargarle los quehaceres a Ana', goal: () => G.quehaceres('ana', ['platos', 'barrer']), favors: [{ f: 'quehaceres', to: 'ana', q: ['platos', 'barrer'] }] },
   { who: 'marilla', from: 17, to: 19, ana: true, label: 'regañar a Ana por los quehaceres', when: () => realR.fact('falta:ana'), goal: () => G.regañado('ana') },

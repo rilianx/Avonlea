@@ -148,21 +148,22 @@ function dlgHacer(list){   // what a scene does when it starts or ends
     if (a.ofensa) { const [k, o, motivo, n] = a.ofensa; game.wm.ofensa[k + '>' + o] = motivo; relSetW(k, o, Math.min(relGetW(k, o), +n)); }   // (k is offended with o)
     if (a.triste) realR.setFact('triste:' + a.triste);
     if (a.nombrar) nombrar(a.nombrar, a.n);
-    if (a.sentar) { const q = SEATS[a.sentar], b = a.sentar === 'ana' ? ana : PEOPLE[a.sentar]; if (q && b) { b.x = q[0]; b.y = q[1]; b.dir = q[2]; b.sit = true; b.moving = false; b.nav = null; if (b !== ana) b.mealSat = true; else { ana.goto = null; ana.vx = ana.vy = 0; } } }
+    if (a.sentar) { const q = SEATS[a.sentar], b = a.sentar === 'ana' ? ana : PEOPLE[a.sentar], sentarse = () => { b.x = q[0]; b.y = q[1]; b.dir = q[2]; b.sit = true; b.moving = false; b.nav = null; if (b !== ana) b.mealSat = true; else { ana.goto = null; ana.vx = ana.vy = 0; } };
+      if (q && b) { if (b === ana && game.scene === 'gg' && dist(ana.x, ana.y, q[0], q[1]) > 30 && !navigator.webdriver) { ana.sit = false; ana.goto = { x: q[0], y: q[1] + 8, scene: game.scene, alLlegar: sentarse }; } else sentarse(); } }   // (Ana walks to her chair, and sits: not a jump)
     if (a.ropa_tirada) game.wm.ropaTirada = true;
     if (a.camison) { game.wm.camison = true; game.wm.sinSombrero = true; }
     if (a.sin_sombrero) game.wm.sinSombrero = true;
     if (a.pasa_tiempo) dayT += a.pasa_tiempo / 24;
     if (a.a_cocina) {
-      if (game.scene !== 'gg') { ana.enCama = null; ana.goto = null; goIn('gg', [KDOOR.x + 40, KIT.h * .6]); }
+      if (game.scene !== 'gg') { ana.enCama = null; ana.goto = null; fundido(game.scene === 'ga' ? 'Ana baja a la cocina…' : 'Ana vuelve a la cocina…', () => goIn('gg', [KDOOR.x + 40, KIT.h * .6])); }
       const M = PEOPLE.marilla; if (sceneOf('marilla') !== 'gg') { M.where = 'gg'; M.x = STOVE.x + 60; M.y = STOVE.y + 60; M.nav = null; M.moving = false; M.sit = false; }
     }
     if (a.junto) { const b = a.junto === 'ana' ? ana : PEOPLE[a.junto], o = a.de === 'ana' ? ana : PEOPLE[a.de]; if (b && o) { b.sit = false; if (b === ana) { ana.meal = null; ana.goto = null; ana.vx = ana.vy = 0; } else { b.nav = null; b.moving = false; } b.x = o.x - 20; b.y = o.y + 2; b.dir = 1; } }
     if (a.vestirse) vestirse(true);
     if (a.punto) puntoGuardar(a.punto, a.texto);
     if (a.final) finalMostrar(a.final, a.texto);
-    if (a.a_pieza && game.scene !== 'ga') { ana.meal = null; ana.goto = null; if (cart.riding) cartOff(); goIn('ga', [GA.bed.x - 20, GA.bed.y + 16]); }
-    if (a.acostarse) { if (game.scene !== 'ga') { ana.meal = null; goIn('ga', [GA.bed.x - 20, GA.bed.y + 16]); } setTimeout(() => { if (!sleeping) goToBed(); }, 500); }
+    if (a.a_pieza && game.scene !== 'ga') { ana.meal = null; ana.goto = null; if (cart.riding) cartOff(); fundido('Ana sube a su pieza…', () => goIn('ga', [GA.bed.x - 20, GA.bed.y + 16])); }
+    if (a.acostarse) { if (game.scene !== 'ga') { ana.meal = null; fundido('Ana sube a su pieza…', () => goIn('ga', [GA.bed.x - 20, GA.bed.y + 16])); } setTimeout(() => { if (!sleeping) goToBed(); }, 900); }
     if (a.a_la_mesa && !ana.meal && game.scene === 'gg') mealSit();
     if (a.mesa) game.comida = a.mesa === 'nada' ? null : { que: a.mesa, dia: today() };
     if (a.cosa) { const [k, it, n] = a.cosa; if (k === 'ana') game.inv[it] = (game.inv[it] || 0) + n; else { const I = wmInv(k); I[it] = (I[it] || 0) + n; } if (k === 'ana' && ITEM_DEFS[it]) float('+' + itemText(it, n), ana.x, ana.y - 60); }
@@ -686,7 +687,10 @@ ROOMS.ga = {
   blocked: (x, y) => (Math.abs(x - GA.armario.x) < 25 && y > GA.armario.y - 14 && y < GA.armario.y + 4) || (Math.abs(x - GA.bed.x) < 76 && y > GA.bed.y - 30 && y < GA.bed.y + 4) || (Math.abs(x - GA.table.x) < 30 && y > GA.table.y - 24 && y < GA.table.y + 4) || (Math.abs(x - GA.wash.x) < 26 && y > GA.wash.y - 26 && y < GA.wash.y + 4),
   glow: () => [GA.table.x, GA.table.y - 40, 150, '255,190,110', .38], place: 'en su cuarto del alero este de Tejas Verdes, con la ventana donde está el cerezo Reina de las Nieves',
   actions: add => {
-    add('bed', GA.bed.x - 20, GA.bed.y + 14, 60, 'Dormir en mi cama', goToBed, { hy: 30, hit: 0, pri: 2, test: (x, y) => Math.abs(x - GA.bed.x) < 76 && y > GA.bed.y - 62 && y < GA.bed.y + 6 });
+    { const noche = (h => h >= 19 || h < 5)(hourNow() % 24);   // (to sleep, at night; by day, the bed is for dreaming awake)
+      add('bed', GA.bed.x - 20, GA.bed.y + 14, 60, noche ? 'Dormir en mi cama' : 'Sentarse en la cama a soñar despierta', noche ? goToBed : () => anaSays(dicho('cama_de_dia')), { hy: 30, hit: 0, pri: 2, test: (x, y) => Math.abs(x - GA.bed.x) < 76 && y > GA.bed.y - 46 && y < GA.bed.y + 6 }); }   // (not up to the chair beside it: the dress on the chair is the chair's)
+    if (game.wm?.ropaSilla && game.wm?.camison) { const [sx, sy] = ROPA_SILLA(); add('ropasilla', sx, sy, 44, 'Ponerse el vestido (en la silla)', () => vestirse(), { hy: 14, hit: 22, pri: 1 }); }
+    add('libros', GA.table.x - 12, GA.table.y + 20, 50, 'Leer uno de sus libros', () => jugar({ v: 'leer', pieza: true }), { hy: 34, hit: 14, pri: 2 });
     add('gwin', GA.win, 3.9 * T, 34, velaPuede() ? 'La ventana (🕯 la vela)' : 'Mirar por la ventana', ventana, { hy: 40, hit: 0, pri: 3, test: (x, y) => Math.abs(x - GA.win) < 46 && y < 62 });
     add('armario', GA.armario.x, GA.armario.y + 22, 50, game.wm?.camison ? 'Vestirse (el armario)' : 'El armario (el sombrero, la ropa)', armario, { hy: 40, hit: 26, pri: 3, nombre: 'El armario', test: (x, y) => Math.abs(x - GA.armario.x) < 34 && y > GA.armario.y - 150 && y < GA.armario.y + 12 });
     if (game.wm?.ropaTirada) { const [rx, ry] = ROPA_SUELO(); add('ropa', rx, ry, 50, 'La ropa tirada en el suelo', ropaMenu, { hy: 4, hit: 22, pri: 2 }); }

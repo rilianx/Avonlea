@@ -26,11 +26,11 @@ function drawAnaRoom(c, t, night){
   c.restore();
   c.strokeStyle = '#8a6a48'; c.lineWidth = 3; c.beginPath(); c.moveTo(wx, 10); c.lineTo(wx, 60); c.moveTo(wx - 42, 35); c.lineTo(wx + 42, 35); c.stroke();
   for (const sd of [-1, 1]) blob(c, [[wx + sd * 46, 8], [wx + sd * 28, 8], [wx + sd * 34, 40], [wx + sd * 48, 64]], 'rgba(255,253,246,.92)');
-  // pegs on the wall: her straw hat and the brown dress with the puffed sleeves
+  // a row of pegs on the wall (empty: her hat is kept in the wardrobe, and the dress with puffed sleeves comes later,
+  // from Matthew, if it comes)
   const px = 1.3 * T;
   blob(c, [[px - 22, 20], [px + 30, 20], [px + 30, 25], [px - 22, 25]], '#7a5536');
-  ell(c, px - 12, 17, 11, 4, '#e8c46a', true); ell(c, px - 12, 14, 6, 4, '#e8c46a', true); line(c, [[px - 18, 16], [px - 6, 16]], '#c0582e', 1.6);
-  blob(c, [[px + 14, 24], [px + 26, 24], [px + 28, 58], [px + 12, 58]], '#8a5a3a'); ell(c, px + 10, 30, 6, 6, '#8a5a3a', true); ell(c, px + 30, 30, 6, 6, '#8a5a3a', true);
+  for (const k of [-12, 6, 22]) ell(c, px + k, 22, 2.2, 2.2, '#5a3a24', true);
   // the looking-glass over the little table
   ell(c, GA.table.x, 34, 14, 19, '#c9a04a', true); ell(c, GA.table.x, 34, 10.5, 15.5, '#cfe2ea');
   // a hooked mat

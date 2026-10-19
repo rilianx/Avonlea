@@ -62,7 +62,7 @@
    "viven": []
   }
  ],
- "generado": "2026-10-19 12:50",
+ "generado": "2026-10-19 21:29",
  "momentos": [
   {
    "id": "dia2",
@@ -558,7 +558,7 @@
    },
    "barry": {
     "sin": 0,
-    "con": 1
+    "con": 2
    },
    "lynde": {
     "sin": 2,
@@ -768,7 +768,7 @@
    },
    "barry": {
     "sin": 0,
-    "con": 1
+    "con": 2
    },
    "lynde": {
     "sin": 2,
@@ -979,7 +979,7 @@
    },
    "barry": {
     "sin": 0,
-    "con": 1
+    "con": 2
    },
    "lynde": {
     "sin": 5,
@@ -1403,7 +1403,7 @@
    },
    "barry": {
     "sin": 2,
-    "con": 3
+    "con": 4
    },
    "lynde": {
     "sin": 5,
@@ -1615,7 +1615,7 @@
    },
    "barry": {
     "sin": 1,
-    "con": 2
+    "con": 3
    },
    "lynde": {
     "sin": 4,
@@ -1828,7 +1828,7 @@
    },
    "barry": {
     "sin": 1,
-    "con": 3
+    "con": 4
    },
    "lynde": {
     "sin": 5,
@@ -2042,7 +2042,7 @@
    },
    "barry": {
     "sin": 2,
-    "con": 3
+    "con": 4
    },
    "lynde": {
     "sin": 5,
@@ -3681,7 +3681,7 @@
    "interrumpe": false,
    "grande": false,
    "repetir": "cada 5",
-   "si": "hora:9.2-12, no_hoy:clase",
+   "si": "hora:9.2-12, no_hoy:clase, hecho:llego_stacy",
    "en": "ana=es, stacy=es",
    "hablan": "stacy",
    "lineas": 4,
@@ -3703,7 +3703,7 @@
    "interrumpe": false,
    "grande": false,
    "repetir": "cada 5",
-   "si": "hora:9.2-12, no_hoy:clase",
+   "si": "hora:9.2-12, no_hoy:clase, hecho:llego_stacy",
    "en": "ana=es, stacy=es",
    "hablan": "stacy",
    "lineas": 3,
@@ -6512,7 +6512,7 @@
    "interrumpe": false,
    "grande": false,
    "repetir": "dia",
-   "si": "!estacion:invierno",
+   "si": "!estacion:invierno, hecho:conocidas_diana",
    "en": "",
    "hablan": "",
    "lineas": 2,
@@ -7401,7 +7401,7 @@
    "interrumpe": false,
    "grande": false,
    "repetir": "una_vez",
-   "si": "afecto:diana:ana>=3, hecho:zanahorias_contesta, !hecho:prohibida",
+   "si": "afecto:diana:ana>=3, hecho:zanahorias_contesta, hecho:llego_gilbert, !hecho:prohibida",
    "en": "",
    "hablan": "diana",
    "lineas": 6,
@@ -7685,6 +7685,58 @@
    ]
   },
   {
+   "id": "conv_harrison_avena",
+   "canal": "conv",
+   "disparo": "conversar",
+   "prioridad": 1,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "conoce:harrison",
+   "en": "",
+   "hablan": "harrison",
+   "lineas": 5,
+   "primera": "ana: Sr. Harrison, su campo de avena se ve tan verde que parece un mar chiquito. Cuando sopla el viento hace olas.",
+   "quienes": [
+    "harrison",
+    "ana"
+   ],
+   "con": "harrison",
+   "una_vez": true,
+   "texto": [
+    "ana: Sr. Harrison, su campo de avena se ve tan verde que parece un mar chiquito. Cuando sopla el viento hace olas.",
+    "harrison: (El Sr. Harrison se rasca la barba, desconfiado.) Olas. Hmpf. Lo que hace es crecer, si las vacas de los vecinos lo dejan en paz.",
+    "ana: ¿Las vacas de los vecinos se lo comen?",
+    "harrison: Una vaca jersey que no voy a nombrar. Se mete por la cerca como si fuera suya la avena."
+   ]
+  },
+  {
+   "id": "conv_harrison_solo",
+   "canal": "conv",
+   "disparo": "conversar",
+   "prioridad": 1,
+   "interrumpe": false,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "conoce:harrison",
+   "en": "",
+   "hablan": "harrison",
+   "lineas": 5,
+   "primera": "ana: Sr. Harrison, ¿no se aburre viviendo solo? Yo, cuando estaba sola, inventaba amigas en los vidrios de las vitrinas.",
+   "quienes": [
+    "harrison",
+    "ana"
+   ],
+   "con": "harrison",
+   "una_vez": true,
+   "texto": [
+    "ana: Sr. Harrison, ¿no se aburre viviendo solo? Yo, cuando estaba sola, inventaba amigas en los vidrios de las vitrinas.",
+    "harrison: No estoy solo. Tengo a Ginger. Y a mí mismo, que soy buena compañía cuando nadie me molesta.",
+    "ana: Ginger es su loro, ¿verdad? Dicen que dice cosas terribles.",
+    "harrison: Dice la verdad, que a la gente le parece terrible. No es lo mismo."
+   ]
+  },
+  {
    "id": "conv_harrison_loro",
    "canal": "conv",
    "disparo": "conversar",
@@ -7718,7 +7770,7 @@
    "interrumpe": false,
    "grande": false,
    "repetir": "una_vez",
-   "si": "hecho:zanahorias, !cuaderno:paces",
+   "si": "hecho:zanahorias, hecho:llego_gilbert, !cuaderno:paces",
    "en": "",
    "hablan": "gilbert",
    "lineas": 3,
@@ -7742,7 +7794,7 @@
    "interrumpe": false,
    "grande": false,
    "repetir": "una_vez",
-   "si": "cuaderno:paces",
+   "si": "cuaderno:paces, hecho:llego_gilbert",
    "en": "",
    "hablan": "gilbert, al_terminar",
    "lineas": 6,
@@ -7770,7 +7822,7 @@
    "interrumpe": false,
    "grande": false,
    "repetir": "una_vez",
-   "si": "conoce:stacy",
+   "si": "conoce:stacy, hecho:llego_stacy",
    "en": "",
    "hablan": "stacy, al_terminar",
    "lineas": 5,
@@ -7797,7 +7849,7 @@
    "interrumpe": false,
    "grande": false,
    "repetir": "una_vez",
-   "si": "conoce:stacy",
+   "si": "conoce:stacy, hecho:llego_stacy",
    "en": "",
    "hablan": "stacy, al_terminar",
    "lineas": 6,
@@ -7825,7 +7877,7 @@
    "interrumpe": false,
    "grande": false,
    "repetir": "una_vez",
-   "si": "conoce:sraallan",
+   "si": "conoce:sraallan, presente:sraallan",
    "en": "",
    "hablan": "sraallan, al_terminar",
    "lineas": 6,
@@ -10650,7 +10702,7 @@
    "en": "",
    "hablan": "marilla",
    "lineas": 3,
-   "primera": "marilla: Ana, ¿barriste el porche como te dije?",
+   "primera": "marilla: Ana, el porche está lleno de hojas. ¿Lo barres tú, o lo barro yo?",
    "quienes": [
     "ana",
     "marilla"
@@ -10658,8 +10710,8 @@
    "con": "",
    "una_vez": true,
    "texto": [
-    "marilla: Ana, ¿barriste el porche como te dije?",
-    "ana: Sí, Marilla… bueno, casi. Me distraje mirando una araña que tejía, y era tan perfecta…",
+    "marilla: Ana, el porche está lleno de hojas. ¿Lo barres tú, o lo barro yo?",
+    "ana: Yo, Marilla… en cuanto termine de mirar esta araña. Está tejiendo, y le está quedando tan perfecto…",
     "marilla: Las arañas no barren porches, Ana."
    ]
   },
@@ -12413,6 +12465,15 @@
     "escena clase_composicion_stacy",
     "escena clase_botanica_stacy"
    ],
+   "llego_stacy": [
+    "escena clase_composicion_stacy",
+    "escena clase_botanica_stacy",
+    "escena conv_stacy_queens",
+    "escena conv_stacy_escribir",
+    "charla par:lynde+marilla:3",
+    "una frase de carrie",
+    "noticia maestra_plumas"
+   ],
    "diana_borracha": [
     "escena prohibida",
     "meta perdon_barry",
@@ -12609,6 +12670,15 @@
    "nombra_avenida": [
     "escena conv_matthew_nombres"
    ],
+   "llego_gilbert": [
+    "escena conv_diana_gilbert_contesta",
+    "escena conv_gilbert_caramelo",
+    "escena conv_gilbert_estudiar",
+    "charla par:ana+diana:5"
+   ],
+   "conoce_harrison": [
+    "una frase de harrison"
+   ],
    "paces": [
     "escena conv_gilbert_caramelo"
    ],
@@ -12634,17 +12704,9 @@
    "conoce_phillips": [
     "escena conv_phillips_libro"
    ],
-   "llego_gilbert": [
-    "charla par:ana+diana:5"
-   ],
    "verano": [
     "charla par:ana+diana:5",
     "una frase de phillips"
-   ],
-   "llego_stacy": [
-    "charla par:lynde+marilla:3",
-    "una frase de carrie",
-    "noticia maestra_plumas"
    ],
    "conv_marilla_oraciones": [
     "una frase de marilla"
@@ -12665,9 +12727,6 @@
    "disculpa_lynde": [
     "hito humillada",
     "hito pedir_perdon"
-   ],
-   "conoce_harrison": [
-    "una frase de harrison"
    ],
    "conoce_gilbert": [
     "una frase de gilbert"
@@ -12704,6 +12763,9 @@
    ],
    "llego_josephine": [
     "llegadas de phillips"
+   ],
+   "diana": [
+    "meta conocer_diana (pista)"
    ],
    "rachel_lo_sabe": [
     "código"

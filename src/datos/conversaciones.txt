@@ -529,6 +529,40 @@ barry: (La Sra. Barry se ríe, por primera vez con Ana.) A mí también, niña. 
 
 # ====================================== El Sr. Harrison ======================================
 
+=== conv_harrison_avena ===
+con: harrison
+tema: Preguntarle por su campo de avena
+si: conoce:harrison
+---
+ana: Sr. Harrison, su campo de avena se ve tan verde que parece un mar chiquito. Cuando sopla el viento hace olas.
+harrison: (El Sr. Harrison se rasca la barba, desconfiado.) Olas. Hmpf. Lo que hace es crecer, si las vacas de los vecinos lo dejan en paz.
+ana: ¿Las vacas de los vecinos se lo comen?
+harrison: Una vaca jersey que no voy a nombrar. Se mete por la cerca como si fuera suya la avena.
+->* «Si la veo, la espanto yo.»
+   ana: Si alguna vez la veo, yo misma la espanto. Soy muy buena espantando cosas: en el orfanato espantaba los ratones.
+   harrison: (Por primera vez, al Sr. Harrison se le escapa media sonrisa.) Bueno. Eso sí que me serviría.
+   ! suma afecto:harrison:ana 1
+-> «A lo mejor la vaca también encuentra que es como un mar.»
+   ana: A lo mejor la vaca también encuentra que es como un mar, y por eso no se puede resistir.
+   harrison: (El Sr. Harrison la mira como si hubiera dicho una barbaridad.) Las vacas no piensan en mares, niña. Piensan en avena.
+
+=== conv_harrison_solo ===
+con: harrison
+tema: Preguntarle si no se aburre viviendo solo
+si: conoce:harrison
+---
+ana: Sr. Harrison, ¿no se aburre viviendo solo? Yo, cuando estaba sola, inventaba amigas en los vidrios de las vitrinas.
+harrison: No estoy solo. Tengo a Ginger. Y a mí mismo, que soy buena compañía cuando nadie me molesta.
+ana: Ginger es su loro, ¿verdad? Dicen que dice cosas terribles.
+harrison: Dice la verdad, que a la gente le parece terrible. No es lo mismo.
+->* «Me gustaría conocerlo algún día.»
+   ana: Me gustaría conocerlo algún día. Prometo no escandalizarme. Bueno… prometo intentarlo.
+   harrison: (El Sr. Harrison gruñe, pero no dice que no.) Algún día. Si te portas bien con mi avena.
+   ! suma afecto:harrison:ana 1
+-> «Yo creo que nadie debería vivir solo.»
+   ana: Yo creo que nadie debería vivir solo. Hasta los ermitaños de los libros tienen una cabra.
+   harrison: (El Sr. Harrison frunce el ceño.) Lo que tú creas no es asunto mío, niña. Buenos días.
+
 === conv_harrison_loro ===
 con: harrison
 tema: Preguntarle por su loro

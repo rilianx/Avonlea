@@ -77,11 +77,21 @@ function opcionesAct(t){
 // in the middle of a scene here that still needs her (she has lines left, or a choice to make), Ana does not walk out:
 // the door, the stairs and the map wait (otherwise the scene would be left waiting for her, forever)
 const retenida = () => TALKS.some(t => t.ch === game.scene && t.lines.slice(t.i).some(l => l.q === 'ana' || l.q === '?'));
+// why Ana cannot be moved now, if she cannot: a scene with her in it is going on (she cries, she eats, they look at her:
+// what she does is what the scene says), or it is night and she is in bed
+function anaQuieta(){
+  if (retenida()) return 'Ahora no: la escena sigue (Espacio o Enter para pasar).';
+  const h = hourNow() % 24; if (ana.enCama && game.scene === 'ga' && (h >= 20 || h < 5)) return 'Ana duerme. (⏭ pasa al día siguiente)';
+  return null;
+}
+let anaQuietaAviso = 0;
+const anaQuietaAvisar = m => { if (TT - anaQuietaAviso > 4) { anaQuietaAviso = TT; notice(m); } };
 function salirSiPuede(f){ if (retenida()) { notice('Ahora no: la están mirando, esperan lo que Ana diga.'); return false; } f(); return true; }
 // a tap: do it at once if she is close enough, otherwise she walks there (A*) and does it on arrival; on bare ground she just walks
 function tapAt(sx, sy){
   if (sleeping) return;
   if (OBS) { observe(null); return; }   // (watching someone: a tap brings the view back to Ana)
+  { const q = anaQuieta(); if (q) { anaQuietaAvisar(q); return; } }
   const wx = view.ox + sx / view.Z, wy = view.oy + sy / view.Z, t = targetAt(wx, wy);
   if (t && (t.self || dist(ana.x, ana.y, t.x, t.y) < t.reach * .85)) { ana.goto = null; opcionesAct(t); }
   else { ana.goto = t ? { id: t.id, scene: game.scene } : { x: wx, y: wy, scene: game.scene };

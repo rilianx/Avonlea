@@ -10,7 +10,7 @@ const AGENDA = [
   { who: 'matthew', from: 6, to: 9, label: 'dar de comer a los animales', goal: () => G.alimentados(['corral', 'gallinero']) },
   { who: 'matthew', from: 6, to: 9.5, label: 'ordeñar y llevarle la leche a Marilla', when: () => !realR.fact('ordeñada:dolly') && cowIn('dolly', 'corral'), goal: () => G.tener('marilla', 'leche', (wmInv('marilla').leche || 0) + 2) },
   { who: 'matthew', from: 9.5, to: 12, season: [1], label: 'hacer heno', when: () => !realR.fact('heno_hecho'), goal: () => G.tener('matthew', 'heno', (wmInv('matthew').heno || 0) + 3) },
-  { who: 'matthew', from: 9.5, to: 12, season: [2, 3], label: 'partir leña para Marilla', goal: () => G.tener('marilla', 'lena', (wmInv('marilla').lena || 0) + 3) },
+  { who: 'matthew', from: 9.5, to: 12, season: [0, 2, 3], label: 'partir leña para Marilla', goal: () => G.tener('marilla', 'lena', (wmInv('marilla').lena || 0) + 3) },
   { who: 'marilla', from: 8.5, to: 11.5, label: 'batir mantequilla', when: () => (wmInv('marilla').leche || 0) >= 2, goal: () => G.tener('marilla', 'mantequilla', (wmInv('marilla').mantequilla || 0) + 1) },
   { who: 'marilla', from: 13, to: 15, ana: true, chores: true, label: 'encargarle los quehaceres a Ana', goal: () => G.quehaceres('ana', ['platos', 'barrer']), favors: [{ f: 'quehaceres', to: 'ana', q: ['platos', 'barrer'] }] },
   { who: 'marilla', from: 17, to: 19, ana: true, label: 'regañar a Ana por los quehaceres', when: () => realR.fact('falta:ana'), goal: () => G.regañado('ana') },

@@ -28,6 +28,7 @@ function update(dt){
     if (stick) { const dx = stick.x - stick.x0, dy = stick.y - stick.y0, l = Math.hypot(dx, dy); if (l > 10) { mx = dx / Math.max(l, 50); my = dy / Math.max(l, 50); } }
   }
   if (ana.hidden) { mx = my = 0; if (ana.goto && !ana.goto.wm) ana.goto = null; }
+  if ((mx || my) && !ANA_AUTO) { const q = anaQuieta(); if (q) { mx = my = 0; anaQuietaAvisar(q); } }   // (in the middle of a scene with her, or asleep: she stays)
   if (game.scene === 'camino' && ana.onCart && (mx || my || (ana.goto && !ana.goto.wm))) roadGetOff();   // (moving her: she gets down from the buggy)
   if (ANA_AUTO) { if (mx || my) { freeStart(); const v = 520 / (cam.zoom || 1) / (viewZoom || 1); freeCam.x += mx * v * dt; freeCam.y += my * v * dt; } mx = my = 0; }   // (on her own: the keys move the view)
   if (game.talk?.deadline && TT > game.talk.deadline && !sayOpen) { game.talk.deadline = 0; autoChoose(); }
@@ -48,7 +49,7 @@ function update(dt){
     else {
       const sk = ana.stk; if (!sk || dist(ana.x, ana.y, sk.x, sk.y) > 6) ana.stk = { x: ana.x, y: ana.y, t: TT }; else if (TT - sk.t > 1.5) { ana.nav = null; ana.stk = null; }   // (stuck: find the way again)
       const n = navStep(ana, t ? t.x : gt.x, t ? t.y : gt.y); if (n.arrived && t && /^[pf]:/.test(t.id) && dist(ana.x, ana.y, t.x, t.y) >= t.reach && TT - (gt.t0 ??= TT) < 15) { ana.nav = null; }   // (someone who moved on: she goes after them, a while)
-      else if (n.arrived) { if (gt.wm) ana.wmArr = TT; ana.goto = null; if (t && dist(ana.x, ana.y, t.x, t.y) < t.reach) { ACT_SOLA = !!gt.auto; try { (gt.use || (gt.auto || gt.wm ? t.act : () => opcionesAct(t)))(); } finally { ACT_SOLA = false; } } } else { const dx = n.wx - ana.x, dy = n.wy - ana.y, d = Math.hypot(dx, dy) || 1; mx = dx / d; my = dy / d; } }
+      else if (n.arrived) { if (gt.wm) ana.wmArr = TT; ana.goto = null; if (gt.alLlegar) gt.alLlegar(); if (t && dist(ana.x, ana.y, t.x, t.y) < t.reach) { ACT_SOLA = !!gt.auto; try { (gt.use || (gt.auto || gt.wm ? t.act : () => opcionesAct(t)))(); } finally { ACT_SOLA = false; } } } else { const dx = n.wx - ana.x, dy = n.wy - ana.y, d = Math.hypot(dx, dy) || 1; mx = dx / d; my = dy / d; } }
   }
   // how fast: a walk (Shift to hurry), or a stroll when she is out on her own: every so often she stops to look about
   if (dest && !ana.goto?.dest) dest = null;
