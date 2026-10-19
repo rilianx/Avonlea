@@ -8,7 +8,7 @@
    full model (Z3) in Node. ---------- */
 const NOCHE_NIVELES = { apagado: 'Apagado', palabras: 'Palabras (solo lo que dicen)', efectos: 'Con efectos (hechos que ya existen, cariño, cosas)', libre: 'Libre (también hechos y escenas propias)' };
 const NOCHE_N = { apagado: 0, palabras: 1, efectos: 2, libre: 3 };
-const NOCHE_MODELO = 'gpt-5.4-mini', NOCHE_MAX = 4, NOCHE_OLVIDO = .9;   // (the profile: what she did a week ago weighs half)
+const NOCHE_MODELO = 'gpt-5.4-mini', NOCHE_MAX = 4, NOCHE_OLVIDO = .9, NOCHE_LINEAS = 4;   // (NOCHE_LINEAS: the least a scene or a conversation has, said by someone)   // (the profile: what she did a week ago weighs half)
 const NOCHE_URL = 'https://api.openai.com/v1/chat/completions';
 // the settings, in this browser only (never in the game's save, nor in the repository: the key is the player's)
 const NOCHE_AJ = (() => { const d = { nivel: 'apagado', clave: '', modelo: NOCHE_MODELO }; try { return { ...d, ...JSON.parse(localStorage.getItem('avonlea-noche') || '{}') }; } catch (e) { return d; } })();
@@ -218,8 +218,7 @@ function nocheEjemplo(el, id){
 function nocheSistema(nivel){
   const V = nocheVocab(), n = NOCHE_N[nivel];
   const voces = [...Object.keys(CH).map(k => `- ${k} (${CH[k].fullName || NAMES[k]}): ${voiceShort(k)}`), ...Object.entries(FOLK_DEFS).filter(([k]) => !/^v\d+$/.test(k)).map(([k, d]) => `- ${k} (${nocheSinArt(d.name)})${fichaOf(k)?.ficha ? ': ' + String(fichaOf(k).ficha).slice(0, 140) : ''}`)].join('\n');
-  const momentos = Object.entries(V.momentos).filter(([, m]) => m.quien && !m.fijo && V.habla.has(m.quien)).map(([k, m]) => `${k} (${m.quien}${m.huecos.size ? '; huecos: ' + [...m.huecos].map(h => '{' + h + '}').join(' ') : ''}${m.si.length ? '; ya pide: ' + m.si.join(', ') : ''})`).join(' · ');
-  const tipos = ['dicho', 'conversacion', 'respuesta', ...(n >= 2 ? ['escena'] : [])];
+  const tipos = ['conversacion', 'respuesta', ...(n >= 2 ? ['escena'] : [])];   // (no sayings: a line on its own floats; what someone says goes in a short scene)
   return `Eres quien escribe, de noche, cosas nuevas para «Un día en Avonlea», un juego tranquilo inspirado en «Ana de las Tejas Verdes» (L. M. Montgomery): Avonlea, un pueblito de granjas de la Isla del Príncipe Eduardo, hacia 1880. Ana Shirley tiene 11 años, es pelirroja, huérfana, soñadora, conversadora, de palabras grandiosas e imaginación desbordante; vive con Marilla y Matthew Cuthbert en Tejas Verdes. El tono es el del libro: tierno, con humor, sin nada moderno. Español; en la familia se tutea a Ana; Ana trata de usted a los grandes.
 
 Mientras Ana duerme, escribes como mucho ${NOCHE_MAX} bloques NUEVOS para ESTA partida, pensados para cómo está cada personaje con Ana, para lo que a quien juega le interesa (el perfil) y para lo que quedó abierto (lo que le falta a la partida, si viene: primero eso; los cabos sueltos; las situaciones abiertas). Cada bloque se escribe en el formato de los archivos de datos del juego, y el juego lo revisa con las mismas reglas que lo escrito a mano: lo que no las cumple se descarta. Mejor pocos y buenos. Si la partida trae «LO QUE LE FALTA A ESTA PARTIDA», al menos uno de tus bloques llena una de esas faltas (pidiendo en su «si:» el hecho que se indica, o con la persona que se nombra).
@@ -229,6 +228,7 @@ LO QUE IMPORTA (el juego quiere escenas con contenido, no relleno):
 - Que nazca de los temas del libro: pertenecer a una familia después de no haber tenido ninguna; la imaginación frente a las costumbres; el orgullo y el perdón; la amistad del alma; crecer sin dejar de ser una misma.
 - Que use lo concreto de ESTA partida: lo que Ana eligió, dijo o escribió, con quién, y qué quedó sin resolver. Nada de cosas que podrían pasar en cualquier partida.
 - Nada de relleno: saludos, el clima, comentarios sueltos, charla que no lleva a nada.
+- Nada de frases sueltas: si alguien dice algo, es una escena (o una conversación) corta: dónde, quién está, qué lo provoca, y qué responde o hace Ana. Al menos ${NOCHE_LINEAS} líneas, con un ida y vuelta; una frase sola no es una escena.
 - Las opciones son decisiones de verdad: cada una lleva a algo propio (otra respuesta de la otra persona, otro efecto), no la misma cosa dicha de dos maneras.
 
 NIVEL: ${nivel}. Tipos permitidos: ${tipos.join(', ')}.
@@ -236,13 +236,6 @@ ${n === 1 ? '- Solo palabras: ningún efecto (nada de «al_empezar:», «al_term
 - Nunca: «olvidar» un hecho del juego, «fin_capitulo», «final», «punto», «meta», «afecto», «nombrar», «dormir»; ni «interrumpe», «lineas: libro:…», «calesa», «camino», «o:».
 
 LOS FORMATOS (el «texto» de cada bloque es exactamente esto):
-
-dicho (líneas sueltas de un MOMENTO QUE YA EXISTE, dichas siempre por la misma persona; se suman a las que ya tiene):
-=== <momento> ===
-quien: <el mismo de ese momento>
-si: <condiciones para todas, opcional>
-- [<condiciones propias, opcional>] <texto, con los huecos {x} de ese momento si hacen falta>
-Momentos que se pueden ampliar (momento (quién; huecos; lo que ya pide)): ${momentos}
 
 conversacion (Ana la elige del menú de esa persona; una vez):
 === ia_<id> ===
@@ -312,8 +305,6 @@ ${n >= 2 ? `
 Una escena con opciones (así pasa en el libro la situación «rival»; la tuya, si la trae de otra forma, lleva «situacion: rival» y en cada opción «! responde <reacción>», y no lleva «interrumpe», «ofensa» ni «! hecho …» de esta):
 ${nocheEjemplo('guion', 'zanahorias')}
 ` : ''}
-Un dicho (tu bloque repite el encabezado del momento y agrega sus líneas):
-${nocheEjemplo('dichos', 'lleva_carta:marilla')}
 
 LO QUE EL JUEGO YA TUVO QUE DESCARTAR (no lo repitas):
 - Cada línea después de «---» es «quien: texto», con el id de quien habla, en minúsculas («ana:», «marilla:», «lynde:»; no «Ana:»). Ninguna línea sin «quien:».
@@ -355,7 +346,7 @@ ${ya ? '\nYA AGREGADO OTRAS NOCHES (no repetir): ' + ya + '\n' : ''}
 Escribe hasta ${NOCHE_MAX} bloques, nivel «${nivel}».`;
 }
 const NOCHE_ESQUEMA = { type: 'object', additionalProperties: false, required: ['bloques'], properties: { bloques: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['tipo', 'texto', 'porque'],
-  properties: { tipo: { type: 'string', enum: ['dicho', 'conversacion', 'respuesta', 'escena'] }, texto: { type: 'string' }, porque: { type: 'string' } } } } } };
+  properties: { tipo: { type: 'string', enum: ['conversacion', 'respuesta', 'escena'] }, texto: { type: 'string' }, porque: { type: 'string' } } } } } };
 function nochePedido(nivel = nocheNivel(), modelo = NOCHE_AJ.modelo || NOCHE_MODELO){
   nocheV = null;
   return { modelo, nivel, mensajes: [{ role: 'system', content: nocheSistema(nivel) }, { role: 'user', content: nocheUsuario(nivel) }] };
@@ -514,7 +505,8 @@ function nocheRevisar(b, ctx){
   if (tipo === 'escena' && n < 2) M.push('una escena es del nivel «efectos» o más');
   if (texto.length > 6000) M.push('demasiado largo');
   const conds = cs => { for (const x of cs) { const e = nocheCondMal(x, ctx); if (e) M.push(e); } };
-  // --- sayings
+  // --- sayings: a line on its own floats (no one brings it about, it leads nowhere): what someone says goes in a scene
+  if (tipo === 'dicho') { M.push('las frases sueltas ya no: lo que alguien dice va en una escena o conversación corta (dónde, quién está, qué lo provoca, qué responde o hace Ana)'); return out; }
   if (tipo === 'dicho') {
     const c = out.c = nocheDichoLeer(texto), m = V.momentos[c.momento];
     out.id = 'ia_dicho_' + (c.momento || '').replace(/\W+/g, '_');
@@ -551,6 +543,9 @@ function nocheRevisar(b, ctx){
   const quienes = new Set(), ver = X => { for (const l of X || []) { if (l[0] === '?') for (const o of l[2] || []) { if (!o.texto) M.push('una opción sin texto'); ver(o.lineas); } else if (l[0] !== '!') { if (!String(l[1] || '').trim()) { M.push(`una línea sin «quien:» («${String(l[0]).slice(0, 50)}»): cada línea es «quien: texto»${tipo === 'respuesta' ? ' (en una carta, «carta: texto»)' : ''}`); continue; } quienes.add(String(l[0]).toLowerCase()); if (String(l[1]).length > 400) M.push('una línea demasiado larga'); } } };
   ver(L);
   for (const q of quienes) if (!V.habla.has(q)) M.push(`«${q}» no es nadie del juego`);
+  { let n = 0; const contar = X => { for (const l of X || []) { if (l[0] === '?') for (const o of l[2] || []) contar(o.lineas); else if (l[0] !== '!' && l[0] !== 'narra' && String(l[1] || '').trim()) n++; } }; contar(L);
+    const min = tipo === 'respuesta' ? 3 : NOCHE_LINEAS;
+    if (n < min) M.push(`demasiado corta (${n} línea${n === 1 ? '' : 's'}): ${tipo === 'respuesta' ? 'una carta' : 'una escena'} tiene al menos ${min}, con un ida y vuelta`); }
   if (L.some(l => typeof l[1] === 'string' && /\{(?!estacion\})/.test(l[1]))) M.push('un hueco {…} que nadie llena (solo {estacion}, en las cartas)');
   if (tipo === 'respuesta') {
     if (c.canal !== 'respuesta') M.push('una respuesta lleva «canal: respuesta»');

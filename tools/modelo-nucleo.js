@@ -425,7 +425,7 @@
         if (!gente.has(k)) continue;
         const tipo = { conversar: 'conversación', encuentro: 'escena al encontrarse', primera: 'escena' }[e.disparo] || 'escena';
         const pres = hablan.filter(h => LLEG.has(h) && h !== k).map(h => 'presente:' + h);
-        U(k).push({ tipo, id: e.id, texto: cut(e.primera || '', 80), conds: [...si, ...en, ...canal, ...pres, 've:' + k], textos: e.texto, deja: DEJA.get(e.id) || new Set() });
+        U(k).push({ tipo, id: e.id, texto: cut(e.primera || '', 80), conds: [...si, ...en, ...canal, ...pres, 've:' + k], textos: e.texto, deja: DEJA.get(e.id) || new Set(), rutina: !!e.repetir && e.repetir !== 'una_vez' });
       }
     }
     for (const k of gente.keys())
@@ -536,7 +536,7 @@
               ...[...gente.keys()].filter(x => !conocidos.includes(x) && !SIN_NOMBRE.has(x) && !CONOCE_BASE.has(x)).map(x => Not(conoce(x)))];
             let n = 0; const vistos = new Set();
             for (const u of UNIDADES.get(k) || []) {
-              if (!es(u) || vistos.has(u.texto) || (!frases && jugada(u))) continue;
+              if (!es(u) || vistos.has(u.texto) || (!frases && (jugada(u) || u.rutina))) continue;   // (what repeats every day is the wheel: not something still to happen)
               const T = nuevo(); for (const x of [...P, ...pronto, vale(u, k)]) T.add(x); const ok = await T.check() === 'sat'; T.release();
               if (ok) { vistos.add(u.texto); if (++n >= min) break; }
             }
@@ -550,7 +550,7 @@
             if (!suyas.length) continue;
             if (!(CARTAS.get(k) || []).length) { const S = nuevo(); for (const x of [...P, presente(k)]) S.add(x); const aqui = await S.check() === 'sat'; S.release(); if (!aqui) continue; }
             let hay = null;
-            for (const u of [...(UNIDADES.get(k) || []), ...(CARTAS.get(k) || [])]) if (ESCENA.has(u.tipo) && !jugada(u) && await puede(u, k)) { hay = u; break; }
+            for (const u of [...(UNIDADES.get(k) || []), ...(CARTAS.get(k) || [])]) if (ESCENA.has(u.tipo) && !u.rutina && !jugada(u) && await puede(u, k)) { hay = u; break; }
             if (!hay) out.push({ regla: r.nombre, de: 'conocidos', quien: k, nombre: nombre(k) });
           }
         }
