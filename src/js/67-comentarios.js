@@ -11,10 +11,14 @@ function comOido(q, t){ COM_OIDO.push({ quien: q === 'ana' ? 'Ana' : wmName(Stri
 // the scenes that began lately (their ids: to find their text in src/datos/)
 const COM_ESC = [];
 function comEscena(id, canal){ COM_ESC.push(`${id}${canal ? ' (' + canal + ')' : ''}, día ${today() + 1} ${fmtHour(hourNow())}`); if (COM_ESC.length > 8) COM_ESC.shift(); }
+// a room, by its name for a person («gg» is the kitchen of Green Gables)
+const SALA_NOMBRE = { gg: 'la cocina de Tejas Verdes', ga: 'su pieza, en el alero de Tejas Verdes', camino: 'el camino (en la calesa)' };
+const salaNombre = s => SALA_NOMBRE[s] || (HOUSES[s]?.name ? HOUSES[s].name + ' (adentro)' : ROOMS[s]?.name || s);
+const cercaDe = n => 'cerca ' + (/^el /.test(n) ? 'del ' + n.slice(3) : 'de ' + n);
 // the moment, as it is now
 function comMomento(){
   const vis = id => { const e = $(id); return e && !e.hidden ? e.innerText.trim() : ''; };
-  const lugar = game.scene !== 'out' ? (ROOMS[game.scene]?.name || game.scene) : (Object.entries(PLACES).map(([k, p]) => [p[0], dist(ana.x, ana.y, p[1], p[2])]).sort((a, b) => a[1] - b[1])[0] || ['afuera'])[0];
+  const lugar = game.scene !== 'out' ? salaNombre(game.scene) : 'afuera, ' + cercaDe((Object.entries(PLACES).map(([k, p]) => [p[0], dist(ana.x, ana.y, p[1], p[2])]).sort((a, b) => a[1] - b[1])[0] || ['Avonlea'])[0]);
   const cerca = [...Object.keys(PEOPLE).filter(k => k !== 'ana' && PEOPLE[k].where === game.scene && (game.scene !== 'out' || dist(PEOPLE[k].x, PEOPLE[k].y, ana.x, ana.y) < 320)),
     ...FOLK.filter(f => f.where === game.scene && (game.scene !== 'out' || dist(f.x, f.y, ana.x, ana.y) < 320)).map(f => f.id)];
   return { dia: today() + 1, hora: fmtHour(hourNow()), estacion: SEASONS[S], lugar, escena: game.scene, cerca: cerca.map(k => wmName(k)),
@@ -39,7 +43,7 @@ function opinar(texto, pend = comPend || { momento: comMomento(), foto: comFoto(
 }
 // everything, to send: the comments (each with its moment) and the saved game, as one file
 function opinionesDatos(){
-  save(); return { juego: document.title, exportado: new Date().toISOString(), comentarios: opiniones(), partida: (() => { try { return JSON.parse(localStorage.getItem('avonlea') || 'null'); } catch (e) { return null; } })() };
+  save(); return { juego: document.title, exportado: new Date().toISOString(), mundo: mundoTexto(), comentarios: opiniones(), partida: (() => { try { return JSON.parse(localStorage.getItem('avonlea') || 'null'); } catch (e) { return null; } })() };
 }
 function opinionesExportar(){
   const datos = opinionesDatos();

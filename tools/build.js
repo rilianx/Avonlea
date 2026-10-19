@@ -26,6 +26,11 @@ const out = build(), target = path.join(root, 'index.html');
 { const malas = [];
   for (const f of fs.readdirSync(src('js')).filter(f => f.endsWith('.js'))) read('js/' + f).split('\n').forEach((l, n) => { const i = l.indexOf('   // ('); if (i > 0 && l.trim()[0] !== '/' && /\)\s+(if|else|const|let|for|return|label|[A-Za-z_$][\w$]*(\.[\w$]+)*\s*(\(|=[^=]))/.test(l.slice(i))) malas.push(f + ':' + (n + 1) + '  ' + l.trim().slice(0, 120)); });
   if (malas.length) { console.error('Hay código después de un comentario (se pierde):\n' + malas.join('\n')); process.exit(1); } }
+// and two functions with the same name: the second one silently replaces the first, everywhere (a checkpoint's
+// «puntoVolver» once replaced the ending's)
+{ const vistas = {}, dobles = [];
+  for (const f of fs.readdirSync(src('js')).filter(f => /^\d\d-.*\.js$/.test(f)).sort()) read('js/' + f).split('\n').forEach((l, n) => { const m = l.match(/^(?:async )?function\s+([\wñ$]+)\s*\(/); if (!m) return; if (vistas[m[1]]) dobles.push(`${m[1]}: ${vistas[m[1]]} y ${f}:${n + 1}`); else vistas[m[1]] = f + ':' + (n + 1); });
+  if (dobles.length) { console.error('Hay funciones con el mismo nombre (la segunda reemplaza a la primera):\n' + dobles.join('\n')); process.exit(1); } }
 if (process.argv.includes('--check')) {
   const now = fs.readFileSync(target, 'utf8');
   if (now !== out) { console.error('index.html no coincide con src/ (corre: node tools/build.js)'); process.exit(1); }
