@@ -148,3 +148,16 @@ curl -s localhost:8765/foto                 # una captura
 ```
 
 Las fotos citadas están en `trazas/mano/dias1-3/`.
+
+## Lo que se arregló después de este informe
+
+- Frases que suponían lo que no pasó: ahora piden su premisa (juramento, huerta regada, días de amistad, «otra vez», «esta vez», la Sra. Lynde, Lawson, la aldea, violetas, «cabeza de chorlito», Gilbert según lo que Ana hizo). Reglas `referencia:` nuevas en `src/datos/reglas.txt` para que Z3 las vigile (0 incoherencias).
+- Visitar a alguien cuenta aunque Ana vaya por su cuenta.
+- Domingos: condición `domingo`, el reloj muestra el día de la semana, y Marilla avisa de la iglesia ese mismo domingo.
+- Chismes: nadie cuenta lo de su casa con su propio nombre; lo que se dice de Ana no se dice delante de ella; «la niña nueva» solo los primeros días.
+- «Sí, señora» a las mujeres.
+- Marilla: «Pedirle que te lleve a conocer a alguna niña de tu edad».
+- Nadie repite un dicho el mismo día (Ana tampoco); las frases sueltas se espacian.
+- La Sra. Lynde visita de 14:30 a 16:30 y se va; no va a Tejas Verdes antes de su visita del cap. 9.
+- Cartas: cuentan primero el hito del día, en palabras de Ana, y dicen «ayer» cuando fue ayer; la Sra. Spencer contesta a lo que pasó.
+- Clases: seis escenas de clase (Sr. Phillips, Srta. Stacy), una al día, con decisiones.
