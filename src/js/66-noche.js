@@ -737,14 +737,18 @@ function nocheCondicionesDeAhora(L, R){
   const si = L[i].replace(/^\s*si:\s*/, '').split(',').map(x => x.trim()).filter(Boolean), ctx = dlgCtx();
   const dichos = {}; for (const l of L.slice(fin + 1)) { const m = l.trim().match(/^(?:->\*?\s*)?([a-z]+):\s*(.*)$/); if (m && !['narra', 'carta'].includes(m[1])) (dichos[m[1]] ||= []).push(m[2]); }
   for (const r of nocheVocab().reglas.referencia) for (const [k, T] of Object.entries(dichos)) {
-    if ((r.salvo || []).includes(k) || !T.some(t => nochePatron(r).test(t))) continue;
+    if ((r.salvo || []).includes(k) || (k === 'ana' && r.exige.flat().some(x => x.includes('{k}'))) || !T.some(t => nochePatron(r).test(t))) continue;   // (what a rule asks of the one who speaks, not of Ana: «afecto:ana:ana»)
     const alts = r.exige.map(g => g.map(x => x.split('{k}').join(k)));
     if (alts.some(g => g.every(x => si.includes(x)))) continue;
     const g = alts.find(g => g.every(x => { try { return dlgCond(x, ctx); } catch (e) { return false; } })); if (!g) continue;
     for (const x of g) if (!si.includes(x)) { si.push(x); R.push(`agregado «${x}» a «si:» (es verdad ahora, y lo pide: ${r.nombre})`); }
   }
   if (si.length) L[i] = 'si: ' + si.join(', '); else L.splice(i, 1);
+  // done with the hands (sowing, baking, milking, sewing): where it is done, as tools/grafo.js asks
+  if (!L.some(l => /^\s*se_hace_en:/.test(l))) { const cuerpo = L.slice(L.findIndex(l => l.trim() === '---') + 1).join('\n');
+    const s = NOCHE_MANOS.find(([re]) => re.test(cuerpo)); if (s) { L.splice(L.findIndex(l => l.trim() === '---'), 0, 'se_hace_en: ' + s[1]); R.push(`agregado «se_hace_en: ${s[1]}» (es con las manos)`); } }
 }
+const NOCHE_MANOS = [[/\b(surco|sembr\w*|semillas? una)\b/i, 'huertito, huerta'], [/\b(harina|al horno|amasa\w*|aguja|hilv\w*)\b/i, 'gg'], [/\b(orde[ñn]\w*|el balde)\b/i, 'granero']];
 // the blocks of one night, in order (what one accepts, the next can use, in «libre»): { aceptados, rechazados }; antes:
 // what this night already accepted (the second round, after the AI corrected what was rejected)
 function nocheValidar(bloques, nivel = nocheNivel(), antes = []){

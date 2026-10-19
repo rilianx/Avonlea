@@ -1,5 +1,5 @@
 {
- "_nota": "Las conversaciones nuevas son para cómo están las cosas ahora (partida de la jugadora curiosa, día 16): la primera no trae «si:» y nombra a Gilbert, y el juego le pone «hecho:llego_gilbert», que es verdad ahora: aceptada. La segunda pide «hecho:prohibida», que en esta partida no ha pasado: rechazada. Uso: node tools/noche.js --respuesta tools/noche/ejemplos/ahora.json",
+ "_nota": "Las conversaciones nuevas son para cómo están las cosas ahora (partida de la jugadora curiosa, día 16): la primera no trae «si:» y nombra a Gilbert, y el juego le pone «hecho:llego_gilbert», que es verdad ahora: aceptada. La segunda pide «hecho:prohibida», que en esta partida no ha pasado: rechazada. Uso: node tools/noche.js --respuesta tools/noche/ejemplos/ahora.json La tercera es con las manos (sembrar) y no dice dónde: el juego le pone «se_hace_en: huertito, huerta».",
  "escenario": "tools/noche/partidas/curiosa.json",
  "nivel": "efectos",
  "bloques": [
@@ -14,6 +14,12 @@
    "esperado": "rechazado",
    "porque": "Pide algo que no es verdad ahora.",
    "texto": "=== ia_matthew_diana_prohibida ===\ncon: matthew\ntema: Contarle que la Sra. Barry no la deja ver a Diana\nsi: hecho:prohibida\n---\nana: Matthew, la Sra. Barry dice que nunca más podré ver a Diana. Mi vida está en ruinas.\nmatthew: (Matthew se queda callado un rato largo.) Bueno, pues… las madres a veces cambian de idea, Ana.\nana: ¿Usted cree?\nmatthew: Yo creo que sí. Hay que darle tiempo."
+  },
+  {
+   "tipo": "conversacion",
+   "esperado": "aceptado",
+   "porque": "Es con las manos (sembrar): el juego le pone dónde se hace.",
+   "texto": "=== ia_matthew_semillas_buenas ===\ncon: matthew\ntema: Preguntarle cómo se sabe si una semilla es buena\nal_terminar: suma afecto:matthew:ana 1\n---\nana: Matthew, ¿cómo sabe usted si una semilla va a salir? Todas se ven igual de dormidas.\nmatthew: (Matthew toma un puñado y las mira contra la luz.) Bueno, pues… las buenas pesan un poquito más. Y no tienen manchas.\nana: ¡Como las personas! Las buenas pesan más por dentro.\nmatthew: (Matthew se ríe bajito.) Eso no lo había pensado. Ven, vamos a sembrar estas en el surco nuevo.\nana: ¿Puedo ponerle nombre a cada una? Así, cuando salgan, sabré quién es quién.\nmatthew: Bueno, pues… si son muchas, vas a necesitar muchos nombres."
   }
  ]
 }
