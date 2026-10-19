@@ -254,7 +254,7 @@ class Dialogo {
       if (this.interrumpe && typeof amb !== 'undefined') for (const k of Object.keys(PEOPLE)) amb.mute[k] = Math.max(amb.mute[k] || 0, TT + 90);   // (after something big, a while without loose lines: it is left to sink in)
       if (this.interrumpe) dlgRespiro = TT + 90;   // (and the smaller scenes wait too: one thing at a time)
     } });
-    t.prio = this.prioridad; t.esc = this.id; t.paso = this.al_paso; t.desde = p; t.puente = k; return t;
+    t.prio = this.prioridad; t.esc = this.id; t.paso = this.al_paso; t.desde = p; t.puente = k; comEscena(this.id, this.canal); return t;
   }
 }
 const DIALOGOS = [], dlgPausa = {}; let dlgRespiro = 0;   // (after a scene that cut in, a breather: only those that cut in too, the chains of the book, before it ends)
@@ -420,6 +420,8 @@ function dichoElegir(m, v = {}){   // { q, t } of one that holds now (not the la
   dichoUlt[m] = d.id; DICHO_HOY.s.add(d.id); return { q: d.quien && d.quien !== '*' ? d.quien : v.quien, t: rellenar(d.t, v) };
 }
 const dicho = (m, v) => dichoElegir(m, v)?.t ?? '';
+// one not said yet today, or nothing (for what is only talk: at the table, once said, silence rather than the same again)
+const dichoNuevo = (m, v) => (DICHOS_DE[m] || []).every(d => DICHO_HOY.dia === today() && DICHO_HOY.s.has(d.id)) ? '' : dicho(m, v);
 // said, in a bubble: by Ana, or by whoever (quien, for «quien: *»)
 function comentar(m, quien){
   const c = comentarioElegir(m); if (!c) return false;

@@ -3,6 +3,8 @@
    them). Nothing is written twice: the menu asks the planner what is possible here. ---------- */
 const JUGABLE_TIPOS = ['visitar', 'devuelto', 'amigas', 'paces', 'sano', 'club', 'felicitar', 'consolado', 'picnic', 'quehaceres', 'alimentados', 'recito', 'rezo', 'adornado', 'remo', 'nombres', 'carta', 'leido', 'concierto', 'sala', 'huerta', 'patinar', 'trineo', 'teñido', 'pelo_corto', 'desafio'];
 const JUGABLE_NO = ['ir', 'tomar', 'recoger', 'dar', 'vender', 'cambiar', 'comprar', 'conversar', 'pedir', 'guiar', 'soltar', 'regañar', 'subir_calesa', 'interceder', 'cocinar', 'preparar', 'batir'];   // (these the player already has in her own way, or are not hers)
+// a scene of the script going on where Ana is (and this one is there): what someone does aloud waits until it ends
+const escenaDelante = k => wmScene(k) === game.scene && TALKS.some(t => t.esc);
 function jugables(){
   if (game.playAct || game.scene === 'camino' || retenida()) return [];   // (in the middle of a scene with her: no chores)
   const s = wmNow(); let here = s.pos.ana; if (!here) return [];
@@ -95,6 +97,7 @@ function wmExec0(ag, a, st, dt){
         const rc = wmMove(me, 'h:' + casa, dt); if (rc !== 'ok') return rc;
         if (wmScene(a.k) !== casa) { st.espera = (st.espera || 0) + dt; if (st.espera > M(40)) { delete h.recibe; st.why = wmName(a.k) + ' no llegó a su casa'; return 'fail'; } return 'run'; }
       }
+      if (st.said !== 2 && escenaDelante(me)) return 'run';   // (a scene going on where Ana is: the visit waits at the door until it ends)
       if (!st.said) { const r = reach(a.k); if (r !== 'ok') return r; st.said = 1; st.t1 = TT; bubble(me, dicho('visitar_saludo', { saludo: saludoHora(), nombre: callName(a.k) })); }   // (up to her, to greet her; then to the chair, not after her)
       if (st.said === 1 && TT - st.t1 > 2.6) { st.said = 2; st.w = 0; bubble(a.k, dicho('visitar_pasa')); }
       if (st.said !== 2 || !wait(3)) return 'run';
@@ -220,7 +223,7 @@ function wmExec0(ag, a, st, dt){
       for (const tag of THINGS[a.x].tags) realR.setFact('dio:' + a.k + ':' + tag); realR.setFact('dio:' + a.k + ':' + a.x); realR.setFact('dio:' + a.x); realR.setFact('dio_de:' + me + '>' + a.k + ':' + a.x);
       const liked = socialRule(realR, 'dar', me, a.k, a.x);
       const tb = wmBody(a.k); if (liked && tb) hearts(tb.x, tb.y - 56);
-      logEv(`${wmName(me)} le dio ${itemTextW(a.x, n)} a ${wmName(a.k)}.`, []); bubble(a.k, liked ? dicho('gracias_gusta') : dicho('gracias_dar')); return 'ok';
+      logEv(`${wmName(me)} le dio ${itemTextW(a.x, n)} a ${wmName(a.k)}.`, []); bubble(a.k, liked ? dicho('gracias_gusta', { cosa: itemTextW(a.x, n) }) : dicho('gracias_dar', { cosa: itemTextW(a.x, n) })); return 'ok';
     }
     case 'vender': {
       const r = reach(a.k); if (r !== 'ok') return r;
@@ -273,7 +276,7 @@ function wmExec0(ag, a, st, dt){
       }
       if (!st.asked) {
         const r = a.llamar ? 'ok' : reach(a.k); if (r !== 'ok') return r;
-        if (hablando()) return 'run';   // (the other is still answering the call: one asks after)
+        if (hablando() || escenaDelante(me)) return 'run';   // (the other is still answering the call, or a scene goes on in front of Ana: one asks after)
         if (!socialRule(realR, 'pedir', me, a.k)) { bubble(a.k, dicho('pedir_no')); st.why = wmName(a.k) + ' no quiso'; realR.setFact('pedido:' + a.favor.f + ':' + a.k); return 'fail'; }
         if (a.k !== 'ana' && activeGoals(AGENTS[a.k]).length >= MAX_GOALS) { bubble(a.k, dicho('pedir_ocupado')); st.why = wmName(a.k) + ' está ocupado'; realR.setFact('pedido:' + a.favor.f + ':' + a.k); return 'fail'; }
         st.asked = 1; realR.setFact('pedido:' + a.favor.f + ':' + a.k); for (const k of [me, a.k]) amb.mute[k] = Math.max(amb.mute[k] || 0, TT + 30);   // (asking and answering: no loose lines in between)
@@ -284,11 +287,16 @@ function wmExec0(ag, a, st, dt){
         if (f.f === 'prestar') { const I = wmInv(a.k); if (!(I[f.item] > 0)) { st.why = wmName(a.k) + ' no lo tiene'; return 'fail'; } I[f.item] -= 1; inv[f.item] = (inv[f.item] || 0) + 1; realR.setFact('prestado:' + f.item + ':' + a.k + '>' + me); float('+' + itemTextW(f.item, 1), b.x, b.y - 50); bubble(a.k, dicho('prestar_si')); logEv(`${wmName(a.k)} le prestó ${ITEM_DEFS[f.item]?.gift?.art || itemTextW(f.item, 1)} a ${wmName(me)}.`, []); return 'ok'; }
         if (f.f === 'pasear') { if (a.k === 'ana') { if (WM_OBEY) { const A = agentOf('ana'); A.followOf = me; agentLog(A, 'pasea con ' + wmName(me)); } else notice(`📜 ${wmName(me)} quiere dar un paseo contigo: síguela.`); } else if (a.k === 'diana' && me === 'ana') diana.follow = true; else agentOf(a.k).followOf = me; return 'ok'; }
         const sub = F.goal(me, f, wmNow());
-        if (a.k === 'ana' && !WM_OBEY) { if (f.f === 'traer' && CH[me]) addTask({ from: me, tipo: 'traer', n: f.n, para: me, d: today(), item: f.item }); else notice(`📜 ${wmName(me)} te pide: ${sub.text}.`); }
+        if (a.k === 'ana' && (!WM_OBEY || !ANA_AUTO)) { if (f.f === 'traer' && CH[me]) { addTask({ from: me, tipo: 'traer', n: f.n, para: me, d: today(), item: f.item }); st.tarea = game.tasks[game.tasks.length - 1]; } else notice(`📜 ${wmName(me)} te pide: ${sub.text}.`); }   // (the player has Ana: it is a request to her, not a goal Ana carries out by herself)
         else { const h = agentStart(a.k, sub, { label: sub.text + ' (se lo pidió ' + wmName(me) + ')', parent: me, chain: [...agentChain(ag), me] }); if (!h) { st.why = wmName(a.k) + ' tiene demasiado que hacer'; return 'fail'; } const gg = ag.goalNow; if (gg) gg.pending = [...(gg.pending || []).filter(p => p.h.st === 'run'), { h, f, to: a.k }]; }
         st.sub = sub; st.t1 = TT;
       }
-      if (st.asked === 1) { if (TT - st.t1 < 2.6 || hablando()) return 'run'; st.asked = 2; bubble(a.k, dicho('si_a:' + a.favor.f) || dicho('si_a')); }   // (and the answer, yes)
+      // (and the answer: yes; when it is asked of Ana and the player has her, the player answers)
+      if (st.asked === 1 && a.k === 'ana' && !ANA_AUTO) { if (TT - st.t1 < 1.2 || hablando()) return 'run'; if (game.talk) { if (TT - st.t1 < 30) return 'run'; st.asked = 2; return 'ok'; }
+        st.asked = 2; const si = dicho('si_a:' + a.favor.f) || dicho('si_a');
+        say(me, st.sub?.text ? cap(st.sub.text.replace(/^Ana /, '')) + '.' : dicho('pedir_favor'), [['«' + si + '»', () => { close(); bubble('ana', si); }], ['«' + dicho('no_a') + '»', () => { close(); bubble('ana', dicho('no_a')); if (st.tarea) game.tasks = game.tasks.filter(t => t !== st.tarea); realR.setFact('dijo_no:' + a.favor.f + ':' + me); logEv(`Ana le dijo a ${wmName(me)} que ahora no podía.`, []); save(); }]]);
+        return 'ok'; }
+      if (st.asked === 1) { if (TT - st.t1 < 2.6 || hablando()) return 'run'; st.asked = 2; bubble(a.k, dicho('si_a:' + a.favor.f) || dicho('si_a')); }
       return 'ok';   // (asked: on with the rest of the plan; what was promised is waited for only where it is needed)
     }
     case 'interceder': {

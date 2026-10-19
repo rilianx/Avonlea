@@ -32,7 +32,7 @@ const ITEM_DEFS = {
   dolares:  { names: ['dólar', 'dólares'], icon: '💵', season: () => game.inv.dolares > 0, giveAll: true, gift: { name: 'el dinero', art: 'el dinero' } },
 };
 for (const k of Object.keys(ITEM_DEFS)) if (!(k in game.inv)) game.inv[k] = 0;
-for (const [k, d] of Object.entries(ITEM_DEFS)) if (d.gift) Object.defineProperty(d.gift, 'reply', { get: () => dicho('regalo:' + k) || dicho('gracias_dar') });   // (the thanks: said when it is given, one of its lines)
+for (const [k, d] of Object.entries(ITEM_DEFS)) if (d.gift) Object.defineProperty(d.gift, 'reply', { get: () => dicho('regalo:' + k) || dicho('gracias_dar', { cosa: d.gift.art }) });   // (the thanks: said when it is given, one of its lines)
 // what is not a gift but for the house: who uses it (the wood she carried in, the eggs, the milk): she can hand it over
 // to them, all of it; what they say then is the saying para_la_casa:<thing> (src/datos/dichos/11-regalos-y-encargos.txt)
 const PARA_LA_CASA = { lena: 'marilla', huevos: 'marilla', leche: 'marilla', mantequilla: 'marilla', azucar: 'marilla', hierbas: 'marilla', heno: 'matthew' };
@@ -59,7 +59,7 @@ function talk(who, again = false){
   if (who === 'diana' && dlgHechos().prohibida) return say('diana', dicho('diana_prohibida'), [['…', close]]);   // (forbidden, cap. 17)
   // first, what to talk about (each topic a scene, had once: src/datos/conversaciones.txt, and the night writes new ones
   // when they run out); then what there is to do with them
-  const opts = [...convOpciones(who), ...taskOptions(who), ...cadenaOpciones(who)];
+  const opts = [...convOpciones(who), ...conEllaOpciones(who), ...taskOptions(who), ...cadenaOpciones(who)];
   for (const [k, [name]] of Object.entries(GIFTS)) if (game.inv[k] > 0) opts.push(['Regalar ' + name, () => give(who, k)]);
   opts.push(...entregaOpciones(who), ...cartaEncargoOpciones(who));   // (and what Ana brings for the house: the wood, the eggs…)
   if (!isQuieto(who) || who === 'marilla') opts.push(['🙏 Pedirle un favor', () => favorMenu(who)]);
@@ -75,6 +75,10 @@ const convOpciones = (who, volver = () => talk(who, true)) => {
   const op = d => [(d.ia && (V[d.id]?.n || 0) <= 1 ? '✨ ' : '💬 ') + d.tema, () => { close(); conversar(d); }];   // (✨: new, written last night, the first day it is offered)
   return [...C.slice(0, n).map(op), ...(C.length > n ? [['💬 Hablar de otra cosa… (' + (C.length - n) + ')', () => say(who, dicho('hablar_de_que'), [...C.slice(n).map(op), ['← Volver', volver]])]] : [])];
 };
+// what Ana can do with this person now (from her own menu too: to swear friendship, to forgive, to say sorry…), here
+// where the player looks for it: touching that person (what is given and asked has its own options below)
+const CON_ELLA_NO = ['visitar', 'conversar', 'dar', 'pedir', 'ir', 'traer', 'guiar', 'devolver', 'vender', 'comprar', 'cambiar'];
+const conEllaOpciones = who => { try { return jugables().filter(a => a.k === who && !CON_ELLA_NO.includes(a.v)).map(a => ['✨ ' + cap(stepText(a)), () => { close(); jugar(a); }]); } catch (e) { return []; } };
 // closing the menu is not leaving: «Adiós» only when it is really a goodbye
 const cierre = who => 'Nada por ahora';
 function face(who){

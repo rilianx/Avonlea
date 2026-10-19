@@ -40,7 +40,7 @@ dice: [hecho:se_queda] Ana, no te quedes soñando despierta. Aunque... la cocina
 dice: [hecho:se_queda] Si quieres cocinar, la estufa está encendida. Cuidado con no quemar nada.
 dice: [hecho:se_queda, hecho:conocidas_diana] Matthew no lo dice, pero te echa de menos cuando te vas donde Diana.
 dice: [hecho:se_queda, hora:12-18, no_hoy:regado] Riega la huerta antes de que caiga el sol, que las plantas lo agradecen. La regadera está junto a la bomba.
-dice: [hecho:se_queda, afecto:marilla:ana>=3] Hmm. Bueno, admito que hoy te has portado muy bien.
+dice: [hecho:se_queda, afecto:marilla:ana>=3, hora:17-22] Hmm. Bueno, admito que hoy te has portado muy bien.
 dice: [hecho:ropa_arrugada, !hecho:ropa_ordenada] Ese vestido parece que durmió en el suelo, Ana. Ah, claro: es que durmió en el suelo.
 primavera: [hecho:se_queda] Hay que limpiar la casa a fondo, que es primavera. Y tú me vas a ayudar, Ana.
 verano: Con este calor, mejor un té y no enciendas mucho la estufa.
@@ -65,7 +65,7 @@ invierno: [hecho:conocidas_diana, !hecho:prohibida] ¡Está nevando! Mamá no me
 
 === barry ===
 dice: [!conoce:barry, !hecho:barry_presenta, sabe:barry:nina_cuthbert] Tú debes ser la niña que trajeron los Cuthbert. Buenas tardes.
-dice: [hecho:barry_presenta, !hecho:prohibida] Ana Shirley, siempre es un gusto verte por aquí. Pórtate bien, ¿eh?
+dice: [dias_desde:barry_presenta:3, !hecho:prohibida] Ana Shirley, siempre es un gusto verte por aquí. Pórtate bien, ¿eh?
 dice: [dias_desde:conocidas_diana:3, !hecho:prohibida] Diana habla de ti todo el día, ¿sabes?
 dice: [hecho:perdonada] Esta vez el cordial de frambuesa está bien etiquetado, te lo aseguro.
 dice: [hecho:prohibida, !hecho:perdonada] Buenas tardes. (La Sra. Barry no la invita a pasar.)

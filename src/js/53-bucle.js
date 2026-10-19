@@ -82,7 +82,7 @@ function update(dt){
     game.lastDay = today(); save();
   }
   if ((storyT -= dt) < 0 && AJUSTES.stories) { storyT = .5; storyTick(); if ((!game.story || game.story.day !== today()) && hourNow() < 18 && TT > 4) makeStory(); }
-  mealTick(); ambUpdate(dt); encUpdate(dt); for (const b of bubbles) { if (!b.t) oido(b.q, b.text); b.t += dt; } bubbles = bubbles.filter(b => b.t < b.dur + .35);   // (what is said, Ana heard it today: src/js/24-personajes.js)
+  mealTick(); ambUpdate(dt); encUpdate(dt); for (const b of bubbles) { if (!b.t) { oido(b.q, b.text); if (burbujaAqui(b)) comOido(b.q, b.text); } b.t += dt; } bubbles = bubbles.filter(b => b.t < b.dur + .35);   // (what is said, Ana heard it today: src/js/24-personajes.js)
   if ((taskTick -= dt) < 0) { taskTick = .5; taskEvent('ir'); }
   // everyone but Diana follows their routine: where they are wanted (home, or visiting), walking there, or about the place
   const hr = hourNow(), visiting = k => !!CH[k].routine && PEOPLE[k].where !== 'out' && PEOPLE[k].where !== CH[k].home;
@@ -336,7 +336,7 @@ function renderView(){
   }
   // speech bubbles over the heads of whoever is talking (on the screen, over the light of the day, so they read at night)
   cuadrosY = W < 640 ? 100 : 56;   // (the captions, from the top down: under the hint)
-  const aqui = bubbles.map(b => [personOf(b.q), b]).filter(([p, b]) => p && (b.q === 'ana' ? anaHere : (PEOPLE[b.q] ? sceneOf(b.q) : b.q.startsWith('f:') ? FOLKBY[b.q.slice(2)]?.where : animalWhere(b.q)) === game.scene));
+  const aqui = bubbles.map(b => [personOf(b.q), b]).filter(([p, b]) => p && burbujaAqui(b));
   for (const [p, b] of aqui) drawBubble(g, p, b, W, H, 'cuadros');   // (the captions first, at the top; the bubbles under them)
   for (const [p, b] of aqui) drawBubble(g, p, b, W, H);
   // the little papers: what she has, the hour, what she can do

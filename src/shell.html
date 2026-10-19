@@ -105,6 +105,12 @@ body.visor > *:not(#cv):not(#visor){display:none !important}
 #rels .bt .k{color:#8a6a4a;font-style:italic}#rels .bt .tag{font-size:11px;border:1px solid currentColor;border-radius:6px;padding:0 4px;margin-left:4px}
 #rels .dh{text-align:left;font-size:13px;font-weight:bold;color:#4f7a4a;margin:8px 0 2px}
 #rels details{text-align:left;font-size:13px;margin:4px 0}
+#combtn{position:fixed;right:10px;bottom:10px;min-width:42px;height:36px;font-size:17px;line-height:30px;padding:0 6px;cursor:pointer;z-index:31}
+#comf{position:fixed;right:10px;bottom:54px;width:min(440px,calc(100% - 20px));box-sizing:border-box;padding:8px 10px;z-index:31;display:flex;flex-direction:column;gap:6px}
+#comf[hidden]{display:none}
+#comlugar{font-size:13px;opacity:.75}
+#comin{font:15px Georgia,serif;padding:6px 8px;border:1.5px solid #6b4a30;border-radius:8px;background:#fffaf0;color:#3b2a1c;resize:vertical}
+#comf .row{display:flex;gap:6px;justify-content:flex-end}
 #saybtn{position:fixed;right:10px;top:130px;width:42px;height:36px;font-size:19px;line-height:30px;padding:0;cursor:pointer}
 #sleep{position:fixed;inset:0;z-index:30;background:#0d1020;color:#e8e2c8;font:italic 34px Georgia,serif;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 1.2s ease}
 #sleep.on{opacity:1;pointer-events:auto}
@@ -171,6 +177,8 @@ body:not(.dev) #spdbtn{top:298px!important;right:10px!important}
 <div id="sleep"></div>
 <form id="say" class="paper" hidden autocomplete="off"><input id="sayin" maxlength="240" placeholder="Lo que dice Ana… (Enter para decir · Esc para cerrar)" spellcheck="false"><button type="submit">Decir</button></form>
 <button id="saybtn" class="paper" title="Decir algo (Enter o T)">💬</button>
+<button id="combtn" class="paper" title="Dejar un comentario sobre este momento (C): se guarda con lo que estaba pasando">📝</button>
+<form id="comf" class="paper" hidden autocomplete="off"><div id="comlugar"></div><textarea id="comin" maxlength="2000" rows="3" placeholder="¿Qué se podría mejorar aquí? (lo que viste, lo que esperabas, lo que no se entiende…) · Ctrl+Enter para guardar · Esc para cerrar"></textarea><div class="row"><button type="submit">Guardar comentario</button><button id="comno">Cancelar</button></div></form>
 <button id="relbtn" class="paper" title="La historia de hoy y quién quiere a quién">👥</button>
 <button id="cuabtn" class="paper" title="Lo que Ana podría hacer (su cuaderno)">📖</button>
 <button id="daybtn" class="paper" title="Pasar al día siguiente">⏭</button>
@@ -199,6 +207,7 @@ body:not(.dev) #spdbtn{top:298px!important;right:10px!important}
     <label>Modelo <input type="text" id="ajmodelo" autocomplete="off"></label>
     <div class="row"><button id="ajprobar">Probar ahora</button><button id="ajnocheve">Ver lo que agregó la noche</button></div>
   </fieldset>
+  <div class="row"><button id="ajcomex">Exportar comentarios</button><button id="ajcomborrar">Borrar comentarios</button></div>
   <div class="row"><button id="ajsaben">Ver lo que saben</button><button id="ajolvidar">Borrar lo que saben</button><button id="ajcero">Empezar de cero</button><button id="ajcerrar">Cerrar</button></div>
   <pre id="ajout" hidden></pre>
 </div></div>

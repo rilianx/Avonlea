@@ -44,6 +44,8 @@ function callNearest(){
   callPerson('ana', best);
 }
 const personOf = k => k === 'ana' ? ana : PEOPLE[k] || ANIM[k] || (k.startsWith('f:') ? FOLKBY[k.slice(2)] : null);
+// a bubble said where Ana is (one drawn on the screen: what the player sees and hears)
+const burbujaAqui = b => b.q === 'ana' ? RENDER_REAL === game.scene : (PEOPLE[b.q] ? sceneOf(b.q) : b.q.startsWith('f:') ? FOLKBY[b.q.slice(2)]?.where : animalWhere(b.q)) === game.scene;
 const lineDur = t => clamp(1.7 + t.length * .055, 2.4, 9);
 const nameOf = k => k === 'ana' ? 'Ana' : NAMES[k] || ANIMALS[k]?.name;
 // who is in the talk: the one asked, and whoever stands close to them (and to Ana)

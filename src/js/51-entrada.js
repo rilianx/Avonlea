@@ -6,6 +6,7 @@ addEventListener('keydown', e => {
   if (e.target.closest && e.target.closest('input,select,textarea')) return;
   if (!$('ajustes').hidden) { if (e.code === 'Escape') ajustesPanel(false); return; }
   audio(); hint(); if (!ANA_AUTO) userInput();
+  if (e.code === 'KeyC') { e.preventDefault(); opinionAbrir(); return; }   // (a comment on this moment: src/js/67-comentarios.js)
   if (e.code === 'KeyT' && !game.map) { e.preventDefault(); openSay(); return; }
   if (e.code === 'KeyM' && !game.talk) { toggleMap(); return; }
   if (e.code === 'KeyL' && !game.map && !game.talk) { callNearest(); return; }

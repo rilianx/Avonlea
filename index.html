@@ -105,6 +105,12 @@ body.visor > *:not(#cv):not(#visor){display:none !important}
 #rels .bt .k{color:#8a6a4a;font-style:italic}#rels .bt .tag{font-size:11px;border:1px solid currentColor;border-radius:6px;padding:0 4px;margin-left:4px}
 #rels .dh{text-align:left;font-size:13px;font-weight:bold;color:#4f7a4a;margin:8px 0 2px}
 #rels details{text-align:left;font-size:13px;margin:4px 0}
+#combtn{position:fixed;right:10px;bottom:10px;min-width:42px;height:36px;font-size:17px;line-height:30px;padding:0 6px;cursor:pointer;z-index:31}
+#comf{position:fixed;right:10px;bottom:54px;width:min(440px,calc(100% - 20px));box-sizing:border-box;padding:8px 10px;z-index:31;display:flex;flex-direction:column;gap:6px}
+#comf[hidden]{display:none}
+#comlugar{font-size:13px;opacity:.75}
+#comin{font:15px Georgia,serif;padding:6px 8px;border:1.5px solid #6b4a30;border-radius:8px;background:#fffaf0;color:#3b2a1c;resize:vertical}
+#comf .row{display:flex;gap:6px;justify-content:flex-end}
 #saybtn{position:fixed;right:10px;top:130px;width:42px;height:36px;font-size:19px;line-height:30px;padding:0;cursor:pointer}
 #sleep{position:fixed;inset:0;z-index:30;background:#0d1020;color:#e8e2c8;font:italic 34px Georgia,serif;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 1.2s ease}
 #sleep.on{opacity:1;pointer-events:auto}
@@ -171,6 +177,8 @@ body:not(.dev) #spdbtn{top:298px!important;right:10px!important}
 <div id="sleep"></div>
 <form id="say" class="paper" hidden autocomplete="off"><input id="sayin" maxlength="240" placeholder="Lo que dice Ana… (Enter para decir · Esc para cerrar)" spellcheck="false"><button type="submit">Decir</button></form>
 <button id="saybtn" class="paper" title="Decir algo (Enter o T)">💬</button>
+<button id="combtn" class="paper" title="Dejar un comentario sobre este momento (C): se guarda con lo que estaba pasando">📝</button>
+<form id="comf" class="paper" hidden autocomplete="off"><div id="comlugar"></div><textarea id="comin" maxlength="2000" rows="3" placeholder="¿Qué se podría mejorar aquí? (lo que viste, lo que esperabas, lo que no se entiende…) · Ctrl+Enter para guardar · Esc para cerrar"></textarea><div class="row"><button type="submit">Guardar comentario</button><button id="comno">Cancelar</button></div></form>
 <button id="relbtn" class="paper" title="La historia de hoy y quién quiere a quién">👥</button>
 <button id="cuabtn" class="paper" title="Lo que Ana podría hacer (su cuaderno)">📖</button>
 <button id="daybtn" class="paper" title="Pasar al día siguiente">⏭</button>
@@ -199,6 +207,7 @@ body:not(.dev) #spdbtn{top:298px!important;right:10px!important}
     <label>Modelo <input type="text" id="ajmodelo" autocomplete="off"></label>
     <div class="row"><button id="ajprobar">Probar ahora</button><button id="ajnocheve">Ver lo que agregó la noche</button></div>
   </fieldset>
+  <div class="row"><button id="ajcomex">Exportar comentarios</button><button id="ajcomborrar">Borrar comentarios</button></div>
   <div class="row"><button id="ajsaben">Ver lo que saben</button><button id="ajolvidar">Borrar lo que saben</button><button id="ajcero">Empezar de cero</button><button id="ajcerrar">Cerrar</button></div>
   <pre id="ajout" hidden></pre>
 </div></div>
@@ -1543,7 +1552,7 @@ si: hecho:desayuno_prueba, ana:camison, ve:marilla, hora:9-19
 ---
 marilla: ¡Ana! ¿Todavía en camisón a esta hora? En esta casa una se viste apenas se levanta.
 -> «Perdón, Marilla. Ahora mismo me visto.»
-   ana: Perdón, Marilla. Se me olvidó por completo: estaba ocupadísima imaginando.
+   ana: Perdón, Marilla. Ahora mismo me visto. Se me olvidó por completo: estaba ocupadísima imaginando.
    ! vestirse
    marilla: (Marilla suspira.) Imaginando. Claro.
 ->* «Es que en camisón me siento como un hada…»
@@ -3576,6 +3585,12 @@ quien: ana
 === si_a ===
 - Está bien.
 
+# (Ana dice que no a lo que le piden, cuando la jugadora lo elige)
+=== no_a ===
+quien: ana
+- Ahora no puedo… ¿después?
+- Ahora no, por favor. Estoy en medio de algo importantísimo.
+
 # --- interceder por alguien (63-jugar.js); huecos: {nombre} (a quien se le pide), {por} (por quien se pide).
 # Y la respuesta: Ana a Diana, o cualquiera («hmpf» si no)
 === interceder ===
@@ -3640,13 +3655,15 @@ quien: ana
 === regalo:dolares ===
 - Vaya... bueno, pues gracias.
 
-# --- lo que se da en el mundo (63-jugar.js, «dar»): si le gusta, o no tanto
+# --- lo que se da en el mundo (63-jugar.js, «dar»): si le gusta, o no tanto ({cosa}: lo que le dieron, «un jarro de
+# leche»: que quien ve la escena sepa de qué es el «gracias»)
 === gracias_gusta ===
-- ¡Qué lindo detalle! Muchas gracias.
-- ¡Oh! Justo lo que me gusta.
+- ¡Qué lindo detalle, {cosa}! Muchas gracias.
+- ¡Oh! Justo lo que me gusta: {cosa}.
 
 === gracias_dar ===
-- Gracias.
+- Gracias por {cosa}.
+- Ah, {cosa}. Gracias.
 
 # --- lo que Ana trae para la casa (35-cosas-que-lleva.js, PARA_LA_CASA: dicho('para_la_casa:' + k)); lo dice quien lo
 # usa (marilla, o matthew el heno)
@@ -4820,8 +4837,8 @@ ana: Los voy a hacer tan bien que se le van a olvidar los niños del orfanato.
 quienes: ana, marilla
 donde: casa
 ---
-marilla: Ana, ¿barriste el porche como te dije?
-ana: Sí, Marilla… bueno, casi. Me distraje mirando una araña que tejía, y era tan perfecta…
+marilla: Ana, el porche está lleno de hojas. ¿Lo barres tú, o lo barro yo?
+ana: Yo, Marilla… en cuanto termine de mirar esta araña. Está tejiendo, y le está quedando tan perfecto…
 marilla: Las arañas no barren porches, Ana.
 
 === par:ana+marilla:3 ===
@@ -5926,7 +5943,7 @@ dice: [hecho:se_queda] Ana, no te quedes soñando despierta. Aunque... la cocina
 dice: [hecho:se_queda] Si quieres cocinar, la estufa está encendida. Cuidado con no quemar nada.
 dice: [hecho:se_queda, hecho:conocidas_diana] Matthew no lo dice, pero te echa de menos cuando te vas donde Diana.
 dice: [hecho:se_queda, hora:12-18, no_hoy:regado] Riega la huerta antes de que caiga el sol, que las plantas lo agradecen. La regadera está junto a la bomba.
-dice: [hecho:se_queda, afecto:marilla:ana>=3] Hmm. Bueno, admito que hoy te has portado muy bien.
+dice: [hecho:se_queda, afecto:marilla:ana>=3, hora:17-22] Hmm. Bueno, admito que hoy te has portado muy bien.
 dice: [hecho:ropa_arrugada, !hecho:ropa_ordenada] Ese vestido parece que durmió en el suelo, Ana. Ah, claro: es que durmió en el suelo.
 primavera: [hecho:se_queda] Hay que limpiar la casa a fondo, que es primavera. Y tú me vas a ayudar, Ana.
 verano: Con este calor, mejor un té y no enciendas mucho la estufa.
@@ -5951,7 +5968,7 @@ invierno: [hecho:conocidas_diana, !hecho:prohibida] ¡Está nevando! Mamá no me
 
 === barry ===
 dice: [!conoce:barry, !hecho:barry_presenta, sabe:barry:nina_cuthbert] Tú debes ser la niña que trajeron los Cuthbert. Buenas tardes.
-dice: [hecho:barry_presenta, !hecho:prohibida] Ana Shirley, siempre es un gusto verte por aquí. Pórtate bien, ¿eh?
+dice: [dias_desde:barry_presenta:3, !hecho:prohibida] Ana Shirley, siempre es un gusto verte por aquí. Pórtate bien, ¿eh?
 dice: [dias_desde:conocidas_diana:3, !hecho:prohibida] Diana habla de ti todo el día, ¿sabes?
 dice: [hecho:perdonada] Esta vez el cordial de frambuesa está bien etiquetado, te lo aseguro.
 dice: [hecho:prohibida, !hecho:perdonada] Buenas tardes. (La Sra. Barry no la invita a pasar.)
@@ -6655,10 +6672,12 @@ guiño matthew: Bueno, pues… Marilla es dura, pero tiene buen corazón. Pórta
 titulo: Conocer a Diana Barry
 pista: Quizás Marilla sepa de alguna niña de tu edad. Habla con ella.
 pista si hecho:quiere_amiga: Marilla dijo que un día de estos iría a La Cuesta del Huerto, donde viven los Barry… y que podrías ir con ella.
+pista si hecho:quiere_amiga, !presente:diana: Diana está en Carmody, donde su tía, y vuelve a las dos semanas y media de que llegaste a Tejas Verdes. Cuando vuelva, Marilla te lleva a conocerla (en la tarde: no te alejes).
+guiño marilla: [hecho:quiere_amiga, !presente:diana] Diana sigue en Carmody, donde su tía. Vuelve dentro de unos días; cuando llegue, te llevo a conocerla. Paciencia, Ana.
 meta: hecho conocidas_diana
 requiere: hecho:se_queda
 antes: quedarse en Tejas Verdes (después, quizás Marilla sepa de alguna niña de tu edad)
-guiño marilla: Los Barry tienen una niña de tu edad, Diana. Si me lo pidieras, quizás un día te llevaría a conocerla.
+guiño marilla: [!hecho:pide_amiga] Los Barry tienen una niña de tu edad, Diana. Si me lo pidieras, quizás un día te llevaría a conocerla.
 
 === amigas ===
 titulo: Tener una amiga del alma
@@ -8132,7 +8151,7 @@ function mealTick(){
   m.next = TT + 30; if (!parts.length || !MEAL(hr)) return;
   const w = mealWord(hr); m.rounds++;
   if (!m.logged) { m.logged = true; logEv(`Ana se sentó a ${w.verb} con ${parts.map(k => NAMES[k]).join(' y ')} (${w.menu}).`, parts); }
-  const ls = [{ q: 'ana', t: dicho('comida_ana') }, ...parts.slice(0, 2).map(k => ({ q: k, t: pick(LINES[k]) || '' })).filter(l => l.t)]; sceneStart({ parts, lines: ls, out: {}, scene: 'gg', resumen: '' }, false);
+  const ls = [{ q: 'ana', t: dichoNuevo('comida_ana') }, ...parts.slice(0, 2).map(k => ({ q: k, t: pick(LINES[k]) || '' }))].filter(l => l.t); if (!ls.length) return; sceneStart({ parts, lines: ls, out: {}, scene: 'gg', resumen: '' }, false);   // (what was said at the table today is not said again: silence)
 }
 function drawKitchen(c, t, night){
   // floor boards, the back wall with a window and shelves, a rag rug
@@ -9458,7 +9477,7 @@ class Dialogo {
       if (this.interrumpe && typeof amb !== 'undefined') for (const k of Object.keys(PEOPLE)) amb.mute[k] = Math.max(amb.mute[k] || 0, TT + 90);   // (after something big, a while without loose lines: it is left to sink in)
       if (this.interrumpe) dlgRespiro = TT + 90;   // (and the smaller scenes wait too: one thing at a time)
     } });
-    t.prio = this.prioridad; t.esc = this.id; t.paso = this.al_paso; t.desde = p; t.puente = k; return t;
+    t.prio = this.prioridad; t.esc = this.id; t.paso = this.al_paso; t.desde = p; t.puente = k; comEscena(this.id, this.canal); return t;
   }
 }
 const DIALOGOS = [], dlgPausa = {}; let dlgRespiro = 0;   // (after a scene that cut in, a breather: only those that cut in too, the chains of the book, before it ends)
@@ -9624,6 +9643,8 @@ function dichoElegir(m, v = {}){   // { q, t } of one that holds now (not the la
   dichoUlt[m] = d.id; DICHO_HOY.s.add(d.id); return { q: d.quien && d.quien !== '*' ? d.quien : v.quien, t: rellenar(d.t, v) };
 }
 const dicho = (m, v) => dichoElegir(m, v)?.t ?? '';
+// one not said yet today, or nothing (for what is only talk: at the table, once said, silence rather than the same again)
+const dichoNuevo = (m, v) => (DICHOS_DE[m] || []).every(d => DICHO_HOY.dia === today() && DICHO_HOY.s.has(d.id)) ? '' : dicho(m, v);
 // said, in a bubble: by Ana, or by whoever (quien, for «quien: *»)
 function comentar(m, quien){
   const c = comentarioElegir(m); if (!c) return false;
@@ -11257,7 +11278,7 @@ const ITEM_DEFS = {
   dolares:  { names: ['dólar', 'dólares'], icon: '💵', season: () => game.inv.dolares > 0, giveAll: true, gift: { name: 'el dinero', art: 'el dinero' } },
 };
 for (const k of Object.keys(ITEM_DEFS)) if (!(k in game.inv)) game.inv[k] = 0;
-for (const [k, d] of Object.entries(ITEM_DEFS)) if (d.gift) Object.defineProperty(d.gift, 'reply', { get: () => dicho('regalo:' + k) || dicho('gracias_dar') });   // (the thanks: said when it is given, one of its lines)
+for (const [k, d] of Object.entries(ITEM_DEFS)) if (d.gift) Object.defineProperty(d.gift, 'reply', { get: () => dicho('regalo:' + k) || dicho('gracias_dar', { cosa: d.gift.art }) });   // (the thanks: said when it is given, one of its lines)
 // what is not a gift but for the house: who uses it (the wood she carried in, the eggs, the milk): she can hand it over
 // to them, all of it; what they say then is the saying para_la_casa:<thing> (src/datos/dichos/11-regalos-y-encargos.txt)
 const PARA_LA_CASA = { lena: 'marilla', huevos: 'marilla', leche: 'marilla', mantequilla: 'marilla', azucar: 'marilla', hierbas: 'marilla', heno: 'matthew' };
@@ -11284,7 +11305,7 @@ function talk(who, again = false){
   if (who === 'diana' && dlgHechos().prohibida) return say('diana', dicho('diana_prohibida'), [['…', close]]);   // (forbidden, cap. 17)
   // first, what to talk about (each topic a scene, had once: src/datos/conversaciones.txt, and the night writes new ones
   // when they run out); then what there is to do with them
-  const opts = [...convOpciones(who), ...taskOptions(who), ...cadenaOpciones(who)];
+  const opts = [...convOpciones(who), ...conEllaOpciones(who), ...taskOptions(who), ...cadenaOpciones(who)];
   for (const [k, [name]] of Object.entries(GIFTS)) if (game.inv[k] > 0) opts.push(['Regalar ' + name, () => give(who, k)]);
   opts.push(...entregaOpciones(who), ...cartaEncargoOpciones(who));   // (and what Ana brings for the house: the wood, the eggs…)
   if (!isQuieto(who) || who === 'marilla') opts.push(['🙏 Pedirle un favor', () => favorMenu(who)]);
@@ -11300,6 +11321,10 @@ const convOpciones = (who, volver = () => talk(who, true)) => {
   const op = d => [(d.ia && (V[d.id]?.n || 0) <= 1 ? '✨ ' : '💬 ') + d.tema, () => { close(); conversar(d); }];   // (✨: new, written last night, the first day it is offered)
   return [...C.slice(0, n).map(op), ...(C.length > n ? [['💬 Hablar de otra cosa… (' + (C.length - n) + ')', () => say(who, dicho('hablar_de_que'), [...C.slice(n).map(op), ['← Volver', volver]])]] : [])];
 };
+// what Ana can do with this person now (from her own menu too: to swear friendship, to forgive, to say sorry…), here
+// where the player looks for it: touching that person (what is given and asked has its own options below)
+const CON_ELLA_NO = ['visitar', 'conversar', 'dar', 'pedir', 'ir', 'traer', 'guiar', 'devolver', 'vender', 'comprar', 'cambiar'];
+const conEllaOpciones = who => { try { return jugables().filter(a => a.k === who && !CON_ELLA_NO.includes(a.v)).map(a => ['✨ ' + cap(stepText(a)), () => { close(); jugar(a); }]); } catch (e) { return []; } };
 // closing the menu is not leaving: «Adiós» only when it is really a goodbye
 const cierre = who => 'Nada por ahora';
 function face(who){
@@ -12580,6 +12605,8 @@ function callNearest(){
   callPerson('ana', best);
 }
 const personOf = k => k === 'ana' ? ana : PEOPLE[k] || ANIM[k] || (k.startsWith('f:') ? FOLKBY[k.slice(2)] : null);
+// a bubble said where Ana is (one drawn on the screen: what the player sees and hears)
+const burbujaAqui = b => b.q === 'ana' ? RENDER_REAL === game.scene : (PEOPLE[b.q] ? sceneOf(b.q) : b.q.startsWith('f:') ? FOLKBY[b.q.slice(2)]?.where : animalWhere(b.q)) === game.scene;
 const lineDur = t => clamp(1.7 + t.length * .055, 2.4, 9);
 const nameOf = k => k === 'ana' ? 'Ana' : NAMES[k] || ANIMALS[k]?.name;
 // who is in the talk: the one asked, and whoever stands close to them (and to Ana)
@@ -12841,6 +12868,7 @@ addEventListener('keydown', e => {
   if (e.target.closest && e.target.closest('input,select,textarea')) return;
   if (!$('ajustes').hidden) { if (e.code === 'Escape') ajustesPanel(false); return; }
   audio(); hint(); if (!ANA_AUTO) userInput();
+  if (e.code === 'KeyC') { e.preventDefault(); opinionAbrir(); return; }   // (a comment on this moment: src/js/67-comentarios.js)
   if (e.code === 'KeyT' && !game.map) { e.preventDefault(); openSay(); return; }
   if (e.code === 'KeyM' && !game.talk) { toggleMap(); return; }
   if (e.code === 'KeyL' && !game.map && !game.talk) { callNearest(); return; }
@@ -13157,7 +13185,7 @@ function update(dt){
     game.lastDay = today(); save();
   }
   if ((storyT -= dt) < 0 && AJUSTES.stories) { storyT = .5; storyTick(); if ((!game.story || game.story.day !== today()) && hourNow() < 18 && TT > 4) makeStory(); }
-  mealTick(); ambUpdate(dt); encUpdate(dt); for (const b of bubbles) { if (!b.t) oido(b.q, b.text); b.t += dt; } bubbles = bubbles.filter(b => b.t < b.dur + .35);   // (what is said, Ana heard it today: src/js/24-personajes.js)
+  mealTick(); ambUpdate(dt); encUpdate(dt); for (const b of bubbles) { if (!b.t) { oido(b.q, b.text); if (burbujaAqui(b)) comOido(b.q, b.text); } b.t += dt; } bubbles = bubbles.filter(b => b.t < b.dur + .35);   // (what is said, Ana heard it today: src/js/24-personajes.js)
   if ((taskTick -= dt) < 0) { taskTick = .5; taskEvent('ir'); }
   // everyone but Diana follows their routine: where they are wanted (home, or visiting), walking there, or about the place
   const hr = hourNow(), visiting = k => !!CH[k].routine && PEOPLE[k].where !== 'out' && PEOPLE[k].where !== CH[k].home;
@@ -13411,7 +13439,7 @@ function renderView(){
   }
   // speech bubbles over the heads of whoever is talking (on the screen, over the light of the day, so they read at night)
   cuadrosY = W < 640 ? 100 : 56;   // (the captions, from the top down: under the hint)
-  const aqui = bubbles.map(b => [personOf(b.q), b]).filter(([p, b]) => p && (b.q === 'ana' ? anaHere : (PEOPLE[b.q] ? sceneOf(b.q) : b.q.startsWith('f:') ? FOLKBY[b.q.slice(2)]?.where : animalWhere(b.q)) === game.scene));
+  const aqui = bubbles.map(b => [personOf(b.q), b]).filter(([p, b]) => p && burbujaAqui(b));
   for (const [p, b] of aqui) drawBubble(g, p, b, W, H, 'cuadros');   // (the captions first, at the top; the bubbles under them)
   for (const [p, b] of aqui) drawBubble(g, p, b, W, H);
   // the little papers: what she has, the hour, what she can do
@@ -15159,6 +15187,8 @@ function cartaLeer(c, i = 0){
    them). Nothing is written twice: the menu asks the planner what is possible here. ---------- */
 const JUGABLE_TIPOS = ['visitar', 'devuelto', 'amigas', 'paces', 'sano', 'club', 'felicitar', 'consolado', 'picnic', 'quehaceres', 'alimentados', 'recito', 'rezo', 'adornado', 'remo', 'nombres', 'carta', 'leido', 'concierto', 'sala', 'huerta', 'patinar', 'trineo', 'teñido', 'pelo_corto', 'desafio'];
 const JUGABLE_NO = ['ir', 'tomar', 'recoger', 'dar', 'vender', 'cambiar', 'comprar', 'conversar', 'pedir', 'guiar', 'soltar', 'regañar', 'subir_calesa', 'interceder', 'cocinar', 'preparar', 'batir'];   // (these the player already has in her own way, or are not hers)
+// a scene of the script going on where Ana is (and this one is there): what someone does aloud waits until it ends
+const escenaDelante = k => wmScene(k) === game.scene && TALKS.some(t => t.esc);
 function jugables(){
   if (game.playAct || game.scene === 'camino' || retenida()) return [];   // (in the middle of a scene with her: no chores)
   const s = wmNow(); let here = s.pos.ana; if (!here) return [];
@@ -15251,6 +15281,7 @@ function wmExec0(ag, a, st, dt){
         const rc = wmMove(me, 'h:' + casa, dt); if (rc !== 'ok') return rc;
         if (wmScene(a.k) !== casa) { st.espera = (st.espera || 0) + dt; if (st.espera > M(40)) { delete h.recibe; st.why = wmName(a.k) + ' no llegó a su casa'; return 'fail'; } return 'run'; }
       }
+      if (st.said !== 2 && escenaDelante(me)) return 'run';   // (a scene going on where Ana is: the visit waits at the door until it ends)
       if (!st.said) { const r = reach(a.k); if (r !== 'ok') return r; st.said = 1; st.t1 = TT; bubble(me, dicho('visitar_saludo', { saludo: saludoHora(), nombre: callName(a.k) })); }   // (up to her, to greet her; then to the chair, not after her)
       if (st.said === 1 && TT - st.t1 > 2.6) { st.said = 2; st.w = 0; bubble(a.k, dicho('visitar_pasa')); }
       if (st.said !== 2 || !wait(3)) return 'run';
@@ -15376,7 +15407,7 @@ function wmExec0(ag, a, st, dt){
       for (const tag of THINGS[a.x].tags) realR.setFact('dio:' + a.k + ':' + tag); realR.setFact('dio:' + a.k + ':' + a.x); realR.setFact('dio:' + a.x); realR.setFact('dio_de:' + me + '>' + a.k + ':' + a.x);
       const liked = socialRule(realR, 'dar', me, a.k, a.x);
       const tb = wmBody(a.k); if (liked && tb) hearts(tb.x, tb.y - 56);
-      logEv(`${wmName(me)} le dio ${itemTextW(a.x, n)} a ${wmName(a.k)}.`, []); bubble(a.k, liked ? dicho('gracias_gusta') : dicho('gracias_dar')); return 'ok';
+      logEv(`${wmName(me)} le dio ${itemTextW(a.x, n)} a ${wmName(a.k)}.`, []); bubble(a.k, liked ? dicho('gracias_gusta', { cosa: itemTextW(a.x, n) }) : dicho('gracias_dar', { cosa: itemTextW(a.x, n) })); return 'ok';
     }
     case 'vender': {
       const r = reach(a.k); if (r !== 'ok') return r;
@@ -15429,7 +15460,7 @@ function wmExec0(ag, a, st, dt){
       }
       if (!st.asked) {
         const r = a.llamar ? 'ok' : reach(a.k); if (r !== 'ok') return r;
-        if (hablando()) return 'run';   // (the other is still answering the call: one asks after)
+        if (hablando() || escenaDelante(me)) return 'run';   // (the other is still answering the call, or a scene goes on in front of Ana: one asks after)
         if (!socialRule(realR, 'pedir', me, a.k)) { bubble(a.k, dicho('pedir_no')); st.why = wmName(a.k) + ' no quiso'; realR.setFact('pedido:' + a.favor.f + ':' + a.k); return 'fail'; }
         if (a.k !== 'ana' && activeGoals(AGENTS[a.k]).length >= MAX_GOALS) { bubble(a.k, dicho('pedir_ocupado')); st.why = wmName(a.k) + ' está ocupado'; realR.setFact('pedido:' + a.favor.f + ':' + a.k); return 'fail'; }
         st.asked = 1; realR.setFact('pedido:' + a.favor.f + ':' + a.k); for (const k of [me, a.k]) amb.mute[k] = Math.max(amb.mute[k] || 0, TT + 30);   // (asking and answering: no loose lines in between)
@@ -15440,11 +15471,16 @@ function wmExec0(ag, a, st, dt){
         if (f.f === 'prestar') { const I = wmInv(a.k); if (!(I[f.item] > 0)) { st.why = wmName(a.k) + ' no lo tiene'; return 'fail'; } I[f.item] -= 1; inv[f.item] = (inv[f.item] || 0) + 1; realR.setFact('prestado:' + f.item + ':' + a.k + '>' + me); float('+' + itemTextW(f.item, 1), b.x, b.y - 50); bubble(a.k, dicho('prestar_si')); logEv(`${wmName(a.k)} le prestó ${ITEM_DEFS[f.item]?.gift?.art || itemTextW(f.item, 1)} a ${wmName(me)}.`, []); return 'ok'; }
         if (f.f === 'pasear') { if (a.k === 'ana') { if (WM_OBEY) { const A = agentOf('ana'); A.followOf = me; agentLog(A, 'pasea con ' + wmName(me)); } else notice(`📜 ${wmName(me)} quiere dar un paseo contigo: síguela.`); } else if (a.k === 'diana' && me === 'ana') diana.follow = true; else agentOf(a.k).followOf = me; return 'ok'; }
         const sub = F.goal(me, f, wmNow());
-        if (a.k === 'ana' && !WM_OBEY) { if (f.f === 'traer' && CH[me]) addTask({ from: me, tipo: 'traer', n: f.n, para: me, d: today(), item: f.item }); else notice(`📜 ${wmName(me)} te pide: ${sub.text}.`); }
+        if (a.k === 'ana' && (!WM_OBEY || !ANA_AUTO)) { if (f.f === 'traer' && CH[me]) { addTask({ from: me, tipo: 'traer', n: f.n, para: me, d: today(), item: f.item }); st.tarea = game.tasks[game.tasks.length - 1]; } else notice(`📜 ${wmName(me)} te pide: ${sub.text}.`); }   // (the player has Ana: it is a request to her, not a goal Ana carries out by herself)
         else { const h = agentStart(a.k, sub, { label: sub.text + ' (se lo pidió ' + wmName(me) + ')', parent: me, chain: [...agentChain(ag), me] }); if (!h) { st.why = wmName(a.k) + ' tiene demasiado que hacer'; return 'fail'; } const gg = ag.goalNow; if (gg) gg.pending = [...(gg.pending || []).filter(p => p.h.st === 'run'), { h, f, to: a.k }]; }
         st.sub = sub; st.t1 = TT;
       }
-      if (st.asked === 1) { if (TT - st.t1 < 2.6 || hablando()) return 'run'; st.asked = 2; bubble(a.k, dicho('si_a:' + a.favor.f) || dicho('si_a')); }   // (and the answer, yes)
+      // (and the answer: yes; when it is asked of Ana and the player has her, the player answers)
+      if (st.asked === 1 && a.k === 'ana' && !ANA_AUTO) { if (TT - st.t1 < 1.2 || hablando()) return 'run'; if (game.talk) { if (TT - st.t1 < 30) return 'run'; st.asked = 2; return 'ok'; }
+        st.asked = 2; const si = dicho('si_a:' + a.favor.f) || dicho('si_a');
+        say(me, st.sub?.text ? cap(st.sub.text.replace(/^Ana /, '')) + '.' : dicho('pedir_favor'), [['«' + si + '»', () => { close(); bubble('ana', si); }], ['«' + dicho('no_a') + '»', () => { close(); bubble('ana', dicho('no_a')); if (st.tarea) game.tasks = game.tasks.filter(t => t !== st.tarea); realR.setFact('dijo_no:' + a.favor.f + ':' + me); logEv(`Ana le dijo a ${wmName(me)} que ahora no podía.`, []); save(); }]]);
+        return 'ok'; }
+      if (st.asked === 1) { if (TT - st.t1 < 2.6 || hablando()) return 'run'; st.asked = 2; bubble(a.k, dicho('si_a:' + a.favor.f) || dicho('si_a')); }
       return 'ok';   // (asked: on with the rest of the plan; what was promised is waited for only where it is needed)
     }
     case 'interceder': {
@@ -17620,6 +17656,64 @@ function relatoTick(){
   const cinco = Math.floor(dayT * 24 * 12);   // (every 5 minutes of the game, how each one is)
   if (cinco !== RELATO.ultimo) { RELATO.ultimo = cinco; for (const k of ks) { const e = relatoEstado(k); if (e) relatoLinea('· ' + relN(k) + ': ' + [e.lugar + conJunto(e.junto), e.postura, e._txt, e.lleva && 'lleva ' + e.lleva, e.objeto && 'con ' + e.objeto].filter(Boolean).join(' · '), { ...e, resumen: true }); } }
 }
+
+/* ---------- comments of whoever plays: «📝» (or the key C) writes one about this very moment, and the game keeps with it
+   what was going on (the day and the hour, where Ana is, who is near, what was just said, the box or the scene open, a
+   small picture of the screen); «Exportar comentarios» (in the settings) downloads them all with the saved game, to send
+   to whoever makes the game: they know when it happened, and can open the game right there ---------- */
+const COM_LS = 'avonlea_comentarios', COM_OIDO_MAX = 14;
+const opiniones = () => { try { return JSON.parse(localStorage.getItem(COM_LS) || '[]'); } catch (e) { return []; } };
+const opinionesGuardar = L => { try { localStorage.setItem(COM_LS, JSON.stringify(L)); return true; } catch (e) { return false; } };
+// what was said lately where Ana is (what the player saw), in order (src/js/53-bucle.js puts each new bubble here)
+const COM_OIDO = [];
+function comOido(q, t){ COM_OIDO.push({ quien: q === 'ana' ? 'Ana' : wmName(String(q).replace(/^f:/, '')) || q, t, dia: today() + 1, hora: +hourNow().toFixed(2) }); if (COM_OIDO.length > COM_OIDO_MAX) COM_OIDO.shift(); }
+// the scenes that began lately (their ids: to find their text in src/datos/)
+const COM_ESC = [];
+function comEscena(id, canal){ COM_ESC.push(`${id}${canal ? ' (' + canal + ')' : ''}, día ${today() + 1} ${fmtHour(hourNow())}`); if (COM_ESC.length > 8) COM_ESC.shift(); }
+// the moment, as it is now
+function comMomento(){
+  const vis = id => { const e = $(id); return e && !e.hidden ? e.innerText.trim() : ''; };
+  const lugar = game.scene !== 'out' ? (ROOMS[game.scene]?.name || game.scene) : (Object.entries(PLACES).map(([k, p]) => [p[0], dist(ana.x, ana.y, p[1], p[2])]).sort((a, b) => a[1] - b[1])[0] || ['afuera'])[0];
+  const cerca = [...Object.keys(PEOPLE).filter(k => k !== 'ana' && PEOPLE[k].where === game.scene && (game.scene !== 'out' || dist(PEOPLE[k].x, PEOPLE[k].y, ana.x, ana.y) < 320)),
+    ...FOLK.filter(f => f.where === game.scene && (game.scene !== 'out' || dist(f.x, f.y, ana.x, ana.y) < 320)).map(f => f.id)];
+  return { dia: today() + 1, hora: fmtHour(hourNow()), estacion: SEASONS[S], lugar, escena: game.scene, cerca: cerca.map(k => wmName(k)),
+    ana: { haciendo: ana.act?.v || null, camison: !!game.wm?.camison, lleva: Object.entries(game.inv || {}).filter(([, n]) => n > 0).map(([k, n]) => k + ' ' + n) },
+    caja: vis('talk'), narra: vis('narra'), ahora: TALKS.map(t => t.esc || t.ch).filter(Boolean), escenas: [...COM_ESC],
+    oido: COM_OIDO.map(o => `[día ${o.dia} ${fmtHour(o.hora)}] ${o.quien}: ${o.t}`), diario: (game.journal || []).slice(-6).map(e => `día ${e.d}: ${e.t}`) };
+}
+// a small picture of the screen (to see what the player saw: 360 wide)
+function comFoto(){ try { const c = $('cv'), w = 360, h = Math.round(c.height * w / c.width), o = document.createElement('canvas'); o.width = w; o.height = h; o.getContext('2d').drawImage(c, 0, 0, w, h); return o.toDataURL('image/jpeg', .6); } catch (e) { return null; } }
+let comPend = null;
+function opinionAbrir(){
+  if (!$('comf').hidden) return opinionCerrar();
+  comPend = { momento: comMomento(), foto: comFoto() };   // (the moment is the one when it was opened, not when it is saved)
+  $('comf').hidden = false; $('comlugar').textContent = `Día ${comPend.momento.dia}, ${comPend.momento.hora} · ${comPend.momento.lugar}`; $('comin').value = ''; $('comin').focus();
+}
+function opinionCerrar(){ $('comf').hidden = true; $('comin').blur(); comPend = null; }
+function opinar(texto, pend = comPend || { momento: comMomento(), foto: comFoto() }){
+  texto = String(texto || '').trim(); if (!texto) return false;
+  const L = opiniones(); L.push({ n: L.length + 1, cuando: new Date().toISOString(), texto, ...pend });
+  if (!opinionesGuardar(L)) { L[L.length - 1].foto = null; opinionesGuardar(L); }   // (the browser is full: without the picture)
+  opinionCerrar(); notice('📝 Comentario guardado (' + L.length + '). Se exportan desde ✒ Ajustes.'); comBoton(); return true;
+}
+// everything, to send: the comments (each with its moment) and the saved game, as one file
+function opinionesDatos(){
+  save(); return { juego: document.title, exportado: new Date().toISOString(), comentarios: opiniones(), partida: (() => { try { return JSON.parse(localStorage.getItem('avonlea') || 'null'); } catch (e) { return null; } })() };
+}
+function opinionesExportar(){
+  const datos = opinionesDatos();
+  const a = document.createElement('a'), f = new Blob([JSON.stringify(datos, null, 1)], { type: 'application/json' });
+  a.href = URL.createObjectURL(f); a.download = 'avonlea-comentarios-' + new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-') + '.json'; document.body.appendChild(a); a.click(); a.remove();
+  return datos;
+}
+const comBoton = () => { const n = opiniones().length; $('combtn').textContent = n ? '📝' + n : '📝'; $('ajcomex').textContent = `Exportar comentarios (${n})`; };
+$('combtn').addEventListener('pointerdown', e => { e.stopPropagation(); e.preventDefault(); opinionAbrir(); });
+$('comf').addEventListener('submit', e => { e.preventDefault(); opinar($('comin').value); });
+$('comno').addEventListener('click', e => { e.preventDefault(); opinionCerrar(); });
+$('comin').addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape') opinionCerrar(); if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) opinar($('comin').value); });
+$('ajcomex').addEventListener('click', () => { const d = opinionesExportar(); $('ajout').hidden = false; $('ajout').textContent = `Se descargó un archivo con ${d.comentarios.length} comentario(s) y la partida. Mándaselo a quien hace el juego.`; });
+$('ajcomborrar').addEventListener('click', () => { if (!opiniones().length || !confirm('¿Borrar todos los comentarios (también los que no exportaste)?')) return; opinionesGuardar([]); comBoton(); });
+comBoton();
 
 /* ---------- the viewer (index.html?visor): only Ana, big, on a plain floor, to look at the drawings and move her:
    arrows (Shift to run), and buttons for everything she can do. ---------- */

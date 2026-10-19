@@ -24,7 +24,7 @@ function mealTick(){
   m.next = TT + 30; if (!parts.length || !MEAL(hr)) return;
   const w = mealWord(hr); m.rounds++;
   if (!m.logged) { m.logged = true; logEv(`Ana se sentó a ${w.verb} con ${parts.map(k => NAMES[k]).join(' y ')} (${w.menu}).`, parts); }
-  const ls = [{ q: 'ana', t: dicho('comida_ana') }, ...parts.slice(0, 2).map(k => ({ q: k, t: pick(LINES[k]) || '' })).filter(l => l.t)]; sceneStart({ parts, lines: ls, out: {}, scene: 'gg', resumen: '' }, false);
+  const ls = [{ q: 'ana', t: dichoNuevo('comida_ana') }, ...parts.slice(0, 2).map(k => ({ q: k, t: pick(LINES[k]) || '' }))].filter(l => l.t); if (!ls.length) return; sceneStart({ parts, lines: ls, out: {}, scene: 'gg', resumen: '' }, false);   // (what was said at the table today is not said again: silence)
 }
 function drawKitchen(c, t, night){
   // floor boards, the back wall with a window and shelves, a rag rug

@@ -1,14 +1,15 @@
 // Jugar a mano, desde afuera: abre el juego en Chromium y espera órdenes por HTTP, una por vez, para que quien juega
 // (una persona, o una IA que prueba el juego como jugadora) vea lo que se ve y decida cada paso. Cada respuesta dice el
 // día y la hora, dónde está Ana, lo que se dijo desde la orden anterior, la caja abierta con sus botones, quién está cerca.
-// Uso: node tools/mano.js [--puerto 8765] [--partida archivo.json]   y luego, por ejemplo:
+// Uso: node tools/mano.js [--puerto 8765] [--partida archivo.json] [--comentarios lista.json (los del 📝, para seguir)]   y luego, por ejemplo:
 //   curl -s localhost:8765/estado            · /boton?i=1 (el botón 1, o ?t=texto) · /seguir (la tarjeta de narración)
 //   /clic?x=&y=[&s=segundos] (tocar la pantalla, en las coordenadas de la foto) · /ana (tocar a Ana: su menú) · /tocar?k=marilla (tocar a alguien) · /ir?a=lago (caminar a un lugar, PLACES)
 //   /pasar?s=30 (segundos de juego; se detiene si algo espera) · /foto (una captura: la ruta) · /guardar?a=archivo.json
+//   /comentar?t=texto (un comentario sobre este momento, como el 📝 del juego) · /exportar?a=archivo.json (los comentarios y la partida)
 //   /ev?js=… (mirar por dentro, sin cambiar nada) · /fin
 const http = require('http'), fs = require('fs'), path = require('path'), { chromium } = require('playwright');
 const RAIZ = path.join(__dirname, '..'), arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d; };
-const PUERTO = +arg('puerto', 8765), PARTIDA = arg('partida', null), FOTOS = path.join(RAIZ, 'trazas', 'mano');
+const PUERTO = +arg('puerto', 8765), PARTIDA = arg('partida', null), COMENTARIOS = arg('comentarios', null), FOTOS = path.join(RAIZ, 'trazas', 'mano');
 const EXE = fs.existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chromium' : undefined;
 
 (async () => {
@@ -16,14 +17,14 @@ const EXE = fs.existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chrom
   const b = await chromium.launch({ executablePath: EXE, args: ['--no-sandbox'] });
   const pg = await (await b.newContext({ viewport: { width: 900, height: 640 } })).newPage(); const errs = [];
   pg.on('pageerror', e => errs.push(e.message));
-  await pg.addInitScript(([s]) => { Object.defineProperty(navigator, 'webdriver', { get: () => false }); if (s) localStorage.setItem('avonlea', s); }, [PARTIDA ? fs.readFileSync(PARTIDA, 'utf8') : null]);
+  await pg.addInitScript(([s, c]) => { Object.defineProperty(navigator, 'webdriver', { get: () => false }); if (s) localStorage.setItem('avonlea', s); if (c) localStorage.setItem('avonlea_comentarios', c); }, [PARTIDA ? fs.readFileSync(PARTIDA, 'utf8') : null, COMENTARIOS ? fs.readFileSync(COMENTARIOS, 'utf8') : null]);
   await pg.goto('file://' + path.join(RAIZ, 'index.html') + '?dev'); await pg.waitForTimeout(1500);
   const ev = (s, a) => pg.evaluate(([s, a]) => { const v = window.__avonlea.ev(s); return typeof v === 'function' ? v(a) : v; }, [s, a]);
-  // what was said, as it is said (every new bubble), from the start
-  await ev(`(() => { window.__oido = []; setInterval(() => { for (const x of bubbles) if (!x.__m) { x.__m = 1;
+  // what was said where Ana is (every new bubble on the screen), from the start
+  await ev(`(() => { window.__oido = []; setInterval(() => { for (const x of bubbles) if (!x.__m && burbujaAqui(x)) { x.__m = 1;
       window.__oido.push({ quien: x.q === 'ana' ? 'Ana' : (wmName(String(x.q).replace(/^f:/, '')) || x.q), t: x.text, dia: today() + 1, hora: +hourNow().toFixed(2) }); } }, 50); })()`);
   let leido = 0, nFoto = 0;
-  const pasar = s => ev(`(s => { for (let k = 0; k < s * 30; k++) { update(1 / 30); for (const x of bubbles) if (!x.__m) { x.__m = 1; window.__oido.push({ quien: x.q === 'ana' ? 'Ana' : (wmName(String(x.q).replace(/^f:/, '')) || x.q), t: x.text, dia: today() + 1, hora: +hourNow().toFixed(2) }); }
+  const pasar = s => ev(`(s => { for (let k = 0; k < s * 30; k++) { update(1 / 30); for (const x of bubbles) if (!x.__m && burbujaAqui(x)) { x.__m = 1; window.__oido.push({ quien: x.q === 'ana' ? 'Ana' : (wmName(String(x.q).replace(/^f:/, '')) || x.q), t: x.text, dia: today() + 1, hora: +hourNow().toFixed(2) }); }
       if (document.querySelector('#talk:not([hidden]) button, #narra:not([hidden]) button')) return k / 30; } return s; })`, s);
   const estado = async () => {
     const e = await ev(`(() => { const vis = id => { const e = document.getElementById(id); return e && !e.hidden && getComputedStyle(e).display !== 'none' ? e.innerText.trim() : ''; };
@@ -52,6 +53,8 @@ const EXE = fs.existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chrom
     pasar: async q => { const s = await pasar(+(q.s || 30)); return { paso: +(+s).toFixed(1), ...(await estado()) }; },
     foto: async () => { const f = path.join(FOTOS, String(++nFoto).padStart(3, '0') + '.jpg'); await pg.screenshot({ path: f, type: 'jpeg', quality: 70 }); return { foto: f }; },
     guardar: async q => { const s = await ev(`(() => { save(); return localStorage.getItem('avonlea'); })()`); const f = path.resolve(q.a || path.join(FOTOS, 'partida.json')); fs.writeFileSync(f, s); return { guardada: f }; },
+    comentar: async q => ({ guardado: await ev(`(t => opinar(t))`, q.t), ...(await estado()) }),   // (a comment on this moment, as the 📝 of the game)
+    exportar: async q => { const d = await ev('opinionesDatos()'); const f = path.resolve(q.a || path.join(FOTOS, 'comentarios.json')); fs.writeFileSync(f, JSON.stringify(d, null, 1)); return { exportado: f, comentarios: d.comentarios.length }; },
     ev: async q => ({ valor: await ev(q.js) }),
     fin: async () => { setTimeout(() => process.exit(0), 100); return { adios: true }; },
   };

@@ -67,7 +67,7 @@ for (const raw of guion.split('\n')) {
     if ((m = s.match(/^si:\s*(.*)$/))) { M[g].si = true; m[1].split(',').forEach(c => /\{/.test(c) || condicion(c.trim(), 'dichos de ' + g)); }
     if ((m = s.match(/^-\s*(\[([^\]]*)\])?/))) { M[g].n++; if (!m[1]) M[g].libre = true; else m[2].split(',').forEach(c => /\{/.test(c) || condicion(c.trim(), 'un dicho de ' + g)); } } }
   for (const [g, x] of Object.entries(M)) { if (!x.n) malas.push(`dichos: «${g}» no tiene ninguna línea`); else if (!x.libre && !x.si) malas.push(`dichos: «${g}» no tiene ninguna línea sin condiciones (alguna vez quedaría callado)`); }
-  const pedidos = new Set([...codigo.matchAll(/\b(?:dicho|dichoElegir|decirDicho|dichosTodos|dichosEnOrden)\('([\w:]+)'/g)].map(m => m[1]));
+  const pedidos = new Set([...codigo.matchAll(/\b(?:dicho|dichoNuevo|dichoElegir|decirDicho|dichosTodos|dichosEnOrden)\('([\w:]+)'/g)].map(m => m[1]));
   for (const g of pedidos) if (!M[g] && !Object.keys(M).some(x => x.startsWith(g) && (g.endsWith(':') || /^\d/.test(x.slice(g.length))))) malas.push(`dichos: el código pide «${g}», y no está en src/datos/dichos/`);
   for (const g of Object.keys(M)) if (!pedidos.has(g) && !/^[\w]+:/.test(g)) malas.push(`dichos: «${g}» no lo pide el código (¿un nombre mal escrito?)`); }
 // the lines of each one (src/datos/frases.txt): someone of the game, and «[condiciones] texto»
@@ -130,6 +130,14 @@ for (const m of codigo.matchAll(/['"`\[]conoce:([a-z_0-9]+)/g)) anota(pide, 'con
 for (const bloque of leer('src/datos/conversaciones.txt').split(/^(?====)/m)) { const id = bloque.match(/^===\s*(.+?)\s*===/)?.[1]; if (!id) continue;
   const cuerpo = bloque.split(/^---$/m)[1] || '';
   if (/\b(surco|sembr\w*|semillas? una|harina|al horno|amasa\w*|orde[ñn]\w*|el balde|aguja|hilv\w*)\b/i.test(cuerpo) && !/^se_hace_en:/m.test(bloque)) malas.push(`conversación ${id}: es con las manos (${cuerpo.match(/\b(surco|sembr\w*|semillas? una|harina|al horno|amasa\w*|orde[ñn]\w*|el balde|aguja|hilv\w*)\b/i)[0]}), y no dice dónde se hace («se_hace_en:»)`); }
+// an option that quotes what Ana says («-> «Perdón. Ahora mismo me visto.»») is what she says: her first line says it
+// (not something else, «se me olvidó…»): at least half of its words
+{ const palabras = t => new Set(t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').split(/[^a-zñ]+/).filter(w => w.length > 3));
+  const L = guion.split('\n');
+  L.forEach((l, i) => { const m = l.match(/^\s*->\*?\s*«(.+)»\s*$/); if (!m) return;
+    const sig = L.slice(i + 1, i + 6).find(x => /^\s+ana:/.test(x)); if (!sig) return;
+    const A = palabras(m[1]), B = palabras(sig.replace(/^\s*ana:\s*(\([^)]*\)\s*)?/, '')); if (A.size < 3) return;
+    const n = [...A].filter(w => B.has(w)).length; if (n / A.size < .5) malas.push(`opción «${m[1].slice(0, 60)}»: Ana dice otra cosa («${sig.trim().slice(5, 75)}…»)`); }); }
 // every letter Ana writes and every answer she gets is a scene of the script, with its conditions (the model reads them):
 // for each one she can write to (src/js/62-cartas.js, CORREO), at least one letter and one answer
 for (const k of [...leer('src/js/62-cartas.js').matchAll(/^  (\w+): \{ nombre:/gm)].map(m => m[1])) {

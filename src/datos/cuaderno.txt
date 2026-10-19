@@ -40,10 +40,12 @@ guiño matthew: Bueno, pues… Marilla es dura, pero tiene buen corazón. Pórta
 titulo: Conocer a Diana Barry
 pista: Quizás Marilla sepa de alguna niña de tu edad. Habla con ella.
 pista si hecho:quiere_amiga: Marilla dijo que un día de estos iría a La Cuesta del Huerto, donde viven los Barry… y que podrías ir con ella.
+pista si hecho:quiere_amiga, !presente:diana: Diana está en Carmody, donde su tía, y vuelve a las dos semanas y media de que llegaste a Tejas Verdes. Cuando vuelva, Marilla te lleva a conocerla (en la tarde: no te alejes).
+guiño marilla: [hecho:quiere_amiga, !presente:diana] Diana sigue en Carmody, donde su tía. Vuelve dentro de unos días; cuando llegue, te llevo a conocerla. Paciencia, Ana.
 meta: hecho conocidas_diana
 requiere: hecho:se_queda
 antes: quedarse en Tejas Verdes (después, quizás Marilla sepa de alguna niña de tu edad)
-guiño marilla: Los Barry tienen una niña de tu edad, Diana. Si me lo pidieras, quizás un día te llevaría a conocerla.
+guiño marilla: [!hecho:pide_amiga] Los Barry tienen una niña de tu edad, Diana. Si me lo pidieras, quizás un día te llevaría a conocerla.
 
 === amigas ===
 titulo: Tener una amiga del alma
