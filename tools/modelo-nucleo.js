@@ -78,11 +78,12 @@
       if (!l || l.startsWith('#')) continue;
       let m = /^===\s*(espera|nunca|referencia|solo|laguna):\s*(.+?)\s*===$/u.exec(l);
       if (m) { r = { nombre: m[2] }; out[m[1]].push(r); continue; }
-      m = /^(quiénes|cuando|hay|si|palabras|exige|salvo|pide|de):\s*(.*)$/u.exec(l);
+      if (l.startsWith('===')) { r = null; continue; }
+      m = /^(quiénes|cuando|hay|si|palabras|exige|salvo|pide|de|mínimo):\s*(.*)$/u.exec(l);
       if (r !== null && m) {
         const [, k, v] = m;
         if (k === 'exige') (r.exige = r.exige || []).push(comas(v));   // (several lines: one or the other)
-        else r[k] = k === 'palabras' ? v.split('|').map(x => x.trim()) : k === 'hay' || k === 'de' ? v : comas(v);
+        else r[k] = k === 'palabras' ? v.split('|').map(x => x.trim()) : k === 'hay' || k === 'de' ? v : k === 'mínimo' ? parseInt(v, 10) : comas(v);
       }
     }
     return out;
@@ -521,6 +522,25 @@
             let hay = null;
             for (const [k, us] of UNIDADES) { for (const u of us) if (u.conds.some(toma) && !(ESCENA.has(u.tipo) && jugada(u)) && await puede(u, k)) { hay = u; break; } if (hay) break; }
             if (!hay) out.push({ regla: r.nombre, de: 'decisiones', hecho: x, dia: H[x], ...DECIDE.get(x) });
+          }
+        } else if (r.de === 'pocas') {   // lo que se gasta: quedan menos de «mínimo» cosas de este tipo con cada uno
+          // (lo que puede darse estos días, de hoy a pasado mañana: lo que la jugadora encuentra si busca; conversaciones y
+          // escenas, las que todavía no pasaron; frases, las distintas, porque se repiten: pocas son la misma rueda)
+          const TIPOS = { 'conversación': u => u.tipo === 'conversación', escena: u => ESCENA.has(u.tipo), frase: u => u.tipo.startsWith('frase') || u.tipo === 'dicho' || u.tipo === 'guiño del cuaderno' };
+          const es = TIPOS[r.hay], min = r['mínimo'] || 1, frases = r.hay === 'frase';
+          if (!es) continue;
+          for (const k of grupo(r['quiénes'] || ['todos']).filter(x => conocidos.includes(x)).sort()) {
+            const S = nuevo(); for (const x of [...P, presente(k)]) S.add(x); const aqui = await S.check() === 'sat'; S.release(); if (!aqui) continue;
+            // (estos días: lo que Ana es ahora se mueve poco, de a 1, y no conoce de golpe a quien todavía no conoce)
+            const Q = partida.cualidades || {}, pronto = [dia.le(hoy + 2), ...[...V.keys()].filter(n => n.startsWith('q_') && has(Q, n.slice(2))).map(n => And([V.get(n).ge(Q[n.slice(2)] - 1), V.get(n).le(Q[n.slice(2)] + 1)])),
+              ...[...gente.keys()].filter(x => !conocidos.includes(x) && !SIN_NOMBRE.has(x) && !CONOCE_BASE.has(x)).map(x => Not(conoce(x)))];
+            let n = 0; const vistos = new Set();
+            for (const u of UNIDADES.get(k) || []) {
+              if (!es(u) || vistos.has(u.texto) || (!frases && jugada(u))) continue;
+              const T = nuevo(); for (const x of [...P, ...pronto, vale(u, k)]) T.add(x); const ok = await T.check() === 'sat'; T.release();
+              if (ok) { vistos.add(u.texto); if (++n >= min) break; }
+            }
+            if (n < min) out.push({ regla: r.nombre, de: 'pocas', quien: k, nombre: nombre(k), hay: r.hay, quedan: n, minimo: min });
           }
         } else if (r.de === 'conocidos') {   // con quien Ana conoce: queda alguna escena o conversación que todavía puede darse
           for (const k of conocidos.sort()) {

@@ -266,6 +266,7 @@ def reglas_leer(txt):
         m = re.match(r'^===\s*(espera|nunca|referencia|solo):\s*(.+?)\s*===$', l)
         if m:
             r = {'nombre': m.group(2)}; out[m.group(1)].append(r); continue
+        if l.startswith('==='): r = None; continue   # (another kind of rule: not this model's, its fields are not the previous rule's)
         m = re.match(r'^(quiénes|cuando|hay|si|palabras|exige|salvo|pide):\s*(.*)$', l)
         if r is not None and m:
             k, v = m.groups()

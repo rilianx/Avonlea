@@ -79,6 +79,7 @@ function nocheReglasLeer(txt){
   for (const raw of txt.split('\n')) {
     const l = raw.trim(); if (!l || l[0] === '#') continue; let m;
     if ((m = l.match(/^===\s*(espera|nunca|referencia|solo):\s*(.+?)\s*===$/))) { r = { nombre: m[2] }; out[m[1]].push(r); continue; }
+    if (l.startsWith('===')) { r = null; continue; }   // (another kind: «laguna:», for the model)
     if (r && (m = l.match(/^(quiénes|cuando|hay|si|palabras|exige|salvo|pide):\s*(.*)$/))) { const [, k, v] = m; if (k === 'exige') (r.exige ||= []).push(comas(v)); else r[k] = k === 'palabras' ? v.split('|').map(x => x.trim()) : k === 'hay' ? v : comas(v); }
   }
   return out;
@@ -174,11 +175,20 @@ const nocheLagunasPoner = L => { NOCHE_LAGUNAS = L; };
 function nochePartida(){
   const P = game.wm?.perm || {};
   return { dia: today() + 1, hechos: { ...dlgHechos() }, metas: Object.fromEntries(Object.entries(P).filter(([k]) => k.startsWith('cuaderno:')).map(([k, d]) => [k.slice(9), d])),
-    conoce: [...nocheVocab().personas].filter(k => conoceA(k)), dichas: Object.keys(dlgDichas()) };
+    conoce: [...nocheVocab().personas].filter(k => conoceA(k)), dichas: Object.keys(dlgDichas()), cualidades: nocheCualidades() };
+}
+// the qualities as they are now, named as the model names them (nombre_dueño[_hacia]): its «estos días» starts from here
+function nocheCualidades(){
+  const Q = {};
+  for (const k of [...nocheVocab().personas].filter(k => conoceA(k))) Q['afecto_' + k + '_ana'] = Math.round(relGetW(k, 'ana'));
+  for (const q of Object.keys(CUALIDAD_DEF)) Q[q + '_ana'] = cualidad('ana', q);
+  for (const [dueño, N] of Object.entries(game.wm?.num || {})) for (const [c, v] of Object.entries(N)) { const [n, h] = c.split('>'); Q[[n, dueño, h].filter(Boolean).join('_')] = v; }
+  return Q;
 }
 function nocheLagunasTexto(){
   return (NOCHE_LAGUNAS || []).map(l => l.de === 'decisiones'
     ? `- Ana eligió «${l.opcion}» (día ${l.dia}), y nada de lo que todavía puede pasar lo toma en cuenta: algo que lo recuerde o le dé consecuencias (que pida «hecho:${l.hecho}»).`
+    : l.de === 'pocas' ? `- Ana quiere ${l.hay === 'frase' ? 'oír cosas nuevas de' : 'conversar con'} ${l.nombre} (${l.quien}), y estos días ${l.quedan ? 'solo ' + (l.quedan === 1 ? 'queda 1' : 'quedan ' + l.quedan) : 'no queda ninguna'} ${l.hay === 'frase' ? 'frase distinta (repite siempre lo mismo)' : l.hay === 'escena' ? 'escena' : 'conversación'}: ${l.hay === 'frase' ? 'líneas nuevas para ' + l.quien + ' (dichos)' : l.hay === 'escena' ? 'una escena nueva con ' + l.quien : 'una conversación nueva con ' + l.quien + ' (que pueda darse ya)'}.`
     : `- Con ${l.nombre} (${l.quien}) ya no queda ninguna escena ni conversación por pasar: algo nuevo entre ${l.quien} y Ana.`).join('\n');
 }
 // each one Ana knows: how fond of her, and the last things that happened between them (from the journal)
@@ -213,6 +223,13 @@ function nocheSistema(nivel){
   return `Eres quien escribe, de noche, cosas nuevas para «Un día en Avonlea», un juego tranquilo inspirado en «Ana de las Tejas Verdes» (L. M. Montgomery): Avonlea, un pueblito de granjas de la Isla del Príncipe Eduardo, hacia 1880. Ana Shirley tiene 11 años, es pelirroja, huérfana, soñadora, conversadora, de palabras grandiosas e imaginación desbordante; vive con Marilla y Matthew Cuthbert en Tejas Verdes. El tono es el del libro: tierno, con humor, sin nada moderno. Español; en la familia se tutea a Ana; Ana trata de usted a los grandes.
 
 Mientras Ana duerme, escribes como mucho ${NOCHE_MAX} bloques NUEVOS para ESTA partida, pensados para cómo está cada personaje con Ana, para lo que a quien juega le interesa (el perfil) y para lo que quedó abierto (lo que le falta a la partida, si viene: primero eso; los cabos sueltos; las situaciones abiertas). Cada bloque se escribe en el formato de los archivos de datos del juego, y el juego lo revisa con las mismas reglas que lo escrito a mano: lo que no las cumple se descarta. Mejor pocos y buenos. Si la partida trae «LO QUE LE FALTA A ESTA PARTIDA», al menos uno de tus bloques llena una de esas faltas (pidiendo en su «si:» el hecho que se indica, o con la persona que se nombra).
+
+LO QUE IMPORTA (el juego quiere escenas con contenido, no relleno):
+- Cada bloque muestra algo que cambia o se revela: una relación que se acerca o se tensa, una decisión que pesa, algo que Ana aprende, pierde o se atreve a decir. Si nada cambia, no vale la pena escribirlo.
+- Que nazca de los temas del libro: pertenecer a una familia después de no haber tenido ninguna; la imaginación frente a las costumbres; el orgullo y el perdón; la amistad del alma; crecer sin dejar de ser una misma.
+- Que use lo concreto de ESTA partida: lo que Ana eligió, dijo o escribió, con quién, y qué quedó sin resolver. Nada de cosas que podrían pasar en cualquier partida.
+- Nada de relleno: saludos, el clima, comentarios sueltos, charla que no lleva a nada.
+- Las opciones son decisiones de verdad: cada una lleva a algo propio (otra respuesta de la otra persona, otro efecto), no la misma cosa dicha de dos maneras.
 
 NIVEL: ${nivel}. Tipos permitidos: ${tipos.join(', ')}.
 ${n === 1 ? '- Solo palabras: ningún efecto (nada de «al_empezar:», «al_terminar:» ni líneas «! …»; las opciones «->», sin «! …»).' : ''}${n >= 2 ? `- Efectos permitidos: «hecho x» (solo hechos que ya existen en el juego, y pidiendo en «si:» lo que suponen), «suma <cualidad>:<dueño>[:<hacia>] n» con n = 1 o -1 (p. ej. «suma afecto:lynde:ana 1»), «cosa <quien> <cosa> n» (n de 1 a 3), «saber <quien> <noticia>», y para mover a la gente en escena: «sentar», «levantar», «junto», «log texto».` : ''}${n >= 3 ? '\n- Libre: además, hechos NUEVOS, todos con prefijo «ia_» («hecho ia_algo», «olvidar ia_algo»), y cadenas de escenas propias («si: hecho:ia_algo», «dicha:ia_otra»).' : n === 2 ? '\n- Nada de hechos nuevos (ni «ia_…»).' : ''}
@@ -578,6 +595,10 @@ function nocheRevisar(b, ctx){
     const falta = (V.supone[x] || []).filter(y => !nocheImplica(S, y));
     if (falta.length) M.push(`deja «${x}», y no pide lo que ese hecho supone: ${falta.join(', ')}`);
   }
+  // choices that are choices: in a scene or a conversation, each option leads somewhere of its own (its effects, or what
+  // the other one answers), not the same thing said twice (the player wants scenes that matter)
+  { const ops = L.filter(l => l[0] === '?').flatMap(l => l[2] || []), huella = o => JSON.stringify([(o.efectos || []).map(a => JSON.stringify(a)).sort(), (o.lineas || []).filter(l => l[0] !== 'ana' && l[0] !== '!').map(l => l[1])]);
+    if (ops.length > 1 && new Set(ops.map(huella)).size < ops.length) M.push('hay opciones que llevan a lo mismo (los mismos efectos y nadie responde distinto): cada opción tiene que llevar a algo propio, o la escena va sin opciones'); }
   // the milestones: one at a time, ready for it and with chances left; the answers, all offered, for the player to choose
   const hs2 = new Set([...(out.hitos || []), ...(c.hito ? [String(c.hito)] : []), ...Object.keys(respuestasOfrecidas)]);
   if (hs2.size > 1) M.push('una escena trae una sola situación');

@@ -34,7 +34,7 @@ if (require.main === module) (async () => {
   if (i > 0) {
     const r = await lagunas(JSON.parse(fs.readFileSync(path.resolve(process.argv[i + 1]), 'utf8')));
     fs.writeFileSync(path.join(RAIZ, 'trazas/lagunas.json'), JSON.stringify(r.lagunas, null, 1));
-    for (const l of r.lagunas) console.log('-', l.de === 'decisiones' ? `${l.hecho} (en ${l.escena}: «${l.opcion}»): nada lo toma en cuenta` : `${l.nombre}: no queda ninguna escena`);
+    for (const l of r.lagunas) console.log('-', l.de === 'decisiones' ? `${l.hecho} (en ${l.escena}: «${l.opcion}»): nada lo toma en cuenta` : l.de === 'pocas' ? `${l.nombre}: ${l.quedan} ${l.hay}(es) estos días (menos de ${l.minimo})` : `${l.nombre}: no queda ninguna escena`);
     console.log(r.resumen); process.exit(0);
   }
 

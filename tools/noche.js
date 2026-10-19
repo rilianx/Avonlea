@@ -196,7 +196,7 @@ async function openai(cuerpos){
     '| Ronda | # | Tipo | Bloque | Navegador | Grafo y modelo (Node) | Queda | Reparado | Motivos | Esperado |', '|---|---|---|---|---|---|---|---|---|---|',
     ...filas.map(f => `| ${f.ronda} | ${f.n} | ${f.tipo} | \`${md(f.id)}\` | ${f.navegador} | ${f.node} | **${f.resultado}** | ${md(f.reparado.join(' · ') || '—')} | ${md(f.motivos.map(m => corto(m, 220)).join(' · ') || '—')} | ${f.esperado ? (f.esperado === f.resultado ? '✔ ' : '✘ ') + f.esperado : ''} |`), '',
     ...(nota2 ? [`_(${nota2})_`, ''] : [])];
-  { const k = l => l.de + ':' + (l.hecho || l.quien), txt = l => l.de === 'decisiones' ? `Ana eligió «${l.opcion}» (\`${l.hecho}\`, en \`${l.escena}\`): nada de lo que todavía puede pasar lo toma en cuenta` : `${l.nombre}: no queda ninguna escena ni conversación`;
+  { const k = l => l.de + ':' + (l.hecho || l.quien) + ':' + (l.hay || ''), txt = l => l.de === 'decisiones' ? `Ana eligió «${l.opcion}» (\`${l.hecho}\`, en \`${l.escena}\`): nada de lo que todavía puede pasar lo toma en cuenta` : l.de === 'pocas' ? `${l.nombre}: ${l.quedan} ${l.hay}(es) estos días (menos de ${l.minimo})` : `${l.nombre}: no queda ninguna escena ni conversación`;
     const despues = C?.lagunasCon?.lagunas ? new Set(C.lagunasCon.lagunas.map(k)) : null;
     L.push('## Lo que le faltaba a la partida (Z3)', '', !lag ? '_(sin el modelo: no se buscaron)_' : lag.error ? `_(no se pudo: ${lag.error})_` : `${lag.resumen}${despues ? ` · con los aceptados: ${C.lagunasCon.resumen}` : ''}`, '',
       ...(lag?.lagunas || []).map(l => `- ${despues ? (despues.has(k(l)) ? '· ' : '✓ ') : ''}${txt(l)}`), ...(despues ? ['', '(✓ lo llenó un bloque aceptado · · sigue faltando)'] : []), ''); }

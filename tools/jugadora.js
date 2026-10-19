@@ -83,7 +83,7 @@ let azar = SEMILLA; const rnd = () => (azar = (azar * 16807) % 2147483647) / 214
   const dir = path.join(RAIZ, 'tools/noche/partidas'), out = path.join(RAIZ, 'trazas/jugadora');
   fs.mkdirSync(dir, { recursive: true }); fs.mkdirSync(out, { recursive: true });
   fs.writeFileSync(path.join(dir, ESTILO + '.json'), fin.guardada);
-  const txt = l => l.de === 'decisiones' ? `Ana eligió «${l.opcion}» (\`${l.hecho}\`, día ${l.dia}): nada de lo que puede pasar lo toma en cuenta` : `${l.nombre}: no queda ninguna escena`;
+  const txt = l => l.de === 'decisiones' ? `Ana eligió «${l.opcion}» (\`${l.hecho}\`, día ${l.dia}): nada de lo que puede pasar lo toma en cuenta` : l.de === 'pocas' ? `${l.nombre}: ${l.quedan} ${l.hay}(es) estos días (menos de ${l.minimo})` : `${l.nombre}: no queda ninguna escena`;
   const md = [`# La jugadora ${ESTILO}: ${fin.partida.dia - 1} días`, '', `Lo genera \`node tools/jugadora.js ${ESTILO} --dias ${DIAS} --semilla ${SEMILLA}\`. La partida quedó en \`tools/noche/partidas/${ESTILO}.json\` (para \`tools/noche.js --escenario\`).`, '',
     errs.length ? '**Errores:** ' + errs.join(' · ') : '**Sin errores del juego.**', '', '## Los hitos', '', '```', fin.hitos, '```', '', '## Las cartas', '', fin.cartas.join(' · ') || '(ninguna)', '',
     '## Día a día', '', ...dias.flatMap(d => [`### Día ${d.dia}`, '', `- fue a: ${d.lugares.join(', ') || '—'}`, `- conversó: ${d.conversaciones.join(', ') || '—'}`, ...(d.cartas.length ? [`- cartas: ${d.cartas.join(', ')}`] : []),
