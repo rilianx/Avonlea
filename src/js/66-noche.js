@@ -8,7 +8,7 @@
    full model (Z3) in Node. ---------- */
 const NOCHE_NIVELES = { apagado: 'Apagado', palabras: 'Palabras (solo lo que dicen)', efectos: 'Con efectos (hechos que ya existen, cariño, cosas)', libre: 'Libre (también hechos y escenas propias)' };
 const NOCHE_N = { apagado: 0, palabras: 1, efectos: 2, libre: 3 };
-const NOCHE_MODELO = 'gpt-5.4-mini', NOCHE_MAX = 4, NOCHE_OLVIDO = .9, NOCHE_LINEAS = 4;   // (NOCHE_LINEAS: the least a scene or a conversation has, said by someone)   // (the profile: what she did a week ago weighs half)
+const NOCHE_MODELO = 'gpt-5.4-mini', NOCHE_TEMAS = 2, NOCHE_MAX = 4, NOCHE_OLVIDO = .9, NOCHE_LINEAS = 4;   // (NOCHE_LINEAS: the least a scene or a conversation has, said by someone)   // (the profile: what she did a week ago weighs half)
 const NOCHE_URL = 'https://api.openai.com/v1/chat/completions';
 // the settings, in this browser only (never in the game's save, nor in the repository: the key is the player's)
 const NOCHE_AJ = (() => { const d = { nivel: 'apagado', clave: '', modelo: NOCHE_MODELO }; try { return { ...d, ...JSON.parse(localStorage.getItem('avonlea-noche') || '{}') }; } catch (e) { return d; } })();
@@ -111,6 +111,15 @@ function nochePerfil(){
   for (const [k, v] of Object.entries(game.noche?.visitas || {})) suma(P.lugares, k, v.n * peso(v.d));
   const top = o => Object.entries(o).sort((a, b) => b[1] - a[1]).slice(0, 6);
   return { personas: top(P.personas), actividades: top(P.actividades), lugares: top(P.lugares) };
+}
+// what she talks about: the topics she chose (the last ones first, with whom and when) and the ones she let pass (offered
+// in the menu on NOCHE_DEJA days or more, never chosen): the way new topics should go, and the way they should not
+const NOCHE_DEJA = 3;
+function nocheTemas(){
+  const E = (game.wm || game).temasElegidos || CONVERSACIONES.filter(d => d.dicha()).map(d => ({ con: d.con, tema: d.tema }));   // (a game saved before: the ones had, without their day)
+  const elegidos = E.slice(-8).reverse().map(e => `${wmName(e.con)}: «${e.tema}»${e.d ? ` (día ${e.d})` : ''}`);
+  const V = (game.wm || game).temasVistos || {}, dejados = CONVERSACIONES.filter(d => (V[d.id]?.n || 0) >= NOCHE_DEJA && !d.dicha()).slice(0, 6).map(d => `${wmName(d.con)}: «${d.tema}»`);
+  return { elegidos, dejados };
 }
 // (where she goes, counted once a day per place; only while the night is on: «apagado» changes nothing)
 let nocheT = 0;
@@ -238,6 +247,7 @@ LO QUE IMPORTA (el juego quiere escenas con contenido, no relleno):
 - Que use lo concreto de ESTA partida: lo que Ana eligió, dijo o escribió, con quién, y qué quedó sin resolver. Nada de cosas que podrían pasar en cualquier partida.
 - Nada de relleno: saludos, el clima, comentarios sueltos, charla que no lleva a nada.
 - Nada de frases sueltas: si alguien dice algo, es una escena (o una conversación) corta: dónde, quién está, qué lo provoca, y qué responde o hace Ana. Al menos ${NOCHE_LINEAS} líneas, con un ida y vuelta; una frase sola no es una escena.
+- Temas nuevos, sin esperar a que se acaben: al menos ${NOCHE_TEMAS} de tus bloques son conversaciones NUEVAS con las personas que más busca (el perfil), en la dirección de lo que le interesa (lo que elige cuando conversa, sus actividades, sus lugares), aunque esas personas todavía tengan temas. Lo que deja pasar, no lo insistas. Un tema nuevo sigue a uno que eligió: lo que vino después, lo que quedó por decir, lo que la otra persona se atreve a contar ahora.
 - Las opciones son decisiones de verdad: cada una lleva a algo propio (otra respuesta de la otra persona, otro efecto), no la misma cosa dicha de dos maneras.
 
 NIVEL: ${nivel}. Tipos permitidos: ${tipos.join(', ')}.
@@ -347,6 +357,8 @@ EL PERFIL (lo que a quien juega le interesa, con lo de los últimos días pesand
 Personas: ${f(P.personas)}
 Actividades: ${f(P.actividades)}
 Lugares: ${f(P.lugares)}
+${(T => `Lo que elige cuando conversa: ${T.elegidos.join(' · ') || '(nada todavía)'}
+Lo que deja pasar (se lo ofrecieron y nunca lo eligió): ${T.dejados.join(' · ') || '(nada)'}`)(nocheTemas())}
 
 LOS CABOS SUELTOS
 ${nocheCabos().map(c => '- ' + c.texto).join('\n') || '(ninguno)'}

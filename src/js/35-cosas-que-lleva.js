@@ -70,7 +70,9 @@ function talk(who, again = false){
 // behind «Hablar de otra cosa…» (none hidden: what is not shown, the player cannot choose); volver: back to the menu
 const CONV_MENU = 4;
 const convOpciones = (who, volver = () => talk(who, true)) => {
-  const C = convDisponibles(who), op = d => ['💬 ' + d.tema, () => { close(); conversar(d); }], n = C.length > CONV_MENU ? CONV_MENU - 1 : CONV_MENU;
+  const C = convDisponibles(who), V = (game.wm || game).temasVistos ||= {}, n = C.length > CONV_MENU ? CONV_MENU - 1 : CONV_MENU;
+  for (const d of C.slice(0, n)) { const v = V[d.id] ||= { n: 0, d: 0 }; if (v.d !== today() + 1) { v.n++; v.d = today() + 1; } }   // (in sight in the menu, one day more: what she lets pass, the night reads it, src/js/66-noche.js)
+  const op = d => [(d.ia && (V[d.id]?.n || 0) <= 1 ? '✨ ' : '💬 ') + d.tema, () => { close(); conversar(d); }];   // (✨: new, written last night, the first day it is offered)
   return [...C.slice(0, n).map(op), ...(C.length > n ? [['💬 Hablar de otra cosa… (' + (C.length - n) + ')', () => say(who, dicho('hablar_de_que'), [...C.slice(n).map(op), ['← Volver', volver]])]] : [])];
 };
 // closing the menu is not leaving: «Adiós» only when it is really a goodbye

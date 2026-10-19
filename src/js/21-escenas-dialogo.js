@@ -427,7 +427,7 @@ function comentar(m, quien){
   if (q === 'ana') anaSays(c.t); else sayB(talkQ(q), c.t);
   return true;
 }
-const convDisponibles = k => !dlgHechos().desayuno_prueba ? [] : CONVERSACIONES.filter(d => d.con === k && !d.dicha() && game.convDejada?.[d.id] !== today() && dlgCumple(d, dlgCtx())).sort((a, b) => b.peso - a.peso);   // (one they set out to have somewhere and left halfway, not again today)
+const convDisponibles = k => !dlgHechos().desayuno_prueba ? [] : CONVERSACIONES.filter(d => d.con === k && !d.dicha() && game.convDejada?.[d.id] !== today() && dlgCumple(d, dlgCtx())).sort((a, b) => !!b.ia - !!a.ia || b.peso - a.peso);   // (one they set out to have somewhere and left halfway, not again today)
 // a conversation done with the hands is had where it is done («se_hace_en: huertito, huerta»: the first of those places
 // there is; a place outdoors, or a room: «gg», the kitchen of Green Gables): if they are elsewhere, they go there
 // together first (Ana, and whoever it is with), and it begins when both have arrived (not sowing in the kitchen, nor
@@ -458,6 +458,7 @@ function conversar(d){   // a conversation, now: said in its own channel, holdin
   const s = convSitio(d); if (s && !convEnSitio(d, s)) return convIr(d, s);
   for (const t of TALKS.filter(t => t.ch === 'conv')) talkEnd(t);
   logEv('Ana conversó con ' + wmName(d.con) + ': ' + d.tema.replace(/^./, c => c.toLowerCase()) + '.', []);
+  const E = (game.wm || game).temasElegidos ||= []; E.push({ id: d.id, con: d.con, tema: d.tema, d: today() + 1 }); if (E.length > 40) E.shift();   // (what she chose to talk about: the night writes the next topics that way)
   return d.decir();
 }
 // the talk of the road, as self-contained scenes: each one a whole topic, with its beginning and its end (they can

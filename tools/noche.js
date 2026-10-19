@@ -192,10 +192,11 @@ async function openai(cuerpos){
     return { ronda: k + 1, n: i + 1, tipo: x.tipo, id, navegador: w.aceptado ? 'aceptado' : 'rechazado', node: !w.aceptado ? '—' : C ? (C.error ? '¿?' : nodo.length ? 'rechazado' : 'aceptado') : 'sin correr', resultado: res, reparado: w.reparado || [], motivos: [...w.motivos, ...nodo], porque: x.porque || '', esperado: x.esperado || null, texto: String(x.texto || ''), textoFinal: w.texto };
   }));
   const mal = filas.filter(f => f.esperado && f.esperado !== f.resultado);
+  const temas = filas.filter(f => f.resultado === 'aceptado' && f.tipo === 'conversacion').length;   // (new topics, without waiting for them to run out: at least NOCHE_TEMAS a night)
   const L = [`# La IA de la noche: lo que propuso y lo que quedó`, '', `Escenario: **${E?.titulo || ESCENARIO}** · nivel **${NIVEL}** · modelo ${pedido.modelo} · respuesta: ${fuente}`, '',
     '| Ronda | # | Tipo | Bloque | Navegador | Grafo y modelo (Node) | Queda | Reparado | Motivos | Esperado |', '|---|---|---|---|---|---|---|---|---|---|',
     ...filas.map(f => `| ${f.ronda} | ${f.n} | ${f.tipo} | \`${md(f.id)}\` | ${f.navegador} | ${f.node} | **${f.resultado}** | ${md(f.reparado.join(' · ') || '—')} | ${md(f.motivos.map(m => corto(m, 220)).join(' · ') || '—')} | ${f.esperado ? (f.esperado === f.resultado ? '✔ ' : '✘ ') + f.esperado : ''} |`), '',
-    ...(nota2 ? [`_(${nota2})_`, ''] : [])];
+    ...(nota2 ? [`_(${nota2})_`, ''] : []), `Temas nuevos (conversaciones aceptadas): **${temas}** (se piden al menos 2 cada noche)`, ''];
   { const k = l => l.de + ':' + (l.hecho || l.quien) + ':' + (l.hay || ''), txt = l => l.de === 'decisiones' ? `Ana eligió «${l.opcion}» (\`${l.hecho}\`, en \`${l.escena}\`): nada de lo que todavía puede pasar lo toma en cuenta` : l.de === 'pocas' ? `${l.nombre}: ${l.quedan} ${l.hay}(es) estos días (menos de ${l.minimo})` : `${l.nombre}: no queda ninguna escena ni conversación`;
     const despues = C?.lagunasCon?.lagunas ? new Set(C.lagunasCon.lagunas.map(k)) : null, ahora = new Map((C?.lagunasCon?.lagunas || []).map(l => [k(l), l]));
     L.push('## Lo que le faltaba a la partida (Z3)', '', !lag ? '_(sin el modelo: no se buscaron)_' : lag.error ? `_(no se pudo: ${lag.error})_` : `${lag.resumen}${despues ? ` · con los aceptados: ${C.lagunasCon.resumen}` : ''}`, '',
