@@ -64,8 +64,12 @@ function talk(who, again = false){
   opts.push(...convOpciones(who), ...walkOption(who), [cierre(who), close]);
   say(who, text, opts);
 }
-// the conversations there are with them today (src/datos/conversaciones.txt): at most two in the menu
-const convOpciones = who => convDisponibles(who).slice(0, 2).map(d => ['💬 ' + d.tema, () => { close(); conversar(d); }]);
+// the conversations there are with them today (src/datos/conversaciones.txt): two in the menu, and the rest behind
+// «Hablar de otra cosa…» (none hidden: what is not shown, the player cannot choose)
+const convOpciones = who => {
+  const C = convDisponibles(who), op = d => ['💬 ' + d.tema, () => { close(); conversar(d); }];
+  return [...C.slice(0, 2).map(op), ...(C.length > 2 ? [['💬 Hablar de otra cosa… (' + (C.length - 2) + ')', () => say(who, dicho('hablar_de_que'), [...C.slice(2).map(op), ['← Volver', () => talk(who, true)]])]] : [])];
+};
 // closing the menu is not leaving: «Adiós» only when it is really a goodbye
 const cierre = who => 'Nada por ahora';
 function face(who){

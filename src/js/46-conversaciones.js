@@ -128,7 +128,7 @@ function ambUpdate(dt){
   if (!best) return;
   { const L = bd < 90 && cadenaEncuentro(best); if (L) { amb.mute[best] = TT + 110; amb.seen[best] = true; sceneStart({ parts: [best], lines: L, out: {}, scene: game.scene, resumen: '' }, false); return; } }   // (two who have not met: they meet, as in the book)
   if (best === 'diana' && !dianaAmiga()) return;   // (no friend's greeting from one she does not know yet)
-  { const C = bd < 90 && !reaccionAlVerla(best) && !activeGoals(AGENTS[best] || { goals: [] }).length && !activeGoals(AGENTS.ana).length && !ocupada(best) && !ocupada('ana') && Math.random() < .3 && convDisponibles(best).filter(d => !convSitio(d) || convEnSitio(d, convSitio(d)))[0]; if (C) { amb.mute[best] = TT + 110; amb.seen[best] = true; conversar(C); return; } }   // (now and then, one of the conversations there are with them, by itself)
+  { const C = ANA_AUTO && bd < 90 && !reaccionAlVerla(best) && !activeGoals(AGENTS[best] || { goals: [] }).length && !activeGoals(AGENTS.ana).length && !ocupada(best) && !ocupada('ana') && Math.random() < .3 && convDisponibles(best).filter(d => !convSitio(d) || convEnSitio(d, convSitio(d)))[0]; if (C) { amb.mute[best] = TT + 110; amb.seen[best] = true; conversar(C); return; } }   // (now and then, one of the conversations there are with them, by itself: only with Ana on her own, 🤖; otherwise what is in the menu, the player chooses)
   // what they see of her (in a nightgown, out at night, no hat), they say first, from where they see it (not only beside
   // her)
   { const ve = reaccionAlVerla(best); if (ve) { amb.mute[best] = TT + 110; amb.seen[best] = true; sceneStart({ parts: [best], lines: [{ q: best, t: ve }], out: {}, scene: game.scene, resumen: '', ve: true }, false); return; } }

@@ -162,6 +162,8 @@ function anaMenu(){
   if (retenida()) { notice('Ahora no: la están mirando, esperan lo que Ana diga.'); return; }
   const J = jugables(), mine = cartas().filter(c => c.para === 'ana' && c.estado === 'recibida').map(c => ['📜 Leer la carta de ' + CORREO[c.de].nombre, () => cartaLeer(c)]);
   for (const k of Object.keys(game.anaStates)) if (ANA_STATES[k].fix) mine.push([ANA_STATES[k].fix, () => { close(); setAnaState(k, false); }]);
+  // (in her nightgown at home: to dress, as Marilla asks; up to her room if she is not there, where her dress is)
+  if (game.wm?.camison && enCasa('ana') && hourNow() % 24 >= 5 && hourNow() % 24 < 20) mine.push(['👗 Vestirse', () => { close(); if (game.scene !== 'ga') goIn('ga', [GA.bed.x - 20, GA.bed.y + 16]); if (game.wm.ropaTirada) ropaPonerse(); else vestirse(); }]);
   if (game.inv.te > 0) mine.push(['☕ Tomar la taza de té', sipTea]);
   if (game.scene === 'out' && (S !== 3 || ana.lie)) mine.push([ana.lie ? 'Levantarse' : '🌿 Recostarme en el pasto', () => { close(); if (ana.lie) { ana.lie = false; return; } if (nearPath(ana.x, ana.y, 26)) return anaSays(dicho('pasto_camino')); if (underTree(ana.x, ana.y)) return anaSays(dicho('pasto_arbol')); ana.lie = true; ana.sit = false; ana.goto = null; ana.dir = 2; logEv('Ana se recostó en el pasto a mirar las nubes.'); }]);
   if (game.scene === 'out' && game.inv.semillas > 0 && !game.huertito) mine.push(['🌱 Hacer mi huertito aquí', hacerHuertito]);   // (where she wants it)

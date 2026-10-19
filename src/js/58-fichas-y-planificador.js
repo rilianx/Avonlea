@@ -346,7 +346,7 @@ function verbs(s, me, C){
   if (C.kind === 'alimentados' && (here === 'corral' || here === 'gallinero') && !s.facts['alimentados:' + here]) add('alimentar', 4, t => { t.facts['alimentados:' + here] = 1; }, { p: here });
   if (C.kind === 'recito' && (here === 'escuela' || here === 'h:es' || here === W.cocina) && !(s.know[me] || []).includes('leccion')) add('estudiar', 20, t => { t.know[me] = [...(t.know[me] || []), 'leccion']; });
   if (C.kind === 'recito' && (here === 'escuela' || here === 'h:es') && (s.know[me] || []).includes('leccion') && !s.facts['recito:' + me]) add('recitar', 3, t => { t.facts['recito:' + me] = 1; });
-  if (C.kind === 'rezo' && (here === W.cocina || here === 'iglesia') && !s.facts['rezo:' + me]) add('rezar', 3, t => { t.facts['rezo:' + me] = 1; });
+  if (C.kind === 'rezo' && (here === W.cocina || here === 'pieza' || here === 'iglesia') && !s.facts['rezo:' + me]) add('rezar', 3, t => { t.facts['rezo:' + me] = 1; });
   if (C.kind === 'adornado' && inv.ramo > 0 && !s.facts['adorno:' + me]) add('adornar', 2, t => { t.invs[me].ramo -= 1; t.facts['adorno:' + me] = 1; });
   if (C.kind === 'remo' && here === 'lago' && !s.facts['invierno'] && !s.facts['remo:' + me]) add('remar', 15, t => { t.facts['remo:' + me] = 1; });
   if (C.kind === 'nombres' && me === 'ana' && NOMBRES_ANA[here] && !s.facts['nombre:' + here]) add('nombrar', 2, t => { t.facts['nombre:' + here] = 1; }, { p: here });
