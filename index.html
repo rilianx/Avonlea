@@ -16537,6 +16537,12 @@ function nochePerfil(){
 // what she talks about: the topics she chose (the last ones first, with whom and when) and the ones she let pass (offered
 // in the menu on NOCHE_DEJA days or more, never chosen): the way new topics should go, and the way they should not
 const NOCHE_DEJA = 3;
+// a topic that is the same as one there is with that person (most of its words, the verb of asking aside)
+const nochePalabras = t => new Set(String(t).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').split(/[^a-zñ]+/).filter(w => w.length > 3 && !/^(pedirle|contarle|preguntarle|hablar|hablarle|decirle|mostrarle|ensenarle|sobre|como|cuando|porque|para|algo|todo|todas|todos|esta|este|ella|tiene|quiere)$/.test(w)).map(w => w.replace(/(es|s)$/, '')));
+function nocheTemaParecido(con, tema){
+  const A = nochePalabras(tema); if (!A.size) return null;
+  return CONVERSACIONES.find(d => d.con === con && d.tema && (B => { const n = [...A].filter(w => B.has(w)).length; return n && n / Math.min(A.size, B.size) >= .6; })(nochePalabras(d.tema))) || null;
+}
 function nocheTemas(){
   const E = (game.wm || game).temasElegidos || CONVERSACIONES.filter(d => d.dicha()).map(d => ({ con: d.con, tema: d.tema }));   // (a game saved before: the ones had, without their day)
   const elegidos = E.slice(-8).reverse().map(e => `${wmName(e.con)}: «${e.tema}»${e.d ? ` (día ${e.d})` : ''}`);
@@ -16669,7 +16675,7 @@ LO QUE IMPORTA (el juego quiere escenas con contenido, no relleno):
 - Que use lo concreto de ESTA partida: lo que Ana eligió, dijo o escribió, con quién, y qué quedó sin resolver. Nada de cosas que podrían pasar en cualquier partida.
 - Nada de relleno: saludos, el clima, comentarios sueltos, charla que no lleva a nada.
 - Nada de frases sueltas: si alguien dice algo, es una escena (o una conversación) corta: dónde, quién está, qué lo provoca, y qué responde o hace Ana. Al menos ${NOCHE_LINEAS} líneas, con un ida y vuelta; una frase sola no es una escena.
-- Temas nuevos, sin esperar a que se acaben: al menos ${NOCHE_TEMAS} de tus bloques son conversaciones NUEVAS con las personas que más busca (el perfil), en la dirección de lo que le interesa (lo que elige cuando conversa, sus actividades, sus lugares), aunque esas personas todavía tengan temas. Lo que deja pasar, no lo insistas. Un tema nuevo sigue a uno que eligió: lo que vino después, lo que quedó por decir, lo que la otra persona se atreve a contar ahora.
+- Temas nuevos, sin esperar a que se acaben: al menos ${NOCHE_TEMAS} de tus bloques son conversaciones NUEVAS con las personas que más busca (el perfil), en la dirección de lo que le interesa (lo que elige cuando conversa, sus actividades, sus lugares), aunque esas personas todavía tengan temas. Lo que deja pasar, no lo insistas. Un tema nuevo sigue a uno que eligió, sin repetirlo: no otra vez lo mismo («enseñarle a cocinar» de nuevo), sino lo que vino después, lo que quedó por decir, lo que la otra persona se atreve a contar ahora (si aprendió a cocinar con Marilla: la primera tarta que le sale bien, o la receta de la madre de Marilla). Y que pueda darse ya en esta partida: nada de pedir que no haya pasado algo que ya pasó.
 - Las opciones son decisiones de verdad: cada una lleva a algo propio (otra respuesta de la otra persona, otro efecto), no la misma cosa dicha de dos maneras.
 
 NIVEL: ${nivel}. Tipos permitidos: ${tipos.join(', ')}.
@@ -16983,6 +16989,11 @@ function nocheRevisar(b, ctx){
   if (!L.length) M.push('no tiene líneas (van después de «---»)');
   if (n >= 3) for (const m of texto.matchAll(/\bhecho\s+(ia_[a-z0-9_]+)/g)) ctx.iaHechos.add(m[1]);   // (its own «ia_» facts, in «libre»: undone below if it is rejected)
   const si = [].concat(c.si ?? []).filter(x => x != null && x !== '').map(String); conds(si);
+  // what is new is for this game: a condition that already cannot hold in it (it asks that something not have happened,
+  // and it did) leaves the block dead, never to be seen
+  for (const x of si) { const m = x.match(/^!(hecho|cuaderno|dicha):(.+)$/); if (!m) continue;
+    const ya = m[1] === 'hecho' ? dlgHechos()[m[2]] : m[1] === 'cuaderno' ? cuadernoHecho(m[2]) : dlgDichas()[m[2]];
+    if (ya != null && ya !== false) M.push(`«${x}»: eso ya pasó en esta partida${typeof ya === 'number' ? ' (día ' + ya + ')' : ''}: así nunca se daría`); }
   // who speaks
   const quienes = new Set(), ver = X => { for (const l of X || []) { if (l[0] === '?') for (const o of l[2] || []) { if (!o.texto) M.push('una opción sin texto'); ver(o.lineas); } else if (l[0] !== '!') { if (!String(l[1] || '').trim()) { M.push(`una línea sin «quien:» («${String(l[0]).slice(0, 50)}»): cada línea es «quien: texto»${tipo === 'respuesta' ? ' (en una carta, «carta: texto»)' : ''}`); continue; } quienes.add(String(l[0]).toLowerCase()); if (String(l[1]).length > 400) M.push('una línea demasiado larga'); } } };
   ver(L);
@@ -17001,6 +17012,7 @@ function nocheRevisar(b, ctx){
   if (tipo === 'conversacion') {
     if (!V.personas.has(c.con)) M.push(`«con: ${c.con || ''}»: no es nadie del juego`);
     if (!c.tema) M.push('falta el «tema:» (cómo aparece en el menú)');
+    else { const d = nocheTemaParecido(c.con, c.tema); if (d) M.push(`ya hay un tema así con ${c.con}: «${d.tema}»${d.dicha() ? ' (ya lo conversaron)' : ''}: un tema nuevo sigue a lo que vino después, no lo repite`); }
     for (const q of quienes) if (![c.con, 'ana', 'narra'].includes(q)) M.push(`en una conversación con ${c.con} solo hablan Ana y ${c.con} (no ${q})`);
   }
   if (tipo === 'escena') {

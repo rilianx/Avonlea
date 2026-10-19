@@ -1,0 +1,19 @@
+{
+ "_nota": "Lo que escribió gpt-5.4-mini (nivel efectos) para la partida de la jugadora curiosa (día 16), pidiendo temas nuevos: la de Marilla repite un tema que ya conversaron («Pedirle que le enseñe a cocinar») y pide «!hecho:se_queda», que ya pasó (nunca se daría): rechazada. La de Cecily es nueva y puede darse: aceptada. Uso: node tools/noche.js --respuesta tools/noche/ejemplos/temas.json",
+ "escenario": "tools/noche/partidas/curiosa.json",
+ "nivel": "efectos",
+ "bloques": [
+  {
+   "tipo": "conversacion",
+   "esperado": "rechazado",
+   "porque": "Repite un tema ya conversado, con una condición que ya no puede cumplirse.",
+   "texto": "=== ia_marilla_cocina ===\ncon: marilla\ntema: Pedirle que le enseñe a cocinar\nsi: conoce:marilla, !hecho:se_queda\nal_terminar: suma paciencia:marilla:ana 1\n---\nana: Señora Marilla, ¿querría enseñarme a cocinar? No le pido nada delicado, sino algo útil y sensato, para no ser una carga.\nmarilla: (Marilla la mira como si aquella pregunta fuera una novedad tan seria como una tormenta.) ¿Y qué te hace pensar que vas a ser una carga?\nana: Porque las niñas buenas siempre ayudan en la cocina. Yo sé estirar la imaginación, pero la masa no parece querer obedecerme.\nmarilla: La masa no obedece a nadie al principio. Hay que tratarla con firmeza y sin tanto parloteo.\nana: Entonces aprenderé, aunque se me pegue todo a los dedos.\nmarilla: Mañana. Vendrás temprano y pelarás papas."
+  },
+  {
+   "tipo": "conversacion",
+   "esperado": "aceptado",
+   "porque": "Un tema nuevo con alguien que Ana trató estos días.",
+   "texto": "=== ia_cecily_bosque ===\ncon: cecily\ntema: Hablar del arroyo\nsi: conoce:cecily\nal_terminar: suma afecto:cecily:ana 1\n---\nana: Cecily, ¿te gustaría ir al arroyo conmigo? Hay allí un sitio tan bonito que parece hecho para confiarle secretos.\ncecily: (Cecily junta las manos y sonríe, tímida.) Sí… si vamos despacio. A mí me gusta escuchar el agua.\nana: Yo también. El agua siempre me da la impresión de que sabe más de lo que dice.\ncecily: Eso me gusta. Cuando una cosa sabe más de lo que dice, una siente que podría confiarle un nombre.\nana: ¡Exactamente! Hay nombres que parecen venir del mismo corazón del lugar.\ncecily: Entonces el arroyo no sería solo un arroyo. Sería un sitio nuestro."
+  }
+ ]
+}
