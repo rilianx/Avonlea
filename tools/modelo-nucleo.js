@@ -217,6 +217,7 @@
       if (key === 'cuaderno') return And([B_('m_' + a[0]), I_('dm_' + a[0]).le(now)]);
       if (key === 'dia_juego') return now.ge(parseInt(a[0], 10));
       if (key === 'estacion') return now.sub(1).div(14).mod(4).eq(has(EST, a[0]) ? EST[a[0]] : -1);
+      if (key === 'domingo') return now.sub(1).mod(7).eq(6);
       if (key === 'dia_estacion') return now.sub(1).mod(14).add(1).eq(parseInt(a[0], 10));
       if (key === 'hora') {
         const [x, y] = a[0].split('-').map(Number);

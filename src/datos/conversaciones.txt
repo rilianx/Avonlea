@@ -184,10 +184,10 @@ ana: (Ana sube la escalera dando saltitos y no deja de sonreír hasta que se due
 
 === conv_matthew_flores ===
 con: matthew
-tema: Mostrarle las flores que encontró
+tema: Contarle de las violetas del camino
 si: afecto:matthew:ana>=2
 ---
-ana: ¡Matthew! Mire estas violetas. Las encontré a la orilla del camino. ¿No le parecen como pedacitos de cielo que se cayeron?
+ana: ¡Matthew! ¿Ha visto las violetas a la orilla del camino? ¿No le parecen como pedacitos de cielo que se cayeron?
 matthew: Bueno, pues… sí. Ahora que lo dices, sí.
 ana: Usted siempre me entiende. Es tan agradable hablar con alguien que entiende.
 matthew: (Matthew se pone colorado hasta las orejas, pero sonríe.)
@@ -229,10 +229,10 @@ matthew: (Matthew se rasca la barbilla y mira a Ana un buen rato, pensativo.) Hm
 
 === conv_matthew_defensa ===
 con: matthew
-tema: Contarle que Marilla la retó
+tema: Preguntarle si es una cabeza de chorlito
 si: afecto:matthew:ana>=3
 ---
-ana: Matthew, Marilla me retó otra vez. Dice que soy una cabeza de chorlito.
+ana: Matthew, ¿usted cree que soy una cabeza de chorlito? A veces Marilla me mira como si lo pensara, y se le escapa un suspiro.
 matthew: Bueno, pues… Marilla es muy buena, ¿sabes? Muy buena. Pero tú… tú haz lo que ella dice, y cuando no puedas, me lo cuentas a mí.
 ana: ¿Usted cree que algún día voy a ser como ella quiere?
 matthew: Yo creo que ya eres bastante buena así. Pero no le digas que te lo dije.
@@ -380,7 +380,7 @@ ana: Los nombres son lo más importante. Cordelia, Geraldine, Rosamunda…
 === conv_diana_gilbert ===
 con: diana
 tema: Hablar de Gilbert Blythe
-si: afecto:diana:ana>=3, hecho:zanahorias, !hecho:prohibida
+si: afecto:diana:ana>=3, hecho:zanahorias, !hecho:zanahorias_contesta, !hecho:prohibida
 ---
 diana: Ana… Gilbert Blythe es el muchacho más guapo de la escuela, ¿no te parece?
 ana: ¡Diana Barry! Gilbert Blythe es la persona más odiosa de toda la isla. Nunca, nunca le voy a hablar.
@@ -389,6 +389,25 @@ ana: Una broma imperdonable. Hay cosas que no se olvidan, Diana. Se llevan en el
 diana: (Diana suspira, pero no dice nada más.)
 ->* Cambiar de tema
    ana: Hablemos de otra cosa. De cualquier cosa que no tenga pelo castaño y sonrisa de presumido.
+   diana: (Diana se ríe.) Como quieras, Ana.
+
+=== conv_diana_gilbert_contesta ===
+con: diana
+tema: Hablar de lo que le contestó a Gilbert
+si: afecto:diana:ana>=3, hecho:zanahorias_contesta, !hecho:prohibida
+---
+diana: Ana… toda la escuela habla de lo que le dijiste a Gilbert. ¡Nadie le había contestado así nunca! Se puso más rojo que tu pelo.
+ana: Se lo merecía, Diana. Una no puede dejar que le digan zanahoria delante de todos y quedarse callada como un pez.
+diana: Pero él dijo «me lo merezco». Y después, en el recreo, te miraba. Yo creo que le gustaste, Ana.
+ana: (Ana se pone colorada hasta las orejas.) ¡Diana Barry! No digas esas cosas. Gilbert Blythe puede mirar todo lo que quiera: yo no pienso mirarlo nunca.
+diana: (Diana sonríe, pero no dice nada.)
+->* «Aunque… fue bastante caballero al reconocerlo.»
+   ana: Aunque… hay que admitir que fue bastante caballero al reconocerlo. Un muchacho cualquiera se habría enojado.
+   diana: ¿Ves? No es tan malo.
+   ana: No he dicho que no sea malo. He dicho que fue caballero. Una vez.
+   ! suma afecto:ana:gilbert 1
+-> «No quiero hablar más de Gilbert Blythe.»
+   ana: No quiero hablar más de Gilbert Blythe, Diana. Ni hoy ni nunca. Hablemos de algo que tenga poesía.
    diana: (Diana se ríe.) Como quieras, Ana.
 -> Admitir que tiene lindos ojos (solo un poquito)
    ana: Bueno… está bien. Tiene lindos ojos. Pero eso no cambia nada. ¡Nada!

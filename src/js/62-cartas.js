@@ -17,7 +17,7 @@ function cartaRespuesta(c){
   game.respAhora = c.para;
   const L = DIALOGOS.filter(d => d.canal === 'respuesta' && d.de === c.para && (!d.responde || d.responde === c.escena) && dlgCumple(d, dlgCtx()));
   game.respAhora = null;
-  const d = [...L].sort((a, b) => (!!b.responde - !!a.responde) || (a.dicha() - b.dicha()))[0];
+  const hechos = d => [].concat(d.si || []).filter(c => /^hecho:/.test(c)).length, d = [...L].sort((a, b) => (!!b.responde - !!a.responde) || (a.dicha() - b.dicha()) || (hechos(b) - hechos(a)))[0];   // (not said yet, and the one that answers what happened to her: the most particular)
   if (!d) return dicho('carta_respuesta', { firma: cap(CORREO[c.para].nombre) }).split(' / ');
   dlgDichas()[d.id] = true;
   return d.lineas().filter(l => l[0] === 'carta').map(l => l[1].replace('{estacion}', ESTACION_TXT[S]));
@@ -26,8 +26,9 @@ const ESTACION_TXT = ['los cerezos están en flor', 'el sol de verano madura las
 const cartas = () => game.cartas || (game.cartas = []);
 const YO = { 'fue': 'fui', 'recogió': 'recogí', 'cocinó': 'cociné', 'preparó': 'preparé', 'regó': 'regué', 'sembró': 'sembré', 'visitó': 'visité', 'patinó': 'patiné', 'remó': 'remé', 'leyó': 'leí', 'juró': 'juré', 'adornó': 'adorné', 'estudió': 'estudié', 'recitó': 'recité', 'decoró': 'decoré', 'lavó': 'lavé', 'barrió': 'barrí', 'puso': 'puse', 'cuidó': 'cuidé', 'consoló': 'consolé', 'felicitó': 'felicité', 'perdonó': 'perdoné', 'bautizó': 'bauticé', 'se tiró': 'me tiré', 'se tiñó': 'me teñí', 'le dio': 'le di', 'le regaló': 'le regalé', 'le devolvió': 'le devolví', 'ensayó': 'ensayé', 'se sentó': 'me senté' };
 function cartaNoticia(){   // something that really happened to her lately, told by her: «Hoy fui de picnic al lago con Diana.»
-  const J = (game.journal || []).slice().reverse().filter(e => e.d >= today() && /^Ana /.test(e.t) && !/carta|correo/.test(e.t));
-  for (const e of J) { const r = e.t.slice(4); for (const [a, b] of Object.entries(YO)) if (r.startsWith(a + ' ')) return 'Hoy ' + b + r.slice(a.length).replace(/\.$/, '') + '.'; }
+  const J = (game.journal || []).slice().reverse().filter(e => e.d >= today() && !/carta|correo/.test(e.t)), cuando = e => e.d === today() + 1 ? 'Hoy' : 'Ayer';   // (from yesterday: «ayer», not «hoy»)
+  const h = J.find(e => e.yo); if (h) return cuando(h) + ' ' + h.yo;   // (first what mattered: a milestone of the story, as she tells it)
+  for (const e of J.filter(e => /^Ana /.test(e.t))) { const r = e.t.slice(4); for (const [a, b] of Object.entries(YO)) if (r.startsWith(a + ' ')) return cuando(e) + ' ' + b + r.slice(a.length).replace(/\.$/, '') + '.'; }
   return null;
 }
 function cartaTexto(para){

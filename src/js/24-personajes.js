@@ -35,8 +35,9 @@ const CHARACTERS = {
   lynde: {
     spawn: [RLC.x + 30, RLC.y + 10], goals: [[RLC.x + 30, RLC.y + 10], [RLQ.x - 70, RLQ.y + 28], [6.4 * T, 7.4 * T]], wait: 3, speed: { walk: 46, room: 26 },
     home: 'rl',
-    routine: { want: (hr, day) => hr >= 13 && hr < 18 ? (day % 2 ? 'os' : 'gg') : 'rl', roomGoals: { gg: [[TABLE.x - 64, TABLE.y + 34]], os: [[TEA.x - 58, TEA.y + 34]], rl: null },
-      describe: "La Sra. Lynde se queda tejiendo en su casa hasta mediodía, y de 13 a 18 visita a Marilla (un día) o a la Sra. Barry (al otro) para tomar el té y ponerse al día con las novedades; después vuelve a su casa. Cuando están juntos, conversan entre ellos." },
+    routine: { want: (hr, day) => hr >= 14.5 && hr < 16.5 ? (day % 2 ? 'os' : game.wm && dlgHechos().inicio_juego && !dlgHechos().lynde_visita ? 'rl' : 'gg') : 'rl',   // (a visit has an end: tea, the news, and home; and not to Green Gables before she came to see the girl, cap. 9)
+      roomGoals: { gg: [[TABLE.x - 64, TABLE.y + 34]], os: [[TEA.x - 58, TEA.y + 34]], rl: null },
+      describe: "La Sra. Lynde se queda tejiendo en su casa hasta mediodía, y de 14:30 a 16:30 visita a Marilla (un día) o a la Sra. Barry (al otro) para tomar el té y ponerse al día con las novedades; después vuelve a su casa. Cuando están juntos, conversan entre ellos." },
   },
   harrison: {
     spawn: [HHR.table.x + 50, HHR.table.y + 30], goals: [[HHR.table.x + 50, HHR.table.y + 30], [HHR.stove.x + 50, HHR.stove.y + 40], [9 * T, 6.4 * T]], wait: 4, speed: { walk: 40, out: 28, room: 26 },

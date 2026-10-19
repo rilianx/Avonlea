@@ -88,12 +88,13 @@ const nombra = (t, k) => nombresDe(k).some(w => new RegExp('(^|[^\\wáéíóúñ
 function chisme(a, b){
   const callan = n => n.callan.includes(sinF(a)) && !n.callan.includes(sinF(b));   // (what shames their own house, they tell no one outside it)
   if (CALLADOS.includes(sinF(a)) && wmScene(a) !== wmScene(b)) return null;   // (the quiet ones tell only who is at home with them)
-  const puede = n => (isKid(sinF(a)) ? n.diceNinos : n.diceDe[sinF(a)] || n.dice).length && sabeK(a, n.id) && seCuenta(a, n) && !callan(n);   // (a child tells only what has a child's way of telling)
+  const sobreAna = n => n.alConocer || /\bAna\b|niña de los Cuthbert/.test(n.titulo), anaOye = veAna(a) || veAna(b);   // (what is said of Ana is not said where she hears it, as if she were not there)
+  const puede = n => (isKid(sinF(a)) ? n.diceNinos : n.diceDe[sinF(a)] || n.dice).length && sabeK(a, n.id) && seCuenta(a, n) && !callan(n) && !(anaOye && sobreAna(n));   // (a child tells only what has a child's way of telling)
   const nueva = NOTICIAS.find(n => puede(n) && !sabeK(b, n.id));
   const n = nueva || (Math.random() < .3 && pick(NOTICIAS.filter(n => puede(n) && sabeK(b, n.id))));
   if (!n) return null;
   const v = versionAlContar(a, n), antes = creencia(b, n.id)?.v || 0, dice = lineaVersion(a, n, v);
-  if (nombra(dice, b)) return null;   // (not «la niña de los Cuthbert» to Marilla Cuthbert)
+  if (nombra(dice, b) || nombra(dice, a)) return null;   // (not «la niña de los Cuthbert» to Marilla Cuthbert, nor by her)
   enterarse(b, n.id, a, v);
   const R = NOTICIAS_RESP, ajena = L => L.filter(t => !nombra(t, b) && !CHISMOSOS().some(x => x !== sinF(a) && nombra(t, x))), resp = ajena(v > Math.max(antes, 1) ? R.exageradas : nueva ? (n.responde.length ? n.responde : R.nuevas) : R.sabidas);   // (bigger than they had it: amazed)
   return Object.assign([[a, dice], [b, pick(resp.length ? resp : ajena(R.nuevas)) || dicho('noticia_respuesta')]], { f: n.id, v });

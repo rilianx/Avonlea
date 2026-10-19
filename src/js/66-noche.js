@@ -276,7 +276,7 @@ narra: <una tarjeta antes de las líneas, opcional>
    ! responde <reacción> (solo en una escena con «situacion:»: cómo reacciona Ana con esta opción)
 ` : ''}
 LAS CONDICIONES (en «si:» y entre corchetes; separadas por comas; «!» delante niega):
-hecho:x · dias_desde:x:n (pasaron n días desde x) · dicha:id (ya se dijo esa escena o conversación) · conoce:quien (Ana y esa persona se conocen) · presente:quien (está en Avonlea) · ve:quien (la ve ahora) · donde:quien:${NOCHE_DONDE.join('|')} · ana:${Object.keys(ANA_ESTADO).join('|')} · cuaderno:meta (cumplió esa meta: ${[...V.metas].join(', ')}) · afecto:quien:ana>=n (de 0 a 5; también <, <=, >) · <cualidad>:<dueño>>=n (cualidades: ${[...V.cualidades].join(', ')}) · sabe:quien:noticia (noticias: ${[...V.noticias].join(', ')}) · estacion:primavera|verano|otoño|invierno · dia_estacion:n (1 a 14) · dia_juego:n · hora:a-b · no_hoy:x · carta:quien · respuesta:quien
+hecho:x · dias_desde:x:n (pasaron n días desde x) · dicha:id (ya se dijo esa escena o conversación) · conoce:quien (Ana y esa persona se conocen) · presente:quien (está en Avonlea) · ve:quien (la ve ahora) · donde:quien:${NOCHE_DONDE.join('|')} · ana:${Object.keys(ANA_ESTADO).join('|')} · cuaderno:meta (cumplió esa meta: ${[...V.metas].join(', ')}) · afecto:quien:ana>=n (de 0 a 5; también <, <=, >) · <cualidad>:<dueño>>=n (cualidades: ${[...V.cualidades].join(', ')}) · sabe:quien:noticia (noticias: ${[...V.noticias].join(', ')}) · estacion:primavera|verano|otoño|invierno · domingo (hoy es domingo) · dia_estacion:n (1 a 14) · dia_juego:n · hora:a-b · no_hoy:x · carta:quien · respuesta:quien
 Ninguna otra: lo que no está aquí se descarta.
 
 LOS HECHOS QUE EXISTEN (los únicos que se pueden pedir o dejar${n >= 3 ? ', además de los «ia_…» que tú mismo dejes' : ''}): ${[...V.hechos].filter(h => !/^(hito_|se_fue_)/.test(h)).sort().join(', ')}
@@ -407,6 +407,7 @@ function nocheCondMal(c, ctx){
     case 'afecto': return persona(a[0]) && persona(a[1]) && num(a[2], 0, 5) ? null : malo;
     case 'sabe': return !V.personas.has(a[0]) ? `«${c}»: «${a[0]}» no es nadie del juego` : !V.noticias.has(a[1]) ? `«${c}»: no hay una noticia «${a[1]}»` : a[2] == null || a[2] === 'contada' || num(a[2], 1) ? null : malo;
     case 'estacion': return ['primavera', 'verano', 'otoño', 'invierno'].includes(a[0]) ? null : malo;
+    case 'domingo': return null;
     case 'dia_estacion': return num(a[0], 1, DIAS_ESTACION) ? null : malo;
     case 'dia_juego': case 'estudio': return num(a[0], 1) ? null : malo;
     case 'hora': return /^\d+-\d+$/.test(a[0] || '') ? null : malo;

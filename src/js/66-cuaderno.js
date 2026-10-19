@@ -52,6 +52,8 @@ function cuadernoCerrada(v, a){
 let cuadernoT = 0;
 function cuadernoTick(dt){
   if ((cuadernoT -= dt) > 0 || !game.wm) return; cuadernoT = 2;
+  // a visit is a visit however Ana got there: in someone's house, with them home (not only when the planner took her)
+  for (const k of WM_PEOPLE()) { const h = casaPos(k); if (k !== 'ana' && h && h !== 'cocina' && personKey('ana') === h && personKey(k) === h && !realR.fact('visita:ana>' + k)) realR.setFact('visita:ana>' + k); }
   let s = null;
   for (const m of CUADERNO_METAS) {
     if (cuadernoHecho(m.id) || !cuadernoAbierta(m)) continue;

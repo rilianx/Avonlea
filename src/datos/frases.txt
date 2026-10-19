@@ -35,11 +35,11 @@ dice: [ana:sin_sombrero, escena_ana:ig] (Marilla le susurra, sin mover los labio
 dice: [!hecho:se_queda] Mientras estés en esta casa, harás tus quehaceres como cualquiera. Después veremos.
 dice: [!hecho:se_queda] No te prometo nada, niña. Que te quedes o no, depende de cómo te portes.
 dice: [!hecho:se_queda] Lávate la cara y péinate esas trenzas. Aquí se come con la cara limpia.
-dice: [!hecho:se_queda] ¿Sabes rezar? Pues vas a aprender. En esta casa se reza.
+dice: [!hecho:se_queda, !dicha:conv_marilla_oraciones] ¿Sabes rezar? Pues vas a aprender. En esta casa se reza.
 dice: [hecho:se_queda] Ana, no te quedes soñando despierta. Aunque... la cocina está ordenada, eso sí.
-dice: [hecho:se_queda] Si quieres cocinar, la estufa está encendida. Cuidado con no quemar nada esta vez.
+dice: [hecho:se_queda] Si quieres cocinar, la estufa está encendida. Cuidado con no quemar nada.
 dice: [hecho:se_queda, hecho:conocidas_diana] Matthew no lo dice, pero te echa de menos cuando te vas donde Diana.
-dice: [hecho:se_queda] Riega la huerta antes de que caiga el sol, que las plantas lo agradecen.
+dice: [hecho:se_queda, hora:12-18, no_hoy:regado] Riega la huerta antes de que caiga el sol, que las plantas lo agradecen. La regadera está junto a la bomba.
 dice: [hecho:se_queda, afecto:marilla:ana>=3] Hmm. Bueno, admito que hoy te has portado muy bien.
 dice: [hecho:ropa_arrugada, !hecho:ropa_ordenada] Ese vestido parece que durmió en el suelo, Ana. Ah, claro: es que durmió en el suelo.
 primavera: [hecho:se_queda] Hay que limpiar la casa a fondo, que es primavera. Y tú me vas a ayudar, Ana.
@@ -51,9 +51,9 @@ invierno: Siéntate cerca de la estufa, niña, que vienes helada.
 dice: [ana:camison, !donde:ana:tejas] ¡Ana! ¿Saliste así? ¡Ven, te presto mi chal antes de que te vea mamá!
 dice: [ana:sin_sombrero, escena_ana:ig] (Diana le pasa su pañuelo, a escondidas.) Póntelo en la cabeza, rápido.
 dice: [hora:21-26, !donde:ana:tejas] ¡Ana! ¿Qué haces afuera a esta hora? Si mamá te ve, no me deja verte nunca más.
-dice: [hecho:conocidas_diana, !hecho:prohibida] ¡Ana, mi alma gemela! Te estaba esperando.
+dice: [dias_desde:conocidas_diana:2, !hecho:prohibida] ¡Ana, mi alma gemela! Te estaba esperando.
 dice: [hecho:conocidas_diana, !hecho:prohibida] Mamá dice que puedo salir hasta que se ponga el sol. ¿Vamos al lago?
-dice: [hecho:conocidas_diana, !hecho:prohibida, afecto:diana:ana>=4] ¿Te acuerdas de nuestro juramento de amistad? ¡Para siempre!
+dice: [hecho:conocidas_diana, cuaderno:amigas, !hecho:prohibida, afecto:diana:ana>=4] ¿Te acuerdas de nuestro juramento de amistad? ¡Para siempre!
 dice: [hecho:conocidas_diana, !hecho:prohibida] Los manzanos están llenos este año. Toma las que quieras.
 dice: [hecho:conocidas_diana, !hecho:prohibida] El Bosque Encantado me da un poquito de miedo... pero contigo no.
 dice: [!hecho:conocidas_diana] Hola. Tú eres la niña nueva de Tejas Verdes, ¿verdad?
@@ -66,7 +66,7 @@ invierno: [hecho:conocidas_diana, !hecho:prohibida] ¡Está nevando! Mamá no me
 === barry ===
 dice: [!conoce:barry, !hecho:barry_presenta, sabe:barry:nina_cuthbert] Tú debes ser la niña que trajeron los Cuthbert. Buenas tardes.
 dice: [hecho:barry_presenta, !hecho:prohibida] Ana Shirley, siempre es un gusto verte por aquí. Pórtate bien, ¿eh?
-dice: [hecho:conocidas_diana, !hecho:prohibida] Diana habla de ti todo el día, ¿sabes?
+dice: [dias_desde:conocidas_diana:3, !hecho:prohibida] Diana habla de ti todo el día, ¿sabes?
 dice: [hecho:perdonada] Esta vez el cordial de frambuesa está bien etiquetado, te lo aseguro.
 dice: [hecho:prohibida, !hecho:perdonada] Buenas tardes. (La Sra. Barry no la invita a pasar.)
 dice: [!donde:ana:tejas, !hecho:prohibida] Saluda a Marilla de mi parte.
@@ -197,7 +197,7 @@ ana: [conoce:sraallan] ¡Oh, Sra. Allan! Usted es mi espíritu afín.
 
 === lawson ===
 dice: ¡Buenos días, Ana! Llegaron caramelos de menta y cintas nuevas.
-dice: ¿Qué te manda Marilla hoy? ¿Azúcar? ¿Hilo?
+dice: [conoce:lawson, dias_desde:llegada_tv:7] ¿Qué te manda Marilla hoy? ¿Azúcar? ¿Hilo?
 
 === herrero ===
 dice: ¡Cuidado con las chispas, niña!
@@ -258,7 +258,7 @@ dice: [estudio:ana>=20] Este año preparamos a los mejores para el examen de Que
 ana: [conoce:stacy] ¡Srta. Stacy! Usted es mi espíritu afín, ¿lo sabía?
 
 === minnie ===
-dice: [conoce:minnie] ¡Ana! ¿Me cuentas el cuento del hada otra vez?
+dice: [conoce:minnie] ¡Ana! ¿Me cuentas un cuento de hadas? Diana dice que tú inventas los mejores.
 dice: [conoce:minnie] Diana no me deja jugar con sus muñecas. ¿Tú me dejas?
 dice: [sabe:minnie:nina_cuthbert] ¿Tú eres la niña nueva de Tejas Verdes? Mamá dice que eres pelirroja. ¡Y es verdad!
 dice: [hecho:perdonada] Ya no tengo tos. ¡Mamá dice que tú me salvaste!

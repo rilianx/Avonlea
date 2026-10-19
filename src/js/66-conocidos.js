@@ -24,7 +24,7 @@ function presentacion(k){
   const sabe = sabeK(k, 'nina_cuthbert');   // (they had heard there is a girl at Green Gables, or not)
   const propia = f ? f.def.presenta : CH[k]?.presentacion; if (propia && sabe) return propia.map(([w, t]) => ({ q: w === 'ana' ? 'ana' : q, t: t.replace(/Buenos días|Buenas tardes|Buenas noches/, saludoHora()) }));   // (the greeting, as the hour is)
   const hi = saludoHora(), yo = nombre.replace(/^(el|la) /, m => m), corto = nombre.replace(/^(el|la) (Sr\.|Sra\.|Srta\.|reverendo) /, '').split(' ')[0];
-  const señ = /^la /.test(nombre) || /Sra|Srta/.test(nombre) ? 'señora' : 'señor';
+  const señ = /^(la|una) /.test(nombre) || /Sra|Srta/.test(nombre) || f?.def.mujer ? 'señora' : 'señor';   // (a woman of the village without «la» in her name: «mujer: true», src/js/56-gente-de-avonlea.js)
   // (the lines: src/datos/dichos/40-gente.txt, «presenta:<caso>:1», «:2»… in order, as many as there are; if they did
   // not know, a girl they have never seen, and the news from her own mouth: «nueva_…»; if they had heard, «sabe_…». A
   // line may come in variants by the length of the name, «…:3:0», «…:3:1», «…:3:2»: always the same one for the same one)

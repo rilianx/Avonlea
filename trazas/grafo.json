@@ -48,6 +48,14 @@
   "zanahorias_contesta": [
    "escena zanahorias (una opción)"
   ],
+  "clase": [
+   "escena clase_geografia",
+   "escena clase_dictado",
+   "escena clase_geometria",
+   "escena clase_lectura",
+   "escena clase_composicion_stacy",
+   "escena clase_botanica_stacy"
+  ],
   "diana_borracha": [
    "escena te_grosella"
   ],
@@ -155,7 +163,7 @@
    "escena conv_diana_nombres"
   ],
   "ana_admite_gilbert": [
-   "escena conv_diana_gilbert (una opción)"
+   "escena conv_diana_gilbert_contesta (una opción)"
   ],
   "llego_diana": [
    "llegadas"
@@ -260,6 +268,9 @@
    "código"
   ],
   "se_fue_": [
+   "código"
+  ],
+  "regado": [
    "código"
   ],
   "nombro_": [
@@ -420,6 +431,13 @@
   "se_queda": [
    "escena carta_spencer_1",
    "escena resp_spencer_prueba_quedo",
+   "escena resp_spencer_conocidas_diana",
+   "escena resp_spencer_zanahorias_pizarra",
+   "escena resp_spencer_zanahorias_contesta",
+   "escena resp_spencer_zanahorias_ignora",
+   "escena resp_spencer_ofendio_lynde",
+   "escena resp_spencer_lynde_llanto",
+   "escena resp_spencer_prohibida",
    "escena resp_spencer_1",
    "escena lynde_visita",
    "escena ventana_se_queda",
@@ -443,22 +461,50 @@
    "meta conocer_diana",
    "hito decision"
   ],
-  "pide_amiga": [
-   "código"
-  ],
-  "quiere_amiga": [
+  "conocidas_diana": [
+   "escena quiere_amiga",
    "escena aviso_barry",
    "escena barry_recibe",
-   "meta conocer_diana (pista)"
+   "escena conoce_diana",
+   "escena diana_por_casualidad",
+   "una frase de diana",
+   "meta conocer_diana",
+   "código"
   ],
-  "conocidas_diana": [
-   "escena broche",
+  "zanahorias_pizarra": [
+   "escena resp_spencer_zanahorias_pizarra",
+   "hito rival"
+  ],
+  "zanahorias_contesta": [
+   "escena conv_diana_gilbert"
+  ],
+  "zanahorias_ignora": [
+   "escena resp_spencer_zanahorias_ignora",
+   "hito rival"
+  ],
+  "ofendio_lynde": [
+   "escena lynde_disculpa",
+   "escena conv_lynde_ventana",
+   "escena conv_lynde_pelo",
+   "escena conv_lynde_queens",
+   "charla par:ana+lynde:0",
+   "charla par:ana+lynde:1",
+   "charla par:ana+lynde+marilla:0",
+   "una frase de lynde",
+   "noticia ana_lengua"
+  ],
+  "lynde_llanto": [
+   "escena resp_spencer_lynde_llanto",
+   "hito humillada"
+  ],
+  "prohibida": [
+   "escena prohibida",
+   "escena crup_salva",
    "escena cama_josephine",
    "escena ventana_diana",
    "escena banco_lago_diana",
    "escena pupitre_diana",
    "escena lugar_puente_diana",
-   "escena lugar_cuesta_huerto",
    "escena conv_marilla_diana",
    "escena conv_diana_pelo",
    "escena conv_diana_minnie",
@@ -467,16 +513,40 @@
    "escena conv_diana_bosque",
    "escena conv_diana_vestidos",
    "escena conv_diana_club",
+   "escena conv_diana_gilbert",
+   "escena conv_diana_gilbert_contesta",
+   "escena conv_diana_tia",
+   "escena conv_diana_secreto",
+   "escena conv_diana_futuro",
+   "escena conv_diana_casarse",
+   "escena conv_diana_vela",
    "escena conv_barry_diana",
-   "un comentario de pupitre",
    "charla par:ana+diana+marilla:1",
-   "charla pares:kids:3",
-   "una frase de marilla",
+   "dichos de paseo_fin_tarde",
+   "dichos de paseo_fin",
+   "dichos de paseo_si",
+   "dichos de mira:diana:flores",
+   "dichos de mira:diana:lago",
+   "dichos de te_diana:primera",
+   "dichos de te_diana_otra_vez",
+   "dichos de te_diana_cordial",
    "una frase de diana",
    "una frase de barry",
+   "meta picnic",
    "meta te_diana",
    "meta josephine",
-   "hito amiga_del_alma"
+   "meta club",
+   "meta remo",
+   "meta techo",
+   "código"
+  ],
+  "pide_amiga": [
+   "código"
+  ],
+  "quiere_amiga": [
+   "escena aviso_barry",
+   "escena barry_recibe",
+   "meta conocer_diana (pista)"
   ],
   "barry_presenta": [
    "escena conoce_diana",
@@ -500,20 +570,18 @@
    "meta paces",
    "hito rival"
   ],
+  "clase": [
+   "escena clase_geografia",
+   "escena clase_dictado",
+   "escena clase_geometria",
+   "escena clase_lectura",
+   "escena clase_composicion_stacy",
+   "escena clase_botanica_stacy"
+  ],
   "diana_borracha": [
    "escena prohibida",
    "meta perdon_barry",
    "hito amistad_a_prueba"
-  ],
-  "prohibida": [
-   "escena barry_no_perdona",
-   "escena crup_aviso",
-   "escena crup_salva",
-   "escena ventana_prohibida",
-   "escena lugar_cuesta_prohibida",
-   "dichos de diana_prohibida",
-   "una frase de diana",
-   "una frase de barry"
   ],
   "perdonada": [
    "escena ventana_perdonada",
@@ -557,6 +625,8 @@
   "llegada_tv": [
    "escena primera_noche",
    "escena desayuno_prueba",
+   "escena lugar_aldea",
+   "una frase de lawson",
    "una frase de vecino",
    "llegadas de diana",
    "hito llegada"
@@ -665,17 +735,6 @@
    "noticia ana_lengua",
    "hito humillada"
   ],
-  "ofendio_lynde": [
-   "escena lynde_disculpa",
-   "escena conv_lynde_ventana",
-   "escena conv_lynde_pelo",
-   "escena conv_lynde_queens",
-   "charla par:ana+lynde:0",
-   "charla par:ana+lynde:1",
-   "charla par:ana+lynde+marilla:0",
-   "una frase de lynde",
-   "noticia ana_lengua"
-  ],
   "perdon_pedido": [
    "escena lynde_perdon_marilla"
   ],
@@ -701,6 +760,9 @@
    "escena lugar_corral_idlewild",
    "escena conv_matthew_huerta"
   ],
+  "regado": [
+   "una frase de marilla"
+  ],
   "nombro_avenida": [
    "escena conv_matthew_nombres"
   ],
@@ -721,6 +783,9 @@
    "charla par:lynde+marilla:3",
    "una frase de carrie",
    "noticia maestra_plumas"
+  ],
+  "conv_marilla_oraciones": [
+   "una frase de marilla"
   ],
   "ropa_arrugada": [
    "una frase de marilla"
@@ -764,6 +829,9 @@
    "una frase de sraallan",
    "código"
   ],
+  "conoce_lawson": [
+   "una frase de lawson"
+  ],
   "conoce_minnie": [
    "una frase de minnie"
   ],
@@ -803,9 +871,6 @@
   "lynde_contenida": [
    "hito humillada"
   ],
-  "lynde_llanto": [
-   "hito humillada"
-  ],
   "amigas": [
    "hito amiga_del_alma"
   ],
@@ -814,15 +879,6 @@
   ],
   "broche_verdad": [
    "hito confianza_marilla"
-  ],
-  "zanahorias_pizarra": [
-   "hito rival"
-  ],
-  "zanahorias_ignora": [
-   "hito rival"
-  ],
-  "zanahorias_contesta": [
-   "hito rival"
   ]
  },
  "metas": [
@@ -876,6 +932,7 @@
   "estudio",
   "camino",
   "estacion",
+  "domingo",
   "dia_estacion",
   "dia_juego",
   "hora",

@@ -47,6 +47,7 @@ function dlgCond(s, c){   // one condition of state, written as text
     case 'estudio': return cualidad('ana', 'estudio') >= +a;   // (the same as «estudio:ana>=n»)
     case 'camino': { const [x, n] = rest.split(':'); return cualidad('ana', x) >= +n; }   // (the same as «x:ana>=n»)
     case 'estacion': return SEASONS[S].toLowerCase() === a;   // (primavera, verano, otoño, invierno)
+    case 'domingo': return today() % 7 === 6;   // (the day of the week: the seventh, as isSunday)
     case 'dia_estacion': return today() % DIAS_ESTACION + 1 === +a;   // (the day of the season, from 1)
     case 'no_hoy': return dlgHechos()[a] !== today() + 1;   // (a did not happen today: one thing of the book per day)
     case 'canal_libre': return !talkBusy(a);
@@ -138,7 +139,7 @@ function dlgHacer(list){   // what a scene does when it starts or ends
   for (const a of list || []) {
     if (a.hecho) dlgHecho(a.hecho);
     if (a.marca) cap1Mark(a.marca, a.nota);
-    if (a.log) logEv(a.log, []);
+    if (a.log) { logEv(a.log, []); const j = game.journal, e = j[j.length - 1]; if (a.yo && e?.t) e.yo = a.yo; }   // (a milestone, as Ana tells it: what her letter tells first)
     if (a.saber) { const [k, f] = a.saber; enterarse(k, f); }   // (someone learns a piece of news: and it goes on as src/datos/noticias.txt says)
     if (a.meta) { const m = a.meta; agentStart(m.quien, { ...G[m.tipo](m.quien, ...(m.args || [])), ...(m.texto ? { text: m.texto } : {}), ...(m.prioridad === 3 ? { urgente: true } : {}) }, { label: m.etiqueta || m.texto, prio: m.prioridad }); }   // (urgent, from the story: it cuts short whatever she was staying for)
     if (a.soltar && FOLKBY[a.soltar]) FOLKBY[a.soltar].talkT = TT + 1;
@@ -299,7 +300,7 @@ function dlgAccion(s){   // an action of the script: «hecho x», «marca id | n
   switch (w) {
     case 'hecho': return { hecho: rest };
     case 'marca': return { marca: part[0], nota: part[1] || undefined };
-    case 'log': return { log: rest };
+    case 'log': return { log: part[0], yo: part[1]?.replace(/^yo:\s*/, '') };   // («log texto | yo: lo mismo, contado por Ana»: for her letters)
     case 'saber': case 'contar': return { saber: r };   // (a fact that someone knows: «contar marilla diana_borracha»)
     case 'suma': return { suma: r };
     case 'soltar': return { soltar: rest };
@@ -410,12 +411,13 @@ function dichosLeer(txt){   // (the files, and what the night adds: src/js/66-no
 }
 const DICHOS = dichosLeer(document.getElementById('dichos')?.textContent || '');
 const DICHOS_DE = DICHOS.reduce((o, d) => ((o[d.momento] ||= []).push(d), o), {});
-const dichoUlt = {};
+const dichoUlt = {}, DICHO_HOY = { dia: -1, s: new Set() };
 const rellenar = (t, v) => t.replace(/\{(\w+)\}/g, (x, k) => v[k] ?? x);
 function dichoElegir(m, v = {}){   // { q, t } of one that holds now (not the last one said, if there are more), or null
   const x = dlgCtx(), C = (DICHOS_DE[m] || []).filter(d => dlgCumple({ si: d.si.map(c => dlgVal(rellenar(c, v))) }, x)); if (!C.length) return null;
-  const U = C.length > 1 ? C.filter(d => d.id !== dichoUlt[m]) : C, P = U.flatMap(d => d.si.length ? [d, d] : [d]), d = pick(P);
-  dichoUlt[m] = d.id; return { q: d.quien && d.quien !== '*' ? d.quien : v.quien, t: rellenar(d.t, v) };
+  if (DICHO_HOY.dia !== today()) { DICHO_HOY.dia = today(); DICHO_HOY.s = new Set(); }
+  const N = C.filter(d => !DICHO_HOY.s.has(d.id)), U = N.length ? N : C.length > 1 ? C.filter(d => d.id !== dichoUlt[m]) : C, P = U.flatMap(d => d.si.length ? [d, d] : [d]), d = pick(P);   // (not one said already today, while there are others; Ana too)
+  dichoUlt[m] = d.id; DICHO_HOY.s.add(d.id); return { q: d.quien && d.quien !== '*' ? d.quien : v.quien, t: rellenar(d.t, v) };
 }
 const dicho = (m, v) => dichoElegir(m, v)?.t ?? '';
 // said, in a bubble: by Ana, or by whoever (quien, for «quien: *»)

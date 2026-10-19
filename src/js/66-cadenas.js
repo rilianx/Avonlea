@@ -13,7 +13,7 @@ const dianaAmiga = () => conoceDiana() && !dlgHechos().prohibida;
 // what Ana can tell Marilla (the player's way: from her menu)
 function cadenaOpciones(who){
   const o = [];
-  if (who === 'marilla' && dlgHechos().se_queda && !dlgHechos().pide_amiga && !conoceDiana()) o.push(['Contarle que quieres una amiga del alma', () => { close(); dlgHecho('pide_amiga'); }]);
+  if (who === 'marilla' && dlgHechos().se_queda && !dlgHechos().pide_amiga && !conoceDiana()) o.push(['💛 Pedirle que te lleve a conocer a alguna niña de tu edad', () => { close(); dlgHecho('pide_amiga'); }]);
   // (cap. 16: Diana to tea at Green Gables, once they have been friends a while; Ana prepares it and serves the «cordial»)
   if (who === 'diana' && dianaAmiga() && cuadernoHecho('amigas') && dlgCond('dias_desde:conocidas_diana:5', dlgCtx()) && relGetW('diana', 'ana') >= 5 && !activeGoals(agentOf('ana')).some(g => g.goal.kind === 'te_con')) o.push(['Invitarla a tomar el té en Tejas Verdes', () => { close(); agentStart('ana', G.te_con('ana', 'diana', 'cocina'), { favors: [{ f: 'venir', to: 'diana', lugar: 'cocina' }], label: 'invitar a Diana a tomar el té en Tejas Verdes (cap. 16)' }); notice('📜 Ana va a invitar a Diana a tomar el té, y a prepararlo.'); }]);
   return o;

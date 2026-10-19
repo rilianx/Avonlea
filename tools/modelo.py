@@ -123,6 +123,8 @@ def atomo(c, k=None, t=None):
         return now >= int(a[0])
     if key == 'estacion':
         return ((now - 1) / 14) % 4 == EST.get(a[0], -1)
+    if key == 'domingo':
+        return (now - 1) % 7 == 6
     if key == 'dia_estacion':
         return (now - 1) % 14 + 1 == int(a[0])
     if key == 'hora':

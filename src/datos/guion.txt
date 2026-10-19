@@ -550,6 +550,76 @@ carta: Cuando llegó tu carta ya me había enterado: ¡los Cuthbert se quedaron 
 carta: Ahora tienes casa, niña. Cuídala, y no hables tanto.
 carta: Afectuosamente, la Sra. Spencer
 
+=== resp_spencer_conocidas_diana ===
+canal: respuesta
+de: spencer
+si: respuesta:spencer, hecho:se_queda, hecho:conocidas_diana
+---
+carta: Querida Ana:
+carta: ¿Así que ya tienes una amiga, la niña de los Barry? Me alegro, Ana. Una buena amiga vale más que un vestido nuevo. Pero no la marees con tanta palabra.
+carta: Y pórtate bien en casa de los Barry, que la Sra. Barry es muy estricta.
+carta: Afectuosamente, la Sra. Spencer
+
+=== resp_spencer_zanahorias_pizarra ===
+canal: respuesta
+de: spencer
+si: respuesta:spencer, hecho:se_queda, hecho:zanahorias_pizarra
+---
+carta: Querida Ana:
+carta: ¡Ana Shirley! ¿Cómo que le partiste la pizarra en la cabeza a un muchacho? Ya sé que te dijo zanahoria, pero una señorita no anda rompiendo pizarras.
+carta: Pídele perdón, o por lo menos no lo hagas otra vez. Lo que se dice del pelo se olvida; lo que se hace, no.
+carta: Afectuosamente, la Sra. Spencer
+
+=== resp_spencer_zanahorias_contesta ===
+canal: respuesta
+de: spencer
+si: respuesta:spencer, hecho:se_queda, hecho:zanahorias_contesta
+---
+carta: Querida Ana:
+carta: Así que le contestaste a ese muchacho delante de toda la escuela. Hmm. No te voy a decir que hiciste mal, porque se lo buscó. Pero cuida esa lengua, Ana.
+carta: Una lengua rápida da más disgustos que alegrías. Te lo digo yo, que tengo cuarenta años de práctica.
+carta: Afectuosamente, la Sra. Spencer
+
+=== resp_spencer_zanahorias_ignora ===
+canal: respuesta
+de: spencer
+si: respuesta:spencer, hecho:se_queda, hecho:zanahorias_ignora
+---
+carta: Querida Ana:
+carta: Me cuentas que un muchacho se burló de tu pelo y que hiciste como si no existiera. Eso, Ana, es tener más juicio que muchas señoras que conozco.
+carta: Sigue así. Y el pelo rojo se oscurece con los años, ya verás.
+carta: Afectuosamente, la Sra. Spencer
+
+=== resp_spencer_ofendio_lynde ===
+canal: respuesta
+de: spencer
+si: respuesta:spencer, hecho:se_queda, hecho:ofendio_lynde
+---
+carta: Querida Ana:
+carta: Me enteré, Ana. Rachel Lynde me escribió. ¿Cómo se te ocurre gritarle a una señora así, en la casa que te recibió?
+carta: Ve a pedirle perdón, niña. Aunque ella haya dicho lo que dijo. Así se hacen las cosas.
+carta: Afectuosamente, la Sra. Spencer
+
+=== resp_spencer_lynde_llanto ===
+canal: respuesta
+de: spencer
+si: respuesta:spencer, hecho:se_queda, hecho:lynde_llanto
+---
+carta: Querida Ana:
+carta: Me dices que la Sra. Lynde te llamó flaca y fea, y que te fuiste llorando. Ay, Ana. Rachel Lynde dice lo que piensa, y piensa demasiado.
+carta: No le hagas caso. Y come más, que algo de razón tiene en lo de flaca.
+carta: Afectuosamente, la Sra. Spencer
+
+=== resp_spencer_prohibida ===
+canal: respuesta
+de: spencer
+si: respuesta:spencer, hecho:se_queda, hecho:prohibida
+---
+carta: Querida Ana:
+carta: Qué pena lo de la niña de los Barry. Vino de grosellas… ¡quién iba a pensar! Ten paciencia, Ana: las madres se ablandan con el tiempo.
+carta: Mientras tanto, no la vayas a buscar a escondidas. Eso lo empeoraría todo.
+carta: Afectuosamente, la Sra. Spencer
+
 === resp_spencer_1 ===
 canal: respuesta
 de: spencer
@@ -569,7 +639,7 @@ sujeta: marilla
 en: ana=gg, marilla=gg
 si: hecho:pide_amiga, !hecho:quiere_amiga, !hecho:conocidas_diana
 al_terminar: hecho quiere_amiga
-al_terminar: log Ana le contó a Marilla que quería una amiga del alma, y Marilla le habló de Diana Barry.
+al_terminar: log Ana le contó a Marilla que quería una amiga del alma, y Marilla le habló de Diana Barry. | yo: le conté a Marilla que quería una amiga del alma, y ella me habló de Diana Barry, la niña de La Cuesta del Huerto.
 ---
 ana: Marilla, ¿cree usted que encontraré una amiga del alma en Avonlea?
 marilla: ¿Una qué?
@@ -618,7 +688,7 @@ si: hecho:barry_presenta, !hecho:conocidas_diana
 al_terminar: hecho conocidas_diana
 al_terminar: afecto diana ana 4
 al_terminar: afecto ana diana 5
-al_terminar: log Ana conoció a Diana Barry en La Cuesta del Huerto: la Sra. Barry las presentó.
+al_terminar: log Ana conoció a Diana Barry en La Cuesta del Huerto: la Sra. Barry las presentó. | yo: conocí a Diana Barry en La Cuesta del Huerto. ¡Creo que vamos a ser amigas del alma!
 ---
 barry: Ésta es mi hija Diana. Diana, ¿por qué no llevas a Ana al jardín y le muestras tus flores?
 diana: Hola… ¿quieres venir a ver el jardín?
@@ -633,7 +703,7 @@ si: !hecho:conocidas_diana, !hecho:barry_presenta, !hecho:quiere_amiga
 al_terminar: hecho conocidas_diana
 al_terminar: afecto diana ana 2
 al_terminar: afecto ana diana 4
-al_terminar: log Ana y Diana se conocieron por casualidad.
+al_terminar: log Ana y Diana se conocieron por casualidad. | yo: conocí a Diana Barry, por pura casualidad. Creo que vamos a ser amigas del alma.
 ---
 diana: Hola… ¿Tú eres la niña que vino a vivir a Tejas Verdes?
 ana: Sí… soy Ana. Ana con una sola n. ¿Y tú… tú eres Diana Barry?
@@ -662,12 +732,12 @@ marilla: Pues no está. Ana, te quedas en tu cuarto hasta que me digas la verdad
    ana: (Ana se queda en su cuarto, pensando en el picnic. Al final, inventa una confesión.) Me lo llevé para ser Lady Cordelia Fitzgerald… y se me cayó al Lago de las Aguas Brillantes. Ya confesé: ¿ahora puedo ir al picnic?
    marilla: ¿Picnic? No irás a ningún picnic, Ana Shirley.
    ! hecho broche_confeso
-   ! log Marilla perdió su broche de amatista y culpó a Ana; Ana «confesó» para poder ir al picnic.
+   ! log Marilla perdió su broche de amatista y culpó a Ana; Ana «confesó» para poder ir al picnic. | yo: Marilla perdió su broche de amatista y creyó que yo lo había tomado. Tuve que «confesar» para poder ir al picnic.
 -> Decir la verdad, aunque se quede sin picnic
    ana: (Ana se queda en su cuarto, con el picnic doliéndole en el pecho, y no inventa nada.) No lo tomé, Marilla. Se lo digo aunque me quede sin helado para siempre.
    marilla: Entonces tampoco hay picnic. Cuando quieras decir otra cosa, me avisas.
    ! hecho broche_verdad
-   ! log Marilla perdió su broche de amatista y culpó a Ana; Ana siguió diciendo la verdad, aunque se quedara sin picnic.
+   ! log Marilla perdió su broche de amatista y culpó a Ana; Ana siguió diciendo la verdad, aunque se quedara sin picnic. | yo: Marilla perdió su broche de amatista y creyó que yo lo había tomado. Le dije la verdad, aunque me quedara sin picnic.
 marilla: (Marilla saca su chal negro para remendarlo… y algo brilla en el encaje.) ¡El broche! Estaba enganchado en mi chal…
 marilla: (Marilla sube la escalera, despacio.) Ana… lo encontré. Perdóname: no debí dudar de ti. Ve a prepararte para el picnic.
 ana: (Ana baja la escalera de un salto, con los ojos brillando.) ¡Helado! ¡Por fin voy a probar el helado!
@@ -693,20 +763,131 @@ gilbert: (Gilbert Blythe alarga la mano, toma la punta de una trenza de Ana y su
    ana: ¡Nunca te lo perdonaré! ¡Nunca jamás!
    ! hecho zanahorias_pizarra
    ! ofensa ana gilbert zanahorias -2
-   ! log En la escuela, Gilbert Blythe le dijo «¡Zanahorias!» a Ana, y Ana le partió la pizarra en la cabeza.
+   ! log En la escuela, Gilbert Blythe le dijo «¡Zanahorias!» a Ana, y Ana le partió la pizarra en la cabeza. | yo: en la escuela, Gilbert Blythe me dijo «¡Zanahorias!» delante de todos… y le partí la pizarra en la cabeza.
 -> Hacer como que no lo oyó, con la frente en alto
    ana: (Ana se pone roja hasta las orejas… pero no se da vuelta. Mira el pizarrón como si Gilbert Blythe no existiera en el mundo.)
    gilbert: (Gilbert se queda con la trenza en la mano, desconcertado. Nadie lo había ignorado nunca.) Oye… solo era una broma.
    ana: (Ana sigue mirando el pizarrón. Por dentro, le está partiendo mil pizarras en la cabeza.)
    ! hecho zanahorias_ignora
    ! ofensa ana gilbert zanahorias -1
-   ! log En la escuela, Gilbert Blythe le dijo «¡Zanahorias!» a Ana, y Ana hizo como que no existía.
+   ! log En la escuela, Gilbert Blythe le dijo «¡Zanahorias!» a Ana, y Ana hizo como que no existía. | yo: en la escuela, Gilbert Blythe me dijo «¡Zanahorias!» delante de todos. Hice como que no existía.
 -> Contestarle, delante de todos
    ana: (Ana se da vuelta despacio.) Mejor zanahoria que cabeza hueca, Gilbert Blythe. Las zanahorias, por lo menos, sirven para algo.
    gilbert: (Toda la clase se ríe… de Gilbert. Él se pone colorado.) Bueno… me lo merezco, supongo.
    ! hecho zanahorias_contesta
    ! ofensa ana gilbert zanahorias -2
-   ! log En la escuela, Gilbert Blythe le dijo «¡Zanahorias!» a Ana, y Ana le contestó delante de toda la clase.
+   ! log En la escuela, Gilbert Blythe le dijo «¡Zanahorias!» a Ana, y Ana le contestó delante de toda la clase. | yo: en la escuela, Gilbert Blythe me dijo «¡Zanahorias!» delante de todos, y le contesté. Toda la clase se rió… de él.
+
+# --- las clases: una al día, mientras Ana está en la escuela (con el Sr. Phillips, y después con la Srta. Stacy)
+=== clase_geografia ===
+narra: Clase de geografía. El Sr. Phillips señala el mapa del Canadá con una varilla, y las provincias parecen manchas de colores.
+canal: es
+prioridad: 4
+en: ana=es, phillips=es
+repetir: cada 6
+si: hora:9.2-12, no_hoy:clase
+al_terminar: hecho clase
+---
+phillips: Ana Shirley. ¿Cuál es la capital de la Isla del Príncipe Eduardo?
+->* «Charlottetown, señor. Y es la isla más hermosa del mundo.»
+   ana: Charlottetown, señor. Y si me permite, la Isla del Príncipe Eduardo es la isla más hermosa del mundo. Lo leí antes de venir, y ahora sé que es verdad.
+   phillips: (El Sr. Phillips carraspea.) Basta con la capital, Ana. Pero… correcto.
+   ! suma estudio:ana 1
+-> Mirar por la ventana, al Lago de las Aguas Refulgentes
+   ana: (Ana no oye la pregunta. Por la ventana se ve un pedacito del lago, y Ana está navegando en él, en un barco de velas de seda.)
+   phillips: ¡Ana Shirley! La capital. Se la estoy preguntando a usted, no a las nubes.
+   ana: (Ana se pone colorada.) ¡Charlottetown! Perdón, señor. Estaba… en otra parte.
+=== clase_dictado ===
+narra: Dictado. Se oye el rasgueo de las plumas sobre las pizarras, y una mosca que choca contra el vidrio.
+canal: es
+prioridad: 4
+en: ana=es, phillips=es
+repetir: cada 6
+si: hora:9.2-12, no_hoy:clase
+al_terminar: hecho clase
+---
+phillips: «El… invierno… en… Avonlea… es… largo… y… blanco.» Punto.
+ana: (Ana escribe «blanco», y después, sin poder evitarlo, «como el vestido de una novia que espera junto a la ventana».)
+->* Borrar lo que agregó
+   ana: (Ana lo borra con la manga, con un suspiro. Un dictado no es lugar para la poesía.)
+   ! suma estudio:ana 1
+-> Dejarlo, total es más bonito así
+   ana: (Ana lo deja. Cuando el Sr. Phillips revisa, levanta las cejas hasta el pelo.)
+   phillips: Ana, esto es un dictado, no un concurso de poesía.
+   ana: Ya lo sé, señor. Pero es que la frase se veía tan sola.
+=== clase_geometria ===
+narra: Geometría. En el pizarrón hay un triángulo con letras en las puntas, y para Ana es un misterio tan grande como las pirámides.
+canal: es
+prioridad: 4
+en: ana=es, phillips=es
+repetir: cada 6
+si: hora:9.2-12, no_hoy:clase
+al_terminar: hecho clase
+---
+phillips: Ana Shirley, al pizarrón. Demuestre que estos dos ángulos son iguales.
+ana: (Ana se queda mirando el triángulo. El triángulo la mira a ella.)
+->* Intentarlo, aunque se equivoque
+   ana: Bueno… si este lado es igual a este otro… entonces… ¿los ángulos se ponen de acuerdo?
+   phillips: (Alguien se ríe al fondo.) No exactamente. Siéntese, Ana. Y estudie la proposición cinco para mañana.
+   ana: (Ana vuelve a su banco con la frente en alto. Por dentro, le dan ganas de que se la trague la tierra.)
+   ! suma estudio:ana 1
+-> Confesar que no entiende nada
+   ana: Señor Phillips, le confieso que no entiendo nada. La geometría y yo no nos llevamos. Tengo el alma más bien literaria.
+   phillips: (El Sr. Phillips suspira.) El alma literaria también tiene que aprobar el examen, Ana. Siéntese.
+=== clase_lectura ===
+narra: Lectura en voz alta. Le toca a Ana leer un poema del libro de cuarto grado.
+canal: es
+prioridad: 4
+en: ana=es, phillips=es
+repetir: cada 6
+si: hora:9.2-12, no_hoy:clase
+al_terminar: hecho clase
+---
+phillips: Ana Shirley, «La batalla de Hohenlinden». Desde el principio.
+ana: (Ana se pone de pie y lee. Al principio despacio; después, con la voz temblando, como si la batalla pasara ahí mismo, entre los bancos.)
+ana: «…y de Hohenlinden en la nieve, corría el río, rojo y frío…»
+->* Seguir hasta el final, con todo el corazón
+   ana: (Cuando termina, nadie se mueve. Hasta Josie Pye se quedó con la boca abierta.)
+   phillips: (El Sr. Phillips se aclara la garganta.) Muy… bien leído. Siéntese.
+   ! suma estudio:ana 1
+-> Bajar la voz, porque todos la miran
+   ana: (Ana siente todos los ojos encima, y la voz se le achica. Termina el poema casi en un susurro.)
+   phillips: Más fuerte la próxima vez, Ana. Un poema leído para adentro es un poema perdido.
+=== clase_composicion_stacy ===
+narra: La Srta. Stacy abre las ventanas para que entre el aire. «Hoy», dice, «van a escribir sobre algo que vean desde aquí».
+canal: es
+prioridad: 4
+en: ana=es, stacy=es
+repetir: cada 5
+si: hora:9.2-12, no_hoy:clase
+al_terminar: hecho clase
+---
+stacy: Escriban lo que ven, niños. Pero miren bien: con los ojos, y con algo más.
+ana: (Ana mira por la ventana. Un arce, el camino, un pedazo de cielo. Y empieza a escribir sin parar.)
+->* Escribir sobre el arce, sencillo y verdadero
+   ana: (Ana escribe del arce: de cómo se le mueven las hojas, y nada más. Le cuesta no adornarlo.)
+   stacy: (La Srta. Stacy lee por encima de su hombro, y sonríe.) Esto, Ana, es escribir. Menos adjetivos, más verdad.
+   ! suma estudio:ana 1
+-> Escribir que el arce es un rey encantado
+   ana: (El arce se vuelve un rey encantado que espera a una princesa desde hace cien años. Ana llena dos páginas.)
+   stacy: (La Srta. Stacy se ríe bajito.) Tienes imaginación de sobra, Ana. Ahora aprende a usarla con rienda.
+=== clase_botanica_stacy ===
+narra: Clase de botánica. La Srta. Stacy trajo del bosque un ramo de flores silvestres, y lo pone en un frasco sobre su mesa.
+canal: es
+prioridad: 4
+en: ana=es, stacy=es
+repetir: cada 5
+si: hora:9.2-12, no_hoy:clase
+al_terminar: hecho clase
+---
+stacy: (La Srta. Stacy saca una florcita blanca, de siete pétalos.) ¿Quién sabe cómo se llama esta flor?
+->* «Es una estrella de junio… bueno, así le digo yo.»
+   ana: Es… una estrella de junio. Bueno, así le digo yo. ¿Cómo se llama de verdad?
+   stacy: Se llama trientalis. Pero me gusta más tu nombre, Ana. Anota los dos.
+   ! suma estudio:ana 1
+-> Quedarse callada, por si se equivoca
+   ana: (Desde el fondo, alguien contesta: «Trientalis, Srta. Stacy».)
+   ana: (Ana aprieta los labios. Lo sabía. Bueno, casi. La próxima vez levanta la mano.)
 
 # --- Diana prohibida (cap. 16, 17 y 18): Ana invita a Diana a tomar el té en Tejas Verdes y le sirve, sin saberlo, vino
 # de grosellas en vez de cordial de frambuesa. Al día siguiente, Marilla le cuenta que la Sra. Barry no quiere que
@@ -721,7 +902,7 @@ en: ana=gg, diana=gg
 si: tomando_te:ana:diana, !hecho:diana_borracha
 al_terminar: hecho diana_borracha
 al_terminar: meta diana estar_en h:os,-,- | Diana se va a su casa, tambaleándose | volver a su casa, mareada | 3
-al_terminar: log Ana invitó a Diana a tomar el té y le sirvió, sin saberlo, vino de grosellas en vez de cordial de frambuesa: Diana se fue a su casa… borracha.
+al_terminar: log Ana invitó a Diana a tomar el té y le sirvió, sin saberlo, vino de grosellas en vez de cordial de frambuesa: Diana se fue a su casa… borracha. | yo: invité a Diana a tomar el té y le serví, sin saberlo, vino de grosellas en vez de cordial de frambuesa. ¡Se fue a su casa borracha!
 ---
 ana: Toma otro vaso de cordial de frambuesa, Diana. Es de Marilla, y es buenísimo.
 diana: Es el cordial más rico que he probado. Mucho más rico que el de la Sra. Lynde. (Diana se sirve el tercer vaso.)
@@ -742,7 +923,7 @@ si: dias_desde:diana_borracha:1, !hecho:prohibida, !hecho:perdonada
 al_terminar: hecho prohibida
 al_terminar: triste diana
 al_terminar: ofensa barry ana vino 0
-al_terminar: log La Sra. Barry le prohibió a Diana volver a ver a Ana: el «cordial» era vino de grosellas.
+al_terminar: log La Sra. Barry le prohibió a Diana volver a ver a Ana: el «cordial» era vino de grosellas. | yo: la Sra. Barry le prohibió a Diana volver a verme. Mi corazón está hecho trizas.
 ---
 marilla: Ana Shirley, ¿qué le diste de tomar a Diana? La Sra. Barry dice que la mandaste a su casa borracha.
 ana: ¡Le di cordial de frambuesa, Marilla! ¡Nada más!
@@ -788,7 +969,7 @@ al_terminar: olvidar prohibida
 al_terminar: hecho perdonada
 al_terminar: afecto barry ana 4
 al_terminar: afecto diana ana 5
-al_terminar: log Ana salvó a Minnie May del crup, toda la noche, con el jarabe de ipecacuana. La Sra. Barry le pidió perdón.
+al_terminar: log Ana salvó a Minnie May del crup, toda la noche, con el jarabe de ipecacuana. La Sra. Barry le pidió perdón. | yo: salvé a Minnie May del crup, toda la noche, con el jarabe de ipecacuana. Y la Sra. Barry me pidió perdón.
 ---
 ana: (Minnie May arde de fiebre en el sofá, y apenas puede respirar.)
 ana: Mary Joe, pon agua a calentar. Diana, más leña en la estufa.
@@ -823,7 +1004,7 @@ en: ana=gg, sraallan=gg
 si: hecho:allan_invitados, !hecho:pastel_linimento, sentada:sraallan
 al_terminar: hecho pastel_linimento
 al_terminar: afecto sraallan ana 5
-al_terminar: log Ana le sirvió a la Sra. Allan un pastel con linimento en vez de vainilla; la Sra. Allan fue tan buena que la invitó a la casa parroquial.
+al_terminar: log Ana le sirvió a la Sra. Allan un pastel con linimento en vez de vainilla; la Sra. Allan fue tan buena que la invitó a la casa parroquial. | yo: le serví a la Sra. Allan un pastel con linimento en vez de vainilla. Ella fue tan buena que me invitó a la casa parroquial.
 ---
 ana: (Ana sirve su pastel en capas, con mermelada roja entre las capas.)
 sraallan: (La Sra. Allan prueba un bocado… y pone una cara rara. Pero sigue comiendo, con valentía.)
@@ -845,7 +1026,7 @@ en: ana=os, diana=os
 si: cuaderno:amigas, !hecho:prohibida, !hecho:cama_josephine, dias_desde:conocidas_diana:15, afecto:diana:ana>=5, letras:ana>=10
 al_terminar: hecho cama_josephine
 al_terminar: afecto josephine ana 5
-al_terminar: log Ana y Diana saltaron sobre la cama del cuarto de huéspedes, donde dormía la tía Josephine; Ana confesó y se ganó su amistad.
+al_terminar: log Ana y Diana saltaron sobre la cama del cuarto de huéspedes, donde dormía la tía Josephine; Ana confesó y se ganó su amistad. | yo: Diana y yo saltamos sobre la cama de huéspedes, ¡y ahí dormía la tía Josephine! Confesé, y se hizo mi amiga.
 ---
 diana: ¡Ana! Esta noche hay concierto del Club de Debate en el salón. Mamá dice que puedes quedarte a dormir… ¡en el cuarto de huéspedes!
 ana: (Esa noche, al volver del concierto, las niñas corren por el pasillo.) ¡A la que llegue última a la cama!
@@ -869,7 +1050,7 @@ al_terminar: hecho queens
 al_terminar: hecho queens_primera
 al_terminar: afecto marilla ana 5
 al_terminar: afecto matthew ana 5
-al_terminar: log Ana dio el examen de ingreso a Queen's en Charlottetown y quedó primera, empatada con Gilbert Blythe.
+al_terminar: log Ana dio el examen de ingreso a Queen's en Charlottetown y quedó primera, empatada con Gilbert Blythe. | yo: di el examen de ingreso a Queen's y quedé primera, empatada con Gilbert Blythe.
 ---
 marilla: Ana, hoy es el examen de Queen's. Matthew te lleva a Charlottetown. Toma, no se te olvide el almuerzo.
 ana: (Ana pasa el día en Charlottetown, con la pluma temblándole en la mano. La geometría… ¡la geometría salió bien!)
@@ -886,7 +1067,7 @@ si: estacion:verano, dia_estacion:1, dia_juego:56, estudio:ana>=50, estudio:ana<
 al_terminar: hecho examen
 al_terminar: hecho queens
 al_terminar: afecto marilla ana 5
-al_terminar: log Ana dio el examen de ingreso a Queen's en Charlottetown y entró.
+al_terminar: log Ana dio el examen de ingreso a Queen's en Charlottetown y entró. | yo: di el examen de ingreso a Queen's, ¡y entré!
 ---
 marilla: Ana, hoy es el examen de Queen's. Matthew te lleva a Charlottetown. Toma, no se te olvide el almuerzo.
 ana: (Ana pasa el día en Charlottetown, con la pluma temblándole en la mano. La geometría fue terrible… pero el resto, no tanto.)
@@ -902,7 +1083,7 @@ en: ana=gg, marilla=gg
 si: estacion:verano, dia_estacion:1, dia_juego:56, estudio:ana>=20, estudio:ana<50, !hecho:queens, no_hoy:examen
 al_terminar: hecho examen
 al_terminar: triste ana
-al_terminar: log Ana dio el examen de ingreso a Queen's en Charlottetown, pero no le alcanzó. El año que viene, otra vez.
+al_terminar: log Ana dio el examen de ingreso a Queen's en Charlottetown, pero no le alcanzó. El año que viene, otra vez. | yo: di el examen de ingreso a Queen's, pero no me alcanzó. El año que viene, otra vez.
 ---
 marilla: Ana, hoy es el examen de Queen's. Matthew te lleva a Charlottetown. Toma, no se te olvide el almuerzo.
 ana: (Ana pasa el día en Charlottetown. La geometría… la geometría fue un desastre.)
@@ -928,7 +1109,7 @@ lineas: libro:llegada
 al_empezar: log Ana llegó a Tejas Verdes con Matthew, de noche. Marilla esperaba a un niño.
 al_terminar: hecho llegada_tv
 al_terminar: hecho primera_noche
-al_terminar: log Marilla dejó que Ana se quedara esa noche, hasta aclarar el enredo. Ana casi no probó la cena.
+al_terminar: log Marilla dejó que Ana se quedara esa noche, hasta aclarar el enredo. Ana casi no probó la cena. | yo: Marilla me dejó quedarme esa noche, hasta aclarar el enredo. Casi no probé la cena.
 ---
 ! sentar ana
 ! ana llora=true
@@ -1018,7 +1199,7 @@ sujeta: matthew, marilla
 en: ana=gg, marilla=gg
 si: hecho:llegada_tv, !hecho:primera_noche, !capitulo
 al_terminar: hecho primera_noche
-al_terminar: log Marilla dejó que Ana se quedara esa noche, hasta aclarar el enredo.
+al_terminar: log Marilla dejó que Ana se quedara esa noche, hasta aclarar el enredo. | yo: Marilla me dejó quedarme esa noche, hasta aclarar el enredo.
 ---
 marilla: Bueno, bueno, no hace falta llorar así. No te vamos a echar esta noche. Te quedas hasta que aclaremos este enredo. ¿Cómo te llamas?
 ana: ¿Me llamaría Cordelia, por favor?
@@ -1079,7 +1260,7 @@ si: hecho:desayuno_prueba, !hecho:a_prueba, hora:14-19, paciencia:marilla:ana>=1
 al_terminar: hecho conoce_blewett
 al_terminar: hecho a_prueba
 al_terminar: suma afecto:marilla:ana 1
-al_terminar: log Marilla llevó a Ana a White Sands; la Sra. Blewett la quería de sirvienta, y Marilla no se la dio. Esa noche le dijo a Matthew que se la quedaba; a Ana, todavía no.
+al_terminar: log Marilla llevó a Ana a White Sands; la Sra. Blewett la quería de sirvienta, y Marilla no se la dio. Esa noche le dijo a Matthew que se la quedaba; a Ana, todavía no. | yo: Marilla me llevó a White Sands. La Sra. Blewett me quería de sirvienta, pero Marilla no me entregó.
 ---
 marilla: Ponte el sombrero, Ana. Nos vamos a White Sands.
 ana piensa: Puede que sea la última vez que veo esta cocina.
@@ -1286,8 +1467,8 @@ al_empezar: suma paciencia:marilla:ana -1
 al_empezar: contar marilla ana_de_noche
 al_terminar: a_pieza
 ---
-->* «¡Perdón, Marilla! Se me pasó la hora mirando las estrellas.»
-   ana: ¡Perdón, Marilla! Se me pasó la hora mirando las estrellas. No pensé que se iba a preocupar.
+->* «¡Perdón, Marilla! Se me pasó la hora.»
+   ana: ¡Perdón, Marilla! Se me pasó la hora, y cuando me di cuenta ya estaba oscuro. No pensé que se iba a preocupar.
 -> «No tenía por qué buscarme. Sé volver sola.»
    ana: No tenía por qué buscarme. Sé volver sola.
    ! suma paciencia:marilla:ana -1
@@ -1338,7 +1519,7 @@ sujeta: marilla
 si: hecho:blewett_duda, !hecho:a_prueba, afecto:matthew:ana>=4
 al_empezar: a_cocina
 al_terminar: hecho a_prueba
-al_terminar: log Marilla casi le dio Ana a la Sra. Blewett; Matthew pidió que se quedara.
+al_terminar: log Marilla casi le dio Ana a la Sra. Blewett; Matthew pidió que se quedara. | yo: Marilla casi me entregó a la Sra. Blewett, pero Matthew pidió que me quedara.
 ---
 ! pasa_tiempo 4
 ana piensa: Me trajo de vuelta. Pero no me ha dicho nada. ¿Me devolverán mañana?
@@ -1353,7 +1534,7 @@ sujeta: marilla
 si: hecho:blewett_duda, !hecho:a_prueba, hecho:blewett_suplica, afecto:marilla:ana>=2
 al_empezar: a_cocina
 al_terminar: hecho a_prueba
-al_terminar: log Ana le suplicó a Marilla en White Sands, y Marilla no la entregó.
+al_terminar: log Ana le suplicó a Marilla en White Sands, y Marilla no la entregó. | yo: le supliqué a Marilla en White Sands, y no me entregó.
 ---
 ! pasa_tiempo 4
 ana piensa: Me trajo de vuelta. Pero no me ha dicho nada. ¿Me devolverán mañana?
@@ -1380,7 +1561,7 @@ prioridad: 1
 interrumpe
 si: hecho:blewett_duda, !hecho:a_prueba
 al_terminar: hecho devuelta
-al_terminar: log Marilla le entregó Ana a la Sra. Blewett.
+al_terminar: log Marilla le entregó Ana a la Sra. Blewett. | yo: Marilla me entregó a la Sra. Blewett.
 al_terminar: final devuelta | Ana se fue con la Sra. Blewett. En el libro, Marilla no la entregó: Ana se ganó, poco a poco, su lugar en Tejas Verdes.
 
 === se_queda ===
@@ -1395,7 +1576,7 @@ al_empezar: a_cocina
 si: hecho:a_prueba, !hecho:se_queda, dias_desde:a_prueba:1, hora:14-19
 al_terminar: hecho se_queda
 al_terminar: suma afecto:marilla:ana 1
-al_terminar: log Marilla le dijo a Ana que se queda en Tejas Verdes, para siempre.
+al_terminar: log Marilla le dijo a Ana que se queda en Tejas Verdes, para siempre. | yo: Marilla me dijo que me quedo en Tejas Verdes. ¡Para siempre!
 ---
 marilla: Ana, Matthew y yo hemos decidido quedarnos contigo. Es decir, si tratas de ser una niña buena y agradecida.
 ana: (Ana se queda quieta, sin respirar.) ¿Para siempre? ¿De verdad me quedo en Tejas Verdes?
@@ -1533,7 +1714,7 @@ disparo: menu
 canal: ana_sola
 repetir: dia
 al_terminar: suma afecto:diana:ana 1
-al_terminar: log Ana le hizo señas a Diana con la vela, desde la ventana de su pieza; Diana contestó.
+al_terminar: log Ana le hizo señas a Diana con la vela, desde la ventana de su pieza; Diana contestó. | yo: le hice señas a Diana con la vela, desde la ventana de mi pieza, ¡y ella me contestó!
 ---
 ana: (Ana pone la vela en la ventana y la tapa y destapa con un cartón: cinco destellos.)
 ana: (Un rato después, entre los árboles, en la ventana de Diana, una luz contesta: cinco destellos.)
@@ -1561,21 +1742,21 @@ lynde: (La Sra. Lynde mira a Ana de arriba abajo.) Bueno, no te eligieron por tu
    marilla: Ana, ve a tu pieza y quédate ahí hasta que yo suba.
    ! hecho ofendio_lynde
    ! suma afecto:lynde:ana -1
-   ! log Ana estalló con la Sra. Lynde, que la llamó flaca, fea y pelirroja. Marilla la mandó a su pieza.
+   ! log Ana estalló con la Sra. Lynde, que la llamó flaca, fea y pelirroja. Marilla la mandó a su pieza. | yo: la Sra. Lynde me llamó flaca, fea y pelirroja, y estallé. Marilla me mandó a mi pieza.
 ->* Apretar los puños y contar hasta diez
    ana: (Ana aprieta los puños, se pone roja como un tomate… y cuenta hasta diez, muy despacio.) Buenas tardes, Sra. Lynde.
    lynde: Hmm. Por lo menos tiene modales. Algo es algo.
    marilla: (Marilla mira a Ana con algo parecido al orgullo.)
    ! suma afecto:marilla:ana 1
    ! hecho lynde_contenida
-   ! log Ana se contuvo cuando la Sra. Lynde la llamó flaca y fea. Marilla lo notó.
+   ! log Ana se contuvo cuando la Sra. Lynde la llamó flaca y fea. Marilla lo notó. | yo: la Sra. Lynde me llamó flaca y fea, y me contuve. Marilla lo notó.
 -> Salir corriendo a llorar a su pieza
    ana: (Ana sale corriendo escaleras arriba y se tira en la cama a llorar.)
    lynde: Vaya, vaya. Sensible, además.
    marilla: Rachel, a veces eres demasiado franca.
    ! hecho lynde_llanto
    ! a_pieza
-   ! log Ana se fue llorando cuando la Sra. Lynde la llamó flaca y fea.
+   ! log Ana se fue llorando cuando la Sra. Lynde la llamó flaca y fea. | yo: la Sra. Lynde me llamó flaca y fea, y me fui llorando a mi pieza.
 
 === lynde_perdon_marilla ===
 canal: gg
@@ -1605,12 +1786,12 @@ ana: (Ana se arrodilla de pronto frente a la Sra. Lynde.)
    lynde: (La Sra. Lynde, que no es mala, se ablanda.) Ya, ya, levántate, niña. Claro que te perdono. Yo fui demasiado dura. Y te diré algo: conocí a una niña con el pelo tan rojo como el tuyo, y de grande se le oscureció a un castaño precioso.
    ana: ¡Oh, Sra. Lynde! Me ha dado una esperanza. Siempre la voy a considerar una benefactora.
    ! suma afecto:lynde:ana 3
-   ! log Ana le pidió perdón a la Sra. Lynde a lo grande, de rodillas; la Sra. Lynde la perdonó y terminó encantada con ella.
+   ! log Ana le pidió perdón a la Sra. Lynde a lo grande, de rodillas; la Sra. Lynde la perdonó y terminó encantada con ella. | yo: le pedí perdón a la Sra. Lynde a lo grande, de rodillas. Me perdonó, y terminó encantada conmigo.
 -> Pedirle perdón con pocas palabras
    ana: Sra. Lynde… perdóneme por lo que le dije. No estuvo bien.
    lynde: Hmm. Está bien, niña. Que no se repita.
    ! suma afecto:lynde:ana 1
-   ! log Ana le pidió perdón a la Sra. Lynde.
+   ! log Ana le pidió perdón a la Sra. Lynde. | yo: le pedí perdón a la Sra. Lynde.
 
 # --- Las cosas (src/js/66-primeras-veces.js): cada cosa que Ana usa o mira puede tener muchas escenas, cada una para su
 # momento («disparo: objeto», «objeto: <la cosa>»: gwin la ventana de su pieza, mirror el espejo, armario, faro, bench
@@ -2325,7 +2506,7 @@ disparo: lugar
 lugar: huerta
 canal: ana_sola
 repetir: dia
-si: estacion:primavera
+si: estacion:primavera, dias_desde:regado:2
 ---
 ana: (En la tierra oscura asoman unos brotes verdes, tan chiquitos que casi no se ven.)
 ana: ¡Salieron! Toda la noche estuvieron empujando para arriba, sin que nadie las viera. Eso sí que es fe.
@@ -2335,7 +2516,7 @@ disparo: lugar
 lugar: huerta
 canal: ana_sola
 repetir: dia
-si: estacion:verano
+si: estacion:verano, hecho:regado
 ---
 ana: (Las flores de la huerta están abiertas y zumban las abejas. Huele a tierra tibia.)
 ana: Cuando regué estas flores no eran nada. Ahora mírenlas: se creen las reinas del verano. Y tienen razón.
@@ -2395,7 +2576,7 @@ disparo: lugar
 lugar: aldea
 canal: ana_sola
 repetir: dia
-si: hora:8-18
+si: hora:8-18, dias_desde:llegada_tv:10
 ---
 ana: (En el cruce de caminos, la gente se saluda de carreta a carreta. Un perro duerme al sol frente a la tienda.)
 ana: Aquí todos saben todo de todos. Al principio me daba miedo; ahora me gusta. Es como vivir dentro de una familia muy grande y un poco metida.

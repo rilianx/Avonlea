@@ -18,7 +18,7 @@ function targets(){
       const id = 'bed:' + i, o = { hy: 4, hit: 24 }, say_ = text => () => float(text, b.x, b.y - 30);
       if (S === 3) add(id, b.x, b.y, 30, 'La huerta duerme bajo la nieve', say_('La huerta duerme bajo la nieve'), { ...o, pri: 50 });
       else if (b.stage >= 3) add(id, b.x, b.y, 30, 'Cortar ' + FLOWER_KINDS[b.kind][1], () => { b.stage = 2; b.dias = 0; game.inv.ramo++; logEv('Ana cortó ' + FLOWER_KINDS[b.kind][1] + ' de la huerta e hizo un ramo.'); float('+1 ramo de ' + FLOWER_KINDS[b.kind][1], b.x, b.y - 26); save(); }, o);
-      else if (game.hasCan && game.water > 0 && !b.wet) add(id, b.x, b.y, 30, 'Regar', () => { b.wet = 1; b.grow = 0; game.water--; logEv('Ana regó la huerta.'); taskEvent('regar'); realR.setFact('sembrado'); realR.setFact('regado'); drops(b.x, b.y); sfx.water(); save(); }, o);
+      else if (game.hasCan && game.water > 0 && !b.wet) add(id, b.x, b.y, 30, 'Regar', () => { b.wet = 1; b.grow = 0; game.water--; logEv('Ana regó la huerta.'); taskEvent('regar'); realR.setFact('sembrado'); realR.setFact('regado'); dlgHecho('regado'); drops(b.x, b.y); sfx.water(); save(); }, o);
       else if (game.hasCan && game.water <= 0 && !b.wet) add(id, b.x, b.y, 30, 'La regadera está vacía (llénala en la bomba)', say_('La regadera está vacía: llénala en la bomba'), { ...o, pri: 50 });
       else add(id, b.x, b.y, 30, b.ana ? 'Mirar mi huertito' : 'Mirar el cantero', say_(ETAPA_TXT[b.stage] + (b.wet ? ' (Hoy ya tiene agua.)' : ' (Le hace falta agua: la regadera está en la bomba.)')), { ...o, pri: 50 });   // (how it is going: it takes its time)
     });
