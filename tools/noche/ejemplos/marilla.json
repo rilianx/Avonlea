@@ -1,0 +1,13 @@
+{
+ "_nota": "La conversación con Marilla que escribió gpt-5.4-mini (nivel libre) para la partida jugada a mano (día 19), acortada: llena dos lagunas y la de «con Marilla no queda de qué conversar». Uso: node tools/noche.js --respuesta tools/noche/ejemplos/marilla.json",
+ "escenario": "tools/noche/partidas/claude.json",
+ "nivel": "libre",
+ "bloques": [
+  {
+   "tipo": "conversacion",
+   "esperado": "aceptado",
+   "porque": "La partida pide una conversación nueva con Marilla y recoge lo de Gilbert y la Sra. Lynde.",
+   "texto": "=== ia_marilla_gilbert_y_lynde ===\ncon: marilla\ntema: Decirle a Marilla que aún le arde lo de la Sra. Lynde y lo de la escuela\nsi: presente:marilla, conoce:marilla, hecho:zanahorias_contesta, hecho:lynde_llanto, hecho:llego_gilbert\nal_terminar: suma afecto:marilla:ana 1\n---\nana: Marilla… tengo que decirle una cosa que me pesa como una piedra en el pecho.\nmarilla: Ya la estás diciendo con esa cara. Habla, Ana.\nana: A veces una quiere ser sensata, pero le sale el orgullo. Contesté delante de todos en la escuela, y antes, con la Sra. Lynde, salí corriendo a llorar a mi pieza.\nmarilla: (Marilla la mira un momento, seria.) Una cosa es tener amor propio y otra hacer una tragedia de cada palabra.\n-> Preguntarle si estuvo muy mal\n   ana: ¿Estuve muy mal, Marilla?\n   marilla: Estuviste mal en contestar por orgullo; y estuviste mejor en admitirlo ahora.\n   ! suma afecto:marilla:ana 1\n-> Decirle que no puede dejar de acordarse\n   ana: No puedo dejar de acordarme, aunque quisiera.\n   marilla: Entonces acuérdate de esto: las cosas se reparan más con una verdad dicha a tiempo que con diez disculpas tarde.\n   ! suma paciencia:ana 1"
+  }
+ ]
+}

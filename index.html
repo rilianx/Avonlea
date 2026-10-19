@@ -16176,7 +16176,7 @@ function nocheCualidades(){
 }
 function nocheLagunasTexto(){
   return (NOCHE_LAGUNAS || []).map(l => l.de === 'decisiones'
-    ? `- Ana eligió «${l.opcion}» (día ${l.dia}), y nada de lo que todavía puede pasar lo toma en cuenta: algo que lo recuerde o le dé consecuencias (que pida «hecho:${l.hecho}»).`
+    ? `- ${l.tema ? `En la conversación «${l.tema}»` : 'En una escena'}${l.conNombres?.length ? ` con ${l.conNombres.join(' y ')}` : ''}, Ana eligió «${l.opcion}» (día ${l.dia}), y nada de lo que todavía puede pasar lo toma en cuenta: algo que lo recuerde o le dé consecuencias (que pida «hecho:${l.hecho}»; ojo: lo que eligió lo dijo o lo hizo ahí, con ${l.conNombres?.join(' y ') || 'quienes estaban'}).`
     : l.de === 'pocas' ? `- Ana quiere ${l.hay === 'frase' ? 'oír cosas nuevas de' : 'conversar con'} ${l.nombre} (${l.quien}), y estos días ${l.quedan ? 'solo ' + (l.quedan === 1 ? 'queda 1' : 'quedan ' + l.quedan) : 'no queda ninguna'} ${l.hay === 'frase' ? 'frase distinta (repite siempre lo mismo)' : l.hay === 'escena' ? 'escena' : 'conversación'}: ${l.hay === 'frase' ? 'líneas nuevas para ' + l.quien + ' (dichos)' : l.hay === 'escena' ? 'una escena nueva con ' + l.quien : 'una conversación nueva con ' + l.quien + ' (que pueda darse ya)'}.`
     : `- Con ${l.nombre} (${l.quien}) ya no queda ninguna escena ni conversación por pasar: algo nuevo entre ${l.quien} y Ana.`).join('\n');
 }

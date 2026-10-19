@@ -171,7 +171,7 @@
           const o = /^\s*->\*?\s*(.*)$/u.exec(l); if (o) { op = o[1].trim(); continue; }
           if (!/^\s/u.test(l) && l.trim()) op = null;
           const m = rx('^\\s+!\\s*hecho\\s+(\\w+)').exec(l);
-          if (m && op && !siempre.includes(m[1]) && !DECIDE.has(m[1])) DECIDE.set(m[1], { escena: p[1], opcion: op });
+          if (m && op && !siempre.includes(m[1]) && !DECIDE.has(m[1])) DECIDE.set(m[1], { escena: p[1], opcion: op, con: [...new Set([...(f.find(([k]) => k === 'con') ? [f.find(([k]) => k === 'con')[1]] : []), ...hablan])], tema: (f.find(([k]) => k === 'tema') || [])[1] || '' });   // (with whom, and what about: the AI has to know where the choice was made)
         }
         for (const x of deja) {
           if (!QUIEN_DEJA.has(x)) QUIEN_DEJA.set(x, []);
@@ -425,7 +425,7 @@
         if (!gente.has(k)) continue;
         const tipo = { conversar: 'conversación', encuentro: 'escena al encontrarse', primera: 'escena' }[e.disparo] || 'escena';
         const pres = hablan.filter(h => LLEG.has(h) && h !== k).map(h => 'presente:' + h);
-        U(k).push({ tipo, id: e.id, texto: cut(e.primera || '', 80), conds: [...si, ...en, ...canal, ...pres, 've:' + k], textos: e.texto, deja: DEJA.get(e.id) || new Set(), rutina: !!e.repetir && e.repetir !== 'una_vez' });
+        U(k).push({ tipo, id: e.id, texto: cut(e.primera || '', 80), conds: [...si, ...en, ...canal, ...pres, 've:' + k], textos: e.texto, deja: DEJA.get(e.id) || new Set(), rutina: /^(dia|siempre|cada \d)/u.test(e.repetir || '') });
       }
     }
     for (const k of gente.keys())
@@ -521,7 +521,7 @@
             const toma = c => c === 'hecho:' + x || c.startsWith('dias_desde:' + x + ':');
             let hay = null;
             for (const [k, us] of UNIDADES) { for (const u of us) if (u.conds.some(toma) && !(ESCENA.has(u.tipo) && jugada(u)) && await puede(u, k)) { hay = u; break; } if (hay) break; }
-            if (!hay) out.push({ regla: r.nombre, de: 'decisiones', hecho: x, dia: H[x], ...DECIDE.get(x) });
+            if (!hay) { const d = DECIDE.get(x); out.push({ regla: r.nombre, de: 'decisiones', hecho: x, dia: H[x], ...d, conNombres: d.con.map(nombre) }); }
           }
         } else if (r.de === 'pocas') {   // lo que se gasta: quedan menos de «mínimo» cosas de este tipo con cada uno
           // (lo que puede darse estos días, de hoy a pasado mañana: lo que la jugadora encuentra si busca; conversaciones y
