@@ -1,0 +1,19 @@
+{
+ "_nota": "Lo que escribió gpt-5.4-mini (nivel efectos) para la jugadora curiosa, con «lo ya conversado»: los efectos venían después de «---» (y por eso se rechazaba todo). Ahora el juego los sube a su lugar. La de Cecily (corregida: se tutean, y dice el secreto) habla de «orden», que ya no la manda al granero. Uso: node tools/noche.js --respuesta tools/noche/ejemplos/campos.json",
+ "escenario": "tools/noche/partidas/curiosa.json",
+ "nivel": "efectos",
+ "bloques": [
+  {
+   "tipo": "conversacion",
+   "esperado": "aceptado",
+   "porque": "Sigue las semillas que le dio Matthew.",
+   "texto": "=== ia_matthew_semillas ===\ncon: matthew\ntema: Preguntarle si ya quiere que Ana siembre las semillas de capuchina\nresumen: Ana vuelve sobre las semillas que él le regaló y descubre que Matthew piensa en ella cuando nadie mira.\n---\nana: Matthew, ¿cree usted que ya puedo plantar las semillas de capuchina que me dio?\nmatthew: (Matthew se quita el sombrero, lo da vueltas entre las manos y mira hacia la ventana.) Si no las plantas hoy, no te van a crecer mañana, ni pasado mañana.\nana: Yo las guardé como si fueran joyas de reyes. Me daba miedo gastarlas.\nmatthew: Las semillas no se gastan por plantarlas. Eso es para lo que sirven.\nana: (Con una sonrisa de oreja a oreja.) ¡Ah, eso es una filosofía muy consoladora! Entonces puedo ponerlas en mi rincón y ver si levantan la cabeza como yo.\nmatthew: Seguro que lo harán. Tú tienes mano para las cosas que crecen.\nana: ¿De veras lo cree usted?\nmatthew: (Muy bajo.) Sí. Y… si necesitas más, ya veremos.\nana: (Ana se queda quieta un instante, con el corazón muy lleno.) Entonces yo cuidaré esas flores como si fueran pequeñas obligaciones con pétalos.\nal_terminar: suma afecto:matthew:ana 1\nal_terminar: cosa ana semillas 1"
+  },
+  {
+   "tipo": "conversacion",
+   "esperado": "aceptado",
+   "porque": "Cecily, en el perfil, sin conversaciones.",
+   "texto": "=== ia_cecily_tesoro ===\ncon: cecily\ntema: Preguntarle qué hace cuando quiere guardar un tesoro pequeño\nresumen: Cecily le cuenta a Ana sus tesoros escondidos y, al final, el secreto que le daba vergüenza decir.\n---\nana: Cecily, ¿tú guardas cosas secretas en algún cajón, o en algún rincón del corazón?\ncecily: (Cecily aprieta los dedos.) Yo… guardo una cinta azul y una piedrecita lisa que parece un huevo de cisne.\nana: ¡Una cinta azul! Eso ya es un tesoro con modales.\ncecily: Felicity dice que las cosas bonitas hay que tenerlas en orden, o se deslucen.\nana: Yo creo que algunas cosas viven mejor escondidas, para que brillen más cuando una las saca.\ncecily: (Cecily sonríe apenas.) La piedrecita la encontré el día que llegaste. Pensé que traía suerte.\nal_terminar: suma afecto:cecily:ana 1"
+  }
+ ]
+}

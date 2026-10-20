@@ -129,7 +129,7 @@ for (const m of codigo.matchAll(/['"`\[]conoce:([a-z_0-9]+)/g)) anota(pide, 'con
 // otherwise it is had wherever they are (sowing in the kitchen)
 for (const bloque of leer('src/datos/conversaciones.txt').split(/^(?====)/m)) { const id = bloque.match(/^===\s*(.+?)\s*===/)?.[1]; if (!id) continue;
   const cuerpo = bloque.split(/^---$/m)[1] || '';
-  if (/\b(surco|sembr\w*|semillas? una|harina|al horno|amasa\w*|orde[ñn]\w*|el balde|aguja|hilv\w*)\b/i.test(cuerpo) && !/^se_hace_en:/m.test(bloque)) malas.push(`conversación ${id}: es con las manos (${cuerpo.match(/\b(surco|sembr\w*|semillas? una|harina|al horno|amasa\w*|orde[ñn]\w*|el balde|aguja|hilv\w*)\b/i)[0]}), y no dice dónde se hace («se_hace_en:»)`); }
+  if (/\b(surco|sembr\w*|semillas? una|harina|al horno|amasa\w*|ordeñ\w*|el balde|aguja|hilv\w*)\b/i.test(cuerpo) && !/^se_hace_en:/m.test(bloque)) malas.push(`conversación ${id}: es con las manos (${cuerpo.match(/\b(surco|sembr\w*|semillas? una|harina|al horno|amasa\w*|ordeñ\w*|el balde|aguja|hilv\w*)\b/i)[0]}), y no dice dónde se hace («se_hace_en:»)`); }
 // an option that quotes what Ana says («-> «Perdón. Ahora mismo me visto.»») is what she says: her first line says it
 // (not something else, «se me olvidó…»): at least half of its words
 { const palabras = t => new Set(t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').split(/[^a-zñ]+/).filter(w => w.length > 3));

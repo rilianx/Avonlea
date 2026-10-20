@@ -16841,7 +16841,7 @@ function nocheSistema(nivel){
   const V = nocheVocab(), n = NOCHE_N[nivel];
   const voces = [...Object.keys(CH).map(k => `- ${k} (${CH[k].fullName || NAMES[k]}): ${voiceShort(k)}`), ...Object.entries(FOLK_DEFS).filter(([k]) => !/^v\d+$/.test(k)).map(([k, d]) => `- ${k} (${nocheSinArt(d.name)})${fichaOf(k)?.ficha ? ': ' + String(fichaOf(k).ficha).slice(0, 140) : ''}`)].join('\n');
   const tipos = ['conversacion', 'respuesta', ...(n >= 2 ? ['escena'] : [])];   // (no sayings: a line on its own floats; what someone says goes in a short scene)
-  return `Eres quien escribe, de noche, cosas nuevas para «Un día en Avonlea», un juego tranquilo inspirado en «Ana de las Tejas Verdes» (L. M. Montgomery): Avonlea, un pueblito de granjas de la Isla del Príncipe Eduardo, hacia 1880. Ana Shirley tiene 11 años, es pelirroja, huérfana, soñadora, conversadora, de palabras grandiosas e imaginación desbordante; vive con Marilla y Matthew Cuthbert en Tejas Verdes. El tono es el del libro: tierno, con humor, sin nada moderno. Español; en la familia se tutea a Ana; Ana trata de usted a los grandes.
+  return `Eres quien escribe, de noche, cosas nuevas para «Un día en Avonlea», un juego tranquilo inspirado en «Ana de las Tejas Verdes» (L. M. Montgomery): Avonlea, un pueblito de granjas de la Isla del Príncipe Eduardo, hacia 1880. Ana Shirley tiene 11 años, es pelirroja, huérfana, soñadora, conversadora, de palabras grandiosas e imaginación desbordante; vive con Marilla y Matthew Cuthbert en Tejas Verdes. El tono es el del libro: tierno, con humor, sin nada moderno. Español; en la familia se tutea a Ana; Ana trata de usted a los grandes; entre niñas y niños se tutean (Ana, Diana, Cecily, Felicity, Ruby, Gilbert…).
 
 Mientras Ana duerme, escribes como mucho ${NOCHE_MAX} bloques NUEVOS para ESTA partida, pensados para cómo está cada personaje con Ana, para lo que a quien juega le interesa (el perfil) y para lo que quedó abierto (lo que le falta a la partida, si viene: primero eso; los cabos sueltos; las situaciones abiertas). Cada bloque se escribe en el formato de los archivos de datos del juego, y el juego lo revisa con las mismas reglas que lo escrito a mano: lo que no las cumple se descarta. Mejor pocos y buenos. Si la partida trae «LO QUE LE FALTA A ESTA PARTIDA», al menos uno de tus bloques llena una de esas faltas (pidiendo en su «si:» el hecho que se indica, o con la persona que se nombra).
 
@@ -16852,6 +16852,7 @@ LO QUE IMPORTA (el juego quiere escenas con contenido, no relleno):
 - Nada de relleno: saludos, el clima, comentarios sueltos, charla que no lleva a nada.
 - Nada de frases sueltas: si alguien dice algo, es una escena (o una conversación) corta: dónde, quién está, qué lo provoca, y qué responde o hace Ana. Al menos ${NOCHE_LINEAS} líneas, con un ida y vuelta; una frase sola no es una escena.
 - Temas nuevos, sin esperar a que se acaben: al menos ${NOCHE_TEMAS} de tus bloques son conversaciones NUEVAS con las personas que más busca (el perfil), en la dirección de lo que le interesa (lo que elige cuando conversa, sus actividades, sus lugares), aunque esas personas todavía tengan temas. Lo que deja pasar, no lo insistas. Un tema nuevo sigue a uno que eligió, sin repetirlo: no otra vez lo mismo («enseñarle a cocinar» de nuevo), sino lo que vino después, lo que quedó por decir, lo que la otra persona se atreve a contar ahora (si aprendió a cocinar con Marilla: la primera tarta que le sale bien, o la receta de la madre de Marilla). Y que pueda darse ya en esta partida: nada de pedir que no haya pasado algo que ya pasó.
+- Nada de lugares comunes, que salen una y otra vez y no sorprenden: «enséñame a coser / a cocinar / a sembrar», «¿cómo era usted de niña?», «quiero ayudar en la granja / ser útil», ordenar la despensa, las gallinas. Lo que más vale es la vida de adentro del otro (un miedo, una pena, un sueño que dejó, algo que nunca cuenta) o algo que pasó en ESTA partida; y si una escena promete un secreto, lo dice.
 - Las opciones son decisiones de verdad: cada una lleva a algo propio (otra respuesta de la otra persona, otro efecto), no la misma cosa dicha de dos maneras.
 
 NIVEL: ${nivel}. Tipos permitidos: ${tipos.join(', ')}.
@@ -17325,6 +17326,10 @@ function nocheReparar(b){
     const lugares = en ? new Set([...hablan].filter(k => k !== 'ana' && k !== 'narra' && en[k]).map(k => en[k])) : new Set();
     if (en && !en.ana && lugares.size === 1) { const l = [...lugares][0]; L[i] = L[i].replace(/\s*$/, '') + ', ana=' + l; R.push(`agregado «ana=${l}» a «en:» (donde están los demás)`); }
   }
+  // the fields written after «---», among the lines (an effect at the end: «al_terminar: suma afecto…»): up, where they go
+  { const f = L.findIndex(l => l.trim() === '---');
+    const campos = f < 0 ? [] : L.slice(f + 1).filter(l => /^(al_terminar|al_empezar|si|resumen|se_hace_en):/.test(l));
+    if (campos.length) { const resto = L.slice(f + 1).filter(l => !campos.includes(l)); L.splice(f, L.length - f, ...campos, '---', ...resto); for (const x of campos) R.push(`«${x.split(':')[0]}:» subido antes de «---» (es un campo, no alguien que habla)`); } }
   if (tipo === 'conversacion') { nocheCondicionesDeAhora(L, R);
     if (!L.some(l => /^\s*resumen:/.test(l))) { const t = L.find(l => /^\s*tema:/.test(l)); if (t) { L.splice(L.indexOf(t) + 1, 0, 'resumen: ' + t.replace(/^\s*tema:\s*/, '')); R.push('agregado «resumen:» (el tema, a falta de uno)'); } } }   // (what it was about, for the nights after)
   return { bloque: { ...b, texto: L.join('\n') }, reparado: [...new Set(R)], motivos: F };
@@ -17349,7 +17354,7 @@ function nocheCondicionesDeAhora(L, R){
   if (!L.some(l => /^\s*se_hace_en:/.test(l))) { const cuerpo = L.slice(L.findIndex(l => l.trim() === '---') + 1).join('\n');
     const s = NOCHE_MANOS.find(([re]) => re.test(cuerpo)); if (s) { L.splice(L.findIndex(l => l.trim() === '---'), 0, 'se_hace_en: ' + s[1]); R.push(`agregado «se_hace_en: ${s[1]}» (es con las manos)`); } }
 }
-const NOCHE_MANOS = [[/\b(surco|sembr\w*|semillas? una)\b/i, 'huertito, huerta'], [/\b(harina|al horno|amasa\w*|aguja|hilv\w*)\b/i, 'gg'], [/\b(orde[ñn]\w*|el balde)\b/i, 'granero']];
+const NOCHE_MANOS = [[/\b(surco|sembr\w*|semillas? una)\b/i, 'huertito, huerta'], [/\b(harina|al horno|amasa\w*|aguja|hilv\w*)\b/i, 'gg'], [/\b(ordeñ\w*|el balde)\b/i, 'granero']];
 // the blocks of one night, in order (what one accepts, the next can use, in «libre»): { aceptados, rechazados }; antes:
 // what this night already accepted (the second round, after the AI corrected what was rejected)
 function nocheValidar(bloques, nivel = nocheNivel(), antes = []){
