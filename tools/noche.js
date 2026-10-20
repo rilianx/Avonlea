@@ -18,7 +18,7 @@ const { BASE, FILA_ESCENA } = require('./momentos');
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 && process.argv[i + 1] && !process.argv[i + 1].startsWith('--') ? process.argv[i + 1] : d; };
 const RESPUESTA = arg('respuesta', null), RESP = RESPUESTA ? JSON.parse(fs.readFileSync(path.resolve(RESPUESTA), 'utf8')) : null;   // (an example may say its scenario and level)
 const NIVEL = arg('nivel', RESP?.nivel || 'efectos'), MODELO = arg('modelo', ''), SALIDA = path.resolve(RAIZ, arg('salida', 'trazas/noche'));
-const ESCENARIO = arg('escenario', RESP?.escenario || 'spencer_rachel'), SIN_MODELO = process.argv.includes('--sin-modelo');
+const ESCENARIO = arg('escenario', RESP?.escenario || 'spencer_rachel'), SIN_MODELO = process.argv.includes('--sin-modelo'), VARIANTE = arg('variante', '');   // (a version of the request: src/js/66-noche.js, NOCHE_VARIANTE)
 
 // ---------------------------------------------------------------- the scenarios: a game at a certain point (in the game: dev)
 const D = (d, t) => ({ d, s: 1, t, h: 15 });
@@ -147,6 +147,7 @@ async function openai(cuerpos){
   // the gaps of this game, with Z3 (tools/modelo.js): into the page, for the request (as nocheModelo will, in the game)
   const partidaZ = await ev('nochePartida()'); let lag = null;
   if (nodeModules() && !SIN_MODELO) { try { lag = await require('./modelo.js').lagunas(partidaZ); await ev('(L => nocheLagunasPoner(L))', lag.lagunas); } catch (e) { lag = { error: String(e.message || e) }; } }
+  if (VARIANTE) await ev(`(v => { NOCHE_VARIANTE = v; })`, VARIANTE);
   const pedido = await ev(`(([n, m]) => nochePedido(n, m || undefined))`, [NIVEL, MODELO]);
   const cuerpos = await ev(`(p => nocheCuerpos(p))`, pedido);
   fs.writeFileSync(path.join(SALIDA, 'pedido.json'), JSON.stringify({ escenario: ESCENARIO, nivel: NIVEL, modelo: pedido.modelo, cuerpo: cuerpos[0] }, null, 1));

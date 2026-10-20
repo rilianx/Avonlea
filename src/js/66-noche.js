@@ -249,6 +249,35 @@ function nocheEjemplo(el, id){
   while (j > i + 1 && (!L[j - 1].trim() || L[j - 1].trim()[0] === '#')) j--;
   return L.slice(i, j).join('\n');
 }
+// versions of the request, to compare what each one writes (tools/noche.js --variante, trazas/temas/): «rubrica» tells
+// the AI how its scenes are judged (trazas/temas/rubrica.md); «ejemplo» shows one of the best scenes it wrote; «plan»
+// asks it to say, for each block, what changes and the line that stays. Several, with «+»: «rubrica+plan»
+let NOCHE_VARIANTE = '';
+const nocheVar = v => NOCHE_VARIANTE.split('+').includes(v) || NOCHE_VARIANTE === 'todo';
+const NOCHE_RUBRICA = `CÓMO SE JUZGA CADA ESCENA (de 0 a 2 en cada punto; apunta a 2 en todos):
+1. Verdad: nada que no haya pasado en esta partida; mejor, parte de algo concreto que pasó (lo que Ana eligió, dijo o escribió).
+2. Voz: al menos una línea que solo esa persona diría.
+3. Algo cambia o se revela entre ellos (un pasado, un miedo, un cariño, una decisión).
+4. Novedad: no repite lo ya conversado; mejor, sigue algo con lo que vino después.
+5. Uno de los temas del libro en el centro (pertenecer; imaginación y costumbre; orgullo y perdón; la amistad; crecer).
+6. Concreta: nace de esta relación y de esta partida, no de «una niña y un adulto».
+7. Inspira: una imagen o una frase que se queda en la memoria.
+8. Si tiene opciones: cada una dice algo de quién es Ana y deja algo distinto.
+9. Forma: cada línea hace algo; el final cierra (o abre) bien.`;
+const NOCHE_EJEMPLO_BUENO = `=== ia_marilla_veraneante ===
+con: marilla
+tema: Preguntarle qué piensa de la veraneante
+resumen: Ana pregunta si una señora que se ríe de todo puede ser buena; Marilla le pide el hilo y la historia a la vez.
+---
+ana: Marilla, ¿usted cree que una señora que se ríe de todo puede ser muy fina y muy buena al mismo tiempo?
+marilla: (Sin levantar la vista de su labor.) Puede. La finura no siempre vive en la cara, Ana, ni la bondad en el vestido.
+ana: Entonces la veraneante podría ser buena aunque traiga voces de Boston y sombreros de otro mundo.
+marilla: Podría. Pero una cosa es ser amable, y otra andar mirando todo como si fuera una curiosidad de feria.
+ana: (Ana se endereza, picada y fascinada a un tiempo.) Yo no miro como feria. Yo miro como si cada cosa tuviera una historia escondida.
+marilla: Eso ya lo sé. Y también sé que a veces las historias escondidas te hacen olvidar el hilo, la aguja y el sentido común.
+ana: ¿Y usted preferiría que yo pensara en el hilo o en la historia?
+marilla: En los dos, si fueras capaz. Lo difícil es que no se te caiga uno mientras persigues el otro.
+(por qué es buena: parte de algo que pasó en la partida; Marilla habla como Marilla; es el tema del libro —imaginación y costumbre—; y termina en una frase que se queda)`;
 function nocheSistema(nivel){
   const V = nocheVocab(), n = NOCHE_N[nivel];
   const voces = [...Object.keys(CH).map(k => `- ${k} (${CH[k].fullName || NAMES[k]}): ${voiceShort(k)}`), ...Object.entries(FOLK_DEFS).filter(([k]) => !/^v\d+$/.test(k)).map(([k, d]) => `- ${k} (${nocheSinArt(d.name)})${fichaOf(k)?.ficha ? ': ' + String(fichaOf(k).ficha).slice(0, 140) : ''}`)].join('\n');
@@ -326,7 +355,7 @@ ${n >= 2 ? `LAS SITUACIONES ABIERTAS (vienen en la partida, abajo): momentos que
 - Cómo reacciona Ana lo elige quien juega, nunca tú: si la situación dice «Ana puede reaccionar», da una opción «->» por cada reacción, cada una con «! responde <reacción>».
 - Una situación que ya pasó y «podría volver» es opcional: tráela solo si la partida lo pide.
 
-` : ''}LAS REGLAS (las revisa un solucionador lógico; lo que las rompe se descarta):
+` : ''}${nocheVar('rubrica') ? NOCHE_RUBRICA + '\n\n' : ''}LAS REGLAS (las revisa un solucionador lógico; lo que las rompe se descarta):
 ${nocheReglasProsa()}
 - Quien no conoce a Ana no la nombra («Ana», «Shirley»): pide «conoce:<quien>».
 - Una frase o escena tiene que poder darse: sus condiciones no se contradicen.
@@ -337,7 +366,7 @@ Una respuesta a una carta:
 ${nocheEjemplo('guion', 'resp_diana_1')}
 
 Una conversación:
-${nocheEjemplo('conversaciones', 'conv_sraallan_ser_buena')}
+${nocheVar('ejemplo') ? NOCHE_EJEMPLO_BUENO : nocheEjemplo('conversaciones', 'conv_sraallan_ser_buena')}
 ${n >= 2 ? `
 Una escena con opciones (así pasa en el libro la situación «rival»; la tuya, si la trae de otra forma, lleva «situacion: rival» y en cada opción «! responde <reacción>», y no lleva «interrumpe», «ofensa» ni «! hecho …» de esta):
 ${nocheEjemplo('guion', 'zanahorias')}
@@ -349,7 +378,7 @@ LO QUE EL JUEGO YA TUVO QUE DESCARTAR (no lo repitas):
 - En una escena, todos los que hablan, Ana también, están en «en:» («en: ana=gg, matthew=gg»); «sujeta:» y «en:» usan los ids.
 - Solo los hechos de la lista${n >= 3 ? ', o los «ia_…» que tus propios bloques dejan' : ''}.
 
-RESPONDE solo con el JSON pedido: { "bloques": [ { "tipo": "${tipos.join('" | "')}", "texto": "<el bloque, con saltos de línea>", "porque": "<una frase: por qué para esta partida>" } ] }.`;
+RESPONDE solo con el JSON pedido: { "bloques": [ { "tipo": "${tipos.join('" | "')}", "texto": "<el bloque, con saltos de línea>", "porque": "${nocheVar('plan') ? '<antes de escribir el bloque: qué cambia o se revela; qué de esta partida usa; la línea que se queda>' : '<una frase: por qué para esta partida>'}" } ] }.${nocheVar('plan') ? ' Escribe primero el «porque» (tu plan) y después el «texto» que lo cumple.' : ''}`;
 }
 // what Ana really wrote to whoever has not answered yet (the last two letters to each): an answer may only refer to this
 function nocheCartasTexto(){
@@ -387,6 +416,8 @@ Escribe hasta ${NOCHE_MAX} bloques, nivel «${nivel}».`;
 }
 const NOCHE_ESQUEMA = { type: 'object', additionalProperties: false, required: ['bloques'], properties: { bloques: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['tipo', 'texto', 'porque'],
   properties: { tipo: { type: 'string', enum: ['conversacion', 'respuesta', 'escena'] }, texto: { type: 'string' }, porque: { type: 'string' } } } } } };
+// (with «plan», the plan comes before the text: the model writes in the order of the schema)
+const nocheEsquema = () => { if (!nocheVar('plan')) return NOCHE_ESQUEMA; const it = NOCHE_ESQUEMA.properties.bloques.items, { porque, ...resto } = it.properties; return { ...NOCHE_ESQUEMA, properties: { bloques: { ...NOCHE_ESQUEMA.properties.bloques, items: { ...it, properties: { porque, ...resto } } } } }; };
 function nochePedido(nivel = nocheNivel(), modelo = NOCHE_AJ.modelo || NOCHE_MODELO){
   nocheV = null;
   return { modelo, nivel, mensajes: [{ role: 'system', content: nocheSistema(nivel) }, { role: 'user', content: nocheUsuario(nivel) }] };
@@ -394,9 +425,9 @@ function nochePedido(nivel = nocheNivel(), modelo = NOCHE_AJ.modelo || NOCHE_MOD
 // the bodies to try, in order: the schema with little reasoning; without choosing the reasoning (a model that does not take
 // it); and plain JSON with the schema in the prompt (a model that does not take schemas)
 function nocheCuerpos(p){
-  const base = { model: p.modelo, max_completion_tokens: 12000, messages: p.mensajes }, fmt = { type: 'json_schema', json_schema: { name: 'bloques_de_la_noche', strict: true, schema: NOCHE_ESQUEMA } };
+  const base = { model: p.modelo, max_completion_tokens: 12000, messages: p.mensajes }, fmt = { type: 'json_schema', json_schema: { name: 'bloques_de_la_noche', strict: true, schema: nocheEsquema() } };
   return [{ ...base, response_format: fmt, reasoning_effort: 'low' }, { ...base, response_format: fmt },
-    { ...base, messages: [{ ...p.mensajes[0], content: p.mensajes[0].content + '\n\nResponde solo con un objeto JSON que siga este esquema: ' + JSON.stringify(NOCHE_ESQUEMA) }, ...p.mensajes.slice(1)], response_format: { type: 'json_object' } }];
+    { ...base, messages: [{ ...p.mensajes[0], content: p.mensajes[0].content + '\n\nResponde solo con un objeto JSON que siga este esquema: ' + JSON.stringify(nocheEsquema()) }, ...p.mensajes.slice(1)], response_format: { type: 'json_object' } }];
 }
 // the answer of the API → the blocks (at most NOCHE_MAX); an error says why, in words
 function nocheLeerRespuesta(data){
