@@ -49,3 +49,26 @@ primero, todo al final) con notas un punto más altas.
 
 Correr de nuevo («experimento: prompts»): rubrica, rubrica+cuidado y rubrica+cuidado+ejemplo, 3 noches cada una, y
 juzgar con la misma rúbrica. La que gane queda como el pedido de siempre.
+
+## Segunda corrida: rubrica, rubrica+cuidado, rubrica+cuidado+ejemplo
+
+Corrida 39509694246 (commit 29dad42): 3 noches por versión, ya con las reglas nuevas del juego (el «usted» entre niñas se
+rechaza y vuelve a la IA; las cualidades mal escritas se quitan). 33 escenas aceptadas; notas en notas-claude.json («r2:»).
+
+| Versión | Tokens del pedido | Escenas | Nota media (de 18) |
+|---|---|---|---|
+| rubrica | 11 237 | 11 | 13,45 |
+| **rubrica+cuidado** | 11 719 | 11 | **13,55** |
+| rubrica+cuidado+ejemplo | 11 821 | 11 | 12,45 |
+
+- **Todo sube un punto** frente a la primera corrida (rubrica: de 12,75 a 13,45): es lo que hacen las reglas del juego,
+  sobre todo el «usted», que ya no llega a la partida.
+- **«cuidado» empata con «rubrica»**: la diferencia (0,1) es ruido con 11 escenas. Deja una marca propia: dos de sus mejores
+  escenas son de la casa y del huerto con hechos de la partida (Matthew: «Tú también creces así», 17; Marilla: «Agradecida,
+  sí. Mojigata, no.», 16).
+- **Pero el «tú» se pasó al otro lado**: al corregir el «usted», Ana tuteó a Matthew (2 escenas). Ahora el juego lo
+  rechaza también (Ana le dice «usted» a los grandes, como en todo lo escrito a mano) y el pedido lo dice con sus nombres.
+- **El ejemplo vuelve a restar** (12,45): copia el molde (la tarta, el silencio de Cecily) en vez de buscar otra cosa.
+
+Queda como pedido de siempre: **rubrica+cuidado** (NOCHE_VARIANTE). Lo que más puede subir la nota ahora no es el pedido
+sino elegir: el experimento «elegir» (8 candidatos y el juez se queda con 4).

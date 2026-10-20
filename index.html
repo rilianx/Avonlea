@@ -16844,7 +16844,7 @@ function nocheEjemplo(el, id){
 // the AI how its scenes are judged (trazas/temas/rubrica.md); «ejemplo» shows one of the best scenes it wrote; «plan»
 // asks it to say, for each block, what changes and the line that stays; «cuidado» names what most often cost good scenes
 // points (how they speak to each other, facts made up, options with no answer). Several, with «+»: «rubrica+cuidado»
-let NOCHE_VARIANTE = '';
+let NOCHE_VARIANTE = 'rubrica+cuidado';   // (the best in trazas/temas/juicio-prompts.md; «ninguna»: the request without them)
 const nocheVar = v => NOCHE_VARIANTE.split('+').includes(v) || NOCHE_VARIANTE === 'todo';
 const NOCHE_RUBRICA = `CÓMO SE JUZGA CADA ESCENA (de 0 a 2 en cada punto; apunta a 2 en todos):
 1. Verdad: nada que no haya pasado en esta partida; mejor, parte de algo concreto que pasó (lo que Ana eligió, dijo o escribió).
@@ -16891,7 +16891,7 @@ LO QUE IMPORTA (el juego quiere escenas con contenido, no relleno):
 - Las opciones son decisiones de verdad: cada una lleva a algo propio (otra respuesta de la otra persona, otro efecto), no la misma cosa dicha de dos maneras.
 ${nocheVar('cuidado') ? `
 LO QUE MÁS LE HACE PERDER A UNA ESCENA BUENA:
-- El trato: Ana dice «tú» a ${[...new Set(['diana', ...Object.keys(FOLK_DEFS).filter(nocheNiño)])].map(wmName).join(', ')} (niñas y niños, como ella), y ellos a ella: nunca «usted». Marilla y Matthew dicen «tú» a Ana. Ana dice «usted» a los grandes.
+- El trato: Ana dice «tú» a ${[...new Set(['diana', ...Object.keys(FOLK_DEFS).filter(nocheNiño)])].map(wmName).join(', ')} (niñas y niños, como ella), y ellos a ella: nunca «usted». Ana dice «usted» a Marilla, a Matthew y a todos los grandes (nunca «tú»), y ellos le dicen «tú» a ella.
 - La verdad del mundo: quién es pariente de quién y dónde vive cada uno, solo lo que dice LA GENTE; nada de «ayer», «esta mañana» u otro día que no esté en la partida; nada de lo que Ana no ha hecho, ni de gente que todavía no conoce como si la conociera.
 - Las opciones: cada «->» lleva la línea de Ana Y lo que la otra persona contesta (una o dos líneas, distinto en cada una); una opción con solo efectos no dice nada.
 - Los efectos, pocos y con sentido: lo que de verdad cambió en la escena (casi siempre un «suma afecto», o nada).
@@ -17292,6 +17292,9 @@ function nocheRevisar(b, ctx){
     const tu = nocheNiño(c.con) ? ['ana', c.con] : ['marilla', 'matthew'].includes(c.con) ? [c.con] : [];
     const dichos = [], todas = X => { for (const l of X || []) { if (l[0] === '?') for (const o of l[2] || []) todas(o.lineas); else if (l[0] !== '!') dichos.push([String(l[0]).toLowerCase(), String(l[1] || '')]); } }; todas(L);
     const u = dichos.find(([q, t]) => tu.includes(q) && /(?<!\p{L})usted(?!\p{L})/iu.test(t.replace(/\([^)]*\)/g, '')));
+    // and Ana to the grown-ups: «usted» (in the book, and in all the conversations written by hand)
+    const t = !nocheNiño(c.con) && dichos.find(([q, x]) => q === 'ana' && /(?<!\p{L})(tú|contigo)(?!\p{L})/iu.test(x.replace(/\([^)]*\)/g, '')));
+    if (t) M.push(`ana le dice «tú» a ${c.con} («${t[1].slice(0, 50)}»): Ana trata de «usted» a los grandes (y ellos a ella, de «tú»)`);
     if (u) M.push(nocheNiño(c.con) ? `${u[0]} dice «usted» («${u[1].slice(0, 50)}»): entre niñas y niños se tutean («tú»)` : `${c.con} dice «usted» a Ana («${u[1].slice(0, 50)}»): en la familia se tutea a Ana`);
   }
   if (tipo === 'escena') {
