@@ -54,7 +54,7 @@ jobs:
         run: |
           if [ "$EXPERIMENTO" = "temas" ]; then node tools/temas.js --partida "$ESCENARIO" --modelo "$MODELO" --veces 3 --salida trazas/noche; cp trazas/noche/temas.md trazas/noche/noche.md; cat trazas/noche/temas.md
           elif [ "$EXPERIMENTO" = "prompts" ]; then
-            for v in base rubrica ejemplo plan todo; do for r in 1 2; do
+            for v in rubrica rubrica+cuidado rubrica+cuidado+ejemplo; do for r in 1 2 3; do
               node tools/noche.js --escenario "$ESCENARIO" --nivel "$NIVEL" --modelo "$MODELO" --variante "$([ $v = base ] || echo $v)" --salida "trazas/noche/$v-$r" > /dev/null 2>&1 || true
               node tools/prompts-muestra.js "trazas/noche/$v-$r" "$v · $r" >> trazas/noche/noche.md
             done; done; cat trazas/noche/noche.md

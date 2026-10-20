@@ -251,7 +251,8 @@ function nocheEjemplo(el, id){
 }
 // versions of the request, to compare what each one writes (tools/noche.js --variante, trazas/temas/): «rubrica» tells
 // the AI how its scenes are judged (trazas/temas/rubrica.md); «ejemplo» shows one of the best scenes it wrote; «plan»
-// asks it to say, for each block, what changes and the line that stays. Several, with «+»: «rubrica+plan»
+// asks it to say, for each block, what changes and the line that stays; «cuidado» names what most often cost good scenes
+// points (how they speak to each other, facts made up, options with no answer). Several, with «+»: «rubrica+cuidado»
 let NOCHE_VARIANTE = '';
 const nocheVar = v => NOCHE_VARIANTE.split('+').includes(v) || NOCHE_VARIANTE === 'todo';
 const NOCHE_RUBRICA = `CÓMO SE JUZGA CADA ESCENA (de 0 a 2 en cada punto; apunta a 2 en todos):
@@ -280,7 +281,7 @@ marilla: En los dos, si fueras capaz. Lo difícil es que no se te caiga uno mien
 (por qué es buena: parte de algo que pasó en la partida; Marilla habla como Marilla; es el tema del libro —imaginación y costumbre—; y termina en una frase que se queda)`;
 function nocheSistema(nivel){
   const V = nocheVocab(), n = NOCHE_N[nivel];
-  const voces = [...Object.keys(CH).map(k => `- ${k} (${CH[k].fullName || NAMES[k]}): ${voiceShort(k)}`), ...Object.entries(FOLK_DEFS).filter(([k]) => !/^v\d+$/.test(k)).map(([k, d]) => `- ${k} (${nocheSinArt(d.name)})${fichaOf(k)?.ficha ? ': ' + String(fichaOf(k).ficha).slice(0, 140) : ''}`)].join('\n');
+  const voces = [...Object.keys(CH).map(k => `- ${k} (${CH[k].fullName || NAMES[k]}): ${voiceShort(k)}`), ...Object.entries(FOLK_DEFS).filter(([k]) => !/^v\d+$/.test(k)).map(([k, d]) => `- ${k} (${nocheSinArt(d.name)}${nocheVar('cuidado') && d.home ? ', ' + d.home : ''})${fichaOf(k)?.ficha ? ': ' + String(fichaOf(k).ficha).slice(0, 140) : ''}`)].join('\n');
   const tipos = ['conversacion', 'respuesta', ...(n >= 2 ? ['escena'] : [])];   // (no sayings: a line on its own floats; what someone says goes in a short scene)
   return `Eres quien escribe, de noche, cosas nuevas para «Un día en Avonlea», un juego tranquilo inspirado en «Ana de las Tejas Verdes» (L. M. Montgomery): Avonlea, un pueblito de granjas de la Isla del Príncipe Eduardo, hacia 1880. Ana Shirley tiene 11 años, es pelirroja, huérfana, soñadora, conversadora, de palabras grandiosas e imaginación desbordante; vive con Marilla y Matthew Cuthbert en Tejas Verdes. El tono es el del libro: tierno, con humor, sin nada moderno. Español; en la familia se tutea a Ana; Ana trata de usted a los grandes; entre niñas y niños se tutean (Ana, Diana, Cecily, Felicity, Ruby, Gilbert…).
 
@@ -295,9 +296,15 @@ LO QUE IMPORTA (el juego quiere escenas con contenido, no relleno):
 - Temas nuevos, sin esperar a que se acaben: al menos ${NOCHE_TEMAS} de tus bloques son conversaciones NUEVAS con las personas que más busca (el perfil), en la dirección de lo que le interesa (lo que elige cuando conversa, sus actividades, sus lugares), aunque esas personas todavía tengan temas. Lo que deja pasar, no lo insistas. Un tema nuevo sigue a uno que eligió, sin repetirlo: no otra vez lo mismo («enseñarle a cocinar» de nuevo), sino lo que vino después, lo que quedó por decir, lo que la otra persona se atreve a contar ahora (si aprendió a cocinar con Marilla: la primera tarta que le sale bien, o la receta de la madre de Marilla). Y que pueda darse ya en esta partida: nada de pedir que no haya pasado algo que ya pasó.
 - Nada de lugares comunes, que salen una y otra vez y no sorprenden: «enséñame a coser / a cocinar / a sembrar», «¿cómo era usted de niña?», «quiero ayudar en la granja / ser útil», ordenar la despensa, las gallinas. Lo que más vale es la vida de adentro del otro (un miedo, una pena, un sueño que dejó, algo que nunca cuenta) o algo que pasó en ESTA partida; y si una escena promete un secreto, lo dice.
 - Las opciones son decisiones de verdad: cada una lleva a algo propio (otra respuesta de la otra persona, otro efecto), no la misma cosa dicha de dos maneras.
-
+${nocheVar('cuidado') ? `
+LO QUE MÁS LE HACE PERDER A UNA ESCENA BUENA:
+- El trato: Ana dice «tú» a ${[...new Set(['diana', ...Object.keys(FOLK_DEFS).filter(nocheNiño)])].map(wmName).join(', ')} (niñas y niños, como ella), y ellos a ella: nunca «usted». Marilla y Matthew dicen «tú» a Ana. Ana dice «usted» a los grandes.
+- La verdad del mundo: quién es pariente de quién y dónde vive cada uno, solo lo que dice LA GENTE; nada de «ayer», «esta mañana» u otro día que no esté en la partida; nada de lo que Ana no ha hecho, ni de gente que todavía no conoce como si la conociera.
+- Las opciones: cada «->» lleva la línea de Ana Y lo que la otra persona contesta (una o dos líneas, distinto en cada una); una opción con solo efectos no dice nada.
+- Los efectos, pocos y con sentido: lo que de verdad cambió en la escena (casi siempre un «suma afecto», o nada).
+` : ''}
 NIVEL: ${nivel}. Tipos permitidos: ${tipos.join(', ')}.
-${n === 1 ? '- Solo palabras: ningún efecto (nada de «al_empezar:», «al_terminar:» ni líneas «! …»; las opciones «->», sin «! …»).' : ''}${n >= 2 ? `- Efectos permitidos: «hecho x» (solo hechos que ya existen en el juego, y pidiendo en «si:» lo que suponen), «suma <cualidad>:<dueño>[:<hacia>] n» con n = 1 o -1 (p. ej. «suma afecto:lynde:ana 1»), «cosa <quien> <cosa> n» (n de 1 a 3), «saber <quien> <noticia>», y para mover a la gente en escena: «sentar», «levantar», «junto», «log texto». Cada efecto va solo, sin «hecho» delante: «al_terminar: cosa ana tarta 1», «! suma afecto:marilla:ana 1» (no «hecho cosa…»).` : ''}${n >= 3 ? '\n- Libre: además, hechos NUEVOS, todos con prefijo «ia_» («hecho ia_algo», «olvidar ia_algo»), y cadenas de escenas propias («si: hecho:ia_algo», «dicha:ia_otra»).' : n === 2 ? '\n- Nada de hechos nuevos (ni «ia_…»).' : ''}
+${n === 1 ? '- Solo palabras: ningún efecto (nada de «al_empezar:», «al_terminar:» ni líneas «! …»; las opciones «->», sin «! …»).' : ''}${n >= 2 ? `- Efectos permitidos: «hecho x» (solo hechos que ya existen en el juego, y pidiendo en «si:» lo que suponen), «suma <cualidad> n» con n = 1 o -1, y la cualidad escrita como es (ninguna otra forma): ${[...V.cualidades].map(nocheCualidadForma).join(', ')} (p. ej. «suma afecto:lynde:ana 1»), «cosa <quien> <cosa> n» (n de 1 a 3), «saber <quien> <noticia>», y para mover a la gente en escena: «sentar», «levantar», «junto», «log texto». Cada efecto va solo, sin «hecho» delante: «al_terminar: cosa ana tarta 1», «! suma afecto:marilla:ana 1» (no «hecho cosa…»).` : ''}${n >= 3 ? '\n- Libre: además, hechos NUEVOS, todos con prefijo «ia_» («hecho ia_algo», «olvidar ia_algo»), y cadenas de escenas propias («si: hecho:ia_algo», «dicha:ia_otra»).' : n === 2 ? '\n- Nada de hechos nuevos (ni «ia_…»).' : ''}
 - Nunca: «olvidar» un hecho del juego, «fin_capitulo», «final», «punto», «meta», «afecto», «nombrar», «dormir»; ni «interrumpe», «lineas: libro:…», «calesa», «camino», «o:».
 
 LOS FORMATOS (el «texto» de cada bloque es exactamente esto):
@@ -638,6 +645,11 @@ function nocheRevisar(b, ctx){
     if (!c.tema) M.push('falta el «tema:» (cómo aparece en el menú)');
     else { const d = nocheTemaParecido(c.con, c.tema); if (d) M.push(`ya hay un tema así con ${c.con}: «${d.tema}»${d.dicha() ? ' (ya lo conversaron)' : ''}: un tema nuevo sigue a lo que vino después, no lo repite`); }
     for (const q of quienes) if (![c.con, 'ana', 'narra'].includes(q)) M.push(`en una conversación con ${c.con} solo hablan Ana y ${c.con} (no ${q})`);
+    // how they speak to each other: between girls and boys, «tú»; Marilla and Matthew, «tú» to Ana (in the book, always)
+    const tu = nocheNiño(c.con) ? ['ana', c.con] : ['marilla', 'matthew'].includes(c.con) ? [c.con] : [];
+    const dichos = [], todas = X => { for (const l of X || []) { if (l[0] === '?') for (const o of l[2] || []) todas(o.lineas); else if (l[0] !== '!') dichos.push([String(l[0]).toLowerCase(), String(l[1] || '')]); } }; todas(L);
+    const u = dichos.find(([q, t]) => tu.includes(q) && /(?<!\p{L})usted(?!\p{L})/iu.test(t.replace(/\([^)]*\)/g, '')));
+    if (u) M.push(nocheNiño(c.con) ? `${u[0]} dice «usted» («${u[1].slice(0, 50)}»): entre niñas y niños se tutean («tú»)` : `${c.con} dice «usted» a Ana («${u[1].slice(0, 50)}»): en la familia se tutea a Ana`);
   }
   if (tipo === 'escena') {
     if (!V.canales.has(c.canal)) M.push(`«canal: ${c.canal || ''}»: no es un canal para una escena de la noche (${[...V.canales].join(', ')})`);
@@ -655,7 +667,7 @@ function nocheRevisar(b, ctx){
     if (!NOCHE_ACCIONES.includes(w)) { M.push(`«${w}» no está permitido a la IA`); continue; }
     if (n < 2) continue;
     if (w === 'olvidar') { if (!/^ia_/.test(a.olvidar)) M.push(`no puede olvidar «${a.olvidar}»: solo sus propios hechos «ia_»`); else if (n < 3) M.push('«olvidar» es del nivel libre'); continue; }
-    if (w === 'suma') { const [q, k] = a.suma, [nom, dueño, hacia] = String(q).split(':'); if (!V.cualidades.has(nom) || !(V.personas.has(dueño) || dueño === 'ana') || (hacia && !(V.personas.has(hacia) || hacia === 'ana'))) M.push(`«suma ${q}»: no es una cualidad del juego`); if (![1, -1].includes(+k)) M.push(`«suma ${q} ${k}»: de a 1 (o -1) por vez`); continue; }
+    if (w === 'suma') { const [q, k] = a.suma, mal = nocheCualidadMal(q); if (mal) M.push(mal); if (![1, -1].includes(+k)) M.push(`«suma ${q} ${k}»: de a 1 (o -1) por vez`); continue; }
     if (w === 'cosa') { const [k, it, x] = a.cosa; if (!(V.personas.has(k) || k === 'ana') || !ITEM_DEFS[it] || !(x >= 1 && x <= 3)) M.push(`«cosa ${a.cosa.join(' ')}»: quien, una cosa del juego (${Object.keys(ITEM_DEFS).slice(0, 6).join(', ')}…), y de 1 a 3`); continue; }
     if (w === 'saber') { const [k, f] = a.saber; if (!V.personas.has(k) || !V.noticias.has(f)) M.push(`«saber ${a.saber.join(' ')}»: quien, y una noticia de src/datos/noticias.txt`); continue; }
     if (w !== 'hecho') continue;
@@ -708,6 +720,18 @@ function nocheQuien(q){   // a speaker as the AI may write it («Ana», «Marill
   const cerca = k.length >= 5 ? [...V.habla].filter(x => x.length >= 5 && nocheDistancia(x, k) === 1) : [];
   return cerca.length === 1 ? cerca[0] : null;
 }
+// a quality as the game has it: its name, whose it is and towards whom («paciencia» is only Marilla's towards Ana; «estudio»,
+// anyone's, towards nobody; «afecto», of someone towards someone). What does not fit: why, or null
+const nocheNiño = k => k === 'diana' || FOLK_DEFS[k]?.kind === 'alumno';   // (who Ana says «tú» to, and who says it to her)
+function nocheCualidadMal(q){
+  const V = nocheVocab(), [nom, dueño, hacia] = String(q).split(':'), d = CUALIDAD_DEF[nom], alguien = k => V.personas.has(k) || k === 'ana';
+  if (!V.cualidades.has(nom) || !alguien(dueño) || (hacia && !alguien(hacia))) return `«suma ${q}»: no es una cualidad del juego`;
+  if (nom === 'afecto') return hacia && hacia !== dueño ? null : `«suma ${q}»: el afecto es de alguien hacia otra persona («afecto:marilla:ana»)`;
+  if (d?.de && dueño !== d.de) return `«suma ${q}»: «${nom}» es solo de ${d.de} («${nocheCualidadForma(nom)}»)`;
+  if ((d?.hacia || '') !== (hacia || '')) return `«suma ${q}»: se escribe «${nocheCualidadForma(nom)}»`;
+  return null;
+}
+const nocheCualidadForma = nom => { const d = CUALIDAD_DEF[nom]; return nom === 'afecto' ? 'afecto:<quien>:<hacia quién>' : `${nom}:${d?.de || '<quien>'}${d?.hacia ? ':' + d.hacia : ''}`; };
 function nocheReparar(b){
   const R = [], tipo = b?.tipo; if (!b || !['dicho', 'conversacion', 'respuesta', 'escena'].includes(tipo)) return { bloque: b, reparado: R };
   let texto = String(b.texto ?? '').replace(/\r\n?/g, '\n');
@@ -773,6 +797,15 @@ function nocheReparar(b){
   { const f = L.findIndex(l => l.trim() === '---');
     const campos = f < 0 ? [] : L.slice(f + 1).filter(l => /^(al_terminar|al_empezar|si|resumen|se_hace_en):/.test(l));
     if (campos.length) { const resto = L.slice(f + 1).filter(l => !campos.includes(l)); L.splice(f, L.length - f, ...campos, '---', ...resto); for (const x of campos) R.push(`«${x.split(':')[0]}:» subido antes de «---» (es un campo, no alguien que habla)`); } }
+  // a block has one «---»: the others (one left at the end) go
+  { const f = L.findIndex(l => l.trim() === '---');
+    if (f >= 0) for (let i = L.length - 1; i > f; i--) if (L[i].trim() === '---') { L.splice(i, 1); R.push('quitado un «---» de más'); } }
+  // a field with one letter wrong («esumen:»): the field
+  { const f = L.findIndex(l => l.trim() === '---'), C = NOCHE_CAMPOS[tipo] || [];
+    for (let i = 0; i < (f < 0 ? L.length : f); i++) { const m = L[i].match(/^(\s*)([a-z_]+):(.*)$/); if (!m || C.includes(m[2])) continue;
+      const c = C.filter(x => x.length >= 4 && nocheDistancia(x, m[2]) === 1); if (c.length === 1) { L[i] = m[1] + c[0] + ':' + m[3]; R.push(`«${m[2]}:» → «${c[0]}:»`); } } }
+  // an effect on a quality the game does not have that way («suma paciencia:ana:marilla»): it goes (the scene stays)
+  for (let i = L.length - 1; i >= 0; i--) { const m = L[i].match(/^\s*(?:!|al_empezar:|al_terminar:)\s*suma\s+(\S+)/); if (m && nocheCualidadMal(m[1])) { R.push(`quitado «suma ${m[1]}» (${nocheCualidadForma(m[1].split(':')[0])})`); L.splice(i, 1); } }
   if (tipo === 'conversacion') { nocheCondicionesDeAhora(L, R);
     if (!L.some(l => /^\s*resumen:/.test(l))) { const t = L.find(l => /^\s*tema:/.test(l)); if (t) { L.splice(L.indexOf(t) + 1, 0, 'resumen: ' + t.replace(/^\s*tema:\s*/, '')); R.push('agregado «resumen:» (el tema, a falta de uno)'); } } }   // (what it was about, for the nights after)
   return { bloque: { ...b, texto: L.join('\n') }, reparado: [...new Set(R)], motivos: F };

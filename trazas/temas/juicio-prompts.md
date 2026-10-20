@@ -1,0 +1,47 @@
+# Juicio de Claude: las versiones del pedido de la noche
+
+Corrida 39506244928 (commit 144cafd): jugadora curiosa, nivel efectos, gpt-5.4-mini. Cada versión se corrió 2 noches, de
+4 escenas cada una: 40 escenas en total, todas aceptadas por el juego. Las juzgué con la parte A de la rúbrica
+(trazas/temas/rubrica.md): A1 a A9, de 0 a 2 cada una; máximo 18.
+
+| Versión | Qué agrega al pedido | Tokens del pedido | Nota media (de 18) |
+|---|---|---|---|
+| base | — | 10 951 | 12,75 |
+| **rubrica** | cómo se juzga cada escena (9 puntos) | 11 184 | **14,1** |
+| ejemplo | una de las mejores escenas, en vez de un ejemplo del juego | 11 053 | 13,5 |
+| plan | escribir primero el «porque» (qué cambia, la línea que se queda) | 10 986 | 12,1 |
+| todo | las tres juntas | 11 321 | 10,8 |
+
+- **Decirle cómo se la juzga es lo que más rinde**, por 230 tokens: más escenas que parten de algo de la partida (A1 = 2,
+  A6 = 2) y con una frase que se queda (A7).
+- **Todo junto es lo peor.** Con el plan delante, la IA escribe el plan y después cumple con lo justo: opciones con solo
+  efectos, sin respuesta, y efectos inventados para «dejar algo distinto» (A8).
+
+## Las fallas que se repiten (en todas las versiones)
+
+| Falla | Cuántas escenas | Ejemplo |
+|---|---|---|
+| «usted» donde va «tú» (Ana y una niña; Marilla o Matthew a Ana) | 16 de 40 | «Carrie, ¿usted alguna vez ha tenido un secreto…?»; «Cuénteme una de esas luces», a Cecily |
+| Hechos del mundo inventados (contados a ojo) | unas 6 de 40 | Carrie, hermana de Jane; Alec que vive en Rose Cottage; «ayer» o «esta mañana» que no pasaron |
+| Cualidades sin sentido | 10 de 40 | «suma paciencia:ana:marilla», «suma paciencia:ana», «suma letras:marilla:ana» |
+| Opciones sin respuesta de la otra persona | 8 de 40 | solo la línea de Ana y un efecto (A8 = 0 o 1) |
+| Un «---» suelto, o un campo con una letra de menos («esumen:») | 2 (rechazadas en la primera ronda) | la escena se rechazaba entera |
+
+## Lo que cambió (las reglas generales)
+
+- **El juego** (siempre, para todas las versiones):
+  - una cualidad se escribe como el juego la tiene: «paciencia» es solo de Marilla hacia Ana; «estudio», «granja»,
+    «letras» son de alguien, hacia nadie; el afecto es de alguien hacia otra persona. Lo que no calza se quita (la escena
+    queda), y el pedido dice la forma de cada una;
+  - en una conversación con una niña o un niño, ninguno de los dos dice «usted»; Marilla y Matthew no le dicen «usted» a
+    Ana. Si pasa, se rechaza y vuelve a la IA para que lo corrija;
+  - un «---» de más se quita; un campo con una letra mal («esumen:») se corrige.
+  - Ejemplo: tools/noche/ejemplos/trato.json (las tres, con bloques de esta corrida).
+- **El pedido**, versión «cuidado»: lo que más le hace perder a una escena buena (el trato, con los nombres; la verdad
+  del mundo: parientes, casas, «ayer»; que cada opción lleve lo que contesta la otra persona; efectos pocos y con
+  sentido), y dónde vive cada persona en LA GENTE.
+
+## Lo que sigue
+
+Correr de nuevo («experimento: prompts»): rubrica, rubrica+cuidado y rubrica+cuidado+ejemplo, 3 noches cada una, y
+juzgar con la misma rúbrica. La que gane queda como el pedido de siempre.
