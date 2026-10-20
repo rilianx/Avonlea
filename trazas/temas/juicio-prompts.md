@@ -6,11 +6,15 @@ Corrida 39506244928 (commit 144cafd): jugadora curiosa, nivel efectos, gpt-5.4-m
 
 | Versión | Qué agrega al pedido | Tokens del pedido | Nota media (de 18) |
 |---|---|---|---|
-| base | — | 10 951 | 12,75 |
-| **rubrica** | cómo se juzga cada escena (9 puntos) | 11 184 | **14,1** |
-| ejemplo | una de las mejores escenas, en vez de un ejemplo del juego | 11 053 | 13,5 |
-| plan | escribir primero el «porque» (qué cambia, la línea que se queda) | 10 986 | 12,1 |
-| todo | las tres juntas | 11 321 | 10,8 |
+| base | — | 10 951 | 11,75 |
+| **rubrica** | cómo se juzga cada escena (9 puntos) | 11 184 | **12,75** |
+| ejemplo | una de las mejores escenas, en vez de un ejemplo del juego | 11 053 | 12,4 |
+| plan | escribir primero el «porque» (qué cambia, la línea que se queda) | 10 986 | 11,25 |
+| todo | las tres juntas | 11 321 | 10,9 |
+
+Las notas de cada escena, criterio por criterio: trazas/temas/notas-claude.json (sirven también para calibrar el juez
+automático, tools/juez.js). Una primera pasada, a ojo y sin anotar cada criterio, daba lo mismo en el orden (rubrica
+primero, todo al final) con notas un punto más altas.
 
 - **Decirle cómo se la juzga es lo que más rinde**, por 230 tokens: más escenas que parten de algo de la partida (A1 = 2,
   A6 = 2) y con una frase que se queda (A7).

@@ -16596,9 +16596,12 @@ window.__avonlea = { ...(/[?&]dev\b/.test(location.search) ? { ev: s => eval(s) 
    full model (Z3) in Node. ---------- */
 const NOCHE_NIVELES = { apagado: 'Apagado', palabras: 'Palabras (solo lo que dicen)', efectos: 'Con efectos (hechos que ya existen, cariño, cosas)', libre: 'Libre (también hechos y escenas propias)' };
 const NOCHE_N = { apagado: 0, palabras: 1, efectos: 2, libre: 3 };
-const NOCHE_MODELO = 'gpt-5.4-mini', NOCHE_TEMAS = 2, NOCHE_MAX = 4, NOCHE_OLVIDO = .9, NOCHE_LINEAS = 4;   // (NOCHE_LINEAS: the least a scene or a conversation has, said by someone)   // (the profile: what she did a week ago weighs half)
+const NOCHE_MODELO = 'gpt-5.4-mini', NOCHE_TEMAS = 2, NOCHE_MAX = 4, NOCHE_CANDIDATOS = { n: 8 }, NOCHE_OLVIDO = .9, NOCHE_LINEAS = 4;   // (NOCHE_LINEAS: the least a scene or a conversation has, said by someone)   // (the profile: what she did a week ago weighs half)
 const NOCHE_URL = 'https://api.openai.com/v1/chat/completions';
 // the settings, in this browser only (never in the game's save, nor in the repository: the key is the player's)
+// write more and choose (the state of the art for scenes that score well): the AI writes NOCHE_CANDIDATOS.n blocks, a judge
+// scores them with the rubric (trazas/temas/rubrica.md), and the best NOCHE_MAX, and different among them, stay (0: off)
+const nocheElige = () => NOCHE_CANDIDATOS.n > NOCHE_MAX, nocheTope = () => nocheElige() ? NOCHE_CANDIDATOS.n : NOCHE_MAX;
 const NOCHE_AJ = (() => { const d = { nivel: 'apagado', clave: '', modelo: NOCHE_MODELO }; try { return { ...d, ...JSON.parse(localStorage.getItem('avonlea-noche') || '{}') }; } catch (e) { return d; } })();
 const nocheGuardarAj = () => { try { localStorage.setItem('avonlea-noche', JSON.stringify(NOCHE_AJ)); } catch (e) {} };
 const nocheNivel = () => NOCHE_N[NOCHE_AJ.nivel] ? NOCHE_AJ.nivel : 'apagado';
@@ -16867,13 +16870,15 @@ marilla: Eso ya lo sé. Y también sé que a veces las historias escondidas te h
 ana: ¿Y usted preferiría que yo pensara en el hilo o en la historia?
 marilla: En los dos, si fueras capaz. Lo difícil es que no se te caiga uno mientras persigues el otro.
 (por qué es buena: parte de algo que pasó en la partida; Marilla habla como Marilla; es el tema del libro —imaginación y costumbre—; y termina en una frase que se queda)`;
+// the people (id: voice; with «casas», where each one lives: the AI made up houses and families)
+const nocheVoces = casas => [...Object.keys(CH).map(k => `- ${k} (${CH[k].fullName || NAMES[k]}): ${voiceShort(k)}`), ...Object.entries(FOLK_DEFS).filter(([k]) => !/^v\d+$/.test(k)).map(([k, d]) => `- ${k} (${nocheSinArt(d.name)}${casas && d.home ? ', ' + d.home : ''})${fichaOf(k)?.ficha ? ': ' + String(fichaOf(k).ficha).slice(0, 140) : ''}`)].join('\n');
 function nocheSistema(nivel){
   const V = nocheVocab(), n = NOCHE_N[nivel];
-  const voces = [...Object.keys(CH).map(k => `- ${k} (${CH[k].fullName || NAMES[k]}): ${voiceShort(k)}`), ...Object.entries(FOLK_DEFS).filter(([k]) => !/^v\d+$/.test(k)).map(([k, d]) => `- ${k} (${nocheSinArt(d.name)}${nocheVar('cuidado') && d.home ? ', ' + d.home : ''})${fichaOf(k)?.ficha ? ': ' + String(fichaOf(k).ficha).slice(0, 140) : ''}`)].join('\n');
+  const voces = nocheVoces(nocheVar('cuidado'));
   const tipos = ['conversacion', 'respuesta', ...(n >= 2 ? ['escena'] : [])];   // (no sayings: a line on its own floats; what someone says goes in a short scene)
   return `Eres quien escribe, de noche, cosas nuevas para «Un día en Avonlea», un juego tranquilo inspirado en «Ana de las Tejas Verdes» (L. M. Montgomery): Avonlea, un pueblito de granjas de la Isla del Príncipe Eduardo, hacia 1880. Ana Shirley tiene 11 años, es pelirroja, huérfana, soñadora, conversadora, de palabras grandiosas e imaginación desbordante; vive con Marilla y Matthew Cuthbert en Tejas Verdes. El tono es el del libro: tierno, con humor, sin nada moderno. Español; en la familia se tutea a Ana; Ana trata de usted a los grandes; entre niñas y niños se tutean (Ana, Diana, Cecily, Felicity, Ruby, Gilbert…).
 
-Mientras Ana duerme, escribes como mucho ${NOCHE_MAX} bloques NUEVOS para ESTA partida, pensados para cómo está cada personaje con Ana, para lo que a quien juega le interesa (el perfil) y para lo que quedó abierto (lo que le falta a la partida, si viene: primero eso; los cabos sueltos; las situaciones abiertas). Cada bloque se escribe en el formato de los archivos de datos del juego, y el juego lo revisa con las mismas reglas que lo escrito a mano: lo que no las cumple se descarta. Mejor pocos y buenos. Si la partida trae «LO QUE LE FALTA A ESTA PARTIDA», al menos uno de tus bloques llena una de esas faltas (pidiendo en su «si:» el hecho que se indica, o con la persona que se nombra).
+Mientras Ana duerme, escribes ${nocheElige() ? `${nocheTope()} bloques NUEVOS candidatos para ESTA partida (el juego elige los ${NOCHE_MAX} mejores con la rúbrica de abajo: que sean distintos entre sí, en personas y en asuntos, para que haya de dónde elegir),` : `como mucho ${NOCHE_MAX} bloques NUEVOS para ESTA partida,`} pensados para cómo está cada personaje con Ana, para lo que a quien juega le interesa (el perfil) y para lo que quedó abierto (lo que le falta a la partida, si viene: primero eso; los cabos sueltos; las situaciones abiertas). Cada bloque se escribe en el formato de los archivos de datos del juego, y el juego lo revisa con las mismas reglas que lo escrito a mano: lo que no las cumple se descarta. Mejor pocos y buenos. Si la partida trae «LO QUE LE FALTA A ESTA PARTIDA», al menos uno de tus bloques llena una de esas faltas (pidiendo en su «si:» el hecho que se indica, o con la persona que se nombra).
 
 LO QUE IMPORTA (el juego quiere escenas con contenido, no relleno):
 - Cada bloque muestra algo que cambia o se revela: una relación que se acerca o se tensa, una decisión que pesa, algo que Ana aprende, pierde o se atreve a decir. Si nada cambia, no vale la pena escribirlo.
@@ -16950,7 +16955,7 @@ ${n >= 2 ? `LAS SITUACIONES ABIERTAS (vienen en la partida, abajo): momentos que
 - Cómo reacciona Ana lo elige quien juega, nunca tú: si la situación dice «Ana puede reaccionar», da una opción «->» por cada reacción, cada una con «! responde <reacción>».
 - Una situación que ya pasó y «podría volver» es opcional: tráela solo si la partida lo pide.
 
-` : ''}${nocheVar('rubrica') ? NOCHE_RUBRICA + '\n\n' : ''}LAS REGLAS (las revisa un solucionador lógico; lo que las rompe se descarta):
+` : ''}${nocheVar('rubrica') || nocheElige() ? NOCHE_RUBRICA + '\n\n' : ''}LAS REGLAS (las revisa un solucionador lógico; lo que las rompe se descarta):
 ${nocheReglasProsa()}
 - Quien no conoce a Ana no la nombra («Ana», «Shirley»): pide «conoce:<quien>».
 - Una frase o escena tiene que poder darse: sus condiciones no se contradicen.
@@ -17007,7 +17012,7 @@ LOS CABOS SUELTOS
 ${nocheCabos().map(c => '- ' + c.texto).join('\n') || '(ninguno)'}
 ${nocheCartasTexto()}${NOCHE_LAGUNAS?.length ? '\nLO QUE LE FALTA A ESTA PARTIDA (lo encontró un solucionador lógico: lo más importante para escribir esta noche)\n' + nocheLagunasTexto() + '\n' : ''}${NOCHE_N[nivel] >= 2 ? '\nLAS SITUACIONES ABIERTAS (para una escena con «situacion: <clave>»)\n' + nocheSituaciones() + '\n' : ''}
 ${ya ? '\nYA AGREGADO OTRAS NOCHES (no repetir): ' + ya + '\n' : ''}
-Escribe hasta ${NOCHE_MAX} bloques, nivel «${nivel}».`;
+Escribe ${nocheElige() ? nocheTope() + ' bloques candidatos' : 'hasta ' + NOCHE_MAX + ' bloques'}, nivel «${nivel}».`;
 }
 const NOCHE_ESQUEMA = { type: 'object', additionalProperties: false, required: ['bloques'], properties: { bloques: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['tipo', 'texto', 'porque'],
   properties: { tipo: { type: 'string', enum: ['conversacion', 'respuesta', 'escena'] }, texto: { type: 'string' }, porque: { type: 'string' } } } } } };
@@ -17024,23 +17029,73 @@ function nocheCuerpos(p){
   return [{ ...base, response_format: fmt, reasoning_effort: 'low' }, { ...base, response_format: fmt },
     { ...base, messages: [{ ...p.mensajes[0], content: p.mensajes[0].content + '\n\nResponde solo con un objeto JSON que siga este esquema: ' + JSON.stringify(nocheEsquema()) }, ...p.mensajes.slice(1)], response_format: { type: 'json_object' } }];
 }
-// the answer of the API → the blocks (at most NOCHE_MAX); an error says why, in words
+// the answer of the API → the blocks (at most nocheTope()); an error says why, in words
 function nocheLeerRespuesta(data){
   const msg = data?.choices?.[0]?.message || {};
   if (msg.refusal) throw new Error('la IA no quiso responder: ' + msg.refusal);
   let j; try { j = JSON.parse(msg.content || ''); } catch (e) { throw new Error('la respuesta no es JSON'); }
-  return { bloques: (Array.isArray(j?.bloques) ? j.bloques : []).slice(0, NOCHE_MAX), modelo: data.model || '', uso: data.usage || null };
+  return { bloques: (Array.isArray(j?.bloques) ? j.bloques : []).slice(0, nocheTope()), modelo: data.model || '', uso: data.usage || null };
 }
-async function nocheLlamar(p, clave){
+async function nocheLlamar(p, clave){ return nocheLeerRespuesta(await nocheLlamarCuerpos(nocheCuerpos(p), clave)); }
+async function nocheLlamarCuerpos(cuerpos, clave){   // (the raw answer of the first body the API takes)
   let ultimo = null;
-  for (const body of nocheCuerpos(p)) {
+  for (const body of cuerpos) {
     const res = await fetch(NOCHE_URL, { method: 'POST', headers: { 'content-type': 'application/json', authorization: 'Bearer ' + clave }, body: JSON.stringify(body) });
     const data = await res.json().catch(() => ({}));
-    if (res.ok) return nocheLeerRespuesta(data);
+    if (res.ok) return data;
     ultimo = new Error(`OpenAI ${res.status}: ${data.error?.message || res.statusText}`);
     if (res.status !== 400) throw ultimo;   // (a bad key, no credit, too many requests: trying another way will not help)
   }
   throw ultimo;
+}
+
+// ---------------------------------------------------------------- the judge: each scene, with the rubric (its anchors)
+// A1–A9 of trazas/temas/rubrica.md, 0 to 2 each, with what most often cost points (how they speak to each other, facts made
+// up, options with no answer). It sees what the AI saw of the game (to know what is true and what was already talked
+// about), and it says why before the numbers (a judge that reasons first agrees more with a person). Calibrated against
+// Claude's notes: tools/juez.js, trazas/temas/notas-claude.json
+const NOCHE_JUEZ = `Eres juez de escenas para «Un día en Avonlea», un juego inspirado en «Ana de las Tejas Verdes» (hacia 1880). Una IA escribió escenas nuevas para la partida de abajo; tú las juzgas, cada una por sí misma, con esta rúbrica: de 0 a 2 en cada punto (0 falla, 1 cumple, 2 destaca). Sé exigente y parejo: un 2 es para lo que de verdad destaca; ante la duda, 1.
+
+A1 Verdad de la partida. 0: supone algo que no pasó o es falso en esta partida: un hecho «ayer», «hoy», «el otro día» que no está en lo que pasó; parientes, casas o lugares que no son (mira LA GENTE: dónde vive cada uno); alguien que Ana no conoce tratado como conocido. 1: nada falso. 2: además usa como premisa algo concreto de esta partida (lo que Ana eligió, dijo, hizo o recibió).
+A2 Voz y época. 0: alguien habla fuera de carácter, algo moderno, o el trato está mal: entre niñas y niños se tutean (Ana y Cecily, Felicity, Carrie, Diana…: «tú»), y Marilla y Matthew tutean a Ana; un «usted» ahí es 0. 1: las voces se reconocen. 2: además hay una línea que solo esa persona diría (Matthew: «Bueno, pues…», pocas palabras; Marilla seca que esconde ternura).
+A3 Algo cambia o se revela. 0: charla que no lleva a nada. 1: se aprende algo de alguien. 2: cambia la relación, o se revela algo que no se sabía (un pasado, un miedo, un cariño).
+A4 Novedad frente a lo ya conversado. 0: repite en lo esencial algo ya hablado (mira LO YA CONVERSADO). 1: otro asunto, o el mismo con un paso nuevo. 2: sigue algo ya hablado con lo que vino después (el pastel → la receta de la madre de Marilla).
+A5 Los temas del libro (pertenecer a una familia; imaginación y costumbre; orgullo y perdón; la amistad del alma; crecer siendo una misma). 0: ninguno. 1: uno, de paso. 2: uno, en el centro.
+A6 Lo concreto. 0: podría pasar en cualquier partida, con cualquiera. 1: tiene lugar, hora o cosa concretos. 2: nace de esta partida y de esta relación. Un lugar común («enséñame a coser/cocinar/sembrar», «¿cómo era usted de niña?», «quiero ser útil», la despensa, las gallinas) es como mucho 1.
+A7 Inspiradora: ¿quien juega querría contarla, o volver a ella? 0: se olvida al terminar. 1: tiene un momento lindo o gracioso. 2: tiene una imagen o una frase que se queda (como «mañana es un día sin errores»).
+A8 Decisiones. Sin opciones: 1. 0: las opciones llevan a lo mismo, o alguna no tiene respuesta de la otra persona (solo la línea de Ana, o solo efectos). 1: llevan a respuestas distintas. 2: cada una dice algo de quién es Ana, y deja algo distinto en el mundo (efectos con sentido).
+A9 Forma. 0: una frase suelta, se arrastra, o restos de formato (un «---» suelto al final). 1: ida y vuelta, 4 a 10 líneas. 2: cada línea hace algo; el final cierra (o abre) bien.
+
+Para cada escena: primero «razones» (dos o tres frases: lo que decide los puntos que no son 2, citando la escena), después los números.`;
+const NOCHE_JUEZ_ESQUEMA = { type: 'object', additionalProperties: false, required: ['juicios'], properties: { juicios: { type: 'array', items: { type: 'object', additionalProperties: false,
+  required: ['n', 'razones', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9'], properties: { n: { type: 'integer' }, razones: { type: 'string' }, ...Object.fromEntries([1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => ['A' + i, { type: 'integer', enum: [0, 1, 2] }])) } } } } };
+function nocheJuezPedido(bloques, modelo = NOCHE_AJ.juez || NOCHE_AJ.modelo || NOCHE_MODELO, nivel = nocheNivel()){
+  const partida = nocheUsuario(nivel).replace(/\n[^\n]*$/, '');   // (what the AI saw, without its last line, the order)
+  const lista = bloques.map((b, i) => `### ESCENA ${i + 1}\n${String(b.texto || '').trim()}`).join('\n\n');
+  return { modelo, mensajes: [{ role: 'system', content: NOCHE_JUEZ }, { role: 'user', content: `LA GENTE (id: quién es, y dónde vive)\n${nocheVoces(true)}\n\n${partida}\n\nLAS ESCENAS A JUZGAR (${bloques.length})\n\n${lista}\n\nJuzga cada una (n = su número).` }] };
+}
+function nocheJuezCuerpos(p){
+  const base = { model: p.modelo, max_completion_tokens: 12000, messages: p.mensajes }, fmt = { type: 'json_schema', json_schema: { name: 'juicios', strict: true, schema: NOCHE_JUEZ_ESQUEMA } };
+  return [{ ...base, response_format: fmt, reasoning_effort: 'low' }, { ...base, response_format: fmt }];
+}
+// the answer → for each block (by its number), its notes A1–A9 and the total; null where the judge said nothing
+function nocheJuezLeer(data, n){
+  let j; try { j = JSON.parse(data?.choices?.[0]?.message?.content || ''); } catch (e) { throw new Error('el juez no respondió JSON'); }
+  const out = Array.from({ length: n }, () => null);
+  for (const x of j?.juicios || []) { const i = +x.n - 1; if (!(i >= 0 && i < n)) continue; const notas = [1, 2, 3, 4, 5, 6, 7, 8, 9].map(k => Math.max(0, Math.min(2, +x['A' + k] || 0))); out[i] = { notas, total: notas.reduce((a, b) => a + b, 0), razones: String(x.razones || '') }; }
+  return out;
+}
+// which ones stay: the best, and different among them (one per person, while there are others); a scene that fails
+// (lies about the game, A1 = 0; repeats, A4 = 0; speaks to a girl as «usted», A2 = 0) does not stay. Indices, in order
+const nocheFalla = J => !!J && (J.notas[0] === 0 || J.notas[3] === 0 || J.notas[1] === 0);
+function nocheElegir(bloques, juicios, k = NOCHE_MAX){
+  const quien = b => (String(b?.texto || '').match(/^\s*(?:con|de):\s*(\S+)/m) || [])[1] || b?.tipo, elegidos = [];
+  const quedan = bloques.map((b, i) => i).filter(i => juicios[i] && !nocheFalla(juicios[i]));
+  while (elegidos.length < k && quedan.length) {
+    const valor = i => juicios[i].total - 3 * elegidos.filter(j => quien(bloques[j]) === quien(bloques[i])).length;
+    const m = quedan.reduce((a, i) => valor(i) > valor(a) ? i : a); elegidos.push(m); quedan.splice(quedan.indexOf(m), 1);
+  }
+  return elegidos;
 }
 
 // ---------------------------------------------------------------- the checks: the same rules as what is written by hand
@@ -17427,7 +17482,7 @@ function nocheValidar(bloques, nivel = nocheNivel(), antes = []){
   const ctx = { nivel, iaHechos: new Set(prev.flatMap(b => b.iaDeja || [])), iaIds: new Set(prev.map(b => b.id)), oportunidades: { ...(game.noche?.oportunidades || {}) } };
   for (const b of antes) if (b.hito) ctx.oportunidades[b.hito] = (ctx.oportunidades[b.hito] || 0) + 1;
   const aceptados = [], rechazados = [], veredictos = [];   // (veredictos: one per block, in order: for tools/noche.js)
-  for (const b0 of [].concat(bloques || []).slice(0, NOCHE_MAX)) {
+  for (const b0 of [].concat(bloques || []).slice(0, nocheTope())) {
     let r, b = b0, reparado = [], iaAntes = new Set(ctx.iaHechos);
     try { let F; ({ bloque: b, reparado, motivos: F = [] } = nocheReparar(b0)); r = nocheRevisar(b, ctx); r.motivos.unshift(...F); } catch (e) { r = { motivos: ['no se pudo revisar: ' + (e.message || e)] }; }
     if (r.motivos.length) { ctx.iaHechos = iaAntes; rechazados.push({ bloque: b0, motivos: r.motivos, reparado }); veredictos.push({ aceptado: false, id: r.id || null, motivos: r.motivos, reparado, texto: String(b.texto) }); continue; }
@@ -17435,7 +17490,7 @@ function nocheValidar(bloques, nivel = nocheNivel(), antes = []){
     const a = { tipo: b.tipo, id: r.id, texto: String(b.texto), porque: String(b.porque || ''), iaDeja: r.iaDeja, hito: r.hito || undefined, ...(reparado.length ? { reparado } : {}) };
     aceptados.push(a); veredictos.push({ aceptado: true, id: a.id, motivos: [], reparado, texto: a.texto }); ctx.iaIds.add(a.id); for (const x of r.iaDeja) ctx.iaHechos.add(x); if (r.hito) ctx.oportunidades[r.hito] = (ctx.oportunidades[r.hito] || 0) + 1;
   }
-  for (const b of [].concat(bloques || []).slice(NOCHE_MAX)) { const motivos = [`más de ${NOCHE_MAX} bloques en una noche`]; rechazados.push({ bloque: b, motivos, reparado: [] }); veredictos.push({ aceptado: false, id: null, motivos, reparado: [], texto: String(b?.texto || '') }); }
+  for (const b of [].concat(bloques || []).slice(nocheTope())) { const motivos = [`más de ${nocheTope()} bloques en una noche`]; rechazados.push({ bloque: b, motivos, reparado: [] }); veredictos.push({ aceptado: false, id: null, motivos, reparado: [], texto: String(b?.texto || '') }); }
   return { aceptados, rechazados, veredictos, completo: false };   // (completo: the full model, with Z3, is not run here: tools/noche.js runs it in Node; nocheModelo is the hook)
 }
 // the second round: what was rejected goes back to the AI with why, once, for corrected versions (the same schema)
@@ -17469,7 +17524,7 @@ for (const b of game.noche?.bloques || []) try { nocheRegistrar(b); } catch (e) 
 let nocheEnCurso = null;
 async function nochePasar(){
   const nivel = nocheNivel(), p = nochePedido(nivel), dia = today() + 1, rondas = [];
-  let modelo = p.modelo, error = null;
+  let modelo = p.modelo, error = null, juezError = null;
   try {
     const r = await nocheLlamar(p, NOCHE_AJ.clave), v = nocheValidar(r.bloques, nivel); modelo = r.modelo || modelo; rondas.push(v);
     if (v.rechazados.length) {   // (once: what was rejected, back to the AI with why)
@@ -17478,10 +17533,19 @@ async function nochePasar(){
         rondas.push(v2); }
       catch (e) { rondas.push({ aceptados: [], rechazados: [], error: String(e.message || e) }); }
     }
+    // more than fit: the judge scores them and the best stay (if it cannot, the first ones)
+    const todos = rondas.flatMap(x => x.aceptados);
+    if (todos.length > NOCHE_MAX) {
+      let elegidos = todos.slice(0, NOCHE_MAX);
+      try { const P = nocheJuezPedido(todos), data = await nocheLlamarCuerpos(nocheJuezCuerpos(P), NOCHE_AJ.clave), J = nocheJuezLeer(data, todos.length);
+        elegidos = nocheElegir(todos, J).map(i => todos[i]); todos.forEach((b, i) => { if (J[i]) b.nota = J[i].total; }); }
+      catch (e) { juezError = String(e.message || e); }
+      for (const r of rondas) { r.noElegidos = r.aceptados.filter(b => !elegidos.includes(b)); r.aceptados = r.aceptados.filter(b => elegidos.includes(b)); }
+    }
     nocheAceptar(rondas.flatMap(x => x.aceptados));
   } catch (e) { error = String(e.message || e); }
-  const N = noche(), A = rondas.flatMap((x, i) => x.aceptados.map(b => ({ id: b.id, ronda: i + 1, reparado: b.reparado || [] })));
-  N.log.push({ dia, nivel, modelo, error, aceptados: A, rechazados: rondas.flatMap((x, i) => x.rechazados.map(y => ({ ronda: i + 1, tipo: y.bloque?.tipo, texto: String(y.bloque?.texto || '').slice(0, 2000), porque: y.bloque?.porque || '', motivos: y.motivos, reparado: y.reparado || [] }))), ...(rondas[1]?.error ? { error2: rondas[1].error } : {}) });
+  const N = noche(), A = rondas.flatMap((x, i) => x.aceptados.map(b => ({ id: b.id, ronda: i + 1, reparado: b.reparado || [], ...(b.nota != null ? { nota: b.nota } : {}) })));
+  N.log.push({ dia, nivel, modelo, error, ...(juezError ? { juezError } : {}), aceptados: A, noElegidos: rondas.flatMap(x => (x.noElegidos || []).map(b => ({ id: b.id, nota: b.nota ?? null, texto: b.texto.slice(0, 2000) }))), rechazados: rondas.flatMap((x, i) => x.rechazados.map(y => ({ ronda: i + 1, tipo: y.bloque?.tipo, texto: String(y.bloque?.texto || '').slice(0, 2000), porque: y.bloque?.porque || '', motivos: y.motivos, reparado: y.reparado || [] }))), ...(rondas[1]?.error ? { error2: rondas[1].error } : {}) });
   if (N.log.length > 30) N.log.splice(0, N.log.length - 30);
   save(); return { error, n: A.length, rondas };
 }

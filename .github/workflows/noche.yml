@@ -22,8 +22,11 @@ on:
       experimento:
         description: 'En vez de la noche, un experimento (temas: cómo contarle a la IA lo ya conversado; tools/temas.js)'
         type: choice
-        options: ['no', 'temas', 'prompts']
+        options: ['no', 'temas', 'prompts', 'juez', 'elegir']
         default: 'no'
+      juez:
+        description: 'Modelo del juez (elige las mejores escenas entre los candidatos; en «juez», los modelos a calibrar, separados por comas)'
+        default: gpt-5.4-mini
 
 permissions:
   contents: read
@@ -51,14 +54,21 @@ jobs:
           NIVEL: ${{ inputs.nivel }}
           MODELO: ${{ inputs.modelo }}
           EXPERIMENTO: ${{ inputs.experimento }}
+          JUEZ: ${{ inputs.juez }}
         run: |
           if [ "$EXPERIMENTO" = "temas" ]; then node tools/temas.js --partida "$ESCENARIO" --modelo "$MODELO" --veces 3 --salida trazas/noche; cp trazas/noche/temas.md trazas/noche/noche.md; cat trazas/noche/temas.md
           elif [ "$EXPERIMENTO" = "prompts" ]; then
             for v in rubrica rubrica+cuidado rubrica+cuidado+ejemplo; do for r in 1 2 3; do
-              node tools/noche.js --escenario "$ESCENARIO" --nivel "$NIVEL" --modelo "$MODELO" --variante "$([ $v = base ] || echo $v)" --salida "trazas/noche/$v-$r" > /dev/null 2>&1 || true
+              node tools/noche.js --escenario "$ESCENARIO" --nivel "$NIVEL" --modelo "$MODELO" --variante "$([ $v = base ] || echo $v)" --candidatos 0 --salida "trazas/noche/$v-$r" > /dev/null 2>&1 || true
               node tools/prompts-muestra.js "trazas/noche/$v-$r" "$v · $r" >> trazas/noche/noche.md
             done; done; cat trazas/noche/noche.md
-          else node tools/noche.js --escenario "$ESCENARIO" --nivel "$NIVEL" --modelo "$MODELO" --salida trazas/noche; fi
+          elif [ "$EXPERIMENTO" = "juez" ]; then node tools/juez.js --modelos "$JUEZ" --veces 2 --salida trazas/noche; cp trazas/noche/juez.md trazas/noche/noche.md
+          elif [ "$EXPERIMENTO" = "elegir" ]; then
+            for c in 0 8; do for r in 1 2 3; do
+              node tools/noche.js --escenario "$ESCENARIO" --nivel "$NIVEL" --modelo "$MODELO" --variante rubrica+cuidado --candidatos $c --juez "$JUEZ" --salida "trazas/noche/c$c-$r" > /dev/null 2>&1 || true
+              node tools/prompts-muestra.js "trazas/noche/c$c-$r" "candidatos $c · $r" >> trazas/noche/noche.md
+            done; done; cat trazas/noche/noche.md
+          else node tools/noche.js --escenario "$ESCENARIO" --nivel "$NIVEL" --modelo "$MODELO" --juez "$JUEZ" --salida trazas/noche; fi
       - name: El informe, en el resumen
         if: always()
         run: |
@@ -81,4 +91,5 @@ jobs:
             trazas/noche/pedido.json
             trazas/noche/respuesta.json
             trazas/noche/temas.json
+            trazas/noche/juez.json
           if-no-files-found: warn

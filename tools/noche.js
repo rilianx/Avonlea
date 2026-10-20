@@ -18,7 +18,7 @@ const { BASE, FILA_ESCENA } = require('./momentos');
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 && process.argv[i + 1] && !process.argv[i + 1].startsWith('--') ? process.argv[i + 1] : d; };
 const RESPUESTA = arg('respuesta', null), RESP = RESPUESTA ? JSON.parse(fs.readFileSync(path.resolve(RESPUESTA), 'utf8')) : null;   // (an example may say its scenario and level)
 const NIVEL = arg('nivel', RESP?.nivel || 'efectos'), MODELO = arg('modelo', ''), SALIDA = path.resolve(RAIZ, arg('salida', 'trazas/noche'));
-const ESCENARIO = arg('escenario', RESP?.escenario || 'spencer_rachel'), SIN_MODELO = process.argv.includes('--sin-modelo'), VARIANTE = arg('variante', '');   // (a version of the request: src/js/66-noche.js, NOCHE_VARIANTE)
+const ESCENARIO = arg('escenario', RESP?.escenario || 'spencer_rachel'), SIN_MODELO = process.argv.includes('--sin-modelo'), VARIANTE = arg('variante', ''), CANDIDATOS = arg('candidatos', null), JUEZ = arg('juez', '');   // (--candidatos: how many the AI writes, to choose the best; 0: as many as stay. --juez: the judge's model)   // (a version of the request: src/js/66-noche.js, NOCHE_VARIANTE)
 
 // ---------------------------------------------------------------- the scenarios: a game at a certain point (in the game: dev)
 const D = (d, t) => ({ d, s: 1, t, h: 15 });
@@ -148,6 +148,7 @@ async function openai(cuerpos){
   const partidaZ = await ev('nochePartida()'); let lag = null;
   if (nodeModules() && !SIN_MODELO) { try { lag = await require('./modelo.js').lagunas(partidaZ); await ev('(L => nocheLagunasPoner(L))', lag.lagunas); } catch (e) { lag = { error: String(e.message || e) }; } }
   if (VARIANTE) await ev(`(v => { NOCHE_VARIANTE = v; })`, VARIANTE);
+  if (CANDIDATOS != null) await ev(`(n => { NOCHE_CANDIDATOS.n = n; })`, +CANDIDATOS);
   const pedido = await ev(`(([n, m]) => nochePedido(n, m || undefined))`, [NIVEL, MODELO]);
   const cuerpos = await ev(`(p => nocheCuerpos(p))`, pedido);
   fs.writeFileSync(path.join(SALIDA, 'pedido.json'), JSON.stringify({ escenario: ESCENARIO, nivel: NIVEL, modelo: pedido.modelo, cuerpo: cuerpos[0] }, null, 1));
@@ -180,7 +181,18 @@ async function openai(cuerpos){
       }
     } catch (e) { nota2 = 'la segunda ronda no pudo: ' + (e.message || e); }
   }
-  const aceptados = rondas.flatMap(r => r.v.aceptados);
+  let aceptados = rondas.flatMap(r => r.v.aceptados);
+  // 1b. more than fit: the judge scores them all (the rubric) and the best stay, different among them
+  const NMAX = await ev('NOCHE_MAX'), juicios = {}; let juez = null;
+  if (aceptados.length > NMAX && !RESP) {
+    try { const P = await ev(`(([B, m]) => nocheJuezPedido(B, m || undefined))`, [aceptados, JUEZ]); const data = await openai(await ev(`(p => nocheJuezCuerpos(p))`, P));
+      fs.writeFileSync(path.join(SALIDA, 'juez.json'), JSON.stringify(data, null, 1));
+      const J = await ev(`(([d, n]) => nocheJuezLeer(d, n))`, [data, aceptados.length]), el = await ev(`(([B, J]) => nocheElegir(B, J))`, [aceptados, J]);
+      aceptados.forEach((a, i) => { if (J[i]) juicios[a.id] = { ...J[i], elegido: el.includes(i) }; });
+      juez = { modelo: data.model || P.modelo, tokens: data.usage?.prompt_tokens || 0, elegidos: el.map(i => aceptados[i].id) };
+      aceptados = el.map(i => aceptados[i]); }
+    catch (e) { juez = { error: String(e.message || e) }; aceptados = aceptados.slice(0, NMAX); }
+  }
   // 2. with the tools: the graph and the model, with the accepted blocks in the data
   const C = SIN_MODELO || !aceptados.length ? null : await completo(aceptados, ev, partidaZ);
   // (what the tools rejected goes out: the final summary is of what stays)
@@ -189,28 +201,28 @@ async function openai(cuerpos){
   const filas = rondas.flatMap((r, k) => r.bloques.slice(0, 99).map((x, i) => {
     const w = r.v.veredictos[i] || { aceptado: false, motivos: ['no se revisó'], reparado: [] };
     const id = w.id || (String(x.texto).match(/===\s*(.+?)\s*===/) || [])[1] || '?', nodo = w.aceptado && C?.porBloque?.[w.id] || [];
-    const res = !w.aceptado || nodo.length ? 'rechazado' : 'aceptado';
-    return { ronda: k + 1, n: i + 1, tipo: x.tipo, id, navegador: w.aceptado ? 'aceptado' : 'rechazado', node: !w.aceptado ? '—' : C ? (C.error ? '¿?' : nodo.length ? 'rechazado' : 'aceptado') : 'sin correr', resultado: res, reparado: w.reparado || [], motivos: [...w.motivos, ...nodo], porque: x.porque || '', esperado: x.esperado || null, texto: String(x.texto || ''), textoFinal: w.texto };
+    const noElegido = w.aceptado && juez && !juez.error && !juez.elegidos.includes(w.id), res = !w.aceptado || nodo.length ? 'rechazado' : noElegido ? 'no elegido' : 'aceptado';
+    return { ronda: k + 1, n: i + 1, tipo: x.tipo, id, navegador: w.aceptado ? 'aceptado' : 'rechazado', node: !w.aceptado || noElegido ? '—' : C ? (C.error ? '¿?' : nodo.length ? 'rechazado' : 'aceptado') : 'sin correr', resultado: res, reparado: w.reparado || [], motivos: [...w.motivos, ...nodo], porque: x.porque || '', juicio: w.aceptado ? juicios[w.id] || null : null, esperado: x.esperado || null, texto: String(x.texto || ''), textoFinal: w.texto };
   }));
   const mal = filas.filter(f => f.esperado && f.esperado !== f.resultado);
   const temas = filas.filter(f => f.resultado === 'aceptado' && f.tipo === 'conversacion').length;   // (new topics, without waiting for them to run out: at least NOCHE_TEMAS a night)
   const L = [`# La IA de la noche: lo que propuso y lo que quedó`, '', `Escenario: **${E?.titulo || ESCENARIO}** · nivel **${NIVEL}** · modelo ${pedido.modelo} · respuesta: ${fuente}`, '',
-    '| Ronda | # | Tipo | Bloque | Navegador | Grafo y modelo (Node) | Queda | Reparado | Motivos | Esperado |', '|---|---|---|---|---|---|---|---|---|---|',
-    ...filas.map(f => `| ${f.ronda} | ${f.n} | ${f.tipo} | \`${md(f.id)}\` | ${f.navegador} | ${f.node} | **${f.resultado}** | ${md(f.reparado.join(' · ') || '—')} | ${md(f.motivos.map(m => corto(m, 220)).join(' · ') || '—')} | ${f.esperado ? (f.esperado === f.resultado ? '✔ ' : '✘ ') + f.esperado : ''} |`), '',
-    ...(nota2 ? [`_(${nota2})_`, ''] : []), `Temas nuevos (conversaciones aceptadas): **${temas}** (se piden al menos 2 cada noche)`, ''];
+    '| Ronda | # | Tipo | Bloque | Navegador | Juez (de 18) | Grafo y modelo (Node) | Queda | Reparado | Motivos | Esperado |', '|---|---|---|---|---|---|---|---|---|---|---|',
+    ...filas.map(f => `| ${f.ronda} | ${f.n} | ${f.tipo} | \`${md(f.id)}\` | ${f.navegador} | ${f.juicio ? f.juicio.total + ' (' + f.juicio.notas.join(' ') + ')' : '—'} | ${f.node} | **${f.resultado}** | ${md(f.reparado.join(' · ') || '—')} | ${md(f.motivos.map(m => corto(m, 220)).join(' · ') || '—')} | ${f.esperado ? (f.esperado === f.resultado ? '✔ ' : '✘ ') + f.esperado : ''} |`), '',
+    ...(nota2 ? [`_(${nota2})_`, ''] : []), ...(juez ? [juez.error ? `_(el juez no pudo: ${juez.error}; quedan los primeros ${NMAX})_` : `Juez: ${juez.modelo} (${juez.tokens} tokens del pedido) · eligió ${juez.elegidos.length} de ${Object.keys(juicios).length} · nota media de los elegidos: **${(juez.elegidos.reduce((a, id) => a + juicios[id].total, 0) / (juez.elegidos.length || 1)).toFixed(1)}**, de todos: ${(Object.values(juicios).reduce((a, j) => a + j.total, 0) / (Object.keys(juicios).length || 1)).toFixed(1)}`, ''] : []), `Temas nuevos (conversaciones aceptadas): **${temas}** (se piden al menos 2 cada noche)`, ''];
   { const k = l => l.de + ':' + (l.hecho || l.quien) + ':' + (l.hay || ''), txt = l => l.de === 'decisiones' ? `Ana eligió «${l.opcion}» (\`${l.hecho}\`, en \`${l.escena}\`): nada de lo que todavía puede pasar lo toma en cuenta` : l.de === 'pocas' ? `${l.nombre}: ${l.quedan} ${l.hay}(es) estos días (menos de ${l.minimo})` : `${l.nombre}: no queda ninguna escena ni conversación`;
     const despues = C?.lagunasCon?.lagunas ? new Set(C.lagunasCon.lagunas.map(k)) : null, ahora = new Map((C?.lagunasCon?.lagunas || []).map(l => [k(l), l]));
     L.push('## Lo que le faltaba a la partida (Z3)', '', !lag ? '_(sin el modelo: no se buscaron)_' : lag.error ? `_(no se pudo: ${lag.error})_` : `${lag.resumen}${despues ? ` · con los aceptados: ${C.lagunasCon.resumen}` : ''}`, '',
       ...(lag?.lagunas || []).map(l => `- ${despues ? (despues.has(k(l)) ? '· ' : '✓ ') : ''}${txt(l)}${l.de === 'pocas' && ahora.get(k(l)) && ahora.get(k(l)).quedan !== l.quedan ? ` → con los aceptados: ${ahora.get(k(l)).quedan}` : ''}`), ...(despues ? ['', '(✓ lo llenó un bloque aceptado · · sigue faltando)'] : []), ''); }
   if (C) L.push('## Con todas las revisiones', '', `- El grafo, sin los bloques: ${C.grafo?.base || '—'}`, `- El grafo, con los aceptados: ${C.grafo?.con || '—'}`, `- El modelo (Z3), sin los bloques: ${C.modelo?.base || '—'}`, `- El modelo (Z3), con los aceptados: ${C.modelo?.con || '—'}`, ...(C.final ? [`- Con lo que queda (sin lo que descartaron el grafo o el modelo): ${C.final.grafo || '—'} · ${C.final.modelo || '—'}`] : []), ...(C.error ? [`- ⚠ ${C.error}`] : []), ...(C.otros?.length ? ['', 'Hallazgos nuevos que no son de un bloque en particular:', ...C.otros.map(o => '- ' + o)] : []), '');
   else L.push(SIN_MODELO ? '_(--sin-modelo: no se corrieron el grafo ni el modelo)_' : '_(ningún bloque pasó la revisión del juego: no hay nada que agregar al modelo)_', '');
-  L.push('## Lo que escribió la IA', '', ...filas.flatMap(f => [`### Ronda ${f.ronda} · ${f.n}. ${f.tipo} \`${md(f.id)}\` → ${f.resultado}`, '', `Por qué: ${f.porque || '—'}`, '', '```', f.texto.trim(), '```', ...(f.reparado.length ? ['', 'Reparado: ' + f.reparado.join(' · '), '', '```', String(f.textoFinal || '').trim(), '```'] : []), '']));
+  L.push('## Lo que escribió la IA', '', ...filas.flatMap(f => [`### Ronda ${f.ronda} · ${f.n}. ${f.tipo} \`${md(f.id)}\` → ${f.resultado}`, '', `Por qué: ${f.porque || '—'}`, '', ...(f.juicio ? [`Juez: ${f.juicio.total}/18 (${f.juicio.notas.join(' ')}) — ${f.juicio.razones}`, ''] : []), '```', f.texto.trim(), '```', ...(f.reparado.length ? ['', 'Reparado: ' + f.reparado.join(' · '), '', '```', String(f.textoFinal || '').trim(), '```'] : []), '']));
   L.push('## Los hitos de la partida', '', '```', hitos, '```', '');
   if (errs.length) L.push('## Errores del juego', '', ...errs.map(e => '- ' + e), '');
   if (mal.length) L.push(`**✘ ${mal.length} bloque(s) no se juzgaron como se esperaba.**`, '');
   const informe = L.join('\n');
   fs.writeFileSync(path.join(SALIDA, 'noche.md'), informe);
-  fs.writeFileSync(path.join(SALIDA, 'noche.json'), JSON.stringify({ escenario: ESCENARIO, titulo: E?.titulo, nivel: NIVEL, modelo: pedido.modelo, fuente, lagunas: lag, lagunasCon: C?.lagunasCon || null, segundaRonda: nota2 || (rondas[1] ? 'sí' : 'no hizo falta'), bloques: filas, aceptados: aceptados.filter(a => !C?.porBloque?.[a.id]), grafo: C?.grafo, modeloZ3: C?.modelo, final: C?.final, otros: C?.otros, errores: errs }, null, 1));
+  fs.writeFileSync(path.join(SALIDA, 'noche.json'), JSON.stringify({ escenario: ESCENARIO, titulo: E?.titulo, nivel: NIVEL, modelo: pedido.modelo, fuente, lagunas: lag, lagunasCon: C?.lagunasCon || null, segundaRonda: nota2 || (rondas[1] ? 'sí' : 'no hizo falta'), juez, bloques: filas, aceptados: aceptados.filter(a => !C?.porBloque?.[a.id]), grafo: C?.grafo, modeloZ3: C?.modelo, final: C?.final, otros: C?.otros, errores: errs }, null, 1));
   console.log(informe);
   console.log(`→ ${path.relative(RAIZ, SALIDA)}/noche.md, noche.json, pedido.md`);
   process.exit(mal.length || errs.length ? 1 : 0);
