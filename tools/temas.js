@@ -17,7 +17,12 @@ const MANERAS = {
   temas: P => P.convs.map(c => `${c.hecha ? '★' : '○'} ${c.tema}`).join('\n'),
   resumenes: P => P.convs.map(c => `${c.hecha ? '★' : '○'} ${c.tema}: ${c.resumen || ''}`).join('\n'),
   mixto: P => [...P.convs.filter(c => c.hecha).map(c => `★ ${c.resumen || c.tema}`), ...P.convs.filter(c => !c.hecha).map(c => `○ ${c.tema}`)].join('\n'),
+  hechas: P => P.convs.filter(c => c.hecha).map(c => `★ ${c.resumen || c.tema}`).join('\n'),
+  claves: P => P.convs.map(c => (c.hecha ? '★ ' : '○ ') + claves(c.resumen || c.tema)).join('; '),
 };
+// a summary in a few words: the ones that say what it is about (not the people, not the little words)
+const VACIAS = new Set('ana marilla matthew diana lynde barry harrison gilbert ella ellos para pero como cuando donde porque sobre desde hasta entre algo todo todas todos nada sola solo mucho poco muy más menos aunque también quiere dice hace tiene puede será sería sabe nunca siempre otra otro misma mismo después antes ahora sin con por que del las los una uno unos unas sus esa ese esta este eso está están'.split(' '));
+const claves = t => [...new Set(t.toLowerCase().replace(/[«»"':;,.¿?¡!()]/g, ' ').split(/\s+/).filter(w => w.length > 3 && !VACIAS.has(w)))].slice(0, 4).join(' ');
 
 async function openai(body){
   const key = process.env.OPENAI_API_KEY; if (!key) throw new Error('no hay OPENAI_API_KEY');

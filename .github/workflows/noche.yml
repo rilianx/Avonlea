@@ -52,7 +52,7 @@ jobs:
           MODELO: ${{ inputs.modelo }}
           EXPERIMENTO: ${{ inputs.experimento }}
         run: |
-          if [ "$EXPERIMENTO" = "temas" ]; then node tools/temas.js --partida "$ESCENARIO" --modelo "$MODELO" --salida trazas/noche; cp trazas/noche/temas.md trazas/noche/noche.md
+          if [ "$EXPERIMENTO" = "temas" ]; then node tools/temas.js --partida "$ESCENARIO" --modelo "$MODELO" --veces 3 --salida trazas/noche; cp trazas/noche/temas.md trazas/noche/noche.md; cat trazas/noche/temas.md
           else node tools/noche.js --escenario "$ESCENARIO" --nivel "$NIVEL" --modelo "$MODELO" --salida trazas/noche; fi
       - name: El informe, en el resumen
         if: always()
