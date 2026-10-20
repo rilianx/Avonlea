@@ -115,6 +115,16 @@ function nochePerfil(){
 // what she talks about: the topics she chose (the last ones first, with whom and when) and the ones she let pass (offered
 // in the menu on NOCHE_DEJA days or more, never chosen): the way new topics should go, and the way they should not
 const NOCHE_DEJA = 3;
+// what has been talked about, with whom Ana talks most (the profile) and with whom a new conversation is missing: only
+// the ones had, each in its summary («resumen:»). An experiment (tools/temas.js, trazas/temas/) chose this way: the
+// titles of the ones still to have make the AI rewrite them (27–33 % repeated), the summaries of the ones had, 9 %,
+// at about 100 tokens a person
+const NOCHE_YA_PERSONAS = 4;
+function nocheYaConversado(){
+  const P = nochePerfil().personas.map(x => x[0]), F = (NOCHE_LAGUNAS || []).filter(l => l.de === 'pocas').map(l => l.quien);
+  const quienes = [...new Set([...P.slice(0, NOCHE_YA_PERSONAS), ...nocheLagunasElegidas().filter(l => l.de === 'pocas').map(l => l.quien)])].filter(k => F.includes(k) || P.includes(k));
+  return quienes.map(k => { const L = CONVERSACIONES.filter(d => d.con === k && d.dicha()); return L.length ? `- ${cap(wmName(k))}: ${L.map(d => d.resumen || d.tema).join(' · ')}` : null; }).filter(Boolean).join('\n');
+}
 // a topic that is the same as one there is with that person (most of its words, the verb of asking aside)
 const nochePalabras = t => new Set(String(t).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').split(/[^a-zñ]+/).filter(w => w.length > 3 && !/^(pedirle|contarle|preguntarle|hablar|hablarle|decirle|mostrarle|ensenarle|sobre|como|cuando|porque|para|algo|todo|todas|todos|esta|este|ella|tiene|quiere)$/.test(w)).map(w => w.replace(/(es|s)$/, '')));
 function nocheTemaParecido(con, tema){
@@ -266,6 +276,7 @@ conversacion (Ana la elige del menú de esa persona; una vez):
 === ia_<id> ===
 con: <persona>
 tema: <cómo aparece en el menú: lo que Ana quiere hablar>
+resumen: <de qué se habla y en qué queda, una línea>
 (sin «si:»: es para cómo están las cosas ahora, y el juego le pone lo que haga falta)
 ${n >= 2 ? 'al_terminar: <efecto> (una línea por efecto)\n' : ''}---
 ana: <línea>
@@ -365,6 +376,7 @@ Actividades: ${f(P.actividades)}
 Lugares: ${f(P.lugares)}
 ${(T => `Lo que elige cuando conversa: ${T.elegidos.join(' · ') || '(nada todavía)'}
 Lo que deja pasar (se lo ofrecieron y nunca lo eligió): ${T.dejados.join(' · ') || '(nada)'}`)(nocheTemas())}
+${(Y => Y ? '\nLO YA CONVERSADO (de qué se habló: no lo repitas; lo nuevo puede seguir de aquí o ir a otra parte)\n' + Y + '\n' : '')(nocheYaConversado())}
 
 LOS CABOS SUELTOS
 ${nocheCabos().map(c => '- ' + c.texto).join('\n') || '(ninguno)'}
@@ -725,7 +737,8 @@ function nocheReparar(b){
     const lugares = en ? new Set([...hablan].filter(k => k !== 'ana' && k !== 'narra' && en[k]).map(k => en[k])) : new Set();
     if (en && !en.ana && lugares.size === 1) { const l = [...lugares][0]; L[i] = L[i].replace(/\s*$/, '') + ', ana=' + l; R.push(`agregado «ana=${l}» a «en:» (donde están los demás)`); }
   }
-  if (tipo === 'conversacion') nocheCondicionesDeAhora(L, R);
+  if (tipo === 'conversacion') { nocheCondicionesDeAhora(L, R);
+    if (!L.some(l => /^\s*resumen:/.test(l))) { const t = L.find(l => /^\s*tema:/.test(l)); if (t) { L.splice(L.indexOf(t) + 1, 0, 'resumen: ' + t.replace(/^\s*tema:\s*/, '')); R.push('agregado «resumen:» (el tema, a falta de uno)'); } } }   // (what it was about, for the nights after)
   return { bloque: { ...b, texto: L.join('\n') }, reparado: [...new Set(R)], motivos: F };
 }
 // a new conversation is for how things are now: what the rules ask of what it says (it names the Srta. Stacy: she has
