@@ -5256,6 +5256,7 @@ b: Podríamos quedarnos aquí toda la tarde.
 # Campos, además de los del guion:
 #   con: con quién es (marilla, matthew, diana, lynde, barry, harrison…)
 #   tema: cómo aparece en el menú (lo que Ana quiere hablar)
+#   resumen: de qué se habló, en una línea (lo que se dice y en qué queda): la IA de la noche lo lee para no repetir
 #   se_hace_en: dónde se hace, si es algo que se hace con las manos (sembrar, cocinar): un lugar de afuera o una pieza
 #         («huertito, huerta»: el primero que haya; «gg»: la cocina de Tejas Verdes). Si están en otra parte, primero
 #         van juntos allá, y empieza cuando llegan los dos.
@@ -5269,6 +5270,7 @@ b: Podríamos quedarnos aquí toda la tarde.
 === conv_marilla_perdon ===
 con: marilla
 tema: Pedirle perdón por portarse mal
+resumen: Ana le pide perdón por portarse mal; Marilla: pedir perdón es un comienzo, importa lo que haga después.
 repetir: dia
 prioridad: 2
 si: hecho:inicio_juego, !hecho:a_prueba, paciencia:marilla:ana<=1
@@ -5280,6 +5282,7 @@ marilla: (Marilla la mira un largo rato, con los labios apretados.) Bueno. Pedir
 === conv_marilla_e ===
 con: marilla
 tema: Explicarle por qué es «Ana con una sola n»
+resumen: Ana explica por qué su nombre se escribe con una sola n; Marilla acepta, casi sonriendo.
 si: afecto:marilla:ana>=2
 ---
 ana: Marilla, usted se acuerda de que es Ana con una sola n, ¿verdad?
@@ -5290,6 +5293,7 @@ marilla: (Marilla aprieta los labios, pero casi sonríe.) Está bien. Ana con un
 === conv_marilla_oraciones ===
 con: marilla
 tema: Confesarle que nunca aprendió a rezar
+resumen: Ana confiesa que nunca ha rezado; Marilla le enseña a dar gracias y pedir con humildad.
 si: afecto:marilla:ana>=2, !hecho:se_queda
 al_terminar: suma afecto:marilla:ana 1
 ---
@@ -5303,6 +5307,7 @@ marilla: (Marilla tiene que darse vuelta para que Ana no la vea reír.) Bueno…
 === conv_marilla_hablar ===
 con: marilla
 tema: Contarle todo lo que imaginó hoy
+resumen: Ana cuenta lo que imaginó; Marilla le dice que habla demasiado, pero que hable pensando antes.
 si: afecto:marilla:ana>=2
 ---
 ana: Marilla, hoy imaginé que el arroyo era un río de plata que llevaba cartas a la reina, y que yo era la mensajera, y…
@@ -5313,6 +5318,7 @@ marilla: (Marilla suspira.) No he dicho eso. Habla… pero de vez en cuando, pie
 === conv_marilla_errores ===
 con: marilla
 tema: Decirle algo que pensó sobre el día de mañana
+resumen: Mañana es un día sin errores; Ana nunca repite un error, Marilla: siempre inventa nuevos.
 si: afecto:marilla:ana>=2, dia_juego:3
 al_terminar: suma letras:ana 1
 ---
@@ -5325,6 +5331,7 @@ ana: Bueno, alguna vez se me tendrán que acabar. Es una idea muy consoladora.
 === conv_marilla_por_que ===
 con: marilla
 tema: Preguntarle por qué se quedaron con ella
+resumen: Por qué se quedaron con ella: Matthew la quiso al verla; Marilla, que nadie la cuidaría mejor.
 si: afecto:marilla:ana>=3, hecho:se_queda
 al_terminar: suma afecto:marilla:ana 1
 ---
@@ -5338,6 +5345,7 @@ marilla: Con eso basta.
 === conv_marilla_vestidos ===
 con: marilla
 tema: Hablarle de las mangas abullonadas
+resumen: Ana pide un vestido con mangas abullonadas; Marilla las encuentra ridículas.
 si: afecto:marilla:ana>=3, hecho:a_prueba, dia_juego:4
 ---
 ana: Marilla, los vestidos que me hizo son muy… prácticos. Pero ¿no podría tener uno, solo uno, con mangas abullonadas?
@@ -5359,6 +5367,7 @@ marilla: (Marilla resopla.) Los vestidos sencillos son para niñas sensatas. Ya 
 === conv_marilla_cocina ===
 con: marilla
 tema: Pedirle que le enseñe a cocinar
+resumen: Marilla le enseña a hacer un pastel: medir bien y no soñar mientras se cuece.
 si: afecto:marilla:ana>=3
 se_hace_en: gg
 al_terminar: suma granja:ana 1
@@ -5372,6 +5381,7 @@ ana: Le prometo vigilarlo con los ojos y con el alma, Marilla.
 === conv_marilla_diana ===
 con: marilla
 tema: Contarle cómo es Diana
+resumen: Ana le describe a Diana, su amiga perfecta; Marilla le pide no cansarla con discursos.
 si: afecto:marilla:ana>=3, hecho:conocidas_diana, !hecho:prohibida
 ---
 ana: Marilla, Diana es la amiga más perfecta del mundo. Tiene los ojos negros y la risa como un arroyo, y le gustan las mismas cosas que a mí. Bueno, casi.
@@ -5382,6 +5392,7 @@ marilla: (Marilla mueve la cabeza.) Entre las dos van a terminar en un libro.
 === conv_marilla_genio ===
 con: marilla
 tema: Preguntarle cómo se controla el genio
+resumen: Cómo controlar el genio: Marilla también lo tuvo; contar hasta diez, o hasta cien.
 si: afecto:marilla:ana>=4, dia_juego:10
 al_terminar: suma afecto:marilla:ana 1
 ---
@@ -5395,6 +5406,7 @@ marilla: Esa es la idea.
 === conv_marilla_queens ===
 con: marilla
 tema: Hablarle de ir a Queen's
+resumen: Marilla y Matthew deciden que Ana irá a Queen's: una mujer debe poder ganarse la vida.
 si: afecto:marilla:ana>=4, estudio:ana>=20, dia_juego:10, conoce:stacy
 al_terminar: suma estudio:ana 1
 ---
@@ -5406,6 +5418,7 @@ marilla: No te enfermes estudiando. Con estudiar bien basta.
 === conv_marilla_john ===
 con: marilla
 tema: Preguntarle por una foto vieja que encontró
+resumen: Una foto de John Blythe: Marilla cuenta que no lo perdonó y se arrepiente.
 si: afecto:marilla:ana>=5, hecho:zanahorias, dia_juego:28
 al_terminar: suma afecto:marilla:ana 1
 ---
@@ -5419,6 +5432,7 @@ marilla: Después ya no volvió. (Marilla guarda la foto.) Siempre me he arrepen
 === conv_marilla_quedarse ===
 con: marilla
 tema: Darle las buenas noches
+resumen: Buenas noches: Marilla, sin decirlo del todo, se alegra de que Ana se haya quedado.
 si: afecto:marilla:ana>=5, dia_juego:14, hora:19-23
 al_terminar: acostarse
 ---
@@ -5433,6 +5447,7 @@ ana: (Ana sube la escalera dando saltitos y no deja de sonreír hasta que se due
 === conv_matthew_flores ===
 con: matthew
 tema: Contarle de las violetas del camino
+resumen: Las violetas del camino como pedacitos de cielo; Matthew siempre la entiende.
 si: afecto:matthew:ana>=2
 ---
 ana: ¡Matthew! ¿Ha visto las violetas a la orilla del camino? ¿No le parecen como pedacitos de cielo que se cayeron?
@@ -5443,6 +5458,7 @@ matthew: (Matthew se pone colorado hasta las orejas, pero sonríe.)
 === conv_matthew_nombres ===
 con: matthew
 tema: Contarle los nombres que les puso a los lugares
+resumen: Ana le cuenta los nombres nuevos que puso a los lugares; Matthew se acostumbrará.
 si: afecto:matthew:ana>=2, hecho:nombro_avenida, hecho:nombro_lago, !dicha:nombra_avenida
 al_terminar: suma letras:ana 1
 ---
@@ -5456,6 +5472,7 @@ matthew: Je. Le queda bien.
 === conv_matthew_estrellas ===
 con: matthew
 tema: Sentarse con él a mirar el cielo
+resumen: Mirando las estrellas: quizás en una hay otra niña mirando; nadie está del todo solo.
 si: afecto:matthew:ana>=3, hora:19-23
 al_terminar: suma afecto:matthew:ana 1
 ---
@@ -5468,6 +5485,7 @@ matthew: (Matthew no dice nada. Pero se queda ahí con ella un buen rato, mirand
 === conv_matthew_mangas ===
 con: matthew
 tema: Contarle que todas tienen mangas abullonadas
+resumen: Todas las niñas tienen mangas abullonadas menos Ana; Matthew se queda pensando.
 si: afecto:matthew:ana>=3, cuaderno:escuela_dominical
 ---
 ana: Matthew… ¿se fijó en los vestidos de las otras niñas en la escuela dominical? Todas tienen mangas abullonadas. Todas, menos yo.
@@ -5478,6 +5496,7 @@ matthew: (Matthew se rasca la barbilla y mira a Ana un buen rato, pensativo.) Hm
 === conv_matthew_defensa ===
 con: matthew
 tema: Preguntarle si es una cabeza de chorlito
+resumen: ¿Es una cabeza de chorlito? Matthew la defiende: ya es bastante buena así.
 si: afecto:matthew:ana>=3
 ---
 ana: Matthew, ¿usted cree que soy una cabeza de chorlito? A veces Marilla me mira como si lo pensara, y se le escapa un suspiro.
@@ -5488,6 +5507,7 @@ matthew: Yo creo que ya eres bastante buena así. Pero no le digas que te lo dij
 === conv_matthew_huerta ===
 con: matthew
 tema: Pedirle que le enseñe a sembrar
+resumen: Matthew le enseña a sembrar y le regala semillas de capuchina para su huertito.
 si: afecto:matthew:ana>=3, !estacion:invierno
 se_hace_en: huertito, huerta
 al_terminar: suma granja:ana 1
@@ -5503,6 +5523,7 @@ ana: ¡Donde yo quiera! Oh, Matthew, es el regalo más lleno de futuro que me ha
 === conv_matthew_mujeres ===
 con: matthew
 tema: Preguntarle por qué le dan miedo las señoras
+resumen: A Matthew le dan miedo las señoras, pero no Marilla ni Ana; la Sra. Lynde, un poco.
 si: afecto:matthew:ana>=3
 ---
 ana: Matthew, ¿es verdad que a usted le dan miedo todas las mujeres?
@@ -5514,6 +5535,7 @@ ana: ¡A mí también! Somos espíritus afines, Matthew.
 === conv_matthew_queens ===
 con: matthew
 tema: Contarle cómo le fue en la escuela
+resumen: Ana sacó la mejor nota y le ganó a Gilbert; Matthew: irá a Queen's, él se encarga.
 si: afecto:matthew:ana>=4, estudio:ana>=20, dia_juego:10, conoce:stacy
 al_terminar: suma estudio:ana 1
 ---
@@ -5525,6 +5547,7 @@ matthew: Entonces vas a ir. No te preocupes por nada más. Yo me encargo.
 === conv_matthew_docena ===
 con: matthew
 tema: Preguntarle si no habría preferido un niño
+resumen: Ana pregunta si habría preferido un niño; Matthew: la prefiere a una docena de muchachos.
 si: afecto:matthew:ana>=5, dia_juego:28
 al_terminar: suma afecto:matthew:ana 1
 ---
@@ -5538,6 +5561,7 @@ matthew: Mi niña. Mi niña de la que estoy orgulloso.
 === conv_diana_pelo ===
 con: diana
 tema: Decirle cuánto le envidia el pelo
+resumen: Ana envidia el pelo negro de Diana; Diana envidia su imaginación.
 si: afecto:diana:ana>=2, hecho:conocidas_diana, !hecho:prohibida
 ---
 ana: Diana, ¿tú sabes lo que es tener el pelo rojo? Es una pena para toda la vida.
@@ -5548,6 +5572,7 @@ diana: Y yo daría cualquier cosa por tener tu imaginación. Así estamos a mano
 === conv_diana_minnie ===
 con: diana
 tema: Preguntarle por su hermanita
+resumen: Minnie May es pesada pero querida; Ana cuidó tres pares de mellizos.
 si: afecto:diana:ana>=2, hecho:conocidas_diana, !hecho:prohibida
 ---
 ana: ¿Cómo está Minnie May?
@@ -5558,6 +5583,7 @@ diana: ¡Tres pares! Ana, has vivido tanto.
 === conv_diana_nombres ===
 con: diana
 tema: Inventar nombres para los lugares con ella
+resumen: Inventan nombres para los lugares (el Paseo de los Enamorados).
 si: afecto:diana:ana>=2, hecho:conocidas_diana, !hecho:prohibida
 al_terminar: suma letras:ana 1
 ---
@@ -5582,6 +5608,7 @@ ana: Los charcos también se lo merecen.
 === conv_diana_escuela ===
 con: diana
 tema: Hablar de la escuela
+resumen: La escuela: Ana odia la geometría, Diana la ortografía; se ayudarán.
 si: afecto:diana:ana>=2, hecho:conocidas_diana, !hecho:prohibida
 ---
 diana: ¿Te gusta la escuela, Ana?
@@ -5594,6 +5621,7 @@ ana: Entonces la vamos a odiar juntas. Eso también une.
 === conv_diana_bosque ===
 con: diana
 tema: Contarle historias del Bosque Encantado
+resumen: Ana inventa fantasmas del Bosque Encantado y asusta a Diana.
 si: afecto:diana:ana>=3, hecho:conocidas_diana, !hecho:prohibida
 al_terminar: suma letras:ana 1
 ---
@@ -5606,6 +5634,7 @@ ana: (Ana mira hacia los abetos, que de pronto se ven muy oscuros.) Bueno… yo 
 === conv_diana_vestidos ===
 con: diana
 tema: Hablar de vestidos y de la fiesta
+resumen: Vestidos para el concierto: Diana el azul, Ana el de siempre, imaginado de seda.
 si: afecto:diana:ana>=3, hecho:conocidas_diana, !hecho:prohibida
 ---
 diana: Para el concierto me voy a poner el vestido azul, el de las cintas.
@@ -5616,6 +5645,7 @@ ana: Con tu ayuda, y con mucha imaginación, quizás.
 === conv_diana_club ===
 con: diana
 tema: Proponerle un club de cuentos
+resumen: Proponen un club de cuentos; los tristes son los más bonitos.
 si: afecto:diana:ana>=3, hecho:conocidas_diana, !hecho:prohibida
 al_terminar: suma letras:ana 1
 ---
@@ -5628,6 +5658,7 @@ ana: Los nombres son lo más importante. Cordelia, Geraldine, Rosamunda…
 === conv_diana_gilbert ===
 con: diana
 tema: Hablar de Gilbert Blythe
+resumen: Diana encuentra guapo a Gilbert; Ana jura que nunca le hablará.
 si: afecto:diana:ana>=3, hecho:zanahorias, !hecho:zanahorias_contesta, !hecho:prohibida
 ---
 diana: Ana… Gilbert Blythe es el muchacho más guapo de la escuela, ¿no te parece?
@@ -5642,6 +5673,7 @@ diana: (Diana suspira, pero no dice nada más.)
 === conv_diana_gilbert_contesta ===
 con: diana
 tema: Hablar de lo que le contestó a Gilbert
+resumen: Toda la escuela habla de lo que Ana le contestó a Gilbert; Diana cree que le gustó.
 si: afecto:diana:ana>=3, hecho:zanahorias_contesta, hecho:llego_gilbert, !hecho:prohibida
 ---
 diana: Ana… toda la escuela habla de lo que le dijiste a Gilbert. ¡Nadie le había contestado así nunca! Se puso más rojo que tu pelo.
@@ -5666,6 +5698,7 @@ diana: (Diana sonríe, pero no dice nada.)
 === conv_diana_tia ===
 con: diana
 tema: Reírse con ella de la noche de la tía Josephine
+resumen: Se ríen de la noche en que saltaron sobre la tía Josephine.
 si: afecto:diana:ana>=3, hecho:cama_josephine, !hecho:prohibida
 ---
 diana: Ana, cada vez que me acuerdo de la cara de la tía Josephine… cuando saltamos sobre la cama…
@@ -5676,6 +5709,7 @@ ana: Es que lo somos. Aunque no lo parezca a primera vista.
 === conv_diana_secreto ===
 con: diana
 tema: Contarle un secreto
+resumen: Ana le cuenta su amiga imaginaria del orfanato, Katie Maurice; Diana: ahora me tienes a mí.
 si: afecto:diana:ana>=4, cuaderno:amigas, !hecho:prohibida, dia_juego:10
 al_terminar: suma afecto:diana:ana 1
 ---
@@ -5688,6 +5722,7 @@ ana: Ya lo sé. Por eso te lo cuento.
 === conv_diana_futuro ===
 con: diana
 tema: Hablarle de Queen's
+resumen: Diana no irá a Queen's; se escribirán todas las semanas.
 si: afecto:diana:ana>=4, estudio:ana>=20, !hecho:prohibida, dia_juego:10, conoce:stacy
 ---
 ana: Diana, la Srta. Stacy va a preparar a los que quieran dar el examen de Queen's. ¿Te vas a anotar?
@@ -5699,6 +5734,7 @@ ana: Todas. Lo juro por el sol y la luna.
 === conv_diana_casarse ===
 con: diana
 tema: Hablar de cuando sean grandes
+resumen: Cuando sean grandes: Diana se casará; Ana será dama de honor o una solterona que escribe.
 si: afecto:diana:ana>=5, cuaderno:amigas, !hecho:prohibida, dia_juego:28
 al_terminar: suma afecto:diana:ana 1
 ---
@@ -5712,6 +5748,7 @@ ana: Mientras el sol y la luna existan, Diana. Ya lo juramos.
 === conv_diana_vela ===
 con: diana
 tema: Inventar con ella unas señas con la vela
+resumen: Inventan señas con una vela entre sus ventanas: un código de destellos.
 si: afecto:diana:ana>=4, cuaderno:amigas, !hecho:prohibida
 ---
 diana: Ana, desde mi ventana se ve la tuya, entre los árboles. ¿Te diste cuenta?
@@ -5725,6 +5762,7 @@ diana: ¡Cinco destellos! Esta noche lo probamos.
 === conv_lynde_ventana ===
 con: lynde
 tema: Preguntarle qué ve desde su ventana
+resumen: Lo que la Sra. Lynde ve desde su ventana: Avonlea como un libro sin fin.
 si: afecto:lynde:ana>=2, !hecho:ofendio_lynde
 ---
 ana: Sra. Lynde, ¿qué ve desde su ventana, todo el día?
@@ -5735,6 +5773,7 @@ lynde: (La Sra. Lynde se queda sin respuesta, cosa que no le pasa nunca.) Bueno�
 === conv_lynde_pelo ===
 con: lynde
 tema: Hablarle de su pelo
+resumen: La Sra. Lynde nota que el pelo de Ana se oscurece; Ana la perdona por todo.
 si: afecto:lynde:ana>=3, !hecho:ofendio_lynde
 al_terminar: suma afecto:lynde:ana 1
 ---
@@ -5747,6 +5786,7 @@ lynde: (La Sra. Lynde parpadea.) Bueno. Gracias, supongo.
 === conv_lynde_queens ===
 con: lynde
 tema: Contarle que quiere ir a Queen's
+resumen: La Sra. Lynde duda de que las mujeres necesiten estudiar; Ana la convence un poco.
 si: afecto:lynde:ana>=3, estudio:ana>=50, !hecho:ofendio_lynde
 ---
 lynde: Así que te vas a Queen's. Yo nunca creí que las mujeres necesitaran tanto estudio…
@@ -5758,6 +5798,7 @@ lynde: Hmm. Si son como tú, ruidosas pero buenas… quizás no sería tan malo.
 === conv_barry_diana ===
 con: barry
 tema: Preguntarle si Diana puede salir
+resumen: Ana pide que Diana salga a jugar; la Sra. Barry: antes de que oscurezca.
 si: afecto:barry:ana>=2, hecho:conocidas_diana, !hecho:prohibida
 ---
 ana: Sra. Barry, ¿Diana puede salir a jugar un rato?
@@ -5767,6 +5808,7 @@ ana: Se lo prometo, Sra. Barry. Solo bosques normales.
 === conv_barry_cordial ===
 con: barry
 tema: Pedirle perdón otra vez por el vino
+resumen: Ana vuelve a pedir perdón por el vino de grosellas; la Sra. Barry se ríe con ella.
 si: afecto:barry:ana>=3, hecho:perdonada
 al_terminar: suma afecto:barry:ana 1
 ---
@@ -5780,6 +5822,7 @@ barry: (La Sra. Barry se ríe, por primera vez con Ana.) A mí también, niña. 
 === conv_harrison_avena ===
 con: harrison
 tema: Preguntarle por su campo de avena
+resumen: El campo de avena del Sr. Harrison y la vaca jersey que se lo come.
 si: conoce:harrison
 ---
 ana: Sr. Harrison, su campo de avena se ve tan verde que parece un mar chiquito. Cuando sopla el viento hace olas.
@@ -5797,6 +5840,7 @@ harrison: Una vaca jersey que no voy a nombrar. Se mete por la cerca como si fue
 === conv_harrison_solo ===
 con: harrison
 tema: Preguntarle si no se aburre viviendo solo
+resumen: ¿Se aburre viviendo solo? Tiene a Ginger, su loro, que dice la verdad.
 si: conoce:harrison
 ---
 ana: Sr. Harrison, ¿no se aburre viviendo solo? Yo, cuando estaba sola, inventaba amigas en los vidrios de las vitrinas.
@@ -5814,6 +5858,7 @@ harrison: Dice la verdad, que a la gente le parece terrible. No es lo mismo.
 === conv_harrison_loro ===
 con: harrison
 tema: Preguntarle por su loro
+resumen: El loro Ginger dice malas palabras; quizás Ana pueda conocerlo.
 si: afecto:harrison:ana>=2
 ---
 ana: Sr. Harrison, ¿es verdad que tiene un loro que dice malas palabras?
@@ -5827,6 +5872,7 @@ harrison: Si no te asustas con facilidad… Y no le hables de la vaca. Ni a mí 
 === conv_gilbert_caramelo ===
 con: gilbert
 tema: Gilbert le ofrece un caramelo
+resumen: Gilbert le ofrece un caramelo de corazón para que lo perdone.
 si: hecho:zanahorias, hecho:llego_gilbert, !cuaderno:paces
 ---
 gilbert: (Gilbert deja sobre el pupitre de Ana un caramelo rosado con forma de corazón. Tiene escrito, en letras doradas: «Eres dulce».)
@@ -5843,6 +5889,7 @@ gilbert: Es para ti, Ana. Para… bueno, para que me perdones.
 === conv_gilbert_estudiar ===
 con: gilbert
 tema: Estudiar con Gilbert para Queen's
+resumen: Ana y Gilbert estudian juntos geometría e historia para Queen's.
 si: cuaderno:paces, hecho:llego_gilbert
 ---
 gilbert: Ana, ¿te parece si repasamos juntos la geometría? Tú me explicas la historia y yo te explico los triángulos.
@@ -5855,6 +5902,7 @@ al_terminar: suma afecto:ana:gilbert 1
 === conv_stacy_queens ===
 con: stacy
 tema: Preguntarle por la clase de Queen's
+resumen: La Srta. Stacy preparará a algunos para Queen's; Ana quiere ser maestra.
 si: conoce:stacy, hecho:llego_stacy
 ---
 ana: Srta. Stacy… ¿es verdad que va a preparar a algunos para el examen de Queen's?
@@ -5866,6 +5914,7 @@ al_terminar: suma estudio:ana 1
 === conv_stacy_escribir ===
 con: stacy
 tema: Contarle que escribe cuentos
+resumen: Ana escribe tragedias; la Srta. Stacy le aconseja escribir de lo que conoce.
 si: conoce:stacy, hecho:llego_stacy
 ---
 ana: Srta. Stacy, Diana y yo tenemos un club de cuentos. Yo escribo tragedias. En la última se mueren todos.
@@ -5878,6 +5927,7 @@ al_terminar: suma afecto:stacy:ana 1
 === conv_sraallan_ser_buena ===
 con: sraallan
 tema: Preguntarle cómo se hace para ser buena
+resumen: Cómo ser buena cuando cuesta; la Sra. Allan también se equivoca.
 si: conoce:sraallan, presente:sraallan
 ---
 ana: Sra. Allan… ¿usted cree que una persona puede ser buena aunque le cueste muchísimo?
@@ -5890,6 +5940,7 @@ al_terminar: suma afecto:sraallan:ana 1
 === conv_ruby_muchachos ===
 con: ruby
 tema: Hablar con Ruby de los muchachos
+resumen: Ruby habla de muchachos; a Ana solo le gustan los héroes de los libros.
 si: conoce:ruby
 ---
 ruby: Ana, ¿a ti quién te gusta? A mí me gustan casi todos. Charlie Sloane me miró dos veces hoy.
@@ -5907,6 +5958,7 @@ ana: Por eso son perfectos.
 === conv_jane_maestra ===
 con: jane
 tema: Preguntarle a Jane qué quiere ser
+resumen: Jane quiere ser maestra con sueldo fijo; Ana, en una escuela junto al mar.
 si: conoce:jane
 ---
 ana: Jane, ¿tú qué quieres ser cuando seas grande?
@@ -5917,6 +5969,7 @@ jane: (Jane se ríe.) Eso no existe, Ana. Pero si existiera, te tocaría a ti.
 === conv_josie_cerca ===
 con: josie
 tema: Responderle a Josie Pye
+resumen: Josie desafía a Ana a caminar por la cerca de los Barry.
 si: conoce:josie
 ---
 josie: Ana Shirley, apuesto a que no te atreves a caminar por arriba de la cerca del jardín de los Barry. Yo lo hice. Bueno, casi.
@@ -5932,6 +5985,7 @@ josie: Ana Shirley, apuesto a que no te atreves a caminar por arriba de la cerca
 === conv_minnie_cuento ===
 con: minnie
 tema: Contarle un cuento de hadas a Minnie May
+resumen: Ana le cuenta a Minnie May el cuento de la niña en la burbuja del arroyo.
 si: conoce:minnie
 ---
 minnie: Ana, ¿sabes cuentos? Diana dice que tú inventas los mejores.
@@ -5944,6 +5998,7 @@ al_terminar: suma afecto:minnie:ana 1
 === conv_phillips_libro ===
 con: phillips
 tema: Pedirle otro libro al Sr. Phillips
+resumen: Ana pide un libro al Sr. Phillips, que solo mira a Prissy Andrews.
 si: conoce:phillips
 ---
 ana: Sr. Phillips, ¿me prestaría otro libro? Ya terminé el de cuarto grado. Dos veces.
@@ -16939,7 +16994,7 @@ async function nocheLlamar(p, clave){
 
 // ---------------------------------------------------------------- the checks: the same rules as what is written by hand
 const NOCHE_CAMPOS = {
-  conversacion: ['con', 'tema', 'si', 'al_empezar', 'al_terminar', 'repetir', 'prioridad', 'se_hace_en', 'narra'],
+  conversacion: ['con', 'tema', 'resumen', 'si', 'al_empezar', 'al_terminar', 'repetir', 'prioridad', 'se_hace_en', 'narra'],
   respuesta: ['canal', 'de', 'responde', 'si'],
   escena: ['canal', 'prioridad', 'en', 'sujeta', 'si', 'al_empezar', 'al_terminar', 'repetir', 'grande', 'tipo', 'hito', 'narra', 'pausa', 'espera'] };
 const NOCHE_ACCIONES = ['hecho', 'olvidar', 'suma', 'cosa', 'saber', 'log', 'sentar', 'levantar', 'junto'];   // (efectos; olvidar, only «ia_» facts, in «libre»)

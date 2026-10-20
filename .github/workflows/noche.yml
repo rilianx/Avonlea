@@ -19,6 +19,11 @@ on:
         description: 'Modelo de OpenAI'
         default: gpt-5.4-mini
         required: true
+      experimento:
+        description: 'En vez de la noche, un experimento (temas: cómo contarle a la IA lo ya conversado; tools/temas.js)'
+        type: choice
+        options: [no, temas]
+        default: 'no'
 
 permissions:
   contents: read
@@ -45,7 +50,10 @@ jobs:
           ESCENARIO: ${{ inputs.escenario }}
           NIVEL: ${{ inputs.nivel }}
           MODELO: ${{ inputs.modelo }}
-        run: node tools/noche.js --escenario "$ESCENARIO" --nivel "$NIVEL" --modelo "$MODELO" --salida trazas/noche
+          EXPERIMENTO: ${{ inputs.experimento }}
+        run: |
+          if [ "$EXPERIMENTO" = "temas" ]; then node tools/temas.js --partida "$ESCENARIO" --modelo "$MODELO" --salida trazas/noche; cp trazas/noche/temas.md trazas/noche/noche.md
+          else node tools/noche.js --escenario "$ESCENARIO" --nivel "$NIVEL" --modelo "$MODELO" --salida trazas/noche; fi
       - name: El informe, en el resumen
         if: always()
         run: |
@@ -67,4 +75,5 @@ jobs:
             trazas/noche/pedido.md
             trazas/noche/pedido.json
             trazas/noche/respuesta.json
+            trazas/noche/temas.json
           if-no-files-found: warn

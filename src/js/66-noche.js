@@ -406,7 +406,7 @@ async function nocheLlamar(p, clave){
 
 // ---------------------------------------------------------------- the checks: the same rules as what is written by hand
 const NOCHE_CAMPOS = {
-  conversacion: ['con', 'tema', 'si', 'al_empezar', 'al_terminar', 'repetir', 'prioridad', 'se_hace_en', 'narra'],
+  conversacion: ['con', 'tema', 'resumen', 'si', 'al_empezar', 'al_terminar', 'repetir', 'prioridad', 'se_hace_en', 'narra'],
   respuesta: ['canal', 'de', 'responde', 'si'],
   escena: ['canal', 'prioridad', 'en', 'sujeta', 'si', 'al_empezar', 'al_terminar', 'repetir', 'grande', 'tipo', 'hito', 'narra', 'pausa', 'espera'] };
 const NOCHE_ACCIONES = ['hecho', 'olvidar', 'suma', 'cosa', 'saber', 'log', 'sentar', 'levantar', 'junto'];   // (efectos; olvidar, only «ia_» facts, in «libre»)
