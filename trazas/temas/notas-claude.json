@@ -1,5 +1,5 @@
 {
- "_nota": "Notas de Claude (A1–A9, rúbrica de trazas/temas/rubrica.md) de las 40 escenas de la corrida 39506244928 (versiones del pedido; jugadora curiosa, día 16). Para calibrar el juez automático (tools/juez.js). Más 33 escenas de la corrida 39509694246 (rubrica, rubrica+cuidado, rubrica+cuidado+ejemplo; versión «r2:…»).",
+ "_nota": "Notas de Claude (A1–A9, rúbrica de trazas/temas/rubrica.md) de las 40 escenas de la corrida 39506244928 (versiones del pedido; jugadora curiosa, día 16). Para calibrar el juez automático (tools/juez.js). Más 33 escenas de la corrida 39509694246 (rubrica, rubrica+cuidado, rubrica+cuidado+ejemplo; versión «r2:…»). Más 24 de la corrida 39513519834 («elegir»: c0, escribir 4; c8, escribir 8 y que el juez elija 4; ids con «r3:c0/»).",
  "corrida": 39506244928,
  "criterios": [
   "A1",
@@ -1326,6 +1326,438 @@
    "total": 9,
    "noche": "r2:rubrica+cuidado+ejemplo-3",
    "texto": "=== ia_felicity_masa_y_orgullo ===\ncon: felicity\ntema: Hablar con Felicity de la cocina como asunto de orgullo y no solo de tarea\nresumen: Ana descubre que Felicity presume de su cocina porque la cocina es, para ella, una forma de mandar en el mundo; Ana la provoca con admiración y una pizca de rivalidad.\nse_hace_en: gg\n---\nana: Felicity, tú hablas de la cocina como si fuera un reino.\nfelicity: (Muy recta.) Lo es, en su medida. Una cocina bien llevada dice mucho de una casa.\nana: Entonces tú debes de ser reina y general al mismo tiempo.\nfelicity: Prefiero reina. Los generales hacen demasiado ruido.\nana: Yo pensaba que cocinar era solo mezclar cosas y procurar que no se quemen.\nfelicity: Eso pensaba cualquiera que no entendiera de verdad. Hay orden, juicio y una clase de orgullo muy decente en sacar una cosa buena de ingredientes modestos.\nana: (Ana la mira con mucho interés.) ¡Qué manera tan solemne de hablar de una tarta!\nfelicity: La tarta merece solemnidad si sale bien.\nana: Entonces tú cocinas para que la gente te admire.\nfelicity: Cocino para que la gente coma, y si además la admira, no la echaré a perder por modestia.\nana: Eso me gusta. Es casi tan grande como decir un verso.\nfelicity: No necesito versos para saber cuándo una costra está bien dorada.\n-> Admirarle el orgullo y pedirle que le diga qué no perdona en una mesa\n   ana: Dígame una cosa, Felicity: ¿qué es lo que tú no perdonas en una mesa?\n   felicity: El descuido. Y que una cosa buena se sirva como si no importara.\n   ! suma afecto:felicity:ana 1\n-> Decirle que Ana ve la cocina como una especie de hechicería ordenada\n   ana: Yo creo que la cocina es una hechicería que se deja aprender.\n   felicity: (A pesar de sí misma, sonríe.) Mejor hechicería ordenada que torpeza orgullosa.\n   ! suma afecto:felicity:ana 1\n-> Retarla a hacer juntas algo sencillo y dejar que la receta mande\n   ana: Entonces un día haremos juntas algo sencillo, y veremos si la receta manda más que nosotras.\n   felicity: Veremos si tú no hablas de más mientras pesas la harina.\n   ! suma afecto:felicity:ana 1"
+  },
+  {
+   "version": "r3:c0",
+   "id": "r3:c0/ia_marilla_16",
+   "notas": [
+    1,
+    2,
+    2,
+    2,
+    2,
+    1,
+    2,
+    1,
+    2
+   ],
+   "total": 15,
+   "noche": "r3:c0-1",
+   "texto": "=== ia_marilla_16 ===\ncon: marilla\ntema: Preguntarle qué se hace cuando a una se le quiere decir algo bueno y no le sale\nresumen: Ana le pregunta por la torpeza de los sentimientos; Marilla admite que no todos saben mostrarlos y deja ver que también se guarda cosas.\nal_terminar: suma afecto:marilla:ana 1\n---\nana: Marilla, ¿a usted le pasa que hay cosas buenas que una siente… y no le salen por la boca?\nmarilla: (Marilla sigue pelando las papas, sin levantar mucho la vista.) A veces. Y no por eso dejan de ser buenas.\nana: Pues eso me atormenta. Quise decir algo bonito y me salió todo torcido, como una media mal tejida.\nmarilla: Si el corazón está derecho, Ana, la lengua puede remendarse después. No andes haciendo tanto alboroto por una palabra.\nana: (Ana se queda muy seria, porque eso le parece casi una receta para el alma.) ¿Y usted nunca se queda con algo en el pecho hasta que le pesa?\nmarilla: (Marilla hace una pausa, y la cuchara queda inmóvil un instante.) Sí. Pero una aprende a seguir adelante con el peso. No siempre hace falta decirlo todo.\n-> Preguntarle si ese peso también se aligera si una se sienta a tomar té con alguien\n   ana: Entonces… ¿si una se sienta con alguien y toma té, el peso se hace un poco más liviano?\n   marilla: Puede ser. Si la compañía es buena, ayuda más que las palabras largas.\n   ana: (Ana sonríe despacio.) Entonces el té es una clase de consuelo muy respetable.\n   ! suma afecto:marilla:ana 1\n-> Confesarle que a veces cree quererla más cuando ella no lo nota\n   ana: Yo creo que a veces una quiere más a una persona cuando esa persona no lo nota.\n   marilla: No digas sandeces. (Pero la voz le sale menos dura que de costumbre.) A mí no me hace falta que me lo declares a cada minuto.\n   ana: (Ana se pone colorada, pero feliz.) Eso es una forma muy Marilla de agradecer.\n   ! suma afecto:marilla:ana 1"
+  },
+  {
+   "version": "r3:c0",
+   "id": "r3:c0/ia_matthew_16",
+   "notas": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    1,
+    2
+   ],
+   "total": 17,
+   "noche": "r3:c0-1",
+   "texto": "=== ia_matthew_16 ===\ncon: matthew\ntema: Contarle lo que hace una casa cuando entra una visita y se rompe el silencio habitual\nresumen: Ana habla del efecto de la veraneante en Tejas Verdes; Matthew le revela que le gusta oírla pensar en voz alta porque hace menos grande el silencio.\nal_terminar: suma afecto:matthew:ana 1\n---\nana: Matthew, ¿una casa cambia mucho cuando entra una visita?\nmatthew: (Matthew mira hacia la puerta, como si esperara que la visita oyera desde el camino.) Sí… cambia. Hace más ruido. Y a veces eso es bueno.\nana: Yo noté que hasta las tazas parecen ponerse más derechas cuando hay una señora forastera en la casa.\nmatthew: (Matthew deja escapar una sonrisa pequeña, casi secreta.) Tejas Verdes tiene sus maneras. A veces parece muy sola, y otras veces se llena de vida de golpe.\nana: ¿Y a usted le gusta más cuando está sola o cuando se llena?\nmatthew: Me gusta cuando hay paz. Pero también me gusta oírte hablar a ti. Entonces la casa no parece tan vacía.\nana: (Ana abre mucho los ojos.) ¿De veras? Yo creí que usted prefería el silencio, como los árboles.\nmatthew: Lo prefiero a muchas cosas… pero no al tuyo.\nana: (Ana se queda un instante sin palabras, lo cual es tan raro que ella misma lo celebra por dentro.) Entonces intentaré pensar en cosas agradables cuando esté usted cerca, para que la paz sea aún mejor.\n-> Preguntarle si alguna vez la casa le pareció demasiado quieta antes de que ella llegara\n   ana: ¿Y antes de que yo llegara, Tejas Verdes le parecía demasiado quieta, Matthew?\n   matthew: Un poco. Marilla y yo nos arreglábamos, pero había mucho aire sin voz.\n   ana: (Ana baja la cabeza, conmovida.) Entonces yo he llenado bastante aire.\n   ! suma afecto:matthew:ana 1\n-> Decirle que no hará menos ruido, porque no quiere que la casa vuelva a quedarse muda\n   ana: No quiero hacer menos ruido, porque no quiero que la casa vuelva a quedarse muda.\n   matthew: (Matthew la mira con ternura.) No hace falta. Mientras sea buen ruido, puedes hacerlo cuanto quieras.\n   ana: Eso me parece una bendición más grande que una cesta entera de violetas.\n   ! suma afecto:matthew:ana 1"
+  },
+  {
+   "version": "r3:c0",
+   "id": "r3:c0/ia_alec_16",
+   "notas": [
+    1,
+    1,
+    1,
+    2,
+    1,
+    1,
+    2,
+    1,
+    2
+   ],
+   "total": 12,
+   "noche": "r3:c0-1",
+   "texto": "=== ia_alec_16 ===\ncon: alec\ntema: Preguntarle por qué el trabajo de una granja no parece cansarlo tanto como a otros hombres\nresumen: Ana encuentra a Alec en un momento quieto y descubre que su manera de querer a la tierra es más seria que habladora.\nal_terminar: suma afecto:alec:ana 1\n---\nana: Sr. Alec, ¿usted siempre mira la tierra como si estuviera oyendo algo que yo no oigo?\nalec: (Alec King apoya los dedos en la cerca, con esa calma de quien no gasta palabras sin necesidad.) A veces la tierra habla, si una la mira bastante.\nana: ¡Entonces yo no estaba equivocada! Yo siempre sospecho que las cosas de la granja guardan secretos.\nalec: Los guardan. Pero no se los dicen a cualquiera.\nana: (Ana levanta la barbilla, interesada.) ¿Y a quién se los dicen?\nalec: A quien no las apura. A quien espera. A quien trabaja sin querer lucirse.\nana: (Ana piensa que esa respuesta le cae muy bien a la paciencia, aunque no sabe si le cae bien a su orgullo.) Eso es más hermoso de lo que parece al principio.\nalec: La belleza no siempre hace ruido.\nana: Entonces la granja de usted debe de ser muy hermosa, porque parece callada de una manera que da confianza.\n-> Preguntarle si una tierra quieta también puede estar contenta\n   ana: ¿Y una tierra quieta también puede estar contenta?\n   alec: Puede. La contentura no siempre salta. A veces se queda en la raíz.\n   ana: (Ana mira al suelo como si acabara de aprender a oír raíces.) Eso me gustaría saber hacerlo.\n   ! suma afecto:alec:ana 1\n-> Decirle que le gustaría aprender a esperar sin ponerse impaciente como una tetera\n   ana: A mí me gustaría aprender a esperar sin ponerme impaciente como una tetera.\n   alec: Entonces ya vas mejor que muchos mayores. La impaciencia les hace más ruido que a una máquina.\n   ana: (Ana se ríe por lo bajo.) Eso me consuela mucho para ser tan poca cosa.\n   ! suma afecto:alec:ana 1"
+  },
+  {
+   "version": "r3:c0",
+   "id": "r3:c0/ia_cecily_16",
+   "notas": [
+    1,
+    2,
+    1,
+    1,
+    2,
+    1,
+    2,
+    1,
+    2
+   ],
+   "total": 13,
+   "noche": "r3:c0-1",
+   "texto": "=== ia_cecily_16 ===\ncon: cecily\ntema: Hablarle de lo que se siente al estar en una casa donde todos parecen saber su sitio\nresumen: Ana y Cecily comparten una conversación suave sobre ser pequeñas, ser vistas y no tener que hacerse grandes de golpe.\nal_terminar: suma afecto:cecily:ana 1\n---\nana: Cecily, tú pareces de esas niñas que saben quedarse muy quietecitas sin volverse tristes.\ncecily: (Cecily sonríe, con sus manos juntas sobre el vestido.) A veces me escondo un poco para no estorbar.\nana: ¡Oh! Eso me da pena y ternura al mismo tiempo. Yo, en cambio, siempre siento que debo ocupar el aire entero.\ncecily: Felicity dice que yo soy demasiado callada.\nana: ¿Y a ti te pesa ser callada?\ncecily: Un poquito. Pero cuando una es callada, oye cosas que los demás no oyen.\nana: (Ana se inclina hacia ella, encantada.) Eso es verdad. Las personas calladas guardan tesoros como cofres cerrados.\ncecily: ¿Tú también guardas cosas?\nana: Yo guardo muchas. Solo que a mí se me salen por la boca con más facilidad que a otras niñas.\ncecily: (Cecily se ríe, bajito.) Entonces tú y yo hacemos una buena compañía: tú dices lo que yo pienso y yo pienso lo que tú dices.\n-> Decirle que le gustaría proteger su silencio para que Felicity no lo pisotee\n   ana: Me gustaría protegerte el silencio para que Felicity no te lo pise con sus botas de reina.\n   cecily: (Cecily abre mucho los ojos, sorprendida y agradecida.) Nadie me lo ha dicho así.\n   ana: Pues yo lo digo con mucho empeño.\n   ! suma afecto:cecily:ana 1\n-> Confesarle que envidió un poco que ella pudiera quedarse quieta sin parecer aburrida\n   ana: Yo te envidio un poco, porque puedes quedarte quieta sin parecer aburrida.\n   cecily: ¿De veras? Yo envidio que tú siempre sabes qué decir.\n   ana: (Ana se ríe, feliz de esa igualdad tan rara.) Entonces cada una tiene algo que la otra quisiera.\n   ! suma afecto:cecily:ana 1"
+  },
+  {
+   "version": "r3:c0",
+   "id": "r3:c0/ia_marilla_tragar_orgullo",
+   "notas": [
+    1,
+    2,
+    1,
+    2,
+    2,
+    1,
+    1,
+    1,
+    2
+   ],
+   "total": 13,
+   "noche": "r3:c0-2",
+   "texto": "=== ia_marilla_tragar_orgullo ===\ncon: marilla\ntema: Preguntarle si alguna vez tuvo que tragarse el orgullo por la casa y seguir adelante\nresumen: Ana ya no pregunta cómo se doma el genio, sino qué hace una persona cuando le toca dejar su orgullo en el plato y servir la cena igual.\nal_terminar: suma afecto:marilla:ana 1\n---\nana: Marilla, ¿usted alguna vez tuvo que tragarse el orgullo por una cosa de la casa y no decir ni una palabra?\nmarilla: Más de una vez. La casa no se sostiene con discursos.\nana: Eso me parece espantoso y admirable a la vez. Yo noto que el orgullo me da mucha compañía, pero poca utilidad.\nmarilla: Entonces empieza por no invitarlo a la mesa cada vez que se sienta un mal humor.\nana: (Ana baja la vista, pensativa.) Quizá por eso me cuesta tanto quedarme quieta cuando me siento herida. Quisiera hacer una escena, y usted me hace ver que una puede guardar la dignidad sin hacer ruido.\nmarilla: Guardar la dignidad y no echarlo todo a perder no son la misma cosa. Tú aprenderás la diferencia.\n-> Decirle que a veces le da más vergüenza haber sentido que haber perdido\n   ana: A veces me da más vergüenza haber sentido tanto que haber perdido la compostura.\n   marilla: La vergüenza útil enseña. La otra solo estorba.\n-> Preguntarle si la calla para no pelear o para no ceder\n   ana: ¿Usted calla para no pelear, o para no ceder?\n   marilla: A veces por ambas cosas. Y a veces porque una palabra a destiempo puede empeorar lo que ya está mal.\n-> Contarle que le gustaría aprender a soportar sin ponerse dramática\n   ana: Yo quisiera aprender a soportar sin volverme una tragedia ambulante.\n   marilla: Entonces vas bien encaminada. Lo primero es reconocer que el mundo no se cae cada vez que a ti te duele algo.\n"
+  },
+  {
+   "version": "r3:c0",
+   "id": "r3:c0/ia_matthew_nombres_hogar",
+   "notas": [
+    1,
+    2,
+    1,
+    2,
+    2,
+    2,
+    2,
+    1,
+    2
+   ],
+   "total": 15,
+   "noche": "r3:c0-2",
+   "texto": "=== ia_matthew_nombres_hogar ===\ncon: matthew\ntema: Contarle que a veces los nombres le hacen sentir que por fin pertenece a algún sitio\nresumen: Ana lleva a Matthew del cielo de las violetas a algo más íntimo: los nombres como una manera de hacer hogar.\nal_terminar: suma afecto:matthew:ana 1\n---\nana: Matthew, creo que los nombres hacen más que llamar a las cosas. A veces parecen ponerles una manta encima.\nmatthew: Sí. Hay nombres que abrigan.\nana: Eso es justamente lo que yo siento cuando digo Tejas Verdes. Ya no es solo una casa con techo y paredes.\nmatthew: (Matthew la mira con esa quietud buena que tiene.) No, no lo es.\nana: Cuando digo ese nombre, siento como si el lugar me reconociera a mí también. Como si me dijera: “Tú ya eres de aquí”.\nmatthew: Me alegra que te sientas así.\nana: Antes me parecía que todo era prestado. Ahora hay cosas que, cuando las nombro, parecen quedarse conmigo.\nmatthew: Entonces sigue nombrándolas. A veces eso ayuda más que muchas palabras grandes.\n-> Decirle que quiere ponerle nombre a cada rincón que le dé paz\n   ana: Quisiera ponerle nombre a cada rincón que me da paz, para no olvidar dónde se me calma el corazón.\n   matthew: Tú sabrías hacerlo mejor que nadie.\n-> Preguntarle si él también siente que algunas cosas se vuelven más queridas cuando se las nombra\n   ana: ¿A usted también le pasa que una cosa se vuelve más querida cuando por fin la puede nombrar bien?\n   matthew: Sí. A veces una palabra propia hace más cercanas las cosas.\n-> Contarle que ya no mira la casa como una visita, sino como alguien que vuelve\n   ana: Ya no miro Tejas Verdes como una visita que intenta portarse bien. La miro como alguien que vuelve.\n   matthew: (Matthew sonríe apenas.) Eso me parece una hermosa manera de decirlo.\n"
+  },
+  {
+   "version": "r3:c0",
+   "id": "r3:c0/ia_cecily_valentia_suave",
+   "notas": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "total": 9,
+   "noche": "r3:c0-2",
+   "texto": "=== ia_cecily_valentia_suave ===\ncon: cecily\ntema: Hablar con Cecily sobre decir las cosas bajito y aun así decirlas\nresumen: Ana deja de tratar a Cecily como una niña a proteger y la escucha como a una compañera capaz de desear y de pedir.\nal_terminar: suma afecto:cecily:ana 1\n---\nana: Cecily, tú hablas como si pedir algo bonito fuera casi una travesura. ¿Te da vergüenza querer mucho las cosas?\ncecily: Sí… porque luego parece que una no las merece.\nana: ¡Oh, eso es una idea tristísima! Las cosas queridas no se merecen por portarse una callada.\ncecily: (Cecily juega con la punta de su listón.) Yo siempre temo decir lo que siento y que se rían.\nana: Si se rieran, serían unos necios desalmados. Las cosas dulces deben decirse despacito, pero decirse igual.\ncecily: ¿Y si me equivoco al decirlas?\nana: Entonces las corriges. Una palabra torpe no arruina un corazón sincero.\n-> Decirle que ella también se siente pequeña a veces\n   ana: Yo también me siento pequeña algunas veces, aunque por fuera hable como si tuviera una torre dentro.\n   cecily: Eso me hace sentir mejor. Pensé que solo yo era así.\n-> Preguntarle cuál es la cosa que más le gustaría pedir sin miedo\n   ana: Si no te diera vergüenza, ¿qué pedirías ahora mismo?\n   cecily: Querría que me dejaran quedarme un ratito más con tú… y con los demás, sin que me manden dentro.\n-> Contarle que quiere defenderla si alguien se burla de su voz bajita\n   ana: Pues si alguien se burla de tu voz, lo tendré que poner en su lugar. Las voces suaves también tienen derechos.\n   cecily: (Cecily se ríe, muy bajito, y ya no parece tan asustada.) Entonces me gustaría que tú estuvieras cerca.\n"
+  },
+  {
+   "version": "r3:c0",
+   "id": "r3:c0/ia_felicity_receta",
+   "notas": [
+    1,
+    2,
+    1,
+    1,
+    2,
+    1,
+    2,
+    1,
+    2
+   ],
+   "total": 13,
+   "noche": "r3:c0-2",
+   "texto": "=== ia_felicity_receta ===\ncon: felicity\ntema: Preguntarle por qué cocina como si la cocina fuera una corona\nresumen: Ana se asoma al orgullo doméstico de Felicity y descubre que detrás de sus aires hay una manera muy seria de querer su casa.\nal_terminar: suma afecto:felicity:ana 1\n---\nana: Felicity, tú hablas de la cocina como si fuera un reino. ¿Es porque te gusta mandar en ella o porque de verdad la quieres?\nfelicity: Las dos cosas. Una cocina bien ordenada es una cosa respetable.\nana: Yo todavía no sé si respeto más una cocina o una conversación ingeniosa, pero sospecho que se llevan bien.\nfelicity: (Felicity alza un poco la barbilla.) Las conversaciones ingeniosas no alimentan a nadie. La sopa sí.\nana: Eso es una verdad tan práctica que casi me ofende… y, sin embargo, me parece admirable.\nfelicity: Si quieres aprender a admirarla, observa cómo queda todo en su sitio cuando una no deja que el descuido mande.\nana: (Ana mira la mesa, tan derecha, como si la hubieran peinado.) Yo creo que tú harías entrar en razón a una olla rebelde.\n-> Decirle que le gustaría hacer una comida que no avergonzara a Marilla\n   ana: Me gustaría hacer una comida que Marilla no mirara como si sospechara de ella desde el principio.\n   felicity: Entonces empieza por no distraerte. La cocina no perdona los pensamientos flotantes.\n-> Preguntarle si su orgullo en la cocina le ha traído alguna pena\n   ana: ¿Tu orgullo en la cocina te ha traído alguna vez una pena? Pareces tan firme que una piensa que nada puede moverlo.\n   felicity: El orgullo trae penas cuando una cree que nadie más podría hacerlo tan bien. Yo procuro no caer en eso.\n-> Contarle que le gustaría aprender a ordenar sin que se le apague la imaginación\n   ana: Yo quiero aprender a ordenar sin apagarme por dentro. No deseo convertirme en una escoba con delantal.\n   felicity: Entonces tendrás que aprender que el orden también puede ser bonito. No hace falta que sea triste para ser exacto.\n"
+  },
+  {
+   "version": "r3:c0",
+   "id": "r3:c0/ia_marilla_1",
+   "notas": [
+    1,
+    2,
+    2,
+    2,
+    2,
+    1,
+    2,
+    1,
+    2
+   ],
+   "total": 15,
+   "noche": "r3:c0-3",
+   "texto": "=== ia_marilla_1 ===\ncon: marilla\ntema: Preguntarle qué quería ser antes de vivir en Tejas Verdes\nresumen: Ana descubre que Marilla también dejó cosas sin elegir, y que no siempre fue tan de piedra como parece.\nse_hace_en: gg\n---\nana: Marilla, ¿usted quiso alguna vez otra vida, antes de Tejas Verdes?\nmarilla: (Marilla deja la aguja sobre el regazo.) Sí. Quise muchas cosas que no llegaron. Eso les pasa a las personas sensatas y a las disparatadas por igual.\nana: ¿Y no le da pena decirlo tan lisa y llanamente?\nmarilla: No me da pena, me da paciencia. La pena no remienda una camisa ni cría una huerta.\nana: (Ana se muerde el labio.) Yo pensaba que usted había nacido ya hecha, como las sillas de la cocina.\nmarilla: Pues no. Yo también tuve que aprender a hacerme útil sin dejar de ser yo misma.\nana: Entonces… ¿ser buena no es lo mismo que no desear nada?\nmarilla: No. Ser buena es elegir bien lo que se deja entrar en el corazón.\n-> Decirle que eso es más difícil que la geometría\n   ana: Eso me parece muchísimo más difícil que la geometría, Marilla.\n   marilla: Y sin embargo se aprende. Con menos teatro y más práctica.\n   ! suma afecto:marilla:ana 1\n-> Contarle que a veces sueña con una vida enteramente distinta\n   ana: Yo a veces sueño con una vida enteramente distinta, y después me siento culpable, como si le faltara el respeto a la que tengo.\n   marilla: Soñar no es faltar al respeto. Quedarse en el sueño, sí.\n   ! suma afecto:marilla:ana 1"
+  },
+  {
+   "version": "r3:c0",
+   "id": "r3:c0/ia_matthew_1",
+   "notas": [
+    1,
+    2,
+    1,
+    2,
+    2,
+    1,
+    2,
+    1,
+    2
+   ],
+   "total": 14,
+   "noche": "r3:c0-3",
+   "texto": "=== ia_matthew_1 ===\ncon: matthew\ntema: Contarle que no siempre sabe quedarse quieta por dentro\nresumen: Matthew le muestra que la quietud no está reñida con tener un corazón lleno de ideas.\n---\nana: Matthew, ¿a usted le pasa que por fuera está quieto, pero por dentro le corren pensamientos como conejos?\nmatthew: (Matthew sonríe apenas, mirando al suelo.) Sí… solo que los míos suelen ser más tímidos que los tuyos.\nana: ¡Entonces usted también tiene conejos en el pecho! Eso me agrada mucho.\nmatthew: Los tengo, y bastante asustadizos. A veces me hacen compañía cuando no sé qué decir.\nana: A mí me parece que los suyos son conejos muy buenos.\nmatthew: Y los tuyos son conejos veloces. Pero no por eso dejan de ser tuyos.\nana: (Ana se queda pensando.) Eso es una manera muy linda de decir que una no tiene que parecerse a una mesa para ser firme.\nmatthew: No. Una puede ser firme y seguir siendo una niña.\n-> Decirle que le gustaría que él le contara más cosas de su juventud\n   ana: Me gustaría que usted me contara más cosas de su juventud, Matthew. Me parece que debió de ser muy silenciosa y muy interesante.\n   matthew: Silenciosa, seguro. Interesante… quizá solo para quien sabe mirar despacio.\n   ! suma afecto:matthew:ana 1\n-> Preguntarle si también le da miedo que la gente lo mire mucho\n   ana: ¿Y a usted le da miedo que la gente lo mire mucho?\n   matthew: Muchísimo. Pero contigo se me pasa un poco.\n   ! suma afecto:matthew:ana 1"
+  },
+  {
+   "version": "r3:c0",
+   "id": "r3:c0/ia_alec_1",
+   "notas": [
+    0,
+    2,
+    2,
+    2,
+    1,
+    1,
+    2,
+    1,
+    2
+   ],
+   "total": 13,
+   "noche": "r3:c0-3",
+   "texto": "=== ia_alec_1 ===\ncon: alec\ntema: Preguntarle por la tía Hetty y lo que piensa de la muchacha nueva en Tejas Verdes\nresumen: Ana descubre que Alec ve más de lo que dice, y que la casa King no se sostiene solo con severidad.\n---\nana: Sr. Alec, ¿la tía Hetty siempre ha tenido esa cara como si el mundo le debiera seis monedas?\nalec: (Alec resopla por la nariz, que es casi una risa.) No siempre. Solo desde hace muchos años.\nana: ¡Ah! Entonces la costumbre ha trabajado más que un reloj.\nalec: La costumbre y el orgullo. Son dos peones que nunca faltan en una casa.\nana: ¿Y a usted le pesa vivir con ellos?\nalec: A veces. Pero una casa se cae si nadie la sostiene, aunque tenga muy buen nombre.\nana: Yo pensaba que la tía Hetty no quería a nadie.\nalec: Quiere a su modo. Solo que su modo es duro de abrir.\nana: (Ana baja la voz.) Entonces quizá no sea indiferencia, sino miedo de aflojar.\nalec: Puede ser. Tú miras deprisa, pero a veces aciertas hondo.\n-> Contarle que le da pena la señorita Hetty, aunque le haya hablado como si fuera una piedra\n   ana: Me da pena la señorita Hetty, aunque me hable como si yo fuera una piedra que se hubiera metido en su jardín.\n   alec: Pues no eres piedra. Y ella lo sabe más de lo que quisiera.\n   ! suma afecto:alec:ana 1\n-> Preguntarle si Felicity manda tanto como parece\n   ana: ¿Felicity manda tanto como parece?\n   alec: Manda bastante. Pero también trabaja bastante, que eso vale más.\n   ! suma afecto:alec:ana 1"
+  },
+  {
+   "version": "r3:c0",
+   "id": "r3:c0/ia_carrie_1",
+   "notas": [
+    1,
+    1,
+    1,
+    2,
+    2,
+    1,
+    2,
+    1,
+    2
+   ],
+   "total": 13,
+   "noche": "r3:c0-3",
+   "texto": "=== ia_carrie_1 ===\ncon: carrie\ntema: Hablarle del gusto de leer en voz baja y de las cosas que una imagina mientras nadie la mira\nresumen: Carrie se anima a decir lo que piensa, y Ana ve en ella una niña que escucha el mundo como si fuera un cuento.\n---\nana: Carrie, ¿tú también piensas cosas que no dices porque se te hacen demasiado delicadas para la boca?\ncarrie: Sí… pero yo las digo muy bajito, para que no se rompan.\nana: ¡Eso es exactamente lo que yo hago con mis mejores pensamientos!\ncarrie: Yo a veces me los digo con nombres, como si fueran muñequitos en fila.\nana: Eso es precioso. A los pensamientos hay que darles casa, o se pierden por los pasillos del aire.\ncarrie: ¿Y los tuyos nunca se pierden?\nana: Se pierden a menudo, pero son muy ingeniosos para volver.\ncarrie: Entonces los míos podrían aprender de los tuyos.\nana: O los míos de los tuyos, que son más cuidadosos.\n-> Contarle que le gustaría leerle un cuento alguna tarde y ver cuál le hace más cosquillas\n   ana: Me gustaría leerle un cuento alguna tarde y ver cuál nos hace más cosquillas por dentro.\n   carrie: Sí… pero uno que termine bien, por favor. Los cuentos tristes me dejan la garganta flaca.\n   ! suma afecto:carrie:ana 1\n-> Decirle que le enseñe a guardar secretos sin que se le note en la cara\n   ana: Entonces enséñame a guardar secretos sin que se me note en la cara.\n   carrie: Yo tampoco sé hacerlo del todo, pero podría intentarlo contigo.\n   ! suma afecto:carrie:ana 1"
+  },
+  {
+   "version": "r3:c8",
+   "id": "r3:c8/ia_matthew_semillas_silencio",
+   "notas": [
+    1,
+    2,
+    1,
+    1,
+    1,
+    2,
+    2,
+    1,
+    2
+   ],
+   "total": 13,
+   "noche": "r3:c8-1",
+   "texto": "=== ia_matthew_semillas_silencio ===\ncon: matthew\ntema: Preguntarle qué hace un hombre cuando prefiere callar antes que hablar de más\nresumen: Ana descubre que el silencio de Matthew no es pobreza de ideas, sino una forma de querer y mirar el mundo.\nal_terminar: suma afecto:matthew:ana 1\n---\nana: Matthew, ¿a usted le parece que hablar mucho estropea lo que una piensa?\nmatthew: (Matthew se rasca la mejilla y mira hacia la ventana, como si allí pudiera encontrar una respuesta más amable.) A veces… sí.\nana: Entonces usted no habla por miedo a estropearlo todo.\nmatthew: No exactamente. A mí me salen mejor las ideas si primero las dejo sentadas un rato.\nana: ¡Qué manera tan prudente de pensar! Yo las mías no las puedo sentar: saltan por la ventana.\nmatthew: Las tuyas saltan y aun así vuelven.\nana: (Ana lo mira con una ternura solemne.) ¿Y usted nunca se cansa de que todo el mundo diga lo que piensa sin descanso?\nmatthew: Me canso más de que nadie mire lo que piensa.\n-> Preguntarle si él mira mucho el cielo porque le gusta o porque le faltan palabras\n   ana: ¿Usted mira mucho el cielo porque le gusta, o porque así se le llenan los silencios?\n   matthew: Puede ser por las dos cosas. El cielo no interrumpe.\n   ana: ¡Ah, qué descanso debe ser hablar con alguien tan bien educado!\n   ! suma afecto:matthew:ana 1\n-> Contarle que cuando él calla ella siente que no está sola\n   ana: Cuando usted calla, yo no me siento abandonada. Es como si alguien sostuviera la casa por dentro.\n   matthew: (Matthew baja la vista, muy conmovido.) Eso es mucho mejor de lo que sé decir.\n   ana: Entonces no lo diga. Solo siga haciéndolo.\n   ! suma afecto:matthew:ana 1\n-> Preguntarle qué semilla elegiría él para un huerto que quiere aprender a crecer\n   ana: Si usted tuviera que escoger una semilla para un huerto nuevo, ¿cuál pondría?\n   matthew: Tal vez una que no sea orgullosa. Una capuchina hace bien en trepar, pero no se cree reina.\n   ana: ¡Eso me parece una flor con excelente carácter!\n   ! suma granja:matthew 1\n"
+  },
+  {
+   "version": "r3:c8",
+   "id": "r3:c8/ia_marilla_ensalada",
+   "notas": [
+    2,
+    2,
+    1,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "total": 17,
+   "noche": "r3:c8-1",
+   "texto": "=== ia_marilla_ensalada ===\ncon: marilla\ntema: Preguntarle cómo se sabe si una persona ya empezó a pertenecer de veras a la casa\nresumen: Ana quiere saber si en Tejas Verdes ya dejó de ser una invitada y cómo se nota eso en una casa como la de Marilla.\nal_terminar: suma afecto:marilla:ana 1\n---\nana: Marilla… ¿cómo se sabe una persona de veras si ya pertenece a una casa?\nmarilla: (Marilla deja el cuenco sobre la mesa y la mira de lado.) Cuando la gente empieza a guardar sus cosas sin preguntar dónde las ponen.\nana: ¿Y si la casa la pone a una a prueba, aunque ya se haya quedado?\nmarilla: Entonces aprende a no andar como si fuera de vidrio. Una casa no es una fonda, Ana.\nana: (Ana se endereza, como si acabaran de darle un título.) Entonces yo no soy una huésped con permiso… ¡soy una persona de la familia que a veces hace papelones!\nmarilla: Eso último lo has entendido con notable rapidez.\n-> Decirle que eso le da más gusto que una corona\n   ana: Usted no sabe cuánto me alegra oírlo. Yo pensaba que una familia era como un mantel muy fino y que yo lo iba a manchar para siempre.\n   marilla: (A Marilla se le mueve apenas una comisura.) No eres un mantel, Ana. Y ya basta de comparaciones absurdas.\n   ana: ¡No es absurdo! Es una imagen clarísima.\n   ! suma afecto:marilla:ana 1\n-> Preguntarle si también ella tuvo que aprender a pertenecer\n   ana: ¿Y usted, Marilla? ¿Le costó aprender a ser de una casa sin pedir permiso a cada paso?\n   marilla: A mí me costó aprender a no mandar más de lo necesario. Las casas se sostienen con costumbre… y con paciencia.\n   ana: Eso suena muchísimo menos hermoso que una novela, pero me parece más verdadero.\n   ! suma paciencia:marilla:ana 1\n-> Callarse un momento y decir que intentará no moverse como una invitada\n   ana: Haré todo lo posible por no andar como si cada silla fuera a morderme.\n   marilla: Eso estaría muy bien. Y si alguna silla te muerde, le diré yo cuatro cosas.\n   ana: (Ana se ríe, rendida.) Entonces ya no tendré miedo de los muebles.\n   ! suma afecto:marilla:ana 1\n"
+  },
+  {
+   "version": "r3:c8",
+   "id": "r3:c8/ia_felicity_cocina_orgullo",
+   "notas": [
+    1,
+    2,
+    2,
+    1,
+    2,
+    1,
+    2,
+    1,
+    2
+   ],
+   "total": 14,
+   "noche": "r3:c8-1",
+   "texto": "=== ia_felicity_cocina_orgullo ===\ncon: felicity\ntema: Preguntarle si el orgullo de la cocina le pesa más que una cacerola llena\nresumen: Ana y Felicity hablan del amor propio en la cocina y de cómo una niña orgullosa se defiende detrás de las buenas maneras.\nal_terminar: suma afecto:felicity:ana 1\n---\nana: Felicity, tú sabes de cocina como si hubieras nacido con una cuchara en la mano. ¿Nunca te da rabia que la gente piense que eso es lo único importante?\nfelicity: Me da rabia, sí. Pero si una no hace bien lo que le toca, ¿qué le queda?\nana: Le queda el derecho a que la miren por todo lo demás.\nfelicity: (Felicity alza la barbilla, aunque se le ablanda un poco la voz.) La gente casi nunca mira.\nana: Yo sí miro.\nfelicity: Tú miras demasiado, Ana Shirley. Por eso a veces ves cosas que otras personas no quieren enseñar.\nana: ¿Y tú? ¿Qué es lo que no quieres enseñar?\nfelicity: Que me importa muchísimo que me aprueben.\nana: ¡Ah! Entonces no eres altiva. Eres sensible con sombrero de orgullo.\nfelicity: ¡Qué manera tan insolente de decir una verdad!\n-> Decirle que cocinar no vuelve menos noble a nadie\n   ana: Cocinar no vuelve menos noble a nadie. Una tarta bien hecha puede ser tan gloriosa como un poema.\n   felicity: Eso suena bonito… aunque todavía me parece sospechoso.\n   ana: Las verdades buenas suelen parecer sospechosas al principio.\n   ! suma afecto:felicity:ana 1\n-> Preguntarle si le cuesta mucho mandar sin que parezca que manda\n   ana: ¿Te cuesta mucho mandar sin que se note?\n   felicity: Muchísimo. Es una ciencia difícil.\n   ana: Entonces eres humana, no un libro de recetas.\n   ! suma afecto:felicity:ana 1\n-> Contarle que a Ana le gustan las personas que son orgullosas pero no crueles\n   ana: A mí me gustan las personas orgullosas que no son crueles. Esas son las más interesantes.\n   felicity: Me alegro de pasar esa prueba.\n   ana: La pasas con nota, aunque no me dejarías copiarte una receta.\n   ! suma afecto:felicity:ana 1\n"
+  },
+  {
+   "version": "r3:c8",
+   "id": "r3:c8/ia_carrie_rosas",
+   "notas": [
+    1,
+    2,
+    1,
+    2,
+    2,
+    1,
+    2,
+    1,
+    1
+   ],
+   "total": 13,
+   "noche": "r3:c8-1",
+   "texto": "=== ia_carrie_rosas ===\ncon: carrie\ntema: Preguntarle qué piensa una niña pequeña de las cosas grandes que oyó decir a las mayores\nresumen: Ana habla con Carrie sobre imaginación y miedo, y descubre que la pequeña tiene una manera muy suya de guardar las cosas que asustan.\nal_terminar: suma afecto:carrie:ana 1\n---\nana: Carrie, ¿tú crees que las cosas grandes dan menos miedo cuando una se las imagina de otro modo?\ncarrie: Yo creo que sí… si una las pone en una cajita.\nana: ¡Una cajita! Esa es una idea preciosa. ¿Y qué harías con el miedo, si cupiera allí?\ncarrie: Le haría una tapita.\nana: (Ana se lleva una mano al corazón, encantada.) Yo sabía que tú tenías pensamientos muy finos para tu edad.\ncarrie: Mamá dice que las cosas grandes no entran en mi cabeza.\nana: Tu mamá no conoce las cajitas.\ncarrie: (Carrie se ríe, seria como quien descubre un secreto.)\n-> Decirle que las historias sirven para guardar miedo y alegría en el mismo sitio\n   ana: Las historias sirven para eso. Para que el miedo no quede solo y la alegría tampoco.\n   carrie: Entonces quiero una historia para cuando esté triste.\n   ana: Yo te la contaré si quieres. Tendrá una casa, un árbol y una niña que encuentra valor donde otros no ven nada.\n   ! suma afecto:carrie:ana 1\n-> Preguntarle si le gustaría tener una amiga con la que hablar de cosas secretas\n   ana: ¿Te gustaría tener una amiga con quien hablar de cosas que no se dicen delante de todos?\n   carrie: Sí… pero que no se ría si me equivoco.\n   ana: Esa es la clase de amiga que vale oro.\n   ! suma afecto:carrie:ana 1\n-> Contarle que a veces las personas pequeñas ven mejor que las grandes\n   ana: A veces las personas pequeñas ven más que las grandes, porque miran desde abajo y no se marean.\n   carrie: ¿De veras?\n   ana: De veras. Y además oyen secretos que los grandes pisan sin querer.\n   ! suma letras:ana 1\n"
+  },
+  {
+   "version": "r3:c8",
+   "id": "r3:c8/ia_matthew_capuchinas",
+   "notas": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    1,
+    2
+   ],
+   "total": 17,
+   "noche": "r3:c8-2",
+   "texto": "=== ia_matthew_capuchinas ===\ncon: matthew\ntema: Las capuchinas de su huertito y lo que Ana teme perder\nresumen: Ana le cuenta a Matthew que cuida las semillas como si fuesen oro; Matthew le muestra que las cosas vivas no se mantienen quietas en un bolsillo.\nse_hace_en: huertito, huerta\n---\nana: Matthew, sus semillas de capuchina están en la repisa de mi pieza, dentro de la caja de costura de Marilla. Las saco a cada rato para mirarlas, y me parece que son tan preciosas como si fueran perlas de agua.\nmatthew: (Matthew sonríe con sus ojos tímidos.) Pues procura no mirarlas tanto que se gasten, Ana.\nana: ¿Se gastan las semillas por mirarlas?\nmatthew: No, niña. Pero a veces uno cree que si aprieta una cosa con demasiada fuerza la protege, y lo cierto es que la ahoga.\nana: (Ana se queda muy seria.) Eso me pasa con las cosas que me gustan. Me da miedo que el mundo se las lleve antes de que yo las haya querido bastante.\nmatthew: Entonces siémbralas. Las cosas sembradas no se guardan por miedo; se cuidan con confianza.\n-> ¿Y si no brotan?\n   ana: ¿Y si no brotan, Matthew?\n   matthew: Algunas no brotarán. Pero las que sí lo hagan te harán olvidar las demás.\n-> Le promete que no las abrirá más\n   ana: Está bien… no volveré a abrir la caja cada hora. Las dejaré descansar como si fueran pollitos en un nido.\n   matthew: Eso me parece lo más prudente que has dicho en toda la semana.\n-> Le pide otra semilla para su huertito\n   ana: Entonces deme otra semilla, por si una se ofende de tanto mirarla.\n   matthew: (Matthew se echa a reír bajito.) Te daré una, pero solo una. Las capuchinas no son para desfiles."
+  },
+  {
+   "version": "r3:c8",
+   "id": "r3:c8/ia_marilla_ropa_herida",
+   "notas": [
+    1,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    1,
+    2
+   ],
+   "total": 16,
+   "noche": "r3:c8-2",
+   "texto": "=== ia_marilla_ropa_herida ===\ncon: marilla\ntema: La ropa arrugada y la vergüenza de Ana\nresumen: Marilla descubre que Ana ha estado escondiendo la ropa desordenada; Ana admite que la vergüenza le pesa más que el castigo.\n---\nana: Marilla… yo sé dónde están las prendas que arrugué. Las doblé mal, las escondí mal, y luego fingí que no existían, lo cual era todavía peor.\nmarilla: (Marilla levanta la vista de la costura.) Eso, por lo menos, tiene el mérito de ser sincero.\nana: No quise mentirle a usted, pero me daba una vergüenza tan grande que casi me la podía poner como sombrero.\nmarilla: La vergüenza no es un sombrero muy útil. ¿Por qué no me lo dijiste en cuanto lo hiciste?\nana: Porque pensé que usted iba a mirarme como si yo fuera una mancha en la sábana.\nmarilla: Yo te habría mirado como a una niña descuidada. No es lo mismo.\nana: (Ana baja la cabeza.) A veces, cuando hago algo torcido, me parece que ya no hay manera de enderezarlo.\nmarilla: Hay manera, si no vuelves a empeorarlo escondiéndolo. Tráeme la ropa.\n-> Pedirle que le diga cómo arreglarlo\n   ana: Enséñeme a remendar lo torcido, Marilla. Quiero saberlo sin volver a esconderme.\n   marilla: Muy bien. Y esta vez no harás más teatro con las medias.\n-> Decirle que lo peor fue el miedo\n   ana: Lo peor no fue arrugar la ropa. Lo peor fue tener miedo de decírselo.\n   marilla: Eso ya es algo que puedes corregir. Y me alegro de que lo veas.\n-> Bromear con que las prendas también se ofendieron\n   ana: Me parece que hasta las mangas estaban disgustadas conmigo.\n   marilla: No me asombra. Las mangas tienen más sentido que tú cuando te empeñas en figurar."
+  },
+  {
+   "version": "r3:c8",
+   "id": "r3:c8/ia_carrie_sloane_salto",
+   "notas": [
+    1,
+    2,
+    2,
+    2,
+    2,
+    1,
+    2,
+    1,
+    2
+   ],
+   "total": 15,
+   "noche": "r3:c8-2",
+   "texto": "=== ia_carrie_sloane_salto ===\ncon: carrie\ntema: Carrie habla de Josie y de lo que le da miedo decir en voz alta\nresumen: Ana consigue que Carrie confiese que a veces quiere decir otra cosa que lo que repite detrás de Josie; Ana le responde con ternura, no con sermón.\n---\nana: Carrie, tú me miras como si estuvieras a punto de decir una cosa y de tragártela enseguida. ¿Qué era?\ncarrie: (Carrie retuerce el borde de su vestido.) Josie dijo que si yo no me río cuando ella se ríe, soy una tonta.\nana: Eso es de una injusticia espléndida.\ncarrie: Yo me río, pero a veces no entiendo por qué me río.\nana: Te ríes porque eres buena y le sigues la corriente. Eso no es lo mismo que pensar.\ncarrie: Josie dice que pensar mucho arruga la cara.\nana: Entonces debo de tener el rostro como un mapa de caminos. Pero prefiero eso a no pensar nada.\ncarrie: (Carrie sonríe apenas.) A mí me gustaría decirle a Josie que no siempre tengo ganas de ser una sombra.\nana: Díselo cuando te salga del corazón, no cuando se lo oigas decir a otra niña.\n-> Animarla a decirlo a Josie\n   ana: Si alguna vez se lo dices, que sea con tus propias palabras. Las palabras prestadas se deshacen pronto.\n   carrie: Entonces quiero buscar las mías. Aunque sean pequeñitas.\n-> Decirle que no tiene que reírse si no quiere\n   ana: No te rías por obediencia, Carrie. Las risas obligadas son como flores de papel.\n   carrie: Eso me gusta. Quiero reírme de verdad, si es posible.\n-> Preguntarle por qué la sigue tanto\n   ana: ¿Y por qué la sigues si a veces te hace sentir como una colita detrás de otra?\n   carrie: Porque a veces tiene una manera tan grande de hablar que una cree que debe ser verdad."
+  },
+  {
+   "version": "r3:c8",
+   "id": "r3:c8/ia_felicity_queda",
+   "notas": [
+    1,
+    2,
+    2,
+    1,
+    1,
+    1,
+    1,
+    1,
+    2
+   ],
+   "total": 12,
+   "noche": "r3:c8-2",
+   "texto": "=== ia_felicity_queda ===\ncon: felicity\ntema: La cocina de la granja King y la manera de guardar el orgullo\nresumen: Felicity habla de su casa como de un reino; Ana descubre que detrás de tanta seguridad hay un miedo a que la juzguen por sus platos y por su modo de mandar.\n---\nana: Felicity, tú hablas de la cocina como si fuera una nación con fronteras. ¿También tiene leyes para las sartenes?\nfelicity: (Felicity alza la barbilla.) Las sartenes deben estar limpias, las tazas alineadas y nadie debe tocar lo que no entiende.\nana: Eso suena muy digno. Yo, en cambio, temo que una cuchara me gane una batalla sin que yo me entere.\nfelicity: Tú te burlas.\nana: No; te tengo una admiración respetuosa. Hay en ti algo de capitana de barco.\nfelicity: (Felicity se ablanda apenas.) Pues a veces no es tan agradable ser quien manda. Si algo sale mal, todos miran primero a una.\nana: ¡Ah! Entonces no es orgullo solamente. También es vigilancia.\nfelicity: Y no me gusta que crean que una, por cuidar bien la casa, no siente nada.\nana: Yo no lo creo. De hecho, creo que las casas bien ordenadas esconden muchas cosas que nadie sospecha.\n-> Preguntarle qué no quiere que crean de ella\n   ana: ¿Qué es lo que más te molesta que la gente imagine de ti?\n   felicity: Que soy dura por gusto. No lo soy. Solo no me gusta perder el sitio que me corresponde.\n-> Decirle que entiende el miedo a parecer débil\n   ana: Yo entiendo eso. A veces una quiere parecer firme porque teme que, si afloja, la llevarán por delante.\n   felicity: Exactamente. Tú no eres tan distraída como pareces.\n-> Proponerle hablar de la cocina como de una fortaleza\n   ana: Entonces hablemos de tu cocina como de una fortaleza guardada por una reina que no duerme nunca.\n   felicity: (Felicity sonríe, vencida un poco.) Eso sí me gusta. Pero no se lo cuentes a Felix."
+  },
+  {
+   "version": "r3:c8",
+   "id": "r3:c8/ia_marilla_1",
+   "notas": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    1,
+    2
+   ],
+   "total": 17,
+   "noche": "r3:c8-3",
+   "texto": "=== ia_marilla_1 ===\ncon: marilla\ntema: Preguntarle por la caja del costurero y la cosa que le pidió a Matthew\nresumen: Ana descubre que Marilla ha estado remendando para ella en silencio, y termina prometiendo no tocar la caja sin pedir permiso.\n---\nana: Marilla, ¿puedo preguntarle una cosa sin que se enfade? Vi que le pidió a Matthew que trajera algo, y se me quedó dando vueltas en la cabeza.\nmarilla: Si me lo preguntas con esa cara tan solemne, ya me enfadas antes de empezar.\nana: No es solemnidad; es una curiosidad de las que hacen cosquillas. ¿Era para coser mi vestido, o para otra cosa misteriosa?\nmarilla: Era hilo. Se me acabó el blanco, y no pienso esperar a que una muchacha descosa media casa por falta de un carrete.\nana: (Ana mira la caja del costurero como si fuera un cofre de tesoros.) Entonces usted me ha estado remendando en secreto.\nmarilla: No en secreto. En silencio, que no es lo mismo.\n-> Decirle que le gusta que haga cosas por ella\n   ana: Me gusta más de lo que puedo decirle cuando usted hace cosas por mí sin echar sermones.\n   marilla: (Marilla resopla, pero se le afloja un poco la boca.) Pues acostúmbrate. En una casa hay más cariño del que se anuncia.\n   ! suma afecto:marilla:ana 1\n-> Preguntarle si puede guardar la caja del costurero para no tentarse\n   ana: Si la guardo yo, ¿me dejará abrirla cuando usted me lo diga? Porque temo a mis propios dedos curiosos.\n   marilla: Eso suena sensato. Guárdala, y así aprenderás que hasta la curiosidad necesita llave.\n   ! suma paciencia:marilla:ana 1"
+  },
+  {
+   "version": "r3:c8",
+   "id": "r3:c8/ia_cecily_1",
+   "notas": [
+    1,
+    0,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    2
+   ],
+   "total": 9,
+   "noche": "r3:c8-3",
+   "texto": "=== ia_cecily_1 ===\ncon: cecily\ntema: Preguntarle por qué se pone tan triste cuando cree que ha estorbado\nresumen: Ana descubre que la timidez de Cecily no es solo dulzura, sino miedo a ser una carga.\n---\nana: Cecily, tú siempre pareces como si fueras a pedir perdón por ocupar una silla. ¿Por qué haces esa carita tan triste cuando hablas?\ncecily: Porque… porque me da miedo que me encuentren molesta.\nana: ¿Molesta? ¡Qué palabra tan injusta para una niña que habla como un copo de nieve! ¿Quién se lo ha hecho creer?\ncecily: Nadie me lo dice. Solo… lo pienso yo.\nana: (Ana baja un poco la voz.) Pensarse cosas feas también puede ser una costumbre. Y las costumbres se pueden deshacer, como una trenza mal hecha.\ncecily: ¿De verdad?\nana: Sí. Pero hace falta un poco de valor, y tú tienes más del que cree.\n-> Decirle que cuando esté con ella no pida perdón por respirar\n   ana: Cuando esté conmigo, no va a tener que pedir perdón por respirar. Yo ya tengo bastante por las dos.\n   cecily: (Cecily sonríe apenas.) Eso suena muy seguro.\n   ! suma afecto:cecily:ana 1\n-> Preguntarle si quiere contarle quién la hace sentirse así\n   ana: Si quiere decirme quién la pone a pensar esas cosas, yo la escucharé sin juzgarla.\n   cecily: No es una persona sola… es como si a veces todos miraran demasiado."
+  },
+  {
+   "version": "r3:c8",
+   "id": "r3:c8/ia_alec_1",
+   "notas": [
+    1,
+    2,
+    1,
+    1,
+    1,
+    1,
+    2,
+    1,
+    2
+   ],
+   "total": 12,
+   "noche": "r3:c8-3",
+   "texto": "=== ia_alec_1 ===\ncon: alec\ntema: Preguntarle por la vida de las granjas King y por qué habla tan poco\nresumen: Ana descubre que Alec no es áspero con ella, solo parco, y que le gusta más escuchar que contestar.\n---\nana: Sr. King… digo, Alec, ¿siempre habla usted tan poco, o se le gastan las palabras en la puerta?\nalec: (Alec la mira con una gravedad que casi da risa.) Se me gastan trabajando. En casa, el que habla demasiado pierde tiempo.\nana: Eso me parece una filosofía muy seca, pero muy sólida. ¿Y no se cansa nunca de oír solo el ruido de la granja?\nalec: La granja habla bastante por sí misma, si una la conoce.\nana: Yo todavía no la conozco como usted, pero estoy aprendiendo que cada lugar tiene su propio modo de decir las cosas.\nalec: Entonces vas bien. La gente joven suele creer que todo lo importante se dice fuerte.\n-> Decirle que le gustaría oír cómo hablan las cosas en la granja King\n   ana: Me gustaría aprender a oír esa conversación silenciosa. Quizá los establos y los campos tengan mejores modales que muchas personas.\n   alec: Puede ser. Los campos no interrumpen.\n   ! suma afecto:alec:ana 1\n-> Preguntarle si le molesta que ella pregunte tanto\n   ana: ¿Le molesta que yo pregunte? A veces temo ser como una campanita sin cuerda.\n   alec: No. Preguntar no molesta; molesta no escuchar la respuesta."
+  },
+  {
+   "version": "r3:c8",
+   "id": "r3:c8/ia_felicity_1",
+   "notas": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    2
+   ],
+   "total": 10,
+   "noche": "r3:c8-3",
+   "texto": "=== ia_felicity_1 ===\ncon: felicity\ntema: Preguntarle por la cocina perfecta y por lo que no deja tocar en su reino\nresumen: Felicity deja ver su orgullo de ama de casa, y Ana descubre que detrás de sus modales hay una necesidad muy seria de orden.\n---\nana: Felicity, he oído que en tu cocina todo está tan bien puesto que uno casi teme respirar. ¿Es verdad o exageración mía?\nfelicity: Depende de quién mire. En mi cocina no se pierde ni una cucharilla.\nana: Eso me parece admirable y un poco intimidante. ¿Nunca has querido dejar que algo quede torcido solo para ver qué pasa?\nfelicity: No. Las cosas torcidas terminan por parecerse a la desidia.\nana: ¡Qué sentencia tan severa! Yo, en cambio, creo que una cocina también puede tener un rincón para las cosas que salen con un borde raro.\nfelicity: (Felicity aprieta los labios, pero no del todo disgustada.) Las cosas raras no se comen mejor por ser raras.\nana: No, pero a veces alegran mucho antes de comerse.\n-> Decirle que su cocina parece una canción muy bien ensayada\n   ana: La tuya parece una canción que nadie desafina nunca. Yo no sé si podría vivir dentro de una cocina así, pero me impresiona muchísimo.\n   felicity: Entonces has entendido más de lo que crees.\n   ! suma afecto:felicity:ana 1\n-> Preguntarle cuál es el desastre que más la ofende\n   ana: ¿Qué clase de desastre le ofende más, Felicity: la miga, la mancha o la gente que abre cajones sin permiso?\n   felicity: Los tres. Y el tercero es el peor."
   }
  ]
 }

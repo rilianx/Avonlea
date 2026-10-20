@@ -72,3 +72,26 @@ rechaza y vuelve a la IA; las cualidades mal escritas se quitan). 33 escenas ace
 
 Queda como pedido de siempre: **rubrica+cuidado** (NOCHE_VARIANTE). Lo que más puede subir la nota ahora no es el pedido
 sino elegir: el experimento «elegir» (8 candidatos y el juez se queda con 4).
+
+## Escribir de más y elegir («elegir»)
+
+Corrida 39513519834 (commit 7c1a9f4), pedido rubrica+cuidado: 3 noches escribiendo 4 (c0) y 3 escribiendo 8, de las que el
+juez (gpt-5.4) se queda con 4 (c8). Notas de Claude en notas-claude.json («r3:»).
+
+| | Escenas | Claude (de 18) | Escenas de 16 o más | Juez: elegidas / todas las aceptadas |
+|---|---|---|---|---|
+| c0: escribir 4 | 12 | 13,5 | 1 | — |
+| c8: escribir 8 y elegir 4 | 12 | 13,75 | 4 | 13,1 / 12,0 |
+| c8 con nota mínima 11 del juez | 10 | **14,3** | 4 | — |
+
+- **Elegir sube lo mejor**: con 8 candidatos aparecen las mejores escenas de todas las corridas (Marilla: «No en secreto. En
+  silencio, que no es lo mismo.»; Matthew: «Las capuchinas no son para desfiles»; Marilla: «Y si alguna silla te muerde, le
+  diré yo cuatro cosas»), y el juez las encuentra.
+- **Pero cuando hay poco de dónde elegir, se llena con lo flojo**: en la tercera noche, de 8 candidatos, 2 se rechazaron
+  (escenas con situaciones mal pedidas, «usted») y 3 fallaban según el juez (Carrie «hermana de Charlie», Diana sin conocerla,
+  Matthew repitiendo las capuchinas). Quedaban 4, y entraron las de 8/18.
+- **Ahora el juego no completa con lo flojo**: lo que el juez pone bajo 11 no queda (NOCHE_NOTA_MIN). Mejor pocas y buenas.
+- **El costo**: la IA de la noche escribe el doble (unos 4 500 tokens de respuesta en vez de 2 500) y el juez lee unos
+  8 500 tokens (gpt-5.4).
+- **El «usted» que se escapa sin la palabra**: «¿Qué clase de desastre le ofende más, Felicity?», «Si quiere decirme…».
+  El juego solo ve la palabra «usted»; el juez lo baja en A2.

@@ -16601,6 +16601,7 @@ const NOCHE_URL = 'https://api.openai.com/v1/chat/completions';
 // the settings, in this browser only (never in the game's save, nor in the repository: the key is the player's)
 // write more and choose (the state of the art for scenes that score well): the AI writes NOCHE_CANDIDATOS.n blocks, a judge
 // scores them with the rubric (trazas/temas/rubrica.md), and the best NOCHE_MAX, and different among them, stay (0: off)
+const NOCHE_JUEZ_MODELO = 'gpt-5.4', NOCHE_NOTA_MIN = 11;   // (the judge that agrees most with Claude: trazas/temas/juez.md; below the least, a scene does not stay even if there is room)
 const nocheElige = () => NOCHE_CANDIDATOS.n > NOCHE_MAX, nocheTope = () => nocheElige() ? NOCHE_CANDIDATOS.n : NOCHE_MAX;
 const NOCHE_AJ = (() => { const d = { nivel: 'apagado', clave: '', modelo: NOCHE_MODELO }; try { return { ...d, ...JSON.parse(localStorage.getItem('avonlea-noche') || '{}') }; } catch (e) { return d; } })();
 const nocheGuardarAj = () => { try { localStorage.setItem('avonlea-noche', JSON.stringify(NOCHE_AJ)); } catch (e) {} };
@@ -17044,7 +17045,7 @@ async function nocheLlamarCuerpos(cuerpos, clave){   // (the raw answer of the f
     const data = await res.json().catch(() => ({}));
     if (res.ok) return data;
     ultimo = new Error(`OpenAI ${res.status}: ${data.error?.message || res.statusText}`);
-    if (res.status !== 400) throw ultimo;   // (a bad key, no credit, too many requests: trying another way will not help)
+    if (res.status !== 400 && res.status !== 404) throw ultimo;   // (a bad key, no credit, too many requests: trying another way will not help; a model the key does not have: the next body)
   }
   throw ultimo;
 }
@@ -17069,14 +17070,15 @@ A9 Forma. 0: una frase suelta, se arrastra, o restos de formato (un «---» suel
 Para cada escena: primero «razones» (dos o tres frases: lo que decide los puntos que no son 2, citando la escena), después los números.`;
 const NOCHE_JUEZ_ESQUEMA = { type: 'object', additionalProperties: false, required: ['juicios'], properties: { juicios: { type: 'array', items: { type: 'object', additionalProperties: false,
   required: ['n', 'razones', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9'], properties: { n: { type: 'integer' }, razones: { type: 'string' }, ...Object.fromEntries([1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => ['A' + i, { type: 'integer', enum: [0, 1, 2] }])) } } } } };
-function nocheJuezPedido(bloques, modelo = NOCHE_AJ.juez || NOCHE_AJ.modelo || NOCHE_MODELO, nivel = nocheNivel()){
+function nocheJuezPedido(bloques, modelo = NOCHE_AJ.juez || NOCHE_JUEZ_MODELO, nivel = nocheNivel()){
   const partida = nocheUsuario(nivel).replace(/\n[^\n]*$/, '');   // (what the AI saw, without its last line, the order)
   const lista = bloques.map((b, i) => `### ESCENA ${i + 1}\n${String(b.texto || '').trim()}`).join('\n\n');
   return { modelo, mensajes: [{ role: 'system', content: NOCHE_JUEZ }, { role: 'user', content: `LA GENTE (id: quién es, y dónde vive)\n${nocheVoces(true)}\n\n${partida}\n\nLAS ESCENAS A JUZGAR (${bloques.length})\n\n${lista}\n\nJuzga cada una (n = su número).` }] };
 }
 function nocheJuezCuerpos(p){
   const base = { model: p.modelo, max_completion_tokens: 12000, messages: p.mensajes }, fmt = { type: 'json_schema', json_schema: { name: 'juicios', strict: true, schema: NOCHE_JUEZ_ESQUEMA } };
-  return [{ ...base, response_format: fmt, reasoning_effort: 'low' }, { ...base, response_format: fmt }];
+  const respaldo = NOCHE_AJ.modelo || NOCHE_MODELO;   // (a key without that model: the night's own)
+  return [{ ...base, response_format: fmt, reasoning_effort: 'low' }, { ...base, response_format: fmt }, ...(respaldo !== p.modelo ? [{ ...base, model: respaldo, response_format: fmt, reasoning_effort: 'low' }] : [])];
 }
 // the answer → for each block (by its number), its notes A1–A9 and the total; null where the judge said nothing
 function nocheJuezLeer(data, n){
@@ -17086,11 +17088,12 @@ function nocheJuezLeer(data, n){
   return out;
 }
 // which ones stay: the best, and different among them (one per person, while there are others); a scene that fails
-// (lies about the game, A1 = 0; repeats, A4 = 0; speaks to a girl as «usted», A2 = 0) does not stay. Indices, in order
+// (lies about the game, A1 = 0; repeats, A4 = 0; speaks to a girl as «usted», A2 = 0), or below NOCHE_NOTA_MIN, does
+// not stay: better fewer and good (trazas/temas/juicio-prompts.md, «elegir»). Indices, in order
 const nocheFalla = J => !!J && (J.notas[0] === 0 || J.notas[3] === 0 || J.notas[1] === 0);
 function nocheElegir(bloques, juicios, k = NOCHE_MAX){
   const quien = b => (String(b?.texto || '').match(/^\s*(?:con|de):\s*(\S+)/m) || [])[1] || b?.tipo, elegidos = [];
-  const quedan = bloques.map((b, i) => i).filter(i => juicios[i] && !nocheFalla(juicios[i]));
+  const quedan = bloques.map((b, i) => i).filter(i => juicios[i] && !nocheFalla(juicios[i]) && juicios[i].total >= NOCHE_NOTA_MIN);
   while (elegidos.length < k && quedan.length) {
     const valor = i => juicios[i].total - 3 * elegidos.filter(j => quien(bloques[j]) === quien(bloques[i])).length;
     const m = quedan.reduce((a, i) => valor(i) > valor(a) ? i : a); elegidos.push(m); quedan.splice(quedan.indexOf(m), 1);

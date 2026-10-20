@@ -127,7 +127,7 @@ async function openai(cuerpos){
     catch (e) { throw new Error('no se pudo llegar a api.openai.com (' + (e.cause?.code || e.cause?.message || e.message) + '): ¿la red lo bloquea?'); }
     const data = await res.json().catch(() => ({}));
     if (res.ok) return data;
-    ultimo = new Error(`OpenAI ${res.status}: ${data.error?.message || res.statusText}`); if (res.status !== 400) throw ultimo;
+    ultimo = new Error(`OpenAI ${res.status}: ${data.error?.message || res.statusText}`); if (res.status !== 400 && res.status !== 404) throw ultimo;
   }
   throw ultimo;
 }
