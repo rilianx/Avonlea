@@ -13,7 +13,10 @@ const NOCHE_URL = 'https://api.openai.com/v1/chat/completions';
 // the settings, in this browser only (never in the game's save, nor in the repository: the key is the player's)
 // write more and choose (the state of the art for scenes that score well): the AI writes NOCHE_CANDIDATOS.n blocks, a judge
 // scores them with the rubric (trazas/temas/rubrica.md), and the best NOCHE_MAX, and different among them, stay (0: off)
-const NOCHE_JUEZ_MODELO = 'gpt-5.4', NOCHE_NOTA_MIN = 11;   // (the judge that agrees most with Claude: trazas/temas/juez.md; below the least, a scene does not stay even if there is room)
+// the judge: cheap (it picks the best 4 of a night as well as gpt-5.4: trazas/temas/juez-barato.md); below the least, a
+// scene does not stay even if there is room. The least is on each judge's scale (mini gives about 1,7 more than gpt-5.4)
+const NOCHE_JUEZ_MODELO = 'gpt-5.4-mini', NOCHE_NOTA_MIN = { 'gpt-5.4': 11, 'gpt-5.4-mini': 13, 'gpt-5.4-nano': 12 };
+const nocheNotaMin = m => NOCHE_NOTA_MIN[m] ?? NOCHE_NOTA_MIN[String(m || '').replace(/-\d{4}-\d\d-\d\d$/, '')] ?? 11;   // (the API answers «gpt-5.4-mini-2026-03-05»)
 const nocheElige = () => NOCHE_CANDIDATOS.n > NOCHE_MAX, nocheTope = () => nocheElige() ? NOCHE_CANDIDATOS.n : NOCHE_MAX;
 const NOCHE_AJ = (() => { const d = { nivel: 'apagado', clave: '', modelo: NOCHE_MODELO }; try { return { ...d, ...JSON.parse(localStorage.getItem('avonlea-noche') || '{}') }; } catch (e) { return d; } })();
 const nocheGuardarAj = () => { try { localStorage.setItem('avonlea-noche', JSON.stringify(NOCHE_AJ)); } catch (e) {} };
@@ -500,12 +503,12 @@ function nocheJuezLeer(data, n){
   return out;
 }
 // which ones stay: the best, and different among them (one per person, while there are others); a scene that fails
-// (lies about the game, A1 = 0; repeats, A4 = 0; speaks to a girl as «usted», A2 = 0), or below NOCHE_NOTA_MIN, does
+// (lies about the game, A1 = 0; repeats, A4 = 0; speaks to a girl as «usted», A2 = 0), or below nocheNotaMin, does
 // not stay: better fewer and good (trazas/temas/juicio-prompts.md, «elegir»). Indices, in order
 const nocheFalla = J => !!J && (J.notas[0] === 0 || J.notas[3] === 0 || J.notas[1] === 0);
-function nocheElegir(bloques, juicios, k = NOCHE_MAX){
+function nocheElegir(bloques, juicios, k = NOCHE_MAX, modelo = NOCHE_JUEZ_MODELO){
   const quien = b => (String(b?.texto || '').match(/^\s*(?:con|de):\s*(\S+)/m) || [])[1] || b?.tipo, elegidos = [];
-  const quedan = bloques.map((b, i) => i).filter(i => juicios[i] && !nocheFalla(juicios[i]) && juicios[i].total >= NOCHE_NOTA_MIN);
+  const quedan = bloques.map((b, i) => i).filter(i => juicios[i] && !nocheFalla(juicios[i]) && juicios[i].total >= nocheNotaMin(modelo));
   while (elegidos.length < k && quedan.length) {
     const valor = i => juicios[i].total - 3 * elegidos.filter(j => quien(bloques[j]) === quien(bloques[i])).length;
     const m = quedan.reduce((a, i) => valor(i) > valor(a) ? i : a); elegidos.push(m); quedan.splice(quedan.indexOf(m), 1);
@@ -956,7 +959,7 @@ async function nochePasar(){
     if (todos.length > NOCHE_MAX) {
       let elegidos = todos.slice(0, NOCHE_MAX);
       try { const P = nocheJuezPedido(todos), data = await nocheLlamarCuerpos(nocheJuezCuerpos(P), NOCHE_AJ.clave), J = nocheJuezLeer(data, todos.length);
-        elegidos = nocheElegir(todos, J).map(i => todos[i]); todos.forEach((b, i) => { if (J[i]) b.nota = J[i].total; }); }
+        elegidos = nocheElegir(todos, J, NOCHE_MAX, data.model || P.modelo).map(i => todos[i]); todos.forEach((b, i) => { if (J[i]) b.nota = J[i].total; }); }
       catch (e) { juezError = String(e.message || e); }
       for (const r of rondas) { r.noElegidos = r.aceptados.filter(b => !elegidos.includes(b)); r.aceptados = r.aceptados.filter(b => elegidos.includes(b)); }
     }

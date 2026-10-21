@@ -32,3 +32,10 @@ escena sino la media de cada grupo: ¿ordena las versiones como Claude?
   queda de cada noche, y el informe termina con la nota media por versión (tools/prompts-muestra.js --resumen).
 - Una diferencia de menos de un punto con unas 10 escenas por versión no decide nada: o más noches, o confirmarla con
   gpt-5.4 (media de 3) o con Claude.
+
+## También para elegir, en el juego
+
+Para elegir las 4 mejores de una noche, gpt-5.4-mini lo hace tan bien como gpt-5.4 (30 de 40 contra 29; nano, 27) y
+cuesta mucho menos: es el juez del juego (NOCHE_JUEZ_MODELO). Pone notas más altas (unos 1,7 puntos sobre gpt-5.4), así
+que la nota mínima va en su escala: 13 con mini, 12 con nano, 11 con gpt-5.4 (nocheNotaMin). Su punto débil es la verdad
+de la partida (A1): deja pasar más hechos inventados que gpt-5.4; las reglas del juego atajan una parte.

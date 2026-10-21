@@ -187,7 +187,7 @@ async function openai(cuerpos){
   if (aceptados.length > NMAX && !RESP) {
     try { const P = await ev(`(([B, m]) => nocheJuezPedido(B, m || undefined))`, [aceptados, JUEZ]); const data = await openai(await ev(`(p => nocheJuezCuerpos(p))`, P));
       fs.writeFileSync(path.join(SALIDA, 'juez.json'), JSON.stringify(data, null, 1));
-      const J = await ev(`(([d, n]) => nocheJuezLeer(d, n))`, [data, aceptados.length]), el = await ev(`(([B, J]) => nocheElegir(B, J))`, [aceptados, J]);
+      const J = await ev(`(([d, n]) => nocheJuezLeer(d, n))`, [data, aceptados.length]), el = await ev(`(([B, J, m]) => nocheElegir(B, J, NOCHE_MAX, m))`, [aceptados, J, data.model || P.modelo]);
       aceptados.forEach((a, i) => { if (J[i]) juicios[a.id] = { ...J[i], elegido: el.includes(i) }; });
       juez = { modelo: data.model || P.modelo, tokens: data.usage?.prompt_tokens || 0, elegidos: el.map(i => aceptados[i].id) };
       aceptados = el.map(i => aceptados[i]); }
