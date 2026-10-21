@@ -18,7 +18,7 @@ const { BASE, FILA_ESCENA } = require('./momentos');
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 && process.argv[i + 1] && !process.argv[i + 1].startsWith('--') ? process.argv[i + 1] : d; };
 const RESPUESTA = arg('respuesta', null), RESP = RESPUESTA ? JSON.parse(fs.readFileSync(path.resolve(RESPUESTA), 'utf8')) : null;   // (an example may say its scenario and level)
 const NIVEL = arg('nivel', RESP?.nivel || 'efectos'), MODELO = arg('modelo', ''), SALIDA = path.resolve(RAIZ, arg('salida', 'trazas/noche'));
-const ESCENARIO = arg('escenario', RESP?.escenario || 'spencer_rachel'), SIN_MODELO = process.argv.includes('--sin-modelo'), VARIANTE = arg('variante', ''), CANDIDATOS = arg('candidatos', null), JUEZ = arg('juez', '');   // (--candidatos: how many the AI writes, to choose the best; 0: as many as stay. --juez: the judge's model)   // (a version of the request: src/js/66-noche.js, NOCHE_VARIANTE)
+const ESCENARIO = arg('escenario', RESP?.escenario || 'spencer_rachel'), SIN_MODELO = process.argv.includes('--sin-modelo'), VARIANTE = arg('variante', ''), CANDIDATOS = arg('candidatos', null), JUEZ = arg('juez', ''), COMPARAR = arg('comparar', '');   // (--comparar: a cheap judge that scores what stays, to compare versions of the request: trazas/temas/juez-barato.md)   // (--candidatos: how many the AI writes, to choose the best; 0: as many as stay. --juez: the judge's model)   // (a version of the request: src/js/66-noche.js, NOCHE_VARIANTE)
 
 // ---------------------------------------------------------------- the scenarios: a game at a certain point (in the game: dev)
 const D = (d, t) => ({ d, s: 1, t, h: 15 });
@@ -193,6 +193,14 @@ async function openai(cuerpos){
       aceptados = el.map(i => aceptados[i]); }
     catch (e) { juez = { error: String(e.message || e) }; aceptados = aceptados.slice(0, NMAX); }
   }
+  // 1c. what stays, scored by the judge for comparing (the same for every version, so their averages can be compared)
+  let compara = null;
+  if (COMPARAR && aceptados.length && !RESP) {
+    try { const P = await ev(`(([B, m]) => nocheJuezPedido(B, m))`, [aceptados, COMPARAR]), data = await openai((await ev(`(p => nocheJuezCuerpos(p))`, P)).filter(c => c.model === COMPARAR));
+      const J = await ev(`(([d, n]) => nocheJuezLeer(d, n))`, [data, aceptados.length]), ok = J.filter(Boolean);
+      compara = { modelo: data.model || COMPARAR, media: ok.reduce((a, j) => a + j.total, 0) / (ok.length || 1), notas: Object.fromEntries(aceptados.map((a, i) => [a.id, J[i] ? J[i].total : null])) }; }
+    catch (e) { compara = { error: String(e.message || e) }; }
+  }
   // 2. with the tools: the graph and the model, with the accepted blocks in the data
   const C = SIN_MODELO || !aceptados.length ? null : await completo(aceptados, ev, partidaZ);
   // (what the tools rejected goes out: the final summary is of what stays)
@@ -222,7 +230,7 @@ async function openai(cuerpos){
   if (mal.length) L.push(`**✘ ${mal.length} bloque(s) no se juzgaron como se esperaba.**`, '');
   const informe = L.join('\n');
   fs.writeFileSync(path.join(SALIDA, 'noche.md'), informe);
-  fs.writeFileSync(path.join(SALIDA, 'noche.json'), JSON.stringify({ escenario: ESCENARIO, titulo: E?.titulo, nivel: NIVEL, modelo: pedido.modelo, fuente, lagunas: lag, lagunasCon: C?.lagunasCon || null, segundaRonda: nota2 || (rondas[1] ? 'sí' : 'no hizo falta'), juez, bloques: filas, aceptados: aceptados.filter(a => !C?.porBloque?.[a.id]), grafo: C?.grafo, modeloZ3: C?.modelo, final: C?.final, otros: C?.otros, errores: errs }, null, 1));
+  fs.writeFileSync(path.join(SALIDA, 'noche.json'), JSON.stringify({ escenario: ESCENARIO, titulo: E?.titulo, nivel: NIVEL, modelo: pedido.modelo, fuente, lagunas: lag, lagunasCon: C?.lagunasCon || null, segundaRonda: nota2 || (rondas[1] ? 'sí' : 'no hizo falta'), juez, compara, bloques: filas, aceptados: aceptados.filter(a => !C?.porBloque?.[a.id]), grafo: C?.grafo, modeloZ3: C?.modelo, final: C?.final, otros: C?.otros, errores: errs }, null, 1));
   console.log(informe);
   console.log(`→ ${path.relative(RAIZ, SALIDA)}/noche.md, noche.json, pedido.md`);
   process.exit(mal.length || errs.length ? 1 : 0);
