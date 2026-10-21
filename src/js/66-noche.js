@@ -305,12 +305,13 @@ const NOCHE_COMUNES = /enséñ(a|e)me a|enseñarle a (coser|cocinar|sembrar|hace
 let NOCHE_TANDA = null;   // (the topics picked for tonight: the second round writes one scene for each)
 const NOCHE_LIBROS = (() => { const out = []; let c = null;
   for (const raw of (document.getElementById('libros')?.textContent || '').split('\n')) { const l = raw.trim(); if (!l || l[0] === '#') continue; let m;
-    if ((m = l.match(/^===\s*(.+?)\s*===$/))) out.push(c = { id: m[1] }); else if (c && (m = l.match(/^(libro|de|semilla|da):\s*(.*)$/))) c[m[1]] = m[2]; }
+    if ((m = l.match(/^===\s*(.+?)\s*===$/))) out.push(c = { id: m[1] }); else if (c && (m = l.match(/^(libro|de|tipo|semilla|da):\s*(.*)$/))) c[m[1]] = m[2]; }
   return out; })();
-// a few seeds from books, at random, not the ones of the last nights
+// a few seeds from books, at random, not the ones of the last nights; one of them, a spiritual one
 function nocheSemillas(n = 3){
-  const usadas = new Set((game.noche?.semillas || []).slice(-12)), L = NOCHE_LIBROS.filter(x => !usadas.has(x.id)), out = [];
-  while (out.length < n && L.length) out.push(...L.splice(Math.floor(Math.random() * L.length), 1));
+  const usadas = new Set((game.noche?.semillas || []).slice(-12)), L = NOCHE_LIBROS.filter(x => !usadas.has(x.id)), out = [], saca = P => { const D = L.filter(P); if (!D.length) return; const x = D[Math.floor(Math.random() * D.length)]; out.push(x); L.splice(L.indexOf(x), 1); };
+  saca(x => x.tipo === 'espiritual');
+  while (out.length < n && L.length) saca(x => x.tipo !== 'espiritual' || out.length === n - 1 && !L.some(y => y.tipo !== 'espiritual'));
   return out;
 }
 function nocheIdeasPedido(nivel = nocheNivel(), modelo = NOCHE_AJ.modelo || NOCHE_MODELO, semillas = nocheSemillas()){
@@ -322,13 +323,13 @@ Propón ${NOCHE_IDEAS} temas para conversaciones entre Ana y gente que ya conoce
 - Cada uno con algo que cambia o se revela entre ellos, y que pueda darse ya (nada que no haya pasado en la partida; nada de parientes ni casas inventados).
 - Inesperados: nada de lugares comunes («enséñame a coser / cocinar / sembrar», «¿cómo era usted de niña?», «quiero ser útil», la despensa, las gallinas, la cocina perfecta de Felicity, la timidez de Cecily otra vez). Lo que más vale: la vida de adentro del otro, algo de esta partida, o algo que traiga un libro.
 - Sin repetir lo ya conversado (abajo): lo nuevo puede seguir de ahí, con lo que vino después.
-- LIBROS: abajo vienen unas semillas de libros cercanos a Avonlea (de los que lee Ana y de los que le gustaban a L. M. Montgomery). Al menos ${Math.min(2, semillas.length)} temas nacen de una de ellas: no para hablar del libro como lección, sino para que traiga algo a la vida de Ana (un juego, una pregunta, un recuerdo, una pena, un plan). Ana puede haberlo leído o recitado; los grandes, haberlo leído de jóvenes.
+- LIBROS: abajo vienen unas semillas de libros cercanos a Avonlea (de los que lee Ana y de los que le gustaban a L. M. Montgomery). Al menos ${Math.min(2, semillas.length)} temas nacen de una de ellas: no para hablar del libro como lección, sino para que traiga algo a la vida de Ana (un juego, una pregunta, un recuerdo, una pena, un plan). Ana puede haberlo leído o recitado; los grandes, haberlo leído de jóvenes. Lo espiritual, en las cosas de todos los días (el arroyo, la sal, el trabajo, una pena), sin sermón ni exotismo: una pregunta de Ana que deja pensando a un grande.
 
 LAS FORMAS (cómo va la escena; varía, y que «tira» sea la más frecuente pero no la única):
 ${Object.entries(NOCHE_FORMAS).map(([k, v]) => `- ${k}: ${v}`).join('\n')}
 
 RESPONDE solo con el JSON: { "temas": [ { "con": "<id de la persona>", "ambito": "<uno de los ámbitos>", "forma": "<una de las formas>", "tema": "<cómo aparece en el menú: lo que Ana quiere hablar>", "revela": "<qué cambia o se revela, una línea>", "semilla": "<id de la semilla de libro que usa, o vacío>" } ] }`;
-  const libros = semillas.map(x => `- ${x.id}: ${x.libro}${x.de === 'ana' ? ' (Ana lo conoce)' : x.de === 'maud' ? ' (le gustaba a Montgomery)' : ' (del mundo de Avonlea)'}. ${x.semilla} Podría dar: ${x.da}`).join('\n');
+  const libros = semillas.map(x => `- ${x.id}: ${x.libro}${x.de === 'ana' ? ' (Ana lo conoce)' : x.de === 'maud' ? ' (le gustaba a Montgomery)' : x.de === 'eco' ? ' (de otra época: nadie en Avonlea lo conoce; entra la idea, en algo concreto, nunca el libro ni su autor)' : ' (del mundo de Avonlea)'}. ${x.semilla} Podría dar: ${x.da}`).join('\n');
   return { modelo, semillas: semillas.map(x => x.id), mensajes: [{ role: 'system', content: sistema }, { role: 'user', content: `${partida}\n\nSEMILLAS DE LIBROS (esta noche)\n${libros}\n\nPropón ${NOCHE_IDEAS} temas.` }] };
 }
 const NOCHE_IDEAS = 15;
