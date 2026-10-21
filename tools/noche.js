@@ -149,6 +149,15 @@ async function openai(cuerpos){
   if (nodeModules() && !SIN_MODELO) { try { lag = await require('./modelo.js').lagunas(partidaZ); await ev('(L => nocheLagunasPoner(L))', lag.lagunas); } catch (e) { lag = { error: String(e.message || e) }; } }
   if (VARIANTE) await ev(`(v => { NOCHE_VARIANTE = v; })`, VARIANTE);
   if (CANDIDATOS != null) await ev(`(n => { NOCHE_CANDIDATOS.n = n; })`, +CANDIDATOS);
+  // the two rounds («tandas»): first the topics (and the game picks the most different), then the request with them
+  let ideas = null;
+  if (!RESP && await ev(`nocheVar('tandas')`)) {
+    try { const P = await ev(`(([n, m]) => nocheIdeasPedido(n, m || undefined))`, [NIVEL, MODELO]), data = await openai(await ev(`(p => nocheIdeasCuerpos(p))`, P));
+      fs.writeFileSync(path.join(SALIDA, 'ideas.json'), JSON.stringify(data, null, 1));
+      const T = await ev(`(d => nocheIdeasLeer(d))`, data), Eg = await ev(`(T => { const E = nocheIdeasElegir(T); NOCHE_TANDA = E.elegidos; return E; })`, T);
+      ideas = { modelo: data.model, tokens: data.usage?.prompt_tokens || 0, semillas: P.semillas, propuestos: T.length, elegidos: Eg.elegidos, fuera: Eg.fuera }; }
+    catch (e) { ideas = { error: String(e.message || e) }; }
+  }
   const pedido = await ev(`(([n, m]) => nochePedido(n, m || undefined))`, [NIVEL, MODELO]);
   const cuerpos = await ev(`(p => nocheCuerpos(p))`, pedido);
   fs.writeFileSync(path.join(SALIDA, 'pedido.json'), JSON.stringify({ escenario: ESCENARIO, nivel: NIVEL, modelo: pedido.modelo, cuerpo: cuerpos[0] }, null, 1));
@@ -217,6 +226,9 @@ async function openai(cuerpos){
   const L = [`# La IA de la noche: lo que propuso y lo que quedó`, '', `Escenario: **${E?.titulo || ESCENARIO}** · nivel **${NIVEL}** · modelo ${pedido.modelo} · respuesta: ${fuente}`, '',
     '| Ronda | # | Tipo | Bloque | Navegador | Juez (de 18) | Grafo y modelo (Node) | Queda | Reparado | Motivos | Esperado |', '|---|---|---|---|---|---|---|---|---|---|---|',
     ...filas.map(f => `| ${f.ronda} | ${f.n} | ${f.tipo} | \`${md(f.id)}\` | ${f.navegador} | ${f.juicio ? f.juicio.total + ' (' + f.juicio.notas.join(' ') + ')' : '—'} | ${f.node} | **${f.resultado}** | ${md(f.reparado.join(' · ') || '—')} | ${md(f.motivos.map(m => corto(m, 220)).join(' · ') || '—')} | ${f.esperado ? (f.esperado === f.resultado ? '✔ ' : '✘ ') + f.esperado : ''} |`), '',
+    ...(ideas ? (ideas.error ? [`_(la primera tanda, los temas, no pudo: ${ideas.error})_`, ''] : ['## Primera tanda: los temas', '', `${ideas.modelo} · ${ideas.tokens} tokens del pedido · ${ideas.propuestos} propuestos · semillas de libros: ${ideas.semillas.join(', ')}`, '',
+      '| | Con | Ámbito | Forma | Tema | Qué se revela | Libro |', '|---|---|---|---|---|---|---|', ...ideas.elegidos.map(t => `| ✓ | ${t.con} | ${t.ambito} | ${t.forma} | ${md(t.tema)} | ${md(t.revela)} | ${t.semilla} |`),
+      ...ideas.fuera.map(t => `| ✗ ${t.por} | ${t.con} | ${t.ambito} | ${t.forma} | ${md(t.tema)} | ${md(corto(t.revela, 80))} | ${t.semilla} |`), '']) : []),
     ...(nota2 ? [`_(${nota2})_`, ''] : []), ...(juez ? [juez.error ? `_(el juez no pudo: ${juez.error}; quedan los primeros ${NMAX})_` : `Juez: ${juez.modelo} (${juez.tokens} tokens del pedido) · eligió ${juez.elegidos.length} de ${Object.keys(juicios).length} · nota media de los elegidos: **${(juez.elegidos.reduce((a, id) => a + juicios[id].total, 0) / (juez.elegidos.length || 1)).toFixed(1)}**, de todos: ${(Object.values(juicios).reduce((a, j) => a + j.total, 0) / (Object.keys(juicios).length || 1)).toFixed(1)}`, ''] : []), `Temas nuevos (conversaciones aceptadas): **${temas}** (se piden al menos 2 cada noche)`, ''];
   { const k = l => l.de + ':' + (l.hecho || l.quien) + ':' + (l.hay || ''), txt = l => l.de === 'decisiones' ? `Ana eligió «${l.opcion}» (\`${l.hecho}\`, en \`${l.escena}\`): nada de lo que todavía puede pasar lo toma en cuenta` : l.de === 'pocas' ? `${l.nombre}: ${l.quedan} ${l.hay}(es) estos días (menos de ${l.minimo})` : `${l.nombre}: no queda ninguna escena ni conversación`;
     const despues = C?.lagunasCon?.lagunas ? new Set(C.lagunasCon.lagunas.map(k)) : null, ahora = new Map((C?.lagunasCon?.lagunas || []).map(l => [k(l), l]));
@@ -230,7 +242,7 @@ async function openai(cuerpos){
   if (mal.length) L.push(`**✘ ${mal.length} bloque(s) no se juzgaron como se esperaba.**`, '');
   const informe = L.join('\n');
   fs.writeFileSync(path.join(SALIDA, 'noche.md'), informe);
-  fs.writeFileSync(path.join(SALIDA, 'noche.json'), JSON.stringify({ escenario: ESCENARIO, titulo: E?.titulo, nivel: NIVEL, modelo: pedido.modelo, fuente, lagunas: lag, lagunasCon: C?.lagunasCon || null, segundaRonda: nota2 || (rondas[1] ? 'sí' : 'no hizo falta'), juez, compara, bloques: filas, aceptados: aceptados.filter(a => !C?.porBloque?.[a.id]), grafo: C?.grafo, modeloZ3: C?.modelo, final: C?.final, otros: C?.otros, errores: errs }, null, 1));
+  fs.writeFileSync(path.join(SALIDA, 'noche.json'), JSON.stringify({ escenario: ESCENARIO, titulo: E?.titulo, nivel: NIVEL, modelo: pedido.modelo, fuente, lagunas: lag, lagunasCon: C?.lagunasCon || null, segundaRonda: nota2 || (rondas[1] ? 'sí' : 'no hizo falta'), juez, compara, ideas, bloques: filas, aceptados: aceptados.filter(a => !C?.porBloque?.[a.id]), grafo: C?.grafo, modeloZ3: C?.modelo, final: C?.final, otros: C?.otros, errores: errs }, null, 1));
   console.log(informe);
   console.log(`→ ${path.relative(RAIZ, SALIDA)}/noche.md, noche.json, pedido.md`);
   process.exit(mal.length || errs.length ? 1 : 0);

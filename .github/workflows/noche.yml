@@ -22,7 +22,7 @@ on:
       experimento:
         description: 'En vez de la noche, un experimento (temas: cómo contarle a la IA lo ya conversado; tools/temas.js)'
         type: choice
-        options: ['no', 'temas', 'prompts', 'juez', 'elegir']
+        options: ['no', 'temas', 'prompts', 'juez', 'elegir', 'tandas']
         default: 'no'
       juez:
         description: 'Modelo del juez (elige las mejores escenas entre los candidatos; en «juez», los modelos a calibrar, separados por comas)'
@@ -72,6 +72,11 @@ jobs:
               node tools/noche.js --escenario "$ESCENARIO" --nivel "$NIVEL" --modelo "$MODELO" --variante rubrica+cuidado --candidatos $c --juez "$JUEZ" --comparar "$COMPARAR" --salida "trazas/noche/c$c-$r" > /dev/null 2>&1 || true
               node tools/prompts-muestra.js "trazas/noche/c$c-$r" "candidatos $c · $r" >> trazas/noche/noche.md
             done; done; node tools/prompts-muestra.js --resumen trazas/noche/c*-[0-9] >> trazas/noche/noche.md; cat trazas/noche/noche.md
+          elif [ "$EXPERIMENTO" = "tandas" ]; then
+            for v in una dos; do for r in 1 2 3; do
+              node tools/noche.js --escenario "$ESCENARIO" --nivel "$NIVEL" --modelo "$MODELO" --variante "rubrica+cuidado$([ $v = dos ] && echo +tandas)" --candidatos 8 --juez "$JUEZ" --comparar "$COMPARAR" --salida "trazas/noche/$v-$r" > /dev/null 2>&1 || true
+              node tools/prompts-muestra.js "trazas/noche/$v-$r" "tandas: $v · $r" >> trazas/noche/noche.md
+            done; done; node tools/prompts-muestra.js --resumen trazas/noche/una-[0-9] trazas/noche/dos-[0-9] >> trazas/noche/noche.md; cat trazas/noche/noche.md
           else node tools/noche.js --escenario "$ESCENARIO" --nivel "$NIVEL" --modelo "$MODELO" --juez "$JUEZ" --salida trazas/noche; fi
       - name: El informe, en el resumen
         if: always()
