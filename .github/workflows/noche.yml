@@ -28,8 +28,8 @@ on:
         description: 'Modelo del juez (elige las mejores escenas entre los candidatos; en «juez», los modelos a calibrar, separados por comas)'
         default: gpt-5.4
       comparar:
-        description: 'Juez barato que puntúa lo que queda, para comparar versiones en «prompts» y «elegir» (vacío: sin él)'
-        default: ''
+        description: 'Juez barato que puntúa lo que queda, para comparar versiones en «prompts» y «elegir» (vacío: sin él; trazas/temas/juez-barato.md)'
+        default: gpt-5.4-nano
 
 permissions:
   contents: read
