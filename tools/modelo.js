@@ -15,7 +15,8 @@ const ARCHIVOS = ['src/datos/llegadas.txt', 'src/datos/guion.txt', 'src/datos/co
 // the texts the model reads, from a checkout (this one, or a copy with more scenes)
 function leerTextos(raiz = RAIZ){
   const textos = {};
-  for (const r of ARCHIVOS) textos[r] = fs.readFileSync(path.join(raiz, r), 'utf8');
+  const M = require('./misiones.js').textos(raiz);   // (the data files with the mini-missions in them)
+  for (const r of ARCHIVOS) textos[r] = M[r] ?? fs.readFileSync(path.join(raiz, r), 'utf8');
   for (const n of fs.readdirSync(path.join(raiz, 'src/datos/dichos'))) if (n.endsWith('.txt')) textos['src/datos/dichos/' + n] = fs.readFileSync(path.join(raiz, 'src/datos/dichos', n), 'utf8');
   return textos;
 }

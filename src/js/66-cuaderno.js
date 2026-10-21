@@ -33,7 +33,7 @@ function cuadernoLeer(txt){
   }
   return out;
 }
-const CUADERNO = cuadernoLeer(document.getElementById('cuaderno')?.textContent || '');
+const CUADERNO = cuadernoLeer((document.getElementById('cuaderno')?.textContent || '') + (MISIONES.cuaderno.trim() ? '\n== Misiones\n' + MISIONES.cuaderno : ''));   // (the mini-missions, in a group of their own)
 const CUADERNO_METAS = CUADERNO.flatMap(g => g.metas), cuadernoMeta = id => CUADERNO_METAS.find(m => m.id === id);
 // what has been done: the day it was first done, as the game counts the days, from 1 (kept with the facts for good)
 const cuadernoHecho = id => game.wm?.perm?.['cuaderno:' + id];

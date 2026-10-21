@@ -8,7 +8,7 @@
 //   - the requirements of the notebook that name a goal that does not exist.
 //   node tools/grafo.js            → trazas/grafo.md (and a summary; exit 1 if a scene or goal can never happen)
 const fs = require('fs'), path = require('path');
-const root = path.resolve(__dirname, '..'), leer = f => fs.readFileSync(path.join(root, f), 'utf8');
+const root = path.resolve(__dirname, '..'), MIS = require('./misiones.js').textos(root), leer = f => MIS[f] ?? fs.readFileSync(path.join(root, f), 'utf8');   // (with the mini-missions: tools/misiones.js)
 const guion = leer('src/datos/guion.txt') + '\n' + leer('src/datos/conversaciones.txt'), cuaderno = leer('src/datos/cuaderno.txt'), habilidades = leer('src/datos/habilidades.txt');
 const codigo = fs.readdirSync(path.join(root, 'src/js')).filter(f => /^\d\d-.*\.js$/.test(f) && !/metas-de-prueba/.test(f)).map(f => leer('src/js/' + f)).join('\n');
 // the keys the engine knows (dlgCond in src/js/21-escenas-dialogo.js), and a quality compared with a number

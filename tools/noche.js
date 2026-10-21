@@ -54,7 +54,7 @@ function nodeModules(){   // where z3-solver is (this checkout, or a parent's no
 function chromiumRuta(){ return fs.existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chromium' : undefined; }   // (here, the container's; on Actions, Playwright's own)
 
 // ---------------------------------------------------------------- the full checks: a copy of the data, with the blocks
-const COPIAR = ['src/datos', 'src/js', 'tools/grafo.js', 'tools/modelo.js', 'tools/modelo-nucleo.js', 'trazas/planilla.json'];
+const COPIAR = ['src/datos', 'src/js', 'tools/grafo.js', 'tools/misiones.js', 'tools/modelo.js', 'tools/modelo-nucleo.js', 'trazas/planilla.json'];
 function copia(nm){
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'noche-'));
   for (const r of COPIAR) fs.cpSync(path.join(RAIZ, r), path.join(dir, r), { recursive: true });

@@ -3249,6 +3249,182 @@ hay: escena
 mínimo: 2
 
 </script>
+<script type="text/plain" id="misiones">
+# Las mini-misiones: historias de unos pasos, como los capítulos de «Crónicas de Avonlea» (lo lee el juego al empezar,
+# src/js/20-misiones.js; y las herramientas: tools/misiones.js). Cada una empieza de una manera (oír, encontrar, ver, un
+# pedido, una carta, un error de Ana, un día, un lugar), sigue con pasos (conversaciones, escenas, encargos) y termina en
+# uno de varios desenlaces, según lo que Ana decida. Se ven en el cuaderno de Ana, con pistas de a quién ir a ver.
+#
+# Cada misión:
+#   ==== mision <id> ====        y sus datos, uno por línea:
+#     titulo, tipo (saber, ayudar, reconciliar, malentendido, deseo), arranque (oir, encontrar, ver, pedido, carta,
+#     error, dia, lugar), personas, resumen, inspiracion
+#   --- cuaderno ---             su entrada en el cuaderno (el formato de src/datos/cuaderno.txt)
+#   --- guion ---                sus escenas (el formato de src/datos/guion.txt)
+#   --- conversaciones ---       sus conversaciones (el formato de src/datos/conversaciones.txt)
+# Sus hechos llevan el prefijo «mis_<id>_», y todos los desenlaces dejan «mis_<id>_fin» (la meta del cuaderno).
+# Las líneas que empiezan con # son comentarios.
+
+==== mision brujula ====
+titulo: La brújula del lago
+tipo: reconciliar
+arranque: encontrar
+personas: harrison, farero, lynde
+resumen: Ana encuentra en el barro del lago una brújula vieja con una dedicatoria. Es del capitán Jim, se la regaló el Sr. Harrison, y hace treinta años que no se hablan. Ana puede averiguar por qué, llevar la brújula, decir o callar lo que sabe, o no meterse.
+inspiracion: «Crónicas de Avonlea»: las peleas viejas que el orgullo no deja arreglar, y una niña que se mete donde nadie la llamó
+
+--- cuaderno ---
+=== mis_brujula ===
+titulo: La brújula del lago
+pista: Una brújula vieja, encontrada en el lago: «A Jim, de J. A. H. — para que siempre encuentres el camino de vuelta». ¿Quién será J. A. H.? En Avonlea, alguien tiene que saberlo: la Sra. Lynde lo sabe todo.
+pista si hecho:mis_brujula_sabe: J. A. H. es el Sr. Harrison, y Jim es el capitán Jim, el del faro. No se hablan desde hace treinta años. ¿Y si le preguntas al Sr. Harrison?
+pista si hecho:mis_brujula_encargo: Le dijiste al Sr. Harrison que hablarías con el capitán Jim. Él anda por el faro y la playa.
+pista si hecho:mis_brujula_jim: El capitán Jim ya sabe lo que tú sabías. Habrá que ver qué hace. Pasa a ver al Sr. Harrison en unos días.
+meta: hecho mis_brujula_fin
+requiere: quedarse, hecho:mis_brujula_hallada
+oculta
+guiño lynde: [hecho:mis_brujula_hallada, !hecho:mis_brujula_sabe, !hecho:ofendio_lynde] ¿Qué es eso que andas trayendo en el bolsillo, niña? Se te nota en la cara que es un misterio.
+guiño lynde: [hecho:mis_brujula_hallada, !hecho:mis_brujula_sabe, hecho:disculpa_lynde] ¿Qué es eso que andas trayendo en el bolsillo, niña? Se te nota en la cara que es un misterio.
+
+--- guion ---
+=== mis_brujula_hallazgo ===
+narra: En la orilla del Lago de las Aguas Brillantes, entre los juncos, algo brilla en el barro. Ana se agacha: es una brújula de bronce, verde de tiempo, con la tapa grabada.
+canal: mision
+prioridad: 3
+en: ana=out
+cerca: ana, lago, 620
+si: hecho:se_queda, hora:9-18, !hecho:mis_brujula_hallada
+al_empezar: hecho mis_brujula_hallada
+al_empezar: log Ana encontró en el lago una brújula vieja con una dedicatoria. | yo: Encontré una brújula en el lago. Dice «A Jim, de J. A. H.». Alguien la perdió… o la tiró.
+---
+ana piensa: «A Jim, de J. A. H. — para que siempre encuentres el camino de vuelta». La aguja todavía tiembla. ¡Todavía busca el norte, después de quién sabe cuántos años en el agua!
+->* Limpiarla con el delantal y guardarla
+   ana piensa: Una brújula que alguien regaló con esas palabras no se tira al lago por descuido. Voy a averiguar de quién es. Una no puede dejar un camino de vuelta tirado en el barro.
+-> Dejarla donde estaba
+   ana piensa: (Ana la deja otra vez entre los juncos, pero no da tres pasos antes de volver por ella.) No. No puedo. Me miraría desde el barro toda la noche.
+
+--- conversaciones ---
+=== mis_brujula_lynde ===
+con: lynde
+tema: Preguntarle quién es «J. A. H.»
+resumen: La Sra. Lynde reconoce la brújula: el Sr. Harrison se la regaló al capitán Jim, y una noche de tormenta, hace treinta años, dejaron de hablarse.
+si: conoce:lynde, hecho:mis_brujula_hallada, !hecho:mis_brujula_sabe
+al_terminar: hecho mis_brujula_sabe
+---
+ana: Sra. Lynde, ¿usted sabe quién es «J. A. H.»? Encontré esto en el lago.
+lynde: (La Sra. Lynde deja de tejer de golpe.) ¡Válgame! James Andrew Harrison. Y el Jim de la tapa es el capitán Jim, el del faro.
+ana: ¿El Sr. Harrison? ¿El de la avena? ¿Le regaló una brújula a alguien, con una dedicatoria tan bonita?
+lynde: Eran uña y carne, de muchachos. Iban a embarcarse juntos en la goleta del viejo MacAllister. Y la noche de la tormenta grande, Harrison no se presentó en el muelle. Jim zarpó solo, y de esa noche no se hablaron nunca más.
+ana: ¿Nunca más? ¿Treinta años sin hablarse, viviendo los dos en la misma isla?
+lynde: Treinta y uno. Y no me mires así, que yo no tengo la culpa. El orgullo de los hombres es como la mala hierba: se le corta la punta y vuelve a salir.
+->* Preguntarle por qué el Sr. Harrison no fue al muelle
+   ana: ¿Y por qué no fue?
+   lynde: Eso no lo sabe nadie, y fíjate que en Avonlea eso es mucho decir. Yo tengo mis sospechas, pero me las guardo.
+   ana piensa: La Sra. Lynde guardándose algo. Debe de ser un secreto muy pesado.
+-> Prometerle no andar contándolo
+   ana: No se lo voy a contar a nadie, Sra. Lynde. Es una historia demasiado triste para andarla repartiendo.
+   lynde: (La Sra. Lynde la mira con algo parecido al respeto.) Hum. Ojalá todo Avonlea pensara como tú. Aunque entonces yo me aburriría bastante.
+   ! suma afecto:lynde:ana 1
+
+=== mis_brujula_harrison ===
+con: harrison
+tema: Mostrarle la brújula del lago
+resumen: El Sr. Harrison reconoce la brújula. La noche de la tormenta no fue al muelle porque su madre se moría, y nunca se lo dijo a Jim, por orgullo. Ana decide qué hacer.
+si: conoce:harrison, hecho:mis_brujula_hallada, !hecho:mis_brujula_fin
+---
+ana: Sr. Harrison, encontré esto en el lago. Tiene unas iniciales, y creo que son las suyas.
+harrison: (El Sr. Harrison toma la brújula, y por un buen rato no dice nada.) Hmpf. Así que la tiró al lago. Era muy de Jim, eso de hacer las cosas con ruido.
+ana: ¿Usted se la regaló?
+harrison: Con mis primeros ahorros. Íbamos a dar la vuelta al mundo, él y yo. Esa noche mi madre se puso muy mala, y yo me quedé con ella. Se murió al amanecer.
+ana: Pero entonces… ¡usted no lo abandonó! ¿Por qué no se lo dijo?
+harrison: Porque él no preguntó, niña. Se fue diciendo en el muelle que yo era un cobarde. Y uno no anda explicándole las cosas a quien ya decidió lo que piensa de uno.
+ana: (Ana aprieta las manos.) Treinta y un años de no explicar…
+harrison: Treinta y uno. Ginger es mejor compañía. No hace preguntas.
+-> Ofrecerse a llevarle la brújula al capitán Jim
+   ana: Sr. Harrison, déjeme llevársela yo. Una brújula que dice «el camino de vuelta» no puede quedarse en un cajón.
+   harrison: (El Sr. Harrison gruñe, pero le devuelve la brújula.) Haz lo que quieras. Pero no le digas que yo te mandé.
+   ! hecho mis_brujula_encargo
+-> Decirle que debería ir él mismo
+   ana: Yo creo que debería ir usted mismo. Las cosas importantes no se mandan con una niña, por muy confiable que sea.
+   harrison: (El Sr. Harrison la mira largo.) Eres insolente. Y tienes razón, que es peor. Llévasela tú; yo… lo pensaré.
+   ! hecho mis_brujula_encargo
+   ! hecho mis_brujula_empujon
+   ! suma afecto:harrison:ana 1
+-> Devolvérsela y no meterse
+   ana: Entonces es suya, Sr. Harrison. Usted sabrá qué hacer con ella. No me voy a meter.
+   harrison: (El Sr. Harrison guarda la brújula en el bolsillo del chaleco.) Eso es lo más sensato que te he oído decir. No me acostumbro.
+   ! hecho mis_brujula_guardada
+   ! hecho mis_brujula_fin
+   ! log Ana le devolvió la brújula al Sr. Harrison y no se metió. | yo: Le devolví la brújula al Sr. Harrison. No me metí. No sé si hice bien.
+
+=== mis_brujula_jim ===
+con: farero
+tema: Llevarle la brújula del lago
+resumen: El capitán Jim reconoce la brújula que tiró al lago la noche que zarpó solo. Ana puede contarle por qué el Sr. Harrison no fue al muelle, o solo pedirle que vaya a verlo.
+si: hecho:mis_brujula_encargo, !hecho:mis_brujula_jim
+al_terminar: hecho mis_brujula_jim
+---
+ana: Capitán Jim, le traigo algo que se le perdió hace mucho. O que usted perdió a propósito.
+farero: (El capitán Jim abre la tapa y se le quiebra la voz.) «Para que siempre encuentres el camino de vuelta.» La tiré al lago la mañana que volví del primer viaje. Pensé que no la quería ver nunca más.
+ana: ¿Porque el Sr. Harrison no fue al muelle?
+farero: Porque esperé a mi mejor amigo bajo la lluvia hasta que el capitán dijo que zarpábamos. Uno no se olvida de esa lluvia, niña.
+-> Contarle por qué el Sr. Harrison no fue
+   ana: Capitán Jim, esa noche la madre del Sr. Harrison se estaba muriendo. Él se quedó con ella. Se murió al amanecer.
+   farero: (El capitán Jim se queda mirando el mar un rato muy largo.) ¿Y por qué diablos no me lo dijo?
+   ana: Dice que usted no preguntó. Que se fue llamándolo cobarde.
+   farero: (Se ríe, sin ganas.) Dos viejos tontos. Uno que no preguntó y otro que no explicó. Treinta y un años.
+   ! hecho mis_brujula_verdad
+   ! suma afecto:farero:ana 1
+-> Callarse eso y solo pedirle que vaya a verlo
+   ana: No me toca a mí contarle nada, capitán. Pero el Sr. Harrison guardó treinta y un años las ganas de explicarle algo. Vaya a verlo.
+   farero: (El capitán Jim guarda la brújula en el bolsillo y no promete nada.) Ya veremos, niña. Ya veremos.
+
+=== mis_brujula_final ===
+con: harrison
+tema: Preguntarle si vino el capitán Jim
+resumen: El capitán Jim fue a ver al Sr. Harrison. No hablaron de la tormenta: hablaron de barcos. La brújula volvió a su dueño.
+si: hecho:mis_brujula_verdad, dias_desde:mis_brujula_jim:1, !hecho:mis_brujula_fin
+al_terminar: hecho mis_brujula_paces
+al_terminar: hecho mis_brujula_fin
+al_terminar: log El capitán Jim y el Sr. Harrison se reconciliaron, después de treinta y un años. | yo: El capitán Jim fue a ver al Sr. Harrison. Hablaron de barcos. A veces las paces se hacen hablando de otra cosa.
+---
+ana: Sr. Harrison… ¿vino?
+harrison: (El Sr. Harrison sigue revolviendo la avena del caballo, sin mirarla.) Vino.
+ana: ¿Y? ¡No me deje así! ¿Se abrazaron? ¿Lloraron? ¿Se pidieron perdón como en las novelas?
+harrison: Tomamos té. Hablamos de barcos. De la tormenta, ni una palabra.
+ana: (Ana se queda pasmada.) ¿Treinta y un años, y hablaron de barcos?
+harrison: Hay cosas que no hace falta decir cuando ya se sabe que el otro las sabe. Eso tú no lo entiendes todavía, porque tú dices todo.
+->* Preguntarle por la brújula
+   ana: ¿Y la brújula?
+   harrison: La tiene él. Dice que ya encontró el camino de vuelta, y que es un poco tarde, pero no tanto.
+   ! suma afecto:harrison:ana 1
+-> Decirle que está contenta, sin más
+   ana: Estoy tan contenta que no sé qué decir. Y eso, viniendo de mí, es mucho.
+   harrison: (Al Sr. Harrison se le escapa una sonrisa, de esas que no le salen hace años.) Ginger dijo lo mismo. Con peores palabras.
+   ! suma afecto:harrison:ana 1
+
+=== mis_brujula_final_sin ===
+con: harrison
+tema: Preguntarle si vino el capitán Jim
+resumen: El capitán Jim no vino. El Sr. Harrison dice que no importa, y no es verdad. Ana puede contarle lo que sabe del muelle, o dejarlo así.
+si: hecho:mis_brujula_jim, !hecho:mis_brujula_verdad, dias_desde:mis_brujula_jim:1, !hecho:mis_brujula_fin
+al_terminar: hecho mis_brujula_fin
+---
+ana: Sr. Harrison… ¿vino el capitán Jim?
+harrison: No. Ya te dije que no importaba.
+ana: Usted lo dijo, pero lo dijo mirando el camino.
+harrison: (El Sr. Harrison deja la horquilla.) Mira, niña: hay cosas que se rompen y se quedan rotas. Las tazas, los muelles, los amigos.
+-> Decirle que vaya usted a explicarle lo de su madre
+   ana: Él no sabe lo de su madre, Sr. Harrison. Yo no se lo dije: no me tocaba. Le toca a usted.
+   harrison: (Largo silencio.) El domingo hay buen viento para ir a la costa. Hmpf. No te prometo nada.
+   ! hecho mis_brujula_empujon
+   ! log Ana le dijo al Sr. Harrison que le tocaba a él explicarle al capitán Jim. | yo: El capitán Jim no vino. Le dije al Sr. Harrison que le tocaba a él. Dijo «hmpf», que en su idioma es casi un sí.
+-> Dejarlo así
+   ana: Está bien. No le voy a insistir.
+   harrison: Gracias. (Pero se queda mirando el camino un rato más.)
+   ! log El capitán Jim no fue a ver al Sr. Harrison. | yo: Hay cosas que se rompen y se quedan rotas, dijo el Sr. Harrison. Yo no quiero creerlo.
+
+</script>
 <script type="text/plain" id="libros">
 # Semillas de libros para la IA de la noche (src/js/66-noche.js, la primera tanda: los temas). Cada noche se le dan unas
 # pocas al azar, para que un tema nazca de algo que no sea lo de siempre. No se citan: se cuenta, en una o dos líneas, lo
@@ -9659,6 +9835,25 @@ function cap1Tick(){
     f.home = 1; dlgHecho('llegaron'); if (CAP1.juego) { cap1AlJuego(); return; } if (game.scene !== 'gg') goIn('gg'); ana.sit = false; cap1Mark('baja_ana', 'Matthew bajó a Ana de la calesa en el patio oscuro de Tejas Verdes, entre los álamos, y entraron a la casa.');
   }
 }
+/* ---------- the mini-missions: stories of a few steps, as the chapters of «Chronicles of Avonlea» ----------
+   Written apart (src/datos/misiones.txt): each one has its data (title, kind, how it starts, who is in it), its entry in
+   Ana's notebook, its scenes and its conversations, in the same formats as their own files; here they are split so that
+   the script, the conversations and the notebook read them with the rest (tools/misiones.js does the same for the
+   tools: the graph and the model check them too). Their facts are «mis_<id>_…», and every ending leaves «mis_<id>_fin». */
+function misionesLeer(txt){
+  const out = { lista: [], guion: '', conversaciones: '', cuaderno: '' }; let m = null, parte = null;
+  for (const raw of txt.split('\n')) {
+    const l = raw.trim(); let h;
+    if ((h = l.match(/^====\s*mision\s+(\S+)\s*====$/))) { out.lista.push(m = { id: h[1], titulo: h[1] }); parte = null; continue; }
+    if (!m) continue;
+    if ((h = l.match(/^---\s*(cuaderno|guion|conversaciones)\s*---$/))) { parte = h[1]; out[parte] += `\n# (misión ${m.id})\n`; continue; }
+    if (parte) { out[parte] += raw + '\n'; continue; }
+    if (l && l[0] !== '#' && (h = l.match(/^(titulo|tipo|arranque|personas|resumen|inspiracion):\s*(.*)$/))) m[h[1]] = h[1] === 'personas' ? h[2].split(',').map(x => x.trim()).filter(Boolean) : h[2];
+  }
+  return out;
+}
+const MISIONES = misionesLeer(document.getElementById('misiones')?.textContent || '');
+
 /* ---------- the dialogues (Dialogo): every written dialogue is a scene, a capsule that plays when its moment comes,
    by place and by state, never by the clock. A scene is pure configuration (data, no code): who must be there and
    where, what must be so, how important it is, what it says, and what it does when it starts and ends. The class
@@ -10024,13 +10219,13 @@ function dlgGuion(txt){
     return { ...c, lineas: ref ? [...ref, ...(_l.length ? [{ lineas: _l }] : [])] : _l };
   });
 }
-const ESCENAS = dlgGuion(document.getElementById('guion')?.textContent || '');
+const ESCENAS = dlgGuion((document.getElementById('guion')?.textContent || '') + '\n' + MISIONES.guion);   // (and the scenes of the mini-missions: src/js/20-misiones.js)
 for (const c of ESCENAS) Dialogo.registrar(c);
 // the conversations of Ana with her own (src/datos/conversaciones.txt): scenes too, available by closeness, had from the
 // menu of the person (or now and then by themselves, when Ana is near and free), as many as she likes; what they add to
 // a quality (affection, a skill), at most once a day for each quality
 const convRegistrar = c => Dialogo.registrar({ ...c, disparo: 'conversar', canal: 'conv', quienes: [c.con, 'ana'], sujeta: [c.con], tema: c.tema || c.id, al_terminar: (c.al_terminar || []).map(a => a.suma ? { ...a, limitado: true } : a) });   // (and those the night adds: src/js/66-noche.js)
-const CONVERSACIONES = dlgGuion(document.getElementById('conversaciones')?.textContent || '').map(convRegistrar);
+const CONVERSACIONES = dlgGuion((document.getElementById('conversaciones')?.textContent || '') + '\n' + MISIONES.conversaciones).map(convRegistrar);
 // the comments (src/datos/comentarios.txt): scenes of one line, grouped by the moment they are said in; the same
 // conditions, chosen by the same engine, but they hold no one, do nothing, and can be said again
 function comentariosLeer(txt){
@@ -16463,7 +16658,7 @@ function cuadernoLeer(txt){
   }
   return out;
 }
-const CUADERNO = cuadernoLeer(document.getElementById('cuaderno')?.textContent || '');
+const CUADERNO = cuadernoLeer((document.getElementById('cuaderno')?.textContent || '') + (MISIONES.cuaderno.trim() ? '\n== Misiones\n' + MISIONES.cuaderno : ''));   // (the mini-missions, in a group of their own)
 const CUADERNO_METAS = CUADERNO.flatMap(g => g.metas), cuadernoMeta = id => CUADERNO_METAS.find(m => m.id === id);
 // what has been done: the day it was first done, as the game counts the days, from 1 (kept with the facts for good)
 const cuadernoHecho = id => game.wm?.perm?.['cuaderno:' + id];
