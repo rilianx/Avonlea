@@ -260,7 +260,7 @@ function nocheEjemplo(el, id){
 // the AI how its scenes are judged (trazas/temas/rubrica.md); «ejemplo» shows one of the best scenes it wrote; «plan»
 // asks it to say, for each block, what changes and the line that stays; «cuidado» names what most often cost good scenes
 // points (how they speak to each other, facts made up, options with no answer). Several, with «+»: «rubrica+cuidado»
-let NOCHE_VARIANTE = 'rubrica+cuidado';   // (the best in trazas/temas/juicio-prompts.md; «ninguna»: the request without them)
+let NOCHE_VARIANTE = 'rubrica+cuidado+tandas';   // (the best in trazas/temas/juicio-prompts.md; «ninguna»: the request without them)
 const nocheVar = v => NOCHE_VARIANTE.split('+').includes(v) || NOCHE_VARIANTE === 'todo';
 const NOCHE_RUBRICA = `CÓMO SE JUZGA CADA ESCENA (de 0 a 2 en cada punto; apunta a 2 en todos):
 1. Verdad: nada que no haya pasado en esta partida; mejor, parte de algo concreto que pasó (lo que Ana eligió, dijo o escribió).
@@ -296,8 +296,8 @@ const NOCHE_FORMAS = {
   tira: 'corta (4 a 7 líneas), como una tira cómica: una pregunta simple de Ana deja al otro sin respuesta o con una salida inesperada, y termina en un remate',
   confidencia: 'lenta y sin chiste: alguien cuenta algo que nunca había contado; termina abierta, sin moraleja',
   malentendido: 'comedia: Ana entiende mal algo (una palabra, una costumbre, una intención) y se enreda; se aclara con gracia',
-  hacer: 'una acción concreta que hacen juntas (sembrar, buscar algo, arreglar, llevar algo a alguien): se habla mientras se hace, y la acción importa',
-  desacuerdo: 'no están de acuerdo, o alguien se ofende: las opciones son decisiones de Ana (ceder, insistir, pedir perdón, callar) y cada una deja algo distinto',
+  hacer: 'una acción concreta que hacen juntas (sembrar, buscar algo, arreglar, llevar algo a alguien): se habla mientras se hace, y la acción importa (con opciones: cómo lo hace Ana)',
+  desacuerdo: 'no están de acuerdo, o alguien se ofende: lleva opciones siempre, y son decisiones de Ana (ceder, insistir, pedir perdón, callar) y cada una deja algo distinto',
   cuento: 'una de las dos cuenta o inventa una historia (o algo de un libro), y la historia dice algo de quien la cuenta',
 };
 const NOCHE_AMBITOS = ['casa', 'granja', 'escuela', 'naturaleza y lugares', 'imaginación', 'pasado', 'sentimientos', 'el pueblo', 'el futuro', 'libros'];
@@ -364,7 +364,7 @@ function nocheIdeasElegir(T, n = NOCHE_CANDIDATOS.n){
 // two topics alike: they share two words that say something (or most of the shorter one)
 const nocheParecidos = (a, b) => { const P = s => new Set(String(s).toLowerCase().replace(/[^\p{L}\s]/gu, ' ').split(/\s+/).filter(w => w.length > 4)), A = P(a), B = P(b), c = [...A].filter(w => B.has(w)).length; return c >= 2 || (c && c / Math.min(A.size, B.size) >= .6); };
 // the topics, for the second round: in the user's request, one scene each
-const nocheTandaTexto = () => !NOCHE_TANDA?.length ? '' : `\nLOS TEMAS DE ESTA NOCHE (los eligió el juego entre muchos: escribe UN bloque «conversacion» por cada uno, en este orden, con esa persona, sobre ese tema y en esa forma; el «tema:» del bloque puede ser el mismo o mejor dicho)\n${NOCHE_TANDA.map((t, i) => `${i + 1}. con ${t.con} · ${t.ambito} · forma «${t.forma}»: ${t.tema} — ${t.revela}${t.semilla ? ` (nace de: ${NOCHE_LIBROS.find(x => x.id === t.semilla)?.libro || t.semilla})` : ''}`).join('\n')}\n`;
+const nocheTandaTexto = () => !NOCHE_TANDA?.length ? '' : `\nLOS TEMAS DE ESTA NOCHE (los eligió el juego entre muchos: escribe UN bloque «conversacion» por cada uno, en este orden, con esa persona, sobre ese tema y en esa forma; el «tema:» del bloque puede ser el mismo o mejor dicho)\n${NOCHE_TANDA.map((t, i) => `${i + 1}. con ${t.con}${nocheNiño(t.con) ? ' (una niña o un niño: Ana y ' + t.con + ' se tutean, «tú», nunca «usted»)' : ''} · ${t.ambito} · forma «${t.forma}»: ${t.tema} — ${t.revela}${t.semilla ? ` (nace de: ${NOCHE_LIBROS.find(x => x.id === t.semilla)?.libro || t.semilla})` : ''}`).join('\n')}\n`;
 
 // the people (id: voice; with «casas», where each one lives: the AI made up houses and families)
 const nocheVoces = casas => [...Object.keys(CH).map(k => `- ${k} (${CH[k].fullName || NAMES[k]}): ${voiceShort(k)}`), ...Object.entries(FOLK_DEFS).filter(([k]) => !/^v\d+$/.test(k)).map(([k, d]) => `- ${k} (${nocheSinArt(d.name)}${casas && d.home ? ', ' + d.home : ''})${fichaOf(k)?.ficha ? ': ' + String(fichaOf(k).ficha).slice(0, 140) : ''}`)].join('\n');
@@ -902,6 +902,8 @@ function nocheReparar(b){
       R.push(`agregado «!hecho:historia_${h}» (mientras la situación no pase)`); } }
   { const id0 = (texto.match(/^\s*===\s*(.+?)\s*===/m) || [])[1];   // (its id starts with «ia_»: and what in it names the id)
     if (id0 && !/^ia_/.test(id0) && /^[A-Za-z0-9_]+$/.test(id0)) { const id = 'ia_' + id0.toLowerCase(); texto = texto.replace(/^(\s*===\s*).+?(\s*===)/m, `$1${id}$2`).replace(new RegExp(`(hecho:|dicha:|dias_desde:|hecho\\s+|olvidar\\s+)${id0}(?![\\w])`, 'g'), `$1${id}`); R.push(`id «${id0}» → «${id}»`); } }
+  // an id with accents or capitals («ia_marilla_ratón_arado»): the same, plain
+  texto = texto.replace(/^(\s*===\s*)(.+?)(\s*===\s*)$/m, (x, a, id, c) => { const n = id.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9_]+/g, '_'); if (n === id || !/^ia_/.test(n)) return x; R.push(`id «${id}» → «${n}»`); return a + n + c; });
   // an effect written as a fact («hecho cosa ana tarta 1», «hecho suma afecto:x:ana 1»): the effect itself
   texto = texto.replace(/^(\s*(?:!|al_empezar:|al_terminar:)\s*)hecho\s+((cosa|suma|saber|contar)\s+\S.*)$/gm, (x, a, e) => { R.push(`«hecho ${e.trim()}» → «${e.trim()}»`); return a + e; });
   texto = texto.replace(/(hecho:|dias_desde:|hecho[ \t]+)([a-z_]+)(?![\w])/g, (x, a, h) => { if (!HITO_DE[h] || nocheVocab().hechos.has(h)) return x; R.push(`«${a.trim()}${a.endsWith(':') ? '' : ' '}${h}» → «${a.trim()}${a.endsWith(':') ? '' : ' '}historia_${h}» (un hito no es un hecho)`); return a + 'historia_' + h; });

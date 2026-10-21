@@ -5,7 +5,7 @@
 const fs = require('fs'), path = require('path'), RAIZ = path.join(__dirname, '..');
 const leer = f => JSON.parse(fs.readFileSync(path.join(RAIZ, f), 'utf8'));
 const C = leer('trazas/temas/notas-claude.json'), J = fs.existsSync(path.join(RAIZ, 'trazas/temas/notas-jueces.json')) ? leer('trazas/temas/notas-jueces.json') : { modelos: [], notas: {}, razones: {} };
-const CORRIDAS = { r1: 'corrida 1 (versiones)', r2: 'corrida 2 (versiones)', r3: 'corrida 3 (elegir)' };
+const CORRIDAS = { r1: 'corrida 1 (versiones)', r2: 'corrida 2 (versiones)', r3: 'corrida 3 (elegir)', r4: 'corrida 4 (tandas)' };
 const E = C.escenas.map((e, i) => {
   const corrida = e.version.includes(':') ? e.version.split(':')[0] : 'r1', version = e.version.replace(/^r\d:/, '');
   const campo = k => (e.texto.match(new RegExp('^' + k + ':\\s*(.*)$', 'm')) || [])[1] || '';

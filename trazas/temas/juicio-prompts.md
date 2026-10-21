@@ -95,3 +95,31 @@ juez (gpt-5.4) se queda con 4 (c8). Notas de Claude en notas-claude.json («r3:�
   8 500 tokens (gpt-5.4).
 - **El «usted» que se escapa sin la palabra**: «¿Qué clase de desastre le ofende más, Felicity?», «Si quiere decirme…».
   El juego solo ve la palabra «usted»; el juez lo baja en A2.
+
+## Dos tandas: primero los temas, después las escenas («tandas»)
+
+Corrida 39526668693 (commit ec27ad0): 3 noches con una tanda y 3 con dos, las dos con 8 candidatos y el juez mini
+eligiendo 4. En la primera tanda, la IA propone 15 temas (persona, ámbito, forma, semilla de libro: src/datos/libros.txt);
+el juego deja fuera los lugares comunes y los repetidos y elige los 8 más distintos. Notas en notas-claude.json («r4:»).
+
+| | Escenas | Claude (de 18) | De 16 o más | Lugares comunes o repetidos | Juez barato (nano) |
+|---|---|---|---|---|---|
+| una tanda | 12 | 12,75 | 0 | 6 (Cecily tímida ×3, las semillas de Matthew ×3) | 12,08 |
+| **dos tandas** | 12 | **14,5** | 3 | 0 o 1 | 12,67 |
+
+- **La diversidad es otra**: con una tanda, las tres noches vuelven a Cecily tímida, a las semillas de Matthew y a la
+  mesa de la escuela dominical. Con dos, aparecen Moody (el camino del peregrino), Ruby («una tristeza vestida de encaje»),
+  Felicity contando un ridículo de juventud en vez de su cocina, Cecily inventando a la gente de las rocas (de Paul
+  Irving), Carrie y un verso de los Salmos para cuando el mundo pesa, la Biblia de la familia con los nombres.
+- **Las formas cambian el ritmo**: tiras cortas con remate (Ruby, Matthew y el plan desbaratado), confidencias sin chiste
+  (Cecily: «Cuando tú viniste, yo pensé que eras como una luz en la sala. Y me dio miedo que te fueras»), desacuerdos con
+  decisiones de verdad (Marilla y el vestido: «como si yo tuviera que pedir permiso hasta para ser contenta», 17).
+- **Lo que falla**: hechos inventados en dos escenas buenas (la Biblia «la tenía tu padre»; un almuerzo con Alec que no
+  pasó); un «desacuerdo» sin opciones. Ahora las formas «desacuerdo» y «hacer» piden opciones siempre.
+- **El juez barato ve la dirección pero no el tamaño**: nano da +0,6; Claude, +1,75. Para la decisión, la diferencia es
+  bastante grande y la diversidad se ve sin juez.
+- **Dos arreglos del juego** que mostró esta corrida: un id con tildes («ia_marilla_ratón_arado») se rechazaba entero;
+  ahora se escribe sin tildes. Y el «usted» entre niñas sigue siendo el rechazo más común: en la lista de temas, cada niña
+  o niño lleva «se tutean».
+
+Queda como pedido de siempre: **rubrica+cuidado+tandas**.
