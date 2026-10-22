@@ -18,7 +18,7 @@ const MAP = (() => {
   coast: pts(L('costa')[0]),
   places: Object.fromEntries(L('lugares').map(o => [o.name, at(o)])),
   roads: Object.fromEntries(L('caminos').map(o => [o.name, pts(o)])),
-  rivers: rios.filter(o => o.type === 'rio').map(o => ({ name: o.name, pts: pts(o), bridges: rios.filter(b => b.type === 'puente' && prop(b, 'rio') === o.name).map(b => ({ at: at(b), ...(prop(b, 'techado') ? { covered: true } : {}) })) })),
+  rivers: rios.filter(o => o.type === 'rio').map(o => ({ name: o.name, pts: pts(o), bridges: rios.filter(b => b.type === 'puente' && prop(b, 'rio') === o.name).map(b => ({ at: at(b), ...(prop(b, 'techado') ? { covered: true } : {}), ...(prop(b, 'piedras') ? { piedras: true } : {}) })) })),   // (a bridge, covered or not, or stepping stones across)
   woods: bos.filter(o => o.type === 'bosque').map(o => ({ name: o.name, at: mid(o), r: rad(o), pines: prop(o, 'pinos'), ...(prop(o, 'embrujado') ? { haunted: true } : {}) })),
   lupins: bos.filter(o => o.type === 'lupinos').map(o => ({ at: mid(o), r: rad(o) })),
   buildings: L('edificios').map(o => ({ style: o.type, at: at(o), name: o.name })),
@@ -57,7 +57,7 @@ const seaAt = (x, y) => { if (x < 0 || y < 0 || x >= WW || y >= WH) return y < W
 const inSea = (x, y, m = 0) => seaAt(x, y) || (m > 0 && nearCoastI(x, y, m) && (seaAt(x, y - m) || seaAt(x + m, y) || seaAt(x, y + m) || seaAt(x - m, y)));
 const nearCoast = (x, y, d) => nearCoastI(x, y, d);
 // rivers and brooks, each with its bridges; the one between Green Gables and Orchard Slope is "the brook"
-const RIVERS = MAP.rivers.map(r => ({ ...r, pts: r.pts.map(mU), bridges: r.bridges.map(b => ({ x: b.at[0] * U, y: b.at[1] * U, covered: !!b.covered })) }));
+const RIVERS = MAP.rivers.map(r => ({ ...r, pts: r.pts.map(mU), bridges: r.bridges.map(b => ({ x: b.at[0] * U, y: b.at[1] * U, covered: !!b.covered, piedras: !!b.piedras })) }));
 const brook = RIVERS[1].pts, BRIDGE = RIVERS[1].bridges[0];
 const HHR = { table: { x: 6.4 * T, y: 5.4 * T }, cage: { x: 10.8 * T, y: 4.6 * T }, stove: { x: 2.4 * T, y: 3.2 * T } };   // (inside his house)
 const PUMP = { x: GG.x + GG.w / 2 + 34, y: GG.y + 56 };

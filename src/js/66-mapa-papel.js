@@ -48,7 +48,7 @@ function paintMapBase(w, h, z = 1, ox = 0, oy = 0){
     if (h.style === 'escuela') { blob(c, [[x - 12, y - 126], [x + 12, y - 126], [x + 12, y - 160], [x - 12, y - 160]], '#f2ede2'); blob(c, [[x - 16, y - 158], [x + 16, y - 158], [x, y - 184]], h.roof); ell(c, x, y - 142, 5, 6, '#c8a040', true); }
     c.strokeStyle = 'rgba(74,47,28,.7)'; c.lineWidth = 3; c.strokeRect(x - h.at.w / 2, y - 60, h.at.w, 60); c.restore(); };
   house(BARN.x, BARN.y, BARN.w, '#6f6a66', '#b5523c');
-  for (const w of WATERS) for (const b of w.bridges) blob(c, [[b.x - 44, b.y - 16], [b.x + 44, b.y - 16], [b.x + 44, b.y + 14], [b.x - 44, b.y + 14]], b.covered ? '#a8463a' : '#a8814f');
+  for (const w of WATERS) for (const b of w.bridges) if (b.piedras) { for (const dx of [-30, 0, 30]) ell(c, b.x + dx, b.y, 10, 7, '#8f8f88', true); } else blob(c, [[b.x - 44, b.y - 16], [b.x + 44, b.y - 16], [b.x + 44, b.y + 14], [b.x - 44, b.y + 14]], b.covered ? '#a8463a' : '#a8814f');
   // names, in ink
   c.fillStyle = '#4a2f1c'; c.textAlign = 'center';
   const label = (text, x, y, size = 46) => { text = conNombres(text); c.font = `italic ${size}px Georgia, serif`; c.fillStyle = 'rgba(241,226,191,.75)'; const tw = c.measureText(text).width; c.fillRect(x - tw / 2 - 8, y - size * .85, tw + 16, size * 1.1); c.fillStyle = '#4a2f1c'; c.fillText(text, x, y); };

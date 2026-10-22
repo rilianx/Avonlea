@@ -151,6 +151,9 @@ function drawProp(c, o, t, night){
   }
   else if (o.kind === 'bench') { ell(c, o.x, o.y + 2, 22, 4, 'rgba(30,40,20,.2)'); blob(c, [[o.x - 20, o.y - 12], [o.x + 20, o.y - 12], [o.x + 20, o.y - 7], [o.x - 20, o.y - 7]], '#8a6040'); blob(c, [[o.x - 20, o.y - 22], [o.x + 20, o.y - 22], [o.x + 20, o.y - 18], [o.x - 20, o.y - 18]], '#8a6040'); c.fillStyle = '#6d4a30'; c.fillRect(o.x - 17, o.y - 12, 3, 12); c.fillRect(o.x + 14, o.y - 12, 3, 12); }
   else if (o.kind === 'bridge') { blob(c, [[o.x - 44, o.y - 30], [o.x + 44, o.y - 30], [o.x + 44, o.y], [o.x - 44, o.y]], '#a8814f'); for (let k = -40; k < 44; k += 10) line(c, [[o.x + k, o.y - 29], [o.x + k, o.y - 1]], 'rgba(90,60,35,.5)', .8, k); c.fillStyle = '#7a5536'; c.fillRect(o.x - 44, o.y - 34, 88, 3); c.fillRect(o.x - 44, o.y - 2, 88, 3); }
+  else if (o.kind === 'piedras') {   // (stepping stones across the river: flat, grey, wet at the edges; snow on top in winter)
+    for (const [dx, dy, r] of [[-38, 22, 9], [-18, 16, 10], [2, 20, 11], [22, 15, 10], [40, 21, 9]]) { const x = o.x + dx, y = o.y + dy;
+      ell(c, x, y + 2, r + 2, r * .45 + 1.5, 'rgba(40,70,90,.35)'); ell(c, x, y, r, r * .5, S === 3 ? '#e8eef2' : '#9a9a94', true); ell(c, x - r * .25, y - r * .15, r * .5, r * .2, S === 3 ? '#ffffff' : '#b8b8b0'); } }
   else if (o.kind === 'roadsign') {   // (the road to Bright River leaves the map here)
     ell(c, o.x + 2, o.y + 1, 8, 2.5, 'rgba(30,40,20,.22)'); c.fillStyle = '#6a4630'; c.fillRect(o.x - 2, o.y - 34, 4, 34);
     c.font = 'italic 8px Georgia, serif'; const tw = c.measureText(o.text).width + 12;

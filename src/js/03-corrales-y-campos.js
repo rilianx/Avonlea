@@ -97,7 +97,7 @@ const props = [
   { kind: 'barn', x: BARN.x, y: BARN.y },
   { kind: 'pump', x: PUMP.x, y: PUMP.y },
   { kind: 'bench', x: BENCH.x, y: BENCH.y },
-  ...WATERS.flatMap(w => w.bridges.map(b => ({ kind: b.covered ? 'covered' : 'bridge', x: b.x, y: b.y + 14 }))),
+  ...WATERS.flatMap(w => w.bridges.map(b => b.piedras ? { kind: 'piedras', x: b.x, y: b.y - 18 } : { kind: b.covered ? 'covered' : 'bridge', x: b.x, y: b.y + 14 })),   // (the stones lie in the water: under whoever crosses)
   { kind: 'sign', x: LAKE.x - 160, y: LAKE.y - LAKE.ry - 34, text: 'Lago de las Aguas Brillantes' },
   { kind: 'sign', x: ROADS.blanco[1][0], y: ROADS.blanco[1][1] + 34, text: 'Camino Blanco de las Delicias' },
   ...WOODS.filter(w => w.haunted).map(w => ({ kind: 'sign', x: w.x, y: w.y - w.ry - 30, text: 'Bosque Encantado' })),
