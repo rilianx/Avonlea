@@ -20,9 +20,32 @@ function jugables(){
   }
   return out;
 }
+// leaving a thing half done (the player moved her): most can be taken up again the same day, where she left them (the
+// step, and how long into it: «↺» in her menu, src/js/30-animales-vacas.js); some cannot wait (the dishes in the water,
+// the cow half milked, the churn, what is on the stove, the dye on her hair): they stay undone, and that has its
+// consequence (what someone says: «sin_terminar:<x>», src/datos/dichos/10-acciones.txt)
+const ACC_SIN_PAUSA = ['quehacer:platos', 'ordeñar', 'batir', 'cocinar', 'teñir', 'cortar_pelo'];
+const accClave = a => a.v + (a.x ? ':' + a.x : '');
+const accPausable = a => !ACC_SIN_PAUSA.includes(accClave(a)) && !ACC_SIN_PAUSA.includes(a.v);
+function accDejar(P){
+  const st = P.st || {}, avanzo = (st.ci || 0) > 0 || (st.pt || 0) > 1 || (st.w || 0) > 2 || (st.n || 0) > 0; if (!avanzo) return;
+  const clave = accClave(P.a);
+  if (!accPausable(P.a)) { dlgHecho('sin_terminar_' + clave.replace(/[^a-zñ_]/g, '_')); float('Quedó a medias', ana.x, ana.y - 60); const d = dicho('sin_terminar:' + clave); if (d) setTimeout(() => anaSays(d), 400); logEv(`Ana no terminó de ${stepText(P.a)}.`, []); return; }
+  const { llego, tw, lt, ...resto } = st;   // (where she was in it: the step and how long; not that she had arrived, she has to go back)
+  (game.pausadas ||= {})[clave] = { a: P.a, st: { ...resto, llego: 0, tw: 0, lt: 0, retoma: 1 }, dia: today() };
+  float('Lo dejó a medias', ana.x, ana.y - 60); logEv(`Ana dejó a medias ${stepText(P.a)}: lo puede retomar hoy.`, []);
+}
+const pausadasHoy = () => Object.entries(game.pausadas || {}).filter(([, p]) => p.dia === today());
+function retomar(clave){
+  const p = game.pausadas?.[clave]; if (!p) return; delete game.pausadas[clave];
+  close(); if (ana.goto) ana.goto = null; ana.sit = false;
+  game.playAct = { who: 'ana', a: p.a, st: p.st, task: { a: p.a }, t0: TT }; game.playAct.task = game.playAct;
+  anaSays(dicho('retomar') || '(Ana vuelve a lo que dejó a medias.)'); logEv('Ana retomó ' + stepText(p.a) + '.', []);
+}
 function jugar(a){
   if (a.v === 'escribir_carta' && !a.para) return say('Ana', dicho('escribir_carta_a_quien'), [...Object.entries(CORREO).filter(([k]) => cartaPuede(k)).map(([k, C]) => [cap(C.nombre) + (C.dias > 1 ? ' (' + C.donde + ')' : ''), () => jugar({ ...a, para: k })]), ['← Volver', anaMenu]]);
-  close(); if (ana.goto) ana.goto = null; ana.sit = false;
+  if (game.playAct && accClave(game.playAct.a) !== accClave(a)) { accEnd(game.playAct); accDejar(game.playAct); game.playAct = null; }   // (she was doing something else: it stays half done)
+  close(); if (ana.goto) ana.goto = null; ana.sit = false; if (game.pausadas) delete game.pausadas[accClave(a)];
   game.playAct = { who: 'ana', a, st: {}, task: { a }, t0: TT };
   game.playAct.task = game.playAct;   // (what accTick and accPush look at)
   logEv('Ana decidió ' + stepText(a) + '.', []);
@@ -36,7 +59,7 @@ function jugarTick(dt){
     if (J.length) { seen.k.push(here); notice('✨ Aquí Ana podría ' + J.slice(0, 2).map(stepText).join(' o ') + (J.length > 2 ? ', y más' : '') + ' (tócala)'); }   // (once a day for each place)
   }
   const P = game.playAct; if (!P) return;
-  if (lastInput > P.t0 + .3 && TT - lastInput < .3 && ana.moving && !ana.goto?.wm) { accEnd(P); game.playAct = null; return; }   // (the player moved her: she leaves it)
+  if (lastInput > P.t0 + .3 && TT - lastInput < .3 && ana.moving && !ana.goto?.wm) { accEnd(P); game.playAct = null; accDejar(P); return; }   // (the player moved her: she leaves it, half done or to be taken up again: accDejar)
   const r = wmExec(P, P.a, P.st, dt);
   if (r === 'run') return;
   game.playAct = null; if (ana.goto?.wm) ana.goto = null;

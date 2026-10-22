@@ -4249,6 +4249,28 @@ quien: ana
 quien: ana
 - Aquí. Mi propio huertito. Las voy a regar todos los días… y a contarles cuentos, para que se animen a salir.
 
+# --- dejar algo a medias (63-jugar.js, accDejar y retomar): lo que se puede retomar el mismo día, y lo que no espera
+=== retomar ===
+- (Ana vuelve a lo que dejó a medias.) Bueno… ¿dónde iba?
+- Ya vuelvo a esto. Las cosas a medias me miran con reproche.
+- (Ana retoma lo que dejó.) Una heroína siempre termina lo que empieza. Casi siempre.
+
+=== sin_terminar:quehacer:platos ===
+- Los platos se quedaron en el agua… Se va a enfriar. Y Marilla también.
+
+=== sin_terminar:ordeñar ===
+- ¡La vaca a medio ordeñar! Me va a mirar con unos ojos…
+
+=== sin_terminar:batir ===
+- La mantequilla a medio batir… Ojalá la crema tenga paciencia. No creo.
+
+=== sin_terminar:teñir ===
+- ¡El tinte se quedó a medias! No quiero ni mirarme en el espejo.
+
+=== sin_terminar:cortar_pelo ===
+- Me fui con el pelo a medio cortar. Es un peinado nuevo. Muy nuevo.
+
+
 # Lo que se dice al recibir algo, al hablar con alguien sin IA (src/js/35-cosas-que-lleva.js), al recibir un encargo
 # o un recado (src/js/38-encargos.js), y al recibir algo en el mundo (src/js/63-jugar.js, «dar»).
 
@@ -6669,6 +6691,9 @@ dice: [hecho:se_queda] Si quieres cocinar, la estufa está encendida. Cuidado co
 dice: [hecho:se_queda, hecho:conocidas_diana] Matthew no lo dice, pero te echa de menos cuando te vas donde Diana.
 dice: [hecho:se_queda, hora:12-18, no_hoy:regado] Riega la huerta antes de que caiga el sol, que las plantas lo agradecen. La regadera está junto a la bomba.
 dice: [hecho:se_queda, afecto:marilla:ana>=3, hora:17-22] Hmm. Bueno, admito que hoy te has portado muy bien.
+dice: [!no_hoy:sin_terminar_quehacer_platos] Ana, dejaste los platos en el agua, y el agua ya está fría. Una cosa empezada se termina, niña.
+dice: [!no_hoy:sin_terminar_ordeñar] ¿Quién dejó la vaca a medio ordeñar? Una vaca a medias no da leche: da problemas.
+dice: [!no_hoy:sin_terminar_batir] La mantequera a medias, y la crema cortándose. La crema no espera a nadie, Ana.
 dice: [hecho:ropa_arrugada, !hecho:ropa_ordenada] Ese vestido parece que durmió en el suelo, Ana. Ah, claro: es que durmió en el suelo.
 primavera: [hecho:se_queda] Hay que limpiar la casa a fondo, que es primavera. Y tú me vas a ayudar, Ana.
 verano: Con este calor, mejor un té y no enciendas mucho la estufa.
@@ -11720,6 +11745,7 @@ const cap = s => s[0].toUpperCase() + s.slice(1);
 function anaMenu(){
   if (retenida()) { notice('Ahora no: la están mirando, esperan lo que Ana diga.'); return; }
   const J = jugables(), mine = cartas().filter(c => c.para === 'ana' && c.estado === 'recibida').map(c => ['📜 Leer la carta de ' + CORREO[c.de].nombre, () => cartaLeer(c)]);
+  const R = pausadasHoy().map(([k, p]) => ['↺ Retomar: ' + stepText(p.a) + ' (lo dejaste a medias)', () => retomar(k)]);   // (what she left half done today, first: src/js/63-jugar.js)
   for (const k of Object.keys(game.anaStates)) if (ANA_STATES[k].fix) mine.push([ANA_STATES[k].fix, () => { close(); setAnaState(k, false); }]);
   // (in her nightgown at home: to dress, as Marilla asks; up to her room if she is not there, where her dress is)
   if (game.wm?.camison && enCasa('ana') && hourNow() % 24 >= 5 && hourNow() % 24 < 20) mine.push(['👗 Vestirse', () => { close(); if (game.scene !== 'ga') goIn('ga', [GA.bed.x - 20, GA.bed.y + 16]); if (game.wm.ropaTirada) ropaPonerse(); else vestirse(); }]);
@@ -11728,11 +11754,11 @@ function anaMenu(){
   if (game.scene === 'out' && game.inv.semillas > 0 && !game.huertito) mine.push(['🌱 Hacer mi huertito aquí', hacerHuertito]);   // (where she wants it)
   if (game.hasCan) mine.push(['Dejar la regadera', () => dropItem('can')]);
   for (const k of ITEMS) if (game.inv[k] > 0) mine.push(['Dejar ' + itemText(k, game.inv[k]), () => dropItem(k)]);
-  if (!J.length && !mine.length) { float('No llevo nada en las manos', ana.x, ana.y - 60); return; }
+  if (!J.length && !mine.length && !R.length) { float('No llevo nada en las manos', ana.x, ana.y - 60); return; }
   const act = a => [cap(stepText(a)), () => jugar(a)];
   const plan = new Set((AGENTS.ana?.tasks || []).filter(t => t.st !== 'done' && t.st !== 'skip').map(t => t.a.v + ':' + (t.a.k || t.a.x || '')));
   const sug = J.filter(a => plan.has(a.v + ':' + (a.k || a.x || '')));   // (what serves the goals she has)
-  if (J.length + mine.length <= 6) return say('Ana', '¿Qué hago?', [...J.map(a => { const [l, f] = act(a); return ['✨ ' + l, f]; }), ...mine, ['Nada', close]]);
+  if (J.length + mine.length <= 6) return say('Ana', '¿Qué hago?', [...R, ...J.map(a => { const [l, f] = act(a); return ['✨ ' + l, f]; }), ...mine, ['Nada', close]]);
   // more than that: by groups (with someone; chores; reading and writing; play; dressing up; what she carries)
   const groups = [];
   if (sug.length) groups.push(['⭐ Lo que me toca', sug]);
@@ -11742,7 +11768,7 @@ function anaMenu(){
   groups.push(['✨ Otras cosas', rest.filter(a => !a.k && !ACC_GRUPOS.some(([, vs]) => vs.includes(a.v)))]);
   const top = groups.filter(([, L]) => L.length).map(([name, L]) => L.length === 1 ? [(name.startsWith('⭐') ? '⭐ ' : '✨ ') + act(L[0])[0], act(L[0])[1]] : [name + ' (' + L.length + ')', () => say('Ana', name.replace(/^\S+ /, '') + ':', [...L.map(act), ['← Volver', anaMenu]])]);
   if (mine.length) top.push(['👜 Lo que llevo (' + mine.length + ')', () => say('Ana', '¿Qué hago con lo que llevo?', [...mine, ['← Volver', anaMenu]])]);
-  say('Ana', '¿Qué hago?', [...top, ['Nada', close]]);
+  say('Ana', '¿Qué hago?', [...R, ...top, ['Nada', close]]);
 }
 function dropItem(k){
   const x = ana.x + (ana.dir === 3 ? -14 : 14), y = ana.y + 3;
@@ -15999,9 +16025,32 @@ function jugables(){
   }
   return out;
 }
+// leaving a thing half done (the player moved her): most can be taken up again the same day, where she left them (the
+// step, and how long into it: «↺» in her menu, src/js/30-animales-vacas.js); some cannot wait (the dishes in the water,
+// the cow half milked, the churn, what is on the stove, the dye on her hair): they stay undone, and that has its
+// consequence (what someone says: «sin_terminar:<x>», src/datos/dichos/10-acciones.txt)
+const ACC_SIN_PAUSA = ['quehacer:platos', 'ordeñar', 'batir', 'cocinar', 'teñir', 'cortar_pelo'];
+const accClave = a => a.v + (a.x ? ':' + a.x : '');
+const accPausable = a => !ACC_SIN_PAUSA.includes(accClave(a)) && !ACC_SIN_PAUSA.includes(a.v);
+function accDejar(P){
+  const st = P.st || {}, avanzo = (st.ci || 0) > 0 || (st.pt || 0) > 1 || (st.w || 0) > 2 || (st.n || 0) > 0; if (!avanzo) return;
+  const clave = accClave(P.a);
+  if (!accPausable(P.a)) { dlgHecho('sin_terminar_' + clave.replace(/[^a-zñ_]/g, '_')); float('Quedó a medias', ana.x, ana.y - 60); const d = dicho('sin_terminar:' + clave); if (d) setTimeout(() => anaSays(d), 400); logEv(`Ana no terminó de ${stepText(P.a)}.`, []); return; }
+  const { llego, tw, lt, ...resto } = st;   // (where she was in it: the step and how long; not that she had arrived, she has to go back)
+  (game.pausadas ||= {})[clave] = { a: P.a, st: { ...resto, llego: 0, tw: 0, lt: 0, retoma: 1 }, dia: today() };
+  float('Lo dejó a medias', ana.x, ana.y - 60); logEv(`Ana dejó a medias ${stepText(P.a)}: lo puede retomar hoy.`, []);
+}
+const pausadasHoy = () => Object.entries(game.pausadas || {}).filter(([, p]) => p.dia === today());
+function retomar(clave){
+  const p = game.pausadas?.[clave]; if (!p) return; delete game.pausadas[clave];
+  close(); if (ana.goto) ana.goto = null; ana.sit = false;
+  game.playAct = { who: 'ana', a: p.a, st: p.st, task: { a: p.a }, t0: TT }; game.playAct.task = game.playAct;
+  anaSays(dicho('retomar') || '(Ana vuelve a lo que dejó a medias.)'); logEv('Ana retomó ' + stepText(p.a) + '.', []);
+}
 function jugar(a){
   if (a.v === 'escribir_carta' && !a.para) return say('Ana', dicho('escribir_carta_a_quien'), [...Object.entries(CORREO).filter(([k]) => cartaPuede(k)).map(([k, C]) => [cap(C.nombre) + (C.dias > 1 ? ' (' + C.donde + ')' : ''), () => jugar({ ...a, para: k })]), ['← Volver', anaMenu]]);
-  close(); if (ana.goto) ana.goto = null; ana.sit = false;
+  if (game.playAct && accClave(game.playAct.a) !== accClave(a)) { accEnd(game.playAct); accDejar(game.playAct); game.playAct = null; }   // (she was doing something else: it stays half done)
+  close(); if (ana.goto) ana.goto = null; ana.sit = false; if (game.pausadas) delete game.pausadas[accClave(a)];
   game.playAct = { who: 'ana', a, st: {}, task: { a }, t0: TT };
   game.playAct.task = game.playAct;   // (what accTick and accPush look at)
   logEv('Ana decidió ' + stepText(a) + '.', []);
@@ -16015,7 +16064,7 @@ function jugarTick(dt){
     if (J.length) { seen.k.push(here); notice('✨ Aquí Ana podría ' + J.slice(0, 2).map(stepText).join(' o ') + (J.length > 2 ? ', y más' : '') + ' (tócala)'); }   // (once a day for each place)
   }
   const P = game.playAct; if (!P) return;
-  if (lastInput > P.t0 + .3 && TT - lastInput < .3 && ana.moving && !ana.goto?.wm) { accEnd(P); game.playAct = null; return; }   // (the player moved her: she leaves it)
+  if (lastInput > P.t0 + .3 && TT - lastInput < .3 && ana.moving && !ana.goto?.wm) { accEnd(P); game.playAct = null; accDejar(P); return; }   // (the player moved her: she leaves it, half done or to be taken up again: accDejar)
   const r = wmExec(P, P.a, P.st, dt);
   if (r === 'run') return;
   game.playAct = null; if (ana.goto?.wm) ana.goto = null;

@@ -161,6 +161,7 @@ const cap = s => s[0].toUpperCase() + s.slice(1);
 function anaMenu(){
   if (retenida()) { notice('Ahora no: la están mirando, esperan lo que Ana diga.'); return; }
   const J = jugables(), mine = cartas().filter(c => c.para === 'ana' && c.estado === 'recibida').map(c => ['📜 Leer la carta de ' + CORREO[c.de].nombre, () => cartaLeer(c)]);
+  const R = pausadasHoy().map(([k, p]) => ['↺ Retomar: ' + stepText(p.a) + ' (lo dejaste a medias)', () => retomar(k)]);   // (what she left half done today, first: src/js/63-jugar.js)
   for (const k of Object.keys(game.anaStates)) if (ANA_STATES[k].fix) mine.push([ANA_STATES[k].fix, () => { close(); setAnaState(k, false); }]);
   // (in her nightgown at home: to dress, as Marilla asks; up to her room if she is not there, where her dress is)
   if (game.wm?.camison && enCasa('ana') && hourNow() % 24 >= 5 && hourNow() % 24 < 20) mine.push(['👗 Vestirse', () => { close(); if (game.scene !== 'ga') goIn('ga', [GA.bed.x - 20, GA.bed.y + 16]); if (game.wm.ropaTirada) ropaPonerse(); else vestirse(); }]);
@@ -169,11 +170,11 @@ function anaMenu(){
   if (game.scene === 'out' && game.inv.semillas > 0 && !game.huertito) mine.push(['🌱 Hacer mi huertito aquí', hacerHuertito]);   // (where she wants it)
   if (game.hasCan) mine.push(['Dejar la regadera', () => dropItem('can')]);
   for (const k of ITEMS) if (game.inv[k] > 0) mine.push(['Dejar ' + itemText(k, game.inv[k]), () => dropItem(k)]);
-  if (!J.length && !mine.length) { float('No llevo nada en las manos', ana.x, ana.y - 60); return; }
+  if (!J.length && !mine.length && !R.length) { float('No llevo nada en las manos', ana.x, ana.y - 60); return; }
   const act = a => [cap(stepText(a)), () => jugar(a)];
   const plan = new Set((AGENTS.ana?.tasks || []).filter(t => t.st !== 'done' && t.st !== 'skip').map(t => t.a.v + ':' + (t.a.k || t.a.x || '')));
   const sug = J.filter(a => plan.has(a.v + ':' + (a.k || a.x || '')));   // (what serves the goals she has)
-  if (J.length + mine.length <= 6) return say('Ana', '¿Qué hago?', [...J.map(a => { const [l, f] = act(a); return ['✨ ' + l, f]; }), ...mine, ['Nada', close]]);
+  if (J.length + mine.length <= 6) return say('Ana', '¿Qué hago?', [...R, ...J.map(a => { const [l, f] = act(a); return ['✨ ' + l, f]; }), ...mine, ['Nada', close]]);
   // more than that: by groups (with someone; chores; reading and writing; play; dressing up; what she carries)
   const groups = [];
   if (sug.length) groups.push(['⭐ Lo que me toca', sug]);
@@ -183,7 +184,7 @@ function anaMenu(){
   groups.push(['✨ Otras cosas', rest.filter(a => !a.k && !ACC_GRUPOS.some(([, vs]) => vs.includes(a.v)))]);
   const top = groups.filter(([, L]) => L.length).map(([name, L]) => L.length === 1 ? [(name.startsWith('⭐') ? '⭐ ' : '✨ ') + act(L[0])[0], act(L[0])[1]] : [name + ' (' + L.length + ')', () => say('Ana', name.replace(/^\S+ /, '') + ':', [...L.map(act), ['← Volver', anaMenu]])]);
   if (mine.length) top.push(['👜 Lo que llevo (' + mine.length + ')', () => say('Ana', '¿Qué hago con lo que llevo?', [...mine, ['← Volver', anaMenu]])]);
-  say('Ana', '¿Qué hago?', [...top, ['Nada', close]]);
+  say('Ana', '¿Qué hago?', [...R, ...top, ['Nada', close]]);
 }
 function dropItem(k){
   const x = ana.x + (ana.dir === 3 ? -14 : 14), y = ana.y + 3;
