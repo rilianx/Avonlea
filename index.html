@@ -1531,6 +1531,28 @@ al_empezar: hecho llamada_almuerzo
 -> Quedarse afuera un ratito más
    ana piensa: Un minutito más. Las abejas todavía no terminan su himno.
 
+# (y si Ana anda lejos, a la hora del almuerzo: Marilla manda a Matthew a buscarla; él camina hasta donde está:
+#  src/js/11-cocina-tejas-verdes.js, almuerzoBuscar)
+=== matthew_busca_almuerzo ===
+canal: general
+prioridad: 5
+repetir: dia
+en: ana=out, matthew=out
+sujeta: matthew
+si: hecho:desayuno_prueba, hora:12-14, !no_hoy:matthew_llega_almuerzo, no_hoy:llamada_almuerzo
+al_empezar: hecho llamada_almuerzo
+---
+matthew: (Matthew llega un poco agitado, con el sombrero en la mano.) Bueno, pues… Marilla dice que el almuerzo se enfría. Y que te diga que no es un almuerzo imaginario.
+->* Volver con Matthew a almorzar
+   ana: ¡El almuerzo! Se me olvidó por completo, Matthew. Estaba en la mitad de un pensamiento larguísimo.
+   matthew: Me lo imaginaba. Los pensamientos largos dan hambre, dicen.
+   ! a_cocina
+   ! a_la_mesa
+-> Pedirle que le guarde algo para más tarde
+   ana: ¿Le podría decir a Marilla que me guarde un plato? Estoy en algo que no se puede dejar a medias.
+   matthew: (Matthew se rasca la nuca.) Le diré. Pero no te prometo la cara que va a poner.
+   ! log Ana no fue a almorzar: le pidió a Matthew que le guardaran un plato. | yo: No fui a almorzar. Matthew vino a buscarme hasta acá. Creo que Marilla va a poner su cara de «ya hablaremos».
+
 # la hora de acostarse: Marilla la manda a la cama (cada noche, si anda por Tejas Verdes)
 === marilla_a_la_cama ===
 narra: Ya es de noche en Tejas Verdes. Marilla se asoma con la vela: «Ana, a la cama. Mañana hay que madrugar.»
@@ -8756,6 +8778,34 @@ function mealSit(){
   const q = SEATS.ana; ana.goto = null; ana.lie = false; ana.x = q[0]; ana.y = q[1]; ana.dir = q[2]; ana.sit = true; ana.vx = ana.vy = 0;
   ana.meal = { next: TT + 2.5, rounds: 0, logged: false }; toby.goal = null; toby.until = 0;
 }
+// Ana goes to the kitchen (and, with «mesa», sits down to eat): from the yard she walks to the door and in, and to her
+// chair; from upstairs or from far away, a fade (if someone came to fetch her, they come back with her). Not a jump
+// that leaves her standing: «a_cocina» and «a_la_mesa» of the script (src/js/21-escenas-dialogo.js)
+let ANA_MESA_PEND = 0;   // (when «a la mesa» was asked for, on her way: it holds a minute)
+function anaIrDespues(gt){ let n = 0; const t = setInterval(() => { if (++n > 120) return clearInterval(t); if (menuOpen() || game.talk || amb.cur) return; clearInterval(t); ana.goto = gt; }, 250); }   // (when the scene is over)
+function anaSentarAComer(){
+  const q = SEATS.ana; ANA_MESA_PEND = 0; if (ana.meal) return;
+  if (navigator.webdriver || dist(ana.x, ana.y, q[0], q[1]) < 30) return mealSit();
+  anaIrDespues({ x: q[0], y: q[1] + 8, scene: 'gg', alLlegar: () => { if (!ana.meal) mealSit(); } });
+}
+function anaACocina(){
+  const dentro = () => { for (const [k, p] of Object.entries(PEOPLE)) if (p.trajo) { p.trajo = false; if (p.where !== 'gg') { p.where = 'gg'; [p.x, p.y] = seatFrom(SEATS[k] || [KDOOR.x + 60, KIT.h * .6]); p.nav = null; p.moving = false; p.target = null; } }
+    if (ANA_MESA_PEND && TT - ANA_MESA_PEND < 60) anaSentarAComer(); else ANA_MESA_PEND = 0; };
+  if (game.scene === 'gg') return;
+  ana.enCama = null; ana.meal = null; ana.goto = null;
+  const lejos = !dlgDonde('casa', 'ana'), quien = Object.keys(PEOPLE).find(k => PEOPLE[k].trajo);
+  if (game.scene === 'out' && !lejos && !quien && !navigator.webdriver) return anaIrDespues({ x: GG.x, y: GG.y + 24, scene: 'out', alLlegar: () => { goIn('gg', [KDOOR.x + 40, KIT.h * .6]); dentro(); } });
+  fundido(game.scene === 'ga' ? 'Ana baja a la cocina…' : quien ? `Ana vuelve con ${NAMES[quien]} a Tejas Verdes…` : 'Ana vuelve a la cocina…', () => { goIn('gg', [KDOOR.x + 40, KIT.h * .6]); dentro(); });
+}
+// lunch, and Ana far away, outdoors: Marilla sends Matthew to look for her (he walks to where she is; then the script:
+// «matthew_busca_almuerzo», src/datos/guion.txt). Once a day
+function almuerzoBuscar(){
+  const hr = hourNow(), H = dlgHechos(), hoy = today() + 1, M = PEOPLE.matthew;
+  if (hr < 12.2 || hr > 13.1 || !H.desayuno_prueba || H.llamada_almuerzo === hoy || H.matthew_busca === hoy) return;
+  if (game.scene !== 'out' || dlgDonde('casa', 'ana') || game.road || ana.onCart || !M || ausente('matthew') || M.story || game.tripWith === 'matthew' || M.where === 'camino' || M.where === 'br') return;   // (his farm work waits: src/js/59-agentes.js)
+  dlgHecho('matthew_busca'); M.busca = { hasta: TT + 900, hecho: 'matthew_llega_almuerzo' };
+  logEv('Marilla mandó a Matthew a buscar a Ana para el almuerzo.', ['matthew', 'marilla']);
+}
 // sitting at the table at mealtime, they talk: a little conversation every so often, while she stays
 function mealTick(){
   const m = ana.meal; if (!m) return;
@@ -10011,7 +10061,7 @@ function dlgHacer(list){   // what a scene does when it starts or ends
     if (a.sin_sombrero) game.wm.sinSombrero = true;
     if (a.pasa_tiempo) dayT += a.pasa_tiempo / 24;
     if (a.a_cocina) {
-      if (game.scene !== 'gg') { ana.enCama = null; ana.goto = null; fundido(game.scene === 'ga' ? 'Ana baja a la cocina…' : 'Ana vuelve a la cocina…', () => goIn('gg', [KDOOR.x + 40, KIT.h * .6])); }
+      anaACocina();   // (walking from the yard, a fade from farther: src/js/11-cocina-tejas-verdes.js)
       const M = PEOPLE.marilla; if (sceneOf('marilla') !== 'gg') { M.where = 'gg'; M.x = STOVE.x + 60; M.y = STOVE.y + 60; M.nav = null; M.moving = false; M.sit = false; }
     }
     if (a.junto) { const b = a.junto === 'ana' ? ana : PEOPLE[a.junto], o = a.de === 'ana' ? ana : PEOPLE[a.de]; if (b && o) { b.sit = false; if (b === ana) { ana.meal = null; ana.goto = null; ana.vx = ana.vy = 0; } else { b.nav = null; b.moving = false; } b.x = o.x - 20; b.y = o.y + 2; b.dir = 1; } }
@@ -10020,7 +10070,7 @@ function dlgHacer(list){   // what a scene does when it starts or ends
     if (a.final) finalMostrar(a.final, a.texto);
     if (a.a_pieza && game.scene !== 'ga') { ana.meal = null; ana.goto = null; if (cart.riding) cartOff(); fundido('Ana sube a su pieza…', () => goIn('ga', [GA.bed.x - 20, GA.bed.y + 16])); }
     if (a.acostarse) { if (game.scene !== 'ga') { ana.meal = null; fundido('Ana sube a su pieza…', () => goIn('ga', [GA.bed.x - 20, GA.bed.y + 16])); } setTimeout(() => { if (!sleeping) goToBed(); }, 900); }
-    if (a.a_la_mesa && !ana.meal && game.scene === 'gg') mealSit();
+    if (a.a_la_mesa && !ana.meal) { if (game.scene === 'gg' && !ana.goto) anaSentarAComer(); else ANA_MESA_PEND = TT; }   // (on her way to the kitchen: when she gets there)
     if (a.mesa) game.comida = a.mesa === 'nada' ? null : { que: a.mesa, dia: today() };
     if (a.cosa) { const [k, it, n] = a.cosa; if (k === 'ana') game.inv[it] = (game.inv[it] || 0) + n; else { const I = wmInv(k); I[it] = (I[it] || 0) + n; } if (k === 'ana' && ITEM_DEFS[it]) float('+' + itemText(it, n), ana.x, ana.y - 60); }
     if (a.dormir) { ana.enCama = null; ana.llora = false; goSleep(false, false, true); }   // (the scene itself puts her to sleep)
@@ -13748,7 +13798,7 @@ function goTarget(p, dt, sp){
   if (tg.ana && game.scene !== 'out') return false;
   const [tx, ty] = tg.ana ? [ana.x + (p.x < ana.x ? -30 : 30), ana.y] : PLACES[tg.place].slice(1);
   if (game.scene !== 'out') { p.x = tx; p.y = ty; return true; }
-  if (dist(p.x, p.y, tx, ty) < 26) { p.moving = false; if (tg.ana) { p.target = null; p.wantsTalk = true; p.dir = ana.x < p.x ? 3 : 1; float(NAMES[p.look] + ' te buscaba', p.x, p.y - 64); } return true; }
+  if (dist(p.x, p.y, tx, ty) < 26) { p.moving = false; if (tg.ana) { p.target = null; if (tg.busca && p.busca) { dlgHecho(p.busca.hecho); p.trajo = true; p.busca = null; } else p.wantsTalk = true; p.dir = ana.x < p.x ? 3 : 1; float(NAMES[p.look] + ' te buscaba', p.x, p.y - 64); } return true; }
   walkPath(p, tx, ty, sp, dt);
   return true;
 }
@@ -13838,14 +13888,14 @@ function update(dt){
     game.lastDay = today(); save();
   }
   if ((storyT -= dt) < 0 && AJUSTES.stories) { storyT = .5; storyTick(); if ((!game.story || game.story.day !== today()) && hourNow() < 18 && TT > 4) makeStory(); }
-  mealTick(); ambUpdate(dt); encUpdate(dt); for (const b of bubbles) { if (!b.t) { oido(b.q, b.text); if (burbujaAqui(b)) comOido(b.q, b.text); } b.t += dt; } bubbles = bubbles.filter(b => b.t < b.dur + .35);   // (what is said, Ana heard it today: src/js/24-personajes.js)
+  mealTick(); almuerzoBuscar(); ambUpdate(dt); encUpdate(dt); for (const b of bubbles) { if (!b.t) { oido(b.q, b.text); if (burbujaAqui(b)) comOido(b.q, b.text); } b.t += dt; } bubbles = bubbles.filter(b => b.t < b.dur + .35);   // (what is said, Ana heard it today: src/js/24-personajes.js)
   if ((taskTick -= dt) < 0) { taskTick = .5; taskEvent('ir'); }
   // everyone but Diana follows their routine: where they are wanted (home, or visiting), walking there, or about the place
   const hr = hourNow(), visiting = k => !!CH[k].routine && PEOPLE[k].where !== 'out' && PEOPLE[k].where !== CH[k].home;
   // (away from Avonlea while the book says so, src/datos/llegadas.txt: Diana, at her aunt's in Carmody)
   for (const [k, p] of Object.entries(PEOPLE)) if (ausente(k)) { if (p.where !== 'away') { p.where = 'away'; p.nav = null; p.dest = null; p.moving = false; p.sit = false; } p.story = null; p.follow = false; p.want = 'away'; }
   for (const [k, p] of Object.entries(PEOPLE)) {
-    const c = CH[k]; if (ausente(k) || wmDriven(k) || c.companion) continue;
+    const c = CH[k]; if (ausente(k) || (wmDriven(k) && !p.busca) || c.companion) continue;
     if (CHAT_HOLD[k] > TT) { p.moving = false; continue; }   // (stopped for a chat)
     if (k === game.tripWith) { p.want = p.where; continue; }   // (he went with Ana to Bright River)
     if (p.where === 'camino') continue;   // (on the road: it takes them home)
@@ -13853,6 +13903,7 @@ function update(dt){
       p.story ? p.story.room : (p.away && p.away.day === today() && hr < p.away.until) ? 'away' : c.routine ? c.routine.want(hr, today()) : c.home;
     if (p.story?.place && p.where === 'out') p.target = { place: p.story.place, until: 99, story: true };
     if (p.vamos && TT < p.vamos.hasta) { if (ROOMS[p.vamos.place]) p.want = p.vamos.place; else { p.want = 'out'; if (p.where === 'out') p.target = { place: p.vamos.place, until: 99 }; } }   // (going somewhere with Ana: «se_hace_en»)
+    if (p.busca && TT < p.busca.hasta) { p.want = 'out'; if (p.where === 'out') p.target = { ana: true, until: 99, busca: true }; }   // (sent to look for Ana: src/js/11-cocina-tejas-verdes.js, almuerzoBuscar)
     if (c.hostGoals) p.goals = Object.keys(PEOPLE).some(o => visiting(o) && PEOPLE[o].where === p.where) ? c.hostGoals : p.base;
     if (p.where === 'br' && p.want !== 'br') { roadStart(k, 0, 1); continue; }
     if (busy(k)) continue;
@@ -15201,6 +15252,7 @@ function agentTick(dt){
   for (const ag of Object.values(AGENTS)) {
     if (ausente(ag.who)) continue;   // (away from Avonlea: her goals wait)
     if (ag.hold) { wmHold(ag, dt); continue; }
+    if (PEOPLE[ag.who]?.busca) continue;   // (sent to fetch Ana for a meal: the errand waits until he finds her)
     if (!activeGoals(ag).length) { if (ag.st !== 'idle') agentIdle(ag); continue; }
     if (ag.who === 'ana' && anaPaused(ag)) continue;
     if (enConversacion(ag.who)) { wmStop(ag.who); continue; }   // (in the middle of a conversation or a scene: no one walks off; the errand waits)

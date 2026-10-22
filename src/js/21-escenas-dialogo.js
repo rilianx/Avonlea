@@ -155,7 +155,7 @@ function dlgHacer(list){   // what a scene does when it starts or ends
     if (a.sin_sombrero) game.wm.sinSombrero = true;
     if (a.pasa_tiempo) dayT += a.pasa_tiempo / 24;
     if (a.a_cocina) {
-      if (game.scene !== 'gg') { ana.enCama = null; ana.goto = null; fundido(game.scene === 'ga' ? 'Ana baja a la cocina…' : 'Ana vuelve a la cocina…', () => goIn('gg', [KDOOR.x + 40, KIT.h * .6])); }
+      anaACocina();   // (walking from the yard, a fade from farther: src/js/11-cocina-tejas-verdes.js)
       const M = PEOPLE.marilla; if (sceneOf('marilla') !== 'gg') { M.where = 'gg'; M.x = STOVE.x + 60; M.y = STOVE.y + 60; M.nav = null; M.moving = false; M.sit = false; }
     }
     if (a.junto) { const b = a.junto === 'ana' ? ana : PEOPLE[a.junto], o = a.de === 'ana' ? ana : PEOPLE[a.de]; if (b && o) { b.sit = false; if (b === ana) { ana.meal = null; ana.goto = null; ana.vx = ana.vy = 0; } else { b.nav = null; b.moving = false; } b.x = o.x - 20; b.y = o.y + 2; b.dir = 1; } }
@@ -164,7 +164,7 @@ function dlgHacer(list){   // what a scene does when it starts or ends
     if (a.final) finalMostrar(a.final, a.texto);
     if (a.a_pieza && game.scene !== 'ga') { ana.meal = null; ana.goto = null; if (cart.riding) cartOff(); fundido('Ana sube a su pieza…', () => goIn('ga', [GA.bed.x - 20, GA.bed.y + 16])); }
     if (a.acostarse) { if (game.scene !== 'ga') { ana.meal = null; fundido('Ana sube a su pieza…', () => goIn('ga', [GA.bed.x - 20, GA.bed.y + 16])); } setTimeout(() => { if (!sleeping) goToBed(); }, 900); }
-    if (a.a_la_mesa && !ana.meal && game.scene === 'gg') mealSit();
+    if (a.a_la_mesa && !ana.meal) { if (game.scene === 'gg' && !ana.goto) anaSentarAComer(); else ANA_MESA_PEND = TT; }   // (on her way to the kitchen: when she gets there)
     if (a.mesa) game.comida = a.mesa === 'nada' ? null : { que: a.mesa, dia: today() };
     if (a.cosa) { const [k, it, n] = a.cosa; if (k === 'ana') game.inv[it] = (game.inv[it] || 0) + n; else { const I = wmInv(k); I[it] = (I[it] || 0) + n; } if (k === 'ana' && ITEM_DEFS[it]) float('+' + itemText(it, n), ana.x, ana.y - 60); }
     if (a.dormir) { ana.enCama = null; ana.llora = false; goSleep(false, false, true); }   // (the scene itself puts her to sleep)

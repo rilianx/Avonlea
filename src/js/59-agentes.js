@@ -163,6 +163,7 @@ function agentTick(dt){
   for (const ag of Object.values(AGENTS)) {
     if (ausente(ag.who)) continue;   // (away from Avonlea: her goals wait)
     if (ag.hold) { wmHold(ag, dt); continue; }
+    if (PEOPLE[ag.who]?.busca) continue;   // (sent to fetch Ana for a meal: the errand waits until he finds her)
     if (!activeGoals(ag).length) { if (ag.st !== 'idle') agentIdle(ag); continue; }
     if (ag.who === 'ana' && anaPaused(ag)) continue;
     if (enConversacion(ag.who)) { wmStop(ag.who); continue; }   // (in the middle of a conversation or a scene: no one walks off; the errand waits)

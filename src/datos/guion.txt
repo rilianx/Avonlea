@@ -1309,6 +1309,28 @@ al_empezar: hecho llamada_almuerzo
 -> Quedarse afuera un ratito más
    ana piensa: Un minutito más. Las abejas todavía no terminan su himno.
 
+# (y si Ana anda lejos, a la hora del almuerzo: Marilla manda a Matthew a buscarla; él camina hasta donde está:
+#  src/js/11-cocina-tejas-verdes.js, almuerzoBuscar)
+=== matthew_busca_almuerzo ===
+canal: general
+prioridad: 5
+repetir: dia
+en: ana=out, matthew=out
+sujeta: matthew
+si: hecho:desayuno_prueba, hora:12-14, !no_hoy:matthew_llega_almuerzo, no_hoy:llamada_almuerzo
+al_empezar: hecho llamada_almuerzo
+---
+matthew: (Matthew llega un poco agitado, con el sombrero en la mano.) Bueno, pues… Marilla dice que el almuerzo se enfría. Y que te diga que no es un almuerzo imaginario.
+->* Volver con Matthew a almorzar
+   ana: ¡El almuerzo! Se me olvidó por completo, Matthew. Estaba en la mitad de un pensamiento larguísimo.
+   matthew: Me lo imaginaba. Los pensamientos largos dan hambre, dicen.
+   ! a_cocina
+   ! a_la_mesa
+-> Pedirle que le guarde algo para más tarde
+   ana: ¿Le podría decir a Marilla que me guarde un plato? Estoy en algo que no se puede dejar a medias.
+   matthew: (Matthew se rasca la nuca.) Le diré. Pero no te prometo la cara que va a poner.
+   ! log Ana no fue a almorzar: le pidió a Matthew que le guardaran un plato. | yo: No fui a almorzar. Matthew vino a buscarme hasta acá. Creo que Marilla va a poner su cara de «ya hablaremos».
+
 # la hora de acostarse: Marilla la manda a la cama (cada noche, si anda por Tejas Verdes)
 === marilla_a_la_cama ===
 narra: Ya es de noche en Tejas Verdes. Marilla se asoma con la vela: «Ana, a la cama. Mañana hay que madrugar.»
