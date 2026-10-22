@@ -184,7 +184,8 @@ function wmExec0(ag, a, st, dt){
       if (!wait(7.6)) return 'run';
       inv.carta -= 1; if (c) { c.estado = 'enviada'; c.envio = today(); } realR.setFact('carta_enviada:' + me); logEv(`${wmName(me)} mandó por correo una carta para ${C.nombre}.`, []); return 'ok';
     }
-    case 'leer': { if (!st.said) { st.said = 1; bubble(me, a.pieza ? dicho('leer_pieza') : dicho('leer')); } if (!wait(5)) return 'run'; if (a.pieza) { logEv(`${wmName(me)} leyó un rato en su pieza.`, []); return 'ok'; } realR.setFact('leido:' + me); logEv(`${wmName(me)} leyó un libro.`, []); return 'ok'; }   // (her own schoolbooks, a while: not the book of the notebook, the one Diana lends)
+    case 'leer': if (me === 'ana' && lecturaLeer(st, dt, a, bubble)) return st.fin ? 'ok' : 'run';
+      { if (!st.said) { st.said = 1; bubble(me, a.pieza ? dicho('leer_pieza') : dicho('leer')); } if (!wait(5)) return 'run'; if (a.pieza) { logEv(`${wmName(me)} leyó un rato en su pieza.`, []); return 'ok'; } realR.setFact('leido:' + me); logEv(`${wmName(me)} leyó un libro.`, []); return 'ok'; }   // (her own schoolbooks, a while: not the book of the notebook, the one Diana lends)
     case 'escribir_cuento': { if (!st.said) { st.said = 1; bubble(me, dicho('escribir_cuento')); } if (!wait(5)) return 'run'; inv.cuento = (inv.cuento || 0) + 1; float('+1 cuento', b.x, b.y - 50); logEv(`${wmName(me)} escribió un cuento.`, []); return 'ok'; }
     case 'leer_cuento': { const r = reach(a.k); if (r !== 'ok') return r; if (!st.said) { st.said = 1; bubble(me, dicho('leer_cuento')); } if (st.said === 1 && wait(4)) { st.said = 2; st.w = 0; bubble(a.k, dicho('leer_cuento_responde')); } if (st.said !== 2 || !wait(3)) return 'run'; inv.cuento -= 1; realR.setFact('club:' + me); logEv(`${wmName(me)} le leyó su cuento a ${wmName(a.k)} en el club de cuentos.`, []); return 'ok'; }
     case 'ensayar': { if (!st.said) { st.said = 1; bubble(me, dicho('ensayar')); } if (!wait(4)) return 'run'; wmKnow(me, 'poema'); logEv(`${wmName(me)} ensayó su recitación.`, []); return 'ok'; }
@@ -334,4 +335,30 @@ function wmFollowTick(){
   if (game.scene === 'out' && HOUSES[wmScene(A.followOf)] && dist(ana.x, ana.y, DOOR[wmScene(A.followOf)][0], DOOR[wmScene(A.followOf)][1]) < 160) { ana.sit = false; goIn(wmScene(A.followOf)); return; }   // (he went in: she goes in after him)
   if (game.scene !== 'out') { if (wmScene(A.followOf) === 'out') goOut(); return; }
   if (dist(ana.x, ana.y, b.x, b.y) > 50) ana.goto = { x: b.x + 26, y: b.y + 6, scene: 'out', wm: true }; else if (ana.goto?.wm) ana.goto = null;
+}
+
+// what Ana reads (src/datos/libros.txt, «lee:»): in her room, her own books; otherwise the one lent to her. She goes on
+// where she left off (game.lecturas: how far in each), two or three thoughts each time she sits down to read, and a book
+// she finishes stays («leyo_<id>», and the diary), for the scenes and the night to remember. True if there was a book
+const lecturaTitulo = x => x.abre || (String(x.libro).match(/«[^»]+»/) || [String(x.libro).replace(/\s*\(.*\)\s*$/, '')])[0];
+function lecturaElegir(pieza){
+  const L = NOCHE_LIBROS.filter(x => x.lee?.length && (x.en || 'prestado') === (pieza ? 'pieza' : 'prestado')), P = game.lecturas ||= {};
+  const empezado = L.find(x => P[x.id] && P[x.id] < x.lee.length); if (empezado) return empezado;
+  const nuevos = L.filter(x => !P[x.id]), D = nuevos.length ? nuevos : L;
+  return D.length ? D[Math.floor(Math.random() * D.length)] : null;
+}
+function lecturaLeer(st, dt, a, bubble){
+  if (st.lib === undefined) {
+    st.lib = lecturaElegir(!!a.pieza); if (!st.lib) return false;
+    const P = game.lecturas; if ((P[st.lib.id] || 0) >= st.lib.lee.length) P[st.lib.id] = 0;   // (a book she already read: again, from the start)
+    st.n = 0; st.lt = 0; bubble('ana', `(Ana ${P[st.lib.id] ? 'vuelve a' : 'abre'} ${lecturaTitulo(st.lib)}${P[st.lib.id] ? ', donde lo dejó' : ''}.)`);
+  }
+  if (!st.lib) return false;
+  if ((st.lt += dt) < 4.5) return true; st.lt = 0;
+  const P = game.lecturas, i = P[st.lib.id] || 0;
+  if (i < st.lib.lee.length && st.n < 3) { bubble('ana', '~' + st.lib.lee[i]); P[st.lib.id] = i + 1; st.n++; return true; }
+  const t = lecturaTitulo(st.lib);
+  if (i >= st.lib.lee.length) { dlgHecho('leyo_' + st.lib.id); logEv(`Ana terminó de leer ${t}.`, []); } else logEv(`Ana leyó un rato ${t}.`, []);
+  if (!a.pieza) realR.setFact('leido:ana');
+  st.fin = true; return true;
 }

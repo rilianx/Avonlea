@@ -305,7 +305,7 @@ const NOCHE_COMUNES = /enséñ(a|e)me a|enseñarle a (coser|cocinar|sembrar|hace
 let NOCHE_TANDA = null;   // (the topics picked for tonight: the second round writes one scene for each)
 const NOCHE_LIBROS = (() => { const out = []; let c = null;
   for (const raw of (document.getElementById('libros')?.textContent || '').split('\n')) { const l = raw.trim(); if (!l || l[0] === '#') continue; let m;
-    if ((m = l.match(/^===\s*(.+?)\s*===$/))) out.push(c = { id: m[1] }); else if (c && (m = l.match(/^(libro|de|tipo|semilla|da):\s*(.*)$/))) c[m[1]] = m[2]; }
+    if ((m = l.match(/^===\s*(.+?)\s*===$/))) out.push(c = { id: m[1] }); else if (c && (m = l.match(/^(libro|de|tipo|semilla|da|en|abre):\s*(.*)$/))) c[m[1]] = m[2]; else if (c && (m = l.match(/^lee:\s*(.*)$/))) (c.lee ||= []).push(m[1]); }
   return out; })();
 // a few seeds from books, at random, not the ones of the last nights; one of them, a spiritual one
 function nocheSemillas(n = 3){
