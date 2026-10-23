@@ -59,8 +59,10 @@ async function caso(nombre, fn){
   });
   await caso('3. el día del viaje, lejos: Marilla la busca, baja, y el viaje sigue; después, la paciencia ya no cuenta', async T => {
     await T.manana(14.6); await T.ev(`(() => { goOut(); ana.x = 900; ana.y = 900; })()`);
-    const v = await T.jugar(null, 'dlgHechos().a_prueba && !TALKS.length', 200);
+    const v = await T.jugar(null, 'dlgHechos().a_prueba && !TALKS.length', 600);
     ok(v[0] === 'falta_viaje' && v.includes('viaje_spencer'), 'la busca y van: ' + v.join(' · '));
+    ok(['ws_t1', 'ws_t2', 'ws_t3', 'ws_pye', 'ws_orilla', 'ws_spencer', 'ws_noche'].every(e => v.includes(e)), 'el viaje en la calesa de Marilla: el camino, la Sra. Pye, la orilla, la Sra. Spencer, la noche');
+    ok(await T.ev(`!cart.on && !cart.viaje && PEOPLE.marilla.where === 'gg' && game.wm.ws.fase === 'fin'`), 'y vuelven: la calesa es de Matthew otra vez');
     ok(await T.pac() === 1 && await T.ev(`!!dlgHechos().a_prueba && !dlgHechos().se_queda`), 'Marilla decidió (paciencia ' + await T.pac() + '), pero no se lo dice todavía');
     await T.ev(`cualidadSuma('marilla', 'paciencia', -1, 'ana')`); ok(await T.pac() === 1, 'después de White Sands la paciencia ya no cambia');
     ok(await T.ev(`!/Cómo la ven/.test(cuadernoMiradas())`), 'ni se muestra');
@@ -96,7 +98,7 @@ async function caso(nombre, fn){
   });
   await caso('8. de noche, lejos: Marilla sale con el farol y la trae a su pieza', async T => {
     await T.manana(21.6); await T.ev(`(() => { dlgHecho('a_prueba'); goOut(); ana.x = 900; ana.y = 900; })()`);
-    const v = await T.jugar('estrellas', 'dlgDichas().falta_noche && !TALKS.length', 100);
+    const v = await T.jugar('estrellas', "dlgDichas().falta_noche && !TALKS.length && game.scene === 'ga'", 100);   // (she goes up as a page turns: a moment)
     ok(v.includes('falta_noche') && await T.ev(`game.scene`) === 'ga', 'la busca: ' + v.join(' · ') + ' · en ' + await T.ev(`game.scene`));
   });
   await caso('9. la Sra. Lynde viene a los quince días, como en el libro', async T => {

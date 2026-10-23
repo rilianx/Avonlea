@@ -6,7 +6,10 @@ const CART_SPEED = 120;
 const cart = { on: false, x: 0, y: 0, dir: 3, dest: null, riding: false, walk: 0, moving: false };
 const CART_ROUTE = [[GG.x + 20, GG.y + 80], ...[...ROADS.sur].reverse(), ...[...ROADS.estacion].reverse().slice(1), [STATION.x + 50, STATION.y + 70]];   // (from Green Gables, through the village, to the station)
 const CART_LEN = CART_ROUTE.slice(1).reduce((a, p, i) => a + dist(p[0], p[1], CART_ROUTE[i][0], CART_ROUTE[i][1]), 0);
-function cartAt(sv){ let left = clamp(sv, 0, CART_LEN); for (let i = 1; i < CART_ROUTE.length; i++) { const a = CART_ROUTE[i - 1], b = CART_ROUTE[i], L = dist(a[0], a[1], b[0], b[1]); if (left <= L || i === CART_ROUTE.length - 1) { const k = clamp(left / L, 0, 1); return [lerp(a[0], b[0], k), lerp(a[1], b[1], k), b[0] - a[0]]; } left -= L; } return [...CART_ROUTE[0], 1]; }
+// (the same cart for another trip: cart.ruta, cart.len, cart.con —who drives—, cart.vel and cart.viaje —what happens on
+// the way and on arrival—: the trip to White Sands with Marilla, src/js/34-viaje-white-sands.js)
+const cartRuta = () => cart.ruta || CART_ROUTE, cartLen = () => cart.len || CART_LEN;
+function cartAt(sv){ const CART_ROUTE = cartRuta(); let left = clamp(sv, 0, cartLen()); for (let i = 1; i < CART_ROUTE.length; i++) { const a = CART_ROUTE[i - 1], b = CART_ROUTE[i], L = dist(a[0], a[1], b[0], b[1]); if (left <= L || i === CART_ROUTE.length - 1) { const k = clamp(left / L, 0, 1); return [lerp(a[0], b[0], k), lerp(a[1], b[1], k), b[0] - a[0]]; } left -= L; } return [...CART_ROUTE[0], 1]; }
 function tripAsk(to){
   const hn = hourNow(), m = PEOPLE.matthew;
   if (m.where === 'away') return anaSays(dicho('carreta_sin_matthew'));
@@ -21,11 +24,12 @@ function cartStart(){
 function cartOn(dest){
   if (dest) cart.dest = dest;
   cart.riding = true; ana.goto = null; ana.lie = false; auto.intent = null; diana.follow = false; close();
-  notice(cart.dest === 'br' ? '🐴 Rumbo a Bright River (para bajarte, muévete o toca el suelo)' : '🐴 De vuelta a Tejas Verdes (para bajarte, muévete o toca el suelo)');
+  notice(cart.viaje ? cart.viaje.aviso : cart.dest === 'br' ? '🐴 Rumbo a Bright River (para bajarte, muévete o toca el suelo)' : '🐴 De vuelta a Tejas Verdes (para bajarte, muévete o toca el suelo)');
 }
 function cartOff(){ cart.riding = false; ana.sit = false; ana.x = cart.x + (cart.dir === 3 ? 10 : -10); ana.y = cart.y + 26; }
 function cartAsk(){
-  const nearSt = cart.s > CART_LEN - 400, nearAv = cart.s < 400, o = [];
+  if (cart.viaje) return cart.viaje.subir();
+  const nearSt = cart.s > cartLen() - 400, nearAv = cart.s < 400, o = [];
   if (!nearSt) o.push([nearAv ? '🐴 Ir a Bright River' : '🐴 Seguir a Bright River', () => cartOn('br')]);
   if (!nearAv) o.push(['🐴 Volver a Tejas Verdes', () => cartOn('av')]);
   o.push(['Todavía no', close]);
@@ -33,15 +37,16 @@ function cartAsk(){
 }
 function cartTick(dt){
   if (!cart.on) return;
-  const m = PEOPLE.matthew, d = cart.dest === 'br' ? 1 : -1;
-  cart.moving = cart.riding && (d > 0 ? cart.s < CART_LEN : cart.s > 0);
-  if (cart.moving) { cart.s = clamp(cart.s + d * CART_SPEED * dt, 0, CART_LEN); cart.walk = (cart.walk + dt * 1.6) % 1; }
+  const m = PEOPLE[cart.con || 'matthew'], d = cart.dest === 'br' ? 1 : -1;
+  cart.moving = cart.riding && !cart.parado && (d > 0 ? cart.s < cartLen() : cart.s > 0);
+  if (cart.moving) { cart.s = clamp(cart.s + d * (cart.vel || CART_SPEED) * dt, 0, cartLen()); cart.walk = (cart.walk + dt * 1.6) % 1; }
   const [cx, cy, dx] = cartAt(cart.s); cart.x = cx; cart.y = cy; if (cart.moving) { cart.dir = (dx * d) >= 0 ? 1 : 3; cartTrack(cart); }
   const c8 = cartC8(cart), [sx, sy] = cartSeat(cart.x, cart.y, c8, 0), [ax, ay] = cartSeat(cart.x, cart.y, c8, 1);
-  m.x = sx; m.y = sy; m.dir = c8Dir(c8); m.sit = true; m.buggy = false; m.moving = false; m.where = 'out';
+  if (!cart.suelto) { m.x = sx; m.y = sy; m.dir = c8Dir(c8); m.sit = true; m.buggy = false; m.moving = false; m.where = 'out'; }   // (unless whoever drives got off: suelto)
   if (cart.riding) { ana.x = ax; ana.y = ay; ana.dir = c8Dir(c8); ana.sit = true; ana.vx = ana.vy = 0; }
-  if (cart.riding && !cart.moving) {   // (arrived)
+  if (cart.riding && !cart.moving && !cart.parado) {   // (arrived)
     cartOff();
+    if (cart.viaje) { cart.viaje.llegar(); return; }
     if (cart.dest === 'br') { cart.on = false; m.sit = false; roadStart('matthew', 1, -1); roadJoin('matthew'); roadTramoIn('matthew', roadTramo(1)); notice('🐴 El camino a Bright River: ocho millas'); return; }
     else { logEv('Ana y Matthew volvieron a Tejas Verdes desde Bright River.', ['matthew']); cart.on = false; game.tripWith = null; m.sit = false; m.y = cart.y + 20; m.nav = null; }
     save();

@@ -83,7 +83,7 @@ function update(dt){
     game.lastDay = today(); save();
   }
   if ((storyT -= dt) < 0 && AJUSTES.stories) { storyT = .5; storyTick(); if ((!game.story || game.story.day !== today()) && hourNow() < 18 && TT > 4) makeStory(); }
-  mealTick(); almuerzoBuscar(); ambUpdate(dt); encUpdate(dt); for (const b of bubbles) { if (!b.t) { oido(b.q, b.text); if (burbujaAqui(b)) comOido(b.q, b.text); } b.t += dt; } bubbles = bubbles.filter(b => b.t < b.dur + .35);   // (what is said, Ana heard it today: src/js/24-personajes.js)
+  mealTick(); almuerzoBuscar(); wsTick(); ambUpdate(dt); encUpdate(dt); for (const b of bubbles) { if (!b.t) { oido(b.q, b.text); if (burbujaAqui(b)) comOido(b.q, b.text); } b.t += dt; } bubbles = bubbles.filter(b => b.t < b.dur + .35);   // (what is said, Ana heard it today: src/js/24-personajes.js)
   if ((taskTick -= dt) < 0) { taskTick = .5; taskEvent('ir'); }
   // everyone but Diana follows their routine: where they are wanted (home, or visiting), walking there, or about the place
   const hr = hourNow(), visiting = k => !!CH[k].routine && PEOPLE[k].where !== 'out' && PEOPLE[k].where !== CH[k].home;
@@ -92,7 +92,7 @@ function update(dt){
   for (const [k, p] of Object.entries(PEOPLE)) {
     const c = CH[k]; if (ausente(k) || (wmDriven(k) && !p.busca) || c.companion) continue;
     if (CHAT_HOLD[k] > TT) { p.moving = false; continue; }   // (stopped for a chat)
-    if (k === game.tripWith) { p.want = p.where; continue; }   // (he went with Ana to Bright River)
+    if (k === game.tripWith && !p.busca) { p.want = p.where; continue; }   // (unless she gets off to look for Ana: src/js/34-viaje-white-sands.js)   // (he went with Ana to Bright River)
     if (p.where === 'camino') continue;   // (on the road: it takes them home)
     p.want = p.recibe && p.recibe.hasta > TT && HOUSES[c.home] ? c.home : (game.wm?.sick || []).includes(k) && HOUSES[c.home] ? c.home :   // (someone is coming to visit her: she stays home, or goes back)
       p.story ? p.story.room : (p.away && p.away.day === today() && hr < p.away.until) ? 'away' : c.routine ? c.routine.want(hr, today()) : c.home;

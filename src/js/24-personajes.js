@@ -56,6 +56,7 @@ const CHARACTERS = {
 // here is only where they stand and walk, which is measured on the maps.
 const PERSONAJES = /*@personajes*/;
 for (const k of Object.keys(CHARACTERS)) CHARACTERS[k] = { ...PERSONAJES[k], ...CHARACTERS[k] };
+for (const c of Object.values(CHARACTERS)) c.speed = { walk: 38, out: 30, room: 30, ...c.speed };   // (whoever walks out of doors only seldom, Marilla, walks too: at a common pace)
 const CH = CHARACTERS;
 // what each one says in passing (src/datos/frases.txt, the same for the people of the house and of the village):
 // «=== quien ===», and «dice:», «primavera:»… «invierno:», «ana:» (what Ana answers), each with its conditions in [ ]

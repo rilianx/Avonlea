@@ -158,6 +158,7 @@ function dlgHacer(list){   // what a scene does when it starts or ends
       anaACocina();   // (walking from the yard, a fade from farther: src/js/11-cocina-tejas-verdes.js)
       const M = PEOPLE.marilla; if (sceneOf('marilla') !== 'gg') { M.where = 'gg'; M.x = STOVE.x + 60; M.y = STOVE.y + 60; M.nav = null; M.moving = false; M.sit = false; }
     }
+    if (a.viaje) wsViaje(a.viaje);   // (src/js/34-viaje-white-sands.js)
     if (a.junto) { const b = a.junto === 'ana' ? ana : PEOPLE[a.junto], o = a.de === 'ana' ? ana : PEOPLE[a.de]; if (b && o) { b.sit = false; if (b === ana) { ana.meal = null; ana.goto = null; ana.vx = ana.vy = 0; } else { b.nav = null; b.moving = false; } b.x = o.x - 20; b.y = o.y + 2; b.dir = 1; } }
     if (a.vestirse) vestirse(true);
     if (a.punto) puntoGuardar(a.punto, a.texto);
@@ -322,6 +323,7 @@ function dlgAccion(s){   // an action of the script: «hecho x», «marca id | n
     case 'mesa': return { mesa: r[0] };
     case 'a_la_mesa': return { a_la_mesa: true };
     case 'a_cocina': return { a_cocina: true };
+    case 'viaje': return { viaje: r[0] };   // (the trip to White Sands: «viaje white_sands», «viaje orilla», «viaje calesa», «viaje casa»)
     case 'acostarse': return { acostarse: true };
     case 'a_pieza': return { a_pieza: true };
     case 'vestirse': return { vestirse: true };   // (Ana puts on her dress)

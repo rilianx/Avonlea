@@ -39,7 +39,7 @@ let lugaresT = 0, lugarRespiro = 0;
 const LUGAR_CERCA = 150, LUGAR_RESPIRO = M(40);
 function lugaresTick(dt){
   if ((lugaresT -= dt) > 0) return; lugaresT = 2;
-  const W = game.wm; if (!W || game.scene !== 'out' || (CAP1.on && !CAP1.done)) return;
+  const W = game.wm; if (!W || game.scene !== 'out' || (CAP1.on && !CAP1.done) || wsSinLugares()) return;   // (crying by the sea, or at Mrs. Spencer's: not the time for the places)
   const H = (W.lugarHoy ||= {}), x = dlgCtx(), cerca = Object.entries(PLACES).filter(([k, p]) => H[k] !== today() && dist(ana.x, ana.y, p[1], p[2]) <= LUGAR_CERCA);
   const de = (k, f) => DIALOGOS.filter(d => d.disparo === 'lugar' && d.lugar === k && !d.dicha() && f(d) && dlgCumple(d, x));
   // a scene that interrupts whatever is going on (as the Avenue in bloom, on the way from Bright River): it does not
