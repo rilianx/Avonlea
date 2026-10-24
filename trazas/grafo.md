@@ -2,7 +2,7 @@
 
 Lo genera `node tools/grafo.js` (ver `docs/MOTOR.md`). Lee el guion, el cuaderno, las habilidades y el código.
 
-**261 escenas** (9 grandes), **32 metas** del cuaderno, **152 hechos** que algo deja.
+**261 escenas** (9 grandes), **32 metas** del cuaderno, **153 hechos** que algo deja.
 
 ## Escenas o metas que nunca podrían pasar
 
@@ -17,6 +17,19 @@ Ninguna.
 
 No es un error: en el dibujo (trazas/grafo.html) se ve su primera frase en vez de una descripción.
 
+- `estacion`
+- `avenida`
+- `newbridge`
+- `avenida_petalos`
+- `avenida_paso`
+- `avenida_roseton`
+- `newbridge_ventanas`
+- `silencio_manos`
+- `silencio_matthew`
+- `silencio_estrella`
+- `silencio_ranas`
+- `silencio_nombre`
+- `tejas_verdes`
 - `carta_diana_1`
 - `carta_diana_2`
 - `carta_stacy_1`

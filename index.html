@@ -312,7 +312,10 @@ marcas: 8=matthew_nina
 al_empezar: marca jefe_explica | El jefe de estación le explicó a Matthew que solo había llegado una niña; Matthew decidió llevarla a casa y que Marilla aclarara el error.
 al_terminar: ana sit=false
 al_terminar: meta matthew llevar ana,cocina | | llevar a la niña a Tejas Verdes en la calesa (cap. 2) | 3
+al_terminar: hecho primer_viaje
 
+# --- el primer viaje, de Bright River a Tejas Verdes (cap. 2): solo mientras dura («primer_viaje»: lo deja la escena
+# de la estación, y se olvida al llegar a Tejas Verdes)
 # --- el túnel de manzanos, antes que nada (Ana enmudece); Newbridge, callada todavía
 === avenida ===
 a prueba
@@ -321,6 +324,7 @@ prioridad: 10
 interrumpe
 calesa: camino
 camino: tramo=avenida
+si: hecho:primer_viaje
 lineas: libro:viaje.10 [7]
 ---
 ana: (Ana enmudece. Se queda mirando la bóveda de flores, con las manos juntas, como si estuviera en una iglesia.)
@@ -334,7 +338,7 @@ prioridad: 8
 interrumpe
 calesa: camino
 camino: tramo=Newbridge
-si: dicha:avenida
+si: hecho:primer_viaje, dicha:avenida
 ---
 ana: (Callada todavía. Los perros les ladran, los chicos gritan desde las cercas, hay caras curiosas en las ventanas: Ana no ve nada de eso.)
 
@@ -346,7 +350,7 @@ prioridad: 1.5
 pausa: 12
 calesa: camino
 camino: tramo=avenida
-si: dicha:avenida
+si: hecho:primer_viaje, dicha:avenida
 ---
 ana: (Ana echa la cabeza atrás para mirar la bóveda de flores. Los pétalos le caen en el pelo y no se los quita.)
 
@@ -357,7 +361,7 @@ prioridad: 1.5
 pausa: 12
 calesa: camino
 camino: tramo=avenida
-si: dicha:avenida_petalos
+si: hecho:primer_viaje, dicha:avenida_petalos
 ---
 matthew: (Matthew afloja las riendas. La yegua va al paso, como si también ella quisiera que esto no se acabara.)
 
@@ -368,7 +372,7 @@ prioridad: 1.5
 pausa: 12
 calesa: camino
 camino: tramo=avenida
-si: dicha:avenida_paso
+si: hecho:primer_viaje, dicha:avenida_paso
 ---
 ana: (Al fondo de la Avenida, el cielo del atardecer brilla como el rosetón de una catedral.)
 
@@ -379,7 +383,7 @@ prioridad: 1.5
 pausa: 12
 calesa: camino
 camino: tramo=Newbridge
-si: dicha:newbridge
+si: hecho:primer_viaje, dicha:newbridge
 ---
 ana: (Las ventanas del pueblo se encienden una a una. Ana sigue mirando hacia atrás, hacia donde quedó la Avenida.)
 
@@ -390,7 +394,7 @@ prioridad: 1.5
 pausa: 14
 calesa: camino
 camino: tramo=campos
-si: dicha:avenida
+si: hecho:primer_viaje, dicha:avenida
 ---
 ana: (Ana va callada, con las manos juntas sobre el bolso de alfombra y los ojos en el cielo del oeste.)
 
@@ -401,7 +405,7 @@ prioridad: 1.5
 pausa: 14
 calesa: camino
 camino: tramo=campos
-si: dicha:silencio_manos
+si: hecho:primer_viaje, dicha:silencio_manos
 ---
 matthew: (Matthew la mira de reojo. Nunca pensó que el silencio de una niña pudiera ser tan cómodo.)
 
@@ -412,7 +416,7 @@ prioridad: 1.5
 pausa: 14
 calesa: camino
 camino: tramo=campos
-si: dicha:silencio_matthew
+si: hecho:primer_viaje, dicha:silencio_matthew
 ---
 ana: (Sobre los campos aparece la primera estrella. Ana mueve los labios: quizás le está pidiendo un deseo.)
 
@@ -423,7 +427,7 @@ prioridad: 1.5
 pausa: 14
 calesa: camino
 camino: tramo=campos
-si: dicha:silencio_estrella
+si: hecho:primer_viaje, dicha:silencio_estrella
 ---
 matthew: (En una laguna junto al camino empiezan a cantar las ranas. La yegua resopla: ya huele su casa.)
 
@@ -434,7 +438,7 @@ prioridad: 1.5
 pausa: 14
 calesa: camino
 camino: tramo=campos
-si: dicha:silencio_ranas
+si: hecho:primer_viaje, dicha:silencio_ranas
 ---
 ana piensa: Blanco… de las Delicias… no, todavía no…
 
@@ -445,7 +449,7 @@ resumen: Ana le pone nombre a la Avenida (en el libro, «el Camino Blanco de las
 canal: viaje
 prioridad: 9
 interrumpe
-si: dicha:avenida
+si: hecho:primer_viaje, dicha:avenida
 o: calesa=camino camino.desde=.955
 o: calesa=avonlea cerca=matthew,letrero_br,2500
 lineas: libro:avonlea.camino_blanco [1,2,3,4]
@@ -469,6 +473,7 @@ prioridad: 9
 interrumpe
 calesa: avonlea
 cerca: matthew, lago, 1300
+si: hecho:primer_viaje
 lineas: libro:avonlea.lago [0]
 marcas: 0=lago
 al_empezar: log Matthew le mostró la laguna de Barry.
@@ -489,7 +494,7 @@ a prueba
 canal: viaje
 prioridad: 9
 interrumpe
-si: dicha:lago
+si: hecho:primer_viaje, dicha:lago
 o: calesa=avonlea cerca=matthew,tejas_verdes,1700 si=y_mayor:matthew:61
 o: si=capitulo,hecho:matthew_llego_casa,!hecho:llegaron
 lineas: libro:avonlea.tejas_verdes [0,1,2,3,4,8,9]
@@ -509,6 +514,7 @@ marcas: 0=marilla_nino
 al_empezar: log Marilla vio a la niña de pelo rojo: «Matthew Cuthbert, ¿quién es ésa? ¿Dónde está el niño?»
 al_terminar: fin_capitulo
 al_terminar: hecho llegada_tv
+al_terminar: olvidar primer_viaje
 
 # --- lo que Ana piensa en voz alta en el camino, cuando no hay otra cosa (un comentario: si lo cortan, se pierde)
 === relleno ===
@@ -1401,6 +1407,7 @@ al_empezar: log Ana llegó a Tejas Verdes con Matthew, de noche. Marilla esperab
 al_terminar: hecho llegada_tv
 al_terminar: hecho primera_noche
 al_terminar: log Marilla dejó que Ana se quedara esa noche, hasta aclarar el enredo. Ana casi no probó la cena. | yo: Marilla me dejó quedarme esa noche, hasta aclarar el enredo. Casi no probé la cena.
+al_empezar: olvidar primer_viaje
 ---
 ! sentar ana
 ! ana llora=true
