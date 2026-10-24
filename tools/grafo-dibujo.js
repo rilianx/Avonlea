@@ -142,6 +142,7 @@ path.c{fill:none;stroke:var(--hi);stroke-width:1;stroke-dasharray:4 4;opacity:.4
 #lista .h.no{text-decoration:line-through}
 #lista .grupo{max-width:980px;margin:18px auto 8px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--sub)}
 #lista .filtros{max-width:980px;margin:0 auto 10px;display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--sub)}
+#navlista{display:none;position:fixed;right:16px;bottom:16px;gap:6px;z-index:5}body.vlista #navlista{display:flex}#navlista button{background:var(--panel);box-shadow:0 2px 8px rgba(0,0,0,.15)}
 body.vlista main{display:none}body.vlista #lista{display:block}body.vlista .solografo{display:none}
 </style></head><body>
 <header>
@@ -154,6 +155,7 @@ body.vlista main{display:none}body.vlista #lista{display:block}body.vlista .solo
   <span class="st" id="st"></span>
 </header>
 <section id="lista" hidden></section>
+<div id="navlista"><button id="atras" title="Volver a la escena anterior">← atrás</button><button id="adelante" title="Avanzar">adelante →</button></div>
 <main>
   <div id="lienzo"><svg id="svg"><g id="vista"><g id="aristas"></g><g id="cierres"></g><g id="nodos"></g><g id="colsh"></g></g></svg>
     <div class="ayuda">Arrastra para moverte · rueda o pellizco para acercar · toca una caja</div>
@@ -259,7 +261,7 @@ function dejaDe(n){
   const i = n.info, L = [], hechoEn = s => s.match(/^hecho\\s+(\\S+)/)?.[1];
   for (const s of [...(i.empieza || []), ...(i.termina || [])]) { const h = hechoEn(s); if (h) L.push([h, '']); }
   for (const o of i.ops || []) for (const s of o.ef) { const h = hechoEn(s); if (h) L.push([h, 'si elige «' + o.t.replace(/^«|»$/g, '') + '»']); }
-  for (const [h, f] of Object.entries(D.hechos)) if (f.hace.includes(n.id) && !L.some(([x]) => x === h)) L.push([h, 'lo deja el juego después']);
+  for (const [h, f] of Object.entries(D.hechos)) if (f.hace.includes(n.id) && !L.some(([x]) => x === h)) L.push([h, 'lo deja el juego, después']);
   return L;
 }
 // what a scene changes in the counters (the qualities: Marilla's patience, the affection, Ana's skills), and when
@@ -350,7 +352,8 @@ const enlace = id => { const n = NOD.get(id); return n ? \`<a data-ir="\${esc(id
 const hchip = (h, no) => \`<span class="h\${no ? ' no' : ''}" data-hf="\${esc(h)}" title="filtrar por este hecho">\${esc(h)}</span>\`;
 function tarjeta(n){
   const { nec, no, cont, resto } = partes(n), deja = n.tipo === 'meta' ? [] : dejaDe(n), cam = n.tipo === 'meta' ? [] : cambiosDe(n);
-  const req = [...nec.map(([x, q]) => q === 'meta' ? enlace(x) : hchip(x) + (q ? ' <span class="mut">' + esc(q) + '</span>' : '')), ...no.map(([x]) => hchip(x, true)), ...cont.map(c => esc(c.t)), ...resto.map(esc)];
+  const de = x => { const L = (D.hechos[x]?.hace || []).filter(w => w !== n.id); return L.some(w => w !== 'código') ? L.filter(w => w !== 'código') : L; };   // (the code, only when no scene is named for it)   // (who leaves it: the way back, to the left)
+  const req = [...nec.map(([x, q]) => q === 'meta' ? enlace(x) : (de(x).length ? de(x).map(enlace).join(' ') + ' <span class="mut">→</span> ' : '') + hchip(x) + (q ? ' <span class="mut">' + esc(q) + '</span>' : '')), ...no.map(([x]) => hchip(x, true)), ...cont.map(c => esc(c.t)), ...resto.map(esc)];
   const act = [...deja.map(([x, q]) => { const L = (D.hechos[x]?.pide || []).filter(w => w !== n.id); return hchip(x) + (q ? ' <span class="mut">' + esc(q) + '</span>' : '') + ' <span class="mut">→</span> ' + (L.length ? L.map(enlace).join(' ') : '<span class="mut">nadie</span>'); }),
     ...cam.map(([t, q, k]) => { const L = (necesitanCont[k] || []).filter(w => w !== n.id); return esc(t) + (q ? ' <span class="mut">' + esc(q) + '</span>' : '') + ' <span class="mut">→</span> ' + (L.length ? L.map(enlace).join(' ') : '<span class="mut">nadie lo mira</span>'); })];
   const marcas = (n.grande ? ' ★' : '') + (PUNTO_DE.has(n.id) ? ' ↺' : '');
@@ -372,20 +375,23 @@ function listaFiltrar(){
   for (const e of document.querySelectorAll('#lista .esc')) { const n = NOD.get(e.id.slice(2)); e.hidden = !tipos.has(e.dataset.tipo) || (n.suelto && !sueltas && !q) || (q && !e.dataset.txt.includes(q)); }
   for (const g of document.querySelectorAll('#lista .grupo')) { let x = g.nextElementSibling, alguno = false; while (x && x.classList.contains('esc')) { if (!x.hidden) alguno = true; x = x.nextElementSibling; } g.hidden = !alguno; }
 }
-function irA(id){
+function irA(id, sinHistoria){
   const e = document.getElementById('e-' + id); if (!e) return;
+  if (!sinHistoria) history.pushState({ ir: id }, '', '#' + encodeURIComponent(id));   // (back and forward: the browser's, and the arrows)
   if (e.hidden) { $('buscar').value = ''; if (NOD.get(id).suelto && $('fsueltas')) $('fsueltas').checked = true; const c = document.querySelector('[data-ft="' + NOD.get(id).tipo + '"]'); if (c) c.checked = true; listaFiltrar(); }
   document.querySelectorAll('#lista .marca').forEach(x => x.classList.remove('marca')); e.classList.add('marca'); e.scrollIntoView({ block: 'center', behavior: 'smooth' });
 }
 $('lista').addEventListener('click', e => { const a = e.target.closest('[data-ir]'); if (a) return irA(a.dataset.ir); const h = e.target.closest('[data-hf]'); if (h) { $('buscar').value = h.dataset.hf; listaFiltrar(); $('lista').scrollTop = 0; } });
 $('lista').addEventListener('change', listaFiltrar);
+addEventListener('popstate', e => { const id = e.state?.ir || decodeURIComponent(location.hash.slice(1)); if (document.body.classList.contains('vlista') && NOD.has(id)) irA(id, true); });
+$('atras').onclick = () => history.back(); $('adelante').onclick = () => history.forward();
 $('buscar').addEventListener('input', () => { if (document.body.classList.contains('vlista')) listaFiltrar(); });
 const vista = v => { document.body.classList.toggle('vlista', v === 'lista'); $('lista').hidden = v !== 'lista'; $('tabLista').classList.toggle('on', v === 'lista'); $('tabGrafo').classList.toggle('on', v !== 'lista'); if (v !== 'lista') setTimeout(() => sel ? centra(sel) : verTodo(), 0); try { localStorage.setItem('avonlea-grafo-vista', v); } catch (e) {} };
 $('tabLista').onclick = () => vista('lista'); $('tabGrafo').onclick = () => vista('grafo');
 listaArmar();
 verTodo(); inicio();
 let v0 = 'lista'; try { v0 = localStorage.getItem('avonlea-grafo-vista') || 'lista'; } catch (e) {} vista(v0);
-{ const h0 = decodeURIComponent(location.hash.slice(1)); if (h0 && NOD.has(h0) && v0 === 'lista') setTimeout(() => irA(h0), 50); }
+{ const h0 = decodeURIComponent(location.hash.slice(1)); if (h0 && NOD.has(h0) && v0 === 'lista') setTimeout(() => irA(h0, true), 50); }
 const deHash = () => { const h0 = decodeURIComponent(location.hash.slice(1)); if (h0 && NOD.has(h0) && h0 !== sel) elegir(h0); };
 deHash(); addEventListener('hashchange', deHash);
 addEventListener('resize', () => { if (!sel) verTodo(); });

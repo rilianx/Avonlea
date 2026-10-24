@@ -4,9 +4,14 @@
    along, Mrs. Pye on the road (not in the book): what she says sends Ana running to the shore, and Marilla follows her
    there. At the hotel, Mrs. Spencer and Mrs. Blewett; and back home, quiet, by the same road. ---------- */
 const wsE = () => game.wm || game;   // (kept with the game: a trip left halfway, when the game is opened again, ends at home)
-// grafo: viaje_spencer → ws_t1, ws_t2, ws_t3, ws_pye, ws_llegan
-// grafo: ws_pye → ws_marilla_llega
+// grafo: viaje_spencer → ws_t1
+// grafo: ws_t1 → ws_t2
+// grafo: ws_t2 → ws_t3
+// grafo: ws_t3 → ws_pye
+// grafo: ws_pye → ws_marilla_llega, ws_llegan
+// grafo: ws_orilla → ws_llegan
 // grafo: ws_spencer → ws_vuelven
+// (each place of the road, once the talk before is over: one after the other, src/js/34 wsTick)
 const WS_VEL = 75, WS_MARCAS = [['ws_t1', .03, () => dlgHecho('ws_t1')], ['ws_t2', .22, () => dlgHecho('ws_t2')], ['ws_t3', .4, () => dlgHecho('ws_t3')], ['ws_pye', .7, () => dlgHecho('ws_pye')]];   // (each fact written whole: tools/grafo.js reads them)
 const wsRuta = () => { const a = [GG.x + 20, GG.y + 80], b = door('Hotel White Sands'), r = netRoute(...a, ...b); return [a, ...(r ? r.pts : []), b]; };
 // the nearest point of the shore (on the sand, a little before the water), and how far
