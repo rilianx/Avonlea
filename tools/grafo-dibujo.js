@@ -140,6 +140,9 @@ path.c{fill:none;stroke:var(--hi);stroke-width:1;stroke-dasharray:4 4;opacity:.4
 #lista a:hover{text-decoration:underline}
 #lista .h{font:12.5px ui-monospace,Menlo,monospace;padding:0 5px;border-radius:4px;background:var(--bg);border:1px solid var(--line);cursor:pointer}
 #lista .h.no{text-decoration:line-through}
+#lista .fuente{font-size:12px;color:var(--sub)}
+#lista .fuente a{font-size:11.5px}
+#lista .vermas{cursor:pointer;color:var(--up);font-size:12px;padding:0 4px;border:1px solid var(--line);border-radius:8px}
 #lista .grupo{max-width:980px;margin:18px auto 8px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--sub)}
 #lista .filtros{max-width:980px;margin:0 auto 10px;display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--sub)}
 #navlista{display:none;position:fixed;right:16px;bottom:16px;gap:6px;z-index:5}body.vlista #navlista{display:flex}#navlista button{background:var(--panel);box-shadow:0 2px 8px rgba(0,0,0,.15)}
@@ -358,12 +361,14 @@ const hchip = (h, no) => \`<span class="h\${no ? ' no' : ''}" data-hf="\${esc(h)
 function tarjeta(n){
   const { nec, no, cont, resto } = partes(n), deja = n.tipo === 'meta' ? [] : dejaDe(n), cam = n.tipo === 'meta' ? [] : cambiosDe(n);
   const de = x => { const L = (D.hechos[x]?.hace || []).filter(w => w !== n.id); return L.some(w => w !== 'código') ? L.filter(w => w !== 'código') : L; };   // (the code, only when no scene is named for it)   // (who leaves it: the way back, to the left)
-  const { crudo } = partes(n), flecha = ' <span class="mut">→</span> ', desde = x => de(x).map(w => w === 'código' ? juego('el juego') : enlace(w)).join(' ');
-  const req = [...nec.map(([x, q]) => q === 'meta' ? enlace(x) : (de(x).length ? desde(x) + flecha : '') + hchip(x) + (q ? ' <span class="mut">' + esc(q) + '</span>' : '')),
-    ...no.map(([x]) => (de(x).length ? desde(x) + flecha : '') + hchip(x, true)),
-    ...cont.map(c => [...(cambianCont[c.k] || [])].filter(w => w !== n.id).map(enlace).concat(juego('el juego')).join(' ') + flecha + esc(c.t)),
-    ...resto.map((t, j) => juego(MUEVE(crudo[j] || '')) + flecha + esc(t))];
-  const act = [...deja.map(([x, q]) => { const L = (D.hechos[x]?.pide || []).filter(w => w !== n.id); return hchip(x) + (q ? ' <span class="mut">' + esc(q) + '</span>' : '') + ' <span class="mut">→</span> ' + (L.length ? L.map(enlace).join(' ') : '<span class="mut">nadie</span>'); }),
+  // each line: the condition first; then, smaller, who changes it (the first ones, and «+n» for the rest)
+  const { crudo } = partes(n), quienes = L => { if (!L.length) return ''; const v = L.length > 3 ? L.slice(0, 2).join(' ') + \` <span class="resto" hidden>\${L.slice(2).join(' ')}</span> <span class="vermas">+\${L.length - 2}</span>\` : L.join(' '); return ' <span class="fuente">← ' + v + '</span>'; };
+  const desde = x => de(x).map(w => w === 'código' ? juego('el juego') : enlace(w));
+  const req = [...nec.map(([x, q]) => q === 'meta' ? enlace(x) + ' <span class="mut">(meta cumplida)</span>' : hchip(x) + (q ? ' <span class="mut">' + esc(q) + '</span>' : '') + quienes(desde(x))),
+    ...no.map(([x]) => '<span class="mut">que no haya pasado</span> ' + hchip(x, true) + quienes(desde(x))),
+    ...cont.map(c => '<span class="cv">' + esc(c.t) + '</span>' + quienes([...[...(cambianCont[c.k] || [])].filter(w => w !== n.id).map(enlace), juego('el juego')])),
+    ...resto.map((t, j) => '<span class="cv">' + esc(t) + '</span>' + quienes([juego(MUEVE(crudo[j] || ''))]))];
+  const act = [...deja.map(([x, q]) => { const L = (D.hechos[x]?.pide || []).filter(w => w !== n.id); return hchip(x) + (q ? ' <span class="mut">' + esc(q) + '</span>' : '') + ' <span class="fuente">→ ' + (L.length ? (L.length > 3 ? L.slice(0, 2).map(enlace).join(' ') + \` <span class="resto" hidden>\${L.slice(2).map(enlace).join(' ')}</span> <span class="vermas">+\${L.length - 2}</span>\` : L.map(enlace).join(' ')) : 'nadie') + '</span>'; }),
     ...cam.map(([t, q, k]) => { const L = (necesitanCont[k] || []).filter(w => w !== n.id); return esc(t) + (q ? ' <span class="mut">' + esc(q) + '</span>' : '') + ' <span class="mut">→</span> ' + (L.length ? L.map(enlace).join(' ') : '<span class="mut">nadie lo mira</span>'); })];
   const marcas = (n.grande ? ' ★' : '') + (PUNTO_DE.has(n.id) ? ' ↺' : '');
   return \`<div class="esc" id="e-\${esc(n.id)}" style="border-left-color:var(--\${TIPCOL[n.tipo]})" data-txt="\${esc((n.k + ' ' + (n.desc || '') + ' ' + [...nec.map(x => x[0]), ...no.map(x => x[0]), ...deja.map(x => x[0]), ...cont.map(c => c.t), ...cam.map(c => c[0])].join(' ')).toLowerCase())}" data-tipo="\${n.tipo}">
@@ -390,7 +395,7 @@ function irA(id, sinHistoria){
   if (e.hidden) { $('buscar').value = ''; if (NOD.get(id).suelto && $('fsueltas')) $('fsueltas').checked = true; const c = document.querySelector('[data-ft="' + NOD.get(id).tipo + '"]'); if (c) c.checked = true; listaFiltrar(); }
   document.querySelectorAll('#lista .marca').forEach(x => x.classList.remove('marca')); e.classList.add('marca'); e.scrollIntoView({ block: 'center', behavior: 'smooth' });
 }
-$('lista').addEventListener('click', e => { const a = e.target.closest('[data-ir]'); if (a) return irA(a.dataset.ir); const h = e.target.closest('[data-hf]'); if (h) { $('buscar').value = h.dataset.hf; listaFiltrar(); $('lista').scrollTop = 0; } });
+$('lista').addEventListener('click', e => { const vm = e.target.closest('.vermas'); if (vm) { vm.previousElementSibling.hidden = false; vm.remove(); return; } const a = e.target.closest('[data-ir]'); if (a) return irA(a.dataset.ir); const h = e.target.closest('[data-hf]'); if (h) { $('buscar').value = h.dataset.hf; listaFiltrar(); $('lista').scrollTop = 0; } });
 $('lista').addEventListener('change', listaFiltrar);
 addEventListener('popstate', e => { const id = e.state?.ir || decodeURIComponent(location.hash.slice(1)); if (document.body.classList.contains('vlista') && NOD.has(id)) irA(id, true); });
 $('atras').onclick = () => history.back(); $('adelante').onclick = () => history.forward();
