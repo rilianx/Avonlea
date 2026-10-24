@@ -56,6 +56,7 @@ for (const raw of guion.split('\n')) {
   if (k === 'narra salvo') v.split(',').forEach(c => condicion(c.trim(), 'escena ' + esc.id + ' (narra salvo)'));
   if (k === 'o') { const m = v.match(/si=(\S+)/); if (m) m[1].split(',').forEach(c => condicion(c, 'escena ' + esc.id + ' (alternativa)')); }
   if (k === 'grande') esc.grande = true;
+  if (k === 'a prueba') esc.aPrueba = true;   // (it may happen before Marilla decides: the days on trial)
   if (k === 'punto') esc.punto = v;
   { const m = s.match(/^(?:!\s*|al_(?:empezar|terminar):\s*)punto\s+(.+)$/); if (m) puntos.push([esc.id, k === 'al_empezar' ? 'al empezar' : k === 'al_terminar' ? 'al terminar' : 'en la escena', m[1]]); }
   if (k === 'al_empezar' || k === 'al_terminar') { const [w, x] = v.split(/\s+/); if (w === 'hecho') anota(hace, x, 'escena ' + esc.id); if (w === 'olvidar') anota(pide, x + ' ', 'escena ' + esc.id); }
@@ -192,6 +193,25 @@ for (const bloque of guion.split(/^(?====)/m)) {
       malas.push(`escena ${id}: «${l.trim().slice(0, 70)}» dice que Ana se mueve, y la escena no la mueve (falta ${que})`);
   }
 }
+// before Marilla accepts Ana (days 1 to 3), only what is marked «a prueba» (as in the notebook): every other scene
+// waits for «se_queda», by itself or through what it needs (a fact that only scenes after it leave, a goal of the
+// notebook, a day of the game past the third, another season). The scenes of a place or a thing (disparo: lugar,
+// objeto, primera) are moments of a place, and go as they are
+{ const porId = new Map(escenas.map(e => [e.id, e])), memo = new Map(), metasDespues = m => !A_PRUEBA.has(m);
+  const despues = (id, vis = new Set()) => {
+    if (memo.has(id)) return memo.get(id); if (vis.has(id)) return false; vis.add(id);
+    const e = porId.get(id); if (!e) return false;
+    const cs = (e.si || '').split(',').map(c => c.trim()).filter(Boolean);
+    const r = cs.some(c => { let m;
+      if ((m = c.match(/^(hecho|dias_desde|horas_desde):(\w+)/))) { if (m[2] === 'se_queda') return true; const M = [...(hace[m[2]] || [])]; return M.length > 0 && M.every(w => /^escena /.test(w) && despues(w.slice(7).replace(/ \(.*\)$/, ''), vis)); }
+      if ((m = c.match(/^dicha:(\w+)/))) return despues(m[1], vis);
+      if ((m = c.match(/^cuaderno:(\w+)/))) return metasDespues(m[1]);
+      if ((m = c.match(/^dia_juego:(\d+)/))) return +m[1] >= 4;   // (Marilla decides on the third day: the fourth is after)
+      if ((m = c.match(/^estacion:(\w+)/))) return m[1] !== 'primavera';
+      return false; });
+    memo.set(id, r); return r; };
+  for (const e of escenas) if (!e.aPrueba && !/^(lugar|objeto|primera)$/.test(e.disparo || '') && !despues(e.id))
+    malas.push(`escena ${e.id}: puede pasar antes de que Marilla acepte a Ana (que pida «hecho:se_queda», o lo que viene después; o márquela «a prueba»)`); }
 // the report
 const necesita = Object.keys(pide).filter(h => !h.endsWith(' ')), lee = new Set(Object.keys(pide).map(h => h.trim()));
 for (const e of escenas) { if (e.punto) puntos.push([e.id, 'antes', e.punto]); else if (e.grande && !puntos.some(([id]) => id === e.id)) malas.push(`escena ${e.id}: es grande y no deja un punto (un momento al que volver: «punto:», justo antes, o «al_terminar: punto»)`); }

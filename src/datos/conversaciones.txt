@@ -20,6 +20,7 @@
 # ====================================== Marilla ======================================
 
 === conv_marilla_perdon ===
+a prueba
 con: marilla
 tema: Pedirle perdón por portarse mal
 resumen: Ana le pide perdón por portarse mal; Marilla: pedir perdón es un comienzo, importa lo que haga después.
@@ -32,6 +33,7 @@ ana: Marilla… quería pedirle perdón. Sé que no me he portado como debía. N
 marilla: (Marilla la mira un largo rato, con los labios apretados.) Bueno. Pedir perdón es un comienzo. Lo que importa es lo que hagas después.
 
 === conv_marilla_e ===
+a prueba
 con: marilla
 tema: Explicarle por qué es «Ana con una sola n»
 resumen: Ana explica por qué su nombre se escribe con una sola n; Marilla acepta, casi sonriendo.
@@ -43,6 +45,7 @@ ana: ¡Oh, mucha! Cuando oye un nombre, ¿no lo ve escrito en su cabeza, como im
 marilla: (Marilla aprieta los labios, pero casi sonríe.) Está bien. Ana con una sola n, entonces.
 
 === conv_marilla_oraciones ===
+a prueba
 con: marilla
 tema: Confesarle que nunca aprendió a rezar
 resumen: Ana confiesa que nunca ha rezado; Marilla le enseña a dar gracias y pedir con humildad.
@@ -57,6 +60,7 @@ ana: (Ana lo piensa con mucha seriedad.) Entonces le voy a dar gracias por el Ca
 marilla: (Marilla tiene que darse vuelta para que Ana no la vea reír.) Bueno… es un comienzo.
 
 === conv_marilla_hablar ===
+a prueba
 con: marilla
 tema: Contarle todo lo que imaginó hoy
 resumen: Ana cuenta lo que imaginó; Marilla le dice que habla demasiado, pero que hable pensando antes.
@@ -68,6 +72,7 @@ ana: Lo intento, Marilla, de verdad. Pero las cosas se me amontonan adentro y ti
 marilla: (Marilla suspira.) No he dicho eso. Habla… pero de vez en cuando, piensa antes.
 
 === conv_marilla_errores ===
+a prueba
 con: marilla
 tema: Decirle algo que pensó sobre el día de mañana
 resumen: Mañana es un día sin errores; Ana nunca repite un error, Marilla: siempre inventa nuevos.
@@ -117,6 +122,7 @@ marilla: (Marilla resopla.) Los vestidos sencillos son para niñas sensatas. Ya 
    marilla: Ana. No.
 
 === conv_marilla_cocina ===
+a prueba
 con: marilla
 tema: Pedirle que le enseñe a cocinar
 resumen: Marilla le enseña a hacer un pastel: medir bien y no soñar mientras se cuece.
@@ -134,7 +140,7 @@ ana: Le prometo vigilarlo con los ojos y con el alma, Marilla.
 con: marilla
 tema: Contarle cómo es Diana
 resumen: Ana le describe a Diana, su amiga perfecta; Marilla le pide no cansarla con discursos.
-si: afecto:marilla:ana>=3, hecho:conocidas_diana, !hecho:prohibida
+si: hecho:se_queda, afecto:marilla:ana>=3, hecho:conocidas_diana, !hecho:prohibida
 ---
 ana: Marilla, Diana es la amiga más perfecta del mundo. Tiene los ojos negros y la risa como un arroyo, y le gustan las mismas cosas que a mí. Bueno, casi.
 marilla: Me alegro. Pero no la canses con tus discursos.
@@ -197,6 +203,7 @@ ana: (Ana sube la escalera dando saltitos y no deja de sonreír hasta que se due
 # ====================================== Matthew ======================================
 
 === conv_matthew_flores ===
+a prueba
 con: matthew
 tema: Contarle de las violetas del camino
 resumen: Las violetas del camino como pedacitos de cielo; Matthew siempre la entiende.
@@ -208,6 +215,7 @@ ana: Usted siempre me entiende. Es tan agradable hablar con alguien que entiende
 matthew: (Matthew se pone colorado hasta las orejas, pero sonríe.)
 
 === conv_matthew_nombres ===
+a prueba
 con: matthew
 tema: Contarle los nombres que les puso a los lugares
 resumen: Ana le cuenta los nombres nuevos que puso a los lugares; Matthew se acostumbrará.
@@ -222,6 +230,7 @@ ana: Y el cerezo de mi ventana es la Reina de las Nieves. Ya lo conoce.
 matthew: Je. Le queda bien.
 
 === conv_matthew_estrellas ===
+a prueba
 con: matthew
 tema: Sentarse con él a mirar el cielo
 resumen: Mirando las estrellas: quizás en una hay otra niña mirando; nadie está del todo solo.
@@ -246,6 +255,7 @@ ana: Infladas, aquí arriba, así. Son lo más elegante del mundo. Pero Marilla 
 matthew: (Matthew se rasca la barbilla y mira a Ana un buen rato, pensativo.) Hm. Ya veo.
 
 === conv_matthew_defensa ===
+a prueba
 con: matthew
 tema: Preguntarle si es una cabeza de chorlito
 resumen: ¿Es una cabeza de chorlito? Matthew la defiende: ya es bastante buena así.
@@ -257,6 +267,7 @@ ana: ¿Usted cree que algún día voy a ser como ella quiere?
 matthew: Yo creo que ya eres bastante buena así. Pero no le digas que te lo dije.
 
 === conv_matthew_huerta ===
+a prueba
 con: matthew
 tema: Pedirle que le enseñe a sembrar
 resumen: Matthew le enseña a sembrar y le regala semillas de capuchina para su huertito.
@@ -273,6 +284,7 @@ matthew: (Saca del bolsillo un sobrecito de papel doblado.) Toma. Capuchinas. Pa
 ana: ¡Donde yo quiera! Oh, Matthew, es el regalo más lleno de futuro que me han hecho nunca.
 
 === conv_matthew_mujeres ===
+a prueba
 con: matthew
 tema: Preguntarle por qué le dan miedo las señoras
 resumen: A Matthew le dan miedo las señoras, pero no Marilla ni Ana; la Sra. Lynde, un poco.
@@ -314,7 +326,7 @@ matthew: Mi niña. Mi niña de la que estoy orgulloso.
 con: diana
 tema: Decirle cuánto le envidia el pelo
 resumen: Ana envidia el pelo negro de Diana; Diana envidia su imaginación.
-si: afecto:diana:ana>=2, hecho:conocidas_diana, !hecho:prohibida
+si: hecho:se_queda, afecto:diana:ana>=2, hecho:conocidas_diana, !hecho:prohibida
 ---
 ana: Diana, ¿tú sabes lo que es tener el pelo rojo? Es una pena para toda la vida.
 diana: A mí me parece bonito tu pelo, Ana.
@@ -325,7 +337,7 @@ diana: Y yo daría cualquier cosa por tener tu imaginación. Así estamos a mano
 con: diana
 tema: Preguntarle por su hermanita
 resumen: Minnie May es pesada pero querida; Ana cuidó tres pares de mellizos.
-si: afecto:diana:ana>=2, hecho:conocidas_diana, !hecho:prohibida
+si: hecho:se_queda, afecto:diana:ana>=2, hecho:conocidas_diana, !hecho:prohibida
 ---
 ana: ¿Cómo está Minnie May?
 diana: Pesada, como siempre. Quiere ir a todas partes conmigo. Pero la quiero mucho.
@@ -336,7 +348,7 @@ diana: ¡Tres pares! Ana, has vivido tanto.
 con: diana
 tema: Inventar nombres para los lugares con ella
 resumen: Inventan nombres para los lugares (el Paseo de los Enamorados).
-si: afecto:diana:ana>=2, hecho:conocidas_diana, !hecho:prohibida
+si: hecho:se_queda, afecto:diana:ana>=2, hecho:conocidas_diana, !hecho:prohibida
 al_terminar: suma letras:ana 1
 ---
 ana: Diana, ese sendero entre los abedules necesita un nombre. ¿Qué te parece…
@@ -361,7 +373,7 @@ ana: Los charcos también se lo merecen.
 con: diana
 tema: Hablar de la escuela
 resumen: La escuela: Ana odia la geometría, Diana la ortografía; se ayudarán.
-si: afecto:diana:ana>=2, hecho:conocidas_diana, !hecho:prohibida
+si: hecho:se_queda, afecto:diana:ana>=2, hecho:conocidas_diana, !hecho:prohibida
 ---
 diana: ¿Te gusta la escuela, Ana?
 ana: Me gusta aprender. Lo que no me gusta es la geometría. Es lo menos imaginativo que hay en el mundo.
@@ -374,7 +386,7 @@ ana: Entonces la vamos a odiar juntas. Eso también une.
 con: diana
 tema: Contarle historias del Bosque Encantado
 resumen: Ana inventa fantasmas del Bosque Encantado y asusta a Diana.
-si: afecto:diana:ana>=3, hecho:conocidas_diana, !hecho:prohibida
+si: hecho:se_queda, afecto:diana:ana>=3, hecho:conocidas_diana, !hecho:prohibida
 al_terminar: suma letras:ana 1
 ---
 ana: Diana, ¿sabías que en el Bosque Encantado vive una dama blanca que llora por su amor perdido? Pasa a medianoche junto al arroyo.
@@ -387,7 +399,7 @@ ana: (Ana mira hacia los abetos, que de pronto se ven muy oscuros.) Bueno… yo 
 con: diana
 tema: Hablar de vestidos y de la fiesta
 resumen: Vestidos para el concierto: Diana el azul, Ana el de siempre, imaginado de seda.
-si: afecto:diana:ana>=3, hecho:conocidas_diana, !hecho:prohibida
+si: hecho:se_queda, afecto:diana:ana>=3, hecho:conocidas_diana, !hecho:prohibida
 ---
 diana: Para el concierto me voy a poner el vestido azul, el de las cintas.
 ana: Yo voy a ir con el de siempre. Pero voy a imaginar que es de seda rosa, con mangas abullonadas y un collar de perlas.
@@ -398,7 +410,7 @@ ana: Con tu ayuda, y con mucha imaginación, quizás.
 con: diana
 tema: Proponerle un club de cuentos
 resumen: Proponen un club de cuentos; los tristes son los más bonitos.
-si: afecto:diana:ana>=3, hecho:conocidas_diana, !hecho:prohibida
+si: hecho:se_queda, afecto:diana:ana>=3, hecho:conocidas_diana, !hecho:prohibida
 al_terminar: suma letras:ana 1
 ---
 ana: Diana, ¿y si hacemos un club de cuentos? Cada una escribe uno por semana y lo leemos juntas.
@@ -515,7 +527,7 @@ diana: ¡Cinco destellos! Esta noche lo probamos.
 con: lynde
 tema: Preguntarle qué ve desde su ventana
 resumen: Lo que la Sra. Lynde ve desde su ventana: Avonlea como un libro sin fin.
-si: afecto:lynde:ana>=2, !hecho:ofendio_lynde
+si: hecho:se_queda, afecto:lynde:ana>=2, !hecho:ofendio_lynde
 ---
 ana: Sra. Lynde, ¿qué ve desde su ventana, todo el día?
 lynde: Todo, niña. Quién pasa, a dónde va y, si me descuido, a qué. Nada se me escapa en Avonlea.
@@ -526,7 +538,7 @@ lynde: (La Sra. Lynde se queda sin respuesta, cosa que no le pasa nunca.) Bueno�
 con: lynde
 tema: Hablarle de su pelo
 resumen: La Sra. Lynde nota que el pelo de Ana se oscurece; Ana la perdona por todo.
-si: afecto:lynde:ana>=3, !hecho:ofendio_lynde
+si: hecho:se_queda, afecto:lynde:ana>=3, !hecho:ofendio_lynde
 al_terminar: suma afecto:lynde:ana 1
 ---
 lynde: Ana, mírate. El pelo se te está oscureciendo. Casi castaño rojizo, diría yo.
@@ -539,7 +551,7 @@ lynde: (La Sra. Lynde parpadea.) Bueno. Gracias, supongo.
 con: lynde
 tema: Contarle que quiere ir a Queen's
 resumen: La Sra. Lynde duda de que las mujeres necesiten estudiar; Ana la convence un poco.
-si: afecto:lynde:ana>=3, estudio:ana>=50, !hecho:ofendio_lynde
+si: hecho:se_queda, afecto:lynde:ana>=3, estudio:ana>=50, !hecho:ofendio_lynde
 ---
 lynde: Así que te vas a Queen's. Yo nunca creí que las mujeres necesitaran tanto estudio…
 ana: Pero, Sra. Lynde, ¿no sería bonito que hubiera maestras muy buenas en toda la isla?
@@ -551,7 +563,7 @@ lynde: Hmm. Si son como tú, ruidosas pero buenas… quizás no sería tan malo.
 con: barry
 tema: Preguntarle si Diana puede salir
 resumen: Ana pide que Diana salga a jugar; la Sra. Barry: antes de que oscurezca.
-si: afecto:barry:ana>=2, hecho:conocidas_diana, !hecho:prohibida
+si: hecho:se_queda, afecto:barry:ana>=2, hecho:conocidas_diana, !hecho:prohibida
 ---
 ana: Sra. Barry, ¿Diana puede salir a jugar un rato?
 barry: Un rato, sí. Pero que vuelva antes de que oscurezca, y nada de bosques encantados.
@@ -575,7 +587,7 @@ barry: (La Sra. Barry se ríe, por primera vez con Ana.) A mí también, niña. 
 con: harrison
 tema: Preguntarle por su campo de avena
 resumen: El campo de avena del Sr. Harrison y la vaca jersey que se lo come.
-si: conoce:harrison
+si: hecho:se_queda, conoce:harrison
 ---
 ana: Sr. Harrison, su campo de avena se ve tan verde que parece un mar chiquito. Cuando sopla el viento hace olas.
 harrison: (El Sr. Harrison se rasca la barba, desconfiado.) Olas. Hmpf. Lo que hace es crecer, si las vacas de los vecinos lo dejan en paz.
@@ -593,7 +605,7 @@ harrison: Una vaca jersey que no voy a nombrar. Se mete por la cerca como si fue
 con: harrison
 tema: Preguntarle si no se aburre viviendo solo
 resumen: ¿Se aburre viviendo solo? Tiene a Ginger, su loro, que dice la verdad.
-si: conoce:harrison
+si: hecho:se_queda, conoce:harrison
 ---
 ana: Sr. Harrison, ¿no se aburre viviendo solo? Yo, cuando estaba sola, inventaba amigas en los vidrios de las vitrinas.
 harrison: No estoy solo. Tengo a Ginger. Y a mí mismo, que soy buena compañía cuando nadie me molesta.
@@ -611,7 +623,7 @@ harrison: Dice la verdad, que a la gente le parece terrible. No es lo mismo.
 con: harrison
 tema: Preguntarle por su loro
 resumen: El loro Ginger dice malas palabras; quizás Ana pueda conocerlo.
-si: afecto:harrison:ana>=2
+si: hecho:se_queda, afecto:harrison:ana>=2
 ---
 ana: Sr. Harrison, ¿es verdad que tiene un loro que dice malas palabras?
 harrison: Ginger dice lo que le da la gana. Como yo. Por eso nos llevamos bien.
@@ -655,7 +667,7 @@ al_terminar: suma afecto:ana:gilbert 1
 con: stacy
 tema: Preguntarle por la clase de Queen's
 resumen: La Srta. Stacy preparará a algunos para Queen's; Ana quiere ser maestra.
-si: conoce:stacy, hecho:llego_stacy
+si: hecho:se_queda, conoce:stacy, hecho:llego_stacy
 ---
 ana: Srta. Stacy… ¿es verdad que va a preparar a algunos para el examen de Queen's?
 stacy: Es verdad. A los que quieran estudiar en serio, después de clases. ¿Te interesa, Ana?
@@ -667,7 +679,7 @@ al_terminar: suma estudio:ana 1
 con: stacy
 tema: Contarle que escribe cuentos
 resumen: Ana escribe tragedias; la Srta. Stacy le aconseja escribir de lo que conoce.
-si: conoce:stacy, hecho:llego_stacy
+si: hecho:se_queda, conoce:stacy, hecho:llego_stacy
 ---
 ana: Srta. Stacy, Diana y yo tenemos un club de cuentos. Yo escribo tragedias. En la última se mueren todos.
 stacy: (La Srta. Stacy sonríe.) ¿Todos? ¿Y no queda nadie para contarlo?
@@ -680,7 +692,7 @@ al_terminar: suma afecto:stacy:ana 1
 con: sraallan
 tema: Preguntarle cómo se hace para ser buena
 resumen: Cómo ser buena cuando cuesta; la Sra. Allan también se equivoca.
-si: conoce:sraallan, presente:sraallan
+si: hecho:se_queda, conoce:sraallan, presente:sraallan
 ---
 ana: Sra. Allan… ¿usted cree que una persona puede ser buena aunque le cueste muchísimo?
 sraallan: Creo que esas son las que más valen, Ana. A los que les sale fácil no tienen tanto mérito.
@@ -693,7 +705,7 @@ al_terminar: suma afecto:sraallan:ana 1
 con: ruby
 tema: Hablar con Ruby de los muchachos
 resumen: Ruby habla de muchachos; a Ana solo le gustan los héroes de los libros.
-si: conoce:ruby
+si: hecho:se_queda, conoce:ruby
 ---
 ruby: Ana, ¿a ti quién te gusta? A mí me gustan casi todos. Charlie Sloane me miró dos veces hoy.
 ana: A mí no me gusta nadie, Ruby. Bueno, me gustan los héroes de los libros, que son mucho más nobles y nunca tiran de las trenzas.
@@ -711,7 +723,7 @@ ana: Por eso son perfectos.
 con: jane
 tema: Preguntarle a Jane qué quiere ser
 resumen: Jane quiere ser maestra con sueldo fijo; Ana, en una escuela junto al mar.
-si: conoce:jane
+si: hecho:se_queda, conoce:jane
 ---
 ana: Jane, ¿tú qué quieres ser cuando seas grande?
 jane: Maestra. En una escuela de campo, con un sueldo fijo. Y después, ya veremos.
@@ -722,7 +734,7 @@ jane: (Jane se ríe.) Eso no existe, Ana. Pero si existiera, te tocaría a ti.
 con: josie
 tema: Responderle a Josie Pye
 resumen: Josie desafía a Ana a caminar por la cerca de los Barry.
-si: conoce:josie
+si: hecho:se_queda, conoce:josie
 ---
 josie: Ana Shirley, apuesto a que no te atreves a caminar por arriba de la cerca del jardín de los Barry. Yo lo hice. Bueno, casi.
 ->* Aceptar el desafío, por orgullo
@@ -738,7 +750,7 @@ josie: Ana Shirley, apuesto a que no te atreves a caminar por arriba de la cerca
 con: minnie
 tema: Contarle un cuento de hadas a Minnie May
 resumen: Ana le cuenta a Minnie May el cuento de la niña en la burbuja del arroyo.
-si: conoce:minnie
+si: hecho:se_queda, conoce:minnie
 ---
 minnie: Ana, ¿sabes cuentos? Diana dice que tú inventas los mejores.
 ana: ¡Claro! Había una vez una niña que vivía en una burbuja, adentro de un arroyo. Una burbuja de cristal, y cuando llovía, sonaba como campanitas.
@@ -751,7 +763,7 @@ al_terminar: suma afecto:minnie:ana 1
 con: phillips
 tema: Pedirle otro libro al Sr. Phillips
 resumen: Ana pide un libro al Sr. Phillips, que solo mira a Prissy Andrews.
-si: conoce:phillips
+si: hecho:se_queda, conoce:phillips
 ---
 ana: Sr. Phillips, ¿me prestaría otro libro? Ya terminé el de cuarto grado. Dos veces.
 phillips: (El Sr. Phillips no la oye. Está mirando por la ventana a Prissy Andrews, que resuelve un problema en el pizarrón.)

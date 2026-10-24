@@ -17,7 +17,26 @@ Ninguna.
 
 No es un error: en el dibujo (trazas/grafo.html) se ve su primera frase en vez de una descripción.
 
-Ninguna.
+- `carta_diana_1`
+- `carta_diana_2`
+- `carta_stacy_1`
+- `carta_stacy_2`
+- `carta_sraallan_1`
+- `carta_sraallan_2`
+- `carta_josephine_1`
+- `carta_josephine_2`
+- `resp_diana_1`
+- `resp_diana_2`
+- `resp_stacy_1`
+- `resp_stacy_2`
+- `resp_sraallan_1`
+- `resp_josephine_1`
+- `resp_josephine_2`
+- `clase_geografia`
+- `clase_dictado`
+- `clase_geometria`
+- `clase_lectura`
+- `senas_vela`
 
 ## Los momentos a los que se puede volver (puntos)
 

@@ -48,7 +48,8 @@ async function caso(nombre, fn){
   await caso('2. el aviso al bajar a 1, la pista del cuaderno, el perdón y la ayuda', async T => {
     await T.manana(10); await T.ev(`cualidadSuma('marilla', 'paciencia', -1, 'ana')`);
     ok(await T.ev(`(game.wm.hitosPend || []).some(p => p.dir === 'bajo' && p.n === 1)`), 'Marilla tiene pendiente decirle «una más así…»');
-    await T.run(12); ok(await T.ev(`!!dlgHechos().bajo_paciencia_1`), 'y se lo dice (bajo_paciencia_1)');
+    for (let i = 0; i < 40 && !(await T.ev(`!!dlgHechos().bajo_paciencia_1`)); i++) await T.run(1);   // (when Marilla is near her and nothing else is being said)
+    ok(await T.ev(`!!dlgHechos().bajo_paciencia_1`), 'y se lo dice (bajo_paciencia_1)');
     ok(/White Sands/.test(await T.ev(`cuadernoPista(CUADERNO_METAS.find(m => m.id === 'quedarse'))`)), 'el cuaderno lo dice');
     ok(/Cómo la ven[\s\S]*paciencia de Marilla/.test(await T.ev(`cuadernoMiradas()`)), 'y muestra la paciencia de Marilla');
     ok(await T.ev(`convDisponibles('marilla').some(d => d.id === 'conv_marilla_perdon')`), 'puede pedirle perdón');
