@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>La historia en fichas</title>
+<style>
+:root{--bg:#f6f1e7;--panel:#fffaf0;--ink:#2e2418;--sub:#7a6a55;--line:#d9cdb8;--hi:#b0452f;--ok:#3f7a3a;--no:#a33;--sit:#7a6a2a;--card:#fffdf6;--acc:#2f6fb0}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#1d1a16;--panel:#26221d;--ink:#eee4d4;--sub:#a99a85;--line:#3d362d;--hi:#ff8a70;--ok:#8fd08a;--no:#ff8a80;--sit:#d9c27a;--card:#2b2620;--acc:#79b0ea}}
+:root[data-theme=dark]{--bg:#1d1a16;--panel:#26221d;--ink:#eee4d4;--sub:#a99a85;--line:#3d362d;--hi:#ff8a70;--ok:#8fd08a;--no:#ff8a80;--sit:#d9c27a;--card:#2b2620;--acc:#79b0ea}
+*{box-sizing:border-box}html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 Georgia,'Times New Roman',serif;display:grid;grid-template-rows:auto 1fr;overflow:hidden}
+header{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;padding:8px 16px;border-bottom:1px solid var(--line);background:var(--panel)}
+header h1{font-size:17px;margin:0;font-weight:normal;font-style:italic}
+#reloj{font-size:14px;color:var(--sub)}
+button{font:inherit;font-size:13.5px;padding:4px 10px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--ink);cursor:pointer}
+button:hover{border-color:var(--sub)}
+button.prim{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+main{display:grid;grid-template-columns:1fr min(400px,40vw);min-height:0}
+#centro{overflow:auto;padding:14px 18px 60px;min-height:0}
+aside{border-left:1px solid var(--line);background:var(--panel);overflow:auto;padding:10px 16px 40px;min-height:0}
+.tabs{display:flex;gap:0;margin-bottom:10px}.tabs button{border-radius:0;flex:1}.tabs button:first-child{border-radius:7px 0 0 7px}.tabs button:last-child{border-radius:0 7px 7px 0}.tabs button+button{border-left:0}
+.tabs button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+h2{font-size:16px;font-weight:normal;margin:6px 0 10px}
+h3{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--sub);margin:16px 0 6px;font-weight:normal}
+.mut{color:var(--sub)}
+.esc{max-width:760px;border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:7px;background:var(--panel);padding:8px 12px;margin:0 0 8px;cursor:pointer}
+.esc:hover{border-color:var(--sub)}
+.esc .id{font:12.5px ui-monospace,Menlo,monospace;color:var(--sub)}
+.esc .sit{font-size:12.5px;color:var(--sit)}
+.esc.conversacion{border-left-color:var(--ok)}.esc.carta{border-left-color:#b0862f}.esc.mision{border-left-color:#8a5aa8}
+.badge{font-size:11.5px;border:1px solid var(--line);border-radius:9px;padding:0 6px;margin-left:4px;color:var(--sub)}
+.ficha{max-width:760px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px 16px;margin:0 0 10px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.ficha.narra{font-style:italic;background:var(--panel)}
+.ficha .q{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--sub)}
+.ficha.piensa{border-style:dashed}
+.ef{max-width:760px;font:12.5px ui-monospace,Menlo,monospace;color:var(--sub);margin:0 0 8px 6px}
+.ops{max-width:760px;display:flex;flex-direction:column;gap:6px;margin:6px 0 14px}
+.ops button{text-align:left;font-size:15px;padding:8px 12px}
+.ops button.propia::after{content:'  (lo que Ana haría sola)';color:var(--sub);font-size:12px}
+.req{max-width:760px;font-size:13px;margin:0 0 12px;padding:8px 12px;border:1px dashed var(--line);border-radius:7px}
+.req .ok{color:var(--ok)}.req .no{color:var(--no)}.req .sit{color:var(--sit)}
+.fila{display:flex;justify-content:space-between;gap:8px;border-bottom:1px dotted var(--line);padding:2px 0;font-size:13.5px}
+.fila code,.cod{font:12.5px ui-monospace,Menlo,monospace}
+.fila button{font-size:11.5px;padding:0 6px}
+input[type=number]{width:60px;font:inherit;font-size:13px;padding:1px 4px;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:5px}
+select,input[type=text],input[type=search]{font:inherit;font-size:13.5px;padding:4px 8px;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:6px}
+.acc{display:flex;flex-wrap:wrap;gap:6px}
+.hist div{font-size:13px;padding:3px 0;border-bottom:1px dotted var(--line);cursor:pointer}
+.hist div:hover{color:var(--hi)}
+.cambios{max-width:760px;font-size:13.5px;border-left:3px solid var(--ok);padding:6px 12px;margin:10px 0;background:var(--panel)}
+.fin{max-width:760px;text-align:center;font-style:italic;padding:22px;border:1px solid var(--hi);border-radius:9px;background:var(--panel);margin:12px 0}
+.grupo{max-width:760px;margin:0 0 6px;padding:4px 10px;border:1px solid var(--line);border-radius:7px;background:var(--panel)}
+.grupo summary{cursor:pointer;font-size:14px}
+.grupo .esc{margin-top:6px}
+.sit{color:var(--sit)}
+.filtros{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--sub);margin:0 0 10px;max-width:760px}
+@media (max-width:760px){main{grid-template-columns:1fr;grid-template-rows:1fr auto}aside{border-left:0;border-top:1px solid var(--line);max-height:45vh}#centro{padding:12px 16px 40px}}
+</style></head><body>
+<header>
+  <h1>La historia en fichas</h1>
+  <span id="reloj"></span>
+  <label class="mut" style="font-size:13px">Ana está en <select id="donde"></select></label>
+  <button id="atras" title="Deshacer el último paso">← Atrás</button>
+  <button id="reiniciar" title="Volver al comienzo">Desde el comienzo</button>
+</header>
+<main>
+  <section id="centro"></section>
+  <aside>
+    <div class="tabs"><button data-tab="estado" class="on">Estado</button><button data-tab="jugadora">La jugadora</button><button data-tab="hist">Pasos</button></div>
+    <div id="lado"></div>
+  </aside>
+</main>
+<script>
+const D = /*@DATOS*/null;
+const $ = id => document.getElementById(id), esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const ESC = new Map(D.escenas.map(e => [e.id, e]));
+const NOMBRES = { ana: 'Ana', marilla: 'Marilla', matthew: 'Matthew', diana: 'Diana', lynde: 'Sra. Lynde', narra: '', carta: 'carta' };
+const nombre = q => q in NOMBRES ? NOMBRES[q] : q;
+const ESTACIONES = ['primavera', 'verano', 'otoño', 'invierno'], DIAS = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
+const HKEY = h => h.id + ':' + (h.de || 'ana') + ':' + (h.hacia || '');
+// ---- the state: facts (with their day), counters, goals done, what was said, the day and the hour (6 to 30: a day
+// begins at six in the morning, as in the game)
+function estadoInicial(){
+  const c = {}; for (const h of D.habilidades) c[HKEY(h)] = h.inicial || 0;
+  return { dia: 1, hora: 19.5, donde: 'gg', h: { inicio_juego: 1 }, d: {}, c, m: {}, sabe: {}, inv: {}, diario: [], fin: null, juego: null };
+}
+let st = estadoInicial(), pila = [], tab = 'estado', filtro = { q: '', cartas: false, mis: true };
+try { const g = JSON.parse(localStorage.getItem('avonlea-historia') || 'null'); if (g?.st) { st = g.st; pila = g.pila || []; st.donde ||= 'gg'; } } catch (e) {}
+const guarda = () => { try { localStorage.setItem('avonlea-historia', JSON.stringify({ st, pila: pila.slice(-200) })); } catch (e) {} };
+const paso = que => { pila.push({ que, st: JSON.stringify(st) }); };   // (before each step: what is about to happen, and the state as it was)
+const estacion = () => ESTACIONES[Math.floor((st.dia - 1) / 14) % 4], hora24 = () => st.hora % 24;
+const fmtHora = h => { h = h % 24; const m = Math.round((h % 1) * 60); return Math.floor(h) + ':' + String(m).padStart(2, '0'); };
+function avanzar(h){ st.hora += h; while (st.hora >= 30) { st.hora -= 24; st.dia++; } }
+const nuevoDia = () => { st.dia++; st.hora = 7; st.donde = 'ga'; };
+// ---- the conditions: «si» (true), «no», or «sit»: the situation, not simulated (where, who is there, who sees her…),
+// shown as what the player would have to bring about
+const QUAL = /^([a-zñ_]+):([a-zñ_]+)(?::([a-zñ_]+))?\s*(>=|<=|>|<|==|=)\s*(-?[\d.]+)$/;
+const contador = k => st.c[k] ?? (k.startsWith('afecto:') ? 0 : 0);
+function cond(c){
+  const neg = c[0] === '!', s = neg ? c.slice(1) : c, q = s.match(QUAL);
+  const r = (() => {
+    if (q) { const v = contador(q[1] + ':' + q[2] + ':' + (q[3] || '')), n = +q[5]; return { '>=': v >= n, '<=': v <= n, '>': v > n, '<': v < n, '==': v === n, '=': v === n }[q[4]]; }
+    const [k, a, b] = s.split(':');
+    switch (k) {
+      case 'hecho': case 'horas_desde': return st.h[a] != null;
+      case 'dicha': return !!st.d[a];
+      case 'no_hoy': return st.h[a] === st.dia;
+      case 'dias_desde': { const x = st.h[a] ?? st.m[a]; return x != null && st.dia - x >= +b; }
+      case 'hora': { const [x, y] = a.split('-').map(Number), h = hora24(); return (h >= x && h < y) || (h + 24 >= x && h + 24 < y); }
+      case 'dia_juego': return st.dia >= +a;
+      case 'estacion': return estacion() === a;
+      case 'dia_estacion': return (st.dia - 1) % 14 + 1 === +a;
+      case 'domingo': return (st.dia - 1) % 7 === 6;
+      case 'cuaderno': return st.m[a] != null;
+      case 'capitulo': return false;
+      case 'sabe': if (st.sabe[a + ':' + b]) return true; if (neg) return false; return 'sit';   // (what someone knows: a scene told it, or the news of the world —not simulated: «pasaría si» someone tells)
+      case 'conoce': return st.h['conoce_' + a] != null || ['marilla', 'matthew'].includes(a) ? true : 'sit';
+      default: return 'sit';
+    }
+  })();
+  if (r === 'sit') return 'sit';
+  return (neg ? !r : r) ? 'si' : 'no';
+}
+// a condition in words (for the situation, and the checks)
+function palabras(c){
+  let m; const neg = c[0] === '!', s = neg ? c.slice(1) : c, no = neg ? 'no ' : '';
+  if ((m = s.match(/^hora:([\d.]+)-([\d.]+)$/))) return `entre las ${m[1]} y las ${m[2]} h`;
+  if ((m = s.match(QUAL))) return `${m[1]} de ${m[2]}${m[3] ? ' hacia ' + m[3] : ''} ${m[4]} ${m[5]}`;
+  if ((m = s.match(/^donde:(\w+):(\w+)$/))) return `${nombre(m[1])} ${no}está en ${m[2]}`;
+  if ((m = s.match(/^ve:(\w+)$/))) return `${nombre(m[1])} ${no}la ve`;
+  if ((m = s.match(/^presente:(\w+)$/))) return `${nombre(m[1])} ${no}anda por Avonlea`;
+  if ((m = s.match(/^avance:(\w+):([\d.]+)-([\d.]+)$/))) return `en el viaje, entre el ${m[2]} y el ${m[3]} % del camino`;
+  if ((m = s.match(/^hecho:(\w+)$/))) return (neg ? 'que no haya pasado ' : '') + m[1];
+  if ((m = s.match(/^dias_desde:(\w+):(\d+)$/))) return `${m[2]} día(s) después de ${m[1]}`;
+  if ((m = s.match(/^ana:(\w+)$/))) return `Ana ${no}${m[1].replace('_', ' ')}`;
+  if ((m = s.match(/^sabe:(\w+):(\w+)/))) return `${nombre(m[1])} ${no}sabe «${m[2]}»`;
+  return c;
+}
+// where Ana is: part of the state (the player moves her, or a scene takes her); where the others are is not simulated:
+// they are taken to be where the scene needs them (their routines), and it is shown
+const LUGARES = { gg: 'la cocina de Tejas Verdes', ga: 'su pieza', patio: 'el patio de Tejas Verdes', out: 'afuera, lejos de casa', os: 'la casa de los Barry', es: 'la escuela', ig: 'la iglesia', rl: 'la casa de la Sra. Lynde', br: 'la estación de Bright River' };
+const ZONA = { gg: ['gg'], ga: ['ga'], dentro: ['gg', 'ga', 'os', 'es', 'ig', 'rl'], tejas: ['gg', 'ga', 'patio'], casa: ['gg', 'patio'], arroyo: ['out'], out: ['patio', 'out'] };
+const zona = l => ZONA[l] || [l];
+// what a scene asks of the situation: Ana somewhere («ana»), something the player has to do («accion»), or the
+// others somewhere («otro»: taken as so)
+function situacion(e, sitConds){
+  const L = [];
+  for (const p of (e.en || '').split(/[,\s]+/).filter(Boolean)) { const [k, v] = p.split('='); L.push(k === 'ana' ? { tipo: 'ana', lugares: zona(v), t: 'Ana en ' + (LUGARES[v] || v) } : { tipo: 'otro', t: nombre(k) + ' en ' + (LUGARES[v] || v) }); }
+  if (e.donde) L.push({ tipo: 'ana', lugares: zona(e.donde), t: 'Ana por ' + e.donde });
+  for (const c of sitConds) { let m;
+    if ((m = c.match(/^(!?)(donde:ana|escena_ana):(\w+)$/))) { const z = zona(m[3]); L.push({ tipo: 'ana', lugares: m[1] ? Object.keys(LUGARES).filter(x => !z.includes(x)) : z, t: palabras(c) }); }
+    else if (/^!?(ve|presente|donde|sentada|conoce):/.test(c)) L.push({ tipo: 'otro', t: palabras(c) });
+    else L.push({ tipo: 'accion', t: palabras(c) }); }
+  if (e.cerca) L.push({ tipo: 'accion', t: 'cerca de ' + e.cerca.split(',')[1]?.trim() });
+  if (e.calesa) L.push({ tipo: 'accion', t: 'va en la calesa' });
+  if (e.con) L.push({ tipo: 'accion', t: 'habla con ' + nombre(e.con) });
+  const DISP = { lugar: x => 'pasa por ' + x, objeto: x => 'mira ' + x, primera: () => 've algo por primera vez', encuentro: () => 'se encuentra con alguien', menu: () => 'lo elige en el menú de alguien' };
+  if (e.disparo) L.push({ tipo: 'accion', t: (DISP[e.disparo] || (x => e.disparo + ' ' + x))(e.lugar || e.objeto || '') });
+  return L;
+}
+// can it happen now? (said already; its conditions on the state; then its situation: with Ana where she is, what is
+// left is what the player would have to do)
+function estado(e){
+  const rep = e.repetir || 'una_vez', v = st.d[e.id];
+  if (rep === 'una_vez' && v) return null;
+  if (rep === 'dia' && v === st.dia) return null;
+  const ver = cs => cs.map(c => [c, cond(c)]);
+  const r = ver(e.si); if (r.some(([, x]) => x === 'no')) return { no: r.filter(([, x]) => x === 'no').map(([c]) => c) };
+  const alts = e.o.map(a => ({ a, r: ver(a.si) })).filter(x => !x.r.some(([, y]) => y === 'no'));
+  if (e.o.length && !alts.length) return { no: ['ninguna de sus alternativas'] };
+  const sit = situacion(e, r.filter(([, x]) => x === 'sit').map(([c]) => c));
+  if (e.o.length) sit.push({ tipo: 'accion', t: 'una de: ' + alts.map(x => x.a.resto || 'otra forma').join(' | ') });
+  const anaNo = sit.filter(x => x.tipo === 'ana' && !x.lugares.includes(st.donde)), acc = sit.filter(x => x.tipo === 'accion'), otros = sit.filter(x => x.tipo === 'otro');
+  return { ok: r.filter(([, x]) => x === 'si').map(([c]) => c), anaNo, acc, otros, sit: sit.map(x => x.t) };
+}
+// ---- what a scene does to the state (the actions of the script); what is not state (moving someone) is only told
+function aplicar(s){
+  const [w, ...r] = s.split(' '), rest = r.join(' '), part = rest.split('|').map(x => x.trim());
+  const ck = (q, k, o) => q + ':' + k + ':' + (o || '');
+  switch (w) {
+    case 'hecho': st.h[rest] = st.dia; return '✓ hecho ' + rest;
+    case 'olvidar': delete st.h[rest]; return '✗ olvida ' + rest;
+    case 'suma': { const [q, n] = r, [nom, k, o] = q.split(':'), key = ck(nom, k, o), h = D.habilidades.find(x => HKEY(x) === key); let v = contador(key) + +n; if (h?.rango) v = Math.max(h.rango[0], Math.min(h.rango[1], v)); st.c[key] = v; return `${nom} de ${k}${o ? ' hacia ' + o : ''} ${+n > 0 ? '+' : ''}${n} → ${v}`; }
+    case 'afecto': { const [k, o, n] = r, key = ck('afecto', k, o); st.c[key] = Math.max(contador(key), +n); return `afecto de ${k} hacia ${o}: al menos ${n} → ${st.c[key]}`; }
+    case 'ofensa': { const [k, o, , n] = r, key = ck('afecto', k, o); st.c[key] = Math.min(contador(key), +n); return `${k} se ofende con ${o} → afecto ${st.c[key]}`; }
+    case 'pasa_tiempo': avanzar(+r[0]); return `pasan ${r[0]} horas`;
+    case 'dormir': nuevoDia(); return 'duerme: otro día';
+    case 'log': st.diario.push([st.dia, part[0]]); return null;
+    case 'saber': case 'contar': st.sabe[r[0] + ':' + r[1]] = true; return `${nombre(r[0])} sabe «${r[1]}»`;
+    case 'final': st.fin = part[1] || part[0]; return 'FIN: ' + st.fin;
+    case 'punto': return '↺ punto para volver: ' + (part[1] || part[0]);
+    case 'a_cocina': case 'a_la_mesa': st.donde = 'gg'; return 'Ana va a la cocina';
+    case 'a_pieza': case 'acostarse': st.donde = 'ga'; return 'Ana sube a su pieza';
+    case 'viaje': if (r[0] === 'casa') st.donde = 'patio'; else st.donde = 'out'; return '(viaje: ' + r[0] + ')';
+    case 'cosa': st.inv[r[1]] = (st.inv[r[1]] || 0) + +(r[2] || 1); return `${nombre(r[0])} recibe ${r[1]}`;
+    default: return '(' + s + ')';
+  }
+}
+// ---- playing a scene: its cards, one block until the next choice; the choice, and on
+function empezar(id){
+  const e = ESC.get(id); paso('empieza ' + id);
+  st.d[id] = (e.repetir || 'una_vez') === 'una_vez' ? true : st.dia;
+  st.juego = { id, i: 0, salida: [], cambios: [] };
+  for (const n of e.narra) st.juego.salida.push({ narra: n });
+  for (const a of e.empieza) { const t = aplicar(a); if (t) st.juego.cambios.push(t); }
+  seguir(); pinta();
+}
+function seguir(){
+  const J = st.juego, e = ESC.get(J.id);
+  while (J.i < e.L.length) {
+    const b = e.L[J.i];
+    if (b.ops) { J.opciones = b.ops.map((o, k) => k); return; }
+    J.i++;
+    if (b.ef != null) { const t = aplicar(b.ef); if (t) J.salida.push({ ef: t }); J.cambios.push(t); continue; }
+    J.salida.push(b);
+  }
+  J.opciones = null; J.fin = true;
+  for (const a of e.termina) { const t = aplicar(a); if (t) J.cambios.push(t); }
+  avanzar(.25);
+}
+function elegir(k){
+  const J = st.juego, e = ESC.get(J.id), op = e.L[J.i].ops[k]; paso('elige «' + op.t + '» en ' + J.id);
+  J.salida.push({ eligio: op.t }); J.i++;
+  for (const b of op.L) { if (b.ef != null) { const t = aplicar(b.ef); if (t) J.salida.push({ ef: t }); J.cambios.push(t); } else J.salida.push(b); }
+  seguir(); pinta();
+}
+function terminar(){ st.juego = null; guarda(); pinta(); $('centro').scrollTop = 0; }
+// ---- what the player does on her own: let time go by, do things (each one raises the counters it raises in the
+// game: src/datos/habilidades.txt), reach a goal of the notebook, or change the state by hand
+const ACCIONES = [...new Set(D.habilidades.flatMap(h => (!h.por || h.por === 'ana') ? h.suma : []))].sort();
+function hacer(a){ paso('la jugadora: ' + a); const L = []; for (const h of D.habilidades) if ((!h.por || h.por === 'ana') && h.suma.includes(a)) { const k = HKEY(h); let v = contador(k) + 1; if (h.rango) v = Math.min(h.rango[1], v); st.c[k] = v; L.push(h.id + (h.de ? ' de ' + h.de : '') + ' → ' + v); } avanzar(1); st.ultimo = a + ': ' + L.join(', '); guarda(); pinta(); }
+function tiempo(h){ paso(h === 'dormir' ? 'la jugadora: a dormir' : 'pasa el tiempo: ' + h + ' h'); if (h === 'dormir') nuevoDia(); else avanzar(h); guarda(); pinta(); }
+function atras(){ const p = pila.pop(); if (!p) return; st = JSON.parse(p.st); guarda(); pinta(); }
+function irA(i){ const p = pila[i]; if (!p) return; st = JSON.parse(p.st); pila = pila.slice(0, i); guarda(); pinta(); }
+// ---- drawing
+function pinta(){
+  $('reloj').textContent = `día ${st.dia} · ${DIAS[(st.dia - 1) % 7]} · ${estacion()} · ${fmtHora(st.hora)}`;
+  $('atras').disabled = !pila.length;
+  $('donde').innerHTML = Object.entries(LUGARES).map(([k, t]) => `<option value="${k}" ${k === st.donde ? 'selected' : ''}>${esc(t)}</option>`).join('');
+  if (st.juego) pintaEscena(); else pintaPosibles();
+  pintaLado();
+}
+const lineaHtml = b => b.narra != null ? `<div class="ficha narra">${esc(b.narra)}</div>`
+  : b.ef != null ? `<div class="ef">${esc(b.ef)}</div>`
+  : b.eligio != null ? `<div class="ef">→ eligió: ${esc(b.eligio)}</div>`
+  : `<div class="ficha${b.piensa ? ' piensa' : ''}">${b.q && nombre(b.q) ? `<div class="q">${esc(nombre(b.q))}${b.piensa ? ' (piensa)' : ''}</div>` : ''}${esc(b.t)}</div>`;
+function pintaEscena(){
+  const J = st.juego, e = ESC.get(J.id), r = estado({ ...e, repetir: 'siempre' }) || {};
+  let h = `<h2>${esc(e.resumen || e.tema || e.id)} <span class="mut cod">${esc(e.id)}</span></h2>`;
+  h += `<div class="req"><b>Pasa porque:</b> ${(r.ok || []).map(c => `<span class="ok">✓ ${esc(palabras(c))}</span>`).join(' · ') || '<span class="mut">no pide nada del estado</span>'}${r.sit?.length ? '<br><b>Situación:</b> ' + r.sit.map(s => `<span class="sit">${esc(s)}</span>`).join(' · ') : ''}</div>`;
+  h += J.salida.map(lineaHtml).join('');
+  if (J.opciones) h += '<div class="ops">' + e.L[J.i].ops.map((o, k) => `<button data-op="${k}" class="${o.propia ? 'propia' : ''}">${esc(o.t)}</button>`).join('') + '</div>';
+  if (J.fin) {
+    const cambios = J.cambios.filter(Boolean);
+    h += `<div class="cambios"><b>Cambió el estado:</b><br>${cambios.length ? cambios.map(esc).join('<br>') : '<span class="mut">nada</span>'}</div>`;
+    if (st.fin) h += `<div class="fin">FIN<br>${esc(st.fin)}</div>`;
+    h += '<p><button class="prim" id="listo">Seguir: qué puede pasar ahora →</button></p>';
+  }
+  $('centro').innerHTML = h;
+  const ult = $('centro').querySelector('.ops, #listo'); if (ult) ult.scrollIntoView({ block: 'nearest' });
+}
+// what can happen now: first, what happens by itself (the state is enough); then, grouped by what the player would have
+// to bring about (go somewhere, talk to someone, be with someone): her own decisions, as choices too
+const tarjetaEsc = (e, r) => `<div class="esc ${e.tipo}" data-esc="${esc(e.id)}"><div>${esc(e.resumen || e.tema || e.narra[0]?.slice(0, 120) || e.id)}${e.grande ? '<span class="badge">★ grande</span>' : ''}${e.interrumpe ? '<span class="badge">interrumpe</span>' : ''}${e.repetir && e.repetir !== 'una_vez' ? '<span class="badge">se repite</span>' : ''}</div><div class="id">${esc(e.id)} · prioridad ${esc(e.prioridad || 1)}${r.otros?.length ? ' · <span class="mut">supone: ' + esc(r.otros.map(x => x.t).join(', ')) + '</span>' : ''}</div></div>`;
+function pintaPosibles(){
+  const L = D.escenas.map(e => [e, estado(e)]).filter(([e, r]) => r && !r.no)
+    .filter(([e]) => (filtro.cartas || e.tipo !== 'carta') && (filtro.mis || e.tipo !== 'mision'))
+    .filter(([e]) => !filtro.q || (e.id + ' ' + (e.resumen || '') + ' ' + (e.tema || '')).toLowerCase().includes(filtro.q))
+    .sort((a, b) => (b[0].interrumpe ? 1 : 0) - (a[0].interrumpe ? 1 : 0) || (+b[0].prioridad || 1) - (+a[0].prioridad || 1));
+  const solas = L.filter(([, r]) => !r.anaNo.length && !r.acc.length), G = new Map();
+  for (const [e, r] of L) if (r.anaNo.length || r.acc.length) { const k = [...(r.anaNo.length ? ['va a ' + r.anaNo.map(x => x.lugares.map(l => LUGARES[l] || l).join(' o ')).join(' y ')] : []), ...r.acc.map(x => x.t)].join(' · '); if (!G.has(k)) G.set(k, []); G.get(k).push([e, r]); }
+  let h = st.fin ? `<div class="fin">FIN<br>${esc(st.fin)}<br><button id="deshacerfin">← Atrás</button></div>` : '';
+  if (st.ultimo) { h += `<div class="cambios">${esc(st.ultimo)}</div>`; st.ultimo = null; }
+  h += `<div class="filtros"><input type="search" id="fq" placeholder="buscar…" value="${esc(filtro.q)}"> <label><input type="checkbox" data-f="cartas" ${filtro.cartas ? 'checked' : ''}> cartas</label><label><input type="checkbox" data-f="mis" ${filtro.mis ? 'checked' : ''}> misiones</label></div>`;
+  h += `<h2>Pasa ahora, con Ana en ${esc(LUGARES[st.donde] || st.donde)} <span class="mut">(${solas.length})</span></h2>`;
+  h += solas.map(([e, r]) => tarjetaEsc(e, r)).join('') || '<p class="mut">Nada pasa solo aquí ahora: deja pasar el tiempo, lleva a Ana a otra parte, o elige abajo lo que hace la jugadora.</p>';
+  h += `<h2>Pasaría si… <span class="mut">(${G.size}: lo que haga la jugadora, o el mundo)</span></h2>`;
+  h += [...G.entries()].sort((a, b) => b[1].length - a[1].length).map(([k, es]) => `<details class="grupo"><summary><span class="sit">${esc(k)}</span> <span class="mut">(${es.length})</span></summary>${es.map(([e, r]) => tarjetaEsc(e, r)).join('')}</details>`).join('');
+  $('centro').innerHTML = h;
+}
+function pintaLado(){
+  document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+  let h = '';
+  if (tab === 'estado') {
+    h += '<h3>Contadores</h3>' + Object.entries(st.c).sort().map(([k, v]) => { const [q, a, b] = k.split(':'); return `<div class="fila"><span>${esc(q)} <span class="mut">de ${esc(a)}${b ? ' hacia ' + esc(b) : ''}</span></span><input type="number" data-c="${esc(k)}" value="${v}"></div>`; }).join('');
+    h += '<div class="fila"><input type="text" id="nuevoc" placeholder="afecto:diana:ana" style="flex:1"> <button id="addc">+ contador</button></div>';
+    const H = Object.entries(st.h).sort((a, b) => a[1] - b[1]);
+    h += `<h3>Hechos (${H.length})</h3>` + H.map(([k, v]) => `<div class="fila"><code>${esc(k)}</code><span class="mut">día ${v} <button data-delh="${esc(k)}" title="quitar">✕</button></span></div>`).join('');
+    h += '<div class="fila"><input type="text" id="nuevoh" placeholder="un hecho" style="flex:1"> <button id="addh">+ hecho</button></div>';
+    const S = Object.keys(st.sabe); if (S.length) h += '<h3>Lo que se sabe</h3>' + S.map(k => `<div class="fila"><code>${esc(k)}</code></div>`).join('');
+    if (st.diario.length) h += '<h3>Diario</h3>' + st.diario.map(([d, t]) => `<div class="fila"><span>${esc(t)}</span><span class="mut">día ${d}</span></div>`).join('');
+  } else if (tab === 'jugadora') {
+    h += '<h3>Dejar pasar el tiempo</h3><div class="acc"><button data-t=".5">+30 min</button><button data-t="1">+1 h</button><button data-t="3">+3 h</button><button data-t="dormir">Dormir (día siguiente, 7:00)</button></div>';
+    h += '<h3>Hacer algo (+1 a lo que sube, y pasa una hora)</h3><div class="acc">' + ACCIONES.map(a => `<button data-hacer="${esc(a)}" title="${esc(D.habilidades.filter(h => h.suma.includes(a)).map(h => h.id + (h.de ? ' de ' + h.de : '')).join(', '))}">${esc(a.replace(/_/g, ' '))}</button>`).join('') + '</div>';
+    h += '<h3>Metas del cuaderno que ya cumplió</h3>' + D.metas.map(m => `<div class="fila"><label><input type="checkbox" data-meta="${esc(m.id)}" ${st.m[m.id] != null ? 'checked' : ''}> ${esc(m.titulo)}</label><span class="mut cod">${esc(m.id)}</span></div>`).join('');
+    h += '<p class="mut">Las conversaciones que Ana busca por su cuenta están en la lista del centro (en verde), con quién tendría que estar.</p>';
+  } else {
+    h += '<h3>Los pasos (toca uno para volver a antes de él)</h3><div class="hist">' + pila.map((p, i) => `<div data-ir="${i}">${i + 1}. ${esc(p.que)}</div>`).join('') + '</div>';
+    if (!pila.length) h += '<p class="mut">Todavía nada.</p>';
+  }
+  $('lado').innerHTML = h;
+}
+// ---- the clicks
+$('centro').addEventListener('click', e => { const a = e.target.closest('[data-esc]'); if (a) return empezar(a.dataset.esc); const o = e.target.closest('[data-op]'); if (o) return elegir(+o.dataset.op); if (e.target.id === 'listo') return terminar(); if (e.target.id === 'deshacerfin') return atras(); });
+$('centro').addEventListener('input', e => { if (e.target.id === 'fq') { filtro.q = e.target.value.toLowerCase(); pintaPosibles(); const q = $('fq'); q.focus(); q.setSelectionRange(q.value.length, q.value.length); } });
+$('centro').addEventListener('change', e => { const f = e.target.dataset.f; if (f) { filtro[f] = e.target.checked; pintaPosibles(); } });
+document.querySelector('.tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (b) { tab = b.dataset.tab; pintaLado(); } });
+$('lado').addEventListener('click', e => { const t = e.target.closest('[data-t]'); if (t) return tiempo(t.dataset.t === 'dormir' ? 'dormir' : +t.dataset.t); const a = e.target.closest('[data-hacer]'); if (a) return hacer(a.dataset.hacer);
+  const d = e.target.closest('[data-delh]'); if (d) { paso('quita el hecho ' + d.dataset.delh); delete st.h[d.dataset.delh]; guarda(); return pinta(); }
+  const i = e.target.closest('[data-ir]'); if (i && confirm('¿Volver a antes de este paso?')) return irA(+i.dataset.ir);
+  if (e.target.id === 'addh') { const v = $('nuevoh').value.trim(); if (v) { paso('pone el hecho ' + v); st.h[v] = st.dia; guarda(); pinta(); } }
+  if (e.target.id === 'addc') { const v = $('nuevoc').value.trim(); if (/^\w+:\w+:\w*$/.test(v)) { paso('agrega el contador ' + v); st.c[v] = contador(v); guarda(); pinta(); } } });
+$('lado').addEventListener('change', e => { const c = e.target.dataset.c; if (c) { paso(`cambia ${c} a ${e.target.value}`); st.c[c] = +e.target.value; guarda(); return pinta(); }
+  const m = e.target.dataset.meta; if (m) { paso((e.target.checked ? 'cumple' : 'deshace') + ' la meta ' + m); if (e.target.checked) st.m[m] = st.dia; else delete st.m[m]; guarda(); pinta(); } });
+$('atras').onclick = atras;
+$('donde').onchange = e => { paso('Ana va a ' + (LUGARES[e.target.value] || e.target.value)); st.donde = e.target.value; avanzar(.25); guarda(); pinta(); };
+$('reiniciar').onclick = () => { if (!confirm('¿Empezar de nuevo, desde la llegada de Ana?')) return; st = estadoInicial(); pila = []; guarda(); pinta(); };
+pinta();
+</script></body></html>

@@ -166,6 +166,7 @@ Un modelo lógico de lo que la gente le dice a Ana, revisado con un solucionador
 | Herramienta | Qué hace | Salida |
 |---|---|---|
 | `node tools/grafo.js` (corre solo con cada build) | revisa el grafo: escenas o metas que piden un hecho que nada deja (nunca pasarían), condiciones mal escritas, hechos que nada lee; y lo dibuja, para recorrerlo (buscar, tocar una escena: lo que necesita y lo que abre, los hechos, los puntos). | `trazas/grafo.md`, `trazas/grafo.html` |
+| `node tools/historia.js` (corre solo con cada build) | la historia en fichas, sin el mundo: el estado (hechos, contadores, metas, día, hora, dónde está Ana), lo que pasa ahora y lo que pasaría si la jugadora o el mundo hacen algo; se juegan las escenas con sus opciones, se vuelve atrás | `trazas/historia.html` |
 | `node tools/auditoria.js` | corre cada meta de prueba y compara el relato del juego con lo que debería pasar | `trazas/auditoria.md` |
 | `node tools/paciencia.js` | la paciencia de Marilla: las faltas, el perdón, la ayuda, la búsqueda, la duda en White Sands y sus desenlaces, el final y volver atrás | en la consola |
 | `node tools/caos.js` | jugadoras que hacen lo inesperado (teclas en plena escena, escaparse, recargar en el peor momento, el teléfono), con invariantes en cada paso | `trazas/partida3/` |

@@ -38,3 +38,5 @@ if (process.argv.includes('--check')) {
 } else { fs.writeFileSync(target, out); console.log('→ index.html (' + Math.round(out.length / 1024) + ' KB, ' + out.split('\n').length + ' líneas)'); }
 // the graph of the story (tools/grafo.js): a scene or goal that could never happen, or a condition written wrong, is said
 { const r = require('child_process').spawnSync(process.execPath, [path.join(__dirname, 'grafo.js')], { encoding: 'utf8' }); process.stdout.write(r.stdout || ''); if (r.status) console.error('⚠ el grafo de la historia tiene problemas: ver trazas/grafo.md'); }
+// the story as cards, to play the script alone (tools/historia.js → trazas/historia.html)
+{ const r = require('child_process').spawnSync(process.execPath, [path.join(__dirname, 'historia.js')], { encoding: 'utf8' }); process.stdout.write(r.stdout || ''); if (r.status) console.error('⚠ trazas/historia.html no se pudo armar: ' + (r.stderr || '').split('\n')[0]); }
