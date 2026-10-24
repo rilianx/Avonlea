@@ -1308,6 +1308,7 @@ interrumpe
 sujeta: marilla
 donde: tejas
 al_empezar: a_cocina
+al_empezar: hecho rumbo_spencer
 si: hecho:desayuno_prueba, !hecho:a_prueba, hora:14-19, paciencia:marilla:ana>=1
 ---
 marilla: Ponte el sombrero, Ana. Nos vamos a White Sands.
@@ -1323,7 +1324,7 @@ prioridad: 6
 interrumpe
 en: ana=out, marilla=out
 calesa: avonlea
-si: avance:ws:1-30
+si: hecho:rumbo_spencer, !hecho:a_prueba, avance:ws:1-30
 ---
 ana: ¿Sabe, Srta. Cuthbert? He decidido disfrutar de este viaje. Si uno se decide con firmeza, casi siempre puede disfrutar de las cosas.
 ana: No voy a pensar en el orfanato mientras vamos. Solo en el camino. ¡Mire, ya hay una rosa silvestre! ¿No le parece que el rosa es el color más encantador del mundo? Lástima que yo no lo pueda usar, con este pelo.
@@ -1341,7 +1342,7 @@ prioridad: 6
 interrumpe
 en: ana=out, marilla=out
 calesa: avonlea
-si: avance:ws:25-60
+si: hecho:rumbo_spencer, !hecho:a_prueba, avance:ws:25-60
 ---
 marilla: (Marilla mira el camino, no a Ana.) Ya que tienes tantas ganas de hablar, cuéntame lo que sepas de ti.
 ana: Oh, lo que sé de mí no vale la pena contarlo, Srta. Cuthbert. Si me dejara contarle lo que imagino de mí, le parecería mucho más interesante.
@@ -1358,7 +1359,7 @@ prioridad: 6
 interrumpe
 en: ana=out, marilla=out
 calesa: avonlea
-si: avance:ws:45-88
+si: hecho:rumbo_spencer, !hecho:a_prueba, avance:ws:45-88
 ---
 ana: Mi madre también era maestra, pero cuando se casó con mi padre dejó de enseñar. Eran pobres como ratones de iglesia. Vivían en una casita amarilla, con madreselvas en la ventana. Yo nunca la vi, pero la he imaginado miles de veces.
 ana: Mi madre se murió de fiebre cuando yo tenía tres meses. Ojalá hubiera vivido lo bastante para que yo me acordara de haberla llamado mamá. Mi padre se murió cuatro días después, de la misma fiebre.
