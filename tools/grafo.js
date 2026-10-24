@@ -41,8 +41,17 @@ for (const raw of guion.split('\n')) {
   { const n = s.match(/^(?:!\s*|al_(?:empezar|terminar):\s*)(?:contar|saber)\s+\S+\s+(\S+)/); if (n && !NOTICIAS.has(n[1])) malas.push(`escena ${esc.id}: «${s}» (no hay una noticia «${n[1]}» en src/datos/noticias.txt)`); }
   // «{De:marilla:x}» (who told her): only if someone did; if she saw it herself, there is no one to name
   if (esc.body) for (const [, k, f] of s.matchAll(/\{[dD]e:(\w+):(\w+)\}/g)) if (!new RegExp(`(?<!!)sabe:${k}:${f}:(contada|[2-9])\\b`).test(esc.si || '')) malas.push(`escena ${esc.id}: nombra quién le contó a ${k} «${f}», y su «si:» no pide que se lo hayan contado (\`sabe:${k}:${f}:contada\`, o una versión 2 o más)`);
-  if (esc.body) { const m = s.match(/^!\s*(hecho|olvidar)\s+(\S+)/); if (m) anota(m[1] === 'hecho' ? hace : pide, m[1] === 'hecho' ? m[2] : m[2] + ' ', 'escena ' + esc.id + ' (una opción)'); if (s.startsWith('->')) esc.opciones = (esc.opciones || 0) + 1; continue; }
+  if (esc.body) { const m = s.match(/^!\s*(hecho|olvidar)\s+(\S+)/); if (m) anota(m[1] === 'hecho' ? hace : pide, m[1] === 'hecho' ? m[2] : m[2] + ' ', 'escena ' + esc.id + ' (una opción)'); if (s.startsWith('->')) esc.opciones = (esc.opciones || 0) + 1;
+    // (for the drawing, trazas/grafo.html: its lines, its choices and what each does)
+    if (s.startsWith('->')) (esc.ops ||= []).push({ t: s.replace(/^->\*?\s*/, ''), propia: s.startsWith('->*'), ef: [] });
+    else if (/^\s/.test(raw) && esc.ops?.length && s.startsWith('!')) esc.ops.at(-1).ef.push(s.slice(1).trim());
+    else if (/^\s/.test(raw) && esc.ops?.length) { const o = esc.ops.at(-1); if (!o.dice) o.dice = s.slice(0, 160); }
+    else { esc.lin = (esc.lin || 0) + 1; if (!esc.primera && /^[a-zñ]+( piensa)?:/.test(s)) esc.primera = s.slice(0, 160); if (esc.ops?.length) esc.opsFin = true; }
+    continue; }
   const i = s.indexOf(':'), k = i < 0 ? s : s.slice(0, i).trim(), v = i < 0 ? '' : s.slice(i + 1).trim();
+  if (['canal', 'prioridad', 'con', 'tema', 'resumen', 'donde', 'en', 'cerca', 'repetir', 'disparo', 'lugar'].includes(k)) esc[k] = v;
+  if (k === 'narra' && !esc.narra) esc.narra = v.slice(0, 260);
+  if (k === 'al_empezar' || k === 'al_terminar') (esc[k + 's'] ||= []).push(v);
   if (k === 'si') { esc.si = v; v.split(',').forEach(c => condicion(c, 'escena ' + esc.id)); }
   if (k === 'narra salvo') v.split(',').forEach(c => condicion(c.trim(), 'escena ' + esc.id + ' (narra salvo)'));
   if (k === 'o') { const m = v.match(/si=(\S+)/); if (m) m[1].split(',').forEach(c => condicion(c, 'escena ' + esc.id + ' (alternativa)')); }
@@ -99,7 +108,7 @@ if (sinReaccion.length) malas.push(...sinReaccion.map(x => 'noticia sin reacció
     if (/^(llega si|de visita):/.test(s)) anota(hace, 'llego_' + q, 'llegadas'); if (/^(se va si|de visita):/.test(s)) anota(hace, 'se_fue_' + q, 'llegadas');   // (arriving and leaving are facts of the story)
     if ((m = s.match(/^(?:llega|se va) si:\s*(.*)$/))) m[1].split(',').forEach(c => condicion(c.trim(), 'llegadas de ' + q)); } }
 // the notebook: what each goal requires, its hints, and goals that are a fact
-let meta = null; const REQ = {}, A_PRUEBA = new Set();
+let meta = null; const REQ = {}, A_PRUEBA = new Set(), METAS_INFO = {};
 for (const raw of cuaderno.split('\n')) {
   const s = raw.trim(); if (!s || s[0] === '#') continue;
   const h = s.match(/^===\s*(.+?)\s*===$/); if (h) { meta = h[1]; continue; } if (!meta) continue;
@@ -110,6 +119,7 @@ for (const raw of cuaderno.split('\n')) {
   if ((m = s.match(/^pista si (.+?):\s/))) m[1].split(',').forEach(c => condicion(c.trim(), 'meta ' + meta + ' (pista)'));
   if ((m = s.match(/^meta:\s*hecho\s+(\S+)/))) anota(pide, m[1] + ' ', 'meta ' + meta);
   if ((m = s.match(/^requiere:\s*(.*)$/))) REQ[meta] = m[1].split(',').map(x => x.trim()); if (s === 'a prueba') A_PRUEBA.add(meta);
+  if ((m = s.match(/^(titulo|pista|meta):\s*(.*)$/))) (METAS_INFO[meta] ||= {})[m[1]] = m[2];
 }
 // before Marilla decides (days 1 to 3), only what is marked «a prueba»: every other goal waits for «quedarse»
 { const llega = (k, vis = new Set()) => k === 'quedarse' || (REQ[k] || []).some(x => x === 'hecho:se_queda' || (metas.has(x) && !vis.has(x) && llega(x, new Set([...vis, k]))));
@@ -124,6 +134,10 @@ for (const raw of habilidades.split('\n')) {
 }
 // the code: facts made (dlgHecho('x')) and read (dlgHechos().x, dlgHechos()['x'])
 for (const m of codigo.matchAll(/dlgHecho\('([a-z_0-9]+)'/g)) anota(hace, m[1], 'código');
+// what the code leaves after a scene (a trip that the scene starts, and the facts of its way): «// grafo: escena → hecho, hecho»
+for (const m of codigo.matchAll(/\/\/\s*grafo:\s*(\w+)\s*→\s*([\w,\s]+?)\s*$/gm)) for (const h of m[2].split(',').map(x => x.trim()).filter(Boolean)) {
+  if (!escenas.some(e => e.id === m[1])) malas.push(`código: «// grafo: ${m[1]} → …» nombra una escena que no hay`);
+  anota(hace, h, 'escena ' + m[1] + ' (por el juego)'); }
 for (const m of codigo.matchAll(/dlgHechos\(\)(?:\.([a-z_0-9]+)|\['([a-z_0-9]+)'\])/g)) anota(pide, (m[1] || m[2]) + ' ', 'código');
 for (const m of codigo.matchAll(/['"`](?:hecho|dias_desde):([a-z_0-9]+)/g)) anota(pide, m[1] + ' ', 'código');
 for (const m of codigo.matchAll(/['"`\[]conoce:([a-z_0-9]+)/g)) anota(pide, 'conoce_' + m[1] + ' ', 'código');
@@ -199,5 +213,7 @@ fs.writeFileSync(path.join(root, 'trazas/grafo.md'), md.join('\n'));
 // the same, as data (for the spreadsheet: tools/planilla.js, tools/importar_planilla.py)
 const lista = o => Object.fromEntries(Object.entries(o).map(([h, w]) => [h.trim(), [...w]]));
 fs.writeFileSync(path.join(root, 'trazas/grafo.json'), JSON.stringify({ hechos: lista(hace), piden: lista(pide), metas: [...metas], claves: CLAVES, cualidades: [...CUALIDADES], noticias: [...NOTICIAS], nunca, sinUso, malas }, null, 1));
+// the drawing: trazas/grafo.html (tools/grafo-dibujo.js)
+require('./grafo-dibujo.js').dibujar({ escenas, hace, pide, puntos, nunca, malas, sinUso, metas: [...metas].map(id => ({ id, ...(METAS_INFO[id] || {}), requiere: REQ[id] || [], aPrueba: A_PRUEBA.has(id) })) }, root);
 console.log(`→ trazas/grafo.md · ${escenas.length} escenas, ${metas.size} metas · nunca pasarían: ${nunca.length} · mal escritas: ${malas.length} · sin uso: ${sinUso.length}`);
 process.exitCode = nunca.length || malas.length ? 1 : 0;
