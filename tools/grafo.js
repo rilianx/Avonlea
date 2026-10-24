@@ -200,11 +200,15 @@ for (const bloque of guion.split(/^(?====)/m)) {
 const necesita = Object.keys(pide).filter(h => !h.endsWith(' ')), lee = new Set(Object.keys(pide).map(h => h.trim()));
 for (const e of escenas) { if (e.punto) puntos.push([e.id, 'antes', e.punto]); else if (e.grande && !puntos.some(([id]) => id === e.id)) malas.push(`escena ${e.id}: es grande y no deja un punto (un momento al que volver: «punto:», justo antes, o «al_terminar: punto»)`); }
 const nunca = necesita.filter(h => !hace[h] && !/^conoce_/.test(h)).sort()   /* (conoce_<who>: whoever Ana meets, src/js/66-conocidos.js) */, sinUso = Object.keys(hace).filter(h => !lee.has(h) && !/^(hito_|historia_|llego_|se_fue_)/.test(h)).sort();
+// the drawing: trazas/grafo.html (tools/grafo-dibujo.js)
+const dibujo = require('./grafo-dibujo.js').dibujar({ escenas, hace, pide, puntos, nunca, malas, sinUso, metas: [...metas].map(id => ({ id, ...(METAS_INFO[id] || {}), requiere: REQ[id] || [], aPrueba: A_PRUEBA.has(id) })) }, root);
+const sinResumen = dibujo.nodos.filter(n => !n.suelto && !['meta', 'sistema'].includes(n.tipo) && !n.info.resumen && !n.info.tema).map(n => n.k);
 const md = ['# El grafo de la historia, revisado', '', 'Lo genera `node tools/grafo.js` (ver `docs/MOTOR.md`). Lee el guion, el cuaderno, las habilidades y el código.', '',
   `**${escenas.length} escenas** (${escenas.filter(e => e.grande).length} grandes), **${metas.size} metas** del cuaderno, **${Object.keys(hace).length} hechos** que algo deja.`, '',
   '## Escenas o metas que nunca podrían pasar', '', nunca.length ? 'Piden un hecho que nada deja:' : 'Ninguna: todo hecho que se pide, algo lo deja.', '',
   ...nunca.map(h => `- \`${h}\`: lo piden ${[...pide[h]].join(', ')}`), '',
   '## Condiciones mal escritas', '', ...(malas.length ? malas.map(m => '- ' + m) : ['Ninguna.']), '',
+  '## Escenas encadenadas sin «resumen:»', '', 'No es un error: en el dibujo (trazas/grafo.html) se ve su primera frase en vez de una descripción.', '', ...(sinResumen.length ? sinResumen.map(x => '- `' + x + '`') : ['Ninguna.']), '',
   '## Los momentos a los que se puede volver (puntos)', '', ...puntos.map(([id, cuando, t]) => `- \`${id}\` (${cuando}): ${t}`), '',
   '## Hechos que se dejan y nada lee', '', 'No es un error (un hecho puede quedar para el registro), pero puede ser algo olvidado:', '',
   ...(sinUso.length ? sinUso.map(h => `- \`${h}\`: lo deja ${[...hace[h]].join(', ')}`) : ['Ninguno.']), ''];
@@ -213,7 +217,5 @@ fs.writeFileSync(path.join(root, 'trazas/grafo.md'), md.join('\n'));
 // the same, as data (for the spreadsheet: tools/planilla.js, tools/importar_planilla.py)
 const lista = o => Object.fromEntries(Object.entries(o).map(([h, w]) => [h.trim(), [...w]]));
 fs.writeFileSync(path.join(root, 'trazas/grafo.json'), JSON.stringify({ hechos: lista(hace), piden: lista(pide), metas: [...metas], claves: CLAVES, cualidades: [...CUALIDADES], noticias: [...NOTICIAS], nunca, sinUso, malas }, null, 1));
-// the drawing: trazas/grafo.html (tools/grafo-dibujo.js)
-require('./grafo-dibujo.js').dibujar({ escenas, hace, pide, puntos, nunca, malas, sinUso, metas: [...metas].map(id => ({ id, ...(METAS_INFO[id] || {}), requiere: REQ[id] || [], aPrueba: A_PRUEBA.has(id) })) }, root);
 console.log(`→ trazas/grafo.md · ${escenas.length} escenas, ${metas.size} metas · nunca pasarían: ${nunca.length} · mal escritas: ${malas.length} · sin uso: ${sinUso.length}`);
 process.exitCode = nunca.length || malas.length ? 1 : 0;

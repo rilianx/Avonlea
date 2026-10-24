@@ -13,6 +13,12 @@ Ninguna: todo hecho que se pide, algo lo deja.
 
 Ninguna.
 
+## Escenas encadenadas sin «resumen:»
+
+No es un error: en el dibujo (trazas/grafo.html) se ve su primera frase en vez de una descripción.
+
+Ninguna.
+
 ## Los momentos a los que se puede volver (puntos)
 
 - `desayuno_prueba` (al empezar): viaje | Volver a la mañana del viaje a White Sands

@@ -244,6 +244,7 @@ body:not(.dev) #spdbtn{top:298px!important;right:10px!important}
 # «narra salvo: <condiciones>»: las tarjetas de «narra:», salvo cuando se cumple (lo que cuentan, la jugadora lo acaba de jugar).
 # En «si:», también: «horas_desde:llegada_tv:0.5» (pasó por lo menos media hora desde ese hecho), «comento:lynde:ana:camison» (ya le comentó hoy eso: el camisón, «hora», el sombrero), «ve:marilla» (Marilla la ve), «donde:ana:tejas» (o con «!»), «ana:camison», «ana:sin_sombrero»,
 #   «ana:ropa_tirada»; y las cualidades de uno hacia otro: «paciencia:marilla:ana<=1» (src/datos/habilidades.txt).
+# «resumen: …»: qué pasa en la escena, en una línea (para el dibujo del grafo, trazas/grafo.html).
 # «! vestirse»; «! punto id | texto» (un punto para volver: la partida como está ahora; el campo «punto: [id |] texto»
 #   lo guarda justo antes de que empiece la escena, y al volver se juega de nuevo; toda escena «grande» lleva uno);
 #   «! final id | texto» (la
@@ -422,6 +423,7 @@ ana piensa: Blanco… de las Delicias… no, todavía no…
 
 # --- entrando a Avonlea: una milla más (y la Avenida tiene nombre), la laguna, Tejas Verdes, la casa
 === nombra_avenida ===
+resumen: Ana le pone nombre a la Avenida (en el libro, «el Camino Blanco de las Delicias»).
 canal: viaje
 prioridad: 9
 interrumpe
@@ -442,6 +444,7 @@ ana: Pero no deberían llamar «la Avenida» a ese lugar tan precioso. Ese nombr
 ana: Otros podrán llamarlo la Avenida, pero yo siempre le diré el Camino Blanco de las Delicias.
 
 === lago ===
+resumen: Matthew le muestra la laguna de Barry, y Ana le pone nombre (en el libro, «el Lago de las Aguas Brillantes»).
 canal: viaje
 prioridad: 9
 interrumpe
@@ -474,6 +477,7 @@ marcas: 2=adivina_tv
 al_empezar: log Ana adivinó cuál era Tejas Verdes, bajo una gran estrella blanca.
 
 === llegada ===
+resumen: Llegan a Tejas Verdes: Marilla ve a la niña y pregunta dónde está el niño.
 canal: gg
 prioridad: 10
 sujeta: matthew, marilla
@@ -662,6 +666,7 @@ carta: Si me devuelven, ¿podría buscarme una casa donde haya árboles? Pero oj
 carta: Su servidora, Ana Shirley
 
 === carta_spencer_1 ===
+resumen: Ana le escribe a la Sra. Spencer cómo le va en Tejas Verdes.
 canal: carta
 prioridad: 5
 repetir: siempre
@@ -764,6 +769,7 @@ carta: Ayuda en la casa, haz lo que te dicen y, sobre todo, no hables tanto. Eso
 carta: Afectuosamente, la Sra. Spencer
 
 === resp_spencer_prueba_quedo ===
+resumen: La Sra. Spencer contesta: se alegra de que los Cuthbert se queden con Ana.
 canal: respuesta
 de: spencer
 responde: carta_spencer_prueba
@@ -775,6 +781,7 @@ carta: Ahora tienes casa, niña. Cuídala, y no hables tanto.
 carta: Afectuosamente, la Sra. Spencer
 
 === resp_spencer_conocidas_diana ===
+resumen: La Sra. Spencer contesta: se alegra de que Ana tenga una amiga, Diana.
 canal: respuesta
 de: spencer
 si: respuesta:spencer, hecho:se_queda, hecho:conocidas_diana
@@ -785,6 +792,7 @@ carta: Y pórtate bien en casa de los Barry, que la Sra. Barry es muy estricta.
 carta: Afectuosamente, la Sra. Spencer
 
 === resp_spencer_zanahorias_pizarra ===
+resumen: La Sra. Spencer la reta por romperle la pizarra en la cabeza a Gilbert.
 canal: respuesta
 de: spencer
 si: respuesta:spencer, hecho:se_queda, hecho:zanahorias_pizarra
@@ -795,6 +803,7 @@ carta: Pídele perdón, o por lo menos no lo hagas otra vez. Lo que se dice del 
 carta: Afectuosamente, la Sra. Spencer
 
 === resp_spencer_zanahorias_contesta ===
+resumen: La Sra. Spencer: le contestó a Gilbert; que cuide esa lengua.
 canal: respuesta
 de: spencer
 si: respuesta:spencer, hecho:se_queda, hecho:zanahorias_contesta
@@ -805,6 +814,7 @@ carta: Una lengua rápida da más disgustos que alegrías. Te lo digo yo, que te
 carta: Afectuosamente, la Sra. Spencer
 
 === resp_spencer_zanahorias_ignora ===
+resumen: La Sra. Spencer la felicita por no hacerle caso a Gilbert.
 canal: respuesta
 de: spencer
 si: respuesta:spencer, hecho:se_queda, hecho:zanahorias_ignora
@@ -815,6 +825,7 @@ carta: Sigue así. Y el pelo rojo se oscurece con los años, ya verás.
 carta: Afectuosamente, la Sra. Spencer
 
 === resp_spencer_ofendio_lynde ===
+resumen: La Sra. Spencer supo que gritó a la Sra. Lynde: que le pida perdón.
 canal: respuesta
 de: spencer
 si: respuesta:spencer, hecho:se_queda, hecho:ofendio_lynde
@@ -825,6 +836,7 @@ carta: Ve a pedirle perdón, niña. Aunque ella haya dicho lo que dijo. Así se 
 carta: Afectuosamente, la Sra. Spencer
 
 === resp_spencer_lynde_llanto ===
+resumen: La Sra. Spencer la consuela: la Sra. Lynde la trató de flaca y fea.
 canal: respuesta
 de: spencer
 si: respuesta:spencer, hecho:se_queda, hecho:lynde_llanto
@@ -835,6 +847,7 @@ carta: No le hagas caso. Y come más, que algo de razón tiene en lo de flaca.
 carta: Afectuosamente, la Sra. Spencer
 
 === resp_spencer_prohibida ===
+resumen: La Sra. Spencer: qué pena lo de Diana; paciencia, y nada a escondidas.
 canal: respuesta
 de: spencer
 si: respuesta:spencer, hecho:se_queda, hecho:prohibida
@@ -845,6 +858,7 @@ carta: Mientras tanto, no la vayas a buscar a escondidas. Eso lo empeoraría tod
 carta: Afectuosamente, la Sra. Spencer
 
 === resp_spencer_1 ===
+resumen: La Sra. Spencer contesta la primera carta: que se porte bien y no hable tanto.
 canal: respuesta
 de: spencer
 si: respuesta:spencer, hecho:se_queda
@@ -855,6 +869,7 @@ carta: Saludos a la Srta. Cuthbert. Y no hables tanto, niña.
 carta: Afectuosamente, la Sra. Spencer
 
 === quiere_amiga ===
+resumen: Ana nunca tuvo una amiga de verdad y le cuenta a Marilla cuánto quiere una.
 narra: Ana nunca ha tenido una amiga de verdad. En el orfanato y en las casas donde vivió, sus únicas amigas fueron imaginarias: Katie Maurice, la niña que vivía detrás del vidrio de una vitrina, y Violetta, el eco de un valle.
 canal: gg
 prioridad: 7
@@ -874,6 +889,7 @@ marilla: Diana es muy bonita: ojos y pelo negros, y mejillas rosadas. Y es buena
 ana: ¡Oh, Marilla! Ahora tengo miedo: ¿y si no le gusto? Sería la desilusión más trágica de mi vida.
 
 === aviso_barry ===
+resumen: Marilla avisa que irá donde los Barry: Ana puede ir a conocer a Diana.
 # (a la mañana, el día que Marilla va a llevarla: para que Ana no ande lejos a esa hora, 66-cadenas.js)
 canal: gg
 prioridad: 5
@@ -886,6 +902,7 @@ marilla: Ana, esta tarde, después del almuerzo, voy a La Cuesta del Huerto a de
 ana: ¡Oh, Marilla! Voy a estar aquí, quietecita como una estatua. Bueno… casi como una estatua.
 
 === barry_recibe ===
+resumen: En La Cuesta del Huerto, la Sra. Barry recibe a Marilla y Ana.
 narra: La Cuesta del Huerto es la granja de los Barry, al otro lado del arroyo, frente a Tejas Verdes. Allí vive Diana, de la edad de Ana, con sus padres y su hermanita Minnie May. La Sra. Barry es una señora muy estricta.
 canal: os
 prioridad: 7
@@ -903,6 +920,7 @@ ana: Ana con una sola n, por favor.
 barry: ¿Cómo estás, Ana? Diana está en el jardín. ¡Diana! Ven a conocer a la niña de los Cuthbert.
 
 === conoce_diana ===
+resumen: Ana conoce a Diana en el jardín de los Barry y le pide ser su amiga del alma.
 canal: os
 prioridad: 8
 interrumpe
@@ -920,6 +938,7 @@ ana: (Ana mira a Diana muy seria, sin atreverse a respirar.) Oh, Diana… ¿cree
 diana: (Diana se ríe; Diana siempre se ríe antes de hablar.) Bueno, creo que sí. Me alegro mucho de que hayas venido a vivir a Tejas Verdes. Va a ser tan lindo tener a alguien con quien jugar.
 
 === diana_por_casualidad ===
+resumen: Ana y Diana se encuentran por casualidad, sin que nadie las presente.
 disparo: encuentro
 quienes: ana, diana
 # (una vez que Ana le contó a Marilla, se conocen como en el libro: Marilla la lleva y la Sra. Barry las presenta)
@@ -939,6 +958,7 @@ diana: Bueno… tal vez. Tengo que volver a casa ahora.
 # poder ir al picnic, «confiesa» que lo perdió en el lago… hasta que el broche aparece en el chal de Marilla.
 # Abre el picnic (cuaderno: picnic requiere hecho:broche).
 === broche ===
+resumen: Desaparece el broche de amatista de Marilla, y Marilla culpa a Ana.
 punto: Antes del broche de amatista
 narra: Marilla tiene un broche de amatista que fue de su madre: lo más valioso que posee, y lo usa solo para ir a la iglesia. Y la escuela dominical va a hacer un picnic en el lago, con helado, algo que Ana nunca ha probado.
 grande
@@ -970,6 +990,7 @@ ana: (Ana baja la escalera de un salto, con los ojos brillando.) ¡Helado! ¡Por
 # --- «¡Zanahorias!» (cap. 15): el primer día de Ana en la escuela con Gilbert Blythe. Desde ahí, Ana no le habla
 # (la ofensa), y hacer las paces se vuelve una meta (cuaderno: paces requiere hecho:zanahorias).
 === zanahorias ===
+resumen: En la escuela, Gilbert le dice «Zanahorias» a Ana.
 punto: Antes del día de la pizarra (Gilbert y las zanahorias)
 narra: La escuela de Avonlea tiene una sola sala, para todos los niños del pueblo. Gilbert Blythe es el más listo y el más buen mozo, y está acostumbrado a que todas las niñas lo miren. Ana todavía no lo ha mirado.
 grande
@@ -1080,6 +1101,7 @@ ana: «…y de Hohenlinden en la nieve, corría el río, rojo y frío…»
    ana: (Ana siente todos los ojos encima, y la voz se le achica. Termina el poema casi en un susurro.)
    phillips: Más fuerte la próxima vez, Ana. Un poema leído para adentro es un poema perdido.
 === clase_composicion_stacy ===
+resumen: La Srta. Stacy pide escribir sobre lo que se ve por la ventana.
 narra: La Srta. Stacy abre las ventanas para que entre el aire. «Hoy», dice, «van a escribir sobre algo que vean desde aquí».
 canal: es
 prioridad: 4
@@ -1098,6 +1120,7 @@ ana: (Ana mira por la ventana. Un arce, el camino, un pedazo de cielo. Y empieza
    ana: (El arce se vuelve un rey encantado que espera a una princesa desde hace cien años. Ana llena dos páginas.)
    stacy: (La Srta. Stacy se ríe bajito.) Tienes imaginación de sobra, Ana. Ahora aprende a usarla con rienda.
 === clase_botanica_stacy ===
+resumen: Clase de botánica de la Srta. Stacy con flores silvestres.
 narra: Clase de botánica. La Srta. Stacy trajo del bosque un ramo de flores silvestres, y lo pone en un frasco sobre su mesa.
 canal: es
 prioridad: 4
@@ -1120,6 +1143,7 @@ stacy: (La Srta. Stacy saca una florcita blanca, de siete pétalos.) ¿Quién sa
 # Diana la vea más (hecho prohibida: se cierra todo lo de Diana). Dos días después, Minnie May tiene crup, Diana viene
 # corriendo, Ana la salva toda la noche con el jarabe, y la Sra. Barry le pide perdón (se olvida prohibida).
 === te_grosella ===
+resumen: El té con Diana: Ana le sirve vino de grosellas creyendo que es cordial.
 narra: Marilla le dio permiso a Ana para invitar a Diana a tomar el té, como dos señoras, con el juego de té bueno y el cordial de frambuesa de la despensa. Pero Marilla no se acordó de que el cordial ya no estaba en la despensa, sino en el sótano.
 canal: gg
 prioridad: 7
@@ -1138,6 +1162,7 @@ ana: ¿A casa? ¡Pero si todavía no hemos tomado el té! ¡Diana, no te vayas!
 diana: (Diana se levanta tambaleándose.) Me siento… muy… muy mal.
 
 === prohibida ===
+resumen: La Sra. Barry le prohíbe a Diana juntarse con Ana.
 punto: Antes de que la Sra. Barry le prohíba a Diana verla
 narra: La Sra. Barry es una mujer severa, que no perdona fácilmente. Y Diana llegó a su casa mareada, tambaleándose, después de tomar el té en Tejas Verdes.
 grande
@@ -1160,6 +1185,7 @@ marilla: La Sra. Barry dice que Diana no puede volver a jugar contigo. Ve a pedi
 ana: (Ana se tira en el sofá, desconsolada.) Mi destino es trágico. Es el más trágico de toda la isla.
 
 === barry_no_perdona ===
+resumen: Ana va a pedirle perdón a la Sra. Barry, y ella no la perdona.
 canal: os
 prioridad: 7
 interrumpe
@@ -1170,6 +1196,7 @@ ana: Sra. Barry, por favor, perdóneme. No sabía que era vino. Me imaginé que 
 barry: No, Ana Shirley. No creo que seas compañía para Diana. Vete a tu casa y pórtate bien.
 
 === crup_aviso ===
+resumen: Noche de invierno: Diana viene corriendo, Minnie May tiene crup.
 punto: Antes de la noche del crup
 narra: Una noche de invierno. Casi todos los grandes de Avonlea fueron a Charlottetown, a escuchar el discurso del Primer Ministro: también los Barry. Diana se quedó en casa cuidando a Minnie May, su hermanita de tres años.
 narra: El crup es una enfermedad de los niños que cierra la garganta: hay que actuar rápido. Ana sabe de crup, porque cuidó a tres pares de mellizos de la Sra. Hammond.
@@ -1188,6 +1215,7 @@ ana: ¡Crup! Yo cuidé a los mellizos de la Sra. Hammond… tres veces tuvieron 
 ana: (Ana toma el frasco del aparador y su chal.) ¡Vamos, Diana! ¡Corre!
 
 === crup_salva ===
+resumen: Ana salva a Minnie May del crup con jarabe de ipecacuana.
 canal: os
 prioridad: 9
 interrumpe
@@ -1210,6 +1238,7 @@ ana: (Ana no cabe en sí de felicidad.) ¡Oh, Sra. Barry! La perdono con toda mi
 # té; Ana hace el pastel… con linimento en vez de vainilla. La Sra. Allan es tan buena que la invita a la casa
 # parroquial (cuaderno: el té con la Sra. Allan requiere hecho:pastel_linimento).
 === invita_allan ===
+resumen: Marilla invita a los Allan a tomar el té, y Ana hará un pastel.
 punto: Antes del té con la Sra. Allan
 narra: Avonlea tiene un pastor nuevo, el Sr. Allan, que llegó con su esposa, joven y alegre. Ana la quiere desde el primer domingo en la escuela dominical. Y en Avonlea, cuando llega un pastor nuevo, cada familia lo invita a tomar el té.
 grande
@@ -1224,6 +1253,7 @@ marilla: Invité al pastor y a la Sra. Allan a tomar el té mañana en la tarde.
 ana: ¡Oh, Marilla! Lo haré con toda mi alma. ¡Y con vainilla, como dice la receta!
 
 === pastel_linimento ===
+resumen: El pastel de Ana para la Sra. Allan lleva linimento en vez de vainilla.
 punto: Antes del pastel con linimento
 grande
 canal: gg
@@ -1247,6 +1277,7 @@ sraallan: (La Sra. Allan sube a verla.) Querida, fue un error muy gracioso, nada
 # --- la tía Josephine (cap. 19): ya amigas, Ana se queda a dormir donde Diana después del concierto del Club de Debate;
 # saltan sobre la cama del cuarto de huéspedes… donde dormía la tía Josephine. Ana confiesa y se gana su amistad.
 === cama_josephine ===
+resumen: Ana y Diana saltan sobre la cama del cuarto de huéspedes… y está la Srta. Josephine.
 punto: Antes de la noche en la cama de la Srta. Josephine
 narra: La tía de la Sra. Barry, la Srta. Josephine Barry, vino desde Charlottetown. Es una anciana rica, muy de mal genio, y se queda en el cuarto de huéspedes de La Cuesta del Huerto. Ana y Diana no lo saben.
 grande
@@ -1270,6 +1301,7 @@ josephine: (La tía Josephine se ríe como hacía años.) Vaya, vaya… Ven a ve
 # --- El examen de ingreso a Queen's (cap. 31, 32): el primer día de cada verano, si Ana estudió lo suficiente para que
 # la Srta. Stacy la mande (estudio:ana>=10). Cómo le va sale de lo que estudió: los días de clase y de lecciones (docs/LARGO_PLAZO.md).
 === examen_primera ===
+resumen: El examen del Queen's: Ana sale primera de toda la Isla.
 narra: El examen de ingreso al Queen's, el colegio de Charlottetown donde se preparan los maestros, se da al comenzar el verano. Los mejores alumnos de toda la Isla compiten por entrar. Ana estudió meses con la Srta. Stacy, y Gilbert Blythe también.
 canal: gg
 prioridad: 8
@@ -1289,6 +1321,7 @@ ana: (Semanas después, Diana llega corriendo con el diario.) ¡Marilla! ¡Pasé
 marilla: (Marilla no dice nada por un momento. Pero los ojos le brillan.) Bueno, Ana. Bien hecho. Bien hecho, de verdad.
 
 === examen_entra ===
+resumen: El examen del Queen's: Ana entra.
 narra: El examen de ingreso al Queen's, el colegio de Charlottetown donde se preparan los maestros, se da al comenzar el verano. Los mejores alumnos de toda la Isla compiten por entrar. Ana estudió meses con la Srta. Stacy, y Gilbert Blythe también.
 canal: gg
 prioridad: 8
@@ -1306,6 +1339,7 @@ ana: (Semanas después, sale la lista en el diario.) ¡Marilla! ¡Entré a Queen
 marilla: Lo sabía. Aunque no te lo iba a decir, para que no te llenaras de humo.
 
 === examen_no ===
+resumen: El examen del Queen's: Ana no alcanza a entrar.
 narra: El examen de ingreso al Queen's, el colegio de Charlottetown donde se preparan los maestros, se da al comenzar el verano. Los mejores alumnos de toda la Isla compiten por entrar. Ana estudió meses con la Srta. Stacy, y Gilbert Blythe también.
 canal: gg
 prioridad: 8
@@ -1327,6 +1361,7 @@ marilla: Bueno. Hay otro examen el año que viene, y tú no eres de las que se r
 # (lo que Ana hizo desde que llegó cuenta: «la paciencia de Marilla»), y esa noche se lo dice a Matthew. Día 3, en la
 # tarde: Marilla le dice a Ana que se queda (el cuaderno: «Quedarse en Tejas Verdes»).
 === inicio_llegada ===
+resumen: El comienzo: Avonlea, los Cuthbert, y Matthew va a buscar a un niño del orfanato.
 narra: Avonlea, un pueblito de granjas en la Isla del Príncipe Eduardo, en Canadá, a fines del siglo XIX. En la granja de Tejas Verdes viven dos hermanos solterones, Matthew y Marilla Cuthbert. Ya están mayores, y le pidieron a la Sra. Spencer que les trajera del orfanato un niño, para ayudar en el campo.
 narra: Pero en la estación de Bright River, Matthew no encontró a ningún niño: lo esperaba una niña flaca, de pelo rojo, con un sombrero de paja y una maleta vieja. Matthew no se atrevió a dejarla allí. Ahora llegan juntos a Tejas Verdes, ya de noche, y Marilla los está esperando en la puerta de la cocina.
 narra salvo: hecho:desde_estacion
@@ -1388,6 +1423,7 @@ narra: Ahora te toca a ti: lleva a Ana a su pieza. Toca el suelo para que camine
 
 # la primera noche, si Ana no sube (se queda abajo, o se escapa afuera): Marilla la lleva a su pieza
 === primera_noche_sube ===
+resumen: La primera noche: Marilla lleva a Ana a la pieza del alero.
 narra: Ya es noche cerrada. Marilla toma la vela, busca a Ana y la lleva hasta la pieza del alero, sin decir palabra.
 canal: gg
 prioridad: 9
@@ -1398,6 +1434,7 @@ al_terminar: a_pieza
 # la primera noche, en la pieza del alero (cap. 3): apenas llega, Ana se tira en la cama, desconsolada; Marilla sube con
 # la vela a darle las buenas noches, y Ana se enoja
 === primera_bed ===
+resumen: Ana en la pieza del alero, la primera noche: llora hasta dormirse.
 disparo: primera
 canal: ana_sola
 sujeta: marilla
@@ -1423,6 +1460,7 @@ ana: (Esa noche, en la pieza del alero, Ana llora hasta quedarse dormida.)
 ! dormir
 
 === primera_noche ===
+resumen: Marilla le dice que esa noche se queda, hasta aclarar el enredo.
 canal: gg
 prioridad: 10
 interrumpe
@@ -1445,6 +1483,7 @@ ana: (Ana apenas prueba la cena. Esa noche, en la pieza del alero, llora hasta q
 # (la primera mañana: la Sra. Rachel lo vio anoche desde su ventana, y ya lo sabe; desde ella, todo Avonlea: la noticia
 # va de uno a otro cuando los vecinos conversan; ver src/js/66-conocidos.js)
 === lynde_se_entera ===
+resumen: La Sra. Lynde se entera de que los Cuthbert tienen una niña.
 narra: Anoche, desde su ventana, la Sra. Rachel Lynde vio pasar la calesa de Matthew… y en ella, una niña de trenzas rojas. Esta mañana, antes de que el sol esté alto, ya se lo ha contado a medio Avonlea. A la otra mitad se lo contará en la tarde.
 canal: rl
 prioridad: 2
@@ -1452,6 +1491,7 @@ si: hecho:inicio_juego, hecho:desayuno_prueba, hora:7-12, !sabe:lynde:nina_cuthb
 al_empezar: saber lynde nina_cuthbert
 
 === desayuno_prueba ===
+resumen: El primer desayuno en Tejas Verdes: Ana todavía no sabe si se queda.
 narra: Huele a pan tostado en toda la casa. Marilla llama: «¡Ana! ¡El desayuno!».
 canal: gg
 prioridad: 9
@@ -1480,6 +1520,7 @@ ana: (Ana baja la mirada al plato y no dice nada más, cosa rara en ella.)
 ! mesa nada
 
 === viaje_spencer ===
+resumen: Marilla y Ana salen a White Sands, a devolverla donde la Sra. Spencer.
 punto: white_sands | Antes de salir a White Sands
 narra: White Sands está a unas millas por el camino de la costa. Allí vive la Sra. Spencer, la que trajo a Ana del orfanato por equivocación: Marilla va a pedirle que la devuelva. Ana sabe que puede ser su último día en Tejas Verdes.
 canal: gg
@@ -1497,6 +1538,7 @@ ana piensa: Puede que sea la última vez que veo esta cocina.
 # el viaje a White Sands, en la calesa de Marilla (src/js/34-viaje-white-sands.js): lo que se dicen por el camino, en
 # sus lugares (capítulo 5 del libro), la Sra. Pye en el camino (no es del libro), y la casa de la Sra. Spencer (capítulo 6)
 === ws_t1 ===
+resumen: En la calesa: Ana decide disfrutar el viaje; las rosas silvestres y su pelo.
 canal: viaje
 prioridad: 6
 interrumpe
@@ -1513,6 +1555,7 @@ marilla: No veo dónde está el consuelo.
 ana: Es que suena tan bonito y tan romántico… como si yo fuera la heroína de un libro.
 
 === ws_t2 ===
+resumen: Marilla le pide «los hechos»: Bolingbroke, Walter y Bertha Shirley.
 canal: viaje
 prioridad: 6
 interrumpe
@@ -1528,6 +1571,7 @@ ana: Bueno, no sé. Una rosa con otro nombre olería igual de dulce, dice el lib
 marilla piensa: Hay que ver la de cosas que caben en esa cabeza.
 
 === ws_t3 ===
+resumen: Ana cuenta su vida: la fiebre, la Sra. Thomas, los mellizos, el orfanato.
 canal: viaje
 prioridad: 6
 interrumpe
@@ -1547,6 +1591,7 @@ marilla piensa: Qué vida, la de esta criatura. Hambre de cariño, trabajo, pobr
 
 # (no es del libro: en la serie, una señora del camino habla mal de Ana, y Ana corre al mar)
 === ws_pye ===
+resumen: La Sra. Pye sale al camino y dice algo cruel de Ana (no es del libro).
 canal: viaje
 prioridad: 7
 interrumpe
@@ -1571,6 +1616,7 @@ ana piensa: Nadie las quiere por algo.
    ! viaje sigue
 
 === ws_orilla ===
+resumen: Ana llora en la orilla del mar; Marilla se sienta con ella en la arena.
 canal: viaje
 prioridad: 8
 interrumpe
@@ -1605,6 +1651,7 @@ marilla: Vamos, levántate. Sacúdete esa arena, que no vas a llegar donde la Sr
 ! viaje calesa
 
 === ws_spencer ===
+resumen: Donde la Sra. Spencer: la Sra. Blewett la quiere de sirvienta; Marilla se la lleva.
 canal: viaje
 prioridad: 8
 interrumpe
@@ -1635,6 +1682,7 @@ marilla: (A Marilla se le escapa algo que podría ser una sonrisa, y se lo traga
 ! viaje casa
 
 === ws_noche ===
+resumen: Esa noche, Marilla le dice a Matthew que se queda con Ana (a ella, todavía no).
 narra: Esa noche, en el corral, Marilla habla largo con Matthew. «Me la quedo», le dice al fin. «Alguien tiene que criarla, y no voy a dársela a esa mujer.» Matthew sonríe, sin decir nada. Pero a Ana, por razones que solo ella sabe, Marilla no le dice nada todavía.
 canal: gg
 prioridad: 9
@@ -1651,6 +1699,7 @@ ana piensa: No me dijo nada en todo el camino de vuelta. ¿Me devolverán mañan
 
 # la hora de almorzar: Marilla la llama a la mesa (cada día, si las dos están en la cocina)
 === llamar_almuerzo ===
+resumen: Marilla llama a Ana a almorzar, en la cocina.
 canal: gg
 prioridad: 4
 sujeta: marilla
@@ -1669,6 +1718,7 @@ marilla: Ana, a la mesa. La comida no se va a quedar esperando a que termines de
 
 # (y si Ana anda afuera, en el patio: Marilla la llama desde la puerta)
 === llamar_almuerzo_afuera ===
+resumen: Marilla llama a Ana a almorzar desde la puerta.
 narra: Desde la puerta de la cocina, Marilla se seca las manos en el delantal y llama: «¡Ana! ¡A la mesa!»
 canal: gg
 prioridad: 4
@@ -1688,6 +1738,7 @@ al_empezar: hecho llamada_almuerzo
 # (y si Ana anda lejos, a la hora del almuerzo: Marilla manda a Matthew a buscarla; él camina hasta donde está:
 #  src/js/11-cocina-tejas-verdes.js, almuerzoBuscar)
 === matthew_busca_almuerzo ===
+resumen: Ana anda lejos a la hora de almuerzo: Matthew viene a buscarla.
 canal: general
 prioridad: 5
 repetir: dia
@@ -1709,6 +1760,7 @@ matthew: (Matthew llega un poco agitado, con el sombrero en la mano.) Bueno, pue
 
 # la hora de acostarse: Marilla la manda a la cama (cada noche, si anda por Tejas Verdes)
 === marilla_a_la_cama ===
+resumen: Marilla manda a Ana a acostarse.
 narra: Ya es de noche en Tejas Verdes. Marilla se asoma con la vela: «Ana, a la cama. Mañana hay que madrugar.»
 canal: gg
 prioridad: 5
@@ -1727,6 +1779,7 @@ si: hecho:a_prueba, hora:21-23.5
 # el libro: el día después de la llegada). Si Ana pide perdón, no baja: lo que aleja a Marilla no son las travesuras,
 # sino no arrepentirse. Ayudar en la casa y pedirle perdón la hacen subir de nuevo.
 === falta_camison ===
+resumen: Marilla encuentra a Ana en camisón a media mañana.
 canal: gg
 prioridad: 6
 repetir: dia
@@ -1855,6 +1908,7 @@ marilla: (Marilla se tapa la boca, y por un momento parece que se ríe.) Ya me p
 
 # (de noche, lejos de Tejas Verdes: Marilla sale con el farol a buscarla)
 === falta_noche ===
+resumen: Ana no ha vuelto de noche: Marilla sale a buscarla con el farol.
 narra: Ya es noche cerrada y Ana no ha vuelto. Marilla enciende el farol y sale a buscarla por los caminos, con el chal sobre los hombros y la boca apretada. La encuentra, y la trae a casa sin decir una palabra.
 canal: gg
 prioridad: 9
@@ -1873,6 +1927,7 @@ al_terminar: a_pieza
 
 # (el día del viaje, si Ana no está: Marilla la busca, y la trae)
 === falta_viaje ===
+resumen: Es hora de ir a White Sands y Ana no está: Marilla la busca.
 narra: Marilla tiene la calesa lista para ir a White Sands, y Ana no aparece por ninguna parte. La busca por la granja, por el huerto, por el camino… y la encuentra lejos, muy lejos. Vuelven a Tejas Verdes en un silencio que da miedo.
 canal: gg
 prioridad: 10
@@ -1884,6 +1939,7 @@ al_terminar: a_cocina
 # White Sands, cuando a Marilla ya no le queda paciencia: duda de verdad. Lo que Ana haga, y lo que la quieran los
 # Cuthbert, decide qué pasa después (las escenas de abajo, por prioridad: la de más arriba que se cumpla).
 === viaje_spencer_duda ===
+resumen: Viaje a White Sands sin paciencia: Marilla duda de verdad ante la Sra. Blewett.
 punto: white_sands | Antes de salir a White Sands
 narra: White Sands está a unas millas por el camino de la costa. Marilla lleva las riendas y no dice nada en todo el viaje: piensa en el camisón a mediodía, en la ropa por el suelo, en lo que ha tenido que aguantar. Ana tampoco habla. Mira el mar y aprieta su maleta vieja.
 canal: gg
@@ -1910,6 +1966,7 @@ narra: Esta vez Marilla no contesta enseguida. Mira a la Sra. Blewett, mira a An
 
 # (Matthew la quiere mucho: la salva él, como en el libro, cuando Marilla vuelve a hablarlo con él)
 === duda_matthew ===
+resumen: Matthew pide quedarse con Ana, y Marilla cede.
 narra: «No puedo decidir sin hablarlo con Matthew», dice al fin Marilla. Vuelven a Tejas Verdes ya de tarde. Esa noche, en el corral, Matthew escucha todo sin interrumpir, y después dice, muy bajito: «Bueno, pues… yo creo que podríamos quedarnos con ella, Marilla. Podríamos hacerle algún bien.» Y Marilla, que estaba decidida a devolverla, cede.
 canal: gg
 prioridad: 9
@@ -1926,6 +1983,7 @@ ana piensa: Me trajo de vuelta. Pero no me ha dicho nada. ¿Me devolverán maña
 
 # (Ana suplica, y Marilla le tiene algo de cariño: no puede dársela a esa mujer)
 === duda_suplica ===
+resumen: Ana suplica, y Marilla no puede entregarla.
 narra: Marilla mira esa manito aferrada a su manga, y algo se le quiebra por dentro. «No», dice. «No puedo. Me la llevo de vuelta.» La Sra. Blewett se encoge de hombros. En la calesa, Ana llora todo el camino, de puro alivio.
 canal: gg
 prioridad: 8
@@ -1942,6 +2000,7 @@ ana piensa: Me trajo de vuelta. Pero no me ha dicho nada. ¿Me devolverán maña
 
 # (calla, y Marilla la quiere: esa carita pálida basta)
 === duda_calla ===
+resumen: Ana calla, pálida, y Marilla no puede entregarla.
 narra: Marilla ve esa carita pálida que no pide nada, y se acuerda de lo que Ana le contó en el camino: la Sra. Thomas, los mellizos, el orfanato. «No», dice de pronto. «Me la llevo de vuelta.»
 canal: gg
 prioridad: 7
@@ -1957,6 +2016,7 @@ ana piensa: Me trajo de vuelta. Pero no me ha dicho nada. ¿Me devolverán maña
 
 # (y si no: Ana se va con la Sra. Blewett. Un final: la jugadora puede volver a la mañana del viaje)
 === devuelta_blewett ===
+resumen: Final: Marilla entrega a Ana a la Sra. Blewett.
 narra: Marilla aprieta los labios y asiente. Esa misma tarde, Ana se va con la Sra. Blewett, con su maleta vieja y su sombrero de paja. No mira hacia atrás, porque si mira hacia atrás va a llorar. En Tejas Verdes, Matthew no dice nada durante días.
 canal: gg
 prioridad: 1
@@ -1967,6 +2027,7 @@ al_terminar: log Marilla le entregó Ana a la Sra. Blewett. | yo: Marilla me ent
 al_terminar: final devuelta | Ana se fue con la Sra. Blewett. En el libro, Marilla no la entregó: Ana se ganó, poco a poco, su lugar en Tejas Verdes.
 
 === se_queda ===
+resumen: Marilla le dice a Ana que se queda en Tejas Verdes.
 narra: «Por razones que solo ella sabía, Marilla no le dijo a Ana que se quedaba en Tejas Verdes hasta la tarde siguiente.» Ana se ha pasado el día con el corazón en la boca, sin atreverse a preguntar.
 canal: gg
 prioridad: 9
@@ -2063,6 +2124,7 @@ ana: Nadie te ha puesto nombre, ¿verdad? Pobrecito. Vivir sin nombre es casi ta
    ! nombrar geranio ?
 
 === primera_stairs ===
+resumen: Ana sube a su pieza de día: ya no le parece tan triste.
 disparo: primera
 canal: ana_sola
 tambien
@@ -2128,6 +2190,7 @@ ana: Cinco destellos: «ven mañana temprano, que tengo algo importante que cont
 # debajo, con sangría, sus líneas y lo que deja («! …»). Si Ana estalla, tiene que ir a pedirle perdón; mientras no lo
 # haga, Marilla la tiene en su pieza.
 === lynde_visita ===
+resumen: La Sra. Lynde viene a conocer a Ana y la llama flaca y fea; Ana elige cómo responder.
 punto: Antes de la visita de la Sra. Lynde
 narra: La Sra. Rachel Lynde, la vecina que todo lo sabe y todo lo dice, ha venido a ver con sus propios ojos a la huérfana de Tejas Verdes. Es la mujer más respetada de Avonlea, y la que tiene la lengua más larga.
 canal: gg
@@ -2163,6 +2226,7 @@ lynde: (La Sra. Lynde mira a Ana de arriba abajo.) Bueno, no te eligieron por tu
    ! log Ana se fue llorando cuando la Sra. Lynde la llamó flaca y fea. | yo: la Sra. Lynde me llamó flaca y fea, y me fui llorando a mi pieza.
 
 === lynde_perdon_marilla ===
+resumen: Marilla le dice a Ana que tiene que pedirle perdón a la Sra. Lynde.
 canal: gg
 prioridad: 8
 en: ana=gg, marilla=gg
@@ -2174,6 +2238,7 @@ ana: ¡Nunca! Puede encerrarme en un calabozo oscuro y húmedo, con sapos y cule
 marilla: No tenemos calabozos en Tejas Verdes. Pero te vas a quedar en tu pieza hasta que estés dispuesta a pedirle perdón.
 
 === lynde_disculpa ===
+resumen: Ana se arrodilla y le pide perdón a la Sra. Lynde, con todo el drama.
 canal: rl
 prioridad: 9
 interrumpe
@@ -2324,6 +2389,7 @@ ana: (Todavía no amanece del todo. Sobre el bosque, el cielo se pone rosado, de
 ana: Me gusta levantarme antes que el sol. Es como estar en el teatro antes de que suba el telón.
 
 === ventana_a_prueba ===
+resumen: En la ventana, a prueba: si se porta bien, quizás se quede.
 disparo: objeto
 objeto: gwin
 canal: ana_sola
@@ -2334,6 +2400,7 @@ ana piensa: (Ana apoya la frente en el vidrio.) Si me porto bien… si soy útil
 ana: Voy a imaginar que esta ventana es mía para siempre. Así, si me tengo que ir, al menos la habré tenido un poco.
 
 === ventana_se_queda ===
+resumen: En la ventana, ya aceptada: todo le parece suyo.
 disparo: objeto
 objeto: gwin
 canal: ana_sola
@@ -2344,6 +2411,7 @@ ana: (Ana abre la ventana de par en par, como si fuera la primera vez.)
 ana: Mi ventana. Mi cerezo. Mi pieza. ¡Ana de Tejas Verdes! ¿Hay algo más lindo que poder decir «mío» sin miedo?
 
 === ventana_diana ===
+resumen: Desde la ventana se ve la casa de Diana.
 disparo: objeto
 objeto: gwin
 canal: ana_sola
@@ -2354,6 +2422,7 @@ ana: (Entre los árboles se ve el techo de La Cuesta del Huerto.)
 ana: Allí está Diana. Seguro que ahora mismo también está mirando por su ventana. Una amiga del alma es alguien que mira por la ventana al mismo tiempo que tú.
 
 === ventana_prohibida ===
+resumen: Desde la ventana, la casa de Diana, que ya no puede visitar.
 disparo: objeto
 objeto: gwin
 canal: ana_sola
@@ -2365,6 +2434,7 @@ ana: Tan cerca, y no puedo ir. Es como en los cuentos, cuando hay un río encant
 ana: Voy a dejar la vela encendida un ratito. Diana no la puede ver… pero yo sé que está.
 
 === ventana_perdonada ===
+resumen: Desde la ventana, la luz de la pieza de Diana: otra vez amigas.
 disparo: objeto
 objeto: gwin
 canal: ana_sola
@@ -2375,6 +2445,7 @@ ana: (La luz de la pieza de Diana brilla entre los árboles desnudos.)
 ana: Minnie May está bien, y la Sra. Barry me perdonó. Creo que nunca había visto una luz tan bonita como esa ventana.
 
 === ventana_zanahorias ===
+resumen: Ana cierra la ventana furiosa: Gilbert le dijo «Zanahorias».
 disparo: objeto
 objeto: gwin
 canal: ana_sola
@@ -2395,6 +2466,7 @@ ana: (Ana tiene la gramática abierta sobre las rodillas, pero mira por la venta
 ana: Si entro al Queen's, voy a ser maestra. Y entonces Marilla y Matthew… no, primero la gramática. Pero qué ganas de mirar el mundo en vez de los verbos.
 
 === ventana_queens ===
+resumen: Ana mira por la ventana antes de irse al Queen's.
 disparo: objeto
 objeto: gwin
 canal: ana_sola
@@ -2426,6 +2498,7 @@ ana: Buenas noches, Lady Cordelia Fitzgerald. Tiene usted un cabello negro como 
 ana: (Ana suspira.) Y una nariz llena de pecas. Qué lástima, Lady Cordelia: casi la convencía.
 
 === espejo_tejas_verdes ===
+resumen: En el espejo: «Ana de Tejas Verdes».
 disparo: objeto
 objeto: mirror
 canal: ana_sola
@@ -2436,6 +2509,7 @@ ana: Ana de Tejas Verdes. (Lo dice despacio, mirándose al espejo.) Ana-de-Tejas
 ana: Suena mucho mejor que Ana de ninguna parte, ¿verdad? Creo que hasta las pecas se ven más contentas.
 
 === espejo_zanahorias ===
+resumen: En el espejo, furiosa con su pelo: «Zanahorias».
 disparo: objeto
 objeto: mirror
 canal: ana_sola
@@ -2466,6 +2540,7 @@ ana: ¿Se puede ser maestra con pecas? La Srta. Stacy no tiene pecas… pero tam
 
 # · el armario (también guarda o saca el sombrero)
 === armario_vestidos ===
+resumen: En el armario, los tres vestidos lisos que le hizo Marilla.
 disparo: objeto
 objeto: armario
 canal: ana_sola
@@ -2529,6 +2604,7 @@ ana: (Un barco de velas blancas pasa a lo lejos, hacia el puerto de Charlottetow
 ana: ¿De dónde vendrá? Seguro que trae especias, sedas y una princesa de incógnito. O papas. Pero yo prefiero lo de la princesa.
 
 === faro_queens ===
+resumen: Desde el faro se ve la costa de enfrente: pronto se va al Queen's.
 disparo: objeto
 objeto: faro
 canal: ana_sola
@@ -2562,6 +2638,7 @@ ana: (El lago está helado. Unos niños patinan a lo lejos, con bufandas de colo
 ana: El Lago de las Aguas Brillantes duerme bajo el hielo. Pero sigue brillando: no se le quita la costumbre.
 
 === banco_lago_diana ===
+resumen: En el banco del lago, pensando en Diana.
 disparo: objeto
 objeto: bench
 canal: ana_sola
@@ -2619,6 +2696,7 @@ ana: El fuego de manzano huele a tarta. Bueno, a lo mejor es que tengo hambre.
 
 # · la escuela
 === pizarra_zanahorias ===
+resumen: En la pizarra: «Ana Shirley tiene muy mal genio».
 disparo: objeto
 objeto: pizarra
 canal: ana_sola
@@ -2638,6 +2716,7 @@ ana: (En la pizarra hay un problema de geometría a medio resolver.)
 ana: La geometría es terrible: no se puede imaginar nada. Un triángulo es un triángulo y no hay más que hablar. Pero esta vez casi lo entiendo.
 
 === pupitre_gilbert ===
+resumen: En su pupitre, Ana no mira hacia Gilbert.
 disparo: objeto
 objeto: pupitre
 canal: ana_sola
@@ -2650,6 +2729,7 @@ ana piensa: No voy a mirar. No voy a mirar.
 ana: (No mira. Bueno, una vez. De reojo. Para ver si él está mirando. No está mirando.)
 
 === pupitre_diana ===
+resumen: En el pupitre, una manzana y un papelito de Diana.
 disparo: objeto
 objeto: pupitre
 canal: ana_sola
@@ -2671,6 +2751,7 @@ ana: (Por la ventana de la iglesia se ve una rama de abedul que se mueve con el 
 ana: Rezar sentada en un banco entre tanta gente es difícil. Yo rezo mejor en el bosque, donde Dios está más a la vista.
 
 === iglesia_allan ===
+resumen: En la iglesia, la Sra. Allan le sonríe.
 disparo: objeto
 objeto: banco
 canal: ana_sola
@@ -2804,6 +2885,7 @@ ana: (El arroyo está helado por los bordes; en el medio, el agua sigue corriend
 ana: Sigue corriendo debajo del hielo. Hay cosas así: por fuera parecen dormidas, y por dentro siguen andando.
 
 === lugar_puente_diana ===
+resumen: El puente entre Tejas Verdes y la casa de Diana.
 disparo: lugar
 lugar: puente
 canal: ana_sola
@@ -2936,6 +3018,7 @@ ana: (Del granero sale olor a heno recién cortado. Una golondrina entra y sale 
 ana: El heno huele a todo el verano junto, guardado. En invierno voy a venir a olerlo cuando extrañe el sol.
 
 === lugar_cuesta_huerto ===
+resumen: El huerto de los Barry en flor: ahí vive Diana.
 disparo: lugar
 lugar: cuesta_del_huerto
 canal: ana_sola
@@ -2946,6 +3029,7 @@ ana: (El huerto de los Barry está en flor. Detrás de esas ventanas está Diana
 ana: Debe ser imposible estar triste viviendo en una casa con un huerto así. Aunque Diana dice que su mamá lo consigue igual.
 
 === lugar_cuesta_prohibida ===
+resumen: Ana pasa frente a la casa de Diana sin detenerse.
 disparo: lugar
 lugar: cuesta_del_huerto
 canal: ana_sola
@@ -2976,6 +3060,7 @@ ana: (El camino a la escuela pasa entre abedules blancos. La luz entra verde por
 ana: Ir a la escuela por aquí es casi como no ir a la escuela. Una llega con el alma ya instruida, aunque la gramática no.
 
 === lugar_aldea ===
+resumen: El cruce de caminos de la aldea, ya conocido.
 disparo: lugar
 lugar: aldea
 canal: ana_sola
@@ -2986,6 +3071,7 @@ ana: (En el cruce de caminos, la gente se saluda de carreta a carreta. Un perro 
 ana: Aquí todos saben todo de todos. Al principio me daba miedo; ahora me gusta. Es como vivir dentro de una familia muy grande y un poco metida.
 
 === lugar_corral_idlewild ===
+resumen: Los abedules junto al corral: un rincón para jugar con Diana.
 disparo: lugar
 lugar: corral
 canal: ana_sola
@@ -2999,6 +3085,7 @@ ana: Idlewild. Aquí Diana y yo vamos a tener nuestra casita de juegos, con plat
 # a que termine la charla ni a que Ana esté libre (aunque vaya a un encargo, o en la carreta): cortan lo que se está
 # diciendo, y Ana se detiene; después, todo sigue. No cortan una elección del jugador. Una vez.
 === lugar_camino_blanco_flor ===
+resumen: Los manzanos del Camino Blanco en flor.
 disparo: lugar
 lugar: camino_blanco
 canal: ana_sola
@@ -3023,6 +3110,7 @@ ana: (Ana se queda quieta, con la boca abierta, el sombrero en la mano.)
 ana: Nunca… nunca había estado tan cerca. Desde el orfanato se veía una rayita gris. Esto no es una rayita: esto es el mundo entero respirando.
 
 === lugar_primera_nieve ===
+resumen: La primera nieve sobre el Camino Blanco.
 disparo: lugar
 lugar: camino_blanco
 canal: ana_sola
@@ -3470,6 +3558,7 @@ guiño lynde: [hecho:mis_brujula_hallada, !hecho:mis_brujula_sabe, hecho:disculp
 
 --- guion ---
 === mis_brujula_hallazgo ===
+resumen: Misión: Ana encuentra una brújula vieja en la orilla del lago.
 narra: En la orilla del Lago de las Aguas Brillantes, entre los juncos, algo brilla en el barro. Ana se agacha: es una brújula de bronce, verde de tiempo, con la tapa grabada.
 canal: mision
 prioridad: 3

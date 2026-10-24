@@ -13,9 +13,15 @@ function dibujar(d, root){
   for (const e of d.escenas) N.set('escena ' + e.id, { id: 'escena ' + e.id, k: e.id, tipo: tipoDe(e), grande: !!e.grande, punto: e.punto || null,
     info: { si: e.si || '', canal: e.canal, prioridad: e.prioridad, con: e.con, tema: e.tema, resumen: e.resumen, donde: e.donde, en: e.en, cerca: e.cerca, repetir: e.repetir, disparo: e.disparo, lugar: e.lugar,
       narra: e.narra, primera: e.primera?.replace(/^narra:\s*/, ''), lineas: e.lin || 0, empieza: e.al_empezars || [], termina: e.al_terminars || [], ops: e.ops || [] } });
+  // a short description of each box: its «resumen:», the theme of a conversation, the title of a goal; else, the first
+  // sentence of its card or its first line (the loose ones mostly: those in chains have a «resumen:», tools/grafo.js)
+  const frase = t => (t || '').replace(/^\w+( piensa)?:\s*/, '').split(/(?<=[.!?»])\s/)[0].slice(0, 140);
+  for (const n of N.values()) { const i = n.info; n.desc = i.resumen || i.tema || frase(i.narra) || frase(i.primera) || ''; }
   for (const m of d.metas) N.set('meta ' + m.id, { id: 'meta ' + m.id, k: m.id, tipo: 'meta', info: { titulo: m.titulo, pista: m.pista, meta: m.meta, requiere: m.requiere, aPrueba: m.aPrueba } });
-  for (const s of ['llegadas', 'hitos']) N.set(s, { id: s, k: s, tipo: 'sistema', info: {} });
-  const nodo = w => { w = limpia(w); if (N.has(w)) return w; if (/^habilidad /.test(w)) { N.set(w, { id: w, k: w, tipo: 'sistema', info: {} }); return w; } return null; };
+  for (const n of N.values()) if (n.tipo === 'meta') n.desc = n.info.titulo || '';
+  const SIS = { llegadas: 'Quién llega a Avonlea y quién se va, y cuándo (src/datos/llegadas.txt).', hitos: 'Los hitos de la historia del día (src/datos/hitos.txt).' };
+  for (const s of ['llegadas', 'hitos']) N.set(s, { id: s, k: s, tipo: 'sistema', desc: SIS[s], info: {} });
+  const nodo = w => { w = limpia(w); if (N.has(w)) return w; if (/^habilidad /.test(w)) { N.set(w, { id: w, k: w, tipo: 'sistema', desc: 'Un hito de la habilidad «' + w.slice(10) + '» (src/datos/habilidades.txt).', info: {} }); return w; } return null; };
   // the facts: who makes each, who needs it, who reads it without needing it («!hecho:x»: it closes when x happens)
   const F = {};
   const hechoDe = h => (F[h] ||= { h, hace: new Set(), pide: new Set(), lee: new Set(), otros: new Set() });
@@ -46,7 +52,7 @@ function dibujar(d, root){
     const vec = it % 2 ? sal : ent, L = it % 2 ? [...cols].reverse() : cols;
     for (const c of L) { const m = new Map(c.map(id => { const v = vec.get(id).filter(x => pos.has(x)); return [id, v.length ? v.reduce((s, x) => s + pos.get(x), 0) / v.length : pos.get(id)]; })); c.sort((a, b) => m.get(a) - m.get(b) || orden(a, b)); c.forEach((id, i) => pos.set(id, i / Math.max(1, c.length - 1))); }
   }
-  const CW = 250, RH = 34, alto = Math.max(...cols.map(c => c.length));
+  const CW = 270, RH = 50, alto = Math.max(...cols.map(c => c.length));
   const xy = {}; cols.forEach((c, i) => { const off = (alto - c.length) * RH / 2; c.forEach((id, j) => { xy[id] = [40 + i * CW, 60 + off + j * RH]; }); });
   // the loose ones (no arrow in or out: they depend on the hour, the place, the qualities, not on facts of others)
   const datos = {
@@ -100,6 +106,8 @@ aside p{margin:4px 0}
 .leyenda i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:4px;border:1.5px solid}
 .n rect{stroke-width:1.2}
 .n text{font:12px Georgia,serif;fill:var(--ink);pointer-events:none}
+.n text.id{font:11px ui-monospace,Menlo,monospace;fill:var(--sub)}
+.n text.de{font:12.5px Georgia,serif}
 .n{cursor:pointer}
 .n.grande rect{stroke-width:2.6}
 .n.sel rect{stroke:var(--hi);stroke-width:3}
@@ -117,7 +125,7 @@ path.c{fill:none;stroke:var(--hi);stroke-width:1;stroke-dasharray:4 4;opacity:.4
 </style></head><body>
 <header>
   <h1>El grafo de la historia</h1>
-  <input type="search" id="buscar" list="todos" placeholder="Buscar escena, meta o hecho…" aria-label="Buscar">
+  <input type="search" id="buscar" list="todos" placeholder="Buscar escena, meta, hecho o palabra…" aria-label="Buscar">
   <datalist id="todos"></datalist>
   <label><input type="checkbox" id="vercierra"> «se cierra con» (- - -)</label>
   <label><input type="checkbox" id="soloRel"> ocultar lo que no se relaciona</label>
@@ -139,7 +147,7 @@ const PUNTO_DE = new Map(); for (const p of D.puntos) (PUNTO_DE.get(p.escena) ||
 const sal = new Map(), ent = new Map(); for (const n of D.nodos) { sal.set(n.id, []); ent.set(n.id, []); }
 for (const [a, b, h] of D.flechas) { sal.get(a).push([b, h]); ent.get(b).push([a, h]); }
 const alcanza = (id, M) => { const v = new Set([id]), q = [id]; while (q.length) for (const [x] of M.get(q.pop())) if (!v.has(x)) { v.add(x); q.push(x); } v.delete(id); return v; };
-const W = 210, H = 24, nombre = n => n.tipo === 'meta' ? '◆ ' + n.k : n.k;
+const W = 236, H = 40, nombre = n => n.tipo === 'meta' ? '◆ ' + n.k : n.k;
 // the drawing
 const el = (t, a, p) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e; };
 const curva = (a, b) => { const [x1, y1] = [a.x + W, a.y + H / 2], [x2, y2] = [b.x, b.y + H / 2], dx = Math.max(40, (x2 - x1) / 2); return \`M\${x1},\${y1} C\${x1 + dx},\${y1} \${x2 - dx},\${y2} \${x2},\${y2}\`; };
@@ -151,16 +159,18 @@ const G = new Map();
 for (const n of vis) {
   const t = TIPOS[n.tipo][1], g = el('g', { class: 'n' + (n.grande ? ' grande' : ''), transform: \`translate(\${n.x},\${n.y})\` }, $('nodos'));
   el('rect', { width: W, height: H, rx: n.tipo === 'meta' ? 12 : 4, style: \`fill:var(--\${t});stroke:var(--\${t}B)\` }, g);
-  const tx = el('text', { x: 8, y: 16 }, g); let s = (n.grande ? '★ ' : '') + (PUNTO_DE.has(n.id) ? '↺ ' : '') + nombre(n); if (s.length > 30) s = s.slice(0, 29) + '…'; tx.textContent = s;
-  el('title', {}, g).textContent = n.k;
+  const corta = (t, m) => t.length > m ? t.slice(0, m - 1) + '…' : t;
+  el('text', { x: 8, y: 15, class: 'id' }, g).textContent = corta((n.grande ? '★ ' : '') + (PUNTO_DE.has(n.id) ? '↺ ' : '') + nombre(n), 36);
+  el('text', { x: 8, y: 31, class: 'de' }, g).textContent = corta(n.desc || '', 40);
+  el('title', {}, g).textContent = n.k + (n.desc ? '\\n' + n.desc : '');
   g.addEventListener('click', e => { e.stopPropagation(); if (!movido) elegir(n.id); });
   G.set(n.id, g);
 }
-for (let c = 0; c < D.cols; c++) { const t = el('text', { class: 'colh', x: 40 + c * 250, y: 36 }, $('colsh')); t.textContent = c === 0 ? 'lo que no pide nada' : 'paso ' + c; }
+for (let c = 0; c < D.cols; c++) { const t = el('text', { class: 'colh', x: 40 + c * 270, y: 36 }, $('colsh')); t.textContent = c === 0 ? 'lo que no pide nada' : 'paso ' + c; }
 // moving and zooming
 let vx = 0, vy = 0, z = 1, movido = false;
 const aplica = () => $('vista').setAttribute('transform', \`translate(\${vx},\${vy}) scale(\${z})\`);
-const verTodo = () => { const r = $('lienzo').getBoundingClientRect(), w = 40 + D.cols * 250, h = Math.max(...vis.map(n => n.y)) + 60; z = Math.min(r.width / w, r.height / h, 1); vx = (r.width - w * z) / 2; vy = 10; aplica(); };
+const verTodo = () => { const r = $('lienzo').getBoundingClientRect(), w = 40 + D.cols * 270, h = Math.max(...vis.map(n => n.y)) + 60; z = Math.min(r.width / w, r.height / h, 1); vx = (r.width - w * z) / 2; vy = 10; aplica(); };
 const zoomEn = (f, cx, cy) => { const nz = Math.min(3, Math.max(.08, z * f)); vx = cx - (cx - vx) * nz / z; vy = cy - (cy - vy) * nz / z; z = nz; aplica(); };
 const ptr = new Map(); let pinch = 0;
 $('lienzo').addEventListener('pointerdown', e => { $('lienzo').setPointerCapture(e.pointerId); ptr.set(e.pointerId, [e.clientX, e.clientY]); movido = false; $('lienzo').classList.add('arrastra'); });
@@ -187,7 +197,7 @@ function marca(){
 }
 $('soloRel').onchange = marca;
 $('vercierra').onchange = () => { $('cierres').style.display = $('vercierra').checked ? '' : 'none'; };
-const chipN = id => { const n = NOD.get(id); return n ? \`<span class="chip" data-n="\${esc(id)}" title="\${esc(TIPOS[n.tipo][0])}">\${esc(nombre(n))}</span>\` : \`<span class="chip mut" title="no es una caja del dibujo">\${esc(id)}</span>\`; };
+const chipN = id => { const n = NOD.get(id); return n ? \`<span class="chip" data-n="\${esc(id)}" title="\${esc(TIPOS[n.tipo][0] + (n.desc ? ': ' + n.desc : ''))}">\${esc(nombre(n))}</span>\` : \`<span class="chip mut" title="no es una caja del dibujo">\${esc(id)}</span>\`; };
 const chipH = (h, no) => \`<span class="chip\${no ? ' no' : ''}" data-h="\${esc(h)}">\${esc(h)}</span>\`;
 // a condition, written as the script has it; the facts in it, clickable
 const condHtml = s => s.split(',').map(c => c.trim()).filter(Boolean).map(c => { const m = c.match(/^(!?)(hecho|dias_desde|no_hoy):([a-z_0-9]+)/); return m && D.hechos[m[3]] ? chipH(m[3], (m[1] === '!') !== (m[2] === 'no_hoy')) + (m[2] !== 'hecho' ? \`<span class="cond mut">\${esc(c.replace(m[3], '…'))}</span> \` : '') : \`<span class="chip cond mut">\${esc(c)}</span>\`; }).join('');
@@ -198,10 +208,9 @@ function elegir(id, sinCentrar){
   const n = NOD.get(sel), i = n.info, P = $('panel');
   const deja = Object.entries(D.hechos).filter(([, f]) => f.hace.includes(sel)).map(([h]) => h);
   const necesita = ent.get(sel), abre = sal.get(sel);
-  let h = \`<div class="tipo">\${esc(TIPOS[n.tipo][0])}\${n.grande ? ' · ★ grande' : ''}\${n.c != null ? ' · paso ' + n.c : ' · suelta'}</div><h2>\${esc(n.k)}</h2>\`;
+  let h = \`<div class="tipo">\${esc(TIPOS[n.tipo][0])}\${n.grande ? ' · ★ grande' : ''}\${n.c != null ? ' · paso ' + n.c : ' · suelta'}</div><h2>\${esc(n.k)}</h2>\${n.desc ? '<p><b>' + esc(n.desc) + '</b></p>' : ''}\`;
   for (const p of PUNTO_DE.get(sel) || []) h += \`<p>↺ <b>Punto</b> (\${esc(p.cuando)}): \${esc(p.texto)}</p>\`;
-  if (i.titulo) h += \`<p><b>\${esc(i.titulo)}</b></p>\`;
-  if (i.tema || i.resumen) h += \`<p>\${esc(i.tema || '')}\${i.resumen ? '<br><span class="mut">' + esc(i.resumen) + '</span>' : ''}</p>\`;
+  if (i.tema && i.resumen) h += \`<p class="mut">Tema: \${esc(i.tema)}</p>\`;
   if (i.narra) h += \`<p class="mut"><i>\${esc(i.narra)}\${i.narra.length >= 260 ? '…' : ''}</i></p>\`;
   else if (i.primera) h += \`<p class="mut"><i>\${esc(i.primera)}</i></p>\`;
   if (i.pista) h += \`<p class="mut">Pista: \${esc(i.pista)}</p>\`;
@@ -252,7 +261,7 @@ $('panel').addEventListener('click', e => { const r = e.target.closest('.lista d
 // searching: a box (by its name) or a fact
 $('todos').innerHTML = [...D.nodos.map(n => n.k), ...Object.keys(D.hechos).map(h => 'hecho: ' + h)].sort().map(s => \`<option value="\${esc(s)}">\`).join('');
 $('buscar').addEventListener('change', () => { const v = $('buscar').value.trim(); if (!v) return; if (v.startsWith('hecho: ')) return hecho(v.slice(7));
-  const n = D.nodos.find(n => n.k === v) || D.nodos.find(n => n.k.includes(v)); if (n) elegir(n.id); else if (D.hechos[v]) hecho(v); });
+  const lv = v.toLowerCase(), n = D.nodos.find(n => n.k === v) || D.nodos.find(n => n.k.includes(v)) || D.nodos.find(n => (n.desc || '').toLowerCase().includes(lv)); if (n) elegir(n.id); else if (D.hechos[v]) hecho(v); });
 $('st').textContent = \`\${D.nodos.length} cajas (\${vis.length} en cadenas, \${D.sueltos} sueltas) · \${D.flechas.length} flechas · \${Object.keys(D.hechos).length} hechos · \${D.puntos.length} puntos\${D.nunca.length || D.malas.length ? ' · ⚠ ' + (D.nunca.length + D.malas.length) + ' problemas' : ''}\`;
 verTodo(); inicio();
 const deHash = () => { const h0 = decodeURIComponent(location.hash.slice(1)); if (h0 && NOD.has(h0) && h0 !== sel) elegir(h0); };
