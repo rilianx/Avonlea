@@ -1,18 +1,16 @@
 /* ---------- the trip to White Sands (chapters 5 and 6): Marilla drives the sorrel mare along the shore road, with Ana.
    The same cart as the trip to Bright River (src/js/33-viaje-bright-river.js), with its own route, driver and pace.
-   On the way, the book's talk at its places (the scenes «ws_t1»… in src/datos/guion.txt, by the facts set here); halfway
+   On the way, the book's talk at its stretches of the road (the scenes «ws_t1»… in src/datos/guion.txt: «avance:ws»); farther
    along, Mrs. Pye on the road (not in the book): what she says sends Ana running to the shore, and Marilla follows her
    there. At the hotel, Mrs. Spencer and Mrs. Blewett; and back home, quiet, by the same road. ---------- */
 const wsE = () => game.wm || game;   // (kept with the game: a trip left halfway, when the game is opened again, ends at home)
-// grafo: viaje_spencer → ws_t1
-// grafo: ws_t1 → ws_t2
-// grafo: ws_t2 → ws_t3
-// grafo: ws_t3 → ws_pye
-// grafo: ws_pye → ws_marilla_llega, ws_llegan
-// grafo: ws_orilla → ws_llegan
+// grafo: viaje_spencer → ws_pye, ws_llegan
+// grafo: ws_pye → ws_marilla_llega
 // grafo: ws_spencer → ws_vuelven
-// (each place of the road, once the talk before is over: one after the other, src/js/34 wsTick)
-const WS_VEL = 75, WS_MARCAS = [['ws_t1', .03, () => dlgHecho('ws_t1')], ['ws_t2', .22, () => dlgHecho('ws_t2')], ['ws_t3', .4, () => dlgHecho('ws_t3')], ['ws_pye', .7, () => dlgHecho('ws_pye')]];   // (each fact written whole: tools/grafo.js reads them)
+// (the talks of the road do not wait for each other: each has its stretch of the way, «avance:ws:25-60» in the script —
+// how far along they are, in %; if the stretch goes by, that talk is lost. While a talk goes on, the mare walks)
+const WS_VEL = 60, WS_PASO = 25;
+AVANCES.ws = () => cart.on && cart.viaje === WS_VIAJE ? cart.s / cartLen() * 100 : null;
 const wsRuta = () => { const a = [GG.x + 20, GG.y + 80], b = door('Hotel White Sands'), r = netRoute(...a, ...b); return [a, ...(r ? r.pts : []), b]; };
 // the nearest point of the shore (on the sand, a little before the water), and how far
 function wsOrillaCerca(x, y){ let best = null; for (let i = 1; i < COAST.length; i++) { const p = proj([x, y], COAST[i - 1], COAST[i]); if (!best || p.d < best.d) best = p; } return best; }
@@ -44,14 +42,11 @@ function wsTick(){
   const w = wsE().ws; if (!w || w.fase === 'fin') return;
   if (!cart.on || cart.viaje !== WS_VIAJE) { if (!w.volviendo && !game.talk) { w.volviendo = true; wsVolverCasa(); } return; }   // (the game was closed halfway: they are back)
   if (w.fase === 'ida') {
-    const H = dlgHechos(), D = dlgDichas(), fr = cart.s / cartLen(), at_ = ([h, a]) => h === 'ws_pye' ? w.pye || a : a, sig = WS_MARCAS.findIndex(([h]) => !H[h]);
-    const antes = sig > 0 && (!D[WS_MARCAS[sig - 1][0]] || TALKS.some(t => t.esc === WS_MARCAS[sig - 1][0]));   // (one talk after the other: the next place waits for the last talk to be over)
-    const espera = sig >= 0 && antes && fr >= at_(WS_MARCAS[sig]);   // (if they are still talking, the mare goes at a walk; where Mrs. Pye waits, it stops)
-    cart.vel = espera ? 25 : WS_VEL; if (sig === WS_MARCAS.length - 1) cart.parado = espera;
-    for (const m of WS_MARCAS) { const [h, , hacer] = m; if (fr < at_(m) || H[h] || antes) continue;
-      hacer();
-      if (h === 'ws_pye') { cart.parado = true; const f = FOLKBY.srapye, [px, py] = cartAt(cart.s + 90); if (f) Object.assign(f, { where: 'out', x: px + 30, y: py + 12, route: [], moving: false, sit: false, dir: 3, talkT: TT + 240 }); }
-      break;
+    const habla = TALKS.some(t => t.ch === 'viaje'), fr = cart.s / cartLen();
+    cart.vel = habla ? WS_PASO : WS_VEL;
+    if (fr >= w.pye && !dlgHechos().ws_pye) {   // Mrs. Pye, where the road runs nearest the sea: the cart stops there (once the talk under way is over)
+      cart.parado = true; if (habla) return;
+      dlgHecho('ws_pye'); const f = FOLKBY.srapye, [px, py] = cartAt(cart.s + 90); if (f) Object.assign(f, { where: 'out', x: px + 30, y: py + 12, route: [], moving: false, sit: false, dir: 3, talkT: TT + 240 });
     }
   }
 }

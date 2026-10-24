@@ -237,6 +237,7 @@ function enPalabras(c){
   if ((m = c.match(/^(!?)presente:(\\w+)$/))) return \`\${m[2]} \${m[1] ? 'no ' : ''}anda por Avonlea\`;
   if ((m = c.match(/^(!?)ve:(\\w+)$/))) return \`\${m[1] ? 'sin que la vea' : 'la ve'} \${m[2]}\`;
   if ((m = c.match(/^estacion:(\\w+)$/))) return 'en ' + m[1];
+  if ((m = c.match(/^avance:(\\w+):([\\d.]+)-([\\d.]+)$/))) return \`en el viaje (\${m[1] === 'ws' ? 'a White Sands' : m[1]}), entre el \${m[2]} y el \${m[3]} % del camino\`;
   if ((m = c.match(/^(!?)(cuaderno):(\\w+)$/))) return \`\${m[1] ? 'sin' : 'con'} la meta «\${m[3]}» cumplida\`;
   if ((m = c.match(/^(!?)dicha:(\\w+)$/))) return \`\${m[1] ? 'antes de' : 'después de'} la escena \${m[2]}\`;
   if ((m = c.match(/^sentada:(\\w+)$/))) return \`\${m[1]} sentada a la mesa\`;

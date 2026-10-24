@@ -245,6 +245,7 @@ body:not(.dev) #spdbtn{top:298px!important;right:10px!important}
 # En «si:», también: «horas_desde:llegada_tv:0.5» (pasó por lo menos media hora desde ese hecho), «comento:lynde:ana:camison» (ya le comentó hoy eso: el camisón, «hora», el sombrero), «ve:marilla» (Marilla la ve), «donde:ana:tejas» (o con «!»), «ana:camison», «ana:sin_sombrero»,
 #   «ana:ropa_tirada»; y las cualidades de uno hacia otro: «paciencia:marilla:ana<=1» (src/datos/habilidades.txt).
 # «resumen: …»: qué pasa en la escena, en una línea (para el dibujo del grafo, trazas/grafo.html).
+# «avance:ws:25-60» (en «si:»): Ana va en un viaje (ws, White Sands) y llevan entre el 25 y el 60 % del camino.
 # «! vestirse»; «! punto id | texto» (un punto para volver: la partida como está ahora; el campo «punto: [id |] texto»
 #   lo guarda justo antes de que empiece la escena, y al volver se juega de nuevo; toda escena «grande» lleva uno);
 #   «! final id | texto» (la
@@ -1535,15 +1536,16 @@ marilla: Ponte el sombrero, Ana. Nos vamos a White Sands.
 ana piensa: Puede que sea la última vez que veo esta cocina.
 ! viaje white_sands
 
-# el viaje a White Sands, en la calesa de Marilla (src/js/34-viaje-white-sands.js): lo que se dicen por el camino, en
-# sus lugares (capítulo 5 del libro), la Sra. Pye en el camino (no es del libro), y la casa de la Sra. Spencer (capítulo 6)
+# el viaje a White Sands, en la calesa de Marilla (src/js/34-viaje-white-sands.js): lo que se dicen por el camino, cada
+# charla en su tramo («avance:ws:25-60», en % del camino; si el tramo pasa sin que se diga, se pierde) (capítulo 5 del libro), la Sra. Pye en el camino (no es del libro), y la casa de la Sra. Spencer (capítulo 6)
 === ws_t1 ===
 resumen: En la calesa: Ana decide disfrutar el viaje; las rosas silvestres y su pelo.
 canal: viaje
 prioridad: 6
 interrumpe
 en: ana=out, marilla=out
-si: hecho:ws_t1, !hecho:ws_vuelven
+calesa: avonlea
+si: avance:ws:1-30
 ---
 ana: ¿Sabe, Srta. Cuthbert? He decidido disfrutar de este viaje. Si uno se decide con firmeza, casi siempre puede disfrutar de las cosas.
 ana: No voy a pensar en el orfanato mientras vamos. Solo en el camino. ¡Mire, ya hay una rosa silvestre! ¿No le parece que el rosa es el color más encantador del mundo? Lástima que yo no lo pueda usar, con este pelo.
@@ -1560,7 +1562,8 @@ canal: viaje
 prioridad: 6
 interrumpe
 en: ana=out, marilla=out
-si: hecho:ws_t2, dicha:ws_t1, !hecho:ws_vuelven
+calesa: avonlea
+si: avance:ws:25-60
 ---
 marilla: (Marilla mira el camino, no a Ana.) Ya que tienes tantas ganas de hablar, cuéntame lo que sepas de ti.
 ana: Oh, lo que sé de mí no vale la pena contarlo, Srta. Cuthbert. Si me dejara contarle lo que imagino de mí, le parecería mucho más interesante.
@@ -1576,7 +1579,8 @@ canal: viaje
 prioridad: 6
 interrumpe
 en: ana=out, marilla=out
-si: hecho:ws_t3, dicha:ws_t2, !hecho:ws_vuelven
+calesa: avonlea
+si: avance:ws:45-88
 ---
 ana: Mi madre también era maestra, pero cuando se casó con mi padre dejó de enseñar. Eran pobres como ratones de iglesia. Vivían en una casita amarilla, con madreselvas en la ventana. Yo nunca la vi, pero la he imaginado miles de veces.
 ana: Mi madre se murió de fiebre cuando yo tenía tres meses. Ojalá hubiera vivido lo bastante para que yo me acordara de haberla llamado mamá. Mi padre se murió cuatro días después, de la misma fiebre.
@@ -10292,13 +10296,14 @@ const MISIONES = misionesLeer(document.getElementById('misiones')?.textContent |
 const DLG_LUGARES = { lago: () => [LAKE.x, LAKE.y], tejas_verdes: () => [GG.x, GG.y], casa_bell: () => WP.casa_bell, letrero_br: () => DOOR.br, hondonada: () => [LY.x, LY.y + 60] };
 // what has happened (kept with the game: the chains of the book go on from one day to another); each with the day it
 // happened (from 1), so that a scene can wait a day or two after another (dias_desde)
+const AVANCES = {};   // (how far along each trip goes, 0 to 100: who drives it registers it)
 const dlgHechos = () => game.wm ? (game.wm.hechos ||= {}) : (game.dlgHechos ||= {});
 const dlgHecho = (n, v = today() + 1) => { dlgHechos()[n] = v; if (game.wm) (game.wm.hechoT ||= {})[n] = dayT; };   // (and when, to the minute: «horas_desde:x:0.5»)
 const dlgDichas = () => game.escDone || (game.escDone = {});
 const dlgEscena = k => k === 'ana' ? game.scene : wmScene(k);
 function dlgCtx(){
   const k = game.road?.with, d = PEOPLE[k], road = game.scene === 'camino' && !!ana.onCart && d?.where === 'camino', M = PEOPLE.matthew;
-  const ride = game.scene === 'out' && M.where === 'out' && ((!!AGENTS.ana?.ride && AGENTS.ana.followOf === 'matthew') || cart.riding);   // (Ana with Matthew in the buggy, in Avonlea)
+  const ride = game.scene === 'out' && ((M.where === 'out' && !!AGENTS.ana?.ride && AGENTS.ana.followOf === 'matthew') || (cart.riding && PEOPLE[cart.con || 'matthew']?.where === 'out'));   // (or with whoever drives the cart: Marilla, to White Sands)   // (Ana with Matthew in the buggy, in Avonlea)
   return { road, d, dir: d?.roadDir || 0, tr: road ? roadTramo(d.roadS) : null, ride };
 }
 function dlgCond(s, c){   // one condition of state, written as text
@@ -10315,6 +10320,7 @@ function dlgCond(s, c){   // one condition of state, written as text
     case 'afecto': { const [x, y, n] = rest.split(':'); return relGetW(x, y) >= +n; }   // (x cares for y at least n, of 0..5; the same as «afecto:x:y>=n»)
     case 'dias_desde': { const d = dlgHechos()[a] ?? cuadernoHecho(a); return typeof d === 'number' && today() + 1 - d >= +b; }   // (at least b days since a happened: a fact, or a goal of the notebook done)
     case 'hora': { const [x, y] = a.split('-').map(Number), h = hourNow() % 24; return h >= x && h < y; }   // (the hour of the day: «hora:19-23»)
+    case 'avance': { const [v, r = ''] = rest.split(':'), [x, y] = r.split('-').map(Number), n = AVANCES[v]?.(); return n != null && n >= x && n <= y; }   // (how far along a trip is, in %: «avance:ws:25-60», src/js/34-viaje-white-sands.js)
     case 'dia_juego': return today() + 1 >= +a;   // (the game has gone on at least so many days: 56, a year)
     case 'sentada': return !!wmBody(a)?.sit;   // (she has sat down: at the table, for the tea)
     case 'estudio': return cualidad('ana', 'estudio') >= +a;   // (the same as «estudio:ana>=n»)
@@ -12326,19 +12332,17 @@ const DIAS_ESTACION = 14;   // (a season of the game: two weeks)
 const seasonCount = () => Math.floor(dayT / DIAS_ESTACION) + game.seasonShift;
 /* ---------- the trip to White Sands (chapters 5 and 6): Marilla drives the sorrel mare along the shore road, with Ana.
    The same cart as the trip to Bright River (src/js/33-viaje-bright-river.js), with its own route, driver and pace.
-   On the way, the book's talk at its places (the scenes «ws_t1»… in src/datos/guion.txt, by the facts set here); halfway
+   On the way, the book's talk at its stretches of the road (the scenes «ws_t1»… in src/datos/guion.txt: «avance:ws»); farther
    along, Mrs. Pye on the road (not in the book): what she says sends Ana running to the shore, and Marilla follows her
    there. At the hotel, Mrs. Spencer and Mrs. Blewett; and back home, quiet, by the same road. ---------- */
 const wsE = () => game.wm || game;   // (kept with the game: a trip left halfway, when the game is opened again, ends at home)
-// grafo: viaje_spencer → ws_t1
-// grafo: ws_t1 → ws_t2
-// grafo: ws_t2 → ws_t3
-// grafo: ws_t3 → ws_pye
-// grafo: ws_pye → ws_marilla_llega, ws_llegan
-// grafo: ws_orilla → ws_llegan
+// grafo: viaje_spencer → ws_pye, ws_llegan
+// grafo: ws_pye → ws_marilla_llega
 // grafo: ws_spencer → ws_vuelven
-// (each place of the road, once the talk before is over: one after the other, src/js/34 wsTick)
-const WS_VEL = 75, WS_MARCAS = [['ws_t1', .03, () => dlgHecho('ws_t1')], ['ws_t2', .22, () => dlgHecho('ws_t2')], ['ws_t3', .4, () => dlgHecho('ws_t3')], ['ws_pye', .7, () => dlgHecho('ws_pye')]];   // (each fact written whole: tools/grafo.js reads them)
+// (the talks of the road do not wait for each other: each has its stretch of the way, «avance:ws:25-60» in the script —
+// how far along they are, in %; if the stretch goes by, that talk is lost. While a talk goes on, the mare walks)
+const WS_VEL = 60, WS_PASO = 25;
+AVANCES.ws = () => cart.on && cart.viaje === WS_VIAJE ? cart.s / cartLen() * 100 : null;
 const wsRuta = () => { const a = [GG.x + 20, GG.y + 80], b = door('Hotel White Sands'), r = netRoute(...a, ...b); return [a, ...(r ? r.pts : []), b]; };
 // the nearest point of the shore (on the sand, a little before the water), and how far
 function wsOrillaCerca(x, y){ let best = null; for (let i = 1; i < COAST.length; i++) { const p = proj([x, y], COAST[i - 1], COAST[i]); if (!best || p.d < best.d) best = p; } return best; }
@@ -12370,14 +12374,11 @@ function wsTick(){
   const w = wsE().ws; if (!w || w.fase === 'fin') return;
   if (!cart.on || cart.viaje !== WS_VIAJE) { if (!w.volviendo && !game.talk) { w.volviendo = true; wsVolverCasa(); } return; }   // (the game was closed halfway: they are back)
   if (w.fase === 'ida') {
-    const H = dlgHechos(), D = dlgDichas(), fr = cart.s / cartLen(), at_ = ([h, a]) => h === 'ws_pye' ? w.pye || a : a, sig = WS_MARCAS.findIndex(([h]) => !H[h]);
-    const antes = sig > 0 && (!D[WS_MARCAS[sig - 1][0]] || TALKS.some(t => t.esc === WS_MARCAS[sig - 1][0]));   // (one talk after the other: the next place waits for the last talk to be over)
-    const espera = sig >= 0 && antes && fr >= at_(WS_MARCAS[sig]);   // (if they are still talking, the mare goes at a walk; where Mrs. Pye waits, it stops)
-    cart.vel = espera ? 25 : WS_VEL; if (sig === WS_MARCAS.length - 1) cart.parado = espera;
-    for (const m of WS_MARCAS) { const [h, , hacer] = m; if (fr < at_(m) || H[h] || antes) continue;
-      hacer();
-      if (h === 'ws_pye') { cart.parado = true; const f = FOLKBY.srapye, [px, py] = cartAt(cart.s + 90); if (f) Object.assign(f, { where: 'out', x: px + 30, y: py + 12, route: [], moving: false, sit: false, dir: 3, talkT: TT + 240 }); }
-      break;
+    const habla = TALKS.some(t => t.ch === 'viaje'), fr = cart.s / cartLen();
+    cart.vel = habla ? WS_PASO : WS_VEL;
+    if (fr >= w.pye && !dlgHechos().ws_pye) {   // Mrs. Pye, where the road runs nearest the sea: the cart stops there (once the talk under way is over)
+      cart.parado = true; if (habla) return;
+      dlgHecho('ws_pye'); const f = FOLKBY.srapye, [px, py] = cartAt(cart.s + 90); if (f) Object.assign(f, { where: 'out', x: px + 30, y: py + 12, route: [], moving: false, sit: false, dir: 3, talkT: TT + 240 });
     }
   }
 }

@@ -223,6 +223,7 @@
         const [x, y] = a[0].split('-').map(Number);
         return y <= 26 ? And([hora.ge(x), hora.lt(y)]) : And([hora.ge(x)]);
       }
+      if (key === 'avance') { const [x, y] = a[1].split('-').map(Number), v = Z.Real.const('avance_' + a[0]); return And([v.ge(x), v.le(y)]); }   // (how far along a trip: a free number, in its stretch)
       if (key === 'conoce') return conoce(a[0]);
       if (key === 'presente') return presente(a[0], t);
       if (key === 've') return ve(a[0]);

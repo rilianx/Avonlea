@@ -19,13 +19,14 @@
 const DLG_LUGARES = { lago: () => [LAKE.x, LAKE.y], tejas_verdes: () => [GG.x, GG.y], casa_bell: () => WP.casa_bell, letrero_br: () => DOOR.br, hondonada: () => [LY.x, LY.y + 60] };
 // what has happened (kept with the game: the chains of the book go on from one day to another); each with the day it
 // happened (from 1), so that a scene can wait a day or two after another (dias_desde)
+const AVANCES = {};   // (how far along each trip goes, 0 to 100: who drives it registers it)
 const dlgHechos = () => game.wm ? (game.wm.hechos ||= {}) : (game.dlgHechos ||= {});
 const dlgHecho = (n, v = today() + 1) => { dlgHechos()[n] = v; if (game.wm) (game.wm.hechoT ||= {})[n] = dayT; };   // (and when, to the minute: «horas_desde:x:0.5»)
 const dlgDichas = () => game.escDone || (game.escDone = {});
 const dlgEscena = k => k === 'ana' ? game.scene : wmScene(k);
 function dlgCtx(){
   const k = game.road?.with, d = PEOPLE[k], road = game.scene === 'camino' && !!ana.onCart && d?.where === 'camino', M = PEOPLE.matthew;
-  const ride = game.scene === 'out' && M.where === 'out' && ((!!AGENTS.ana?.ride && AGENTS.ana.followOf === 'matthew') || cart.riding);   // (Ana with Matthew in the buggy, in Avonlea)
+  const ride = game.scene === 'out' && ((M.where === 'out' && !!AGENTS.ana?.ride && AGENTS.ana.followOf === 'matthew') || (cart.riding && PEOPLE[cart.con || 'matthew']?.where === 'out'));   // (or with whoever drives the cart: Marilla, to White Sands)   // (Ana with Matthew in the buggy, in Avonlea)
   return { road, d, dir: d?.roadDir || 0, tr: road ? roadTramo(d.roadS) : null, ride };
 }
 function dlgCond(s, c){   // one condition of state, written as text
@@ -42,6 +43,7 @@ function dlgCond(s, c){   // one condition of state, written as text
     case 'afecto': { const [x, y, n] = rest.split(':'); return relGetW(x, y) >= +n; }   // (x cares for y at least n, of 0..5; the same as «afecto:x:y>=n»)
     case 'dias_desde': { const d = dlgHechos()[a] ?? cuadernoHecho(a); return typeof d === 'number' && today() + 1 - d >= +b; }   // (at least b days since a happened: a fact, or a goal of the notebook done)
     case 'hora': { const [x, y] = a.split('-').map(Number), h = hourNow() % 24; return h >= x && h < y; }   // (the hour of the day: «hora:19-23»)
+    case 'avance': { const [v, r = ''] = rest.split(':'), [x, y] = r.split('-').map(Number), n = AVANCES[v]?.(); return n != null && n >= x && n <= y; }   // (how far along a trip is, in %: «avance:ws:25-60», src/js/34-viaje-white-sands.js)
     case 'dia_juego': return today() + 1 >= +a;   // (the game has gone on at least so many days: 56, a year)
     case 'sentada': return !!wmBody(a)?.sit;   // (she has sat down: at the table, for the tea)
     case 'estudio': return cualidad('ana', 'estudio') >= +a;   // (the same as «estudio:ana>=n»)

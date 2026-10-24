@@ -23,6 +23,7 @@
 # En «si:», también: «horas_desde:llegada_tv:0.5» (pasó por lo menos media hora desde ese hecho), «comento:lynde:ana:camison» (ya le comentó hoy eso: el camisón, «hora», el sombrero), «ve:marilla» (Marilla la ve), «donde:ana:tejas» (o con «!»), «ana:camison», «ana:sin_sombrero»,
 #   «ana:ropa_tirada»; y las cualidades de uno hacia otro: «paciencia:marilla:ana<=1» (src/datos/habilidades.txt).
 # «resumen: …»: qué pasa en la escena, en una línea (para el dibujo del grafo, trazas/grafo.html).
+# «avance:ws:25-60» (en «si:»): Ana va en un viaje (ws, White Sands) y llevan entre el 25 y el 60 % del camino.
 # «! vestirse»; «! punto id | texto» (un punto para volver: la partida como está ahora; el campo «punto: [id |] texto»
 #   lo guarda justo antes de que empiece la escena, y al volver se juega de nuevo; toda escena «grande» lleva uno);
 #   «! final id | texto» (la
@@ -1313,15 +1314,16 @@ marilla: Ponte el sombrero, Ana. Nos vamos a White Sands.
 ana piensa: Puede que sea la última vez que veo esta cocina.
 ! viaje white_sands
 
-# el viaje a White Sands, en la calesa de Marilla (src/js/34-viaje-white-sands.js): lo que se dicen por el camino, en
-# sus lugares (capítulo 5 del libro), la Sra. Pye en el camino (no es del libro), y la casa de la Sra. Spencer (capítulo 6)
+# el viaje a White Sands, en la calesa de Marilla (src/js/34-viaje-white-sands.js): lo que se dicen por el camino, cada
+# charla en su tramo («avance:ws:25-60», en % del camino; si el tramo pasa sin que se diga, se pierde) (capítulo 5 del libro), la Sra. Pye en el camino (no es del libro), y la casa de la Sra. Spencer (capítulo 6)
 === ws_t1 ===
 resumen: En la calesa: Ana decide disfrutar el viaje; las rosas silvestres y su pelo.
 canal: viaje
 prioridad: 6
 interrumpe
 en: ana=out, marilla=out
-si: hecho:ws_t1, !hecho:ws_vuelven
+calesa: avonlea
+si: avance:ws:1-30
 ---
 ana: ¿Sabe, Srta. Cuthbert? He decidido disfrutar de este viaje. Si uno se decide con firmeza, casi siempre puede disfrutar de las cosas.
 ana: No voy a pensar en el orfanato mientras vamos. Solo en el camino. ¡Mire, ya hay una rosa silvestre! ¿No le parece que el rosa es el color más encantador del mundo? Lástima que yo no lo pueda usar, con este pelo.
@@ -1338,7 +1340,8 @@ canal: viaje
 prioridad: 6
 interrumpe
 en: ana=out, marilla=out
-si: hecho:ws_t2, dicha:ws_t1, !hecho:ws_vuelven
+calesa: avonlea
+si: avance:ws:25-60
 ---
 marilla: (Marilla mira el camino, no a Ana.) Ya que tienes tantas ganas de hablar, cuéntame lo que sepas de ti.
 ana: Oh, lo que sé de mí no vale la pena contarlo, Srta. Cuthbert. Si me dejara contarle lo que imagino de mí, le parecería mucho más interesante.
@@ -1354,7 +1357,8 @@ canal: viaje
 prioridad: 6
 interrumpe
 en: ana=out, marilla=out
-si: hecho:ws_t3, dicha:ws_t2, !hecho:ws_vuelven
+calesa: avonlea
+si: avance:ws:45-88
 ---
 ana: Mi madre también era maestra, pero cuando se casó con mi padre dejó de enseñar. Eran pobres como ratones de iglesia. Vivían en una casita amarilla, con madreselvas en la ventana. Yo nunca la vi, pero la he imaginado miles de veces.
 ana: Mi madre se murió de fiebre cuando yo tenía tres meses. Ojalá hubiera vivido lo bastante para que yo me acordara de haberla llamado mamá. Mi padre se murió cuatro días después, de la misma fiebre.
