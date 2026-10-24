@@ -25,6 +25,9 @@ aside{border-left:1px solid var(--line);background:var(--panel);overflow:auto;pa
 aside h2{font-size:16px;margin:4px 0 2px;font-weight:normal;word-break:break-word}
 aside h3{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--sub);margin:16px 0 6px;font-weight:normal}
 aside p{margin:4px 0}
+.fila{margin:5px 0;line-height:1.9}
+details{margin-top:18px;border-top:1px solid var(--line);padding-top:8px}
+summary{cursor:pointer;color:var(--sub);font-size:13px}
 .chip{display:inline-block;margin:2px 3px 2px 0;padding:1px 7px;border-radius:10px;border:1px solid var(--line);font-size:12.5px;cursor:pointer;background:var(--bg)}
 .chip:hover{border-color:var(--sub)}
 .chip.no{text-decoration:line-through;opacity:.75}
@@ -132,31 +135,71 @@ const chipH = (h, no) => `<span class="chip${no ? ' no' : ''}" data-h="${esc(h)}
 // a condition, written as the script has it; the facts in it, clickable
 const condHtml = s => s.split(',').map(c => c.trim()).filter(Boolean).map(c => { const m = c.match(/^(!?)(hecho|dias_desde|no_hoy):([a-z_0-9]+)/); return m && D.hechos[m[3]] ? chipH(m[3], (m[1] === '!') !== (m[2] === 'no_hoy')) + (m[2] !== 'hecho' ? `<span class="cond mut">${esc(c.replace(m[3], '…'))}</span> ` : '') : `<span class="chip cond mut">${esc(c)}</span>`; }).join('');
 const accHtml = s => { const m = s.match(/^(hecho|olvidar)\s+(\S+)/); return m && D.hechos[m[2]] ? (m[1] === 'olvidar' ? 'olvida ' : '') + chipH(m[2]) : `<span class="cond">${esc(s)}</span>`; };
+// a condition that is not a fact, said in words (the hour, the place, who is there, a quality)
+const CUAL = { '>=': '≥', '<=': '≤', '>': '>', '<': '<', '==': '=', '=': '=' };
+function enPalabras(c){
+  let m;
+  if ((m = c.match(/^hora:([\d.]+)-([\d.]+)$/))) return `entre las ${m[1]} y las ${m[2]} h`;
+  if ((m = c.match(/^([a-zñ_]+):([a-zñ_]+)(?::([a-zñ_]+))?\s*(>=|<=|>|<|==|=)\s*(-?[\d.]+)$/))) return `${m[1]} de ${m[2]}${m[3] ? ' hacia ' + m[3] : ''} ${CUAL[m[4]]} ${m[5]}`;
+  if ((m = c.match(/^(!?)donde:(\w+):(\w+)$/))) return `${m[2]} ${m[1] ? 'no está' : 'está'} en ${m[3]}`;
+  if ((m = c.match(/^(!?)presente:(\w+)$/))) return `${m[2]} ${m[1] ? 'no ' : ''}anda por Avonlea`;
+  if ((m = c.match(/^(!?)ve:(\w+)$/))) return `${m[1] ? 'sin que la vea' : 'la ve'} ${m[2]}`;
+  if ((m = c.match(/^estacion:(\w+)$/))) return 'en ' + m[1];
+  if ((m = c.match(/^(!?)(cuaderno):(\w+)$/))) return `${m[1] ? 'sin' : 'con'} la meta «${m[3]}» cumplida`;
+  if ((m = c.match(/^(!?)dicha:(\w+)$/))) return `${m[1] ? 'antes de' : 'después de'} la escena ${m[2]}`;
+  if ((m = c.match(/^sentada:(\w+)$/))) return `${m[1]} sentada a la mesa`;
+  if ((m = c.match(/^tomando_te:(\w+):(\w+)$/))) return `${m[1]} y ${m[2]} tomando el té`;
+  return c;
+}
+// the conditions of a scene, sorted: the facts it needs (and from where), the facts that must NOT have happened (that
+// is how the branches exclude each other), and the rest (when and where: no arrows, but they decide too)
+function partes(n){
+  const i = n.info, si = (i.si || '').split(',').map(c => c.trim()).filter(Boolean), nec = [], no = [], resto = [];
+  for (const c of si) { const m = c.match(/^(!?)(hecho|dias_desde|no_hoy):([a-z_0-9]+)(?::(\d+))?/);
+    if (!m) { resto.push(enPalabras(c)); continue; }
+    const neg = (m[1] === '!') !== (m[2] === 'no_hoy');
+    if (m[2] === 'no_hoy') (neg ? no : nec).push([m[3], neg ? 'hoy' : 'hoy']);
+    else if (m[2] === 'dias_desde') nec.push([m[3], m[4] + (m[4] === '1' ? ' día' : ' días') + ' después']);
+    else (neg ? no : nec).push([m[3], '']); }
+  for (const r of i.requiere || []) { if (NOD.has('meta ' + r)) nec.push(['meta ' + r, 'meta']); else { const m = r.match(/^(!?)hecho:(\w+)$/); if (m) (m[1] ? no : nec).push([m[2], '']); else resto.push(enPalabras(r)); } }
+  return { nec, no, resto };
+}
+// what a scene leaves: always (al empezar, al terminar, after it by the game), or only if Ana chooses an option
+function dejaDe(n){
+  const i = n.info, L = [], hechoEn = s => s.match(/^hecho\s+(\S+)/)?.[1];
+  for (const s of [...(i.empieza || []), ...(i.termina || [])]) { const h = hechoEn(s); if (h) L.push([h, '']); }
+  for (const o of i.ops || []) for (const s of o.ef) { const h = hechoEn(s); if (h) L.push([h, 'si elige «' + o.t.replace(/^«|»$/g, '') + '»']); }
+  for (const [h, f] of Object.entries(D.hechos)) if (f.hace.includes(n.id) && !L.some(([x]) => x === h)) L.push([h, 'lo deja el juego después']);
+  return L;
+}
+const quien = h => (D.hechos[h]?.hace || []).map(w => w === 'código' ? '<span class="chip mut" title="lo deja el código del juego">⚙ el juego</span>' : chipN(w)).join('') || '<span class="mut">nadie</span>';
+const aQuien = h => { const L = (D.hechos[h]?.pide || []).filter(w => w !== sel); return L.length ? '<span class="mut">→ lo necesita</span> ' + L.map(chipN).join('') : '<span class="mut">→ nadie lo necesita</span>'; };
 function elegir(id, sinCentrar){
   sel = id && NOD.has(id) ? id : null; marca();
   if (!sel) return inicio();
-  const n = NOD.get(sel), i = n.info, P = $('panel');
-  const deja = Object.entries(D.hechos).filter(([, f]) => f.hace.includes(sel)).map(([h]) => h);
-  const necesita = ent.get(sel), abre = sal.get(sel);
+  const n = NOD.get(sel), i = n.info, P = $('panel'), { nec, no, resto } = partes(n), deja = dejaDe(n);
   let h = `<div class="tipo">${esc(TIPOS[n.tipo][0])}${n.grande ? ' · ★ grande' : ''}${n.c != null ? ' · paso ' + n.c : ' · suelta'}</div><h2>${esc(n.k)}</h2>${n.desc ? '<p><b>' + esc(n.desc) + '</b></p>' : ''}`;
-  for (const p of PUNTO_DE.get(sel) || []) h += `<p>↺ <b>Punto</b> (${esc(p.cuando)}): ${esc(p.texto)}</p>`;
-  if (i.tema && i.resumen) h += `<p class="mut">Tema: ${esc(i.tema)}</p>`;
-  if (i.narra) h += `<p class="mut"><i>${esc(i.narra)}${i.narra.length >= 260 ? '…' : ''}</i></p>`;
-  else if (i.primera) h += `<p class="mut"><i>${esc(i.primera)}</i></p>`;
-  if (i.pista) h += `<p class="mut">Pista: ${esc(i.pista)}</p>`;
-  const donde = [i.con && 'con ' + i.con, i.canal && 'canal ' + i.canal, i.prioridad && 'prioridad ' + i.prioridad, i.repetir && 'se repite: ' + i.repetir, i.en && 'en: ' + i.en, i.cerca && 'cerca: ' + i.cerca, i.donde && 'donde: ' + i.donde, i.disparo && 'disparo: ' + i.disparo, i.lugar && 'lugar: ' + i.lugar, i.lineas && i.lineas + ' líneas', i.aPrueba && 'a prueba'].filter(Boolean);
-  if (donde.length) h += `<p class="tipo">${esc(donde.join(' · '))}</p>`;
-  h += '<h3>Cuándo puede pasar (si:)</h3>' + (i.si ? condHtml(i.si) : i.requiere?.length ? i.requiere.map(r => NOD.has('meta ' + r) ? chipN('meta ' + r) : condHtml(r)).join('') : '<p class="mut">Sin condiciones de estado.</p>');
-  if (i.meta) h += `<p class="tipo">Está cumplida cuando: <span class="cond">${esc(i.meta)}</span></p>`;
-  h += '<h3>Lo que necesita (viene de)</h3>' + (necesita.length ? necesita.map(([a, hs]) => `<p>${chipN(a)} <span class="mut">→</span> ${hs.map(x => chipH(x)).join('')}</p>`).join('') : '<p class="mut">Nada que deje otra escena.</p>');
-  const delJuego = (i.si || '').split(',').map(c => c.trim().match(/^hecho:([a-z_0-9]+)/)?.[1]).filter(x => x && D.hechos[x]?.hace.some(w => w === 'código'));
-  if (delJuego.length) h += `<p class="tipo">⚙ Lo deja el juego (código): ${delJuego.map(x => chipH(x)).join('')}</p>`;
-  if (i.empieza?.length) h += '<h3>Al empezar</h3>' + i.empieza.map(s => '<p>' + accHtml(s) + '</p>').join('');
-  if (i.termina?.length) h += '<h3>Al terminar</h3>' + i.termina.map(s => '<p>' + accHtml(s) + '</p>').join('');
-  if (i.ops?.length) h += '<h3>Las opciones</h3>' + i.ops.map(o => `<div class="op">${o.propia ? '→* ' : '→ '}${esc(o.t)}${o.dice ? '<br><span class="mut">' + esc(o.dice) + '</span>' : ''}${o.ef.length ? '<br>' + o.ef.map(accHtml).join(' ') : ''}</div>`).join('');
-  h += '<h3>Lo que deja</h3>' + (deja.length ? deja.map(x => chipH(x)).join('') : '<p class="mut">Ningún hecho.</p>');
-  h += '<h3>Lo que abre (va a)</h3>' + (abre.length ? abre.map(([b, hs]) => `<p>${hs.map(x => chipH(x)).join('')} <span class="mut">→</span> ${chipN(b)}</p>`).join('') : '<p class="mut">Nada la necesita.</p>');
-  const cierra = D.cierra.filter(([, b]) => b === sel); if (cierra.length) h += '<h3>Se cierra con (ya no pasa después de)</h3>' + cierra.map(([a, , hs]) => `<p>${hs.map(x => chipH(x, true)).join('')} <span class="mut">←</span> ${chipN(a)}</p>`).join('');
+  for (const p of PUNTO_DE.get(sel) || []) h += `<p>↺ Punto para volver: ${esc(p.texto)}</p>`;
+  // 1. what it needs
+  h += '<h3>Necesita</h3>';
+  h += nec.length ? nec.map(([x, q]) => q === 'meta' ? `<p class="fila">${chipN(x)} <span class="mut">(meta cumplida)</span></p>` : `<p class="fila">${chipH(x)}${q ? ' <span class="mut">' + esc(q) + '</span>' : ''} <span class="mut">← lo deja</span> ${quien(x)}</p>`).join('') : '<p class="mut">Ningún hecho: puede pasar desde el comienzo.</p>';
+  if (no.length) h += '<p class="fila"><span class="mut">y que todavía no haya pasado:</span> ' + no.map(([x]) => chipH(x, true)).join('') + '</p>';
+  if (resto.length) h += '<p class="fila mut">cuándo: ' + resto.map(esc).join(' · ') + '</p>';
+  // 2. what it leaves
+  h += '<h3>Deja</h3>';
+  h += deja.length ? deja.map(([x, q]) => `<p class="fila">${chipH(x)}${q ? ' <span class="mut">' + esc(q) + '</span>' : ''} ${aQuien(x)}</p>`).join('') : '<p class="mut">Ningún hecho.</p>';
+  // the rest, folded: the text, the options, everything it does
+  let det = '';
+  if (i.narra) det += `<p class="mut"><i>${esc(i.narra)}${i.narra.length >= 260 ? '…' : ''}</i></p>`; else if (i.primera) det += `<p class="mut"><i>${esc(i.primera)}</i></p>`;
+  if (i.pista) det += `<p class="mut">Pista: ${esc(i.pista)}</p>`;
+  if (i.meta) det += `<p class="tipo">Está cumplida cuando: <span class="cond">${esc(i.meta)}</span></p>`;
+  const donde = [i.con && 'con ' + i.con, i.canal && 'canal ' + i.canal, i.prioridad && 'prioridad ' + i.prioridad, i.repetir && 'se repite: ' + i.repetir, i.en && 'en: ' + i.en, i.cerca && 'cerca: ' + i.cerca, i.donde && 'donde: ' + i.donde, i.lineas && i.lineas + ' líneas'].filter(Boolean);
+  if (donde.length) det += `<p class="tipo">${esc(donde.join(' · '))}</p>`;
+  if (i.si) det += `<p class="tipo">si: <span class="cond">${esc(i.si)}</span></p>`;
+  if (i.ops?.length) det += '<p class="tipo">Opciones:</p>' + i.ops.map(o => `<div class="op">${o.propia ? '→* ' : '→ '}${esc(o.t)}${o.ef.length ? '<br><span class="cond mut">' + o.ef.map(esc).join(' · ') + '</span>' : ''}</div>`).join('');
+  const hace = [...(i.empieza || []).map(x => 'al empezar: ' + x), ...(i.termina || []).map(x => 'al terminar: ' + x)];
+  if (hace.length) det += '<p class="tipo">Lo que hace:</p>' + hace.map(x => `<p class="cond mut">${esc(x)}</p>`).join('');
+  if (det) h += '<details><summary>Detalles (texto, opciones, todo lo que hace)</summary>' + det + '</details>';
   P.innerHTML = h; P.scrollTop = 0; if (!sinCentrar) centra(sel); location.replace('#' + encodeURIComponent(sel));
 }
 function hecho(h){
@@ -175,7 +218,8 @@ $('panel').addEventListener('click', e => { const c = e.target.closest('.chip');
 // the start: what the drawing is, the points, what never could happen, the loose ones
 function inicio(){
   const sueltos = D.nodos.filter(n => n.suelto), porTipo = t => sueltos.filter(n => n.tipo === t);
-  let h = '<h2>Cómo leerlo</h2><p>Cada caja es una escena o una meta del cuaderno. La flecha va de lo que <b>deja</b> un hecho a lo que lo <b>necesita</b> (pasa el ratón por la flecha para ver el hecho). De izquierda a derecha, el orden de la historia: cada caja va una columna a la derecha de lo más lejano que necesita.</p>';
+  let h = '<h2>Cómo leerlo</h2><p>Cada escena dice dos cosas: qué hechos <b>necesita</b> y qué hechos <b>deja</b>. Con eso el grafo sale solo: la flecha va de la escena que deja un hecho a la que lo necesita (pasa el ratón por la flecha para ver cuál). De izquierda a derecha, el orden de la historia.</p>';
+  h += '<p>Lo que no son flechas, pero también decide, va en una línea aparte en cada escena: <b>que algo todavía no haya pasado</b> (así se excluyen los caminos: si Marilla ya decidió, ya no se va a White Sands) y <b>cuándo</b> (la hora, el lugar, quién está, la paciencia o el afecto). Y lo que deja puede depender de lo que Ana elija.</p>';
   h += '<p>Toca una caja: en <span style="color:var(--up)">azul</span>, todo lo que tiene que pasar antes; en <span style="color:var(--down)">naranja</span>, todo lo que abre después.</p>';
   h += '<div class="leyenda">' + Object.values(TIPOS).map(([t, k]) => `<span><i style="background:var(--${k});border-color:var(--${k}B)"></i>${t}</span>`).join('') + '<span>★ grande (del libro)</span><span>↺ punto para volver</span><span>◆ meta</span></div>';
   h += '<h3>Puntos para volver</h3><div class="lista">' + D.puntos.map(p => `<div data-n="${esc(p.escena)}">↺ ${esc(p.texto)} <span class="mut">· ${esc(p.escena.slice(7))}, ${esc(p.cuando)}</span></div>`).join('') + '</div>';
