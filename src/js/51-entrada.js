@@ -165,6 +165,7 @@ $('wmobey').addEventListener('change', e => { WM_OBEY = e.target.checked; });
 $('wmstop').addEventListener('click', () => { for (const k of Object.keys(AGENTS)) { wmRelease(k); delete AGENTS[k]; } wmPanelDraw(); });
 $('wmclose').addEventListener('click', () => wmPanel(false));
 $('relbtn').addEventListener('pointerdown', e => { e.stopPropagation(); audio(); userInput(); relPanel($('rels').hidden); });
+$('cualist').addEventListener('click', e => { const b = e.target.closest('.cuapunto'); if (b && confirm('¿Volver a ese momento? Lo que pasó después se pierde (los demás momentos guardados quedan).')) puntoVolver(b.dataset.punto); });
 $('cuabtn').addEventListener('pointerdown', e => { e.stopPropagation(); audio(); userInput(); cuadernoPanel($('cua').hidden); });
 $('cuaclose').addEventListener('click', () => cuadernoPanel(false));
 $('relclose').addEventListener('click', () => relPanel(false));

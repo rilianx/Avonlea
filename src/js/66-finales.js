@@ -6,10 +6,12 @@
    the page is opened again). */
 const PUNTOS_KEY = 'avonlea:puntos';
 const puntosLeer = () => { try { return JSON.parse(localStorage.getItem(PUNTOS_KEY) || '{}'); } catch (e) { return {}; } };
-// a point: the game as it is now, once the scene that keeps it is under way (so that it goes on from there)
-function puntoGuardar(id, texto){
-  setTimeout(() => { if (game.final) return; save(); try { const P = puntosLeer(); P[id] = { texto: texto || 'Volver atrás', dia: today(), data: localStorage.getItem('avonlea') }; localStorage.setItem(PUNTOS_KEY, JSON.stringify(P)); } catch (e) {} }, 100);
-}
+// a point: the game as it is now («! punto», «al_terminar: punto»: once what the scene does is done, so that it goes on
+// from there); or, with the field «punto:» of a scene, just before it begins (going back, it is played again)
+function puntoAhora(id, texto){ if (game.final) return; save(); try { const P = puntosLeer(); P[id] = { texto: texto || 'Volver atrás', dia: today(), hora: fmtHour(hourNow()), t: Date.now(), data: localStorage.getItem('avonlea') }; localStorage.setItem(PUNTOS_KEY, JSON.stringify(P)); } catch (e) {} }
+function puntoGuardar(id, texto){ setTimeout(() => puntoAhora(id, texto), 100); }
+// the points kept, in the order they were reached (for the notebook: going back at any moment, not only at an ending)
+const puntosLista = () => Object.entries(puntosLeer()).sort((a, b) => (a[1].t || 0) - (b[1].t || 0));
 function puntoVolver(id){ const p = puntosLeer()[id]; if (!p?.data) return; wiping = true; try { localStorage.setItem('avonlea', p.data); } catch (e) {} location.reload(); }
 function empezarDeNuevo(){ wiping = true; try { localStorage.removeItem('avonlea'); localStorage.removeItem(PUNTOS_KEY); } catch (e) {} location.reload(); }
 // the ending: its card (the text is the scene's; the buttons, the points kept and a new beginning)
@@ -18,7 +20,7 @@ function finalMostrar(id, texto){
   if (navigator.webdriver && !/[?&]dev\b/.test(location.search)) return;
   let el = $('final'); if (!el) { el = document.createElement('div'); el.id = 'final'; document.body.appendChild(el); }
   el.style.cssText = 'position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;background:rgba(40,28,16,.55);padding:16px';
-  const P = Object.entries(puntosLeer());
+  const P = puntosLista();
   el.innerHTML = '<div style="width:min(480px,100%);background:#f6ecd2;color:#3b2a1c;border:1px solid #8a6a48;border-radius:10px;box-shadow:0 8px 30px rgba(20,10,0,.45);padding:22px 24px;font:17px/1.5 Georgia,serif;text-align:center">'
     + '<div style="font-size:13px;letter-spacing:.2em;color:#8a6a48">FIN</div><p class="tx" style="font-style:italic;margin:10px 0 18px"></p><div class="bt" style="display:flex;flex-direction:column;gap:8px;align-items:center"></div></div>';
   el.querySelector('.tx').textContent = conNombres(texto || 'Aquí termina esta historia.');

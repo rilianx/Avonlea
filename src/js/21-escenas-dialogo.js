@@ -236,7 +236,9 @@ class Dialogo {
     return [[l[0], dicho('puente:' + l[0]) || dicho('puente:otro')]];   // (what is said to pick up a conversation cut short, by who speaks next: src/datos/dichos/40-gente.txt)
   }
   decir(){
-    const D = dlgDichas(), P = dlgProg(), p = P[this.id] || 0; if (this.repetir === 'una_vez') D[this.id] = true; else if (this.repetir === 'dia') D[this.id] = today();
+    const D = dlgDichas(), P = dlgProg(), p = P[this.id] || 0;
+    if (!p && this.punto) { const [id, texto] = this.punto.includes('|') ? this.punto.split('|').map(x => x.trim()) : [this.id, this.punto]; puntoAhora(id, texto); }   // (a point just before it: the game as it is, the scene still to come)
+    if (this.repetir === 'una_vez') D[this.id] = true; else if (this.repetir === 'dia') D[this.id] = today();
     if (this.repetir.cada) this.proxima = TT + this.repetir.cada;
     if (this.tipo === 'comentario') dlgComento[this.canal] = TT + DLG_RESPIRO;
     const L = this.lineas(); if (p >= L.length) delete P[this.id]; if (!L.length || p >= L.length) return null;

@@ -244,7 +244,9 @@ body:not(.dev) #spdbtn{top:298px!important;right:10px!important}
 # «narra salvo: <condiciones>»: las tarjetas de «narra:», salvo cuando se cumple (lo que cuentan, la jugadora lo acaba de jugar).
 # En «si:», también: «horas_desde:llegada_tv:0.5» (pasó por lo menos media hora desde ese hecho), «comento:lynde:ana:camison» (ya le comentó hoy eso: el camisón, «hora», el sombrero), «ve:marilla» (Marilla la ve), «donde:ana:tejas» (o con «!»), «ana:camison», «ana:sin_sombrero»,
 #   «ana:ropa_tirada»; y las cualidades de uno hacia otro: «paciencia:marilla:ana<=1» (src/datos/habilidades.txt).
-# «! vestirse»; «! punto id | texto» (un punto para volver: la partida como está ahora); «! final id | texto» (la
+# «! vestirse»; «! punto id | texto» (un punto para volver: la partida como está ahora; el campo «punto: [id |] texto»
+#   lo guarda justo antes de que empiece la escena, y al volver se juega de nuevo; toda escena «grande» lleva uno);
+#   «! final id | texto» (la
 #   historia termina: una tarjeta, y se puede volver a un punto o empezar de nuevo).
 # Si varias escenas pueden decirse a la vez en un canal, va la de más prioridad; a igual prioridad, la más específica
 # (la que pide más condiciones). «grande»: empieza algo grande del libro; como mucho una grande por día (el ritmo).
@@ -937,6 +939,7 @@ diana: Bueno… tal vez. Tengo que volver a casa ahora.
 # poder ir al picnic, «confiesa» que lo perdió en el lago… hasta que el broche aparece en el chal de Marilla.
 # Abre el picnic (cuaderno: picnic requiere hecho:broche).
 === broche ===
+punto: Antes del broche de amatista
 narra: Marilla tiene un broche de amatista que fue de su madre: lo más valioso que posee, y lo usa solo para ir a la iglesia. Y la escuela dominical va a hacer un picnic en el lago, con helado, algo que Ana nunca ha probado.
 grande
 canal: gg
@@ -967,6 +970,7 @@ ana: (Ana baja la escalera de un salto, con los ojos brillando.) ¡Helado! ¡Por
 # --- «¡Zanahorias!» (cap. 15): el primer día de Ana en la escuela con Gilbert Blythe. Desde ahí, Ana no le habla
 # (la ofensa), y hacer las paces se vuelve una meta (cuaderno: paces requiere hecho:zanahorias).
 === zanahorias ===
+punto: Antes del día de la pizarra (Gilbert y las zanahorias)
 narra: La escuela de Avonlea tiene una sola sala, para todos los niños del pueblo. Gilbert Blythe es el más listo y el más buen mozo, y está acostumbrado a que todas las niñas lo miren. Ana todavía no lo ha mirado.
 grande
 canal: es
@@ -1134,6 +1138,7 @@ ana: ¿A casa? ¡Pero si todavía no hemos tomado el té! ¡Diana, no te vayas!
 diana: (Diana se levanta tambaleándose.) Me siento… muy… muy mal.
 
 === prohibida ===
+punto: Antes de que la Sra. Barry le prohíba a Diana verla
 narra: La Sra. Barry es una mujer severa, que no perdona fácilmente. Y Diana llegó a su casa mareada, tambaleándose, después de tomar el té en Tejas Verdes.
 grande
 canal: gg
@@ -1165,6 +1170,7 @@ ana: Sra. Barry, por favor, perdóneme. No sabía que era vino. Me imaginé que 
 barry: No, Ana Shirley. No creo que seas compañía para Diana. Vete a tu casa y pórtate bien.
 
 === crup_aviso ===
+punto: Antes de la noche del crup
 narra: Una noche de invierno. Casi todos los grandes de Avonlea fueron a Charlottetown, a escuchar el discurso del Primer Ministro: también los Barry. Diana se quedó en casa cuidando a Minnie May, su hermanita de tres años.
 narra: El crup es una enfermedad de los niños que cierra la garganta: hay que actuar rápido. Ana sabe de crup, porque cuidó a tres pares de mellizos de la Sra. Hammond.
 grande
@@ -1204,6 +1210,7 @@ ana: (Ana no cabe en sí de felicidad.) ¡Oh, Sra. Barry! La perdono con toda mi
 # té; Ana hace el pastel… con linimento en vez de vainilla. La Sra. Allan es tan buena que la invita a la casa
 # parroquial (cuaderno: el té con la Sra. Allan requiere hecho:pastel_linimento).
 === invita_allan ===
+punto: Antes del té con la Sra. Allan
 narra: Avonlea tiene un pastor nuevo, el Sr. Allan, que llegó con su esposa, joven y alegre. Ana la quiere desde el primer domingo en la escuela dominical. Y en Avonlea, cuando llega un pastor nuevo, cada familia lo invita a tomar el té.
 grande
 canal: gg
@@ -1217,6 +1224,7 @@ marilla: Invité al pastor y a la Sra. Allan a tomar el té mañana en la tarde.
 ana: ¡Oh, Marilla! Lo haré con toda mi alma. ¡Y con vainilla, como dice la receta!
 
 === pastel_linimento ===
+punto: Antes del pastel con linimento
 grande
 canal: gg
 prioridad: 7
@@ -1239,6 +1247,7 @@ sraallan: (La Sra. Allan sube a verla.) Querida, fue un error muy gracioso, nada
 # --- la tía Josephine (cap. 19): ya amigas, Ana se queda a dormir donde Diana después del concierto del Club de Debate;
 # saltan sobre la cama del cuarto de huéspedes… donde dormía la tía Josephine. Ana confiesa y se gana su amistad.
 === cama_josephine ===
+punto: Antes de la noche en la cama de la Srta. Josephine
 narra: La tía de la Sra. Barry, la Srta. Josephine Barry, vino desde Charlottetown. Es una anciana rica, muy de mal genio, y se queda en el cuarto de huéspedes de La Cuesta del Huerto. Ana y Diana no lo saben.
 grande
 canal: os
@@ -1471,6 +1480,7 @@ ana: (Ana baja la mirada al plato y no dice nada más, cosa rara en ella.)
 ! mesa nada
 
 === viaje_spencer ===
+punto: white_sands | Antes de salir a White Sands
 narra: White Sands está a unas millas por el camino de la costa. Allí vive la Sra. Spencer, la que trajo a Ana del orfanato por equivocación: Marilla va a pedirle que la devuelva. Ana sabe que puede ser su último día en Tejas Verdes.
 canal: gg
 prioridad: 9
@@ -1635,6 +1645,7 @@ al_terminar: hecho conoce_blewett
 al_terminar: hecho a_prueba
 al_terminar: suma afecto:marilla:ana 1
 al_terminar: log Marilla llevó a Ana a White Sands; la Sra. Blewett la quería de sirvienta, y Marilla no se la dio. Esa noche le dijo a Matthew que se la quedaba; a Ana, todavía no. | yo: Marilla me llevó a White Sands. La Sra. Blewett me quería de sirvienta, pero Marilla no me entregó.
+al_terminar: punto a_prueba | Marilla decidió quedársela, a prueba
 ---
 ana piensa: No me dijo nada en todo el camino de vuelta. ¿Me devolverán mañana?
 
@@ -1873,6 +1884,7 @@ al_terminar: a_cocina
 # White Sands, cuando a Marilla ya no le queda paciencia: duda de verdad. Lo que Ana haga, y lo que la quieran los
 # Cuthbert, decide qué pasa después (las escenas de abajo, por prioridad: la de más arriba que se cumpla).
 === viaje_spencer_duda ===
+punto: white_sands | Antes de salir a White Sands
 narra: White Sands está a unas millas por el camino de la costa. Marilla lleva las riendas y no dice nada en todo el viaje: piensa en el camisón a mediodía, en la ropa por el suelo, en lo que ha tenido que aguantar. Ana tampoco habla. Mira el mar y aprieta su maleta vieja.
 canal: gg
 prioridad: 9
@@ -1907,6 +1919,7 @@ si: hecho:blewett_duda, !hecho:a_prueba, afecto:matthew:ana>=4
 al_empezar: a_cocina
 al_terminar: hecho a_prueba
 al_terminar: log Marilla casi le dio Ana a la Sra. Blewett; Matthew pidió que se quedara. | yo: Marilla casi me entregó a la Sra. Blewett, pero Matthew pidió que me quedara.
+al_terminar: punto a_prueba | Marilla decidió quedársela, a prueba
 ---
 ! pasa_tiempo 4
 ana piensa: Me trajo de vuelta. Pero no me ha dicho nada. ¿Me devolverán mañana?
@@ -1922,6 +1935,7 @@ si: hecho:blewett_duda, !hecho:a_prueba, hecho:blewett_suplica, afecto:marilla:a
 al_empezar: a_cocina
 al_terminar: hecho a_prueba
 al_terminar: log Ana le suplicó a Marilla en White Sands, y Marilla no la entregó. | yo: le supliqué a Marilla en White Sands, y no me entregó.
+al_terminar: punto a_prueba | Marilla decidió quedársela, a prueba
 ---
 ! pasa_tiempo 4
 ana piensa: Me trajo de vuelta. Pero no me ha dicho nada. ¿Me devolverán mañana?
@@ -1936,6 +1950,7 @@ sujeta: marilla
 si: hecho:blewett_duda, !hecho:a_prueba, hecho:blewett_calla, afecto:marilla:ana>=3
 al_empezar: a_cocina
 al_terminar: hecho a_prueba
+al_terminar: punto a_prueba | Marilla decidió quedársela, a prueba
 ---
 ! pasa_tiempo 4
 ana piensa: Me trajo de vuelta. Pero no me ha dicho nada. ¿Me devolverán mañana?
@@ -1964,6 +1979,7 @@ si: hecho:a_prueba, !hecho:se_queda, dias_desde:a_prueba:1, hora:14-19
 al_terminar: hecho se_queda
 al_terminar: suma afecto:marilla:ana 1
 al_terminar: log Marilla le dijo a Ana que se queda en Tejas Verdes, para siempre. | yo: Marilla me dijo que me quedo en Tejas Verdes. ¡Para siempre!
+al_terminar: punto se_queda | Marilla le dijo que se queda en Tejas Verdes
 ---
 marilla: Ana, Matthew y yo hemos decidido quedarnos contigo. Es decir, si tratas de ser una niña buena y agradecida.
 ana: (Ana se queda quieta, sin respirar.) ¿Para siempre? ¿De verdad me quedo en Tejas Verdes?
@@ -2112,6 +2128,7 @@ ana: Cinco destellos: «ven mañana temprano, que tengo algo importante que cont
 # debajo, con sangría, sus líneas y lo que deja («! …»). Si Ana estalla, tiene que ir a pedirle perdón; mientras no lo
 # haga, Marilla la tiene en su pieza.
 === lynde_visita ===
+punto: Antes de la visita de la Sra. Lynde
 narra: La Sra. Rachel Lynde, la vecina que todo lo sabe y todo lo dice, ha venido a ver con sus propios ojos a la huérfana de Tejas Verdes. Es la mujer más respetada de Avonlea, y la que tiene la lengua más larga.
 canal: gg
 prioridad: 9
@@ -10403,7 +10420,9 @@ class Dialogo {
     return [[l[0], dicho('puente:' + l[0]) || dicho('puente:otro')]];   // (what is said to pick up a conversation cut short, by who speaks next: src/datos/dichos/40-gente.txt)
   }
   decir(){
-    const D = dlgDichas(), P = dlgProg(), p = P[this.id] || 0; if (this.repetir === 'una_vez') D[this.id] = true; else if (this.repetir === 'dia') D[this.id] = today();
+    const D = dlgDichas(), P = dlgProg(), p = P[this.id] || 0;
+    if (!p && this.punto) { const [id, texto] = this.punto.includes('|') ? this.punto.split('|').map(x => x.trim()) : [this.id, this.punto]; puntoAhora(id, texto); }   // (a point just before it: the game as it is, the scene still to come)
+    if (this.repetir === 'una_vez') D[this.id] = true; else if (this.repetir === 'dia') D[this.id] = today();
     if (this.repetir.cada) this.proxima = TT + this.repetir.cada;
     if (this.tipo === 'comentario') dlgComento[this.canal] = TT + DLG_RESPIRO;
     const L = this.lineas(); if (p >= L.length) delete P[this.id]; if (!L.length || p >= L.length) return null;
@@ -14096,6 +14115,7 @@ $('wmobey').addEventListener('change', e => { WM_OBEY = e.target.checked; });
 $('wmstop').addEventListener('click', () => { for (const k of Object.keys(AGENTS)) { wmRelease(k); delete AGENTS[k]; } wmPanelDraw(); });
 $('wmclose').addEventListener('click', () => wmPanel(false));
 $('relbtn').addEventListener('pointerdown', e => { e.stopPropagation(); audio(); userInput(); relPanel($('rels').hidden); });
+$('cualist').addEventListener('click', e => { const b = e.target.closest('.cuapunto'); if (b && confirm('¿Volver a ese momento? Lo que pasó después se pierde (los demás momentos guardados quedan).')) puntoVolver(b.dataset.punto); });
 $('cuabtn').addEventListener('pointerdown', e => { e.stopPropagation(); audio(); userInput(); cuadernoPanel($('cua').hidden); });
 $('cuaclose').addEventListener('click', () => cuadernoPanel(false));
 $('relclose').addEventListener('click', () => relPanel(false));
@@ -17180,8 +17200,10 @@ function cuadernoPanel(open){
     return d ? `<div class="cm hecha"><b>✓ ${esc(m.titulo)}</b><span>el día ${d}</span></div>`
       : abierta ? `<div class="cm"><b>○ ${esc(m.titulo)}</b><small>${esc(cuadernoPista(m))}</small></div>`
       : `<div class="cm cerrada"><b>🔒 ${esc(m.titulo)}</b><small>Antes: ${esc(cuadernoAntes(m))}.</small></div>`;
-  }).join('')).join('') + cuadernoHabilidades() + cuadernoAmigos();
+  }).join('')).join('') + cuadernoHabilidades() + cuadernoAmigos() + cuadernoPuntos();
 }
+// the points of the story she has passed (src/datos/guion.txt, «punto»): to go back to any of them, as a page turned back
+const cuadernoPuntos = () => { const L = puntosLista(); return L.length ? '<h4>Volver a un momento</h4>' + L.map(([k, p]) => `<div class="cm"><b>↺ ${esc(p.texto)}</b><small>día ${p.dia + 1}${p.hora ? ', ' + esc(p.hora) : ''} · <button class="cuapunto" data-punto="${esc(k)}">Volver aquí</button></small></div>`).join('') : ''; };
 // the date, as Ana would write it: «martes, día 3 de la primavera»
 const cuadernoFecha = () => ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'][today() % 7] + ', día ' + (today() % DIAS_ESTACION + 1) + ' de ' + (S === 0 ? 'la ' : 'el ') + SEASONS[S].toLowerCase();
 // her skills: how far she has gone in each, and what comes next
@@ -17207,10 +17229,12 @@ if (game.wm?.perm?.['amigas:ana&diana'] && !dlgHechos().conocidas_diana) dlgHech
    the page is opened again). */
 const PUNTOS_KEY = 'avonlea:puntos';
 const puntosLeer = () => { try { return JSON.parse(localStorage.getItem(PUNTOS_KEY) || '{}'); } catch (e) { return {}; } };
-// a point: the game as it is now, once the scene that keeps it is under way (so that it goes on from there)
-function puntoGuardar(id, texto){
-  setTimeout(() => { if (game.final) return; save(); try { const P = puntosLeer(); P[id] = { texto: texto || 'Volver atrás', dia: today(), data: localStorage.getItem('avonlea') }; localStorage.setItem(PUNTOS_KEY, JSON.stringify(P)); } catch (e) {} }, 100);
-}
+// a point: the game as it is now («! punto», «al_terminar: punto»: once what the scene does is done, so that it goes on
+// from there); or, with the field «punto:» of a scene, just before it begins (going back, it is played again)
+function puntoAhora(id, texto){ if (game.final) return; save(); try { const P = puntosLeer(); P[id] = { texto: texto || 'Volver atrás', dia: today(), hora: fmtHour(hourNow()), t: Date.now(), data: localStorage.getItem('avonlea') }; localStorage.setItem(PUNTOS_KEY, JSON.stringify(P)); } catch (e) {} }
+function puntoGuardar(id, texto){ setTimeout(() => puntoAhora(id, texto), 100); }
+// the points kept, in the order they were reached (for the notebook: going back at any moment, not only at an ending)
+const puntosLista = () => Object.entries(puntosLeer()).sort((a, b) => (a[1].t || 0) - (b[1].t || 0));
 function puntoVolver(id){ const p = puntosLeer()[id]; if (!p?.data) return; wiping = true; try { localStorage.setItem('avonlea', p.data); } catch (e) {} location.reload(); }
 function empezarDeNuevo(){ wiping = true; try { localStorage.removeItem('avonlea'); localStorage.removeItem(PUNTOS_KEY); } catch (e) {} location.reload(); }
 // the ending: its card (the text is the scene's; the buttons, the points kept and a new beginning)
@@ -17219,7 +17243,7 @@ function finalMostrar(id, texto){
   if (navigator.webdriver && !/[?&]dev\b/.test(location.search)) return;
   let el = $('final'); if (!el) { el = document.createElement('div'); el.id = 'final'; document.body.appendChild(el); }
   el.style.cssText = 'position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;background:rgba(40,28,16,.55);padding:16px';
-  const P = Object.entries(puntosLeer());
+  const P = puntosLista();
   el.innerHTML = '<div style="width:min(480px,100%);background:#f6ecd2;color:#3b2a1c;border:1px solid #8a6a48;border-radius:10px;box-shadow:0 8px 30px rgba(20,10,0,.45);padding:22px 24px;font:17px/1.5 Georgia,serif;text-align:center">'
     + '<div style="font-size:13px;letter-spacing:.2em;color:#8a6a48">FIN</div><p class="tx" style="font-style:italic;margin:10px 0 18px"></p><div class="bt" style="display:flex;flex-direction:column;gap:8px;align-items:center"></div></div>';
   el.querySelector('.tx').textContent = conNombres(texto || 'Aquí termina esta historia.');

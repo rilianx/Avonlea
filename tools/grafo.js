@@ -18,7 +18,7 @@ const CUALIDAD = /^([a-zñ_]+):([a-zñ_]+)(?::([a-zñ_]+))?\s*(>=|<=|>|<|==|=)\s
 const CUALIDADES = new Set(['afecto', ...[...habilidades.matchAll(/^===\s*(.+?)\s*===$/gm)].map(m => m[1]), ...[...guion.matchAll(/al_(?:empezar|terminar):\s*suma\s+([a-zñ_]+):/g)].map(m => m[1])]);
 const NOTICIAS = new Set([...leer('src/datos/noticias.txt').matchAll(/^===\s*(.+?)\s*===$/gm)].map(m => m[1]));   // (the news there are: src/datos/noticias.txt)
 const metas = new Set([...cuaderno.matchAll(/^===\s*(.+?)\s*===$/gm)].map(m => m[1]));   // (the goals of the notebook: «dias_desde» may count from one of them)
-const pide = {}, hace = {}, malas = [];   // (fact → where it is asked for / made)
+const pide = {}, hace = {}, malas = [], puntos = [];   // (fact → where it is asked for / made)
 const anota = (o, h, donde) => (o[h] ||= new Set()).add(donde);
 function condicion(c, donde){
   c = c.trim(); if (!c) return; const neg = c[0] === '!', s = neg ? c.slice(1) : c;
@@ -47,6 +47,8 @@ for (const raw of guion.split('\n')) {
   if (k === 'narra salvo') v.split(',').forEach(c => condicion(c.trim(), 'escena ' + esc.id + ' (narra salvo)'));
   if (k === 'o') { const m = v.match(/si=(\S+)/); if (m) m[1].split(',').forEach(c => condicion(c, 'escena ' + esc.id + ' (alternativa)')); }
   if (k === 'grande') esc.grande = true;
+  if (k === 'punto') esc.punto = v;
+  { const m = s.match(/^(?:!\s*|al_(?:empezar|terminar):\s*)punto\s+(.+)$/); if (m) puntos.push([esc.id, k === 'al_empezar' ? 'al empezar' : k === 'al_terminar' ? 'al terminar' : 'en la escena', m[1]]); }
   if (k === 'al_empezar' || k === 'al_terminar') { const [w, x] = v.split(/\s+/); if (w === 'hecho') anota(hace, x, 'escena ' + esc.id); if (w === 'olvidar') anota(pide, x + ' ', 'escena ' + esc.id); }
 }
 // the comments (src/datos/comentarios.txt): scenes of one line; their conditions too
@@ -182,12 +184,14 @@ for (const bloque of guion.split(/^(?====)/m)) {
 }
 // the report
 const necesita = Object.keys(pide).filter(h => !h.endsWith(' ')), lee = new Set(Object.keys(pide).map(h => h.trim()));
+for (const e of escenas) { if (e.punto) puntos.push([e.id, 'antes', e.punto]); else if (e.grande && !puntos.some(([id]) => id === e.id)) malas.push(`escena ${e.id}: es grande y no deja un punto (un momento al que volver: «punto:», justo antes, o «al_terminar: punto»)`); }
 const nunca = necesita.filter(h => !hace[h] && !/^conoce_/.test(h)).sort()   /* (conoce_<who>: whoever Ana meets, src/js/66-conocidos.js) */, sinUso = Object.keys(hace).filter(h => !lee.has(h) && !/^(hito_|historia_|llego_|se_fue_)/.test(h)).sort();
 const md = ['# El grafo de la historia, revisado', '', 'Lo genera `node tools/grafo.js` (ver `docs/MOTOR.md`). Lee el guion, el cuaderno, las habilidades y el código.', '',
   `**${escenas.length} escenas** (${escenas.filter(e => e.grande).length} grandes), **${metas.size} metas** del cuaderno, **${Object.keys(hace).length} hechos** que algo deja.`, '',
   '## Escenas o metas que nunca podrían pasar', '', nunca.length ? 'Piden un hecho que nada deja:' : 'Ninguna: todo hecho que se pide, algo lo deja.', '',
   ...nunca.map(h => `- \`${h}\`: lo piden ${[...pide[h]].join(', ')}`), '',
   '## Condiciones mal escritas', '', ...(malas.length ? malas.map(m => '- ' + m) : ['Ninguna.']), '',
+  '## Los momentos a los que se puede volver (puntos)', '', ...puntos.map(([id, cuando, t]) => `- \`${id}\` (${cuando}): ${t}`), '',
   '## Hechos que se dejan y nada lee', '', 'No es un error (un hecho puede quedar para el registro), pero puede ser algo olvidado:', '',
   ...(sinUso.length ? sinUso.map(h => `- \`${h}\`: lo deja ${[...hace[h]].join(', ')}`) : ['Ninguno.']), ''];
 fs.mkdirSync(path.join(root, 'trazas'), { recursive: true });

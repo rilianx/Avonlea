@@ -13,6 +13,25 @@ Ninguna: todo hecho que se pide, algo lo deja.
 
 Ninguna.
 
+## Los momentos a los que se puede volver (puntos)
+
+- `desayuno_prueba` (al empezar): viaje | Volver a la mañana del viaje a White Sands
+- `ws_noche` (al terminar): a_prueba | Marilla decidió quedársela, a prueba
+- `duda_matthew` (al terminar): a_prueba | Marilla decidió quedársela, a prueba
+- `duda_suplica` (al terminar): a_prueba | Marilla decidió quedársela, a prueba
+- `duda_calla` (al terminar): a_prueba | Marilla decidió quedársela, a prueba
+- `se_queda` (al terminar): se_queda | Marilla le dijo que se queda en Tejas Verdes
+- `broche` (antes): Antes del broche de amatista
+- `zanahorias` (antes): Antes del día de la pizarra (Gilbert y las zanahorias)
+- `prohibida` (antes): Antes de que la Sra. Barry le prohíba a Diana verla
+- `crup_aviso` (antes): Antes de la noche del crup
+- `invita_allan` (antes): Antes del té con la Sra. Allan
+- `pastel_linimento` (antes): Antes del pastel con linimento
+- `cama_josephine` (antes): Antes de la noche en la cama de la Srta. Josephine
+- `viaje_spencer` (antes): white_sands | Antes de salir a White Sands
+- `viaje_spencer_duda` (antes): white_sands | Antes de salir a White Sands
+- `lynde_visita` (antes): Antes de la visita de la Sra. Lynde
+
 ## Hechos que se dejan y nada lee
 
 No es un error (un hecho puede quedar para el registro), pero puede ser algo olvidado:

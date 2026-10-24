@@ -86,8 +86,10 @@ function cuadernoPanel(open){
     return d ? `<div class="cm hecha"><b>✓ ${esc(m.titulo)}</b><span>el día ${d}</span></div>`
       : abierta ? `<div class="cm"><b>○ ${esc(m.titulo)}</b><small>${esc(cuadernoPista(m))}</small></div>`
       : `<div class="cm cerrada"><b>🔒 ${esc(m.titulo)}</b><small>Antes: ${esc(cuadernoAntes(m))}.</small></div>`;
-  }).join('')).join('') + cuadernoHabilidades() + cuadernoAmigos();
+  }).join('')).join('') + cuadernoHabilidades() + cuadernoAmigos() + cuadernoPuntos();
 }
+// the points of the story she has passed (src/datos/guion.txt, «punto»): to go back to any of them, as a page turned back
+const cuadernoPuntos = () => { const L = puntosLista(); return L.length ? '<h4>Volver a un momento</h4>' + L.map(([k, p]) => `<div class="cm"><b>↺ ${esc(p.texto)}</b><small>día ${p.dia + 1}${p.hora ? ', ' + esc(p.hora) : ''} · <button class="cuapunto" data-punto="${esc(k)}">Volver aquí</button></small></div>`).join('') : ''; };
 // the date, as Ana would write it: «martes, día 3 de la primavera»
 const cuadernoFecha = () => ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'][today() % 7] + ', día ' + (today() % DIAS_ESTACION + 1) + ' de ' + (S === 0 ? 'la ' : 'el ') + SEASONS[S].toLowerCase();
 // her skills: how far she has gone in each, and what comes next

@@ -1,6 +1,6 @@
 // La paciencia de Marilla mientras Ana está a prueba: las faltas, el perdón, la ayuda, la búsqueda, la duda en White
 // Sands y sus desenlaces, el final y volver atrás. Cada caso en un navegador nuevo, el juego mirado por dentro (?dev).
-// Uso: NODE_PATH=… node tools/paciencia.js
+// Uso: NODE_PATH=… node tools/paciencia.js (CASO=10 para correr solo ese caso)
 const { chromium } = require('playwright'); const fs = require('fs'), path = require('path');
 const URL = 'file://' + path.join(__dirname, '..', 'index.html') + '?dev', EXE = fs.existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chromium' : undefined;
 let fallas = 0; const ok = (c, t) => { console.log((c ? '  ✔ ' : '  ✘ ') + t); if (!c) fallas++; };
@@ -9,6 +9,7 @@ const MANANA = `(() => { const H = dlgHechos(); Object.assign(H, { inicio_juego:
   for (const t of [...TALKS]) { t.interrupted = true; talkEnd(t); } bubbles = []; game.wm.camison = false; dayT = 1 + (H0 - 6) / 24; goIn('gg', [KDOOR.x + 40, KIT.h * .6]);
   const M = PEOPLE.marilla; M.where = 'gg'; M.x = STOVE.x + 60; M.y = STOVE.y + 60; M.nav = null; for (const k of Object.keys(PEOPLE)) amb.mute[k] = TT + 9999; })()`;
 async function caso(nombre, fn){
+  if (process.env.CASO && !nombre.startsWith(process.env.CASO + '.')) return;   // (CASO=10: only that one)
   console.log('\n' + nombre);
   const b = await chromium.launch({ executablePath: EXE, args: ['--no-sandbox'] }), ctx = await b.newContext({ viewport: { width: 900, height: 640 } });
   let pg; const errs = [];
@@ -105,6 +106,19 @@ async function caso(nombre, fn){
     await T.manana(16); await T.ev(`(() => { dlgHecho('a_prueba'); dlgHecho('se_queda'); })()`);
     const vino = d => T.ev(`(() => { dayT = ${d} + (16 - 6) / 24; return AGENDA.find(e => e.who === 'lynde' && /niña nueva/.test(e.label)).when(); })()`);
     ok(!(await vino(3)) && !(await vino(13)) && await vino(14), 'no el día 4 ni el 14; sí el 15');
+  });
+  await caso('10. los puntos: antes de White Sands y cuando Marilla decide; se vuelve desde el cuaderno, y la escena se juega otra vez', async T => {
+    await T.manana(14.6);
+    await T.jugar(null, 'dlgHechos().a_prueba && !TALKS.length', 700); await T.pg.waitForTimeout(400);
+    const ids = await T.ev(`puntosLista().map(([k]) => k).join(',')`);
+    ok(/white_sands/.test(ids) && /a_prueba/.test(ids) && ids.indexOf('white_sands') < ids.indexOf('a_prueba'), 'quedaron, en orden: ' + ids);
+    await T.ev(`cuadernoPanel(true)`);
+    ok(/Volver a un momento[\s\S]*Antes de salir a White Sands/.test(await T.ev(`document.getElementById('cualist').innerText`)), 'el cuaderno los muestra');
+    T.pg.once('dialog', d => d.accept());
+    await Promise.all([T.pg.waitForNavigation(), T.ev(`document.querySelector('.cuapunto[data-punto="white_sands"]').click()`)]); await T.pg.waitForTimeout(1500);   // (the scene may already be under way again: what matters is that the trip is not done)
+    ok(await T.ev(`!dlgHechos().a_prueba && !dlgHechos().ws_vuelven && !dlgHechos().ws_t1`), 'volvió a antes de salir: el viaje está por hacerse');
+    const v = await T.jugar(null, 'dlgDichas().viaje_spencer', 60);
+    ok(v.includes('viaje_spencer'), 'y Marilla vuelve a decir «Ponte el sombrero»: ' + v.join(' · '));
   });
   console.log('\n' + (fallas ? fallas + ' comprobaciones fallaron' : 'todo bien'));
   process.exit(fallas ? 1 : 0);

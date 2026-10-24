@@ -22,7 +22,9 @@
 # «narra salvo: <condiciones>»: las tarjetas de «narra:», salvo cuando se cumple (lo que cuentan, la jugadora lo acaba de jugar).
 # En «si:», también: «horas_desde:llegada_tv:0.5» (pasó por lo menos media hora desde ese hecho), «comento:lynde:ana:camison» (ya le comentó hoy eso: el camisón, «hora», el sombrero), «ve:marilla» (Marilla la ve), «donde:ana:tejas» (o con «!»), «ana:camison», «ana:sin_sombrero»,
 #   «ana:ropa_tirada»; y las cualidades de uno hacia otro: «paciencia:marilla:ana<=1» (src/datos/habilidades.txt).
-# «! vestirse»; «! punto id | texto» (un punto para volver: la partida como está ahora); «! final id | texto» (la
+# «! vestirse»; «! punto id | texto» (un punto para volver: la partida como está ahora; el campo «punto: [id |] texto»
+#   lo guarda justo antes de que empiece la escena, y al volver se juega de nuevo; toda escena «grande» lleva uno);
+#   «! final id | texto» (la
 #   historia termina: una tarjeta, y se puede volver a un punto o empezar de nuevo).
 # Si varias escenas pueden decirse a la vez en un canal, va la de más prioridad; a igual prioridad, la más específica
 # (la que pide más condiciones). «grande»: empieza algo grande del libro; como mucho una grande por día (el ritmo).
@@ -715,6 +717,7 @@ diana: Bueno… tal vez. Tengo que volver a casa ahora.
 # poder ir al picnic, «confiesa» que lo perdió en el lago… hasta que el broche aparece en el chal de Marilla.
 # Abre el picnic (cuaderno: picnic requiere hecho:broche).
 === broche ===
+punto: Antes del broche de amatista
 narra: Marilla tiene un broche de amatista que fue de su madre: lo más valioso que posee, y lo usa solo para ir a la iglesia. Y la escuela dominical va a hacer un picnic en el lago, con helado, algo que Ana nunca ha probado.
 grande
 canal: gg
@@ -745,6 +748,7 @@ ana: (Ana baja la escalera de un salto, con los ojos brillando.) ¡Helado! ¡Por
 # --- «¡Zanahorias!» (cap. 15): el primer día de Ana en la escuela con Gilbert Blythe. Desde ahí, Ana no le habla
 # (la ofensa), y hacer las paces se vuelve una meta (cuaderno: paces requiere hecho:zanahorias).
 === zanahorias ===
+punto: Antes del día de la pizarra (Gilbert y las zanahorias)
 narra: La escuela de Avonlea tiene una sola sala, para todos los niños del pueblo. Gilbert Blythe es el más listo y el más buen mozo, y está acostumbrado a que todas las niñas lo miren. Ana todavía no lo ha mirado.
 grande
 canal: es
@@ -912,6 +916,7 @@ ana: ¿A casa? ¡Pero si todavía no hemos tomado el té! ¡Diana, no te vayas!
 diana: (Diana se levanta tambaleándose.) Me siento… muy… muy mal.
 
 === prohibida ===
+punto: Antes de que la Sra. Barry le prohíba a Diana verla
 narra: La Sra. Barry es una mujer severa, que no perdona fácilmente. Y Diana llegó a su casa mareada, tambaleándose, después de tomar el té en Tejas Verdes.
 grande
 canal: gg
@@ -943,6 +948,7 @@ ana: Sra. Barry, por favor, perdóneme. No sabía que era vino. Me imaginé que 
 barry: No, Ana Shirley. No creo que seas compañía para Diana. Vete a tu casa y pórtate bien.
 
 === crup_aviso ===
+punto: Antes de la noche del crup
 narra: Una noche de invierno. Casi todos los grandes de Avonlea fueron a Charlottetown, a escuchar el discurso del Primer Ministro: también los Barry. Diana se quedó en casa cuidando a Minnie May, su hermanita de tres años.
 narra: El crup es una enfermedad de los niños que cierra la garganta: hay que actuar rápido. Ana sabe de crup, porque cuidó a tres pares de mellizos de la Sra. Hammond.
 grande
@@ -982,6 +988,7 @@ ana: (Ana no cabe en sí de felicidad.) ¡Oh, Sra. Barry! La perdono con toda mi
 # té; Ana hace el pastel… con linimento en vez de vainilla. La Sra. Allan es tan buena que la invita a la casa
 # parroquial (cuaderno: el té con la Sra. Allan requiere hecho:pastel_linimento).
 === invita_allan ===
+punto: Antes del té con la Sra. Allan
 narra: Avonlea tiene un pastor nuevo, el Sr. Allan, que llegó con su esposa, joven y alegre. Ana la quiere desde el primer domingo en la escuela dominical. Y en Avonlea, cuando llega un pastor nuevo, cada familia lo invita a tomar el té.
 grande
 canal: gg
@@ -995,6 +1002,7 @@ marilla: Invité al pastor y a la Sra. Allan a tomar el té mañana en la tarde.
 ana: ¡Oh, Marilla! Lo haré con toda mi alma. ¡Y con vainilla, como dice la receta!
 
 === pastel_linimento ===
+punto: Antes del pastel con linimento
 grande
 canal: gg
 prioridad: 7
@@ -1017,6 +1025,7 @@ sraallan: (La Sra. Allan sube a verla.) Querida, fue un error muy gracioso, nada
 # --- la tía Josephine (cap. 19): ya amigas, Ana se queda a dormir donde Diana después del concierto del Club de Debate;
 # saltan sobre la cama del cuarto de huéspedes… donde dormía la tía Josephine. Ana confiesa y se gana su amistad.
 === cama_josephine ===
+punto: Antes de la noche en la cama de la Srta. Josephine
 narra: La tía de la Sra. Barry, la Srta. Josephine Barry, vino desde Charlottetown. Es una anciana rica, muy de mal genio, y se queda en el cuarto de huéspedes de La Cuesta del Huerto. Ana y Diana no lo saben.
 grande
 canal: os
@@ -1249,6 +1258,7 @@ ana: (Ana baja la mirada al plato y no dice nada más, cosa rara en ella.)
 ! mesa nada
 
 === viaje_spencer ===
+punto: white_sands | Antes de salir a White Sands
 narra: White Sands está a unas millas por el camino de la costa. Allí vive la Sra. Spencer, la que trajo a Ana del orfanato por equivocación: Marilla va a pedirle que la devuelva. Ana sabe que puede ser su último día en Tejas Verdes.
 canal: gg
 prioridad: 9
@@ -1413,6 +1423,7 @@ al_terminar: hecho conoce_blewett
 al_terminar: hecho a_prueba
 al_terminar: suma afecto:marilla:ana 1
 al_terminar: log Marilla llevó a Ana a White Sands; la Sra. Blewett la quería de sirvienta, y Marilla no se la dio. Esa noche le dijo a Matthew que se la quedaba; a Ana, todavía no. | yo: Marilla me llevó a White Sands. La Sra. Blewett me quería de sirvienta, pero Marilla no me entregó.
+al_terminar: punto a_prueba | Marilla decidió quedársela, a prueba
 ---
 ana piensa: No me dijo nada en todo el camino de vuelta. ¿Me devolverán mañana?
 
@@ -1651,6 +1662,7 @@ al_terminar: a_cocina
 # White Sands, cuando a Marilla ya no le queda paciencia: duda de verdad. Lo que Ana haga, y lo que la quieran los
 # Cuthbert, decide qué pasa después (las escenas de abajo, por prioridad: la de más arriba que se cumpla).
 === viaje_spencer_duda ===
+punto: white_sands | Antes de salir a White Sands
 narra: White Sands está a unas millas por el camino de la costa. Marilla lleva las riendas y no dice nada en todo el viaje: piensa en el camisón a mediodía, en la ropa por el suelo, en lo que ha tenido que aguantar. Ana tampoco habla. Mira el mar y aprieta su maleta vieja.
 canal: gg
 prioridad: 9
@@ -1685,6 +1697,7 @@ si: hecho:blewett_duda, !hecho:a_prueba, afecto:matthew:ana>=4
 al_empezar: a_cocina
 al_terminar: hecho a_prueba
 al_terminar: log Marilla casi le dio Ana a la Sra. Blewett; Matthew pidió que se quedara. | yo: Marilla casi me entregó a la Sra. Blewett, pero Matthew pidió que me quedara.
+al_terminar: punto a_prueba | Marilla decidió quedársela, a prueba
 ---
 ! pasa_tiempo 4
 ana piensa: Me trajo de vuelta. Pero no me ha dicho nada. ¿Me devolverán mañana?
@@ -1700,6 +1713,7 @@ si: hecho:blewett_duda, !hecho:a_prueba, hecho:blewett_suplica, afecto:marilla:a
 al_empezar: a_cocina
 al_terminar: hecho a_prueba
 al_terminar: log Ana le suplicó a Marilla en White Sands, y Marilla no la entregó. | yo: le supliqué a Marilla en White Sands, y no me entregó.
+al_terminar: punto a_prueba | Marilla decidió quedársela, a prueba
 ---
 ! pasa_tiempo 4
 ana piensa: Me trajo de vuelta. Pero no me ha dicho nada. ¿Me devolverán mañana?
@@ -1714,6 +1728,7 @@ sujeta: marilla
 si: hecho:blewett_duda, !hecho:a_prueba, hecho:blewett_calla, afecto:marilla:ana>=3
 al_empezar: a_cocina
 al_terminar: hecho a_prueba
+al_terminar: punto a_prueba | Marilla decidió quedársela, a prueba
 ---
 ! pasa_tiempo 4
 ana piensa: Me trajo de vuelta. Pero no me ha dicho nada. ¿Me devolverán mañana?
@@ -1742,6 +1757,7 @@ si: hecho:a_prueba, !hecho:se_queda, dias_desde:a_prueba:1, hora:14-19
 al_terminar: hecho se_queda
 al_terminar: suma afecto:marilla:ana 1
 al_terminar: log Marilla le dijo a Ana que se queda en Tejas Verdes, para siempre. | yo: Marilla me dijo que me quedo en Tejas Verdes. ¡Para siempre!
+al_terminar: punto se_queda | Marilla le dijo que se queda en Tejas Verdes
 ---
 marilla: Ana, Matthew y yo hemos decidido quedarnos contigo. Es decir, si tratas de ser una niña buena y agradecida.
 ana: (Ana se queda quieta, sin respirar.) ¿Para siempre? ¿De verdad me quedo en Tejas Verdes?
@@ -1890,6 +1906,7 @@ ana: Cinco destellos: «ven mañana temprano, que tengo algo importante que cont
 # debajo, con sangría, sus líneas y lo que deja («! …»). Si Ana estalla, tiene que ir a pedirle perdón; mientras no lo
 # haga, Marilla la tiene en su pieza.
 === lynde_visita ===
+punto: Antes de la visita de la Sra. Lynde
 narra: La Sra. Rachel Lynde, la vecina que todo lo sabe y todo lo dice, ha venido a ver con sus propios ojos a la huérfana de Tejas Verdes. Es la mujer más respetada de Avonlea, y la que tiene la lengua más larga.
 canal: gg
 prioridad: 9
