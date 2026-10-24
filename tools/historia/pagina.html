@@ -57,7 +57,7 @@ select,input[type=text],input[type=search]{font:inherit;font-size:13.5px;padding
 <header>
   <h1>La historia en fichas</h1>
   <span id="reloj"></span>
-  <label class="mut" style="font-size:13px">Ana está en <select id="donde"></select></label>
+  <span class="mut" style="font-size:13px">Ana en <span id="donde"></span></span>
   <button id="atras" title="Deshacer el último paso">← Atrás</button>
   <button id="reiniciar" title="Volver al comienzo">Desde el comienzo</button>
 </header>
@@ -82,7 +82,7 @@ function estadoInicial(){
   const c = {}; for (const h of D.habilidades) c[HKEY(h)] = h.inicial || 0;
   return { dia: 1, hora: 19.5, donde: 'gg', h: { inicio_juego: 1 }, d: {}, c, m: {}, sabe: {}, inv: {}, diario: [], fin: null, juego: null };
 }
-let st = estadoInicial(), pila = [], tab = 'estado', filtro = { q: '', cartas: false, mis: true };
+let st = estadoInicial(), pila = [], tab = 'estado', filtro = { q: '', cartas: false, mis: true, solas: false };
 try { const g = JSON.parse(localStorage.getItem('avonlea-historia') || 'null'); if (g?.st) { st = g.st; pila = g.pila || []; st.donde ||= 'gg'; } } catch (e) {}
 const guarda = () => { try { localStorage.setItem('avonlea-historia', JSON.stringify({ st, pila: pila.slice(-200) })); } catch (e) {} };
 const paso = que => { pila.push({ que, st: JSON.stringify(st) }); };   // (before each step: what is about to happen, and the state as it was)
@@ -171,6 +171,20 @@ function estado(e){
   const anaNo = sit.filter(x => x.tipo === 'ana' && !x.lugares.includes(st.donde)), acc = sit.filter(x => x.tipo === 'accion'), otros = sit.filter(x => x.tipo === 'otro');
   return { ok: r.filter(([, x]) => x === 'si').map(([c]) => c), anaNo, acc, otros, sit: sit.map(x => x.t) };
 }
+// ---- when: the first moment, from now on, when a scene could happen (its conditions on the state, at that day and
+// hour): now; or later today, at the hour it asks for; or another day. The time is never moved by hand: choosing a
+// scene that asks to wait, the story jumps there
+const HORIZONTE = 60;
+function cuando(e){
+  const d0 = st.dia, h0 = st.hora, ini = new Set([6]);
+  for (const c of [...e.si, ...e.o.flatMap(a => a.si)]) { const m = c.match(/^hora:([\d.]+)-/); if (m) { const x = +m[1]; ini.add(x < 6 ? x + 24 : x); } }
+  const horas = [...ini].sort((a, b) => a - b), cand = [[d0, h0]];
+  for (let d = d0; d <= d0 + HORIZONTE; d++) for (const h of horas) if (d > d0 || h > h0) cand.push([d, h]);
+  let res = null;
+  for (const [d, h] of cand) { st.dia = d; st.hora = h; const r = estado(e); if (r && !r.no) { res = { dia: d, hora: h, r }; break; } }
+  st.dia = d0; st.hora = h0; return res;
+}
+const momento = (d, h) => d === st.dia && h === st.hora ? 'ahora' : d === st.dia ? 'hoy, a las ' + fmtHora(h) : d === st.dia + 1 ? 'mañana, a las ' + fmtHora(h) : `día ${d} (${DIAS[(d - 1) % 7]}), a las ${fmtHora(h)}`;
 // ---- what a scene does to the state (the actions of the script); what is not state (moving someone) is only told
 function aplicar(s){
   const [w, ...r] = s.split(' '), rest = r.join(' '), part = rest.split('|').map(x => x.trim());
@@ -196,7 +210,8 @@ function aplicar(s){
 }
 // ---- playing a scene: its cards, one block until the next choice; the choice, and on
 function empezar(id){
-  const e = ESC.get(id); paso('empieza ' + id);
+  const e = ESC.get(id), c = cuando(e); paso((c && momento(c.dia, c.hora) !== 'ahora' ? momento(c.dia, c.hora) + ': ' : '') + 'empieza ' + id);
+  if (c) { st.dia = c.dia; st.hora = c.hora; if (c.r.anaNo.length) st.donde = c.r.anaNo[0].lugares[0]; }   // (the story jumps to when it can happen, and Ana goes where it asks)
   st.d[id] = (e.repetir || 'una_vez') === 'una_vez' ? true : st.dia;
   st.juego = { id, i: 0, salida: [], cambios: [] };
   for (const n of e.narra) st.juego.salida.push({ narra: n });
@@ -214,7 +229,6 @@ function seguir(){
   }
   J.opciones = null; J.fin = true;
   for (const a of e.termina) { const t = aplicar(a); if (t) J.cambios.push(t); }
-  avanzar(.25);
 }
 function elegir(k){
   const J = st.juego, e = ESC.get(J.id), op = e.L[J.i].ops[k]; paso('elige «' + op.t + '» en ' + J.id);
@@ -226,15 +240,14 @@ function terminar(){ st.juego = null; guarda(); pinta(); $('centro').scrollTop =
 // ---- what the player does on her own: let time go by, do things (each one raises the counters it raises in the
 // game: src/datos/habilidades.txt), reach a goal of the notebook, or change the state by hand
 const ACCIONES = [...new Set(D.habilidades.flatMap(h => (!h.por || h.por === 'ana') ? h.suma : []))].sort();
-function hacer(a){ paso('la jugadora: ' + a); const L = []; for (const h of D.habilidades) if ((!h.por || h.por === 'ana') && h.suma.includes(a)) { const k = HKEY(h); let v = contador(k) + 1; if (h.rango) v = Math.min(h.rango[1], v); st.c[k] = v; L.push(h.id + (h.de ? ' de ' + h.de : '') + ' → ' + v); } avanzar(1); st.ultimo = a + ': ' + L.join(', '); guarda(); pinta(); }
-function tiempo(h){ paso(h === 'dormir' ? 'la jugadora: a dormir' : 'pasa el tiempo: ' + h + ' h'); if (h === 'dormir') nuevoDia(); else avanzar(h); guarda(); pinta(); }
+function hacer(a){ paso('la jugadora: ' + a); const L = []; for (const h of D.habilidades) if ((!h.por || h.por === 'ana') && h.suma.includes(a)) { const k = HKEY(h); let v = contador(k) + 1; if (h.rango) v = Math.min(h.rango[1], v); st.c[k] = v; L.push(h.id + (h.de ? ' de ' + h.de : '') + ' → ' + v); } st.ultimo = a + ': ' + L.join(', '); guarda(); pinta(); }
 function atras(){ const p = pila.pop(); if (!p) return; st = JSON.parse(p.st); guarda(); pinta(); }
 function irA(i){ const p = pila[i]; if (!p) return; st = JSON.parse(p.st); pila = pila.slice(0, i); guarda(); pinta(); }
 // ---- drawing
 function pinta(){
   $('reloj').textContent = `día ${st.dia} · ${DIAS[(st.dia - 1) % 7]} · ${estacion()} · ${fmtHora(st.hora)}`;
   $('atras').disabled = !pila.length;
-  $('donde').innerHTML = Object.entries(LUGARES).map(([k, t]) => `<option value="${k}" ${k === st.donde ? 'selected' : ''}>${esc(t)}</option>`).join('');
+  $('donde').textContent = LUGARES[st.donde] || st.donde;
   if (st.juego) pintaEscena(); else pintaPosibles();
   pintaLado();
 }
@@ -261,19 +274,23 @@ function pintaEscena(){
 // to bring about (go somewhere, talk to someone, be with someone): her own decisions, as choices too
 const tarjetaEsc = (e, r) => `<div class="esc ${e.tipo}" data-esc="${esc(e.id)}"><div>${esc(e.resumen || e.tema || e.narra[0]?.slice(0, 120) || e.id)}${e.grande ? '<span class="badge">★ grande</span>' : ''}${e.interrumpe ? '<span class="badge">interrumpe</span>' : ''}${e.repetir && e.repetir !== 'una_vez' ? '<span class="badge">se repite</span>' : ''}</div><div class="id">${esc(e.id)} · prioridad ${esc(e.prioridad || 1)}${r.otros?.length ? ' · <span class="mut">supone: ' + esc(r.otros.map(x => x.t).join(', ')) + '</span>' : ''}</div></div>`;
 function pintaPosibles(){
-  const L = D.escenas.map(e => [e, estado(e)]).filter(([e, r]) => r && !r.no)
-    .filter(([e]) => (filtro.cartas || e.tipo !== 'carta') && (filtro.mis || e.tipo !== 'mision'))
-    .filter(([e]) => !filtro.q || (e.id + ' ' + (e.resumen || '') + ' ' + (e.tema || '')).toLowerCase().includes(filtro.q))
-    .sort((a, b) => (b[0].interrumpe ? 1 : 0) - (a[0].interrumpe ? 1 : 0) || (+b[0].prioridad || 1) - (+a[0].prioridad || 1));
-  const solas = L.filter(([, r]) => !r.anaNo.length && !r.acc.length), G = new Map();
-  for (const [e, r] of L) if (r.anaNo.length || r.acc.length) { const k = [...(r.anaNo.length ? ['va a ' + r.anaNo.map(x => x.lugares.map(l => LUGARES[l] || l).join(' o ')).join(' y ')] : []), ...r.acc.map(x => x.t)].join(' · '); if (!G.has(k)) G.set(k, []); G.get(k).push([e, r]); }
+  const L = D.escenas.filter(e => (filtro.cartas || e.tipo !== 'carta') && (filtro.mis || e.tipo !== 'mision'))
+    .filter(e => !filtro.q || (e.id + ' ' + (e.resumen || '') + ' ' + (e.tema || '')).toLowerCase().includes(filtro.q))
+    .map(e => [e, cuando(e)]).filter(([, c]) => c).filter(([, c]) => !filtro.solas || (!c.r.anaNo.length && !c.r.acc.length))
+    .sort((a, b) => a[1].dia - b[1].dia || a[1].hora - b[1].hora || (a[1].r.anaNo.length + a[1].r.acc.length > 0) - (b[1].r.anaNo.length + b[1].r.acc.length > 0) || (b[0].interrumpe ? 1 : 0) - (a[0].interrumpe ? 1 : 0) || (+b[0].prioridad || 1) - (+a[0].prioridad || 1));
   let h = st.fin ? `<div class="fin">FIN<br>${esc(st.fin)}<br><button id="deshacerfin">← Atrás</button></div>` : '';
   if (st.ultimo) { h += `<div class="cambios">${esc(st.ultimo)}</div>`; st.ultimo = null; }
-  h += `<div class="filtros"><input type="search" id="fq" placeholder="buscar…" value="${esc(filtro.q)}"> <label><input type="checkbox" data-f="cartas" ${filtro.cartas ? 'checked' : ''}> cartas</label><label><input type="checkbox" data-f="mis" ${filtro.mis ? 'checked' : ''}> misiones</label></div>`;
-  h += `<h2>Pasa ahora, con Ana en ${esc(LUGARES[st.donde] || st.donde)} <span class="mut">(${solas.length})</span></h2>`;
-  h += solas.map(([e, r]) => tarjetaEsc(e, r)).join('') || '<p class="mut">Nada pasa solo aquí ahora: deja pasar el tiempo, lleva a Ana a otra parte, o elige abajo lo que hace la jugadora.</p>';
-  h += `<h2>Pasaría si… <span class="mut">(${G.size}: lo que haga la jugadora, o el mundo)</span></h2>`;
-  h += [...G.entries()].sort((a, b) => b[1].length - a[1].length).map(([k, es]) => `<details class="grupo"><summary><span class="sit">${esc(k)}</span> <span class="mut">(${es.length})</span></summary>${es.map(([e, r]) => tarjetaEsc(e, r)).join('')}</details>`).join('');
+  h += `<div class="filtros"><input type="search" id="fq" placeholder="buscar…" value="${esc(filtro.q)}"> <label><input type="checkbox" data-f="solas" ${filtro.solas ? 'checked' : ''}> solo lo que no pide nada a la jugadora</label><label><input type="checkbox" data-f="cartas" ${filtro.cartas ? 'checked' : ''}> cartas</label><label><input type="checkbox" data-f="mis" ${filtro.mis ? 'checked' : ''}> misiones</label></div>`;
+  h += `<h2>Lo que puede pasar, de aquí en adelante <span class="mut">(${L.length})</span></h2>`;
+  let grupo = null;
+  for (const [e, c] of L) {
+    const m = momento(c.dia, c.hora); if (m !== grupo) { grupo = m; h += `<h3>${esc(m)}</h3>`; }
+    const pide = [...(c.r.anaNo.length ? ['Ana va a ' + c.r.anaNo.map(x => x.lugares.map(l => LUGARES[l] || l).join(' o ')).join(' y ')] : []), ...c.r.acc.map(x => x.t)];
+    h += `<div class="esc ${e.tipo}" data-esc="${esc(e.id)}"><div>${esc(e.resumen || e.tema || e.narra[0]?.slice(0, 120) || e.id)}${e.grande ? '<span class="badge">★ grande</span>' : ''}${e.interrumpe ? '<span class="badge">interrumpe</span>' : ''}${e.repetir && e.repetir !== 'una_vez' ? '<span class="badge">se repite</span>' : ''}</div>`
+      + (pide.length ? `<div class="sit">pide: ${esc(pide.join(' · '))}</div>` : '')
+      + `<div class="id">${esc(e.id)} · prioridad ${esc(e.prioridad || 1)}${c.r.otros.length ? ' · <span class="mut">supone: ' + esc(c.r.otros.map(x => x.t).join(', ')) + '</span>' : ''}</div></div>`;
+  }
+  if (!L.length) h += `<p class="mut">Nada puede pasar en los próximos ${HORIZONTE} días con este estado.</p>`;
   $('centro').innerHTML = h;
 }
 function pintaLado(){
@@ -288,8 +305,7 @@ function pintaLado(){
     const S = Object.keys(st.sabe); if (S.length) h += '<h3>Lo que se sabe</h3>' + S.map(k => `<div class="fila"><code>${esc(k)}</code></div>`).join('');
     if (st.diario.length) h += '<h3>Diario</h3>' + st.diario.map(([d, t]) => `<div class="fila"><span>${esc(t)}</span><span class="mut">día ${d}</span></div>`).join('');
   } else if (tab === 'jugadora') {
-    h += '<h3>Dejar pasar el tiempo</h3><div class="acc"><button data-t=".5">+30 min</button><button data-t="1">+1 h</button><button data-t="3">+3 h</button><button data-t="dormir">Dormir (día siguiente, 7:00)</button></div>';
-    h += '<h3>Hacer algo (+1 a lo que sube, y pasa una hora)</h3><div class="acc">' + ACCIONES.map(a => `<button data-hacer="${esc(a)}" title="${esc(D.habilidades.filter(h => h.suma.includes(a)).map(h => h.id + (h.de ? ' de ' + h.de : '')).join(', '))}">${esc(a.replace(/_/g, ' '))}</button>`).join('') + '</div>';
+    h += '<h3>Hacer algo (+1 a lo que sube)</h3><div class="acc">' + ACCIONES.map(a => `<button data-hacer="${esc(a)}" title="${esc(D.habilidades.filter(h => h.suma.includes(a)).map(h => h.id + (h.de ? ' de ' + h.de : '')).join(', '))}">${esc(a.replace(/_/g, ' '))}</button>`).join('') + '</div>';
     h += '<h3>Metas del cuaderno que ya cumplió</h3>' + D.metas.map(m => `<div class="fila"><label><input type="checkbox" data-meta="${esc(m.id)}" ${st.m[m.id] != null ? 'checked' : ''}> ${esc(m.titulo)}</label><span class="mut cod">${esc(m.id)}</span></div>`).join('');
     h += '<p class="mut">Las conversaciones que Ana busca por su cuenta están en la lista del centro (en verde), con quién tendría que estar.</p>';
   } else {
@@ -303,7 +319,7 @@ $('centro').addEventListener('click', e => { const a = e.target.closest('[data-e
 $('centro').addEventListener('input', e => { if (e.target.id === 'fq') { filtro.q = e.target.value.toLowerCase(); pintaPosibles(); const q = $('fq'); q.focus(); q.setSelectionRange(q.value.length, q.value.length); } });
 $('centro').addEventListener('change', e => { const f = e.target.dataset.f; if (f) { filtro[f] = e.target.checked; pintaPosibles(); } });
 document.querySelector('.tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (b) { tab = b.dataset.tab; pintaLado(); } });
-$('lado').addEventListener('click', e => { const t = e.target.closest('[data-t]'); if (t) return tiempo(t.dataset.t === 'dormir' ? 'dormir' : +t.dataset.t); const a = e.target.closest('[data-hacer]'); if (a) return hacer(a.dataset.hacer);
+$('lado').addEventListener('click', e => { const a = e.target.closest('[data-hacer]'); if (a) return hacer(a.dataset.hacer);
   const d = e.target.closest('[data-delh]'); if (d) { paso('quita el hecho ' + d.dataset.delh); delete st.h[d.dataset.delh]; guarda(); return pinta(); }
   const i = e.target.closest('[data-ir]'); if (i && confirm('¿Volver a antes de este paso?')) return irA(+i.dataset.ir);
   if (e.target.id === 'addh') { const v = $('nuevoh').value.trim(); if (v) { paso('pone el hecho ' + v); st.h[v] = st.dia; guarda(); pinta(); } }
@@ -311,7 +327,6 @@ $('lado').addEventListener('click', e => { const t = e.target.closest('[data-t]'
 $('lado').addEventListener('change', e => { const c = e.target.dataset.c; if (c) { paso(`cambia ${c} a ${e.target.value}`); st.c[c] = +e.target.value; guarda(); return pinta(); }
   const m = e.target.dataset.meta; if (m) { paso((e.target.checked ? 'cumple' : 'deshace') + ' la meta ' + m); if (e.target.checked) st.m[m] = st.dia; else delete st.m[m]; guarda(); pinta(); } });
 $('atras').onclick = atras;
-$('donde').onchange = e => { paso('Ana va a ' + (LUGARES[e.target.value] || e.target.value)); st.donde = e.target.value; avanzar(.25); guarda(); pinta(); };
 $('reiniciar').onclick = () => { if (!confirm('¿Empezar de nuevo, desde la llegada de Ana?')) return; st = estadoInicial(); pila = []; guarda(); pinta(); };
 pinta();
 </script></body></html>
