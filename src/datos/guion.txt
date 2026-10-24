@@ -1380,7 +1380,8 @@ prioridad: 7
 interrumpe
 en: ana=out, marilla=out, srapye=out
 sujeta: srapye
-si: hecho:ws_pye, !hecho:ws_vuelven
+calesa: avonlea
+si: hecho:rumbo_spencer, !hecho:a_prueba, avance:ws:80-100, ve:srapye
 ---
 srapye: ¡Marilla Cuthbert! (La Sra. Pye se acerca a la calesa, con su canasto, y mira a Ana de arriba abajo.) ¿Así que esta es la huérfana que les mandaron por equivocación?
 marilla: Buenas tardes, Sra. Pye.
@@ -1405,7 +1406,7 @@ prioridad: 8
 interrumpe
 en: ana=out, marilla=out
 sujeta: marilla
-si: hecho:ws_corrio, !no_hoy:ws_marilla_llega, !hecho:ws_vuelven
+si: hecho:rumbo_spencer, !hecho:a_prueba, hecho:ws_corrio, !no_hoy:ws_marilla_llega
 ---
 narra: El mar está gris y verde, con espuma en las rocas. Ana se ha sentado en la arena roja, abrazada a las rodillas, y llora como si el mar entero le hubiera entrado por los ojos.
 marilla: (Marilla llega sin aliento, sujetándose el sombrero.) No se sale corriendo así, sin una palabra. Casi me matas del susto.
@@ -1440,7 +1441,8 @@ prioridad: 8
 interrumpe
 en: ana=out, marilla=out, spencer=out, blewett=out
 sujeta: spencer, blewett
-si: hecho:ws_llegan, !hecho:ws_vuelven
+si: hecho:rumbo_spencer, !hecho:a_prueba, avance:ws:100-100, ve:spencer
+al_terminar: hecho ws_vuelven
 ---
 spencer: ¡Marilla Cuthbert! ¡Qué sorpresa! Pasen, pasen. ¿Y cómo está la niña?
 marilla: Para eso venimos, Sra. Spencer. Ha habido una equivocación. Le mandamos a decir con su hermano Robert que queríamos un niño de diez u once años.

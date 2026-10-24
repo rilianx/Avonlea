@@ -4,11 +4,10 @@
    along, Mrs. Pye on the road (not in the book): what she says sends Ana running to the shore, and Marilla follows her
    there. At the hotel, Mrs. Spencer and Mrs. Blewett; and back home, quiet, by the same road. ---------- */
 const wsE = () => game.wm || game;   // (kept with the game: a trip left halfway, when the game is opened again, ends at home)
-// grafo: viaje_spencer → ws_pye, ws_llegan
-// grafo: ws_pye → ws_marilla_llega
-// grafo: ws_spencer → ws_vuelven
-// (the talks of the road do not wait for each other: each has its stretch of the way, «avance:ws:25-60» in the script —
-// how far along they are, in %; if the stretch goes by, that talk is lost. While a talk goes on, the mare walks)
+// (the scenes of the road are conditions on the state, as any other: the trip, «rumbo_spencer»; its stretch of the way,
+// «avance:ws:25-60» —how far along, in %; if the stretch goes by, that scene is lost—; and who is there. What the code
+// does is the world: the cart goes on (at a walk while they talk), Mrs. Pye waits on the road near the sea, Mrs. Spencer
+// and Mrs. Blewett come out at the hotel. It leaves no facts of its own)
 const WS_VEL = 60, WS_PASO = 25;
 AVANCES.ws = () => cart.on && cart.viaje === WS_VIAJE ? cart.s / cartLen() * 100 : null;
 const wsRuta = () => { const a = [GG.x + 20, GG.y + 80], b = door('Hotel White Sands'), r = netRoute(...a, ...b); return [a, ...(r ? r.pts : []), b]; };
@@ -21,7 +20,6 @@ const WS_VIAJE = {
     wsE().ws.fase = 'llegada'; const [hx, hy] = door('Hotel White Sands');
     for (const [k, dx] of [['spencer', -30], ['blewett', 30]]) { const f = FOLKBY[k]; if (f) Object.assign(f, { where: 'out', x: hx + dx, y: hy + 40, route: [], moving: false, sit: false, dir: 2, talkT: TT + 240 }); }
     cart.suelto = true; Object.assign(PEOPLE.marilla, { sit: false, x: hx - 70, y: hy + 46, dir: 1, moving: false, nav: null });   // (she gets down, too)
-    dlgHecho('ws_llegan');
   },
 };
 function wsSalir(){
@@ -31,22 +29,22 @@ function wsSalir(){
     const r = wsRuta(); Object.assign(cart, { ruta: r, len: r.slice(1).reduce((a, p, i) => a + dist(p[0], p[1], r[i][0], r[i][1]), 0), con: 'marilla', vel: WS_VEL, viaje: WS_VIAJE, parado: false, suelto: false });
     cart.on = true; cart.s = 0; [cart.x, cart.y] = cartAt(0); cart.dir = 1; cart.dest = 'br';
     game.tripWith = 'marilla'; Object.assign(M, { where: 'out', nav: null, target: null, story: null, busca: null, trajo: false });
-    let pye = .7, dMin = 1e9; for (let f = .5; f <= .9; f += .01) { const [x, y] = cartAt(f * cart.len), d = wsOrillaCerca(x, y)?.d ?? 1e9; if (d < dMin) { dMin = d; pye = f; } }   // (Mrs. Pye, where the road runs nearest the sea)
+    let pye = .88, dMin = 1e9; for (let f = .8; f <= .95; f += .01) { const [x, y] = cartAt(f * cart.len), d = wsOrillaCerca(x, y)?.d ?? 1e9; if (d < dMin) { dMin = d; pye = f; } }   // (Mrs. Pye, where the road runs nearest the sea)
     wsE().ws = { fase: 'ida', dia: today(), pye };
     logEv('Marilla y Ana salieron en la calesa hacia White Sands, por el camino de la costa.', ['marilla']); cartOn();
     if (!obsScene()) { cam.x = cart.x; cam.y = cart.y; cam.snap = true; }
   });
 }
-// along the way: the facts that let the scenes of the road play, at their places; and Mrs. Pye, ahead on the road
+// along the way: the pace of the mare, and Mrs. Pye, ahead on the road
 function wsTick(){
   const w = wsE().ws; if (!w || w.fase === 'fin') return;
   if (!cart.on || cart.viaje !== WS_VIAJE) { if (!w.volviendo && !game.talk) { w.volviendo = true; wsVolverCasa(); } return; }   // (the game was closed halfway: they are back)
   if (w.fase === 'ida') {
     const habla = TALKS.some(t => t.ch === 'viaje'), fr = cart.s / cartLen();
     cart.vel = habla ? WS_PASO : WS_VEL;
-    if (fr >= w.pye && !dlgHechos().ws_pye) {   // Mrs. Pye, where the road runs nearest the sea: the cart stops there (once the talk under way is over)
+    if (fr >= w.pye && !w.pyeAhi) {   // Mrs. Pye, where the road runs nearest the sea: the cart stops there (once the talk under way is over)
       cart.parado = true; if (habla) return;
-      dlgHecho('ws_pye'); const f = FOLKBY.srapye, [px, py] = cartAt(cart.s + 90); if (f) Object.assign(f, { where: 'out', x: px + 30, y: py + 12, route: [], moving: false, sit: false, dir: 3, talkT: TT + 240 });
+      w.pyeAhi = true; const f = FOLKBY.srapye, [px, py] = cartAt(cart.s + 90); if (f) Object.assign(f, { where: 'out', x: px + 30, y: py + 12, route: [], moving: false, sit: false, dir: 3, talkT: TT + 240 });
     }
   }
 }
@@ -93,7 +91,7 @@ function wsVolverCasa(){
     game.scene = 'out'; ana.sit = false; ana.llora = false; ana.goto = null; ana.x = GG.x + 30; ana.y = GG.y + 70; ana.dir = 2;
     if (!obsScene()) { cam.x = ana.x; cam.y = ana.y; cam.snap = true; }
     if (hourNow() < 18) dayAt(18);
-    wsE().ws.fase = 'fin'; wsE().ws.volviendo = false; dlgHecho('ws_vuelven');
+    wsE().ws.fase = 'fin'; wsE().ws.volviendo = false; dlgHecho('ws_vuelven');   // (also when the game was closed halfway: then no scene said it)
     logEv('Marilla y Ana volvieron de White Sands sin la Sra. Blewett.', ['marilla']); save();
   });
 }

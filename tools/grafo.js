@@ -134,10 +134,6 @@ for (const raw of habilidades.split('\n')) {
 }
 // the code: facts made (dlgHecho('x')) and read (dlgHechos().x, dlgHechos()['x'])
 for (const m of codigo.matchAll(/dlgHecho\('([a-z_0-9]+)'/g)) anota(hace, m[1], 'código');
-// what the code leaves after a scene (a trip that the scene starts, and the facts of its way): «// grafo: escena → hecho, hecho»
-for (const m of codigo.matchAll(/\/\/\s*grafo:\s*(\w+)\s*→\s*([\w,\s]+?)\s*$/gm)) for (const h of m[2].split(',').map(x => x.trim()).filter(Boolean)) {
-  if (!escenas.some(e => e.id === m[1])) malas.push(`código: «// grafo: ${m[1]} → …» nombra una escena que no hay`);
-  anota(hace, h, 'escena ' + m[1] + ' (por el juego)'); }
 for (const m of codigo.matchAll(/dlgHechos\(\)(?:\.([a-z_0-9]+)|\['([a-z_0-9]+)'\])/g)) anota(pide, (m[1] || m[2]) + ' ', 'código');
 for (const m of codigo.matchAll(/['"`](?:hecho|dias_desde):([a-z_0-9]+)/g)) anota(pide, m[1] + ' ', 'código');
 for (const m of codigo.matchAll(/['"`\[]conoce:([a-z_0-9]+)/g)) anota(pide, 'conoce_' + m[1] + ' ', 'código');

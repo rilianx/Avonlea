@@ -7,7 +7,7 @@
 const fs = require('fs'), path = require('path');
 
 function dibujar(d, root){
-  const limpia = s => s.replace(/ \((una opción|alternativa|narra salvo|pista|por el juego)\)$/, '');
+  const limpia = s => s.replace(/ \((una opción|alternativa|narra salvo|pista)\)$/, '');
   const N = new Map();   // id → node
   const tipoDe = e => e.con ? 'conversacion' : /^mis_/.test(e.id) ? 'mision' : /^(carta|respuesta)$/.test(e.canal || '') || /^(carta|resp)_/.test(e.id) ? 'carta' : 'escena';
   for (const e of d.escenas) N.set('escena ' + e.id, { id: 'escena ' + e.id, k: e.id, tipo: tipoDe(e), grande: !!e.grande, punto: e.punto || null,
@@ -265,7 +265,6 @@ function dejaDe(n){
   const i = n.info, L = [], hechoEn = s => s.match(/^hecho\\s+(\\S+)/)?.[1];
   for (const s of [...(i.empieza || []), ...(i.termina || [])]) { const h = hechoEn(s); if (h) L.push([h, '']); }
   for (const o of i.ops || []) for (const s of o.ef) { const h = hechoEn(s); if (h) L.push([h, 'si elige «' + o.t.replace(/^«|»$/g, '') + '»']); }
-  for (const [h, f] of Object.entries(D.hechos)) if (f.hace.includes(n.id) && !L.some(([x]) => x === h)) L.push([h, 'lo deja el juego, después']);
   return L;
 }
 // what a scene changes in the counters (the qualities: Marilla's patience, the affection, Ana's skills), and when
