@@ -26,6 +26,7 @@ aside h2{font-size:16px;margin:4px 0 2px;font-weight:normal;word-break:break-wor
 aside h3{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--sub);margin:16px 0 6px;font-weight:normal}
 aside p{margin:4px 0}
 .fila{margin:5px 0;line-height:1.9}
+.et{display:inline-block;min-width:92px;font-size:11.5px;letter-spacing:.04em;color:var(--sub);font-variant:small-caps}
 details{margin-top:18px;border-top:1px solid var(--line);padding-top:8px}
 summary{cursor:pointer;color:var(--sub);font-size:13px}
 .chip{display:inline-block;margin:2px 3px 2px 0;padding:1px 7px;border-radius:10px;border:1px solid var(--line);font-size:12.5px;cursor:pointer;background:var(--bg)}
@@ -154,15 +155,15 @@ function enPalabras(c){
 // the conditions of a scene, sorted: the facts it needs (and from where), the facts that must NOT have happened (that
 // is how the branches exclude each other), and the rest (when and where: no arrows, but they decide too)
 function partes(n){
-  const i = n.info, si = (i.si || '').split(',').map(c => c.trim()).filter(Boolean), nec = [], no = [], resto = [];
+  const i = n.info, si = (i.si || '').split(',').map(c => c.trim()).filter(Boolean), nec = [], no = [], cont = [], resto = [];
   for (const c of si) { const m = c.match(/^(!?)(hecho|dias_desde|no_hoy):([a-z_0-9]+)(?::(\d+))?/);
-    if (!m) { resto.push(enPalabras(c)); continue; }
+    if (!m) { (/^([a-zñ_]+):([a-zñ_]+)(?::([a-zñ_]+))?\s*(>=|<=|>|<|==|=)\s*(-?[\d.]+)$/.test(c) ? cont : resto).push(enPalabras(c)); continue; }
     const neg = (m[1] === '!') !== (m[2] === 'no_hoy');
     if (m[2] === 'no_hoy') (neg ? no : nec).push([m[3], neg ? 'hoy' : 'hoy']);
     else if (m[2] === 'dias_desde') nec.push([m[3], m[4] + (m[4] === '1' ? ' día' : ' días') + ' después']);
     else (neg ? no : nec).push([m[3], '']); }
   for (const r of i.requiere || []) { if (NOD.has('meta ' + r)) nec.push(['meta ' + r, 'meta']); else { const m = r.match(/^(!?)hecho:(\w+)$/); if (m) (m[1] ? no : nec).push([m[2], '']); else resto.push(enPalabras(r)); } }
-  return { nec, no, resto };
+  return { nec, no, cont, resto };
 }
 // what a scene leaves: always (al empezar, al terminar, after it by the game), or only if Ana chooses an option
 function dejaDe(n){
@@ -172,22 +173,38 @@ function dejaDe(n){
   for (const [h, f] of Object.entries(D.hechos)) if (f.hace.includes(n.id) && !L.some(([x]) => x === h)) L.push([h, 'lo deja el juego después']);
   return L;
 }
+// what a scene changes in the counters (the qualities: Marilla's patience, the affection, Ana's skills), and when
+function cambiosDe(n){
+  const i = n.info, L = [], de = (s, q) => { let m;
+    if ((m = s.match(/^suma\s+([a-zñ_]+):([a-zñ_]+)(?::([a-zñ_]+))?\s+(-?[\d.]+)/))) L.push([`${m[1]} de ${m[2]}${m[3] ? ' hacia ' + m[3] : ''} ${+m[4] > 0 ? '+' : ''}${m[4]}`, q]);
+    else if ((m = s.match(/^afecto\s+(\w+)\s+(\w+)\s+(\d+)/))) L.push([`afecto de ${m[1]} hacia ${m[2]}: al menos ${m[3]}`, q]);
+    else if ((m = s.match(/^ofensa\s+(\w+)\s+(\w+)/))) L.push([`${m[1]} se ofende con ${m[2]}`, q]); };
+  for (const s of [...(i.empieza || []), ...(i.termina || [])]) de(s, '');
+  for (const o of i.ops || []) for (const s of o.ef) de(s, 'si elige «' + o.t.replace(/^«|»$/g, '') + '»');
+  return L;
+}
 const quien = h => (D.hechos[h]?.hace || []).map(w => w === 'código' ? '<span class="chip mut" title="lo deja el código del juego">⚙ el juego</span>' : chipN(w)).join('') || '<span class="mut">nadie</span>';
 const aQuien = h => { const L = (D.hechos[h]?.pide || []).filter(w => w !== sel); return L.length ? '<span class="mut">→ lo necesita</span> ' + L.map(chipN).join('') : '<span class="mut">→ nadie lo necesita</span>'; };
 function elegir(id, sinCentrar){
   sel = id && NOD.has(id) ? id : null; marca();
   if (!sel) return inicio();
-  const n = NOD.get(sel), i = n.info, P = $('panel'), { nec, no, resto } = partes(n), deja = dejaDe(n);
+  const n = NOD.get(sel), i = n.info, P = $('panel'), { nec, no, cont, resto } = partes(n), deja = dejaDe(n);
   let h = `<div class="tipo">${esc(TIPOS[n.tipo][0])}${n.grande ? ' · ★ grande' : ''}${n.c != null ? ' · paso ' + n.c : ' · suelta'}</div><h2>${esc(n.k)}</h2>${n.desc ? '<p><b>' + esc(n.desc) + '</b></p>' : ''}`;
   for (const p of PUNTO_DE.get(sel) || []) h += `<p>↺ Punto para volver: ${esc(p.texto)}</p>`;
-  // 1. what it needs
-  h += '<h3>Necesita</h3>';
-  h += nec.length ? nec.map(([x, q]) => q === 'meta' ? `<p class="fila">${chipN(x)} <span class="mut">(meta cumplida)</span></p>` : `<p class="fila">${chipH(x)}${q ? ' <span class="mut">' + esc(q) + '</span>' : ''} <span class="mut">← lo deja</span> ${quien(x)}</p>`).join('') : '<p class="mut">Ningún hecho: puede pasar desde el comienzo.</p>';
-  if (no.length) h += '<p class="fila"><span class="mut">y que todavía no haya pasado:</span> ' + no.map(([x]) => chipH(x, true)).join('') + '</p>';
-  if (resto.length) h += '<p class="fila mut">cuándo: ' + resto.map(esc).join(' · ') + '</p>';
-  // 2. what it leaves
-  h += '<h3>Deja</h3>';
-  h += deja.length ? deja.map(([x, q]) => `<p class="fila">${chipH(x)}${q ? ' <span class="mut">' + esc(q) + '</span>' : ''} ${aQuien(x)}</p>`).join('') : '<p class="mut">Ningún hecho.</p>';
+  // a scene is two things: what the state must be before (requires), and how it changes it (changes). The state: the
+  // facts (what happened), the counters (qualities, of someone or towards someone) and the situation (when, where, who)
+  const fila = (t, x) => `<p class="fila"><span class="et">${t}</span> ${x}</p>`;
+  h += '<h3>Requiere (el estado antes)</h3>';
+  if (!nec.length && !no.length && !cont.length && !resto.length) h += '<p class="mut">Nada: puede pasar desde el comienzo.</p>';
+  for (const [x, q] of nec) h += fila('hecho', q === 'meta' ? `${chipN(x)} <span class="mut">(meta cumplida)</span>` : `${chipH(x)}${q ? ' <span class="mut">' + esc(q) + '</span>' : ''} <span class="mut">← lo deja</span> ${quien(x)}`);
+  if (no.length) h += fila('no ha pasado', no.map(([x]) => chipH(x, true)).join(''));
+  if (cont.length) h += fila('contador', cont.map(esc).join(' · '));
+  if (resto.length) h += fila('situación', resto.map(esc).join(' · '));
+  const cambios = cambiosDe(n);
+  h += '<h3>Cambia (el estado después)</h3>';
+  if (!deja.length && !cambios.length) h += '<p class="mut">Nada.</p>';
+  for (const [x, q] of deja) h += fila('hecho', `${chipH(x)}${q ? ' <span class="mut">' + esc(q) + '</span>' : ''} ${aQuien(x)}`);
+  for (const [x, q] of cambios) h += fila('contador', esc(x) + (q ? ' <span class="mut">' + esc(q) + '</span>' : ''));
   // the rest, folded: the text, the options, everything it does
   let det = '';
   if (i.narra) det += `<p class="mut"><i>${esc(i.narra)}${i.narra.length >= 260 ? '…' : ''}</i></p>`; else if (i.primera) det += `<p class="mut"><i>${esc(i.primera)}</i></p>`;
@@ -218,8 +235,8 @@ $('panel').addEventListener('click', e => { const c = e.target.closest('.chip');
 // the start: what the drawing is, the points, what never could happen, the loose ones
 function inicio(){
   const sueltos = D.nodos.filter(n => n.suelto), porTipo = t => sueltos.filter(n => n.tipo === t);
-  let h = '<h2>Cómo leerlo</h2><p>Cada escena dice dos cosas: qué hechos <b>necesita</b> y qué hechos <b>deja</b>. Con eso el grafo sale solo: la flecha va de la escena que deja un hecho a la que lo necesita (pasa el ratón por la flecha para ver cuál). De izquierda a derecha, el orden de la historia.</p>';
-  h += '<p>Lo que no son flechas, pero también decide, va en una línea aparte en cada escena: <b>que algo todavía no haya pasado</b> (así se excluyen los caminos: si Marilla ya decidió, ya no se va a White Sands) y <b>cuándo</b> (la hora, el lugar, quién está, la paciencia o el afecto). Y lo que deja puede depender de lo que Ana elija.</p>';
+  let h = '<h2>Cómo leerlo</h2><p>Cada escena es dos cosas: lo que <b>requiere</b> del estado y cómo lo <b>cambia</b>. El estado tiene <b>hechos</b> (lo que pasó), <b>contadores</b> (la paciencia de Marilla, el afecto, las habilidades de Ana) y la <b>situación</b> (la hora, el lugar, quién está), que la mueve el mundo: el reloj, las rutinas, la jugadora.</p>';
+  h += '<p>Las flechas son los hechos: van de la escena que deja uno a la que lo necesita (pasa el ratón por la flecha para ver cuál). De izquierda a derecha, el orden de la historia. Lo demás (lo que no tiene que haber pasado, los contadores, la situación) se ve en cada escena.</p>';
   h += '<p>Toca una caja: en <span style="color:var(--up)">azul</span>, todo lo que tiene que pasar antes; en <span style="color:var(--down)">naranja</span>, todo lo que abre después.</p>';
   h += '<div class="leyenda">' + Object.values(TIPOS).map(([t, k]) => `<span><i style="background:var(--${k});border-color:var(--${k}B)"></i>${t}</span>`).join('') + '<span>★ grande (del libro)</span><span>↺ punto para volver</span><span>◆ meta</span></div>';
   h += '<h3>Puntos para volver</h3><div class="lista">' + D.puntos.map(p => `<div data-n="${esc(p.escena)}">↺ ${esc(p.texto)} <span class="mut">· ${esc(p.escena.slice(7))}, ${esc(p.cuando)}</span></div>`).join('') + '</div>';
