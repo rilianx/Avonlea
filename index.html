@@ -1700,6 +1700,7 @@ en: ana=out, marilla=out, spencer=out, blewett=out
 sujeta: spencer, blewett
 si: hecho:rumbo_spencer, !hecho:a_prueba, avance:ws:100-100, ve:spencer
 al_terminar: hecho ws_vuelven
+al_terminar: olvidar rumbo_spencer
 ---
 spencer: ¡Marilla Cuthbert! ¡Qué sorpresa! Pasen, pasen. ¿Y cómo está la niña?
 marilla: Para eso venimos, Sra. Spencer. Ha habido una equivocación. Le mandamos a decir con su hermano Robert que queríamos un niño de diez u once años.
@@ -12497,6 +12498,7 @@ function wsVolverCasa(){
     if (!obsScene()) { cam.x = ana.x; cam.y = ana.y; cam.snap = true; }
     if (hourNow() < 18) dayAt(18);
     wsE().ws.fase = 'fin'; wsE().ws.volviendo = false; dlgHecho('ws_vuelven');   // (also when the game was closed halfway: then no scene said it)
+    delete dlgHechos().rumbo_spencer;   // (the trip is over: no longer on the way)
     logEv('Marilla y Ana volvieron de White Sands sin la Sra. Blewett.', ['marilla']); save();
   });
 }

@@ -55,7 +55,14 @@ const HAB = []; { let h = null;
 // the goals of the notebook (cuaderno:x, dias_desde:meta): marked by hand, as the player reaches them
 const METAS = leer('src/datos/cuaderno.txt').split(/^(?====)/m).map(b => ({ id: b.match(/^===\s*(.+?)\s*===/)?.[1], titulo: b.match(/^titulo:\s*(.*)$/m)?.[1] })).filter(m => m.id).map(m => ({ ...m, titulo: m.titulo || m.id }));
 
-const datos = { escenas: E, habilidades: HAB, metas: METAS };
+// who is in Avonlea, and from/until when (src/datos/llegadas.txt): someone away is in no scene
+const LLEG = {}; { let q = null;
+  for (const raw of leer('src/datos/llegadas.txt').split('\n')) { const s = raw.trim(); if (!s || s[0] === '#') continue; let m;
+    if ((m = s.match(/^===\s*(.+?)\s*===$/))) { q = LLEG[m[1]] = { llega: [], seva: [], visita: false }; continue; } if (!q) continue;
+    if ((m = s.match(/^llega si:\s*(.*)$/))) q.llega.push(m[1].split(',').map(x => x.trim()).filter(Boolean));
+    if ((m = s.match(/^se va si:\s*(.*)$/))) q.seva.push(m[1].split(',').map(x => x.trim()).filter(Boolean));
+    if (/^de visita:/.test(s)) q.visita = true; } }
+const datos = { escenas: E, habilidades: HAB, metas: METAS, llegadas: LLEG };
 const pag = fs.readFileSync(path.join(__dirname, 'historia', 'pagina.html'), 'utf8');
 fs.writeFileSync(path.join(root, 'trazas/historia.html'), pag.replace('/*@DATOS*/null', () => JSON.stringify(datos).replace(/</g, '\\u003c')));
 console.log(`→ trazas/historia.html · ${E.length} escenas · ${HAB.length} contadores · ${METAS.length} metas`);

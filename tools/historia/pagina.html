@@ -77,7 +77,7 @@ function estadoInicial(){
   const c = {}; for (const h of D.habilidades) c[HKEY(h)] = h.inicial || 0;
   return { dia: 1, hora: 19.5, donde: 'gg', h: { inicio_juego: 1 }, d: {}, c, m: {}, sabe: {}, inv: {}, diario: [], fin: null, juego: null };
 }
-let st = estadoInicial(), pila = [], tab = 'sigue', filtro = { q: '', cartas: false, mis: true, solas: false };
+let st = estadoInicial(), pila = [], tab = 'sigue', filtro = { q: '', cartas: true, mis: true, solas: false };
 try { const g = JSON.parse(localStorage.getItem('avonlea-historia') || 'null'); if (g?.st) { st = g.st; pila = g.pila || []; st.donde ||= 'gg'; } } catch (e) {}
 const guarda = () => { try { localStorage.setItem('avonlea-historia', JSON.stringify({ st, pila: pila.slice(-200) })); } catch (e) {} };
 const paso = que => { pila.push({ que, st: JSON.stringify(st) }); };   // (before each step: what is about to happen, and the state as it was)
@@ -108,12 +108,24 @@ function cond(c){
       case 'capitulo': return false;
       case 'sabe': if (st.sabe[a + ':' + b]) return true; if (neg) return false; return 'sit';   // (what someone knows: a scene told it, or the news of the world —not simulated: «pasaría si» someone tells)
       case 'conoce': return st.h['conoce_' + a] != null || ['marilla', 'matthew'].includes(a) ? true : 'sit';
+      case 'presente': return presente(a);
+      case 've': return presente(a) ? 'sit' : false;   // (to see her, they must be in Avonlea: where, is the situation)
       default: return 'sit';
     }
   })();
   if (r === 'sit') return 'sit';
   return (neg ? !r : r) ? 'si' : 'no';
 }
+// who is in Avonlea now (src/datos/llegadas.txt, as the game: arrived, and not gone; a visit, only while it lasts)
+const todas = cs => cs.every(c => cond(c) === 'si');
+function presente(k){
+  const L = D.llegadas[k]; if (!L) return true;
+  const llega = L.llega.some(todas), seva = L.seva.some(todas);
+  if (L.visita) return llega && !seva;
+  return (!L.llega.length || st.h['llego_' + k] != null || llega) && !(st.h['se_fue_' + k] != null || seva);
+}
+// the arrivals and departures that happened by now: facts of the story (llego_x, se_fue_x), as in the game
+function llegadasAl(){ for (const [k, L] of Object.entries(D.llegadas)) { if (L.llega.length && st.h['llego_' + k] == null && L.llega.some(todas)) st.h['llego_' + k] = st.dia; if (L.seva.length && st.h['llego_' + k] != null && st.h['se_fue_' + k] == null && L.seva.some(todas)) st.h['se_fue_' + k] = st.dia; } }
 // a condition in words (for the situation, and the checks)
 function palabras(c){
   let m; const neg = c[0] === '!', s = neg ? c.slice(1) : c, no = neg ? 'no ' : '';
@@ -127,6 +139,9 @@ function palabras(c){
   if ((m = s.match(/^dias_desde:(\w+):(\d+)$/))) return `${m[2]} día(s) después de ${m[1]}`;
   if ((m = s.match(/^ana:(\w+)$/))) return `Ana ${no}${m[1].replace('_', ' ')}`;
   if ((m = s.match(/^sabe:(\w+):(\w+)/))) return `${nombre(m[1])} ${no}sabe «${m[2]}»`;
+  if ((m = s.match(/^carta:(\w+)$/))) return `la jugadora le escribe una carta a ${nombre(m[1])}`;
+  if ((m = s.match(/^respuesta:(\w+)$/))) return `llega la respuesta de ${nombre(m[1])}`;
+  if ((m = s.match(/^tomando_te:(\w+):(\w+)$/))) return `la jugadora invita a ${nombre(m[2])} a tomar el té`;
   return c;
 }
 // where Ana is: part of the state (the player moves her, or a scene takes her); where the others are is not simulated:
@@ -146,7 +161,7 @@ function situacion(e, sitConds){
     else L.push({ tipo: 'accion', t: palabras(c) }); }
   if (e.cerca) L.push({ tipo: 'accion', t: 'cerca de ' + e.cerca.split(',')[1]?.trim() });
   if (e.calesa) L.push({ tipo: 'accion', t: 'va en la calesa' });
-  if (e.con) L.push({ tipo: 'accion', t: 'habla con ' + nombre(e.con) });
+  if (e.con) L.push({ tipo: 'accion', t: 'la jugadora habla con ' + nombre(e.con) });
   const DISP = { lugar: x => 'pasa por ' + x, objeto: x => 'mira ' + x, primera: () => 've algo por primera vez', encuentro: () => 'se encuentra con alguien', menu: () => 'lo elige en el menú de alguien' };
   if (e.disparo) L.push({ tipo: 'accion', t: (DISP[e.disparo] || (x => e.disparo + ' ' + x))(e.lugar || e.objeto || '') });
   return L;
@@ -159,6 +174,8 @@ function estado(e){
   if (rep === 'dia' && v === st.dia) return null;
   const ver = cs => cs.map(c => [c, cond(c)]);
   const r = ver(e.si); if (r.some(([, x]) => x === 'no')) return { no: r.filter(([, x]) => x === 'no').map(([c]) => c) };
+  const fuera = (e.en || '').split(/[,\s]+/).map(p => p.split('=')[0]).filter(k => k && k !== 'ana' && !presente(k)).concat(e.con && !presente(e.con) ? [e.con] : []);
+  if (fuera.length) return { no: fuera.map(k => nombre(k) + ' no está en Avonlea') };
   const alts = e.o.map(a => ({ a, r: ver(a.si) })).filter(x => !x.r.some(([, y]) => y === 'no'));
   if (e.o.length && !alts.length) return { no: ['ninguna de sus alternativas'] };
   const sit = situacion(e, r.filter(([, x]) => x === 'sit').map(([c]) => c));
@@ -206,7 +223,7 @@ function aplicar(s){
 // ---- playing a scene: its cards, one block until the next choice; the choice, and on
 function empezar(id){
   const e = ESC.get(id), c = cuando(e); paso((c && momento(c.dia, c.hora) !== 'ahora' ? momento(c.dia, c.hora) + ': ' : '') + 'empieza ' + id);
-  if (c) { st.dia = c.dia; st.hora = c.hora; if (c.r.anaNo.length) st.donde = c.r.anaNo[0].lugares[0]; }   // (the story jumps to when it can happen, and Ana goes where it asks)
+  if (c) { st.dia = c.dia; st.hora = c.hora; if (c.r.anaNo.length) st.donde = c.r.anaNo[0].lugares[0]; } llegadasAl();   // (the story jumps to when it can happen, and Ana goes where it asks)
   st.d[id] = (e.repetir || 'una_vez') === 'una_vez' ? true : st.dia;
   st.juego = { id, i: 0, salida: [], cambios: [] };
   for (const n of e.narra) st.juego.salida.push({ narra: n });

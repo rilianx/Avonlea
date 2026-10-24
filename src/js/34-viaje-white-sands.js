@@ -92,6 +92,7 @@ function wsVolverCasa(){
     if (!obsScene()) { cam.x = ana.x; cam.y = ana.y; cam.snap = true; }
     if (hourNow() < 18) dayAt(18);
     wsE().ws.fase = 'fin'; wsE().ws.volviendo = false; dlgHecho('ws_vuelven');   // (also when the game was closed halfway: then no scene said it)
+    delete dlgHechos().rumbo_spencer;   // (the trip is over: no longer on the way)
     logEv('Marilla y Ana volvieron de White Sands sin la Sra. Blewett.', ['marilla']); save();
   });
 }
