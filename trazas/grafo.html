@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Grafo de Avonlea</title>
+<title>Escenas de Avonlea</title>
 <style>
 :root{--bg:#f6f1e7;--panel:#fffaf0;--ink:#2e2418;--sub:#7a6a55;--line:#d9cdb8;--edge:#9c8b73;--hi:#c0392b;--up:#2f6fb0;--down:#b5651d;
 --escena:#dce8f5;--escenaB:#4a78a8;--conv:#dff0dc;--convB:#4f8a46;--mision:#ece0f5;--misionB:#7d55a0;--carta:#f8ecd2;--cartaB:#b0862f;--meta:#fbf0b8;--metaB:#a8901c;--sist:#e6e2dc;--sistB:#857c70}
@@ -56,15 +56,34 @@ path.c{fill:none;stroke:var(--hi);stroke-width:1;stroke-dasharray:4 4;opacity:.4
 .zoom{position:absolute;right:10px;bottom:10px;display:flex;gap:6px}
 .ayuda{position:absolute;left:10px;bottom:10px;font-size:12px;color:var(--sub);background:var(--panel);padding:4px 8px;border-radius:6px;border:1px solid var(--line);max-width:calc(100% - 140px)}
 @media (max-width:760px){main{grid-template-columns:1fr;grid-template-rows:55vh 1fr}aside{border-left:0;border-top:1px solid var(--line)}header{padding:8px 16px}}
+.tabs button{border-radius:0}.tabs button:first-child{border-radius:7px 0 0 7px}.tabs button:last-child{border-radius:0 7px 7px 0;border-left:0}
+.tabs button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+#lista{overflow:auto;padding:12px 16px 60px;min-height:0}
+#lista .esc{max-width:980px;margin:0 auto 10px;padding:9px 12px;border:1px solid var(--line);border-left-width:4px;border-radius:6px;background:var(--panel)}
+#lista .esc.marca{outline:2px solid var(--hi)}
+#lista .cab{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
+#lista .cab b{font:13px ui-monospace,Menlo,monospace}
+#lista .de{margin:2px 0 4px}
+#lista .r{font-size:13px;line-height:1.8;margin:1px 0}
+#lista .r .et{min-width:70px}
+#lista a{color:var(--up);text-decoration:none;font:12.5px ui-monospace,Menlo,monospace;margin-right:6px;cursor:pointer}
+#lista a:hover{text-decoration:underline}
+#lista .h{font:12.5px ui-monospace,Menlo,monospace;padding:0 5px;border-radius:4px;background:var(--bg);border:1px solid var(--line);cursor:pointer}
+#lista .h.no{text-decoration:line-through}
+#lista .grupo{max-width:980px;margin:18px auto 8px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--sub)}
+#lista .filtros{max-width:980px;margin:0 auto 10px;display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--sub)}
+body.vlista main{display:none}body.vlista #lista{display:block}body.vlista .solografo{display:none}
 </style></head><body>
 <header>
-  <h1>El grafo de la historia</h1>
+  <h1>Las escenas de la historia</h1>
+  <span class="tabs"><button id="tabLista" class="on">Lista</button><button id="tabGrafo">Grafo</button></span>
   <input type="search" id="buscar" list="todos" placeholder="Buscar escena, meta, hecho o palabra…" aria-label="Buscar">
   <datalist id="todos"></datalist>
-  <label><input type="checkbox" id="vercierra"> «se cierra con» (- - -)</label>
-  <label><input type="checkbox" id="soloRel"> ocultar lo que no se relaciona</label>
+  <label class="solografo"><input type="checkbox" id="vercierra"> «se cierra con» (- - -)</label>
+  <label class="solografo"><input type="checkbox" id="soloRel"> ocultar lo que no se relaciona</label>
   <span class="st" id="st"></span>
 </header>
+<section id="lista" hidden></section>
 <main>
   <div id="lienzo"><svg id="svg"><g id="vista"><g id="aristas"></g><g id="cierres"></g><g id="nodos"></g><g id="colsh"></g></g></svg>
     <div class="ayuda">Arrastra para moverte · rueda o pellizco para acercar · toca una caja</div>
@@ -157,7 +176,7 @@ function enPalabras(c){
 function partes(n){
   const i = n.info, si = (i.si || '').split(',').map(c => c.trim()).filter(Boolean), nec = [], no = [], cont = [], resto = [];
   for (const c of si) { const m = c.match(/^(!?)(hecho|dias_desde|no_hoy):([a-z_0-9]+)(?::(\d+))?/);
-    if (!m) { (/^([a-zñ_]+):([a-zñ_]+)(?::([a-zñ_]+))?\s*(>=|<=|>|<|==|=)\s*(-?[\d.]+)$/.test(c) ? cont : resto).push(enPalabras(c)); continue; }
+    if (!m) { const qm = c.match(/^([a-zñ_]+):([a-zñ_]+)(?::([a-zñ_]+))?\s*(>=|<=|>|<|==|=)\s*(-?[\d.]+)$/); if (qm) cont.push({ k: qm[1] + ':' + qm[2] + ':' + (qm[3] || ''), t: enPalabras(c) }); else resto.push(enPalabras(c)); continue; }
     const neg = (m[1] === '!') !== (m[2] === 'no_hoy');
     if (m[2] === 'no_hoy') (neg ? no : nec).push([m[3], neg ? 'hoy' : 'hoy']);
     else if (m[2] === 'dias_desde') nec.push([m[3], m[4] + (m[4] === '1' ? ' día' : ' días') + ' después']);
@@ -176,8 +195,8 @@ function dejaDe(n){
 // what a scene changes in the counters (the qualities: Marilla's patience, the affection, Ana's skills), and when
 function cambiosDe(n){
   const i = n.info, L = [], de = (s, q) => { let m;
-    if ((m = s.match(/^suma\s+([a-zñ_]+):([a-zñ_]+)(?::([a-zñ_]+))?\s+(-?[\d.]+)/))) L.push([`${m[1]} de ${m[2]}${m[3] ? ' hacia ' + m[3] : ''} ${+m[4] > 0 ? '+' : ''}${m[4]}`, q]);
-    else if ((m = s.match(/^afecto\s+(\w+)\s+(\w+)\s+(\d+)/))) L.push([`afecto de ${m[1]} hacia ${m[2]}: al menos ${m[3]}`, q]);
+    if ((m = s.match(/^suma\s+([a-zñ_]+):([a-zñ_]+)(?::([a-zñ_]+))?\s+(-?[\d.]+)/))) L.push([`${m[1]} de ${m[2]}${m[3] ? ' hacia ' + m[3] : ''} ${+m[4] > 0 ? '+' : ''}${m[4]}`, q, m[1] + ':' + m[2] + ':' + (m[3] || '')]);
+    else if ((m = s.match(/^afecto\s+(\w+)\s+(\w+)\s+(\d+)/))) L.push([`afecto de ${m[1]} hacia ${m[2]}: al menos ${m[3]}`, q, 'afecto:' + m[1] + ':' + m[2]]);
     else if ((m = s.match(/^ofensa\s+(\w+)\s+(\w+)/))) L.push([`${m[1]} se ofende con ${m[2]}`, q]); };
   for (const s of [...(i.empieza || []), ...(i.termina || [])]) de(s, '');
   for (const o of i.ops || []) for (const s of o.ef) de(s, 'si elige «' + o.t.replace(/^«|»$/g, '') + '»');
@@ -198,7 +217,7 @@ function elegir(id, sinCentrar){
   if (!nec.length && !no.length && !cont.length && !resto.length) h += '<p class="mut">Nada: puede pasar desde el comienzo.</p>';
   for (const [x, q] of nec) h += fila('hecho', q === 'meta' ? `${chipN(x)} <span class="mut">(meta cumplida)</span>` : `${chipH(x)}${q ? ' <span class="mut">' + esc(q) + '</span>' : ''} <span class="mut">← lo deja</span> ${quien(x)}`);
   if (no.length) h += fila('no ha pasado', no.map(([x]) => chipH(x, true)).join(''));
-  if (cont.length) h += fila('contador', cont.map(esc).join(' · '));
+  if (cont.length) h += fila('contador', cont.map(c => esc(c.t)).join(' · '));
   if (resto.length) h += fila('situación', resto.map(esc).join(' · '));
   const cambios = cambiosDe(n);
   h += '<h3>Cambia (el estado después)</h3>';
@@ -251,10 +270,52 @@ function inicio(){
 $('panel').addEventListener('click', e => { const r = e.target.closest('.lista div'); if (r) elegir(r.dataset.n); });
 // searching: a box (by its name) or a fact
 $('todos').innerHTML = [...D.nodos.map(n => n.k), ...Object.keys(D.hechos).map(h => 'hecho: ' + h)].sort().map(s => `<option value="${esc(s)}">`).join('');
-$('buscar').addEventListener('change', () => { const v = $('buscar').value.trim(); if (!v) return; if (v.startsWith('hecho: ')) return hecho(v.slice(7));
+$('buscar').addEventListener('change', () => { const v = $('buscar').value.trim(); if (!v || document.body.classList.contains('vlista')) return; if (v.startsWith('hecho: ')) return hecho(v.slice(7));
   const lv = v.toLowerCase(), n = D.nodos.find(n => n.k === v) || D.nodos.find(n => n.k.includes(v)) || D.nodos.find(n => (n.desc || '').toLowerCase().includes(lv)); if (n) elegir(n.id); else if (D.hechos[v]) hecho(v); });
 $('st').textContent = `${D.nodos.length} cajas (${vis.length} en cadenas, ${D.sueltos} sueltas) · ${D.flechas.length} flechas · ${Object.keys(D.hechos).length} hechos · ${D.puntos.length} puntos${D.nunca.length || D.malas.length ? ' · ⚠ ' + (D.nunca.length + D.malas.length) + ' problemas' : ''}`;
+// the list: each scene, what it requires and what it changes; and, for each change, the scenes that need it directly
+const TIPCOL = { escena: 'escenaB', conversacion: 'convB', mision: 'misionB', carta: 'cartaB', meta: 'metaB', sistema: 'sistB' };
+const necesitanCont = {}; for (const n of D.nodos) for (const c of partes(n).cont) (necesitanCont[c.k] ||= []).push(n.id);
+const enlace = id => { const n = NOD.get(id); return n ? `<a data-ir="${esc(id)}" title="${esc(n.desc || '')}">${esc(nombre(n))}</a>` : `<span class="mut">${esc(id === 'código' ? '⚙ el juego' : id)}</span>`; };
+const hchip = (h, no) => `<span class="h${no ? ' no' : ''}" data-hf="${esc(h)}" title="filtrar por este hecho">${esc(h)}</span>`;
+function tarjeta(n){
+  const { nec, no, cont, resto } = partes(n), deja = n.tipo === 'meta' ? [] : dejaDe(n), cam = n.tipo === 'meta' ? [] : cambiosDe(n);
+  const req = [...nec.map(([x, q]) => q === 'meta' ? enlace(x) : hchip(x) + (q ? ' <span class="mut">' + esc(q) + '</span>' : '')), ...no.map(([x]) => hchip(x, true)), ...cont.map(c => esc(c.t)), ...resto.map(esc)];
+  const act = [...deja.map(([x, q]) => { const L = (D.hechos[x]?.pide || []).filter(w => w !== n.id); return hchip(x) + (q ? ' <span class="mut">' + esc(q) + '</span>' : '') + ' <span class="mut">→</span> ' + (L.length ? L.map(enlace).join(' ') : '<span class="mut">nadie</span>'); }),
+    ...cam.map(([t, q, k]) => { const L = (necesitanCont[k] || []).filter(w => w !== n.id); return esc(t) + (q ? ' <span class="mut">' + esc(q) + '</span>' : '') + ' <span class="mut">→</span> ' + (L.length ? L.map(enlace).join(' ') : '<span class="mut">nadie lo mira</span>'); })];
+  const marcas = (n.grande ? ' ★' : '') + (PUNTO_DE.has(n.id) ? ' ↺' : '');
+  return `<div class="esc" id="e-${esc(n.id)}" style="border-left-color:var(--${TIPCOL[n.tipo]})" data-txt="${esc((n.k + ' ' + (n.desc || '') + ' ' + [...nec.map(x => x[0]), ...no.map(x => x[0]), ...deja.map(x => x[0]), ...cont.map(c => c.t), ...cam.map(c => c[0])].join(' ')).toLowerCase())}" data-tipo="${n.tipo}">
+    <div class="cab"><b>${esc(nombre(n))}${marcas}</b><span class="tipo">${esc(TIPOS[n.tipo][0])}${n.c != null ? ' · paso ' + n.c : ''}</span></div>
+    ${n.desc ? '<div class="de">' + esc(n.desc) + '</div>' : ''}
+    <div class="r"><span class="et">necesita</span> ${req.length ? req.join(' · ') : '<span class="mut">nada</span>'}</div>
+    <div class="r"><span class="et">actualiza</span> ${act.length ? act.join('<br><span class="et"></span> ') : '<span class="mut">nada</span>'}</div></div>`;
+}
+function listaArmar(){
+  const L = D.nodos.filter(n => n.tipo !== 'sistema').sort((a, b) => (a.c ?? 99) - (b.c ?? 99) || a.k.localeCompare(b.k));
+  let h = '<div class="filtros">' + Object.entries(TIPOS).filter(([t]) => t !== 'sistema').map(([t, [nom]]) => `<label><input type="checkbox" data-ft="${t}" checked> ${esc(nom)}</label>`).join('') + '<label><input type="checkbox" id="fsueltas"> también las sueltas (sin hechos de otras)</label></div>';
+  let paso = null;
+  for (const n of L) { const p = n.c ?? 'sueltas'; if (p !== paso) { paso = p; h += `<div class="grupo" data-grupo="${p}">${p === 'sueltas' ? 'Sueltas: pasan por la hora, el lugar o un contador' : p === 0 ? 'Paso 0: no necesitan hechos de otras' : 'Paso ' + p}</div>`; } h += tarjeta(n); }
+  $('lista').innerHTML = h; listaFiltrar();
+}
+function listaFiltrar(){
+  const q = ($('buscar').value || '').trim().toLowerCase(), tipos = new Set([...document.querySelectorAll('[data-ft]')].filter(x => x.checked).map(x => x.dataset.ft)), sueltas = $('fsueltas')?.checked;
+  for (const e of document.querySelectorAll('#lista .esc')) { const n = NOD.get(e.id.slice(2)); e.hidden = !tipos.has(e.dataset.tipo) || (n.suelto && !sueltas && !q) || (q && !e.dataset.txt.includes(q)); }
+  for (const g of document.querySelectorAll('#lista .grupo')) { let x = g.nextElementSibling, alguno = false; while (x && x.classList.contains('esc')) { if (!x.hidden) alguno = true; x = x.nextElementSibling; } g.hidden = !alguno; }
+}
+function irA(id){
+  const e = document.getElementById('e-' + id); if (!e) return;
+  if (e.hidden) { $('buscar').value = ''; if (NOD.get(id).suelto && $('fsueltas')) $('fsueltas').checked = true; const c = document.querySelector('[data-ft="' + NOD.get(id).tipo + '"]'); if (c) c.checked = true; listaFiltrar(); }
+  document.querySelectorAll('#lista .marca').forEach(x => x.classList.remove('marca')); e.classList.add('marca'); e.scrollIntoView({ block: 'center', behavior: 'smooth' });
+}
+$('lista').addEventListener('click', e => { const a = e.target.closest('[data-ir]'); if (a) return irA(a.dataset.ir); const h = e.target.closest('[data-hf]'); if (h) { $('buscar').value = h.dataset.hf; listaFiltrar(); $('lista').scrollTop = 0; } });
+$('lista').addEventListener('change', listaFiltrar);
+$('buscar').addEventListener('input', () => { if (document.body.classList.contains('vlista')) listaFiltrar(); });
+const vista = v => { document.body.classList.toggle('vlista', v === 'lista'); $('lista').hidden = v !== 'lista'; $('tabLista').classList.toggle('on', v === 'lista'); $('tabGrafo').classList.toggle('on', v !== 'lista'); if (v !== 'lista') setTimeout(() => sel ? centra(sel) : verTodo(), 0); try { localStorage.setItem('avonlea-grafo-vista', v); } catch (e) {} };
+$('tabLista').onclick = () => vista('lista'); $('tabGrafo').onclick = () => vista('grafo');
+listaArmar();
 verTodo(); inicio();
+let v0 = 'lista'; try { v0 = localStorage.getItem('avonlea-grafo-vista') || 'lista'; } catch (e) {} vista(v0);
+{ const h0 = decodeURIComponent(location.hash.slice(1)); if (h0 && NOD.has(h0) && v0 === 'lista') setTimeout(() => irA(h0), 50); }
 const deHash = () => { const h0 = decodeURIComponent(location.hash.slice(1)); if (h0 && NOD.has(h0) && h0 !== sel) elegir(h0); };
 deHash(); addEventListener('hashchange', deHash);
 addEventListener('resize', () => { if (!sel) verTodo(); });
