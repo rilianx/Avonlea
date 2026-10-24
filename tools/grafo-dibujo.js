@@ -247,15 +247,15 @@ function enPalabras(c){
 // the conditions of a scene, sorted: the facts it needs (and from where), the facts that must NOT have happened (that
 // is how the branches exclude each other), and the rest (when and where: no arrows, but they decide too)
 function partes(n){
-  const i = n.info, si = (i.si || '').split(',').map(c => c.trim()).filter(Boolean), nec = [], no = [], cont = [], resto = [];
+  const i = n.info, si = (i.si || '').split(',').map(c => c.trim()).filter(Boolean), nec = [], no = [], cont = [], resto = [], crudo = [];
   for (const c of si) { const m = c.match(/^(!?)(hecho|dias_desde|no_hoy):([a-z_0-9]+)(?::(\\d+))?/);
-    if (!m) { const qm = c.match(/^([a-zñ_]+):([a-zñ_]+)(?::([a-zñ_]+))?\\s*(>=|<=|>|<|==|=)\\s*(-?[\\d.]+)$/); if (qm) cont.push({ k: qm[1] + ':' + qm[2] + ':' + (qm[3] || ''), t: enPalabras(c) }); else resto.push(enPalabras(c)); continue; }
+    if (!m) { const qm = c.match(/^([a-zñ_]+):([a-zñ_]+)(?::([a-zñ_]+))?\\s*(>=|<=|>|<|==|=)\\s*(-?[\\d.]+)$/); if (qm) cont.push({ k: qm[1] + ':' + qm[2] + ':' + (qm[3] || ''), t: enPalabras(c) }); else { resto.push(enPalabras(c)); crudo.push(c); } continue; }
     const neg = (m[1] === '!') !== (m[2] === 'no_hoy');
     if (m[2] === 'no_hoy') (neg ? no : nec).push([m[3], neg ? 'hoy' : 'hoy']);
     else if (m[2] === 'dias_desde') nec.push([m[3], m[4] + (m[4] === '1' ? ' día' : ' días') + ' después']);
     else (neg ? no : nec).push([m[3], '']); }
   for (const r of i.requiere || []) { if (NOD.has('meta ' + r)) nec.push(['meta ' + r, 'meta']); else { const m = r.match(/^(!?)hecho:(\\w+)$/); if (m) (m[1] ? no : nec).push([m[2], '']); else resto.push(enPalabras(r)); } }
-  return { nec, no, cont, resto };
+  return { nec, no, cont, resto, crudo };
 }
 // what a scene leaves: always (al empezar, al terminar, after it by the game), or only if Ana chooses an option
 function dejaDe(n){
@@ -348,32 +348,40 @@ $('buscar').addEventListener('change', () => { const v = $('buscar').value.trim(
 $('st').textContent = \`\${D.nodos.length} cajas (\${vis.length} en cadenas, \${D.sueltos} sueltas) · \${D.flechas.length} flechas · \${Object.keys(D.hechos).length} hechos · \${D.puntos.length} puntos\${D.nunca.length || D.malas.length ? ' · ⚠ ' + (D.nunca.length + D.malas.length) + ' problemas' : ''}\`;
 // the list: each scene, what it requires and what it changes; and, for each change, the scenes that need it directly
 const TIPCOL = { escena: 'escenaB', conversacion: 'convB', mision: 'misionB', carta: 'cartaB', meta: 'metaB', sistema: 'sistB' };
-const necesitanCont = {}; for (const n of D.nodos) for (const c of partes(n).cont) (necesitanCont[c.k] ||= []).push(n.id);
+const necesitanCont = {}, cambianCont = {}; for (const n of D.nodos) { for (const c of partes(n).cont) (necesitanCont[c.k] ||= []).push(n.id); if (n.tipo !== 'meta') for (const c of cambiosDe(n)) if (c[2]) ((cambianCont[c[2]] ||= new Set())).add(n.id); }
+// who changes what a scene needs: every condition alike (a fact: the scenes that leave it; a counter: the scenes that
+// add to it, and the game; the situation: the clock, the cart, the player and the routines)
+const MUEVE = c => /^!?hora:/.test(c) ? 'el reloj' : /^avance:/.test(c) ? 'la calesa' : /^(!?)(estacion|dia_|domingo)/.test(c) ? 'el calendario' : 'la jugadora y las rutinas';
+const juego = t => \`<span class="mut">⚙ \${esc(t)}</span>\`;
 const enlace = id => { const n = NOD.get(id); return n ? \`<a data-ir="\${esc(id)}" title="\${esc(n.desc || '')}">\${esc(nombre(n))}</a>\` : \`<span class="mut">\${esc(id === 'código' ? '⚙ el juego' : id)}</span>\`; };
 const hchip = (h, no) => \`<span class="h\${no ? ' no' : ''}" data-hf="\${esc(h)}" title="filtrar por este hecho">\${esc(h)}</span>\`;
 function tarjeta(n){
   const { nec, no, cont, resto } = partes(n), deja = n.tipo === 'meta' ? [] : dejaDe(n), cam = n.tipo === 'meta' ? [] : cambiosDe(n);
   const de = x => { const L = (D.hechos[x]?.hace || []).filter(w => w !== n.id); return L.some(w => w !== 'código') ? L.filter(w => w !== 'código') : L; };   // (the code, only when no scene is named for it)   // (who leaves it: the way back, to the left)
-  const req = [...nec.map(([x, q]) => q === 'meta' ? enlace(x) : (de(x).length ? de(x).map(enlace).join(' ') + ' <span class="mut">→</span> ' : '') + hchip(x) + (q ? ' <span class="mut">' + esc(q) + '</span>' : '')), ...no.map(([x]) => hchip(x, true)), ...cont.map(c => esc(c.t)), ...resto.map(esc)];
+  const { crudo } = partes(n), flecha = ' <span class="mut">→</span> ', desde = x => de(x).map(w => w === 'código' ? juego('el juego') : enlace(w)).join(' ');
+  const req = [...nec.map(([x, q]) => q === 'meta' ? enlace(x) : (de(x).length ? desde(x) + flecha : '') + hchip(x) + (q ? ' <span class="mut">' + esc(q) + '</span>' : '')),
+    ...no.map(([x]) => (de(x).length ? desde(x) + flecha : '') + hchip(x, true)),
+    ...cont.map(c => [...(cambianCont[c.k] || [])].filter(w => w !== n.id).map(enlace).concat(juego('el juego')).join(' ') + flecha + esc(c.t)),
+    ...resto.map((t, j) => juego(MUEVE(crudo[j] || '')) + flecha + esc(t))];
   const act = [...deja.map(([x, q]) => { const L = (D.hechos[x]?.pide || []).filter(w => w !== n.id); return hchip(x) + (q ? ' <span class="mut">' + esc(q) + '</span>' : '') + ' <span class="mut">→</span> ' + (L.length ? L.map(enlace).join(' ') : '<span class="mut">nadie</span>'); }),
     ...cam.map(([t, q, k]) => { const L = (necesitanCont[k] || []).filter(w => w !== n.id); return esc(t) + (q ? ' <span class="mut">' + esc(q) + '</span>' : '') + ' <span class="mut">→</span> ' + (L.length ? L.map(enlace).join(' ') : '<span class="mut">nadie lo mira</span>'); })];
   const marcas = (n.grande ? ' ★' : '') + (PUNTO_DE.has(n.id) ? ' ↺' : '');
   return \`<div class="esc" id="e-\${esc(n.id)}" style="border-left-color:var(--\${TIPCOL[n.tipo]})" data-txt="\${esc((n.k + ' ' + (n.desc || '') + ' ' + [...nec.map(x => x[0]), ...no.map(x => x[0]), ...deja.map(x => x[0]), ...cont.map(c => c.t), ...cam.map(c => c[0])].join(' ')).toLowerCase())}" data-tipo="\${n.tipo}">
     <div class="cab"><b>\${esc(nombre(n))}\${marcas}</b><span class="tipo">\${esc(TIPOS[n.tipo][0])}\${n.c != null ? ' · paso ' + n.c : ''}</span></div>
     \${n.desc ? '<div class="de">' + esc(n.desc) + '</div>' : ''}
-    <div class="r"><span class="et">necesita</span> \${req.length ? req.join(' · ') : '<span class="mut">nada</span>'}</div>
+    <div class="r"><span class="et">necesita</span> \${req.length ? req.join('<br><span class="et"></span> ') : '<span class="mut">nada</span>'}</div>
     <div class="r"><span class="et">actualiza</span> \${act.length ? act.join('<br><span class="et"></span> ') : '<span class="mut">nada</span>'}</div></div>\`;
 }
 function listaArmar(){
   const L = D.nodos.filter(n => n.tipo !== 'sistema').sort((a, b) => (a.c ?? 99) - (b.c ?? 99) || a.k.localeCompare(b.k));
-  let h = '<div class="filtros">' + Object.entries(TIPOS).filter(([t]) => t !== 'sistema').map(([t, [nom]]) => \`<label><input type="checkbox" data-ft="\${t}" checked> \${esc(nom)}</label>\`).join('') + '<label><input type="checkbox" id="fsueltas"> también las sueltas (sin hechos de otras)</label></div>';
+  let h = '<div class="filtros">' + Object.entries(TIPOS).filter(([t]) => t !== 'sistema').map(([t, [nom]]) => \`<label><input type="checkbox" data-ft="\${t}" checked> \${esc(nom)}</label>\`).join('') + '</div>';
   let paso = null;
-  for (const n of L) { const p = n.c ?? 'sueltas'; if (p !== paso) { paso = p; h += \`<div class="grupo" data-grupo="\${p}">\${p === 'sueltas' ? 'Sueltas: pasan por la hora, el lugar o un contador' : p === 0 ? 'Paso 0: no necesitan hechos de otras' : 'Paso ' + p}</div>\`; } h += tarjeta(n); }
+  for (const n of L) { const p = n.c ?? 'sueltas'; if (p !== paso) { paso = p; h += \`<div class="grupo" data-grupo="\${p}">\${p === 'sueltas' ? 'Sin hechos de otras escenas: solo contadores y situación' : p === 0 ? 'Paso 0: no necesitan hechos de otras escenas' : 'Paso ' + p}</div>\`; } h += tarjeta(n); }
   $('lista').innerHTML = h; listaFiltrar();
 }
 function listaFiltrar(){
   const q = ($('buscar').value || '').trim().toLowerCase(), tipos = new Set([...document.querySelectorAll('[data-ft]')].filter(x => x.checked).map(x => x.dataset.ft)), sueltas = $('fsueltas')?.checked;
-  for (const e of document.querySelectorAll('#lista .esc')) { const n = NOD.get(e.id.slice(2)); e.hidden = !tipos.has(e.dataset.tipo) || (n.suelto && !sueltas && !q) || (q && !e.dataset.txt.includes(q)); }
+  for (const e of document.querySelectorAll('#lista .esc')) { const n = NOD.get(e.id.slice(2)); e.hidden = !tipos.has(e.dataset.tipo) || (q && !e.dataset.txt.includes(q)); }
   for (const g of document.querySelectorAll('#lista .grupo')) { let x = g.nextElementSibling, alguno = false; while (x && x.classList.contains('esc')) { if (!x.hidden) alguno = true; x = x.nextElementSibling; } g.hidden = !alguno; }
 }
 function irA(id, sinHistoria){
