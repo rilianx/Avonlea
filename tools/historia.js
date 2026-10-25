@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // The story, as cards (trazas/historia.html): a page that plays the script alone, without the world, to see whether
-// what happens is coherent. The state: the facts (and the day each happened), the counters (the qualities: Marilla's
+// what happens is coherent. The state: the facts (and the day each happened), the state of the story (estado.txt), the counters (the qualities: Marilla's
 // patience, the affection, Ana's skills), the goals of the notebook done, the day and the hour. At each step, the
 // scenes whose conditions on the state hold; the situation (where, who is there, the cart…) is not simulated: it is
 // shown as what the player would have to bring about, and taken as possible. Choose a scene, read its cards, choose its
@@ -62,7 +62,10 @@ const LLEG = {}; { let q = null;
     if ((m = s.match(/^llega si:\s*(.*)$/))) q.llega.push(m[1].split(',').map(x => x.trim()).filter(Boolean));
     if ((m = s.match(/^se va si:\s*(.*)$/))) q.seva.push(m[1].split(',').map(x => x.trim()).filter(Boolean));
     if (/^de visita:/.test(s)) q.visita = true; } }
-const datos = { escenas: E, habilidades: HAB, metas: METAS, llegadas: LLEG };
+// the state of the story (src/datos/estado.txt): read as the game reads it (estadoLeer, in src/js/20-estado.js)
+const estadoLeer = new Function(fs.readFileSync(path.join(root, 'src/js/20-estado.js'), 'utf8').match(/^function estadoLeer[\s\S]*?^}$/m)[0] + '\nreturn estadoLeer;')();
+const ESTADO = estadoLeer(leer('src/datos/estado.txt'));
+const datos = { escenas: E, habilidades: HAB, metas: METAS, llegadas: LLEG, estado: ESTADO };
 const pag = fs.readFileSync(path.join(__dirname, 'historia', 'pagina.html'), 'utf8');
 fs.writeFileSync(path.join(root, 'trazas/historia.html'), pag.replace('/*@DATOS*/null', () => JSON.stringify(datos).replace(/</g, '\\u003c')));
-console.log(`→ trazas/historia.html · ${E.length} escenas · ${HAB.length} contadores · ${METAS.length} metas`);
+console.log(`→ trazas/historia.html · ${E.length} escenas · ${HAB.length} contadores · ${Object.keys(ESTADO).length} estados · ${METAS.length} metas`);

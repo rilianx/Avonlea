@@ -137,6 +137,45 @@
       return t === undefined ? h : And([h, d.le(t)]);
     }
 
+    // the state (src/datos/estado.txt): each value, as the facts it leaves say it (Ana decided on: the fact a_prueba,
+    // and not a later one; Mrs. Barry forbids: the fact prohibida, while it is not forgotten); a value with no fact of
+    // its own (the first one), when none of the others is
+    const ESTADO = {};
+    if (typeof textos['src/datos/estado.txt'] === 'string') { let v = null;
+      for (const raw of leer('src/datos/estado.txt').split('\n')) { const t = raw.trim(); if (!t || t[0] === '#') continue; let m;
+        if ((m = t.match(/^===\s*(\w+)\s*===$/))) { v = ESTADO[m[1]] = { orden: [], otros: [], hecho: {}, deja: {}, olvida: {} }; continue; } if (!v) continue;
+        if ((m = t.match(/^valores:\s*(.*)$/))) { if (m[1].includes('<')) v.orden = m[1].split('<').map(x => x.trim()); else v.otros.push(...m[1].split(',').map(x => x.trim())); }
+        if ((m = t.match(/^otros:\s*(.*)$/))) v.otros.push(...m[1].split(',').map(x => x.trim()));
+        if ((m = t.match(/^(\w+):\s*(hecho|viene de)\s+(\w+)$/))) { (v.hecho[m[1]] ||= []).push(m[3]); if (m[2] === 'hecho') (v.deja[m[1]] ||= []).push(m[3]); }
+        if ((m = t.match(/^(\w+):\s*olvida\s+(\w+)$/))) (v.olvida[m[1]] ||= []).push(m[2]); }
+      for (const x of Object.values(ESTADO)) x.valores = [...x.orden, ...x.otros]; }
+    function estadoEs(k, x, t){   // (the state k has the value x, by time t)
+      const V = ESTADO[k], f = V.hecho[x] || [], hay = y => Or((V.hecho[y] || []).map(h => hecho(h, t)));
+      const otros = V.valores.filter(   // (a value on the scale is not any higher one; off the scale, none of the others)
+        y => y !== x && (V.hecho[y] || []).length && (V.orden.includes(x) ? V.orden.includes(y) && V.orden.indexOf(y) > V.orden.indexOf(x) : true));
+      if (!f.length && !V.valores.some(y => (V.hecho[y] || []).length)) return B_('s_' + k + '_' + x);   // (a state no fact tells: free)
+      return And([...(f.length ? [Or(f.map(h => hecho(h, t)))] : []), ...otros.map(y => Not(hay(y)))]);
+    }
+    // (what a scene supposes, for the facts it leaves: only what must have happened before, as with the facts —its
+    // values that leave a fact—; not what must not have, which the scene itself may change)
+    // (a condition on the state → its variable and the values that satisfy it; null if it is not one)
+    function estadoValores(c){
+      const m = c.match(/^(\w+)\s*(>=|<=|!=|=|>|<)\s*(\w+)$/); if (!m || !ESTADO[m[1]]) return null;
+      const V = ESTADO[m[1]], i = b => V.orden.indexOf(b);
+      return [m[1], V.valores.filter(a => m[2] === '=' ? a === m[3] : m[2] === '!=' ? a !== m[3] : (i(a) >= 0 && i(m[3]) >= 0 && { '>=': i(a) >= i(m[3]), '<=': i(a) <= i(m[3]), '>': i(a) > i(m[3]), '<': i(a) < i(m[3]) }[m[2]]))];
+    }
+    function estadoSupone(c, t){
+      const e = estadoValores(c); if (!e) return null; const V = ESTADO[e[0]], S = e[1];
+      if (S.some(x => !(V.hecho[x] || []).length)) return T();
+      return Or(S.map(x => Or(V.hecho[x].map(h => hecho(h, t)))));
+    }
+    function estadoAtomo(c, t){
+      const e = estadoValores(c); if (!e) return null;
+      return e[1].length ? Or(e[1].map(x => estadoEs(e[0], x, t))) : F();
+    }
+    // (the scene that puts the state there: «hemos decidido quedarnos contigo» is said where Ana comes to stay)
+    const estadoLoDeja = (c, deja) => { const e = estadoValores(c); return !!e && e[1].some(x => (ESTADO[e[0]].deja[x] || []).some(h => deja.has(h))); };
+
     // the arrivals (src/datos/llegadas.txt): who is in Avonlea, and since when
     const LLEG = new Map();
     for (const p of partir(leer('src/datos/llegadas.txt'))) {
@@ -154,6 +193,8 @@
     const DECIDE = new Map(), SIEMPRE = new Map();   // (a fact only an option of Ana's leaves → that scene and option; scene → what it leaves whatever she chooses)
     const addTo = (m, k, v) => { if (!m.has(k)) m.set(k, new Set()); m.get(k).add(v); };
     const esHecho = (k, v) => (k === 'al_terminar' || k === 'al_empezar') && ws(v)[0] === 'hecho' && ws(v).length > 1;
+    // (a change of the state leaves the facts of its value: «estado ana_en_tv se_queda» leaves se_queda)
+    const estadoDeja = t => { const w = ws(t.replace(/=/g, ' ')); return w[0] === 'estado' && ESTADO[w[1]] ? (ESTADO[w[1]].deja[w[w.length - 1]] || []) : []; };
     for (const archivo of ['src/datos/guion.txt', 'src/datos/conversaciones.txt']) {
       for (const p of partir(leer(archivo))) {
         if (p[0] !== 'bloque') continue;
@@ -162,9 +203,10 @@
         const hablan = new Set();
         for (const l of p[3]) { const m = rx('^\\s*(\\w+):').exec(l); if (m && !['ana', 'narra', 'carta'].includes(m[1])) hablan.add(m[1]); }
         for (const h of hablan) if (LLEG.has(h)) si.push('presente:' + h);   // (who speaks in it was here)
-        const deja = f.filter(([k, v]) => esHecho(k, v)).map(([, v]) => ws(v)[1]);
+        const deja = [...f.filter(([k, v]) => esHecho(k, v)).map(([, v]) => ws(v)[1]), ...f.filter(([k]) => k === 'al_terminar' || k === 'al_empezar').flatMap(([, v]) => estadoDeja(v))];
         for (const l of p[3]) { const m = rx('^\\s*!\\s*hecho\\s+(\\w+)').exec(l); if (m) deja.push(m[1]); }
-        const siempre = f.filter(([k, v]) => esHecho(k, v)).map(([, v]) => ws(v)[1]);   // (what it leaves whatever she chooses)
+        for (const l of p[3]) { const m = /^\s*!\s*(estado\s.*)$/u.exec(l); if (m) deja.push(...estadoDeja(m[1])); }
+        const siempre = [...f.filter(([k, v]) => esHecho(k, v)).map(([, v]) => ws(v)[1]), ...f.filter(([k]) => k === 'al_terminar' || k === 'al_empezar').flatMap(([, v]) => estadoDeja(v))];   // (what it leaves whatever she chooses)
         SIEMPRE.set(p[1], new Set(siempre));
         let op = null;   // (the option a line is under: its lines are indented)
         for (const l of p[3]) {
@@ -182,16 +224,18 @@
       }
     }
     const EXCLUYE = [], excluyeVisto = new Set();
+    const estadoOlvida = t => { const w = ws(t.replace(/=/g, ' ')); return w[0] === 'estado' && ESTADO[w[1]] ? (ESTADO[w[1]].olvida[w[w.length - 1]] || []) : []; };   // («estado lynde_ana bien» forgets ofendio_lynde)
     for (const archivo of ['src/datos/guion.txt', 'src/datos/conversaciones.txt']) {
       for (const p of partir(leer(archivo))) {
         if (p[0] !== 'bloque') continue;
-        const f = campos(p[2], guionClasificar);
-        const olv = f.filter(([k, v]) => (k === 'al_terminar' || k === 'al_empezar') && ws(v)[0] === 'olvidar' && ws(v).length > 1).map(([, v]) => ws(v)[1]);
+        const f = campos(p[2], guionClasificar), fin = f.filter(([k]) => k === 'al_terminar' || k === 'al_empezar');
+        const olv = [...fin.filter(([, v]) => ws(v)[0] === 'olvidar' && ws(v).length > 1).map(([, v]) => ws(v)[1]), ...fin.flatMap(([, v]) => estadoOlvida(v))];
         const dej = f.filter(([k, v]) => esHecho(k, v)).map(([, v]) => ws(v)[1]);
         for (const x of olv) for (const y of dej) if (!excluyeVisto.has(x + '\n' + y)) { excluyeVisto.add(x + '\n' + y); EXCLUYE.push([x, y]); }
       }
     }
     OLVIDABLES = new Set([...(leer('src/datos/guion.txt') + leer('src/datos/conversaciones.txt')).matchAll(rx('olvidar\\s+(\\w+)', 'g'))].map(m => m[1]));   // (facts that can be forgotten: one cannot say they stay)
+    for (const V of Object.values(ESTADO)) for (const L of Object.values(V.olvida)) for (const h of L) OLVIDABLES.add(h);   // (and what a value of the state forgets)
     const DEL_CODIGO = new Set(Object.entries(G.hechos).filter(([, w]) => w.some(x => x === 'código' || x.startsWith('habilidad') || x === 'llegadas')).map(([h]) => h));
     const METAS = new Set(G.metas);
 
@@ -206,6 +250,7 @@
         const v = I_('q_' + [m[1], m[2], m[3]].filter(Boolean).join('_')), n = parseInt(m[5], 10);
         return { '>=': () => v.ge(n), '<=': () => v.le(n), '>': () => v.gt(n), '<': () => v.lt(n) }[m[4]]();
       }
+      { const e = estadoAtomo(c, t); if (e) return e; }   // (the state: «diana>=conocida»)
       const i = c.indexOf(':'), key = i < 0 ? c : c.slice(0, i), a = (i < 0 ? '' : c.slice(i + 1)).split(':');
       if (key === 'hecho') return hecho(a[0], now);
       if (key === 'horas_desde') return atomo('hecho:' + a[0], k, t);   // (the hours do not matter to the model: that it happened)
@@ -308,7 +353,7 @@
         }
         if (DEL_CODIGO.has(x) || !QUIEN_DEJA.has(x)) continue;
         R.push(Z.Implies(B_('h_' + x), Or(QUIEN_DEJA.get(x).map(([, si, junto]) => {
-          const cs = [...si.filter(c => RE_SUPONE.test(c)).map(c => atomo(c, undefined, I_('d_' + x))),
+          const cs = [...si.filter(c => RE_SUPONE.test(c)).map(c => atomo(c, undefined, I_('d_' + x))), ...si.map(c => estadoSupone(c, I_('d_' + x))).filter(Boolean),
             ...junto.filter(y => !OLVIDABLES.has(y)).map(y => And([B_('h_' + y), I_('d_' + y).eq(I_('d_' + x))]))];   // (and the facts the same scene leaves, the same day)
           return And(cs.length ? cs : [T()]);
         }))));
@@ -591,10 +636,11 @@
       for (const [k, us] of UNIDADES) {
         if ((r.salvo || []).includes(k)) continue;
         for (const u of us) {
+          if ((r.salvo || []).includes(u.id)) continue;   // (salvo: a person, or a scene where the words mean something else)
           const textos_ = u.tipo.startsWith('frase') ? [u.texto] : (u.textos || []).filter(t => t.split(':')[0] === k);
           const hit = textos_.find(t => pat.test(t));
           if (hit === undefined) continue;
-          if (r.exige.some(g => g.some(c => (c.startsWith('hecho:') && (u.deja || new Set()).has(c.slice(6))) || (CUENTA.get(u.id) || new Set()).has(c.split('{k}').join(k))))) continue;   // (the scene that makes it happen, or tells it)
+          if (r.exige.some(g => g.some(c => (c.startsWith('hecho:') && (u.deja || new Set()).has(c.slice(6))) || estadoLoDeja(c, u.deja || new Set()) || (CUENTA.get(u.id) || new Set()).has(c.split('{k}').join(k))))) continue;   // (the scene that makes it happen, or tells it)
           const S = nuevo(); S.add(vale(u, k)); S.add(Not(Or(r.exige.map(g => todos(g, k)))));
           if (await S.check() === 'sat')
             hallazgos.incoherencias.push({ regla: r.nombre, quien: k, nombre: nombre(k), tipo: u.tipo, id: u.id, texto: hit, exige: r.exige.map(g => g.join(', ')).join(' o ').split('{k}').join(k), 'situación': situacion(S.model(), k) });

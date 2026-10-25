@@ -14,13 +14,13 @@
 #   si: <condiciones del guion>
 #
 # «=== solo: nombre ===»  mientras pasa algo, esa persona solo dice lo que lo tiene en cuenta
-#   quiénes: …   cuando: <condiciones>   pide: <lo que tiene que nombrar su condición> (ofendio_lynde; o reaccionar a cómo anda Ana:
+#   quiénes: …   cuando: <condiciones>   pide: <lo que tiene que nombrar su condición> (ofendio_lynde, o el estado lynde_ana; o reaccionar a cómo anda Ana:
 #   ana:camison, ana:sin_sombrero, hora:21: aunque esté ofendida, si la ve así, reacciona)
 #
 # «=== referencia: nombre ===»  una frase que dice esto exige que se cumpla aquello
 #   palabras: <expresiones, separadas por |>  (tal como se escriben, con mayúsculas)
 #   exige: <condiciones del guion>          ({k}: quien la dice; donde:{k}:propia: en su propia casa); varias líneas: una u otra
-#   salvo: <quienes>                        (no vale para ellos)
+#   salvo: <quienes o escenas>              (no vale para ellos, ni en esas escenas)
 
 # ---------------------------------------------------------------- lo que debería haber
 === espera: algo que decirle ===
@@ -54,29 +54,29 @@ si: hora:21-26, donde:ana:publico
 
 # (el orden del libro, cuando los hechos los deja el código y no una escena)
 === nunca: Ana y Diana se conocen sin que la Sra. Barry las presente ===
-si: hecho:conocidas_diana, !hecho:barry_presenta
+si: diana>=conocida, !hecho:barry_presenta
 
 === nunca: el día 5 sin que la acepten (Marilla decide el día 3: se queda, o se va con la Sra. Blewett y el juego termina) ===
-si: dia_juego:5, !hecho:se_queda
+si: dia_juego:5, ana_en_tv<se_queda
 
 === nunca: la prohibición (lo del vino de grosellas), sin conocer a Diana ===
-si: hecho:prohibida, !hecho:conocidas_diana
+si: barry_permite=no, diana=desconocida
 
 # ---------------------------------------------------------------- mientras pasa algo
 === solo: la Sra. Lynde ofendida no le habla como si nada ===
 quiénes: lynde
-cuando: hecho:ofendio_lynde, !hecho:disculpa_lynde
-pide: ofendio_lynde, disculpa_lynde, ana:camison, ana:sin_sombrero, hora:21
+cuando: lynde_ana=ofendida, !hecho:disculpa_lynde
+pide: ofendio_lynde, lynde_ana, disculpa_lynde, ana:camison, ana:sin_sombrero, hora:21
 
 === solo: la Sra. Barry, mientras le prohíbe ver a Diana, no la trata como antes ===
 quiénes: barry
-cuando: hecho:prohibida, !hecho:perdonada
-pide: prohibida, perdonada, ana:camison, ana:sin_sombrero, hora:21
+cuando: barry_permite=no, !hecho:perdonada
+pide: prohibida, barry_permite, perdonada, ana:camison, ana:sin_sombrero, hora:21
 
 === solo: Diana, mientras se lo prohíben, no la invita ni juega como si nada ===
 quiénes: diana
-cuando: hecho:prohibida, !hecho:perdonada
-pide: prohibida, perdonada, ana:camison, ana:sin_sombrero, hora:21
+cuando: barry_permite=no, !hecho:perdonada
+pide: prohibida, barry_permite, perdonada, ana:camison, ana:sin_sombrero, hora:21
 
 # ---------------------------------------------------------------- lo que una frase supone
 === referencia: «pasa» invita a entrar ===
@@ -149,7 +149,9 @@ salvo: marilla
 === referencia: lo que supone que Ana se queda, cuando ya se queda ===
 # (antes de que Marilla decida, nadie habla de su futuro en Avonlea: la escuela, la amiga, «el año que viene»)
 palabras: la escuela | Escuela | escuela dominical | el año que viene | cuando seas grande | cuando crezcas | vivir aquí | vives aquí | tu pieza
-exige: hecho:se_queda
+exige: ana_en_tv=se_queda
+salvo: ws_t3
+# (ws_t3: Marilla le pregunta si fue a la escuela, antes: la del orfanato)
 
 # (lo que una frase recuerda tiene que haber pasado: la partida jugada a mano, trazas/jugadora/claude.md)
 === referencia: el juramento, cuando ya se juraron ===
@@ -179,12 +181,12 @@ exige: !cuaderno:lynde
 # ---------------------------------------------------------------- los días a prueba (del 1 al 3: cap. 2 a 8 del libro)
 === espera: Marilla y Matthew, mientras está a prueba, tienen algo que lo tenga en cuenta ===
 quiénes: marilla, matthew
-cuando: ve:{k}, hecho:desayuno_prueba, !hecho:se_queda, hora:7-20
-hay: reacción !hecho:se_queda
+cuando: ve:{k}, hecho:desayuno_prueba, ana_en_tv<se_queda, hora:7-20
+hay: reacción ana_en_tv<se_queda
 
 === referencia: «ojalá te quedes», «devolverte»: solo mientras no se sabe ===
 palabras: ojalá te quedes | te quedes o no | devolverte | te devuelvan | te devolvemos | a prueba | si te quedas
-exige: !hecho:se_queda
+exige: ana_en_tv<se_queda
 
 === referencia: preguntarle cómo llamaría algo, mientras todavía no le puso nombre ===
 palabras: cómo le dirías al estanque | cómo le dirías a la laguna
@@ -192,7 +194,7 @@ exige: !hecho:nombro_lago
 
 === referencia: que se quedan con ella, cuando ya lo decidieron y se lo dijeron ===
 palabras: quedarnos contigo | se quedaron conmigo | hacerse cargo de ti | Me la quedo
-exige: hecho:se_queda
+exige: ana_en_tv=se_queda
 salvo: matthew
 
 # ---------------------------------------------------------------- las lagunas de una partida (para la IA de la noche)

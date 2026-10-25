@@ -7,7 +7,7 @@
 # «quien: texto» (como en src/datos/guion.txt). Lo que se cuenta de alguien, entre paréntesis al comienzo: «(se ríe bajito)».
 # Campos:
 #   quienes: quiénes hablan (las personas: ana, diana, marilla…; o papeles: a, b, otro, que el código llena)
-#   si: condiciones (las del guion: «hecho:se_queda», «!hecho:a_prueba», «estacion:verano», «afecto:matthew:ana>=5»…)
+#   si: condiciones (las del guion: «ana_en_tv=se_queda», «ana_en_tv<decidida», «estacion:verano», «afecto:matthew:ana>=5»…)
 #   donde: dónde tiene sentido («casa»: la cocina o el patio de Tejas Verdes; «gg»: la cocina; «dentro», «arroyo»…)
 #
 # Las clases de charla, por cómo empieza su id:
@@ -70,7 +70,7 @@ diana: Si tú lo dices…
 
 === par:ana+marilla:0 ===
 quienes: ana, marilla
-si: hecho:a_prueba, !hecho:se_queda
+si: ana_en_tv>=decidida, ana_en_tv<se_queda
 ---
 marilla: Esa cama se tiende apenas te levantas. Aquí no somos desordenados.
 ana: Sí, Marilla. ¿Y si la tiendo imaginando que es la cama de una princesa?
@@ -78,7 +78,7 @@ marilla: Tiéndela como la de una niña ordenada. Con eso basta.
 
 === par:ana+marilla:1 ===
 quienes: ana, marilla
-si: hecho:a_prueba, !hecho:se_queda
+si: ana_en_tv>=decidida, ana_en_tv<se_queda
 ---
 ana: Marilla, ¿cree que podré quedarme?
 marilla: Eso depende de ti, no de mí. Haz tus quehaceres y di tus oraciones.
@@ -125,7 +125,7 @@ marilla: Tu pelo no tiene la culpa de nada. Quítate eso antes de ir a la iglesi
 
 === par:ana+matthew:0 ===
 quienes: ana, matthew
-si: hecho:a_prueba, !hecho:se_queda
+si: ana_en_tv>=decidida, ana_en_tv<se_queda
 ---
 matthew: Bueno, pues… ¿dormiste bien, Ana?
 ana: Soñé que me quedaba, señor Matthew. ¿Los sueños se cumplen?
@@ -141,7 +141,7 @@ ana: ¡Sabía que usted lo entendería!
 
 === par:ana+matthew:2 ===
 quienes: ana, matthew
-si: hecho:se_queda, afecto:matthew:ana>=5
+si: ana_en_tv=se_queda, afecto:matthew:ana>=5
 ---
 matthew: Ana… ¿te gustaría un vestido con mangas abullonadas? Digo… por si acaso.
 ana: ¡Oh, señor Matthew! ¿De verdad lo dice?
@@ -172,7 +172,7 @@ ana: ¡Ay! Entonces tendré que esforzarme más.
 
 === par:lynde+marilla:0 ===
 quienes: lynde, marilla
-si: hecho:se_queda, hecho:lynde_visita
+si: ana_en_tv=se_queda, hecho:lynde_visita
 ---
 lynde: Marilla, esa niña tuya va a terminar de maestra o de actriz, una de dos.
 marilla: Mientras termine sus quehaceres primero, Rachel, que termine de lo que quiera.
@@ -203,7 +203,7 @@ lynde: Ya veremos, Marilla. Ya veremos.
 
 === par:marilla+matthew:0 ===
 quienes: marilla, matthew
-si: hecho:a_prueba, !hecho:se_queda
+si: ana_en_tv>=decidida, ana_en_tv<se_queda
 ---
 marilla: Hoy no rompió nada, Matthew. Y lavó los platos sin que se lo pidiera.
 matthew: Bueno, pues… ¿ves? Ya te lo decía yo.
@@ -211,7 +211,7 @@ marilla: No he dicho nada todavía. Es una prueba.
 
 === par:marilla+matthew:1 ===
 quienes: marilla, matthew
-si: hecho:se_queda
+si: ana_en_tv=se_queda
 ---
 marilla: Matthew, ¿le estuviste dando caramelos a Ana otra vez?
 matthew: Bueno, pues… quizás uno. O dos.
@@ -219,7 +219,7 @@ marilla: Esa niña te tiene en la palma de la mano.
 
 === par:marilla+matthew:2 ===
 quienes: marilla, matthew
-si: hecho:se_queda, dia_juego:28
+si: ana_en_tv=se_queda, dia_juego:28
 ---
 matthew: Marilla… la niña está creciendo, ¿no te parece?
 marilla: Demasiado rápido, Matthew. Demasiado rápido.
@@ -260,14 +260,14 @@ gilbert: Ya sé que puedes. Solo preguntaba.
 
 === par:ana+lynde:0 ===
 quienes: ana, lynde
-si: hecho:lynde_visita, !hecho:ofendio_lynde, dia_juego:28
+si: hecho:lynde_visita, lynde_ana=bien, dia_juego:28
 ---
 lynde: Vaya, Ana, se te está oscureciendo el pelo. Ya no es tan colorado.
 ana: ¿De verdad, Sra. Lynde? ¡Es lo más lindo que me ha dicho nunca!
 
 === par:ana+lynde:1 ===
 quienes: ana, lynde
-si: hecho:lynde_visita, !hecho:ofendio_lynde
+si: hecho:lynde_visita, lynde_ana=bien
 ---
 lynde: Espero que te portes bien en la escuela, niña.
 ana: Lo intento con todas mis fuerzas, Sra. Lynde. A veces mis fuerzas se distraen.
@@ -285,7 +285,7 @@ marilla: Ana…
 
 === par:ana+diana+marilla:1 ===
 quienes: ana, diana, marilla
-si: hecho:conocidas_diana, !hecho:prohibida
+si: diana>=conocida, barry_permite=si
 ---
 diana: Srta. Cuthbert, ¿Ana puede venir a tomar el té mañana?
 marilla: Si termina sus quehaceres, sí.
@@ -295,7 +295,7 @@ ana: ¡Los terminaré hoy mismo! Bueno, mañana temprano.
 
 === par:ana+marilla+matthew:0 ===
 quienes: ana, marilla, matthew
-si: hecho:se_queda
+si: ana_en_tv=se_queda
 ---
 ana: ¡Adivinen qué me pasó hoy!
 marilla: Algo que vamos a lamentar, seguramente.
@@ -314,7 +314,7 @@ matthew: (se ríe bajito) Je.
 
 === par:ana+lynde+marilla:0 ===
 quienes: ana, lynde, marilla
-si: hecho:lynde_visita, !hecho:ofendio_lynde
+si: hecho:lynde_visita, lynde_ana=bien
 ---
 lynde: Marilla, esa niña habla más que un loro.
 ana: Los loros solo repiten, Sra. Lynde. Yo invento.

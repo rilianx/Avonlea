@@ -6,14 +6,14 @@
 #   meta: cuándo está cumplida: una meta del planificador y sus argumentos, separados por espacios
 #         (p. ej. «amigas ana diana», «nombres ana 3»; una lista va con comas: «quehaceres ana platos,barrer»)
 #   requiere: lo que tiene que pasar antes (separado por comas): otras metas del cuaderno (por su id), o
-#         condiciones del guion («hecho:conocidas_diana», «dias_desde:quiere_amiga:1», «afecto:diana:ana>=4», «estudio:ana>=10»)
+#         condiciones del guion («diana>=conocida», «dias_desde:quiere_amiga:1», «afecto:diana:ana>=4», «estudio:ana>=10»)
 #   antes: cómo se dice lo que falta, mientras está cerrada (si no, los títulos de las metas que requiere)
 #   oculta: no aparece en el cuaderno hasta que se abre (algo que no se puede saber antes, como una prohibición)
 #   a prueba: se puede hacer antes de que Marilla decida que Ana se queda (los días 1 a 3, como en los cap. 2 a 8 del libro:
 #         rezar, ayudar, ponerle nombre a las cosas); las demás piden «quedarse» (lo revisa tools/grafo.js)
 #   guiño quien: lo que esa persona dice al pasar mientras la meta está abierta y sin cumplir (un guiño para el
 #         jugador, en el diálogo mismo, sin abrir el cuaderno); «guiño cerrada quien:» mientras está cerrada (lo que falta).
-#         Con «[condiciones]» al principio, como en frases.txt: «guiño diana: [!hecho:prohibida] …»
+#         Con «[condiciones]» al principio, como en frases.txt: «guiño diana: [barry_permite=si] …»
 #   acciones: lo que no se puede hacer mientras está cerrada (separado por comas): una acción («jurar»), una
 #         acción con alguien («perdonar:gilbert»), o un pedido («pedir/venir»: invitar a tomar el té)
 #   Las metas que se pueden usar (las del planificador): amigas, picnic, visitar, paces, quehaceres, regalo_gusto,
@@ -30,7 +30,7 @@
 titulo: Quedarse en Tejas Verdes
 pista: Marilla esperaba un niño. Mañana la lleva a White Sands, donde la Sra. Spencer, a devolverla. Ayúdala, pórtate bien: todavía puede cambiar de opinión.
 pista si paciencia:marilla:ana<=1: Marilla está pensando en dejarte en White Sands. Pídele perdón, ayúdala en la casa, y no le des motivos.
-pista si hecho:a_prueba: Marilla te trajo de vuelta de White Sands… pero no te ha dicho nada. Quizás mañana.
+pista si ana_en_tv>=decidida: Marilla te trajo de vuelta de White Sands… pero no te ha dicho nada. Quizás mañana.
 meta: hecho se_queda
 guiño matthew: Bueno, pues… Marilla es dura, pero tiene buen corazón. Pórtate bien, ayúdala, y verás.
 
@@ -43,7 +43,7 @@ pista si hecho:quiere_amiga: Marilla dijo que un día de estos iría a La Cuesta
 pista si hecho:quiere_amiga, !presente:diana: Diana está en Carmody, donde su tía, y vuelve a las dos semanas y media de que llegaste a Tejas Verdes. Cuando vuelva, Marilla te lleva a conocerla (en la tarde: no te alejes).
 guiño marilla: [hecho:quiere_amiga, !presente:diana] Diana sigue en Carmody, donde su tía. Vuelve dentro de unos días; cuando llegue, te llevo a conocerla. Paciencia, Ana.
 meta: hecho conocidas_diana
-requiere: hecho:se_queda
+requiere: ana_en_tv=se_queda
 antes: quedarse en Tejas Verdes (después, quizás Marilla sepa de alguna niña de tu edad)
 guiño marilla: [!hecho:pide_amiga] Los Barry tienen una niña de tu edad, Diana. Si me lo pidieras, quizás un día te llevaría a conocerla.
 
@@ -54,26 +54,26 @@ pista si afecto:diana:ana<4: Ya conoces a Diana, pero para jurar tienen que quer
 meta: amigas ana diana
 requiere: conocer_diana
 acciones: jurar
-guiño diana: [!hecho:prohibida] Mamá dice que las amigas de verdad se juran amistad para siempre… ¿tú crees en esas cosas, Ana?
+guiño diana: [barry_permite=si] Mamá dice que las amigas de verdad se juran amistad para siempre… ¿tú crees en esas cosas, Ana?
 
 === picnic ===
 titulo: Ir de picnic con Diana
 pista: Al lago, con una canasta. Primero hay que pedirle permiso a Marilla.
 pista si !hecho:broche: Marilla tiene que dejarte ir… y Marilla anda buscando algo que perdió.
 meta: picnic ana diana
-requiere: amigas, hecho:broche, !hecho:prohibida
+requiere: amigas, hecho:broche, barry_permite=si
 antes: ser amiga de Diana (y que Marilla te deje ir al picnic)
 acciones: merendar, pedir_permiso
-guiño diana: [!hecho:prohibida] ¿Supiste? ¡La escuela dominical va a hacer un picnic en el Lago de las Aguas Brillantes! Con helado, dicen.
+guiño diana: [barry_permite=si] ¿Supiste? ¡La escuela dominical va a hacer un picnic en el Lago de las Aguas Brillantes! Con helado, dicen.
 guiño cerrada marilla: ¿Alguien ha visto mi broche de amatista? Juraría que lo dejé en el alfiletero…
 
 === te_diana ===
 titulo: Invitar a Diana a tomar el té
 pista: En Tejas Verdes, con el cordial de frambuesa de Marilla. Invítala cuando la veas.
 meta: tomando_te ana diana
-requiere: amigas, dias_desde:conocidas_diana:5, afecto:diana:ana>=5, !hecho:prohibida
+requiere: amigas, dias_desde:conocidas_diana:5, afecto:diana:ana>=5, barry_permite=si
 antes: que Diana te quiera mucho, mucho (pasen tiempo juntas, escríbele, regálale algo) y que se conozcan desde hace unos días
-guiño diana: [!hecho:prohibida] Mamá nunca me deja ir a tomar el té a ninguna parte… ¡me encantaría que alguien me invitara de verdad!
+guiño diana: [barry_permite=si] Mamá nunca me deja ir a tomar el té a ninguna parte… ¡me encantaría que alguien me invitara de verdad!
 guiño cerrada marilla: Diana Barry es una niña buena. Si te sigues portando así con ella, algún día podrías invitarla a tomar el té.
 
 === perdon_barry ===
@@ -88,9 +88,9 @@ oculta
 titulo: Hacerse amiga de la tía Josephine
 pista: La tía de la Sra. Barry viene de Charlottetown. Un concierto, una noche en casa de Diana… y una cama de huéspedes.
 meta: hecho cama_josephine
-requiere: amigas, dias_desde:conocidas_diana:15, afecto:diana:ana>=5, letras:ana>=10, !hecho:prohibida
+requiere: amigas, dias_desde:conocidas_diana:15, afecto:diana:ana>=5, letras:ana>=10, barry_permite=si
 antes: ser muy amiga de Diana desde hace tiempo, y tener imaginación de sobra (escribe cuentos y cartas, ponle nombre a los lugares): a la tía Josephine le encanta
-guiño diana: [!hecho:prohibida] Mi tía Josephine viene de Charlottetown para el concierto del Club de Debate. Es un poco… temible.
+guiño diana: [barry_permite=si] Mi tía Josephine viene de Charlottetown para el concierto del Club de Debate. Es un poco… temible.
 guiño cerrada diana: Mi tía Josephine dice que las niñas de hoy no tienen imaginación. ¡Si te conociera a ti!
 
 === lynde ===
@@ -156,7 +156,7 @@ titulo: Ir a la escuela
 requiere: quedarse
 pista: La escuela está junto al río, más allá de la aldea. Allí van Diana, Gilbert Blythe y los demás.
 meta: estar_en ana escuela
-guiño diana: [!hecho:prohibida] ¿Vienes conmigo a la escuela? Está junto al río. Te presento a todos.
+guiño diana: [barry_permite=si] ¿Vienes conmigo a la escuela? Está junto al río. Te presento a todos.
 
 === recito ===
 titulo: Recitar la lección en la escuela
@@ -164,7 +164,7 @@ pista: Hay que estudiarla antes.
 meta: recito ana
 requiere: escuela
 acciones: recitar
-guiño diana: [!hecho:prohibida] Mañana toca recitar la lección… ¿tú ya te la aprendiste? Yo ni la miré.
+guiño diana: [barry_permite=si] Mañana toca recitar la lección… ¿tú ya te la aprendiste? Yo ni la miré.
 
 === queens ===
 titulo: Entrar a Queen's
@@ -185,7 +185,7 @@ meta: paces ana gilbert
 requiere: quedarse, hecho:zanahorias, dias_desde:zanahorias:28, estudio:ana>=30
 antes: ir a la escuela, donde está Gilbert Blythe (y que pase algo); y después, mucho tiempo y mucha rivalidad en clases (estudiar, competir con él): Ana no perdona fácil
 acciones: disculparse:gilbert, perdonar:gilbert, interceder:gilbert
-guiño diana: [!hecho:prohibida] Gilbert te mira todo el tiempo en clase, Ana… Creo que quiere pedirte perdón.
+guiño diana: [barry_permite=si] Gilbert te mira todo el tiempo en clase, Ana… Creo que quiere pedirte perdón.
 guiño cerrada diana: Gilbert sacó otra vez la mejor nota… Si estudiaras un poco más, le ganarías, Ana.
 
 === leido ===
@@ -193,7 +193,7 @@ titulo: Leer un libro de principio a fin
 requiere: quedarse
 pista: Diana presta libros. Un buen rincón: la silla junto a la ventana de la cocina.
 meta: leido ana
-guiño diana: [!hecho:prohibida] Te presto mi libro, si quieres. Es de una dama muy triste, en un castillo.
+guiño diana: [barry_permite=si] Te presto mi libro, si quieres. Es de una dama muy triste, en un castillo.
 
 === carta ===
 titulo: Escribir una carta y mandarla
@@ -205,9 +205,9 @@ meta: carta ana
 titulo: Escribir un cuento para el club de cuentos
 pista: Una historia trágica, con una dama de cabellos de oro… y leérsela a Diana.
 meta: club ana
-requiere: amigas, !hecho:prohibida
+requiere: amigas, barry_permite=si
 acciones: escribir_cuento, leer_cuento
-guiño diana: [!hecho:prohibida] ¿Y si hacemos un club de cuentos? Tú escribes tan bonito…
+guiño diana: [barry_permite=si] ¿Y si hacemos un club de cuentos? Tú escribes tan bonito…
 
 === concierto ===
 titulo: Recitar en el concierto
@@ -216,7 +216,7 @@ meta: concierto ana
 requiere: escuela
 antes: ir a la escuela (el concierto lo organizan la maestra y sus alumnos)
 acciones: ensayar, actuar
-guiño diana: [!hecho:prohibida] ¡Va a haber un concierto en el salón! ¿Vas a recitar algo, Ana?
+guiño diana: [barry_permite=si] ¡Va a haber un concierto en el salón! ¿Vas a recitar algo, Ana?
 
 === sala ===
 titulo: Decorar el salón para el concierto
@@ -244,24 +244,24 @@ meta: adornado ana
 titulo: Remar en el Lago de las Aguas Brillantes
 pista: El bote de los Barry está en el lago. En verano.
 meta: remo ana
-requiere: amigas, !hecho:prohibida
+requiere: amigas, barry_permite=si
 antes: ser amiga de Diana (el bote es de los Barry)
 acciones: remar
-guiño diana: [!hecho:prohibida] Papá dejó el bote en el lago… ¿Jugamos a la doncella de los lirios?
+guiño diana: [barry_permite=si] Papá dejó el bote en el lago… ¿Jugamos a la doncella de los lirios?
 
 === patinar ===
 titulo: Patinar en el lago helado
 requiere: quedarse
 pista: Solo en invierno.
 meta: patinar ana
-guiño diana: [!hecho:prohibida] Cuando el lago se hiele, ¡vamos a patinar! Es lo más lindo del invierno.
+guiño diana: [barry_permite=si] Cuando el lago se hiele, ¡vamos a patinar! Es lo más lindo del invierno.
 
 === trineo ===
 titulo: Tirarse en trineo colina abajo
 requiere: quedarse
 pista: Solo en invierno, en la colina.
 meta: trineo ana
-guiño diana: [!hecho:prohibida] ¡Si nieva, nos tiramos en trineo por la colina!
+guiño diana: [barry_permite=si] ¡Si nieva, nos tiramos en trineo por la colina!
 
 == Travesuras
 
@@ -283,6 +283,6 @@ acciones: cortar_pelo
 titulo: Aceptar el desafío de Josie Pye
 pista: Caminar por el caballete del techo de los Barry. ¿Qué podría salir mal?
 meta: desafio ana
-requiere: amigas, !hecho:prohibida
+requiere: amigas, barry_permite=si
 antes: ser amiga de Diana (el desafío es en una fiesta en su casa)
 acciones: trepar

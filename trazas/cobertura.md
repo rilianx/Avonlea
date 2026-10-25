@@ -1,6 +1,6 @@
 # Cobertura de la historia: lo que falta
 
-Generado el 2026-10-19 21:29 por `node tools/planilla.js` (también en la hoja «Cobertura» de planilla/avonlea.xlsx).
+Generado el 2026-10-25 15:53 por `node tools/planilla.js` (también en la hoja «Cobertura» de planilla/avonlea.xlsx).
 
 No son errores: son situaciones que el juego deja que pasen y nadie considera, noticias o llegadas sin consecuencias, gente con poco que decir.
 
@@ -13,7 +13,7 @@ No son errores: son situaciones que el juego deja que pasen y nadie considera, n
 | Exploración | 0 | 0 | 12 |
 | Llegadas | 0 | 0 | 3 |
 | Personas | 0 | 0 | 36 |
-| Hechos | 0 | 0 | 4 |
+| Hechos | 0 | 0 | 19 |
 
 ## Situaciones
 
@@ -138,11 +138,26 @@ No son errores: son situaciones que el juego deja que pasen y nadie considera, n
 - [baja] **Thomas Lynde**: tiene 1 frase(s) suelta(s). _Idea: unas frases más en la hoja «Frases»._
 - [baja] **una veraneante del hotel**: tiene 2 frase(s) suelta(s). _Idea: unas frases más en la hoja «Frases»._
 - [baja] **un pescador**: tiene 1 frase(s) suelta(s). _Idea: unas frases más en la hoja «Frases»._
-- [baja] **Sin ninguna escena**: 36 de la gente del pueblo solo tienen frases sueltas: el buhonero, Gertie Pye, Prissy Andrews, Charlie Sloane, Moody Spurgeon, Tillie Boulter, Felicity King, Felix King, Cecily King, Sara Stanley, el reverendo Allan, el Sr. Lawson, el herrero, el editor de La Crónica, la Srta. Hetty King, Olivia King…. _Idea: una escena pequeña para los que importan en el libro._
+- [baja] **Sin ninguna escena**: 32 de la gente del pueblo solo tienen frases sueltas: el buhonero, Gertie Pye, Prissy Andrews, Charlie Sloane, Moody Spurgeon, Tillie Boulter, Felicity King, Felix King, Cecily King, Sara Stanley, el reverendo Allan, el Sr. Lawson, el herrero, el editor de La Crónica, la Srta. Hetty King, Olivia King…. _Idea: una escena pequeña para los que importan en el libro._
 
 ## Hechos
 
+- [baja] **«amigas_del_alma»**: se deja y nadie lo lee: algo pasó y no tiene consecuencias. _Idea: una escena, una frase o una noticia que lo recuerde._
 - [baja] **«ana_admite_gilbert»**: se deja y nadie lo lee: algo pasó y no tiene consecuencias. _Idea: una escena, una frase o una noticia que lo recuerde._
 - [baja] **«blewett_orgullo»**: se deja y nadie lo lee: algo pasó y no tiene consecuencias. _Idea: una escena, una frase o una noticia que lo recuerde._
+- [baja] **«carta_a_»**: se deja y nadie lo lee: algo pasó y no tiene consecuencias. _Idea: una escena, una frase o una noticia que lo recuerde._
+- [baja] **«leyo_»**: se deja y nadie lo lee: algo pasó y no tiene consecuencias. _Idea: una escena, una frase o una noticia que lo recuerde._
 - [baja] **«marilla_doblo_ropa»**: se deja y nadie lo lee: algo pasó y no tiene consecuencias. _Idea: una escena, una frase o una noticia que lo recuerde._
+- [baja] **«matthew_busca»**: se deja y nadie lo lee: algo pasó y no tiene consecuencias. _Idea: una escena, una frase o una noticia que lo recuerde._
+- [baja] **«mis_brujula_empujon»**: se deja y nadie lo lee: algo pasó y no tiene consecuencias. _Idea: una escena, una frase o una noticia que lo recuerde._
+- [baja] **«mis_brujula_guardada»**: se deja y nadie lo lee: algo pasó y no tiene consecuencias. _Idea: una escena, una frase o una noticia que lo recuerde._
+- [baja] **«mis_brujula_paces»**: se deja y nadie lo lee: algo pasó y no tiene consecuencias. _Idea: una escena, una frase o una noticia que lo recuerde._
+- [baja] **«ofendio_lynde»**: se deja y nadie lo lee: algo pasó y no tiene consecuencias. _Idea: una escena, una frase o una noticia que lo recuerde._
 - [baja] **«queens_primera»**: se deja y nadie lo lee: algo pasó y no tiene consecuencias. _Idea: una escena, una frase o una noticia que lo recuerde._
+- [baja] **«sin_terminar_»**: se deja y nadie lo lee: algo pasó y no tiene consecuencias. _Idea: una escena, una frase o una noticia que lo recuerde._
+- [baja] **«ws_callo»**: se deja y nadie lo lee: algo pasó y no tiene consecuencias. _Idea: una escena, una frase o una noticia que lo recuerde._
+- [baja] **«ws_mar»**: se deja y nadie lo lee: algo pasó y no tiene consecuencias. _Idea: una escena, una frase o una noticia que lo recuerde._
+- [baja] **«ws_mira»**: se deja y nadie lo lee: algo pasó y no tiene consecuencias. _Idea: una escena, una frase o una noticia que lo recuerde._
+- [baja] **«ws_ofrece»**: se deja y nadie lo lee: algo pasó y no tiene consecuencias. _Idea: una escena, una frase o una noticia que lo recuerde._
+- [baja] **«ws_perdon»**: se deja y nadie lo lee: algo pasó y no tiene consecuencias. _Idea: una escena, una frase o una noticia que lo recuerde._
+- [baja] **«ws_pregunto»**: se deja y nadie lo lee: algo pasó y no tiene consecuencias. _Idea: una escena, una frase o una noticia que lo recuerde._

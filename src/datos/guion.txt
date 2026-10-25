@@ -90,8 +90,7 @@ marcas: 8=matthew_nina
 al_empezar: marca jefe_explica | El jefe de estación le explicó a Matthew que solo había llegado una niña; Matthew decidió llevarla a casa y que Marilla aclarara el error.
 al_terminar: ana sit=false
 al_terminar: meta matthew llevar ana,cocina | | llevar a la niña a Tejas Verdes en la calesa (cap. 2) | 3
-al_terminar: hecho primer_viaje
-
+al_terminar: estado viaje primer_viaje
 # --- el primer viaje, de Bright River a Tejas Verdes (cap. 2): solo mientras dura («primer_viaje»: lo deja la escena
 # de la estación, y se olvida al llegar a Tejas Verdes)
 # --- el túnel de manzanos, antes que nada (Ana enmudece); Newbridge, callada todavía
@@ -102,7 +101,7 @@ prioridad: 10
 interrumpe
 calesa: camino
 camino: tramo=avenida
-si: hecho:primer_viaje
+si: viaje=primer_viaje
 lineas: libro:viaje.10 [7]
 ---
 ana: (Ana enmudece. Se queda mirando la bóveda de flores, con las manos juntas, como si estuviera en una iglesia.)
@@ -116,7 +115,7 @@ prioridad: 8
 interrumpe
 calesa: camino
 camino: tramo=Newbridge
-si: hecho:primer_viaje, dicha:avenida
+si: viaje=primer_viaje, dicha:avenida
 ---
 ana: (Callada todavía. Los perros les ladran, los chicos gritan desde las cercas, hay caras curiosas en las ventanas: Ana no ve nada de eso.)
 
@@ -128,7 +127,7 @@ prioridad: 1.5
 pausa: 12
 calesa: camino
 camino: tramo=avenida
-si: hecho:primer_viaje, dicha:avenida
+si: viaje=primer_viaje, dicha:avenida
 ---
 ana: (Ana echa la cabeza atrás para mirar la bóveda de flores. Los pétalos le caen en el pelo y no se los quita.)
 
@@ -139,7 +138,7 @@ prioridad: 1.5
 pausa: 12
 calesa: camino
 camino: tramo=avenida
-si: hecho:primer_viaje, dicha:avenida_petalos
+si: viaje=primer_viaje, dicha:avenida_petalos
 ---
 matthew: (Matthew afloja las riendas. La yegua va al paso, como si también ella quisiera que esto no se acabara.)
 
@@ -150,7 +149,7 @@ prioridad: 1.5
 pausa: 12
 calesa: camino
 camino: tramo=avenida
-si: hecho:primer_viaje, dicha:avenida_paso
+si: viaje=primer_viaje, dicha:avenida_paso
 ---
 ana: (Al fondo de la Avenida, el cielo del atardecer brilla como el rosetón de una catedral.)
 
@@ -161,7 +160,7 @@ prioridad: 1.5
 pausa: 12
 calesa: camino
 camino: tramo=Newbridge
-si: hecho:primer_viaje, dicha:newbridge
+si: viaje=primer_viaje, dicha:newbridge
 ---
 ana: (Las ventanas del pueblo se encienden una a una. Ana sigue mirando hacia atrás, hacia donde quedó la Avenida.)
 
@@ -172,7 +171,7 @@ prioridad: 1.5
 pausa: 14
 calesa: camino
 camino: tramo=campos
-si: hecho:primer_viaje, dicha:avenida
+si: viaje=primer_viaje, dicha:avenida
 ---
 ana: (Ana va callada, con las manos juntas sobre el bolso de alfombra y los ojos en el cielo del oeste.)
 
@@ -183,7 +182,7 @@ prioridad: 1.5
 pausa: 14
 calesa: camino
 camino: tramo=campos
-si: hecho:primer_viaje, dicha:silencio_manos
+si: viaje=primer_viaje, dicha:silencio_manos
 ---
 matthew: (Matthew la mira de reojo. Nunca pensó que el silencio de una niña pudiera ser tan cómodo.)
 
@@ -194,7 +193,7 @@ prioridad: 1.5
 pausa: 14
 calesa: camino
 camino: tramo=campos
-si: hecho:primer_viaje, dicha:silencio_matthew
+si: viaje=primer_viaje, dicha:silencio_matthew
 ---
 ana: (Sobre los campos aparece la primera estrella. Ana mueve los labios: quizás le está pidiendo un deseo.)
 
@@ -205,7 +204,7 @@ prioridad: 1.5
 pausa: 14
 calesa: camino
 camino: tramo=campos
-si: hecho:primer_viaje, dicha:silencio_estrella
+si: viaje=primer_viaje, dicha:silencio_estrella
 ---
 matthew: (En una laguna junto al camino empiezan a cantar las ranas. La yegua resopla: ya huele su casa.)
 
@@ -216,7 +215,7 @@ prioridad: 1.5
 pausa: 14
 calesa: camino
 camino: tramo=campos
-si: hecho:primer_viaje, dicha:silencio_ranas
+si: viaje=primer_viaje, dicha:silencio_ranas
 ---
 ana piensa: Blanco… de las Delicias… no, todavía no…
 
@@ -227,7 +226,7 @@ resumen: Ana le pone nombre a la Avenida (en el libro, «el Camino Blanco de las
 canal: viaje
 prioridad: 9
 interrumpe
-si: hecho:primer_viaje, dicha:avenida
+si: viaje=primer_viaje, dicha:avenida
 o: calesa=camino camino.desde=.955
 o: calesa=avonlea cerca=matthew,letrero_br,2500
 lineas: libro:avonlea.camino_blanco [1,2,3,4]
@@ -251,7 +250,7 @@ prioridad: 9
 interrumpe
 calesa: avonlea
 cerca: matthew, lago, 1300
-si: hecho:primer_viaje
+si: viaje=primer_viaje
 lineas: libro:avonlea.lago [0]
 marcas: 0=lago
 al_empezar: log Matthew le mostró la laguna de Barry.
@@ -272,7 +271,7 @@ a prueba
 canal: viaje
 prioridad: 9
 interrumpe
-si: hecho:primer_viaje, dicha:lago
+si: viaje=primer_viaje, dicha:lago
 o: calesa=avonlea cerca=matthew,tejas_verdes,1700 si=y_mayor:matthew:61
 o: si=capitulo,hecho:matthew_llego_casa,!hecho:llegaron
 lineas: libro:avonlea.tejas_verdes [0,1,2,3,4,8,9]
@@ -292,8 +291,8 @@ marcas: 0=marilla_nino
 al_empezar: log Marilla vio a la niña de pelo rojo: «Matthew Cuthbert, ¿quién es ésa? ¿Dónde está el niño?»
 al_terminar: fin_capitulo
 al_terminar: hecho llegada_tv
-al_terminar: olvidar primer_viaje
-
+al_terminar: estado ana_en_tv en_prueba
+al_terminar: estado viaje ninguno
 # --- lo que Ana piensa en voz alta en el camino, cuando no hay otra cosa (un comentario: si lo cortan, se pierde)
 === relleno ===
 a prueba
@@ -313,7 +312,7 @@ lineas: relleno:1
 === carta_diana_1 ===
 canal: carta
 prioridad: 5
-si: hecho:se_queda, carta:diana, hecho:conocidas_diana
+si: ana_en_tv=se_queda, carta:diana, diana>=conocida
 entre: 5
 al_terminar: hecho carta_a_diana
 ---
@@ -336,7 +335,7 @@ ana: Listo. ¡La doblo como un abanico, para que se vea elegante!
 canal: carta
 prioridad: 5
 repetir: siempre
-si: hecho:se_queda, carta:diana, dicha:carta_diana_1, hecho:conocidas_diana
+si: ana_en_tv=se_queda, carta:diana, dicha:carta_diana_1, diana>=conocida
 entre: 5
 al_terminar: hecho carta_a_diana
 ---
@@ -356,7 +355,7 @@ carta: Tuya siempre, Ana (con una sola n).
 === carta_stacy_1 ===
 canal: carta
 prioridad: 5
-si: hecho:se_queda, carta:stacy, conoce:stacy, hecho:llego_stacy
+si: ana_en_tv=se_queda, carta:stacy, conoce:stacy, hecho:llego_stacy
 entre: 5
 al_terminar: hecho carta_a_stacy
 ---
@@ -377,7 +376,7 @@ carta: Su alumna que la quiere, Ana Shirley.
 canal: carta
 prioridad: 5
 repetir: siempre
-si: hecho:se_queda, carta:stacy, dicha:carta_stacy_1, conoce:stacy, hecho:llego_stacy
+si: ana_en_tv=se_queda, carta:stacy, dicha:carta_stacy_1, conoce:stacy, hecho:llego_stacy
 entre: 5
 al_terminar: hecho carta_a_stacy
 ---
@@ -395,7 +394,7 @@ carta: Su alumna que la quiere, Ana Shirley.
 === carta_sraallan_1 ===
 canal: carta
 prioridad: 5
-si: hecho:se_queda, carta:sraallan, conoce:sraallan
+si: ana_en_tv=se_queda, carta:sraallan, conoce:sraallan
 entre: 5
 al_terminar: hecho carta_a_sraallan
 ---
@@ -414,7 +413,7 @@ carta: Con todo cariño, Ana Shirley.
 canal: carta
 prioridad: 5
 repetir: siempre
-si: hecho:se_queda, carta:sraallan, dicha:carta_sraallan_1, conoce:sraallan
+si: ana_en_tv=se_queda, carta:sraallan, dicha:carta_sraallan_1, conoce:sraallan
 entre: 5
 al_terminar: hecho carta_a_sraallan
 ---
@@ -430,7 +429,7 @@ carta: Con todo cariño, Ana Shirley.
 === carta_josephine_1 ===
 canal: carta
 prioridad: 5
-si: hecho:se_queda, carta:josephine, conoce:josephine
+si: ana_en_tv=se_queda, carta:josephine, conoce:josephine
 entre: 5
 al_terminar: hecho carta_a_josephine
 ---
@@ -448,7 +447,7 @@ carta: Su amiga que la recuerda siempre, Ana Shirley.
 canal: carta
 prioridad: 5
 repetir: siempre
-si: hecho:se_queda, carta:josephine, dicha:carta_josephine_1, conoce:josephine
+si: ana_en_tv=se_queda, carta:josephine, dicha:carta_josephine_1, conoce:josephine
 entre: 5
 al_terminar: hecho carta_a_josephine
 ---
@@ -468,7 +467,7 @@ carta: Su amiga que la recuerda siempre, Ana Shirley.
 a prueba
 canal: carta
 prioridad: 5
-si: carta:spencer, !hecho:se_queda, hecho:desayuno_prueba
+si: carta:spencer, ana_en_tv<se_queda, hecho:desayuno_prueba
 entre: 5
 al_terminar: hecho carta_a_spencer
 ---
@@ -487,7 +486,7 @@ resumen: Ana le escribe a la Sra. Spencer cómo le va en Tejas Verdes.
 canal: carta
 prioridad: 5
 repetir: siempre
-si: carta:spencer, hecho:se_queda
+si: carta:spencer, ana_en_tv=se_queda
 entre: 5
 al_terminar: hecho carta_a_spencer
 ---
@@ -508,7 +507,7 @@ carta: Su agradecida, Ana Shirley (de Tejas Verdes)
 === resp_diana_1 ===
 canal: respuesta
 de: diana
-si: hecho:se_queda, respuesta:diana, hecho:carta_a_diana
+si: ana_en_tv=se_queda, respuesta:diana, hecho:carta_a_diana
 ---
 carta: Querida Ana:
 carta: ¡Qué carta tan bonita! La leí tres veces y la guardé en mi caja de cartas, con la cinta azul.
@@ -518,7 +517,7 @@ carta: Tu amiga del alma, Diana
 === resp_diana_2 ===
 canal: respuesta
 de: diana
-si: hecho:se_queda, respuesta:diana, hecho:carta_a_diana
+si: ana_en_tv=se_queda, respuesta:diana, hecho:carta_a_diana
 ---
 carta: Queridísima Ana:
 carta: Tu carta me hizo reír tanto que Minnie May me preguntó qué pasaba. No le dije: es un secreto de amigas del alma.
@@ -528,7 +527,7 @@ carta: Siempre tuya, Diana
 === resp_stacy_1 ===
 canal: respuesta
 de: stacy
-si: hecho:se_queda, respuesta:stacy, hecho:carta_a_stacy
+si: ana_en_tv=se_queda, respuesta:stacy, hecho:carta_a_stacy
 ---
 carta: Querida Ana:
 carta: Me alegró mucho recibir tu carta. Escribes con el corazón, y eso no se enseña.
@@ -538,7 +537,7 @@ carta: Con cariño, Muriel Stacy
 === resp_stacy_2 ===
 canal: respuesta
 de: stacy
-si: hecho:se_queda, respuesta:stacy, hecho:carta_a_stacy
+si: ana_en_tv=se_queda, respuesta:stacy, hecho:carta_a_stacy
 ---
 carta: Querida Ana:
 carta: Claro que podrías escribir un libro. Empieza por una página, y después otra. Así se hacen todos.
@@ -548,7 +547,7 @@ carta: Tu maestra, M. Stacy
 === resp_sraallan_1 ===
 canal: respuesta
 de: sraallan
-si: hecho:se_queda, respuesta:sraallan, hecho:carta_a_sraallan
+si: ana_en_tv=se_queda, respuesta:sraallan, hecho:carta_a_sraallan
 ---
 carta: Querida Ana:
 carta: Qué alegría me dio tu carta. A mí también me gustó mucho la tarde del té.
@@ -558,7 +557,7 @@ carta: Te quiere, la Sra. Allan
 === resp_josephine_1 ===
 canal: respuesta
 de: josephine
-si: hecho:se_queda, respuesta:josephine, hecho:carta_a_josephine
+si: ana_en_tv=se_queda, respuesta:josephine, hecho:carta_a_josephine
 ---
 carta: Querida Ana:
 carta: Tu carta me hizo reír más que cualquier cosa en todo el invierno. Hacía años que no me reía así.
@@ -568,7 +567,7 @@ carta: Tu vieja amiga, Josephine Barry
 === resp_josephine_2 ===
 canal: respuesta
 de: josephine
-si: hecho:se_queda, respuesta:josephine, hecho:carta_a_josephine
+si: ana_en_tv=se_queda, respuesta:josephine, hecho:carta_a_josephine
 ---
 carta: Mi querida Ana:
 carta: Recibí tu carta y la leí junto a la chimenea. Escribes como hablas, y eso es un gran elogio viniendo de mí.
@@ -580,7 +579,7 @@ a prueba
 canal: respuesta
 de: spencer
 responde: carta_spencer_prueba
-si: respuesta:spencer, !hecho:se_queda, dicha:carta_spencer_prueba
+si: respuesta:spencer, ana_en_tv<se_queda, dicha:carta_spencer_prueba
 ---
 carta: Querida Ana:
 carta: Recibí tu carta. No te preocupes antes de tiempo, niña: la Srta. Cuthbert es una mujer seria, pero justa.
@@ -592,7 +591,7 @@ resumen: La Sra. Spencer contesta: se alegra de que los Cuthbert se queden con A
 canal: respuesta
 de: spencer
 responde: carta_spencer_prueba
-si: respuesta:spencer, hecho:se_queda, dicha:carta_spencer_prueba
+si: respuesta:spencer, ana_en_tv=se_queda, dicha:carta_spencer_prueba
 ---
 carta: Querida Ana:
 carta: Cuando llegó tu carta ya me había enterado: ¡los Cuthbert se quedaron contigo! Ya ves que las cosas se arreglan, cuando una se porta bien.
@@ -603,7 +602,7 @@ carta: Afectuosamente, la Sra. Spencer
 resumen: La Sra. Spencer contesta: se alegra de que Ana tenga una amiga, Diana.
 canal: respuesta
 de: spencer
-si: respuesta:spencer, hecho:se_queda, hecho:conocidas_diana, hecho:carta_a_spencer
+si: respuesta:spencer, ana_en_tv=se_queda, diana>=conocida, hecho:carta_a_spencer
 ---
 carta: Querida Ana:
 carta: ¿Así que ya tienes una amiga, la niña de los Barry? Me alegro, Ana. Una buena amiga vale más que un vestido nuevo. Pero no la marees con tanta palabra.
@@ -614,7 +613,7 @@ carta: Afectuosamente, la Sra. Spencer
 resumen: La Sra. Spencer la reta por romperle la pizarra en la cabeza a Gilbert.
 canal: respuesta
 de: spencer
-si: respuesta:spencer, hecho:se_queda, hecho:zanahorias_pizarra, hecho:carta_a_spencer
+si: respuesta:spencer, ana_en_tv=se_queda, hecho:zanahorias_pizarra, hecho:carta_a_spencer
 ---
 carta: Querida Ana:
 carta: ¡Ana Shirley! ¿Cómo que le partiste la pizarra en la cabeza a un muchacho? Ya sé que te dijo zanahoria, pero una señorita no anda rompiendo pizarras.
@@ -625,7 +624,7 @@ carta: Afectuosamente, la Sra. Spencer
 resumen: La Sra. Spencer: le contestó a Gilbert; que cuide esa lengua.
 canal: respuesta
 de: spencer
-si: respuesta:spencer, hecho:se_queda, hecho:zanahorias_contesta, hecho:carta_a_spencer
+si: respuesta:spencer, ana_en_tv=se_queda, hecho:zanahorias_contesta, hecho:carta_a_spencer
 ---
 carta: Querida Ana:
 carta: Así que le contestaste a ese muchacho delante de toda la escuela. Hmm. No te voy a decir que hiciste mal, porque se lo buscó. Pero cuida esa lengua, Ana.
@@ -636,7 +635,7 @@ carta: Afectuosamente, la Sra. Spencer
 resumen: La Sra. Spencer la felicita por no hacerle caso a Gilbert.
 canal: respuesta
 de: spencer
-si: respuesta:spencer, hecho:se_queda, hecho:zanahorias_ignora, hecho:carta_a_spencer
+si: respuesta:spencer, ana_en_tv=se_queda, hecho:zanahorias_ignora, hecho:carta_a_spencer
 ---
 carta: Querida Ana:
 carta: Me cuentas que un muchacho se burló de tu pelo y que hiciste como si no existiera. Eso, Ana, es tener más juicio que muchas señoras que conozco.
@@ -647,7 +646,7 @@ carta: Afectuosamente, la Sra. Spencer
 resumen: La Sra. Spencer supo que gritó a la Sra. Lynde: que le pida perdón.
 canal: respuesta
 de: spencer
-si: respuesta:spencer, hecho:se_queda, hecho:ofendio_lynde, hecho:carta_a_spencer
+si: respuesta:spencer, ana_en_tv=se_queda, lynde_ana=ofendida, hecho:carta_a_spencer
 ---
 carta: Querida Ana:
 carta: Me enteré, Ana. Rachel Lynde me escribió. ¿Cómo se te ocurre gritarle a una señora así, en la casa que te recibió?
@@ -658,7 +657,7 @@ carta: Afectuosamente, la Sra. Spencer
 resumen: La Sra. Spencer la consuela: la Sra. Lynde la trató de flaca y fea.
 canal: respuesta
 de: spencer
-si: respuesta:spencer, hecho:se_queda, hecho:lynde_llanto, hecho:carta_a_spencer
+si: respuesta:spencer, ana_en_tv=se_queda, hecho:lynde_llanto, hecho:carta_a_spencer
 ---
 carta: Querida Ana:
 carta: Me dices que la Sra. Lynde te llamó flaca y fea, y que te fuiste llorando. Ay, Ana. Rachel Lynde dice lo que piensa, y piensa demasiado.
@@ -669,7 +668,7 @@ carta: Afectuosamente, la Sra. Spencer
 resumen: La Sra. Spencer: qué pena lo de Diana; paciencia, y nada a escondidas.
 canal: respuesta
 de: spencer
-si: respuesta:spencer, hecho:se_queda, hecho:prohibida, hecho:carta_a_spencer
+si: respuesta:spencer, ana_en_tv=se_queda, barry_permite=no, hecho:carta_a_spencer
 ---
 carta: Querida Ana:
 carta: Qué pena lo de la niña de los Barry. Vino de grosellas… ¡quién iba a pensar! Ten paciencia, Ana: las madres se ablandan con el tiempo.
@@ -680,7 +679,7 @@ carta: Afectuosamente, la Sra. Spencer
 resumen: La Sra. Spencer contesta la primera carta: que se porte bien y no hable tanto.
 canal: respuesta
 de: spencer
-si: respuesta:spencer, hecho:se_queda, hecho:carta_a_spencer
+si: respuesta:spencer, ana_en_tv=se_queda, hecho:carta_a_spencer
 ---
 carta: Querida Ana:
 carta: Me dio mucho gusto saber de ti. Ya ves que las cosas se arreglan solas, cuando una se porta bien.
@@ -695,7 +694,7 @@ prioridad: 7
 interrumpe
 sujeta: marilla
 en: ana=gg, marilla=gg
-si: hecho:se_queda, hecho:pide_amiga, !hecho:quiere_amiga, !hecho:conocidas_diana
+si: ana_en_tv=se_queda, hecho:pide_amiga, !hecho:quiere_amiga, diana=desconocida
 al_terminar: hecho quiere_amiga
 al_terminar: log Ana le contó a Marilla que quería una amiga del alma, y Marilla le habló de Diana Barry. | yo: le conté a Marilla que quería una amiga del alma, y ella me habló de Diana Barry, la niña de La Cuesta del Huerto.
 ---
@@ -715,7 +714,7 @@ prioridad: 5
 repetir: dia
 sujeta: marilla
 en: ana=gg, marilla=gg
-si: hecho:se_queda, dias_desde:quiere_amiga:1, !hecho:conocidas_diana, !hecho:barry_presenta, presente:diana, hora:6-13
+si: ana_en_tv=se_queda, dias_desde:quiere_amiga:1, diana=desconocida, !hecho:barry_presenta, presente:diana, hora:6-13
 ---
 marilla: Ana, esta tarde, después del almuerzo, voy a La Cuesta del Huerto a devolverle un patrón a la Sra. Barry. Si quieres conocer a Diana, no te vayas lejos.
 ana: ¡Oh, Marilla! Voy a estar aquí, quietecita como una estatua. Bueno… casi como una estatua.
@@ -728,7 +727,7 @@ prioridad: 7
 interrumpe
 sujeta: marilla, barry
 en: ana=os, marilla=os
-si: hecho:se_queda, hecho:quiere_amiga, !hecho:conocidas_diana, !hecho:barry_presenta
+si: ana_en_tv=se_queda, hecho:quiere_amiga, diana=desconocida, !hecho:barry_presenta
 al_empezar: contar barry nina_cuthbert
 al_terminar: hecho barry_presenta
 al_terminar: meta diana estar_en h:os,-,- | Diana entra a conocer a la niña de Tejas Verdes | entrar a conocer a la niña de Tejas Verdes (cap. 12) | 3
@@ -745,8 +744,8 @@ prioridad: 8
 interrumpe
 sujeta: ana, diana
 en: ana=os, diana=os
-si: hecho:se_queda, hecho:barry_presenta, !hecho:conocidas_diana
-al_terminar: hecho conocidas_diana
+si: ana_en_tv=se_queda, hecho:barry_presenta, diana=desconocida
+al_terminar: estado diana amiga_del_alma
 al_terminar: afecto diana ana 4
 al_terminar: afecto ana diana 5
 al_terminar: log Ana conoció a Diana Barry en La Cuesta del Huerto: la Sra. Barry las presentó. | yo: conocí a Diana Barry en La Cuesta del Huerto. ¡Creo que vamos a ser amigas del alma!
@@ -761,8 +760,8 @@ resumen: Ana y Diana se encuentran por casualidad, sin que nadie las presente.
 disparo: encuentro
 quienes: ana, diana
 # (una vez que Ana le contó a Marilla, se conocen como en el libro: Marilla la lleva y la Sra. Barry las presenta)
-si: hecho:se_queda, !hecho:conocidas_diana, !hecho:barry_presenta, !hecho:quiere_amiga
-al_terminar: hecho conocidas_diana
+si: ana_en_tv=se_queda, diana=desconocida, !hecho:barry_presenta, !hecho:quiere_amiga
+al_terminar: estado diana conocida
 al_terminar: afecto diana ana 2
 al_terminar: afecto ana diana 4
 al_terminar: log Ana y Diana se conocieron por casualidad. | yo: conocí a Diana Barry, por pura casualidad. Creo que vamos a ser amigas del alma.
@@ -817,7 +816,7 @@ canal: es
 prioridad: 7
 interrumpe
 en: ana=es, gilbert=es
-si: hecho:se_queda, !hecho:zanahorias
+si: ana_en_tv=se_queda, !hecho:zanahorias
 al_terminar: hecho zanahorias
 al_terminar: hecho conoce_gilbert
 ---
@@ -851,7 +850,7 @@ canal: es
 prioridad: 4
 en: ana=es, phillips=es
 repetir: cada 6
-si: hecho:se_queda, hora:9.2-12, no_hoy:clase
+si: ana_en_tv=se_queda, hora:9.2-12, no_hoy:clase
 al_terminar: hecho clase
 ---
 phillips: Ana Shirley. ¿Cuál es la capital de la Isla del Príncipe Eduardo?
@@ -869,7 +868,7 @@ canal: es
 prioridad: 4
 en: ana=es, phillips=es
 repetir: cada 6
-si: hecho:se_queda, hora:9.2-12, no_hoy:clase
+si: ana_en_tv=se_queda, hora:9.2-12, no_hoy:clase
 al_terminar: hecho clase
 ---
 phillips: «El… invierno… en… Avonlea… es… largo… y… blanco.» Punto.
@@ -887,7 +886,7 @@ canal: es
 prioridad: 4
 en: ana=es, phillips=es
 repetir: cada 6
-si: hecho:se_queda, hora:9.2-12, no_hoy:clase
+si: ana_en_tv=se_queda, hora:9.2-12, no_hoy:clase
 al_terminar: hecho clase
 ---
 phillips: Ana Shirley, al pizarrón. Demuestre que estos dos ángulos son iguales.
@@ -906,7 +905,7 @@ canal: es
 prioridad: 4
 en: ana=es, phillips=es
 repetir: cada 6
-si: hecho:se_queda, hora:9.2-12, no_hoy:clase
+si: ana_en_tv=se_queda, hora:9.2-12, no_hoy:clase
 al_terminar: hecho clase
 ---
 phillips: Ana Shirley, «La batalla de Hohenlinden». Desde el principio.
@@ -926,7 +925,7 @@ canal: es
 prioridad: 4
 en: ana=es, stacy=es
 repetir: cada 5
-si: hecho:se_queda, hora:9.2-12, no_hoy:clase, hecho:llego_stacy
+si: ana_en_tv=se_queda, hora:9.2-12, no_hoy:clase, hecho:llego_stacy
 al_terminar: hecho clase
 ---
 stacy: Escriban lo que ven, niños. Pero miren bien: con los ojos, y con algo más.
@@ -945,7 +944,7 @@ canal: es
 prioridad: 4
 en: ana=es, stacy=es
 repetir: cada 5
-si: hecho:se_queda, hora:9.2-12, no_hoy:clase, hecho:llego_stacy
+si: ana_en_tv=se_queda, hora:9.2-12, no_hoy:clase, hecho:llego_stacy
 al_terminar: hecho clase
 ---
 stacy: (La Srta. Stacy saca una florcita blanca, de siete pétalos.) ¿Quién sabe cómo se llama esta flor?
@@ -968,7 +967,7 @@ canal: gg
 prioridad: 7
 interrumpe
 en: ana=gg, diana=gg
-si: hecho:se_queda, tomando_te:ana:diana, !hecho:diana_borracha
+si: ana_en_tv=se_queda, tomando_te:ana:diana, !hecho:diana_borracha
 al_terminar: hecho diana_borracha
 al_terminar: meta diana estar_en h:os,-,- | Diana se va a su casa, tambaleándose | volver a su casa, mareada | 3
 al_terminar: log Ana invitó a Diana a tomar el té y le sirvió, sin saberlo, vino de grosellas en vez de cordial de frambuesa: Diana se fue a su casa… borracha. | yo: invité a Diana a tomar el té y le serví, sin saberlo, vino de grosellas en vez de cordial de frambuesa. ¡Se fue a su casa borracha!
@@ -990,8 +989,8 @@ prioridad: 7
 interrumpe
 sujeta: marilla
 en: ana=gg, marilla=gg
-si: dias_desde:diana_borracha:1, !hecho:prohibida, !hecho:perdonada
-al_terminar: hecho prohibida
+si: dias_desde:diana_borracha:1, barry_permite=si, !hecho:perdonada
+al_terminar: estado barry_permite no
 al_terminar: triste diana
 al_terminar: ofensa barry ana vino 0
 al_terminar: log La Sra. Barry le prohibió a Diana volver a ver a Ana: el «cordial» era vino de grosellas. | yo: la Sra. Barry le prohibió a Diana volver a verme. Mi corazón está hecho trizas.
@@ -1009,7 +1008,7 @@ canal: os
 prioridad: 7
 interrumpe
 en: ana=os, barry=os
-si: hecho:prohibida
+si: barry_permite=no
 ---
 ana: Sra. Barry, por favor, perdóneme. No sabía que era vino. Me imaginé que era cordial… bueno, creí que era cordial.
 barry: No, Ana Shirley. No creo que seas compañía para Diana. Vete a tu casa y pórtate bien.
@@ -1024,7 +1023,7 @@ canal: gg
 prioridad: 9
 interrumpe
 en: ana=gg, diana=gg
-si: hecho:prohibida, dias_desde:prohibida:12, !hecho:crup
+si: barry_permite=no, dias_desde:prohibida:12, !hecho:crup
 al_terminar: hecho crup
 al_terminar: meta ana estar_en h:os,-,23 | Ana corre a La Cuesta del Huerto: Minnie May tiene crup | correr a La Cuesta del Huerto: Minnie May tiene crup (cap. 18) | 3
 al_terminar: meta diana estar_en h:os,-,23 | Diana vuelve corriendo a su casa | volver corriendo a su casa con Ana | 3
@@ -1039,8 +1038,8 @@ canal: os
 prioridad: 9
 interrumpe
 en: ana=os
-si: hecho:crup, hecho:prohibida
-al_terminar: olvidar prohibida
+si: hecho:crup, barry_permite=no
+al_terminar: estado barry_permite si
 al_terminar: hecho perdonada
 al_terminar: afecto barry ana 4
 al_terminar: afecto diana ana 5
@@ -1104,7 +1103,7 @@ canal: os
 prioridad: 6
 interrumpe
 en: ana=os, diana=os
-si: cuaderno:amigas, !hecho:prohibida, !hecho:cama_josephine, dias_desde:conocidas_diana:15, afecto:diana:ana>=5, letras:ana>=10
+si: cuaderno:amigas, barry_permite=si, !hecho:cama_josephine, dias_desde:conocidas_diana:15, afecto:diana:ana>=5, letras:ana>=10
 al_terminar: hecho cama_josephine
 al_terminar: afecto josephine ana 5
 al_terminar: log Ana y Diana saltaron sobre la cama del cuarto de huéspedes, donde dormía la tía Josephine; Ana confesó y se ganó su amistad. | yo: Diana y yo saltamos sobre la cama de huéspedes, ¡y ahí dormía la tía Josephine! Confesé, y se hizo mi amiga.
@@ -1195,8 +1194,9 @@ lineas: libro:llegada
 al_empezar: log Ana llegó a Tejas Verdes con Matthew, de noche. Marilla esperaba a un niño.
 al_terminar: hecho llegada_tv
 al_terminar: hecho primera_noche
+al_terminar: estado ana_en_tv en_prueba
 al_terminar: log Marilla dejó que Ana se quedara esa noche, hasta aclarar el enredo. Ana casi no probó la cena. | yo: Marilla me dejó quedarme esa noche, hasta aclarar el enredo. Casi no probé la cena.
-al_empezar: olvidar primer_viaje
+al_empezar: estado viaje ninguno
 ---
 ! sentar ana
 ! ana llora=true
@@ -1327,8 +1327,8 @@ interrumpe
 sujeta: marilla
 donde: tejas
 al_empezar: a_cocina
-al_empezar: hecho rumbo_spencer
-si: hecho:desayuno_prueba, !hecho:a_prueba, hora:14-19, paciencia:marilla:ana>=1
+al_empezar: estado viaje white_sands
+si: hecho:desayuno_prueba, ana_en_tv<decidida, hora:14-19, paciencia:marilla:ana>=1
 ---
 marilla: Ponte el sombrero, Ana. Nos vamos a White Sands.
 ana piensa: Puede que sea la última vez que veo esta cocina.
@@ -1344,7 +1344,7 @@ prioridad: 6
 interrumpe
 en: ana=out, marilla=out
 calesa: avonlea
-si: hecho:rumbo_spencer, !hecho:a_prueba, avance:ws:1-30
+si: viaje=white_sands, ana_en_tv<decidida, avance:ws:1-30
 ---
 ana: ¿Sabe, Srta. Cuthbert? He decidido disfrutar de este viaje. Si uno se decide con firmeza, casi siempre puede disfrutar de las cosas.
 ana: No voy a pensar en el orfanato mientras vamos. Solo en el camino. ¡Mire, ya hay una rosa silvestre! ¿No le parece que el rosa es el color más encantador del mundo? Lástima que yo no lo pueda usar, con este pelo.
@@ -1363,7 +1363,7 @@ prioridad: 6
 interrumpe
 en: ana=out, marilla=out
 calesa: avonlea
-si: hecho:rumbo_spencer, !hecho:a_prueba, avance:ws:25-60
+si: viaje=white_sands, ana_en_tv<decidida, avance:ws:25-60
 ---
 marilla: (Marilla mira el camino, no a Ana.) Ya que tienes tantas ganas de hablar, cuéntame lo que sepas de ti.
 ana: Oh, lo que sé de mí no vale la pena contarlo, Srta. Cuthbert. Si me dejara contarle lo que imagino de mí, le parecería mucho más interesante.
@@ -1381,7 +1381,7 @@ prioridad: 6
 interrumpe
 en: ana=out, marilla=out
 calesa: avonlea
-si: hecho:rumbo_spencer, !hecho:a_prueba, avance:ws:45-88
+si: viaje=white_sands, ana_en_tv<decidida, avance:ws:45-88
 ---
 ana: Mi madre también era maestra, pero cuando se casó con mi padre dejó de enseñar. Eran pobres como ratones de iglesia. Vivían en una casita amarilla, con madreselvas en la ventana. Yo nunca la vi, pero la he imaginado miles de veces.
 ana: Mi madre se murió de fiebre cuando yo tenía tres meses. Ojalá hubiera vivido lo bastante para que yo me acordara de haberla llamado mamá. Mi padre se murió cuatro días después, de la misma fiebre.
@@ -1404,7 +1404,7 @@ interrumpe
 en: ana=out, marilla=out, srapye=out
 sujeta: srapye
 calesa: avonlea
-si: hecho:rumbo_spencer, !hecho:a_prueba, avance:ws:80-100, ve:srapye
+si: viaje=white_sands, ana_en_tv<decidida, avance:ws:80-100, ve:srapye
 ---
 srapye: ¡Marilla Cuthbert! (La Sra. Pye se acerca a la calesa, con su canasto, y mira a Ana de arriba abajo.) ¿Así que esta es la huérfana que les mandaron por equivocación?
 marilla: Buenas tardes, Sra. Pye.
@@ -1430,7 +1430,7 @@ prioridad: 8
 interrumpe
 en: ana=out, marilla=out
 sujeta: marilla
-si: hecho:rumbo_spencer, !hecho:a_prueba, hecho:ws_corrio, !no_hoy:ws_marilla_llega
+si: viaje=white_sands, ana_en_tv<decidida, hecho:ws_corrio, !no_hoy:ws_marilla_llega
 ---
 narra: El mar está gris y verde, con espuma en las rocas. Ana se ha sentado en la arena roja, abrazada a las rodillas, y llora como si el mar entero le hubiera entrado por los ojos.
 marilla: (Marilla llega sin aliento, sujetándose el sombrero.) No se sale corriendo así, sin una palabra. Casi me matas del susto.
@@ -1466,9 +1466,9 @@ prioridad: 8
 interrumpe
 en: ana=out, marilla=out, spencer=out, blewett=out
 sujeta: spencer, blewett
-si: hecho:rumbo_spencer, !hecho:a_prueba, avance:ws:100-100, ve:spencer
+si: viaje=white_sands, ana_en_tv<decidida, avance:ws:100-100, ve:spencer
 al_terminar: hecho ws_vuelven
-al_terminar: olvidar rumbo_spencer
+al_terminar: estado viaje ninguno
 ---
 spencer: ¡Marilla Cuthbert! ¡Qué sorpresa! Pasen, pasen. ¿Y cómo está la niña?
 marilla: Para eso venimos, Sra. Spencer. Ha habido una equivocación. Le mandamos a decir con su hermano Robert que queríamos un niño de diez u once años.
@@ -1500,9 +1500,9 @@ canal: gg
 prioridad: 9
 interrumpe
 sujeta: marilla
-si: hecho:ws_vuelven, !hecho:a_prueba
+si: hecho:ws_vuelven, ana_en_tv<decidida
 al_terminar: hecho conoce_blewett
-al_terminar: hecho a_prueba
+al_terminar: estado ana_en_tv decidida
 al_terminar: suma afecto:marilla:ana 1
 al_terminar: log Marilla llevó a Ana a White Sands; la Sra. Blewett la quería de sirvienta, y Marilla no se la dio. Esa noche le dijo a Matthew que se la quedaba; a Ana, todavía no. | yo: Marilla me llevó a White Sands. La Sra. Blewett me quería de sirvienta, pero Marilla no me entregó.
 al_terminar: punto a_prueba | Marilla decidió quedársela, a prueba
@@ -1582,7 +1582,7 @@ canal: gg
 prioridad: 5
 repetir: dia
 donde: tejas
-si: hecho:a_prueba, hora:21-23.5
+si: ana_en_tv>=decidida, hora:21-23.5
 ---
 ->* Ir a acostarse
    ! acostarse
@@ -1759,7 +1759,7 @@ narra: Marilla tiene la calesa lista para ir a White Sands, y Ana no aparece por
 canal: gg
 prioridad: 10
 interrumpe
-si: hecho:desayuno_prueba, !hecho:a_prueba, !dicha:viaje_spencer, !dicha:viaje_spencer_duda, !donde:ana:tejas, hora:14.5-19
+si: hecho:desayuno_prueba, ana_en_tv<decidida, !dicha:viaje_spencer, !dicha:viaje_spencer_duda, !donde:ana:tejas, hora:14.5-19
 al_empezar: suma paciencia:marilla:ana -1
 al_terminar: a_cocina
 
@@ -1776,7 +1776,7 @@ interrumpe
 sujeta: marilla
 donde: tejas
 al_empezar: a_cocina
-si: hecho:desayuno_prueba, !hecho:a_prueba, hora:14-19, paciencia:marilla:ana<1
+si: hecho:desayuno_prueba, ana_en_tv<decidida, hora:14-19, paciencia:marilla:ana<1
 al_terminar: hecho conoce_blewett
 al_terminar: hecho blewett_duda
 ---
@@ -1801,9 +1801,9 @@ canal: gg
 prioridad: 9
 interrumpe
 sujeta: marilla
-si: hecho:blewett_duda, !hecho:a_prueba, afecto:matthew:ana>=4
+si: hecho:blewett_duda, ana_en_tv<decidida, afecto:matthew:ana>=4
 al_empezar: a_cocina
-al_terminar: hecho a_prueba
+al_terminar: estado ana_en_tv decidida
 al_terminar: log Marilla casi le dio Ana a la Sra. Blewett; Matthew pidió que se quedara. | yo: Marilla casi me entregó a la Sra. Blewett, pero Matthew pidió que me quedara.
 al_terminar: punto a_prueba | Marilla decidió quedársela, a prueba
 ---
@@ -1819,9 +1819,9 @@ canal: gg
 prioridad: 8
 interrumpe
 sujeta: marilla
-si: hecho:blewett_duda, !hecho:a_prueba, hecho:blewett_suplica, afecto:marilla:ana>=2
+si: hecho:blewett_duda, ana_en_tv<decidida, hecho:blewett_suplica, afecto:marilla:ana>=2
 al_empezar: a_cocina
-al_terminar: hecho a_prueba
+al_terminar: estado ana_en_tv decidida
 al_terminar: log Ana le suplicó a Marilla en White Sands, y Marilla no la entregó. | yo: le supliqué a Marilla en White Sands, y no me entregó.
 al_terminar: punto a_prueba | Marilla decidió quedársela, a prueba
 ---
@@ -1837,9 +1837,9 @@ canal: gg
 prioridad: 7
 interrumpe
 sujeta: marilla
-si: hecho:blewett_duda, !hecho:a_prueba, hecho:blewett_calla, afecto:marilla:ana>=3
+si: hecho:blewett_duda, ana_en_tv<decidida, hecho:blewett_calla, afecto:marilla:ana>=3
 al_empezar: a_cocina
-al_terminar: hecho a_prueba
+al_terminar: estado ana_en_tv decidida
 al_terminar: punto a_prueba | Marilla decidió quedársela, a prueba
 ---
 ! pasa_tiempo 4
@@ -1853,8 +1853,8 @@ narra: Marilla aprieta los labios y asiente. Esa misma tarde, Ana se va con la S
 canal: gg
 prioridad: 1
 interrumpe
-si: hecho:blewett_duda, !hecho:a_prueba
-al_terminar: hecho devuelta
+si: hecho:blewett_duda, ana_en_tv<decidida
+al_terminar: estado ana_en_tv devuelta
 al_terminar: log Marilla le entregó Ana a la Sra. Blewett. | yo: Marilla me entregó a la Sra. Blewett.
 al_terminar: final devuelta | Ana se fue con la Sra. Blewett. En el libro, Marilla no la entregó: Ana se ganó, poco a poco, su lugar en Tejas Verdes.
 
@@ -1869,8 +1869,8 @@ grande
 sujeta: marilla
 donde: tejas
 al_empezar: a_cocina
-si: hecho:a_prueba, !hecho:se_queda, dias_desde:a_prueba:1, hora:14-19
-al_terminar: hecho se_queda
+si: ana_en_tv>=decidida, ana_en_tv<se_queda, dias_desde:a_prueba:1, hora:14-19
+al_terminar: estado ana_en_tv se_queda
 al_terminar: suma afecto:marilla:ana 1
 al_terminar: log Marilla le dijo a Ana que se queda en Tejas Verdes, para siempre. | yo: Marilla me dijo que me quedo en Tejas Verdes. ¡Para siempre!
 al_terminar: punto se_queda | Marilla le dijo que se queda en Tejas Verdes
@@ -1897,7 +1897,7 @@ canal: ana_sola
 repetir: dia
 al_terminar: suma afecto:diana:ana 1
 al_terminar: log Ana le hizo señas a Diana con la vela, desde la ventana de su pieza; Diana contestó. | yo: le hice señas a Diana con la vela, desde la ventana de mi pieza, ¡y ella me contestó!
-si: hecho:se_queda, hecho:conocidas_diana
+si: ana_en_tv=se_queda, diana>=conocida
 ---
 ana: (Ana pone la vela en la ventana y la tapa y destapa con un cartón: cinco destellos.)
 ana: (Un rato después, entre los árboles, en la ventana de Diana, una luz contesta: cinco destellos.)
@@ -1917,7 +1917,7 @@ interrumpe
 grande
 sujeta: lynde, marilla
 en: ana=gg, marilla=gg, lynde=gg
-si: hecho:se_queda, !hecho:lynde_visita, sentada:lynde
+si: ana_en_tv=se_queda, !hecho:lynde_visita, sentada:lynde
 al_terminar: hecho lynde_visita
 ---
 lynde: (La Sra. Lynde mira a Ana de arriba abajo.) Bueno, no te eligieron por tu cara, eso seguro. Es terriblemente flaca y fea, Marilla. ¡Y qué pecas! ¡Y el pelo, rojo como zanahoria!
@@ -1925,7 +1925,7 @@ lynde: (La Sra. Lynde mira a Ana de arriba abajo.) Bueno, no te eligieron por tu
    ana: (Ana se planta frente a ella, temblando de rabia.) ¡La odio! ¡La odio, la odio, la odio! ¿Cómo se atreve a decir que soy flaca y fea? ¿Le gustaría que dijeran que usted es gorda y torpe y que no tiene una chispa de imaginación?
    lynde: ¡Habráse visto! ¡Qué genio!
    marilla: Ana, ve a tu pieza y quédate ahí hasta que yo suba.
-   ! hecho ofendio_lynde
+   ! estado lynde_ana ofendida
    ! suma afecto:lynde:ana -1
    ! log Ana estalló con la Sra. Lynde, que la llamó flaca, fea y pelirroja. Marilla la mandó a su pieza. | yo: la Sra. Lynde me llamó flaca, fea y pelirroja, y estallé. Marilla me mandó a mi pieza.
 ->* Apretar los puños y contar hasta diez
@@ -1948,7 +1948,7 @@ resumen: Marilla le dice a Ana que tiene que pedirle perdón a la Sra. Lynde.
 canal: gg
 prioridad: 8
 en: ana=gg, marilla=gg
-si: hecho:ofendio_lynde, !hecho:perdon_pedido
+si: lynde_ana=ofendida, !hecho:perdon_pedido
 al_terminar: hecho perdon_pedido
 ---
 marilla: Ana, lo que hiciste no se hace. Vas a ir a la casa de la Sra. Lynde a pedirle perdón.
@@ -1962,9 +1962,9 @@ prioridad: 9
 interrumpe
 sujeta: lynde
 en: ana=rl, lynde=rl
-si: hecho:ofendio_lynde
+si: lynde_ana=ofendida
 al_terminar: hecho disculpa_lynde
-al_terminar: olvidar ofendio_lynde
+al_terminar: estado lynde_ana bien
 ---
 ana: (Ana se arrodilla de pronto frente a la Sra. Lynde.)
 ->* Disculparse a lo grande, con todo el dramatismo del mundo
@@ -2022,7 +2022,7 @@ objeto: gwin
 paso: 2
 canal: ana_sola
 prioridad: 2
-si: hecho:a_prueba, !hecho:se_queda
+si: ana_en_tv>=decidida, ana_en_tv<se_queda
 ---
 ana piensa: (Ana apoya la frente en el vidrio.) Si me porto bien… si soy útil… si aprendo…
 ana: Voy a imaginar que esta ventana es mía para siempre. Así, si me tengo que ir, al menos la habré tenido un poco.
@@ -2034,7 +2034,7 @@ objeto: gwin
 paso: 3
 canal: ana_sola
 prioridad: 3
-si: hecho:se_queda
+si: ana_en_tv=se_queda
 ---
 ana: (Ana abre la ventana de par en par, como si fuera la primera vez.)
 ana: Mi ventana. Mi cerezo. Mi pieza. ¡Ana de Tejas Verdes! ¿Hay algo más lindo que poder decir «mío» sin miedo?
@@ -2046,7 +2046,7 @@ objeto: gwin
 paso: 4
 canal: ana_sola
 prioridad: 2
-si: hecho:conocidas_diana, !hecho:prohibida
+si: diana>=conocida, barry_permite=si
 ---
 ana: (Entre los árboles se ve el techo de La Cuesta del Huerto.)
 ana: Allí está Diana. Seguro que ahora mismo también está mirando por su ventana. Una amiga del alma es alguien que mira por la ventana al mismo tiempo que tú.
@@ -2070,7 +2070,7 @@ objeto: gwin
 paso: 6
 canal: ana_sola
 prioridad: 4
-si: hecho:prohibida, !hecho:perdonada
+si: barry_permite=no, !hecho:perdonada
 ---
 ana: (Ana mira largo rato hacia La Cuesta del Huerto, con los ojos llenos de lágrimas.)
 ana: Tan cerca, y no puedo ir. Es como en los cuentos, cuando hay un río encantado entre dos castillos.
@@ -2259,7 +2259,7 @@ objeto: mirror
 paso: 2
 canal: ana_sola
 prioridad: 2
-si: hecho:se_queda
+si: ana_en_tv=se_queda
 ---
 ana: Ana de Tejas Verdes. (Lo dice despacio, mirándose al espejo.) Ana-de-Tejas-Verdes.
 ana: Suena mucho mejor que Ana de ninguna parte, ¿verdad? Creo que hasta las pecas se ven más contentas.
@@ -2347,7 +2347,7 @@ objeto: armario
 paso: 2
 canal: ana_sola
 tambien
-si: hecho:se_queda
+si: ana_en_tv=se_queda
 ---
 ana: (En el armario cuelgan los tres vestidos que le hizo Marilla: lisos, de mangas angostas.)
 ana: Son útiles y sensatos, como dice Marilla. Voy a imaginar que uno tiene mangas abullonadas. El del medio. Así, por lo menos, tengo uno de mentira.
@@ -2397,7 +2397,7 @@ objeto: bed
 paso: 1
 canal: ana_sola
 sujeta: marilla
-si: hecho:primera_noche, !hecho:desayuno_prueba, !hecho:se_queda
+si: hecho:primera_noche, !hecho:desayuno_prueba, ana_en_tv<se_queda
 ---
 ana: (La pieza del alero: paredes blancas y desnudas, una cama alta, una mesita, una silla. Ana la mira con espanto.)
 ana: (Se arranca el vestido a tirones y lo tira al suelo, con los zapatos. El sombrero lo lanza lejos: por casualidad, queda colgando de la percha. Se pone el camisón del orfanato, que le queda corto.)
@@ -2650,7 +2650,7 @@ objeto: pupitre
 paso: 1
 canal: ana_sola
 tambien
-si: hecho:conocidas_diana, !hecho:prohibida
+si: diana>=conocida, barry_permite=si
 ---
 ana: (En el pupitre, alguien dejó una manzana roja y un papelito: «Para Ana, de tu D.».)
 ana: Diana. Esta manzana es demasiado linda para comérsela. Me la voy a comer igual, pero despacio.
@@ -2922,7 +2922,7 @@ paso: 2
 canal: ana_sola
 tambien
 prioridad: 2
-si: hecho:conocidas_diana, !hecho:prohibida
+si: diana>=conocida, barry_permite=si
 ---
 ana: (En el agua se ven reflejados los manzanos del huerto de los Barry.)
 ana: El huerto de Diana se mira en el lago como en un espejo. Si Diana estuviera aquí, nos reflejaríamos las dos: dos amigas del alma, cabeza abajo.
@@ -2981,7 +2981,7 @@ paso: 2
 canal: ana_sola
 prioridad: 6
 interrumpe
-si: estacion:primavera, hecho:se_queda
+si: estacion:primavera, ana_en_tv=se_queda
 ---
 narra: Los manzanos del Camino Blanco florecieron todos juntos, en una sola noche.
 ana: (Ana se detiene en seco. Sobre ella, la bóveda de flores es tan blanca que parece hecha de luz. Ya no se acuerda de adónde iba.)
@@ -3006,7 +3006,7 @@ paso: 4
 canal: ana_sola
 prioridad: 6
 interrumpe
-si: estacion:invierno, hecho:se_queda
+si: estacion:invierno, ana_en_tv=se_queda
 ---
 ana: (Empiezan a caer los primeros copos, grandes y lentos, sobre las ramas desnudas del Camino Blanco.)
 ana: (Ana levanta la cara y saca la lengua para atrapar uno.)
@@ -3099,7 +3099,7 @@ lugar: puente
 paso: 2
 canal: ana_sola
 prioridad: 2
-si: hecho:conocidas_diana, !hecho:prohibida
+si: diana>=conocida, barry_permite=si
 ---
 ana: (El puente une Tejas Verdes con La Cuesta del Huerto.)
 ana: Este es el puente más importante del mundo. Por aquí voy a ver a Diana y por aquí viene ella. Un puente entre dos amigas del alma.
@@ -3243,7 +3243,7 @@ disparo: lugar
 lugar: cuesta_del_huerto
 paso: 1
 canal: ana_sola
-si: estacion:primavera, hecho:conocidas_diana
+si: estacion:primavera, diana>=conocida
 ---
 ana: (El huerto de los Barry está en flor. Detrás de esas ventanas está Diana.)
 ana: Debe ser imposible estar triste viviendo en una casa con un huerto así. Aunque Diana dice que su mamá lo consigue igual.
@@ -3255,7 +3255,7 @@ lugar: cuesta_del_huerto
 paso: 2
 canal: ana_sola
 prioridad: 3
-si: hecho:prohibida, !hecho:perdonada
+si: barry_permite=no, !hecho:perdonada
 ---
 ana: (Ana pasa frente a La Cuesta del Huerto sin detenerse. Le parece ver una cortina que se mueve.)
 ana piensa: No voy a mirar, para no ponerla en un aprieto. Pero voy a caminar despacito, para que sepa que pasé.
@@ -3371,7 +3371,7 @@ disparo: lugar
 lugar: corral
 paso: 1
 canal: ana_sola
-si: !estacion:invierno, hecho:conocidas_diana
+si: !estacion:invierno, diana>=conocida
 ---
 ana: (Junto al corral, cuatro abedules forman un rincón, como una salita al aire libre.)
 ana: Idlewild. Aquí Diana y yo vamos a tener nuestra casita de juegos, con platos rotos de porcelana como si fueran la mejor vajilla.

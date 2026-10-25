@@ -1,0 +1,62 @@
+# El estado de la historia: variables con un valor de una lista (lo lee el juego al empezar; el motor:
+# src/js/20-estado.js). Un hecho es algo que pasó, una vez, con su día; el estado es cómo están las cosas ahora, y
+# cambia: Ana a prueba o aceptada, Diana desconocida o amiga del alma, si la Sra. Barry deja que se vean.
+#
+# «=== nombre ===» y sus campos, uno por línea:
+#   titulo: cómo se dice
+#   valores: a < b < c       los valores, en orden (una escala: se puede preguntar «diana>=conocida»)
+#   valores: a, b            los valores, sin orden (solo «=» y «!=»)
+#   otros: x                 valores fuera de la escala (Ana devuelta: ni más ni menos que aceptada)
+#   inicial: a               el valor al empezar (si no, el primero)
+#   <valor>: hecho x         al entrar en ese valor queda también el hecho x (para lo que cuenta los días desde
+#                            algo, «dias_desde:x:3», y para el código); una partida de antes, con el hecho, ya está ahí
+#   <valor>: olvida x        al entrar en ese valor, el hecho x deja de ser
+#   <valor>: viene de x      una partida de antes, con el hecho x, ya está en ese valor (sin dejarlo)
+#
+# En el guion: «! estado diana amiga_del_alma» lo cambia (o «al_terminar: estado …»); «si: diana>=conocida»,
+# «barry_permite=no», «ana_en_tv<decidida» lo pregunta. El grafo revisa que los nombres y los valores existan.
+# Las líneas que empiezan con # son comentarios.
+
+# --- Ana en Tejas Verdes (cap. 3 a 8): llega esperando un niño; a prueba; Marilla decide quedársela, a prueba
+# (después de White Sands); y al día siguiente le dice que se queda. O, sin paciencia ni cariño, la devuelve.
+=== ana_en_tv ===
+titulo: Ana en Tejas Verdes
+valores: llegando < en_prueba < decidida < se_queda
+otros: devuelta
+en_prueba: viene de llegada_tv
+decidida: hecho a_prueba
+se_queda: hecho se_queda
+devuelta: hecho devuelta
+
+# --- Diana (cap. 12): no se conocen; se conocen (por casualidad); o, como en el libro, la Sra. Barry las presenta y
+# Ana le pide ser su amiga del alma.
+=== diana ===
+titulo: Diana y Ana
+valores: desconocida < conocida < amiga_del_alma
+conocida: hecho conocidas_diana
+amiga_del_alma: hecho conocidas_diana
+amiga_del_alma: hecho amigas_del_alma
+
+# --- La Sra. Barry (cap. 16 a 18): después del vino de grosellas le prohíbe a Diana ver a Ana; la perdona cuando
+# Ana le salva la vida a Minnie May.
+=== barry_permite ===
+titulo: La Sra. Barry deja que Diana y Ana se vean
+valores: si, no
+inicial: si
+no: hecho prohibida
+si: olvida prohibida
+
+# --- La Sra. Lynde (cap. 9 y 10): si Ana le grita, queda ofendida hasta que Ana le pide perdón.
+=== lynde_ana ===
+titulo: La Sra. Lynde con Ana
+valores: bien, ofendida
+inicial: bien
+ofendida: hecho ofendio_lynde
+bien: olvida ofendio_lynde
+
+# --- El viaje en curso: el primero, de Bright River a Tejas Verdes (cap. 2), o a White Sands con Marilla (cap. 5 y
+# 6). Las escenas del camino son de ese viaje, y solo mientras dura.
+=== viaje ===
+titulo: El viaje en curso
+valores: ninguno, primer_viaje, white_sands
+inicial: ninguno

@@ -83,24 +83,24 @@ quien: matthew
 
 === diana_prohibida ===
 quien: diana
-si: hecho:prohibida
+si: barry_permite=no
 - Ana… mamá no me deja hablar contigo. Lo siento tanto, tanto…
 - No puedo, Ana… mamá dice que no. Pero te sigo queriendo, ¿sabes?
 
 # (pasear con Diana, 35-cosas-que-lleva.js, walkOption(): la despedida, de tarde o no; y el sí)
 === paseo_fin_tarde ===
 quien: diana
-si: !hecho:prohibida
+si: barry_permite=si
 - ¡Hasta mañana, Ana! Que sueñes bonito.
 
 === paseo_fin ===
 quien: diana
-si: !hecho:prohibida
+si: barry_permite=si
 - ¡Nos vemos, Ana! Fue un paseo precioso.
 
 === paseo_si ===
 quien: diana
-si: !hecho:prohibida
+si: barry_permite=si
 - ¡Sí! Vamos, Ana, a donde tú quieras.
 
 # --- los encargos (38-encargos.js): al entregarle lo que pidió, y al darle un recado

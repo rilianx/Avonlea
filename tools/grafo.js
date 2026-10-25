@@ -18,11 +18,25 @@ const CUALIDAD = /^([a-zñ_]+):([a-zñ_]+)(?::([a-zñ_]+))?\s*(>=|<=|>|<|==|=)\s
 const CUALIDADES = new Set(['afecto', ...[...habilidades.matchAll(/^===\s*(.+?)\s*===$/gm)].map(m => m[1]), ...[...guion.matchAll(/al_(?:empezar|terminar):\s*suma\s+([a-zñ_]+):/g)].map(m => m[1])]);
 const NOTICIAS = new Set([...leer('src/datos/noticias.txt').matchAll(/^===\s*(.+?)\s*===$/gm)].map(m => m[1]));   // (the news there are: src/datos/noticias.txt)
 const metas = new Set([...cuaderno.matchAll(/^===\s*(.+?)\s*===$/gm)].map(m => m[1]));   // (the goals of the notebook: «dias_desde» may count from one of them)
-const pide = {}, hace = {}, malas = [], puntos = [];   // (fact → where it is asked for / made)
+const pide = {}, hace = {}, malas = [], puntos = [];
+// the state (src/datos/estado.txt): its variables and values; a condition on it («diana>=conocida») asks for the values
+// that satisfy it (each value is, for the graph, a fact «diana=conocida» that the scenes setting it leave)
+const ESTADO = {}; { let v = null; for (const raw of leer('src/datos/estado.txt').split('\n')) { const t = raw.trim(); if (!t || t[0] === '#') continue; let m;
+  if ((m = t.match(/^===\s*(\w+)\s*===$/))) { v = ESTADO[m[1]] = { orden: [], otros: [], inicial: null, al: {} }; continue; } if (!v) continue;
+  if ((m = t.match(/^valores:\s*(.*)$/))) { if (m[1].includes('<')) v.orden = m[1].split('<').map(x => x.trim()); else v.otros.push(...m[1].split(',').map(x => x.trim())); }
+  if ((m = t.match(/^otros:\s*(.*)$/))) v.otros.push(...m[1].split(',').map(x => x.trim()));
+  if ((m = t.match(/^inicial:\s*(\w+)/))) v.inicial = m[1];
+  if ((m = t.match(/^(\w+):\s*(hecho|olvida|viene de)\s+(\w+)$/))) (v.al[m[1]] ||= []).push([m[2], m[3]]); }
+  for (const x of Object.values(ESTADO)) { x.valores = [...x.orden, ...x.otros]; x.inicial ??= x.valores[0]; } }
+const ESTADO_RE = /^(\w+)\s*(>=|<=|!=|=|>|<)\s*(\w+)$/;
+const estadoCumplen = (v, op, b) => { const V = ESTADO[v]; return V.valores.filter(a => op === '=' ? a === b : op === '!=' ? a !== b : (V.orden.includes(a) && V.orden.includes(b) && { '>=': V.orden.indexOf(a) >= V.orden.indexOf(b), '<=': V.orden.indexOf(a) <= V.orden.indexOf(b), '>': V.orden.indexOf(a) > V.orden.indexOf(b), '<': V.orden.indexOf(a) < V.orden.indexOf(b) }[op])); };
+const estadoLee = [];   // (each condition on the state: where, and the values that satisfy it; resolved once all is read)   // (fact → where it is asked for / made)
 const anota = (o, h, donde) => (o[h] ||= new Set()).add(donde);
 function condicion(c, donde){
   c = c.trim(); if (!c) return; const neg = c[0] === '!', s = neg ? c.slice(1) : c;
   const q = s.match(CUALIDAD); if (q) { if (!CUALIDADES.has(q[1])) malas.push(`${donde}: «${c}» (no hay una cualidad «${q[1]}»: ni el afecto, ni una habilidad, ni algo que sume una escena)`); return; }
+  { const m = s.match(ESTADO_RE); if (m && !s.includes(':')) { if (!ESTADO[m[1]]) return malas.push(`${donde}: «${c}» (no hay un estado «${m[1]}» en src/datos/estado.txt)`); if (!ESTADO[m[1]].valores.includes(m[3])) return malas.push(`${donde}: «${c}» («${m[3]}» no es un valor de ${m[1]}: ${ESTADO[m[1]].valores.join(', ')})`); if (/[<>]/.test(m[2]) && !ESTADO[m[1]].orden.includes(m[3])) return malas.push(`${donde}: «${c}» (${m[1]} no tiene orden para «${m[2]}» con ${m[3]})`);
+    const S = estadoCumplen(m[1], m[2], m[3]), T = neg ? ESTADO[m[1]].valores.filter(x => !S.includes(x)) : S; estadoLee.push({ donde, v: m[1], S: T }); return; } }
   const [k, a] = s.split(':');
   if (!CLAVES.includes(k)) return malas.push(`${donde}: «${c}» (no es una condición conocida)`);
   if (k === 'sabe' && !NOTICIAS.has(s.split(':')[2])) return malas.push(`${donde}: «${c}» (no hay una noticia «${s.split(':')[2]}» en src/datos/noticias.txt)`);
@@ -41,6 +55,7 @@ for (const raw of guion.split('\n')) {
   { const n = s.match(/^(?:!\s*|al_(?:empezar|terminar):\s*)(?:contar|saber)\s+\S+\s+(\S+)/); if (n && !NOTICIAS.has(n[1])) malas.push(`escena ${esc.id}: «${s}» (no hay una noticia «${n[1]}» en src/datos/noticias.txt)`); }
   // «{De:marilla:x}» (who told her): only if someone did; if she saw it herself, there is no one to name
   if (esc.body) for (const [, k, f] of s.matchAll(/\{[dD]e:(\w+):(\w+)\}/g)) if (!new RegExp(`(?<!!)sabe:${k}:${f}:(contada|[2-9])\\b`).test(esc.si || '')) malas.push(`escena ${esc.id}: nombra quién le contó a ${k} «${f}», y su «si:» no pide que se lo hayan contado (\`sabe:${k}:${f}:contada\`, o una versión 2 o más)`);
+  { const m = s.match(/^(?:!\s*|al_(?:empezar|terminar):\s*)estado\s+(\w+)\s+(?:=\s*)?(\w+)\s*$/); if (m) { if (!ESTADO[m[1]] || !ESTADO[m[1]].valores.includes(m[2])) malas.push(`escena ${esc.id}: «${s}» (no hay ese estado o ese valor en src/datos/estado.txt)`); else { const w = 'escena ' + esc.id + (esc.body ? ' (una opción)' : ''); anota(hace, m[1] + '=' + m[2], w); for (const [q, h] of ESTADO[m[1]].al[m[2]] || []) if (q === 'hecho') anota(hace, h, w); } } }
   if (esc.body) { const m = s.match(/^!\s*(hecho|olvidar)\s+(\S+)/); if (m) anota(m[1] === 'hecho' ? hace : pide, m[1] === 'hecho' ? m[2] : m[2] + ' ', 'escena ' + esc.id + ' (una opción)'); if (s.startsWith('->')) esc.opciones = (esc.opciones || 0) + 1;
     // (for the drawing, trazas/grafo.html: its lines, its choices and what each does)
     if (s.startsWith('->')) (esc.ops ||= []).push({ t: s.replace(/^->\*?\s*/, ''), propia: s.startsWith('->*'), ef: [] });
@@ -115,7 +130,7 @@ for (const raw of cuaderno.split('\n')) {
   const h = s.match(/^===\s*(.+?)\s*===$/); if (h) { meta = h[1]; continue; } if (!meta) continue;
   let m;
   if ((m = s.match(/^requiere:\s*(.*)$/))) for (const r of m[1].split(',').map(x => x.trim()).filter(Boolean)) {
-    if (r.includes(':') || r[0] === '!') condicion(r, 'meta ' + meta); else if (!metas.has(r)) malas.push(`meta ${meta}: requiere «${r}», que no es una meta del cuaderno`);
+    if (r.includes(':') || r[0] === '!' || ESTADO_RE.test(r)) condicion(r, 'meta ' + meta); else if (!metas.has(r)) malas.push(`meta ${meta}: requiere «${r}», que no es una meta del cuaderno`);
   }
   if ((m = s.match(/^pista si (.+?):\s/))) m[1].split(',').forEach(c => condicion(c.trim(), 'meta ' + meta + ' (pista)'));
   if ((m = s.match(/^meta:\s*hecho\s+(\S+)/))) anota(pide, m[1] + ' ', 'meta ' + meta);
@@ -123,7 +138,7 @@ for (const raw of cuaderno.split('\n')) {
   if ((m = s.match(/^(titulo|pista|meta):\s*(.*)$/))) (METAS_INFO[meta] ||= {})[m[1]] = m[2];
 }
 // before Marilla decides (days 1 to 3), only what is marked «a prueba»: every other goal waits for «quedarse»
-{ const llega = (k, vis = new Set()) => k === 'quedarse' || (REQ[k] || []).some(x => x === 'hecho:se_queda' || (metas.has(x) && !vis.has(x) && llega(x, new Set([...vis, k]))));
+{ const llega = (k, vis = new Set()) => k === 'quedarse' || (REQ[k] || []).some(x => x === 'hecho:se_queda' || x === 'ana_en_tv=se_queda' || (metas.has(x) && !vis.has(x) && llega(x, new Set([...vis, k]))));
   for (const k of metas) if (!A_PRUEBA.has(k) && !llega(k)) malas.push(`meta ${k}: se puede hacer antes de que acepten a Ana (que pida «quedarse», o márquela «a prueba»)`); }
 // the skills: Ana's milestones that someone tells leave a fact
 let hab = null;
@@ -205,6 +220,7 @@ for (const bloque of guion.split(/^(?====)/m)) {
     const r = cs.some(c => { let m;
       if ((m = c.match(/^(hecho|dias_desde|horas_desde):(\w+)/))) { if (m[2] === 'se_queda') return true; const M = [...(hace[m[2]] || [])]; return M.length > 0 && M.every(w => /^escena /.test(w) && despues(w.slice(7).replace(/ \(.*\)$/, ''), vis)); }
       if ((m = c.match(/^dicha:(\w+)/))) return despues(m[1], vis);
+      if ((m = c.match(ESTADO_RE)) && ESTADO[m[1]]) { if (m[1] === 'ana_en_tv' && (c === 'ana_en_tv=se_queda' || c === 'ana_en_tv>=se_queda')) return true; const S = estadoCumplen(m[1], m[2], m[3]); if (S.includes(ESTADO[m[1]].inicial)) return false; return S.every(x => { const M = [...(hace[m[1] + '=' + x] || [])]; return M.length > 0 && M.every(w => /^escena /.test(w) && despues(w.slice(7).replace(/ \(.*\)$/, ''), vis)); }); }
       if ((m = c.match(/^cuaderno:(\w+)/))) return metasDespues(m[1]);
       if ((m = c.match(/^dia_juego:(\d+)/))) return +m[1] >= 4;   // (Marilla decides on the third day: the fourth is after)
       if ((m = c.match(/^estacion:(\w+)/))) return m[1] !== 'primavera';
@@ -212,6 +228,12 @@ for (const bloque of guion.split(/^(?====)/m)) {
     memo.set(id, r); return r; };
   for (const e of escenas) if (!e.aPrueba && !/^(lugar|objeto|primera)$/.test(e.disparo || '') && !despues(e.id))
     malas.push(`escena ${e.id}: puede pasar antes de que Marilla acepte a Ana (que pida «hecho:se_queda», o lo que viene después; o márquela «a prueba»)`); }
+// the reads of the state: what satisfies them from the start needs nothing; otherwise, the values that some scene sets
+// (if none does, it could never happen)
+for (const { donde, v, S } of estadoLee) {
+  if (S.includes(ESTADO[v].inicial)) { for (const x of S) anota(pide, v + '=' + x + ' ', donde); continue; }
+  const P = S.filter(x => hace[v + '=' + x]); if (!P.length) { malas.push(`${donde}: pide ${v} en ${S.join(' o ')}, y ninguna escena lo pone`); continue; }
+  for (const x of P) anota(pide, v + '=' + x, donde); }
 // the lines of the things and the places: every scene of a thing or a place has its step («paso: 1», «4.1»), one step
 // each («4.1» and «4.2» are variants of one); and every line its wildcard («paso: siempre», with no conditions): there
 // is always something to say
@@ -223,7 +245,7 @@ for (const bloque of guion.split(/^(?====)/m)) {
 // the report
 const necesita = Object.keys(pide).filter(h => !h.endsWith(' ')), lee = new Set(Object.keys(pide).map(h => h.trim()));
 for (const e of escenas) { if (e.punto) puntos.push([e.id, 'antes', e.punto]); else if (e.grande && !puntos.some(([id]) => id === e.id)) malas.push(`escena ${e.id}: es grande y no deja un punto (un momento al que volver: «punto:», justo antes, o «al_terminar: punto»)`); }
-const nunca = necesita.filter(h => !hace[h] && !/^conoce_/.test(h)).sort()   /* (conoce_<who>: whoever Ana meets, src/js/66-conocidos.js) */, sinUso = Object.keys(hace).filter(h => !lee.has(h) && !/^(hito_|historia_|llego_|se_fue_)/.test(h)).sort();
+const nunca = necesita.filter(h => !hace[h] && !/^conoce_/.test(h)).sort()   /* (conoce_<who>: whoever Ana meets, src/js/66-conocidos.js) */, sinUso = Object.keys(hace).filter(h => !lee.has(h) && !h.includes('=') && !/^(hito_|historia_|llego_|se_fue_)/.test(h)).sort();
 // the drawing: trazas/grafo.html (tools/grafo-dibujo.js)
 const dibujo = require('./grafo-dibujo.js').dibujar({ escenas, hace, pide, puntos, nunca, malas, sinUso, metas: [...metas].map(id => ({ id, ...(METAS_INFO[id] || {}), requiere: REQ[id] || [], aPrueba: A_PRUEBA.has(id) })) }, root);
 const sinResumen = dibujo.nodos.filter(n => !n.suelto && !['meta', 'sistema'].includes(n.tipo) && !n.info.resumen && !n.info.tema).map(n => n.k);

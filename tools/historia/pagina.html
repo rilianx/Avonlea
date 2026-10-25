@@ -80,7 +80,7 @@ const HKEY = h => h.id + ':' + (h.de || 'ana') + ':' + (h.hacia || '');
 // begins at six in the morning, as in the game)
 function estadoInicial(){
   const c = {}; for (const h of D.habilidades) c[HKEY(h)] = h.inicial || 0;
-  return { dia: 1, hora: 19.75, donde: 'gg', h: { inicio_juego: 1 }, d: {}, c, m: {}, sabe: {}, inv: {}, diario: [], fin: null, juego: null };
+  return { dia: 1, hora: 19.75, donde: 'gg', h: { inicio_juego: 1 }, e: {}, d: {}, c, m: {}, sabe: {}, inv: {}, diario: [], fin: null, juego: null };
 }
 let st = estadoInicial(), pila = [], tab = 'sigue', filtro = { q: '', cartas: true, mis: true, solas: false };
 try { const g = JSON.parse(localStorage.getItem('avonlea-historia') || 'null'); if (g?.st) { st = g.st; pila = g.pila || []; st.donde ||= 'gg'; } } catch (e) {}
@@ -94,9 +94,31 @@ const nuevoDia = () => { st.dia++; st.hora = 7; st.donde = 'ga'; };
 // shown as what the player would have to bring about
 const QUAL = /^([a-zñ_]+):([a-zñ_]+)(?::([a-zñ_]+))?\s*(>=|<=|>|<|==|=)\s*(-?[\d.]+)$/;
 const contador = k => st.c[k] ?? (k.startsWith('afecto:') ? 0 : 0);
+// the state of the story (src/datos/estado.txt), as the game: the value set, or what the facts say; on a scale, the higher
+function estadoValor(k){
+  const V = D.estado[k]; if (!V) return null; let d = null;
+  for (const x of V.valores) if ((V.al[x] || []).some(([q, h]) => (q === 'hecho' || q === 'viene de') && st.h[h] != null)) d = x;
+  const g = (st.e ||= {})[k], i = V.orden.indexOf(g), j = V.orden.indexOf(d);
+  if (g && d && i >= 0 && j >= 0) return j > i ? d : g;
+  return g || d || V.inicial;
+}
+function estadoPoner(k, x){
+  const V = D.estado[k]; if (!V || !V.valores.includes(x)) return false;
+  (st.e ||= {})[k] = x; for (const [q, h] of V.al[x] || []) if (q === 'hecho') st.h[h] = st.dia; else if (q === 'olvida') delete st.h[h];
+  return true;
+}
+const ESTADO_RE = /^(\w+)\s*(>=|<=|!=|=|>|<)\s*(\w+)$/;
+function estadoCond(s){
+  const m = s.match(ESTADO_RE); if (!m || !D.estado[m[1]]) return null;
+  const V = D.estado[m[1]], a = estadoValor(m[1]), b = m[3];
+  if (m[2] === '=') return a === b; if (m[2] === '!=') return a !== b;
+  const i = V.orden.indexOf(a), j = V.orden.indexOf(b); if (i < 0 || j < 0) return false;
+  return { '>=': i >= j, '<=': i <= j, '>': i > j, '<': i < j }[m[2]];
+}
 function cond(c){
-  const neg = c[0] === '!', s = neg ? c.slice(1) : c, q = s.match(QUAL);
+  const neg = c[0] === '!', s = neg ? c.slice(1) : c, q = s.match(QUAL), e = estadoCond(s);
   const r = (() => {
+    if (e != null) return e;
     if (q) { const v = contador(q[1] + ':' + q[2] + ':' + (q[3] || '')), n = +q[5]; return { '>=': v >= n, '<=': v <= n, '>': v > n, '<': v < n, '==': v === n, '=': v === n }[q[4]]; }
     const [k, a, b] = s.split(':');
     switch (k) {
@@ -214,7 +236,7 @@ const momento = (d, h) => d === st.dia && h === st.hora ? 'ahora' : d === st.dia
 // ---- a fact: a chip (struck through if it must not have happened); touched, what it is: the scenes that leave it
 // (and how: always, or if Ana chooses something), those that need it, those it closes
 const hchip = (h, no) => `<span class="hecho${no ? ' no' : ''}" data-hecho="${esc(h)}">${esc(h)}</span>`;
-function condHtml(c){ const m = c.match(/^(!?)(hecho|dias_desde|horas_desde):(\w+)(?::([\d.]+))?$/); if (!m) return esc(palabras(c)); return hchip(m[3], !!m[1]) + (m[2] === 'dias_desde' ? ` <span class="mut">+${m[4]} día${m[4] === '1' ? '' : 's'}</span>` : ''); }
+function condHtml(c){ const e = c.match(ESTADO_RE); if (e && D.estado[e[1]]) return `<span class="hecho">${esc(e[1])} ${{ '>=': '≥', '<=': '≤', '!=': '≠' }[e[2]] || e[2]} ${esc(e[3])}</span>`; const m = c.match(/^(!?)(hecho|dias_desde|horas_desde):(\w+)(?::([\d.]+))?$/); if (!m) return esc(palabras(c)); return hchip(m[3], !!m[1]) + (m[2] === 'dias_desde' ? ` <span class="mut">+${m[4]} día${m[4] === '1' ? '' : 's'}</span>` : ''); }
 function infoHecho(h){
   const deja = [], pide = [], cierra = [], titulo = e => esc(e.resumen || e.tema || e.id);
   for (const e of D.escenas) {
@@ -238,6 +260,7 @@ function aplicar(s){
   switch (w) {
     case 'hecho': st.h[rest] = st.dia; return '✓ hecho ' + rest;
     case 'olvidar': delete st.h[rest]; return '✗ olvida ' + rest;
+    case 'estado': return estadoPoner(r[0], r.at(-1)) ? `◆ ${D.estado[r[0]].titulo}: ${r.at(-1).replace(/_/g, ' ')}` : '(' + s + ')';
     case 'suma': { const [q, n] = r, [nom, k, o] = q.split(':'), key = ck(nom, k, o), h = D.habilidades.find(x => HKEY(x) === key); let v = contador(key) + +n; if (h?.rango) v = Math.max(h.rango[0], Math.min(h.rango[1], v)); st.c[key] = v; return `${nom} de ${k}${o ? ' hacia ' + o : ''} ${+n > 0 ? '+' : ''}${n} → ${v}`; }
     case 'afecto': { const [k, o, n] = r, key = ck('afecto', k, o); st.c[key] = Math.max(contador(key), +n); return `afecto de ${k} hacia ${o}: al menos ${n} → ${st.c[key]}`; }
     case 'ofensa': { const [k, o, , n] = r, key = ck('afecto', k, o); st.c[key] = Math.min(contador(key), +n); return `${k} se ofende con ${o} → afecto ${st.c[key]}`; }
@@ -369,6 +392,7 @@ function pintaPosibles(){
 function pintaLado(){
   let h = '';
   if (tab === 'estado') {
+    h += '<h3>El estado de la historia</h3>' + Object.values(D.estado).map(V => { const v = estadoValor(V.id); return `<div class="fila"><span>${esc(V.titulo)} <span class="mut cod">${esc(V.id)}</span></span><select data-est="${esc(V.id)}">${V.valores.map(x => `<option${x === v ? ' selected' : ''}>${esc(x)}</option>`).join('')}</select></div>`; }).join('');
     h += '<h3>Contadores</h3>' + Object.entries(st.c).sort().map(([k, v]) => { const [q, a, b] = k.split(':'); return `<div class="fila"><span>${esc(q)} <span class="mut">de ${esc(a)}${b ? ' hacia ' + esc(b) : ''}</span></span><input type="number" data-c="${esc(k)}" value="${v}"></div>`; }).join('');
     h += '<div class="fila"><input type="text" id="nuevoc" placeholder="afecto:diana:ana" style="flex:1"> <button id="addc">+ contador</button></div>';
     const H = Object.entries(st.h).sort((a, b) => a[1] - b[1]);
@@ -396,7 +420,8 @@ $('lado').addEventListener('click', e => { const a = e.target.closest('[data-hac
   const i = e.target.closest('[data-ir]'); if (i && confirm('¿Volver a antes de este paso?')) return irA(+i.dataset.ir);
   if (e.target.id === 'addh') { const v = $('nuevoh').value.trim(); if (v) { paso('pone el hecho ' + v); st.h[v] = st.dia; guarda(); pinta(); } }
   if (e.target.id === 'addc') { const v = $('nuevoc').value.trim(); if (/^\w+:\w+:\w*$/.test(v)) { paso('agrega el contador ' + v); st.c[v] = contador(v); guarda(); pinta(); } } });
-$('lado').addEventListener('change', e => { const c = e.target.dataset.c; if (c) { paso(`cambia ${c} a ${e.target.value}`); st.c[c] = +e.target.value; guarda(); return pinta(); }
+$('lado').addEventListener('change', e => { const x = e.target.dataset.est; if (x) { paso(`pone ${x} en ${e.target.value}`); estadoPoner(x, e.target.value); guarda(); return pinta(); }
+  const c = e.target.dataset.c; if (c) { paso(`cambia ${c} a ${e.target.value}`); st.c[c] = +e.target.value; guarda(); return pinta(); }
   const m = e.target.dataset.meta; if (m) { paso((e.target.checked ? 'cumple' : 'deshace') + ' la meta ' + m); if (e.target.checked) st.m[m] = st.dia; else delete st.m[m]; guarda(); pinta(); } });
 $('atras').onclick = atras;
 document.addEventListener('click', e => { const h = e.target.closest('[data-hecho]'); if (h) { e.stopPropagation(); return infoHecho(h.dataset.hecho); } if (e.target.id === 'cerrardlg' || e.target.id === 'dlg') $('dlg').close(); }, true);

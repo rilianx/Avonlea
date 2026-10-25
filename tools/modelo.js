@@ -10,7 +10,7 @@ const { modelo } = require('./modelo-nucleo.js');
 
 const RAIZ = path.join(__dirname, '..');
 // what the model reads (by path from the repo root, as the core names them)
-const ARCHIVOS = ['src/datos/llegadas.txt', 'src/datos/guion.txt', 'src/datos/conversaciones.txt', 'src/datos/reglas.txt', 'src/datos/frases.txt', 'src/datos/cuaderno.txt'];
+const ARCHIVOS = ['src/datos/estado.txt', 'src/datos/llegadas.txt', 'src/datos/guion.txt', 'src/datos/conversaciones.txt', 'src/datos/reglas.txt', 'src/datos/frases.txt', 'src/datos/cuaderno.txt'];
 
 // the texts the model reads, from a checkout (this one, or a copy with more scenes)
 function leerTextos(raiz = RAIZ){

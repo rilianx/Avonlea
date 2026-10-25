@@ -31,7 +31,7 @@ pista si hecho:mis_brujula_jim: El capitán Jim ya sabe lo que tú sabías. Habr
 meta: hecho mis_brujula_fin
 requiere: quedarse, hecho:mis_brujula_hallada
 oculta
-guiño lynde: [hecho:mis_brujula_hallada, !hecho:mis_brujula_sabe, !hecho:ofendio_lynde] ¿Qué es eso que andas trayendo en el bolsillo, niña? Se te nota en la cara que es un misterio.
+guiño lynde: [hecho:mis_brujula_hallada, !hecho:mis_brujula_sabe, lynde_ana=bien] ¿Qué es eso que andas trayendo en el bolsillo, niña? Se te nota en la cara que es un misterio.
 guiño lynde: [hecho:mis_brujula_hallada, !hecho:mis_brujula_sabe, hecho:disculpa_lynde] ¿Qué es eso que andas trayendo en el bolsillo, niña? Se te nota en la cara que es un misterio.
 
 --- guion ---
@@ -42,7 +42,7 @@ canal: mision
 prioridad: 3
 en: ana=out
 cerca: ana, lago, 620
-si: hecho:se_queda, hora:9-18, !hecho:mis_brujula_hallada
+si: ana_en_tv=se_queda, hora:9-18, !hecho:mis_brujula_hallada
 al_empezar: hecho mis_brujula_hallada
 al_empezar: log Ana encontró en el lago una brújula vieja con una dedicatoria. | yo: Encontré una brújula en el lago. Dice «A Jim, de J. A. H.». Alguien la perdió… o la tiró.
 ---
@@ -57,7 +57,7 @@ ana piensa: «A Jim, de J. A. H. — para que siempre encuentres el camino de vu
 con: lynde
 tema: Preguntarle quién es «J. A. H.»
 resumen: La Sra. Lynde reconoce la brújula: el Sr. Harrison se la regaló al capitán Jim, y una noche de tormenta, hace treinta años, dejaron de hablarse.
-si: conoce:lynde, hecho:mis_brujula_hallada, !hecho:mis_brujula_sabe
+si: conoce:lynde, hecho:mis_brujula_hallada, !hecho:mis_brujula_sabe, lynde_ana=bien
 al_terminar: hecho mis_brujula_sabe
 ---
 ana: Sra. Lynde, ¿usted sabe quién es «J. A. H.»? Encontré esto en el lago.

@@ -35,7 +35,7 @@ peso: nucleo
 capitulos: 4–6
 situacion: Ana vive unos días sin saber si la devuelven al orfanato; tiene que ganarse un lugar.
 necesita: llegada
-pasa si: hecho:a_prueba
+pasa si: ana_en_tv>=decidida
 libro: Marilla la lleva donde la Sra. Spencer; la Sra. Blewett la quiere de criada; Marilla decide probarla.
 no puede: que la acepten sin dudas; que Ana sepa desde el principio que se queda
 variantes: Marilla la pone a prueba con los quehaceres de la casa; alguien del pueblo opina que hay que devolverla
@@ -46,8 +46,8 @@ peso: nucleo
 capitulos: 6–8
 situacion: Los Cuthbert deciden qué hacer con Ana.
 necesita: a_prueba
-pasa si: hecho:se_queda | hecho:devuelta
-respuesta se_queda: hecho:se_queda
+pasa si: ana_en_tv=se_queda | hecho:devuelta
+respuesta se_queda: ana_en_tv=se_queda
 respuesta devuelta: hecho:devuelta
 libro: se_queda — Marilla le dice que se queda, «si te portas bien y te muestras agradecida».
 no puede: que lo decida Ana sola; que pase sin que Marilla lo diga
@@ -71,7 +71,7 @@ capitulos: 9
 situacion: Una persona mayor humilla a Ana por su aspecto, delante de los de la casa.
 necesita: decision:se_queda
 pasa si: hecho:lynde_visita
-respuesta estalla: hecho:ofendio_lynde | hecho:disculpa_lynde
+respuesta estalla: lynde_ana=ofendida | hecho:disculpa_lynde
 respuesta se_contiene: hecho:lynde_contenida
 respuesta llora: hecho:lynde_llanto
 libro: estalla — la Sra. Lynde dice que es flaca, fea y pelirroja; Ana le grita «¡La odio!».
@@ -107,7 +107,7 @@ peso: menor
 capitulos: 12
 situacion: Ana conoce a la niña que podría ser la amiga que siempre soñó.
 necesita: decision:se_queda
-pasa si: hecho:conocidas_diana
+pasa si: diana>=conocida
 respuesta juran: cuaderno:amigas
 respuesta no_juran: dias_desde:conocidas_diana:14, !cuaderno:amigas
 libro: juran — en el jardín de La Cuesta del Huerto, «mientras el sol y la luna existan».

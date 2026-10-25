@@ -312,8 +312,7 @@ marcas: 8=matthew_nina
 al_empezar: marca jefe_explica | El jefe de estación le explicó a Matthew que solo había llegado una niña; Matthew decidió llevarla a casa y que Marilla aclarara el error.
 al_terminar: ana sit=false
 al_terminar: meta matthew llevar ana,cocina | | llevar a la niña a Tejas Verdes en la calesa (cap. 2) | 3
-al_terminar: hecho primer_viaje
-
+al_terminar: estado viaje primer_viaje
 # --- el primer viaje, de Bright River a Tejas Verdes (cap. 2): solo mientras dura («primer_viaje»: lo deja la escena
 # de la estación, y se olvida al llegar a Tejas Verdes)
 # --- el túnel de manzanos, antes que nada (Ana enmudece); Newbridge, callada todavía
@@ -324,7 +323,7 @@ prioridad: 10
 interrumpe
 calesa: camino
 camino: tramo=avenida
-si: hecho:primer_viaje
+si: viaje=primer_viaje
 lineas: libro:viaje.10 [7]
 ---
 ana: (Ana enmudece. Se queda mirando la bóveda de flores, con las manos juntas, como si estuviera en una iglesia.)
@@ -338,7 +337,7 @@ prioridad: 8
 interrumpe
 calesa: camino
 camino: tramo=Newbridge
-si: hecho:primer_viaje, dicha:avenida
+si: viaje=primer_viaje, dicha:avenida
 ---
 ana: (Callada todavía. Los perros les ladran, los chicos gritan desde las cercas, hay caras curiosas en las ventanas: Ana no ve nada de eso.)
 
@@ -350,7 +349,7 @@ prioridad: 1.5
 pausa: 12
 calesa: camino
 camino: tramo=avenida
-si: hecho:primer_viaje, dicha:avenida
+si: viaje=primer_viaje, dicha:avenida
 ---
 ana: (Ana echa la cabeza atrás para mirar la bóveda de flores. Los pétalos le caen en el pelo y no se los quita.)
 
@@ -361,7 +360,7 @@ prioridad: 1.5
 pausa: 12
 calesa: camino
 camino: tramo=avenida
-si: hecho:primer_viaje, dicha:avenida_petalos
+si: viaje=primer_viaje, dicha:avenida_petalos
 ---
 matthew: (Matthew afloja las riendas. La yegua va al paso, como si también ella quisiera que esto no se acabara.)
 
@@ -372,7 +371,7 @@ prioridad: 1.5
 pausa: 12
 calesa: camino
 camino: tramo=avenida
-si: hecho:primer_viaje, dicha:avenida_paso
+si: viaje=primer_viaje, dicha:avenida_paso
 ---
 ana: (Al fondo de la Avenida, el cielo del atardecer brilla como el rosetón de una catedral.)
 
@@ -383,7 +382,7 @@ prioridad: 1.5
 pausa: 12
 calesa: camino
 camino: tramo=Newbridge
-si: hecho:primer_viaje, dicha:newbridge
+si: viaje=primer_viaje, dicha:newbridge
 ---
 ana: (Las ventanas del pueblo se encienden una a una. Ana sigue mirando hacia atrás, hacia donde quedó la Avenida.)
 
@@ -394,7 +393,7 @@ prioridad: 1.5
 pausa: 14
 calesa: camino
 camino: tramo=campos
-si: hecho:primer_viaje, dicha:avenida
+si: viaje=primer_viaje, dicha:avenida
 ---
 ana: (Ana va callada, con las manos juntas sobre el bolso de alfombra y los ojos en el cielo del oeste.)
 
@@ -405,7 +404,7 @@ prioridad: 1.5
 pausa: 14
 calesa: camino
 camino: tramo=campos
-si: hecho:primer_viaje, dicha:silencio_manos
+si: viaje=primer_viaje, dicha:silencio_manos
 ---
 matthew: (Matthew la mira de reojo. Nunca pensó que el silencio de una niña pudiera ser tan cómodo.)
 
@@ -416,7 +415,7 @@ prioridad: 1.5
 pausa: 14
 calesa: camino
 camino: tramo=campos
-si: hecho:primer_viaje, dicha:silencio_matthew
+si: viaje=primer_viaje, dicha:silencio_matthew
 ---
 ana: (Sobre los campos aparece la primera estrella. Ana mueve los labios: quizás le está pidiendo un deseo.)
 
@@ -427,7 +426,7 @@ prioridad: 1.5
 pausa: 14
 calesa: camino
 camino: tramo=campos
-si: hecho:primer_viaje, dicha:silencio_estrella
+si: viaje=primer_viaje, dicha:silencio_estrella
 ---
 matthew: (En una laguna junto al camino empiezan a cantar las ranas. La yegua resopla: ya huele su casa.)
 
@@ -438,7 +437,7 @@ prioridad: 1.5
 pausa: 14
 calesa: camino
 camino: tramo=campos
-si: hecho:primer_viaje, dicha:silencio_ranas
+si: viaje=primer_viaje, dicha:silencio_ranas
 ---
 ana piensa: Blanco… de las Delicias… no, todavía no…
 
@@ -449,7 +448,7 @@ resumen: Ana le pone nombre a la Avenida (en el libro, «el Camino Blanco de las
 canal: viaje
 prioridad: 9
 interrumpe
-si: hecho:primer_viaje, dicha:avenida
+si: viaje=primer_viaje, dicha:avenida
 o: calesa=camino camino.desde=.955
 o: calesa=avonlea cerca=matthew,letrero_br,2500
 lineas: libro:avonlea.camino_blanco [1,2,3,4]
@@ -473,7 +472,7 @@ prioridad: 9
 interrumpe
 calesa: avonlea
 cerca: matthew, lago, 1300
-si: hecho:primer_viaje
+si: viaje=primer_viaje
 lineas: libro:avonlea.lago [0]
 marcas: 0=lago
 al_empezar: log Matthew le mostró la laguna de Barry.
@@ -494,7 +493,7 @@ a prueba
 canal: viaje
 prioridad: 9
 interrumpe
-si: hecho:primer_viaje, dicha:lago
+si: viaje=primer_viaje, dicha:lago
 o: calesa=avonlea cerca=matthew,tejas_verdes,1700 si=y_mayor:matthew:61
 o: si=capitulo,hecho:matthew_llego_casa,!hecho:llegaron
 lineas: libro:avonlea.tejas_verdes [0,1,2,3,4,8,9]
@@ -514,8 +513,8 @@ marcas: 0=marilla_nino
 al_empezar: log Marilla vio a la niña de pelo rojo: «Matthew Cuthbert, ¿quién es ésa? ¿Dónde está el niño?»
 al_terminar: fin_capitulo
 al_terminar: hecho llegada_tv
-al_terminar: olvidar primer_viaje
-
+al_terminar: estado ana_en_tv en_prueba
+al_terminar: estado viaje ninguno
 # --- lo que Ana piensa en voz alta en el camino, cuando no hay otra cosa (un comentario: si lo cortan, se pierde)
 === relleno ===
 a prueba
@@ -535,7 +534,7 @@ lineas: relleno:1
 === carta_diana_1 ===
 canal: carta
 prioridad: 5
-si: hecho:se_queda, carta:diana, hecho:conocidas_diana
+si: ana_en_tv=se_queda, carta:diana, diana>=conocida
 entre: 5
 al_terminar: hecho carta_a_diana
 ---
@@ -558,7 +557,7 @@ ana: Listo. ¡La doblo como un abanico, para que se vea elegante!
 canal: carta
 prioridad: 5
 repetir: siempre
-si: hecho:se_queda, carta:diana, dicha:carta_diana_1, hecho:conocidas_diana
+si: ana_en_tv=se_queda, carta:diana, dicha:carta_diana_1, diana>=conocida
 entre: 5
 al_terminar: hecho carta_a_diana
 ---
@@ -578,7 +577,7 @@ carta: Tuya siempre, Ana (con una sola n).
 === carta_stacy_1 ===
 canal: carta
 prioridad: 5
-si: hecho:se_queda, carta:stacy, conoce:stacy, hecho:llego_stacy
+si: ana_en_tv=se_queda, carta:stacy, conoce:stacy, hecho:llego_stacy
 entre: 5
 al_terminar: hecho carta_a_stacy
 ---
@@ -599,7 +598,7 @@ carta: Su alumna que la quiere, Ana Shirley.
 canal: carta
 prioridad: 5
 repetir: siempre
-si: hecho:se_queda, carta:stacy, dicha:carta_stacy_1, conoce:stacy, hecho:llego_stacy
+si: ana_en_tv=se_queda, carta:stacy, dicha:carta_stacy_1, conoce:stacy, hecho:llego_stacy
 entre: 5
 al_terminar: hecho carta_a_stacy
 ---
@@ -617,7 +616,7 @@ carta: Su alumna que la quiere, Ana Shirley.
 === carta_sraallan_1 ===
 canal: carta
 prioridad: 5
-si: hecho:se_queda, carta:sraallan, conoce:sraallan
+si: ana_en_tv=se_queda, carta:sraallan, conoce:sraallan
 entre: 5
 al_terminar: hecho carta_a_sraallan
 ---
@@ -636,7 +635,7 @@ carta: Con todo cariño, Ana Shirley.
 canal: carta
 prioridad: 5
 repetir: siempre
-si: hecho:se_queda, carta:sraallan, dicha:carta_sraallan_1, conoce:sraallan
+si: ana_en_tv=se_queda, carta:sraallan, dicha:carta_sraallan_1, conoce:sraallan
 entre: 5
 al_terminar: hecho carta_a_sraallan
 ---
@@ -652,7 +651,7 @@ carta: Con todo cariño, Ana Shirley.
 === carta_josephine_1 ===
 canal: carta
 prioridad: 5
-si: hecho:se_queda, carta:josephine, conoce:josephine
+si: ana_en_tv=se_queda, carta:josephine, conoce:josephine
 entre: 5
 al_terminar: hecho carta_a_josephine
 ---
@@ -670,7 +669,7 @@ carta: Su amiga que la recuerda siempre, Ana Shirley.
 canal: carta
 prioridad: 5
 repetir: siempre
-si: hecho:se_queda, carta:josephine, dicha:carta_josephine_1, conoce:josephine
+si: ana_en_tv=se_queda, carta:josephine, dicha:carta_josephine_1, conoce:josephine
 entre: 5
 al_terminar: hecho carta_a_josephine
 ---
@@ -690,7 +689,7 @@ carta: Su amiga que la recuerda siempre, Ana Shirley.
 a prueba
 canal: carta
 prioridad: 5
-si: carta:spencer, !hecho:se_queda, hecho:desayuno_prueba
+si: carta:spencer, ana_en_tv<se_queda, hecho:desayuno_prueba
 entre: 5
 al_terminar: hecho carta_a_spencer
 ---
@@ -709,7 +708,7 @@ resumen: Ana le escribe a la Sra. Spencer cómo le va en Tejas Verdes.
 canal: carta
 prioridad: 5
 repetir: siempre
-si: carta:spencer, hecho:se_queda
+si: carta:spencer, ana_en_tv=se_queda
 entre: 5
 al_terminar: hecho carta_a_spencer
 ---
@@ -730,7 +729,7 @@ carta: Su agradecida, Ana Shirley (de Tejas Verdes)
 === resp_diana_1 ===
 canal: respuesta
 de: diana
-si: hecho:se_queda, respuesta:diana, hecho:carta_a_diana
+si: ana_en_tv=se_queda, respuesta:diana, hecho:carta_a_diana
 ---
 carta: Querida Ana:
 carta: ¡Qué carta tan bonita! La leí tres veces y la guardé en mi caja de cartas, con la cinta azul.
@@ -740,7 +739,7 @@ carta: Tu amiga del alma, Diana
 === resp_diana_2 ===
 canal: respuesta
 de: diana
-si: hecho:se_queda, respuesta:diana, hecho:carta_a_diana
+si: ana_en_tv=se_queda, respuesta:diana, hecho:carta_a_diana
 ---
 carta: Queridísima Ana:
 carta: Tu carta me hizo reír tanto que Minnie May me preguntó qué pasaba. No le dije: es un secreto de amigas del alma.
@@ -750,7 +749,7 @@ carta: Siempre tuya, Diana
 === resp_stacy_1 ===
 canal: respuesta
 de: stacy
-si: hecho:se_queda, respuesta:stacy, hecho:carta_a_stacy
+si: ana_en_tv=se_queda, respuesta:stacy, hecho:carta_a_stacy
 ---
 carta: Querida Ana:
 carta: Me alegró mucho recibir tu carta. Escribes con el corazón, y eso no se enseña.
@@ -760,7 +759,7 @@ carta: Con cariño, Muriel Stacy
 === resp_stacy_2 ===
 canal: respuesta
 de: stacy
-si: hecho:se_queda, respuesta:stacy, hecho:carta_a_stacy
+si: ana_en_tv=se_queda, respuesta:stacy, hecho:carta_a_stacy
 ---
 carta: Querida Ana:
 carta: Claro que podrías escribir un libro. Empieza por una página, y después otra. Así se hacen todos.
@@ -770,7 +769,7 @@ carta: Tu maestra, M. Stacy
 === resp_sraallan_1 ===
 canal: respuesta
 de: sraallan
-si: hecho:se_queda, respuesta:sraallan, hecho:carta_a_sraallan
+si: ana_en_tv=se_queda, respuesta:sraallan, hecho:carta_a_sraallan
 ---
 carta: Querida Ana:
 carta: Qué alegría me dio tu carta. A mí también me gustó mucho la tarde del té.
@@ -780,7 +779,7 @@ carta: Te quiere, la Sra. Allan
 === resp_josephine_1 ===
 canal: respuesta
 de: josephine
-si: hecho:se_queda, respuesta:josephine, hecho:carta_a_josephine
+si: ana_en_tv=se_queda, respuesta:josephine, hecho:carta_a_josephine
 ---
 carta: Querida Ana:
 carta: Tu carta me hizo reír más que cualquier cosa en todo el invierno. Hacía años que no me reía así.
@@ -790,7 +789,7 @@ carta: Tu vieja amiga, Josephine Barry
 === resp_josephine_2 ===
 canal: respuesta
 de: josephine
-si: hecho:se_queda, respuesta:josephine, hecho:carta_a_josephine
+si: ana_en_tv=se_queda, respuesta:josephine, hecho:carta_a_josephine
 ---
 carta: Mi querida Ana:
 carta: Recibí tu carta y la leí junto a la chimenea. Escribes como hablas, y eso es un gran elogio viniendo de mí.
@@ -802,7 +801,7 @@ a prueba
 canal: respuesta
 de: spencer
 responde: carta_spencer_prueba
-si: respuesta:spencer, !hecho:se_queda, dicha:carta_spencer_prueba
+si: respuesta:spencer, ana_en_tv<se_queda, dicha:carta_spencer_prueba
 ---
 carta: Querida Ana:
 carta: Recibí tu carta. No te preocupes antes de tiempo, niña: la Srta. Cuthbert es una mujer seria, pero justa.
@@ -814,7 +813,7 @@ resumen: La Sra. Spencer contesta: se alegra de que los Cuthbert se queden con A
 canal: respuesta
 de: spencer
 responde: carta_spencer_prueba
-si: respuesta:spencer, hecho:se_queda, dicha:carta_spencer_prueba
+si: respuesta:spencer, ana_en_tv=se_queda, dicha:carta_spencer_prueba
 ---
 carta: Querida Ana:
 carta: Cuando llegó tu carta ya me había enterado: ¡los Cuthbert se quedaron contigo! Ya ves que las cosas se arreglan, cuando una se porta bien.
@@ -825,7 +824,7 @@ carta: Afectuosamente, la Sra. Spencer
 resumen: La Sra. Spencer contesta: se alegra de que Ana tenga una amiga, Diana.
 canal: respuesta
 de: spencer
-si: respuesta:spencer, hecho:se_queda, hecho:conocidas_diana, hecho:carta_a_spencer
+si: respuesta:spencer, ana_en_tv=se_queda, diana>=conocida, hecho:carta_a_spencer
 ---
 carta: Querida Ana:
 carta: ¿Así que ya tienes una amiga, la niña de los Barry? Me alegro, Ana. Una buena amiga vale más que un vestido nuevo. Pero no la marees con tanta palabra.
@@ -836,7 +835,7 @@ carta: Afectuosamente, la Sra. Spencer
 resumen: La Sra. Spencer la reta por romperle la pizarra en la cabeza a Gilbert.
 canal: respuesta
 de: spencer
-si: respuesta:spencer, hecho:se_queda, hecho:zanahorias_pizarra, hecho:carta_a_spencer
+si: respuesta:spencer, ana_en_tv=se_queda, hecho:zanahorias_pizarra, hecho:carta_a_spencer
 ---
 carta: Querida Ana:
 carta: ¡Ana Shirley! ¿Cómo que le partiste la pizarra en la cabeza a un muchacho? Ya sé que te dijo zanahoria, pero una señorita no anda rompiendo pizarras.
@@ -847,7 +846,7 @@ carta: Afectuosamente, la Sra. Spencer
 resumen: La Sra. Spencer: le contestó a Gilbert; que cuide esa lengua.
 canal: respuesta
 de: spencer
-si: respuesta:spencer, hecho:se_queda, hecho:zanahorias_contesta, hecho:carta_a_spencer
+si: respuesta:spencer, ana_en_tv=se_queda, hecho:zanahorias_contesta, hecho:carta_a_spencer
 ---
 carta: Querida Ana:
 carta: Así que le contestaste a ese muchacho delante de toda la escuela. Hmm. No te voy a decir que hiciste mal, porque se lo buscó. Pero cuida esa lengua, Ana.
@@ -858,7 +857,7 @@ carta: Afectuosamente, la Sra. Spencer
 resumen: La Sra. Spencer la felicita por no hacerle caso a Gilbert.
 canal: respuesta
 de: spencer
-si: respuesta:spencer, hecho:se_queda, hecho:zanahorias_ignora, hecho:carta_a_spencer
+si: respuesta:spencer, ana_en_tv=se_queda, hecho:zanahorias_ignora, hecho:carta_a_spencer
 ---
 carta: Querida Ana:
 carta: Me cuentas que un muchacho se burló de tu pelo y que hiciste como si no existiera. Eso, Ana, es tener más juicio que muchas señoras que conozco.
@@ -869,7 +868,7 @@ carta: Afectuosamente, la Sra. Spencer
 resumen: La Sra. Spencer supo que gritó a la Sra. Lynde: que le pida perdón.
 canal: respuesta
 de: spencer
-si: respuesta:spencer, hecho:se_queda, hecho:ofendio_lynde, hecho:carta_a_spencer
+si: respuesta:spencer, ana_en_tv=se_queda, lynde_ana=ofendida, hecho:carta_a_spencer
 ---
 carta: Querida Ana:
 carta: Me enteré, Ana. Rachel Lynde me escribió. ¿Cómo se te ocurre gritarle a una señora así, en la casa que te recibió?
@@ -880,7 +879,7 @@ carta: Afectuosamente, la Sra. Spencer
 resumen: La Sra. Spencer la consuela: la Sra. Lynde la trató de flaca y fea.
 canal: respuesta
 de: spencer
-si: respuesta:spencer, hecho:se_queda, hecho:lynde_llanto, hecho:carta_a_spencer
+si: respuesta:spencer, ana_en_tv=se_queda, hecho:lynde_llanto, hecho:carta_a_spencer
 ---
 carta: Querida Ana:
 carta: Me dices que la Sra. Lynde te llamó flaca y fea, y que te fuiste llorando. Ay, Ana. Rachel Lynde dice lo que piensa, y piensa demasiado.
@@ -891,7 +890,7 @@ carta: Afectuosamente, la Sra. Spencer
 resumen: La Sra. Spencer: qué pena lo de Diana; paciencia, y nada a escondidas.
 canal: respuesta
 de: spencer
-si: respuesta:spencer, hecho:se_queda, hecho:prohibida, hecho:carta_a_spencer
+si: respuesta:spencer, ana_en_tv=se_queda, barry_permite=no, hecho:carta_a_spencer
 ---
 carta: Querida Ana:
 carta: Qué pena lo de la niña de los Barry. Vino de grosellas… ¡quién iba a pensar! Ten paciencia, Ana: las madres se ablandan con el tiempo.
@@ -902,7 +901,7 @@ carta: Afectuosamente, la Sra. Spencer
 resumen: La Sra. Spencer contesta la primera carta: que se porte bien y no hable tanto.
 canal: respuesta
 de: spencer
-si: respuesta:spencer, hecho:se_queda, hecho:carta_a_spencer
+si: respuesta:spencer, ana_en_tv=se_queda, hecho:carta_a_spencer
 ---
 carta: Querida Ana:
 carta: Me dio mucho gusto saber de ti. Ya ves que las cosas se arreglan solas, cuando una se porta bien.
@@ -917,7 +916,7 @@ prioridad: 7
 interrumpe
 sujeta: marilla
 en: ana=gg, marilla=gg
-si: hecho:se_queda, hecho:pide_amiga, !hecho:quiere_amiga, !hecho:conocidas_diana
+si: ana_en_tv=se_queda, hecho:pide_amiga, !hecho:quiere_amiga, diana=desconocida
 al_terminar: hecho quiere_amiga
 al_terminar: log Ana le contó a Marilla que quería una amiga del alma, y Marilla le habló de Diana Barry. | yo: le conté a Marilla que quería una amiga del alma, y ella me habló de Diana Barry, la niña de La Cuesta del Huerto.
 ---
@@ -937,7 +936,7 @@ prioridad: 5
 repetir: dia
 sujeta: marilla
 en: ana=gg, marilla=gg
-si: hecho:se_queda, dias_desde:quiere_amiga:1, !hecho:conocidas_diana, !hecho:barry_presenta, presente:diana, hora:6-13
+si: ana_en_tv=se_queda, dias_desde:quiere_amiga:1, diana=desconocida, !hecho:barry_presenta, presente:diana, hora:6-13
 ---
 marilla: Ana, esta tarde, después del almuerzo, voy a La Cuesta del Huerto a devolverle un patrón a la Sra. Barry. Si quieres conocer a Diana, no te vayas lejos.
 ana: ¡Oh, Marilla! Voy a estar aquí, quietecita como una estatua. Bueno… casi como una estatua.
@@ -950,7 +949,7 @@ prioridad: 7
 interrumpe
 sujeta: marilla, barry
 en: ana=os, marilla=os
-si: hecho:se_queda, hecho:quiere_amiga, !hecho:conocidas_diana, !hecho:barry_presenta
+si: ana_en_tv=se_queda, hecho:quiere_amiga, diana=desconocida, !hecho:barry_presenta
 al_empezar: contar barry nina_cuthbert
 al_terminar: hecho barry_presenta
 al_terminar: meta diana estar_en h:os,-,- | Diana entra a conocer a la niña de Tejas Verdes | entrar a conocer a la niña de Tejas Verdes (cap. 12) | 3
@@ -967,8 +966,8 @@ prioridad: 8
 interrumpe
 sujeta: ana, diana
 en: ana=os, diana=os
-si: hecho:se_queda, hecho:barry_presenta, !hecho:conocidas_diana
-al_terminar: hecho conocidas_diana
+si: ana_en_tv=se_queda, hecho:barry_presenta, diana=desconocida
+al_terminar: estado diana amiga_del_alma
 al_terminar: afecto diana ana 4
 al_terminar: afecto ana diana 5
 al_terminar: log Ana conoció a Diana Barry en La Cuesta del Huerto: la Sra. Barry las presentó. | yo: conocí a Diana Barry en La Cuesta del Huerto. ¡Creo que vamos a ser amigas del alma!
@@ -983,8 +982,8 @@ resumen: Ana y Diana se encuentran por casualidad, sin que nadie las presente.
 disparo: encuentro
 quienes: ana, diana
 # (una vez que Ana le contó a Marilla, se conocen como en el libro: Marilla la lleva y la Sra. Barry las presenta)
-si: hecho:se_queda, !hecho:conocidas_diana, !hecho:barry_presenta, !hecho:quiere_amiga
-al_terminar: hecho conocidas_diana
+si: ana_en_tv=se_queda, diana=desconocida, !hecho:barry_presenta, !hecho:quiere_amiga
+al_terminar: estado diana conocida
 al_terminar: afecto diana ana 2
 al_terminar: afecto ana diana 4
 al_terminar: log Ana y Diana se conocieron por casualidad. | yo: conocí a Diana Barry, por pura casualidad. Creo que vamos a ser amigas del alma.
@@ -1039,7 +1038,7 @@ canal: es
 prioridad: 7
 interrumpe
 en: ana=es, gilbert=es
-si: hecho:se_queda, !hecho:zanahorias
+si: ana_en_tv=se_queda, !hecho:zanahorias
 al_terminar: hecho zanahorias
 al_terminar: hecho conoce_gilbert
 ---
@@ -1073,7 +1072,7 @@ canal: es
 prioridad: 4
 en: ana=es, phillips=es
 repetir: cada 6
-si: hecho:se_queda, hora:9.2-12, no_hoy:clase
+si: ana_en_tv=se_queda, hora:9.2-12, no_hoy:clase
 al_terminar: hecho clase
 ---
 phillips: Ana Shirley. ¿Cuál es la capital de la Isla del Príncipe Eduardo?
@@ -1091,7 +1090,7 @@ canal: es
 prioridad: 4
 en: ana=es, phillips=es
 repetir: cada 6
-si: hecho:se_queda, hora:9.2-12, no_hoy:clase
+si: ana_en_tv=se_queda, hora:9.2-12, no_hoy:clase
 al_terminar: hecho clase
 ---
 phillips: «El… invierno… en… Avonlea… es… largo… y… blanco.» Punto.
@@ -1109,7 +1108,7 @@ canal: es
 prioridad: 4
 en: ana=es, phillips=es
 repetir: cada 6
-si: hecho:se_queda, hora:9.2-12, no_hoy:clase
+si: ana_en_tv=se_queda, hora:9.2-12, no_hoy:clase
 al_terminar: hecho clase
 ---
 phillips: Ana Shirley, al pizarrón. Demuestre que estos dos ángulos son iguales.
@@ -1128,7 +1127,7 @@ canal: es
 prioridad: 4
 en: ana=es, phillips=es
 repetir: cada 6
-si: hecho:se_queda, hora:9.2-12, no_hoy:clase
+si: ana_en_tv=se_queda, hora:9.2-12, no_hoy:clase
 al_terminar: hecho clase
 ---
 phillips: Ana Shirley, «La batalla de Hohenlinden». Desde el principio.
@@ -1148,7 +1147,7 @@ canal: es
 prioridad: 4
 en: ana=es, stacy=es
 repetir: cada 5
-si: hecho:se_queda, hora:9.2-12, no_hoy:clase, hecho:llego_stacy
+si: ana_en_tv=se_queda, hora:9.2-12, no_hoy:clase, hecho:llego_stacy
 al_terminar: hecho clase
 ---
 stacy: Escriban lo que ven, niños. Pero miren bien: con los ojos, y con algo más.
@@ -1167,7 +1166,7 @@ canal: es
 prioridad: 4
 en: ana=es, stacy=es
 repetir: cada 5
-si: hecho:se_queda, hora:9.2-12, no_hoy:clase, hecho:llego_stacy
+si: ana_en_tv=se_queda, hora:9.2-12, no_hoy:clase, hecho:llego_stacy
 al_terminar: hecho clase
 ---
 stacy: (La Srta. Stacy saca una florcita blanca, de siete pétalos.) ¿Quién sabe cómo se llama esta flor?
@@ -1190,7 +1189,7 @@ canal: gg
 prioridad: 7
 interrumpe
 en: ana=gg, diana=gg
-si: hecho:se_queda, tomando_te:ana:diana, !hecho:diana_borracha
+si: ana_en_tv=se_queda, tomando_te:ana:diana, !hecho:diana_borracha
 al_terminar: hecho diana_borracha
 al_terminar: meta diana estar_en h:os,-,- | Diana se va a su casa, tambaleándose | volver a su casa, mareada | 3
 al_terminar: log Ana invitó a Diana a tomar el té y le sirvió, sin saberlo, vino de grosellas en vez de cordial de frambuesa: Diana se fue a su casa… borracha. | yo: invité a Diana a tomar el té y le serví, sin saberlo, vino de grosellas en vez de cordial de frambuesa. ¡Se fue a su casa borracha!
@@ -1212,8 +1211,8 @@ prioridad: 7
 interrumpe
 sujeta: marilla
 en: ana=gg, marilla=gg
-si: dias_desde:diana_borracha:1, !hecho:prohibida, !hecho:perdonada
-al_terminar: hecho prohibida
+si: dias_desde:diana_borracha:1, barry_permite=si, !hecho:perdonada
+al_terminar: estado barry_permite no
 al_terminar: triste diana
 al_terminar: ofensa barry ana vino 0
 al_terminar: log La Sra. Barry le prohibió a Diana volver a ver a Ana: el «cordial» era vino de grosellas. | yo: la Sra. Barry le prohibió a Diana volver a verme. Mi corazón está hecho trizas.
@@ -1231,7 +1230,7 @@ canal: os
 prioridad: 7
 interrumpe
 en: ana=os, barry=os
-si: hecho:prohibida
+si: barry_permite=no
 ---
 ana: Sra. Barry, por favor, perdóneme. No sabía que era vino. Me imaginé que era cordial… bueno, creí que era cordial.
 barry: No, Ana Shirley. No creo que seas compañía para Diana. Vete a tu casa y pórtate bien.
@@ -1246,7 +1245,7 @@ canal: gg
 prioridad: 9
 interrumpe
 en: ana=gg, diana=gg
-si: hecho:prohibida, dias_desde:prohibida:12, !hecho:crup
+si: barry_permite=no, dias_desde:prohibida:12, !hecho:crup
 al_terminar: hecho crup
 al_terminar: meta ana estar_en h:os,-,23 | Ana corre a La Cuesta del Huerto: Minnie May tiene crup | correr a La Cuesta del Huerto: Minnie May tiene crup (cap. 18) | 3
 al_terminar: meta diana estar_en h:os,-,23 | Diana vuelve corriendo a su casa | volver corriendo a su casa con Ana | 3
@@ -1261,8 +1260,8 @@ canal: os
 prioridad: 9
 interrumpe
 en: ana=os
-si: hecho:crup, hecho:prohibida
-al_terminar: olvidar prohibida
+si: hecho:crup, barry_permite=no
+al_terminar: estado barry_permite si
 al_terminar: hecho perdonada
 al_terminar: afecto barry ana 4
 al_terminar: afecto diana ana 5
@@ -1326,7 +1325,7 @@ canal: os
 prioridad: 6
 interrumpe
 en: ana=os, diana=os
-si: cuaderno:amigas, !hecho:prohibida, !hecho:cama_josephine, dias_desde:conocidas_diana:15, afecto:diana:ana>=5, letras:ana>=10
+si: cuaderno:amigas, barry_permite=si, !hecho:cama_josephine, dias_desde:conocidas_diana:15, afecto:diana:ana>=5, letras:ana>=10
 al_terminar: hecho cama_josephine
 al_terminar: afecto josephine ana 5
 al_terminar: log Ana y Diana saltaron sobre la cama del cuarto de huéspedes, donde dormía la tía Josephine; Ana confesó y se ganó su amistad. | yo: Diana y yo saltamos sobre la cama de huéspedes, ¡y ahí dormía la tía Josephine! Confesé, y se hizo mi amiga.
@@ -1417,8 +1416,9 @@ lineas: libro:llegada
 al_empezar: log Ana llegó a Tejas Verdes con Matthew, de noche. Marilla esperaba a un niño.
 al_terminar: hecho llegada_tv
 al_terminar: hecho primera_noche
+al_terminar: estado ana_en_tv en_prueba
 al_terminar: log Marilla dejó que Ana se quedara esa noche, hasta aclarar el enredo. Ana casi no probó la cena. | yo: Marilla me dejó quedarme esa noche, hasta aclarar el enredo. Casi no probé la cena.
-al_empezar: olvidar primer_viaje
+al_empezar: estado viaje ninguno
 ---
 ! sentar ana
 ! ana llora=true
@@ -1549,8 +1549,8 @@ interrumpe
 sujeta: marilla
 donde: tejas
 al_empezar: a_cocina
-al_empezar: hecho rumbo_spencer
-si: hecho:desayuno_prueba, !hecho:a_prueba, hora:14-19, paciencia:marilla:ana>=1
+al_empezar: estado viaje white_sands
+si: hecho:desayuno_prueba, ana_en_tv<decidida, hora:14-19, paciencia:marilla:ana>=1
 ---
 marilla: Ponte el sombrero, Ana. Nos vamos a White Sands.
 ana piensa: Puede que sea la última vez que veo esta cocina.
@@ -1566,7 +1566,7 @@ prioridad: 6
 interrumpe
 en: ana=out, marilla=out
 calesa: avonlea
-si: hecho:rumbo_spencer, !hecho:a_prueba, avance:ws:1-30
+si: viaje=white_sands, ana_en_tv<decidida, avance:ws:1-30
 ---
 ana: ¿Sabe, Srta. Cuthbert? He decidido disfrutar de este viaje. Si uno se decide con firmeza, casi siempre puede disfrutar de las cosas.
 ana: No voy a pensar en el orfanato mientras vamos. Solo en el camino. ¡Mire, ya hay una rosa silvestre! ¿No le parece que el rosa es el color más encantador del mundo? Lástima que yo no lo pueda usar, con este pelo.
@@ -1585,7 +1585,7 @@ prioridad: 6
 interrumpe
 en: ana=out, marilla=out
 calesa: avonlea
-si: hecho:rumbo_spencer, !hecho:a_prueba, avance:ws:25-60
+si: viaje=white_sands, ana_en_tv<decidida, avance:ws:25-60
 ---
 marilla: (Marilla mira el camino, no a Ana.) Ya que tienes tantas ganas de hablar, cuéntame lo que sepas de ti.
 ana: Oh, lo que sé de mí no vale la pena contarlo, Srta. Cuthbert. Si me dejara contarle lo que imagino de mí, le parecería mucho más interesante.
@@ -1603,7 +1603,7 @@ prioridad: 6
 interrumpe
 en: ana=out, marilla=out
 calesa: avonlea
-si: hecho:rumbo_spencer, !hecho:a_prueba, avance:ws:45-88
+si: viaje=white_sands, ana_en_tv<decidida, avance:ws:45-88
 ---
 ana: Mi madre también era maestra, pero cuando se casó con mi padre dejó de enseñar. Eran pobres como ratones de iglesia. Vivían en una casita amarilla, con madreselvas en la ventana. Yo nunca la vi, pero la he imaginado miles de veces.
 ana: Mi madre se murió de fiebre cuando yo tenía tres meses. Ojalá hubiera vivido lo bastante para que yo me acordara de haberla llamado mamá. Mi padre se murió cuatro días después, de la misma fiebre.
@@ -1626,7 +1626,7 @@ interrumpe
 en: ana=out, marilla=out, srapye=out
 sujeta: srapye
 calesa: avonlea
-si: hecho:rumbo_spencer, !hecho:a_prueba, avance:ws:80-100, ve:srapye
+si: viaje=white_sands, ana_en_tv<decidida, avance:ws:80-100, ve:srapye
 ---
 srapye: ¡Marilla Cuthbert! (La Sra. Pye se acerca a la calesa, con su canasto, y mira a Ana de arriba abajo.) ¿Así que esta es la huérfana que les mandaron por equivocación?
 marilla: Buenas tardes, Sra. Pye.
@@ -1652,7 +1652,7 @@ prioridad: 8
 interrumpe
 en: ana=out, marilla=out
 sujeta: marilla
-si: hecho:rumbo_spencer, !hecho:a_prueba, hecho:ws_corrio, !no_hoy:ws_marilla_llega
+si: viaje=white_sands, ana_en_tv<decidida, hecho:ws_corrio, !no_hoy:ws_marilla_llega
 ---
 narra: El mar está gris y verde, con espuma en las rocas. Ana se ha sentado en la arena roja, abrazada a las rodillas, y llora como si el mar entero le hubiera entrado por los ojos.
 marilla: (Marilla llega sin aliento, sujetándose el sombrero.) No se sale corriendo así, sin una palabra. Casi me matas del susto.
@@ -1688,9 +1688,9 @@ prioridad: 8
 interrumpe
 en: ana=out, marilla=out, spencer=out, blewett=out
 sujeta: spencer, blewett
-si: hecho:rumbo_spencer, !hecho:a_prueba, avance:ws:100-100, ve:spencer
+si: viaje=white_sands, ana_en_tv<decidida, avance:ws:100-100, ve:spencer
 al_terminar: hecho ws_vuelven
-al_terminar: olvidar rumbo_spencer
+al_terminar: estado viaje ninguno
 ---
 spencer: ¡Marilla Cuthbert! ¡Qué sorpresa! Pasen, pasen. ¿Y cómo está la niña?
 marilla: Para eso venimos, Sra. Spencer. Ha habido una equivocación. Le mandamos a decir con su hermano Robert que queríamos un niño de diez u once años.
@@ -1722,9 +1722,9 @@ canal: gg
 prioridad: 9
 interrumpe
 sujeta: marilla
-si: hecho:ws_vuelven, !hecho:a_prueba
+si: hecho:ws_vuelven, ana_en_tv<decidida
 al_terminar: hecho conoce_blewett
-al_terminar: hecho a_prueba
+al_terminar: estado ana_en_tv decidida
 al_terminar: suma afecto:marilla:ana 1
 al_terminar: log Marilla llevó a Ana a White Sands; la Sra. Blewett la quería de sirvienta, y Marilla no se la dio. Esa noche le dijo a Matthew que se la quedaba; a Ana, todavía no. | yo: Marilla me llevó a White Sands. La Sra. Blewett me quería de sirvienta, pero Marilla no me entregó.
 al_terminar: punto a_prueba | Marilla decidió quedársela, a prueba
@@ -1804,7 +1804,7 @@ canal: gg
 prioridad: 5
 repetir: dia
 donde: tejas
-si: hecho:a_prueba, hora:21-23.5
+si: ana_en_tv>=decidida, hora:21-23.5
 ---
 ->* Ir a acostarse
    ! acostarse
@@ -1981,7 +1981,7 @@ narra: Marilla tiene la calesa lista para ir a White Sands, y Ana no aparece por
 canal: gg
 prioridad: 10
 interrumpe
-si: hecho:desayuno_prueba, !hecho:a_prueba, !dicha:viaje_spencer, !dicha:viaje_spencer_duda, !donde:ana:tejas, hora:14.5-19
+si: hecho:desayuno_prueba, ana_en_tv<decidida, !dicha:viaje_spencer, !dicha:viaje_spencer_duda, !donde:ana:tejas, hora:14.5-19
 al_empezar: suma paciencia:marilla:ana -1
 al_terminar: a_cocina
 
@@ -1998,7 +1998,7 @@ interrumpe
 sujeta: marilla
 donde: tejas
 al_empezar: a_cocina
-si: hecho:desayuno_prueba, !hecho:a_prueba, hora:14-19, paciencia:marilla:ana<1
+si: hecho:desayuno_prueba, ana_en_tv<decidida, hora:14-19, paciencia:marilla:ana<1
 al_terminar: hecho conoce_blewett
 al_terminar: hecho blewett_duda
 ---
@@ -2023,9 +2023,9 @@ canal: gg
 prioridad: 9
 interrumpe
 sujeta: marilla
-si: hecho:blewett_duda, !hecho:a_prueba, afecto:matthew:ana>=4
+si: hecho:blewett_duda, ana_en_tv<decidida, afecto:matthew:ana>=4
 al_empezar: a_cocina
-al_terminar: hecho a_prueba
+al_terminar: estado ana_en_tv decidida
 al_terminar: log Marilla casi le dio Ana a la Sra. Blewett; Matthew pidió que se quedara. | yo: Marilla casi me entregó a la Sra. Blewett, pero Matthew pidió que me quedara.
 al_terminar: punto a_prueba | Marilla decidió quedársela, a prueba
 ---
@@ -2041,9 +2041,9 @@ canal: gg
 prioridad: 8
 interrumpe
 sujeta: marilla
-si: hecho:blewett_duda, !hecho:a_prueba, hecho:blewett_suplica, afecto:marilla:ana>=2
+si: hecho:blewett_duda, ana_en_tv<decidida, hecho:blewett_suplica, afecto:marilla:ana>=2
 al_empezar: a_cocina
-al_terminar: hecho a_prueba
+al_terminar: estado ana_en_tv decidida
 al_terminar: log Ana le suplicó a Marilla en White Sands, y Marilla no la entregó. | yo: le supliqué a Marilla en White Sands, y no me entregó.
 al_terminar: punto a_prueba | Marilla decidió quedársela, a prueba
 ---
@@ -2059,9 +2059,9 @@ canal: gg
 prioridad: 7
 interrumpe
 sujeta: marilla
-si: hecho:blewett_duda, !hecho:a_prueba, hecho:blewett_calla, afecto:marilla:ana>=3
+si: hecho:blewett_duda, ana_en_tv<decidida, hecho:blewett_calla, afecto:marilla:ana>=3
 al_empezar: a_cocina
-al_terminar: hecho a_prueba
+al_terminar: estado ana_en_tv decidida
 al_terminar: punto a_prueba | Marilla decidió quedársela, a prueba
 ---
 ! pasa_tiempo 4
@@ -2075,8 +2075,8 @@ narra: Marilla aprieta los labios y asiente. Esa misma tarde, Ana se va con la S
 canal: gg
 prioridad: 1
 interrumpe
-si: hecho:blewett_duda, !hecho:a_prueba
-al_terminar: hecho devuelta
+si: hecho:blewett_duda, ana_en_tv<decidida
+al_terminar: estado ana_en_tv devuelta
 al_terminar: log Marilla le entregó Ana a la Sra. Blewett. | yo: Marilla me entregó a la Sra. Blewett.
 al_terminar: final devuelta | Ana se fue con la Sra. Blewett. En el libro, Marilla no la entregó: Ana se ganó, poco a poco, su lugar en Tejas Verdes.
 
@@ -2091,8 +2091,8 @@ grande
 sujeta: marilla
 donde: tejas
 al_empezar: a_cocina
-si: hecho:a_prueba, !hecho:se_queda, dias_desde:a_prueba:1, hora:14-19
-al_terminar: hecho se_queda
+si: ana_en_tv>=decidida, ana_en_tv<se_queda, dias_desde:a_prueba:1, hora:14-19
+al_terminar: estado ana_en_tv se_queda
 al_terminar: suma afecto:marilla:ana 1
 al_terminar: log Marilla le dijo a Ana que se queda en Tejas Verdes, para siempre. | yo: Marilla me dijo que me quedo en Tejas Verdes. ¡Para siempre!
 al_terminar: punto se_queda | Marilla le dijo que se queda en Tejas Verdes
@@ -2119,7 +2119,7 @@ canal: ana_sola
 repetir: dia
 al_terminar: suma afecto:diana:ana 1
 al_terminar: log Ana le hizo señas a Diana con la vela, desde la ventana de su pieza; Diana contestó. | yo: le hice señas a Diana con la vela, desde la ventana de mi pieza, ¡y ella me contestó!
-si: hecho:se_queda, hecho:conocidas_diana
+si: ana_en_tv=se_queda, diana>=conocida
 ---
 ana: (Ana pone la vela en la ventana y la tapa y destapa con un cartón: cinco destellos.)
 ana: (Un rato después, entre los árboles, en la ventana de Diana, una luz contesta: cinco destellos.)
@@ -2139,7 +2139,7 @@ interrumpe
 grande
 sujeta: lynde, marilla
 en: ana=gg, marilla=gg, lynde=gg
-si: hecho:se_queda, !hecho:lynde_visita, sentada:lynde
+si: ana_en_tv=se_queda, !hecho:lynde_visita, sentada:lynde
 al_terminar: hecho lynde_visita
 ---
 lynde: (La Sra. Lynde mira a Ana de arriba abajo.) Bueno, no te eligieron por tu cara, eso seguro. Es terriblemente flaca y fea, Marilla. ¡Y qué pecas! ¡Y el pelo, rojo como zanahoria!
@@ -2147,7 +2147,7 @@ lynde: (La Sra. Lynde mira a Ana de arriba abajo.) Bueno, no te eligieron por tu
    ana: (Ana se planta frente a ella, temblando de rabia.) ¡La odio! ¡La odio, la odio, la odio! ¿Cómo se atreve a decir que soy flaca y fea? ¿Le gustaría que dijeran que usted es gorda y torpe y que no tiene una chispa de imaginación?
    lynde: ¡Habráse visto! ¡Qué genio!
    marilla: Ana, ve a tu pieza y quédate ahí hasta que yo suba.
-   ! hecho ofendio_lynde
+   ! estado lynde_ana ofendida
    ! suma afecto:lynde:ana -1
    ! log Ana estalló con la Sra. Lynde, que la llamó flaca, fea y pelirroja. Marilla la mandó a su pieza. | yo: la Sra. Lynde me llamó flaca, fea y pelirroja, y estallé. Marilla me mandó a mi pieza.
 ->* Apretar los puños y contar hasta diez
@@ -2170,7 +2170,7 @@ resumen: Marilla le dice a Ana que tiene que pedirle perdón a la Sra. Lynde.
 canal: gg
 prioridad: 8
 en: ana=gg, marilla=gg
-si: hecho:ofendio_lynde, !hecho:perdon_pedido
+si: lynde_ana=ofendida, !hecho:perdon_pedido
 al_terminar: hecho perdon_pedido
 ---
 marilla: Ana, lo que hiciste no se hace. Vas a ir a la casa de la Sra. Lynde a pedirle perdón.
@@ -2184,9 +2184,9 @@ prioridad: 9
 interrumpe
 sujeta: lynde
 en: ana=rl, lynde=rl
-si: hecho:ofendio_lynde
+si: lynde_ana=ofendida
 al_terminar: hecho disculpa_lynde
-al_terminar: olvidar ofendio_lynde
+al_terminar: estado lynde_ana bien
 ---
 ana: (Ana se arrodilla de pronto frente a la Sra. Lynde.)
 ->* Disculparse a lo grande, con todo el dramatismo del mundo
@@ -2244,7 +2244,7 @@ objeto: gwin
 paso: 2
 canal: ana_sola
 prioridad: 2
-si: hecho:a_prueba, !hecho:se_queda
+si: ana_en_tv>=decidida, ana_en_tv<se_queda
 ---
 ana piensa: (Ana apoya la frente en el vidrio.) Si me porto bien… si soy útil… si aprendo…
 ana: Voy a imaginar que esta ventana es mía para siempre. Así, si me tengo que ir, al menos la habré tenido un poco.
@@ -2256,7 +2256,7 @@ objeto: gwin
 paso: 3
 canal: ana_sola
 prioridad: 3
-si: hecho:se_queda
+si: ana_en_tv=se_queda
 ---
 ana: (Ana abre la ventana de par en par, como si fuera la primera vez.)
 ana: Mi ventana. Mi cerezo. Mi pieza. ¡Ana de Tejas Verdes! ¿Hay algo más lindo que poder decir «mío» sin miedo?
@@ -2268,7 +2268,7 @@ objeto: gwin
 paso: 4
 canal: ana_sola
 prioridad: 2
-si: hecho:conocidas_diana, !hecho:prohibida
+si: diana>=conocida, barry_permite=si
 ---
 ana: (Entre los árboles se ve el techo de La Cuesta del Huerto.)
 ana: Allí está Diana. Seguro que ahora mismo también está mirando por su ventana. Una amiga del alma es alguien que mira por la ventana al mismo tiempo que tú.
@@ -2292,7 +2292,7 @@ objeto: gwin
 paso: 6
 canal: ana_sola
 prioridad: 4
-si: hecho:prohibida, !hecho:perdonada
+si: barry_permite=no, !hecho:perdonada
 ---
 ana: (Ana mira largo rato hacia La Cuesta del Huerto, con los ojos llenos de lágrimas.)
 ana: Tan cerca, y no puedo ir. Es como en los cuentos, cuando hay un río encantado entre dos castillos.
@@ -2481,7 +2481,7 @@ objeto: mirror
 paso: 2
 canal: ana_sola
 prioridad: 2
-si: hecho:se_queda
+si: ana_en_tv=se_queda
 ---
 ana: Ana de Tejas Verdes. (Lo dice despacio, mirándose al espejo.) Ana-de-Tejas-Verdes.
 ana: Suena mucho mejor que Ana de ninguna parte, ¿verdad? Creo que hasta las pecas se ven más contentas.
@@ -2569,7 +2569,7 @@ objeto: armario
 paso: 2
 canal: ana_sola
 tambien
-si: hecho:se_queda
+si: ana_en_tv=se_queda
 ---
 ana: (En el armario cuelgan los tres vestidos que le hizo Marilla: lisos, de mangas angostas.)
 ana: Son útiles y sensatos, como dice Marilla. Voy a imaginar que uno tiene mangas abullonadas. El del medio. Así, por lo menos, tengo uno de mentira.
@@ -2619,7 +2619,7 @@ objeto: bed
 paso: 1
 canal: ana_sola
 sujeta: marilla
-si: hecho:primera_noche, !hecho:desayuno_prueba, !hecho:se_queda
+si: hecho:primera_noche, !hecho:desayuno_prueba, ana_en_tv<se_queda
 ---
 ana: (La pieza del alero: paredes blancas y desnudas, una cama alta, una mesita, una silla. Ana la mira con espanto.)
 ana: (Se arranca el vestido a tirones y lo tira al suelo, con los zapatos. El sombrero lo lanza lejos: por casualidad, queda colgando de la percha. Se pone el camisón del orfanato, que le queda corto.)
@@ -2872,7 +2872,7 @@ objeto: pupitre
 paso: 1
 canal: ana_sola
 tambien
-si: hecho:conocidas_diana, !hecho:prohibida
+si: diana>=conocida, barry_permite=si
 ---
 ana: (En el pupitre, alguien dejó una manzana roja y un papelito: «Para Ana, de tu D.».)
 ana: Diana. Esta manzana es demasiado linda para comérsela. Me la voy a comer igual, pero despacio.
@@ -3144,7 +3144,7 @@ paso: 2
 canal: ana_sola
 tambien
 prioridad: 2
-si: hecho:conocidas_diana, !hecho:prohibida
+si: diana>=conocida, barry_permite=si
 ---
 ana: (En el agua se ven reflejados los manzanos del huerto de los Barry.)
 ana: El huerto de Diana se mira en el lago como en un espejo. Si Diana estuviera aquí, nos reflejaríamos las dos: dos amigas del alma, cabeza abajo.
@@ -3203,7 +3203,7 @@ paso: 2
 canal: ana_sola
 prioridad: 6
 interrumpe
-si: estacion:primavera, hecho:se_queda
+si: estacion:primavera, ana_en_tv=se_queda
 ---
 narra: Los manzanos del Camino Blanco florecieron todos juntos, en una sola noche.
 ana: (Ana se detiene en seco. Sobre ella, la bóveda de flores es tan blanca que parece hecha de luz. Ya no se acuerda de adónde iba.)
@@ -3228,7 +3228,7 @@ paso: 4
 canal: ana_sola
 prioridad: 6
 interrumpe
-si: estacion:invierno, hecho:se_queda
+si: estacion:invierno, ana_en_tv=se_queda
 ---
 ana: (Empiezan a caer los primeros copos, grandes y lentos, sobre las ramas desnudas del Camino Blanco.)
 ana: (Ana levanta la cara y saca la lengua para atrapar uno.)
@@ -3321,7 +3321,7 @@ lugar: puente
 paso: 2
 canal: ana_sola
 prioridad: 2
-si: hecho:conocidas_diana, !hecho:prohibida
+si: diana>=conocida, barry_permite=si
 ---
 ana: (El puente une Tejas Verdes con La Cuesta del Huerto.)
 ana: Este es el puente más importante del mundo. Por aquí voy a ver a Diana y por aquí viene ella. Un puente entre dos amigas del alma.
@@ -3465,7 +3465,7 @@ disparo: lugar
 lugar: cuesta_del_huerto
 paso: 1
 canal: ana_sola
-si: estacion:primavera, hecho:conocidas_diana
+si: estacion:primavera, diana>=conocida
 ---
 ana: (El huerto de los Barry está en flor. Detrás de esas ventanas está Diana.)
 ana: Debe ser imposible estar triste viviendo en una casa con un huerto así. Aunque Diana dice que su mamá lo consigue igual.
@@ -3477,7 +3477,7 @@ lugar: cuesta_del_huerto
 paso: 2
 canal: ana_sola
 prioridad: 3
-si: hecho:prohibida, !hecho:perdonada
+si: barry_permite=no, !hecho:perdonada
 ---
 ana: (Ana pasa frente a La Cuesta del Huerto sin detenerse. Le parece ver una cortina que se mueve.)
 ana piensa: No voy a mirar, para no ponerla en un aprieto. Pero voy a caminar despacito, para que sepa que pasé.
@@ -3593,7 +3593,7 @@ disparo: lugar
 lugar: corral
 paso: 1
 canal: ana_sola
-si: !estacion:invierno, hecho:conocidas_diana
+si: !estacion:invierno, diana>=conocida
 ---
 ana: (Junto al corral, cuatro abedules forman un rincón, como una salita al aire libre.)
 ana: Idlewild. Aquí Diana y yo vamos a tener nuestra casita de juegos, con platos rotos de porcelana como si fueran la mejor vajilla.
@@ -3696,7 +3696,7 @@ peso: nucleo
 capitulos: 4–6
 situacion: Ana vive unos días sin saber si la devuelven al orfanato; tiene que ganarse un lugar.
 necesita: llegada
-pasa si: hecho:a_prueba
+pasa si: ana_en_tv>=decidida
 libro: Marilla la lleva donde la Sra. Spencer; la Sra. Blewett la quiere de criada; Marilla decide probarla.
 no puede: que la acepten sin dudas; que Ana sepa desde el principio que se queda
 variantes: Marilla la pone a prueba con los quehaceres de la casa; alguien del pueblo opina que hay que devolverla
@@ -3707,8 +3707,8 @@ peso: nucleo
 capitulos: 6–8
 situacion: Los Cuthbert deciden qué hacer con Ana.
 necesita: a_prueba
-pasa si: hecho:se_queda | hecho:devuelta
-respuesta se_queda: hecho:se_queda
+pasa si: ana_en_tv=se_queda | hecho:devuelta
+respuesta se_queda: ana_en_tv=se_queda
 respuesta devuelta: hecho:devuelta
 libro: se_queda — Marilla le dice que se queda, «si te portas bien y te muestras agradecida».
 no puede: que lo decida Ana sola; que pase sin que Marilla lo diga
@@ -3732,7 +3732,7 @@ capitulos: 9
 situacion: Una persona mayor humilla a Ana por su aspecto, delante de los de la casa.
 necesita: decision:se_queda
 pasa si: hecho:lynde_visita
-respuesta estalla: hecho:ofendio_lynde | hecho:disculpa_lynde
+respuesta estalla: lynde_ana=ofendida | hecho:disculpa_lynde
 respuesta se_contiene: hecho:lynde_contenida
 respuesta llora: hecho:lynde_llanto
 libro: estalla — la Sra. Lynde dice que es flaca, fea y pelirroja; Ana le grita «¡La odio!».
@@ -3768,7 +3768,7 @@ peso: menor
 capitulos: 12
 situacion: Ana conoce a la niña que podría ser la amiga que siempre soñó.
 necesita: decision:se_queda
-pasa si: hecho:conocidas_diana
+pasa si: diana>=conocida
 respuesta juran: cuaderno:amigas
 respuesta no_juran: dias_desde:conocidas_diana:14, !cuaderno:amigas
 libro: juran — en el jardín de La Cuesta del Huerto, «mientras el sol y la luna existan».
@@ -3834,13 +3834,13 @@ peso: nucleo
 #   si: <condiciones del guion>
 #
 # «=== solo: nombre ===»  mientras pasa algo, esa persona solo dice lo que lo tiene en cuenta
-#   quiénes: …   cuando: <condiciones>   pide: <lo que tiene que nombrar su condición> (ofendio_lynde; o reaccionar a cómo anda Ana:
+#   quiénes: …   cuando: <condiciones>   pide: <lo que tiene que nombrar su condición> (ofendio_lynde, o el estado lynde_ana; o reaccionar a cómo anda Ana:
 #   ana:camison, ana:sin_sombrero, hora:21: aunque esté ofendida, si la ve así, reacciona)
 #
 # «=== referencia: nombre ===»  una frase que dice esto exige que se cumpla aquello
 #   palabras: <expresiones, separadas por |>  (tal como se escriben, con mayúsculas)
 #   exige: <condiciones del guion>          ({k}: quien la dice; donde:{k}:propia: en su propia casa); varias líneas: una u otra
-#   salvo: <quienes>                        (no vale para ellos)
+#   salvo: <quienes o escenas>              (no vale para ellos, ni en esas escenas)
 
 # ---------------------------------------------------------------- lo que debería haber
 === espera: algo que decirle ===
@@ -3874,29 +3874,29 @@ si: hora:21-26, donde:ana:publico
 
 # (el orden del libro, cuando los hechos los deja el código y no una escena)
 === nunca: Ana y Diana se conocen sin que la Sra. Barry las presente ===
-si: hecho:conocidas_diana, !hecho:barry_presenta
+si: diana>=conocida, !hecho:barry_presenta
 
 === nunca: el día 5 sin que la acepten (Marilla decide el día 3: se queda, o se va con la Sra. Blewett y el juego termina) ===
-si: dia_juego:5, !hecho:se_queda
+si: dia_juego:5, ana_en_tv<se_queda
 
 === nunca: la prohibición (lo del vino de grosellas), sin conocer a Diana ===
-si: hecho:prohibida, !hecho:conocidas_diana
+si: barry_permite=no, diana=desconocida
 
 # ---------------------------------------------------------------- mientras pasa algo
 === solo: la Sra. Lynde ofendida no le habla como si nada ===
 quiénes: lynde
-cuando: hecho:ofendio_lynde, !hecho:disculpa_lynde
-pide: ofendio_lynde, disculpa_lynde, ana:camison, ana:sin_sombrero, hora:21
+cuando: lynde_ana=ofendida, !hecho:disculpa_lynde
+pide: ofendio_lynde, lynde_ana, disculpa_lynde, ana:camison, ana:sin_sombrero, hora:21
 
 === solo: la Sra. Barry, mientras le prohíbe ver a Diana, no la trata como antes ===
 quiénes: barry
-cuando: hecho:prohibida, !hecho:perdonada
-pide: prohibida, perdonada, ana:camison, ana:sin_sombrero, hora:21
+cuando: barry_permite=no, !hecho:perdonada
+pide: prohibida, barry_permite, perdonada, ana:camison, ana:sin_sombrero, hora:21
 
 === solo: Diana, mientras se lo prohíben, no la invita ni juega como si nada ===
 quiénes: diana
-cuando: hecho:prohibida, !hecho:perdonada
-pide: prohibida, perdonada, ana:camison, ana:sin_sombrero, hora:21
+cuando: barry_permite=no, !hecho:perdonada
+pide: prohibida, barry_permite, perdonada, ana:camison, ana:sin_sombrero, hora:21
 
 # ---------------------------------------------------------------- lo que una frase supone
 === referencia: «pasa» invita a entrar ===
@@ -3969,7 +3969,9 @@ salvo: marilla
 === referencia: lo que supone que Ana se queda, cuando ya se queda ===
 # (antes de que Marilla decida, nadie habla de su futuro en Avonlea: la escuela, la amiga, «el año que viene»)
 palabras: la escuela | Escuela | escuela dominical | el año que viene | cuando seas grande | cuando crezcas | vivir aquí | vives aquí | tu pieza
-exige: hecho:se_queda
+exige: ana_en_tv=se_queda
+salvo: ws_t3
+# (ws_t3: Marilla le pregunta si fue a la escuela, antes: la del orfanato)
 
 # (lo que una frase recuerda tiene que haber pasado: la partida jugada a mano, trazas/jugadora/claude.md)
 === referencia: el juramento, cuando ya se juraron ===
@@ -3999,12 +4001,12 @@ exige: !cuaderno:lynde
 # ---------------------------------------------------------------- los días a prueba (del 1 al 3: cap. 2 a 8 del libro)
 === espera: Marilla y Matthew, mientras está a prueba, tienen algo que lo tenga en cuenta ===
 quiénes: marilla, matthew
-cuando: ve:{k}, hecho:desayuno_prueba, !hecho:se_queda, hora:7-20
-hay: reacción !hecho:se_queda
+cuando: ve:{k}, hecho:desayuno_prueba, ana_en_tv<se_queda, hora:7-20
+hay: reacción ana_en_tv<se_queda
 
 === referencia: «ojalá te quedes», «devolverte»: solo mientras no se sabe ===
 palabras: ojalá te quedes | te quedes o no | devolverte | te devuelvan | te devolvemos | a prueba | si te quedas
-exige: !hecho:se_queda
+exige: ana_en_tv<se_queda
 
 === referencia: preguntarle cómo llamaría algo, mientras todavía no le puso nombre ===
 palabras: cómo le dirías al estanque | cómo le dirías a la laguna
@@ -4012,7 +4014,7 @@ exige: !hecho:nombro_lago
 
 === referencia: que se quedan con ella, cuando ya lo decidieron y se lo dijeron ===
 palabras: quedarnos contigo | se quedaron conmigo | hacerse cargo de ti | Me la quedo
-exige: hecho:se_queda
+exige: ana_en_tv=se_queda
 salvo: matthew
 
 # ---------------------------------------------------------------- las lagunas de una partida (para la IA de la noche)
@@ -4088,7 +4090,7 @@ pista si hecho:mis_brujula_jim: El capitán Jim ya sabe lo que tú sabías. Habr
 meta: hecho mis_brujula_fin
 requiere: quedarse, hecho:mis_brujula_hallada
 oculta
-guiño lynde: [hecho:mis_brujula_hallada, !hecho:mis_brujula_sabe, !hecho:ofendio_lynde] ¿Qué es eso que andas trayendo en el bolsillo, niña? Se te nota en la cara que es un misterio.
+guiño lynde: [hecho:mis_brujula_hallada, !hecho:mis_brujula_sabe, lynde_ana=bien] ¿Qué es eso que andas trayendo en el bolsillo, niña? Se te nota en la cara que es un misterio.
 guiño lynde: [hecho:mis_brujula_hallada, !hecho:mis_brujula_sabe, hecho:disculpa_lynde] ¿Qué es eso que andas trayendo en el bolsillo, niña? Se te nota en la cara que es un misterio.
 
 --- guion ---
@@ -4099,7 +4101,7 @@ canal: mision
 prioridad: 3
 en: ana=out
 cerca: ana, lago, 620
-si: hecho:se_queda, hora:9-18, !hecho:mis_brujula_hallada
+si: ana_en_tv=se_queda, hora:9-18, !hecho:mis_brujula_hallada
 al_empezar: hecho mis_brujula_hallada
 al_empezar: log Ana encontró en el lago una brújula vieja con una dedicatoria. | yo: Encontré una brújula en el lago. Dice «A Jim, de J. A. H.». Alguien la perdió… o la tiró.
 ---
@@ -4114,7 +4116,7 @@ ana piensa: «A Jim, de J. A. H. — para que siempre encuentres el camino de vu
 con: lynde
 tema: Preguntarle quién es «J. A. H.»
 resumen: La Sra. Lynde reconoce la brújula: el Sr. Harrison se la regaló al capitán Jim, y una noche de tormenta, hace treinta años, dejaron de hablarse.
-si: conoce:lynde, hecho:mis_brujula_hallada, !hecho:mis_brujula_sabe
+si: conoce:lynde, hecho:mis_brujula_hallada, !hecho:mis_brujula_sabe, lynde_ana=bien
 al_terminar: hecho mis_brujula_sabe
 ---
 ana: Sra. Lynde, ¿usted sabe quién es «J. A. H.»? Encontré esto en el lago.
@@ -5140,24 +5142,24 @@ quien: matthew
 
 === diana_prohibida ===
 quien: diana
-si: hecho:prohibida
+si: barry_permite=no
 - Ana… mamá no me deja hablar contigo. Lo siento tanto, tanto…
 - No puedo, Ana… mamá dice que no. Pero te sigo queriendo, ¿sabes?
 
 # (pasear con Diana, 35-cosas-que-lleva.js, walkOption(): la despedida, de tarde o no; y el sí)
 === paseo_fin_tarde ===
 quien: diana
-si: !hecho:prohibida
+si: barry_permite=si
 - ¡Hasta mañana, Ana! Que sueñes bonito.
 
 === paseo_fin ===
 quien: diana
-si: !hecho:prohibida
+si: barry_permite=si
 - ¡Nos vemos, Ana! Fue un paseo precioso.
 
 === paseo_si ===
 quien: diana
-si: !hecho:prohibida
+si: barry_permite=si
 - ¡Sí! Vamos, Ana, a donde tú quieras.
 
 # --- los encargos (38-encargos.js): al entregarle lo que pidió, y al darle un recado
@@ -5333,12 +5335,12 @@ quien: matthew
 
 === mira:diana:flores ===
 quien: diana
-si: !hecho:prohibida
+si: barry_permite=si
 - ¡Ay, qué lindas! Le llevaré unas a mamá.
 
 === mira:diana:lago ===
 quien: diana
-si: !hecho:prohibida
+si: barry_permite=si
 - Ana diría algo precioso de este lago...
 
 === mira:otros:lago ===
@@ -5724,7 +5726,7 @@ quien: ana
 # mismo día, y lo del cordial de frambuesa
 === te_diana:primera ===
 quien: diana
-si: !hecho:prohibida
+si: barry_permite=si
 - Mamá nos dejó té y galletas. ¡Y cordial de frambuesa!
 - ¿Más té, Ana? Me encanta tomar el té contigo, como dos señoras de verdad.
 - Cuando seamos mayores tomaremos el té así todas las tardes, ¿verdad?
@@ -5732,12 +5734,12 @@ si: !hecho:prohibida
 
 === te_diana_otra_vez ===
 quien: diana
-si: !hecho:prohibida
+si: barry_permite=si
 - Ya tomamos el té hoy, Ana... ¡pero podemos quedarnos conversando!
 
 === te_diana_cordial ===
 quien: diana
-si: !hecho:prohibida
+si: barry_permite=si
 - ¡Sí, sí! Esta vez lo revisé dos veces. Nada de vino de grosellas... ¡qué susto el de aquella vez!
 
 # La gente: lo que dicen los demás en momentos que el código nombra (el Sr. Lawson en su tienda, quien es llamado de
@@ -6109,7 +6111,7 @@ quien: ana
 - Con tantas pecas parezco un mapa de islas. ¡Tengo toda la Isla del Príncipe Eduardo en la nariz!
 - Algún día seré pálida y de pelo negro azabache. Y mientras tanto, ¡me quedo con mi imaginación!
 - [estacion:verano] El sol me trajo pecas nuevas. Las voy a bautizar, ya que se instalaron.
-- [hecho:se_queda] La niña del espejo ya no tiene cara de huérfana. Tiene cara de Tejas Verdes.
+- [ana_en_tv=se_queda] La niña del espejo ya no tiene cara de huérfana. Tiene cara de Tejas Verdes.
 
 === faro ===
 - Desde aquí se ve todo el golfo. ¡Si hasta me parece ver Escocia! Bueno... no, pero casi.
@@ -6129,7 +6131,7 @@ quien: ana
 === pupitre ===
 - Mi pupitre, junto a la ventana... desde aquí se ve el río donde dejamos las botellas de leche.
 - [hecho:zanahorias] Aquí fue donde le rompí la pizarra en la cabeza a Gilbert Blythe. ¡Me llamó «Zanahorias»! Todavía no se lo perdono... bueno, casi.
-- [hecho:conocidas_diana] Diana y yo nos pasamos papelitos cuando el maestro no mira. Es una forma muy respetable de la amistad.
+- [diana>=conocida] Diana y yo nos pasamos papelitos cuando el maestro no mira. Es una forma muy respetable de la amistad.
 
 === pizarra ===
 - La pizarra está llena de números. Los números no tienen imaginación, pobrecitos.
@@ -6198,7 +6200,7 @@ quien: *
 # «quien: texto» (como en src/datos/guion.txt). Lo que se cuenta de alguien, entre paréntesis al comienzo: «(se ríe bajito)».
 # Campos:
 #   quienes: quiénes hablan (las personas: ana, diana, marilla…; o papeles: a, b, otro, que el código llena)
-#   si: condiciones (las del guion: «hecho:se_queda», «!hecho:a_prueba», «estacion:verano», «afecto:matthew:ana>=5»…)
+#   si: condiciones (las del guion: «ana_en_tv=se_queda», «ana_en_tv<decidida», «estacion:verano», «afecto:matthew:ana>=5»…)
 #   donde: dónde tiene sentido («casa»: la cocina o el patio de Tejas Verdes; «gg»: la cocina; «dentro», «arroyo»…)
 #
 # Las clases de charla, por cómo empieza su id:
@@ -6261,7 +6263,7 @@ diana: Si tú lo dices…
 
 === par:ana+marilla:0 ===
 quienes: ana, marilla
-si: hecho:a_prueba, !hecho:se_queda
+si: ana_en_tv>=decidida, ana_en_tv<se_queda
 ---
 marilla: Esa cama se tiende apenas te levantas. Aquí no somos desordenados.
 ana: Sí, Marilla. ¿Y si la tiendo imaginando que es la cama de una princesa?
@@ -6269,7 +6271,7 @@ marilla: Tiéndela como la de una niña ordenada. Con eso basta.
 
 === par:ana+marilla:1 ===
 quienes: ana, marilla
-si: hecho:a_prueba, !hecho:se_queda
+si: ana_en_tv>=decidida, ana_en_tv<se_queda
 ---
 ana: Marilla, ¿cree que podré quedarme?
 marilla: Eso depende de ti, no de mí. Haz tus quehaceres y di tus oraciones.
@@ -6316,7 +6318,7 @@ marilla: Tu pelo no tiene la culpa de nada. Quítate eso antes de ir a la iglesi
 
 === par:ana+matthew:0 ===
 quienes: ana, matthew
-si: hecho:a_prueba, !hecho:se_queda
+si: ana_en_tv>=decidida, ana_en_tv<se_queda
 ---
 matthew: Bueno, pues… ¿dormiste bien, Ana?
 ana: Soñé que me quedaba, señor Matthew. ¿Los sueños se cumplen?
@@ -6332,7 +6334,7 @@ ana: ¡Sabía que usted lo entendería!
 
 === par:ana+matthew:2 ===
 quienes: ana, matthew
-si: hecho:se_queda, afecto:matthew:ana>=5
+si: ana_en_tv=se_queda, afecto:matthew:ana>=5
 ---
 matthew: Ana… ¿te gustaría un vestido con mangas abullonadas? Digo… por si acaso.
 ana: ¡Oh, señor Matthew! ¿De verdad lo dice?
@@ -6363,7 +6365,7 @@ ana: ¡Ay! Entonces tendré que esforzarme más.
 
 === par:lynde+marilla:0 ===
 quienes: lynde, marilla
-si: hecho:se_queda, hecho:lynde_visita
+si: ana_en_tv=se_queda, hecho:lynde_visita
 ---
 lynde: Marilla, esa niña tuya va a terminar de maestra o de actriz, una de dos.
 marilla: Mientras termine sus quehaceres primero, Rachel, que termine de lo que quiera.
@@ -6394,7 +6396,7 @@ lynde: Ya veremos, Marilla. Ya veremos.
 
 === par:marilla+matthew:0 ===
 quienes: marilla, matthew
-si: hecho:a_prueba, !hecho:se_queda
+si: ana_en_tv>=decidida, ana_en_tv<se_queda
 ---
 marilla: Hoy no rompió nada, Matthew. Y lavó los platos sin que se lo pidiera.
 matthew: Bueno, pues… ¿ves? Ya te lo decía yo.
@@ -6402,7 +6404,7 @@ marilla: No he dicho nada todavía. Es una prueba.
 
 === par:marilla+matthew:1 ===
 quienes: marilla, matthew
-si: hecho:se_queda
+si: ana_en_tv=se_queda
 ---
 marilla: Matthew, ¿le estuviste dando caramelos a Ana otra vez?
 matthew: Bueno, pues… quizás uno. O dos.
@@ -6410,7 +6412,7 @@ marilla: Esa niña te tiene en la palma de la mano.
 
 === par:marilla+matthew:2 ===
 quienes: marilla, matthew
-si: hecho:se_queda, dia_juego:28
+si: ana_en_tv=se_queda, dia_juego:28
 ---
 matthew: Marilla… la niña está creciendo, ¿no te parece?
 marilla: Demasiado rápido, Matthew. Demasiado rápido.
@@ -6451,14 +6453,14 @@ gilbert: Ya sé que puedes. Solo preguntaba.
 
 === par:ana+lynde:0 ===
 quienes: ana, lynde
-si: hecho:lynde_visita, !hecho:ofendio_lynde, dia_juego:28
+si: hecho:lynde_visita, lynde_ana=bien, dia_juego:28
 ---
 lynde: Vaya, Ana, se te está oscureciendo el pelo. Ya no es tan colorado.
 ana: ¿De verdad, Sra. Lynde? ¡Es lo más lindo que me ha dicho nunca!
 
 === par:ana+lynde:1 ===
 quienes: ana, lynde
-si: hecho:lynde_visita, !hecho:ofendio_lynde
+si: hecho:lynde_visita, lynde_ana=bien
 ---
 lynde: Espero que te portes bien en la escuela, niña.
 ana: Lo intento con todas mis fuerzas, Sra. Lynde. A veces mis fuerzas se distraen.
@@ -6476,7 +6478,7 @@ marilla: Ana…
 
 === par:ana+diana+marilla:1 ===
 quienes: ana, diana, marilla
-si: hecho:conocidas_diana, !hecho:prohibida
+si: diana>=conocida, barry_permite=si
 ---
 diana: Srta. Cuthbert, ¿Ana puede venir a tomar el té mañana?
 marilla: Si termina sus quehaceres, sí.
@@ -6486,7 +6488,7 @@ ana: ¡Los terminaré hoy mismo! Bueno, mañana temprano.
 
 === par:ana+marilla+matthew:0 ===
 quienes: ana, marilla, matthew
-si: hecho:se_queda
+si: ana_en_tv=se_queda
 ---
 ana: ¡Adivinen qué me pasó hoy!
 marilla: Algo que vamos a lamentar, seguramente.
@@ -6505,7 +6507,7 @@ matthew: (se ríe bajito) Je.
 
 === par:ana+lynde+marilla:0 ===
 quienes: ana, lynde, marilla
-si: hecho:lynde_visita, !hecho:ofendio_lynde
+si: hecho:lynde_visita, lynde_ana=bien
 ---
 lynde: Marilla, esa niña habla más que un loro.
 ana: Los loros solo repiten, Sra. Lynde. Yo invento.
@@ -6696,7 +6698,7 @@ tema: Pedirle perdón por portarse mal
 resumen: Ana le pide perdón por portarse mal; Marilla: pedir perdón es un comienzo, importa lo que haga después.
 repetir: dia
 prioridad: 2
-si: hecho:inicio_juego, !hecho:a_prueba, paciencia:marilla:ana<=1
+si: hecho:inicio_juego, ana_en_tv<decidida, paciencia:marilla:ana<=1
 al_terminar: suma paciencia:marilla:ana 1
 ---
 ana: Marilla… quería pedirle perdón. Sé que no me he portado como debía. No es que quiera ser mala: es que a veces se me olvida ser buena.
@@ -6719,7 +6721,7 @@ a prueba
 con: marilla
 tema: Confesarle que nunca aprendió a rezar
 resumen: Ana confiesa que nunca ha rezado; Marilla le enseña a dar gracias y pedir con humildad.
-si: afecto:marilla:ana>=2, !hecho:se_queda
+si: afecto:marilla:ana>=2, ana_en_tv<se_queda
 al_terminar: suma afecto:marilla:ana 1
 ---
 ana: Marilla… tengo que confesarle algo. Nunca he dicho mis oraciones. La Sra. Thomas decía que Dios me había hecho el pelo rojo a propósito, y desde entonces no me interesó mucho.
@@ -6759,7 +6761,7 @@ ana: Bueno, alguna vez se me tendrán que acabar. Es una idea muy consoladora.
 con: marilla
 tema: Preguntarle por qué se quedaron con ella
 resumen: Por qué se quedaron con ella: Matthew la quiso al verla; Marilla, que nadie la cuidaría mejor.
-si: afecto:marilla:ana>=3, hecho:se_queda
+si: afecto:marilla:ana>=3, ana_en_tv=se_queda
 al_terminar: suma afecto:marilla:ana 1
 ---
 ana: Marilla… ¿por qué se quedaron conmigo, si querían un niño?
@@ -6773,7 +6775,7 @@ marilla: Con eso basta.
 con: marilla
 tema: Hablarle de las mangas abullonadas
 resumen: Ana pide un vestido con mangas abullonadas; Marilla las encuentra ridículas.
-si: afecto:marilla:ana>=3, hecho:a_prueba, dia_juego:4
+si: afecto:marilla:ana>=3, ana_en_tv>=decidida, dia_juego:4
 ---
 ana: Marilla, los vestidos que me hizo son muy… prácticos. Pero ¿no podría tener uno, solo uno, con mangas abullonadas?
 marilla: Las mangas abullonadas son ridículas. Parecen globos.
@@ -6810,7 +6812,7 @@ ana: Le prometo vigilarlo con los ojos y con el alma, Marilla.
 con: marilla
 tema: Contarle cómo es Diana
 resumen: Ana le describe a Diana, su amiga perfecta; Marilla le pide no cansarla con discursos.
-si: hecho:se_queda, afecto:marilla:ana>=3, hecho:conocidas_diana, !hecho:prohibida
+si: ana_en_tv=se_queda, afecto:marilla:ana>=3, diana>=conocida, barry_permite=si
 ---
 ana: Marilla, Diana es la amiga más perfecta del mundo. Tiene los ojos negros y la risa como un arroyo, y le gustan las mismas cosas que a mí. Bueno, casi.
 marilla: Me alegro. Pero no la canses con tus discursos.
@@ -6996,7 +6998,7 @@ matthew: Mi niña. Mi niña de la que estoy orgulloso.
 con: diana
 tema: Decirle cuánto le envidia el pelo
 resumen: Ana envidia el pelo negro de Diana; Diana envidia su imaginación.
-si: hecho:se_queda, afecto:diana:ana>=2, hecho:conocidas_diana, !hecho:prohibida
+si: ana_en_tv=se_queda, afecto:diana:ana>=2, diana>=conocida, barry_permite=si
 ---
 ana: Diana, ¿tú sabes lo que es tener el pelo rojo? Es una pena para toda la vida.
 diana: A mí me parece bonito tu pelo, Ana.
@@ -7007,7 +7009,7 @@ diana: Y yo daría cualquier cosa por tener tu imaginación. Así estamos a mano
 con: diana
 tema: Preguntarle por su hermanita
 resumen: Minnie May es pesada pero querida; Ana cuidó tres pares de mellizos.
-si: hecho:se_queda, afecto:diana:ana>=2, hecho:conocidas_diana, !hecho:prohibida
+si: ana_en_tv=se_queda, afecto:diana:ana>=2, diana>=conocida, barry_permite=si
 ---
 ana: ¿Cómo está Minnie May?
 diana: Pesada, como siempre. Quiere ir a todas partes conmigo. Pero la quiero mucho.
@@ -7018,7 +7020,7 @@ diana: ¡Tres pares! Ana, has vivido tanto.
 con: diana
 tema: Inventar nombres para los lugares con ella
 resumen: Inventan nombres para los lugares (el Paseo de los Enamorados).
-si: hecho:se_queda, afecto:diana:ana>=2, hecho:conocidas_diana, !hecho:prohibida
+si: ana_en_tv=se_queda, afecto:diana:ana>=2, diana>=conocida, barry_permite=si
 al_terminar: suma letras:ana 1
 ---
 ana: Diana, ese sendero entre los abedules necesita un nombre. ¿Qué te parece…
@@ -7043,7 +7045,7 @@ ana: Los charcos también se lo merecen.
 con: diana
 tema: Hablar de la escuela
 resumen: La escuela: Ana odia la geometría, Diana la ortografía; se ayudarán.
-si: hecho:se_queda, afecto:diana:ana>=2, hecho:conocidas_diana, !hecho:prohibida
+si: ana_en_tv=se_queda, afecto:diana:ana>=2, diana>=conocida, barry_permite=si
 ---
 diana: ¿Te gusta la escuela, Ana?
 ana: Me gusta aprender. Lo que no me gusta es la geometría. Es lo menos imaginativo que hay en el mundo.
@@ -7056,7 +7058,7 @@ ana: Entonces la vamos a odiar juntas. Eso también une.
 con: diana
 tema: Contarle historias del Bosque Encantado
 resumen: Ana inventa fantasmas del Bosque Encantado y asusta a Diana.
-si: hecho:se_queda, afecto:diana:ana>=3, hecho:conocidas_diana, !hecho:prohibida
+si: ana_en_tv=se_queda, afecto:diana:ana>=3, diana>=conocida, barry_permite=si
 al_terminar: suma letras:ana 1
 ---
 ana: Diana, ¿sabías que en el Bosque Encantado vive una dama blanca que llora por su amor perdido? Pasa a medianoche junto al arroyo.
@@ -7069,7 +7071,7 @@ ana: (Ana mira hacia los abetos, que de pronto se ven muy oscuros.) Bueno… yo 
 con: diana
 tema: Hablar de vestidos y de la fiesta
 resumen: Vestidos para el concierto: Diana el azul, Ana el de siempre, imaginado de seda.
-si: hecho:se_queda, afecto:diana:ana>=3, hecho:conocidas_diana, !hecho:prohibida
+si: ana_en_tv=se_queda, afecto:diana:ana>=3, diana>=conocida, barry_permite=si
 ---
 diana: Para el concierto me voy a poner el vestido azul, el de las cintas.
 ana: Yo voy a ir con el de siempre. Pero voy a imaginar que es de seda rosa, con mangas abullonadas y un collar de perlas.
@@ -7080,7 +7082,7 @@ ana: Con tu ayuda, y con mucha imaginación, quizás.
 con: diana
 tema: Proponerle un club de cuentos
 resumen: Proponen un club de cuentos; los tristes son los más bonitos.
-si: hecho:se_queda, afecto:diana:ana>=3, hecho:conocidas_diana, !hecho:prohibida
+si: ana_en_tv=se_queda, afecto:diana:ana>=3, diana>=conocida, barry_permite=si
 al_terminar: suma letras:ana 1
 ---
 ana: Diana, ¿y si hacemos un club de cuentos? Cada una escribe uno por semana y lo leemos juntas.
@@ -7093,7 +7095,7 @@ ana: Los nombres son lo más importante. Cordelia, Geraldine, Rosamunda…
 con: diana
 tema: Hablar de Gilbert Blythe
 resumen: Diana encuentra guapo a Gilbert; Ana jura que nunca le hablará.
-si: afecto:diana:ana>=3, hecho:zanahorias, !hecho:zanahorias_contesta, !hecho:prohibida
+si: afecto:diana:ana>=3, hecho:zanahorias, !hecho:zanahorias_contesta, barry_permite=si
 ---
 diana: Ana… Gilbert Blythe es el muchacho más guapo de la escuela, ¿no te parece?
 ana: ¡Diana Barry! Gilbert Blythe es la persona más odiosa de toda la isla. Nunca, nunca le voy a hablar.
@@ -7108,7 +7110,7 @@ diana: (Diana suspira, pero no dice nada más.)
 con: diana
 tema: Hablar de lo que le contestó a Gilbert
 resumen: Toda la escuela habla de lo que Ana le contestó a Gilbert; Diana cree que le gustó.
-si: afecto:diana:ana>=3, hecho:zanahorias_contesta, hecho:llego_gilbert, !hecho:prohibida
+si: afecto:diana:ana>=3, hecho:zanahorias_contesta, hecho:llego_gilbert, barry_permite=si
 ---
 diana: Ana… toda la escuela habla de lo que le dijiste a Gilbert. ¡Nadie le había contestado así nunca! Se puso más rojo que tu pelo.
 ana: Se lo merecía, Diana. Una no puede dejar que le digan zanahoria delante de todos y quedarse callada como un pez.
@@ -7133,7 +7135,7 @@ diana: (Diana sonríe, pero no dice nada.)
 con: diana
 tema: Reírse con ella de la noche de la tía Josephine
 resumen: Se ríen de la noche en que saltaron sobre la tía Josephine.
-si: afecto:diana:ana>=3, hecho:cama_josephine, !hecho:prohibida
+si: afecto:diana:ana>=3, hecho:cama_josephine, barry_permite=si
 ---
 diana: Ana, cada vez que me acuerdo de la cara de la tía Josephine… cuando saltamos sobre la cama…
 ana: (Las dos se ríen hasta que les duele la barriga.) ¡«Misericordia»! ¡Eso dijo!
@@ -7144,7 +7146,7 @@ ana: Es que lo somos. Aunque no lo parezca a primera vista.
 con: diana
 tema: Contarle un secreto
 resumen: Ana le cuenta su amiga imaginaria del orfanato, Katie Maurice; Diana: ahora me tienes a mí.
-si: afecto:diana:ana>=4, cuaderno:amigas, !hecho:prohibida, dia_juego:10
+si: afecto:diana:ana>=4, cuaderno:amigas, barry_permite=si, dia_juego:10
 al_terminar: suma afecto:diana:ana 1
 ---
 ana: Diana, te voy a contar algo que nunca le he contado a nadie. Antes de venir a Tejas Verdes, tenía una amiga imaginaria. Se llamaba Katie Maurice y vivía en el vidrio de un armario.
@@ -7157,7 +7159,7 @@ ana: Ya lo sé. Por eso te lo cuento.
 con: diana
 tema: Hablarle de Queen's
 resumen: Diana no irá a Queen's; se escribirán todas las semanas.
-si: afecto:diana:ana>=4, estudio:ana>=20, !hecho:prohibida, dia_juego:10, conoce:stacy
+si: afecto:diana:ana>=4, estudio:ana>=20, barry_permite=si, dia_juego:10, conoce:stacy
 ---
 ana: Diana, la Srta. Stacy va a preparar a los que quieran dar el examen de Queen's. ¿Te vas a anotar?
 diana: Mamá no quiere. Dice que no hace falta que yo estudie para maestra.
@@ -7169,7 +7171,7 @@ ana: Todas. Lo juro por el sol y la luna.
 con: diana
 tema: Hablar de cuando sean grandes
 resumen: Cuando sean grandes: Diana se casará; Ana será dama de honor o una solterona que escribe.
-si: afecto:diana:ana>=5, cuaderno:amigas, !hecho:prohibida, dia_juego:28
+si: afecto:diana:ana>=5, cuaderno:amigas, barry_permite=si, dia_juego:28
 al_terminar: suma afecto:diana:ana 1
 ---
 diana: Ana, ¿tú crees que nos vamos a casar algún día?
@@ -7183,7 +7185,7 @@ ana: Mientras el sol y la luna existan, Diana. Ya lo juramos.
 con: diana
 tema: Inventar con ella unas señas con la vela
 resumen: Inventan señas con una vela entre sus ventanas: un código de destellos.
-si: afecto:diana:ana>=4, cuaderno:amigas, !hecho:prohibida
+si: afecto:diana:ana>=4, cuaderno:amigas, barry_permite=si
 ---
 diana: Ana, desde mi ventana se ve la tuya, entre los árboles. ¿Te diste cuenta?
 ana: ¡Diana! Podríamos hacernos señas de noche, con una vela y un cartón. Como en los libros.
@@ -7197,7 +7199,7 @@ diana: ¡Cinco destellos! Esta noche lo probamos.
 con: lynde
 tema: Preguntarle qué ve desde su ventana
 resumen: Lo que la Sra. Lynde ve desde su ventana: Avonlea como un libro sin fin.
-si: hecho:se_queda, afecto:lynde:ana>=2, !hecho:ofendio_lynde
+si: ana_en_tv=se_queda, afecto:lynde:ana>=2, lynde_ana=bien
 ---
 ana: Sra. Lynde, ¿qué ve desde su ventana, todo el día?
 lynde: Todo, niña. Quién pasa, a dónde va y, si me descuido, a qué. Nada se me escapa en Avonlea.
@@ -7208,7 +7210,7 @@ lynde: (La Sra. Lynde se queda sin respuesta, cosa que no le pasa nunca.) Bueno�
 con: lynde
 tema: Hablarle de su pelo
 resumen: La Sra. Lynde nota que el pelo de Ana se oscurece; Ana la perdona por todo.
-si: hecho:se_queda, afecto:lynde:ana>=3, !hecho:ofendio_lynde
+si: ana_en_tv=se_queda, afecto:lynde:ana>=3, lynde_ana=bien
 al_terminar: suma afecto:lynde:ana 1
 ---
 lynde: Ana, mírate. El pelo se te está oscureciendo. Casi castaño rojizo, diría yo.
@@ -7221,7 +7223,7 @@ lynde: (La Sra. Lynde parpadea.) Bueno. Gracias, supongo.
 con: lynde
 tema: Contarle que quiere ir a Queen's
 resumen: La Sra. Lynde duda de que las mujeres necesiten estudiar; Ana la convence un poco.
-si: hecho:se_queda, afecto:lynde:ana>=3, estudio:ana>=50, !hecho:ofendio_lynde
+si: ana_en_tv=se_queda, afecto:lynde:ana>=3, estudio:ana>=50, lynde_ana=bien
 ---
 lynde: Así que te vas a Queen's. Yo nunca creí que las mujeres necesitaran tanto estudio…
 ana: Pero, Sra. Lynde, ¿no sería bonito que hubiera maestras muy buenas en toda la isla?
@@ -7233,7 +7235,7 @@ lynde: Hmm. Si son como tú, ruidosas pero buenas… quizás no sería tan malo.
 con: barry
 tema: Preguntarle si Diana puede salir
 resumen: Ana pide que Diana salga a jugar; la Sra. Barry: antes de que oscurezca.
-si: hecho:se_queda, afecto:barry:ana>=2, hecho:conocidas_diana, !hecho:prohibida
+si: ana_en_tv=se_queda, afecto:barry:ana>=2, diana>=conocida, barry_permite=si
 ---
 ana: Sra. Barry, ¿Diana puede salir a jugar un rato?
 barry: Un rato, sí. Pero que vuelva antes de que oscurezca, y nada de bosques encantados.
@@ -7257,7 +7259,7 @@ barry: (La Sra. Barry se ríe, por primera vez con Ana.) A mí también, niña. 
 con: harrison
 tema: Preguntarle por su campo de avena
 resumen: El campo de avena del Sr. Harrison y la vaca jersey que se lo come.
-si: hecho:se_queda, conoce:harrison
+si: ana_en_tv=se_queda, conoce:harrison
 ---
 ana: Sr. Harrison, su campo de avena se ve tan verde que parece un mar chiquito. Cuando sopla el viento hace olas.
 harrison: (El Sr. Harrison se rasca la barba, desconfiado.) Olas. Hmpf. Lo que hace es crecer, si las vacas de los vecinos lo dejan en paz.
@@ -7275,7 +7277,7 @@ harrison: Una vaca jersey que no voy a nombrar. Se mete por la cerca como si fue
 con: harrison
 tema: Preguntarle si no se aburre viviendo solo
 resumen: ¿Se aburre viviendo solo? Tiene a Ginger, su loro, que dice la verdad.
-si: hecho:se_queda, conoce:harrison
+si: ana_en_tv=se_queda, conoce:harrison
 ---
 ana: Sr. Harrison, ¿no se aburre viviendo solo? Yo, cuando estaba sola, inventaba amigas en los vidrios de las vitrinas.
 harrison: No estoy solo. Tengo a Ginger. Y a mí mismo, que soy buena compañía cuando nadie me molesta.
@@ -7293,7 +7295,7 @@ harrison: Dice la verdad, que a la gente le parece terrible. No es lo mismo.
 con: harrison
 tema: Preguntarle por su loro
 resumen: El loro Ginger dice malas palabras; quizás Ana pueda conocerlo.
-si: hecho:se_queda, afecto:harrison:ana>=2
+si: ana_en_tv=se_queda, afecto:harrison:ana>=2
 ---
 ana: Sr. Harrison, ¿es verdad que tiene un loro que dice malas palabras?
 harrison: Ginger dice lo que le da la gana. Como yo. Por eso nos llevamos bien.
@@ -7337,7 +7339,7 @@ al_terminar: suma afecto:ana:gilbert 1
 con: stacy
 tema: Preguntarle por la clase de Queen's
 resumen: La Srta. Stacy preparará a algunos para Queen's; Ana quiere ser maestra.
-si: hecho:se_queda, conoce:stacy, hecho:llego_stacy
+si: ana_en_tv=se_queda, conoce:stacy, hecho:llego_stacy
 ---
 ana: Srta. Stacy… ¿es verdad que va a preparar a algunos para el examen de Queen's?
 stacy: Es verdad. A los que quieran estudiar en serio, después de clases. ¿Te interesa, Ana?
@@ -7349,7 +7351,7 @@ al_terminar: suma estudio:ana 1
 con: stacy
 tema: Contarle que escribe cuentos
 resumen: Ana escribe tragedias; la Srta. Stacy le aconseja escribir de lo que conoce.
-si: hecho:se_queda, conoce:stacy, hecho:llego_stacy
+si: ana_en_tv=se_queda, conoce:stacy, hecho:llego_stacy
 ---
 ana: Srta. Stacy, Diana y yo tenemos un club de cuentos. Yo escribo tragedias. En la última se mueren todos.
 stacy: (La Srta. Stacy sonríe.) ¿Todos? ¿Y no queda nadie para contarlo?
@@ -7362,7 +7364,7 @@ al_terminar: suma afecto:stacy:ana 1
 con: sraallan
 tema: Preguntarle cómo se hace para ser buena
 resumen: Cómo ser buena cuando cuesta; la Sra. Allan también se equivoca.
-si: hecho:se_queda, conoce:sraallan, presente:sraallan
+si: ana_en_tv=se_queda, conoce:sraallan, presente:sraallan
 ---
 ana: Sra. Allan… ¿usted cree que una persona puede ser buena aunque le cueste muchísimo?
 sraallan: Creo que esas son las que más valen, Ana. A los que les sale fácil no tienen tanto mérito.
@@ -7375,7 +7377,7 @@ al_terminar: suma afecto:sraallan:ana 1
 con: ruby
 tema: Hablar con Ruby de los muchachos
 resumen: Ruby habla de muchachos; a Ana solo le gustan los héroes de los libros.
-si: hecho:se_queda, conoce:ruby
+si: ana_en_tv=se_queda, conoce:ruby
 ---
 ruby: Ana, ¿a ti quién te gusta? A mí me gustan casi todos. Charlie Sloane me miró dos veces hoy.
 ana: A mí no me gusta nadie, Ruby. Bueno, me gustan los héroes de los libros, que son mucho más nobles y nunca tiran de las trenzas.
@@ -7393,7 +7395,7 @@ ana: Por eso son perfectos.
 con: jane
 tema: Preguntarle a Jane qué quiere ser
 resumen: Jane quiere ser maestra con sueldo fijo; Ana, en una escuela junto al mar.
-si: hecho:se_queda, conoce:jane
+si: ana_en_tv=se_queda, conoce:jane
 ---
 ana: Jane, ¿tú qué quieres ser cuando seas grande?
 jane: Maestra. En una escuela de campo, con un sueldo fijo. Y después, ya veremos.
@@ -7404,7 +7406,7 @@ jane: (Jane se ríe.) Eso no existe, Ana. Pero si existiera, te tocaría a ti.
 con: josie
 tema: Responderle a Josie Pye
 resumen: Josie desafía a Ana a caminar por la cerca de los Barry.
-si: hecho:se_queda, conoce:josie
+si: ana_en_tv=se_queda, conoce:josie
 ---
 josie: Ana Shirley, apuesto a que no te atreves a caminar por arriba de la cerca del jardín de los Barry. Yo lo hice. Bueno, casi.
 ->* Aceptar el desafío, por orgullo
@@ -7420,7 +7422,7 @@ josie: Ana Shirley, apuesto a que no te atreves a caminar por arriba de la cerca
 con: minnie
 tema: Contarle un cuento de hadas a Minnie May
 resumen: Ana le cuenta a Minnie May el cuento de la niña en la burbuja del arroyo.
-si: hecho:se_queda, conoce:minnie
+si: ana_en_tv=se_queda, conoce:minnie
 ---
 minnie: Ana, ¿sabes cuentos? Diana dice que tú inventas los mejores.
 ana: ¡Claro! Había una vez una niña que vivía en una burbuja, adentro de un arroyo. Una burbuja de cristal, y cuando llovía, sonaba como campanitas.
@@ -7433,7 +7435,7 @@ al_terminar: suma afecto:minnie:ana 1
 con: phillips
 tema: Pedirle otro libro al Sr. Phillips
 resumen: Ana pide un libro al Sr. Phillips, que solo mira a Prissy Andrews.
-si: hecho:se_queda, conoce:phillips
+si: ana_en_tv=se_queda, conoce:phillips
 ---
 ana: Sr. Phillips, ¿me prestaría otro libro? Ya terminé el de cuarto grado. Dos veces.
 phillips: (El Sr. Phillips no la oye. Está mirando por la ventana a Prissy Andrews, que resuelve un problema en el pizarrón.)
@@ -7462,13 +7464,13 @@ al_terminar: suma estudio:ana 1
 === matthew ===
 dice: [ana:camison, !donde:ana:tejas] (Matthew se pone colorado y mira para otro lado.) Bueno, pues… quizás… ¿no tienes frío, Ana?
 dice: [hora:21-26, !donde:ana:tejas] Bueno, pues… es tarde, Ana. Marilla se va a preocupar. Te acompaño, ¿sí?
-dice: [!hecho:se_queda] Bueno, pues... Marilla es buena, ¿sabes? Solo que no se le nota mucho al principio.
-dice: [!hecho:se_queda] Ya lo creo que... bueno, ojalá te quedes, Ana. Yo... sí. Eso.
+dice: [ana_en_tv<se_queda] Bueno, pues... Marilla es buena, ¿sabes? Solo que no se le nota mucho al principio.
+dice: [ana_en_tv<se_queda] Ya lo creo que... bueno, ojalá te quedes, Ana. Yo... sí. Eso.
 dice: Bueno, pues... sí, es un día precioso, Ana. Ya lo creo.
 dice: Las vacas andan contentas hoy. Será por el sol, supongo.
-dice: [hecho:se_queda] Marilla dice que hablas mucho. Bueno, a mí me gusta oírte, ¿sabes?
-dice: [hecho:se_queda] ¿Viste las flores junto al camino? Bueno, pues... me hicieron pensar en ti.
-dice: [hecho:se_queda] Ya lo creo, ya lo creo. Anda, ve a jugar un rato, que el día está lindo.
+dice: [ana_en_tv=se_queda] Marilla dice que hablas mucho. Bueno, a mí me gusta oírte, ¿sabes?
+dice: [ana_en_tv=se_queda] ¿Viste las flores junto al camino? Bueno, pues... me hicieron pensar en ti.
+dice: [ana_en_tv=se_queda] Ya lo creo, ya lo creo. Anda, ve a jugar un rato, que el día está lindo.
 primavera: Bueno, pues... ya brotó todo. La primavera, ¿no? Ya lo creo.
 verano: Hace calor para la siega, ya lo creo. Bueno, el heno no se corta solo.
 otoño: Las manzanas de los Barry están en su punto. Marilla querrá hacer compota, supongo.
@@ -7478,20 +7480,20 @@ invierno: Abrígate bien, Ana. El frío... bueno, pues, no es broma.
 dice: [ana:camison, !donde:ana:tejas] ¡Ana Shirley! ¡A casa ahora mismo, y te vistes como una persona decente!
 dice: [hora:21-26, !donde:ana:tejas] ¿Qué haces afuera a estas horas? ¡A casa, y sin chistar!
 dice: [ana:sin_sombrero, escena_ana:ig] (Marilla le susurra, sin mover los labios.) ¿Y tu sombrero? ¡En la iglesia!
-dice: [!hecho:se_queda] Mientras estés en esta casa, harás tus quehaceres como cualquiera. Después veremos.
-dice: [!hecho:se_queda] No te prometo nada, niña. Que te quedes o no, depende de cómo te portes.
-dice: [!hecho:se_queda] Lávate la cara y péinate esas trenzas. Aquí se come con la cara limpia.
-dice: [!hecho:se_queda, !dicha:conv_marilla_oraciones] ¿Sabes rezar? Pues vas a aprender. En esta casa se reza.
-dice: [hecho:se_queda] Ana, no te quedes soñando despierta. Aunque... la cocina está ordenada, eso sí.
-dice: [hecho:se_queda] Si quieres cocinar, la estufa está encendida. Cuidado con no quemar nada.
-dice: [hecho:se_queda, hecho:conocidas_diana] Matthew no lo dice, pero te echa de menos cuando te vas donde Diana.
-dice: [hecho:se_queda, hora:12-18, no_hoy:regado] Riega la huerta antes de que caiga el sol, que las plantas lo agradecen. La regadera está junto a la bomba.
-dice: [hecho:se_queda, afecto:marilla:ana>=3, hora:17-22] Hmm. Bueno, admito que hoy te has portado muy bien.
+dice: [ana_en_tv<se_queda] Mientras estés en esta casa, harás tus quehaceres como cualquiera. Después veremos.
+dice: [ana_en_tv<se_queda] No te prometo nada, niña. Que te quedes o no, depende de cómo te portes.
+dice: [ana_en_tv<se_queda] Lávate la cara y péinate esas trenzas. Aquí se come con la cara limpia.
+dice: [ana_en_tv<se_queda, !dicha:conv_marilla_oraciones] ¿Sabes rezar? Pues vas a aprender. En esta casa se reza.
+dice: [ana_en_tv=se_queda] Ana, no te quedes soñando despierta. Aunque... la cocina está ordenada, eso sí.
+dice: [ana_en_tv=se_queda] Si quieres cocinar, la estufa está encendida. Cuidado con no quemar nada.
+dice: [ana_en_tv=se_queda, diana>=conocida] Matthew no lo dice, pero te echa de menos cuando te vas donde Diana.
+dice: [ana_en_tv=se_queda, hora:12-18, no_hoy:regado] Riega la huerta antes de que caiga el sol, que las plantas lo agradecen. La regadera está junto a la bomba.
+dice: [ana_en_tv=se_queda, afecto:marilla:ana>=3, hora:17-22] Hmm. Bueno, admito que hoy te has portado muy bien.
 dice: [!no_hoy:sin_terminar_quehacer_platos] Ana, dejaste los platos en el agua, y el agua ya está fría. Una cosa empezada se termina, niña.
 dice: [!no_hoy:sin_terminar_ordeñar] ¿Quién dejó la vaca a medio ordeñar? Una vaca a medias no da leche: da problemas.
 dice: [!no_hoy:sin_terminar_batir] La mantequera a medias, y la crema cortándose. La crema no espera a nadie, Ana.
 dice: [hecho:ropa_arrugada, !hecho:ropa_ordenada] Ese vestido parece que durmió en el suelo, Ana. Ah, claro: es que durmió en el suelo.
-primavera: [hecho:se_queda] Hay que limpiar la casa a fondo, que es primavera. Y tú me vas a ayudar, Ana.
+primavera: [ana_en_tv=se_queda] Hay que limpiar la casa a fondo, que es primavera. Y tú me vas a ayudar, Ana.
 verano: Con este calor, mejor un té y no enciendas mucho la estufa.
 otoño: Es tiempo de manzanas: una buena compota para el invierno no está de más.
 invierno: Siéntate cerca de la estufa, niña, que vienes helada.
@@ -7500,44 +7502,44 @@ invierno: Siéntate cerca de la estufa, niña, que vienes helada.
 dice: [ana:camison, !donde:ana:tejas] ¡Ana! ¿Saliste así? ¡Ven, te presto mi chal antes de que te vea mamá!
 dice: [ana:sin_sombrero, escena_ana:ig] (Diana le pasa su pañuelo, a escondidas.) Póntelo en la cabeza, rápido.
 dice: [hora:21-26, !donde:ana:tejas] ¡Ana! ¿Qué haces afuera a esta hora? Si mamá te ve, no me deja verte nunca más.
-dice: [dias_desde:conocidas_diana:2, !hecho:prohibida] ¡Ana, mi alma gemela! Te estaba esperando.
-dice: [hecho:conocidas_diana, !hecho:prohibida] Mamá dice que puedo salir hasta que se ponga el sol. ¿Vamos al lago?
-dice: [hecho:conocidas_diana, cuaderno:amigas, !hecho:prohibida, afecto:diana:ana>=4] ¿Te acuerdas de nuestro juramento de amistad? ¡Para siempre!
-dice: [hecho:conocidas_diana, !hecho:prohibida] Los manzanos están llenos este año. Toma las que quieras.
-dice: [hecho:conocidas_diana, !hecho:prohibida] El Bosque Encantado me da un poquito de miedo... pero contigo no.
-dice: [!hecho:conocidas_diana] Hola. Tú eres la niña nueva de Tejas Verdes, ¿verdad?
-dice: [hecho:prohibida] (Diana baja la vista.) Mamá dice que no puedo hablar contigo, Ana... Lo siento tanto.
-primavera: [hecho:conocidas_diana, !hecho:prohibida] ¡Mira los manzanos en flor, Ana! Parecen novias vestidas de blanco.
-verano: [hecho:conocidas_diana, !hecho:prohibida] ¡Qué calor! ¿Vamos a remojar los pies en el lago?
-otoño: [hecho:conocidas_diana, !hecho:prohibida] El Bosque Encantado está todo rojo y dorado... ¡como un cuento!
-invierno: [hecho:conocidas_diana, !hecho:prohibida] ¡Está nevando! Mamá no me deja salir sin bufanda. Ven, entra a calentarte junto al fuego.
+dice: [dias_desde:conocidas_diana:2, barry_permite=si] ¡Ana, mi alma gemela! Te estaba esperando.
+dice: [diana>=conocida, barry_permite=si] Mamá dice que puedo salir hasta que se ponga el sol. ¿Vamos al lago?
+dice: [diana>=conocida, cuaderno:amigas, barry_permite=si, afecto:diana:ana>=4] ¿Te acuerdas de nuestro juramento de amistad? ¡Para siempre!
+dice: [diana>=conocida, barry_permite=si] Los manzanos están llenos este año. Toma las que quieras.
+dice: [diana>=conocida, barry_permite=si] El Bosque Encantado me da un poquito de miedo... pero contigo no.
+dice: [diana=desconocida] Hola. Tú eres la niña nueva de Tejas Verdes, ¿verdad?
+dice: [barry_permite=no] (Diana baja la vista.) Mamá dice que no puedo hablar contigo, Ana... Lo siento tanto.
+primavera: [diana>=conocida, barry_permite=si] ¡Mira los manzanos en flor, Ana! Parecen novias vestidas de blanco.
+verano: [diana>=conocida, barry_permite=si] ¡Qué calor! ¿Vamos a remojar los pies en el lago?
+otoño: [diana>=conocida, barry_permite=si] El Bosque Encantado está todo rojo y dorado... ¡como un cuento!
+invierno: [diana>=conocida, barry_permite=si] ¡Está nevando! Mamá no me deja salir sin bufanda. Ven, entra a calentarte junto al fuego.
 
 === barry ===
 dice: [!conoce:barry, !hecho:barry_presenta, sabe:barry:nina_cuthbert] Tú debes ser la niña que trajeron los Cuthbert. Buenas tardes.
-dice: [conoce:barry, !hecho:prohibida] ¿Cómo estás, Ana? Abrígate bien, que el viento de la isla es traicionero.
-dice: [dias_desde:barry_presenta:3, !hecho:prohibida] Ana Shirley, siempre es un gusto verte por aquí. Pórtate bien, ¿eh?
-dice: [dias_desde:conocidas_diana:3, !hecho:prohibida] Diana habla de ti todo el día, ¿sabes?
+dice: [conoce:barry, barry_permite=si] ¿Cómo estás, Ana? Abrígate bien, que el viento de la isla es traicionero.
+dice: [dias_desde:barry_presenta:3, barry_permite=si] Ana Shirley, siempre es un gusto verte por aquí. Pórtate bien, ¿eh?
+dice: [dias_desde:conocidas_diana:3, barry_permite=si] Diana habla de ti todo el día, ¿sabes?
 dice: [hecho:perdonada] Esta vez el cordial de frambuesa está bien etiquetado, te lo aseguro.
-dice: [hecho:prohibida, !hecho:perdonada] Buenas tardes. (La Sra. Barry no la invita a pasar.)
-dice: [!donde:ana:tejas, !hecho:prohibida] Saluda a Marilla de mi parte.
+dice: [barry_permite=no, !hecho:perdonada] Buenas tardes. (La Sra. Barry no la invita a pasar.)
+dice: [!donde:ana:tejas, barry_permite=si] Saluda a Marilla de mi parte.
 dice: [conoce:barry, !hecho:barry_presenta] Buenos días, niña. ¿Y Marilla, cómo está? Hace tiempo que no la veo.
-primavera: [hecho:barry_presenta, !hecho:prohibida] Buenos días, Ana. Diana está deseando verte.
-verano: [hecho:barry_presenta, !hecho:prohibida] Qué calor, ¿verdad? Hay limonada en la despensa.
-otoño: [hecho:barry_presenta, !hecho:prohibida] Diana me ayudó con las manzanas. Llévale algunas a Marilla.
-invierno: [hecho:barry_presenta, !hecho:prohibida, escena_ana:os] Pasa, pasa, que hace un frío terrible. Diana está junto al fuego.
+primavera: [hecho:barry_presenta, barry_permite=si] Buenos días, Ana. Diana está deseando verte.
+verano: [hecho:barry_presenta, barry_permite=si] Qué calor, ¿verdad? Hay limonada en la despensa.
+otoño: [hecho:barry_presenta, barry_permite=si] Diana me ayudó con las manzanas. Llévale algunas a Marilla.
+invierno: [hecho:barry_presenta, barry_permite=si, escena_ana:os] Pasa, pasa, que hace un frío terrible. Diana está junto al fuego.
 
 === lynde ===
 dice: [!conoce:lynde, !hecho:lynde_visita, sabe:lynde:nina_cuthbert] ¿Así que tú eres la huérfana de Tejas Verdes? Ya iré a verte con calma, ya.
-dice: [hecho:ofendio_lynde, !hecho:disculpa_lynde] Hmpf. No tengo nada que hablar contigo, niña malcriada.
-dice: [!hecho:ofendio_lynde] Desde mi ventana veo todo el camino: no se me escapa nadie. Lo digo sin mala intención, ¿eh?
-dice: [!hecho:ofendio_lynde] Llevo cincuenta y dos cubrecamas de retazos, ¡cincuenta y dos! Y no pienso parar.
-dice: [hecho:se_queda, !hecho:ofendio_lynde, hecho:lynde_visita] Marilla hizo bien en quedarse contigo, y lo digo yo, que nunca me callo lo que pienso.
-dice: [hecho:lynde_visita, !hecho:ofendio_lynde] A una niña hay que enseñarle a ser útil. Pero, bueno, tú vas por buen camino.
-dice: [hecho:lynde_visita, !hecho:ofendio_lynde] Ana Shirley, hablas más que un molino... pero tienes buen corazón, eso lo reconozco.
-primavera: [hecho:lynde_visita, !hecho:ofendio_lynde] ¡Vaya, vaya, ya brotó todo! Ya es hora de limpiar la casa, digo yo.
-verano: [hecho:lynde_visita, !hecho:ofendio_lynde] Con este calor no hay quien teja... ¡pero yo tejo, claro que tejo!
-otoño: [hecho:lynde_visita, !hecho:ofendio_lynde] El otoño siempre me hace pensar en los cubrecamas. Este año haré uno rojo y dorado.
-invierno: [hecho:lynde_visita, !hecho:ofendio_lynde, escena_ana:rl] Pasa, niña, que hace un frío de mil demonios... perdón, de los que dan escalofríos.
+dice: [lynde_ana=ofendida, !hecho:disculpa_lynde] Hmpf. No tengo nada que hablar contigo, niña malcriada.
+dice: [lynde_ana=bien] Desde mi ventana veo todo el camino: no se me escapa nadie. Lo digo sin mala intención, ¿eh?
+dice: [lynde_ana=bien] Llevo cincuenta y dos cubrecamas de retazos, ¡cincuenta y dos! Y no pienso parar.
+dice: [ana_en_tv=se_queda, lynde_ana=bien, hecho:lynde_visita] Marilla hizo bien en quedarse contigo, y lo digo yo, que nunca me callo lo que pienso.
+dice: [hecho:lynde_visita, lynde_ana=bien] A una niña hay que enseñarle a ser útil. Pero, bueno, tú vas por buen camino.
+dice: [hecho:lynde_visita, lynde_ana=bien] Ana Shirley, hablas más que un molino... pero tienes buen corazón, eso lo reconozco.
+primavera: [hecho:lynde_visita, lynde_ana=bien] ¡Vaya, vaya, ya brotó todo! Ya es hora de limpiar la casa, digo yo.
+verano: [hecho:lynde_visita, lynde_ana=bien] Con este calor no hay quien teja... ¡pero yo tejo, claro que tejo!
+otoño: [hecho:lynde_visita, lynde_ana=bien] El otoño siempre me hace pensar en los cubrecamas. Este año haré uno rojo y dorado.
+invierno: [hecho:lynde_visita, lynde_ana=bien, escena_ana:rl] Pasa, niña, que hace un frío de mil demonios... perdón, de los que dan escalofríos.
 
 === harrison ===
 dice: [ana:camison, !donde:ana:tejas] ¡Hmpf! ¡En camisón! Ni Ginger anda tan mal vestido, muchacha.
@@ -7608,7 +7610,7 @@ dice: Ayer el maestro me dejó sin recreo. Fue injusto, aunque sí me reí en la
 
 === tillie ===
 dice: ¿Juegas a la mancha? ¡Tú la llevas!
-dice: [hecho:se_queda] Encontré un nido de petirrojos detrás de la escuela. ¡No le digas a nadie!
+dice: [ana_en_tv=se_queda] Encontré un nido de petirrojos detrás de la escuela. ¡No le digas a nadie!
 
 === felicity ===
 dice: Mi madre dice que una señorita nunca corre. Pero yo corro si llego tarde.
@@ -7634,7 +7636,7 @@ dice: [!estacion:verano] Mañana hay examen de geometría. Que nadie lo olvide.
 === allan ===
 dice: [ana:camison, !donde:ana:tejas] (El reverendo carraspea.) Ana… quizás deberías volver a casa a vestirte.
 dice: [ana:sin_sombrero, escena_ana:ig] Bienvenida, Ana. El Señor no mira los sombreros… pero la Sra. Lynde sí.
-dice: [hecho:se_queda] Que Dios te bendiga, Ana. ¿Te veremos el domingo en la escuela dominical?
+dice: [ana_en_tv=se_queda] Que Dios te bendiga, Ana. ¿Te veremos el domingo en la escuela dominical?
 dice: Hermoso día para dar gracias, ¿no te parece?
 
 === sraallan ===
@@ -7738,7 +7740,7 @@ dice: ¿Alguien enfermo en Tejas Verdes? Espero que no.
 dice: [hecho:perdonada] Esa niña Shirley tiene buena cabeza: salvó a la pequeña Barry del crup antes de que yo llegara.
 
 === srbell ===
-dice: [hecho:se_queda] Te esperamos el domingo en la escuela dominical, Ana. Y apréndete el versículo.
+dice: [ana_en_tv=se_queda] Te esperamos el domingo en la escuela dominical, Ana. Y apréndete el versículo.
 dice: Una oración larga no es mejor que una sincera, niña.
 
 === josephine ===
@@ -7752,9 +7754,9 @@ dice: ¡Ana! Qué bien te ves. Y yo que creí que los Cuthbert querían una niñ
 dice: Mi Lily estuvo enferma, por eso no pude llevarte yo a Tejas Verdes.
 
 === blewett ===
-dice: [hecho:a_prueba] Así que te quedaste con los Cuthbert. Hmm. Yo te habría hecho trabajar de verdad.
+dice: [ana_en_tv>=decidida] Así que te quedaste con los Cuthbert. Hmm. Yo te habría hecho trabajar de verdad.
 dice: Hmm. Flacucha. En mi casa no hay tiempo para mirar las nubes, ¿sabes?
-ana: [hecho:a_prueba] (Ana se esconde detrás de un árbol. ¡Menos mal que Marilla no la dejó irse con ella!)
+ana: [ana_en_tv>=decidida] (Ana se esconde detrás de un árbol. ¡Menos mal que Marilla no la dejó irse con ella!)
 
 === carrie ===
 dice: [dias_desde:escuela:3, hecho:llego_stacy] ¿Viste la composición de Ana? ¡La señorita Stacy la leyó en voz alta!
@@ -7802,6 +7804,71 @@ dice: [ana:camison, !donde:ana:tejas, !afecto:{k}:ana>=3, sabe:{k}:nina_cuthbert
 dice: [ana:camison, !donde:ana:tejas] ¿Saliste en camisón? ¡Mi mamá me mataría!
 dice: [hora:21-26, !donde:ana:tejas] ¿Tú puedes andar afuera a esta hora? A mí no me dejan.
 dice: [ana:sin_sombrero, escena_ana:ig, !afecto:{k}:ana>=3] (Le susurra a la de al lado, mirando a Ana sin sombrero, y las dos se ríen.)
+
+</script>
+<script type="text/plain" id="estado">
+# El estado de la historia: variables con un valor de una lista (lo lee el juego al empezar; el motor:
+# src/js/20-estado.js). Un hecho es algo que pasó, una vez, con su día; el estado es cómo están las cosas ahora, y
+# cambia: Ana a prueba o aceptada, Diana desconocida o amiga del alma, si la Sra. Barry deja que se vean.
+#
+# «=== nombre ===» y sus campos, uno por línea:
+#   titulo: cómo se dice
+#   valores: a < b < c       los valores, en orden (una escala: se puede preguntar «diana>=conocida»)
+#   valores: a, b            los valores, sin orden (solo «=» y «!=»)
+#   otros: x                 valores fuera de la escala (Ana devuelta: ni más ni menos que aceptada)
+#   inicial: a               el valor al empezar (si no, el primero)
+#   <valor>: hecho x         al entrar en ese valor queda también el hecho x (para lo que cuenta los días desde
+#                            algo, «dias_desde:x:3», y para el código); una partida de antes, con el hecho, ya está ahí
+#   <valor>: olvida x        al entrar en ese valor, el hecho x deja de ser
+#   <valor>: viene de x      una partida de antes, con el hecho x, ya está en ese valor (sin dejarlo)
+#
+# En el guion: «! estado diana amiga_del_alma» lo cambia (o «al_terminar: estado …»); «si: diana>=conocida»,
+# «barry_permite=no», «ana_en_tv<decidida» lo pregunta. El grafo revisa que los nombres y los valores existan.
+# Las líneas que empiezan con # son comentarios.
+
+# --- Ana en Tejas Verdes (cap. 3 a 8): llega esperando un niño; a prueba; Marilla decide quedársela, a prueba
+# (después de White Sands); y al día siguiente le dice que se queda. O, sin paciencia ni cariño, la devuelve.
+=== ana_en_tv ===
+titulo: Ana en Tejas Verdes
+valores: llegando < en_prueba < decidida < se_queda
+otros: devuelta
+en_prueba: viene de llegada_tv
+decidida: hecho a_prueba
+se_queda: hecho se_queda
+devuelta: hecho devuelta
+
+# --- Diana (cap. 12): no se conocen; se conocen (por casualidad); o, como en el libro, la Sra. Barry las presenta y
+# Ana le pide ser su amiga del alma.
+=== diana ===
+titulo: Diana y Ana
+valores: desconocida < conocida < amiga_del_alma
+conocida: hecho conocidas_diana
+amiga_del_alma: hecho conocidas_diana
+amiga_del_alma: hecho amigas_del_alma
+
+# --- La Sra. Barry (cap. 16 a 18): después del vino de grosellas le prohíbe a Diana ver a Ana; la perdona cuando
+# Ana le salva la vida a Minnie May.
+=== barry_permite ===
+titulo: La Sra. Barry deja que Diana y Ana se vean
+valores: si, no
+inicial: si
+no: hecho prohibida
+si: olvida prohibida
+
+# --- La Sra. Lynde (cap. 9 y 10): si Ana le grita, queda ofendida hasta que Ana le pide perdón.
+=== lynde_ana ===
+titulo: La Sra. Lynde con Ana
+valores: bien, ofendida
+inicial: bien
+ofendida: hecho ofendio_lynde
+bien: olvida ofendio_lynde
+
+# --- El viaje en curso: el primero, de Bright River a Tejas Verdes (cap. 2), o a White Sands con Marilla (cap. 5 y
+# 6). Las escenas del camino son de ese viaje, y solo mientras dura.
+=== viaje ===
+titulo: El viaje en curso
+valores: ninguno, primer_viaje, white_sands
+inicial: ninguno
 
 </script>
 <script type="text/plain" id="llegadas">
@@ -7993,13 +8060,13 @@ dice: Matthew Cuthbert fue a la tienda y salió con un rastrillo. ¡En pleno inv
 
 === ana_lengua ===
 titulo: la niña de los Cuthbert tiene una lengua, pero buen corazón
-saben si hecho:lynde_visita, !hecho:ofendio_lynde: lynde
+saben si hecho:lynde_visita, lynde_ana=bien: lynde
 dice: ¡Esa niña de los Cuthbert! Pelirroja y con una lengua... aunque buen corazón tiene, eso sí.
 
 === ana_ofendio_lynde ===
 la callan: marilla, matthew
 titulo: la niña de los Cuthbert le dijo vieja chismosa a la Sra. Lynde
-saben si hecho:ofendio_lynde: lynde
+saben si lynde_ana=ofendida: lynde
 dice: ¡Esa niña de los Cuthbert! Me dijo vieja chismosa en mi propia cara. ¡A mí!
 exagerada: ¿Supo? La niña de los Cuthbert le gritó a Rachel Lynde que era una vieja gorda y chismosa, ¡y pataleando!
 responde: ¡Qué niña! ¿Y qué hizo Marilla?
@@ -8175,7 +8242,7 @@ inicial: 2
 rango: 0-4
 suma: quehacer, rezar, cocinar, coser, recoger
 por_dia: 1
-visible si: hecho:inicio_juego, !hecho:a_prueba
+visible si: hecho:inicio_juego, ana_en_tv<decidida
 hito 3: Marilla empieza a pensar que la niña quizás sirva para algo.
 hito 4: Marilla ya casi no piensa en devolverla.
 bajo 1: Marilla está pensando en dejarla en White Sands: pídele perdón y ayúdala.
@@ -8193,14 +8260,14 @@ bajo 0: Marilla ya no tiene paciencia contigo: en White Sands puede pasar cualqu
 #   meta: cuándo está cumplida: una meta del planificador y sus argumentos, separados por espacios
 #         (p. ej. «amigas ana diana», «nombres ana 3»; una lista va con comas: «quehaceres ana platos,barrer»)
 #   requiere: lo que tiene que pasar antes (separado por comas): otras metas del cuaderno (por su id), o
-#         condiciones del guion («hecho:conocidas_diana», «dias_desde:quiere_amiga:1», «afecto:diana:ana>=4», «estudio:ana>=10»)
+#         condiciones del guion («diana>=conocida», «dias_desde:quiere_amiga:1», «afecto:diana:ana>=4», «estudio:ana>=10»)
 #   antes: cómo se dice lo que falta, mientras está cerrada (si no, los títulos de las metas que requiere)
 #   oculta: no aparece en el cuaderno hasta que se abre (algo que no se puede saber antes, como una prohibición)
 #   a prueba: se puede hacer antes de que Marilla decida que Ana se queda (los días 1 a 3, como en los cap. 2 a 8 del libro:
 #         rezar, ayudar, ponerle nombre a las cosas); las demás piden «quedarse» (lo revisa tools/grafo.js)
 #   guiño quien: lo que esa persona dice al pasar mientras la meta está abierta y sin cumplir (un guiño para el
 #         jugador, en el diálogo mismo, sin abrir el cuaderno); «guiño cerrada quien:» mientras está cerrada (lo que falta).
-#         Con «[condiciones]» al principio, como en frases.txt: «guiño diana: [!hecho:prohibida] …»
+#         Con «[condiciones]» al principio, como en frases.txt: «guiño diana: [barry_permite=si] …»
 #   acciones: lo que no se puede hacer mientras está cerrada (separado por comas): una acción («jurar»), una
 #         acción con alguien («perdonar:gilbert»), o un pedido («pedir/venir»: invitar a tomar el té)
 #   Las metas que se pueden usar (las del planificador): amigas, picnic, visitar, paces, quehaceres, regalo_gusto,
@@ -8217,7 +8284,7 @@ bajo 0: Marilla ya no tiene paciencia contigo: en White Sands puede pasar cualqu
 titulo: Quedarse en Tejas Verdes
 pista: Marilla esperaba un niño. Mañana la lleva a White Sands, donde la Sra. Spencer, a devolverla. Ayúdala, pórtate bien: todavía puede cambiar de opinión.
 pista si paciencia:marilla:ana<=1: Marilla está pensando en dejarte en White Sands. Pídele perdón, ayúdala en la casa, y no le des motivos.
-pista si hecho:a_prueba: Marilla te trajo de vuelta de White Sands… pero no te ha dicho nada. Quizás mañana.
+pista si ana_en_tv>=decidida: Marilla te trajo de vuelta de White Sands… pero no te ha dicho nada. Quizás mañana.
 meta: hecho se_queda
 guiño matthew: Bueno, pues… Marilla es dura, pero tiene buen corazón. Pórtate bien, ayúdala, y verás.
 
@@ -8230,7 +8297,7 @@ pista si hecho:quiere_amiga: Marilla dijo que un día de estos iría a La Cuesta
 pista si hecho:quiere_amiga, !presente:diana: Diana está en Carmody, donde su tía, y vuelve a las dos semanas y media de que llegaste a Tejas Verdes. Cuando vuelva, Marilla te lleva a conocerla (en la tarde: no te alejes).
 guiño marilla: [hecho:quiere_amiga, !presente:diana] Diana sigue en Carmody, donde su tía. Vuelve dentro de unos días; cuando llegue, te llevo a conocerla. Paciencia, Ana.
 meta: hecho conocidas_diana
-requiere: hecho:se_queda
+requiere: ana_en_tv=se_queda
 antes: quedarse en Tejas Verdes (después, quizás Marilla sepa de alguna niña de tu edad)
 guiño marilla: [!hecho:pide_amiga] Los Barry tienen una niña de tu edad, Diana. Si me lo pidieras, quizás un día te llevaría a conocerla.
 
@@ -8241,26 +8308,26 @@ pista si afecto:diana:ana<4: Ya conoces a Diana, pero para jurar tienen que quer
 meta: amigas ana diana
 requiere: conocer_diana
 acciones: jurar
-guiño diana: [!hecho:prohibida] Mamá dice que las amigas de verdad se juran amistad para siempre… ¿tú crees en esas cosas, Ana?
+guiño diana: [barry_permite=si] Mamá dice que las amigas de verdad se juran amistad para siempre… ¿tú crees en esas cosas, Ana?
 
 === picnic ===
 titulo: Ir de picnic con Diana
 pista: Al lago, con una canasta. Primero hay que pedirle permiso a Marilla.
 pista si !hecho:broche: Marilla tiene que dejarte ir… y Marilla anda buscando algo que perdió.
 meta: picnic ana diana
-requiere: amigas, hecho:broche, !hecho:prohibida
+requiere: amigas, hecho:broche, barry_permite=si
 antes: ser amiga de Diana (y que Marilla te deje ir al picnic)
 acciones: merendar, pedir_permiso
-guiño diana: [!hecho:prohibida] ¿Supiste? ¡La escuela dominical va a hacer un picnic en el Lago de las Aguas Brillantes! Con helado, dicen.
+guiño diana: [barry_permite=si] ¿Supiste? ¡La escuela dominical va a hacer un picnic en el Lago de las Aguas Brillantes! Con helado, dicen.
 guiño cerrada marilla: ¿Alguien ha visto mi broche de amatista? Juraría que lo dejé en el alfiletero…
 
 === te_diana ===
 titulo: Invitar a Diana a tomar el té
 pista: En Tejas Verdes, con el cordial de frambuesa de Marilla. Invítala cuando la veas.
 meta: tomando_te ana diana
-requiere: amigas, dias_desde:conocidas_diana:5, afecto:diana:ana>=5, !hecho:prohibida
+requiere: amigas, dias_desde:conocidas_diana:5, afecto:diana:ana>=5, barry_permite=si
 antes: que Diana te quiera mucho, mucho (pasen tiempo juntas, escríbele, regálale algo) y que se conozcan desde hace unos días
-guiño diana: [!hecho:prohibida] Mamá nunca me deja ir a tomar el té a ninguna parte… ¡me encantaría que alguien me invitara de verdad!
+guiño diana: [barry_permite=si] Mamá nunca me deja ir a tomar el té a ninguna parte… ¡me encantaría que alguien me invitara de verdad!
 guiño cerrada marilla: Diana Barry es una niña buena. Si te sigues portando así con ella, algún día podrías invitarla a tomar el té.
 
 === perdon_barry ===
@@ -8275,9 +8342,9 @@ oculta
 titulo: Hacerse amiga de la tía Josephine
 pista: La tía de la Sra. Barry viene de Charlottetown. Un concierto, una noche en casa de Diana… y una cama de huéspedes.
 meta: hecho cama_josephine
-requiere: amigas, dias_desde:conocidas_diana:15, afecto:diana:ana>=5, letras:ana>=10, !hecho:prohibida
+requiere: amigas, dias_desde:conocidas_diana:15, afecto:diana:ana>=5, letras:ana>=10, barry_permite=si
 antes: ser muy amiga de Diana desde hace tiempo, y tener imaginación de sobra (escribe cuentos y cartas, ponle nombre a los lugares): a la tía Josephine le encanta
-guiño diana: [!hecho:prohibida] Mi tía Josephine viene de Charlottetown para el concierto del Club de Debate. Es un poco… temible.
+guiño diana: [barry_permite=si] Mi tía Josephine viene de Charlottetown para el concierto del Club de Debate. Es un poco… temible.
 guiño cerrada diana: Mi tía Josephine dice que las niñas de hoy no tienen imaginación. ¡Si te conociera a ti!
 
 === lynde ===
@@ -8343,7 +8410,7 @@ titulo: Ir a la escuela
 requiere: quedarse
 pista: La escuela está junto al río, más allá de la aldea. Allí van Diana, Gilbert Blythe y los demás.
 meta: estar_en ana escuela
-guiño diana: [!hecho:prohibida] ¿Vienes conmigo a la escuela? Está junto al río. Te presento a todos.
+guiño diana: [barry_permite=si] ¿Vienes conmigo a la escuela? Está junto al río. Te presento a todos.
 
 === recito ===
 titulo: Recitar la lección en la escuela
@@ -8351,7 +8418,7 @@ pista: Hay que estudiarla antes.
 meta: recito ana
 requiere: escuela
 acciones: recitar
-guiño diana: [!hecho:prohibida] Mañana toca recitar la lección… ¿tú ya te la aprendiste? Yo ni la miré.
+guiño diana: [barry_permite=si] Mañana toca recitar la lección… ¿tú ya te la aprendiste? Yo ni la miré.
 
 === queens ===
 titulo: Entrar a Queen's
@@ -8372,7 +8439,7 @@ meta: paces ana gilbert
 requiere: quedarse, hecho:zanahorias, dias_desde:zanahorias:28, estudio:ana>=30
 antes: ir a la escuela, donde está Gilbert Blythe (y que pase algo); y después, mucho tiempo y mucha rivalidad en clases (estudiar, competir con él): Ana no perdona fácil
 acciones: disculparse:gilbert, perdonar:gilbert, interceder:gilbert
-guiño diana: [!hecho:prohibida] Gilbert te mira todo el tiempo en clase, Ana… Creo que quiere pedirte perdón.
+guiño diana: [barry_permite=si] Gilbert te mira todo el tiempo en clase, Ana… Creo que quiere pedirte perdón.
 guiño cerrada diana: Gilbert sacó otra vez la mejor nota… Si estudiaras un poco más, le ganarías, Ana.
 
 === leido ===
@@ -8380,7 +8447,7 @@ titulo: Leer un libro de principio a fin
 requiere: quedarse
 pista: Diana presta libros. Un buen rincón: la silla junto a la ventana de la cocina.
 meta: leido ana
-guiño diana: [!hecho:prohibida] Te presto mi libro, si quieres. Es de una dama muy triste, en un castillo.
+guiño diana: [barry_permite=si] Te presto mi libro, si quieres. Es de una dama muy triste, en un castillo.
 
 === carta ===
 titulo: Escribir una carta y mandarla
@@ -8392,9 +8459,9 @@ meta: carta ana
 titulo: Escribir un cuento para el club de cuentos
 pista: Una historia trágica, con una dama de cabellos de oro… y leérsela a Diana.
 meta: club ana
-requiere: amigas, !hecho:prohibida
+requiere: amigas, barry_permite=si
 acciones: escribir_cuento, leer_cuento
-guiño diana: [!hecho:prohibida] ¿Y si hacemos un club de cuentos? Tú escribes tan bonito…
+guiño diana: [barry_permite=si] ¿Y si hacemos un club de cuentos? Tú escribes tan bonito…
 
 === concierto ===
 titulo: Recitar en el concierto
@@ -8403,7 +8470,7 @@ meta: concierto ana
 requiere: escuela
 antes: ir a la escuela (el concierto lo organizan la maestra y sus alumnos)
 acciones: ensayar, actuar
-guiño diana: [!hecho:prohibida] ¡Va a haber un concierto en el salón! ¿Vas a recitar algo, Ana?
+guiño diana: [barry_permite=si] ¡Va a haber un concierto en el salón! ¿Vas a recitar algo, Ana?
 
 === sala ===
 titulo: Decorar el salón para el concierto
@@ -8431,24 +8498,24 @@ meta: adornado ana
 titulo: Remar en el Lago de las Aguas Brillantes
 pista: El bote de los Barry está en el lago. En verano.
 meta: remo ana
-requiere: amigas, !hecho:prohibida
+requiere: amigas, barry_permite=si
 antes: ser amiga de Diana (el bote es de los Barry)
 acciones: remar
-guiño diana: [!hecho:prohibida] Papá dejó el bote en el lago… ¿Jugamos a la doncella de los lirios?
+guiño diana: [barry_permite=si] Papá dejó el bote en el lago… ¿Jugamos a la doncella de los lirios?
 
 === patinar ===
 titulo: Patinar en el lago helado
 requiere: quedarse
 pista: Solo en invierno.
 meta: patinar ana
-guiño diana: [!hecho:prohibida] Cuando el lago se hiele, ¡vamos a patinar! Es lo más lindo del invierno.
+guiño diana: [barry_permite=si] Cuando el lago se hiele, ¡vamos a patinar! Es lo más lindo del invierno.
 
 === trineo ===
 titulo: Tirarse en trineo colina abajo
 requiere: quedarse
 pista: Solo en invierno, en la colina.
 meta: trineo ana
-guiño diana: [!hecho:prohibida] ¡Si nieva, nos tiramos en trineo por la colina!
+guiño diana: [barry_permite=si] ¡Si nieva, nos tiramos en trineo por la colina!
 
 == Travesuras
 
@@ -8470,7 +8537,7 @@ acciones: cortar_pelo
 titulo: Aceptar el desafío de Josie Pye
 pista: Caminar por el caballete del techo de los Barry. ¿Qué podría salir mal?
 meta: desafio ana
-requiere: amigas, !hecho:prohibida
+requiere: amigas, barry_permite=si
 antes: ser amiga de Diana (el desafío es en una fiesta en su casa)
 acciones: trepar
 
@@ -10807,6 +10874,53 @@ function cap1Tick(){
     f.home = 1; dlgHecho('llegaron'); if (CAP1.juego) { cap1AlJuego(); return; } if (game.scene !== 'gg') goIn('gg'); ana.sit = false; cap1Mark('baja_ana', 'Matthew bajó a Ana de la calesa en el patio oscuro de Tejas Verdes, entre los álamos, y entraron a la casa.');
   }
 }
+/* ---------- the state of the story (src/datos/estado.txt): variables with a value of a list, ordered or not: Ana on
+   trial or staying, Diana unknown or a bosom friend, whether Mrs. Barry lets them see each other, the trip under way.
+   A fact is something that happened, once, with its day; the state is how things are now, and it changes. The script
+   sets it («! estado diana amiga_del_alma») and asks it («si: diana>=conocida», «barry_permite=no»); entering a value
+   may leave a fact too (for «dias_desde» and the code), or forget one. ---------- */
+function estadoLeer(txt){
+  const E = {}; let v = null;
+  for (const raw of txt.split('\n')) {
+    const s = raw.trim(); if (!s || s[0] === '#') continue; let m;
+    if ((m = s.match(/^===\s*(\w+)\s*===$/))) { v = E[m[1]] = { id: m[1], titulo: m[1], orden: [], otros: [], inicial: null, al: {} }; continue; } if (!v) continue;
+    if ((m = s.match(/^titulo:\s*(.*)$/))) v.titulo = m[1];
+    else if ((m = s.match(/^valores:\s*(.*)$/))) { if (m[1].includes('<')) v.orden = m[1].split('<').map(x => x.trim()).filter(Boolean); else v.otros.push(...m[1].split(',').map(x => x.trim()).filter(Boolean)); }
+    else if ((m = s.match(/^otros:\s*(.*)$/))) v.otros.push(...m[1].split(',').map(x => x.trim()).filter(Boolean));
+    else if ((m = s.match(/^inicial:\s*(\w+)/))) v.inicial = m[1];
+    else if ((m = s.match(/^(\w+):\s*(hecho|olvida|viene de)\s+(\w+)$/))) (v.al[m[1]] ||= []).push([m[2], m[3]]);
+  }
+  for (const x of Object.values(E)) { x.valores = [...x.orden, ...x.otros]; x.inicial ??= x.valores[0]; }
+  return E;
+}
+const ESTADO = estadoLeer(document.getElementById('estado')?.textContent || '');
+const estadoGuardado = () => game.wm ? (game.wm.estado ||= {}) : (game.estado ||= {});
+const estadoDesde = () => game.wm ? (game.wm.estadoDesde ||= {}) : (game.estadoDesde ||= {});
+// its value now: the one the script set; in a game from before (or a fact left by the code), what its facts say; on a
+// scale, the higher of the two
+function estadoValor(k){
+  const V = ESTADO[k]; if (!V) return null;
+  const H = dlgHechos(); let d = null;
+  for (const x of V.valores) if ((V.al[x] || []).some(([q, h]) => (q === 'hecho' || q === 'viene de') && H[h] != null)) d = x;
+  const g = estadoGuardado()[k], i = V.orden.indexOf(g), j = V.orden.indexOf(d);
+  if (g && d && i >= 0 && j >= 0) return j > i ? d : g;
+  return g || d || V.inicial;
+}
+function estadoPoner(k, x){
+  const V = ESTADO[k]; if (!V || !V.valores.includes(x)) return;
+  estadoGuardado()[k] = x; estadoDesde()[k] = today() + 1;
+  for (const [q, h] of V.al[x] || []) if (q === 'hecho') dlgHecho(h); else if (q === 'olvida') delete dlgHechos()[h];
+}
+// a condition on the state: «diana>=conocida», «barry_permite=no», «ana_en_tv!=devuelta» (null if it is not one); on a
+// scale, a value off it (Ana sent back) is neither more nor less
+function estadoCond(s){
+  const m = s.match(/^(\w+)\s*(>=|<=|!=|=|>|<)\s*(\w+)$/); if (!m || !ESTADO[m[1]]) return null;
+  const V = ESTADO[m[1]], a = estadoValor(m[1]), b = m[3];
+  if (m[2] === '=') return a === b; if (m[2] === '!=') return a !== b;
+  const i = V.orden.indexOf(a), j = V.orden.indexOf(b); if (i < 0 || j < 0) return false;
+  return { '>=': i >= j, '<=': i <= j, '>': i > j, '<': i < j }[m[2]];
+}
+
 /* ---------- the mini-missions: stories of a few steps, as the chapters of «Chronicles of Avonlea» ----------
    Written apart (src/datos/misiones.txt): each one has its data (title, kind, how it starts, who is in it), its entry in
    Ana's notebook, its scenes and its conversations, in the same formats as their own files; here they are split so that
@@ -10859,6 +10973,7 @@ function dlgCtx(){
 }
 function dlgCond(s, c){   // one condition of state, written as text
   if (s[0] === '!') return !dlgCond(s.slice(1), c);
+  { const e = estadoCond(s); if (e != null) return e; }   // (the state: «diana>=conocida», src/js/20-estado.js)
   { const q = cualidadCond(s); if (q) return q(); }   // (a quality compared with a number: «granja:ana>=15», «afecto:diana:ana>=4»)
   const i = s.indexOf(':'), k = i < 0 ? s : s.slice(0, i), rest = i < 0 ? '' : s.slice(i + 1), [a, b] = k === 'sabe' || k === 'y_mayor' || k === 'dias_desde' ? rest.split(':') : [rest];   // (an id may have ':' in it)
   switch (k) {
@@ -10988,6 +11103,7 @@ function dlgHacer(list){   // what a scene does when it starts or ends
       anaACocina();   // (walking from the yard, a fade from farther: src/js/11-cocina-tejas-verdes.js)
       const M = PEOPLE.marilla; if (sceneOf('marilla') !== 'gg') { M.where = 'gg'; M.x = STOVE.x + 60; M.y = STOVE.y + 60; M.nav = null; M.moving = false; M.sit = false; }
     }
+    if (a.estado) estadoPoner(...a.estado);
     if (a.viaje) wsViaje(a.viaje);   // (src/js/34-viaje-white-sands.js)
     if (a.junto) { const b = a.junto === 'ana' ? ana : PEOPLE[a.junto], o = a.de === 'ana' ? ana : PEOPLE[a.de]; if (b && o) { b.sit = false; if (b === ana) { ana.meal = null; ana.goto = null; ana.vx = ana.vy = 0; } else { b.nav = null; b.moving = false; } b.x = o.x - 20; b.y = o.y + 2; b.dir = 1; } }
     if (a.vestirse) vestirse(true);
@@ -11155,7 +11271,8 @@ function dlgAccion(s){   // an action of the script: «hecho x», «marca id | n
     case 'mesa': return { mesa: r[0] };
     case 'a_la_mesa': return { a_la_mesa: true };
     case 'a_cocina': return { a_cocina: true };
-    case 'viaje': return { viaje: r[0] };   // (the trip to White Sands: «viaje white_sands», «viaje orilla», «viaje calesa», «viaje casa»)
+    case 'viaje': return { viaje: r[0] };
+    case 'estado': return { estado: [r[0], r[r.length - 1]] };   // (the state changes: «estado diana amiga_del_alma», or «estado diana = amiga_del_alma»)   // (the trip to White Sands: «viaje white_sands», «viaje orilla», «viaje calesa», «viaje casa»)
     case 'acostarse': return { acostarse: true };
     case 'a_pieza': return { a_pieza: true };
     case 'vestirse': return { vestirse: true };   // (Ana puts on her dress)
@@ -12975,7 +13092,7 @@ function wsVolverCasa(){
     if (!obsScene()) { cam.x = ana.x; cam.y = ana.y; cam.snap = true; }
     if (hourNow() < 18) dayAt(18);
     wsE().ws.fase = 'fin'; wsE().ws.volviendo = false; dlgHecho('ws_vuelven');   // (also when the game was closed halfway: then no scene said it)
-    delete dlgHechos().rumbo_spencer;   // (the trip is over: no longer on the way)
+    estadoPoner('viaje', 'ninguno');   // (the trip is over: no longer on the way)
     logEv('Marilla y Ana volvieron de White Sands sin la Sra. Blewett.', ['marilla']); save();
   });
 }
