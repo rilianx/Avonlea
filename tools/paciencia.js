@@ -64,6 +64,7 @@ async function caso(nombre, fn){
     const v = await T.jugar(null, 'dlgHechos().a_prueba && !TALKS.length', 600);
     ok(v[0] === 'falta_viaje' && v.includes('viaje_spencer'), 'la busca y van: ' + v.join(' · '));
     ok(['ws_t1', 'ws_t2', 'ws_t3', 'ws_pye', 'ws_orilla', 'ws_spencer', 'ws_noche'].every(e => v.includes(e)), 'el viaje en la calesa de Marilla: el camino, la Sra. Pye, la orilla, la Sra. Spencer, la noche');
+    for (let i = 0; i < 20 && await T.ev(`cart.on`); i++) await T.pg.waitForTimeout(100);   // (they go home as a page turns: a moment)
     ok(await T.ev(`!cart.on && !cart.viaje && PEOPLE.marilla.where === 'gg' && game.wm.ws.fase === 'fin'`), 'y vuelven: la calesa es de Matthew otra vez');
     ok(await T.pac() === 1 && await T.ev(`!!dlgHechos().a_prueba && !dlgHechos().se_queda`), 'Marilla decidió (paciencia ' + await T.pac() + '), pero no se lo dice todavía');
     await T.ev(`cualidadSuma('marilla', 'paciencia', -1, 'ana')`); ok(await T.pac() === 1, 'después de White Sands la paciencia ya no cambia');
