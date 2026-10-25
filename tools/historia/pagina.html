@@ -323,6 +323,14 @@ function pintaEscena(){
 // what can happen now: first, what happens by itself (the state is enough); then, grouped by what the player would have
 // to bring about (go somewhere, talk to someone, be with someone): her own decisions, as choices too
 const tarjetaEsc = (e, r) => `<div class="esc ${e.tipo}" data-esc="${esc(e.id)}"><div>${esc(e.resumen || e.tema || e.narra[0]?.slice(0, 120) || e.id)}${e.grande ? '<span class="badge">★ grande</span>' : ''}${e.interrumpe ? '<span class="badge">interrumpe</span>' : ''}${e.repetir && e.repetir !== 'una_vez' ? '<span class="badge">se repite</span>' : ''}</div><div class="id">${esc(e.id)} · prioridad ${esc(e.prioridad || 1)}${r.otros?.length ? ' · <span class="mut">supone: ' + esc(r.otros.map(x => x.t).join(', ')) + '</span>' : ''}</div></div>`;
+// of the scenes of a thing or a place that could happen, the next of each line (its first step not said; the wildcard
+// only if no step can): as the game does
+function lineaSiguiente(L){
+  const num = e => e.paso === 'siempre' ? Infinity : Math.floor(parseFloat(e.paso || 99)), M = new Map();
+  const dicho = e => e.paso !== 'siempre' && D.escenas.some(o => o !== e && (o.objeto || o.lugar) === (e.objeto || e.lugar) && o.paso !== 'siempre' && num(o) === num(e) && st.d[o.id]);
+  for (const x of L) { const e = x[0], k = e.objeto || e.lugar; if (dicho(e)) continue; const y = M.get(k); if (!y || num(e) < num(y[0])) M.set(k, x); }
+  return [...M.values()];
+}
 function pintaPosibles(){
   const T = D.escenas.filter(e => (filtro.cartas || e.tipo !== 'carta') && (filtro.mis || e.tipo !== 'mision'))
     .filter(e => !filtro.q || (e.id + ' ' + (e.resumen || '') + ' ' + (e.tema || '')).toLowerCase().includes(filtro.q))
@@ -342,7 +350,7 @@ function pintaPosibles(){
     if (otras) h += `<p class="mut">(${otras} más esperan su turno: después de esta)</p>`;
     $('centro').innerHTML = h; return;
   }   // (a moment of a place or a thing: when she looks, or passes)
-  const pronto = T.filter(([, c]) => enHoras(c) <= HORAS && viaje(c) <= CERCA), cerca = pronto.filter(([e]) => !ambiente(e)), momentos = pronto.filter(([e]) => ambiente(e)), lejos = T.filter(x => !pronto.includes(x) && !ambiente(x[0]));
+  const pronto = T.filter(([, c]) => enHoras(c) <= HORAS && viaje(c) <= CERCA), cerca = pronto.filter(([e]) => !ambiente(e)), momentos = lineaSiguiente(pronto.filter(([e]) => ambiente(e))), lejos = T.filter(x => !pronto.includes(x) && !ambiente(x[0]));
   const tarjeta = ([e, c]) => { const v = viaje(c), pide = [...(c.r.anaNo.length ? [c.r.anaNo.map(x => x.lejos ? x.t : 'Ana va a ' + x.lugares.map(l => LUGARES[l] || l).join(' o ')).join(' y ') + (v ? ` (${v} min a pie)` : '')] : []), ...c.r.acc.map(x => x.t)];
     return `<div class="esc ${e.tipo}" data-esc="${esc(e.id)}"><div>${esc(e.resumen || e.tema || e.narra[0]?.slice(0, 120) || e.id)}${e.grande ? '<span class="badge">★ grande</span>' : ''}${e.interrumpe ? '<span class="badge">interrumpe</span>' : ''}${e.repetir && e.repetir !== 'una_vez' ? '<span class="badge">se repite</span>' : ''}</div>`
       + (pide.length ? `<div class="sit">pide: ${esc(pide.join(' · '))}</div>` : '')

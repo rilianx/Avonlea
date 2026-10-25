@@ -49,7 +49,7 @@ for (const raw of guion.split('\n')) {
     else { esc.lin = (esc.lin || 0) + 1; if (!esc.primera && /^[a-zñ]+( piensa)?:/.test(s)) esc.primera = s.slice(0, 160); if (esc.ops?.length) esc.opsFin = true; }
     continue; }
   const i = s.indexOf(':'), k = i < 0 ? s : s.slice(0, i).trim(), v = i < 0 ? '' : s.slice(i + 1).trim();
-  if (['canal', 'prioridad', 'con', 'tema', 'resumen', 'donde', 'en', 'cerca', 'repetir', 'disparo', 'lugar'].includes(k)) esc[k] = v;
+  if (['canal', 'prioridad', 'con', 'tema', 'resumen', 'donde', 'en', 'cerca', 'repetir', 'disparo', 'lugar', 'objeto', 'paso'].includes(k)) esc[k] = v;
   if (k === 'narra' && !esc.narra) esc.narra = v.slice(0, 260);
   if (k === 'al_empezar' || k === 'al_terminar') (esc[k + 's'] ||= []).push(v);
   if (k === 'si') { esc.si = v; v.split(',').forEach(c => condicion(c, 'escena ' + esc.id)); }
@@ -185,7 +185,7 @@ const MUEVE = [[/escaleras? arriba|sube la escalera|corre a su pieza|se va a su 
 for (const bloque of guion.split(/^(?====)/m)) {
   const id = bloque.match(/^===\s*(.+?)\s*===/)?.[1]; if (!id) continue;
   const [cab, ...resto] = bloque.split(/^---\s*$/m), cuerpo = resto.join('---'), partes = [[]]; let enOpcion = false;
-  if (/^disparo:\s*primera/m.test(cab)) continue;   // (a «primera» scene tells what she is doing as she does it: she is already on the stairs)
+  if (/^disparo:\s*primera/m.test(cab) || /^tambien\s*$/m.test(cab)) continue;   // (the thing is done too: the line tells it as it happens)   // (a «primera» scene tells what she is doing as she does it: she is already on the stairs)
   for (const l of cuerpo.split('\n')) { if (/^\s*->/.test(l)) { partes.push([l]); enOpcion = true; } else if (enOpcion && /^\S/.test(l)) { partes.push([l]); enOpcion = false; } else partes[partes.length - 1].push(l); }
   for (const P of partes) for (const [dice, hace, que] of MUEVE) {
     const l = P.find(x => /^\s*ana(\s+piensa)?:/.test(x) && dice.test(x));
@@ -212,6 +212,14 @@ for (const bloque of guion.split(/^(?====)/m)) {
     memo.set(id, r); return r; };
   for (const e of escenas) if (!e.aPrueba && !/^(lugar|objeto|primera)$/.test(e.disparo || '') && !despues(e.id))
     malas.push(`escena ${e.id}: puede pasar antes de que Marilla acepte a Ana (que pida «hecho:se_queda», o lo que viene después; o márquela «a prueba»)`); }
+// the lines of the things and the places: every scene of a thing or a place has its step («paso: 1», «4.1»), one step
+// each («4.1» and «4.2» are variants of one); and every line its wildcard («paso: siempre», with no conditions): there
+// is always something to say
+{ const L = {}; for (const e of escenas) if (/^(objeto|lugar)$/.test(e.disparo || '')) { const k = e.disparo + ' ' + (e.objeto || e.lugar); (L[k] ||= []).push(e); }
+  for (const [k, es] of Object.entries(L)) {
+    for (const e of es) if (!e.paso) malas.push(`escena ${e.id}: es de la línea de ${k} y no dice su paso («paso: 3», o «paso: siempre»)`);
+    const vistos = {}; for (const e of es) if (e.paso && e.paso !== 'siempre') { if (vistos[e.paso]) malas.push(`línea de ${k}: el paso ${e.paso} está dos veces (${vistos[e.paso]}, ${e.id})`); vistos[e.paso] = e.id; }
+    if (!es.some(e => e.paso === 'siempre' && !e.si)) malas.push(`línea de ${k}: no tiene comodín («paso: siempre», sin condiciones): alguna vez no habría nada que decir`); } }
 // the report
 const necesita = Object.keys(pide).filter(h => !h.endsWith(' ')), lee = new Set(Object.keys(pide).map(h => h.trim()));
 for (const e of escenas) { if (e.punto) puntos.push([e.id, 'antes', e.punto]); else if (e.grande && !puntos.some(([id]) => id === e.id)) malas.push(`escena ${e.id}: es grande y no deja un punto (un momento al que volver: «punto:», justo antes, o «al_terminar: punto»)`); }

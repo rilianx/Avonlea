@@ -80,7 +80,7 @@ const ESTADOS = ['normal', 'camison', 'sin_sombrero', 'noche'];
   let exploracion = null;
   if (EXPLORAR) {
     const J = await abrir();
-    await J.ev(`(M => { (${PREPARAR})(M); for (const t of [...TALKS]) { t.interrupted = true; talkEnd(t); } for (const d of ['inicio_llegada', 'primera_bed', 'desayuno_prueba', 'lynde_se_entera', 'viaje_spencer', 'se_queda']) dlgDichas()[d] = true;
+    await J.ev(`(M => { (${PREPARAR})(M); for (const t of [...TALKS]) { t.interrupted = true; talkEnd(t); } for (const d of ['inicio_llegada', 'cama_1', 'desayuno_prueba', 'lynde_se_entera', 'viaje_spencer', 'se_queda']) dlgDichas()[d] = true;
       dayT = 3 + (7 - 6) / 24; goIn('ga'); game.wm.camison = true; game.wm.sinSombrero = true;
       window.__expl = { lugares: {}, gente: {}, acciones: {}, porDia: [], espera: 0 }; })`, MOMENTOS.find(m => m.id === 'dia4'));
     const PASO = `(() => {

@@ -84,9 +84,9 @@ const ESC = {
     await H.foto('lejos');
     for (let i = 0; i < 80 && !s.sleeping && s.dia < 1; i++) { await H.run(30); s = await H.check('noche ' + i); if (s.botones.length) { log('  pregunta: ' + s.talk.slice(0, 100)); await H.foto('pregunta'); await H.ev(() => document.querySelector('#talk button').click()); } if (s.narra) { log('  tarjeta: ' + s.narra.slice(0, 100)); await H.seguir(); } }
     for (let i = 0; i < 20 && (s.sleeping || s.dia < 1); i++) { await pg.waitForTimeout(500); s = await H.st(); }
-    log('  amanece: día ' + s.dia + ' ' + s.hora + ' · ' + s.scene + ' · primera_bed dicha: ' + s.dichas.includes('primera_bed') + ' · ropa ' + JSON.stringify(s.ropa));
+    log('  amanece: día ' + s.dia + ' ' + s.hora + ' · ' + s.scene + ' · cama_1 dicha: ' + s.dichas.includes('cama_1') + ' · ropa ' + JSON.stringify(s.ropa));
     await H.foto('amanece');
-    if (!s.dichas.includes('primera_bed')) await H.hallazgo('se saltó la primera noche (tirarse en la cama, las buenas noches de Marilla) por no subir');
+    if (!s.dichas.includes('cama_1')) await H.hallazgo('se saltó la primera noche (tirarse en la cama, las buenas noches de Marilla) por no subir');
     // breakfast: does it happen if she was out all night?
     for (let i = 0; i < 60 && !s.hechos.includes('desayuno_prueba'); i++) { await H.run(20); s = await H.check('mañana ' + i); if (s.narra) await H.seguir(); if (s.botones.length) await H.ev(() => document.querySelector('#talk button').click()); }
     log('  ' + s.hora + ' desayuno: ' + s.hechos.includes('desayuno_prueba') + ' · escena ' + s.scene);

@@ -1,33 +1,40 @@
 /* ---------- the first time: a scene of its own; the window and the candle; her hat in the wardrobe ----------
-   - The first time Ana does some things (looks out of her window, sees herself in the mirror, climbs to her room, sees
-     the sea from the lighthouse…), a scene of the script (primera_<what>, disparo: primera) instead of the plain line;
-     with «tambien», the thing is done too (climbing the stairs). Once said, the plain line as always.
+   - Each thing and each place has its line of scenes (src/datos/guion.txt): the first time Ana does something (looks out
+     of her window, sees herself in the mirror, climbs to her room, sees the sea from the lighthouse…), its step 1; later,
+     the next steps, and the wildcard; with «tambien», the thing is done too (climbing the stairs).
    - The window of her room, once Diana and she have agreed on the signals (the conversation conv_diana_vela, cap. 18):
      in the evening, a candle and a piece of cardboard, flashes to Diana's window across the trees (senas_vela).
    - Her hat: she can take it off and keep it in the wardrobe of her room, and put it on again. */
+// (the scenes of a thing or a place were renamed by their line and step: the games saved before keep what was said)
+const ESC_RENOMBRE = {"primera_gwin": "ventana_1", "ventana_a_prueba": "ventana_2", "ventana_se_queda": "ventana_3", "ventana_diana": "ventana_4", "ventana_zanahorias": "ventana_5", "ventana_prohibida": "ventana_6", "ventana_perdonada": "ventana_7", "ventana_estudia": "ventana_8", "ventana_queens": "ventana_9", "ventana_primavera_manana": "ventana_10", "ventana_primavera_tarde": "ventana_11", "ventana_primavera_noche": "ventana_12", "ventana_verano_manana": "ventana_13", "ventana_verano_noche": "ventana_14", "ventana_otono": "ventana_15", "ventana_otono_gansos": "ventana_16", "ventana_otono_noche": "ventana_17", "ventana_invierno": "ventana_18", "ventana_invierno_noche": "ventana_19", "ventana_madrugada": "ventana_20", "primera_mirror": "espejo_1", "espejo_tejas_verdes": "espejo_2", "espejo_pelo": "espejo_3", "espejo_zanahorias": "espejo_4", "espejo_cordelia": "espejo_5", "espejo_estudio": "espejo_6", "espejo_invierno": "espejo_7", "primera_armario": "armario_1", "armario_vestidos": "armario_2", "armario_otono": "armario_3", "armario_invierno": "armario_4", "primera_bed": "cama_1", "primera_cage": "ginger_1", "ginger_loro": "ginger_2", "primera_escenario": "escenario_1", "primera_faro": "faro_1", "faro_manana": "faro_2", "faro_verano": "faro_3", "faro_invierno": "faro_4", "faro_queens": "faro_5", "primera_frascos": "frascos_1", "frascos_caramelos": "frascos_2", "frascos_matthew": "frascos_3", "primera_geranio": "geranio_1_1", "geranio_sola": "geranio_1_2", "primera_pizarra": "pizarra_1", "pizarra_zanahorias": "pizarra_2", "pizarra_estudio": "pizarra_3", "primera_stairs": "escalera_1", "primera_toby": "pelusa_1", "pelusa_verano": "pelusa_2", "pelusa_invierno": "pelusa_3", "banco_lago_primavera": "banco_lago_1", "banco_lago_diana": "banco_lago_2", "banco_lago_atardecer": "banco_lago_3", "banco_lago_invierno": "banco_lago_4", "fuego_noche": "fuego_1", "fuego_otono": "fuego_2", "fuego_invierno": "fuego_3", "pupitre_diana": "pupitre_1", "pupitre_gilbert": "pupitre_2", "libros_pastor": "libros_1", "iglesia_banco": "banco_iglesia_1", "iglesia_allan": "banco_iglesia_2", "lugar_camino_blanco_primavera": "camino_blanco_1", "lugar_camino_blanco_flor": "camino_blanco_2", "lugar_camino_blanco_otono": "camino_blanco_3", "lugar_primera_nieve": "camino_blanco_4", "lugar_camino_blanco_invierno": "camino_blanco_5", "lugar_mar_primera": "playa_1", "lugar_playa": "playa_2", "lugar_playa_invierno": "playa_3", "lugar_puente": "puente_1", "lugar_puente_diana": "puente_2", "lugar_puente_invierno": "puente_3", "lugar_bosque_manana": "bosque_1", "lugar_bosque_crepusculo": "bosque_2", "lugar_bosque_invierno": "bosque_3", "lugar_lago_niebla": "lago_brillante_1", "lugar_lago_verano": "lago_brillante_2", "lugar_huerta_brotes": "huerta_1", "lugar_huerta_verano": "huerta_2", "lugar_cuesta_huerto": "cuesta_del_huerto_1", "lugar_cuesta_prohibida": "cuesta_del_huerto_2", "lugar_rio_escuela": "rio_1", "lugar_iglesia": "iglesia_1", "lugar_granero": "granero_1", "lugar_escuela_abedules": "escuela_abedules_1", "lugar_corral_idlewild": "corral_1", "lugar_campo_rosado": "campo_rosado_1", "lugar_aldea": "aldea_1"};
+{ const D = dlgDichas(); for (const [a, b] of Object.entries(ESC_RENOMBRE)) if (D[a] != null && D[b] == null) { D[b] = D[a]; delete D[a]; } }
+// the line of a thing or a place (src/datos/guion.txt, «Las líneas de las cosas y los lugares»): its steps («paso: 1»,
+// «2», «4.1»…) and its wildcard («paso: siempre»). A step is said when one of its variants is
+const lineaDe = k => DIALOGOS.filter(d => (d.disparo === 'objeto' && d.objeto === k) || (d.disparo === 'lugar' && d.lugar === k));
+const pasoNum = d => d.paso === 'siempre' ? Infinity : Math.floor(parseFloat(String(d.paso ?? 99)));
+const pasoDicho = (d, L) => d.paso !== 'siempre' && L.some(o => o !== d && o.paso !== 'siempre' && pasoNum(o) === pasoNum(d) && o.dicha());
+// of those that can be said now: the first step not said yet (the order is a preference: one of winter waits, it does
+// not stop the line); of its variants, the one that asks more; if no step can be, the wildcard
+function lineaElegir(C){
+  const pasos = C.filter(d => d.paso !== 'siempre'); if (!pasos.length) return C.length ? pick(C) : null;
+  const m = Math.min(...pasos.map(pasoNum)), T = pasos.filter(d => pasoNum(d) === m), v = d => (d.prioridad || 0) + dlgEspecificidad(d) * .001, top = Math.max(...T.map(v));
+  return pick(T.filter(d => v(d) === top));
+}
+const lineaPuede = (k, x, f = () => true) => { const L = lineaDe(k); return L.filter(d => !d.dicha() && !pasoDicho(d, L) && f(d) && dlgCumple(d, x)); };
+// the first time: the first step of its line, whenever she does it (in her room, the first night: her bed)
 function primeraVez(id, act){
-  const d = DIALOGOS.find(x => x.id === 'primera_' + id && x.disparo === 'primera');
-  if (!d || d.dicha() || !dlgCumple(d, dlgCtx())) return false;
+  const d = lineaElegir(lineaPuede(id, dlgCtx(), d => pasoNum(d) === 1)); if (!d) return false;
   if (d.tambien) act(true);   // (done too, quietly: the scene tells it)
   for (const t of TALKS.filter(t => t.ch === d.canal)) talkEnd(t);   // (what she was saying to herself gives way to this)
   d.decir(); return true;
 }
-// the scenes of a thing (disparo: objeto, objeto: <what>): looking out of the window, at the mirror, at the sea… many,
-// each for its moment (the season, the hour, what has happened: «si:»); at most one a day for each thing, the one that
-// fits best (more priority, then more specific; among equals, any). The rest of the times, the plain line as always.
+// the scenes of a thing (disparo: objeto, objeto: <what>): looking out of the window, at the mirror, at the sea… its
+// line, step by step; at most one a day for each thing. The rest of the times, the plain line as always.
 let ACT_SOLA = false;   // (Ana doing it on her own, on her way to something: the plain line, she has things to do)
-// of the scenes that can be said now, the one that fits best: more priority, then more specific; among equals, one not
-// seen yet (one already seen, again, only now and then: not every day)
-function escenaElegir(C){
-  if (!C.length) return null;
-  const v = d => (d.prioridad || 0) + dlgEspecificidad(d) * .001, top = Math.max(...C.map(v)), T = C.filter(c => v(c) === top), nuevas = T.filter(c => dlgDichas()[c.id] == null);
-  if (!nuevas.length && Math.random() < .5) return null;
-  return pick(nuevas.length ? nuevas : T);
-}
 function escenaObjeto(id, act){
   const W = game.wm; if (!W || ana.sit || ACT_SOLA || (id === 'gwin' && velaPuede() && act !== true)) return false;   // (the window, with the candle: its menu first)
   const H = (W.objHoy ||= {}), k = id.split(':')[0]; if (H[k] === today()) return false;   // (bed:3 is a bed of the garden: «objeto: bed»)
-  const x = dlgCtx(), d = escenaElegir(DIALOGOS.filter(d => d.disparo === 'objeto' && d.objeto === k && !d.dicha() && dlgCumple(d, x))); if (!d) return false;
+  const d = lineaElegir(lineaPuede(k, dlgCtx())); if (!d) return false;
   H[k] = today(); if (d.tambien && typeof act === 'function') act(true);
   for (const t of TALKS.filter(t => t.ch === d.canal)) talkEnd(t);
   d.decir(); return true;
@@ -41,17 +48,17 @@ function lugaresTick(dt){
   if ((lugaresT -= dt) > 0) return; lugaresT = 2;
   const W = game.wm; if (!W || game.scene !== 'out' || (CAP1.on && !CAP1.done) || wsSinLugares()) return;   // (crying by the sea, or at Mrs. Spencer's: not the time for the places)
   const H = (W.lugarHoy ||= {}), x = dlgCtx(), cerca = Object.entries(PLACES).filter(([k, p]) => H[k] !== today() && dist(ana.x, ana.y, p[1], p[2]) <= LUGAR_CERCA);
-  const de = (k, f) => DIALOGOS.filter(d => d.disparo === 'lugar' && d.lugar === k && !d.dicha() && f(d) && dlgCumple(d, x));
+  const de = (k, f) => lineaPuede(k, x, f);
   // a scene that interrupts whatever is going on (as the Avenue in bloom, on the way from Bright River): it does not
   // wait for the talk to end, nor for Ana to be free; it cuts what is being said (unless Ana is choosing something)
   for (const [k] of cerca) {
-    const d = escenaElegir(de(k, d => d.interrumpe)); if (!d || !interrumpirTodo(d.prioridad || 0)) continue;
+    const d = lineaElegir(de(k, d => d.interrumpe)); if (!d || !interrumpirTodo(d.prioridad || 0)) continue;
     H[k] = today(); lugarRespiro = TT + LUGAR_RESPIRO; d.decir(); return;
   }
   if (ana.sit || ana.goto?.auto || ana.goto?.wm || cart.riding) return;
   if (TT < lugarRespiro || hablando() || amb.cur || game.talk || TALKS.some(t => t.lines.some(l => l.q === 'ana'))) return;
   for (const [k] of cerca) {
-    const d = escenaElegir(de(k, d => !d.interrumpe)); if (!d) continue;
+    const d = lineaElegir(de(k, d => !d.interrumpe)); if (!d) continue;
     H[k] = today(); lugarRespiro = TT + LUGAR_RESPIRO; d.decir(); return;
   }
 }

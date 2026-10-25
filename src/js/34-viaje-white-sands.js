@@ -63,7 +63,7 @@ function wsOrilla(){
   if (cart.riding) cartOff();
   cart.suelto = true; wsE().ws.fase = 'orilla';
   const best = wsOrillaCerca(ana.x, ana.y);
-  dlgDichas().lugar_mar_primera = true;   // (her first time by the sea is this one: not the joyful one of src/datos/guion.txt afterwards)
+  dlgDichas().playa_1 = true;   // (her first time by the sea is this one: not the joyful one of src/datos/guion.txt afterwards)
   const d = best ? Math.max(1, best.d) : 1, x = best ? best.x + (ana.x - best.x) / d * 40 : ana.x, y = best ? best.y + (ana.y - best.y) / d * 40 : ana.y;
   const llega = () => { ana.dir = 0; ana.sit = true; ana.llora = true; M.sit = false; M.busca = { hasta: TT + 600, hecho: 'ws_marilla_llega' }; };
   if (navigator.webdriver) { ana.x = x; ana.y = y; llega(); }

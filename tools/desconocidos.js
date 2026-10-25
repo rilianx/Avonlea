@@ -7,8 +7,8 @@ const { chromium } = require('playwright'); const fs = require('fs'), path = req
 const RAIZ = path.join(__dirname, '..'), OUT = path.join(RAIZ, 'trazas', 'partida5'), URL = 'file://' + path.join(RAIZ, 'index.html') + '?dev';
 const EXE = fs.existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chromium' : undefined;
 const MOMENTOS = [
-  { id: 'dia2', titulo: 'Día 2, a media mañana (antes de White Sands)', hechos: { inicio_juego: 1, llegada_tv: 1, primera_noche: 1, desayuno_prueba: 2 }, dichas: ['inicio_llegada', 'primera_bed', 'desayuno_prueba', 'lynde_se_entera'], dia: 1, hora: 10.5 },
-  { id: 'dia4', titulo: 'Día 4 (ya se queda; antes de la escuela, la Sra. Lynde y Diana)', hechos: { inicio_juego: 1, llegada_tv: 1, primera_noche: 1, desayuno_prueba: 2, a_prueba: 2, se_queda: 3 }, dichas: ['inicio_llegada', 'primera_bed', 'desayuno_prueba', 'lynde_se_entera', 'viaje_spencer', 'se_queda'], dia: 3, hora: 11, saben: ['barry', 'srbarry', 'minnie', 'pye', 'josie', 'gertie', 'blewett'] },
+  { id: 'dia2', titulo: 'Día 2, a media mañana (antes de White Sands)', hechos: { inicio_juego: 1, llegada_tv: 1, primera_noche: 1, desayuno_prueba: 2 }, dichas: ['inicio_llegada', 'cama_1', 'desayuno_prueba', 'lynde_se_entera'], dia: 1, hora: 10.5 },
+  { id: 'dia4', titulo: 'Día 4 (ya se queda; antes de la escuela, la Sra. Lynde y Diana)', hechos: { inicio_juego: 1, llegada_tv: 1, primera_noche: 1, desayuno_prueba: 2, a_prueba: 2, se_queda: 3 }, dichas: ['inicio_llegada', 'cama_1', 'desayuno_prueba', 'lynde_se_entera', 'viaje_spencer', 'se_queda'], dia: 3, hora: 11, saben: ['barry', 'srbarry', 'minnie', 'pye', 'josie', 'gertie', 'blewett'] },
 ];
 (async () => {
   const b = await chromium.launch({ executablePath: EXE, args: ['--no-sandbox'] }); const res = {};
