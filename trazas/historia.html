@@ -328,7 +328,20 @@ function pintaPosibles(){
     .filter(e => !filtro.q || (e.id + ' ' + (e.resumen || '') + ' ' + (e.tema || '')).toLowerCase().includes(filtro.q))
     .map(e => [e, cuando(e)]).filter(([, c]) => c).filter(([, c]) => !filtro.solas || (!c.r.anaNo.length && !c.r.acc.length))
     .sort((a, b) => a[1].dia - b[1].dia || a[1].hora - b[1].hora || (a[1].r.anaNo.length + a[1].r.acc.length > 0) - (b[1].r.anaNo.length + b[1].r.acc.length > 0) || (b[0].interrumpe ? 1 : 0) - (a[0].interrumpe ? 1 : 0) || (+b[0].prioridad || 1) - (+a[0].prioridad || 1));
-  const ambiente = e => /^(lugar|objeto|primera)$/.test(e.disparo || '');   // (a moment of a place or a thing: when she looks, or passes)
+  const ambiente = e => /^(lugar|objeto|primera)$/.test(e.disparo || '');
+  // what happens by itself, now, where Ana is (it asks nothing of the player): there is nothing to choose; the scene the
+  // game would play (the most important: one that cuts in, then priority, then the one that asks more), and only it
+  const sola = ([e, c]) => enHoras(c) === 0 && !c.r.anaNo.length && !c.r.acc.length && !ambiente(e) && !['siempre'].includes(e.repetir) && !/^cada/.test(e.repetir || '') && e.tipo !== 'comentario';
+  const ya = T.filter(sola).sort((a, b) => (b[0].interrumpe ? 1 : 0) - (a[0].interrumpe ? 1 : 0) || (+b[0].prioridad || 1) - (+a[0].prioridad || 1) || b[0].si.length - a[0].si.length)[0];
+  if (ya && !filtro.q) {
+    let h = st.fin ? `<div class="fin">FIN<br>${esc(st.fin)}<br><button id="deshacerfin">← Atrás</button></div>` : '';
+    if (st.ultimo) { h += `<div class="cambios">${esc(st.ultimo)}</div>`; st.ultimo = null; }
+    const [e] = ya, otras = T.filter(sola).length - 1;
+    h += `<h2>Ahora pasa esto</h2><div class="esc ${e.tipo}" data-esc="${esc(e.id)}" style="font-size:16px"><div>${esc(e.resumen || e.tema || e.narra[0]?.slice(0, 160) || e.id)}${e.grande ? '<span class="badge">★ grande</span>' : ''}</div><div class="id">${esc(e.id)} · prioridad ${esc(e.prioridad || 1)}</div></div>`;
+    h += `<p><button class="prim" data-esc="${esc(e.id)}">Ver la escena →</button></p>`;
+    if (otras) h += `<p class="mut">(${otras} más esperan su turno: después de esta)</p>`;
+    $('centro').innerHTML = h; return;
+  }   // (a moment of a place or a thing: when she looks, or passes)
   const pronto = T.filter(([, c]) => enHoras(c) <= HORAS && viaje(c) <= CERCA), cerca = pronto.filter(([e]) => !ambiente(e)), momentos = pronto.filter(([e]) => ambiente(e)), lejos = T.filter(x => !pronto.includes(x) && !ambiente(x[0]));
   const tarjeta = ([e, c]) => { const v = viaje(c), pide = [...(c.r.anaNo.length ? [c.r.anaNo.map(x => x.lejos ? x.t : 'Ana va a ' + x.lugares.map(l => LUGARES[l] || l).join(' o ')).join(' y ') + (v ? ` (${v} min a pie)` : '')] : []), ...c.r.acc.map(x => x.t)];
     return `<div class="esc ${e.tipo}" data-esc="${esc(e.id)}"><div>${esc(e.resumen || e.tema || e.narra[0]?.slice(0, 120) || e.id)}${e.grande ? '<span class="badge">★ grande</span>' : ''}${e.interrumpe ? '<span class="badge">interrumpe</span>' : ''}${e.repetir && e.repetir !== 'una_vez' ? '<span class="badge">se repite</span>' : ''}</div>`
