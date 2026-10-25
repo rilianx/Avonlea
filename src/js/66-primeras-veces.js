@@ -20,12 +20,22 @@ function lineaElegir(C){
   const m = Math.min(...pasos.map(pasoNum)), T = pasos.filter(d => pasoNum(d) === m), v = d => (d.prioridad || 0) + dlgEspecificidad(d) * .001, top = Math.max(...T.map(v));
   return pick(T.filter(d => v(d) === top));
 }
-const lineaPuede = (k, x, f = () => true) => { const L = lineaDe(k); return L.filter(d => !d.dicha() && !pasoDicho(d, L) && f(d) && dlgCumple(d, x)); };
+// (the wildcard, only once the line has begun: the first time is its step 1, or nothing)
+const lineaEmpezada = L => !L.some(o => pasoNum(o) === 1) || L.some(o => pasoNum(o) === 1 && o.dicha());
+const lineaPuede = (k, x, f = () => true) => { const L = lineaDe(k), ya = lineaEmpezada(L); return L.filter(d => !d.dicha() && !pasoDicho(d, L) && (ya || d.paso !== 'siempre') && f(d) && dlgCumple(d, x)); };
 // the first time: the first step of its line, whenever she does it (in her room, the first night: her bed)
 function primeraVez(id, act){
   const d = lineaElegir(lineaPuede(id, dlgCtx(), d => pasoNum(d) === 1)); if (!d) return false;
   if (d.tambien) act(true);   // (done too, quietly: the scene tells it)
   for (const t of TALKS.filter(t => t.ch === d.canal)) talkEnd(t);   // (what she was saying to herself gives way to this)
+  d.decir(); return true;
+}
+// a scene of a line that plays by itself («sola»), with no touching: when its conditions hold, and Ana is where it says
+// («en: ana=ga»): the first night, as soon as she is up in her room, she throws herself on the bed
+function lineaSola(){
+  const x = dlgCtx(), d = lineaElegir(DIALOGOS.filter(d => d.sola && (d.objeto || d.lugar) && !d.dicha() && !pasoDicho(d, lineaDe(d.objeto || d.lugar)) && dlgCumple(d, x)));
+  if (!d) return false;
+  for (const t of TALKS.filter(t => t.ch === d.canal)) talkEnd(t);
   d.decir(); return true;
 }
 // the scenes of a thing (disparo: objeto, objeto: <what>): looking out of the window, at the mirror, at the sea… its

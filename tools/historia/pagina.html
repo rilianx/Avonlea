@@ -51,6 +51,7 @@ select,input[type=text],input[type=search]{font:inherit;font-size:13.5px;padding
 .fin{max-width:760px;text-align:center;font-style:italic;padding:22px;border:1px solid var(--hi);border-radius:9px;background:var(--panel);margin:12px 0}
 .grupo{max-width:760px;margin:0 0 6px;padding:4px 10px;border:1px solid var(--line);border-radius:7px;background:var(--panel)}
 .grupo summary{cursor:pointer;font-size:14px}
+.grupo.accion summary{padding:4px 0}.grupo.accion summary b{font-weight:600}
 .grupo .esc{margin-top:6px}
 .sit{color:var(--sit)}
 .filtros{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--sub);margin:0 0 10px;max-width:760px}
@@ -75,7 +76,7 @@ const D = /*@DATOS*/null;
 const $ = id => document.getElementById(id), esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const ESC = new Map(D.escenas.map(e => [e.id, e]));
 const NOMBRES = { ana: 'Ana', marilla: 'Marilla', matthew: 'Matthew', diana: 'Diana', lynde: 'Sra. Lynde', narra: '', carta: 'carta' };
-const nombre = q => q in NOMBRES ? NOMBRES[q] : q;
+const nombre = q => q in NOMBRES ? NOMBRES[q] : q ? q[0].toUpperCase() + q.slice(1).replace(/_/g, ' ') : q;
 for (const e of D.escenas) if (!e.resumen && !e.tema) { const l = e.L.find(b => b.t); if (l) e.resumen = (l.q && l.q !== 'ana' ? nombre(l.q) + ': ' : '') + (l.t.length > 110 ? l.t.slice(0, 110) + '…' : l.t); }   // (a scene without a summary: its first line)
 const ESTACIONES = ['primavera', 'verano', 'otoño', 'invierno'], DIAS = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
 const HKEY = h => h.id + ':' + (h.de || 'ana') + ':' + (h.hacia || '');
@@ -210,7 +211,7 @@ function situacion(e, sitConds){
   // (a thing: Ana touches it, uses it, looks into it —the player clicks it—; a place: she passes by it)
   const k = e.objeto || e.lugar, cosa = D.cosas[k] || (k || '').replace(/_/g, ' ');
   const DISP = { lugar: () => 'pasar por ' + cosa, objeto: () => 'tocar ' + cosa, encuentro: () => 'encontrarse con alguien', menu: () => 'elegirlo en el menú de alguien' };
-  if (e.disparo) L.push({ tipo: 'accion', t: (DISP[e.disparo] || (() => e.disparo + ' ' + cosa))() });
+  if (e.disparo && !e.sola) L.push({ tipo: 'accion', t: (DISP[e.disparo] || (() => e.disparo + ' ' + cosa))() });   // («sola»: it plays by itself, where it says)
   if (k && D.dondeCosa[k] && !L.some(x => x.tipo === 'ana')) L.push({ tipo: 'ana', lugares: D.dondeCosa[k] === 'out' ? ['out'] : zona(D.dondeCosa[k]), t: 'Ana en ' + LUGARES[D.dondeCosa[k]] });   // (outside: by the lake, the woods… not the yard)
   else if (e.disparo === 'lugar' && !L.some(x => x.tipo === 'ana')) L.push({ tipo: 'ana', lugares: ['out'], t: 'Ana afuera' });
   return L;
@@ -374,7 +375,8 @@ const tarjetaEsc = (e, r) => `<div class="esc ${e.tipo}" data-esc="${esc(e.id)}"
 function lineaSiguiente(L){
   const num = e => e.paso === 'siempre' ? Infinity : Math.floor(parseFloat(e.paso || 99)), M = new Map();
   const dicho = e => e.paso !== 'siempre' && D.escenas.some(o => o !== e && (o.objeto || o.lugar) === (e.objeto || e.lugar) && o.paso !== 'siempre' && num(o) === num(e) && st.d[o.id]);
-  for (const x of L) { const e = x[0], k = e.objeto || e.lugar; if (dicho(e)) continue; const y = M.get(k); if (!y || num(e) < num(y[0])) M.set(k, x); }
+  const empezada = k => { const P = D.escenas.filter(o => (o.objeto || o.lugar) === k && num(o) === 1); return !P.length || P.some(o => st.d[o.id]); };   // (the wildcard, only once the line has begun)
+  for (const x of L) { const e = x[0], k = e.objeto || e.lugar; if (dicho(e) || (e.paso === 'siempre' && !empezada(k))) continue; const y = M.get(k); if (!y || num(e) < num(y[0])) M.set(k, x); }
   return [...M.values()];
 }
 function pintaPosibles(){
@@ -382,7 +384,7 @@ function pintaPosibles(){
     .filter(e => !filtro.q || (e.id + ' ' + (e.resumen || '') + ' ' + (e.tema || '')).toLowerCase().includes(filtro.q))
     .map(e => [e, cuando(e)]).filter(([, c]) => c).filter(([, c]) => !filtro.solas || (!c.r.anaNo.length && !c.r.acc.length))
     .sort((a, b) => a[1].dia - b[1].dia || a[1].hora - b[1].hora || (a[1].r.anaNo.length + a[1].r.acc.length > 0) - (b[1].r.anaNo.length + b[1].r.acc.length > 0) || (b[0].interrumpe ? 1 : 0) - (a[0].interrumpe ? 1 : 0) || (+b[0].prioridad || 1) - (+a[0].prioridad || 1));
-  const ambiente = e => /^(lugar|objeto|primera)$/.test(e.disparo || '');
+  const ambiente = e => /^(lugar|objeto|primera)$/.test(e.disparo || '') && !e.sola;
   // what happens by itself, now, where Ana is (it asks nothing of the player): there is nothing to choose; the scene the
   // game would play (the most important: one that cuts in, then priority, then the one that asks more), and only it
   const sola = ([e, c]) => enHoras(c) === 0 && !c.r.anaNo.length && !c.r.acc.length && !ambiente(e) && !['siempre'].includes(e.repetir) && !/^cada/.test(e.repetir || '') && e.tipo !== 'comentario';
@@ -397,8 +399,8 @@ function pintaPosibles(){
     $('centro').innerHTML = h; return;
   }   // (a moment of a place or a thing: when she looks, or passes)
   const pronto = T.filter(([, c]) => enHoras(c) <= HORAS && viaje(c) <= CERCA), cerca = [...pronto.filter(([e]) => !ambiente(e)), ...lineaSiguiente(pronto.filter(([e]) => ambiente(e)))], lejos = T.filter(x => !pronto.includes(x) && !ambiente(x[0]));
-  const tarjeta = ([e, c], conHora) => { const v = viaje(c), pide = [...(c.r.anaNo.length ? [c.r.anaNo.map(x => x.lejos ? x.t : 'Ana va a ' + x.lugares.map(l => LUGARES[l] || l).join(' o ')).join(' y ') + (v ? ` (${v} min a pie)` : '')] : []), ...c.r.acc.slice(conHora ? 1 : 0).map(x => x.t)];
-    return `<div class="esc ${e.tipo}" data-esc="${esc(e.id)}"><div>${esc(e.resumen || e.tema || e.narra[0]?.slice(0, 120) || e.id)}${e.grande ? '<span class="badge">★ grande</span>' : ''}${e.interrumpe ? '<span class="badge">interrumpe</span>' : ''}${e.repetir && e.repetir !== 'una_vez' ? '<span class="badge">se repite</span>' : ''}${notas[e.id] ? '<span class="badge">📝 nota</span>' : ''}</div>`
+  const tarjeta = ([e, c], conHora) => { const v = viaje(c), pide = [...(c.r.anaNo.length ? [c.r.anaNo.map(x => x.lejos ? x.t : 'Ana va a ' + x.lugares.map(l => LUGARES[l] || l).join(' o ')).join(' y ') + (v ? ` (${v} min a pie)` : '')] : []), ...c.r.acc.slice(conHora ? 1 : 0).map(x => x.t)].filter(t => !conHora || !/^Ana va a /.test(t) || c.r.acc.length);
+    return `<div class="esc ${e.tipo}" data-esc="${esc(e.id)}">${conHora ? `<div class="sit"><b>${esc(accion([e, c]))}</b>${v ? ` · ${v} min a pie` : ''}</div>` : ''}<div>${esc(e.resumen || e.tema || e.narra[0]?.slice(0, 120) || e.id)}${e.grande ? '<span class="badge">★ grande</span>' : ''}${e.interrumpe ? '<span class="badge">interrumpe</span>' : ''}${e.repetir && e.repetir !== 'una_vez' ? '<span class="badge">se repite</span>' : ''}${notas[e.id] ? '<span class="badge">📝 nota</span>' : ''}</div>`
       + (pide.length ? `<div class="sit">pide: ${esc(pide.join(' · '))}</div>` : '')
       + `<div class="id">${conHora ? esc(momento(c.dia, c.hora)) + ' · ' : ''}${esc(e.id)} · prioridad ${esc(e.prioridad || 1)}${c.r.otros.length ? ' · <span class="mut">supone: ' + esc(c.r.otros.map(x => x.t).join(', ')) + '</span>' : ''}</div></div>`; };
   const porMomento = L => { let h = '', g = null; for (const x of L) { const m = momento(x[1].dia, x[1].hora); if (m !== g) { g = m; h += `<h3>${esc(m)}</h3>`; } h += tarjeta(x); } return h; };
@@ -406,12 +408,17 @@ function pintaPosibles(){
   // somewhere, wait): the nearest first, then the most important
   const accion = ([, c]) => { const t = c.r.acc[0]?.t || (c.r.anaNo.length ? 'ir a ' + c.r.anaNo[0].lugares.map(l => LUGARES[l] || l).join(' o ') : enHoras(c) > 0 ? 'esperar' : 'pasa sola, aquí'); return t[0].toUpperCase() + t.slice(1); };
   const prio = ([e]) => (e.interrumpe ? 100 : 0) + (+e.prioridad || 1), orden = (a, b) => viaje(a[1]) - viaje(b[1]) || prio(b) - prio(a) || enHoras(a[1]) - enHoras(b[1]);
-  const G = new Map(); for (const x of cerca.sort(orden)) { const k = accion(x); if (!G.has(k)) G.set(k, []); G.get(k).push(x); }
-  const porAccion = [...G].sort((a, b) => orden(a[1][0], b[1][0])).map(([k, L]) => { const v = viaje(L[0][1]); return `<h3>${esc(k)} <span class="mut">${v ? `· ${v} min a pie` : '· aquí'} · ${L.length}</span></h3>` + L.map(x => tarjeta(x, true)).join(''); }).join('');
+  // grouped by the kind of action, all together and collapsed: touch things, pass by places, talk to someone, write…;
+  // inside, each scene with its own action (which thing, which place, who), the nearest first
+  const TIPOS = [[/^tocar /i, 'Tocar cosas'], [/^pasar por /i, 'Pasar por lugares'], [/^hablar con /i, 'Hablar con alguien'], [/^escribirle /i, 'Escribir cartas'], [/^invitar /i, 'Invitar'], [/^ir a /i, 'Ir a otro lugar'], [/^esperar/i, 'Esperar'], [/^pasa sola/i, 'Pasa sola, aquí']];
+  const tipo = x => (TIPOS.find(([r]) => r.test(accion(x))) || [, 'Otras cosas'])[1];
+  const G = new Map(); for (const x of cerca.sort(orden)) { const k = tipo(x); if (!G.has(k)) G.set(k, []); G.get(k).push(x); }
+  const porAccion = [...G].sort((a, b) => orden(a[1][0], b[1][0])).map(([k, L]) => { const v = viaje(L[0][1]); return `<details class="grupo accion"><summary><b>${esc(k)}</b> <span class="mut">· ${L.length} · ${v ? `lo más cerca, a ${v} min a pie` : 'lo más cerca, aquí'}</span></summary>` + L.map(x => tarjeta(x, true)).join('') + '</details>'; }).join('');
   let h = st.fin ? `<div class="fin">FIN<br>${esc(st.fin)}<br><button id="deshacerfin">← Atrás</button></div>` : '';
   if (st.ultimo) { h += `<div class="cambios">${esc(st.ultimo)}</div>`; st.ultimo = null; }
   h += `<div class="filtros"><input type="search" id="fq" placeholder="buscar…" value="${esc(filtro.q)}"> <label><input type="checkbox" data-f="solas" ${filtro.solas ? 'checked' : ''}> solo lo que no pide nada a la jugadora</label><label><input type="checkbox" data-f="cartas" ${filtro.cartas ? 'checked' : ''}> cartas</label><label><input type="checkbox" data-f="mis" ${filtro.mis ? 'checked' : ''}> misiones</label></div>`;
   h += `<h2>Lo que puede hacer, cerca de Ana, en las próximas ${HORAS} horas <span class="mut">(${cerca.length})</span></h2>`;
+  if (hora24() >= 20 || hora24() < 5) h += `<details class="grupo accion"><summary><b>Irse a dormir</b> <span class="mut">· hasta mañana a las 7, en su pieza</span></summary><p><button class="prim" id="dormir">🛏 Dormir</button></p></details>`;
   h += porAccion || `<p class="mut">Nada cerca de ${esc(LUGARES[st.donde] || st.donde)} en las próximas ${HORAS} horas.</p>`;
   if (lejos.length) h += `<details class="grupo"${cerca.length ? '' : ' open'}><summary><span class="sit">Más adelante, o más lejos</span> <span class="mut">(${lejos.length}: elegir una salta hasta ahí)</span></summary>${porMomento(lejos.slice(0, 30))}</details>`;
   if (!T.length) h += `<p class="mut">Nada puede pasar en los próximos ${HORIZONTE} días con este estado.</p>`;
@@ -447,7 +454,7 @@ function pintaLado(){
   $('lado').innerHTML = h;
 }
 // ---- the clicks
-$('centro').addEventListener('click', e => { const a = e.target.closest('[data-esc]'); if (a) return empezar(a.dataset.esc); const o = e.target.closest('[data-op]'); if (o) return elegir(+o.dataset.op); if (e.target.id === 'listo') return terminar(); if (e.target.id === 'deshacerfin') return atras(); });
+$('centro').addEventListener('click', e => { const a = e.target.closest('[data-esc]'); if (a) return empezar(a.dataset.esc); const o = e.target.closest('[data-op]'); if (o) return elegir(+o.dataset.op); if (e.target.id === 'listo') return terminar(); if (e.target.id === 'dormir') { paso('duerme hasta el día ' + (st.dia + 1)); nuevoDia(); llegadasAl(); guarda(); return pinta(); } if (e.target.id === 'deshacerfin') return atras(); });
 $('centro').addEventListener('input', e => { if (e.target.id === 'fq') { filtro.q = e.target.value.toLowerCase(); pintaPosibles(); const q = $('fq'); q.focus(); q.setSelectionRange(q.value.length, q.value.length); } });
 $('centro').addEventListener('change', e => { const f = e.target.dataset.f; if (f) { filtro[f] = e.target.checked; pintaPosibles(); } });
 document.querySelector('.tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (b && !b.disabled) { tab = b.dataset.tab; pinta(); document.querySelector('main').scrollTop = 0; } });

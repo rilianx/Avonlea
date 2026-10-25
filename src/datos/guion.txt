@@ -2015,7 +2015,9 @@ ana: (Ana se arrodilla de pronto frente a la Sra. Lynde.)
 # cumplen ahora: el orden es una preferencia, no una obligación (uno de invierno espera al invierno sin trabar la
 # línea). Variantes del mismo paso («4.1», «4.2»): el mismo momento con condiciones distintas; va la más específica, y
 # dicha una, el paso queda dicho. Al final, el comodín («paso: siempre», sin condiciones, una vez al día): siempre hay
-# algo que decir. Cuando una línea se queda solo con el comodín, la IA de la noche puede escribir pasos nuevos.
+# algo que decir, pero solo cuando la línea ya empezó (la primera vez es su paso 1, o nada). Cuando una línea se queda
+# solo con el comodín, la IA de la noche puede escribir pasos nuevos. Con «sola», la escena pasa sin que Ana toque la
+# cosa, apenas se cumplen sus condiciones y está donde dice «en:» (la primera noche, en su pieza: la cama).
 # Como mucho una escena al día por cosa o lugar; con «tambien», la cosa se hace igual (sentarse, calentarse, subir).
 # Las de un lugar, una por paseo, y no una detrás de otra; con «interrumpe», cortan lo que se esté diciendo (como la
 # Avenida en flor), sin cortar una elección de la jugadora.
@@ -2423,6 +2425,8 @@ resumen: Ana en la pieza del alero, la primera noche: llora hasta dormirse.
 disparo: objeto
 objeto: bed
 paso: 1
+sola
+en: ana=ga
 canal: ana_sola
 sujeta: marilla
 si: hecho:primera_noche, !hecho:desayuno_prueba, ana_en_tv<se_queda

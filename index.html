@@ -2237,7 +2237,9 @@ ana: (Ana se arrodilla de pronto frente a la Sra. Lynde.)
 # cumplen ahora: el orden es una preferencia, no una obligación (uno de invierno espera al invierno sin trabar la
 # línea). Variantes del mismo paso («4.1», «4.2»): el mismo momento con condiciones distintas; va la más específica, y
 # dicha una, el paso queda dicho. Al final, el comodín («paso: siempre», sin condiciones, una vez al día): siempre hay
-# algo que decir. Cuando una línea se queda solo con el comodín, la IA de la noche puede escribir pasos nuevos.
+# algo que decir, pero solo cuando la línea ya empezó (la primera vez es su paso 1, o nada). Cuando una línea se queda
+# solo con el comodín, la IA de la noche puede escribir pasos nuevos. Con «sola», la escena pasa sin que Ana toque la
+# cosa, apenas se cumplen sus condiciones y está donde dice «en:» (la primera noche, en su pieza: la cama).
 # Como mucho una escena al día por cosa o lugar; con «tambien», la cosa se hace igual (sentarse, calentarse, subir).
 # Las de un lugar, una por paseo, y no una detrás de otra; con «interrumpe», cortan lo que se esté diciendo (como la
 # Avenida en flor), sin cortar una elección de la jugadora.
@@ -2645,6 +2647,8 @@ resumen: Ana en la pieza del alero, la primera noche: llora hasta dormirse.
 disparo: objeto
 objeto: bed
 paso: 1
+sola
+en: ana=ga
 canal: ana_sola
 sujeta: marilla
 si: hecho:primera_noche, !hecho:desayuno_prueba, ana_en_tv<se_queda
@@ -18298,7 +18302,7 @@ function inicioTick(dt){
   if ((inicioT -= dt) > 0) return; inicioT = 3;
   const H = dlgHechos(); if (!H.primera_noche || H.desayuno_prueba || dlgDichas().cama_1 || sleeping || navigator.webdriver) { inicioFin = 0; return; }
   if (TALKS.length || game.talk) return;
-  if (game.scene === 'ga') { primeraVez('bed', goToBed); return; }   // (up in her room: she throws herself on the bed at once)
+  if (lineaSola()) return;   // (up in her room: she throws herself on the bed at once —cama_1, «sola»—)
   if (!inicioFin) inicioFin = TT;
   if (auto.on && TT - inicioFin > 60) { if (game.scene !== 'ga') goIn('ga', [GA.bed.x - 20, GA.bed.y + 16]); primeraVez('bed', goToBed) || goSleep(false); }
 }
@@ -19630,12 +19634,22 @@ function lineaElegir(C){
   const m = Math.min(...pasos.map(pasoNum)), T = pasos.filter(d => pasoNum(d) === m), v = d => (d.prioridad || 0) + dlgEspecificidad(d) * .001, top = Math.max(...T.map(v));
   return pick(T.filter(d => v(d) === top));
 }
-const lineaPuede = (k, x, f = () => true) => { const L = lineaDe(k); return L.filter(d => !d.dicha() && !pasoDicho(d, L) && f(d) && dlgCumple(d, x)); };
+// (the wildcard, only once the line has begun: the first time is its step 1, or nothing)
+const lineaEmpezada = L => !L.some(o => pasoNum(o) === 1) || L.some(o => pasoNum(o) === 1 && o.dicha());
+const lineaPuede = (k, x, f = () => true) => { const L = lineaDe(k), ya = lineaEmpezada(L); return L.filter(d => !d.dicha() && !pasoDicho(d, L) && (ya || d.paso !== 'siempre') && f(d) && dlgCumple(d, x)); };
 // the first time: the first step of its line, whenever she does it (in her room, the first night: her bed)
 function primeraVez(id, act){
   const d = lineaElegir(lineaPuede(id, dlgCtx(), d => pasoNum(d) === 1)); if (!d) return false;
   if (d.tambien) act(true);   // (done too, quietly: the scene tells it)
   for (const t of TALKS.filter(t => t.ch === d.canal)) talkEnd(t);   // (what she was saying to herself gives way to this)
+  d.decir(); return true;
+}
+// a scene of a line that plays by itself («sola»), with no touching: when its conditions hold, and Ana is where it says
+// («en: ana=ga»): the first night, as soon as she is up in her room, she throws herself on the bed
+function lineaSola(){
+  const x = dlgCtx(), d = lineaElegir(DIALOGOS.filter(d => d.sola && (d.objeto || d.lugar) && !d.dicha() && !pasoDicho(d, lineaDe(d.objeto || d.lugar)) && dlgCumple(d, x)));
+  if (!d) return false;
+  for (const t of TALKS.filter(t => t.ch === d.canal)) talkEnd(t);
   d.decir(); return true;
 }
 // the scenes of a thing (disparo: objeto, objeto: <what>): looking out of the window, at the mirror, at the sea… its
