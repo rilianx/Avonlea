@@ -1341,6 +1341,7 @@ ana piensa: Puede que sea la última vez que veo esta cocina.
 # Cada charla va por lugares del mapa y en secuencia: sigue a la anterior («o: si=dicha:ws_t1»), o empieza al pasar por su
 # lugar («o: si=cerca:ana:hondonada_lynde:500») aunque la anterior no se haya dicho; y no después de la que sigue
 # («!dicha:ws_t3»), para que no se dé fuera de su sitio. Entre una y otra, la calesa sigue unos segundos en silencio.
+# La del mar, solo frente al mar; la Sra. Pye espera a que la hayan dicho.
 === ws_t1 ===
 a prueba
 resumen: En la calesa: Ana decide disfrutar el viaje; las rosas silvestres y su pelo.
@@ -1349,7 +1350,7 @@ prioridad: 6
 interrumpe
 en: ana=out, marilla=out
 calesa: avonlea
-si: viaje=white_sands, ana_en_tv<decidida, !dicha:ws_t2
+si: viaje=white_sands, ana_en_tv<decidida, cerca:ana:tejas_verdes:1000, !dicha:ws_t2
 ---
 ana: ¿Sabe, Srta. Cuthbert? He decidido disfrutar de este viaje. Si uno se decide con firmeza, casi siempre puede disfrutar de las cosas.
 ana: No voy a pensar en el orfanato mientras vamos. Solo en el camino. ¡Mire, ya hay una rosa silvestre! ¿No le parece que el rosa es el color más encantador del mundo? Lástima que yo no lo pueda usar, con este pelo.
@@ -1411,9 +1412,7 @@ prioridad: 6
 interrumpe
 en: ana=out, marilla=out
 calesa: avonlea
-si: viaje=white_sands, ana_en_tv<decidida, !dicha:ws_pye
-o: si=dicha:ws_t3
-o: si=cerca:ana:playa:850
+si: viaje=white_sands, ana_en_tv<decidida, cerca:ana:playa:850, !dicha:ws_pye
 ---
 ana: (Ana despierta de un largo silencio, con los ojos muy abiertos. Allá adelante brilla el mar.) ¿No es maravilloso el mar?
 ana: Una vez, cuando vivía en Marysville, el Sr. Thomas alquiló un carro y nos llevó a todos a pasar el día en la playa, a diez millas. Disfruté cada minuto, aunque tuve que cuidar a los niños todo el tiempo. Lo volví a vivir en sueños felices durante años.
@@ -1432,7 +1431,7 @@ interrumpe
 en: ana=out, marilla=out, srapye=out
 sujeta: srapye
 calesa: avonlea
-si: viaje=white_sands, ana_en_tv<decidida, cerca:ana:playa:900, ve:srapye
+si: viaje=white_sands, ana_en_tv<decidida, cerca:ana:playa:900, dicha:ws_mar, ve:srapye
 ---
 srapye: ¡Marilla Cuthbert! (La Sra. Pye se acerca a la calesa, con su canasto, y mira a Ana de arriba abajo.) ¿Así que esta es la huérfana que les mandaron por equivocación?
 marilla: Buenas tardes, Sra. Pye.
@@ -1488,21 +1487,24 @@ marilla: Vamos, levántate. Sacúdete esa arena, que no vas a llegar donde la Sr
 
 === ws_spencer ===
 a prueba
-resumen: Donde la Sra. Spencer: la Sra. Blewett la quiere de sirvienta; Marilla se la lleva.
+resumen: Donde la Sra. Spencer: la equivocación; la Sra. Blewett la quiere de sirvienta; Marilla se la lleva a casa.
 canal: viaje
 prioridad: 8
 interrumpe
-en: ana=out, marilla=out, spencer=out, blewett=out
+en: ana=out, marilla=out
 sujeta: spencer, blewett
-si: viaje=white_sands, ana_en_tv<decidida, cerca:ana:playa:400, ve:spencer
-al_terminar: hecho ws_vuelven
-al_terminar: estado viaje ninguno
+si: viaje=white_sands, ana_en_tv<decidida, cerca:ana:hotel_white_sands:250, ve:spencer
 ---
-spencer: ¡Marilla Cuthbert! ¡Qué sorpresa! Pasen, pasen. ¿Y cómo está la niña?
-marilla: Para eso venimos, Sra. Spencer. Ha habido una equivocación. Le mandamos a decir con su hermano Robert que queríamos un niño de diez u once años.
-spencer: ¡No me diga! Pues Robert me mandó a decir con su hija Nancy que ustedes querían una niña. ¿No fue así, Flora Jane? (Mira hacia dentro de la casa.) Bueno, la culpa no es mía. Hice lo que pude, y seguí sus instrucciones.
-spencer: Pero mire qué casualidad: aquí está la Sra. Peter Blewett, que justo andaba buscando una niña para que la ayude. Tiene una familia grande, y le cuesta conseguir ayuda.
-blewett: (La Sra. Blewett mira a Ana de arriba abajo, con sus ojos chicos y duros.) ¿Cuántos años tienes y cómo te llamas?
+narra: El hotel White Sands, todavía cerrado antes de la temporada. En la puerta las espera la Sra. Spencer, menuda y sonriente, que vino a pasar el día con su prima. Detrás de ella, en la sombra del portal, una mujer flaca, de cara afilada, que no sonríe: la Sra. Peter Blewett.
+spencer: ¡Marilla Cuthbert! ¡Qué sorpresa! Y la niña… ¡Qué bien te ves, Ana! ¿Cómo estás?
+ana: (Ana hace una reverencia, sin sonreír.) Todo lo bien que se puede estar sin esperanzas, Sra. Spencer, gracias.
+marilla: Venimos por una equivocación, Sra. Spencer. Le mandamos a decir con su hermano Robert que queríamos un niño de diez u once años.
+spencer: ¡No me diga! Pues Robert me mandó a decir con su hija Nancy que ustedes querían una niña. ¿No fue así, Flora Jane? (Mira hacia dentro, a su hija.) Bueno, la culpa no es mía. Hice lo que pude, y seguí sus instrucciones.
+marilla: Fue culpa nuestra. Teníamos que haber venido nosotros, en vez de mandar recados de boca en boca. Lo que importa ahora es cómo se arregla. ¿Se puede devolver la niña al orfanato?
+spencer: Supongo que sí, pero no creo que haga falta. (Se le ilumina la cara.) ¡Mire qué casualidad! La Sra. Peter Blewett estuvo en mi casa ayer, diciéndome que ojalá me hubiera encargado una niña para que la ayude. Tiene una familia grande y le cuesta conseguir quien la ayude. Ana le viene como anillo al dedo. ¡Es providencial!
+marilla piensa: La Sra. Peter Blewett. Dicen que es muy trabajadora y que hace trabajar más todavía a los demás. Que sus sirvientas no le duran, y que sus hijos son malcriados y peleadores.
+narra: La Sra. Blewett sale de la sombra del portal y se acerca. Mira a Ana de arriba abajo, sin una palabra.
+blewett: (Con sus ojos chicos y duros.) ¿Cuántos años tienes y cómo te llamas?
 ana: Ana Shirley. Tengo once años.
 blewett: Hm. No pareces gran cosa, pero eres fibrosa. Las fibrosas son las que más rinden. Si te llevo, vas a tener que ser buena, ¿entiendes? Buena y lista, y respetuosa. Te vas a ganar lo que comes, no te equivoques. Y el bebé es de lo más caprichoso.
 ana piensa: Tiene cara de barrena. De esas que se meten en la madera.
@@ -1514,11 +1516,36 @@ ana piensa: Tiene cara de barrena. De esas que se meten en la madera.
    ! hecho ws_ofrece
 marilla: (Marilla carraspea.) Bueno, no sé. No he dicho que Matthew y yo hayamos decidido del todo no quedarnos con ella. La verdad es que Matthew quiere quedársela. Me la llevo a casa y lo hablamos.
 blewett: (La Sra. Blewett aprieta los labios.) Como quiera. Pero no me la mande después, cuando ya tenga a otra.
-ana: (Ya en el camino, Ana le habla en un susurro.) Srta. Cuthbert, ¿de verdad dijo que a lo mejor me dejaba quedarme en Tejas Verdes? ¿O me lo imaginé?
+spencer: (La Sra. Spencer junta las manos.) Bueno, bueno, todo se arregla. Ana, niña, pórtate bien y no hables tanto, ¿eh? Marilla, ¿no se quedan a tomar el té? Flora Jane hizo bollos.
+marilla: Gracias, Sra. Spencer, pero no. Matthew nos espera, y el camino es largo.
+spencer: Entonces que les vaya bien. Y salúdeme a Matthew. (Se queda en la puerta, diciendo adiós con la mano, hasta que la Sra. Blewett se mete adentro sin despedirse.)
+ana: (Ana sube a la calesa sin mirar atrás, apretando la maleta vieja contra las rodillas.)
+! estado viaje vuelta_white_sands
+! viaje casa
+
+# (la vuelta de White Sands, en la calesa: lo que se dicen apenas salen; capítulo 6 del libro)
+=== ws_vuelta ===
+a prueba
+resumen: De vuelta, en la calesa: «¿De verdad dijo que a lo mejor me dejaba quedarme?»
+canal: viaje
+prioridad: 7
+interrumpe
+en: ana=out, marilla=out
+calesa: avonlea
+si: viaje=vuelta_white_sands, ana_en_tv<decidida
+---
+ana: (Cuando el hotel ya queda atrás, Ana le habla en un susurro.) Srta. Cuthbert, ¿de verdad dijo que a lo mejor me dejaba quedarme en Tejas Verdes? ¿O me lo imaginé?
 marilla: Más te vale aprender a sujetar esa imaginación, Ana, si no sabes distinguir lo que es de verdad de lo que no. Sí, oíste bien, y nada más. Todavía no está decidido.
 ana: Prefiero volver al orfanato antes que ir con ella. Parece una… una barrena.
-marilla: (A Marilla se le escapa algo que podría ser una sonrisa, y se lo traga.) No se habla así de una señora, y menos de una que no conoces. Súbete, y quédate quieta.
-! viaje casa
+marilla: (A Marilla se le escapa algo que podría ser una sonrisa, y se lo traga.) No se habla así de una señora, y menos de una que no conoces.
+->* «Voy a tratar de ser todo lo que usted quiera, si me deja quedarme.»
+   ana: Voy a tratar de ser todo lo que usted quiera, Srta. Cuthbert. Todo. Si me deja quedarme.
+   marilla: Hm. Ya veremos. Ahora quédate quieta, que la yegua se pone nerviosa con tanto movimiento.
+   ! hecho ws_promete
+-> Mirar el mar en silencio, todo el camino
+   ana: (Ana no dice nada más. Mira el mar, que se va poniendo dorado con la tarde, como si quisiera guardárselo entero por si acaso.)
+   marilla piensa: Ni una palabra en todo el camino. En ella, eso es mucho decir.
+   ! hecho ws_calla_vuelta
 
 === ws_noche ===
 a prueba
@@ -1953,6 +1980,9 @@ lynde: (La Sra. Lynde mira a Ana de arriba abajo.) Bueno, no te eligieron por tu
    ana: (Ana se planta frente a ella, temblando de rabia.) ¡La odio! ¡La odio, la odio, la odio! ¿Cómo se atreve a decir que soy flaca y fea? ¿Le gustaría que dijeran que usted es gorda y torpe y que no tiene una chispa de imaginación?
    lynde: ¡Habráse visto! ¡Qué genio!
    marilla: Ana, ve a tu pieza y quédate ahí hasta que yo suba.
+   ana: (Ana sube la escalera corriendo, cierra la puerta de un golpe y se tira en la cama, boca abajo, a llorar de rabia.)
+   ! a_pieza
+   ! ana enCama=boca_abajo
    ! estado lynde_ana ofendida
    ! suma afecto:lynde:ana -1
    ! log Ana estalló con la Sra. Lynde, que la llamó flaca, fea y pelirroja. Marilla la mandó a su pieza. | yo: la Sra. Lynde me llamó flaca, fea y pelirroja, y estallé. Marilla me mandó a mi pieza.
@@ -1971,17 +2001,61 @@ lynde: (La Sra. Lynde mira a Ana de arriba abajo.) Bueno, no te eligieron por tu
    ! a_pieza
    ! log Ana se fue llorando cuando la Sra. Lynde la llamó flaca y fea. | yo: la Sra. Lynde me llamó flaca y fea, y me fui llorando a mi pieza.
 
+# (capítulos 9 y 10: Ana llora en su pieza; Marilla sube y le dice que tiene que pedirle perdón; Ana se niega y se queda
+# encerrada; al otro día en la tarde, Matthew sube a escondidas y la convence)
 === lynde_perdon_marilla ===
-resumen: Marilla le dice a Ana que tiene que pedirle perdón a la Sra. Lynde.
-canal: gg
+resumen: Marilla sube a la pieza: Ana tiene que pedirle perdón a la Sra. Lynde.
+canal: ana_sola
 prioridad: 8
-en: ana=gg, marilla=gg
-si: lynde_ana=ofendida, !hecho:perdon_pedido
+interrumpe
+sujeta: marilla
+en: ana=ga
+si: lynde_ana=ofendida, !hecho:perdon_pedido, horas_desde:ofendio_lynde:0.5
 al_terminar: hecho perdon_pedido
 ---
-marilla: Ana, lo que hiciste no se hace. Vas a ir a la casa de la Sra. Lynde a pedirle perdón.
-ana: ¡Nunca! Puede encerrarme en un calabozo oscuro y húmedo, con sapos y culebras, y darme pan y agua. Pero no le voy a pedir perdón.
-marilla: No tenemos calabozos en Tejas Verdes. Pero te vas a quedar en tu pieza hasta que estés dispuesta a pedirle perdón.
+ana: (Ana sigue boca abajo en la cama, con la cara hundida en la almohada. Ya no llora fuerte: solo hipa de vez en cuando.)
+! entra marilla ga
+marilla: (Marilla entra con la vela, aunque todavía hay luz, y se queda de pie junto a la cama.) Ana. Siéntate y escúchame.
+ana: (Ana se da vuelta, con la cara colorada e hinchada.) No quiero escuchar a nadie. Nunca más.
+marilla: Lo que hiciste no se hace. Una niña no le grita así a una visita, y menos a una señora mayor. Vas a ir a la casa de la Sra. Lynde a pedirle perdón.
+->* «¡Nunca! Puede encerrarme en un calabozo…»
+   ana: ¡Nunca! Puede encerrarme en un calabozo oscuro y húmedo, con sapos y culebras, y darme pan y agua. Pero no le voy a pedir perdón.
+   marilla: No tenemos calabozos en Tejas Verdes. Pero te vas a quedar en tu pieza hasta que estés dispuesta a pedirle perdón.
+   ana: Entonces me voy a quedar aquí para siempre. Porque no puedo decirle que siento lo que le dije. ¿Cómo voy a sentirlo? Ni siquiera puedo imaginarme sintiéndolo.
+   ! hecho encerrada
+-> «Ella me dijo fea primero…»
+   ana: Ella me dijo flaca y fea primero. Y pelirroja. ¿Por qué nadie le pide perdón a una a mí?
+   marilla: (Marilla vacila. Se acuerda, sin querer, de una tía que dijo de ella, de chica, «qué lástima que sea tan morena y tan sin gracia».) Rachel habla demasiado, eso es verdad. Pero eso no te disculpa. Te quedas aquí hasta que estés dispuesta a pedirle perdón.
+   ! hecho encerrada
+marilla: (Marilla sale y cierra la puerta despacio.)
+! sale marilla
+
+=== lynde_matthew_sube ===
+resumen: Matthew sube a escondidas a la pieza y convence a Ana de pedirle perdón a la Sra. Lynde.
+canal: ana_sola
+prioridad: 8
+interrumpe
+sujeta: matthew
+en: ana=ga
+si: lynde_ana=ofendida, hecho:encerrada, !hecho:dispuesta_perdon, dias_desde:perdon_pedido:1, hora:17-21
+al_terminar: hecho dispuesta_perdon
+---
+narra: Ana pasó el día en su pieza. Marilla le subió las comidas en silencio, y bajó los platos casi llenos. En la tarde, mientras Marilla sale a buscar las vacas, Matthew sube la escalera en puntillas, como un ladrón en su propia casa.
+! entra matthew ga
+matthew: (Matthew golpea la puerta muy despacio, y asoma la cabeza.) Ana… ¿Cómo te va, Ana?
+ana: (Ana, sentada junto a la ventana, sonríe apenas.) Bastante bien, gracias. Imagino muchas cosas, y eso ayuda a pasar el tiempo. Es un poco solitario, claro.
+matthew: (Matthew se rasca la barba, buscando las palabras.) Bueno, Ana, ¿no crees que sería mejor hacerlo de una vez y quedar en paz? Tarde o temprano vas a tener que hacerlo, ya sabes, porque Marilla es una mujer terriblemente decidida. Hazlo de una vez, digo yo, y quedas en paz.
+->* «Lo haré por usted.»
+   ana: (Ana suspira.) Supongo que podría hacerlo, por usted. Sería bastante verdad decir que lo siento, porque ahora sí lo siento. Esta mañana ya no estaba enojada. Solo me sentía… como avergonzada. Lo haré.
+   matthew: Eso es, Ana. Eso es. Pero no le digas a Marilla que te dije nada. Va a pensar que me estoy metiendo, y prometí no meterme.
+   ana: Ni con caballos salvajes me lo sacarán. ¿Cómo se sacan secretos con caballos salvajes, por cierto?
+   ! suma afecto:matthew:ana 1
+-> «No puedo. Todavía no.»
+   ana: No puedo, Matthew. Todavía no. Si le pido perdón sin sentirlo, sería una mentira, y Marilla dice que mentir es lo peor.
+   matthew: (Matthew asiente despacio, sin saber qué más decir.) Bueno… bueno. Pero piénsalo, Ana. Por mí.
+   ana piensa: Por Matthew. Por Matthew sí podría. Mañana. Mañana lo siento de verdad, seguro.
+matthew: (Matthew baja la escalera en puntillas, antes de que Marilla vuelva del potrero.)
+! sale matthew
 
 === lynde_disculpa ===
 resumen: Ana se arrodilla y le pide perdón a la Sra. Lynde, con todo el drama.

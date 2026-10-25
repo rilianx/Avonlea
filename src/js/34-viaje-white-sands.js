@@ -38,9 +38,11 @@ function wsSalir(){
 // along the way: the pace of the mare, and Mrs. Pye, ahead on the road
 function wsTick(){
   const w = wsE().ws; if (!w || w.fase === 'fin') return;
-  if (!cart.on || cart.viaje !== WS_VIAJE) { if (!w.volviendo && !game.talk) { w.volviendo = true; wsVolverCasa(); } return; }   // (the game was closed halfway: they are back)
+  if (!cart.on || (cart.viaje !== WS_VIAJE && cart.viaje !== WS_VUELTA)) { if (!w.volviendo && !game.talk) { w.volviendo = true; wsVolverCasa(); } return; }   // (the game was closed halfway: they are back)
+  const habla = TALKS.some(t => t.ch === 'viaje');
+  if (w.fase === 'vuelta') { cart.vel = habla ? WS_PASO : WS_VEL; return; }
   if (w.fase === 'ida') {
-    const habla = TALKS.some(t => t.ch === 'viaje'), fr = cart.s / cartLen();
+    const fr = cart.s / cartLen();
     cart.vel = habla ? WS_PASO : WS_VEL; if (habla) w.hablaT = TT;
     if (fr >= w.pye && !w.pyeAhi) {   // Mrs. Pye, where the road runs nearest the sea: the cart stops there (once the talk under way is over, and the next one, if it follows it, has begun)
       cart.parado = true; if (habla || TT - (w.hablaT ?? -99) < WS_PAUSA) return;
@@ -48,13 +50,28 @@ function wsTick(){
     }
   }
 }
+// back home: the same road, the other way; Marilla drives, and they talk (the scenes of «viaje=vuelta_white_sands»)
+const WS_VUELTA = {
+  aviso: '🐴 De vuelta a Tejas Verdes, con Marilla, por el camino de la costa',
+  subir(){ say('marilla', 'Sube, Ana. Ya es tarde.', [['🐴 Subir a la calesa', () => { close(); cartOn(); }], ['Todavía no', close]]); },
+  llegar(){ wsVolverCasa(); },
+};
+function wsVolver(){
+  const M = PEOPLE.marilla;
+  fundido('Se despiden de la Sra. Spencer, y Marilla engancha otra vez la yegua…', () => {
+    for (const k of ['spencer', 'blewett']) if (FOLKBY[k]) FOLKBY[k].talkT = TT + 1;
+    Object.assign(M, { busca: null, trajo: false, sit: false, nav: null, target: null, where: 'out' }); ana.llora = false; ana.sit = false;
+    Object.assign(cart, { viaje: WS_VUELTA, dest: 'casa', suelto: false, parado: false, vel: WS_VEL }); game.tripWith = 'marilla'; wsE().ws.fase = 'vuelta';
+    cartOn();
+  });
+}
 const wsSinLugares = () => ['orilla', 'llegada'].includes(wsE().ws?.fase);
-// what the script does on this trip: «! viaje white_sands», «orilla», «calesa», «sigue», «casa»
+// what the script does on this trip: «! viaje white_sands», «orilla», «calesa», «sigue», «casa» (from Mrs. Spencer's, back by the road)
 function wsViaje(x){
   if (x === 'white_sands') return wsSalir();
   if (x === 'orilla') return wsOrilla();
   if (x === 'calesa') return wsCalesa();
-  if (x === 'casa') return wsVolverCasa();
+  if (x === 'casa') return wsE().ws?.fase === 'llegada' ? wsVolver() : wsVolverCasa();   // (from Mrs. Spencer's: by the road, in the cart; otherwise, home at once)
   if (x === 'sigue') { cart.parado = false; if (FOLKBY.srapye) FOLKBY.srapye.talkT = TT + 1; }   // (Ana stays in the cart: on)
 }
 // Ana gets off and runs to the sea, the nearest shore (on the sand, a little before the water); Marilla goes after her
@@ -80,10 +97,10 @@ function wsCalesa(){
     cartOn();
   });
 }
-// back home along the shore road, without a word; the cart is Matthew's again
+// home: the cart is Matthew's again (also when the game was closed halfway)
 function wsVolverCasa(){
   const M = PEOPLE.marilla;
-  fundido('Vuelven a Tejas Verdes por el camino de la costa. Marilla no dice una palabra en todo el viaje…', () => {
+  fundido('Llegan a Tejas Verdes con la última luz de la tarde…', () => {
     if (cart.riding) cartOff();
     Object.assign(cart, { on: false, riding: false, moving: false, ruta: null, len: null, con: null, vel: null, viaje: null, parado: false, suelto: false });
     game.tripWith = null; for (const k of ['spencer', 'blewett', 'srapye']) if (FOLKBY[k]) FOLKBY[k].talkT = TT + 1;

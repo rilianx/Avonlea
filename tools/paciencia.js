@@ -61,9 +61,9 @@ async function caso(nombre, fn){
   });
   await caso('3. el día del viaje, lejos: Marilla la busca, baja, y el viaje sigue; después, la paciencia ya no cuenta', async T => {
     await T.manana(14.6); await T.ev(`(() => { goOut(); ana.x = 900; ana.y = 900; })()`);
-    const v = await T.jugar(null, 'dlgHechos().a_prueba && !TALKS.length', 600);
+    const v = await T.jugar(null, 'dlgHechos().a_prueba && !TALKS.length', 900);
     ok(v[0] === 'falta_viaje' && v.includes('viaje_spencer'), 'la busca y van: ' + v.join(' · '));
-    ok(['ws_t1', 'ws_t2', 'ws_t3', 'ws_mar', 'ws_pye', 'ws_orilla', 'ws_spencer', 'ws_noche'].every(e => v.includes(e)), 'el viaje en la calesa de Marilla: el camino, la Sra. Pye, la orilla, la Sra. Spencer, la noche');
+    ok(['ws_t1', 'ws_t2', 'ws_t3', 'ws_mar', 'ws_pye', 'ws_orilla', 'ws_spencer', 'ws_vuelta', 'ws_noche'].every(e => v.includes(e)), 'el viaje en la calesa de Marilla: el camino, la Sra. Pye, la orilla, la Sra. Spencer, la noche');
     for (let i = 0; i < 20 && await T.ev(`cart.on`); i++) await T.pg.waitForTimeout(100);   // (they go home as a page turns: a moment)
     ok(await T.ev(`!cart.on && !cart.viaje && PEOPLE.marilla.where === 'gg' && game.wm.ws.fase === 'fin'`), 'y vuelven: la calesa es de Matthew otra vez');
     ok(await T.pac() === 1 && await T.ev(`!!dlgHechos().a_prueba && !dlgHechos().se_queda`), 'Marilla decidió (paciencia ' + await T.pac() + '), pero no se lo dice todavía');

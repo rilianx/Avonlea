@@ -2,7 +2,7 @@
 
 Lo genera `node tools/grafo.js` (ver `docs/MOTOR.md`). Lee el guion, el cuaderno, las habilidades y el código.
 
-**293 escenas** (9 grandes), **32 metas** del cuaderno, **171 hechos** que algo deja.
+**295 escenas** (9 grandes), **32 metas** del cuaderno, **176 hechos** que algo deja.
 
 ## Escenas o metas que nunca podrían pasar
 
@@ -95,8 +95,10 @@ No es un error (un hecho puede quedar para el registro), pero puede ser algo olv
 - `ofendio_lynde`: lo deja escena lynde_visita (una opción)
 - `queens_primera`: lo deja escena examen_primera
 - `sin_terminar_`: lo deja código
+- `ws_calla_vuelta`: lo deja escena ws_vuelta (una opción)
 - `ws_callo`: lo deja escena ws_pye (una opción)
 - `ws_mira`: lo deja escena ws_spencer (una opción)
 - `ws_ofrece`: lo deja escena ws_spencer (una opción)
 - `ws_perdon`: lo deja escena ws_orilla (una opción)
 - `ws_pregunto`: lo deja escena ws_orilla (una opción)
+- `ws_promete`: lo deja escena ws_vuelta (una opción)

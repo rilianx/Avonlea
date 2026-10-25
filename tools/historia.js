@@ -71,7 +71,15 @@ const COSAS = Object.fromEntries([...leer('src/datos/guion.txt').matchAll(/^# --
 const DONDE_COSA = { gwin: 'ga', mirror: 'ga', armario: 'ga', bed: 'ga', stairs: 'gg', geranio: 'gg', fire: 'gg', toby: 'gg', pizarra: 'es', pupitre: 'es', rio: 'es', escuela: 'es',
   banco: 'ig', iglesia: 'ig', libros: 'parroquial', huerta: 'patio', granero: 'patio', corral: 'patio', cuesta_del_huerto: 'os', escenario: 'aldea', frascos: 'aldea', aldea: 'aldea',
   cage: 'harrison', faro: 'costa', playa: 'costa', bench: 'out', lago: 'out', puente: 'out', camino_blanco: 'out', bosque_encantado: 'out', campo_rosado: 'out' };
-const datos = { escenas: E, habilidades: HAB, metas: METAS, llegadas: LLEG, estado: ESTADO, cosas: COSAS, dondeCosa: DONDE_COSA };
+// the post (src/js/62-cartas.js: CORREO): how many days a letter takes to arrive, and the answer after it
+const CORREO = new Function('return ' + fs.readFileSync(path.join(root, 'src/js/62-cartas.js'), 'utf8').match(/^const CORREO = (\{[\s\S]*?^\});/m)[1])();
+// the trips: the places the cart passes, in order (measured on the map: where each «cerca:ana:<lugar>» of the scenes of
+// the road falls along the way), and what the game does on arriving (src/js/34-viaje-white-sands.js)
+const RUTAS = {
+  white_sands: { paradas: ['tejas_verdes', 'hondonada_lynde', 'escuela', 'aldea', 'playa', 'hotel_white_sands'], llegar: [] },
+  vuelta_white_sands: { paradas: ['hotel_white_sands', 'playa', 'aldea', 'escuela', 'hondonada_lynde', 'tejas_verdes'], llegar: ['estado viaje ninguno', 'hecho ws_vuelven', 'viaje casa'] },
+};
+const datos = { escenas: E, habilidades: HAB, metas: METAS, llegadas: LLEG, estado: ESTADO, cosas: COSAS, dondeCosa: DONDE_COSA, correo: CORREO, rutas: RUTAS };
 const pag = fs.readFileSync(path.join(__dirname, 'historia', 'pagina.html'), 'utf8');
 fs.writeFileSync(path.join(root, 'trazas/historia.html'), pag.replace('/*@DATOS*/null', () => JSON.stringify(datos).replace(/</g, '\\u003c')));
 console.log(`→ trazas/historia.html · ${E.length} escenas · ${HAB.length} contadores · ${Object.keys(ESTADO).length} estados · ${METAS.length} metas`);

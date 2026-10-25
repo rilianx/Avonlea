@@ -16,7 +16,7 @@
      lineas: [[who, text], ...] | 'libro:path' | 'relleno:n', elegir: [indices], marcas: {index: mark},
      al_empezar / al_terminar: [{hecho}, {marca, nota}, {log}, {saber: [who, what]}, {meta: {quien, tipo, args,
           texto, etiqueta, prioridad}}, {soltar: who}, {ana: {props}}, {fin_capitulo: true}] ---------- */
-const DLG_LUGARES = { lago: () => [LAKE.x, LAKE.y], tejas_verdes: () => [GG.x, GG.y], casa_bell: () => WP.casa_bell, letrero_br: () => DOOR.br, hondonada: () => [LY.x, LY.y + 60] };
+const DLG_LUGARES = { lago: () => [LAKE.x, LAKE.y], tejas_verdes: () => [GG.x, GG.y], casa_bell: () => WP.casa_bell, letrero_br: () => DOOR.br, hondonada: () => [LY.x, LY.y + 60], hotel_white_sands: () => door('Hotel White Sands') };
 // a place of the map, by name: those above, or any of the places one can walk to (PLACES: hondonada_lynde, aldea, playa…)
 const dlgLugar = l => DLG_LUGARES[l]?.() || (PLACES[l] ? [PLACES[l][1], PLACES[l][2]] : null);
 // someone outside, within r of a place: «cerca:ana:playa:800» (on a trip, where the cart is: each talk at its stretch of the road)

@@ -62,7 +62,7 @@
    "viven": []
   }
  ],
- "generado": "2026-10-25 17:03",
+ "generado": "2026-10-25 17:50",
  "momentos": [
   {
    "id": "dia2",
@@ -4155,7 +4155,7 @@
    "interrumpe": true,
    "grande": false,
    "repetir": "una_vez",
-   "si": "viaje=white_sands, ana_en_tv<decidida, !dicha:ws_t2",
+   "si": "viaje=white_sands, ana_en_tv<decidida, cerca:ana:tejas_verdes:1000, !dicha:ws_t2",
    "en": "ana=out, marilla=out",
    "hablan": "marilla",
    "lineas": 8,
@@ -4237,7 +4237,7 @@
    "interrumpe": true,
    "grande": false,
    "repetir": "una_vez",
-   "si": "viaje=white_sands, ana_en_tv<decidida, !dicha:ws_pye",
+   "si": "viaje=white_sands, ana_en_tv<decidida, cerca:ana:playa:850, !dicha:ws_pye",
    "en": "ana=out, marilla=out",
    "hablan": "marilla",
    "lineas": 6,
@@ -4262,7 +4262,7 @@
    "interrumpe": true,
    "grande": false,
    "repetir": "una_vez",
-   "si": "viaje=white_sands, ana_en_tv<decidida, cerca:ana:playa:900, ve:srapye",
+   "si": "viaje=white_sands, ana_en_tv<decidida, cerca:ana:playa:900, dicha:ws_mar, ve:srapye",
    "en": "ana=out, marilla=out, srapye=out",
    "hablan": "srapye, marilla",
    "lineas": 5,
@@ -4312,29 +4312,57 @@
    "interrumpe": true,
    "grande": false,
    "repetir": "una_vez",
-   "si": "viaje=white_sands, ana_en_tv<decidida, cerca:ana:playa:400, ve:spencer",
-   "en": "ana=out, marilla=out, spencer=out, blewett=out",
+   "si": "viaje=white_sands, ana_en_tv<decidida, cerca:ana:hotel_white_sands:250, ve:spencer",
+   "en": "ana=out, marilla=out",
    "hablan": "spencer, marilla, blewett",
-   "lineas": 16,
-   "primera": "spencer: ¡Marilla Cuthbert! ¡Qué sorpresa! Pasen, pasen. ¿Y cómo está la niña?",
+   "lineas": 22,
+   "primera": "narra: El hotel White Sands, todavía cerrado antes de la temporada. En la puerta las espera la Sra. Spencer, menuda y sonriente, que vino a pasar el día con su prima. Detrás de ella, en la sombra del portal, una mujer flaca, de cara afilada, que no sonríe: la Sra. Peter Blewett.",
    "quienes": [],
    "con": "",
    "una_vez": true,
    "texto": [
-    "spencer: ¡Marilla Cuthbert! ¡Qué sorpresa! Pasen, pasen. ¿Y cómo está la niña?",
-    "marilla: Para eso venimos, Sra. Spencer. Ha habido una equivocación. Le mandamos a decir con su hermano Robert que queríamos un niño de diez u once años.",
-    "spencer: ¡No me diga! Pues Robert me mandó a decir con su hija Nancy que ustedes querían una niña. ¿No fue así, Flora Jane? (Mira hacia dentro de la casa.) Bueno, la culpa no es mía. Hice lo que pude, y seguí sus instrucciones.",
-    "spencer: Pero mire qué casualidad: aquí está la Sra. Peter Blewett, que justo andaba buscando una niña para que la ayude. Tiene una familia grande, y le cuesta conseguir ayuda.",
-    "blewett: (La Sra. Blewett mira a Ana de arriba abajo, con sus ojos chicos y duros.) ¿Cuántos años tienes y cómo te llamas?",
+    "narra: El hotel White Sands, todavía cerrado antes de la temporada. En la puerta las espera la Sra. Spencer, menuda y sonriente, que vino a pasar el día con su prima. Detrás de ella, en la sombra del portal, una mujer flaca, de cara afilada, que no sonríe: la Sra. Peter Blewett.",
+    "spencer: ¡Marilla Cuthbert! ¡Qué sorpresa! Y la niña… ¡Qué bien te ves, Ana! ¿Cómo estás?",
+    "ana: (Ana hace una reverencia, sin sonreír.) Todo lo bien que se puede estar sin esperanzas, Sra. Spencer, gracias.",
+    "marilla: Venimos por una equivocación, Sra. Spencer. Le mandamos a decir con su hermano Robert que queríamos un niño de diez u once años.",
+    "spencer: ¡No me diga! Pues Robert me mandó a decir con su hija Nancy que ustedes querían una niña. ¿No fue así, Flora Jane? (Mira hacia dentro, a su hija.) Bueno, la culpa no es mía. Hice lo que pude, y seguí sus instrucciones.",
+    "marilla: Fue culpa nuestra. Teníamos que haber venido nosotros, en vez de mandar recados de boca en boca. Lo que importa ahora es cómo se arregla. ¿Se puede devolver la niña al orfanato?",
+    "spencer: Supongo que sí, pero no creo que haga falta. (Se le ilumina la cara.) ¡Mire qué casualidad! La Sra. Peter Blewett estuvo en mi casa ayer, diciéndome que ojalá me hubiera encargado una niña para que la ayude. Tiene una familia grande y le cuesta conseguir quien la ayude. Ana le viene como anillo al dedo. ¡Es providencial!",
+    "marilla: ~La Sra. Peter Blewett. Dicen que es muy trabajadora y que hace trabajar más todavía a los demás. Que sus sirvientas no le duran, y que sus hijos son malcriados y peleadores.",
+    "narra: La Sra. Blewett sale de la sombra del portal y se acerca. Mira a Ana de arriba abajo, sin una palabra.",
+    "blewett: (Con sus ojos chicos y duros.) ¿Cuántos años tienes y cómo te llamas?",
     "ana: Ana Shirley. Tengo once años.",
     "blewett: Hm. No pareces gran cosa, pero eres fibrosa. Las fibrosas son las que más rinden. Si te llevo, vas a tener que ser buena, ¿entiendes? Buena y lista, y respetuosa. Te vas a ganar lo que comes, no te equivoques. Y el bebé es de lo más caprichoso.",
     "ana: ~Tiene cara de barrena. De esas que se meten en la madera.",
     "marilla: (Marilla carraspea.) Bueno, no sé. No he dicho que Matthew y yo hayamos decidido del todo no quedarnos con ella. La verdad es que Matthew quiere quedársela. Me la llevo a casa y lo hablamos.",
     "blewett: (La Sra. Blewett aprieta los labios.) Como quiera. Pero no me la mande después, cuando ya tenga a otra.",
-    "ana: (Ya en el camino, Ana le habla en un susurro.) Srta. Cuthbert, ¿de verdad dijo que a lo mejor me dejaba quedarme en Tejas Verdes? ¿O me lo imaginé?",
+    "spencer: (La Sra. Spencer junta las manos.) Bueno, bueno, todo se arregla. Ana, niña, pórtate bien y no hables tanto, ¿eh? Marilla, ¿no se quedan a tomar el té? Flora Jane hizo bollos.",
+    "marilla: Gracias, Sra. Spencer, pero no. Matthew nos espera, y el camino es largo.",
+    "spencer: Entonces que les vaya bien. Y salúdeme a Matthew. (Se queda en la puerta, diciendo adiós con la mano, hasta que la Sra. Blewett se mete adentro sin despedirse.)",
+    "ana: (Ana sube a la calesa sin mirar atrás, apretando la maleta vieja contra las rodillas.)"
+   ]
+  },
+  {
+   "id": "ws_vuelta",
+   "canal": "viaje",
+   "disparo": "",
+   "prioridad": 7,
+   "interrumpe": true,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "viaje=vuelta_white_sands, ana_en_tv<decidida",
+   "en": "ana=out, marilla=out",
+   "hablan": "marilla",
+   "lineas": 5,
+   "primera": "ana: (Cuando el hotel ya queda atrás, Ana le habla en un susurro.) Srta. Cuthbert, ¿de verdad dijo que a lo mejor me dejaba quedarme en Tejas Verdes? ¿O me lo imaginé?",
+   "quienes": [],
+   "con": "",
+   "una_vez": true,
+   "texto": [
+    "ana: (Cuando el hotel ya queda atrás, Ana le habla en un susurro.) Srta. Cuthbert, ¿de verdad dijo que a lo mejor me dejaba quedarme en Tejas Verdes? ¿O me lo imaginé?",
     "marilla: Más te vale aprender a sujetar esa imaginación, Ana, si no sabes distinguir lo que es de verdad de lo que no. Sí, oíste bien, y nada más. Todavía no está decidido.",
     "ana: Prefiero volver al orfanato antes que ir con ella. Parece una… una barrena.",
-    "marilla: (A Marilla se le escapa algo que podría ser una sonrisa, y se lo traga.) No se habla así de una señora, y menos de una que no conoces. Súbete, y quédate quieta."
+    "marilla: (A Marilla se le escapa algo que podría ser una sonrisa, y se lo traga.) No se habla así de una señora, y menos de una que no conoces."
    ]
   },
   {
@@ -4835,24 +4863,50 @@
   },
   {
    "id": "lynde_perdon_marilla",
-   "canal": "gg",
+   "canal": "ana_sola",
    "disparo": "",
    "prioridad": 8,
-   "interrumpe": false,
+   "interrumpe": true,
    "grande": false,
    "repetir": "una_vez",
-   "si": "lynde_ana=ofendida, !hecho:perdon_pedido",
-   "en": "ana=gg, marilla=gg",
+   "si": "lynde_ana=ofendida, !hecho:perdon_pedido, horas_desde:ofendio_lynde:0.5",
+   "en": "ana=ga",
    "hablan": "marilla",
-   "lineas": 3,
-   "primera": "marilla: Ana, lo que hiciste no se hace. Vas a ir a la casa de la Sra. Lynde a pedirle perdón.",
+   "lineas": 8,
+   "primera": "ana: (Ana sigue boca abajo en la cama, con la cara hundida en la almohada. Ya no llora fuerte: solo hipa de vez en cuando.)",
    "quienes": [],
    "con": "",
    "una_vez": true,
    "texto": [
-    "marilla: Ana, lo que hiciste no se hace. Vas a ir a la casa de la Sra. Lynde a pedirle perdón.",
-    "ana: ¡Nunca! Puede encerrarme en un calabozo oscuro y húmedo, con sapos y culebras, y darme pan y agua. Pero no le voy a pedir perdón.",
-    "marilla: No tenemos calabozos en Tejas Verdes. Pero te vas a quedar en tu pieza hasta que estés dispuesta a pedirle perdón."
+    "ana: (Ana sigue boca abajo en la cama, con la cara hundida en la almohada. Ya no llora fuerte: solo hipa de vez en cuando.)",
+    "marilla: (Marilla entra con la vela, aunque todavía hay luz, y se queda de pie junto a la cama.) Ana. Siéntate y escúchame.",
+    "ana: (Ana se da vuelta, con la cara colorada e hinchada.) No quiero escuchar a nadie. Nunca más.",
+    "marilla: Lo que hiciste no se hace. Una niña no le grita así a una visita, y menos a una señora mayor. Vas a ir a la casa de la Sra. Lynde a pedirle perdón.",
+    "marilla: (Marilla sale y cierra la puerta despacio.)"
+   ]
+  },
+  {
+   "id": "lynde_matthew_sube",
+   "canal": "ana_sola",
+   "disparo": "",
+   "prioridad": 8,
+   "interrumpe": true,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "lynde_ana=ofendida, hecho:encerrada, !hecho:dispuesta_perdon, dias_desde:perdon_pedido:1, hora:17-21",
+   "en": "ana=ga",
+   "hablan": "matthew",
+   "lineas": 8,
+   "primera": "narra: Ana pasó el día en su pieza. Marilla le subió las comidas en silencio, y bajó los platos casi llenos. En la tarde, mientras Marilla sale a buscar las vacas, Matthew sube la escalera en puntillas, como un ladrón en su propia casa.",
+   "quienes": [],
+   "con": "",
+   "una_vez": true,
+   "texto": [
+    "narra: Ana pasó el día en su pieza. Marilla le subió las comidas en silencio, y bajó los platos casi llenos. En la tarde, mientras Marilla sale a buscar las vacas, Matthew sube la escalera en puntillas, como un ladrón en su propia casa.",
+    "matthew: (Matthew golpea la puerta muy despacio, y asoma la cabeza.) Ana… ¿Cómo te va, Ana?",
+    "ana: (Ana, sentada junto a la ventana, sonríe apenas.) Bastante bien, gracias. Imagino muchas cosas, y eso ayuda a pasar el tiempo. Es un poco solitario, claro.",
+    "matthew: (Matthew se rasca la barba, buscando las palabras.) Bueno, Ana, ¿no crees que sería mejor hacerlo de una vez y quedar en paz? Tarde o temprano vas a tener que hacerlo, ya sabes, porque Marilla es una mujer terriblemente decidida. Hazlo de una vez, digo yo, y quedas en paz.",
+    "matthew: (Matthew baja la escalera en puntillas, antes de que Marilla vuelva del potrero.)"
    ]
   },
   {
@@ -12918,8 +12972,7 @@
    ],
    "viaje=ninguno": [
     "escena llegada",
-    "escena inicio_llegada",
-    "escena ws_spencer"
+    "escena inicio_llegada"
    ],
    "carta_a_diana": [
     "escena carta_diana_1",
@@ -13060,15 +13113,20 @@
    "ws_perdon": [
     "escena ws_orilla (una opción)"
    ],
-   "ws_vuelven": [
-    "escena ws_spencer",
-    "código"
-   ],
    "ws_mira": [
     "escena ws_spencer (una opción)"
    ],
    "ws_ofrece": [
     "escena ws_spencer (una opción)"
+   ],
+   "viaje=vuelta_white_sands": [
+    "escena ws_spencer (una opción)"
+   ],
+   "ws_promete": [
+    "escena ws_vuelta (una opción)"
+   ],
+   "ws_calla_vuelta": [
+    "escena ws_vuelta (una opción)"
    ],
    "conoce_blewett": [
     "escena ws_noche",
@@ -13132,6 +13190,12 @@
    ],
    "perdon_pedido": [
     "escena lynde_perdon_marilla"
+   ],
+   "encerrada": [
+    "escena lynde_perdon_marilla (una opción)"
+   ],
+   "dispuesta_perdon": [
+    "escena lynde_matthew_sube"
    ],
    "disculpa_lynde": [
     "escena lynde_disculpa"
@@ -13294,6 +13358,9 @@
     "código"
    ],
    "regado": [
+    "código"
+   ],
+   "ws_vuelven": [
     "código"
    ],
    "nombro_": [
@@ -13753,7 +13820,13 @@
     "hito humillada"
    ],
    "perdon_pedido": [
-    "escena lynde_perdon_marilla"
+    "escena lynde_matthew_sube"
+   ],
+   "encerrada": [
+    "escena lynde_matthew_sube"
+   ],
+   "dispuesta_perdon": [
+    "escena lynde_matthew_sube"
    ],
    "nombro_geranio": [
     "escena geranio_1_2"
@@ -14121,6 +14194,7 @@
     "escena ws_pye",
     "escena ws_orilla",
     "escena ws_spencer",
+    "escena ws_vuelta",
     "escena ws_noche",
     "escena falta_viaje",
     "escena viaje_spencer_duda",
@@ -14151,6 +14225,7 @@
     "escena ws_pye",
     "escena ws_orilla",
     "escena ws_spencer",
+    "escena ws_vuelta",
     "escena ws_noche",
     "escena falta_viaje",
     "escena viaje_spencer_duda",
@@ -14186,6 +14261,7 @@
    "lynde_ana=ofendida": [
     "escena resp_spencer_ofendio_lynde",
     "escena lynde_perdon_marilla",
+    "escena lynde_matthew_sube",
     "escena lynde_disculpa",
     "una frase de lynde",
     "noticia ana_ofendio_lynde",
@@ -14259,6 +14335,9 @@
     "escena ws_pye",
     "escena ws_orilla",
     "escena ws_spencer"
+   ],
+   "viaje=vuelta_white_sands": [
+    "escena ws_vuelta"
    ],
    "lynde_ana=bien": [
     "escena conv_lynde_ventana",
@@ -14389,11 +14468,13 @@
    "ofendio_lynde",
    "queens_primera",
    "sin_terminar_",
+   "ws_calla_vuelta",
    "ws_callo",
    "ws_mira",
    "ws_ofrece",
    "ws_perdon",
-   "ws_pregunto"
+   "ws_pregunto",
+   "ws_promete"
   ],
   "malas": []
  },
