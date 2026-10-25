@@ -4,11 +4,11 @@
    along, Mrs. Pye on the road (not in the book): what she says sends Ana running to the shore, and Marilla follows her
    there. At the hotel, Mrs. Spencer and Mrs. Blewett; and back home, quiet, by the same road. ---------- */
 const wsE = () => game.wm || game;   // (kept with the game: a trip left halfway, when the game is opened again, ends at home)
-// (the scenes of the road are conditions on the state, as any other: the trip, «rumbo_spencer»; its stretch of the way,
-// «avance:ws:25-60» —how far along, in %; if the stretch goes by, that scene is lost—; and who is there. What the code
+// (the scenes of the road are conditions on the state, as any other: the trip, «viaje=white_sands»; where the cart goes,
+// «cerca:ana:aldea:700», or after the talk before it, «dicha:ws_t2»; and who is there. What the code
 // does is the world: the cart goes on (at a walk while they talk), Mrs. Pye waits on the road near the sea, Mrs. Spencer
 // and Mrs. Blewett come out at the hotel. It leaves no facts of its own)
-const WS_VEL = 60, WS_PASO = 25;
+const WS_VEL = 60, WS_PASO = 25, WS_PAUSA = 4;   // (the pace of the mare, and at a walk while they talk; the seconds of quiet between one talk and the next)
 AVANCES.ws = () => cart.on && cart.viaje === WS_VIAJE ? cart.s / cartLen() * 100 : null;
 const wsRuta = () => { const a = [GG.x + 20, GG.y + 80], b = door('Hotel White Sands'), r = netRoute(...a, ...b); return [a, ...(r ? r.pts : []), b]; };
 // the nearest point of the shore (on the sand, a little before the water), and how far
@@ -41,9 +41,9 @@ function wsTick(){
   if (!cart.on || cart.viaje !== WS_VIAJE) { if (!w.volviendo && !game.talk) { w.volviendo = true; wsVolverCasa(); } return; }   // (the game was closed halfway: they are back)
   if (w.fase === 'ida') {
     const habla = TALKS.some(t => t.ch === 'viaje'), fr = cart.s / cartLen();
-    cart.vel = habla ? WS_PASO : WS_VEL;
-    if (fr >= w.pye && !w.pyeAhi) {   // Mrs. Pye, where the road runs nearest the sea: the cart stops there (once the talk under way is over)
-      cart.parado = true; if (habla) return;
+    cart.vel = habla ? WS_PASO : WS_VEL; if (habla) w.hablaT = TT;
+    if (fr >= w.pye && !w.pyeAhi) {   // Mrs. Pye, where the road runs nearest the sea: the cart stops there (once the talk under way is over, and the next one, if it follows it, has begun)
+      cart.parado = true; if (habla || TT - (w.hablaT ?? -99) < WS_PAUSA) return;
       w.pyeAhi = true; const f = FOLKBY.srapye, [px, py] = cartAt(cart.s + 90); if (f) Object.assign(f, { where: 'out', x: px + 30, y: py + 12, route: [], moving: false, sit: false, dir: 3, talkT: TT + 240 });
     }
   }

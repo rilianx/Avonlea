@@ -24,6 +24,8 @@
 #   «ana:ropa_tirada»; y las cualidades de uno hacia otro: «paciencia:marilla:ana<=1» (src/datos/habilidades.txt).
 # «resumen: …»: qué pasa en la escena, en una línea (para el dibujo del grafo, trazas/grafo.html).
 # «avance:ws:25-60» (en «si:»): Ana va en un viaje (ws, White Sands) y llevan entre el 25 y el 60 % del camino.
+# «cerca:ana:aldea:700» (en «si:»): alguien, afuera, a menos de 700 de un lugar del mapa (los de src/js/36-cosas-y-lugares.js:
+# hondonada_lynde, escuela, aldea, playa, lago…); en un viaje, dónde va la calesa.
 # «! vestirse»; «! punto id | texto» (un punto para volver: la partida como está ahora; el campo «punto: [id |] texto»
 #   lo guarda justo antes de que empiece la escena, y al volver se juega de nuevo; toda escena «grande» lleva uno);
 #   «! final id | texto» (la
@@ -1334,8 +1336,11 @@ marilla: Ponte el sombrero, Ana. Nos vamos a White Sands.
 ana piensa: Puede que sea la última vez que veo esta cocina.
 ! viaje white_sands
 
-# el viaje a White Sands, en la calesa de Marilla (src/js/34-viaje-white-sands.js): lo que se dicen por el camino, cada
-# charla en su tramo («avance:ws:25-60», en % del camino; si el tramo pasa sin que se diga, se pierde) (capítulo 5 del libro), la Sra. Pye en el camino (no es del libro), y la casa de la Sra. Spencer (capítulo 6)
+# el viaje a White Sands, en la calesa de Marilla (src/js/34-viaje-white-sands.js): lo que se dicen por el camino
+# (capítulo 5 del libro), la Sra. Pye en el camino (no es del libro), y la casa de la Sra. Spencer (capítulo 6).
+# Cada charla va por lugares del mapa y en secuencia: sigue a la anterior («o: si=dicha:ws_t1»), o empieza al pasar por su
+# lugar («o: si=cerca:ana:hondonada_lynde:500») aunque la anterior no se haya dicho; y no después de la que sigue
+# («!dicha:ws_t3»), para que no se dé fuera de su sitio. Entre una y otra, la calesa sigue unos segundos en silencio.
 === ws_t1 ===
 a prueba
 resumen: En la calesa: Ana decide disfrutar el viaje; las rosas silvestres y su pelo.
@@ -1344,7 +1349,7 @@ prioridad: 6
 interrumpe
 en: ana=out, marilla=out
 calesa: avonlea
-si: viaje=white_sands, ana_en_tv<decidida, avance:ws:1-30
+si: viaje=white_sands, ana_en_tv<decidida, !dicha:ws_t2
 ---
 ana: ¿Sabe, Srta. Cuthbert? He decidido disfrutar de este viaje. Si uno se decide con firmeza, casi siempre puede disfrutar de las cosas.
 ana: No voy a pensar en el orfanato mientras vamos. Solo en el camino. ¡Mire, ya hay una rosa silvestre! ¿No le parece que el rosa es el color más encantador del mundo? Lástima que yo no lo pueda usar, con este pelo.
@@ -1363,7 +1368,9 @@ prioridad: 6
 interrumpe
 en: ana=out, marilla=out
 calesa: avonlea
-si: viaje=white_sands, ana_en_tv<decidida, avance:ws:25-60
+si: viaje=white_sands, ana_en_tv<decidida, !dicha:ws_t3
+o: si=dicha:ws_t1
+o: si=cerca:ana:hondonada_lynde:500
 ---
 marilla: (Marilla mira el camino, no a Ana.) Ya que tienes tantas ganas de hablar, cuéntame lo que sepas de ti.
 ana: Oh, lo que sé de mí no vale la pena contarlo, Srta. Cuthbert. Si me dejara contarle lo que imagino de mí, le parecería mucho más interesante.
@@ -1381,7 +1388,9 @@ prioridad: 6
 interrumpe
 en: ana=out, marilla=out
 calesa: avonlea
-si: viaje=white_sands, ana_en_tv<decidida, avance:ws:45-88
+si: viaje=white_sands, ana_en_tv<decidida, !dicha:ws_mar
+o: si=dicha:ws_t2
+o: si=cerca:ana:escuela:700
 ---
 ana: Mi madre también era maestra, pero cuando se casó con mi padre dejó de enseñar. Eran pobres como ratones de iglesia. Vivían en una casita amarilla, con madreselvas en la ventana. Yo nunca la vi, pero la he imaginado miles de veces.
 ana: Mi madre se murió de fiebre cuando yo tenía tres meses. Ojalá hubiera vivido lo bastante para que yo me acordara de haberla llamado mamá. Mi padre se murió cuatro días después, de la misma fiebre.
@@ -1394,6 +1403,25 @@ marilla: ¿Y esas mujeres, la Sra. Thomas y la Sra. Hammond, te trataban bien?
 ana: (Ana se pone colorada hasta la frente.) Q-querían tratarme bien. Sé que querían ser tan buenas y amables como pudieran. Y cuando alguien quiere ser bueno con uno, no importa tanto si no lo consigue del todo, ¿no? Tenían muchas preocupaciones.
 marilla piensa: Qué vida, la de esta criatura. Hambre de cariño, trabajo, pobreza y abandono. Y está tan contenta de haber llegado a un hogar de verdad. ¿Y si se la quedaran? Matthew quiere. Y parece buena, y enseñable.
 
+=== ws_mar ===
+a prueba
+resumen: Frente al mar: Ana quisiera ser gaviota; el hotel White Sands, y el miedo a llegar.
+canal: viaje
+prioridad: 6
+interrumpe
+en: ana=out, marilla=out
+calesa: avonlea
+si: viaje=white_sands, ana_en_tv<decidida, !dicha:ws_pye
+o: si=dicha:ws_t3
+o: si=cerca:ana:playa:850
+---
+ana: (Ana despierta de un largo silencio, con los ojos muy abiertos. Allá adelante brilla el mar.) ¿No es maravilloso el mar?
+ana: Una vez, cuando vivía en Marysville, el Sr. Thomas alquiló un carro y nos llevó a todos a pasar el día en la playa, a diez millas. Disfruté cada minuto, aunque tuve que cuidar a los niños todo el tiempo. Lo volví a vivir en sueños felices durante años.
+ana: Pero esta costa es más bonita que la de Marysville. ¿No son espléndidas esas gaviotas? ¿A usted le gustaría ser gaviota? A mí sí, si no pudiera ser una niña. Despertar al amanecer, bajar en picada sobre el agua y salir volando por todo ese azul el día entero; y en la noche, volver al nido.
+ana: ¿Qué es esa casa grande, ahí adelante?
+marilla: El hotel White Sands. Lo tiene el Sr. Kirke, pero la temporada todavía no empieza. En verano viene un montón de americanos. Ahí nos espera la Sra. Spencer.
+ana: (Ana se hunde en el asiento.) Tenía miedo de que fuera ahí. No quiero llegar. De algún modo, va a ser como el fin de todo.
+
 # (no es del libro: en la serie, una señora del camino habla mal de Ana, y Ana corre al mar)
 === ws_pye ===
 a prueba
@@ -1404,7 +1432,7 @@ interrumpe
 en: ana=out, marilla=out, srapye=out
 sujeta: srapye
 calesa: avonlea
-si: viaje=white_sands, ana_en_tv<decidida, avance:ws:80-100, ve:srapye
+si: viaje=white_sands, ana_en_tv<decidida, cerca:ana:playa:900, ve:srapye
 ---
 srapye: ¡Marilla Cuthbert! (La Sra. Pye se acerca a la calesa, con su canasto, y mira a Ana de arriba abajo.) ¿Así que esta es la huérfana que les mandaron por equivocación?
 marilla: Buenas tardes, Sra. Pye.
@@ -1466,7 +1494,7 @@ prioridad: 8
 interrumpe
 en: ana=out, marilla=out, spencer=out, blewett=out
 sujeta: spencer, blewett
-si: viaje=white_sands, ana_en_tv<decidida, avance:ws:100-100, ve:spencer
+si: viaje=white_sands, ana_en_tv<decidida, cerca:ana:playa:400, ve:spencer
 al_terminar: hecho ws_vuelven
 al_terminar: estado viaje ninguno
 ---

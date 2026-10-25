@@ -65,7 +65,13 @@ const LLEG = {}; { let q = null;
 // the state of the story (src/datos/estado.txt): read as the game reads it (estadoLeer, in src/js/20-estado.js)
 const estadoLeer = new Function(fs.readFileSync(path.join(root, 'src/js/20-estado.js'), 'utf8').match(/^function estadoLeer[\s\S]*?^}$/m)[0] + '\nreturn estadoLeer;')();
 const ESTADO = estadoLeer(leer('src/datos/estado.txt'));
-const datos = { escenas: E, habilidades: HAB, metas: METAS, llegadas: LLEG, estado: ESTADO };
+// the things and places with a line of scenes: their names (the header of each line, in the script) and where they are
+// (the coarse places of the page: her room, the kitchen, the yard, outside…)
+const COSAS = Object.fromEntries([...leer('src/datos/guion.txt').matchAll(/^# ----- (.+?)(?: \(también [^)]*\))? \((\w+)\)$/gm)].map(m => [m[2], m[1]]));
+const DONDE_COSA = { gwin: 'ga', mirror: 'ga', armario: 'ga', bed: 'ga', stairs: 'gg', geranio: 'gg', fire: 'gg', toby: 'gg', pizarra: 'es', pupitre: 'es', rio: 'es', escuela: 'es',
+  banco: 'ig', iglesia: 'ig', libros: 'parroquial', huerta: 'patio', granero: 'patio', corral: 'patio', cuesta_del_huerto: 'os', escenario: 'aldea', frascos: 'aldea', aldea: 'aldea',
+  cage: 'harrison', faro: 'costa', playa: 'costa', bench: 'out', lago: 'out', puente: 'out', camino_blanco: 'out', bosque_encantado: 'out', campo_rosado: 'out' };
+const datos = { escenas: E, habilidades: HAB, metas: METAS, llegadas: LLEG, estado: ESTADO, cosas: COSAS, dondeCosa: DONDE_COSA };
 const pag = fs.readFileSync(path.join(__dirname, 'historia', 'pagina.html'), 'utf8');
 fs.writeFileSync(path.join(root, 'trazas/historia.html'), pag.replace('/*@DATOS*/null', () => JSON.stringify(datos).replace(/</g, '\\u003c')));
 console.log(`→ trazas/historia.html · ${E.length} escenas · ${HAB.length} contadores · ${Object.keys(ESTADO).length} estados · ${METAS.length} metas`);

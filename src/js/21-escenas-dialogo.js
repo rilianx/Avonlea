@@ -17,6 +17,10 @@
      al_empezar / al_terminar: [{hecho}, {marca, nota}, {log}, {saber: [who, what]}, {meta: {quien, tipo, args,
           texto, etiqueta, prioridad}}, {soltar: who}, {ana: {props}}, {fin_capitulo: true}] ---------- */
 const DLG_LUGARES = { lago: () => [LAKE.x, LAKE.y], tejas_verdes: () => [GG.x, GG.y], casa_bell: () => WP.casa_bell, letrero_br: () => DOOR.br, hondonada: () => [LY.x, LY.y + 60] };
+// a place of the map, by name: those above, or any of the places one can walk to (PLACES: hondonada_lynde, aldea, playa…)
+const dlgLugar = l => DLG_LUGARES[l]?.() || (PLACES[l] ? [PLACES[l][1], PLACES[l][2]] : null);
+// someone outside, within r of a place: «cerca:ana:playa:800» (on a trip, where the cart is: each talk at its stretch of the road)
+function dlgCerca(k, l, r){ const b = k === 'ana' ? ana : wmBody(k), p = dlgLugar(l); return !!b && !!p && dlgEscena(k) === 'out' && dist(b.x, b.y, p[0], p[1]) <= +r; }
 // what has happened (kept with the game: the chains of the book go on from one day to another); each with the day it
 // happened (from 1), so that a scene can wait a day or two after another (dias_desde)
 const AVANCES = {};   // (how far along each trip goes, 0 to 100: who drives it registers it)
@@ -44,6 +48,7 @@ function dlgCond(s, c){   // one condition of state, written as text
     case 'afecto': { const [x, y, n] = rest.split(':'); return relGetW(x, y) >= +n; }   // (x cares for y at least n, of 0..5; the same as «afecto:x:y>=n»)
     case 'dias_desde': { const d = dlgHechos()[a] ?? cuadernoHecho(a); return typeof d === 'number' && today() + 1 - d >= +b; }   // (at least b days since a happened: a fact, or a goal of the notebook done)
     case 'hora': { const [x, y] = a.split('-').map(Number), h = hourNow() % 24; return h >= x && h < y; }   // (the hour of the day: «hora:19-23»)
+    case 'cerca': { const [x, l, r] = rest.split(':'); return dlgCerca(x, l, r); }   // (someone near a place of the map: «cerca:ana:aldea:700»)
     case 'avance': { const [v, r = ''] = rest.split(':'), [x, y] = r.split('-').map(Number), n = AVANCES[v]?.(); return n != null && n >= x && n <= y; }   // (how far along a trip is, in %: «avance:ws:25-60», src/js/34-viaje-white-sands.js)
     case 'dia_juego': return today() + 1 >= +a;   // (the game has gone on at least so many days: 56, a year)
     case 'sentada': return !!wmBody(a)?.sit;   // (she has sat down: at the table, for the tea)
@@ -85,7 +90,7 @@ function dlgDonde(at, k){   // where a talk of pairs and trios may happen
 function dlgFalla(c, x){   // why the conditions of place and state of a configuration (or of one of its alternatives) are not met (null: they are)
   if (c.hablan) { const a = c.hablan().find(k => ausente(k)); if (a) return a + ' no está en Avonlea'; }   // (someone who speaks in it is away: src/datos/llegadas.txt)
   if (c.en) for (const [k, sc] of Object.entries(c.en)) if (dlgEscena(k) !== sc) return `${k} no está en ${sc}`;
-  if (c.cerca) { const [k, l, r] = c.cerca, b = k === 'ana' ? ana : wmBody(k), p = DLG_LUGARES[l]?.(); if (!b || !p || dlgEscena(k) !== 'out' || dist(b.x, b.y, p[0], p[1]) > r) return `${k} no está cerca de ${l}`; }
+  if (c.cerca) { const [k, l, r] = c.cerca; if (!dlgCerca(k, l, r)) return `${k} no está cerca de ${l}`; }
   if (c.calesa) { const ok = c.calesa === 'camino' ? x.road : c.calesa === 'avonlea' ? x.ride : x.road || x.ride; if (!ok) return c.calesa === 'avonlea' ? 'Ana no va en la calesa por Avonlea' : 'Ana no va en la calesa por el camino'; }
   if (c.camino) {
     const w = c.camino; if (!x.road || x.dir <= 0) return 'no van de vuelta por el camino';

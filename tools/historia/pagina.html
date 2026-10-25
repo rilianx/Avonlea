@@ -32,6 +32,8 @@ h3{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--sub)
 .ficha .q{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--sub)}
 .ficha.piensa{border-style:dashed}
 .ef{max-width:760px;font:12.5px ui-monospace,Menlo,monospace;color:var(--sub);margin:0 0 8px 6px}
+.esc-mini{cursor:pointer;text-decoration:underline dotted}
+.nota{max-width:760px;margin:8px 0 14px}.nota textarea{width:100%;min-height:64px;font:inherit;font-size:14px;padding:8px;border:1px solid var(--line);border-radius:7px;background:var(--panel);color:var(--ink);box-sizing:border-box}
 .ops{max-width:760px;display:flex;flex-direction:column;gap:6px;margin:6px 0 14px}
 .ops button{text-align:left;font-size:15px;padding:8px 12px}
 .ops button.propia::after{content:'  (lo que Ana haría sola)';color:var(--sub);font-size:12px}
@@ -65,7 +67,7 @@ dialog::backdrop{background:rgba(0,0,0,.35)}dialog ul{margin:4px 0 8px;padding-l
   <button id="atras" title="Deshacer el último paso">← Atrás</button>
   <button id="reiniciar" title="Volver al comienzo">Desde el comienzo</button>
 </header>
-<nav class="tabs"><button data-tab="sigue">Qué sigue</button><button data-tab="escena">Escena</button><button data-tab="estado">Estado</button><button data-tab="jugadora">La jugadora</button><button data-tab="hist">Pasos</button></nav>
+<nav class="tabs"><button data-tab="sigue">Qué sigue</button><button data-tab="escena">Escena</button><button data-tab="estado">Estado</button><button data-tab="jugadora">La jugadora</button><button data-tab="hist">Pasos</button><button data-tab="notas">Notas</button></nav>
 <main><section id="centro"></section><section id="lado" hidden></section></main>
 <dialog id="dlg"></dialog>
 <script>
@@ -74,6 +76,7 @@ const $ = id => document.getElementById(id), esc = s => String(s ?? '').replace(
 const ESC = new Map(D.escenas.map(e => [e.id, e]));
 const NOMBRES = { ana: 'Ana', marilla: 'Marilla', matthew: 'Matthew', diana: 'Diana', lynde: 'Sra. Lynde', narra: '', carta: 'carta' };
 const nombre = q => q in NOMBRES ? NOMBRES[q] : q;
+for (const e of D.escenas) if (!e.resumen && !e.tema) { const l = e.L.find(b => b.t); if (l) e.resumen = (l.q && l.q !== 'ana' ? nombre(l.q) + ': ' : '') + (l.t.length > 110 ? l.t.slice(0, 110) + '…' : l.t); }   // (a scene without a summary: its first line)
 const ESTACIONES = ['primavera', 'verano', 'otoño', 'invierno'], DIAS = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
 const HKEY = h => h.id + ':' + (h.de || 'ana') + ':' + (h.hacia || '');
 // ---- the state: facts (with their day), counters, goals done, what was said, the day and the hour (6 to 30: a day
@@ -84,6 +87,19 @@ function estadoInicial(){
 }
 let st = estadoInicial(), pila = [], tab = 'sigue', filtro = { q: '', cartas: true, mis: true, solas: false };
 try { const g = JSON.parse(localStorage.getItem('avonlea-historia') || 'null'); if (g?.st) { st = g.st; pila = g.pila || []; st.donde ||= 'gg'; } } catch (e) {}
+// the notes on the scenes (for Claude: what to change, what is wrong), kept in this browser and downloaded as a file;
+// each with where the story was when it was written
+let notas = {}; try { notas = JSON.parse(localStorage.getItem('avonlea-historia-notas') || '{}'); } catch (e) {}
+const guardaNotas = () => { try { localStorage.setItem('avonlea-historia-notas', JSON.stringify(notas)); } catch (e) {} };
+function notaPoner(id, texto){
+  if (!texto.trim()) delete notas[id];
+  else notas[id] = { texto, cuando: new Date().toISOString().slice(0, 16), dia: st.dia, hora: fmtHora(st.hora), donde: st.donde, estado: Object.fromEntries(Object.keys(D.estado).map(k => [k, estadoValor(k)])), hechos: Object.keys(st.h), pasos: pila.map(p => p.que).slice(-12) };
+  guardaNotas(); const b = document.querySelector('[data-tab=notas]'); if (b) b.textContent = 'Notas' + (Object.keys(notas).length ? ` (${Object.keys(notas).length})` : '');
+}
+function notasBajar(){
+  const f = new Blob([JSON.stringify({ tipo: 'notas de la historia en fichas', generado: new Date().toISOString(), notas: Object.entries(notas).map(([id, n]) => ({ escena: id, resumen: ESC.get(id)?.resumen || ESC.get(id)?.tema || '', ...n })) }, null, 1)], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(f); a.download = 'avonlea-notas-historia-' + new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-') + '.json'; document.body.appendChild(a); a.click(); a.remove();
+}
 const guarda = () => { try { localStorage.setItem('avonlea-historia', JSON.stringify({ st, pila: pila.slice(-200) })); } catch (e) {} };
 const paso = que => { pila.push({ que, st: JSON.stringify(st) }); };   // (before each step: what is about to happen, and the state as it was)
 const estacion = () => ESTACIONES[Math.floor((st.dia - 1) / 14) % 4], hora24 = () => st.hora % 24;
@@ -162,19 +178,20 @@ function palabras(c){
   if ((m = s.match(/^donde:(\w+):(\w+)$/))) return `${nombre(m[1])} ${no}está en ${m[2]}`;
   if ((m = s.match(/^ve:(\w+)$/))) return `${nombre(m[1])} ${no}la ve`;
   if ((m = s.match(/^presente:(\w+)$/))) return `${nombre(m[1])} ${no}anda por Avonlea`;
+  if ((m = s.match(/^cerca:(\w+):(\w+):(\d+)$/))) return `${nombre(m[1]) || 'Ana'} ${no}pasa cerca de ${m[2].replace(/_/g, ' ')}`;
   if ((m = s.match(/^avance:(\w+):([\d.]+)-([\d.]+)$/))) return `en el viaje, entre el ${m[2]} y el ${m[3]} % del camino`;
   if ((m = s.match(/^hecho:(\w+)$/))) return (neg ? 'que no haya pasado ' : '') + m[1];
   if ((m = s.match(/^dias_desde:(\w+):(\d+)$/))) return `${m[2]} día(s) después de ${m[1]}`;
   if ((m = s.match(/^ana:(\w+)$/))) return `Ana ${no}${m[1].replace('_', ' ')}`;
   if ((m = s.match(/^sabe:(\w+):(\w+)/))) return `${nombre(m[1])} ${no}sabe «${m[2]}»`;
-  if ((m = s.match(/^carta:(\w+)$/))) return `la jugadora le escribe una carta a ${nombre(m[1])}`;
+  if ((m = s.match(/^carta:(\w+)$/))) return `escribirle una carta a ${nombre(m[1])}`;
   if ((m = s.match(/^respuesta:(\w+)$/))) return `llega la respuesta de ${nombre(m[1])}`;
-  if ((m = s.match(/^tomando_te:(\w+):(\w+)$/))) return `la jugadora invita a ${nombre(m[2])} a tomar el té`;
+  if ((m = s.match(/^tomando_te:(\w+):(\w+)$/))) return `invitar a ${nombre(m[2])} a tomar el té`;
   return c;
 }
 // where Ana is: part of the state (the player moves her, or a scene takes her); where the others are is not simulated:
 // they are taken to be where the scene needs them (their routines), and it is shown
-const LUGARES = { gg: 'la cocina de Tejas Verdes', ga: 'su pieza', patio: 'el patio de Tejas Verdes', out: 'afuera, lejos de casa', os: 'la casa de los Barry', es: 'la escuela', ig: 'la iglesia', rl: 'la casa de la Sra. Lynde', br: 'la estación de Bright River' };
+const LUGARES = { gg: 'la cocina de Tejas Verdes', ga: 'su pieza', patio: 'el patio de Tejas Verdes', out: 'afuera, lejos de casa', os: 'la casa de los Barry', es: 'la escuela', ig: 'la iglesia', rl: 'la casa de la Sra. Lynde', br: 'la estación de Bright River', aldea: 'la aldea (la tienda, el salón)', parroquial: 'la casa parroquial', harrison: 'la granja del Sr. Harrison', costa: 'la costa (la playa, el faro)' };
 const ZONA = { gg: ['gg'], ga: ['ga'], dentro: ['gg', 'ga', 'os', 'es', 'ig', 'rl'], tejas: ['gg', 'ga', 'patio'], casa: ['gg', 'patio'], arroyo: ['out'], out: ['patio', 'out'] };
 const zona = l => ZONA[l] || [l];
 // what a scene asks of the situation: Ana somewhere («ana»), something the player has to do («accion»), or the
@@ -189,9 +206,13 @@ function situacion(e, sitConds){
     else L.push({ tipo: 'accion', t: palabras(c) }); }
   if (e.cerca) L.push({ tipo: 'accion', t: 'cerca de ' + e.cerca.split(',')[1]?.trim() });
   if (e.calesa) L.push({ tipo: 'accion', t: 'va en la calesa' });
-  if (e.con) L.push({ tipo: 'accion', t: 'la jugadora habla con ' + nombre(e.con) });
-  const DISP = { lugar: x => 'pasa por ' + x, objeto: x => 'mira ' + x, primera: () => 've algo por primera vez', encuentro: () => 'se encuentra con alguien', menu: () => 'lo elige en el menú de alguien' };
-  if (e.disparo) L.push({ tipo: 'accion', t: (DISP[e.disparo] || (x => e.disparo + ' ' + x))(e.lugar || e.objeto || '') });
+  if (e.con) L.push({ tipo: 'accion', t: 'hablar con ' + nombre(e.con) });
+  // (a thing: Ana touches it, uses it, looks into it —the player clicks it—; a place: she passes by it)
+  const k = e.objeto || e.lugar, cosa = D.cosas[k] || (k || '').replace(/_/g, ' ');
+  const DISP = { lugar: () => 'pasar por ' + cosa, objeto: () => 'tocar ' + cosa, encuentro: () => 'encontrarse con alguien', menu: () => 'elegirlo en el menú de alguien' };
+  if (e.disparo) L.push({ tipo: 'accion', t: (DISP[e.disparo] || (() => e.disparo + ' ' + cosa))() });
+  if (k && D.dondeCosa[k] && !L.some(x => x.tipo === 'ana')) L.push({ tipo: 'ana', lugares: D.dondeCosa[k] === 'out' ? ['out'] : zona(D.dondeCosa[k]), t: 'Ana en ' + LUGARES[D.dondeCosa[k]] });   // (outside: by the lake, the woods… not the yard)
+  else if (e.disparo === 'lugar' && !L.some(x => x.tipo === 'ana')) L.push({ tipo: 'ana', lugares: ['out'], t: 'Ana afuera' });
   return L;
 }
 // can it happen now? (said already; its conditions on the state; then its situation: with Ana where she is, what is
@@ -202,6 +223,7 @@ function estado(e){
   if (rep === 'dia' && v === st.dia) return null;
   const ver = cs => cs.map(c => [c, cond(c)]);
   const r = ver(e.si); if (r.some(([, x]) => x === 'no')) return { no: r.filter(([, x]) => x === 'no').map(([c]) => c) };
+  if (e.calesa === 'camino' && estadoValor('viaje') !== 'primer_viaje') return { no: ['no van por el camino de Bright River'] };   // (the road to Bright River: only on that trip)
   const fuera = (e.en || '').split(/[,\s]+/).map(p => p.split('=')[0]).filter(k => k && k !== 'ana' && !presente(k)).concat(e.con && !presente(e.con) ? [e.con] : []);
   if (fuera.length) return { no: fuera.map(k => nombre(k) + ' no está en Avonlea') };
   const alts = e.o.map(a => ({ a, r: ver(a.si) })).filter(x => !x.r.some(([, y]) => y === 'no'));
@@ -227,8 +249,8 @@ function cuando(e){
 // near: how long it takes to walk from one place to another (minutes), and what counts as near (a short walk); and the
 // next hours: what is shown first is what can happen around Ana, soon
 const TV = ['gg', 'ga', 'patio'];
-function minutos(a, b){ if (a === b) return 0; if (TV.includes(a) && TV.includes(b)) return 2; if (a === 'br' || b === 'br') return 120;
-  const desdeTV = { out: 10, os: 10, rl: 10, es: 20, ig: 25 }; if (TV.includes(a)) return desdeTV[b] ?? 30; if (TV.includes(b)) return desdeTV[a] ?? 30; return 20; }
+function minutos(a, b){ if (a === b) return 0; if (TV.includes(a) && TV.includes(b)) return 2; if (a === 'br' || b === 'br') return 120; if (a === 'costa' || b === 'costa') return 60;
+  const desdeTV = { out: 10, os: 10, rl: 10, harrison: 10, es: 20, ig: 25, aldea: 25, parroquial: 25, costa: 60 }; if (TV.includes(a)) return desdeTV[b] ?? 30; if (TV.includes(b)) return desdeTV[a] ?? 30; return 20; }
 const CERCA = 25, HORAS = 6;
 const viaje = c => c.r.anaNo.length ? Math.min(...c.r.anaNo.flatMap(x => x.lugares.map(l => minutos(st.donde, l)))) : 0;
 const enHoras = c => (c.dia - st.dia) * 24 + (c.hora - st.hora);
@@ -332,6 +354,7 @@ function pintaEscena(){
   const J = st.juego, e = ESC.get(J.id), r = estado({ ...e, repetir: 'siempre' }) || {};
   let h = `<h2>${esc(e.resumen || e.tema || e.id)} <span class="mut cod">${esc(e.id)}</span></h2>`;
   h += `<div class="req"><b>Pasa porque:</b> ${(r.ok || []).map(c => `<span class="ok">✓</span> ${condHtml(c)}`).join(' · ') || '<span class="mut">no pide nada del estado</span>'}${r.sit?.length ? '<br><b>Situación:</b> ' + r.sit.map(s => `<span class="sit">${esc(s)}</span>`).join(' · ') : ''}</div>`;
+  h += `<div class="nota"><textarea id="nota" data-nota="${esc(J.id)}" placeholder="📝 Una nota sobre esta escena, para Claude: qué cambiarías, qué no calza… (se guarda sola; se baja en la pestaña Notas)">${esc(notas[J.id]?.texto || '')}</textarea></div>`;
   h += J.salida.map(lineaHtml).join('');
   if (J.opciones) h += '<div class="ops">' + e.L[J.i].ops.map((o, k) => `<button data-op="${k}" class="${o.propia ? 'propia' : ''}">${esc(o.t)}</button>`).join('') + '</div>';
   if (J.fin) {
@@ -373,18 +396,23 @@ function pintaPosibles(){
     if (otras) h += `<p class="mut">(${otras} más esperan su turno: después de esta)</p>`;
     $('centro').innerHTML = h; return;
   }   // (a moment of a place or a thing: when she looks, or passes)
-  const pronto = T.filter(([, c]) => enHoras(c) <= HORAS && viaje(c) <= CERCA), cerca = pronto.filter(([e]) => !ambiente(e)), momentos = lineaSiguiente(pronto.filter(([e]) => ambiente(e))), lejos = T.filter(x => !pronto.includes(x) && !ambiente(x[0]));
-  const tarjeta = ([e, c]) => { const v = viaje(c), pide = [...(c.r.anaNo.length ? [c.r.anaNo.map(x => x.lejos ? x.t : 'Ana va a ' + x.lugares.map(l => LUGARES[l] || l).join(' o ')).join(' y ') + (v ? ` (${v} min a pie)` : '')] : []), ...c.r.acc.map(x => x.t)];
-    return `<div class="esc ${e.tipo}" data-esc="${esc(e.id)}"><div>${esc(e.resumen || e.tema || e.narra[0]?.slice(0, 120) || e.id)}${e.grande ? '<span class="badge">★ grande</span>' : ''}${e.interrumpe ? '<span class="badge">interrumpe</span>' : ''}${e.repetir && e.repetir !== 'una_vez' ? '<span class="badge">se repite</span>' : ''}</div>`
+  const pronto = T.filter(([, c]) => enHoras(c) <= HORAS && viaje(c) <= CERCA), cerca = [...pronto.filter(([e]) => !ambiente(e)), ...lineaSiguiente(pronto.filter(([e]) => ambiente(e)))], lejos = T.filter(x => !pronto.includes(x) && !ambiente(x[0]));
+  const tarjeta = ([e, c], conHora) => { const v = viaje(c), pide = [...(c.r.anaNo.length ? [c.r.anaNo.map(x => x.lejos ? x.t : 'Ana va a ' + x.lugares.map(l => LUGARES[l] || l).join(' o ')).join(' y ') + (v ? ` (${v} min a pie)` : '')] : []), ...c.r.acc.slice(conHora ? 1 : 0).map(x => x.t)];
+    return `<div class="esc ${e.tipo}" data-esc="${esc(e.id)}"><div>${esc(e.resumen || e.tema || e.narra[0]?.slice(0, 120) || e.id)}${e.grande ? '<span class="badge">★ grande</span>' : ''}${e.interrumpe ? '<span class="badge">interrumpe</span>' : ''}${e.repetir && e.repetir !== 'una_vez' ? '<span class="badge">se repite</span>' : ''}${notas[e.id] ? '<span class="badge">📝 nota</span>' : ''}</div>`
       + (pide.length ? `<div class="sit">pide: ${esc(pide.join(' · '))}</div>` : '')
-      + `<div class="id">${esc(e.id)} · prioridad ${esc(e.prioridad || 1)}${c.r.otros.length ? ' · <span class="mut">supone: ' + esc(c.r.otros.map(x => x.t).join(', ')) + '</span>' : ''}</div></div>`; };
+      + `<div class="id">${conHora ? esc(momento(c.dia, c.hora)) + ' · ' : ''}${esc(e.id)} · prioridad ${esc(e.prioridad || 1)}${c.r.otros.length ? ' · <span class="mut">supone: ' + esc(c.r.otros.map(x => x.t).join(', ')) + '</span>' : ''}</div></div>`; };
   const porMomento = L => { let h = '', g = null; for (const x of L) { const m = momento(x[1].dia, x[1].hora); if (m !== g) { g = m; h += `<h3>${esc(m)}</h3>`; } h += tarjeta(x); } return h; };
+  // near Ana, by what the player would do to bring it about (talk to someone, touch a thing, pass by a place, go
+  // somewhere, wait): the nearest first, then the most important
+  const accion = ([, c]) => { const t = c.r.acc[0]?.t || (c.r.anaNo.length ? 'ir a ' + c.r.anaNo[0].lugares.map(l => LUGARES[l] || l).join(' o ') : enHoras(c) > 0 ? 'esperar' : 'pasa sola, aquí'); return t[0].toUpperCase() + t.slice(1); };
+  const prio = ([e]) => (e.interrumpe ? 100 : 0) + (+e.prioridad || 1), orden = (a, b) => viaje(a[1]) - viaje(b[1]) || prio(b) - prio(a) || enHoras(a[1]) - enHoras(b[1]);
+  const G = new Map(); for (const x of cerca.sort(orden)) { const k = accion(x); if (!G.has(k)) G.set(k, []); G.get(k).push(x); }
+  const porAccion = [...G].sort((a, b) => orden(a[1][0], b[1][0])).map(([k, L]) => { const v = viaje(L[0][1]); return `<h3>${esc(k)} <span class="mut">${v ? `· ${v} min a pie` : '· aquí'} · ${L.length}</span></h3>` + L.map(x => tarjeta(x, true)).join(''); }).join('');
   let h = st.fin ? `<div class="fin">FIN<br>${esc(st.fin)}<br><button id="deshacerfin">← Atrás</button></div>` : '';
   if (st.ultimo) { h += `<div class="cambios">${esc(st.ultimo)}</div>`; st.ultimo = null; }
   h += `<div class="filtros"><input type="search" id="fq" placeholder="buscar…" value="${esc(filtro.q)}"> <label><input type="checkbox" data-f="solas" ${filtro.solas ? 'checked' : ''}> solo lo que no pide nada a la jugadora</label><label><input type="checkbox" data-f="cartas" ${filtro.cartas ? 'checked' : ''}> cartas</label><label><input type="checkbox" data-f="mis" ${filtro.mis ? 'checked' : ''}> misiones</label></div>`;
-  h += `<h2>Cerca de Ana, en las próximas ${HORAS} horas <span class="mut">(${cerca.length})</span></h2>`;
-  h += porMomento(cerca) || `<p class="mut">Nada cerca de ${esc(LUGARES[st.donde] || st.donde)} en las próximas ${HORAS} horas.</p>`;
-  if (momentos.length) h += `<details class="grupo"><summary><span class="sit">Momentos de lugares y cosas, por aquí</span> <span class="mut">(${momentos.length}: si Ana mira o pasa)</span></summary>${porMomento(momentos)}</details>`;
+  h += `<h2>Lo que puede hacer, cerca de Ana, en las próximas ${HORAS} horas <span class="mut">(${cerca.length})</span></h2>`;
+  h += porAccion || `<p class="mut">Nada cerca de ${esc(LUGARES[st.donde] || st.donde)} en las próximas ${HORAS} horas.</p>`;
   if (lejos.length) h += `<details class="grupo"${cerca.length ? '' : ' open'}><summary><span class="sit">Más adelante, o más lejos</span> <span class="mut">(${lejos.length}: elegir una salta hasta ahí)</span></summary>${porMomento(lejos.slice(0, 30))}</details>`;
   if (!T.length) h += `<p class="mut">Nada puede pasar en los próximos ${HORIZONTE} días con este estado.</p>`;
   $('centro').innerHTML = h;
@@ -400,8 +428,16 @@ function pintaLado(){
     h += '<div class="fila"><input type="text" id="nuevoh" placeholder="un hecho" style="flex:1"> <button id="addh">+ hecho</button></div>';
     const S = Object.keys(st.sabe); if (S.length) h += '<h3>Lo que se sabe</h3>' + S.map(k => `<div class="fila"><code>${esc(k)}</code></div>`).join('');
     if (st.diario.length) h += '<h3>Diario</h3>' + st.diario.map(([d, t]) => `<div class="fila"><span>${esc(t)}</span><span class="mut">día ${d}</span></div>`).join('');
+  } else if (tab === 'notas') {
+    const N = Object.entries(notas);
+    h += `<h3>Notas sobre las escenas (${N.length})</h3><p class="mut">Escríbelas al jugar una escena (arriba de sus fichas). Se guardan en este navegador; bájalas y súbelas al chat para que Claude las lea.</p><p><button class="prim" id="bajarnotas"${N.length ? '' : ' disabled'}>⬇ Bajar las notas (JSON)</button></p>`;
+    h += N.map(([id, n]) => `<div class="nota"><div><b>${esc(ESC.get(id)?.resumen || ESC.get(id)?.tema || id)}</b> <span class="mut cod">${esc(id)} · día ${n.dia}, ${esc(n.hora)}</span> <button data-delnota="${esc(id)}" title="borrar">✕</button></div><textarea data-nota="${esc(id)}">${esc(n.texto)}</textarea></div>`).join('');
   } else if (tab === 'jugadora') {
     h += '<h3>Hacer algo (+1 a lo que sube)</h3><div class="acc">' + ACCIONES.map(a => `<button data-hacer="${esc(a)}" title="${esc(D.habilidades.filter(h => h.suma.includes(a)).map(h => h.id + (h.de ? ' de ' + h.de : '')).join(', '))}">${esc(a.replace(/_/g, ' '))}</button>`).join('') + '</div>';
+    // (what each action leads to: the scenes not yet played that ask for what it raises, and how much)
+    h += '<h3>A qué escenas lleva cada acción</h3>' + ACCIONES.map(a => { const H = D.habilidades.filter(x => (!x.por || x.por === 'ana') && x.suma.includes(a)), L = [];
+      for (const e of D.escenas) { if (st.d[e.id] && (e.repetir || 'una_vez') === 'una_vez') continue; for (const c of e.si) { const q = c.match(QUAL); if (q && H.some(x => x.id === q[1] && (x.de || 'ana') === q[2] && (x.hacia || '') === (q[3] || ''))) { L.push(`<span class="esc-mini" data-esc="${esc(e.id)}" title="${esc(e.resumen || e.tema || '')}">${esc(e.id)} <span class="mut">(${esc(palabras(c))}, ahora ${contador(q[1] + ':' + q[2] + ':' + (q[3] || ''))})</span></span>`); break; } } }
+      return L.length ? `<div class="fila" style="display:block"><b>${esc(a.replace(/_/g, ' '))}</b> → ${L.slice(0, 8).join(' · ')}${L.length > 8 ? ` <span class="mut">y ${L.length - 8} más</span>` : ''}</div>` : ''; }).join('');
     h += '<h3>Metas del cuaderno que ya cumplió</h3>' + D.metas.map(m => `<div class="fila"><label><input type="checkbox" data-meta="${esc(m.id)}" ${st.m[m.id] != null ? 'checked' : ''}> ${esc(m.titulo)}</label><span class="mut cod">${esc(m.id)}</span></div>`).join('');
     h += '<p class="mut">Las conversaciones que Ana busca por su cuenta están en la lista del centro (en verde), con quién tendría que estar.</p>';
   } else {
@@ -416,6 +452,9 @@ $('centro').addEventListener('input', e => { if (e.target.id === 'fq') { filtro.
 $('centro').addEventListener('change', e => { const f = e.target.dataset.f; if (f) { filtro[f] = e.target.checked; pintaPosibles(); } });
 document.querySelector('.tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (b && !b.disabled) { tab = b.dataset.tab; pinta(); document.querySelector('main').scrollTop = 0; } });
 $('lado').addEventListener('click', e => { const a = e.target.closest('[data-hacer]'); if (a) return hacer(a.dataset.hacer);
+  if (e.target.id === 'bajarnotas') return notasBajar();
+  const em = e.target.closest('[data-esc]'); if (em) return empezar(em.dataset.esc);
+  const dn = e.target.closest('[data-delnota]'); if (dn && confirm('¿Borrar esta nota?')) { notaPoner(dn.dataset.delnota, ''); return pinta(); }
   const d = e.target.closest('[data-delh]'); if (d) { paso('quita el hecho ' + d.dataset.delh); delete st.h[d.dataset.delh]; guarda(); return pinta(); }
   const i = e.target.closest('[data-ir]'); if (i && confirm('¿Volver a antes de este paso?')) return irA(+i.dataset.ir);
   if (e.target.id === 'addh') { const v = $('nuevoh').value.trim(); if (v) { paso('pone el hecho ' + v); st.h[v] = st.dia; guarda(); pinta(); } }
@@ -423,8 +462,9 @@ $('lado').addEventListener('click', e => { const a = e.target.closest('[data-hac
 $('lado').addEventListener('change', e => { const x = e.target.dataset.est; if (x) { paso(`pone ${x} en ${e.target.value}`); estadoPoner(x, e.target.value); guarda(); return pinta(); }
   const c = e.target.dataset.c; if (c) { paso(`cambia ${c} a ${e.target.value}`); st.c[c] = +e.target.value; guarda(); return pinta(); }
   const m = e.target.dataset.meta; if (m) { paso((e.target.checked ? 'cumple' : 'deshace') + ' la meta ' + m); if (e.target.checked) st.m[m] = st.dia; else delete st.m[m]; guarda(); pinta(); } });
+document.addEventListener('input', e => { const n = e.target.dataset?.nota; if (n) notaPoner(n, e.target.value); });
 $('atras').onclick = atras;
 document.addEventListener('click', e => { const h = e.target.closest('[data-hecho]'); if (h) { e.stopPropagation(); return infoHecho(h.dataset.hecho); } if (e.target.id === 'cerrardlg' || e.target.id === 'dlg') $('dlg').close(); }, true);
 $('reiniciar').onclick = () => { if (!confirm('¿Empezar de nuevo, desde la llegada de Ana?')) return; st = estadoInicial(); pila = []; guarda(); pinta(); };
-pinta();
+notaPoner('', ''); pinta();
 </script></body></html>

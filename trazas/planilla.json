@@ -62,7 +62,7 @@
    "viven": []
   }
  ],
- "generado": "2026-10-25 15:53",
+ "generado": "2026-10-25 16:29",
  "momentos": [
   {
    "id": "dia2",
@@ -4155,7 +4155,7 @@
    "interrumpe": true,
    "grande": false,
    "repetir": "una_vez",
-   "si": "viaje=white_sands, ana_en_tv<decidida, avance:ws:1-30",
+   "si": "viaje=white_sands, ana_en_tv<decidida, !dicha:ws_t2",
    "en": "ana=out, marilla=out",
    "hablan": "marilla",
    "lineas": 8,
@@ -4182,7 +4182,7 @@
    "interrumpe": true,
    "grande": false,
    "repetir": "una_vez",
-   "si": "viaje=white_sands, ana_en_tv<decidida, avance:ws:25-60",
+   "si": "viaje=white_sands, ana_en_tv<decidida, !dicha:ws_t3",
    "en": "ana=out, marilla=out",
    "hablan": "marilla",
    "lineas": 7,
@@ -4208,7 +4208,7 @@
    "interrumpe": true,
    "grande": false,
    "repetir": "una_vez",
-   "si": "viaje=white_sands, ana_en_tv<decidida, avance:ws:45-88",
+   "si": "viaje=white_sands, ana_en_tv<decidida, !dicha:ws_mar",
    "en": "ana=out, marilla=out",
    "hablan": "marilla",
    "lineas": 10,
@@ -4230,6 +4230,31 @@
    ]
   },
   {
+   "id": "ws_mar",
+   "canal": "viaje",
+   "disparo": "",
+   "prioridad": 6,
+   "interrumpe": true,
+   "grande": false,
+   "repetir": "una_vez",
+   "si": "viaje=white_sands, ana_en_tv<decidida, !dicha:ws_pye",
+   "en": "ana=out, marilla=out",
+   "hablan": "marilla",
+   "lineas": 6,
+   "primera": "ana: (Ana despierta de un largo silencio, con los ojos muy abiertos. Allá adelante brilla el mar.) ¿No es maravilloso el mar?",
+   "quienes": [],
+   "con": "",
+   "una_vez": true,
+   "texto": [
+    "ana: (Ana despierta de un largo silencio, con los ojos muy abiertos. Allá adelante brilla el mar.) ¿No es maravilloso el mar?",
+    "ana: Una vez, cuando vivía en Marysville, el Sr. Thomas alquiló un carro y nos llevó a todos a pasar el día en la playa, a diez millas. Disfruté cada minuto, aunque tuve que cuidar a los niños todo el tiempo. Lo volví a vivir en sueños felices durante años.",
+    "ana: Pero esta costa es más bonita que la de Marysville. ¿No son espléndidas esas gaviotas? ¿A usted le gustaría ser gaviota? A mí sí, si no pudiera ser una niña. Despertar al amanecer, bajar en picada sobre el agua y salir volando por todo ese azul el día entero; y en la noche, volver al nido.",
+    "ana: ¿Qué es esa casa grande, ahí adelante?",
+    "marilla: El hotel White Sands. Lo tiene el Sr. Kirke, pero la temporada todavía no empieza. En verano viene un montón de americanos. Ahí nos espera la Sra. Spencer.",
+    "ana: (Ana se hunde en el asiento.) Tenía miedo de que fuera ahí. No quiero llegar. De algún modo, va a ser como el fin de todo."
+   ]
+  },
+  {
    "id": "ws_pye",
    "canal": "viaje",
    "disparo": "",
@@ -4237,7 +4262,7 @@
    "interrumpe": true,
    "grande": false,
    "repetir": "una_vez",
-   "si": "viaje=white_sands, ana_en_tv<decidida, avance:ws:80-100, ve:srapye",
+   "si": "viaje=white_sands, ana_en_tv<decidida, cerca:ana:playa:900, ve:srapye",
    "en": "ana=out, marilla=out, srapye=out",
    "hablan": "srapye, marilla",
    "lineas": 5,
@@ -4287,7 +4312,7 @@
    "interrumpe": true,
    "grande": false,
    "repetir": "una_vez",
-   "si": "viaje=white_sands, ana_en_tv<decidida, avance:ws:100-100, ve:spencer",
+   "si": "viaje=white_sands, ana_en_tv<decidida, cerca:ana:playa:400, ve:spencer",
    "en": "ana=out, marilla=out, spencer=out, blewett=out",
    "hablan": "spencer, marilla, blewett",
    "lineas": 16,
@@ -13631,6 +13656,18 @@
     "escena camison_lynde",
     "una frase de lynde"
    ],
+   "ws_t2": [
+    "escena ws_t1"
+   ],
+   "ws_t3": [
+    "escena ws_t2"
+   ],
+   "ws_mar": [
+    "escena ws_t3"
+   ],
+   "ws_pye": [
+    "escena ws_mar"
+   ],
    "ws_corrio": [
     "escena ws_orilla"
    ],
@@ -14080,6 +14117,7 @@
     "escena ws_t1",
     "escena ws_t2",
     "escena ws_t3",
+    "escena ws_mar",
     "escena ws_pye",
     "escena ws_orilla",
     "escena ws_spencer",
@@ -14109,6 +14147,7 @@
     "escena ws_t1",
     "escena ws_t2",
     "escena ws_t3",
+    "escena ws_mar",
     "escena ws_pye",
     "escena ws_orilla",
     "escena ws_spencer",
@@ -14216,6 +14255,7 @@
     "escena ws_t1",
     "escena ws_t2",
     "escena ws_t3",
+    "escena ws_mar",
     "escena ws_pye",
     "escena ws_orilla",
     "escena ws_spencer"
@@ -14268,6 +14308,7 @@
   ],
   "claves": [
    "avance",
+   "cerca",
    "hecho",
    "dicha",
    "ve",
@@ -14349,7 +14390,6 @@
    "queens_primera",
    "sin_terminar_",
    "ws_callo",
-   "ws_mar",
    "ws_mira",
    "ws_ofrece",
    "ws_perdon",

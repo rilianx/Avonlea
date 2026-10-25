@@ -240,6 +240,7 @@ function enPalabras(c){
   if ((m = c.match(/^(!?)presente:(\\w+)$/))) return \`\${m[2]} \${m[1] ? 'no ' : ''}anda por Avonlea\`;
   if ((m = c.match(/^(!?)ve:(\\w+)$/))) return \`\${m[1] ? 'sin que la vea' : 'la ve'} \${m[2]}\`;
   if ((m = c.match(/^estacion:(\\w+)$/))) return 'en ' + m[1];
+  if ((m = c.match(/^cerca:(\\w+):(\\w+):(\\d+)$/))) return \`\${m[1] === 'ana' ? 'Ana' : m[1]} cerca de \${m[2].replace(/_/g, ' ')}\`;
   if ((m = c.match(/^avance:(\\w+):([\\d.]+)-([\\d.]+)$/))) return \`en el viaje (\${m[1] === 'ws' ? 'a White Sands' : m[1]}), entre el \${m[2]} y el \${m[3]} % del camino\`;
   if ((m = c.match(/^(!?)(cuaderno):(\\w+)$/))) return \`\${m[1] ? 'sin' : 'con'} la meta «\${m[3]}» cumplida\`;
   if ((m = c.match(/^(!?)dicha:(\\w+)$/))) return \`\${m[1] ? 'antes de' : 'después de'} la escena \${m[2]}\`;
@@ -353,7 +354,7 @@ const TIPCOL = { escena: 'escenaB', conversacion: 'convB', mision: 'misionB', ca
 const necesitanCont = {}, cambianCont = {}; for (const n of D.nodos) { for (const c of partes(n).cont) (necesitanCont[c.k] ||= []).push(n.id); if (n.tipo !== 'meta') for (const c of cambiosDe(n)) if (c[2]) ((cambianCont[c[2]] ||= new Set())).add(n.id); }
 // who changes what a scene needs: every condition alike (a fact: the scenes that leave it; a counter: the scenes that
 // add to it, and the game; the situation: the clock, the cart, the player and the routines)
-const MUEVE = c => /^!?hora:/.test(c) ? 'el reloj' : /^avance:/.test(c) ? 'la calesa' : /^(!?)(estacion|dia_|domingo)/.test(c) ? 'el calendario' : 'la jugadora y las rutinas';
+const MUEVE = c => /^!?hora:/.test(c) ? 'el reloj' : /^(avance|cerca):/.test(c) ? 'la calesa o la jugadora' : /^(!?)(estacion|dia_|domingo)/.test(c) ? 'el calendario' : 'la jugadora y las rutinas';
 const juego = t => \`<span class="mut">⚙ \${esc(t)}</span>\`;
 const enlace = id => { const n = NOD.get(id); return n ? \`<a data-ir="\${esc(id)}" title="\${esc(n.desc || '')}">\${esc(nombre(n))}</a>\` : \`<span class="mut">\${esc(id === 'código' ? '⚙ el juego' : id)}</span>\`; };
 const hchip = (h, no) => \`<span class="h\${no ? ' no' : ''}" data-hf="\${esc(h)}" title="filtrar por este hecho">\${esc(h)}</span>\`;

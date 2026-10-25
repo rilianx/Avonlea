@@ -1,6 +1,6 @@
 # Cobertura de la historia: lo que falta
 
-Generado el 2026-10-25 15:53 por `node tools/planilla.js` (también en la hoja «Cobertura» de planilla/avonlea.xlsx).
+Generado el 2026-10-25 16:29 por `node tools/planilla.js` (también en la hoja «Cobertura» de planilla/avonlea.xlsx).
 
 No son errores: son situaciones que el juego deja que pasen y nadie considera, noticias o llegadas sin consecuencias, gente con poco que decir.
 
@@ -13,7 +13,7 @@ No son errores: son situaciones que el juego deja que pasen y nadie considera, n
 | Exploración | 0 | 0 | 12 |
 | Llegadas | 0 | 0 | 3 |
 | Personas | 0 | 0 | 36 |
-| Hechos | 0 | 0 | 19 |
+| Hechos | 0 | 0 | 18 |
 
 ## Situaciones
 
@@ -156,7 +156,6 @@ No son errores: son situaciones que el juego deja que pasen y nadie considera, n
 - [baja] **«queens_primera»**: se deja y nadie lo lee: algo pasó y no tiene consecuencias. _Idea: una escena, una frase o una noticia que lo recuerde._
 - [baja] **«sin_terminar_»**: se deja y nadie lo lee: algo pasó y no tiene consecuencias. _Idea: una escena, una frase o una noticia que lo recuerde._
 - [baja] **«ws_callo»**: se deja y nadie lo lee: algo pasó y no tiene consecuencias. _Idea: una escena, una frase o una noticia que lo recuerde._
-- [baja] **«ws_mar»**: se deja y nadie lo lee: algo pasó y no tiene consecuencias. _Idea: una escena, una frase o una noticia que lo recuerde._
 - [baja] **«ws_mira»**: se deja y nadie lo lee: algo pasó y no tiene consecuencias. _Idea: una escena, una frase o una noticia que lo recuerde._
 - [baja] **«ws_ofrece»**: se deja y nadie lo lee: algo pasó y no tiene consecuencias. _Idea: una escena, una frase o una noticia que lo recuerde._
 - [baja] **«ws_perdon»**: se deja y nadie lo lee: algo pasó y no tiene consecuencias. _Idea: una escena, una frase o una noticia que lo recuerde._
