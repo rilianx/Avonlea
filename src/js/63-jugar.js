@@ -196,6 +196,7 @@ function wmExec0(ag, a, st, dt){
       if (escena && game.cartaEscena?.lineas.length) st.txt = game.cartaEscena.lineas;
       for (const t of TALKS.filter(t => t.ch === 'carta')) talkEnd(t);   // (the letter is done: what she was saying over it, too)
       inv.carta = (inv.carta || 0) + 1; cartas().push({ id: cartas().length + 1, de: me, para: st.para, texto: st.txt, dia: today(), estado: 'escrita', escena: me === 'ana' ? game.cartaEscena?.id : undefined });
+      if (me === 'ana') dlgHecho('carta_a_' + st.para);   // (Ana wrote to her: an answer may come; the script asks it, src/datos/guion.txt)
       float('+1 carta para ' + CORREO[st.para].nombre, b.x, b.y - 50); logEv(`${wmName(me)} escribió una carta para ${CORREO[st.para].nombre}.`, []); return 'ok';
     }
     case 'enviar_carta': {   // (at the post office: who it is for, and off it goes with tomorrow's mail)

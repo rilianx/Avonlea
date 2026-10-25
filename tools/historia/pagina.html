@@ -53,6 +53,10 @@ select,input[type=text],input[type=search]{font:inherit;font-size:13.5px;padding
 .sit{color:var(--sit)}
 .filtros{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--sub);margin:0 0 10px;max-width:760px}
 @media (max-width:760px){.tabs button{flex:0 0 auto}}
+.hecho{font:12.5px ui-monospace,Menlo,monospace;padding:0 6px;border:1px solid var(--line);border-radius:5px;background:var(--bg);cursor:pointer;white-space:nowrap}
+.hecho:hover{border-color:var(--sub)}.hecho.no{text-decoration:line-through}.hecho.falta{opacity:.7}
+dialog{max-width:min(620px,92vw);border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink);padding:14px 20px}
+dialog::backdrop{background:rgba(0,0,0,.35)}dialog ul{margin:4px 0 8px;padding-left:20px;font-size:14px}
 </style></head><body>
 <header>
   <h1>La historia en fichas</h1>
@@ -63,6 +67,7 @@ select,input[type=text],input[type=search]{font:inherit;font-size:13.5px;padding
 </header>
 <nav class="tabs"><button data-tab="sigue">Qué sigue</button><button data-tab="escena">Escena</button><button data-tab="estado">Estado</button><button data-tab="jugadora">La jugadora</button><button data-tab="hist">Pasos</button></nav>
 <main><section id="centro"></section><section id="lado" hidden></section></main>
+<dialog id="dlg"></dialog>
 <script>
 const D = /*@DATOS*/null;
 const $ = id => document.getElementById(id), esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -206,6 +211,26 @@ const CERCA = 25, HORAS = 6;
 const viaje = c => c.r.anaNo.length ? Math.min(...c.r.anaNo.flatMap(x => x.lugares.map(l => minutos(st.donde, l)))) : 0;
 const enHoras = c => (c.dia - st.dia) * 24 + (c.hora - st.hora);
 const momento = (d, h) => d === st.dia && h === st.hora ? 'ahora' : d === st.dia ? 'hoy, a las ' + fmtHora(h) : d === st.dia + 1 ? 'mañana, a las ' + fmtHora(h) : `día ${d} (${DIAS[(d - 1) % 7]}), a las ${fmtHora(h)}`;
+// ---- a fact: a chip (struck through if it must not have happened); touched, what it is: the scenes that leave it
+// (and how: always, or if Ana chooses something), those that need it, those it closes
+const hchip = (h, no) => `<span class="hecho${no ? ' no' : ''}" data-hecho="${esc(h)}">${esc(h)}</span>`;
+function condHtml(c){ const m = c.match(/^(!?)(hecho|dias_desde|horas_desde):(\w+)(?::([\d.]+))?$/); if (!m) return esc(palabras(c)); return hchip(m[3], !!m[1]) + (m[2] === 'dias_desde' ? ` <span class="mut">+${m[4]} día${m[4] === '1' ? '' : 's'}</span>` : ''); }
+function infoHecho(h){
+  const deja = [], pide = [], cierra = [], titulo = e => esc(e.resumen || e.tema || e.id);
+  for (const e of D.escenas) {
+    for (const a of [...e.empieza, ...e.termina]) if (a === 'hecho ' + h) deja.push(`<li>${titulo(e)} <span class="mut cod">${esc(e.id)}</span></li>`);
+    for (const b of e.L) for (const o of b.ops || []) for (const x of o.L) if (x.ef === 'hecho ' + h) deja.push(`<li>${titulo(e)}, si Ana elige «${esc(o.t.replace(/^«|»$/g, ''))}» <span class="mut cod">${esc(e.id)}</span></li>`);
+    for (const b of e.L) if (b.ef === 'hecho ' + h) deja.push(`<li>${titulo(e)} <span class="mut cod">${esc(e.id)}</span></li>`);
+    for (const c of e.si) { const m = c.match(/^(!?)(?:hecho|dias_desde|horas_desde|no_hoy):(\w+)/); if (m && m[2] === h) (m[1] ? cierra : pide).push(`<li>${titulo(e)} <span class="mut cod">${esc(e.id)}</span></li>`); }
+  }
+  if (/^llego_|^se_fue_/.test(h)) deja.push(`<li>las llegadas: ${esc(h.startsWith('llego_') ? 'llega ' : 'se va ') + nombre(h.replace(/^(llego|se_fue)_/, ''))}</li>`);
+  const dia = st.h[h];
+  $('dlg').innerHTML = `<h2><span class="hecho${dia == null ? ' falta' : ''}">${esc(h)}</span> <span class="mut">${dia != null ? 'pasó el día ' + dia : 'no ha pasado'}</span></h2>`
+    + `<h3>Lo deja</h3>${deja.length ? '<ul>' + [...new Set(deja)].join('') + '</ul>' : '<p class="mut">el juego (código)</p>'}`
+    + (pide.length ? `<h3>Lo necesitan</h3><ul>${pide.join('')}</ul>` : '') + (cierra.length ? `<h3>Ya no pasan después de él</h3><ul>${cierra.join('')}</ul>` : '')
+    + '<p><button id="cerrardlg">Cerrar</button></p>';
+  $('dlg').showModal();
+}
 // ---- what a scene does to the state (the actions of the script); what is not state (moving someone) is only told
 function aplicar(s){
   const [w, ...r] = s.split(' '), rest = r.join(' '), part = rest.split('|').map(x => x.trim());
@@ -283,7 +308,7 @@ const lineaHtml = b => b.narra != null ? `<div class="ficha narra">${esc(b.narra
 function pintaEscena(){
   const J = st.juego, e = ESC.get(J.id), r = estado({ ...e, repetir: 'siempre' }) || {};
   let h = `<h2>${esc(e.resumen || e.tema || e.id)} <span class="mut cod">${esc(e.id)}</span></h2>`;
-  h += `<div class="req"><b>Pasa porque:</b> ${(r.ok || []).map(c => `<span class="ok">✓ ${esc(palabras(c))}</span>`).join(' · ') || '<span class="mut">no pide nada del estado</span>'}${r.sit?.length ? '<br><b>Situación:</b> ' + r.sit.map(s => `<span class="sit">${esc(s)}</span>`).join(' · ') : ''}</div>`;
+  h += `<div class="req"><b>Pasa porque:</b> ${(r.ok || []).map(c => `<span class="ok">✓</span> ${condHtml(c)}`).join(' · ') || '<span class="mut">no pide nada del estado</span>'}${r.sit?.length ? '<br><b>Situación:</b> ' + r.sit.map(s => `<span class="sit">${esc(s)}</span>`).join(' · ') : ''}</div>`;
   h += J.salida.map(lineaHtml).join('');
   if (J.opciones) h += '<div class="ops">' + e.L[J.i].ops.map((o, k) => `<button data-op="${k}" class="${o.propia ? 'propia' : ''}">${esc(o.t)}</button>`).join('') + '</div>';
   if (J.fin) {
@@ -326,7 +351,7 @@ function pintaLado(){
     h += '<h3>Contadores</h3>' + Object.entries(st.c).sort().map(([k, v]) => { const [q, a, b] = k.split(':'); return `<div class="fila"><span>${esc(q)} <span class="mut">de ${esc(a)}${b ? ' hacia ' + esc(b) : ''}</span></span><input type="number" data-c="${esc(k)}" value="${v}"></div>`; }).join('');
     h += '<div class="fila"><input type="text" id="nuevoc" placeholder="afecto:diana:ana" style="flex:1"> <button id="addc">+ contador</button></div>';
     const H = Object.entries(st.h).sort((a, b) => a[1] - b[1]);
-    h += `<h3>Hechos (${H.length})</h3>` + H.map(([k, v]) => `<div class="fila"><code>${esc(k)}</code><span class="mut">día ${v} <button data-delh="${esc(k)}" title="quitar">✕</button></span></div>`).join('');
+    h += `<h3>Hechos (${H.length})</h3>` + H.map(([k, v]) => `<div class="fila">${hchip(k)}<span class="mut">día ${v} <button data-delh="${esc(k)}" title="quitar">✕</button></span></div>`).join('');
     h += '<div class="fila"><input type="text" id="nuevoh" placeholder="un hecho" style="flex:1"> <button id="addh">+ hecho</button></div>';
     const S = Object.keys(st.sabe); if (S.length) h += '<h3>Lo que se sabe</h3>' + S.map(k => `<div class="fila"><code>${esc(k)}</code></div>`).join('');
     if (st.diario.length) h += '<h3>Diario</h3>' + st.diario.map(([d, t]) => `<div class="fila"><span>${esc(t)}</span><span class="mut">día ${d}</span></div>`).join('');
@@ -353,6 +378,7 @@ $('lado').addEventListener('click', e => { const a = e.target.closest('[data-hac
 $('lado').addEventListener('change', e => { const c = e.target.dataset.c; if (c) { paso(`cambia ${c} a ${e.target.value}`); st.c[c] = +e.target.value; guarda(); return pinta(); }
   const m = e.target.dataset.meta; if (m) { paso((e.target.checked ? 'cumple' : 'deshace') + ' la meta ' + m); if (e.target.checked) st.m[m] = st.dia; else delete st.m[m]; guarda(); pinta(); } });
 $('atras').onclick = atras;
+document.addEventListener('click', e => { const h = e.target.closest('[data-hecho]'); if (h) { e.stopPropagation(); return infoHecho(h.dataset.hecho); } if (e.target.id === 'cerrardlg' || e.target.id === 'dlg') $('dlg').close(); }, true);
 $('reiniciar').onclick = () => { if (!confirm('¿Empezar de nuevo, desde la llegada de Ana?')) return; st = estadoInicial(); pila = []; guarda(); pinta(); };
 pinta();
 </script></body></html>

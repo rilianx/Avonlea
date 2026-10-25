@@ -291,7 +291,7 @@ function elegir(id, sinCentrar){
   h += '<h3>Requiere (el estado antes)</h3>';
   if (!nec.length && !no.length && !cont.length && !resto.length) h += '<p class="mut">Nada: puede pasar desde el comienzo.</p>';
   for (const [x, q] of nec) h += fila('hecho', q === 'meta' ? \`\${chipN(x)} <span class="mut">(meta cumplida)</span>\` : \`\${chipH(x)}\${q ? ' <span class="mut">' + esc(q) + '</span>' : ''} <span class="mut">← lo deja</span> \${quien(x)}\`);
-  if (no.length) h += fila('no ha pasado', no.map(([x]) => chipH(x, true)).join(''));
+  if (no.length) h += fila('hecho', no.map(([x]) => chipH(x, true)).join(''));
   if (cont.length) h += fila('contador', cont.map(c => esc(c.t)).join(' · '));
   if (resto.length) h += fila('situación', resto.map(esc).join(' · '));
   const cambios = cambiosDe(n);
@@ -364,7 +364,7 @@ function tarjeta(n){
   const { crudo } = partes(n), quienes = L => { if (!L.length) return ''; const v = L.length > 3 ? L.slice(0, 2).join(' ') + \` <span class="resto" hidden>\${L.slice(2).join(' ')}</span> <span class="vermas">+\${L.length - 2}</span>\` : L.join(' '); return ' <span class="fuente">← ' + v + '</span>'; };
   const desde = x => de(x).map(w => w === 'código' ? juego('el juego') : enlace(w));
   const req = [...nec.map(([x, q]) => q === 'meta' ? enlace(x) + ' <span class="mut">(meta cumplida)</span>' : hchip(x) + (q ? ' <span class="mut">' + esc(q) + '</span>' : '') + quienes(desde(x))),
-    ...no.map(([x]) => '<span class="mut">que no haya pasado</span> ' + hchip(x, true) + quienes(desde(x))),
+    ...no.map(([x]) => hchip(x, true) + quienes(desde(x))),
     ...cont.map(c => '<span class="cv">' + esc(c.t) + '</span>' + quienes([...[...(cambianCont[c.k] || [])].filter(w => w !== n.id).map(enlace), juego('el juego')])),
     ...resto.map((t, j) => '<span class="cv">' + esc(t) + '</span>' + quienes([juego(MUEVE(crudo[j] || ''))]))];
   const act = [...deja.map(([x, q]) => { const L = (D.hechos[x]?.pide || []).filter(w => w !== n.id); return hchip(x) + (q ? ' <span class="mut">' + esc(q) + '</span>' : '') + ' <span class="fuente">→ ' + (L.length ? (L.length > 3 ? L.slice(0, 2).map(enlace).join(' ') + \` <span class="resto" hidden>\${L.slice(2).map(enlace).join(' ')}</span> <span class="vermas">+\${L.length - 2}</span>\` : L.map(enlace).join(' ')) : 'nadie') + '</span>'; }),

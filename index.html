@@ -527,6 +527,7 @@ calesa: camino
 camino: no_callado
 lineas: relleno:1
 # --- las cartas: Ana escribe en su escritorio, y mientras escribe (unos 25 minutos) se le va la cabeza a otras cosas.
+# Cada carta deja «carta_a_<quien>» (Ana le escribió); cada respuesta la pide (o «dicha:» de la carta que responde).
 # «carta:» es lo que escribe (lo lee en voz alta; es la carta que llega); «ana:» lo que piensa en voz alta; entre
 # paréntesis, lo que hace. {estacion} y {noticia} se llenan con la estación y con algo que de verdad le pasó hoy.
 # La segunda carta de cada una se repite desde entonces (si: dicha de la primera).
@@ -534,8 +535,9 @@ lineas: relleno:1
 === carta_diana_1 ===
 canal: carta
 prioridad: 5
-si: hecho:se_queda, carta:diana
+si: hecho:se_queda, carta:diana, hecho:conocidas_diana
 entre: 5
+al_terminar: hecho carta_a_diana
 ---
 ana: (Ana moja la pluma en el tintero y se queda mirando el papel en blanco.)
 carta: Mi queridísima Diana, amiga del alma:
@@ -556,8 +558,9 @@ ana: Listo. ¡La doblo como un abanico, para que se vea elegante!
 canal: carta
 prioridad: 5
 repetir: siempre
-si: hecho:se_queda, carta:diana, dicha:carta_diana_1
+si: hecho:se_queda, carta:diana, dicha:carta_diana_1, hecho:conocidas_diana
 entre: 5
+al_terminar: hecho carta_a_diana
 ---
 ana: (Ana estira el papel con la palma de la mano, muy seria.)
 carta: Mi queridísima Diana:
@@ -575,8 +578,9 @@ carta: Tuya siempre, Ana (con una sola n).
 === carta_stacy_1 ===
 canal: carta
 prioridad: 5
-si: hecho:se_queda, carta:stacy
+si: hecho:se_queda, carta:stacy, conoce:stacy, hecho:llego_stacy
 entre: 5
+al_terminar: hecho carta_a_stacy
 ---
 ana: (Ana se sienta derechita, como en la escuela, y moja la pluma.)
 carta: Querida Srta. Stacy:
@@ -595,8 +599,9 @@ carta: Su alumna que la quiere, Ana Shirley.
 canal: carta
 prioridad: 5
 repetir: siempre
-si: hecho:se_queda, carta:stacy, dicha:carta_stacy_1
+si: hecho:se_queda, carta:stacy, dicha:carta_stacy_1, conoce:stacy, hecho:llego_stacy
 entre: 5
+al_terminar: hecho carta_a_stacy
 ---
 ana: (Ana mira el techo, buscando las palabras entre las vigas.)
 carta: Querida Srta. Stacy:
@@ -612,8 +617,9 @@ carta: Su alumna que la quiere, Ana Shirley.
 === carta_sraallan_1 ===
 canal: carta
 prioridad: 5
-si: hecho:se_queda, carta:sraallan
+si: hecho:se_queda, carta:sraallan, conoce:sraallan
 entre: 5
+al_terminar: hecho carta_a_sraallan
 ---
 ana: (Ana busca su mejor papel, el que tiene un borde de florcitas.)
 carta: Querida Sra. Allan:
@@ -630,8 +636,9 @@ carta: Con todo cariño, Ana Shirley.
 canal: carta
 prioridad: 5
 repetir: siempre
-si: hecho:se_queda, carta:sraallan, dicha:carta_sraallan_1
+si: hecho:se_queda, carta:sraallan, dicha:carta_sraallan_1, conoce:sraallan
 entre: 5
+al_terminar: hecho carta_a_sraallan
 ---
 ana: (Ana escribe despacio, con su mejor letra.)
 carta: Querida Sra. Allan:
@@ -645,8 +652,9 @@ carta: Con todo cariño, Ana Shirley.
 === carta_josephine_1 ===
 canal: carta
 prioridad: 5
-si: hecho:se_queda, carta:josephine
+si: hecho:se_queda, carta:josephine, conoce:josephine
 entre: 5
+al_terminar: hecho carta_a_josephine
 ---
 ana: (Ana sopla la pluma antes de empezar, como si fuera a tocar una flauta.)
 carta: Querida tía Josephine (porque usted me dejó llamarla así):
@@ -662,8 +670,9 @@ carta: Su amiga que la recuerda siempre, Ana Shirley.
 canal: carta
 prioridad: 5
 repetir: siempre
-si: hecho:se_queda, carta:josephine, dicha:carta_josephine_1
+si: hecho:se_queda, carta:josephine, dicha:carta_josephine_1, conoce:josephine
 entre: 5
+al_terminar: hecho carta_a_josephine
 ---
 ana: (Ana se arregla el pelo antes de escribir, como si la tía Josephine pudiera verla.)
 carta: Querida tía Josephine:
@@ -681,8 +690,9 @@ carta: Su amiga que la recuerda siempre, Ana Shirley.
 a prueba
 canal: carta
 prioridad: 5
-si: carta:spencer, !hecho:se_queda
+si: carta:spencer, !hecho:se_queda, hecho:desayuno_prueba
 entre: 5
+al_terminar: hecho carta_a_spencer
 ---
 ana: (Ana moja la pluma y se queda quieta un rato largo. Le tiembla un poco la mano.)
 carta: Querida Sra. Spencer:
@@ -701,6 +711,7 @@ prioridad: 5
 repetir: siempre
 si: carta:spencer, hecho:se_queda
 entre: 5
+al_terminar: hecho carta_a_spencer
 ---
 ana: (Ana escribe con su mejor letra, como si la Sra. Spencer fuera a corregirla.)
 carta: Querida Sra. Spencer:
@@ -719,7 +730,7 @@ carta: Su agradecida, Ana Shirley (de Tejas Verdes)
 === resp_diana_1 ===
 canal: respuesta
 de: diana
-si: hecho:se_queda, respuesta:diana
+si: hecho:se_queda, respuesta:diana, hecho:carta_a_diana
 ---
 carta: Querida Ana:
 carta: ¡Qué carta tan bonita! La leí tres veces y la guardé en mi caja de cartas, con la cinta azul.
@@ -729,7 +740,7 @@ carta: Tu amiga del alma, Diana
 === resp_diana_2 ===
 canal: respuesta
 de: diana
-si: hecho:se_queda, respuesta:diana
+si: hecho:se_queda, respuesta:diana, hecho:carta_a_diana
 ---
 carta: Queridísima Ana:
 carta: Tu carta me hizo reír tanto que Minnie May me preguntó qué pasaba. No le dije: es un secreto de amigas del alma.
@@ -739,7 +750,7 @@ carta: Siempre tuya, Diana
 === resp_stacy_1 ===
 canal: respuesta
 de: stacy
-si: hecho:se_queda, respuesta:stacy
+si: hecho:se_queda, respuesta:stacy, hecho:carta_a_stacy
 ---
 carta: Querida Ana:
 carta: Me alegró mucho recibir tu carta. Escribes con el corazón, y eso no se enseña.
@@ -749,7 +760,7 @@ carta: Con cariño, Muriel Stacy
 === resp_stacy_2 ===
 canal: respuesta
 de: stacy
-si: hecho:se_queda, respuesta:stacy
+si: hecho:se_queda, respuesta:stacy, hecho:carta_a_stacy
 ---
 carta: Querida Ana:
 carta: Claro que podrías escribir un libro. Empieza por una página, y después otra. Así se hacen todos.
@@ -759,7 +770,7 @@ carta: Tu maestra, M. Stacy
 === resp_sraallan_1 ===
 canal: respuesta
 de: sraallan
-si: hecho:se_queda, respuesta:sraallan
+si: hecho:se_queda, respuesta:sraallan, hecho:carta_a_sraallan
 ---
 carta: Querida Ana:
 carta: Qué alegría me dio tu carta. A mí también me gustó mucho la tarde del té.
@@ -769,7 +780,7 @@ carta: Te quiere, la Sra. Allan
 === resp_josephine_1 ===
 canal: respuesta
 de: josephine
-si: hecho:se_queda, respuesta:josephine
+si: hecho:se_queda, respuesta:josephine, hecho:carta_a_josephine
 ---
 carta: Querida Ana:
 carta: Tu carta me hizo reír más que cualquier cosa en todo el invierno. Hacía años que no me reía así.
@@ -779,7 +790,7 @@ carta: Tu vieja amiga, Josephine Barry
 === resp_josephine_2 ===
 canal: respuesta
 de: josephine
-si: hecho:se_queda, respuesta:josephine
+si: hecho:se_queda, respuesta:josephine, hecho:carta_a_josephine
 ---
 carta: Mi querida Ana:
 carta: Recibí tu carta y la leí junto a la chimenea. Escribes como hablas, y eso es un gran elogio viniendo de mí.
@@ -791,7 +802,7 @@ a prueba
 canal: respuesta
 de: spencer
 responde: carta_spencer_prueba
-si: respuesta:spencer, !hecho:se_queda
+si: respuesta:spencer, !hecho:se_queda, dicha:carta_spencer_prueba
 ---
 carta: Querida Ana:
 carta: Recibí tu carta. No te preocupes antes de tiempo, niña: la Srta. Cuthbert es una mujer seria, pero justa.
@@ -803,7 +814,7 @@ resumen: La Sra. Spencer contesta: se alegra de que los Cuthbert se queden con A
 canal: respuesta
 de: spencer
 responde: carta_spencer_prueba
-si: respuesta:spencer, hecho:se_queda
+si: respuesta:spencer, hecho:se_queda, dicha:carta_spencer_prueba
 ---
 carta: Querida Ana:
 carta: Cuando llegó tu carta ya me había enterado: ¡los Cuthbert se quedaron contigo! Ya ves que las cosas se arreglan, cuando una se porta bien.
@@ -814,7 +825,7 @@ carta: Afectuosamente, la Sra. Spencer
 resumen: La Sra. Spencer contesta: se alegra de que Ana tenga una amiga, Diana.
 canal: respuesta
 de: spencer
-si: respuesta:spencer, hecho:se_queda, hecho:conocidas_diana
+si: respuesta:spencer, hecho:se_queda, hecho:conocidas_diana, hecho:carta_a_spencer
 ---
 carta: Querida Ana:
 carta: ¿Así que ya tienes una amiga, la niña de los Barry? Me alegro, Ana. Una buena amiga vale más que un vestido nuevo. Pero no la marees con tanta palabra.
@@ -825,7 +836,7 @@ carta: Afectuosamente, la Sra. Spencer
 resumen: La Sra. Spencer la reta por romperle la pizarra en la cabeza a Gilbert.
 canal: respuesta
 de: spencer
-si: respuesta:spencer, hecho:se_queda, hecho:zanahorias_pizarra
+si: respuesta:spencer, hecho:se_queda, hecho:zanahorias_pizarra, hecho:carta_a_spencer
 ---
 carta: Querida Ana:
 carta: ¡Ana Shirley! ¿Cómo que le partiste la pizarra en la cabeza a un muchacho? Ya sé que te dijo zanahoria, pero una señorita no anda rompiendo pizarras.
@@ -836,7 +847,7 @@ carta: Afectuosamente, la Sra. Spencer
 resumen: La Sra. Spencer: le contestó a Gilbert; que cuide esa lengua.
 canal: respuesta
 de: spencer
-si: respuesta:spencer, hecho:se_queda, hecho:zanahorias_contesta
+si: respuesta:spencer, hecho:se_queda, hecho:zanahorias_contesta, hecho:carta_a_spencer
 ---
 carta: Querida Ana:
 carta: Así que le contestaste a ese muchacho delante de toda la escuela. Hmm. No te voy a decir que hiciste mal, porque se lo buscó. Pero cuida esa lengua, Ana.
@@ -847,7 +858,7 @@ carta: Afectuosamente, la Sra. Spencer
 resumen: La Sra. Spencer la felicita por no hacerle caso a Gilbert.
 canal: respuesta
 de: spencer
-si: respuesta:spencer, hecho:se_queda, hecho:zanahorias_ignora
+si: respuesta:spencer, hecho:se_queda, hecho:zanahorias_ignora, hecho:carta_a_spencer
 ---
 carta: Querida Ana:
 carta: Me cuentas que un muchacho se burló de tu pelo y que hiciste como si no existiera. Eso, Ana, es tener más juicio que muchas señoras que conozco.
@@ -858,7 +869,7 @@ carta: Afectuosamente, la Sra. Spencer
 resumen: La Sra. Spencer supo que gritó a la Sra. Lynde: que le pida perdón.
 canal: respuesta
 de: spencer
-si: respuesta:spencer, hecho:se_queda, hecho:ofendio_lynde
+si: respuesta:spencer, hecho:se_queda, hecho:ofendio_lynde, hecho:carta_a_spencer
 ---
 carta: Querida Ana:
 carta: Me enteré, Ana. Rachel Lynde me escribió. ¿Cómo se te ocurre gritarle a una señora así, en la casa que te recibió?
@@ -869,7 +880,7 @@ carta: Afectuosamente, la Sra. Spencer
 resumen: La Sra. Spencer la consuela: la Sra. Lynde la trató de flaca y fea.
 canal: respuesta
 de: spencer
-si: respuesta:spencer, hecho:se_queda, hecho:lynde_llanto
+si: respuesta:spencer, hecho:se_queda, hecho:lynde_llanto, hecho:carta_a_spencer
 ---
 carta: Querida Ana:
 carta: Me dices que la Sra. Lynde te llamó flaca y fea, y que te fuiste llorando. Ay, Ana. Rachel Lynde dice lo que piensa, y piensa demasiado.
@@ -880,7 +891,7 @@ carta: Afectuosamente, la Sra. Spencer
 resumen: La Sra. Spencer: qué pena lo de Diana; paciencia, y nada a escondidas.
 canal: respuesta
 de: spencer
-si: respuesta:spencer, hecho:se_queda, hecho:prohibida
+si: respuesta:spencer, hecho:se_queda, hecho:prohibida, hecho:carta_a_spencer
 ---
 carta: Querida Ana:
 carta: Qué pena lo de la niña de los Barry. Vino de grosellas… ¡quién iba a pensar! Ten paciencia, Ana: las madres se ablandan con el tiempo.
@@ -891,7 +902,7 @@ carta: Afectuosamente, la Sra. Spencer
 resumen: La Sra. Spencer contesta la primera carta: que se porte bien y no hable tanto.
 canal: respuesta
 de: spencer
-si: respuesta:spencer, hecho:se_queda
+si: respuesta:spencer, hecho:se_queda, hecho:carta_a_spencer
 ---
 carta: Querida Ana:
 carta: Me dio mucho gusto saber de ti. Ya ves que las cosas se arreglan solas, cuando una se porta bien.
@@ -16650,6 +16661,7 @@ function wmExec0(ag, a, st, dt){
       if (escena && game.cartaEscena?.lineas.length) st.txt = game.cartaEscena.lineas;
       for (const t of TALKS.filter(t => t.ch === 'carta')) talkEnd(t);   // (the letter is done: what she was saying over it, too)
       inv.carta = (inv.carta || 0) + 1; cartas().push({ id: cartas().length + 1, de: me, para: st.para, texto: st.txt, dia: today(), estado: 'escrita', escena: me === 'ana' ? game.cartaEscena?.id : undefined });
+      if (me === 'ana') dlgHecho('carta_a_' + st.para);   // (Ana wrote to her: an answer may come; the script asks it, src/datos/guion.txt)
       float('+1 carta para ' + CORREO[st.para].nombre, b.x, b.y - 50); logEv(`${wmName(me)} escribió una carta para ${CORREO[st.para].nombre}.`, []); return 'ok';
     }
     case 'enviar_carta': {   // (at the post office: who it is for, and off it goes with tomorrow's mail)
