@@ -7242,7 +7242,15 @@ dice: En el bosque no hay brujas, niña. Solo estoy yo... je, je.
 ana: (¡Es Peg Bowen! Felix dice que es una bruja...)
 
 === farero ===
-dice: Ese faro lleva cuarenta años encendido, y yo con él. Las noches de tormenta son las más hermosas.
+# (el capitán Jim de «La casa de los sueños de Ana», unos treinta años antes: todavía no es viejo, ya tiene sus
+# historias, y las va escribiendo en el libro de su vida)
+dice: Este faro lleva veinte años conmigo, y yo con él. Las noches de tormenta son las más hermosas.
+dice: Escribo mis aventuras en un cuaderno grueso: el libro de mi vida, lo llamo. Algún día alguien que sepa escribir lo pondrá bonito.
+dice: Una vez naufragamos en las islas de la Magdalena. Pasamos el invierno entero comiendo bacalao y contándonos historias.
+dice: Hubo una muchacha, Margaret… se quedó dormida en un bote y la marea se la llevó, mientras yo estaba en el mar. Todavía la busco en la niebla.
+dice: En la bahía de los Cuatro Vientos cuentan de la novia del maestro, que vino de muy lejos a casarse con él. Esa historia te la cuento entera otro día.
+dice: Un faro es un barco que no se mueve, y que salva a los que se mueven. Por eso me quedé en él.
+ana: [conoce:farero] ¡Capitán Jim! ¿Me dejará leer el libro de su vida algún día?
 dice: ¿Ves esa vela allá lejos? Va a Charlottetown. Antes yo navegaba hasta las Antillas.
 dice: Si subes al faro al atardecer, el mar se pone de oro. Pregúntale a cualquier gaviota.
 ana: ¡Capitán Jim, cuénteme una historia del mar!
@@ -12099,7 +12107,7 @@ const ACC_GRUPOS = [
 const cap = s => s[0].toUpperCase() + s.slice(1);
 function anaMenu(){
   if (retenida()) { notice('Ahora no: la están mirando, esperan lo que Ana diga.'); return; }
-  const J = jugables(), mine = cartas().filter(c => c.para === 'ana' && c.estado === 'recibida').map(c => ['📜 Leer la carta de ' + CORREO[c.de].nombre, () => cartaLeer(c)]);
+  const J = jugables(), mine = [...cartas().filter(c => c.para === 'ana' && c.estado === 'recibida').map(c => ['📜 Leer la carta de ' + CORREO[c.de].nombre, () => cartaLeer(c)]), ...cartas().filter(c => c.de === 'ana' && c.estado === 'escrita').map(c => ['📜 Releer mi carta para ' + CORREO[c.para].nombre, () => cartaReleer(c)])];   // (and her own, before it goes to the post office)
   const R = pausadasHoy().map(([k, p]) => ['↺ Retomar: ' + stepText(p.a) + ' (lo dejaste a medias)', () => retomar(k)]);   // (what she left half done today, first: src/js/63-jugar.js)
   for (const k of Object.keys(game.anaStates)) if (ANA_STATES[k].fix) mine.push([ANA_STATES[k].fix, () => { close(); setAnaState(k, false); }]);
   // (in her nightgown at home: to dress, as Marilla asks; up to her room if she is not there, where her dress is)
@@ -14214,6 +14222,12 @@ $('mapzin').addEventListener('click', () => mapZoom(1.5)); $('mapzout').addEvent
 // the view of the fields: the wheel brings it closer or farther (out of doors)
 let viewZoom = 1;
 cv.addEventListener('wheel', e => { e.preventDefault(); if (game.scene === 'out' || viewScene() === 'out') viewZoom = clamp(viewZoom * Math.exp(-e.deltaY * .0012), .55, 2.2); }, { passive: false });
+// (or two fingers, pinching: the second finger takes over from the first, which no longer moves Ana nor taps)
+{ const dedos = new Map(); let d0 = 0; const dd = () => { const [a, b] = [...dedos.values()]; return Math.hypot(a[0] - b[0], a[1] - b[1]); };
+  cv.addEventListener('pointerdown', e => { if (e.pointerType !== 'touch') return; dedos.set(e.pointerId, [e.clientX, e.clientY]); if (dedos.size === 2) { d0 = dd(); stick = null; tapStart = null; panDrag = null; e.stopImmediatePropagation(); } }, true);
+  addEventListener('pointermove', e => { if (!dedos.has(e.pointerId)) return; dedos.set(e.pointerId, [e.clientX, e.clientY]); if (dedos.size === 2 && d0) { const d = dd(); if (game.scene === 'out' || viewScene() === 'out') viewZoom = clamp(viewZoom * d / d0, .55, 2.2); d0 = d; stick = null; tapStart = null; } });
+  const fuera = e => { if (!dedos.delete(e.pointerId)) return; if (dedos.size < 2) { if (d0) { tapStart = null; stick = null; } d0 = 0; } };
+  addEventListener('pointerup', fuera, true); addEventListener('pointercancel', fuera, true); }
 // the settings (✒): Ana on her own when idle, the story of the day; and a look at what they know
 function ajustesPanel(on){
   $('ajustes').hidden = !on; if (!on) return;
@@ -14853,7 +14867,7 @@ const FOLK_DEFS = {
   sloane: { name: 'el Sr. Sloane', kind: 'granjero', home: 'Granja Sloane', look: { hair: '#8a7a6a', hairD: '#6a5a4a', style: 'old', dress: '#6a5a40', dressD: '#4a3a20', coat: true, skin: '#e0b090', h: 1.14 } },
   andrews: { name: 'el Sr. Andrews', kind: 'granjero', home: 'Granja Andrews', look: { hair: '#5a4a3a', hairD: '#3a2a1a', beard: true, dress: '#5a5a40', dressD: '#3a3a20', coat: true, hatDark: true, skin: '#e0b090', h: 1.16 } },
   peg: { name: 'Peg Bowen', mujer: true, kind: 'peg', home: 'Casa de Peg Bowen', look: { hair: '#8a8a88', hairD: '#5a5a58', style: 'old', dress: '#4a3a30', dressD: '#2a1a10', apron: '#6a5a40', skin: '#d8b090', h: 1.04 } },
-  farero: { name: 'el capitán Jim', kind: 'farero', home: 'Casa del farero', look: { hair: '#e8e4dc', hairD: '#b8b4ac', beard: true, style: 'old', dress: '#2a3a5a', dressD: '#1a2a40', coat: true, skin: '#e0b090', h: 1.16 } },
+  farero: { name: 'el capitán Jim', kind: 'farero', home: 'Casa del farero', look: { hair: '#8a7a66', hairD: '#5e4f3e', beard: true, dress: '#2a3a5a', dressD: '#1a2a40', coat: true, skin: '#e0b090', h: 1.16 } },
   // --- the ones from the book that were missing
   stacy: { name: 'la Srta. Stacy', kind: 'maestro', home: 'Pensión', look: { hair: '#a8683a', hairD: '#80482a', style: 'bun', dress: '#6a8a6a', dressD: '#4a6a4a', brooch: true, skin: '#f2cfb2', h: 1.08 } },
   minnie: { name: 'Minnie May Barry', kind: 'juego', home: 'La Cuesta del Huerto', look: kidLook('#2a1a14', '#e8c0d0', { dressD: '#c098a8', style: 'curls', bow: '#c8463a', h: .64 }) },
@@ -16458,6 +16472,8 @@ function correoRetirar(){
   for (const c of L) c.estado = 'recibida'; logEv(`Ana retiró del correo ${L.length === 1 ? 'una carta de ' + CORREO[L[0].de].nombre : L.length + ' cartas'}.`, []); save();
   say('lawson', L.length === 1 ? dicho('correo_una_carta', { de: CORREO[L[0].de].nombre }) : dicho('correo_cartas', { n: L.length }), [['📜 Leerla ahora', () => cartaLeer(L[0])], ['← Volver', () => shopMenu()]]);
 }
+// her own letter, carried to the post office: she reads it again (it stays as it is, to be sent)
+function cartaReleer(c, i = 0){ const L = c.texto || [], last = i >= L.length - 1; if (!L.length) return close(); say('Ana', L[i], last ? [['Doblarla otra vez', close]] : [['Seguir leyendo', () => cartaReleer(c, i + 1)], ['Doblarla otra vez', close]]); }
 function cartaLeer(c, i = 0){
   c.estado = 'leida'; if (!i) logEv(`Ana leyó la carta de ${CORREO[c.de].nombre}.`, []);
   const L = c.texto, last = i >= L.length - 1;

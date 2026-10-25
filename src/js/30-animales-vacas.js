@@ -160,7 +160,7 @@ const ACC_GRUPOS = [
 const cap = s => s[0].toUpperCase() + s.slice(1);
 function anaMenu(){
   if (retenida()) { notice('Ahora no: la están mirando, esperan lo que Ana diga.'); return; }
-  const J = jugables(), mine = cartas().filter(c => c.para === 'ana' && c.estado === 'recibida').map(c => ['📜 Leer la carta de ' + CORREO[c.de].nombre, () => cartaLeer(c)]);
+  const J = jugables(), mine = [...cartas().filter(c => c.para === 'ana' && c.estado === 'recibida').map(c => ['📜 Leer la carta de ' + CORREO[c.de].nombre, () => cartaLeer(c)]), ...cartas().filter(c => c.de === 'ana' && c.estado === 'escrita').map(c => ['📜 Releer mi carta para ' + CORREO[c.para].nombre, () => cartaReleer(c)])];   // (and her own, before it goes to the post office)
   const R = pausadasHoy().map(([k, p]) => ['↺ Retomar: ' + stepText(p.a) + ' (lo dejaste a medias)', () => retomar(k)]);   // (what she left half done today, first: src/js/63-jugar.js)
   for (const k of Object.keys(game.anaStates)) if (ANA_STATES[k].fix) mine.push([ANA_STATES[k].fix, () => { close(); setAnaState(k, false); }]);
   // (in her nightgown at home: to dress, as Marilla asks; up to her room if she is not there, where her dress is)

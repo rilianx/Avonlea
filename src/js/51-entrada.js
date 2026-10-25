@@ -75,6 +75,12 @@ $('mapzin').addEventListener('click', () => mapZoom(1.5)); $('mapzout').addEvent
 // the view of the fields: the wheel brings it closer or farther (out of doors)
 let viewZoom = 1;
 cv.addEventListener('wheel', e => { e.preventDefault(); if (game.scene === 'out' || viewScene() === 'out') viewZoom = clamp(viewZoom * Math.exp(-e.deltaY * .0012), .55, 2.2); }, { passive: false });
+// (or two fingers, pinching: the second finger takes over from the first, which no longer moves Ana nor taps)
+{ const dedos = new Map(); let d0 = 0; const dd = () => { const [a, b] = [...dedos.values()]; return Math.hypot(a[0] - b[0], a[1] - b[1]); };
+  cv.addEventListener('pointerdown', e => { if (e.pointerType !== 'touch') return; dedos.set(e.pointerId, [e.clientX, e.clientY]); if (dedos.size === 2) { d0 = dd(); stick = null; tapStart = null; panDrag = null; e.stopImmediatePropagation(); } }, true);
+  addEventListener('pointermove', e => { if (!dedos.has(e.pointerId)) return; dedos.set(e.pointerId, [e.clientX, e.clientY]); if (dedos.size === 2 && d0) { const d = dd(); if (game.scene === 'out' || viewScene() === 'out') viewZoom = clamp(viewZoom * d / d0, .55, 2.2); d0 = d; stick = null; tapStart = null; } });
+  const fuera = e => { if (!dedos.delete(e.pointerId)) return; if (dedos.size < 2) { if (d0) { tapStart = null; stick = null; } d0 = 0; } };
+  addEventListener('pointerup', fuera, true); addEventListener('pointercancel', fuera, true); }
 // the settings (✒): Ana on her own when idle, the story of the day; and a look at what they know
 function ajustesPanel(on){
   $('ajustes').hidden = !on; if (!on) return;

@@ -33,7 +33,7 @@ const FOLK_DEFS = {
   sloane: { name: 'el Sr. Sloane', kind: 'granjero', home: 'Granja Sloane', look: { hair: '#8a7a6a', hairD: '#6a5a4a', style: 'old', dress: '#6a5a40', dressD: '#4a3a20', coat: true, skin: '#e0b090', h: 1.14 } },
   andrews: { name: 'el Sr. Andrews', kind: 'granjero', home: 'Granja Andrews', look: { hair: '#5a4a3a', hairD: '#3a2a1a', beard: true, dress: '#5a5a40', dressD: '#3a3a20', coat: true, hatDark: true, skin: '#e0b090', h: 1.16 } },
   peg: { name: 'Peg Bowen', mujer: true, kind: 'peg', home: 'Casa de Peg Bowen', look: { hair: '#8a8a88', hairD: '#5a5a58', style: 'old', dress: '#4a3a30', dressD: '#2a1a10', apron: '#6a5a40', skin: '#d8b090', h: 1.04 } },
-  farero: { name: 'el capitán Jim', kind: 'farero', home: 'Casa del farero', look: { hair: '#e8e4dc', hairD: '#b8b4ac', beard: true, style: 'old', dress: '#2a3a5a', dressD: '#1a2a40', coat: true, skin: '#e0b090', h: 1.16 } },
+  farero: { name: 'el capitán Jim', kind: 'farero', home: 'Casa del farero', look: { hair: '#8a7a66', hairD: '#5e4f3e', beard: true, dress: '#2a3a5a', dressD: '#1a2a40', coat: true, skin: '#e0b090', h: 1.16 } },
   // --- the ones from the book that were missing
   stacy: { name: 'la Srta. Stacy', kind: 'maestro', home: 'Pensión', look: { hair: '#a8683a', hairD: '#80482a', style: 'bun', dress: '#6a8a6a', dressD: '#4a6a4a', brooch: true, skin: '#f2cfb2', h: 1.08 } },
   minnie: { name: 'Minnie May Barry', kind: 'juego', home: 'La Cuesta del Huerto', look: kidLook('#2a1a14', '#e8c0d0', { dressD: '#c098a8', style: 'curls', bow: '#c8463a', h: .64 }) },

@@ -66,6 +66,8 @@ function correoRetirar(){
   for (const c of L) c.estado = 'recibida'; logEv(`Ana retiró del correo ${L.length === 1 ? 'una carta de ' + CORREO[L[0].de].nombre : L.length + ' cartas'}.`, []); save();
   say('lawson', L.length === 1 ? dicho('correo_una_carta', { de: CORREO[L[0].de].nombre }) : dicho('correo_cartas', { n: L.length }), [['📜 Leerla ahora', () => cartaLeer(L[0])], ['← Volver', () => shopMenu()]]);
 }
+// her own letter, carried to the post office: she reads it again (it stays as it is, to be sent)
+function cartaReleer(c, i = 0){ const L = c.texto || [], last = i >= L.length - 1; if (!L.length) return close(); say('Ana', L[i], last ? [['Doblarla otra vez', close]] : [['Seguir leyendo', () => cartaReleer(c, i + 1)], ['Doblarla otra vez', close]]); }
 function cartaLeer(c, i = 0){
   c.estado = 'leida'; if (!i) logEv(`Ana leyó la carta de ${CORREO[c.de].nombre}.`, []);
   const L = c.texto, last = i >= L.length - 1;
