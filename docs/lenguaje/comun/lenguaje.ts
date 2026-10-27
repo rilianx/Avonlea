@@ -119,7 +119,9 @@ function verbo<A extends unknown[], S extends string>(tipo: string, nombre: stri
   const f = ((...args: A) => ({ verbo: nombre, args })) as unknown as Verbo<A, S>
   // (al construir: la definición se llama una vez con los nombres de sus parámetros, y se guarda como datos)
   const params = Array.from({ length: def.length }, (_, i) => ({ param: i }))
-  return Object.assign(f, { verbo: nombre, def: { tipo, ...(def(...(params as unknown as A)) as object) } })
+  // (y los nombres de los parámetros, para los textos: «Subir a {m}»)
+  const nombres = (String(def).match(/^[^(]*\(([^)]*)\)/)?.[1] ?? '').split(',').map(x => x.trim().split(/[\s:=]/)[0].replace(/^_/, '')).filter(Boolean)
+  return Object.assign(f, { verbo: nombre, def: { tipo, params: nombres, ...(def(...(params as unknown as A)) as object) } })
 }
 
 // («opcion»: cómo se le ofrece a la jugadora cuando se lo piden a Ana: 'Ir con {otro}')
@@ -132,7 +134,7 @@ export const primitivo = <A extends unknown[]>(nombre: string, def: (...a: A) =>
 export type DefReceta<P extends Record<string, Paso>> = {
   readonly pide?: Cond
   readonly pasos: P
-  readonly mantiene?: { readonly si: Cond; readonly desde: keyof P & string; readonly si_se_rompe: keyof P & string }
+  readonly mantiene?: { readonly si: Cond; readonly desde: keyof P & string; readonly hasta?: keyof P & string; readonly si_se_rompe: keyof P & string }
   readonly cumplido?: Cond
 }
 export const receta = <A extends unknown[], const P extends Record<string, Paso>>(nombre: string, def: (...a: A) => DefReceta<P>) => verbo<A, Caminos<P>>('receta', nombre, def)
@@ -207,12 +209,26 @@ export const responde = (quien: Persona, r: Respuesta, a: Verbo<never[], string>
 // otra escena terminó
 export const tras = (e: Escena): Activacion => ({ activa: { tras: e } })
 
-export type DefEscena = { readonly se_activa: readonly Activacion[]; readonly si?: Cond; readonly hablan: readonly (Persona | 'narra')[]; readonly efectos?: readonly (Efecto | Llamada)[] }
-export const defEscena = (_id: Escena, def: DefEscena) => def
+// el guion de una escena: líneas (con su acto), comandos, opciones de la jugadora y variaciones (<<if>>)
+export type Item =
+  | { readonly q: Persona | 'narra'; readonly t: string; readonly piensa?: true; readonly acto?: Llamada }
+  | { readonly hace: Efecto | Llamada }
+  | { readonly op: string; readonly propia?: true; readonly cuerpo: readonly Item[] }
+  | { readonly si: Cond; readonly cuerpo: readonly Item[]; readonly sino: readonly Item[] }
+export type DefEscena = {
+  readonly resumen: string
+  readonly se_activa: readonly Activacion[]
+  readonly si: Cond
+  readonly repetir?: 'una_vez' | 'dia' | 'siempre'
+  readonly punto?: string
+  readonly hablan: readonly (Persona | 'narra')[]
+  readonly cuerpo: readonly Item[]
+}
+export const defEscena = (id: Escena, def: DefEscena) => ({ ...id, ...def })
 // una voz: el patrón de llamada («_» vale cualquiera), el paso de la receta si es la voz de un paso, y las condiciones
 // de sus variantes (true: sin condición)
 export const _ = { comodin: true } as never
-export const voz = <S extends string>(llamada: Llamada<S>, def: { readonly paso?: NoInfer<S>; readonly lineas: readonly (Cond | true)[] }) => ({ llamada, ...def })
+export const voz = <S extends string>(llamada: Llamada<S>, def: { readonly paso?: NoInfer<S>; readonly lineas: readonly { readonly t: string; readonly si: Cond | true }[] }) => ({ llamada, ...def })
 export const suma = (n: Numero, cuanto: number): Efecto => n.suma(cuanto)
 export const deja = (h: Hecho | Efecto): Efecto => ('deja' in h ? h.deja : h)
 export const log = (texto: string): Efecto => ({ e: 'log', texto })

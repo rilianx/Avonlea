@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Probar una historia</title>
+<style>
+:root{--bg:#f6f1e7;--panel:#fffdf8;--ink:#2b2620;--mut:#8a8173;--line:#e4dccb;--acento:#7a4b2a;--ana:#9b3d2a;--narra:#efe6d3;--momento:#a49a89}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#1d1b18;--panel:#26231f;--ink:#ece6da;--mut:#a29a8c;--line:#3a352e;--acento:#d9a273;--ana:#e08f78;--narra:#2f2b25;--momento:#7f776b}}
+:root[data-theme=dark]{--bg:#1d1b18;--panel:#26231f;--ink:#ece6da;--mut:#a29a8c;--line:#3a352e;--acento:#d9a273;--ana:#e08f78;--narra:#2f2b25;--momento:#7f776b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Georgia,'Iowan Old Style',serif}
+header{position:sticky;top:0;z-index:2;background:var(--panel);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+header h1{font-size:17px;margin:0;font-style:italic;font-weight:normal}header .reloj{color:var(--mut);font-size:14px}
+button,select{font:inherit;font-size:14px;padding:6px 11px;border-radius:7px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+button.prim{background:var(--acento);color:var(--bg);border-color:var(--acento)}button:disabled{opacity:.45;cursor:default}
+main{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;padding:16px;max-width:1150px;margin:0 auto}
+@media (max-width:820px){main{grid-template-columns:1fr}}
+#relato{display:flex;flex-direction:column;gap:6px;padding-bottom:12px}
+.linea{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:7px 11px;max-width:760px}
+.linea .q{font-size:12px;color:var(--mut);letter-spacing:.03em;text-transform:uppercase}.linea.ana{border-left:3px solid var(--ana)}
+.linea.piensa{font-style:italic;background:transparent;border-style:dashed}.narra{background:var(--narra);border-radius:9px;padding:9px 12px;max-width:760px}
+.momento{color:var(--momento);font:12px/1.4 ui-monospace,Menlo,monospace;padding-left:4px}.momento.oculto{display:none}
+.escena{margin-top:10px;font-weight:bold;color:var(--acento)}.titulo{margin-top:6px;font-size:16px;font-style:italic}
+.eleccion{align-self:flex-start;color:var(--acento);font-style:italic}
+#accion{position:sticky;bottom:0;background:var(--bg);padding:10px 0;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+#accion .pide{width:100%;font-size:14px;color:var(--mut)}
+aside{display:flex;flex-direction:column;gap:12px}aside section{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:10px 12px}
+aside h3{margin:0 0 6px;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--mut);font-weight:normal}
+.fila{display:flex;justify-content:space-between;gap:8px;font-size:14px;padding:2px 0}.fila span:last-child{color:var(--mut);text-align:right}
+.est-cumplido{color:#3d7a3d}.est-en_curso{color:var(--acento)}.est-fallido{color:#b03a2e}
+label.chk{font-size:13px;color:var(--mut);display:flex;gap:5px;align-items:center}
+.fin{background:var(--acento);color:var(--bg);padding:10px 12px;border-radius:9px;max-width:760px}
+</style></head><body>
+<header>
+  <h1>Probar una historia: White Sands</h1>
+  <span class="reloj" id="reloj"></span>
+  <select id="esc" title="Cómo empieza">
+    <option value="normal">Ana en la cocina, Marilla con paciencia</option>
+    <option value="lejos">Ana lejos (en la escuela) a la hora de salir</option>
+    <option value="sin_paciencia">Marilla sin paciencia (la duda)</option>
+    <option value="quiere">Ana ya quiere a Marilla (afecto 3)</option>
+  </select>
+  <button id="reiniciar">Empezar de nuevo</button>
+  <button id="sola" title="Ana decide sola hasta el final">Ana sola hasta el final</button>
+  <label class="chk"><input type="checkbox" id="vermom"> ver los momentos</label>
+</header>
+<main>
+  <section><div id="relato"></div><div id="accion"></div></section>
+  <aside>
+    <section><h3>Los encargos</h3><div id="encargos"></div></section>
+    <section><h3>Dónde está cada uno</h3><div id="lugares"></div></section>
+    <section><h3>El estado</h3><div id="estado"></div></section>
+    <section><h3>Cómo leer esto</h3><div style="font-size:13px;color:var(--mut)">Tú eres Ana. Contesta lo que te piden («Subir a la calesa» o «Todavía no»), elige en las escenas, o haz algo por tu cuenta: ir a otro lugar, bajarte de la calesa. Con «ver los momentos» aparece lo que mueve la historia por dentro: los encargos, sus pasos, lo que planifica Marilla. Esto lo ejecuta el motor mínimo del lenguaje (tools/lenguaje/motor.js) con los datos de docs/lenguaje/: no es el juego.</div></section>
+  </aside>
+</main>
+<script>/*@MOTOR*/</script>
+<script>
+const D = /*@DATOS*/null;
+const $ = id => document.getElementById(id), esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const ESCENARIOS = { normal: {}, lejos: { lugares: { ana: 'escuela' } }, sin_paciencia: { estado: { 'cualidad.marilla.paciencia.ana': 0 } }, quiere: { estado: { 'cualidad.ana.afecto.marilla': 3 } } };
+let M, u, visto = 0;
+function empezar(){ $('relato').innerHTML = ''; visto = 0; M = Motor(D, { ...ESCENARIOS[$('esc').value] }); u = M.avanzar(); pintar(); }
+function pintar(){
+  const R = $('relato'), ver = $('vermom').checked;
+  for (; visto < M.registro.length; visto++) {
+    const r = M.registro[visto], d = document.createElement('div');
+    if (r.tipo === 'linea') {
+      if (r.q === 'narra') { d.className = 'narra'; d.textContent = r.t; }
+      else { d.className = 'linea' + (r.q === 'ana' ? ' ana' : '') + (r.piensa ? ' piensa' : ''); d.innerHTML = `<div class="q">${esc(M.nombre(r.q))}${r.piensa ? ' (piensa)' : ''} · ${esc(r.hora.split(', ')[1])}</div>${esc(r.t)}`; }
+    } else if (r.tipo === 'eleccion') { d.className = 'eleccion'; d.textContent = '→ ' + r.t; }
+    else if (r.tipo === 'escena') { d.className = 'escena'; d.textContent = r.t; }
+    else if (r.tipo === 'titulo') { d.className = 'titulo'; d.textContent = r.t; }
+    else { d.className = 'momento' + (ver ? '' : ' oculto'); d.textContent = r.hora.split(', ')[1] + '  ' + r.t; }
+    R.appendChild(d);
+  }
+  $('reloj').textContent = u.reloj;
+  const A = $('accion'); A.innerHTML = '';
+  if (u.fin) A.innerHTML = `<div class="fin">${u.fin === 'terminada' ? 'La historia terminó: Marilla decidió quedarse con Ana, a prueba.' : 'La historia se perdió: Ana nunca volvió a la calesa.'}</div>`;
+  else if (u.pregunta) {
+    A.innerHTML = `<div class="pide">${esc(u.pregunta.de)} te pide:</div>`;
+    A.append(boton(u.pregunta.si, () => { u = M.responder(true); pintar(); }, true), boton(u.pregunta.no, () => { u = M.responder(false); pintar(); }));
+  } else if (u.escena && u.escena.ops) {
+    A.innerHTML = '<div class="pide">¿Qué hace Ana?</div>';
+    u.escena.ops.forEach((o, i) => A.append(boton(o, () => { u = M.elegir(i); pintar(); }, i === 0)));
+  } else {
+    A.innerHTML = '<div class="pide">Nada que esperar ahora. Ana puede hacer algo por su cuenta:</div>';
+    const s = document.createElement('select'); for (const l of M.lugares()) { const o = document.createElement('option'); o.value = l; o.textContent = M.nombre(l); s.append(o); }
+    A.append(s, boton('Ir', () => { u = M.irA(s.value); pintar(); }, true), boton('Esperar 10 minutos', () => { u = M.esperar(10); pintar(); }));
+  }
+  if (!u.fin && !u.pregunta && !(u.escena && u.escena.ops) && M.get(['mundo', 'ana', 'en']) !== 'nada') A.append(boton('Bajarse de la calesa', () => { u = M.bajarse(); pintar(); }));
+  const S = M.resumen();
+  $('encargos').innerHTML = M.encargos().map(e => `<div class="fila"><span>${esc(e.etiqueta)}</span><span class="est-${e.estado}">${esc(e.estado.replace('_', ' '))}</span></div>`).join('');
+  $('lugares').innerHTML = Object.entries(S.lugares).filter(([, l]) => l).map(([p, l]) => `<div class="fila"><span>${esc(M.nombre(p))}</span><span>${esc(M.nombre(l))}${S.en[p] ? ' · en ' + esc(M.nombre(S.en[p])) : ''}</span></div>`).join('');
+  $('estado').innerHTML = `<div class="fila"><span>Ana en Tejas Verdes</span><span>${esc(S.estado)}</span></div><div class="fila"><span>paciencia de Marilla</span><span>${S.paciencia}</span></div><div class="fila"><span>afecto de Marilla</span><span>${S.afecto}</span></div>`
+    + `<div class="fila"><span>escenas dichas</span><span>${S.hechos.filter(h => h.includes('.dichas.')).length}</span></div>`
+    + S.hechos.filter(h => h.includes('.hechos.')).map(h => `<div class="fila"><span>${esc(h.split('.').pop())}</span><span>hecho</span></div>`).join('');
+  A.scrollIntoView({ block: 'nearest' });
+}
+function boton(t, f, prim){ const b = document.createElement('button'); b.textContent = t; b.onclick = f; if (prim) b.className = 'prim'; return b; }
+$('reiniciar').onclick = empezar; $('esc').onchange = empezar;
+$('vermom').onchange = () => { for (const d of document.querySelectorAll('.momento')) d.classList.toggle('oculto', !$('vermom').checked); };
+$('sola').onclick = () => { for (let i = 0; i < 300 && !u.fin && (u.pregunta || (u.escena && u.escena.ops)); i++) u = M.decideSola(); pintar(); };
+empezar();
+</script></body></html>

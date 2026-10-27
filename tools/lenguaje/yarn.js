@@ -3,8 +3,9 @@
 // (o los comunes), revisa que cada expresión tenga la forma permitida (nombres, llamadas, textos y números: nada más),
 // y escribe dos archivos que tsc revisa junto con lo demás:
 //   escenas.ids.ts      los nombres de las escenas de la historia (lo que usan historia.ts y las otras escenas)
-//   *.chequeo.ts        cada escena y cada voz traducida a llamadas del lenguaje: sus activaciones, sus condiciones,
-//                       quién habla, sus actos y sus comandos. Un nombre mal escrito en un .yarn es un error de tsc.
+//   *.datos.ts          cada escena y cada voz traducida a datos del lenguaje: sus activaciones, sus condiciones, su
+//                       guion entero (líneas, actos, opciones, comandos, <<if>>). Un nombre mal escrito en un .yarn es un
+//                       error de tsc; y compilados, son los datos que lee el motor (tools/lenguaje/motor.js).
 // Uso: node tools/lenguaje/yarn.js docs/lenguaje            (todas: comun/ y cada historias/<nombre>/)
 const fs = require('fs'), path = require('path');
 
@@ -40,7 +41,7 @@ function expr(e, donde){
 }
 // una lista separada por comas, solo en el primer nivel
 function partes(t){ const out = []; let p = 0, q = false, a = ''; for (const c of t) { if (c === "'") q = !q; if (!q && (c === '(' || c === '[')) p++; if (!q && (c === ')' || c === ']')) p--; if (c === ',' && !p && !q) { out.push(a); a = ''; } else a += c; } if (a.trim()) out.push(a); return out.map(x => x.trim()); }
-const ident = t => [...t.replace(/'[^']*'/g, '').matchAll(/(?<![\w.])([A-Za-z_]\w*)(?!\w)(?!\s*:)/gu)].map(m => m[1]);   // (no las claves de un objeto: «si:»)
+const ident = t => [...t.replace(/"(?:[^"\\]|\\.)*"/g, '').replace(/'[^']*'/g, '').matchAll(/(?<![\w.])([A-Za-z_]\w*)(?!\w)(?!\s*:)/gu)].map(m => m[1]);   // (no las claves de un objeto: «si:»)
 
 // ---------------------------------------------------------------- una escena
 const MOMENTOS = ['empieza', 'cumplido', 'fallido', 'sigue'];
@@ -54,35 +55,60 @@ function activacion(a, historia, donde){
   if (w.length === 2) return `momento(${historia}.encargo.${expr(camino[0], donde)}, ${pasos}, '${m}')`;     // un encargo de la historia
   throw new Error(donde + ': «' + a + '» no es una activación');
 }
+// el guion: líneas, actos (#ofender:ana), opciones (-> con su cuerpo, con sangría), comandos (<<…>>) y <<if>>
+function guion(n){
+  const L = n.lineas, hablan = new Set(); let k = 0;
+  const sang = s => s.match(/^\s*/)[0].length;
+  function bloque(ind){
+    const out = [];
+    while (k < L.length) {
+      const { s, i } = L[k], t = s.trim(), d = `${n.archivo}:${i}`; let m;
+      if (sang(s) < ind) break;
+      if (sang(s) > ind) throw error(n.archivo, i, 'sangría de más (el cuerpo de una opción va con sangría, debajo de ella)');
+      if (/^<<(else|endif)>>$/.test(t)) break;
+      k++;
+      if ((m = t.match(/^<<if\s+(.*)>>$/))) {
+        const si = expr(m[1], d), cuerpo = bloque(ind); let sino = [];
+        if (k < L.length && L[k].s.trim() === '<<else>>') { k++; sino = bloque(ind); }
+        if (!(k < L.length && L[k].s.trim() === '<<endif>>')) throw error(n.archivo, i, '<<if>> sin <<endif>>');
+        k++; out.push(`{ si: ${si}, cuerpo: [${cuerpo.join(', ')}], sino: [${sino.join(', ')}] }`); continue;
+      }
+      if ((m = t.match(/^<<(.*)>>$/))) { out.push(`{ hace: ${expr(m[1], d)} }`); continue; }
+      if ((m = t.match(/^->\s*(.*?)((?:\s+#\S+)*)$/))) {
+        const tags = m[2].trim().split(/\s+/).filter(Boolean), sub = k < L.length && sang(L[k].s) > ind ? bloque(sang(L[k].s)) : [];
+        out.push(`{ op: ${JSON.stringify(m[1])}${tags.includes('#propia') ? ', propia: true' : ''}, cuerpo: [${sub.join(', ')}] }`); continue;
+      }
+      if ((m = t.match(/^(\w+):\s*(.*?)((?:\s+#\S+)*)$/))) {
+        hablan.add(m[1]); const extra = [];
+        for (const tag of m[3].trim().split(/\s+/).filter(Boolean).map(x => x.slice(1))) {
+          if (tag === 'piensa') { extra.push('piensa: true'); continue; }
+          const [acto, ...args] = tag.split(':');                          // #ofender:ana → ofender('srapye', 'ana')
+          extra.push(`acto: ${expr(acto, d)}('${m[1]}'${args.map(x => `, '${expr(x, d)}'`).join('')})`);
+        }
+        out.push(`{ q: '${m[1]}', t: ${JSON.stringify(m[2])}${extra.map(x => ', ' + x).join('')} }`); continue;
+      }
+      throw error(n.archivo, i, '«' + t + '» no es una línea de Yarn (quien: texto, -> opción, <<comando>>)');
+    }
+    return out;
+  }
+  const cuerpo = bloque(0);
+  if (k < L.length) throw error(n.archivo, L[k].i, '«' + L[k].s.trim() + '» fuera de lugar');
+  return { cuerpo, hablan };
+}
 function escena(n, historia){
-  const donde = `${n.archivo}:${n.desde} (${n.cab.title})`, efectos = [], hablan = new Set(), conds = [];
+  const donde = `${n.archivo}:${n.desde} (${n.cab.title})`;
   if (!n.cab.title || !n.cab.resumen) throw new Error(donde + ': falta title o resumen');
   if (!n.cab.se_activa) throw new Error(donde + ': falta se_activa');
-  for (const { s, i } of n.lineas) {
-    const t = s.trim(), d = `${n.archivo}:${i}`;
-    let m;
-    if ((m = t.match(/^<<(if|elseif)\s+(.*)>>$/))) { conds.push(expr(m[2], d)); continue; }
-    if (/^<<(else|endif)>>$/.test(t)) continue;
-    if ((m = t.match(/^<<(.*)>>$/))) { efectos.push(expr(m[1], d)); continue; }
-    if (t.startsWith('->')) continue;                                   // una opción (su texto y sus etiquetas)
-    if ((m = t.match(/^(\w+):\s*(.*?)((?:\s+#\S+)*)$/))) {
-      hablan.add(m[1]);
-      for (const tag of m[3].trim().split(/\s+/).filter(Boolean).map(x => x.slice(1))) {
-        if (tag === 'piensa') continue;
-        const [acto, ...args] = tag.split(':');                          // #ofender:ana → ofender('srapye', 'ana')
-        efectos.push(`${expr(acto, d)}('${m[1]}'${args.map(x => `, '${expr(x, d)}'`).join('')})`);
-      }
-      continue;
-    }
-    throw error(n.archivo, i, '«' + t + '» no es una línea de Yarn (quien: texto, -> opción, <<comando>>)');
-  }
-  const si = n.cab.si ? partes(n.cab.si).map(c => expr(c, donde)) : [];
-  return `defEscena(escena.${n.cab.title}, {
-  se_activa: [${n.cab.se_activa.split('|').map(a => activacion(a, historia, donde)).join(', ')}],
-  si: y(${[...si, ...conds].join(', ')}),
-  hablan: [${[...hablan].map(q => `'${q}'`).join(', ')}],
-  efectos: [${efectos.join(', ')}],
-})`;
+  const { cuerpo, hablan } = guion(n), si = n.cab.si ? partes(n.cab.si).map(c => expr(c, donde)) : [];
+  return `  ${n.cab.title}: defEscena(escena.${n.cab.title}, {
+    resumen: ${JSON.stringify(n.cab.resumen)},
+    se_activa: [${n.cab.se_activa.split('|').map(a => activacion(a, historia, donde)).join(', ')}],
+    si: y(${si.join(', ')}),${n.cab.repetir ? `\n    repetir: '${expr(n.cab.repetir, donde)}',` : ''}${n.cab.punto ? `\n    punto: ${JSON.stringify(n.cab.punto)},` : ''}
+    hablan: [${[...hablan].map(q => `'${q}'`).join(', ')}],
+    cuerpo: [
+      ${cuerpo.join(',\n      ')},
+    ],
+  }),`;
 }
 
 // ---------------------------------------------------------------- una voz
@@ -92,9 +118,9 @@ function voz(n){
   for (const { s, i } of n.lineas) {
     const m = s.trim().match(/^=>\s*(.*?)(?:\s*<<if\s+(.*)>>)?$/);
     if (!m) throw error(n.archivo, i, 'una voz es un grupo de variantes: «=> texto» o «=> texto <<if condición>>»');
-    lineas.push(m[2] ? expr(m[2], `${n.archivo}:${i}`) : 'true');
+    lineas.push(`{ t: ${JSON.stringify(m[1])}, si: ${m[2] ? expr(m[2], `${n.archivo}:${i}`) : 'true'} }`);
   }
-  return `voz(${expr(n.cab.voz, donde)}, { ${n.cab.paso ? `paso: '${expr(n.cab.paso, donde)}', ` : ''}lineas: [${lineas.join(', ')}] })`;
+  return `  voz(${expr(n.cab.voz, donde)}, { ${n.cab.paso ? `paso: '${expr(n.cab.paso, donde)}', ` : ''}lineas: [${lineas.join(', ')}] }),`;
 }
 
 // ---------------------------------------------------------------- los imports: solo lo que se usa, de donde está
@@ -127,8 +153,9 @@ function construir(raiz){
   if (fs.existsSync(path.join(comun, 'voces.yarn'))) {
     const vs = nodos(fs.readFileSync(path.join(comun, 'voces.yarn'), 'utf8'), 'comun/voces.yarn').map(voz);
     const cuerpo = vs.join('\n');
-    fs.writeFileSync(path.join(comun, 'voces.chequeo.ts'), CABEZA('comun/voces.yarn') + imports(cuerpo + ' voz', modulosComunes, comun) + '\n\n' + vs.map(v => v + '\n').join(''));
-    escritos.push('comun/voces.chequeo.ts (' + vs.length + ' voces)');
+    fs.writeFileSync(path.join(comun, 'voces.datos.ts'), CABEZA('comun/voces.yarn') + imports(cuerpo + ' voz', modulosComunes, comun)
+      + '\n\nexport const voces = [\n' + vs.join('\n') + '\n]\n');
+    escritos.push('comun/voces.datos.ts (' + vs.length + ' voces)');
   }
   // cada historia
   for (const h of fs.readdirSync(path.join(raiz, 'historias'))) {
@@ -141,8 +168,9 @@ function construir(raiz){
     const vf = path.join(dir, 'voces.yarn'), vs = fs.existsSync(vf) ? nodos(fs.readFileSync(vf, 'utf8'), `historias/${h}/voces.yarn`).map(voz) : [];
     const cuerpo = [...es, ...vs].join('\n');
     const locales = [[path.join(dir, 'historia.ts'), exportsDe(path.join(dir, 'historia.ts'))], [path.join(dir, 'escenas.ids.ts'), new Set(['escena', 'dichas'])]];
-    fs.writeFileSync(path.join(dir, 'escenas.chequeo.ts'), CABEZA(`historias/${h}/escenas.yarn y voces.yarn`)
-      + imports(cuerpo + ' defEscena y voz', [...locales, ...modulosComunes], dir) + '\n\n' + [...es, ...vs].map(x => x + '\n').join(''));
+    fs.writeFileSync(path.join(dir, 'escenas.datos.ts'), CABEZA(`historias/${h}/escenas.yarn y voces.yarn`)
+      + imports(cuerpo + ' defEscena y voz', [...locales, ...modulosComunes], dir)
+      + '\n\nexport const escenas = {\n' + es.join('\n') + '\n}\n\nexport const voces = [\n' + vs.join('\n') + '\n]\n');
     escritos.push(`historias/${h}: ${es.length} escenas, ${vs.length} voces`);
   }
   return escritos;

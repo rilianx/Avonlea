@@ -62,16 +62,17 @@ export const esperar = primitivo('esperar', (_quien: Persona, hasta: Cond) => ({
 type Destino = Lugar | Campo<Lugar>
 
 // (si quien va en un medio, el medio va con él y con todos los que lleva; quien lo sigue, también)
-export const ir_a = mapa('ir_a', (_quien: Persona, _a: Destino) => ({ opcion: 'Ir a {a}' }))
+export const ir_a = mapa('ir_a', (_quien: Persona, _a: Destino) => ({ opcion: 'Ir hasta {a}' }))
 
 // (deja el medio en que iba: si va en la calesa, primero salta)
 export const correr_a = mapa('correr_a', (_quien: Persona, _a: Destino) => ({ paso: 'rapido' }))
 
 // ---------------------------------------------------------------- por receta
 
-// (va donde está el otro, lo toma de la mano —él puede soltarse— y lo trae)
+// (va donde está el otro —a pie: si iba en un medio, se baja—, lo toma de la mano —él puede soltarse— y lo trae)
 export const traer = receta('traer', (quien: Persona, otro: Persona, a: Destino) => ({
   pasos: {
+    a_pie: bajar(quien),
     va: ir_a(quien, mundo(otro).lugar),
     toma: tomar_de_la_mano(quien, otro),
     vuelve: ir_a(quien, a),
@@ -110,6 +111,7 @@ export const conseguir_que = busca('conseguir_que', (_quien: Persona, _otro: Per
 // vuelve a «cerca», y el camino continúa desde la parada en que iban)
 export const llevar_a = receta('llevar_a', (quien: Persona, otro: Persona, a: Lugar, m: Medio, por: Ruta) => ({
   pasos: {
+    va: ir_a(quien, medio(m).lugar),
     engancha: enganchar(quien, m),
     cerca: conseguir_que(quien, otro, mundo(otro).lugar.es(medio(m).lugar)),
     sube: conseguir_que(quien, otro, mundo(otro).en.es(m)),
@@ -117,6 +119,6 @@ export const llevar_a = receta('llevar_a', (quien: Persona, otro: Persona, a: Lu
     camino: viajar(quien, m, por, a),
     baja: [bajar(otro), bajar(quien)],
   },
-  mantiene: { si: mundo(otro).en.es(m), desde: 'arriba', si_se_rompe: 'cerca' },
+  mantiene: { si: mundo(otro).en.es(m), desde: 'arriba', hasta: 'camino', si_se_rompe: 'cerca' },
   cumplido: mundo(otro).lugar.es(a),
 }))

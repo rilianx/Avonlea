@@ -3,19 +3,21 @@
 import { accesoCualidad, accesoEstado, hechosDe } from './lenguaje'
 import type { Persona } from './mundo'
 
-export const estado = accesoEstado({
+export const estados = {
   ana_en_tv: {
     titulo: 'Ana en Tejas Verdes',
     orden: ['llegando', 'en_prueba', 'decidida', 'se_queda'],   // una escala: se compara con lt, gte…
     otros: ['devuelta'],                                        // fuera de la escala: solo es / no_es
     inicial: 'llegando',
   },
-})
+} as const
+export const estado = accesoEstado(estados)
 
-export const cualidad = accesoCualidad<Persona>()({
+export const cualidades = {
   paciencia: { titulo: 'la paciencia de Marilla con Ana', de: 'marilla', hacia: 'ana', rango: [0, 5], inicial: 3 },
   afecto: { titulo: 'cuánto quiere uno a otro', de: 'todos', hacia: 'todos', rango: [0, 5], inicial: 0 },
-})
+} as const
+export const cualidad = accesoCualidad<Persona>()(cualidades)
 
 export const hechos = hechosDe('comun', {
   primera_noche: 'Ana pasó su primera noche en Tejas Verdes (lo deja la historia de la llegada)',

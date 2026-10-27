@@ -11,7 +11,7 @@ diseño: compila (`tsc`), pero el juego todavía no lo lee. Hoy esta historia vi
 | [`escenas.yarn`](escenas.yarn) | las quince escenas: las trece de hoy, con la cabecera nueva, y dos para cuando Ana no quiere subir |
 | [`voces.yarn`](voces.yarn) | su sabor propio: «¡Ana! Ven, que nos vamos», «Sube, Ana. No tenemos todo el día», «Ana Shirley. Sube. Ahora.» |
 | [`index.ts`](index.ts) | lo que ven las demás historias: si terminó, y el recuerdo de que Ana corrió al mar |
-| `escenas.ids.ts`, `escenas.chequeo.ts` | generados por `tools/lenguaje/yarn.js` (no se editan) |
+| `escenas.ids.ts`, `escenas.datos.ts` | generados por `tools/lenguaje/yarn.js` (no se editan) |
 
 Lo común (el mundo, el estado compartido, los verbos como `llevar_a` y `conseguir_que`, los actos, las voces
 generales) está en [`../../comun/`](../../comun/).

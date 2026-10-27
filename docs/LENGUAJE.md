@@ -53,7 +53,7 @@ docs/lenguaje/
     actos.ts                 los actos de habla
     ana.ts                   Ana es la jugadora: cómo responde a lo que le piden cuando va sola
     voces.yarn               las voces comunes
-    voces.chequeo.ts         (generado)
+    voces.datos.ts         (generado)
   historias/
     white_sands/             una historia: todo lo de aquí es local
       historia.ts            sus hechos, sus condiciones, sus encargos, su orden, su salida
@@ -61,7 +61,7 @@ docs/lenguaje/
       voces.yarn             sus voces: el sabor propio, mientras está en curso
       index.ts               lo que ven las demás historias
       escenas.ids.ts         (generado) los nombres de sus escenas
-      escenas.chequeo.ts     (generado) cada escena y cada voz traducida, para que tsc la revise
+      escenas.datos.ts     (generado) cada escena y cada voz traducida, para que tsc la revise
 ```
 
 ## 3. Lo local y lo común
@@ -343,7 +343,7 @@ Lo revisan dos herramientas, y `tools/lenguaje/mutaciones.py` prueba que lo haga
 - dos escenas con el mismo nombre;
 - una escena sin `title`, `resumen` o `se_activa`.
 
-Después escribe `escenas.ids.ts` (los nombres de las escenas) y `escenas.chequeo.ts` (cada escena y cada voz,
+Después escribe `escenas.ids.ts` (los nombres de las escenas) y `escenas.datos.ts` (cada escena y cada voz,
 traducidas a llamadas del lenguaje).
 
 **`tsc`** revisa todo junto y rechaza:
@@ -360,13 +360,32 @@ traducidas a llamadas del lenguaje).
 - una escena que nada activa;
 - una historia que no puede terminar.
 
-## 13. Construir
+## 13. Construir y probar
 
 ```
-node tools/lenguaje/yarn.js docs/lenguaje     # los .yarn → escenas.ids.ts y *.chequeo.ts
+node tools/lenguaje/yarn.js docs/lenguaje     # los .yarn → escenas.ids.ts y *.datos.ts (las escenas y voces, como datos)
 tsc -p docs/lenguaje                          # revisa todo
 python3 tools/lenguaje/mutaciones.py          # que lo estricto lo sea
+node tools/lenguaje/construir.js              # todo, compilado, en un JSON (lo que lee el motor)
+node tools/lenguaje/probar.js                 # cada historia de punta a punta, en varios escenarios
+node tools/lenguaje/probar.js --ver sola      # lo que pasa, línea a línea
+node tools/lenguaje/pagina.js                 # trazas/lenguaje.html: jugarla en el navegador
 ```
+
+**El motor mínimo** (`tools/lenguaje/motor.js`) ejecuta los datos sin el juego: el estado y los momentos, los
+encargos con sus pasos y su reparación (`mantiene`), los pedidos a Ana, las escenas por `orden` y especificidad, y las
+voces. Sirve para probar una historia antes de llevarla al juego. Simplifica dos cosas:
+- **el mundo:** los lugares por nombre y los minutos entre ellos (15 entre paradas de una ruta, 2 dentro de un mismo
+  lugar, 3 a uno cercano, 10 si no), sin el mapa;
+- **las búsquedas:** el plan es de un paso (el verbo más barato de su `con` que logra el objetivo; lo que ya falló
+  cuesta más), y no el A\* completo del juego.
+
+**La página** `trazas/lenguaje.html` es para jugarla: tú eres Ana, contestas los pedidos, eliges en las escenas, o
+vas a otro lugar y te bajas de la calesa; a la derecha, los encargos, dónde está cada uno y el estado. Con «ver los
+momentos» aparece lo que la mueve por dentro.
+
+**La prueba** `tools/lenguaje/probar.js` la recorre en varios escenarios y revisa cómo termina: Ana sola; obediente;
+que se niega dos veces; que corre al mar; Marilla sin paciencia; Ana lejos a la hora de salir.
 
 **Para el juego**, el mismo `tsc` compila a JavaScript, y los constructores arman los datos: el JSON de cada historia
 con sus encargos, de cada verbo con su receta, de cada escena. El juego, el grafo, el modelo lógico (Z3) y la historia
