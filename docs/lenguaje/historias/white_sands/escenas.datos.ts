@@ -4,35 +4,35 @@ import { dichas, escena } from './escenas.ids'
 import { _, defEscena, deja, hace, log, momento, no, responde, suma, tras, voz, y } from '../../comun/lenguaje'
 import { ve } from '../../comun/mundo'
 import { cualidad } from '../../comun/estado'
-import { bajar, correr_a, ir_a, subir, traer } from '../../comun/verbos'
+import { bajar, correr_a, ir_a, ir_a_buscar, seguir, subir, traer } from '../../comun/verbos'
 import { disculparse, informar, ofender, ordenar, pedir } from '../../comun/actos'
 
 export const escenas = {
   ws_no_sube: defEscena(escena.ws_no_sube, {
     resumen: "Ana no quiere subir a la calesa: Marilla la espera, y se le acaba un poco la paciencia.",
-    se_activa: [responde('ana', 'rechaza', pedir)],
+    se_activa: [responde('ana', 'rechaza', pedir, subir)],
     si: y(white_sands.encargo.ida.estado.es('en_curso')),
     hablan: ['marilla', 'ana'],
     cuerpo: [
-      { q: 'marilla', t: "(Marilla la mira desde el pescante, con las riendas en la mano.) Ana. Te estoy esperando." },
+      { q: 'marilla', t: "(Marilla espera junto a la calesa, con las riendas en la mano.) Ana. Te estoy esperando." },
       { q: 'ana', t: "Es que… mientras no suba, todavía estoy en Tejas Verdes. Si subo, se acaba.", piensa: true },
       { hace: suma(cualidad('marilla', 'paciencia', 'ana'), -1) },
     ],
   }),
   ws_no_sube_orden: defEscena(escena.ws_no_sube_orden, {
-    resumen: "Ana sigue sin subir: Marilla baja de la calesa a buscarla.",
-    se_activa: [responde('ana', 'rechaza', ordenar)],
+    resumen: "Ana sigue sin subir: Marilla se cruza de brazos.",
+    se_activa: [responde('ana', 'rechaza', ordenar, subir)],
     si: y(white_sands.encargo.ida.estado.es('en_curso')),
     hablan: ['narra', 'marilla'],
     cuerpo: [
-      { q: 'narra', t: "Marilla deja las riendas, baja de la calesa y va derecho hacia Ana, sin apurarse y sin detenerse." },
-      { q: 'marilla', t: "Se acabó. Vamos." },
+      { q: 'narra', t: "Marilla deja las riendas sobre el asiento y se cruza de brazos. No piensa irse sin ella, y no piensa repetirlo muchas veces más." },
+      { q: 'marilla', t: "Se acabó, Ana. Sube." },
       { hace: suma(cualidad('marilla', 'paciencia', 'ana'), -1) },
     ],
   }),
   falta_viaje: defEscena(escena.falta_viaje, {
     resumen: "Es hora de ir a White Sands y Ana no está cerca: Marilla tuvo que ir a buscarla.",
-    se_activa: [hace('marilla', traer, '', 'cumplido')],
+    se_activa: [hace('marilla', ir_a_buscar, '', 'cumplido'), hace('marilla', traer, '', 'cumplido')],
     si: y(white_sands.encargo.busca.estado.es('en_curso')),
     hablan: ['narra', 'marilla'],
     cuerpo: [
@@ -142,7 +142,7 @@ export const escenas = {
   }),
   ws_orilla: defEscena(escena.ws_orilla, {
     resumen: "Ana llora en la orilla del mar; Marilla se sienta con ella en la arena.",
-    se_activa: [hace('marilla', traer, 'va', 'cumplido')],
+    se_activa: [hace('marilla', ir_a_buscar, 'va', 'cumplido'), hace('marilla', traer, 'va', 'cumplido')],
     si: y(hechos.ws_corrio.hoy),
     hablan: ['narra', 'marilla', 'ana'],
     cuerpo: [
@@ -232,6 +232,8 @@ export const escenas = {
 
 export const voces = [
   voz(pedir('marilla', 'ana', ir_a('ana', 'cocina')), { lineas: [{ t: "¡Ana! Ven, que nos vamos.", si: true }] }),
+  voz(ir_a_buscar('marilla', 'ana', _), { paso: 'va', lineas: [{ t: "Así que aquí estabas. La calesa lleva media hora esperando.", si: white_sands.encargo.busca.estado.es('en_curso') }, { t: "Aquí estás. Vamos, que la calesa está lista.", si: y(white_sands.encargo.ida.estado.es('en_curso'), no(hechos.ws_corrio.hoy)) }] }),
+  voz(pedir('marilla', 'ana', seguir('ana', 'marilla')), { lineas: [{ t: "Ven, Ana. Nos vamos a White Sands.", si: white_sands.encargo.ida.estado.es('en_curso') }] }),
   voz(traer('marilla', 'ana', _), { paso: 'va', lineas: [{ t: "Así que aquí estabas. La calesa lleva media hora esperando.", si: white_sands.encargo.busca.estado.es('en_curso') }] }),
   voz(pedir('marilla', 'ana', ir_a('ana', _)), { lineas: [{ t: "¡Ana! A la calesa, que nos vamos.", si: white_sands.encargo.ida.estado.es('en_curso') }] }),
   voz(pedir('marilla', 'ana', subir('ana', 'calesa')), { lineas: [{ t: "Sube, Ana. No tenemos todo el día.", si: true }, { t: "Vamos, sube. Y sacúdete esa arena.", si: hechos.ws_corrio.hoy }] }),

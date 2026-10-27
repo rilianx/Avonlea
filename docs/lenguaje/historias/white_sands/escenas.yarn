@@ -4,32 +4,33 @@
 // prioridad) lo dan la historia (historia.ts), su encargo y su «orden». Los nombres son los de historia.ts y comun/.
 // Comandos: <<deja(…)>>, <<suma(…)>>, y cualquier verbo: <<correr_a('ana', 'orilla')>>. Etiquetas: #piensa (lo que
 // alguien piensa), #propia (lo que Ana haría sola), #<acto>:<a quién> (la línea es ese acto: #ofender:ana).
-// Que Ana venga a la calesa y que suba no lo decide Marilla: se lo pide (pedir), y la jugadora acepta o no («Subir a la
-// calesa» / «Todavía no»). Si no, «ana rechaza pedir» es un momento: las escenas ws_no_sube y ws_no_sube_orden.
+// Que Ana venga a la calesa y que suba no lo decide Marilla: va donde está Ana y le pide que venga con ella («Ir con
+// Marilla»), y después que suba («Subir a la calesa»); la jugadora acepta o no («Todavía no»). Si no quiere subir,
+// «ana rechaza pedir subir» es un momento: las escenas ws_no_sube y ws_no_sube_orden.
 
 title: ws_no_sube
 resumen: Ana no quiere subir a la calesa: Marilla la espera, y se le acaba un poco la paciencia.
-se_activa: ana rechaza pedir
+se_activa: ana rechaza pedir subir
 si: white_sands.encargo.ida.estado.es('en_curso')
 ---
-marilla: (Marilla la mira desde el pescante, con las riendas en la mano.) Ana. Te estoy esperando.
+marilla: (Marilla espera junto a la calesa, con las riendas en la mano.) Ana. Te estoy esperando.
 ana: Es que… mientras no suba, todavía estoy en Tejas Verdes. Si subo, se acaba. #piensa
 <<suma(cualidad('marilla', 'paciencia', 'ana'), -1)>>
 ===
 
 title: ws_no_sube_orden
-resumen: Ana sigue sin subir: Marilla baja de la calesa a buscarla.
-se_activa: ana rechaza ordenar
+resumen: Ana sigue sin subir: Marilla se cruza de brazos.
+se_activa: ana rechaza ordenar subir
 si: white_sands.encargo.ida.estado.es('en_curso')
 ---
-narra: Marilla deja las riendas, baja de la calesa y va derecho hacia Ana, sin apurarse y sin detenerse.
-marilla: Se acabó. Vamos.
+narra: Marilla deja las riendas sobre el asiento y se cruza de brazos. No piensa irse sin ella, y no piensa repetirlo muchas veces más.
+marilla: Se acabó, Ana. Sube.
 <<suma(cualidad('marilla', 'paciencia', 'ana'), -1)>>
 ===
 
 title: falta_viaje
 resumen: Es hora de ir a White Sands y Ana no está cerca: Marilla tuvo que ir a buscarla.
-se_activa: marilla traer cumplido
+se_activa: marilla ir_a_buscar cumplido | marilla traer cumplido
 si: white_sands.encargo.busca.estado.es('en_curso')
 ---
 narra: Marilla tiene la calesa lista para ir a White Sands, y Ana no aparece por ninguna parte. La busca por la granja, por el huerto, por el camino… y la encuentra lejos, muy lejos. Vuelven a Tejas Verdes en un silencio que da miedo.
@@ -140,7 +141,7 @@ ana: Nadie las quiere por algo. #piensa
 
 title: ws_orilla
 resumen: Ana llora en la orilla del mar; Marilla se sienta con ella en la arena.
-se_activa: marilla traer.va cumplido
+se_activa: marilla ir_a_buscar.va cumplido | marilla traer.va cumplido
 si: hechos.ws_corrio.hoy
 ---
 narra: El mar está gris y verde, con espuma en las rocas. Ana se ha sentado en la arena roja, abrazada a las rodillas, y llora como si el mar entero le hubiera entrado por los ojos.

@@ -26,10 +26,10 @@ flowchart TD
   E((empieza:<br/>a prueba, tras la primera<br/>noche, 14 a 19 h)) --> B([busca: Marilla consigue<br/>que Ana venga a la cocina])
   B -- "marilla traer cumplido<br/>(tuvo que ir a buscarla)" --> FV[falta_viaje<br/>paciencia −1]
   B -- busca cumplido --> VS{¿paciencia?}
-  IDA -- "cerca, sube: Marilla le pide<br/>que venga y que suba" --> PE{{la jugadora:<br/>¿Subir a la calesa?}}
-  PE -- "ana rechaza pedir" --> NS[ws_no_sube<br/>paciencia −1]
+  IDA -- "cerca: Marilla va a buscarla<br/>(«Ir con Marilla»); sube" --> PE{{la jugadora:<br/>¿Subir a la calesa?}}
+  PE -- "ana rechaza pedir subir" --> NS[ws_no_sube<br/>paciencia −1]
   NS -- "otra vez: ordenar" --> PE2{{¿Subir a la calesa?}}
-  PE2 -- "ana rechaza ordenar" --> NO[ws_no_sube_orden<br/>paciencia −1, la trae]
+  PE2 -- "ana rechaza ordenar subir" --> NO[ws_no_sube_orden<br/>paciencia −1]
   PE -- acepta --> IDA
   PE2 -- acepta --> IDA
   VS -- ">= 1" --> V1[viaje_spencer]
@@ -44,8 +44,8 @@ flowchart TD
   IDA -. camino.escuela .-> T3
   IDA -- camino.playa empieza --> M[ws_mar]
   IDA -- camino.playa cumplido --> P[ws_pye]
-  P -- "Ana se baja y corre al mar:<br/>se rompe «mantiene»" --> TR([cerca: conseguir_que<br/>→ traer])
-  TR -- marilla traer.va cumplido --> O[ws_orilla]
+  P -- "Ana se baja y corre al mar:<br/>se rompe «mantiene»" --> TR([cerca: conseguir_que<br/>→ ir_a_buscar])
+  TR -- marilla ir_a_buscar.va cumplido --> O[ws_orilla]
   O --> IDA
   P -- "Ana se calla" --> IDA
   IDA -- ida cumplido --> SP{¿paciencia?}
@@ -73,10 +73,11 @@ flowchart TD
   | Marilla buscando a Ana | la búsqueda `conseguir_que` |
   | «Sube, Ana» | las voces de `pedir` y `ordenar` |
 
-- **Que Ana venga y suba lo decide la jugadora.** Marilla no la sube: necesita que Ana venga donde está la calesa
-  (por el mapa) y que suba, y se lo pide. La jugadora acepta («Subir a la calesa») o no («Todavía no»). Si no, Marilla se lo vuelve a decir, más firme (`ws_no_sube`), y
-  después baja a buscarla (`ws_no_sube_orden`); cada negativa le cuesta paciencia. Ana sola le hace caso a quien
-  quiere (`comun/ana.ts`).
+- **Que Ana venga y suba lo decide la jugadora.** Marilla no la sube: va donde está Ana y le pide que venga con ella
+  («Ir con Marilla»); vuelven juntas a la calesa, y le pide que suba («Subir a la calesa»). La jugadora acepta o no
+  («Todavía no»). Si no quiere subir, Marilla se lo vuelve a decir, más firme (`ws_no_sube`), y después se cruza de
+  brazos (`ws_no_sube_orden`); cada negativa le cuesta paciencia. Ana sola le hace caso a quien quiere
+  (`comun/ana.ts`). Todo esto se puede jugar en `trazas/lenguaje.html` (`node tools/lenguaje/pagina.js`).
 - **Las charlas van por lugares, en secuencia.** `ws_t2` se activa tras `ws_t1`, o al pasar la Hondonada de Lynde si
   la primera no se dijo.
 - **La paciencia de Marilla abre dos variantes** (la del libro y la de la duda) con la misma activación.

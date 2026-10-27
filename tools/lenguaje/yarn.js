@@ -48,7 +48,8 @@ const MOMENTOS = ['empieza', 'cumplido', 'fallido', 'sigue'];
 function activacion(a, historia, donde){
   const w = a.trim().split(/\s+/);
   if (w[0] === 'tras' && w.length === 2) return `tras(escena.${expr(w[1], donde)})`;
-  if (w.length === 3 && (w[1] === 'acepta' || w[1] === 'rechaza')) return `responde('${expr(w[0], donde)}', '${w[1]}', ${expr(w[2], donde)})`;   // la respuesta a un pedido
+  if ((w.length === 3 || w.length === 4) && (w[1] === 'acepta' || w[1] === 'rechaza'))   // la respuesta a un pedido (y a qué: «ana rechaza pedir subir»)
+    return `responde('${expr(w[0], donde)}', '${w[1]}', ${expr(w[2], donde)}${w[3] ? ', ' + expr(w[3], donde) : ''})`;
   const m = w.at(-1); if (!MOMENTOS.includes(m)) throw new Error(donde + ': «' + a + '»: el momento es uno de ' + MOMENTOS.join(', '));
   const camino = w.at(-2).split('.'), pasos = `'${camino.slice(1).map(x => expr(x, donde)).join('.')}'`;
   if (w.length === 3) return `hace('${expr(w[0], donde)}', ${expr(camino[0], donde)}, ${pasos}, '${m}')`;   // un verbo de alguien

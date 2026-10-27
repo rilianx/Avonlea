@@ -28,6 +28,25 @@ voz: ordenar(_, 'ana', subir('ana', _))
 => Ana Shirley. Sube. Ahora.
 ===
 
+title: voz_pedir_seguir
+voz: pedir(_, 'ana', seguir('ana', _))
+---
+=> Ven conmigo, Ana.
+===
+
+title: voz_ordenar_seguir
+voz: ordenar(_, 'ana', seguir('ana', _))
+---
+=> Ana Shirley. Ven conmigo. Ahora.
+===
+
+title: voz_ir_a_buscar_llega
+voz: ir_a_buscar(_, 'ana', _)
+paso: va
+---
+=> Aquí estás.
+===
+
 title: voz_traer_llega
 voz: traer(_, 'ana', _)
 paso: va

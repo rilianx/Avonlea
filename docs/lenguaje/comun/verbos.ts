@@ -69,8 +69,10 @@ export const correr_a = mapa('correr_a', (_quien: Persona, _a: Destino) => ({ pa
 
 // ---------------------------------------------------------------- por receta
 
-// (va donde está el otro —a pie: si iba en un medio, se baja—, lo toma de la mano —él puede soltarse— y lo trae)
+// (va donde está el otro —a pie: si iba en un medio, se baja—, lo toma de la mano —él puede soltarse— y lo trae; lo
+// más firme: cuesta más que pedírselo)
 export const traer = receta('traer', (quien: Persona, otro: Persona, a: Destino) => ({
+  cuesta: 5,
   pasos: {
     a_pie: bajar(quien),
     va: ir_a(quien, mundo(otro).lugar),
@@ -95,12 +97,32 @@ export const viajar = por_cada_uno('viajar', (quien: Persona, m: Medio, por: Rut
 
 // ---------------------------------------------------------------- por búsqueda
 
-// (el A* elige el plan más barato: pedírselo si Ana la oye; ordenárselo si ya se lo pidió; ir a buscarla y traerla si
-// está lejos o no obedece. Lo que depende de Ana es un pedido: el A* supone que acepta; si rechaza, el intento falla y
-// vuelve a planificar —más firme, o ir a buscarla—; al cuarto, la búsqueda falla)
+// (que el otro decida venir con quien se lo pide: pedírselo, y si no, ordenárselo; estando juntos)
+export const que_la_siga = busca('que_la_siga', (quien: Persona, otro: Persona) => ({
+  objetivo: mundo(otro).sigue.es(quien),
+  con: [pedir, ordenar],
+  intentos: 2,
+}))
+
+// (va donde está el otro, le pide que venga con él, y vuelven juntos —el otro, detrás—: para que alguien venga, se le
+// va a buscar, no se le grita desde lejos)
+export const ir_a_buscar = receta('ir_a_buscar', (quien: Persona, otro: Persona, a: Destino) => ({
+  cuesta: 2,
+  pasos: {
+    a_pie: bajar(quien),
+    va: ir_a(quien, mundo(otro).lugar),
+    pide: que_la_siga(quien, otro),
+    vuelve: ir_a(quien, a),
+    llegan: dejar_de_seguir(otro),
+  },
+}))
+
+// (el A* elige el plan más barato: pedírselo si están juntos; si no, ir a buscarla; ordenárselo si ya se lo pidió;
+// traerla de la mano si no obedece. Lo que depende de Ana es un pedido: el A* supone que acepta; si rechaza, el intento
+// falla y vuelve a planificar —más firme—; al cuarto, la búsqueda falla)
 export const conseguir_que = busca('conseguir_que', (_quien: Persona, _otro: Persona, c: Cond) => ({
   objetivo: c,
-  con: [pedir, ordenar, traer, esperar],
+  con: [pedir, ordenar, ir_a_buscar, traer, esperar],
   intentos: 4,
 }))
 

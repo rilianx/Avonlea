@@ -131,7 +131,9 @@ export const primitivo = <A extends unknown[]>(nombre: string, def: (...a: A) =>
 
 // una secuencia fija: cada paso con su etiqueta (los momentos de las escenas); «mantiene», lo que tiene que seguir
 // siendo cierto desde un paso (si el mundo lo rompe, se vuelve al paso que lo consigue, y se sigue donde iba)
+// («cuesta»: lo que le suma a un plan, para el A*; si no, lo que dura)
 export type DefReceta<P extends Record<string, Paso>> = {
+  readonly cuesta?: number
   readonly pide?: Cond
   readonly pasos: P
   readonly mantiene?: { readonly si: Cond; readonly desde: keyof P & string; readonly hasta?: keyof P & string; readonly si_se_rompe: keyof P & string }
@@ -203,9 +205,10 @@ export type Activacion = { readonly activa: unknown }
 export const momento = <S extends string>(e: Encargo<S>, paso: '' | NoInfer<S>, m: Momento): Activacion => ({ activa: { encargo: e, paso, momento: m } })
 // un verbo de alguien: hace('marilla', traer, 'va', 'cumplido'); o lo que hace la jugadora: hace('ana', tocar, '', 'empieza')
 export const hace = <S extends string>(quien: Persona, v: Verbo<never[], S>, paso: '' | NoInfer<S>, m: Momento): Activacion => ({ activa: { quien, verbo: v.verbo, paso, momento: m } })
-// alguien acepta o rechaza lo que le pidieron: responde('ana', 'rechaza', pedir)
+// alguien acepta o rechaza lo que le pidieron: responde('ana', 'rechaza', pedir), o un pedido en particular:
+// responde('ana', 'rechaza', pedir, subir) —que suba—
 export type Respuesta = 'acepta' | 'rechaza'
-export const responde = (quien: Persona, r: Respuesta, a: Verbo<never[], string>): Activacion => ({ activa: { quien, responde: r, acto: a.verbo } })
+export const responde = (quien: Persona, r: Respuesta, a: Verbo<never[], string>, que?: Verbo<never[], string>): Activacion => ({ activa: { quien, responde: r, acto: a.verbo, ...(que ? { hace: que.verbo } : {}) } })
 // otra escena terminó
 export const tras = (e: Escena): Activacion => ({ activa: { tras: e } })
 

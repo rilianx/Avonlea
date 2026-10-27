@@ -172,8 +172,9 @@ export const llevar_a = receta('llevar_a', (quien: Persona, otro: Persona, a: Lu
 ```
 
 - **Lo que necesita son dos decisiones del otro**, una después de la otra, cada una con su búsqueda. Marilla no
-  puede subir a Ana a la calesa. Primero consigue que Ana venga donde está la calesa (`cerca`): se lo pide, y Ana
-  camina por el mapa, o la va a buscar y la trae de la mano. Después, que suba (`sube`). Las dos las decide Ana (§7.1).
+  puede subir a Ana a la calesa. Primero consigue que Ana venga donde está la calesa (`cerca`): **va a buscarla**
+  (`ir_a_buscar`: va donde está Ana, le pide que venga con ella —«Ir con Marilla»—, y vuelven juntas, Ana detrás), o
+  si no obedece, la trae de la mano (`traer`). Después, que suba (`sube`). Las dos las decide Ana (§7.1).
   (También existe `seguir`, para ir juntos a pie; la calesa no lo usa, porque al jugar es más claro «Subir a la
   calesa» que «Ir con Marilla».)
 - **`mantiene`**: una condición que tiene que seguir siendo cierta desde un paso. Si el mundo la rompe (Ana se baja
@@ -198,6 +199,8 @@ export const ofender = acto('ofender', (quien: Persona, a: Persona) => ({ deja: 
 
 Un acto con **`pedido`** (`pedir`, `ordenar`) le pide a alguien que haga un verbo, y ese alguien decide.
 
+- **Se pide estando juntos.** `pedir` y `ordenar` piden que el otro oiga (en el mismo lugar): para que alguien que está
+  lejos venga, primero hay que ir a buscarlo, no gritarle desde la calesa.
 - **Si es Ana, decide la jugadora.** El juego le ofrece hacerlo (el texto `opcion` del verbo: `subir` se ofrece
   como «Subir a la calesa», `ir_a` como «Ir a …») o no (`opcion_no`: «Todavía no»). No contestar dentro de `espera`
   también es no. Si en vez de contestar camina hacia la calesa, también cuenta: lo que importa es la condición.
@@ -272,6 +275,7 @@ Una escena de una historia pide, además, sin escribirlo, que su historia esté 
 | `marilla traer.va cumplido` | un verbo de alguien (en cualquier encargo) | `hace('marilla', traer, 'va', 'cumplido')` |
 | `ana tocar empieza` | lo que hace la jugadora | `hace('ana', tocar, '', 'empieza')` |
 | `ana rechaza pedir` | la respuesta a un pedido (§7.1): `acepta` o `rechaza` | `responde('ana', 'rechaza', pedir)` |
+| `ana rechaza pedir subir` | la respuesta a un pedido en particular (que suba) | `responde('ana', 'rechaza', pedir, subir)` |
 | `tras ws_t1` | otra escena terminó (con una pausa breve) | `tras(escena.ws_t1)` |
 
 ### 9.3 El cuerpo

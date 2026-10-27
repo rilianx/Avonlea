@@ -61,8 +61,8 @@
       }
       throw new Error('condición desconocida: ' + JSON.stringify(c));
     }
-    // (lo que el mundo calcula: verse y oírse, en el mismo lugar o dentro del mismo —en Tejas Verdes, de la cocina al corral—)
-    const juntos = (a, b) => { const x = lugarDe(a), y = lugarDe(b), p = l => D.lugares[l]?.dentro || l; return x === y || p(x) === p(y); };
+    // (lo que el mundo calcula: verse y oírse, en el mismo lugar)
+    const juntos = (a, b) => lugarDe(a) === lugarDe(b);
     const funciones = { ve: juntos, oye: juntos };
     function aplicar(e){
       if (e.verbo) return instantaneo(e);
@@ -207,17 +207,20 @@
       const cand = [];
       for (const n of con) {
         const d0 = D.verbos[n];
-        if (d0.tipo === 'acto' && d0.pedido) for (const v of logran(otro, obj)) {
+        if (d0.tipo === 'acto' && d0.pedido) for (const v of logran(otro, obj)) {   // (pedirle al otro lo que lo deja así)
           const ll = { verbo: n, args: [quien, otro, v] }, d = sub(d0, { params: ll.args });
           if (cumple(d.pide)) cand.push({ ll, costo: d.cuesta ?? 1 });
         }
-        if (n === 'traer' && obj.camino?.[2] === 'lugar' && obj.camino[1] === otro) cand.push({ ll: { verbo: 'traer', args: [quien, otro, val(obj.valor)] }, costo: 5 + minutos(lugarDe(quien), lugarDe(otro)) / 3 });
+        // (una receta de quien, el otro y un destino —ir a buscarla, traerla—: para que el otro quede en un lugar)
+        if (d0.tipo === 'receta' && d0.params.length === 3 && obj.camino?.[2] === 'lugar' && obj.camino[1] === otro)
+          cand.push({ ll: { verbo: n, args: [quien, otro, val(obj.valor)] }, costo: (d0.cuesta ?? 3) + minutos(lugarDe(quien), lugarDe(otro)) / 3 });
       }
       for (const c of cand) c.costo += 5 * (fallas[c.ll.verbo] || 0);
       cand.sort((a, b) => a.costo - b.costo);
       return cand[0]?.ll;
     }
-    const describir = ll => ll.verbo === 'traer' ? `ir a buscar a ${nombre(ll.args[1])} y traerla` : `${ll.verbo} a ${nombre(ll.args[1])}: «${texto(D.verbos[ll.args[2].verbo].opcion, ll.args[2])}»`;
+    const describir = ll => D.verbos[ll.verbo].tipo === 'receta' ? `${ll.verbo.replace(/_/g, ' ')} a ${nombre(ll.args[1])} (hasta ${nombre(ll.args[2])})`
+      : `${ll.verbo} a ${nombre(ll.args[1])}: «${texto(D.verbos[ll.args[2].verbo].opcion, ll.args[2])}»`;
     function* acto(d, ll, inst){
       if (d.pide && !cumple(d.pide)) return false;
       decir(ll);
@@ -225,7 +228,7 @@
       if (!d.pedido) return true;
       const a = d.pedido.a, v = d.pedido.hace;
       const acepta = a === 'ana' ? yield { pregunta: { de: ll.args[0], acto: ll.verbo, hace: v, si: texto(D.verbos[v.verbo].opcion, v), no: D.opcion_no } } : true;
-      cola.push({ tipo: 'responde', quien: a, r: acepta ? 'acepta' : 'rechaza', acto: ll.verbo });
+      cola.push({ tipo: 'responde', quien: a, r: acepta ? 'acepta' : 'rechaza', acto: ll.verbo, hace: v.verbo });
       nota(`${nombre(a)} ${acepta ? 'acepta' : 'rechaza'} (${ll.verbo})`, 'momento');
       if (!acepta) { yield { min: 1 }; return false; }   // (un respiro: lo que pasa cuando Ana dice que no, antes de volver a intentar)
       return yield* hijo(v, inst, 'hace');
@@ -261,7 +264,7 @@
     }
     function coincide(a, mo){
       if (a.tras) return mo.tipo === 'tras' && mo.escena === a.tras.escena;
-      if (a.responde) return mo.tipo === 'responde' && mo.quien === a.quien && mo.r === a.responde && mo.acto === a.acto;
+      if (a.responde) return mo.tipo === 'responde' && mo.quien === a.quien && mo.r === a.responde && mo.acto === a.acto && (!a.hace || mo.hace === a.hace);
       if (a.encargo) return mo.tipo === 'encargo' && mo.historia === a.encargo.estado.camino[1] && mo.etiqueta === a.encargo.etiqueta && mo.paso === a.paso && mo.momento === a.momento;
       if (a.verbo) return mo.tipo === 'verbo' && mo.quien === a.quien && mo.verbo === a.verbo && mo.paso === a.paso && mo.momento === a.momento;
       return false;

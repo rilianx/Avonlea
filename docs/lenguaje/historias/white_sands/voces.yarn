@@ -6,6 +6,20 @@ voz: pedir('marilla', 'ana', ir_a('ana', 'cocina'))
 => ¡Ana! Ven, que nos vamos.
 ===
 
+title: voz_ir_a_buscar_llega
+voz: ir_a_buscar('marilla', 'ana', _)
+paso: va
+---
+=> Así que aquí estabas. La calesa lleva media hora esperando. <<if white_sands.encargo.busca.estado.es('en_curso')>>
+=> Aquí estás. Vamos, que la calesa está lista. <<if y(white_sands.encargo.ida.estado.es('en_curso'), no(hechos.ws_corrio.hoy))>>
+===
+
+title: voz_pedir_seguir
+voz: pedir('marilla', 'ana', seguir('ana', 'marilla'))
+---
+=> Ven, Ana. Nos vamos a White Sands. <<if white_sands.encargo.ida.estado.es('en_curso')>>
+===
+
 title: voz_traer_llega
 voz: traer('marilla', 'ana', _)
 paso: va
