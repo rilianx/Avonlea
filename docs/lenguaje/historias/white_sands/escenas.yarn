@@ -1,44 +1,43 @@
-# El guion de White Sands (capítulos 5 y 6), en el lenguaje de docs/LENGUAJE.md (§9).
-# Las líneas son las del guion de hoy (src/datos/guion.txt); cambia la cabecera: cada escena dice de qué historia es,
-# en qué momento se activa (§9.2) y qué pide. Lo que hoy repetían todas (viaje=white_sands, ana_en_tv<decidida, en:,
-# calesa:, canal:, prioridad:, interrumpe:, sujeta:) lo dan la historia, el encargo y la lista «orden».
+// Las escenas de White Sands (capítulos 5 y 6), en Yarn Spinner (docs/LENGUAJE.md §9).
+// Las líneas son las del guion de hoy (src/datos/guion.txt). La cabecera dice en qué momento se activa cada una
+// (se_activa) y qué pide (si); lo que pedían todas (estar de viaje, Ana a prueba, ir en la calesa, el canal, la
+// prioridad) lo dan la historia (historia.ts), su encargo y su «orden». Los nombres son los de historia.ts y comun/.
+// Comandos: <<deja(…)>>, <<suma(…)>>, y cualquier verbo: <<correr_a('ana', 'orilla')>>. Etiquetas: #piensa (lo que
+// alguien piensa), #propia (lo que Ana haría sola), #<acto>:<a quién> (la línea es ese acto: #ofender:ana).
 
-=== viaje_spencer ===
-historia: white_sands
-resumen: Marilla y Ana salen a White Sands, a devolverla donde la Sra. Spencer.
-punto: Antes de salir a White Sands
-se activa: busca cumplido
-si: marilla_con_paciencia
-narra: White Sands está a unas millas por el camino de la costa. Allí vive la Sra. Spencer, la que trajo a Ana del orfanato por equivocación: Marilla va a pedirle que la devuelva. Ana sabe que puede ser su último día en Tejas Verdes.
----
-marilla: Ponte el sombrero, Ana. Nos vamos a White Sands.
-ana piensa: Puede que sea la última vez que veo esta cocina.
-
-=== viaje_spencer_duda ===
-historia: white_sands
-resumen: Marilla, sin paciencia, sale a White Sands sin decir una palabra.
-punto: Antes de salir a White Sands
-se activa: busca cumplido
-si: !marilla_con_paciencia
-narra: White Sands está a unas millas por el camino de la costa. Marilla lleva las riendas y no dice nada en todo el viaje: piensa en el camisón a mediodía, en la ropa por el suelo, en lo que ha tenido que aguantar. Ana tampoco habla. Mira el mar y aprieta su maleta vieja.
----
-marilla: Ponte el sombrero, Ana. Nos vamos a White Sands.
-ana piensa: Ni siquiera me mira. Puede que sea la última vez que veo esta cocina.
-
-=== falta_viaje ===
-historia: white_sands
+title: falta_viaje
 resumen: Es hora de ir a White Sands y Ana no está cerca: Marilla tuvo que ir a buscarla.
-se activa: marilla traer(marilla, ana) cumplido
-si: encargo.white_sands.busca = en_curso
-narra: Marilla tiene la calesa lista para ir a White Sands, y Ana no aparece por ninguna parte. La busca por la granja, por el huerto, por el camino… y la encuentra lejos, muy lejos. Vuelven a Tejas Verdes en un silencio que da miedo.
+se_activa: marilla traer cumplido
+si: white_sands.encargo.busca.estado.es('en_curso')
 ---
-! suma cualidad.marilla.paciencia.ana -1
+narra: Marilla tiene la calesa lista para ir a White Sands, y Ana no aparece por ninguna parte. La busca por la granja, por el huerto, por el camino… y la encuentra lejos, muy lejos. Vuelven a Tejas Verdes en un silencio que da miedo.
+<<suma(cualidad('marilla', 'paciencia', 'ana'), -1)>>
 marilla: (Sin aliento, con la boca apretada.) La calesa lleva media hora esperando, Ana. Media hora.
+===
 
-=== ws_t1 ===
-historia: white_sands
+title: viaje_spencer
+resumen: Marilla y Ana salen a White Sands, a devolverla donde la Sra. Spencer.
+se_activa: busca cumplido
+si: marilla_con_paciencia
+---
+narra: White Sands está a unas millas por el camino de la costa. Allí vive la Sra. Spencer, la que trajo a Ana del orfanato por equivocación: Marilla va a pedirle que la devuelva. Ana sabe que puede ser su último día en Tejas Verdes.
+marilla: Ponte el sombrero, Ana. Nos vamos a White Sands.
+ana: Puede que sea la última vez que veo esta cocina. #piensa
+===
+
+title: viaje_spencer_duda
+resumen: Marilla, sin paciencia, sale a White Sands sin decir una palabra.
+se_activa: busca cumplido
+si: no(marilla_con_paciencia)
+---
+narra: White Sands está a unas millas por el camino de la costa. Marilla lleva las riendas y no dice nada en todo el viaje: piensa en el camisón a mediodía, en la ropa por el suelo, en lo que ha tenido que aguantar. Ana tampoco habla. Mira el mar y aprieta su maleta vieja.
+marilla: Ponte el sombrero, Ana. Nos vamos a White Sands.
+ana: Ni siquiera me mira. Puede que sea la última vez que veo esta cocina. #piensa
+===
+
+title: ws_t1
 resumen: En la calesa: Ana decide disfrutar el viaje; las rosas silvestres y su pelo.
-se activa: ida.camino empieza
+se_activa: ida.camino empieza
 si: marilla_con_paciencia
 ---
 ana: ¿Sabe, Srta. Cuthbert? He decidido disfrutar de este viaje. Si uno se decide con firmeza, casi siempre puede disfrutar de las cosas.
@@ -49,12 +48,11 @@ marilla: No, nunca. Y no creo que en tu caso vaya a pasar.
 ana: (Ana suspira.) Bueno, otra esperanza perdida. Mi vida es un perfecto cementerio de esperanzas enterradas. Lo leí en un libro, y me lo digo para consolarme cuando algo me sale mal.
 marilla: No veo dónde está el consuelo.
 ana: Es que suena tan bonito y tan romántico… como si yo fuera la heroína de un libro.
+===
 
-=== ws_t2 ===
-historia: white_sands
+title: ws_t2
 resumen: Marilla le pide «los hechos»: Bolingbroke, Walter y Bertha Shirley.
-se activa: tras ws_t1
-se activa: ida.camino.hondonada_lynde cumplido
+se_activa: tras ws_t1 | ida.camino.hondonada_lynde cumplido
 si: marilla_con_paciencia
 ---
 marilla: (Marilla mira el camino, no a Ana.) Ya que tienes tantas ganas de hablar, cuéntame lo que sepas de ti.
@@ -63,13 +61,12 @@ marilla: No, nada de imaginaciones. Los hechos, sin adornos. ¿Dónde naciste y 
 ana: Cumplí once en marzo. Nací en Bolingbroke, en Nueva Escocia. Mi padre se llamaba Walter Shirley y era maestro en la escuela de Bolingbroke. Mi madre se llamaba Bertha Shirley. ¿No son lindos nombres, Walter y Bertha? Me alegra tanto que mis padres tuvieran nombres bonitos.
 marilla: El nombre de una persona importa poco, si se porta bien.
 ana: Bueno, no sé. Una rosa con otro nombre olería igual de dulce, dice el libro, pero nunca he podido creerlo. No creo que una rosa fuera tan linda si se llamara cardo o repollo.
-marilla piensa: Hay que ver la de cosas que caben en esa cabeza.
+marilla: Hay que ver la de cosas que caben en esa cabeza. #piensa
+===
 
-=== ws_t3 ===
-historia: white_sands
+title: ws_t3
 resumen: Ana cuenta su vida: la fiebre, la Sra. Thomas, los mellizos, el orfanato.
-se activa: tras ws_t2
-se activa: ida.camino.escuela cumplido
+se_activa: tras ws_t2 | ida.camino.escuela cumplido
 si: marilla_con_paciencia
 ---
 ana: Mi madre también era maestra, pero cuando se casó con mi padre dejó de enseñar. Eran pobres como ratones de iglesia. Vivían en una casita amarilla, con madreselvas en la ventana. Yo nunca la vi, pero la he imaginado miles de veces.
@@ -81,12 +78,12 @@ marilla: ¿Y fuiste a la escuela?
 ana: No mucho. Pero sé muchísimos poemas de memoria: «La batalla de Hohenlinden», y «Edimburgo después de Flodden», y casi todo «La dama del lago». ¿No le encantan esos poemas que le dan a uno escalofríos por la espalda?
 marilla: ¿Y esas mujeres, la Sra. Thomas y la Sra. Hammond, te trataban bien?
 ana: (Ana se pone colorada hasta la frente.) Q-querían tratarme bien. Sé que querían ser tan buenas y amables como pudieran. Y cuando alguien quiere ser bueno con uno, no importa tanto si no lo consigue del todo, ¿no? Tenían muchas preocupaciones.
-marilla piensa: Qué vida, la de esta criatura. Hambre de cariño, trabajo, pobreza y abandono. Y está tan contenta de haber llegado a un hogar de verdad. ¿Y si se la quedaran? Matthew quiere. Y parece buena, y enseñable.
+marilla: Qué vida, la de esta criatura. Hambre de cariño, trabajo, pobreza y abandono. Y está tan contenta de haber llegado a un hogar de verdad. ¿Y si se la quedaran? Matthew quiere. Y parece buena, y enseñable. #piensa
+===
 
-=== ws_mar ===
-historia: white_sands
+title: ws_mar
 resumen: Frente al mar: Ana quisiera ser gaviota; el hotel White Sands, y el miedo a llegar.
-se activa: ida.camino.playa empieza
+se_activa: ida.camino.playa empieza
 ---
 ana: (Ana despierta de un largo silencio, con los ojos muy abiertos. Allá adelante brilla el mar.) ¿No es maravilloso el mar?
 ana: Una vez, cuando vivía en Marysville, el Sr. Thomas alquiló un carro y nos llevó a todos a pasar el día en la playa, a diez millas. Disfruté cada minuto, aunque tuve que cuidar a los niños todo el tiempo. Lo volví a vivir en sueños felices durante años.
@@ -94,34 +91,34 @@ ana: Pero esta costa es más bonita que la de Marysville. ¿No son espléndidas 
 ana: ¿Qué es esa casa grande, ahí adelante?
 marilla: El hotel White Sands. Lo tiene el Sr. Kirke, pero la temporada todavía no empieza. En verano viene un montón de americanos. Ahí nos espera la Sra. Spencer.
 ana: (Ana se hunde en el asiento.) Tenía miedo de que fuera ahí. No quiero llegar. De algún modo, va a ser como el fin de todo.
+===
 
-# (no es del libro: en la serie, una señora del camino habla mal de Ana, y Ana corre al mar)
-=== ws_pye ===
-historia: white_sands
+// (no es del libro: en la serie, una señora del camino habla mal de Ana, y Ana corre al mar)
+title: ws_pye
 resumen: La Sra. Pye sale al camino y dice algo cruel de Ana (no es del libro).
-se activa: ida.camino.playa cumplido
-si: dichas.ws_mar, f:ve(srapye, ana)
+se_activa: ida.camino.playa cumplido
+si: dichas.ws_mar, ve('srapye', 'ana')
 ---
 srapye: ¡Marilla Cuthbert! (La Sra. Pye se acerca a la calesa, con su canasto, y mira a Ana de arriba abajo.) ¿Así que esta es la huérfana que les mandaron por equivocación?
 marilla: Buenas tardes, Sra. Pye.
-srapye [ofender(srapye, ana)]: Flaca como un palo, y con ese pelo… Yo que usted, Marilla, la devolvía hoy mismo. A esas niñas del asilo no se les quita lo que traen: mienten, roban, y al primer descuido le queman a una la casa. Nadie las quiere por algo.
-ana piensa: Nadie las quiere por algo.
-->* Bajar de la calesa y correr hacia el mar
-   ana: (Ana salta de la calesa sin decir una palabra y echa a correr por el pasto, hacia el mar, con la trenza al viento.)
-   marilla: ¡Ana! ¡Ana Shirley!
-   ! deja hechos.ws_corrio
-   ! ana correr_a(orilla)
+srapye: Flaca como un palo, y con ese pelo… Yo que usted, Marilla, la devolvía hoy mismo. A esas niñas del asilo no se les quita lo que traen: mienten, roban, y al primer descuido le queman a una la casa. Nadie las quiere por algo. #ofender:ana
+ana: Nadie las quiere por algo. #piensa
+-> Bajar de la calesa y correr hacia el mar #propia
+    ana: (Ana salta de la calesa sin decir una palabra y echa a correr por el pasto, hacia el mar, con la trenza al viento.)
+    marilla: ¡Ana! ¡Ana Shirley!
+    <<deja(hechos.ws_corrio)>>
+    <<correr_a('ana', 'orilla')>>
 -> Quedarse quieta, apretando la maleta
-   ana: (Ana no dice nada. Aprieta la maleta vieja contra las rodillas, hasta que le duelen los dedos, y mira el mar.)
-   marilla: (Marilla sacude las riendas.) Buenas tardes, Sra. Pye. Tenemos que llegar a White Sands antes del té.
-   ana piensa: No voy a llorar delante de ella. No voy a llorar.
-   ! deja hechos.ws_callo
+    ana: (Ana no dice nada. Aprieta la maleta vieja contra las rodillas, hasta que le duelen los dedos, y mira el mar.)
+    marilla: (Marilla sacude las riendas.) Buenas tardes, Sra. Pye. Tenemos que llegar a White Sands antes del té.
+    ana: No voy a llorar delante de ella. No voy a llorar. #piensa
+    <<deja(hechos.ws_callo)>>
+===
 
-=== ws_orilla ===
-historia: white_sands
+title: ws_orilla
 resumen: Ana llora en la orilla del mar; Marilla se sienta con ella en la arena.
-se activa: marilla traer(marilla, ana).va cumplido
-si: hechos[hoy].ws_corrio
+se_activa: marilla traer.va cumplido
+si: hechos.ws_corrio.hoy
 ---
 narra: El mar está gris y verde, con espuma en las rocas. Ana se ha sentado en la arena roja, abrazada a las rodillas, y llora como si el mar entero le hubiera entrado por los ojos.
 marilla: (Marilla llega sin aliento, sujetándose el sombrero.) No se sale corriendo así, sin una palabra. Casi me matas del susto.
@@ -130,102 +127,101 @@ marilla: (Marilla se queda de pie un momento. Después, con un suspiro, se sient
 marilla: La Sra. Pye dice lo que dice de todo el mundo, Ana. De mí también, a mis espaldas, y aquí me tienes.
 ana: Pero a mí me lo dijo delante. Y usted no le contestó nada.
 marilla: Le dije buenas tardes. Con la Sra. Pye, eso ya es decirle bastante.
-->* «¿Usted también cree que debería volver al orfanato?»
-   ana: ¿Usted también cree que debería volver al orfanato? Dígamelo de verdad. Prefiero saberlo aquí, con el mar, que allá, delante de la Sra. Spencer.
-   marilla: (Marilla mira las olas un buen rato antes de contestar.) Lo que yo crea es asunto mío, y todavía no lo he decidido. Pero no lo voy a decidir por lo que diga una mujer en un camino. Eso te lo prometo.
-   ana: (Ana se seca la cara con la manga.) Gracias, Srta. Cuthbert. Eso ya es bastante. Es casi una esperanza, y yo sé vivir con casi esperanzas.
-   ! suma cualidad.marilla.afecto.ana 1
-   ! deja hechos.ws_pregunto
+-> «¿Usted también cree que debería volver al orfanato?» #propia
+    ana: ¿Usted también cree que debería volver al orfanato? Dígamelo de verdad. Prefiero saberlo aquí, con el mar, que allá, delante de la Sra. Spencer.
+    marilla: (Marilla mira las olas un buen rato antes de contestar.) Lo que yo crea es asunto mío, y todavía no lo he decidido. Pero no lo voy a decidir por lo que diga una mujer en un camino. Eso te lo prometo.
+    ana: (Ana se seca la cara con la manga.) Gracias, Srta. Cuthbert. Eso ya es bastante. Es casi una esperanza, y yo sé vivir con casi esperanzas.
+    <<suma(cualidad('marilla', 'afecto', 'ana'), 1)>>
+    <<deja(hechos.ws_pregunto)>>
 -> Mirar el mar sin decir nada
-   ana: (Ana se queda mirando las olas, que van y vienen. Al rato, sin darse cuenta, ya no llora.) El mar no se ofende de nada, ¿verdad? Le dicen cosas y él sigue yendo y viniendo, como si nada.
-   marilla: Hm. Será que tiene mucho que hacer. (Pero Marilla no se levanta todavía. Se quedan las dos, mirando el agua.)
-   ana piensa: Se quedó. No dijo nada bonito, pero se sentó en la arena conmigo. Eso tiene que contar.
-   ! suma cualidad.marilla.afecto.ana 1
-   ! deja hechos.ws_miro_mar
+    ana: (Ana se queda mirando las olas, que van y vienen. Al rato, sin darse cuenta, ya no llora.) El mar no se ofende de nada, ¿verdad? Le dicen cosas y él sigue yendo y viniendo, como si nada.
+    marilla: Hm. Será que tiene mucho que hacer. (Pero Marilla no se levanta todavía. Se quedan las dos, mirando el agua.)
+    ana: Se quedó. No dijo nada bonito, pero se sentó en la arena conmigo. Eso tiene que contar. #piensa
+    <<suma(cualidad('marilla', 'afecto', 'ana'), 1)>>
+    <<deja(hechos.ws_miro_mar)>>
 -> «Perdón por salir corriendo. No sé portarme como una niña decente.»
-   ana [disculparse(ana, marilla)]: Perdón por salir corriendo, Srta. Cuthbert. Ya ve, no sé portarme como una niña decente. A lo mejor por eso…
-   marilla: Una niña decente no se tira de una calesa, eso es verdad. (Marilla le arregla el sombrero torcido.) Pero tampoco se queda sentada oyendo eso. Ya está. Vamos, que se hace tarde.
-   ! deja hechos.ws_perdon
+    ana: Perdón por salir corriendo, Srta. Cuthbert. Ya ve, no sé portarme como una niña decente. A lo mejor por eso… #disculparse:marilla
+    marilla: Una niña decente no se tira de una calesa, eso es verdad. (Marilla le arregla el sombrero torcido.) Pero tampoco se queda sentada oyendo eso. Ya está. Vamos, que se hace tarde.
+    <<deja(hechos.ws_perdon)>>
 marilla: Vamos, levántate. Sacúdete esa arena, que no vas a llegar donde la Sra. Spencer hecha una playa.
+===
 
-=== ws_spencer ===
-historia: white_sands
+title: ws_spencer
 resumen: Donde la Sra. Spencer: la equivocación; la Sra. Blewett la quiere de sirvienta; Marilla se la lleva a casa.
-se activa: ida cumplido
+se_activa: ida cumplido
 si: marilla_con_paciencia
-con: blewett
 ---
 narra: El hotel White Sands, todavía cerrado antes de la temporada. En la puerta las espera la Sra. Spencer, menuda y sonriente, que vino a pasar el día con su prima. Detrás de ella, en la sombra del portal, una mujer flaca, de cara afilada, que no sonríe: la Sra. Peter Blewett.
 spencer: ¡Marilla Cuthbert! ¡Qué sorpresa! Y la niña… ¡Qué bien te ves, Ana! ¿Cómo estás?
 ana: (Ana hace una reverencia, sin sonreír.) Todo lo bien que se puede estar sin esperanzas, Sra. Spencer, gracias.
-marilla [informar(marilla, spencer, equivocacion)]: Venimos por una equivocación, Sra. Spencer. Le mandamos a decir con su hermano Robert que queríamos un niño de diez u once años.
+marilla: Venimos por una equivocación, Sra. Spencer. Le mandamos a decir con su hermano Robert que queríamos un niño de diez u once años. #informar:spencer:equivocacion
 spencer: ¡No me diga! Pues Robert me mandó a decir con su hija Nancy que ustedes querían una niña. ¿No fue así, Flora Jane? (Mira hacia dentro, a su hija.) Bueno, la culpa no es mía. Hice lo que pude, y seguí sus instrucciones.
 marilla: Fue culpa nuestra. Teníamos que haber venido nosotros, en vez de mandar recados de boca en boca. Lo que importa ahora es cómo se arregla. ¿Se puede devolver la niña al orfanato?
 spencer: Supongo que sí, pero no creo que haga falta. (Se le ilumina la cara.) ¡Mire qué casualidad! La Sra. Peter Blewett estuvo en mi casa ayer, diciéndome que ojalá me hubiera encargado una niña para que la ayude. Tiene una familia grande y le cuesta conseguir quien la ayude. Ana le viene como anillo al dedo. ¡Es providencial!
-marilla piensa: La Sra. Peter Blewett. Dicen que es muy trabajadora y que hace trabajar más todavía a los demás. Que sus sirvientas no le duran, y que sus hijos son malcriados y peleadores.
+marilla: La Sra. Peter Blewett. Dicen que es muy trabajadora y que hace trabajar más todavía a los demás. Que sus sirvientas no le duran, y que sus hijos son malcriados y peleadores. #piensa
 narra: La Sra. Blewett sale de la sombra del portal y se acerca. Mira a Ana de arriba abajo, sin una palabra.
 blewett: (Con sus ojos chicos y duros.) ¿Cuántos años tienes y cómo te llamas?
 ana: Ana Shirley. Tengo once años.
 blewett: Hm. No pareces gran cosa, pero eres fibrosa. Las fibrosas son las que más rinden. Si te llevo, vas a tener que ser buena, ¿entiendes? Buena y lista, y respetuosa. Te vas a ganar lo que comes, no te equivoques. Y el bebé es de lo más caprichoso.
-ana piensa: Tiene cara de barrena. De esas que se meten en la madera.
-->* Mirar a Marilla, sin decir una palabra
-   ana: (Ana no dice nada. Se pone pálida y mira a Marilla, con unos ojos tan desesperados que Marilla tiene que bajar los suyos.)
-   ! deja hechos.ws_mira
+ana: Tiene cara de barrena. De esas que se meten en la madera. #piensa
+-> Mirar a Marilla, sin decir una palabra #propia
+    ana: (Ana no dice nada. Se pone pálida y mira a Marilla, con unos ojos tan desesperados que Marilla tiene que bajar los suyos.)
+    <<deja(hechos.ws_mira)>>
 -> «Sé barrer y lavar platos, y cuidar mellizos…»
-   ana: (Con un hilo de voz.) Sé barrer y lavar platos, y cuidar mellizos. Tres pares. Pero… pero en Tejas Verdes hay un cerezo que se ve desde mi ventana.
-   ! deja hechos.ws_ofrece
+    ana: (Con un hilo de voz.) Sé barrer y lavar platos, y cuidar mellizos. Tres pares. Pero… pero en Tejas Verdes hay un cerezo que se ve desde mi ventana.
+    <<deja(hechos.ws_ofrece)>>
 marilla: (Marilla carraspea.) Bueno, no sé. No he dicho que Matthew y yo hayamos decidido del todo no quedarnos con ella. La verdad es que Matthew quiere quedársela. Me la llevo a casa y lo hablamos.
 blewett: (La Sra. Blewett aprieta los labios.) Como quiera. Pero no me la mande después, cuando ya tenga a otra.
 spencer: (La Sra. Spencer junta las manos.) Bueno, bueno, todo se arregla. Ana, niña, pórtate bien y no hables tanto, ¿eh? Marilla, ¿no se quedan a tomar el té? Flora Jane hizo bollos.
 marilla: Gracias, Sra. Spencer, pero no. Matthew nos espera, y el camino es largo.
 spencer: Entonces que les vaya bien. Y salúdeme a Matthew. (Se queda en la puerta, diciendo adiós con la mano, hasta que la Sra. Blewett se mete adentro sin despedirse.)
 ana: (Ana sube a la calesa sin mirar atrás, apretando la maleta vieja contra las rodillas.)
+===
 
-=== ws_spencer_duda ===
-historia: white_sands
+title: ws_spencer_duda
 resumen: Donde la Sra. Spencer, sin paciencia: Marilla duda de verdad ante la Sra. Blewett.
-se activa: ida cumplido
-si: !marilla_con_paciencia
-con: spencer, blewett
+se_activa: ida cumplido
+si: no(marilla_con_paciencia)
 ---
 narra: En casa de la Sra. Spencer está la Sra. Peter Blewett, que busca una niña para cuidarle los hijos. Mira a Ana de arriba abajo: «Esta me sirve. Es flaca, pero dura. Va a tener que ganarse lo que come.»
 narra: Esta vez Marilla no contesta enseguida. Mira a la Sra. Blewett, mira a Ana, y por primera vez duda de verdad. El silencio dura una eternidad.
 -> «¡Por favor, Srta. Cuthbert! Voy a ser buena, se lo juro…»
-   ana: (Ana se aferra a la manga de Marilla.) ¡Por favor, Srta. Cuthbert! Voy a ser buena, se lo juro. Voy a doblar la ropa y a vestirme temprano y a no imaginar nada en horas de trabajo…
-   ! deja hechos.blewett_suplica
+    ana: (Ana se aferra a la manga de Marilla.) ¡Por favor, Srta. Cuthbert! Voy a ser buena, se lo juro. Voy a doblar la ropa y a vestirme temprano y a no imaginar nada en horas de trabajo…
+    <<deja(hechos.blewett_suplica)>>
 -> Quedarse callada, mirando el suelo
-   ana: (Ana no dice nada. Se queda mirando el suelo, muy pálida, con los labios apretados para no llorar.)
-   ! deja hechos.blewett_calla
-->* «Prefiero volver al orfanato antes que irme con esa señora.»
-   ana: (Ana levanta la barbilla.) Prefiero volver al orfanato antes que irme con esa señora.
-   ! deja hechos.blewett_orgullo
+    ana: (Ana no dice nada. Se queda mirando el suelo, muy pálida, con los labios apretados para no llorar.)
+    <<deja(hechos.blewett_calla)>>
+-> «Prefiero volver al orfanato antes que irme con esa señora.» #propia
+    ana: (Ana levanta la barbilla.) Prefiero volver al orfanato antes que irme con esa señora.
+    <<deja(hechos.blewett_orgullo)>>
 narra: Al fin Marilla dice, con la voz seca: «Me la llevo a casa. Lo hablaré con Matthew.» La Sra. Blewett se encoge de hombros.
+===
 
-=== ws_vuelta ===
-historia: white_sands
+title: ws_vuelta
 resumen: De vuelta, en la calesa: «¿De verdad dijo que a lo mejor me dejaba quedarme?»
-se activa: vuelta.camino empieza
+se_activa: vuelta.camino empieza
 si: marilla_con_paciencia
 ---
 ana: (Cuando el hotel ya queda atrás, Ana le habla en un susurro.) Srta. Cuthbert, ¿de verdad dijo que a lo mejor me dejaba quedarme en Tejas Verdes? ¿O me lo imaginé?
 marilla: Más te vale aprender a sujetar esa imaginación, Ana, si no sabes distinguir lo que es de verdad de lo que no. Sí, oíste bien, y nada más. Todavía no está decidido.
 ana: Prefiero volver al orfanato antes que ir con ella. Parece una… una barrena.
 marilla: (A Marilla se le escapa algo que podría ser una sonrisa, y se lo traga.) No se habla así de una señora, y menos de una que no conoces.
-->* «Voy a tratar de ser todo lo que usted quiera, si me deja quedarme.»
-   ana: Voy a tratar de ser todo lo que usted quiera, Srta. Cuthbert. Todo. Si me deja quedarme.
-   marilla: Hm. Ya veremos. Ahora quédate quieta, que la yegua se pone nerviosa con tanto movimiento.
-   ! deja hechos.ws_promete
+-> «Voy a tratar de ser todo lo que usted quiera, si me deja quedarme.» #propia
+    ana: Voy a tratar de ser todo lo que usted quiera, Srta. Cuthbert. Todo. Si me deja quedarme.
+    marilla: Hm. Ya veremos. Ahora quédate quieta, que la yegua se pone nerviosa con tanto movimiento.
+    <<deja(hechos.ws_promete)>>
 -> Mirar el mar en silencio, todo el camino
-   ana: (Ana no dice nada más. Mira el mar, que se va poniendo dorado con la tarde, como si quisiera guardárselo entero por si acaso.)
-   marilla piensa: Ni una palabra en todo el camino. En ella, eso es mucho decir.
-   ! deja hechos.ws_calla_vuelta
+    ana: (Ana no dice nada más. Mira el mar, que se va poniendo dorado con la tarde, como si quisiera guardárselo entero por si acaso.)
+    marilla: Ni una palabra en todo el camino. En ella, eso es mucho decir. #piensa
+    <<deja(hechos.ws_calla_vuelta)>>
+===
 
-=== ws_noche ===
-historia: white_sands
+title: ws_noche
 resumen: Esa noche, Marilla le dice a Matthew que se queda con Ana (a ella, todavía no).
-se activa: vuelta cumplido
-narra: Esa noche, en el corral, Marilla habla largo con Matthew. «Me la quedo», le dice al fin. «Alguien tiene que criarla, y no voy a dársela a esa mujer.» Matthew sonríe, sin decir nada. Pero a Ana, por razones que solo ella sabe, Marilla no le dice nada todavía.
+se_activa: vuelta cumplido
 ---
-! suma cualidad.marilla.afecto.ana 1
-! log Marilla llevó a Ana a White Sands; la Sra. Blewett la quería de sirvienta, y Marilla no se la dio. Esa noche le dijo a Matthew que se la quedaba; a Ana, todavía no. | yo: Marilla me llevó a White Sands. La Sra. Blewett me quería de sirvienta, pero Marilla no me entregó.
-ana piensa: No me dijo nada en todo el camino de vuelta. ¿Me devolverán mañana?
+narra: Esa noche, en el corral, Marilla habla largo con Matthew. «Me la quedo», le dice al fin. «Alguien tiene que criarla, y no voy a dársela a esa mujer.» Matthew sonríe, sin decir nada. Pero a Ana, por razones que solo ella sabe, Marilla no le dice nada todavía.
+<<suma(cualidad('marilla', 'afecto', 'ana'), 1)>>
+<<log('Marilla llevó a Ana a White Sands; la Sra. Blewett la quería de sirvienta, y Marilla no se la dio. Esa noche le dijo a Matthew que se la quedaba; a Ana, todavía no.')>>
+ana: No me dijo nada en todo el camino de vuelta. ¿Me devolverán mañana? #piensa
+===

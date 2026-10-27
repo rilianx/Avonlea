@@ -1,0 +1,33 @@
+// Las voces propias de White Sands: le dan su sabor a las comunes (comun/voces.yarn) mientras la historia está en curso.
+
+title: voz_pedir_venir
+voz: pedir('marilla', 'ana', ir_a('ana', 'cocina'))
+---
+=> ¡Ana! Ven, que nos vamos.
+===
+
+title: voz_traer_llega
+voz: traer('marilla', 'ana', _)
+paso: va
+---
+=> Así que aquí estabas. La calesa lleva media hora esperando. <<if white_sands.encargo.busca.estado.es('en_curso')>>
+===
+
+title: voz_pedir_subir
+voz: pedir('marilla', 'ana', subir('ana', 'calesa'))
+---
+=> Sube, Ana. No tenemos todo el día.
+=> Vamos, sube. Y sacúdete esa arena. <<if hechos.ws_corrio.hoy>>
+===
+
+title: voz_ordenar_subir
+voz: ordenar('marilla', 'ana', subir('ana', 'calesa'))
+---
+=> (Marilla no dice nada. Solo señala el asiento.) <<if no(marilla_con_paciencia)>>
+===
+
+title: voz_bajar
+voz: bajar('ana')
+---
+=> (Ana baja despacio, apretando la maleta vieja.) <<if white_sands.encargo.ida.estado.es('cumplido')>>
+===

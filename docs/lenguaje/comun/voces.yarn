@@ -1,0 +1,30 @@
+// Las voces comunes (docs/LENGUAJE.md §8): lo que se dice al hacer un verbo o un acto, en cualquier historia.
+// Cada nodo es un patrón de llamada (voz: …, con «_» para cualquiera; paso: … para la voz de un paso de una receta).
+// Sus líneas son un grupo de variantes de Yarn («=>»), cada una con su condición (<<if …>>): gana la más específica que
+// se cumpla, y entre iguales, una al azar. Las de una historia (historias/<nombre>/voces.yarn) ganan a estas mientras
+// la historia está en curso. Quien habla es quien hace el verbo; lo que va entre paréntesis es narración.
+
+title: voz_pedir_subir
+voz: pedir(_, 'ana', subir('ana', _))
+---
+=> Sube, Ana.
+===
+
+title: voz_ordenar_subir
+voz: ordenar(_, 'ana', subir('ana', _))
+---
+=> Ana Shirley. Sube. Ahora.
+===
+
+title: voz_traer_llega
+voz: traer(_, 'ana', _)
+paso: va
+---
+=> Aquí estás. Vamos.
+===
+
+title: voz_enganchar
+voz: enganchar('marilla', 'calesa')
+---
+=> (Marilla engancha la yegua alazana a la calesa, sin apuro y sin perder un movimiento.)
+===
