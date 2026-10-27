@@ -1,0 +1,33 @@
+# El mundo de White Sands, en el lenguaje de docs/LENGUAJE.md (§3): quiénes, dónde, por dónde y en qué.
+# (Solo lo que usa este ejemplo; el juego entero declara aquí a toda Avonlea.)
+
+=== personas ===
+ana: Ana
+marilla: Marilla
+matthew: Matthew
+spencer: la Sra. Spencer
+blewett: la Sra. Peter Blewett
+srapye: la Sra. Pye
+
+=== lugares ===
+tejas_verdes: Tejas Verdes
+cocina: la cocina de Tejas Verdes | dentro de: tejas_verdes
+corral: el corral de Tejas Verdes | dentro de: tejas_verdes
+hondonada_lynde: la Hondonada de Lynde
+escuela: la escuela
+aldea: la aldea de Avonlea
+playa: la playa, junto al hotel White Sands
+orilla: la orilla del mar | cerca de: playa
+hotel_white_sands: el hotel White Sands
+
+=== rutas ===
+# (en orden: así pasa la calesa, medido sobre el mapa; de vuelta, al revés)
+costa: tejas_verdes > hondonada_lynde > escuela > aldea > playa > hotel_white_sands
+
+=== medios ===
+calesa: la calesa de Marilla, con la yegua alazana | lleva: 2 | se guarda en: corral
+
+=== funciones ===
+# (lo que el mundo calcula y el estado no guarda: la única salida a código, a la vista)
+ve(quien: persona, otro: persona): quien ve a otro (en la misma pieza, o cerca afuera)
+oye(quien: persona, otro: persona): quien oye a otro (en la misma pieza, o a unos pasos)

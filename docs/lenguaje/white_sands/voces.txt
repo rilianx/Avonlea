@@ -1,0 +1,33 @@
+# Las voces de White Sands, en el lenguaje de docs/LENGUAJE.md (§8): lo que se dice al hacer un verbo o un acto.
+# Cada bloque es un patrón de llamada («_» vale cualquiera); gana la línea más específica que se cumpla, y un patrón
+# más específico gana a uno general. Las de esta historia le dan su sabor a las generales del juego.
+
+# ---------------------------------------------------------------- que Ana venga (el encargo «busca»)
+
+=== pedir(marilla, ana, ir_a(ana, cocina)) ===
+- ¡Ana! Ven a la cocina.
+- [historia.white_sands = en_curso] ¡Ana! Ven, que nos vamos.
+
+=== traer(marilla, ana, _).va ===
+# (cuando Marilla llega donde está Ana)
+- Aquí estás. Vamos.
+- [historia.white_sands = en_curso, !hechos[hoy].ws_corrio] Así que aquí estabas. La calesa lleva media hora esperando.
+
+# ---------------------------------------------------------------- que Ana suba a la calesa (el paso «sube»)
+
+=== pedir(marilla, ana, subir(ana, calesa)) ===
+- Sube, Ana.
+- [historia.white_sands = en_curso] Sube, Ana. No tenemos todo el día.
+- [historia.white_sands = en_curso, hechos[hoy].ws_corrio] Vamos, sube. Y sacúdete esa arena.
+
+=== ordenar(marilla, ana, subir(ana, calesa)) ===
+- Ana Shirley. Sube. Ahora.
+- [!marilla_con_paciencia] (Marilla no dice nada. Solo señala el asiento.)
+
+# ---------------------------------------------------------------- los verbos sin acto
+
+=== enganchar(marilla, calesa) ===
+- (Marilla engancha la yegua alazana a la calesa, sin apuro y sin perder un movimiento.)
+
+=== bajar(ana) ===
+- [historia.white_sands = en_curso, encargo.white_sands.ida = cumplido] (Ana baja despacio, apretando la maleta vieja.)
