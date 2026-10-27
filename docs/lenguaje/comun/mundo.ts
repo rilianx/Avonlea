@@ -32,8 +32,8 @@ export const rutas = {
 export type Ruta = keyof typeof rutas
 
 export const medios = {
-  calesa: { nombre: 'la calesa de Marilla, con la yegua alazana', lleva: 2, se_guarda_en: 'corral' },
-} as const satisfies Record<string, { nombre: string; lleva: number; se_guarda_en: Lugar }>
+  calesa: { nombre: 'la calesa', es: 'la calesa de Marilla, con la yegua alazana', lleva: 2, se_guarda_en: 'corral' },
+} as const satisfies Record<string, { nombre: string; es: string; lleva: number; se_guarda_en: Lugar }>
 export type Medio = keyof typeof medios
 
 // dónde está cada uno, en qué va, a quién sigue, cómo anda vestida

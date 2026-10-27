@@ -160,22 +160,25 @@ quien lo hace. Al construir, la definición se llama una vez con los nombres de 
 export const llevar_a = receta('llevar_a', (quien: Persona, otro: Persona, a: Lugar, m: Medio, por: Ruta) => ({
   pasos: {
     engancha: enganchar(quien, m),
-    sigue: conseguir_que(quien, otro, mundo(otro).sigue.es(quien)),
+    cerca: conseguir_que(quien, otro, mundo(otro).lugar.es(medio(m).lugar)),
+    sube: conseguir_que(quien, otro, mundo(otro).en.es(m)),
     arriba: subir(quien, m),
     camino: viajar(quien, m, por, a),
-    baja: [bajar(quien), dejar_de_seguir(otro)],
+    baja: [bajar(otro), bajar(quien)],
   },
-  mantiene: { si: mundo(otro).sigue.es(quien), desde: 'arriba', si_se_rompe: 'sigue' },
+  mantiene: { si: mundo(otro).en.es(m), desde: 'arriba', si_se_rompe: 'cerca' },
   cumplido: mundo(otro).lugar.es(a),
 }))
 ```
 
-- **Lo que necesita es que el otro decida seguirla.** Marilla no puede subir a Ana a la calesa: consigue que Ana la
-  siga (`sigue`), y quien sigue a alguien que sube, sube con él. Que Ana la siga es un verbo de Ana, `seguir`, y lo
-  decide ella (§7.1).
-- **`mantiene`**: una condición que tiene que seguir siendo cierta desde un paso. Si el mundo la rompe (Ana deja de
-  seguirla y salta de la calesa), el verbo **se repara**: vuelve al paso que la consigue (`sigue`: pedírselo de nuevo,
-  ir a buscarla) y, cuando se cumple, sigue desde donde iba.
+- **Lo que necesita son dos decisiones del otro**, una después de la otra, cada una con su búsqueda. Marilla no
+  puede subir a Ana a la calesa. Primero consigue que Ana venga donde está la calesa (`cerca`): se lo pide, y Ana
+  camina por el mapa, o la va a buscar y la trae de la mano. Después, que suba (`sube`). Las dos las decide Ana (§7.1).
+  (También existe `seguir`, para ir juntos a pie; la calesa no lo usa, porque al jugar es más claro «Subir a la
+  calesa» que «Ir con Marilla».)
+- **`mantiene`**: una condición que tiene que seguir siendo cierta desde un paso. Si el mundo la rompe (Ana se baja
+  de la calesa y sale corriendo), el verbo **se repara**: vuelve al paso que la consigue (`cerca`: que vuelva, y
+  después que suba) y, cuando se cumple, sigue desde donde iba.
 - **Los caminos de los pasos** van con puntos: `'camino'`, `'camino.playa'` (la parada `playa` del paso `camino`).
   Son un tipo: un paso que no existe es un error.
 - **Los momentos de un verbo**, de cualquier nivel, son `empieza`, `cumplido`, `fallido` y `sigue` (sigue después de una
@@ -195,8 +198,9 @@ export const ofender = acto('ofender', (quien: Persona, a: Persona) => ({ deja: 
 
 Un acto con **`pedido`** (`pedir`, `ordenar`) le pide a alguien que haga un verbo, y ese alguien decide.
 
-- **Si es Ana, decide la jugadora.** El juego le ofrece hacerlo (el texto `opcion` del verbo: `seguir` se ofrece
-  como «Ir con Marilla») o no (`opcion_no`: «Todavía no»). No contestar dentro de `espera` también es no.
+- **Si es Ana, decide la jugadora.** El juego le ofrece hacerlo (el texto `opcion` del verbo: `subir` se ofrece
+  como «Subir a la calesa», `ir_a` como «Ir a …») o no (`opcion_no`: «Todavía no»). No contestar dentro de `espera`
+  también es no. Si en vez de contestar camina hacia la calesa, también cuenta: lo que importa es la condición.
 - **Si Ana va sola, o es otro personaje,** responde según `comun/ana.ts`: por acto, una condición sobre quién lo pide.
   ```ts
   export const ana_sola = respuestas({
@@ -322,7 +326,7 @@ export const white_sands = historia('white_sands', {
 6. **Sus efectos cambian el estado.** Pueden empezar historias o encargos, o romper un `mantiene`.
 7. **Las búsquedas cuyo estado cambió planifican de nuevo.**
 
-**Ana es la jugadora.** Los verbos de los demás que necesitan algo de Ana (que la siga, que venga) no lo deciden: lo
+**Ana es la jugadora.** Los verbos de los demás que necesitan algo de Ana (que venga, que suba) no lo deciden: lo
 piden (§7.1), y la jugadora acepta o no. Si no, la búsqueda vuelve a planificar (más firme, o ir a buscarla) hasta
 agotar sus intentos. Entonces falla, y eso es un momento de la historia.
 

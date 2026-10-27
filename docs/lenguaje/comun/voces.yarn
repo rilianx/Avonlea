@@ -4,16 +4,28 @@
 // se cumpla, y entre iguales, una al azar. Las de una historia (historias/<nombre>/voces.yarn) ganan a estas mientras
 // la historia está en curso. Quien habla es quien hace el verbo; lo que va entre paréntesis es narración.
 
-title: voz_pedir_seguir
-voz: pedir(_, 'ana', seguir('ana', _))
+title: voz_pedir_venir
+voz: pedir(_, 'ana', ir_a('ana', _))
 ---
 => Ven, Ana.
 ===
 
-title: voz_ordenar_seguir
-voz: ordenar(_, 'ana', seguir('ana', _))
+title: voz_ordenar_venir
+voz: ordenar(_, 'ana', ir_a('ana', _))
 ---
-=> Ana Shirley. Ven. Ahora.
+=> Ana Shirley. Ven aquí. Ahora.
+===
+
+title: voz_pedir_subir
+voz: pedir(_, 'ana', subir('ana', _))
+---
+=> Sube, Ana.
+===
+
+title: voz_ordenar_subir
+voz: ordenar(_, 'ana', subir('ana', _))
+---
+=> Ana Shirley. Sube. Ahora.
 ===
 
 title: voz_traer_llega

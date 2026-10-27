@@ -13,17 +13,23 @@ paso: va
 => Así que aquí estabas. La calesa lleva media hora esperando. <<if white_sands.encargo.busca.estado.es('en_curso')>>
 ===
 
-title: voz_pedir_seguir
-voz: pedir('marilla', 'ana', seguir('ana', 'marilla'))
+title: voz_pedir_venir_a_la_calesa
+voz: pedir('marilla', 'ana', ir_a('ana', _))
 ---
-=> Sube, Ana. No tenemos todo el día. <<if white_sands.encargo.ida.estado.es('en_curso')>>
+=> ¡Ana! A la calesa, que nos vamos. <<if white_sands.encargo.ida.estado.es('en_curso')>>
+===
+
+title: voz_pedir_subir
+voz: pedir('marilla', 'ana', subir('ana', 'calesa'))
+---
+=> Sube, Ana. No tenemos todo el día.
 => Vamos, sube. Y sacúdete esa arena. <<if hechos.ws_corrio.hoy>>
 ===
 
-title: voz_ordenar_seguir
-voz: ordenar('marilla', 'ana', seguir('ana', 'marilla'))
+title: voz_ordenar_subir
+voz: ordenar('marilla', 'ana', subir('ana', 'calesa'))
 ---
-=> Ana Shirley. Sube. Ahora. <<if white_sands.encargo.ida.estado.es('en_curso')>>
+=> Ana Shirley. Sube. Ahora.
 => (Marilla no dice nada. Solo señala el asiento.) <<if no(marilla_con_paciencia)>>
 ===
 

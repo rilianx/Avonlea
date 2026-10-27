@@ -4,7 +4,7 @@ import { dichas, escena } from './escenas.ids'
 import { _, defEscena, deja, hace, log, momento, no, responde, suma, tras, voz, y } from '../../comun/lenguaje'
 import { ve } from '../../comun/mundo'
 import { cualidad } from '../../comun/estado'
-import { bajar, correr_a, dejar_de_seguir, ir_a, seguir, traer } from '../../comun/verbos'
+import { bajar, correr_a, ir_a, subir, traer } from '../../comun/verbos'
 import { disculparse, informar, ofender, ordenar, pedir } from '../../comun/actos'
 
 defEscena(escena.ws_no_sube, {
@@ -65,7 +65,7 @@ defEscena(escena.ws_pye, {
   se_activa: [momento(white_sands.encargo.ida, 'camino.playa', 'cumplido')],
   si: y(dichas.ws_mar, ve('srapye', 'ana')),
   hablan: ['srapye', 'marilla', 'ana'],
-  efectos: [ofender('srapye', 'ana'), deja(hechos.ws_corrio), dejar_de_seguir('ana'), correr_a('ana', 'orilla'), deja(hechos.ws_callo)],
+  efectos: [ofender('srapye', 'ana'), deja(hechos.ws_corrio), bajar('ana'), correr_a('ana', 'orilla'), deja(hechos.ws_callo)],
 })
 defEscena(escena.ws_orilla, {
   se_activa: [hace('marilla', traer, 'va', 'cumplido')],
@@ -99,6 +99,7 @@ defEscena(escena.ws_noche, {
 })
 voz(pedir('marilla', 'ana', ir_a('ana', 'cocina')), { lineas: [true] })
 voz(traer('marilla', 'ana', _), { paso: 'va', lineas: [white_sands.encargo.busca.estado.es('en_curso')] })
-voz(pedir('marilla', 'ana', seguir('ana', 'marilla')), { lineas: [white_sands.encargo.ida.estado.es('en_curso'), hechos.ws_corrio.hoy] })
-voz(ordenar('marilla', 'ana', seguir('ana', 'marilla')), { lineas: [white_sands.encargo.ida.estado.es('en_curso'), no(marilla_con_paciencia)] })
+voz(pedir('marilla', 'ana', ir_a('ana', _)), { lineas: [white_sands.encargo.ida.estado.es('en_curso')] })
+voz(pedir('marilla', 'ana', subir('ana', 'calesa')), { lineas: [true, hechos.ws_corrio.hoy] })
+voz(ordenar('marilla', 'ana', subir('ana', 'calesa')), { lineas: [true, no(marilla_con_paciencia)] })
 voz(bajar('ana'), { lineas: [white_sands.encargo.ida.estado.es('cumplido')] })

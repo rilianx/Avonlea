@@ -2,17 +2,18 @@
 // (fijos), por búsqueda (A* sobre el estado) y por mapa (A* sobre el mapa). El primer parámetro es siempre quien lo hace.
 // Las etiquetas de los pasos son los momentos a los que se engancha una escena: el paso «playa» del paso «camino» del
 // encargo «ida» es momento(white_sands.encargo.ida, 'camino.playa', 'cumplido').
-import { busca, mapa, por_cada, por_cada_uno, primitivo, receta, type Campo, type Cond } from './lenguaje'
+import { busca, mapa, por_cada, por_cada_uno, primitivo, receta, y, type Campo, type Cond } from './lenguaje'
 import { medio, mundo, tramo, type Lugar, type Medio, type Persona, type Ruta } from './mundo'
 import { ordenar, pedir } from './actos'
 
 // ---------------------------------------------------------------- primitivos
 
-// (quien sigue a quien sube, sube con él: así Ana sube a la calesa cuando sigue a Marilla)
+// (si se lo piden a Ana, la jugadora ve «Subir a la calesa»)
 export const subir = primitivo('subir', (quien: Persona, m: Medio) => ({
-  pide: mundo(quien).en.es('nada'),
+  pide: y(mundo(quien).en.es('nada'), mundo(quien).lugar.es(medio(m).lugar)),
   deja: [mundo(quien).en.vale(m)],
   dura: '10s',
+  opcion: 'Subir a {m}',
 }))
 
 export const bajar = primitivo('bajar', (quien: Persona) => ({
@@ -61,19 +62,20 @@ export const esperar = primitivo('esperar', (_quien: Persona, hasta: Cond) => ({
 type Destino = Lugar | Campo<Lugar>
 
 // (si quien va en un medio, el medio va con él y con todos los que lleva; quien lo sigue, también)
-export const ir_a = mapa('ir_a', (_quien: Persona, _a: Destino) => ({}))
+export const ir_a = mapa('ir_a', (_quien: Persona, _a: Destino) => ({ opcion: 'Ir a {a}' }))
 
 // (deja el medio en que iba: si va en la calesa, primero salta)
 export const correr_a = mapa('correr_a', (_quien: Persona, _a: Destino) => ({ paso: 'rapido' }))
 
 // ---------------------------------------------------------------- por receta
 
-// (la trae de la mano, y no la suelta: al llegar, la sigue)
-export const traer = receta('traer', (quien: Persona, otro: Persona, a: Lugar) => ({
+// (va donde está el otro, lo toma de la mano —él puede soltarse— y lo trae)
+export const traer = receta('traer', (quien: Persona, otro: Persona, a: Destino) => ({
   pasos: {
     va: ir_a(quien, mundo(otro).lugar),
     toma: tomar_de_la_mano(quien, otro),
     vuelve: ir_a(quien, a),
+    suelta: soltar(quien, otro),
   },
 }))
 
@@ -103,17 +105,18 @@ export const conseguir_que = busca('conseguir_que', (_quien: Persona, _otro: Per
 
 // ---------------------------------------------------------------- lo que encadena todo
 
-// (lo que necesita es que el otro decida seguirla: «sigue» lo consigue —pedírselo, ordenárselo, ir a buscarla—; si la
-// sigue, sube con ella. Si Ana deja de seguirla en el camino —salta de la calesa—, se rompe lo que mantiene: vuelve a
-// «sigue», y el camino continúa desde la parada en que iban)
+// (dos cosas que decide el otro, una después de la otra, cada una con su búsqueda: que venga donde está el medio —por
+// el mapa: pedírselo, o ir a buscarla y traerla—, y que suba. Si Ana se baja en el camino, se rompe lo que mantiene:
+// vuelve a «cerca», y el camino continúa desde la parada en que iban)
 export const llevar_a = receta('llevar_a', (quien: Persona, otro: Persona, a: Lugar, m: Medio, por: Ruta) => ({
   pasos: {
     engancha: enganchar(quien, m),
-    sigue: conseguir_que(quien, otro, mundo(otro).sigue.es(quien)),
+    cerca: conseguir_que(quien, otro, mundo(otro).lugar.es(medio(m).lugar)),
+    sube: conseguir_que(quien, otro, mundo(otro).en.es(m)),
     arriba: subir(quien, m),
     camino: viajar(quien, m, por, a),
-    baja: [bajar(quien), dejar_de_seguir(otro)],
+    baja: [bajar(otro), bajar(quien)],
   },
-  mantiene: { si: mundo(otro).sigue.es(quien), desde: 'arriba', si_se_rompe: 'sigue' },
+  mantiene: { si: mundo(otro).en.es(m), desde: 'arriba', si_se_rompe: 'cerca' },
   cumplido: mundo(otro).lugar.es(a),
 }))

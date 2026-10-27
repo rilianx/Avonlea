@@ -26,9 +26,9 @@ flowchart TD
   E((empieza:<br/>a prueba, tras la primera<br/>noche, 14 a 19 h)) --> B([busca: Marilla consigue<br/>que Ana venga a la cocina])
   B -- "marilla traer cumplido<br/>(tuvo que ir a buscarla)" --> FV[falta_viaje<br/>paciencia −1]
   B -- busca cumplido --> VS{¿paciencia?}
-  IDA -- "sigue: Marilla le pide<br/>que suba (pedir)" --> PE{{la jugadora:<br/>¿Ir con Marilla?}}
+  IDA -- "cerca, sube: Marilla le pide<br/>que venga y que suba" --> PE{{la jugadora:<br/>¿Subir a la calesa?}}
   PE -- "ana rechaza pedir" --> NS[ws_no_sube<br/>paciencia −1]
-  NS -- "otra vez: ordenar" --> PE2{{¿Ir con Marilla?}}
+  NS -- "otra vez: ordenar" --> PE2{{¿Subir a la calesa?}}
   PE2 -- "ana rechaza ordenar" --> NO[ws_no_sube_orden<br/>paciencia −1, la trae]
   PE -- acepta --> IDA
   PE2 -- acepta --> IDA
@@ -44,7 +44,7 @@ flowchart TD
   IDA -. camino.escuela .-> T3
   IDA -- camino.playa empieza --> M[ws_mar]
   IDA -- camino.playa cumplido --> P[ws_pye]
-  P -- "Ana corre al mar: deja de<br/>seguirla, se rompe «mantiene»" --> TR([sigue: conseguir_que<br/>→ traer])
+  P -- "Ana se baja y corre al mar:<br/>se rompe «mantiene»" --> TR([cerca: conseguir_que<br/>→ traer])
   TR -- marilla traer.va cumplido --> O[ws_orilla]
   O --> IDA
   P -- "Ana se calla" --> IDA
@@ -73,8 +73,8 @@ flowchart TD
   | Marilla buscando a Ana | la búsqueda `conseguir_que` |
   | «Sube, Ana» | las voces de `pedir` y `ordenar` |
 
-- **Que Ana suba lo decide la jugadora.** Marilla no la sube: necesita que Ana la siga, y se lo pide. La jugadora
-  acepta («Ir con Marilla») o no («Todavía no»). Si no, Marilla se lo vuelve a decir, más firme (`ws_no_sube`), y
+- **Que Ana venga y suba lo decide la jugadora.** Marilla no la sube: necesita que Ana venga donde está la calesa
+  (por el mapa) y que suba, y se lo pide. La jugadora acepta («Subir a la calesa») o no («Todavía no»). Si no, Marilla se lo vuelve a decir, más firme (`ws_no_sube`), y
   después baja a buscarla (`ws_no_sube_orden`); cada negativa le cuesta paciencia. Ana sola le hace caso a quien
   quiere (`comun/ana.ts`).
 - **Las charlas van por lugares, en secuencia.** `ws_t2` se activa tras `ws_t1`, o al pasar la Hondonada de Lynde si

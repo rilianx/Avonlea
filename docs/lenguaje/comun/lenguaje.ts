@@ -32,8 +32,9 @@ export const funcion = <A extends unknown[]>(f: string) => (...args: A): Cond =>
 // un lugar del estado con un valor de una lista: se pregunta (es, no_es) y se cambia (vale)
 export class Campo<V extends Valor> {
   constructor(readonly camino: readonly string[]) {}
-  es(valor: V): Cond { return { c: 'cmp', camino: this.camino, op: '=', valor } }
-  no_es(valor: V): Cond { return { c: 'cmp', camino: this.camino, op: '!=', valor } }
+  // (el valor puede ser otro lugar del estado: mundo('ana').lugar.es(medio('calesa').lugar), Ana donde está la calesa)
+  es(valor: V | Campo<V>): Cond { return { c: 'cmp', camino: this.camino, op: '=', valor: valor instanceof Campo ? { ref: valor.camino } as never : valor } }
+  no_es(valor: V | Campo<V>): Cond { return { c: 'cmp', camino: this.camino, op: '!=', valor: valor instanceof Campo ? { ref: valor.camino } as never : valor } }
   vale(valor: V): Efecto { return { e: 'deja', camino: this.camino, valor } }
 }
 // una escala: además, se compara en su orden (los valores fuera de la escala no se comparan)
@@ -143,7 +144,7 @@ export type DefBusca = { readonly objetivo: Cond; readonly con: readonly Verbo<n
 export const busca = <A extends unknown[]>(nombre: string, def: (...a: A) => DefBusca) => verbo<A, never>('busca', nombre, def)
 
 // un destino: el A* sobre el mapa busca el camino
-export const mapa = <A extends unknown[]>(nombre: string, def: (...a: A) => { readonly paso?: 'lento' | 'normal' | 'rapido' }) => verbo<A, never>('mapa', nombre, def)
+export const mapa = <A extends unknown[]>(nombre: string, def: (...a: A) => { readonly paso?: 'lento' | 'normal' | 'rapido'; readonly opcion?: string }) => verbo<A, never>('mapa', nombre, def)
 
 // repetir un paso por cada elemento de una lista: cada vuelta toma la etiqueta de su elemento
 export const por_cada = <T>(lista: readonly T[] | { readonly lista: string; readonly _de?: T }, hace: (x: T) => Llamada): PorCada<T> =>
