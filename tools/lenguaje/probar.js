@@ -1,11 +1,15 @@
 #!/usr/bin/env node
 // Probar una historia de punta a punta con el motor mínimo (tools/lenguaje/motor.js), sin el juego: en varios
 // escenarios —Ana sola; Ana que se niega a subir; Ana que corre al mar; Marilla sin paciencia; Ana lejos a la hora de
-// salir—, y revisa que cada uno termine como debe. Con --ver <escenario>, imprime lo que pasa, línea a línea.
+// salir; la llegada con Matthew por la Avenida; Ana que pasea sola por la Avenida—, y revisa que cada uno termine como debe. Con --ver <escenario>, imprime lo que pasa, línea a línea.
 // Uso: node tools/lenguaje/probar.js [--ver sola]
 const path = require('path'), { datos } = require('./construir.js'), { Motor } = require('./motor.js');
 const D = datos(path.resolve(__dirname, '..', '..', 'docs', 'lenguaje'));
 
+// (la llegada: el primer día, en la estación de Bright River, con la calesa enganchada; a Matthew, Ana lo quiere desde
+// el primer momento)
+const LLEGADA = { dia: 1, hora: 17, lugares: { ana: 'estacion_bright_river', matthew: 'estacion_bright_river', calesa: 'estacion_bright_river' },
+  estado: { 'estado.ana_en_tv': 'llegando', 'comun.hechos.primera_noche': null, 'mundo.calesa.listo': 'si', 'cualidad.ana.afecto.matthew': 3 } };
 const ESCENARIOS = {
   // Ana sola: a Marilla todavía no la quiere (afecto 0), así que a un pedido dice que no, y a una orden, que sí
   sola: { auto: true, espera: { fin: 'terminada', dichas: ['viaje_spencer', 'ws_t1', 'ws_t2', 'ws_t3', 'ws_mar', 'ws_pye', 'ws_orilla', 'ws_spencer', 'ws_vuelta', 'ws_noche', 'ws_no_sube'] } },
@@ -19,6 +23,13 @@ const ESCENARIOS = {
   sin_paciencia: { auto: true, estado: { 'cualidad.marilla.paciencia.ana': 0 }, espera: { fin: 'terminada', dichas: ['viaje_spencer_duda', 'ws_spencer_duda'], noDichas: ['ws_t1', 'ws_spencer'] } },
   // a la hora de salir, Ana está lejos (en la escuela): Marilla tiene que ir a buscarla
   lejos: { auto: true, lugares: { ana: 'escuela' }, espera: { fin: 'terminada', dichas: ['falta_viaje', 'viaje_spencer'] } },
+  // la llegada (cap. 2): Ana habla todo el camino desde Bright River; al entrar a la Avenida corta la charla, calla, y
+  // después le pone nombre (la escena del libro, con Matthew)
+  llegada: { ...LLEGADA, auto: true, espera: { fin: 'terminada', dichas: ['ll_pelo', 'll_angelical', 'cb_libro', 'll_llegan'], cortadas: ['ll_angelical'], interrumpio: ['cb_libro'] } },
+  // la llegada, si Ana ya hubiera pasado antes por la Avenida: la otra variante, que también corta la charla
+  llegada_otra: { ...LLEGADA, auto: true, estado: { ...LLEGADA.estado, 'camino_blanco.dichas.cb_libro': 1 }, espera: { fin: 'terminada', dichas: ['cb_otra_vez'], interrumpio: ['cb_otra_vez'] } },
+  // de noche, sin viaje: Ana va sola a la Avenida (en silencio: nada que cortar), vuelve, y va otra vez
+  paseo: { auto: true, hora: 20, acciones: [['irA', 'camino_blanco'], ['irA', 'tejas_verdes'], ['irA', 'camino_blanco']], espera: { dichas: ['cb_sola', 'cb_siempre'], noDichas: ['cb_libro', 'cb_otra_vez'] } },
 };
 
 function correr(nombre, esc){
@@ -27,14 +38,18 @@ function correr(nombre, esc){
   for (let i = 0; i < 200 && !u.fin; i++) {
     if (u.pregunta) u = M.responder(true);       // (si el guion de respuestas se acabó: sí)
     else if (u.escena && u.escena.ops) u = M.elegir(0);
+    else if (esc.acciones && esc.acciones.length) { const [f, ...a] = esc.acciones.shift(); u = M[f](...a); }   // (lo que la jugadora hace por su cuenta)
     else break;
   }
   const dichas = M.resumen().hechos.filter(h => h.includes('.dichas.')).map(h => h.split('.').pop());
-  const fallas = [];
+  const fallas = [], notas = M.registro.map(r => r.t);
+  for (const d of esc.espera.cortadas || []) if (!notas.includes('✂ se corta ' + d)) fallas.push(`no se cortó ${d}`);
+  // (que la escena empezara cortando otra: la exclamación de <<if interrumpio>> está en el registro, justo después del corte)
+  for (const d of esc.espera.interrumpio || []) { const i = notas.findIndex(x => x && x.startsWith('🎬 ' + d + ':')); if (i < 1 || !String(notas[i - 1]).startsWith('✂')) fallas.push(`${d} no interrumpió nada`); }
   if (esc.espera.fin && u.fin !== esc.espera.fin) fallas.push(`termina «${u.fin}», no «${esc.espera.fin}»`);
   for (const d of esc.espera.dichas || []) if (!dichas.includes(d)) fallas.push(`no pasó ${d}`);
   for (const d of esc.espera.noDichas || []) if (dichas.includes(d)) fallas.push(`pasó ${d}`);
-  if (u.fin === 'terminada' && M.get(['estado', 'ana_en_tv']) !== 'decidida') fallas.push('ana_en_tv no quedó en «decidida»');
+  if (M.get(['historia', 'white_sands']) === 'terminada' && M.get(['estado', 'ana_en_tv']) !== 'decidida') fallas.push('ana_en_tv no quedó en «decidida»');
   return { M, u, dichas, fallas };
 }
 function ver(M){

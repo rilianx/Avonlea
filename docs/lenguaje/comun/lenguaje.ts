@@ -4,7 +4,7 @@
 // el juego, el grafo, el modelo lógico (Z3) y la historia en fichas leen ese JSON.
 // Los tipos son lo estricto: un nombre que no está declarado, o un valor que no es de su lista, es un error de tsc.
 
-import type { Persona } from './mundo'
+import type { Lugar, Persona } from './mundo'
 
 // ---------------------------------------------------------------- condiciones y efectos (datos)
 
@@ -22,6 +22,7 @@ export type Efecto =
   | { readonly e: 'suma'; readonly camino: readonly string[]; readonly n: number }
   | { readonly e: 'encarga'; readonly a: string; readonly hace: Llamada }
   | { readonly e: 'log'; readonly texto: string }
+  | { readonly e: 'silencio'; readonly dura: Duracion }
 export type Duracion = `${number}${'s' | 'm' | 'h' | 'd'}`
 
 export const y = (...de: Cond[]): Cond => ({ c: 'y', de })
@@ -179,7 +180,7 @@ export type DefHistoria<E extends Record<string, Encargo<string>>> = {
   readonly empieza: Cond
   readonly encarga: E
   readonly orden: readonly (Escena | readonly Escena[])[]
-  readonly termina: Cond
+  readonly termina?: Cond   // (sin «termina»: una historia de fondo, siempre en curso —lo que pasa cada vez que…—)
   readonly deja?: readonly Efecto[]
   readonly punto?: string
   readonly falla?: (encargo: EncargosDe<E>) => Cond
@@ -211,6 +212,10 @@ export type Respuesta = 'acepta' | 'rechaza'
 export const responde = (quien: Persona, r: Respuesta, a: Verbo<never[], string>, que?: Verbo<never[], string>): Activacion => ({ activa: { quien, responde: r, acto: a.verbo, ...(que ? { hace: que.verbo } : {}) } })
 // otra escena terminó
 export const tras = (e: Escena): Activacion => ({ activa: { tras: e } })
+// alguien pasa por un lugar (llega a él, o lo cruza en un viaje): pasa('ana', 'camino_blanco')
+export const pasa = (quien: Persona, lugar: Lugar): Activacion => ({ activa: { quien, pasa: lugar } })
+// (dentro de una escena que «interrumpe»: si cortó otra —había una conversación— o no —estaban en silencio—)
+export const interrumpio: Cond = { c: 'existe', camino: ['escena', 'interrumpio'] }
 
 // el guion de una escena: líneas (con su acto), comandos, opciones de la jugadora y variaciones (<<if>>)
 export type Item =
@@ -224,6 +229,7 @@ export type DefEscena = {
   readonly si: Cond
   readonly repetir?: 'una_vez' | 'dia' | 'siempre'
   readonly en_marcha?: true   // (se dice mientras los encargos siguen: una charla en la calesa, que no la detiene)
+  readonly interrumpe?: true  // (no espera a que termine la escena que se está diciendo: la corta)
   readonly punto?: string
   readonly hablan: readonly (Persona | 'narra')[]
   readonly cuerpo: readonly Item[]
@@ -236,3 +242,5 @@ export const voz = <S extends string>(llamada: Llamada<S>, def: { readonly paso?
 export const suma = (n: Numero, cuanto: number): Efecto => n.suma(cuanto)
 export const deja = (h: Hecho | Efecto): Efecto => ('deja' in h ? h.deja : h)
 export const log = (texto: string): Efecto => ({ e: 'log', texto })
+// (en una escena: nadie habla durante un rato; si la escena va en marcha, el mundo sigue: la calesa avanza)
+export const silencio = (dura: Duracion): Efecto => ({ e: 'silencio', dura })

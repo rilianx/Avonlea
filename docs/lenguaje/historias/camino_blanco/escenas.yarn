@@ -1,0 +1,82 @@
+// Las escenas del Camino Blanco de las Delicias, en Yarn Spinner (docs/LENGUAJE.md §9). Todas se activan cuando Ana
+// pasa por la Avenida (camino_blanco), a pie o en la calesa, y todas la interrumpen: no esperan a que termine la
+// escena que se está diciendo, la cortan. Van «en marcha»: mientras Ana calla, la calesa sigue.
+// La idea es siempre la misma, en tres tiempos:
+//   1. si había una conversación (interrumpio), Ana la corta con una exclamación; si iban en silencio, nada;
+//   2. silencio mientras pasan (<<silencio('…')>>: nadie habla, el mundo sigue);
+//   3. después, Ana dice algo.
+// La primera vez, con Matthew, es la del libro (cap. 2, «viaje» y «avonlea.camino_blanco»).
+
+title: cb_libro
+resumen: La Avenida, la primera vez: Ana enmudece, y después le pone nombre (el Camino Blanco de las Delicias).
+se_activa: ana pasa camino_blanco
+si: ve('ana', 'matthew')
+interrumpe: si
+en_marcha: si
+---
+<<if interrumpio>>
+ana: …¡Oh, señor Cuthbert! ¡Oh, señor Cuthbert!! ¡Oh, señor Cuthbert!!!
+<<endif>>
+narra: La calesa entra a la Avenida: cuatrocientos o quinientos metros de camino bajo los manzanos en flor, que se juntan arriba como una bóveda. Al fondo, el cielo del atardecer brilla como el rosetón de una catedral.
+ana: (Ana enmudece. Echa la cabeza atrás, con las manos juntas, como si estuviera en una iglesia. Los pétalos le caen en el pelo.)
+matthew: (Matthew la mira de reojo. No dice nada, para no romper el encanto.)
+<<silencio('20m')>>
+matthew: Supongo que estarás bien cansada y con hambre. Pero ya no falta mucho: solo una milla más.
+ana: Oh, señor Cuthbert… ese lugar por el que pasamos, ese lugar blanco… ¿qué era?
+matthew: Bueno, pues, debes referirte a la Avenida. Es un lugar bonito, más o menos.
+ana: ¿Bonito? Oh, «bonito» no parece la palabra justa. Ni «hermoso» tampoco. No alcanzan. ¡Oh, era maravilloso, maravilloso!
+ana: Es lo primero que veo que la imaginación no podría mejorar. Me llena aquí (se pone una mano en el pecho). Me dio un dolorcito raro y, sin embargo, agradable.
+ana: ¿Alguna vez ha sentido un dolor así, señor Cuthbert?
+matthew: Bueno, pues, no recuerdo haberlo sentido nunca.
+ana: Yo lo siento muchas veces, cada vez que veo algo regiamente hermoso. Pero no deberían llamar «la Avenida» a ese lugar tan precioso. Ese nombre no significa nada.
+ana: Deberían llamarlo… a ver… el Camino Blanco de las Delicias. ¿No es un nombre bonito e imaginativo?
+ana: Otros podrán llamarlo la Avenida, pero yo siempre le diré el Camino Blanco de las Delicias.
+<<deja(hechos.cb_nombre)>>
+===
+
+title: cb_otra_vez
+resumen: La Avenida otra vez: Ana corta lo que se está diciendo, calla, y después dice que el dolorcito sigue ahí.
+se_activa: ana pasa camino_blanco
+si: no(sola('ana'))
+interrumpe: si
+en_marcha: si
+---
+<<if interrumpio>>
+ana: ¡Shh! Perdón, perdón… pero es que ya llegamos. ¡El Camino Blanco de las Delicias!
+<<else>>
+ana: (Ana se endereza. Ya sabe lo que viene detrás de la curva.)
+<<endif>>
+narra: Los manzanos se cierran sobre el camino. Ana no dice una palabra hasta que salen del otro lado.
+<<silencio('8m')>>
+ana: Creí que la segunda vez no iba a ser igual. Que una se acostumbra. Pero no: me dio el mismo dolorcito aquí. ¿No es una suerte que haya cosas a las que una no se acostumbra nunca?
+<<if ve('ana', 'marilla')>>
+marilla: Son manzanos, Ana.
+ana: Sí, Srta. Cuthbert. Pero no son solamente manzanos.
+<<endif>>
+===
+
+title: cb_sola
+resumen: Ana pasa sola por la Avenida: calla, y después piensa en voz baja.
+se_activa: ana pasa camino_blanco
+si: sola('ana')
+interrumpe: si
+en_marcha: si
+---
+narra: Ana entra sola bajo los manzanos. No hay nadie a quien contárselo, y por una vez no hace falta.
+<<silencio('8m')>>
+ana: El Camino Blanco de las Delicias. Cuando no hay nadie, es todavía más mío. #piensa
+===
+
+title: cb_siempre
+resumen: La Avenida, una vez más: Ana calla al pasar, y después suspira.
+se_activa: ana pasa camino_blanco
+interrumpe: si
+en_marcha: si
+repetir: siempre
+---
+<<if interrumpio>>
+ana: (Ana deja la frase a medias y levanta la vista. Ya están bajo los manzanos.)
+<<endif>>
+<<silencio('5m')>>
+ana: (Ana suspira, contenta.) Cada vez es como la primera. Casi.
+===

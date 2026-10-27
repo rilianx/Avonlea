@@ -62,6 +62,8 @@ docs/lenguaje/
       index.ts               lo que ven las demás historias
       escenas.ids.ts         (generado) los nombres de sus escenas
       escenas.datos.ts     (generado) cada escena y cada voz traducida, para que tsc la revise
+    llegada/                 Matthew trae a Ana de Bright River (cap. 2)
+    camino_blanco/           una historia de fondo: lo que pasa cada vez que Ana pasa por la Avenida
 ```
 
 ## 3. Lo local y lo común
@@ -262,6 +264,7 @@ marilla: Hay que ver la de cosas que caben en esa cabeza. #piensa
 | `si` | condiciones (§5), separadas por comas: todas | ninguna |
 | `repetir` | `una_vez`, `dia`, `siempre` | `una_vez` |
 | `en_marcha` | `si`: se dice mientras los encargos siguen (una charla en la calesa, que no la detiene) | la escena detiene a quienes participan |
+| `interrumpe` | `si`: no espera a que termine la escena que se está diciendo; la corta (queda a medias, sin `tras`). Adentro, `interrumpio` dice si cortó algo | espera su turno |
 | `punto` | un punto para volver, antes de empezar | |
 | `con` | quienes participan sin hablar | los que hablan |
 
@@ -278,6 +281,7 @@ Una escena de una historia pide, además, sin escribirlo, que su historia esté 
 | `ana rechaza pedir` | la respuesta a un pedido (§7.1): `acepta` o `rechaza` | `responde('ana', 'rechaza', pedir)` |
 | `ana rechaza pedir subir` | la respuesta a un pedido en particular (que suba) | `responde('ana', 'rechaza', pedir, subir)` |
 | `tras ws_t1` | otra escena terminó (con una pausa breve) | `tras(escena.ws_t1)` |
+| `ana pasa camino_blanco` | alguien llega a un lugar, o lo cruza en un viaje (a pie, en la calesa, siguiendo a otro) | `pasa('ana', 'camino_blanco')` |
 
 ### 9.3 El cuerpo
 
@@ -289,7 +293,10 @@ Una escena de una historia pide, además, sin escribirlo, que su historia esté 
 - `<<comando>>`: un efecto o un verbo.
   - `<<deja(hechos.ws_corrio)>>`, `<<suma(cualidad('marilla', 'afecto', 'ana'), 1)>>`, `<<log('…')>>`
   - `<<correr_a('ana', 'orilla')>>`: alguien hace un verbo ahora.
-- `<<if …>> … <<else>> … <<endif>>`: una variación dentro de la escena (como en Yarn).
+  - `<<silencio('20m')>>`: nadie habla durante ese rato. Si la escena va `en_marcha`, el mundo sigue (la calesa avanza,
+    pasa por otros lugares); sus momentos esperan a que la escena termine, salvo los de una que `interrumpe`.
+- `<<if …>> … <<else>> … <<endif>>`: una variación dentro de la escena (como en Yarn). `<<if interrumpio>>`: si la
+  escena empezó cortando otra (había una conversación) o no (estaban en silencio).
 - Mientras una escena se juega, **los verbos de quienes participan se pausan**; al terminar, siguen. Es lo que hoy son
   `interrumpe`, `sujeta` y `canal`. Con `en_marcha: si`, no: la escena se dice mientras siguen (las charlas del camino,
   con la calesa avanzando; la Sra. Pye o la orilla, en cambio, detienen el viaje).
@@ -318,7 +325,37 @@ export const white_sands = historia('white_sands', {
   especificidad.
 - **`deja`**: lo que queda en lo común al terminar. **`falla`**: cuándo la historia se pierde.
 - **Las historias de fondo** (la de cada persona, cada cosa y cada lugar: sus conversaciones, sus líneas) son
-  historias sin `termina`.
+  historias sin `termina` (y sin encargos, si no los necesitan): empiezan cuando se cumple `empieza` y siguen en curso.
+
+### 10.1 Un ejemplo de fondo: el Camino Blanco de las Delicias
+
+Cada vez que Ana pasa por la Avenida, el túnel de manzanos en flor, pasa lo mismo, en tres tiempos: si había una
+conversación, Ana la corta con una exclamación; después, silencio mientras pasan; y al salir, Ana dice algo. La
+primera vez, con Matthew (cap. 2), con las palabras del libro; las otras, con otras palabras.
+
+```
+title: cb_libro
+resumen: La Avenida, la primera vez: Ana enmudece, y después le pone nombre.
+se_activa: ana pasa camino_blanco
+si: ve('ana', 'matthew')
+interrumpe: si
+en_marcha: si
+---
+<<if interrumpio>>
+ana: …¡Oh, señor Cuthbert! ¡Oh, señor Cuthbert!! ¡Oh, señor Cuthbert!!!
+<<endif>>
+narra: La calesa entra a la Avenida…
+<<silencio('20m')>>
+matthew: Supongo que estarás bien cansada y con hambre. Pero ya no falta mucho: solo una milla más.
+ana: Oh, señor Cuthbert… ese lugar por el que pasamos, ese lugar blanco… ¿qué era?
+===
+```
+
+Las variantes son escenas de la misma historia (`historias/camino_blanco/`), todas con la misma activación; el
+`orden` dice cuál prefiere: `[cb_libro, cb_otra_vez, cb_sola, cb_siempre]`. Las tres primeras se dicen una vez; la
+última, `repetir: siempre`. Ninguna sabe nada de la charla que corta: en la llegada (`historias/llegada/`), Ana viene
+hablando de ser «angelicalmente buena» y la corta al entrar; en cualquier otro viaje que pase por ahí, cortará lo
+que se esté diciendo.
 
 ## 11. Cómo se ejecuta
 
@@ -328,7 +365,8 @@ export const white_sands = historia('white_sands', {
    terminaron; historias que empezaron o terminaron; lo que hizo la jugadora.
 3. **Se juntan las candidatas:** para cada momento, las escenas que se activan con él y cuyas condiciones se cumplen.
 4. **Se elige** con el `orden` de su historia, y si no, la más específica.
-5. **Se juega una escena por grupo de participantes.** Las que no comparten personas pueden ir a la vez.
+5. **Se juega una escena por grupo de participantes.** Las que no comparten personas pueden ir a la vez. Mientras una
+   se dice, los momentos nuevos esperan a que termine; solo una escena que `interrumpe` no espera: la corta.
 6. **Sus efectos cambian el estado.** Pueden empezar historias o encargos, o romper un `mantiene`.
 7. **Las búsquedas cuyo estado cambió planifican de nuevo.**
 
@@ -383,7 +421,7 @@ encargos con sus pasos y su reparación (`mantiene`), los pedidos a Ana, las esc
 voces. Sirve para probar una historia antes de llevarla al juego. Simplifica dos cosas:
 - **el mundo:** los lugares por nombre y los minutos entre ellos (15 entre paradas de una ruta, 2 dentro de un mismo
   lugar, 3 a uno cercano, 10 si no), sin el mapa;
-- **el tiempo de las escenas:** un minuto de juego por línea;
+- **el tiempo de las escenas:** un minuto de juego por línea, y lo que diga `<<silencio>>`;
 - **las búsquedas:** el plan es de un paso (el verbo más barato de su `con` que logra el objetivo; lo que ya falló
   cuesta más), y no el A\* completo del juego.
 
@@ -392,7 +430,9 @@ vas a otro lugar y te bajas de la calesa; a la derecha, los encargos, dónde est
 momentos» aparece lo que la mueve por dentro.
 
 **La prueba** `tools/lenguaje/probar.js` la recorre en varios escenarios y revisa cómo termina: Ana sola; obediente;
-que se niega dos veces; que corre al mar; Marilla sin paciencia; Ana lejos a la hora de salir.
+que se niega dos veces; que corre al mar; Marilla sin paciencia; Ana lejos a la hora de salir; la llegada por la
+Avenida (que la escena del libro corte la charla); la llegada si Ana ya hubiera pasado (la otra variante); y Ana
+que pasea sola por la Avenida, dos veces (sin nada que cortar).
 
 **Para el juego**, el mismo `tsc` compila a JavaScript, y los constructores arman los datos: el JSON de cada historia
 con sus encargos, de cada verbo con su receta, de cada escena. El juego, el grafo, el modelo lógico (Z3) y la historia

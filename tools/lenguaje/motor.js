@@ -65,7 +65,7 @@
     }
     // (lo que el mundo calcula: verse y oírse, en el mismo lugar)
     const juntos = (a, b) => lugarDe(a) === lugarDe(b);
-    const funciones = { ve: juntos, oye: juntos };
+    const funciones = { ve: juntos, oye: juntos, sola: p => Object.keys(D.personas).every(q => q === p || !juntos(p, q)) };
     function aplicar(e){
       if (e.verbo) return instantaneo(e);
       if (e.e === 'deja') set(e.camino, e.valor === undefined ? dia() : val(e.valor));
@@ -84,12 +84,14 @@
       if (L(a).cerca === b || L(b).cerca === a) return 3;
       return 10;
     }
-    // (quien va en un medio lo lleva, con los que van en él; quien lo sigue, va detrás)
+    // (quien va en un medio lo lleva, con los que van en él; quien lo sigue, va detrás. Cada uno que llega a un lugar,
+    // pasa por él: es un momento —«ana pasa camino_blanco»—)
     function mover(p, a){
-      set(['mundo', p, 'lugar'], a);
+      const poner = q => { if (lugarDe(q) !== a) { set(['mundo', q, 'lugar'], a); if (D.personas[q]) cola.push({ tipo: 'pasa', quien: q, lugar: a }); } };
+      poner(p);
       const m = get(['mundo', p, 'en']);
-      if (m !== 'nada') { set(['mundo', m, 'lugar'], a); for (const q of Object.keys(D.personas)) if (get(['mundo', q, 'en']) === m) set(['mundo', q, 'lugar'], a); }
-      for (const q of Object.keys(D.personas)) if (get(['mundo', q, 'sigue']) === p && get(['mundo', q, 'en']) === 'nada') set(['mundo', q, 'lugar'], a);
+      if (m !== 'nada') { poner(m); for (const q of Object.keys(D.personas)) if (get(['mundo', q, 'en']) === m) poner(q); }
+      for (const q of Object.keys(D.personas)) if (get(['mundo', q, 'sigue']) === p && get(['mundo', q, 'en']) === 'nada') poner(q);
     }
     function tramo(tr){
       const r = D.rutas[tr.por], en = x => (r.includes(x) ? x : D.lugares[x]?.dentro || D.lugares[x]?.cerca);
@@ -253,7 +255,7 @@
           set(['historia', h], 'en_curso'); nota(`▶ empieza la historia «${H.titulo}»`, 'titulo'); cola.push({ tipo: 'historia', historia: h, momento: 'empieza' });
           for (const [et, e] of Object.entries(H.encargo)) if (!e.tras || !e.tras.length) empezarEncargo(h, et, e); else porTras.push({ h, et, e });
         } else if (est === 'en_curso' && !escena) {
-          const termina = cumple(H.termina), falla = H.falla && cumple(H.falla);
+          const termina = H.termina != null && cumple(H.termina), falla = H.falla && cumple(H.falla);   // (sin «termina»: de fondo, no termina)
           if (termina || falla) {
             set(['historia', h], termina ? 'terminada' : 'fallida');
             if (termina) for (const e of H.deja || []) aplicar(e);
@@ -266,27 +268,35 @@
     }
     function coincide(a, mo){
       if (a.tras) return mo.tipo === 'tras' && mo.escena === a.tras.escena;
+      if (a.pasa) return mo.tipo === 'pasa' && mo.quien === a.quien && mo.lugar === a.pasa;
       if (a.responde) return mo.tipo === 'responde' && mo.quien === a.quien && mo.r === a.responde && mo.acto === a.acto && (!a.hace || mo.hace === a.hace);
       if (a.encargo) return mo.tipo === 'encargo' && mo.historia === a.encargo.estado.camino[1] && mo.etiqueta === a.encargo.etiqueta && mo.paso === a.paso && mo.momento === a.momento;
       if (a.verbo) return mo.tipo === 'verbo' && mo.quien === a.quien && mo.verbo === a.verbo && mo.paso === a.paso && mo.momento === a.momento;
       return false;
     }
     const cuenta = c => (!c || c === true ? 0 : c.c === 'y' || c.c === 'o' ? c.de.reduce((n, x) => n + cuenta(x), 0) : 1);
-    // (de los momentos que pasaron, la escena que va: la primera del «orden» de su historia; si no, la más específica)
-    function elegirEscena(){
-      const momentos = cola.splice(0); let mejor = null, top = -Infinity;
+    // (de los momentos que pasaron, la escena que va: la primera del «orden» de su historia; si no, la más específica.
+    // Mientras se dice una escena, los momentos esperan a que termine; solo una que «interrumpe» la corta: entonces se
+    // miran solo esas, y los demás momentos siguen esperando)
+    function elegirEscena(interrumpe = false){
+      const momentos = interrumpe ? cola : cola.splice(0); let mejor = null, top = -Infinity, suyo = null;
       for (const mo of momentos) {
-        if (mo.tipo === 'tras') for (const p of porTras.filter(x => x.e.tras.some(s => s.escena === mo.escena))) { porTras.splice(porTras.indexOf(p), 1); empezarEncargo(p.h, p.et, p.e); }
+        if (!interrumpe && mo.tipo === 'tras') for (const p of porTras.filter(x => x.e.tras.some(s => s.escena === mo.escena))) { porTras.splice(porTras.indexOf(p), 1); empezarEncargo(p.h, p.et, p.e); }
         for (const e of Object.values(D.escenas)) {
-          const [h, id] = e.escena.split('.');
-          if (get(['historia', h]) !== 'en_curso' || ((e.repetir || 'una_vez') === 'una_vez' && get([h, 'dichas', id]) != null)) continue;
+          if (interrumpe && !e.interrumpe) continue;
+          const [h, id] = e.escena.split('.'), r = e.repetir || 'una_vez', dicha = get([h, 'dichas', id]);
+          if (get(['historia', h]) !== 'en_curso' || (r === 'una_vez' && dicha != null) || (r === 'dia' && dicha === dia())) continue;
           if (!e.se_activa.some(a => coincide(a.activa, mo)) || !cumple(e.si)) continue;
           const o = D.historias[h].orden.findIndex(x => (Array.isArray(x) ? x : [x]).some(y => y.escena === e.escena));
           const s = (o >= 0 ? 1000 - o : 0) + cuenta(e.si);
-          if (s > top) { top = s; mejor = e; }
+          if (s > top) { top = s; mejor = e; suyo = mo; }
         }
       }
       if (!mejor) return false;
+      if (interrumpe) cola.splice(cola.indexOf(suyo), 1);
+      // (si corta otra escena, esa no sigue: queda dicha, a medias, y no hay «tras» de ella)
+      if (escena) { nota(`✂ se corta ${escena.e.escena.split('.')[1]}`, 'momento'); set(['escena', 'interrumpio'], escena.e.escena); }
+      else delete S['escena.interrumpio'];
       const [h, id] = mejor.escena.split('.'); set([h, 'dichas', id], dia());
       nota(`🎬 ${id}: ${mejor.resumen}`, 'escena');
       escena = { e: mejor, pila: [[...mejor.cuerpo]], proxima: t, en_marcha: !!mejor.en_marcha, participan: new Set(mejor.hablan) };
@@ -308,6 +318,7 @@
         }
         top.shift();
         if (it.q) { escena.proxima = t + MIN_LINEA; registro.push({ tipo: 'linea', q: it.q, t: it.t, piensa: !!it.piensa, hora: reloj() }); if (it.acto) { const d = sub(D.verbos[it.acto.verbo], { params: it.acto.args }); for (const e of d.deja || []) aplicar(e); } }
+        else if (it.hace && it.hace.e === 'silencio') { escena.proxima = t + aMin(it.hace.dura); registro.push({ tipo: 'silencio', t: it.hace.dura, hora: reloj() }); }
         else if (it.hace) aplicar(it.hace);
         else if (it.si) pila.push([...(cumple(it.si) ? it.cuerpo : it.sino)]);
       }
@@ -318,7 +329,7 @@
       escena.pila.push([...op.cuerpo]);
     }
     function terminarEscena(){
-      const id = escena.e.escena; escena = null;
+      const id = escena.e.escena; escena = null; delete S['escena.interrumpio'];
       cola.push({ tipo: 'tras', escena: id });
     }
 
@@ -334,6 +345,7 @@
       for (let vuelta = 0; vuelta < limite; vuelta++) {
         if (pregunta) return estadoUI();
         if (escena) { seguirEscena(); if (escena && escena.ops) return estadoUI(); }
+        if (escena && cola.length && elegirEscena(true)) continue;   // (una que interrumpe: no espera)
         revisarHistorias();
         if (fin) return estadoUI();
         if (!escena && cola.length && elegirEscena()) continue;
@@ -367,7 +379,7 @@
     const ini = { ana: 'cocina', marilla: 'cocina', matthew: 'corral', calesa: 'corral', srapye: 'aldea', spencer: 'hotel_white_sands', blewett: 'hotel_white_sands', ...(escenario.lugares || {}) };
     for (const [x, l] of Object.entries(ini)) set(['mundo', x, 'lugar'], l);
     set(['comun', 'hechos', 'primera_noche'], 1); set(['estado', 'ana_en_tv'], 'en_prueba');
-    for (const [c, v] of Object.entries(escenario.estado || {})) set(c.split('.'), v);
+    for (const [c, v] of Object.entries(escenario.estado || {})) if (v === null) delete S[c]; else set(c.split('.'), v);   // (null: lo borra)
 
     return {
       avanzar,

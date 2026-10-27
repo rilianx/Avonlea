@@ -22,12 +22,17 @@ export const lugares = {
   playa: { nombre: 'la playa, junto al hotel White Sands' },
   orilla: { nombre: 'la orilla del mar', cerca: 'playa' },
   hotel_white_sands: { nombre: 'el hotel White Sands' },
+  estacion_bright_river: { nombre: 'la estación de Bright River' },
+  camino_blanco: { nombre: 'la Avenida (el Camino Blanco de las Delicias)' },
+  newbridge: { nombre: 'Newbridge' },
+  estanque_barry: { nombre: 'el estanque de los Barry (el Lago de las Aguas Brillantes)' },
 } as const
 export type Lugar = keyof typeof lugares
 
 // (en orden: así pasa la calesa, medido sobre el mapa; de vuelta, al revés)
 export const rutas = {
   costa: ['tejas_verdes', 'hondonada_lynde', 'escuela', 'aldea', 'playa', 'hotel_white_sands'],
+  bright_river: ['estacion_bright_river', 'camino_blanco', 'newbridge', 'estanque_barry', 'tejas_verdes'],
 } as const satisfies Record<string, readonly Lugar[]>
 export type Ruta = keyof typeof rutas
 
@@ -53,3 +58,4 @@ export const tramo = (por: Ruta, desde: Campo<Lugar> | Lugar, hasta: Lugar): { r
 // lo que el mundo calcula y el estado no guarda: la única salida a código, a la vista
 export const ve = funcion<[quien: Persona, otro: Persona]>('ve')     // quien ve a otro (la misma pieza, o cerca afuera)
 export const oye = funcion<[quien: Persona, otro: Persona]>('oye')   // quien oye a otro (la misma pieza, o a unos pasos)
+export const sola = funcion<[quien: Persona]>('sola')                // no hay nadie más donde está

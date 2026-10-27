@@ -48,6 +48,7 @@ const MOMENTOS = ['empieza', 'cumplido', 'fallido', 'sigue'];
 function activacion(a, historia, donde){
   const w = a.trim().split(/\s+/);
   if (w[0] === 'tras' && w.length === 2) return `tras(escena.${expr(w[1], donde)})`;
+  if (w.length === 3 && w[1] === 'pasa') return `pasa('${expr(w[0], donde)}', '${expr(w[2], donde)}')`;   // alguien pasa por un lugar
   if ((w.length === 3 || w.length === 4) && (w[1] === 'acepta' || w[1] === 'rechaza'))   // la respuesta a un pedido (y a qué: «ana rechaza pedir subir»)
     return `responde('${expr(w[0], donde)}', '${w[1]}', ${expr(w[2], donde)}${w[3] ? ', ' + expr(w[3], donde) : ''})`;
   const m = w.at(-1); if (!MOMENTOS.includes(m)) throw new Error(donde + ': «' + a + '»: el momento es uno de ' + MOMENTOS.join(', '));
@@ -104,7 +105,7 @@ function escena(n, historia){
   return `  ${n.cab.title}: defEscena(escena.${n.cab.title}, {
     resumen: ${JSON.stringify(n.cab.resumen)},
     se_activa: [${n.cab.se_activa.split('|').map(a => activacion(a, historia, donde)).join(', ')}],
-    si: y(${si.join(', ')}),${n.cab.en_marcha === 'si' ? '\n    en_marcha: true,' : ''}${n.cab.repetir ? `\n    repetir: '${expr(n.cab.repetir, donde)}',` : ''}${n.cab.punto ? `\n    punto: ${JSON.stringify(n.cab.punto)},` : ''}
+    si: y(${si.join(', ')}),${n.cab.en_marcha === 'si' ? '\n    en_marcha: true,' : ''}${n.cab.interrumpe === 'si' ? '\n    interrumpe: true,' : ''}${n.cab.repetir ? `\n    repetir: '${expr(n.cab.repetir, donde)}',` : ''}${n.cab.punto ? `\n    punto: ${JSON.stringify(n.cab.punto)},` : ''}
     hablan: [${[...hablan].map(q => `'${q}'`).join(', ')}],
     cuerpo: [
       ${cuerpo.join(',\n      ')},
@@ -170,7 +171,7 @@ function construir(raiz){
     const cuerpo = [...es, ...vs].join('\n');
     const locales = [[path.join(dir, 'historia.ts'), exportsDe(path.join(dir, 'historia.ts'))], [path.join(dir, 'escenas.ids.ts'), new Set(['escena', 'dichas'])]];
     fs.writeFileSync(path.join(dir, 'escenas.datos.ts'), CABEZA(`historias/${h}/escenas.yarn y voces.yarn`)
-      + imports(cuerpo + ' defEscena y voz', [...locales, ...modulosComunes], dir)
+      + imports(cuerpo + ' defEscena y' + (vs.length ? ' voz' : ''), [...locales, ...modulosComunes], dir)
       + '\n\nexport const escenas = {\n' + es.join('\n') + '\n}\n\nexport const voces = [\n' + vs.join('\n') + '\n]\n');
     escritos.push(`historias/${h}: ${es.length} escenas, ${vs.length} voces`);
   }

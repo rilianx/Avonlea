@@ -20,7 +20,8 @@ export const cualidades = {
 export const cualidad = accesoCualidad<Persona>()(cualidades)
 
 export const hechos = hechosDe('comun', {
-  primera_noche: 'Ana pasó su primera noche en Tejas Verdes (lo deja la historia de la llegada)',
+  llego: 'Ana llegó a Tejas Verdes con Matthew (lo deja la historia de la llegada)',
+  primera_noche: 'Ana pasó su primera noche en Tejas Verdes',
   conoce_blewett: 'Ana conoce a la Sra. Blewett',
 })
 
