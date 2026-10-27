@@ -50,7 +50,7 @@ export const white_sands = historia('white_sands', {
   },
 
   // la prioridad: la primera elegible gana (las que no están, por especificidad)
-  orden: [escena.falta_viaje, escena.ws_orilla, escena.ws_pye, escena.ws_mar, escena.ws_t3, escena.ws_t2, escena.ws_t1],
+  orden: [escena.falta_viaje, escena.ws_no_sube_orden, escena.ws_no_sube, escena.ws_orilla, escena.ws_pye, escena.ws_mar, escena.ws_t3, escena.ws_t2, escena.ws_t1],
 
   termina: dichas.ws_noche,
   deja: [estado.ana_en_tv.vale('decidida'), comun.conoce_blewett.deja],

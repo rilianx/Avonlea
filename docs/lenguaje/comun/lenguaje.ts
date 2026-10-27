@@ -121,7 +121,8 @@ function verbo<A extends unknown[], S extends string>(tipo: string, nombre: stri
   return Object.assign(f, { verbo: nombre, def: { tipo, ...(def(...(params as unknown as A)) as object) } })
 }
 
-export type DefPrimitivo = { readonly pide?: Cond; readonly deja?: readonly Efecto[]; readonly dura?: Duracion; readonly cuesta?: number }
+// («opcion»: cómo se le ofrece a la jugadora cuando se lo piden a Ana: 'Ir con {otro}')
+export type DefPrimitivo = { readonly pide?: Cond; readonly deja?: readonly Efecto[]; readonly dura?: Duracion; readonly cuesta?: number; readonly opcion?: string }
 // lo hace el mundo, con su animación y su duración
 export const primitivo = <A extends unknown[]>(nombre: string, def: (...a: A) => DefPrimitivo) => verbo<A, never>('primitivo', nombre, def)
 
@@ -150,10 +151,17 @@ export const por_cada = <T>(lista: readonly T[] | { readonly lista: string; read
 
 // ---------------------------------------------------------------- actos de habla
 
-export type DefActo = { readonly pide?: Cond; readonly deja?: readonly Efecto[]; readonly cuesta?: number }
+// «pedido»: el acto le pide a alguien que haga un verbo. Ese alguien decide: si es Ana, la jugadora (el juego le
+// ofrece hacerlo o no; no contestar en un rato también es no); si Ana va sola, o es otro, según sus respuestas
+// (comun/ana.ts). Para planificar, el A* supone que acepta, con el costo de lo probable; si rechaza, el intento falla
+export type DefActo = { readonly pide?: Cond; readonly deja?: readonly Efecto[]; readonly cuesta?: number; readonly pedido?: { readonly a: Persona; readonly hace: Llamada; readonly espera: Duracion } }
 // decir algo es un verbo: quien lo dice (el primer parámetro), a quién, y sus efectos; su texto es su voz
 export const acto = <A extends unknown[]>(nombre: string, def: (...a: A) => DefActo) => verbo<A, never>('acto', nombre, def)
 export const encarga = (a: string, hace: Llamada): Efecto => ({ e: 'encarga', a, hace })
+// cómo responde alguien a un pedido cuando decide solo (Ana sin jugadora, o los demás): por acto, una condición sobre
+// quién lo pide (true: siempre acepta)
+export const respuestas = <const R extends Record<string, (quien: Persona) => Cond | true>>(r: R) =>
+  Object.fromEntries(Object.entries(r).map(([k, f]) => [k, f({ param: 0 } as never)])) as { readonly [K in keyof R]: Cond | true }
 
 // ---------------------------------------------------------------- historias
 
@@ -192,6 +200,9 @@ export type Activacion = { readonly activa: unknown }
 export const momento = <S extends string>(e: Encargo<S>, paso: '' | NoInfer<S>, m: Momento): Activacion => ({ activa: { encargo: e, paso, momento: m } })
 // un verbo de alguien: hace('marilla', traer, 'va', 'cumplido'); o lo que hace la jugadora: hace('ana', tocar, '', 'empieza')
 export const hace = <S extends string>(quien: Persona, v: Verbo<never[], S>, paso: '' | NoInfer<S>, m: Momento): Activacion => ({ activa: { quien, verbo: v.verbo, paso, momento: m } })
+// alguien acepta o rechaza lo que le pidieron: responde('ana', 'rechaza', pedir)
+export type Respuesta = 'acepta' | 'rechaza'
+export const responde = (quien: Persona, r: Respuesta, a: Verbo<never[], string>): Activacion => ({ activa: { quien, responde: r, acto: a.verbo } })
 // otra escena terminó
 export const tras = (e: Escena): Activacion => ({ activa: { tras: e } })
 

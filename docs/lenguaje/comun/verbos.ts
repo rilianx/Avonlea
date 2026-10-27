@@ -8,6 +8,7 @@ import { ordenar, pedir } from './actos'
 
 // ---------------------------------------------------------------- primitivos
 
+// (quien sigue a quien sube, sube con él: así Ana sube a la calesa cuando sigue a Marilla)
 export const subir = primitivo('subir', (quien: Persona, m: Medio) => ({
   pide: mundo(quien).en.es('nada'),
   deja: [mundo(quien).en.vale(m)],
@@ -25,6 +26,21 @@ export const enganchar = primitivo('enganchar', (_quien: Persona, m: Medio) => (
   dura: '5m',
 }))
 
+// (un verbo de quien decide: Ana sigue a alguien porque quiere, o porque se lo pidieron y aceptó; puede dejar de
+// hacerlo cuando quiera —bajarse de la calesa, salir corriendo—)
+export const seguir = primitivo('seguir', (quien: Persona, otro: Persona) => ({
+  deja: [mundo(quien).sigue.vale(otro)],
+  dura: '1s',
+  opcion: 'Ir con {otro}',
+}))
+
+export const dejar_de_seguir = primitivo('dejar_de_seguir', (quien: Persona) => ({
+  pide: mundo(quien).sigue.no_es('nadie'),
+  deja: [mundo(quien).sigue.vale('nadie')],
+  dura: '1s',
+}))
+
+// (llevarla de la mano: también la sigue; ella puede soltarse —dejar_de_seguir—)
 export const tomar_de_la_mano = primitivo('tomar_de_la_mano', (quien: Persona, otro: Persona) => ({
   deja: [mundo(otro).sigue.vale(quien)],
   dura: '5s',
@@ -52,12 +68,12 @@ export const correr_a = mapa('correr_a', (_quien: Persona, _a: Destino) => ({ pa
 
 // ---------------------------------------------------------------- por receta
 
+// (la trae de la mano, y no la suelta: al llegar, la sigue)
 export const traer = receta('traer', (quien: Persona, otro: Persona, a: Lugar) => ({
   pasos: {
     va: ir_a(quien, mundo(otro).lugar),
     toma: tomar_de_la_mano(quien, otro),
     vuelve: ir_a(quien, a),
-    suelta: soltar(quien, otro),
   },
 }))
 
@@ -77,7 +93,8 @@ export const viajar = por_cada_uno('viajar', (quien: Persona, m: Medio, por: Rut
 // ---------------------------------------------------------------- por búsqueda
 
 // (el A* elige el plan más barato: pedírselo si Ana la oye; ordenárselo si ya se lo pidió; ir a buscarla y traerla si
-// está lejos o no obedece. Cada intento fallido —la jugadora no obedece— vuelve a planificar; al cuarto, falla)
+// está lejos o no obedece. Lo que depende de Ana es un pedido: el A* supone que acepta; si rechaza, el intento falla y
+// vuelve a planificar —más firme, o ir a buscarla—; al cuarto, la búsqueda falla)
 export const conseguir_que = busca('conseguir_que', (_quien: Persona, _otro: Persona, c: Cond) => ({
   objetivo: c,
   con: [pedir, ordenar, traer, esperar],
@@ -86,16 +103,17 @@ export const conseguir_que = busca('conseguir_que', (_quien: Persona, _otro: Per
 
 // ---------------------------------------------------------------- lo que encadena todo
 
-// (si Ana salta de la calesa en el camino, se rompe lo que mantiene: Marilla vuelve a «sube» —consigue que vuelva— y
-// el camino sigue desde la parada en que iban)
+// (lo que necesita es que el otro decida seguirla: «sigue» lo consigue —pedírselo, ordenárselo, ir a buscarla—; si la
+// sigue, sube con ella. Si Ana deja de seguirla en el camino —salta de la calesa—, se rompe lo que mantiene: vuelve a
+// «sigue», y el camino continúa desde la parada en que iban)
 export const llevar_a = receta('llevar_a', (quien: Persona, otro: Persona, a: Lugar, m: Medio, por: Ruta) => ({
   pasos: {
     engancha: enganchar(quien, m),
-    sube: conseguir_que(quien, otro, mundo(otro).en.es(m)),
+    sigue: conseguir_que(quien, otro, mundo(otro).sigue.es(quien)),
     arriba: subir(quien, m),
     camino: viajar(quien, m, por, a),
-    baja: [bajar(otro), bajar(quien)],
+    baja: [bajar(quien), dejar_de_seguir(otro)],
   },
-  mantiene: { si: mundo(otro).en.es(m), desde: 'camino', si_se_rompe: 'sube' },
+  mantiene: { si: mundo(otro).sigue.es(quien), desde: 'arriba', si_se_rompe: 'sigue' },
   cumplido: mundo(otro).lugar.es(a),
 }))

@@ -4,6 +4,28 @@
 // prioridad) lo dan la historia (historia.ts), su encargo y su «orden». Los nombres son los de historia.ts y comun/.
 // Comandos: <<deja(…)>>, <<suma(…)>>, y cualquier verbo: <<correr_a('ana', 'orilla')>>. Etiquetas: #piensa (lo que
 // alguien piensa), #propia (lo que Ana haría sola), #<acto>:<a quién> (la línea es ese acto: #ofender:ana).
+// Que Ana suba a la calesa no lo decide Marilla: se lo pide (pedir), y la jugadora acepta o no. Si no, «ana rechaza
+// pedir» es un momento: las escenas ws_no_sube y ws_no_sube_orden.
+
+title: ws_no_sube
+resumen: Ana no quiere subir a la calesa: Marilla la espera, y se le acaba un poco la paciencia.
+se_activa: ana rechaza pedir
+si: white_sands.encargo.ida.estado.es('en_curso')
+---
+marilla: (Marilla la mira desde el pescante, con las riendas en la mano.) Ana. Te estoy esperando.
+ana: Es que… mientras no suba, todavía estoy en Tejas Verdes. Si subo, se acaba. #piensa
+<<suma(cualidad('marilla', 'paciencia', 'ana'), -1)>>
+===
+
+title: ws_no_sube_orden
+resumen: Ana sigue sin subir: Marilla baja de la calesa a buscarla.
+se_activa: ana rechaza ordenar
+si: white_sands.encargo.ida.estado.es('en_curso')
+---
+narra: Marilla deja las riendas, baja de la calesa y va derecho hacia Ana, sin apurarse y sin detenerse.
+marilla: Se acabó. Vamos.
+<<suma(cualidad('marilla', 'paciencia', 'ana'), -1)>>
+===
 
 title: falta_viaje
 resumen: Es hora de ir a White Sands y Ana no está cerca: Marilla tuvo que ir a buscarla.
@@ -107,6 +129,7 @@ ana: Nadie las quiere por algo. #piensa
     ana: (Ana salta de la calesa sin decir una palabra y echa a correr por el pasto, hacia el mar, con la trenza al viento.)
     marilla: ¡Ana! ¡Ana Shirley!
     <<deja(hechos.ws_corrio)>>
+    <<dejar_de_seguir('ana')>>
     <<correr_a('ana', 'orilla')>>
 -> Quedarse quieta, apretando la maleta
     ana: (Ana no dice nada. Aprieta la maleta vieja contra las rodillas, hasta que le duelen los dedos, y mira el mar.)

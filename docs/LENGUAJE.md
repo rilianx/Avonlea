@@ -51,6 +51,7 @@ docs/lenguaje/
     estado.ts                el estado común: estados, cualidades, hechos, noticias
     verbos.ts                los verbos
     actos.ts                 los actos de habla
+    ana.ts                   Ana es la jugadora: cómo responde a lo que le piden cuando va sola
     voces.yarn               las voces comunes
     voces.chequeo.ts         (generado)
   historias/
@@ -159,18 +160,22 @@ quien lo hace. Al construir, la definición se llama una vez con los nombres de 
 export const llevar_a = receta('llevar_a', (quien: Persona, otro: Persona, a: Lugar, m: Medio, por: Ruta) => ({
   pasos: {
     engancha: enganchar(quien, m),
-    sube: conseguir_que(quien, otro, mundo(otro).en.es(m)),
+    sigue: conseguir_que(quien, otro, mundo(otro).sigue.es(quien)),
     arriba: subir(quien, m),
     camino: viajar(quien, m, por, a),
-    baja: [bajar(otro), bajar(quien)],
+    baja: [bajar(quien), dejar_de_seguir(otro)],
   },
-  mantiene: { si: mundo(otro).en.es(m), desde: 'camino', si_se_rompe: 'sube' },
+  mantiene: { si: mundo(otro).sigue.es(quien), desde: 'arriba', si_se_rompe: 'sigue' },
   cumplido: mundo(otro).lugar.es(a),
 }))
 ```
 
-- **`mantiene`**: una condición que tiene que seguir siendo cierta desde un paso. Si el mundo la rompe (Ana salta de
-  la calesa), el verbo **se repara**: vuelve al paso que la consigue y, cuando se cumple, sigue desde donde iba.
+- **Lo que necesita es que el otro decida seguirla.** Marilla no puede subir a Ana a la calesa: consigue que Ana la
+  siga (`sigue`), y quien sigue a alguien que sube, sube con él. Que Ana la siga es un verbo de Ana, `seguir`, y lo
+  decide ella (§7.1).
+- **`mantiene`**: una condición que tiene que seguir siendo cierta desde un paso. Si el mundo la rompe (Ana deja de
+  seguirla y salta de la calesa), el verbo **se repara**: vuelve al paso que la consigue (`sigue`: pedírselo de nuevo,
+  ir a buscarla) y, cuando se cumple, sigue desde donde iba.
 - **Los caminos de los pasos** van con puntos: `'camino'`, `'camino.playa'` (la parada `playa` del paso `camino`).
   Son un tipo: un paso que no existe es un error.
 - **Los momentos de un verbo**, de cualquier nivel, son `empieza`, `cumplido`, `fallido` y `sigue` (sigue después de una
@@ -182,10 +187,31 @@ Decir algo es un verbo, `acto`: quien lo dice, a quién y sus efectos. Precondic
 su voz (§8), o la línea de la escena que lo lleva (`#ofender:ana`). Una línea sin acto es `comentar`: solo voz.
 
 ```ts
-export const pedir = acto('pedir', (quien: Persona, a: Persona, v: Llamada) => ({ pide: oye(a, quien), deja: [encarga(a, v)], cuesta: 1 }))
+export const pedir = acto('pedir', (quien: Persona, a: Persona, v: Llamada) => ({ pide: oye(a, quien), pedido: { a, hace: v, espera: '1m' }, cuesta: 1 }))
 export const ofender = acto('ofender', (quien: Persona, a: Persona) => ({ deja: [cualidad(a, 'afecto', quien).suma(-1)] }))
 ```
 
+### 7.1 Los pedidos: Ana es la jugadora
+
+Un acto con **`pedido`** (`pedir`, `ordenar`) le pide a alguien que haga un verbo, y ese alguien decide.
+
+- **Si es Ana, decide la jugadora.** El juego le ofrece hacerlo (el texto `opcion` del verbo: `seguir` se ofrece
+  como «Ir con Marilla») o no (`opcion_no`: «Todavía no»). No contestar dentro de `espera` también es no.
+- **Si Ana va sola, o es otro personaje,** responde según `comun/ana.ts`: por acto, una condición sobre quién lo pide.
+  ```ts
+  export const ana_sola = respuestas({
+    pedir: quien => cualidad('ana', 'afecto', quien).gte(2),   // a quien quiere, le hace caso
+    ordenar: () => true,                                        // una orden, sola, la cumple
+  })
+  ```
+- **Para planificar, el A\* supone que el pedido funciona**, con el costo de lo probable: `pedir` es barato,
+  `ordenar` cuesta más e ir a buscarla, más todavía. En la ejecución espera la respuesta:
+  - si acepta, sigue el plan;
+  - si rechaza, el intento falla y vuelve a planificar: más firme (`ordenar`, solo después de un intento) o ir a
+    buscarla (`traer`, de la mano; ella puede soltarse);
+  - al agotar los `intentos`, la búsqueda falla, y eso es un momento de la historia.
+- **La respuesta es un momento:** `ana acepta pedir`, `ana rechaza ordenar` (§9.2). A ellos se engancha lo que pasa
+  cuando Ana se niega: la paciencia de Marilla, una escena.
 ## 8. Voces (`voces.yarn`)
 
 Lo que se dice al hacer un verbo o un acto. Un nodo por patrón de llamada (`voz:`, donde `_` vale cualquiera; `paso:`
@@ -241,6 +267,7 @@ Una escena de una historia pide, además, sin escribirlo, que su historia esté 
 | `ida cumplido` | el encargo entero | `momento(white_sands.encargo.ida, '', 'cumplido')` |
 | `marilla traer.va cumplido` | un verbo de alguien (en cualquier encargo) | `hace('marilla', traer, 'va', 'cumplido')` |
 | `ana tocar empieza` | lo que hace la jugadora | `hace('ana', tocar, '', 'empieza')` |
+| `ana rechaza pedir` | la respuesta a un pedido (§7.1): `acepta` o `rechaza` | `responde('ana', 'rechaza', pedir)` |
 | `tras ws_t1` | otra escena terminó (con una pausa breve) | `tras(escena.ws_t1)` |
 
 ### 9.3 El cuerpo
@@ -295,18 +322,19 @@ export const white_sands = historia('white_sands', {
 6. **Sus efectos cambian el estado.** Pueden empezar historias o encargos, o romper un `mantiene`.
 7. **Las búsquedas cuyo estado cambió planifican de nuevo.**
 
-**Ana es la jugadora.** Los verbos de los demás que necesitan algo de Ana (que suba, que venga) no lo deciden: lo
-piden, y la jugadora obedece o no. Si no, la búsqueda vuelve a planificar (más firme, o ir a buscarla) hasta agotar
-sus intentos. Entonces falla, y eso es un momento de la historia.
+**Ana es la jugadora.** Los verbos de los demás que necesitan algo de Ana (que la siga, que venga) no lo deciden: lo
+piden (§7.1), y la jugadora acepta o no. Si no, la búsqueda vuelve a planificar (más firme, o ir a buscarla) hasta
+agotar sus intentos. Entonces falla, y eso es un momento de la historia.
 
 ## 12. Lo estricto
 
 Lo revisan dos herramientas, y `tools/lenguaje/mutaciones.py` prueba que lo hagan: le mete a una copia del ejemplo
-16 errores, uno a la vez, y hoy los detecta todos.
+19 errores, uno a la vez, y hoy los detecta todos.
 
 **El generador** `tools/lenguaje/yarn.js` lee los `.yarn` y rechaza:
 - una expresión que no tenga la forma permitida (código en una condición);
 - un nombre que no está declarado en ninguna parte (una condición o un acto mal escritos);
+- una activación que no tiene ninguna de las formas (`ana rechasa pedir`);
 - una línea que no es Yarn;
 - dos escenas con el mismo nombre;
 - una escena sin `title`, `resumen` o `se_activa`.
@@ -319,6 +347,7 @@ traducidas a llamadas del lenguaje).
 - un acto hacia alguien que no existe;
 - un hecho, un lugar, una ruta o una escena que no existen (en `orden`, en `tras`, en `dichas`);
 - un encargo o un paso que no existe (`ida.cmino.playa`, `traer.vaa`), incluida la voz de un paso;
+- la respuesta de alguien que no existe, o a un acto que no existe (`ana rechaza pedri`);
 - comparar un valor fuera de la escala (`lt('devuelta')`);
 - una llamada con otros tipos de parámetros.
 

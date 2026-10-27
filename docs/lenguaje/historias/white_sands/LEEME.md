@@ -8,8 +8,8 @@ diseño: compila (`tsc`), pero el juego todavía no lo lee. Hoy esta historia vi
 | Archivo | Qué hay |
 |---|---|
 | [`historia.ts`](historia.ts) | sus hechos (locales), sus condiciones con nombre, sus encargos (`busca`, `ida`, `pye`, `vuelta`), su orden, lo que deja |
-| [`escenas.yarn`](escenas.yarn) | las trece escenas, con las líneas de hoy y la cabecera nueva |
-| [`voces.yarn`](voces.yarn) | su sabor propio: «¡Ana! Ven, que nos vamos», «Sube, Ana. No tenemos todo el día» |
+| [`escenas.yarn`](escenas.yarn) | las quince escenas: las trece de hoy, con la cabecera nueva, y dos para cuando Ana no quiere subir |
+| [`voces.yarn`](voces.yarn) | su sabor propio: «¡Ana! Ven, que nos vamos», «Sube, Ana. No tenemos todo el día», «Ana Shirley. Sube. Ahora.» |
 | [`index.ts`](index.ts) | lo que ven las demás historias: si terminó, y el recuerdo de que Ana corrió al mar |
 | `escenas.ids.ts`, `escenas.chequeo.ts` | generados por `tools/lenguaje/yarn.js` (no se editan) |
 
@@ -26,6 +26,12 @@ flowchart TD
   E((empieza:<br/>a prueba, tras la primera<br/>noche, 14 a 19 h)) --> B([busca: Marilla consigue<br/>que Ana venga a la cocina])
   B -- "marilla traer cumplido<br/>(tuvo que ir a buscarla)" --> FV[falta_viaje<br/>paciencia −1]
   B -- busca cumplido --> VS{¿paciencia?}
+  IDA -- "sigue: Marilla le pide<br/>que suba (pedir)" --> PE{{la jugadora:<br/>¿Ir con Marilla?}}
+  PE -- "ana rechaza pedir" --> NS[ws_no_sube<br/>paciencia −1]
+  NS -- "otra vez: ordenar" --> PE2{{¿Ir con Marilla?}}
+  PE2 -- "ana rechaza ordenar" --> NO[ws_no_sube_orden<br/>paciencia −1, la trae]
+  PE -- acepta --> IDA
+  PE2 -- acepta --> IDA
   VS -- ">= 1" --> V1[viaje_spencer]
   VS -- "< 1" --> V2[viaje_spencer_duda]
   V1 --> IDA([ida: llevar_a hotel_white_sands,<br/>en calesa, por la costa])
@@ -38,7 +44,7 @@ flowchart TD
   IDA -. camino.escuela .-> T3
   IDA -- camino.playa empieza --> M[ws_mar]
   IDA -- camino.playa cumplido --> P[ws_pye]
-  P -- "Ana corre al mar:<br/>se rompe «mantiene»" --> TR([sube: conseguir_que<br/>→ traer])
+  P -- "Ana corre al mar: deja de<br/>seguirla, se rompe «mantiene»" --> TR([sigue: conseguir_que<br/>→ traer])
   TR -- marilla traer.va cumplido --> O[ws_orilla]
   O --> IDA
   P -- "Ana se calla" --> IDA
@@ -67,6 +73,10 @@ flowchart TD
   | Marilla buscando a Ana | la búsqueda `conseguir_que` |
   | «Sube, Ana» | las voces de `pedir` y `ordenar` |
 
+- **Que Ana suba lo decide la jugadora.** Marilla no la sube: necesita que Ana la siga, y se lo pide. La jugadora
+  acepta («Ir con Marilla») o no («Todavía no»). Si no, Marilla se lo vuelve a decir, más firme (`ws_no_sube`), y
+  después baja a buscarla (`ws_no_sube_orden`); cada negativa le cuesta paciencia. Ana sola le hace caso a quien
+  quiere (`comun/ana.ts`).
 - **Las charlas van por lugares, en secuencia.** `ws_t2` se activa tras `ws_t1`, o al pasar la Hondonada de Lynde si
   la primera no se dijo.
 - **La paciencia de Marilla abre dos variantes** (la del libro y la de la duda) con la misma activación.

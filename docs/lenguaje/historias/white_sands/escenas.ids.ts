@@ -2,6 +2,8 @@
 import { escenasDe } from '../../comun/lenguaje'
 
 export const { escena, dichas } = escenasDe('white_sands', [
+  'ws_no_sube',
+  'ws_no_sube_orden',
   'falta_viaje',
   'viaje_spencer',
   'viaje_spencer_duda',
