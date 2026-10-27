@@ -223,6 +223,7 @@ export type DefEscena = {
   readonly se_activa: readonly Activacion[]
   readonly si: Cond
   readonly repetir?: 'una_vez' | 'dia' | 'siempre'
+  readonly en_marcha?: true   // (se dice mientras los encargos siguen: una charla en la calesa, que no la detiene)
   readonly punto?: string
   readonly hablan: readonly (Persona | 'narra')[]
   readonly cuerpo: readonly Item[]

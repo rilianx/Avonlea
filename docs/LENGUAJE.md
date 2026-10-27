@@ -261,6 +261,7 @@ marilla: Hay que ver la de cosas que caben en esa cabeza. #piensa
 | `se_activa` | el momento (§9.2); varios con `\|` | obligatorio |
 | `si` | condiciones (§5), separadas por comas: todas | ninguna |
 | `repetir` | `una_vez`, `dia`, `siempre` | `una_vez` |
+| `en_marcha` | `si`: se dice mientras los encargos siguen (una charla en la calesa, que no la detiene) | la escena detiene a quienes participan |
 | `punto` | un punto para volver, antes de empezar | |
 | `con` | quienes participan sin hablar | los que hablan |
 
@@ -290,7 +291,8 @@ Una escena de una historia pide, además, sin escribirlo, que su historia esté 
   - `<<correr_a('ana', 'orilla')>>`: alguien hace un verbo ahora.
 - `<<if …>> … <<else>> … <<endif>>`: una variación dentro de la escena (como en Yarn).
 - Mientras una escena se juega, **los verbos de quienes participan se pausan**; al terminar, siguen. Es lo que hoy son
-  `interrumpe`, `sujeta` y `canal`.
+  `interrumpe`, `sujeta` y `canal`. Con `en_marcha: si`, no: la escena se dice mientras siguen (las charlas del camino,
+  con la calesa avanzando; la Sra. Pye o la orilla, en cambio, detienen el viaje).
 
 ## 10. Historias (`historia.ts`)
 
@@ -381,6 +383,7 @@ encargos con sus pasos y su reparación (`mantiene`), los pedidos a Ana, las esc
 voces. Sirve para probar una historia antes de llevarla al juego. Simplifica dos cosas:
 - **el mundo:** los lugares por nombre y los minutos entre ellos (15 entre paradas de una ruta, 2 dentro de un mismo
   lugar, 3 a uno cercano, 10 si no), sin el mapa;
+- **el tiempo de las escenas:** un minuto de juego por línea;
 - **las búsquedas:** el plan es de un paso (el verbo más barato de su `con` que logra el objetivo; lo que ya falló
   cuesta más), y no el A\* completo del juego.
 

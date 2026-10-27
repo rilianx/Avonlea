@@ -104,7 +104,7 @@ function escena(n, historia){
   return `  ${n.cab.title}: defEscena(escena.${n.cab.title}, {
     resumen: ${JSON.stringify(n.cab.resumen)},
     se_activa: [${n.cab.se_activa.split('|').map(a => activacion(a, historia, donde)).join(', ')}],
-    si: y(${si.join(', ')}),${n.cab.repetir ? `\n    repetir: '${expr(n.cab.repetir, donde)}',` : ''}${n.cab.punto ? `\n    punto: ${JSON.stringify(n.cab.punto)},` : ''}
+    si: y(${si.join(', ')}),${n.cab.en_marcha === 'si' ? '\n    en_marcha: true,' : ''}${n.cab.repetir ? `\n    repetir: '${expr(n.cab.repetir, donde)}',` : ''}${n.cab.punto ? `\n    punto: ${JSON.stringify(n.cab.punto)},` : ''}
     hablan: [${[...hablan].map(q => `'${q}'`).join(', ')}],
     cuerpo: [
       ${cuerpo.join(',\n      ')},

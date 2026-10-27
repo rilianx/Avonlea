@@ -7,6 +7,7 @@
 // Que Ana venga a la calesa y que suba no lo decide Marilla: va donde está Ana y le pide que venga con ella («Ir con
 // Marilla»), y después que suba («Subir a la calesa»); la jugadora acepta o no («Todavía no»). Si no quiere subir,
 // «ana rechaza pedir subir» es un momento: las escenas ws_no_sube y ws_no_sube_orden.
+// Las charlas del camino van «en marcha»: se dicen mientras la calesa avanza (las demás detienen el viaje).
 
 title: ws_no_sube
 resumen: Ana no quiere subir a la calesa: Marilla la espera, y se le acaba un poco la paciencia.
@@ -62,6 +63,7 @@ title: ws_t1
 resumen: En la calesa: Ana decide disfrutar el viaje; las rosas silvestres y su pelo.
 se_activa: ida.camino empieza
 si: marilla_con_paciencia
+en_marcha: si
 ---
 ana: ¿Sabe, Srta. Cuthbert? He decidido disfrutar de este viaje. Si uno se decide con firmeza, casi siempre puede disfrutar de las cosas.
 ana: No voy a pensar en el orfanato mientras vamos. Solo en el camino. ¡Mire, ya hay una rosa silvestre! ¿No le parece que el rosa es el color más encantador del mundo? Lástima que yo no lo pueda usar, con este pelo.
@@ -77,6 +79,7 @@ title: ws_t2
 resumen: Marilla le pide «los hechos»: Bolingbroke, Walter y Bertha Shirley.
 se_activa: tras ws_t1 | ida.camino.hondonada_lynde cumplido
 si: marilla_con_paciencia
+en_marcha: si
 ---
 marilla: (Marilla mira el camino, no a Ana.) Ya que tienes tantas ganas de hablar, cuéntame lo que sepas de ti.
 ana: Oh, lo que sé de mí no vale la pena contarlo, Srta. Cuthbert. Si me dejara contarle lo que imagino de mí, le parecería mucho más interesante.
@@ -91,6 +94,7 @@ title: ws_t3
 resumen: Ana cuenta su vida: la fiebre, la Sra. Thomas, los mellizos, el orfanato.
 se_activa: tras ws_t2 | ida.camino.escuela cumplido
 si: marilla_con_paciencia
+en_marcha: si
 ---
 ana: Mi madre también era maestra, pero cuando se casó con mi padre dejó de enseñar. Eran pobres como ratones de iglesia. Vivían en una casita amarilla, con madreselvas en la ventana. Yo nunca la vi, pero la he imaginado miles de veces.
 ana: Mi madre se murió de fiebre cuando yo tenía tres meses. Ojalá hubiera vivido lo bastante para que yo me acordara de haberla llamado mamá. Mi padre se murió cuatro días después, de la misma fiebre.
@@ -107,6 +111,7 @@ marilla: Qué vida, la de esta criatura. Hambre de cariño, trabajo, pobreza y a
 title: ws_mar
 resumen: Frente al mar: Ana quisiera ser gaviota; el hotel White Sands, y el miedo a llegar.
 se_activa: ida.camino.playa empieza
+en_marcha: si
 ---
 ana: (Ana despierta de un largo silencio, con los ojos muy abiertos. Allá adelante brilla el mar.) ¿No es maravilloso el mar?
 ana: Una vez, cuando vivía en Marysville, el Sr. Thomas alquiló un carro y nos llevó a todos a pasar el día en la playa, a diez millas. Disfruté cada minuto, aunque tuve que cuidar a los niños todo el tiempo. Lo volví a vivir en sueños felices durante años.
@@ -225,6 +230,7 @@ title: ws_vuelta
 resumen: De vuelta, en la calesa: «¿De verdad dijo que a lo mejor me dejaba quedarme?»
 se_activa: vuelta.camino empieza
 si: marilla_con_paciencia
+en_marcha: si
 ---
 ana: (Cuando el hotel ya queda atrás, Ana le habla en un susurro.) Srta. Cuthbert, ¿de verdad dijo que a lo mejor me dejaba quedarme en Tejas Verdes? ¿O me lo imaginé?
 marilla: Más te vale aprender a sujetar esa imaginación, Ana, si no sabes distinguir lo que es de verdad de lo que no. Sí, oíste bien, y nada más. Todavía no está decidido.

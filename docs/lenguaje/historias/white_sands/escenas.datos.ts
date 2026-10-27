@@ -67,6 +67,7 @@ export const escenas = {
     resumen: "En la calesa: Ana decide disfrutar el viaje; las rosas silvestres y su pelo.",
     se_activa: [momento(white_sands.encargo.ida, 'camino', 'empieza')],
     si: y(marilla_con_paciencia),
+    en_marcha: true,
     hablan: ['ana', 'marilla'],
     cuerpo: [
       { q: 'ana', t: "¿Sabe, Srta. Cuthbert? He decidido disfrutar de este viaje. Si uno se decide con firmeza, casi siempre puede disfrutar de las cosas." },
@@ -83,6 +84,7 @@ export const escenas = {
     resumen: "Marilla le pide «los hechos»: Bolingbroke, Walter y Bertha Shirley.",
     se_activa: [tras(escena.ws_t1), momento(white_sands.encargo.ida, 'camino.hondonada_lynde', 'cumplido')],
     si: y(marilla_con_paciencia),
+    en_marcha: true,
     hablan: ['marilla', 'ana'],
     cuerpo: [
       { q: 'marilla', t: "(Marilla mira el camino, no a Ana.) Ya que tienes tantas ganas de hablar, cuéntame lo que sepas de ti." },
@@ -98,6 +100,7 @@ export const escenas = {
     resumen: "Ana cuenta su vida: la fiebre, la Sra. Thomas, los mellizos, el orfanato.",
     se_activa: [tras(escena.ws_t2), momento(white_sands.encargo.ida, 'camino.escuela', 'cumplido')],
     si: y(marilla_con_paciencia),
+    en_marcha: true,
     hablan: ['ana', 'marilla'],
     cuerpo: [
       { q: 'ana', t: "Mi madre también era maestra, pero cuando se casó con mi padre dejó de enseñar. Eran pobres como ratones de iglesia. Vivían en una casita amarilla, con madreselvas en la ventana. Yo nunca la vi, pero la he imaginado miles de veces." },
@@ -116,6 +119,7 @@ export const escenas = {
     resumen: "Frente al mar: Ana quisiera ser gaviota; el hotel White Sands, y el miedo a llegar.",
     se_activa: [momento(white_sands.encargo.ida, 'camino.playa', 'empieza')],
     si: y(),
+    en_marcha: true,
     hablan: ['ana', 'marilla'],
     cuerpo: [
       { q: 'ana', t: "(Ana despierta de un largo silencio, con los ojos muy abiertos. Allá adelante brilla el mar.) ¿No es maravilloso el mar?" },
@@ -206,6 +210,7 @@ export const escenas = {
     resumen: "De vuelta, en la calesa: «¿De verdad dijo que a lo mejor me dejaba quedarme?»",
     se_activa: [momento(white_sands.encargo.vuelta, 'camino', 'empieza')],
     si: y(marilla_con_paciencia),
+    en_marcha: true,
     hablan: ['ana', 'marilla'],
     cuerpo: [
       { q: 'ana', t: "(Cuando el hotel ya queda atrás, Ana le habla en un susurro.) Srta. Cuthbert, ¿de verdad dijo que a lo mejor me dejaba quedarme en Tejas Verdes? ¿O me lo imaginé?" },

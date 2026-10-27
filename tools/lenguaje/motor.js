@@ -2,13 +2,15 @@
 // tools/lenguaje/construir.js. Sirve para probar una historia sin el juego: en la página trazas/lenguaje.html (la
 // jugadora contesta y elige) o en tools/lenguaje/probar.js (de punta a punta, sola o con un guion de respuestas).
 // El mundo va simplificado: los lugares por nombre y los minutos entre ellos (15 entre paradas de una ruta, 2 dentro de
-// un mismo lugar, 3 a uno cercano, 10 si no). El planificador de las búsquedas es de un paso: entre los verbos de su
+// un mismo lugar, 3 a uno cercano, 10 si no); y cada línea de una escena, un minuto. Mientras una escena se dice, los
+// encargos de quienes participan se detienen, salvo que la escena vaya «en marcha» (las charlas de la calesa). El planificador de las búsquedas es de un paso: entre los verbos de su
 // «con» que logran el objetivo, el más barato; si falla, vuelve a planificar. No es todavía el A* del juego.
 (function (raiz) {
   function Motor(D, escenario = {}) {
     const S = {}, registro = [], tareas = [], cola = [], porTras = [];
     let t = (escenario.dia ?? 2) * 1440 - 1440 + (escenario.hora ?? 14) * 60;   // (minutos desde el comienzo del día 1)
     let escena = null, pregunta = null, auto = !!escenario.auto, fin = null;
+    const MIN_LINEA = 1;   // (lo que dura una línea de una escena, en minutos de juego)
     const respuestas = escenario.respuestas ? [...escenario.respuestas] : null, opcionesGuion = escenario.opciones || {};
 
     // ---------------------------------------------------------------- el estado
@@ -97,7 +99,7 @@
 
     // ---------------------------------------------------------------- los momentos, el registro y las voces
     const nota = (txt, tipo = 'nota') => registro.push({ tipo, t: txt, hora: reloj() });
-    const reloj = () => `día ${dia()}, ${String(Math.floor(hora())).padStart(2, '0')}:${String(Math.round((hora() % 1) * 60)).padStart(2, '0')}`;
+    const reloj = () => { const m = Math.round(t % 1440); return `día ${dia()}, ${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`; };
     const unir = (a, b) => (a && b ? a + '.' + b : a || b);
     function emitir(inst, momento){
       for (const { inst: A, rel } of [...inst.anc, { inst, rel: '' }]) cola.push({ tipo: 'verbo', quien: A.quien, verbo: A.verbo, paso: rel, momento });
@@ -242,7 +244,7 @@
     // ---------------------------------------------------------------- las historias, los encargos y las escenas
     function empezarEncargo(h, etiqueta, e){
       set(['encargo', h, etiqueta], 'en_curso');
-      tareas.push({ gen: ejecutar(e.hace, { encargo: { historia: h, etiqueta }, ruta: '' }), despierta: t, h, etiqueta });
+      tareas.push({ gen: ejecutar(e.hace, { encargo: { historia: h, etiqueta }, ruta: '' }), despierta: t, h, etiqueta, quien: e.quien });
     }
     function revisarHistorias(){
       for (const [h, H] of Object.entries(D.historias)) {
@@ -287,12 +289,13 @@
       if (!mejor) return false;
       const [h, id] = mejor.escena.split('.'); set([h, 'dichas', id], dia());
       nota(`🎬 ${id}: ${mejor.resumen}`, 'escena');
-      escena = { e: mejor, pila: [[...mejor.cuerpo]] };
+      escena = { e: mejor, pila: [[...mejor.cuerpo]], proxima: t, en_marcha: !!mejor.en_marcha, participan: new Set(mejor.hablan) };
       return true;
     }
-    // el guion de la escena en curso: lo que sigue hasta una elección de la jugadora (o el final)
+    // el guion de la escena en curso: lo que sigue hasta una elección de la jugadora, o hasta que la próxima línea tenga
+    // que esperar su minuto (o el final)
     function seguirEscena(){
-      while (escena) {
+      while (escena && escena.proxima <= t) {
         const pila = escena.pila, top = pila[pila.length - 1];
         if (!top) { terminarEscena(); return; }
         if (!top.length) { pila.pop(); continue; }
@@ -304,7 +307,7 @@
           return;
         }
         top.shift();
-        if (it.q) { registro.push({ tipo: 'linea', q: it.q, t: it.t, piensa: !!it.piensa, hora: reloj() }); if (it.acto) { const d = sub(D.verbos[it.acto.verbo], { params: it.acto.args }); for (const e of d.deja || []) aplicar(e); } }
+        if (it.q) { escena.proxima = t + MIN_LINEA; registro.push({ tipo: 'linea', q: it.q, t: it.t, piensa: !!it.piensa, hora: reloj() }); if (it.acto) { const d = sub(D.verbos[it.acto.verbo], { params: it.acto.args }); for (const e of d.deja || []) aplicar(e); } }
         else if (it.hace) aplicar(it.hace);
         else if (it.si) pila.push([...(cumple(it.si) ? it.cuerpo : it.sino)]);
       }
@@ -326,13 +329,15 @@
     }
     // avanza hasta que haya algo que mostrar o decidir (una escena, una pregunta) o hasta el final; devuelve el estado
     function avanzar(limite = 5000){
+      // (los encargos de quienes están en una escena que no va en marcha, esperan a que termine)
+      const detenida = T => escena && !escena.en_marcha && escena.participan.has(T.quien);
       for (let vuelta = 0; vuelta < limite; vuelta++) {
-        if (escena) { seguirEscena(); if (escena) return estadoUI(); continue; }
         if (pregunta) return estadoUI();
+        if (escena) { seguirEscena(); if (escena && escena.ops) return estadoUI(); }
         revisarHistorias();
         if (fin) return estadoUI();
-        if (cola.length && elegirEscena()) continue;
-        const lista = tareas.filter(T => !T.fin && !T.pregunta && (T.hasta ? cumple(T.hasta) : T.despierta <= t));
+        if (!escena && cola.length && elegirEscena()) continue;
+        const lista = tareas.filter(T => !T.fin && !T.pregunta && !detenida(T) && (T.hasta ? cumple(T.hasta) : T.despierta <= t));
         if (lista.length) {
           const T = lista[0]; T.hasta = null;
           const r = T.gen.next(T.valor); T.valor = undefined;
@@ -346,7 +351,8 @@
           }
           continue;
         }
-        const prox = tareas.filter(T => !T.fin && !T.pregunta && !T.hasta).map(T => T.despierta);
+        const prox = tareas.filter(T => !T.fin && !T.pregunta && !T.hasta && !detenida(T)).map(T => T.despierta);
+        if (escena) prox.push(escena.proxima);
         if (!prox.length) return estadoUI();   // (nada más que hacer: esperan algo que no va a pasar solo)
         t = Math.max(t, Math.min(...prox));
       }
@@ -374,7 +380,7 @@
         return avanzar();
       },
       // lo que la jugadora hace por su cuenta (cuando no hay escena ni pregunta)
-      irA(l){ nota(`(la jugadora: Ana va hasta ${nombre(l)})`); tareas.push({ gen: ejecutar({ verbo: 'ir_a', args: ['ana', l] }, {}), despierta: t }); return avanzar(); },
+      irA(l){ nota(`(la jugadora: Ana va hasta ${nombre(l)})`); tareas.push({ gen: ejecutar({ verbo: 'ir_a', args: ['ana', l] }, {}), despierta: t, quien: 'ana' }); return avanzar(); },
       bajarse(){ nota('(la jugadora: Ana se baja de la calesa)'); instantaneo({ verbo: 'bajar', args: ['ana'] }); return avanzar(); },
       esperar(m){ t += m; return avanzar(); },
       registro, get, nombre, lugares: () => Object.keys(D.lugares),
