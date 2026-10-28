@@ -1,9 +1,13 @@
 #!/usr/bin/env node
-// Probar una historia de punta a punta con el motor mínimo (tools/lenguaje/motor.js), sin el juego: en varios
-// escenarios —Ana sola; Ana que se niega a subir; Ana que corre al mar; Marilla sin paciencia; Ana lejos a la hora de
-// salir; la llegada con Matthew por la Avenida; Ana que pasea sola por la Avenida—, y revisa que cada uno termine como debe. Con --ver <escenario>, imprime lo que pasa, línea a línea.
+// Probar las historias de punta a punta con el motor (tools/lenguaje/motor.js) y el mundo simulado, sin el juego, en
+// varios escenarios —Ana sola; que se niega a subir; que corre al mar; Marilla sin paciencia; Ana lejos a la hora de
+// salir; Ana que se baja a mitad de camino; la llegada con Matthew por la Avenida; Ana que pasea sola por la Avenida—,
+// y revisar que cada uno termine como debe. Cada escenario se corre dos veces: de corrido, y guardando la partida y
+// cargándola en un motor nuevo cada pocas vueltas; tiene que pasar exactamente lo mismo. Con --ver <escenario>,
+// imprime lo que pasa, línea a línea.
 // Uso: node tools/lenguaje/probar.js [--ver sola]
 const path = require('path'), { datos } = require('./construir.js'), { Motor } = require('./motor.js');
+const SALTO = 3;   // (al probar guardar: cada cuántas vueltas del motor se guarda la partida y se vuelve a cargar)
 const D = datos(path.resolve(__dirname, '..', '..', 'docs', 'lenguaje'));
 
 // (la llegada: el primer día, en la estación de Bright River, con la calesa enganchada; a Matthew, Ana lo quiere desde
@@ -23,6 +27,10 @@ const ESCENARIOS = {
   sin_paciencia: { auto: true, estado: { 'cualidad.marilla.paciencia.ana': 0 }, espera: { fin: 'terminada', dichas: ['viaje_spencer_duda', 'ws_spencer_duda'], noDichas: ['ws_t1', 'ws_spencer'] } },
   // a la hora de salir, Ana está lejos (en la escuela): Marilla tiene que ir a buscarla
   lejos: { auto: true, lugares: { ana: 'escuela' }, espera: { fin: 'terminada', dichas: ['falta_viaje', 'viaje_spencer'] } },
+  // a mitad de camino, entre la escuela y la aldea, la jugadora se baja de la calesa: el viaje se detiene donde iba,
+  // Marilla le pide que suba, y la calesa sigue con lo que le faltaba
+  se_baja: { respuestas: Array(20).fill(true), opciones: { 'white_sands.ws_pye': 1 }, al: { hora: '14:45', hace: ['bajarse'] },
+    espera: { fin: 'terminada', reparo: 1 } },
   // la llegada (cap. 2): Ana habla todo el camino desde Bright River; al entrar a la Avenida corta la charla, calla, y
   // después le pone nombre (la escena del libro, con Matthew)
   llegada: { ...LLEGADA, auto: true, espera: { fin: 'terminada', dichas: ['ll_pelo', 'll_angelical', 'cb_libro', 'll_llegan'], cortadas: ['ll_angelical'], interrumpio: ['cb_libro'] } },
@@ -32,11 +40,18 @@ const ESCENARIOS = {
   paseo: { auto: true, hora: 20, acciones: [['irA', 'camino_blanco'], ['irA', 'tejas_verdes'], ['irA', 'camino_blanco']], espera: { dichas: ['cb_sola', 'cb_siempre'], noDichas: ['cb_libro', 'cb_otra_vez'] } },
 };
 
-function correr(nombre, esc){
-  const M = Motor(D, esc);
+// (guardar: cada pocas vueltas, la partida se guarda y sigue en un motor nuevo, cargado de lo guardado)
+function correr(nombre, esc0, guardar = false){
+  // (con «al» —algo que la jugadora hace a una hora—, el motor se detiene en cada vuelta, para hacerlo justo a esa hora)
+  const esc = { ...JSON.parse(JSON.stringify(esc0)), ...(guardar ? { paso: SALTO } : {}), ...(esc0.al ? { paso: 1 } : {}) };
+  let al = esc0.al;
+  let M = Motor(D, esc);
   let u = M.avanzar();
-  for (let i = 0; i < 200 && !u.fin; i++) {
-    if (u.pregunta) u = M.responder(true);       // (si el guion de respuestas se acabó: sí)
+  for (let i = 0; i < 20000 && !u.fin; i++) {
+    if (guardar) M = Motor.cargar(D, M.guardar());
+    if (al && u.reloj.split(', ')[1] >= al.hora && !u.pregunta && !(u.escena && u.escena.ops)) { const [f, ...a] = al.hace; al = null; u = M[f](...a); }
+    else if (u.pausa) u = M.avanzar();
+    else if (u.pregunta) u = M.responder(true);       // (si el guion de respuestas se acabó: sí)
     else if (u.escena && u.escena.ops) u = M.elegir(0);
     else if (esc.acciones && esc.acciones.length) { const [f, ...a] = esc.acciones.shift(); u = M[f](...a); }   // (lo que la jugadora hace por su cuenta)
     else break;
@@ -48,6 +63,7 @@ function correr(nombre, esc){
   for (const d of esc.espera.interrumpio || []) { const i = notas.findIndex(x => x && x.startsWith('🎬 ' + d + ':')); if (i < 1 || !String(notas[i - 1]).startsWith('✂')) fallas.push(`${d} no interrumpió nada`); }
   if (esc.espera.fin && u.fin !== esc.espera.fin) fallas.push(`termina «${u.fin}», no «${esc.espera.fin}»`);
   for (const d of esc.espera.dichas || []) if (!dichas.includes(d)) fallas.push(`no pasó ${d}`);
+  if (esc.espera.reparo != null && notas.filter(x => String(x).startsWith('↺')).length !== esc.espera.reparo) fallas.push(`no se reparó ${esc.espera.reparo} vez`);
   for (const d of esc.espera.noDichas || []) if (dichas.includes(d)) fallas.push(`pasó ${d}`);
   if (M.get(['historia', 'white_sands']) === 'terminada' && M.get(['estado', 'ana_en_tv']) !== 'decidida') fallas.push('ana_en_tv no quedó en «decidida»');
   return { M, u, dichas, fallas };
@@ -63,7 +79,11 @@ const i = process.argv.indexOf('--ver');
 if (i > 0) { const n = process.argv[i + 1] || 'sola'; const { M, fallas } = correr(n, ESCENARIOS[n]); ver(M); console.log(fallas.length ? '\n✘ ' + fallas.join('; ') : '\n✔ ' + n); process.exit(fallas.length ? 1 : 0); }
 let malas = 0;
 for (const [n, e] of Object.entries(ESCENARIOS)) {
-  const { u, dichas, fallas } = correr(n, e);
+  const { M, u, dichas, fallas } = correr(n, e);
+  // (y lo mismo, guardando y cargando la partida cada pocas vueltas: tiene que pasar exactamente lo mismo)
+  const G = correr(n, e, true), linea = r => `${r.hora} ${r.tipo} ${r.q || ''} ${r.t}`;
+  const a = M.registro.map(linea), b = G.M.registro.map(linea), i = a.findIndex((x, j) => x !== b[j]);
+  if (i >= 0 || a.length !== b.length) fallas.push(`al guardar y cargar, cambia desde «${a[i] ?? '(fin)'}» → «${b[i] ?? '(fin)'}»`);
   console.log(`${fallas.length ? '✘' : '✔'} ${n}: ${u.reloj} · ${dichas.length} escenas${fallas.length ? ' · ' + fallas.join('; ') : ''}`);
   if (fallas.length) malas++;
 }

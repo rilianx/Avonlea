@@ -416,23 +416,43 @@ node tools/lenguaje/probar.js --ver sola      # lo que pasa, línea a línea
 node tools/lenguaje/pagina.js                 # trazas/lenguaje.html: jugarla en el navegador
 ```
 
-**El motor mínimo** (`tools/lenguaje/motor.js`) ejecuta los datos sin el juego: el estado y los momentos, los
-encargos con sus pasos y su reparación (`mantiene`), los pedidos a Ana, las escenas por `orden` y especificidad, y las
-voces. Sirve para probar una historia antes de llevarla al juego. Simplifica dos cosas:
-- **el mundo:** los lugares por nombre y los minutos entre ellos (15 entre paradas de una ruta, 2 dentro de un mismo
-  lugar, 3 a uno cercano, 10 si no), sin el mapa;
+**El motor** (`tools/lenguaje/motor.js`) ejecuta los datos: el estado y los momentos, los encargos con sus pasos y su
+reparación (`mantiene`), los pedidos a Ana, las escenas por `orden` y especificidad, y las voces. Es solo la lógica; el
+mundo lo pone otro, por una interfaz chica:
+
+| El motor le pide al mundo | Qué |
+|---|---|
+| `empezar(acc)`, `avanzar(acc)`, `cuando(acc)` | hacer un primitivo (lo que dura) o un verbo de mapa (ir hasta un lugar), y avisar cuando terminó |
+| `parar(acc)`, `seguir(acc)` | detenerlo mientras se repara lo que se rompió, y seguir después con lo que faltaba |
+| `minutos(a, b)`, `tramo(ruta, desde, hasta)` | cuánto hay entre dos lugares (el costo de un plan), y las paradas de una ruta |
+| `funciones` | lo que el mundo calcula: `ve`, `oye`, `sola` |
+
+| El mundo le avisa al motor | Qué |
+|---|---|
+| `llega(quien, lugar)` | alguien llegó a un lugar o pasó por él (el momento `pasa`) |
+
+Para probar sin el juego está **el mundo simulado** (`tools/lenguaje/mundo_simulado.js`), que simplifica:
+- **el mapa:** los lugares por nombre y los minutos entre ellos (15 entre paradas de una ruta, 2 dentro de un mismo
+  lugar, 3 a uno cercano, 10 si no);
 - **el tiempo de las escenas:** un minuto de juego por línea, y lo que diga `<<silencio>>`;
 - **las búsquedas:** el plan es de un paso (el verbo más barato de su `con` que logra el objetivo; lo que ya falló
   cuesta más), y no el A\* completo del juego.
 
+**Todo lo que recuerda el motor son datos.** Un verbo en curso no es código suspendido: es una pila de marcos (el verbo
+de abajo, el paso que está haciendo, el paso de ese paso), cada uno con su llamada y en qué va (fase, paso, intento,
+la acción que el mundo está haciendo). Así una partida se guarda (`guardar()`, un JSON) y se carga (`Motor.cargar`) en
+cualquier momento, aun a mitad de un viaje o de una reparación.
+
 **La página** `trazas/lenguaje.html` es para jugarla: tú eres Ana, contestas los pedidos, eliges en las escenas, o
-vas a otro lugar y te bajas de la calesa; a la derecha, los encargos, dónde está cada uno y el estado. Con «ver los
+vas a otro lugar y te bajas de la calesa; puedes guardar y cargar la partida; a la derecha, los encargos, dónde está cada uno y el estado. Con «ver los
 momentos» aparece lo que la mueve por dentro.
 
 **La prueba** `tools/lenguaje/probar.js` la recorre en varios escenarios y revisa cómo termina: Ana sola; obediente;
-que se niega dos veces; que corre al mar; Marilla sin paciencia; Ana lejos a la hora de salir; la llegada por la
+que se niega dos veces; que corre al mar; Marilla sin paciencia; Ana lejos a la hora de salir; Ana que se baja de la
+calesa a mitad de camino; la llegada por la
 Avenida (que la escena del libro corte la charla); la llegada si Ana ya hubiera pasado (la otra variante); y Ana
-que pasea sola por la Avenida, dos veces (sin nada que cortar).
+que pasea sola por la Avenida, dos veces (sin nada que cortar). Cada escenario se corre dos veces: de corrido, y
+guardando la partida y cargándola en un motor nuevo cada pocas vueltas; las dos tienen que dar exactamente lo mismo.
 
 **Para el juego**, el mismo `tsc` compila a JavaScript, y los constructores arman los datos: el JSON de cada historia
 con sus encargos, de cada verbo con su receta, de cada escena. El juego, el grafo, el modelo lógico (Z3) y la historia

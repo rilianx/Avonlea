@@ -42,6 +42,8 @@ label.chk{font-size:13px;color:var(--mut);display:flex;gap:5px;align-items:cente
   </select>
   <button id="reiniciar">Empezar de nuevo</button>
   <button id="sola" title="Ana decide sola hasta el final">Ana sola hasta el final</button>
+  <button id="guardar" title="Guarda la partida en este navegador">Guardar</button>
+  <button id="cargar" title="Vuelve a la partida guardada">Cargar</button>
   <label class="chk"><input type="checkbox" id="vermom"> ver los momentos</label>
 </header>
 <main>
@@ -50,7 +52,7 @@ label.chk{font-size:13px;color:var(--mut);display:flex;gap:5px;align-items:cente
     <section><h3>Los encargos</h3><div id="encargos"></div></section>
     <section><h3>Dónde está cada uno</h3><div id="lugares"></div></section>
     <section><h3>El estado</h3><div id="estado"></div></section>
-    <section><h3>Cómo leer esto</h3><div style="font-size:13px;color:var(--mut)">Tú eres Ana. Contesta lo que te piden («Subir a la calesa» o «Todavía no»), elige en las escenas, o haz algo por tu cuenta: ir a otro lugar, bajarte de la calesa. Con «ver los momentos» aparece lo que mueve la historia por dentro: los encargos, sus pasos, lo que planifica Marilla. Esto lo ejecuta el motor mínimo del lenguaje (tools/lenguaje/motor.js) con los datos de docs/lenguaje/: no es el juego.</div></section>
+    <section><h3>Cómo leer esto</h3><div style="font-size:13px;color:var(--mut)">Tú eres Ana. Contesta lo que te piden («Subir a la calesa» o «Todavía no»), elige en las escenas, o haz algo por tu cuenta: ir a otro lugar, bajarte de la calesa. Con «ver los momentos» aparece lo que mueve la historia por dentro: los encargos, sus pasos, lo que planifica Marilla. Esto lo ejecuta el motor del lenguaje (tools/lenguaje/motor.js) con los datos de docs/lenguaje/ y un mundo simulado (tools/lenguaje/mundo_simulado.js): no es el juego. «Guardar» guarda la partida en este navegador, aun a mitad de un viaje.</div></section>
   </aside>
 </main>
 <script>/*@MOTOR*/</script>
@@ -103,6 +105,14 @@ function pintar(){
 function boton(t, f, prim){ const b = document.createElement('button'); b.textContent = t; b.onclick = f; if (prim) b.className = 'prim'; return b; }
 $('reiniciar').onclick = empezar; $('esc').onchange = empezar;
 $('vermom').onchange = () => { for (const d of document.querySelectorAll('.momento')) d.classList.toggle('oculto', !$('vermom').checked); };
+// (guardar: la partida entera es datos —M.guardar()—; se guarda en este navegador, con el relato hasta ahí)
+const CLAVE = 'avonlea-lenguaje-partida';
+$('guardar').onclick = () => { try { localStorage.setItem(CLAVE, JSON.stringify({ esc: $('esc').value, partida: M.guardar() })); $('guardar').textContent = 'Guardado ✓'; setTimeout(() => { $('guardar').textContent = 'Guardar'; }, 1200); } catch (e) { alert('No se pudo guardar en este navegador.'); } };
+$('cargar').onclick = () => {
+  let g = null; try { g = JSON.parse(localStorage.getItem(CLAVE)); } catch (e) {}
+  if (!g) { alert('No hay una partida guardada.'); return; }
+  $('esc').value = g.esc; $('relato').innerHTML = ''; visto = 0; M = Motor.cargar(D, g.partida); u = M.avanzar(); pintar();
+};
 $('sola').onclick = () => { for (let i = 0; i < 300 && !u.fin && (u.pregunta || (u.escena && u.escena.ops)); i++) u = M.decideSola(); pintar(); };
 empezar();
 </script></body></html>
