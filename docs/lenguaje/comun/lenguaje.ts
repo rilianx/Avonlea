@@ -4,7 +4,7 @@
 // el juego, el grafo, el modelo lógico (Z3) y la historia en fichas leen ese JSON.
 // Los tipos son lo estricto: un nombre que no está declarado, o un valor que no es de su lista, es un error de tsc.
 
-import type { Lugar, Persona } from './mundo'
+import type { Lugar, Nombrable, Persona } from './mundo'
 
 // ---------------------------------------------------------------- condiciones y efectos (datos)
 
@@ -23,6 +23,8 @@ export type Efecto =
   | { readonly e: 'encarga'; readonly a: string; readonly hace: Llamada }
   | { readonly e: 'log'; readonly texto: string }
   | { readonly e: 'silencio'; readonly dura: Duracion }
+  | { readonly e: 'nombrar'; readonly cosa: Nombrable; readonly pedir: boolean }
+  | { readonly e: 'marca'; readonly id: string }
 export type Duracion = `${number}${'s' | 'm' | 'h' | 'd'}`
 
 export const y = (...de: Cond[]): Cond => ({ c: 'y', de })
@@ -244,3 +246,7 @@ export const deja = (h: Hecho | Efecto): Efecto => ('deja' in h ? h.deja : h)
 export const log = (texto: string): Efecto => ({ e: 'log', texto })
 // (en una escena: nadie habla durante un rato; si la escena va en marcha, el mundo sigue: la calesa avanza)
 export const silencio = (dura: Duracion): Efecto => ({ e: 'silencio', dura })
+// (Ana le pone nombre a algo: el del libro; con 'pedir', la jugadora elige —el del libro, o uno suyo, escrito—)
+export const nombrar = (cosa: Nombrable, como?: 'pedir'): Efecto => ({ e: 'nombrar', cosa, pedir: como === 'pedir' })
+// (un momento del libro, para comparar lo que pasa con lo que cuenta el libro: src/datos/libro1.json, «verdad»)
+export const marca = (id: string): Efecto => ({ e: 'marca', id })

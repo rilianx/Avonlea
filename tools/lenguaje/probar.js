@@ -34,8 +34,8 @@ const ESCENARIOS = {
   // la llegada (cap. 2): Ana habla todo el camino desde Bright River; al entrar a la Avenida corta la charla, calla, y
   // después le pone nombre (la escena del libro, con Matthew)
   llegada: { ...LLEGADA, auto: true, espera: { fin: 'terminada', dichas: ['ll_pelo', 'll_angelical', 'cb_libro', 'll_llegan'], cortadas: ['ll_angelical'], interrumpio: ['cb_libro'] } },
-  // la llegada, si Ana ya hubiera pasado antes por la Avenida: la otra variante, que también corta la charla
-  llegada_otra: { ...LLEGADA, auto: true, estado: { ...LLEGADA.estado, 'camino_blanco.dichas.cb_libro': 1 }, espera: { fin: 'terminada', dichas: ['cb_otra_vez'], interrumpio: ['cb_otra_vez'] } },
+  // la llegada, si Ana ya hubiera pasado antes por la Avenida (otro día): la otra variante, que también corta la charla
+  llegada_otra: { ...LLEGADA, auto: true, estado: { ...LLEGADA.estado, 'camino_blanco.dichas.cb_libro': 0 }, espera: { fin: 'terminada', dichas: ['cb_otra_vez'], interrumpio: ['cb_otra_vez'] } },
   // de noche, sin viaje: Ana va sola a la Avenida (en silencio: nada que cortar), vuelve, y va otra vez
   paseo: { auto: true, hora: 20, acciones: [['irA', 'camino_blanco'], ['irA', 'tejas_verdes'], ['irA', 'camino_blanco']], espera: { dichas: ['cb_sola', 'cb_siempre'], noDichas: ['cb_libro', 'cb_otra_vez'] } },
 };

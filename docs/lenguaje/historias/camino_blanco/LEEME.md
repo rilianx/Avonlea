@@ -14,13 +14,18 @@ Siempre es la misma idea, en tres tiempos:
 | Escena | Cuándo | Qué |
 |---|---|---|
 | `cb_libro` | va con Matthew (la primera vez, en la llegada) | el libro: «¡Oh, señor Cuthbert!!!», el silencio hasta después de Newbridge, y el nombre: el Camino Blanco de las Delicias |
-| `cb_otra_vez` | va con alguien | «¡Shh! Perdón… pero es que ya llegamos»; el mismo dolorcito |
-| `cb_sola` | va sola | lo piensa: «cuando no hay nadie, es todavía más mío» |
-| `cb_siempre` | cualquier otra vez (`repetir: siempre`) | calla, y suspira: «cada vez es como la primera. Casi» |
+| `cb_otra_vez` | va con alguien (no el mismo día que la del libro) | «¡Shh! Perdón… pero es que ya llegamos»; el mismo dolorcito |
+| `cb_sola` | va sola (tampoco ese día) | lo piensa: «cuando no hay nadie, es todavía más mío» |
+| `cb_siempre` | cualquier otra vez (`repetir: dia`: una vez por día) | calla, y suspira: «cada vez es como la primera. Casi» |
 
 El `orden` (`historia.ts`) dice cuál prefiere cuando se puede más de una. Ninguna sabe qué charla corta: en la
 llegada ([`../llegada/`](../llegada/)) Ana viene hablando de ser «angelicalmente buena» y la corta en la mitad de la
 frase, como en el libro.
+
+**En el juego** ya corre esta historia (`src/js/67-lenguaje.js`, docs/LENGUAJE.md §13): en el camino de Bright River
+(el tramo de la Avenida) y en el Camino Blanco del mapa de Avonlea. Reemplaza a las escenas del guion que hacían lo
+mismo (`avenida`, `newbridge`, `avenida_*`, `newbridge_ventanas`, `silencio_*`, `nombra_avenida`). El nombre lo elige
+la jugadora, como antes (el del libro, o el que escriba). Se prueba con `node tools/lenguaje/en_el_juego.js`.
 
 Para verla: `node tools/lenguaje/probar.js --ver llegada` (o `--ver paseo`, Ana sola), o en `trazas/lenguaje.html`,
 con «La llegada (cap. 2)».

@@ -5,10 +5,13 @@
 //   1. si había una conversación (interrumpio), Ana la corta con una exclamación; si iban en silencio, nada;
 //   2. silencio mientras pasan (<<silencio('…')>>: nadie habla, el mundo sigue);
 //   3. después, Ana dice algo.
-// La primera vez, con Matthew, es la del libro (cap. 2, «viaje» y «avonlea.camino_blanco»).
+// La primera vez, con Matthew, es la del libro (cap. 2, «viaje» y «avonlea.camino_blanco»): el silencio sigue por
+// Newbridge y tres millas de campos, hasta una milla antes de casa; ahí Ana le pone nombre (<<nombrar('avenida')>>: el
+// del libro, o uno que escriba la jugadora). Las otras variantes no van el mismo día que esa (el camino a Tejas Verdes
+// puede volver a pasar por la Avenida), y la última, una vez por día.
 
 title: cb_libro
-resumen: La Avenida, la primera vez: Ana enmudece, y después le pone nombre (el Camino Blanco de las Delicias).
+resumen: La Avenida, la primera vez: Ana enmudece hasta una milla antes de casa, y después le pone nombre.
 se_activa: ana pasa camino_blanco
 si: ve('ana', 'matthew')
 interrumpe: si
@@ -18,9 +21,26 @@ en_marcha: si
 ana: …¡Oh, señor Cuthbert! ¡Oh, señor Cuthbert!! ¡Oh, señor Cuthbert!!!
 <<endif>>
 narra: La calesa entra a la Avenida: cuatrocientos o quinientos metros de camino bajo los manzanos en flor, que se juntan arriba como una bóveda. Al fondo, el cielo del atardecer brilla como el rosetón de una catedral.
-ana: (Ana enmudece. Echa la cabeza atrás, con las manos juntas, como si estuviera en una iglesia. Los pétalos le caen en el pelo.)
+ana: (Ana enmudece. Se queda mirando la bóveda de flores, con las manos juntas, como si estuviera en una iglesia.)
 matthew: (Matthew la mira de reojo. No dice nada, para no romper el encanto.)
-<<silencio('20m')>>
+<<silencio('3m')>>
+ana: (Ana echa la cabeza atrás para mirar la bóveda de flores. Los pétalos le caen en el pelo y no se los quita.)
+<<silencio('3m')>>
+matthew: (Matthew afloja las riendas. La yegua va al paso, como si también ella quisiera que esto no se acabara.)
+<<silencio('4m')>>
+narra: Cruzan Newbridge: perros que ladran, chicos que gritan desde las cercas, caras curiosas en las ventanas. Ana no ve nada de eso; sigue mirando hacia atrás, hacia donde quedó la Avenida.
+<<silencio('4m')>>
+ana: (Ana va callada, con las manos juntas sobre el bolso de alfombra y los ojos en el cielo del oeste.)
+<<silencio('3m')>>
+matthew: (Matthew la mira de reojo. Nunca pensó que el silencio de una niña pudiera ser tan cómodo.)
+<<silencio('3m')>>
+ana: (Sobre los campos aparece la primera estrella. Ana mueve los labios: quizás le está pidiendo un deseo.)
+<<silencio('3m')>>
+matthew: (En una laguna junto al camino empiezan a cantar las ranas. La yegua resopla: ya huele su casa.)
+<<silencio('2m')>>
+ana: Blanco… de las Delicias… no, todavía no… #piensa
+<<silencio('3m')>>
+<<marca('una_milla')>>
 matthew: Supongo que estarás bien cansada y con hambre. Pero ya no falta mucho: solo una milla más.
 ana: Oh, señor Cuthbert… ese lugar por el que pasamos, ese lugar blanco… ¿qué era?
 matthew: Bueno, pues, debes referirte a la Avenida. Es un lugar bonito, más o menos.
@@ -28,8 +48,12 @@ ana: ¿Bonito? Oh, «bonito» no parece la palabra justa. Ni «hermoso» tampoco
 ana: Es lo primero que veo que la imaginación no podría mejorar. Me llena aquí (se pone una mano en el pecho). Me dio un dolorcito raro y, sin embargo, agradable.
 ana: ¿Alguna vez ha sentido un dolor así, señor Cuthbert?
 matthew: Bueno, pues, no recuerdo haberlo sentido nunca.
-ana: Yo lo siento muchas veces, cada vez que veo algo regiamente hermoso. Pero no deberían llamar «la Avenida» a ese lugar tan precioso. Ese nombre no significa nada.
-ana: Deberían llamarlo… a ver… el Camino Blanco de las Delicias. ¿No es un nombre bonito e imaginativo?
+ana: Yo lo siento muchas veces, cada vez que veo algo regiamente hermoso. Pero no deberían llamar «la Avenida» a ese lugar tan precioso. Ese nombre no significa nada. Deberían llamarlo… a ver…
+-> el Camino Blanco de las Delicias #propia
+    <<nombrar('avenida')>>
+-> Otro nombre…
+    <<nombrar('avenida', 'pedir')>>
+ana: ¡El Camino Blanco de las Delicias! ¿No es un nombre bonito e imaginativo?
 ana: Otros podrán llamarlo la Avenida, pero yo siempre le diré el Camino Blanco de las Delicias.
 <<deja(hechos.cb_nombre)>>
 ===
@@ -37,7 +61,7 @@ ana: Otros podrán llamarlo la Avenida, pero yo siempre le diré el Camino Blanc
 title: cb_otra_vez
 resumen: La Avenida otra vez: Ana corta lo que se está diciendo, calla, y después dice que el dolorcito sigue ahí.
 se_activa: ana pasa camino_blanco
-si: no(sola('ana'))
+si: no(sola('ana')), no(dichas.cb_libro.hoy)
 interrumpe: si
 en_marcha: si
 ---
@@ -58,7 +82,7 @@ ana: Sí, Srta. Cuthbert. Pero no son solamente manzanos.
 title: cb_sola
 resumen: Ana pasa sola por la Avenida: calla, y después piensa en voz baja.
 se_activa: ana pasa camino_blanco
-si: sola('ana')
+si: sola('ana'), no(dichas.cb_libro.hoy)
 interrumpe: si
 en_marcha: si
 ---
@@ -68,11 +92,11 @@ ana: El Camino Blanco de las Delicias. Cuando no hay nadie, es todavía más mí
 ===
 
 title: cb_siempre
-resumen: La Avenida, una vez más: Ana calla al pasar, y después suspira.
+resumen: La Avenida, una vez más (una vez por día): Ana calla al pasar, y después suspira.
 se_activa: ana pasa camino_blanco
 interrumpe: si
 en_marcha: si
-repetir: siempre
+repetir: dia
 ---
 <<if interrumpio>>
 ana: (Ana deja la frase a medias y levanta la vista. Ya están bajo los manzanos.)

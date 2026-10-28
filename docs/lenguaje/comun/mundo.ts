@@ -41,6 +41,13 @@ export const medios = {
 } as const satisfies Record<string, { nombre: string; es: string; lleva: number; se_guarda_en: Lugar }>
 export type Medio = keyof typeof medios
 
+// lo que Ana bautiza: el nombre del libro (la jugadora puede escribir otro; desde entonces se llama así en todas partes)
+export const nombrables = {
+  avenida: { libro: 'el Camino Blanco de las Delicias', que: 'la Avenida, el túnel de manzanos en flor' },
+  lago: { libro: 'el Lago de las Aguas Brillantes', que: 'la laguna de Barry' },
+} as const
+export type Nombrable = keyof typeof nombrables
+
 // dónde está cada uno, en qué va, a quién sigue, cómo anda vestida
 export const mundo = (quien: Persona) => ({
   lugar: new Campo<Lugar>(['mundo', quien, 'lugar']),

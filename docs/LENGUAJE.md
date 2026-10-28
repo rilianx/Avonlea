@@ -410,7 +410,7 @@ traducidas a llamadas del lenguaje).
 node tools/lenguaje/yarn.js docs/lenguaje     # los .yarn → escenas.ids.ts y *.datos.ts (las escenas y voces, como datos)
 tsc -p docs/lenguaje                          # revisa todo
 python3 tools/lenguaje/mutaciones.py          # que lo estricto lo sea
-node tools/lenguaje/construir.js              # todo, compilado, en un JSON (lo que lee el motor)
+node tools/lenguaje/construir.js docs/lenguaje src/datos/lenguaje.json   # todo, compilado, en un JSON (lo que lee el motor, en el juego)
 node tools/lenguaje/probar.js                 # cada historia de punta a punta, en varios escenarios
 node tools/lenguaje/probar.js --ver sola      # lo que pasa, línea a línea
 node tools/lenguaje/pagina.js                 # trazas/lenguaje.html: jugarla en el navegador
@@ -453,6 +453,28 @@ calesa a mitad de camino; la llegada por la
 Avenida (que la escena del libro corte la charla); la llegada si Ana ya hubiera pasado (la otra variante); y Ana
 que pasea sola por la Avenida, dos veces (sin nada que cortar). Cada escenario se corre dos veces: de corrido, y
 guardando la partida y cargándola en un motor nuevo cada pocas vueltas; las dos tienen que dar exactamente lo mismo.
+
+**En el juego.** Las historias que ya pasaron al lenguaje corren en el mismo motor, dentro del juego
+(`src/js/67-lenguaje.js`), y el juego es su mundo:
+
+| El motor necesita | El juego lo pone con |
+|---|---|
+| dónde está cada uno (`llega`) | su posición: un tramo del camino de Bright River (la Avenida, Newbridge), la estación, el Camino Blanco del mapa de Avonlea, la laguna, Tejas Verdes, una pieza |
+| `ve`, `oye`, `sola` | estar en la misma escena, a menos de unos pasos |
+| una línea | una burbuja (o una nube, si piensa), o la tarjeta de narración; el motor sigue cuando termina |
+| un silencio | minutos del reloj del juego, mientras la calesa sigue |
+| una elección | el menú de siempre; Ana sola elige lo suyo (`#propia`) |
+| `nombrar` | el nombre del libro, o el cuadro para escribir otro (`src/js/57-nombres-de-ana.js`) |
+| `cortar` | termina la charla del guion que iba por el camino (la de siempre, del canal «viaje») |
+| el reloj | el del juego: el motor no se adelanta (`alTiempo`) |
+| guardar | la partida del motor va dentro de la del juego (`lenguaje`) |
+
+Mientras una escena del motor se dice, ocupa el canal del camino: las charlas del guion esperan. Una escena del guion
+más importante todavía puede cortarla. Los datos llegan al juego en `src/datos/lenguaje.json`
+(`node tools/lenguaje/construir.js docs/lenguaje src/datos/lenguaje.json`), y `tools/build.js` los incluye con el motor.
+Hoy corre en el juego una historia: `camino_blanco`. Reemplaza a las escenas del guion `avenida`, `newbridge`,
+`avenida_*`, `newbridge_ventanas`, `silencio_*` y `nombra_avenida`. Los verbos que mueven a la gente (los viajes de
+`llevar_a`) todavía no los hace el juego; es lo que falta para pasar la llegada y White Sands.
 
 **Para el juego**, el mismo `tsc` compila a JavaScript, y los constructores arman los datos: el JSON de cada historia
 con sus encargos, de cada verbo con su receta, de cada escena. El juego, el grafo, el modelo lógico (Z3) y la historia

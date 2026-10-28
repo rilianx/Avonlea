@@ -7,12 +7,22 @@
 //   empezar(acc)   que empiece una acción: { quien, verbo, args, dura } (un primitivo, en minutos) o
 //                  { quien, verbo, a, mapa: true } (ir hasta un lugar). Con ya: true, se hace en el acto (un verbo
 //                  dicho en una escena).
-//   avanzar(acc)   ¿terminó? Si terminó, sus efectos en el mundo ya están hechos (quien llegó, llegó).
-//   cuando(acc)    cuándo volver a preguntar (en minutos de juego).
+//                  También lo que se dice en una escena: { decir: { q, t, piensa } } (una línea) y { silencio: true,
+//                  dura } (nadie habla), y lo que solo el mundo sabe hacer: { nombrar: cosa, pedir } (que Ana le ponga
+//                  nombre: el del libro, o el que escriba la jugadora; el mundo lo deja en acc.nombre).
+//   listo(acc)     ¿terminó? (solo mira: no cambia nada)
+//   terminar(acc)  lo que pasa al terminar (quien llegó, llegó). Opcional.
+//   cuando(acc)    cuándo volver a mirar, en minutos de juego (para revisar lo que mantiene una receta en el camino).
+//   cancelar(acc)  se deja (una escena cortada, una reparación que falló). Opcional.
 //   parar(acc), seguir(acc)   se detiene mientras se repara lo que se rompió (§6, «mantiene»), y sigue después.
 //   minutos(a, b)  cuánto hay entre dos lugares (para el costo de un plan).
 //   tramo(ruta, desde, hasta)   las paradas de una ruta entre dos lugares, en el sentido que corresponda.
 //   funciones      lo que el mundo calcula y el estado no guarda: ve, oye, sola.
+//   cortar()       una escena que interrumpe va a empezar: si el mundo tiene una conversación suya en curso, la corta,
+//                  y dice si cortó algo. Opcional.
+//   escena(momento, id)   una escena del motor empieza, termina o se corta. Opcional.
+//   efecto(e)      un efecto que el mundo también anota (log, marca). Opcional.
+//   inicio         dónde está cada uno y el estado al empezar (lo que el escenario no diga). Opcional.
 // Lo que el mundo tiene que recordar de una acción va en la acción misma (son datos: se guardan con la partida).
 // El mundo avisa al motor con api.llega(quien, lugar): alguien llegó a un lugar o pasó por él.
 (function (raiz) {
@@ -43,14 +53,20 @@
         return i <= j ? r.slice(i + 1, j + 1) : r.slice(j, i).reverse();
       },
       funciones: { ve: juntos, oye: juntos, sola: p => Object.keys(D.personas).every(q => q === p || !juntos(p, q)) },
-      empezar(acc){ acc.fin = api.ahora() + (acc.ya ? 0 : acc.mapa ? minutos(lugarDe(acc.quien), acc.a) : acc.dura); },
-      avanzar(acc){ if (api.ahora() < acc.fin) return false; if (acc.mapa) mover(acc.quien, acc.a); return true; },
+      empezar(acc){ acc.fin = api.ahora() + (acc.ya ? 0 : acc.mapa ? minutos(lugarDe(acc.quien), acc.a) : acc.decir ? 1 : acc.dura || 0); if (acc.nombrar) acc.nombre = D.nombrables[acc.nombrar].libro; },
+      listo: acc => api.ahora() >= acc.fin,
+      terminar(acc){ if (acc.mapa) mover(acc.quien, acc.a); },
       // (un viaje se mira de a un minuto: si algo se rompe en el camino, se nota enseguida)
       cuando: acc => (acc.mapa ? Math.min(acc.fin, api.ahora() + 1) : acc.fin),
       parar(acc){ acc.resta = acc.fin - api.ahora(); },
       seguir(acc){ acc.fin = api.ahora() + acc.resta; delete acc.resta; },
     };
   }
+  // (el día de White Sands: Ana y Marilla en la cocina, Matthew y la calesa en el corral; Ana a prueba, tras su primera noche)
+  MundoSimulado.inicio = {
+    lugares: { ana: 'cocina', marilla: 'cocina', matthew: 'corral', calesa: 'corral', srapye: 'aldea', spencer: 'hotel_white_sands', blewett: 'hotel_white_sands' },
+    estado: { 'comun.hechos.primera_noche': 1, 'estado.ana_en_tv': 'en_prueba' },
+  };
   if (typeof module !== 'undefined' && module.exports) module.exports = { MundoSimulado };
   else raiz.MundoSimulado = MundoSimulado;
 })(this);

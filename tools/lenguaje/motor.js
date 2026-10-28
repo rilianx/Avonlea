@@ -16,7 +16,6 @@
     let t = (escenario.dia ?? 2) * 1440 - 1440 + (escenario.hora ?? 14) * 60;   // (minutos desde el comienzo del día 1)
     let respuestas = escenario.respuestas ? [...escenario.respuestas] : null;
     const auto = !!escenario.auto, opcionesGuion = escenario.opciones || {};
-    const MIN_LINEA = 1;   // (lo que dura una línea de una escena, en minutos de juego)
 
     // ---------------------------------------------------------------- el estado
     const k = c => c.join('.');
@@ -74,6 +73,8 @@
       else if (e.e === 'olvida') delete S[k(e.camino)];
       else if (e.e === 'suma') { const d = D.cualidades[e.camino[2]], r = d ? d.rango : [-1e9, 1e9]; set(e.camino, Math.max(r[0], Math.min(r[1], get(e.camino) + e.n))); nota(`${nombre(e.camino[1])}: ${e.camino[2]}${e.camino[3] ? ' hacia ' + nombre(e.camino[3]) : ''} ${e.n > 0 ? '+' : ''}${e.n} → ${get(e.camino)}`); }
       else if (e.e === 'log') nota('📔 ' + e.texto);
+      else if (e.e === 'marca') nota('📖 ' + e.id, 'momento');
+      if (e.e === 'log' || e.e === 'marca') mundo.efecto?.(e);   // (el juego también lo anota)
     }
 
     // ---------------------------------------------------------------- el mundo
@@ -165,7 +166,7 @@
           if (d.dura) { F.acc = { quien: ll.args[0], verbo: ll.verbo, args: ll.args, dura: aMin(d.dura), ya: !!T.ya }; mundo.empezar(F.acc); F.fase = 1; }
           return;
         }
-        if (F.fase === 1) { if (!mundo.avanzar(F.acc)) return { espera: { accion: F.acc } }; F.fase = 3; return; }
+        if (F.fase === 1) { if (!mundo.listo(F.acc)) return { espera: { accion: F.acc } }; mundo.terminar?.(F.acc); F.fase = 3; return; }
         if (F.fase === 2) return { vale: true };
         for (const e of d.deja || []) aplicar(e);
         return { vale: true };
@@ -178,7 +179,8 @@
           decir(ll);
           F.acc = { quien: ll.args[0], verbo: ll.verbo, a: val(ll.args[1]), mapa: true, ya: !!T.ya }; mundo.empezar(F.acc); F.fase = 1;
         }
-        return mundo.avanzar(F.acc) ? { vale: true } : { espera: { accion: F.acc } };
+        if (!mundo.listo(F.acc)) return { espera: { accion: F.acc } };
+        mundo.terminar?.(F.acc); return { vale: true };
       },
       // (una secuencia fija de pasos, o un «por cada»; lo que mantiene lo revisa revisarMantiene)
       receta(F, T, ret){
@@ -314,6 +316,7 @@
     }
     function revisarHistorias(){
       for (const [h, H] of Object.entries(D.historias)) {
+        if (escenario.historias && !escenario.historias.includes(h)) continue;   // (solo las que corren aquí: en el juego, las que ya pasaron al lenguaje)
         const est = get(['historia', h]);
         if (est === 'no_empezada' && cumple(H.empieza)) {
           set(['historia', h], 'en_curso'); nota(`▶ empieza la historia «${H.titulo}»`, 'titulo'); cola.push({ tipo: 'historia', historia: h, momento: 'empieza' });
@@ -358,18 +361,27 @@
       }
       if (!mejor) return false;
       if (interrumpe) cola.splice(cola.indexOf(suyo), 1);
-      // (si corta otra escena, esa no sigue: queda dicha, a medias, y no hay «tras» de ella)
-      if (escena) { nota(`✂ se corta ${escena.id.split('.')[1]}`, 'momento'); set(['escena', 'interrumpio'], escena.id); }
+      // (si corta otra escena, esa no sigue: queda dicha, a medias, y no hay «tras» de ella. Una que interrumpe corta
+      // también una conversación del mundo —en el juego, una charla del guion de siempre—)
+      if (escena) { const id = escena.id; cortar(); set(['escena', 'interrumpio'], id); }
+      else if (mejor.interrumpe && mundo.cortar?.()) { nota('✂ se corta una conversación', 'momento'); set(['escena', 'interrumpio'], 'mundo'); }
       else delete S['escena.interrumpio'];
       const [h, id] = mejor.escena.split('.'); set([h, 'dichas', id], dia());
       nota(`🎬 ${id}: ${mejor.resumen}`, 'escena');
-      escena = { id: mejor.escena, pila: [[...mejor.cuerpo]], proxima: t, en_marcha: !!mejor.en_marcha, participan: [...mejor.hablan], ops: null };
+      escena = { id: mejor.escena, pila: [[...mejor.cuerpo]], acc: null, en_marcha: !!mejor.en_marcha, participan: [...mejor.hablan], ops: null };
+      mundo.escena?.('empieza', escena.id);
       return true;
     }
     // el guion de la escena en curso: lo que sigue hasta una elección de la jugadora, o hasta que la próxima línea tenga
     // que esperar su minuto (o el final)
+    // (cada línea, cada silencio, lo dice el mundo: en el juego, una burbuja o una tarjeta; la escena sigue cuando termina)
     function seguirEscena(){
-      while (escena && escena.proxima <= t) {
+      while (escena && (!escena.acc || mundo.listo(escena.acc))) {
+        if (escena.acc) {
+          const a = escena.acc; escena.acc = null; mundo.terminar?.(a);
+          if (a.nombrar) { set(['nombres', a.nombrar], a.nombre); nota(`✎ Ana le pone nombre: ${a.nombre}`, 'momento'); }
+          continue;
+        }
         const pila = escena.pila, top = pila[pila.length - 1];
         if (!top) { terminarEscena(); return; }
         if (!top.length) { pila.pop(); continue; }
@@ -381,8 +393,10 @@
           return;
         }
         top.shift();
-        if (it.q) { escena.proxima = t + MIN_LINEA; registro.push({ tipo: 'linea', q: it.q, t: it.t, piensa: !!it.piensa, hora: reloj() }); if (it.acto) { const d = def(it.acto); for (const e of d.deja || []) aplicar(e); } }
-        else if (it.hace && it.hace.e === 'silencio') { escena.proxima = t + aMin(it.hace.dura); registro.push({ tipo: 'silencio', t: it.hace.dura, hora: reloj() }); }
+        const hace = acc => { escena.acc = acc; mundo.empezar(acc); };
+        if (it.q) { registro.push({ tipo: 'linea', q: it.q, t: it.t, piensa: !!it.piensa, hora: reloj() }); hace({ decir: { q: it.q, t: it.t, piensa: !!it.piensa } }); if (it.acto) { const d = def(it.acto); for (const e of d.deja || []) aplicar(e); } }
+        else if (it.hace && it.hace.e === 'silencio') { registro.push({ tipo: 'silencio', t: it.hace.dura, hora: reloj() }); hace({ silencio: true, dura: aMin(it.hace.dura) }); }
+        else if (it.hace && it.hace.e === 'nombrar') hace({ nombrar: it.hace.cosa, pedir: !!it.hace.pedir });
         else if (it.hace) aplicar(it.hace);
         else if (it.si) pila.push([...(cumple(it.si) ? it.cuerpo : it.sino)]);
       }
@@ -394,7 +408,14 @@
     }
     function terminarEscena(){
       const id = escena.id; escena = null; delete S['escena.interrumpio'];
+      mundo.escena?.('termina', id);
       cola.push({ tipo: 'tras', escena: id });
+    }
+    // (cortarla: no sigue, ni hay «tras» de ella; la corta otra escena, o el mundo —en el juego, una escena suya—)
+    function cortar(){
+      const id = escena.id; nota(`✂ se corta ${id.split('.')[1]}`, 'momento');
+      if (escena.acc) mundo.cancelar?.(escena.acc);
+      escena = null; delete S['escena.interrumpio']; mundo.escena?.('corta', id);
     }
 
     // ---------------------------------------------------------------- el paso del tiempo
@@ -405,6 +426,8 @@
     const enPregunta = () => tareas.find(T => T.id === pregunta);
     // avanza hasta que haya algo que mostrar o decidir (una escena, una pregunta) o hasta el final; devuelve el estado.
     // (escenario.paso: para probar que se puede guardar en cualquier momento, se detiene cada tantas vueltas —pausa—)
+    // (tope: en el juego, la hora del juego; el motor no se adelanta a ella)
+    let tope = null;
     function avanzar(limite = escenario.paso || 5000){
       // (los encargos de quienes están en una escena que no va en marcha, esperan a que termine)
       const detenida = T => escena && !escena.en_marcha && escena.participan.includes(T.quien);
@@ -415,13 +438,13 @@
         revisarHistorias();
         if (fin) return estadoUI();
         if (!escena && cola.length && elegirEscena()) continue;
-        const lista = tareas.filter(T => !T.fin && !T.pregunta && !detenida(T) && (T.hasta ? cumple(T.hasta) : T.despierta <= t));
+        const lista = tareas.filter(T => !T.fin && !T.pregunta && !detenida(T) && ((T.accion && mundo.listo(T.accion)) || (T.hasta ? cumple(T.hasta) : T.despierta <= t)));
         if (lista.length) {
-          const T = lista[0]; T.hasta = null;
+          const T = lista[0]; T.hasta = null; T.accion = null;
           const w = correr(T);
           if ('fin' in w) { T.fin = true; if (T.etiqueta) set(['encargo', T.h, T.etiqueta], w.fin ? 'cumplido' : 'fallido'); continue; }
           if (w.min != null) T.despierta = t + w.min;
-          else if (w.accion) T.despierta = mundo.cuando(w.accion);
+          else if (w.accion) { T.accion = w.accion; T.despierta = mundo.cuando(w.accion); }
           else if (w.hasta) T.hasta = w.hasta;
           else if (w.pregunta) {
             if (auto || (respuestas && respuestas.length)) { T.valor = responderAuto(w.pregunta); T.despierta = t; }
@@ -430,9 +453,11 @@
           continue;
         }
         const prox = tareas.filter(T => !T.fin && !T.pregunta && !T.hasta && !detenida(T)).map(T => T.despierta);
-        if (escena) prox.push(escena.proxima);
+        if (escena && escena.acc) prox.push(mundo.cuando(escena.acc));
+        const prox1 = prox.length ? Math.min(...prox) : Infinity;
+        if (tope != null && prox1 > tope) { t = Math.max(t, tope); return estadoUI(); }   // (lo que sigue es más tarde que la hora del juego)
         if (!prox.length) return estadoUI();   // (nada más que hacer: esperan algo que no va a pasar solo)
-        t = Math.max(t, Math.min(...prox));
+        t = Math.max(t, prox1);
       }
       if (escenario.paso) return { ...estadoUI(), pausa: true };
       throw new Error('el motor no avanza (¿un ciclo?)');
@@ -444,13 +469,12 @@
     }
 
     // ---------------------------------------------------------------- el comienzo: un escenario, o una partida guardada
+    // (lo que trae el mundo —el simulado: el día de White Sands—, y encima lo del escenario: lugares y estado; null borra)
     if (guardado) ({ S, registro, tareas, cola, porTras, escena, pregunta, fin, sigId, t, respuestas } = guardado);
     else {
-      // (por defecto: el día de White Sands. Un escenario cambia lugares y estado; null borra)
-      const ini = { ana: 'cocina', marilla: 'cocina', matthew: 'corral', calesa: 'corral', srapye: 'aldea', spencer: 'hotel_white_sands', blewett: 'hotel_white_sands', ...(escenario.lugares || {}) };
-      for (const [x, l] of Object.entries(ini)) set(['mundo', x, 'lugar'], l);
-      set(['comun', 'hechos', 'primera_noche'], 1); set(['estado', 'ana_en_tv'], 'en_prueba');
-      for (const [c, v] of Object.entries(escenario.estado || {})) if (v === null) delete S[c]; else set(c.split('.'), v);
+      const ini = Mundo.inicio || {};
+      for (const [x, l] of Object.entries({ ...(ini.lugares || {}), ...(escenario.lugares || {}) })) set(['mundo', x, 'lugar'], l);
+      for (const [c, v] of Object.entries({ ...(ini.estado || {}), ...(escenario.estado || {}) })) if (v === null) delete S[c]; else set(c.split('.'), v);
     }
 
     return {
@@ -467,6 +491,14 @@
       irA(l){ nota(`(la jugadora: Ana va hasta ${nombre(l)})`); nuevaTarea({ verbo: 'ir_a', args: ['ana', l] }, {}); return avanzar(); },
       bajarse(){ nota('(la jugadora: Ana se baja de la calesa)'); instantaneo({ verbo: 'bajar', args: ['ana'] }); return avanzar(); },
       esperar(m){ t += m; return avanzar(); },
+      // en el juego: lo que toca hasta la hora del juego (en minutos desde el comienzo del día 1), y no más
+      alTiempo(m){ if (tope == null) t = m; tope = m; return avanzar(); },   // (la primera vez, la hora es la del juego)
+      // en el juego: el mundo cortó la escena en curso (una escena suya, más importante)
+      cortarEscena(){ if (escena) cortar(); return avanzar(); },
+      estado: () => estadoUI(),
+      // el mundo avisa: alguien llegó a un lugar, o pasó por él (en el juego, cada vez que cambia el lugar de alguien);
+      // con «ya_estaba», sin momento: es dónde estaba al empezar, no que haya llegado
+      llega(q, a, ya_estaba){ if (ya_estaba) set(['mundo', q, 'lugar'], a); else llega(q, a); },
       // la partida entera, como datos (JSON): se vuelve a cargar con Motor.cargar
       guardar: () => JSON.stringify({ v: 1, escenario, S, registro, tareas, cola, porTras, escena, pregunta, fin, sigId, t, respuestas }),
       registro, get, nombre, lugares: () => Object.keys(D.lugares),

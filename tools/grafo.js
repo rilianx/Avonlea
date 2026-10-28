@@ -44,6 +44,11 @@ function condicion(c, donde){
   if (k === 'conoce') anota(pide, 'conoce_' + a + ' ', donde);   // (whom Ana knows: the fact conoce_<who>, or how the book has them meet)
   if (neg || k === 'no_hoy') anota(pide, a + ' ', donde);   // (read, but not needed: «!hecho:x» holds while x has not happened)
 }
+// the stories in the language (docs/lenguaje/, built into src/datos/lenguaje.json; they run in the game through
+// src/js/67-lenguaje.js): what they leave for the script (naming a thing leaves nombro_<thing>, as here)
+{ const L = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'src', 'datos', 'lenguaje.json'), 'utf8'));
+  const recorrer = (items, id) => { for (const it of items || []) { if (it.hace?.e === 'nombrar') anota(hace, 'nombro_' + it.hace.cosa, 'escena ' + id + ' (lenguaje)'); recorrer(it.cuerpo, id); recorrer(it.sino, id); } };
+  for (const [id, e] of Object.entries(L.escenas)) recorrer(e.cuerpo, id); }
 // the script: each scene, its conditions and what it does
 let esc = null;
 const escenas = [];

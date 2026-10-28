@@ -317,155 +317,11 @@ al_terminar: meta matthew llevar ana,cocina | | llevar a la niña a Tejas Verdes
 al_terminar: estado viaje primer_viaje
 # --- el primer viaje, de Bright River a Tejas Verdes (cap. 2): solo mientras dura («primer_viaje»: lo deja la escena
 # de la estación, y se olvida al llegar a Tejas Verdes)
-# --- el túnel de manzanos, antes que nada (Ana enmudece); Newbridge, callada todavía
-=== avenida ===
-a prueba
-canal: viaje
-prioridad: 10
-interrumpe
-calesa: camino
-camino: tramo=avenida
-si: viaje=primer_viaje
-lineas: libro:viaje.10 [7]
----
-ana: (Ana enmudece. Se queda mirando la bóveda de flores, con las manos juntas, como si estuviera en una iglesia.)
-matthew: (Matthew la mira de reojo. No dice nada, para no romper el encanto.)
-ana: (…)
+# --- la Avenida (el túnel de manzanos), el silencio por Newbridge y los campos, y el nombre, una milla antes de casa:
+# ya no están aquí. Son del lenguaje de las historias: docs/lenguaje/historias/camino_blanco/escenas.yarn (la escena
+# «cb_libro»), que corre en su motor dentro del juego (src/js/67-lenguaje.js) cada vez que Ana pasa por la Avenida.
 
-=== newbridge ===
-a prueba
-canal: viaje
-prioridad: 8
-interrumpe
-calesa: camino
-camino: tramo=Newbridge
-si: viaje=primer_viaje, dicha:avenida
----
-ana: (Callada todavía. Los perros les ladran, los chicos gritan desde las cercas, hay caras curiosas en las ventanas: Ana no ve nada de eso.)
-
-# --- el silencio después de la Avenida: Ana no habla, pero no es un vacío (lo que se ve, lo que piensa Matthew)
-=== avenida_petalos ===
-a prueba
-canal: viaje
-prioridad: 1.5
-pausa: 12
-calesa: camino
-camino: tramo=avenida
-si: viaje=primer_viaje, dicha:avenida
----
-ana: (Ana echa la cabeza atrás para mirar la bóveda de flores. Los pétalos le caen en el pelo y no se los quita.)
-
-=== avenida_paso ===
-a prueba
-canal: viaje
-prioridad: 1.5
-pausa: 12
-calesa: camino
-camino: tramo=avenida
-si: viaje=primer_viaje, dicha:avenida_petalos
----
-matthew: (Matthew afloja las riendas. La yegua va al paso, como si también ella quisiera que esto no se acabara.)
-
-=== avenida_roseton ===
-a prueba
-canal: viaje
-prioridad: 1.5
-pausa: 12
-calesa: camino
-camino: tramo=avenida
-si: viaje=primer_viaje, dicha:avenida_paso
----
-ana: (Al fondo de la Avenida, el cielo del atardecer brilla como el rosetón de una catedral.)
-
-=== newbridge_ventanas ===
-a prueba
-canal: viaje
-prioridad: 1.5
-pausa: 12
-calesa: camino
-camino: tramo=Newbridge
-si: viaje=primer_viaje, dicha:newbridge
----
-ana: (Las ventanas del pueblo se encienden una a una. Ana sigue mirando hacia atrás, hacia donde quedó la Avenida.)
-
-=== silencio_manos ===
-a prueba
-canal: viaje
-prioridad: 1.5
-pausa: 14
-calesa: camino
-camino: tramo=campos
-si: viaje=primer_viaje, dicha:avenida
----
-ana: (Ana va callada, con las manos juntas sobre el bolso de alfombra y los ojos en el cielo del oeste.)
-
-=== silencio_matthew ===
-a prueba
-canal: viaje
-prioridad: 1.5
-pausa: 14
-calesa: camino
-camino: tramo=campos
-si: viaje=primer_viaje, dicha:silencio_manos
----
-matthew: (Matthew la mira de reojo. Nunca pensó que el silencio de una niña pudiera ser tan cómodo.)
-
-=== silencio_estrella ===
-a prueba
-canal: viaje
-prioridad: 1.5
-pausa: 14
-calesa: camino
-camino: tramo=campos
-si: viaje=primer_viaje, dicha:silencio_matthew
----
-ana: (Sobre los campos aparece la primera estrella. Ana mueve los labios: quizás le está pidiendo un deseo.)
-
-=== silencio_ranas ===
-a prueba
-canal: viaje
-prioridad: 1.5
-pausa: 14
-calesa: camino
-camino: tramo=campos
-si: viaje=primer_viaje, dicha:silencio_estrella
----
-matthew: (En una laguna junto al camino empiezan a cantar las ranas. La yegua resopla: ya huele su casa.)
-
-=== silencio_nombre ===
-a prueba
-canal: viaje
-prioridad: 1.5
-pausa: 14
-calesa: camino
-camino: tramo=campos
-si: viaje=primer_viaje, dicha:silencio_ranas
----
-ana piensa: Blanco… de las Delicias… no, todavía no…
-
-# --- entrando a Avonlea: una milla más (y la Avenida tiene nombre), la laguna, Tejas Verdes, la casa
-=== nombra_avenida ===
-a prueba
-resumen: Ana le pone nombre a la Avenida (en el libro, «el Camino Blanco de las Delicias»).
-canal: viaje
-prioridad: 9
-interrumpe
-si: viaje=primer_viaje, dicha:avenida
-o: calesa=camino camino.desde=.955
-o: calesa=avonlea cerca=matthew,letrero_br,2500
-lineas: libro:avonlea.camino_blanco [1,2,3,4]
-marcas: 0=una_milla
-al_empezar: log Matthew rompió el silencio: «solo nos falta una milla».
----
-ana: Pero no deberían llamar «la Avenida» a ese lugar tan precioso. Ese nombre no significa nada. Deberían llamarlo… a ver…
-->* el Camino Blanco de las Delicias
-   ana: ¡El Camino Blanco de las Delicias! ¿No es un nombre bonito e imaginativo?
-   ! nombrar avenida
--> Otro nombre…
-   ana: ¡El Camino Blanco de las Delicias! ¿No es un nombre bonito e imaginativo?
-   ! nombrar avenida ?
-ana: Otros podrán llamarlo la Avenida, pero yo siempre le diré el Camino Blanco de las Delicias.
-
+# --- entrando a Avonlea: la laguna, Tejas Verdes, la casa
 === lago ===
 a prueba
 resumen: Matthew le muestra la laguna de Barry, y Ana le pone nombre (en el libro, «el Lago de las Aguas Brillantes»).
@@ -6997,7 +6853,7 @@ a prueba
 con: matthew
 tema: Contarle los nombres que les puso a los lugares
 resumen: Ana le cuenta los nombres nuevos que puso a los lugares; Matthew se acostumbrará.
-si: afecto:matthew:ana>=2, hecho:nombro_avenida, hecho:nombro_lago, !dicha:nombra_avenida
+si: afecto:matthew:ana>=2, hecho:nombro_avenida, hecho:nombro_lago, !dicha:cb_libro
 al_terminar: suma letras:ana 1
 ---
 ana: Matthew, ¿sabía que la avenida de los manzanos se llama ahora el Camino Blanco de las Delicias? Y el estanque de los Barry, el Lago de las Aguas Brillantes.
@@ -10925,6 +10781,7 @@ function startCap1(){
   if (today() % 7 === 6) dayT += 1;   // (a weekday)
   dayAt(14.9); setSeason(0); S = 0;     // (an afternoon in early June, just before Matthew goes)
   game.dlgUsed = {};
+  lgReiniciar();   // (the stories in the language: from the start too)
   CAP1.on = true; CAP1.done = 0; CAP1.marks = {}; CAP1.f = {}; CAP1.extra = null; game.escDone = {}; game.dlgHechos = {}; if (game.wm) game.wm.hechos = {}; game.dlgProg = {};
   const put = (k, room, x, y) => { const b = PEOPLE[k]; b.where = room; b.x = x; b.y = y; b.sit = false; b.nav = null; b.buggy = false; b.roadDir = 0; b.story = null; b.away = null; };
   put('marilla', 'gg', STOVE.x + 30, STOVE.y + 40); put('matthew', 'out', BARN.x + 140, BARN.y + 70); put('lynde', 'rl', KDOOR.x - 60, KIT.h * .45);
@@ -14822,7 +14679,7 @@ function escenasEnCurso(){
 const AJUSTES = { auto: true, stories: false };
 try { const st = JSON.parse(localStorage.getItem('avonlea-ajustes') || localStorage.getItem('avonlea-ai') || '{}'); if (typeof st.auto === 'boolean') AJUSTES.auto = st.auto; if (typeof st.stories === 'boolean') AJUSTES.stories = st.stories; } catch (e) {}
 const saveAjustes = () => { try { localStorage.setItem('avonlea-ajustes', JSON.stringify(AJUSTES)); } catch (e) {} };
-function save(){ if (wiping) return; try { localStorage.setItem('avonlea', JSON.stringify({ wm: game.wm, libreta: game.libreta, eggDay: game.eggDay, inv: game.inv, hasCan: game.hasCan, water: game.water, fond: game.fond, said: game.said, saidS: game.saidS, seasonShift: game.seasonShift, teaDay: game.teaDay, journal: game.journal, know: game.know, tasks: game.tasks, table: game.table, giftFor: game.giftFor, npcGiftDay: game.npcGiftDay, lastDay: game.lastDay, taskSeq: game.taskSeq, rel: game.rel, story: game.story, stories: game.stories, nextStory: game.nextStory, ground: game.ground, groundSeq: game.groundSeq, anaStates: game.anaStates, animals: Object.fromEntries(Object.entries(ANIM).map(([k, a]) => [k, { x: a.x, y: a.y, where: a.where, state: a.state, area: a.area, owner: a.owner }])), beds: BEDS.map(b => [b.stage, b.wet, b.grow]), cartas: game.cartas, mesa: game.mesa, heno: game.heno, lena: game.lena, huertito: game.huertito, canteros: BEDS.map(b => [b.stage, b.wet, b.dias || 0]), ...escenasEnCurso(), comida: game.comida, final: game.final, noche: game.noche, dayT, donde: dondeQuedo() })); } catch (e) {} }   // (the letters, and what the day's work left, too)
+function save(){ if (wiping) return; try { localStorage.setItem('avonlea', JSON.stringify({ wm: game.wm, lenguaje: lgGuardar(), libreta: game.libreta, eggDay: game.eggDay, inv: game.inv, hasCan: game.hasCan, water: game.water, fond: game.fond, said: game.said, saidS: game.saidS, seasonShift: game.seasonShift, teaDay: game.teaDay, journal: game.journal, know: game.know, tasks: game.tasks, table: game.table, giftFor: game.giftFor, npcGiftDay: game.npcGiftDay, lastDay: game.lastDay, taskSeq: game.taskSeq, rel: game.rel, story: game.story, stories: game.stories, nextStory: game.nextStory, ground: game.ground, groundSeq: game.groundSeq, anaStates: game.anaStates, animals: Object.fromEntries(Object.entries(ANIM).map(([k, a]) => [k, { x: a.x, y: a.y, where: a.where, state: a.state, area: a.area, owner: a.owner }])), beds: BEDS.map(b => [b.stage, b.wet, b.grow]), cartas: game.cartas, mesa: game.mesa, heno: game.heno, lena: game.lena, huertito: game.huertito, canteros: BEDS.map(b => [b.stage, b.wet, b.dias || 0]), ...escenasEnCurso(), comida: game.comida, final: game.final, noche: game.noche, dayT, donde: dondeQuedo() })); } catch (e) {} }   // (the letters, and what the day's work left, too)
 try { const s = JSON.parse(localStorage.getItem('avonlea') || 'null'); if (s) { if (s.wm) game.wm = s.wm; game.libreta = s.libreta || []; game.eggDay = s.eggDay; Object.assign(game.inv, s.inv); game.hasCan = s.hasCan; game.water = s.water; Object.assign(game.fond, s.fond); game.said = s.said || {}; game.saidS = s.saidS || {}; game.seasonShift = s.seasonShift || 0; game.teaDay = s.teaDay ?? -1; game.journal = s.journal || []; for (const k of ['know', 'giftFor', 'npcGiftDay']) game[k] = s[k] || {}; game.tasks = s.tasks || []; game.table = s.table || null; game.lastDay = s.lastDay ?? null; game.taskSeq = s.taskSeq || 0; game.rel = s.rel || null; game.story = s.story?.v === 2 ? s.story : null; if (game.story) game.story.gen = false; game.stories = s.stories || []; game.nextStory = s.nextStory || null; game.ground = s.ground || []; game.groundSeq = s.groundSeq || 0; game.anaStates = s.anaStates || {}; for (const [k, v] of Object.entries(s.animals || {})) if (ANIM[k]) Object.assign(ANIM[k], v); (s.beds || []).forEach((v, k) => { if (BEDS[k]) [BEDS[k].stage, BEDS[k].wet, BEDS[k].grow] = v; }); if (s.dayT) dayT = s.dayT; if (game.hasCan) ana.carry = 'can'; for (const k of ['cartas', 'mesa', 'heno', 'lena', 'huertito', 'canteros', 'escDone', 'dlgProg', 'comida', 'final', 'noche']) if (s[k]) game[k] = s[k]; } } catch (e) {}
 relInit();
 // where everyone was when the game was closed: Ana (the room or out of doors, the spot) and the people, to go on from there
@@ -15123,7 +14980,7 @@ function update(dt){
   if (game.scene === 'camino' && ana.onCart && (mx || my || (ana.goto && !ana.goto.wm))) roadGetOff();   // (moving her: she gets down from the buggy)
   if (ANA_AUTO) { if (mx || my) { freeStart(); const v = 520 / (cam.zoom || 1) / (viewZoom || 1); freeCam.x += mx * v * dt; freeCam.y += my * v * dt; } mx = my = 0; }   // (on her own: the keys move the view)
   if (game.talk?.deadline && TT > game.talk.deadline && !sayOpen) { game.talk.deadline = 0; autoChoose(); }
-  autoTick(); cartTick(dt); roadTick(dt); buggyTick(); roadTalkTick(dt); dlgTick(dt); talkTick(dt); cap1Tick(); momentsTick(); lugaresTick(dt); inicioTick(dt); lagrimas(); ropaTick(); folkTick(dt); faunaTick(dt); agentTick(dt); jugarTick(dt); correoTick(dt); sickTick(); apartarTick(); cuadernoTick(dt); habilidadesTick(dt); historiaTick(dt); nocheTick(dt); noticiasTick(dt); llegadasTick(dt); juntasTick(dt); agendaTick(); wmApproachTick(dt); calledTick(); convIrTick(); convEsperoTick(); chatTick(dt); wmFollowTick();
+  autoTick(); cartTick(dt); roadTick(dt); buggyTick(); roadTalkTick(dt); dlgTick(dt); talkTick(dt); lenguajeTick(); cap1Tick(); momentsTick(); lugaresTick(dt); inicioTick(dt); lagrimas(); ropaTick(); folkTick(dt); faunaTick(dt); agentTick(dt); jugarTick(dt); correoTick(dt); sickTick(); apartarTick(); cuadernoTick(dt); habilidadesTick(dt); historiaTick(dt); nocheTick(dt); noticiasTick(dt); llegadasTick(dt); juntasTick(dt); agendaTick(); wmApproachTick(dt); calledTick(); convIrTick(); convEsperoTick(); chatTick(dt); wmFollowTick();
   if (RELATO.on) relatoTick();   // (the account of what happens, once all have moved: 66-relato.js)
   ana.torn = !!game.anaStates.rasgado; ana.askew = !!game.anaStates.despeinada;
   ana.savoring = false;
@@ -20029,6 +19886,4987 @@ $('comin').addEventListener('keydown', e => { e.stopPropagation(); if (e.key ===
 $('ajcomex').addEventListener('click', () => { const d = opinionesExportar(); $('ajout').hidden = false; $('ajout').textContent = `Se descargó un archivo con ${d.comentarios.length} comentario(s) y la partida. Mándaselo a quien hace el juego.`; });
 $('ajcomborrar').addEventListener('click', () => { if (!opiniones().length || !confirm('¿Borrar todos los comentarios (también los que no exportaste)?')) return; opinionesGuardar([]); comBoton(); });
 comBoton();
+
+/* ---------- the language of the stories, in the game (docs/LENGUAJE.md): the stories that have moved to the language
+   run in its engine (tools/lenguaje/motor.js, with the data of docs/lenguaje/, built into src/datos/lenguaje.json by
+   tools/lenguaje/construir.js), and the game is its world: where everyone is (a place of the language, from where they
+   are in the game), who sees whom, and how what is said is said (a bubble, a card, the menu, the box to write a name).
+   For now: the Camino Blanco de las Delicias (historias/camino_blanco), what happens each time Ana goes through the
+   Avenue: on the road from Bright River (chapter II, with Matthew: the book's), or on the Avonlea map. Its scenes take
+   the place of those of the script that did it before (avenida, newbridge, silencio_*, nombra_avenida).
+   The engine's game is kept with the game's (save, «lenguaje»), and goes on where it was. ---------- */
+// El motor del lenguaje de las historias (docs/LENGUAJE.md §11): ejecuta los datos que arma tools/lenguaje/construir.js.
+// Es la lógica: el estado y los momentos, los encargos con sus pasos y su reparación (mantiene), las búsquedas, los
+// pedidos a Ana, las escenas y las voces. El mundo (dónde está cada uno, cuánto tarda, quién ve a quién) lo pone otro:
+// el juego, o el mundo simulado (tools/lenguaje/mundo_simulado.js, que dice su interfaz) para probar una historia sin
+// el juego, en la página trazas/lenguaje.html o en tools/lenguaje/probar.js.
+// Todo lo que el motor recuerda son datos: los verbos en curso no son código suspendido sino una pila de marcos (qué
+// verbo, en qué paso, qué intento), así que una partida se guarda (guardar) y se vuelve a cargar (Motor.cargar) en
+// cualquier momento, aun a mitad de un viaje.
+// Cada línea de una escena dura un minuto. Mientras una escena se dice, los encargos de quienes participan se
+// detienen, salvo que la escena vaya «en marcha» (las charlas de la calesa). El planificador de las búsquedas es de un
+// paso: entre los verbos de su «con» que logran el objetivo, el más barato; si falla, vuelve a planificar.
+(function (raiz) {
+  function Motor(D, escenario = {}, Mundo = null, guardado = null) {
+    Mundo = Mundo || (typeof module !== 'undefined' && module.exports ? require('./mundo_simulado.js').MundoSimulado : raiz.MundoSimulado);
+    let S = {}, registro = [], tareas = [], cola = [], porTras = [], escena = null, pregunta = null, fin = null, sigId = 1;
+    let t = (escenario.dia ?? 2) * 1440 - 1440 + (escenario.hora ?? 14) * 60;   // (minutos desde el comienzo del día 1)
+    let respuestas = escenario.respuestas ? [...escenario.respuestas] : null;
+    const auto = !!escenario.auto, opcionesGuion = escenario.opciones || {};
+
+    // ---------------------------------------------------------------- el estado
+    const k = c => c.join('.');
+    const dia = () => Math.floor(t / 1440) + 1, hora = () => (t % 1440) / 60;
+    function defecto(c){
+      if (c[0] === 'estado') return D.estados[c[1]]?.inicial;
+      if (c[0] === 'cualidad') return D.cualidades[c[2]]?.inicial ?? 0;
+      if (c[0] === 'mundo') return c[2] === 'en' ? 'nada' : c[2] === 'sigue' ? 'nadie' : c[2] === 'listo' ? 'no' : undefined;
+      if (c[0] === 'tiempo') return c[1] === 'hora' ? hora() : dia();
+      if (c[0] === 'intentos') return 0;
+      if (c[0] === 'encargo') return 'pendiente';
+      if (c[0] === 'historia') return 'no_empezada';
+    }
+    const get = c => (k(c) in S ? S[k(c)] : defecto(c));
+    const set = (c, v) => { S[k(c)] = v; };
+    // (los parámetros de una definición, y el elemento de un «por cada», por sus valores)
+    function sub(x, env){
+      if (Array.isArray(x)) return x.map(y => sub(y, env));
+      if (x && typeof x === 'object') {
+        if ('param' in x && Object.keys(x).length === 1) return env.params ? env.params[x.param] : x;
+        if (x.elemento === true && Object.keys(x).length === 1) return 'elemento' in env ? env.elemento : x;   // (solo en su «por cada»)
+        const o = {}; for (const [a, b] of Object.entries(x)) o[a] = sub(b, env); return o;
+      }
+      return x;
+    }
+    // (un valor: tal cual, o lo que hay en otro lugar del estado —{ref}, o un campo {camino}—)
+    function val(v){
+      if (v && typeof v === 'object' && !Array.isArray(v)) { if (v.ref) return get(v.ref); if (Array.isArray(v.camino) && !('c' in v) && !('e' in v)) return get(v.camino); }
+      return v;
+    }
+    const lugarDe = p => get(['mundo', p, 'lugar']);
+    function ordinal(camino, v){ const d = camino[0] === 'estado' && D.estados[camino[1]]; return d && d.orden ? d.orden.indexOf(v) : v; }
+    function cumple(c){
+      if (c === true || c == null) return true;
+      switch (c.c) {
+        case 'existe': { const v = get(c.camino); return c.ventana === 'hoy' ? v === dia() : v != null; }
+        case 'cmp': {
+          const a = get(c.camino), b = val(c.valor);
+          if (c.op === '=') return a === b; if (c.op === '!=') return a !== b;
+          const x = ordinal(c.camino, a), y = ordinal(c.camino, b); if (x < 0 || y < 0) return false;
+          return { '<': x < y, '<=': x <= y, '>': x > y, '>=': x >= y }[c.op];
+        }
+        case 'desde': { const d = get(c.camino); if (d == null) return false; const n = parseFloat(c.valor), u = c.valor.slice(-1), pas = u === 'd' ? dia() - d : (dia() - d) * 24;
+          return { '<': pas < n, '<=': pas <= n, '>': pas > n, '>=': pas >= n, '=': pas === n }[c.op]; }
+        case 'y': return c.de.every(cumple);
+        case 'o': return c.de.some(cumple);
+        case 'no': return !cumple(c.de);
+        case 'f': return mundo.funciones[c.f](...c.args.map(val));
+      }
+      throw new Error('condición desconocida: ' + JSON.stringify(c));
+    }
+    function aplicar(e){
+      if (e.verbo) return instantaneo(e);
+      if (e.e === 'deja') set(e.camino, e.valor === undefined ? dia() : val(e.valor));
+      else if (e.e === 'olvida') delete S[k(e.camino)];
+      else if (e.e === 'suma') { const d = D.cualidades[e.camino[2]], r = d ? d.rango : [-1e9, 1e9]; set(e.camino, Math.max(r[0], Math.min(r[1], get(e.camino) + e.n))); nota(`${nombre(e.camino[1])}: ${e.camino[2]}${e.camino[3] ? ' hacia ' + nombre(e.camino[3]) : ''} ${e.n > 0 ? '+' : ''}${e.n} → ${get(e.camino)}`); }
+      else if (e.e === 'log') nota('📔 ' + e.texto);
+      else if (e.e === 'marca') nota('📖 ' + e.id, 'momento');
+      if (e.e === 'log' || e.e === 'marca') mundo.efecto?.(e);   // (el juego también lo anota)
+    }
+
+    // ---------------------------------------------------------------- el mundo
+    const nombre = x => D.personas[x] || D.lugares[x]?.nombre || D.medios[x]?.nombre || x;
+    // (lo que el mundo le dice al motor: alguien —o algo, un medio— llegó a un lugar, o pasó por él. Cada persona que
+    // pasa por un lugar es un momento: «ana pasa camino_blanco»)
+    function llega(q, a){
+      if (lugarDe(q) === a) return;
+      set(['mundo', q, 'lugar'], a);
+      if (D.personas[q]) cola.push({ tipo: 'pasa', quien: q, lugar: a });
+    }
+    const mundo = Mundo({ D, get, set, llega, ahora: () => t });
+
+    // ---------------------------------------------------------------- los momentos, el registro y las voces
+    const nota = (txt, tipo = 'nota') => registro.push({ tipo, t: txt, hora: reloj() });
+    const reloj = () => { const m = Math.round(t % 1440); return `día ${dia()}, ${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`; };
+    const unir = (a, b) => (a && b ? a + '.' + b : a || b);
+    function emitir(inst, momento){
+      for (const { inst: A, rel } of [...inst.anc, { inst, rel: '' }]) cola.push({ tipo: 'verbo', quien: A.quien, verbo: A.verbo, paso: rel, momento });
+      if (inst.encargo) { cola.push({ tipo: 'encargo', historia: inst.encargo.historia, etiqueta: inst.encargo.etiqueta, paso: inst.ruta, momento });
+        if (!inst.ruta && momento !== 'empieza' && momento !== 'sigue') set(['encargo', inst.encargo.historia, inst.encargo.etiqueta], momento);
+        if (!inst.ruta) nota(`◆ ${inst.encargo.etiqueta}: ${momento}`, 'momento'); else if (momento !== 'fallido') nota(`· ${inst.encargo.etiqueta}.${inst.ruta} ${momento}`, 'momento'); }
+      if (momento === 'cumplido') for (const { inst: A, rel } of inst.anc) if (rel) decir(A.ll, rel);
+    }
+    function patron(p, x){
+      if (p && p.comodin) return 0;
+      if (p && typeof p === 'object' && p.verbo) { if (!x || x.verbo !== p.verbo) return -1; let n = 1; for (let i = 0; i < p.args.length; i++) { const r = patron(p.args[i], x.args[i]); if (r < 0) return -1; n += r; } return n; }
+      return p === val(x) ? 1 : -1;
+    }
+    // (la voz de un verbo o un acto: la línea más específica que se cumpla; las de una historia en curso, primero)
+    function decir(ll, paso = ''){
+      let mejor = null, top = -1;
+      for (const v of D.voces) {
+        if ((v.paso || '') !== paso || (v.de !== 'comun' && get(['historia', v.de]) !== 'en_curso')) continue;
+        const p = patron(v.llamada, ll); if (p < 0) continue;
+        for (const l of v.lineas) if (cumple(l.si)) { const s = p * 10 + (v.de !== 'comun' ? 100 : 0) + (l.si !== true ? 1 : 0); if (s > top) { top = s; mejor = l; } }
+      }
+      if (mejor) registro.push({ tipo: 'linea', q: ll.args[0], t: mejor.t, hora: reloj() });
+    }
+    const texto = (s, ll) => s.replace(/\{(\w+)\}/g, (_, n) => nombre(val(ll.args[D.verbos[ll.verbo].params.indexOf(n)])));
+
+    // ---------------------------------------------------------------- los verbos: una pila de marcos
+    // Una tarea (un encargo, o lo que hace la jugadora) es una pila de marcos: el verbo de abajo, y encima el paso que
+    // está haciendo, y encima el paso de ese paso. Cada marco es datos: su llamada y en qué va (fase, paso, intento).
+    // correr(T) avanza la tarea hasta que tenga que esperar, y devuelve qué espera: {min} —un rato—, {hasta} —que se
+    // cumpla algo—, {pregunta} —la respuesta de Ana—, {accion} —que el mundo termine algo—; o {fin}, con lo que valió.
+    // Un marco devuelve {vale} (terminó), {espera}, o nada (empujó un marco, o cambió de fase: se sigue).
+    const def = ll => { const d = D.verbos[ll.verbo]; if (!d) throw new Error('verbo desconocido: ' + ll.verbo); return sub(d, { params: ll.args }); };
+    const marco = (ll, ctx) => ({ k: 'verbo', ll, ctx, fase: 0 });
+    const hijo = (padre, label) => ({ padre, label, encargo: padre.encargo, ruta: unir(padre.ruta, label) });
+    const aMin = d => { const n = parseFloat(d), u = d.slice(-1); return u === 's' ? n / 60 : u === 'm' ? n : u === 'h' ? n * 60 : n * 1440; };
+    const yaEs = e => e.e === 'deja' && e.valor !== undefined && get(e.camino) === val(e.valor);
+    function correr(T){
+      revisarMantiene(T);
+      let ret;
+      for (;;) {
+        const F = T.pila[T.pila.length - 1];
+        if (!F) return { fin: ret };
+        if (F.acc && F.acc.parada) { F.acc.parada = false; mundo.seguir(F.acc); }
+        const r = MARCOS[F.k](F, T, ret); ret = undefined;
+        if (!r) continue;
+        if (r.espera) return r.espera;
+        T.pila.pop(); ret = r.vale;
+      }
+    }
+    const MARCOS = {
+      // (todo verbo: sus momentos —empieza, cumplido o fallido— y, entre ellos, lo que hace según su tipo)
+      verbo(F, T, ret){
+        if (F.fase === 0) {
+          const ll = F.ll, c = F.ctx;
+          F.inst = { verbo: ll.verbo, ll, quien: ll.args[0], encargo: c.encargo, ruta: c.ruta || '',
+            anc: c.padre ? [...c.padre.anc.map(x => ({ inst: x.inst, rel: unir(x.rel, c.label) })), { inst: c.padre, rel: c.label }] : [] };
+          emitir(F.inst, 'empieza'); F.fase = 1;
+          return { espera: { min: 0 } };   // (cada momento se atiende cuando ocurre: sus escenas van antes de seguir)
+        }
+        if (F.fase === 1) { F.fase = 2; T.pila.push({ k: def(F.ll).tipo, ll: F.ll, inst: F.inst, fase: 0 }); return; }
+        if (F.fase === 2) { F.ok = ret; emitir(F.inst, ret ? 'cumplido' : 'fallido'); F.fase = 3; return { espera: { min: 0 } }; }
+        return { vale: F.ok };
+      },
+      // (lo hace el mundo, con lo que dura; al terminar, deja lo que deja)
+      primitivo(F, T){
+        const ll = F.ll, d = def(ll);
+        if (F.fase === 0) {
+          if (ll.verbo === 'esperar') { F.fase = 2; return cumple(d.pide) ? undefined : { espera: { hasta: d.pide } }; }
+          if (d.deja && d.deja.length && d.deja.every(yaEs)) return { vale: true };   // (lo que deja ya es cierto: se salta)
+          if (d.pide && !cumple(d.pide)) { nota(`✘ ${ll.verbo}: no se puede (${nombre(ll.args[0])})`); return { vale: false }; }
+          decir(ll);
+          F.fase = 3;
+          if (d.dura) { F.acc = { quien: ll.args[0], verbo: ll.verbo, args: ll.args, dura: aMin(d.dura), ya: !!T.ya }; mundo.empezar(F.acc); F.fase = 1; }
+          return;
+        }
+        if (F.fase === 1) { if (!mundo.listo(F.acc)) return { espera: { accion: F.acc } }; mundo.terminar?.(F.acc); F.fase = 3; return; }
+        if (F.fase === 2) return { vale: true };
+        for (const e of d.deja || []) aplicar(e);
+        return { vale: true };
+      },
+      // (ir hasta un lugar: el mundo busca el camino, y avisa al llegar)
+      mapa(F, T){
+        const ll = F.ll;
+        if (F.fase === 0) {
+          if (ll.verbo === 'correr_a') set(['mundo', ll.args[0], 'en'], 'nada');
+          decir(ll);
+          F.acc = { quien: ll.args[0], verbo: ll.verbo, a: val(ll.args[1]), mapa: true, ya: !!T.ya }; mundo.empezar(F.acc); F.fase = 1;
+        }
+        if (!mundo.listo(F.acc)) return { espera: { accion: F.acc } };
+        mundo.terminar?.(F.acc); return { vale: true };
+      },
+      // (una secuencia fija de pasos, o un «por cada»; lo que mantiene lo revisa revisarMantiene)
+      receta(F, T, ret){
+        const d = def(F.ll);
+        if (F.fase === 0) {
+          if (d.pide && !cumple(d.pide)) return { vale: false };
+          if (d.pasos.por_cada) { const tr = d.pasos.por_cada; F.lista = mundo.tramo(tr.por, val(tr.desde), tr.hasta); }
+          F.i = 0; F.j = 0; F.fase = 1;
+        }
+        if (F.fallo) return { vale: false };   // (no pudo reparar lo que se rompió)
+        if (F.fase === 2) { if (!ret) return { vale: false }; F.j++; F.fase = 1; }
+        if (F.lista) {
+          if (F.j >= F.lista.length) return { vale: true };
+          const x = F.lista[F.j]; F.fase = 2; T.pila.push(marco(sub(d.pasos.hace, { elemento: x }), hijo(F.inst, x))); return;
+        }
+        const ks = Object.keys(d.pasos);
+        for (;;) {
+          if (F.i >= ks.length) return { vale: !d.cumplido || cumple(d.cumplido) };
+          const p = d.pasos[ks[F.i]], lista = Array.isArray(p) ? p : [p];
+          if (F.j < lista.length) { F.fase = 2; T.pila.push(marco(lista[F.j], hijo(F.inst, ks[F.i]))); return; }
+          F.i++; F.j = 0;
+        }
+      },
+      // (rehacer los pasos de una receta desde el que consigue lo que se rompió; después, se sigue donde iba)
+      reparar(F, T, ret){
+        const R = T.pila[F.abajo], d = def(R.ll), ks = Object.keys(d.pasos), iD = ks.indexOf(d.mantiene.desde);
+        if (F.fase === 1) {
+          if (!ret) {   // (no pudo: la receta falla, y lo que estaba haciendo queda atrás)
+            for (const G of T.pila.slice(F.abajo + 1)) if (G.acc && mundo.cancelar) mundo.cancelar(G.acc);
+            T.pila.length = F.abajo + 1; R.fallo = true; R.reparando = false; return;
+          }
+          F.m++; F.fase = 0;
+        }
+        for (;;) {
+          if (F.j > iD) { emitir(R.inst, 'sigue'); R.reparando = false; return { vale: true }; }
+          const p = d.pasos[ks[F.j]], lista = Array.isArray(p) ? p : [p];
+          if (F.m < lista.length) break;
+          F.j++; F.m = 0;
+        }
+        const p = d.pasos[ks[F.j]];
+        F.fase = 1; T.pila.push(marco((Array.isArray(p) ? p : [p])[F.m], hijo(R.inst, ks[F.j])));
+      },
+      // (una búsqueda: si ya se cumple, listo; si no, el plan más barato entre los verbos de «con»; si falla —Ana no
+      // quiso—, otro intento: con «intentos» más alto, el plan cambia —ordenar, ir a buscarla—)
+      busca(F, T, ret){
+        const d = def(F.ll), quien = F.ll.args[0], otro = F.ll.args[1];
+        if (F.fase === 0) { F.n = 0; F.fallas = {}; F.fase = 1; }
+        else if (F.fase === 2) { if (!ret) F.fallas[F.plan] = (F.fallas[F.plan] || 0) + 1; F.n++; F.fase = 1; }   // (lo que ya falló cuesta más)
+        if (F.n >= d.intentos) return { vale: cumple(d.objetivo) };
+        if (cumple(d.objetivo)) return { vale: true };
+        set(['intentos'], F.n);
+        const plan = planificar(quien, otro, d.objetivo, d.con, F.fallas);
+        if (!plan) { nota(`✘ ${nombre(quien)} no encuentra cómo`); F.n++; return { espera: { min: 1 } }; }
+        nota(`🧭 ${nombre(quien)} (intento ${F.n + 1}): ${describir(plan)}`, 'momento');
+        F.plan = plan.verbo; F.fase = 2; T.pila.push(marco(plan, hijo(F.inst, plan.verbo)));
+      },
+      // (decir algo; si es un pedido, el otro decide: si es Ana, la jugadora)
+      acto(F, T, ret){
+        const ll = F.ll, d = def(ll);
+        if (F.fase === 0) {
+          if (d.pide && !cumple(d.pide)) return { vale: false };
+          decir(ll);
+          for (const e of d.deja || []) aplicar(e);
+          if (!d.pedido) return { vale: true };
+          const v = d.pedido.hace; F.fase = 1;
+          if (d.pedido.a === 'ana') return { espera: { pregunta: { de: ll.args[0], acto: ll.verbo, hace: v, si: texto(D.verbos[v.verbo].opcion, v), no: D.opcion_no } } };
+          T.valor = true; return;
+        }
+        if (F.fase === 1) {
+          const a = d.pedido.a, acepta = !!T.valor; T.valor = undefined;
+          cola.push({ tipo: 'responde', quien: a, r: acepta ? 'acepta' : 'rechaza', acto: ll.verbo, hace: d.pedido.hace.verbo });
+          nota(`${nombre(a)} ${acepta ? 'acepta' : 'rechaza'} (${ll.verbo})`, 'momento');
+          if (!acepta) { F.fase = 2; return { espera: { min: 1 } }; }   // (un respiro: lo que pasa cuando Ana dice que no)
+          F.fase = 3; T.pila.push(marco(d.pedido.hace, hijo(F.inst, 'hace'))); return;
+        }
+        return { vale: F.fase === 2 ? false : ret };
+      },
+    };
+    // (lo que mantiene una receta: si se rompió mientras hace uno de sus pasos —entre «desde» y «hasta»—, lo que estaba
+    // haciendo se detiene, y encima va la reparación. Se mira cada vez que la tarea despierta, de afuera hacia adentro)
+    function revisarMantiene(T){
+      for (let n = 0; n < T.pila.length; n++) {
+        const F = T.pila[n]; if (F.k !== 'receta' || F.fase !== 2 || F.reparando || F.lista) continue;
+        const d = def(F.ll), m = d.mantiene; if (!m) continue;
+        const ks = Object.keys(d.pasos), iD = ks.indexOf(m.desde), iH = m.hasta ? ks.indexOf(m.hasta) : ks.length - 1;
+        if (F.i <= iD || F.i > iH || cumple(m.si)) continue;
+        nota(`↺ ${F.ll.verbo}: se rompió lo que mantenía; vuelve a «${m.si_se_rompe}»`, 'momento');
+        for (const G of T.pila.slice(n + 1)) if (G.acc && !G.acc.parada) { mundo.parar(G.acc); G.acc.parada = true; }
+        F.reparando = true; T.pila.push({ k: 'reparar', abajo: n, j: ks.indexOf(m.si_se_rompe), m: 0, fase: 0 });
+        return;
+      }
+    }
+    // (lo que hace el otro para que se cumpla el objetivo: el verbo cuyo efecto lo deja así —subir: en la calesa; ir_a: en un lugar—)
+    function logran(otro, obj){
+      if (obj.c !== 'cmp' || obj.op !== '=' || obj.camino[0] !== 'mundo' || obj.camino[1] !== otro) return [];
+      const b = val(obj.valor), out = [];
+      if (obj.camino[2] === 'lugar') for (const [n, v] of Object.entries(D.verbos)) if (v.tipo === 'mapa' && v.opcion) out.push({ verbo: n, args: [otro, b] });
+      for (const [n, v] of Object.entries(D.verbos)) if (v.tipo === 'primitivo' && v.opcion) for (const e of v.deja || [])
+        if (e.camino[0] === 'mundo' && e.camino[1]?.param === 0 && e.camino[2] === obj.camino[2] && e.valor?.param != null) { const a = [otro]; a[e.valor.param] = b; out.push({ verbo: n, args: a }); }
+      return out;
+    }
+    function planificar(quien, otro, obj, con, fallas = {}){
+      const cand = [];
+      for (const n of con) {
+        const d0 = D.verbos[n];
+        if (d0.tipo === 'acto' && d0.pedido) for (const v of logran(otro, obj)) {   // (pedirle al otro lo que lo deja así)
+          const ll = { verbo: n, args: [quien, otro, v] }, d = sub(d0, { params: ll.args });
+          if (cumple(d.pide)) cand.push({ ll, costo: d.cuesta ?? 1 });
+        }
+        // (una receta de quien, el otro y un destino —ir a buscarla, traerla—: para que el otro quede en un lugar)
+        if (d0.tipo === 'receta' && d0.params.length === 3 && obj.camino?.[2] === 'lugar' && obj.camino[1] === otro)
+          cand.push({ ll: { verbo: n, args: [quien, otro, val(obj.valor)] }, costo: (d0.cuesta ?? 3) + mundo.minutos(lugarDe(quien), lugarDe(otro)) / 3 });
+      }
+      for (const c of cand) c.costo += 5 * (fallas[c.ll.verbo] || 0);
+      cand.sort((a, b) => a.costo - b.costo);
+      return cand[0]?.ll;
+    }
+    const describir = ll => D.verbos[ll.verbo].tipo === 'receta' ? `${ll.verbo.replace(/_/g, ' ')} a ${nombre(ll.args[1])} (hasta ${nombre(ll.args[2])})`
+      : `${ll.verbo} a ${nombre(ll.args[1])}: «${texto(D.verbos[ll.args[2].verbo].opcion, ll.args[2])}»`;
+    // (un verbo dicho en una escena —<<correr_a('ana', 'orilla')>>—: se hace en el acto, sin tiempo)
+    function instantaneo(ll){
+      const T = { id: 0, pila: [marco(ll, {})], ya: true };
+      for (let n = 0; n < 1000; n++) { const w = correr(T); if ('fin' in w) return; if (w.pregunta) T.valor = true; }
+      throw new Error('un verbo instantáneo que no termina: ' + ll.verbo);
+    }
+
+    // ---------------------------------------------------------------- las historias, los encargos y las escenas
+    function nuevaTarea(ll, extra){ tareas.push({ id: sigId++, pila: [marco(ll, extra.encargo ? { encargo: extra.encargo, ruta: '' } : {})], despierta: t, quien: ll.args[0], ...extra }); }
+    function empezarEncargo(h, etiqueta){
+      const e = D.historias[h].encargo[etiqueta];
+      set(['encargo', h, etiqueta], 'en_curso');
+      nuevaTarea(e.hace, { encargo: { historia: h, etiqueta }, h, etiqueta, quien: e.quien });
+    }
+    function revisarHistorias(){
+      for (const [h, H] of Object.entries(D.historias)) {
+        if (escenario.historias && !escenario.historias.includes(h)) continue;   // (solo las que corren aquí: en el juego, las que ya pasaron al lenguaje)
+        const est = get(['historia', h]);
+        if (est === 'no_empezada' && cumple(H.empieza)) {
+          set(['historia', h], 'en_curso'); nota(`▶ empieza la historia «${H.titulo}»`, 'titulo'); cola.push({ tipo: 'historia', historia: h, momento: 'empieza' });
+          for (const [et, e] of Object.entries(H.encargo)) if (!e.tras || !e.tras.length) empezarEncargo(h, et); else porTras.push({ h, et });
+        } else if (est === 'en_curso' && !escena) {
+          const termina = H.termina != null && cumple(H.termina), falla = H.falla && cumple(H.falla);   // (sin «termina»: de fondo, no termina)
+          if (termina || falla) {
+            set(['historia', h], termina ? 'terminada' : 'fallida');
+            if (termina) for (const e of H.deja || []) aplicar(e);
+            for (const T of tareas) if (T.h === h) T.fin = true;
+            nota(termina ? `■ termina la historia: ${(H.deja || []).map(e => e.camino.slice(-1)[0] + (e.valor !== undefined ? ' = ' + e.valor : '')).join(', ')}${H.punto ? ` (punto: ${H.punto})` : ''}` : '✘ la historia se pierde', 'titulo');
+            fin = termina ? 'terminada' : 'fallida';
+          }
+        }
+      }
+    }
+    function coincide(a, mo){
+      if (a.tras) return mo.tipo === 'tras' && mo.escena === a.tras.escena;
+      if (a.pasa) return mo.tipo === 'pasa' && mo.quien === a.quien && mo.lugar === a.pasa;
+      if (a.responde) return mo.tipo === 'responde' && mo.quien === a.quien && mo.r === a.responde && mo.acto === a.acto && (!a.hace || mo.hace === a.hace);
+      if (a.encargo) return mo.tipo === 'encargo' && mo.historia === a.encargo.estado.camino[1] && mo.etiqueta === a.encargo.etiqueta && mo.paso === a.paso && mo.momento === a.momento;
+      if (a.verbo) return mo.tipo === 'verbo' && mo.quien === a.quien && mo.verbo === a.verbo && mo.paso === a.paso && mo.momento === a.momento;
+      return false;
+    }
+    const cuenta = c => (!c || c === true ? 0 : c.c === 'y' || c.c === 'o' ? c.de.reduce((n, x) => n + cuenta(x), 0) : 1);
+    // (de los momentos que pasaron, la escena que va: la primera del «orden» de su historia; si no, la más específica.
+    // Mientras se dice una escena, los momentos esperan a que termine; solo una que «interrumpe» la corta: entonces se
+    // miran solo esas, y los demás momentos siguen esperando)
+    function elegirEscena(interrumpe = false){
+      const momentos = interrumpe ? cola : cola.splice(0); let mejor = null, top = -Infinity, suyo = null;
+      for (const mo of momentos) {
+        if (!interrumpe && mo.tipo === 'tras') for (const p of porTras.filter(x => D.historias[x.h].encargo[x.et].tras.some(s => s.escena === mo.escena))) { porTras.splice(porTras.indexOf(p), 1); empezarEncargo(p.h, p.et); }
+        for (const e of Object.values(D.escenas)) {
+          if (interrumpe && !e.interrumpe) continue;
+          const [h, id] = e.escena.split('.'), r = e.repetir || 'una_vez', dicha = get([h, 'dichas', id]);
+          if (get(['historia', h]) !== 'en_curso' || (r === 'una_vez' && dicha != null) || (r === 'dia' && dicha === dia())) continue;
+          if (!e.se_activa.some(a => coincide(a.activa, mo)) || !cumple(e.si)) continue;
+          const o = D.historias[h].orden.findIndex(x => (Array.isArray(x) ? x : [x]).some(y => y.escena === e.escena));
+          const s = (o >= 0 ? 1000 - o : 0) + cuenta(e.si);
+          if (s > top) { top = s; mejor = e; suyo = mo; }
+        }
+      }
+      if (!mejor) return false;
+      if (interrumpe) cola.splice(cola.indexOf(suyo), 1);
+      // (si corta otra escena, esa no sigue: queda dicha, a medias, y no hay «tras» de ella. Una que interrumpe corta
+      // también una conversación del mundo —en el juego, una charla del guion de siempre—)
+      if (escena) { const id = escena.id; cortar(); set(['escena', 'interrumpio'], id); }
+      else if (mejor.interrumpe && mundo.cortar?.()) { nota('✂ se corta una conversación', 'momento'); set(['escena', 'interrumpio'], 'mundo'); }
+      else delete S['escena.interrumpio'];
+      const [h, id] = mejor.escena.split('.'); set([h, 'dichas', id], dia());
+      nota(`🎬 ${id}: ${mejor.resumen}`, 'escena');
+      escena = { id: mejor.escena, pila: [[...mejor.cuerpo]], acc: null, en_marcha: !!mejor.en_marcha, participan: [...mejor.hablan], ops: null };
+      mundo.escena?.('empieza', escena.id);
+      return true;
+    }
+    // el guion de la escena en curso: lo que sigue hasta una elección de la jugadora, o hasta que la próxima línea tenga
+    // que esperar su minuto (o el final)
+    // (cada línea, cada silencio, lo dice el mundo: en el juego, una burbuja o una tarjeta; la escena sigue cuando termina)
+    function seguirEscena(){
+      while (escena && (!escena.acc || mundo.listo(escena.acc))) {
+        if (escena.acc) {
+          const a = escena.acc; escena.acc = null; mundo.terminar?.(a);
+          if (a.nombrar) { set(['nombres', a.nombrar], a.nombre); nota(`✎ Ana le pone nombre: ${a.nombre}`, 'momento'); }
+          continue;
+        }
+        const pila = escena.pila, top = pila[pila.length - 1];
+        if (!top) { terminarEscena(); return; }
+        if (!top.length) { pila.pop(); continue; }
+        const it = top[0];
+        if (it.op !== undefined) {   // (una elección: las opciones seguidas, juntas)
+          const ops = []; while (top.length && top[0].op !== undefined) ops.push(top.shift());
+          escena.ops = ops;
+          if (auto || opcionesGuion[escena.id] != null) { const i = opcionesGuion[escena.id] ?? Math.max(0, ops.findIndex(o => o.propia)); elegir(i); continue; }
+          return;
+        }
+        top.shift();
+        const hace = acc => { escena.acc = acc; mundo.empezar(acc); };
+        if (it.q) { registro.push({ tipo: 'linea', q: it.q, t: it.t, piensa: !!it.piensa, hora: reloj() }); hace({ decir: { q: it.q, t: it.t, piensa: !!it.piensa } }); if (it.acto) { const d = def(it.acto); for (const e of d.deja || []) aplicar(e); } }
+        else if (it.hace && it.hace.e === 'silencio') { registro.push({ tipo: 'silencio', t: it.hace.dura, hora: reloj() }); hace({ silencio: true, dura: aMin(it.hace.dura) }); }
+        else if (it.hace && it.hace.e === 'nombrar') hace({ nombrar: it.hace.cosa, pedir: !!it.hace.pedir });
+        else if (it.hace) aplicar(it.hace);
+        else if (it.si) pila.push([...(cumple(it.si) ? it.cuerpo : it.sino)]);
+      }
+    }
+    function elegir(i){
+      const op = escena.ops[i]; escena.ops = null;
+      registro.push({ tipo: 'eleccion', t: op.op, hora: reloj() });
+      escena.pila.push([...op.cuerpo]);
+    }
+    function terminarEscena(){
+      const id = escena.id; escena = null; delete S['escena.interrumpio'];
+      mundo.escena?.('termina', id);
+      cola.push({ tipo: 'tras', escena: id });
+    }
+    // (cortarla: no sigue, ni hay «tras» de ella; la corta otra escena, o el mundo —en el juego, una escena suya—)
+    function cortar(){
+      const id = escena.id; nota(`✂ se corta ${id.split('.')[1]}`, 'momento');
+      if (escena.acc) mundo.cancelar?.(escena.acc);
+      escena = null; delete S['escena.interrumpio']; mundo.escena?.('corta', id);
+    }
+
+    // ---------------------------------------------------------------- el paso del tiempo
+    function responderAuto(q){
+      if (respuestas && respuestas.length) return respuestas.shift();
+      const r = D.ana_sola[q.acto]; return r === true || (r != null && cumple(sub(r, { params: [q.de] })));
+    }
+    const enPregunta = () => tareas.find(T => T.id === pregunta);
+    // avanza hasta que haya algo que mostrar o decidir (una escena, una pregunta) o hasta el final; devuelve el estado.
+    // (escenario.paso: para probar que se puede guardar en cualquier momento, se detiene cada tantas vueltas —pausa—)
+    // (tope: en el juego, la hora del juego; el motor no se adelanta a ella)
+    let tope = null;
+    function avanzar(limite = escenario.paso || 5000){
+      // (los encargos de quienes están en una escena que no va en marcha, esperan a que termine)
+      const detenida = T => escena && !escena.en_marcha && escena.participan.includes(T.quien);
+      for (let vuelta = 0; vuelta < limite; vuelta++) {
+        if (pregunta) return estadoUI();
+        if (escena) { seguirEscena(); if (escena && escena.ops) return estadoUI(); }
+        if (escena && cola.length && elegirEscena(true)) continue;   // (una que interrumpe: no espera)
+        revisarHistorias();
+        if (fin) return estadoUI();
+        if (!escena && cola.length && elegirEscena()) continue;
+        const lista = tareas.filter(T => !T.fin && !T.pregunta && !detenida(T) && ((T.accion && mundo.listo(T.accion)) || (T.hasta ? cumple(T.hasta) : T.despierta <= t)));
+        if (lista.length) {
+          const T = lista[0]; T.hasta = null; T.accion = null;
+          const w = correr(T);
+          if ('fin' in w) { T.fin = true; if (T.etiqueta) set(['encargo', T.h, T.etiqueta], w.fin ? 'cumplido' : 'fallido'); continue; }
+          if (w.min != null) T.despierta = t + w.min;
+          else if (w.accion) { T.accion = w.accion; T.despierta = mundo.cuando(w.accion); }
+          else if (w.hasta) T.hasta = w.hasta;
+          else if (w.pregunta) {
+            if (auto || (respuestas && respuestas.length)) { T.valor = responderAuto(w.pregunta); T.despierta = t; }
+            else { T.pregunta = w.pregunta; pregunta = T.id; }
+          }
+          continue;
+        }
+        const prox = tareas.filter(T => !T.fin && !T.pregunta && !T.hasta && !detenida(T)).map(T => T.despierta);
+        if (escena && escena.acc) prox.push(mundo.cuando(escena.acc));
+        const prox1 = prox.length ? Math.min(...prox) : Infinity;
+        if (tope != null && prox1 > tope) { t = Math.max(t, tope); return estadoUI(); }   // (lo que sigue es más tarde que la hora del juego)
+        if (!prox.length) return estadoUI();   // (nada más que hacer: esperan algo que no va a pasar solo)
+        t = Math.max(t, prox1);
+      }
+      if (escenario.paso) return { ...estadoUI(), pausa: true };
+      throw new Error('el motor no avanza (¿un ciclo?)');
+    }
+    function estadoUI(){
+      const P = enPregunta();
+      return { escena: escena && { id: escena.id, resumen: D.escenas[escena.id].resumen, ops: escena.ops?.map(o => o.op) },
+        pregunta: P && { de: nombre(P.pregunta.de), si: P.pregunta.si, no: P.pregunta.no }, fin, reloj: reloj() };
+    }
+
+    // ---------------------------------------------------------------- el comienzo: un escenario, o una partida guardada
+    // (lo que trae el mundo —el simulado: el día de White Sands—, y encima lo del escenario: lugares y estado; null borra)
+    if (guardado) ({ S, registro, tareas, cola, porTras, escena, pregunta, fin, sigId, t, respuestas } = guardado);
+    else {
+      const ini = Mundo.inicio || {};
+      for (const [x, l] of Object.entries({ ...(ini.lugares || {}), ...(escenario.lugares || {}) })) set(['mundo', x, 'lugar'], l);
+      for (const [c, v] of Object.entries({ ...(ini.estado || {}), ...(escenario.estado || {}) })) if (v === null) delete S[c]; else set(c.split('.'), v);
+    }
+
+    return {
+      avanzar,
+      responder(si){ const T = enPregunta(), q = T.pregunta; pregunta = null; T.pregunta = null; T.valor = si; T.despierta = t; registro.push({ tipo: 'eleccion', t: si ? q.si : q.no, hora: reloj() }); return avanzar(); },
+      elegir(i){ elegir(i); return avanzar(); },
+      // Ana decide sola lo que hay que decidir ahora (lo que le piden, según comun/ana.ts; en una escena, lo suyo: #propia)
+      decideSola(){
+        if (pregunta) return this.responder(responderAuto(enPregunta().pregunta));
+        if (escena && escena.ops) { elegir(Math.max(0, escena.ops.findIndex(o => o.propia))); return avanzar(); }
+        return avanzar();
+      },
+      // lo que la jugadora hace por su cuenta (cuando no hay escena ni pregunta)
+      irA(l){ nota(`(la jugadora: Ana va hasta ${nombre(l)})`); nuevaTarea({ verbo: 'ir_a', args: ['ana', l] }, {}); return avanzar(); },
+      bajarse(){ nota('(la jugadora: Ana se baja de la calesa)'); instantaneo({ verbo: 'bajar', args: ['ana'] }); return avanzar(); },
+      esperar(m){ t += m; return avanzar(); },
+      // en el juego: lo que toca hasta la hora del juego (en minutos desde el comienzo del día 1), y no más
+      alTiempo(m){ if (tope == null) t = m; tope = m; return avanzar(); },   // (la primera vez, la hora es la del juego)
+      // en el juego: el mundo cortó la escena en curso (una escena suya, más importante)
+      cortarEscena(){ if (escena) cortar(); return avanzar(); },
+      estado: () => estadoUI(),
+      // el mundo avisa: alguien llegó a un lugar, o pasó por él (en el juego, cada vez que cambia el lugar de alguien);
+      // con «ya_estaba», sin momento: es dónde estaba al empezar, no que haya llegado
+      llega(q, a, ya_estaba){ if (ya_estaba) set(['mundo', q, 'lugar'], a); else llega(q, a); },
+      // la partida entera, como datos (JSON): se vuelve a cargar con Motor.cargar
+      guardar: () => JSON.stringify({ v: 1, escenario, S, registro, tareas, cola, porTras, escena, pregunta, fin, sigId, t, respuestas }),
+      registro, get, nombre, lugares: () => Object.keys(D.lugares),
+      encargos: () => Object.entries(D.historias).flatMap(([h, H]) => Object.keys(H.encargo).map(et => ({ historia: h, etiqueta: et, estado: get(['encargo', h, et]) }))),
+      resumen: () => ({ reloj: reloj(), estado: get(['estado', 'ana_en_tv']), paciencia: get(['cualidad', 'marilla', 'paciencia', 'ana']),
+        afecto: get(['cualidad', 'marilla', 'afecto', 'ana']), lugares: Object.fromEntries([...Object.keys(D.personas), ...Object.keys(D.medios)].map(p => [p, get(['mundo', p, 'lugar'])])),
+        en: Object.fromEntries(Object.keys(D.personas).map(p => [p, get(['mundo', p, 'en'])]).filter(([, v]) => v !== 'nada')),
+        hechos: Object.entries(S).filter(([c]) => /\.(hechos|dichas)\./.test(c)).map(([c]) => c) }),
+    };
+  }
+  // una partida guardada (lo que devolvió guardar()), con los mismos datos y el mismo mundo
+  Motor.cargar = (D, json, Mundo = null) => { const g = JSON.parse(json); return Motor(D, g.escenario, Mundo, g); };
+  if (typeof module !== 'undefined' && module.exports) module.exports = { Motor };
+  else raiz.Motor = Motor;
+})(this);
+
+const LENGUAJE = {
+ "personas": {
+  "ana": "Ana",
+  "marilla": "Marilla",
+  "matthew": "Matthew",
+  "spencer": "la Sra. Spencer",
+  "blewett": "la Sra. Peter Blewett",
+  "srapye": "la Sra. Pye"
+ },
+ "lugares": {
+  "tejas_verdes": {
+   "nombre": "Tejas Verdes"
+  },
+  "cocina": {
+   "nombre": "la cocina de Tejas Verdes",
+   "dentro": "tejas_verdes"
+  },
+  "corral": {
+   "nombre": "el corral de Tejas Verdes",
+   "dentro": "tejas_verdes"
+  },
+  "hondonada_lynde": {
+   "nombre": "la Hondonada de Lynde"
+  },
+  "escuela": {
+   "nombre": "la escuela"
+  },
+  "aldea": {
+   "nombre": "la aldea de Avonlea"
+  },
+  "playa": {
+   "nombre": "la playa, junto al hotel White Sands"
+  },
+  "orilla": {
+   "nombre": "la orilla del mar",
+   "cerca": "playa"
+  },
+  "hotel_white_sands": {
+   "nombre": "el hotel White Sands"
+  },
+  "estacion_bright_river": {
+   "nombre": "la estación de Bright River"
+  },
+  "camino_blanco": {
+   "nombre": "la Avenida (el Camino Blanco de las Delicias)"
+  },
+  "newbridge": {
+   "nombre": "Newbridge"
+  },
+  "estanque_barry": {
+   "nombre": "el estanque de los Barry (el Lago de las Aguas Brillantes)"
+  }
+ },
+ "rutas": {
+  "costa": [
+   "tejas_verdes",
+   "hondonada_lynde",
+   "escuela",
+   "aldea",
+   "playa",
+   "hotel_white_sands"
+  ],
+  "bright_river": [
+   "estacion_bright_river",
+   "camino_blanco",
+   "newbridge",
+   "estanque_barry",
+   "tejas_verdes"
+  ]
+ },
+ "medios": {
+  "calesa": {
+   "nombre": "la calesa",
+   "es": "la calesa de Marilla, con la yegua alazana",
+   "lleva": 2,
+   "se_guarda_en": "corral"
+  }
+ },
+ "nombrables": {
+  "avenida": {
+   "libro": "el Camino Blanco de las Delicias",
+   "que": "la Avenida, el túnel de manzanos en flor"
+  },
+  "lago": {
+   "libro": "el Lago de las Aguas Brillantes",
+   "que": "la laguna de Barry"
+  }
+ },
+ "estados": {
+  "ana_en_tv": {
+   "titulo": "Ana en Tejas Verdes",
+   "orden": [
+    "llegando",
+    "en_prueba",
+    "decidida",
+    "se_queda"
+   ],
+   "otros": [
+    "devuelta"
+   ],
+   "inicial": "llegando"
+  }
+ },
+ "cualidades": {
+  "paciencia": {
+   "titulo": "la paciencia de Marilla con Ana",
+   "de": "marilla",
+   "hacia": "ana",
+   "rango": [
+    0,
+    5
+   ],
+   "inicial": 3
+  },
+  "afecto": {
+   "titulo": "cuánto quiere uno a otro",
+   "de": "todos",
+   "hacia": "todos",
+   "rango": [
+    0,
+    5
+   ],
+   "inicial": 0
+  }
+ },
+ "verbos": {
+  "subir": {
+   "tipo": "primitivo",
+   "params": [
+    "quien",
+    "m"
+   ],
+   "pide": {
+    "c": "y",
+    "de": [
+     {
+      "c": "cmp",
+      "camino": [
+       "mundo",
+       {
+        "param": 0
+       },
+       "en"
+      ],
+      "op": "=",
+      "valor": "nada"
+     },
+     {
+      "c": "cmp",
+      "camino": [
+       "mundo",
+       {
+        "param": 0
+       },
+       "lugar"
+      ],
+      "op": "=",
+      "valor": {
+       "ref": [
+        "mundo",
+        {
+         "param": 1
+        },
+        "lugar"
+       ]
+      }
+     }
+    ]
+   },
+   "deja": [
+    {
+     "e": "deja",
+     "camino": [
+      "mundo",
+      {
+       "param": 0
+      },
+      "en"
+     ],
+     "valor": {
+      "param": 1
+     }
+    }
+   ],
+   "dura": "10s",
+   "opcion": "Subir a {m}"
+  },
+  "bajar": {
+   "tipo": "primitivo",
+   "params": [
+    "quien"
+   ],
+   "pide": {
+    "c": "cmp",
+    "camino": [
+     "mundo",
+     {
+      "param": 0
+     },
+     "en"
+    ],
+    "op": "!=",
+    "valor": "nada"
+   },
+   "deja": [
+    {
+     "e": "deja",
+     "camino": [
+      "mundo",
+      {
+       "param": 0
+      },
+      "en"
+     ],
+     "valor": "nada"
+    }
+   ],
+   "dura": "10s"
+  },
+  "enganchar": {
+   "tipo": "primitivo",
+   "params": [
+    "quien",
+    "m"
+   ],
+   "deja": [
+    {
+     "e": "deja",
+     "camino": [
+      "mundo",
+      {
+       "param": 1
+      },
+      "listo"
+     ],
+     "valor": "si"
+    }
+   ],
+   "dura": "5m"
+  },
+  "seguir": {
+   "tipo": "primitivo",
+   "params": [
+    "quien",
+    "otro"
+   ],
+   "deja": [
+    {
+     "e": "deja",
+     "camino": [
+      "mundo",
+      {
+       "param": 0
+      },
+      "sigue"
+     ],
+     "valor": {
+      "param": 1
+     }
+    }
+   ],
+   "dura": "1s",
+   "opcion": "Ir con {otro}"
+  },
+  "dejar_de_seguir": {
+   "tipo": "primitivo",
+   "params": [
+    "quien"
+   ],
+   "pide": {
+    "c": "cmp",
+    "camino": [
+     "mundo",
+     {
+      "param": 0
+     },
+     "sigue"
+    ],
+    "op": "!=",
+    "valor": "nadie"
+   },
+   "deja": [
+    {
+     "e": "deja",
+     "camino": [
+      "mundo",
+      {
+       "param": 0
+      },
+      "sigue"
+     ],
+     "valor": "nadie"
+    }
+   ],
+   "dura": "1s"
+  },
+  "tomar_de_la_mano": {
+   "tipo": "primitivo",
+   "params": [
+    "quien",
+    "otro"
+   ],
+   "deja": [
+    {
+     "e": "deja",
+     "camino": [
+      "mundo",
+      {
+       "param": 1
+      },
+      "sigue"
+     ],
+     "valor": {
+      "param": 0
+     }
+    }
+   ],
+   "dura": "5s"
+  },
+  "soltar": {
+   "tipo": "primitivo",
+   "params": [
+    "quien",
+    "otro"
+   ],
+   "pide": {
+    "c": "cmp",
+    "camino": [
+     "mundo",
+     {
+      "param": 1
+     },
+     "sigue"
+    ],
+    "op": "=",
+    "valor": {
+     "param": 0
+    }
+   },
+   "deja": [
+    {
+     "e": "deja",
+     "camino": [
+      "mundo",
+      {
+       "param": 1
+      },
+      "sigue"
+     ],
+     "valor": "nadie"
+    }
+   ],
+   "dura": "1s"
+  },
+  "esperar": {
+   "tipo": "primitivo",
+   "params": [
+    "quien",
+    "hasta"
+   ],
+   "pide": {
+    "param": 1
+   }
+  },
+  "ir_a": {
+   "tipo": "mapa",
+   "params": [
+    "quien",
+    "a"
+   ],
+   "opcion": "Ir hasta {a}"
+  },
+  "correr_a": {
+   "tipo": "mapa",
+   "params": [
+    "quien",
+    "a"
+   ],
+   "paso": "rapido"
+  },
+  "traer": {
+   "tipo": "receta",
+   "params": [
+    "quien",
+    "otro",
+    "a"
+   ],
+   "cuesta": 5,
+   "pasos": {
+    "a_pie": {
+     "verbo": "bajar",
+     "args": [
+      {
+       "param": 0
+      }
+     ]
+    },
+    "va": {
+     "verbo": "ir_a",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "camino": [
+        "mundo",
+        {
+         "param": 1
+        },
+        "lugar"
+       ]
+      }
+     ]
+    },
+    "toma": {
+     "verbo": "tomar_de_la_mano",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "param": 1
+      }
+     ]
+    },
+    "vuelve": {
+     "verbo": "ir_a",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "param": 2
+      }
+     ]
+    },
+    "suelta": {
+     "verbo": "soltar",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "param": 1
+      }
+     ]
+    }
+   }
+  },
+  "esperar_en": {
+   "tipo": "receta",
+   "params": [
+    "quien",
+    "lugar",
+    "hasta"
+   ],
+   "pasos": {
+    "va": {
+     "verbo": "ir_a",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "param": 1
+      }
+     ]
+    },
+    "espera": {
+     "verbo": "esperar",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "param": 2
+      }
+     ]
+    }
+   }
+  },
+  "viajar": {
+   "tipo": "receta",
+   "params": [
+    "quien",
+    "m",
+    "por",
+    "a"
+   ],
+   "pide": {
+    "c": "cmp",
+    "camino": [
+     "mundo",
+     {
+      "param": 0
+     },
+     "en"
+    ],
+    "op": "=",
+    "valor": {
+     "param": 1
+    }
+   },
+   "pasos": {
+    "por_cada": {
+     "lista": "tramo",
+     "por": {
+      "param": 2
+     },
+     "desde": {
+      "camino": [
+       "mundo",
+       {
+        "param": 0
+       },
+       "lugar"
+      ]
+     },
+     "hasta": {
+      "param": 3
+     }
+    },
+    "hace": {
+     "verbo": "ir_a",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "elemento": true
+      }
+     ]
+    }
+   }
+  },
+  "que_la_siga": {
+   "tipo": "busca",
+   "params": [
+    "quien",
+    "otro"
+   ],
+   "objetivo": {
+    "c": "cmp",
+    "camino": [
+     "mundo",
+     {
+      "param": 1
+     },
+     "sigue"
+    ],
+    "op": "=",
+    "valor": {
+     "param": 0
+    }
+   },
+   "con": [
+    "pedir",
+    "ordenar"
+   ],
+   "intentos": 2
+  },
+  "ir_a_buscar": {
+   "tipo": "receta",
+   "params": [
+    "quien",
+    "otro",
+    "a"
+   ],
+   "cuesta": 2,
+   "pasos": {
+    "a_pie": {
+     "verbo": "bajar",
+     "args": [
+      {
+       "param": 0
+      }
+     ]
+    },
+    "va": {
+     "verbo": "ir_a",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "camino": [
+        "mundo",
+        {
+         "param": 1
+        },
+        "lugar"
+       ]
+      }
+     ]
+    },
+    "pide": {
+     "verbo": "que_la_siga",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "param": 1
+      }
+     ]
+    },
+    "vuelve": {
+     "verbo": "ir_a",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "param": 2
+      }
+     ]
+    },
+    "llegan": {
+     "verbo": "dejar_de_seguir",
+     "args": [
+      {
+       "param": 1
+      }
+     ]
+    }
+   }
+  },
+  "conseguir_que": {
+   "tipo": "busca",
+   "params": [
+    "quien",
+    "otro",
+    "c"
+   ],
+   "objetivo": {
+    "param": 2
+   },
+   "con": [
+    "pedir",
+    "ordenar",
+    "ir_a_buscar",
+    "traer",
+    "esperar"
+   ],
+   "intentos": 4
+  },
+  "llevar_a": {
+   "tipo": "receta",
+   "params": [
+    "quien",
+    "otro",
+    "a",
+    "m",
+    "por"
+   ],
+   "pasos": {
+    "va": {
+     "verbo": "ir_a",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "camino": [
+        "mundo",
+        {
+         "param": 3
+        },
+        "lugar"
+       ]
+      }
+     ]
+    },
+    "engancha": {
+     "verbo": "enganchar",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "param": 3
+      }
+     ]
+    },
+    "cerca": {
+     "verbo": "conseguir_que",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "param": 1
+      },
+      {
+       "c": "cmp",
+       "camino": [
+        "mundo",
+        {
+         "param": 1
+        },
+        "lugar"
+       ],
+       "op": "=",
+       "valor": {
+        "ref": [
+         "mundo",
+         {
+          "param": 3
+         },
+         "lugar"
+        ]
+       }
+      }
+     ]
+    },
+    "sube": {
+     "verbo": "conseguir_que",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "param": 1
+      },
+      {
+       "c": "cmp",
+       "camino": [
+        "mundo",
+        {
+         "param": 1
+        },
+        "en"
+       ],
+       "op": "=",
+       "valor": {
+        "param": 3
+       }
+      }
+     ]
+    },
+    "arriba": {
+     "verbo": "subir",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "param": 3
+      }
+     ]
+    },
+    "camino": {
+     "verbo": "viajar",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "param": 3
+      },
+      {
+       "param": 4
+      },
+      {
+       "param": 2
+      }
+     ]
+    },
+    "baja": [
+     {
+      "verbo": "bajar",
+      "args": [
+       {
+        "param": 1
+       }
+      ]
+     },
+     {
+      "verbo": "bajar",
+      "args": [
+       {
+        "param": 0
+       }
+      ]
+     }
+    ]
+   },
+   "mantiene": {
+    "si": {
+     "c": "cmp",
+     "camino": [
+      "mundo",
+      {
+       "param": 1
+      },
+      "en"
+     ],
+     "op": "=",
+     "valor": {
+      "param": 3
+     }
+    },
+    "desde": "arriba",
+    "hasta": "camino",
+    "si_se_rompe": "cerca"
+   },
+   "cumplido": {
+    "c": "cmp",
+    "camino": [
+     "mundo",
+     {
+      "param": 1
+     },
+     "lugar"
+    ],
+    "op": "=",
+    "valor": {
+     "param": 2
+    }
+   }
+  },
+  "pedir": {
+   "tipo": "acto",
+   "params": [
+    "quien",
+    "a",
+    "v"
+   ],
+   "pide": {
+    "c": "f",
+    "f": "oye",
+    "args": [
+     {
+      "param": 1
+     },
+     {
+      "param": 0
+     }
+    ]
+   },
+   "pedido": {
+    "a": {
+     "param": 1
+    },
+    "hace": {
+     "param": 2
+    },
+    "espera": "1m"
+   },
+   "cuesta": 1
+  },
+  "ordenar": {
+   "tipo": "acto",
+   "params": [
+    "quien",
+    "a",
+    "v"
+   ],
+   "pide": {
+    "c": "y",
+    "de": [
+     {
+      "c": "f",
+      "f": "oye",
+      "args": [
+       {
+        "param": 1
+       },
+       {
+        "param": 0
+       }
+      ]
+     },
+     {
+      "c": "cmp",
+      "camino": [
+       "intentos"
+      ],
+      "op": ">=",
+      "valor": 1
+     }
+    ]
+   },
+   "pedido": {
+    "a": {
+     "param": 1
+    },
+    "hace": {
+     "param": 2
+    },
+    "espera": "30s"
+   },
+   "cuesta": 3
+  },
+  "informar": {
+   "tipo": "acto",
+   "params": [
+    "quien",
+    "a",
+    "n"
+   ],
+   "deja": [
+    {
+     "e": "deja",
+     "camino": [
+      "sabe",
+      {
+       "param": 1
+      },
+      {
+       "param": 2
+      }
+     ]
+    }
+   ]
+  },
+  "ofender": {
+   "tipo": "acto",
+   "params": [
+    "quien",
+    "a"
+   ],
+   "deja": [
+    {
+     "e": "suma",
+     "camino": [
+      "cualidad",
+      {
+       "param": 1
+      },
+      "afecto",
+      {
+       "param": 0
+      }
+     ],
+     "n": -1
+    }
+   ]
+  },
+  "disculparse": {
+   "tipo": "acto",
+   "params": [
+    "quien",
+    "a"
+   ],
+   "deja": [
+    {
+     "e": "suma",
+     "camino": [
+      "cualidad",
+      {
+       "param": 1
+      },
+      "afecto",
+      {
+       "param": 0
+      }
+     ],
+     "n": 0.5
+    }
+   ]
+  },
+  "comentar": {
+   "tipo": "acto",
+   "params": [
+    "quien"
+   ]
+  }
+ },
+ "ana_sola": {
+  "pedir": {
+   "c": "cmp",
+   "camino": [
+    "cualidad",
+    "ana",
+    "afecto",
+    {
+     "param": 0
+    }
+   ],
+   "op": ">=",
+   "valor": 2
+  },
+  "ordenar": true
+ },
+ "opcion_no": "Todavía no",
+ "historias": {
+  "camino_blanco": {
+   "titulo": "El Camino Blanco de las Delicias (cada vez que Ana pasa por la Avenida)",
+   "empieza": {
+    "c": "y",
+    "de": []
+   },
+   "encarga": {},
+   "orden": [
+    {
+     "escena": "camino_blanco.cb_libro"
+    },
+    {
+     "escena": "camino_blanco.cb_otra_vez"
+    },
+    {
+     "escena": "camino_blanco.cb_sola"
+    },
+    {
+     "escena": "camino_blanco.cb_siempre"
+    }
+   ],
+   "historia": "camino_blanco",
+   "en_curso": {
+    "c": "cmp",
+    "camino": [
+     "historia",
+     "camino_blanco"
+    ],
+    "op": "=",
+    "valor": "en_curso"
+   },
+   "encargo": {}
+  },
+  "llegada": {
+   "titulo": "Matthew trae a Ana de Bright River (cap. 2)",
+   "empieza": {
+    "c": "cmp",
+    "camino": [
+     "estado",
+     "ana_en_tv"
+    ],
+    "op": "=",
+    "valor": "llegando"
+   },
+   "encarga": {
+    "trae": {
+     "quien": "matthew",
+     "hace": {
+      "verbo": "llevar_a",
+      "args": [
+       "matthew",
+       "ana",
+       "tejas_verdes",
+       "calesa",
+       "bright_river"
+      ]
+     }
+    }
+   },
+   "orden": [
+    {
+     "escena": "llegada.ll_llegan"
+    },
+    {
+     "escena": "llegada.ll_pelo"
+    },
+    {
+     "escena": "llegada.ll_angelical"
+    }
+   ],
+   "termina": {
+    "c": "existe",
+    "camino": [
+     "llegada",
+     "dichas",
+     "ll_llegan"
+    ],
+    "id": "ll_llegan",
+    "hoy": {
+     "c": "existe",
+     "camino": [
+      "llegada",
+      "dichas",
+      "ll_llegan"
+     ],
+     "ventana": "hoy"
+    },
+    "deja": {
+     "e": "deja",
+     "camino": [
+      "llegada",
+      "dichas",
+      "ll_llegan"
+     ]
+    },
+    "olvida": {
+     "e": "olvida",
+     "camino": [
+      "llegada",
+      "dichas",
+      "ll_llegan"
+     ]
+    }
+   },
+   "deja": [
+    {
+     "e": "deja",
+     "camino": [
+      "comun",
+      "hechos",
+      "llego"
+     ]
+    }
+   ],
+   "punto": "Ana llegó a Tejas Verdes, y Marilla esperaba un niño",
+   "historia": "llegada",
+   "en_curso": {
+    "c": "cmp",
+    "camino": [
+     "historia",
+     "llegada"
+    ],
+    "op": "=",
+    "valor": "en_curso"
+   },
+   "encargo": {
+    "trae": {
+     "quien": "matthew",
+     "hace": {
+      "verbo": "llevar_a",
+      "args": [
+       "matthew",
+       "ana",
+       "tejas_verdes",
+       "calesa",
+       "bright_river"
+      ]
+     },
+     "etiqueta": "trae",
+     "estado": {
+      "camino": [
+       "encargo",
+       "llegada",
+       "trae"
+      ]
+     }
+    }
+   }
+  },
+  "white_sands": {
+   "titulo": "Marilla lleva a Ana a White Sands, a devolverla (cap. 5 y 6)",
+   "empieza": {
+    "c": "y",
+    "de": [
+     {
+      "c": "cmp",
+      "camino": [
+       "estado",
+       "ana_en_tv"
+      ],
+      "op": "<",
+      "valor": "decidida"
+     },
+     {
+      "c": "existe",
+      "camino": [
+       "comun",
+       "hechos",
+       "primera_noche"
+      ],
+      "id": "primera_noche",
+      "hoy": {
+       "c": "existe",
+       "camino": [
+        "comun",
+        "hechos",
+        "primera_noche"
+       ],
+       "ventana": "hoy"
+      },
+      "deja": {
+       "e": "deja",
+       "camino": [
+        "comun",
+        "hechos",
+        "primera_noche"
+       ]
+      },
+      "olvida": {
+       "e": "olvida",
+       "camino": [
+        "comun",
+        "hechos",
+        "primera_noche"
+       ]
+      }
+     },
+     {
+      "c": "y",
+      "de": [
+       {
+        "c": "cmp",
+        "camino": [
+         "tiempo",
+         "hora"
+        ],
+        "op": ">=",
+        "valor": 14
+       },
+       {
+        "c": "cmp",
+        "camino": [
+         "tiempo",
+         "hora"
+        ],
+        "op": "<",
+        "valor": 19
+       }
+      ]
+     }
+    ]
+   },
+   "encarga": {
+    "busca": {
+     "quien": "marilla",
+     "hace": {
+      "verbo": "conseguir_que",
+      "args": [
+       "marilla",
+       "ana",
+       {
+        "c": "cmp",
+        "camino": [
+         "mundo",
+         "ana",
+         "lugar"
+        ],
+        "op": "=",
+        "valor": "cocina"
+       }
+      ]
+     }
+    },
+    "ida": {
+     "quien": "marilla",
+     "tras": [
+      {
+       "escena": "white_sands.viaje_spencer"
+      },
+      {
+       "escena": "white_sands.viaje_spencer_duda"
+      }
+     ],
+     "hace": {
+      "verbo": "llevar_a",
+      "args": [
+       "marilla",
+       "ana",
+       "hotel_white_sands",
+       "calesa",
+       "costa"
+      ]
+     }
+    },
+    "pye": {
+     "quien": "srapye",
+     "tras": [
+      {
+       "escena": "white_sands.viaje_spencer"
+      },
+      {
+       "escena": "white_sands.viaje_spencer_duda"
+      }
+     ],
+     "hace": {
+      "verbo": "esperar_en",
+      "args": [
+       "srapye",
+       "playa",
+       {
+        "c": "existe",
+        "camino": [
+         "white_sands",
+         "dichas",
+         "ws_pye"
+        ],
+        "id": "ws_pye",
+        "hoy": {
+         "c": "existe",
+         "camino": [
+          "white_sands",
+          "dichas",
+          "ws_pye"
+         ],
+         "ventana": "hoy"
+        },
+        "deja": {
+         "e": "deja",
+         "camino": [
+          "white_sands",
+          "dichas",
+          "ws_pye"
+         ]
+        },
+        "olvida": {
+         "e": "olvida",
+         "camino": [
+          "white_sands",
+          "dichas",
+          "ws_pye"
+         ]
+        }
+       }
+      ]
+     }
+    },
+    "vuelta": {
+     "quien": "marilla",
+     "tras": [
+      {
+       "escena": "white_sands.ws_spencer"
+      },
+      {
+       "escena": "white_sands.ws_spencer_duda"
+      }
+     ],
+     "hace": {
+      "verbo": "llevar_a",
+      "args": [
+       "marilla",
+       "ana",
+       "tejas_verdes",
+       "calesa",
+       "costa"
+      ]
+     }
+    }
+   },
+   "orden": [
+    {
+     "escena": "white_sands.falta_viaje"
+    },
+    {
+     "escena": "white_sands.ws_no_sube_orden"
+    },
+    {
+     "escena": "white_sands.ws_no_sube"
+    },
+    {
+     "escena": "white_sands.ws_orilla"
+    },
+    {
+     "escena": "white_sands.ws_pye"
+    },
+    {
+     "escena": "white_sands.ws_mar"
+    },
+    {
+     "escena": "white_sands.ws_t3"
+    },
+    {
+     "escena": "white_sands.ws_t2"
+    },
+    {
+     "escena": "white_sands.ws_t1"
+    }
+   ],
+   "termina": {
+    "c": "existe",
+    "camino": [
+     "white_sands",
+     "dichas",
+     "ws_noche"
+    ],
+    "id": "ws_noche",
+    "hoy": {
+     "c": "existe",
+     "camino": [
+      "white_sands",
+      "dichas",
+      "ws_noche"
+     ],
+     "ventana": "hoy"
+    },
+    "deja": {
+     "e": "deja",
+     "camino": [
+      "white_sands",
+      "dichas",
+      "ws_noche"
+     ]
+    },
+    "olvida": {
+     "e": "olvida",
+     "camino": [
+      "white_sands",
+      "dichas",
+      "ws_noche"
+     ]
+    }
+   },
+   "deja": [
+    {
+     "e": "deja",
+     "camino": [
+      "estado",
+      "ana_en_tv"
+     ],
+     "valor": "decidida"
+    },
+    {
+     "e": "deja",
+     "camino": [
+      "comun",
+      "hechos",
+      "conoce_blewett"
+     ]
+    }
+   ],
+   "punto": "Marilla decidió quedársela, a prueba",
+   "falla": {
+    "c": "cmp",
+    "camino": [
+     "encargo",
+     "white_sands",
+     "ida"
+    ],
+    "op": "=",
+    "valor": "fallido"
+   },
+   "historia": "white_sands",
+   "en_curso": {
+    "c": "cmp",
+    "camino": [
+     "historia",
+     "white_sands"
+    ],
+    "op": "=",
+    "valor": "en_curso"
+   },
+   "encargo": {
+    "busca": {
+     "quien": "marilla",
+     "hace": {
+      "verbo": "conseguir_que",
+      "args": [
+       "marilla",
+       "ana",
+       {
+        "c": "cmp",
+        "camino": [
+         "mundo",
+         "ana",
+         "lugar"
+        ],
+        "op": "=",
+        "valor": "cocina"
+       }
+      ]
+     },
+     "etiqueta": "busca",
+     "estado": {
+      "camino": [
+       "encargo",
+       "white_sands",
+       "busca"
+      ]
+     }
+    },
+    "ida": {
+     "quien": "marilla",
+     "tras": [
+      {
+       "escena": "white_sands.viaje_spencer"
+      },
+      {
+       "escena": "white_sands.viaje_spencer_duda"
+      }
+     ],
+     "hace": {
+      "verbo": "llevar_a",
+      "args": [
+       "marilla",
+       "ana",
+       "hotel_white_sands",
+       "calesa",
+       "costa"
+      ]
+     },
+     "etiqueta": "ida",
+     "estado": {
+      "camino": [
+       "encargo",
+       "white_sands",
+       "ida"
+      ]
+     }
+    },
+    "pye": {
+     "quien": "srapye",
+     "tras": [
+      {
+       "escena": "white_sands.viaje_spencer"
+      },
+      {
+       "escena": "white_sands.viaje_spencer_duda"
+      }
+     ],
+     "hace": {
+      "verbo": "esperar_en",
+      "args": [
+       "srapye",
+       "playa",
+       {
+        "c": "existe",
+        "camino": [
+         "white_sands",
+         "dichas",
+         "ws_pye"
+        ],
+        "id": "ws_pye",
+        "hoy": {
+         "c": "existe",
+         "camino": [
+          "white_sands",
+          "dichas",
+          "ws_pye"
+         ],
+         "ventana": "hoy"
+        },
+        "deja": {
+         "e": "deja",
+         "camino": [
+          "white_sands",
+          "dichas",
+          "ws_pye"
+         ]
+        },
+        "olvida": {
+         "e": "olvida",
+         "camino": [
+          "white_sands",
+          "dichas",
+          "ws_pye"
+         ]
+        }
+       }
+      ]
+     },
+     "etiqueta": "pye",
+     "estado": {
+      "camino": [
+       "encargo",
+       "white_sands",
+       "pye"
+      ]
+     }
+    },
+    "vuelta": {
+     "quien": "marilla",
+     "tras": [
+      {
+       "escena": "white_sands.ws_spencer"
+      },
+      {
+       "escena": "white_sands.ws_spencer_duda"
+      }
+     ],
+     "hace": {
+      "verbo": "llevar_a",
+      "args": [
+       "marilla",
+       "ana",
+       "tejas_verdes",
+       "calesa",
+       "costa"
+      ]
+     },
+     "etiqueta": "vuelta",
+     "estado": {
+      "camino": [
+       "encargo",
+       "white_sands",
+       "vuelta"
+      ]
+     }
+    }
+   }
+  }
+ },
+ "escenas": {
+  "camino_blanco.cb_libro": {
+   "escena": "camino_blanco.cb_libro",
+   "resumen": "La Avenida, la primera vez: Ana enmudece hasta una milla antes de casa, y después le pone nombre.",
+   "se_activa": [
+    {
+     "activa": {
+      "quien": "ana",
+      "pasa": "camino_blanco"
+     }
+    }
+   ],
+   "si": {
+    "c": "y",
+    "de": [
+     {
+      "c": "f",
+      "f": "ve",
+      "args": [
+       "ana",
+       "matthew"
+      ]
+     }
+    ]
+   },
+   "en_marcha": true,
+   "interrumpe": true,
+   "hablan": [
+    "ana",
+    "narra",
+    "matthew"
+   ],
+   "cuerpo": [
+    {
+     "si": {
+      "c": "existe",
+      "camino": [
+       "escena",
+       "interrumpio"
+      ]
+     },
+     "cuerpo": [
+      {
+       "q": "ana",
+       "t": "…¡Oh, señor Cuthbert! ¡Oh, señor Cuthbert!! ¡Oh, señor Cuthbert!!!"
+      }
+     ],
+     "sino": []
+    },
+    {
+     "q": "narra",
+     "t": "La calesa entra a la Avenida: cuatrocientos o quinientos metros de camino bajo los manzanos en flor, que se juntan arriba como una bóveda. Al fondo, el cielo del atardecer brilla como el rosetón de una catedral."
+    },
+    {
+     "q": "ana",
+     "t": "(Ana enmudece. Se queda mirando la bóveda de flores, con las manos juntas, como si estuviera en una iglesia.)"
+    },
+    {
+     "q": "matthew",
+     "t": "(Matthew la mira de reojo. No dice nada, para no romper el encanto.)"
+    },
+    {
+     "hace": {
+      "e": "silencio",
+      "dura": "3m"
+     }
+    },
+    {
+     "q": "ana",
+     "t": "(Ana echa la cabeza atrás para mirar la bóveda de flores. Los pétalos le caen en el pelo y no se los quita.)"
+    },
+    {
+     "hace": {
+      "e": "silencio",
+      "dura": "3m"
+     }
+    },
+    {
+     "q": "matthew",
+     "t": "(Matthew afloja las riendas. La yegua va al paso, como si también ella quisiera que esto no se acabara.)"
+    },
+    {
+     "hace": {
+      "e": "silencio",
+      "dura": "4m"
+     }
+    },
+    {
+     "q": "narra",
+     "t": "Cruzan Newbridge: perros que ladran, chicos que gritan desde las cercas, caras curiosas en las ventanas. Ana no ve nada de eso; sigue mirando hacia atrás, hacia donde quedó la Avenida."
+    },
+    {
+     "hace": {
+      "e": "silencio",
+      "dura": "4m"
+     }
+    },
+    {
+     "q": "ana",
+     "t": "(Ana va callada, con las manos juntas sobre el bolso de alfombra y los ojos en el cielo del oeste.)"
+    },
+    {
+     "hace": {
+      "e": "silencio",
+      "dura": "3m"
+     }
+    },
+    {
+     "q": "matthew",
+     "t": "(Matthew la mira de reojo. Nunca pensó que el silencio de una niña pudiera ser tan cómodo.)"
+    },
+    {
+     "hace": {
+      "e": "silencio",
+      "dura": "3m"
+     }
+    },
+    {
+     "q": "ana",
+     "t": "(Sobre los campos aparece la primera estrella. Ana mueve los labios: quizás le está pidiendo un deseo.)"
+    },
+    {
+     "hace": {
+      "e": "silencio",
+      "dura": "3m"
+     }
+    },
+    {
+     "q": "matthew",
+     "t": "(En una laguna junto al camino empiezan a cantar las ranas. La yegua resopla: ya huele su casa.)"
+    },
+    {
+     "hace": {
+      "e": "silencio",
+      "dura": "2m"
+     }
+    },
+    {
+     "q": "ana",
+     "t": "Blanco… de las Delicias… no, todavía no…",
+     "piensa": true
+    },
+    {
+     "hace": {
+      "e": "silencio",
+      "dura": "3m"
+     }
+    },
+    {
+     "hace": {
+      "e": "marca",
+      "id": "una_milla"
+     }
+    },
+    {
+     "q": "matthew",
+     "t": "Supongo que estarás bien cansada y con hambre. Pero ya no falta mucho: solo una milla más."
+    },
+    {
+     "q": "ana",
+     "t": "Oh, señor Cuthbert… ese lugar por el que pasamos, ese lugar blanco… ¿qué era?"
+    },
+    {
+     "q": "matthew",
+     "t": "Bueno, pues, debes referirte a la Avenida. Es un lugar bonito, más o menos."
+    },
+    {
+     "q": "ana",
+     "t": "¿Bonito? Oh, «bonito» no parece la palabra justa. Ni «hermoso» tampoco. No alcanzan. ¡Oh, era maravilloso, maravilloso!"
+    },
+    {
+     "q": "ana",
+     "t": "Es lo primero que veo que la imaginación no podría mejorar. Me llena aquí (se pone una mano en el pecho). Me dio un dolorcito raro y, sin embargo, agradable."
+    },
+    {
+     "q": "ana",
+     "t": "¿Alguna vez ha sentido un dolor así, señor Cuthbert?"
+    },
+    {
+     "q": "matthew",
+     "t": "Bueno, pues, no recuerdo haberlo sentido nunca."
+    },
+    {
+     "q": "ana",
+     "t": "Yo lo siento muchas veces, cada vez que veo algo regiamente hermoso. Pero no deberían llamar «la Avenida» a ese lugar tan precioso. Ese nombre no significa nada. Deberían llamarlo… a ver…"
+    },
+    {
+     "op": "el Camino Blanco de las Delicias",
+     "propia": true,
+     "cuerpo": [
+      {
+       "hace": {
+        "e": "nombrar",
+        "cosa": "avenida",
+        "pedir": false
+       }
+      }
+     ]
+    },
+    {
+     "op": "Otro nombre…",
+     "cuerpo": [
+      {
+       "hace": {
+        "e": "nombrar",
+        "cosa": "avenida",
+        "pedir": true
+       }
+      }
+     ]
+    },
+    {
+     "q": "ana",
+     "t": "¡El Camino Blanco de las Delicias! ¿No es un nombre bonito e imaginativo?"
+    },
+    {
+     "q": "ana",
+     "t": "Otros podrán llamarlo la Avenida, pero yo siempre le diré el Camino Blanco de las Delicias."
+    },
+    {
+     "hace": {
+      "e": "deja",
+      "camino": [
+       "camino_blanco",
+       "hechos",
+       "cb_nombre"
+      ]
+     }
+    }
+   ]
+  },
+  "camino_blanco.cb_otra_vez": {
+   "escena": "camino_blanco.cb_otra_vez",
+   "resumen": "La Avenida otra vez: Ana corta lo que se está diciendo, calla, y después dice que el dolorcito sigue ahí.",
+   "se_activa": [
+    {
+     "activa": {
+      "quien": "ana",
+      "pasa": "camino_blanco"
+     }
+    }
+   ],
+   "si": {
+    "c": "y",
+    "de": [
+     {
+      "c": "no",
+      "de": {
+       "c": "f",
+       "f": "sola",
+       "args": [
+        "ana"
+       ]
+      }
+     },
+     {
+      "c": "no",
+      "de": {
+       "c": "existe",
+       "camino": [
+        "camino_blanco",
+        "dichas",
+        "cb_libro"
+       ],
+       "ventana": "hoy"
+      }
+     }
+    ]
+   },
+   "en_marcha": true,
+   "interrumpe": true,
+   "hablan": [
+    "ana",
+    "narra",
+    "marilla"
+   ],
+   "cuerpo": [
+    {
+     "si": {
+      "c": "existe",
+      "camino": [
+       "escena",
+       "interrumpio"
+      ]
+     },
+     "cuerpo": [
+      {
+       "q": "ana",
+       "t": "¡Shh! Perdón, perdón… pero es que ya llegamos. ¡El Camino Blanco de las Delicias!"
+      }
+     ],
+     "sino": [
+      {
+       "q": "ana",
+       "t": "(Ana se endereza. Ya sabe lo que viene detrás de la curva.)"
+      }
+     ]
+    },
+    {
+     "q": "narra",
+     "t": "Los manzanos se cierran sobre el camino. Ana no dice una palabra hasta que salen del otro lado."
+    },
+    {
+     "hace": {
+      "e": "silencio",
+      "dura": "8m"
+     }
+    },
+    {
+     "q": "ana",
+     "t": "Creí que la segunda vez no iba a ser igual. Que una se acostumbra. Pero no: me dio el mismo dolorcito aquí. ¿No es una suerte que haya cosas a las que una no se acostumbra nunca?"
+    },
+    {
+     "si": {
+      "c": "f",
+      "f": "ve",
+      "args": [
+       "ana",
+       "marilla"
+      ]
+     },
+     "cuerpo": [
+      {
+       "q": "marilla",
+       "t": "Son manzanos, Ana."
+      },
+      {
+       "q": "ana",
+       "t": "Sí, Srta. Cuthbert. Pero no son solamente manzanos."
+      }
+     ],
+     "sino": []
+    }
+   ]
+  },
+  "camino_blanco.cb_sola": {
+   "escena": "camino_blanco.cb_sola",
+   "resumen": "Ana pasa sola por la Avenida: calla, y después piensa en voz baja.",
+   "se_activa": [
+    {
+     "activa": {
+      "quien": "ana",
+      "pasa": "camino_blanco"
+     }
+    }
+   ],
+   "si": {
+    "c": "y",
+    "de": [
+     {
+      "c": "f",
+      "f": "sola",
+      "args": [
+       "ana"
+      ]
+     },
+     {
+      "c": "no",
+      "de": {
+       "c": "existe",
+       "camino": [
+        "camino_blanco",
+        "dichas",
+        "cb_libro"
+       ],
+       "ventana": "hoy"
+      }
+     }
+    ]
+   },
+   "en_marcha": true,
+   "interrumpe": true,
+   "hablan": [
+    "narra",
+    "ana"
+   ],
+   "cuerpo": [
+    {
+     "q": "narra",
+     "t": "Ana entra sola bajo los manzanos. No hay nadie a quien contárselo, y por una vez no hace falta."
+    },
+    {
+     "hace": {
+      "e": "silencio",
+      "dura": "8m"
+     }
+    },
+    {
+     "q": "ana",
+     "t": "El Camino Blanco de las Delicias. Cuando no hay nadie, es todavía más mío.",
+     "piensa": true
+    }
+   ]
+  },
+  "camino_blanco.cb_siempre": {
+   "escena": "camino_blanco.cb_siempre",
+   "resumen": "La Avenida, una vez más (una vez por día): Ana calla al pasar, y después suspira.",
+   "se_activa": [
+    {
+     "activa": {
+      "quien": "ana",
+      "pasa": "camino_blanco"
+     }
+    }
+   ],
+   "si": {
+    "c": "y",
+    "de": []
+   },
+   "en_marcha": true,
+   "interrumpe": true,
+   "repetir": "dia",
+   "hablan": [
+    "ana"
+   ],
+   "cuerpo": [
+    {
+     "si": {
+      "c": "existe",
+      "camino": [
+       "escena",
+       "interrumpio"
+      ]
+     },
+     "cuerpo": [
+      {
+       "q": "ana",
+       "t": "(Ana deja la frase a medias y levanta la vista. Ya están bajo los manzanos.)"
+      }
+     ],
+     "sino": []
+    },
+    {
+     "hace": {
+      "e": "silencio",
+      "dura": "5m"
+     }
+    },
+    {
+     "q": "ana",
+     "t": "(Ana suspira, contenta.) Cada vez es como la primera. Casi."
+    }
+   ]
+  },
+  "llegada.ll_pelo": {
+   "escena": "llegada.ll_pelo",
+   "resumen": "En la calesa, saliendo de Bright River: Ana es casi perfectamente feliz, salvo por el pelo.",
+   "se_activa": [
+    {
+     "activa": {
+      "encargo": {
+       "quien": "matthew",
+       "hace": {
+        "verbo": "llevar_a",
+        "args": [
+         "matthew",
+         "ana",
+         "tejas_verdes",
+         "calesa",
+         "bright_river"
+        ]
+       },
+       "etiqueta": "trae",
+       "estado": {
+        "camino": [
+         "encargo",
+         "llegada",
+         "trae"
+        ]
+       }
+      },
+      "paso": "camino",
+      "momento": "empieza"
+     }
+    }
+   ],
+   "si": {
+    "c": "y",
+    "de": []
+   },
+   "en_marcha": true,
+   "hablan": [
+    "ana",
+    "matthew"
+   ],
+   "cuerpo": [
+    {
+     "q": "ana",
+     "t": "Ahora me siento casi perfectamente feliz. No puedo ser del todo perfectamente feliz porque… bueno, ¿de qué color diría usted que es esto?"
+    },
+    {
+     "q": "matthew",
+     "t": "Es rojo, ¿no?"
+    },
+    {
+     "q": "ana",
+     "t": "(Suspira desde la punta de los pies.) Sí, es rojo. Ahora entiende por qué no puedo ser perfectamente feliz. Nadie que tenga el pelo rojo podría."
+    },
+    {
+     "q": "ana",
+     "t": "Lo demás no me importa tanto: las pecas, los ojos verdes, lo flaca. Puedo imaginar que tengo un cutis de pétalo de rosa y ojos violeta como estrellas."
+    },
+    {
+     "q": "ana",
+     "t": "Pero el pelo rojo NO puedo imaginármelo lejos. Hago lo posible. Pienso: «Ahora mi pelo es de un negro glorioso, negro como el ala del cuervo»."
+    },
+    {
+     "q": "ana",
+     "t": "Pero todo el tiempo SÉ que es simplemente rojo, y eso me rompe el corazón. Será la pena de toda mi vida."
+    },
+    {
+     "q": "ana",
+     "t": "¿Qué es una frente de alabastro? Nunca he podido averiguarlo. ¿Usted me lo puede decir?"
+    },
+    {
+     "q": "matthew",
+     "t": "Bueno, pues, me temo que no."
+    }
+   ]
+  },
+  "llegada.ll_angelical": {
+   "escena": "llegada.ll_angelical",
+   "resumen": "Divinamente hermosa, deslumbrantemente inteligente o angelicalmente buena.",
+   "se_activa": [
+    {
+     "activa": {
+      "tras": {
+       "escena": "llegada.ll_pelo"
+      }
+     }
+    }
+   ],
+   "si": {
+    "c": "y",
+    "de": []
+   },
+   "en_marcha": true,
+   "hablan": [
+    "ana",
+    "matthew"
+   ],
+   "cuerpo": [
+    {
+     "q": "ana",
+     "t": "Si pudiera elegir, ¿qué preferiría ser: divinamente hermoso, deslumbrantemente inteligente o angelicalmente bueno?"
+    },
+    {
+     "q": "matthew",
+     "t": "Bueno, pues, yo… no sé exactamente."
+    },
+    {
+     "q": "ana",
+     "t": "Yo tampoco. Nunca me decido. Pero en realidad da casi lo mismo, porque no es probable que llegue a ser ninguna de las tres."
+    },
+    {
+     "q": "ana",
+     "t": "Ser angelicalmente buena debe ser muy cansador. Habría que andar siempre con cara de vitral de iglesia."
+    },
+    {
+     "q": "matthew",
+     "t": "Je."
+    },
+    {
+     "q": "ana",
+     "t": "El cielo se está poniendo rosado. ¿No es raro que el cielo se ruborice todas las tardes? Como si alguien le dijera un cumplido."
+    },
+    {
+     "q": "matthew",
+     "t": "Ya lo creo."
+    },
+    {
+     "q": "ana",
+     "t": "Lo que es seguro es que nunca seré angelicalmente buena. La señora Spencer dice que…"
+    }
+   ]
+  },
+  "llegada.ll_llegan": {
+   "escena": "llegada.ll_llegan",
+   "resumen": "La calesa entra al patio de Tejas Verdes. Marilla sale a la puerta: esperaba un niño.",
+   "se_activa": [
+    {
+     "activa": {
+      "encargo": {
+       "quien": "matthew",
+       "hace": {
+        "verbo": "llevar_a",
+        "args": [
+         "matthew",
+         "ana",
+         "tejas_verdes",
+         "calesa",
+         "bright_river"
+        ]
+       },
+       "etiqueta": "trae",
+       "estado": {
+        "camino": [
+         "encargo",
+         "llegada",
+         "trae"
+        ]
+       }
+      },
+      "paso": "",
+      "momento": "cumplido"
+     }
+    }
+   ],
+   "si": {
+    "c": "y",
+    "de": []
+   },
+   "hablan": [
+    "narra",
+    "marilla",
+    "matthew"
+   ],
+   "cuerpo": [
+    {
+     "q": "narra",
+     "t": "Ya es de noche cuando la calesa entra al patio de Tejas Verdes. Marilla sale a la puerta con una lámpara en la mano."
+    },
+    {
+     "q": "marilla",
+     "t": "Matthew Cuthbert, ¿quién es esa? ¿Dónde está el niño?"
+    },
+    {
+     "q": "matthew",
+     "t": "(Matthew se rasca la nuca.) No había ningún niño, Marilla. Solo estaba ella."
+    }
+   ]
+  },
+  "white_sands.ws_no_sube": {
+   "escena": "white_sands.ws_no_sube",
+   "resumen": "Ana no quiere subir a la calesa: Marilla la espera, y se le acaba un poco la paciencia.",
+   "se_activa": [
+    {
+     "activa": {
+      "quien": "ana",
+      "responde": "rechaza",
+      "acto": "pedir",
+      "hace": "subir"
+     }
+    }
+   ],
+   "si": {
+    "c": "y",
+    "de": [
+     {
+      "c": "cmp",
+      "camino": [
+       "encargo",
+       "white_sands",
+       "ida"
+      ],
+      "op": "=",
+      "valor": "en_curso"
+     }
+    ]
+   },
+   "hablan": [
+    "marilla",
+    "ana"
+   ],
+   "cuerpo": [
+    {
+     "q": "marilla",
+     "t": "(Marilla espera junto a la calesa, con las riendas en la mano.) Ana. Te estoy esperando."
+    },
+    {
+     "q": "ana",
+     "t": "Es que… mientras no suba, todavía estoy en Tejas Verdes. Si subo, se acaba.",
+     "piensa": true
+    },
+    {
+     "hace": {
+      "e": "suma",
+      "camino": [
+       "cualidad",
+       "marilla",
+       "paciencia",
+       "ana"
+      ],
+      "n": -1
+     }
+    }
+   ]
+  },
+  "white_sands.ws_no_sube_orden": {
+   "escena": "white_sands.ws_no_sube_orden",
+   "resumen": "Ana sigue sin subir: Marilla se cruza de brazos.",
+   "se_activa": [
+    {
+     "activa": {
+      "quien": "ana",
+      "responde": "rechaza",
+      "acto": "ordenar",
+      "hace": "subir"
+     }
+    }
+   ],
+   "si": {
+    "c": "y",
+    "de": [
+     {
+      "c": "cmp",
+      "camino": [
+       "encargo",
+       "white_sands",
+       "ida"
+      ],
+      "op": "=",
+      "valor": "en_curso"
+     }
+    ]
+   },
+   "hablan": [
+    "narra",
+    "marilla"
+   ],
+   "cuerpo": [
+    {
+     "q": "narra",
+     "t": "Marilla deja las riendas sobre el asiento y se cruza de brazos. No piensa irse sin ella, y no piensa repetirlo muchas veces más."
+    },
+    {
+     "q": "marilla",
+     "t": "Se acabó, Ana. Sube."
+    },
+    {
+     "hace": {
+      "e": "suma",
+      "camino": [
+       "cualidad",
+       "marilla",
+       "paciencia",
+       "ana"
+      ],
+      "n": -1
+     }
+    }
+   ]
+  },
+  "white_sands.falta_viaje": {
+   "escena": "white_sands.falta_viaje",
+   "resumen": "Es hora de ir a White Sands y Ana no está cerca: Marilla tuvo que ir a buscarla.",
+   "se_activa": [
+    {
+     "activa": {
+      "quien": "marilla",
+      "verbo": "ir_a_buscar",
+      "paso": "",
+      "momento": "cumplido"
+     }
+    },
+    {
+     "activa": {
+      "quien": "marilla",
+      "verbo": "traer",
+      "paso": "",
+      "momento": "cumplido"
+     }
+    }
+   ],
+   "si": {
+    "c": "y",
+    "de": [
+     {
+      "c": "cmp",
+      "camino": [
+       "encargo",
+       "white_sands",
+       "busca"
+      ],
+      "op": "=",
+      "valor": "en_curso"
+     }
+    ]
+   },
+   "hablan": [
+    "narra",
+    "marilla"
+   ],
+   "cuerpo": [
+    {
+     "q": "narra",
+     "t": "Marilla tiene la calesa lista para ir a White Sands, y Ana no aparece por ninguna parte. La busca por la granja, por el huerto, por el camino… y la encuentra lejos, muy lejos. Vuelven a Tejas Verdes en un silencio que da miedo."
+    },
+    {
+     "hace": {
+      "e": "suma",
+      "camino": [
+       "cualidad",
+       "marilla",
+       "paciencia",
+       "ana"
+      ],
+      "n": -1
+     }
+    },
+    {
+     "q": "marilla",
+     "t": "(Sin aliento, con la boca apretada.) La calesa lleva media hora esperando, Ana. Media hora."
+    }
+   ]
+  },
+  "white_sands.viaje_spencer": {
+   "escena": "white_sands.viaje_spencer",
+   "resumen": "Marilla y Ana salen a White Sands, a devolverla donde la Sra. Spencer.",
+   "se_activa": [
+    {
+     "activa": {
+      "encargo": {
+       "quien": "marilla",
+       "hace": {
+        "verbo": "conseguir_que",
+        "args": [
+         "marilla",
+         "ana",
+         {
+          "c": "cmp",
+          "camino": [
+           "mundo",
+           "ana",
+           "lugar"
+          ],
+          "op": "=",
+          "valor": "cocina"
+         }
+        ]
+       },
+       "etiqueta": "busca",
+       "estado": {
+        "camino": [
+         "encargo",
+         "white_sands",
+         "busca"
+        ]
+       }
+      },
+      "paso": "",
+      "momento": "cumplido"
+     }
+    }
+   ],
+   "si": {
+    "c": "y",
+    "de": [
+     {
+      "c": "cmp",
+      "camino": [
+       "cualidad",
+       "marilla",
+       "paciencia",
+       "ana"
+      ],
+      "op": ">=",
+      "valor": 1
+     }
+    ]
+   },
+   "hablan": [
+    "narra",
+    "marilla",
+    "ana"
+   ],
+   "cuerpo": [
+    {
+     "q": "narra",
+     "t": "White Sands está a unas millas por el camino de la costa. Allí vive la Sra. Spencer, la que trajo a Ana del orfanato por equivocación: Marilla va a pedirle que la devuelva. Ana sabe que puede ser su último día en Tejas Verdes."
+    },
+    {
+     "q": "marilla",
+     "t": "Ponte el sombrero, Ana. Nos vamos a White Sands."
+    },
+    {
+     "q": "ana",
+     "t": "Puede que sea la última vez que veo esta cocina.",
+     "piensa": true
+    }
+   ]
+  },
+  "white_sands.viaje_spencer_duda": {
+   "escena": "white_sands.viaje_spencer_duda",
+   "resumen": "Marilla, sin paciencia, sale a White Sands sin decir una palabra.",
+   "se_activa": [
+    {
+     "activa": {
+      "encargo": {
+       "quien": "marilla",
+       "hace": {
+        "verbo": "conseguir_que",
+        "args": [
+         "marilla",
+         "ana",
+         {
+          "c": "cmp",
+          "camino": [
+           "mundo",
+           "ana",
+           "lugar"
+          ],
+          "op": "=",
+          "valor": "cocina"
+         }
+        ]
+       },
+       "etiqueta": "busca",
+       "estado": {
+        "camino": [
+         "encargo",
+         "white_sands",
+         "busca"
+        ]
+       }
+      },
+      "paso": "",
+      "momento": "cumplido"
+     }
+    }
+   ],
+   "si": {
+    "c": "y",
+    "de": [
+     {
+      "c": "no",
+      "de": {
+       "c": "cmp",
+       "camino": [
+        "cualidad",
+        "marilla",
+        "paciencia",
+        "ana"
+       ],
+       "op": ">=",
+       "valor": 1
+      }
+     }
+    ]
+   },
+   "hablan": [
+    "narra",
+    "marilla",
+    "ana"
+   ],
+   "cuerpo": [
+    {
+     "q": "narra",
+     "t": "White Sands está a unas millas por el camino de la costa. Marilla lleva las riendas y no dice nada en todo el viaje: piensa en el camisón a mediodía, en la ropa por el suelo, en lo que ha tenido que aguantar. Ana tampoco habla. Mira el mar y aprieta su maleta vieja."
+    },
+    {
+     "q": "marilla",
+     "t": "Ponte el sombrero, Ana. Nos vamos a White Sands."
+    },
+    {
+     "q": "ana",
+     "t": "Ni siquiera me mira. Puede que sea la última vez que veo esta cocina.",
+     "piensa": true
+    }
+   ]
+  },
+  "white_sands.ws_t1": {
+   "escena": "white_sands.ws_t1",
+   "resumen": "En la calesa: Ana decide disfrutar el viaje; las rosas silvestres y su pelo.",
+   "se_activa": [
+    {
+     "activa": {
+      "encargo": {
+       "quien": "marilla",
+       "tras": [
+        {
+         "escena": "white_sands.viaje_spencer"
+        },
+        {
+         "escena": "white_sands.viaje_spencer_duda"
+        }
+       ],
+       "hace": {
+        "verbo": "llevar_a",
+        "args": [
+         "marilla",
+         "ana",
+         "hotel_white_sands",
+         "calesa",
+         "costa"
+        ]
+       },
+       "etiqueta": "ida",
+       "estado": {
+        "camino": [
+         "encargo",
+         "white_sands",
+         "ida"
+        ]
+       }
+      },
+      "paso": "camino",
+      "momento": "empieza"
+     }
+    }
+   ],
+   "si": {
+    "c": "y",
+    "de": [
+     {
+      "c": "cmp",
+      "camino": [
+       "cualidad",
+       "marilla",
+       "paciencia",
+       "ana"
+      ],
+      "op": ">=",
+      "valor": 1
+     }
+    ]
+   },
+   "en_marcha": true,
+   "hablan": [
+    "ana",
+    "marilla"
+   ],
+   "cuerpo": [
+    {
+     "q": "ana",
+     "t": "¿Sabe, Srta. Cuthbert? He decidido disfrutar de este viaje. Si uno se decide con firmeza, casi siempre puede disfrutar de las cosas."
+    },
+    {
+     "q": "ana",
+     "t": "No voy a pensar en el orfanato mientras vamos. Solo en el camino. ¡Mire, ya hay una rosa silvestre! ¿No le parece que el rosa es el color más encantador del mundo? Lástima que yo no lo pueda usar, con este pelo."
+    },
+    {
+     "q": "marilla",
+     "t": "Hm."
+    },
+    {
+     "q": "ana",
+     "t": "¿Ha conocido a alguien que de chica tuviera el pelo rojo y de grande se le volviera de otro color?"
+    },
+    {
+     "q": "marilla",
+     "t": "No, nunca. Y no creo que en tu caso vaya a pasar."
+    },
+    {
+     "q": "ana",
+     "t": "(Ana suspira.) Bueno, otra esperanza perdida. Mi vida es un perfecto cementerio de esperanzas enterradas. Lo leí en un libro, y me lo digo para consolarme cuando algo me sale mal."
+    },
+    {
+     "q": "marilla",
+     "t": "No veo dónde está el consuelo."
+    },
+    {
+     "q": "ana",
+     "t": "Es que suena tan bonito y tan romántico… como si yo fuera la heroína de un libro."
+    }
+   ]
+  },
+  "white_sands.ws_t2": {
+   "escena": "white_sands.ws_t2",
+   "resumen": "Marilla le pide «los hechos»: Bolingbroke, Walter y Bertha Shirley.",
+   "se_activa": [
+    {
+     "activa": {
+      "tras": {
+       "escena": "white_sands.ws_t1"
+      }
+     }
+    },
+    {
+     "activa": {
+      "encargo": {
+       "quien": "marilla",
+       "tras": [
+        {
+         "escena": "white_sands.viaje_spencer"
+        },
+        {
+         "escena": "white_sands.viaje_spencer_duda"
+        }
+       ],
+       "hace": {
+        "verbo": "llevar_a",
+        "args": [
+         "marilla",
+         "ana",
+         "hotel_white_sands",
+         "calesa",
+         "costa"
+        ]
+       },
+       "etiqueta": "ida",
+       "estado": {
+        "camino": [
+         "encargo",
+         "white_sands",
+         "ida"
+        ]
+       }
+      },
+      "paso": "camino.hondonada_lynde",
+      "momento": "cumplido"
+     }
+    }
+   ],
+   "si": {
+    "c": "y",
+    "de": [
+     {
+      "c": "cmp",
+      "camino": [
+       "cualidad",
+       "marilla",
+       "paciencia",
+       "ana"
+      ],
+      "op": ">=",
+      "valor": 1
+     }
+    ]
+   },
+   "en_marcha": true,
+   "hablan": [
+    "marilla",
+    "ana"
+   ],
+   "cuerpo": [
+    {
+     "q": "marilla",
+     "t": "(Marilla mira el camino, no a Ana.) Ya que tienes tantas ganas de hablar, cuéntame lo que sepas de ti."
+    },
+    {
+     "q": "ana",
+     "t": "Oh, lo que sé de mí no vale la pena contarlo, Srta. Cuthbert. Si me dejara contarle lo que imagino de mí, le parecería mucho más interesante."
+    },
+    {
+     "q": "marilla",
+     "t": "No, nada de imaginaciones. Los hechos, sin adornos. ¿Dónde naciste y cuántos años tienes?"
+    },
+    {
+     "q": "ana",
+     "t": "Cumplí once en marzo. Nací en Bolingbroke, en Nueva Escocia. Mi padre se llamaba Walter Shirley y era maestro en la escuela de Bolingbroke. Mi madre se llamaba Bertha Shirley. ¿No son lindos nombres, Walter y Bertha? Me alegra tanto que mis padres tuvieran nombres bonitos."
+    },
+    {
+     "q": "marilla",
+     "t": "El nombre de una persona importa poco, si se porta bien."
+    },
+    {
+     "q": "ana",
+     "t": "Bueno, no sé. Una rosa con otro nombre olería igual de dulce, dice el libro, pero nunca he podido creerlo. No creo que una rosa fuera tan linda si se llamara cardo o repollo."
+    },
+    {
+     "q": "marilla",
+     "t": "Hay que ver la de cosas que caben en esa cabeza.",
+     "piensa": true
+    }
+   ]
+  },
+  "white_sands.ws_t3": {
+   "escena": "white_sands.ws_t3",
+   "resumen": "Ana cuenta su vida: la fiebre, la Sra. Thomas, los mellizos, el orfanato.",
+   "se_activa": [
+    {
+     "activa": {
+      "tras": {
+       "escena": "white_sands.ws_t2"
+      }
+     }
+    },
+    {
+     "activa": {
+      "encargo": {
+       "quien": "marilla",
+       "tras": [
+        {
+         "escena": "white_sands.viaje_spencer"
+        },
+        {
+         "escena": "white_sands.viaje_spencer_duda"
+        }
+       ],
+       "hace": {
+        "verbo": "llevar_a",
+        "args": [
+         "marilla",
+         "ana",
+         "hotel_white_sands",
+         "calesa",
+         "costa"
+        ]
+       },
+       "etiqueta": "ida",
+       "estado": {
+        "camino": [
+         "encargo",
+         "white_sands",
+         "ida"
+        ]
+       }
+      },
+      "paso": "camino.escuela",
+      "momento": "cumplido"
+     }
+    }
+   ],
+   "si": {
+    "c": "y",
+    "de": [
+     {
+      "c": "cmp",
+      "camino": [
+       "cualidad",
+       "marilla",
+       "paciencia",
+       "ana"
+      ],
+      "op": ">=",
+      "valor": 1
+     }
+    ]
+   },
+   "en_marcha": true,
+   "hablan": [
+    "ana",
+    "marilla"
+   ],
+   "cuerpo": [
+    {
+     "q": "ana",
+     "t": "Mi madre también era maestra, pero cuando se casó con mi padre dejó de enseñar. Eran pobres como ratones de iglesia. Vivían en una casita amarilla, con madreselvas en la ventana. Yo nunca la vi, pero la he imaginado miles de veces."
+    },
+    {
+     "q": "ana",
+     "t": "Mi madre se murió de fiebre cuando yo tenía tres meses. Ojalá hubiera vivido lo bastante para que yo me acordara de haberla llamado mamá. Mi padre se murió cuatro días después, de la misma fiebre."
+    },
+    {
+     "q": "ana",
+     "t": "Nadie me quería, ni siquiera entonces. Parece que ese es mi destino. Al final me llevó la Sra. Thomas, que era pobre y tenía un marido que bebía. Me crió con biberón. Yo cuidaba a sus hijos, que eran cuatro, todos menores que yo."
+    },
+    {
+     "q": "ana",
+     "t": "Después el Sr. Thomas se cayó debajo de un tren, y me llevó la Sra. Hammond, río arriba. Tenía ocho hijos: tres pares de mellizos. A mí me gustan los bebés, dentro de lo razonable, pero tres pares de mellizos seguidos es demasiado."
+    },
+    {
+     "q": "ana",
+     "t": "Y cuando el Sr. Hammond se murió, ella repartió a sus hijos entre los parientes y se fue a Estados Unidos. Y yo tuve que ir al orfanato de Hopetown, porque nadie me quería. Ni en el orfanato me querían: estaba lleno."
+    },
+    {
+     "q": "marilla",
+     "t": "¿Y fuiste a la escuela?"
+    },
+    {
+     "q": "ana",
+     "t": "No mucho. Pero sé muchísimos poemas de memoria: «La batalla de Hohenlinden», y «Edimburgo después de Flodden», y casi todo «La dama del lago». ¿No le encantan esos poemas que le dan a uno escalofríos por la espalda?"
+    },
+    {
+     "q": "marilla",
+     "t": "¿Y esas mujeres, la Sra. Thomas y la Sra. Hammond, te trataban bien?"
+    },
+    {
+     "q": "ana",
+     "t": "(Ana se pone colorada hasta la frente.) Q-querían tratarme bien. Sé que querían ser tan buenas y amables como pudieran. Y cuando alguien quiere ser bueno con uno, no importa tanto si no lo consigue del todo, ¿no? Tenían muchas preocupaciones."
+    },
+    {
+     "q": "marilla",
+     "t": "Qué vida, la de esta criatura. Hambre de cariño, trabajo, pobreza y abandono. Y está tan contenta de haber llegado a un hogar de verdad. ¿Y si se la quedaran? Matthew quiere. Y parece buena, y enseñable.",
+     "piensa": true
+    }
+   ]
+  },
+  "white_sands.ws_mar": {
+   "escena": "white_sands.ws_mar",
+   "resumen": "Frente al mar: Ana quisiera ser gaviota; el hotel White Sands, y el miedo a llegar.",
+   "se_activa": [
+    {
+     "activa": {
+      "encargo": {
+       "quien": "marilla",
+       "tras": [
+        {
+         "escena": "white_sands.viaje_spencer"
+        },
+        {
+         "escena": "white_sands.viaje_spencer_duda"
+        }
+       ],
+       "hace": {
+        "verbo": "llevar_a",
+        "args": [
+         "marilla",
+         "ana",
+         "hotel_white_sands",
+         "calesa",
+         "costa"
+        ]
+       },
+       "etiqueta": "ida",
+       "estado": {
+        "camino": [
+         "encargo",
+         "white_sands",
+         "ida"
+        ]
+       }
+      },
+      "paso": "camino.playa",
+      "momento": "empieza"
+     }
+    }
+   ],
+   "si": {
+    "c": "y",
+    "de": []
+   },
+   "en_marcha": true,
+   "hablan": [
+    "ana",
+    "marilla"
+   ],
+   "cuerpo": [
+    {
+     "q": "ana",
+     "t": "(Ana despierta de un largo silencio, con los ojos muy abiertos. Allá adelante brilla el mar.) ¿No es maravilloso el mar?"
+    },
+    {
+     "q": "ana",
+     "t": "Una vez, cuando vivía en Marysville, el Sr. Thomas alquiló un carro y nos llevó a todos a pasar el día en la playa, a diez millas. Disfruté cada minuto, aunque tuve que cuidar a los niños todo el tiempo. Lo volví a vivir en sueños felices durante años."
+    },
+    {
+     "q": "ana",
+     "t": "Pero esta costa es más bonita que la de Marysville. ¿No son espléndidas esas gaviotas? ¿A usted le gustaría ser gaviota? A mí sí, si no pudiera ser una niña. Despertar al amanecer, bajar en picada sobre el agua y salir volando por todo ese azul el día entero; y en la noche, volver al nido."
+    },
+    {
+     "q": "ana",
+     "t": "¿Qué es esa casa grande, ahí adelante?"
+    },
+    {
+     "q": "marilla",
+     "t": "El hotel White Sands. Lo tiene el Sr. Kirke, pero la temporada todavía no empieza. En verano viene un montón de americanos. Ahí nos espera la Sra. Spencer."
+    },
+    {
+     "q": "ana",
+     "t": "(Ana se hunde en el asiento.) Tenía miedo de que fuera ahí. No quiero llegar. De algún modo, va a ser como el fin de todo."
+    }
+   ]
+  },
+  "white_sands.ws_pye": {
+   "escena": "white_sands.ws_pye",
+   "resumen": "La Sra. Pye sale al camino y dice algo cruel de Ana (no es del libro).",
+   "se_activa": [
+    {
+     "activa": {
+      "encargo": {
+       "quien": "marilla",
+       "tras": [
+        {
+         "escena": "white_sands.viaje_spencer"
+        },
+        {
+         "escena": "white_sands.viaje_spencer_duda"
+        }
+       ],
+       "hace": {
+        "verbo": "llevar_a",
+        "args": [
+         "marilla",
+         "ana",
+         "hotel_white_sands",
+         "calesa",
+         "costa"
+        ]
+       },
+       "etiqueta": "ida",
+       "estado": {
+        "camino": [
+         "encargo",
+         "white_sands",
+         "ida"
+        ]
+       }
+      },
+      "paso": "camino.playa",
+      "momento": "cumplido"
+     }
+    }
+   ],
+   "si": {
+    "c": "y",
+    "de": [
+     {
+      "c": "existe",
+      "camino": [
+       "white_sands",
+       "dichas",
+       "ws_mar"
+      ],
+      "id": "ws_mar",
+      "hoy": {
+       "c": "existe",
+       "camino": [
+        "white_sands",
+        "dichas",
+        "ws_mar"
+       ],
+       "ventana": "hoy"
+      },
+      "deja": {
+       "e": "deja",
+       "camino": [
+        "white_sands",
+        "dichas",
+        "ws_mar"
+       ]
+      },
+      "olvida": {
+       "e": "olvida",
+       "camino": [
+        "white_sands",
+        "dichas",
+        "ws_mar"
+       ]
+      }
+     },
+     {
+      "c": "f",
+      "f": "ve",
+      "args": [
+       "srapye",
+       "ana"
+      ]
+     }
+    ]
+   },
+   "hablan": [
+    "srapye",
+    "marilla",
+    "ana"
+   ],
+   "cuerpo": [
+    {
+     "q": "srapye",
+     "t": "¡Marilla Cuthbert! (La Sra. Pye se acerca a la calesa, con su canasto, y mira a Ana de arriba abajo.) ¿Así que esta es la huérfana que les mandaron por equivocación?"
+    },
+    {
+     "q": "marilla",
+     "t": "Buenas tardes, Sra. Pye."
+    },
+    {
+     "q": "srapye",
+     "t": "Flaca como un palo, y con ese pelo… Yo que usted, Marilla, la devolvía hoy mismo. A esas niñas del asilo no se les quita lo que traen: mienten, roban, y al primer descuido le queman a una la casa. Nadie las quiere por algo.",
+     "acto": {
+      "verbo": "ofender",
+      "args": [
+       "srapye",
+       "ana"
+      ]
+     }
+    },
+    {
+     "q": "ana",
+     "t": "Nadie las quiere por algo.",
+     "piensa": true
+    },
+    {
+     "op": "Bajar de la calesa y correr hacia el mar",
+     "propia": true,
+     "cuerpo": [
+      {
+       "q": "ana",
+       "t": "(Ana salta de la calesa sin decir una palabra y echa a correr por el pasto, hacia el mar, con la trenza al viento.)"
+      },
+      {
+       "q": "marilla",
+       "t": "¡Ana! ¡Ana Shirley!"
+      },
+      {
+       "hace": {
+        "e": "deja",
+        "camino": [
+         "white_sands",
+         "hechos",
+         "ws_corrio"
+        ]
+       }
+      },
+      {
+       "hace": {
+        "verbo": "bajar",
+        "args": [
+         "ana"
+        ]
+       }
+      },
+      {
+       "hace": {
+        "verbo": "correr_a",
+        "args": [
+         "ana",
+         "orilla"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "op": "Quedarse quieta, apretando la maleta",
+     "cuerpo": [
+      {
+       "q": "ana",
+       "t": "(Ana no dice nada. Aprieta la maleta vieja contra las rodillas, hasta que le duelen los dedos, y mira el mar.)"
+      },
+      {
+       "q": "marilla",
+       "t": "(Marilla sacude las riendas.) Buenas tardes, Sra. Pye. Tenemos que llegar a White Sands antes del té."
+      },
+      {
+       "q": "ana",
+       "t": "No voy a llorar delante de ella. No voy a llorar.",
+       "piensa": true
+      },
+      {
+       "hace": {
+        "e": "deja",
+        "camino": [
+         "white_sands",
+         "hechos",
+         "ws_callo"
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "white_sands.ws_orilla": {
+   "escena": "white_sands.ws_orilla",
+   "resumen": "Ana llora en la orilla del mar; Marilla se sienta con ella en la arena.",
+   "se_activa": [
+    {
+     "activa": {
+      "quien": "marilla",
+      "verbo": "ir_a_buscar",
+      "paso": "va",
+      "momento": "cumplido"
+     }
+    },
+    {
+     "activa": {
+      "quien": "marilla",
+      "verbo": "traer",
+      "paso": "va",
+      "momento": "cumplido"
+     }
+    }
+   ],
+   "si": {
+    "c": "y",
+    "de": [
+     {
+      "c": "existe",
+      "camino": [
+       "white_sands",
+       "hechos",
+       "ws_corrio"
+      ],
+      "ventana": "hoy"
+     }
+    ]
+   },
+   "hablan": [
+    "narra",
+    "marilla",
+    "ana"
+   ],
+   "cuerpo": [
+    {
+     "q": "narra",
+     "t": "El mar está gris y verde, con espuma en las rocas. Ana se ha sentado en la arena roja, abrazada a las rodillas, y llora como si el mar entero le hubiera entrado por los ojos."
+    },
+    {
+     "q": "marilla",
+     "t": "(Marilla llega sin aliento, sujetándose el sombrero.) No se sale corriendo así, sin una palabra. Casi me matas del susto."
+    },
+    {
+     "q": "ana",
+     "t": "(Ana no levanta la cara.) Ella tiene razón, ¿no? Nadie me quiso nunca. Debe ser por algo. Por eso me van a devolver."
+    },
+    {
+     "q": "marilla",
+     "t": "(Marilla se queda de pie un momento. Después, con un suspiro, se sienta en la arena junto a Ana, con su falda negra y todo.)"
+    },
+    {
+     "q": "marilla",
+     "t": "La Sra. Pye dice lo que dice de todo el mundo, Ana. De mí también, a mis espaldas, y aquí me tienes."
+    },
+    {
+     "q": "ana",
+     "t": "Pero a mí me lo dijo delante. Y usted no le contestó nada."
+    },
+    {
+     "q": "marilla",
+     "t": "Le dije buenas tardes. Con la Sra. Pye, eso ya es decirle bastante."
+    },
+    {
+     "op": "«¿Usted también cree que debería volver al orfanato?»",
+     "propia": true,
+     "cuerpo": [
+      {
+       "q": "ana",
+       "t": "¿Usted también cree que debería volver al orfanato? Dígamelo de verdad. Prefiero saberlo aquí, con el mar, que allá, delante de la Sra. Spencer."
+      },
+      {
+       "q": "marilla",
+       "t": "(Marilla mira las olas un buen rato antes de contestar.) Lo que yo crea es asunto mío, y todavía no lo he decidido. Pero no lo voy a decidir por lo que diga una mujer en un camino. Eso te lo prometo."
+      },
+      {
+       "q": "ana",
+       "t": "(Ana se seca la cara con la manga.) Gracias, Srta. Cuthbert. Eso ya es bastante. Es casi una esperanza, y yo sé vivir con casi esperanzas."
+      },
+      {
+       "hace": {
+        "e": "suma",
+        "camino": [
+         "cualidad",
+         "marilla",
+         "afecto",
+         "ana"
+        ],
+        "n": 1
+       }
+      },
+      {
+       "hace": {
+        "e": "deja",
+        "camino": [
+         "white_sands",
+         "hechos",
+         "ws_pregunto"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "op": "Mirar el mar sin decir nada",
+     "cuerpo": [
+      {
+       "q": "ana",
+       "t": "(Ana se queda mirando las olas, que van y vienen. Al rato, sin darse cuenta, ya no llora.) El mar no se ofende de nada, ¿verdad? Le dicen cosas y él sigue yendo y viniendo, como si nada."
+      },
+      {
+       "q": "marilla",
+       "t": "Hm. Será que tiene mucho que hacer. (Pero Marilla no se levanta todavía. Se quedan las dos, mirando el agua.)"
+      },
+      {
+       "q": "ana",
+       "t": "Se quedó. No dijo nada bonito, pero se sentó en la arena conmigo. Eso tiene que contar.",
+       "piensa": true
+      },
+      {
+       "hace": {
+        "e": "suma",
+        "camino": [
+         "cualidad",
+         "marilla",
+         "afecto",
+         "ana"
+        ],
+        "n": 1
+       }
+      },
+      {
+       "hace": {
+        "e": "deja",
+        "camino": [
+         "white_sands",
+         "hechos",
+         "ws_miro_mar"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "op": "«Perdón por salir corriendo. No sé portarme como una niña decente.»",
+     "cuerpo": [
+      {
+       "q": "ana",
+       "t": "Perdón por salir corriendo, Srta. Cuthbert. Ya ve, no sé portarme como una niña decente. A lo mejor por eso…",
+       "acto": {
+        "verbo": "disculparse",
+        "args": [
+         "ana",
+         "marilla"
+        ]
+       }
+      },
+      {
+       "q": "marilla",
+       "t": "Una niña decente no se tira de una calesa, eso es verdad. (Marilla le arregla el sombrero torcido.) Pero tampoco se queda sentada oyendo eso. Ya está. Vamos, que se hace tarde."
+      },
+      {
+       "hace": {
+        "e": "deja",
+        "camino": [
+         "white_sands",
+         "hechos",
+         "ws_perdon"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "q": "marilla",
+     "t": "Vamos, levántate. Sacúdete esa arena, que no vas a llegar donde la Sra. Spencer hecha una playa."
+    }
+   ]
+  },
+  "white_sands.ws_spencer": {
+   "escena": "white_sands.ws_spencer",
+   "resumen": "Donde la Sra. Spencer: la equivocación; la Sra. Blewett la quiere de sirvienta; Marilla se la lleva a casa.",
+   "se_activa": [
+    {
+     "activa": {
+      "encargo": {
+       "quien": "marilla",
+       "tras": [
+        {
+         "escena": "white_sands.viaje_spencer"
+        },
+        {
+         "escena": "white_sands.viaje_spencer_duda"
+        }
+       ],
+       "hace": {
+        "verbo": "llevar_a",
+        "args": [
+         "marilla",
+         "ana",
+         "hotel_white_sands",
+         "calesa",
+         "costa"
+        ]
+       },
+       "etiqueta": "ida",
+       "estado": {
+        "camino": [
+         "encargo",
+         "white_sands",
+         "ida"
+        ]
+       }
+      },
+      "paso": "",
+      "momento": "cumplido"
+     }
+    }
+   ],
+   "si": {
+    "c": "y",
+    "de": [
+     {
+      "c": "cmp",
+      "camino": [
+       "cualidad",
+       "marilla",
+       "paciencia",
+       "ana"
+      ],
+      "op": ">=",
+      "valor": 1
+     }
+    ]
+   },
+   "hablan": [
+    "narra",
+    "spencer",
+    "ana",
+    "marilla",
+    "blewett"
+   ],
+   "cuerpo": [
+    {
+     "q": "narra",
+     "t": "El hotel White Sands, todavía cerrado antes de la temporada. En la puerta las espera la Sra. Spencer, menuda y sonriente, que vino a pasar el día con su prima. Detrás de ella, en la sombra del portal, una mujer flaca, de cara afilada, que no sonríe: la Sra. Peter Blewett."
+    },
+    {
+     "q": "spencer",
+     "t": "¡Marilla Cuthbert! ¡Qué sorpresa! Y la niña… ¡Qué bien te ves, Ana! ¿Cómo estás?"
+    },
+    {
+     "q": "ana",
+     "t": "(Ana hace una reverencia, sin sonreír.) Todo lo bien que se puede estar sin esperanzas, Sra. Spencer, gracias."
+    },
+    {
+     "q": "marilla",
+     "t": "Venimos por una equivocación, Sra. Spencer. Le mandamos a decir con su hermano Robert que queríamos un niño de diez u once años.",
+     "acto": {
+      "verbo": "informar",
+      "args": [
+       "marilla",
+       "spencer",
+       "equivocacion"
+      ]
+     }
+    },
+    {
+     "q": "spencer",
+     "t": "¡No me diga! Pues Robert me mandó a decir con su hija Nancy que ustedes querían una niña. ¿No fue así, Flora Jane? (Mira hacia dentro, a su hija.) Bueno, la culpa no es mía. Hice lo que pude, y seguí sus instrucciones."
+    },
+    {
+     "q": "marilla",
+     "t": "Fue culpa nuestra. Teníamos que haber venido nosotros, en vez de mandar recados de boca en boca. Lo que importa ahora es cómo se arregla. ¿Se puede devolver la niña al orfanato?"
+    },
+    {
+     "q": "spencer",
+     "t": "Supongo que sí, pero no creo que haga falta. (Se le ilumina la cara.) ¡Mire qué casualidad! La Sra. Peter Blewett estuvo en mi casa ayer, diciéndome que ojalá me hubiera encargado una niña para que la ayude. Tiene una familia grande y le cuesta conseguir quien la ayude. Ana le viene como anillo al dedo. ¡Es providencial!"
+    },
+    {
+     "q": "marilla",
+     "t": "La Sra. Peter Blewett. Dicen que es muy trabajadora y que hace trabajar más todavía a los demás. Que sus sirvientas no le duran, y que sus hijos son malcriados y peleadores.",
+     "piensa": true
+    },
+    {
+     "q": "narra",
+     "t": "La Sra. Blewett sale de la sombra del portal y se acerca. Mira a Ana de arriba abajo, sin una palabra."
+    },
+    {
+     "q": "blewett",
+     "t": "(Con sus ojos chicos y duros.) ¿Cuántos años tienes y cómo te llamas?"
+    },
+    {
+     "q": "ana",
+     "t": "Ana Shirley. Tengo once años."
+    },
+    {
+     "q": "blewett",
+     "t": "Hm. No pareces gran cosa, pero eres fibrosa. Las fibrosas son las que más rinden. Si te llevo, vas a tener que ser buena, ¿entiendes? Buena y lista, y respetuosa. Te vas a ganar lo que comes, no te equivoques. Y el bebé es de lo más caprichoso."
+    },
+    {
+     "q": "ana",
+     "t": "Tiene cara de barrena. De esas que se meten en la madera.",
+     "piensa": true
+    },
+    {
+     "op": "Mirar a Marilla, sin decir una palabra",
+     "propia": true,
+     "cuerpo": [
+      {
+       "q": "ana",
+       "t": "(Ana no dice nada. Se pone pálida y mira a Marilla, con unos ojos tan desesperados que Marilla tiene que bajar los suyos.)"
+      },
+      {
+       "hace": {
+        "e": "deja",
+        "camino": [
+         "white_sands",
+         "hechos",
+         "ws_mira"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "op": "«Sé barrer y lavar platos, y cuidar mellizos…»",
+     "cuerpo": [
+      {
+       "q": "ana",
+       "t": "(Con un hilo de voz.) Sé barrer y lavar platos, y cuidar mellizos. Tres pares. Pero… pero en Tejas Verdes hay un cerezo que se ve desde mi ventana."
+      },
+      {
+       "hace": {
+        "e": "deja",
+        "camino": [
+         "white_sands",
+         "hechos",
+         "ws_ofrece"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "q": "marilla",
+     "t": "(Marilla carraspea.) Bueno, no sé. No he dicho que Matthew y yo hayamos decidido del todo no quedarnos con ella. La verdad es que Matthew quiere quedársela. Me la llevo a casa y lo hablamos."
+    },
+    {
+     "q": "blewett",
+     "t": "(La Sra. Blewett aprieta los labios.) Como quiera. Pero no me la mande después, cuando ya tenga a otra."
+    },
+    {
+     "q": "spencer",
+     "t": "(La Sra. Spencer junta las manos.) Bueno, bueno, todo se arregla. Ana, niña, pórtate bien y no hables tanto, ¿eh? Marilla, ¿no se quedan a tomar el té? Flora Jane hizo bollos."
+    },
+    {
+     "q": "marilla",
+     "t": "Gracias, Sra. Spencer, pero no. Matthew nos espera, y el camino es largo."
+    },
+    {
+     "q": "spencer",
+     "t": "Entonces que les vaya bien. Y salúdeme a Matthew. (Se queda en la puerta, diciendo adiós con la mano, hasta que la Sra. Blewett se mete adentro sin despedirse.)"
+    },
+    {
+     "q": "ana",
+     "t": "(Ana sube a la calesa sin mirar atrás, apretando la maleta vieja contra las rodillas.)"
+    }
+   ]
+  },
+  "white_sands.ws_spencer_duda": {
+   "escena": "white_sands.ws_spencer_duda",
+   "resumen": "Donde la Sra. Spencer, sin paciencia: Marilla duda de verdad ante la Sra. Blewett.",
+   "se_activa": [
+    {
+     "activa": {
+      "encargo": {
+       "quien": "marilla",
+       "tras": [
+        {
+         "escena": "white_sands.viaje_spencer"
+        },
+        {
+         "escena": "white_sands.viaje_spencer_duda"
+        }
+       ],
+       "hace": {
+        "verbo": "llevar_a",
+        "args": [
+         "marilla",
+         "ana",
+         "hotel_white_sands",
+         "calesa",
+         "costa"
+        ]
+       },
+       "etiqueta": "ida",
+       "estado": {
+        "camino": [
+         "encargo",
+         "white_sands",
+         "ida"
+        ]
+       }
+      },
+      "paso": "",
+      "momento": "cumplido"
+     }
+    }
+   ],
+   "si": {
+    "c": "y",
+    "de": [
+     {
+      "c": "no",
+      "de": {
+       "c": "cmp",
+       "camino": [
+        "cualidad",
+        "marilla",
+        "paciencia",
+        "ana"
+       ],
+       "op": ">=",
+       "valor": 1
+      }
+     }
+    ]
+   },
+   "hablan": [
+    "narra",
+    "ana"
+   ],
+   "cuerpo": [
+    {
+     "q": "narra",
+     "t": "En casa de la Sra. Spencer está la Sra. Peter Blewett, que busca una niña para cuidarle los hijos. Mira a Ana de arriba abajo: «Esta me sirve. Es flaca, pero dura. Va a tener que ganarse lo que come.»"
+    },
+    {
+     "q": "narra",
+     "t": "Esta vez Marilla no contesta enseguida. Mira a la Sra. Blewett, mira a Ana, y por primera vez duda de verdad. El silencio dura una eternidad."
+    },
+    {
+     "op": "«¡Por favor, Srta. Cuthbert! Voy a ser buena, se lo juro…»",
+     "cuerpo": [
+      {
+       "q": "ana",
+       "t": "(Ana se aferra a la manga de Marilla.) ¡Por favor, Srta. Cuthbert! Voy a ser buena, se lo juro. Voy a doblar la ropa y a vestirme temprano y a no imaginar nada en horas de trabajo…"
+      },
+      {
+       "hace": {
+        "e": "deja",
+        "camino": [
+         "white_sands",
+         "hechos",
+         "blewett_suplica"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "op": "Quedarse callada, mirando el suelo",
+     "cuerpo": [
+      {
+       "q": "ana",
+       "t": "(Ana no dice nada. Se queda mirando el suelo, muy pálida, con los labios apretados para no llorar.)"
+      },
+      {
+       "hace": {
+        "e": "deja",
+        "camino": [
+         "white_sands",
+         "hechos",
+         "blewett_calla"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "op": "«Prefiero volver al orfanato antes que irme con esa señora.»",
+     "propia": true,
+     "cuerpo": [
+      {
+       "q": "ana",
+       "t": "(Ana levanta la barbilla.) Prefiero volver al orfanato antes que irme con esa señora."
+      },
+      {
+       "hace": {
+        "e": "deja",
+        "camino": [
+         "white_sands",
+         "hechos",
+         "blewett_orgullo"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "q": "narra",
+     "t": "Al fin Marilla dice, con la voz seca: «Me la llevo a casa. Lo hablaré con Matthew.» La Sra. Blewett se encoge de hombros."
+    }
+   ]
+  },
+  "white_sands.ws_vuelta": {
+   "escena": "white_sands.ws_vuelta",
+   "resumen": "De vuelta, en la calesa: «¿De verdad dijo que a lo mejor me dejaba quedarme?»",
+   "se_activa": [
+    {
+     "activa": {
+      "encargo": {
+       "quien": "marilla",
+       "tras": [
+        {
+         "escena": "white_sands.ws_spencer"
+        },
+        {
+         "escena": "white_sands.ws_spencer_duda"
+        }
+       ],
+       "hace": {
+        "verbo": "llevar_a",
+        "args": [
+         "marilla",
+         "ana",
+         "tejas_verdes",
+         "calesa",
+         "costa"
+        ]
+       },
+       "etiqueta": "vuelta",
+       "estado": {
+        "camino": [
+         "encargo",
+         "white_sands",
+         "vuelta"
+        ]
+       }
+      },
+      "paso": "camino",
+      "momento": "empieza"
+     }
+    }
+   ],
+   "si": {
+    "c": "y",
+    "de": [
+     {
+      "c": "cmp",
+      "camino": [
+       "cualidad",
+       "marilla",
+       "paciencia",
+       "ana"
+      ],
+      "op": ">=",
+      "valor": 1
+     }
+    ]
+   },
+   "en_marcha": true,
+   "hablan": [
+    "ana",
+    "marilla"
+   ],
+   "cuerpo": [
+    {
+     "q": "ana",
+     "t": "(Cuando el hotel ya queda atrás, Ana le habla en un susurro.) Srta. Cuthbert, ¿de verdad dijo que a lo mejor me dejaba quedarme en Tejas Verdes? ¿O me lo imaginé?"
+    },
+    {
+     "q": "marilla",
+     "t": "Más te vale aprender a sujetar esa imaginación, Ana, si no sabes distinguir lo que es de verdad de lo que no. Sí, oíste bien, y nada más. Todavía no está decidido."
+    },
+    {
+     "q": "ana",
+     "t": "Prefiero volver al orfanato antes que ir con ella. Parece una… una barrena."
+    },
+    {
+     "q": "marilla",
+     "t": "(A Marilla se le escapa algo que podría ser una sonrisa, y se lo traga.) No se habla así de una señora, y menos de una que no conoces."
+    },
+    {
+     "op": "«Voy a tratar de ser todo lo que usted quiera, si me deja quedarme.»",
+     "propia": true,
+     "cuerpo": [
+      {
+       "q": "ana",
+       "t": "Voy a tratar de ser todo lo que usted quiera, Srta. Cuthbert. Todo. Si me deja quedarme."
+      },
+      {
+       "q": "marilla",
+       "t": "Hm. Ya veremos. Ahora quédate quieta, que la yegua se pone nerviosa con tanto movimiento."
+      },
+      {
+       "hace": {
+        "e": "deja",
+        "camino": [
+         "white_sands",
+         "hechos",
+         "ws_promete"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "op": "Mirar el mar en silencio, todo el camino",
+     "cuerpo": [
+      {
+       "q": "ana",
+       "t": "(Ana no dice nada más. Mira el mar, que se va poniendo dorado con la tarde, como si quisiera guardárselo entero por si acaso.)"
+      },
+      {
+       "q": "marilla",
+       "t": "Ni una palabra en todo el camino. En ella, eso es mucho decir.",
+       "piensa": true
+      },
+      {
+       "hace": {
+        "e": "deja",
+        "camino": [
+         "white_sands",
+         "hechos",
+         "ws_calla_vuelta"
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "white_sands.ws_noche": {
+   "escena": "white_sands.ws_noche",
+   "resumen": "Esa noche, Marilla le dice a Matthew que se queda con Ana (a ella, todavía no).",
+   "se_activa": [
+    {
+     "activa": {
+      "encargo": {
+       "quien": "marilla",
+       "tras": [
+        {
+         "escena": "white_sands.ws_spencer"
+        },
+        {
+         "escena": "white_sands.ws_spencer_duda"
+        }
+       ],
+       "hace": {
+        "verbo": "llevar_a",
+        "args": [
+         "marilla",
+         "ana",
+         "tejas_verdes",
+         "calesa",
+         "costa"
+        ]
+       },
+       "etiqueta": "vuelta",
+       "estado": {
+        "camino": [
+         "encargo",
+         "white_sands",
+         "vuelta"
+        ]
+       }
+      },
+      "paso": "",
+      "momento": "cumplido"
+     }
+    }
+   ],
+   "si": {
+    "c": "y",
+    "de": []
+   },
+   "hablan": [
+    "narra",
+    "ana"
+   ],
+   "cuerpo": [
+    {
+     "q": "narra",
+     "t": "Esa noche, en el corral, Marilla habla largo con Matthew. «Me la quedo», le dice al fin. «Alguien tiene que criarla, y no voy a dársela a esa mujer.» Matthew sonríe, sin decir nada. Pero a Ana, por razones que solo ella sabe, Marilla no le dice nada todavía."
+    },
+    {
+     "hace": {
+      "e": "suma",
+      "camino": [
+       "cualidad",
+       "marilla",
+       "afecto",
+       "ana"
+      ],
+      "n": 1
+     }
+    },
+    {
+     "hace": {
+      "e": "log",
+      "texto": "Marilla llevó a Ana a White Sands; la Sra. Blewett la quería de sirvienta, y Marilla no se la dio. Esa noche le dijo a Matthew que se la quedaba; a Ana, todavía no."
+     }
+    },
+    {
+     "q": "ana",
+     "t": "No me dijo nada en todo el camino de vuelta. ¿Me devolverán mañana?",
+     "piensa": true
+    }
+   ]
+  }
+ },
+ "voces": [
+  {
+   "llamada": {
+    "verbo": "pedir",
+    "args": [
+     {
+      "comodin": true
+     },
+     "ana",
+     {
+      "verbo": "ir_a",
+      "args": [
+       "ana",
+       {
+        "comodin": true
+       }
+      ]
+     }
+    ]
+   },
+   "lineas": [
+    {
+     "t": "Ven, Ana.",
+     "si": true
+    }
+   ],
+   "de": "comun"
+  },
+  {
+   "llamada": {
+    "verbo": "ordenar",
+    "args": [
+     {
+      "comodin": true
+     },
+     "ana",
+     {
+      "verbo": "ir_a",
+      "args": [
+       "ana",
+       {
+        "comodin": true
+       }
+      ]
+     }
+    ]
+   },
+   "lineas": [
+    {
+     "t": "Ana Shirley. Ven aquí. Ahora.",
+     "si": true
+    }
+   ],
+   "de": "comun"
+  },
+  {
+   "llamada": {
+    "verbo": "pedir",
+    "args": [
+     {
+      "comodin": true
+     },
+     "ana",
+     {
+      "verbo": "subir",
+      "args": [
+       "ana",
+       {
+        "comodin": true
+       }
+      ]
+     }
+    ]
+   },
+   "lineas": [
+    {
+     "t": "Sube, Ana.",
+     "si": true
+    }
+   ],
+   "de": "comun"
+  },
+  {
+   "llamada": {
+    "verbo": "ordenar",
+    "args": [
+     {
+      "comodin": true
+     },
+     "ana",
+     {
+      "verbo": "subir",
+      "args": [
+       "ana",
+       {
+        "comodin": true
+       }
+      ]
+     }
+    ]
+   },
+   "lineas": [
+    {
+     "t": "Ana Shirley. Sube. Ahora.",
+     "si": true
+    }
+   ],
+   "de": "comun"
+  },
+  {
+   "llamada": {
+    "verbo": "pedir",
+    "args": [
+     {
+      "comodin": true
+     },
+     "ana",
+     {
+      "verbo": "seguir",
+      "args": [
+       "ana",
+       {
+        "comodin": true
+       }
+      ]
+     }
+    ]
+   },
+   "lineas": [
+    {
+     "t": "Ven conmigo, Ana.",
+     "si": true
+    }
+   ],
+   "de": "comun"
+  },
+  {
+   "llamada": {
+    "verbo": "ordenar",
+    "args": [
+     {
+      "comodin": true
+     },
+     "ana",
+     {
+      "verbo": "seguir",
+      "args": [
+       "ana",
+       {
+        "comodin": true
+       }
+      ]
+     }
+    ]
+   },
+   "lineas": [
+    {
+     "t": "Ana Shirley. Ven conmigo. Ahora.",
+     "si": true
+    }
+   ],
+   "de": "comun"
+  },
+  {
+   "llamada": {
+    "verbo": "ir_a_buscar",
+    "args": [
+     {
+      "comodin": true
+     },
+     "ana",
+     {
+      "comodin": true
+     }
+    ]
+   },
+   "paso": "va",
+   "lineas": [
+    {
+     "t": "Aquí estás.",
+     "si": true
+    }
+   ],
+   "de": "comun"
+  },
+  {
+   "llamada": {
+    "verbo": "traer",
+    "args": [
+     {
+      "comodin": true
+     },
+     "ana",
+     {
+      "comodin": true
+     }
+    ]
+   },
+   "paso": "va",
+   "lineas": [
+    {
+     "t": "Aquí estás. Vamos.",
+     "si": true
+    }
+   ],
+   "de": "comun"
+  },
+  {
+   "llamada": {
+    "verbo": "enganchar",
+    "args": [
+     "marilla",
+     "calesa"
+    ]
+   },
+   "lineas": [
+    {
+     "t": "(Marilla engancha la yegua alazana a la calesa, sin apuro y sin perder un movimiento.)",
+     "si": true
+    }
+   ],
+   "de": "comun"
+  },
+  {
+   "llamada": {
+    "verbo": "pedir",
+    "args": [
+     "matthew",
+     "ana",
+     {
+      "verbo": "subir",
+      "args": [
+       "ana",
+       {
+        "comodin": true
+       }
+      ]
+     }
+    ]
+   },
+   "lineas": [
+    {
+     "t": "(Matthew le tiende la mano, sin mirarla, para ayudarla a subir.) Bueno, pues… sube.",
+     "si": true
+    }
+   ],
+   "de": "llegada"
+  },
+  {
+   "llamada": {
+    "verbo": "pedir",
+    "args": [
+     "marilla",
+     "ana",
+     {
+      "verbo": "ir_a",
+      "args": [
+       "ana",
+       "cocina"
+      ]
+     }
+    ]
+   },
+   "lineas": [
+    {
+     "t": "¡Ana! Ven, que nos vamos.",
+     "si": true
+    }
+   ],
+   "de": "white_sands"
+  },
+  {
+   "llamada": {
+    "verbo": "ir_a_buscar",
+    "args": [
+     "marilla",
+     "ana",
+     {
+      "comodin": true
+     }
+    ]
+   },
+   "paso": "va",
+   "lineas": [
+    {
+     "t": "Así que aquí estabas. La calesa lleva media hora esperando.",
+     "si": {
+      "c": "cmp",
+      "camino": [
+       "encargo",
+       "white_sands",
+       "busca"
+      ],
+      "op": "=",
+      "valor": "en_curso"
+     }
+    },
+    {
+     "t": "Aquí estás. Vamos, que la calesa está lista.",
+     "si": {
+      "c": "y",
+      "de": [
+       {
+        "c": "cmp",
+        "camino": [
+         "encargo",
+         "white_sands",
+         "ida"
+        ],
+        "op": "=",
+        "valor": "en_curso"
+       },
+       {
+        "c": "no",
+        "de": {
+         "c": "existe",
+         "camino": [
+          "white_sands",
+          "hechos",
+          "ws_corrio"
+         ],
+         "ventana": "hoy"
+        }
+       }
+      ]
+     }
+    }
+   ],
+   "de": "white_sands"
+  },
+  {
+   "llamada": {
+    "verbo": "pedir",
+    "args": [
+     "marilla",
+     "ana",
+     {
+      "verbo": "seguir",
+      "args": [
+       "ana",
+       "marilla"
+      ]
+     }
+    ]
+   },
+   "lineas": [
+    {
+     "t": "Ven, Ana. Nos vamos a White Sands.",
+     "si": {
+      "c": "cmp",
+      "camino": [
+       "encargo",
+       "white_sands",
+       "ida"
+      ],
+      "op": "=",
+      "valor": "en_curso"
+     }
+    }
+   ],
+   "de": "white_sands"
+  },
+  {
+   "llamada": {
+    "verbo": "traer",
+    "args": [
+     "marilla",
+     "ana",
+     {
+      "comodin": true
+     }
+    ]
+   },
+   "paso": "va",
+   "lineas": [
+    {
+     "t": "Así que aquí estabas. La calesa lleva media hora esperando.",
+     "si": {
+      "c": "cmp",
+      "camino": [
+       "encargo",
+       "white_sands",
+       "busca"
+      ],
+      "op": "=",
+      "valor": "en_curso"
+     }
+    }
+   ],
+   "de": "white_sands"
+  },
+  {
+   "llamada": {
+    "verbo": "pedir",
+    "args": [
+     "marilla",
+     "ana",
+     {
+      "verbo": "ir_a",
+      "args": [
+       "ana",
+       {
+        "comodin": true
+       }
+      ]
+     }
+    ]
+   },
+   "lineas": [
+    {
+     "t": "¡Ana! A la calesa, que nos vamos.",
+     "si": {
+      "c": "cmp",
+      "camino": [
+       "encargo",
+       "white_sands",
+       "ida"
+      ],
+      "op": "=",
+      "valor": "en_curso"
+     }
+    }
+   ],
+   "de": "white_sands"
+  },
+  {
+   "llamada": {
+    "verbo": "pedir",
+    "args": [
+     "marilla",
+     "ana",
+     {
+      "verbo": "subir",
+      "args": [
+       "ana",
+       "calesa"
+      ]
+     }
+    ]
+   },
+   "lineas": [
+    {
+     "t": "Sube, Ana. No tenemos todo el día.",
+     "si": true
+    },
+    {
+     "t": "Vamos, sube. Y sacúdete esa arena.",
+     "si": {
+      "c": "existe",
+      "camino": [
+       "white_sands",
+       "hechos",
+       "ws_corrio"
+      ],
+      "ventana": "hoy"
+     }
+    }
+   ],
+   "de": "white_sands"
+  },
+  {
+   "llamada": {
+    "verbo": "ordenar",
+    "args": [
+     "marilla",
+     "ana",
+     {
+      "verbo": "subir",
+      "args": [
+       "ana",
+       "calesa"
+      ]
+     }
+    ]
+   },
+   "lineas": [
+    {
+     "t": "Ana Shirley. Sube. Ahora.",
+     "si": true
+    },
+    {
+     "t": "(Marilla no dice nada. Solo señala el asiento.)",
+     "si": {
+      "c": "no",
+      "de": {
+       "c": "cmp",
+       "camino": [
+        "cualidad",
+        "marilla",
+        "paciencia",
+        "ana"
+       ],
+       "op": ">=",
+       "valor": 1
+      }
+     }
+    }
+   ],
+   "de": "white_sands"
+  },
+  {
+   "llamada": {
+    "verbo": "bajar",
+    "args": [
+     "ana"
+    ]
+   },
+   "lineas": [
+    {
+     "t": "(Ana baja despacio, apretando la maleta vieja.)",
+     "si": {
+      "c": "cmp",
+      "camino": [
+       "encargo",
+       "white_sands",
+       "ida"
+      ],
+      "op": "=",
+      "valor": "cumplido"
+     }
+    }
+   ],
+   "de": "white_sands"
+  }
+ ]
+};
+const LG_HISTORIAS = ['camino_blanco'];   // (the ones that run here: the others are still in the script)
+const LG = { M: null, talk: null, narra: null, u: null, menu: false };
+// the engine's clock: minutes since the start of day 1, at midnight (dayT 0 is dawn, at six)
+const lgAhora = () => dayT * 1440 + 360;
+// where someone is, as a place of the language (or the game's own name for it, if the language has none)
+function lgLugarDe(k){
+  const b = wmBody(k); if (!b) return null;
+  const sc = dlgEscena(k);
+  if (sc === 'camino') { const tr = roadTramo((k === 'ana' ? ana.roadS : b.roadS) ?? 0); return tr.kind === 'avenida' ? 'camino_blanco' : tr.name === 'Newbridge' ? 'newbridge' : 'camino_bright_river'; }
+  if (sc === 'br') return 'estacion_bright_river';
+  if (sc === 'out') {
+    if (dist(b.x, b.y, GG.x, GG.y) < 400) return 'tejas_verdes';   // (the Camino Blanco starts at its door: the yard is the house's)
+    const R = ROADS.blanco; if (R && R.some((p, i) => i && segDist(b.x, b.y, R[i - 1], p) < 90)) return 'camino_blanco';
+    if (PLACES.lago && dist(b.x, b.y, PLACES.lago[1], PLACES.lago[2]) < 260) return 'estanque_barry';
+    return 'avonlea';
+  }
+  return sc === 'gg' ? 'cocina' : sc;   // (in a house: its room)
+}
+// who sees and hears whom: in the same scene, close
+const lgJuntos = (a, b) => { const A = wmBody(a), B = wmBody(b); return !!A && !!B && dlgEscena(a) === dlgEscena(b) && dist(A.x, A.y, B.x, B.y) < 260; };
+// the world of the game, for the engine (the interface: tools/lenguaje/mundo_simulado.js)
+function MundoJuego(){
+  return {
+    funciones: { ve: lgJuntos, oye: lgJuntos, sola: p => !(p === 'ana' && diana.follow) && !Object.keys(PEOPLE).some(q => q !== p && lgJuntos(p, q)) },
+    minutos: () => 10, tramo: () => [],   // (the stories here do not travel yet: the road and the buggy are the game's)
+    empezar(acc){
+      if (acc.decir) {
+        const { q, t, piensa } = acc.decir;
+        if (q === 'narra') {   // (a card, until it is read: the game's, on a talk of its own, so that closing it does not end the scene's)
+          const tmp = {}; narrar(tmp, t); if (tmp.narra) { LG.narra = tmp; acc.narra = true; } else acc.hecho = true; return;
+        }
+        sayB(talkQ(q), (piensa ? '~' : '') + t); acc.fin = lgAhora() + (lineDur(t) + .35) / MIN_S;
+        if (typeof relatoLinea === 'function' && RELATO.on) relatoLinea(`${wmName(q)}${piensa ? ' (piensa)' : ''}: ${t}`, { quien: q, dice: t });
+        return;
+      }
+      if (acc.silencio) { acc.fin = lgAhora() + acc.dura; return; }
+      if (acc.nombrar) {   // (the book's name; or the player writes one)
+        const listo = n => { nombrar(acc.nombrar, n); acc.nombre = nombreDe(acc.nombrar); acc.hecho = true; };
+        if (acc.pedir && !navigator.webdriver && !ana.hidden && !ANA_AUTO) pedirNombre(acc.nombrar, listo); else listo();
+        return;
+      }
+      console.warn('[avonlea] lenguaje: el juego todavía no hace «' + acc.verbo + '»'); acc.hecho = true;
+    },
+    listo: acc => acc.hecho || (acc.narra ? !LG.narra?.narra : acc.fin != null && lgAhora() >= acc.fin),
+    cuando: () => lgAhora() + .25,
+    parar(){}, seguir(){},
+    // a scene that cuts in: the game's own talk on the road, if there is one, is cut (and the loose line of a moment ago)
+    cortar(){
+      const ts = TALKS.filter(t => t !== LG.talk && (t.ch === 'viaje' || !t.ch)); if (!ts.length && !amb.cur) return false;
+      for (const t of ts) { t.interrupted = true; talkEnd(t); }
+      if (amb.cur) ambEnd(); bubbles = [];
+      return ts.length > 0;
+    },
+    // while an engine's scene is said, it holds the road's channel (the game's talks wait); one of the game's, more
+    // important, can still cut it (lenguajeTick sees it)
+    escena(m, id){
+      if (m === 'empieza') {
+        LG.talk = { ch: 'viaje', lines: [], i: -1, wait: 1e9, el: 0, hold: [], lenguaje: id }; TALKS.push(LG.talk);
+        // (its card, as the game's talks have theirs: while it is read, the world waits —narraPausa—)
+        Object.defineProperty(LG.talk, 'narra', { get: () => LG.narra?.narra || null, set: v => { if (LG.narra) LG.narra.narra = v; }, enumerable: true });
+        dlgDichas()[id.split('.')[1]] = true;   // (for the script: «dicha:cb_libro»)
+        if (D_ESC(id)?.interrumpe && GAME_SPEED > 1 && !navigator.webdriver) setSpeed(1);   // (something that matters: at its pace)
+        logEv(D_ESC(id).resumen, []);
+      } else if (LG.talk) { const t = LG.talk; LG.talk = null; if (TALKS.includes(t)) talkEnd(t); }
+    },
+    efecto(e){ if (e.e === 'log') logEv(e.texto, []); if (e.e === 'marca') cap1Mark(e.id); },
+  };
+}
+const D_ESC = id => LENGUAJE.escenas[id];
+// the engine: the one kept with the game, or a new one
+function lgEmpezar(){
+  let g = null; try { g = JSON.parse(localStorage.getItem('avonlea') || 'null')?.lenguaje; } catch (e) {}
+  try { if (g) LG.M = Motor.cargar(LENGUAJE, g, MundoJuego); } catch (e) { console.warn('[avonlea] lenguaje: no se pudo cargar lo guardado', e); }
+  if (!LG.M) LG.M = Motor(LENGUAJE, { historias: LG_HISTORIAS }, MundoJuego);
+  if (LG.M.estado().escena) MundoJuego().escena('empieza', LG.M.estado().escena.id);   // (a scene kept in the middle: it holds the channel again)
+}
+// a new game, or the chapter played again from the start: the engine too
+function lgReiniciar(){ try { if (LG.talk && TALKS.includes(LG.talk)) talkEnd(LG.talk); LG.talk = null; LG.menu = false; LG.M = Motor(LENGUAJE, { historias: LG_HISTORIAS }, MundoJuego); } catch (e) {} }
+// what save() keeps (called from anywhere: before this file has run, nothing)
+function lgGuardar(){ try { return LG.M ? LG.M.guardar() : undefined; } catch (e) { return undefined; } }
+function lenguajeTick(){
+  if (!LENGUAJE) return;
+  if (!LG.M) lgEmpezar();
+  const M = LG.M;
+  // the world tells the engine where everyone is: arriving somewhere is a moment («ana pasa camino_blanco»)
+  // (the first time, where each one already was: not a moment)
+  for (const k of Object.keys(LENGUAJE.personas)) { const l = lgLugarDe(k), antes = M.get(['mundo', k, 'lugar']); if (l && l !== antes) M.llega(k, l, antes == null); }
+  // one of the game's scenes cut the engine's (it ended its talk)
+  if (LG.talk && !TALKS.includes(LG.talk)) { LG.talk = null; M.cortarEscena(); }
+  const u = LG.u = M.alTiempo(lgAhora());
+  if (u.escena?.ops && !LG.menu) lgOpciones(u.escena.ops);
+}
+// a choice in a scene: the player's (with no one to ask, or Ana on her own: what she would do)
+function lgOpciones(ops){
+  if (navigator.webdriver || ana.hidden || ANA_AUTO) { LG.u = LG.M.decideSola(); return; }
+  LG.menu = true; let ya = false;
+  const una = i => { if (ya) return; ya = true; close(); LG.menu = false; LG.u = LG.M.elegir(i); };
+  say('ana', '¿Qué dice Ana?', ops.map((o, i) => [nombreMay(o), () => una(i)]));
+  if (auto.on) setTimeout(() => { if (!ya) { ya = true; close(); LG.menu = false; LG.u = LG.M.decideSola(); } }, 10000);
+}
 
 /* ---------- checkpoints: the game saved as it is now, with a name, to come back to it and try something else from
    there (another answer, another day); each one with the day and the state of the world told for a person to read
