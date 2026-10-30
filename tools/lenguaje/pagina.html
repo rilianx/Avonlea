@@ -61,7 +61,7 @@ const D = /*@DATOS*/null;
 const $ = id => document.getElementById(id), esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const ESCENARIOS = { normal: {}, lejos: { lugares: { ana: 'escuela' } }, sin_paciencia: { estado: { 'cualidad.marilla.paciencia.ana': 0 } }, quiere: { estado: { 'cualidad.ana.afecto.marilla': 3 } },
   llegada: { dia: 1, hora: 17, lugares: { ana: 'estacion_bright_river', matthew: 'estacion_bright_river', calesa: 'estacion_bright_river' },
-    estado: { 'estado.ana_en_tv': 'llegando', 'comun.hechos.primera_noche': null, 'mundo.calesa.listo': 'si', 'cualidad.ana.afecto.matthew': 3 } },
+    estado: { 'estado.ana_en_tv': 'llegando', 'comun.hechos.encontro_a_ana': 1, 'comun.hechos.primera_noche': null, 'mundo.calesa.listo': 'si', 'cualidad.ana.afecto.matthew': 3 } },
   paseo: { hora: 20 } };
 let M, u, visto = 0;
 function empezar(){ $('relato').innerHTML = ''; visto = 0; M = Motor(D, { ...ESCENARIOS[$('esc').value] }); u = M.avanzar(); pintar(); }

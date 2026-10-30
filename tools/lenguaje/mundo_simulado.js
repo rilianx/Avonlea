@@ -22,6 +22,9 @@
 //                  y dice si cortó algo. Opcional.
 //   escena(momento, id)   una escena del motor empieza, termina o se corta. Opcional.
 //   efecto(e)      un efecto que el mundo también anota (log, marca). Opcional.
+//   voz(q, texto)  la voz de un verbo o un acto («Sube, Ana»): el juego la dice en una burbuja. Opcional.
+//   encargo(momento, quien, id)   empieza o termina un encargo de una historia: en el juego, quien lo tiene está
+//                  ocupado (su rutina espera, como con una meta del planificador). Opcional.
 //   inicio         dónde está cada uno y el estado al empezar (lo que el escenario no diga). Opcional.
 // Lo que el mundo tiene que recordar de una acción va en la acción misma (son datos: se guardan con la partida).
 // El mundo avisa al motor con api.llega(quien, lugar): alguien llegó a un lugar o pasó por él.

@@ -3,7 +3,7 @@ import { llegada } from './historia'
 import { escena } from './escenas.ids'
 import { _, defEscena, momento, tras, voz, y } from '../../comun/lenguaje'
 import { subir } from '../../comun/verbos'
-import { pedir } from '../../comun/actos'
+import { ordenar, pedir } from '../../comun/actos'
 
 export const escenas = {
   ll_pelo: defEscena(escena.ll_pelo, {
@@ -55,4 +55,5 @@ export const escenas = {
 
 export const voces = [
   voz(pedir('matthew', 'ana', subir('ana', _)), { lineas: [{ t: "(Matthew le tiende la mano, sin mirarla, para ayudarla a subir.) Bueno, pues… sube.", si: true }] }),
+  voz(ordenar('matthew', 'ana', subir('ana', _)), { lineas: [{ t: "(Matthew sigue con la mano tendida.) Bueno, pues… se hace tarde. Marilla nos espera.", si: true }] }),
 ]

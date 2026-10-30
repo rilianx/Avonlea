@@ -13,7 +13,7 @@ const D = datos(path.resolve(__dirname, '..', '..', 'docs', 'lenguaje'));
 // (la llegada: el primer día, en la estación de Bright River, con la calesa enganchada; a Matthew, Ana lo quiere desde
 // el primer momento)
 const LLEGADA = { dia: 1, hora: 17, lugares: { ana: 'estacion_bright_river', matthew: 'estacion_bright_river', calesa: 'estacion_bright_river' },
-  estado: { 'estado.ana_en_tv': 'llegando', 'comun.hechos.primera_noche': null, 'mundo.calesa.listo': 'si', 'cualidad.ana.afecto.matthew': 3 } };
+  estado: { 'estado.ana_en_tv': 'llegando', 'comun.hechos.encontro_a_ana': 1, 'comun.hechos.primera_noche': null, 'mundo.calesa.listo': 'si', 'cualidad.ana.afecto.matthew': 3 } };
 const ESCENARIOS = {
   // Ana sola: a Marilla todavía no la quiere (afecto 0), así que a un pedido dice que no, y a una orden, que sí
   sola: { auto: true, espera: { fin: 'terminada', dichas: ['viaje_spencer', 'ws_t1', 'ws_t2', 'ws_t3', 'ws_mar', 'ws_pye', 'ws_orilla', 'ws_spencer', 'ws_vuelta', 'ws_noche', 'ws_no_sube'] } },

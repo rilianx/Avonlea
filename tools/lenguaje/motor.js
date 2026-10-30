@@ -54,7 +54,7 @@
         case 'existe': { const v = get(c.camino); return c.ventana === 'hoy' ? v === dia() : v != null; }
         case 'cmp': {
           const a = get(c.camino), b = val(c.valor);
-          if (c.op === '=') return a === b; if (c.op === '!=') return a !== b;
+          if (c.op === '=' || c.op === '!=') return (a === b || (c.camino[0] === 'mundo' && c.camino[2] === 'lugar' && D.lugares[a]?.dentro === b)) === (c.op === '=');   // (estar en un lugar es estar en él o en algo de adentro: la cocina es Tejas Verdes)
           const x = ordinal(c.camino, a), y = ordinal(c.camino, b); if (x < 0 || y < 0) return false;
           return { '<': x < y, '<=': x <= y, '>': x > y, '>=': x >= y }[c.op];
         }
@@ -112,7 +112,7 @@
         const p = patron(v.llamada, ll); if (p < 0) continue;
         for (const l of v.lineas) if (cumple(l.si)) { const s = p * 10 + (v.de !== 'comun' ? 100 : 0) + (l.si !== true ? 1 : 0); if (s > top) { top = s; mejor = l; } }
       }
-      if (mejor) registro.push({ tipo: 'linea', q: ll.args[0], t: mejor.t, hora: reloj() });
+      if (mejor) { registro.push({ tipo: 'linea', q: ll.args[0], t: mejor.t, hora: reloj() }); mundo.voz?.(ll.args[0], mejor.t); }   // (en el juego, una burbuja)
     }
     const texto = (s, ll) => s.replace(/\{(\w+)\}/g, (_, n) => nombre(val(ll.args[D.verbos[ll.verbo].params.indexOf(n)])));
 
@@ -313,6 +313,7 @@
       const e = D.historias[h].encargo[etiqueta];
       set(['encargo', h, etiqueta], 'en_curso');
       nuevaTarea(e.hace, { encargo: { historia: h, etiqueta }, h, etiqueta, quien: e.quien });
+      mundo.encargo?.('empieza', e.quien, h + '.' + etiqueta);   // (en el juego: está ocupado, su rutina espera)
     }
     function revisarHistorias(){
       for (const [h, H] of Object.entries(D.historias)) {
@@ -326,7 +327,7 @@
           if (termina || falla) {
             set(['historia', h], termina ? 'terminada' : 'fallida');
             if (termina) for (const e of H.deja || []) aplicar(e);
-            for (const T of tareas) if (T.h === h) T.fin = true;
+            for (const T of tareas) if (T.h === h && !T.fin) { T.fin = true; mundo.encargo?.('termina', T.quien, h + '.' + T.etiqueta); }
             nota(termina ? `■ termina la historia: ${(H.deja || []).map(e => e.camino.slice(-1)[0] + (e.valor !== undefined ? ' = ' + e.valor : '')).join(', ')}${H.punto ? ` (punto: ${H.punto})` : ''}` : '✘ la historia se pierde', 'titulo');
             fin = termina ? 'terminada' : 'fallida';
           }
@@ -351,6 +352,7 @@
         if (!interrumpe && mo.tipo === 'tras') for (const p of porTras.filter(x => D.historias[x.h].encargo[x.et].tras.some(s => s.escena === mo.escena))) { porTras.splice(porTras.indexOf(p), 1); empezarEncargo(p.h, p.et); }
         for (const e of Object.values(D.escenas)) {
           if (interrumpe && !e.interrumpe) continue;
+          if (escenario.omitir?.includes(e.escena)) continue;   // (las que este mundo hace a su manera: en el juego, las charlas del camino)
           const [h, id] = e.escena.split('.'), r = e.repetir || 'una_vez', dicha = get([h, 'dichas', id]);
           if (get(['historia', h]) !== 'en_curso' || (r === 'una_vez' && dicha != null) || (r === 'dia' && dicha === dia())) continue;
           if (!e.se_activa.some(a => coincide(a.activa, mo)) || !cumple(e.si)) continue;
@@ -436,13 +438,13 @@
         if (escena) { seguirEscena(); if (escena && escena.ops) return estadoUI(); }
         if (escena && cola.length && elegirEscena(true)) continue;   // (una que interrumpe: no espera)
         revisarHistorias();
-        if (fin) return estadoUI();
+        if (fin && tope == null) return estadoUI();   // (al probar, una historia que termina es el final; en el juego, el mundo sigue)
         if (!escena && cola.length && elegirEscena()) continue;
         const lista = tareas.filter(T => !T.fin && !T.pregunta && !detenida(T) && ((T.accion && mundo.listo(T.accion)) || (T.hasta ? cumple(T.hasta) : T.despierta <= t)));
         if (lista.length) {
           const T = lista[0]; T.hasta = null; T.accion = null;
           const w = correr(T);
-          if ('fin' in w) { T.fin = true; if (T.etiqueta) set(['encargo', T.h, T.etiqueta], w.fin ? 'cumplido' : 'fallido'); continue; }
+          if ('fin' in w) { T.fin = true; if (T.etiqueta) { set(['encargo', T.h, T.etiqueta], w.fin ? 'cumplido' : 'fallido'); mundo.encargo?.('termina', T.quien, T.h + '.' + T.etiqueta); } continue; }
           if (w.min != null) T.despierta = t + w.min;
           else if (w.accion) { T.accion = w.accion; T.despierta = mundo.cuando(w.accion); }
           else if (w.hasta) T.hasta = w.hasta;
@@ -496,9 +498,13 @@
       // en el juego: el mundo cortó la escena en curso (una escena suya, más importante)
       cortarEscena(){ if (escena) cortar(); return avanzar(); },
       estado: () => estadoUI(),
+      // quiénes tienen un encargo de una historia en curso (en el juego: están ocupados; su rutina espera)
+      ocupados: () => [...new Set(tareas.filter(T => !T.fin && T.etiqueta).map(T => T.quien))],
       // el mundo avisa: alguien llegó a un lugar, o pasó por él (en el juego, cada vez que cambia el lugar de alguien);
       // con «ya_estaba», sin momento: es dónde estaba al empezar, no que haya llegado
       llega(q, a, ya_estaba){ if (ya_estaba) set(['mundo', q, 'lugar'], a); else llega(q, a); },
+      // el mundo dice cómo está lo que es suyo (en qué va cada uno, la calesa lista, el afecto, un estado del juego); null lo borra
+      vale(camino, v){ if (v == null) delete S[k(camino)]; else if (get(camino) !== v) set(camino, v); },
       // la partida entera, como datos (JSON): se vuelve a cargar con Motor.cargar
       guardar: () => JSON.stringify({ v: 1, escenario, S, registro, tareas, cola, porTras, escena, pregunta, fin, sigId, t, respuestas }),
       registro, get, nombre, lugares: () => Object.keys(D.lugares),
@@ -510,7 +516,8 @@
     };
   }
   // una partida guardada (lo que devolvió guardar()), con los mismos datos y el mismo mundo
-  Motor.cargar = (D, json, Mundo = null) => { const g = JSON.parse(json); return Motor(D, g.escenario, Mundo, g); };
+  // (cambios: lo que cambió del escenario desde que se guardó —en el juego, las historias que ya pasaron al lenguaje—)
+  Motor.cargar = (D, json, Mundo = null, cambios = {}) => { const g = JSON.parse(json); return Motor(D, { ...g.escenario, ...cambios }, Mundo, g); };
   if (typeof module !== 'undefined' && module.exports) module.exports = { Motor };
   else raiz.Motor = Motor;
 })(this);

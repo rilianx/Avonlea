@@ -91,8 +91,10 @@ lineas: libro:estacion
 marcas: 8=matthew_nina
 al_empezar: marca jefe_explica | El jefe de estación le explicó a Matthew que solo había llegado una niña; Matthew decidió llevarla a casa y que Marilla aclarara el error.
 al_terminar: ana sit=false
-al_terminar: meta matthew llevar ana,cocina | | llevar a la niña a Tejas Verdes en la calesa (cap. 2) | 3
 al_terminar: estado viaje primer_viaje
+# (el viaje a Tejas Verdes ya no es una meta de aquí: es el encargo «trae» de la historia de la llegada, en el lenguaje
+# —docs/lenguaje/historias/llegada/—, que empieza con «primer_viaje»; Matthew le pide a Ana que suba, y la lleva en la
+# calesa con el planificador, src/js/67-lenguaje.js)
 # --- el primer viaje, de Bright River a Tejas Verdes (cap. 2): solo mientras dura («primer_viaje»: lo deja la escena
 # de la estación, y se olvida al llegar a Tejas Verdes)
 # --- la Avenida (el túnel de manzanos), el silencio por Newbridge y los campos, y el nombre, una milla antes de casa:

@@ -460,6 +460,12 @@ guardando la partida y cargándola en un motor nuevo cada pocas vueltas; las dos
 | El motor necesita | El juego lo pone con |
 |---|---|
 | dónde está cada uno (`llega`) | su posición: un tramo del camino de Bright River (la Avenida, Newbridge), la estación, el Camino Blanco del mapa de Avonlea, la laguna, Tejas Verdes, una pieza |
+| `ir_a` (y cada viaje de `llevar_a`) | una meta `estar_en` del planificador del juego: busca el camino (las ocho millas incluidas), y quien va con él, va también |
+| `subir`, `bajar` | la calesa del juego: ir con quien la maneja (como `subir_calesa` del planificador); en el camino, sentada a su lado |
+| en qué va cada uno, la calesa lista, el afecto, `ana_en_tv`, si empezó el primer viaje | lo que el juego sabe (`vale`): se lo dice al motor en cada paso |
+| un pedido a Ana | el menú: «Subir a la calesa» o «Todavía no»; Ana sola decide como en `comun/ana.ts` |
+| la voz de un verbo o un acto | una burbuja |
+| quien tiene un encargo | está ocupado, como con una meta del planificador: su rutina espera |
 | `ve`, `oye`, `sola` | estar en la misma escena, a menos de unos pasos |
 | una línea | una burbuja (o una nube, si piensa), o la tarjeta de narración; el motor sigue cuando termina |
 | un silencio | minutos del reloj del juego, mientras la calesa sigue |
@@ -472,9 +478,16 @@ guardando la partida y cargándola en un motor nuevo cada pocas vueltas; las dos
 Mientras una escena del motor se dice, ocupa el canal del camino: las charlas del guion esperan. Una escena del guion
 más importante todavía puede cortarla. Los datos llegan al juego en `src/datos/lenguaje.json`
 (`node tools/lenguaje/construir.js docs/lenguaje src/datos/lenguaje.json`), y `tools/build.js` los incluye con el motor.
-Hoy corre en el juego una historia: `camino_blanco`. Reemplaza a las escenas del guion `avenida`, `newbridge`,
-`avenida_*`, `newbridge_ventanas`, `silencio_*` y `nombra_avenida`. Los verbos que mueven a la gente (los viajes de
-`llevar_a`) todavía no los hace el juego; es lo que falta para pasar la llegada y White Sands.
+Hoy corren en el juego dos historias:
+- **`camino_blanco`**: reemplaza a las escenas del guion `avenida`, `newbridge`, `avenida_*`, `newbridge_ventanas`,
+  `silencio_*` y `nombra_avenida`.
+- **`llegada`**: su encargo `trae` reemplaza a la meta del guion `llevar ana,cocina` (al final de la escena de la
+  estación). Matthew le pide a Ana que suba; la jugadora contesta; el planificador los lleva. Las charlas del camino
+  y la llegada a Tejas Verdes siguen siendo del juego (por tramo, del libro; y las escenas `tejas_verdes` y `llegada`
+  del guion, con la maquinaria del capítulo): esas escenas del lenguaje (`ll_pelo`, `ll_angelical`, `ll_llegan`) se
+  omiten en el juego (`omitir` del escenario).
+
+Falta White Sands: Marilla, la calesa del corral, la ruta de la costa y la playa como lugares del planificador.
 
 **Para el juego**, el mismo `tsc` compila a JavaScript, y los constructores arman los datos: el JSON de cada historia
 con sus encargos, de cada verbo con su receta, de cada escena. El juego, el grafo, el modelo lógico (Z3) y la historia

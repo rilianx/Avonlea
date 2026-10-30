@@ -3,7 +3,11 @@
 //   1. la Avenida con Matthew (cap. 2): Ana viene hablando en la calesa; al entrar a la Avenida, la escena del libro
 //      (cb_libro) corta la charla, calla por Newbridge y los campos, y al final Ana le pone nombre;
 //   2. Ana sola por el Camino Blanco del mapa de Avonlea (cb_sola): no hay nada que cortar; a mitad de la escena se
-//      guarda la partida y se recarga la página, y la escena sigue donde iba.
+//      guarda la partida y se recarga la página, y la escena sigue donde iba;
+//   3. la llegada, como la juega una persona, desde una partida nueva («Empezar antes, en la estación»): después de la
+//      escena de la estación, Matthew le pide a Ana que suba a la calesa; la jugadora dice «Todavía no», Matthew
+//      insiste, y la segunda vez dice que sí; Matthew la lleva a Tejas Verdes con el planificador del juego (las ocho
+//      millas del camino, la Avenida, el mapa de Avonlea).
 // Uso: node tools/lenguaje/en_el_juego.js        (después de node tools/build.js)
 const { chromium } = require('playwright'), path = require('path');
 const URL = 'file://' + path.join(__dirname, '..', '..', 'index.html') + '?dev';
@@ -40,6 +44,28 @@ const URL = 'file://' + path.join(__dirname, '..', '..', 'index.html') + '?dev';
     if (!await esperar(pg, `!LG.M.estado().escena`, 60)) fallas.push('sola: no terminó');
     if (!(await registro(pg)).some(t => /todavía más mío/.test(t))) fallas.push('sola: no dijo lo último');
     console.log('sola por el Camino Blanco, guardando y recargando a mitad: ' + (fallas.some(f => f.startsWith('sola')) ? 'mal' : 'bien'));
+    await ctx.close(); }
+  // 3. la llegada, con la jugadora, desde una partida nueva: «Empezar antes, en la estación»; las tarjetas se leen, en
+  // las escenas va lo primero, y cuando Matthew le pide que suba: primero «Todavía no», después «Subir a la calesa»
+  { const ctx = await b.newContext(), pg = await ctx.newPage();
+    await pg.addInitScript(() => { Object.defineProperty(navigator, 'webdriver', { get: () => false }); if (!sessionStorage.getItem('ya')) { localStorage.clear(); sessionStorage.setItem('ya', 1); } });
+    await abrir(pg);
+    for (let k = 0; k < 2; k++) { await pg.click('#antes'); await pg.waitForTimeout(300); }
+    const respondio = []; let fin = null;
+    for (let i = 0; i < 2400 && !fin; i++) {
+      await pg.waitForTimeout(150);
+      const t = await ev(pg, `$('talk').hidden ? '' : $('talk').textContent`);
+      if (/te pide/.test(t)) { const si = respondio.length >= 1; await pg.evaluate(t => { const x = [...document.querySelectorAll('#talk button')].find(b => b.textContent.includes(t)); if (x) x.click(); }, si ? 'Subir a la calesa' : 'Todavía no'); respondio.push(si ? 'sí' : 'no'); continue; }
+      await pg.evaluate(() => { const n = document.querySelector('#narra:not([hidden]) button'); if (n) n.click(); const o = document.querySelector('#talk:not([hidden]) .opts button'); if (o) o.click(); });
+      if (await ev(pg, 'GAME_SPEED < 50')) await ev(pg, 'setSpeed(50); 1');
+      const e = await ev(pg, `LG.M ? LG.M.get(['encargo', 'llegada', 'trae']) : 'pendiente'`); if (e === 'cumplido' || e === 'fallido') fin = e;
+    }
+    const E = JSON.parse(await ev(pg, `JSON.stringify({ cb: dlgDichas().cb_libro, nombre: nombreDe('avenida'), hora: fmtHour(hourNow()), ana: game.scene, voces: LG.M.registro.filter(r => r.q === 'matthew' && /Bueno, pues…/.test(r.t)).length })`));
+    if (respondio.slice(0, 2).join() !== 'no,sí') fallas.push('la llegada: Matthew no le pidió a Ana dos veces que subiera (' + respondio.join() + ')');
+    if (E.voces < 2) fallas.push('la llegada: no se oyeron las dos voces de Matthew (pedir, insistir)');
+    if (fin !== 'cumplido') fallas.push('la llegada: el encargo «trae» quedó ' + (fin || 'en curso'));
+    if (!E.cb) fallas.push('la llegada: en el camino no pasó la Avenida (cb_libro)');
+    console.log(`la llegada, desde la estación: respondió ${respondio.join(' y ')}; trae ${fin} a las ${E.hora} (Ana en ${E.ana}); la Avenida: ${E.nombre}`);
     await ctx.close(); }
   await b.close();
   for (const e of errs) fallas.push('error en la página: ' + e);

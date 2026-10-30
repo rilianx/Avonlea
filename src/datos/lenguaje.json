@@ -1021,13 +1021,52 @@
   "llegada": {
    "titulo": "Matthew trae a Ana de Bright River (cap. 2)",
    "empieza": {
-    "c": "cmp",
-    "camino": [
-     "estado",
-     "ana_en_tv"
-    ],
-    "op": "=",
-    "valor": "llegando"
+    "c": "y",
+    "de": [
+     {
+      "c": "cmp",
+      "camino": [
+       "estado",
+       "ana_en_tv"
+      ],
+      "op": "=",
+      "valor": "llegando"
+     },
+     {
+      "c": "existe",
+      "camino": [
+       "comun",
+       "hechos",
+       "encontro_a_ana"
+      ],
+      "id": "encontro_a_ana",
+      "hoy": {
+       "c": "existe",
+       "camino": [
+        "comun",
+        "hechos",
+        "encontro_a_ana"
+       ],
+       "ventana": "hoy"
+      },
+      "deja": {
+       "e": "deja",
+       "camino": [
+        "comun",
+        "hechos",
+        "encontro_a_ana"
+       ]
+      },
+      "olvida": {
+       "e": "olvida",
+       "camino": [
+        "comun",
+        "hechos",
+        "encontro_a_ana"
+       ]
+      }
+     }
+    ]
    },
    "encarga": {
     "trae": {
@@ -4070,6 +4109,31 @@
    "lineas": [
     {
      "t": "(Matthew le tiende la mano, sin mirarla, para ayudarla a subir.) Bueno, pues… sube.",
+     "si": true
+    }
+   ],
+   "de": "llegada"
+  },
+  {
+   "llamada": {
+    "verbo": "ordenar",
+    "args": [
+     "matthew",
+     "ana",
+     {
+      "verbo": "subir",
+      "args": [
+       "ana",
+       {
+        "comodin": true
+       }
+      ]
+     }
+    ]
+   },
+   "lineas": [
+    {
+     "t": "(Matthew sigue con la mano tendida.) Bueno, pues… se hace tarde. Marilla nos espera.",
      "si": true
     }
    ],

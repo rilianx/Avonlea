@@ -1,7 +1,13 @@
-// Las voces de la llegada: Matthew no manda; le tiende la mano.
+// Las voces de la llegada: Matthew no manda; le tiende la mano, y si Ana no sube, le recuerda que se hace tarde.
 
 title: voz_matthew_subir
 voz: pedir('matthew', 'ana', subir('ana', _))
 ---
 => (Matthew le tiende la mano, sin mirarla, para ayudarla a subir.) Bueno, pues… sube.
+===
+
+title: voz_matthew_subir_otra_vez
+voz: ordenar('matthew', 'ana', subir('ana', _))
+---
+=> (Matthew sigue con la mano tendida.) Bueno, pues… se hace tarde. Marilla nos espera.
 ===

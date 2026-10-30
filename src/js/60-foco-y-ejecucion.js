@@ -255,4 +255,4 @@ function wmHold(ag, dt){   // someone kept at a place for a test (the buyer wait
   if (dist(b.x, b.y, ag.hold[0], ag.hold[1]) > 30) wmWalk(ag.who, ag.hold[0], ag.hold[1], 'out', dt); else b.moving = false;
 }
 // the bodies of the agents are moved here, not by their routines (the routine loops ask this first)
-const wmDriven = k => !!AGENTS[k] && (activeGoals(AGENTS[k]).length > 0 || !!AGENTS[k].hold);
+const wmDriven = k => (!!AGENTS[k] && (activeGoals(AGENTS[k]).length > 0 || !!AGENTS[k].hold)) || lgOcupado(k);   // (or busy with an errand of a story: src/js/67-lenguaje.js)
