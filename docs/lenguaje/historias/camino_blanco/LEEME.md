@@ -16,7 +16,7 @@ Siempre es la misma idea, en tres tiempos:
 | `cb_libro` | va con Matthew (la primera vez, en la llegada) | el libro: «¡Oh, señor Cuthbert!!!», el silencio hasta después de Newbridge, y el nombre: el Camino Blanco de las Delicias |
 | `cb_otra_vez` | va con alguien (no el mismo día que la del libro) | «¡Shh! Perdón… pero es que ya llegamos»; el mismo dolorcito |
 | `cb_sola` | va sola (tampoco ese día) | lo piensa: «cuando no hay nadie, es todavía más mío» |
-| `cb_siempre` | cualquier otra vez (`repetir: dia`: una vez por día) | calla, y suspira: «cada vez es como la primera. Casi» |
+| `cb_siempre` | cualquier otra vez (`repetir: dia`: una vez por día; tampoco el día de la primera) | calla, y suspira: «cada vez es como la primera. Casi» |
 
 El `orden` (`historia.ts`) dice cuál prefiere cuando se puede más de una. Ninguna sabe qué charla corta: en la
 llegada ([`../llegada/`](../llegada/)) Ana viene hablando de ser «angelicalmente buena» y la corta en la mitad de la

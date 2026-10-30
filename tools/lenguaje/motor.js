@@ -74,7 +74,7 @@
       else if (e.e === 'suma') { const d = D.cualidades[e.camino[2]], r = d ? d.rango : [-1e9, 1e9]; set(e.camino, Math.max(r[0], Math.min(r[1], get(e.camino) + e.n))); nota(`${nombre(e.camino[1])}: ${e.camino[2]}${e.camino[3] ? ' hacia ' + nombre(e.camino[3]) : ''} ${e.n > 0 ? '+' : ''}${e.n} → ${get(e.camino)}`); }
       else if (e.e === 'log') nota('📔 ' + e.texto);
       else if (e.e === 'marca') nota('📖 ' + e.id, 'momento');
-      if (e.e === 'log' || e.e === 'marca') mundo.efecto?.(e);   // (el juego también lo anota)
+      mundo.efecto?.(e);   // (el juego lo hace también en el suyo: sus hechos, sus estados, el diario)
     }
 
     // ---------------------------------------------------------------- el mundo
@@ -177,7 +177,9 @@
         if (F.fase === 0) {
           if (ll.verbo === 'correr_a') set(['mundo', ll.args[0], 'en'], 'nada');
           decir(ll);
-          F.acc = { quien: ll.args[0], verbo: ll.verbo, a: val(ll.args[1]), mapa: true, ya: !!T.ya }; mundo.empezar(F.acc); F.fase = 1;
+          F.acc = { quien: ll.args[0], verbo: ll.verbo, a: val(ll.args[1]), mapa: true, ya: !!T.ya };
+          const P = T.pila[T.pila.length - 3]; if (P && P.k === 'receta' && P.lista) F.acc.de_paso = true;   // (una parada de un viaje: el «por cada» de una ruta)
+          mundo.empezar(F.acc); F.fase = 1;
         }
         if (!mundo.listo(F.acc)) return { espera: { accion: F.acc } };
         mundo.terminar?.(F.acc); return { vale: true };
@@ -187,7 +189,7 @@
         const d = def(F.ll);
         if (F.fase === 0) {
           if (d.pide && !cumple(d.pide)) return { vale: false };
-          if (d.pasos.por_cada) { const tr = d.pasos.por_cada; F.lista = mundo.tramo(tr.por, val(tr.desde), tr.hasta); }
+          if (d.pasos.por_cada) { const tr = d.pasos.por_cada; F.lista = mundo.tramo(tr.por, val(tr.desde), tr.hasta, F.ll.args[0]); }   // (y quién va)
           F.i = 0; F.j = 0; F.fase = 1;
         }
         if (F.fallo) return { vale: false };   // (no pudo reparar lo que se rompió)
@@ -327,8 +329,9 @@
           if (termina || falla) {
             set(['historia', h], termina ? 'terminada' : 'fallida');
             if (termina) for (const e of H.deja || []) aplicar(e);
+            mundo.historia?.(termina ? 'termina' : 'falla', h);   // (en el juego: su punto para volver)
             for (const T of tareas) if (T.h === h && !T.fin) { T.fin = true; mundo.encargo?.('termina', T.quien, h + '.' + T.etiqueta); }
-            nota(termina ? `■ termina la historia: ${(H.deja || []).map(e => e.camino.slice(-1)[0] + (e.valor !== undefined ? ' = ' + e.valor : '')).join(', ')}${H.punto ? ` (punto: ${H.punto})` : ''}` : '✘ la historia se pierde', 'titulo');
+            nota(termina ? `■ termina la historia: ${(H.deja || []).map(e => e.camino.slice(-1)[0] + (e.valor !== undefined ? ' = ' + e.valor : '')).join(', ')}${H.punto ? ` (punto: ${H.punto.split('|').pop().trim()})` : ''}` : '✘ la historia se pierde', 'titulo');
             fin = termina ? 'terminada' : 'fallida';
           }
         }
@@ -347,7 +350,7 @@
     // Mientras se dice una escena, los momentos esperan a que termine; solo una que «interrumpe» la corta: entonces se
     // miran solo esas, y los demás momentos siguen esperando)
     function elegirEscena(interrumpe = false){
-      const momentos = interrumpe ? cola : cola.splice(0); let mejor = null, top = -Infinity, suyo = null;
+      const momentos = interrumpe ? cola : cola.splice(0); let mejor = null, top = -Infinity, suyo = null; const otros = [];
       for (const mo of momentos) {
         if (!interrumpe && mo.tipo === 'tras') for (const p of porTras.filter(x => D.historias[x.h].encargo[x.et].tras.some(s => s.escena === mo.escena))) { porTras.splice(porTras.indexOf(p), 1); empezarEncargo(p.h, p.et); }
         for (const e of Object.values(D.escenas)) {
@@ -359,9 +362,12 @@
           const o = D.historias[h].orden.findIndex(x => (Array.isArray(x) ? x : [x]).some(y => y.escena === e.escena));
           const s = (o >= 0 ? 1000 - o : 0) + cuenta(e.si);
           if (s > top) { top = s; mejor = e; suyo = mo; }
+          otros.push({ e, mo });
         }
       }
       if (!mejor) return false;
+      // (una escena por vez: los momentos de las otras que tocaban vuelven a la cola, para cuando esta termine)
+      if (!interrumpe) for (const o of otros) if (o.e !== mejor && o.mo !== suyo && !cola.includes(o.mo)) cola.push(o.mo);
       if (interrumpe) cola.splice(cola.indexOf(suyo), 1);
       // (si corta otra escena, esa no sigue: queda dicha, a medias, y no hay «tras» de ella. Una que interrumpe corta
       // también una conversación del mundo —en el juego, una charla del guion de siempre—)
@@ -435,7 +441,8 @@
       const detenida = T => escena && !escena.en_marcha && escena.participan.includes(T.quien);
       for (let vuelta = 0; vuelta < limite; vuelta++) {
         if (pregunta) return estadoUI();
-        if (escena) { seguirEscena(); if (escena && escena.ops) return estadoUI(); }
+        if (escena && !escena.ops) seguirEscena();   // (con opciones pendientes, la escena espera a que la jugadora elija)
+        if (escena && escena.ops) return estadoUI();
         if (escena && cola.length && elegirEscena(true)) continue;   // (una que interrumpe: no espera)
         revisarHistorias();
         if (fin && tope == null) return estadoUI();   // (al probar, una historia que termina es el final; en el juego, el mundo sigue)

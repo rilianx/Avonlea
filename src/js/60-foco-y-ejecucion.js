@@ -217,7 +217,7 @@ function wmMove(who, key, dt){
 function wmWalk(who, x, y, scene, dt){
   const b = wmBody(who);
   if (who === 'ana') { if (TT - (ana.wmArr || -9) < .4) return true; if (!ana.goto || !ana.goto.wm || dist(ana.goto.x, ana.goto.y, x, y) > 30) ana.goto = { x, y, scene, wm: true }; return false; }
-  const sp = b.buggy ? CARRO : (AGENTS[who] ? wmPace(AGENTS[who]) : (CH[who]?.speed?.walk || 40)) * (AGENTS.ana?.ride && AGENTS.ana.followOf === who ? 2.4 : 1), visible = viewScene() === scene && (scene !== 'out' || seen(b.x, b.y, 300));
+  const sp = b.buggy ? CARRO * lgPaso(who) : (AGENTS[who] ? wmPace(AGENTS[who]) : (CH[who]?.speed?.walk || 40)) * (AGENTS.ana?.ride && AGENTS.ana.followOf === who ? 2.4 : 1), visible = viewScene() === scene && (scene !== 'out' || seen(b.x, b.y, 300));
   if (b.called && TT < b.called.until) { b.moving = false; return false; }
   if (b.buggy && scene === 'out') {   // (a buggy, seen or not, goes by the roads: past Mrs. Lynde's window)
     if (!b.bnav || dist(b.bnav.x, b.bnav.y, x, y) > 30) { const r = netRoute(b.x, b.y, x, y); b.bnav = { x, y, pts: r ? [...r.pts, [x, y]] : [[x, y]], i: 0 }; }

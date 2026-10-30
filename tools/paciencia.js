@@ -60,12 +60,12 @@ async function caso(nombre, fn){
     ok(await T.pac() === 3, 'ayudar en la casa la sube, una vez al día: paciencia ' + await T.pac());
   });
   await caso('3. el día del viaje, lejos: Marilla la busca, baja, y el viaje sigue; después, la paciencia ya no cuenta', async T => {
-    await T.manana(14.6); await T.ev(`(() => { goOut(); ana.x = 900; ana.y = 900; })()`);
-    const v = await T.jugar(null, 'dlgHechos().a_prueba && !TALKS.length', 900);
-    ok(v[0] === 'falta_viaje' && v.includes('viaje_spencer'), 'la busca y van: ' + v.join(' · '));
+    await T.ev(MANANA.replace('H0', 14.6) + `; (() => { goOut(); ana.x = 900; ana.y = 900; })()`);   // (at once: the story begins in the very moment the hour comes, with Ana where she is)
+    const v = await T.jugar(null, 'dlgHechos().a_prueba && !TALKS.length', 3500);   // (Marilla goes for her on foot, harnesses the mare, drives there and back: the whole afternoon)
+    ok(v.find(x => !x.startsWith('→')) === 'falta_viaje' && v.includes('viaje_spencer'), 'la busca y van: ' + v.join(' · '));   // (the first scene; before it, Marilla asks her to come: «Ir con Marilla»)
     ok(['ws_t1', 'ws_t2', 'ws_t3', 'ws_mar', 'ws_pye', 'ws_orilla', 'ws_spencer', 'ws_vuelta', 'ws_noche'].every(e => v.includes(e)), 'el viaje en la calesa de Marilla: el camino, la Sra. Pye, la orilla, la Sra. Spencer, la noche');
-    for (let i = 0; i < 20 && await T.ev(`cart.on`); i++) await T.pg.waitForTimeout(100);   // (they go home as a page turns: a moment)
-    ok(await T.ev(`!cart.on && !cart.viaje && PEOPLE.marilla.where === 'gg' && game.wm.ws.fase === 'fin'`), 'y vuelven: la calesa es de Matthew otra vez');
+    // (the trip is the language's, src/js/67-lenguaje.js: the errand «vuelta» done, Marilla home, off the buggy)
+    ok(await T.ev(`LG.M.get(['encargo', 'white_sands', 'vuelta']) === 'cumplido' && LG.M.get(['historia', 'white_sands']) === 'terminada' && !PEOPLE.marilla.buggy && !cart.on`), 'y vuelven: la calesa queda en casa');
     ok(await T.pac() === 1 && await T.ev(`!!dlgHechos().a_prueba && !dlgHechos().se_queda`), 'Marilla decidió (paciencia ' + await T.pac() + '), pero no se lo dice todavía');
     await T.ev(`cualidadSuma('marilla', 'paciencia', -1, 'ana')`); ok(await T.pac() === 1, 'después de White Sands la paciencia ya no cambia');
     ok(await T.ev(`!/Cómo la ven/.test(cuadernoMiradas())`), 'ni se muestra');
@@ -111,7 +111,7 @@ async function caso(nombre, fn){
   });
   await caso('10. los puntos: antes de White Sands y cuando Marilla decide; se vuelve desde el cuaderno, y la escena se juega otra vez', async T => {
     await T.manana(14.6);
-    await T.jugar(null, 'dlgHechos().a_prueba && !TALKS.length', 700); await T.pg.waitForTimeout(400);
+    await T.jugar(null, 'dlgHechos().a_prueba && !TALKS.length', 3500); await T.pg.waitForTimeout(400);
     const ids = await T.ev(`puntosLista().map(([k]) => k).join(',')`);
     ok(/white_sands/.test(ids) && /a_prueba/.test(ids) && ids.indexOf('white_sands') < ids.indexOf('a_prueba'), 'quedaron, en orden: ' + ids);
     await T.ev(`cuadernoPanel(true)`);

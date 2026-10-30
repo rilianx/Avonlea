@@ -1,9 +1,13 @@
 # White Sands, en el lenguaje de las historias
 
 El viaje a White Sands (capítulos 5 y 6 del libro), escrito entero en el lenguaje de
-[`docs/LENGUAJE.md`](../../../LENGUAJE.md). La lógica está en TypeScript y el guion en Yarn. Es un ejemplo de
-diseño: compila (`tsc`), pero el juego todavía no lo lee. Hoy esta historia vive en `src/datos/guion.txt` (las escenas
-`viaje_spencer` y `ws_*`) y en `src/js/34-viaje-white-sands.js` (el viaje).
+[`docs/LENGUAJE.md`](../../../LENGUAJE.md). La lógica está en TypeScript y el guion en Yarn.
+
+**En el juego** corre en el motor del lenguaje (`src/js/67-lenguaje.js`), con la calesa y el planificador del juego.
+Reemplaza a las escenas del guion `viaje_spencer`, `ws_*` y `falta_viaje`, y al código del viaje (el viejo
+`34-viaje-white-sands.js`). Sin paciencia, el camino de la duda sigue en el guion (`viaje_spencer_duda`,
+`duda_matthew`, `duda_suplica`, `duda_calla`, `devuelta_blewett`): se cuenta en casa, sin viaje. Por eso, en el juego
+se omiten `viaje_spencer_duda` y `ws_spencer_duda`. Se prueba con `tools/paciencia.js`.
 
 | Archivo | Qué hay |
 |---|---|
@@ -44,6 +48,7 @@ flowchart TD
   IDA -. camino.escuela .-> T3
   IDA -- camino.playa empieza --> M[ws_mar]
   IDA -- camino.playa cumplido --> P[ws_pye]
+  M -- "tras ws_mar (la Sra. Pye<br/>espera en el camino)" --> P
   P -- "Ana se baja y corre al mar:<br/>se rompe «mantiene»" --> TR([cerca: conseguir_que<br/>→ ir_a_buscar])
   TR -- marilla ir_a_buscar.va cumplido --> O[ws_orilla]
   O --> IDA
@@ -78,6 +83,9 @@ flowchart TD
   («Todavía no»). Si no quiere subir, Marilla se lo vuelve a decir, más firme (`ws_no_sube`), y después se cruza de
   brazos (`ws_no_sube_orden`); cada negativa le cuesta paciencia. Ana sola le hace caso a quien quiere
   (`comun/ana.ts`). Todo esto se puede jugar en `trazas/lenguaje.html` (`node tools/lenguaje/pagina.js`).
+- **Primero el mar, después la Sra. Pye.** `ws_pye` pide que se haya dicho `ws_mar`, y también va tras ella; corta lo
+  que se esté diciendo (`interrumpe`). Después de la Sra. Pye no vuelven las charlas de antes. En el juego, la Sra.
+  Pye se para en el camino y detiene la calesa hasta que se dice lo suyo.
 - **Las charlas van por lugares, en secuencia.** `ws_t2` se activa tras `ws_t1`, o al pasar la Hondonada de Lynde si
   la primera no se dijo.
 - **La paciencia de Marilla abre dos variantes** (la del libro y la de la duda) con la misma activación.

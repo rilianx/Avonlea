@@ -81,7 +81,7 @@ export const escenas = {
   cb_siempre: defEscena(escena.cb_siempre, {
     resumen: "La Avenida, una vez más (una vez por día): Ana calla al pasar, y después suspira.",
     se_activa: [pasa('ana', 'camino_blanco')],
-    si: y(),
+    si: y(no(dichas.cb_libro.hoy)),
     en_marcha: true,
     interrumpe: true,
     repetir: 'dia',

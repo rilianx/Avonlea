@@ -358,6 +358,7 @@ function wmFollowTick(){
   if (A.ride && game.scene === 'out' && wmScene(A.followOf) === 'out') { if (b.buggy) { const c8 = cartC8(b), [cx, cy] = cartFromDriver(b.x, b.y, c8); [ana.x, ana.y] = cartSeat(cx, cy, c8, 1); ana.dir = c8Dir(c8); } else { ana.x = b.x + 18; ana.y = b.y + 4; } ana.sit = !!b.buggy; ana.goto = null; ana.moving = false; return; }   // (in the cart, beside him)
   if (game.scene === 'out' && HOUSES[wmScene(A.followOf)] && dist(ana.x, ana.y, DOOR[wmScene(A.followOf)][0], DOOR[wmScene(A.followOf)][1]) < 160) { ana.sit = false; goIn(wmScene(A.followOf)); return; }   // (he went in: she goes in after him)
   if (game.scene !== 'out') { if (wmScene(A.followOf) === 'out') goOut(); return; }
+  if (HOUSES[wmScene(A.followOf)]) { const d = DOOR[wmScene(A.followOf)]; if (d) ana.goto = { x: d[0], y: d[1] + 20, scene: 'out', wm: true }; return; }   // (he is inside: to the door, and in after him)
   if (dist(ana.x, ana.y, b.x, b.y) > 50) ana.goto = { x: b.x + 26, y: b.y + 6, scene: 'out', wm: true }; else if (ana.goto?.wm) ana.goto = null;
 }
 

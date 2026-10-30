@@ -5,8 +5,8 @@
 //
 // La interfaz del mundo (la misma que tendrá el juego). El motor llama:
 //   empezar(acc)   que empiece una acción: { quien, verbo, args, dura } (un primitivo, en minutos) o
-//                  { quien, verbo, a, mapa: true } (ir hasta un lugar). Con ya: true, se hace en el acto (un verbo
-//                  dicho en una escena).
+//                  { quien, verbo, a, mapa: true } (ir hasta un lugar; de_paso: true si es una parada de un viaje por
+//                  una ruta). Con ya: true, se hace en el acto (un verbo dicho en una escena).
 //                  También lo que se dice en una escena: { decir: { q, t, piensa } } (una línea) y { silencio: true,
 //                  dura } (nadie habla), y lo que solo el mundo sabe hacer: { nombrar: cosa, pedir } (que Ana le ponga
 //                  nombre: el del libro, o el que escriba la jugadora; el mundo lo deja en acc.nombre).
@@ -16,12 +16,15 @@
 //   cancelar(acc)  se deja (una escena cortada, una reparación que falló). Opcional.
 //   parar(acc), seguir(acc)   se detiene mientras se repara lo que se rompió (§6, «mantiene»), y sigue después.
 //   minutos(a, b)  cuánto hay entre dos lugares (para el costo de un plan).
-//   tramo(ruta, desde, hasta)   las paradas de una ruta entre dos lugares, en el sentido que corresponda.
+//   tramo(ruta, desde, hasta, quien)   las paradas de una ruta entre dos lugares, en el sentido que corresponda (y
+//                  quién va: el juego recuerda adónde va al final, para ir de una vez y reconocer las paradas al pasar).
+//   historia(momento, h)   una historia termina o se pierde. Opcional.
 //   funciones      lo que el mundo calcula y el estado no guarda: ve, oye, sola.
 //   cortar()       una escena que interrumpe va a empezar: si el mundo tiene una conversación suya en curso, la corta,
 //                  y dice si cortó algo. Opcional.
 //   escena(momento, id)   una escena del motor empieza, termina o se corta. Opcional.
-//   efecto(e)      un efecto que el mundo también anota (log, marca). Opcional.
+//   efecto(e)      cada efecto, para que el mundo lo haga también en lo suyo (en el juego: sus hechos, sus estados,
+//                  sus cualidades, el diario, las marcas del libro). Opcional.
 //   voz(q, texto)  la voz de un verbo o un acto («Sube, Ana»): el juego la dice en una burbuja. Opcional.
 //   encargo(momento, quien, id)   empieza o termina un encargo de una historia: en el juego, quien lo tiene está
 //                  ocupado (su rutina espera, como con una meta del planificador). Opcional.

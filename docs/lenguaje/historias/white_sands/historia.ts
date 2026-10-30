@@ -54,7 +54,7 @@ export const white_sands = historia('white_sands', {
 
   termina: dichas.ws_noche,
   deja: [estado.ana_en_tv.vale('decidida'), comun.conoce_blewett.deja],
-  punto: 'Marilla decidió quedársela, a prueba',
+  punto: 'a_prueba | Marilla decidió quedársela, a prueba',   // (id | texto: el juego lo guarda para volver a él)
 
   // (Ana no volvió a la calesa en cuatro intentos: la historia se pierde; otra —«Marilla la devuelve»— la pide)
   falla: encargo => encargo.ida.estado.es('fallido'),

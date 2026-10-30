@@ -10,6 +10,11 @@ export const estados = {
     otros: ['devuelta'],                                        // fuera de la escala: solo es / no_es
     inicial: 'llegando',
   },
+  viaje: {
+    titulo: 'El viaje en curso (las escenas del camino son de ese viaje, y solo mientras dura)',
+    valores: ['ninguno', 'primer_viaje', 'white_sands', 'vuelta_white_sands'],
+    inicial: 'ninguno',
+  },
 } as const
 export const estado = accesoEstado(estados)
 

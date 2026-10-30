@@ -171,7 +171,18 @@ const WP = {
   aldea: PLAY.aldea, lago: [PLACES.lago[1], PLACES.lago[2]], gallinero: [BARN.x + 150, BARN.y + 96], iglesia: CHURCH_DOOR, salon: door('Ayuntamiento'), colina: PLAY.campo_rosado, campo: (f => [f.x + f.w / 2, f.y + f.h / 2])(fieldNear([GG.x + 300, GG.y - 200])),
 };
 WP.casa_bell = door('Casa de los Pettibone');
-const WP_NAME = { casa_bell: 'la casa de Robert Bell', 'h:br': 'la estación de Bright River', 'h:rl': 'la casa de la Sra. Lynde', camino: 'el camino de Bright River', gallinero: 'el gallinero', granero: 'el granero', corral: 'el corral', potrero: 'el potrero del Sr. Harrison', huerta: 'la huerta', arbustos: 'los arbustos de bayas', huerto: 'el huerto de los Barry', cocina: 'la cocina de Tejas Verdes', pieza: 'la pieza de Ana, arriba en Tejas Verdes', tienda: 'la tienda de Lawson', escuela: 'la escuela', casa_parroquial: 'la casa parroquial', 'h:cp': 'la casa parroquial', bosque_peg: 'el bosque de Peg Bowen', aldea: 'la aldea', iglesia: 'la iglesia', salon: 'el salón del pueblo', colina: 'la colina', campo: 'el campo de heno', lago: 'el lago' };
+// White Sands, by the shore road (the trip of chapters 5 and 6, src/js/67-lenguaje.js): the hotel, and the beach where
+// the road runs nearest the sea (Mrs. Pye waits there)
+WP.hotel_ws = door('Hotel White Sands');
+WP.playa_ws = (() => { try {
+  const r = netRoute(GG.x + 20, GG.y + 80, ...WP.hotel_ws), pts = [[GG.x + 20, GG.y + 80], ...(r ? r.pts : []), WP.hotel_ws];
+  const L = [0]; for (let i = 1; i < pts.length; i++) L.push(L[i - 1] + dist(...pts[i - 1], ...pts[i]));
+  const at = f => { const s = f * L[L.length - 1]; let i = 1; while (i < pts.length - 1 && L[i] < s) i++; const k = (s - L[i - 1]) / ((L[i] - L[i - 1]) || 1); return [lerp(pts[i - 1][0], pts[i][0], k), lerp(pts[i - 1][1], pts[i][1], k)]; };
+  const mar = ([x, y]) => { let d = 1e9; for (let i = 1; i < COAST.length; i++) d = Math.min(d, segDist(x, y, COAST[i - 1], COAST[i])); return d; };
+  let best = at(.88), dMin = 1e9; for (let f = .8; f <= .95; f += .01) { const p = at(f), d = mar(p); if (d < dMin) { dMin = d; best = p; } }
+  return best.map(Math.round);
+} catch (e) { return [PLACES.playa[1], PLACES.playa[2]]; } })();
+const WP_NAME = { hotel_ws: 'el hotel White Sands', playa_ws: 'la playa, en el camino de White Sands', casa_bell: 'la casa de Robert Bell', 'h:br': 'la estación de Bright River', 'h:rl': 'la casa de la Sra. Lynde', camino: 'el camino de Bright River', gallinero: 'el gallinero', granero: 'el granero', corral: 'el corral', potrero: 'el potrero del Sr. Harrison', huerta: 'la huerta', arbustos: 'los arbustos de bayas', huerto: 'el huerto de los Barry', cocina: 'la cocina de Tejas Verdes', pieza: 'la pieza de Ana, arriba en Tejas Verdes', tienda: 'la tienda de Lawson', escuela: 'la escuela', casa_parroquial: 'la casa parroquial', 'h:cp': 'la casa parroquial', bosque_peg: 'el bosque de Peg Bowen', aldea: 'la aldea', iglesia: 'la iglesia', salon: 'el salón del pueblo', colina: 'la colina', campo: 'el campo de heno', lago: 'el lago' };
 const OFRECE = { gallinero: { recoger: ['huevos'] }, granero: { tomar: ['cuerda'] }, arbustos: { recoger: ['bayas'] }, huerto: { recoger: ['manzanas'] }, huerta: { recoger: ['ramo'] }, bosque_peg: { recoger: ['hierbas'] }, cocina: { tomar: ['jarabe'] } };
 for (const k of ['granero', 'corral', 'potrero', 'escuela', 'casa_parroquial', 'tienda']) if (!PLACES[k]) PLACES[k] = [WP_NAME[k], ...WP[k]];   // (so errands can name them)
 // --- people: character, likes, what they buy and sell, where they cook, whether they leave the house; and their inventories

@@ -3,7 +3,7 @@ import { hechos, marilla_con_paciencia, white_sands } from './historia'
 import { dichas, escena } from './escenas.ids'
 import { _, defEscena, deja, hace, log, momento, no, responde, suma, tras, voz, y } from '../../comun/lenguaje'
 import { ve } from '../../comun/mundo'
-import { cualidad } from '../../comun/estado'
+import { cualidad, estado } from '../../comun/estado'
 import { bajar, correr_a, ir_a, ir_a_buscar, seguir, subir, traer } from '../../comun/verbos'
 import { disculparse, informar, ofender, ordenar, pedir } from '../../comun/actos'
 
@@ -45,8 +45,10 @@ export const escenas = {
     resumen: "Marilla y Ana salen a White Sands, a devolverla donde la Sra. Spencer.",
     se_activa: [momento(white_sands.encargo.busca, '', 'cumplido')],
     si: y(marilla_con_paciencia),
+    punto: "white_sands | Antes de salir a White Sands",
     hablan: ['narra', 'marilla', 'ana'],
     cuerpo: [
+      { hace: deja(estado.viaje.vale('white_sands')) },
       { q: 'narra', t: "White Sands está a unas millas por el camino de la costa. Allí vive la Sra. Spencer, la que trajo a Ana del orfanato por equivocación: Marilla va a pedirle que la devuelva. Ana sabe que puede ser su último día en Tejas Verdes." },
       { q: 'marilla', t: "Ponte el sombrero, Ana. Nos vamos a White Sands." },
       { q: 'ana', t: "Puede que sea la última vez que veo esta cocina.", piensa: true },
@@ -56,8 +58,10 @@ export const escenas = {
     resumen: "Marilla, sin paciencia, sale a White Sands sin decir una palabra.",
     se_activa: [momento(white_sands.encargo.busca, '', 'cumplido')],
     si: y(no(marilla_con_paciencia)),
+    punto: "white_sands | Antes de salir a White Sands",
     hablan: ['narra', 'marilla', 'ana'],
     cuerpo: [
+      { hace: deja(estado.viaje.vale('white_sands')) },
       { q: 'narra', t: "White Sands está a unas millas por el camino de la costa. Marilla lleva las riendas y no dice nada en todo el viaje: piensa en el camisón a mediodía, en la ropa por el suelo, en lo que ha tenido que aguantar. Ana tampoco habla. Mira el mar y aprieta su maleta vieja." },
       { q: 'marilla', t: "Ponte el sombrero, Ana. Nos vamos a White Sands." },
       { q: 'ana', t: "Ni siquiera me mira. Puede que sea la última vez que veo esta cocina.", piensa: true },
@@ -83,7 +87,7 @@ export const escenas = {
   ws_t2: defEscena(escena.ws_t2, {
     resumen: "Marilla le pide «los hechos»: Bolingbroke, Walter y Bertha Shirley.",
     se_activa: [tras(escena.ws_t1), momento(white_sands.encargo.ida, 'camino.hondonada_lynde', 'cumplido')],
-    si: y(marilla_con_paciencia),
+    si: y(marilla_con_paciencia, no(dichas.ws_pye)),
     en_marcha: true,
     hablan: ['marilla', 'ana'],
     cuerpo: [
@@ -99,7 +103,7 @@ export const escenas = {
   ws_t3: defEscena(escena.ws_t3, {
     resumen: "Ana cuenta su vida: la fiebre, la Sra. Thomas, los mellizos, el orfanato.",
     se_activa: [tras(escena.ws_t2), momento(white_sands.encargo.ida, 'camino.escuela', 'cumplido')],
-    si: y(marilla_con_paciencia),
+    si: y(marilla_con_paciencia, no(dichas.ws_pye)),
     en_marcha: true,
     hablan: ['ana', 'marilla'],
     cuerpo: [
@@ -118,7 +122,7 @@ export const escenas = {
   ws_mar: defEscena(escena.ws_mar, {
     resumen: "Frente al mar: Ana quisiera ser gaviota; el hotel White Sands, y el miedo a llegar.",
     se_activa: [momento(white_sands.encargo.ida, 'camino.playa', 'empieza')],
-    si: y(),
+    si: y(no(dichas.ws_pye)),
     en_marcha: true,
     hablan: ['ana', 'marilla'],
     cuerpo: [
@@ -132,8 +136,9 @@ export const escenas = {
   }),
   ws_pye: defEscena(escena.ws_pye, {
     resumen: "La Sra. Pye sale al camino y dice algo cruel de Ana (no es del libro).",
-    se_activa: [momento(white_sands.encargo.ida, 'camino.playa', 'cumplido')],
+    se_activa: [momento(white_sands.encargo.ida, 'camino.playa', 'cumplido'), tras(escena.ws_mar)],
     si: y(dichas.ws_mar, ve('srapye', 'ana')),
+    interrumpe: true,
     hablan: ['srapye', 'marilla', 'ana'],
     cuerpo: [
       { q: 'srapye', t: "¡Marilla Cuthbert! (La Sra. Pye se acerca a la calesa, con su canasto, y mira a Ana de arriba abajo.) ¿Así que esta es la huérfana que les mandaron por equivocación?" },
@@ -190,6 +195,7 @@ export const escenas = {
       { q: 'marilla', t: "Gracias, Sra. Spencer, pero no. Matthew nos espera, y el camino es largo." },
       { q: 'spencer', t: "Entonces que les vaya bien. Y salúdeme a Matthew. (Se queda en la puerta, diciendo adiós con la mano, hasta que la Sra. Blewett se mete adentro sin despedirse.)" },
       { q: 'ana', t: "(Ana sube a la calesa sin mirar atrás, apretando la maleta vieja contra las rodillas.)" },
+      { hace: deja(estado.viaje.vale('vuelta_white_sands')) },
     ],
   }),
   ws_spencer_duda: defEscena(escena.ws_spencer_duda, {
@@ -204,6 +210,7 @@ export const escenas = {
       { op: "Quedarse callada, mirando el suelo", cuerpo: [{ q: 'ana', t: "(Ana no dice nada. Se queda mirando el suelo, muy pálida, con los labios apretados para no llorar.)" }, { hace: deja(hechos.blewett_calla) }] },
       { op: "«Prefiero volver al orfanato antes que irme con esa señora.»", propia: true, cuerpo: [{ q: 'ana', t: "(Ana levanta la barbilla.) Prefiero volver al orfanato antes que irme con esa señora." }, { hace: deja(hechos.blewett_orgullo) }] },
       { q: 'narra', t: "Al fin Marilla dice, con la voz seca: «Me la llevo a casa. Lo hablaré con Matthew.» La Sra. Blewett se encoge de hombros." },
+      { hace: deja(estado.viaje.vale('vuelta_white_sands')) },
     ],
   }),
   ws_vuelta: defEscena(escena.ws_vuelta, {
@@ -231,6 +238,7 @@ export const escenas = {
       { hace: suma(cualidad('marilla', 'afecto', 'ana'), 1) },
       { hace: log('Marilla llevó a Ana a White Sands; la Sra. Blewett la quería de sirvienta, y Marilla no se la dio. Esa noche le dijo a Matthew que se la quedaba; a Ana, todavía no.') },
       { q: 'ana', t: "No me dijo nada en todo el camino de vuelta. ¿Me devolverán mañana?", piensa: true },
+      { hace: deja(estado.viaje.vale('ninguno')) },
     ],
   }),
 }

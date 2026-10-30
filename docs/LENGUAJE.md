@@ -466,6 +466,14 @@ guardando la partida y cargándola en un motor nuevo cada pocas vueltas; las dos
 | un pedido a Ana | el menú: «Subir a la calesa» o «Todavía no»; Ana sola decide como en `comun/ana.ts` |
 | la voz de un verbo o un acto | una burbuja |
 | quien tiene un encargo | está ocupado, como con una meta del planificador: su rutina espera |
+| un viaje por una ruta (`viajar`, por paradas) | una sola meta del planificador hasta el final; cada parada se cumple al pasarla (o al pasar una más adelante) |
+| ir hacia alguien (Ana en la orilla) | una meta hacia esa persona (`p:ana`); se llega estando a su lado |
+| bajarse de la calesa lejos de casa | la calesa queda estacionada donde se bajó |
+| alguien del pueblo en un lugar (la Sra. Pye) | aparece ahí; si espera a la calesa en una parada, sale al camino y la detiene hasta que se dice lo suyo; al terminar, vuelve a donde estaba |
+| una escena en marcha | la yegua va al paso mientras se habla (no en los silencios) |
+| una escena que no va en marcha | quienes hablan se quedan quietos (y la calesa en que va Ana) |
+| cada efecto | el juego lo hace en lo suyo: hechos, estados, paciencia y afecto, el diario |
+| `punto` de una escena o una historia | un punto para volver (`id \| texto`), como los del guion |
 | `ve`, `oye`, `sola` | estar en la misma escena, a menos de unos pasos |
 | una línea | una burbuja (o una nube, si piensa), o la tarjeta de narración; el motor sigue cuando termina |
 | un silencio | minutos del reloj del juego, mientras la calesa sigue |
@@ -478,7 +486,7 @@ guardando la partida y cargándola en un motor nuevo cada pocas vueltas; las dos
 Mientras una escena del motor se dice, ocupa el canal del camino: las charlas del guion esperan. Una escena del guion
 más importante todavía puede cortarla. Los datos llegan al juego en `src/datos/lenguaje.json`
 (`node tools/lenguaje/construir.js docs/lenguaje src/datos/lenguaje.json`), y `tools/build.js` los incluye con el motor.
-Hoy corren en el juego dos historias:
+Hoy corren en el juego tres historias:
 - **`camino_blanco`**: reemplaza a las escenas del guion `avenida`, `newbridge`, `avenida_*`, `newbridge_ventanas`,
   `silencio_*` y `nombra_avenida`.
 - **`llegada`**: su encargo `trae` reemplaza a la meta del guion `llevar ana,cocina` (al final de la escena de la
@@ -487,7 +495,15 @@ Hoy corren en el juego dos historias:
   del guion, con la maquinaria del capítulo): esas escenas del lenguaje (`ll_pelo`, `ll_angelical`, `ll_llegan`) se
   omiten en el juego (`omitir` del escenario).
 
-Falta White Sands: Marilla, la calesa del corral, la ruta de la costa y la playa como lugares del planificador.
+- **`white_sands`**, cuando Marilla tiene paciencia:
+  - Marilla busca a Ana si está lejos, engancha la yegua y le pide que suba.
+  - La lleva por la costa: la Sra. Pye, Ana que corre al mar, la orilla, la Sra. Spencer.
+  - Y la trae de vuelta.
+
+  Reemplaza a `viaje_spencer`, `ws_t1`… `ws_noche` y `falta_viaje` del guion, y al código del viaje (el viejo
+  `34-viaje-white-sands.js`). Sin paciencia, la duda sigue en el guion (`viaje_spencer_duda` y lo que viene): se
+  cuenta en casa, sin viaje; por eso esas dos escenas del lenguaje (`viaje_spencer_duda`, `ws_spencer_duda`) se omiten
+  en el juego. Se prueba con `tools/paciencia.js` (casos 3 y 10).
 
 **Para el juego**, el mismo `tsc` compila a JavaScript, y los constructores arman los datos: el JSON de cada historia
 con sus encargos, de cada verbo con su receta, de cada escena. El juego, el grafo, el modelo lógico (Z3) y la historia
@@ -514,7 +530,7 @@ en fichas leen ese JSON. Una sola traducción para todos, porque hay una sola fo
 | `! meta quien tipo` | `encarga` en la historia, o `<<verbo(…)>>` |
 | `ana piensa: x` | `ana: x #piensa` |
 | `->* x` | `-> x #propia` |
-| el código de cada viaje (`34-viaje-white-sands.js`) | el verbo `llevar_a` y sus voces |
+| el código de cada viaje (el viejo `34-viaje-white-sands.js`) | el verbo `llevar_a` y sus voces (en el juego: la calesa y el planificador) |
 
 ## 15. Preguntas abiertas
 

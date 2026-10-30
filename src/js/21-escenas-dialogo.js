@@ -49,7 +49,7 @@ function dlgCond(s, c){   // one condition of state, written as text
     case 'dias_desde': { const d = dlgHechos()[a] ?? cuadernoHecho(a); return typeof d === 'number' && today() + 1 - d >= +b; }   // (at least b days since a happened: a fact, or a goal of the notebook done)
     case 'hora': { const [x, y] = a.split('-').map(Number), h = hourNow() % 24; return h >= x && h < y; }   // (the hour of the day: «hora:19-23»)
     case 'cerca': { const [x, l, r] = rest.split(':'); return dlgCerca(x, l, r); }   // (someone near a place of the map: «cerca:ana:aldea:700»)
-    case 'avance': { const [v, r = ''] = rest.split(':'), [x, y] = r.split('-').map(Number), n = AVANCES[v]?.(); return n != null && n >= x && n <= y; }   // (how far along a trip is, in %: «avance:ws:25-60», src/js/34-viaje-white-sands.js)
+    case 'avance': { const [v, r = ''] = rest.split(':'), [x, y] = r.split('-').map(Number), n = AVANCES[v]?.(); return n != null && n >= x && n <= y; }   // (how far along a trip is, in %: «avance:<trip>:25-60», AVANCES)
     case 'dia_juego': return today() + 1 >= +a;   // (the game has gone on at least so many days: 56, a year)
     case 'sentada': return !!wmBody(a)?.sit;   // (she has sat down: at the table, for the tea)
     case 'estudio': return cualidad('ana', 'estudio') >= +a;   // (the same as «estudio:ana>=n»)
@@ -167,7 +167,6 @@ function dlgHacer(list){   // what a scene does when it starts or ends
       const M = PEOPLE.marilla; if (sceneOf('marilla') !== 'gg') { M.where = 'gg'; M.x = STOVE.x + 60; M.y = STOVE.y + 60; M.nav = null; M.moving = false; M.sit = false; }
     }
     if (a.estado) estadoPoner(...a.estado);
-    if (a.viaje) wsViaje(a.viaje);   // (src/js/34-viaje-white-sands.js)
     if (a.junto) { const b = a.junto === 'ana' ? ana : PEOPLE[a.junto], o = a.de === 'ana' ? ana : PEOPLE[a.de]; if (b && o) { b.sit = false; if (b === ana) { ana.meal = null; ana.goto = null; ana.vx = ana.vy = 0; } else { b.nav = null; b.moving = false; } b.x = o.x - 20; b.y = o.y + 2; b.dir = 1; } }
     if (a.vestirse) vestirse(true);
     if (a.punto) puntoGuardar(a.punto, a.texto);
@@ -334,8 +333,7 @@ function dlgAccion(s){   // an action of the script: «hecho x», «marca id | n
     case 'mesa': return { mesa: r[0] };
     case 'a_la_mesa': return { a_la_mesa: true };
     case 'a_cocina': return { a_cocina: true };
-    case 'viaje': return { viaje: r[0] };
-    case 'estado': return { estado: [r[0], r[r.length - 1]] };   // (the state changes: «estado diana amiga_del_alma», or «estado diana = amiga_del_alma»)   // (the trip to White Sands: «viaje white_sands», «viaje orilla», «viaje calesa», «viaje casa»)
+    case 'estado': return { estado: [r[0], r[r.length - 1]] };   // (the state changes: «estado diana amiga_del_alma», or «estado diana = amiga_del_alma»)
     case 'acostarse': return { acostarse: true };
     case 'a_pieza': return { a_pieza: true };
     case 'vestirse': return { vestirse: true };   // (Ana puts on her dress)

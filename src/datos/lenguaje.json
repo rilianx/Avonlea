@@ -99,6 +99,16 @@
     "devuelta"
    ],
    "inicial": "llegando"
+  },
+  "viaje": {
+   "titulo": "El viaje en curso (las escenas del camino son de ese viaje, y solo mientras dura)",
+   "valores": [
+    "ninguno",
+    "primer_viaje",
+    "white_sands",
+    "vuelta_white_sands"
+   ],
+   "inicial": "ninguno"
   }
  },
  "cualidades": {
@@ -1443,7 +1453,7 @@
      ]
     }
    ],
-   "punto": "Marilla decidió quedársela, a prueba",
+   "punto": "a_prueba | Marilla decidió quedársela, a prueba",
    "falla": {
     "c": "cmp",
     "camino": [
@@ -2021,7 +2031,20 @@
    ],
    "si": {
     "c": "y",
-    "de": []
+    "de": [
+     {
+      "c": "no",
+      "de": {
+       "c": "existe",
+       "camino": [
+        "camino_blanco",
+        "dichas",
+        "cb_libro"
+       ],
+       "ventana": "hoy"
+      }
+     }
+    ]
    },
    "en_marcha": true,
    "interrumpe": true,
@@ -2475,12 +2498,23 @@
      }
     ]
    },
+   "punto": "white_sands | Antes de salir a White Sands",
    "hablan": [
     "narra",
     "marilla",
     "ana"
    ],
    "cuerpo": [
+    {
+     "hace": {
+      "e": "deja",
+      "camino": [
+       "estado",
+       "viaje"
+      ],
+      "valor": "white_sands"
+     }
+    },
     {
      "q": "narra",
      "t": "White Sands está a unas millas por el camino de la costa. Allí vive la Sra. Spencer, la que trajo a Ana del orfanato por equivocación: Marilla va a pedirle que la devuelva. Ana sabe que puede ser su último día en Tejas Verdes."
@@ -2554,12 +2588,23 @@
      }
     ]
    },
+   "punto": "white_sands | Antes de salir a White Sands",
    "hablan": [
     "narra",
     "marilla",
     "ana"
    ],
    "cuerpo": [
+    {
+     "hace": {
+      "e": "deja",
+      "camino": [
+       "estado",
+       "viaje"
+      ],
+      "valor": "white_sands"
+     }
+    },
     {
      "q": "narra",
      "t": "White Sands está a unas millas por el camino de la costa. Marilla lleva las riendas y no dice nada en todo el viaje: piensa en el camisón a mediodía, en la ropa por el suelo, en lo que ha tenido que aguantar. Ana tampoco habla. Mira el mar y aprieta su maleta vieja."
@@ -2731,6 +2776,43 @@
       ],
       "op": ">=",
       "valor": 1
+     },
+     {
+      "c": "no",
+      "de": {
+       "c": "existe",
+       "camino": [
+        "white_sands",
+        "dichas",
+        "ws_pye"
+       ],
+       "id": "ws_pye",
+       "hoy": {
+        "c": "existe",
+        "camino": [
+         "white_sands",
+         "dichas",
+         "ws_pye"
+        ],
+        "ventana": "hoy"
+       },
+       "deja": {
+        "e": "deja",
+        "camino": [
+         "white_sands",
+         "dichas",
+         "ws_pye"
+        ]
+       },
+       "olvida": {
+        "e": "olvida",
+        "camino": [
+         "white_sands",
+         "dichas",
+         "ws_pye"
+        ]
+       }
+      }
      }
     ]
    },
@@ -2831,6 +2913,43 @@
       ],
       "op": ">=",
       "valor": 1
+     },
+     {
+      "c": "no",
+      "de": {
+       "c": "existe",
+       "camino": [
+        "white_sands",
+        "dichas",
+        "ws_pye"
+       ],
+       "id": "ws_pye",
+       "hoy": {
+        "c": "existe",
+        "camino": [
+         "white_sands",
+         "dichas",
+         "ws_pye"
+        ],
+        "ventana": "hoy"
+       },
+       "deja": {
+        "e": "deja",
+        "camino": [
+         "white_sands",
+         "dichas",
+         "ws_pye"
+        ]
+       },
+       "olvida": {
+        "e": "olvida",
+        "camino": [
+         "white_sands",
+         "dichas",
+         "ws_pye"
+        ]
+       }
+      }
      }
     ]
    },
@@ -2925,7 +3044,45 @@
    ],
    "si": {
     "c": "y",
-    "de": []
+    "de": [
+     {
+      "c": "no",
+      "de": {
+       "c": "existe",
+       "camino": [
+        "white_sands",
+        "dichas",
+        "ws_pye"
+       ],
+       "id": "ws_pye",
+       "hoy": {
+        "c": "existe",
+        "camino": [
+         "white_sands",
+         "dichas",
+         "ws_pye"
+        ],
+        "ventana": "hoy"
+       },
+       "deja": {
+        "e": "deja",
+        "camino": [
+         "white_sands",
+         "dichas",
+         "ws_pye"
+        ]
+       },
+       "olvida": {
+        "e": "olvida",
+        "camino": [
+         "white_sands",
+         "dichas",
+         "ws_pye"
+        ]
+       }
+      }
+     }
+    ]
    },
    "en_marcha": true,
    "hablan": [
@@ -2997,6 +3154,13 @@
       "paso": "camino.playa",
       "momento": "cumplido"
      }
+    },
+    {
+     "activa": {
+      "tras": {
+       "escena": "white_sands.ws_mar"
+      }
+     }
     }
    ],
    "si": {
@@ -3046,6 +3210,7 @@
      }
     ]
    },
+   "interrumpe": true,
    "hablan": [
     "srapye",
     "marilla",
@@ -3520,6 +3685,16 @@
     {
      "q": "ana",
      "t": "(Ana sube a la calesa sin mirar atrás, apretando la maleta vieja contra las rodillas.)"
+    },
+    {
+     "hace": {
+      "e": "deja",
+      "camino": [
+       "estado",
+       "viaje"
+      ],
+      "valor": "vuelta_white_sands"
+     }
     }
    ]
   },
@@ -3656,6 +3831,16 @@
     {
      "q": "narra",
      "t": "Al fin Marilla dice, con la voz seca: «Me la llevo a casa. Lo hablaré con Matthew.» La Sra. Blewett se encoge de hombros."
+    },
+    {
+     "hace": {
+      "e": "deja",
+      "camino": [
+       "estado",
+       "viaje"
+      ],
+      "valor": "vuelta_white_sands"
+     }
     }
    ]
   },
@@ -3862,6 +4047,16 @@
      "q": "ana",
      "t": "No me dijo nada en todo el camino de vuelta. ¿Me devolverán mañana?",
      "piensa": true
+    },
+    {
+     "hace": {
+      "e": "deja",
+      "camino": [
+       "estado",
+       "viaje"
+      ],
+      "valor": "ninguno"
+     }
     }
    ]
   }

@@ -7,7 +7,8 @@ const cart = { on: false, x: 0, y: 0, dir: 3, dest: null, riding: false, walk: 0
 const CART_ROUTE = [[GG.x + 20, GG.y + 80], ...[...ROADS.sur].reverse(), ...[...ROADS.estacion].reverse().slice(1), [STATION.x + 50, STATION.y + 70]];   // (from Green Gables, through the village, to the station)
 const CART_LEN = CART_ROUTE.slice(1).reduce((a, p, i) => a + dist(p[0], p[1], CART_ROUTE[i][0], CART_ROUTE[i][1]), 0);
 // (the same cart for another trip: cart.ruta, cart.len, cart.con —who drives—, cart.vel and cart.viaje —what happens on
-// the way and on arrival—: the trip to White Sands with Marilla, src/js/34-viaje-white-sands.js)
+// the way and on arrival—; the trip to White Sands with Marilla is now the language's, with the planner's buggy: there the
+// cart is only the buggy left standing where she got down, src/js/67-lenguaje.js)
 const cartRuta = () => cart.ruta || CART_ROUTE, cartLen = () => cart.len || CART_LEN;
 function cartAt(sv){ const CART_ROUTE = cartRuta(); let left = clamp(sv, 0, cartLen()); for (let i = 1; i < CART_ROUTE.length; i++) { const a = CART_ROUTE[i - 1], b = CART_ROUTE[i], L = dist(a[0], a[1], b[0], b[1]); if (left <= L || i === CART_ROUTE.length - 1) { const k = clamp(left / L, 0, 1); return [lerp(a[0], b[0], k), lerp(a[1], b[1], k), b[0] - a[0]]; } left -= L; } return [...CART_ROUTE[0], 1]; }
 function tripAsk(to){

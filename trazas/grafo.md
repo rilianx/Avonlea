@@ -2,7 +2,7 @@
 
 Lo genera `node tools/grafo.js` (ver `docs/MOTOR.md`). Lee el guion, el cuaderno, las habilidades y el código.
 
-**283 escenas** (9 grandes), **32 metas** del cuaderno, **176 hechos** que algo deja.
+**272 escenas** (9 grandes), **32 metas** del cuaderno, **164 hechos** que algo deja.
 
 ## Escenas o metas que nunca podrían pasar
 
@@ -44,7 +44,6 @@ No es un error: en el dibujo (trazas/grafo.html) se ve su primera frase en vez d
 ## Los momentos a los que se puede volver (puntos)
 
 - `desayuno_prueba` (al empezar): viaje | Volver a la mañana del viaje a White Sands
-- `ws_noche` (al terminar): a_prueba | Marilla decidió quedársela, a prueba
 - `duda_matthew` (al terminar): a_prueba | Marilla decidió quedársela, a prueba
 - `duda_suplica` (al terminar): a_prueba | Marilla decidió quedársela, a prueba
 - `duda_calla` (al terminar): a_prueba | Marilla decidió quedársela, a prueba
@@ -56,7 +55,6 @@ No es un error: en el dibujo (trazas/grafo.html) se ve su primera frase en vez d
 - `invita_allan` (antes): Antes del té con la Sra. Allan
 - `pastel_linimento` (antes): Antes del pastel con linimento
 - `cama_josephine` (antes): Antes de la noche en la cama de la Srta. Josephine
-- `viaje_spencer` (antes): white_sands | Antes de salir a White Sands
 - `viaje_spencer_duda` (antes): white_sands | Antes de salir a White Sands
 - `lynde_visita` (antes): Antes de la visita de la Sra. Lynde
 
@@ -69,7 +67,7 @@ No es un error (un hecho puede quedar para el registro), pero puede ser algo olv
 - `blewett_orgullo`: lo deja escena viaje_spencer_duda (una opción)
 - `carta_a_`: lo deja código
 - `conoce_`: lo deja código
-- `conoce_blewett`: lo deja escena ws_noche, escena viaje_spencer_duda
+- `conoce_blewett`: lo deja escena viaje_spencer_duda
 - `leyo_`: lo deja código
 - `marilla_doblo_ropa`: lo deja código
 - `matthew_busca`: lo deja código
@@ -84,10 +82,3 @@ No es un error (un hecho puede quedar para el registro), pero puede ser algo olv
 - `ofendio_lynde`: lo deja escena lynde_visita (una opción)
 - `queens_primera`: lo deja escena examen_primera
 - `sin_terminar_`: lo deja código
-- `ws_calla_vuelta`: lo deja escena ws_vuelta (una opción)
-- `ws_callo`: lo deja escena ws_pye (una opción)
-- `ws_mira`: lo deja escena ws_spencer (una opción)
-- `ws_ofrece`: lo deja escena ws_spencer (una opción)
-- `ws_perdon`: lo deja escena ws_orilla (una opción)
-- `ws_pregunto`: lo deja escena ws_orilla (una opción)
-- `ws_promete`: lo deja escena ws_vuelta (una opción)

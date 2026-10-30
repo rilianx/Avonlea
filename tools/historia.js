@@ -74,7 +74,8 @@ const DONDE_COSA = { gwin: 'ga', mirror: 'ga', armario: 'ga', bed: 'ga', stairs:
 // the post (src/js/62-cartas.js: CORREO): how many days a letter takes to arrive, and the answer after it
 const CORREO = new Function('return ' + fs.readFileSync(path.join(root, 'src/js/62-cartas.js'), 'utf8').match(/^const CORREO = (\{[\s\S]*?^\});/m)[1])();
 // the trips: the places the cart passes, in order (measured on the map: where each «cerca:ana:<lugar>» of the scenes of
-// the road falls along the way), and what the game does on arriving (src/js/34-viaje-white-sands.js)
+// the road falls along the way), and what the game does on arriving (the trip to White Sands is now the language's:
+// docs/lenguaje/historias/white_sands/, src/js/67-lenguaje.js; these are for the script's scenes of a trip, if any)
 const RUTAS = {
   white_sands: { paradas: ['tejas_verdes', 'hondonada_lynde', 'escuela', 'aldea', 'playa', 'hotel_white_sands'], llegar: [] },
   vuelta_white_sands: { paradas: ['hotel_white_sands', 'playa', 'aldea', 'escuela', 'hondonada_lynde', 'tejas_verdes'], llegar: ['estado viaje ninguno', 'hecho ws_vuelven', 'viaje casa'] },
