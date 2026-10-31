@@ -459,8 +459,8 @@ guardando la partida y cargándola en un motor nuevo cada pocas vueltas; las dos
 
 | El motor necesita | El juego lo pone con |
 |---|---|
-| dónde está cada uno (`llega`) | su posición: un tramo del camino de Bright River (la Avenida, Newbridge), la estación, el Camino Blanco del mapa de Avonlea, la laguna, Tejas Verdes, una pieza |
-| `ir_a` (y cada viaje de `llevar_a`) | una meta `estar_en` del planificador del juego: busca el camino (las ocho millas incluidas), y quien va con él, va también |
+| dónde está cada uno (`llega`) | su posición: un tramo de un camino largo (el de Bright River: la Avenida, Newbridge; el de la costa: la playa, el hotel White Sands, la orilla), la estación, el Camino Blanco del mapa de Avonlea, la laguna, Tejas Verdes, una pieza |
+| `ir_a` (y cada viaje de `llevar_a`) | una meta `estar_en` del planificador del juego: busca el camino (las ocho millas a Bright River, o las seis de la costa a White Sands, incluidas), y quien va con él, va también |
 | `subir`, `bajar` | la calesa del juego: ir con quien la maneja (como `subir_calesa` del planificador); en el camino, sentada a su lado |
 | en qué va cada uno, la calesa lista, el afecto, `ana_en_tv`, si empezó el primer viaje | lo que el juego sabe (`vale`): se lo dice al motor en cada paso |
 | un pedido a Ana | el menú: «Subir a la calesa» o «Todavía no»; Ana sola decide como en `comun/ana.ts` |

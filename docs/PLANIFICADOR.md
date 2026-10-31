@@ -254,6 +254,16 @@ Cuando no hay meta, sigue la rutina de lugares de siempre. Al lanzar una meta de
 
 La estación está al final de un camino de ocho millas que no está en el mapa (una tierra aparte, `'camino'`, dibujada como Avonlea). Para el planificador, `h:br` está a `ROAD_MIN` = 145 minutos más que su puerta (el letrero en el borde del mapa): `travelMin` suma `roadMin(a) − roadMin(b)`. Como esa acción cuesta mucho más que las demás, la heurística de `estar_en` y `llevar` también la cuenta (si no, el A\* con peso probaría todo lo demás antes y se quedaría sin espacio). En la ejecución, quien va a `h:br` llega al letrero, entra al camino (`where: 'camino'`, `roadS` de 1 a 0) y al llegar aparece en el andén; al salir de la estación, al revés. Si Ana va con alguien en la calesa (`subir_calesa`), entra al camino con el que maneja.
 
+**El camino de la costa** (a White Sands) es otro camino largo, hecho igual (`CAMINOS.costa`, en
+`src/js/17-camino-bright-river.js`): 75 minutos junto al mar, desde un letrero en la costa norte de Avonlea, donde antes
+estaba el hotel. El hotel y su playa son lugares de ese camino (`WP_CAMINO`: `hotel_ws` y `playa_ws`, cada uno con su
+camino y su `s`). Para el planificador están en el letrero, más lo que dura el camino hasta ellos (`roadMin`); quien está
+en ese camino, cerca de su `s`, está ahí (`personKey`). Al ir, se llega al letrero, se entra al camino
+(`roadStart(…, 'costa')`) y se avanza hasta su `s`. Al final del camino no hay pieza: se llega a White Sands y se queda
+ahí, en el camino. Cada cuerpo sabe en qué camino va (`b.camino`; el de Ana, `ana.camino`), y lo que se mueve o se
+dibuja usa ese camino (`usarCamino`, `enCamino`). Alguien a pie, fuera del camino (Ana llorando en la orilla), se busca
+caminando hasta ella (`b.suelto`), y después se vuelve al camino.
+
 Un ejemplo con todo: el capítulo 1 del libro ([CAP1.md](CAP1.md)).
 
 ## 8. Ejemplo completo: «La Sra. Barry quiere compota»

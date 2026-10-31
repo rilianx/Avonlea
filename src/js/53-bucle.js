@@ -229,6 +229,7 @@ function renderView(){
   const W = innerWidth, H = innerHeight, dpr = devicePixelRatio || 1;
   if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
   const { night, dusk } = light(), t = TT, road = game.scene === 'camino', inside = game.scene !== 'out' && !road;
+  if (viewScene() === 'camino') usarCamino(obsScene() === 'camino' ? caminoDe(OBS) : ana.camino);   // (the road of whoever is watched)
   drawingOut = !inside;
   const BOT = W > 600 ? 76 : 0;   // (the column of buttons on the right, on a wide screen: the room fits beside it)
   const Z = inside ? Math.min((W - BOT) / KIT.w, H / KIT.h) * .94 : clamp(Math.min(W / ((H > W ? 8 : 12) * T), H / (9 * T)), 1.1, 3.2) * (cam.zoom ?? 1) * viewZoom;
@@ -259,7 +260,7 @@ function renderView(){
     sueloPintar(g, ox, oy, vw, vh, t, { baldosas: true, fijo: true, vivo: true });
     for (const o of [...props, ...trees, ...bushes]) if (inView(o.x, o.y, 170)) list.push({ y: o.y, draw: () => drawProp(g, o, t, night) });
     for (const k of Object.keys(PEOPLE)) if (sceneOf(k) === 'out') { const p = PEOPLE[k]; if (p.buggy) pushDriven(list, g, p, t); else list.push({ y: p.sortY ?? p.y, draw: () => drawPerson(g, p, t) }); if (CH[k].vehicle === 'cart') list.push({ y: p.y - .5, draw: () => drawCart(g, p, t) }); }
-    if (cart.on && inView(cart.x, cart.y, 120)) pushCart(list, g, cart, t);
+    if (cart.on && !cart.camino && inView(cart.x, cart.y, 120)) pushCart(list, g, cart, t);   // (left by a long road: drawn there)
     for (const f of FOLK) if (f.where === 'out' && inView(f.x, f.y)) list.push({ y: f.sortY ?? f.y, draw: () => drawPerson(g, f, t) });
     for (const a of FAUNA) if (inView(a.x, a.y - (a.alt || 0), 60)) list.push({ y: a.fly ? a.y + 1e5 : a.water ? a.y - 40 : a.y, draw: () => FAUNA_DRAW[a.kind](g, a, t) });
     for (const b of BUGGIES) if (inView(b.x, b.y, 120)) list.push({ y: b.y + 1, draw: () => drawBuggy(g, b, t) });

@@ -14,8 +14,8 @@
      at Green Gables are still the game's (by stretch, src/js/21; the script's tejas_verdes and llegada, with the
      chapter's machinery, src/js/20): those scenes of the language are left out here (LG_OMITIR);
    - White Sands (historias/white_sands), when Marilla still has patience: she fetches Ana if she is far, harnesses
-     the mare in the yard, asks her to get in, and drives her by the shore road (Mrs. Pye, the shore, Mrs. Spencer)
-     and back. Without patience, the doubt is still the script's (viaje_spencer_duda and what follows: told at home).
+     the mare in the yard, asks her to get in, and drives her by the shore road —a long road of its own, as Bright
+     River's, src/js/17: the hotel and its beach are at its far end— (Mrs. Pye, the shore, Mrs. Spencer) and back. Without patience, the doubt is still the script's (viaje_spencer_duda and what follows: told at home).
    What the engine does in its own state, the game does in its own too (efecto): facts, states, Marilla's patience and
    fondness, the journal, the points to go back to.
    The engine's game is kept with the game's (save, «lenguaje»), and goes on where it was. ---------- */
@@ -26,8 +26,8 @@ const LG_OMITIR = ['llegada.ll_pelo', 'llegada.ll_angelical', 'llegada.ll_llegan
 const LG_ESCENARIO = { historias: LG_HISTORIAS, omitir: LG_OMITIR };
 // the language's places, as the planner's (where it can take someone): the rest are only known as they are passed
 const LG_PLAN = { estacion_bright_river: 'h:br', tejas_verdes: 'cocina', cocina: 'cocina', corral: 'corral', estanque_barry: 'lago', aldea: 'aldea', escuela: 'escuela', hotel_white_sands: 'hotel_ws', playa: 'playa_ws' };
-// (out of doors, the places of the language around a point of the map, and how far: the places by the shore road too)
-const LG_ZONAS = [['hotel_white_sands', () => WP.hotel_ws, 250], ['playa', () => WP.playa_ws, 200], ['hondonada_lynde', () => dlgLugar('hondonada'), 450], ['escuela', () => SCHOOL_DOOR, 650], ['aldea', () => dlgLugar('aldea'), 550]];
+// (out of doors, the places of the language around a point of the map, and how far)
+const LG_ZONAS = [['hondonada_lynde', () => dlgLugar('hondonada'), 450], ['escuela', () => SCHOOL_DOOR, 650], ['aldea', () => dlgLugar('aldea'), 550]];
 // (the state of the world that is the game's own, not the engine's: who runs where, the journeys, the parked buggy, who
 // is held still while a scene is said, the townsfolk an errand put somewhere)
 const LG = { M: null, talk: null, narra: null, u: null, menu: false, corriendo: {}, viajes: {}, sujetos: [], gente: new Set() };
@@ -37,7 +37,12 @@ const lgAhora = () => dayT * 1440 + 360;
 function lgLugarDe(k){
   const b = wmBody(k); if (!b) return null;
   const sc = dlgEscena(k);
-  if (sc === 'camino') { const tr = roadTramo((k === 'ana' ? ana.roadS : b.roadS) ?? 0); return tr.kind === 'avenida' ? 'camino_blanco' : tr.name === 'Newbridge' ? 'newbridge' : 'camino_bright_river'; }
+  if (sc === 'camino') return enCamino(caminoDe(k), () => {   // (on a long road: its stretch —a place of the stories, some—; by the shore road, the sand by the water)
+    const tr = roadTramo((k === 'ana' ? ana.roadS : b.roadS) ?? roadSOf(b.x));
+    if (CAM.id === 'br') return tr.kind === 'avenida' ? 'camino_blanco' : tr.name === 'Newbridge' ? 'newbridge' : 'camino_bright_river';
+    if (CAM.mar && b.y < roadY(b.x) - 60) return 'orilla';   // (off the road, on the sea side)
+    return tr.lugar || 'camino_' + CAM.id;
+  });
   if (sc === 'br') return 'estacion_bright_river';
   if (sc === 'out') {
     { const A = AREAS.corral; if (A && b.x > A.x - 90 && b.x < A.x + A.w + 90 && b.y > A.y - 90 && b.y < A.y + A.h + 90) return 'corral'; }   // (by its fence, too: the buggy waits there)
@@ -53,7 +58,7 @@ function lgLugarDe(k){
 // who sees and hears whom: in the same room; or out of doors, close and in the same place (or one within the other: the
 // yard and the pen) —as the language says it, «in the same place»—; and not one who runs off (crying, to the sea)
 const lgMismo = (a, b) => { const x = LG.corriendo[a] || lgLugarDe(a), y = LG.corriendo[b] || lgLugarDe(b), L = LENGUAJE.lugares; return x === y || L[x]?.dentro === y || L[y]?.dentro === x; };
-const lgJuntos = (a, b) => { const A = wmBody(a), B = wmBody(b), sc = dlgEscena(a); return !!A && !!B && sc === dlgEscena(b) && !LG.corriendo[a] && !LG.corriendo[b] && (!['out', 'camino'].includes(sc) || (d => d < 120 || (d < 260 && lgMismo(a, b)))(dist(A.x, A.y, B.x, B.y))); };   // (side by side, always)
+const lgJuntos = (a, b) => { const A = wmBody(a), B = wmBody(b), sc = dlgEscena(a); return !!A && !!B && sc === dlgEscena(b) && (sc !== 'camino' || caminoDe(a) === caminoDe(b)) && !LG.corriendo[a] && !LG.corriendo[b] && (!['out', 'camino'].includes(sc) || (d => d < 120 || (d < 260 && lgMismo(a, b)))(dist(A.x, A.y, B.x, B.y))); };   // (side by side, always)
 // the nearest point of the shore (on the sand, a little before the water), and how far
 function orillaCerca(x, y){ let best = null; for (let i = 1; i < COAST.length; i++) { const p = proj([x, y], COAST[i - 1], COAST[i]); if (!best || p.d < best.d) best = p; } return best; }
 // who drives the buggy (the one who has it), and whether someone rides in it
@@ -68,12 +73,13 @@ function lgEn(k){
 }
 // a place of the language, as a place of the planner: its own; or, out of doors, where someone is (to go to her: Ana by
 // the sea)
-const lgDestino = (l, quien) => LG_PLAN[l] || (k => k && 'p:' + k)(Object.keys(LENGUAJE.personas).find(k => k !== quien && dlgEscena(k) === 'out' && (LG.corriendo[k] || lgLugarDe(k)) === l));
+const lgDestino = (l, quien) => LG_PLAN[l] || (k => k && 'p:' + k)(Object.keys(LENGUAJE.personas).find(k => k !== quien && ['out', 'camino'].includes(dlgEscena(k)) && (LG.corriendo[k] || lgLugarDe(k)) === l));
 // a verb of the language that moves someone: a goal for the planner (and whoever rides with them, goes too). On a
 // journey (a «por cada» of stops: the shore road), one goal to its end; each stop is done when it is passed
 function lgIr(acc){
   const v = LG.viajes[acc.quien], destino = acc.destino || acc.a;
   if (v && v.hasta === destino) { const g = AGENTS[acc.quien]?.goals.find(g => g.seq === v.seq); if (g?.st === 'run') { acc.seq = v.seq; return; } }   // (the journey's goal, already on its way)
+  if (v && v.hasta !== destino) { const ag = AGENTS[acc.quien], g = ag?.goals.find(g => g.seq === v.seq); if (g?.st === 'run') goalEnd(ag, g, 'fail', 'el lenguaje: va a otra parte'); }   // (somewhere else on the way —after Ana, to the sea—: the journey's goal is left, and set again after)
   const key = lgDestino(destino, acc.quien); if (key?.startsWith('p:')) acc.persona = key.slice(2); if (!key) { console.warn('[avonlea] lenguaje: el planificador no conoce «' + destino + '»'); acc.hecho = true; return; }
   const g = agentStart(acc.quien, { ...G.estar_en(acc.quien, key), sale: true, text: `${wmName(acc.quien)} va a ${WP_NAME[key] || wmPlaceText(key)}` }, { label: `ir a ${WP_NAME[key] || wmPlaceText(key)} (${acc.verbo}, del lenguaje)`, prio: 3 });
   if (g) { acc.seq = g.seq; if (v && v.hasta === destino) v.seq = g.seq; }
@@ -98,26 +104,27 @@ const lgLlego = acc => { const v = LG.viajes[acc.quien], A = acc.persona && wmBo
 // someone of the village an errand puts somewhere (Mrs. Pye on the road): there, as the game does with them; and still
 // until the errand is over
 function lgPoner(k, l){
-  const f = FOLKBY[k], P = WP[LG_PLAN[l]] || dlgLugar(l); if (!f || !P) return;
+  const f = FOLKBY[k], R = WP_CAMINO[LG_PLAN[l]], P = R ? enCamino(R[0], () => roadAt(R[1])) : WP[LG_PLAN[l]] || dlgLugar(l); if (!f || !P) return;
   lgTraer(k);
-  Object.assign(f, { where: 'out', x: P[0] + 30, y: P[1] + 12, route: [], moving: false, sit: false, dir: 3, talkT: TT + 1e6 }); LG.gente.add(k); (LG.esperan ||= {})[k] = l;
+  Object.assign(f, { where: R ? 'camino' : 'out', camino: R?.[0], x: P[0] + 30, y: P[1] + (R ? -40 : 12), route: [], moving: false, sit: false, dir: 3, talkT: TT + 1e6 }); LG.gente.add(k); (LG.esperan ||= {})[k] = l;   // (on a long road: by its side, towards the sea)
 }
 // (the townsfolk a story brings somewhere: where they were is kept, and they go back there when it is over —into the
 // hotel, home—, not to stand in the road)
-function lgTraer(k){ const f = FOLKBY[k]; if (f && !(LG.antes ||= {})[k]) LG.antes[k] = { where: f.where, x: f.x, y: f.y }; }
+function lgTraer(k){ const f = FOLKBY[k]; if (f && !(LG.antes ||= {})[k]) LG.antes[k] = { where: f.where, camino: f.camino, x: f.x, y: f.y }; }
 function lgDevolver(k){ const f = FOLKBY[k], a = LG.antes?.[k]; if (!f) return; f.talkT = TT + 1; if (a) { Object.assign(f, a, { route: [], moving: false }); delete LG.antes[k]; } }
 // Ana runs (a verb said in a scene, at once: «<<correr_a('ana', 'orilla')>>»): off the buggy, and away; to the sea, the
 // nearest shore. Until she gets there, she is where she runs to (for the engine: she is gone)
 function lgCorrer(acc){
   const q = acc.quien; if (q !== 'ana') return;
   const A = AGENTS.ana; if (A) { A.followOf = null; A.ride = false; } ana.sit = false;
-  let x, y; if (acc.a === 'orilla') { const o = orillaCerca(ana.x, ana.y), d = o ? Math.max(1, o.d) : 1; x = o ? o.x + (ana.x - o.x) / d * 40 : ana.x; y = o ? o.y + (ana.y - o.y) / d * 40 : ana.y; dlgDichas().playa_1 = true; }   // (her first time by the sea is this one)
+  let x, y; if (acc.a === 'orilla' && game.scene === 'camino') { usarCamino(ana.camino); x = ana.x - 120; y = seaY(x) + 50; dlgDichas().playa_1 = true; }   // (by the shore road: down to the water, back along the road —into the stretch they were in—)
+  else if (acc.a === 'orilla') { const o = orillaCerca(ana.x, ana.y), d = o ? Math.max(1, o.d) : 1; x = o ? o.x + (ana.x - o.x) / d * 40 : ana.x; y = o ? o.y + (ana.y - o.y) / d * 40 : ana.y; dlgDichas().playa_1 = true; }   // (her first time by the sea is this one)
   else { const P = keyPoint(lgDestino(acc.a, q) || '') || [ana.x, ana.y]; [x, y] = P; }
   LG.corriendo[q] = acc.a; LG.corre = [x, y]; LG.api?.llega(q, acc.a);
-  if (navigator.webdriver) { ana.x = x; ana.y = y; } else anaIrDespues({ x, y, scene: 'out', corre: true });   // (the arrival: lgMundo sees it)
+  if (navigator.webdriver) { ana.x = x; ana.y = y; } else anaIrDespues({ x, y, scene: game.scene, corre: true });   // (the arrival: lgMundo sees it)
 }
 // the buggy left where its driver got down, away from home (the cart, standing; she walks)
-function lgAparcar(k){ const b = wmBody(k); Object.assign(cart, { on: true, riding: false, moving: false, ruta: [[b.x, b.y], [b.x + 1, b.y]], len: 1, s: 0, con: k, suelto: true, parado: true, vel: 0, viaje: { aviso: '', subir(){} } }); [cart.x, cart.y] = [b.x, b.y]; LG.aparcada = k; }
+function lgAparcar(k){ const b = wmBody(k); Object.assign(cart, { camino: dlgEscena(k) === 'camino' ? caminoDe(k) : null, on: true, riding: false, moving: false, ruta: [[b.x, b.y], [b.x + 1, b.y]], len: 1, s: 0, con: k, suelto: true, parado: true, vel: 0, viaje: { aviso: '', subir(){} } }); [cart.x, cart.y] = [b.x, b.y]; LG.aparcada = k; }
 // the world of the game, for the engine (the interface: tools/lenguaje/mundo_simulado.js)
 function MundoJuego(api){
   if (api) LG.api = api;   // (to tell the engine at once: where someone runs to)
@@ -137,7 +144,7 @@ function MundoJuego(api){
         if (acc.ya) { lgCorrer(acc); acc.hecho = true; return; }
         if (!PEOPLE[acc.quien] && FOLKBY[acc.quien]) { lgPoner(acc.quien, acc.a); acc.hecho = true; return; }   // (the townsfolk: there)
         const v = LG.viajes[acc.quien]; if (acc.de_paso && v && v.paradas.includes(acc.a)) { acc.destino = v.hasta; acc.dePaso = acc.a !== v.hasta; }   // (a stop of the journey: the engine says so)
-        if ((acc.dePaso || acc.persona) && lgLlego(acc)) acc.hecho = true; else lgIr(acc);   // (to a place: the planner says when —the yard is not yet the kitchen—)
+        if ((acc.dePaso || acc.persona || WP_CAMINO[LG_PLAN[acc.a]]) && lgLlego(acc)) acc.hecho = true; else lgIr(acc);   // (a place on a long road is a stretch of it: in it, there)   // (to a place: the planner says when —the yard is not yet the kitchen—)
         return;
       }
       if (acc.verbo) { lgHacer(acc); acc.fin = lgAhora() + (acc.ya ? 0 : acc.dura || 0); return; }
@@ -203,7 +210,7 @@ function MundoJuego(api){
         LG.talk = { ch: 'viaje', lines: [], i: -1, wait: 1e9, el: 0, hold: [], lenguaje: id, esc: corto }; TALKS.push(LG.talk);
         // (those who speak in it, and are of the village, come where it is: Mrs. Spencer and Mrs. Blewett at the door of
         // the hotel; and if it is not said on the way, they all stay still while it is said —the buggy too, if Ana speaks—)
-        for (const [n, k] of E.hablan.entries()) if (!PEOPLE[k] && FOLKBY[k] && k !== 'narra' && !lgJuntos('ana', k) && !lgTraer(k)) Object.assign(FOLKBY[k], { where: 'out', x: ana.x + (n % 2 ? -40 : 40) * (1 + n / 2), y: ana.y + 30, route: [], moving: false, sit: false, dir: 2 });
+        for (const [n, k] of E.hablan.entries()) if (!PEOPLE[k] && FOLKBY[k] && k !== 'narra' && !lgJuntos('ana', k) && !lgTraer(k)) Object.assign(FOLKBY[k], { where: game.scene === 'camino' ? 'camino' : 'out', camino: game.scene === 'camino' ? ana.camino : undefined, x: ana.x + (n % 2 ? -40 : 40) * (1 + n / 2), y: ana.y + 30, route: [], moving: false, sit: false, dir: 2 });
         LG.sujetos = E.en_marcha ? [] : [...E.hablan.filter(k => k !== 'narra' && k !== 'ana'), ...(E.hablan.includes('ana') && AGENTS.ana?.ride && AGENTS.ana.followOf ? [AGENTS.ana.followOf] : [])];
         for (const k of LG.sujetos) if (PEOPLE[k]) CHAT_HOLD[k] = TT + 1e6; else if (FOLKBY[k]) FOLKBY[k].talkT = TT + 1e6;
         // (its card, as the game's talks have theirs: while it is read, the world waits —narraPausa—)
@@ -237,13 +244,13 @@ function lgHacer(acc){
   const [q, x] = acc.args;
   switch (acc.verbo) {
     case 'subir':
-      if (q !== 'ana') { const b = wmBody(q); if (b) b.buggy = true; if (LG.aparcada === q) { cart.on = false; cart.viaje = null; LG.aparcada = null; } break; }   // (the parked buggy: hers again)
+      if (q !== 'ana') { const b = wmBody(q); if (b) b.buggy = true; if (LG.aparcada === q) { cart.on = false; cart.viaje = null; cart.camino = null; LG.aparcada = null; } break; }   // (the parked buggy: hers again)
       { const d = lgConductor(), A = agentOf('ana'); A.followOf = d; A.ride = true; ana.llora = false;   // (while he has the errand, he is «driven»: she stays with him)
         if (game.scene === 'camino' && game.road?.with === d) roadBoard(); logEv(`Ana subió a la calesa con ${wmName(d)}.`, []); }
       break;
     case 'bajar':
       if (q === 'ana') { const A = AGENTS.ana; if (A) { A.followOf = null; A.ride = false; } ana.sit = false; if (game.scene === 'camino' && ana.onCart) roadGetOff(); }
-      else { const b = wmBody(q); if (b?.buggy && dlgEscena(q) === 'out') { b.buggy = false; if (!['tejas_verdes', 'corral'].includes(lgLugarDe(q))) lgAparcar(q); } }   // (away from home, the buggy stays there)
+      else { const b = wmBody(q); if (b?.buggy && ['out', 'camino'].includes(dlgEscena(q))) { b.buggy = false; if (dlgEscena(q) === 'camino') { b.sit = false; b.roadDir = 0; } if (!['tejas_verdes', 'corral'].includes(lgLugarDe(q))) lgAparcar(q); } }   // (away from home, the buggy stays there)
       break;
     case 'enganchar': { const b = wmBody(q); if (b) b.buggy = true; break; }
     case 'seguir': if (q === 'ana') { agentOf('ana').followOf = x; ana.sit = false; ana.llora = false; } break;
@@ -310,11 +317,12 @@ function lgMundo(){
   // (who waits at a stop comes out to the road when the buggy with Ana gets there: Mrs. Pye, ahead of it)
   { const d = AGENTS.ana?.ride && AGENTS.ana.followOf, b = d && wmBody(d);
     if (b?.buggy) for (const [k, l] of Object.entries(LG.esperan || {})) { const f = FOLKBY[k]; if (!f || !LG.gente.has(k) || (lgLugarDe(d) !== l && !LG.viajes[d]?.pasados.has(l))) continue;   // (there, or already past it: she catches them up)
-      if (dist(f.x, f.y, b.x, b.y) >= 110) { const q = b.bnav?.pts[Math.min(b.bnav.i + 1, b.bnav.pts.length - 1)] || [b.x + 1, b.y], L = dist(b.x, b.y, q[0], q[1]) || 1; f.x = b.x + (q[0] - b.x) / L * 70 + 26; f.y = b.y + (q[1] - b.y) / L * 70 + 12; f.dir = 3; }
+      if (dist(f.x, f.y, b.x, b.y) >= 110 && dlgEscena(d) === 'camino') enCamino(caminoDe(d), () => { const [x, y] = roadAt(b.roadS + (b.roadDir || -1) * 90 / ROAD_LEN); Object.assign(f, { where: 'camino', camino: CAM.id, x: x + 10, y: y - 30, dir: 3 }); });   // (on a long road: ahead of it, by its side)
+      else if (dist(f.x, f.y, b.x, b.y) >= 110) { const q = b.bnav?.pts[Math.min(b.bnav.i + 1, b.bnav.pts.length - 1)] || [b.x + 1, b.y], L = dist(b.x, b.y, q[0], q[1]) || 1; f.x = b.x + (q[0] - b.x) / L * 70 + 26; f.y = b.y + (q[1] - b.y) / L * 70 + 12; f.dir = 3; }
       CHAT_HOLD[d] = Math.max(CHAT_HOLD[d] || 0, TT + .5);   // (and she stands in the road: the buggy stops there, until what she waits for is said)
     } }
   // (running: until she gets there; if something cut her way —a menu, the end of a scene—, she is given it again)
-  if (LG.corriendo.ana && LG.corre && !ana.goto && dist(ana.x, ana.y, LG.corre[0], LG.corre[1]) >= 40 && TT > (LG.corre.otra || 0)) { LG.corre.otra = TT + 2; if (navigator.webdriver) [ana.x, ana.y] = LG.corre; else anaIrDespues({ x: LG.corre[0], y: LG.corre[1], scene: 'out', corre: true }); }
+  if (LG.corriendo.ana && LG.corre && !ana.goto && dist(ana.x, ana.y, LG.corre[0], LG.corre[1]) >= 40 && TT > (LG.corre.otra || 0)) { LG.corre.otra = TT + 2; if (navigator.webdriver) [ana.x, ana.y] = LG.corre; else anaIrDespues({ x: LG.corre[0], y: LG.corre[1], scene: game.scene, corre: true }); }
   if (LG.corriendo.ana && (!LG.corre || dist(ana.x, ana.y, LG.corre[0], LG.corre[1]) < 40)) { if (LG.corriendo.ana === 'orilla' && LG.corre && dist(ana.x, ana.y, LG.corre[0], LG.corre[1]) < 40) { ana.dir = 0; ana.sit = true; ana.llora = true; } delete LG.corriendo.ana; }   // (she got there, or stopped running)
   if (M.get(['mundo', 'calesa', 'lugar']) == null) M.vale(['mundo', 'calesa', 'lugar'], 'corral');
   for (const k of ['ana_en_tv', 'viaje']) { const e = estadoValor(k); if (e) M.vale(['estado', k], e); }

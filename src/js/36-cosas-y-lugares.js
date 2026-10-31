@@ -19,7 +19,7 @@ const PLACES = {
   huerta: ['la huerta de Tejas Verdes', BEDS[4].x, BEDS[4].y + 34],
   granero: ['el granero', BARN.x + 60, BARN.y + 50], puente: ['el puente del arroyo', BRIDGE.x - 80, BRIDGE.y + 8], camino_blanco: ['el Camino Blanco de las Delicias', (GG.x + BRIDGE.x) / 2, BRIDGE.y + 6],
   lago: ['el Lago de las Aguas Brillantes', BENCH.x + 40, BENCH.y + 22], ...Object.fromEntries(WOODS.filter(w => w.haunted).map(w => ['bosque_encantado', ['el Bosque Encantado', w.x, w.y - w.ry + 40]])),
-  aldea: ['la aldea de Avonlea (el cruce de caminos)', ROADS.este[0][0], ROADS.este[0][1] + 10], playa: ['la playa, junto al hotel White Sands', MAP.buildings[0].at[0] * U + 160, MAP.buildings[0].at[1] * U + 100], faro: ['el faro', MAP.buildings[1].at[0] * U, MAP.buildings[1].at[1] * U + 60], rio: ['el río, junto a la escuela', MILK.x - 40, MILK.y + 10], campo_rosado: ['el campo de flores rosadas', LUPINS[0].x, LUPINS[0].y],
+  aldea: ['la aldea de Avonlea (el cruce de caminos)', ROADS.este[0][0], ROADS.este[0][1] + 10], playa: ['la playa, junto al faro', MAP.buildings[0].at[0] * U + 160, MAP.buildings[0].at[1] * U + 100], faro: ['el faro', MAP.buildings[1].at[0] * U, MAP.buildings[1].at[1] * U + 60], rio: ['el río, junto a la escuela', MILK.x - 40, MILK.y + 10], campo_rosado: ['el campo de flores rosadas', LUPINS[0].x, LUPINS[0].y],
 };
 // where someone is now, in words (for the choices of Ana on her own: «Ir a conversar con Marilla (en la cocina)»)
 function whereText(k){

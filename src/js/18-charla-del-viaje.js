@@ -64,6 +64,7 @@ const VIAJE_MAS = Array.from({ length: Math.max(...ROAD_TRAMOS.map(t => t.v)) + 
 // and her loose musings, after the book's (viaje:relleno, in order)
 LIBRO1.relleno.push(...dichosEnOrden('viaje:relleno').map(([, t]) => t));
 function roadTramoIn(k, tr){
+  if (caminoDe(k) !== 'br') return;   // (the stretches of the book's road: Bright River's)
   if (tr.m) cap1Mark(tr.m, tr.note);
   else if (tr.note) logEv(tr.note, []);
   if (tr.v === 1 && PEOPLE[k].roadDir > 0 && !game.roadLady) game.roadLady = { s: clamp(PEOPLE[k].roadS + .03, 0, 1) };   // (a lady in a cart, coming the other way)
@@ -99,7 +100,7 @@ let tripTxt = '';
 function tripBarDraw(){
   const on = tripOn() && $('talk').hidden && !document.querySelector('#narra:not([hidden])'); $('tripbar').hidden = !on; if (!on) return;   // (not over a choice or a card: it would hide them)
   let s = '🐴 En la calesa';
-  if (game.scene === 'camino') { const d = PEOPLE[game.road?.with], dir = d?.roadDir || 1, tr = roadTramo(ana.roadS); s = ana.onCart ? `🐴 ${dir > 0 ? 'Hacia Avonlea' : 'Hacia Bright River'} · ${tr.name} · faltan ${millas(roadMiles(ana.roadS, dir))}` : `🚶 A pie · ${tr.name} · ${millas(roadMiles(ana.roadS, 1))} a Tejas Verdes, ${millas(roadMiles(ana.roadS, -1))} a la estación`; }
+  if (game.scene === 'camino') { const d = PEOPLE[game.road?.with], dir = d?.roadDir || 1, tr = roadTramo(ana.roadS); s = ana.onCart ? `🐴 ${dir > 0 ? 'Hacia Avonlea' : 'Hacia ' + CAM.fin_nombre} · ${tr.name} · faltan ${millas(roadMiles(ana.roadS, dir))}` : `🚶 A pie · ${tr.name} · ${millas(roadMiles(ana.roadS, 1))} a Tejas Verdes, ${millas(roadMiles(ana.roadS, -1))} ${CAM.id === 'br' ? 'a la estación' : 'a ' + CAM.fin_nombre}`; }
   else if (CAP1.on && !CAP1.done) s = CAP1.juego ? (game.scene === 'br' ? '🚉 Bright River · ' : '🐴 Con Matthew, camino a Avonlea · ') + fmtHour(hourNow()) : '📖 Capítulo 1 · ' + fmtHour(hourNow());   // (the beginning at the station: where she is, not a chapter of the tests)
   if (s !== tripTxt) { tripTxt = s; $('tripstop').textContent = s; }
 }
@@ -127,10 +128,10 @@ function islaDraw(){
   c.font = `italic ${11 * dpr}px Georgia, serif`; c.fillStyle = '#4a6a7a'; c.fillText('Golfo de San Lorenzo', .5 * w, .12 * h); c.fillText('Estrecho de Northumberland', .45 * w, .85 * h);
   // where Ana is: in Avonlea, at Bright River, or somewhere on the road between them
   const av = [T_.avonlea[1], T_.avonlea[2]], nb = [T_.newbridge[1], T_.newbridge[2]], br = [T_.brightriver[1], T_.brightriver[2]];
-  const onRoad = s => s > .5 ? [lerp(nb[0], av[0], (s - .5) * 2), lerp(nb[1], av[1], (s - .5) * 2)] : [lerp(br[0], nb[0], s * 2), lerp(br[1], nb[1], s * 2)];
+  const ws = [T_.whitesands[1], T_.whitesands[2]], onRoad = (s, c = 'br') => c === 'costa' ? [lerp(ws[0], av[0], s), lerp(ws[1], av[1], s)] : s > .5 ? [lerp(nb[0], av[0], (s - .5) * 2), lerp(nb[1], av[1], (s - .5) * 2)] : [lerp(br[0], nb[0], s * 2), lerp(br[1], nb[1], s * 2)];
   const mk = (p, name, col) => { const [sx, sy] = P(p); c.beginPath(); c.arc(sx, sy, (6 + Math.sin(TT * 5)) * dpr, 0, TAU); c.fillStyle = col; c.fill(); c.lineWidth = 1.4 * dpr; c.strokeStyle = 'rgba(60,35,20,.9)'; c.stroke(); c.font = `bold ${12 * dpr}px Georgia, serif`; c.fillStyle = '#4a2f1c'; c.fillText(name, sx, sy + 20 * dpr); };
-  const m = PEOPLE.matthew; if (m.where === 'camino' && game.scene !== 'camino') mk(onRoad(m.roadS), 'Matthew', LOOKS.matthew.dress);
-  mk(game.scene === 'camino' ? onRoad(ana.roadS) : game.scene === 'br' ? br : av, 'Ana', '#d9433b');
+  const m = PEOPLE.matthew; if (m.where === 'camino' && game.scene !== 'camino') mk(onRoad(m.roadS, m.camino), 'Matthew', LOOKS.matthew.dress);
+  mk(game.scene === 'camino' ? onRoad(ana.roadS, ana.camino) : game.scene === 'br' ? br : av, 'Ana', '#d9433b');
 }
 // a choice in a scene: the player chooses (a menu); if Ana goes on her own, she chooses (what she would do, «->*», or
 // the first); the chosen option's lines go on in the scene, and what it does is done at once

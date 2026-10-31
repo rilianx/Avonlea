@@ -26,7 +26,7 @@ for (const h of Object.values(HOUSES)) if (h.path) paths.push(h.path);
 // (a path to a door leaves from the front of the house; if the road is behind it, around the house, not through it)
 const entrada = (x, y, w, best) => { const pie = [x, y + 44]; if (best[1] > y - 10 || Math.abs(best[0] - x) > w / 2 + 30) return [[x, y + 8], pie, best];
   const lado = Math.sign(best[0] - x) || 1, cx = x + lado * (w / 2 + 34); return [[x, y + 8], pie, [cx, y + 44], [cx, best[1]], best]; };
-for (const h of [OS, STATION, CHURCH, SCHOOL]) { let best = null, bd = 1e9; for (const p of Object.values(ROADS)) for (const q of p) { const d = dist(q[0], q[1], h.x, h.y + 40); if (d < bd) { bd = d; best = q; } } if (best && bd > 30) paths.push(entrada(h.x, h.y, h.w || 160, best)); }
+for (const h of [OS, STATION, CHURCH, SCHOOL, HOTEL_WS_AT]) { let best = null, bd = 1e9; for (const p of Object.values(ROADS)) for (const q of p) { const d = dist(q[0], q[1], h.x, h.y + 40); if (d < bd) { bd = d; best = q; } } if (best && bd > 30) paths.push(entrada(h.x, h.y, h.w || 160, best)); }
 for (const b of BUILDINGS) if (b.style !== 'faro') { let best = null, bd = 1e9; for (const p of Object.values(ROADS)) for (let i = 1; i < p.length; i++) { const [a, c] = [p[i - 1], p[i]], dx = c[0] - a[0], dy = c[1] - a[1], t = clamp(((b.x - a[0]) * dx + (b.y + 40 - a[1]) * dy) / (dx * dx + dy * dy), 0, 1), q = [a[0] + dx * t, a[1] + dy * t], d = dist(q[0], q[1], b.x, b.y + 40); if (d < bd) { bd = d; best = q; } } if (best && bd > 20 && bd < 12 * U) paths.push(entrada(b.x, b.y, b.w || 4.6 * T, best)); }
 paths.push([[TOWN[0], TOWN[1]], [WW - 2, TOWN[1] + 4]]);
 // (no road goes through a house: a point of it inside one goes out in front, by the door; a stretch that crosses one goes
@@ -103,6 +103,7 @@ const props = [
   ...WOODS.filter(w => w.haunted).map(w => ({ kind: 'sign', x: w.x, y: w.y - w.ry - 30, text: 'Bosque Encantado' })),
   { kind: 'sign', x: TOWN[0] - 120, y: TOWN[1] - 34, text: 'A Carmody' },
   { kind: 'sign', x: ROADS.estacion[3][0], y: ROADS.estacion[3][1] - 34, text: 'A Bright River' },
+  { kind: 'roadsign', x: HOTEL_WS_AT.x, y: HOTEL_WS_AT.y, text: 'White Sands · 6 millas' },   // (the shore road leaves the map here)
   ...BUILDINGS.map(b => ({ kind: 'edificio', b, x: b.x, y: b.y })), ...BUILDINGS.filter(b => b.style !== 'faro').map(b => ({ kind: 'sign', x: b.x - b.w / 2 - 30, y: b.y + 50, text: b.name })),
   ...Array.from({ length: Math.ceil((STATION.x + 22 * U) / 28) }, (_, k) => ({ kind: 'rail', x: k * 28, y: STATION.y - 130 })),
 ];

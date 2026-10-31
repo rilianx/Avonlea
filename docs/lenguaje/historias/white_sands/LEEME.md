@@ -9,6 +9,11 @@ Reemplaza a las escenas del guion `viaje_spencer`, `ws_*` y `falta_viaje`, y al 
 `duda_matthew`, `duda_suplica`, `duda_calla`, `devuelta_blewett`): se cuenta en casa, sin viaje. Por eso, en el juego
 se omiten `viaje_spencer_duda` y `ws_spencer_duda`. Se prueba con `tools/paciencia.js`.
 
+White Sands está lejos de Avonlea: el hotel y su playa están al final del **camino de la costa**, un camino largo
+como el de Bright River (`src/js/17-camino-bright-river.js`), unas seis millas junto al mar. Sale del mapa de
+Avonlea por un letrero en la costa norte. La parada `camino_costa` es ese camino; la `playa` es su último tramo
+antes del hotel, donde espera la Sra. Pye. El faro y la orilla cercana siguen en Avonlea.
+
 | Archivo | Qué hay |
 |---|---|
 | [`historia.ts`](historia.ts) | sus hechos (locales), sus condiciones con nombre, sus encargos (`busca`, `ida`, `pye`, `vuelta`), su orden, lo que deja |

@@ -18,7 +18,7 @@ const SALA_MAPA = { gg: 'cocina', ga: 'pieza', os: 'salita', sa: 'salon', cp: 'p
 function relatoSitio(k){
   const b = wmBody(k), sc = wmScene(k); if (!b || !sc) return { lugar: '?', junto: '' };
   if (sc === 'away') return { lugar: 'fuera de Avonlea', junto: '' };
-  if (sc === 'camino') return { lugar: 'el camino de Bright River', junto: '' };
+  if (sc === 'camino') return { lugar: CAMINOS[caminoDe(k)].nombre, junto: '' };
   if (sc !== 'out') {
     const m = MAPAS[SALA_MAPA[sc]]; let junto = '', mejor = 46;
     if (m) for (const o of m.layers.flatMap(l => l.objects || [])) { const d = Math.hypot(b.x - o.x, b.y - o.y); if (d < mejor) { mejor = d; junto = SITIO_NOMBRE[o.name] || o.name; } }

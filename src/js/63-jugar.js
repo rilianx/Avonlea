@@ -354,6 +354,7 @@ function wmFollowTick(){
   const A = AGENTS.ana; if (!A || !A.followOf) return;
   if (!wmDriven(A.followOf)) { A.followOf = null; if (A.ride) { A.ride = false; ana.sit = false; } if (ana.goto?.wm) ana.goto = null; return; }
   const b = wmBody(A.followOf); if (!b) return;
+  if (game.scene === 'camino' && wmScene(A.followOf) === 'camino' && !ana.onCart && !A.ride && caminoDe(A.followOf) === caminoDe('ana')) { if (dist(ana.x, ana.y, b.x, b.y) > 50) ana.goto = { x: b.x + 26, y: b.y + 6, scene: 'camino', wm: true }; else if (ana.goto?.wm) ana.goto = null; return; }   // (on foot on the road, after him: up from the shore)
   if (wmScene(A.followOf) === 'camino' || game.scene === 'camino') { if (game.scene !== 'camino' && wmScene(A.followOf) === 'camino') { roadJoin(A.followOf); roadTramoIn(A.followOf, b.roadTr || roadTramo(b.roadS)); } return; }
   if (A.ride && game.scene === 'out' && wmScene(A.followOf) === 'out') { if (b.buggy) { const c8 = cartC8(b), [cx, cy] = cartFromDriver(b.x, b.y, c8); [ana.x, ana.y] = cartSeat(cx, cy, c8, 1); ana.dir = c8Dir(c8); } else { ana.x = b.x + 18; ana.y = b.y + 4; } ana.sit = !!b.buggy; ana.goto = null; ana.moving = false; return; }   // (in the cart, beside him)
   if (game.scene === 'out' && HOUSES[wmScene(A.followOf)] && dist(ana.x, ana.y, DOOR[wmScene(A.followOf)][0], DOOR[wmScene(A.followOf)][1]) < 160) { ana.sit = false; goIn(wmScene(A.followOf)); return; }   // (he went in: she goes in after him)

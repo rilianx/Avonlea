@@ -19,7 +19,8 @@ export const lugares = {
   hondonada_lynde: { nombre: 'la Hondonada de Lynde' },
   escuela: { nombre: 'la escuela' },
   aldea: { nombre: 'la aldea de Avonlea' },
-  playa: { nombre: 'la playa, junto al hotel White Sands' },
+  camino_costa: { nombre: 'el camino de la costa, a White Sands (millas junto al mar)' },
+  playa: { nombre: 'la playa de White Sands, junto al hotel' },
   orilla: { nombre: 'la orilla del mar', cerca: 'playa' },
   hotel_white_sands: { nombre: 'el hotel White Sands' },
   estacion_bright_river: { nombre: 'la estación de Bright River' },
@@ -31,7 +32,7 @@ export type Lugar = keyof typeof lugares
 
 // (en orden: así pasa la calesa, medido sobre el mapa; de vuelta, al revés)
 export const rutas = {
-  costa: ['tejas_verdes', 'hondonada_lynde', 'escuela', 'aldea', 'playa', 'hotel_white_sands'],
+  costa: ['tejas_verdes', 'hondonada_lynde', 'escuela', 'aldea', 'camino_costa', 'playa', 'hotel_white_sands'],
   bright_river: ['estacion_bright_river', 'camino_blanco', 'newbridge', 'estanque_barry', 'tejas_verdes'],
 } as const satisfies Record<string, readonly Lugar[]>
 export type Ruta = keyof typeof rutas

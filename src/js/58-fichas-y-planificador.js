@@ -171,18 +171,14 @@ const WP = {
   aldea: PLAY.aldea, lago: [PLACES.lago[1], PLACES.lago[2]], gallinero: [BARN.x + 150, BARN.y + 96], iglesia: CHURCH_DOOR, salon: door('Ayuntamiento'), colina: PLAY.campo_rosado, campo: (f => [f.x + f.w / 2, f.y + f.h / 2])(fieldNear([GG.x + 300, GG.y - 200])),
 };
 WP.casa_bell = door('Casa de los Pettibone');
-// White Sands, by the shore road (the trip of chapters 5 and 6, src/js/67-lenguaje.js): the hotel, and the beach where
-// the road runs nearest the sea (Mrs. Pye waits there)
-WP.hotel_ws = door('Hotel White Sands');
-WP.playa_ws = (() => { try {
-  const r = netRoute(GG.x + 20, GG.y + 80, ...WP.hotel_ws), pts = [[GG.x + 20, GG.y + 80], ...(r ? r.pts : []), WP.hotel_ws];
-  const L = [0]; for (let i = 1; i < pts.length; i++) L.push(L[i - 1] + dist(...pts[i - 1], ...pts[i]));
-  const at = f => { const s = f * L[L.length - 1]; let i = 1; while (i < pts.length - 1 && L[i] < s) i++; const k = (s - L[i - 1]) / ((L[i] - L[i - 1]) || 1); return [lerp(pts[i - 1][0], pts[i][0], k), lerp(pts[i - 1][1], pts[i][1], k)]; };
-  const mar = ([x, y]) => { let d = 1e9; for (let i = 1; i < COAST.length; i++) d = Math.min(d, segDist(x, y, COAST[i - 1], COAST[i])); return d; };
-  let best = at(.88), dMin = 1e9; for (let f = .8; f <= .95; f += .01) { const p = at(f), d = mar(p); if (d < dMin) { dMin = d; best = p; } }
-  return best.map(Math.round);
-} catch (e) { return [PLACES.playa[1], PLACES.playa[2]]; } })();
-const WP_NAME = { hotel_ws: 'el hotel White Sands', playa_ws: 'la playa, en el camino de White Sands', casa_bell: 'la casa de Robert Bell', 'h:br': 'la estación de Bright River', 'h:rl': 'la casa de la Sra. Lynde', camino: 'el camino de Bright River', gallinero: 'el gallinero', granero: 'el granero', corral: 'el corral', potrero: 'el potrero del Sr. Harrison', huerta: 'la huerta', arbustos: 'los arbustos de bayas', huerto: 'el huerto de los Barry', cocina: 'la cocina de Tejas Verdes', pieza: 'la pieza de Ana, arriba en Tejas Verdes', tienda: 'la tienda de Lawson', escuela: 'la escuela', casa_parroquial: 'la casa parroquial', 'h:cp': 'la casa parroquial', bosque_peg: 'el bosque de Peg Bowen', aldea: 'la aldea', iglesia: 'la iglesia', salon: 'el salón del pueblo', colina: 'la colina', campo: 'el campo de heno', lago: 'el lago' };
+// places on a long road, not on the map (the hotel of White Sands and its beach, at the end of the shore road —the trip
+// of chapters 5 and 6, src/js/67-lenguaje.js—): [road, s]. For the planner they are where that road leaves Avonlea,
+// and as far as the road takes; whoever is on that road, near there, is there
+const WP_CAMINO = { hotel_ws: ['costa', .012], playa_ws: ['costa', .2] };
+// (the stretch of its road a place is: from where to where; whoever is on the road there, is there)
+const wpTramo = k => { const [c, s] = WP_CAMINO[k]; return enCamino(c, () => { const i = ROAD_TRAMOS.indexOf(roadTramo(s)); return [ROAD_TRAMOS[i].s, ROAD_TRAMOS[i + 1]?.s ?? 1]; }); };
+for (const [k, [c]] of Object.entries(WP_CAMINO)) WP[k] = caminoPuerta(c);
+const WP_NAME = { hotel_ws: 'el hotel White Sands', playa_ws: 'la playa de White Sands, en el camino de la costa', 'camino:costa': 'el camino de la costa', casa_bell: 'la casa de Robert Bell', 'h:br': 'la estación de Bright River', 'h:rl': 'la casa de la Sra. Lynde', camino: 'el camino de Bright River', gallinero: 'el gallinero', granero: 'el granero', corral: 'el corral', potrero: 'el potrero del Sr. Harrison', huerta: 'la huerta', arbustos: 'los arbustos de bayas', huerto: 'el huerto de los Barry', cocina: 'la cocina de Tejas Verdes', pieza: 'la pieza de Ana, arriba en Tejas Verdes', tienda: 'la tienda de Lawson', escuela: 'la escuela', casa_parroquial: 'la casa parroquial', 'h:cp': 'la casa parroquial', bosque_peg: 'el bosque de Peg Bowen', aldea: 'la aldea', iglesia: 'la iglesia', salon: 'el salón del pueblo', colina: 'la colina', campo: 'el campo de heno', lago: 'el lago' };
 const OFRECE = { gallinero: { recoger: ['huevos'] }, granero: { tomar: ['cuerda'] }, arbustos: { recoger: ['bayas'] }, huerto: { recoger: ['manzanas'] }, huerta: { recoger: ['ramo'] }, bosque_peg: { recoger: ['hierbas'] }, cocina: { tomar: ['jarabe'] } };
 for (const k of ['granero', 'corral', 'potrero', 'escuela', 'casa_parroquial', 'tienda']) if (!PLACES[k]) PLACES[k] = [WP_NAME[k], ...WP[k]];   // (so errands can name them)
 // --- people: character, likes, what they buy and sell, where they cook, whether they leave the house; and their inventories
@@ -248,22 +244,23 @@ function personKey(k){
   const b = wmBody(k), w = wmScene(k); if (!b || !w || w === 'away' || w === 'in') return null;
   if (w === 'gg') return 'cocina';
   if (w === 'ga') return 'pieza';
-  if (w === 'camino') return 'camino';
+  if (w === 'camino') { const c = caminoDe(k), fuera = enCamino(c, () => Math.abs(b.y - roadY(b.x)) > 60); const me = k === 'ana' ? ana.roadS : b.roadS ?? 0; for (const [p, [cc]] of Object.entries(WP_CAMINO)) if (cc === c && !fuera && (([a, z]) => me >= a && me < z)(wpTramo(p))) return p; return c === 'br' ? 'camino' : 'camino:' + c; }
   if (w !== 'out') return HOUSES[w] ? 'h:' + w : null;
-  for (const [p, xy] of Object.entries(WP)) if (AREAS[p] ? inArea(AREAS[p], b.x, b.y) : dist(b.x, b.y, xy[0], xy[1]) < 135) return p;
+  for (const [p, xy] of Object.entries(WP)) if (!WP_CAMINO[p] && AREAS[p] ? inArea(AREAS[p], b.x, b.y) : dist(b.x, b.y, xy[0], xy[1]) < 135) return p;
   return 'p:' + k;
 }
 function cowKey(a){ if (a.state === 'led') return 'led:' + (a.ledBy || 'ana'); if (a.state === 'bought') return 'sold:' + a.owner; const ar = areaAt(a.x, a.y); return ar === 'corral' || ar === 'potrero' ? ar : 'c:' + a.id; }
 function keyPoint(key){
   if (WP[key]) return WP[key];
   if (key === 'camino') return DOOR.br;
+  if (key.startsWith('camino:')) return caminoPuerta(key.slice(7));
   if (key === 'pieza') return DOOR.gg;   // (Ana's room: up the stairs of Green Gables)
   if (key.startsWith('h:')) return DOOR[key.slice(2)];
   if (key.startsWith('c:')) { const a = ANIM[key.slice(2)]; return a ? [a.x, a.y] : null; }
   if (key.startsWith('p:')) { const b = wmBody(key.slice(2)); return b ? [b.x, b.y] : null; }
 }
 const SPEEDS = { ana: 60 };
-const roadMin = k => k === 'h:br' ? ROAD_MIN : k === 'camino' ? ROAD_MIN / 2 : 0;
+const roadMin = k => k === 'h:br' ? CAMINOS.br.min : k === 'camino' ? CAMINOS.br.min / 2 : WP_CAMINO[k] ? CAMINOS[WP_CAMINO[k][0]].min * (1 - WP_CAMINO[k][1]) : k?.startsWith('camino:') ? CAMINOS[k.slice(7)].min / 2 : 0;
 const travelMin = (who, a, b, pts) => { const p = pts[a], q = pts[b]; if (!p || !q) return 1e6; return 1 + Math.abs(roadMin(a) - roadMin(b)) + dist(p[0], p[1], q[0], q[1]) * 1.3 / (SPEEDS[who] || 40) / MIN_S + (a === 'cocina' || b === 'cocina' || a.startsWith('h:') || b.startsWith('h:') ? 2 : 0); };
 
 // --- the state now (for planning and for checking a goal in the world)

@@ -174,9 +174,11 @@ function wmTarget(who, key){
   // where to walk now (and in which scene) to reach 'key'
   if (key === 'pieza') return { room: 'ga', door: DOOR.gg };
   if (key === 'cocina' || key.startsWith('h:')) { const room = key === 'cocina' ? 'gg' : key.slice(2); return { room, door: DOOR[room] }; }
+  if (WP_CAMINO[key]) { const [c, s] = WP_CAMINO[key], b = wmBody(who), me = who === 'ana' ? ana.roadS : b?.roadS, [a, z] = wpTramo(key); return { road: wmScene(who) === 'camino' && caminoDe(who) === c && me > a && me < z ? me : s, camino: c }; }   // (a place on a long road —White Sands—: a stretch of it; already in it, there)
+  if (key.startsWith('camino:')) return { road: .5, camino: key.slice(7) };
   const q = keyPoint(key); if (!q) return null;
   const tb = key.startsWith('p:') ? wmBody(key.slice(2)) : null, tscene = key.startsWith('p:') ? wmScene(key.slice(2)) : 'out';
-  if (tscene === 'camino') return { road: wmBody(key.slice(2)).roadS };
+  if (tscene === 'camino') return { road: wmBody(key.slice(2)).roadS, camino: tb.camino || 'br', at: [tb.x, tb.y] };
   if (tscene && tscene !== 'out') return tscene === 'gg' ? { room: 'gg', door: DOOR.gg, at: tb ? libreJunto('gg', tb.x, tb.y) : null } : HOUSES[tscene] ? { room: tscene, door: DOOR[tscene], at: tb ? libreJunto(tscene, tb.x, tb.y + (tb.bed ? 34 : 0)) : null } : null;   // (inside: up to them; to someone in bed, to the bedside)
   return { out: q };
 }
@@ -184,11 +186,15 @@ function wmMove(who, key, dt){
   const T = wmTarget(who, key); if (!T) return 'fail';
   const b = wmBody(who), sc = wmScene(who), near = key.startsWith('p:') ? 40 : 46;
   if (T.room === 'br' && who === 'matthew') b.buggy = true;   // (to the station: in the buggy)
-  if (sc === 'camino') {   // (on the road: on towards the end that leads there; or, to someone on the road, up to them)
-    if (T.road != null) { if (Math.abs(T.road - b.roadS) < .004) { b.roadDir = 0; return 'ok'; } b.roadDir = T.road > b.roadS ? 1 : -1; return 'run'; }
-    b.roadDir = T.room === 'br' ? -1 : 1; return 'run';
-  }
-  if (T.road != null) { if (sc !== 'out') { wmExit(who); return 'run'; } if (dist(b.x, b.y, DOOR.br[0], DOOR.br[1] + 20) < 40) { roadStart(who, 1, -1); return 'run'; } wmWalk(who, DOOR.br[0], DOOR.br[1] + 20, 'out', dt); return 'run'; }
+  if (sc === 'camino') return enCamino(b.camino, () => {   // (on the road: on towards the end that leads there; or, to someone on the road, up to them)
+    const c = caminoDe(who), mio = T.road != null && (T.camino || 'br') === c;
+    if (who === 'ana') { if (!mio) return 'fail'; const [x, y] = T.at || roadAt(T.road); if (dist(b.x, b.y, x, y + 14) < 40) { wmStop('ana'); return 'ok'; } wmWalk('ana', x, y + 14, 'camino', dt); return 'run'; }   // (Ana, on foot: up to whom she goes, or to that point of the road)
+    if (mio && T.at && Math.abs(roadXOf(T.road) - b.x) < 300 && dist(b.x, b.y, T.at[0], T.at[1]) > 60) { b.roadDir = 0; b.suelto = true; wmWalk(who, T.at[0], T.at[1] + 10, 'camino', dt); return 'run'; }   // (someone off the road, down by the sea: on foot, up to her)
+    if (b.suelto) { const [x, y] = roadAt(b.roadS); if (dist(b.x, b.y, x, y) > 24) { wmWalk(who, x, y, 'camino', dt); return 'run'; } b.suelto = false; }   // (and back to the road)
+    if (mio) { if (Math.abs(T.road - b.roadS) < .004 || (T.at && dist(b.x, b.y, T.at[0], T.at[1]) <= 60)) { b.roadDir = 0; return 'ok'; } b.roadDir = T.road > b.roadS ? 1 : -1; return 'run'; }
+    b.roadDir = T.room === 'br' && c === 'br' ? -1 : 1; return 'run';   // (anywhere else: back to Avonlea first)
+  });
+  if (T.road != null) { const P = caminoPuerta(T.camino || 'br'); if (sc !== 'out') { wmExit(who); return 'run'; } if (dist(b.x, b.y, P[0], P[1] + 20) < 40) { roadStart(who, 1, -1, T.camino || 'br'); return 'run'; } wmWalk(who, P[0], P[1] + 20, 'out', dt); return 'run'; }
   if (T.out) {
     if (sc !== 'out') { wmExit(who); return 'run'; }
     const pen = AREAS[key], d = dist(b.x, b.y, T.out[0], T.out[1]);

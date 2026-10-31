@@ -143,7 +143,7 @@ $('autooff').addEventListener('pointerdown', e => { e.stopPropagation(); setAuto
 $('wmp').addEventListener('pointerdown', e => e.stopPropagation());
 $('obsback').addEventListener('click', e => { e.stopPropagation(); observe(null); });
 // choosing whom to watch: everyone with a name (the main characters first), and where they are now
-function obsWhere(k){ const b = wmBody(k), w = wmScene(k); if (!b || !w) return ''; const pk = w === 'out' ? personKey(k) : null; return w === 'out' ? (pk && WP_NAME[pk] ? 'en ' + WP_NAME[pk] : 'afuera') : w === 'away' ? 'fuera de Avonlea' : w === 'in' ? 'en su casa' : w === 'camino' ? 'en el camino de Bright River' : w === 'br' ? 'en la estación de Bright River' : placeName(w); }
+function obsWhere(k){ const b = wmBody(k), w = wmScene(k); if (!b || !w) return ''; const pk = w === 'out' ? personKey(k) : null; return w === 'out' ? (pk && WP_NAME[pk] ? 'en ' + WP_NAME[pk] : 'afuera') : w === 'away' ? 'fuera de Avonlea' : w === 'in' ? 'en su casa' : w === 'camino' ? 'en ' + CAMINOS[caminoDe(k)].nombre : w === 'br' ? 'en la estación de Bright River' : placeName(w); }
 function obsMenu(show = $('obsmenu').hidden){
   const el = $('obsmenu'); el.hidden = !show; if (!show) return;
   const main = Object.keys(PEOPLE).filter(k => CH[k].onMap !== false || PEOPLE[k].where !== 'away'), folk = FOLK.filter(f => !/^v\d+$/.test(f.id)).map(f => f.id);

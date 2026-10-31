@@ -42,7 +42,7 @@ El silencio también se escribe: después de la Avenida hay escenas de una líne
 
 | Campo | Se cumple cuando |
 |---|---|
-| `en: { quien: escena }` | cada uno está en esa escena (`'gg'` la cocina de Tejas Verdes, `'rl'` la casa de Rachel, `'br'` la estación, `'out'` afuera, `'camino'` el camino de Bright River) |
+| `en: { quien: escena }` | cada uno está en esa escena (`'gg'` la cocina de Tejas Verdes, `'rl'` la casa de Rachel, `'br'` la estación, `'out'` afuera, `'camino'` un camino largo: el de Bright River o el de la costa) |
 | `cerca: [quien, lugar, radio]` | quien está afuera, a menos de `radio` de un lugar con nombre (`lago`, `tejas_verdes`, `casa_bell`, `letrero_br`, `hondonada`; se agregan en `DLG_LUGARES`) |
 | `calesa` | Ana va en la calesa con quien maneja: `'camino'` (en el camino de Bright River), `'avonlea'` (con Matthew en Avonlea) o `'cualquiera'` |
 | `camino: { tramo, tramo_v, desde, visible, no_callado }` | en el camino, de vuelta a Avonlea: en ese tramo (por tipo, p. ej. `'avenida'`, o por nombre, p. ej. `'Newbridge'`); en el tramo número `tramo_v`; pasado cierto punto (`desde`, de 0 = la estación a 1 = Avonlea); con algo a la vista (`visible`: `cerezo`, `carreta`, `mar`, `aserradero`, `granjero`, `vacas`, `iglesia`, `lilas`, `sauces`, `curva`, `barranco`, `abetos`, `flores`); fuera de los tramos de silencio (`no_callado`) |

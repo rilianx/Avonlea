@@ -8,7 +8,7 @@ function BRIDGES_COVERED_AT(){ for (const w of WATERS) for (const b of w.bridges
 // where Ana is, in words: the room or house she is in, the station, the road, or the nearest named place out of doors
 function dondeAna(){
   const sc = game.scene, R = ROOMS[sc], H = HOUSES[R?.parent ?? sc];
-  if (sc === 'camino') return 'el camino de Bright River'; if (sc === 'br') return 'Bright River';
+  if (sc === 'camino') return CAMINOS[ana.camino || 'br'].nombre; if (sc === 'br') return 'Bright River';
   if (sc === 'ga') return 'su pieza, en Tejas Verdes'; if (H) return H.name;
   const n = sc === 'out' ? placeNear(ana.x, ana.y) : null; return n || 'Avonlea';
 }

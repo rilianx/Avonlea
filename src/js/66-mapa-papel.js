@@ -79,21 +79,21 @@ function drawMap(){
   const sz = MV.z / mapBase.z; c.setTransform(sz, 0, 0, sz, (mapBase.ox - ox) * k, (mapBase.oy - oy) * k); c.drawImage(mapBase.cv, 0, 0);
   c.setTransform(1, 0, 0, 1, -ox * k, -oy * k);
   // where everyone is (someone indoors is shown at the door of the house)
-  const at = (where, x, y) => where === 'out' ? [x, y] : where === 'camino' ? [STATION.x, STATION.y] : [HOUSES[ROOMS[where].parent ?? where].at.x, HOUSES[ROOMS[where].parent ?? where].at.y + 20];
+  const at = (where, x, y, c = 'br') => where === 'out' ? [x, y] : where === 'camino' ? (c === 'br' ? [STATION.x, STATION.y] : caminoPuerta(c)) : [HOUSES[ROOMS[where].parent ?? where].at.x, HOUSES[ROOMS[where].parent ?? where].at.y + 20];
   const mark = (who, [x, y], col, dx, big) => {
     const sx = x * k + dx * dpr, sy = y * k, r = (big ? 6 + Math.sin(TT * 5) * 1.2 : 4.5) * dpr;
     c.beginPath(); c.arc(sx, sy, r, 0, TAU); c.fillStyle = col; c.fill(); c.lineWidth = 1.4 * dpr; c.strokeStyle = 'rgba(60,35,20,.9)'; c.stroke();
     c.font = `italic ${12 * dpr}px Georgia, serif`; c.textAlign = 'center'; c.lineWidth = 3 * dpr; c.strokeStyle = 'rgba(241,226,191,.95)'; const ly = big ? sy - r - 4 * dpr : sy + r + 12 * dpr; c.strokeText(who, sx, ly); c.fillStyle = '#4a2f1c'; c.fillText(who, sx, ly);
   };
   const slot = {};
-  for (const [k, p] of Object.entries(PEOPLE)) { if (CH[k].onMap === false || p.where === 'away') continue; const n = slot[p.where] = (slot[p.where] || 0) + 1; mark(NAMES[k], at(p.where, p.x, p.y), LOOKS[k].dress, p.where === 'out' ? 0 : [12, -12, 24, -24][n - 1] || 0, false); }
+  for (const [k, p] of Object.entries(PEOPLE)) { if (CH[k].onMap === false || p.where === 'away') continue; const n = slot[p.where] = (slot[p.where] || 0) + 1; mark(NAMES[k], at(p.where, p.x, p.y, p.camino), LOOKS[k].dress, p.where === 'out' ? 0 : [12, -12, 24, -24][n - 1] || 0, false); }
   for (const f of FOLK) if (f.where === 'out') { c.beginPath(); c.arc(f.x * k, f.y * k, (f.kid ? 2 : 2.6) * dpr, 0, TAU); c.fillStyle = f.def.look.dress; c.fill(); c.lineWidth = .8 * dpr; c.strokeStyle = 'rgba(60,35,20,.7)'; c.stroke(); }
   if (dest) {   // where she is going, and the way (by the roads)
     const pts = ana.nav?.pts ? [[ana.x, ana.y], ...ana.nav.pts.slice(ana.nav.i)] : [[ana.x, ana.y], [dest.x, dest.y]];
     c.setLineDash([4 * dpr, 4 * dpr]); c.strokeStyle = 'rgba(200,60,50,.85)'; c.lineWidth = 2 * dpr; c.beginPath(); pts.forEach(([x, y], i) => i ? c.lineTo(x * k, y * k) : c.moveTo(x * k, y * k)); c.stroke(); c.setLineDash([]);
     const fx = dest.x * k, fy = dest.y * k; line(c, [[fx, fy], [fx, fy - 16 * dpr]], '#4a2f1c', 1.4 * dpr, 1); blob(c, [[fx, fy - 16 * dpr], [fx + 10 * dpr, fy - 13 * dpr], [fx, fy - 10 * dpr]], '#d9433b');
   }
-  mark('Ana', at(game.scene, ana.x, ana.y), '#d9433b', 0, true);
+  mark('Ana', at(game.scene, ana.x, ana.y, ana.camino), '#d9433b', 0, true);
   $('maptitle').textContent = 'Avonlea · ' + SEASONS[S] + ', día ' + (today() % DIAS_ESTACION + 1) + ' · ' + SICON[S] + ' · toca un lugar para ir allí · rueda o pellizco: acercar · arrastra para moverte';
 }
 let owed = 0;   // (faster: the game time owed is made up in steps of at most 0.05 s, within a budget of time per frame; a slow frame is not lost)

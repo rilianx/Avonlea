@@ -6,7 +6,11 @@
    hollow of wild plums, the gulf from a hill, the sawmill, the ploughed fields, the white church, the brook with
    its willows, the Avenue under the apple blossom, Newbridge, and three miles of fields at dusk.
    One can drive it (about two hours and a half, as in the book), walk it, get off the buggy and on again.
-   Whoever goes along it: b.where = 'camino', b.roadS (0 at the station, 1 at Avonlea), b.roadDir (+1, -1, 0). ---------- */
+   Whoever goes along it: b.where = 'camino', b.roadS (0 at the station, 1 at Avonlea), b.roadDir (+1, -1, 0).
+   There is more than one such road, made the same way (CAMINOS): this one, and the shore road to White Sands (chapters
+   5 and 6: the hotel and its beach are at its far end, some miles from Avonlea, with the sea along it all the way).
+   Each one goes on b.camino ('br' when not said; Ana's, ana.camino); the one in use —whoever is moved or drawn—
+   is CAM, and usarCamino(id) puts its things in the names below (ROAD_PTS, RP, roadAt, roadTramo…). ---------- */
 // the sayings of a moment, all of them, in the order they are written (src/datos/dichos/, «=== viaje:M3 ===»): the
 // tables said one line after another (Ana's chatter on each stretch), not one line chosen as dicho() does. Read from the
 // text itself, so that they can be used while the code loads (DICHOS is built later, in 21). [[who, text], …]: who is
@@ -23,8 +27,15 @@ function dichosEnOrden(m){
   if (!out.length) console.warn('[avonlea] dichos: «' + m + '» no está (src/datos/dichos/)');
   return out;
 }
-const ROAD_MIN = 145, ROAD_MILES = 7, RW = 60000, RH = 2400;
-const ROAD_TRAMOS = [
+// the road in use, and its things (usarCamino)
+let ROAD_MIN, ROAD_MILES, RW, RH, ROAD_TRAMOS, ROAD_X0, ROAD_DX, ROAD_PTS, ROAD_CUM, ROAD_LEN, ROAD_SEC, ROAD_V, RP, RT, RF, RWAT, RFOLK, RCOW, RDOG, RBANK, RSEA, RSAND, ROAD_SPOT, RBINS, CAM = null;
+const CAMINOS = {};
+function cargarCamino(C){ CAM = C; ({ min: ROAD_MIN, miles: ROAD_MILES, w: RW, h: RH, tramos: ROAD_TRAMOS, x0: ROAD_X0, dx: ROAD_DX, pts: ROAD_PTS, cum: ROAD_CUM, len: ROAD_LEN, sec: ROAD_SEC, v: ROAD_V, RP, RT, RF, RWAT, RFOLK, RCOW, RDOG, RBANK, RSEA, RSAND, spot: ROAD_SPOT, bins: RBINS } = C); }
+const usarCamino = id => { const C = CAMINOS[id] || CAMINOS.br; if (C !== CAM) cargarCamino(C); };
+// (something about a road that may not be the one in use: on that one, and back)
+const enCamino = (id, f) => { const o = CAM; usarCamino(id); try { return f(); } finally { if (o) cargarCamino(o); } };
+const caminoDe = k => (k === 'ana' ? ana.camino : wmBody(k)?.camino) || 'br';
+const BR_TRAMOS = [
   { s: 0, kind: 'pueblo', name: 'Bright River', v: -1 },
   { s: .035, kind: 'barranco', name: 'La cuesta de los cerezos silvestres', v: 0 },
   { s: .09, kind: 'granjas', name: 'Las granjas de los manzanos', v: 1 },
@@ -46,38 +57,34 @@ const roadTramo = s => { let r = ROAD_TRAMOS[0]; for (const t of ROAD_TRAMOS) if
 const roadMiles = (s, dir) => Math.max(0, Math.round((dir > 0 ? (1 - s) * ROAD_MILES + 1 : s * ROAD_MILES) * 2) / 2);
 const millas = n => (n === 1 ? '1 milla' : String(n).replace('.', ',') + ' millas');   // (to Green Gables there is one mile more, in Avonlea)
 const rh = (i, k = 0) => { const x = Math.sin(i * 127.1 + k * 311.7) * 43758.5453; return x - Math.floor(x); };
-// the road itself: a red line that winds a little, west to east
-const ROAD_X0 = 900, ROAD_DX = 300, ROAD_PTS = [];
-for (let x = ROAD_X0; x <= RW - 200; x += ROAD_DX) ROAD_PTS.push([x, Math.round(RH / 2 + 300 * Math.sin(x / 2600) + 140 * Math.sin(x / 830 + 1))]);
-const ROAD_CUM = [0]; for (let i = 1; i < ROAD_PTS.length; i++) ROAD_CUM.push(ROAD_CUM[i - 1] + dist(...ROAD_PTS[i - 1], ...ROAD_PTS[i]));
-const ROAD_LEN = ROAD_CUM[ROAD_CUM.length - 1], ROAD_SEC = ROAD_MIN * MIN_S, ROAD_V = ROAD_LEN / ROAD_SEC;   // (the buggy: the whole road in ROAD_MIN minutes)
-function roadAt(s){ const L = clamp(s, 0, 1) * ROAD_LEN; let lo = 1, hi = ROAD_CUM.length - 1; while (lo < hi) { const m = (lo + hi) >> 1; if (ROAD_CUM[m] < L) lo = m + 1; else hi = m; } const a = ROAD_PTS[lo - 1], b = ROAD_PTS[lo], k = (L - ROAD_CUM[lo - 1]) / (ROAD_CUM[lo] - ROAD_CUM[lo - 1] || 1); return [lerp(a[0], b[0], k), lerp(a[1], b[1], k), b[0] - a[0], b[1] - a[1]]; }
-const roadY = x => { const f = clamp((x - ROAD_X0) / ROAD_DX, 0, ROAD_PTS.length - 1.001), i = Math.floor(f); return lerp(ROAD_PTS[i][1], ROAD_PTS[i + 1][1], f - i); };
-const roadSOf = x => { const f = clamp((x - ROAD_X0) / ROAD_DX, 0, ROAD_PTS.length - 1.001), i = Math.floor(f); return lerp(ROAD_CUM[i], ROAD_CUM[i + 1], f - i) / ROAD_LEN; };
-const roadXOf = s => roadAt(s)[0];
-// Bright River: the station house and its platform, the railway (with its bend), the hotel and its yard
-const RSTN = { x: 760, y: roadY(900) - 330, w: 5 * T }, RAIL = [[260, 0], [300, 500], [330, 900], [340, 1300], [320, 1700], [250, 2100], [180, RH]], RHOTEL = { x: 1700, y: roadY(1700) - 300 };
-const RCHERRY = { x: 470, y: 560 };   // (the big wild cherry tree at the bend of the line, where Ana meant to sleep)
-const RP = [], RT = [], RF = [], RWAT = [], RFOLK = [], RCOW = [], RDOG = [], RBANK = [], RSEA = [], ROAD_SPOT = { aserradero: [], granjero: [], vacas: [], iglesia: [], lilas: [], sauces: [] };
-{
-  const r = rng(1908), R_ = () => r(), tree_ = (x, y, kind, s = .85 + R_() * .4, gap = 62) => { if (y > 60 && y < RH - 40 && Math.abs(y - roadY(x)) > gap && !nearW(x, y, 60)) RT.push({ kind, x, y, s, ph: R_() * TAU }); };
+// the sea at the top of a road (the gulf, seen from a hill; all along the shore road)
+const seaY = x => 330 + 70 * Math.sin(x / 520);
+const inRSea = (x, y) => RSEA.some(([a, b]) => x > a && x < b) && y < seaY(x);
+// the road itself: a red line that winds a little, west to east; and, stretch by stretch, what is by it. A road is made
+// once, from its data: o = { nombre, min, miles, w, h, tramos, seed, forma (its winding), inicio (what is at its far end,
+// s = 0), tramo (its own kinds of stretch), fin }
+function hacerCamino(id, o){
+  const pts = [], X0 = 900, DX = 300;
+  for (let x = X0; x <= o.w - 200; x += DX) pts.push([x, Math.round(o.forma(x))]);
+  const cum = [0]; for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + dist(...pts[i - 1], ...pts[i]));
+  const len = cum[cum.length - 1], sec = o.min * MIN_S;   // (the buggy: the whole road in its minutes)
+  const C = CAMINOS[id] = { id, ...o, x0: X0, dx: DX, pts, cum, len, sec, v: len / sec, RP: [], RT: [], RF: [], RWAT: [], RFOLK: [], RCOW: [], RDOG: [], RBANK: [], RSEA: [], RSAND: [], spot: { aserradero: [], granjero: [], vacas: [], iglesia: [], lilas: [], sauces: [] }, bins: new Map() };
+  cargarCamino(C);
+  const r = rng(o.seed), R_ = () => r(), tree_ = (x, y, kind, s = .85 + R_() * .4, gap = 62) => { if (y > 60 && y < RH - 40 && Math.abs(y - roadY(x)) > gap && !nearW(x, y, 60) && !(CAM.mar && y < seaY(x) + 40)) RT.push({ kind, x, y, s, ph: R_() * TAU }); };
   const nearW = (x, y, m) => RWAT.some(w => w.pts.some((p, i) => i && segDist(x, y, w.pts[i - 1], p) < w.w / 2 + m));
   const house = (x, y, o = {}) => RP.push({ kind: 'house', h: { x, y, w: o.w || 4.4 * T }, roof: o.roof || ['#8a5a3c', '#5f7a9a', '#7a6a4a', '#9a5a3c'][Math.floor(R_() * 4)], wall: o.wall || ['#efe4cc', '#e6dcc4', '#f1ead8'][Math.floor(R_() * 3)], trim: '#6a4a32', x, y, small: true, style: o.style });
   const sign = (x, y, text) => RP.push({ kind: 'sign', x, y, text });
   const fence = (x0, x1, off) => { let prev = null; for (let x = x0; x < x1; x += 64) { const o = { kind: 'fpost', x, y: roadY(x) + off }; if (prev) { prev.nx = o.x; prev.ny = o.y; } RP.push(o); prev = o; } };
   const xs = s => roadXOf(s);
-  // the station
-  RP.push({ kind: 'house', h: RSTN, roof: '#7a4a3a', wall: '#d9c6a0', trim: '#6a4630', x: RSTN.x, y: RSTN.y, small: true });
-  sign(RSTN.x - 150, RSTN.y + 50, 'Estación de Bright River'); RP.push({ kind: 'edificio', b: { style: 'hotel', x: RHOTEL.x, y: RHOTEL.y, w: 9 * T } }); sign(RHOTEL.x - 210, RHOTEL.y + 50, 'Hotel de Bright River');
-  RT.push({ kind: 'blossom', x: RCHERRY.x, y: RCHERRY.y, s: 2.6, ph: 0 });
-  for (let k = 0; k < 6; k++) house(2300 + k * 300 + R_() * 80, roadY(2300 + k * 300) + (k % 2 ? 300 : -320));
-  for (let k = 0; k < 18; k++) tree_(1000 + R_() * 2600, R_() * RH, R_() < .5 ? 'oak' : 'tree');
+  const ctx = { R_, tree_, house, sign, fence, xs, nearW };
+  o.inicio?.(ctx);
   // stretch by stretch
   ROAD_TRAMOS.forEach((tr, j) => {
     const x0 = xs(tr.s), x1 = xs(ROAD_TRAMOS[j + 1]?.s ?? 1), xm = (x0 + x1) / 2;
     sign(x0 + 60, roadY(x0 + 60) - 80, tr.name);
     const k = tr.kind;
     if (j === 0) return;
+    if (o.tramo?.(ctx, tr, x0, x1, xm)) return;   // (the road's own kinds of stretch)
     if (k === 'barranco') { RBANK.push([x0, x1]); for (let x = x0; x < x1; x += 50) for (const sd of [-1, 1]) { tree_(x + R_() * 30, roadY(x) + sd * (100 + R_() * 70), R_() < .6 ? 'blossom' : 'tree', .7 + R_() * .3); if (R_() < .5) tree_(x, roadY(x) + sd * (230 + R_() * 500), R_() < .5 ? 'blossom' : 'oak'); } }
     else if (k === 'granjas') {
       fence(x0, x1, -74); fence(x0, x1, 78);
@@ -118,7 +125,7 @@ const RP = [], RT = [], RF = [], RWAT = [], RFOLK = [], RCOW = [], RDOG = [], RB
     else if (k === 'avenida') { for (let x = x0; x < x1; x += 34 + R_() * 8) { tree_(x + R_() * 6, roadY(x) - 46 - R_() * 6, R_() < .9 ? 'manzano' : 'tree', 1.15 + R_() * .2, 40); tree_(x + 17 + R_() * 6, roadY(x) + 46 + R_() * 6, R_() < .9 ? 'manzano' : 'tree', 1.1 + R_() * .2, 40); } }   // (one row on each side, close to the road: a tunnel; the near one lets the buggy show through)
     else if (k === 'pueblo') {   // Newbridge: a bustling little village (dogs, boys, faces at the windows)
       for (let x = x0 + 150; x < x1 - 150; x += 280) for (const sd of [-1, 1]) if (R_() < .85) house(x + R_() * 50, roadY(x) + sd * (200 + R_() * 40) + (sd > 0 ? 60 : 0), { w: 3.8 * T });
-      RP.push({ kind: 'edificio', b: { style: 'tienda', x: xm, y: roadY(xm) - 200, w: 4.6 * T } }); sign(xm - 120, roadY(xm) - 150, 'Newbridge');
+      RP.push({ kind: 'edificio', b: { style: 'tienda', x: xm, y: roadY(xm) - 200, w: 4.6 * T } }); sign(xm - 120, roadY(xm) - 150, tr.name);
       for (let n = 0; n < 5; n++) RFOLK.push({ look: 'f:v' + (14 + n % 4), x: x0 + 400 + n * 380, y: roadY(x0 + 400 + n * 380) + (n % 2 ? 120 : -120), dir: n % 2 ? 3 : 1, hoot: true });
       for (let n = 0; n < 4; n++) RDOG.push({ x: x0 + 600 + n * 520, y: roadY(x0 + 600 + n * 520) + (n % 2 ? 100 : -100), dir: 1, walk: 0, moving: false, sitT: 0, sniff: 0, petted: 0, bark: true });
       for (let x = x0; x < x1; x += 200) if (R_() < .4) tree_(x, roadY(x) + (R_() < .5 ? -1 : 1) * (150 + R_() * 80), 'oak');
@@ -127,14 +134,66 @@ const RP = [], RT = [], RF = [], RWAT = [], RFOLK = [], RCOW = [], RDOG = [], RB
   });
   for (let x = 2400; x < RW - 400; x += 90) { const k = roadTramo(roadSOf(x)).kind; if (k !== 'avenida' && k !== 'barranco' && k !== 'bosque' && R_() < .3) tree_(x + R_() * 40, roadY(x) + (R_() < .5 ? -1 : 1) * (100 + R_() * 160), k === 'ciruelos' || k === 'curva' ? 'blossom' : k === 'granjas' ? 'apple' : R_() < .3 ? 'pine' : 'oak', .8 + R_() * .3); }
   for (let m = 1; m < ROAD_MILES; m++) { const x = xs(m / ROAD_MILES); RP.push({ kind: 'mojon', x, y: roadY(x) + 60, text: String(ROAD_MILES - m + 1) }); }
-  sign(RW - 360, roadY(RW - 360) - 80, 'Avonlea →');
+  sign(RW - 360, roadY(RW - 360) - 80, 'Avonlea →');  // (what is drawn, by slices along the road, to find quickly what is in view)
+  if (o.mar) C.RP = RP = RP.filter(q => (q.y ?? q.b.y) > seaY(q.x ?? q.b.x) + (q.kind === 'sign' || q.kind === 'fpost' ? 50 : 170));   // (by the shore: nothing built on the beach or in the water)
+  for (const q of RP) if (q.kind === 'edificio') { q.x = q.b.x; q.y = q.b.y; }   // (where it stands: the drawings' cache needs it, src/js/66-cache-dibujos.js)
+  for (const [kind, L] of [['p', RP], ['t', RT], ['f', RFOLK], ['c', RCOW], ['d', RDOG]]) for (const q of L) { const x = q.kind === 'edificio' ? q.b.x : q.x, k = Math.floor(x / RBIN); if (!RBINS.has(k)) RBINS.set(k, []); RBINS.get(k).push([kind, q]); }
+  for (const q of RFOLK) Object.assign(q, { walk: 0, moving: false, blink: 0, idle: 0, sit: false, vx: 0, vy: 0, carry: null, pet: false, crouch: false, lookAround: 0 });
+  return C;
 }
-// (what is drawn, by slices along the road, to find quickly what is in view)
-const RBIN = 900, RBINS = new Map();
-for (const [kind, L] of [['p', RP], ['t', RT], ['f', RFOLK], ['c', RCOW], ['d', RDOG]]) for (const o of L) { const x = o.kind === 'edificio' ? o.b.x : o.x, k = Math.floor(x / RBIN); if (!RBINS.has(k)) RBINS.set(k, []); RBINS.get(k).push([kind, o]); }
-for (const o of RFOLK) Object.assign(o, { walk: 0, moving: false, blink: 0, idle: 0, sit: false, vx: 0, vy: 0, carry: null, pet: false, crouch: false, lookAround: 0 });
-const seaY = x => 330 + 70 * Math.sin(x / 520);
-const inRSea = (x, y) => RSEA.some(([a, b]) => x > a && x < b) && y < seaY(x);
+const RBIN = 900;
+function roadAt(s){ const L = clamp(s, 0, 1) * ROAD_LEN; let lo = 1, hi = ROAD_CUM.length - 1; while (lo < hi) { const m = (lo + hi) >> 1; if (ROAD_CUM[m] < L) lo = m + 1; else hi = m; } const a = ROAD_PTS[lo - 1], b = ROAD_PTS[lo], k = (L - ROAD_CUM[lo - 1]) / (ROAD_CUM[lo] - ROAD_CUM[lo - 1] || 1); return [lerp(a[0], b[0], k), lerp(a[1], b[1], k), b[0] - a[0], b[1] - a[1]]; }
+const roadY = x => { const f = clamp((x - ROAD_X0) / ROAD_DX, 0, ROAD_PTS.length - 1.001), i = Math.floor(f); return lerp(ROAD_PTS[i][1], ROAD_PTS[i + 1][1], f - i); };
+const roadSOf = x => { const f = clamp((x - ROAD_X0) / ROAD_DX, 0, ROAD_PTS.length - 1.001), i = Math.floor(f); return lerp(ROAD_CUM[i], ROAD_CUM[i + 1], f - i) / ROAD_LEN; };
+const roadXOf = s => roadAt(s)[0];
+// Bright River: the station house and its platform, the railway (with its bend), the hotel and its yard
+let RSTN, RHOTEL; const RAIL = [[260, 0], [300, 500], [330, 900], [340, 1300], [320, 1700], [250, 2100], [180, 2400]];
+const RCHERRY = { x: 470, y: 560 };   // (the big wild cherry tree at the bend of the line, where Ana meant to sleep)
+// Bright River's road: the station at its far end (the station, the hotel, the cherry tree)
+hacerCamino('br', { nombre: 'el camino de Bright River', fin_nombre: 'Bright River', min: 145, miles: 7, w: 60000, h: 2400, tramos: BR_TRAMOS, seed: 1908, cuarto: 'br',
+  forma: x => 2400 / 2 + 300 * Math.sin(x / 2600) + 140 * Math.sin(x / 830 + 1),
+  inicio({ R_, tree_, house, sign }){
+    RSTN = { x: 760, y: roadY(900) - 330, w: 5 * T }; RHOTEL = { x: 1700, y: roadY(1700) - 300 };
+    CAM.lanes = [[[RSTN.x, RSTN.y + 60], [ROAD_X0, roadY(ROAD_X0)]], [[RHOTEL.x, RHOTEL.y + 40], [RHOTEL.x, roadY(RHOTEL.x)]]];   // (the lanes to the station and to the hotel)
+    // the station
+    RP.push({ kind: 'house', h: RSTN, roof: '#7a4a3a', wall: '#d9c6a0', trim: '#6a4630', x: RSTN.x, y: RSTN.y, small: true });
+    sign(RSTN.x - 150, RSTN.y + 50, 'Estación de Bright River'); RP.push({ kind: 'edificio', b: { style: 'hotel', x: RHOTEL.x, y: RHOTEL.y, w: 9 * T } }); sign(RHOTEL.x - 210, RHOTEL.y + 50, 'Hotel de Bright River');
+    RT.push({ kind: 'blossom', x: RCHERRY.x, y: RCHERRY.y, s: 2.6, ph: 0 });
+    for (let k = 0; k < 6; k++) house(2300 + k * 300 + R_() * 80, roadY(2300 + k * 300) + (k % 2 ? 300 : -320));
+    for (let k = 0; k < 18; k++) tree_(1000 + R_() * 2600, R_() * RH, R_() < .5 ? 'oak' : 'tree');
+  } });
+// the shore road to White Sands (chapters 5 and 6): out of Avonlea by the signpost on the north coast, along the gulf
+// all the way —farms, the red cliffs, the firs, the fields over the sea, and the long beach of White Sands, where Mrs.
+// Pye waits (src/js/67-lenguaje.js)—; at its far end White Sands, its houses, and the hotel (closed before the season)
+// facing the beach. A stretch may be a place of the stories (lugar)
+// (its signpost in Avonlea: where the north coast road leaves the map, by the sea)
+const COSTA_LETRERO = [HOTEL_WS_AT.x, HOTEL_WS_AT.y + 10];
+hacerCamino('costa', { nombre: 'el camino de la costa', fin_nombre: 'White Sands', min: 75, miles: 5, w: 32000, h: 1500, seed: 1905, mar: true,
+  puerta: () => COSTA_LETRERO,
+  tramos: [
+    { s: 0, kind: 'pueblo', name: 'White Sands', lugar: 'hotel_white_sands' },
+    { s: .07, kind: 'dunas', name: 'La playa de White Sands', lugar: 'playa' },
+    { s: .22, kind: 'acantilado', name: 'Los acantilados rojos' },
+    { s: .4, kind: 'granjas', name: 'Las granjas de la costa' },
+    { s: .58, kind: 'bosque', name: 'Los abetos del golfo' },
+    { s: .72, kind: 'campos', name: 'Los campos sobre el mar', quiet: true },
+    { s: .955, kind: 'borde', name: 'La entrada de Avonlea', quiet: true },
+  ],
+  forma: x => 540 + 40 * Math.sin(x / 2600) + 20 * Math.sin(x / 830 + 1) + 380 * clamp(1 - (x - 2500) / 2500, 0, 1),   // (near the sea; further from it at White Sands, where the hotel stands between)
+  inicio({ R_, tree_, house, sign }){
+    RSEA.push([0, 32000]); RSAND.push([0, roadXOf(.22)]);   // (the sea all along; the sand of the beach, wide, up to the cliffs)
+    const hx = 1500, hy = roadY(hx) - 190; RP.push({ kind: 'edificio', b: { style: 'hotel', x: hx, y: hy, w: 9 * T } }); sign(hx - 210, hy + 50, 'Hotel White Sands');
+    CAM.lanes = [[[hx, hy + 40], [hx, roadY(hx)]]]; CAM.hotel = [hx, hy];
+    for (let k = 0; k < 6; k++) house(2200 + k * 320 + R_() * 80, roadY(2200 + k * 320) + 260 + R_() * 40);
+    for (let k = 0; k < 14; k++) tree_(1000 + R_() * 3000, roadY(1000) + 150 + R_() * 700, R_() < .5 ? 'oak' : 'pine');
+    for (let n = 0; n < 3; n++) RFOLK.push({ look: 'f:v' + (14 + n), x: 2400 + n * 300, y: seaY(2400 + n * 300) + 90, dir: n % 2 ? 1 : 3 });   // (people strolling on the beach)
+  },
+  tramo({ R_, tree_, fence }, tr, x0, x1){
+    if (tr.kind === 'dunas') { for (let x = x0; x < x1; x += 160) if (R_() < .5) tree_(x, roadY(x) + 120 + R_() * 500, R_() < .6 ? 'pine' : 'tree', .8); return true; }
+    if (tr.kind === 'acantilado') { fence(x0, x1, -74); for (let x = x0; x < x1; x += 120) if (R_() < .5) tree_(x, roadY(x) + 110 + R_() * 600, R_() < .5 ? 'oak' : 'pine'); return true; }
+    return false;
+  } });
+usarCamino('br');
 function roadBlocked(x, y){
   if (x < 40 || y < 40 || y > RH - 40 || x > RW - 40) return true;
   if (inRSea(x, y)) return true;
@@ -145,7 +204,7 @@ function roadBlocked(x, y){
 // the ground of the road, by tiles, painted as Avonlea's is (the fields, the banks, the water, the red road, the rails)
 const rtiles = new Map();
 function roadTile(tx, ty){
-  const key = S + ':' + tx + ',' + ty; let cv = rtiles.get(key);
+  const key = CAM.id + ':' + S + ':' + tx + ',' + ty; let cv = rtiles.get(key);
   if (cv && perdido(cv)) { rtiles.delete(key); cv = null; }
   if (cv) { rtiles.delete(key); rtiles.set(key, cv); return cv; }
   { const w = tileBudget(); if (w) return w; }
@@ -160,6 +219,8 @@ function roadPaint(cv, s, X0, Y0){
   for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) { const ax = X0 + i * TILE, ay = Y0 + j * TILE, rw = rng(99 + ax * 3 + ay * 7); for (let n = 0; n < 9; n++) { const x = ax + rw() * TILE, y = ay + rw() * TILE, rr = 30 + rw() * 130, cc = rw(), cc2 = rw(); if (x + rr < X0 || x - rr > X0 + TILE || y + rr < Y0 || y - rr > Y0 + TILE) continue; const gr = c.createRadialGradient(x, y, 0, x, y, rr), col = cc < .4 ? P.wash[0] : cc2 < .5 ? P.wash[1] : P.wash[2]; gr.addColorStop(0, `rgba(${col},.33)`); gr.addColorStop(1, `rgba(${col},0)`); c.fillStyle = gr; c.fillRect(x - rr, y - rr, rr * 2, rr * 2); } }
   const CROPS = [['#b8d47e', '#e0c872', '#c8a862', '#eef2f4'], ['#a6c86c', '#cdbb6a', '#b9a066', '#eef2f4'], ['#9a6a4c', '#9a6a4c', '#8a6a48', '#e6eaee'], ['#c9d98a', '#d8cf86', '#c2b07a', '#f0f3f5']];
   for (const f of RF) { if (!inT(f.x, f.y, f.x + f.w, f.y + f.h)) continue; c.fillStyle = CROPS[f.crop][s]; c.fillRect(f.x, f.y, f.w, f.h); c.strokeStyle = f.crop === 2 && s !== 3 ? 'rgba(70,45,25,.45)' : 'rgba(80,90,40,.22)'; c.lineWidth = f.crop === 2 ? 2 : 1.2; for (let y = f.y + 8; y < f.y + f.h; y += 10) { c.beginPath(); c.moveTo(f.x + 3, y); c.lineTo(f.x + f.w - 3, y); c.stroke(); } c.strokeStyle = 'rgba(90,70,40,.4)'; c.lineWidth = 1.4; c.strokeRect(f.x, f.y, f.w, f.h); }
+  // the sand of a beach, from the water to near the road
+  for (const [a, b] of RSAND) if (inT(a, 0, b, RH)) { c.fillStyle = s === 3 ? '#eef0f0' : '#e2b98e'; c.beginPath(); c.moveTo(a, 0); for (let x = a; x <= b; x += 40) c.lineTo(x, roadY(x) - 60); c.lineTo(b, 0); c.closePath(); c.fill(); }
   // the gulf, seen from the hill: the sea at the top, with its red sand
   for (const [a, b] of RSEA) if (inT(a, 0, b, 460)) { c.beginPath(); c.moveTo(a, 0); for (let x = a; x <= b; x += 40) c.lineTo(x, seaY(x)); c.lineTo(b, 0); c.closePath(); c.fillStyle = s === 3 ? '#c7dbe6' : '#5c9fc2'; c.fill(); c.strokeStyle = s === 3 ? '#e6eef2' : '#e8b48a'; c.lineWidth = 50; c.beginPath(); for (let x = a; x <= b; x += 40) x === a ? c.moveTo(x, seaY(x) + 20) : c.lineTo(x, seaY(x) + 20); c.stroke(); }
   // the banks of the cutting, higher than the buggy: red earth along the road
@@ -171,14 +232,14 @@ function roadPaint(cv, s, X0, Y0){
   const stroke = (pts, w, col) => { c.strokeStyle = col; c.lineWidth = w; c.lineCap = 'round'; c.lineJoin = 'round'; c.beginPath(); c.moveTo(...pts[0]); for (let i = 1; i < pts.length; i++) { const p = pts[i - 1], q = pts[i]; c.quadraticCurveTo(p[0], p[1], (p[0] + q[0]) / 2, (p[1] + q[1]) / 2); } c.lineTo(...pts[pts.length - 1]); c.stroke(); };
   for (const w of RWAT) if (inT(Math.min(...w.pts.map(p => p[0])), 0, Math.max(...w.pts.map(p => p[0])), RH)) { stroke(w.pts, w.w + 26, `rgba(${P.bank},.45)`); stroke(w.pts, w.w, s === 3 ? '#cfe2ea' : '#6aa8c4'); }
   // the railway at Bright River, and the platform
-  if (inT(0, 0, 700, RH)) { c.strokeStyle = '#7a5a3e'; c.lineWidth = 5; for (let i = 1; i < RAIL.length; i++) { const a = RAIL[i - 1], b = RAIL[i], n = Math.ceil(dist(...a, ...b) / 16); for (let k = 0; k < n; k++) { const x = lerp(a[0], b[0], k / n), y = lerp(a[1], b[1], k / n); c.beginPath(); c.moveTo(x - 16, y); c.lineTo(x + 16, y); c.stroke(); } } for (const o of [-9, 9]) { c.strokeStyle = '#5a5a62'; c.lineWidth = 2.4; c.beginPath(); RAIL.forEach(([x, y], i) => i ? c.lineTo(x + o, y) : c.moveTo(x + o, y)); c.stroke(); } }
-  if (inT(340, RSTN.y - 60, 1100, RSTN.y + 90)) { c.fillStyle = '#c9a06a'; c.fillRect(350, RSTN.y + 4, 760, 70); c.strokeStyle = 'rgba(110,70,40,.35)'; c.lineWidth = 1; for (let x = 362; x < 1110; x += 14) { c.beginPath(); c.moveTo(x, RSTN.y + 4); c.lineTo(x, RSTN.y + 74); c.stroke(); } }
+  if (CAM.id === 'br' && inT(0, 0, 700, RH)) { c.strokeStyle = '#7a5a3e'; c.lineWidth = 5; for (let i = 1; i < RAIL.length; i++) { const a = RAIL[i - 1], b = RAIL[i], n = Math.ceil(dist(...a, ...b) / 16); for (let k = 0; k < n; k++) { const x = lerp(a[0], b[0], k / n), y = lerp(a[1], b[1], k / n); c.beginPath(); c.moveTo(x - 16, y); c.lineTo(x + 16, y); c.stroke(); } } for (const o of [-9, 9]) { c.strokeStyle = '#5a5a62'; c.lineWidth = 2.4; c.beginPath(); RAIL.forEach(([x, y], i) => i ? c.lineTo(x + o, y) : c.moveTo(x + o, y)); c.stroke(); } }
+  if (CAM.id === 'br' && inT(340, RSTN.y - 60, 1100, RSTN.y + 90)) { c.fillStyle = '#c9a06a'; c.fillRect(350, RSTN.y + 4, 760, 70); c.strokeStyle = 'rgba(110,70,40,.35)'; c.lineWidth = 1; for (let x = 362; x < 1110; x += 14) { c.beginPath(); c.moveTo(x, RSTN.y + 4); c.lineTo(x, RSTN.y + 74); c.stroke(); } }
   // the red road (as the roads of Avonlea), and the lane to the station
   const near = ROAD_PTS.filter(([x, y]) => x > X0 - 700 && x < X0 + TILE + 700);
-  const lanes = [[[RSTN.x, RSTN.y + 60], [ROAD_X0, roadY(ROAD_X0)]], [[RHOTEL.x, RHOTEL.y + 40], [RHOTEL.x, roadY(RHOTEL.x)]]].filter(L => inT(Math.min(L[0][0], L[1][0]), Math.min(L[0][1], L[1][1]), Math.max(L[0][0], L[1][0]), Math.max(L[0][1], L[1][1])));
+  const lanes = (CAM.lanes || []).filter(L => inT(Math.min(L[0][0], L[1][0]), Math.min(L[0][1], L[1][1]), Math.max(L[0][0], L[1][0]), Math.max(L[0][1], L[1][1])));
   for (const p of [...(near.length > 1 ? [near] : []), ...lanes]) { stroke(p, 54, P.path[0]); stroke(p, 40, s === 3 ? P.path[1] : '#c98a62'); stroke(p, 26, s === 3 ? P.path[2] : '#d49a72'); }
-  { const [a, b] = avenidaX(); if (s < 2 && X0 + TILE > a && X0 < b) { const pts = ROAD_PTS.filter(([x]) => x > Math.max(a, X0 - 400) && x < Math.min(b, X0 + TILE + 400)); if (pts.length > 1) { stroke(pts, 46, 'rgba(126,176,84,.62)'); for (const o of [-8, 8]) stroke(pts.map(([x, y]) => [x, y + o]), 5, 'rgba(176,104,70,.55)'); for (let n = 0; n < 400; n++) { const x = RX(), y = RY(); if (x > a && x < b && Math.abs(y - roadY(x)) < 22) { c.strokeStyle = 'rgba(90,140,60,.6)'; c.lineWidth = .8; c.beginPath(); c.moveTo(x, y); c.lineTo(x + 1, y - 3); c.stroke(); } } } } }   // (under the blossom the road is grassy, with two ruts)
-  { const [a, b] = avenidaX(); if (s === 0 && X0 + TILE > a && X0 < b) for (let n = 0; n < 1600; n++) { const x = RX(), y = RY(); if (x < a || x > b) continue; const dy = Math.abs(y - roadY(x)); if (dy < 30 || r() < .3) { c.fillStyle = ['rgba(255,255,250,.9)', 'rgba(244,246,232,.85)', 'rgba(255,255,255,.8)'][n % 3]; c.beginPath(); c.ellipse(x, y, 1.8 + r() * 1.6, 1 + r(), r() * TAU, 0, TAU); c.fill(); } } }   // (the Avenue: a carpet of fallen petals)
+  if (avenidaX()) { const [a, b] = avenidaX(); if (s < 2 && X0 + TILE > a && X0 < b) { const pts = ROAD_PTS.filter(([x]) => x > Math.max(a, X0 - 400) && x < Math.min(b, X0 + TILE + 400)); if (pts.length > 1) { stroke(pts, 46, 'rgba(126,176,84,.62)'); for (const o of [-8, 8]) stroke(pts.map(([x, y]) => [x, y + o]), 5, 'rgba(176,104,70,.55)'); for (let n = 0; n < 400; n++) { const x = RX(), y = RY(); if (x > a && x < b && Math.abs(y - roadY(x)) < 22) { c.strokeStyle = 'rgba(90,140,60,.6)'; c.lineWidth = .8; c.beginPath(); c.moveTo(x, y); c.lineTo(x + 1, y - 3); c.stroke(); } } } } }   // (under the blossom the road is grassy, with two ruts)
+  if (avenidaX()) { const [a, b] = avenidaX(); if (s === 0 && X0 + TILE > a && X0 < b) for (let n = 0; n < 1600; n++) { const x = RX(), y = RY(); if (x < a || x > b) continue; const dy = Math.abs(y - roadY(x)); if (dy < 30 || r() < .3) { c.fillStyle = ['rgba(255,255,250,.9)', 'rgba(244,246,232,.85)', 'rgba(255,255,255,.8)'][n % 3]; c.beginPath(); c.ellipse(x, y, 1.8 + r() * 1.6, 1 + r(), r() * TAU, 0, TAU); c.fill(); } } }   // (the Avenue: a carpet of fallen petals)
   for (let n = 0; n < 140; n++) { const x = RX(), y = RY(); if (Math.abs(y - roadY(x)) < 16 && x > ROAD_X0) { c.fillStyle = r() < .5 ? 'rgba(120,60,40,.4)' : 'rgba(245,220,200,.5)'; c.beginPath(); c.ellipse(x, y, 1.5 + r() * 2, 1 + r(), 0, 0, TAU); c.fill(); } }
 }
 // the things of the road that are not in drawProp: log piles, washing on a line, gravestones, lilacs, milestones
@@ -207,15 +268,19 @@ function roadView(g, ox, oy, vw, vh, t, night, list){
     else if (kind === 'd') list.push({ y, draw: () => drawDog(g, o, t) });
   }
   // the lady in a cart coming the other way, near Bright River (Matthew nods to her: on the Island one nods to everybody)
-  if (game.roadLady) { const s = game.roadLady.s, [x, y, dx] = roadAt(s); if (inV(x, y)) { const b = { look: 'f:blewett', x, y: y + 14, dir: 3, c8: ((Math.round(Math.atan2(-roadAt(s)[3], -dx) / (Math.PI / 4)) + 2) % 8 + 8) % 8, walk: (t * 1.6) % 1, moving: true }; list.push({ y: y + 15, draw: () => drawBuggy(g, b, t) }); } }
-  for (const k of Object.keys(PEOPLE)) { const p = PEOPLE[k]; if (p.where !== 'camino' || !inV(p.x, p.y)) continue; if (p.buggy) pushDriven(list, g, p, t); else list.push({ y: p.y, draw: () => drawPerson(g, p, t) }); }
+  if (game.roadLady && CAM.id === 'br') { const s = game.roadLady.s, [x, y, dx] = roadAt(s); if (inV(x, y)) { const b = { look: 'f:blewett', x, y: y + 14, dir: 3, c8: ((Math.round(Math.atan2(-roadAt(s)[3], -dx) / (Math.PI / 4)) + 2) % 8 + 8) % 8, walk: (t * 1.6) % 1, moving: true }; list.push({ y: y + 15, draw: () => drawBuggy(g, b, t) }); } }
+  for (const k of Object.keys(PEOPLE)) { const p = PEOPLE[k]; if (p.where !== 'camino' || (p.camino || 'br') !== CAM.id || !inV(p.x, p.y)) continue; if (p.buggy) pushDriven(list, g, p, t); else list.push({ y: p.y, draw: () => drawPerson(g, p, t) }); }
+  // (the townsfolk a story brings onto this road: Mrs. Pye on the beach, Mrs. Spencer at the door of the hotel)
+  for (const f of FOLK) if (f.where === 'camino' && f.camino === CAM.id && inV(f.x, f.y)) list.push({ y: f.y, draw: () => drawPerson(g, f, t) });
+  // (the buggy left standing by the road, while its driver walks)
+  if (cart.on && cart.camino === CAM.id && inV(cart.x, cart.y)) pushCart(list, g, cart, t);
 }
 // the Avenue, painted like a watercolour of it (the book: «a canopy of snowy fragrant bloom… the sunset sky at the far end like a great rose window at
 // the end of a cathedral aisle»): an arch of blossom over the road, petals falling, the light rosy and golden, and at
 // its end the glow of the sunset
-const avenidaX = () => [roadXOf(ROAD_TRAMOS.find(r => r.kind === 'avenida').s), roadXOf(ROAD_TRAMOS.find(r => r.name === 'Newbridge').s)];
+const avenidaX = () => { const i = ROAD_TRAMOS.findIndex(r => r.kind === 'avenida'); return i < 0 ? null : [roadXOf(ROAD_TRAMOS[i].s), roadXOf(ROAD_TRAMOS[i + 1].s)]; };
 function roadCanopy(g, ox, oy, vw, vh, t){
-  const [a, b] = avenidaX(); if (ox > b + 600 || ox + vw < a - 600) return;
+  if (!avenidaX()) return; const [a, b] = avenidaX(); if (ox > b + 600 || ox + vw < a - 600) return;
   const bloom = S === 0, inn = x => clamp(Math.min(x - a, b - x) / 400, 0, 1);   // (how deep into the Avenue: the arch thickens)
   const deep = inn(ox + vw / 2), FL = ['#ffffff', '#fbfcf4', '#f4f7ea'], LV = ['#a8d07a', '#86b85a', '#c4e09a'];
   // the near trees, in their own layer, with a soft hole where the buggy is (so the tunnel closes round it and it still shows)
@@ -269,56 +334,63 @@ function roadCanopy(g, ox, oy, vw, vh, t){
   g.restore();
 }
 ROOMS.camino = {
-  draw: () => {}, place: 'en el largo camino rojo entre Bright River y Avonlea', exitLabel: '',
+  draw: () => {}, get place(){ return CAM.id === 'br' ? 'en el largo camino rojo entre Bright River y Avonlea' : `en ${CAM.nombre}, entre ${CAM.fin_nombre} y Avonlea`; }, exitLabel: '',
   items: () => [],
   blocked: roadBlocked,
   glow: () => [0, 0, 1, '255,200,120', 0],
   actions: add => {
-    if (dist(ana.x, ana.y, RSTN.x, RSTN.y + 20) < 260) add('andén', RSTN.x, RSTN.y + 10, 40, 'Entrar al andén de la estación', () => goIn('br'), { pri: 3, hy: 20, hit: 36 });
-    if (dist(ana.x, ana.y, RCHERRY.x, RCHERRY.y) < 360) add('cerezo', RCHERRY.x, RCHERRY.y - 30, 70, 'Mirar el gran cerezo silvestre', () => comentar('cerezo_silvestre'), { pri: 5, hy: 60, hit: 60 });
+    if (CAM.id === 'br' && dist(ana.x, ana.y, RSTN.x, RSTN.y + 20) < 260) add('andén', RSTN.x, RSTN.y + 10, 40, 'Entrar al andén de la estación', () => goIn('br'), { pri: 3, hy: 20, hit: 36 });
+    if (CAM.id === 'br' && dist(ana.x, ana.y, RCHERRY.x, RCHERRY.y) < 360) add('cerezo', RCHERRY.x, RCHERRY.y - 30, 70, 'Mirar el gran cerezo silvestre', () => comentar('cerezo_silvestre'), { pri: 5, hy: 60, hit: 60 });
     const d = PEOPLE[game.road?.with]; if (d && d.where === 'camino' && !ana.onCart) { const [cx, cy] = cartFromDriver(d.x, d.y, cartC8(d)); add('calesa', cx, cy - 6, 70, '🐴 Subir a la calesa', () => roadBoard(), { pri: 2, hy: 20, hit: 46 }); }
-    for (const k of Object.keys(PEOPLE)) { const p = PEOPLE[k]; if (p.where === 'camino' && p.buggy && !game.road && dist(ana.x, ana.y, p.x, p.y) < 200) add('calesa:' + k, p.x, p.y, 60, `🐴 Pedirle a ${wmName(k)} que la lleve`, () => { game.road = { with: k }; roadBoard(); }, { pri: 2, hy: 20, hit: 46 }); }
+    for (const k of Object.keys(PEOPLE)) { const p = PEOPLE[k]; if (p.where === 'camino' && (p.camino || 'br') === CAM.id && p.buggy && !game.road && dist(ana.x, ana.y, p.x, p.y) < 200) add('calesa:' + k, p.x, p.y, 60, `🐴 Pedirle a ${wmName(k)} que la lleve`, () => { game.road = { with: k }; roadBoard(); }, { pri: 2, hy: 20, hit: 46 }); }
   },
 };
-// someone sets off on the road (from the signpost of Avonlea, s = 1, or from the station, s = 0)
-function roadStart(k, s, dir){
+// someone sets off on a road (from its signpost in Avonlea, s = 1, or from its far end, s = 0)
+// (where a road comes out in Avonlea: Bright River's signpost; the shore road's, on the north coast)
+const caminoPuerta = id => CAMINOS[id]?.puerta?.() || DOOR.br;
+function roadStart(k, s, dir, camino = 'br'){
   const b = wmBody(k); if (!b) return;
-  b.where = 'camino'; b.roadS = s; b.roadDir = dir; b.nav = null; b.moving = false; if (k === 'matthew' || b.buggy) b.buggy = true; b.sit = !!b.buggy; b.roadTr = roadTramo(s);
+  b.where = 'camino'; b.camino = camino; b.suelto = false; usarCamino(camino); b.roadS = s; b.roadDir = dir; b.nav = null; b.moving = false; if (k === 'matthew' || b.buggy) b.buggy = true; b.sit = !!b.buggy; b.roadTr = roadTramo(s);
   roadPlace(k, b);
-  logEv(`${wmName(k)} tomó el camino ${dir > 0 ? 'de Bright River a Avonlea' : 'de Avonlea a Bright River'} (ocho millas).`, []);
+  logEv(`${wmName(k)} tomó ${CAM.nombre} ${dir > 0 ? `de ${CAM.fin_nombre} a Avonlea` : `de Avonlea a ${CAM.fin_nombre}`} (${CAM.miles + 1} millas).`, []);
 }
 function roadPlace(k, b){ const [x, y, dx, dy] = roadAt(b.roadS), L = Math.hypot(dx, dy) || 1, sd = (b.roadDir || 1) > 0 ? 1 : -1; b.x = x - dy / L * 14 * sd; b.y = y + dx / L * 14 * sd - (b.buggy ? 4 : 0); if (b.roadDir) b.dir = b.roadDir > 0 ? 1 : 3; }
-// and arrives at the other end
+// and arrives at the other end: into the station; out into Avonlea, by its signpost; or, where the road ends in a
+// place of its own (White Sands), there, on the road
 function roadArrive(k, where){
   const b = wmBody(k); b.roadDir = 0; b.sit = false; b.moving = false; b.nav = null;
   if (where === 'br') { b.where = 'br'; b.x = BRS.cart.x - 70; b.y = BRS.cart.y + 4; b.dir = 3; logEv(`${wmName(k)} llegó a Bright River.`, []); }
-  else { b.where = 'out'; b.x = DOOR.br[0] + 40; b.y = DOOR.br[1] + 24; b.dir = 1; logEv(`${wmName(k)} llegó a Avonlea por el camino de Bright River.`, []); }
+  else if (where === 'out') { const P = caminoPuerta(b.camino || 'br'); b.where = 'out'; b.x = P[0] + 40; b.y = P[1] + 24; b.dir = 1; logEv(`${wmName(k)} llegó a Avonlea por ${CAM.nombre}.`, []); }
+  else { b.sit = !!b.buggy; logEv(`${wmName(k)} llegó a ${CAM.fin_nombre}.`, []); }
 }
 // Ana on the road: in the buggy with whoever drives (game.road.with), or on foot
 function roadJoin(withK){
   const d = wmBody(withK); if (!d || d.where !== 'camino') return;
   if (game.talk) close();
-  game.scene = 'camino'; game.road = { with: withK }; ana.onCart = true; ana.sit = true; ana.goto = null; ana.lie = false; ana.moving = false; diana.follow = false; ana.roadS = d.roadS;
+  game.scene = 'camino'; ana.camino = d.camino || 'br'; usarCamino(ana.camino); game.road = { with: withK }; ana.onCart = true; ana.sit = true; ana.goto = null; ana.lie = false; ana.moving = false; diana.follow = false; ana.roadS = d.roadS;
   const c8_ = cartC8(d), [cx_, cy_] = cartFromDriver(d.x, d.y, c8_), [ax_, ay_] = cartSeat(cx_, cy_, c8_, 1); ana.x = ax_; ana.y = ay_; ana.dir = c8Dir(c8_);
   if (!obsScene()) { cam.x = ana.x; cam.y = ana.y; cam.snap = true; }
 }
 function roadBoard(){ const d = PEOPLE[game.road?.with]; if (!d) return; ana.onCart = true; ana.sit = true; ana.goto = null; sayB(qOf(game.road.with), dicho('camino_subir')); }
 function roadGetOff(){ if (!ana.onCart) return; ana.onCart = false; ana.sit = false; ana.y += 24; ana.offT = TT; const d = PEOPLE[game.road?.with]; if (d) sayB(qOf(game.road.with), dicho('camino_bajar')); }
 // Ana walks on to the edge of Avonlea, or into the road from the signpost, on foot
-function roadOnFoot(s){ game.scene = 'camino'; game.road = null; ana.onCart = false; ana.sit = false; const [x, y] = roadAt(s); ana.x = x + (s > .5 ? -60 : 60); ana.y = y + 20; ana.roadS = s; if (!obsScene()) { cam.x = ana.x; cam.y = ana.y; cam.snap = true; } anaSays(s > .5 ? dicho('camino_a_pie_hacia_br') : dicho('camino_a_pie_hacia_avonlea')); }
+function roadOnFoot(s, camino = 'br'){ game.scene = 'camino'; ana.camino = camino; usarCamino(camino); game.road = null; ana.onCart = false; ana.sit = false; const [x, y] = roadAt(s); ana.x = x + (s > .5 ? -60 : 60); ana.y = y + 20; ana.roadS = s; if (!obsScene()) { cam.x = ana.x; cam.y = ana.y; cam.snap = true; } if (camino === 'br') anaSays(s > .5 ? dicho('camino_a_pie_hacia_br') : dicho('camino_a_pie_hacia_avonlea')); }
 function roadTick(dt){
   for (const k of Object.keys(PEOPLE)) {
     const b = PEOPLE[k]; if (b.where !== 'camino') continue;
+    usarCamino(b.camino);
     if (b.roadDir == null) b.roadDir = 1;   // (left on the road: home to Avonlea)
-    b.roadWait = game.road?.with === k && game.scene === 'camino' && !ana.onCart;   // (Ana got down: the buggy waits for her)
-    if (b.roadDir && !b.roadWait && !(CHAT_HOLD[k] > TT)) {
-      const v = b.buggy ? ROAD_V * (roadTramo(b.roadS ?? 1).ritmo || 1) * (game.road?.with === k && TALKS.some(t => t.paso) ? ROAD_PASO : 1) : AGENTS[k] ? wmPace(AGENTS[k]) : (CH[k]?.speed?.walk || 40);   // (at a walk, while something that matters is said)
+    b.roadWait = game.road?.with === k && game.scene === 'camino' && !ana.onCart && !lgOcupado(k);   // (Ana got down: the buggy waits for her; on an errand of a story, the story says what is done)
+    if (b.suelto) { b.roadS = roadSOf(b.x); b.roadDir = 0; }   // (on foot off the road —down to the shore—: wherever she walks)
+    else if (b.roadDir && !b.roadWait && !(CHAT_HOLD[k] > TT)) {
+      const v = b.buggy ? ROAD_V * (roadTramo(b.roadS ?? 1).ritmo || 1) * (game.road?.with === k && TALKS.some(t => t.paso) ? ROAD_PASO : 1) * lgPaso(k) : AGENTS[k] ? wmPace(AGENTS[k]) : (CH[k]?.speed?.walk || 40);   // (at a walk, while something that matters is said)
       b.roadS = clamp((b.roadS ?? 1) + b.roadDir * v * dt / ROAD_LEN, 0, 1); b.walk = ((b.walk || 0) + dt * 1.6) % 1; b.moving = !b.buggy;
     } else b.moving = false;
-    b.sit = !!b.buggy; roadPlace(k, b);
-    const tr = roadTramo(b.roadS); if (tr !== b.roadTr) { b.roadTr = tr; if (game.road?.with === k && game.scene === 'camino') roadTramoIn(k, tr); }
-    if (b.roadDir > 0 && b.roadS >= 1) roadArrive(k, 'out'); else if (b.roadDir < 0 && b.roadS <= 0) roadArrive(k, 'br');
+    if (!b.suelto) { b.sit = !!b.buggy; roadPlace(k, b); }
+    const tr = roadTramo(b.roadS); if (tr !== b.roadTr) { b.roadTr = tr; if (CAM.id === 'br' && game.road?.with === k && game.scene === 'camino') roadTramoIn(k, tr); }   // (the talk by stretches: Bright River's)
+    if (b.roadDir > 0 && b.roadS >= 1) roadArrive(k, 'out'); else if (b.roadDir < 0 && b.roadS <= 0) roadArrive(k, CAM.cuarto || null);
   }
+  usarCamino(ana.camino);   // (the road Ana is on, or was last: the one drawn)
   if (game.scene === 'camino') {
     const d = PEOPLE[game.road?.with];
     if (ana.onCart && d) {   // in the buggy: where the buggy is; at the end of the road, she gets down with the driver
@@ -332,7 +404,8 @@ function roadTick(dt){
       }
     } else {   // on foot: along the road, out at either end
       ana.roadS = roadSOf(ana.x);
-      if (ana.x > RW - 160) { game.scene = 'out'; game.road = null; ana.x = DOOR.br[0] + 30; ana.y = DOOR.br[1] + 30; if (!obsScene()) { cam.x = ana.x; cam.y = ana.y; cam.snap = true; } logEv('Ana llegó a pie a Avonlea por el camino de Bright River.'); }
+      if (ana.x > RW - 160) { const P = caminoPuerta(CAM.id); game.scene = 'out'; game.road = null; ana.x = P[0] + 30; ana.y = P[1] + 30; if (!obsScene()) { cam.x = ana.x; cam.y = ana.y; cam.snap = true; } logEv(`Ana llegó a pie a Avonlea por ${CAM.nombre}.`); }
+      else if (d && lgOcupado(game.road.with)) {}   // (on a journey of a story: what she does is the story's —she ran to the sea—)
       else if (d && d.where === 'camino' && TT - lastInput > 8 && !ANA_AUTO) { const [cx0, cy0] = cartFromDriver(d.x, d.y, cartC8(d)), cx = cx0, cy = cy0 + 16; if (dist(ana.x, ana.y, cx, cy) < 40) roadBoard(); else if (!ana.goto) ana.goto = { x: cx, y: cy, scene: 'camino' }; }   // (a while without moving her: back to the buggy)
       else if (d && d.where === 'camino' && ANA_AUTO && TT - (ana.offT || 0) > 25) roadBoard();
     }

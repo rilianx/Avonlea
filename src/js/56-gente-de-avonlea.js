@@ -65,7 +65,8 @@ const FOLK_DEFS = {
 // (what they say: src/datos/frases.txt)
 for (const [k, d] of Object.entries(FOLK_DEFS)) if (!/^v\d+$/.test(k)) { d.lines = [...(FRASES[k]?.dice || []), ...frasesGrupo(d.look.h < .99)]; d.ana = FRASES[k]?.ana || []; }
 for (const [k, d] of Object.entries(FOLK_DEFS)) LOOKS['f:' + k] = { hairD: d.look.hair, dressD: d.look.dress, scarf: '#a85a4a', ...d.look };
-const BLD = n => BUILDINGS.find(b => b.name === n) || Object.values(HOUSES).find(h => h.name === n)?.at;
+const BLD = n => (n === 'Hotel White Sands' ? HOTEL_WS_AT : null) || BUILDINGS.find(b => b.name === n) ||   // (those who live at the hotel come and go by the shore road's signpost)
+  Object.values(HOUSES).find(h => h.name === n)?.at;
 const door = n => { const b = BLD(n); return [b.x, b.y + 36]; };
 const YARD = [(SCHOOL.x + MILK.x) / 2, (SCHOOL.y + 60 + MILK.y) / 2], SCHOOL_DOOR = [SCHOOL.x, SCHOOL.y + 30], CHURCH_DOOR = [CHURCH.x, CHURCH.y + 50];
 const PLAY = { lago: [PLACES.lago[1], PLACES.lago[2]], aldea: [PLACES.aldea[1], PLACES.aldea[2] + 30], rio: [PLACES.rio[1] - 30, PLACES.rio[2] + 40], escuela: YARD, playa: [PLACES.playa[1], PLACES.playa[2]],

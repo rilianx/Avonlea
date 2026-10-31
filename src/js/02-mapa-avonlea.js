@@ -1,6 +1,6 @@
 /* ---------- THE MAP OF AVONLEA: one local map, described in a few lines (in units U) and drawn by the game, the same
    every time. Like the old maps of the island: the sea to the north and east, Bright River station and its railway,
-   the White Sands hotel and the lighthouse on the coast, the village at the crossroads (town hall, store, blacksmith,
+   the lighthouse on the coast (and the signpost of the shore road to White Sands, far away), the village at the crossroads (town hall, store, blacksmith,
    the newspaper...), the river under the covered bridge running down to the school and the Lake of Shining Waters,
    a patchwork of fields, the woods, and Green Gables down to the south-west.
    - COAST: the line where the land ends (the sea lies north and east of it); ROADS: named lines; RIVERS: their lines and
@@ -95,7 +95,10 @@ const HOUSES = {
     describe: 'la tienda de Lawson (en la aldea, con su toldo a rayas: azúcar, harina, hilo, cintas, caramelos de menta; se cambian huevos, fruta y tartas por lo que hace falta, y lo de la casa se anota en la libreta de cada familia)' },
 };
 const HOUSE_SPOTS = Object.values(HOUSES).map(h => h.at);
-const BUILDINGS = MAP.buildings.map(b => ({ ...b, x: b.at[0] * U, y: b.at[1] * U, w: b.style === 'hotel' ? 9 * T : b.style === 'galpon' ? 7 * T : b.style === 'faro' ? 44 : 4.6 * T }));
+// (the White Sands hotel is not in Avonlea: it is at the end of the shore road, src/js/17-camino-bright-river.js; where it
+// is on the map's data, the road leaves Avonlea, by a signpost)
+const HOTEL_WS_AT = (b => ({ x: b.at[0] * U, y: b.at[1] * U, w: 160 }))(MAP.buildings.find(b => b.style === 'hotel'));
+const BUILDINGS = MAP.buildings.filter(b => b.style !== 'hotel').map(b => ({ ...b, x: b.at[0] * U, y: b.at[1] * U, w: b.style === 'hotel' ? 9 * T : b.style === 'galpon' ? 7 * T : b.style === 'faro' ? 44 : 4.6 * T }));
 // the town hall, where the concerts are: one can go in (the building itself is drawn with the others)
 HOUSES.sa = { at: (b => ({ x: b.x, y: b.y, w: b.w }))(BUILDINGS.find(b => b.name === 'Ayuntamiento')), name: 'El salón del pueblo', noProp: true, small: true,
   enter: 'Entrar al salón del pueblo', inText: 'en el salón del pueblo', arrive: ' entró al salón del pueblo.', place: ['salon_pueblo', 'el salón del pueblo', 30, 56],

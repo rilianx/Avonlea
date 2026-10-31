@@ -29,7 +29,8 @@ const dlgHecho = (n, v = today() + 1) => { dlgHechos()[n] = v; if (game.wm) (gam
 const dlgDichas = () => game.escDone || (game.escDone = {});
 const dlgEscena = k => k === 'ana' ? game.scene : wmScene(k);
 function dlgCtx(){
-  const k = game.road?.with, d = PEOPLE[k], road = game.scene === 'camino' && !!ana.onCart && d?.where === 'camino', M = PEOPLE.matthew;
+  const k = game.road?.with, d = PEOPLE[k], road = game.scene === 'camino' && (ana.camino || 'br') === 'br' && !!ana.onCart && d?.where === 'camino',   // (the talk by stretches: Bright River's road)
+    M = PEOPLE.matthew;
   const ride = game.scene === 'out' && ((M.where === 'out' && !!AGENTS.ana?.ride && AGENTS.ana.followOf === 'matthew') || (cart.riding && PEOPLE[cart.con || 'matthew']?.where === 'out'));   // (or with whoever drives the cart: Marilla, to White Sands)   // (Ana with Matthew in the buggy, in Avonlea)
   return { road, d, dir: d?.roadDir || 0, tr: road ? roadTramo(d.roadS) : null, ride };
 }
