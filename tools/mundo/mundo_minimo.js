@@ -8,11 +8,14 @@
 // Como en el juego, la gente del pueblo (la Sra. Pye, la Sra. Spencer…) no camina: aparece donde una historia la pone.
 // Lo que todavía no hace (lo hace el juego): el planificador y las rutinas de la gente; aquí se mueven solo los que una
 // historia mueve, o la consola (tools/mundo/consola.js).
-const fs = require('fs'), path = require('path');
-const ARCHIVO = path.join(__dirname, 'geografia.json');
+// (en node lee tools/mundo/geografia.json; en una página —trazas/lenguaje.html—, la geografía viene en GEOGRAFIA)
+(function (raiz) {
+const enNode = typeof module !== 'undefined' && !!module.exports;
 let GEO = null;
 function geografia(){
   if (GEO) return GEO;
+  if (!enNode) return (GEO = raiz.GEOGRAFIA);
+  const fs = require('fs'), path = require('path'), ARCHIVO = path.join(__dirname, 'geografia.json');
   if (!fs.existsSync(ARCHIVO)) throw new Error('falta tools/mundo/geografia.json: node tools/mundo/exportar.js');
   GEO = JSON.parse(fs.readFileSync(ARCHIVO, 'utf8'));
   // (si el mapa o los caminos cambiaron desde que se exportó, las distancias pueden estar viejas: se avisa, una vez)
@@ -66,6 +69,8 @@ function MundoMinimo(api){
 }
 // (quién va de camino ahora, para mirarlo —la consola—: la acción de cada uno; no se guarda, es solo para ver)
 MundoMinimo.viajes = {};
-MundoMinimo.inicio = require('../lenguaje/mundo_simulado.js').MundoSimulado.inicio;
+MundoMinimo.inicio = (enNode ? require('../lenguaje/mundo_simulado.js').MundoSimulado : raiz.MundoSimulado).inicio;
 MundoMinimo.geografia = geografia;
-module.exports = { MundoMinimo };
+if (enNode) module.exports = { MundoMinimo };
+else raiz.MundoMinimo = MundoMinimo;
+})(this);

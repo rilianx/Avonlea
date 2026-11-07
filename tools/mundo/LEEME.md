@@ -17,6 +17,13 @@ hace solo lo primero:
 
 Tiene la misma interfaz que el mundo simulado (`tools/lenguaje/mundo_simulado.js`), que la documenta.
 
+## Verlo
+
+La página `trazas/lenguaje.html` (`node tools/lenguaje/pagina.js`) juega las historias en el mundo mínimo, con «el mapa
+real»: arriba se ve Avonlea desde arriba (la costa, los caminos), los caminos largos saliendo de sus letreros tan largos
+como sus minutos, cada lugar del lenguaje y cada persona donde está a esa hora. Quien va de camino avanza por el camino.
+▶ Reproducir avanza el reloj y se para cuando le piden algo a Ana. El mundo simulado sigue ahí, como opción.
+
 ## Qué hay
 
 | Archivo | Qué hace |

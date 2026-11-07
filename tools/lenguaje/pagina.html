@@ -28,6 +28,12 @@ aside h3{margin:0 0 6px;font-size:13px;letter-spacing:.04em;text-transform:upper
 label.chk{font-size:13px;color:var(--mut);display:flex;gap:5px;align-items:center}
 .silencio{color:var(--mut);text-align:center;font-style:italic;margin:6px 0;max-width:760px}
 .fin{background:var(--acento);color:var(--bg);padding:10px 12px;border-radius:9px;max-width:760px}
+#mapa{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:8px;margin-bottom:12px}#mapa[hidden]{display:none}
+#mapa svg{width:100%;height:auto;display:block;max-height:62vh}
+#mapa .ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px;font-size:13px;color:var(--mut)}
+:root{--tierra:#e7dcc2;--mar:#b9d3dc;--camino:#c99a74;--largo:#a8714f;--lugar:#5d5346}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--tierra:#34302a;--mar:#22323a;--camino:#6f5643;--largo:#9a6a4c;--lugar:#c9bfae}}
+:root[data-theme=dark]{--tierra:#34302a;--mar:#22323a;--camino:#6f5643;--largo:#9a6a4c;--lugar:#c9bfae}
 </style></head><body>
 <header>
   <h1>Probar las historias</h1>
@@ -40,6 +46,10 @@ label.chk{font-size:13px;color:var(--mut);display:flex;gap:5px;align-items:cente
     <option value="llegada">La llegada (cap. 2): Matthew trae a Ana por la Avenida</option>
     <option value="paseo">De noche, sin viaje: Ana puede ir sola a la Avenida</option>
   </select>
+  <select id="mundo" title="Con qué mundo se juega">
+    <option value="minimo">El mapa real (el mundo mínimo)</option>
+    <option value="simulado">El mundo simulado (minutos fijos)</option>
+  </select>
   <button id="reiniciar">Empezar de nuevo</button>
   <button id="sola" title="Ana decide sola hasta el final">Ana sola hasta el final</button>
   <button id="guardar" title="Guarda la partida en este navegador">Guardar</button>
@@ -47,15 +57,21 @@ label.chk{font-size:13px;color:var(--mut);display:flex;gap:5px;align-items:cente
   <label class="chk"><input type="checkbox" id="vermom"> ver los momentos</label>
 </header>
 <main>
-  <section><div id="relato"></div><div id="accion"></div></section>
+  <section>
+    <div id="mapa" hidden><svg id="svg" role="img" aria-label="El mapa de Avonlea, con los caminos largos, los lugares y dónde está cada uno"></svg>
+      <div class="ctl"><button id="play" class="prim">▶ Reproducir</button><button id="mas10">+10 min</button>
+        <label>velocidad <select id="vel"><option value="2">2 min/s</option><option value="10" selected>10 min/s</option><option value="30">30 min/s</option></select></label>
+        <span id="mapinfo"></span></div></div>
+    <div id="relato"></div><div id="accion"></div></section>
   <aside>
     <section><h3>Los encargos</h3><div id="encargos"></div></section>
     <section><h3>Dónde está cada uno</h3><div id="lugares"></div></section>
     <section><h3>El estado</h3><div id="estado"></div></section>
-    <section><h3>Cómo leer esto</h3><div style="font-size:13px;color:var(--mut)">Tú eres Ana. Contesta lo que te piden («Subir a la calesa» o «Todavía no»), elige en las escenas, o haz algo por tu cuenta: ir a otro lugar, bajarte de la calesa. Con «ver los momentos» aparece lo que mueve la historia por dentro: los encargos, sus pasos, lo que planifica Marilla. Esto lo ejecuta el motor del lenguaje (tools/lenguaje/motor.js) con los datos de docs/lenguaje/ y un mundo simulado (tools/lenguaje/mundo_simulado.js): no es el juego. «Guardar» guarda la partida en este navegador, aun a mitad de un viaje.</div></section>
+    <section><h3>Cómo leer esto</h3><div style="font-size:13px;color:var(--mut)">Con «el mapa real», arriba se ve Avonlea desde arriba, con los caminos largos saliendo de sus letreros, tan largos como sus minutos; ▶ Reproducir avanza el reloj y se para cuando te piden algo. Tú eres Ana. Contesta lo que te piden («Subir a la calesa» o «Todavía no»), elige en las escenas, o haz algo por tu cuenta: ir a otro lugar, bajarte de la calesa. Con «ver los momentos» aparece lo que mueve la historia por dentro: los encargos, sus pasos, lo que planifica Marilla. Esto lo ejecuta el motor del lenguaje (tools/lenguaje/motor.js) con los datos de docs/lenguaje/ y un mundo simulado (tools/lenguaje/mundo_simulado.js): no es el juego. «Guardar» guarda la partida en este navegador, aun a mitad de un viaje.</div></section>
   </aside>
 </main>
 <script>/*@MOTOR*/</script>
+<script>window.GEOGRAFIA = /*@GEOGRAFIA*/null;</script>
 <script>
 const D = /*@DATOS*/null;
 const $ = id => document.getElementById(id), esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -64,7 +80,19 @@ const ESCENARIOS = { normal: {}, lejos: { lugares: { ana: 'escuela' } }, sin_pac
     estado: { 'estado.ana_en_tv': 'llegando', 'comun.hechos.encontro_a_ana': 1, 'comun.hechos.primera_noche': null, 'mundo.calesa.listo': 'si', 'cualidad.ana.afecto.matthew': 3 } },
   paseo: { hora: 20 } };
 let M, u, visto = 0;
-function empezar(){ $('relato').innerHTML = ''; visto = 0; M = Motor(D, { ...ESCENARIOS[$('esc').value] }); u = M.avanzar(); pintar(); }
+// (el mundo: el simulado —minutos fijos, el motor salta al próximo evento— o el mínimo —el mapa real, con su reloj—)
+const minimo = () => $('mundo').value === 'minimo', MUNDO = () => (minimo() ? MundoMinimo : null);
+const ahoraMin = () => (M.get(['tiempo', 'dia']) - 1) * 1440 + Math.round(M.get(['tiempo', 'hora']) * 60);
+// (en el mapa real, el motor no se adelanta al reloj: alTiempo, como en el juego)
+function arrancar(){ if (minimo()) { MundoMinimo.viajes = {}; u = M.alTiempo(ahoraMin()); } else u = M.avanzar(); }
+function empezar(){ pausar(); $('relato').innerHTML = ''; visto = 0; M = Motor(D, { ...ESCENARIOS[$('esc').value] }, MUNDO()); arrancar(); pintar(); }
+const esperando = () => u.fin || u.pregunta || (u.escena && u.escena.ops);
+let reloj = null;
+function pausar(){ clearInterval(reloj); reloj = null; $('play').textContent = '▶ Reproducir'; }
+function reproducir(){ if (reloj) return pausar(); if (esperando()) return; $('play').textContent = '⏸ Pausa'; reloj = setInterval(() => { u = M.alTiempo(ahoraMin() + +$('vel').value / 10); pintar(); if (esperando()) pausar(); }, 100); }
+$('play').onclick = reproducir;
+$('mas10').onclick = () => { if (esperando()) return; u = M.alTiempo(ahoraMin() + 10); pintar(); };
+$('mundo').onchange = empezar;
 function pintar(){
   const R = $('relato'), ver = $('vermom').checked;
   for (; visto < M.registro.length; visto++) {
@@ -91,7 +119,7 @@ function pintar(){
   } else {
     A.innerHTML = '<div class="pide">Nada que esperar ahora. Ana puede hacer algo por su cuenta:</div>';
     const s = document.createElement('select'); for (const l of M.lugares()) { const o = document.createElement('option'); o.value = l; o.textContent = M.nombre(l); s.append(o); }
-    A.append(s, boton('Ir', () => { u = M.irA(s.value); pintar(); }, true), boton('Esperar 10 minutos', () => { u = M.esperar(10); pintar(); }));
+    A.append(s, boton('Ir', () => { u = M.irA(s.value); pintar(); }, true), boton('Esperar 10 minutos', () => { u = minimo() ? M.alTiempo(ahoraMin() + 10) : M.esperar(10); pintar(); }));
   }
   if (!u.fin && !u.pregunta && !(u.escena && u.escena.ops) && M.get(['mundo', 'ana', 'en']) !== 'nada') A.append(boton('Bajarse de la calesa', () => { u = M.bajarse(); pintar(); }));
   const S = M.resumen();
@@ -100,19 +128,81 @@ function pintar(){
   $('estado').innerHTML = `<div class="fila"><span>Ana en Tejas Verdes</span><span>${esc(S.estado)}</span></div><div class="fila"><span>paciencia de Marilla</span><span>${S.paciencia}</span></div><div class="fila"><span>afecto de Marilla</span><span>${S.afecto}</span></div>`
     + `<div class="fila"><span>escenas dichas</span><span>${S.hechos.filter(h => h.includes('.dichas.')).length}</span></div>`
     + S.hechos.filter(h => h.includes('.hechos.')).map(h => `<div class="fila"><span>${esc(h.split('.').pop())}</span><span>hecho</span></div>`).join('');
-  A.scrollIntoView({ block: 'nearest' });
+  mapa();
+  if (!reloj) A.scrollIntoView({ block: 'nearest' });
 }
 function boton(t, f, prim){ const b = document.createElement('button'); b.textContent = t; b.onclick = f; if (prim) b.className = 'prim'; return b; }
 $('reiniciar').onclick = empezar; $('esc').onchange = empezar;
 $('vermom').onchange = () => { for (const d of document.querySelectorAll('.momento')) d.classList.toggle('oculto', !$('vermom').checked); };
 // (guardar: la partida entera es datos —M.guardar()—; se guarda en este navegador, con el relato hasta ahí)
 const CLAVE = 'avonlea-lenguaje-partida';
-$('guardar').onclick = () => { try { localStorage.setItem(CLAVE, JSON.stringify({ esc: $('esc').value, partida: M.guardar() })); $('guardar').textContent = 'Guardado ✓'; setTimeout(() => { $('guardar').textContent = 'Guardar'; }, 1200); } catch (e) { alert('No se pudo guardar en este navegador.'); } };
+$('guardar').onclick = () => { try { localStorage.setItem(CLAVE, JSON.stringify({ esc: $('esc').value, mundo: $('mundo').value, partida: M.guardar() })); $('guardar').textContent = 'Guardado ✓'; setTimeout(() => { $('guardar').textContent = 'Guardar'; }, 1200); } catch (e) { alert('No se pudo guardar en este navegador.'); } };
 $('cargar').onclick = () => {
   let g = null; try { g = JSON.parse(localStorage.getItem(CLAVE)); } catch (e) {}
   if (!g) { alert('No hay una partida guardada.'); return; }
-  $('esc').value = g.esc; $('relato').innerHTML = ''; visto = 0; M = Motor.cargar(D, g.partida); u = M.avanzar(); pintar();
+  pausar(); $('esc').value = g.esc; $('mundo').value = g.mundo || 'simulado'; $('relato').innerHTML = ''; visto = 0; M = Motor.cargar(D, g.partida, MUNDO()); arrancar(); pintar();
 };
-$('sola').onclick = () => { for (let i = 0; i < 300 && !u.fin && (u.pregunta || (u.escena && u.escena.ops)); i++) u = M.decideSola(); pintar(); };
+$('sola').onclick = () => { pausar();
+  if (minimo()) { const hasta = ahoraMin() + 2880; for (let i = 0; i < 3000 && !u.fin && ahoraMin() < hasta; i++) u = esperando() ? M.decideSola() : M.alTiempo(ahoraMin() + 5); }   // (con el reloj: de a 5 minutos, hasta dos días)
+  else for (let i = 0; i < 300 && !u.fin && (u.pregunta || (u.escena && u.escena.ops)); i++) u = M.decideSola();
+  pintar(); };
+// ---------------------------------------------------------------- el mapa (el mundo mínimo, visto desde arriba)
+// Avonlea como en el juego (la costa, los caminos), y los caminos largos saliendo de sus letreros hacia afuera, tan
+// largos como sus minutos; cada lugar del lenguaje donde está, y cada uno donde está a esta hora (si va de camino, en
+// el punto del camino que le toca)
+const GEO = window.GEOGRAFIA, DIB = GEO.dibujo, POR_MIN = 12;
+const CAM = Object.fromEntries(Object.entries(GEO.caminos).map(([c, C]) => { const p = DIB.puertas[c], dx = p[0] - DIB.w / 2, dy = p[1] - DIB.h / 2, L = Math.hypot(dx, dy) || 1; return [c, { puerta: p, dir: [dx / L, dy / L], largo: C.minutos * POR_MIN, ...C }]; }));
+const enCamino = (c, s) => { const C = CAM[c]; return [C.puerta[0] + C.dir[0] * (1 - s) * C.largo, C.puerta[1] + C.dir[1] * (1 - s) * C.largo]; };
+const xy = p => (p.mapa ? p.mapa : enCamino(p.camino, p.s));
+// (por dónde va de un punto a otro: por los letreros de los caminos largos, si sale de uno o entra a otro)
+function ruta(p, q){
+  if (p.camino && q.camino && p.camino === q.camino) return [xy(p), xy(q)];
+  const ida = x => (x.camino ? [xy(x), CAM[x.camino].puerta] : [xy(x)]);
+  return [...ida(p), ...ida(q).reverse()];
+}
+const largo = R => R.reduce((d, a, i) => d + (i ? Math.hypot(a[0] - R[i - 1][0], a[1] - R[i - 1][1]) : 0), 0);
+function rutaEntre(a, b){ let mejor = null; for (const p of GEO.puntos[a] || []) for (const q of GEO.puntos[b] || []) { const R = ruta(p, q); if (!mejor || largo(R) < largo(mejor)) mejor = R; } return mejor; }
+function enRuta(R, f){ let d = largo(R) * Math.max(0, Math.min(1, f)); for (let i = 1; i < R.length; i++) { const a = R[i - 1], b = R[i], l = Math.hypot(b[0] - a[0], b[1] - a[1]); if (d <= l) return [a[0] + (b[0] - a[0]) * d / (l || 1), a[1] + (b[1] - a[1]) * d / (l || 1)]; d -= l; } return R[R.length - 1]; }
+const COLOR = { ana: 'var(--ana)', marilla: '#4f5d7a', matthew: '#5d7a4f', calesa: '#8a6a3a' };
+let fondo = null, caja = null;
+function mapa(){
+  $('mapa').hidden = !minimo(); if (!minimo()) return;
+  const svg = $('svg');
+  if (!fondo) {   // (lo que no cambia: el mapa, los caminos largos, los lugares)
+    const pts = [[0, 0], [DIB.w, DIB.h], ...Object.keys(CAM).map(c => enCamino(c, 0))], x0 = Math.min(...pts.map(p => p[0])) - 300, y0 = Math.min(...pts.map(p => p[1])) - 300, x1 = Math.max(...pts.map(p => p[0])) + 300, y1 = Math.max(...pts.map(p => p[1])) + 300;
+    caja = [x0, y0, x1 - x0, y1 - y0]; svg.setAttribute('viewBox', caja.join(' '));
+    const linea = (L, a) => `<polyline points="${L.map(p => p.join(',')).join(' ')}" fill="none" ${a}/>`;
+    let h = `<rect x="${x0}" y="${y0}" width="${x1 - x0}" height="${y1 - y0}" fill="var(--mar)"/>`;
+    h += `<polygon points="${[...DIB.costa, [DIB.w, DIB.h], [0, DIB.h]].map(p => p.join(',')).join(' ')}" fill="var(--tierra)"/>`;   // (la tierra: al sur y al oeste de la costa)
+    for (const r of DIB.caminos) h += linea(r, 'stroke="var(--camino)" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"');
+    for (const [c, C] of Object.entries(CAM)) h += linea([C.puerta, enCamino(c, 0)], 'stroke="var(--tierra)" stroke-width="320" stroke-linecap="round" opacity=".85"');   // (una tierra aparte, como en el juego)
+    for (const [c, C] of Object.entries(CAM)) {
+      h += linea([C.puerta, enCamino(c, 0)], 'stroke="var(--largo)" stroke-width="44" stroke-dasharray="120 60"');
+      for (const t of C.tramos) { const [x, y] = enCamino(c, t.s); h += `<circle cx="${x}" cy="${y}" r="26" fill="var(--largo)"/>`; }
+      const [ex, ey] = enCamino(c, 0); h += `<text x="${ex}" y="${ey - 120}" font-size="170" text-anchor="middle" fill="var(--lugar)" font-style="italic">${esc(C.nombre)} · ${C.minutos} min</text>`;
+    }
+    const nombres = {};   // (los lugares en un mismo punto —la playa y su orilla—: un solo círculo, con los dos nombres)
+    for (const [l, P] of Object.entries(GEO.puntos)) for (const p of P) { const k = xy(p).map(Math.round).join(','); (nombres[k] ||= []).push(M.nombre(l).replace(/,.*$/, '').replace(/ \(.*\)$/, '')); }
+    for (const [k, N] of Object.entries(nombres)) { const [x, y] = k.split(',').map(Number); h += `<circle cx="${x}" cy="${y}" r="60" fill="none" stroke="var(--lugar)" stroke-width="16"/><text x="${x + 90}" y="${y + 50}" font-size="150" fill="var(--lugar)">${esc(N.join(' · '))}</text>`; }
+    fondo = h;
+  }
+  // (cada uno: si va de camino —él, o el medio en que va, o a quien sigue—, en su punto del camino; si no, en su lugar)
+  const t = ahoraMin(), viajes = MundoMinimo.viajes, quienes = [...Object.keys(D.personas), ...Object.keys(D.medios)];
+  const viajeDe = q => { const v = viajes[q]; if (v && v.fin > t && v.sale <= t) return v; const en = M.get(['mundo', q, 'en']), sig = M.get(['mundo', q, 'sigue']);
+    for (const [o, w] of Object.entries(viajes)) if (w.fin > t && w.sale <= t && ((en && en !== 'nada' && (M.get(['mundo', o, 'en']) === en || o === en)) || o === sig || (D.medios[q] && M.get(['mundo', o, 'en']) === q))) return w; return null; };
+  const cuantos = {}; let h = fondo, moviendo = 0;
+  for (const q of quienes) {
+    const v = viajeDe(q), l = M.get(['mundo', q, 'lugar']); if (!l && !v) continue;
+    let P;
+    if (v) { const R = rutaEntre(v.de, v.a); P = R && enRuta(R, (t - v.sale) / Math.max(1, v.fin - v.sale)); moviendo++; }
+    if (!P) { const p = (GEO.puntos[l] || [])[0]; if (!p) continue; P = xy(p); }
+    const k = Math.round(P[0] / 250) + ',' + Math.round(P[1] / 250), n = cuantos[k] = (cuantos[k] || 0) + 1, dx = (n - 1) * 150;
+    const medio = !!D.medios[q], c = COLOR[q] || '#7a5a8a', ini = M.nombre(q).replace(/^la |^el /i, '').replace(/^Sra\. (Peter )?/, '')[0];
+    h += medio ? `<rect x="${P[0] + dx - 70}" y="${P[1] - 210}" width="140" height="90" rx="20" fill="${c}"><title>${esc(M.nombre(q))}</title></rect>`
+      : `<g><circle cx="${P[0] + dx}" cy="${P[1] - 40}" r="85" fill="${c}" stroke="var(--panel)" stroke-width="18"/><text x="${P[0] + dx}" y="${P[1]}" font-size="120" text-anchor="middle" fill="#fff" font-weight="bold">${esc(ini)}</text><title>${esc(M.nombre(q))}${v ? ' → ' + esc(M.nombre(v.a)) : ''}</title></g>`;
+  }
+  svg.innerHTML = h;
+  $('mapinfo').textContent = moviendo ? `${moviendo} en camino` : '';
+}
 empezar();
 </script></body></html>

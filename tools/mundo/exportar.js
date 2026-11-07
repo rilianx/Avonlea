@@ -55,7 +55,10 @@ const MEDIR = `(() => {
   const caminos = Object.fromEntries(Object.entries(CAMINOS).map(([c, C]) => [c, { nombre: C.nombre, fin: C.fin_nombre, minutos: C.min, millas: C.miles + 1, tramos: C.tramos.map(t => ({ s: t.s, nombre: t.name, ...(t.lugar ? { lugar: t.lugar } : {}) })) }]));
   // (la gente del pueblo —no la de Tejas Verdes—: el juego no la hace caminar a donde la pone una historia, aparece ahí)
   const del_pueblo = Object.keys(LENGUAJE.personas).filter(k => k !== 'ana' && !PEOPLE[k] && FOLKBY[k]);
-  return JSON.stringify({ velocidades: V, minuto_de_juego_s: MIN_S, del_pueblo, puntos: P, minutos: M, caminos });
+  // (para dibujarlo —trazas/lenguaje.html, el mundo mínimo—: el tamaño del mapa, la costa, los caminos, y dónde sale cada camino largo)
+  const fino = (L, n) => L.filter((p, i) => i % n === 0 || i === L.length - 1).map(([x, y]) => [Math.round(x), Math.round(y)]);
+  const dibujo = { w: WW, h: WH, costa: fino(COAST, 1), caminos: Object.values(ROADS).map(r => fino(r, 2)), puertas: Object.fromEntries(Object.keys(CAMINOS).map(c => [c, caminoPuerta(c).map(Math.round)])) };
+  return JSON.stringify({ velocidades: V, minuto_de_juego_s: MIN_S, del_pueblo, puntos: P, minutos: M, caminos, dibujo });
 })()`;
 
 (async () => {
