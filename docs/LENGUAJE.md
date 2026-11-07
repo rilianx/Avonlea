@@ -444,7 +444,9 @@ Entre el mundo simulado y el juego está **el mundo mínimo** (`tools/mundo/`, v
 la misma interfaz, pero con los minutos reales del mapa del juego entre los lugares —a pie, Ana, en calesa, con las
 millas de los caminos largos—, exportados del juego una vez (`tools/mundo/exportar.js`). No dibuja nada y el reloj salta
 de evento en evento: el viaje a White Sands entero se juega en unos 40 ms. Con su consola se mueve a la gente, se
-avanza el reloj y se contesta por Ana; lo mismo escrito en un archivo es una prueba.
+avanza el reloj y se contesta por Ana; lo mismo escrito en un archivo es una prueba. También consulta el planificador del juego
+(cargado en node, sin navegador: `tools/mundo/sin_navegador.js`), y `tools/mundo/planes.js` prueba sus metas en unos
+3 segundos.
 
 **Todo lo que recuerda el motor son datos.** Un verbo en curso no es código suspendido: es una pila de marcos (el verbo
 de abajo, el paso que está haciendo, el paso de ese paso), cada uno con su llamada y en qué va (fase, paso, intento,

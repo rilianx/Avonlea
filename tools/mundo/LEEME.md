@@ -27,6 +27,9 @@ Tiene la misma interfaz que el mundo simulado (`tools/lenguaje/mundo_simulado.js
 | `mundo_minimo.js` | El mundo, para el motor del lenguaje. |
 | `consola.js` | Jugar a mano, o correr pruebas escritas con los mismos comandos. |
 | `pruebas/*.txt` | Las pruebas. |
+| `sin_navegador.js` | Carga el código del juego en node, con una pantalla de mentira (todo lo que es dibujo responde y no hace nada), en unos 400 ms. Sirve para usar la lógica del juego —el planificador, el guion— sin abrir un navegador. |
+| `planes.js` | Las metas de prueba del planificador (`src/js/64-metas-de-prueba.js`), en el estado lógico: prepara cada una como siempre, planifica, ejecuta el plan acción por acción (su efecto y lo que dura) y mira si llega y a qué hora. |
+| `planes.esperado.json` | Lo que dio cada meta. `planes.js` avisa lo que cambie. |
 
 ## Uso
 
@@ -37,6 +40,9 @@ node tools/mundo/consola.js tools/mundo/pruebas/*.txt          # las pruebas
 node tools/mundo/consola.js --ver tools/mundo/pruebas/white_sands_corre.txt   # una prueba, viendo lo que pasa
 node tools/mundo/consola.js -e "nueva 3 09:00; ir escuela; avanzar 30m; donde"
 node tools/lenguaje/probar.js --mundo minimo      # los escenarios de probar.js, con las distancias reales
+node tools/mundo/planes.js                        # las metas del planificador, sin navegador (unos 3 s)
+node tools/mundo/planes.js --ver vaca             # solo las que dicen «vaca», con cada paso
+node tools/mundo/planes.js --guardar              # cuando un cambio es el que se quería: guardarlo como lo esperado
 ```
 
 Los comandos de la consola:
@@ -51,7 +57,36 @@ si · no · elegir <n> · sola  contestar, elegir, o que Ana decida sola
 donde · minutos <a> <b>      dónde está cada uno (y quién va de camino); cuánto hay entre dos lugares
 espera <a.b.c>[=valor]       en una prueba: que se cumpla (espera mundo.ana.lugar=playa)
 espera dicha <escena> · espera hora <= hh:mm
+plan <quien> <meta> [args…]  lo que haría el planificador del juego, paso a paso y con hora
+metas                        las metas que conoce el planificador
 ```
+
+Con `plan`, el planificador del juego planifica desde donde está cada uno en el mundo mínimo (sus lugares, como los
+llama el planificador: `LG_PLAN`, en `src/js/67-lenguaje.js`). Muestra el plan, pero no lo ejecuta:
+
+```
+> nueva 3 10:00
+> plan marilla tener marilla azucar 1
+  Marilla tiene una taza de azúcar: llega a las 10:46
+    10:00  pedirle a Ana que le traiga una taza de azúcar (47 min)
+> poner ana aldea
+> plan ana estar_en ana escuela
+  Ana está en la escuela: llega a las 10:04
+    10:00  ir a la escuela (5 min)
+```
+
+## Las metas del planificador
+
+`planes.js` corre en unos 3 segundos las metas de prueba que se pueden probar sin el juego: 55 llegan y 2 no llegan a
+propósito. Una es la tarta de bayas en invierno, imposible. La otra es Gilbert: va y se disculpa, pero Ana no lo perdona.
+Las 14 restantes son solo del juego, porque esperan una escena del guion, un pedido a Ana o varias metas a la vez.
+
+Las pruebas no dicen qué esperan, así que lo que dio cada una queda en `planes.esperado.json`. Si un cambio en el
+planificador o en el mapa hace que una meta llegue distinto (otros pasos, otra hora, o que ya no llegue), sale con ✘ y
+dice cómo era antes.
+
+Lo que no se prueba aquí: si el plan se puede caminar en el mapa (que nadie se trabe, que la calesa vaya por los
+caminos). Eso sigue siendo del juego (`tools/trace_goal.js`).
 
 ## Una prueba
 
@@ -67,8 +102,9 @@ espera mundo.ana.lugar=escuela
 
 ## Lo que todavía no hace
 
-- **El planificador y las rutinas de la gente** siguen en el juego. Aquí solo se mueve quien una historia mueve, o la
-  consola.
+- **Ejecutar los planes en el mundo mínimo.** El planificador se consulta (`plan`) y sus metas se prueban (`planes.js`),
+  pero los planes todavía no mueven a la gente del mundo mínimo junto con las historias. Las rutinas del día tampoco
+  corren aquí.
 - **El dibujo:** el juego todavía decide con píxeles. El paso siguiente es que el juego dibuje este estado.
 
 ## Lo que ya mostró

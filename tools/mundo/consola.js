@@ -23,6 +23,9 @@ const AYUDA = `
   minutos <lugar> <lugar>      cuánto hay entre dos lugares: a pie, Ana, en calesa
   lugares | quienes            los lugares y las personas del lenguaje
   registro [n]                 las últimas n líneas de lo que pasó
+  plan <quien> <meta> [args…]  lo que haría para una meta del planificador del juego, paso a paso y con hora, desde
+                               donde está cada uno: plan marilla tener marilla azucar 1 · plan ana estar_en ana escuela
+  metas                        las metas que conoce el planificador
   espera <a.b.c>[=valor]       (en una prueba) que se cumpla, si no, falla: espera mundo.ana.lugar=hotel_white_sands
   espera dicha <escena>        que una escena se haya dicho
   espera hora <= hh:mm         que no sea más tarde que esa hora
@@ -81,6 +84,28 @@ function espera(args){
   else { const [c, v] = args[0].split('='); const x = M.get(c.split('.')); ok = v === undefined ? x != null && x !== 'nada' && x !== 'no' && x !== 0 : String(x) === v; que += ` (es ${JSON.stringify(x)})`; }
   if (!ok) { fallas++; console.log(`  ✘ espera ${que}`); } else out(`  ✔ ${args.join(' ')}`);
 }
+// el planificador del juego (src/js/58-fichas-y-planificador.js), cargado sin navegador la primera vez que se usa: planifica
+// desde el estado del juego a esa hora, con cada uno donde está en el mundo mínimo (sus lugares, como el planificador los
+// llama: src/js/67-lenguaje.js, LG_PLAN), y muestra el plan; no lo ejecuta (eso es tools/mundo/planes.js)
+let JUEGO = null;
+const juego = () => JUEGO || (JUEGO = require('./sin_navegador.js').cargarJuego());
+function plan(quien, meta, args){
+  const J = juego(), arg = args.map(x => JSON.stringify(valor(x))).join(', ');
+  const pos = Object.fromEntries(Object.keys(D.personas).map(p => [p, M.get(['mundo', p, 'lugar'])]).filter(([, l]) => l));
+  const r = JSON.parse(J.ev(`(() => {
+    dayT = ${M.get(["tiempo", "dia"]) - 1} + (${M.get(["tiempo", "hora"])} - 6) / 24 + 1e-7;
+    if (!G[${JSON.stringify(meta)}]) return JSON.stringify({ error: 'el planificador no tiene la meta «${meta}» (metas)' });
+    const g = { ...G[${JSON.stringify(meta)}](${arg}), sale: true }, s0 = wmNow(), pos = ${JSON.stringify(pos)};
+    for (const [k, l] of Object.entries(pos)) if (s0.pos[k] !== undefined && LG_PLAN[l]) s0.pos[k] = LG_PLAN[l];   // (donde está en el mundo mínimo)
+    const P = wmPlan(${JSON.stringify(quien)}, g, [], s0);
+    if (!P.plan) return JSON.stringify({ meta: g.text, ok: false, n: P.n });
+    const s = clone(s0), pasos = []; for (const a of P.plan) { const h = s.t; a.eff(s); s.t += a.cost; pasos.push(fmtHour(h / 60) + '  ' + stepText(a) + ' (' + Math.round(a.cost) + ' min)'); }
+    return JSON.stringify({ meta: g.text, ok: P.ok && g.test(s), parcial: !!P.partial, pasos, fin: fmtHour(s.t / 60), n: P.n });
+  })()`));
+  if (r.error) return out('  ' + r.error);
+  out(`  ${r.meta}: ${r.ok ? 'llega a las ' + r.fin : r.pasos ? 'no llega (hace lo que puede)' : 'no encuentra cómo'} · ${r.n} estados mirados`);
+  for (const p of r.pasos || []) out('    ' + p);
+}
 function comando(linea){
   const [c, ...a] = linea.trim().split(/\s+/);
   if (!c || c.startsWith('#')) return;
@@ -102,6 +127,8 @@ function comando(linea){
     case 'quienes': return out('  ' + Object.keys(D.personas).join(', '));
     case 'registro': { const n = +a[0] || 20; for (const r of M.registro.slice(-n)) out(`  ${r.hora}  ${r.q ? nombre(r.q) + ': ' : ''}${r.t}`); return; }
     case 'espera': return espera(a);
+    case 'plan': return plan(a[0], a[1], a.slice(2));
+    case 'metas': return out('  ' + juego().ev('Object.keys(G).join(", ")'));
     default: out(`  no conozco «${c}» (ayuda)`);
   }
 }
