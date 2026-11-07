@@ -499,6 +499,8 @@
       // lo que la jugadora hace por su cuenta (cuando no hay escena ni pregunta)
       irA(l){ nota(`(la jugadora: Ana va hasta ${nombre(l)})`); nuevaTarea({ verbo: 'ir_a', args: ['ana', l] }, {}); return avanzar(); },
       bajarse(){ nota('(la jugadora: Ana se baja de la calesa)'); instantaneo({ verbo: 'bajar', args: ['ana'] }); return avanzar(); },
+      // cualquier verbo, de cualquiera (para probarlo: la consola del mundo mínimo, tools/mundo/consola.js)
+      hacer(verbo, args){ if (!D.verbos[verbo]) throw new Error('el lenguaje no tiene el verbo «' + verbo + '»'); nota(`(se pide: ${verbo}(${args.join(', ')}))`); nuevaTarea({ verbo, args }, {}); return avanzar(); },
       esperar(m){ t += m; return avanzar(); },
       // en el juego: lo que toca hasta la hora del juego (en minutos desde el comienzo del día 1), y no más
       alTiempo(m){ if (tope == null) t = m; tope = m; return avanzar(); },   // (la primera vez, la hora es la del juego)

@@ -122,6 +122,7 @@ function pintar(){
     A.append(s, boton('Ir', () => { u = M.irA(s.value); pintar(); }, true), boton('Esperar 10 minutos', () => { u = minimo() ? M.alTiempo(ahoraMin() + 10) : M.esperar(10); pintar(); }));
   }
   if (!u.fin && !u.pregunta && !(u.escena && u.escena.ops) && M.get(['mundo', 'ana', 'en']) !== 'nada') A.append(boton('Bajarse de la calesa', () => { u = M.bajarse(); pintar(); }));
+  if (!u.fin && !u.pregunta && !(u.escena && u.escena.ops)) A.append(verboUI());
   const S = M.resumen();
   $('encargos').innerHTML = M.encargos().map(e => `<div class="fila"><span>${esc(e.etiqueta)}</span><span class="est-${e.estado}">${esc(e.estado.replace('_', ' '))}</span></div>`).join('');
   $('lugares').innerHTML = Object.entries(S.lugares).filter(([, l]) => l).map(([p, l]) => `<div class="fila"><span>${esc(M.nombre(p))}</span><span>${esc(M.nombre(l))}${S.en[p] ? ' · en ' + esc(M.nombre(S.en[p])) : ''}</span></div>`).join('');
@@ -130,6 +131,20 @@ function pintar(){
     + S.hechos.filter(h => h.includes('.hechos.')).map(h => `<div class="fila"><span>${esc(h.split('.').pop())}</span><span>hecho</span></div>`).join('');
   mapa();
   if (!reloj) A.scrollIntoView({ block: 'nearest' });
+}
+// (cualquier verbo del lenguaje, de cualquiera: para probarlo —correr_a, seguir, subir, traer…—; los que piden una
+// condición no, que no se eligen de una lista)
+const OPCIONES = (v, p) => (p === 'quien' || p === 'otro' || (p === 'a' && D.verbos[v].tipo === 'acto') ? D.personas : p === 'm' ? D.medios : p === 'por' ? D.rutas : p === 'a' || p === 'lugar' ? D.lugares : null);
+const VERBOS = Object.keys(D.verbos).filter(v => (D.verbos[v].params || []).every(p => OPCIONES(v, p)));
+function verboUI(){
+  const f = document.createElement('div'); f.style.cssText = 'width:100%;display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:14px;color:var(--mut)';
+  const sv = document.createElement('select'); for (const v of VERBOS) { const o = document.createElement('option'); o.value = v; o.textContent = v; sv.append(o); }
+  sv.value = verboUI.ultimo || 'correr_a';
+  const args = document.createElement('span'); args.style.cssText = 'display:contents';
+  const armar = () => { args.innerHTML = ''; verboUI.ultimo = sv.value; for (const p of D.verbos[sv.value].params) { const s = document.createElement('select'); s.title = p; for (const k of Object.keys(OPCIONES(sv.value, p))) { const o = document.createElement('option'); o.value = k; o.textContent = M.nombre(k); s.append(o); } args.append(s); } };
+  sv.onchange = armar; armar();
+  f.append('O un verbo del lenguaje:', sv, args, boton('Hacer', () => { try { u = M.hacer(sv.value, [...args.children].map(s => s.value)); } catch (e) { alert(e.message); } pintar(); }));
+  return f;
 }
 function boton(t, f, prim){ const b = document.createElement('button'); b.textContent = t; b.onclick = f; if (prim) b.className = 'prim'; return b; }
 $('reiniciar').onclick = empezar; $('esc').onchange = empezar;

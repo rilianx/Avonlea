@@ -650,6 +650,8 @@ label.chk{font-size:13px;color:var(--mut);display:flex;gap:5px;align-items:cente
       // lo que la jugadora hace por su cuenta (cuando no hay escena ni pregunta)
       irA(l){ nota(`(la jugadora: Ana va hasta ${nombre(l)})`); nuevaTarea({ verbo: 'ir_a', args: ['ana', l] }, {}); return avanzar(); },
       bajarse(){ nota('(la jugadora: Ana se baja de la calesa)'); instantaneo({ verbo: 'bajar', args: ['ana'] }); return avanzar(); },
+      // cualquier verbo, de cualquiera (para probarlo: la consola del mundo mínimo, tools/mundo/consola.js)
+      hacer(verbo, args){ if (!D.verbos[verbo]) throw new Error('el lenguaje no tiene el verbo «' + verbo + '»'); nota(`(se pide: ${verbo}(${args.join(', ')}))`); nuevaTarea({ verbo, args }, {}); return avanzar(); },
       esperar(m){ t += m; return avanzar(); },
       // en el juego: lo que toca hasta la hora del juego (en minutos desde el comienzo del día 1), y no más
       alTiempo(m){ if (tope == null) t = m; tope = m; return avanzar(); },   // (la primera vez, la hora es la del juego)
@@ -866,6 +868,12 @@ else raiz.MundoMinimo = MundoMinimo;
   ],
   "orilla": [
    {
+    "mapa": [
+     2960,
+     1092
+    ]
+   },
+   {
     "camino": "costa",
     "s": 0.2,
     "adentro": 2
@@ -936,9 +944,9 @@ else raiz.MundoMinimo = MundoMinimo;
     "calesa": 82
    },
    "orilla": {
-    "pie": 159,
-    "ana": 102,
-    "calesa": 84
+    "pie": 27,
+    "ana": 17,
+    "calesa": 22
    },
    "hotel_white_sands": {
     "pie": 188,
@@ -1003,9 +1011,9 @@ else raiz.MundoMinimo = MundoMinimo;
     "calesa": 83
    },
    "orilla": {
-    "pie": 160,
-    "ana": 103,
-    "calesa": 85
+    "pie": 28,
+    "ana": 18,
+    "calesa": 23
    },
    "hotel_white_sands": {
     "pie": 189,
@@ -1070,9 +1078,9 @@ else raiz.MundoMinimo = MundoMinimo;
     "calesa": 83
    },
    "orilla": {
-    "pie": 160,
-    "ana": 102,
-    "calesa": 85
+    "pie": 28,
+    "ana": 18,
+    "calesa": 23
    },
    "hotel_white_sands": {
     "pie": 189,
@@ -1137,9 +1145,9 @@ else raiz.MundoMinimo = MundoMinimo;
     "calesa": 76
    },
    "orilla": {
-    "pie": 152,
-    "ana": 97,
-    "calesa": 78
+    "pie": 19,
+    "ana": 12,
+    "calesa": 16
    },
    "hotel_white_sands": {
     "pie": 180,
@@ -1204,9 +1212,9 @@ else raiz.MundoMinimo = MundoMinimo;
     "calesa": 72
    },
    "orilla": {
-    "pie": 146,
-    "ana": 93,
-    "calesa": 74
+    "pie": 14,
+    "ana": 9,
+    "calesa": 11
    },
    "hotel_white_sands": {
     "pie": 175,
@@ -1271,9 +1279,9 @@ else raiz.MundoMinimo = MundoMinimo;
     "calesa": 67
    },
    "orilla": {
-    "pie": 141,
-    "ana": 90,
-    "calesa": 69
+    "pie": 8,
+    "ana": 5,
+    "calesa": 7
    },
    "hotel_white_sands": {
     "pie": 169,
@@ -1338,9 +1346,9 @@ else raiz.MundoMinimo = MundoMinimo;
     "calesa": 81
    },
    "orilla": {
-    "pie": 157,
-    "ana": 100,
-    "calesa": 83
+    "pie": 25,
+    "ana": 16,
+    "calesa": 20
    },
    "hotel_white_sands": {
     "pie": 186,
@@ -1405,9 +1413,9 @@ else raiz.MundoMinimo = MundoMinimo;
     "calesa": 85
    },
    "orilla": {
-    "pie": 162,
-    "ana": 103,
-    "calesa": 87
+    "pie": 30,
+    "ana": 19,
+    "calesa": 24
    },
    "hotel_white_sands": {
     "pie": 191,
@@ -1472,9 +1480,9 @@ else raiz.MundoMinimo = MundoMinimo;
     "calesa": 105
    },
    "orilla": {
-    "pie": 241,
-    "ana": 154,
-    "calesa": 107
+    "pie": 109,
+    "ana": 69,
+    "calesa": 45
    },
    "hotel_white_sands": {
     "pie": 270,
@@ -1539,9 +1547,9 @@ else raiz.MundoMinimo = MundoMinimo;
     "calesa": 212
    },
    "orilla": {
-    "pie": 471,
-    "ana": 299,
-    "calesa": 214
+    "pie": 338,
+    "ana": 214,
+    "calesa": 152
    },
    "hotel_white_sands": {
     "pie": 499,
@@ -1607,8 +1615,8 @@ else raiz.MundoMinimo = MundoMinimo;
    },
    "orilla": {
     "pie": 67,
-    "ana": 43,
-    "calesa": 32
+    "ana": 42,
+    "calesa": 31
    },
    "hotel_white_sands": {
     "pie": 96,
@@ -1685,59 +1693,59 @@ else raiz.MundoMinimo = MundoMinimo;
   },
   "orilla": {
    "tejas_verdes": {
-    "pie": 159,
-    "ana": 102,
-    "calesa": 84
+    "pie": 27,
+    "ana": 17,
+    "calesa": 22
    },
    "cocina": {
-    "pie": 160,
-    "ana": 103,
-    "calesa": 85
+    "pie": 28,
+    "ana": 18,
+    "calesa": 23
    },
    "corral": {
-    "pie": 160,
-    "ana": 102,
-    "calesa": 85
+    "pie": 28,
+    "ana": 18,
+    "calesa": 23
    },
    "hondonada_lynde": {
-    "pie": 152,
-    "ana": 97,
-    "calesa": 78
+    "pie": 19,
+    "ana": 12,
+    "calesa": 16
    },
    "escuela": {
-    "pie": 146,
-    "ana": 93,
-    "calesa": 74
+    "pie": 14,
+    "ana": 9,
+    "calesa": 11
    },
    "aldea": {
-    "pie": 141,
-    "ana": 90,
-    "calesa": 69
+    "pie": 8,
+    "ana": 5,
+    "calesa": 7
    },
    "estanque_barry": {
-    "pie": 157,
-    "ana": 100,
-    "calesa": 83
+    "pie": 25,
+    "ana": 16,
+    "calesa": 20
    },
    "camino_blanco": {
-    "pie": 162,
-    "ana": 103,
-    "calesa": 87
+    "pie": 30,
+    "ana": 19,
+    "calesa": 24
    },
    "newbridge": {
-    "pie": 241,
-    "ana": 154,
-    "calesa": 107
+    "pie": 109,
+    "ana": 69,
+    "calesa": 45
    },
    "estacion_bright_river": {
-    "pie": 471,
-    "ana": 299,
-    "calesa": 214
+    "pie": 338,
+    "ana": 214,
+    "calesa": 152
    },
    "camino_costa": {
     "pie": 67,
-    "ana": 43,
-    "calesa": 32
+    "ana": 42,
+    "calesa": 31
    },
    "playa": {
     "pie": 2,
@@ -2231,6 +2239,7 @@ function pintar(){
     A.append(s, boton('Ir', () => { u = M.irA(s.value); pintar(); }, true), boton('Esperar 10 minutos', () => { u = minimo() ? M.alTiempo(ahoraMin() + 10) : M.esperar(10); pintar(); }));
   }
   if (!u.fin && !u.pregunta && !(u.escena && u.escena.ops) && M.get(['mundo', 'ana', 'en']) !== 'nada') A.append(boton('Bajarse de la calesa', () => { u = M.bajarse(); pintar(); }));
+  if (!u.fin && !u.pregunta && !(u.escena && u.escena.ops)) A.append(verboUI());
   const S = M.resumen();
   $('encargos').innerHTML = M.encargos().map(e => `<div class="fila"><span>${esc(e.etiqueta)}</span><span class="est-${e.estado}">${esc(e.estado.replace('_', ' '))}</span></div>`).join('');
   $('lugares').innerHTML = Object.entries(S.lugares).filter(([, l]) => l).map(([p, l]) => `<div class="fila"><span>${esc(M.nombre(p))}</span><span>${esc(M.nombre(l))}${S.en[p] ? ' · en ' + esc(M.nombre(S.en[p])) : ''}</span></div>`).join('');
@@ -2239,6 +2248,20 @@ function pintar(){
     + S.hechos.filter(h => h.includes('.hechos.')).map(h => `<div class="fila"><span>${esc(h.split('.').pop())}</span><span>hecho</span></div>`).join('');
   mapa();
   if (!reloj) A.scrollIntoView({ block: 'nearest' });
+}
+// (cualquier verbo del lenguaje, de cualquiera: para probarlo —correr_a, seguir, subir, traer…—; los que piden una
+// condición no, que no se eligen de una lista)
+const OPCIONES = (v, p) => (p === 'quien' || p === 'otro' || (p === 'a' && D.verbos[v].tipo === 'acto') ? D.personas : p === 'm' ? D.medios : p === 'por' ? D.rutas : p === 'a' || p === 'lugar' ? D.lugares : null);
+const VERBOS = Object.keys(D.verbos).filter(v => (D.verbos[v].params || []).every(p => OPCIONES(v, p)));
+function verboUI(){
+  const f = document.createElement('div'); f.style.cssText = 'width:100%;display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:14px;color:var(--mut)';
+  const sv = document.createElement('select'); for (const v of VERBOS) { const o = document.createElement('option'); o.value = v; o.textContent = v; sv.append(o); }
+  sv.value = verboUI.ultimo || 'correr_a';
+  const args = document.createElement('span'); args.style.cssText = 'display:contents';
+  const armar = () => { args.innerHTML = ''; verboUI.ultimo = sv.value; for (const p of D.verbos[sv.value].params) { const s = document.createElement('select'); s.title = p; for (const k of Object.keys(OPCIONES(sv.value, p))) { const o = document.createElement('option'); o.value = k; o.textContent = M.nombre(k); s.append(o); } args.append(s); } };
+  sv.onchange = armar; armar();
+  f.append('O un verbo del lenguaje:', sv, args, boton('Hacer', () => { try { u = M.hacer(sv.value, [...args.children].map(s => s.value)); } catch (e) { alert(e.message); } pintar(); }));
+  return f;
 }
 function boton(t, f, prim){ const b = document.createElement('button'); b.textContent = t; b.onclick = f; if (prim) b.className = 'prim'; return b; }
 $('reiniciar').onclick = empezar; $('esc').onchange = empezar;

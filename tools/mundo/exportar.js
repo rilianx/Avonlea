@@ -28,7 +28,7 @@ const MEDIR = `(() => {
     estacion_bright_river: [{ camino: 'br', s: 0, adentro: 1 }],
     camino_costa: [{ camino: 'costa', s: .6 }],
     playa: [{ camino: 'costa', s: WP_CAMINO.playa_ws[1] }],
-    orilla: [{ camino: 'costa', s: WP_CAMINO.playa_ws[1], adentro: 2 }],   // (bajar a la arena, por el camino de la costa)
+    orilla: [mapa(PLACES.playa[1], PLACES.playa[2]), { camino: 'costa', s: WP_CAMINO.playa_ws[1], adentro: 2 }],   // (la de Avonlea, junto al faro; y bajar a la arena por el camino de la costa)
     hotel_white_sands: [{ camino: 'costa', s: WP_CAMINO.hotel_ws[1] }],
   };
   for (const l of Object.keys(L)) if (!P[l]) throw new Error('el exportador no sabe dónde está «' + l + '» (agrégalo a MEDIR)');

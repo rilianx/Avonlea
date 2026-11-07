@@ -26,6 +26,13 @@ const AYUDA = `
   plan <quien> <meta> [args…]  lo que haría para una meta del planificador del juego, paso a paso y con hora, desde
                                donde está cada uno: plan marilla tener marilla azucar 1 · plan ana estar_en ana escuela
   metas                        las metas que conoce el planificador
+  verbo <verbo> <args…>        cualquier verbo del lenguaje, de cualquiera: verbo correr_a ana orilla · verbo seguir ana marilla
+  verbos                       los verbos del lenguaje, con lo que piden
+  acciones [quien]             lo que puede hacer ahora en el juego (las acciones del planificador: leer, estudiar, coser,
+                               partir leña…), numerado, con lo que dura
+  hacer [quien] <n | verbo>    hacer una de ellas: su efecto, su tiempo, y lo que cambió
+  tiene <quien> <cosa> <n>     ponerle algo en las manos (para probar: tiene ana libro 1)
+  cosas [quien]                lo que tiene, y lo que sabe
   espera <a.b.c>[=valor]       (en una prueba) que se cumpla, si no, falla: espera mundo.ana.lugar=hotel_white_sands
   espera dicha <escena>        que una escena se haya dicho
   espera hora <= hh:mm         que no sea más tarde que esa hora
@@ -106,11 +113,76 @@ function plan(quien, meta, args){
   out(`  ${r.meta}: ${r.ok ? 'llega a las ' + r.fin : r.pasos ? 'no llega (hace lo que puede)' : 'no encuentra cómo'} · ${r.n} estados mirados`);
   for (const p of r.pasos || []) out('    ' + p);
 }
+// las acciones del juego, sueltas: el estado del planificador (wmNow) a la hora de la partida, con cada uno donde está en
+// el mundo mínimo; lo que se puede hacer ahí (los verbos del planificador, de todas las metas: cada meta mira solo los
+// suyos), y hacer uno: su efecto en ese estado, sus minutos en el reloj, y quien se movió, se mueve en el mundo mínimo
+let ACC = null, ULTIMAS = {};
+function acciones(){
+  if (ACC) return ACC;
+  const J = juego();
+  J.ventana.__acc = J.ev(`(() => {
+    const TIPOS = [undefined, ...new Set([...verbs.toString().matchAll(/C\.kind === '([a-z_]+)'/g)].map(m => m[1]))];
+    let S = null;
+    const contexto = s => { const places = new Set([...Object.keys(WP).filter(p => !WP_CAMINO[p]), 'cocina', 'pieza', ...Object.keys(HOUSES).map(h => 'h:' + h), ...Object.values(s.pos).filter(Boolean)]);
+      const pts = {}; for (const p of places) { const q = keyPoint(p); if (q) pts[p] = q; }
+      return { places: [...places].filter(p => pts[p]), pts, people: WM_PEOPLE().filter(k => s.pos[k]), items: Object.keys(THINGS), favors: [], owner: Object.fromEntries(Object.keys(s.cows).map(c => [c, ANIM[c].owner || ANIMALS[c].owner])), sale: true }; };
+    // (todas las que se pueden ahora: las de cada tipo de meta, sin repetir)
+    const lista = me => { const C = contexto(S), vistas = new Map();
+      for (const kind of TIPOS) for (const a of verbs(S, me, { ...C, kind })) { const txt = stepText(a); if (!vistas.has(txt)) vistas.set(txt, a); }
+      return [...vistas.entries()].map(([txt, a]) => ({ txt, a })).sort((x, y) => (x.a.v === 'ir') - (y.a.v === 'ir')); };   // (ir a otro lugar, al final)
+    const foto = () => JSON.parse(JSON.stringify({ pos: S.pos, invs: S.invs, rel: S.rel, facts: S.facts, know: S.know, follow: S.follow, cows: S.cows, sick: S.sick }));
+    const cambios = (A, B) => { const L = [];
+      for (const k of Object.keys(B.pos)) if (A.pos[k] !== B.pos[k]) L.push(wmName(k) + ': ' + (WP_NAME[A.pos[k]] || A.pos[k]) + ' → ' + (WP_NAME[B.pos[k]] || B.pos[k]));
+      for (const k of Object.keys(B.invs)) for (const x of new Set([...Object.keys(A.invs[k] || {}), ...Object.keys(B.invs[k] || {})])) if ((A.invs[k]?.[x] || 0) !== (B.invs[k]?.[x] || 0)) L.push(wmName(k) + ' tiene ' + x + ': ' + (A.invs[k]?.[x] || 0) + ' → ' + (B.invs[k]?.[x] || 0));
+      for (const r of Object.keys(B.rel)) if (A.rel[r] !== B.rel[r]) { const [a, b] = r.split('>'); L.push('cómo quiere ' + wmName(a) + ' a ' + wmName(b) + ': ' + A.rel[r] + ' → ' + B.rel[r]); }
+      for (const f of Object.keys(B.facts)) if (!(f in A.facts)) L.push('pasó: ' + f);
+      for (const k of Object.keys(B.know)) for (const f of B.know[k] || []) if (!(A.know[k] || []).includes(f)) L.push(wmName(k) + ' sabe: ' + f);
+      for (const k of Object.keys(B.follow)) if (A.follow[k] !== B.follow[k]) L.push(wmName(k) + ' sigue a ' + wmName(B.follow[k]));
+      for (const c of Object.keys(B.cows)) if (A.cows[c] !== B.cows[c]) L.push(ANIMALS[c].name + ': ' + A.cows[c] + ' → ' + B.cows[c]);
+      return L; };
+    return {
+      empezar(dia, hora){ dayT = dia - 1 + (hora - 6) / 24 + 1e-7; S = wmNow(); },
+      // (donde está cada uno en el mundo mínimo, como lo llama el planificador; y la hora)
+      sincronizar(pos, min){ for (const [k, l] of Object.entries(pos)) if (S.pos[k] !== undefined && LG_PLAN[l] && S.pos[k] !== LG_PLAN[l]) S.pos[k] = LG_PLAN[l]; S.t = min % 1440; },
+      lista: me => JSON.stringify(lista(me).map(o => ({ txt: o.txt, v: o.a.v, min: Math.round(o.a.cost) }))),
+      hacer(me, i){ const L = lista(me), o = L[i]; if (!o) return JSON.stringify({ error: 'no hay acción ' + (i + 1) });
+        const A = foto(); o.a.eff(S); S.t += o.a.cost; const B = foto();
+        return JSON.stringify({ txt: o.txt, min: Math.round(o.a.cost), cambios: cambios(A, B), antes: A.pos, pos: S.pos }); },
+      tiene(k, x, n){ (S.invs[k] ||= {})[x] = n; },
+      cosas: k => JSON.stringify({ tiene: S.invs[k] || {}, sabe: S.know[k] || [], donde: WP_NAME[S.pos[k]] || S.pos[k] }),
+    };
+  })()`);
+  ACC = J.ventana.__acc; ACC.empezar(M.get(['tiempo', 'dia']), M.get(['tiempo', 'hora']));
+  return ACC;
+}
+const posMundo = () => Object.fromEntries(Object.keys(D.personas).map(p => [p, M.get(['mundo', p, 'lugar'])]).filter(([, l]) => l));
+// (del planificador al lenguaje: el primer lugar del lenguaje que el planificador llama así)
+const lugarDePlan = k => { const L = juego().ev('LG_PLAN'); return Object.keys(L).find(l => L[l] === k); };
+function listarAcciones(q){
+  const A = acciones(); A.sincronizar(posMundo(), ahoraMin());
+  const L = JSON.parse(A.lista(q)); ULTIMAS[q] = L;
+  const ir = L.filter(o => o.v === 'ir'), otras = L.map((o, i) => ({ ...o, i })).filter(o => o.v !== 'ir');
+  out(`  ${M.nombre(q)} puede, ahora:`);
+  for (const o of otras) out(`   ${String(o.i + 1).padStart(3)}. ${o.txt} (${o.min} min)`);
+  if (ir.length) out(`        y ir a otro lugar: hacer ${q} ir <lugar> (${ir.length} lugares)`);
+}
+function hacerAccion(q, que){
+  const A = acciones(); A.sincronizar(posMundo(), ahoraMin());
+  const L = JSON.parse(A.lista(q));
+  let i = /^\d+$/.test(que[0]) ? +que[0] - 1 : L.findIndex(o => o.v === que[0] && (!que[1] || o.txt.includes(que.slice(1).join(' '))));
+  if (que[0] === 'ir' && que[1] && i >= 0) { const w = juego().ev(`WP_NAME[LG_PLAN[${JSON.stringify(que[1])}]] || ''`); const j = L.findIndex(o => o.v === 'ir' && w && o.txt.includes(w)); if (j >= 0) i = j; }
+  if (i < 0 || !L[i]) return out(`  ${M.nombre(q)} no puede hacer «${que.join(' ')}» ahora (acciones ${q})`);
+  const r = JSON.parse(A.hacer(q, i));
+  out(`  ${M.nombre(q)}: ${r.txt} (${r.min} min)`);
+  for (const c of r.cambios) out('    · ' + c);
+  for (const [k, p] of Object.entries(r.pos)) if (D.personas[k] && p !== r.antes[k]) { const l = lugarDePlan(p); if (l) M.llega(k, l); }   // (quien se movió, en el mundo mínimo también)
+  mostrar(M.alTiempo(ahoraMin() + r.min));
+}
 function comando(linea){
   const [c, ...a] = linea.trim().split(/\s+/);
   if (!c || c.startsWith('#')) return;
   if (c === 'ayuda') return out(AYUDA);
-  if (c === 'nueva') return mostrar(nueva(a[0], a[1]));
+  if (c === 'nueva') { if (ACC) ACC.empezar(a[0] ? +a[0] : 2, a[1] ? +a[1].split(':')[0] + (+a[1].split(':')[1] || 0) / 60 : 14); return mostrar(nueva(a[0], a[1])); }
   if (!M) nueva();
   switch (c) {
     case 'poner': return M.llega(a[0], a[1], true);
@@ -129,10 +201,16 @@ function comando(linea){
     case 'espera': return espera(a);
     case 'plan': return plan(a[0], a[1], a.slice(2));
     case 'metas': return out('  ' + juego().ev('Object.keys(G).join(", ")'));
+    case 'verbo': return mostrar(M.hacer(a[0], a.slice(1)));
+    case 'verbos': for (const [v, d] of Object.entries(D.verbos)) out(`  ${v}(${(d.params || []).join(', ')})${d.tipo ? '  · ' + d.tipo : ''}`); return;
+    case 'acciones': return listarAcciones(a[0] || 'ana');
+    case 'hacer': return D.personas[a[0]] ? hacerAccion(a[0], a.slice(1)) : hacerAccion('ana', a);
+    case 'tiene': acciones().tiene(a[0], a[1], +a[2]); return out(`  ${M.nombre(a[0])} tiene ${a[1]}: ${a[2]}`);
+    case 'cosas': { const r = JSON.parse(acciones().cosas(a[0] || 'ana')); return out(`  ${M.nombre(a[0] || 'ana')}, en ${r.donde}: tiene ${Object.entries(r.tiene).filter(([, n]) => n).map(([x, n]) => n + ' ' + x).join(', ') || 'nada'}; sabe ${r.sabe.join(', ') || 'nada'}`); }
     default: out(`  no conozco «${c}» (ayuda)`);
   }
 }
-const correr = texto => { for (const l of texto.split(/\n|;/)) { if (!silencio && l.trim() && !l.trim().startsWith('#')) out('> ' + l.trim()); try { comando(l); } catch (e) { fallas++; console.log('  ✘ ' + e.message); } } };
+const correr = texto => { for (const l of texto.split('\n').filter(x => !x.trim().startsWith('#')).flatMap(x => x.split(';'))) { if (!silencio && l.trim() && !l.trim().startsWith('#')) out('> ' + l.trim()); try { comando(l); } catch (e) { fallas++; console.log('  ✘ ' + e.message); } } };
 
 const args = process.argv.slice(2);
 if (args[0] === '-e') { correr(args.slice(1).join(' ')); process.exit(fallas ? 1 : 0); }

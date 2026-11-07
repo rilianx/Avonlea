@@ -22,7 +22,9 @@ Tiene la misma interfaz que el mundo simulado (`tools/lenguaje/mundo_simulado.js
 La página `trazas/lenguaje.html` (`node tools/lenguaje/pagina.js`) juega las historias en el mundo mínimo, con «el mapa
 real»: arriba se ve Avonlea desde arriba (la costa, los caminos), los caminos largos saliendo de sus letreros tan largos
 como sus minutos, cada lugar del lenguaje y cada persona donde está a esa hora. Quien va de camino avanza por el camino.
-▶ Reproducir avanza el reloj y se para cuando le piden algo a Ana. El mundo simulado sigue ahí, como opción.
+▶ Reproducir avanza el reloj y se para cuando le piden algo a Ana. Abajo, además de ir a un lugar, se puede pedir
+cualquier verbo del lenguaje a cualquiera (`correr_a`, `seguir`, `subir`, `traer`…). El mundo simulado sigue ahí, como
+opción.
 
 ## Qué hay
 
@@ -66,7 +68,43 @@ espera <a.b.c>[=valor]       en una prueba: que se cumpla (espera mundo.ana.luga
 espera dicha <escena> · espera hora <= hh:mm
 plan <quien> <meta> [args…]  lo que haría el planificador del juego, paso a paso y con hora
 metas                        las metas que conoce el planificador
+verbo <verbo> <args…>        cualquier verbo del lenguaje, de cualquiera (verbo correr_a ana orilla)
+verbos                       los verbos del lenguaje
+acciones [quien]             lo que puede hacer ahora en el juego: leer, estudiar, coser, partir leña…
+hacer [quien] <n | verbo>    hacer una de ellas; muestra lo que cambió
+tiene <quien> <cosa> <n>     ponerle algo en las manos, para probar
+cosas [quien]                lo que tiene y lo que sabe
 ```
+
+## Las acciones
+
+Hay dos clases de acciones:
+
+- **Los verbos del lenguaje** (`docs/lenguaje/comun/verbos.ts`): subir, bajar, seguir, `correr_a`, traer… Con `verbo`
+  (o en la página) se le pide uno a cualquiera, y el motor lo hace en el mundo mínimo.
+- **Las acciones del juego**: leer, estudiar, coser, partir leña, cocinar, regalar… Son las del planificador
+  (`verbs`, en `src/js/58-fichas-y-planificador.js`): cada una dice cuándo se puede hacer (dónde, con qué), cuánto dura
+  y qué cambia. `acciones` las lista para alguien, en ese momento, y `hacer` hace una. Por ejemplo, con un libro en las
+  manos aparece «leer un libro (20 min)».
+
+```
+> tiene ana libro 1
+> acciones ana
+  Ana puede, ahora:
+     5. estudiar la lección (20 min)
+     8. leer un libro (20 min)
+     …
+> hacer ana estudiar
+  Ana: estudiar la lección (20 min)
+    · Ana sabe: leccion
+> hacer ana ir escuela
+    · Ana: la cocina de Tejas Verdes → la escuela
+```
+
+El estado de estas acciones es el del planificador: lo que tiene cada uno, cómo se quieren, qué sabe, qué pasó. Quien
+se mueve con una acción se mueve también en el mundo mínimo, y el reloj avanza lo que dura (las historias siguen
+mientras tanto). Las acciones del juego todavía no están en la página: necesitan el código del juego, y la página no lo
+carga.
 
 Con `plan`, el planificador del juego planifica desde donde está cada uno en el mundo mínimo (sus lugares, como los
 llama el planificador: `LG_PLAN`, en `src/js/67-lenguaje.js`). Muestra el plan, pero no lo ejecuta:
