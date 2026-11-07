@@ -102,7 +102,7 @@ La IA solo puede hacer lo que el juego permite. Cada encargo, regalo y paso del 
 
 ## También en este repositorio
 
-- [**Hablemos coreano**](idiomas/): una app para aprender idiomas (empezando por el coreano) conversando con IA, con audio, palabras que se tocan para ver su significado, niveles y un diccionario propio. En línea: https://rilianx.github.io/Avonlea/idiomas/
+- [**Hablemos coreano**](https://github.com/rilianx/idiomas): una app para aprender idiomas (empezando por el coreano) conversando con IA, con audio, palabras que se tocan para ver su significado, niveles y un diccionario propio. Ahora tiene su propio repositorio; en línea: https://rilianx.github.io/idiomas/
 
 ## Créditos
 
