@@ -100,6 +100,10 @@ La IA solo puede hacer lo que el juego permite. Cada encargo, regalo y paso del 
 - Más lugares y personajes: Gilbert Blythe, la señorita Stacy, la iglesia.
 - Un servidor intermediario para jugar con IA sin que cada uno ponga su clave.
 
+## También en este repositorio
+
+- [**Hablemos coreano**](https://github.com/rilianx/idiomas): una app para aprender idiomas (empezando por el coreano) conversando con IA, con audio, palabras que se tocan para ver su significado, niveles y un diccionario propio. Ahora tiene su propio repositorio; en línea: https://rilianx.github.io/idiomas/
+
 ## Créditos
 
 Inspirado en *Ana de las Tejas Verdes* de L. M. Montgomery (1908), de dominio público. Los dibujos y el código son propios del juego.
