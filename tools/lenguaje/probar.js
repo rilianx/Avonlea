@@ -5,10 +5,12 @@
 // y revisar que cada uno termine como debe. Cada escenario se corre dos veces: de corrido, y guardando la partida y
 // cargándola en un motor nuevo cada pocas vueltas; tiene que pasar exactamente lo mismo. Con --ver <escenario>,
 // imprime lo que pasa, línea a línea.
-// Uso: node tools/lenguaje/probar.js [--ver sola]
+// Con --mundo minimo, en el mundo mínimo (tools/mundo/mundo_minimo.js): las distancias reales del mapa del juego.
+// Uso: node tools/lenguaje/probar.js [--ver sola] [--mundo minimo]
 const path = require('path'), { datos } = require('./construir.js'), { Motor } = require('./motor.js');
 const SALTO = 3;   // (al probar guardar: cada cuántas vueltas del motor se guarda la partida y se vuelve a cargar)
 const D = datos(path.resolve(__dirname, '..', '..', 'docs', 'lenguaje'));
+const MUNDO = process.argv.includes('--mundo') && process.argv[process.argv.indexOf('--mundo') + 1] === 'minimo' ? require('../mundo/mundo_minimo.js').MundoMinimo : null;
 
 // (la llegada: el primer día, en la estación de Bright River, con la calesa enganchada; a Matthew, Ana lo quiere desde
 // el primer momento)
@@ -45,10 +47,10 @@ function correr(nombre, esc0, guardar = false){
   // (con «al» —algo que la jugadora hace a una hora—, el motor se detiene en cada vuelta, para hacerlo justo a esa hora)
   const esc = { ...JSON.parse(JSON.stringify(esc0)), ...(guardar ? { paso: SALTO } : {}), ...(esc0.al ? { paso: 1 } : {}) };
   let al = esc0.al;
-  let M = Motor(D, esc);
+  let M = Motor(D, esc, MUNDO);
   let u = M.avanzar();
   for (let i = 0; i < 20000 && !u.fin; i++) {
-    if (guardar) M = Motor.cargar(D, M.guardar());
+    if (guardar) M = Motor.cargar(D, M.guardar(), MUNDO);
     if (al && u.reloj.split(', ')[1] >= al.hora && !u.pregunta && !(u.escena && u.escena.ops)) { const [f, ...a] = al.hace; al = null; u = M[f](...a); }
     else if (u.pausa) u = M.avanzar();
     else if (u.pregunta) u = M.responder(true);       // (si el guion de respuestas se acabó: sí)

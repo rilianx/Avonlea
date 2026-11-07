@@ -1,0 +1,34 @@
+# White Sands, como lo juega una persona: va con Marilla y sube; con la Sra. Pye corre al mar; en la orilla pregunta
+# si la va a devolver; vuelve a la calesa, y siguen hasta la Sra. Spencer y de vuelta a casa
+nueva 2 14:00
+avanzar 1h
+espera mundo.marilla.lugar=cocina
+si
+# (sube)
+si
+espera mundo.ana.en=calesa
+avanzar 3h
+# (la Sra. Pye: bajar y correr al mar)
+espera dicha ws_pye
+elegir 1
+espera mundo.ana.lugar=orilla
+avanzar 1h
+# (la orilla: «¿Usted también cree…?»)
+espera dicha ws_orilla
+elegir 1
+avanzar 1h
+# (que vuelva con Marilla, y que suba)
+si
+avanzar 1h
+si
+avanzar 3h
+espera dicha ws_spencer
+elegir 1
+avanzar 3h
+si
+avanzar 3h
+elegir 1
+avanzar 4h
+espera historia.white_sands=terminada
+espera mundo.ana.lugar=tejas_verdes
+espera dicha ws_noche

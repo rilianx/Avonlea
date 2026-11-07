@@ -414,6 +414,8 @@ node tools/lenguaje/construir.js docs/lenguaje src/datos/lenguaje.json   # todo,
 node tools/lenguaje/probar.js                 # cada historia de punta a punta, en varios escenarios
 node tools/lenguaje/probar.js --ver sola      # lo que pasa, línea a línea
 node tools/lenguaje/pagina.js                 # trazas/lenguaje.html: jugarla en el navegador
+node tools/lenguaje/probar.js --mundo minimo  # lo mismo, con las distancias reales del mapa (el mundo mínimo)
+node tools/mundo/consola.js                   # jugar en la consola, en el mundo mínimo (y sus pruebas: tools/mundo/pruebas/)
 ```
 
 **El motor** (`tools/lenguaje/motor.js`) ejecuta los datos: el estado y los momentos, los encargos con sus pasos y su
@@ -437,6 +439,12 @@ Para probar sin el juego está **el mundo simulado** (`tools/lenguaje/mundo_simu
 - **el tiempo de las escenas:** un minuto de juego por línea, y lo que diga `<<silencio>>`;
 - **las búsquedas:** el plan es de un paso (el verbo más barato de su `con` que logra el objetivo; lo que ya falló
   cuesta más), y no el A\* completo del juego.
+
+Entre el mundo simulado y el juego está **el mundo mínimo** (`tools/mundo/`, ver su [LEEME](../tools/mundo/LEEME.md)):
+la misma interfaz, pero con los minutos reales del mapa del juego entre los lugares —a pie, Ana, en calesa, con las
+millas de los caminos largos—, exportados del juego una vez (`tools/mundo/exportar.js`). No dibuja nada y el reloj salta
+de evento en evento: el viaje a White Sands entero se juega en unos 40 ms. Con su consola se mueve a la gente, se
+avanza el reloj y se contesta por Ana; lo mismo escrito en un archivo es una prueba.
 
 **Todo lo que recuerda el motor son datos.** Un verbo en curso no es código suspendido: es una pila de marcos (el verbo
 de abajo, el paso que está haciendo, el paso de ese paso), cada uno con su llamada y en qué va (fase, paso, intento,
