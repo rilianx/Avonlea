@@ -84,8 +84,9 @@ let M, u, visto = 0;
 const minimo = () => $('mundo').value === 'minimo', MUNDO = () => (minimo() ? MundoMinimo : null);
 const ahoraMin = () => (M.get(['tiempo', 'dia']) - 1) * 1440 + Math.round(M.get(['tiempo', 'hora']) * 60);
 // (en el mapa real, el motor no se adelanta al reloj: alTiempo, como en el juego)
-function arrancar(){ if (minimo()) { MundoMinimo.viajes = {}; u = M.alTiempo(ahoraMin()); } else u = M.avanzar(); }
-function empezar(){ pausar(); $('relato').innerHTML = ''; visto = 0; M = Motor(D, { ...ESCENARIOS[$('esc').value] }, MUNDO()); arrancar(); pintar(); }
+function arrancar(){ if (minimo()) u = M.alTiempo(ahoraMin()); else u = M.avanzar(); }
+const mundoNuevo = () => { MundoMinimo.mundo = null; MundoMinimo.viajes = {}; };   // (cada partida, en un mundo nuevo)
+function empezar(){ pausar(); $('relato').innerHTML = ''; visto = 0; mundoNuevo(); M = Motor(D, { ...ESCENARIOS[$('esc').value] }, MUNDO()); arrancar(); pintar(); }
 const esperando = () => u.fin || u.pregunta || (u.escena && u.escena.ops);
 let reloj = null;
 function pausar(){ clearInterval(reloj); reloj = null; $('play').textContent = '▶ Reproducir'; }
@@ -155,7 +156,7 @@ $('guardar').onclick = () => { try { localStorage.setItem(CLAVE, JSON.stringify(
 $('cargar').onclick = () => {
   let g = null; try { g = JSON.parse(localStorage.getItem(CLAVE)); } catch (e) {}
   if (!g) { alert('No hay una partida guardada.'); return; }
-  pausar(); $('esc').value = g.esc; $('mundo').value = g.mundo || 'simulado'; $('relato').innerHTML = ''; visto = 0; M = Motor.cargar(D, g.partida, MUNDO()); arrancar(); pintar();
+  pausar(); $('esc').value = g.esc; $('mundo').value = g.mundo || 'simulado'; $('relato').innerHTML = ''; visto = 0; mundoNuevo(); M = Motor.cargar(D, g.partida, MUNDO()); arrancar(); pintar();
 };
 $('sola').onclick = () => { pausar();
   if (minimo()) { const hasta = ahoraMin() + 2880; for (let i = 0; i < 3000 && !u.fin && ahoraMin() < hasta; i++) u = esperando() ? M.decideSola() : M.alTiempo(ahoraMin() + 5); }   // (con el reloj: de a 5 minutos, hasta dos días)
@@ -196,25 +197,28 @@ function mapa(){
       for (const t of C.tramos) { const [x, y] = enCamino(c, t.s); h += `<circle cx="${x}" cy="${y}" r="26" fill="var(--largo)"/>`; }
       const [ex, ey] = enCamino(c, 0); h += `<text x="${ex}" y="${ey - 120}" font-size="170" text-anchor="middle" fill="var(--lugar)" font-style="italic">${esc(C.nombre)} · ${C.minutos} min</text>`;
     }
+    // (los lugares del mundo: los de las historias, con su nombre; los demás —el granero, la tienda…—, un punto, con su nombre al pasar)
     const nombres = {};   // (los lugares en un mismo punto —la playa y su orilla—: un solo círculo, con los dos nombres)
-    for (const [l, P] of Object.entries(GEO.puntos)) for (const p of P) { const k = xy(p).map(Math.round).join(','); (nombres[k] ||= []).push(M.nombre(l).replace(/,.*$/, '').replace(/ \(.*\)$/, '')); }
-    for (const [k, N] of Object.entries(nombres)) { const [x, y] = k.split(',').map(Number); h += `<circle cx="${x}" cy="${y}" r="60" fill="none" stroke="var(--lugar)" stroke-width="16"/><text x="${x + 90}" y="${y + 50}" font-size="150" fill="var(--lugar)">${esc(N.join(' · '))}</text>`; }
+    for (const [l, P] of Object.entries(GEO.puntos)) for (const p of P) { const k = xy(p).map(Math.round).join(','), info = GEO.lugares[l], deHistoria = !!D.lugares[info.vista] && (info.vista === l || GEO.alias[info.vista] === l); (nombres[k] ||= { N: [], h: false, todos: [] }); nombres[k].todos.push(info.nombre); if (deHistoria) { nombres[k].N.push(info.nombre.replace(/,.*$/, '').replace(/ \(.*\)$/, '')); nombres[k].h = true; } }
+    for (const [k, o] of Object.entries(nombres)) { const [x, y] = k.split(',').map(Number);
+      h += o.h ? `<circle cx="${x}" cy="${y}" r="60" fill="none" stroke="var(--lugar)" stroke-width="16"><title>${esc(o.todos.join(' · '))}</title></circle><text x="${x + 90}" y="${y + 50}" font-size="150" fill="var(--lugar)">${esc(o.N.join(' · '))}</text>`
+        : `<circle cx="${x}" cy="${y}" r="34" fill="var(--lugar)" opacity=".5"><title>${esc(o.todos.join(' · '))}</title></circle>`; }
     fondo = h;
   }
-  // (cada uno: si va de camino —él, o el medio en que va, o a quien sigue—, en su punto del camino; si no, en su lugar)
-  const t = ahoraMin(), viajes = MundoMinimo.viajes, quienes = [...Object.keys(D.personas), ...Object.keys(D.medios)];
-  const viajeDe = q => { const v = viajes[q]; if (v && v.fin > t && v.sale <= t) return v; const en = M.get(['mundo', q, 'en']), sig = M.get(['mundo', q, 'sigue']);
-    for (const [o, w] of Object.entries(viajes)) if (w.fin > t && w.sale <= t && ((en && en !== 'nada' && (M.get(['mundo', o, 'en']) === en || o === en)) || o === sig || (D.medios[q] && M.get(['mundo', o, 'en']) === q))) return w; return null; };
+  // (cada uno, como está en el mundo: si va de camino, en su punto del camino; si no, en su lugar)
+  const W = MundoMinimo.mundo; if (!W) { svg.innerHTML = fondo; return; }
+  W.avanzarHasta(ahoraMin());
+  const t = ahoraMin(), todos = { ...W.E.personas, ...W.E.medios };
   const cuantos = {}; let h = fondo, moviendo = 0;
-  for (const q of quienes) {
-    const v = viajeDe(q), l = M.get(['mundo', q, 'lugar']); if (!l && !v) continue;
+  for (const [q, x] of Object.entries(todos)) {
+    const v = x.viaje, l = x.lugar; if (!l && !v) continue;
     let P;
-    if (v) { const R = rutaEntre(v.de, v.a); P = R && enRuta(R, (t - v.sale) / Math.max(1, v.fin - v.sale)); moviendo++; }
+    if (v && v.llega > t) { const R = rutaEntre(v.de, v.a); P = R && enRuta(R, (t - v.sale) / Math.max(1, v.llega - v.sale)); moviendo++; }
     if (!P) { const p = (GEO.puntos[l] || [])[0]; if (!p) continue; P = xy(p); }
     const k = Math.round(P[0] / 250) + ',' + Math.round(P[1] / 250), n = cuantos[k] = (cuantos[k] || 0) + 1, dx = (n - 1) * 150;
     const medio = !!D.medios[q], c = COLOR[q] || '#7a5a8a', ini = M.nombre(q).replace(/^la |^el /i, '').replace(/^Sra\. (Peter )?/, '')[0];
     h += medio ? `<rect x="${P[0] + dx - 70}" y="${P[1] - 210}" width="140" height="90" rx="20" fill="${c}"><title>${esc(M.nombre(q))}</title></rect>`
-      : `<g><circle cx="${P[0] + dx}" cy="${P[1] - 40}" r="85" fill="${c}" stroke="var(--panel)" stroke-width="18"/><text x="${P[0] + dx}" y="${P[1]}" font-size="120" text-anchor="middle" fill="#fff" font-weight="bold">${esc(ini)}</text><title>${esc(M.nombre(q))}${v ? ' → ' + esc(M.nombre(v.a)) : ''}</title></g>`;
+      : `<g><circle cx="${P[0] + dx}" cy="${P[1] - 40}" r="85" fill="${c}" stroke="var(--panel)" stroke-width="18"/><text x="${P[0] + dx}" y="${P[1]}" font-size="120" text-anchor="middle" fill="#fff" font-weight="bold">${esc(ini)}</text><title>${esc(M.nombre(q))}${v ? ' → ' + esc(GEO.lugares[v.a]?.nombre || v.a) : ''}</title></g>`;
   }
   svg.innerHTML = h;
   $('mapinfo').textContent = moviendo ? `${moviendo} en camino` : '';

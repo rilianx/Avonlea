@@ -47,6 +47,7 @@ function correr(nombre, esc0, guardar = false){
   // (con «al» —algo que la jugadora hace a una hora—, el motor se detiene en cada vuelta, para hacerlo justo a esa hora)
   const esc = { ...JSON.parse(JSON.stringify(esc0)), ...(guardar ? { paso: SALTO } : {}), ...(esc0.al ? { paso: 1 } : {}) };
   let al = esc0.al;
+  if (MUNDO) { MUNDO.mundo = null; MUNDO.viajes = {}; }   // (un mundo nuevo para cada escenario)
   let M = Motor(D, esc, MUNDO);
   let u = M.avanzar();
   for (let i = 0; i < 20000 && !u.fin; i++) {

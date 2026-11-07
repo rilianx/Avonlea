@@ -440,13 +440,13 @@ Para probar sin el juego está **el mundo simulado** (`tools/lenguaje/mundo_simu
 - **las búsquedas:** el plan es de un paso (el verbo más barato de su `con` que logra el objetivo; lo que ya falló
   cuesta más), y no el A\* completo del juego.
 
-Entre el mundo simulado y el juego está **el mundo mínimo** (`tools/mundo/`, ver su [LEEME](../tools/mundo/LEEME.md)):
-la misma interfaz, pero con los minutos reales del mapa del juego entre los lugares —a pie, Ana, en calesa, con las
-millas de los caminos largos—, exportados del juego una vez (`tools/mundo/exportar.js`). No dibuja nada y el reloj salta
-de evento en evento: el viaje a White Sands entero se juega en unos 40 ms. Con su consola se mueve a la gente, se
-avanza el reloj y se contesta por Ana; lo mismo escrito en un archivo es una prueba. También consulta el planificador del juego
-(cargado en node, sin navegador: `tools/mundo/sin_navegador.js`), y `tools/mundo/planes.js` prueba sus metas en unos
-3 segundos.
+Entre el mundo simulado y el juego está **el mundo** (`tools/mundo/`, ver su [LEEME](../tools/mundo/LEEME.md)): el
+juego sin dibujarlo. Un solo estado (dónde está cada uno, qué tiene, qué sabe, cuánto se quieren, qué pasó), sobre los
+lugares y los minutos reales del mapa del juego (exportados una vez: `tools/mundo/exportar.js`). Lo usan las historias
+—el motor juega sobre él con esta misma interfaz: `tools/mundo/mundo_minimo.js`— y las reglas del juego —las acciones
+del planificador: leer, coser, partir leña…—. El reloj salta de evento en evento: el viaje a White Sands entero se juega
+en unos 40 ms. Con su consola se mueve a la gente, con o sin historias (marionetas), y lo mismo escrito en un archivo es
+una prueba.
 
 **Todo lo que recuerda el motor son datos.** Un verbo en curso no es código suspendido: es una pila de marcos (el verbo
 de abajo, el paso que está haciendo, el paso de ese paso), cada uno con su llamada y en qué va (fase, paso, intento,

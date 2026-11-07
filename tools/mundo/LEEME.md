@@ -1,165 +1,173 @@
-# El mundo mínimo
+# El mundo
 
-El mundo del juego sin dibujarlo, para probar historias, acciones y viajes en milisegundos, sin abrir el navegador.
+El mundo del juego sin dibujarlo: para probar lo que hacen los personajes (ir, leer, coser, correr, seguir a alguien),
+con o sin historias, en milisegundos y sin abrir el navegador. Es un teatro de marionetas: se toma a un personaje, se
+ve todo lo que puede hacer ahí, lo hace, y se ve qué cambió.
 
-El juego hace dos cosas: decide qué pasa (quién va adónde, cuánto tarda, quién ve a quién) y lo dibuja. El mundo mínimo
-hace solo lo primero:
+El juego hace dos cosas: decide qué pasa y lo dibuja. El mundo hace solo lo primero.
 
-- **Lugares, no píxeles.** Cada persona está en un lugar del lenguaje (`docs/lenguaje/comun/mundo.ts`), o va de uno a
-  otro y llega a una hora.
-- **Los minutos son los del mapa real.** `exportar.js` abre el juego una vez y mide, entre cada par de lugares, cuánto
-  se tarda a pie, Ana (que va más rápido) y en calesa. Usa la red de caminos de Avonlea y las millas de los caminos
-  largos (Bright River, la costa). El resultado queda en `geografia.json`.
-- **El reloj salta de evento en evento.** El motor del lenguaje pregunta cuándo termina cada cosa y salta hasta ahí. Un
-  día entero se juega en milisegundos.
-- **La gente del pueblo** (la Sra. Pye, la Sra. Spencer…) no camina: aparece donde la pone una historia, como en el
-  juego.
+## Cómo está hecho
 
-Tiene la misma interfaz que el mundo simulado (`tools/lenguaje/mundo_simulado.js`), que la documenta.
+```
+  QUIÉN DECIDE   las historias (motor del lenguaje) · el planificador del juego · tú (consola, página)
+                       │                              │
+                 mundo_minimo.js               reglas_juego.js          ← cada uno, por su puerta
+                       └───────────────┬──────────────┘
+  EL MUNDO                         mundo.js                             ← un solo estado
+                                       │
+  GEOGRAFÍA                     geografia.json                          ← medida sobre el mapa real
+```
 
-## Verlo
+**La geografía** (`geografia.json`, la escribe `exportar.js` abriendo el juego una vez) tiene:
 
-La página `trazas/lenguaje.html` (`node tools/lenguaje/pagina.js`) juega las historias en el mundo mínimo, con «el mapa
-real»: arriba se ve Avonlea desde arriba (la costa, los caminos), los caminos largos saliendo de sus letreros tan largos
-como sus minutos, cada lugar del lenguaje y cada persona donde está a esa hora. Quien va de camino avanza por el camino.
-▶ Reproducir avanza el reloj y se para cuando le piden algo a Ana. Abajo, además de ir a un lugar, se puede pedir
-cualquier verbo del lenguaje a cualquiera (`correr_a`, `seguir`, `subir`, `traer`…). El mundo simulado sigue ahí, como
-opción.
+- **Una sola lista de lugares** (37). Junta los del planificador del juego (el granero, la tienda, el gallinero, «h:rl»,
+  que es la casa de la Sra. Lynde por dentro…) con los que solo tienen las historias (Tejas Verdes —el patio—, la
+  Avenida, la orilla, el camino de la costa…).
+- Para cada lugar: su nombre, cómo lo llaman las historias (`vista`: el granero queda en «Tejas Verdes» o en
+  «Avonlea», según el juego) y cómo lo llama el planificador (`plan`).
+- Los **minutos entre cada par de lugares**, a pie, Ana (que va más rápido) y en calesa, medidos sobre la red de caminos
+  de Avonlea y las millas de los caminos largos.
+- Los caminos largos con sus tramos, quiénes son gente del pueblo, y lo necesario para dibujarlo.
 
-## Qué hay
+**El mundo** (`mundo.js`) es un solo estado, que se guarda y se carga entero:
 
-| Archivo | Qué hace |
+| | |
 |---|---|
-| `exportar.js` | Abre el juego (`index.html`) y escribe `geografia.json`. Se corre de nuevo si cambia el mapa o un camino. |
-| `geografia.json` | Los lugares, los minutos entre ellos, los caminos largos con sus tramos, y la gente del pueblo. |
-| `huella.js` | La huella de las fuentes de la geografía. Si el mapa cambió y no se exportó, el mundo mínimo avisa. |
-| `mundo_minimo.js` | El mundo, para el motor del lenguaje. |
-| `consola.js` | Jugar a mano, o correr pruebas escritas con los mismos comandos. |
-| `pruebas/*.txt` | Las pruebas. |
-| `sin_navegador.js` | Carga el código del juego en node, con una pantalla de mentira (todo lo que es dibujo responde y no hace nada), en unos 400 ms. Sirve para usar la lógica del juego —el planificador, el guion— sin abrir un navegador. |
-| `planes.js` | Las metas de prueba del planificador (`src/js/64-metas-de-prueba.js`), en el estado lógico: prepara cada una como siempre, planifica, ejecuta el plan acción por acción (su efecto y lo que dura) y mira si llega y a qué hora. |
-| `planes.esperado.json` | Lo que dio cada meta. `planes.js` avisa lo que cambie. |
+| personas | dónde está cada una (un lugar de la lista), en qué va, a quién sigue, qué tiene, qué sabe; si va de camino (de dónde, adónde, a qué hora llega); si está ocupada en algo (qué, hasta qué hora) |
+| medios | la calesa: dónde está y si está enganchada |
+| cariño | cuánto quiere cada uno a cada otro (`ana>marilla`, de −2 a 5, como en el juego) |
+| hechos, ofensas | lo que pasó |
+| vacas, existencias, enfermos | dónde está cada vaca, lo que hay para recoger, quién está en cama |
+| estados, cualidades | lo de las historias: `ana_en_tv`, la paciencia de Marilla |
+| reloj | minutos desde el comienzo del día 1; salta de evento en evento (alguien llega, alguien termina lo que hacía) |
+
+Con sus operaciones: ir (un viaje: llega cuando le toca, con los que van en su calesa o lo siguen), subir, bajar,
+seguir, ocuparse en algo, avanzar el reloj.
+
+**Quienes lo usan**, cada uno por su puerta, leen y cambian el mismo estado:
+
+- **Las reglas del juego** (`reglas_juego.js`): qué puede hacer cada uno y qué cambia. Son las acciones del
+  planificador del juego (leer, estudiar, coser, partir leña, cocinar, regalar, ordeñar…: cada una dice dónde y con qué
+  se puede hacer, cuánto dura y qué cambia), con el juego cargado sin navegador (`sin_navegador.js`). El mundo le
+  muestra al planificador su estado como el planificador lo llama (sus claves de lugar; las cosas, los saberes y el
+  cariño son los mismos), y lo que cambia vuelve al mundo. Quien va a otro lugar, viaja en el mundo, con sus minutos.
+  Lo que el juego sabe y el mundo todavía no (quién más hay en Avonlea a esa hora, qué tiene cada uno, cuánto se
+  quieren), el mundo lo toma del juego la primera vez.
+- **Las historias** (`mundo_minimo.js`): el motor del lenguaje juega sobre el mundo como en el juego juega sobre el
+  juego. Lo que el motor hace (ir, subir, seguir, un hecho, la paciencia) lo hace el mundo; el motor lleva una copia de
+  lo que lee (dónde está cada uno, en qué va), y el mundo se la cuenta cuando cambia. Los lugares de las historias son
+  lugares del mundo (el lago es el «estanque de los Barry»). La gente del pueblo aparece donde la pone una historia.
+- **Tú**: la consola, o la página.
 
 ## Uso
 
 ```
-node tools/mundo/exportar.js                      # medir el mapa (cuando cambia)
-node tools/mundo/consola.js                       # jugar a mano («ayuda» dice los comandos)
+node tools/mundo/consola.js                       # a mano («ayuda» dice los comandos)
 node tools/mundo/consola.js tools/mundo/pruebas/*.txt          # las pruebas
-node tools/mundo/consola.js --ver tools/mundo/pruebas/white_sands_corre.txt   # una prueba, viendo lo que pasa
-node tools/mundo/consola.js -e "nueva 3 09:00; ir escuela; avanzar 30m; donde"
-node tools/lenguaje/probar.js --mundo minimo      # los escenarios de probar.js, con las distancias reales
+node tools/mundo/consola.js --ver tools/mundo/pruebas/acciones.txt   # una prueba, viendo lo que pasa
+node tools/mundo/consola.js -e "marionetas; hacer matthew ir granero; avanzar; donde"
+node tools/mundo/exportar.js                      # medir el mapa (cuando cambia: el mundo avisa)
+node tools/lenguaje/probar.js --mundo minimo      # los escenarios de las historias, en el mundo
 node tools/mundo/planes.js                        # las metas del planificador, sin navegador (unos 3 s)
-node tools/mundo/planes.js --ver vaca             # solo las que dicen «vaca», con cada paso
 node tools/mundo/planes.js --guardar              # cuando un cambio es el que se quería: guardarlo como lo esperado
 ```
 
-Los comandos de la consola:
+### Marionetas (sin historias)
 
 ```
-nueva [día] [hh:mm]          una partida nueva (por omisión, el día 2 a las 14:00)
-poner <quien> <lugar>        alguien está en un lugar (así empieza)
-vale <a.b.c> <valor>         un valor del estado
-ir <lugar> · bajarse         lo que Ana hace por su cuenta
-avanzar [30m | 2h | hh:mm]   el reloj (se detiene si le piden algo a Ana)
-si · no · elegir <n> · sola  contestar, elegir, o que Ana decida sola
-donde · minutos <a> <b>      dónde está cada uno (y quién va de camino); cuánto hay entre dos lugares
-espera <a.b.c>[=valor]       en una prueba: que se cumpla (espera mundo.ana.lugar=playa)
-espera dicha <escena> · espera hora <= hh:mm
-plan <quien> <meta> [args…]  lo que haría el planificador del juego, paso a paso y con hora
-metas                        las metas que conoce el planificador
-verbo <verbo> <args…>        cualquier verbo del lenguaje, de cualquiera (verbo correr_a ana orilla)
-verbos                       los verbos del lenguaje
-acciones [quien]             lo que puede hacer ahora en el juego: leer, estudiar, coser, partir leña…
-hacer [quien] <n | verbo>    hacer una de ellas; muestra lo que cambió
-tiene <quien> <cosa> <n>     ponerle algo en las manos, para probar
-cosas [quien]                lo que tiene y lo que sabe
-```
-
-## Las acciones
-
-Hay dos clases de acciones:
-
-- **Los verbos del lenguaje** (`docs/lenguaje/comun/verbos.ts`): subir, bajar, seguir, `correr_a`, traer… Con `verbo`
-  (o en la página) se le pide uno a cualquiera, y el motor lo hace en el mundo mínimo.
-- **Las acciones del juego**: leer, estudiar, coser, partir leña, cocinar, regalar… Son las del planificador
-  (`verbs`, en `src/js/58-fichas-y-planificador.js`): cada una dice cuándo se puede hacer (dónde, con qué), cuánto dura
-  y qué cambia. `acciones` las lista para alguien, en ese momento, y `hacer` hace una. Por ejemplo, con un libro en las
-  manos aparece «leer un libro (20 min)».
-
-```
+> marionetas 4 09:00
 > tiene ana libro 1
 > acciones ana
-  Ana puede, ahora:
+  Ana puede, ahora, en la cocina de Tejas Verdes:
      5. estudiar la lección (20 min)
      8. leer un libro (20 min)
      …
-> hacer ana estudiar
-  Ana: estudiar la lección (20 min)
-    · Ana sabe: leccion
-> hacer ana ir escuela
-    · Ana: la cocina de Tejas Verdes → la escuela
+        e ir a: granero, corral, huerta, escuela, aldea, lago, h:os, …
+> hacer ana leer
+  Ana: leer un libro (20 min)
+    · pasó: leido:ana
+> hacer matthew ir granero
+    · Matthew va al granero, llega a las 09:04
+> avanzar 20m
+  09:04  · Matthew llega al granero
+  09:20  · Ana termina: leer un libro
+> hacer matthew partir_lena
+    · Matthew tiene lena: 0 → 3
+> donde
 ```
 
-El estado de estas acciones es el del planificador: lo que tiene cada uno, cómo se quieren, qué sabe, qué pasó. Quien
-se mueve con una acción se mueve también en el mundo mínimo, y el reloj avanza lo que dura (las historias siguen
-mientras tanto). Las acciones del juego todavía no están en la página: necesitan el código del juego, y la página no lo
-carga.
+Cada uno hace lo suyo a la vez: mientras Ana lee (ocupada 20 minutos), Matthew va al granero. `avanzar` mueve el reloj y
+cuenta quién llega y quién termina.
 
-Con `plan`, el planificador del juego planifica desde donde está cada uno en el mundo mínimo (sus lugares, como los
-llama el planificador: `LG_PLAN`, en `src/js/67-lenguaje.js`). Muestra el plan, pero no lo ejecuta:
+### Los comandos
 
 ```
-> nueva 3 10:00
-> plan marilla tener marilla azucar 1
-  Marilla tiene una taza de azúcar: llega a las 10:46
-    10:00  pedirle a Ana que le traiga una taza de azúcar (47 min)
-> poner ana aldea
-> plan ana estar_en ana escuela
-  Ana está en la escuela: llega a las 10:04
-    10:00  ir a la escuela (5 min)
+nueva [día] [hh:mm]          una partida con las historias (por omisión, el día 2 a las 14:00)
+marionetas [día] [hh:mm]     sin historias (por omisión, el día 3 a las 10:00)
+donde                        dónde está cada uno, quién va de camino, quién está ocupado
+poner <quien> <lugar>        alguien está en un lugar (así empieza)
+avanzar [30m | 2h | hh:mm]   el reloj: hasta que pase algo, o ese rato, o esa hora
+acciones [quien]             lo que puede hacer ahora, numerado, con lo que dura
+hacer [quien] <n | verbo> …  hacer una: «hacer ana leer», «hacer matthew 3», «hacer ana ir escuela»
+tiene <quien> <cosa> <n>     ponerle algo en las manos
+cosas [quien]                lo que tiene y lo que sabe
+cariño <a> <b> [n]           cuánto quiere a a b (y cambiarlo)
+plan <quien> <meta> [args…]  lo que haría el planificador para una meta, paso a paso
+metas                        las metas del planificador
+verbo <verbo> <args…>        un verbo del lenguaje, de cualquiera (con historias): verbo correr_a ana orilla
+verbos                       los verbos del lenguaje
+si · no · elegir <n> · sola  contestar lo que le piden a Ana, elegir en una escena, o que decida sola (con historias)
+vale <a.b.c> <valor>         un valor del estado de las historias
+minutos <a> <b>              cuánto hay entre dos lugares
+lugares · quienes            los lugares del mundo, y quiénes hay
+registro [n]                 lo último que pasó en el mundo
+espera <a.b.c>[=valor]       en una prueba: que se cumpla (espera mundo.ana.lugar=escuela · espera matthew.cosas.lena=3 ·
+                             espera hechos.leido:ana · espera ana.ocupado.que=leer un libro)
+espera dicha <escena>        que una escena se haya dicho
 ```
+
+## La página
+
+`trazas/lenguaje.html` (`node tools/lenguaje/pagina.js`) juega las historias en el mundo, con «el mapa real»: Avonlea
+desde arriba, los caminos largos saliendo de sus letreros, los lugares (los de las historias con su nombre, los demás
+como puntos) y cada uno donde está; quien va de camino avanza por el camino. ▶ Reproducir avanza el reloj y se para
+cuando le piden algo a Ana. Abajo se puede pedir cualquier verbo del lenguaje a cualquiera. Las acciones del juego
+todavía no están en la página: necesitan el código del juego.
 
 ## Las metas del planificador
 
-`planes.js` corre en unos 3 segundos las metas de prueba que se pueden probar sin el juego: 55 llegan y 2 no llegan a
-propósito. Una es la tarta de bayas en invierno, imposible. La otra es Gilbert: va y se disculpa, pero Ana no lo perdona.
-Las 14 restantes son solo del juego, porque esperan una escena del guion, un pedido a Ana o varias metas a la vez.
+`planes.js` corre en unos 3 segundos las metas de prueba del planificador (`src/js/64-metas-de-prueba.js`) que se pueden
+probar sin el juego: prepara cada una como siempre, planifica, ejecuta el plan y mira si llega y a qué hora. 55 llegan
+y 2 no llegan a propósito (la tarta de bayas en invierno, imposible; Gilbert, a quien Ana no perdona). Las 14 restantes
+esperan una escena del guion, un pedido a Ana o varias metas a la vez. Lo que dio cada una queda en
+`planes.esperado.json`, y cada corrida avisa lo que cambió.
 
-Las pruebas no dicen qué esperan, así que lo que dio cada una queda en `planes.esperado.json`. Si un cambio en el
-planificador o en el mapa hace que una meta llegue distinto (otros pasos, otra hora, o que ya no llegue), sale con ✘ y
-dice cómo era antes.
+## Archivos
 
-Lo que no se prueba aquí: si el plan se puede caminar en el mapa (que nadie se trabe, que la calesa vaya por los
-caminos). Eso sigue siendo del juego (`tools/trace_goal.js`).
-
-## Una prueba
-
-```
-# a pie por el mapa real: de Tejas Verdes a la escuela
-nueva 3 09:00
-ir escuela
-avanzar 5m
-espera mundo.ana.lugar=cocina
-avanzar 10m
-espera mundo.ana.lugar=escuela
-```
+| Archivo | Qué hace |
+|---|---|
+| `mundo.js` | El mundo: el estado y sus operaciones. No depende del juego ni del motor; corre en node y en una página. |
+| `reglas_juego.js` | Las reglas del juego para el mundo: las acciones del planificador, sobre el estado del mundo. |
+| `mundo_minimo.js` | Las historias en el mundo: la interfaz del motor del lenguaje, hecha con el mundo. |
+| `sin_navegador.js` | Carga el código del juego en node, con una pantalla de mentira, en unos 400 ms. |
+| `exportar.js` · `geografia.json` · `huella.js` | Medir el mapa real; lo medido; avisar si el mapa cambió. |
+| `consola.js` · `pruebas/*.txt` | La consola, y las pruebas escritas con sus comandos. |
+| `planes.js` · `planes.esperado.json` | Las metas del planificador, sin navegador; lo esperado. |
 
 ## Lo que todavía no hace
 
-- **Ejecutar los planes en el mundo mínimo.** El planificador se consulta (`plan`) y sus metas se prueban (`planes.js`),
-  pero los planes todavía no mueven a la gente del mundo mínimo junto con las historias. Las rutinas del día tampoco
-  corren aquí.
-- **El dibujo:** el juego todavía decide con píxeles. El paso siguiente es que el juego dibuje este estado.
+- **La página de marionetas.** Las acciones del juego (leer, partir leña…) están en la consola; la página tiene las
+  historias y los verbos del lenguaje.
+- **Correr** tarda lo mismo que caminar.
+- **Las rutinas del día** (Matthew al campo, Marilla a la cocina) no corren solas: en el mundo cada uno hace lo que se le
+  pide.
+- **El juego** todavía decide con píxeles; el paso siguiente es que dibuje el estado del mundo.
 
 ## Lo que ya mostró
 
-Con las distancias reales:
-
-- **La Sra. Pye no llegaba a la playa.** Desde la aldea son más de dos horas a pie. En el juego aparece ahí; ahora el
-  mundo mínimo hace lo mismo con la gente del pueblo.
+- **La Sra. Pye no llegaba a la playa** (desde la aldea son más de dos horas a pie). En el juego aparece ahí; el mundo
+  hace lo mismo con la gente del pueblo.
 - **La llegada desde Bright River.** La Avenida queda a 99 minutos de la estación, y las charlas de Ana en el lenguaje
-  (`ll_pelo`, `ll_angelical`) se acaban en el primer cuarto de hora. Por eso `cb_libro` no corta nada:
-  `probar.js --mundo minimo` da 8 de 10, y las dos que fallan son las de la llegada. En el juego no se nota porque esas
-  charlas son las del juego, por tramos. Para que el lenguaje lleve el viaje entero, la llegada necesita más charla, o
-  una que dure hasta un lugar.
+  (`ll_pelo`, `ll_angelical`) se acaban en el primer cuarto de hora: `cb_libro` no corta nada, y
+  `probar.js --mundo minimo` da 8 de 10. En el juego no se nota porque esas charlas son las del juego, por tramos. Para
+  que el lenguaje lleve el viaje entero, la llegada necesita más charla, o una que dure hasta un lugar.

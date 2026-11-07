@@ -1,76 +1,95 @@
-// El mundo mínimo: el mundo del juego sin dibujarlo. Los lugares son los del lenguaje y los minutos entre ellos son los
-// del mapa real (tools/mundo/geografia.json, que exporta tools/mundo/exportar.js): a pie, Ana más rápido, y en calesa,
-// con las millas de los caminos largos. No hay píxeles: cada uno está en un lugar, o va de uno a otro y llega a una hora.
-// El reloj salta de un evento al siguiente (el motor pregunta «cuándo», src: tools/lenguaje/motor.js), así que un día
-// entero se juega en milisegundos.
-// Tiene la misma interfaz que el mundo simulado (tools/lenguaje/mundo_simulado.js, donde está documentada), y como él,
-// lo que tiene que recordar de una acción va en la acción misma: se guarda con la partida.
-// Como en el juego, la gente del pueblo (la Sra. Pye, la Sra. Spencer…) no camina: aparece donde una historia la pone.
-// Lo que todavía no hace (lo hace el juego): el planificador y las rutinas de la gente; aquí se mueven solo los que una
-// historia mueve, o la consola (tools/mundo/consola.js).
-// (en node lee tools/mundo/geografia.json; en una página —trazas/lenguaje.html—, la geografía viene en GEOGRAFIA)
+// Las historias en el mundo: el motor del lenguaje (tools/lenguaje/motor.js) juega sobre el mundo (tools/mundo/mundo.js),
+// como en el juego juega sobre el juego. Esto es lo que los une: la interfaz del mundo para el motor (la misma que la
+// del mundo simulado, tools/lenguaje/mundo_simulado.js, donde está documentada), hecha con el mundo.
+// - El estado es el del mundo. El motor lleva una copia de lo que lee (dónde está cada uno, en qué va, a quién sigue,
+//   la calesa): se la dice el mundo cada vez que cambia (contar).
+// - Lo que el motor hace (ir a un lugar, subir, seguir, un hecho, la paciencia de Marilla) lo hace el mundo (efecto).
+// - Los lugares de las historias son lugares del mundo (la estación, el lago… con su nombre del planificador: alias).
+// - Como en el juego, la gente del pueblo (la Sra. Pye, la Sra. Spencer…) no camina: aparece donde la pone una historia.
+// Cada motor juega en un mundo (MundoMinimo.mundo; si no hay, uno nuevo, desde donde el motor dice que está cada uno).
+// Lo de un viaje en curso va también en la acción del motor (de, a, sale, fin): se guarda con la partida.
 (function (raiz) {
-const enNode = typeof module !== 'undefined' && !!module.exports;
-let GEO = null;
-function geografia(){
-  if (GEO) return GEO;
-  if (!enNode) return (GEO = raiz.GEOGRAFIA);
-  const fs = require('fs'), path = require('path'), ARCHIVO = path.join(__dirname, 'geografia.json');
-  if (!fs.existsSync(ARCHIVO)) throw new Error('falta tools/mundo/geografia.json: node tools/mundo/exportar.js');
-  GEO = JSON.parse(fs.readFileSync(ARCHIVO, 'utf8'));
-  // (si el mapa o los caminos cambiaron desde que se exportó, las distancias pueden estar viejas: se avisa, una vez)
-  try { const h = require('./huella.js').huella(); if (h !== GEO.huella) console.warn('[mundo mínimo] el mapa o los caminos cambiaron desde que se exportó la geografía: node tools/build.js && node tools/mundo/exportar.js'); } catch (e) {}
-  return GEO;
-}
-// cómo va alguien: en calesa (si va en un medio), Ana a pie (más ligera), o a pie
-const modo = (q, en) => (en && en !== 'nada' ? 'calesa' : q === 'ana' ? 'ana' : 'pie');
+  const enNode = typeof module !== 'undefined' && !!module.exports;
+  const { Mundo } = enNode ? require('./mundo.js') : raiz;
 
-function MundoMinimo(api){
-  const { D, get } = api, G = geografia();
-  const lugarDe = p => get(['mundo', p, 'lugar']);
-  // (los minutos entre dos lugares, como se va; un lugar que la geografía no tiene —uno nuevo del lenguaje—: 10, y se avisa)
-  function minutos(a, b, como = 'pie'){
-    if (a === b || a == null || b == null) return 0;
-    const m = G.minutos[a]?.[b]; if (m) return Math.max(1, m[como]);
-    if (!minutos.avisado?.[a + '>' + b]) { (minutos.avisado ||= {})[a + '>' + b] = 1; console.warn(`[mundo mínimo] no sé cuánto hay de «${a}» a «${b}»: 10 min (¿exportar de nuevo?)`); }
-    return 10;
+  function MundoMinimo(api){
+    const { D, get, set } = api, G = Mundo.geografia();
+    const W = MundoMinimo.mundo || (MundoMinimo.mundo = Mundo(G));
+    const L = D.lugares, dentro = Object.fromEntries(Object.entries(L).filter(([, l]) => l.dentro).map(([k, l]) => [k, l.dentro]));
+    const quienes = () => [...Object.keys(D.personas), ...Object.keys(D.medios)];
+    // el mundo le dice al motor cómo está: dónde está cada uno (si se movió, llega: es un momento; si el motor no sabía
+    // dónde estaba, no), en qué va, a quién sigue, si la calesa está enganchada
+    function contar(){
+      iniciar(); W.avanzarHasta(api.ahora());
+      for (const q of quienes()) { const l = W.vista(q), antes = get(['mundo', q, 'lugar']); if (l != null && l !== antes) { if (antes == null) set(['mundo', q, 'lugar'], l); else api.llega(q, l); } }
+      for (const q of Object.keys(D.personas)) { const p = W.E.personas[q]; if (!p) continue; for (const c of ['en', 'sigue']) if (get(['mundo', q, c]) !== p[c]) set(['mundo', q, c], p[c]); }
+      for (const [m, x] of Object.entries(W.E.medios)) if (D.medios[m] && get(['mundo', m, 'listo']) !== x.listo) set(['mundo', m, 'listo'], x.listo);
+    }
+    // (al empezar —la primera vez que el motor le pide algo: cuando se crea, todavía no sabe dónde empieza cada uno—, el
+    // mundo toma del motor lo que no sabe: dónde está cada uno, en qué va, la calesa)
+    let iniciado = false;
+    function iniciar(){
+    if (iniciado) return; iniciado = true;
+    W.avanzarHasta(api.ahora());
+    for (const q of quienes()) { const l = get(['mundo', q, 'lugar']), x = W.E.personas[q] || W.E.medios[q]; if (l != null && x?.lugar == null) W.poner(q, l); }
+    for (const q of Object.keys(D.personas)) { const p = W.E.personas[q]; if (!p) continue; for (const c of ['en', 'sigue']) { const v = get(['mundo', q, c]); if (v !== 'nada' && v !== 'nadie' && v != null) p[c] = v; } }
+    for (const m of Object.keys(D.medios)) if (get(['mundo', m, 'listo']) === 'si') W.E.medios[m].listo = 'si';
+    contar();
+    }
+    const y = f => (...a) => { iniciar(); return f(...a); };   // (cada cosa que pide el motor: primero, iniciar)
+    return {
+      minutos: y((a, b) => W.minutos(a, b)),
+      tramo(por, desde, hasta){
+        const r = D.rutas[por], en = x => (r.includes(x) ? x : L[x]?.dentro || L[x]?.cerca);
+        const i = r.indexOf(en(desde)), j = r.indexOf(hasta);
+        return i <= j ? r.slice(i + 1, j + 1) : r.slice(j, i).reverse();
+      },
+      funciones: { ve: y((a, b) => W.juntos(a, b, dentro)), oye: y((a, b) => W.juntos(a, b, dentro)), sola: y(p => Object.keys(D.personas).every(q => q === p || !W.juntos(p, q, dentro))) },
+      empezar(acc){
+        iniciar(); W.avanzarHasta(api.ahora());
+        if (acc.mapa) {   // (la gente del pueblo aparece: sale ahora y llega ya)
+          acc.de = W.vista(acc.quien); acc.deW = W.persona(acc.quien).lugar; acc.aW = W.lugarId(acc.a); acc.sale = api.ahora();
+          acc.fin = W.ir(acc.quien, acc.a, acc.ya || G.del_pueblo.includes(acc.quien) ? { minutos: 0 } : {});   // (lo dicho en una escena —correr al mar— es ya, como en el juego, para el motor) acc.como = W.persona(acc.quien).viaje?.como || 'pie';
+          MundoMinimo.viajes[acc.quien] = acc;
+        } else acc.fin = api.ahora() + (acc.ya ? 0 : acc.decir ? 1 : acc.dura || 0);
+        if (acc.nombrar) acc.nombre = D.nombrables[acc.nombrar].libro;
+      },
+      // (un viaje: cuando el mundo dice que llegó; si el mundo no lo tiene en camino —una partida cargada—, se le vuelve a dar)
+      listo(acc){
+        iniciar(); if (!acc.mapa) return api.ahora() >= acc.fin;
+        const p = W.persona(acc.quien); if (!p.viaje && p.lugar !== acc.aW && api.ahora() < acc.fin) W.ir(acc.quien, acc.a, { minutos: acc.fin - api.ahora() });
+        W.avanzarHasta(api.ahora()); return !W.persona(acc.quien).viaje;
+      },
+      terminar(acc){ if (acc.mapa) { contar(); if (MundoMinimo.viajes[acc.quien] === acc) delete MundoMinimo.viajes[acc.quien]; } },
+      cancelar(acc){ if (acc.mapa) { W.parar(acc.quien); if (MundoMinimo.viajes[acc.quien] === acc) delete MundoMinimo.viajes[acc.quien]; } },
+      // (un viaje se mira de a un minuto: si algo se rompe en el camino, se nota enseguida)
+      cuando: acc => (acc.mapa ? Math.min(acc.fin, api.ahora() + 1) : acc.fin),
+      parar(acc){ acc.resta = acc.mapa ? W.parar(acc.quien) : acc.fin - api.ahora(); },
+      seguir(acc){ if (acc.mapa) { W.avanzarHasta(api.ahora()); acc.fin = W.ir(acc.quien, acc.a, { minutos: acc.resta }); acc.sale = api.ahora(); MundoMinimo.viajes[acc.quien] = acc; } else acc.fin = api.ahora() + acc.resta; delete acc.resta; },
+      // lo que el motor hace en su estado, el mundo lo hace en el suyo (subir, bajar, seguir, la calesa, los hechos, las
+      // cualidades, los estados)
+      efecto(e){
+        iniciar();
+        const c = e.camino || [], v = e.valor;
+        if (e.e === 'deja' && c[0] === 'mundo') {
+          if (c[2] === 'en') v === 'nada' ? W.bajar(c[1]) : W.subir(c[1], v);
+          else if (c[2] === 'sigue') v === 'nadie' ? W.dejarDeSeguir(c[1]) : W.seguir(c[1], v);
+          else if (c[2] === 'listo' && W.E.medios[c[1]]) W.E.medios[c[1]].listo = v;
+          else if (c[2] === 'lugar') W.poner(c[1], v);
+        }
+        else if (e.e === 'deja' && c[0] === 'estado') W.E.estados[c[1]] = v;
+        else if (e.e === 'deja') W.E.hechos[c.join('.')] = v ?? 1;
+        else if (e.e === 'olvida') delete W.E.hechos[c.join('.')];
+        else if (e.e === 'suma' && c[0] === 'cualidad') W.E.cualidades[c.slice(1).join('.')] = get(c);
+      },
+      contar,
+    };
   }
-  // (quien va en un medio lo lleva, con los que van en él; quien lo sigue a pie, va detrás)
-  function mover(p, a){
-    api.llega(p, a);
-    const m = get(['mundo', p, 'en']);
-    if (m !== 'nada') { api.llega(m, a); for (const q of Object.keys(D.personas)) if (q !== p && get(['mundo', q, 'en']) === m) api.llega(q, a); }
-    for (const q of Object.keys(D.personas)) if (get(['mundo', q, 'sigue']) === p && get(['mundo', q, 'en']) === 'nada') api.llega(q, a);
-  }
-  // (juntos: en el mismo lugar, o uno dentro del otro —el corral es de Tejas Verdes—, como en el juego)
-  const juntos = (a, b) => { const x = lugarDe(a), y = lugarDe(b), L = D.lugares; return x != null && (x === y || L[x]?.dentro === y || L[y]?.dentro === x); };
-  return {
-    minutos: (a, b) => minutos(a, b),
-    tramo(por, desde, hasta){
-      const r = D.rutas[por], en = x => (r.includes(x) ? x : D.lugares[x]?.dentro || D.lugares[x]?.cerca);
-      const i = r.indexOf(en(desde)), j = r.indexOf(hasta);
-      return i <= j ? r.slice(i + 1, j + 1) : r.slice(j, i).reverse();
-    },
-    funciones: { ve: juntos, oye: juntos, sola: p => Object.keys(D.personas).every(q => q === p || !juntos(p, q)) },
-    empezar(acc){
-      const ahora = api.ahora();
-      if (acc.mapa) { acc.de = lugarDe(acc.quien); acc.como = modo(acc.quien, get(['mundo', acc.quien, 'en'])); acc.sale = ahora; acc.fin = ahora + (acc.ya || G.del_pueblo.includes(acc.quien) ? 0 : minutos(acc.de, acc.a, acc.como)); MundoMinimo.viajes[acc.quien] = acc; }   // (la gente del pueblo aparece donde la pone una historia, como en el juego)
-      else acc.fin = ahora + (acc.ya ? 0 : acc.decir ? 1 : acc.dura || 0);
-      if (acc.nombrar) acc.nombre = D.nombrables[acc.nombrar].libro;
-    },
-    listo: acc => api.ahora() >= acc.fin,
-    terminar(acc){ if (acc.mapa) { mover(acc.quien, acc.a); if (MundoMinimo.viajes[acc.quien] === acc) delete MundoMinimo.viajes[acc.quien]; } },
-    cancelar(acc){ if (MundoMinimo.viajes[acc.quien] === acc) delete MundoMinimo.viajes[acc.quien]; },
-    // (un viaje se mira de a un minuto: si algo se rompe en el camino, se nota enseguida)
-    cuando: acc => (acc.mapa ? Math.min(acc.fin, api.ahora() + 1) : acc.fin),
-    parar(acc){ acc.resta = acc.fin - api.ahora(); },
-    seguir(acc){ acc.fin = api.ahora() + acc.resta; delete acc.resta; },
-  };
-}
-// (quién va de camino ahora, para mirarlo —la consola—: la acción de cada uno; no se guarda, es solo para ver)
-MundoMinimo.viajes = {};
-MundoMinimo.inicio = (enNode ? require('../lenguaje/mundo_simulado.js').MundoSimulado : raiz.MundoSimulado).inicio;
-MundoMinimo.geografia = geografia;
-if (enNode) module.exports = { MundoMinimo };
-else raiz.MundoMinimo = MundoMinimo;
+  // (quién va de camino ahora, para mirarlo —la consola, la página—: la acción de cada uno; no se guarda, es solo para ver)
+  MundoMinimo.viajes = {};
+  MundoMinimo.mundo = null;
+  MundoMinimo.inicio = (enNode ? require('../lenguaje/mundo_simulado.js').MundoSimulado : raiz.MundoSimulado).inicio;
+  MundoMinimo.geografia = () => Mundo.geografia();
+  if (enNode) module.exports = { MundoMinimo };
+  else raiz.MundoMinimo = MundoMinimo;
 })(this);
