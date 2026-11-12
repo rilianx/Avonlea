@@ -50,8 +50,25 @@
    "ropa_sucia": {
     "titulo": "prendas de ropa sucia"
    },
-   "libro": {
-    "titulo": "libros"
+   "la_dama_de_shalott": {
+    "titulo": "«La dama de Shalott»",
+    "es": "libro"
+   },
+   "ben_hur": {
+    "titulo": "«Ben-Hur»",
+    "es": "libro"
+   },
+   "biblia": {
+    "titulo": "la Biblia",
+    "es": "libro"
+   },
+   "periodico": {
+    "titulo": "el periódico de Charlottetown",
+    "es": "libro"
+   },
+   "cuentos": {
+    "titulo": "un libro de cuentos",
+    "es": "libro"
    },
    "gallinas": {
     "titulo": "gallinas",
@@ -83,16 +100,17 @@
     "mantequilla": 3
    },
    "ana": {
-    "libro": 1
+    "la_dama_de_shalott": 1,
+    "ben_hur": 1
    },
    "diana": {
-    "libro": 1
+    "cuentos": 1
    },
    "marilla": {
-    "libro": 1
+    "biblia": 1
    },
    "matthew": {
-    "libro": 1
+    "periodico": 1
    }
   }
  },
@@ -1000,7 +1018,40 @@
     },
     {
      "q": "ana",
-     "t": "Una historia de una dama encerrada en una torre. ¡Es trágicamente hermosa!"
+     "t": "{0}.",
+     "vars": [
+      {
+       "camino": [
+        "usa",
+        "ana",
+        "libro"
+       ]
+      }
+     ]
+    },
+    {
+     "si": {
+      "c": "cmp",
+      "camino": [
+       "usa",
+       "ana",
+       "libro"
+      ],
+      "op": "=",
+      "valor": "la_dama_de_shalott"
+     },
+     "cuerpo": [
+      {
+       "q": "ana",
+       "t": "Es de una dama encerrada en una torre, que solo puede mirar el mundo en un espejo. ¡Es trágicamente hermosa!"
+      }
+     ],
+     "sino": [
+      {
+       "q": "ana",
+       "t": "¡La carrera de cuadrigas! No puedo dejarlo, aunque ya sé que Ben-Hur gana. Una nunca está segura del todo, ¿no?"
+      }
+     ]
     },
     {
      "si": {
@@ -3305,7 +3356,7 @@
    "junto_a": "mesa",
    "postura": "sentada",
    "usa": [
-    "libro"
+    "pizarra"
    ],
    "dura": "30m"
   },

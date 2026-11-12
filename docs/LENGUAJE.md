@@ -287,6 +287,11 @@ una vida es una receta, y una actividad («ir a clases»: ir, quedarse, volver) 
   - **Cariño:** `quiere('marilla', 'ana')` es un número de −2 a 5, como en el juego (es el mismo del planificador). Lo
     que dice Ana lo cambia (`<<quiere('matthew', 'ana').suma(1)>>`) y abre o cierra charlas (`<<if quiere(…).gte(3)>>`).
     Lo que hay al empezar: `quiereDe`, en las vidas.
+  - **Lo que usa cada uno:** una cosa puede ser de una clase (`la_dama_de_shalott: { titulo: '«La dama de Shalott»', es:
+    'libro' }`). Una acción que usa «un libro» (`usa: ['libro']`) usa uno de los suyos: el que venía usando, si lo tiene
+    a mano; si no, otro. `usando('ana', 'libro')` dice cuál, y una línea lo nombra entre llaves:
+    `ana: {usando('ana', 'libro')}.` → «Ben-Hur». Lo que va entre llaves es cualquier valor del mundo, revisado como
+    cualquier expresión; se dice con su nombre (una cosa, su título; una persona o un lugar, el suyo).
   - **Memoria:** una opción deja un hecho (`<<deja(hechos.la_gallina_pinta)>>`), y otra charla, días después, se acuerda
     (`si: hechos.la_gallina_pinta.desde('>=', '1d')`).
   - Las charlas de un lugar corren con sus vidas (`vidas: 'tejas_verdes'`). `node tools/mundo/dia.js` cuenta cuántas

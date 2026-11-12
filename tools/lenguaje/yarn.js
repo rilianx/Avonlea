@@ -87,7 +87,9 @@ function guion(n){
           const [acto, ...args] = tag.split(':');                          // #ofender:ana → ofender('srapye', 'ana')
           extra.push(`acto: ${expr(acto, d)}('${m[1]}'${args.map(x => `, '${expr(x, d)}'`).join('')})`);
         }
-        out.push(`{ q: '${m[1]}', t: ${JSON.stringify(m[2])}${extra.map(x => ', ' + x).join('')} }`); continue;
+        // (lo que va entre llaves en el texto: un valor del mundo —{usando('ana', 'libro')}—, revisado como cualquier expresión)
+        const vars = []; const t = m[2].replace(/\{([^{}]+)\}/g, (_, e) => { vars.push(expr(e, d)); return '{' + (vars.length - 1) + '}'; });
+        out.push(`{ q: '${m[1]}', t: ${JSON.stringify(t)}${vars.length ? `, vars: [${vars.join(', ')}]` : ''}${extra.map(x => ', ' + x).join('')} }`); continue;
       }
       throw error(n.archivo, i, '«' + t + '» no es una línea de Yarn (quien: texto, -> opción, <<comando>>)');
     }

@@ -187,7 +187,7 @@ const lleva = q => Object.keys(D.cosas?.tipos || {}).map(x => [x, M.get(['cosas'
 function fichaLupa(q, t){
   const w = que(q), o = w.o, p = W.E.personas[q], cadena = M.haciendo(q).map(v => v.replace(/^dia_de_\w+$/, 'su día').replace(/_/g, ' ')).join(' › ');
   return `<div class="fila"><span><b style="color:${COLOR[q]}">${esc(M.nombre(q))}</b> ${w.ico} ${esc(w.txt)}</span><span>${w.hasta ? 'hasta ' + hhmm(w.hasta) : ''}</span></div>${barra(w, t)}`
-    + (o ? `<div class="cadena">${[o.junto_a && 'junto a ' + o.junto_a, o.postura && o.postura.replace('_', ' '), o.usa && 'con ' + o.usa.join(', ')].filter(Boolean).map(esc).join(' · ')}</div>` : '')
+    + (o ? `<div class="cadena">${[o.junto_a && 'junto a ' + o.junto_a, o.postura && o.postura.replace('_', ' '), o.usa && 'con ' + o.usa.map(x => D.cosas?.tipos?.[x]?.titulo || x).join(', ')].filter(Boolean).map(esc).join(' · ')}</div>` : '')
     + (cadena ? `<div class="cadena">${esc(cadena)}</div>` : '') + M.recados(q).map(r => `<div class="cadena">✉ recado de ${esc(M.nombre(r.de))}: ${esc(r.hace.verbo.replace(/_/g, ' '))}, hasta las ${hhmm(r.hasta)}</div>`).join('') + `<div class="cadena">en ${esc(NOMBRE(p.lugar))}${lleva(q) ? ' · lleva: ' + lleva(q) : ''}</div>`;
 }
 function lupa(){

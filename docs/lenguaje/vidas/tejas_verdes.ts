@@ -44,7 +44,12 @@ export const cosas = cosasDe({
   huevos: { titulo: 'huevos' },
   platos_sucios: { titulo: 'platos sucios' },
   ropa_sucia: { titulo: 'prendas de ropa sucia' },
-  libro: { titulo: 'libros' },
+  // (los libros: cada uno, el suyo —«usa: ['libro']» es cualquiera de ellos; el que venía leyendo—)
+  la_dama_de_shalott: { titulo: '«La dama de Shalott»', es: 'libro' },
+  ben_hur: { titulo: '«Ben-Hur»', es: 'libro' },
+  biblia: { titulo: 'la Biblia', es: 'libro' },
+  periodico: { titulo: 'el periódico de Charlottetown', es: 'libro' },
+  cuentos: { titulo: 'un libro de cuentos', es: 'libro' },
   gallinas: { titulo: 'gallinas', icono: '🐔' },
   vacas: { titulo: 'vacas', icono: '🐄' },
 }, {
@@ -53,7 +58,7 @@ export const cosas = cosasDe({
   gallinero: { gallinas: 8 },
   corral: { vacas: 3 },
   cuesta_del_huerto: { pan: 6, mantequilla: 3 },
-  ana: { libro: 1 }, diana: { libro: 1 }, marilla: { libro: 1 }, matthew: { libro: 1 },   // (Ana, su libro de cuentos; Marilla, la Biblia; Matthew, el periódico)
+  ana: { la_dama_de_shalott: 1, ben_hur: 1 }, diana: { cuentos: 1 }, marilla: { biblia: 1 }, matthew: { periodico: 1 },
 })
 const { en, con } = cosas
 export const muebles = mueblesDe({
@@ -129,7 +134,7 @@ export const jugar_en_la_huerta = primitivo('jugar_en_la_huerta', (_q: Persona) 
 export const sonar_despierta = primitivo('sonar_despierta', (_q: Persona) => ({ icono: '☁️', donde: 'pieza', junto_a: 'ventana', postura: 'sentada', dura: '20m' }))
 export const mirar_las_vacas = primitivo('mirar_las_vacas', (_q: Persona) => ({ icono: '🐄', donde: 'corral', junto_a: 'cerca', postura: 'de_pie', dura: '15m' }))
 export const rezar = primitivo('rezar', (_q: Persona) => ({ callado: true, icono: '🙏', donde: 'pieza', junto_a: 'cama', postura: 'agachada', dura: '5m' }))
-export const estudiar = primitivo('estudiar', (_q: Persona, l: Lugar) => ({ callado: true, icono: '✏️', donde: l, junto_a: 'mesa', postura: 'sentada', usa: ['libro'], dura: '30m' }))
+export const estudiar = primitivo('estudiar', (_q: Persona, l: Lugar) => ({ callado: true, icono: '✏️', donde: l, junto_a: 'mesa', postura: 'sentada', usa: ['pizarra'], dura: '30m' }))
 // (con otra: si se ven; si una se va, la otra deja)
 export const jugar_con = primitivo('jugar_con', (q: Persona, otra: Persona) => ({ de_conversar: true, icono: '🎈', pide: ve(q, otra), postura: 'caminando', dura: '30m' }))
 

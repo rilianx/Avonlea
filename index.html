@@ -19740,6 +19740,9 @@ comBoton();
 
     // ---------------------------------------------------------------- los momentos, el registro y las voces
     const nota = (txt, tipo = 'nota') => registro.push({ tipo, t: txt, hora: reloj() });
+    // (el texto de una línea: lo que va entre llaves, con su nombre —una cosa, su título; una persona, un lugar, el suyo—)
+    const mostrar = v => D.cosas?.tipos?.[v]?.titulo ?? D.personas?.[v] ?? D.lugares?.[v]?.nombre ?? (v == null ? '…' : String(v));
+    const textoDe = it => (it.vars ? it.t.replace(/\{(\d+)\}/g, (_, i) => mostrar(val(it.vars[+i]))) : it.t);
     const reloj = () => { const m = Math.round(t % 1440); return `día ${dia()}, ${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`; };
     const unir = (a, b) => (a && b ? a + '.' + b : a || b);
     function emitir(inst, momento){
@@ -19843,6 +19846,9 @@ comBoton();
           if (lleno(q, d)) { nota(`✘ ${ll.verbo}: ${d.junto_a} está ocupado (${nombre(q)})`); return { vale: false }; }
           { const x = faltaCosa(q, d, ll); if (x) { nota(`✘ ${ll.verbo}: no hay ${x} a mano (${nombre(q)})`); return { vale: false }; } }
           for (const e of d.empieza || []) aplicar(e);
+          // (lo que usa de una clase —un libro—: el que venía usando, si lo tiene a mano; si no, otro de los suyos)
+          for (const x of d.usa || []) { if (D.cosas?.tipos?.[x]) continue; const aqui = d.donde || lugarDe(q), tiene = deClase(x).filter(k => get(['cosas', q, k]) + get(['cosas', aqui, k]) > 0); if (!tiene.length) continue;
+            const antes = get(['usa', q, x]); set(['usa', q, x], tiene.includes(antes) ? antes : tiene[Math.floor(azar() * tiene.length)]); }
           decir(ll);
           if (d.de_conversar && !T.ya) { const c = charlaPara(q, null, 0); if (c) empezarCharla(c, null, true); }   // (comer, coser…: si hay otro y algo que decirse, conversan mientras)
           F.fase = 3;
@@ -19851,7 +19857,7 @@ comBoton();
             const r = resto(q, ll.verbo); F.dura = r ?? aMin(d.dura); F.t0 = t;
             if (r != null) nota(`↩ ${nombre(q)} retoma ${ll.verbo} (le faltan ${Math.round(r)} min)`, 'momento');
             delete S[k(['resto', q, ll.verbo])]; delete S[k(['resto_dia', q, ll.verbo])];
-            F.acc = { quien: ll.args[0], verbo: ll.verbo, args: ll.args, dura: F.dura, ya: !!T.ya, ...(d.donde ? { donde: d.donde } : {}), ...(d.junto_a ? { junto_a: d.junto_a } : {}), ...(d.postura ? { postura: d.postura } : {}), ...(d.usa ? { usa: d.usa } : {}) }; mundo.empezar(F.acc); F.fase = 1;   // (y lo que dice de sí, para el dibujo)
+            F.acc = { quien: ll.args[0], verbo: ll.verbo, args: ll.args, dura: F.dura, ya: !!T.ya, ...(d.donde ? { donde: d.donde } : {}), ...(d.junto_a ? { junto_a: d.junto_a } : {}), ...(d.postura ? { postura: d.postura } : {}), ...(d.usa ? { usa: d.usa.map(x => (D.cosas?.tipos?.[x] ? x : get(['usa', ll.args[0], x]) ?? x)) } : {}) }; mundo.empezar(F.acc); F.fase = 1;   // (y lo que dice de sí, para el dibujo)   // (lo que usa: de una clase, cuál —«Ben-Hur»—)
           }
           return;
         }
@@ -20052,11 +20058,13 @@ comBoton();
     const lleno = (q, d) => { const m = d.junto_a && d.donde ? D.muebles?.[d.donde]?.[d.junto_a] : null, cap = m && typeof m === 'object' ? m.caben : m; if (cap == null) return false;
       return tareas.filter(U => !U.fin && U.quien !== q && U.pila.some(G => G.k === 'primitivo' && G.fase === 1 && G.acc && G.acc.junto_a === d.junto_a && G.acc.donde === d.donde)).length >= cap; };
     // (lo que usa, si es una cosa: tiene que haber una a mano —la lleva, o está donde se hace—; tomar y poner, lo que mueven)
+    // (las cosas de una clase —los libros—; una cosa declarada es su propia clase)
+    const deClase = x => (D.cosas?.tipos?.[x] ? [x] : Object.keys(D.cosas?.tipos || {}).filter(k => D.cosas.tipos[k].es === x));
     function faltaCosa(q, d, ll){
-      const aqui = d.donde || lugarDe(q), hay = x => get(['cosas', q, x]) + get(['cosas', aqui, x]);
+      const aqui = d.donde || lugarDe(q), hay = x => deClase(x).reduce((n, k) => n + get(['cosas', q, k]) + get(['cosas', aqui, k]), 0);
       if (opDe(ll) === 'tomar' && get(['cosas', lugarDe(q), ll.args[1]]) < 1) return ll.args[1];
       if (opDe(ll) === 'poner' && get(['cosas', q, ll.args[1]]) < 1) return ll.args[1];
-      for (const x of d.usa || []) if (D.cosas?.tipos?.[x] && hay(x) < 1) return x;
+      for (const x of d.usa || []) if (deClase(x).length && hay(x) < 1) return x;
       return null;
     }
     // (tomar: del lugar a quien, las que haya, hasta n; poner: de quien al lugar)
@@ -20222,7 +20230,7 @@ comBoton();
         }
         top.shift();
         const hace = acc => { escena.acc = acc; mundo.empezar(acc); };
-        if (it.q) { registro.push({ tipo: 'linea', q: it.q, t: it.t, piensa: !!it.piensa, hora: reloj() }); hace({ decir: { q: it.q, t: it.t, piensa: !!it.piensa } }); if (it.acto) { const d = def(it.acto); for (const e of d.deja || []) aplicar(e); } }
+        if (it.q) { registro.push({ tipo: 'linea', q: it.q, t: textoDe(it), piensa: !!it.piensa, hora: reloj() }); hace({ decir: { q: it.q, t: textoDe(it), piensa: !!it.piensa } }); if (it.acto) { const d = def(it.acto); for (const e of d.deja || []) aplicar(e); } }
         else if (it.hace && it.hace.e === 'silencio') { registro.push({ tipo: 'silencio', t: it.hace.dura, hora: reloj() }); hace({ silencio: true, dura: aMin(it.hace.dura) }); }
         else if (it.hace && it.hace.e === 'nombrar') hace({ nombrar: it.hace.cosa, pedir: !!it.hace.pedir });
         else if (it.hace) aplicar(it.hace);
@@ -20321,7 +20329,7 @@ comBoton();
             elegirEnCharla(C, ops, i); continue;
           }
           top.shift();
-          if (it.q) { registro.push({ tipo: 'linea', q: it.q, t: it.t, piensa: !!it.piensa, hora: reloj(), charla: C.id }); C.acc = { decir: { q: it.q, t: it.t, piensa: !!it.piensa } }; mundo.empezar(C.acc); if (it.acto) for (const e of def(it.acto).deja || []) aplicar(e); }
+          if (it.q) { registro.push({ tipo: 'linea', q: it.q, t: textoDe(it), piensa: !!it.piensa, hora: reloj(), charla: C.id }); C.acc = { decir: { q: it.q, t: textoDe(it), piensa: !!it.piensa } }; mundo.empezar(C.acc); if (it.acto) for (const e of def(it.acto).deja || []) aplicar(e); }
           else if (it.hace && it.hace.e === 'silencio') { C.acc = { silencio: true, dura: aMin(it.hace.dura) }; mundo.empezar(C.acc); }
           else if (it.hace) aplicar(it.hace);
           else if (it.si) C.pila.push([...(cumple(it.si) ? it.cuerpo : it.sino)]);
@@ -20505,8 +20513,25 @@ const LENGUAJE = {
    "ropa_sucia": {
     "titulo": "prendas de ropa sucia"
    },
-   "libro": {
-    "titulo": "libros"
+   "la_dama_de_shalott": {
+    "titulo": "«La dama de Shalott»",
+    "es": "libro"
+   },
+   "ben_hur": {
+    "titulo": "«Ben-Hur»",
+    "es": "libro"
+   },
+   "biblia": {
+    "titulo": "la Biblia",
+    "es": "libro"
+   },
+   "periodico": {
+    "titulo": "el periódico de Charlottetown",
+    "es": "libro"
+   },
+   "cuentos": {
+    "titulo": "un libro de cuentos",
+    "es": "libro"
    },
    "gallinas": {
     "titulo": "gallinas",
@@ -20538,16 +20563,17 @@ const LENGUAJE = {
     "mantequilla": 3
    },
    "ana": {
-    "libro": 1
+    "la_dama_de_shalott": 1,
+    "ben_hur": 1
    },
    "diana": {
-    "libro": 1
+    "cuentos": 1
    },
    "marilla": {
-    "libro": 1
+    "biblia": 1
    },
    "matthew": {
-    "libro": 1
+    "periodico": 1
    }
   }
  },
@@ -21455,7 +21481,40 @@ const LENGUAJE = {
     },
     {
      "q": "ana",
-     "t": "Una historia de una dama encerrada en una torre. ¡Es trágicamente hermosa!"
+     "t": "{0}.",
+     "vars": [
+      {
+       "camino": [
+        "usa",
+        "ana",
+        "libro"
+       ]
+      }
+     ]
+    },
+    {
+     "si": {
+      "c": "cmp",
+      "camino": [
+       "usa",
+       "ana",
+       "libro"
+      ],
+      "op": "=",
+      "valor": "la_dama_de_shalott"
+     },
+     "cuerpo": [
+      {
+       "q": "ana",
+       "t": "Es de una dama encerrada en una torre, que solo puede mirar el mundo en un espejo. ¡Es trágicamente hermosa!"
+      }
+     ],
+     "sino": [
+      {
+       "q": "ana",
+       "t": "¡La carrera de cuadrigas! No puedo dejarlo, aunque ya sé que Ben-Hur gana. Una nunca está segura del todo, ¿no?"
+      }
+     ]
     },
     {
      "si": {
@@ -23760,7 +23819,7 @@ const LENGUAJE = {
    "junto_a": "mesa",
    "postura": "sentada",
    "usa": [
-    "libro"
+    "pizarra"
    ],
    "dura": "30m"
   },

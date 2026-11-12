@@ -208,7 +208,10 @@ export const tiene_recado = (quien: Persona, v: { readonly verbo: string }): Con
 // LAS COSAS: cada una está en algún lado —en un lugar (la leña, en el granero) o con alguien (el libro, con Ana)—, y
 // hay tantas. Se declaran los tipos y dónde hay al empezar; se preguntan y se cambian como números, donde están:
 // en('granero').lena.gt(0), con('ana').libro.suma(-1). Nunca bajan de cero. Se mueven con tomar y poner (y llevar).
-export type DefCosa = { readonly titulo: string; readonly icono?: string }   // (icono: si se dibuja donde está —las gallinas—)
+export type DefCosa = { readonly titulo: string; readonly icono?: string; readonly es?: string }   // (icono: si se dibuja donde está —las gallinas—; es: de qué clase —«La dama de Shalott» es un libro—)
+// LO QUE USA alguien de una clase: cuando una acción usa «un libro», cuál (el que venía usando, si lo tiene; si no, otro
+// de los suyos). Se pregunta —usando('ana', 'libro').es('ben_hur')— y se nombra en una línea: «Leo {usando('ana', 'libro')}»
+export const usando = (quien: Persona, clase: string) => new Campo<string>(['usa', quien, clase])
 export type Cosas<C> = { readonly [K in keyof C]: Numero }
 export function cosasDe<const C extends Record<string, DefCosa>>(tipos: C, inicio: { readonly [donde: string]: { readonly [K in keyof C]?: number } }) {
   const de = (donde: string): Cosas<C> => Object.fromEntries(Object.keys(tipos).map(k => [k, new Numero(['cosas', donde, k])])) as never
@@ -298,7 +301,7 @@ export const interrumpio: Cond = { c: 'existe', camino: ['escena', 'interrumpio'
 
 // el guion de una escena: líneas (con su acto), comandos, opciones de la jugadora y variaciones (<<if>>)
 export type Item =
-  | { readonly q: Persona | 'narra' | 'alguien' | 'otro'; readonly t: string; readonly piensa?: true; readonly acto?: Llamada }
+  | { readonly q: Persona | 'narra' | 'alguien' | 'otro'; readonly t: string; readonly piensa?: true; readonly acto?: Llamada; readonly vars?: readonly Campo<Valor>[] }   // (vars: lo que va en {0}, {1}… del texto)
   | { readonly hace: Efecto | Llamada }
   | { readonly op: string; readonly propia?: true; readonly cuerpo: readonly Item[] }
   | { readonly si: Cond; readonly cuerpo: readonly Item[]; readonly sino: readonly Item[] }

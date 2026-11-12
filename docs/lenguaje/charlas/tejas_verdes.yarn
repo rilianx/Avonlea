@@ -146,7 +146,12 @@ si: hizo('ana', leer).desde('<', '2h')
 repetir: dia
 ---
 alguien: ¿Qué estás leyendo, Ana?
-ana: Una historia de una dama encerrada en una torre. ¡Es trágicamente hermosa!
+ana: {usando('ana', 'libro')}.
+<<if usando('ana', 'libro').es('la_dama_de_shalott')>>
+ana: Es de una dama encerrada en una torre, que solo puede mirar el mundo en un espejo. ¡Es trágicamente hermosa!
+<<else>>
+ana: ¡La carrera de cuadrigas! No puedo dejarlo, aunque ya sé que Ben-Hur gana. Una nunca está segura del todo, ¿no?
+<<endif>>
 <<if quiere(alguien, 'ana').gte(4)>>
 alguien: Bueno… me la tendrás que contar, entonces.
 <<quiere('ana', alguien).suma(1)>>

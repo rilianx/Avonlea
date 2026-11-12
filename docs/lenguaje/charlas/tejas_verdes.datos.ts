@@ -1,7 +1,7 @@
 // GENERADO por tools/lenguaje/yarn.js desde charlas/tejas_verdes.yarn: no editar a mano.
 import { charla } from './tejas_verdes.ids'
 import { arreglar_cerca, cosas, entrar_lena, hechos, leer, recoger_huevos } from '../vidas/tejas_verdes'
-import { alguien, defCharla, deja, hizo, no, otro, quiere, rol, tiempo, tiene_recado, y } from '../comun/lenguaje'
+import { alguien, defCharla, deja, hizo, no, otro, quiere, rol, tiempo, tiene_recado, usando, y } from '../comun/lenguaje'
 import { dar_recado } from '../comun/verbos'
 
 export const charlas = {
@@ -140,7 +140,8 @@ export const charlas = {
     hablan: ['alguien', 'ana'],
     cuerpo: [
       { q: 'alguien', t: "¿Qué estás leyendo, Ana?" },
-      { q: 'ana', t: "Una historia de una dama encerrada en una torre. ¡Es trágicamente hermosa!" },
+      { q: 'ana', t: "{0}.", vars: [usando('ana', 'libro')] },
+      { si: usando('ana', 'libro').es('la_dama_de_shalott'), cuerpo: [{ q: 'ana', t: "Es de una dama encerrada en una torre, que solo puede mirar el mundo en un espejo. ¡Es trágicamente hermosa!" }], sino: [{ q: 'ana', t: "¡La carrera de cuadrigas! No puedo dejarlo, aunque ya sé que Ben-Hur gana. Una nunca está segura del todo, ¿no?" }] },
       { si: quiere(alguien, 'ana').gte(4), cuerpo: [{ q: 'alguien', t: "Bueno… me la tendrás que contar, entonces." }, { hace: quiere('ana', alguien).suma(1) }], sino: [{ q: 'alguien', t: "Mientras no se te olvide lo que tienes que hacer." }] },
     ],
   }),
