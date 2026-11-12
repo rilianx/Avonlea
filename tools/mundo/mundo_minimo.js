@@ -21,7 +21,7 @@
     // (el lago es el estanque de los Barry); si no, el que dice la geografía (el granero queda en Tejas Verdes)
     const inv = Object.fromEntries(Object.entries(G.alias).map(([l, w]) => [w, l]));
     const vista = q => { const l = (W.E.personas[q] || W.E.medios[q])?.lugar; return l == null ? null : D.lugares[l] ? l : D.lugares[inv[l]] ? inv[l] : G.lugares[l]?.vista ?? l; };
-    const juntos = (a, b) => { const x = vista(a), y = vista(b); return x != null && (x === y || dentro[x] === y || dentro[y] === x); };
+    const juntos = (a, b) => W.juntos(a, b, dentro);   // (afuera, en el tablero de Tejas Verdes: el mismo cuadrante)
     // el mundo le dice al motor cómo está: dónde está cada uno (si se movió, llega: es un momento; si el motor no sabía
     // dónde estaba, no), en qué va, a quién sigue, si la calesa está enganchada
     function contar(){
@@ -60,6 +60,9 @@
           MundoMinimo.viajes[acc.quien] = acc;
         } else {
           acc.fin = api.ahora() + (acc.ya ? 0 : acc.decir ? 1 : acc.dura || 0);
+          // (junto a un mueble que tiene su cuadrante —la cerca del corral—: unos pasos, hasta ahí)
+          { const c = acc.junto_a && acc.donde && G.tablero?.muebles[acc.donde + '.' + acc.junto_a], p = W.E.personas[acc.quien];
+            if (c && p && p.lugar !== c && G.lugares[p.lugar]?.zona === G.lugares[c].zona && !acc.ya) W.poner(acc.quien, c); }
           if (acc.verbo && acc.dura && !acc.ya && W.E.personas[acc.quien]) W.ocupar(acc.quien, acc.verbo === 'tomar' || acc.verbo === 'poner' ? `${acc.verbo} ${acc.args[1]}` : acc.verbo, acc.dura, { junto_a: acc.junto_a, postura: acc.postura, usa: acc.usa });   // (tomar leña: qué cosa)   // (lo que hace, para mirarlo: la lupa)
         }
         if (acc.nombrar) acc.nombre = D.nombrables[acc.nombrar].libro;

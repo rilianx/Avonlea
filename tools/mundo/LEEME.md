@@ -13,9 +13,19 @@ El primer juego chico hecho entero con el motor único: Ana, Marilla, Matthew y 
 que corresponde a esa hora y deja lo que hace si aparece algo más importante. Nadie los mueve, y ningún día es igual a
 otro.
 
-- **El tablero** (`trazas/tablero.html`, lo arma `node tools/mundo/tablero.js`): las casillas son los lugares (la casa, el
-  patio, y afuera el campo, la escuela, la iglesia y la casa de Diana); las fichas son las personas, con un ícono de lo
-  que hacen, y se deslizan de casilla en casilla cuando van de un lugar a otro.
+- **El tablero** (`trazas/tablero.html`, lo arma `node tools/mundo/tablero.js`): alrededor de la casa, los cuadrantes
+  (abajo), dibujados un poco traslapados, con lo que hay en el mapa del juego —la casa y su puerta, el granero, el cerco
+  del corral, el gallinero y sus gallinas, las vacas, la huerta, los abedules del sendero, los caminos—; la casa por
+  dentro, aparte (la cocina, las piezas); y lo lejos, a un lado (el campo, la escuela, la iglesia, la casa de Diana).
+  Las fichas son las personas, con un ícono de lo que hacen, y se deslizan de casilla en casilla cuando van de un lugar
+  a otro.
+- **Los cuadrantes de Tejas Verdes** (`tools/mundo/exportar.js` → `geografia.json`, `tablero`): afuera, alrededor de la
+  casa, el mundo es una grilla de 8×4 cuadrantes del tamaño en que dos se ponen a conversar (120 px del mapa del juego:
+  donde el juego dice que dos están juntos). Cada cuadrante es un lugar del mundo (`c:2,0`) de una zona —el granero, el
+  gallinero, el corral (lo que cubre su cerco), el patio, la huerta, el sendero—; el nombre de la zona es su cuadrante
+  principal, así que las vidas y las historias siguen diciendo «el corral». Afuera, están juntos (`ve`, `oye`) los que
+  están en el mismo cuadrante; la casa por dentro es aparte. Algunos muebles tienen su cuadrante: la cerca del corral no
+  es donde están las vacas, y quien hace algo junto a ellos da unos pasos hasta ahí.
   - **La lupa**: tocando una casilla o una ficha se ve quién está, qué hace, junto a qué, en qué postura, con qué, y
     hasta qué hora, y lo que lleva. En una casilla, también cuánto hay de cada cosa ahí (los leños del granero).
   - **El diario de cada uno**: se elige a la persona (o se toca su ficha) y se ve su día hasta ahora, cada cosa con su

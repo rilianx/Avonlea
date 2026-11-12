@@ -15,7 +15,7 @@ main{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px;padding:16p
 #tablero{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px;align-self:start}
 #tablero svg{width:100%;height:auto;display:block}
 .casilla rect{stroke:var(--line);stroke-width:2;cursor:pointer}.casilla:hover rect{stroke:var(--acento)}.casilla.sel rect{stroke:var(--acento);stroke-width:4}
-.casilla text{fill:var(--mut);font-size:15px;pointer-events:none}.zona{fill:none;stroke:var(--line);stroke-dasharray:6 5}.zona-t{fill:var(--mut);font-size:13px;font-style:italic;letter-spacing:.04em;text-transform:uppercase}
+.casilla text{fill:var(--mut);font-size:15px;pointer-events:none}.celda rect{stroke:rgba(120,100,70,.18);stroke-width:1.5}.celda text{font-size:11.5px}.obj{font-size:12px;fill:#5a4a36;font-style:italic}.emo{font-size:15px}.zona{fill:none;stroke:var(--line);stroke-dasharray:6 5}.zona-t{fill:var(--mut);font-size:13px;font-style:italic;letter-spacing:.04em;text-transform:uppercase}
 .ficha{cursor:pointer}.ficha circle{stroke:var(--panel);stroke-width:3;filter:drop-shadow(0 2px 2px var(--sombra))}.ficha .ini{fill:#fff;font-weight:bold;font-size:16px;pointer-events:none}.ficha .ico{font-size:17px;pointer-events:none}
 .ficha.sel circle{stroke:var(--acento);stroke-width:4}
 aside{display:flex;flex-direction:column;gap:12px}aside section{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
@@ -38,7 +38,7 @@ aside h3{margin:0 0 6px;font-size:13px;letter-spacing:.04em;text-transform:upper
   <button id="nuevo">Empezar de nuevo</button>
 </header>
 <main>
-  <section id="tablero"><svg id="svg" viewBox="0 0 900 500" role="img" aria-label="El tablero de Tejas Verdes: las casillas son los lugares, las fichas son las personas"></svg></section>
+  <section id="tablero"><svg id="svg" viewBox="0 0 990 624" role="img" aria-label="El tablero de Tejas Verdes: las casillas son los lugares, las fichas son las personas"></svg></section>
   <aside>
     <section><h3>La lupa</h3><div id="lupa"><div class="vacio">Toca una casilla o una ficha.</div></div></section>
     <section><h3>El diario de <select id="quien"></select></h3><div id="midiario"></div></section>
@@ -55,13 +55,35 @@ const $ = id => document.getElementById(id), esc = s => String(s ?? '').replace(
 const G = window.GEOGRAFIA, QUIENES = Object.keys(D.vidas.tejas_verdes);
 const CAMAS = { ana: 'pieza', marilla: 'pieza_marilla', matthew: 'pieza_matthew', diana: 'cuesta_del_huerto', calesa: 'corral' };
 // el tablero: las casillas (los lugares), en sus zonas
+// EL TABLERO: afuera, alrededor de la casa, los cuadrantes (tools/mundo/geografia.json, «tablero»: cada uno del tamaño en
+// que dos se ponen a conversar; están juntos los que están en el mismo), dibujados un poco traslapados, con lo que hay
+// en el mapa del juego —la casa, el granero, el cerco, las gallinas—. La casa por dentro es aparte; lo lejos, a un lado.
+const TB = G.tablero, PASO = 88, BX = 24, BY = 66, ESC = PASO / TB.c;
+const enTablero = (x, y) => [BX + (x - TB.x0) * ESC, BY + (y - TB.y0) * ESC];
+const COLZONA = { granero: '#e2d3b8', gallinero: '#ecdcae', corral: '#d6e2bf', tejas_verdes: '#e4ecd2', huerta: '#cfe3c4', arbustos: '#d5e4d8' };
 const ZONAS = [
-  { t: 'el patio', x: 20, y: 20, w: 520, h: 225, c: 'var(--patio)', casillas: { tejas_verdes: [30, 60, 240, 175], gallinero: [280, 60, 120, 80], huerta: [410, 60, 120, 80], corral: [280, 155, 120, 80], granero: [410, 155, 120, 80] } },
-  { t: 'la casa', x: 20, y: 260, w: 520, h: 220, c: 'var(--casa)', casillas: { cocina: [30, 300, 240, 170], pieza: [280, 300, 120, 80], pieza_marilla: [410, 300, 120, 80], pieza_matthew: [280, 390, 120, 80] } },
-  { t: 'afuera', x: 560, y: 20, w: 320, h: 460, c: 'var(--afuera)', casillas: { campo: [575, 60, 290, 70], arbustos: [575, 140, 290, 70], escuela: [575, 220, 290, 70], iglesia: [575, 300, 290, 70], cuesta_del_huerto: [575, 380, 290, 90] } },
+  { t: 'alrededor de la casa', x: 12, y: 12, w: TB.cols * PASO + 24, h: TB.filas * PASO + 66, c: 'var(--patio)', casillas: {} },
+  { t: 'la casa, por dentro', x: 12, y: TB.filas * PASO + 92, w: TB.cols * PASO + 24, h: 150, c: 'var(--casa)', casillas: (y => ({ cocina: [24, y, 260, 104], pieza: [296, y, 150, 104], pieza_marilla: [458, y, 150, 104], pieza_matthew: [620, y, 116, 104] }))(TB.filas * PASO + 128) },
+  { t: 'lejos', x: TB.cols * PASO + 50, y: 12, w: 210, h: TB.filas * PASO + 230, c: 'var(--afuera)', casillas: (x => ({ campo: [x, 48, 186, 82], escuela: [x, 142, 186, 82], iglesia: [x, 236, 186, 82], cuesta_del_huerto: [x, 330, 186, 110] }))(TB.cols * PASO + 62) },
 ];
 const CASILLA = {}; for (const z of ZONAS) for (const [k, r] of Object.entries(z.casillas)) CASILLA[k] = { r, c: z.c };
-const NOMBRE = l => (D.lugares[l]?.nombre || G.lugares[G.alias[l] || l]?.nombre || l).replace(/^(la|el) /, '').replace(/ \(.*$/, '').replace(/, .*$/, '').replace(/ de Tejas Verdes$/, '').replace(/ de Avonlea$/, '').replace(/^\w/, c => c.toUpperCase());
+for (const [l, x] of Object.entries(G.lugares)) if (x.celda) { const [i, j] = x.celda; CASILLA[l] = { r: [BX + i * PASO, BY + j * PASO, PASO, PASO], c: COLZONA[x.zona] || 'var(--patio)', celda: true }; }
+// (lo que hay dibujado en el tablero: la casa, el granero, el cerco del corral, el gallinero y sus gallinas, las vacas, la huerta, los abedules, los caminos)
+function cosasDelTablero(){
+  let h = '';
+  for (const c of TB.caminos) h += `<polyline points="${c.map(p => enTablero(...p).join(',')).join(' ')}" fill="none" stroke="#cdb894" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity=".55" pointer-events="none"/>`;
+  for (const o of TB.cosas) {
+    const [x, y] = enTablero(o.x, o.y), w = (o.w || 0) * ESC, hh = (o.h || 0) * ESC;
+    if (o.que === 'casa') { const [px, py] = enTablero(...o.puerta); h += `<g pointer-events="none"><rect x="${x}" y="${y}" width="${w}" height="${hh}" fill="#f6efe2" stroke="#8a7a62" stroke-width="1.5"/><polygon points="${x - 6},${y} ${x + w / 2},${y - 26} ${x + w + 6},${y}" fill="#5f7d4e" stroke="#4a6340"/><rect x="${px - 6}" y="${py - 18}" width="12" height="18" fill="#7a4b2a"/><text x="${x + w / 2}" y="${y + hh / 2}" text-anchor="middle" class="obj">la casa</text></g>`; }
+    else if (o.que === 'granero') h += `<g pointer-events="none"><rect x="${x}" y="${y}" width="${w}" height="${hh}" fill="#b5654a" opacity=".8" stroke="#7f4532"/><polygon points="${x - 4},${y} ${x + w / 2},${y - 18} ${x + w + 4},${y}" fill="#7f4532"/><text x="${x + w / 2}" y="${y + hh / 2 + 4}" text-anchor="middle" class="obj" style="fill:#fff">granero</text></g>`;
+    else if (o.que === 'cerco') h += `<rect x="${x}" y="${y}" width="${w}" height="${hh}" fill="none" stroke="#8a6a44" stroke-width="2.5" stroke-dasharray="7 4" pointer-events="none"/>`;
+    else if (o.que === 'gallinero') h += `<g pointer-events="none"><rect x="${x}" y="${y}" width="${w}" height="${hh}" fill="#d9b36c" stroke="#9b7a3a"/><polygon points="${x - 3},${y} ${x + w / 2},${y - 10} ${x + w + 3},${y}" fill="#9b7a3a"/></g>`;
+    else if (o.que === 'huerta') { for (let k = 0; k < 4; k++) h += `<line x1="${x + 4}" y1="${y + 8 + k * hh / 4}" x2="${x + w - 4}" y2="${y + 8 + k * hh / 4}" stroke="#6f9a52" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 7" pointer-events="none"/>`; }
+    else h += `<text x="${x}" y="${y}" class="emo" text-anchor="middle" pointer-events="none">${{ gallinas: '🐔🐔', vacas: '🐄', abedules: '🌳🌳' }[o.que] || ''}</text>`;
+  }
+  return h;
+}
+const NOMBRE = l => (D.lugares[G.lugares[l]?.zona || l]?.nombre || G.lugares[G.alias[l] || l]?.nombre || l).replace(/^(la|el) /, '').replace(/ \(.*$/, '').replace(/, .*$/, '').replace(/ de Tejas Verdes$/, '').replace(/ de Avonlea$/, '').replace(/^\w/, c => c.toUpperCase());
 const COLOR = { ana: '#b8442f', marilla: '#4f5d7a', matthew: '#557a43', diana: '#7a4f86' };
 const ICONO = { tomar: '✋', poner: '📦', dormir: '💤', descansar: '🪑', desayunar: '🍽', comer: '🍽', cenar: '🍽', cocinar: '🍲', lavar_platos: '🧽', barrer: '🧹', amasar: '🍞', coser: '🧵', buscar_huevos: '🥚', regar: '🌱', ordeñar: '🥛', dar_de_comer: '🌾', trabajar_el_campo: '🌾', partir_lena: '🪓', arreglar_cerca: '🔨', fumar_pipa: '🪈', leer: '📖', jugar_en_la_huerta: '🎈', sonar_despierta: '☁️', mirar_las_vacas: '🐄', rezar: '🙏', estudiar: '✏️', jugar_con: '🎈', lavar_ropa: '🧺', batir_mantequilla: '🧈', pasear: '🚶', ir_a_clases: '🏫', ir_a_la_iglesia: '⛪', quedarse: '⏳' };
 // el mundo, y las vidas jugando en él
@@ -107,13 +129,18 @@ function que(q){
 }
 const get = (...c) => M.get(c);
 // dónde va la ficha: en su casilla (si hay varias, una al lado de otra); si va de camino, entre las dos, según la hora
-function lugarTablero(l){ if (CASILLA[l]) return l; const v = G.lugares[l]?.vista; return CASILLA[v] ? v : null; }
-function centro(l, i = 0, n = 1){ const c = CASILLA[lugarTablero(l)]; if (!c) return [470, 20]; const [x, y, w, h] = c.r; return [x + w / 2 + (i - (n - 1) / 2) * 44, y + h / 2 + 12]; }
+function lugarTablero(l){ l = G.alias[l] || l; if (CASILLA[l]) return l; const v = G.lugares[l]?.vista; return CASILLA[v] ? v : CASILLA[G.alias[v]] ? G.alias[v] : null; }
+function centro(l, i = 0, n = 1){ const c = CASILLA[lugarTablero(l)]; if (!c) return [470, 20]; const [x, y, w, h] = c.r, sep = c.celda ? 26 : 44; return [x + w / 2 + (i - (n - 1) / 2) * sep, y + h / 2 + (c.celda ? 10 : 12)]; }
 function pintar(){
   const t = ahora(); $('reloj').textContent = `${SEMANA[(Math.floor(t / 1440) + 1) % 7]} ${Math.floor(t / 1440) + 1}, ${hhmm(t)}`;
   let h = '';
   for (const z of ZONAS) { h += `<rect class="zona" x="${z.x}" y="${z.y}" width="${z.w}" height="${z.h}" rx="16"/><text class="zona-t" x="${z.x + 12}" y="${z.y + 22}">${esc(z.t)}</text>`;
-    for (const [k, [x, y, w, hh]] of Object.entries(z.casillas)) h += `<g class="casilla${sel?.l === k ? ' sel' : ''}" data-l="${k}"><rect x="${x}" y="${y}" width="${w}" height="${hh}" rx="10" fill="${z.c}"/><text x="${x + 10}" y="${y + 20}">${esc(NOMBRE(k))}</text></g>`; }
+    for (const [k, [x, y, w, hh]] of Object.entries(z.casillas)) h += `<g class="casilla${sel?.l === k ? ' sel' : ''}" data-l="${k}"><rect x="${x}" y="${y}" width="${w}" height="${hh}" rx="10" fill="${z.c}"/><text x="${x + 10}" y="${y + 20}">${esc(NOMBRE(k))}</text></g>`;
+    if (z === ZONAS[0]) {   // (los cuadrantes: un poco más grandes que su paso, traslapados; el nombre de la zona, en su cuadrante principal)
+      const anclas = new Set(Object.values(TB.zonas).map(x => x.ancla)), d = PASO * .07;
+      for (const [k, c] of Object.entries(CASILLA)) if (c.celda) { const [x, y, w, hh] = c.r; h += `<g class="casilla celda${sel?.l === k ? ' sel' : ''}" data-l="${k}"><rect x="${x - d}" y="${y - d}" width="${w + 2 * d}" height="${hh + 2 * d}" rx="16" fill="${c.c}" fill-opacity=".78"/>${anclas.has(k) ? `<text x="${x + 6}" y="${y + 15}">${esc(NOMBRE(k))}</text>` : ''}</g>`; }
+      h += cosasDelTablero();
+    } }
   const aqui = {}; for (const q of QUIENES) { const p = W.E.personas[q]; if (p && !p.viaje) (aqui[lugarTablero(p.lugar)] ||= []).push(q); }
   for (const q of QUIENES) {
     const p = W.E.personas[q]; if (!p) continue;
@@ -142,7 +169,8 @@ function lupa(){
   if (sel?.q) { L.innerHTML = fichaLupa(sel.q, t); return; }
   if (sel?.l) { const qs = QUIENES.filter(q => { const p = W.E.personas[q]; return p && !p.viaje && lugarTablero(p.lugar) === sel.l; });
     const hay = d => Object.keys(D.cosas?.tipos || {}).map(x => [x, M.get(['cosas', d, x]) || 0]).filter(([, n]) => n).map(([x, n]) => `${esc(D.cosas.tipos[x].titulo.replace(/^(los|las|la|el|un|una) /, ''))} ${n}`).join(' · ');
-    const cosas = hay(sel.l) ? `<div class="cadena" style="margin-bottom:6px">aquí hay: ${hay(sel.l)}</div>` : '';   // (las cosas de este lugar: cuánto hay de cada una)
+    const z = G.lugares[sel.l]?.zona, dz = z || sel.l;   // (un cuadrante: las cosas son de su zona —los huevos, del gallinero—)
+    const cosas = (z ? `<div class="cadena">un cuadrante de ${esc(G.tablero.zonas[z].nombre)}: los que están en él pueden conversar</div>` : '') + (hay(dz) ? `<div class="cadena" style="margin-bottom:6px">${z ? 'en ' + esc(G.tablero.zonas[z].nombre) : 'aquí'} hay: ${hay(dz)}</div>` : '');   // (las cosas de este lugar: cuánto hay de cada una)
     L.innerHTML = `<div class="fila"><span><b>${esc(NOMBRE(sel.l))}</b></span><span>${qs.length ? qs.length + ' aquí' : 'nadie'}</span></div>` + cosas + qs.map(q => fichaLupa(q, t)).join('<hr style="border:0;border-top:1px solid var(--line)">'); return; }
 }
 // Ana: manejarla o soltarla; manejándola, lo que puede hacer donde está (las acciones de su día), e ir: tocando una casilla

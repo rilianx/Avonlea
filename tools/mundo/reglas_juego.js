@@ -48,7 +48,7 @@ function ReglasJuego(W){
   // (un lugar del mundo, como el planificador lo llama; y su punto en el mapa del juego, para «donde está»)
   const punto = l => { const P = G.puntos[l] || []; const m = P.find(p => p.mapa); return m ? m.mapa : P[0]?.camino ? G.dibujo.puertas[P[0].camino] : null; };
   // (una clave del planificador, como lugar del mundo: la misma, o donde está esa persona)
-  const lugarDeClave = k => (k == null ? null : G.lugares[k] ? k : k.startsWith('p:') ? W.E.personas[k.slice(2)]?.lugar ?? null : null);
+  const lugarDeClave = k => (k == null ? null : G.lugares[k] ? k : G.lugares[G.alias[k]] ? G.alias[k] : k.startsWith('p:') ? W.E.personas[k.slice(2)]?.lugar ?? null : null);
   // (el lugar del mundo más cerca de un punto del mapa del juego: para quien el juego tiene «donde está»)
   function cercano([x, y]){ let mejor = null, d0 = Infinity; for (const l of Object.keys(G.lugares)) { const p = punto(l); if (!p || !G.puntos[l].some(q => q.mapa)) continue; const d = Math.hypot(p[0] - x, p[1] - y); if (d < d0) { d0 = d; mejor = l; } } return mejor; }
 

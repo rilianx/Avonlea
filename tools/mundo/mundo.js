@@ -1,5 +1,7 @@
 // EL MUNDO: lo que hay y cómo está, sin dibujarlo. Un solo estado para todo (tools/mundo/LEEME.md):
-//   lugares    la lista de tools/mundo/geografia.json (los del planificador del juego y los de las historias, juntos)
+//   lugares    la lista de tools/mundo/geografia.json (los del planificador del juego y los de las historias, juntos).
+//              Alrededor de Tejas Verdes, el tablero: cuadrantes del tamaño de una conversación (c:2,0), cada uno de una
+//              zona (el corral); el nombre de la zona es su cuadrante principal
 //   personas   cada una: dónde está (un lugar de la lista), en qué va, a quién sigue, qué sabe, si va de
 //              camino (de dónde, adónde, a qué hora llega), y si está ocupada en algo (qué, hasta qué hora)
 //   medios     la calesa: dónde está y si está enganchada
@@ -77,8 +79,10 @@
       ocupar(k, que, min, como = {}){ persona(k).ocupado = { que, desde: E.t, hasta: E.t + min, ...Object.fromEntries(Object.entries(como).filter(([, v]) => v != null)) }; nota(`${k}: ${que} (${Math.round(min)} min)`); },
       // (dejarlo a medias: lo cortó algo más importante)
       dejar(k, que){ const p = persona(k); if (p.ocupado && p.ocupado.que === que) { nota(`${k} deja: ${que}`); p.ocupado = null; } },
-      // dos en el mismo lugar (o uno dentro del otro, para las historias: el corral es de Tejas Verdes)
-      juntos(a, b, dentro = {}){ const x = this.vista(a), y = this.vista(b); return x != null && (x === y || dentro[x] === y || dentro[y] === x); },
+      // dos en el mismo lugar (o uno dentro del otro, para las historias: la cocina es de Tejas Verdes). Afuera, en el
+      // tablero de Tejas Verdes: en el mismo cuadrante —el tamaño en que dos se ponen a conversar—; la casa, por dentro, es aparte
+      juntos(a, b, dentro = {}){ const la = quien(a)?.lugar, lb = quien(b)?.lugar; if (G.lugares[la]?.celda || G.lugares[lb]?.celda) return la === lb;
+        const x = this.vista(a), y = this.vista(b); return x != null && (x === y || dentro[x] === y || dentro[y] === x); },
       guardar: () => JSON.stringify(E),
     };
   }
