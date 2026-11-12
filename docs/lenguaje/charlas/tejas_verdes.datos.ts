@@ -1,7 +1,7 @@
 // GENERADO por tools/lenguaje/yarn.js desde charlas/tejas_verdes.yarn: no editar a mano.
 import { charla } from './tejas_verdes.ids'
-import { arreglar_cerca, cosas, entrar_lena, hechos, leer, recoger_huevos } from '../vidas/tejas_verdes'
-import { alguien, defCharla, deja, hizo, no, otro, quiere, rol, tiempo, tiene_recado, usando, y } from '../comun/lenguaje'
+import { arrear_la_vaca, cosas, entrar_lena, hechos, leer, recoger_huevos } from '../vidas/tejas_verdes'
+import { alguien, defCharla, deja, hizo, no, otro, quiere, rol, tiempo, tiene_recado, usando, vio, y } from '../comun/lenguaje'
 import { dar_recado } from '../comun/verbos'
 
 export const charlas = {
@@ -48,7 +48,7 @@ export const charlas = {
   la_cerca: defCharla(charla.la_cerca, {
     resumen: "Marilla le recuerda a Matthew la cerca del corral.",
     entre: ['marilla', 'matthew'],
-    si: y(tiempo.hora.entre(17, 21), no(hizo('matthew', arreglar_cerca).hoy)),
+    si: y(tiempo.hora.entre(17, 21), cosas.en('corral').tablas_sueltas.gte(1)),
     repetir: 'dia',
     hablan: ['marilla', 'matthew'],
     cuerpo: [
@@ -169,6 +169,62 @@ export const charlas = {
       { q: 'ana', t: "¡Se llama Cordelia! Pero solo en secreto, Srta. Cuthbert." },
       { q: 'marilla', t: "(Marilla aprieta los labios para no sonreír.) Hm. Cordelia." },
       { hace: quiere('marilla', 'ana').suma(1) },
+    ],
+  }),
+  la_vaca: defCharla(charla.la_vaca, {
+    resumen: "Ana le avisa a Matthew que una vaca se escapó a la huerta.",
+    entre: ['ana', 'matthew'],
+    si: y(cosas.en('huerta').vaca_suelta.gt(0), vio('ana', 'vaca_suelta').hoy, no(vio('matthew', 'vaca_suelta').hoy)),
+    repetir: 'siempre',
+    peso: 20,
+    hablan: ['ana', 'matthew'],
+    cuerpo: [
+      { q: 'ana', t: "¡Sr. Cuthbert! ¡Una vaca se escapó y está en la huerta, comiéndose todo!" },
+      { q: 'matthew', t: "Bueno… bueno. Vamos a ver." },
+      { hace: deja(vio('matthew', 'vaca_suelta')) },
+      { hace: deja(hechos.ana_aviso_la_vaca) },
+      { hace: quiere('matthew', 'ana').suma(1) },
+    ],
+  }),
+  la_vaca_marilla: defCharla(charla.la_vaca_marilla, {
+    resumen: "Marilla le avisa a Matthew que la vaca está en la huerta.",
+    entre: ['marilla', 'matthew'],
+    si: y(cosas.en('huerta').vaca_suelta.gt(0), vio('marilla', 'vaca_suelta').hoy, no(vio('matthew', 'vaca_suelta').hoy)),
+    repetir: 'siempre',
+    peso: 20,
+    hablan: ['marilla', 'matthew'],
+    cuerpo: [
+      { q: 'marilla', t: "Matthew, la vaca está en la huerta. Te lo dije: la cerca." },
+      { q: 'matthew', t: "Bueno… sí. Voy." },
+      { hace: deja(vio('matthew', 'vaca_suelta')) },
+    ],
+  }),
+  gracias_por_la_vaca: defCharla(charla.gracias_por_la_vaca, {
+    resumen: "Matthew le agradece a Ana que haya traído la vaca ella sola.",
+    entre: ['matthew', 'ana'],
+    si: y(hizo('ana', arrear_la_vaca).hoy),
+    repetir: 'dia',
+    peso: 20,
+    hablan: ['matthew'],
+    cuerpo: [
+      { q: 'matthew', t: "Me dijeron que trajiste tú sola la vaca de vuelta. Bueno… eres una niña valiente, Ana." },
+      { op: "No fue nada, Sr. Cuthbert. Le hablé bajito, como a una reina destronada.", propia: true, cuerpo: [] },
+      { op: "Me dio un poquito de miedo. Pero solo un poquito.", cuerpo: [{ q: 'matthew', t: "Bueno… eso es lo valiente, ¿no?" }] },
+      { hace: quiere('matthew', 'ana').suma(1) },
+    ],
+  }),
+  la_huerta_comida: defCharla(charla.la_huerta_comida, {
+    resumen: "Marilla le reprocha a Ana que vio la vaca suelta y no avisó.",
+    entre: ['marilla', 'ana'],
+    si: y(hechos.la_vaca_se_comio_la_huerta.hoy, vio('ana', 'vaca_suelta').hoy, no(hechos.ana_aviso_la_vaca.hoy), no(hizo('ana', arrear_la_vaca).hoy)),
+    repetir: 'dia',
+    peso: 20,
+    hablan: ['marilla'],
+    cuerpo: [
+      { q: 'marilla', t: "Ana, la vaca se comió media huerta. Y tú la viste… ¿por qué no le avisaste a nadie?" },
+      { op: "Lo siento, Srta. Cuthbert. Me quedé pensando en otra cosa.", propia: true, cuerpo: [{ q: 'marilla', t: "Siempre en otra cosa. Las lechugas no crecen de un día para otro." }] },
+      { op: "Pensé que era una vaca encantada, que venía a buscar algo…", cuerpo: [{ q: 'marilla', t: "Encantada o no, se comió las lechugas." }] },
+      { hace: quiere('marilla', 'ana').suma(-1) },
     ],
   }),
 }

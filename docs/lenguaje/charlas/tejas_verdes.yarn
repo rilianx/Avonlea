@@ -50,7 +50,7 @@ matthew: Bueno... sí. Ya la entro.
 title: la_cerca
 resumen: Marilla le recuerda a Matthew la cerca del corral.
 entre: marilla matthew
-si: tiempo.hora.entre(17, 21), no(hizo('matthew', arreglar_cerca).hoy)
+si: tiempo.hora.entre(17, 21), cosas.en('corral').tablas_sueltas.gte(1)
 repetir: dia
 ---
 marilla: Matthew, la cerca del corral está otra vez floja. Un día de estos se nos escapa la vaca.
@@ -184,4 +184,61 @@ marilla: Y esa gallina pinta, Ana… ¿le pusiste nombre, al final?
 ana: ¡Se llama Cordelia! Pero solo en secreto, Srta. Cuthbert.
 marilla: (Marilla aprieta los labios para no sonreír.) Hm. Cordelia.
 <<quiere('marilla', 'ana').suma(1)>>
+===
+
+// ---- la vaca que se escapa (la primera misión: nadie obliga a nadie)
+
+title: la_vaca
+resumen: Ana le avisa a Matthew que una vaca se escapó a la huerta.
+entre: ana matthew
+si: cosas.en('huerta').vaca_suelta.gt(0), vio('ana', 'vaca_suelta').hoy, no(vio('matthew', 'vaca_suelta').hoy)
+repetir: siempre
+peso: 20
+---
+ana: ¡Sr. Cuthbert! ¡Una vaca se escapó y está en la huerta, comiéndose todo!
+matthew: Bueno… bueno. Vamos a ver.
+<<deja(vio('matthew', 'vaca_suelta'))>>
+<<deja(hechos.ana_aviso_la_vaca)>>
+<<quiere('matthew', 'ana').suma(1)>>
+===
+
+title: la_vaca_marilla
+resumen: Marilla le avisa a Matthew que la vaca está en la huerta.
+entre: marilla matthew
+si: cosas.en('huerta').vaca_suelta.gt(0), vio('marilla', 'vaca_suelta').hoy, no(vio('matthew', 'vaca_suelta').hoy)
+repetir: siempre
+peso: 20
+---
+marilla: Matthew, la vaca está en la huerta. Te lo dije: la cerca.
+matthew: Bueno… sí. Voy.
+<<deja(vio('matthew', 'vaca_suelta'))>>
+===
+
+title: gracias_por_la_vaca
+resumen: Matthew le agradece a Ana que haya traído la vaca ella sola.
+entre: matthew ana
+si: hizo('ana', arrear_la_vaca).hoy
+repetir: dia
+peso: 20
+---
+matthew: Me dijeron que trajiste tú sola la vaca de vuelta. Bueno… eres una niña valiente, Ana.
+-> No fue nada, Sr. Cuthbert. Le hablé bajito, como a una reina destronada. #propia
+-> Me dio un poquito de miedo. Pero solo un poquito.
+    matthew: Bueno… eso es lo valiente, ¿no?
+<<quiere('matthew', 'ana').suma(1)>>
+===
+
+title: la_huerta_comida
+resumen: Marilla le reprocha a Ana que vio la vaca suelta y no avisó.
+entre: marilla ana
+si: hechos.la_vaca_se_comio_la_huerta.hoy, vio('ana', 'vaca_suelta').hoy, no(hechos.ana_aviso_la_vaca.hoy), no(hizo('ana', arrear_la_vaca).hoy)
+repetir: dia
+peso: 20
+---
+marilla: Ana, la vaca se comió media huerta. Y tú la viste… ¿por qué no le avisaste a nadie?
+-> Lo siento, Srta. Cuthbert. Me quedé pensando en otra cosa. #propia
+    marilla: Siempre en otra cosa. Las lechugas no crecen de un día para otro.
+-> Pensé que era una vaca encantada, que venía a buscar algo…
+    marilla: Encantada o no, se comió las lechugas.
+<<quiere('marilla', 'ana').suma(-1)>>
 ===

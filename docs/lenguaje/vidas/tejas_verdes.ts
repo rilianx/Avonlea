@@ -22,7 +22,7 @@
 //   y siguen juntas (Ana acompaña a Diana), si lo quedaron la tarde anterior (una charla). Si una no llega —Diana,
 //   algunas mañanas, va directo—, la otra la espera
 //   hasta casi las ocho y va sola; si Diana cambia de planes en el camino, Ana sigue sola.
-import { cosasDe, elegir, esta_haciendo, hechosDe, hizo, inicioDe, mueblesDe, quiereDe, no, primitivo, procesos, receta, repetir, si, tiempo, tiene_recado, vida, y, o } from '../comun/lenguaje'
+import { cosasDe, elegir, esta_haciendo, hechosDe, hizo, inicioDe, mueblesDe, quiereDe, vio, no, primitivo, procesos, receta, repetir, si, tiempo, tiene_recado, vida, y, o } from '../comun/lenguaje'
 import { mundo, ve, type Lugar, type Persona } from '../comun/mundo'
 import { acompañar, dar_recado, esperar, hacer_recado, ir_a, ir_a_hablar_con, llevar, poner, quedarse } from '../comun/verbos'
 import { dichas } from '../charlas/tejas_verdes.ids'
@@ -51,12 +51,17 @@ export const cosas = cosasDe({
   periodico: { titulo: 'el periódico de Charlottetown', es: 'libro' },
   cuentos: { titulo: 'un libro de cuentos', es: 'libro' },
   gallinas: { titulo: 'gallinas', icono: '🐔' },
+  // (la vaca que se escapa: la cerca se va soltando; con tres tablas sueltas, una vaca puede salirse a la huerta)
+  tablas_sueltas: { titulo: 'tablas sueltas en la cerca' },
+  vaca_suelta: { titulo: 'una vaca suelta', icono: '🐄', se_nota: true },
+  lechugas: { titulo: 'lechugas' },
   vacas: { titulo: 'vacas', icono: '🐄' },
 }, {
   cocina: { pan: 3, lena: 4, mantequilla: 2, ropa_sucia: 6 },
   granero: { lena: 10 },
   gallinero: { gallinas: 8 },
-  corral: { vacas: 3 },
+  corral: { vacas: 3, tablas_sueltas: 1 },
+  huerta: { lechugas: 12 },
   cuesta_del_huerto: { pan: 6, mantequilla: 3 },
   ana: { la_dama_de_shalott: 1, ben_hur: 1 }, diana: { cuentos: 1 }, marilla: { biblia: 1 }, matthew: { periodico: 1 },
 })
@@ -71,6 +76,9 @@ export const muebles = mueblesDe({
 export const hechos = hechosDe('tejas_verdes', {
   quedamos_en_el_sendero: 'Ana y Diana quedaron de juntarse en el Sendero de los Abedules, a la mañana siguiente, para ir a la escuela',
   la_gallina_pinta: 'Ana le preguntó a Marilla si podía ponerle nombre a la gallina pinta',
+  la_vaca_se_salio: 'una vaca se salió del corral por la cerca floja',
+  la_vaca_se_comio_la_huerta: 'la vaca suelta se comió las lechugas de la huerta',
+  ana_aviso_la_vaca: 'Ana le avisó a Matthew que la vaca estaba suelta',
 })
 // (si quedaron —ayer, o antes de ayer si fue sábado—: hoy se juntan)
 const quedaron = y(hechos.quedamos_en_el_sendero.desde('<', '3d'), no(hechos.quedamos_en_el_sendero.hoy))
@@ -83,6 +91,13 @@ export const se_quieren = quiereDe({
 // (dónde empieza cada uno: donde duerme; la calesa, en el corral)
 export const inicio = inicioDe({ ana: 'pieza', marilla: 'pieza_marilla', matthew: 'pieza_matthew', diana: 'cuesta_del_huerto', calesa: 'corral' })
 export const pasa_solo = procesos(
+  // (la vaca que se escapa —la primera misión: nadie obliga a nadie; si nadie hace nada, vuelve sola al atardecer—)
+  { hora: 22, titulo: 'la cerca del corral se suelta un poco más', deja: [si(en('corral').tablas_sueltas.lt(4), en('corral').tablas_sueltas.suma(1))] },
+  { hora: 5, titulo: 'una vaca se sale del corral por la cerca floja, de madrugada', se_nota: true, si: y(en('corral').tablas_sueltas.gte(3), en('corral').vacas.gt(0), en('huerta').vaca_suelta.lt(1), no(hechos.la_vaca_se_salio.desde('<', '3d'))), probabilidad: .6,
+    deja: [en('corral').vacas.suma(-1), en('huerta').vaca_suelta.suma(1), hechos.la_vaca_se_salio.deja] },
+  { hora: 16, titulo: 'la vaca suelta se come las lechugas de la huerta', se_nota: true, si: en('huerta').vaca_suelta.gt(0), deja: [en('huerta').lechugas.suma(-6), hechos.la_vaca_se_comio_la_huerta.deja] },
+  { hora: 19.5, titulo: 'la vaca vuelve sola al corral, al atardecer', se_nota: true, si: en('huerta').vaca_suelta.gt(0), deja: [en('huerta').vaca_suelta.suma(-1), en('corral').vacas.suma(1)] },
+  { hora: 6, titulo: 'crecen las lechugas', si: en('huerta').lechugas.lt(12), deja: [en('huerta').lechugas.suma(2)] },
   { hora: 6, titulo: 'las gallinas ponen', deja: [si(en('gallinero').huevos.lt(12), en('gallinero').huevos.suma(6))] },
   { hora: 21, titulo: 'se junta la ropa sucia del día', deja: [en('cocina').ropa_sucia.suma(3)] },
 )
@@ -126,7 +141,11 @@ export const dar_de_comer = primitivo('dar_de_comer', (_q: Persona) => ({ icono:
 export const trabajar_el_campo = primitivo('trabajar_el_campo', (_q: Persona) => ({ icono: '🌾', donde: 'campo', postura: 'caminando', usa: ['horqueta'], dura: '1h' }))
 export const partir_lena = primitivo('partir_lena', (_q: Persona) => ({ icono: '🪓', donde: 'granero', junto_a: 'tronco', postura: 'de_pie', usa: ['hacha'], dura: '30m',
   pide: en('granero').lena.lt(15), deja: [en('granero').lena.suma(5)] }))
-export const arreglar_cerca = primitivo('arreglar_cerca', (_q: Persona) => ({ icono: '🔨', donde: 'corral', junto_a: 'cerca', postura: 'agachada', usa: ['martillo'], dura: '40m' }))
+// (arrear la vaca suelta de vuelta al corral)
+export const arrear_la_vaca = primitivo('arrear_la_vaca', (_q: Persona) => ({ icono: '🐄', donde: 'huerta', postura: 'caminando', dura: '15m',
+  pide: en('huerta').vaca_suelta.gt(0), deja: [en('huerta').vaca_suelta.suma(-1), en('corral').vacas.suma(1)] }))
+// (arreglar la cerca: las tablas sueltas, firmes otra vez)
+export const arreglar_cerca = primitivo('arreglar_cerca', (_q: Persona) => ({ pide: en('corral').tablas_sueltas.gt(0), deja: [en('corral').tablas_sueltas.vale(0)], icono: '🔨', donde: 'corral', junto_a: 'cerca', postura: 'agachada', usa: ['martillo'], dura: '40m' }))
 export const fumar_pipa = primitivo('fumar_pipa', (_q: Persona) => ({ de_conversar: true, icono: '🪈', donde: 'tejas_verdes', junto_a: 'porche', postura: 'sentada', usa: ['pipa'], dura: '30m' }))
 // lo de Ana (y de Diana)
 export const leer = primitivo('leer', (_q: Persona, l: Lugar) => ({ icono: '📖', donde: l, junto_a: 'ventana', postura: 'sentada', usa: ['libro'], dura: '30m' }))
@@ -229,6 +248,7 @@ export const dia_de_marilla = receta('dia_de_marilla', (q: Persona) => ({
       // (los recados: uno cada tanto, al que está ahí; ella no espera. Los huevos y la leña los pide conversando: charlas)
       { hace: dar_recado(q, 'ana', barrer('ana'), '12h'), si: y(sabado, manana, no(hizo(q, barrer).hoy), no(hizo(q, dar_recado).desde('<', '2h'))), prioridad: 4 },
       { hace: dar_recado(q, 'matthew', partir_lena('matthew'), '4h'), si: y(en('granero').lena.lt(2), en('cocina').lena.lt(3), no(hizo(q, dar_recado).desde('<', '1h'))), prioridad: 4 },
+      { hace: ir_a_hablar_con(q, 'matthew'), si: y(vio(q, 'vaca_suelta').hoy, en('huerta').vaca_suelta.gt(0), no(vio('matthew', 'vaca_suelta').hoy), tiempo.hora.entre(7, 20)), prioridad: 4 },   // (si ve la vaca suelta, va a decírselo a Matthew)
       { hace: coser(q), si: y(o(manana, tarde, atardecer), no(domingo), no(hizo(q, coser).desde('<', '40m'))), prioridad: 1, peso: 3 },   // (cose un rato, y hace otra cosa)
       { hace: leer(q, 'cocina'), si: domingo, prioridad: 1 },   // (el domingo, la Biblia)
       { hace: regar(q), si: y(tarde, no(hizo(q, regar).hoy)), prioridad: 1 },
@@ -256,7 +276,9 @@ export const dia_de_matthew = receta('dia_de_matthew', (q: Persona) => ({
       { hace: trabajar_el_campo(q), si: y(o(tiempo.hora.entre(8, 11.5), tiempo.hora.entre(13, 16.5)), no(domingo)), prioridad: 3, peso: 4 },
       { hace: entrar_lena(q), si: tiempo.hora.entre(6, 20), prioridad: 4 },   // (cuando queda poca junto a la estufa, deja lo que hace)
       { hace: partir_lena(q), si: y(en('granero').lena.lt(6), o(manana, tarde), no(domingo)), prioridad: 3 },
-      { hace: arreglar_cerca(q), si: y(o(manana, tarde), no(domingo), no(hizo(q, arreglar_cerca).hoy)), prioridad: 3 },
+      { hace: arreglar_cerca(q), si: y(o(manana, tarde), no(domingo), en('corral').tablas_sueltas.gte(3)), prioridad: 3 },
+      { hace: arreglar_cerca(q), si: y(tiempo.hora.entre(6, 20), hechos.la_vaca_se_salio.desde('<', '2d')), prioridad: 5 },   // (después de que se le escapó la vaca: ahora sí, aunque sea domingo)   // (la posterga hasta que está bien floja: a veces la vaca se le adelanta)
+      { hace: arrear_la_vaca(q), si: y(vio(q, 'vaca_suelta').hoy, tiempo.hora.entre(6, 20)), prioridad: 6 },   // (si la vio, o se lo dijeron)
       { hace: fumar_pipa(q), si: y(o(atardecer, domingo), no(hizo(q, fumar_pipa).desde('<', '1h'))), prioridad: 1, peso: 2 },
       { hace: leer(q, 'cocina'), si: atardecer, prioridad: 1 },   // (el periódico, en la cocina)
       { hace: pasear(q, 'campo'), si: y(domingo, o(manana, tarde)), prioridad: 1 },
@@ -289,6 +311,9 @@ export const dia_de_ana = receta('dia_de_ana', (q: Persona) => ({
       { hace: sonar_despierta(q), prioridad: 1, peso: 2 },
       { hace: mirar_las_vacas(q), si: o(tarde, manana), prioridad: 1 },
       // (al volver de la escuela, va a buscar a Matthew para contarle cómo le fue: si él está en algo que importa más, no)
+      // (si ve la vaca suelta: va a avisarle a Matthew, o la trae ella; o nada —a veces se le pasa—)
+      { hace: ir_a_hablar_con(q, 'matthew'), si: y(vio(q, 'vaca_suelta').hoy, en('huerta').vaca_suelta.gt(0), no(vio('matthew', 'vaca_suelta').hoy), tiempo.hora.entre(7, 20)), prioridad: 4, peso: 2 },
+      { hace: arrear_la_vaca(q), si: y(vio(q, 'vaca_suelta').hoy, tiempo.hora.entre(7, 20)), prioridad: 4 },
       { hace: ir_a_hablar_con(q, 'matthew'), si: y(dia_de_clases, tiempo.hora.entre(15.5, 18), no(dichas.como_te_fue.hoy), no(hizo(q, ir_a_hablar_con).desde('<', '1h'))), prioridad: 2 },
       { hace: descansar(q), prioridad: 0 },
     )),

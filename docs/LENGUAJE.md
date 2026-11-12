@@ -296,6 +296,18 @@ una vida es una receta, y una actividad («ir a clases»: ir, quedarse, volver) 
     (`si: hechos.la_gallina_pinta.desde('>=', '1d')`).
   - Las charlas de un lugar corren con sus vidas (`vidas: 'tejas_verdes'`). `node tools/mundo/dia.js` cuenta cuántas
     hubo, cuáles nunca salen y quiénes no se hablan (`--charlas`: cada una, con lo que se dijeron).
+- **Misiones sutiles: lo que pasa solo, que alguien ve, y lo que cada uno hace con eso.** La primera, la vaca que se
+  escapa (`vidas/tejas_verdes.ts`, `charlas/tejas_verdes.yarn`), está hecha solo con lo que ya hay:
+  - **Lo que pasa solo puede depender del mundo y del azar** (`procesos`: `si`, `probabilidad`; `se_nota`: es un suceso,
+    queda en el registro). Por ejemplo: cada noche se suelta una tabla de la cerca; con tres, de madrugada, una vaca
+    puede salirse a la huerta (seis de cada diez veces); a las cuatro se come las lechugas; al atardecer vuelve sola.
+  - **Las cosas que se notan** (`se_nota`: la vaca suelta): quien está donde están, las ve (`vio('ana', 'vaca_suelta').hoy`).
+    Otro puede saberlo porque se lo dicen (`<<deja(vio('matthew', 'vaca_suelta'))>>`).
+  - **Cada uno hace con eso lo que es suyo.** Ana, si la ve, va a avisarle a Matthew o la trae ella; Marilla va a
+    decírselo; Matthew, si lo sabe, la trae, y después arregla la cerca. Nadie obliga a nadie: si nadie hace nada, la
+    vaca se come las lechugas y vuelve sola.
+  - **Deja huella:** Matthew le agradece a Ana, o Marilla le reprocha que la vio y no avisó; el cariño cambia.
+  - Si la jugadora maneja a Ana, ve la vaca en la huerta y puede arrearla o no.
 - **Nada del mundo está escrito en el código: todo se declara.**
   - **El tablero y el plano** de una casa (`tableros`, `planos` en `comun/mundo.ts`). Del tablero: su esquina en el mapa
     del juego, cuántos cuadrantes y qué zonas. Del plano: sus piezas en cada piso, sus puertas y por dónde se sale.

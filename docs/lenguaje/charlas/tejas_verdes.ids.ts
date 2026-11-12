@@ -15,4 +15,8 @@ export const { charla, dichas } = charlasDe('tejas_verdes', [
   'que_lees',
   'el_dia',
   'la_gallina_otra_vez',
+  'la_vaca',
+  'la_vaca_marilla',
+  'gracias_por_la_vaca',
+  'la_huerta_comida',
 ] as const)

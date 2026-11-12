@@ -93,6 +93,8 @@ function diarioDe(q){
 const interrupciones = M.registro.filter(r => /^⤳/.test(r.t)).length, retomas = M.registro.filter(r => /^↩/.test(r.t)).length;
 // (las charlas: cuántas, cuáles, y quiénes nunca se hablan —docs/lenguaje/charlas/—)
 const charlasDichas = M.registro.filter(r => /^💬 /.test(r.t)).map(r => r.t.slice(2).split(':')[0].trim());
+// (lo que pasó solo y se notó: los procesos con condición —una vaca que se sale—, y quién lo vio)
+const paso = M.registro.filter(r => /^(⚑|👀)/.test(r.t));
 const recados = { dados: M.registro.filter(r => /^✉/.test(r.t)), hechos: M.registro.filter(r => /^✔ .* hizo el recado/.test(r.t)), vencidos: M.registro.filter(r => /^· .*venció$/.test(r.t)), sobran: M.registro.filter(r => /^· .*ya no hace falta$/.test(r.t)) };
 if (DIARIO) fs.writeFileSync(DIARIO, QUIENES.map(diarioDe).join('\n'));
 if (DIARIOS) { fs.mkdirSync(DIARIOS, { recursive: true }); for (const q of QUIENES) fs.writeFileSync(path.join(DIARIOS, q + '.txt'), diarioDe(q)); console.log(`→ ${QUIENES.map(q => path.join(DIARIOS, q + '.txt')).join(', ')}`); }
@@ -105,6 +107,7 @@ console.log(`\n${DIAS} días de Tejas Verdes (desde el ${DESDE}, semilla ${SEMIL
   const callados = QUIENES.flatMap((a, i) => QUIENES.slice(i + 1).map(b => [a, b].sort().join('·'))).filter(p => !pares.has(p));
   console.log(`  charlas: ${charlasDichas.length} (${(charlasDichas.length / DIAS).toFixed(1)} al día) · ${Object.entries(n).sort((x, y) => y[1] - x[1]).map(([c, k]) => c + ' ' + k).join(' · ')}${nunca.length ? ' · nunca: ' + nunca.join(', ') : ''}${callados.length ? ' · no se hablan: ' + callados.join(', ') : ''}`); }
 if (process.argv.includes('--charlas')) for (const r of M.registro) if (r.charla || /^💬/.test(r.t)) console.log(`    ${r.hora}  ${r.tipo === 'linea' ? D.personas[r.q] + ': ' + r.t : r.tipo === 'eleccion' ? '  (Ana elige) ' + r.t : r.t}`);
+if (paso.length) console.log(`  pasó: ${paso.map(r => r.hora.replace(/^día /, '') + ' ' + r.t.slice(2).trim()).join(' · ')}`);
 console.log(`  recados: ${recados.dados.length} pedidos, ${recados.hechos.length} hechos, ${recados.vencidos.length} vencidos, ${recados.sobran.length} que ya no hacían falta`);
 if (process.argv.includes('--recados')) for (const r of M.registro) if (/^(✉|✔ .* hizo el recado|· .*(venció|hace falta)$)/.test(r.t)) console.log(`    ${r.hora}  ${r.t}`);
 { const u = casa[casa.length - 1], max = x => Math.max(...casa.map(c => c[x])), min = x => Math.min(...casa.map(c => c[x])); console.log(`  la casa: pan ${min('pan')}–${max('pan')} · leña ${min('lena')}–${max('lena')} · leche hasta ${max('leche')} · mantequilla ${u.mantequilla} al final · platos sucios hasta ${max('platos_sucios')} · huevos hasta ${max('huevos')} · leña del granero ${min('lena_granero')}–${max('lena_granero')}`); }

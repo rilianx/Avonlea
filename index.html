@@ -19716,7 +19716,7 @@ comBoton();
     }
     function aplicar(e){
       if (e.verbo) return instantaneo(e);
-      if (e.e === 'deja') set(e.camino, e.valor === undefined ? dia() : val(e.valor));
+      if (e.e === 'deja') { set(e.camino, e.valor === undefined ? dia() : val(e.valor)); if (e.camino[0] === 'vio') set(['vio_t', e.camino[1], e.camino[2]], t); }
       else if (e.e === 'olvida') delete S[k(e.camino)];
       else if (e.e === 'suma' && e.camino[0] === 'cosas') set(e.camino, Math.max(0, get(e.camino) + e.n));   // (las cosas: nunca menos de cero)
       else if (e.e === 'suma' && e.camino[0] === 'cariño') { const a = get(e.camino), b = Math.max(-2, Math.min(5, a + e.n)); set(e.camino, b); if (a !== b) nota(`${e.n > 0 ? '💗' : '💔'} ${nombre(e.camino[1])} quiere a ${nombre(e.camino[2])}: ${a} → ${b}`, 'momento'); }   // (de −2 a 5, como en el juego)
@@ -20074,7 +20074,13 @@ comBoton();
     }
     // LO QUE PASA SOLO (procesos de las vidas: las gallinas ponen a las seis): una vez al día, a su hora
     const PROCESOS = () => (escenario.vidas && D.procesos?.[escenario.vidas]) || [];
-    function procesar(){ PROCESOS().forEach((p, i) => { const c = 'proceso.' + i; if (hora() >= p.hora && S[c] !== dia()) { S[c] = dia(); for (const e of p.deja) aplicar(e); } }); }
+    function procesar(){ PROCESOS().forEach((p, i) => { const c = 'proceso.' + i; if (hora() >= p.hora && S[c] !== dia()) { S[c] = dia(); if ((p.si == null || cumple(p.si)) && (p.probabilidad == null || azar() < p.probabilidad)) { if (p.se_nota) nota(`⚑ ${p.titulo}`, 'momento'); for (const e of p.deja) aplicar(e); } } }); }   // (si se cumple, y si toca)
+    // (lo que se nota —una vaca suelta—: quien está donde está, la ve; queda sabiéndolo: vio)
+    function notar(){
+      const notables = Object.entries(D.cosas?.tipos || {}).filter(([, t]) => t.se_nota).map(([k]) => k); if (!notables.length) return;
+      for (const q of Object.keys(D.personas)) { const l = lugarDe(q); if (l == null) continue;
+        for (const x of notables) if (get(['cosas', l, x]) > 0 && get(['vio', q, x]) !== dia()) { set(['vio', q, x], dia()); set(['vio_t', q, x], t); nota(`👀 ${nombre(q)} ve ${D.cosas.tipos[x].titulo} (${nombre(l)})`, 'momento'); } }
+    }
     const proxProceso = () => Math.min(...PROCESOS().map((p, i) => { const hoy = (dia() - 1) * 1440 + p.hora * 60; return S['proceso.' + i] === dia() || t >= hoy ? hoy + 1440 : hoy; }));
     // (lo que le faltaba a algo que dejó a medias hoy: los minutos; si no, nada)
     const resto = (q, v) => (get(['resto_dia', q, v]) === dia() ? get(['resto', q, v]) ?? null : null);
@@ -20360,7 +20366,7 @@ comBoton();
         revisarHistorias();
         if (fin && tope == null) return estadoUI();   // (al probar, una historia que termina es el final; en el juego, el mundo sigue)
         if (!escena && cola.length && elegirEscena()) continue;
-        revisarVidas(); procesar();
+        revisarVidas(); procesar(); notar();
         if (seguirCharlas()) return estadoUI();   // (una charla en que la jugadora tiene que elegir qué dice Ana: espera)
         const lista = tareas.filter(T => !T.fin && !T.pregunta && !T.susp && !detenida(T) && ((T.accion && mundo.listo(T.accion)) || (T.hasta ? cumple(T.hasta) || (T.revisa && T.despierta <= t) : T.despierta <= t)));
         if (lista.length) {
@@ -20537,6 +20543,17 @@ const LENGUAJE = {
     "titulo": "gallinas",
     "icono": "🐔"
    },
+   "tablas_sueltas": {
+    "titulo": "tablas sueltas en la cerca"
+   },
+   "vaca_suelta": {
+    "titulo": "una vaca suelta",
+    "icono": "🐄",
+    "se_nota": true
+   },
+   "lechugas": {
+    "titulo": "lechugas"
+   },
    "vacas": {
     "titulo": "vacas",
     "icono": "🐄"
@@ -20556,7 +20573,11 @@ const LENGUAJE = {
     "gallinas": 8
    },
    "corral": {
-    "vacas": 3
+    "vacas": 3,
+    "tablas_sueltas": 1
+   },
+   "huerta": {
+    "lechugas": 12
    },
    "cuesta_del_huerto": {
     "pan": 6,
@@ -20626,6 +20647,212 @@ const LENGUAJE = {
  },
  "procesos": {
   "tejas_verdes": [
+   {
+    "hora": 22,
+    "titulo": "la cerca del corral se suelta un poco más",
+    "deja": [
+     {
+      "e": "si",
+      "si": {
+       "c": "cmp",
+       "camino": [
+        "cosas",
+        "corral",
+        "tablas_sueltas"
+       ],
+       "op": "<",
+       "valor": 4
+      },
+      "entonces": [
+       {
+        "e": "suma",
+        "camino": [
+         "cosas",
+         "corral",
+         "tablas_sueltas"
+        ],
+        "n": 1
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "hora": 5,
+    "titulo": "una vaca se sale del corral por la cerca floja, de madrugada",
+    "se_nota": true,
+    "si": {
+     "c": "y",
+     "de": [
+      {
+       "c": "cmp",
+       "camino": [
+        "cosas",
+        "corral",
+        "tablas_sueltas"
+       ],
+       "op": ">=",
+       "valor": 3
+      },
+      {
+       "c": "cmp",
+       "camino": [
+        "cosas",
+        "corral",
+        "vacas"
+       ],
+       "op": ">",
+       "valor": 0
+      },
+      {
+       "c": "cmp",
+       "camino": [
+        "cosas",
+        "huerta",
+        "vaca_suelta"
+       ],
+       "op": "<",
+       "valor": 1
+      },
+      {
+       "c": "no",
+       "de": {
+        "c": "desde",
+        "camino": [
+         "tejas_verdes",
+         "hechos",
+         "la_vaca_se_salio"
+        ],
+        "op": "<",
+        "valor": "3d"
+       }
+      }
+     ]
+    },
+    "probabilidad": 0.6,
+    "deja": [
+     {
+      "e": "suma",
+      "camino": [
+       "cosas",
+       "corral",
+       "vacas"
+      ],
+      "n": -1
+     },
+     {
+      "e": "suma",
+      "camino": [
+       "cosas",
+       "huerta",
+       "vaca_suelta"
+      ],
+      "n": 1
+     },
+     {
+      "e": "deja",
+      "camino": [
+       "tejas_verdes",
+       "hechos",
+       "la_vaca_se_salio"
+      ]
+     }
+    ]
+   },
+   {
+    "hora": 16,
+    "titulo": "la vaca suelta se come las lechugas de la huerta",
+    "se_nota": true,
+    "si": {
+     "c": "cmp",
+     "camino": [
+      "cosas",
+      "huerta",
+      "vaca_suelta"
+     ],
+     "op": ">",
+     "valor": 0
+    },
+    "deja": [
+     {
+      "e": "suma",
+      "camino": [
+       "cosas",
+       "huerta",
+       "lechugas"
+      ],
+      "n": -6
+     },
+     {
+      "e": "deja",
+      "camino": [
+       "tejas_verdes",
+       "hechos",
+       "la_vaca_se_comio_la_huerta"
+      ]
+     }
+    ]
+   },
+   {
+    "hora": 19.5,
+    "titulo": "la vaca vuelve sola al corral, al atardecer",
+    "se_nota": true,
+    "si": {
+     "c": "cmp",
+     "camino": [
+      "cosas",
+      "huerta",
+      "vaca_suelta"
+     ],
+     "op": ">",
+     "valor": 0
+    },
+    "deja": [
+     {
+      "e": "suma",
+      "camino": [
+       "cosas",
+       "huerta",
+       "vaca_suelta"
+      ],
+      "n": -1
+     },
+     {
+      "e": "suma",
+      "camino": [
+       "cosas",
+       "corral",
+       "vacas"
+      ],
+      "n": 1
+     }
+    ]
+   },
+   {
+    "hora": 6,
+    "titulo": "crecen las lechugas",
+    "si": {
+     "c": "cmp",
+     "camino": [
+      "cosas",
+      "huerta",
+      "lechugas"
+     ],
+     "op": "<",
+     "valor": 12
+    },
+    "deja": [
+     {
+      "e": "suma",
+      "camino": [
+       "cosas",
+       "huerta",
+       "lechugas"
+      ],
+      "n": 2
+     }
+    ]
+   },
    {
     "hora": 6,
     "titulo": "las gallinas ponen",
@@ -20980,16 +21207,14 @@ const LENGUAJE = {
       ]
      },
      {
-      "c": "no",
-      "de": {
-       "c": "existe",
-       "camino": [
-        "hizo",
-        "matthew",
-        "arreglar_cerca"
-       ],
-       "ventana": "hoy"
-      }
+      "c": "cmp",
+      "camino": [
+       "cosas",
+       "corral",
+       "tablas_sueltas"
+      ],
+      "op": ">=",
+      "valor": 1
      }
     ]
    },
@@ -21673,6 +21898,321 @@ const LENGUAJE = {
        "ana"
       ],
       "n": 1
+     }
+    }
+   ]
+  },
+  "tejas_verdes.la_vaca": {
+   "charla": "tejas_verdes.la_vaca",
+   "resumen": "Ana le avisa a Matthew que una vaca se escapó a la huerta.",
+   "entre": [
+    "ana",
+    "matthew"
+   ],
+   "si": {
+    "c": "y",
+    "de": [
+     {
+      "c": "cmp",
+      "camino": [
+       "cosas",
+       "huerta",
+       "vaca_suelta"
+      ],
+      "op": ">",
+      "valor": 0
+     },
+     {
+      "c": "existe",
+      "camino": [
+       "vio",
+       "ana",
+       "vaca_suelta"
+      ],
+      "ventana": "hoy"
+     },
+     {
+      "c": "no",
+      "de": {
+       "c": "existe",
+       "camino": [
+        "vio",
+        "matthew",
+        "vaca_suelta"
+       ],
+       "ventana": "hoy"
+      }
+     }
+    ]
+   },
+   "repetir": "siempre",
+   "peso": 20,
+   "hablan": [
+    "ana",
+    "matthew"
+   ],
+   "cuerpo": [
+    {
+     "q": "ana",
+     "t": "¡Sr. Cuthbert! ¡Una vaca se escapó y está en la huerta, comiéndose todo!"
+    },
+    {
+     "q": "matthew",
+     "t": "Bueno… bueno. Vamos a ver."
+    },
+    {
+     "hace": {
+      "e": "deja",
+      "camino": [
+       "vio",
+       "matthew",
+       "vaca_suelta"
+      ]
+     }
+    },
+    {
+     "hace": {
+      "e": "deja",
+      "camino": [
+       "tejas_verdes",
+       "hechos",
+       "ana_aviso_la_vaca"
+      ]
+     }
+    },
+    {
+     "hace": {
+      "e": "suma",
+      "camino": [
+       "cariño",
+       "matthew",
+       "ana"
+      ],
+      "n": 1
+     }
+    }
+   ]
+  },
+  "tejas_verdes.la_vaca_marilla": {
+   "charla": "tejas_verdes.la_vaca_marilla",
+   "resumen": "Marilla le avisa a Matthew que la vaca está en la huerta.",
+   "entre": [
+    "marilla",
+    "matthew"
+   ],
+   "si": {
+    "c": "y",
+    "de": [
+     {
+      "c": "cmp",
+      "camino": [
+       "cosas",
+       "huerta",
+       "vaca_suelta"
+      ],
+      "op": ">",
+      "valor": 0
+     },
+     {
+      "c": "existe",
+      "camino": [
+       "vio",
+       "marilla",
+       "vaca_suelta"
+      ],
+      "ventana": "hoy"
+     },
+     {
+      "c": "no",
+      "de": {
+       "c": "existe",
+       "camino": [
+        "vio",
+        "matthew",
+        "vaca_suelta"
+       ],
+       "ventana": "hoy"
+      }
+     }
+    ]
+   },
+   "repetir": "siempre",
+   "peso": 20,
+   "hablan": [
+    "marilla",
+    "matthew"
+   ],
+   "cuerpo": [
+    {
+     "q": "marilla",
+     "t": "Matthew, la vaca está en la huerta. Te lo dije: la cerca."
+    },
+    {
+     "q": "matthew",
+     "t": "Bueno… sí. Voy."
+    },
+    {
+     "hace": {
+      "e": "deja",
+      "camino": [
+       "vio",
+       "matthew",
+       "vaca_suelta"
+      ]
+     }
+    }
+   ]
+  },
+  "tejas_verdes.gracias_por_la_vaca": {
+   "charla": "tejas_verdes.gracias_por_la_vaca",
+   "resumen": "Matthew le agradece a Ana que haya traído la vaca ella sola.",
+   "entre": [
+    "matthew",
+    "ana"
+   ],
+   "si": {
+    "c": "y",
+    "de": [
+     {
+      "c": "existe",
+      "camino": [
+       "hizo",
+       "ana",
+       "arrear_la_vaca"
+      ],
+      "ventana": "hoy"
+     }
+    ]
+   },
+   "repetir": "dia",
+   "peso": 20,
+   "hablan": [
+    "matthew"
+   ],
+   "cuerpo": [
+    {
+     "q": "matthew",
+     "t": "Me dijeron que trajiste tú sola la vaca de vuelta. Bueno… eres una niña valiente, Ana."
+    },
+    {
+     "op": "No fue nada, Sr. Cuthbert. Le hablé bajito, como a una reina destronada.",
+     "propia": true,
+     "cuerpo": []
+    },
+    {
+     "op": "Me dio un poquito de miedo. Pero solo un poquito.",
+     "cuerpo": [
+      {
+       "q": "matthew",
+       "t": "Bueno… eso es lo valiente, ¿no?"
+      }
+     ]
+    },
+    {
+     "hace": {
+      "e": "suma",
+      "camino": [
+       "cariño",
+       "matthew",
+       "ana"
+      ],
+      "n": 1
+     }
+    }
+   ]
+  },
+  "tejas_verdes.la_huerta_comida": {
+   "charla": "tejas_verdes.la_huerta_comida",
+   "resumen": "Marilla le reprocha a Ana que vio la vaca suelta y no avisó.",
+   "entre": [
+    "marilla",
+    "ana"
+   ],
+   "si": {
+    "c": "y",
+    "de": [
+     {
+      "c": "existe",
+      "camino": [
+       "tejas_verdes",
+       "hechos",
+       "la_vaca_se_comio_la_huerta"
+      ],
+      "ventana": "hoy"
+     },
+     {
+      "c": "existe",
+      "camino": [
+       "vio",
+       "ana",
+       "vaca_suelta"
+      ],
+      "ventana": "hoy"
+     },
+     {
+      "c": "no",
+      "de": {
+       "c": "existe",
+       "camino": [
+        "tejas_verdes",
+        "hechos",
+        "ana_aviso_la_vaca"
+       ],
+       "ventana": "hoy"
+      }
+     },
+     {
+      "c": "no",
+      "de": {
+       "c": "existe",
+       "camino": [
+        "hizo",
+        "ana",
+        "arrear_la_vaca"
+       ],
+       "ventana": "hoy"
+      }
+     }
+    ]
+   },
+   "repetir": "dia",
+   "peso": 20,
+   "hablan": [
+    "marilla"
+   ],
+   "cuerpo": [
+    {
+     "q": "marilla",
+     "t": "Ana, la vaca se comió media huerta. Y tú la viste… ¿por qué no le avisaste a nadie?"
+    },
+    {
+     "op": "Lo siento, Srta. Cuthbert. Me quedé pensando en otra cosa.",
+     "propia": true,
+     "cuerpo": [
+      {
+       "q": "marilla",
+       "t": "Siempre en otra cosa. Las lechugas no crecen de un día para otro."
+      }
+     ]
+    },
+    {
+     "op": "Pensé que era una vaca encantada, que venía a buscar algo…",
+     "cuerpo": [
+      {
+       "q": "marilla",
+       "t": "Encantada o no, se comió las lechugas."
+      }
+     ]
+    },
+    {
+     "hace": {
+      "e": "suma",
+      "camino": [
+       "cariño",
+       "marilla",
+       "ana"
+      ],
+      "n": -1
      }
     }
    ]
@@ -23715,10 +24255,71 @@ const LENGUAJE = {
     }
    ]
   },
+  "arrear_la_vaca": {
+   "tipo": "primitivo",
+   "params": [
+    "q"
+   ],
+   "icono": "🐄",
+   "donde": "huerta",
+   "postura": "caminando",
+   "dura": "15m",
+   "pide": {
+    "c": "cmp",
+    "camino": [
+     "cosas",
+     "huerta",
+     "vaca_suelta"
+    ],
+    "op": ">",
+    "valor": 0
+   },
+   "deja": [
+    {
+     "e": "suma",
+     "camino": [
+      "cosas",
+      "huerta",
+      "vaca_suelta"
+     ],
+     "n": -1
+    },
+    {
+     "e": "suma",
+     "camino": [
+      "cosas",
+      "corral",
+      "vacas"
+     ],
+     "n": 1
+    }
+   ]
+  },
   "arreglar_cerca": {
    "tipo": "primitivo",
    "params": [
     "q"
+   ],
+   "pide": {
+    "c": "cmp",
+    "camino": [
+     "cosas",
+     "corral",
+     "tablas_sueltas"
+    ],
+    "op": ">",
+    "valor": 0
+   },
+   "deja": [
+    {
+     "e": "deja",
+     "camino": [
+      "cosas",
+      "corral",
+      "tablas_sueltas"
+     ],
+     "valor": 0
+    }
    ],
    "icono": "🔨",
    "donde": "corral",
@@ -25338,6 +25939,79 @@ const LENGUAJE = {
        },
        {
         "hace": {
+         "verbo": "ir_a_hablar_con",
+         "args": [
+          {
+           "param": 0
+          },
+          "matthew"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "existe",
+           "camino": [
+            "vio",
+            {
+             "param": 0
+            },
+            "vaca_suelta"
+           ],
+           "ventana": "hoy"
+          },
+          {
+           "c": "cmp",
+           "camino": [
+            "cosas",
+            "huerta",
+            "vaca_suelta"
+           ],
+           "op": ">",
+           "valor": 0
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "vio",
+             "matthew",
+             "vaca_suelta"
+            ],
+            "ventana": "hoy"
+           }
+          },
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 7
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 20
+            }
+           ]
+          }
+         ]
+        },
+        "prioridad": 4
+       },
+       {
+        "hace": {
          "verbo": "coser",
          "args": [
           {
@@ -26577,22 +27251,117 @@ const LENGUAJE = {
            }
           },
           {
-           "c": "no",
-           "de": {
-            "c": "existe",
-            "camino": [
-             "hizo",
-             {
-              "param": 0
-             },
-             "arreglar_cerca"
-            ],
-            "ventana": "hoy"
-           }
+           "c": "cmp",
+           "camino": [
+            "cosas",
+            "corral",
+            "tablas_sueltas"
+           ],
+           "op": ">=",
+           "valor": 3
           }
          ]
         },
         "prioridad": 3
+       },
+       {
+        "hace": {
+         "verbo": "arreglar_cerca",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 6
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 20
+            }
+           ]
+          },
+          {
+           "c": "desde",
+           "camino": [
+            "tejas_verdes",
+            "hechos",
+            "la_vaca_se_salio"
+           ],
+           "op": "<",
+           "valor": "2d"
+          }
+         ]
+        },
+        "prioridad": 5
+       },
+       {
+        "hace": {
+         "verbo": "arrear_la_vaca",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "existe",
+           "camino": [
+            "vio",
+            {
+             "param": 0
+            },
+            "vaca_suelta"
+           ],
+           "ventana": "hoy"
+          },
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 6
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 20
+            }
+           ]
+          }
+         ]
+        },
+        "prioridad": 6
        },
        {
         "hace": {
@@ -27985,6 +28754,130 @@ const LENGUAJE = {
          ]
         },
         "prioridad": 1
+       },
+       {
+        "hace": {
+         "verbo": "ir_a_hablar_con",
+         "args": [
+          {
+           "param": 0
+          },
+          "matthew"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "existe",
+           "camino": [
+            "vio",
+            {
+             "param": 0
+            },
+            "vaca_suelta"
+           ],
+           "ventana": "hoy"
+          },
+          {
+           "c": "cmp",
+           "camino": [
+            "cosas",
+            "huerta",
+            "vaca_suelta"
+           ],
+           "op": ">",
+           "valor": 0
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "vio",
+             "matthew",
+             "vaca_suelta"
+            ],
+            "ventana": "hoy"
+           }
+          },
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 7
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 20
+            }
+           ]
+          }
+         ]
+        },
+        "prioridad": 4,
+        "peso": 2
+       },
+       {
+        "hace": {
+         "verbo": "arrear_la_vaca",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "existe",
+           "camino": [
+            "vio",
+            {
+             "param": 0
+            },
+            "vaca_suelta"
+           ],
+           "ventana": "hoy"
+          },
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 7
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 20
+            }
+           ]
+          }
+         ]
+        },
+        "prioridad": 4
        },
        {
         "hace": {

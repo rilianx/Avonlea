@@ -208,7 +208,13 @@ export const tiene_recado = (quien: Persona, v: { readonly verbo: string }): Con
 // LAS COSAS: cada una está en algún lado —en un lugar (la leña, en el granero) o con alguien (el libro, con Ana)—, y
 // hay tantas. Se declaran los tipos y dónde hay al empezar; se preguntan y se cambian como números, donde están:
 // en('granero').lena.gt(0), con('ana').libro.suma(-1). Nunca bajan de cero. Se mueven con tomar y poner (y llevar).
-export type DefCosa = { readonly titulo: string; readonly icono?: string; readonly es?: string }   // (icono: si se dibuja donde está —las gallinas—; es: de qué clase —«La dama de Shalott» es un libro—)
+export type DefCosa = { readonly titulo: string; readonly icono?: string; readonly es?: string; readonly se_nota?: true }   // (se_nota: quien está donde está, la ve —vio—: una vaca suelta)
+// LO QUE ALGUIEN VIO (una cosa que se nota, donde estaba), o supo por otro (<<deja(vio('matthew', 'vaca_suelta'))>>):
+// vio('ana', 'vaca_suelta').hoy; vio(…).desde('<', '1h')
+export const vio = (quien: Persona, cosa: string): Hecho => {
+  const camino = ['vio', quien, cosa]
+  return { c: 'existe', camino, id: cosa, hoy: { c: 'existe', camino, ventana: 'hoy' }, desde: (op, valor) => ({ c: 'desde', camino: ['vio_t', quien, cosa], op, valor, min: true }), deja: { e: 'deja', camino }, olvida: { e: 'olvida', camino } }
+}   // (icono: si se dibuja donde está —las gallinas—; es: de qué clase —«La dama de Shalott» es un libro—)
 // LO QUE USA alguien de una clase: cuando una acción usa «un libro», cuál (el que venía usando, si lo tiene; si no, otro
 // de los suyos). Se pregunta —usando('ana', 'libro').es('ben_hur')— y se nombra en una línea: «Leo {usando('ana', 'libro')}»
 export const usando = (quien: Persona, clase: string) => new Campo<string>(['usa', quien, clase])
@@ -225,7 +231,9 @@ export const mueblesDe = <const M extends { readonly [L in Lugar]?: { readonly [
 // DÓNDE EMPIEZA cada uno (y cada medio) cuando empiezan las vidas: donde duerme
 export const inicioDe = <const I extends { readonly [quien: string]: Lugar }>(i: I) => ({ _inicio: i })
 // LO QUE PASA SOLO, cada día a una hora (las gallinas ponen a las seis; se junta ropa sucia)
-export type Proceso = { readonly hora: number; readonly titulo: string; readonly deja: readonly Efecto[] }
+// («si»: solo si se cumple —la cerca está floja—; «probabilidad»: y no siempre —de cada diez días así, en seis—)
+// («se_nota»: es un suceso —una vaca que se sale—, no la rutina: queda en el registro)
+export type Proceso = { readonly hora: number; readonly titulo: string; readonly si?: Cond; readonly probabilidad?: number; readonly se_nota?: true; readonly deja: readonly Efecto[] }
 export const procesos = (...p: Proceso[]) => ({ _procesos: p })
 // un efecto que solo se hace si se cumple algo: si hay pan, se come uno
 export const si = (c: Cond, ...entonces: Efecto[]): Efecto => ({ e: 'si', si: c, entonces })

@@ -75,7 +75,7 @@
     }
     function aplicar(e){
       if (e.verbo) return instantaneo(e);
-      if (e.e === 'deja') set(e.camino, e.valor === undefined ? dia() : val(e.valor));
+      if (e.e === 'deja') { set(e.camino, e.valor === undefined ? dia() : val(e.valor)); if (e.camino[0] === 'vio') set(['vio_t', e.camino[1], e.camino[2]], t); }
       else if (e.e === 'olvida') delete S[k(e.camino)];
       else if (e.e === 'suma' && e.camino[0] === 'cosas') set(e.camino, Math.max(0, get(e.camino) + e.n));   // (las cosas: nunca menos de cero)
       else if (e.e === 'suma' && e.camino[0] === 'cariño') { const a = get(e.camino), b = Math.max(-2, Math.min(5, a + e.n)); set(e.camino, b); if (a !== b) nota(`${e.n > 0 ? '💗' : '💔'} ${nombre(e.camino[1])} quiere a ${nombre(e.camino[2])}: ${a} → ${b}`, 'momento'); }   // (de −2 a 5, como en el juego)
@@ -433,7 +433,13 @@
     }
     // LO QUE PASA SOLO (procesos de las vidas: las gallinas ponen a las seis): una vez al día, a su hora
     const PROCESOS = () => (escenario.vidas && D.procesos?.[escenario.vidas]) || [];
-    function procesar(){ PROCESOS().forEach((p, i) => { const c = 'proceso.' + i; if (hora() >= p.hora && S[c] !== dia()) { S[c] = dia(); for (const e of p.deja) aplicar(e); } }); }
+    function procesar(){ PROCESOS().forEach((p, i) => { const c = 'proceso.' + i; if (hora() >= p.hora && S[c] !== dia()) { S[c] = dia(); if ((p.si == null || cumple(p.si)) && (p.probabilidad == null || azar() < p.probabilidad)) { if (p.se_nota) nota(`⚑ ${p.titulo}`, 'momento'); for (const e of p.deja) aplicar(e); } } }); }   // (si se cumple, y si toca)
+    // (lo que se nota —una vaca suelta—: quien está donde está, la ve; queda sabiéndolo: vio)
+    function notar(){
+      const notables = Object.entries(D.cosas?.tipos || {}).filter(([, t]) => t.se_nota).map(([k]) => k); if (!notables.length) return;
+      for (const q of Object.keys(D.personas)) { const l = lugarDe(q); if (l == null) continue;
+        for (const x of notables) if (get(['cosas', l, x]) > 0 && get(['vio', q, x]) !== dia()) { set(['vio', q, x], dia()); set(['vio_t', q, x], t); nota(`👀 ${nombre(q)} ve ${D.cosas.tipos[x].titulo} (${nombre(l)})`, 'momento'); } }
+    }
     const proxProceso = () => Math.min(...PROCESOS().map((p, i) => { const hoy = (dia() - 1) * 1440 + p.hora * 60; return S['proceso.' + i] === dia() || t >= hoy ? hoy + 1440 : hoy; }));
     // (lo que le faltaba a algo que dejó a medias hoy: los minutos; si no, nada)
     const resto = (q, v) => (get(['resto_dia', q, v]) === dia() ? get(['resto', q, v]) ?? null : null);
@@ -719,7 +725,7 @@
         revisarHistorias();
         if (fin && tope == null) return estadoUI();   // (al probar, una historia que termina es el final; en el juego, el mundo sigue)
         if (!escena && cola.length && elegirEscena()) continue;
-        revisarVidas(); procesar();
+        revisarVidas(); procesar(); notar();
         if (seguirCharlas()) return estadoUI();   // (una charla en que la jugadora tiene que elegir qué dice Ana: espera)
         const lista = tareas.filter(T => !T.fin && !T.pregunta && !T.susp && !detenida(T) && ((T.accion && mundo.listo(T.accion)) || (T.hasta ? cumple(T.hasta) || (T.revisa && T.despierta <= t) : T.despierta <= t)));
         if (lista.length) {
