@@ -201,6 +201,687 @@
    "calesa": "corral"
   }
  },
+ "charlas": {
+  "tejas_verdes.buenos_dias": {
+   "charla": "tejas_verdes.buenos_dias",
+   "resumen": "Marilla le da los buenos días a Ana, a su manera.",
+   "entre": [
+    "marilla",
+    "ana"
+   ],
+   "si": {
+    "c": "y",
+    "de": [
+     {
+      "c": "y",
+      "de": [
+       {
+        "c": "cmp",
+        "camino": [
+         "tiempo",
+         "hora"
+        ],
+        "op": ">=",
+        "valor": 6
+       },
+       {
+        "c": "cmp",
+        "camino": [
+         "tiempo",
+         "hora"
+        ],
+        "op": "<",
+        "valor": 9
+       }
+      ]
+     }
+    ]
+   },
+   "repetir": "dia",
+   "peso": 3,
+   "hablan": [
+    "marilla"
+   ],
+   "cuerpo": [
+    {
+     "q": "marilla",
+     "t": "Buenos días, Ana. Lávate la cara y peina esas trenzas antes de sentarte a la mesa."
+    },
+    {
+     "op": "Buenos días, Srta. Cuthbert. Ya voy.",
+     "propia": true,
+     "cuerpo": []
+    },
+    {
+     "op": "¿No es una mañana preciosa? Desde la ventana se ve la Reina de las Nieves toda blanca.",
+     "cuerpo": [
+      {
+       "q": "marilla",
+       "t": "El cerezo no se va a ir a ninguna parte, Ana. El desayuno sí se enfría."
+      }
+     ]
+    }
+   ]
+  },
+  "tejas_verdes.los_huevos": {
+   "charla": "tejas_verdes.los_huevos",
+   "resumen": "Marilla le pide a Ana que traiga los huevos del gallinero.",
+   "entre": [
+    "marilla",
+    "ana"
+   ],
+   "si": {
+    "c": "y",
+    "de": [
+     {
+      "c": "cmp",
+      "camino": [
+       "cosas",
+       "gallinero",
+       "huevos"
+      ],
+      "op": ">",
+      "valor": 0
+     },
+     {
+      "c": "no",
+      "de": {
+       "c": "recado",
+       "quien": "ana",
+       "verbo": "recoger_huevos"
+      }
+     },
+     {
+      "c": "no",
+      "de": {
+       "c": "existe",
+       "camino": [
+        "hizo",
+        "ana",
+        "recoger_huevos"
+       ],
+       "ventana": "hoy"
+      }
+     }
+    ]
+   },
+   "repetir": "dia",
+   "peso": 2,
+   "hablan": [
+    "marilla"
+   ],
+   "cuerpo": [
+    {
+     "q": "marilla",
+     "t": "Ana, cuando puedas, trae los huevos del gallinero. Y no te quedes soñando entre las gallinas."
+    },
+    {
+     "hace": {
+      "verbo": "dar_recado",
+      "args": [
+       "marilla",
+       "ana",
+       {
+        "verbo": "recoger_huevos",
+        "args": [
+         "ana"
+        ]
+       },
+       "12h"
+      ]
+     }
+    },
+    {
+     "op": "Sí, Srta. Cuthbert.",
+     "propia": true,
+     "cuerpo": []
+    },
+    {
+     "op": "¿Puedo ponerle nombre a la gallina pinta?",
+     "cuerpo": [
+      {
+       "q": "marilla",
+       "t": "Las gallinas no necesitan nombre, Ana. Necesitan que alguien recoja sus huevos."
+      }
+     ]
+    }
+   ]
+  },
+  "tejas_verdes.la_lena": {
+   "charla": "tejas_verdes.la_lena",
+   "resumen": "Marilla le avisa a Matthew que se está acabando la leña de la estufa.",
+   "entre": [
+    "marilla",
+    "matthew"
+   ],
+   "si": {
+    "c": "y",
+    "de": [
+     {
+      "c": "cmp",
+      "camino": [
+       "cosas",
+       "cocina",
+       "lena"
+      ],
+      "op": "<",
+      "valor": 3
+     },
+     {
+      "c": "cmp",
+      "camino": [
+       "cosas",
+       "granero",
+       "lena"
+      ],
+      "op": ">",
+      "valor": 0
+     },
+     {
+      "c": "no",
+      "de": {
+       "c": "recado",
+       "quien": "matthew",
+       "verbo": "entrar_lena"
+      }
+     }
+    ]
+   },
+   "repetir": "siempre",
+   "peso": 3,
+   "hablan": [
+    "marilla",
+    "matthew"
+   ],
+   "cuerpo": [
+    {
+     "q": "marilla",
+     "t": "Matthew, se está acabando la leña de la estufa."
+    },
+    {
+     "hace": {
+      "verbo": "dar_recado",
+      "args": [
+       "marilla",
+       "matthew",
+       {
+        "verbo": "entrar_lena",
+        "args": [
+         "matthew"
+        ]
+       },
+       "2h"
+      ]
+     }
+    },
+    {
+     "q": "matthew",
+     "t": "Bueno... sí. Ya la entro."
+    }
+   ]
+  },
+  "tejas_verdes.la_cerca": {
+   "charla": "tejas_verdes.la_cerca",
+   "resumen": "Marilla le recuerda a Matthew la cerca del corral.",
+   "entre": [
+    "marilla",
+    "matthew"
+   ],
+   "si": {
+    "c": "y",
+    "de": [
+     {
+      "c": "y",
+      "de": [
+       {
+        "c": "cmp",
+        "camino": [
+         "tiempo",
+         "hora"
+        ],
+        "op": ">=",
+        "valor": 17
+       },
+       {
+        "c": "cmp",
+        "camino": [
+         "tiempo",
+         "hora"
+        ],
+        "op": "<",
+        "valor": 21
+       }
+      ]
+     },
+     {
+      "c": "no",
+      "de": {
+       "c": "existe",
+       "camino": [
+        "hizo",
+        "matthew",
+        "arreglar_cerca"
+       ],
+       "ventana": "hoy"
+      }
+     }
+    ]
+   },
+   "repetir": "dia",
+   "hablan": [
+    "marilla",
+    "matthew"
+   ],
+   "cuerpo": [
+    {
+     "q": "marilla",
+     "t": "Matthew, la cerca del corral está otra vez floja. Un día de estos se nos escapa la vaca."
+    },
+    {
+     "q": "matthew",
+     "t": "Bueno... sí. Mañana la veo."
+    }
+   ]
+  },
+  "tejas_verdes.como_te_fue": {
+   "charla": "tejas_verdes.como_te_fue",
+   "resumen": "Matthew le pregunta a Ana cómo le fue, y Ana le cuenta.",
+   "entre": [
+    "matthew",
+    "ana"
+   ],
+   "si": {
+    "c": "y",
+    "de": [
+     {
+      "c": "y",
+      "de": [
+       {
+        "c": "cmp",
+        "camino": [
+         "tiempo",
+         "hora"
+        ],
+        "op": ">=",
+        "valor": 15
+       },
+       {
+        "c": "cmp",
+        "camino": [
+         "tiempo",
+         "hora"
+        ],
+        "op": "<",
+        "valor": 20
+       }
+      ]
+     }
+    ]
+   },
+   "repetir": "dia",
+   "peso": 2,
+   "hablan": [
+    "matthew",
+    "ana"
+   ],
+   "cuerpo": [
+    {
+     "q": "matthew",
+     "t": "Bueno, Ana... ¿cómo te fue hoy?"
+    },
+    {
+     "q": "ana",
+     "t": "¡Oh, Sr. Cuthbert! Pasaron tantas cosas que no sé por dónde empezar."
+    },
+    {
+     "op": "Contarle todo, desde el principio.",
+     "propia": true,
+     "cuerpo": [
+      {
+       "q": "ana",
+       "t": "Primero, el camino estaba lleno de rocío, y cada gota era como un diamante pequeñito…"
+      },
+      {
+       "q": "matthew",
+       "t": "Bueno, bueno. Cuéntame."
+      }
+     ]
+    },
+    {
+     "op": "Preguntarle por las vacas.",
+     "cuerpo": [
+      {
+       "q": "matthew",
+       "t": "Pues… están bien. La pinta da más leche que nunca."
+      }
+     ]
+    }
+   ]
+  },
+  "tejas_verdes.quedamos": {
+   "charla": "tejas_verdes.quedamos",
+   "resumen": "Ana y Diana quedan de juntarse mañana en el Sendero de los Abedules, para ir a la escuela.",
+   "entre": [
+    "ana",
+    "diana"
+   ],
+   "si": {
+    "c": "y",
+    "de": [
+     {
+      "c": "y",
+      "de": [
+       {
+        "c": "cmp",
+        "camino": [
+         "tiempo",
+         "hora"
+        ],
+        "op": ">=",
+        "valor": 14
+       },
+       {
+        "c": "cmp",
+        "camino": [
+         "tiempo",
+         "hora"
+        ],
+        "op": "<",
+        "valor": 19
+       }
+      ]
+     },
+     {
+      "c": "no",
+      "de": {
+       "c": "cmp",
+       "camino": [
+        "tiempo",
+        "semana"
+       ],
+       "op": "=",
+       "valor": "sabado"
+      }
+     },
+     {
+      "c": "no",
+      "de": {
+       "c": "existe",
+       "camino": [
+        "tejas_verdes",
+        "hechos",
+        "quedamos_en_el_sendero"
+       ],
+       "ventana": "hoy"
+      }
+     }
+    ]
+   },
+   "repetir": "dia",
+   "peso": 4,
+   "hablan": [
+    "diana"
+   ],
+   "cuerpo": [
+    {
+     "q": "diana",
+     "t": "¿Mañana nos juntamos en el sendero, como siempre?"
+    },
+    {
+     "op": "¡Claro! Te espero junto a los abedules.",
+     "propia": true,
+     "cuerpo": [
+      {
+       "hace": {
+        "e": "deja",
+        "camino": [
+         "tejas_verdes",
+         "hechos",
+         "quedamos_en_el_sendero"
+        ]
+       }
+      },
+      {
+       "q": "diana",
+       "t": "¡Hasta mañana, Ana!"
+      }
+     ]
+    },
+    {
+     "op": "Mañana no puedo: Marilla quiere que vaya temprano.",
+     "cuerpo": [
+      {
+       "q": "diana",
+       "t": "Bueno. Entonces nos vemos allá."
+      }
+     ]
+    }
+   ]
+  },
+  "tejas_verdes.el_lago": {
+   "charla": "tejas_verdes.el_lago",
+   "resumen": "Ana inventa un juego para las dos.",
+   "entre": [
+    "ana",
+    "diana"
+   ],
+   "si": {
+    "c": "y",
+    "de": [
+     {
+      "c": "y",
+      "de": [
+       {
+        "c": "cmp",
+        "camino": [
+         "tiempo",
+         "hora"
+        ],
+        "op": ">=",
+        "valor": 14
+       },
+       {
+        "c": "cmp",
+        "camino": [
+         "tiempo",
+         "hora"
+        ],
+        "op": "<",
+        "valor": 19
+       }
+      ]
+     }
+    ]
+   },
+   "repetir": "dia",
+   "peso": 2,
+   "hablan": [
+    "ana",
+    "diana"
+   ],
+   "cuerpo": [
+    {
+     "q": "ana",
+     "t": "Diana, ¿y si jugamos a que el estanque es un lago encantado, y en el fondo vive una dama de niebla?"
+    },
+    {
+     "q": "diana",
+     "t": "¡Sí! Pero tú hablas con ella. A mí me da miedo."
+    }
+   ]
+  },
+  "tejas_verdes.buenas_tardes_diana": {
+   "charla": "tejas_verdes.buenas_tardes_diana",
+   "resumen": "Diana saluda a Marilla, muy formal.",
+   "entre": [
+    "marilla",
+    "diana"
+   ],
+   "si": {
+    "c": "y",
+    "de": [
+     {
+      "c": "y",
+      "de": [
+       {
+        "c": "cmp",
+        "camino": [
+         "tiempo",
+         "hora"
+        ],
+        "op": ">=",
+        "valor": 13
+       },
+       {
+        "c": "cmp",
+        "camino": [
+         "tiempo",
+         "hora"
+        ],
+        "op": "<",
+        "valor": 19
+       }
+      ]
+     }
+    ]
+   },
+   "repetir": "dia",
+   "hablan": [
+    "diana",
+    "marilla"
+   ],
+   "cuerpo": [
+    {
+     "q": "diana",
+     "t": "Buenas tardes, Srta. Cuthbert."
+    },
+    {
+     "q": "marilla",
+     "t": "Buenas tardes, Diana. ¿Cómo está tu madre?"
+    },
+    {
+     "q": "diana",
+     "t": "Bien, gracias. Le manda saludos."
+    }
+   ]
+  },
+  "tejas_verdes.a_la_cama": {
+   "charla": "tejas_verdes.a_la_cama",
+   "resumen": "Marilla manda a Ana a la cama.",
+   "entre": [
+    "marilla",
+    "ana"
+   ],
+   "si": {
+    "c": "y",
+    "de": [
+     {
+      "c": "y",
+      "de": [
+       {
+        "c": "cmp",
+        "camino": [
+         "tiempo",
+         "hora"
+        ],
+        "op": ">=",
+        "valor": 19
+       },
+       {
+        "c": "cmp",
+        "camino": [
+         "tiempo",
+         "hora"
+        ],
+        "op": "<",
+        "valor": 21.5
+       }
+      ]
+     }
+    ]
+   },
+   "repetir": "dia",
+   "peso": 2,
+   "hablan": [
+    "marilla"
+   ],
+   "cuerpo": [
+    {
+     "q": "marilla",
+     "t": "A la cama, Ana. Y no te olvides de rezar."
+    },
+    {
+     "op": "Buenas noches, Srta. Cuthbert.",
+     "propia": true,
+     "cuerpo": []
+    },
+    {
+     "op": "¿Puedo leer un ratito más?",
+     "cuerpo": [
+      {
+       "q": "marilla",
+       "t": "Ni un ratito. Las velas no crecen en los árboles."
+      }
+     ]
+    }
+   ]
+  },
+  "tejas_verdes.el_sr_cuthbert": {
+   "charla": "tejas_verdes.el_sr_cuthbert",
+   "resumen": "Diana saluda a Matthew, que no sabe muy bien qué decirle a una niña.",
+   "entre": [
+    "matthew",
+    "diana"
+   ],
+   "si": {
+    "c": "y",
+    "de": [
+     {
+      "c": "y",
+      "de": [
+       {
+        "c": "cmp",
+        "camino": [
+         "tiempo",
+         "hora"
+        ],
+        "op": ">=",
+        "valor": 13
+       },
+       {
+        "c": "cmp",
+        "camino": [
+         "tiempo",
+         "hora"
+        ],
+        "op": "<",
+        "valor": 19
+       }
+      ]
+     }
+    ]
+   },
+   "repetir": "dia",
+   "hablan": [
+    "diana",
+    "matthew"
+   ],
+   "cuerpo": [
+    {
+     "q": "diana",
+     "t": "Buenas tardes, Sr. Cuthbert."
+    },
+    {
+     "q": "matthew",
+     "t": "Bueno… buenas tardes. Ana está… por ahí, creo."
+    },
+    {
+     "q": "diana",
+     "t": "Gracias, Sr. Cuthbert."
+    }
+   ]
+  }
+ },
  "personas": {
   "ana": "Ana",
   "marilla": "Marilla",
@@ -3660,56 +4341,6 @@
           },
           "ana",
           {
-           "verbo": "recoger_huevos",
-           "args": [
-            "ana"
-           ]
-          },
-          "12h"
-         ]
-        },
-        "si": {
-         "c": "y",
-         "de": [
-          {
-           "c": "cmp",
-           "camino": [
-            "cosas",
-            "gallinero",
-            "huevos"
-           ],
-           "op": ">",
-           "valor": 0
-          },
-          {
-           "c": "no",
-           "de": {
-            "c": "desde",
-            "camino": [
-             "hizo_t",
-             {
-              "param": 0
-             },
-             "dar_recado"
-            ],
-            "op": "<",
-            "valor": "2h",
-            "min": true
-           }
-          }
-         ]
-        },
-        "prioridad": 4
-       },
-       {
-        "hace": {
-         "verbo": "dar_recado",
-         "args": [
-          {
-           "param": 0
-          },
-          "ana",
-          {
            "verbo": "barrer",
            "args": [
             "ana"
@@ -3780,56 +4411,6 @@
             ],
             "op": "<",
             "valor": "2h",
-            "min": true
-           }
-          }
-         ]
-        },
-        "prioridad": 4
-       },
-       {
-        "hace": {
-         "verbo": "dar_recado",
-         "args": [
-          {
-           "param": 0
-          },
-          "matthew",
-          {
-           "verbo": "entrar_lena",
-           "args": [
-            "matthew"
-           ]
-          },
-          "2h"
-         ]
-        },
-        "si": {
-         "c": "y",
-         "de": [
-          {
-           "c": "cmp",
-           "camino": [
-            "cosas",
-            "cocina",
-            "lena"
-           ],
-           "op": "<",
-           "valor": 3
-          },
-          {
-           "c": "no",
-           "de": {
-            "c": "desde",
-            "camino": [
-             "hizo_t",
-             {
-              "param": 0
-             },
-             "dar_recado"
-            ],
-            "op": "<",
-            "valor": "1h",
             "min": true
            }
           }
@@ -5740,6 +6321,33 @@
            "c": "y",
            "de": [
             {
+             "c": "desde",
+             "camino": [
+              "tejas_verdes",
+              "hechos",
+              "quedamos_en_el_sendero"
+             ],
+             "op": "<",
+             "valor": "3d"
+            },
+            {
+             "c": "no",
+             "de": {
+              "c": "existe",
+              "camino": [
+               "tejas_verdes",
+               "hechos",
+               "quedamos_en_el_sendero"
+              ],
+              "ventana": "hoy"
+             }
+            }
+           ]
+          },
+          {
+           "c": "y",
+           "de": [
+            {
              "c": "cmp",
              "camino": [
               "tiempo",
@@ -6795,6 +7403,33 @@
             "op": "=",
             "valor": "domingo"
            }
+          },
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "desde",
+             "camino": [
+              "tejas_verdes",
+              "hechos",
+              "quedamos_en_el_sendero"
+             ],
+             "op": "<",
+             "valor": "3d"
+            },
+            {
+             "c": "no",
+             "de": {
+              "c": "existe",
+              "camino": [
+               "tejas_verdes",
+               "hechos",
+               "quedamos_en_el_sendero"
+              ],
+              "ventana": "hoy"
+             }
+            }
+           ]
           },
           {
            "c": "y",

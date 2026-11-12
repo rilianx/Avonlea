@@ -145,6 +145,7 @@ $('nuevo').onclick = nuevo; $('dia').onchange = nuevo; $('semilla').onchange = n
 // (qué hace alguien: su acción en el mundo; si está quieto esperando —en clase, en misa—, la actividad que lo tiene ahí)
 function que(q){
   const p = W.E.personas[q] || {}, h = M.haciendo(q);
+  const ch = M.charlas().find(c => c.quienes.includes(q)); if (ch && !p.viaje) return { ico: '💬', txt: 'conversa con ' + ch.quienes.filter(x => x !== q).map(x => M.nombre(x)).join(' y '), o: p.ocupado };   // (charlando: se detuvo a conversar)
   if (p.viaje) return { ico: '🚶', txt: 'va a ' + NOMBRE(p.viaje.a), hasta: p.viaje.llega, desde: p.viaje.sale };
   if (p.ocupado) return { ico: ICONO[p.ocupado.que.split(' ')[0]] || '•', txt: p.ocupado.que.replace(/_/g, ' '), hasta: p.ocupado.hasta, desde: p.ocupado.desde, o: p.ocupado };
   const a = h.length > 1 && /^(quedarse|esperar)$/.test(h[h.length - 1]) ? h[h.length - 2] : null;
@@ -206,6 +207,9 @@ function ana(){
   b('Soltar a Ana', () => { M.controlar('ana', false); pintar(); }, true);
   A.insertAdjacentHTML('beforeend', '<div class="t">La manejas tú: toca una casilla para que vaya, o hazle hacer algo ahí.</div>');
   // (lo que le pidieron: lo hace si quiere —tocando—; si no, vence, y no pasa nada)
+  // (una charla en que Ana tiene que decir algo: lo eliges tú)
+  const ec = M.estado().charla;
+  if (ec) { A.insertAdjacentHTML('beforeend', `<div class="t" style="margin-top:6px">💬 ${esc(ec.resumen)} ¿Qué dice Ana?</div>`); ec.ops.forEach((o, i) => b('«' + o + '»', () => { M.elegirCharla(i); pintar(); })); return; }
   const rs = M.recados('ana');
   if (rs.length) A.insertAdjacentHTML('beforeend', `<div class="t" style="margin-top:6px">${rs.map(r => `✉ ${esc(M.nombre(r.de))} te pidió: ${esc(r.hace.verbo.replace(/_/g, ' '))} (hasta las ${hhmm(r.hasta)})`).join('<br>')}</div>`);
   if (W.E.personas.ana?.viaje || W.E.personas.ana?.ocupado) return;
@@ -221,7 +225,7 @@ const ACCIONES_ANA = (() => { const L = [], vistos = new Set();
 // lo que pasa: el registro del mundo (quién va, llega, hace, termina, deja) y el del motor (quién deja lo que hacía, y por qué)
 function diario(){
   const L = [...W.E.registro.slice(-40).map(r => ({ t: r.t, txt: r.txt.replace(/^(\w+)/, (m, k) => D.personas[k] || k).replace(/_/g, ' ') })),
-    ...M.registro.slice(-30).filter(r => /^([⤳⏸▷✉]|✔ .* recado|· )/.test(r.t)).map(r => ({ t: (+r.hora.match(/día (\d+)/)[1] - 1) * 1440 + (+r.hora.slice(-5, -3)) * 60 + (+r.hora.slice(-2)), txt: r.t.replace(/_/g, ' ') }))]
+    ...M.registro.slice(-40).map((r, i) => ({ ...r, i })).filter(r => r.charla || /^([⤳⏸▷✉]|✔ .* recado|· )/.test(r.t)).map(r => ({ t: (+r.hora.match(/día (\d+)/)[1] - 1) * 1440 + (+r.hora.slice(-5, -3)) * 60 + (+r.hora.slice(-2)) + r.i * 1e-3, txt: r.tipo === 'linea' ? `💬 ${M.nombre(r.q)}: «${r.t}»` : r.tipo === 'eleccion' ? `💬 Ana: «${r.t}»` : r.t.replace(/_/g, ' ') }))]
     .filter(r => !/termina: (dormir|descansar)|: (dormir|descansar) \(/.test(r.txt)).sort((a, b) => b.t - a.t).slice(0, 30);
   $('diario').innerHTML = L.map(r => `<div><span class="h">${hhmm(r.t)}</span>${esc(r.txt)}</div>`).join('');
 }

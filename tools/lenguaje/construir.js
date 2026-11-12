@@ -37,7 +37,11 @@ function datos(raiz){
         if (v && v._inicio) inicio[id] = { ...inicio[id], ...v._inicio };
       }
     }
-    const D = { vidas, cosas, muebles, procesos, inicio, personas: mundo.personas, aspecto: mundo.aspecto, tableros: mundo.tableros, planos: mundo.planos, lugares: mundo.lugares, rutas: mundo.rutas, medios: mundo.medios, nombrables: mundo.nombrables, estados: estado.estados,
+    // (las charlas: lo que se dicen los que se encuentran —docs/lenguaje/charlas/—)
+    const charlas = {};
+    for (const f of fs.existsSync(path.join(raiz, 'charlas')) ? fs.readdirSync(path.join(raiz, 'charlas')).filter(f => f.endsWith('.datos.ts')) : [])
+      for (const c of Object.values(req('charlas/' + f.replace(/\.ts$/, '.js')).charlas)) charlas[c.charla] = c;
+    const D = { vidas, cosas, muebles, procesos, inicio, charlas, personas: mundo.personas, aspecto: mundo.aspecto, tableros: mundo.tableros, planos: mundo.planos, lugares: mundo.lugares, rutas: mundo.rutas, medios: mundo.medios, nombrables: mundo.nombrables, estados: estado.estados,
       cualidades: estado.cualidades, verbos, ana_sola: ana.ana_sola, opcion_no: ana.opcion_no, historias, escenas, voces };
     // (las funciones —un verbo nombrado en «con»— van como su nombre)
     return JSON.parse(JSON.stringify(D, (k, v) => typeof v === 'function' ? v.verbo : v));
@@ -49,6 +53,6 @@ if (require.main === module) {
   const raiz = path.resolve(process.argv[2] || 'docs/lenguaje'), D = datos(raiz);
   const salida = process.argv[3];
   if (salida) fs.writeFileSync(salida, JSON.stringify(D, null, 1));
-  console.log(`→ ${Object.keys(D.verbos).length} verbos, ${Object.keys(D.historias).length} historias, ${Object.keys(D.escenas).length} escenas, ${D.voces.length} voces${salida ? ' → ' + salida : ''}`);
+  console.log(`→ ${Object.keys(D.verbos).length} verbos, ${Object.keys(D.historias).length} historias, ${Object.keys(D.escenas).length} escenas, ${D.voces.length} voces, ${Object.keys(D.charlas).length} charlas${salida ? ' → ' + salida : ''}`);
 }
 module.exports = { datos };

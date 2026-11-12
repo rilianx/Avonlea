@@ -1,0 +1,131 @@
+// LAS CHARLAS DE TEJAS VERDES: lo que se dicen Ana, Marilla, Matthew y Diana cuando se encuentran (en el mismo
+// cuadrante, en la misma pieza). Cada una: entre quiénes, cuándo (si), cada cuánto (repetir: una_vez, dia, siempre) y
+// qué tan probable (peso) entre las que se pueden en ese momento. El guion es el de las escenas: «quien: texto», las
+// opciones de Ana («-> …», con lo que sigue debajo, con sangría; #propia: lo que diría ella sola), comandos que cambian
+// el mundo («<<dar_recado(…)>>», «<<deja(…)>>») y <<if>>. Lo revisa TypeScript: un nombre mal escrito es un error.
+
+title: buenos_dias
+resumen: Marilla le da los buenos días a Ana, a su manera.
+entre: marilla ana
+si: tiempo.hora.entre(6, 9)
+repetir: dia
+peso: 3
+---
+marilla: Buenos días, Ana. Lávate la cara y peina esas trenzas antes de sentarte a la mesa.
+-> Buenos días, Srta. Cuthbert. Ya voy. #propia
+-> ¿No es una mañana preciosa? Desde la ventana se ve la Reina de las Nieves toda blanca.
+    marilla: El cerezo no se va a ir a ninguna parte, Ana. El desayuno sí se enfría.
+===
+
+title: los_huevos
+resumen: Marilla le pide a Ana que traiga los huevos del gallinero.
+entre: marilla ana
+si: cosas.en('gallinero').huevos.gt(0), no(tiene_recado('ana', recoger_huevos)), no(hizo('ana', recoger_huevos).hoy)
+repetir: dia
+peso: 2
+---
+marilla: Ana, cuando puedas, trae los huevos del gallinero. Y no te quedes soñando entre las gallinas.
+<<dar_recado('marilla', 'ana', recoger_huevos('ana'), '12h')>>
+-> Sí, Srta. Cuthbert. #propia
+-> ¿Puedo ponerle nombre a la gallina pinta?
+    marilla: Las gallinas no necesitan nombre, Ana. Necesitan que alguien recoja sus huevos.
+===
+
+title: la_lena
+resumen: Marilla le avisa a Matthew que se está acabando la leña de la estufa.
+entre: marilla matthew
+si: cosas.en('cocina').lena.lt(3), cosas.en('granero').lena.gt(0), no(tiene_recado('matthew', entrar_lena))
+repetir: siempre
+peso: 3
+---
+marilla: Matthew, se está acabando la leña de la estufa.
+<<dar_recado('marilla', 'matthew', entrar_lena('matthew'), '2h')>>
+matthew: Bueno... sí. Ya la entro.
+===
+
+title: la_cerca
+resumen: Marilla le recuerda a Matthew la cerca del corral.
+entre: marilla matthew
+si: tiempo.hora.entre(17, 21), no(hizo('matthew', arreglar_cerca).hoy)
+repetir: dia
+---
+marilla: Matthew, la cerca del corral está otra vez floja. Un día de estos se nos escapa la vaca.
+matthew: Bueno... sí. Mañana la veo.
+===
+
+title: como_te_fue
+resumen: Matthew le pregunta a Ana cómo le fue, y Ana le cuenta.
+entre: matthew ana
+si: tiempo.hora.entre(15, 20)
+repetir: dia
+peso: 2
+---
+matthew: Bueno, Ana... ¿cómo te fue hoy?
+ana: ¡Oh, Sr. Cuthbert! Pasaron tantas cosas que no sé por dónde empezar.
+-> Contarle todo, desde el principio. #propia
+    ana: Primero, el camino estaba lleno de rocío, y cada gota era como un diamante pequeñito…
+    matthew: Bueno, bueno. Cuéntame.
+-> Preguntarle por las vacas.
+    matthew: Pues… están bien. La pinta da más leche que nunca.
+===
+
+title: quedamos
+resumen: Ana y Diana quedan de juntarse mañana en el Sendero de los Abedules, para ir a la escuela.
+entre: ana diana
+si: tiempo.hora.entre(14, 19), no(tiempo.semana.es('sabado')), no(hechos.quedamos_en_el_sendero.hoy)
+repetir: dia
+peso: 4
+---
+diana: ¿Mañana nos juntamos en el sendero, como siempre?
+-> ¡Claro! Te espero junto a los abedules. #propia
+    <<deja(hechos.quedamos_en_el_sendero)>>
+    diana: ¡Hasta mañana, Ana!
+-> Mañana no puedo: Marilla quiere que vaya temprano.
+    diana: Bueno. Entonces nos vemos allá.
+===
+
+title: el_lago
+resumen: Ana inventa un juego para las dos.
+entre: ana diana
+si: tiempo.hora.entre(14, 19)
+repetir: dia
+peso: 2
+---
+ana: Diana, ¿y si jugamos a que el estanque es un lago encantado, y en el fondo vive una dama de niebla?
+diana: ¡Sí! Pero tú hablas con ella. A mí me da miedo.
+===
+
+title: buenas_tardes_diana
+resumen: Diana saluda a Marilla, muy formal.
+entre: marilla diana
+si: tiempo.hora.entre(13, 19)
+repetir: dia
+---
+diana: Buenas tardes, Srta. Cuthbert.
+marilla: Buenas tardes, Diana. ¿Cómo está tu madre?
+diana: Bien, gracias. Le manda saludos.
+===
+
+title: a_la_cama
+resumen: Marilla manda a Ana a la cama.
+entre: marilla ana
+si: tiempo.hora.entre(19, 21.5)
+repetir: dia
+peso: 2
+---
+marilla: A la cama, Ana. Y no te olvides de rezar.
+-> Buenas noches, Srta. Cuthbert. #propia
+-> ¿Puedo leer un ratito más?
+    marilla: Ni un ratito. Las velas no crecen en los árboles.
+===
+
+title: el_sr_cuthbert
+resumen: Diana saluda a Matthew, que no sabe muy bien qué decirle a una niña.
+entre: matthew diana
+si: tiempo.hora.entre(13, 19)
+repetir: dia
+---
+diana: Buenas tardes, Sr. Cuthbert.
+matthew: Bueno… buenas tardes. Ana está… por ahí, creo.
+diana: Gracias, Sr. Cuthbert.
+===

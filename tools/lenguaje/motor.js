@@ -12,7 +12,7 @@
 (function (raiz) {
   function Motor(D, escenario = {}, Mundo = null, guardado = null) {
     Mundo = Mundo || (typeof module !== 'undefined' && module.exports ? require('./mundo_simulado.js').MundoSimulado : raiz.MundoSimulado);
-    let S = {}, registro = [], tareas = [], cola = [], porTras = [], escena = null, pregunta = null, fin = null, sigId = 1;
+    let S = {}, registro = [], tareas = [], cola = [], porTras = [], escena = null, pregunta = null, fin = null, sigId = 1, charlas = [];
     let t = (escenario.dia ?? 2) * 1440 - 1440 + (escenario.hora ?? 14) * 60;   // (minutos desde el comienzo del día 1)
     let respuestas = escenario.respuestas ? [...escenario.respuestas] : null;
     const auto = !!escenario.auto, opcionesGuion = escenario.opciones || {};
@@ -596,6 +596,63 @@
       escena = null; delete S['escena.interrumpio']; mundo.escena?.('corta', id);
     }
 
+    // ---------------------------------------------------------------- las charlas
+    // LO QUE SE DICEN LOS QUE SE ENCUENTRAN (docs/lenguaje/charlas/): cuando dos quedan juntos —el mismo cuadrante, la
+    // misma pieza: se ven—, si hay una charla para ellos que se pueda ahora (su «si», cada cuánto se repite), se la
+    // dicen. Como una escena, pero de la vida de todos los días, y varias a la vez, cada una con los suyos; se dicen
+    // mientras cada uno sigue en lo suyo. Si se separan, se corta. Si habla Ana y la maneja la jugadora, ella elige lo que
+    // dice; si no, Ana dice lo suyo (#propia) o algo, al azar.
+    const enCharla = q => charlas.some(C => C.quienes.includes(q));
+    const juntosTodos = qs => qs.every((a, i) => qs.slice(i + 1).every(b => mundo.funciones?.ve?.(a, b)));
+    function puedeCharla(c){
+      const [amb, id] = c.charla.split('.'), r = c.repetir || 'una_vez', d = get([amb, 'dichas', id]);
+      if ((r === 'una_vez' && d != null) || (r === 'dia' && d === dia())) return false;
+      return cumple(c.si);
+    }
+    function revisarEncuentros(){
+      if (!escenario.vidas || !D.charlas || !mundo.funciones?.ve) return;   // (las charlas de un lugar corren con sus vidas: charlas/tejas_verdes.yarn, con vidas: 'tejas_verdes')
+      const qs = Object.keys(D.personas).filter(q => lugarDe(q) != null), ahora = [];
+      for (let i = 0; i < qs.length; i++) for (let j = i + 1; j < qs.length; j++) if (mundo.funciones.ve(qs[i], qs[j])) ahora.push(qs[i] + '|' + qs[j]);
+      const antes = S['juntos'] || []; S['juntos'] = ahora;
+      for (const par of ahora) if (!antes.includes(par)) encuentro(par.split('|'));
+    }
+    function encuentro(par){
+      if (par.some(enCharla) || par.some(q => mundo.funciones?.de_camino?.(q))) return;   // (quien va de paso, no se pone a charlar)
+      const cands = Object.values(D.charlas).filter(c => c.charla.startsWith(escenario.vidas + '.') && c.entre.length === par.length && par.every(q => c.entre.includes(q)) && puedeCharla(c));
+      if (!cands.length) return;
+      let r = azar() * cands.reduce((n, c) => n + (c.peso ?? 1), 0), c = cands[cands.length - 1];
+      for (const x of cands) { r -= x.peso ?? 1; if (r < 0) { c = x; break; } }
+      const [amb, id] = c.charla.split('.'); set([amb, 'dichas', id], dia());
+      nota(`💬 ${id}: ${c.resumen}`, 'charla');
+      charlas.push({ id: c.charla, quienes: [...c.entre], pila: [[...c.cuerpo]], acc: null, ops: null });
+    }
+    // (cada charla, lo que sigue: hasta una elección de la jugadora, o hasta que la línea que se dice termine; devuelve si
+    // alguna espera a la jugadora)
+    function seguirCharlas(){
+      for (const C of [...charlas]) {
+        if (!juntosTodos(C.quienes)) { nota(`✂ se corta la charla ${C.id.split('.')[1]}: se separaron`, 'charla'); if (C.acc) mundo.cancelar?.(C.acc); charlas.splice(charlas.indexOf(C), 1); continue; }
+        while (!C.ops && (!C.acc || mundo.listo(C.acc))) {
+          if (C.acc) { mundo.terminar?.(C.acc); C.acc = null; continue; }
+          const top = C.pila[C.pila.length - 1];
+          if (!top) { charlas.splice(charlas.indexOf(C), 1); break; }
+          if (!top.length) { C.pila.pop(); continue; }
+          const it = top[0];
+          if (it.op !== undefined) {
+            const ops = []; while (top.length && top[0].op !== undefined) ops.push(top.shift());
+            if (C.quienes.includes('ana') && get(['controla', 'ana']) && !auto) { C.ops = ops; break; }   // (la jugadora elige)
+            const p = ops.findIndex(o => o.propia); elegirEnCharla(C, ops, p >= 0 ? p : Math.floor(azar() * ops.length)); continue;
+          }
+          top.shift();
+          if (it.q) { registro.push({ tipo: 'linea', q: it.q, t: it.t, piensa: !!it.piensa, hora: reloj(), charla: C.id }); C.acc = { decir: { q: it.q, t: it.t, piensa: !!it.piensa } }; mundo.empezar(C.acc); if (it.acto) for (const e of def(it.acto).deja || []) aplicar(e); }
+          else if (it.hace && it.hace.e === 'silencio') { C.acc = { silencio: true, dura: aMin(it.hace.dura) }; mundo.empezar(C.acc); }
+          else if (it.hace) aplicar(it.hace);
+          else if (it.si) C.pila.push([...(cumple(it.si) ? it.cuerpo : it.sino)]);
+        }
+      }
+      return charlas.some(C => C.ops);
+    }
+    function elegirEnCharla(C, ops, i){ const op = ops[i]; registro.push({ tipo: 'eleccion', t: op.op, hora: reloj(), charla: C.id }); C.ops = null; C.pila.push([...op.cuerpo]); }
+
     // ---------------------------------------------------------------- el paso del tiempo
     function responderAuto(q){
       if (respuestas && respuestas.length) return respuestas.shift();
@@ -608,7 +665,7 @@
     let tope = null;
     function avanzar(limite = escenario.paso || 5000){
       // (los encargos de quienes están en una escena que no va en marcha, esperan a que termine)
-      const detenida = T => escena && !escena.en_marcha && escena.participan.includes(T.quien);
+      const detenida = T => (escena && !escena.en_marcha && escena.participan.includes(T.quien)) || enCharla(T.quien);   // (y los que están charlando: se detienen a conversar —terminan lo que hacían, y esperan—)
       for (let vuelta = 0; vuelta < limite; vuelta++) {
         if (pregunta) return estadoUI();
         if (escena && !escena.ops) seguirEscena();   // (con opciones pendientes, la escena espera a que la jugadora elija)
@@ -617,7 +674,8 @@
         revisarHistorias();
         if (fin && tope == null) return estadoUI();   // (al probar, una historia que termina es el final; en el juego, el mundo sigue)
         if (!escena && cola.length && elegirEscena()) continue;
-        revisarVidas(); procesar();
+        revisarVidas(); procesar(); revisarEncuentros();
+        if (seguirCharlas()) return estadoUI();   // (una charla en que la jugadora tiene que elegir qué dice Ana: espera)
         const lista = tareas.filter(T => !T.fin && !T.pregunta && !T.susp && !detenida(T) && ((T.accion && mundo.listo(T.accion)) || (T.hasta ? cumple(T.hasta) || (T.revisa && T.despierta <= t) : T.despierta <= t)));
         if (lista.length) {
           const T = lista[0]; T.hasta = null; T.accion = null;
@@ -636,6 +694,7 @@
         }
         const prox = tareas.filter(T => !T.fin && !T.pregunta && !T.susp && (!T.hasta || T.revisa) && !detenida(T)).map(T => T.despierta);
         if (escena && escena.acc) prox.push(mundo.cuando(escena.acc));
+        for (const C of charlas) if (C.acc) prox.push(mundo.cuando(C.acc));
         if (PROCESOS().length) prox.push(proxProceso());
         const prox1 = prox.length ? Math.min(...prox) : Infinity;
         if (tope != null && prox1 > tope) { t = Math.max(t, tope); return estadoUI(); }   // (lo que sigue es más tarde que la hora del juego)
@@ -648,12 +707,13 @@
     function estadoUI(){
       const P = enPregunta();
       return { escena: escena && { id: escena.id, resumen: D.escenas[escena.id].resumen, ops: escena.ops?.map(o => o.op) },
-        pregunta: P && { de: nombre(P.pregunta.de), si: P.pregunta.si, no: P.pregunta.no }, fin, reloj: reloj() };
+        pregunta: P && { de: nombre(P.pregunta.de), si: P.pregunta.si, no: P.pregunta.no }, fin, reloj: reloj(),
+        charla: (C => C && { id: C.id, quienes: C.quienes, resumen: D.charlas[C.id].resumen, ops: C.ops.map(o => o.op) })(charlas.find(C => C.ops)) };
     }
 
     // ---------------------------------------------------------------- el comienzo: un escenario, o una partida guardada
     // (lo que trae el mundo —el simulado: el día de White Sands—, y encima lo del escenario: lugares y estado; null borra)
-    if (guardado) ({ S, registro, tareas, cola, porTras, escena, pregunta, fin, sigId, t, respuestas } = guardado);
+    if (guardado) ({ S, registro, tareas, cola, porTras, escena, pregunta, fin, sigId, t, respuestas, charlas = [] } = guardado);
     else {
       const ini = Mundo.inicio || {};
       for (const [x, l] of Object.entries({ ...(ini.lugares || {}), ...((escenario.vidas && D.inicio?.[escenario.vidas]) || {}), ...(escenario.lugares || {}) })) set(['mundo', x, 'lugar'], l);   // (y si hay vidas, donde empieza cada uno: inicioDe)
@@ -675,6 +735,9 @@
       // la jugadora maneja a alguien (Ana): su vida se suspende; al soltarla, vuelve a la suya
       controlar(q, si = true){ if (si) set(['controla', q], 1); else delete S[k(['controla', q])]; nota(si ? `(la jugadora maneja a ${nombre(q)})` : `(la jugadora suelta a ${nombre(q)})`); return avanzar(); },
       haciendo,
+      // la jugadora elige lo que dice Ana en una charla (la que espera: estado().charla)
+      elegirCharla(i){ const C = charlas.find(x => x.ops); if (C) elegirEnCharla(C, C.ops, i); return avanzar(); },
+      charlas: () => charlas.map(C => ({ id: C.id, quienes: [...C.quienes] })),
       // los recados que tiene alguien: de quién, qué, hasta qué hora
       recados: q => revisarRecados(q).map(r => ({ ...r })),
       // lo que la jugadora hace por su cuenta (cuando no hay escena ni pregunta)
@@ -696,7 +759,7 @@
       // el mundo dice cómo está lo que es suyo (en qué va cada uno, la calesa lista, el afecto, un estado del juego); null lo borra
       vale(camino, v){ if (v == null) delete S[k(camino)]; else if (get(camino) !== v) set(camino, v); },
       // la partida entera, como datos (JSON): se vuelve a cargar con Motor.cargar
-      guardar: () => JSON.stringify({ v: 1, escenario, S, registro, tareas, cola, porTras, escena, pregunta, fin, sigId, t, respuestas }),
+      guardar: () => JSON.stringify({ v: 1, escenario, S, registro, tareas, cola, porTras, escena, pregunta, fin, sigId, t, respuestas, charlas }),
       registro, get, nombre, lugares: () => Object.keys(D.lugares),
       encargos: () => Object.entries(D.historias).flatMap(([h, H]) => Object.keys(H.encargo).map(et => ({ historia: h, etiqueta: et, estado: get(['encargo', h, et]) }))),
       resumen: () => ({ reloj: reloj(), estado: get(['estado', 'ana_en_tv']), paciencia: get(['cualidad', 'marilla', 'paciencia', 'ana']),

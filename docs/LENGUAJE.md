@@ -267,6 +267,19 @@ una vida es una receta, y una actividad («ir a clases»: ir, quedarse, volver) 
   otra hasta una hora; se cumple si se ven. Así van Ana y Diana a la escuela, como en el libro: se juntan en el Sendero
   de los Abedules, Diana espera a que Ana vaya con ella, y siguen juntas. Si una no llega, la otra va sola; si Diana
   cambia de planes en el camino, Ana la suelta y sigue sola.
+- **Las charlas** (`docs/lenguaje/charlas/<lugar>.yarn`, compiladas y revisadas por TypeScript como las escenas):
+  lo que se dicen los que se encuentran, en el mismo cuadrante o en la misma pieza.
+  - Cada charla declara entre quiénes es (`entre: marilla ana`), cuándo (`si`), cada cuánto (`repetir`) y qué tan
+    probable es entre las que se pueden en ese momento (`peso`).
+  - El guion es el de las escenas: líneas, opciones de Ana (`-> …`, `#propia`), `<<if>>` y comandos que cambian el
+    mundo. Marilla pide los huevos diciéndolo (`<<dar_recado(…)>>`), y Ana y Diana quedan para mañana
+    (`<<deja(hechos.quedamos_en_el_sendero)>>`): el encuentro de la mañana depende de haberlo quedado.
+  - Cuando dos quedan juntos y hay una charla que se pueda, se la dicen. Pueden ir varias a la vez, cada una con los
+    suyos. Los que charlan se detienen a conversar (terminan lo que hacían y esperan); quien va de paso no charla, y si
+    se separan, la charla se corta.
+  - Si habla Ana y la maneja la jugadora, ella elige lo que dice; si no, Ana dice lo suyo (`#propia`).
+  - Las charlas de un lugar corren con sus vidas (`vidas: 'tejas_verdes'`). `node tools/mundo/dia.js` cuenta cuántas
+    hubo, cuáles nunca salen y quiénes no se hablan (`--charlas`: cada una, con lo que se dijeron).
 - **Nada del mundo está escrito en el código: todo se declara.**
   - **El tablero y el plano** de una casa (`tableros`, `planos` en `comun/mundo.ts`). Del tablero: su esquina en el mapa
     del juego, cuántos cuadrantes y qué zonas. Del plano: sus piezas en cada piso, sus puertas y por dónde se sale.

@@ -113,6 +113,25 @@ function escena(n, historia){
   }),`;
 }
 
+// ---------------------------------------------------------------- una charla (docs/lenguaje/charlas/*.yarn)
+// cabecera: title, resumen, entre (quiénes: «marilla ana»), si, repetir, peso; el guion, como el de una escena
+function charla(n){
+  const donde = `${n.archivo}:${n.desde} (${n.cab.title})`;
+  if (!n.cab.title || !n.cab.resumen) throw new Error(donde + ': falta title o resumen');
+  if (!n.cab.entre) throw new Error(donde + ': falta entre (quiénes: «marilla ana»)');
+  const { cuerpo, hablan } = guion(n), si = n.cab.si ? partes(n.cab.si).map(c => expr(c, donde)) : [], entre = n.cab.entre.trim().split(/\s+/).map(q => expr(q, donde));
+  for (const q of hablan) if (q !== 'narra' && !entre.includes(q)) throw new Error(donde + ': habla «' + q + '», que no está en «entre»');
+  return `  ${n.cab.title}: defCharla(charla.${n.cab.title}, {
+    resumen: ${JSON.stringify(n.cab.resumen)},
+    entre: [${entre.map(q => `'${q}'`).join(', ')}],
+    si: y(${si.join(', ')}),${n.cab.repetir ? `\n    repetir: '${expr(n.cab.repetir, donde)}',` : ''}${n.cab.peso ? `\n    peso: ${+expr(n.cab.peso, donde)},` : ''}
+    hablan: [${[...hablan].map(q => `'${q}'`).join(', ')}],
+    cuerpo: [
+      ${cuerpo.join(',\n      ')},
+    ],
+  }),`;
+}
+
 // ---------------------------------------------------------------- una voz
 function voz(n){
   const donde = `${n.archivo}:${n.desde} (${n.cab.title})`, lineas = [];
@@ -174,6 +193,18 @@ function construir(raiz){
       + imports(cuerpo + ' defEscena y' + (vs.length ? ' voz' : ''), [...locales, ...modulosComunes], dir)
       + '\n\nexport const escenas = {\n' + es.join('\n') + '\n}\n\nexport const voces = [\n' + vs.join('\n') + '\n]\n');
     escritos.push(`historias/${h}: ${es.length} escenas, ${vs.length} voces`);
+  }
+  // las charlas: cada archivo, un ámbito (charlas/tejas_verdes.yarn: los de Tejas Verdes; sus nombres, los de sus vidas)
+  const dc = path.join(raiz, 'charlas');
+  if (fs.existsSync(dc)) for (const f of fs.readdirSync(dc).filter(f => f.endsWith('.yarn'))) {
+    const a = f.replace(/\.yarn$/, ''), ns = nodos(fs.readFileSync(path.join(dc, f), 'utf8'), `charlas/${f}`), ids = ns.map(n => n.cab.title);
+    const rep = ids.find((x, i) => ids.indexOf(x) !== i); if (rep) throw new Error(`charlas/${f}: dos charlas «${rep}»`);
+    fs.writeFileSync(path.join(dc, a + '.ids.ts'), CABEZA(`charlas/${f}`) + `import { charlasDe } from '../comun/lenguaje'\n\nexport const { charla, dichas } = charlasDe('${a}', [\n${ids.map(x => `  '${x}',\n`).join('')}] as const)\n`);
+    const cs = ns.map(charla), cuerpo = cs.join('\n'), vida = path.join(raiz, 'vidas', a + '.ts');
+    const locales = [[path.join(dc, a + '.ids.ts'), new Set(['charla', 'dichas'])], ...(fs.existsSync(vida) ? [[vida, exportsDe(vida)]] : [])];
+    fs.writeFileSync(path.join(dc, a + '.datos.ts'), CABEZA(`charlas/${f}`) + imports(cuerpo + ' defCharla y', [...locales, ...modulosComunes], dc)
+      + '\n\nexport const charlas = {\n' + cs.join('\n') + '\n}\n');
+    escritos.push(`charlas/${f}: ${cs.length} charlas`);
   }
   return escritos;
 }

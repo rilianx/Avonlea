@@ -51,7 +51,7 @@
         const i = r.indexOf(en(desde)), j = r.indexOf(hasta);
         return i <= j ? r.slice(i + 1, j + 1) : r.slice(j, i).reverse();
       },
-      funciones: { ve: y(juntos), oye: y(juntos), sola: y(p => Object.keys(D.personas).every(q => q === p || !juntos(p, q))) },
+      funciones: { ve: y(juntos), oye: y(juntos), de_camino: y(q => !!(W.E.personas[q] || W.E.medios[q])?.viaje), sola: y(p => Object.keys(D.personas).every(q => q === p || !juntos(p, q))) },
       empezar(acc){
         iniciar(); W.avanzarHasta(api.ahora());
         if (acc.mapa) {   // (la gente del pueblo aparece: sale ahora y llega ya)

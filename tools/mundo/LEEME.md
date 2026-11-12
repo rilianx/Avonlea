@@ -43,14 +43,15 @@ otro.
     hora, dónde y cuánto duró.
   - **Manejar a Ana**: su día se suspende; tocando una casilla, va; y se le puede hacer hacer lo de su día ahí. Al
     soltarla, vuelve a lo suyo. Si le pidieron algo (✉ Marilla te pidió: recoger huevos, hasta las 19:30), lo hace si
-    quiere; si no, vence y no pasa nada. Si ve a alguien, «👣 ir con…»: lo acompaña mientras siga en lo suyo (o hasta
+    quiere; si no, vence y no pasa nada. En una charla, elige lo que dice Ana. Si ve a alguien, «👣 ir con…»: lo acompaña mientras siga en lo suyo (o hasta
     que la sueltes, tocando una casilla). En la lupa, los recados de cada uno.
 - **Un día en un minuto** (`node tools/mundo/dia.js`): vive unos días seguidos —una semana, en menos de un segundo—, saca
   el diario de cada uno, y revisa las reglas de lo natural: de noche duermen; desayunan y cenan; los días de clases
   están en la escuela a mediodía; nadie pasa más de una hora sin nada que hacer; dos días seguidos de Ana no son
   iguales; la casa no se descuida (nunca más de 6 platos sucios, y nunca falta leña para cocinar); nadie se queda
   trabado. También dice cuántas veces alguien retomó algo, y cuánto hubo de cada cosa en la casa. Si una no se cumple, falla.
-  Cuenta las mañanas en que Ana y Diana se encontraron en el sendero, y los recados (cuántos se pidieron, se hicieron, vencieron, o ya no hacían falta; `--recados`, cada uno).
+  Cuenta las charlas (cuántas al día, cuáles, las que nunca salen, quiénes no se hablan; `--charlas`, con lo que se
+  dijeron), las mañanas en que Ana y Diana se encontraron en el sendero, y los recados (cuántos se pidieron, se hicieron, vencieron, o ya no hacían falta; `--recados`, cada uno).
   Antes de vivirlos, revisa las cosas y los muebles (`node tools/mundo/verificar_vidas.js`, docs/LENGUAJE.md §6.1).
   ```
   node tools/mundo/dia.js                          # tres días, desde el viernes

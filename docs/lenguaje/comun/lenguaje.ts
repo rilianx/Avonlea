@@ -312,6 +312,27 @@ export type DefEscena = {
   readonly cuerpo: readonly Item[]
 }
 export const defEscena = (id: Escena, def: DefEscena) => ({ ...id, ...def })
+// LAS CHARLAS (docs/lenguaje/charlas/*.yarn, las genera tools/lenguaje/yarn.js): lo que se dicen los que se encuentran
+// —en el mismo cuadrante, en la misma pieza—. Como una escena, pero no la activa una historia, sino encontrarse:
+// «entre», quiénes; «si», cuándo; «repetir», cada cuánto; «peso», qué tan probable entre las que se pueden. El guion,
+// el de las escenas (líneas, actos, opciones de Ana, comandos que cambian el mundo —un recado, un hecho—, <<if>>)
+export type Charla = { readonly charla: string }
+export function charlasDe<const E extends readonly string[]>(ambito: string, ids: E) {
+  return {
+    charla: Object.fromEntries(ids.map(k => [k, { charla: ambito + '.' + k }])) as { readonly [K in E[number]]: Charla },
+    dichas: Object.fromEntries(ids.map(k => [k, hecho(ambito, 'dichas', k)])) as { readonly [K in E[number]]: Hecho },
+  }
+}
+export type DefCharla = {
+  readonly resumen: string
+  readonly entre: readonly Persona[]
+  readonly si: Cond
+  readonly repetir?: 'una_vez' | 'dia' | 'siempre'
+  readonly peso?: number
+  readonly hablan: readonly (Persona | 'narra')[]
+  readonly cuerpo: readonly Item[]
+}
+export const defCharla = (id: Charla, def: DefCharla) => ({ ...id, ...def })
 // una voz: el patrón de llamada («_» vale cualquiera), el paso de la receta si es la voz de un paso, y las condiciones
 // de sus variantes (true: sin condición)
 export const _ = { comodin: true } as never

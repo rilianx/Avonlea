@@ -19,9 +19,10 @@
 //   No espera: queda en la lista del otro, que lo hace cuando puede —Ana, después de la escuela—, o vence y no pasa
 //   nada. Si la jugadora maneja a Ana, lo ve como un recado que puede hacer o no.
 // - Juntas: las mañanas de clases, Ana y Diana quedan de encontrarse en el Sendero de los Abedules, como en el libro,
-//   y siguen juntas (Ana acompaña a Diana). Si una no llega —Diana, algunas mañanas, va directo—, la otra la espera
+//   y siguen juntas (Ana acompaña a Diana), si lo quedaron la tarde anterior (una charla). Si una no llega —Diana,
+//   algunas mañanas, va directo—, la otra la espera
 //   hasta casi las ocho y va sola; si Diana cambia de planes en el camino, Ana sigue sola.
-import { cosasDe, elegir, esta_haciendo, hizo, inicioDe, mueblesDe, no, primitivo, procesos, receta, repetir, si, tiempo, tiene_recado, vida, y, o } from '../comun/lenguaje'
+import { cosasDe, elegir, esta_haciendo, hechosDe, hizo, inicioDe, mueblesDe, no, primitivo, procesos, receta, repetir, si, tiempo, tiene_recado, vida, y, o } from '../comun/lenguaje'
 import { mundo, ve, type Lugar, type Persona } from '../comun/mundo'
 import { acompañar, dar_recado, esperar, hacer_recado, ir_a, llevar, poner, quedarse } from '../comun/verbos'
 
@@ -60,6 +61,12 @@ export const muebles = mueblesDe({
   granero: { tronco: 1 }, corral: { vacas: 1, cerca: { caben: 3, en: [0, 1] } }, tejas_verdes: { porche: 3, tina: { caben: 1, en: [1, 0] } },   // (la cerca, un cuadrante más abajo que las vacas; la tina, al lado del patio)
   cuesta_del_huerto: { cama: 1, mesa: 6, ventana: 2 },
 })
+// (lo que pasó, de los de Tejas Verdes: lo dejan las charlas —docs/lenguaje/charlas/tejas_verdes.yarn—)
+export const hechos = hechosDe('tejas_verdes', {
+  quedamos_en_el_sendero: 'Ana y Diana quedaron de juntarse en el Sendero de los Abedules, a la mañana siguiente, para ir a la escuela',
+})
+// (si quedaron —ayer, o antes de ayer si fue sábado—: hoy se juntan)
+const quedaron = y(hechos.quedamos_en_el_sendero.desde('<', '3d'), no(hechos.quedamos_en_el_sendero.hoy))
 // (dónde empieza cada uno: donde duerme; la calesa, en el corral)
 export const inicio = inicioDe({ ana: 'pieza', marilla: 'pieza_marilla', matthew: 'pieza_matthew', diana: 'cuesta_del_huerto', calesa: 'corral' })
 export const pasa_solo = procesos(
@@ -206,10 +213,8 @@ export const dia_de_marilla = receta('dia_de_marilla', (q: Persona) => ({
       { hace: batir_mantequilla(q), si: y(o(manana, tarde), no(domingo)), prioridad: 3 },   // (si hay leche)
       { hace: ir_a_la_iglesia(q, 'cocina'), si: y(domingo, tiempo.hora.entre(10, 10.5), no(hizo(q, ir_a_la_iglesia).hoy)), prioridad: 7 },
       { hace: recoger_huevos(q), si: y(o(manana, tarde), no(ve(q, 'ana')), no(tiene_recado('ana', recoger_huevos)), no(hizo(q, dar_recado).desde('<', '6h'))), prioridad: 3 },   // (si Ana está, se lo pide a ella; si se lo pidió, espera; si a Ana se le pasó, los trae ella)
-      // (los recados: uno cada tanto, al que está ahí; ella no espera)
-      { hace: dar_recado(q, 'ana', recoger_huevos('ana'), '12h'), si: y(en('gallinero').huevos.gt(0), no(hizo(q, dar_recado).desde('<', '2h'))), prioridad: 4 },
+      // (los recados: uno cada tanto, al que está ahí; ella no espera. Los huevos y la leña los pide conversando: charlas)
       { hace: dar_recado(q, 'ana', barrer('ana'), '12h'), si: y(sabado, manana, no(hizo(q, barrer).hoy), no(hizo(q, dar_recado).desde('<', '2h'))), prioridad: 4 },
-      { hace: dar_recado(q, 'matthew', entrar_lena('matthew'), '2h'), si: y(en('cocina').lena.lt(3), no(hizo(q, dar_recado).desde('<', '1h'))), prioridad: 4 },
       { hace: dar_recado(q, 'matthew', partir_lena('matthew'), '4h'), si: y(en('granero').lena.lt(2), en('cocina').lena.lt(3), no(hizo(q, dar_recado).desde('<', '1h'))), prioridad: 4 },
       { hace: coser(q), si: y(o(manana, tarde, atardecer), no(domingo), no(hizo(q, coser).desde('<', '40m'))), prioridad: 1, peso: 3 },   // (cose un rato, y hace otra cosa)
       { hace: leer(q, 'cocina'), si: domingo, prioridad: 1 },   // (el domingo, la Biblia)
@@ -256,7 +261,7 @@ export const dia_de_ana = receta('dia_de_ana', (q: Persona) => ({
       { hace: rezar(q), si: y(tiempo.hora.entre(20.5, 21), no(hizo(q, rezar).hoy)), prioridad: 8 },
       { hace: desayunar(q, 'cocina'), si: y(tiempo.hora.entre(7, 7.75), no(hizo(q, desayunar).hoy)), prioridad: 8 },
       { hace: ir_a_clases(q, 'tejas_verdes'), si: y(dia_de_clases, tiempo.hora.entre(7.85, 8.25), no(hizo(q, ir_a_clases).hoy), no(hizo(q, ir_a_clases_con).hoy)), prioridad: 7 },   // (sola: si no se encontraron)
-      { hace: ir_a_clases_con(q, 'diana', 'arbustos', 'tejas_verdes'), si: y(dia_de_clases, tiempo.hora.entre(7.6, 7.85), no(hizo(q, ir_a_clases).hoy), no(hizo(q, ir_a_clases_con).hoy), o(no(ve(q, 'diana')), esta_haciendo('diana', ir_a_clases_por))), prioridad: 7 },   // (con Diana: se encuentran en el sendero; no si Diana, ahí, está en otra cosa)
+      { hace: ir_a_clases_con(q, 'diana', 'arbustos', 'tejas_verdes'), si: y(dia_de_clases, quedaron, tiempo.hora.entre(7.6, 7.85), no(hizo(q, ir_a_clases).hoy), no(hizo(q, ir_a_clases_con).hoy), o(no(ve(q, 'diana')), esta_haciendo('diana', ir_a_clases_por))), prioridad: 7 },   // (con Diana: se encuentran en el sendero; no si Diana, ahí, está en otra cosa)
       { hace: comer(q, 'cocina'), si: y(domingo, tiempo.hora.entre(12, 13.5), no(hizo(q, comer).hoy)), prioridad: 8 },
       { hace: ir_a_la_iglesia(q, 'tejas_verdes'), si: y(domingo, tiempo.hora.entre(10, 10.5), no(hizo(q, ir_a_la_iglesia).hoy)), prioridad: 7 },
       { hace: cenar(q, 'cocina'), si: y(tiempo.hora.entre(18, 19), no(hizo(q, cenar).hoy)), prioridad: 8 },
@@ -282,7 +287,7 @@ export const dia_de_diana = receta('dia_de_diana', (q: Persona) => ({
       { hace: volver_a_casa(q, 'cuesta_del_huerto'), si: y(tiempo.hora.entre(18, 7), no(mundo(q).lugar.es('cuesta_del_huerto'))), prioridad: 9 },
       { hace: desayunar(q, 'cuesta_del_huerto'), si: y(tiempo.hora.entre(7, 7.75), no(hizo(q, desayunar).hoy)), prioridad: 8 },
       { hace: ir_a_clases(q, 'cuesta_del_huerto'), si: y(dia_de_clases, tiempo.hora.entre(7.4, 8.25), no(hizo(q, ir_a_clases).hoy), no(hizo(q, ir_a_clases_por).hoy)), prioridad: 7 },   // (directo: algunas mañanas)
-      { hace: ir_a_clases_por(q, 'ana', 'arbustos', 'cuesta_del_huerto'), si: y(dia_de_clases, tiempo.hora.entre(7.4, 7.9), no(hizo(q, ir_a_clases_por).hoy), no(hizo(q, ir_a_clases).hoy)), prioridad: 7, peso: 3 },   // (por el sendero, a encontrarse con Ana)
+      { hace: ir_a_clases_por(q, 'ana', 'arbustos', 'cuesta_del_huerto'), si: y(dia_de_clases, quedaron, tiempo.hora.entre(7.4, 7.9), no(hizo(q, ir_a_clases_por).hoy), no(hizo(q, ir_a_clases).hoy)), prioridad: 7, peso: 3 },   // (por el sendero, a encontrarse con Ana)
       { hace: cenar(q, 'cuesta_del_huerto'), si: y(tiempo.hora.entre(18, 19), no(hizo(q, cenar).hoy)), prioridad: 8 },
       { hace: comer(q, 'cuesta_del_huerto'), si: y(domingo, tiempo.hora.entre(12, 13.5), no(hizo(q, comer).hoy)), prioridad: 8 },
       { hace: ir_a_la_iglesia(q, 'cuesta_del_huerto'), si: y(domingo, tiempo.hora.entre(10, 10.5), no(hizo(q, ir_a_la_iglesia).hoy)), prioridad: 7 },
