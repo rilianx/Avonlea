@@ -56,6 +56,10 @@ export const soltar = primitivo('soltar', (quien: Persona, otro: Persona) => ({
 // (no deja nada: se cumple cuando se cumple «hasta»)
 export const esperar = primitivo('esperar', (_quien: Persona, hasta: Cond) => ({ pide: hasta }))
 
+// (quedarse donde está hasta que se cumpla «hasta»: si se va antes —lo corta algo más importante, la jugadora se la
+// lleva—, no se cumple: la clase hasta las tres y media)
+export const quedarse = primitivo('quedarse', (_quien: Persona, hasta: Cond) => ({ pide: hasta }))
+
 // ---------------------------------------------------------------- por mapa
 
 // (un lugar, o donde está alguien ahora: mundo(otro).lugar)

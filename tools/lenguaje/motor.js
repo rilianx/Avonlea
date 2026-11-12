@@ -20,11 +20,12 @@
     // ---------------------------------------------------------------- el estado
     const k = c => c.join('.');
     const dia = () => Math.floor(t / 1440) + 1, hora = () => (t % 1440) / 60;
+    const SEMANA = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
     function defecto(c){
       if (c[0] === 'estado') return D.estados[c[1]]?.inicial;
       if (c[0] === 'cualidad') return D.cualidades[c[2]]?.inicial ?? 0;
       if (c[0] === 'mundo') return c[2] === 'en' ? 'nada' : c[2] === 'sigue' ? 'nadie' : c[2] === 'listo' ? 'no' : undefined;
-      if (c[0] === 'tiempo') return c[1] === 'hora' ? hora() : dia();
+      if (c[0] === 'tiempo') return c[1] === 'hora' ? hora() : c[1] === 'semana' ? SEMANA[dia() % 7] : dia();
       if (c[0] === 'intentos') return 0;
       if (c[0] === 'encargo') return 'pendiente';
       if (c[0] === 'historia') return 'no_empezada';
@@ -58,7 +59,8 @@
           const x = ordinal(c.camino, a), y = ordinal(c.camino, b); if (x < 0 || y < 0) return false;
           return { '<': x < y, '<=': x <= y, '>': x > y, '>=': x >= y }[c.op];
         }
-        case 'desde': { const d = get(c.camino); if (d == null) return false; const n = parseFloat(c.valor), u = c.valor.slice(-1), pas = u === 'd' ? dia() - d : (dia() - d) * 24;
+        case 'desde': { const d = get(c.camino); if (c.min) { const pas = d == null ? Infinity : t - d, n = aMin(c.valor); return { '<': pas < n, '<=': pas <= n, '>': pas > n, '>=': pas >= n, '=': pas === n }[c.op]; }   // (hizo: el minuto en que lo hizo)
+          if (d == null) return false; const n = parseFloat(c.valor), u = c.valor.slice(-1), pas = u === 'd' ? dia() - d : (dia() - d) * 24;
           return { '<': pas < n, '<=': pas <= n, '>': pas > n, '>=': pas >= n, '=': pas === n }[c.op]; }
         case 'y': return c.de.every(cumple);
         case 'o': return c.de.some(cumple);
@@ -128,7 +130,7 @@
     const aMin = d => { const n = parseFloat(d), u = d.slice(-1); return u === 's' ? n / 60 : u === 'm' ? n : u === 'h' ? n * 60 : n * 1440; };
     const yaEs = e => e.e === 'deja' && e.valor !== undefined && get(e.camino) === val(e.valor);
     function correr(T){
-      revisarMantiene(T);
+      revisarMantiene(T); revisarElegir(T);
       let ret;
       for (;;) {
         const F = T.pila[T.pila.length - 1];
@@ -151,23 +153,32 @@
           return { espera: { min: 0 } };   // (cada momento se atiende cuando ocurre: sus escenas van antes de seguir)
         }
         if (F.fase === 1) { F.fase = 2; T.pila.push({ k: def(F.ll).tipo, ll: F.ll, inst: F.inst, fase: 0 }); return; }
-        if (F.fase === 2) { F.ok = ret; emitir(F.inst, ret ? 'cumplido' : 'fallido'); F.fase = 3; return { espera: { min: 0 } }; }
+        if (F.fase === 2) { F.ok = ret; if (ret && D.personas[F.inst.quien]) { set(['hizo', F.inst.quien, F.ll.verbo], dia()); set(['hizo_t', F.inst.quien, F.ll.verbo], t); }   // (lo que hizo: hizo(quien, verbo).hoy)
+          emitir(F.inst, ret ? 'cumplido' : 'fallido'); F.fase = 3; return { espera: { min: 0 } }; }
         return { vale: F.ok };
       },
       // (lo hace el mundo, con lo que dura; al terminar, deja lo que deja)
-      primitivo(F, T){
+      primitivo(F, T, ret){
         const ll = F.ll, d = def(ll);
+        if (F.fase === 4) { if (!ret) return { vale: false }; F.fase = 0; }   // (fue hasta donde se hace)
         if (F.fase === 0) {
+          const q = ll.args[0];
+          if (d.donde && !T.ya && !F.fue && !estaEn(q, d.donde)) { F.fue = true; F.fase = 4; T.pila.push(marco({ verbo: 'ir_a', args: [q, d.donde] }, hijo(F.inst, 'va'))); return; }   // (si no está donde se hace, primero va)
           if (ll.verbo === 'esperar') { F.fase = 2; return cumple(d.pide) ? undefined : { espera: { hasta: d.pide } }; }
+          if (ll.verbo === 'quedarse') { F.fase = 5; F.lugar = lugarDe(q); return; }
           if (d.deja && d.deja.length && d.deja.every(yaEs)) return { vale: true };   // (lo que deja ya es cierto: se salta)
           if (d.pide && !cumple(d.pide)) { nota(`✘ ${ll.verbo}: no se puede (${nombre(ll.args[0])})`); return { vale: false }; }
           decir(ll);
           F.fase = 3;
-          if (d.dura) { F.acc = { quien: ll.args[0], verbo: ll.verbo, args: ll.args, dura: aMin(d.dura), ya: !!T.ya }; mundo.empezar(F.acc); F.fase = 1; }
+          if (d.dura) { F.acc = { quien: ll.args[0], verbo: ll.verbo, args: ll.args, dura: aMin(d.dura), ya: !!T.ya, ...(d.donde ? { donde: d.donde } : {}), ...(d.junto_a ? { junto_a: d.junto_a } : {}), ...(d.postura ? { postura: d.postura } : {}), ...(d.usa ? { usa: d.usa } : {}) }; mundo.empezar(F.acc); F.fase = 1; }   // (y lo que dice de sí, para el dibujo)
           return;
         }
         if (F.fase === 1) { if (!mundo.listo(F.acc)) return { espera: { accion: F.acc } }; mundo.terminar?.(F.acc); F.fase = 3; return; }
-        if (F.fase === 2) return { vale: true };
+        if (F.fase === 2) return cumple(d.pide) ? { vale: true } : { espera: { hasta: d.pide } };   // (despertó a mirar otra cosa: si no, sigue esperando)
+        if (F.fase === 5) {   // (quedarse: hasta que se cumpla, o hasta que se vaya —entonces no se cumplió—)
+          if (lugarDe(ll.args[0]) !== F.lugar) return { vale: false };
+          return cumple(d.pide) ? { vale: true } : { espera: { hasta: { c: 'o', de: [d.pide, { c: 'cmp', camino: ['mundo', ll.args[0], 'lugar'], op: '!=', valor: F.lugar }] } } };
+        }
         for (const e of d.deja || []) aplicar(e);
         return { vale: true };
       },
@@ -192,8 +203,8 @@
           if (d.pasos.por_cada) { const tr = d.pasos.por_cada; F.lista = mundo.tramo(tr.por, val(tr.desde), tr.hasta, F.ll.args[0]); }   // (y quién va)
           F.i = 0; F.j = 0; F.fase = 1;
         }
-        if (F.fallo) return { vale: false };   // (no pudo reparar lo que se rompió)
-        if (F.fase === 2) { if (!ret) return { vale: false }; F.j++; F.fase = 1; }
+        if (F.fallo) { dejar(F); return { vale: false }; }   // (no pudo reparar lo que se rompió, o lo dejó)
+        if (F.fase === 2) { if (!ret) { dejar(F); return { vale: false }; } F.j++; F.fase = 1; }
         if (F.lista) {
           if (F.j >= F.lista.length) return { vale: true };
           const x = F.lista[F.j]; F.fase = 2; T.pila.push(marco(sub(d.pasos.hace, { elemento: x }), hijo(F.inst, x))); return;
@@ -202,7 +213,7 @@
         for (;;) {
           if (F.i >= ks.length) return { vale: !d.cumplido || cumple(d.cumplido) };
           const p = d.pasos[ks[F.i]], lista = Array.isArray(p) ? p : [p];
-          if (F.j < lista.length) { F.fase = 2; T.pila.push(marco(lista[F.j], hijo(F.inst, ks[F.i]))); return; }
+          if (F.j < lista.length) { F.fase = 2; T.pila.push(pasoMarco(lista[F.j], hijo(F.inst, ks[F.i]))); return; }
           F.i++; F.j = 0;
         }
       },
@@ -239,6 +250,23 @@
         nota(`🧭 ${nombre(quien)} (intento ${F.n + 1}): ${describir(plan)}`, 'momento');
         F.plan = plan.verbo; F.fase = 2; T.pila.push(marco(plan, hijo(F.inst, plan.verbo)));
       },
+      // (elegir: de lo que se puede —su «si», y lo que pide su verbo—, lo de más prioridad; entre lo de igual prioridad,
+      // al azar, por peso. Mientras se hace, si algo de más prioridad se vuelve posible, revisarElegir lo corta)
+      elegir(F, T, ret){
+        if (F.fase === 1) return { vale: ret };
+        const ops = F.p.elige.map((o, i) => ({ o, i })).filter(({ o }) => (o.si == null || cumple(o.si)) && puede(o.hace));
+        if (!ops.length) return { vale: false };
+        const pm = Math.max(...ops.map(x => x.o.prioridad || 0)), top = ops.filter(x => (x.o.prioridad || 0) === pm);
+        let r = azar() * top.reduce((n, x) => n + (x.o.peso ?? 1), 0), ch = top[top.length - 1];
+        for (const x of top) { r -= x.o.peso ?? 1; if (r < 0) { ch = x; break; } }
+        F.prio = pm; F.cual = ch.i; F.fase = 1; T.pila.push(pasoMarco(ch.o.hace, F.ctx));
+      },
+      // (repetir: el paso, una y otra vez, mientras se cumpla «mientras»; si no hubo nada que hacer, o no tomó tiempo, un respiro)
+      repetir(F, T){
+        if (F.fase === 1) { F.fase = 0; if (t === F.t0) return { espera: { min: 5 } }; }
+        if (F.p.mientras && !cumple(F.p.mientras)) return { vale: true };
+        F.t0 = t; F.fase = 1; T.pila.push(pasoMarco(F.p.repite, F.ctx));
+      },
       // (decir algo; si es un pedido, el otro decide: si es Ana, la jugadora)
       acto(F, T, ret){
         const ll = F.ll, d = def(ll);
@@ -269,12 +297,37 @@
         const d = def(F.ll), m = d.mantiene; if (!m) continue;
         const ks = Object.keys(d.pasos), iD = ks.indexOf(m.desde), iH = m.hasta ? ks.indexOf(m.hasta) : ks.length - 1;
         if (F.i <= iD || F.i > iH || cumple(m.si)) continue;
+        if (m.si_se_rompe === 'dejar') { nota(`↯ ${F.ll.verbo}: se rompió lo que mantenía; lo deja`, 'momento'); cortarDesde(T, n); F.fallo = true; return; }
         nota(`↺ ${F.ll.verbo}: se rompió lo que mantenía; vuelve a «${m.si_se_rompe}»`, 'momento');
         for (const G of T.pila.slice(n + 1)) if (G.acc && !G.acc.parada) { mundo.parar(G.acc); G.acc.parada = true; }
         F.reparando = true; T.pila.push({ k: 'reparar', abajo: n, j: ks.indexOf(m.si_se_rompe), m: 0, fase: 0 });
         return;
       }
     }
+    // (una elección en curso: si algo de más prioridad se volvió posible —la hora de comer, llegó Diana—, deja lo que
+    // hacía y vuelve a elegir. Se mira cada vez que la tarea despierta: la que tiene algo así despierta cada tanto)
+    function revisarElegir(T){
+      for (let n = 0; n < T.pila.length; n++) {
+        const F = T.pila[n]; if (F.k !== 'elegir' || F.fase !== 1) continue;
+        const mejor = F.p.elige.find(o => (o.prioridad || 0) > F.prio && (o.si == null || cumple(o.si)) && puede(o.hace));
+        if (!mejor) continue;
+        nota(`⤳ ${nombre(T.quien)} deja lo que hacía, por ${mejor.hace.verbo}`, 'momento');
+        cortarDesde(T, n); F.fase = 0; return;
+      }
+    }
+    const conMejores = T => T.pila.some(F => F.k === 'elegir' && F.fase === 1 && F.p.elige.some(o => (o.prioridad || 0) > F.prio));
+    const REVISAR = 5;   // (cada cuántos minutos se mira si hay algo más importante)
+    // (cortar lo que hay encima de un marco: lo que el mundo estaba haciendo se cancela; las recetas a medias dejan lo suyo)
+    function cortarDesde(T, n){
+      for (const G of T.pila.slice(n + 1).reverse()) { if (G.acc && mundo.cancelar) mundo.cancelar(G.acc); if (G.k === 'receta') dejar(G); }
+      T.pila.length = n + 1;
+    }
+    function dejar(F){ if (F.dejada) return; F.dejada = true; for (const e of def(F.ll).si_se_deja || []) aplicar(e); }
+    const pasoMarco = (p, ctx) => (p.elige ? { k: 'elegir', p, ctx, fase: 0 } : p.repite ? { k: 'repetir', p, ctx, fase: 0 } : marco(p, ctx));
+    const puede = ll => { if (ll.elige || ll.repite) return true; const d = def(ll); return !d.pide || d.tipo === 'primitivo' && (ll.verbo === 'esperar' || ll.verbo === 'quedarse') || cumple(d.pide); };
+    const estaEn = (q, l) => lugarDe(q) === l;   // (donde se hace algo: ahí mismo —fumar en el porche no es en la cocina—)
+    // (el azar, con semilla: la misma partida da lo mismo; se guarda con ella)
+    function azar(){ let x = S['azar'] ?? ((escenario.semilla ?? 1) >>> 0); x = (Math.imul(x ^ 0x5bd1e995, 1664525) + 1013904223) >>> 0; S['azar'] = x; return x / 4294967296; }
     // (lo que hace el otro para que se cumpla el objetivo: el verbo cuyo efecto lo deja así —subir: en la calesa; ir_a: en un lugar—)
     function logran(otro, obj){
       if (obj.c !== 'cmp' || obj.op !== '=' || obj.camino[0] !== 'mundo' || obj.camino[1] !== otro) return [];
@@ -307,6 +360,25 @@
       const T = { id: 0, pila: [marco(ll, {})], ya: true };
       for (let n = 0; n < 1000; n++) { const w = correr(T); if ('fin' in w) return; if (w.pregunta) T.valor = true; }
       throw new Error('un verbo instantáneo que no termina: ' + ll.verbo);
+    }
+
+    // ---------------------------------------------------------------- las vidas
+    // (cada uno, lo de todos los días —docs/lenguaje/vidas/—: una tarea de fondo. Mientras otra cosa lo ocupa —un
+    // encargo de una historia, lo que la jugadora le pide hacer, o que la jugadora lo maneja—, se suspende: lo que
+    // hacía queda a medias, sin más. Cuando lo sueltan, vuelve a elegir qué hacer)
+    const ocupadoAparte = q => !!get(['controla', q]) || tareas.some(U => !U.fin && !U.vida && U.quien === q);
+    function revisarVidas(){
+      for (const T of tareas) {
+        if (!T.vida || T.fin) continue;
+        const s = ocupadoAparte(T.quien);
+        if (s && !T.susp) { T.susp = true; cortarDesde(T, -1); T.accion = null; T.hasta = null; nota(`⏸ ${nombre(T.quien)} deja su día: otra cosa la ocupa`, 'momento'); }
+        else if (!s && T.susp) { T.susp = false; T.pila = [marco(T.vida, {})]; T.despierta = t; T.accion = null; T.hasta = null; nota(`▷ ${nombre(T.quien)} vuelve a su día`, 'momento'); }
+      }
+    }
+    // (lo que está haciendo alguien: los verbos de su tarea, de afuera hacia adentro —dia_de_ana › ir_a_clases › quedarse—)
+    function haciendo(q){
+      const T = tareas.find(U => !U.fin && !U.vida && U.quien === q) || tareas.find(U => !U.fin && U.vida && U.quien === q && !U.susp);
+      return T ? T.pila.filter(F => F.k === 'verbo').map(F => F.ll.verbo) : [];
     }
 
     // ---------------------------------------------------------------- las historias, los encargos y las escenas
@@ -447,7 +519,8 @@
         revisarHistorias();
         if (fin && tope == null) return estadoUI();   // (al probar, una historia que termina es el final; en el juego, el mundo sigue)
         if (!escena && cola.length && elegirEscena()) continue;
-        const lista = tareas.filter(T => !T.fin && !T.pregunta && !detenida(T) && ((T.accion && mundo.listo(T.accion)) || (T.hasta ? cumple(T.hasta) : T.despierta <= t)));
+        revisarVidas();
+        const lista = tareas.filter(T => !T.fin && !T.pregunta && !T.susp && !detenida(T) && ((T.accion && mundo.listo(T.accion)) || (T.hasta ? cumple(T.hasta) || (T.revisa && T.despierta <= t) : T.despierta <= t)));
         if (lista.length) {
           const T = lista[0]; T.hasta = null; T.accion = null;
           const w = correr(T);
@@ -455,13 +528,15 @@
           if (w.min != null) T.despierta = t + w.min;
           else if (w.accion) { T.accion = w.accion; T.despierta = mundo.cuando(w.accion); }
           else if (w.hasta) T.hasta = w.hasta;
+          T.revisa = conMejores(T);   // (algo más importante puede volverse posible: se mira cada tanto)
+          if (T.revisa) T.despierta = Math.min(w.hasta ? Infinity : T.despierta ?? Infinity, t + REVISAR);
           else if (w.pregunta) {
             if (auto || (respuestas && respuestas.length)) { T.valor = responderAuto(w.pregunta); T.despierta = t; }
             else { T.pregunta = w.pregunta; pregunta = T.id; }
           }
           continue;
         }
-        const prox = tareas.filter(T => !T.fin && !T.pregunta && !T.hasta && !detenida(T)).map(T => T.despierta);
+        const prox = tareas.filter(T => !T.fin && !T.pregunta && !T.susp && (!T.hasta || T.revisa) && !detenida(T)).map(T => T.despierta);
         if (escena && escena.acc) prox.push(mundo.cuando(escena.acc));
         const prox1 = prox.length ? Math.min(...prox) : Infinity;
         if (tope != null && prox1 > tope) { t = Math.max(t, tope); return estadoUI(); }   // (lo que sigue es más tarde que la hora del juego)
@@ -484,6 +559,8 @@
       const ini = Mundo.inicio || {};
       for (const [x, l] of Object.entries({ ...(ini.lugares || {}), ...(escenario.lugares || {}) })) set(['mundo', x, 'lugar'], l);
       for (const [c, v] of Object.entries({ ...(ini.estado || {}), ...(escenario.estado || {}) })) if (v === null) delete S[c]; else set(c.split('.'), v);
+      // (las vidas de ese lugar —escenario.vidas: 'tejas_verdes'—: cada uno, su día; y donde duerme cada uno, si el escenario no dice)
+      for (const [q, ll] of Object.entries((escenario.vidas && D.vidas?.[escenario.vidas]) || {})) tareas.push({ id: sigId++, pila: [marco(ll, {})], despierta: t, quien: q, vida: ll });
     }
 
     return {
@@ -496,6 +573,9 @@
         if (escena && escena.ops) { elegir(Math.max(0, escena.ops.findIndex(o => o.propia))); return avanzar(); }
         return avanzar();
       },
+      // la jugadora maneja a alguien (Ana): su vida se suspende; al soltarla, vuelve a la suya
+      controlar(q, si = true){ if (si) set(['controla', q], 1); else delete S[k(['controla', q])]; nota(si ? `(la jugadora maneja a ${nombre(q)})` : `(la jugadora suelta a ${nombre(q)})`); return avanzar(); },
+      haciendo,
       // lo que la jugadora hace por su cuenta (cuando no hay escena ni pregunta)
       irA(l){ nota(`(la jugadora: Ana va hasta ${nombre(l)})`); nuevaTarea({ verbo: 'ir_a', args: ['ana', l] }, {}); return avanzar(); },
       bajarse(){ nota('(la jugadora: Ana se baja de la calesa)'); instantaneo({ verbo: 'bajar', args: ['ana'] }); return avanzar(); },

@@ -70,7 +70,9 @@
       dejarDeSeguir(k){ persona(k).sigue = 'nadie'; },
       enganchar(m){ E.medios[m].listo = 'si'; },
       // (hacer algo que dura: hasta que termina, no hace otra cosa)
-      ocupar(k, que, min){ persona(k).ocupado = { que, hasta: E.t + min }; nota(`${k}: ${que} (${Math.round(min)} min)`); },
+      ocupar(k, que, min, como = {}){ persona(k).ocupado = { que, desde: E.t, hasta: E.t + min, ...Object.fromEntries(Object.entries(como).filter(([, v]) => v != null)) }; nota(`${k}: ${que} (${Math.round(min)} min)`); },
+      // (dejarlo a medias: lo cortó algo más importante)
+      dejar(k, que){ const p = persona(k); if (p.ocupado && p.ocupado.que === que) { nota(`${k} deja: ${que}`); p.ocupado = null; } },
       // dos en el mismo lugar (o uno dentro del otro, para las historias: el corral es de Tejas Verdes)
       juntos(a, b, dentro = {}){ const x = this.vista(a), y = this.vista(b); return x != null && (x === y || dentro[x] === y || dentro[y] === x); },
       guardar: () => JSON.stringify(E),

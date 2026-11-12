@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tejas Verdes, el tablero</title>
+<style>
+:root{--bg:#f4efe3;--panel:#fffdf8;--ink:#2b2620;--mut:#857c6e;--line:#e2d9c6;--acento:#7a4b2a;--casa:#f3e6cf;--patio:#e4ecd2;--afuera:#e7e2d4;--sombra:rgba(60,40,20,.12)}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#1c1a17;--panel:#25221e;--ink:#ece6da;--mut:#a2998b;--line:#3a352e;--acento:#d9a273;--casa:#3a3227;--patio:#2d3427;--afuera:#302d27;--sombra:rgba(0,0,0,.4)}}
+:root[data-theme=dark]{--bg:#1c1a17;--panel:#25221e;--ink:#ece6da;--mut:#a2998b;--line:#3a352e;--acento:#d9a273;--casa:#3a3227;--patio:#2d3427;--afuera:#302d27;--sombra:rgba(0,0,0,.4)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 Georgia,'Iowan Old Style',serif}
+header{position:sticky;top:0;z-index:3;background:var(--panel);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+header h1{font-size:18px;margin:0;font-style:italic;font-weight:normal}#reloj{font-size:16px;min-width:150px}
+button,select{font:inherit;font-size:14px;padding:6px 11px;border-radius:7px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+button.prim{background:var(--acento);color:var(--bg);border-color:var(--acento)}button:disabled{opacity:.45;cursor:default}
+main{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px;padding:16px;max-width:1240px;margin:0 auto}
+@media (max-width:860px){main{grid-template-columns:1fr}}
+#tablero{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px;align-self:start}
+#tablero svg{width:100%;height:auto;display:block}
+.casilla rect{stroke:var(--line);stroke-width:2;cursor:pointer}.casilla:hover rect{stroke:var(--acento)}.casilla.sel rect{stroke:var(--acento);stroke-width:4}
+.casilla text{fill:var(--mut);font-size:15px;pointer-events:none}.zona{fill:none;stroke:var(--line);stroke-dasharray:6 5}.zona-t{fill:var(--mut);font-size:13px;font-style:italic;letter-spacing:.04em;text-transform:uppercase}
+.ficha{cursor:pointer}.ficha circle{stroke:var(--panel);stroke-width:3;filter:drop-shadow(0 2px 2px var(--sombra))}.ficha .ini{fill:#fff;font-weight:bold;font-size:16px;pointer-events:none}.ficha .ico{font-size:17px;pointer-events:none}
+.ficha.sel circle{stroke:var(--acento);stroke-width:4}
+aside{display:flex;flex-direction:column;gap:12px}aside section{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+aside h3{margin:0 0 6px;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--mut);font-weight:normal}
+.fila{display:flex;justify-content:space-between;gap:8px;font-size:14px;padding:2px 0}.fila span:last-child{color:var(--mut);text-align:right}
+.barra{height:5px;background:var(--line);border-radius:3px;overflow:hidden;margin:3px 0 6px}.barra i{display:block;height:100%;background:var(--acento)}
+#diario{max-height:280px;overflow:auto;font-size:13px}#diario div{padding:1px 0}#diario .h{color:var(--mut);margin-right:6px;font-variant-numeric:tabular-nums}
+.cadena{font-size:12.5px;color:var(--mut)}.vacio{color:var(--mut);font-size:13px;font-style:italic}
+#ana{display:flex;flex-wrap:wrap;gap:6px}#ana .t{width:100%;font-size:13px;color:var(--mut)}
+</style></head><body>
+<header>
+  <h1>Tejas Verdes</h1>
+  <span id="reloj"></span>
+  <button id="play" class="prim">▶ Reproducir</button>
+  <label>velocidad <select id="vel"><option value="2">2 min/s</option><option value="10" selected>10 min/s</option><option value="30">30 min/s</option><option value="90">90 min/s</option></select></label>
+  <label>empieza <select id="dia"><option value="1">el lunes</option><option value="6">el sábado</option><option value="7">el domingo</option></select></label>
+  <label>semilla <select id="semilla"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></label>
+  <button id="nuevo">Empezar de nuevo</button>
+</header>
+<main>
+  <section id="tablero"><svg id="svg" viewBox="0 0 900 500" role="img" aria-label="El tablero de Tejas Verdes: las casillas son los lugares, las fichas son las personas"></svg></section>
+  <aside>
+    <section><h3>La lupa</h3><div id="lupa"><div class="vacio">Toca una casilla o una ficha.</div></div></section>
+    <section><h3>Ana</h3><div id="ana"></div></section>
+    <section><h3>Lo que pasa</h3><div id="diario"></div></section>
+    <section><h3>Cómo leer esto</h3><div style="font-size:13px;color:var(--mut)">Cada casilla es un lugar, cada ficha una persona con lo que está haciendo. Nadie las mueve: cada una vive su día (<code>docs/lenguaje/vidas/tejas_verdes.ts</code>), elige lo que corresponde a esa hora, y deja lo que hace si llega algo más importante. Puedes manejar a Ana: su día se suspende, la mueves tocando casillas, y al soltarla vuelve a lo suyo.</div></section>
+  </aside>
+</main>
+<script>/*@MOTOR*/</script>
+<script>window.GEOGRAFIA = /*@GEOGRAFIA*/null;</script>
+<script>
+const D = /*@DATOS*/null;
+const $ = id => document.getElementById(id), esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const G = window.GEOGRAFIA, QUIENES = Object.keys(D.vidas.tejas_verdes);
+const CAMAS = { ana: 'pieza', marilla: 'pieza_marilla', matthew: 'pieza_matthew', diana: 'cuesta_del_huerto', calesa: 'corral' };
+// el tablero: las casillas (los lugares), en sus zonas
+const ZONAS = [
+  { t: 'el patio', x: 20, y: 20, w: 520, h: 225, c: 'var(--patio)', casillas: { tejas_verdes: [30, 60, 240, 175], gallinero: [280, 60, 120, 80], huerta: [410, 60, 120, 80], corral: [280, 155, 120, 80], granero: [410, 155, 120, 80] } },
+  { t: 'la casa', x: 20, y: 260, w: 520, h: 220, c: 'var(--casa)', casillas: { cocina: [30, 300, 240, 170], pieza: [280, 300, 120, 80], pieza_marilla: [410, 300, 120, 80], pieza_matthew: [280, 390, 120, 80] } },
+  { t: 'afuera', x: 560, y: 20, w: 320, h: 460, c: 'var(--afuera)', casillas: { campo: [575, 60, 290, 90], escuela: [575, 160, 290, 90], iglesia: [575, 260, 290, 90], cuesta_del_huerto: [575, 360, 290, 110] } },
+];
+const CASILLA = {}; for (const z of ZONAS) for (const [k, r] of Object.entries(z.casillas)) CASILLA[k] = { r, c: z.c };
+const NOMBRE = l => (D.lugares[l]?.nombre || G.lugares[G.alias[l] || l]?.nombre || l).replace(/^(la|el) /, '').replace(/, .*$/, '').replace(/ de Tejas Verdes$/, '').replace(/ de Avonlea$/, '').replace(/^\w/, c => c.toUpperCase());
+const COLOR = { ana: '#b8442f', marilla: '#4f5d7a', matthew: '#557a43', diana: '#7a4f86' };
+const ICONO = { dormir: '💤', descansar: '🪑', desayunar: '🍽', comer: '🍽', cenar: '🍽', cocinar: '🍲', lavar_platos: '🧽', barrer: '🧹', amasar: '🍞', coser: '🧵', buscar_huevos: '🥚', regar: '🌱', ordeñar: '🥛', dar_de_comer: '🌾', trabajar_el_campo: '🌾', partir_lena: '🪓', arreglar_cerca: '🔨', fumar_pipa: '🪈', leer: '📖', jugar_en_la_huerta: '🎈', sonar_despierta: '☁️', mirar_las_vacas: '🐄', rezar: '🙏', estudiar: '✏️', jugar_con: '🎈', lavar_ropa: '🧺', batir_mantequilla: '🧈', pasear: '🚶', ir_a_clases: '🏫', ir_a_la_iglesia: '⛪', quedarse: '⏳' };
+// el mundo, y las vidas jugando en él
+let M, W, sel = null, reloj = null;
+const ahora = () => (M.get(['tiempo', 'dia']) - 1) * 1440 + Math.round(M.get(['tiempo', 'hora']) * 60);
+const hhmm = m => `${String(Math.floor((m % 1440) / 60)).padStart(2, '0')}:${String(Math.round(m % 60)).padStart(2, '0')}`;
+const SEMANA = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+function nuevo(){
+  pausar(); sel = null;
+  const dia = +$('dia').value;
+  W = Mundo(G); MundoMinimo.mundo = W; MundoMinimo.viajes = {}; W.E.t = (dia - 1) * 1440 + 6 * 60;
+  M = Motor(D, { dia, hora: 6, vidas: 'tejas_verdes', historias: [], semilla: +$('semilla').value, lugares: CAMAS }, MundoMinimo);
+  M.alTiempo(ahora()); pintar();
+}
+function pausar(){ clearInterval(reloj); reloj = null; $('play').textContent = '▶ Reproducir'; }
+$('play').onclick = () => { if (reloj) return pausar(); $('play').textContent = '⏸ Pausa'; reloj = setInterval(() => { M.alTiempo(ahora() + +$('vel').value / 10); W.avanzarHasta(ahora()); pintar(); }, 100); };
+$('nuevo').onclick = nuevo; $('dia').onchange = nuevo; $('semilla').onchange = nuevo;
+// (qué hace alguien: su acción en el mundo; si está quieto esperando —en clase, en misa—, la actividad que lo tiene ahí)
+function que(q){
+  const p = W.E.personas[q] || {}, h = M.haciendo(q);
+  if (p.viaje) return { ico: '🚶', txt: 'va a ' + NOMBRE(p.viaje.a), hasta: p.viaje.llega, desde: p.viaje.sale };
+  if (p.ocupado) return { ico: ICONO[p.ocupado.que] || '•', txt: p.ocupado.que.replace(/_/g, ' '), hasta: p.ocupado.hasta, desde: p.ocupado.desde, o: p.ocupado };
+  const a = h.length > 1 && /^(quedarse|esperar)$/.test(h[h.length - 1]) ? h[h.length - 2] : null;
+  return a ? { ico: ICONO[a] || '⏳', txt: a.replace(/_/g, ' ') } : { ico: '', txt: get('controla', q) ? 'la manejas tú' : '—' };
+}
+const get = (...c) => M.get(c);
+// dónde va la ficha: en su casilla (si hay varias, una al lado de otra); si va de camino, entre las dos, según la hora
+function lugarTablero(l){ if (CASILLA[l]) return l; const v = G.lugares[l]?.vista; return CASILLA[v] ? v : null; }
+function centro(l, i = 0, n = 1){ const c = CASILLA[lugarTablero(l)]; if (!c) return [470, 20]; const [x, y, w, h] = c.r; return [x + w / 2 + (i - (n - 1) / 2) * 44, y + h / 2 + 12]; }
+function pintar(){
+  const t = ahora(); $('reloj').textContent = `${SEMANA[(Math.floor(t / 1440) + 1) % 7]} ${Math.floor(t / 1440) + 1}, ${hhmm(t)}`;
+  let h = '';
+  for (const z of ZONAS) { h += `<rect class="zona" x="${z.x}" y="${z.y}" width="${z.w}" height="${z.h}" rx="16"/><text class="zona-t" x="${z.x + 12}" y="${z.y + 22}">${esc(z.t)}</text>`;
+    for (const [k, [x, y, w, hh]] of Object.entries(z.casillas)) h += `<g class="casilla${sel?.l === k ? ' sel' : ''}" data-l="${k}"><rect x="${x}" y="${y}" width="${w}" height="${hh}" rx="10" fill="${z.c}"/><text x="${x + 10}" y="${y + 20}">${esc(NOMBRE(k))}</text></g>`; }
+  const aqui = {}; for (const q of QUIENES) { const p = W.E.personas[q]; if (p && !p.viaje) (aqui[lugarTablero(p.lugar)] ||= []).push(q); }
+  for (const q of QUIENES) {
+    const p = W.E.personas[q]; if (!p) continue;
+    let P; if (p.viaje) { const A = centro(p.viaje.de), B = centro(p.viaje.a), f = Math.max(0, Math.min(1, (t - p.viaje.sale) / Math.max(1, p.viaje.llega - p.viaje.sale))); P = [A[0] + (B[0] - A[0]) * f, A[1] + (B[1] - A[1]) * f]; }
+    else { const L = aqui[lugarTablero(p.lugar)] || [q]; P = centro(p.lugar, L.indexOf(q), L.length); }
+    const w = que(q);
+    h += `<g class="ficha${sel?.q === q ? ' sel' : ''}" data-q="${q}"><circle cx="${P[0]}" cy="${P[1]}" r="19" fill="${COLOR[q]}"/><text class="ini" x="${P[0]}" y="${P[1] + 6}" text-anchor="middle">${esc(M.nombre(q)[0])}</text><text class="ico" x="${P[0] + 13}" y="${P[1] - 13}">${w.ico}</text><title>${esc(M.nombre(q) + ': ' + w.txt)}</title></g>`;
+  }
+  $('svg').innerHTML = h;
+  lupa(); ana(); diario();
+}
+$('svg').onclick = e => { const f = e.target.closest('.ficha'), c = e.target.closest('.casilla');
+  if (f) sel = { q: f.dataset.q }; else if (c) { if (get('controla', 'ana') && !esperandoAna()) { M.irA(c.dataset.l); } sel = { l: c.dataset.l }; } pintar(); };
+const esperandoAna = () => false;
+function barra(w, t){ return w.hasta ? `<div class="barra"><i style="width:${Math.round(100 * Math.max(0, Math.min(1, (t - w.desde) / Math.max(1, w.hasta - w.desde))))}%"></i></div>` : ''; }
+function fichaLupa(q, t){
+  const w = que(q), o = w.o, p = W.E.personas[q], cadena = M.haciendo(q).map(v => v.replace(/^dia_de_\w+$/, 'su día').replace(/_/g, ' ')).join(' › ');
+  return `<div class="fila"><span><b style="color:${COLOR[q]}">${esc(M.nombre(q))}</b> ${w.ico} ${esc(w.txt)}</span><span>${w.hasta ? 'hasta ' + hhmm(w.hasta) : ''}</span></div>${barra(w, t)}`
+    + (o ? `<div class="cadena">${[o.junto_a && 'junto a ' + o.junto_a, o.postura && o.postura.replace('_', ' '), o.usa && 'con ' + o.usa.join(', ')].filter(Boolean).map(esc).join(' · ')}</div>` : '')
+    + (cadena ? `<div class="cadena">${esc(cadena)}</div>` : '') + `<div class="cadena">en ${esc(NOMBRE(p.lugar))}</div>`;
+}
+function lupa(){
+  const t = ahora(), L = $('lupa');
+  if (sel?.q) { L.innerHTML = fichaLupa(sel.q, t); return; }
+  if (sel?.l) { const qs = QUIENES.filter(q => { const p = W.E.personas[q]; return p && !p.viaje && lugarTablero(p.lugar) === sel.l; });
+    L.innerHTML = `<div class="fila"><span><b>${esc(NOMBRE(sel.l))}</b></span><span>${qs.length ? qs.length + ' aquí' : 'nadie'}</span></div>` + qs.map(q => fichaLupa(q, t)).join('<hr style="border:0;border-top:1px solid var(--line)">'); return; }
+}
+// Ana: manejarla o soltarla; manejándola, lo que puede hacer donde está (las acciones de su día), e ir: tocando una casilla
+function ana(){
+  const A = $('ana'), mia = !!get('controla', 'ana'); A.innerHTML = '';
+  const b = (t, f, prim) => { const x = document.createElement('button'); x.textContent = t; x.onclick = f; if (prim) x.className = 'prim'; A.append(x); };
+  if (!mia) { b('Manejar a Ana', () => { M.controlar('ana', true); pintar(); }, true); A.insertAdjacentHTML('beforeend', '<div class="t">Ana vive su día sola.</div>'); return; }
+  b('Soltar a Ana', () => { M.controlar('ana', false); pintar(); }, true);
+  A.insertAdjacentHTML('beforeend', '<div class="t">La manejas tú: toca una casilla para que vaya, o hazle hacer algo ahí.</div>');
+  if (W.E.personas.ana?.viaje || W.E.personas.ana?.ocupado) return;
+  for (const v of ACCIONES_ANA) b(`${ICONO[v.verbo] || ''} ${v.verbo.replace(/_/g, ' ')}`, () => { M.hacer(v.verbo, v.args); pintar(); });
+}
+// (las acciones del día de Ana que no necesitan a nadie más: las de un solo parámetro, o con un lugar —donde está—)
+const ACCIONES_ANA = (() => { const L = [], vistos = new Set();
+  const recorrer = x => { if (!x || typeof x !== 'object') return; if (Array.isArray(x)) return x.forEach(recorrer); if (x.verbo && D.verbos[x.verbo]?.tipo === 'primitivo' && !vistos.has(x.verbo)) { vistos.add(x.verbo); L.push({ verbo: x.verbo, args: x.args.map(a => (a && a.param === 0 ? 'ana' : a)) }); } for (const v of Object.values(x)) recorrer(v); };
+  recorrer(D.verbos.dia_de_ana.pasos); return L.filter(v => !v.args.some(a => typeof a === 'object')); })();
+// lo que pasa: el registro del mundo (quién va, llega, hace, termina, deja) y el del motor (quién deja lo que hacía, y por qué)
+function diario(){
+  const L = [...W.E.registro.slice(-40).map(r => ({ t: r.t, txt: r.txt.replace(/^(\w+)/, (m, k) => D.personas[k] || k).replace(/_/g, ' ') })),
+    ...M.registro.slice(-30).filter(r => /^[⤳⏸▷]/.test(r.t)).map(r => ({ t: (+r.hora.match(/día (\d+)/)[1] - 1) * 1440 + (+r.hora.slice(-5, -3)) * 60 + (+r.hora.slice(-2)), txt: r.t.replace(/_/g, ' ') }))]
+    .filter(r => !/termina: (dormir|descansar)|: (dormir|descansar) \(/.test(r.txt)).sort((a, b) => b.t - a.t).slice(0, 30);
+  $('diario').innerHTML = L.map(r => `<div><span class="h">${hhmm(r.t)}</span>${esc(r.txt)}</div>`).join('');
+}
+nuevo();
+</script></body></html>

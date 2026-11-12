@@ -1,11 +1,40 @@
 {
+ "vidas": {
+  "tejas_verdes": {
+   "ana": {
+    "verbo": "dia_de_ana",
+    "args": [
+     "ana"
+    ]
+   },
+   "marilla": {
+    "verbo": "dia_de_marilla",
+    "args": [
+     "marilla"
+    ]
+   },
+   "matthew": {
+    "verbo": "dia_de_matthew",
+    "args": [
+     "matthew"
+    ]
+   },
+   "diana": {
+    "verbo": "dia_de_diana",
+    "args": [
+     "diana"
+    ]
+   }
+  }
+ },
  "personas": {
   "ana": "Ana",
   "marilla": "Marilla",
   "matthew": "Matthew",
   "spencer": "la Sra. Spencer",
   "blewett": "la Sra. Peter Blewett",
-  "srapye": "la Sra. Pye"
+  "srapye": "la Sra. Pye",
+  "diana": "Diana"
  },
  "lugares": {
   "tejas_verdes": {
@@ -18,6 +47,39 @@
   "corral": {
    "nombre": "el corral de Tejas Verdes",
    "dentro": "tejas_verdes"
+  },
+  "pieza": {
+   "nombre": "la pieza de Ana, arriba",
+   "dentro": "tejas_verdes"
+  },
+  "pieza_marilla": {
+   "nombre": "la pieza de Marilla",
+   "dentro": "tejas_verdes"
+  },
+  "pieza_matthew": {
+   "nombre": "la pieza de Matthew",
+   "dentro": "tejas_verdes"
+  },
+  "granero": {
+   "nombre": "el granero",
+   "dentro": "tejas_verdes"
+  },
+  "gallinero": {
+   "nombre": "el gallinero",
+   "dentro": "tejas_verdes"
+  },
+  "huerta": {
+   "nombre": "la huerta",
+   "dentro": "tejas_verdes"
+  },
+  "campo": {
+   "nombre": "el campo de heno"
+  },
+  "cuesta_del_huerto": {
+   "nombre": "La Cuesta del Huerto, la casa de los Barry"
+  },
+  "iglesia": {
+   "nombre": "la iglesia de Avonlea"
   },
   "hondonada_lynde": {
    "nombre": "la Hondonada de Lynde"
@@ -367,6 +429,16 @@
    "dura": "1s"
   },
   "esperar": {
+   "tipo": "primitivo",
+   "params": [
+    "quien",
+    "hasta"
+   ],
+   "pide": {
+    "param": 1
+   }
+  },
+  "quedarse": {
    "tipo": "primitivo",
    "params": [
     "quien",
@@ -979,6 +1051,3932 @@
    "params": [
     "quien"
    ]
+  },
+  "dormir": {
+   "tipo": "primitivo",
+   "params": [
+    "q",
+    "cama"
+   ],
+   "donde": {
+    "param": 1
+   },
+   "junto_a": "cama",
+   "postura": "acostada",
+   "dura": "1h"
+  },
+  "descansar": {
+   "tipo": "primitivo",
+   "params": [
+    "q"
+   ],
+   "postura": "sentada",
+   "dura": "15m"
+  },
+  "desayunar": {
+   "tipo": "primitivo",
+   "params": [
+    "q",
+    "casa"
+   ],
+   "donde": {
+    "param": 1
+   },
+   "junto_a": "mesa",
+   "postura": "sentada",
+   "usa": [
+    "taza"
+   ],
+   "dura": "25m"
+  },
+  "comer": {
+   "tipo": "primitivo",
+   "params": [
+    "q",
+    "casa"
+   ],
+   "donde": {
+    "param": 1
+   },
+   "junto_a": "mesa",
+   "postura": "sentada",
+   "usa": [
+    "plato"
+   ],
+   "dura": "30m"
+  },
+  "cenar": {
+   "tipo": "primitivo",
+   "params": [
+    "q",
+    "casa"
+   ],
+   "donde": {
+    "param": 1
+   },
+   "junto_a": "mesa",
+   "postura": "sentada",
+   "usa": [
+    "plato"
+   ],
+   "dura": "30m"
+  },
+  "cocinar": {
+   "tipo": "primitivo",
+   "params": [
+    "q"
+   ],
+   "donde": "cocina",
+   "junto_a": "estufa",
+   "postura": "de_pie",
+   "usa": [
+    "olla"
+   ],
+   "dura": "35m"
+  },
+  "lavar_platos": {
+   "tipo": "primitivo",
+   "params": [
+    "q"
+   ],
+   "donde": "cocina",
+   "junto_a": "fregadero",
+   "postura": "de_pie",
+   "usa": [
+    "platos"
+   ],
+   "dura": "20m"
+  },
+  "barrer": {
+   "tipo": "primitivo",
+   "params": [
+    "q"
+   ],
+   "donde": "cocina",
+   "postura": "caminando",
+   "usa": [
+    "escoba"
+   ],
+   "dura": "15m"
+  },
+  "amasar": {
+   "tipo": "primitivo",
+   "params": [
+    "q"
+   ],
+   "donde": "cocina",
+   "junto_a": "mesa",
+   "postura": "de_pie",
+   "usa": [
+    "harina"
+   ],
+   "dura": "40m"
+  },
+  "coser": {
+   "tipo": "primitivo",
+   "params": [
+    "q"
+   ],
+   "donde": "cocina",
+   "junto_a": "ventana",
+   "postura": "sentada",
+   "usa": [
+    "aguja",
+    "tela"
+   ],
+   "dura": "45m"
+  },
+  "lavar_ropa": {
+   "tipo": "primitivo",
+   "params": [
+    "q"
+   ],
+   "donde": "tejas_verdes",
+   "junto_a": "tina",
+   "postura": "agachada",
+   "usa": [
+    "tabla",
+    "jabon"
+   ],
+   "dura": "1h"
+  },
+  "batir_mantequilla": {
+   "tipo": "primitivo",
+   "params": [
+    "q"
+   ],
+   "donde": "cocina",
+   "junto_a": "mantequera",
+   "postura": "sentada",
+   "usa": [
+    "mantequera"
+   ],
+   "dura": "40m"
+  },
+  "pasear": {
+   "tipo": "primitivo",
+   "params": [
+    "q",
+    "l"
+   ],
+   "donde": {
+    "param": 1
+   },
+   "postura": "caminando",
+   "dura": "30m"
+  },
+  "buscar_huevos": {
+   "tipo": "primitivo",
+   "params": [
+    "q"
+   ],
+   "donde": "gallinero",
+   "postura": "agachada",
+   "usa": [
+    "canasta"
+   ],
+   "dura": "10m"
+  },
+  "regar": {
+   "tipo": "primitivo",
+   "params": [
+    "q"
+   ],
+   "donde": "huerta",
+   "postura": "caminando",
+   "usa": [
+    "regadera"
+   ],
+   "dura": "15m"
+  },
+  "ordeñar": {
+   "tipo": "primitivo",
+   "params": [
+    "q"
+   ],
+   "donde": "corral",
+   "junto_a": "vacas",
+   "postura": "agachada",
+   "usa": [
+    "balde"
+   ],
+   "dura": "25m"
+  },
+  "dar_de_comer": {
+   "tipo": "primitivo",
+   "params": [
+    "q"
+   ],
+   "donde": "corral",
+   "postura": "caminando",
+   "usa": [
+    "heno"
+   ],
+   "dura": "15m"
+  },
+  "trabajar_el_campo": {
+   "tipo": "primitivo",
+   "params": [
+    "q"
+   ],
+   "donde": "campo",
+   "postura": "caminando",
+   "usa": [
+    "horqueta"
+   ],
+   "dura": "1h"
+  },
+  "partir_lena": {
+   "tipo": "primitivo",
+   "params": [
+    "q"
+   ],
+   "donde": "granero",
+   "junto_a": "tronco",
+   "postura": "de_pie",
+   "usa": [
+    "hacha"
+   ],
+   "dura": "30m"
+  },
+  "arreglar_cerca": {
+   "tipo": "primitivo",
+   "params": [
+    "q"
+   ],
+   "donde": "corral",
+   "junto_a": "cerca",
+   "postura": "agachada",
+   "usa": [
+    "martillo"
+   ],
+   "dura": "40m"
+  },
+  "fumar_pipa": {
+   "tipo": "primitivo",
+   "params": [
+    "q"
+   ],
+   "donde": "tejas_verdes",
+   "junto_a": "porche",
+   "postura": "sentada",
+   "usa": [
+    "pipa"
+   ],
+   "dura": "30m"
+  },
+  "leer": {
+   "tipo": "primitivo",
+   "params": [
+    "q",
+    "l"
+   ],
+   "donde": {
+    "param": 1
+   },
+   "junto_a": "ventana",
+   "postura": "sentada",
+   "usa": [
+    "libro"
+   ],
+   "dura": "30m"
+  },
+  "jugar_en_la_huerta": {
+   "tipo": "primitivo",
+   "params": [
+    "q"
+   ],
+   "donde": "huerta",
+   "postura": "caminando",
+   "dura": "25m"
+  },
+  "sonar_despierta": {
+   "tipo": "primitivo",
+   "params": [
+    "q"
+   ],
+   "donde": "pieza",
+   "junto_a": "ventana",
+   "postura": "sentada",
+   "dura": "20m"
+  },
+  "mirar_las_vacas": {
+   "tipo": "primitivo",
+   "params": [
+    "q"
+   ],
+   "donde": "corral",
+   "junto_a": "cerca",
+   "postura": "de_pie",
+   "dura": "15m"
+  },
+  "rezar": {
+   "tipo": "primitivo",
+   "params": [
+    "q"
+   ],
+   "donde": "pieza",
+   "junto_a": "cama",
+   "postura": "agachada",
+   "dura": "5m"
+  },
+  "estudiar": {
+   "tipo": "primitivo",
+   "params": [
+    "q",
+    "l"
+   ],
+   "donde": {
+    "param": 1
+   },
+   "junto_a": "mesa",
+   "postura": "sentada",
+   "usa": [
+    "libro"
+   ],
+   "dura": "30m"
+  },
+  "jugar_con": {
+   "tipo": "primitivo",
+   "params": [
+    "q",
+    "otra"
+   ],
+   "pide": {
+    "c": "f",
+    "f": "ve",
+    "args": [
+     {
+      "param": 0
+     },
+     {
+      "param": 1
+     }
+    ]
+   },
+   "postura": "caminando",
+   "dura": "30m"
+  },
+  "ir_a_clases": {
+   "tipo": "receta",
+   "params": [
+    "q",
+    "casa"
+   ],
+   "pasos": {
+    "va": {
+     "verbo": "ir_a",
+     "args": [
+      {
+       "param": 0
+      },
+      "escuela"
+     ]
+    },
+    "clase": {
+     "verbo": "quedarse",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "c": "cmp",
+       "camino": [
+        "tiempo",
+        "hora"
+       ],
+       "op": ">=",
+       "valor": 15.5
+      }
+     ]
+    },
+    "vuelve": {
+     "verbo": "ir_a",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "param": 1
+      }
+     ]
+    }
+   }
+  },
+  "visitar": {
+   "tipo": "receta",
+   "params": [
+    "q",
+    "otra",
+    "casa"
+   ],
+   "pasos": {
+    "va": {
+     "verbo": "ir_a",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "camino": [
+        "mundo",
+        {
+         "param": 1
+        },
+        "lugar"
+       ]
+      }
+     ]
+    },
+    "juegan": {
+     "verbo": "jugar_con",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "param": 1
+      }
+     ]
+    },
+    "vuelve": {
+     "verbo": "ir_a",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "param": 2
+      }
+     ]
+    }
+   }
+  },
+  "ir_a_la_iglesia": {
+   "tipo": "receta",
+   "params": [
+    "q",
+    "casa"
+   ],
+   "pasos": {
+    "va": {
+     "verbo": "ir_a",
+     "args": [
+      {
+       "param": 0
+      },
+      "iglesia"
+     ]
+    },
+    "misa": {
+     "verbo": "quedarse",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "c": "cmp",
+       "camino": [
+        "tiempo",
+        "hora"
+       ],
+       "op": ">=",
+       "valor": 12
+      }
+     ]
+    },
+    "vuelve": {
+     "verbo": "ir_a",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "param": 1
+      }
+     ]
+    }
+   }
+  },
+  "volver_a_casa": {
+   "tipo": "receta",
+   "params": [
+    "q",
+    "casa"
+   ],
+   "pasos": {
+    "vuelve": {
+     "verbo": "ir_a",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "param": 1
+      }
+     ]
+    }
+   }
+  },
+  "dia_de_marilla": {
+   "tipo": "receta",
+   "params": [
+    "q"
+   ],
+   "pasos": {
+    "vive": {
+     "repite": {
+      "elige": [
+       {
+        "hace": {
+         "verbo": "dormir",
+         "args": [
+          {
+           "param": 0
+          },
+          "pieza_marilla"
+         ]
+        },
+        "si": {
+         "c": "o",
+         "de": [
+          {
+           "c": "cmp",
+           "camino": [
+            "tiempo",
+            "hora"
+           ],
+           "op": ">=",
+           "valor": 21.5
+          },
+          {
+           "c": "cmp",
+           "camino": [
+            "tiempo",
+            "hora"
+           ],
+           "op": "<",
+           "valor": 6
+          }
+         ]
+        },
+        "prioridad": 9
+       },
+       {
+        "hace": {
+         "verbo": "cocinar",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 6
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 7
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "cocinar"
+            ],
+            "ventana": "hoy"
+           }
+          }
+         ]
+        },
+        "prioridad": 6
+       },
+       {
+        "hace": {
+         "verbo": "desayunar",
+         "args": [
+          {
+           "param": 0
+          },
+          "cocina"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 7
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 8
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "desayunar"
+            ],
+            "ventana": "hoy"
+           }
+          }
+         ]
+        },
+        "prioridad": 8
+       },
+       {
+        "hace": {
+         "verbo": "cocinar",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 11.25
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 12
+            }
+           ]
+          }
+         ]
+        },
+        "prioridad": 6
+       },
+       {
+        "hace": {
+         "verbo": "comer",
+         "args": [
+          {
+           "param": 0
+          },
+          "cocina"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 12
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 13
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "comer"
+            ],
+            "ventana": "hoy"
+           }
+          }
+         ]
+        },
+        "prioridad": 8
+       },
+       {
+        "hace": {
+         "verbo": "cocinar",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 17.25
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 18
+            }
+           ]
+          }
+         ]
+        },
+        "prioridad": 6
+       },
+       {
+        "hace": {
+         "verbo": "cenar",
+         "args": [
+          {
+           "param": 0
+          },
+          "cocina"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 18
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 19
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "cenar"
+            ],
+            "ventana": "hoy"
+           }
+          }
+         ]
+        },
+        "prioridad": 8
+       },
+       {
+        "hace": {
+         "verbo": "lavar_platos",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "o",
+           "de": [
+            {
+             "c": "y",
+             "de": [
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": ">=",
+               "valor": 8
+              },
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": "<",
+               "valor": 9
+              }
+             ]
+            },
+            {
+             "c": "y",
+             "de": [
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": ">=",
+               "valor": 19
+              },
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": "<",
+               "valor": 20.5
+              }
+             ]
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "desde",
+            "camino": [
+             "hizo_t",
+             {
+              "param": 0
+             },
+             "lavar_platos"
+            ],
+            "op": "<",
+            "valor": "1h",
+            "min": true
+           }
+          }
+         ]
+        },
+        "prioridad": 3,
+        "peso": 3
+       },
+       {
+        "hace": {
+         "verbo": "barrer",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 6
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 12
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "barrer"
+            ],
+            "ventana": "hoy"
+           }
+          }
+         ]
+        },
+        "prioridad": 3
+       },
+       {
+        "hace": {
+         "verbo": "amasar",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 6
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 12
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "cmp",
+            "camino": [
+             "tiempo",
+             "semana"
+            ],
+            "op": "=",
+            "valor": "domingo"
+           }
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "amasar"
+            ],
+            "ventana": "hoy"
+           }
+          }
+         ]
+        },
+        "prioridad": 3
+       },
+       {
+        "hace": {
+         "verbo": "lavar_ropa",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "cmp",
+           "camino": [
+            "tiempo",
+            "semana"
+           ],
+           "op": "=",
+           "valor": "lunes"
+          },
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 6
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 12
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "lavar_ropa"
+            ],
+            "ventana": "hoy"
+           }
+          }
+         ]
+        },
+        "prioridad": 3,
+        "peso": 2
+       },
+       {
+        "hace": {
+         "verbo": "batir_mantequilla",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 6
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 12
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "cmp",
+            "camino": [
+             "tiempo",
+             "semana"
+            ],
+            "op": "=",
+            "valor": "domingo"
+           }
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "batir_mantequilla"
+            ],
+            "ventana": "hoy"
+           }
+          }
+         ]
+        },
+        "prioridad": 3
+       },
+       {
+        "hace": {
+         "verbo": "ir_a_la_iglesia",
+         "args": [
+          {
+           "param": 0
+          },
+          "cocina"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "cmp",
+           "camino": [
+            "tiempo",
+            "semana"
+           ],
+           "op": "=",
+           "valor": "domingo"
+          },
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 10
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 10.5
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "ir_a_la_iglesia"
+            ],
+            "ventana": "hoy"
+           }
+          }
+         ]
+        },
+        "prioridad": 7
+       },
+       {
+        "hace": {
+         "verbo": "buscar_huevos",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 6
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 12
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "buscar_huevos"
+            ],
+            "ventana": "hoy"
+           }
+          }
+         ]
+        },
+        "prioridad": 3
+       },
+       {
+        "hace": {
+         "verbo": "coser",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "o",
+           "de": [
+            {
+             "c": "y",
+             "de": [
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": ">=",
+               "valor": 6
+              },
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": "<",
+               "valor": 12
+              }
+             ]
+            },
+            {
+             "c": "y",
+             "de": [
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": ">=",
+               "valor": 13
+              },
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": "<",
+               "valor": 18
+              }
+             ]
+            },
+            {
+             "c": "y",
+             "de": [
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": ">=",
+               "valor": 18
+              },
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": "<",
+               "valor": 21.5
+              }
+             ]
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "cmp",
+            "camino": [
+             "tiempo",
+             "semana"
+            ],
+            "op": "=",
+            "valor": "domingo"
+           }
+          }
+         ]
+        },
+        "prioridad": 1,
+        "peso": 3
+       },
+       {
+        "hace": {
+         "verbo": "leer",
+         "args": [
+          {
+           "param": 0
+          },
+          "cocina"
+         ]
+        },
+        "si": {
+         "c": "cmp",
+         "camino": [
+          "tiempo",
+          "semana"
+         ],
+         "op": "=",
+         "valor": "domingo"
+        },
+        "prioridad": 1
+       },
+       {
+        "hace": {
+         "verbo": "regar",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 13
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 18
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "regar"
+            ],
+            "ventana": "hoy"
+           }
+          }
+         ]
+        },
+        "prioridad": 1
+       },
+       {
+        "hace": {
+         "verbo": "descansar",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "prioridad": 0
+       }
+      ]
+     }
+    }
+   }
+  },
+  "dia_de_matthew": {
+   "tipo": "receta",
+   "params": [
+    "q"
+   ],
+   "pasos": {
+    "vive": {
+     "repite": {
+      "elige": [
+       {
+        "hace": {
+         "verbo": "dormir",
+         "args": [
+          {
+           "param": 0
+          },
+          "pieza_matthew"
+         ]
+        },
+        "si": {
+         "c": "o",
+         "de": [
+          {
+           "c": "cmp",
+           "camino": [
+            "tiempo",
+            "hora"
+           ],
+           "op": ">=",
+           "valor": 21
+          },
+          {
+           "c": "cmp",
+           "camino": [
+            "tiempo",
+            "hora"
+           ],
+           "op": "<",
+           "valor": 5.5
+          }
+         ]
+        },
+        "prioridad": 9
+       },
+       {
+        "hace": {
+         "verbo": "ordeñar",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 5.5
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 7
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "ordeñar"
+            ],
+            "ventana": "hoy"
+           }
+          }
+         ]
+        },
+        "prioridad": 6
+       },
+       {
+        "hace": {
+         "verbo": "desayunar",
+         "args": [
+          {
+           "param": 0
+          },
+          "cocina"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 7
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 8
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "desayunar"
+            ],
+            "ventana": "hoy"
+           }
+          }
+         ]
+        },
+        "prioridad": 8
+       },
+       {
+        "hace": {
+         "verbo": "comer",
+         "args": [
+          {
+           "param": 0
+          },
+          "cocina"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 12
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 13
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "comer"
+            ],
+            "ventana": "hoy"
+           }
+          }
+         ]
+        },
+        "prioridad": 8
+       },
+       {
+        "hace": {
+         "verbo": "cenar",
+         "args": [
+          {
+           "param": 0
+          },
+          "cocina"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 18
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 19
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "cenar"
+            ],
+            "ventana": "hoy"
+           }
+          }
+         ]
+        },
+        "prioridad": 8
+       },
+       {
+        "hace": {
+         "verbo": "ordeñar",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 17
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 18
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "desde",
+            "camino": [
+             "hizo_t",
+             {
+              "param": 0
+             },
+             "ordeñar"
+            ],
+            "op": "<",
+            "valor": "6h",
+            "min": true
+           }
+          }
+         ]
+        },
+        "prioridad": 6
+       },
+       {
+        "hace": {
+         "verbo": "dar_de_comer",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "o",
+           "de": [
+            {
+             "c": "y",
+             "de": [
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": ">=",
+               "valor": 7.5
+              },
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": "<",
+               "valor": 9
+              }
+             ]
+            },
+            {
+             "c": "y",
+             "de": [
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": ">=",
+               "valor": 16
+              },
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": "<",
+               "valor": 17
+              }
+             ]
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "desde",
+            "camino": [
+             "hizo_t",
+             {
+              "param": 0
+             },
+             "dar_de_comer"
+            ],
+            "op": "<",
+            "valor": "4h",
+            "min": true
+           }
+          }
+         ]
+        },
+        "prioridad": 3
+       },
+       {
+        "hace": {
+         "verbo": "trabajar_el_campo",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "o",
+           "de": [
+            {
+             "c": "y",
+             "de": [
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": ">=",
+               "valor": 8
+              },
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": "<",
+               "valor": 11.5
+              }
+             ]
+            },
+            {
+             "c": "y",
+             "de": [
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": ">=",
+               "valor": 13
+              },
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": "<",
+               "valor": 16.5
+              }
+             ]
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "cmp",
+            "camino": [
+             "tiempo",
+             "semana"
+            ],
+            "op": "=",
+            "valor": "domingo"
+           }
+          }
+         ]
+        },
+        "prioridad": 3,
+        "peso": 4
+       },
+       {
+        "hace": {
+         "verbo": "partir_lena",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "o",
+           "de": [
+            {
+             "c": "y",
+             "de": [
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": ">=",
+               "valor": 6
+              },
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": "<",
+               "valor": 12
+              }
+             ]
+            },
+            {
+             "c": "y",
+             "de": [
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": ">=",
+               "valor": 13
+              },
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": "<",
+               "valor": 18
+              }
+             ]
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "cmp",
+            "camino": [
+             "tiempo",
+             "semana"
+            ],
+            "op": "=",
+            "valor": "domingo"
+           }
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "partir_lena"
+            ],
+            "ventana": "hoy"
+           }
+          }
+         ]
+        },
+        "prioridad": 3,
+        "peso": 2
+       },
+       {
+        "hace": {
+         "verbo": "arreglar_cerca",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "o",
+           "de": [
+            {
+             "c": "y",
+             "de": [
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": ">=",
+               "valor": 6
+              },
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": "<",
+               "valor": 12
+              }
+             ]
+            },
+            {
+             "c": "y",
+             "de": [
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": ">=",
+               "valor": 13
+              },
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": "<",
+               "valor": 18
+              }
+             ]
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "cmp",
+            "camino": [
+             "tiempo",
+             "semana"
+            ],
+            "op": "=",
+            "valor": "domingo"
+           }
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "arreglar_cerca"
+            ],
+            "ventana": "hoy"
+           }
+          }
+         ]
+        },
+        "prioridad": 3
+       },
+       {
+        "hace": {
+         "verbo": "fumar_pipa",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "si": {
+         "c": "o",
+         "de": [
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 18
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 21.5
+            }
+           ]
+          },
+          {
+           "c": "cmp",
+           "camino": [
+            "tiempo",
+            "semana"
+           ],
+           "op": "=",
+           "valor": "domingo"
+          }
+         ]
+        },
+        "prioridad": 1,
+        "peso": 2
+       },
+       {
+        "hace": {
+         "verbo": "pasear",
+         "args": [
+          {
+           "param": 0
+          },
+          "campo"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "cmp",
+           "camino": [
+            "tiempo",
+            "semana"
+           ],
+           "op": "=",
+           "valor": "domingo"
+          },
+          {
+           "c": "o",
+           "de": [
+            {
+             "c": "y",
+             "de": [
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": ">=",
+               "valor": 6
+              },
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": "<",
+               "valor": 12
+              }
+             ]
+            },
+            {
+             "c": "y",
+             "de": [
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": ">=",
+               "valor": 13
+              },
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": "<",
+               "valor": 18
+              }
+             ]
+            }
+           ]
+          }
+         ]
+        },
+        "prioridad": 1
+       },
+       {
+        "hace": {
+         "verbo": "mirar_las_vacas",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "si": {
+         "c": "o",
+         "de": [
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 6
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 12
+            }
+           ]
+          },
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 13
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 18
+            }
+           ]
+          }
+         ]
+        },
+        "prioridad": 1
+       },
+       {
+        "hace": {
+         "verbo": "ir_a_la_iglesia",
+         "args": [
+          {
+           "param": 0
+          },
+          "tejas_verdes"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "cmp",
+           "camino": [
+            "tiempo",
+            "semana"
+           ],
+           "op": "=",
+           "valor": "domingo"
+          },
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 10
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 10.5
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "ir_a_la_iglesia"
+            ],
+            "ventana": "hoy"
+           }
+          }
+         ]
+        },
+        "prioridad": 7
+       },
+       {
+        "hace": {
+         "verbo": "descansar",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "prioridad": 0
+       }
+      ]
+     }
+    }
+   }
+  },
+  "dia_de_ana": {
+   "tipo": "receta",
+   "params": [
+    "q"
+   ],
+   "pasos": {
+    "vive": {
+     "repite": {
+      "elige": [
+       {
+        "hace": {
+         "verbo": "dormir",
+         "args": [
+          {
+           "param": 0
+          },
+          "pieza"
+         ]
+        },
+        "si": {
+         "c": "o",
+         "de": [
+          {
+           "c": "cmp",
+           "camino": [
+            "tiempo",
+            "hora"
+           ],
+           "op": ">=",
+           "valor": 21
+          },
+          {
+           "c": "cmp",
+           "camino": [
+            "tiempo",
+            "hora"
+           ],
+           "op": "<",
+           "valor": 6.5
+          }
+         ]
+        },
+        "prioridad": 9
+       },
+       {
+        "hace": {
+         "verbo": "rezar",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 20.5
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 21
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "rezar"
+            ],
+            "ventana": "hoy"
+           }
+          }
+         ]
+        },
+        "prioridad": 8
+       },
+       {
+        "hace": {
+         "verbo": "desayunar",
+         "args": [
+          {
+           "param": 0
+          },
+          "cocina"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 7
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 7.75
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "desayunar"
+            ],
+            "ventana": "hoy"
+           }
+          }
+         ]
+        },
+        "prioridad": 8
+       },
+       {
+        "hace": {
+         "verbo": "ir_a_clases",
+         "args": [
+          {
+           "param": 0
+          },
+          "tejas_verdes"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "no",
+           "de": {
+            "c": "cmp",
+            "camino": [
+             "tiempo",
+             "semana"
+            ],
+            "op": "=",
+            "valor": "domingo"
+           }
+          },
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 7.75
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 8.25
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "ir_a_clases"
+            ],
+            "ventana": "hoy"
+           }
+          }
+         ]
+        },
+        "prioridad": 7
+       },
+       {
+        "hace": {
+         "verbo": "comer",
+         "args": [
+          {
+           "param": 0
+          },
+          "cocina"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "cmp",
+           "camino": [
+            "tiempo",
+            "semana"
+           ],
+           "op": "=",
+           "valor": "domingo"
+          },
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 12
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 13.5
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "comer"
+            ],
+            "ventana": "hoy"
+           }
+          }
+         ]
+        },
+        "prioridad": 8
+       },
+       {
+        "hace": {
+         "verbo": "ir_a_la_iglesia",
+         "args": [
+          {
+           "param": 0
+          },
+          "tejas_verdes"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "cmp",
+           "camino": [
+            "tiempo",
+            "semana"
+           ],
+           "op": "=",
+           "valor": "domingo"
+          },
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 10
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 10.5
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "ir_a_la_iglesia"
+            ],
+            "ventana": "hoy"
+           }
+          }
+         ]
+        },
+        "prioridad": 7
+       },
+       {
+        "hace": {
+         "verbo": "cenar",
+         "args": [
+          {
+           "param": 0
+          },
+          "cocina"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 18
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 19
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "cenar"
+            ],
+            "ventana": "hoy"
+           }
+          }
+         ]
+        },
+        "prioridad": 8
+       },
+       {
+        "hace": {
+         "verbo": "jugar_con",
+         "args": [
+          {
+           "param": 0
+          },
+          "diana"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "f",
+           "f": "ve",
+           "args": [
+            {
+             "param": 0
+            },
+            "diana"
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "desde",
+            "camino": [
+             "hizo_t",
+             {
+              "param": 0
+             },
+             "jugar_con"
+            ],
+            "op": "<",
+            "valor": "2h",
+            "min": true
+           }
+          }
+         ]
+        },
+        "prioridad": 5
+       },
+       {
+        "hace": {
+         "verbo": "lavar_platos",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 19
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 20
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "lavar_platos"
+            ],
+            "ventana": "hoy"
+           }
+          }
+         ]
+        },
+        "prioridad": 3
+       },
+       {
+        "hace": {
+         "verbo": "estudiar",
+         "args": [
+          {
+           "param": 0
+          },
+          "cocina"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "no",
+           "de": {
+            "c": "cmp",
+            "camino": [
+             "tiempo",
+             "semana"
+            ],
+            "op": "=",
+            "valor": "domingo"
+           }
+          },
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 16
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 18
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "estudiar"
+            ],
+            "ventana": "hoy"
+           }
+          }
+         ]
+        },
+        "prioridad": 3
+       },
+       {
+        "hace": {
+         "verbo": "buscar_huevos",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 13
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 18
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "buscar_huevos"
+            ],
+            "ventana": "hoy"
+           }
+          }
+         ]
+        },
+        "prioridad": 1
+       },
+       {
+        "hace": {
+         "verbo": "leer",
+         "args": [
+          {
+           "param": 0
+          },
+          "pieza"
+         ]
+        },
+        "si": {
+         "c": "o",
+         "de": [
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 13
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 18
+            }
+           ]
+          },
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 18
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 21.5
+            }
+           ]
+          },
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 6
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 12
+            }
+           ]
+          }
+         ]
+        },
+        "prioridad": 1,
+        "peso": 3
+       },
+       {
+        "hace": {
+         "verbo": "jugar_en_la_huerta",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "si": {
+         "c": "o",
+         "de": [
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 13
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 18
+            }
+           ]
+          },
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 6
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 12
+            }
+           ]
+          }
+         ]
+        },
+        "prioridad": 1,
+        "peso": 2
+       },
+       {
+        "hace": {
+         "verbo": "sonar_despierta",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "prioridad": 1,
+        "peso": 2
+       },
+       {
+        "hace": {
+         "verbo": "mirar_las_vacas",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "si": {
+         "c": "o",
+         "de": [
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 13
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 18
+            }
+           ]
+          },
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 6
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 12
+            }
+           ]
+          }
+         ]
+        },
+        "prioridad": 1
+       },
+       {
+        "hace": {
+         "verbo": "descansar",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "prioridad": 0
+       }
+      ]
+     }
+    }
+   }
+  },
+  "dia_de_diana": {
+   "tipo": "receta",
+   "params": [
+    "q"
+   ],
+   "pasos": {
+    "vive": {
+     "repite": {
+      "elige": [
+       {
+        "hace": {
+         "verbo": "dormir",
+         "args": [
+          {
+           "param": 0
+          },
+          "cuesta_del_huerto"
+         ]
+        },
+        "si": {
+         "c": "o",
+         "de": [
+          {
+           "c": "cmp",
+           "camino": [
+            "tiempo",
+            "hora"
+           ],
+           "op": ">=",
+           "valor": 20.5
+          },
+          {
+           "c": "cmp",
+           "camino": [
+            "tiempo",
+            "hora"
+           ],
+           "op": "<",
+           "valor": 7
+          }
+         ]
+        },
+        "prioridad": 9
+       },
+       {
+        "hace": {
+         "verbo": "volver_a_casa",
+         "args": [
+          {
+           "param": 0
+          },
+          "cuesta_del_huerto"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "o",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 18
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 7
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "cmp",
+            "camino": [
+             "mundo",
+             {
+              "param": 0
+             },
+             "lugar"
+            ],
+            "op": "=",
+            "valor": "cuesta_del_huerto"
+           }
+          }
+         ]
+        },
+        "prioridad": 9
+       },
+       {
+        "hace": {
+         "verbo": "desayunar",
+         "args": [
+          {
+           "param": 0
+          },
+          "cuesta_del_huerto"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 7
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 7.75
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "desayunar"
+            ],
+            "ventana": "hoy"
+           }
+          }
+         ]
+        },
+        "prioridad": 8
+       },
+       {
+        "hace": {
+         "verbo": "ir_a_clases",
+         "args": [
+          {
+           "param": 0
+          },
+          "cuesta_del_huerto"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "no",
+           "de": {
+            "c": "cmp",
+            "camino": [
+             "tiempo",
+             "semana"
+            ],
+            "op": "=",
+            "valor": "domingo"
+           }
+          },
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 7.75
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 8.25
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "ir_a_clases"
+            ],
+            "ventana": "hoy"
+           }
+          }
+         ]
+        },
+        "prioridad": 7
+       },
+       {
+        "hace": {
+         "verbo": "cenar",
+         "args": [
+          {
+           "param": 0
+          },
+          "cuesta_del_huerto"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 18
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 19
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "cenar"
+            ],
+            "ventana": "hoy"
+           }
+          }
+         ]
+        },
+        "prioridad": 8
+       },
+       {
+        "hace": {
+         "verbo": "comer",
+         "args": [
+          {
+           "param": 0
+          },
+          "cuesta_del_huerto"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "cmp",
+           "camino": [
+            "tiempo",
+            "semana"
+           ],
+           "op": "=",
+           "valor": "domingo"
+          },
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 12
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 13.5
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "comer"
+            ],
+            "ventana": "hoy"
+           }
+          }
+         ]
+        },
+        "prioridad": 8
+       },
+       {
+        "hace": {
+         "verbo": "ir_a_la_iglesia",
+         "args": [
+          {
+           "param": 0
+          },
+          "cuesta_del_huerto"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "cmp",
+           "camino": [
+            "tiempo",
+            "semana"
+           ],
+           "op": "=",
+           "valor": "domingo"
+          },
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 10
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 10.5
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "ir_a_la_iglesia"
+            ],
+            "ventana": "hoy"
+           }
+          }
+         ]
+        },
+        "prioridad": 7
+       },
+       {
+        "hace": {
+         "verbo": "pasear",
+         "args": [
+          {
+           "param": 0
+          },
+          "huerta"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "o",
+           "de": [
+            {
+             "c": "y",
+             "de": [
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": ">=",
+               "valor": 13
+              },
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": "<",
+               "valor": 18
+              }
+             ]
+            },
+            {
+             "c": "y",
+             "de": [
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": ">=",
+               "valor": 6
+              },
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": "<",
+               "valor": 12
+              }
+             ]
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "cmp",
+            "camino": [
+             "mundo",
+             {
+              "param": 0
+             },
+             "lugar"
+            ],
+            "op": "=",
+            "valor": "escuela"
+           }
+          }
+         ]
+        },
+        "prioridad": 1
+       },
+       {
+        "hace": {
+         "verbo": "visitar",
+         "args": [
+          {
+           "param": 0
+          },
+          "ana",
+          "cuesta_del_huerto"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 15.75
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 17
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "visitar"
+            ],
+            "ventana": "hoy"
+           }
+          }
+         ]
+        },
+        "prioridad": 3,
+        "peso": 2
+       },
+       {
+        "hace": {
+         "verbo": "leer",
+         "args": [
+          {
+           "param": 0
+          },
+          "cuesta_del_huerto"
+         ]
+        },
+        "si": {
+         "c": "o",
+         "de": [
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 13
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 18
+            }
+           ]
+          },
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 18
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 21.5
+            }
+           ]
+          },
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 6
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 12
+            }
+           ]
+          }
+         ]
+        },
+        "prioridad": 1,
+        "peso": 2
+       },
+       {
+        "hace": {
+         "verbo": "descansar",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "prioridad": 0
+       }
+      ]
+     }
+    }
+   }
   }
  },
  "ana_sola": {

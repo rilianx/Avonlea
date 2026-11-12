@@ -17,11 +17,16 @@
     const W = MundoMinimo.mundo || (MundoMinimo.mundo = Mundo(G));
     const L = D.lugares, dentro = Object.fromEntries(Object.entries(L).filter(([, l]) => l.dentro).map(([k, l]) => [k, l.dentro]));
     const quienes = () => [...Object.keys(D.personas), ...Object.keys(D.medios)];
+    // dónde está alguien, como lo dicen las historias: su lugar, si es de las historias; el de las historias que es ese
+    // (el lago es el estanque de los Barry); si no, el que dice la geografía (el granero queda en Tejas Verdes)
+    const inv = Object.fromEntries(Object.entries(G.alias).map(([l, w]) => [w, l]));
+    const vista = q => { const l = (W.E.personas[q] || W.E.medios[q])?.lugar; return l == null ? null : D.lugares[l] ? l : D.lugares[inv[l]] ? inv[l] : G.lugares[l]?.vista ?? l; };
+    const juntos = (a, b) => { const x = vista(a), y = vista(b); return x != null && (x === y || dentro[x] === y || dentro[y] === x); };
     // el mundo le dice al motor cómo está: dónde está cada uno (si se movió, llega: es un momento; si el motor no sabía
     // dónde estaba, no), en qué va, a quién sigue, si la calesa está enganchada
     function contar(){
       iniciar(); W.avanzarHasta(api.ahora());
-      for (const q of quienes()) { const l = W.vista(q), antes = get(['mundo', q, 'lugar']); if (l != null && l !== antes) { if (antes == null) set(['mundo', q, 'lugar'], l); else api.llega(q, l); } }
+      for (const q of quienes()) { const l = vista(q), antes = get(['mundo', q, 'lugar']); if (l != null && l !== antes) { if (antes == null) set(['mundo', q, 'lugar'], l); else api.llega(q, l); } }
       for (const q of Object.keys(D.personas)) { const p = W.E.personas[q]; if (!p) continue; for (const c of ['en', 'sigue']) if (get(['mundo', q, c]) !== p[c]) set(['mundo', q, c], p[c]); }
       for (const [m, x] of Object.entries(W.E.medios)) if (D.medios[m] && get(['mundo', m, 'listo']) !== x.listo) set(['mundo', m, 'listo'], x.listo);
     }
@@ -44,14 +49,17 @@
         const i = r.indexOf(en(desde)), j = r.indexOf(hasta);
         return i <= j ? r.slice(i + 1, j + 1) : r.slice(j, i).reverse();
       },
-      funciones: { ve: y((a, b) => W.juntos(a, b, dentro)), oye: y((a, b) => W.juntos(a, b, dentro)), sola: y(p => Object.keys(D.personas).every(q => q === p || !W.juntos(p, q, dentro))) },
+      funciones: { ve: y(juntos), oye: y(juntos), sola: y(p => Object.keys(D.personas).every(q => q === p || !juntos(p, q))) },
       empezar(acc){
         iniciar(); W.avanzarHasta(api.ahora());
         if (acc.mapa) {   // (la gente del pueblo aparece: sale ahora y llega ya)
-          acc.de = W.vista(acc.quien); acc.deW = W.persona(acc.quien).lugar; acc.aW = W.lugarId(acc.a); acc.sale = api.ahora();
+          acc.de = vista(acc.quien); acc.deW = W.persona(acc.quien).lugar; acc.aW = W.lugarId(acc.a); acc.sale = api.ahora();
           acc.fin = W.ir(acc.quien, acc.a, acc.ya || G.del_pueblo.includes(acc.quien) ? { minutos: 0 } : {});   // (lo dicho en una escena —correr al mar— es ya, como en el juego, para el motor) acc.como = W.persona(acc.quien).viaje?.como || 'pie';
           MundoMinimo.viajes[acc.quien] = acc;
-        } else acc.fin = api.ahora() + (acc.ya ? 0 : acc.decir ? 1 : acc.dura || 0);
+        } else {
+          acc.fin = api.ahora() + (acc.ya ? 0 : acc.decir ? 1 : acc.dura || 0);
+          if (acc.verbo && acc.dura && !acc.ya && W.E.personas[acc.quien]) W.ocupar(acc.quien, acc.verbo, acc.dura, { junto_a: acc.junto_a, postura: acc.postura, usa: acc.usa });   // (lo que hace, para mirarlo: la lupa)
+        }
         if (acc.nombrar) acc.nombre = D.nombrables[acc.nombrar].libro;
       },
       // (un viaje: cuando el mundo dice que llegó; si el mundo no lo tiene en camino —una partida cargada—, se le vuelve a dar)
@@ -61,7 +69,7 @@
         W.avanzarHasta(api.ahora()); return !W.persona(acc.quien).viaje;
       },
       terminar(acc){ if (acc.mapa) { contar(); if (MundoMinimo.viajes[acc.quien] === acc) delete MundoMinimo.viajes[acc.quien]; } },
-      cancelar(acc){ if (acc.mapa) { W.parar(acc.quien); if (MundoMinimo.viajes[acc.quien] === acc) delete MundoMinimo.viajes[acc.quien]; } },
+      cancelar(acc){ if (acc.mapa) { W.parar(acc.quien); if (MundoMinimo.viajes[acc.quien] === acc) delete MundoMinimo.viajes[acc.quien]; } else if (acc.verbo && W.E.personas[acc.quien]?.ocupado) W.dejar(acc.quien, acc.verbo); },
       // (un viaje se mira de a un minuto: si algo se rompe en el camino, se nota enseguida)
       cuando: acc => (acc.mapa ? Math.min(acc.fin, api.ahora() + 1) : acc.fin),
       parar(acc){ acc.resta = acc.mapa ? W.parar(acc.quien) : acc.fin - api.ahora(); },

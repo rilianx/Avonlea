@@ -64,6 +64,8 @@ docs/lenguaje/
       escenas.datos.ts     (generado) cada escena y cada voz traducida, para que tsc la revise
     llegada/                 Matthew trae a Ana de Bright River (cap. 2)
     camino_blanco/           una historia de fondo: lo que pasa cada vez que Ana pasa por la Avenida
+  vidas/
+    tejas_verdes.ts          lo de todos los días: las acciones, las actividades y la vida de cada uno (§6.1)
 ```
 
 ## 3. Lo local y lo común
@@ -186,6 +188,51 @@ export const llevar_a = receta('llevar_a', (quien: Persona, otro: Persona, a: Lu
   Son un tipo: un paso que no existe es un error.
 - **Los momentos de un verbo**, de cualquier nivel, son `empieza`, `cumplido`, `fallido` y `sigue` (sigue después de una
   reparación). Son a los que se engancha una escena.
+
+### 6.1 Las vidas: lo de todos los días
+
+Lo que los personajes hacen cuando nada los ocupa también se escribe con verbos (`vidas/`). No hay rutinas aparte:
+una vida es una receta, y una actividad («ir a clases»: ir, quedarse, volver) también.
+
+- **Las acciones** son primitivos que, además, dicen de sí lo que el dibujo necesita: `donde` (si no está ahí, primero
+  va), `junto_a`, `postura` y `usa`. Solo `donde` cambia lo que pasa; lo demás es para el dibujo.
+  ```ts
+  export const coser = primitivo('coser', (_q: Persona) => ({ donde: 'cocina', junto_a: 'ventana', postura: 'sentada', usa: ['aguja', 'tela'], dura: '45m' }))
+  ```
+- **`elegir(...)`**: una de varias opciones, cada una con `hace`, `si`, `prioridad` y `peso`. Se elige la de más
+  prioridad que se pueda (su `si`, y lo que pide su verbo); entre las de igual prioridad, al azar, por peso. Así no
+  todos los días son iguales. El azar tiene semilla: la misma partida da lo mismo, y se guarda con ella.
+- **Interrupciones**: mientras hace una opción, si otra de **más prioridad** se vuelve posible (la hora de comer, llegó
+  Diana), deja lo que hacía y vuelve a elegir. Dejar algo a medias no es grave: la receta deja su `si_se_deja` (si
+  tiene: «faltó a clases») y se sigue con otra cosa.
+- **`repetir(paso, mientras?)`**: un paso una y otra vez. Una vida es `repetir(elegir(...))`.
+- **`quedarse(quien, hasta)`**: estar donde está hasta que se cumpla `hasta`; si se va antes, no se cumplió.
+- **`mantiene` con `si_se_rompe: 'dejar'`**: si se rompe, la receta se deja, sin repararla.
+- **`hizo(quien, verbo)`**: lo que alguien hizo (lo anota el motor): `hizo('ana', desayunar).hoy`,
+  `hizo('marilla', lavar_platos).desde('<', '1h')`.
+- **`tiempo.semana`**: el día de la semana (el día 7 es domingo, como en el juego). `tiempo.hora.entre(21, 6)` cruza la
+  medianoche, y `tiempo.hora.desde(15.5)` es desde las tres y media.
+- **`vida(quien, receta)`**: la vida de cada uno. El motor la corre de fondo si el escenario dice
+  `vidas: 'tejas_verdes'`. Mientras otra cosa ocupa a esa persona (un encargo de una historia, lo que la jugadora le
+  pide, o que la jugadora la maneje: `M.controlar('ana')`), su vida se suspende. Cuando la sueltan, vuelve a elegir.
+
+```ts
+export const dia_de_ana = receta('dia_de_ana', (q: Persona) => ({
+  pasos: {
+    vive: repetir(elegir(
+      { hace: dormir(q, 'pieza'), si: de_noche(6.5, 21), prioridad: 9 },
+      { hace: ir_a_clases(q, 'tejas_verdes'), si: y(dia_de_clases, tiempo.hora.entre(7.75, 8.25), no(hizo(q, ir_a_clases).hoy)), prioridad: 7 },
+      { hace: jugar_con(q, 'diana'), si: y(ve(q, 'diana'), no(hizo(q, jugar_con).desde('<', '2h'))), prioridad: 5 },
+      { hace: leer(q, 'pieza'), si: o(tarde, atardecer, manana), prioridad: 1, peso: 3 },
+      { hace: descansar(q), prioridad: 0 },   // (siempre se puede: nadie se queda sin nada que hacer)
+    )),
+  },
+}))
+```
+
+Se prueba con `tools/mundo/dia.js`, que vive unos días seguidos en el mundo, saca el diario de cada uno y revisa las
+reglas de lo natural. Se ve en el tablero, `trazas/tablero.html` (`node tools/mundo/tablero.js`). Ver
+`tools/mundo/LEEME.md`.
 
 ## 7. Actos de habla
 

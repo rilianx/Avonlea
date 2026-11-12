@@ -24,6 +24,7 @@ const MEDIR = `(() => {
   const vistaEn = (x, y) => { const b = PEOPLE.shearer, antes = { where: b.where, x: b.x, y: b.y }; Object.assign(b, { where: 'out', x, y }); try { return lgLugarDe('shearer'); } finally { Object.assign(b, antes); } };   // (lo que diría el juego de alguien parado ahí)
   for (const k of Object.keys(WP)) if (!WP_CAMINO[k]) lugar(k, WP_NAME[k] || k, [k === 'cocina' ? { ...mapa(...WP[k]), adentro: 1 } : mapa(...WP[k])], { plan: k, vista: k === 'cocina' ? 'cocina' : vistaEn(...WP[k]) });
   lugar('pieza', WP_NAME.pieza, [{ ...mapa(...DOOR.gg), adentro: 2 }], { plan: 'pieza', vista: 'cocina' });
+  for (const [k, n] of [['pieza_marilla', 'la pieza de Marilla'], ['pieza_matthew', 'la pieza de Matthew']]) lugar(k, n, [{ ...mapa(...DOOR.gg), adentro: 2 }], { plan: 'cocina', vista: 'cocina' });   // (el juego no las tiene: arriba, como la de Ana)
   for (const h of Object.keys(HOUSES)) if (h !== 'gg' && h !== 'br') lugar('h:' + h, HOUSES[h].name, [{ ...mapa(...DOOR[h]), adentro: 1 }], { plan: 'h:' + h, vista: vistaEn(...DOOR[h]) });
   lugar('h:br', 'la estación de Bright River', [{ camino: 'br', s: 0, adentro: 1 }], { plan: 'h:br', vista: 'estacion_bright_river' });
   for (const [k, [c, sv]] of Object.entries(WP_CAMINO)) lugar(k, WP_NAME[k], [{ camino: c, s: sv }], { plan: k, vista: { hotel_ws: 'hotel_white_sands', playa_ws: 'playa' }[k] });
@@ -35,10 +36,10 @@ const MEDIR = `(() => {
   lugar('camino_costa', 'el camino de la costa', [{ camino: 'costa', s: .6 }], { vista: 'camino_costa' });
   lugar('orilla', 'la orilla del mar', [mapa(PLACES.playa[1], PLACES.playa[2]), { camino: 'costa', s: WP_CAMINO.playa_ws[1], adentro: 2 }], { vista: 'orilla' });   // (la de Avonlea, junto al faro; y bajar a la arena por el camino de la costa)
   // (cada lugar de las historias, en el mundo: el mismo, o el del planificador que es ese lugar)
-  const alias = { estacion_bright_river: 'h:br', estanque_barry: 'lago', hotel_white_sands: 'hotel_ws', playa: 'playa_ws' };
+  const alias = { estacion_bright_river: 'h:br', estanque_barry: 'lago', hotel_white_sands: 'hotel_ws', playa: 'playa_ws', cuesta_del_huerto: 'h:os' };
   for (const l of Object.keys(L)) if (!P[alias[l] || l]) throw new Error('el exportador no sabe dónde está «' + l + '» (agrégalo a MEDIR)');
   for (const [l, w] of Object.entries(alias)) INFO[w].vista = l;
-  for (const l of ['cocina', 'corral', 'aldea', 'escuela']) INFO[l].vista = l;
+  for (const l of Object.keys(L)) if (INFO[l]) INFO[l].vista = l;   // (un lugar que es de las historias, se llama así)
   // (por el mapa: lo que mide la red de caminos de Avonlea; si no hay red, en línea recta, un poco más)
   const largo = (a, b) => { const r = netRoute(a[0], a[1], b[0], b[1]); if (!r) return dist(a[0], a[1], b[0], b[1]) * 1.3; const pts = [a, ...r.pts, b]; let d = 0; for (let i = 1; i < pts.length; i++) d += dist(...pts[i - 1], ...pts[i]); return d; };
   // (por un camino largo, entre dos «s»: en calesa con el ritmo de cada tramo; a pie, al paso)

@@ -6,6 +6,29 @@ ve todo lo que puede hacer ahí, lo hace, y se ve qué cambió.
 
 El juego hace dos cosas: decide qué pasa y lo dibuja. El mundo hace solo lo primero.
 
+## Tejas Verdes, todos los días
+
+El primer juego chico hecho entero con el motor único: Ana, Marilla, Matthew y Diana viven su día
+(`docs/lenguaje/vidas/tejas_verdes.ts`, con `elegir`, `repetir` y `quedarse`: docs/LENGUAJE.md §6.1). Cada uno elige lo
+que corresponde a esa hora y deja lo que hace si aparece algo más importante. Nadie los mueve, y ningún día es igual a
+otro.
+
+- **El tablero** (`trazas/tablero.html`, lo arma `node tools/mundo/tablero.js`): las casillas son los lugares (la casa, el
+  patio, y afuera el campo, la escuela, la iglesia y la casa de Diana); las fichas son las personas, con un ícono de lo
+  que hacen, y se deslizan de casilla en casilla cuando van de un lugar a otro.
+  - **La lupa**: tocando una casilla o una ficha se ve quién está, qué hace, junto a qué, en qué postura, con qué, y
+    hasta qué hora.
+  - **Manejar a Ana**: su día se suspende; tocando una casilla, va; y se le puede hacer hacer lo de su día ahí. Al
+    soltarla, vuelve a lo suyo.
+- **Un día en un minuto** (`node tools/mundo/dia.js`): vive unos días seguidos —una semana, en menos de un segundo—, saca
+  el diario de cada uno, y revisa las reglas de lo natural: de noche duermen; desayunan y cenan; los días de clases
+  están en la escuela a mediodía; nadie pasa más de una hora sin nada que hacer; dos días seguidos de Ana no son
+  iguales; nadie se queda trabado. Si una no se cumple, falla.
+  ```
+  node tools/mundo/dia.js                          # tres días, desde el viernes
+  node tools/mundo/dia.js --dias 7 --desde 1 --semilla 3 --ver ana   # una semana, con otra semilla, y el diario de Ana
+  ```
+
 ## Cómo está hecho
 
 ```

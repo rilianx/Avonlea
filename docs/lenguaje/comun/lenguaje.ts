@@ -13,7 +13,7 @@ export type Valor = string | number
 export type Cond =
   | { readonly c: 'existe'; readonly camino: readonly string[]; readonly ventana?: string }
   | { readonly c: 'cmp'; readonly camino: readonly string[]; readonly op: Op; readonly valor: Valor }
-  | { readonly c: 'desde'; readonly camino: readonly string[]; readonly op: Op; readonly valor: Duracion }
+  | { readonly c: 'desde'; readonly camino: readonly string[]; readonly op: Op; readonly valor: Duracion; readonly min?: true }   // (min: lo guardado es el minuto, no el día —hizo—)
   | { readonly c: 'y' | 'o'; readonly de: readonly Cond[] }
   | { readonly c: 'no'; readonly de: Cond }
   | { readonly c: 'f'; readonly f: string; readonly args: readonly unknown[] }
@@ -99,9 +99,17 @@ export function escenasDe<const E extends readonly string[]>(historia: string, i
 }
 
 // el tiempo
+// (la hora, en horas con decimales: 7.5 son las 7:30; entre(21, 6) cruza la medianoche)
+export type DiaSemana = 'lunes' | 'martes' | 'miercoles' | 'jueves' | 'viernes' | 'sabado' | 'domingo'
 export const tiempo = {
-  hora: { entre: (desde: number, hasta: number): Cond => y({ c: 'cmp', camino: ['tiempo', 'hora'], op: '>=', valor: desde }, { c: 'cmp', camino: ['tiempo', 'hora'], op: '<', valor: hasta }) },
+  hora: {
+    entre: (desde: number, hasta: number): Cond => desde <= hasta
+      ? y({ c: 'cmp', camino: ['tiempo', 'hora'], op: '>=', valor: desde }, { c: 'cmp', camino: ['tiempo', 'hora'], op: '<', valor: hasta })
+      : o({ c: 'cmp', camino: ['tiempo', 'hora'], op: '>=', valor: desde }, { c: 'cmp', camino: ['tiempo', 'hora'], op: '<', valor: hasta }),
+    desde: (h: number): Cond => ({ c: 'cmp', camino: ['tiempo', 'hora'], op: '>=', valor: h }),
+  },
   dia: new Numero(['tiempo', 'dia']),
+  semana: new Campo<DiaSemana>(['tiempo', 'semana']),   // (el día 7 es domingo, como en el juego)
 }
 // dentro de una búsqueda: cuántas veces se intentó el paso de ahora
 export const intentos = new Numero(['intentos'])
@@ -111,7 +119,13 @@ export const intentos = new Numero(['intentos'])
 // (S: los caminos de sus pasos, con puntos: 'camino', 'camino.playa'; lo que una escena puede nombrar)
 export type Llamada<S extends string = string> = { readonly verbo: string; readonly args: readonly unknown[]; readonly _pasos?: S }
 export type PorCada<T = unknown> = { readonly por_cada: unknown; readonly hace: Llamada; readonly _elemento?: T }
-export type Paso = Llamada<string> | readonly Llamada<string>[] | PorCada
+// (elegir: una de varias, la de más prioridad que se pueda —«si», y lo que pide su verbo—, y entre las de igual
+// prioridad, al azar, por peso; mientras hace una, si otra de más prioridad se vuelve posible, la corta y hace esa.
+// repetir: un paso una y otra vez, mientras se cumpla «mientras» —o siempre—)
+export type Opcion = { readonly hace: Llamada<string>; readonly peso?: number; readonly si?: Cond; readonly prioridad?: number }
+export type Elegir = { readonly elige: readonly Opcion[] }
+export type Repetir = { readonly repite: Paso; readonly mientras?: Cond }
+export type Paso = Llamada<string> | readonly Llamada<string>[] | PorCada | Elegir | Repetir
 // los caminos de los pasos de una receta: cada etiqueta, y lo de adentro (los pasos de su verbo, o los elementos de su
 // «por cada»), con un punto
 type Dentro<V> = V extends PorCada<infer T> ? T & string : V extends Llamada<infer S> ? S : never
@@ -128,7 +142,11 @@ function verbo<A extends unknown[], S extends string>(tipo: string, nombre: stri
 }
 
 // («opcion»: cómo se le ofrece a la jugadora cuando se lo piden a Ana: 'Ir con {otro}')
-export type DefPrimitivo = { readonly pide?: Cond; readonly deja?: readonly Efecto[]; readonly dura?: Duracion; readonly cuesta?: number; readonly opcion?: string }
+// (lo que dice de sí para que se pueda dibujar —no cambia lo que pasa, salvo «donde»: hay que estar ahí—: en qué lugar,
+// junto a qué, de pie, sentada o acostada, y con qué cosas en las manos; el juego lo traduce a su animación)
+export type Postura = 'de_pie' | 'sentada' | 'acostada' | 'agachada' | 'caminando'
+export type DefPrimitivo = { readonly pide?: Cond; readonly deja?: readonly Efecto[]; readonly dura?: Duracion; readonly cuesta?: number; readonly opcion?: string
+  readonly donde?: Lugar; readonly junto_a?: string; readonly postura?: Postura; readonly usa?: readonly string[] }
 // lo hace el mundo, con su animación y su duración
 export const primitivo = <A extends unknown[]>(nombre: string, def: (...a: A) => DefPrimitivo) => verbo<A, never>('primitivo', nombre, def)
 
@@ -139,8 +157,11 @@ export type DefReceta<P extends Record<string, Paso>> = {
   readonly cuesta?: number
   readonly pide?: Cond
   readonly pasos: P
-  readonly mantiene?: { readonly si: Cond; readonly desde: keyof P & string; readonly hasta?: keyof P & string; readonly si_se_rompe: keyof P & string }
+  // (si se rompe: volver a un paso —repararlo—, o dejar: la receta termina sin cumplirse, sin más)
+  readonly mantiene?: { readonly si: Cond; readonly desde: keyof P & string; readonly hasta?: keyof P & string; readonly si_se_rompe: (keyof P & string) | 'dejar' }
   readonly cumplido?: Cond
+  // (lo que queda si se deja a medias: la cortó algo más importante, o se rompió lo que mantenía —«faltó a clases»—)
+  readonly si_se_deja?: readonly Efecto[]
 }
 export const receta = <A extends unknown[], const P extends Record<string, Paso>>(nombre: string, def: (...a: A) => DefReceta<P>) => verbo<A, Caminos<P>>('receta', nombre, def)
 // una receta que es un solo «por cada»: sus pasos se nombran por sus elementos (viajar: 'hondonada_lynde', 'playa'…)
@@ -152,6 +173,18 @@ export const busca = <A extends unknown[]>(nombre: string, def: (...a: A) => Def
 
 // un destino: el A* sobre el mapa busca el camino
 export const mapa = <A extends unknown[]>(nombre: string, def: (...a: A) => { readonly paso?: 'lento' | 'normal' | 'rapido'; readonly opcion?: string }) => verbo<A, never>('mapa', nombre, def)
+
+export const elegir = (...opciones: Opcion[]): Elegir => ({ elige: opciones })
+export const repetir = (paso: Paso, mientras?: Cond): Repetir => (mientras ? { repite: paso, mientras } : { repite: paso })
+// lo que alguien hizo (un verbo que se cumplió): hizo('ana', desayunar).hoy; hizo('marilla', lavar_platos).desde('<', '1h')
+// (el motor lo anota solo: el día, y el minuto)
+export const hizo = (quien: Persona, v: { readonly verbo: string }): Hecho => {
+  const camino = ['hizo', quien, v.verbo]
+  return { c: 'existe', camino, id: v.verbo, hoy: { c: 'existe', camino, ventana: 'hoy' }, desde: (op, valor) => ({ c: 'desde', camino: ['hizo_t', quien, v.verbo], op, valor, min: true }), deja: { e: 'deja', camino }, olvida: { e: 'olvida', camino } }
+}
+// la vida de alguien: lo que hace de fondo, todo el día, cuando nada lo ocupa (una historia, la jugadora)
+export type Vida = { readonly vida: Persona; readonly hace: Llamada<string> }
+export const vida = (quien: Persona, hace: Llamada<string>): Vida => ({ vida: quien, hace })
 
 // repetir un paso por cada elemento de una lista: cada vuelta toma la etiqueta de su elemento
 export const por_cada = <T>(lista: readonly T[] | { readonly lista: string; readonly _de?: T }, hace: (x: T) => Llamada): PorCada<T> =>

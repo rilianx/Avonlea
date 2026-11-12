@@ -9,6 +9,7 @@ export const personas = {
   spencer: 'la Sra. Spencer',
   blewett: 'la Sra. Peter Blewett',
   srapye: 'la Sra. Pye',
+  diana: 'Diana',
 } as const
 export type Persona = keyof typeof personas
 
@@ -16,6 +17,16 @@ export const lugares = {
   tejas_verdes: { nombre: 'Tejas Verdes' },
   cocina: { nombre: 'la cocina de Tejas Verdes', dentro: 'tejas_verdes' },
   corral: { nombre: 'el corral de Tejas Verdes', dentro: 'tejas_verdes' },
+  // (Tejas Verdes por dentro y por fuera: las vidas de todos los días, docs/lenguaje/vidas/)
+  pieza: { nombre: 'la pieza de Ana, arriba', dentro: 'tejas_verdes' },
+  pieza_marilla: { nombre: 'la pieza de Marilla', dentro: 'tejas_verdes' },
+  pieza_matthew: { nombre: 'la pieza de Matthew', dentro: 'tejas_verdes' },
+  granero: { nombre: 'el granero', dentro: 'tejas_verdes' },
+  gallinero: { nombre: 'el gallinero', dentro: 'tejas_verdes' },
+  huerta: { nombre: 'la huerta', dentro: 'tejas_verdes' },
+  campo: { nombre: 'el campo de heno' },
+  cuesta_del_huerto: { nombre: 'La Cuesta del Huerto, la casa de los Barry' },
+  iglesia: { nombre: 'la iglesia de Avonlea' },
   hondonada_lynde: { nombre: 'la Hondonada de Lynde' },
   escuela: { nombre: 'la escuela' },
   aldea: { nombre: 'la aldea de Avonlea' },
