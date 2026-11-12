@@ -134,7 +134,7 @@ function fichaLupa(q, t){
   const w = que(q), o = w.o, p = W.E.personas[q], cadena = M.haciendo(q).map(v => v.replace(/^dia_de_\w+$/, 'su día').replace(/_/g, ' ')).join(' › ');
   return `<div class="fila"><span><b style="color:${COLOR[q]}">${esc(M.nombre(q))}</b> ${w.ico} ${esc(w.txt)}</span><span>${w.hasta ? 'hasta ' + hhmm(w.hasta) : ''}</span></div>${barra(w, t)}`
     + (o ? `<div class="cadena">${[o.junto_a && 'junto a ' + o.junto_a, o.postura && o.postura.replace('_', ' '), o.usa && 'con ' + o.usa.join(', ')].filter(Boolean).map(esc).join(' · ')}</div>` : '')
-    + (cadena ? `<div class="cadena">${esc(cadena)}</div>` : '') + `<div class="cadena">en ${esc(NOMBRE(p.lugar))}${lleva(q) ? ' · lleva: ' + lleva(q) : ''}</div>`;
+    + (cadena ? `<div class="cadena">${esc(cadena)}</div>` : '') + M.recados(q).map(r => `<div class="cadena">✉ recado de ${esc(M.nombre(r.de))}: ${esc(r.hace.verbo.replace(/_/g, ' '))}, hasta las ${hhmm(r.hasta)}</div>`).join('') + `<div class="cadena">en ${esc(NOMBRE(p.lugar))}${lleva(q) ? ' · lleva: ' + lleva(q) : ''}</div>`;
 }
 function lupa(){
   const t = ahora(), L = $('lupa');
@@ -151,17 +151,21 @@ function ana(){
   if (!mia) { b('Manejar a Ana', () => { M.controlar('ana', true); pintar(); }, true); A.insertAdjacentHTML('beforeend', '<div class="t">Ana vive su día sola.</div>'); return; }
   b('Soltar a Ana', () => { M.controlar('ana', false); pintar(); }, true);
   A.insertAdjacentHTML('beforeend', '<div class="t">La manejas tú: toca una casilla para que vaya, o hazle hacer algo ahí.</div>');
+  // (lo que le pidieron: lo hace si quiere —tocando—; si no, vence, y no pasa nada)
+  const rs = M.recados('ana');
+  if (rs.length) A.insertAdjacentHTML('beforeend', `<div class="t" style="margin-top:6px">${rs.map(r => `✉ ${esc(M.nombre(r.de))} te pidió: ${esc(r.hace.verbo.replace(/_/g, ' '))} (hasta las ${hhmm(r.hasta)})`).join('<br>')}</div>`);
   if (W.E.personas.ana?.viaje || W.E.personas.ana?.ocupado) return;
+  for (const r of rs) b(`✉ ${r.hace.verbo.replace(/_/g, ' ')}`, () => { M.hacer(r.hace.verbo, r.hace.args); pintar(); });
   for (const v of ACCIONES_ANA) b(`${ICONO[v.verbo] || ''} ${v.verbo.replace(/_/g, ' ')}`, () => { M.hacer(v.verbo, v.args); pintar(); });
 }
 // (las acciones del día de Ana que no necesitan a nadie más: las de un solo parámetro, o con un lugar —donde está—)
 const ACCIONES_ANA = (() => { const L = [], vistos = new Set();
   const recorrer = x => { if (!x || typeof x !== 'object') return; if (Array.isArray(x)) return x.forEach(recorrer); if (x.verbo && D.verbos[x.verbo]?.tipo === 'primitivo' && !vistos.has(x.verbo)) { vistos.add(x.verbo); L.push({ verbo: x.verbo, args: x.args.map(a => (a && a.param === 0 ? 'ana' : a)) }); } for (const v of Object.values(x)) recorrer(v); };
-  recorrer(D.verbos.dia_de_ana.pasos); return L.filter(v => !v.args.some(a => typeof a === 'object')); })();
+  recorrer(D.verbos.dia_de_ana.pasos); return L.filter(v => !v.args.some(a => typeof a === 'object') && !/recado/.test(v.verbo)); })();   // (los recados, aparte: los que tiene)
 // lo que pasa: el registro del mundo (quién va, llega, hace, termina, deja) y el del motor (quién deja lo que hacía, y por qué)
 function diario(){
   const L = [...W.E.registro.slice(-40).map(r => ({ t: r.t, txt: r.txt.replace(/^(\w+)/, (m, k) => D.personas[k] || k).replace(/_/g, ' ') })),
-    ...M.registro.slice(-30).filter(r => /^[⤳⏸▷]/.test(r.t)).map(r => ({ t: (+r.hora.match(/día (\d+)/)[1] - 1) * 1440 + (+r.hora.slice(-5, -3)) * 60 + (+r.hora.slice(-2)), txt: r.t.replace(/_/g, ' ') }))]
+    ...M.registro.slice(-30).filter(r => /^([⤳⏸▷✉]|✔ .* recado|· )/.test(r.t)).map(r => ({ t: (+r.hora.match(/día (\d+)/)[1] - 1) * 1440 + (+r.hora.slice(-5, -3)) * 60 + (+r.hora.slice(-2)), txt: r.t.replace(/_/g, ' ') }))]
     .filter(r => !/termina: (dormir|descansar)|: (dormir|descansar) \(/.test(r.txt)).sort((a, b) => b.t - a.t).slice(0, 30);
   $('diario').innerHTML = L.map(r => `<div><span class="h">${hhmm(r.t)}</span>${esc(r.txt)}</div>`).join('');
 }

@@ -21,12 +21,14 @@ otro.
   - **El diario de cada uno**: se elige a la persona (o se toca su ficha) y se ve su día hasta ahora, cada cosa con su
     hora, dónde y cuánto duró.
   - **Manejar a Ana**: su día se suspende; tocando una casilla, va; y se le puede hacer hacer lo de su día ahí. Al
-    soltarla, vuelve a lo suyo.
+    soltarla, vuelve a lo suyo. Si le pidieron algo (✉ Marilla te pidió: recoger huevos, hasta las 19:30), lo hace si
+    quiere; si no, vence y no pasa nada. En la lupa, los recados de cada uno.
 - **Un día en un minuto** (`node tools/mundo/dia.js`): vive unos días seguidos —una semana, en menos de un segundo—, saca
   el diario de cada uno, y revisa las reglas de lo natural: de noche duermen; desayunan y cenan; los días de clases
   están en la escuela a mediodía; nadie pasa más de una hora sin nada que hacer; dos días seguidos de Ana no son
   iguales; la casa no se descuida (nunca más de 6 platos sucios, y nunca falta leña para cocinar); nadie se queda
   trabado. También dice cuántas veces alguien retomó algo, y cuánto hubo de cada cosa en la casa. Si una no se cumple, falla.
+  Cuenta los recados (cuántos se pidieron, se hicieron, vencieron, o ya no hacían falta; `--recados`, cada uno).
   Antes de vivirlos, revisa las cosas y los muebles (`node tools/mundo/verificar_vidas.js`, docs/LENGUAJE.md §6.1).
   ```
   node tools/mundo/dia.js                          # tres días, desde el viernes

@@ -2,8 +2,8 @@
 // (fijos), por búsqueda (A* sobre el estado) y por mapa (A* sobre el mapa). El primer parámetro es siempre quien lo hace.
 // Las etiquetas de los pasos son los momentos a los que se engancha una escena: el paso «playa» del paso «camino» del
 // encargo «ida» es momento(white_sands.encargo.ida, 'camino.playa', 'cumplido').
-import { busca, mapa, por_cada, por_cada_uno, primitivo, receta, y, type Campo, type Cond } from './lenguaje'
-import { medio, mundo, tramo, type Lugar, type Medio, type Persona, type Ruta } from './mundo'
+import { busca, mapa, por_cada, por_cada_uno, primitivo, receta, y, type Campo, type Cond, type Duracion, type Llamada } from './lenguaje'
+import { medio, mundo, tramo, ve, type Lugar, type Medio, type Persona, type Ruta } from './mundo'
 import { ordenar, pedir } from './actos'
 
 // ---------------------------------------------------------------- primitivos
@@ -64,6 +64,14 @@ export const poner = primitivo('poner', (_quien: Persona, _cosa: string, _n: num
 // (quedarse donde está hasta que se cumpla «hasta»: si se va antes —lo corta algo más importante, la jugadora se la
 // lleva—, no se cumple: la clase hasta las tres y media)
 export const quedarse = primitivo('quedarse', (_quien: Persona, hasta: Cond) => ({ pide: hasta }))
+
+// LOS RECADOS: alguien le pide a otro que haga algo, cuando pueda, hasta una hora («vence»). No espera la respuesta:
+// queda en la lista del otro, que lo hace cuando su día se lo permite (hacer_recado, una opción de su vida) o cuando la
+// jugadora quiere, si es Ana. Si vence, o ya no hace falta (alguien trajo los huevos), se borra, sin más.
+// (se lo dice en persona: tienen que verse)
+export const dar_recado = primitivo('dar_recado', (quien: Persona, a: Persona, _hace: Llamada, _vence: Duracion) => ({ pide: ve(quien, a), postura: 'de_pie', dura: '1m' }))
+// (hacer el primero de sus recados que se pueda ahora: si no hay ninguno, no se puede)
+export const hacer_recado = primitivo('hacer_recado', (_quien: Persona) => ({}))
 
 // ---------------------------------------------------------------- por mapa
 

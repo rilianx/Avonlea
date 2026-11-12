@@ -15,14 +15,17 @@
 //   pan, alguien entra leña cuando se acaba. Junto a cada mueble caben tantos (el fregadero, uno; la mesa, cuatro).
 //   Algunas cosas pasan solas: las gallinas ponen a las seis, y se junta ropa sucia.
 // - Lo que se deja a medias, se retoma: le falta lo que le faltaba (el motor lo recuerda ese día).
-import { cosasDe, elegir, hizo, mueblesDe, no, primitivo, procesos, receta, repetir, si, tiempo, vida, y, o } from '../comun/lenguaje'
+// - Los recados: Marilla le pide a Ana que traiga los huevos (o, el sábado, que barra), y a Matthew que entre leña.
+//   No espera: queda en la lista del otro, que lo hace cuando puede —Ana, después de la escuela—, o vence y no pasa
+//   nada. Si la jugadora maneja a Ana, lo ve como un recado que puede hacer o no.
+import { cosasDe, elegir, hizo, mueblesDe, no, primitivo, procesos, receta, repetir, si, tiempo, tiene_recado, vida, y, o } from '../comun/lenguaje'
 import { mundo, ve, type Lugar, type Persona } from '../comun/mundo'
-import { ir_a, llevar, poner, quedarse } from '../comun/verbos'
+import { dar_recado, hacer_recado, ir_a, llevar, poner, quedarse } from '../comun/verbos'
 
 // ---------------------------------------------------------------- cuándo
 
 const de_noche = (despierta: number, se_acuesta: number) => tiempo.hora.entre(se_acuesta, despierta)
-const domingo = tiempo.semana.es('domingo'), lunes = tiempo.semana.es('lunes'), martes = tiempo.semana.es('martes')
+const domingo = tiempo.semana.es('domingo'), lunes = tiempo.semana.es('lunes'), martes = tiempo.semana.es('martes'), sabado = tiempo.semana.es('sabado')
 const dia_de_clases = no(domingo)
 const manana = tiempo.hora.entre(6, 12), tarde = tiempo.hora.entre(13, 18), atardecer = tiempo.hora.entre(18, 21.5)
 
@@ -159,12 +162,17 @@ export const dia_de_marilla = receta('dia_de_marilla', (q: Persona) => ({
       { hace: cocinar(q), si: y(tiempo.hora.entre(17.25, 18)), prioridad: 6 },
       { hace: cenar(q, 'cocina'), si: y(tiempo.hora.entre(18, 19), no(hizo(q, cenar).hoy)), prioridad: 8 },
       { hace: lavar_platos(q), si: tiempo.hora.entre(6, 21.5), prioridad: 3, peso: 3 },   // (si hay platos sucios: lo pide lavar)
-      { hace: barrer(q), si: y(manana, no(hizo(q, barrer).hoy)), prioridad: 3 },
+      { hace: barrer(q), si: y(manana, no(hizo(q, barrer).hoy), no(hizo('ana', barrer).hoy)), prioridad: 3 },
       { hace: amasar(q), si: y(manana, no(domingo)), prioridad: 3 },   // (si queda poco pan)
       { hace: lavar_ropa(q), si: y(lunes, manana), prioridad: 3, peso: 2 },
       { hace: batir_mantequilla(q), si: y(o(manana, tarde), no(domingo)), prioridad: 3 },   // (si hay leche)
       { hace: ir_a_la_iglesia(q, 'cocina'), si: y(domingo, tiempo.hora.entre(10, 10.5), no(hizo(q, ir_a_la_iglesia).hoy)), prioridad: 7 },
-      { hace: recoger_huevos(q), si: manana, prioridad: 3 },
+      { hace: recoger_huevos(q), si: y(o(manana, tarde), no(ve(q, 'ana')), no(tiene_recado('ana', recoger_huevos)), no(hizo(q, dar_recado).desde('<', '6h'))), prioridad: 3 },   // (si Ana está, se lo pide a ella; si se lo pidió, espera; si a Ana se le pasó, los trae ella)
+      // (los recados: uno cada tanto, al que está ahí; ella no espera)
+      { hace: dar_recado(q, 'ana', recoger_huevos('ana'), '12h'), si: y(en('gallinero').huevos.gt(0), no(hizo(q, dar_recado).desde('<', '2h'))), prioridad: 4 },
+      { hace: dar_recado(q, 'ana', barrer('ana'), '12h'), si: y(sabado, manana, no(hizo(q, barrer).hoy), no(hizo(q, dar_recado).desde('<', '2h'))), prioridad: 4 },
+      { hace: dar_recado(q, 'matthew', entrar_lena('matthew'), '2h'), si: y(en('cocina').lena.lt(3), no(hizo(q, dar_recado).desde('<', '1h'))), prioridad: 4 },
+      { hace: dar_recado(q, 'matthew', partir_lena('matthew'), '4h'), si: y(en('granero').lena.lt(2), en('cocina').lena.lt(3), no(hizo(q, dar_recado).desde('<', '1h'))), prioridad: 4 },
       { hace: coser(q), si: y(o(manana, tarde, atardecer), no(domingo), no(hizo(q, coser).desde('<', '40m'))), prioridad: 1, peso: 3 },   // (cose un rato, y hace otra cosa)
       { hace: leer(q, 'cocina'), si: domingo, prioridad: 1 },   // (el domingo, la Biblia)
       { hace: regar(q), si: y(tarde, no(hizo(q, regar).hoy)), prioridad: 1 },
@@ -187,6 +195,7 @@ export const dia_de_matthew = receta('dia_de_matthew', (q: Persona) => ({
       { hace: cenar(q, 'cocina'), si: y(tiempo.hora.entre(18, 19), no(hizo(q, cenar).hoy)), prioridad: 8 },
       { hace: ordeñar(q), si: y(tiempo.hora.entre(17, 18), no(hizo(q, ordeñar).desde('<', '6h'))), prioridad: 6 },
       { hace: dejar_la_leche(q), prioridad: 6 },   // (si trae leche en el balde)
+      { hace: hacer_recado(q), si: tiempo.hora.entre(6, 20), prioridad: 4 },   // (lo que le pidió Marilla: deja lo que hace)
       { hace: dar_de_comer(q), si: y(o(tiempo.hora.entre(7.5, 9), tiempo.hora.entre(16, 17)), no(hizo(q, dar_de_comer).desde('<', '4h'))), prioridad: 3 },
       { hace: trabajar_el_campo(q), si: y(o(tiempo.hora.entre(8, 11.5), tiempo.hora.entre(13, 16.5)), no(domingo)), prioridad: 3, peso: 4 },
       { hace: entrar_lena(q), si: tiempo.hora.entre(6, 20), prioridad: 4 },   // (cuando queda poca junto a la estufa, deja lo que hace)
@@ -216,6 +225,7 @@ export const dia_de_ana = receta('dia_de_ana', (q: Persona) => ({
       { hace: lavar_platos(q), si: tiempo.hora.entre(18.5, 20), prioridad: 3 },   // (si hay platos sucios y nadie los está lavando)
       { hace: estudiar(q, 'cocina'), si: y(dia_de_clases, tiempo.hora.entre(16, 18), no(hizo(q, estudiar).hoy)), prioridad: 3 },
       { hace: recoger_huevos(q), si: o(tarde, manana), prioridad: 1 },   // (si hay huevos en el gallinero)
+      { hace: hacer_recado(q), si: tiempo.hora.entre(6.5, 20.5), prioridad: 1, peso: 4 },   // (lo que le pidió Marilla: entre lo libre, lo más probable; a veces sueña despierta antes, o se le pasa)
       { hace: entrar_lena(q), si: o(tarde, atardecer), prioridad: 3 },   // (si queda poca leña junto a la estufa)
       { hace: leer(q, 'pieza'), si: o(tarde, atardecer, manana), prioridad: 1, peso: 3 },
       { hace: jugar_en_la_huerta(q), si: o(tarde, manana), prioridad: 1, peso: 2 },

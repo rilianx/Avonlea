@@ -19708,6 +19708,7 @@ comBoton();
         case 'o': return c.de.some(cumple);
         case 'no': return !cumple(c.de);
         case 'f': return mundo.funciones[c.f](...c.args.map(val));
+        case 'recado': return recadosDe(c.quien).some(r => r.hace.verbo === c.verbo && t <= r.hasta);
       }
       throw new Error('condición desconocida: ' + JSON.stringify(c));
     }
@@ -19797,7 +19798,7 @@ comBoton();
           return { espera: { min: 0 } };   // (cada momento se atiende cuando ocurre: sus escenas van antes de seguir)
         }
         if (F.fase === 1) { F.fase = 2; T.pila.push({ k: def(F.ll).tipo, ll: F.ll, inst: F.inst, fase: 0 }); return; }
-        if (F.fase === 2) { F.ok = ret; if (ret && D.personas[F.inst.quien]) { set(['hizo', F.inst.quien, F.ll.verbo], dia()); set(['hizo_t', F.inst.quien, F.ll.verbo], t); }   // (lo que hizo: hizo(quien, verbo).hoy)
+        if (F.fase === 2) { F.ok = ret; if (ret && D.personas[F.inst.quien]) { set(['hizo', F.inst.quien, F.ll.verbo], dia()); set(['hizo_t', F.inst.quien, F.ll.verbo], t); cumplirRecado(F.inst.quien, F.ll); }   // (lo que hizo: hizo(quien, verbo).hoy)
           emitir(F.inst, ret ? 'cumplido' : 'fallido'); F.fase = 3; return { espera: { min: 0 } }; }
         return { vale: F.ok };
       },
@@ -19805,6 +19806,8 @@ comBoton();
       primitivo(F, T, ret){
         const ll = F.ll, d = def(ll);
         if (F.fase === 4) { if (!ret) return { vale: false }; F.fase = 0; }   // (fue hasta donde se hace)
+        if (F.fase === 7) return { vale: ret };   // (hizo el recado, o no pudo)
+        if (F.fase === 0 && ll.verbo === 'hacer_recado') { const r = recadoPara(ll.args[0]); if (!r) return { vale: false }; F.fase = 7; T.pila.push(marco(r.hace, hijo(F.inst, 'recado'))); return; }
         if (F.fase === 0) {
           const q = ll.args[0];
           if (d.donde && !T.ya && !F.fue && !estaEn(q, d.donde)) { F.fue = true; F.fase = 4; T.pila.push(marco({ verbo: 'ir_a', args: [q, d.donde] }, hijo(F.inst, 'va'))); return; }   // (si no está donde se hace, primero va)
@@ -19834,6 +19837,7 @@ comBoton();
         }
         for (const e of d.deja || []) aplicar(e);
         if (ll.verbo === 'tomar' || ll.verbo === 'poner') mover(ll);   // (la cosa va del lugar a quien, o de quien al lugar)
+        if (ll.verbo === 'dar_recado') darRecado(ll);
         return { vale: true };
       },
       // (ir hasta un lugar: el mundo busca el camino, y avisa al llegar)
@@ -19987,7 +19991,35 @@ comBoton();
     }
     function dejar(F){ if (F.dejada) return; F.dejada = true; for (const e of def(F.ll).si_se_deja || []) aplicar(e); }
     const pasoMarco = (p, ctx) => (p.elige ? { k: 'elegir', p, ctx, fase: 0 } : p.repite ? { k: 'repetir', p, ctx, fase: 0 } : marco(p, ctx));
-    const puede = ll => { if (ll.elige || ll.repite) return true; const d = def(ll); if (d.tipo === 'primitivo' && (lleno(ll.args[0], d) || faltaCosa(ll.args[0], d, ll))) return false; return !d.pide || d.tipo === 'primitivo' && (ll.verbo === 'esperar' || ll.verbo === 'quedarse') || cumple(d.pide); };
+    const puede = ll => { if (ll.elige || ll.repite) return true; if (ll.verbo === 'hacer_recado') return !!recadoPara(ll.args[0]); if (ll.verbo === 'dar_recado') { const p = def(ll.args[2]).pide; if (p && !cumple(p)) return false; }   /* (no se pide lo que no se puede: entrar leña, si no hay) */    const d = def(ll); if (d.tipo === 'primitivo' && (lleno(ll.args[0], d) || faltaCosa(ll.args[0], d, ll))) return false; return !d.pide || d.tipo === 'primitivo' && (ll.verbo === 'esperar' || ll.verbo === 'quedarse') || cumple(d.pide); };
+    // (los recados de alguien: los que le dieron —dar_recado—, hasta que los hace, vencen, o ya no hacen falta: lo que
+    // pide su verbo ya no se cumple —no quedan huevos en el gallinero—)
+    const recadosDe = q => S[k(['recados', q])] || [];
+    const igual = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+    function darRecado(ll){
+      const [de, a, hace, vence] = ll.args, L = recadosDe(a);
+      if (L.some(r => igual(r.hace, hace))) return;   // (ya se lo habían pedido)
+      S[k(['recados', a])] = [...L, { de, hace, desde: t, hasta: t + aMin(vence || '3h') }];
+      nota(`✉ ${nombre(de)} le pide a ${nombre(a)}: ${hace.verbo.replace(/_/g, ' ')}`, 'momento');
+    }
+    function revisarRecados(q){
+      const L = recadosDe(q); if (!L.length) return L;
+      const quedan = L.filter(r => {
+        if (t > r.hasta) { nota(`· ${nombre(q)} no hizo el recado de ${nombre(r.de)} (${r.hace.verbo.replace(/_/g, ' ')}): venció`, 'momento'); return false; }
+        const p = def(r.hace).pide; if (p && !cumple(p)) { nota(`· el recado de ${nombre(r.de)} a ${nombre(q)} (${r.hace.verbo.replace(/_/g, ' ')}) ya no hace falta`, 'momento'); return false; }
+        return true;
+      });
+      if (quedan.length !== L.length) S[k(['recados', q])] = quedan;
+      return quedan;
+    }
+    const recadoPara = q => revisarRecados(q).find(r => puede(r.hace));
+    // (alguien hizo un verbo: si era un recado suyo, está hecho —por su vida, por la jugadora, por lo que sea—)
+    function cumplirRecado(q, ll){
+      const L = recadosDe(q), r = L.find(x => igual(x.hace, ll)); if (!r) return;
+      S[k(['recados', q])] = L.filter(x => x !== r);
+      set(['recado_hecho', q, r.de], dia()); set(['recado_hecho_t', q, r.de], t);
+      nota(`✔ ${nombre(q)} hizo el recado de ${nombre(r.de)} (${ll.verbo.replace(/_/g, ' ')})`, 'momento');
+    }
     // (junto a un mueble: ¿ya están todos los que caben —el fregadero, de a uno—? Los muebles y cuántos caben: mueblesDe)
     const lleno = (q, d) => { const cap = d.junto_a && d.donde ? D.muebles?.[d.donde]?.[d.junto_a] : null; if (cap == null) return false;
       return tareas.filter(U => !U.fin && U.quien !== q && U.pila.some(G => G.k === 'primitivo' && G.fase === 1 && G.acc && G.acc.junto_a === d.junto_a && G.acc.donde === d.donde)).length >= cap; };
@@ -20263,6 +20295,8 @@ comBoton();
       // la jugadora maneja a alguien (Ana): su vida se suspende; al soltarla, vuelve a la suya
       controlar(q, si = true){ if (si) set(['controla', q], 1); else delete S[k(['controla', q])]; nota(si ? `(la jugadora maneja a ${nombre(q)})` : `(la jugadora suelta a ${nombre(q)})`); return avanzar(); },
       haciendo,
+      // los recados que tiene alguien: de quién, qué, hasta qué hora
+      recados: q => revisarRecados(q).map(r => ({ ...r })),
       // lo que la jugadora hace por su cuenta (cuando no hay escena ni pregunta)
       irA(l){ nota(`(la jugadora: Ana va hasta ${nombre(l)})`); nuevaTarea({ verbo: 'ir_a', args: ['ana', l] }, {}); return avanzar(); },
       bajarse(){ nota('(la jugadora: Ana se baja de la calesa)'); instantaneo({ verbo: 'bajar', args: ['ana'] }); return avanzar(); },

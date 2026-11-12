@@ -243,6 +243,19 @@ una vida es una receta, y una actividad («ir a clases»: ir, quedarse, volver) 
   toda cosa nombrada está declarada; lo que se gasta, algo lo hace (si no, se acaba para siempre); y lo que se hace,
   algo lo gasta (si no, se junta sin fin). Lo que el compilador de tipos no puede ver.
 - **Lo de la casa, una vez, sale de las cosas**: si Ana ya trajo los huevos, en el gallinero no quedan, y Marilla no va.
+- **Los recados** (`dar_recado(quien, a, hace, vence)`, `hacer_recado(quien)`): alguien le pide a otro que haga algo,
+  cuando pueda, hasta una hora. No espera la respuesta (eso es `pedir`, el acto de las historias, que se queda
+  esperando a que Ana conteste): el recado queda en la lista del otro. Se lo dice en persona (tienen que verse), y no se
+  pide lo que no se puede hacer ahora (entrar leña, si el granero está vacío). El otro lo hace cuando su día se lo
+  permite: `{ hace: hacer_recado(q), prioridad: 1, peso: 4 }` es una opción más de su vida, el primero de sus recados
+  que se pueda. Está hecho cuando hace ese verbo, por lo que sea: su vida, la jugadora, o porque se le ocurrió
+  sola. Si vence, o ya no hace falta (alguien trajo los huevos), se borra, sin más. `tiene_recado('ana',
+  recoger_huevos)` dice si lo tiene pendiente (Marilla espera, en vez de ir ella), y `hizo_recado('ana', 'marilla').hoy`,
+  si lo hizo. En el tablero, si la jugadora maneja a Ana, ve sus recados y los hace si quiere: son las misiones más
+  chicas, las que no obligan a nada.
+  ```ts
+  { hace: dar_recado(q, 'ana', recoger_huevos('ana'), '12h'), si: y(en('gallinero').huevos.gt(0), no(hizo(q, dar_recado).desde('<', '2h'))), prioridad: 4 },
+  ```
 - **Retomar lo interrumpido**: lo que se corta a medias guarda lo que le faltaba. La próxima vez que esa persona lo
   hace ese día, le falta solo eso («↩ Matthew retoma partir_lena (le faltan 25 min)»), y al elegir, prefiere retomarlo.
 - **`vida(quien, receta)`**: la vida de cada uno. El motor la corre de fondo si el escenario dice

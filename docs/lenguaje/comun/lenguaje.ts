@@ -17,6 +17,7 @@ export type Cond =
   | { readonly c: 'y' | 'o'; readonly de: readonly Cond[] }
   | { readonly c: 'no'; readonly de: Cond }
   | { readonly c: 'f'; readonly f: string; readonly args: readonly unknown[] }
+  | { readonly c: 'recado'; readonly quien: string; readonly verbo: string }   // (tiene_recado)
 export type Efecto =
   | { readonly e: 'deja' | 'olvida'; readonly camino: readonly string[]; readonly valor?: Valor }
   | { readonly e: 'suma'; readonly camino: readonly string[]; readonly n: number }
@@ -187,6 +188,13 @@ export const hizo = (quien: Persona, v: { readonly verbo: string }): Hecho => {
   const camino = ['hizo', quien, v.verbo]
   return { c: 'existe', camino, id: v.verbo, hoy: { c: 'existe', camino, ventana: 'hoy' }, desde: (op, valor) => ({ c: 'desde', camino: ['hizo_t', quien, v.verbo], op, valor, min: true }), deja: { e: 'deja', camino }, olvida: { e: 'olvida', camino } }
 }
+// un recado que alguien hizo (dar_recado, en comun/verbos.ts): hizo_recado('ana', 'marilla').hoy
+export const hizo_recado = (quien: Persona, de: Persona): Hecho => {
+  const camino = ['recado_hecho', quien, de]
+  return { c: 'existe', camino, id: 'recado', hoy: { c: 'existe', camino, ventana: 'hoy' }, desde: (op, valor) => ({ c: 'desde', camino: ['recado_hecho_t', quien, de], op, valor, min: true }), deja: { e: 'deja', camino }, olvida: { e: 'olvida', camino } }
+}
+// alguien tiene un recado pendiente de ese verbo (se lo pidieron, y todavía no lo hace ni venció): tiene_recado('ana', recoger_huevos)
+export const tiene_recado = (quien: Persona, v: { readonly verbo: string }): Cond => ({ c: 'recado', quien, verbo: v.verbo })
 // LAS COSAS: cada una está en algún lado —en un lugar (la leña, en el granero) o con alguien (el libro, con Ana)—, y
 // hay tantas. Se declaran los tipos y dónde hay al empezar; se preguntan y se cambian como números, donde están:
 // en('granero').lena.gt(0), con('ana').libro.suma(-1). Nunca bajan de cero. Se mueven con tomar y poner (y llevar).
