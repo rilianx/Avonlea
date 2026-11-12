@@ -58,10 +58,10 @@ const CAMAS = { ana: 'pieza', marilla: 'pieza_marilla', matthew: 'pieza_matthew'
 const ZONAS = [
   { t: 'el patio', x: 20, y: 20, w: 520, h: 225, c: 'var(--patio)', casillas: { tejas_verdes: [30, 60, 240, 175], gallinero: [280, 60, 120, 80], huerta: [410, 60, 120, 80], corral: [280, 155, 120, 80], granero: [410, 155, 120, 80] } },
   { t: 'la casa', x: 20, y: 260, w: 520, h: 220, c: 'var(--casa)', casillas: { cocina: [30, 300, 240, 170], pieza: [280, 300, 120, 80], pieza_marilla: [410, 300, 120, 80], pieza_matthew: [280, 390, 120, 80] } },
-  { t: 'afuera', x: 560, y: 20, w: 320, h: 460, c: 'var(--afuera)', casillas: { campo: [575, 60, 290, 90], escuela: [575, 160, 290, 90], iglesia: [575, 260, 290, 90], cuesta_del_huerto: [575, 360, 290, 110] } },
+  { t: 'afuera', x: 560, y: 20, w: 320, h: 460, c: 'var(--afuera)', casillas: { campo: [575, 60, 290, 70], arbustos: [575, 140, 290, 70], escuela: [575, 220, 290, 70], iglesia: [575, 300, 290, 70], cuesta_del_huerto: [575, 380, 290, 90] } },
 ];
 const CASILLA = {}; for (const z of ZONAS) for (const [k, r] of Object.entries(z.casillas)) CASILLA[k] = { r, c: z.c };
-const NOMBRE = l => (D.lugares[l]?.nombre || G.lugares[G.alias[l] || l]?.nombre || l).replace(/^(la|el) /, '').replace(/, .*$/, '').replace(/ de Tejas Verdes$/, '').replace(/ de Avonlea$/, '').replace(/^\w/, c => c.toUpperCase());
+const NOMBRE = l => (D.lugares[l]?.nombre || G.lugares[G.alias[l] || l]?.nombre || l).replace(/^(la|el) /, '').replace(/ \(.*$/, '').replace(/, .*$/, '').replace(/ de Tejas Verdes$/, '').replace(/ de Avonlea$/, '').replace(/^\w/, c => c.toUpperCase());
 const COLOR = { ana: '#b8442f', marilla: '#4f5d7a', matthew: '#557a43', diana: '#7a4f86' };
 const ICONO = { tomar: '✋', poner: '📦', dormir: '💤', descansar: '🪑', desayunar: '🍽', comer: '🍽', cenar: '🍽', cocinar: '🍲', lavar_platos: '🧽', barrer: '🧹', amasar: '🍞', coser: '🧵', buscar_huevos: '🥚', regar: '🌱', ordeñar: '🥛', dar_de_comer: '🌾', trabajar_el_campo: '🌾', partir_lena: '🪓', arreglar_cerca: '🔨', fumar_pipa: '🪈', leer: '📖', jugar_en_la_huerta: '🎈', sonar_despierta: '☁️', mirar_las_vacas: '🐄', rezar: '🙏', estudiar: '✏️', jugar_con: '🎈', lavar_ropa: '🧺', batir_mantequilla: '🧈', pasear: '🚶', ir_a_clases: '🏫', ir_a_la_iglesia: '⛪', quedarse: '⏳' };
 // el mundo, y las vidas jugando en él
@@ -117,7 +117,8 @@ function pintar(){
   const aqui = {}; for (const q of QUIENES) { const p = W.E.personas[q]; if (p && !p.viaje) (aqui[lugarTablero(p.lugar)] ||= []).push(q); }
   for (const q of QUIENES) {
     const p = W.E.personas[q]; if (!p) continue;
-    let P; if (p.viaje) { const A = centro(p.viaje.de), B = centro(p.viaje.a), f = Math.max(0, Math.min(1, (t - p.viaje.sale) / Math.max(1, p.viaje.llega - p.viaje.sale))); P = [A[0] + (B[0] - A[0]) * f, A[1] + (B[1] - A[1]) * f]; }
+    let P; if (p.viaje) { const A = centro(p.viaje.de), B = centro(p.viaje.a), f = Math.max(0, Math.min(1, (t - p.viaje.sale) / Math.max(1, p.viaje.llega - p.viaje.sale))); P = [A[0] + (B[0] - A[0]) * f, A[1] + (B[1] - A[1]) * f];
+      const jun = Object.keys(W.E.personas).filter(o => { const v = W.E.personas[o].viaje; return v && v.de === p.viaje.de && v.a === p.viaje.a && v.sale === p.viaje.sale; }); P[0] += (jun.indexOf(q) - (jun.length - 1) / 2) * 30; }   // (los que van juntos, lado a lado)
     else { const L = aqui[lugarTablero(p.lugar)] || [q]; P = centro(p.lugar, L.indexOf(q), L.length); }
     const w = que(q);
     h += `<g class="ficha${sel?.q === q ? ' sel' : ''}" data-q="${q}"><circle cx="${P[0]}" cy="${P[1]}" r="19" fill="${COLOR[q]}"/><text class="ini" x="${P[0]}" y="${P[1] + 6}" text-anchor="middle">${esc(M.nombre(q)[0])}</text><text class="ico" x="${P[0] + 13}" y="${P[1] - 13}">${w.ico}</text><title>${esc(M.nombre(q) + ': ' + w.txt)}</title></g>`;
@@ -156,6 +157,8 @@ function ana(){
   if (rs.length) A.insertAdjacentHTML('beforeend', `<div class="t" style="margin-top:6px">${rs.map(r => `✉ ${esc(M.nombre(r.de))} te pidió: ${esc(r.hace.verbo.replace(/_/g, ' '))} (hasta las ${hhmm(r.hasta)})`).join('<br>')}</div>`);
   if (W.E.personas.ana?.viaje || W.E.personas.ana?.ocupado) return;
   for (const r of rs) b(`✉ ${r.hace.verbo.replace(/_/g, ' ')}`, () => { M.hacer(r.hace.verbo, r.hace.args); pintar(); });
+  // (ir con alguien que está ahí: lo acompaña mientras siga en lo suyo —o hasta que la sueltes, tocando una casilla—)
+  for (const q of Object.keys(D.personas)) if (q !== 'ana' && W.E.personas[q] && W.juntos('ana', q)) b(`👣 ir con ${M.nombre(q)}`, () => { M.hacer('acompañar', ['ana', q]); pintar(); });
   for (const v of ACCIONES_ANA) b(`${ICONO[v.verbo] || ''} ${v.verbo.replace(/_/g, ' ')}`, () => { M.hacer(v.verbo, v.args); pintar(); });
 }
 // (las acciones del día de Ana que no necesitan a nadie más: las de un solo parámetro, o con un lugar —donde está—)

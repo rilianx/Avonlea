@@ -67,6 +67,7 @@
         case 'o': return c.de.some(cumple);
         case 'no': return !cumple(c.de);
         case 'f': return mundo.funciones[c.f](...c.args.map(val));
+        case 'haciendo': return haciendo(c.quien).includes(c.verbo);
         case 'recado': return recadosDe(c.quien).some(r => r.hace.verbo === c.verbo && t <= r.hasta);
       }
       throw new Error('condición desconocida: ' + JSON.stringify(c));
@@ -166,6 +167,20 @@
         const ll = F.ll, d = def(ll);
         if (F.fase === 4) { if (!ret) return { vale: false }; F.fase = 0; }   // (fue hasta donde se hace)
         if (F.fase === 7) return { vale: ret };   // (hizo el recado, o no pudo)
+        if (F.fase === 0 && ll.verbo === 'acompañar') {   // (va con la otra: la sigue; lo que la otra hace ahora es el porqué)
+          const [q, otra] = ll.args;
+          if (!cumple(d.pide)) { nota(`✘ acompañar: ${nombre(q)} no está con ${nombre(otra)}`); return { vale: false }; }
+          F.prop = proposito(otra); F.t0 = t; F.fase = 8; aplicar({ e: 'deja', camino: ['mundo', q, 'sigue'], valor: otra });
+          nota(`👣 ${nombre(q)} acompaña a ${nombre(otra)}${F.prop ? ` (${F.prop.replace(/_/g, ' ')})` : ''}`, 'momento');
+        }
+        if (F.fase === 8) {
+          const [q, otra, hasta] = ll.args, fin = (v, por) => { if (por) nota(`· ${nombre(q)} deja de acompañar a ${nombre(otra)}: ${por}`, 'momento'); aplicar({ e: 'deja', camino: ['mundo', q, 'sigue'], valor: 'nadie' }); return { vale: v }; };
+          if (hasta && cumple(hasta)) return fin(true);
+          if (get(['mundo', q, 'sigue']) !== otra) return fin(false, 'se soltó');
+          if (F.prop ? !haciendo(otra).includes(F.prop) : t - F.t0 >= 30) return fin(!hasta, F.prop ? `${nombre(otra)} dejó de ${F.prop.replace(/_/g, ' ')}` : 'ya fue un rato');
+          if (!cumple(d.pide)) return fin(false, 'se separaron');
+          return { espera: { min: 1 } };
+        }
         if (F.fase === 0 && ll.verbo === 'hacer_recado') { const r = recadoPara(ll.args[0]); if (!r) return { vale: false }; F.fase = 7; T.pila.push(marco(r.hace, hijo(F.inst, 'recado'))); return; }
         if (F.fase === 0) {
           const q = ll.args[0];
@@ -338,6 +353,7 @@
     // (cortar lo que hay encima de un marco: lo que el mundo estaba haciendo se cancela; las recetas a medias dejan lo suyo)
     function cortarDesde(T, n){
       for (const G of T.pila.slice(n + 1).reverse()) {
+        if (G.k === 'primitivo' && G.fase === 8) { nota(`· ${nombre(G.ll.args[0])} deja de acompañar a ${nombre(G.ll.args[1])}`, 'momento'); aplicar({ e: 'deja', camino: ['mundo', G.ll.args[0], 'sigue'], valor: 'nadie' }); }   // (acompañaba: se suelta)
         if (G.acc && mundo.cancelar) mundo.cancelar(G.acc);
         if (G.k === 'receta') dejar(G);
         if (G.k === 'primitivo' && G.fase === 1 && G.acc) {   // (a medias: se guarda lo que le faltaba —lo retoma hoy—, y deja lo suyo)
@@ -451,6 +467,8 @@
         else if (!s && T.susp) { T.susp = false; T.pila = [marco(T.vida, {})]; T.despierta = t; T.accion = null; T.hasta = null; nota(`▷ ${nombre(T.quien)} vuelve a su día`, 'momento'); }
       }
     }
+    // (por qué hace lo que hace alguien: lo que eligió en su día —ir_a_clases—, o lo que le pidieron; nada, si nada)
+    const proposito = q => { const T = tareas.find(U => !U.fin && !U.vida && U.quien === q) || tareas.find(U => !U.fin && U.vida && U.quien === q && !U.susp); if (!T) return null; const v = T.pila.filter(F => F.k === 'verbo').map(F => F.ll.verbo); return (T.vida ? v[1] : v[0]) || null; };
     // (lo que está haciendo alguien: los verbos de su tarea, de afuera hacia adentro —dia_de_ana › ir_a_clases › quedarse—)
     function haciendo(q){
       const T = tareas.find(U => !U.fin && !U.vida && U.quien === q) || tareas.find(U => !U.fin && U.vida && U.quien === q && !U.susp);

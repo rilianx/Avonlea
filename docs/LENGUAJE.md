@@ -256,6 +256,17 @@ una vida es una receta, y una actividad («ir a clases»: ir, quedarse, volver) 
   ```ts
   { hace: dar_recado(q, 'ana', recoger_huevos('ana'), '12h'), si: y(en('gallinero').huevos.gt(0), no(hizo(q, dar_recado).desde('<', '2h'))), prioridad: 4 },
   ```
+- **Juntos: `acompañar(quien, otra, hasta?)`**: ir con otra, adonde vaya (la sigue: el mundo la lleva con ella). No
+  pausa el día de quien acompaña: es lo que está haciendo, y lo deja como deja cualquier cosa. Termina con lo primero
+  que pase: se cumple `hasta` (llegaron a la escuela: se cumplió); la otra deja lo que hacía cuando empezó (terminó, o
+  cambió de planes: sin `hasta`, se cumplió —la acompañó mientras duró—; con `hasta`, no); se separan, o quien
+  acompaña se suelta; o le aparece algo más importante (la cena). Al soltarse, se detiene: el viaje era de la otra.
+  `esta_haciendo('diana', ir_a_clases_por)` dice si alguien está en eso ahora (o en algo que lo tiene adentro): para
+  no acompañar a alguien que va a otra cosa.
+- **Quedar de encontrarse** (en las vidas: `encontrarse_en(q, otra, lugar, hasta)`): cada una va al lugar y espera a la
+  otra hasta una hora; se cumple si se ven. Así van Ana y Diana a la escuela, como en el libro: se juntan en el Sendero
+  de los Abedules, Diana espera a que Ana vaya con ella, y siguen juntas. Si una no llega, la otra va sola; si Diana
+  cambia de planes en el camino, Ana la suelta y sigue sola.
 - **Retomar lo interrumpido**: lo que se corta a medias guarda lo que le faltaba. La próxima vez que esa persona lo
   hace ese día, le falta solo eso («↩ Matthew retoma partir_lena (le faltan 25 min)»), y al elegir, prefiere retomarlo.
 - **`vida(quien, receta)`**: la vida de cada uno. El motor la corre de fondo si el escenario dice

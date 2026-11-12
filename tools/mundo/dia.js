@@ -96,6 +96,7 @@ if (DIARIO) fs.writeFileSync(DIARIO, QUIENES.map(diarioDe).join('\n'));
 if (DIARIOS) { fs.mkdirSync(DIARIOS, { recursive: true }); for (const q of QUIENES) fs.writeFileSync(path.join(DIARIOS, q + '.txt'), diarioDe(q)); console.log(`→ ${QUIENES.map(q => path.join(DIARIOS, q + '.txt')).join(', ')}`); }
 if (VER) console.log('\n' + diarioDe(VER));
 console.log(`\n${DIAS} días de Tejas Verdes (desde el ${DESDE}, semilla ${SEMILLA}) en ${ms} ms · ${interrupciones} interrupciones, ${retomas} retomadas`);
+{ const n = M.registro.filter(r => /^👣 Ana acompaña a Diana/.test(r.t)).length; console.log(`  juntas: Ana y Diana se encontraron en el sendero ${n} mañanas`); }
 console.log(`  recados: ${recados.dados.length} pedidos, ${recados.hechos.length} hechos, ${recados.vencidos.length} vencidos, ${recados.sobran.length} que ya no hacían falta`);
 if (process.argv.includes('--recados')) for (const r of M.registro) if (/^(✉|✔ .* hizo el recado|· .*(venció|hace falta)$)/.test(r.t)) console.log(`    ${r.hora}  ${r.t}`);
 { const u = casa[casa.length - 1], max = x => Math.max(...casa.map(c => c[x])), min = x => Math.min(...casa.map(c => c[x])); console.log(`  la casa: pan ${min('pan')}–${max('pan')} · leña ${min('lena')}–${max('lena')} · leche hasta ${max('leche')} · mantequilla ${u.mantequilla} al final · platos sucios hasta ${max('platos_sucios')} · huevos hasta ${max('huevos')} · leña del granero ${min('lena_granero')}–${max('lena_granero')}`); }

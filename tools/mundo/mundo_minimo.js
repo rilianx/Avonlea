@@ -83,7 +83,8 @@
         const c = e.camino || [], v = e.valor;
         if (e.e === 'deja' && c[0] === 'mundo') {
           if (c[2] === 'en') v === 'nada' ? W.bajar(c[1]) : W.subir(c[1], v);
-          else if (c[2] === 'sigue') v === 'nadie' ? W.dejarDeSeguir(c[1]) : W.seguir(c[1], v);
+          else if (c[2] === 'sigue') { if (v !== 'nadie') W.seguir(c[1], v); else { const p = W.E.personas[c[1]], iba = p?.sigue; W.dejarDeSeguir(c[1]);   // (si iba con la otra, se detiene: el viaje era de la otra)
+            if (iba && iba !== 'nadie' && p.viaje && !MundoMinimo.viajes[c[1]]) W.parar(c[1]); } }
           else if (c[2] === 'listo' && W.E.medios[c[1]]) W.E.medios[c[1]].listo = v;
           else if (c[2] === 'lugar') W.poner(c[1], v);
         }

@@ -29,6 +29,7 @@ export const lugares = {
   iglesia: { nombre: 'la iglesia de Avonlea' },
   hondonada_lynde: { nombre: 'la Hondonada de Lynde' },
   escuela: { nombre: 'la escuela' },
+  arbustos: { nombre: 'el Sendero de los Abedules (camino a la escuela, junto a Tejas Verdes)' },
   aldea: { nombre: 'la aldea de Avonlea' },
   camino_costa: { nombre: 'el camino de la costa, a White Sands (millas junto al mar)' },
   playa: { nombre: 'la playa de White Sands, junto al hotel' },

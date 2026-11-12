@@ -70,6 +70,14 @@ export const quedarse = primitivo('quedarse', (_quien: Persona, hasta: Cond) => 
 // jugadora quiere, si es Ana. Si vence, o ya no hace falta (alguien trajo los huevos), se borra, sin más.
 // (se lo dice en persona: tienen que verse)
 export const dar_recado = primitivo('dar_recado', (quien: Persona, a: Persona, _hace: Llamada, _vence: Duracion) => ({ pide: ve(quien, a), postura: 'de_pie', dura: '1m' }))
+// ACOMPAÑAR: ir con otra, adonde vaya (la sigue: el mundo la lleva con ella). No es una pausa de su día: es lo que
+// está haciendo, y lo deja como deja cualquier cosa. Termina, lo primero que pase:
+//   · se cumple «hasta» (llegaron a la escuela): se cumplió;
+//   · la otra deja lo que estaba haciendo cuando empezó (terminó, o cambió de planes): sin «hasta», se cumplió —la
+//     acompañó mientras duró—; con «hasta», no;
+//   · se separan, o quien acompaña se suelta (la jugadora, dejar_de_seguir): no se cumplió;
+//   · a quien acompaña le aparece algo más importante (la cena): lo deja, como cualquier cosa.
+export const acompañar = primitivo('acompañar', (quien: Persona, otra: Persona, _hasta?: Cond) => ({ pide: ve(quien, otra), postura: 'caminando' }))
 // (hacer el primero de sus recados que se pueda ahora: si no hay ninguno, no se puede)
 export const hacer_recado = primitivo('hacer_recado', (_quien: Persona) => ({}))
 

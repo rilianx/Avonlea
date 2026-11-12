@@ -22,7 +22,7 @@ const MEDIR = `(() => {
   const P = {}, INFO = {};
   const lugar = (id, nombre, puntos, o = {}) => { P[id] = puntos; INFO[id] = { nombre, ...o }; };
   const vistaEn = (x, y) => { const b = PEOPLE.shearer, antes = { where: b.where, x: b.x, y: b.y }; Object.assign(b, { where: 'out', x, y }); try { return lgLugarDe('shearer'); } finally { Object.assign(b, antes); } };   // (lo que diría el juego de alguien parado ahí)
-  for (const k of Object.keys(WP)) if (!WP_CAMINO[k]) lugar(k, WP_NAME[k] || k, [k === 'cocina' ? { ...mapa(...WP[k]), adentro: 1 } : mapa(...WP[k])], { plan: k, vista: k === 'cocina' ? 'cocina' : vistaEn(...WP[k]) });
+  for (const k of Object.keys(WP)) if (!WP_CAMINO[k]) lugar(k, WP_NAME[k] || k, [k === 'cocina' ? { ...mapa(...WP[k]), adentro: 1 } : mapa(...WP[k])], { plan: k, vista: { cocina: 'cocina', arbustos: 'arbustos' }[k] || vistaEn(...WP[k]) });   // (el sendero: un lugar de las vidas —donde se encuentran Ana y Diana—, no el patio)
   lugar('pieza', WP_NAME.pieza, [{ ...mapa(...DOOR.gg), adentro: 2 }], { plan: 'pieza', vista: 'cocina' });
   for (const [k, n] of [['pieza_marilla', 'la pieza de Marilla'], ['pieza_matthew', 'la pieza de Matthew']]) lugar(k, n, [{ ...mapa(...DOOR.gg), adentro: 2 }], { plan: 'cocina', vista: 'cocina' });   // (el juego no las tiene: arriba, como la de Ana)
   for (const h of Object.keys(HOUSES)) if (h !== 'gg' && h !== 'br') lugar('h:' + h, HOUSES[h].name, [{ ...mapa(...DOOR[h]), adentro: 1 }], { plan: 'h:' + h, vista: vistaEn(...DOOR[h]) });
