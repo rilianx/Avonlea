@@ -153,10 +153,12 @@ export type Postura = 'de_pie' | 'sentada' | 'acostada' | 'agachada' | 'caminand
 // una cosa declarada (cosasDe), tiene que haber una a mano —la lleva, o está ahí—; si no, es solo para el dibujo)
 export type DefPrimitivo = { readonly pide?: Cond; readonly deja?: readonly Efecto[]; readonly dura?: Duracion; readonly cuesta?: number; readonly opcion?: string
   readonly donde?: Lugar; readonly junto_a?: string; readonly postura?: Postura; readonly usa?: readonly string[]; readonly icono?: string
-  readonly empieza?: readonly Efecto[]; readonly si_se_deja?: readonly Efecto[]; readonly opera?: Operacion }
+  readonly empieza?: readonly Efecto[]; readonly si_se_deja?: readonly Efecto[]; readonly opera?: Operacion
+  // (callado: haciendo esto no se le habla —dormir, rezar—; de_conversar: mientras se hace, si hay otro, se conversa —comer, coser—)
+  readonly callado?: true; readonly de_conversar?: true }
 // (las operaciones del motor: lo que un primitivo hace además de durar —mover una cosa, esperar, dar un recado…—. El
 // motor las reconoce por esto, no por el nombre del verbo: un verbo nuevo puede ser cualquiera de ellas)
-export type Operacion = 'tomar' | 'poner' | 'esperar' | 'quedarse' | 'dar_recado' | 'hacer_recado' | 'acompañar'
+export type Operacion = 'tomar' | 'poner' | 'esperar' | 'quedarse' | 'dar_recado' | 'hacer_recado' | 'acompañar' | 'charlar'
 // lo hace el mundo, con su animación y su duración
 export const primitivo = <A extends unknown[]>(nombre: string, def: (...a: A) => DefPrimitivo) => verbo<A, never>('primitivo', nombre, def)
 

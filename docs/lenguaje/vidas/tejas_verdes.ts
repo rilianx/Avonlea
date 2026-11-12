@@ -24,7 +24,8 @@
 //   hasta casi las ocho y va sola; si Diana cambia de planes en el camino, Ana sigue sola.
 import { cosasDe, elegir, esta_haciendo, hechosDe, hizo, inicioDe, mueblesDe, no, primitivo, procesos, receta, repetir, si, tiempo, tiene_recado, vida, y, o } from '../comun/lenguaje'
 import { mundo, ve, type Lugar, type Persona } from '../comun/mundo'
-import { acompañar, dar_recado, esperar, hacer_recado, ir_a, llevar, poner, quedarse } from '../comun/verbos'
+import { acompañar, dar_recado, esperar, hacer_recado, ir_a, ir_a_hablar_con, llevar, poner, quedarse } from '../comun/verbos'
+import { dichas } from '../charlas/tejas_verdes.ids'
 
 // ---------------------------------------------------------------- cuándo
 
@@ -76,13 +77,13 @@ export const pasa_solo = procesos(
 
 // ---------------------------------------------------------------- las acciones (las hace el mundo)
 
-export const dormir = primitivo('dormir', (_q: Persona, cama: Lugar) => ({ icono: '💤', donde: cama, junto_a: 'cama', postura: 'acostada', dura: '1h' }))
-export const descansar = primitivo('descansar', (_q: Persona) => ({ icono: '🪑', postura: 'sentada', dura: '15m' }))
+export const dormir = primitivo('dormir', (_q: Persona, cama: Lugar) => ({ callado: true, icono: '💤', donde: cama, junto_a: 'cama', postura: 'acostada', dura: '1h' }))
+export const descansar = primitivo('descansar', (_q: Persona) => ({ de_conversar: true, icono: '🪑', postura: 'sentada', dura: '15m' }))
 // (en la mesa, cada uno en su casa: comer ensucia un plato; el desayuno es pan con mantequilla, si hay)
-export const desayunar = primitivo('desayunar', (_q: Persona, casa: Lugar) => ({ icono: '🍽', donde: casa, junto_a: 'mesa', postura: 'sentada', usa: ['taza'], dura: '25m',
+export const desayunar = primitivo('desayunar', (_q: Persona, casa: Lugar) => ({ de_conversar: true, icono: '🍽', donde: casa, junto_a: 'mesa', postura: 'sentada', usa: ['taza'], dura: '25m',
   deja: [en(casa).platos_sucios.suma(1), si(en(casa).pan.gt(0), en(casa).pan.suma(-1)), si(en(casa).mantequilla.gt(0), en(casa).mantequilla.suma(-1))] }))
-export const comer = primitivo('comer', (_q: Persona, casa: Lugar) => ({ icono: '🍽', donde: casa, junto_a: 'mesa', postura: 'sentada', usa: ['plato'], dura: '30m', deja: [en(casa).platos_sucios.suma(1)] }))
-export const cenar = primitivo('cenar', (_q: Persona, casa: Lugar) => ({ icono: '🍽', donde: casa, junto_a: 'mesa', postura: 'sentada', usa: ['plato'], dura: '30m', deja: [en(casa).platos_sucios.suma(1)] }))
+export const comer = primitivo('comer', (_q: Persona, casa: Lugar) => ({ de_conversar: true, icono: '🍽', donde: casa, junto_a: 'mesa', postura: 'sentada', usa: ['plato'], dura: '30m', deja: [en(casa).platos_sucios.suma(1)] }))
+export const cenar = primitivo('cenar', (_q: Persona, casa: Lugar) => ({ de_conversar: true, icono: '🍽', donde: casa, junto_a: 'mesa', postura: 'sentada', usa: ['plato'], dura: '30m', deja: [en(casa).platos_sucios.suma(1)] }))
 // la casa
 // (cocinar: un leño a la estufa al empezar —sin leña junto a la estufa, no se puede—; los huevos, si hay)
 export const cocinar = primitivo('cocinar', (_q: Persona) => ({ icono: '🍲', donde: 'cocina', junto_a: 'estufa', postura: 'de_pie', usa: ['olla'], dura: '35m',
@@ -92,18 +93,18 @@ export const lavar_platos = primitivo('lavar_platos', (_q: Persona) => ({ icono:
 export const barrer = primitivo('barrer', (_q: Persona) => ({ icono: '🧹', donde: 'cocina', postura: 'caminando', usa: ['escoba'], dura: '15m' }))
 export const amasar = primitivo('amasar', (_q: Persona) => ({ icono: '🍞', donde: 'cocina', junto_a: 'mesa', postura: 'de_pie', usa: ['harina'], dura: '40m',
   pide: en('cocina').pan.lt(3), deja: [en('cocina').pan.suma(6)] }))
-export const coser = primitivo('coser', (_q: Persona) => ({ icono: '🧵', donde: 'cocina', junto_a: 'ventana', postura: 'sentada', usa: ['aguja', 'tela'], dura: '45m' }))
+export const coser = primitivo('coser', (_q: Persona) => ({ de_conversar: true, icono: '🧵', donde: 'cocina', junto_a: 'ventana', postura: 'sentada', usa: ['aguja', 'tela'], dura: '45m' }))
 export const lavar_ropa = primitivo('lavar_ropa', (_q: Persona) => ({ icono: '🧺', donde: 'tejas_verdes', junto_a: 'tina', postura: 'agachada', usa: ['tabla', 'jabon'], dura: '1h',
   pide: en('cocina').ropa_sucia.gt(0), deja: [en('cocina').ropa_sucia.vale(0)] }))
 // (dos baldes de leche, un pan de mantequilla)
-export const batir_mantequilla = primitivo('batir_mantequilla', (_q: Persona) => ({ icono: '🧈', donde: 'cocina', junto_a: 'mantequera', postura: 'sentada', usa: ['mantequera'], dura: '40m',
+export const batir_mantequilla = primitivo('batir_mantequilla', (_q: Persona) => ({ de_conversar: true, icono: '🧈', donde: 'cocina', junto_a: 'mantequera', postura: 'sentada', usa: ['mantequera'], dura: '40m',
   pide: en('cocina').leche.gte(2), empieza: [en('cocina').leche.suma(-2)], deja: [en('cocina').mantequilla.suma(1)] }))
-export const tejer = primitivo('tejer', (_q: Persona) => ({ icono: '🧶', donde: 'cocina', junto_a: 'ventana', postura: 'sentada', usa: ['agujas', 'lana'], dura: '30m' }))
-export const planchar = primitivo('planchar', (_q: Persona) => ({ icono: '👕', donde: 'cocina', junto_a: 'mesa', postura: 'de_pie', usa: ['plancha'], dura: '45m' }))
+export const tejer = primitivo('tejer', (_q: Persona) => ({ de_conversar: true, icono: '🧶', donde: 'cocina', junto_a: 'ventana', postura: 'sentada', usa: ['agujas', 'lana'], dura: '30m' }))
+export const planchar = primitivo('planchar', (_q: Persona) => ({ de_conversar: true, icono: '👕', donde: 'cocina', junto_a: 'mesa', postura: 'de_pie', usa: ['plancha'], dura: '45m' }))
 export const hacer_conservas = primitivo('hacer_conservas', (_q: Persona) => ({ icono: '🫙', donde: 'cocina', junto_a: 'estufa', postura: 'de_pie', usa: ['frascos', 'ciruelas'], dura: '1h',
   pide: en('cocina').lena.gt(0), empieza: [en('cocina').lena.suma(-1)] }))
 // (conversar con alguien que está ahí: la Sra. Lynde, en su casa —está siempre, mirando el camino por la ventana—)
-export const conversar = primitivo('conversar', (_q: Persona, l: Lugar) => ({ icono: '☕', donde: l, postura: 'sentada', usa: ['taza'], dura: '45m' }))
+export const conversar = primitivo('conversar', (_q: Persona, l: Lugar) => ({ de_conversar: true, icono: '☕', donde: l, postura: 'sentada', usa: ['taza'], dura: '45m' }))
 export const pasear = primitivo('pasear', (_q: Persona, l: Lugar) => ({ icono: '🚶', donde: l, postura: 'caminando', dura: '30m' }))
 export const regar = primitivo('regar', (_q: Persona) => ({ icono: '🌱', donde: 'huerta', postura: 'caminando', usa: ['regadera'], dura: '15m' }))
 // el campo y los animales
@@ -114,16 +115,16 @@ export const trabajar_el_campo = primitivo('trabajar_el_campo', (_q: Persona) =>
 export const partir_lena = primitivo('partir_lena', (_q: Persona) => ({ icono: '🪓', donde: 'granero', junto_a: 'tronco', postura: 'de_pie', usa: ['hacha'], dura: '30m',
   pide: en('granero').lena.lt(15), deja: [en('granero').lena.suma(5)] }))
 export const arreglar_cerca = primitivo('arreglar_cerca', (_q: Persona) => ({ icono: '🔨', donde: 'corral', junto_a: 'cerca', postura: 'agachada', usa: ['martillo'], dura: '40m' }))
-export const fumar_pipa = primitivo('fumar_pipa', (_q: Persona) => ({ icono: '🪈', donde: 'tejas_verdes', junto_a: 'porche', postura: 'sentada', usa: ['pipa'], dura: '30m' }))
+export const fumar_pipa = primitivo('fumar_pipa', (_q: Persona) => ({ de_conversar: true, icono: '🪈', donde: 'tejas_verdes', junto_a: 'porche', postura: 'sentada', usa: ['pipa'], dura: '30m' }))
 // lo de Ana (y de Diana)
 export const leer = primitivo('leer', (_q: Persona, l: Lugar) => ({ icono: '📖', donde: l, junto_a: 'ventana', postura: 'sentada', usa: ['libro'], dura: '30m' }))
 export const jugar_en_la_huerta = primitivo('jugar_en_la_huerta', (_q: Persona) => ({ icono: '🎈', donde: 'huerta', postura: 'caminando', dura: '25m' }))
 export const sonar_despierta = primitivo('sonar_despierta', (_q: Persona) => ({ icono: '☁️', donde: 'pieza', junto_a: 'ventana', postura: 'sentada', dura: '20m' }))
 export const mirar_las_vacas = primitivo('mirar_las_vacas', (_q: Persona) => ({ icono: '🐄', donde: 'corral', junto_a: 'cerca', postura: 'de_pie', dura: '15m' }))
-export const rezar = primitivo('rezar', (_q: Persona) => ({ icono: '🙏', donde: 'pieza', junto_a: 'cama', postura: 'agachada', dura: '5m' }))
-export const estudiar = primitivo('estudiar', (_q: Persona, l: Lugar) => ({ icono: '✏️', donde: l, junto_a: 'mesa', postura: 'sentada', usa: ['libro'], dura: '30m' }))
+export const rezar = primitivo('rezar', (_q: Persona) => ({ callado: true, icono: '🙏', donde: 'pieza', junto_a: 'cama', postura: 'agachada', dura: '5m' }))
+export const estudiar = primitivo('estudiar', (_q: Persona, l: Lugar) => ({ callado: true, icono: '✏️', donde: l, junto_a: 'mesa', postura: 'sentada', usa: ['libro'], dura: '30m' }))
 // (con otra: si se ven; si una se va, la otra deja)
-export const jugar_con = primitivo('jugar_con', (q: Persona, otra: Persona) => ({ icono: '🎈', pide: ve(q, otra), postura: 'caminando', dura: '30m' }))
+export const jugar_con = primitivo('jugar_con', (q: Persona, otra: Persona) => ({ de_conversar: true, icono: '🎈', pide: ve(q, otra), postura: 'caminando', dura: '30m' }))
 
 // ---------------------------------------------------------------- las actividades (varios pasos)
 
@@ -275,6 +276,8 @@ export const dia_de_ana = receta('dia_de_ana', (q: Persona) => ({
       { hace: jugar_en_la_huerta(q), si: o(tarde, manana), prioridad: 1, peso: 2 },
       { hace: sonar_despierta(q), prioridad: 1, peso: 2 },
       { hace: mirar_las_vacas(q), si: o(tarde, manana), prioridad: 1 },
+      // (al volver de la escuela, va a buscar a Matthew para contarle cómo le fue: si él está en algo que importa más, no)
+      { hace: ir_a_hablar_con(q, 'matthew'), si: y(dia_de_clases, tiempo.hora.entre(15.5, 18), no(dichas.como_te_fue.hoy), no(hizo(q, ir_a_hablar_con).desde('<', '1h'))), prioridad: 2 },
       { hace: descansar(q), prioridad: 0 },
     )),
   },

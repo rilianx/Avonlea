@@ -274,9 +274,11 @@ una vida es una receta, y una actividad («ir a clases»: ir, quedarse, volver) 
   - El guion es el de las escenas: líneas, opciones de Ana (`-> …`, `#propia`), `<<if>>` y comandos que cambian el
     mundo. Marilla pide los huevos diciéndolo (`<<dar_recado(…)>>`), y Ana y Diana quedan para mañana
     (`<<deja(hechos.quedamos_en_el_sendero)>>`): el encuentro de la mañana depende de haberlo quedado.
-  - Cuando dos quedan juntos y hay una charla que se pueda, se la dicen. Pueden ir varias a la vez, cada una con los
-    suyos. Los que charlan se detienen a conversar (terminan lo que hacían y esperan); quien va de paso no charla, y si
-    se separan, la charla se corta.
+  - **Cuándo se conversa:** mientras se hace algo de conversar (`de_conversar`: comer, coser, jugar, fumar en el porche),
+    si hay otro y algo que decirse; o a propósito, con la acción `charlar(quien, con?)` (ir a contarle a Matthew:
+    `ir_a_hablar_con`; o la jugadora: «💬 hablar con…»). A quien está en algo callado (`callado`: dormir, rezar, estudiar)
+    no se le habla. Pueden ir varias a la vez, cada una con los suyos; los que escuchan no empiezan otra cosa hasta que
+    termina; quien va de paso no charla; si se separan, se corta.
   - Si habla Ana y la maneja la jugadora, ella elige lo que dice; si no, Ana dice lo suyo (`#propia`).
   - Las charlas de un lugar corren con sus vidas (`vidas: 'tejas_verdes'`). `node tools/mundo/dia.js` cuenta cuántas
     hubo, cuáles nunca salen y quiénes no se hablan (`--charlas`: cada una, con lo que se dijeron).

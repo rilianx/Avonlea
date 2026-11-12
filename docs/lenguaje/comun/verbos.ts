@@ -78,6 +78,11 @@ export const dar_recado = primitivo('dar_recado', (quien: Persona, a: Persona, _
 //   · se separan, o quien acompaña se suelta (la jugadora, dejar_de_seguir): no se cumplió;
 //   · a quien acompaña le aparece algo más importante (la cena): lo deja, como cualquier cosa.
 export const acompañar = primitivo('acompañar', (quien: Persona, otra: Persona, _hasta?: Cond) => ({ opera: 'acompañar', icono: '👣', pide: ve(quien, otra), postura: 'caminando' }))
+// CHARLAR: decirse una charla (docs/lenguaje/charlas/) con alguien que está ahí —o, sin «con», con quien esté—. Es una
+// acción como cualquier otra: la vida la elige con su prioridad, y la corta lo que importe más. Se puede si hay una
+// charla para ellos que se pueda ahora, y los otros están disponibles (no en algo que importe más: no se le habla a
+// quien duerme). Lo que se dicen, lo elige el motor entre las charlas que corresponden
+export const charlar = primitivo('charlar', (_quien: Persona, _con?: Persona) => ({ opera: 'charlar', icono: '💬', postura: 'de_pie' }))
 // (hacer el primero de sus recados que se pueda ahora: si no hay ninguno, no se puede)
 export const hacer_recado = primitivo('hacer_recado', (_quien: Persona) => ({ opera: 'hacer_recado' }))
 
@@ -174,3 +179,6 @@ export const llevar_a = receta('llevar_a', (quien: Persona, otro: Persona, a: Lu
   mantiene: { si: mundo(otro).en.es(m), desde: 'arriba', hasta: 'camino', si_se_rompe: 'cerca' },
   cumplido: mundo(otro).lugar.es(a),
 }))
+
+// (ir a contarle algo a alguien: ir adonde está, y charlar con él)
+export const ir_a_hablar_con = receta('ir_a_hablar_con', (quien: Persona, otro: Persona) => ({ icono: '💬', pasos: { va: ir_a(quien, mundo(otro).lugar), habla: charlar(quien, otro) } }))

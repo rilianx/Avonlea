@@ -1582,6 +1582,16 @@
    },
    "postura": "caminando"
   },
+  "charlar": {
+   "tipo": "primitivo",
+   "params": [
+    "quien",
+    "con"
+   ],
+   "opera": "charlar",
+   "icono": "💬",
+   "postura": "de_pie"
+  },
   "hacer_recado": {
    "tipo": "primitivo",
    "params": [
@@ -2109,6 +2119,44 @@
     }
    }
   },
+  "ir_a_hablar_con": {
+   "tipo": "receta",
+   "params": [
+    "quien",
+    "otro"
+   ],
+   "icono": "💬",
+   "pasos": {
+    "va": {
+     "verbo": "ir_a",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "camino": [
+        "mundo",
+        {
+         "param": 1
+        },
+        "lugar"
+       ]
+      }
+     ]
+    },
+    "habla": {
+     "verbo": "charlar",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "param": 1
+      }
+     ]
+    }
+   }
+  },
   "pedir": {
    "tipo": "acto",
    "params": [
@@ -2262,6 +2310,7 @@
     "q",
     "cama"
    ],
+   "callado": true,
    "icono": "💤",
    "donde": {
     "param": 1
@@ -2275,6 +2324,7 @@
    "params": [
     "q"
    ],
+   "de_conversar": true,
    "icono": "🪑",
    "postura": "sentada",
    "dura": "15m"
@@ -2285,6 +2335,7 @@
     "q",
     "casa"
    ],
+   "de_conversar": true,
    "icono": "🍽",
    "donde": {
     "param": 1
@@ -2371,6 +2422,7 @@
     "q",
     "casa"
    ],
+   "de_conversar": true,
    "icono": "🍽",
    "donde": {
     "param": 1
@@ -2401,6 +2453,7 @@
     "q",
     "casa"
    ],
+   "de_conversar": true,
    "icono": "🍽",
    "donde": {
     "param": 1
@@ -2574,6 +2627,7 @@
    "params": [
     "q"
    ],
+   "de_conversar": true,
    "icono": "🧵",
    "donde": "cocina",
    "junto_a": "ventana",
@@ -2625,6 +2679,7 @@
    "params": [
     "q"
    ],
+   "de_conversar": true,
    "icono": "🧈",
    "donde": "cocina",
    "junto_a": "mantequera",
@@ -2671,6 +2726,7 @@
    "params": [
     "q"
    ],
+   "de_conversar": true,
    "icono": "🧶",
    "donde": "cocina",
    "junto_a": "ventana",
@@ -2686,6 +2742,7 @@
    "params": [
     "q"
    ],
+   "de_conversar": true,
    "icono": "👕",
    "donde": "cocina",
    "junto_a": "mesa",
@@ -2737,6 +2794,7 @@
     "q",
     "l"
    ],
+   "de_conversar": true,
    "icono": "☕",
    "donde": {
     "param": 1
@@ -2880,6 +2938,7 @@
    "params": [
     "q"
    ],
+   "de_conversar": true,
    "icono": "🪈",
    "donde": "tejas_verdes",
    "junto_a": "porche",
@@ -2943,6 +3002,7 @@
    "params": [
     "q"
    ],
+   "callado": true,
    "icono": "🙏",
    "donde": "pieza",
    "junto_a": "cama",
@@ -2955,6 +3015,7 @@
     "q",
     "l"
    ],
+   "callado": true,
    "icono": "✏️",
    "donde": {
     "param": 1
@@ -2972,6 +3033,7 @@
     "q",
     "otra"
    ],
+   "de_conversar": true,
    "icono": "🎈",
    "pide": {
     "c": "f",
@@ -7127,6 +7189,86 @@
          ]
         },
         "prioridad": 1
+       },
+       {
+        "hace": {
+         "verbo": "ir_a_hablar_con",
+         "args": [
+          {
+           "param": 0
+          },
+          "matthew"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "no",
+           "de": {
+            "c": "cmp",
+            "camino": [
+             "tiempo",
+             "semana"
+            ],
+            "op": "=",
+            "valor": "domingo"
+           }
+          },
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 15.5
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 18
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "tejas_verdes",
+             "dichas",
+             "como_te_fue"
+            ],
+            "ventana": "hoy"
+           }
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "desde",
+            "camino": [
+             "hizo_t",
+             {
+              "param": 0
+             },
+             "ir_a_hablar_con"
+            ],
+            "op": "<",
+            "valor": "1h",
+            "min": true
+           }
+          }
+         ]
+        },
+        "prioridad": 2
        },
        {
         "hace": {

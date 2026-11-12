@@ -216,6 +216,8 @@ function ana(){
   for (const r of rs) b(`✉ ${r.hace.verbo.replace(/_/g, ' ')}`, () => { M.hacer(r.hace.verbo, r.hace.args); pintar(); });
   // (ir con alguien que está ahí: lo acompaña mientras siga en lo suyo —o hasta que la sueltes, tocando una casilla—)
   for (const q of Object.keys(D.personas)) if (q !== 'ana' && W.E.personas[q] && W.juntos('ana', q)) b(`👣 ir con ${M.nombre(q)}`, () => { M.hacer('acompañar', ['ana', q]); pintar(); });
+  // (hablarle a alguien que está ahí: si tienen algo que decirse, y no está en algo callado)
+  for (const q of Object.keys(D.personas)) if (q !== 'ana' && W.E.personas[q] && W.juntos('ana', q)) b(`💬 hablar con ${M.nombre(q)}`, () => { M.hacer('charlar', ['ana', q]); pintar(); });
   for (const v of ACCIONES_ANA) b(`${ICONO[v.verbo] || ''} ${v.verbo.replace(/_/g, ' ')}`, () => { M.hacer(v.verbo, v.args); pintar(); });
 }
 // (las acciones del día de Ana que no necesitan a nadie más: las de un solo parámetro, o con un lugar —donde está—)

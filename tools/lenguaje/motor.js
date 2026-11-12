@@ -183,6 +183,12 @@
           if (!cumple(d.pide)) return fin(false, 'se separaron');
           return { espera: { min: 1 } };
         }
+        if (F.fase === 0 && opDe(ll) === 'charlar') {   // (charlar: elige qué charla, la empieza, y espera a que termine)
+          const prio = T.vida ? Math.max(0, ...T.pila.filter(G => G.k === 'elegir' && G.fase === 1).map(G => G.prio ?? 0)) : Infinity;
+          const c = charlaPara(ll.args[0], ll.args[1], prio); if (!c) return { vale: false };
+          F.charla = empezarCharla(c, T.id); F.fase = 9;
+        }
+        if (F.fase === 9) { if (charlas.some(C => C.n === F.charla)) return { espera: { min: 1 } }; const r = get(['charla_fin', F.charla]); delete S[k(['charla_fin', F.charla])]; return { vale: r === 'dicha' }; }
         if (F.fase === 0 && opDe(ll) === 'hacer_recado') { const r = recadoPara(ll.args[0]); if (!r) return { vale: false }; F.fase = 7; T.pila.push(marco(r.hace, hijo(F.inst, 'recado'))); return; }
         if (F.fase === 0) {
           const q = ll.args[0];
@@ -195,6 +201,7 @@
           { const x = faltaCosa(q, d, ll); if (x) { nota(`✘ ${ll.verbo}: no hay ${x} a mano (${nombre(q)})`); return { vale: false }; } }
           for (const e of d.empieza || []) aplicar(e);
           decir(ll);
+          if (d.de_conversar && !T.ya) { const c = charlaPara(q, null, 0); if (c) empezarCharla(c, null, true); }   // (comer, coser…: si hay otro y algo que decirse, conversan mientras)
           F.fase = 3;
           if (d.dura) {
             // (lo que dejó a medias hoy, lo retoma: le falta lo que le faltaba)
@@ -289,7 +296,7 @@
       // al azar, por peso. Mientras se hace, si algo de más prioridad se vuelve posible, revisarElegir lo corta)
       elegir(F, T, ret){
         if (F.fase === 1) return { vale: ret };
-        const ops = F.p.elige.map((o, i) => ({ o, i })).filter(({ o }) => (o.si == null || cumple(o.si)) && puede(o.hace));
+        const ops = F.p.elige.map((o, i) => ({ o, i })).filter(({ o }) => (o.si == null || cumple(o.si)) && puede(o.hace, o.prioridad || 0));
         if (!ops.length) return { vale: false };
         const pm = Math.max(...ops.map(x => x.o.prioridad || 0)), top = ops.filter(x => (x.o.prioridad || 0) === pm);
         const peso = x => (x.o.peso ?? 1) * (x.o.hace.verbo && resto(x.o.hace.args[0], x.o.hace.verbo) != null ? 4 : 1);   // (lo que dejó a medias, más probable)
@@ -345,7 +352,7 @@
     function revisarElegir(T){
       for (let n = 0; n < T.pila.length; n++) {
         const F = T.pila[n]; if (F.k !== 'elegir' || F.fase !== 1) continue;
-        const mejor = F.p.elige.find(o => (o.prioridad || 0) > F.prio && (o.si == null || cumple(o.si)) && puede(o.hace));
+        const mejor = F.p.elige.find(o => (o.prioridad || 0) > F.prio && (o.si == null || cumple(o.si)) && puede(o.hace, o.prioridad || 0));
         if (!mejor) continue;
         nota(`⤳ ${nombre(T.quien)} deja lo que hacía, por ${mejor.hace.verbo}`, 'momento');
         cortarDesde(T, n); F.fase = 0; return;
@@ -369,7 +376,7 @@
     }
     function dejar(F){ if (F.dejada) return; F.dejada = true; for (const e of def(F.ll).si_se_deja || []) aplicar(e); }
     const pasoMarco = (p, ctx) => (p.elige ? { k: 'elegir', p, ctx, fase: 0 } : p.repite ? { k: 'repetir', p, ctx, fase: 0 } : marco(p, ctx));
-    const puede = ll => { if (ll.elige || ll.repite) return true; if (opDe(ll) === 'hacer_recado') return !!recadoPara(ll.args[0]); if (opDe(ll) === 'dar_recado') { const p = def(ll.args[2]).pide; if (p && !cumple(p)) return false; }   /* (no se pide lo que no se puede: entrar leña, si no hay) */    const d = def(ll); if (d.tipo === 'primitivo' && (lleno(ll.args[0], d) || faltaCosa(ll.args[0], d, ll))) return false; return !d.pide || d.tipo === 'primitivo' && (opDe(ll) === 'esperar' || opDe(ll) === 'quedarse') || cumple(d.pide); };
+    const puede = (ll, prio = 0) => { if (ll.elige || ll.repite) return true; if (opDe(ll) === 'charlar') return !!charlaPara(ll.args[0], ll.args[1], prio, false); if (opDe(ll) === 'hacer_recado') return !!recadoPara(ll.args[0]); if (opDe(ll) === 'dar_recado') { const p = def(ll.args[2]).pide; if (p && !cumple(p)) return false; }   /* (no se pide lo que no se puede: entrar leña, si no hay) */    const d = def(ll); if (d.tipo === 'primitivo' && (lleno(ll.args[0], d) || faltaCosa(ll.args[0], d, ll))) return false; return !d.pide || d.tipo === 'primitivo' && (opDe(ll) === 'esperar' || opDe(ll) === 'quedarse') || cumple(d.pide); };
     // (los recados de alguien: los que le dieron —dar_recado—, hasta que los hace, vencen, o ya no hacen falta: lo que
     // pide su verbo ya no se cumple —no quedan huevos en el gallinero—)
     const recadosDe = q => S[k(['recados', q])] || [];
@@ -609,32 +616,49 @@
       if ((r === 'una_vez' && d != null) || (r === 'dia' && d === dia())) return false;
       return cumple(c.si);
     }
-    function revisarEncuentros(){
-      if (!escenario.vidas || !D.charlas || !mundo.funciones?.ve) return;   // (las charlas de un lugar corren con sus vidas: charlas/tejas_verdes.yarn, con vidas: 'tejas_verdes')
-      const qs = Object.keys(D.personas).filter(q => lugarDe(q) != null), ahora = [];
-      for (let i = 0; i < qs.length; i++) for (let j = i + 1; j < qs.length; j++) if (mundo.funciones.ve(qs[i], qs[j])) ahora.push(qs[i] + '|' + qs[j]);
-      const antes = S['juntos'] || []; S['juntos'] = ahora;
-      for (const par of ahora) if (!antes.includes(par)) encuentro(par.split('|'));
+    // CHARLAR ES UNA ACCIÓN (opera: 'charlar'): la elige la vida de alguien —o la jugadora— como cualquier otra, con su
+    // prioridad. Elige qué charla corresponde: con alguien en particular, o con quien esté ahí; los otros tienen que estar
+    // disponibles —no charlando ya, no de camino, y en algo que no importe más que esto (no se le habla a quien duerme o
+    // está en clase)—. La charla la lleva la tarea de quien la empezó; los otros se detienen a escuchar.
+    // (se le puede hablar a alguien si no está en algo callado —durmiendo, rezando—, ni en algo de una historia; a Ana, si
+    // la maneja la jugadora, sí: ella decide)
+    function callado(q){
+      if (get(['controla', q])) return false;
+      const T = tareas.find(U => !U.fin && !U.vida && U.quien === q) || tareas.find(U => !U.fin && U.vida && U.quien === q && !U.susp);
+      if (!T) return false; if (!T.vida) return true;
+      return T.pila.some(F => F.k === 'primitivo' && F.fase === 1 && def(F.ll).callado);
     }
-    function encuentro(par){
-      if (par.some(enCharla) || par.some(q => mundo.funciones?.de_camino?.(q))) return;   // (quien va de paso, no se pone a charlar)
-      const cands = Object.values(D.charlas).filter(c => c.charla.startsWith(escenario.vidas + '.') && c.entre.length === par.length && par.every(q => c.entre.includes(q)) && puedeCharla(c));
-      if (!cands.length) return;
+    const disponible = (q, o) => !enCharla(o) && !mundo.funciones?.de_camino?.(o) && mundo.funciones?.ve?.(q, o) && !callado(o);
+    function charlaPara(q, con, prio, sortear = true){   // (sortear: elegir una al azar, por peso; si no, ¿hay alguna?)
+      if (!escenario.vidas || !D.charlas || enCharla(q)) return null;
+      const cands = Object.values(D.charlas).filter(c => c.charla.startsWith(escenario.vidas + '.') && c.entre.includes(q) && (!con || c.entre.includes(con))
+        && c.entre.every(o => o === q || disponible(q, o)) && puedeCharla(c));
+      if (!cands.length) return null; if (!sortear) return cands[0];
       let r = azar() * cands.reduce((n, c) => n + (c.peso ?? 1), 0), c = cands[cands.length - 1];
       for (const x of cands) { r -= x.peso ?? 1; if (r < 0) { c = x; break; } }
+      return c;
+    }
+    function empezarCharla(c, tarea, mientras = false){
       const [amb, id] = c.charla.split('.'); set([amb, 'dichas', id], dia());
       nota(`💬 ${id}: ${c.resumen}`, 'charla');
-      charlas.push({ id: c.charla, quienes: [...c.entre], pila: [[...c.cuerpo]], acc: null, ops: null });
+      const C = { n: sigId++, id: c.charla, quienes: [...c.entre], pila: [[...c.cuerpo]], acc: null, ops: null, tarea, ocupa: [] };
+      if (!mientras) for (const q of C.quienes) { const a = { quien: q, verbo: 'charlar', dura: 60, charla: true }; mundo.empezar(a); C.ocupa.push(a); }   // (para el mundo: están conversando —si no conversan mientras hacen otra cosa—)
+      charlas.push(C); return C.n;
+    }
+    function terminarCharla(C, cortada){
+      for (const a of C.ocupa || []) mundo.cancelar?.(a);
+      if (C.acc) mundo.cancelar?.(C.acc);
+      set(['charla_fin', C.n], cortada ? 'cortada' : 'dicha'); charlas.splice(charlas.indexOf(C), 1);
     }
     // (cada charla, lo que sigue: hasta una elección de la jugadora, o hasta que la línea que se dice termine; devuelve si
     // alguna espera a la jugadora)
     function seguirCharlas(){
       for (const C of [...charlas]) {
-        if (!juntosTodos(C.quienes)) { nota(`✂ se corta la charla ${C.id.split('.')[1]}: se separaron`, 'charla'); if (C.acc) mundo.cancelar?.(C.acc); charlas.splice(charlas.indexOf(C), 1); continue; }
+        if (!juntosTodos(C.quienes)) { nota(`✂ se corta la charla ${C.id.split('.')[1]}: se separaron`, 'charla'); terminarCharla(C, true); continue; }
         while (!C.ops && (!C.acc || mundo.listo(C.acc))) {
           if (C.acc) { mundo.terminar?.(C.acc); C.acc = null; continue; }
           const top = C.pila[C.pila.length - 1];
-          if (!top) { charlas.splice(charlas.indexOf(C), 1); break; }
+          if (!top) { terminarCharla(C, false); break; }
           if (!top.length) { C.pila.pop(); continue; }
           const it = top[0];
           if (it.op !== undefined) {
@@ -665,7 +689,7 @@
     let tope = null;
     function avanzar(limite = escenario.paso || 5000){
       // (los encargos de quienes están en una escena que no va en marcha, esperan a que termine)
-      const detenida = T => (escena && !escena.en_marcha && escena.participan.includes(T.quien)) || enCharla(T.quien);   // (y los que están charlando: se detienen a conversar —terminan lo que hacían, y esperan—)
+      const detenida = T => (escena && !escena.en_marcha && escena.participan.includes(T.quien)) || charlas.some(C => C.quienes.includes(T.quien) && C.tarea !== T.id);   // (y los que escuchan una charla: se detienen —la lleva la tarea de quien la empezó—)
       for (let vuelta = 0; vuelta < limite; vuelta++) {
         if (pregunta) return estadoUI();
         if (escena && !escena.ops) seguirEscena();   // (con opciones pendientes, la escena espera a que la jugadora elija)
@@ -674,7 +698,7 @@
         revisarHistorias();
         if (fin && tope == null) return estadoUI();   // (al probar, una historia que termina es el final; en el juego, el mundo sigue)
         if (!escena && cola.length && elegirEscena()) continue;
-        revisarVidas(); procesar(); revisarEncuentros();
+        revisarVidas(); procesar();
         if (seguirCharlas()) return estadoUI();   // (una charla en que la jugadora tiene que elegir qué dice Ana: espera)
         const lista = tareas.filter(T => !T.fin && !T.pregunta && !T.susp && !detenida(T) && ((T.accion && mundo.listo(T.accion)) || (T.hasta ? cumple(T.hasta) || (T.revisa && T.despierta <= t) : T.despierta <= t)));
         if (lista.length) {
