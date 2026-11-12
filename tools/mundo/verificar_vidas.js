@@ -15,6 +15,9 @@ function verificar(D){
   // (cada vez que algo llama a un verbo —en una receta o en una vida—: con qué argumentos)
   const todas = []; (function andar(x){ if (Array.isArray(x)) return x.forEach(andar); if (!x || typeof x !== 'object') return; if (typeof x.verbo === 'string' && Array.isArray(x.args)) todas.push(x); Object.values(x).forEach(andar); })([D.verbos, D.vidas]);
   const llamadas = k => todas.filter(x => x.verbo === k).map(x => x.args);
+  // (qué argumento es la cosa que mueve un verbo: tomar y poner, el segundo; una receta que los llama con un parámetro suyo —llevar—, ese)
+  const mueve = (v, vistos = new Set()) => { const d = D.verbos[v]; if (!d || vistos.has(v)) return null; vistos.add(v); if (['tomar', 'poner'].includes(d.opera)) return 1;
+    for (const p of Object.values(d.pasos || {})) for (const x of [p].flat()) { const i = x?.verbo && mueve(x.verbo, vistos); if (i != null && x.args?.[i]?.param != null) return x.args[i].param; } return null; };
   // (los efectos de algo: qué cosas suben y cuáles bajan, también dentro de un «si»)
   const efectos = (L, de) => { for (const e of L || []) {
     if (e.e === 'si') { condicion(e.si, de); efectos(e.entonces, de); continue; }
@@ -35,7 +38,7 @@ function verificar(D){
       for (const l of donde) if (!muebles[l]?.[v.junto_a]) fallas.push(`muebles: ${k} es junto a «${v.junto_a}» en ${l}, y ahí no hay (${Object.keys(muebles[l] || {}).join(', ') || 'ningún mueble'})`);
     }
     // (las cosas que se llevan, se toman o se ponen: un texto entre los argumentos de un paso)
-    for (const p of Object.values(v.pasos || {})) if (['llevar', 'tomar', 'poner'].includes(p?.verbo)) { const x = p.args?.[1]; if (typeof x === 'string') nombradas.add(x + '\u0000' + k); }
+    for (const p of Object.values(v.pasos || {})) { const i = mueve(p?.verbo); const x = i != null && p.args?.[i]; if (typeof x === 'string') nombradas.add(x + '\u0000' + k); }
   }
   for (const [h, L] of Object.entries(D.procesos || {})) for (const p of L) efectos(p.deja, `${h}: ${p.titulo}`);
   for (const n of nombradas) { const [x, de] = n.split('\u0000'); if (!tipos[x]) fallas.push(`cosas: ${de} nombra «${x}», que no está en cosasDe`); }

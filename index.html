@@ -19770,6 +19770,8 @@ comBoton();
     // correr(T) avanza la tarea hasta que tenga que esperar, y devuelve qué espera: {min} —un rato—, {hasta} —que se
     // cumpla algo—, {pregunta} —la respuesta de Ana—, {accion} —que el mundo termine algo—; o {fin}, con lo que valió.
     // Un marco devuelve {vale} (terminó), {espera}, o nada (empujó un marco, o cambió de fase: se sigue).
+    // (la operación de un primitivo —tomar, esperar, dar un recado…—: la declara el verbo, no su nombre)
+    const opDe = ll => D.verbos[ll.verbo]?.opera;
     const def = ll => { const d = D.verbos[ll.verbo]; if (!d) throw new Error('verbo desconocido: ' + ll.verbo); return sub(d, { params: ll.args }); };
     const marco = (ll, ctx) => ({ k: 'verbo', ll, ctx, fase: 0 });
     const hijo = (padre, label) => ({ padre, label, encargo: padre.encargo, ruta: unir(padre.ruta, label) });
@@ -19808,7 +19810,7 @@ comBoton();
         const ll = F.ll, d = def(ll);
         if (F.fase === 4) { if (!ret) return { vale: false }; F.fase = 0; }   // (fue hasta donde se hace)
         if (F.fase === 7) return { vale: ret };   // (hizo el recado, o no pudo)
-        if (F.fase === 0 && ll.verbo === 'acompañar') {   // (va con la otra: la sigue; lo que la otra hace ahora es el porqué)
+        if (F.fase === 0 && opDe(ll) === 'acompañar') {   // (va con la otra: la sigue; lo que la otra hace ahora es el porqué)
           const [q, otra] = ll.args;
           if (!cumple(d.pide)) { nota(`✘ acompañar: ${nombre(q)} no está con ${nombre(otra)}`); return { vale: false }; }
           F.prop = proposito(otra); F.t0 = t; F.fase = 8; aplicar({ e: 'deja', camino: ['mundo', q, 'sigue'], valor: otra });
@@ -19822,12 +19824,12 @@ comBoton();
           if (!cumple(d.pide)) return fin(false, 'se separaron');
           return { espera: { min: 1 } };
         }
-        if (F.fase === 0 && ll.verbo === 'hacer_recado') { const r = recadoPara(ll.args[0]); if (!r) return { vale: false }; F.fase = 7; T.pila.push(marco(r.hace, hijo(F.inst, 'recado'))); return; }
+        if (F.fase === 0 && opDe(ll) === 'hacer_recado') { const r = recadoPara(ll.args[0]); if (!r) return { vale: false }; F.fase = 7; T.pila.push(marco(r.hace, hijo(F.inst, 'recado'))); return; }
         if (F.fase === 0) {
           const q = ll.args[0];
           if (d.donde && !T.ya && !F.fue && !estaEn(q, d.donde)) { F.fue = true; F.fase = 4; T.pila.push(marco({ verbo: 'ir_a', args: [q, d.donde] }, hijo(F.inst, 'va'))); return; }   // (si no está donde se hace, primero va)
-          if (ll.verbo === 'esperar') { F.fase = 2; return cumple(d.pide) ? undefined : { espera: { hasta: d.pide } }; }
-          if (ll.verbo === 'quedarse') { F.fase = 5; F.lugar = lugarDe(q); return; }
+          if (opDe(ll) === 'esperar') { F.fase = 2; return cumple(d.pide) ? undefined : { espera: { hasta: d.pide } }; }
+          if (opDe(ll) === 'quedarse') { F.fase = 5; F.lugar = lugarDe(q); return; }
           if (d.deja && d.deja.length && d.deja.every(yaEs)) return { vale: true };   // (lo que deja ya es cierto: se salta)
           if (d.pide && !cumple(d.pide)) { nota(`✘ ${ll.verbo}: no se puede (${nombre(ll.args[0])})`); return { vale: false }; }
           if (lleno(q, d)) { nota(`✘ ${ll.verbo}: ${d.junto_a} está ocupado (${nombre(q)})`); return { vale: false }; }
@@ -19851,15 +19853,15 @@ comBoton();
           return cumple(d.pide) ? { vale: true } : { espera: { hasta: { c: 'o', de: [d.pide, { c: 'cmp', camino: ['mundo', ll.args[0], 'lugar'], op: '!=', valor: F.lugar }] } } };
         }
         for (const e of d.deja || []) aplicar(e);
-        if (ll.verbo === 'tomar' || ll.verbo === 'poner') mover(ll);   // (la cosa va del lugar a quien, o de quien al lugar)
-        if (ll.verbo === 'dar_recado') darRecado(ll);
+        if (opDe(ll) === 'tomar' || opDe(ll) === 'poner') mover(ll);   // (la cosa va del lugar a quien, o de quien al lugar)
+        if (opDe(ll) === 'dar_recado') darRecado(ll);
         return { vale: true };
       },
       // (ir hasta un lugar: el mundo busca el camino, y avisa al llegar)
       mapa(F, T){
         const ll = F.ll;
         if (F.fase === 0) {
-          if (ll.verbo === 'correr_a') set(['mundo', ll.args[0], 'en'], 'nada');
+          if (D.verbos[ll.verbo].a_pie) set(['mundo', ll.args[0], 'en'], 'nada');   // (correr: se baja de lo que va)
           decir(ll);
           const c = ll.args[1]?.camino, hacia = c && c[0] === 'mundo' && c[2] === 'lugar' ? c[1] : null;   // (adonde está alguien: el mundo sabe más fino dónde —en qué cuadrante—)
           F.acc = { quien: ll.args[0], verbo: ll.verbo, a: val(ll.args[1]), mapa: true, ya: !!T.ya, ...(hacia ? { hacia } : {}) };
@@ -20008,7 +20010,7 @@ comBoton();
     }
     function dejar(F){ if (F.dejada) return; F.dejada = true; for (const e of def(F.ll).si_se_deja || []) aplicar(e); }
     const pasoMarco = (p, ctx) => (p.elige ? { k: 'elegir', p, ctx, fase: 0 } : p.repite ? { k: 'repetir', p, ctx, fase: 0 } : marco(p, ctx));
-    const puede = ll => { if (ll.elige || ll.repite) return true; if (ll.verbo === 'hacer_recado') return !!recadoPara(ll.args[0]); if (ll.verbo === 'dar_recado') { const p = def(ll.args[2]).pide; if (p && !cumple(p)) return false; }   /* (no se pide lo que no se puede: entrar leña, si no hay) */    const d = def(ll); if (d.tipo === 'primitivo' && (lleno(ll.args[0], d) || faltaCosa(ll.args[0], d, ll))) return false; return !d.pide || d.tipo === 'primitivo' && (ll.verbo === 'esperar' || ll.verbo === 'quedarse') || cumple(d.pide); };
+    const puede = ll => { if (ll.elige || ll.repite) return true; if (opDe(ll) === 'hacer_recado') return !!recadoPara(ll.args[0]); if (opDe(ll) === 'dar_recado') { const p = def(ll.args[2]).pide; if (p && !cumple(p)) return false; }   /* (no se pide lo que no se puede: entrar leña, si no hay) */    const d = def(ll); if (d.tipo === 'primitivo' && (lleno(ll.args[0], d) || faltaCosa(ll.args[0], d, ll))) return false; return !d.pide || d.tipo === 'primitivo' && (opDe(ll) === 'esperar' || opDe(ll) === 'quedarse') || cumple(d.pide); };
     // (los recados de alguien: los que le dieron —dar_recado—, hasta que los hace, vencen, o ya no hacen falta: lo que
     // pide su verbo ya no se cumple —no quedan huevos en el gallinero—)
     const recadosDe = q => S[k(['recados', q])] || [];
@@ -20038,19 +20040,19 @@ comBoton();
       nota(`✔ ${nombre(q)} hizo el recado de ${nombre(r.de)} (${ll.verbo.replace(/_/g, ' ')})`, 'momento');
     }
     // (junto a un mueble: ¿ya están todos los que caben —el fregadero, de a uno—? Los muebles y cuántos caben: mueblesDe)
-    const lleno = (q, d) => { const cap = d.junto_a && d.donde ? D.muebles?.[d.donde]?.[d.junto_a] : null; if (cap == null) return false;
+    const lleno = (q, d) => { const m = d.junto_a && d.donde ? D.muebles?.[d.donde]?.[d.junto_a] : null, cap = m && typeof m === 'object' ? m.caben : m; if (cap == null) return false;
       return tareas.filter(U => !U.fin && U.quien !== q && U.pila.some(G => G.k === 'primitivo' && G.fase === 1 && G.acc && G.acc.junto_a === d.junto_a && G.acc.donde === d.donde)).length >= cap; };
     // (lo que usa, si es una cosa: tiene que haber una a mano —la lleva, o está donde se hace—; tomar y poner, lo que mueven)
     function faltaCosa(q, d, ll){
       const aqui = d.donde || lugarDe(q), hay = x => get(['cosas', q, x]) + get(['cosas', aqui, x]);
-      if (ll.verbo === 'tomar' && get(['cosas', lugarDe(q), ll.args[1]]) < 1) return ll.args[1];
-      if (ll.verbo === 'poner' && get(['cosas', q, ll.args[1]]) < 1) return ll.args[1];
+      if (opDe(ll) === 'tomar' && get(['cosas', lugarDe(q), ll.args[1]]) < 1) return ll.args[1];
+      if (opDe(ll) === 'poner' && get(['cosas', q, ll.args[1]]) < 1) return ll.args[1];
       for (const x of d.usa || []) if (D.cosas?.tipos?.[x] && hay(x) < 1) return x;
       return null;
     }
     // (tomar: del lugar a quien, las que haya, hasta n; poner: de quien al lugar)
     function mover(ll){
-      const [q, x, n0] = ll.args, L = lugarDe(q), [de, a] = ll.verbo === 'tomar' ? [L, q] : [q, L], n = Math.min(n0, get(['cosas', de, x]));
+      const [q, x, n0] = ll.args, L = lugarDe(q), [de, a] = opDe(ll) === 'tomar' ? [L, q] : [q, L], n = Math.min(n0, get(['cosas', de, x]));
       if (n > 0) { aplicar({ e: 'suma', camino: ['cosas', de, x], n: -n }); aplicar({ e: 'suma', camino: ['cosas', a, x], n }); }
     }
     // LO QUE PASA SOLO (procesos de las vidas: las gallinas ponen a las seis): una vez al día, a su hora
@@ -20295,7 +20297,7 @@ comBoton();
     if (guardado) ({ S, registro, tareas, cola, porTras, escena, pregunta, fin, sigId, t, respuestas } = guardado);
     else {
       const ini = Mundo.inicio || {};
-      for (const [x, l] of Object.entries({ ...(ini.lugares || {}), ...(escenario.lugares || {}) })) set(['mundo', x, 'lugar'], l);
+      for (const [x, l] of Object.entries({ ...(ini.lugares || {}), ...((escenario.vidas && D.inicio?.[escenario.vidas]) || {}), ...(escenario.lugares || {}) })) set(['mundo', x, 'lugar'], l);   // (y si hay vidas, donde empieza cada uno: inicioDe)
       for (const [c, v] of Object.entries({ ...(ini.estado || {}), ...(escenario.estado || {}) })) if (v === null) delete S[c]; else set(c.split('.'), v);
       // (las vidas de ese lugar —escenario.vidas: 'tejas_verdes'—: cada uno, su día; y donde duerme cada uno, si el escenario no dice)
       for (const [q, ll] of Object.entries((escenario.vidas && D.vidas?.[escenario.vidas]) || {})) tareas.push({ id: sigId++, pila: [marco(ll, {})], despierta: t, quien: q, vida: ll });
@@ -20405,6 +20407,14 @@ const LENGUAJE = {
    },
    "libro": {
     "titulo": "libros"
+   },
+   "gallinas": {
+    "titulo": "gallinas",
+    "icono": "🐔"
+   },
+   "vacas": {
+    "titulo": "vacas",
+    "icono": "🐄"
    }
   },
   "inicio": {
@@ -20416,6 +20426,12 @@ const LENGUAJE = {
    },
    "granero": {
     "lena": 10
+   },
+   "gallinero": {
+    "gallinas": 8
+   },
+   "corral": {
+    "vacas": 3
    },
    "cuesta_del_huerto": {
     "pan": 6,
@@ -20458,11 +20474,23 @@ const LENGUAJE = {
   },
   "corral": {
    "vacas": 1,
-   "cerca": 3
+   "cerca": {
+    "caben": 3,
+    "en": [
+     0,
+     1
+    ]
+   }
   },
   "tejas_verdes": {
    "porche": 3,
-   "tina": 1
+   "tina": {
+    "caben": 1,
+    "en": [
+     1,
+     0
+    ]
+   }
   },
   "cuesta_del_huerto": {
    "cama": 1,
@@ -20519,6 +20547,15 @@ const LENGUAJE = {
    }
   ]
  },
+ "inicio": {
+  "tejas_verdes": {
+   "ana": "pieza",
+   "marilla": "pieza_marilla",
+   "matthew": "pieza_matthew",
+   "diana": "cuesta_del_huerto",
+   "calesa": "corral"
+  }
+ },
  "personas": {
   "ana": "Ana",
   "marilla": "Marilla",
@@ -20527,6 +20564,187 @@ const LENGUAJE = {
   "blewett": "la Sra. Peter Blewett",
   "srapye": "la Sra. Pye",
   "diana": "Diana"
+ },
+ "aspecto": {
+  "ana": {
+   "color": "#b8442f"
+  },
+  "marilla": {
+   "color": "#4f5d7a"
+  },
+  "matthew": {
+   "color": "#557a43"
+  },
+  "diana": {
+   "color": "#7a4f86"
+  }
+ },
+ "tableros": {
+  "tejas_verdes": {
+   "origen": [
+    1220,
+    4900
+   ],
+   "cols": 8,
+   "filas": 4,
+   "zonas": [
+    "granero",
+    "gallinero",
+    "corral",
+    "arbustos",
+    "tejas_verdes",
+    "huerta"
+   ]
+  }
+ },
+ "planos": {
+  "tejas_verdes": {
+   "pisos": [
+    "abajo",
+    "arriba"
+   ],
+   "piezas": {
+    "despensa": {
+     "piso": 0,
+     "en": [
+      0,
+      0,
+      110,
+      80
+     ]
+    },
+    "escalera": {
+     "piso": 0,
+     "en": [
+      110,
+      0,
+      90,
+      80
+     ]
+    },
+    "cocina": {
+     "piso": 0,
+     "en": [
+      0,
+      80,
+      250,
+      160
+     ]
+    },
+    "sala": {
+     "piso": 0,
+     "en": [
+      250,
+      0,
+      160,
+      240
+     ]
+    },
+    "pieza_marilla": {
+     "piso": 1,
+     "en": [
+      0,
+      0,
+      140,
+      110
+     ]
+    },
+    "pieza_matthew": {
+     "piso": 1,
+     "en": [
+      0,
+      110,
+      140,
+      130
+     ]
+    },
+    "pasillo": {
+     "piso": 1,
+     "en": [
+      140,
+      0,
+      90,
+      240
+     ]
+    },
+    "pieza": {
+     "piso": 1,
+     "en": [
+      230,
+      0,
+      160,
+      150
+     ]
+    }
+   },
+   "puertas": [
+    [
+     "cocina",
+     "despensa",
+     [
+      55,
+      80
+     ]
+    ],
+    [
+     "cocina",
+     "escalera",
+     [
+      155,
+      80
+     ]
+    ],
+    [
+     "cocina",
+     "sala",
+     [
+      250,
+      160
+     ]
+    ],
+    [
+     "escalera",
+     "pasillo",
+     [
+      185,
+      20
+     ]
+    ],
+    [
+     "pasillo",
+     "pieza_marilla",
+     [
+      140,
+      55
+     ]
+    ],
+    [
+     "pasillo",
+     "pieza_matthew",
+     [
+      140,
+      175
+     ]
+    ],
+    [
+     "pasillo",
+     "pieza",
+     [
+      230,
+      75
+     ]
+    ]
+   ],
+   "afuera": {
+    "cocina": {
+     "a": "tejas_verdes",
+     "en": [
+      125,
+      240
+     ]
+    }
+   }
+  }
  },
  "lugares": {
   "tejas_verdes": {
@@ -20552,17 +20770,35 @@ const LENGUAJE = {
    "nombre": "la pieza de Matthew",
    "dentro": "tejas_verdes"
   },
+  "sala": {
+   "nombre": "la sala de Tejas Verdes",
+   "dentro": "tejas_verdes"
+  },
+  "despensa": {
+   "nombre": "la despensa",
+   "dentro": "tejas_verdes"
+  },
+  "escalera": {
+   "nombre": "la escalera",
+   "dentro": "tejas_verdes"
+  },
+  "pasillo": {
+   "nombre": "el pasillo de arriba",
+   "dentro": "tejas_verdes"
+  },
   "granero": {
    "nombre": "el granero",
    "dentro": "tejas_verdes"
   },
   "gallinero": {
    "nombre": "el gallinero",
-   "dentro": "tejas_verdes"
+   "dentro": "tejas_verdes",
+   "icono": "🛖"
   },
   "huerta": {
    "nombre": "la huerta",
-   "dentro": "tejas_verdes"
+   "dentro": "tejas_verdes",
+   "icono": "🥬"
   },
   "campo": {
    "nombre": "el campo de heno"
@@ -20578,6 +20814,10 @@ const LENGUAJE = {
   },
   "escuela": {
    "nombre": "la escuela"
+  },
+  "arbustos": {
+   "nombre": "el Sendero de los Abedules (camino a la escuela, junto a Tejas Verdes)",
+   "icono": "🌳"
   },
   "aldea": {
    "nombre": "la aldea de Avonlea"
@@ -20926,6 +21166,8 @@ const LENGUAJE = {
     "quien",
     "hasta"
    ],
+   "opera": "esperar",
+   "icono": "⏳",
    "pide": {
     "param": 1
    }
@@ -20937,6 +21179,8 @@ const LENGUAJE = {
     "cosa",
     "n"
    ],
+   "opera": "tomar",
+   "icono": "✋",
    "postura": "agachada",
    "dura": "1m"
   },
@@ -20947,6 +21191,8 @@ const LENGUAJE = {
     "cosa",
     "n"
    ],
+   "opera": "poner",
+   "icono": "📦",
    "postura": "agachada",
    "dura": "1m"
   },
@@ -20956,9 +21202,66 @@ const LENGUAJE = {
     "quien",
     "hasta"
    ],
+   "opera": "quedarse",
+   "icono": "⏳",
    "pide": {
     "param": 1
    }
+  },
+  "dar_recado": {
+   "tipo": "primitivo",
+   "params": [
+    "quien",
+    "a",
+    "hace",
+    "vence"
+   ],
+   "opera": "dar_recado",
+   "icono": "✉️",
+   "pide": {
+    "c": "f",
+    "f": "ve",
+    "args": [
+     {
+      "param": 0
+     },
+     {
+      "param": 1
+     }
+    ]
+   },
+   "postura": "de_pie",
+   "dura": "1m"
+  },
+  "acompañar": {
+   "tipo": "primitivo",
+   "params": [
+    "quien",
+    "otra",
+    "hasta"
+   ],
+   "opera": "acompañar",
+   "icono": "👣",
+   "pide": {
+    "c": "f",
+    "f": "ve",
+    "args": [
+     {
+      "param": 0
+     },
+     {
+      "param": 1
+     }
+    ]
+   },
+   "postura": "caminando"
+  },
+  "hacer_recado": {
+   "tipo": "primitivo",
+   "params": [
+    "quien"
+   ],
+   "opera": "hacer_recado"
   },
   "ir_a": {
    "tipo": "mapa",
@@ -20974,7 +21277,8 @@ const LENGUAJE = {
     "quien",
     "a"
    ],
-   "paso": "rapido"
+   "paso": "rapido",
+   "a_pie": true
   },
   "traer": {
    "tipo": "receta",
@@ -21632,6 +21936,7 @@ const LENGUAJE = {
     "q",
     "cama"
    ],
+   "icono": "💤",
    "donde": {
     "param": 1
    },
@@ -21644,6 +21949,7 @@ const LENGUAJE = {
    "params": [
     "q"
    ],
+   "icono": "🪑",
    "postura": "sentada",
    "dura": "15m"
   },
@@ -21653,6 +21959,7 @@ const LENGUAJE = {
     "q",
     "casa"
    ],
+   "icono": "🍽",
    "donde": {
     "param": 1
    },
@@ -21738,6 +22045,7 @@ const LENGUAJE = {
     "q",
     "casa"
    ],
+   "icono": "🍽",
    "donde": {
     "param": 1
    },
@@ -21767,6 +22075,7 @@ const LENGUAJE = {
     "q",
     "casa"
    ],
+   "icono": "🍽",
    "donde": {
     "param": 1
    },
@@ -21795,6 +22104,7 @@ const LENGUAJE = {
    "params": [
     "q"
    ],
+   "icono": "🍲",
    "donde": "cocina",
    "junto_a": "estufa",
    "postura": "de_pie",
@@ -21855,6 +22165,7 @@ const LENGUAJE = {
    "params": [
     "q"
    ],
+   "icono": "🧽",
    "donde": "cocina",
    "junto_a": "fregadero",
    "postura": "de_pie",
@@ -21889,6 +22200,7 @@ const LENGUAJE = {
    "params": [
     "q"
    ],
+   "icono": "🧹",
    "donde": "cocina",
    "postura": "caminando",
    "usa": [
@@ -21901,6 +22213,7 @@ const LENGUAJE = {
    "params": [
     "q"
    ],
+   "icono": "🍞",
    "donde": "cocina",
    "junto_a": "mesa",
    "postura": "de_pie",
@@ -21935,6 +22248,7 @@ const LENGUAJE = {
    "params": [
     "q"
    ],
+   "icono": "🧵",
    "donde": "cocina",
    "junto_a": "ventana",
    "postura": "sentada",
@@ -21949,6 +22263,7 @@ const LENGUAJE = {
    "params": [
     "q"
    ],
+   "icono": "🧺",
    "donde": "tejas_verdes",
    "junto_a": "tina",
    "postura": "agachada",
@@ -21984,6 +22299,7 @@ const LENGUAJE = {
    "params": [
     "q"
    ],
+   "icono": "🧈",
    "donde": "cocina",
    "junto_a": "mantequera",
    "postura": "sentada",
@@ -22029,6 +22345,7 @@ const LENGUAJE = {
    "params": [
     "q"
    ],
+   "icono": "🧶",
    "donde": "cocina",
    "junto_a": "ventana",
    "postura": "sentada",
@@ -22043,6 +22360,7 @@ const LENGUAJE = {
    "params": [
     "q"
    ],
+   "icono": "👕",
    "donde": "cocina",
    "junto_a": "mesa",
    "postura": "de_pie",
@@ -22056,6 +22374,7 @@ const LENGUAJE = {
    "params": [
     "q"
    ],
+   "icono": "🫙",
    "donde": "cocina",
    "junto_a": "estufa",
    "postura": "de_pie",
@@ -22092,6 +22411,7 @@ const LENGUAJE = {
     "q",
     "l"
    ],
+   "icono": "☕",
    "donde": {
     "param": 1
    },
@@ -22107,6 +22427,7 @@ const LENGUAJE = {
     "q",
     "l"
    ],
+   "icono": "🚶",
    "donde": {
     "param": 1
    },
@@ -22118,6 +22439,7 @@ const LENGUAJE = {
    "params": [
     "q"
    ],
+   "icono": "🌱",
    "donde": "huerta",
    "postura": "caminando",
    "usa": [
@@ -22130,6 +22452,7 @@ const LENGUAJE = {
    "params": [
     "q"
    ],
+   "icono": "🥛",
    "donde": "corral",
    "junto_a": "vacas",
    "postura": "agachada",
@@ -22156,6 +22479,7 @@ const LENGUAJE = {
    "params": [
     "q"
    ],
+   "icono": "🌾",
    "donde": "corral",
    "postura": "caminando",
    "usa": [
@@ -22168,6 +22492,7 @@ const LENGUAJE = {
    "params": [
     "q"
    ],
+   "icono": "🌾",
    "donde": "campo",
    "postura": "caminando",
    "usa": [
@@ -22180,6 +22505,7 @@ const LENGUAJE = {
    "params": [
     "q"
    ],
+   "icono": "🪓",
    "donde": "granero",
    "junto_a": "tronco",
    "postura": "de_pie",
@@ -22214,6 +22540,7 @@ const LENGUAJE = {
    "params": [
     "q"
    ],
+   "icono": "🔨",
    "donde": "corral",
    "junto_a": "cerca",
    "postura": "agachada",
@@ -22227,6 +22554,7 @@ const LENGUAJE = {
    "params": [
     "q"
    ],
+   "icono": "🪈",
    "donde": "tejas_verdes",
    "junto_a": "porche",
    "postura": "sentada",
@@ -22241,6 +22569,7 @@ const LENGUAJE = {
     "q",
     "l"
    ],
+   "icono": "📖",
    "donde": {
     "param": 1
    },
@@ -22256,6 +22585,7 @@ const LENGUAJE = {
    "params": [
     "q"
    ],
+   "icono": "🎈",
    "donde": "huerta",
    "postura": "caminando",
    "dura": "25m"
@@ -22265,6 +22595,7 @@ const LENGUAJE = {
    "params": [
     "q"
    ],
+   "icono": "☁️",
    "donde": "pieza",
    "junto_a": "ventana",
    "postura": "sentada",
@@ -22275,6 +22606,7 @@ const LENGUAJE = {
    "params": [
     "q"
    ],
+   "icono": "🐄",
    "donde": "corral",
    "junto_a": "cerca",
    "postura": "de_pie",
@@ -22285,6 +22617,7 @@ const LENGUAJE = {
    "params": [
     "q"
    ],
+   "icono": "🙏",
    "donde": "pieza",
    "junto_a": "cama",
    "postura": "agachada",
@@ -22296,6 +22629,7 @@ const LENGUAJE = {
     "q",
     "l"
    ],
+   "icono": "✏️",
    "donde": {
     "param": 1
    },
@@ -22312,6 +22646,7 @@ const LENGUAJE = {
     "q",
     "otra"
    ],
+   "icono": "🎈",
    "pide": {
     "c": "f",
     "f": "ve",
@@ -22333,6 +22668,7 @@ const LENGUAJE = {
     "q",
     "casa"
    ],
+   "icono": "🏫",
    "pasos": {
     "va": {
      "verbo": "ir_a",
@@ -22368,6 +22704,251 @@ const LENGUAJE = {
       },
       {
        "param": 1
+      }
+     ]
+    }
+   }
+  },
+  "encontrarse_en": {
+   "tipo": "receta",
+   "params": [
+    "q",
+    "otra",
+    "l",
+    "hasta"
+   ],
+   "icono": "⏳",
+   "pasos": {
+    "va": {
+     "verbo": "ir_a",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "param": 2
+      }
+     ]
+    },
+    "espera": {
+     "verbo": "esperar",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "c": "o",
+       "de": [
+        {
+         "c": "f",
+         "f": "ve",
+         "args": [
+          {
+           "param": 0
+          },
+          {
+           "param": 1
+          }
+         ]
+        },
+        {
+         "c": "cmp",
+         "camino": [
+          "tiempo",
+          "hora"
+         ],
+         "op": ">=",
+         "valor": {
+          "param": 3
+         }
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "cumplido": {
+    "c": "f",
+    "f": "ve",
+    "args": [
+     {
+      "param": 0
+     },
+     {
+      "param": 1
+     }
+    ]
+   }
+  },
+  "ir_a_clases_por": {
+   "tipo": "receta",
+   "params": [
+    "q",
+    "otra",
+    "l",
+    "casa"
+   ],
+   "icono": "🏫",
+   "pasos": {
+    "va": {
+     "verbo": "ir_a",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "param": 2
+      }
+     ]
+    },
+    "espera": {
+     "verbo": "esperar",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "c": "o",
+       "de": [
+        {
+         "c": "cmp",
+         "camino": [
+          "mundo",
+          {
+           "param": 1
+          },
+          "sigue"
+         ],
+         "op": "=",
+         "valor": {
+          "param": 0
+         }
+        },
+        {
+         "c": "cmp",
+         "camino": [
+          "tiempo",
+          "hora"
+         ],
+         "op": ">=",
+         "valor": 7.95
+        }
+       ]
+      }
+     ]
+    },
+    "sigue": {
+     "verbo": "ir_a",
+     "args": [
+      {
+       "param": 0
+      },
+      "escuela"
+     ]
+    },
+    "clase": {
+     "verbo": "quedarse",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "c": "cmp",
+       "camino": [
+        "tiempo",
+        "hora"
+       ],
+       "op": ">=",
+       "valor": 15.5
+      }
+     ]
+    },
+    "vuelve": {
+     "verbo": "ir_a",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "param": 3
+      }
+     ]
+    }
+   }
+  },
+  "ir_a_clases_con": {
+   "tipo": "receta",
+   "params": [
+    "q",
+    "otra",
+    "l",
+    "casa"
+   ],
+   "icono": "🏫",
+   "pasos": {
+    "encuentro": {
+     "verbo": "encontrarse_en",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "param": 1
+      },
+      {
+       "param": 2
+      },
+      7.95
+     ]
+    },
+    "van": {
+     "verbo": "acompañar",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "param": 1
+      },
+      {
+       "c": "cmp",
+       "camino": [
+        "mundo",
+        {
+         "param": 0
+        },
+        "lugar"
+       ],
+       "op": "=",
+       "valor": "escuela"
+      }
+     ]
+    },
+    "clase": {
+     "verbo": "quedarse",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "c": "cmp",
+       "camino": [
+        "tiempo",
+        "hora"
+       ],
+       "op": ">=",
+       "valor": 15.5
+      }
+     ]
+    },
+    "vuelve": {
+     "verbo": "ir_a",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "param": 3
       }
      ]
     }
@@ -22428,6 +23009,7 @@ const LENGUAJE = {
     "q",
     "casa"
    ],
+   "icono": "⛪",
    "pasos": {
     "va": {
      "verbo": "ir_a",
@@ -22474,6 +23056,7 @@ const LENGUAJE = {
     "q",
     "casa"
    ],
+   "icono": "☕",
    "pasos": {
     "va": {
      "verbo": "ir_a",
@@ -23060,6 +23643,18 @@ const LENGUAJE = {
             ],
             "ventana": "hoy"
            }
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             "ana",
+             "barrer"
+            ],
+            "ventana": "hoy"
+           }
           }
          ]
         },
@@ -23320,26 +23915,342 @@ const LENGUAJE = {
          "c": "y",
          "de": [
           {
-           "c": "cmp",
-           "camino": [
-            "tiempo",
-            "hora"
-           ],
-           "op": ">=",
-           "valor": 6
+           "c": "o",
+           "de": [
+            {
+             "c": "y",
+             "de": [
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": ">=",
+               "valor": 6
+              },
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": "<",
+               "valor": 12
+              }
+             ]
+            },
+            {
+             "c": "y",
+             "de": [
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": ">=",
+               "valor": 13
+              },
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": "<",
+               "valor": 18
+              }
+             ]
+            }
+           ]
           },
           {
-           "c": "cmp",
-           "camino": [
-            "tiempo",
-            "hora"
-           ],
-           "op": "<",
-           "valor": 12
+           "c": "no",
+           "de": {
+            "c": "f",
+            "f": "ve",
+            "args": [
+             {
+              "param": 0
+             },
+             "ana"
+            ]
+           }
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "recado",
+            "quien": "ana",
+            "verbo": "recoger_huevos"
+           }
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "desde",
+            "camino": [
+             "hizo_t",
+             {
+              "param": 0
+             },
+             "dar_recado"
+            ],
+            "op": "<",
+            "valor": "6h",
+            "min": true
+           }
           }
          ]
         },
         "prioridad": 3
+       },
+       {
+        "hace": {
+         "verbo": "dar_recado",
+         "args": [
+          {
+           "param": 0
+          },
+          "ana",
+          {
+           "verbo": "recoger_huevos",
+           "args": [
+            "ana"
+           ]
+          },
+          "12h"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "cmp",
+           "camino": [
+            "cosas",
+            "gallinero",
+            "huevos"
+           ],
+           "op": ">",
+           "valor": 0
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "desde",
+            "camino": [
+             "hizo_t",
+             {
+              "param": 0
+             },
+             "dar_recado"
+            ],
+            "op": "<",
+            "valor": "2h",
+            "min": true
+           }
+          }
+         ]
+        },
+        "prioridad": 4
+       },
+       {
+        "hace": {
+         "verbo": "dar_recado",
+         "args": [
+          {
+           "param": 0
+          },
+          "ana",
+          {
+           "verbo": "barrer",
+           "args": [
+            "ana"
+           ]
+          },
+          "12h"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "cmp",
+           "camino": [
+            "tiempo",
+            "semana"
+           ],
+           "op": "=",
+           "valor": "sabado"
+          },
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 6
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 12
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "barrer"
+            ],
+            "ventana": "hoy"
+           }
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "desde",
+            "camino": [
+             "hizo_t",
+             {
+              "param": 0
+             },
+             "dar_recado"
+            ],
+            "op": "<",
+            "valor": "2h",
+            "min": true
+           }
+          }
+         ]
+        },
+        "prioridad": 4
+       },
+       {
+        "hace": {
+         "verbo": "dar_recado",
+         "args": [
+          {
+           "param": 0
+          },
+          "matthew",
+          {
+           "verbo": "entrar_lena",
+           "args": [
+            "matthew"
+           ]
+          },
+          "2h"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "cmp",
+           "camino": [
+            "cosas",
+            "cocina",
+            "lena"
+           ],
+           "op": "<",
+           "valor": 3
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "desde",
+            "camino": [
+             "hizo_t",
+             {
+              "param": 0
+             },
+             "dar_recado"
+            ],
+            "op": "<",
+            "valor": "1h",
+            "min": true
+           }
+          }
+         ]
+        },
+        "prioridad": 4
+       },
+       {
+        "hace": {
+         "verbo": "dar_recado",
+         "args": [
+          {
+           "param": 0
+          },
+          "matthew",
+          {
+           "verbo": "partir_lena",
+           "args": [
+            "matthew"
+           ]
+          },
+          "4h"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "cmp",
+           "camino": [
+            "cosas",
+            "granero",
+            "lena"
+           ],
+           "op": "<",
+           "valor": 2
+          },
+          {
+           "c": "cmp",
+           "camino": [
+            "cosas",
+            "cocina",
+            "lena"
+           ],
+           "op": "<",
+           "valor": 3
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "desde",
+            "camino": [
+             "hizo_t",
+             {
+              "param": 0
+             },
+             "dar_recado"
+            ],
+            "op": "<",
+            "valor": "1h",
+            "min": true
+           }
+          }
+         ]
+        },
+        "prioridad": 4
        },
        {
         "hace": {
@@ -24185,6 +25096,40 @@ const LENGUAJE = {
          ]
         },
         "prioridad": 6
+       },
+       {
+        "hace": {
+         "verbo": "hacer_recado",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "cmp",
+           "camino": [
+            "tiempo",
+            "hora"
+           ],
+           "op": ">=",
+           "valor": 6
+          },
+          {
+           "c": "cmp",
+           "camino": [
+            "tiempo",
+            "hora"
+           ],
+           "op": "<",
+           "valor": 20
+          }
+         ]
+        },
+        "prioridad": 4
        },
        {
         "hace": {
@@ -25074,7 +26019,7 @@ const LENGUAJE = {
               "hora"
              ],
              "op": ">=",
-             "valor": 7.75
+             "valor": 7.85
             },
             {
              "c": "cmp",
@@ -25100,6 +26045,125 @@ const LENGUAJE = {
             ],
             "ventana": "hoy"
            }
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "ir_a_clases_con"
+            ],
+            "ventana": "hoy"
+           }
+          }
+         ]
+        },
+        "prioridad": 7
+       },
+       {
+        "hace": {
+         "verbo": "ir_a_clases_con",
+         "args": [
+          {
+           "param": 0
+          },
+          "diana",
+          "arbustos",
+          "tejas_verdes"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "no",
+           "de": {
+            "c": "cmp",
+            "camino": [
+             "tiempo",
+             "semana"
+            ],
+            "op": "=",
+            "valor": "domingo"
+           }
+          },
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 7.6
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 7.85
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "ir_a_clases"
+            ],
+            "ventana": "hoy"
+           }
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "ir_a_clases_con"
+            ],
+            "ventana": "hoy"
+           }
+          },
+          {
+           "c": "o",
+           "de": [
+            {
+             "c": "no",
+             "de": {
+              "c": "f",
+              "f": "ve",
+              "args": [
+               {
+                "param": 0
+               },
+               "diana"
+              ]
+             }
+            },
+            {
+             "c": "haciendo",
+             "quien": "diana",
+             "verbo": "ir_a_clases_por"
+            }
+           ]
           }
          ]
         },
@@ -25492,6 +26556,41 @@ const LENGUAJE = {
        },
        {
         "hace": {
+         "verbo": "hacer_recado",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "cmp",
+           "camino": [
+            "tiempo",
+            "hora"
+           ],
+           "op": ">=",
+           "valor": 6.5
+          },
+          {
+           "c": "cmp",
+           "camino": [
+            "tiempo",
+            "hora"
+           ],
+           "op": "<",
+           "valor": 20.5
+          }
+         ]
+        },
+        "prioridad": 1,
+        "peso": 4
+       },
+       {
+        "hace": {
          "verbo": "entrar_lena",
          "args": [
           {
@@ -25830,7 +26929,7 @@ const LENGUAJE = {
             "hora"
            ],
            "op": "<",
-           "valor": 7
+           "valor": 6.5
           }
          ]
         },
@@ -25980,7 +27079,7 @@ const LENGUAJE = {
               "hora"
              ],
              "op": ">=",
-             "valor": 7.75
+             "valor": 7.4
             },
             {
              "c": "cmp",
@@ -26006,10 +27105,107 @@ const LENGUAJE = {
             ],
             "ventana": "hoy"
            }
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "ir_a_clases_por"
+            ],
+            "ventana": "hoy"
+           }
           }
          ]
         },
         "prioridad": 7
+       },
+       {
+        "hace": {
+         "verbo": "ir_a_clases_por",
+         "args": [
+          {
+           "param": 0
+          },
+          "ana",
+          "arbustos",
+          "cuesta_del_huerto"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "no",
+           "de": {
+            "c": "cmp",
+            "camino": [
+             "tiempo",
+             "semana"
+            ],
+            "op": "=",
+            "valor": "domingo"
+           }
+          },
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 7.4
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 7.9
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "ir_a_clases_por"
+            ],
+            "ventana": "hoy"
+           }
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "ir_a_clases"
+            ],
+            "ventana": "hoy"
+           }
+          }
+         ]
+        },
+        "prioridad": 7,
+        "peso": 3
        },
        {
         "hace": {

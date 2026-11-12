@@ -52,6 +52,14 @@
    },
    "libro": {
     "titulo": "libros"
+   },
+   "gallinas": {
+    "titulo": "gallinas",
+    "icono": "🐔"
+   },
+   "vacas": {
+    "titulo": "vacas",
+    "icono": "🐄"
    }
   },
   "inicio": {
@@ -63,6 +71,12 @@
    },
    "granero": {
     "lena": 10
+   },
+   "gallinero": {
+    "gallinas": 8
+   },
+   "corral": {
+    "vacas": 3
    },
    "cuesta_del_huerto": {
     "pan": 6,
@@ -105,11 +119,23 @@
   },
   "corral": {
    "vacas": 1,
-   "cerca": 3
+   "cerca": {
+    "caben": 3,
+    "en": [
+     0,
+     1
+    ]
+   }
   },
   "tejas_verdes": {
    "porche": 3,
-   "tina": 1
+   "tina": {
+    "caben": 1,
+    "en": [
+     1,
+     0
+    ]
+   }
   },
   "cuesta_del_huerto": {
    "cama": 1,
@@ -166,6 +192,15 @@
    }
   ]
  },
+ "inicio": {
+  "tejas_verdes": {
+   "ana": "pieza",
+   "marilla": "pieza_marilla",
+   "matthew": "pieza_matthew",
+   "diana": "cuesta_del_huerto",
+   "calesa": "corral"
+  }
+ },
  "personas": {
   "ana": "Ana",
   "marilla": "Marilla",
@@ -174,6 +209,187 @@
   "blewett": "la Sra. Peter Blewett",
   "srapye": "la Sra. Pye",
   "diana": "Diana"
+ },
+ "aspecto": {
+  "ana": {
+   "color": "#b8442f"
+  },
+  "marilla": {
+   "color": "#4f5d7a"
+  },
+  "matthew": {
+   "color": "#557a43"
+  },
+  "diana": {
+   "color": "#7a4f86"
+  }
+ },
+ "tableros": {
+  "tejas_verdes": {
+   "origen": [
+    1220,
+    4900
+   ],
+   "cols": 8,
+   "filas": 4,
+   "zonas": [
+    "granero",
+    "gallinero",
+    "corral",
+    "arbustos",
+    "tejas_verdes",
+    "huerta"
+   ]
+  }
+ },
+ "planos": {
+  "tejas_verdes": {
+   "pisos": [
+    "abajo",
+    "arriba"
+   ],
+   "piezas": {
+    "despensa": {
+     "piso": 0,
+     "en": [
+      0,
+      0,
+      110,
+      80
+     ]
+    },
+    "escalera": {
+     "piso": 0,
+     "en": [
+      110,
+      0,
+      90,
+      80
+     ]
+    },
+    "cocina": {
+     "piso": 0,
+     "en": [
+      0,
+      80,
+      250,
+      160
+     ]
+    },
+    "sala": {
+     "piso": 0,
+     "en": [
+      250,
+      0,
+      160,
+      240
+     ]
+    },
+    "pieza_marilla": {
+     "piso": 1,
+     "en": [
+      0,
+      0,
+      140,
+      110
+     ]
+    },
+    "pieza_matthew": {
+     "piso": 1,
+     "en": [
+      0,
+      110,
+      140,
+      130
+     ]
+    },
+    "pasillo": {
+     "piso": 1,
+     "en": [
+      140,
+      0,
+      90,
+      240
+     ]
+    },
+    "pieza": {
+     "piso": 1,
+     "en": [
+      230,
+      0,
+      160,
+      150
+     ]
+    }
+   },
+   "puertas": [
+    [
+     "cocina",
+     "despensa",
+     [
+      55,
+      80
+     ]
+    ],
+    [
+     "cocina",
+     "escalera",
+     [
+      155,
+      80
+     ]
+    ],
+    [
+     "cocina",
+     "sala",
+     [
+      250,
+      160
+     ]
+    ],
+    [
+     "escalera",
+     "pasillo",
+     [
+      185,
+      20
+     ]
+    ],
+    [
+     "pasillo",
+     "pieza_marilla",
+     [
+      140,
+      55
+     ]
+    ],
+    [
+     "pasillo",
+     "pieza_matthew",
+     [
+      140,
+      175
+     ]
+    ],
+    [
+     "pasillo",
+     "pieza",
+     [
+      230,
+      75
+     ]
+    ]
+   ],
+   "afuera": {
+    "cocina": {
+     "a": "tejas_verdes",
+     "en": [
+      125,
+      240
+     ]
+    }
+   }
+  }
  },
  "lugares": {
   "tejas_verdes": {
@@ -199,17 +415,35 @@
    "nombre": "la pieza de Matthew",
    "dentro": "tejas_verdes"
   },
+  "sala": {
+   "nombre": "la sala de Tejas Verdes",
+   "dentro": "tejas_verdes"
+  },
+  "despensa": {
+   "nombre": "la despensa",
+   "dentro": "tejas_verdes"
+  },
+  "escalera": {
+   "nombre": "la escalera",
+   "dentro": "tejas_verdes"
+  },
+  "pasillo": {
+   "nombre": "el pasillo de arriba",
+   "dentro": "tejas_verdes"
+  },
   "granero": {
    "nombre": "el granero",
    "dentro": "tejas_verdes"
   },
   "gallinero": {
    "nombre": "el gallinero",
-   "dentro": "tejas_verdes"
+   "dentro": "tejas_verdes",
+   "icono": "🛖"
   },
   "huerta": {
    "nombre": "la huerta",
-   "dentro": "tejas_verdes"
+   "dentro": "tejas_verdes",
+   "icono": "🥬"
   },
   "campo": {
    "nombre": "el campo de heno"
@@ -225,6 +459,10 @@
   },
   "escuela": {
    "nombre": "la escuela"
+  },
+  "arbustos": {
+   "nombre": "el Sendero de los Abedules (camino a la escuela, junto a Tejas Verdes)",
+   "icono": "🌳"
   },
   "aldea": {
    "nombre": "la aldea de Avonlea"
@@ -573,6 +811,8 @@
     "quien",
     "hasta"
    ],
+   "opera": "esperar",
+   "icono": "⏳",
    "pide": {
     "param": 1
    }
@@ -584,6 +824,8 @@
     "cosa",
     "n"
    ],
+   "opera": "tomar",
+   "icono": "✋",
    "postura": "agachada",
    "dura": "1m"
   },
@@ -594,6 +836,8 @@
     "cosa",
     "n"
    ],
+   "opera": "poner",
+   "icono": "📦",
    "postura": "agachada",
    "dura": "1m"
   },
@@ -603,9 +847,66 @@
     "quien",
     "hasta"
    ],
+   "opera": "quedarse",
+   "icono": "⏳",
    "pide": {
     "param": 1
    }
+  },
+  "dar_recado": {
+   "tipo": "primitivo",
+   "params": [
+    "quien",
+    "a",
+    "hace",
+    "vence"
+   ],
+   "opera": "dar_recado",
+   "icono": "✉️",
+   "pide": {
+    "c": "f",
+    "f": "ve",
+    "args": [
+     {
+      "param": 0
+     },
+     {
+      "param": 1
+     }
+    ]
+   },
+   "postura": "de_pie",
+   "dura": "1m"
+  },
+  "acompañar": {
+   "tipo": "primitivo",
+   "params": [
+    "quien",
+    "otra",
+    "hasta"
+   ],
+   "opera": "acompañar",
+   "icono": "👣",
+   "pide": {
+    "c": "f",
+    "f": "ve",
+    "args": [
+     {
+      "param": 0
+     },
+     {
+      "param": 1
+     }
+    ]
+   },
+   "postura": "caminando"
+  },
+  "hacer_recado": {
+   "tipo": "primitivo",
+   "params": [
+    "quien"
+   ],
+   "opera": "hacer_recado"
   },
   "ir_a": {
    "tipo": "mapa",
@@ -621,7 +922,8 @@
     "quien",
     "a"
    ],
-   "paso": "rapido"
+   "paso": "rapido",
+   "a_pie": true
   },
   "traer": {
    "tipo": "receta",
@@ -1279,6 +1581,7 @@
     "q",
     "cama"
    ],
+   "icono": "💤",
    "donde": {
     "param": 1
    },
@@ -1291,6 +1594,7 @@
    "params": [
     "q"
    ],
+   "icono": "🪑",
    "postura": "sentada",
    "dura": "15m"
   },
@@ -1300,6 +1604,7 @@
     "q",
     "casa"
    ],
+   "icono": "🍽",
    "donde": {
     "param": 1
    },
@@ -1385,6 +1690,7 @@
     "q",
     "casa"
    ],
+   "icono": "🍽",
    "donde": {
     "param": 1
    },
@@ -1414,6 +1720,7 @@
     "q",
     "casa"
    ],
+   "icono": "🍽",
    "donde": {
     "param": 1
    },
@@ -1442,6 +1749,7 @@
    "params": [
     "q"
    ],
+   "icono": "🍲",
    "donde": "cocina",
    "junto_a": "estufa",
    "postura": "de_pie",
@@ -1502,6 +1810,7 @@
    "params": [
     "q"
    ],
+   "icono": "🧽",
    "donde": "cocina",
    "junto_a": "fregadero",
    "postura": "de_pie",
@@ -1536,6 +1845,7 @@
    "params": [
     "q"
    ],
+   "icono": "🧹",
    "donde": "cocina",
    "postura": "caminando",
    "usa": [
@@ -1548,6 +1858,7 @@
    "params": [
     "q"
    ],
+   "icono": "🍞",
    "donde": "cocina",
    "junto_a": "mesa",
    "postura": "de_pie",
@@ -1582,6 +1893,7 @@
    "params": [
     "q"
    ],
+   "icono": "🧵",
    "donde": "cocina",
    "junto_a": "ventana",
    "postura": "sentada",
@@ -1596,6 +1908,7 @@
    "params": [
     "q"
    ],
+   "icono": "🧺",
    "donde": "tejas_verdes",
    "junto_a": "tina",
    "postura": "agachada",
@@ -1631,6 +1944,7 @@
    "params": [
     "q"
    ],
+   "icono": "🧈",
    "donde": "cocina",
    "junto_a": "mantequera",
    "postura": "sentada",
@@ -1676,6 +1990,7 @@
    "params": [
     "q"
    ],
+   "icono": "🧶",
    "donde": "cocina",
    "junto_a": "ventana",
    "postura": "sentada",
@@ -1690,6 +2005,7 @@
    "params": [
     "q"
    ],
+   "icono": "👕",
    "donde": "cocina",
    "junto_a": "mesa",
    "postura": "de_pie",
@@ -1703,6 +2019,7 @@
    "params": [
     "q"
    ],
+   "icono": "🫙",
    "donde": "cocina",
    "junto_a": "estufa",
    "postura": "de_pie",
@@ -1739,6 +2056,7 @@
     "q",
     "l"
    ],
+   "icono": "☕",
    "donde": {
     "param": 1
    },
@@ -1754,6 +2072,7 @@
     "q",
     "l"
    ],
+   "icono": "🚶",
    "donde": {
     "param": 1
    },
@@ -1765,6 +2084,7 @@
    "params": [
     "q"
    ],
+   "icono": "🌱",
    "donde": "huerta",
    "postura": "caminando",
    "usa": [
@@ -1777,6 +2097,7 @@
    "params": [
     "q"
    ],
+   "icono": "🥛",
    "donde": "corral",
    "junto_a": "vacas",
    "postura": "agachada",
@@ -1803,6 +2124,7 @@
    "params": [
     "q"
    ],
+   "icono": "🌾",
    "donde": "corral",
    "postura": "caminando",
    "usa": [
@@ -1815,6 +2137,7 @@
    "params": [
     "q"
    ],
+   "icono": "🌾",
    "donde": "campo",
    "postura": "caminando",
    "usa": [
@@ -1827,6 +2150,7 @@
    "params": [
     "q"
    ],
+   "icono": "🪓",
    "donde": "granero",
    "junto_a": "tronco",
    "postura": "de_pie",
@@ -1861,6 +2185,7 @@
    "params": [
     "q"
    ],
+   "icono": "🔨",
    "donde": "corral",
    "junto_a": "cerca",
    "postura": "agachada",
@@ -1874,6 +2199,7 @@
    "params": [
     "q"
    ],
+   "icono": "🪈",
    "donde": "tejas_verdes",
    "junto_a": "porche",
    "postura": "sentada",
@@ -1888,6 +2214,7 @@
     "q",
     "l"
    ],
+   "icono": "📖",
    "donde": {
     "param": 1
    },
@@ -1903,6 +2230,7 @@
    "params": [
     "q"
    ],
+   "icono": "🎈",
    "donde": "huerta",
    "postura": "caminando",
    "dura": "25m"
@@ -1912,6 +2240,7 @@
    "params": [
     "q"
    ],
+   "icono": "☁️",
    "donde": "pieza",
    "junto_a": "ventana",
    "postura": "sentada",
@@ -1922,6 +2251,7 @@
    "params": [
     "q"
    ],
+   "icono": "🐄",
    "donde": "corral",
    "junto_a": "cerca",
    "postura": "de_pie",
@@ -1932,6 +2262,7 @@
    "params": [
     "q"
    ],
+   "icono": "🙏",
    "donde": "pieza",
    "junto_a": "cama",
    "postura": "agachada",
@@ -1943,6 +2274,7 @@
     "q",
     "l"
    ],
+   "icono": "✏️",
    "donde": {
     "param": 1
    },
@@ -1959,6 +2291,7 @@
     "q",
     "otra"
    ],
+   "icono": "🎈",
    "pide": {
     "c": "f",
     "f": "ve",
@@ -1980,6 +2313,7 @@
     "q",
     "casa"
    ],
+   "icono": "🏫",
    "pasos": {
     "va": {
      "verbo": "ir_a",
@@ -2015,6 +2349,251 @@
       },
       {
        "param": 1
+      }
+     ]
+    }
+   }
+  },
+  "encontrarse_en": {
+   "tipo": "receta",
+   "params": [
+    "q",
+    "otra",
+    "l",
+    "hasta"
+   ],
+   "icono": "⏳",
+   "pasos": {
+    "va": {
+     "verbo": "ir_a",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "param": 2
+      }
+     ]
+    },
+    "espera": {
+     "verbo": "esperar",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "c": "o",
+       "de": [
+        {
+         "c": "f",
+         "f": "ve",
+         "args": [
+          {
+           "param": 0
+          },
+          {
+           "param": 1
+          }
+         ]
+        },
+        {
+         "c": "cmp",
+         "camino": [
+          "tiempo",
+          "hora"
+         ],
+         "op": ">=",
+         "valor": {
+          "param": 3
+         }
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "cumplido": {
+    "c": "f",
+    "f": "ve",
+    "args": [
+     {
+      "param": 0
+     },
+     {
+      "param": 1
+     }
+    ]
+   }
+  },
+  "ir_a_clases_por": {
+   "tipo": "receta",
+   "params": [
+    "q",
+    "otra",
+    "l",
+    "casa"
+   ],
+   "icono": "🏫",
+   "pasos": {
+    "va": {
+     "verbo": "ir_a",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "param": 2
+      }
+     ]
+    },
+    "espera": {
+     "verbo": "esperar",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "c": "o",
+       "de": [
+        {
+         "c": "cmp",
+         "camino": [
+          "mundo",
+          {
+           "param": 1
+          },
+          "sigue"
+         ],
+         "op": "=",
+         "valor": {
+          "param": 0
+         }
+        },
+        {
+         "c": "cmp",
+         "camino": [
+          "tiempo",
+          "hora"
+         ],
+         "op": ">=",
+         "valor": 7.95
+        }
+       ]
+      }
+     ]
+    },
+    "sigue": {
+     "verbo": "ir_a",
+     "args": [
+      {
+       "param": 0
+      },
+      "escuela"
+     ]
+    },
+    "clase": {
+     "verbo": "quedarse",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "c": "cmp",
+       "camino": [
+        "tiempo",
+        "hora"
+       ],
+       "op": ">=",
+       "valor": 15.5
+      }
+     ]
+    },
+    "vuelve": {
+     "verbo": "ir_a",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "param": 3
+      }
+     ]
+    }
+   }
+  },
+  "ir_a_clases_con": {
+   "tipo": "receta",
+   "params": [
+    "q",
+    "otra",
+    "l",
+    "casa"
+   ],
+   "icono": "🏫",
+   "pasos": {
+    "encuentro": {
+     "verbo": "encontrarse_en",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "param": 1
+      },
+      {
+       "param": 2
+      },
+      7.95
+     ]
+    },
+    "van": {
+     "verbo": "acompañar",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "param": 1
+      },
+      {
+       "c": "cmp",
+       "camino": [
+        "mundo",
+        {
+         "param": 0
+        },
+        "lugar"
+       ],
+       "op": "=",
+       "valor": "escuela"
+      }
+     ]
+    },
+    "clase": {
+     "verbo": "quedarse",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "c": "cmp",
+       "camino": [
+        "tiempo",
+        "hora"
+       ],
+       "op": ">=",
+       "valor": 15.5
+      }
+     ]
+    },
+    "vuelve": {
+     "verbo": "ir_a",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "param": 3
       }
      ]
     }
@@ -2075,6 +2654,7 @@
     "q",
     "casa"
    ],
+   "icono": "⛪",
    "pasos": {
     "va": {
      "verbo": "ir_a",
@@ -2121,6 +2701,7 @@
     "q",
     "casa"
    ],
+   "icono": "☕",
    "pasos": {
     "va": {
      "verbo": "ir_a",
@@ -2707,6 +3288,18 @@
             ],
             "ventana": "hoy"
            }
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             "ana",
+             "barrer"
+            ],
+            "ventana": "hoy"
+           }
           }
          ]
         },
@@ -2967,26 +3560,342 @@
          "c": "y",
          "de": [
           {
-           "c": "cmp",
-           "camino": [
-            "tiempo",
-            "hora"
-           ],
-           "op": ">=",
-           "valor": 6
+           "c": "o",
+           "de": [
+            {
+             "c": "y",
+             "de": [
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": ">=",
+               "valor": 6
+              },
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": "<",
+               "valor": 12
+              }
+             ]
+            },
+            {
+             "c": "y",
+             "de": [
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": ">=",
+               "valor": 13
+              },
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": "<",
+               "valor": 18
+              }
+             ]
+            }
+           ]
           },
           {
-           "c": "cmp",
-           "camino": [
-            "tiempo",
-            "hora"
-           ],
-           "op": "<",
-           "valor": 12
+           "c": "no",
+           "de": {
+            "c": "f",
+            "f": "ve",
+            "args": [
+             {
+              "param": 0
+             },
+             "ana"
+            ]
+           }
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "recado",
+            "quien": "ana",
+            "verbo": "recoger_huevos"
+           }
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "desde",
+            "camino": [
+             "hizo_t",
+             {
+              "param": 0
+             },
+             "dar_recado"
+            ],
+            "op": "<",
+            "valor": "6h",
+            "min": true
+           }
           }
          ]
         },
         "prioridad": 3
+       },
+       {
+        "hace": {
+         "verbo": "dar_recado",
+         "args": [
+          {
+           "param": 0
+          },
+          "ana",
+          {
+           "verbo": "recoger_huevos",
+           "args": [
+            "ana"
+           ]
+          },
+          "12h"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "cmp",
+           "camino": [
+            "cosas",
+            "gallinero",
+            "huevos"
+           ],
+           "op": ">",
+           "valor": 0
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "desde",
+            "camino": [
+             "hizo_t",
+             {
+              "param": 0
+             },
+             "dar_recado"
+            ],
+            "op": "<",
+            "valor": "2h",
+            "min": true
+           }
+          }
+         ]
+        },
+        "prioridad": 4
+       },
+       {
+        "hace": {
+         "verbo": "dar_recado",
+         "args": [
+          {
+           "param": 0
+          },
+          "ana",
+          {
+           "verbo": "barrer",
+           "args": [
+            "ana"
+           ]
+          },
+          "12h"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "cmp",
+           "camino": [
+            "tiempo",
+            "semana"
+           ],
+           "op": "=",
+           "valor": "sabado"
+          },
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 6
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 12
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "barrer"
+            ],
+            "ventana": "hoy"
+           }
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "desde",
+            "camino": [
+             "hizo_t",
+             {
+              "param": 0
+             },
+             "dar_recado"
+            ],
+            "op": "<",
+            "valor": "2h",
+            "min": true
+           }
+          }
+         ]
+        },
+        "prioridad": 4
+       },
+       {
+        "hace": {
+         "verbo": "dar_recado",
+         "args": [
+          {
+           "param": 0
+          },
+          "matthew",
+          {
+           "verbo": "entrar_lena",
+           "args": [
+            "matthew"
+           ]
+          },
+          "2h"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "cmp",
+           "camino": [
+            "cosas",
+            "cocina",
+            "lena"
+           ],
+           "op": "<",
+           "valor": 3
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "desde",
+            "camino": [
+             "hizo_t",
+             {
+              "param": 0
+             },
+             "dar_recado"
+            ],
+            "op": "<",
+            "valor": "1h",
+            "min": true
+           }
+          }
+         ]
+        },
+        "prioridad": 4
+       },
+       {
+        "hace": {
+         "verbo": "dar_recado",
+         "args": [
+          {
+           "param": 0
+          },
+          "matthew",
+          {
+           "verbo": "partir_lena",
+           "args": [
+            "matthew"
+           ]
+          },
+          "4h"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "cmp",
+           "camino": [
+            "cosas",
+            "granero",
+            "lena"
+           ],
+           "op": "<",
+           "valor": 2
+          },
+          {
+           "c": "cmp",
+           "camino": [
+            "cosas",
+            "cocina",
+            "lena"
+           ],
+           "op": "<",
+           "valor": 3
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "desde",
+            "camino": [
+             "hizo_t",
+             {
+              "param": 0
+             },
+             "dar_recado"
+            ],
+            "op": "<",
+            "valor": "1h",
+            "min": true
+           }
+          }
+         ]
+        },
+        "prioridad": 4
        },
        {
         "hace": {
@@ -3832,6 +4741,40 @@
          ]
         },
         "prioridad": 6
+       },
+       {
+        "hace": {
+         "verbo": "hacer_recado",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "cmp",
+           "camino": [
+            "tiempo",
+            "hora"
+           ],
+           "op": ">=",
+           "valor": 6
+          },
+          {
+           "c": "cmp",
+           "camino": [
+            "tiempo",
+            "hora"
+           ],
+           "op": "<",
+           "valor": 20
+          }
+         ]
+        },
+        "prioridad": 4
        },
        {
         "hace": {
@@ -4721,7 +5664,7 @@
               "hora"
              ],
              "op": ">=",
-             "valor": 7.75
+             "valor": 7.85
             },
             {
              "c": "cmp",
@@ -4747,6 +5690,125 @@
             ],
             "ventana": "hoy"
            }
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "ir_a_clases_con"
+            ],
+            "ventana": "hoy"
+           }
+          }
+         ]
+        },
+        "prioridad": 7
+       },
+       {
+        "hace": {
+         "verbo": "ir_a_clases_con",
+         "args": [
+          {
+           "param": 0
+          },
+          "diana",
+          "arbustos",
+          "tejas_verdes"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "no",
+           "de": {
+            "c": "cmp",
+            "camino": [
+             "tiempo",
+             "semana"
+            ],
+            "op": "=",
+            "valor": "domingo"
+           }
+          },
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 7.6
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 7.85
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "ir_a_clases"
+            ],
+            "ventana": "hoy"
+           }
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "ir_a_clases_con"
+            ],
+            "ventana": "hoy"
+           }
+          },
+          {
+           "c": "o",
+           "de": [
+            {
+             "c": "no",
+             "de": {
+              "c": "f",
+              "f": "ve",
+              "args": [
+               {
+                "param": 0
+               },
+               "diana"
+              ]
+             }
+            },
+            {
+             "c": "haciendo",
+             "quien": "diana",
+             "verbo": "ir_a_clases_por"
+            }
+           ]
           }
          ]
         },
@@ -5139,6 +6201,41 @@
        },
        {
         "hace": {
+         "verbo": "hacer_recado",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "cmp",
+           "camino": [
+            "tiempo",
+            "hora"
+           ],
+           "op": ">=",
+           "valor": 6.5
+          },
+          {
+           "c": "cmp",
+           "camino": [
+            "tiempo",
+            "hora"
+           ],
+           "op": "<",
+           "valor": 20.5
+          }
+         ]
+        },
+        "prioridad": 1,
+        "peso": 4
+       },
+       {
+        "hace": {
          "verbo": "entrar_lena",
          "args": [
           {
@@ -5477,7 +6574,7 @@
             "hora"
            ],
            "op": "<",
-           "valor": 7
+           "valor": 6.5
           }
          ]
         },
@@ -5627,7 +6724,7 @@
               "hora"
              ],
              "op": ">=",
-             "valor": 7.75
+             "valor": 7.4
             },
             {
              "c": "cmp",
@@ -5653,10 +6750,107 @@
             ],
             "ventana": "hoy"
            }
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "ir_a_clases_por"
+            ],
+            "ventana": "hoy"
+           }
           }
          ]
         },
         "prioridad": 7
+       },
+       {
+        "hace": {
+         "verbo": "ir_a_clases_por",
+         "args": [
+          {
+           "param": 0
+          },
+          "ana",
+          "arbustos",
+          "cuesta_del_huerto"
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "no",
+           "de": {
+            "c": "cmp",
+            "camino": [
+             "tiempo",
+             "semana"
+            ],
+            "op": "=",
+            "valor": "domingo"
+           }
+          },
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 7.4
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 7.9
+            }
+           ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "ir_a_clases_por"
+            ],
+            "ventana": "hoy"
+           }
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "existe",
+            "camino": [
+             "hizo",
+             {
+              "param": 0
+             },
+             "ir_a_clases"
+            ],
+            "ventana": "hoy"
+           }
+          }
+         ]
+        },
+        "prioridad": 7,
+        "peso": 3
        },
        {
         "hace": {

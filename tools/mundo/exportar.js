@@ -12,7 +12,7 @@ const EXE = fs.existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chrom
 // (lo que se mide adentro del juego: cada lugar del lenguaje es uno o más puntos —del mapa de Avonlea, o de un camino
 // largo, en su «s»—; entre dos lugares, el camino más corto entre sus puntos)
 const MEDIR = `(() => {
-  const L = LENGUAJE.lugares, V = { pie: CH.marilla?.speed?.walk || 38, ana: SPEEDS.ana, calesa: CARRO }, mapa = (x, y) => ({ mapa: [Math.round(x), Math.round(y)] });
+  const L = LENGUAJE.lugares, V = { pie: CH.marilla?.speed?.walk || 38, ...Object.fromEntries(Object.entries(SPEEDS).filter(([k]) => LENGUAJE.personas[k])), calesa: CARRO },   /* (a pie; los que tienen su paso en el juego —SPEEDS—, el suyo; en calesa) */ mapa = (x, y) => ({ mapa: [Math.round(x), Math.round(y)] });
   const tramoDe = (c, f) => enCamino(c, () => { const T = ROAD_TRAMOS.find(f), i = ROAD_TRAMOS.indexOf(T); return (T.s + (ROAD_TRAMOS[i + 1]?.s ?? 1)) / 2; });
   const blanco = ROADS.blanco[Math.floor(ROADS.blanco.length / 2)];
   // LOS LUGARES DEL MUNDO: una sola lista. Los del planificador (sus claves: el granero, la tienda, «h:rl» —la casa de la
@@ -37,60 +37,45 @@ const MEDIR = `(() => {
   lugar('orilla', 'la orilla del mar', [mapa(PLACES.playa[1], PLACES.playa[2]), { camino: 'costa', s: WP_CAMINO.playa_ws[1], adentro: 2 }], { vista: 'orilla' });   // (la de Avonlea, junto al faro; y bajar a la arena por el camino de la costa)
   // (cada lugar de las historias, en el mundo: el mismo, o el del planificador que es ese lugar)
   const alias = { estacion_bright_river: 'h:br', estanque_barry: 'lago', hotel_white_sands: 'hotel_ws', playa: 'playa_ws', cuesta_del_huerto: 'h:os' };
-  // EL TABLERO DE TEJAS VERDES: los alrededores de la casa, en cuadrantes del tamaño en que dos personas se ponen a
-  // conversar (en el juego, afuera, están juntas a menos de 120 px). Cada cuadrante es un lugar del mundo, de una zona
-  // —el corral, el granero, el patio…—: la del corral, los que caen adentro de su cerco; los demás, la de la zona más
-  // cerca. El nombre de una zona (el corral) es su cuadrante principal, el de su punto en el mapa. La casa, por dentro
-  // (la cocina, las piezas), es un mundo aparte: se entra por la puerta. Algunos muebles de afuera tienen su cuadrante
-  // (la cerca del corral no es donde están las vacas): quien hace algo junto a ellos, va ahí.
-  const TB = { x0: 1220, y0: 4900, cols: 8, filas: 4, c: 120 };
-  const celdaDe = (x, y) => [Math.floor((x - TB.x0) / TB.c), Math.floor((y - TB.y0) / TB.c)], cid = ([i, j]) => 'c:' + i + ',' + j;
-  const ZONAS = ['granero', 'gallinero', 'corral', 'arbustos', 'tejas_verdes', 'huerta'], ancla = {};
-  for (const z of ZONAS) { ancla[z] = celdaDe(...P[z][0].mapa); const otra = ZONAS.find(y => y !== z && ancla[y] && cid(ancla[y]) === cid(ancla[z])); if (otra) throw new Error('el tablero: ' + z + ' y ' + otra + ' caen en el mismo cuadrante'); }
-  const nombreZona = Object.fromEntries(ZONAS.map(z => [z, INFO[z].nombre])), planZona = Object.fromEntries(ZONAS.map(z => [z, INFO[z].plan]));
-  for (const z of ZONAS) { delete P[z]; delete INFO[z]; }
-  const cubre = (A, i, j) => { const x = TB.x0 + i * TB.c, y = TB.y0 + j * TB.c, w = Math.max(0, Math.min(x + TB.c, A.x + A.w) - Math.max(x, A.x)), h = Math.max(0, Math.min(y + TB.c, A.y + A.h) - Math.max(y, A.y)); return w * h / (TB.c * TB.c); };   // (cuánto del cuadrante cae adentro)
-  const EDIFICIOS = [{ x: GG.x - GG.w / 2, y: GG.y - 130, w: GG.w, h: 130 }, { x: BARN.x - BARN.w / 2, y: BARN.y - 110, w: BARN.w, h: 110 }];
-  const zonaDe = (i, j) => { if (cubre(AREAS.corral, i, j) > .25) return 'corral';
-    let m = null, d0 = Infinity; for (const z of ZONAS) if (z !== 'corral') {   // (el corral: solo lo que cubre su cerco)
-    const d = Math.hypot(ancla[z][0] - i, ancla[z][1] - j); if (d < d0) { d0 = d; m = z; } } return m; };
-  for (let j = 0; j < TB.filas; j++) for (let i = 0; i < TB.cols; i++) {
-    const z = zonaDe(i, j), id = cid([i, j]);
-    const bajo = EDIFICIOS.some(A => cubre(A, i, j) > .3);   // (debajo de la casa o del granero: no se pasa, se rodea)
-    P[id] = [{ ...mapa(TB.x0 + (i + .5) * TB.c, TB.y0 + (j + .5) * TB.c), celda: 1 }]; INFO[id] = { nombre: nombreZona[z], ...(planZona[z] ? { plan: planZona[z] } : {}), vista: z, celda: [i, j], zona: z, ...(bajo ? { edificio: true } : {}) };
+  // LOS TABLEROS (docs/lenguaje/comun/mundo.ts: tableros y planos): alrededor de una casa, cuadrantes del tamaño en que
+  // dos se ponen a conversar (en el juego, afuera, están juntos a menos de 120 px: ese es el lado). Cada cuadrante es un
+  // lugar del mundo, de una zona: la que tiene un cerco en el juego (AREAS), lo que cubre; los demás, la zona más cerca.
+  // El nombre de la zona es su cuadrante principal. Debajo de un edificio del juego, no se pasa. La casa por dentro es su
+  // plano. Aquí no se nombra ningún lugar: todo sale del lenguaje y del mapa del juego.
+  const LADO = 120, TBs = LENGUAJE.tableros || {}, PLs = LENGUAJE.planos || {};
+  if (Object.keys(TBs).length > 1) throw new Error('por ahora, un tablero');
+  let tablero = null;
+  for (const [casa, Td] of Object.entries(TBs)) {
+    const TB = { x0: Td.origen[0], y0: Td.origen[1], cols: Td.cols, filas: Td.filas, c: LADO };
+    const celdaDe = (x, y) => [Math.floor((x - TB.x0) / TB.c), Math.floor((y - TB.y0) / TB.c)], cid = ([i, j]) => 'c:' + i + ',' + j;
+    const ZONAS = Td.zonas, ancla = {}, punto = z => P[alias[z] || z]?.[0]?.mapa;
+    for (const z of ZONAS) { if (!punto(z)) throw new Error('el tablero: «' + z + '» no está en el mapa'); ancla[z] = celdaDe(...punto(z)); const otra = ZONAS.find(y => y !== z && ancla[y] && cid(ancla[y]) === cid(ancla[z])); if (otra) throw new Error('el tablero: ' + z + ' y ' + otra + ' caen en el mismo cuadrante'); }
+    const nombreZona = Object.fromEntries(ZONAS.map(z => [z, L[z]?.nombre || INFO[z].nombre])), planZona = Object.fromEntries(ZONAS.map(z => [z, INFO[z]?.plan]));
+    for (const z of ZONAS) { delete P[z]; delete INFO[z]; }
+    const enTB = ([x, y], m = 60) => x >= TB.x0 - m && x <= TB.x0 + TB.cols * TB.c + m && y >= TB.y0 - m && y <= TB.y0 + TB.filas * TB.c + m;
+    const cubre = (A, i, j) => { const x = TB.x0 + i * TB.c, y = TB.y0 + j * TB.c, w = Math.max(0, Math.min(x + TB.c, A.x + A.w) - Math.max(x, A.x)), h = Math.max(0, Math.min(y + TB.c, A.y + A.h) - Math.max(y, A.y)); return w * h / (TB.c * TB.c); };   // (cuánto del cuadrante cae adentro)
+    // (lo que hay en el mapa del juego, en el tablero: las casas, el granero —los edificios—, los cercos, los caminos)
+    const EDIFICIOS = [...Object.entries(HOUSES).map(([k, h]) => ({ que: 'casa', nombre: h.name, x: h.at.x - h.at.w / 2, y: h.at.y - 130, w: h.at.w, h: 130, puerta: DOOR[k] })),
+      ...[BARN].map(b => ({ que: 'granero', nombre: 'el granero', x: b.x - b.w / 2, y: b.y - 110, w: b.w, h: 110 }))].filter(o => enTB([o.x + o.w / 2, o.y + o.h]));
+    const CERCOS = Object.entries(AREAS).filter(([, A]) => enTB([A.x + A.w / 2, A.y + A.h / 2])).map(([k, A]) => ({ que: 'cerco', zona: k, nombre: A.name, x: A.x, y: A.y, w: A.w, h: A.h }));
+    const zonaDe = (i, j) => { const c = CERCOS.find(A => ZONAS.includes(A.zona) && cubre(A, i, j) > .25); if (c) return c.zona;
+      let m = null, d0 = Infinity; for (const z of ZONAS) if (!CERCOS.some(A => A.zona === z)) { const d = Math.hypot(ancla[z][0] - i, ancla[z][1] - j); if (d < d0) { d0 = d; m = z; } } return m; };
+    for (let j = 0; j < TB.filas; j++) for (let i = 0; i < TB.cols; i++) {
+      const z = zonaDe(i, j), id = cid([i, j]), bajo = EDIFICIOS.some(A => cubre(A, i, j) > .3);   // (debajo de un edificio: no se pasa, se rodea)
+      P[id] = [{ ...mapa(TB.x0 + (i + .5) * TB.c, TB.y0 + (j + .5) * TB.c), celda: 1 }]; INFO[id] = { nombre: nombreZona[z], ...(planZona[z] ? { plan: planZona[z] } : {}), vista: z, celda: [i, j], zona: z, ...(bajo ? { edificio: true } : {}) };
+    }
+    for (const z of ZONAS) alias[z] = cid(ancla[z]);
+    // (los muebles con su cuadrante —docs/lenguaje: mueblesDe, «en»—: contando desde el principal de su zona)
+    const muebles = {};
+    for (const [z, ms] of Object.entries(LENGUAJE.muebles || {})) if (ZONAS.includes(z)) for (const [m, d] of Object.entries(ms)) if (d && typeof d === 'object' && d.en) {
+      const c = cid([ancla[z][0] + d.en[0], ancla[z][1] + d.en[1]]); if (INFO[c]?.zona !== z) throw new Error('el tablero: ' + z + '.' + m + ' cae fuera de su zona (' + c + ')'); muebles[z + '.' + m] = c; }
+    // (el plano de la casa, como lo usa el mundo: cada pieza con su rectángulo; la puerta de afuera, a su cuadrante)
+    const PLc = PLs[casa], plano = PLc && { pisos: PLc.pisos, piezas: Object.fromEntries(Object.entries(PLc.piezas).map(([k, p]) => [k, { piso: p.piso, x: p.en[0], y: p.en[1], w: p.en[2], h: p.en[3] }])),
+      puertas: PLc.puertas, afuera: Object.fromEntries(Object.entries(PLc.afuera).map(([k, o]) => [k, { celda: alias[o.a] || o.a, en: o.en }])) };
+    if (plano) for (const k of Object.keys(plano.piezas)) if (!INFO[k]) throw new Error('el plano: «' + k + '» no es un lugar del mundo');
+    tablero = { ...TB, casa, plano, zonas: Object.fromEntries(ZONAS.map(z => [z, { nombre: nombreZona[z], ancla: cid(ancla[z]), ...(L[z]?.icono ? { icono: L[z].icono } : {}) }])), muebles,
+      cosas: [...EDIFICIOS, ...CERCOS], caminos: paths.map(r => r.filter(p => enTB(p)).map(p => p.map(Math.round))).filter(r => r.length > 1) };   // (los caminos y los senderos a las puertas)
   }
-  for (const z of ZONAS) alias[z] = cid(ancla[z]);
-  const muebles = Object.fromEntries(Object.entries({ 'corral.vacas': WP.corral, 'corral.cerca': [AREAS.corral.x + AREAS.corral.w / 2, AREAS.corral.y + AREAS.corral.h - 10], 'tejas_verdes.tina': [GG.x + 130, GG.y + 80], 'tejas_verdes.porche': [GG.x, GG.y + 40] }).map(([k, p]) => [k, cid(celdaDe(...p))]));
-  for (const [k, c] of Object.entries(muebles)) if (INFO[c].zona !== k.split('.')[0]) throw new Error('el tablero: ' + k + ' cae fuera de su zona (' + c + ')');
-  // (para dibujarlo: lo que hay en el tablero, en el mapa del juego —la casa, el granero, el cerco del corral, los caminos—)
-  const enTB = ([x, y]) => x >= TB.x0 - 60 && x <= TB.x0 + TB.cols * TB.c + 60 && y >= TB.y0 - 60 && y <= TB.y0 + TB.filas * TB.c + 60;
-  // EL PLANO DE LA CASA, por dentro: sus piezas (en px, como el mapa: una pieza es del tamaño de una conversación, o
-  // poco más) y sus puertas. Abajo, la cocina —el corazón de la casa: la puerta de afuera da al patio—, la sala, la
-  // despensa y la escalera; arriba, el pasillo y las piezas (la de Ana, la buhardilla del este). Quien va de una pieza a
-  // otra pasa por las de en medio, como afuera por los cuadrantes.
-  const plano = {
-    pisos: ['abajo', 'arriba'],
-    piezas: {
-      despensa: { piso: 0, x: 0, y: 0, w: 110, h: 80 }, escalera: { piso: 0, x: 110, y: 0, w: 90, h: 80 },
-      cocina: { piso: 0, x: 0, y: 80, w: 250, h: 160 }, sala: { piso: 0, x: 250, y: 0, w: 160, h: 240 },
-      pieza_marilla: { piso: 1, x: 0, y: 0, w: 140, h: 110 }, pieza_matthew: { piso: 1, x: 0, y: 110, w: 140, h: 130 },
-      pasillo: { piso: 1, x: 140, y: 0, w: 90, h: 240 }, pieza: { piso: 1, x: 230, y: 0, w: 160, h: 150 },
-    },
-    // (cada puerta: entre qué piezas, y dónde está —para dibujarla—; la escalera sube al pasillo)
-    puertas: [['cocina', 'despensa', [55, 80]], ['cocina', 'escalera', [155, 80]], ['cocina', 'sala', [250, 160]], ['escalera', 'pasillo', [185, 20]],
-      ['pasillo', 'pieza_marilla', [140, 55]], ['pasillo', 'pieza_matthew', [140, 175]], ['pasillo', 'pieza', [230, 75]]],
-    afuera: { cocina: { celda: alias.tejas_verdes, en: [125, 240] } },   // (la puerta de la cocina, al patio)
-  };
-  for (const k of Object.keys(plano.piezas)) if (!INFO[k]) throw new Error('el plano: «' + k + '» no es un lugar del mundo');
-  const tablero = { ...TB, plano, zonas: Object.fromEntries(ZONAS.map(z => [z, { nombre: nombreZona[z], ancla: cid(ancla[z]) }])), muebles,
-    cosas: [{ que: 'casa', nombre: 'la casa', x: GG.x - GG.w / 2, y: GG.y - 130, w: GG.w, h: 130, puerta: [GG.x, GG.y] },
-      { que: 'granero', nombre: 'el granero', x: BARN.x - BARN.w / 2, y: BARN.y - 110, w: BARN.w, h: 110 },
-      { que: 'cerco', nombre: 'el corral', x: AREAS.corral.x, y: AREAS.corral.y, w: AREAS.corral.w, h: AREAS.corral.h },
-      { que: 'gallinero', nombre: 'el gallinero', x: WP.gallinero[0] - 30, y: WP.gallinero[1] - 40, w: 60, h: 40 },
-      { que: 'gallinas', x: WP.gallinero[0] + 20, y: WP.gallinero[1] + 10 }, { que: 'vacas', x: WP.corral[0], y: WP.corral[1] },
-      { que: 'huerta', nombre: 'la huerta', x: WP.huerta[0] - 70, y: WP.huerta[1] - 40, w: 140, h: 80 },
-      { que: 'abedules', x: WP.arbustos[0], y: WP.arbustos[1] }],
-    caminos: Object.values(ROADS).map(r => r.filter(enTB).map(p => p.map(Math.round))).filter(r => r.length > 1).concat([[[GG.x - 60, GG.y + 70], [BARN.x + 20, BARN.y + 30]].map(p => p.map(Math.round))]) };
   for (const l of Object.keys(L)) if (!P[alias[l] || l]) throw new Error('el exportador no sabe dónde está «' + l + '» (agrégalo a MEDIR)');
   for (const [l, w] of Object.entries(alias)) INFO[w].vista = l;
   for (const l of Object.keys(L)) if (INFO[l]) INFO[l].vista = l;   // (un lugar que es de las historias, se llama así)
@@ -112,7 +97,7 @@ const MEDIR = `(() => {
   const ids = Object.keys(P), M = {};
   for (const a of ids) { M[a] = {}; for (const b of ids) if (a !== b) {
     const mejor = v => Math.min(...P[a].flatMap(p => P[b].map(q => minutos(p, q, v))));
-    M[a][b] = { pie: Math.round(mejor(V.pie)), ana: Math.round(mejor(V.ana)), calesa: Math.round(mejor(null)) };
+    M[a][b] = Object.fromEntries(Object.keys(V).map(k => [k, Math.round(mejor(k === 'calesa' ? null : V[k]))]));   // (a pie, al paso de cada uno que tiene el suyo, y en calesa)
   } }
   // (los caminos largos: cuánto duran, y sus tramos —lo que es un lugar del lenguaje—)
   const caminos = Object.fromEntries(Object.entries(CAMINOS).map(([c, C]) => [c, { nombre: C.nombre, fin: C.fin_nombre, minutos: C.min, millas: C.miles + 1, tramos: C.tramos.map(t => ({ s: t.s, nombre: t.name, ...(t.lugar ? { lugar: t.lugar } : {}) })) }]));
@@ -137,5 +122,5 @@ const MEDIR = `(() => {
   fs.writeFileSync(SALIDA, JSON.stringify(G, null, 1) + '\n');
   const n = Object.keys(G.minutos).length;
   console.log(`→ ${path.relative(RAIZ, SALIDA)} · ${n} lugares, ${n * (n - 1)} distancias · huella ${G.huella}`);
-  const tv = G.minutos[G.alias.tejas_verdes]; console.log(`  ejemplos: tejas_verdes → hotel_ws, en calesa ${tv.hotel_ws.calesa} min; → h:br ${tv['h:br'].calesa} min; a la escuela a pie ${tv.escuela.pie} min; al granero ${G.minutos.cocina[G.alias.granero].pie} min · el tablero: ${G.tablero.cols}×${G.tablero.filas} cuadrantes`);
+  console.log(`  ${Object.keys(G.lugares).length} lugares · ${G.tablero ? `el tablero de ${G.tablero.casa}: ${G.tablero.cols}×${G.tablero.filas} cuadrantes, ${G.tablero.plano ? Object.keys(G.tablero.plano.piezas).length + ' piezas por dentro' : 'sin plano'}` : 'sin tablero'} · a la escuela, a pie desde ${G.alias.tejas_verdes}: ${G.minutos[G.alias.tejas_verdes]?.escuela?.pie} min`);
 })();

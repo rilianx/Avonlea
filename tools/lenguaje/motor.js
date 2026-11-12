@@ -129,6 +129,8 @@
     // correr(T) avanza la tarea hasta que tenga que esperar, y devuelve qué espera: {min} —un rato—, {hasta} —que se
     // cumpla algo—, {pregunta} —la respuesta de Ana—, {accion} —que el mundo termine algo—; o {fin}, con lo que valió.
     // Un marco devuelve {vale} (terminó), {espera}, o nada (empujó un marco, o cambió de fase: se sigue).
+    // (la operación de un primitivo —tomar, esperar, dar un recado…—: la declara el verbo, no su nombre)
+    const opDe = ll => D.verbos[ll.verbo]?.opera;
     const def = ll => { const d = D.verbos[ll.verbo]; if (!d) throw new Error('verbo desconocido: ' + ll.verbo); return sub(d, { params: ll.args }); };
     const marco = (ll, ctx) => ({ k: 'verbo', ll, ctx, fase: 0 });
     const hijo = (padre, label) => ({ padre, label, encargo: padre.encargo, ruta: unir(padre.ruta, label) });
@@ -167,7 +169,7 @@
         const ll = F.ll, d = def(ll);
         if (F.fase === 4) { if (!ret) return { vale: false }; F.fase = 0; }   // (fue hasta donde se hace)
         if (F.fase === 7) return { vale: ret };   // (hizo el recado, o no pudo)
-        if (F.fase === 0 && ll.verbo === 'acompañar') {   // (va con la otra: la sigue; lo que la otra hace ahora es el porqué)
+        if (F.fase === 0 && opDe(ll) === 'acompañar') {   // (va con la otra: la sigue; lo que la otra hace ahora es el porqué)
           const [q, otra] = ll.args;
           if (!cumple(d.pide)) { nota(`✘ acompañar: ${nombre(q)} no está con ${nombre(otra)}`); return { vale: false }; }
           F.prop = proposito(otra); F.t0 = t; F.fase = 8; aplicar({ e: 'deja', camino: ['mundo', q, 'sigue'], valor: otra });
@@ -181,12 +183,12 @@
           if (!cumple(d.pide)) return fin(false, 'se separaron');
           return { espera: { min: 1 } };
         }
-        if (F.fase === 0 && ll.verbo === 'hacer_recado') { const r = recadoPara(ll.args[0]); if (!r) return { vale: false }; F.fase = 7; T.pila.push(marco(r.hace, hijo(F.inst, 'recado'))); return; }
+        if (F.fase === 0 && opDe(ll) === 'hacer_recado') { const r = recadoPara(ll.args[0]); if (!r) return { vale: false }; F.fase = 7; T.pila.push(marco(r.hace, hijo(F.inst, 'recado'))); return; }
         if (F.fase === 0) {
           const q = ll.args[0];
           if (d.donde && !T.ya && !F.fue && !estaEn(q, d.donde)) { F.fue = true; F.fase = 4; T.pila.push(marco({ verbo: 'ir_a', args: [q, d.donde] }, hijo(F.inst, 'va'))); return; }   // (si no está donde se hace, primero va)
-          if (ll.verbo === 'esperar') { F.fase = 2; return cumple(d.pide) ? undefined : { espera: { hasta: d.pide } }; }
-          if (ll.verbo === 'quedarse') { F.fase = 5; F.lugar = lugarDe(q); return; }
+          if (opDe(ll) === 'esperar') { F.fase = 2; return cumple(d.pide) ? undefined : { espera: { hasta: d.pide } }; }
+          if (opDe(ll) === 'quedarse') { F.fase = 5; F.lugar = lugarDe(q); return; }
           if (d.deja && d.deja.length && d.deja.every(yaEs)) return { vale: true };   // (lo que deja ya es cierto: se salta)
           if (d.pide && !cumple(d.pide)) { nota(`✘ ${ll.verbo}: no se puede (${nombre(ll.args[0])})`); return { vale: false }; }
           if (lleno(q, d)) { nota(`✘ ${ll.verbo}: ${d.junto_a} está ocupado (${nombre(q)})`); return { vale: false }; }
@@ -210,15 +212,15 @@
           return cumple(d.pide) ? { vale: true } : { espera: { hasta: { c: 'o', de: [d.pide, { c: 'cmp', camino: ['mundo', ll.args[0], 'lugar'], op: '!=', valor: F.lugar }] } } };
         }
         for (const e of d.deja || []) aplicar(e);
-        if (ll.verbo === 'tomar' || ll.verbo === 'poner') mover(ll);   // (la cosa va del lugar a quien, o de quien al lugar)
-        if (ll.verbo === 'dar_recado') darRecado(ll);
+        if (opDe(ll) === 'tomar' || opDe(ll) === 'poner') mover(ll);   // (la cosa va del lugar a quien, o de quien al lugar)
+        if (opDe(ll) === 'dar_recado') darRecado(ll);
         return { vale: true };
       },
       // (ir hasta un lugar: el mundo busca el camino, y avisa al llegar)
       mapa(F, T){
         const ll = F.ll;
         if (F.fase === 0) {
-          if (ll.verbo === 'correr_a') set(['mundo', ll.args[0], 'en'], 'nada');
+          if (D.verbos[ll.verbo].a_pie) set(['mundo', ll.args[0], 'en'], 'nada');   // (correr: se baja de lo que va)
           decir(ll);
           const c = ll.args[1]?.camino, hacia = c && c[0] === 'mundo' && c[2] === 'lugar' ? c[1] : null;   // (adonde está alguien: el mundo sabe más fino dónde —en qué cuadrante—)
           F.acc = { quien: ll.args[0], verbo: ll.verbo, a: val(ll.args[1]), mapa: true, ya: !!T.ya, ...(hacia ? { hacia } : {}) };
@@ -367,7 +369,7 @@
     }
     function dejar(F){ if (F.dejada) return; F.dejada = true; for (const e of def(F.ll).si_se_deja || []) aplicar(e); }
     const pasoMarco = (p, ctx) => (p.elige ? { k: 'elegir', p, ctx, fase: 0 } : p.repite ? { k: 'repetir', p, ctx, fase: 0 } : marco(p, ctx));
-    const puede = ll => { if (ll.elige || ll.repite) return true; if (ll.verbo === 'hacer_recado') return !!recadoPara(ll.args[0]); if (ll.verbo === 'dar_recado') { const p = def(ll.args[2]).pide; if (p && !cumple(p)) return false; }   /* (no se pide lo que no se puede: entrar leña, si no hay) */    const d = def(ll); if (d.tipo === 'primitivo' && (lleno(ll.args[0], d) || faltaCosa(ll.args[0], d, ll))) return false; return !d.pide || d.tipo === 'primitivo' && (ll.verbo === 'esperar' || ll.verbo === 'quedarse') || cumple(d.pide); };
+    const puede = ll => { if (ll.elige || ll.repite) return true; if (opDe(ll) === 'hacer_recado') return !!recadoPara(ll.args[0]); if (opDe(ll) === 'dar_recado') { const p = def(ll.args[2]).pide; if (p && !cumple(p)) return false; }   /* (no se pide lo que no se puede: entrar leña, si no hay) */    const d = def(ll); if (d.tipo === 'primitivo' && (lleno(ll.args[0], d) || faltaCosa(ll.args[0], d, ll))) return false; return !d.pide || d.tipo === 'primitivo' && (opDe(ll) === 'esperar' || opDe(ll) === 'quedarse') || cumple(d.pide); };
     // (los recados de alguien: los que le dieron —dar_recado—, hasta que los hace, vencen, o ya no hacen falta: lo que
     // pide su verbo ya no se cumple —no quedan huevos en el gallinero—)
     const recadosDe = q => S[k(['recados', q])] || [];
@@ -397,19 +399,19 @@
       nota(`✔ ${nombre(q)} hizo el recado de ${nombre(r.de)} (${ll.verbo.replace(/_/g, ' ')})`, 'momento');
     }
     // (junto a un mueble: ¿ya están todos los que caben —el fregadero, de a uno—? Los muebles y cuántos caben: mueblesDe)
-    const lleno = (q, d) => { const cap = d.junto_a && d.donde ? D.muebles?.[d.donde]?.[d.junto_a] : null; if (cap == null) return false;
+    const lleno = (q, d) => { const m = d.junto_a && d.donde ? D.muebles?.[d.donde]?.[d.junto_a] : null, cap = m && typeof m === 'object' ? m.caben : m; if (cap == null) return false;
       return tareas.filter(U => !U.fin && U.quien !== q && U.pila.some(G => G.k === 'primitivo' && G.fase === 1 && G.acc && G.acc.junto_a === d.junto_a && G.acc.donde === d.donde)).length >= cap; };
     // (lo que usa, si es una cosa: tiene que haber una a mano —la lleva, o está donde se hace—; tomar y poner, lo que mueven)
     function faltaCosa(q, d, ll){
       const aqui = d.donde || lugarDe(q), hay = x => get(['cosas', q, x]) + get(['cosas', aqui, x]);
-      if (ll.verbo === 'tomar' && get(['cosas', lugarDe(q), ll.args[1]]) < 1) return ll.args[1];
-      if (ll.verbo === 'poner' && get(['cosas', q, ll.args[1]]) < 1) return ll.args[1];
+      if (opDe(ll) === 'tomar' && get(['cosas', lugarDe(q), ll.args[1]]) < 1) return ll.args[1];
+      if (opDe(ll) === 'poner' && get(['cosas', q, ll.args[1]]) < 1) return ll.args[1];
       for (const x of d.usa || []) if (D.cosas?.tipos?.[x] && hay(x) < 1) return x;
       return null;
     }
     // (tomar: del lugar a quien, las que haya, hasta n; poner: de quien al lugar)
     function mover(ll){
-      const [q, x, n0] = ll.args, L = lugarDe(q), [de, a] = ll.verbo === 'tomar' ? [L, q] : [q, L], n = Math.min(n0, get(['cosas', de, x]));
+      const [q, x, n0] = ll.args, L = lugarDe(q), [de, a] = opDe(ll) === 'tomar' ? [L, q] : [q, L], n = Math.min(n0, get(['cosas', de, x]));
       if (n > 0) { aplicar({ e: 'suma', camino: ['cosas', de, x], n: -n }); aplicar({ e: 'suma', camino: ['cosas', a, x], n }); }
     }
     // LO QUE PASA SOLO (procesos de las vidas: las gallinas ponen a las seis): una vez al día, a su hora
@@ -654,7 +656,7 @@
     if (guardado) ({ S, registro, tareas, cola, porTras, escena, pregunta, fin, sigId, t, respuestas } = guardado);
     else {
       const ini = Mundo.inicio || {};
-      for (const [x, l] of Object.entries({ ...(ini.lugares || {}), ...(escenario.lugares || {}) })) set(['mundo', x, 'lugar'], l);
+      for (const [x, l] of Object.entries({ ...(ini.lugares || {}), ...((escenario.vidas && D.inicio?.[escenario.vidas]) || {}), ...(escenario.lugares || {}) })) set(['mundo', x, 'lugar'], l);   // (y si hay vidas, donde empieza cada uno: inicioDe)
       for (const [c, v] of Object.entries({ ...(ini.estado || {}), ...(escenario.estado || {}) })) if (v === null) delete S[c]; else set(c.split('.'), v);
       // (las vidas de ese lugar —escenario.vidas: 'tejas_verdes'—: cada uno, su día; y donde duerme cada uno, si el escenario no dice)
       for (const [q, ll] of Object.entries((escenario.vidas && D.vidas?.[escenario.vidas]) || {})) tareas.push({ id: sigId++, pila: [marco(ll, {})], despierta: t, quien: q, vida: ll });

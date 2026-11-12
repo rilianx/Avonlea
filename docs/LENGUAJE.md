@@ -267,6 +267,16 @@ una vida es una receta, y una actividad («ir a clases»: ir, quedarse, volver) 
   otra hasta una hora; se cumple si se ven. Así van Ana y Diana a la escuela, como en el libro: se juntan en el Sendero
   de los Abedules, Diana espera a que Ana vaya con ella, y siguen juntas. Si una no llega, la otra va sola; si Diana
   cambia de planes en el camino, Ana la suelta y sigue sola.
+- **Nada del mundo está escrito en el código: todo se declara.**
+  - **El tablero y el plano** de una casa (`tableros`, `planos` en `comun/mundo.ts`). Del tablero: su esquina en el mapa
+    del juego, cuántos cuadrantes y qué zonas. Del plano: sus piezas en cada piso, sus puertas y por dónde se sale.
+    `tools/mundo/exportar.js` lo mide sobre el mapa del juego, y de ahí saca también lo que hay en el tablero: los
+    edificios (no se pasa por debajo), los cercos (la zona de un cerco es lo que cubre) y los caminos.
+  - **Un mueble de afuera con su cuadrante:** `{ caben: 3, en: [0, 1] }`, contando desde el cuadrante principal de su zona.
+  - **Dónde empieza cada uno** (`inicioDe`, en las vidas), **cómo se ve** (`aspecto`: su color) y **el ícono de cada
+    acción** (`icono`). Los animales son cosas con ícono (`gallinas`, en el gallinero), y se dibujan donde están.
+  - **Las operaciones del motor** (`opera`: `tomar`, `poner`, `esperar`, `quedarse`, `dar_recado`, `hacer_recado`,
+    `acompañar`) se reconocen por lo que declara el verbo, no por su nombre. Un verbo nuevo puede ser cualquiera de ellas.
 - **Retomar lo interrumpido**: lo que se corta a medias guarda lo que le faltaba. La próxima vez que esa persona lo
   hace ese día, le falta solo eso («↩ Matthew retoma partir_lena (le faltan 25 min)»), y al elegir, prefiere retomarlo.
 - **`vida(quien, receta)`**: la vida de cada uno. El motor la corre de fondo si el escenario dice

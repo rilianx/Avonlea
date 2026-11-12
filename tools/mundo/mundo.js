@@ -15,10 +15,10 @@
 // Es datos: se guarda y se carga entero (guardar / Mundo.cargar).
 (function (raiz) {
   const enNode = typeof module !== 'undefined' && !!module.exports;
-  // cómo va alguien: en calesa (si va en un medio), Ana a pie (más ligera), o a pie
-  const modo = (q, en) => (en && en !== 'nada' ? 'calesa' : q === 'ana' ? 'ana' : 'pie');
+  // cómo va alguien: en calesa (si va en un medio), a su paso (si la geografía tiene el suyo: Ana, más ligera), o a pie
 
   function Mundo(G, E = null){
+    const modo = (q, en) => (en && en !== 'nada' ? 'calesa' : G.velocidades[q] ? q : 'pie');
     E = E || { t: 0, personas: {}, medios: { calesa: { lugar: null, listo: 'no' } }, cosas: {}, cariño: {}, ofensas: {}, hechos: {}, vacas: {}, existencias: {}, enfermos: [], estados: {}, cualidades: {}, registro: [] };
     const nota = t => { E.registro.push({ t: E.t, txt: t }); if (E.registro.length > 400) E.registro.splice(0, 100); };
     const lugarId = l => (l == null ? l : G.lugares[l] ? l : G.alias[l] || l);   // (un lugar de las historias, como lo llama el mundo)

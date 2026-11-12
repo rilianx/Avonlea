@@ -53,23 +53,29 @@ aside h3{margin:0 0 6px;font-size:13px;letter-spacing:.04em;text-transform:upper
 const D = /*@DATOS*/null;
 const $ = id => document.getElementById(id), esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const G = window.GEOGRAFIA, QUIENES = Object.keys(D.vidas.tejas_verdes);
-const CAMAS = { ana: 'pieza', marilla: 'pieza_marilla', matthew: 'pieza_matthew', diana: 'cuesta_del_huerto', calesa: 'corral' };
 // el tablero: las casillas (los lugares), en sus zonas
 // EL TABLERO: afuera, alrededor de la casa, los cuadrantes (tools/mundo/geografia.json, «tablero»: cada uno del tamaño en
 // que dos se ponen a conversar; están juntos los que están en el mismo), dibujados un poco traslapados, con lo que hay
 // en el mapa del juego —la casa, el granero, el cerco, las gallinas—. La casa por dentro es aparte; lo lejos, a un lado.
 const TB = G.tablero, PASO = 88, BX = 24, BY = 66, ESC = PASO / TB.c;
 const enTablero = (x, y) => [BX + (x - TB.x0) * ESC, BY + (y - TB.y0) * ESC];
-const COLZONA = { granero: '#e2d3b8', gallinero: '#ecdcae', corral: '#d6e2bf', tejas_verdes: '#e4ecd2', huerta: '#cfe3c4', arbustos: '#d5e4d8' };
+// (cada zona, un tono: de amarillos a verdes, en el orden del tablero)
+const COLZONA = Object.fromEntries(Object.keys(TB.zonas).map((z, k, L) => [z, `hsl(${48 + k * 70 / Math.max(1, L.length - 1)}, 38%, 84%)`]));
 const ZONAS = [
   { t: 'alrededor de la casa', x: 12, y: 12, w: TB.cols * PASO + 24, h: TB.filas * PASO + 66, c: 'var(--patio)', casillas: {} },
   { t: 'la casa, por dentro', x: 12, y: TB.filas * PASO + 92, w: TB.cols * PASO + 24, h: 280, c: 'var(--casa)', casillas: {} },
-  { t: 'lejos', x: TB.cols * PASO + 50, y: 12, w: 210, h: TB.filas * PASO + 360, c: 'var(--afuera)', casillas: (x => ({ campo: [x, 48, 186, 82], escuela: [x, 142, 186, 82], iglesia: [x, 236, 186, 82], cuesta_del_huerto: [x, 330, 186, 110] }))(TB.cols * PASO + 62) },
+  { t: 'lejos', x: TB.cols * PASO + 50, y: 12, w: 210, h: TB.filas * PASO + 360, c: 'var(--afuera)', casillas: {} },
 ];
 // (el plano de la casa: las dos plantas, lado a lado; cada pieza es una casilla, con sus puertas)
 const PL = TB.plano, PESC = .82, PY = TB.filas * PASO + 146, PX = [24, 24 + 410 * PESC + 26];
 const enPlano = (piso, x, y) => [PX[piso] + x * PESC, PY + y * PESC];
 for (const [k, p] of Object.entries(PL.piezas)) { const [x, y] = enPlano(p.piso, p.x, p.y); ZONAS[1].casillas[k] = [x, y, p.w * PESC, p.h * PESC]; }
+// (lo lejos: los lugares que nombran las vidas —adonde van, donde empiezan— que no están en el tablero ni en la casa)
+const LEJOS = (() => { const S = new Set(), vistos = new Set(), mira = x => { if (typeof x === 'string') { if (D.lugares[x]) S.add(x); return; } if (!x || typeof x !== 'object') return;
+  if (x.verbo && D.verbos[x.verbo] && !vistos.has(x.verbo)) { vistos.add(x.verbo); mira(D.verbos[x.verbo]); } Object.values(x).forEach(mira); };
+  mira(D.vidas.tejas_verdes); mira(D.inicio?.tejas_verdes);
+  return [...S].filter(l => !TB.zonas[l] && !PL.piezas[l] && !(D.lugares[l].dentro && TB.zonas[D.lugares[l].dentro])); })();
+LEJOS.forEach((l, k) => { const h = (ZONAS[2].h - 50 - (LEJOS.length - 1) * 10) / LEJOS.length; ZONAS[2].casillas[l] = [TB.cols * PASO + 62, 48 + k * (h + 10), 186, h]; });
 const CASILLA = {}; for (const z of ZONAS) for (const [k, r] of Object.entries(z.casillas)) CASILLA[k] = { r, c: z.c, ...(PL.piezas[k] ? { pieza: true } : {}) };
 for (const [l, x] of Object.entries(G.lugares)) if (x.celda) { const [i, j] = x.celda; CASILLA[l] = { r: [BX + i * PASO, BY + j * PASO, PASO, PASO], c: COLZONA[x.zona] || 'var(--patio)', celda: true }; }
 // (lo que hay dibujado en el tablero: la casa, el granero, el cerco del corral, el gallinero y sus gallinas, las vacas, la huerta, los abedules, los caminos)
@@ -86,18 +92,23 @@ function cosasDelTablero(){
   for (const c of TB.caminos) h += `<polyline points="${c.map(p => enTablero(...p).join(',')).join(' ')}" fill="none" stroke="#cdb894" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity=".55" pointer-events="none"/>`;
   for (const o of TB.cosas) {
     const [x, y] = enTablero(o.x, o.y), w = (o.w || 0) * ESC, hh = (o.h || 0) * ESC;
-    if (o.que === 'casa') { const [px, py] = enTablero(...o.puerta); h += `<g pointer-events="none"><rect x="${x}" y="${y}" width="${w}" height="${hh}" fill="#f6efe2" stroke="#8a7a62" stroke-width="1.5"/><polygon points="${x - 6},${y} ${x + w / 2},${y - 26} ${x + w + 6},${y}" fill="#5f7d4e" stroke="#4a6340"/><rect x="${px - 6}" y="${py - 18}" width="12" height="18" fill="#7a4b2a"/><text x="${x + w / 2}" y="${y + hh / 2}" text-anchor="middle" class="obj">la casa</text></g>`; }
+    if (o.que === 'casa') { const [px, py] = enTablero(...o.puerta); h += `<g pointer-events="none"><rect x="${x}" y="${y}" width="${w}" height="${hh}" fill="#f6efe2" stroke="#8a7a62" stroke-width="1.5"/><polygon points="${x - 6},${y} ${x + w / 2},${y - 26} ${x + w + 6},${y}" fill="#5f7d4e" stroke="#4a6340"/><rect x="${px - 6}" y="${py - 18}" width="12" height="18" fill="#7a4b2a"/><text x="${x + w / 2}" y="${y + hh / 2}" text-anchor="middle" class="obj">${esc(o.nombre)}</text></g>`; }
     else if (o.que === 'granero') h += `<g pointer-events="none"><rect x="${x}" y="${y}" width="${w}" height="${hh}" fill="#b5654a" opacity=".8" stroke="#7f4532"/><polygon points="${x - 4},${y} ${x + w / 2},${y - 18} ${x + w + 4},${y}" fill="#7f4532"/><text x="${x + w / 2}" y="${y + hh / 2 + 4}" text-anchor="middle" class="obj" style="fill:#fff">granero</text></g>`;
     else if (o.que === 'cerco') h += `<rect x="${x}" y="${y}" width="${w}" height="${hh}" fill="none" stroke="#8a6a44" stroke-width="2.5" stroke-dasharray="7 4" pointer-events="none"/>`;
-    else if (o.que === 'gallinero') h += `<g pointer-events="none"><rect x="${x}" y="${y}" width="${w}" height="${hh}" fill="#d9b36c" stroke="#9b7a3a"/><polygon points="${x - 3},${y} ${x + w / 2},${y - 10} ${x + w + 3},${y}" fill="#9b7a3a"/></g>`;
-    else if (o.que === 'huerta') { for (let k = 0; k < 4; k++) h += `<line x1="${x + 4}" y1="${y + 8 + k * hh / 4}" x2="${x + w - 4}" y2="${y + 8 + k * hh / 4}" stroke="#6f9a52" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 7" pointer-events="none"/>`; }
-    else h += `<text x="${x}" y="${y}" class="emo" text-anchor="middle" pointer-events="none">${{ gallinas: '🐔🐔', vacas: '🐄', abedules: '🌳🌳' }[o.que] || ''}</text>`;
+  }
+  // (cada zona: su ícono, en su cuadrante principal —el gallinero, la huerta—; y las cosas que se ven donde están —las
+  // gallinas, las vacas: las que tienen ícono—, tantas como hay, hasta cuatro)
+  for (const [z, o] of Object.entries(TB.zonas)) {
+    const c = CASILLA[o.ancla]; if (!c) continue; const [x, y, w, hh] = c.r;
+    if (o.icono) h += `<text x="${x + w - 16}" y="${y + 22}" class="emo" text-anchor="middle" pointer-events="none">${o.icono}</text>`;
+    const vis = Object.entries(D.cosas?.tipos || {}).filter(([, t]) => t.icono).map(([k, t]) => t.icono.repeat(Math.min(4, M?.get(['cosas', z, k]) || 0))).join('');
+    if (vis) h += `<text x="${x + w / 2}" y="${y + hh - 8}" class="emo" text-anchor="middle" pointer-events="none" style="font-size:12px">${vis}</text>`;
   }
   return h;
 }
 const NOMBRE = l => (D.lugares[G.lugares[l]?.zona || l]?.nombre || G.lugares[G.alias[l] || l]?.nombre || l).replace(/^(la|el) /, '').replace(/ \(.*$/, '').replace(/, .*$/, '').replace(/ de Tejas Verdes$/, '').replace(/ de Avonlea$/, '').replace(/^\w/, c => c.toUpperCase());
-const COLOR = { ana: '#b8442f', marilla: '#4f5d7a', matthew: '#557a43', diana: '#7a4f86' };
-const ICONO = { tomar: '✋', poner: '📦', dormir: '💤', descansar: '🪑', desayunar: '🍽', comer: '🍽', cenar: '🍽', cocinar: '🍲', lavar_platos: '🧽', barrer: '🧹', amasar: '🍞', coser: '🧵', buscar_huevos: '🥚', regar: '🌱', ordeñar: '🥛', dar_de_comer: '🌾', trabajar_el_campo: '🌾', partir_lena: '🪓', arreglar_cerca: '🔨', fumar_pipa: '🪈', leer: '📖', jugar_en_la_huerta: '🎈', sonar_despierta: '☁️', mirar_las_vacas: '🐄', rezar: '🙏', estudiar: '✏️', jugar_con: '🎈', lavar_ropa: '🧺', batir_mantequilla: '🧈', pasear: '🚶', ir_a_clases: '🏫', ir_a_la_iglesia: '⛪', quedarse: '⏳' };
+const COLOR = Object.fromEntries(Object.entries(D.aspecto || {}).map(([k, v]) => [k, v.color]));   // (cómo se ve cada uno: docs/lenguaje/comun/mundo.ts, aspecto)
+const ICONO = Object.fromEntries(Object.entries(D.verbos).filter(([, v]) => v.icono).map(([k, v]) => [k, v.icono]));   // (cada acción dice su ícono: docs/lenguaje, «icono»)
 // el mundo, y las vidas jugando en él
 let M, W, sel = null, reloj = null;
 const ahora = () => (M.get(['tiempo', 'dia']) - 1) * 1440 + M.get(['tiempo', 'hora']) * 60;   // (sin redondear: un paso de cuadrante a cuadrante dura menos de un minuto)
@@ -125,7 +136,7 @@ function nuevo(){
   pausar(); sel = null; DIARIOS = {};
   const dia = +$('dia').value;
   W = Mundo(G); MundoMinimo.mundo = W; MundoMinimo.viajes = {}; W.E.t = (dia - 1) * 1440 + 6 * 60;
-  M = Motor(D, { dia, hora: 6, vidas: 'tejas_verdes', historias: [], semilla: +$('semilla').value, lugares: CAMAS }, MundoMinimo);
+  M = Motor(D, { dia, hora: 6, vidas: 'tejas_verdes', historias: [], semilla: +$('semilla').value }, MundoMinimo);   // (dónde empieza cada uno: inicioDe, en las vidas)
   M.alTiempo(ahora()); pintar();
 }
 function pausar(){ clearInterval(reloj); reloj = null; $('play').textContent = '▶ Reproducir'; }
@@ -206,7 +217,7 @@ function ana(){
 // (las acciones del día de Ana que no necesitan a nadie más: las de un solo parámetro, o con un lugar —donde está—)
 const ACCIONES_ANA = (() => { const L = [], vistos = new Set();
   const recorrer = x => { if (!x || typeof x !== 'object') return; if (Array.isArray(x)) return x.forEach(recorrer); if (x.verbo && D.verbos[x.verbo]?.tipo === 'primitivo' && !vistos.has(x.verbo)) { vistos.add(x.verbo); L.push({ verbo: x.verbo, args: x.args.map(a => (a && a.param === 0 ? 'ana' : a)) }); } for (const v of Object.values(x)) recorrer(v); };
-  recorrer(D.verbos.dia_de_ana.pasos); return L.filter(v => !v.args.some(a => typeof a === 'object') && !/recado/.test(v.verbo)); })();   // (los recados, aparte: los que tiene)
+  recorrer(D.verbos[D.vidas.tejas_verdes.ana.verbo].pasos); return L.filter(v => !v.args.some(a => typeof a === 'object') && !/recado/.test(D.verbos[v.verbo].opera || '')); })();   // (los recados, aparte: los que tiene)
 // lo que pasa: el registro del mundo (quién va, llega, hace, termina, deja) y el del motor (quién deja lo que hacía, y por qué)
 function diario(){
   const L = [...W.E.registro.slice(-40).map(r => ({ t: r.t, txt: r.txt.replace(/^(\w+)/, (m, k) => D.personas[k] || k).replace(/_/g, ' ') })),

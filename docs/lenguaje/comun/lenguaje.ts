@@ -152,8 +152,11 @@ export type Postura = 'de_pie' | 'sentada' | 'acostada' | 'agachada' | 'caminand
 // «junto_a»: un mueble de ese lugar (mueblesDe): si ya está lleno —el fregadero es de a uno—, no se puede. «usa»: si es
 // una cosa declarada (cosasDe), tiene que haber una a mano —la lleva, o está ahí—; si no, es solo para el dibujo)
 export type DefPrimitivo = { readonly pide?: Cond; readonly deja?: readonly Efecto[]; readonly dura?: Duracion; readonly cuesta?: number; readonly opcion?: string
-  readonly donde?: Lugar; readonly junto_a?: string; readonly postura?: Postura; readonly usa?: readonly string[]
-  readonly empieza?: readonly Efecto[]; readonly si_se_deja?: readonly Efecto[] }
+  readonly donde?: Lugar; readonly junto_a?: string; readonly postura?: Postura; readonly usa?: readonly string[]; readonly icono?: string
+  readonly empieza?: readonly Efecto[]; readonly si_se_deja?: readonly Efecto[]; readonly opera?: Operacion }
+// (las operaciones del motor: lo que un primitivo hace además de durar —mover una cosa, esperar, dar un recado…—. El
+// motor las reconoce por esto, no por el nombre del verbo: un verbo nuevo puede ser cualquiera de ellas)
+export type Operacion = 'tomar' | 'poner' | 'esperar' | 'quedarse' | 'dar_recado' | 'hacer_recado' | 'acompañar'
 // lo hace el mundo, con su animación y su duración
 export const primitivo = <A extends unknown[]>(nombre: string, def: (...a: A) => DefPrimitivo) => verbo<A, never>('primitivo', nombre, def)
 
@@ -162,6 +165,7 @@ export const primitivo = <A extends unknown[]>(nombre: string, def: (...a: A) =>
 // («cuesta»: lo que le suma a un plan, para el A*; si no, lo que dura)
 export type DefReceta<P extends Record<string, Paso>> = {
   readonly cuesta?: number
+  readonly icono?: string   // (para dibujarlo mientras se hace: ⛪)
   readonly pide?: Cond
   readonly pasos: P
   // (si se rompe: volver a un paso —repararlo—, o dejar: la receta termina sin cumplirse, sin más)
@@ -179,7 +183,8 @@ export type DefBusca = { readonly objetivo: Cond; readonly con: readonly Verbo<n
 export const busca = <A extends unknown[]>(nombre: string, def: (...a: A) => DefBusca) => verbo<A, never>('busca', nombre, def)
 
 // un destino: el A* sobre el mapa busca el camino
-export const mapa = <A extends unknown[]>(nombre: string, def: (...a: A) => { readonly paso?: 'lento' | 'normal' | 'rapido'; readonly opcion?: string }) => verbo<A, never>('mapa', nombre, def)
+// («a_pie»: quien va así se baja de su medio primero —correr—)
+export const mapa = <A extends unknown[]>(nombre: string, def: (...a: A) => { readonly paso?: 'lento' | 'normal' | 'rapido'; readonly opcion?: string; readonly a_pie?: true }) => verbo<A, never>('mapa', nombre, def)
 
 export const elegir = (...opciones: Opcion[]): Elegir => ({ elige: opciones })
 export const repetir = (paso: Paso, mientras?: Cond): Repetir => (mientras ? { repite: paso, mientras } : { repite: paso })
@@ -201,14 +206,19 @@ export const tiene_recado = (quien: Persona, v: { readonly verbo: string }): Con
 // LAS COSAS: cada una está en algún lado —en un lugar (la leña, en el granero) o con alguien (el libro, con Ana)—, y
 // hay tantas. Se declaran los tipos y dónde hay al empezar; se preguntan y se cambian como números, donde están:
 // en('granero').lena.gt(0), con('ana').libro.suma(-1). Nunca bajan de cero. Se mueven con tomar y poner (y llevar).
-export type DefCosa = { readonly titulo: string }
+export type DefCosa = { readonly titulo: string; readonly icono?: string }   // (icono: si se dibuja donde está —las gallinas—)
 export type Cosas<C> = { readonly [K in keyof C]: Numero }
 export function cosasDe<const C extends Record<string, DefCosa>>(tipos: C, inicio: { readonly [donde: string]: { readonly [K in keyof C]?: number } }) {
   const de = (donde: string): Cosas<C> => Object.fromEntries(Object.keys(tipos).map(k => [k, new Numero(['cosas', donde, k])])) as never
   return { en: (l: Lugar) => de(l), con: (q: Persona) => de(q), _cosas: { tipos, inicio } }
 }
-// LOS MUEBLES de cada lugar, y cuántos caben junto a cada uno a la vez (el fregadero 1, la mesa 4): «junto_a» nombra uno
-export const mueblesDe = <const M extends { readonly [L in Lugar]?: { readonly [mueble: string]: number } }>(m: M) => ({ _muebles: m })
+// LOS MUEBLES de cada lugar, y cuántos caben junto a cada uno a la vez (el fregadero 1, la mesa 4): «junto_a» nombra uno.
+// Afuera, en un tablero, un mueble puede estar en otro cuadrante de su zona: «en», contando desde el principal
+// ({ caben: 3, en: [0, 1] }: la cerca, un cuadrante más abajo que las vacas)
+export type Mueble = number | { readonly caben: number; readonly en?: readonly [number, number] }
+export const mueblesDe = <const M extends { readonly [L in Lugar]?: { readonly [mueble: string]: Mueble } }>(m: M) => ({ _muebles: m })
+// DÓNDE EMPIEZA cada uno (y cada medio) cuando empiezan las vidas: donde duerme
+export const inicioDe = <const I extends { readonly [quien: string]: Lugar }>(i: I) => ({ _inicio: i })
 // LO QUE PASA SOLO, cada día a una hora (las gallinas ponen a las seis; se junta ropa sucia)
 export type Proceso = { readonly hora: number; readonly titulo: string; readonly deja: readonly Efecto[] }
 export const procesos = (...p: Proceso[]) => ({ _procesos: p })

@@ -54,22 +54,22 @@ export const soltar = primitivo('soltar', (quien: Persona, otro: Persona) => ({
 }))
 
 // (no deja nada: se cumple cuando se cumple «hasta»)
-export const esperar = primitivo('esperar', (_quien: Persona, hasta: Cond) => ({ pide: hasta }))
+export const esperar = primitivo('esperar', (_quien: Persona, hasta: Cond) => ({ opera: 'esperar', icono: '⏳', pide: hasta }))
 
 // (tomar cosas de donde está, y ponerlas donde está: las que haya, hasta «n». Lo hace el mundo —el motor sabe dónde
 // está cada uno—: la cosa va del lugar a quien, o de quien al lugar)
-export const tomar = primitivo('tomar', (_quien: Persona, _cosa: string, _n: number) => ({ postura: 'agachada', dura: '1m' }))
-export const poner = primitivo('poner', (_quien: Persona, _cosa: string, _n: number) => ({ postura: 'agachada', dura: '1m' }))
+export const tomar = primitivo('tomar', (_quien: Persona, _cosa: string, _n: number) => ({ opera: 'tomar', icono: '✋', postura: 'agachada', dura: '1m' }))
+export const poner = primitivo('poner', (_quien: Persona, _cosa: string, _n: number) => ({ opera: 'poner', icono: '📦', postura: 'agachada', dura: '1m' }))
 
 // (quedarse donde está hasta que se cumpla «hasta»: si se va antes —lo corta algo más importante, la jugadora se la
 // lleva—, no se cumple: la clase hasta las tres y media)
-export const quedarse = primitivo('quedarse', (_quien: Persona, hasta: Cond) => ({ pide: hasta }))
+export const quedarse = primitivo('quedarse', (_quien: Persona, hasta: Cond) => ({ opera: 'quedarse', icono: '⏳', pide: hasta }))
 
 // LOS RECADOS: alguien le pide a otro que haga algo, cuando pueda, hasta una hora («vence»). No espera la respuesta:
 // queda en la lista del otro, que lo hace cuando su día se lo permite (hacer_recado, una opción de su vida) o cuando la
 // jugadora quiere, si es Ana. Si vence, o ya no hace falta (alguien trajo los huevos), se borra, sin más.
 // (se lo dice en persona: tienen que verse)
-export const dar_recado = primitivo('dar_recado', (quien: Persona, a: Persona, _hace: Llamada, _vence: Duracion) => ({ pide: ve(quien, a), postura: 'de_pie', dura: '1m' }))
+export const dar_recado = primitivo('dar_recado', (quien: Persona, a: Persona, _hace: Llamada, _vence: Duracion) => ({ opera: 'dar_recado', icono: '✉️', pide: ve(quien, a), postura: 'de_pie', dura: '1m' }))
 // ACOMPAÑAR: ir con otra, adonde vaya (la sigue: el mundo la lleva con ella). No es una pausa de su día: es lo que
 // está haciendo, y lo deja como deja cualquier cosa. Termina, lo primero que pase:
 //   · se cumple «hasta» (llegaron a la escuela): se cumplió;
@@ -77,9 +77,9 @@ export const dar_recado = primitivo('dar_recado', (quien: Persona, a: Persona, _
 //     acompañó mientras duró—; con «hasta», no;
 //   · se separan, o quien acompaña se suelta (la jugadora, dejar_de_seguir): no se cumplió;
 //   · a quien acompaña le aparece algo más importante (la cena): lo deja, como cualquier cosa.
-export const acompañar = primitivo('acompañar', (quien: Persona, otra: Persona, _hasta?: Cond) => ({ pide: ve(quien, otra), postura: 'caminando' }))
+export const acompañar = primitivo('acompañar', (quien: Persona, otra: Persona, _hasta?: Cond) => ({ opera: 'acompañar', icono: '👣', pide: ve(quien, otra), postura: 'caminando' }))
 // (hacer el primero de sus recados que se pueda ahora: si no hay ninguno, no se puede)
-export const hacer_recado = primitivo('hacer_recado', (_quien: Persona) => ({}))
+export const hacer_recado = primitivo('hacer_recado', (_quien: Persona) => ({ opera: 'hacer_recado' }))
 
 // ---------------------------------------------------------------- por mapa
 
@@ -90,7 +90,7 @@ type Destino = Lugar | Campo<Lugar>
 export const ir_a = mapa('ir_a', (_quien: Persona, _a: Destino) => ({ opcion: 'Ir hasta {a}' }))
 
 // (deja el medio en que iba: si va en la calesa, primero salta)
-export const correr_a = mapa('correr_a', (_quien: Persona, _a: Destino) => ({ paso: 'rapido' }))
+export const correr_a = mapa('correr_a', (_quien: Persona, _a: Destino) => ({ paso: 'rapido', a_pie: true }))
 
 // ---------------------------------------------------------------- por receta
 

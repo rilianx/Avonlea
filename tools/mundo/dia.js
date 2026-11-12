@@ -24,14 +24,13 @@ const D = datos(path.resolve(__dirname, '..', '..', 'docs', 'lenguaje')), G = Mu
 const QUIENES = Object.keys(D.vidas.tejas_verdes);
 // (antes de vivirlas: las cosas y los muebles tienen sentido —tools/mundo/verificar_vidas.js—)
 { const { fallas } = require('./verificar_vidas.js').verificar(D); if (fallas.length) { for (const f of fallas) console.log('✘ ' + f); process.exit(1); } }
-const CAMAS = { ana: 'pieza', marilla: 'pieza_marilla', matthew: 'pieza_matthew', diana: 'cuesta_del_huerto' };
 const hhmm = m => `${String(Math.floor((m % 1440) / 60)).padStart(2, '0')}:${String(Math.round(m % 60)).padStart(2, '0')}`;
 const SEMANA = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
 
 const t0 = Date.now();
 const W = Mundo(G); MundoMinimo.mundo = W; MundoMinimo.viajes = {};
 W.E.t = (DESDE - 1) * 1440;
-const M = Motor(D, { dia: DESDE, hora: 0, vidas: 'tejas_verdes', historias: [], semilla: SEMILLA, lugares: { ...CAMAS, calesa: 'corral' } }, MundoMinimo);
+const M = Motor(D, { dia: DESDE, hora: 0, vidas: 'tejas_verdes', historias: [], semilla: SEMILLA }, MundoMinimo);   // (dónde empieza cada uno: inicioDe, en las vidas)
 // (cada 5 minutos: qué está haciendo cada uno —su acción, o su viaje— y dónde, para el diario y las reglas)
 const PASO = 5, foto = {}, casa = []; for (const q of QUIENES) foto[q] = [];
 const fin = (DESDE - 1 + DIAS) * 1440;

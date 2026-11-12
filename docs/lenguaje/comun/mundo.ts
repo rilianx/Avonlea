@@ -12,6 +12,10 @@ export const personas = {
   diana: 'Diana',
 } as const
 export type Persona = keyof typeof personas
+// cómo se ve cada uno en un dibujo (el tablero): su color
+export const aspecto = {
+  ana: { color: '#b8442f' }, marilla: { color: '#4f5d7a' }, matthew: { color: '#557a43' }, diana: { color: '#7a4f86' },
+} as const satisfies { readonly [P in Persona]?: { readonly color: string } }
 
 export const lugares = {
   tejas_verdes: { nombre: 'Tejas Verdes' },
@@ -26,14 +30,14 @@ export const lugares = {
   escalera: { nombre: 'la escalera', dentro: 'tejas_verdes' },
   pasillo: { nombre: 'el pasillo de arriba', dentro: 'tejas_verdes' },
   granero: { nombre: 'el granero', dentro: 'tejas_verdes' },
-  gallinero: { nombre: 'el gallinero', dentro: 'tejas_verdes' },
-  huerta: { nombre: 'la huerta', dentro: 'tejas_verdes' },
+  gallinero: { nombre: 'el gallinero', dentro: 'tejas_verdes', icono: '🛖' },
+  huerta: { nombre: 'la huerta', dentro: 'tejas_verdes', icono: '🥬' },
   campo: { nombre: 'el campo de heno' },
   cuesta_del_huerto: { nombre: 'La Cuesta del Huerto, la casa de los Barry' },
   iglesia: { nombre: 'la iglesia de Avonlea' },
   hondonada_lynde: { nombre: 'la Hondonada de Lynde' },
   escuela: { nombre: 'la escuela' },
-  arbustos: { nombre: 'el Sendero de los Abedules (camino a la escuela, junto a Tejas Verdes)' },
+  arbustos: { nombre: 'el Sendero de los Abedules (camino a la escuela, junto a Tejas Verdes)', icono: '🌳' },
   aldea: { nombre: 'la aldea de Avonlea' },
   camino_costa: { nombre: 'el camino de la costa, a White Sands (millas junto al mar)' },
   playa: { nombre: 'la playa de White Sands, junto al hotel' },
@@ -45,6 +49,41 @@ export const lugares = {
   estanque_barry: { nombre: 'el estanque de los Barry (el Lago de las Aguas Brillantes)' },
 } as const
 export type Lugar = keyof typeof lugares
+
+// LOS TABLEROS: alrededor de una casa, afuera, el mundo en cuadrantes del tamaño en que dos se ponen a conversar (en el
+// juego, a menos de 120 px: están juntos). Cada cuadrante es de una zona —un lugar—: la que tiene un cerco en el juego
+// (el corral), lo que cubre; los demás, la zona más cerca. El nombre de la zona es su cuadrante principal. Lo mide
+// tools/mundo/exportar.js sobre el mapa del juego. «origen»: la esquina de arriba a la izquierda, en px del mapa
+export type Tablero = { readonly origen: readonly [number, number]; readonly cols: number; readonly filas: number; readonly zonas: readonly Lugar[] }
+export const tableros = {
+  tejas_verdes: { origen: [1220, 4900], cols: 8, filas: 4, zonas: ['granero', 'gallinero', 'corral', 'arbustos', 'tejas_verdes', 'huerta'] },
+} as const satisfies Record<string, Tablero>
+
+// LOS PLANOS: una casa por dentro, sus piezas (en px, como el mapa: una pieza es del tamaño de una conversación, o poco
+// más; cada una en su piso) y sus puertas (entre qué piezas, y dónde —para dibujarla—); y por dónde se sale, a qué zona
+// de su tablero. Quien va de una pieza a otra pasa por las de en medio, como afuera por los cuadrantes
+export type Plano = {
+  readonly pisos: readonly string[]
+  readonly piezas: { readonly [L in Lugar]?: { readonly piso: number; readonly en: readonly [number, number, number, number] } }
+  readonly puertas: readonly (readonly [Lugar, Lugar, readonly [number, number]])[]
+  readonly afuera: { readonly [L in Lugar]?: { readonly a: Lugar; readonly en: readonly [number, number] } }
+}
+export const planos = {
+  // Tejas Verdes: abajo, la cocina —el corazón de la casa; su puerta da al patio—, la sala, la despensa y la escalera;
+  // arriba, el pasillo y las piezas (la de Ana, la buhardilla del este)
+  tejas_verdes: {
+    pisos: ['abajo', 'arriba'],
+    piezas: {
+      despensa: { piso: 0, en: [0, 0, 110, 80] }, escalera: { piso: 0, en: [110, 0, 90, 80] },
+      cocina: { piso: 0, en: [0, 80, 250, 160] }, sala: { piso: 0, en: [250, 0, 160, 240] },
+      pieza_marilla: { piso: 1, en: [0, 0, 140, 110] }, pieza_matthew: { piso: 1, en: [0, 110, 140, 130] },
+      pasillo: { piso: 1, en: [140, 0, 90, 240] }, pieza: { piso: 1, en: [230, 0, 160, 150] },
+    },
+    puertas: [['cocina', 'despensa', [55, 80]], ['cocina', 'escalera', [155, 80]], ['cocina', 'sala', [250, 160]], ['escalera', 'pasillo', [185, 20]],
+      ['pasillo', 'pieza_marilla', [140, 55]], ['pasillo', 'pieza_matthew', [140, 175]], ['pasillo', 'pieza', [230, 75]]],
+    afuera: { cocina: { a: 'tejas_verdes', en: [125, 240] } },
+  },
+} as const satisfies Record<string, Plano>
 
 // (en orden: así pasa la calesa, medido sobre el mapa; de vuelta, al revés)
 export const rutas = {

@@ -19,7 +19,8 @@ otro.
   dentro, aparte (la cocina, las piezas); y lo lejos, a un lado (el campo, la escuela, la iglesia, la casa de Diana).
   Las fichas son las personas, con un ícono de lo que hacen, y se deslizan de casilla en casilla cuando van de un lugar
   a otro.
-- **Los cuadrantes de Tejas Verdes** (`tools/mundo/exportar.js` → `geografia.json`, `tablero`): afuera, alrededor de la
+- **Los cuadrantes de Tejas Verdes** (declarados en `docs/lenguaje/comun/mundo.ts`, `tableros` y `planos`; medidos por
+  `tools/mundo/exportar.js` → `geografia.json`, `tablero`; el exportador no nombra ningún lugar): afuera, alrededor de la
   casa, el mundo es una grilla de 8×4 cuadrantes del tamaño en que dos se ponen a conversar (120 px del mapa del juego:
   donde el juego dice que dos están juntos). Cada cuadrante es un lugar del mundo (`c:2,0`) de una zona —el granero, el
   gallinero, el corral (lo que cubre su cerco), el patio, la huerta, el sendero—; el nombre de la zona es su cuadrante

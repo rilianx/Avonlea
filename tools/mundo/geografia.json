@@ -99,22 +99,22 @@
   "sala": {
    "nombre": "la sala de Tejas Verdes",
    "plan": "cocina",
-   "vista": "cocina"
+   "vista": "sala"
   },
   "despensa": {
    "nombre": "la despensa",
    "plan": "cocina",
-   "vista": "cocina"
+   "vista": "despensa"
   },
   "escalera": {
    "nombre": "la escalera",
    "plan": "cocina",
-   "vista": "cocina"
+   "vista": "escalera"
   },
   "pasillo": {
    "nombre": "el pasillo de arriba",
    "plan": "cocina",
-   "vista": "cocina"
+   "vista": "pasillo"
   },
   "h:os": {
    "nombre": "La Cuesta del Huerto",
@@ -213,7 +213,7 @@
    "zona": "gallinero"
   },
   "c:2,0": {
-   "nombre": "el corral",
+   "nombre": "el corral de Tejas Verdes",
    "plan": "corral",
    "vista": "corral",
    "celda": [
@@ -223,7 +223,7 @@
    "zona": "corral"
   },
   "c:3,0": {
-   "nombre": "el corral",
+   "nombre": "el corral de Tejas Verdes",
    "plan": "corral",
    "vista": "corral",
    "celda": [
@@ -233,7 +233,7 @@
    "zona": "corral"
   },
   "c:4,0": {
-   "nombre": "Tejas Verdes (el patio)",
+   "nombre": "Tejas Verdes",
    "vista": "tejas_verdes",
    "celda": [
     4,
@@ -242,7 +242,7 @@
    "zona": "tejas_verdes"
   },
   "c:5,0": {
-   "nombre": "Tejas Verdes (el patio)",
+   "nombre": "Tejas Verdes",
    "vista": "tejas_verdes",
    "celda": [
     5,
@@ -291,7 +291,7 @@
    "zona": "gallinero"
   },
   "c:2,1": {
-   "nombre": "el corral",
+   "nombre": "el corral de Tejas Verdes",
    "plan": "corral",
    "vista": "corral",
    "celda": [
@@ -301,7 +301,7 @@
    "zona": "corral"
   },
   "c:3,1": {
-   "nombre": "Tejas Verdes (el patio)",
+   "nombre": "Tejas Verdes",
    "vista": "tejas_verdes",
    "celda": [
     3,
@@ -311,7 +311,7 @@
    "edificio": true
   },
   "c:4,1": {
-   "nombre": "Tejas Verdes (el patio)",
+   "nombre": "Tejas Verdes",
    "vista": "tejas_verdes",
    "celda": [
     4,
@@ -321,7 +321,7 @@
    "edificio": true
   },
   "c:5,1": {
-   "nombre": "Tejas Verdes (el patio)",
+   "nombre": "Tejas Verdes",
    "vista": "tejas_verdes",
    "celda": [
     5,
@@ -371,7 +371,7 @@
    "zona": "gallinero"
   },
   "c:2,2": {
-   "nombre": "los arbustos de bayas",
+   "nombre": "el Sendero de los Abedules (camino a la escuela, junto a Tejas Verdes)",
    "plan": "arbustos",
    "vista": "arbustos",
    "celda": [
@@ -381,7 +381,7 @@
    "zona": "arbustos"
   },
   "c:3,2": {
-   "nombre": "Tejas Verdes (el patio)",
+   "nombre": "Tejas Verdes",
    "vista": "tejas_verdes",
    "celda": [
     3,
@@ -390,7 +390,7 @@
    "zona": "tejas_verdes"
   },
   "c:4,2": {
-   "nombre": "Tejas Verdes (el patio)",
+   "nombre": "Tejas Verdes",
    "vista": "tejas_verdes",
    "celda": [
     4,
@@ -399,7 +399,7 @@
    "zona": "tejas_verdes"
   },
   "c:5,2": {
-   "nombre": "Tejas Verdes (el patio)",
+   "nombre": "Tejas Verdes",
    "vista": "tejas_verdes",
    "celda": [
     5,
@@ -438,7 +438,7 @@
    "zona": "granero"
   },
   "c:1,3": {
-   "nombre": "los arbustos de bayas",
+   "nombre": "el Sendero de los Abedules (camino a la escuela, junto a Tejas Verdes)",
    "plan": "arbustos",
    "vista": "arbustos",
    "celda": [
@@ -448,7 +448,7 @@
    "zona": "arbustos"
   },
   "c:2,3": {
-   "nombre": "los arbustos de bayas",
+   "nombre": "el Sendero de los Abedules (camino a la escuela, junto a Tejas Verdes)",
    "plan": "arbustos",
    "vista": "arbustos",
    "celda": [
@@ -458,7 +458,7 @@
    "zona": "arbustos"
   },
   "c:3,3": {
-   "nombre": "los arbustos de bayas",
+   "nombre": "el Sendero de los Abedules (camino a la escuela, junto a Tejas Verdes)",
    "plan": "arbustos",
    "vista": "arbustos",
    "celda": [
@@ -468,7 +468,7 @@
    "zona": "arbustos"
   },
   "c:4,3": {
-   "nombre": "Tejas Verdes (el patio)",
+   "nombre": "Tejas Verdes",
    "vista": "tejas_verdes",
    "celda": [
     4,
@@ -477,7 +477,7 @@
    "zona": "tejas_verdes"
   },
   "c:5,3": {
-   "nombre": "Tejas Verdes (el patio)",
+   "nombre": "Tejas Verdes",
    "vista": "tejas_verdes",
    "celda": [
     5,
@@ -25087,6 +25087,7 @@
   "cols": 8,
   "filas": 4,
   "c": 120,
+  "casa": "tejas_verdes",
   "plano": {
    "pisos": [
     "abajo",
@@ -25225,42 +25226,43 @@
    },
    "gallinero": {
     "nombre": "el gallinero",
-    "ancla": "c:1,1"
+    "ancla": "c:1,1",
+    "icono": "🛖"
    },
    "corral": {
-    "nombre": "el corral",
+    "nombre": "el corral de Tejas Verdes",
     "ancla": "c:2,0"
    },
    "arbustos": {
-    "nombre": "los arbustos de bayas",
-    "ancla": "c:2,3"
+    "nombre": "el Sendero de los Abedules (camino a la escuela, junto a Tejas Verdes)",
+    "ancla": "c:2,3",
+    "icono": "🌳"
    },
    "tejas_verdes": {
-    "nombre": "Tejas Verdes (el patio)",
+    "nombre": "Tejas Verdes",
     "ancla": "c:4,2"
    },
    "huerta": {
     "nombre": "la huerta",
-    "ancla": "c:6,2"
+    "ancla": "c:6,2",
+    "icono": "🥬"
    }
   },
   "muebles": {
-   "corral.vacas": "c:2,0",
    "corral.cerca": "c:2,1",
-   "tejas_verdes.tina": "c:5,2",
-   "tejas_verdes.porche": "c:4,2"
+   "tejas_verdes.tina": "c:5,2"
   },
   "cosas": [
    {
     "que": "casa",
-    "nombre": "la casa",
+    "nombre": "Tejas Verdes",
     "x": 1648,
     "y": 4990,
     "w": 224,
     "h": 130,
     "puerta": [
      1760,
-     5120
+     5130
     ]
    },
    {
@@ -25273,42 +25275,12 @@
    },
    {
     "que": "cerco",
-    "nombre": "el corral",
+    "zona": "corral",
+    "nombre": "el corral de Tejas Verdes",
     "x": 1514.4,
     "y": 4952,
     "w": 121.6,
     "h": 128
-   },
-   {
-    "que": "gallinero",
-    "nombre": "el gallinero",
-    "x": 1360,
-    "y": 5064,
-    "w": 60,
-    "h": 40
-   },
-   {
-    "que": "gallinas",
-    "x": 1410,
-    "y": 5114
-   },
-   {
-    "que": "vacas",
-    "x": 1575.2,
-    "y": 5016
-   },
-   {
-    "que": "huerta",
-    "nombre": "la huerta",
-    "x": 1928,
-    "y": 5178,
-    "w": 140,
-    "h": 80
-   },
-   {
-    "que": "abedules",
-    "x": 1560,
-    "y": 5290
    }
   ],
   "caminos": [
@@ -25334,5 +25306,5 @@
    ]
   ]
  },
- "huella": "513f14c70ae5"
+ "huella": "dabb085c5558"
 }

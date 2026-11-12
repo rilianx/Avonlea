@@ -64,7 +64,7 @@
           // (junto a un mueble que tiene su cuadrante —la cerca del corral—: unos pasos, hasta ahí)
           { const c = acc.junto_a && acc.donde && G.tablero?.muebles[acc.donde + '.' + acc.junto_a], p = W.E.personas[acc.quien];
             if (c && p && p.lugar !== c && G.lugares[p.lugar]?.zona === G.lugares[c].zona && !acc.ya) W.poner(acc.quien, c); }
-          if (acc.verbo && acc.dura && !acc.ya && W.E.personas[acc.quien]) W.ocupar(acc.quien, acc.verbo === 'tomar' || acc.verbo === 'poner' ? `${acc.verbo} ${acc.args[1]}` : acc.verbo, acc.dura, { junto_a: acc.junto_a, postura: acc.postura, usa: acc.usa });   // (tomar leña: qué cosa)   // (lo que hace, para mirarlo: la lupa)
+          if (acc.verbo && acc.dura && !acc.ya && W.E.personas[acc.quien]) W.ocupar(acc.quien, ['tomar', 'poner'].includes(D.verbos[acc.verbo]?.opera) ? `${acc.verbo} ${acc.args[1]}` : acc.verbo, acc.dura, { junto_a: acc.junto_a, postura: acc.postura, usa: acc.usa });   // (tomar leña: qué cosa)   // (lo que hace, para mirarlo: la lupa)
         }
         if (acc.nombrar) acc.nombre = D.nombrables[acc.nombrar].libro;
       },
