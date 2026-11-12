@@ -298,7 +298,7 @@ export const interrumpio: Cond = { c: 'existe', camino: ['escena', 'interrumpio'
 
 // el guion de una escena: líneas (con su acto), comandos, opciones de la jugadora y variaciones (<<if>>)
 export type Item =
-  | { readonly q: Persona | 'narra'; readonly t: string; readonly piensa?: true; readonly acto?: Llamada }
+  | { readonly q: Persona | 'narra' | 'alguien' | 'otro'; readonly t: string; readonly piensa?: true; readonly acto?: Llamada }
   | { readonly hace: Efecto | Llamada }
   | { readonly op: string; readonly propia?: true; readonly cuerpo: readonly Item[] }
   | { readonly si: Cond; readonly cuerpo: readonly Item[]; readonly sino: readonly Item[] }
@@ -331,10 +331,19 @@ export type DefCharla = {
   readonly si: Cond
   readonly repetir?: 'una_vez' | 'dia' | 'siempre'
   readonly peso?: number
-  readonly hablan: readonly (Persona | 'narra')[]
+  readonly hablan: readonly (Persona | 'narra' | 'alguien' | 'otro')[]   // (los roles hablan por quien les toque)
   readonly cuerpo: readonly Item[]
 }
 export const defCharla = (id: Charla, def: DefCharla) => ({ ...id, ...def })
+// LOS ROLES de una charla: en vez de una persona, «alguien» (o «otro»): cualquiera de los que están ahí —o, con «de»,
+// solo de esos—. Al elegir la charla, el motor pone a la persona en su lugar, en todo el guion: «alguien: ¿Qué lees?»
+export const rol = (nombre: string, de?: readonly Persona[]): Persona => ({ rol: nombre, ...(de ? { de } : {}) }) as unknown as Persona
+export const alguien = rol('alguien')
+export const otro = rol('otro')
+// CUÁNTO QUIERE alguien a alguien (de −2 a 5, como en el juego): un número; las charlas lo cambian y lo preguntan:
+// quiere('marilla', 'ana').suma(1), quiere('ana', 'matthew').gte(4). Lo que hay al empezar: quiereDe, en las vidas
+export const quiere = (a: Persona, b: Persona) => new Numero(['cariño', a, b])
+export const quiereDe = <const Q extends { readonly [par: string]: number }>(q: Q) => ({ _quiere: q })   // ({ 'ana>matthew': 4 })
 // una voz: el patrón de llamada («_» vale cualquiera), el paso de la receta si es la voz de un paso, y las condiciones
 // de sus variantes (true: sin condición)
 export const _ = { comodin: true } as never

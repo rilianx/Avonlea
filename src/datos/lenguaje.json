@@ -201,6 +201,22 @@
    "calesa": "corral"
   }
  },
+ "quiere": {
+  "tejas_verdes": {
+   "matthew>ana": 4,
+   "ana>matthew": 4,
+   "marilla>ana": 1,
+   "ana>marilla": 1,
+   "ana>diana": 5,
+   "diana>ana": 5,
+   "marilla>matthew": 3,
+   "matthew>marilla": 3,
+   "diana>marilla": 1,
+   "marilla>diana": 2,
+   "diana>matthew": 1,
+   "matthew>diana": 1
+  }
+ },
  "charlas": {
   "tejas_verdes.buenos_dias": {
    "charla": "tejas_verdes.buenos_dias",
@@ -258,6 +274,25 @@
       {
        "q": "marilla",
        "t": "El cerezo no se va a ir a ninguna parte, Ana. El desayuno sí se enfría."
+      },
+      {
+       "si": {
+        "c": "cmp",
+        "camino": [
+         "cariño",
+         "marilla",
+         "ana"
+        ],
+        "op": ">=",
+        "valor": 3
+       },
+       "cuerpo": [
+        {
+         "q": "marilla",
+         "t": "(Pero Marilla mira por la ventana, un momento, antes de volverse a la estufa.)"
+        }
+       ],
+       "sino": []
       }
      ]
     }
@@ -342,6 +377,16 @@
       {
        "q": "marilla",
        "t": "Las gallinas no necesitan nombre, Ana. Necesitan que alguien recoja sus huevos."
+      },
+      {
+       "hace": {
+        "e": "deja",
+        "camino": [
+         "tejas_verdes",
+         "hechos",
+         "la_gallina_pinta"
+        ]
+       }
       }
      ]
     }
@@ -544,6 +589,28 @@
       {
        "q": "matthew",
        "t": "Bueno, bueno. Cuéntame."
+      },
+      {
+       "hace": {
+        "e": "suma",
+        "camino": [
+         "cariño",
+         "matthew",
+         "ana"
+        ],
+        "n": 1
+       }
+      },
+      {
+       "hace": {
+        "e": "suma",
+        "camino": [
+         "cariño",
+         "ana",
+         "matthew"
+        ],
+        "n": 1
+       }
       }
      ]
     },
@@ -821,6 +888,17 @@
       {
        "q": "marilla",
        "t": "Ni un ratito. Las velas no crecen en los árboles."
+      },
+      {
+       "hace": {
+        "e": "suma",
+        "camino": [
+         "cariño",
+         "marilla",
+         "ana"
+        ],
+        "n": -1
+       }
       }
      ]
     }
@@ -878,6 +956,210 @@
     {
      "q": "diana",
      "t": "Gracias, Sr. Cuthbert."
+    }
+   ]
+  },
+  "tejas_verdes.que_lees": {
+   "charla": "tejas_verdes.que_lees",
+   "resumen": "Uno de los mayores le pregunta a Ana qué está leyendo.",
+   "entre": [
+    {
+     "rol": "alguien",
+     "de": [
+      "marilla",
+      "matthew"
+     ]
+    },
+    "ana"
+   ],
+   "si": {
+    "c": "y",
+    "de": [
+     {
+      "c": "desde",
+      "camino": [
+       "hizo_t",
+       "ana",
+       "leer"
+      ],
+      "op": "<",
+      "valor": "2h",
+      "min": true
+     }
+    ]
+   },
+   "repetir": "dia",
+   "hablan": [
+    "alguien",
+    "ana"
+   ],
+   "cuerpo": [
+    {
+     "q": "alguien",
+     "t": "¿Qué estás leyendo, Ana?"
+    },
+    {
+     "q": "ana",
+     "t": "Una historia de una dama encerrada en una torre. ¡Es trágicamente hermosa!"
+    },
+    {
+     "si": {
+      "c": "cmp",
+      "camino": [
+       "cariño",
+       {
+        "rol": "alguien"
+       },
+       "ana"
+      ],
+      "op": ">=",
+      "valor": 4
+     },
+     "cuerpo": [
+      {
+       "q": "alguien",
+       "t": "Bueno… me la tendrás que contar, entonces."
+      },
+      {
+       "hace": {
+        "e": "suma",
+        "camino": [
+         "cariño",
+         "ana",
+         {
+          "rol": "alguien"
+         }
+        ],
+        "n": 1
+       }
+      }
+     ],
+     "sino": [
+      {
+       "q": "alguien",
+       "t": "Mientras no se te olvide lo que tienes que hacer."
+      }
+     ]
+    }
+   ]
+  },
+  "tejas_verdes.el_dia": {
+   "charla": "tejas_verdes.el_dia",
+   "resumen": "Dos que se cruzan comentan el día.",
+   "entre": [
+    {
+     "rol": "alguien"
+    },
+    {
+     "rol": "otro"
+    }
+   ],
+   "si": {
+    "c": "y",
+    "de": [
+     {
+      "c": "y",
+      "de": [
+       {
+        "c": "cmp",
+        "camino": [
+         "tiempo",
+         "hora"
+        ],
+        "op": ">=",
+        "valor": 9
+       },
+       {
+        "c": "cmp",
+        "camino": [
+         "tiempo",
+         "hora"
+        ],
+        "op": "<",
+        "valor": 18
+       }
+      ]
+     }
+    ]
+   },
+   "repetir": "dia",
+   "peso": 1,
+   "hablan": [
+    "alguien",
+    "otro"
+   ],
+   "cuerpo": [
+    {
+     "q": "alguien",
+     "t": "Qué día más lindo."
+    },
+    {
+     "q": "otro",
+     "t": "Sí que lo es."
+    }
+   ]
+  },
+  "tejas_verdes.la_gallina_otra_vez": {
+   "charla": "tejas_verdes.la_gallina_otra_vez",
+   "resumen": "Marilla se acuerda de la gallina pinta que Ana quería bautizar.",
+   "entre": [
+    "marilla",
+    "ana"
+   ],
+   "si": {
+    "c": "y",
+    "de": [
+     {
+      "c": "desde",
+      "camino": [
+       "tejas_verdes",
+       "hechos",
+       "la_gallina_pinta"
+      ],
+      "op": ">=",
+      "valor": "1d"
+     },
+     {
+      "c": "cmp",
+      "camino": [
+       "cariño",
+       "marilla",
+       "ana"
+      ],
+      "op": ">=",
+      "valor": 1
+     }
+    ]
+   },
+   "repetir": "una_vez",
+   "peso": 5,
+   "hablan": [
+    "marilla",
+    "ana"
+   ],
+   "cuerpo": [
+    {
+     "q": "marilla",
+     "t": "Y esa gallina pinta, Ana… ¿le pusiste nombre, al final?"
+    },
+    {
+     "q": "ana",
+     "t": "¡Se llama Cordelia! Pero solo en secreto, Srta. Cuthbert."
+    },
+    {
+     "q": "marilla",
+     "t": "(Marilla aprieta los labios para no sonreír.) Hm. Cordelia."
+    },
+    {
+     "hace": {
+      "e": "suma",
+      "camino": [
+       "cariño",
+       "marilla",
+       "ana"
+      ],
+      "n": 1
+     }
     }
    ]
   }

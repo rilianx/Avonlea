@@ -1,7 +1,7 @@
 // GENERADO por tools/lenguaje/yarn.js desde charlas/tejas_verdes.yarn: no editar a mano.
 import { charla } from './tejas_verdes.ids'
-import { arreglar_cerca, cosas, entrar_lena, hechos, recoger_huevos } from '../vidas/tejas_verdes'
-import { defCharla, deja, hizo, no, tiempo, tiene_recado, y } from '../comun/lenguaje'
+import { arreglar_cerca, cosas, entrar_lena, hechos, leer, recoger_huevos } from '../vidas/tejas_verdes'
+import { alguien, defCharla, deja, hizo, no, otro, quiere, rol, tiempo, tiene_recado, y } from '../comun/lenguaje'
 import { dar_recado } from '../comun/verbos'
 
 export const charlas = {
@@ -15,7 +15,7 @@ export const charlas = {
     cuerpo: [
       { q: 'marilla', t: "Buenos días, Ana. Lávate la cara y peina esas trenzas antes de sentarte a la mesa." },
       { op: "Buenos días, Srta. Cuthbert. Ya voy.", propia: true, cuerpo: [] },
-      { op: "¿No es una mañana preciosa? Desde la ventana se ve la Reina de las Nieves toda blanca.", cuerpo: [{ q: 'marilla', t: "El cerezo no se va a ir a ninguna parte, Ana. El desayuno sí se enfría." }] },
+      { op: "¿No es una mañana preciosa? Desde la ventana se ve la Reina de las Nieves toda blanca.", cuerpo: [{ q: 'marilla', t: "El cerezo no se va a ir a ninguna parte, Ana. El desayuno sí se enfría." }, { si: quiere('marilla', 'ana').gte(3), cuerpo: [{ q: 'marilla', t: "(Pero Marilla mira por la ventana, un momento, antes de volverse a la estufa.)" }], sino: [] }] },
     ],
   }),
   los_huevos: defCharla(charla.los_huevos, {
@@ -29,7 +29,7 @@ export const charlas = {
       { q: 'marilla', t: "Ana, cuando puedas, trae los huevos del gallinero. Y no te quedes soñando entre las gallinas." },
       { hace: dar_recado('marilla', 'ana', recoger_huevos('ana'), '12h') },
       { op: "Sí, Srta. Cuthbert.", propia: true, cuerpo: [] },
-      { op: "¿Puedo ponerle nombre a la gallina pinta?", cuerpo: [{ q: 'marilla', t: "Las gallinas no necesitan nombre, Ana. Necesitan que alguien recoja sus huevos." }] },
+      { op: "¿Puedo ponerle nombre a la gallina pinta?", cuerpo: [{ q: 'marilla', t: "Las gallinas no necesitan nombre, Ana. Necesitan que alguien recoja sus huevos." }, { hace: deja(hechos.la_gallina_pinta) }] },
     ],
   }),
   la_lena: defCharla(charla.la_lena, {
@@ -66,7 +66,7 @@ export const charlas = {
     cuerpo: [
       { q: 'matthew', t: "Bueno, Ana... ¿cómo te fue hoy?" },
       { q: 'ana', t: "¡Oh, Sr. Cuthbert! Pasaron tantas cosas que no sé por dónde empezar." },
-      { op: "Contarle todo, desde el principio.", propia: true, cuerpo: [{ q: 'ana', t: "Primero, el camino estaba lleno de rocío, y cada gota era como un diamante pequeñito…" }, { q: 'matthew', t: "Bueno, bueno. Cuéntame." }] },
+      { op: "Contarle todo, desde el principio.", propia: true, cuerpo: [{ q: 'ana', t: "Primero, el camino estaba lleno de rocío, y cada gota era como un diamante pequeñito…" }, { q: 'matthew', t: "Bueno, bueno. Cuéntame." }, { hace: quiere('matthew', 'ana').suma(1) }, { hace: quiere('ana', 'matthew').suma(1) }] },
       { op: "Preguntarle por las vacas.", cuerpo: [{ q: 'matthew', t: "Pues… están bien. La pinta da más leche que nunca." }] },
     ],
   }),
@@ -117,7 +117,7 @@ export const charlas = {
     cuerpo: [
       { q: 'marilla', t: "A la cama, Ana. Y no te olvides de rezar." },
       { op: "Buenas noches, Srta. Cuthbert.", propia: true, cuerpo: [] },
-      { op: "¿Puedo leer un ratito más?", cuerpo: [{ q: 'marilla', t: "Ni un ratito. Las velas no crecen en los árboles." }] },
+      { op: "¿Puedo leer un ratito más?", cuerpo: [{ q: 'marilla', t: "Ni un ratito. Las velas no crecen en los árboles." }, { hace: quiere('marilla', 'ana').suma(-1) }] },
     ],
   }),
   el_sr_cuthbert: defCharla(charla.el_sr_cuthbert, {
@@ -130,6 +130,44 @@ export const charlas = {
       { q: 'diana', t: "Buenas tardes, Sr. Cuthbert." },
       { q: 'matthew', t: "Bueno… buenas tardes. Ana está… por ahí, creo." },
       { q: 'diana', t: "Gracias, Sr. Cuthbert." },
+    ],
+  }),
+  que_lees: defCharla(charla.que_lees, {
+    resumen: "Uno de los mayores le pregunta a Ana qué está leyendo.",
+    entre: [rol('alguien', ['marilla', 'matthew']), 'ana'],
+    si: y(hizo('ana', leer).desde('<', '2h')),
+    repetir: 'dia',
+    hablan: ['alguien', 'ana'],
+    cuerpo: [
+      { q: 'alguien', t: "¿Qué estás leyendo, Ana?" },
+      { q: 'ana', t: "Una historia de una dama encerrada en una torre. ¡Es trágicamente hermosa!" },
+      { si: quiere(alguien, 'ana').gte(4), cuerpo: [{ q: 'alguien', t: "Bueno… me la tendrás que contar, entonces." }, { hace: quiere('ana', alguien).suma(1) }], sino: [{ q: 'alguien', t: "Mientras no se te olvide lo que tienes que hacer." }] },
+    ],
+  }),
+  el_dia: defCharla(charla.el_dia, {
+    resumen: "Dos que se cruzan comentan el día.",
+    entre: [alguien, otro],
+    si: y(tiempo.hora.entre(9, 18)),
+    repetir: 'dia',
+    peso: 1,
+    hablan: ['alguien', 'otro'],
+    cuerpo: [
+      { q: 'alguien', t: "Qué día más lindo." },
+      { q: 'otro', t: "Sí que lo es." },
+    ],
+  }),
+  la_gallina_otra_vez: defCharla(charla.la_gallina_otra_vez, {
+    resumen: "Marilla se acuerda de la gallina pinta que Ana quería bautizar.",
+    entre: ['marilla', 'ana'],
+    si: y(hechos.la_gallina_pinta.desde('>=', '1d'), quiere('marilla', 'ana').gte(1)),
+    repetir: 'una_vez',
+    peso: 5,
+    hablan: ['marilla', 'ana'],
+    cuerpo: [
+      { q: 'marilla', t: "Y esa gallina pinta, Ana… ¿le pusiste nombre, al final?" },
+      { q: 'ana', t: "¡Se llama Cordelia! Pero solo en secreto, Srta. Cuthbert." },
+      { q: 'marilla', t: "(Marilla aprieta los labios para no sonreír.) Hm. Cordelia." },
+      { hace: quiere('marilla', 'ana').suma(1) },
     ],
   }),
 }

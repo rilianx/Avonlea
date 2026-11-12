@@ -25,7 +25,7 @@ function datos(raiz){
       voces.push(...E.voces.map(v => ({ ...v, de: h })));
     }
     // (las vidas: lo que cada uno hace todos los días —docs/lenguaje/vidas/—; sus verbos, con los demás)
-    const vidas = {}, cosas = { tipos: {}, inicio: {} }, muebles = {}, procesos = {}, inicio = {};
+    const vidas = {}, cosas = { tipos: {}, inicio: {} }, muebles = {}, procesos = {}, inicio = {}, quiere = {};
     for (const f of fs.existsSync(path.join(raiz, 'vidas')) ? fs.readdirSync(path.join(raiz, 'vidas')).filter(f => f.endsWith('.ts')) : []) {
       const m = req('vidas/' + f.replace(/\.ts$/, '.js')), id = f.replace(/\.ts$/, '');
       for (const v of Object.values(m)) if (typeof v === 'function' && v.def) verbos[v.verbo] = v.def;
@@ -35,13 +35,14 @@ function datos(raiz){
         if (v && v._muebles) for (const [l, x] of Object.entries(v._muebles)) muebles[l] = { ...muebles[l], ...x };
         if (v && v._procesos) procesos[id] = [...(procesos[id] || []), ...v._procesos];
         if (v && v._inicio) inicio[id] = { ...inicio[id], ...v._inicio };
+        if (v && v._quiere) quiere[id] = { ...quiere[id], ...v._quiere };
       }
     }
     // (las charlas: lo que se dicen los que se encuentran —docs/lenguaje/charlas/—)
     const charlas = {};
     for (const f of fs.existsSync(path.join(raiz, 'charlas')) ? fs.readdirSync(path.join(raiz, 'charlas')).filter(f => f.endsWith('.datos.ts')) : [])
       for (const c of Object.values(req('charlas/' + f.replace(/\.ts$/, '.js')).charlas)) charlas[c.charla] = c;
-    const D = { vidas, cosas, muebles, procesos, inicio, charlas, personas: mundo.personas, aspecto: mundo.aspecto, tableros: mundo.tableros, planos: mundo.planos, lugares: mundo.lugares, rutas: mundo.rutas, medios: mundo.medios, nombrables: mundo.nombrables, estados: estado.estados,
+    const D = { vidas, cosas, muebles, procesos, inicio, quiere, charlas, personas: mundo.personas, aspecto: mundo.aspecto, tableros: mundo.tableros, planos: mundo.planos, lugares: mundo.lugares, rutas: mundo.rutas, medios: mundo.medios, nombrables: mundo.nombrables, estados: estado.estados,
       cualidades: estado.cualidades, verbos, ana_sola: ana.ana_sola, opcion_no: ana.opcion_no, historias, escenas, voces };
     // (las funciones —un verbo nombrado en «con»— van como su nombre)
     return JSON.parse(JSON.stringify(D, (k, v) => typeof v === 'function' ? v.verbo : v));

@@ -29,7 +29,8 @@
       for (const q of quienes()) { const l = vista(q), antes = get(['mundo', q, 'lugar']); if (l != null && l !== antes) { if (antes == null) set(['mundo', q, 'lugar'], l); else api.llega(q, l); } }
       for (const q of Object.keys(D.personas)) { const p = W.E.personas[q]; if (!p) continue; for (const c of ['en', 'sigue']) if (get(['mundo', q, c]) !== p[c]) set(['mundo', q, c], p[c]); }
       for (const [m, x] of Object.entries(W.E.medios)) if (D.medios[m] && get(['mundo', m, 'listo']) !== x.listo) set(['mundo', m, 'listo'], x.listo);
-      for (const [d, c] of Object.entries(W.E.cosas)) for (const [x, n] of Object.entries(c)) if (get(['cosas', d, x]) !== n) set(['cosas', d, x], n);   // (las cosas que movió otro: el planificador, la consola)
+      for (const [d, c] of Object.entries(W.E.cosas)) for (const [x, n] of Object.entries(c)) if (get(['cosas', d, x]) !== n) set(['cosas', d, x], n);
+      for (const [par, n] of Object.entries(W.E.cariño)) { const [a, b] = par.split('>'); if (D.personas[a] && D.personas[b] && get(['cariño', a, b]) !== n) set(['cariño', a, b], n); }   // (las cosas que movió otro: el planificador, la consola)
     }
     // (al empezar —la primera vez que el motor le pide algo: cuando se crea, todavía no sabe dónde empieza cada uno—, el
     // mundo toma del motor lo que no sabe: dónde está cada uno, en qué va, la calesa)
@@ -92,7 +93,8 @@
           else if (c[2] === 'listo' && W.E.medios[c[1]]) W.E.medios[c[1]].listo = v;
           else if (c[2] === 'lugar') W.poner(c[1], v);
         }
-        else if ((e.e === 'deja' || e.e === 'suma') && c[0] === 'cosas') W.cosasDe(c[1])[c[2]] = get(c);   // (una cosa que se gastó, se hizo o se movió)
+        else if ((e.e === 'deja' || e.e === 'suma') && c[0] === 'cosas') W.cosasDe(c[1])[c[2]] = get(c);
+        else if (e.e === 'suma' && c[0] === 'cariño') W.E.cariño[c[1] + '>' + c[2]] = get(c);   // (cuánto se quieren: el mismo del planificador)   // (una cosa que se gastó, se hizo o se movió)
         else if (e.e === 'deja' && c[0] === 'estado') W.E.estados[c[1]] = v;
         else if (e.e === 'deja') W.E.hechos[c.join('.')] = v ?? 1;
         else if (e.e === 'olvida') delete W.E.hechos[c.join('.')];

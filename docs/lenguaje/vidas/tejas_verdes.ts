@@ -22,7 +22,7 @@
 //   y siguen juntas (Ana acompaña a Diana), si lo quedaron la tarde anterior (una charla). Si una no llega —Diana,
 //   algunas mañanas, va directo—, la otra la espera
 //   hasta casi las ocho y va sola; si Diana cambia de planes en el camino, Ana sigue sola.
-import { cosasDe, elegir, esta_haciendo, hechosDe, hizo, inicioDe, mueblesDe, no, primitivo, procesos, receta, repetir, si, tiempo, tiene_recado, vida, y, o } from '../comun/lenguaje'
+import { cosasDe, elegir, esta_haciendo, hechosDe, hizo, inicioDe, mueblesDe, quiereDe, no, primitivo, procesos, receta, repetir, si, tiempo, tiene_recado, vida, y, o } from '../comun/lenguaje'
 import { mundo, ve, type Lugar, type Persona } from '../comun/mundo'
 import { acompañar, dar_recado, esperar, hacer_recado, ir_a, ir_a_hablar_con, llevar, poner, quedarse } from '../comun/verbos'
 import { dichas } from '../charlas/tejas_verdes.ids'
@@ -65,9 +65,16 @@ export const muebles = mueblesDe({
 // (lo que pasó, de los de Tejas Verdes: lo dejan las charlas —docs/lenguaje/charlas/tejas_verdes.yarn—)
 export const hechos = hechosDe('tejas_verdes', {
   quedamos_en_el_sendero: 'Ana y Diana quedaron de juntarse en el Sendero de los Abedules, a la mañana siguiente, para ir a la escuela',
+  la_gallina_pinta: 'Ana le preguntó a Marilla si podía ponerle nombre a la gallina pinta',
 })
 // (si quedaron —ayer, o antes de ayer si fue sábado—: hoy se juntan)
 const quedaron = y(hechos.quedamos_en_el_sendero.desde('<', '3d'), no(hechos.quedamos_en_el_sendero.hoy))
+// (cuánto se quieren al empezar —de −2 a 5, como en el juego—: Matthew y Ana, desde el primer día; Marilla, todavía no
+// lo sabe; Diana y Ana, amigas del alma)
+export const se_quieren = quiereDe({
+  'matthew>ana': 4, 'ana>matthew': 4, 'marilla>ana': 1, 'ana>marilla': 1, 'ana>diana': 5, 'diana>ana': 5,
+  'marilla>matthew': 3, 'matthew>marilla': 3, 'diana>marilla': 1, 'marilla>diana': 2, 'diana>matthew': 1, 'matthew>diana': 1,
+})
 // (dónde empieza cada uno: donde duerme; la calesa, en el corral)
 export const inicio = inicioDe({ ana: 'pieza', marilla: 'pieza_marilla', matthew: 'pieza_matthew', diana: 'cuesta_del_huerto', calesa: 'corral' })
 export const pasa_solo = procesos(

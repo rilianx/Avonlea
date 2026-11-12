@@ -119,11 +119,14 @@ function charla(n){
   const donde = `${n.archivo}:${n.desde} (${n.cab.title})`;
   if (!n.cab.title || !n.cab.resumen) throw new Error(donde + ': falta title o resumen');
   if (!n.cab.entre) throw new Error(donde + ': falta entre (quiénes: «marilla ana»)');
-  const { cuerpo, hablan } = guion(n), si = n.cab.si ? partes(n.cab.si).map(c => expr(c, donde)) : [], entre = n.cab.entre.trim().split(/\s+/).map(q => expr(q, donde));
-  for (const q of hablan) if (q !== 'narra' && !entre.includes(q)) throw new Error(donde + ': habla «' + q + '», que no está en «entre»');
+  const { cuerpo, hablan } = guion(n), si = n.cab.si ? partes(n.cab.si).map(c => expr(c, donde)) : [];
+  // (entre: personas, o roles —alguien, otro—; un rol puede decir de quiénes: alguien(marilla,matthew))
+  const entre = n.cab.entre.trim().split(/\s+/).map(q => { const m = q.match(/^(alguien|otro)(?:\((.*)\))?$/); return m ? { rol: m[1], de: m[2] ? m[2].split(',').map(x => expr(x, donde)) : null } : { q: expr(q, donde) }; });
+  const nombres = entre.map(e => e.rol || e.q);
+  for (const q of hablan) if (q !== 'narra' && !nombres.includes(q)) throw new Error(donde + ': habla «' + q + '», que no está en «entre»');
   return `  ${n.cab.title}: defCharla(charla.${n.cab.title}, {
     resumen: ${JSON.stringify(n.cab.resumen)},
-    entre: [${entre.map(q => `'${q}'`).join(', ')}],
+    entre: [${entre.map(e => e.rol ? (e.de ? `rol('${e.rol}', [${e.de.map(x => `'${x}'`).join(', ')}])` : e.rol) : `'${e.q}'`).join(', ')}],
     si: y(${si.join(', ')}),${n.cab.repetir ? `\n    repetir: '${expr(n.cab.repetir, donde)}',` : ''}${n.cab.peso ? `\n    peso: ${+expr(n.cab.peso, donde)},` : ''}
     hablan: [${[...hablan].map(q => `'${q}'`).join(', ')}],
     cuerpo: [

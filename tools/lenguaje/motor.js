@@ -30,6 +30,7 @@
       if (c[0] === 'encargo') return 'pendiente';
       if (c[0] === 'historia') return 'no_empezada';
       if (c[0] === 'cosas') return D.cosas?.inicio?.[c[1]]?.[c[2]] ?? 0;   // (cuántas hay ahí al empezar)
+      if (c[0] === 'cariño') return D.quiere?.[escenario.vidas]?.[c[1] + '>' + c[2]] ?? 0;   // (cuánto se quieren al empezar: quiereDe)
     }
     const get = c => (k(c) in S ? S[k(c)] : defecto(c));
     const set = (c, v) => { S[k(c)] = v; };
@@ -77,6 +78,7 @@
       if (e.e === 'deja') set(e.camino, e.valor === undefined ? dia() : val(e.valor));
       else if (e.e === 'olvida') delete S[k(e.camino)];
       else if (e.e === 'suma' && e.camino[0] === 'cosas') set(e.camino, Math.max(0, get(e.camino) + e.n));   // (las cosas: nunca menos de cero)
+      else if (e.e === 'suma' && e.camino[0] === 'cariño') { const a = get(e.camino), b = Math.max(-2, Math.min(5, a + e.n)); set(e.camino, b); if (a !== b) nota(`${e.n > 0 ? '💗' : '💔'} ${nombre(e.camino[1])} quiere a ${nombre(e.camino[2])}: ${a} → ${b}`, 'momento'); }   // (de −2 a 5, como en el juego)
       else if (e.e === 'si') { if (cumple(e.si)) for (const x of e.entonces) aplicar(x); }   // (un efecto que depende: si hay pan)
       else if (e.e === 'suma') { const d = D.cualidades[e.camino[2]], r = d ? d.rango : [-1e9, 1e9]; set(e.camino, Math.max(r[0], Math.min(r[1], get(e.camino) + e.n))); nota(`${nombre(e.camino[1])}: ${e.camino[2]}${e.camino[3] ? ' hacia ' + nombre(e.camino[3]) : ''} ${e.n > 0 ? '+' : ''}${e.n} → ${get(e.camino)}`); }
       else if (e.e === 'log') nota('📔 ' + e.texto);
@@ -629,10 +631,19 @@
       return T.pila.some(F => F.k === 'primitivo' && F.fase === 1 && def(F.ll).callado);
     }
     const disponible = (q, o) => !enCharla(o) && !mundo.funciones?.de_camino?.(o) && mundo.funciones?.ve?.(q, o) && !callado(o);
+    // (una charla con roles —alguien, otro—, con las personas en su lugar: en «entre», en las condiciones, en el guion)
+    const conRoles = (x, b) => Array.isArray(x) ? x.map(y => conRoles(y, b)) : x && typeof x === 'object' ? (x.rol && b[x.rol] ? b[x.rol] : Object.fromEntries(Object.entries(x).map(([k, v]) => [k, k === 'q' && b[v] ? b[v] : conRoles(v, b)]))) : x;
+    // (las maneras de hacer una charla con los que están: cada rol, alguien que esté ahí, disponible, y que pueda —«de»—)
+    function maneras(c, q, con){
+      const ahi = Object.keys(D.personas).filter(o => o === q || disponible(q, o)), fijos = c.entre.filter(e => typeof e === 'string'), roles = c.entre.filter(e => typeof e === 'object');
+      if (!fijos.every(o => ahi.includes(o))) return [];
+      let L = [{}];
+      for (const r of roles) L = L.flatMap(b => ahi.filter(o => !fijos.includes(o) && !Object.values(b).includes(o) && (!r.de || r.de.includes(o))).map(o => ({ ...b, [r.rol]: o })));
+      return L.map(b => roles.length ? { ...conRoles(c, b), charla: c.charla, roles: b } : c).filter(x => x.entre.includes(q) && (!con || x.entre.includes(con)));
+    }
     function charlaPara(q, con, prio, sortear = true){   // (sortear: elegir una al azar, por peso; si no, ¿hay alguna?)
       if (!escenario.vidas || !D.charlas || enCharla(q)) return null;
-      const cands = Object.values(D.charlas).filter(c => c.charla.startsWith(escenario.vidas + '.') && c.entre.includes(q) && (!con || c.entre.includes(con))
-        && c.entre.every(o => o === q || disponible(q, o)) && puedeCharla(c));
+      const cands = Object.values(D.charlas).filter(c => c.charla.startsWith(escenario.vidas + '.')).flatMap(c => maneras(c, q, con)).filter(puedeCharla);
       if (!cands.length) return null; if (!sortear) return cands[0];
       let r = azar() * cands.reduce((n, c) => n + (c.peso ?? 1), 0), c = cands[cands.length - 1];
       for (const x of cands) { r -= x.peso ?? 1; if (r < 0) { c = x; break; } }
@@ -640,8 +651,8 @@
     }
     function empezarCharla(c, tarea, mientras = false){
       const [amb, id] = c.charla.split('.'); set([amb, 'dichas', id], dia());
-      nota(`💬 ${id}: ${c.resumen}`, 'charla');
-      const C = { n: sigId++, id: c.charla, quienes: [...c.entre], pila: [[...c.cuerpo]], acc: null, ops: null, tarea, ocupa: [] };
+      nota(`💬 ${id}: ${c.resumen}${c.roles ? ` (${Object.values(c.roles).map(nombre).join(', ')})` : ''}`, 'charla');
+      const C = { n: sigId++, id: c.charla, quienes: [...c.entre], pila: [[...c.cuerpo]], acc: null, ops: null, tarea, ocupa: [], resumen: c.resumen };
       if (!mientras) for (const q of C.quienes) { const a = { quien: q, verbo: 'charlar', dura: 60, charla: true }; mundo.empezar(a); C.ocupa.push(a); }   // (para el mundo: están conversando —si no conversan mientras hacen otra cosa—)
       charlas.push(C); return C.n;
     }
@@ -664,7 +675,9 @@
           if (it.op !== undefined) {
             const ops = []; while (top.length && top[0].op !== undefined) ops.push(top.shift());
             if (C.quienes.includes('ana') && get(['controla', 'ana']) && !auto) { C.ops = ops; break; }   // (la jugadora elige)
-            const p = ops.findIndex(o => o.propia); elegirEnCharla(C, ops, p >= 0 ? p : Math.floor(azar() * ops.length)); continue;
+            // (Ana sola: casi siempre lo suyo —#propia, tres veces más probable—, a veces otra cosa)
+            const w = ops.map(o => (o.propia ? 3 : 1)); let r = azar() * w.reduce((a, b) => a + b, 0), i = ops.length - 1; for (let j = 0; j < ops.length; j++) { r -= w[j]; if (r < 0) { i = j; break; } }
+            elegirEnCharla(C, ops, i); continue;
           }
           top.shift();
           if (it.q) { registro.push({ tipo: 'linea', q: it.q, t: it.t, piensa: !!it.piensa, hora: reloj(), charla: C.id }); C.acc = { decir: { q: it.q, t: it.t, piensa: !!it.piensa } }; mundo.empezar(C.acc); if (it.acto) for (const e of def(it.acto).deja || []) aplicar(e); }
@@ -732,7 +745,7 @@
       const P = enPregunta();
       return { escena: escena && { id: escena.id, resumen: D.escenas[escena.id].resumen, ops: escena.ops?.map(o => o.op) },
         pregunta: P && { de: nombre(P.pregunta.de), si: P.pregunta.si, no: P.pregunta.no }, fin, reloj: reloj(),
-        charla: (C => C && { id: C.id, quienes: C.quienes, resumen: D.charlas[C.id].resumen, ops: C.ops.map(o => o.op) })(charlas.find(C => C.ops)) };
+        charla: (C => C && { id: C.id, quienes: C.quienes, resumen: C.resumen, ops: C.ops.map(o => o.op) })(charlas.find(C => C.ops)) };
     }
 
     // ---------------------------------------------------------------- el comienzo: un escenario, o una partida guardada

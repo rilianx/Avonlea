@@ -12,4 +12,7 @@ export const { charla, dichas } = charlasDe('tejas_verdes', [
   'buenas_tardes_diana',
   'a_la_cama',
   'el_sr_cuthbert',
+  'que_lees',
+  'el_dia',
+  'la_gallina_otra_vez',
 ] as const)

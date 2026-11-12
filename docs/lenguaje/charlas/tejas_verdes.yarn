@@ -15,6 +15,9 @@ marilla: Buenos días, Ana. Lávate la cara y peina esas trenzas antes de sentar
 -> Buenos días, Srta. Cuthbert. Ya voy. #propia
 -> ¿No es una mañana preciosa? Desde la ventana se ve la Reina de las Nieves toda blanca.
     marilla: El cerezo no se va a ir a ninguna parte, Ana. El desayuno sí se enfría.
+    <<if quiere('marilla', 'ana').gte(3)>>
+    marilla: (Pero Marilla mira por la ventana, un momento, antes de volverse a la estufa.)
+    <<endif>>
 ===
 
 title: los_huevos
@@ -29,6 +32,7 @@ marilla: Ana, cuando puedas, trae los huevos del gallinero. Y no te quedes soña
 -> Sí, Srta. Cuthbert. #propia
 -> ¿Puedo ponerle nombre a la gallina pinta?
     marilla: Las gallinas no necesitan nombre, Ana. Necesitan que alguien recoja sus huevos.
+    <<deja(hechos.la_gallina_pinta)>>
 ===
 
 title: la_lena
@@ -65,6 +69,8 @@ ana: ¡Oh, Sr. Cuthbert! Pasaron tantas cosas que no sé por dónde empezar.
 -> Contarle todo, desde el principio. #propia
     ana: Primero, el camino estaba lleno de rocío, y cada gota era como un diamante pequeñito…
     matthew: Bueno, bueno. Cuéntame.
+    <<quiere('matthew', 'ana').suma(1)>>
+    <<quiere('ana', 'matthew').suma(1)>>
 -> Preguntarle por las vacas.
     matthew: Pues… están bien. La pinta da más leche que nunca.
 ===
@@ -117,6 +123,7 @@ marilla: A la cama, Ana. Y no te olvides de rezar.
 -> Buenas noches, Srta. Cuthbert. #propia
 -> ¿Puedo leer un ratito más?
     marilla: Ni un ratito. Las velas no crecen en los árboles.
+    <<quiere('marilla', 'ana').suma(-1)>>
 ===
 
 title: el_sr_cuthbert
@@ -128,4 +135,48 @@ repetir: dia
 diana: Buenas tardes, Sr. Cuthbert.
 matthew: Bueno… buenas tardes. Ana está… por ahí, creo.
 diana: Gracias, Sr. Cuthbert.
+===
+
+// ---- con roles: «alguien» es cualquiera de los que están ahí (o, entre paréntesis, solo de esos)
+
+title: que_lees
+resumen: Uno de los mayores le pregunta a Ana qué está leyendo.
+entre: alguien(marilla,matthew) ana
+si: hizo('ana', leer).desde('<', '2h')
+repetir: dia
+---
+alguien: ¿Qué estás leyendo, Ana?
+ana: Una historia de una dama encerrada en una torre. ¡Es trágicamente hermosa!
+<<if quiere(alguien, 'ana').gte(4)>>
+alguien: Bueno… me la tendrás que contar, entonces.
+<<quiere('ana', alguien).suma(1)>>
+<<else>>
+alguien: Mientras no se te olvide lo que tienes que hacer.
+<<endif>>
+===
+
+title: el_dia
+resumen: Dos que se cruzan comentan el día.
+entre: alguien otro
+si: tiempo.hora.entre(9, 18)
+repetir: dia
+peso: 1
+---
+alguien: Qué día más lindo.
+otro: Sí que lo es.
+===
+
+// ---- con memoria: lo que dejó otra charla, días después
+
+title: la_gallina_otra_vez
+resumen: Marilla se acuerda de la gallina pinta que Ana quería bautizar.
+entre: marilla ana
+si: hechos.la_gallina_pinta.desde('>=', '1d'), quiere('marilla', 'ana').gte(1)
+repetir: una_vez
+peso: 5
+---
+marilla: Y esa gallina pinta, Ana… ¿le pusiste nombre, al final?
+ana: ¡Se llama Cordelia! Pero solo en secreto, Srta. Cuthbert.
+marilla: (Marilla aprieta los labios para no sonreír.) Hm. Cordelia.
+<<quiere('marilla', 'ana').suma(1)>>
 ===

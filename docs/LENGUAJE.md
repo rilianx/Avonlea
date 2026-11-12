@@ -279,7 +279,16 @@ una vida es una receta, y una actividad («ir a clases»: ir, quedarse, volver) 
     `ir_a_hablar_con`; o la jugadora: «💬 hablar con…»). A quien está en algo callado (`callado`: dormir, rezar, estudiar)
     no se le habla. Pueden ir varias a la vez, cada una con los suyos; los que escuchan no empiezan otra cosa hasta que
     termina; quien va de paso no charla; si se separan, se corta.
-  - Si habla Ana y la maneja la jugadora, ella elige lo que dice; si no, Ana dice lo suyo (`#propia`).
+  - Si habla Ana y la maneja la jugadora, ella elige lo que dice; si no, casi siempre lo suyo (`#propia`, tres veces más
+    probable) y a veces otra cosa.
+  - **Roles:** en vez de una persona, `alguien` u `otro` (`entre: alguien(marilla,matthew) ana`): cualquiera de los que
+    están ahí, o solo de esos. El motor pone a la persona en su lugar en todo el guion (`alguien: ¿Qué lees?`,
+    `quiere(alguien, 'ana')`). Una charla sirve para muchos pares.
+  - **Cariño:** `quiere('marilla', 'ana')` es un número de −2 a 5, como en el juego (es el mismo del planificador). Lo
+    que dice Ana lo cambia (`<<quiere('matthew', 'ana').suma(1)>>`) y abre o cierra charlas (`<<if quiere(…).gte(3)>>`).
+    Lo que hay al empezar: `quiereDe`, en las vidas.
+  - **Memoria:** una opción deja un hecho (`<<deja(hechos.la_gallina_pinta)>>`), y otra charla, días después, se acuerda
+    (`si: hechos.la_gallina_pinta.desde('>=', '1d')`).
   - Las charlas de un lugar corren con sus vidas (`vidas: 'tejas_verdes'`). `node tools/mundo/dia.js` cuenta cuántas
     hubo, cuáles nunca salen y quiénes no se hablan (`--charlas`: cada una, con lo que se dijeron).
 - **Nada del mundo está escrito en el código: todo se declara.**
