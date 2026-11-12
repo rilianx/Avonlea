@@ -18,6 +18,8 @@ otro.
   que hacen, y se deslizan de casilla en casilla cuando van de un lugar a otro.
   - **La lupa**: tocando una casilla o una ficha se ve quién está, qué hace, junto a qué, en qué postura, con qué, y
     hasta qué hora.
+  - **El diario de cada uno**: se elige a la persona (o se toca su ficha) y se ve su día hasta ahora, cada cosa con su
+    hora, dónde y cuánto duró.
   - **Manejar a Ana**: su día se suspende; tocando una casilla, va; y se le puede hacer hacer lo de su día ahí. Al
     soltarla, vuelve a lo suyo.
 - **Un día en un minuto** (`node tools/mundo/dia.js`): vive unos días seguidos —una semana, en menos de un segundo—, saca
@@ -27,6 +29,7 @@ otro.
   ```
   node tools/mundo/dia.js                          # tres días, desde el viernes
   node tools/mundo/dia.js --dias 7 --desde 1 --semilla 3 --ver ana   # una semana, con otra semilla, y el diario de Ana
+  node tools/mundo/dia.js --dias 1 --desde 2 --diarios diarios/        # un día, y el diario de cada uno en su archivo
   ```
 
 ## Cómo está hecho

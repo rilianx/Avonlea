@@ -25,6 +25,8 @@ aside h3{margin:0 0 6px;font-size:13px;letter-spacing:.04em;text-transform:upper
 #diario{max-height:280px;overflow:auto;font-size:13px}#diario div{padding:1px 0}#diario .h{color:var(--mut);margin-right:6px;font-variant-numeric:tabular-nums}
 .cadena{font-size:12.5px;color:var(--mut)}.vacio{color:var(--mut);font-size:13px;font-style:italic}
 #ana{display:flex;flex-wrap:wrap;gap:6px}#ana .t{width:100%;font-size:13px;color:var(--mut)}
+#midiario{max-height:300px;overflow:auto;font-size:13.5px}#midiario div{display:flex;gap:8px;padding:1px 0}#midiario .h{color:var(--mut);font-variant-numeric:tabular-nums;min-width:40px}#midiario .d{color:var(--mut);margin-left:auto;white-space:nowrap}#midiario .ahora{font-weight:bold}
+#quien{font-size:13px;padding:2px 6px}
 </style></head><body>
 <header>
   <h1>Tejas Verdes</h1>
@@ -39,6 +41,7 @@ aside h3{margin:0 0 6px;font-size:13px;letter-spacing:.04em;text-transform:upper
   <section id="tablero"><svg id="svg" viewBox="0 0 900 500" role="img" aria-label="El tablero de Tejas Verdes: las casillas son los lugares, las fichas son las personas"></svg></section>
   <aside>
     <section><h3>La lupa</h3><div id="lupa"><div class="vacio">Toca una casilla o una ficha.</div></div></section>
+    <section><h3>El diario de <select id="quien"></select></h3><div id="midiario"></div></section>
     <section><h3>Ana</h3><div id="ana"></div></section>
     <section><h3>Lo que pasa</h3><div id="diario"></div></section>
     <section><h3>Cómo leer esto</h3><div style="font-size:13px;color:var(--mut)">Cada casilla es un lugar, cada ficha una persona con lo que está haciendo. Nadie las mueve: cada una vive su día (<code>docs/lenguaje/vidas/tejas_verdes.ts</code>), elige lo que corresponde a esa hora, y deja lo que hace si llega algo más importante. Puedes manejar a Ana: su día se suspende, la mueves tocando casillas, y al soltarla vuelve a lo suyo.</div></section>
@@ -9346,8 +9349,26 @@ let M, W, sel = null, reloj = null;
 const ahora = () => (M.get(['tiempo', 'dia']) - 1) * 1440 + Math.round(M.get(['tiempo', 'hora']) * 60);
 const hhmm = m => `${String(Math.floor((m % 1440) / 60)).padStart(2, '0')}:${String(Math.round(m % 60)).padStart(2, '0')}`;
 const SEMANA = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+// el diario de cada uno: cada vez que cambia lo que hace (o adónde va), una línea con su hora
+let DIARIOS = {};
+for (const q of QUIENES) { const o = document.createElement('option'); o.value = q; o.textContent = (D.personas[q] || q); $('quien').append(o); }
+$('quien').onchange = () => pintar();
+function anotar(){
+  const t = ahora();
+  for (const q of QUIENES) {
+    const p = W.E.personas[q]; if (!p) continue;
+    const w = que(q), txt = p.viaje ? 'va ' + ('a ' + NOMBRE(p.viaje.a).toLowerCase()).replace(/^a el /, 'al ') : w.txt, L = (DIARIOS[q] ||= []), u = L[L.length - 1];
+    if (!u || u.txt !== txt || u.l !== p.lugar) L.push({ t, txt, ico: p.viaje ? '🚶' : w.ico, l: p.lugar });
+  }
+}
+function midiario(){
+  const q = $('quien').value, L = DIARIOS[q] || [], t = ahora(), hoy = Math.floor(t / 1440);
+  const filas = L.map((x, i) => ({ ...x, hasta: L[i + 1]?.t ?? t, ahora: i === L.length - 1 })).filter(x => Math.floor(x.hasta / 1440) >= hoy && !(x.txt === '—' && x.hasta - x.t < 1));
+  $('midiario').innerHTML = filas.map(x => `<div class="${x.ahora ? 'ahora' : ''}"><span class="h">${hhmm(Math.max(x.t, hoy * 1440))}</span><span>${x.ico} ${esc(x.txt)}${x.txt.startsWith('va ') ? '' : ' <span style="color:var(--mut)">· ' + esc(NOMBRE(x.l)) + '</span>'}</span><span class="d">${x.ahora ? 'ahora' : Math.round(x.hasta - x.t) + ' min'}</span></div>`).join('') || '<div class="vacio">Todavía nada hoy.</div>';
+  const D_ = $('midiario'); D_.scrollTop = D_.scrollHeight;
+}
 function nuevo(){
-  pausar(); sel = null;
+  pausar(); sel = null; DIARIOS = {};
   const dia = +$('dia').value;
   W = Mundo(G); MundoMinimo.mundo = W; MundoMinimo.viajes = {}; W.E.t = (dia - 1) * 1440 + 6 * 60;
   M = Motor(D, { dia, hora: 6, vidas: 'tejas_verdes', historias: [], semilla: +$('semilla').value, lugares: CAMAS }, MundoMinimo);
@@ -9382,10 +9403,10 @@ function pintar(){
     h += `<g class="ficha${sel?.q === q ? ' sel' : ''}" data-q="${q}"><circle cx="${P[0]}" cy="${P[1]}" r="19" fill="${COLOR[q]}"/><text class="ini" x="${P[0]}" y="${P[1] + 6}" text-anchor="middle">${esc(M.nombre(q)[0])}</text><text class="ico" x="${P[0] + 13}" y="${P[1] - 13}">${w.ico}</text><title>${esc(M.nombre(q) + ': ' + w.txt)}</title></g>`;
   }
   $('svg').innerHTML = h;
-  lupa(); ana(); diario();
+  anotar(); lupa(); ana(); diario(); midiario();
 }
 $('svg').onclick = e => { const f = e.target.closest('.ficha'), c = e.target.closest('.casilla');
-  if (f) sel = { q: f.dataset.q }; else if (c) { if (get('controla', 'ana') && !esperandoAna()) { M.irA(c.dataset.l); } sel = { l: c.dataset.l }; } pintar(); };
+  if (f) { sel = { q: f.dataset.q }; $('quien').value = f.dataset.q; } else if (c) { if (get('controla', 'ana') && !esperandoAna()) { M.irA(c.dataset.l); } sel = { l: c.dataset.l }; } pintar(); };
 const esperandoAna = () => false;
 function barra(w, t){ return w.hasta ? `<div class="barra"><i style="width:${Math.round(100 * Math.max(0, Math.min(1, (t - w.desde) / Math.max(1, w.hasta - w.desde))))}%"></i></div>` : ''; }
 function fichaLupa(q, t){

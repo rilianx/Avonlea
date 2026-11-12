@@ -10,11 +10,14 @@
 //   variado      dos días seguidos de Ana no son iguales
 //   sin_trabas   nadie se queda trabado: algo que no se puede hacer («✘» del motor) pasa a veces —Diana llega y Ana ya
 //                se fue—, pero más de 6 veces en un día es que algo no tiene salida
-// Uso: node tools/mundo/dia.js [--dias 3] [--desde 5] [--semilla 1] [--ver ana] [--diario archivo.txt]
+// Uso: node tools/mundo/dia.js [--dias 3] [--desde 5] [--semilla 1] [--ver ana] [--diario archivo.txt] [--diarios carpeta]
+//   --ver ana        el diario de Ana, en la pantalla
+//   --diario f.txt   los diarios de todos, en un archivo
+//   --diarios dir    el de cada uno en su archivo: dir/ana.txt, dir/marilla.txt…
 const path = require('path'), fs = require('fs');
 const { datos } = require('../lenguaje/construir.js'), { Motor } = require('../lenguaje/motor.js'), { MundoMinimo } = require('./mundo_minimo.js'), { Mundo } = require('./mundo.js');
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d; };
-const DIAS = +arg('dias', 3), DESDE = +arg('desde', 5), SEMILLA = +arg('semilla', 1), VER = arg('ver', null), DIARIO = arg('diario', null);
+const DIAS = +arg('dias', 3), DESDE = +arg('desde', 5), SEMILLA = +arg('semilla', 1), VER = arg('ver', null), DIARIO = arg('diario', null), DIARIOS = arg('diarios', null);
 const D = datos(path.resolve(__dirname, '..', '..', 'docs', 'lenguaje')), G = Mundo.geografia();
 const QUIENES = Object.keys(D.vidas.tejas_verdes);
 const CAMAS = { ana: 'pieza', marilla: 'pieza_marilla', matthew: 'pieza_matthew', diana: 'cuesta_del_huerto' };
@@ -64,20 +67,26 @@ for (const q of QUIENES) {
 { const n = {}; for (const r of M.registro) if (/^✘/.test(r.t)) { const k = r.hora.split(',')[0] + ' ' + (r.t.match(/\(([^)]+)\)$/)?.[1] || ''); n[k] = (n[k] || 0) + 1; }
   for (const [k, c] of Object.entries(n)) regla('sin_trabas', c <= 6, `${k}: ${c} veces algo que no se podía`); }
 
-// lo que sale
-const texto = [];
-for (const q of QUIENES) {
-  texto.push(`\n${M.nombre(q)}`);
+// lo que sale: el diario de cada uno, por separado
+// (un lugar, con su nombre: el de las historias si lo es —La Cuesta del Huerto, no «h:os»—, si no el del mundo)
+const inv = Object.fromEntries(Object.entries(G.alias).map(([l, w]) => [w, l]));
+const lugarNombre = l => (D.lugares[l] || D.lugares[inv[l]])?.nombre || W.nombre(l);
+function diarioDe(q){
+  const L = [`${M.nombre(q)} — diario (semilla ${SEMILLA})`];
   let d0 = null;
   for (const x of diario(q)) {
-    if (dia(x.desde) !== d0) { d0 = dia(x.desde); texto.push(`  — día ${d0}, ${SEMANA[d0 % 7]}`); }
-    if (x.que === 'dormir' && x.hasta - x.desde > 60) { texto.push(`    ${hhmm(x.desde)}–${hhmm(x.hasta)}  duerme (${W.nombre(x.lugar)})`); continue; }
-    texto.push(`    ${hhmm(x.desde)}  ${x.que.replace(/_/g, ' ').padEnd(22)} ${String(Math.round(x.hasta - x.desde)).padStart(3)} min  ${x.que.startsWith('→') ? '' : W.nombre(x.lugar)}`);
+    if (dia(x.desde) !== d0) { d0 = dia(x.desde); L.push(`\n  día ${d0}, ${SEMANA[d0 % 7]}`); }
+    const min = Math.round(x.hasta - x.desde);
+    if (x.que === 'dormir' && min > 60) { L.push(`    ${hhmm(x.desde)}–${hhmm(x.hasta)}  duerme · ${lugarNombre(x.lugar)}`); continue; }
+    if (x.que.startsWith('→ ')) { L.push(`    ${hhmm(x.desde)}  va ${('a ' + lugarNombre(x.que.slice(2))).replace(/^a el /, 'al ')} (${min} min)`); continue; }
+    L.push(`    ${hhmm(x.desde)}  ${x.que.replace(/_/g, ' ').padEnd(22)} ${String(min).padStart(3)} min · ${lugarNombre(x.lugar)}`);
   }
+  return L.join('\n') + '\n';
 }
 const interrupciones = M.registro.filter(r => /^⤳/.test(r.t)).length;
-if (DIARIO) fs.writeFileSync(DIARIO, texto.join('\n') + '\n');
-if (VER) { const i = texto.findIndex(l => l === '\n' + M.nombre(VER)); console.log(texto.slice(i, texto.findIndex((l, j) => j > i && l.startsWith('\n'))).join('\n')); }
+if (DIARIO) fs.writeFileSync(DIARIO, QUIENES.map(diarioDe).join('\n'));
+if (DIARIOS) { fs.mkdirSync(DIARIOS, { recursive: true }); for (const q of QUIENES) fs.writeFileSync(path.join(DIARIOS, q + '.txt'), diarioDe(q)); console.log(`→ ${QUIENES.map(q => path.join(DIARIOS, q + '.txt')).join(', ')}`); }
+if (VER) console.log('\n' + diarioDe(VER));
 console.log(`\n${DIAS} días de Tejas Verdes (desde el ${DESDE}, semilla ${SEMILLA}) en ${ms} ms · ${interrupciones} interrupciones`);
 for (const q of QUIENES) { const cuenta = {}; for (const x of diario(q)) if (!x.que.startsWith('→') && x.que !== '·') cuenta[x.que] = (cuenta[x.que] || 0) + 1; console.log(`  ${M.nombre(q).padEnd(8)} ${Object.entries(cuenta).sort((a, b) => b[1] - a[1]).map(([k, n]) => `${k.replace(/_/g, ' ')} ${n}`).join(' · ')}`); }
 console.log(fallas.length ? `\n✘ ${fallas.length} reglas no se cumplen:\n  ` + fallas.slice(0, 30).join('\n  ') : '\n✔ todas las reglas de lo natural');
