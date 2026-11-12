@@ -26,6 +26,10 @@ otro.
   principal, así que las vidas y las historias siguen diciendo «el corral». Afuera, están juntos (`ve`, `oye`) los que
   están en el mismo cuadrante; la casa por dentro es aparte. Algunos muebles tienen su cuadrante: la cerca del corral no
   es donde están las vacas, y quien hace algo junto a ellos da unos pasos hasta ahí.
+  Quien va de un cuadrante a otro pasa por los de en medio, uno por uno (el camino más corto, rodeando la casa y el
+  granero), y mientras pasa está ahí: ve y lo ven. De la casa se sale por la puerta, al patio; a un lugar lejos, por el
+  borde del tablero que queda hacia allá (y de vuelta se entra por ahí). Quien va adonde está alguien, va a su
+  cuadrante, no solo a su zona. En el tablero, la ficha recorre los cuadrantes, con lo que le falta del camino punteado.
   - **La lupa**: tocando una casilla o una ficha se ve quién está, qué hace, junto a qué, en qué postura, con qué, y
     hasta qué hora, y lo que lleva. En una casilla, también cuánto hay de cada cosa ahí (los leños del granero).
   - **El diario de cada uno**: se elige a la persona (o se toca su ficha) y se ve su día hasta ahora, cada cosa con su

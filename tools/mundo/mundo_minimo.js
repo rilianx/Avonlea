@@ -56,7 +56,8 @@
         iniciar(); W.avanzarHasta(api.ahora());
         if (acc.mapa) {   // (la gente del pueblo aparece: sale ahora y llega ya)
           acc.de = vista(acc.quien); acc.deW = W.persona(acc.quien).lugar; acc.aW = W.lugarId(acc.a); acc.sale = api.ahora();
-          acc.fin = W.ir(acc.quien, acc.a, acc.ya || G.del_pueblo.includes(acc.quien) ? { minutos: 0 } : {});   // (lo dicho en una escena —correr al mar— es ya, como en el juego, para el motor) acc.como = W.persona(acc.quien).viaje?.como || 'pie';
+          { const o = acc.hacia && (W.E.personas[acc.hacia] || W.E.medios[acc.hacia]), l = o && !o.viaje && o.lugar; if (l && G.lugares[l]?.celda && G.lugares[l].vista === acc.a) acc.aW = l; }   // (adonde está alguien, en el tablero: a su cuadrante, no al de su zona)
+          acc.fin = W.ir(acc.quien, acc.aW, acc.ya || G.del_pueblo.includes(acc.quien) ? { minutos: 0 } : {});   // (lo dicho en una escena —correr al mar— es ya, como en el juego, para el motor) acc.como = W.persona(acc.quien).viaje?.como || 'pie';
           MundoMinimo.viajes[acc.quien] = acc;
         } else {
           acc.fin = api.ahora() + (acc.ya ? 0 : acc.decir ? 1 : acc.dura || 0);
@@ -70,7 +71,7 @@
       // (un viaje: cuando el mundo dice que llegó; si el mundo no lo tiene en camino —una partida cargada—, se le vuelve a dar)
       listo(acc){
         iniciar(); if (!acc.mapa) return api.ahora() >= acc.fin;
-        const p = W.persona(acc.quien); if (!p.viaje && p.lugar !== acc.aW && api.ahora() < acc.fin) W.ir(acc.quien, acc.a, { minutos: acc.fin - api.ahora() });
+        const p = W.persona(acc.quien); if (!p.viaje && p.lugar !== acc.aW && api.ahora() < acc.fin) W.ir(acc.quien, acc.aW, { minutos: acc.fin - api.ahora() });
         W.avanzarHasta(api.ahora()); return !W.persona(acc.quien).viaje;
       },
       terminar(acc){ if (acc.mapa) { contar(); if (MundoMinimo.viajes[acc.quien] === acc) delete MundoMinimo.viajes[acc.quien]; } },

@@ -34,6 +34,44 @@
       if (!minutos.avisado?.[a + '>' + b]) { (minutos.avisado ||= {})[a + '>' + b] = 1; console.warn(`[mundo] no sé cuánto hay de «${a}» a «${b}»: 10 min`); }
       return 10;
     }
+    // EL CAMINO POR EL TABLERO (los cuadrantes de Tejas Verdes, geografia.json «tablero»): quien va de un cuadrante a
+    // otro pasa por los de en medio, uno por uno —y mientras pasa, está ahí: ve y lo ven—. De la casa se sale por la
+    // puerta (al patio); a un lugar lejos, por el borde del tablero que queda hacia allá (y de vuelta, se entra por ahí)
+    const TB = G.tablero, celda = l => G.lugares[l]?.celda, centro = l => G.puntos[l]?.[0]?.mapa;
+    const PUERTA = TB?.cosas.find(o => o.que === 'casa')?.puerta;
+    const deLaCasa = l => !celda(l) && G.puntos[l]?.[0]?.adentro && PUERTA && centro(l) && Math.hypot(centro(l)[0] - PUERTA[0], centro(l)[1] - PUERTA[1]) < 80;
+    const CELDAS = TB ? Object.keys(G.lugares).filter(celda) : [];
+    function entrada(l){   // (por dónde entra al tablero, o sale, quien viene de ese lugar o va a él)
+      if (deLaCasa(l)) return G.alias.tejas_verdes;
+      const p = centro(l) || G.dibujo?.puertas?.[G.puntos[l]?.[0]?.camino]; if (!p) return null;
+      let m = null, d0 = Infinity; for (const c of CELDAS) { const q = centro(c), d = Math.hypot(q[0] - p[0], q[1] - p[1]); if (d < d0) { d0 = d; m = c; } } return m;
+    }
+    function rutaCeldas(a, b){   // (de cuadrante en cuadrante, también en diagonal: el camino más corto)
+      if (a === b) return [];
+      const id = ([i, j]) => 'c:' + i + ',' + j, dist = { [a]: 0 }, prev = {}, abiertos = [a];
+      while (abiertos.length) {
+        abiertos.sort((x, y) => dist[x] - dist[y]); const u = abiertos.shift(); if (u === b) break;
+        const [i, j] = celda(u);
+        for (let di = -1; di <= 1; di++) for (let dj = -1; dj <= 1; dj++) { const v = id([i + di, j + dj]); if ((!di && !dj) || !G.lugares[v] || (G.lugares[v].edificio && v !== b)) continue;
+          const d = dist[u] + Math.hypot(di, dj); if (d < (dist[v] ?? Infinity)) { dist[v] = d; prev[v] = u; abiertos.push(v); } }
+      }
+      const L = []; for (let x = b; x !== a; x = prev[x]) { if (x == null) return []; L.unshift(x); } return L;
+    }
+    // (los pasos de un viaje por el tablero: cada cuadrante, a qué minuto del viaje; y lo que dura todo)
+    function pasosDe(de, a, como, total){
+      if (!TB || de == null || a == null) return null;
+      const ca = celda(de), cb = celda(a);
+      if (!ca && !cb && deLaCasa(de) === deLaCasa(a)) return null;   // (de la casa a la casa, o de lejos a lejos: no pasa por el tablero)
+      const desde = ca ? de : entrada(de), hasta = cb ? a : entrada(a); if (!desde || !hasta) return null;
+      const v = G.velocidades[como] * G.minuto_de_juego_s, pasos = []; let t = 0, ant = desde;
+      for (const c of rutaCeldas(desde, hasta)) { t += Math.hypot(centro(c)[0] - centro(ant)[0], centro(c)[1] - centro(ant)[1]) / v; pasos.push({ l: c, t }); ant = c; }
+      if (ca && cb) return { pasos, total: Math.max(t, .5) };
+      if (!ca && !cb) {   // (de lejos a la casa, o al revés: cruza el tablero hasta la puerta, o desde ella)
+        const fuera = deLaCasa(de) ? .5 : Math.max(total - t - .5, .5);
+        return { pasos: [{ l: desde, t: fuera }, ...pasos.map(p => ({ l: p.l, t: fuera + p.t }))], total: Math.max(total, fuera + t + .5) }; }
+      if (!ca) { const fuera = Math.max(total - t, .5); return { pasos: [{ l: desde, t: fuera }, ...pasos.map(p => ({ l: p.l, t: fuera + p.t }))], total: fuera + t }; }   // (llega al tablero, y lo cruza)
+      return { pasos, total: Math.max(total, t + .5) };   // (cruza el tablero, y sigue)
+    }
     // quiénes van con alguien: los que van en su medio (y el medio), y los que lo siguen a pie
     const conEl = k => { const p = persona(k), L = []; if (p.en !== 'nada') { L.push(p.en); for (const [q, o] of Object.entries(E.personas)) if (q !== k && o.en === p.en) L.push(q); }
       for (const [q, o] of Object.entries(E.personas)) if (q !== k && o.sigue === k && o.en === 'nada') L.push(q); return L; };
@@ -42,29 +80,32 @@
     // quedaba a un viaje detenido)
     function ir(k, a, o = {}){
       const p = persona(k), de = p.lugar, de_ = l => (l == null ? '' : ('de ' + nombre(l)).replace(/^de el /, 'del ')), a_ = l => ('a ' + nombre(l)).replace(/^a el /, 'al '); a = lugarId(a);
-      const como = modo(k, p.en), m = o.minutos ?? minutos(de, a, como), v = { de, a, sale: E.t, llega: E.t + m, como };
+      const como = modo(k, p.en), P = o.minutos === 0 ? null : pasosDe(de, a, como, o.minutos ?? minutos(de, a, como));   // (por el tablero: de cuadrante en cuadrante)
+      const m = P ? P.total : o.minutos ?? minutos(de, a, como), v = { de, a, sale: E.t, llega: E.t + m, como, ...(P ? { pasos: P.pasos.map(x => ({ l: x.l, t: E.t + x.t })), i: 0 } : {}) };
       for (const q of [k, ...conEl(k)]) { const x = quien(q); x.viaje = { ...v }; }
       if (m > 0) nota(`${k} va ${de_(de)} ${a_(a)} (${como}, ${Math.round(m)} min)`);
       else avanzarHasta(E.t);
       return v.llega;
     }
-    // detenerse a mitad de camino: se queda donde salió (el mundo no tiene «medio camino»: está en un lugar o va a otro)
+    // detenerse a mitad de camino: se queda donde salió, o, en el tablero, en el cuadrante que iba pisando (el mundo no
+    // tiene «medio camino»: está en un lugar o va a otro)
     function parar(k){ const v = persona(k).viaje; if (!v) return 0; const resta = v.llega - E.t; for (const q of [k, ...conEl(k)]) { const x = quien(q); if (x.viaje) x.viaje = null; } nota(`${k} se detiene`); return resta; }
     // el reloj: lo que pasa hasta esa hora (los que llegan, llegan)
     function avanzarHasta(t){
       for (;;) {   // (en orden: quien llega, quien termina lo que hacía)
         let prox = null; const ver = (k, x, cuando, que) => { if (cuando <= t && (!prox || cuando < prox.cuando)) prox = { k, x, cuando, que }; };
-        for (const L of [E.personas, E.medios]) for (const [k, x] of Object.entries(L)) { if (x.viaje) ver(k, x, x.viaje.llega, 'llega'); if (x.ocupado) ver(k, x, x.ocupado.hasta, 'termina'); }
+        for (const L of [E.personas, E.medios]) for (const [k, x] of Object.entries(L)) { if (x.viaje) { const ps = x.viaje.pasos?.[x.viaje.i]; if (ps) ver(k, x, ps.t, 'pasa'); else ver(k, x, x.viaje.llega, 'llega'); } if (x.ocupado) ver(k, x, x.ocupado.hasta, 'termina'); }
         if (!prox) break;
         const { k, x, cuando, que } = prox; E.t = Math.max(E.t, cuando);
+        if (que === 'pasa') { x.lugar = x.viaje.pasos[x.viaje.i].l; x.viaje.i++; continue; }   // (un cuadrante más del camino)
         if (que === 'llega') { x.lugar = x.viaje.a; x.viaje = null; nota(`${k} llega ${a(x.lugar)}`); } else { nota(`${k} termina: ${x.ocupado.que}`); x.ocupado = null; }
       }
       E.t = Math.max(E.t, t);
     }
     // (lo próximo que pasa: alguien que llega, o que termina lo que hacía)
-    const proximo = () => { let m = Infinity; for (const L of [E.personas, E.medios]) for (const x of Object.values(L)) { if (x.viaje) m = Math.min(m, x.viaje.llega); if (x.ocupado) m = Math.min(m, x.ocupado.hasta); } return m; };
+    const proximo = () => { let m = Infinity; for (const L of [E.personas, E.medios]) for (const x of Object.values(L)) { if (x.viaje) m = Math.min(m, x.viaje.pasos?.[x.viaje.i]?.t ?? x.viaje.llega); if (x.ocupado) m = Math.min(m, x.ocupado.hasta); } return m; };
     return {
-      E, G, nombre, al: a, del: de, lugarId, cosasDe, persona, minutos, ir, parar, avanzarHasta, proximo, nota,
+      E, G, nombre, al: a, del: de, lugarId, cosasDe, pasosDe, persona, minutos, ir, parar, avanzarHasta, proximo, nota,
       ahora: () => E.t,
       poner(k, l){ const x = quien(k) || persona(k); x.lugar = lugarId(l); x.viaje = null; },
       // dónde está, como lo dicen las historias (el granero queda en Tejas Verdes; quien va de camino, todavía donde salió)

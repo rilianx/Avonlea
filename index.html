@@ -19861,7 +19861,8 @@ comBoton();
         if (F.fase === 0) {
           if (ll.verbo === 'correr_a') set(['mundo', ll.args[0], 'en'], 'nada');
           decir(ll);
-          F.acc = { quien: ll.args[0], verbo: ll.verbo, a: val(ll.args[1]), mapa: true, ya: !!T.ya };
+          const c = ll.args[1]?.camino, hacia = c && c[0] === 'mundo' && c[2] === 'lugar' ? c[1] : null;   // (adonde está alguien: el mundo sabe más fino dónde —en qué cuadrante—)
+          F.acc = { quien: ll.args[0], verbo: ll.verbo, a: val(ll.args[1]), mapa: true, ya: !!T.ya, ...(hacia ? { hacia } : {}) };
           const P = T.pila[T.pila.length - 3]; if (P && P.k === 'receta' && P.lista) F.acc.de_paso = true;   // (una parada de un viaje: el «por cada» de una ruta)
           mundo.empezar(F.acc); F.fase = 1;
         }

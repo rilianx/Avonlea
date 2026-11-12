@@ -50,12 +50,14 @@ const MEDIR = `(() => {
   const nombreZona = Object.fromEntries(ZONAS.map(z => [z, INFO[z].nombre])), planZona = Object.fromEntries(ZONAS.map(z => [z, INFO[z].plan]));
   for (const z of ZONAS) { delete P[z]; delete INFO[z]; }
   const cubre = (A, i, j) => { const x = TB.x0 + i * TB.c, y = TB.y0 + j * TB.c, w = Math.max(0, Math.min(x + TB.c, A.x + A.w) - Math.max(x, A.x)), h = Math.max(0, Math.min(y + TB.c, A.y + A.h) - Math.max(y, A.y)); return w * h / (TB.c * TB.c); };   // (cuánto del cuadrante cae adentro)
+  const EDIFICIOS = [{ x: GG.x - GG.w / 2, y: GG.y - 130, w: GG.w, h: 130 }, { x: BARN.x - BARN.w / 2, y: BARN.y - 110, w: BARN.w, h: 110 }];
   const zonaDe = (i, j) => { if (cubre(AREAS.corral, i, j) > .25) return 'corral';
     let m = null, d0 = Infinity; for (const z of ZONAS) if (z !== 'corral') {   // (el corral: solo lo que cubre su cerco)
     const d = Math.hypot(ancla[z][0] - i, ancla[z][1] - j); if (d < d0) { d0 = d; m = z; } } return m; };
   for (let j = 0; j < TB.filas; j++) for (let i = 0; i < TB.cols; i++) {
     const z = zonaDe(i, j), id = cid([i, j]);
-    P[id] = [{ ...mapa(TB.x0 + (i + .5) * TB.c, TB.y0 + (j + .5) * TB.c), celda: 1 }]; INFO[id] = { nombre: nombreZona[z], ...(planZona[z] ? { plan: planZona[z] } : {}), vista: z, celda: [i, j], zona: z };
+    const bajo = EDIFICIOS.some(A => cubre(A, i, j) > .3);   // (debajo de la casa o del granero: no se pasa, se rodea)
+    P[id] = [{ ...mapa(TB.x0 + (i + .5) * TB.c, TB.y0 + (j + .5) * TB.c), celda: 1 }]; INFO[id] = { nombre: nombreZona[z], ...(planZona[z] ? { plan: planZona[z] } : {}), vista: z, celda: [i, j], zona: z, ...(bajo ? { edificio: true } : {}) };
   }
   for (const z of ZONAS) alias[z] = cid(ancla[z]);
   const muebles = Object.fromEntries(Object.entries({ 'corral.vacas': WP.corral, 'corral.cerca': [AREAS.corral.x + AREAS.corral.w / 2, AREAS.corral.y + AREAS.corral.h - 10], 'tejas_verdes.tina': [GG.x + 130, GG.y + 80], 'tejas_verdes.porche': [GG.x, GG.y + 40] }).map(([k, p]) => [k, cid(celdaDe(...p))]));

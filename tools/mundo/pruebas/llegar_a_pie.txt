@@ -1,8 +1,11 @@
-# a pie por el mapa real: de Tejas Verdes a la escuela, y a la playa de White Sands (el camino de la costa)
+# a pie por el mapa real: de Tejas Verdes a la escuela (cruzando el tablero de la casa), y a la playa de White Sands (el camino de la costa)
 nueva 3 09:00
 ir escuela
-avanzar 5m
-espera mundo.ana.lugar=cocina
+avanzar 1m
+espera mundo.ana.lugar=tejas_verdes
+# (sale por la puerta y cruza el tablero de cuadrante en cuadrante; a los 5 minutos va saliendo por el borde hacia la escuela)
+avanzar 4m
+espera mundo.ana.lugar=huerta
 avanzar 10m
 espera mundo.ana.lugar=escuela
 ir playa
