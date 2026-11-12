@@ -8,6 +8,7 @@
 //   escuela      los días de clases, Ana y Diana van, y están en la escuela a mediodía
 //   sin_aburrir  nadie pasa más de una hora seguida «descansando» (es lo que hace cuando no tiene nada)
 //   variado      dos días seguidos de Ana no son iguales
+//   la_casa      la casa no se descuida: nunca más de 6 platos sucios, y nunca falta leña para cocinar
 //   sin_trabas   nadie se queda trabado: algo que no se puede hacer («✘» del motor) pasa a veces —Diana llega y Ana ya
 //                se fue—, pero más de 6 veces en un día es que algo no tiene salida
 // Uso: node tools/mundo/dia.js [--dias 3] [--desde 5] [--semilla 1] [--ver ana] [--diario archivo.txt] [--diarios carpeta]
@@ -29,10 +30,11 @@ const W = Mundo(G); MundoMinimo.mundo = W; MundoMinimo.viajes = {};
 W.E.t = (DESDE - 1) * 1440;
 const M = Motor(D, { dia: DESDE, hora: 0, vidas: 'tejas_verdes', historias: [], semilla: SEMILLA, lugares: { ...CAMAS, calesa: 'corral' } }, MundoMinimo);
 // (cada 5 minutos: qué está haciendo cada uno —su acción, o su viaje— y dónde, para el diario y las reglas)
-const PASO = 5, foto = {}; for (const q of QUIENES) foto[q] = [];
+const PASO = 5, foto = {}, casa = []; for (const q of QUIENES) foto[q] = [];
 const fin = (DESDE - 1 + DIAS) * 1440;
 for (let m = (DESDE - 1) * 1440; m <= fin; m += PASO) {
   M.alTiempo(m); W.avanzarHasta(m);
+  casa.push({ m, ...Object.fromEntries(Object.keys(D.cosas.cocina).map(x => [x, M.get(['cosas', 'cocina', x])])) });
   for (const q of QUIENES) { const p = W.E.personas[q] || {}, h = M.haciendo(q), quieta = h.length > 1 && /^(quedarse|esperar)$/.test(h[h.length - 1]) ? h[h.length - 2] : '·';   // (quedarse en clase: «ir a clases»)
     foto[q].push({ m, lugar: p.lugar, que: p.viaje ? `→ ${p.viaje.a}` : p.ocupado?.que || quieta, hace: h }); }
 }
@@ -50,6 +52,8 @@ function diario(q){
 }
 const fallas = [], dia = m => Math.floor(m / 1440) + 1;
 const regla = (id, ok, txt) => { if (!ok) fallas.push(`${id}: ${txt}`); };
+{ const p = casa.find(c => c.platos_sucios > 6); if (p) regla('la_casa', false, `${p.platos_sucios} platos sucios a las ${hhmm(p.m)} del día ${dia(p.m)}`); }
+for (const r of M.registro) if (/^✘ cocinar: no se puede/.test(r.t)) { regla('la_casa', false, `${r.hora}: no hay leña para cocinar`); break; }
 for (const q of QUIENES) {
   const F = foto[q], en = (d, h) => F.find(f => f.m === (d - 1) * 1440 + h * 60);
   for (let d = DESDE; d < DESDE + DIAS; d++) {
@@ -83,11 +87,12 @@ function diarioDe(q){
   }
   return L.join('\n') + '\n';
 }
-const interrupciones = M.registro.filter(r => /^⤳/.test(r.t)).length;
+const interrupciones = M.registro.filter(r => /^⤳/.test(r.t)).length, retomas = M.registro.filter(r => /^↩/.test(r.t)).length;
 if (DIARIO) fs.writeFileSync(DIARIO, QUIENES.map(diarioDe).join('\n'));
 if (DIARIOS) { fs.mkdirSync(DIARIOS, { recursive: true }); for (const q of QUIENES) fs.writeFileSync(path.join(DIARIOS, q + '.txt'), diarioDe(q)); console.log(`→ ${QUIENES.map(q => path.join(DIARIOS, q + '.txt')).join(', ')}`); }
 if (VER) console.log('\n' + diarioDe(VER));
-console.log(`\n${DIAS} días de Tejas Verdes (desde el ${DESDE}, semilla ${SEMILLA}) en ${ms} ms · ${interrupciones} interrupciones`);
+console.log(`\n${DIAS} días de Tejas Verdes (desde el ${DESDE}, semilla ${SEMILLA}) en ${ms} ms · ${interrupciones} interrupciones, ${retomas} retomadas`);
+{ const u = casa[casa.length - 1], max = x => Math.max(...casa.map(c => c[x])), min = x => Math.min(...casa.map(c => c[x])); console.log(`  la casa: pan ${min('pan')}–${max('pan')} · leña ${min('lena')}–${max('lena')} · leche hasta ${max('leche')} · mantequilla ${u.mantequilla} al final · platos sucios hasta ${max('platos_sucios')}`); }
 for (const q of QUIENES) { const cuenta = {}; for (const x of diario(q)) if (!x.que.startsWith('→') && x.que !== '·') cuenta[x.que] = (cuenta[x.que] || 0) + 1; console.log(`  ${M.nombre(q).padEnd(8)} ${Object.entries(cuenta).sort((a, b) => b[1] - a[1]).map(([k, n]) => `${k.replace(/_/g, ' ')} ${n}`).join(' · ')}`); }
 console.log(fallas.length ? `\n✘ ${fallas.length} reglas no se cumplen:\n  ` + fallas.slice(0, 30).join('\n  ') : '\n✔ todas las reglas de lo natural');
 process.exit(fallas.length ? 1 : 0);

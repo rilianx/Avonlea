@@ -25,13 +25,14 @@ function datos(raiz){
       voces.push(...E.voces.map(v => ({ ...v, de: h })));
     }
     // (las vidas: lo que cada uno hace todos los días —docs/lenguaje/vidas/—; sus verbos, con los demás)
-    const vidas = {};
+    const vidas = {}, cosas = {};
     for (const f of fs.existsSync(path.join(raiz, 'vidas')) ? fs.readdirSync(path.join(raiz, 'vidas')).filter(f => f.endsWith('.ts')) : []) {
       const m = req('vidas/' + f.replace(/\.ts$/, '.js')), id = f.replace(/\.ts$/, '');
       for (const v of Object.values(m)) if (typeof v === 'function' && v.def) verbos[v.verbo] = v.def;
       vidas[id] = Object.fromEntries((m.vidas || []).map(v => [v.vida, v.hace]));
+      for (const v of Object.values(m)) if (v && v._cosas) cosas[v._cosas.ambito] = v._cosas.defs;   // (las cosas de la casa: cuántas hay al empezar)
     }
-    const D = { vidas, personas: mundo.personas, lugares: mundo.lugares, rutas: mundo.rutas, medios: mundo.medios, nombrables: mundo.nombrables, estados: estado.estados,
+    const D = { vidas, cosas, personas: mundo.personas, lugares: mundo.lugares, rutas: mundo.rutas, medios: mundo.medios, nombrables: mundo.nombrables, estados: estado.estados,
       cualidades: estado.cualidades, verbos, ana_sola: ana.ana_sola, opcion_no: ana.opcion_no, historias, escenas, voces };
     // (las funciones —un verbo nombrado en «con»— van como su nombre)
     return JSON.parse(JSON.stringify(D, (k, v) => typeof v === 'function' ? v.verbo : v));

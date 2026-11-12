@@ -29,6 +29,7 @@
       if (c[0] === 'intentos') return 0;
       if (c[0] === 'encargo') return 'pendiente';
       if (c[0] === 'historia') return 'no_empezada';
+      if (c[0] === 'cosas') return D.cosas?.[c[1]]?.[c[2]]?.inicial ?? 0;
     }
     const get = c => (k(c) in S ? S[k(c)] : defecto(c));
     const set = (c, v) => { S[k(c)] = v; };
@@ -73,6 +74,7 @@
       if (e.verbo) return instantaneo(e);
       if (e.e === 'deja') set(e.camino, e.valor === undefined ? dia() : val(e.valor));
       else if (e.e === 'olvida') delete S[k(e.camino)];
+      else if (e.e === 'suma' && e.camino[0] === 'cosas') set(e.camino, Math.max(0, get(e.camino) + e.n));   // (las cosas: nunca menos de cero)
       else if (e.e === 'suma') { const d = D.cualidades[e.camino[2]], r = d ? d.rango : [-1e9, 1e9]; set(e.camino, Math.max(r[0], Math.min(r[1], get(e.camino) + e.n))); nota(`${nombre(e.camino[1])}: ${e.camino[2]}${e.camino[3] ? ' hacia ' + nombre(e.camino[3]) : ''} ${e.n > 0 ? '+' : ''}${e.n} → ${get(e.camino)}`); }
       else if (e.e === 'log') nota('📔 ' + e.texto);
       else if (e.e === 'marca') nota('📖 ' + e.id, 'momento');
@@ -168,9 +170,17 @@
           if (ll.verbo === 'quedarse') { F.fase = 5; F.lugar = lugarDe(q); return; }
           if (d.deja && d.deja.length && d.deja.every(yaEs)) return { vale: true };   // (lo que deja ya es cierto: se salta)
           if (d.pide && !cumple(d.pide)) { nota(`✘ ${ll.verbo}: no se puede (${nombre(ll.args[0])})`); return { vale: false }; }
+          if (d.solo && usadoPorOtro(q, d)) { nota(`✘ ${ll.verbo}: ${d.junto_a} lo está usando otro (${nombre(q)})`); return { vale: false }; }
+          for (const e of d.empieza || []) aplicar(e);
           decir(ll);
           F.fase = 3;
-          if (d.dura) { F.acc = { quien: ll.args[0], verbo: ll.verbo, args: ll.args, dura: aMin(d.dura), ya: !!T.ya, ...(d.donde ? { donde: d.donde } : {}), ...(d.junto_a ? { junto_a: d.junto_a } : {}), ...(d.postura ? { postura: d.postura } : {}), ...(d.usa ? { usa: d.usa } : {}) }; mundo.empezar(F.acc); F.fase = 1; }   // (y lo que dice de sí, para el dibujo)
+          if (d.dura) {
+            // (lo que dejó a medias hoy, lo retoma: le falta lo que le faltaba)
+            const r = resto(q, ll.verbo); F.dura = r ?? aMin(d.dura); F.t0 = t;
+            if (r != null) nota(`↩ ${nombre(q)} retoma ${ll.verbo} (le faltan ${Math.round(r)} min)`, 'momento');
+            delete S[k(['resto', q, ll.verbo])]; delete S[k(['resto_dia', q, ll.verbo])];
+            F.acc = { quien: ll.args[0], verbo: ll.verbo, args: ll.args, dura: F.dura, ya: !!T.ya, ...(d.donde ? { donde: d.donde } : {}), ...(d.junto_a ? { junto_a: d.junto_a } : {}), ...(d.postura ? { postura: d.postura } : {}), ...(d.usa ? { usa: d.usa } : {}) }; mundo.empezar(F.acc); F.fase = 1;   // (y lo que dice de sí, para el dibujo)
+          }
           return;
         }
         if (F.fase === 1) { if (!mundo.listo(F.acc)) return { espera: { accion: F.acc } }; mundo.terminar?.(F.acc); F.fase = 3; return; }
@@ -257,8 +267,9 @@
         const ops = F.p.elige.map((o, i) => ({ o, i })).filter(({ o }) => (o.si == null || cumple(o.si)) && puede(o.hace));
         if (!ops.length) return { vale: false };
         const pm = Math.max(...ops.map(x => x.o.prioridad || 0)), top = ops.filter(x => (x.o.prioridad || 0) === pm);
-        let r = azar() * top.reduce((n, x) => n + (x.o.peso ?? 1), 0), ch = top[top.length - 1];
-        for (const x of top) { r -= x.o.peso ?? 1; if (r < 0) { ch = x; break; } }
+        const peso = x => (x.o.peso ?? 1) * (x.o.hace.verbo && resto(x.o.hace.args[0], x.o.hace.verbo) != null ? 4 : 1);   // (lo que dejó a medias, más probable)
+        let r = azar() * top.reduce((n, x) => n + peso(x), 0), ch = top[top.length - 1];
+        for (const x of top) { r -= peso(x); if (r < 0) { ch = x; break; } }
         F.prio = pm; F.cual = ch.i; F.fase = 1; T.pila.push(pasoMarco(ch.o.hace, F.ctx));
       },
       // (repetir: el paso, una y otra vez, mientras se cumpla «mientras»; si no hubo nada que hacer, o no tomó tiempo, un respiro)
@@ -319,12 +330,24 @@
     const REVISAR = 5;   // (cada cuántos minutos se mira si hay algo más importante)
     // (cortar lo que hay encima de un marco: lo que el mundo estaba haciendo se cancela; las recetas a medias dejan lo suyo)
     function cortarDesde(T, n){
-      for (const G of T.pila.slice(n + 1).reverse()) { if (G.acc && mundo.cancelar) mundo.cancelar(G.acc); if (G.k === 'receta') dejar(G); }
+      for (const G of T.pila.slice(n + 1).reverse()) {
+        if (G.acc && mundo.cancelar) mundo.cancelar(G.acc);
+        if (G.k === 'receta') dejar(G);
+        if (G.k === 'primitivo' && G.fase === 1 && G.acc) {   // (a medias: se guarda lo que le faltaba —lo retoma hoy—, y deja lo suyo)
+          const hecho = t - G.t0, falta = G.dura - hecho, q = G.ll.args[0];
+          if (hecho >= 1 && falta >= 1) { set(['resto', q, G.ll.verbo], falta); set(['resto_dia', q, G.ll.verbo], dia()); }
+          for (const e of def(G.ll).si_se_deja || []) aplicar(e);
+        }
+      }
       T.pila.length = n + 1;
     }
     function dejar(F){ if (F.dejada) return; F.dejada = true; for (const e of def(F.ll).si_se_deja || []) aplicar(e); }
     const pasoMarco = (p, ctx) => (p.elige ? { k: 'elegir', p, ctx, fase: 0 } : p.repite ? { k: 'repetir', p, ctx, fase: 0 } : marco(p, ctx));
-    const puede = ll => { if (ll.elige || ll.repite) return true; const d = def(ll); return !d.pide || d.tipo === 'primitivo' && (ll.verbo === 'esperar' || ll.verbo === 'quedarse') || cumple(d.pide); };
+    const puede = ll => { if (ll.elige || ll.repite) return true; const d = def(ll); if (d.solo && usadoPorOtro(ll.args[0], d)) return false; return !d.pide || d.tipo === 'primitivo' && (ll.verbo === 'esperar' || ll.verbo === 'quedarse') || cumple(d.pide); };
+    // (junto a algo que es de uno a la vez —el fregadero—: ¿lo está usando otro, ahí mismo?)
+    const usadoPorOtro = (q, d) => tareas.some(U => !U.fin && U.quien !== q && U.pila.some(G => G.k === 'primitivo' && G.fase === 1 && G.acc && G.acc.junto_a === d.junto_a && G.acc.donde === d.donde));
+    // (lo que le faltaba a algo que dejó a medias hoy: los minutos; si no, nada)
+    const resto = (q, v) => (get(['resto_dia', q, v]) === dia() ? get(['resto', q, v]) ?? null : null);
     const estaEn = (q, l) => lugarDe(q) === l;   // (donde se hace algo: ahí mismo —fumar en el porche no es en la cocina—)
     // (el azar, con semilla: la misma partida da lo mismo; se guarda con ella)
     function azar(){ let x = S['azar'] ?? ((escenario.semilla ?? 1) >>> 0); x = (Math.imul(x ^ 0x5bd1e995, 1664525) + 1013904223) >>> 0; S['azar'] = x; return x / 4294967296; }

@@ -212,6 +212,21 @@ una vida es una receta, y una actividad («ir a clases»: ir, quedarse, volver) 
   `hizo('marilla', lavar_platos).desde('<', '1h')`.
 - **`tiempo.semana`**: el día de la semana (el día 7 es domingo, como en el juego). `tiempo.hora.entre(21, 6)` cruza la
   medianoche, y `tiempo.hora.desde(15.5)` es desde las tres y media.
+- **Las cosas existen** (`cosasDe(lugar, {...})`): la casa tiene pan, leña, leche, mantequilla y platos sucios, con
+  cuántos hay al empezar. Son números (`cosas.pan.lt(3)`, `cosas.lena.suma(-1)`, `cosas.platos_sucios.vale(0)`) que
+  nunca bajan de cero. Las acciones los piden (`pide`), los cambian al empezar (`empieza`) y al terminar (`deja`), y
+  dicen qué queda si las cortan (`si_se_deja`). Así se hace lo que hace falta: no se lava si no hay platos sucios, no
+  se amasa si queda pan, y Matthew parte leña cuando se acaba.
+  ```ts
+  export const lavar_platos = primitivo('lavar_platos', (_q: Persona) => ({ donde: 'cocina', junto_a: 'fregadero', dura: '20m', solo: true,
+    pide: cosas.platos_sucios.gt(0), deja: [cosas.platos_sucios.vale(0)] }))
+  ```
+- **`solo: true`**: junto a eso cabe uno a la vez (el fregadero, la estufa). Si otro lo está usando, no se puede (ni
+  se elige). Así Ana y Marilla no lavan los platos juntas.
+- **Lo de la casa, una vez**: un hecho de la casa (`hechos.huevos_recogidos.hoy`), no de una persona: si Ana recogió
+  los huevos, Marilla no va.
+- **Retomar lo interrumpido**: lo que se corta a medias guarda lo que le faltaba. La próxima vez que esa persona lo
+  hace ese día, le falta solo eso («↩ Matthew retoma partir_lena (le faltan 25 min)»), y al elegir, prefiere retomarlo.
 - **`vida(quien, receta)`**: la vida de cada uno. El motor la corre de fondo si el escenario dice
   `vidas: 'tejas_verdes'`. Mientras otra cosa ocupa a esa persona (un encargo de una historia, lo que la jugadora le
   pide, o que la jugadora la maneje: `M.controlar('ana')`), su vida se suspende. Cuando la sueltan, vuelve a elegir.

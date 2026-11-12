@@ -139,7 +139,8 @@ function lupa(){
   const t = ahora(), L = $('lupa');
   if (sel?.q) { L.innerHTML = fichaLupa(sel.q, t); return; }
   if (sel?.l) { const qs = QUIENES.filter(q => { const p = W.E.personas[q]; return p && !p.viaje && lugarTablero(p.lugar) === sel.l; });
-    L.innerHTML = `<div class="fila"><span><b>${esc(NOMBRE(sel.l))}</b></span><span>${qs.length ? qs.length + ' aquí' : 'nadie'}</span></div>` + qs.map(q => fichaLupa(q, t)).join('<hr style="border:0;border-top:1px solid var(--line)">'); return; }
+    const cosas = D.cosas?.[sel.l] ? `<div class="cadena" style="margin-bottom:6px">en la casa: ${Object.entries(D.cosas[sel.l]).map(([x, c]) => `${esc(c.titulo.replace(/^(los|las|la|el) /, ''))} ${M.get(['cosas', sel.l, x])}`).join(' · ')}</div>` : '';   // (las cosas de la casa: cuánto hay de cada una)
+    L.innerHTML = `<div class="fila"><span><b>${esc(NOMBRE(sel.l))}</b></span><span>${qs.length ? qs.length + ' aquí' : 'nadie'}</span></div>` + cosas + qs.map(q => fichaLupa(q, t)).join('<hr style="border:0;border-top:1px solid var(--line)">'); return; }
 }
 // Ana: manejarla o soltarla; manejándola, lo que puede hacer donde está (las acciones de su día), e ir: tocando una casilla
 function ana(){

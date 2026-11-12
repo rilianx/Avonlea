@@ -145,8 +145,11 @@ function verbo<A extends unknown[], S extends string>(tipo: string, nombre: stri
 // (lo que dice de sí para que se pueda dibujar —no cambia lo que pasa, salvo «donde»: hay que estar ahí—: en qué lugar,
 // junto a qué, de pie, sentada o acostada, y con qué cosas en las manos; el juego lo traduce a su animación)
 export type Postura = 'de_pie' | 'sentada' | 'acostada' | 'agachada' | 'caminando'
+// (las cosas: «empieza» se hace al empezar —tomar la leña—, «deja» al terminar, «si_se_deja» si lo cortan a medias;
+// «solo»: junto a eso cabe uno a la vez —el fregadero, la estufa—: si otro lo está usando, no se puede)
 export type DefPrimitivo = { readonly pide?: Cond; readonly deja?: readonly Efecto[]; readonly dura?: Duracion; readonly cuesta?: number; readonly opcion?: string
-  readonly donde?: Lugar; readonly junto_a?: string; readonly postura?: Postura; readonly usa?: readonly string[] }
+  readonly donde?: Lugar; readonly junto_a?: string; readonly postura?: Postura; readonly usa?: readonly string[]
+  readonly empieza?: readonly Efecto[]; readonly si_se_deja?: readonly Efecto[]; readonly solo?: true }
 // lo hace el mundo, con su animación y su duración
 export const primitivo = <A extends unknown[]>(nombre: string, def: (...a: A) => DefPrimitivo) => verbo<A, never>('primitivo', nombre, def)
 
@@ -181,6 +184,12 @@ export const repetir = (paso: Paso, mientras?: Cond): Repetir => (mientras ? { r
 export const hizo = (quien: Persona, v: { readonly verbo: string }): Hecho => {
   const camino = ['hizo', quien, v.verbo]
   return { c: 'existe', camino, id: v.verbo, hoy: { c: 'existe', camino, ventana: 'hoy' }, desde: (op, valor) => ({ c: 'desde', camino: ['hizo_t', quien, v.verbo], op, valor, min: true }), deja: { e: 'deja', camino }, olvida: { e: 'olvida', camino } }
+}
+// las cosas de un lugar (la casa de Tejas Verdes): cuántas hay de cada una —el pan, la leña, los platos sucios—; se
+// preguntan y se cambian como números (cosas.pan.gt(0), cosas.pan.suma(-1)); nunca bajan de cero
+export type DefCosa = { readonly titulo: string; readonly inicial: number }
+export function cosasDe<const C extends Record<string, DefCosa>>(ambito: string, defs: C): { readonly [K in keyof C]: Numero } & { readonly _cosas: { readonly ambito: string; readonly defs: C } } {
+  return Object.assign(Object.fromEntries(Object.keys(defs).map(k => [k, new Numero(['cosas', ambito, k])])), { _cosas: { ambito, defs } }) as never
 }
 // la vida de alguien: lo que hace de fondo, todo el día, cuando nada lo ocupa (una historia, la jugadora)
 export type Vida = { readonly vida: Persona; readonly hace: Llamada<string> }
