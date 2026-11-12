@@ -30,6 +30,11 @@ otro.
   granero), y mientras pasa está ahí: ve y lo ven. De la casa se sale por la puerta, al patio; a un lugar lejos, por el
   borde del tablero que queda hacia allá (y de vuelta se entra por ahí). Quien va adonde está alguien, va a su
   cuadrante, no solo a su zona. En el tablero, la ficha recorre los cuadrantes, con lo que le falta del camino punteado.
+- **El plano de la casa** (`geografia.json`, `tablero.plano`): Tejas Verdes por dentro tiene sus piezas y sus puertas.
+  Abajo, la cocina —el corazón de la casa: su puerta da al patio—, la sala, la despensa y la escalera; arriba, el pasillo
+  y las piezas de Ana (la buhardilla del este), de Marilla y de Matthew. Las piezas y los cuadrantes son un solo camino:
+  de la pieza de Ana al gallinero se pasa por el pasillo, la escalera, la cocina, la puerta y el patio. En una pieza
+  están juntos los que están en ella. En el tablero, las dos plantas, lado a lado, con sus puertas.
   - **La lupa**: tocando una casilla o una ficha se ve quién está, qué hace, junto a qué, en qué postura, con qué, y
     hasta qué hora, y lo que lleva. En una casilla, también cuánto hay de cada cosa ahí (los leños del granero).
   - **El diario de cada uno**: se elige a la persona (o se toca su ficha) y se ve su día hasta ahora, cada cosa con su

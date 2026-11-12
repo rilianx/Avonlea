@@ -34,42 +34,44 @@
       if (!minutos.avisado?.[a + '>' + b]) { (minutos.avisado ||= {})[a + '>' + b] = 1; console.warn(`[mundo] no sé cuánto hay de «${a}» a «${b}»: 10 min`); }
       return 10;
     }
-    // EL CAMINO POR EL TABLERO (los cuadrantes de Tejas Verdes, geografia.json «tablero»): quien va de un cuadrante a
-    // otro pasa por los de en medio, uno por uno —y mientras pasa, está ahí: ve y lo ven—. De la casa se sale por la
-    // puerta (al patio); a un lugar lejos, por el borde del tablero que queda hacia allá (y de vuelta, se entra por ahí)
-    const TB = G.tablero, celda = l => G.lugares[l]?.celda, centro = l => G.puntos[l]?.[0]?.mapa;
-    const PUERTA = TB?.cosas.find(o => o.que === 'casa')?.puerta;
-    const deLaCasa = l => !celda(l) && G.puntos[l]?.[0]?.adentro && PUERTA && centro(l) && Math.hypot(centro(l)[0] - PUERTA[0], centro(l)[1] - PUERTA[1]) < 80;
-    const CELDAS = TB ? Object.keys(G.lugares).filter(celda) : [];
-    function entrada(l){   // (por dónde entra al tablero, o sale, quien viene de ese lugar o va a él)
-      if (deLaCasa(l)) return G.alias.tejas_verdes;
+    // EL CAMINO, PASO A PASO (geografia.json «tablero»): afuera, los cuadrantes de Tejas Verdes; adentro, las piezas de la
+    // casa (su plano) y sus puertas; la puerta de la cocina da al patio. Quien va de un lugar a otro de todo eso pasa
+    // por los de en medio, uno por uno —y mientras pasa, está ahí: ve y lo ven—. A un lugar lejos, sale por el borde del
+    // tablero que queda hacia allá (y de vuelta, entra por ahí)
+    const TB = G.tablero, PL = TB?.plano, celda = l => G.lugares[l]?.celda, pieza = l => PL?.piezas[l], centro = l => G.puntos[l]?.[0]?.mapa;
+    const enGrafo = l => !!(celda(l) || pieza(l));
+    const CELDAS = TB ? Object.keys(G.lugares).filter(l => celda(l) && !G.lugares[l].edificio) : [];
+    function entrada(l){   // (por qué cuadrante del borde entra al tablero, o sale, quien viene de ese lugar o va a él)
       const p = centro(l) || G.dibujo?.puertas?.[G.puntos[l]?.[0]?.camino]; if (!p) return null;
       let m = null, d0 = Infinity; for (const c of CELDAS) { const q = centro(c), d = Math.hypot(q[0] - p[0], q[1] - p[1]); if (d < d0) { d0 = d; m = c; } } return m;
     }
-    function rutaCeldas(a, b){   // (de cuadrante en cuadrante, también en diagonal: el camino más corto)
+    // (los vecinos de un lugar del grafo, y cuántos px hay hasta cada uno —la escalera, un poco más—)
+    const mitad = l => { const x = pieza(l); return [x.x + x.w / 2, x.y + x.h / 2]; };
+    function vecinos(u){
+      const L = [];
+      if (celda(u)) { const [i, j] = celda(u); for (let di = -1; di <= 1; di++) for (let dj = -1; dj <= 1; dj++) { const v = 'c:' + (i + di) + ',' + (j + dj); if ((di || dj) && G.lugares[v]) L.push([v, Math.hypot(di, dj) * TB.c]); }
+        for (const [k, o] of Object.entries(PL?.afuera || {})) if (o.celda === u) L.push([k, 60]); }
+      else if (pieza(u)) { for (const [a, b] of PL.puertas) if (a === u || b === u) { const v = a === u ? b : a, [x0, y0] = mitad(u), [x1, y1] = mitad(v); L.push([v, pieza(u).piso !== pieza(v).piso ? 140 : Math.hypot(x1 - x0, y1 - y0)]); }
+        if (PL.afuera[u]) L.push([PL.afuera[u].celda, 60]); }
+      return L;
+    }
+    function ruta(a, b){   // (el camino más corto entre dos lugares del grafo: rodea la casa y el granero por afuera)
       if (a === b) return [];
-      const id = ([i, j]) => 'c:' + i + ',' + j, dist = { [a]: 0 }, prev = {}, abiertos = [a];
+      const dist = { [a]: 0 }, prev = {}, abiertos = [a];
       while (abiertos.length) {
         abiertos.sort((x, y) => dist[x] - dist[y]); const u = abiertos.shift(); if (u === b) break;
-        const [i, j] = celda(u);
-        for (let di = -1; di <= 1; di++) for (let dj = -1; dj <= 1; dj++) { const v = id([i + di, j + dj]); if ((!di && !dj) || !G.lugares[v] || (G.lugares[v].edificio && v !== b)) continue;
-          const d = dist[u] + Math.hypot(di, dj); if (d < (dist[v] ?? Infinity)) { dist[v] = d; prev[v] = u; abiertos.push(v); } }
+        for (const [v, d] of vecinos(u)) { if (G.lugares[v]?.edificio && v !== b) continue; const n = dist[u] + d; if (n < (dist[v] ?? Infinity)) { dist[v] = n; prev[v] = u; abiertos.push(v); } }
       }
-      const L = []; for (let x = b; x !== a; x = prev[x]) { if (x == null) return []; L.unshift(x); } return L;
+      const L = []; for (let x = b; x !== a; x = prev[x]) { if (x == null) return []; L.unshift([x, dist[x]]); } return L;
     }
-    // (los pasos de un viaje por el tablero: cada cuadrante, a qué minuto del viaje; y lo que dura todo)
+    // (los pasos de un viaje: cada lugar del grafo, a qué minuto del viaje; y lo que dura todo)
     function pasosDe(de, a, como, total){
       if (!TB || de == null || a == null) return null;
-      const ca = celda(de), cb = celda(a);
-      if (!ca && !cb && deLaCasa(de) === deLaCasa(a)) return null;   // (de la casa a la casa, o de lejos a lejos: no pasa por el tablero)
-      const desde = ca ? de : entrada(de), hasta = cb ? a : entrada(a); if (!desde || !hasta) return null;
-      const v = G.velocidades[como] * G.minuto_de_juego_s, pasos = []; let t = 0, ant = desde;
-      for (const c of rutaCeldas(desde, hasta)) { t += Math.hypot(centro(c)[0] - centro(ant)[0], centro(c)[1] - centro(ant)[1]) / v; pasos.push({ l: c, t }); ant = c; }
-      if (ca && cb) return { pasos, total: Math.max(t, .5) };
-      if (!ca && !cb) {   // (de lejos a la casa, o al revés: cruza el tablero hasta la puerta, o desde ella)
-        const fuera = deLaCasa(de) ? .5 : Math.max(total - t - .5, .5);
-        return { pasos: [{ l: desde, t: fuera }, ...pasos.map(p => ({ l: p.l, t: fuera + p.t }))], total: Math.max(total, fuera + t + .5) }; }
-      if (!ca) { const fuera = Math.max(total - t, .5); return { pasos: [{ l: desde, t: fuera }, ...pasos.map(p => ({ l: p.l, t: fuera + p.t }))], total: fuera + t }; }   // (llega al tablero, y lo cruza)
+      const da = enGrafo(de), dd = enGrafo(a); if (!da && !dd) return null;
+      const desde = da ? de : entrada(de), hasta = dd ? a : entrada(a); if (!desde || !hasta) return null;
+      const v = G.velocidades[como] * G.minuto_de_juego_s, pasos = ruta(desde, hasta).map(([l, d]) => ({ l, t: d / v })), t = pasos.length ? pasos[pasos.length - 1].t : 0;
+      if (da && dd) return { pasos, total: Math.max(t, .3) };
+      if (!da) { const fuera = Math.max(total - t, .5); return { pasos: [{ l: desde, t: fuera }, ...pasos.map(p => ({ l: p.l, t: fuera + p.t }))], total: fuera + t }; }   // (llega al tablero, y lo cruza)
       return { pasos, total: Math.max(total, t + .5) };   // (cruza el tablero, y sigue)
     }
     // quiénes van con alguien: los que van en su medio (y el medio), y los que lo siguen a pie

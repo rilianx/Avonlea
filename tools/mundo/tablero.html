@@ -15,7 +15,7 @@ main{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px;padding:16p
 #tablero{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px;align-self:start}
 #tablero svg{width:100%;height:auto;display:block}
 .casilla rect{stroke:var(--line);stroke-width:2;cursor:pointer}.casilla:hover rect{stroke:var(--acento)}.casilla.sel rect{stroke:var(--acento);stroke-width:4}
-.casilla text{fill:var(--mut);font-size:15px;pointer-events:none}.celda rect{stroke:rgba(120,100,70,.18);stroke-width:1.5}.celda text{font-size:11.5px}.obj{font-size:12px;fill:#5a4a36;font-style:italic}.emo{font-size:15px}.zona{fill:none;stroke:var(--line);stroke-dasharray:6 5}.zona-t{fill:var(--mut);font-size:13px;font-style:italic;letter-spacing:.04em;text-transform:uppercase}
+.casilla text{fill:var(--mut);font-size:15px;pointer-events:none}.celda rect{stroke:rgba(120,100,70,.18);stroke-width:1.5}.celda text{font-size:11.5px}.pieza text{font-size:12.5px}.obj{font-size:12px;fill:#5a4a36;font-style:italic}.emo{font-size:15px}.zona{fill:none;stroke:var(--line);stroke-dasharray:6 5}.zona-t{fill:var(--mut);font-size:13px;font-style:italic;letter-spacing:.04em;text-transform:uppercase}
 .ficha{cursor:pointer}.ficha circle{stroke:var(--panel);stroke-width:3;filter:drop-shadow(0 2px 2px var(--sombra))}.ficha .ini{fill:#fff;font-weight:bold;font-size:16px;pointer-events:none}.ficha .ico{font-size:17px;pointer-events:none}
 .ficha.sel circle{stroke:var(--acento);stroke-width:4}
 aside{display:flex;flex-direction:column;gap:12px}aside section{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
@@ -38,7 +38,7 @@ aside h3{margin:0 0 6px;font-size:13px;letter-spacing:.04em;text-transform:upper
   <button id="nuevo">Empezar de nuevo</button>
 </header>
 <main>
-  <section id="tablero"><svg id="svg" viewBox="0 0 990 624" role="img" aria-label="El tablero de Tejas Verdes: las casillas son los lugares, las fichas son las personas"></svg></section>
+  <section id="tablero"><svg id="svg" viewBox="0 0 990 760" role="img" aria-label="El tablero de Tejas Verdes: las casillas son los lugares, las fichas son las personas"></svg></section>
   <aside>
     <section><h3>La lupa</h3><div id="lupa"><div class="vacio">Toca una casilla o una ficha.</div></div></section>
     <section><h3>El diario de <select id="quien"></select></h3><div id="midiario"></div></section>
@@ -63,12 +63,24 @@ const enTablero = (x, y) => [BX + (x - TB.x0) * ESC, BY + (y - TB.y0) * ESC];
 const COLZONA = { granero: '#e2d3b8', gallinero: '#ecdcae', corral: '#d6e2bf', tejas_verdes: '#e4ecd2', huerta: '#cfe3c4', arbustos: '#d5e4d8' };
 const ZONAS = [
   { t: 'alrededor de la casa', x: 12, y: 12, w: TB.cols * PASO + 24, h: TB.filas * PASO + 66, c: 'var(--patio)', casillas: {} },
-  { t: 'la casa, por dentro', x: 12, y: TB.filas * PASO + 92, w: TB.cols * PASO + 24, h: 150, c: 'var(--casa)', casillas: (y => ({ cocina: [24, y, 260, 104], pieza: [296, y, 150, 104], pieza_marilla: [458, y, 150, 104], pieza_matthew: [620, y, 116, 104] }))(TB.filas * PASO + 128) },
-  { t: 'lejos', x: TB.cols * PASO + 50, y: 12, w: 210, h: TB.filas * PASO + 230, c: 'var(--afuera)', casillas: (x => ({ campo: [x, 48, 186, 82], escuela: [x, 142, 186, 82], iglesia: [x, 236, 186, 82], cuesta_del_huerto: [x, 330, 186, 110] }))(TB.cols * PASO + 62) },
+  { t: 'la casa, por dentro', x: 12, y: TB.filas * PASO + 92, w: TB.cols * PASO + 24, h: 280, c: 'var(--casa)', casillas: {} },
+  { t: 'lejos', x: TB.cols * PASO + 50, y: 12, w: 210, h: TB.filas * PASO + 360, c: 'var(--afuera)', casillas: (x => ({ campo: [x, 48, 186, 82], escuela: [x, 142, 186, 82], iglesia: [x, 236, 186, 82], cuesta_del_huerto: [x, 330, 186, 110] }))(TB.cols * PASO + 62) },
 ];
-const CASILLA = {}; for (const z of ZONAS) for (const [k, r] of Object.entries(z.casillas)) CASILLA[k] = { r, c: z.c };
+// (el plano de la casa: las dos plantas, lado a lado; cada pieza es una casilla, con sus puertas)
+const PL = TB.plano, PESC = .82, PY = TB.filas * PASO + 146, PX = [24, 24 + 410 * PESC + 26];
+const enPlano = (piso, x, y) => [PX[piso] + x * PESC, PY + y * PESC];
+for (const [k, p] of Object.entries(PL.piezas)) { const [x, y] = enPlano(p.piso, p.x, p.y); ZONAS[1].casillas[k] = [x, y, p.w * PESC, p.h * PESC]; }
+const CASILLA = {}; for (const z of ZONAS) for (const [k, r] of Object.entries(z.casillas)) CASILLA[k] = { r, c: z.c, ...(PL.piezas[k] ? { pieza: true } : {}) };
 for (const [l, x] of Object.entries(G.lugares)) if (x.celda) { const [i, j] = x.celda; CASILLA[l] = { r: [BX + i * PASO, BY + j * PASO, PASO, PASO], c: COLZONA[x.zona] || 'var(--patio)', celda: true }; }
 // (lo que hay dibujado en el tablero: la casa, el granero, el cerco del corral, el gallinero y sus gallinas, las vacas, la huerta, los abedules, los caminos)
+function puertasDelPlano(){
+  let h = PL.pisos.map((n, i) => `<text class="zona-t" x="${PX[i]}" y="${PY - 8}">${esc(n)}</text>`).join('');
+  for (const [a, b, [x, y]] of PL.puertas) for (const piso of new Set([PL.piezas[a].piso, PL.piezas[b].piso])) { const [px, py] = enPlano(piso, x, y); h += `<rect x="${px - 9}" y="${py - 4}" width="18" height="8" rx="2" fill="#a0784f" pointer-events="none"><title>puerta: ${esc(NOMBRE(a))} · ${esc(NOMBRE(b))}</title></rect>`; }
+  for (const [k, o] of Object.entries(PL.afuera)) { const [px, py] = enPlano(PL.piezas[k].piso, ...o.en); h += `<rect x="${px - 12}" y="${py - 5}" width="24" height="10" rx="2" fill="#7a4b2a" pointer-events="none"/><text x="${px}" y="${py + 20}" text-anchor="middle" class="obj" pointer-events="none">al patio</text>`; }
+  const [ex, ey] = enPlano(0, PL.piezas.escalera.x + PL.piezas.escalera.w / 2, PL.piezas.escalera.y + PL.piezas.escalera.h / 2 + 6);
+  for (let k = 0; k < 4; k++) h += `<line x1="${ex - 22}" x2="${ex + 22}" y1="${ey - 14 + k * 8}" y2="${ey - 14 + k * 8}" stroke="#b08a5e" stroke-width="2" pointer-events="none"/>`;
+  return h;
+}
 function cosasDelTablero(){
   let h = '';
   for (const c of TB.caminos) h += `<polyline points="${c.map(p => enTablero(...p).join(',')).join(' ')}" fill="none" stroke="#cdb894" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity=".55" pointer-events="none"/>`;
@@ -142,12 +154,13 @@ function pintar(){
   const t = ahora(); $('reloj').textContent = `${SEMANA[(Math.floor(t / 1440) + 1) % 7]} ${Math.floor(t / 1440) + 1}, ${hhmm(t)}`;
   let h = '';
   for (const z of ZONAS) { h += `<rect class="zona" x="${z.x}" y="${z.y}" width="${z.w}" height="${z.h}" rx="16"/><text class="zona-t" x="${z.x + 12}" y="${z.y + 22}">${esc(z.t)}</text>`;
-    for (const [k, [x, y, w, hh]] of Object.entries(z.casillas)) h += `<g class="casilla${sel?.l === k ? ' sel' : ''}" data-l="${k}"><rect x="${x}" y="${y}" width="${w}" height="${hh}" rx="10" fill="${z.c}"/><text x="${x + 10}" y="${y + 20}">${esc(NOMBRE(k))}</text></g>`;
+    for (const [k, [x, y, w, hh]] of Object.entries(z.casillas)) h += `<g class="casilla${PL.piezas[k] ? ' pieza' : ''}${sel?.l === k ? ' sel' : ''}" data-l="${k}"><rect x="${x}" y="${y}" width="${w}" height="${hh}" rx="${PL.piezas[k] ? 3 : 10}" fill="${z.c}"/><text x="${x + 7}" y="${y + 16}">${esc(PL.piezas[k] ? NOMBRE(k).replace(/^Pieza de /, '').replace(/ de arriba$/, '') : NOMBRE(k))}</text></g>`;
     if (z === ZONAS[0]) {   // (los cuadrantes: un poco más grandes que su paso, traslapados; el nombre de la zona, en su cuadrante principal)
       const anclas = new Set(Object.values(TB.zonas).map(x => x.ancla)), d = PASO * .07;
       for (const [k, c] of Object.entries(CASILLA)) if (c.celda) { const [x, y, w, hh] = c.r; h += `<g class="casilla celda${sel?.l === k ? ' sel' : ''}" data-l="${k}"><rect x="${x - d}" y="${y - d}" width="${w + 2 * d}" height="${hh + 2 * d}" rx="16" fill="${c.c}" fill-opacity=".78"/>${anclas.has(k) ? `<text x="${x + 6}" y="${y + 15}">${esc(NOMBRE(k))}</text>` : ''}</g>`; }
       h += cosasDelTablero();
-    } }
+    }
+    if (z === ZONAS[1]) h += puertasDelPlano(); }
   const aqui = {}; for (const q of QUIENES) { const p = W.E.personas[q]; if (p && !p.viaje) (aqui[lugarTablero(p.lugar)] ||= []).push(q); }
   for (const q of QUIENES) {
     const p = W.E.personas[q]; if (!p) continue;

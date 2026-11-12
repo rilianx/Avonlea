@@ -24,7 +24,7 @@ const MEDIR = `(() => {
   const vistaEn = (x, y) => { const b = PEOPLE.shearer, antes = { where: b.where, x: b.x, y: b.y }; Object.assign(b, { where: 'out', x, y }); try { return lgLugarDe('shearer'); } finally { Object.assign(b, antes); } };   // (lo que diría el juego de alguien parado ahí)
   for (const k of Object.keys(WP)) if (!WP_CAMINO[k]) lugar(k, WP_NAME[k] || k, [k === 'cocina' ? { ...mapa(...WP[k]), adentro: 1 } : mapa(...WP[k])], { plan: k, vista: { cocina: 'cocina', arbustos: 'arbustos' }[k] || vistaEn(...WP[k]) });   // (el sendero: un lugar de las vidas —donde se encuentran Ana y Diana—, no el patio)
   lugar('pieza', WP_NAME.pieza, [{ ...mapa(...DOOR.gg), adentro: 2 }], { plan: 'pieza', vista: 'cocina' });
-  for (const [k, n] of [['pieza_marilla', 'la pieza de Marilla'], ['pieza_matthew', 'la pieza de Matthew']]) lugar(k, n, [{ ...mapa(...DOOR.gg), adentro: 2 }], { plan: 'cocina', vista: 'cocina' });   // (el juego no las tiene: arriba, como la de Ana)
+  for (const [k, n] of [['pieza_marilla', 'la pieza de Marilla'], ['pieza_matthew', 'la pieza de Matthew'], ['sala', 'la sala de Tejas Verdes'], ['despensa', 'la despensa'], ['escalera', 'la escalera'], ['pasillo', 'el pasillo de arriba']]) lugar(k, n, [{ ...mapa(...DOOR.gg), adentro: 2 }], { plan: 'cocina', vista: 'cocina' });   // (el juego no las tiene: arriba, como la de Ana)
   for (const h of Object.keys(HOUSES)) if (h !== 'gg' && h !== 'br') lugar('h:' + h, HOUSES[h].name, [{ ...mapa(...DOOR[h]), adentro: 1 }], { plan: 'h:' + h, vista: vistaEn(...DOOR[h]) });
   lugar('h:br', 'la estación de Bright River', [{ camino: 'br', s: 0, adentro: 1 }], { plan: 'h:br', vista: 'estacion_bright_river' });
   for (const [k, [c, sv]] of Object.entries(WP_CAMINO)) lugar(k, WP_NAME[k], [{ camino: c, s: sv }], { plan: k, vista: { hotel_ws: 'hotel_white_sands', playa_ws: 'playa' }[k] });
@@ -64,7 +64,25 @@ const MEDIR = `(() => {
   for (const [k, c] of Object.entries(muebles)) if (INFO[c].zona !== k.split('.')[0]) throw new Error('el tablero: ' + k + ' cae fuera de su zona (' + c + ')');
   // (para dibujarlo: lo que hay en el tablero, en el mapa del juego —la casa, el granero, el cerco del corral, los caminos—)
   const enTB = ([x, y]) => x >= TB.x0 - 60 && x <= TB.x0 + TB.cols * TB.c + 60 && y >= TB.y0 - 60 && y <= TB.y0 + TB.filas * TB.c + 60;
-  const tablero = { ...TB, zonas: Object.fromEntries(ZONAS.map(z => [z, { nombre: nombreZona[z], ancla: cid(ancla[z]) }])), muebles,
+  // EL PLANO DE LA CASA, por dentro: sus piezas (en px, como el mapa: una pieza es del tamaño de una conversación, o
+  // poco más) y sus puertas. Abajo, la cocina —el corazón de la casa: la puerta de afuera da al patio—, la sala, la
+  // despensa y la escalera; arriba, el pasillo y las piezas (la de Ana, la buhardilla del este). Quien va de una pieza a
+  // otra pasa por las de en medio, como afuera por los cuadrantes.
+  const plano = {
+    pisos: ['abajo', 'arriba'],
+    piezas: {
+      despensa: { piso: 0, x: 0, y: 0, w: 110, h: 80 }, escalera: { piso: 0, x: 110, y: 0, w: 90, h: 80 },
+      cocina: { piso: 0, x: 0, y: 80, w: 250, h: 160 }, sala: { piso: 0, x: 250, y: 0, w: 160, h: 240 },
+      pieza_marilla: { piso: 1, x: 0, y: 0, w: 140, h: 110 }, pieza_matthew: { piso: 1, x: 0, y: 110, w: 140, h: 130 },
+      pasillo: { piso: 1, x: 140, y: 0, w: 90, h: 240 }, pieza: { piso: 1, x: 230, y: 0, w: 160, h: 150 },
+    },
+    // (cada puerta: entre qué piezas, y dónde está —para dibujarla—; la escalera sube al pasillo)
+    puertas: [['cocina', 'despensa', [55, 80]], ['cocina', 'escalera', [155, 80]], ['cocina', 'sala', [250, 160]], ['escalera', 'pasillo', [185, 20]],
+      ['pasillo', 'pieza_marilla', [140, 55]], ['pasillo', 'pieza_matthew', [140, 175]], ['pasillo', 'pieza', [230, 75]]],
+    afuera: { cocina: { celda: alias.tejas_verdes, en: [125, 240] } },   // (la puerta de la cocina, al patio)
+  };
+  for (const k of Object.keys(plano.piezas)) if (!INFO[k]) throw new Error('el plano: «' + k + '» no es un lugar del mundo');
+  const tablero = { ...TB, plano, zonas: Object.fromEntries(ZONAS.map(z => [z, { nombre: nombreZona[z], ancla: cid(ancla[z]) }])), muebles,
     cosas: [{ que: 'casa', nombre: 'la casa', x: GG.x - GG.w / 2, y: GG.y - 130, w: GG.w, h: 130, puerta: [GG.x, GG.y] },
       { que: 'granero', nombre: 'el granero', x: BARN.x - BARN.w / 2, y: BARN.y - 110, w: BARN.w, h: 110 },
       { que: 'cerco', nombre: 'el corral', x: AREAS.corral.x, y: AREAS.corral.y, w: AREAS.corral.w, h: AREAS.corral.h },
