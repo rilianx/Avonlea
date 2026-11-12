@@ -25,6 +25,7 @@ export type Efecto =
   | { readonly e: 'silencio'; readonly dura: Duracion }
   | { readonly e: 'nombrar'; readonly cosa: Nombrable; readonly pedir: boolean }
   | { readonly e: 'marca'; readonly id: string }
+  | { readonly e: 'si'; readonly si: Cond; readonly entonces: readonly Efecto[] }   // (solo si se cumple: si hay pan, se come uno)
 export type Duracion = `${number}${'s' | 'm' | 'h' | 'd'}`
 
 export const y = (...de: Cond[]): Cond => ({ c: 'y', de })
@@ -145,11 +146,12 @@ function verbo<A extends unknown[], S extends string>(tipo: string, nombre: stri
 // (lo que dice de sí para que se pueda dibujar —no cambia lo que pasa, salvo «donde»: hay que estar ahí—: en qué lugar,
 // junto a qué, de pie, sentada o acostada, y con qué cosas en las manos; el juego lo traduce a su animación)
 export type Postura = 'de_pie' | 'sentada' | 'acostada' | 'agachada' | 'caminando'
-// (las cosas: «empieza» se hace al empezar —tomar la leña—, «deja» al terminar, «si_se_deja» si lo cortan a medias;
-// «solo»: junto a eso cabe uno a la vez —el fregadero, la estufa—: si otro lo está usando, no se puede)
+// (las cosas: «empieza» se hace al empezar —un leño a la estufa—, «deja» al terminar, «si_se_deja» si lo cortan a medias.
+// «junto_a»: un mueble de ese lugar (mueblesDe): si ya está lleno —el fregadero es de a uno—, no se puede. «usa»: si es
+// una cosa declarada (cosasDe), tiene que haber una a mano —la lleva, o está ahí—; si no, es solo para el dibujo)
 export type DefPrimitivo = { readonly pide?: Cond; readonly deja?: readonly Efecto[]; readonly dura?: Duracion; readonly cuesta?: number; readonly opcion?: string
   readonly donde?: Lugar; readonly junto_a?: string; readonly postura?: Postura; readonly usa?: readonly string[]
-  readonly empieza?: readonly Efecto[]; readonly si_se_deja?: readonly Efecto[]; readonly solo?: true }
+  readonly empieza?: readonly Efecto[]; readonly si_se_deja?: readonly Efecto[] }
 // lo hace el mundo, con su animación y su duración
 export const primitivo = <A extends unknown[]>(nombre: string, def: (...a: A) => DefPrimitivo) => verbo<A, never>('primitivo', nombre, def)
 
@@ -185,12 +187,22 @@ export const hizo = (quien: Persona, v: { readonly verbo: string }): Hecho => {
   const camino = ['hizo', quien, v.verbo]
   return { c: 'existe', camino, id: v.verbo, hoy: { c: 'existe', camino, ventana: 'hoy' }, desde: (op, valor) => ({ c: 'desde', camino: ['hizo_t', quien, v.verbo], op, valor, min: true }), deja: { e: 'deja', camino }, olvida: { e: 'olvida', camino } }
 }
-// las cosas de un lugar (la casa de Tejas Verdes): cuántas hay de cada una —el pan, la leña, los platos sucios—; se
-// preguntan y se cambian como números (cosas.pan.gt(0), cosas.pan.suma(-1)); nunca bajan de cero
-export type DefCosa = { readonly titulo: string; readonly inicial: number }
-export function cosasDe<const C extends Record<string, DefCosa>>(ambito: string, defs: C): { readonly [K in keyof C]: Numero } & { readonly _cosas: { readonly ambito: string; readonly defs: C } } {
-  return Object.assign(Object.fromEntries(Object.keys(defs).map(k => [k, new Numero(['cosas', ambito, k])])), { _cosas: { ambito, defs } }) as never
+// LAS COSAS: cada una está en algún lado —en un lugar (la leña, en el granero) o con alguien (el libro, con Ana)—, y
+// hay tantas. Se declaran los tipos y dónde hay al empezar; se preguntan y se cambian como números, donde están:
+// en('granero').lena.gt(0), con('ana').libro.suma(-1). Nunca bajan de cero. Se mueven con tomar y poner (y llevar).
+export type DefCosa = { readonly titulo: string }
+export type Cosas<C> = { readonly [K in keyof C]: Numero }
+export function cosasDe<const C extends Record<string, DefCosa>>(tipos: C, inicio: { readonly [donde: string]: { readonly [K in keyof C]?: number } }) {
+  const de = (donde: string): Cosas<C> => Object.fromEntries(Object.keys(tipos).map(k => [k, new Numero(['cosas', donde, k])])) as never
+  return { en: (l: Lugar) => de(l), con: (q: Persona) => de(q), _cosas: { tipos, inicio } }
 }
+// LOS MUEBLES de cada lugar, y cuántos caben junto a cada uno a la vez (el fregadero 1, la mesa 4): «junto_a» nombra uno
+export const mueblesDe = <const M extends { readonly [L in Lugar]?: { readonly [mueble: string]: number } }>(m: M) => ({ _muebles: m })
+// LO QUE PASA SOLO, cada día a una hora (las gallinas ponen a las seis; se junta ropa sucia)
+export type Proceso = { readonly hora: number; readonly titulo: string; readonly deja: readonly Efecto[] }
+export const procesos = (...p: Proceso[]) => ({ _procesos: p })
+// un efecto que solo se hace si se cumple algo: si hay pan, se come uno
+export const si = (c: Cond, ...entonces: Efecto[]): Efecto => ({ e: 'si', si: c, entonces })
 // la vida de alguien: lo que hace de fondo, todo el día, cuando nada lo ocupa (una historia, la jugadora)
 export type Vida = { readonly vida: Persona; readonly hace: Llamada<string> }
 export const vida = (quien: Persona, hace: Llamada<string>): Vida => ({ vida: quien, hace })

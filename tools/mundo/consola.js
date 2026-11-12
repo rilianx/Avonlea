@@ -81,6 +81,7 @@ function nueva(dia = 2, hora = '14:00', historias = true){
   W = Mundo(G); R = null; visto = 0; vistoW = 0; M = null;
   MundoMinimo.mundo = W; MundoMinimo.viajes = {};
   W.E.t = (+dia - 1) * 1440 + Math.round(horaDe(hora) * 60);
+  for (const [d, c] of Object.entries(D.cosas?.inicio || {})) Object.assign(W.cosasDe(d), c);   // (las cosas, donde empiezan)
   if (historias) { M = Motor(D, { dia: +dia, hora: horaDe(hora) }, MundoMinimo); return M.alTiempo(ahoraMin()); }   // (desde aquí, el motor no se adelanta al reloj de la consola)
   for (const [k, l] of Object.entries(MundoMinimo.inicio.lugares)) W.poner(k, l);   // (sin historias: los de Tejas Verdes en casa; los demás, donde los tiene el juego a esa hora —con la primera acción—)
   return null;
@@ -100,6 +101,7 @@ function leer(c){
   const [a, b, ...r] = c.split('.');
   if (a === 'mundo' && W.E.personas[b] && r[0] === 'lugar') return [W.E.personas[b].lugar, W.vista(b)];
   if (a === 'mundo' && W.E.personas[b] && r[0] === 'en') return [W.E.personas[b].en];
+  if (W.E.personas[a] && b === 'cosas') return [W.cosasDe(a)[r[0]] ?? 0];   // (lo que tiene alguien: ana.cosas.libro)
   for (const raiz of [W.E.personas, W.E]) if (raiz[a] !== undefined) { let x = raiz[a]; for (const k of [b, ...r].filter(k => k !== undefined)) x = x?.[k]; return [Array.isArray(x) ? x.join(',') : x]; }   // (de una persona, o del mundo: hechos.leido:ana, cariño.ana>diana)
   return [M ? M.get(c.split('.')) : undefined];
 }
@@ -146,8 +148,8 @@ function comando(linea){
     case 'avanzar': { const ahora = ahoraMin(), f = a[0] ? rato(a[0], ahora) : ahora + 1440; if (f == null) return out('  ¿cuánto? 30m, 2h o hh:mm'); avanzarHasta(f, !a[0]); return; }
     case 'acciones': return acciones(a[0] || 'ana');
     case 'hacer': return W.E.personas[a[0]] || D.personas[a[0]] ? hacer(a[0], a.slice(1)) : hacer('ana', a);
-    case 'tiene': reglas(); W.persona(a[0]).cosas[a[1]] = +a[2]; return out(`  ${nom(a[0])} tiene ${a[1]}: ${a[2]}`);
-    case 'cosas': { reglas(); const p = W.persona(a[0] || 'ana'); return out(`  ${nom(a[0] || 'ana')}, en ${W.nombre(p.lugar)}: tiene ${Object.entries(p.cosas).filter(([, n]) => n).map(([x, n]) => n + ' ' + x).join(', ') || 'nada'}; sabe ${p.sabe.join(', ') || 'nada'}`); }
+    case 'tiene': W.cosasDe(a[0])[a[1]] = +a[2]; return out(`  ${nom(a[0])} tiene ${a[1]}: ${a[2]}`);   // (alguien, o un lugar: tiene cocina pan 0)
+    case 'cosas': { const k = a[0] || 'ana', p = W.E.personas[k]; if (!p) return out(`  en ${W.nombre(k)}: ${Object.entries(W.cosasDe(k)).filter(([, n]) => n).map(([x, n]) => n + ' ' + x).join(', ') || 'nada'}`); return out(`  ${nom(k)}, en ${W.nombre(p.lugar)}: tiene ${Object.entries(W.cosasDe(k)).filter(([, n]) => n).map(([x, n]) => n + ' ' + x).join(', ') || 'nada'}; sabe ${p.sabe.join(', ') || 'nada'}`); }
     case 'cariño': { reglas(); const r = a[0] + '>' + a[1]; if (a[2] != null) W.E.cariño[r] = +a[2]; return out(`  cómo quiere ${nom(a[0])} a ${nom(a[1])}: ${W.E.cariño[r] ?? '—'}`); }
     case 'plan': return plan(a[0], a[1], a.slice(2));
     case 'metas': return out('  ' + reglas().metas());

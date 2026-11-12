@@ -4,7 +4,7 @@
 //   mundo                         planificador (wmNow)
 //   persona.lugar (un lugar)      pos: su clave (la cocina, «h:rl»…); un lugar que no tiene clave —el patio de Tejas
 //                                 Verdes, la orilla—, «donde está» (p:ana), con su cuerpo puesto ahí en el mapa del juego
-//   persona.cosas · persona.sabe  invs · know
+//   cosas[persona] · persona.sabe invs · know (las cosas de cada uno: las mismas que usan las vidas)
 //   persona.sigue                 follow
 //   cariño · ofensas · hechos     rel · ofensa · facts
 //   vacas · existencias · enfermos   cows · stock · sick
@@ -57,7 +57,7 @@ function ReglasJuego(W){
     for (const [k, p] of Object.entries(E.personas)) {
       const l = p.viaje ? p.viaje.de : p.lugar; if (l == null) continue;
       const clave = G.lugares[l]?.plan; pos[k] = clave || 'p:' + k; if (!clave) { const q = punto(l); if (q) C[k] = q; }
-      invs[k] = { ...p.cosas }; know[k] = [...p.sabe]; if (p.sigue && p.sigue !== 'nadie') follow[k] = p.sigue;
+      invs[k] = { ...(E.cosas[k] || {}) }; know[k] = [...p.sabe]; if (p.sigue && p.sigue !== 'nadie') follow[k] = p.sigue;
     }
     return { s: { t: E.t % 1440, pos, invs, cows: { ...E.vacas }, rel: { ...E.cariño }, ofensa: { ...E.ofensas }, know, follow, facts: { ...E.hechos }, stock: { ...E.existencias }, sick: [...E.enfermos] }, C };
   }
@@ -65,7 +65,7 @@ function ReglasJuego(W){
   // tiene que ir a otro lugar, va (el mundo le cuenta el tiempo del camino)
   function delPlanificador(s, antes){
     const E = W.E;
-    for (const [k, inv] of Object.entries(s.invs)) if (E.personas[k]) E.personas[k].cosas = { ...inv };
+    for (const [k, inv] of Object.entries(s.invs)) if (E.personas[k]) E.cosas[k] = { ...inv };
     for (const [k, sa] of Object.entries(s.know)) if (E.personas[k]) E.personas[k].sabe = [...sa];
     for (const k of Object.keys(E.personas)) { const f = s.follow[k] || 'nadie'; if (E.personas[k].sigue !== f && (antes.follow[k] || 'nadie') !== f) E.personas[k].sigue = f; }
     Object.assign(E.cariño, s.rel); E.ofensas = { ...s.ofensa }; Object.assign(E.hechos, s.facts); E.vacas = { ...s.cows }; E.existencias = { ...s.stock }; E.enfermos = [...(s.sick || [])];
@@ -78,7 +78,7 @@ function ReglasJuego(W){
       if (p == null) continue;
       const o = W.persona(k); o.nombre ||= nombres[k];
       if (o.lugar == null) o.lugar = lugarDeClave(p) || (cuerpos[k] ? cercano(cuerpos[k]) : null);
-      if (!Object.keys(o.cosas).length) o.cosas = { ...(s.invs[k] || {}) };
+      if (!Object.keys(W.cosasDe(k)).length) Object.assign(W.cosasDe(k), s.invs[k] || {});
       if (!o.sabe.length) o.sabe = [...(s.know[k] || [])];
     }
     for (const [r, n] of Object.entries(s.rel)) if (!(r in E.cariño)) E.cariño[r] = n;
@@ -113,9 +113,9 @@ function ReglasJuego(W){
   function cambios(A, B){
     const L = [], nom = k => B.personas[k]?.nombre || k;
     for (const [k, p] of Object.entries(B.personas)) {
-      const q = A.personas[k] || { cosas: {}, sabe: [] };
+      const q = A.personas[k] || { sabe: [] }, cq = A.cosas[k] || {}, cp = B.cosas[k] || {};
       if (p.viaje && !q.viaje) L.push(`${nom(k)} va ${W.al(p.viaje.a)}, llega a las ${hhmm(p.viaje.llega)}`);
-      for (const x of new Set([...Object.keys(q.cosas), ...Object.keys(p.cosas)])) if ((q.cosas[x] || 0) !== (p.cosas[x] || 0)) L.push(`${nom(k)} tiene ${x}: ${q.cosas[x] || 0} → ${p.cosas[x] || 0}`);
+      for (const x of new Set([...Object.keys(cq), ...Object.keys(cp)])) if ((cq[x] || 0) !== (cp[x] || 0)) L.push(`${nom(k)} tiene ${x}: ${cq[x] || 0} → ${cp[x] || 0}`);
       for (const f of p.sabe) if (!q.sabe.includes(f)) L.push(`${nom(k)} sabe: ${f}`);
       if (p.sigue !== q.sigue) L.push(`${nom(k)} sigue a ${p.sigue}`);
     }

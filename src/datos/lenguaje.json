@@ -28,28 +28,143 @@
   }
  },
  "cosas": {
-  "cocina": {
+  "tipos": {
    "pan": {
-    "titulo": "las hogazas de pan",
-    "inicial": 3
+    "titulo": "hogazas de pan"
    },
    "lena": {
-    "titulo": "los leños junto a la estufa",
-    "inicial": 6
+    "titulo": "leños"
    },
    "leche": {
-    "titulo": "los baldes de leche",
-    "inicial": 0
+    "titulo": "baldes de leche"
    },
    "mantequilla": {
-    "titulo": "la mantequilla",
-    "inicial": 1
+    "titulo": "panes de mantequilla"
+   },
+   "huevos": {
+    "titulo": "huevos"
    },
    "platos_sucios": {
-    "titulo": "los platos sucios",
-    "inicial": 0
+    "titulo": "platos sucios"
+   },
+   "ropa_sucia": {
+    "titulo": "prendas de ropa sucia"
+   },
+   "libro": {
+    "titulo": "libros"
+   }
+  },
+  "inicio": {
+   "cocina": {
+    "pan": 3,
+    "lena": 4,
+    "mantequilla": 2,
+    "ropa_sucia": 6
+   },
+   "granero": {
+    "lena": 10
+   },
+   "cuesta_del_huerto": {
+    "pan": 6,
+    "mantequilla": 3
+   },
+   "ana": {
+    "libro": 1
+   },
+   "diana": {
+    "libro": 1
+   },
+   "marilla": {
+    "libro": 1
+   },
+   "matthew": {
+    "libro": 1
    }
   }
+ },
+ "muebles": {
+  "cocina": {
+   "estufa": 1,
+   "fregadero": 1,
+   "mesa": 4,
+   "ventana": 2,
+   "mantequera": 1
+  },
+  "pieza": {
+   "cama": 1,
+   "ventana": 1
+  },
+  "pieza_marilla": {
+   "cama": 1
+  },
+  "pieza_matthew": {
+   "cama": 1
+  },
+  "granero": {
+   "tronco": 1
+  },
+  "corral": {
+   "vacas": 1,
+   "cerca": 3
+  },
+  "tejas_verdes": {
+   "porche": 3,
+   "tina": 1
+  },
+  "cuesta_del_huerto": {
+   "cama": 1,
+   "mesa": 6,
+   "ventana": 2
+  }
+ },
+ "procesos": {
+  "tejas_verdes": [
+   {
+    "hora": 6,
+    "titulo": "las gallinas ponen",
+    "deja": [
+     {
+      "e": "si",
+      "si": {
+       "c": "cmp",
+       "camino": [
+        "cosas",
+        "gallinero",
+        "huevos"
+       ],
+       "op": "<",
+       "valor": 12
+      },
+      "entonces": [
+       {
+        "e": "suma",
+        "camino": [
+         "cosas",
+         "gallinero",
+         "huevos"
+        ],
+        "n": 6
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "hora": 21,
+    "titulo": "se junta la ropa sucia del día",
+    "deja": [
+     {
+      "e": "suma",
+      "camino": [
+       "cosas",
+       "cocina",
+       "ropa_sucia"
+      ],
+      "n": 3
+     }
+    ]
+   }
+  ]
  },
  "personas": {
   "ana": "Ana",
@@ -462,6 +577,26 @@
     "param": 1
    }
   },
+  "tomar": {
+   "tipo": "primitivo",
+   "params": [
+    "quien",
+    "cosa",
+    "n"
+   ],
+   "postura": "agachada",
+   "dura": "1m"
+  },
+  "poner": {
+   "tipo": "primitivo",
+   "params": [
+    "quien",
+    "cosa",
+    "n"
+   ],
+   "postura": "agachada",
+   "dura": "1m"
+  },
   "quedarse": {
    "tipo": "primitivo",
    "params": [
@@ -552,6 +687,68 @@
       },
       {
        "param": 1
+      }
+     ]
+    }
+   }
+  },
+  "llevar": {
+   "tipo": "receta",
+   "params": [
+    "quien",
+    "cosa",
+    "n",
+    "de",
+    "a"
+   ],
+   "pasos": {
+    "va": {
+     "verbo": "ir_a",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "param": 3
+      }
+     ]
+    },
+    "toma": {
+     "verbo": "tomar",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "param": 1
+      },
+      {
+       "param": 2
+      }
+     ]
+    },
+    "lleva": {
+     "verbo": "ir_a",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "param": 4
+      }
+     ]
+    },
+    "pone": {
+     "verbo": "poner",
+     "args": [
+      {
+       "param": 0
+      },
+      {
+       "param": 1
+      },
+      {
+       "param": 2
       }
      ]
     }
@@ -1109,8 +1306,7 @@
    "junto_a": "mesa",
    "postura": "sentada",
    "usa": [
-    "taza",
-    "pan"
+    "taza"
    ],
    "dura": "25m",
    "deja": [
@@ -1126,15 +1322,60 @@
      "n": 1
     },
     {
-     "e": "suma",
-     "camino": [
-      "cosas",
+     "e": "si",
+     "si": {
+      "c": "cmp",
+      "camino": [
+       "cosas",
+       {
+        "param": 1
+       },
+       "pan"
+      ],
+      "op": ">",
+      "valor": 0
+     },
+     "entonces": [
       {
-       "param": 1
-      },
-      "pan"
-     ],
-     "n": -1
+       "e": "suma",
+       "camino": [
+        "cosas",
+        {
+         "param": 1
+        },
+        "pan"
+       ],
+       "n": -1
+      }
+     ]
+    },
+    {
+     "e": "si",
+     "si": {
+      "c": "cmp",
+      "camino": [
+       "cosas",
+       {
+        "param": 1
+       },
+       "mantequilla"
+      ],
+      "op": ">",
+      "valor": 0
+     },
+     "entonces": [
+      {
+       "e": "suma",
+       "camino": [
+        "cosas",
+        {
+         "param": 1
+        },
+        "mantequilla"
+       ],
+       "n": -1
+      }
+     ]
     }
    ]
   },
@@ -1208,7 +1449,6 @@
     "olla"
    ],
    "dura": "35m",
-   "solo": true,
    "pide": {
     "c": "cmp",
     "camino": [
@@ -1229,6 +1469,32 @@
      ],
      "n": -1
     }
+   ],
+   "deja": [
+    {
+     "e": "si",
+     "si": {
+      "c": "cmp",
+      "camino": [
+       "cosas",
+       "cocina",
+       "huevos"
+      ],
+      "op": ">",
+      "valor": 1
+     },
+     "entonces": [
+      {
+       "e": "suma",
+       "camino": [
+        "cosas",
+        "cocina",
+        "huevos"
+       ],
+       "n": -2
+      }
+     ]
+    }
    ]
   },
   "lavar_platos": {
@@ -1243,7 +1509,6 @@
     "platos"
    ],
    "dura": "20m",
-   "solo": true,
    "pide": {
     "c": "cmp",
     "camino": [
@@ -1339,27 +1604,25 @@
     "jabon"
    ],
    "dura": "1h",
-   "solo": true,
    "pide": {
-    "c": "no",
-    "de": {
-     "c": "existe",
-     "camino": [
-      "tejas_verdes",
-      "hechos",
-      "ropa_lavada"
-     ],
-     "ventana": "hoy"
-    }
+    "c": "cmp",
+    "camino": [
+     "cosas",
+     "cocina",
+     "ropa_sucia"
+    ],
+    "op": ">",
+    "valor": 0
    },
    "deja": [
     {
      "e": "deja",
      "camino": [
-      "tejas_verdes",
-      "hechos",
-      "ropa_lavada"
-     ]
+      "cosas",
+      "cocina",
+      "ropa_sucia"
+     ],
+     "valor": 0
     }
    ]
   },
@@ -1375,7 +1638,6 @@
     "mantequera"
    ],
    "dura": "40m",
-   "solo": true,
    "pide": {
     "c": "cmp",
     "camino": [
@@ -1415,7 +1677,7 @@
     "q"
    ],
    "donde": "cocina",
-   "junto_a": "estufa",
+   "junto_a": "ventana",
    "postura": "sentada",
    "usa": [
     "agujas",
@@ -1434,8 +1696,7 @@
    "usa": [
     "plancha"
    ],
-   "dura": "45m",
-   "solo": true
+   "dura": "45m"
   },
   "hacer_conservas": {
    "tipo": "primitivo",
@@ -1450,7 +1711,6 @@
     "ciruelas"
    ],
    "dura": "1h",
-   "solo": true,
    "pide": {
     "c": "cmp",
     "camino": [
@@ -1500,41 +1760,6 @@
    "postura": "caminando",
    "dura": "30m"
   },
-  "buscar_huevos": {
-   "tipo": "primitivo",
-   "params": [
-    "q"
-   ],
-   "donde": "gallinero",
-   "postura": "agachada",
-   "usa": [
-    "canasta"
-   ],
-   "dura": "10m",
-   "solo": true,
-   "pide": {
-    "c": "no",
-    "de": {
-     "c": "existe",
-     "camino": [
-      "tejas_verdes",
-      "hechos",
-      "huevos_recogidos"
-     ],
-     "ventana": "hoy"
-    }
-   },
-   "deja": [
-    {
-     "e": "deja",
-     "camino": [
-      "tejas_verdes",
-      "hechos",
-      "huevos_recogidos"
-     ]
-    }
-   ]
-  },
   "regar": {
    "tipo": "primitivo",
    "params": [
@@ -1564,7 +1789,9 @@
      "e": "suma",
      "camino": [
       "cosas",
-      "cocina",
+      {
+       "param": 0
+      },
       "leche"
      ],
      "n": 2
@@ -1607,13 +1834,22 @@
     "hacha"
    ],
    "dura": "30m",
-   "solo": true,
+   "pide": {
+    "c": "cmp",
+    "camino": [
+     "cosas",
+     "granero",
+     "lena"
+    ],
+    "op": "<",
+    "valor": 15
+   },
    "deja": [
     {
      "e": "suma",
      "camino": [
       "cosas",
-      "cocina",
+      "granero",
       "lena"
      ],
      "n": 5
@@ -1913,6 +2149,120 @@
       {
        "param": 1
       }
+     ]
+    }
+   }
+  },
+  "recoger_huevos": {
+   "tipo": "receta",
+   "params": [
+    "q"
+   ],
+   "pide": {
+    "c": "cmp",
+    "camino": [
+     "cosas",
+     "gallinero",
+     "huevos"
+    ],
+    "op": ">",
+    "valor": 0
+   },
+   "pasos": {
+    "trae": {
+     "verbo": "llevar",
+     "args": [
+      {
+       "param": 0
+      },
+      "huevos",
+      12,
+      "gallinero",
+      "cocina"
+     ]
+    }
+   }
+  },
+  "entrar_lena": {
+   "tipo": "receta",
+   "params": [
+    "q"
+   ],
+   "pide": {
+    "c": "y",
+    "de": [
+     {
+      "c": "cmp",
+      "camino": [
+       "cosas",
+       "cocina",
+       "lena"
+      ],
+      "op": "<",
+      "valor": 3
+     },
+     {
+      "c": "cmp",
+      "camino": [
+       "cosas",
+       "granero",
+       "lena"
+      ],
+      "op": ">",
+      "valor": 0
+     }
+    ]
+   },
+   "pasos": {
+    "trae": {
+     "verbo": "llevar",
+     "args": [
+      {
+       "param": 0
+      },
+      "lena",
+      4,
+      "granero",
+      "cocina"
+     ]
+    }
+   }
+  },
+  "dejar_la_leche": {
+   "tipo": "receta",
+   "params": [
+    "q"
+   ],
+   "pide": {
+    "c": "cmp",
+    "camino": [
+     "cosas",
+     {
+      "param": 0
+     },
+     "leche"
+    ],
+    "op": ">",
+    "valor": 0
+   },
+   "pasos": {
+    "va": {
+     "verbo": "ir_a",
+     "args": [
+      {
+       "param": 0
+      },
+      "cocina"
+     ]
+    },
+    "deja": {
+     "verbo": "poner",
+     "args": [
+      {
+       "param": 0
+      },
+      "leche",
+      4
      ]
     }
    }
@@ -2606,7 +2956,7 @@
        },
        {
         "hace": {
-         "verbo": "buscar_huevos",
+         "verbo": "recoger_huevos",
          "args": [
           {
            "param": 0
@@ -3474,6 +3824,17 @@
        },
        {
         "hace": {
+         "verbo": "dejar_la_leche",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "prioridad": 6
+       },
+       {
+        "hace": {
          "verbo": "dar_de_comer",
          "args": [
           {
@@ -3637,6 +3998,40 @@
        },
        {
         "hace": {
+         "verbo": "entrar_lena",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "si": {
+         "c": "y",
+         "de": [
+          {
+           "c": "cmp",
+           "camino": [
+            "tiempo",
+            "hora"
+           ],
+           "op": ">=",
+           "valor": 6
+          },
+          {
+           "c": "cmp",
+           "camino": [
+            "tiempo",
+            "hora"
+           ],
+           "op": "<",
+           "valor": 20
+          }
+         ]
+        },
+        "prioridad": 4
+       },
+       {
+        "hace": {
          "verbo": "partir_lena",
          "args": [
           {
@@ -3651,38 +4046,78 @@
            "c": "cmp",
            "camino": [
             "cosas",
-            "cocina",
+            "granero",
             "lena"
            ],
            "op": "<",
-           "valor": 4
+           "valor": 6
           },
           {
-           "c": "y",
+           "c": "o",
            "de": [
             {
-             "c": "cmp",
-             "camino": [
-              "tiempo",
-              "hora"
-             ],
-             "op": ">=",
-             "valor": 6
+             "c": "y",
+             "de": [
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": ">=",
+               "valor": 6
+              },
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": "<",
+               "valor": 12
+              }
+             ]
             },
             {
-             "c": "cmp",
-             "camino": [
-              "tiempo",
-              "hora"
-             ],
-             "op": "<",
-             "valor": 20
+             "c": "y",
+             "de": [
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": ">=",
+               "valor": 13
+              },
+              {
+               "c": "cmp",
+               "camino": [
+                "tiempo",
+                "hora"
+               ],
+               "op": "<",
+               "valor": 18
+              }
+             ]
             }
            ]
+          },
+          {
+           "c": "no",
+           "de": {
+            "c": "cmp",
+            "camino": [
+             "tiempo",
+             "semana"
+            ],
+            "op": "=",
+            "valor": "domingo"
+           }
           }
          ]
         },
-        "prioridad": 4
+        "prioridad": 3
        },
        {
         "hace": {
@@ -4642,7 +5077,7 @@
        },
        {
         "hace": {
-         "verbo": "buscar_huevos",
+         "verbo": "recoger_huevos",
          "args": [
           {
            "param": 0
@@ -4701,6 +5136,68 @@
          ]
         },
         "prioridad": 1
+       },
+       {
+        "hace": {
+         "verbo": "entrar_lena",
+         "args": [
+          {
+           "param": 0
+          }
+         ]
+        },
+        "si": {
+         "c": "o",
+         "de": [
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 13
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 18
+            }
+           ]
+          },
+          {
+           "c": "y",
+           "de": [
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": ">=",
+             "valor": 18
+            },
+            {
+             "c": "cmp",
+             "camino": [
+              "tiempo",
+              "hora"
+             ],
+             "op": "<",
+             "valor": 21.5
+            }
+           ]
+          }
+         ]
+        },
+        "prioridad": 3
        },
        {
         "hace": {

@@ -21,6 +21,8 @@ const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ?
 const DIAS = +arg('dias', 3), DESDE = +arg('desde', 5), SEMILLA = +arg('semilla', 1), VER = arg('ver', null), DIARIO = arg('diario', null), DIARIOS = arg('diarios', null);
 const D = datos(path.resolve(__dirname, '..', '..', 'docs', 'lenguaje')), G = Mundo.geografia();
 const QUIENES = Object.keys(D.vidas.tejas_verdes);
+// (antes de vivirlas: las cosas y los muebles tienen sentido —tools/mundo/verificar_vidas.js—)
+{ const { fallas } = require('./verificar_vidas.js').verificar(D); if (fallas.length) { for (const f of fallas) console.log('✘ ' + f); process.exit(1); } }
 const CAMAS = { ana: 'pieza', marilla: 'pieza_marilla', matthew: 'pieza_matthew', diana: 'cuesta_del_huerto' };
 const hhmm = m => `${String(Math.floor((m % 1440) / 60)).padStart(2, '0')}:${String(Math.round(m % 60)).padStart(2, '0')}`;
 const SEMANA = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
@@ -34,7 +36,7 @@ const PASO = 5, foto = {}, casa = []; for (const q of QUIENES) foto[q] = [];
 const fin = (DESDE - 1 + DIAS) * 1440;
 for (let m = (DESDE - 1) * 1440; m <= fin; m += PASO) {
   M.alTiempo(m); W.avanzarHasta(m);
-  casa.push({ m, ...Object.fromEntries(Object.keys(D.cosas.cocina).map(x => [x, M.get(['cosas', 'cocina', x])])) });
+  casa.push({ m, ...Object.fromEntries(Object.keys(D.cosas.tipos).map(x => [x, W.cosasDe('cocina')[x] || 0])), lena_granero: W.cosasDe('granero').lena || 0, huevos_gallinero: W.cosasDe('gallinero').huevos || 0 });
   for (const q of QUIENES) { const p = W.E.personas[q] || {}, h = M.haciendo(q), quieta = h.length > 1 && /^(quedarse|esperar)$/.test(h[h.length - 1]) ? h[h.length - 2] : '·';   // (quedarse en clase: «ir a clases»)
     foto[q].push({ m, lugar: p.lugar, que: p.viaje ? `→ ${p.viaje.a}` : p.ocupado?.que || quieta, hace: h }); }
 }
@@ -92,7 +94,7 @@ if (DIARIO) fs.writeFileSync(DIARIO, QUIENES.map(diarioDe).join('\n'));
 if (DIARIOS) { fs.mkdirSync(DIARIOS, { recursive: true }); for (const q of QUIENES) fs.writeFileSync(path.join(DIARIOS, q + '.txt'), diarioDe(q)); console.log(`→ ${QUIENES.map(q => path.join(DIARIOS, q + '.txt')).join(', ')}`); }
 if (VER) console.log('\n' + diarioDe(VER));
 console.log(`\n${DIAS} días de Tejas Verdes (desde el ${DESDE}, semilla ${SEMILLA}) en ${ms} ms · ${interrupciones} interrupciones, ${retomas} retomadas`);
-{ const u = casa[casa.length - 1], max = x => Math.max(...casa.map(c => c[x])), min = x => Math.min(...casa.map(c => c[x])); console.log(`  la casa: pan ${min('pan')}–${max('pan')} · leña ${min('lena')}–${max('lena')} · leche hasta ${max('leche')} · mantequilla ${u.mantequilla} al final · platos sucios hasta ${max('platos_sucios')}`); }
+{ const u = casa[casa.length - 1], max = x => Math.max(...casa.map(c => c[x])), min = x => Math.min(...casa.map(c => c[x])); console.log(`  la casa: pan ${min('pan')}–${max('pan')} · leña ${min('lena')}–${max('lena')} · leche hasta ${max('leche')} · mantequilla ${u.mantequilla} al final · platos sucios hasta ${max('platos_sucios')} · huevos hasta ${max('huevos')} · leña del granero ${min('lena_granero')}–${max('lena_granero')}`); }
 for (const q of QUIENES) { const cuenta = {}; for (const x of diario(q)) if (!x.que.startsWith('→') && x.que !== '·') cuenta[x.que] = (cuenta[x.que] || 0) + 1; console.log(`  ${M.nombre(q).padEnd(8)} ${Object.entries(cuenta).sort((a, b) => b[1] - a[1]).map(([k, n]) => `${k.replace(/_/g, ' ')} ${n}`).join(' · ')}`); }
 console.log(fallas.length ? `\n✘ ${fallas.length} reglas no se cumplen:\n  ` + fallas.slice(0, 30).join('\n  ') : '\n✔ todas las reglas de lo natural');
 process.exit(fallas.length ? 1 : 0);

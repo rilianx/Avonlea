@@ -56,6 +56,11 @@ export const soltar = primitivo('soltar', (quien: Persona, otro: Persona) => ({
 // (no deja nada: se cumple cuando se cumple «hasta»)
 export const esperar = primitivo('esperar', (_quien: Persona, hasta: Cond) => ({ pide: hasta }))
 
+// (tomar cosas de donde está, y ponerlas donde está: las que haya, hasta «n». Lo hace el mundo —el motor sabe dónde
+// está cada uno—: la cosa va del lugar a quien, o de quien al lugar)
+export const tomar = primitivo('tomar', (_quien: Persona, _cosa: string, _n: number) => ({ postura: 'agachada', dura: '1m' }))
+export const poner = primitivo('poner', (_quien: Persona, _cosa: string, _n: number) => ({ postura: 'agachada', dura: '1m' }))
+
 // (quedarse donde está hasta que se cumpla «hasta»: si se va antes —lo corta algo más importante, la jugadora se la
 // lleva—, no se cumple: la clase hasta las tres y media)
 export const quedarse = primitivo('quedarse', (_quien: Persona, hasta: Cond) => ({ pide: hasta }))
@@ -84,6 +89,11 @@ export const traer = receta('traer', (quien: Persona, otro: Persona, a: Destino)
     vuelve: ir_a(quien, a),
     suelta: soltar(quien, otro),
   },
+}))
+
+// (llevar cosas de un lugar a otro: ir, tomarlas, ir, ponerlas —los huevos al canasto de la cocina, la leña a la estufa—)
+export const llevar = receta('llevar', (quien: Persona, cosa: string, n: number, de: Lugar, a: Lugar) => ({
+  pasos: { va: ir_a(quien, de), toma: tomar(quien, cosa, n), lleva: ir_a(quien, a), pone: poner(quien, cosa, n) },
 }))
 
 export const esperar_en = receta('esperar_en', (quien: Persona, lugar: Lugar, hasta: Cond) => ({

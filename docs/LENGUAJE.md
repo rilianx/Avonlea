@@ -212,19 +212,37 @@ una vida es una receta, y una actividad («ir a clases»: ir, quedarse, volver) 
   `hizo('marilla', lavar_platos).desde('<', '1h')`.
 - **`tiempo.semana`**: el día de la semana (el día 7 es domingo, como en el juego). `tiempo.hora.entre(21, 6)` cruza la
   medianoche, y `tiempo.hora.desde(15.5)` es desde las tres y media.
-- **Las cosas existen** (`cosasDe(lugar, {...})`): la casa tiene pan, leña, leche, mantequilla y platos sucios, con
-  cuántos hay al empezar. Son números (`cosas.pan.lt(3)`, `cosas.lena.suma(-1)`, `cosas.platos_sucios.vale(0)`) que
-  nunca bajan de cero. Las acciones los piden (`pide`), los cambian al empezar (`empieza`) y al terminar (`deja`), y
-  dicen qué queda si las cortan (`si_se_deja`). Así se hace lo que hace falta: no se lava si no hay platos sucios, no
-  se amasa si queda pan, y Matthew parte leña cuando se acaba.
+- **Las cosas existen, en un lugar o con alguien** (`cosasDe`): se declaran sus tipos (`pan`, `lena`, `leche`, `huevos`,
+  `libro`…) y dónde hay al empezar: `{ cocina: { pan: 3 }, granero: { lena: 10 }, ana: { libro: 1 } }`. Un lugar y una
+  persona son lo mismo para esto: un sitio donde hay cosas. `en('granero').lena` es la leña del granero, `con(q).leche`
+  la leche que lleva quien hace la acción. Son números que nunca bajan de cero; las acciones los piden (`pide`), los
+  cambian al empezar (`empieza`) y al terminar (`deja`), y dicen qué queda si las cortan (`si_se_deja`). Es el mismo
+  inventario del mundo (`E.cosas`) y del planificador del juego: lo que Ana tiene en el juego es lo que tiene aquí.
   ```ts
-  export const lavar_platos = primitivo('lavar_platos', (_q: Persona) => ({ donde: 'cocina', junto_a: 'fregadero', dura: '20m', solo: true,
-    pide: cosas.platos_sucios.gt(0), deja: [cosas.platos_sucios.vale(0)] }))
+  export const cosas = cosasDe({ pan: { titulo: 'hogazas de pan' }, lena: { titulo: 'leños' }, /* … */ },
+    { cocina: { pan: 3, lena: 4 }, granero: { lena: 10 }, ana: { libro: 1 } })
+  const { en, con } = cosas
+  export const cocinar = primitivo('cocinar', (_q: Persona) => ({ donde: 'cocina', junto_a: 'estufa', dura: '35m',
+    pide: en('cocina').lena.gt(0), empieza: [en('cocina').lena.suma(-1)],
+    deja: [si(en('cocina').huevos.gt(1), en('cocina').huevos.suma(-2))] }))
   ```
-- **`solo: true`**: junto a eso cabe uno a la vez (el fregadero, la estufa). Si otro lo está usando, no se puede (ni
-  se elige). Así Ana y Marilla no lavan los platos juntas.
-- **Lo de la casa, una vez**: un hecho de la casa (`hechos.huevos_recogidos.hoy`), no de una persona: si Ana recogió
-  los huevos, Marilla no va.
+- **`si(cond, ...efectos)`**: un efecto que pasa solo si se cumple (gasta huevos si hay; si no, cocina otra cosa).
+- **Llevar cosas**: `tomar(q, cosa, n)` saca de donde está y se lo lleva (las que haya, hasta n); `poner(q, cosa, n)`
+  deja lo que lleva donde está. `llevar(q, cosa, n, de, a)` es la receta de las dos con los viajes: Matthew entra
+  leña del granero a la cocina, Ana trae los huevos del gallinero, Matthew deja la leche en la cocina después de
+  ordeñar.
+- **Los muebles tienen lugar y capacidad** (`mueblesDe`): `{ cocina: { estufa: 1, mesa: 4, ventana: 2 } }`. Una acción
+  `junto_a: 'estufa'` no se puede (ni se elige) si la estufa está llena: dos no cocinan juntas, y a la mesa caben
+  cuatro.
+- **`usa` exige lo que es una cosa**: si `usa: ['libro']` y el libro es una cosa declarada, hay que tenerlo (consigo o
+  donde se hace). Lo que no se declara (la olla, las agujas) es de la escena: se dibuja, no se cuenta.
+- **Lo que pasa solo** (`procesos`): a una hora, cada día, sin que nadie lo haga: las gallinas ponen a las 6
+  (`si(en('gallinero').huevos.lt(12), en('gallinero').huevos.suma(6))`), la ropa sucia del día se junta a las 21.
+- **La revisión** (`node tools/mundo/verificar_vidas.js`, también al empezar `dia.js`): cada `junto_a` existe en los
+  muebles de su lugar (también en los lugares que se le pasan: `dormir(q, 'pieza')` necesita una cama en la pieza);
+  toda cosa nombrada está declarada; lo que se gasta, algo lo hace (si no, se acaba para siempre); y lo que se hace,
+  algo lo gasta (si no, se junta sin fin). Lo que el compilador de tipos no puede ver.
+- **Lo de la casa, una vez, sale de las cosas**: si Ana ya trajo los huevos, en el gallinero no quedan, y Marilla no va.
 - **Retomar lo interrumpido**: lo que se corta a medias guarda lo que le faltaba. La próxima vez que esa persona lo
   hace ese día, le falta solo eso («↩ Matthew retoma partir_lena (le faltan 25 min)»), y al elegir, prefiere retomarlo.
 - **`vida(quien, receta)`**: la vida de cada uno. El motor la corre de fondo si el escenario dice
@@ -326,7 +344,7 @@ marilla: Hay que ver la de cosas que caben en esa cabeza. #piensa
 | `si` | condiciones (§5), separadas por comas: todas | ninguna |
 | `repetir` | `una_vez`, `dia`, `siempre` | `una_vez` |
 | `en_marcha` | `si`: se dice mientras los encargos siguen (una charla en la calesa, que no la detiene) | la escena detiene a quienes participan |
-| `interrumpe` | `si`: no espera a que termine la escena que se está diciendo; la corta (queda a medias, sin `tras`). Adentro, `interrumpio` dice si cortó algo | espera su turno |
+| `interrumpe` | `si`: no espera a que termine la escena que se está diciendo; la corta (queda a medias, sin `tras`), salvo que sea de su misma historia: esa la deja terminar. Adentro, `interrumpio` dice si cortó algo | espera su turno |
 | `punto` | un punto para volver, antes de empezar | |
 | `con` | quienes participan sin hablar | los que hablan |
 

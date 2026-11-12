@@ -1,8 +1,10 @@
 // EL MUNDO: lo que hay y cómo está, sin dibujarlo. Un solo estado para todo (tools/mundo/LEEME.md):
 //   lugares    la lista de tools/mundo/geografia.json (los del planificador del juego y los de las historias, juntos)
-//   personas   cada una: dónde está (un lugar de la lista), en qué va, a quién sigue, qué tiene, qué sabe, si va de
+//   personas   cada una: dónde está (un lugar de la lista), en qué va, a quién sigue, qué sabe, si va de
 //              camino (de dónde, adónde, a qué hora llega), y si está ocupada en algo (qué, hasta qué hora)
 //   medios     la calesa: dónde está y si está enganchada
+//   cosas      dónde está cada cosa, y cuántas: en un lugar (la leña, en el granero) o con alguien (el libro, con Ana):
+//              { granero: { lena: 10 }, ana: { libro: 1 } }. Un solo inventario, el de las vidas y el del planificador
 //   cariño     cuánto quiere cada uno a cada otro ('ana>marilla': -2..5, como en el juego)
 //   hechos, ofensas, vacas, existencias (lo que hay para recoger), enfermos, estados (ana_en_tv…), cualidades
 //   (la paciencia de Marilla…), y el reloj: minutos desde el comienzo del día 1
@@ -15,12 +17,14 @@
   const modo = (q, en) => (en && en !== 'nada' ? 'calesa' : q === 'ana' ? 'ana' : 'pie');
 
   function Mundo(G, E = null){
-    E = E || { t: 0, personas: {}, medios: { calesa: { lugar: null, listo: 'no' } }, cariño: {}, ofensas: {}, hechos: {}, vacas: {}, existencias: {}, enfermos: [], estados: {}, cualidades: {}, registro: [] };
+    E = E || { t: 0, personas: {}, medios: { calesa: { lugar: null, listo: 'no' } }, cosas: {}, cariño: {}, ofensas: {}, hechos: {}, vacas: {}, existencias: {}, enfermos: [], estados: {}, cualidades: {}, registro: [] };
     const nota = t => { E.registro.push({ t: E.t, txt: t }); if (E.registro.length > 400) E.registro.splice(0, 100); };
     const lugarId = l => (l == null ? l : G.lugares[l] ? l : G.alias[l] || l);   // (un lugar de las historias, como lo llama el mundo)
     const nombre = l => G.lugares[l]?.nombre || l;
     const a = l => ('a ' + nombre(l)).replace(/^a el /, 'al '), de = l => ('de ' + nombre(l)).replace(/^de el /, 'del ');   // (al granero, del granero)
-    const persona = k => (E.personas[k] ||= { lugar: null, en: 'nada', sigue: 'nadie', cosas: {}, sabe: [], viaje: null });
+    const persona = k => (E.personas[k] ||= { lugar: null, en: 'nada', sigue: 'nadie', sabe: [], viaje: null });
+    // (las cosas de un lugar o de alguien: cuántas hay)
+    const cosasDe = d => (E.cosas[d] ||= {});
     // (los minutos entre dos lugares, como se va: los medidos sobre el mapa; uno que no está: 10, y se avisa)
     function minutos(a, b, como = 'pie'){
       a = lugarId(a); b = lugarId(b); if (a === b || a == null || b == null) return 0;
@@ -58,7 +62,7 @@
     // (lo próximo que pasa: alguien que llega, o que termina lo que hacía)
     const proximo = () => { let m = Infinity; for (const L of [E.personas, E.medios]) for (const x of Object.values(L)) { if (x.viaje) m = Math.min(m, x.viaje.llega); if (x.ocupado) m = Math.min(m, x.ocupado.hasta); } return m; };
     return {
-      E, G, nombre, al: a, del: de, lugarId, persona, minutos, ir, parar, avanzarHasta, proximo, nota,
+      E, G, nombre, al: a, del: de, lugarId, cosasDe, persona, minutos, ir, parar, avanzarHasta, proximo, nota,
       ahora: () => E.t,
       poner(k, l){ const x = quien(k) || persona(k); x.lugar = lugarId(l); x.viaje = null; },
       // dónde está, como lo dicen las historias (el granero queda en Tejas Verdes; quien va de camino, todavía donde salió)

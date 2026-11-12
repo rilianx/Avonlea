@@ -63,7 +63,7 @@ const ZONAS = [
 const CASILLA = {}; for (const z of ZONAS) for (const [k, r] of Object.entries(z.casillas)) CASILLA[k] = { r, c: z.c };
 const NOMBRE = l => (D.lugares[l]?.nombre || G.lugares[G.alias[l] || l]?.nombre || l).replace(/^(la|el) /, '').replace(/, .*$/, '').replace(/ de Tejas Verdes$/, '').replace(/ de Avonlea$/, '').replace(/^\w/, c => c.toUpperCase());
 const COLOR = { ana: '#b8442f', marilla: '#4f5d7a', matthew: '#557a43', diana: '#7a4f86' };
-const ICONO = { dormir: '💤', descansar: '🪑', desayunar: '🍽', comer: '🍽', cenar: '🍽', cocinar: '🍲', lavar_platos: '🧽', barrer: '🧹', amasar: '🍞', coser: '🧵', buscar_huevos: '🥚', regar: '🌱', ordeñar: '🥛', dar_de_comer: '🌾', trabajar_el_campo: '🌾', partir_lena: '🪓', arreglar_cerca: '🔨', fumar_pipa: '🪈', leer: '📖', jugar_en_la_huerta: '🎈', sonar_despierta: '☁️', mirar_las_vacas: '🐄', rezar: '🙏', estudiar: '✏️', jugar_con: '🎈', lavar_ropa: '🧺', batir_mantequilla: '🧈', pasear: '🚶', ir_a_clases: '🏫', ir_a_la_iglesia: '⛪', quedarse: '⏳' };
+const ICONO = { tomar: '✋', poner: '📦', dormir: '💤', descansar: '🪑', desayunar: '🍽', comer: '🍽', cenar: '🍽', cocinar: '🍲', lavar_platos: '🧽', barrer: '🧹', amasar: '🍞', coser: '🧵', buscar_huevos: '🥚', regar: '🌱', ordeñar: '🥛', dar_de_comer: '🌾', trabajar_el_campo: '🌾', partir_lena: '🪓', arreglar_cerca: '🔨', fumar_pipa: '🪈', leer: '📖', jugar_en_la_huerta: '🎈', sonar_despierta: '☁️', mirar_las_vacas: '🐄', rezar: '🙏', estudiar: '✏️', jugar_con: '🎈', lavar_ropa: '🧺', batir_mantequilla: '🧈', pasear: '🚶', ir_a_clases: '🏫', ir_a_la_iglesia: '⛪', quedarse: '⏳' };
 // el mundo, y las vidas jugando en él
 let M, W, sel = null, reloj = null;
 const ahora = () => (M.get(['tiempo', 'dia']) - 1) * 1440 + Math.round(M.get(['tiempo', 'hora']) * 60);
@@ -101,7 +101,7 @@ $('nuevo').onclick = nuevo; $('dia').onchange = nuevo; $('semilla').onchange = n
 function que(q){
   const p = W.E.personas[q] || {}, h = M.haciendo(q);
   if (p.viaje) return { ico: '🚶', txt: 'va a ' + NOMBRE(p.viaje.a), hasta: p.viaje.llega, desde: p.viaje.sale };
-  if (p.ocupado) return { ico: ICONO[p.ocupado.que] || '•', txt: p.ocupado.que.replace(/_/g, ' '), hasta: p.ocupado.hasta, desde: p.ocupado.desde, o: p.ocupado };
+  if (p.ocupado) return { ico: ICONO[p.ocupado.que.split(' ')[0]] || '•', txt: p.ocupado.que.replace(/_/g, ' '), hasta: p.ocupado.hasta, desde: p.ocupado.desde, o: p.ocupado };
   const a = h.length > 1 && /^(quedarse|esperar)$/.test(h[h.length - 1]) ? h[h.length - 2] : null;
   return a ? { ico: ICONO[a] || '⏳', txt: a.replace(/_/g, ' ') } : { ico: '', txt: get('controla', q) ? 'la manejas tú' : '—' };
 }
@@ -129,17 +129,19 @@ $('svg').onclick = e => { const f = e.target.closest('.ficha'), c = e.target.clo
   if (f) { sel = { q: f.dataset.q }; $('quien').value = f.dataset.q; } else if (c) { if (get('controla', 'ana') && !esperandoAna()) { M.irA(c.dataset.l); } sel = { l: c.dataset.l }; } pintar(); };
 const esperandoAna = () => false;
 function barra(w, t){ return w.hasta ? `<div class="barra"><i style="width:${Math.round(100 * Math.max(0, Math.min(1, (t - w.desde) / Math.max(1, w.hasta - w.desde))))}%"></i></div>` : ''; }
+const lleva = q => Object.keys(D.cosas?.tipos || {}).map(x => [x, M.get(['cosas', q, x]) || 0]).filter(([, n]) => n).map(([x, n]) => `${esc(D.cosas.tipos[x].titulo.replace(/^(los|las|la|el|un|una) /, ''))}${n > 1 ? ' ' + n : ''}`).join(', ');
 function fichaLupa(q, t){
   const w = que(q), o = w.o, p = W.E.personas[q], cadena = M.haciendo(q).map(v => v.replace(/^dia_de_\w+$/, 'su día').replace(/_/g, ' ')).join(' › ');
   return `<div class="fila"><span><b style="color:${COLOR[q]}">${esc(M.nombre(q))}</b> ${w.ico} ${esc(w.txt)}</span><span>${w.hasta ? 'hasta ' + hhmm(w.hasta) : ''}</span></div>${barra(w, t)}`
     + (o ? `<div class="cadena">${[o.junto_a && 'junto a ' + o.junto_a, o.postura && o.postura.replace('_', ' '), o.usa && 'con ' + o.usa.join(', ')].filter(Boolean).map(esc).join(' · ')}</div>` : '')
-    + (cadena ? `<div class="cadena">${esc(cadena)}</div>` : '') + `<div class="cadena">en ${esc(NOMBRE(p.lugar))}</div>`;
+    + (cadena ? `<div class="cadena">${esc(cadena)}</div>` : '') + `<div class="cadena">en ${esc(NOMBRE(p.lugar))}${lleva(q) ? ' · lleva: ' + lleva(q) : ''}</div>`;
 }
 function lupa(){
   const t = ahora(), L = $('lupa');
   if (sel?.q) { L.innerHTML = fichaLupa(sel.q, t); return; }
   if (sel?.l) { const qs = QUIENES.filter(q => { const p = W.E.personas[q]; return p && !p.viaje && lugarTablero(p.lugar) === sel.l; });
-    const cosas = D.cosas?.[sel.l] ? `<div class="cadena" style="margin-bottom:6px">en la casa: ${Object.entries(D.cosas[sel.l]).map(([x, c]) => `${esc(c.titulo.replace(/^(los|las|la|el) /, ''))} ${M.get(['cosas', sel.l, x])}`).join(' · ')}</div>` : '';   // (las cosas de la casa: cuánto hay de cada una)
+    const hay = d => Object.keys(D.cosas?.tipos || {}).map(x => [x, M.get(['cosas', d, x]) || 0]).filter(([, n]) => n).map(([x, n]) => `${esc(D.cosas.tipos[x].titulo.replace(/^(los|las|la|el|un|una) /, ''))} ${n}`).join(' · ');
+    const cosas = hay(sel.l) ? `<div class="cadena" style="margin-bottom:6px">aquí hay: ${hay(sel.l)}</div>` : '';   // (las cosas de este lugar: cuánto hay de cada una)
     L.innerHTML = `<div class="fila"><span><b>${esc(NOMBRE(sel.l))}</b></span><span>${qs.length ? qs.length + ' aquí' : 'nadie'}</span></div>` + cosas + qs.map(q => fichaLupa(q, t)).join('<hr style="border:0;border-top:1px solid var(--line)">'); return; }
 }
 // Ana: manejarla o soltarla; manejándola, lo que puede hacer donde está (las acciones de su día), e ir: tocando una casilla

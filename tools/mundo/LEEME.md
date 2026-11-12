@@ -17,7 +17,7 @@ otro.
   patio, y afuera el campo, la escuela, la iglesia y la casa de Diana); las fichas son las personas, con un ícono de lo
   que hacen, y se deslizan de casilla en casilla cuando van de un lugar a otro.
   - **La lupa**: tocando una casilla o una ficha se ve quién está, qué hace, junto a qué, en qué postura, con qué, y
-    hasta qué hora. En la cocina, también cuánto hay de cada cosa en la casa.
+    hasta qué hora, y lo que lleva. En una casilla, también cuánto hay de cada cosa ahí (los leños del granero).
   - **El diario de cada uno**: se elige a la persona (o se toca su ficha) y se ve su día hasta ahora, cada cosa con su
     hora, dónde y cuánto duró.
   - **Manejar a Ana**: su día se suspende; tocando una casilla, va; y se le puede hacer hacer lo de su día ahí. Al
@@ -27,6 +27,7 @@ otro.
   están en la escuela a mediodía; nadie pasa más de una hora sin nada que hacer; dos días seguidos de Ana no son
   iguales; la casa no se descuida (nunca más de 6 platos sucios, y nunca falta leña para cocinar); nadie se queda
   trabado. También dice cuántas veces alguien retomó algo, y cuánto hubo de cada cosa en la casa. Si una no se cumple, falla.
+  Antes de vivirlos, revisa las cosas y los muebles (`node tools/mundo/verificar_vidas.js`, docs/LENGUAJE.md §6.1).
   ```
   node tools/mundo/dia.js                          # tres días, desde el viernes
   node tools/mundo/dia.js --dias 7 --desde 1 --semilla 3 --ver ana   # una semana, con otra semilla, y el diario de Ana
@@ -60,8 +61,9 @@ otro.
 
 | | |
 |---|---|
-| personas | dónde está cada una (un lugar de la lista), en qué va, a quién sigue, qué tiene, qué sabe; si va de camino (de dónde, adónde, a qué hora llega); si está ocupada en algo (qué, hasta qué hora) |
+| personas | dónde está cada una (un lugar de la lista), en qué va, a quién sigue, qué sabe; si va de camino (de dónde, adónde, a qué hora llega); si está ocupada en algo (qué, hasta qué hora) |
 | medios | la calesa: dónde está y si está enganchada |
+| cosas | cuántas hay de cada cosa en cada lugar o con cada persona (`granero: { lena: 10 }`, `ana: { libro: 1 }`): un solo inventario, el de las vidas, la consola y el planificador del juego |
 | cariño | cuánto quiere cada uno a cada otro (`ana>marilla`, de −2 a 5, como en el juego) |
 | hechos, ofensas | lo que pasó |
 | vacas, existencias, enfermos | dónde está cada vaca, lo que hay para recoger, quién está en cama |
@@ -136,8 +138,8 @@ poner <quien> <lugar>        alguien está en un lugar (así empieza)
 avanzar [30m | 2h | hh:mm]   el reloj: hasta que pase algo, o ese rato, o esa hora
 acciones [quien]             lo que puede hacer ahora, numerado, con lo que dura
 hacer [quien] <n | verbo> …  hacer una: «hacer ana leer», «hacer matthew 3», «hacer ana ir escuela»
-tiene <quien> <cosa> <n>     ponerle algo en las manos
-cosas [quien]                lo que tiene y lo que sabe
+tiene <quien> <cosa> <n>     ponerle algo en las manos (o en un lugar: tiene cocina pan 0)
+cosas [quien | lugar]        lo que tiene y lo que sabe (o lo que hay en un lugar: cosas granero)
 cariño <a> <b> [n]           cuánto quiere a a b (y cambiarlo)
 plan <quien> <meta> [args…]  lo que haría el planificador para una meta, paso a paso
 metas                        las metas del planificador

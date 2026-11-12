@@ -29,6 +29,7 @@
       for (const q of quienes()) { const l = vista(q), antes = get(['mundo', q, 'lugar']); if (l != null && l !== antes) { if (antes == null) set(['mundo', q, 'lugar'], l); else api.llega(q, l); } }
       for (const q of Object.keys(D.personas)) { const p = W.E.personas[q]; if (!p) continue; for (const c of ['en', 'sigue']) if (get(['mundo', q, c]) !== p[c]) set(['mundo', q, c], p[c]); }
       for (const [m, x] of Object.entries(W.E.medios)) if (D.medios[m] && get(['mundo', m, 'listo']) !== x.listo) set(['mundo', m, 'listo'], x.listo);
+      for (const [d, c] of Object.entries(W.E.cosas)) for (const [x, n] of Object.entries(c)) if (get(['cosas', d, x]) !== n) set(['cosas', d, x], n);   // (las cosas que movió otro: el planificador, la consola)
     }
     // (al empezar —la primera vez que el motor le pide algo: cuando se crea, todavía no sabe dónde empieza cada uno—, el
     // mundo toma del motor lo que no sabe: dónde está cada uno, en qué va, la calesa)
@@ -39,6 +40,7 @@
     for (const q of quienes()) { const l = get(['mundo', q, 'lugar']), x = W.E.personas[q] || W.E.medios[q]; if (l != null && x?.lugar == null) W.poner(q, l); }
     for (const q of Object.keys(D.personas)) { const p = W.E.personas[q]; if (!p) continue; for (const c of ['en', 'sigue']) { const v = get(['mundo', q, c]); if (v !== 'nada' && v !== 'nadie' && v != null) p[c] = v; } }
     for (const m of Object.keys(D.medios)) if (get(['mundo', m, 'listo']) === 'si') W.E.medios[m].listo = 'si';
+    if (!Object.keys(W.E.cosas).length) for (const [d, c] of Object.entries(D.cosas?.inicio || {})) Object.assign(W.cosasDe(d), c);   // (las cosas: dónde hay al empezar)
     contar();
     }
     const y = f => (...a) => { iniciar(); return f(...a); };   // (cada cosa que pide el motor: primero, iniciar)
@@ -58,7 +60,7 @@
           MundoMinimo.viajes[acc.quien] = acc;
         } else {
           acc.fin = api.ahora() + (acc.ya ? 0 : acc.decir ? 1 : acc.dura || 0);
-          if (acc.verbo && acc.dura && !acc.ya && W.E.personas[acc.quien]) W.ocupar(acc.quien, acc.verbo, acc.dura, { junto_a: acc.junto_a, postura: acc.postura, usa: acc.usa });   // (lo que hace, para mirarlo: la lupa)
+          if (acc.verbo && acc.dura && !acc.ya && W.E.personas[acc.quien]) W.ocupar(acc.quien, acc.verbo === 'tomar' || acc.verbo === 'poner' ? `${acc.verbo} ${acc.args[1]}` : acc.verbo, acc.dura, { junto_a: acc.junto_a, postura: acc.postura, usa: acc.usa });   // (tomar leña: qué cosa)   // (lo que hace, para mirarlo: la lupa)
         }
         if (acc.nombrar) acc.nombre = D.nombrables[acc.nombrar].libro;
       },
@@ -69,7 +71,7 @@
         W.avanzarHasta(api.ahora()); return !W.persona(acc.quien).viaje;
       },
       terminar(acc){ if (acc.mapa) { contar(); if (MundoMinimo.viajes[acc.quien] === acc) delete MundoMinimo.viajes[acc.quien]; } },
-      cancelar(acc){ if (acc.mapa) { W.parar(acc.quien); if (MundoMinimo.viajes[acc.quien] === acc) delete MundoMinimo.viajes[acc.quien]; } else if (acc.verbo && W.E.personas[acc.quien]?.ocupado) W.dejar(acc.quien, acc.verbo); },
+      cancelar(acc){ if (acc.mapa) { W.parar(acc.quien); if (MundoMinimo.viajes[acc.quien] === acc) delete MundoMinimo.viajes[acc.quien]; } else if (acc.verbo && W.E.personas[acc.quien]?.ocupado) W.dejar(acc.quien, W.E.personas[acc.quien].ocupado.que); },
       // (un viaje se mira de a un minuto: si algo se rompe en el camino, se nota enseguida)
       cuando: acc => (acc.mapa ? Math.min(acc.fin, api.ahora() + 1) : acc.fin),
       parar(acc){ acc.resta = acc.mapa ? W.parar(acc.quien) : acc.fin - api.ahora(); },
@@ -85,6 +87,7 @@
           else if (c[2] === 'listo' && W.E.medios[c[1]]) W.E.medios[c[1]].listo = v;
           else if (c[2] === 'lugar') W.poner(c[1], v);
         }
+        else if ((e.e === 'deja' || e.e === 'suma') && c[0] === 'cosas') W.cosasDe(c[1])[c[2]] = get(c);   // (una cosa que se gastó, se hizo o se movió)
         else if (e.e === 'deja' && c[0] === 'estado') W.E.estados[c[1]] = v;
         else if (e.e === 'deja') W.E.hechos[c.join('.')] = v ?? 1;
         else if (e.e === 'olvida') delete W.E.hechos[c.join('.')];

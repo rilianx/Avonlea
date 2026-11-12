@@ -29,7 +29,7 @@
       if (c[0] === 'intentos') return 0;
       if (c[0] === 'encargo') return 'pendiente';
       if (c[0] === 'historia') return 'no_empezada';
-      if (c[0] === 'cosas') return D.cosas?.[c[1]]?.[c[2]]?.inicial ?? 0;
+      if (c[0] === 'cosas') return D.cosas?.inicio?.[c[1]]?.[c[2]] ?? 0;   // (cuántas hay ahí al empezar)
     }
     const get = c => (k(c) in S ? S[k(c)] : defecto(c));
     const set = (c, v) => { S[k(c)] = v; };
@@ -75,6 +75,7 @@
       if (e.e === 'deja') set(e.camino, e.valor === undefined ? dia() : val(e.valor));
       else if (e.e === 'olvida') delete S[k(e.camino)];
       else if (e.e === 'suma' && e.camino[0] === 'cosas') set(e.camino, Math.max(0, get(e.camino) + e.n));   // (las cosas: nunca menos de cero)
+      else if (e.e === 'si') { if (cumple(e.si)) for (const x of e.entonces) aplicar(x); }   // (un efecto que depende: si hay pan)
       else if (e.e === 'suma') { const d = D.cualidades[e.camino[2]], r = d ? d.rango : [-1e9, 1e9]; set(e.camino, Math.max(r[0], Math.min(r[1], get(e.camino) + e.n))); nota(`${nombre(e.camino[1])}: ${e.camino[2]}${e.camino[3] ? ' hacia ' + nombre(e.camino[3]) : ''} ${e.n > 0 ? '+' : ''}${e.n} → ${get(e.camino)}`); }
       else if (e.e === 'log') nota('📔 ' + e.texto);
       else if (e.e === 'marca') nota('📖 ' + e.id, 'momento');
@@ -170,7 +171,8 @@
           if (ll.verbo === 'quedarse') { F.fase = 5; F.lugar = lugarDe(q); return; }
           if (d.deja && d.deja.length && d.deja.every(yaEs)) return { vale: true };   // (lo que deja ya es cierto: se salta)
           if (d.pide && !cumple(d.pide)) { nota(`✘ ${ll.verbo}: no se puede (${nombre(ll.args[0])})`); return { vale: false }; }
-          if (d.solo && usadoPorOtro(q, d)) { nota(`✘ ${ll.verbo}: ${d.junto_a} lo está usando otro (${nombre(q)})`); return { vale: false }; }
+          if (lleno(q, d)) { nota(`✘ ${ll.verbo}: ${d.junto_a} está ocupado (${nombre(q)})`); return { vale: false }; }
+          { const x = faltaCosa(q, d, ll); if (x) { nota(`✘ ${ll.verbo}: no hay ${x} a mano (${nombre(q)})`); return { vale: false }; } }
           for (const e of d.empieza || []) aplicar(e);
           decir(ll);
           F.fase = 3;
@@ -190,6 +192,7 @@
           return cumple(d.pide) ? { vale: true } : { espera: { hasta: { c: 'o', de: [d.pide, { c: 'cmp', camino: ['mundo', ll.args[0], 'lugar'], op: '!=', valor: F.lugar }] } } };
         }
         for (const e of d.deja || []) aplicar(e);
+        if (ll.verbo === 'tomar' || ll.verbo === 'poner') mover(ll);   // (la cosa va del lugar a quien, o de quien al lugar)
         return { vale: true };
       },
       // (ir hasta un lugar: el mundo busca el camino, y avisa al llegar)
@@ -343,9 +346,27 @@
     }
     function dejar(F){ if (F.dejada) return; F.dejada = true; for (const e of def(F.ll).si_se_deja || []) aplicar(e); }
     const pasoMarco = (p, ctx) => (p.elige ? { k: 'elegir', p, ctx, fase: 0 } : p.repite ? { k: 'repetir', p, ctx, fase: 0 } : marco(p, ctx));
-    const puede = ll => { if (ll.elige || ll.repite) return true; const d = def(ll); if (d.solo && usadoPorOtro(ll.args[0], d)) return false; return !d.pide || d.tipo === 'primitivo' && (ll.verbo === 'esperar' || ll.verbo === 'quedarse') || cumple(d.pide); };
-    // (junto a algo que es de uno a la vez —el fregadero—: ¿lo está usando otro, ahí mismo?)
-    const usadoPorOtro = (q, d) => tareas.some(U => !U.fin && U.quien !== q && U.pila.some(G => G.k === 'primitivo' && G.fase === 1 && G.acc && G.acc.junto_a === d.junto_a && G.acc.donde === d.donde));
+    const puede = ll => { if (ll.elige || ll.repite) return true; const d = def(ll); if (d.tipo === 'primitivo' && (lleno(ll.args[0], d) || faltaCosa(ll.args[0], d, ll))) return false; return !d.pide || d.tipo === 'primitivo' && (ll.verbo === 'esperar' || ll.verbo === 'quedarse') || cumple(d.pide); };
+    // (junto a un mueble: ¿ya están todos los que caben —el fregadero, de a uno—? Los muebles y cuántos caben: mueblesDe)
+    const lleno = (q, d) => { const cap = d.junto_a && d.donde ? D.muebles?.[d.donde]?.[d.junto_a] : null; if (cap == null) return false;
+      return tareas.filter(U => !U.fin && U.quien !== q && U.pila.some(G => G.k === 'primitivo' && G.fase === 1 && G.acc && G.acc.junto_a === d.junto_a && G.acc.donde === d.donde)).length >= cap; };
+    // (lo que usa, si es una cosa: tiene que haber una a mano —la lleva, o está donde se hace—; tomar y poner, lo que mueven)
+    function faltaCosa(q, d, ll){
+      const aqui = d.donde || lugarDe(q), hay = x => get(['cosas', q, x]) + get(['cosas', aqui, x]);
+      if (ll.verbo === 'tomar' && get(['cosas', lugarDe(q), ll.args[1]]) < 1) return ll.args[1];
+      if (ll.verbo === 'poner' && get(['cosas', q, ll.args[1]]) < 1) return ll.args[1];
+      for (const x of d.usa || []) if (D.cosas?.tipos?.[x] && hay(x) < 1) return x;
+      return null;
+    }
+    // (tomar: del lugar a quien, las que haya, hasta n; poner: de quien al lugar)
+    function mover(ll){
+      const [q, x, n0] = ll.args, L = lugarDe(q), [de, a] = ll.verbo === 'tomar' ? [L, q] : [q, L], n = Math.min(n0, get(['cosas', de, x]));
+      if (n > 0) { aplicar({ e: 'suma', camino: ['cosas', de, x], n: -n }); aplicar({ e: 'suma', camino: ['cosas', a, x], n }); }
+    }
+    // LO QUE PASA SOLO (procesos de las vidas: las gallinas ponen a las seis): una vez al día, a su hora
+    const PROCESOS = () => (escenario.vidas && D.procesos?.[escenario.vidas]) || [];
+    function procesar(){ PROCESOS().forEach((p, i) => { const c = 'proceso.' + i; if (hora() >= p.hora && S[c] !== dia()) { S[c] = dia(); for (const e of p.deja) aplicar(e); } }); }
+    const proxProceso = () => Math.min(...PROCESOS().map((p, i) => { const hoy = (dia() - 1) * 1440 + p.hora * 60; return S['proceso.' + i] === dia() || t >= hoy ? hoy + 1440 : hoy; }));
     // (lo que le faltaba a algo que dejó a medias hoy: los minutos; si no, nada)
     const resto = (q, v) => (get(['resto_dia', q, v]) === dia() ? get(['resto', q, v]) ?? null : null);
     const estaEn = (q, l) => lugarDe(q) === l;   // (donde se hace algo: ahí mismo —fumar en el porche no es en la cocina—)
@@ -450,6 +471,7 @@
         if (!interrumpe && mo.tipo === 'tras') for (const p of porTras.filter(x => D.historias[x.h].encargo[x.et].tras.some(s => s.escena === mo.escena))) { porTras.splice(porTras.indexOf(p), 1); empezarEncargo(p.h, p.et); }
         for (const e of Object.values(D.escenas)) {
           if (interrumpe && !e.interrumpe) continue;
+          if (interrumpe && escena && escena.id.split('.')[0] === e.escena.split('.')[0]) continue;   // (no corta a otra de su misma historia: son maneras de decir lo mismo; espera a que termine)
           if (escenario.omitir?.includes(e.escena)) continue;   // (las que este mundo hace a su manera: en el juego, las charlas del camino)
           const [h, id] = e.escena.split('.'), r = e.repetir || 'una_vez', dicha = get([h, 'dichas', id]);
           if (get(['historia', h]) !== 'en_curso' || (r === 'una_vez' && dicha != null) || (r === 'dia' && dicha === dia())) continue;
@@ -542,7 +564,7 @@
         revisarHistorias();
         if (fin && tope == null) return estadoUI();   // (al probar, una historia que termina es el final; en el juego, el mundo sigue)
         if (!escena && cola.length && elegirEscena()) continue;
-        revisarVidas();
+        revisarVidas(); procesar();
         const lista = tareas.filter(T => !T.fin && !T.pregunta && !T.susp && !detenida(T) && ((T.accion && mundo.listo(T.accion)) || (T.hasta ? cumple(T.hasta) || (T.revisa && T.despierta <= t) : T.despierta <= t)));
         if (lista.length) {
           const T = lista[0]; T.hasta = null; T.accion = null;
@@ -561,6 +583,7 @@
         }
         const prox = tareas.filter(T => !T.fin && !T.pregunta && !T.susp && (!T.hasta || T.revisa) && !detenida(T)).map(T => T.despierta);
         if (escena && escena.acc) prox.push(mundo.cuando(escena.acc));
+        if (PROCESOS().length) prox.push(proxProceso());
         const prox1 = prox.length ? Math.min(...prox) : Infinity;
         if (tope != null && prox1 > tope) { t = Math.max(t, tope); return estadoUI(); }   // (lo que sigue es más tarde que la hora del juego)
         if (!prox.length) return estadoUI();   // (nada más que hacer: esperan algo que no va a pasar solo)
