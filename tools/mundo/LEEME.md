@@ -29,7 +29,8 @@ otro.
   Quien va de un cuadrante a otro pasa por los de en medio, uno por uno (el camino más corto, rodeando la casa y el
   granero), y mientras pasa está ahí: ve y lo ven. De la casa se sale por la puerta, al patio; a un lugar lejos, por el
   borde del tablero que queda hacia allá (y de vuelta se entra por ahí). Quien va adonde está alguien, va a su
-  cuadrante, no solo a su zona. En el tablero, la ficha recorre los cuadrantes, con lo que le falta del camino punteado.
+  cuadrante, no solo a su zona. En el tablero, la ficha salta de cuadrante en cuadrante —como en el mundo—, en la mitad del que pisa (si hay
+  varios, uno al lado del otro), con lo que le falta del camino punteado.
 - **El plano de la casa** (`geografia.json`, `tablero.plano`): Tejas Verdes por dentro tiene sus piezas y sus puertas.
   Abajo, la cocina —el corazón de la casa: su puerta da al patio—, la sala, la despensa y la escalera; arriba, el pasillo
   y las piezas de Ana (la buhardilla del este), de Marilla y de Matthew. Las piezas y los cuadrantes son un solo camino:

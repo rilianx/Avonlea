@@ -26530,14 +26530,7 @@ function que(q){
 const get = (...c) => M.get(c);
 // dónde va la ficha: en su casilla (si hay varias, una al lado de otra); si va de camino, entre las dos, según la hora
 function lugarTablero(l){ l = G.alias[l] || l; if (CASILLA[l]) return l; const v = G.lugares[l]?.vista; return CASILLA[v] ? v : CASILLA[G.alias[v]] ? G.alias[v] : null; }
-function centro(l, i = 0, n = 1){ const c = CASILLA[lugarTablero(l)]; if (!c) return [470, 20]; const [x, y, w, h] = c.r, sep = c.celda ? 26 : 44; return [x + w / 2 + (i - (n - 1) / 2) * sep, y + h / 2 + (c.celda ? 10 : 12)]; }
-// (dónde va alguien de camino, a esta hora: por el tablero, de cuadrante en cuadrante —los pasos del viaje, con su
-// minuto—; fuera del tablero, derecho entre las casillas)
-function posViaje(v, t){
-  const pts = [[v.sale, centro(v.de)], ...(v.pasos || []).map(x => [x.t, centro(x.l)]), [v.llega, centro(v.a)]];
-  for (let i = 1; i < pts.length; i++) if (t <= pts[i][0] || i === pts.length - 1) { const [t0, A] = pts[i - 1], [t1, B] = pts[i], f = Math.max(0, Math.min(1, (t - t0) / Math.max(.01, t1 - t0))); return [A[0] + (B[0] - A[0]) * f, A[1] + (B[1] - A[1]) * f]; }
-  return centro(v.a);
-}
+function centro(l, i = 0, n = 1){ const c = CASILLA[lugarTablero(l)]; if (!c) return [470, 20]; const [x, y, w, h] = c.r, chico = c.celda || c.pieza, sep = chico ? 31 : 44; return [x + w / 2 + (i - (n - 1) / 2) * sep, y + h / 2 + (chico ? 6 : 12)]; }   // (en la mitad; varios, uno al lado del otro)
 function pintar(){
   const t = ahora(); $('reloj').textContent = `${SEMANA[(Math.floor(t / 1440) + 1) % 7]} ${Math.floor(t / 1440) + 1}, ${hhmm(t)}`;
   let h = '';
@@ -26549,15 +26542,15 @@ function pintar(){
       h += cosasDelTablero();
     }
     if (z === ZONAS[1]) h += puertasDelPlano(); }
-  const aqui = {}; for (const q of QUIENES) { const p = W.E.personas[q]; if (p && !p.viaje) (aqui[lugarTablero(p.lugar)] ||= []).push(q); }
+  // (cada ficha, en el lugar donde está ahora —el cuadrante o la pieza que pisa, también de camino: salta de uno al
+  // siguiente, como en el mundo—, en la mitad; si hay varios, uno al lado del otro)
+  const aqui = {}; for (const q of QUIENES) { const p = W.E.personas[q]; if (p) (aqui[lugarTablero(p.lugar)] ||= []).push(q); }
   for (const q of QUIENES) {
     const p = W.E.personas[q]; if (!p) continue;
-    let P; if (p.viaje) { P = posViaje(p.viaje, t);
-      const resta = (p.viaje.pasos || []).filter(x => x.t > t).map(x => centro(x.l)); if (resta.length) h += `<polyline points="${[P, ...resta].map(c => c.join(',')).join(' ')}" fill="none" stroke="${COLOR[q]}" stroke-width="2.5" stroke-dasharray="3 6" opacity=".7" pointer-events="none"/>`;   // (lo que le falta del camino: los cuadrantes que va a pasar)
-      const jun = Object.keys(W.E.personas).filter(o => { const v = W.E.personas[o].viaje; return v && v.de === p.viaje.de && v.a === p.viaje.a && v.sale === p.viaje.sale; }); P[0] += (jun.indexOf(q) - (jun.length - 1) / 2) * 30; }   // (los que van juntos, lado a lado)
-    else { const L = aqui[lugarTablero(p.lugar)] || [q]; P = centro(p.lugar, L.indexOf(q), L.length); }
+    const L = aqui[lugarTablero(p.lugar)] || [q], P = centro(p.lugar, L.indexOf(q), L.length), C = CASILLA[lugarTablero(p.lugar)], R = C?.celda || C?.pieza ? 15 : 19;   // (en un cuadrante, más chicas: caben tres)
+    if (p.viaje) { const resta = (p.viaje.pasos || []).slice(p.viaje.i || 0).map(x => centro(x.l)); if (resta.length) h += `<polyline points="${[centro(p.lugar), ...resta].map(c => c.join(',')).join(' ')}" fill="none" stroke="${COLOR[q]}" stroke-width="2.5" stroke-dasharray="3 6" opacity=".7" pointer-events="none"/>`; }   // (lo que le falta del camino: los cuadrantes que va a pasar)
     const w = que(q);
-    h += `<g class="ficha${sel?.q === q ? ' sel' : ''}" data-q="${q}"><circle cx="${P[0]}" cy="${P[1]}" r="19" fill="${COLOR[q]}"/><text class="ini" x="${P[0]}" y="${P[1] + 6}" text-anchor="middle">${esc(M.nombre(q)[0])}</text><text class="ico" x="${P[0] + 13}" y="${P[1] - 13}">${w.ico}</text><title>${esc(M.nombre(q) + ': ' + w.txt)}</title></g>`;
+    h += `<g class="ficha${sel?.q === q ? ' sel' : ''}" data-q="${q}"><circle cx="${P[0]}" cy="${P[1]}" r="${R}" fill="${COLOR[q]}"/><text class="ini" x="${P[0]}" y="${P[1] + 6}" text-anchor="middle">${esc(M.nombre(q)[0])}</text><text class="ico" x="${P[0] + 13}" y="${P[1] - 13}">${w.ico}</text><title>${esc(M.nombre(q) + ': ' + w.txt)}</title></g>`;
   }
   $('svg').innerHTML = h;
   anotar(); lupa(); ana(); diario(); midiario();
@@ -26576,7 +26569,7 @@ function fichaLupa(q, t){
 function lupa(){
   const t = ahora(), L = $('lupa');
   if (sel?.q) { L.innerHTML = fichaLupa(sel.q, t); return; }
-  if (sel?.l) { const qs = QUIENES.filter(q => { const p = W.E.personas[q]; return p && !p.viaje && lugarTablero(p.lugar) === sel.l; });
+  if (sel?.l) { const qs = QUIENES.filter(q => { const p = W.E.personas[q]; return p && lugarTablero(p.lugar) === sel.l; });
     const hay = d => Object.keys(D.cosas?.tipos || {}).map(x => [x, M.get(['cosas', d, x]) || 0]).filter(([, n]) => n).map(([x, n]) => `${esc(D.cosas.tipos[x].titulo.replace(/^(los|las|la|el|un|una) /, ''))} ${n}`).join(' · ');
     const z = G.lugares[sel.l]?.zona, dz = z || sel.l;   // (un cuadrante: las cosas son de su zona —los huevos, del gallinero—)
     const cosas = (z ? `<div class="cadena">un cuadrante de ${esc(G.tablero.zonas[z].nombre)}: los que están en él pueden conversar</div>` : '') + (hay(dz) ? `<div class="cadena" style="margin-bottom:6px">${z ? 'en ' + esc(G.tablero.zonas[z].nombre) : 'aquí'} hay: ${hay(dz)}</div>` : '');   // (las cosas de este lugar: cuánto hay de cada una)
